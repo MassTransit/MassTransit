@@ -24,6 +24,7 @@ namespace MassTransit.Tests.Serialization
     [TestFixture(typeof(JsonMessageSerializer))]
     [TestFixture(typeof(BsonMessageSerializer))]
     [TestFixture(typeof(XmlMessageSerializer))]
+    [TestFixture(typeof(EncryptedMessageSerializer))]
     public class Given_a_variety_of_challenging_messages :
         SerializationTest
     {

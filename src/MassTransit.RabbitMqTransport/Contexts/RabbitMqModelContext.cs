@@ -32,7 +32,7 @@ namespace MassTransit.RabbitMqTransport.Contexts
         public RabbitMqModelContext(ConnectionContext connectionContext, IModel model, CancellationToken cancellationToken)
         {
             _model = model;
-            _haModel = new HaModel(model);
+            _haModel = new HaModel(connectionContext, model);
             _connectionContext = connectionContext;
             _payloadCache = new PayloadCache();
 

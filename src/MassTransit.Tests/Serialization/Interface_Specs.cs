@@ -24,7 +24,8 @@ namespace MassTransit.Tests.Serialization
     [TestFixture(typeof(JsonMessageSerializer))]
     [TestFixture(typeof(BsonMessageSerializer))]
     [TestFixture(typeof(XmlMessageSerializer))]
-    public  class Deserializing_an_interface :
+    [TestFixture(typeof(EncryptedMessageSerializer))]
+    public class Deserializing_an_interface :
         SerializationTest
 	{
         public Deserializing_an_interface(Type serializerType)

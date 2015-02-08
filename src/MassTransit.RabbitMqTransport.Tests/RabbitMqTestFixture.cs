@@ -155,13 +155,13 @@ namespace MassTransit.RabbitMqTransport.Tests
         {
             return MassTransit.Bus.Factory.CreateUsingRabbitMq(x =>
             {
+                ConfigureBus(x);
+
                 var host = x.Host(_hostAddress, h =>
                 {
                     h.Username("guest");
                     h.Password("guest");
                 });
-
-                ConfigureBus(x);
 
                 x.ReceiveEndpoint(host, "input_queue", e =>
                 {

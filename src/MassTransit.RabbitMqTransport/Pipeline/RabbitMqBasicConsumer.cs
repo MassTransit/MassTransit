@@ -110,8 +110,8 @@ namespace MassTransit.RabbitMqTransport.Pipeline
 
             try
             {
-                var context = new RabbitMqReceiveContext(exchange, routingKey, _consumerTag, _inputAddress, deliveryTag,
-                    body, redelivered, properties);
+                var context = new RabbitMqReceiveContext(_inputAddress, exchange,
+                    routingKey, _consumerTag, deliveryTag, body, redelivered, properties);
 
                 if (!_pending.TryAdd(deliveryTag, context))
                 {

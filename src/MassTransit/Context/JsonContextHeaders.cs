@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -27,17 +27,17 @@ namespace MassTransit.Context
     public class JsonContextHeaders :
         ContextHeaders
     {
-        readonly IContextHeaderProvider _provider;
         readonly JsonSerializer _deserializer;
+        readonly IContextHeaderProvider _provider;
 
-        public JsonContextHeaders(IContextHeaderProvider provider, JsonSerializer deserializer = null)
+        public JsonContextHeaders(IContextHeaderProvider provider)
         {
             if (provider == null)
                 throw new ArgumentNullException("provider");
 
             _provider = provider;
 
-            _deserializer = deserializer ?? JsonMessageSerializer.Deserializer;
+            _deserializer = JsonMessageSerializer.Deserializer;
         }
 
         public IEnumerable<Tuple<string, object>> Headers

@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,40 +14,31 @@ namespace MassTransit.AzureServiceBusTransport.Contexts
 {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics;
     using System.IO;
     using System.Net.Mime;
-    using System.Threading;
-    using System.Threading.Tasks;
     using Context;
     using Microsoft.ServiceBus.Messaging;
+    using Transports;
 
 
     public class AzureServiceBusReceiveContext :
-        ReceiveContext,
+        ReceiveContextBase,
         BrokeredMessageContext
     {
-        static readonly ContentType DefaultContentType = new ContentType("application/vnd.masstransit+json");
-
-        readonly CancellationTokenSource _cancellationTokenSource;
-        readonly Uri _inputAddress;
         readonly BrokeredMessage _message;
-        readonly PayloadCache _payloadCache;
-        readonly Stopwatch _receiveTimer;
         byte[] _body;
-        ContentType _contentType;
-        ContextHeaders _headers;
 
-        public AzureServiceBusReceiveContext(BrokeredMessage message, Uri inputAddress)
+        public AzureServiceBusReceiveContext(Uri inputAddress, BrokeredMessage message)
+            : base(inputAddress, message.DeliveryCount > 0)
         {
-            _receiveTimer = Stopwatch.StartNew();
-
-            _payloadCache = new PayloadCache();
-
             _message = message;
-            _inputAddress = inputAddress;
 
-            _cancellationTokenSource = new CancellationTokenSource();
+            ((ReceiveContext)this).GetOrAddPayload<BrokeredMessageContext>(() => this);
+        }
+
+        protected override IContextHeaderProvider HeaderProvider
+        {
+            get { return new DictionaryContextHeaderProvider(_message.Properties); }
         }
 
         public IDictionary<string, object> Properties
@@ -140,95 +131,28 @@ namespace MassTransit.AzureServiceBusTransport.Contexts
             get { return _message.ScheduledEnqueueTimeUtc; }
         }
 
-        public bool HasPayloadType(Type contextType)
+        protected override Stream GetBodyStream()
         {
-            return _payloadCache.HasPayloadType(contextType);
-        }
-
-        public bool TryGetPayload<TPayload>(out TPayload context)
-            where TPayload : class
-        {
-            return _payloadCache.TryGetPayload(out context);
-        }
-
-        public TPayload GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory)
-            where TPayload : class
-        {
-            return _payloadCache.GetOrAddPayload(payloadFactory);
-        }
-
-        public bool Redelivered
-        {
-            get { return _message.DeliveryCount > 1; }
-        }
-
-        public CancellationToken CancellationToken
-        {
-            get { return _cancellationTokenSource.Token; }
-        }
-
-        public Stream Body
-        {
-            get
+            if (_body == null)
             {
-                if (_body == null)
+                using (var bodyStream = _message.GetBody<Stream>())
+                using (var ms = new MemoryStream())
                 {
-                    using (var bodyStream = _message.GetBody<Stream>())
-                    using (var ms = new MemoryStream())
-                    {
-                        bodyStream.CopyTo(ms);
+                    bodyStream.CopyTo(ms);
 
-                        _body = ms.ToArray();
-                    }
+                    _body = ms.ToArray();
                 }
-
-                return new MemoryStream(_body, 0, _body.Length, false);
-            }
-        }
-
-        public TimeSpan ElapsedTime
-        {
-            get { return _receiveTimer.Elapsed; }
-        }
-
-        public Uri InputAddress
-        {
-            get { return _inputAddress; }
-        }
-
-        public ContentType ContentType
-        {
-            get { return _contentType ?? (_contentType = GetContentType()); }
-        }
-
-        public ContextHeaders TransportHeaders
-        {
-            get { return _headers ?? (_headers = new JsonContextHeaders(new AzureServiceBusContextHeaderProvider(this))); }
-        }
-
-        public void NotifyConsumed(TimeSpan elapsed, string messageType, string consumerType)
-        {
-        }
-
-        public Task NotifyFaulted<T>(T message, string consumerType, Exception exception)
-        {
-            throw new NotImplementedException();
-        }
-
-        ContentType GetContentType()
-        {
-            object contentTypeHeader;
-            if (TransportHeaders.TryGetHeader("Content-Type", out contentTypeHeader))
-            {
-                var contentType = contentTypeHeader as ContentType;
-                if (contentType != null)
-                    return contentType;
-                var s = contentTypeHeader as string;
-                if (s != null)
-                    return new ContentType(s);
             }
 
-            return DefaultContentType;
+            return new MemoryStream(_body, false);
+        }
+
+        protected override ContentType GetContentType()
+        {
+            if (!string.IsNullOrWhiteSpace(_message.ContentType))
+                return new ContentType(_message.ContentType);
+
+            return base.GetContentType();
         }
     }
 }

@@ -98,6 +98,7 @@
     <Compile Include="TestConsumeContext.cs" />
     <Compile Include="TestConsumeObserver.cs" />
     <Compile Include="TestObserver.cs" />
+    <Compile Include="TestSymmetricKeyProvider.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="MassTransit.TestFramework.log4net.xml">

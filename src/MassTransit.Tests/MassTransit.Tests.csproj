@@ -142,7 +142,6 @@
     <Compile Include="SerializationSupport_Specs.cs" />
     <Compile Include="Serialization\SerializationException_Specs.cs" />
     <Compile Include="InMemoryTest_Specs.cs" />
-    <Compile Include="Serialization\TestSymmetricKeyProvider.cs" />
     <Compile Include="StaticProperty_Specs.cs" />
     <Compile Include="Testing\ConsumerMultiple_Specs.cs" />
     <Compile Include="Testing\ConsumerTest_Specs.cs" />

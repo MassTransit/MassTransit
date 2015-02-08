@@ -128,7 +128,7 @@ namespace MassTransit.AzureServiceBusTransport
                 _log.DebugFormat("Receiving {0}:{1} - {2}", deliveryCount, message.MessageId, _receiveSettings.QueueDescription.Path);
 
             Exception exception = null;
-            var context = new AzureServiceBusReceiveContext(message, _inputAddress);
+            var context = new AzureServiceBusReceiveContext(_inputAddress, message);
 
             try
             {

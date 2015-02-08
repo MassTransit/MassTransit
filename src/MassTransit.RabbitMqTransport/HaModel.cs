@@ -24,13 +24,15 @@ namespace MassTransit.RabbitMqTransport
     public class HaModel :
         IHaModel
     {
+        readonly ConnectionContext _connectionContext;
         readonly IModel _model;
         readonly object _publishLock = new object();
-        readonly ConcurrentDictionary<ulong, Published> _published;
+        readonly ConcurrentDictionary<ulong, PendingPublish> _published;
 
-        public HaModel(IModel model)
+        public HaModel(ConnectionContext connectionContext, IModel model)
         {
-            _published = new ConcurrentDictionary<ulong, Published>();
+            _published = new ConcurrentDictionary<ulong, PendingPublish>();
+            _connectionContext = connectionContext;
             _model = model;
             _model.ConfirmSelect();
             _model.BasicAcks += ModelOnBasicAcks;
@@ -282,17 +284,17 @@ namespace MassTransit.RabbitMqTransport
         public Task BasicPublishAsync(string exchange, string routingKey, bool mandatory, bool immediate, IBasicProperties basicProperties,
             byte[] body)
         {
-            Published published;
+            PendingPublish pendingPublish;
             lock (_publishLock)
             {
                 ulong publishTag = _model.NextPublishSeqNo;
                 BasicPublish(exchange, routingKey, mandatory, immediate, basicProperties, body);
 
-                published = new Published(exchange, routingKey, mandatory, immediate, basicProperties, body, publishTag);
-                _published.TryAdd(publishTag, published);
+                pendingPublish = new PendingPublish(_connectionContext, exchange, publishTag);
+                _published.TryAdd(publishTag, pendingPublish);
             }
 
-            return published.Task;
+            return pendingPublish.Task;
         }
 
         public void BasicAck(ulong deliveryTag, bool multiple)
@@ -441,14 +443,14 @@ namespace MassTransit.RabbitMqTransport
                     ulong[] ids = _published.Keys.Where(x => x <= args.DeliveryTag).ToArray();
                     foreach (ulong id in ids)
                     {
-                        Published value;
+                        PendingPublish value;
                         if (_published.TryRemove(id, out value))
                             value.Nack();
                     }
                 }
                 else
                 {
-                    Published value;
+                    PendingPublish value;
                     if (_published.TryRemove(args.DeliveryTag, out value))
                         value.Nack();
                 }
@@ -464,14 +466,14 @@ namespace MassTransit.RabbitMqTransport
                     ulong[] ids = _published.Keys.Where(x => x <= args.DeliveryTag).ToArray();
                     foreach (ulong id in ids)
                     {
-                        Published value;
+                        PendingPublish value;
                         if (_published.TryRemove(id, out value))
                             value.Ack();
                     }
                 }
                 else
                 {
-                    Published value;
+                    PendingPublish value;
                     if (_published.TryRemove(args.DeliveryTag, out value))
                         value.Ack();
                 }

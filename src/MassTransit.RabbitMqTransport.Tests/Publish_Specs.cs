@@ -18,6 +18,8 @@ namespace MassTransit.RabbitMqTransport.Tests
         using System.Threading.Tasks;
         using Configuration;
         using NUnit.Framework;
+        using Serialization;
+        using TestFramework;
 
 
         [TestFixture]
@@ -49,6 +51,45 @@ namespace MassTransit.RabbitMqTransport.Tests
 
 
         [TestFixture]
+        public class WhenAMessageIsSendToTheEndpointEncrypted :
+            RabbitMqTestFixture
+        {
+            [Test]
+            public async void Should_be_received()
+            {
+                ISendEndpoint endpoint = await Bus.GetSendEndpoint(InputQueueAddress);
+
+                var message = new A {Id = Guid.NewGuid()};
+                await endpoint.Send(message);
+
+                ConsumeContext<A> received = await _receivedA;
+
+                Assert.AreEqual(message.Id, received.Message.Id);
+
+                Assert.AreEqual(EncryptedMessageSerializer.EncryptedContentType, received.ReceiveContext.ContentType);
+            }
+
+            Task<ConsumeContext<A>> _receivedA;
+
+            protected override void ConfigureInputQueueEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
+            {
+                base.ConfigureInputQueueEndpoint(configurator);
+
+                _receivedA = Handler<A>(configurator);
+            }
+
+            protected override void ConfigureBus(IRabbitMqBusFactoryConfigurator configurator)
+            {
+                ISymmetricKeyProvider keyProvider = new TestSymmetricKeyProvider();
+                var streamProvider = new AesCryptoStreamProvider(keyProvider, "default");
+                configurator.UseEncryptedSerializer(streamProvider);
+
+                base.ConfigureBus(configurator);
+            }
+        }
+
+
+        [TestFixture]
         public class WhenAMessageIsPublishedToTheEndpoint :
             RabbitMqTestFixture
         {
@@ -70,6 +111,26 @@ namespace MassTransit.RabbitMqTransport.Tests
                 base.ConfigureInputQueueEndpoint(configurator);
 
                 _receivedA = Handler<A>(configurator);
+            }
+        }
+
+
+        [TestFixture]
+        public class When_a_message_is_published_without_a_queue_binding :
+            RabbitMqTestFixture
+        {
+            [Test]
+            public async void Should_not_throw_an_exception()
+            {
+                var message = new UnboundMessage {Id = Guid.NewGuid()};
+
+                await Bus.Publish(message);
+            }
+
+
+            class UnboundMessage
+            {
+                public Guid Id { get; set; }
             }
         }
 

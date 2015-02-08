@@ -15,6 +15,7 @@ namespace MassTransit.RabbitMqTransport.Contexts
     using System.Collections;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Text;
     using RabbitMQ.Client;
 
 
@@ -52,7 +53,15 @@ namespace MassTransit.RabbitMqTransport.Contexts
                 return false;
             }
 
-            return _basicProperties.Headers.TryGetValue(key, out value);
+            var found = _basicProperties.Headers.TryGetValue(key, out value);
+            if (found)
+            {
+                if (value is byte[])
+                {
+                    value = Encoding.UTF8.GetString((byte[])value);
+                }
+            }
+            return found;
         }
 
         public IEnumerator<KeyValuePair<string, object>> GetEnumerator()

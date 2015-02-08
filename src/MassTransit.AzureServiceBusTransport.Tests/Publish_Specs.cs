@@ -13,7 +13,10 @@
 namespace MassTransit.AzureServiceBusTransport.Tests
 {
     using System.Threading.Tasks;
+    using Configuration;
     using NUnit.Framework;
+    using Serialization;
+    using TestFramework;
     using TestFramework.Messages;
 
 
@@ -34,6 +37,38 @@ namespace MassTransit.AzureServiceBusTransport.Tests
         protected override void ConfigureInputQueueEndpoint(IServiceBusReceiveEndpointConfigurator configurator)
         {
             _handler = Handler<PingMessage>(configurator);
+        }
+    }
+
+
+    [TestFixture]
+    public class Publishing_an_encrypted_message_to_an_endpoint :
+        AzureServiceBusTestFixture
+    {
+        [Test]
+        public async void Should_succeed()
+        {
+            await Bus.Publish(new PingMessage());
+
+            ConsumeContext<PingMessage> received = await _handler;
+
+            Assert.AreEqual(EncryptedMessageSerializer.EncryptedContentType, received.ReceiveContext.ContentType);
+        }
+
+        Task<ConsumeContext<PingMessage>> _handler;
+
+        protected override void ConfigureInputQueueEndpoint(IServiceBusReceiveEndpointConfigurator configurator)
+        {
+            _handler = Handler<PingMessage>(configurator);
+        }
+
+        protected override void ConfigureBus(IServiceBusBusFactoryConfigurator configurator)
+        {
+            ISymmetricKeyProvider keyProvider = new TestSymmetricKeyProvider();
+            var streamProvider = new AesCryptoStreamProvider(keyProvider, "default");
+            configurator.UseEncryptedSerializer(streamProvider);
+
+            base.ConfigureBus(configurator);
         }
     }
 }
