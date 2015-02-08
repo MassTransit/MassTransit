@@ -87,6 +87,7 @@ namespace MassTransit.Tests.Serialization
     [TestFixture(typeof(JsonMessageSerializer))]
     [TestFixture(typeof(BsonMessageSerializer))]
     [TestFixture(typeof(XmlMessageSerializer))]
+    [TestFixture(typeof(EncryptedMessageSerializer))]
     public class Serializing_a_string_with_an_escaped_character :
         SerializationTest
     {

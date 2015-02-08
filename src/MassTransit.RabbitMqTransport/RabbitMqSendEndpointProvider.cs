@@ -21,8 +21,7 @@ namespace MassTransit.RabbitMqTransport
 
 
     public class RabbitMqSendEndpointProvider :
-        ISendEndpointProvider,
-        IDisposable
+        ISendEndpointProvider
     {
         readonly IRabbitMqHost[] _hosts;
         readonly Uri _inputAddress;
@@ -33,15 +32,6 @@ namespace MassTransit.RabbitMqTransport
             _hosts = hosts;
             _inputAddress = inputAddress;
             _serializer = serializer;
-        }
-
-        public void Dispose()
-        {
-            foreach (IRabbitMqHost host in _hosts)
-            {
-                host.ConnectionCache.Stop();
-                host.SendConnectionCache.Stop();
-            }
         }
 
         public async Task<ISendEndpoint> GetSendEndpoint(Uri address)

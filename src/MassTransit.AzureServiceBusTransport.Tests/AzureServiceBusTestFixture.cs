@@ -140,6 +140,8 @@ namespace MassTransit.AzureServiceBusTransport.Tests
         {
             return MassTransit.Bus.Factory.CreateUsingAzureServiceBus(x =>
             {
+                ConfigureBus(x);
+
                 AzureServiceBusTokenProviderSettings settings = new TestAzureServiceBusAccountSettings();
 
                 var host = x.Host(_serviceUri, h =>
@@ -152,8 +154,6 @@ namespace MassTransit.AzureServiceBusTransport.Tests
                         s.TokenScope = settings.TokenScope;
                     });
                 });
-
-                ConfigureBus(x);
 
                 x.ReceiveEndpoint(host, "input_queue", e =>
                 {

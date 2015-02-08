@@ -78,6 +78,7 @@
     <Compile Include="Contexts\SharedModelContext.cs" />
     <Compile Include="EndpointAddressBuilder.cs" />
     <Compile Include="Exceptions\MessageNotConfirmedException.cs" />
+    <Compile Include="Exceptions\PublishNegativeAckException.cs" />
     <Compile Include="Exceptions\RabbitMqAddressException.cs" />
     <Compile Include="Exceptions\RabbitMqConnectionException.cs" />
     <Compile Include="IConnectionCache.cs" />
@@ -94,7 +95,7 @@
     <Compile Include="Pipeline\PrepareReceiveQueueFilter.cs" />
     <Compile Include="Pipeline\SendExchangeBindingModelFilter.cs" />
     <Compile Include="Pipeline\ExchangeBindingSettings.cs" />
-    <Compile Include="Published.cs" />
+    <Compile Include="PendingPublish.cs" />
     <Compile Include="PublishSettings.cs" />
     <Compile Include="RabbitMq.cs" />
     <Compile Include="RabbitMqAddressExtensions.cs" />

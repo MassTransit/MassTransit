@@ -77,7 +77,6 @@
     <Compile Include="Configuration\SharedAccessSignatureTokenProviderConfigurator.cs" />
     <Compile Include="Configuration\TopicSubscriptionSettings.cs" />
     <Compile Include="Contexts\AzureServiceBusReceiveContext.cs" />
-    <Compile Include="Contexts\AzureServiceBusReceiveContextHeaders.cs" />
     <Compile Include="Contexts\AzureServiceBusSendContextHeaders.cs" />
     <Compile Include="Contexts\AzureServiceBusSendContextImpl.cs" />
     <Compile Include="Contexts\ConnectionContext.cs" />

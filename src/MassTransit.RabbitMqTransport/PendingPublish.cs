@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,17 +14,22 @@ namespace MassTransit.RabbitMqTransport
 {
     using System;
     using System.Threading.Tasks;
-    using RabbitMQ.Client;
 
 
-    public class Published
+    /// <summary>
+    /// A pending BasicPublish to RabbitMQ, waiting for an ACK/NAK from the broker
+    /// </summary>
+    public class PendingPublish
     {
+        readonly ConnectionContext _connectionContext;
+        readonly string _exchange;
         readonly ulong _publishTag;
         readonly TaskCompletionSource<ulong> _source;
 
-        public Published(string exchange, string routingKey, bool mandatory, bool immediate, IBasicProperties basicProperties, byte[] body,
-            ulong publishTag)
+        public PendingPublish(ConnectionContext connectionContext, string exchange, ulong publishTag)
         {
+            _connectionContext = connectionContext;
+            _exchange = exchange;
             _publishTag = publishTag;
             _source = new TaskCompletionSource<ulong>();
         }
@@ -41,7 +46,9 @@ namespace MassTransit.RabbitMqTransport
 
         public void Nack()
         {
-            _source.TrySetException(new InvalidOperationException("Message was nacked"));
+            Uri address = _connectionContext.GetAddress(_exchange);
+
+            _source.TrySetException(new PublishNegativeAckException(address, "The message was nacked by RabbitMQ"));
         }
     }
 }

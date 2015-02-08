@@ -659,7 +659,7 @@
     <Compile Include="Transports\IBusHost.cs" />
     <Compile Include="Transports\IInboundMessageTracker.cs" />
     <Compile Include="Transports\IMessageNameFormatter.cs" />
-    <Compile Include="Transports\InMemoryContextHeaderProvider.cs" />
+    <Compile Include="Transports\DictionaryContextHeaderProvider.cs" />
     <Compile Include="Transports\InMemoryPublishEndpoint.cs" />
     <Compile Include="Transports\InMemoryReceiveContext.cs" />
     <Compile Include="Transports\InMemorySendEndpointProvider.cs" />
@@ -675,6 +675,7 @@
     <Compile Include="Transports\MessageName.cs" />
     <Compile Include="Transports\MessageTrackerFactory.cs" />
     <Compile Include="Transports\PublishPipeContextAdapter.cs" />
+    <Compile Include="Transports\ReceiveContextBase.cs" />
     <Compile Include="Transports\ReceiveEndpoint.cs" />
     <Compile Include="Transports\ReceiveEndpointHandle.cs" />
     <Compile Include="Transports\ReceiveFaultTracker.cs" />

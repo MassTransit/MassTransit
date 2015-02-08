@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,6 +14,7 @@ namespace MassTransit.RabbitMqTransport.Contexts
 {
     using System;
     using System.Collections.Generic;
+    using System.Text;
     using Context;
 
 
@@ -53,7 +54,14 @@ namespace MassTransit.RabbitMqTransport.Contexts
             }
 
             if (_context.Properties.Headers.TryGetValue(key, out value))
+            {
+                if (value is byte[])
+                {
+                    value = Encoding.UTF8.GetString((byte[])value);
+                    return !string.IsNullOrWhiteSpace((string)value);
+                }
                 return true;
+            }
 
             if (RabbitMqHeaders.Exchange.Equals(key, StringComparison.OrdinalIgnoreCase))
             {

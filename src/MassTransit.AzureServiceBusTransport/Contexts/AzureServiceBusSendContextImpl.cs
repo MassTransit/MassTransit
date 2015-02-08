@@ -105,20 +105,13 @@ namespace MassTransit.AzureServiceBusTransport.Contexts
             if (Message == null)
                 throw new SendException(typeof(T), DestinationAddress, "No message specified");
 
-            var memoryStream = new MemoryStream();
-            try
+            using (var memoryStream = new MemoryStream())
             {
                 _serializer.Serialize(memoryStream, this);
 
                 _body = memoryStream.ToArray();
 
-                memoryStream.Position = 0;
-                return memoryStream;
-            }
-            catch (Exception)
-            {
-                memoryStream.Dispose();
-                throw;
+                return new MemoryStream(_body, false);
             }
         }
     }

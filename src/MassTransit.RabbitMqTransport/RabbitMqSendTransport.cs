@@ -88,7 +88,7 @@ namespace MassTransit.RabbitMqTransport
                     {
                         await pipe.Send(context);
 
-                        properties.Headers["Content-Type"] = context.ContentType.ToString();
+                        properties.Headers["Content-Type"] = context.ContentType.MediaType;
 
                         properties.SetPersistent(context.Durable);
 
