@@ -3,7 +3,7 @@ Routing of Messages in MassTransit
 
 How are messages routed?
 
-RabbitMQ Routing Conventionns
+RabbitMQ Routing Conventions
 '''''''''''''''''''''''''''''
 
 As we were building in the RabbitMQ support into MassTransit, we tried to follow the best
