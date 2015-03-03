@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,6 +14,7 @@ namespace MassTransit.Saga
 {
     using System;
     using System.Linq.Expressions;
+    using SubscriptionConnectors;
 
 
     public class CreateOrUseExistingSagaPolicy<TSaga, TMessage> :
@@ -40,8 +41,7 @@ namespace MassTransit.Saga
 
         public TSaga CreateInstance(ConsumeContext<TMessage> context, Guid sagaId)
         {
-            // TODO get the optimized saga factory for this one
-            return (TSaga)Activator.CreateInstance(typeof(TSaga), sagaId);
+            return SagaMetadataCache<TSaga>.FactoryMethod(sagaId);
         }
 
         public bool CanUseExistingInstance(ConsumeContext<TMessage> context)

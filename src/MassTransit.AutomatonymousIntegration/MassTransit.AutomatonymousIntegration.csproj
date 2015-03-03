@@ -37,9 +37,9 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Automatonymous, Version=3.0.0.0, Culture=neutral, PublicKeyToken=b800c4cfcdeea87b, processorArchitecture=MSIL">
+    <Reference Include="Automatonymous, Version=3.0.2.0, Culture=neutral, PublicKeyToken=b800c4cfcdeea87b, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Automatonymous.3.0.0-alpha\lib\net45\Automatonymous.dll</HintPath>
+      <HintPath>..\packages\Automatonymous.3.0.2-alpha\lib\net45\Automatonymous.dll</HintPath>
     </Reference>
     <Reference Include="NewId">
       <HintPath>..\packages\NewId.2.1.2\lib\net45\NewId.dll</HintPath>
@@ -52,15 +52,23 @@
       <Link>Properties\SolutionVersion.cs</Link>
     </Compile>
     <Compile Include="Activities\PublishActivity.cs" />
+    <Compile Include="Activities\RequestActivity.cs" />
     <Compile Include="Activities\RespondActivity.cs" />
     <Compile Include="Activities\RetryLaterActivity.cs" />
     <Compile Include="Configuration\IStateMachineInterfaceType.cs" />
     <Compile Include="Configuration\RepositoryConfigurators\StateMachineEventCorrelationConfigurator.cs" />
     <Compile Include="Configuration\StateMachineInterfaceType.cs" />
+    <Compile Include="Configuration\StateMachineRequestConfigurator.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\CorrelatedStateMachineEventConnectorFactory.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\ExpressionStateMachineEventConnectorFactory.cs" />
     <Compile Include="ConsumeEventContext.cs" />
-    <Compile Include="ConsumeEventContextImpl.cs" />
+    <Compile Include="Contexts\AutomatonymousConsumeEventContext.cs" />
+    <Compile Include="MassTransitStateMachine.cs" />
+    <Compile Include="Request.cs" />
+    <Compile Include="RequestConfigurator.cs" />
+    <Compile Include="RequestExtensions.cs" />
+    <Compile Include="RequestSettings.cs" />
+    <Compile Include="StateMachineRequest.cs" />
     <Compile Include="Testing\StateMachineSagaTestBuilderImpl.cs" />
     <Compile Include="Testing\StateMachineSagaTestInstance.cs" />
     <Compile Include="Testing\StateMachineSagaTestSubjectImpl.cs" />
@@ -84,7 +92,7 @@
     <Compile Include="Configuration\SubscriptionConnectors\StateMachineSagaMessageConnector.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\StateMachineConnector.cs" />
     <Compile Include="SagaStateMachineInstance.cs" />
-    <Compile Include="Saga\Pipeline\CorrelatedSagaStateMachineMessageSink.cs" />
+    <Compile Include="Pipeline\StateMachineSagaMessageFilter.cs" />
     <Compile Include="StateMachineSagaRepository.cs" />
     <Compile Include="AutomatonymousStateMachineSagaRepository.cs" />
   </ItemGroup>

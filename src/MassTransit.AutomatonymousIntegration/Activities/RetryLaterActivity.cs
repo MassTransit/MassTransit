@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -22,9 +22,9 @@ namespace Automatonymous.Activities
         where TInstance : SagaStateMachineInstance
         where TData : class
     {
-        public void Accept(StateMachineInspector inspector)
+        void Visitable.Accept(StateMachineVisitor inspector)
         {
-            inspector.Inspect(this);
+            inspector.Visit(this);
         }
 
         async Task Activity<TInstance, TData>.Execute(BehaviorContext<TInstance, TData> context, Behavior<TInstance, TData> next)
@@ -34,6 +34,12 @@ namespace Automatonymous.Activities
                 throw new ContextException("The consume context could not be retrieved.");
 
             consumeContext.RetryLater();
+        }
+
+        Task Activity<TInstance, TData>.Faulted<TException>(BehaviorExceptionContext<TInstance, TData, TException> context,
+            Behavior<TInstance, TData> next)
+        {
+            return next.Faulted(context);
         }
     }
 }

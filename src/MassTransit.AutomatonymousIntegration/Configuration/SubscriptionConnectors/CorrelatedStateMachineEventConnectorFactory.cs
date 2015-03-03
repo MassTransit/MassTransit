@@ -19,7 +19,7 @@ namespace Automatonymous.SubscriptionConnectors
     using MassTransit.Saga;
     using MassTransit.Saga.Pipeline.Filters;
     using MassTransit.Saga.SubscriptionConnectors;
-    using Saga.Pipeline;
+    using Pipeline;
 
 
     public class CorrelatedStateMachineEventConnectorFactory<TInstance, TMessage> :

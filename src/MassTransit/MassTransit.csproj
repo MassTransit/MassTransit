@@ -436,7 +436,9 @@
     <Compile Include="Saga\Pipeline\Pipes\SagaMergePipe.cs" />
     <Compile Include="Saga\Pipeline\SagaFilterExpressionConverter.cs" />
     <Compile Include="Saga\SagaContext.cs" />
+    <Compile Include="Saga\SagaInstanceFactoryMethod.cs" />
     <Compile Include="Saga\SagaPolicyBase.cs" />
+    <Compile Include="Saga\SubscriptionConnectors\ConstructorSagaInstanceFactory.cs" />
     <Compile Include="Saga\SubscriptionConnectors\CorrelatedSagaMessageConnector.cs" />
     <Compile Include="Saga\SubscriptionConnectors\InitiatedBySagaConnectorFactory.cs" />
     <Compile Include="Saga\SubscriptionConnectors\ISagaConnectorCache.cs" />
