@@ -14,6 +14,7 @@ namespace Automatonymous.Activities
 {
     using System;
     using System.Threading.Tasks;
+    using Contexts;
     using MassTransit;
     using MassTransit.Context;
     using MassTransit.Pipeline;
@@ -45,9 +46,9 @@ namespace Automatonymous.Activities
             });
         }
 
-        public void Accept(StateMachineInspector inspector)
+        public void Accept(StateMachineVisitor inspector)
         {
-            inspector.Inspect(this);
+            inspector.Visit(this);
         }
 
         async Task Activity<TInstance>.Execute(BehaviorContext<TInstance> context, Behavior<TInstance> next)
@@ -74,6 +75,16 @@ namespace Automatonymous.Activities
             TMessage message = _messageFactory(consumeEventContext);
 
             await consumeContext.Publish(message, _publishPipe);
+        }
+
+        Task Activity<TInstance>.Faulted<TException>(BehaviorExceptionContext<TInstance, TException> context, Behavior<TInstance> next)
+        {
+            return next.Faulted(context);
+        }
+
+        Task Activity<TInstance>.Faulted<T, TException>(BehaviorExceptionContext<TInstance, T, TException> context, Behavior<TInstance, T> next)
+        {
+            return next.Faulted(context);
         }
     }
 
@@ -105,9 +116,9 @@ namespace Automatonymous.Activities
             _publishPipe = Pipe.Empty<PublishContext<TMessage>>();
         }
 
-        public void Accept(StateMachineInspector inspector)
+        void Visitable.Accept(StateMachineVisitor inspector)
         {
-            inspector.Inspect(this);
+            inspector.Visit(this);
         }
 
         async Task Activity<TInstance, TData>.Execute(BehaviorContext<TInstance, TData> context, Behavior<TInstance, TData> next)
@@ -116,11 +127,16 @@ namespace Automatonymous.Activities
             if (!context.TryGetPayload(out consumeContext))
                 throw new ContextException("The consume context could not be retrieved.");
 
-            var consumeEventContext = new ConsumeEventContextImpl<TInstance, TData>(context, consumeContext);
+            var consumeEventContext = new AutomatonymousConsumeEventContext<TInstance, TData>(context, consumeContext);
 
             TMessage message = _messageFactory(consumeEventContext);
 
             await consumeContext.Publish(message, _publishPipe);
+        }
+
+        Task Activity<TInstance, TData>.Faulted<TException>(BehaviorExceptionContext<TInstance, TData, TException> context, Behavior<TInstance, TData> next)
+        {
+            return next.Faulted(context);
         }
     }
 }

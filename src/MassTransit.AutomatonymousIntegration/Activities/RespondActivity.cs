@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,6 +14,7 @@ namespace Automatonymous.Activities
 {
     using System;
     using System.Threading.Tasks;
+    using Contexts;
     using MassTransit;
     using MassTransit.Context;
     using MassTransit.Pipeline;
@@ -46,9 +47,9 @@ namespace Automatonymous.Activities
             _publishPipe = Pipe.Empty<SendContext<TMessage>>();
         }
 
-        public void Accept(StateMachineInspector inspector)
+        void Visitable.Accept(StateMachineVisitor inspector)
         {
-            inspector.Inspect(this);
+            inspector.Visit(this);
         }
 
         async Task Activity<TInstance, TData>.Execute(BehaviorContext<TInstance, TData> context, Behavior<TInstance, TData> next)
@@ -57,11 +58,17 @@ namespace Automatonymous.Activities
             if (!context.TryGetPayload(out consumeContext))
                 throw new ContextException("The consume context could not be retrieved.");
 
-            var consumeEventContext = new ConsumeEventContextImpl<TInstance, TData>(context, consumeContext);
+            var consumeEventContext = new AutomatonymousConsumeEventContext<TInstance, TData>(context, consumeContext);
 
             TMessage message = _messageFactory(consumeEventContext);
 
             await consumeContext.RespondAsync(message);
+        }
+
+        Task Activity<TInstance, TData>.Faulted<TException>(BehaviorExceptionContext<TInstance, TData, TException> context,
+            Behavior<TInstance, TData> next)
+        {
+            return next.Faulted(context);
         }
     }
 }

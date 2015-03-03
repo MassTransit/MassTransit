@@ -10,15 +10,11 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Saga.SubscriptionConnectors
+namespace MassTransit.Saga
 {
-    public interface ISagaMetadataCache<out TSaga>
-        where TSaga : class, ISaga
-    {
-        SagaInterfaceType[] InitiatedByTypes { get; }
-        SagaInterfaceType[] OrchestratesTypes { get; }
-        SagaInterfaceType[] ObservesTypes { get; }
+    using System;
 
-        SagaInstanceFactoryMethod<TSaga> FactoryMethod { get; }
-    }
+
+    public delegate TSaga SagaInstanceFactoryMethod<out TSaga>(Guid correlationId)
+        where TSaga : class, ISaga;
 }

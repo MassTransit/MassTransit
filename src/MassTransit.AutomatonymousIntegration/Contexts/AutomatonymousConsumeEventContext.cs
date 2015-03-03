@@ -10,21 +10,21 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace Automatonymous
+namespace Automatonymous.Contexts
 {
     using System;
     using System.Threading;
     using MassTransit;
 
 
-    public class ConsumeEventContextImpl<TInstance, TData> :
+    public class AutomatonymousConsumeEventContext<TInstance, TData> :
         ConsumeEventContext<TInstance, TData>
         where TData : class
     {
         readonly ConsumeContext<TData> _consumeContext;
         readonly BehaviorContext<TInstance, TData> _context;
 
-        public ConsumeEventContextImpl(BehaviorContext<TInstance, TData> context, ConsumeContext<TData> consumeContext)
+        public AutomatonymousConsumeEventContext(BehaviorContext<TInstance, TData> context, ConsumeContext<TData> consumeContext)
         {
             _context = context;
             _consumeContext = consumeContext;

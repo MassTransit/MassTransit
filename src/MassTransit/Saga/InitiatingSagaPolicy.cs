@@ -14,6 +14,7 @@ namespace MassTransit.Saga
 {
     using System;
     using System.Linq.Expressions;
+    using SubscriptionConnectors;
 
 
     public class InitiatingSagaPolicy<TSaga, TMessage> :
@@ -37,8 +38,7 @@ namespace MassTransit.Saga
 
         public TSaga CreateInstance(ConsumeContext<TMessage> context, Guid sagaId)
         {
-            // TODO optimize
-            return (TSaga)Activator.CreateInstance(typeof(TSaga), sagaId);
+            return SagaMetadataCache<TSaga>.FactoryMethod(sagaId);
         }
 
         public Guid GetNewSagaId(ConsumeContext<TMessage> context)

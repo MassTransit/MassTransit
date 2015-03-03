@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -16,12 +16,14 @@ namespace MassTransit.Saga.SubscriptionConnectors
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading;
+    using System.Threading.Tasks;
 
 
     public class SagaMetadataCache<TSaga> :
         ISagaMetadataCache<TSaga>
         where TSaga : class, ISaga
     {
+        SagaInstanceFactoryMethod<TSaga> _factoryMethod;
         readonly SagaInterfaceType[] _initiatedByTypes;
         readonly SagaInterfaceType[] _observesTypes;
         readonly SagaInterfaceType[] _orchestratesTypes;
@@ -31,6 +33,10 @@ namespace MassTransit.Saga.SubscriptionConnectors
             _initiatedByTypes = GetInitiatingTypes().ToArray();
             _orchestratesTypes = GetOrchestratingTypes().ToArray();
             _observesTypes = GetObservingTypes().ToArray();
+
+            _factoryMethod = (Guid correlationId) => (TSaga)Activator.CreateInstance(typeof(TSaga), correlationId);
+
+            GenerateFactoryMethodAsynchronously();
         }
 
         public static SagaInterfaceType[] InitiatedByTypes
@@ -48,6 +54,16 @@ namespace MassTransit.Saga.SubscriptionConnectors
             get { return Cached.Instance.Value.ObservesTypes; }
         }
 
+        public static SagaInstanceFactoryMethod<TSaga> FactoryMethod
+        {
+            get { return Cached.Instance.Value.FactoryMethod; }
+        }
+
+        SagaInstanceFactoryMethod<TSaga> ISagaMetadataCache<TSaga>.FactoryMethod
+        {
+            get { return _factoryMethod; }
+        }
+
         SagaInterfaceType[] ISagaMetadataCache<TSaga>.InitiatedByTypes
         {
             get { return _initiatedByTypes; }
@@ -61,6 +77,26 @@ namespace MassTransit.Saga.SubscriptionConnectors
         SagaInterfaceType[] ISagaMetadataCache<TSaga>.ObservesTypes
         {
             get { return _observesTypes; }
+        }
+
+        /// <summary>
+        /// Creates a task to generate a compiled saga factory method that is faster than the 
+        /// regular Activator, but doing this asynchronously ensures we don't slow down startup
+        /// </summary>
+        /// <returns></returns>
+        async Task GenerateFactoryMethodAsynchronously()
+        {
+            await Task.Yield();
+
+            try
+            {
+                var factory = new ConstructorSagaInstanceFactory<TSaga>();
+
+                Interlocked.Exchange(ref _factoryMethod, factory.FactoryMethod);
+            }
+            catch (Exception)
+            {
+            }            
         }
 
         static IEnumerable<SagaInterfaceType> GetInitiatingTypes()

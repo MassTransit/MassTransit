@@ -20,6 +20,7 @@ namespace MassTransit
     using Builders;
     using Configurators;
     using EndpointConfigurators;
+    using Logging;
     using PipeConfigurators;
     using Pipeline;
     using Pipeline.Filters;
@@ -35,6 +36,7 @@ namespace MassTransit
         readonly IBuildPipeConfigurator<ConsumeContext> _pipeConfigurator;
         readonly string _queueName;
         readonly IBuildPipeConfigurator<ReceiveContext> _receivePipeConfigurator;
+        readonly ILog _log = Logger.Get<InMemoryReceiveEndpointConfigurator>();
 
         public InMemoryReceiveEndpointConfigurator(string queueName)
         {
@@ -69,6 +71,14 @@ namespace MassTransit
             IReceiveTransport transport = builder.ReceiveTransportProvider.GetReceiveTransport(_queueName);
 
             ConsumePipe consumePipe = CreateInboundPipe();
+
+            if (_log.IsDebugEnabled)
+            {
+                var inspector = new StringPipeVisitor();
+                ((IPipe<ConsumeContext>)consumePipe).Visit(inspector);
+
+                _log.Debug(inspector.ToString());
+            }
 
             IPipe<ReceiveContext> receivePipe = CreateReceivePipe(builder, consumePipe);
 
