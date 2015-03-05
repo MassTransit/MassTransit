@@ -1,6 +1,8 @@
 Mass Transit - A Service Bus Implementation for .NET
 =======
 
+[![Join the chat at https://gitter.im/MassTransit/MassTransit](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/MassTransit/MassTransit?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 ![Mass Transit](http://www.phatboyg.com/mt-logo.png "Mass Transit")
 
 MassTransit is lean service bus implementation for building loosely coupled applications using the .NET Framework.
