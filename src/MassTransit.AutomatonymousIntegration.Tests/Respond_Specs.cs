@@ -55,7 +55,7 @@ namespace MassTransit.AutomatonymousTests
 
 
         class TestStateMachine :
-            AutomatonymousStateMachine<Instance>
+            MassTransitStateMachine<Instance>
         {
             public TestStateMachine()
             {

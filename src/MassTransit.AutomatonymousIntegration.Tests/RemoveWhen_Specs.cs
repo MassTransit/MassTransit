@@ -25,7 +25,7 @@ namespace MassTransit.AutomatonymousTests
     {
         protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
         {
-            configurator.StateMachineSaga(_machine, _repository, x => x.RemoveWhenFinalized());
+            configurator.StateMachineSaga(_machine, _repository);
         }
 
         readonly TestStateMachine _machine;
@@ -57,7 +57,7 @@ namespace MassTransit.AutomatonymousTests
 
 
         class TestStateMachine :
-            AutomatonymousStateMachine<Instance>
+            MassTransitStateMachine<Instance>
         {
             public TestStateMachine()
             {
@@ -74,6 +74,8 @@ namespace MassTransit.AutomatonymousTests
                 During(Running,
                     When(Stopped)
                         .Finalize());
+
+                SetCompletedWhenFinalized();
             }
 
             public State Running { get; private set; }

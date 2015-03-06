@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -17,8 +17,6 @@ namespace MassTransit.AutomatonymousTests
     using Automatonymous;
     using Automatonymous.UserTypes;
     using NHibernate;
-    using NHibernate.Mapping.ByCode;
-    using NHibernate.Mapping.ByCode.Conformist;
     using NHibernateIntegration;
     using NHibernateIntegration.Saga;
     using NUnit.Framework;
@@ -30,6 +28,34 @@ namespace MassTransit.AutomatonymousTests
     public class When_using_NHibernateRepository :
         InMemoryTestFixture
     {
+        [Test]
+        public async void Should_have_the_state_machine()
+        {
+            Guid correlationId = Guid.NewGuid();
+
+            await InputQueueSendEndpoint.Send(new GirlfriendYelling
+            {
+                CorrelationId = correlationId
+            });
+
+            Guid? sagaId = await _repository.ShouldContainSaga(correlationId, TestTimeout);
+
+            Assert.IsTrue(sagaId.HasValue);
+
+            await InputQueueSendEndpoint.Send(new GotHitByACar
+            {
+                CorrelationId = correlationId
+            });
+
+            sagaId = await _repository.ShouldContainSaga(x => x.CorrelationId == correlationId && x.CurrentState == _machine.Final, TestTimeout);
+
+            Assert.IsTrue(sagaId.HasValue);
+
+            ShoppingChore instance = await GetSaga(correlationId);
+
+            Assert.IsTrue(instance.Screwed);
+        }
+
         SuperShopper _machine;
         ISessionFactory _sessionFactory;
         ISagaRepository<ShoppingChore> _repository;
@@ -43,13 +69,7 @@ namespace MassTransit.AutomatonymousTests
                 .GetSessionFactory();
             _repository = new NHibernateSagaRepository<ShoppingChore>(_sessionFactory);
 
-            configurator.StateMachineSaga(_machine, _repository, x =>
-            {
-                x.Correlate(_machine.ExitFrontDoor, (saga, message) => saga.CorrelationId == message.CorrelationId)
-                    .SelectCorrelationId(message => message.CorrelationId);
-
-                x.Correlate(_machine.GotHitByCar, (saga, message) => saga.CorrelationId == message.CorrelationId);
-            });
+            configurator.StateMachineSaga(_machine, _repository);
         }
 
         [TestFixtureTearDown]
@@ -65,9 +85,7 @@ namespace MassTransit.AutomatonymousTests
             {
                 var instance = session.Get<ShoppingChore>(id, LockMode.Upgrade);
                 if (instance == null)
-                {
                     instance = new ShoppingChore(id);
-                }
 
                 await _machine.RaiseEvent(instance, @event, data);
 
@@ -137,15 +155,15 @@ namespace MassTransit.AutomatonymousTests
                 CorrelationId = correlationId;
             }
 
-            public Guid CorrelationId { get; set; }
             public State CurrentState { get; set; }
             public CompositeEventStatus Everything { get; set; }
             public bool Screwed { get; set; }
+            public Guid CorrelationId { get; set; }
         }
 
 
         class SuperShopper :
-            AutomatonymousStateMachine<ShoppingChore>
+            MassTransitStateMachine<ShoppingChore>
         {
             public SuperShopper()
             {
@@ -153,8 +171,8 @@ namespace MassTransit.AutomatonymousTests
 
                 State(() => OnTheWayToTheStore);
 
-                Event(() => ExitFrontDoor);
-                Event(() => GotHitByCar);
+                Event(() => ExitFrontDoor, x => x.CorrelateById(context => context.Message.CorrelationId));
+                Event(() => GotHitByCar, x => x.CorrelateById(context => context.Message.CorrelationId));
 
                 Event(() => EndOfTheWorld, x => x.Everything, CompositeEventOptions.IncludeInitial, ExitFrontDoor, GotHitByCar);
 
@@ -179,35 +197,6 @@ namespace MassTransit.AutomatonymousTests
             public Event EndOfTheWorld { get; private set; }
 
             public State OnTheWayToTheStore { get; private set; }
-        }
-
-
-        [Test]
-        public async void Should_have_the_state_machine()
-        {
-            Guid correlationId = Guid.NewGuid();
-
-            await InputQueueSendEndpoint.Send(new GirlfriendYelling
-            {
-                CorrelationId = correlationId
-            });
-
-            Guid? sagaId = await _repository.ShouldContainSaga(correlationId, TestTimeout);
-
-            Assert.IsTrue(sagaId.HasValue);
-
-            await InputQueueSendEndpoint.Send(new GotHitByACar
-            {
-                CorrelationId = correlationId
-            });
-
-            sagaId = await _repository.ShouldContainSaga(x => x.CorrelationId == correlationId && x.CurrentState == _machine.Final, TestTimeout);
-
-            Assert.IsTrue(sagaId.HasValue);
-
-            ShoppingChore instance = await GetSaga(correlationId);
-
-            Assert.IsTrue(instance.Screwed);
         }
     }
 }

@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,23 +13,20 @@
 namespace MassTransit.Saga
 {
     using System;
-    using System.Linq.Expressions;
 
 
     public abstract class SagaPolicyBase<TSaga>
     {
-        readonly Lazy<Func<TSaga, bool>> _canRemoveInstance;
+        readonly Func<TSaga, bool> _canRemoveInstance;
 
-        protected SagaPolicyBase(Expression<Func<TSaga, bool>> canRemoveInstance)
+        protected SagaPolicyBase(Func<TSaga, bool> canRemoveInstance)
         {
-            _canRemoveInstance = canRemoveInstance != null
-                ? new Lazy<Func<TSaga, bool>>(canRemoveInstance.Compile)
-                : new Lazy<Func<TSaga, bool>>(() => Default);
+            _canRemoveInstance = canRemoveInstance ?? Default;
         }
 
         public bool CanRemoveInstance(TSaga instance)
         {
-            return _canRemoveInstance.Value(instance);
+            return _canRemoveInstance(instance);
         }
 
         bool Default(TSaga saga)

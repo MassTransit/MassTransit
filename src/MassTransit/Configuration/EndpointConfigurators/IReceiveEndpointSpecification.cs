@@ -15,6 +15,9 @@ namespace MassTransit.EndpointConfigurators
     using Configurators;
 
 
+    /// <summary>
+    /// Specification for configuring a receive endpoint
+    /// </summary>
     public interface IReceiveEndpointSpecification :
         Configurator
     {

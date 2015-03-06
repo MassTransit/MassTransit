@@ -28,7 +28,7 @@ namespace Automatonymous.Testing
         SagaTest<TScenario, TSaga>
         where TSaga : class, SagaStateMachineInstance
         where TScenario : ITestScenario
-        where TStateMachine : StateMachine<TSaga>
+        where TStateMachine : SagaStateMachine<TSaga>
     {
         readonly StateMachineSagaTestSubjectImpl<TScenario, TSaga, TStateMachine> _subject;
 
@@ -40,7 +40,7 @@ namespace Automatonymous.Testing
             : base(scenario, actions)
         {
             _subject = new StateMachineSagaTestSubjectImpl<TScenario, TSaga, TStateMachine>(sagaRepository,
-                stateMachine, configureCallback);
+                stateMachine);
         }
 
         public SagaTestSubject<TSaga> Saga

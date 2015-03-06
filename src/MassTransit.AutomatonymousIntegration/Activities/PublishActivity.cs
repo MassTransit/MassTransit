@@ -53,24 +53,25 @@ namespace Automatonymous.Activities
 
         async Task Activity<TInstance>.Execute(BehaviorContext<TInstance> context, Behavior<TInstance> next)
         {
-            ConsumeContext consumeContext;
-            if (!context.TryGetPayload(out consumeContext))
-                throw new ContextException("The consume context could not be retrieved.");
+            await Execute(context);
 
-            var consumeEventContext = new ConsumeEventContextImpl<TInstance>(context, consumeContext);
-
-            TMessage message = _messageFactory(consumeEventContext);
-
-            await consumeContext.Publish(message, _publishPipe);
+            await next.Execute(context);
         }
 
         async Task Activity<TInstance>.Execute<T>(BehaviorContext<TInstance, T> context, Behavior<TInstance, T> next)
+        {
+            await Execute(context);
+
+            await next.Execute(context);
+        }
+
+        async Task Execute(BehaviorContext<TInstance> context)
         {
             ConsumeContext consumeContext;
             if (!context.TryGetPayload(out consumeContext))
                 throw new ContextException("The consume context could not be retrieved.");
 
-            var consumeEventContext = new ConsumeEventContextImpl<TInstance>(context, consumeContext);
+            var consumeEventContext = new AutomatonymousConsumeEventContext<TInstance>(context, consumeContext);
 
             TMessage message = _messageFactory(consumeEventContext);
 
@@ -132,6 +133,8 @@ namespace Automatonymous.Activities
             TMessage message = _messageFactory(consumeEventContext);
 
             await consumeContext.Publish(message, _publishPipe);
+
+            await next.Execute(context);
         }
 
         Task Activity<TInstance, TData>.Faulted<TException>(BehaviorExceptionContext<TInstance, TData, TException> context, Behavior<TInstance, TData> next)

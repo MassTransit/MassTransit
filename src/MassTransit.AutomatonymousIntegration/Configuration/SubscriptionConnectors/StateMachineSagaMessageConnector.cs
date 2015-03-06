@@ -15,7 +15,7 @@ namespace Automatonymous.SubscriptionConnectors
     using MassTransit;
     using MassTransit.Pipeline;
     using MassTransit.Saga;
-    using MassTransit.Saga.SubscriptionConnectors;
+    using MassTransit.Saga.Connectors;
 
 
     public class StateMachineSagaMessageConnector<TInstance, TMessage> :

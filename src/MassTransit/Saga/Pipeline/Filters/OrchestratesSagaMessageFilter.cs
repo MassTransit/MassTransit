@@ -28,10 +28,10 @@ namespace MassTransit.Saga.Pipeline.Filters
         where TSaga : class, ISaga, Orchestrates<TMessage>
         where TMessage : class, CorrelatedBy<Guid>
     {
-        public Task Send(SagaConsumeContext<TSaga, TMessage> context, IPipe<SagaConsumeContext<TSaga, TMessage>> next)
+        public async Task Send(SagaConsumeContext<TSaga, TMessage> context, IPipe<SagaConsumeContext<TSaga, TMessage>> next)
         {
-            var messageConsumer = context.Saga as Orchestrates<TMessage>;
-            if (messageConsumer == null)
+            var orchestrator = context.Saga as Orchestrates<TMessage>;
+            if (orchestrator == null)
             {
                 string message = string.Format("Saga type {0} does not orchestrate message type {1}",
                     TypeMetadataCache<TSaga>.ShortName, TypeMetadataCache<TMessage>.ShortName);
@@ -39,7 +39,9 @@ namespace MassTransit.Saga.Pipeline.Filters
                 throw new ConsumerMessageException(message);
             }
 
-            return messageConsumer.Consume(context);
+            await orchestrator.Consume(context);
+
+            await next.Send(context);
         }
 
         public bool Visit(IPipeVisitor visitor)

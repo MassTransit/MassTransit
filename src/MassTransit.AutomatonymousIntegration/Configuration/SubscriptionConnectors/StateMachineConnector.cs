@@ -21,7 +21,7 @@ namespace Automatonymous.SubscriptionConnectors
     using MassTransit.Pipeline;
     using MassTransit.Policies;
     using MassTransit.Saga;
-    using MassTransit.Saga.SubscriptionConnectors;
+    using MassTransit.Saga.Connectors;
     using MassTransit.Util;
 
 
@@ -30,10 +30,10 @@ namespace Automatonymous.SubscriptionConnectors
         where TInstance : class, ISaga, SagaStateMachineInstance
     {
         readonly IEnumerable<SagaMessageConnector> _connectors;
-        readonly StateMachineSagaRepository<TInstance> _repository;
-        readonly StateMachine<TInstance> _stateMachine;
+        readonly ISagaRepository<TInstance> _repository;
+        readonly SagaStateMachine<TInstance> _stateMachine;
 
-        public StateMachineConnector(StateMachine<TInstance> stateMachine, StateMachineSagaRepository<TInstance> repository)
+        public StateMachineConnector(SagaStateMachine<TInstance> stateMachine, ISagaRepository<TInstance> repository)
         {
             _stateMachine = stateMachine;
             _repository = repository;
@@ -80,28 +80,15 @@ namespace Automatonymous.SubscriptionConnectors
 
         IEnumerable<SagaMessageConnector> StateMachineEvents()
         {
-            StateMachinePolicyFactory<TInstance> policyFactory = new AutomatonymousStateMachinePolicyFactory<TInstance>(_stateMachine);
-
-            foreach (Event @event in _stateMachine.Events)
+            foreach (var correlation in _stateMachine.Correlations)
             {
-                Event stateMachineEvent = @event;
-
-                Type eventType = stateMachineEvent.GetType();
-                if (!eventType.HasInterface(typeof(Event<>)))
+                if (correlation.DataType.IsValueType)
                     continue;
 
-                Type messageType = eventType.GetClosingArguments(typeof(Event<>)).SingleOrDefault();
-                if (messageType == null || messageType.IsValueType)
-                    continue;
-
-                IEnumerable<State<TInstance>> states = _stateMachine.States
-                    .Where(state => _stateMachine.NextEvents(state).Contains(stateMachineEvent))
-                    .Select(x => _stateMachine.GetState(x.Name));
-
-                Type genericType = typeof(StateMachineInterfaceType<,>).MakeGenericType(typeof(TInstance), messageType);
+                Type genericType = typeof(StateMachineInterfaceType<,>).MakeGenericType(typeof(TInstance), correlation.DataType);
 
                 var interfaceType = (IStateMachineInterfaceType<TInstance>)Activator.CreateInstance(genericType,
-                    _stateMachine, _repository, policyFactory, states, stateMachineEvent);
+                    _stateMachine, _repository, correlation);
 
                 yield return interfaceType.GetConnector();
             }

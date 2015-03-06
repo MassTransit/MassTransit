@@ -425,6 +425,8 @@
     <Compile Include="SagaConsumeContext.cs" />
     <Compile Include="Saga\Configuration\SagaFilterSpecification.cs" />
     <Compile Include="Saga\Configuration\SagaPipeConfiguratorExtensions.cs" />
+    <Compile Include="Saga\ConstructorSagaInstanceFactory.cs" />
+    <Compile Include="Saga\ISagaMetadataCache.cs" />
     <Compile Include="Saga\Pipeline\CorrelationExpressionToSagaIdVisitor.cs" />
     <Compile Include="Saga\Pipeline\Filters\SagaLocatorFilter.cs" />
     <Compile Include="Saga\Pipeline\Filters\InitiatedBySagaMessageFilter.cs" />
@@ -435,21 +437,23 @@
     <Compile Include="Saga\Pipeline\Filters\SagaSplitFilter.cs" />
     <Compile Include="Saga\Pipeline\Pipes\SagaMergePipe.cs" />
     <Compile Include="Saga\Pipeline\SagaFilterExpressionConverter.cs" />
+    <Compile Include="Saga\Policies\CreateOrUseExistingSagaPolicy.cs" />
+    <Compile Include="Saga\Policies\ExistingOrIgnoreSagaPolicy.cs" />
+    <Compile Include="Saga\Policies\InitiatingSagaPolicy.cs" />
     <Compile Include="Saga\SagaContext.cs" />
+    <Compile Include="Saga\SagaContextImpl.cs" />
     <Compile Include="Saga\SagaInstanceFactoryMethod.cs" />
+    <Compile Include="Saga\SagaInterfaceType.cs" />
+    <Compile Include="Saga\SagaMetadataCache.cs" />
     <Compile Include="Saga\SagaPolicyBase.cs" />
-    <Compile Include="Saga\SubscriptionConnectors\ConstructorSagaInstanceFactory.cs" />
-    <Compile Include="Saga\SubscriptionConnectors\CorrelatedSagaMessageConnector.cs" />
-    <Compile Include="Saga\SubscriptionConnectors\InitiatedBySagaConnectorFactory.cs" />
-    <Compile Include="Saga\SubscriptionConnectors\ISagaConnectorCache.cs" />
-    <Compile Include="Saga\SubscriptionConnectors\ISagaMetadataCache.cs" />
-    <Compile Include="Saga\SubscriptionConnectors\OrchestratesSagaConnectorFactory.cs" />
-    <Compile Include="Saga\SubscriptionConnectors\PropertySagaMessageConnector.cs" />
-    <Compile Include="Saga\SubscriptionConnectors\SagaConnectorCache.cs" />
-    <Compile Include="Saga\SubscriptionConnectors\SagaConnectorFactory.cs" />
-    <Compile Include="Saga\SubscriptionConnectors\SagaInterfaceType.cs" />
-    <Compile Include="Saga\SubscriptionConnectors\SagaMessageConnector.cs" />
-    <Compile Include="Saga\SubscriptionConnectors\SagaMetadataCache.cs" />
+    <Compile Include="Saga\Connectors\CorrelatedSagaMessageConnector.cs" />
+    <Compile Include="Saga\Connectors\InitiatedBySagaConnectorFactory.cs" />
+    <Compile Include="Saga\Connectors\ISagaConnectorCache.cs" />
+    <Compile Include="Saga\Connectors\OrchestratesSagaConnectorFactory.cs" />
+    <Compile Include="Saga\Connectors\PropertySagaMessageConnector.cs" />
+    <Compile Include="Saga\Connectors\SagaConnectorCache.cs" />
+    <Compile Include="Saga\Connectors\SagaConnectorFactory.cs" />
+    <Compile Include="Saga\Connectors\SagaMessageConnector.cs" />
     <Compile Include="ScheduleMessageExtensions.cs" />
     <Compile Include="Scheduling\CancelScheduledMessage.cs" />
     <Compile Include="Scheduling\ScheduledMessage.cs" />
@@ -548,8 +552,8 @@
     <Compile Include="Saga\Configuration\SagaExtensions.cs" />
     <Compile Include="Saga\SubscriptionConfigurators\ISagaConfigurator.cs" />
     <Compile Include="Saga\SubscriptionConfigurators\SagaConfigurator.cs" />
-    <Compile Include="Saga\SubscriptionConnectors\ObservesSagaConnectorFactory.cs" />
-    <Compile Include="Saga\SubscriptionConnectors\SagaConnector.cs" />
+    <Compile Include="Saga\Connectors\ObservesSagaConnectorFactory.cs" />
+    <Compile Include="Saga\Connectors\SagaConnector.cs" />
     <Compile Include="Serialization\BsonMessageSerializer.cs" />
     <Compile Include="Serialization\Envelope.cs" />
     <Compile Include="Serialization\EnvelopeExtensions.cs" />
@@ -717,12 +721,7 @@
     <Compile Include="Monitoring\RuntimePerformanceCounter.cs" />
     <Compile Include="Monitoring\ServiceBusInstancePerformanceCounters.cs" />
     <Compile Include="Monitoring\ServiceBusPerformanceCounters.cs" />
-    <Compile Include="Saga\CreateOrUseExistingSagaPolicy.cs" />
-    <Compile Include="Saga\DataEventBinder.cs" />
-    <Compile Include="Saga\EventBinder.cs" />
-    <Compile Include="Saga\ExistingOrIgnoreSagaPolicy.cs" />
     <Compile Include="Saga\Observes.cs" />
-    <Compile Include="Saga\InitiatingSagaPolicy.cs" />
     <Compile Include="Saga\ISagaPolicy.cs" />
     <Compile Include="Transports\InMemoryInboundMessageTracker.cs" />
     <Compile Include="Util\IndexedAttribute.cs" />
@@ -764,7 +763,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Configuration\Configuration\" />
-    <Folder Include="Saga\SubscriptionBuilders\" />
     <Folder Include="Subscriptions\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

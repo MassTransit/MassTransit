@@ -13,7 +13,7 @@
 namespace MassTransit.Tests.Configuration
 {
     using System.Linq;
-    using MassTransit.Saga.SubscriptionConnectors;
+    using MassTransit.Saga.Connectors;
     using NUnit.Framework;
     using Saga;
     using Shouldly;

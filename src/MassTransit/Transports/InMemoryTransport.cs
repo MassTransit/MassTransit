@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -23,8 +23,6 @@ namespace MassTransit.Transports
     using Logging;
     using Pipeline;
     using Util;
-
-
 
 
     /// <summary>
@@ -72,27 +70,33 @@ namespace MassTransit.Transports
                 _log.DebugFormat("Starting InMemory Transport: {0}", _inputAddress);
                 using (RegisterShutdown(handle.StopToken))
                 {
-                    Parallel.ForEach(GetConsumingPartitioner(_collection), async message =>
+                    try
                     {
-                        if (handle.StopToken.IsCancellationRequested)
-                            return;
-
-                        var context = new InMemoryReceiveContext(_inputAddress, message);
-
-                        try
+                        Parallel.ForEach(GetConsumingPartitioner(_collection), async message =>
                         {
-                            await receivePipe.Send(context);
+                            if (handle.StopToken.IsCancellationRequested)
+                                return;
 
-                            _log.DebugFormat("RECV: {0} {1}", _inputAddress, message.MessageId);
-                        }
-                        catch (Exception ex)
-                        {
-                            message.DeliveryCount++;
-                            _log.Error(string.Format("Receive Fault: {0}", message.MessageId), ex);
+                            var context = new InMemoryReceiveContext(_inputAddress, message);
 
-                            _collection.Add(message, handle.StopToken);
-                        }
-                    });
+                            try
+                            {
+                                await receivePipe.Send(context);
+
+                                _log.DebugFormat("RECV: {0} {1}", _inputAddress, message.MessageId);
+                            }
+                            catch (Exception ex)
+                            {
+                                message.DeliveryCount++;
+                                _log.Error(string.Format("Receive Fault: {0}", message.MessageId), ex);
+
+                                _collection.Add(message, handle.StopToken);
+                            }
+                        });
+                    }
+                    catch (OperationCanceledException ex)
+                    {
+                    }
 
                     handle.Stopped();
                 }
@@ -232,14 +236,14 @@ namespace MassTransit.Transports
                 get { return _stop.Token; }
             }
 
-            void IDisposable.Dispose()
-            {
-                _stop.Cancel();
-            }
-
             public IReceiveTransport Transport
             {
                 get { return _transport; }
+            }
+
+            void IDisposable.Dispose()
+            {
+                _stop.Cancel();
             }
 
             async Task ReceiveTransportHandle.Stop(CancellationToken cancellationToken)

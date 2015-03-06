@@ -20,11 +20,5 @@ namespace Automatonymous.RepositoryConfigurators
         where TSaga : class, SagaStateMachineInstance
     {
         StateMachine<TSaga> StateMachine { get; }
-
-        StateMachineEventCorrelationConfigurator<TSaga, TData> Correlate<TData>(Event<TData> @event,
-            Expression<Func<TSaga, TData, bool>> correlationExpression)
-            where TData : class;
-
-        void RemoveWhen(Expression<Func<TSaga, bool>> removeExpression);
     }
 }

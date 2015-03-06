@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -27,10 +27,10 @@ namespace MassTransit.Saga.Pipeline.Filters
         where TSaga : class, ISaga, Observes<TMessage, TSaga>
         where TMessage : class
     {
-        public Task Send(SagaConsumeContext<TSaga, TMessage> context, IPipe<SagaConsumeContext<TSaga, TMessage>> next)
+        public async Task Send(SagaConsumeContext<TSaga, TMessage> context, IPipe<SagaConsumeContext<TSaga, TMessage>> next)
         {
-            var messageConsumer = context.Saga as Observes<TMessage, TSaga>;
-            if (messageConsumer == null)
+            var consumer = context.Saga as Observes<TMessage, TSaga>;
+            if (consumer == null)
             {
                 string message = string.Format("Saga type {0} does not observe message type {1}",
                     TypeMetadataCache<TSaga>.ShortName, TypeMetadataCache<TMessage>.ShortName);
@@ -38,7 +38,9 @@ namespace MassTransit.Saga.Pipeline.Filters
                 throw new ConsumerMessageException(message);
             }
 
-            return messageConsumer.Consume(context);
+            await consumer.Consume(context);
+
+            await next.Send(context);
         }
 
         public bool Visit(IPipeVisitor visitor)
