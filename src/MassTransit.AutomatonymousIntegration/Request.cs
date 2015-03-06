@@ -12,6 +12,8 @@
 // specific language governing permissions and limitations under the License.
 namespace Automatonymous
 {
+    using System;
+    using Events;
     using MassTransit;
 
 
@@ -21,7 +23,9 @@ namespace Automatonymous
     /// </summary>
     /// <typeparam name="TRequest">The request type</typeparam>
     /// <typeparam name="TResponse">The response type</typeparam>
-    public interface Request<TRequest, TResponse>
+    /// <typeparam name="TInstance"></typeparam>
+    public interface Request<in TInstance, TRequest, TResponse>
+        where TInstance : class, SagaStateMachineInstance
         where TRequest : class
         where TResponse : class
     {
@@ -45,11 +49,18 @@ namespace Automatonymous
         /// <summary>
         /// The event raised when the request times out with no response received
         /// </summary>
-        Event<TRequest> TimeoutExpired { get; set; }
+        Event<RequestTimeoutExpired> TimeoutExpired { get; set; }
 
         /// <summary>
         /// The state that is transitioned to once the request is pending
         /// </summary>
         State Pending { get; set; }
+
+        /// <summary>
+        /// Sets the requestId on the instance using the configured property
+        /// </summary>
+        /// <param name="instance"></param>
+        /// <param name="requestId"></param>
+        void SetRequestId(TInstance instance, Guid requestId);
     }
 }

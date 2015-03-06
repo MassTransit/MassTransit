@@ -57,7 +57,7 @@ namespace MassTransit.AutomatonymousTests
 
 
         class TestStateMachine :
-            AutomatonymousStateMachine<Instance>
+            MassTransitStateMachine<Instance>
         {
             public TestStateMachine()
             {
@@ -66,7 +66,6 @@ namespace MassTransit.AutomatonymousTests
                 State(() => Running);
                 Event(() => Started);
                 Event(() => Stopped);
-                Event(() => ShouldNotBind);
 
                 Initially(
                     When(Started)
@@ -80,7 +79,6 @@ namespace MassTransit.AutomatonymousTests
             public State Running { get; private set; }
             public Event<Start> Started { get; private set; }
             public Event<Stop> Stopped { get; private set; }
-            public Event<int> ShouldNotBind { get; private set; }
         }
 
 

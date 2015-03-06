@@ -63,6 +63,8 @@ namespace Automatonymous.Activities
             TMessage message = _messageFactory(consumeEventContext);
 
             await consumeContext.RespondAsync(message);
+
+            await next.Execute(context);
         }
 
         Task Activity<TInstance, TData>.Faulted<TException>(BehaviorExceptionContext<TInstance, TData, TException> context,

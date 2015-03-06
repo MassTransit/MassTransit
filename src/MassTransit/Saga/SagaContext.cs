@@ -29,30 +29,4 @@ namespace MassTransit.Saga
         /// </summary>
         ISagaPolicy<TSaga, TMessage> Policy { get; }
     }
-
-
-    public class SagaContextImpl<TSaga, TMessage> : 
-        SagaContext<TSaga, TMessage>
-        where TSaga : class, ISaga
-        where TMessage : class
-    {
-        readonly Guid _id;
-        readonly ISagaPolicy<TSaga, TMessage> _policy;
-
-        public SagaContextImpl(Guid id, ISagaPolicy<TSaga, TMessage> policy)
-        {
-            _id = id;
-            _policy = policy;
-        }
-
-        public Guid Id
-        {
-            get { return _id; }
-        }
-
-        public ISagaPolicy<TSaga, TMessage> Policy
-        {
-            get { return _policy; }
-        }
-    }
 }

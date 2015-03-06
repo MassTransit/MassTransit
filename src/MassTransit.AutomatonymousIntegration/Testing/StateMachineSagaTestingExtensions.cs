@@ -27,7 +27,7 @@ namespace MassTransit.Testing
             this ISagaTestConfigurator<TScenario, TSaga> configurator, TStateMachine stateMachine)
             where TSaga : class, SagaStateMachineInstance
             where TScenario : ITestScenario
-            where TStateMachine : StateMachine<TSaga>
+            where TStateMachine : SagaStateMachine<TSaga>
         {
             configurator.UseBuilder(scenario =>
                                     new StateMachineSagaTestBuilderImpl<TScenario, TSaga, TStateMachine>(scenario,
@@ -39,7 +39,7 @@ namespace MassTransit.Testing
             Action<StateMachineSagaRepositoryConfigurator<TSaga>> configureCallback)
             where TSaga : class, SagaStateMachineInstance
             where TScenario : ITestScenario
-            where TStateMachine : StateMachine<TSaga>
+            where TStateMachine : SagaStateMachine<TSaga>
         {
             configurator.UseBuilder(scenario =>
                                     new StateMachineSagaTestBuilderImpl<TScenario, TSaga, TStateMachine>(scenario,
@@ -47,7 +47,7 @@ namespace MassTransit.Testing
         }
 
         public static TSaga ContainsInState<TSaga>(this ISagaList<TSaga> sagas, Guid sagaId,
-            State state, StateMachine<TSaga> machine)
+            State state, SagaStateMachine<TSaga> machine)
             where TSaga : class, SagaStateMachineInstance
         {
             bool any = sagas.Select(x => x.CorrelationId == sagaId && machine.InstanceStateAccessor.GetState(x).Equals(state)).Any();

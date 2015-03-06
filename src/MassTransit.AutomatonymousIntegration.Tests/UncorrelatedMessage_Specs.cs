@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -24,19 +24,78 @@ namespace MassTransit.AutomatonymousTests
     public class When_a_message_is_not_correlated :
         InMemoryTestFixture
     {
+        [Test]
+        public async void Should_retry_the_status_message()
+        {
+            Task<Status> statusTask = null;
+            Request<CheckStatus> request = await Bus.Request(InputQueueAddress, new CheckStatus("A"), x =>
+            {
+                statusTask = x.Handle<Status>();
+                x.Timeout = TestTimeout;
+            }, TestCancellationToken);
+
+            await InputQueueSendEndpoint.Send(new Start("A", Guid.NewGuid()));
+
+            Status status = await statusTask;
+
+            Assert.AreEqual("A", status.ServiceName);
+        }
+
+        [Test]
+        public async void Should_start_and_handle_the_status_request()
+        {
+            Task<StartupComplete> startupCompletedTask = null;
+            await Bus.Request(InputQueueAddress, new Start("A", Guid.NewGuid()), x =>
+            {
+                startupCompletedTask = x.Handle<StartupComplete>();
+                x.Timeout = TestTimeout;
+            }, TestCancellationToken);
+
+            var startupComplete = await startupCompletedTask;
+
+            Task<Status> statusTask = null;
+            await Bus.Request(InputQueueAddress, new CheckStatus("A"), x =>
+            {
+                statusTask = x.Handle<Status>();
+                x.Timeout = TestTimeout;
+            }, TestCancellationToken);
+
+            Status status = await statusTask;
+
+            Assert.AreEqual("A", status.ServiceName);
+        }
+
+        [Test]
+        public async void Should_start_and_handle_the_status_request_awaited()
+        {
+            var request = await Bus.Request(InputQueueAddress, new Start("B", Guid.NewGuid()), x =>
+            {
+                x.Handle<StartupComplete>();
+                x.Timeout = TestTimeout;
+            }, TestCancellationToken);
+
+            await request.Task;
+
+            Task<Status> statusTask = null;
+            await Bus.Request(InputQueueAddress, new CheckStatus("B"), x =>
+            {
+                statusTask = x.Handle<Status>();
+                x.Timeout = TestTimeout;
+            }, TestCancellationToken);
+
+            Status status = await statusTask;
+
+            Assert.AreEqual("B", status.ServiceName);
+        }
+
+
+
         protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
         {
             _machine = new TestStateMachine();
             _repository = new InMemorySagaRepository<Instance>();
 
-            configurator.StateMachineSaga(_machine, _repository, x =>
-            {
-                x.Correlate(_machine.Started, (i, d) => i.ServiceName == d.ServiceName)
-                    .SelectCorrelationId(msg => msg.ServiceId);
-
-                x.Correlate(_machine.CheckStatus, (i, d) => i.ServiceName == d.ServiceName)
-                    .RetryLimit(5);
-            });
+            configurator.StateMachineSaga(_machine, _repository);
         }
 
         TestStateMachine _machine;
@@ -57,30 +116,39 @@ namespace MassTransit.AutomatonymousTests
 
             public State CurrentState { get; set; }
             public string ServiceName { get; set; }
-            public IServiceBus Bus { get; set; }
             public Guid CorrelationId { get; set; }
         }
 
 
         class TestStateMachine :
-            AutomatonymousStateMachine<Instance>
+            MassTransitStateMachine<Instance>
         {
             public TestStateMachine()
             {
                 InstanceState(x => x.CurrentState);
 
                 State(() => Running);
-                Event(() => Started);
-                Event(() => CheckStatus);
+
+                Event(() => Started, x => x
+                    .CorrelateBy(instance => instance.ServiceName, context => context.Message.ServiceName)
+                    .SelectId(context => context.Message.ServiceId));
+                Event(() => CheckStatus, x => x
+                    .CorrelateBy(instance => instance.ServiceName, context => context.Message.ServiceName));
 
                 Initially(
                     When(Started)
                         .Then(context => context.Instance.ServiceName = context.Data.ServiceName)
-                        .Respond(context => new StartupComplete {ServiceId = context.Instance.CorrelationId, ServiceName = context.Instance.ServiceName})
+                        .Respond(context => new StartupComplete
+                        {
+                            ServiceId = context.Instance.CorrelationId,
+                            ServiceName = context.Instance.ServiceName
+                        })
+                        .Then(context => Console.WriteLine("Started: {0} - {1}", context.Instance.CorrelationId, context.Instance.ServiceName))
                         .TransitionTo(Running));
 
                 During(Running,
                     When(CheckStatus)
+                        .Then(context => Console.WriteLine("Status check!"))
                         .Respond(context => new Status("Running", context.Instance.ServiceName)));
             }
 
@@ -142,42 +210,5 @@ namespace MassTransit.AutomatonymousTests
         }
 
 
-//        [Test]
-//        public async void Should_create_the_saga_with_any_id()
-//        {
-//            Guid serviceId = NewId.NextGuid();
-//
-//            Bus.PublishRequest(new Start("A", serviceId), x =>
-//            {
-//                x.Handle<StartupComplete>(responseReceived.Set);
-//                x.HandleTimeout(8.Seconds(), () =>
-//                {
-//                });
-//            });
-//
-//            Assert.IsTrue(responseReceived.IsAvailable(0.Seconds()));
-//            Assert.AreEqual("A", responseReceived.Message.ServiceName);
-//
-//            Assert.AreEqual(serviceId, responseReceived.Message.ServiceId);
-//
-//            Assert.IsNotNull(_repository.ShouldContainSaga(responseReceived.Message.ServiceId, 1.Seconds()));
-//        }
-
-        [Test]
-        public async void Should_retry_the_status_message()
-        {
-            Task<Status> statusTask = null;
-            Request<CheckStatus> request = await Bus.Request(InputQueueAddress, new CheckStatus("A"), x =>
-            {
-                statusTask = x.Handle<Status>();
-                x.Timeout = TestTimeout;
-            }, TestCancellationToken);
-
-            await Bus.Publish(new Start("A", Guid.NewGuid()));
-
-            Status status = await statusTask;
-
-            Assert.AreEqual("A", status.ServiceName);
-        }
     }
 }

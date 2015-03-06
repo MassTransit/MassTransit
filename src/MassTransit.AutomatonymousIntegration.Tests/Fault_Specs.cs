@@ -15,6 +15,7 @@ namespace MassTransit.AutomatonymousTests
     using System;
     using System.Threading.Tasks;
     using Automatonymous;
+    using Automatonymous.Contexts;
     using NUnit.Framework;
     using Saga;
     using TestFramework;
@@ -24,32 +25,40 @@ namespace MassTransit.AutomatonymousTests
     public class When_an_activity_throws_an_exception :
         InMemoryTestFixture
     {
-//
-//        [Test]
-//        public void Should_be_able_to_observe_its_own_event_fault()
-//        {
-//            var message = new Initialize();
-//            Bus.Publish(message);
-//
-//            var initalizedSaga = _repository.ShouldContainSagaInState(message.CorrelationId, _machine.WaitingToStart, _machine, 8.Seconds());
-//            Assert.IsNotNull(initalizedSaga);
-//
-//            Bus.Publish(new Start(message.CorrelationId));
-//
-//            var faultedSaga = _repository.ShouldContainSagaInState(message.CorrelationId, _machine.FailedToStart, _machine, 8.Seconds());
-//            Assert.IsNotNull(faultedSaga);
-//        }
+
+        [Test]
+        public async void Should_be_able_to_observe_its_own_event_fault()
+        {
+            var message = new Initialize();
+            await InputQueueSendEndpoint.Send(message);
+
+            Guid? saga = await _repository.ShouldContainSaga(x => x.CorrelationId == message.CorrelationId
+    && GetCurrentState(x) == _machine.WaitingToStart, TestTimeout);
+            Assert.IsTrue(saga.HasValue);
+
+
+            await InputQueueSendEndpoint.Send(new Start(message.CorrelationId));
+
+             saga = await _repository.ShouldContainSaga(x => x.CorrelationId == message.CorrelationId
+&& GetCurrentState(x) == _machine.FailedToStart, TestTimeout);
+            Assert.IsTrue(saga.HasValue);
+
+        }
 
         protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
         {
             _machine = new TestStateMachine();
             _repository = new InMemorySagaRepository<Instance>();
 
-            configurator.StateMachineSaga(_machine, _repository, x =>
-            {
-                x.Correlate(_machine.StartFaulted, (saga, message) => saga.CorrelationId == message.Message.CorrelationId);
-            });
+            configurator.StateMachineSaga(_machine, _repository);
         }
+
+
+        State GetCurrentState(Instance state)
+        {
+            return ((StateMachine<Instance>)_machine).InstanceStateAccessor.GetState(state);
+        }
+
 
         TestStateMachine _machine;
         InMemorySagaRepository<Instance> _repository;
@@ -73,7 +82,7 @@ namespace MassTransit.AutomatonymousTests
 
 
         class TestStateMachine :
-            AutomatonymousStateMachine<Instance>
+            MassTransitStateMachine<Instance>
         {
             public TestStateMachine()
             {
@@ -83,10 +92,10 @@ namespace MassTransit.AutomatonymousTests
                 State(() => WaitingToStart);
                 State(() => FailedToStart);
 
-                Event(() => Started);
-                Event(() => Initialized);
-                Event(() => Created);
-                Event(() => StartFaulted);
+                Event(() => Started, x => x.CorrelateById(context => context.Message.CorrelationId));
+                Event(() => Initialized, x => x.CorrelateById(context => context.Message.CorrelationId));
+                Event(() => Created, x => x.CorrelateById(context => context.Message.CorrelationId));
+                Event(() => StartFaulted, x => x.CorrelateById(context => context.Message.Message.CorrelationId));
 
                 Initially(
                     When(Started)

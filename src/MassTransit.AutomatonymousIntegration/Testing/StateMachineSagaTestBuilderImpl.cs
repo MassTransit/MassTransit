@@ -26,7 +26,7 @@ namespace Automatonymous.Testing
         SagaTestBuilder<TScenario, TSaga>
         where TSaga : class, SagaStateMachineInstance
         where TScenario : ITestScenario
-        where TStateMachine : StateMachine<TSaga>
+        where TStateMachine : SagaStateMachine<TSaga>
     {
         readonly IList<ITestAction<TScenario>> _actions;
         readonly Action<StateMachineSagaRepositoryConfigurator<TSaga>> _configureCallback;

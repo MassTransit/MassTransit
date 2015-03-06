@@ -29,10 +29,7 @@ namespace MassTransit.AutomatonymousTests
 
             SagaTest<IBusTestScenario, Instance> test = TestFactory.ForSaga<Instance>().New(x =>
                 {
-                    x.UseStateMachineBuilder(_machine, sm =>
-                        {
-                            sm.Correlate(_machine.Stopped, (s, m) => s.CorrelationId == m.CorrelationId);
-                        });
+                    x.UseStateMachineBuilder(_machine);
 
                     x.Publish(new Start
                         {
@@ -57,10 +54,7 @@ namespace MassTransit.AutomatonymousTests
 
             SagaTest<IBusTestScenario, Instance> test = TestFactory.ForSaga<Instance>().New(x =>
                 {
-                    x.UseStateMachineBuilder(_machine, sm =>
-                        {
-                            sm.Correlate(_machine.Stopped, (s, m) => s.CorrelationId == m.CorrelationId);
-                        });
+                    x.UseStateMachineBuilder(_machine);
 
                     x.Publish(new Start
                         {
@@ -111,7 +105,7 @@ namespace MassTransit.AutomatonymousTests
 
 
         class TestStateMachine :
-            AutomatonymousStateMachine<Instance>
+            MassTransitStateMachine<Instance>
         {
             public TestStateMachine()
             {
@@ -119,8 +113,7 @@ namespace MassTransit.AutomatonymousTests
 
                 State(() => Running);
                 Event(() => Started);
-                Event(() => Stopped);
-                Event(() => ShouldNotBind);
+                Event(() => Stopped, x => x.CorrelateById(context => context.Message.CorrelationId));
 
                 Initially(
                     When(Started)
@@ -134,7 +127,6 @@ namespace MassTransit.AutomatonymousTests
             public State Running { get; private set; }
             public Event<Start> Started { get; private set; }
             public Event<Stop> Stopped { get; private set; }
-            public Event<int> ShouldNotBind { get; private set; }
         }
 
 

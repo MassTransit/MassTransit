@@ -65,7 +65,7 @@ namespace Automatonymous.Contexts
             get { return _context.Data; }
         }
 
-        public ConsumeContext ConsumeContext
+        public ConsumeContext<TData> ConsumeContext
         {
             get { return _consumeContext; }
         }
@@ -77,13 +77,13 @@ namespace Automatonymous.Contexts
     }
 
 
-    public class ConsumeEventContextImpl<TInstance> :
+    public class AutomatonymousConsumeEventContext<TInstance> :
         ConsumeEventContext<TInstance>
     {
         readonly ConsumeContext _consumeContext;
         readonly BehaviorContext<TInstance> _context;
 
-        public ConsumeEventContextImpl(BehaviorContext<TInstance> context, ConsumeContext consumeContext)
+        public AutomatonymousConsumeEventContext(BehaviorContext<TInstance> context, ConsumeContext consumeContext)
         {
             _context = context;
             _consumeContext = consumeContext;

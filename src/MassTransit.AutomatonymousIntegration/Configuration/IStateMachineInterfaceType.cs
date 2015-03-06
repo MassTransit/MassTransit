@@ -13,7 +13,7 @@
 namespace Automatonymous
 {
     using MassTransit.Saga;
-    using MassTransit.Saga.SubscriptionConnectors;
+    using MassTransit.Saga.Connectors;
 
 
     public interface IStateMachineInterfaceType<TInstance>

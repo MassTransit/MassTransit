@@ -15,6 +15,7 @@ namespace MassTransit.AutomatonymousTests
     using System;
     using System.Threading.Tasks;
     using Automatonymous;
+    using Automatonymous.Contexts;
     using NUnit.Framework;
     using Saga;
     using TestFramework;
@@ -36,6 +37,12 @@ namespace MassTransit.AutomatonymousTests
 
         TestStateMachine _machine;
 
+        async Task<State> GetCurrentState(Instance state)
+        {
+            var context = new StateMachineInstanceContext<Instance>(state);
+
+            return await ((StateMachine<Instance>)_machine).InstanceStateAccessor.Get(context);
+        }
 
         class Instance :
             SagaStateMachineInstance
@@ -49,25 +56,27 @@ namespace MassTransit.AutomatonymousTests
             {
             }
 
-            public CompositeEventStatus CompositeStatus { get; set; }
-            public State CurrentState { get; set; }
+            public int CompositeStatus { get; set; }
+            public int CurrentState { get; set; }
 
             public Guid CorrelationId { get; private set; }
         }
 
 
         class TestStateMachine :
-            AutomatonymousStateMachine<Instance>
+            MassTransitStateMachine<Instance>
         {
             public TestStateMachine()
             {
                 InstanceState(x => x.CurrentState);
+
                 State(() => Waiting);
                 State(() => WaitingForSecond);
 
-                Event(() => Start);
-                Event(() => First);
-                Event(() => Second);
+                Event(() => Start, x => x.CorrelateById(m => m.Message.CorrelationId));
+                Event(() => First, x => x.CorrelateById(m => m.Message.CorrelationId));
+                Event(() => Second, x => x.CorrelateById(m => m.Message.CorrelationId));
+
                 Event(() => Third, x => x.CompositeStatus, First, Second);
 
                 Initially(
@@ -88,7 +97,6 @@ namespace MassTransit.AutomatonymousTests
             public State WaitingForSecond { get; private set; }
 
             public Event<StartMessage> Start { get; private set; }
-
             public Event<FirstMessage> First { get; private set; }
             public Event<SecondMessage> Second { get; private set; }
             public Event Third { get; private set; }
@@ -119,8 +127,7 @@ namespace MassTransit.AutomatonymousTests
         }
 
 
-        class SecondMessage :
-            CorrelatedBy<Guid>
+        class SecondMessage
         {
             public SecondMessage(Guid correlationId)
             {
@@ -151,13 +158,14 @@ namespace MassTransit.AutomatonymousTests
             Task<ConsumeContext<CompleteMessage>> received = SubscribeHandler<CompleteMessage>(x => x.Message.CorrelationId == message.CorrelationId);
 
             await Bus.Publish(message);
+
             Guid? saga = await _repository.ShouldContainSaga(x => x.CorrelationId == message.CorrelationId
-                && x.CurrentState == _machine.Waiting, TestTimeout);
+                && GetCurrentState(x).Result == _machine.Waiting, TestTimeout);
             Assert.IsTrue(saga.HasValue);
 
             await Bus.Publish(new FirstMessage(message.CorrelationId));
             saga = await _repository.ShouldContainSaga(x => x.CorrelationId == message.CorrelationId
-                && x.CurrentState == _machine.WaitingForSecond, TestTimeout);
+                && GetCurrentState(x).Result == _machine.WaitingForSecond, TestTimeout);
             Assert.IsTrue(saga.HasValue);
 
             await Bus.Publish(new SecondMessage(message.CorrelationId));

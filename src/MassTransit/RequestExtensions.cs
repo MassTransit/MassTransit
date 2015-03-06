@@ -29,7 +29,7 @@ namespace MassTransit
         /// <param name="message">The request message</param>
         /// <param name="callback">A callback to configure the request and response handlers</param>
         /// <param name="cancellationToken">Can be used to cancel the request</param>
-        /// <returns>An awaitable task that completes once the request is completed</returns>
+        /// <returns>An awaitable task that completes once the request is sent</returns>
         public static async Task<Request<TRequest>> Request<TRequest>(this IBus bus, Uri address, TRequest message,
             Action<RequestContext<TRequest>> callback, CancellationToken cancellationToken = default(CancellationToken))
             where TRequest : class

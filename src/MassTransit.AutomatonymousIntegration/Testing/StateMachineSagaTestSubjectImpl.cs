@@ -22,7 +22,6 @@ namespace Automatonymous.Testing
     using MassTransit.Testing.ScenarioConfigurators;
     using MassTransit.Testing.Subjects;
     using MassTransit.Testing.TestDecorators;
-    using RepositoryConfigurators;
 
 
     public class StateMachineSagaTestSubjectImpl<TScenario, TSaga, TStateMachine> :
@@ -30,21 +29,18 @@ namespace Automatonymous.Testing
         IScenarioSpecification<TScenario>
         where TSaga : class, SagaStateMachineInstance
         where TScenario : ITestScenario
-        where TStateMachine : StateMachine<TSaga>
+        where TStateMachine : SagaStateMachine<TSaga>
     {
-        readonly Action<StateMachineSagaRepositoryConfigurator<TSaga>> _configureCorrelation;
         readonly ISagaRepository<TSaga> _sagaRepository;
         readonly TStateMachine _stateMachine;
         SagaListImpl<TSaga> _created;
         ReceivedMessageList _received;
         SagaListImpl<TSaga> _sagas;
 
-        public StateMachineSagaTestSubjectImpl(ISagaRepository<TSaga> sagaRepository, TStateMachine stateMachine,
-            Action<StateMachineSagaRepositoryConfigurator<TSaga>> configureCorrelation)
+        public StateMachineSagaTestSubjectImpl(ISagaRepository<TSaga> sagaRepository, TStateMachine stateMachine)
         {
             _sagaRepository = sagaRepository;
             _stateMachine = stateMachine;
-            _configureCorrelation = configureCorrelation;
         }
 
         public ITestScenarioBuilder<TScenario> Configure(ITestScenarioBuilder<TScenario> builder)
@@ -58,7 +54,7 @@ namespace Automatonymous.Testing
             var scenarioBuilder = builder as IBusTestScenarioBuilder;
             if (scenarioBuilder != null)
                 scenarioBuilder.ConfigureReceiveEndpoint(
-                    x => x.StateMachineSaga(_stateMachine, decoratedSagaRepository, _configureCorrelation));
+                    x => x.StateMachineSaga(_stateMachine, decoratedSagaRepository));
 
             return builder;
         }

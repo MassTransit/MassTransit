@@ -98,11 +98,17 @@ namespace MassTransit.TestFramework
 
             _busHandle = startTask.Result;
 
-            _busSendEndpoint = _bus.GetSendEndpoint(_bus.Address).Result;
-            _busSendEndpoint.Connect(_sendObserver);
+            _busSendEndpoint = GetSendEndpoint(_bus.Address).Result;
 
-            _inputQueueSendEndpoint = _bus.GetSendEndpoint(_inputQueueAddress).Result;
-            _inputQueueSendEndpoint.Connect(_sendObserver);
+            _inputQueueSendEndpoint = GetSendEndpoint(InputQueueAddress).Result;
+        }
+
+        protected async Task<ISendEndpoint> GetSendEndpoint(Uri address)
+        {
+            var sendEndpoint = await _bus.GetSendEndpoint(address);
+            sendEndpoint.Connect(_sendObserver);
+
+            return sendEndpoint;
         }
 
         [TestFixtureTearDown]

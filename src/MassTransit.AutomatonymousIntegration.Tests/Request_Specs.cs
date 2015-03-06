@@ -24,7 +24,7 @@ namespace MassTransit.AutomatonymousTests
 
         [TestFixture]
         public class Sending_a_request_from_a_state_machine :
-            InMemoryTestFixture
+            StateMachineTestFixture
         {
             [Test]
             public async Task Should_handle_the_response()
@@ -41,10 +41,22 @@ namespace MassTransit.AutomatonymousTests
                 await InputQueueSendEndpoint.Send(registerMember);
 
                 ConsumeContext<MemberRegistered> registered = await handler;
+
+                Guid? saga = await _repository.ShouldContainSaga(x => x.CorrelationId == registerMember.CorrelationId
+                    && GetCurrentState(x) == _machine.Registered, TestTimeout);
+                Assert.IsTrue(saga.HasValue);
+
+                TestState sagaInstance = _repository[saga.Value];
+                Assert.IsTrue(sagaInstance.ValidateAddressRequestId.HasValue);
             }
 
             InMemorySagaRepository<TestState> _repository;
             TestStateMachine _machine;
+
+            State GetCurrentState(TestState state)
+            {
+                return ((StateMachine<TestState>)_machine).InstanceStateAccessor.GetState(state);
+            }
 
             public Sending_a_request_from_a_state_machine()
             {
@@ -65,33 +77,24 @@ namespace MassTransit.AutomatonymousTests
                 }
             }
 
-
-            public class RegisterMemberCommand :
-                RegisterMember
-            {
-                public Guid CorrelationId { get; set; }
-                public string Name { get; set; }
-                public string Address { get; set; }
-            }
-
-
             protected override void ConfigureBus(IInMemoryBusFactoryConfigurator configurator)
             {
+                base.ConfigureBus(configurator);
+
                 configurator.ReceiveEndpoint("service_queue", ConfigureServiceQueueEndpoint);
             }
 
             protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
             {
+                base.ConfigureInputQueueEndpoint(configurator);
+
                 _repository = new InMemorySagaRepository<TestState>();
 
-                var settings = new RequestSettingsImpl(ServiceQueueAddress, InputQueueAddress, TestTimeout);
+                var settings = new RequestSettingsImpl(ServiceQueueAddress, QuartzQueueAddress, TestTimeout);
+
                 _machine = new TestStateMachine(settings);
 
-                configurator.StateMachineSaga(_machine, _repository, x =>
-                {
-                    x.Correlate(_machine.ValidateAddress.Faulted, (state, message) => state.CorrelationId == message.Message.CorrelationId);
-                    x.Correlate(_machine.ValidateAddress.TimeoutExpired, (state, message) => state.CorrelationId == message.CorrelationId);
-                });
+                configurator.StateMachineSaga(_machine, _repository);
             }
 
             protected virtual void ConfigureServiceQueueEndpoint(IReceiveEndpointConfigurator configurator)
@@ -105,64 +108,74 @@ namespace MassTransit.AutomatonymousTests
             }
 
 
-            class RequestSettingsImpl :
-                RequestSettings
+        }
+
+
+        class RegisterMemberCommand :
+            RegisterMember
+        {
+            public Guid CorrelationId { get; set; }
+            public string Name { get; set; }
+            public string Address { get; set; }
+        }
+
+
+        class RequestSettingsImpl :
+            RequestSettings
+        {
+            readonly Uri _schedulingServiceAddress;
+            readonly Uri _serviceAddress;
+            readonly TimeSpan _timeout;
+
+            public RequestSettingsImpl(Uri serviceAddress, Uri schedulingServiceAddress, TimeSpan timeout)
             {
-                readonly Uri _schedulingServiceAddress;
-                readonly Uri _serviceAddress;
-                readonly TimeSpan _timeout;
-
-                public RequestSettingsImpl(Uri serviceAddress, Uri schedulingServiceAddress, TimeSpan timeout)
-                {
-                    _serviceAddress = serviceAddress;
-                    _schedulingServiceAddress = schedulingServiceAddress;
-                    _timeout = timeout;
-                }
-
-                public Uri ServiceAddress
-                {
-                    get { return _serviceAddress; }
-                }
-
-                public Uri SchedulingServiceAddress
-                {
-                    get { return _schedulingServiceAddress; }
-                }
-
-                public TimeSpan Timeout
-                {
-                    get { return _timeout; }
-                }
+                _serviceAddress = serviceAddress;
+                _schedulingServiceAddress = schedulingServiceAddress;
+                _timeout = timeout;
             }
 
-
-            class AddressValidatedResponse :
-                AddressValidated
+            public Uri ServiceAddress
             {
-                readonly ValidateAddress _message;
+                get { return _serviceAddress; }
+            }
 
-                public AddressValidatedResponse(ValidateAddress message)
-                {
-                    _message = message;
-                }
+            public Uri SchedulingServiceAddress
+            {
+                get { return _schedulingServiceAddress; }
+            }
 
-                public string Address
-                {
-                    get { return _message.Address.ToUpperInvariant(); }
-                }
-
-                public string RequestAddress
-                {
-                    get { return _message.Address; }
-                }
-
-                public Guid CorrelationId
-                {
-                    get { return _message.CorrelationId; }
-                }
+            public TimeSpan Timeout
+            {
+                get { return _timeout; }
             }
         }
 
+
+        class AddressValidatedResponse :
+            AddressValidated
+        {
+            readonly ValidateAddress _message;
+
+            public AddressValidatedResponse(ValidateAddress message)
+            {
+                _message = message;
+            }
+
+            public string Address
+            {
+                get { return _message.Address.ToUpperInvariant(); }
+            }
+
+            public string RequestAddress
+            {
+                get { return _message.Address; }
+            }
+
+            public Guid CorrelationId
+            {
+                get { return _message.CorrelationId; }
+            }
+        }
 
         class TestState :
             SagaStateMachineInstance
@@ -180,6 +193,8 @@ namespace MassTransit.AutomatonymousTests
 
             public string Name { get; set; }
             public string Address { get; set; }
+
+            public Guid? ValidateAddressRequestId { get; set; }
             public Guid CorrelationId { get; set; }
         }
 
@@ -266,9 +281,14 @@ namespace MassTransit.AutomatonymousTests
             {
                 InstanceState(x => x.CurrentState);
 
-                Event(() => Register);
 
-                Request(() => ValidateAddress, settings);
+                State(() => Registered);
+                State(() => AddressValidationFaulted);
+                State(() => AddressValidationTimeout);
+
+                Event(() => Register, x => x.CorrelateById(context => context.Message.CorrelationId));
+
+                Request(() => ValidateAddress, x => x.ValidateAddressRequestId, settings);
 
                 Initially(
                     When(Register)
@@ -291,16 +311,23 @@ namespace MassTransit.AutomatonymousTests
 
                             context.Instance.Address = context.Data.Address;
                         })
-                        .Publish(context => new MemberRegisteredImpl(context.Instance)),
+                        .Publish(context => new MemberRegisteredImpl(context.Instance))
+                        .TransitionTo(Registered),
                     When(ValidateAddress.Faulted)
-                        .Then(context => Console.WriteLine("Request Faulted")),
+                        .Then(context => Console.WriteLine("Request Faulted"))
+                        .TransitionTo(AddressValidationFaulted),
                     When(ValidateAddress.TimeoutExpired)
-                        .Then(context => Console.WriteLine("Request timed out")));
+                        .Then(context => Console.WriteLine("Request timed out"))
+                        .TransitionTo(AddressValidationTimeout));
             }
 
-            public Request<ValidateAddress, AddressValidated> ValidateAddress { get; set; }
+            public Request<TestState, ValidateAddress, AddressValidated> ValidateAddress { get; private set; }
 
-            public Event<RegisterMember> Register { get; set; }
+            public Event<RegisterMember> Register { get; private set; }
+
+            public State Registered { get; private set; }
+            public State AddressValidationFaulted { get; private set; }
+            public State AddressValidationTimeout { get; private set; }
         }
     }
 }

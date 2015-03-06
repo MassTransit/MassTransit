@@ -16,7 +16,7 @@ namespace MassTransit.Saga
     
 
     /// <summary>
-    /// Defines a component as a saga
+    /// Interface required by a saga, which includes the CorrelatedBy<Guid>Guid</Guid> interface.
     /// </summary>
     public interface ISaga :
         CorrelatedBy<Guid>

@@ -14,9 +14,9 @@ namespace MassTransit.Saga.SubscriptionConfigurators
 {
     using System.Collections.Generic;
     using Configurators;
+    using Connectors;
     using EndpointConfigurators;
-    using Policies;
-    using SubscriptionConnectors;
+    using MassTransit.Policies;
 
 
     public class SagaConfigurator<TSaga> :

@@ -411,7 +411,7 @@ task :all_nuspecs => [:mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :mtsm_nuspec, :
     nuspec.requireLicenseAcceptance = "false"
     nuspec.dependency "MassTransit", NUGET_VERSION
     nuspec.dependency "NewId", "2.1.2"
-    nuspec.dependency "Automatonymous", "3.0.0-alpha"
+    nuspec.dependency "Automatonymous", "3.0.2-alpha"
     nuspec.output_file = 'nuspecs/MassTransit.Automatonymous.nuspec'
 
   add_files props[:stage], "#{File.join('MassTransit.AutomatonymousIntegration.{dll,pdb,xml}')}", nuspec
@@ -447,7 +447,7 @@ task :all_nuspecs => [:mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :mtsm_nuspec, :
     nuspec.licenseUrl = "http://www.apache.org/licenses/LICENSE-2.0"
     nuspec.requireLicenseAcceptance = "false"
     nuspec.dependency "MassTransit", NUGET_VERSION
-    nuspec.dependency "NLog", "3.1.0"
+    nuspec.dependency "NLog", "3.2.0"
     nuspec.output_file = 'nuspecs/MassTransit.NLog.nuspec'
 
     add_files props[:stage], File.join('Logging', 'MassTransit.NLogIntegration.{dll,pdb,xml}'), nuspec

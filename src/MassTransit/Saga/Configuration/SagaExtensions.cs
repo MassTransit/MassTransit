@@ -13,11 +13,13 @@
 namespace MassTransit
 {
     using System;
+    using Internals.Extensions;
     using Logging;
     using Policies;
     using Saga;
+    using Saga.Connectors;
     using Saga.SubscriptionConfigurators;
-    using Saga.SubscriptionConnectors;
+    using Util;
 
 
     public static class SagaExtensions
@@ -30,13 +32,14 @@ namespace MassTransit
         /// <typeparam name="TSaga"></typeparam>
         /// <param name="configurator"></param>
         /// <param name="sagaRepository"></param>
+        /// <param name="retryPolicy"></param>
         /// <returns></returns>
         public static ISagaConfigurator<TSaga> Saga<TSaga>(this IReceiveEndpointConfigurator configurator,
             ISagaRepository<TSaga> sagaRepository, IRetryPolicy retryPolicy = null)
             where TSaga : class, ISaga
         {
             if (_log.IsDebugEnabled)
-                _log.DebugFormat("Subscribing Saga: {0}", typeof(TSaga));
+                _log.DebugFormat("Subscribing Saga: {0}", TypeMetadataCache<TSaga>.ShortName);
 
             var sagaConfigurator = new SagaConfigurator<TSaga>(sagaRepository, retryPolicy);
 
@@ -46,11 +49,11 @@ namespace MassTransit
         }
 
         /// <summary>
-        /// Connects the saga to the service bus
+        /// Connects the saga to the bus
         /// </summary>
-        /// <typeparam name="TSaga">The consumer type</typeparam>
-        /// <param name="bus"></param>
-        /// <param name="sagaRepository"></param>
+        /// <typeparam name="TSaga">The saga type</typeparam>
+        /// <param name="bus">The bus to which the saga is to be connected</param>
+        /// <param name="sagaRepository">The saga repository</param>
         public static ConnectHandle ConnectSaga<TSaga>(this IBus bus, ISagaRepository<TSaga> sagaRepository, IRetryPolicy retryPolicy = null)
             where TSaga : class, ISaga
         {
@@ -60,7 +63,7 @@ namespace MassTransit
                 throw new ArgumentNullException("sagaRepository");
 
             if (_log.IsDebugEnabled)
-                _log.DebugFormat("Subscribing Saga: {0}", typeof(TSaga));
+                _log.DebugFormat("Subscribing Saga: {0}", TypeMetadataCache<TSaga>.ShortName);
 
             return SagaConnectorCache<TSaga>.Connector.Connect(bus.ConsumePipe, sagaRepository, retryPolicy ?? Retry.None);
         }
