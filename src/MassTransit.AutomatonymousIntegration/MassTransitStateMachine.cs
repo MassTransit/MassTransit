@@ -143,10 +143,22 @@ namespace Automatonymous
         /// </summary>
         /// <typeparam name="T">The event data type</typeparam>
         /// <param name="propertyExpression">The property to initialize</param>
-        protected new void Event<T>(Expression<Func<Event<T>>> propertyExpression)
-            where T : class, CorrelatedBy<Guid>
+        protected override void Event<T>(Expression<Func<Event<T>>> propertyExpression)
         {
-            Event(propertyExpression, DefaultCorrelatedByConfigurator);
+            base.Event(propertyExpression);
+
+            if (typeof(T).HasInterface<CorrelatedBy<Guid>>())
+            {
+                PropertyInfo propertyInfo = propertyExpression.GetPropertyInfo();
+
+                var @event = (Event<T>)propertyInfo.GetValue(this);
+
+
+                Type builderType = typeof(CorrelatedByEventCorrelationBuilder<,>).MakeGenericType(typeof(TInstance), typeof(T));
+                var builder = (EventCorrelationBuilder<TInstance>)Activator.CreateInstance(builderType, this, @event);
+
+                _eventCorrelations[@event] = builder.Build();
+            }
         }
 
         void DefaultCorrelatedByConfigurator<T>(EventCorrelationConfigurator<TInstance, T> configurator)

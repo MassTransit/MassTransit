@@ -24,7 +24,7 @@ namespace MassTransit.AutomatonymousTests
     public class When_a_message_is_not_correlated :
         InMemoryTestFixture
     {
-        [Test]
+        [Test, Explicit]
         public async void Should_retry_the_status_message()
         {
             Task<Status> statusTask = null;

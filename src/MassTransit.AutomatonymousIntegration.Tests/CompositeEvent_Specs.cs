@@ -70,14 +70,11 @@ namespace MassTransit.AutomatonymousTests
             {
                 InstanceState(x => x.CurrentState);
 
-                State(() => Waiting);
-                State(() => WaitingForSecond);
-
                 Event(() => Start, x => x.CorrelateById(m => m.Message.CorrelationId));
                 Event(() => First, x => x.CorrelateById(m => m.Message.CorrelationId));
                 Event(() => Second, x => x.CorrelateById(m => m.Message.CorrelationId));
 
-                Event(() => Third, x => x.CompositeStatus, First, Second);
+                CompositeEvent(() => Third, x => x.CompositeStatus, First, Second);
 
                 Initially(
                     When(Start)

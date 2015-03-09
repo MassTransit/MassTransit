@@ -37,13 +37,13 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Automatonymous, Version=3.0.2.0, Culture=neutral, PublicKeyToken=b800c4cfcdeea87b, processorArchitecture=MSIL">
+    <Reference Include="Automatonymous, Version=3.0.4.0, Culture=neutral, PublicKeyToken=b800c4cfcdeea87b, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Automatonymous.3.0.2-alpha\lib\net45\Automatonymous.dll</HintPath>
+      <HintPath>..\packages\Automatonymous.3.0.4-beta\lib\net45\Automatonymous.dll</HintPath>
     </Reference>
-    <Reference Include="Automatonymous.NHibernateIntegration, Version=3.0.2.0, Culture=neutral, PublicKeyToken=b800c4cfcdeea87b, processorArchitecture=MSIL">
+    <Reference Include="Automatonymous.NHibernateIntegration, Version=3.0.4.0, Culture=neutral, PublicKeyToken=b800c4cfcdeea87b, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Automatonymous.NHibernate.3.0.2-alpha\lib\net45\Automatonymous.NHibernateIntegration.dll</HintPath>
+      <HintPath>..\packages\Automatonymous.NHibernate.3.0.4-beta\lib\net45\Automatonymous.NHibernateIntegration.dll</HintPath>
     </Reference>
     <Reference Include="Common.Logging">
       <HintPath>..\packages\Common.Logging.3.0.0\lib\net40\Common.Logging.dll</HintPath>

@@ -18,8 +18,37 @@ namespace Automatonymous.CorrelationConfigurators
     using MassTransit.Saga;
 
 
+    public interface EventCorrelationBuilder<TInstance>
+        where TInstance : class, SagaStateMachineInstance
+    {
+        EventCorrelation<TInstance> Build();
+    }
+
+    public class CorrelatedByEventCorrelationBuilder<TInstance, TData> :
+        EventCorrelationBuilder<TInstance>
+        where TData : class, CorrelatedBy<Guid>
+        where TInstance : class, SagaStateMachineInstance
+    {
+        MassTransitEventCorrelationConfigurator<TInstance, TData> _configurator;
+
+        public CorrelatedByEventCorrelationBuilder(SagaStateMachine<TInstance> machine, Event<TData> @event)
+        {
+            var configurator = new MassTransitEventCorrelationConfigurator<TInstance, TData>(machine, @event);
+            configurator.CorrelateById(x => x.Message.CorrelationId);
+
+            _configurator = configurator;
+        }
+
+        public EventCorrelation<TInstance> Build()
+        {
+            return _configurator.Build();
+        }
+    }
+
+
     public class MassTransitEventCorrelationConfigurator<TInstance, TData> :
-        EventCorrelationConfigurator<TInstance, TData>
+        EventCorrelationConfigurator<TInstance, TData>,
+        EventCorrelationBuilder<TInstance>
         where TInstance : class, SagaStateMachineInstance
         where TData : class
     {
