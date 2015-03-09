@@ -174,7 +174,7 @@ namespace MassTransit.AutomatonymousTests
                 Event(() => ExitFrontDoor, x => x.CorrelateById(context => context.Message.CorrelationId));
                 Event(() => GotHitByCar, x => x.CorrelateById(context => context.Message.CorrelationId));
 
-                Event(() => EndOfTheWorld, x => x.Everything, CompositeEventOptions.IncludeInitial, ExitFrontDoor, GotHitByCar);
+                CompositeEvent(() => EndOfTheWorld, x => x.Everything, CompositeEventOptions.IncludeInitial, ExitFrontDoor, GotHitByCar);
 
                 Initially(
                     When(ExitFrontDoor)
