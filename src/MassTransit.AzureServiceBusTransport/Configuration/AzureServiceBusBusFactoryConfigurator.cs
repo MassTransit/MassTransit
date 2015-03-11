@@ -62,7 +62,8 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
 
                 _defaultEndpointConfigurator = new ServiceBusReceiveEndpointConfigurator(host, queueName)
                 {
-                    EnableExpress = true
+                    EnableExpress = true,
+                    AutoDeleteOnIdle = TimeSpan.FromMinutes(5),
                 };
 
                 _transportSpecifications.Add(_defaultEndpointConfigurator);

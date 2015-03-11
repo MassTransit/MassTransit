@@ -38,6 +38,7 @@ namespace MassTransit.AzureServiceBusTransport
         readonly QueueDescription _queueDescription;
         readonly IBuildPipeConfigurator<ReceiveContext> _receivePipeConfigurator;
         int _prefetchCount;
+        int _maxConcurrentCalls;
 
         public ServiceBusReceiveEndpointConfigurator(IServiceBusHost host, string queueName)
             : this(host, new QueueDescription(queueName))
@@ -58,7 +59,8 @@ namespace MassTransit.AzureServiceBusTransport
 
             _host = host;
             _queueDescription = queueDescription;
-            _prefetchCount = 32;
+            _maxConcurrentCalls = Math.Max(Environment.ProcessorCount, 8);
+            _prefetchCount = Math.Max(_maxConcurrentCalls, 32);
         }
 
         public bool DuplicateDetection
@@ -117,6 +119,16 @@ namespace MassTransit.AzureServiceBusTransport
             set { _prefetchCount = value; }
         }
 
+        public int MaxConcurrentCalls
+        {
+            set
+            {
+                _maxConcurrentCalls = value;
+                if (_maxConcurrentCalls > _prefetchCount)
+                    _prefetchCount = _maxConcurrentCalls;
+            }
+        }
+
         public Uri QueuePath
         {
             get { return _host.Settings.GetInputAddress(_queueDescription); }
@@ -128,6 +140,11 @@ namespace MassTransit.AzureServiceBusTransport
             _queueDescription.DuplicateDetectionHistoryTimeWindow = historyTimeWindow;
         }
 
+        public TimeSpan AutoDeleteOnIdle
+        {
+            set { _queueDescription.AutoDeleteOnIdle = value; }
+        }
+
         ReceiveEndpoint CreateReceiveEndpoint(IMessageDeserializer deserializer)
         {
             IRetryPolicy retryPolicy = Retry.Exponential(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(60), TimeSpan.FromSeconds(2));
@@ -135,7 +152,7 @@ namespace MassTransit.AzureServiceBusTransport
             ReceiveSettings settings = new ReceiveEndpointSettings
             {
                 AutoRenewTimeout = TimeSpan.FromMinutes(5),
-                MaxConcurrentCalls = _prefetchCount,
+                MaxConcurrentCalls = _maxConcurrentCalls,
                 PrefetchCount = _prefetchCount,
                 QueueDescription = _queueDescription,
             };

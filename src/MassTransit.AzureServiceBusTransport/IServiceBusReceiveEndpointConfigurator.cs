@@ -44,10 +44,15 @@ namespace MassTransit.AzureServiceBusTransport
         TimeSpan DefaultMessageTimeToLive { set; }
 
         /// <summary>
-        /// Specify the maximum number of concurrent messages that are consumed
+        /// Specify the number of messages to prefetch from the queue to the service
         /// </summary>
         /// <value>The limit</value>
         int PrefetchCount { set; }
+
+        /// <summary>
+        /// Specify the number of concurrent consumers (separate from prefetch count)
+        /// </summary>
+        int MaxConcurrentCalls { set; }
 
         /// <summary>
         /// The path of the queue that's being configured
@@ -59,5 +64,10 @@ namespace MassTransit.AzureServiceBusTransport
         /// </summary>
         /// <param name="historyTimeWindow">The time window for duplicate history</param>
         void EnableDuplicateDetection(TimeSpan historyTimeWindow);
+
+        /// <summary>
+        /// True if the queue should be deleted if idle
+        /// </summary>
+        TimeSpan AutoDeleteOnIdle { set; }
     }
 }
