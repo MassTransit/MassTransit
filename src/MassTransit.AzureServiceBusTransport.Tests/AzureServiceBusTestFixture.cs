@@ -36,6 +36,8 @@ namespace MassTransit.AzureServiceBusTransport.Tests
 
         public AzureServiceBusTestFixture()
         {
+            ServiceBusEnvironment.SystemConnectivity.Mode = ConnectivityMode.Http;
+            
             TestTimeout = Debugger.IsAttached ? TimeSpan.FromMinutes(5) : TimeSpan.FromSeconds(60);
 
             _serviceUri = ServiceBusEnvironment.CreateServiceUri("sb", "masstransit-build", "MassTransit.AzureServiceBusTransport.Tests");
@@ -104,9 +106,12 @@ namespace MassTransit.AzureServiceBusTransport.Tests
                 _inputQueueSendEndpoint = _bus.GetSendEndpoint(_inputQueueAddress).Result;
                 _inputQueueSendEndpoint.Connect(_sendObserver);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                _busHandle.Stop();
+                Console.WriteLine("The bus creation failed: {0}", ex);
+
+
+                _busHandle.Stop().Wait(TestTimeout);
 
                 throw;
             }

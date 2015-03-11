@@ -56,12 +56,12 @@ namespace MassTransit.AzureServiceBusTransport
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Starting receive transport: {0}", new Uri(_host.Settings.ServiceUri, _settings.QueueDescription.Path));
 
-            var handle = new Handle();
+            var stopTokenSource = new CancellationTokenSource();
 
             IPipe<ConnectionContext> connectionPipe = Pipe.New<ConnectionContext>(x =>
             {
-                x.Repeat(handle.StopToken);
-                x.Retry(_retryPolicy, handle.StopToken);
+                x.Repeat(stopTokenSource.Token);
+                x.Retry(_retryPolicy, stopTokenSource.Token);
 
                 x.Filter(new PrepareReceiveQueueFilter(_settings));
 
@@ -71,21 +71,21 @@ namespace MassTransit.AzureServiceBusTransport
                 x.Filter(new MessageReceiverFilter(receivePipe));
             });
 
-            Receiver(handle, connectionPipe);
+            var receiveTask = Receiver(stopTokenSource.Token, connectionPipe);
 
-            return handle;
+            return new Handle(stopTokenSource, receiveTask);
         }
 
-        async void Receiver(Handle handle, IPipe<ConnectionContext> connectionPipe)
+        async Task Receiver(CancellationToken stopTokenSource, IPipe<ConnectionContext> connectionPipe)
         {
-            await Repeat.UntilCancelled(handle.StopToken, async () =>
+            await Repeat.UntilCancelled(stopTokenSource, async () =>
             {
                 if (_log.IsDebugEnabled)
                     _log.DebugFormat("Connecting receive transport: {0}", _host.Settings.GetInputAddress(_settings.QueueDescription));
 
                 try
                 {
-                    var context = new ServiceBusConnectionContext(_host, handle.StopToken);
+                    var context = new ServiceBusConnectionContext(_host, stopTokenSource);
 
                     await connectionPipe.Send(context);
                 }
@@ -98,8 +98,6 @@ namespace MassTransit.AzureServiceBusTransport
                         _log.ErrorFormat("Azure Service Bus connection failed: {0}", ex.Message);
                 }
             });
-
-            handle.Stopped();
         }
 
 
@@ -107,17 +105,12 @@ namespace MassTransit.AzureServiceBusTransport
             ReceiveTransportHandle
         {
             readonly CancellationTokenSource _stop;
-            readonly TaskCompletionSource<bool> _stopped;
+            readonly Task _receiveTask;
 
-            public Handle()
+            public Handle(CancellationTokenSource cancellationTokenSource, Task receiveTask)
             {
-                _stop = new CancellationTokenSource();
-                _stopped = new TaskCompletionSource<bool>();
-            }
-
-            public CancellationToken StopToken
-            {
-                get { return _stop.Token; }
+                _stop = cancellationTokenSource;
+                _receiveTask = receiveTask;
             }
 
             void IDisposable.Dispose()
@@ -129,12 +122,7 @@ namespace MassTransit.AzureServiceBusTransport
             {
                 _stop.Cancel();
 
-                await _stopped.Task.WithCancellation(cancellationToken);
-            }
-
-            public void Stopped()
-            {
-                _stopped.TrySetResult(true);
+                await _receiveTask.WithCancellation(cancellationToken);
             }
         }
     }
