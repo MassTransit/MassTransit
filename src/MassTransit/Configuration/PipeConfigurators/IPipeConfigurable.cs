@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,22 +12,9 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.PipeConfigurators
 {
-    using PipeBuilders;
-
-
-    /// <summary>
-    /// Configures a pipe builder (typically by adding filters), but allows late binding to the
-    /// pipe builder with pre-validation that the operations will succeed.
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
-    public interface IPipeSpecification<T> :
-        IConfigurable<T>
+    public interface IPipeConfigurable<T> :
+        IPipeSpecification<T>
         where T : class, PipeContext
     {
-        /// <summary>
-        /// Configure the builder
-        /// </summary>
-        /// <param name="builder">The pipe builder</param>
-        void Build(IPipeBuilder<T> builder);
     }
 }

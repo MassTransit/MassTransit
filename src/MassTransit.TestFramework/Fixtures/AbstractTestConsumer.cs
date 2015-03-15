@@ -107,9 +107,11 @@ namespace MassTransit.TestFramework.Fixtures
             return true;
         }
 
-        public static void AnyShouldHaveReceivedMessage(TMessage message, TimeSpan timeout)
+        public static IEnumerable<ConsumeContext<TMessage>> AnyShouldHaveReceivedMessage(TMessage message, TimeSpan timeout)
         {
             Assert.That(AnyReceivedMessage(message, timeout), Is.True, "Message should have been received");
+
+            return _allMessages.Where(x => x.Message == message);
         }
 
         public static void OnlyOneShouldHaveReceivedMessage(TMessage message, TimeSpan timeout)

@@ -46,7 +46,7 @@ namespace MassTransit.SubscriptionConnectors
             get { return typeof(TMessage); }
         }
 
-        ConnectHandle ConsumerConnector.Connect<T>(IConsumePipe consumePipe, IConsumerFactory<T> consumerFactory, IRetryPolicy retryPolicy,
+        ConnectHandle ConsumerConnector.Connect<T>(IConsumePipeConnector consumePipe, IConsumerFactory<T> consumerFactory, IRetryPolicy retryPolicy,
             params IPipeSpecification<ConsumerConsumeContext<T>>[] pipeSpecifications)
         {
             var factory = consumerFactory as IConsumerFactory<TConsumer>;

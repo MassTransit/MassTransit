@@ -51,7 +51,7 @@ namespace MassTransit.SubscriptionConfigurators
 
         public void Configure(IReceiveEndpointBuilder builder)
         {
-            builder.InputPipe.ConnectConsumer(_consumerFactory, _retryPolicy, _pipeBuilderConfigurators.ToArray());
+            builder.ConnectConsumer(_consumerFactory, _retryPolicy, _pipeBuilderConfigurators.ToArray());
         }
     }
 }

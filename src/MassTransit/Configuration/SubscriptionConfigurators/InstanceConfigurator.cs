@@ -35,7 +35,7 @@ namespace MassTransit.SubscriptionConfigurators
 
         public void Configure(IReceiveEndpointBuilder builder)
         {
-            InstanceConnectorCache.GetInstanceConnector(_instance.GetType()).Connect(builder.InputPipe, _instance, _retryPolicy);
+            InstanceConnectorCache.GetInstanceConnector(_instance.GetType()).Connect(builder, _instance, _retryPolicy);
         }
 
         public IEnumerable<ValidationResult> Validate()

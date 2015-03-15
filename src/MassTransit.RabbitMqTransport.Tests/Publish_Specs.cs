@@ -15,6 +15,7 @@ namespace MassTransit.RabbitMqTransport.Tests
     namespace Send_Specs
     {
         using System;
+        using System.Linq;
         using System.Threading.Tasks;
         using Configuration;
         using NUnit.Framework;
@@ -114,6 +115,29 @@ namespace MassTransit.RabbitMqTransport.Tests
             }
         }
 
+        [TestFixture]
+        public class WhenAMessageIsPublishedToTheConsumer :
+            RabbitMqTestFixture
+        {
+            [Test]
+            public async void Should_be_received()
+            {
+                var message = new B {Id = Guid.NewGuid()};
+                await Bus.Publish(message);
+
+                var received = ConsumerOf<B>.AnyShouldHaveReceivedMessage(message, TestTimeout).ToList();
+
+                Assert.AreEqual(message.Id, received[0].Message.Id);
+            }
+
+            protected override void ConfigureInputQueueEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
+            {
+                base.ConfigureInputQueueEndpoint(configurator);
+
+                configurator.Consumer<ConsumerOf<B>>();
+            }
+        }
+
 
         [TestFixture]
         public class When_a_message_is_published_without_a_queue_binding :
@@ -138,6 +162,36 @@ namespace MassTransit.RabbitMqTransport.Tests
         class A
         {
             public Guid Id { get; set; }
+        }
+
+        class B : IEquatable<B>
+        {
+            public Guid Id { get; set; }
+
+            public bool Equals(B other)
+            {
+                if (ReferenceEquals(null, other))
+                    return false;
+                if (ReferenceEquals(this, other))
+                    return true;
+                return Id.Equals(other.Id);
+            }
+
+            public override bool Equals(object obj)
+            {
+                if (ReferenceEquals(null, obj))
+                    return false;
+                if (ReferenceEquals(this, obj))
+                    return true;
+                if (obj.GetType() != this.GetType())
+                    return false;
+                return Equals((B)obj);
+            }
+
+            public override int GetHashCode()
+            {
+                return Id.GetHashCode();
+            }
         }
     }
 }

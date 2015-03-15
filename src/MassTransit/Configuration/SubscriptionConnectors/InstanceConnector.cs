@@ -21,7 +21,7 @@ namespace MassTransit.SubscriptionConnectors
 
     public interface InstanceConnector
     {
-        ConnectHandle Connect(IConsumePipe pipe, object instance, IRetryPolicy retryPolicy);
+        ConnectHandle Connect(IConsumePipeConnector pipe, object instance, IRetryPolicy retryPolicy);
     }
 
 
@@ -42,7 +42,7 @@ namespace MassTransit.SubscriptionConnectors
                 .ToList();
         }
 
-        public ConnectHandle Connect(IConsumePipe pipe, object instance, IRetryPolicy retryPolicy)
+        public ConnectHandle Connect(IConsumePipeConnector pipe, object instance, IRetryPolicy retryPolicy)
         {
             return new MultipleConnectHandle(_connectors.Select(x => x.Connect(pipe, instance, retryPolicy)));
         }

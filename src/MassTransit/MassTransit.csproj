@@ -128,6 +128,7 @@
     <Compile Include="Configuration\PipeConfigurators\DelegatePipeSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\FilterPipeSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\HandlerPipeSpecification.cs" />
+    <Compile Include="Configuration\PipeConfigurators\IPipeConfigurable.cs" />
     <Compile Include="Configuration\PipeConfigurators\IPipeSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\LogPipeSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\PipeConfigurator.cs" />
@@ -458,6 +459,8 @@
     <Compile Include="Scheduling\CancelScheduledMessage.cs" />
     <Compile Include="Scheduling\ScheduledMessage.cs" />
     <Compile Include="Scheduling\ScheduleMessage.cs" />
+    <Compile Include="Scheduling\SchedulerContext.cs" />
+    <Compile Include="Scheduling\SchedulerFilter.cs" />
     <Compile Include="SendContext.cs" />
     <Compile Include="SendContextHeaders.cs" />
     <Compile Include="SerializationFault.cs" />

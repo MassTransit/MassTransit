@@ -80,7 +80,6 @@
     <Compile Include="ActivityTestFixture.cs" />
     <Compile Include="AsyncTestFixture.cs" />
     <Compile Include="IntentionalTestException.cs" />
-    <Compile Include="Future.cs" />
     <Compile Include="Fixtures\AbstractTestConsumer.cs" />
     <Compile Include="ConsumerOf.cs" />
     <Compile Include="InMemoryTestFixture.cs" />
