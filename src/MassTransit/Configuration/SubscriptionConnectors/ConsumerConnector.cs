@@ -27,7 +27,7 @@ namespace MassTransit.SubscriptionConnectors
     /// </summary>
     public interface ConsumerConnector
     {
-        ConnectHandle Connect<TConsumer>(IConsumePipe consumePipe, IConsumerFactory<TConsumer> consumerFactory, IRetryPolicy retryPolicy,
+        ConnectHandle Connect<TConsumer>(IConsumePipeConnector consumePipe, IConsumerFactory<TConsumer> consumerFactory, IRetryPolicy retryPolicy,
             params IPipeSpecification<ConsumerConsumeContext<TConsumer>>[] pipeSpecifications)
             where TConsumer : class;
     }
@@ -55,7 +55,7 @@ namespace MassTransit.SubscriptionConnectors
             get { return _connectors; }
         }
 
-        public ConnectHandle Connect<TConsumer>(IConsumePipe consumePipe, IConsumerFactory<TConsumer> consumerFactory,
+        public ConnectHandle Connect<TConsumer>(IConsumePipeConnector consumePipe, IConsumerFactory<TConsumer> consumerFactory,
             IRetryPolicy retryPolicy, params IPipeSpecification<ConsumerConsumeContext<TConsumer>>[] pipeSpecifications)
             where TConsumer : class
         {

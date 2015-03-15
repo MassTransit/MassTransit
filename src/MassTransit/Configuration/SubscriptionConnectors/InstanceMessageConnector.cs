@@ -55,7 +55,7 @@ namespace MassTransit.SubscriptionConnectors
             get { return typeof(TMessage); }
         }
 
-        public ConnectHandle Connect(IConsumePipe pipe, object instance, IRetryPolicy retryPolicy)
+        public ConnectHandle Connect(IConsumePipeConnector pipe, object instance, IRetryPolicy retryPolicy)
         {
             if (instance == null)
                 throw new ArgumentNullException("instance");

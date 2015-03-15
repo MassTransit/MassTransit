@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,6 +13,7 @@
 namespace MassTransit
 {
     using System;
+    using System.Collections.Generic;
     using System.Threading.Tasks;
     using Context;
     using Pipeline;
@@ -58,10 +59,25 @@ namespace MassTransit
         public static Task Forward<T>(this ConsumeContext context, ISendEndpoint endpoint, T message)
             where T : class
         {
-            return endpoint.Send(message, CreateSendPipe<T>(context));
+            return endpoint.Send(message, CreateCopyContextPipe<T>(context, GetForwardHeaders));
         }
 
-        static IPipe<SendContext<T>> CreateSendPipe<T>(ConsumeContext context)
+        static IEnumerable<Tuple<string, object>> GetForwardHeaders(ConsumeContext context)
+        {
+            Uri inputAddress = context.ReceiveContext.InputAddress ?? context.DestinationAddress;
+            if (inputAddress != null)
+                yield return Tuple.Create<string, object>("MT-Forwarder-Address", inputAddress.ToString());
+        }
+
+        /// <summary>
+        /// Create a send pipe that copies the source message headers to the message being sent
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="context"></param>
+        /// <param name="getAdditionalHeaders">Returns additional headers for the pipe that should be added to the message</param>
+        /// <returns></returns>
+        public static IPipe<SendContext<T>> CreateCopyContextPipe<T>(this ConsumeContext context,
+            Func<ConsumeContext, IEnumerable<Tuple<string, object>>> getAdditionalHeaders)
             where T : class
         {
             return Pipe.New<SendContext<T>>(x => x.Execute(target =>
@@ -78,9 +94,8 @@ namespace MassTransit
                 foreach (var header in context.Headers.Headers)
                     target.Headers.Set(header.Item1, header.Item2);
 
-                Uri inputAddress = context.ReceiveContext.InputAddress ?? context.DestinationAddress;
-                if (inputAddress != null)
-                    target.Headers.Set("MT-Forwarder-Address", inputAddress.ToString());
+                foreach (var additionalHeader in getAdditionalHeaders(context))
+                    target.Headers.Set(additionalHeader.Item1, additionalHeader.Item2);
             }));
         }
     }

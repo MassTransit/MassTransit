@@ -27,7 +27,7 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
         readonly IList<IServiceBusHost> _hosts;
         readonly IList<IBusFactorySpecification> _transportSpecifications;
         ServiceBusReceiveEndpointConfigurator _defaultEndpointConfigurator;
-        Uri _localAddress;
+        Uri _inputAddress;
 
         public AzureServiceBusBusFactoryConfigurator()
         {
@@ -42,7 +42,7 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
 
         public IBusControl CreateBus()
         {
-            var builder = new AzureServiceBusBusBuilder(_hosts, _localAddress);
+            var builder = new AzureServiceBusBusBuilder(_hosts, _inputAddress);
 
             foreach (IBusFactorySpecification configurator in _transportSpecifications)
                 configurator.Configure(builder);
@@ -52,10 +52,12 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
 
         public IServiceBusHost Host(ServiceBusHostSettings settings)
         {
+            if (settings == null)
+                throw new ArgumentNullException("settings");
+
             var host = new ServiceBusHost(settings);
             _hosts.Add(host);
 
-            // use first host for default host settings :(
             if (_hosts.Count == 1)
             {
                 string queueName = string.Format("bus_{0}", NewId.Next().ToString("NS"));
@@ -68,7 +70,7 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
 
                 _transportSpecifications.Add(_defaultEndpointConfigurator);
 
-                _localAddress = settings.GetInputAddress(_defaultEndpointConfigurator.QueueDescription);
+                _inputAddress = settings.GetInputAddress(_defaultEndpointConfigurator.QueueDescription);
             }
 
             return host;
@@ -84,6 +86,9 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
 
         void IPipeConfigurator<ConsumeContext>.AddPipeSpecification(IPipeSpecification<ConsumeContext> configurator)
         {
+            if (configurator == null)
+                throw new ArgumentNullException("configurator");
+
             if (_defaultEndpointConfigurator != null)
                 _defaultEndpointConfigurator.AddPipeSpecification(configurator);
         }

@@ -13,7 +13,6 @@
 namespace MassTransit.AzureServiceBusTransport
 {
     using System;
-    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.ServiceBus;
@@ -68,7 +67,7 @@ namespace MassTransit.AzureServiceBusTransport
 
         public string GetQueuePath(QueueDescription queueDescription)
         {
-            return string.Join("/",_settings.ServiceUri.AbsolutePath.Trim(new[] {'/'}), queueDescription.Path);
+            return string.Join("/", _settings.ServiceUri.AbsolutePath.Trim(new[] {'/'}), queueDescription.Path);
         }
 
         public async Task Close(CancellationToken cancellationToken)
@@ -119,8 +118,10 @@ namespace MassTransit.AzureServiceBusTransport
                 OperationTimeout = TimeSpan.FromSeconds(10),
                 RetryPolicy = RetryPolicy.NoRetry,
             };
-            var builder = new UriBuilder(_settings.ServiceUri);
-            builder.Path = "";
+            var builder = new UriBuilder(_settings.ServiceUri)
+            {
+                Path = ""
+            };
 
             return new NamespaceManager(builder.Uri, nms);
         }

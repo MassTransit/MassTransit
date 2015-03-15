@@ -36,14 +36,14 @@ namespace MassTransit.Pipeline
             return HandlerConnectorCache<T>.Connector.Connect(filter, handler, retryFilter);
         }
 
-        public static ConnectHandle ConnectConsumer<T>(this IConsumePipe filter, IConsumerFactory<T> consumerFactory,
+        public static ConnectHandle ConnectConsumer<T>(this IConsumePipeConnector connector, IConsumerFactory<T> consumerFactory,
             IRetryPolicy retryPolicy = null, params IPipeSpecification<ConsumerConsumeContext<T>>[] pipeSpecifications)
             where T : class
         {
-            return ConsumerConnectorCache<T>.Connector.Connect(filter, consumerFactory, retryPolicy ?? Retry.None, pipeSpecifications);
+            return ConsumerConnectorCache<T>.Connector.Connect(connector, consumerFactory, retryPolicy ?? Retry.None, pipeSpecifications);
         }
 
-        public static ConnectHandle ConnectConsumer<T>(this IConsumePipe filter,
+        public static ConnectHandle ConnectConsumer<T>(this IConsumePipeConnector filter,
             IRetryPolicy retryPolicy = null, params IPipeSpecification<ConsumerConsumeContext<T>>[] pipeSpecifications)
             where T : class, new()
         {
@@ -54,7 +54,7 @@ namespace MassTransit.Pipeline
             return connector.Connect(filter, consumerFactory, retryPolicy ?? Retry.None, pipeSpecifications);
         }
 
-        public static ConnectHandle ConnectConsumer<T>(this IConsumePipe filter, Func<T> factoryMethod,
+        public static ConnectHandle ConnectConsumer<T>(this IConsumePipeConnector filter, Func<T> factoryMethod,
             IRetryPolicy retryPolicy = null)
             where T : class
         {
@@ -65,19 +65,19 @@ namespace MassTransit.Pipeline
             return connector.Connect(filter, consumerFactory, retryPolicy ?? Retry.None);
         }
 
-        public static ConnectHandle ConnectConsumer(this IConsumePipe filter, Type consumerType, Func<Type, object> objectFactory,
+        public static ConnectHandle ConnectConsumer(this IConsumePipeConnector filter, Type consumerType, Func<Type, object> objectFactory,
             IRetryPolicy retryPolicy = null)
         {
             return ConsumerConnectorCache.Connect(filter, consumerType, objectFactory, retryPolicy ?? Retry.None);
         }
 
-        public static ConnectHandle ConnectInstance<T>(this IConsumePipe filter, T instance, IRetryPolicy retryPolicy = null)
+        public static ConnectHandle ConnectInstance<T>(this IConsumePipeConnector filter, T instance, IRetryPolicy retryPolicy = null)
             where T : class
         {
             return InstanceConnectorCache<T>.Connector.Connect(filter, instance, retryPolicy ?? Retry.None);
         }
 
-        public static ConnectHandle ConnectInstance(this IConsumePipe filter, object instance, IRetryPolicy retryPolicy = null)
+        public static ConnectHandle ConnectInstance(this IConsumePipeConnector filter, object instance, IRetryPolicy retryPolicy = null)
         {
             return InstanceConnectorCache.GetInstanceConnector(instance.GetType()).Connect(filter, instance, retryPolicy ?? Retry.None);
         }
