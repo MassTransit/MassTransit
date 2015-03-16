@@ -8,6 +8,6 @@ using System.Security;
 [assembly: AssemblyVersion("3.0.1")]
 [assembly: AssemblyFileVersion("3.0.1")]
 
-[assembly: AssemblyInformationalVersion("3.0.1-alpha.605ab9")]
+[assembly: AssemblyInformationalVersion("3.0.1-alpha.31f5de")]
 [assembly: ComVisibleAttribute(false)]
 [assembly: CLSCompliantAttribute(true)]
