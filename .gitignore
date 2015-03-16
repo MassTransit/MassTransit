@@ -5,6 +5,8 @@ build_artifacts/*
 packages
 *.dotCover
 
+Gemfile.lock
+
 *.ncrunch*
 
 src/logs/*

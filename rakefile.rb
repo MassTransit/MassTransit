@@ -413,7 +413,7 @@ task :all_nuspecs => [:versioning, :mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :m
     nuspec.require_license_acceptance
     nuspec.dependency "MassTransit", NUGET_VERSION
     nuspec.dependency "NewId", "2.1.2"
-    nuspec.dependency "Automatonymous", "3.0.2-alpha"
+    nuspec.dependency "Automatonymous", "3.0.4-beta"
     nuspec.output_file = 'nuspecs/MassTransit.Automatonymous.nuspec'
 
   add_files props[:stage], "#{File.join('MassTransit.AutomatonymousIntegration.{dll,pdb,xml}')}", nuspec
@@ -529,7 +529,7 @@ task :all_nuspecs => [:versioning, :mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :m
     nuspec.license_url = "http://www.apache.org/licenses/LICENSE-2.0"
     nuspec.require_license_acceptance
     nuspec.dependency "MassTransit", NUGET_VERSION
-    nuspec.dependency "NHibernate", "4.0.2"
+    nuspec.dependency "NHibernate", "4.0.3"
     nuspec.dependency "Iesi.Collections", "4.0.1"
     nuspec.output_file = 'nuspecs/MassTransit.NHibernate.nuspec'
 
