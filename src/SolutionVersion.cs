@@ -5,9 +5,9 @@ using System.Security;
 [assembly: AssemblyDescription("MassTransit is a distributed application framework for .NET http://masstransit-project.com")]
 [assembly: AssemblyProduct("MassTransit")]
 [assembly: AssemblyCopyright("Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al. - All rights reserved.")]
-[assembly: AssemblyVersion("3.0.1")]
-[assembly: AssemblyFileVersion("3.0.1")]
+[assembly: AssemblyVersion("3.0.2")]
+[assembly: AssemblyFileVersion("3.0.2")]
 
-[assembly: AssemblyInformationalVersion("3.0.1-alpha.31f5de")]
+[assembly: AssemblyInformationalVersion("3.0.2-alpha.88519f")]
 [assembly: ComVisibleAttribute(false)]
 [assembly: CLSCompliantAttribute(true)]
