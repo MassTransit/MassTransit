@@ -43,7 +43,7 @@ namespace MassTransit
         }
 
         /// <summary>
-        /// Connects any consumers for the component to the message dispatcher
+        /// Connects any consumers for the object to the message dispatcher
         /// </summary>
         /// <param name="bus">The service bus to configure</param>
         /// <param name="instance"></param>
@@ -59,11 +59,11 @@ namespace MassTransit
 
             InstanceConnector connector = InstanceConnectorCache.GetInstanceConnector(instance.GetType());
 
-            return connector.Connect(bus.ConsumePipe, instance, retryPolicy ?? Retry.None);
+            return connector.Connect(bus, instance, retryPolicy ?? Retry.None);
         }
 
         /// <summary>
-        /// Connects any consumers for the component to the message dispatcher
+        /// Connects any consumers for the object to the message dispatcher
         /// </summary>
         /// <typeparam name="T">The consumer type</typeparam>
         /// <param name="bus">The service bus instance to call this method on.</param>
@@ -76,7 +76,7 @@ namespace MassTransit
         {
             InstanceConnector connector = InstanceConnectorCache.GetInstanceConnector<T>();
 
-            return connector.Connect(bus.ConsumePipe, instance, retryPolicy ?? Retry.None);
+            return connector.Connect(bus, instance, retryPolicy ?? Retry.None);
         }
     }
 }

@@ -23,7 +23,7 @@ namespace MassTransit.Saga.Connectors
 
     public interface SagaConnector
     {
-        ConnectHandle Connect<T>(IConsumePipe consumePipe, ISagaRepository<T> sagaRepository, IRetryPolicy retryPolicy,
+        ConnectHandle Connect<T>(IConsumePipeConnector consumePipe, ISagaRepository<T> sagaRepository, IRetryPolicy retryPolicy,
             params IPipeSpecification<SagaConsumeContext<T>>[] pipeSpecifications)
             where T : class, ISaga;
     }
@@ -62,7 +62,7 @@ namespace MassTransit.Saga.Connectors
             get { return _connectors; }
         }
 
-        public ConnectHandle Connect<T>(IConsumePipe consumePipe, ISagaRepository<T> sagaRepository, IRetryPolicy retryPolicy,
+        public ConnectHandle Connect<T>(IConsumePipeConnector consumePipe, ISagaRepository<T> sagaRepository, IRetryPolicy retryPolicy,
             params IPipeSpecification<SagaConsumeContext<T>>[] pipeSpecifications) where T : class, ISaga
         {
             var handles = new List<ConnectHandle>();

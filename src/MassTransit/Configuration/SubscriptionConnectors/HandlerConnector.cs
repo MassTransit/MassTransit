@@ -30,7 +30,7 @@ namespace MassTransit.SubscriptionConnectors
         /// <param name="handler"></param>
         /// <param name="filters"></param>
         /// <returns></returns>
-        ConnectHandle Connect(IConsumePipe consumePipe, MessageHandler<T> handler,
+        ConnectHandle Connect(IConsumePipeConnector consumePipe, MessageHandler<T> handler,
             params IFilter<ConsumeContext<T>>[] filters);
 
         /// <summary>
@@ -41,7 +41,7 @@ namespace MassTransit.SubscriptionConnectors
         /// <param name="handler"></param>
         /// <param name="filters"></param>
         /// <returns></returns>
-        ConnectHandle Connect(IConsumePipe consumePipe, Guid requestId, MessageHandler<T> handler,
+        ConnectHandle Connect(IRequestPipeConnector consumePipe, Guid requestId, MessageHandler<T> handler,
             params IFilter<ConsumeContext<T>>[] filters);
     }
 }

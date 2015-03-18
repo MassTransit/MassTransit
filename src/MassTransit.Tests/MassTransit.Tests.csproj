@@ -129,7 +129,9 @@
     <Compile Include="Pipeline\ConnectObserver_Specs.cs" />
     <Compile Include="Pipeline\MessageTestFixture.cs" />
     <Compile Include="Pipeline\OneMessageConsumer.cs" />
-    <Compile Include="Pipeline\PipeFactory_Specs.cs" />
+    <Compile Include="Pipeline\Retry_Specs.cs" />
+    <Compile Include="Pipeline\TestPipeContext.cs" />
+    <Compile Include="Pipeline\Transaction_Specs.cs" />
     <Compile Include="Pipeline\TwoMessageConsumer.cs" />
     <Compile Include="RequestClient_Specs.cs" />
     <Compile Include="Saga\InjectingSampleSaga.cs" />

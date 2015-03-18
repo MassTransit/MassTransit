@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -38,20 +38,17 @@ namespace MassTransit.Pipeline.Filters
             get { return _retryPolicy; }
         }
 
-        public async Task Send(T context, IPipe<T> next)
+        async Task IFilter<T>.Send(T context, IPipe<T> next)
         {
-            using (IRetryContext retryContext = _retryPolicy.GetRetryContext())
-            {
-                await Attempt(retryContext, context, next);
-            }
+            await Attempt(context, next);
         }
 
-        public bool Visit(IPipeVisitor visitor)
+        bool IFilter<T>.Visit(IPipeVisitor visitor)
         {
             return visitor.Visit(this);
         }
 
-        static async Task Attempt(IRetryContext retryContext, T context, IPipe<T> next)
+        async Task Attempt(T context, IPipe<T> next)
         {
             TimeSpan delay;
             try
@@ -62,13 +59,14 @@ namespace MassTransit.Pipeline.Filters
             }
             catch (Exception ex)
             {
+                IRetryContext retryContext = context.GetOrAddPayload(() => _retryPolicy.GetRetryContext());
                 if (!retryContext.CanRetry(ex, out delay))
                     throw;
             }
 
             await Task.Delay(delay);
 
-            await Attempt(retryContext, context, next);
+            await Attempt(context, next);
         }
     }
 }

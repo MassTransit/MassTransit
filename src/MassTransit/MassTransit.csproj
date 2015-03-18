@@ -119,7 +119,7 @@
     <Compile Include="Configuration\IPipeConfigurator.cs" />
     <Compile Include="Configuration\IBusFactory.cs" />
     <Compile Include="Configuration\IBusFactoryConfigurator.cs" />
-    <Compile Include="Configuration\LogConsume.cs" />
+    <Compile Include="Configuration\ITransactionConfigurator.cs" />
     <Compile Include="Configuration\LogPipeConfiguratorExtensions.cs" />
     <Compile Include="Configuration\PipeBuilders\IPipeBuilder.cs" />
     <Compile Include="Configuration\PipeBuilders\PipeBuilder.cs" />
@@ -128,13 +128,13 @@
     <Compile Include="Configuration\PipeConfigurators\DelegatePipeSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\FilterPipeSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\HandlerPipeSpecification.cs" />
-    <Compile Include="Configuration\PipeConfigurators\IPipeConfigurable.cs" />
     <Compile Include="Configuration\PipeConfigurators\IPipeSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\LogPipeSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\PipeConfigurator.cs" />
     <Compile Include="Configuration\PipeConfigurators\RepeatPipeSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\RescuePipeSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\RetryPipeSpecification.cs" />
+    <Compile Include="Configuration\PipeConfigurators\TransactionPipeSpecification.cs" />
     <Compile Include="Configuration\RepeatPipeConfiguratorExtensions.cs" />
     <Compile Include="Configuration\RescueFilterConfiguratorExtensions.cs" />
     <Compile Include="Configuration\RetryPipeConfiguratorExtensions.cs" />
@@ -154,6 +154,7 @@
     <Compile Include="Configuration\SubscriptionConnectors\InstanceMessageConnector.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\MessageConnectorFactory.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\LegacyConsumeConnectorFactory.cs" />
+    <Compile Include="Configuration\TransactionConfiguratorExtensions.cs" />
     <Compile Include="ConnectHandle.cs" />
     <Compile Include="ConsumeContext.cs" />
     <Compile Include="ConsumeContextExtensions.cs" />
@@ -171,6 +172,7 @@
     <Compile Include="Context\SagaConsumeContextProxy.cs" />
     <Compile Include="Context\SendRequest.cs" />
     <Compile Include="Context\SendRequestContext.cs" />
+    <Compile Include="Context\SystemTransactionContext.cs" />
     <Compile Include="Courier\Activity.cs" />
     <Compile Include="Courier\ActivityFactory.cs" />
     <Compile Include="Courier\ActivityFactoryExtensions.cs" />
@@ -357,6 +359,7 @@
     <Compile Include="Pipeline\Filters\RescueFilter.cs" />
     <Compile Include="Pipeline\Filters\RetryFilter.cs" />
     <Compile Include="Pipeline\Filters\TeeConsumeFilter.cs" />
+    <Compile Include="Pipeline\Filters\TransactionFilter.cs" />
     <Compile Include="Pipeline\IConnectPipeById.cs" />
     <Compile Include="Pipeline\IConsumeMessageFilterVisitor.cs" />
     <Compile Include="Pipeline\IConsumeMessageFilterVisitorAdapter.cs" />
@@ -663,6 +666,8 @@
     <Compile Include="Testing\TestInstanceConfigurators\IHandlerTestConfigurator.cs" />
     <Compile Include="Testing\TestInstanceConfigurators\HandlerTestInstanceConfiguratorImpl.cs" />
     <Compile Include="Testing\ITestSubject.cs" />
+    <Compile Include="TransactionContext.cs" />
+    <Compile Include="TransactionContextExtensions.cs" />
     <Compile Include="Transports\AddressEqualityComparer.cs" />
     <Compile Include="Transports\DefaultMessageNameFormatter.cs" />
     <Compile Include="Transports\IBusHost.cs" />

@@ -60,7 +60,7 @@ namespace MassTransit
         public static ConnectHandle ConnectHandler<T>(this IBus bus, MessageHandler<T> handler)
             where T : class
         {
-            return HandlerConnectorCache<T>.Connector.Connect(bus.ConsumePipe, handler);
+            return HandlerConnectorCache<T>.Connector.Connect(bus, handler);
         }
 
         /// <summary>
@@ -74,7 +74,7 @@ namespace MassTransit
         public static ConnectHandle ConnectRequestHandler<T>(this IBus bus, Guid requestId, MessageHandler<T> handler)
             where T : class
         {
-            return HandlerConnectorCache<T>.Connector.Connect(bus.ConsumePipe, requestId, handler);
+            return HandlerConnectorCache<T>.Connector.Connect(bus, requestId, handler);
         }
     }
 }

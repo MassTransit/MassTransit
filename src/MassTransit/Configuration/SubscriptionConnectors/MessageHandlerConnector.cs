@@ -24,7 +24,7 @@ namespace MassTransit.SubscriptionConnectors
         HandlerConnector<TMessage>
         where TMessage : class
     {
-        public ConnectHandle Connect(IConsumePipe consumePipe, MessageHandler<TMessage> handler,
+        public ConnectHandle Connect(IConsumePipeConnector consumePipe, MessageHandler<TMessage> handler,
             params IFilter<ConsumeContext<TMessage>>[] filters)
         {
             IPipe<ConsumeContext<TMessage>> pipe = Pipe.New<ConsumeContext<TMessage>>(x =>
@@ -32,13 +32,13 @@ namespace MassTransit.SubscriptionConnectors
                 foreach (var filter in filters)
                     x.Filter(filter);
 
-                x.Use(() => new HandlerPipeSpecification<TMessage>(handler));
+                x.AddPipeSpecification(new HandlerPipeSpecification<TMessage>(handler));
             });
 
             return consumePipe.ConnectConsumePipe(pipe);
         }
 
-        public ConnectHandle Connect(IConsumePipe consumePipe, Guid requestId, MessageHandler<TMessage> handler,
+        public ConnectHandle Connect(IRequestPipeConnector consumePipe, Guid requestId, MessageHandler<TMessage> handler,
             params IFilter<ConsumeContext<TMessage>>[] filters)
         {
             IPipe<ConsumeContext<TMessage>> pipe = Pipe.New<ConsumeContext<TMessage>>(x =>
@@ -46,7 +46,7 @@ namespace MassTransit.SubscriptionConnectors
                 foreach (var filter in filters)
                     x.Filter(filter);
 
-                x.Use(() => new HandlerPipeSpecification<TMessage>(handler));
+                x.AddPipeSpecification(new HandlerPipeSpecification<TMessage>(handler));
             });
 
             return consumePipe.ConnectRequestPipe(requestId, pipe);
