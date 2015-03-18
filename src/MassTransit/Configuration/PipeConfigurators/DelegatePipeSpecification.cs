@@ -20,7 +20,7 @@ namespace MassTransit.PipeConfigurators
 
 
     public class DelegatePipeSpecification<T> :
-        IPipeConfigurable<T>
+        IPipeSpecification<T>
         where T : class, PipeContext
     {
         readonly Action<T> _callback;

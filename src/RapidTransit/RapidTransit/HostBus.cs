@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -45,6 +45,26 @@ namespace RapidTransit
             });
 
             _log.DebugFormat("HostBus created: {0}", _bus.Address);
+        }
+
+        ConnectHandle IConsumePipeConnector.ConnectConsumePipe<T>(IPipe<ConsumeContext<T>> pipe)
+        {
+            return _bus.ConnectConsumePipe(pipe);
+        }
+
+        ConnectHandle IRequestPipeConnector.ConnectRequestPipe<T>(Guid requestId, IPipe<ConsumeContext<T>> pipe)
+        {
+            return _bus.ConnectRequestPipe(requestId, pipe);
+        }
+
+        ConnectHandle IConsumeMessageObserverConnector.ConnectConsumeMessageObserver<T>(IConsumeMessageObserver<T> observer)
+        {
+            return _bus.ConnectConsumeMessageObserver(observer);
+        }
+
+        ConnectHandle IConsumeObserverConnector.ConnectConsumeObserver(IConsumeObserver observer)
+        {
+            return _bus.ConnectConsumeObserver(observer);
         }
 
         Task IPublishEndpoint.Publish<T>(T message, CancellationToken cancellationToken)
@@ -106,11 +126,6 @@ namespace RapidTransit
         public Uri Address
         {
             get { return _bus.Address; }
-        }
-
-        public IConsumePipe ConsumePipe
-        {
-            get { return _bus.ConsumePipe; }
         }
 
         public Task Start(CancellationToken cancellationToken = default(CancellationToken))

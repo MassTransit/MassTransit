@@ -35,41 +35,6 @@ namespace MassTransit.PipeConfigurators
             _configurators = new List<IPipeSpecification<TContext>>();
         }
 
-        /// <summary>
-        /// Add middleware to the pipe
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="configure"></param>
-        public void Use<T>(Action<T> configure)
-            where T : IPipeConfigurable<TContext>, new()
-        {
-            var middleware = new T();
-
-            configure(middleware);
-
-            _configurators.Add(middleware);
-        }
-
-        /// <summary>
-        /// Add middleware to the pipe using the default configuration settings
-        /// </summary>
-        /// <typeparam name="T">The context type</typeparam>
-        public void Use<T>()
-            where T : IPipeConfigurable<TContext>, new()
-        {
-            _configurators.Add(new T());
-        }
-
-        /// <summary>
-        /// Add middleware to the pipe using the default configuration settings
-        /// </summary>
-        /// <typeparam name="T">The context type</typeparam>
-        public void Use<T>(Func<T> factoryMethod)
-            where T : IPipeConfigurable<TContext>
-        {
-            _configurators.Add(factoryMethod());
-        }
-
         IEnumerable<ValidationResult> Configurator.Validate()
         {
             return _configurators.SelectMany(x => x.Validate());

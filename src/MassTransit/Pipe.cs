@@ -26,7 +26,7 @@ namespace MassTransit
         /// <typeparam name="T">The pipe context type</typeparam>
         /// <param name="callback">The configuration callback</param>
         /// <returns>An initialized pipe ready for use</returns>
-        public static IPipe<T> New<T>(Action<PipeConfigurator<T>> callback)
+        public static IPipe<T> New<T>(Action<IPipeConfigurator<T>> callback)
             where T : class, PipeContext
         {
             var configurator = new PipeConfigurator<T>();

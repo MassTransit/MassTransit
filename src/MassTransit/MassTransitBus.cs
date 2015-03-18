@@ -43,6 +43,26 @@ namespace MassTransit
             _hosts = hosts.ToArray();
         }
 
+        ConnectHandle IConsumePipeConnector.ConnectConsumePipe<T>(IPipe<ConsumeContext<T>> pipe)
+        {
+            return _consumePipe.ConnectConsumePipe(pipe);
+        }
+
+        ConnectHandle IRequestPipeConnector.ConnectRequestPipe<T>(Guid requestId, IPipe<ConsumeContext<T>> pipe)
+        {
+            return _consumePipe.ConnectRequestPipe(requestId, pipe);
+        }
+
+        ConnectHandle IConsumeMessageObserverConnector.ConnectConsumeMessageObserver<T>(IConsumeMessageObserver<T> observer)
+        {
+            return _consumePipe.ConnectConsumeMessageObserver(observer);
+        }
+
+        ConnectHandle IConsumeObserverConnector.ConnectConsumeObserver(IConsumeObserver observer)
+        {
+            return _consumePipe.ConnectConsumeObserver(observer);
+        }
+
         Task IPublishEndpoint.Publish<T>(T message, CancellationToken cancellationToken)
         {
             return _publishEndpoint.Publish(message, cancellationToken);
@@ -97,11 +117,6 @@ namespace MassTransit
         public Uri Address
         {
             get { return _address; }
-        }
-
-        IConsumePipe IBus.ConsumePipe
-        {
-            get { return _consumePipe; }
         }
 
         Task<ISendEndpoint> ISendEndpointProvider.GetSendEndpoint(Uri address)

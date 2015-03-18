@@ -23,7 +23,7 @@ namespace MassTransit.PipeConfigurators
     /// </summary>
     /// <typeparam name="T">The message type</typeparam>
     public class HandlerPipeSpecification<T> :
-        IPipeConfigurable<ConsumeContext<T>>
+        IPipeSpecification<ConsumeContext<T>>
         where T : class
     {
         readonly MessageHandler<T> _handler;

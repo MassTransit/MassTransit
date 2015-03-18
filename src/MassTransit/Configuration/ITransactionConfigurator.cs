@@ -10,11 +10,22 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.PipeConfigurators
+namespace MassTransit
 {
-    public interface IPipeConfigurable<T> :
-        IPipeSpecification<T>
-        where T : class, PipeContext
+    using System;
+    using System.Transactions;
+
+
+    public interface ITransactionConfigurator
     {
+        /// <summary>
+        /// Sets the transaction timeout
+        /// </summary>
+        TimeSpan Timeout { set; }
+
+        /// <summary>
+        /// Sets the isolation level of the transaction
+        /// </summary>
+        IsolationLevel IsolationLevel { set; }
     }
 }

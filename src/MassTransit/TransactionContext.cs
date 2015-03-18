@@ -13,23 +13,31 @@
 namespace MassTransit
 {
     using System;
-    using Pipeline;
+    using System.Transactions;
 
 
-    /// <summary>
-    /// A bus is a logical element that includes a local endpoint and zero or more receive endpoints
-    /// </summary>
-    public interface IBus :
-        IPublishEndpoint,
-        ISendEndpointProvider,
-        IConsumePipeConnector,
-        IRequestPipeConnector,
-        IConsumeMessageObserverConnector,
-        IConsumeObserverConnector
+    public interface TransactionContext
     {
         /// <summary>
-        /// The receive address of the bus itself, versus any receive endpoints that were created
+        /// Returns the current transaction scope, creating a dependent scope if a thread switch
+        /// occurred
         /// </summary>
-        Uri Address { get; }
+        Transaction Transaction { get; }
+
+        /// <summary>
+        /// Complete the transaction scope
+        /// </summary>
+        void Commit();
+
+        /// <summary>
+        /// Rollback the transaction
+        /// </summary>
+        void Rollback();
+
+        /// <summary>
+        /// Rollback the transaction
+        /// </summary>
+        /// <param name="exception">The exception that caused the rollback</param>
+        void Rollback(Exception exception);
     }
 }

@@ -36,7 +36,7 @@ namespace MassTransit.Saga.Connectors
         protected abstract IFilter<SagaConsumeContext<TSaga, TMessage>> GetMessageFilter();
         protected abstract IFilter<ConsumeContext<TMessage>> GetLocatorFilter(ISagaRepository<TSaga> repository);
 
-        public ConnectHandle Connect<T>(IConsumePipe consumePipe, ISagaRepository<T> sagaRepository, IRetryPolicy retryPolicy,
+        public ConnectHandle Connect<T>(IConsumePipeConnector consumePipe, ISagaRepository<T> sagaRepository, IRetryPolicy retryPolicy,
             params IPipeSpecification<SagaConsumeContext<T>>[] pipeSpecifications)
             where T : class, ISaga
         {

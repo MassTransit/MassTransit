@@ -65,7 +65,7 @@ namespace MassTransit
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Subscribing Saga: {0}", TypeMetadataCache<TSaga>.ShortName);
 
-            return SagaConnectorCache<TSaga>.Connector.Connect(bus.ConsumePipe, sagaRepository, retryPolicy ?? Retry.None);
+            return SagaConnectorCache<TSaga>.Connector.Connect(bus, sagaRepository, retryPolicy ?? Retry.None);
         }
     }
 }

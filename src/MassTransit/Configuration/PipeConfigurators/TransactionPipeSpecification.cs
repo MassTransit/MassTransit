@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,32 +14,45 @@ namespace MassTransit.PipeConfigurators
 {
     using System;
     using System.Collections.Generic;
-    using System.Threading.Tasks;
+    using System.Transactions;
     using Configurators;
     using PipeBuilders;
     using Pipeline.Filters;
 
 
-    public class AsyncDelegatePipeBuilderConfigurator<T> :
+    public class TransactionPipeSpecification<T> :
+        ITransactionConfigurator,
         IPipeSpecification<T>
         where T : class, PipeContext
     {
-        readonly Func<T, Task> _callback;
+        IsolationLevel _isolationLevel;
+        TimeSpan _timeout;
 
-        public AsyncDelegatePipeBuilderConfigurator(Func<T, Task> callback)
+        public TransactionPipeSpecification()
         {
-            _callback = callback;
+            _isolationLevel = IsolationLevel.ReadCommitted;
+            _timeout = TimeSpan.FromSeconds(30);
         }
 
         public void Build(IPipeBuilder<T> builder)
         {
-            builder.AddFilter(new AsyncDelegateFilter<T>(_callback));
+            builder.AddFilter(new TransactionFilter<T>(_isolationLevel, _timeout));
         }
 
         public IEnumerable<ValidationResult> Validate()
         {
-            if (_callback == null)
-                yield return this.Failure("Callback", "must not be null");
+            if (_timeout == TimeSpan.Zero)
+                yield return this.Failure("Timeout", "Must be > 0");
+        }
+
+        public TimeSpan Timeout
+        {
+            set { _timeout = value; }
+        }
+
+        public IsolationLevel IsolationLevel
+        {
+            set { _isolationLevel = value; }
         }
     }
 }

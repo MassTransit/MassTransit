@@ -25,7 +25,7 @@ namespace MassTransit
         /// <typeparam name="T">The context type</typeparam>
         /// <param name="configurator">The pipe configurator</param>
         /// <param name="callback">The callback to invoke</param>
-        public static void Execute<T>(this PipeConfigurator<T> configurator, Action<T> callback)
+        public static void Execute<T>(this IPipeConfigurator<T> configurator, Action<T> callback)
             where T : class, PipeContext
         {
             if (configurator == null)
@@ -33,7 +33,7 @@ namespace MassTransit
 
             var pipeBuilderConfigurator = new DelegatePipeSpecification<T>(callback);
 
-            configurator.Use(() => pipeBuilderConfigurator);
+            configurator.AddPipeSpecification(pipeBuilderConfigurator);
         }
 
         /// <summary>
@@ -42,7 +42,7 @@ namespace MassTransit
         /// <typeparam name="T">The context type</typeparam>
         /// <param name="configurator">The pipe configurator</param>
         /// <param name="callback">The callback to invoke</param>
-        public static void ExecuteAsync<T>(this PipeConfigurator<T> configurator, Func<T, Task> callback)
+        public static void ExecuteAsync<T>(this IPipeConfigurator<T> configurator, Func<T, Task> callback)
             where T : class, PipeContext
         {
             if (configurator == null)
@@ -50,7 +50,7 @@ namespace MassTransit
 
             var pipeBuilderConfigurator = new AsyncDelegatePipeBuilderConfigurator<T>(callback);
 
-            configurator.Use(() => pipeBuilderConfigurator);
+            configurator.AddPipeSpecification(pipeBuilderConfigurator);
         }
     }
 }

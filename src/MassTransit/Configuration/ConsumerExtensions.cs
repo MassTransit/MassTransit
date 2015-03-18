@@ -65,7 +65,7 @@ namespace MassTransit
             if (consumerFactory == null)
                 throw new ArgumentNullException("consumerFactory");
 
-            return bus.ConsumePipe.ConnectConsumer(consumerFactory, retryPolicy);
+            return bus.ConnectConsumer(consumerFactory, retryPolicy);
         }
 
         /// <summary>
@@ -104,7 +104,7 @@ namespace MassTransit
             if (bus == null)
                 throw new ArgumentNullException("bus");
 
-            return bus.ConsumePipe.ConnectConsumer<TConsumer>(retryPolicy);
+            return bus.ConnectConsumer<TConsumer>(retryPolicy);
         }
 
         /// <summary>
@@ -147,7 +147,7 @@ namespace MassTransit
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Subscribing Consumer: {0} (using delegate consumer factory)", typeof(TConsumer));
 
-            return bus.ConsumePipe.ConnectConsumer(consumerFactoryMethod, retryPolicy);
+            return bus.ConnectConsumer(consumerFactoryMethod, retryPolicy);
         }
 
         /// <summary>
@@ -195,7 +195,7 @@ namespace MassTransit
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Subscribing Consumer: {0} (by type, using object consumer factory)", consumerType);
 
-            return bus.ConsumePipe.ConnectConsumer(consumerType, objectFactory, retryPolicy);
+            return bus.ConnectConsumer(consumerType, objectFactory, retryPolicy);
         }
     }
 }
