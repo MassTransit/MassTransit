@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,8 +13,6 @@
 namespace MassTransit.QuartzService
 {
     using System;
-    using System.Linq;
-    using System.Threading;
     using Configuration;
     using Logging;
     using Quartz;
@@ -29,8 +27,8 @@ namespace MassTransit.QuartzService
     {
         readonly IConfigurationProvider _configurationProvider;
         readonly int _consumerLimit;
-        readonly string _queueName;
         readonly ILog _log = Logger.Get<ScheduleMessageService>();
+        readonly string _queueName;
         readonly IScheduler _scheduler;
         IBusControl _bus;
         BusHandle _busHandle;
@@ -48,13 +46,13 @@ namespace MassTransit.QuartzService
         {
             try
             {
-                var serviceBusUri = _configurationProvider.GetServiceBusUri("ignored");
+                Uri serviceBusUri = _configurationProvider.GetServiceBusUri("ignored");
 
                 if (serviceBusUri.Scheme.Equals("rabbitmq", StringComparison.OrdinalIgnoreCase))
                 {
                     _bus = Bus.Factory.CreateUsingRabbitMq(x =>
                     {
-                        var host = x.Host(serviceBusUri, h => _configurationProvider.GetHostSettings(h));
+                        IRabbitMqHost host = x.Host(serviceBusUri, h => _configurationProvider.GetHostSettings(h));
                         x.UseJsonSerializer();
 
                         x.ReceiveEndpoint(host, _queueName, e =>
@@ -67,8 +65,7 @@ namespace MassTransit.QuartzService
                     });
                 }
 
-                _busHandle = _bus.Start(new CancellationTokenSource(TimeSpan.FromMinutes(1)).Token)
-                    .Result;
+                _busHandle = _bus.Start();
 
                 _scheduler.JobFactory = new MassTransitJobFactory(_bus);
 
@@ -82,7 +79,6 @@ namespace MassTransit.QuartzService
 
             return true;
         }
-
 
         public bool Stop(HostControl hostControl)
         {

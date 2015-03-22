@@ -17,6 +17,7 @@ namespace MassTransit.Tests.Serialization
     using System.IO;
     using MassTransit.Serialization;
     using MassTransit.Transports;
+    using MassTransit.Transports.InMemory;
     using Messages;
     using NUnit.Framework;
 

@@ -16,6 +16,7 @@ namespace MassTransit.Serialization
     using System.Net.Mime;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Bson;
+    using Util;
 
 
     public class EncryptedMessageSerializer :
@@ -42,7 +43,7 @@ namespace MassTransit.Serialization
         {
             context.ContentType = EncryptedContentType;
 
-            var envelope = new JsonMessageEnvelope(context, context.Message, typeof(T).GetMessageTypes());
+            var envelope = new JsonMessageEnvelope(context, context.Message, TypeMetadataCache<T>.MessageTypes);
 
             using (Stream cryptoStream = _streamProvider.GetEncryptStream(stream, context))
             using (var jsonWriter = new BsonWriter(cryptoStream))

@@ -16,6 +16,7 @@ namespace MassTransit.RabbitMqTransport.Tests
     {
         using System;
         using Configuration;
+        using Integration;
         using NUnit.Framework;
         using Pipeline;
         using Policies;

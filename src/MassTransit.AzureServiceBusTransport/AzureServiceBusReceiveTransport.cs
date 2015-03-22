@@ -51,7 +51,7 @@ namespace MassTransit.AzureServiceBusTransport
             get { return _inputAddress; }
         }
 
-        public async Task<ReceiveTransportHandle> Start(IPipe<ReceiveContext> receivePipe, CancellationToken cancellationToken)
+        public ReceiveTransportHandle Start(IPipe<ReceiveContext> receivePipe)
         {
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Starting receive transport: {0}", new Uri(_host.Settings.ServiceUri, _settings.QueueDescription.Path));

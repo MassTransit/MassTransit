@@ -51,11 +51,11 @@ namespace MassTransit
         /// and operation.
         /// </summary>
         public ServiceBus(IEndpoint endpointToListenOn,
-            IEndpointCache endpointCache, bool enablePerformanceCounters)
+            bool enablePerformanceCounters)
         {
 
             Endpoint = endpointToListenOn;
-            EndpointCache = endpointCache;
+  //          EndpointCache = endpointCache;
 
             ConsumePipe = new ConsumePipe();
 
@@ -70,7 +70,7 @@ namespace MassTransit
             get { return string.Format("{0}: ", Endpoint.Address); }
         }
 
-        public IEndpointCache EndpointCache { get; private set; }
+//        public IEndpointCache EndpointCache { get; private set; }
 
         /// <summary>
         /// Publishes a message to all subscribed consumers for the message type
@@ -158,7 +158,7 @@ namespace MassTransit
                     _counters = null;
                 }
 
-                EndpointCache.Dispose();
+//                EndpointCache.Dispose();
             }
             _disposed = true;
         }

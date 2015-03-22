@@ -124,19 +124,18 @@ namespace MassTransit
             return _sendEndpointProvider.GetSendEndpoint(address);
         }
 
-        async Task<BusHandle> IBusControl.Start(CancellationToken cancellationToken)
+        BusHandle IBusControl.Start()
         {
             var receiveEndpointHandles = new List<ReceiveEndpointHandle>();
 
             Exception exception = null;
             try
             {
-                Task<ReceiveEndpointHandle>[] receiveEndpoints = _receiveEndpoints.Select(x => x.Start(cancellationToken)).ToArray();
-                foreach (var endpoint in receiveEndpoints)
+                foreach (IReceiveEndpoint endpoint in _receiveEndpoints)
                 {
                     try
                     {
-                        ReceiveEndpointHandle handle = await endpoint;
+                        ReceiveEndpointHandle handle = endpoint.Start();
 
                         receiveEndpointHandles.Add(handle);
                     }
@@ -153,7 +152,7 @@ namespace MassTransit
 
             if (exception != null)
             {
-                await Task.WhenAll(receiveEndpointHandles.Select(x => x.Stop(cancellationToken)));
+                var stops = receiveEndpointHandles.Select(x => x.Stop()).ToArray();
 
                 throw new MassTransitException("The service bus could not be started.", exception);
             }
@@ -182,7 +181,7 @@ namespace MassTransit
             public async Task Stop(CancellationToken cancellationToken)
             {
                 await Task.WhenAll(_receiveEndpoints.Select(x => x.Stop(cancellationToken)));
-                await Task.WhenAll(_hosts.Select(x => x.Close(cancellationToken)));
+                await Task.WhenAll(_hosts.Select(x => x.Stop(cancellationToken)));
             }
         }
     }

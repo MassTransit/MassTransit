@@ -18,6 +18,7 @@ namespace MassTransit.Configurators
     using Builders;
     using PipeConfigurators;
     using Transports;
+    using Transports.InMemory;
 
 
     public class InMemoryBusFactoryConfigurator :

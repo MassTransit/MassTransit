@@ -128,9 +128,9 @@ namespace RapidTransit
             get { return _bus.Address; }
         }
 
-        public Task Start(CancellationToken cancellationToken = default(CancellationToken))
+        public BusHandle Start()
         {
-            return _bus.Start(cancellationToken);
+            return _bus.Start();
         }
     }
 }

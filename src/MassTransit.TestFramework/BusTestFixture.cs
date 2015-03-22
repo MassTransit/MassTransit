@@ -120,7 +120,7 @@ namespace MassTransit.TestFramework
 
             configurator.Handler<T>(async context =>
             {
-                await handler(context);
+                await handler(context).ConfigureAwait(false);
                 source.TrySetResult(context);
             });
 

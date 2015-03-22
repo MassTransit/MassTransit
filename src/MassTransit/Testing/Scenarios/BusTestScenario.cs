@@ -45,8 +45,7 @@ namespace MassTransit.Testing.Scenarios
             _tokenSource = new CancellationTokenSource(timeout);
             _cancellationToken = _tokenSource.Token;
 
-            _busHandle = _busControl.Start(_cancellationToken)
-                .Result;
+            _busHandle = _busControl.Start();
         }
 
         public virtual ISendEndpoint SubjectSendEndpoint

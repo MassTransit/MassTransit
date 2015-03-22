@@ -20,6 +20,7 @@ namespace MassTransit.Tests
 	using Context;
 	using Magnum.Extensions;
 	using MassTransit.Transports;
+	using MassTransit.Transports.InMemory;
 	using NUnit.Framework;
 
 	public static class TestExtensions

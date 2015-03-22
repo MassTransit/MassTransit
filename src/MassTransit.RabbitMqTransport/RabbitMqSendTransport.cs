@@ -18,6 +18,7 @@ namespace MassTransit.RabbitMqTransport
     using System.Threading;
     using System.Threading.Tasks;
     using Contexts;
+    using Integration;
     using Logging;
     using MassTransit.Pipeline;
     using Pipeline;
@@ -46,10 +47,7 @@ namespace MassTransit.RabbitMqTransport
 
         Task ISendTransport.Send<T>(T message, IPipe<SendContext<T>> pipe, CancellationToken cancelSend)
         {
-            IPipe<ModelContext> modelPipe =
-                Pipe.New<ModelContext>(p => p.ExecuteAsync(modelContext => SendMessage(message, pipe, cancelSend)));
-
-            return _modelCache.Send(modelPipe, cancelSend);
+            return SendMessage(message, pipe, cancelSend);
         }
 
         public Task Move(ReceiveContext context)

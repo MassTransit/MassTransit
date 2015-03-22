@@ -86,7 +86,6 @@
     <Compile Include="Bus.cs" />
     <Compile Include="BusHandle.cs" />
     <Compile Include="BusHandleExtensions.cs" />
-    <Compile Include="Configuration\Builders\EndpointFactoryBuilder.cs" />
     <Compile Include="Configuration\Builders\IInMemoryBusBuilder.cs" />
     <Compile Include="Configuration\Builders\IInMemoryServiceBusFactorySpecification.cs" />
     <Compile Include="Configuration\Builders\InMemoryBusBuilder.cs" />
@@ -331,7 +330,6 @@
     <Compile Include="MessageContext.cs" />
     <Compile Include="MessageHandler.cs" />
     <Compile Include="MessageRequestClient.cs" />
-    <Compile Include="MessageTypeExtensions.cs" />
     <Compile Include="Pipe.cs" />
     <Compile Include="PipeContext.cs" />
     <Compile Include="Pipeline\ConsumeMessageFilterVisitorAdapter.cs" />
@@ -490,8 +488,6 @@
     <Compile Include="Serialization\StaticConsumeContext.cs" />
     <Compile Include="Serialization\StaticContextHeaders.cs" />
     <Compile Include="Serialization\SupportedMessageDeserializers.cs" />
-    <Compile Include="Configuration\EndpointConfigurators\DefaultMessageTrackerEndpointFactoryConfigurator.cs" />
-    <Compile Include="Configuration\EndpointConfigurators\DefaultRetryLimitEndpointFactoryConfigurator.cs" />
     <Compile Include="Configuration\SubscriptionConfigurators\ConsumerFactoryConfiguratorExtensions.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\MessageInterfaceType.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\IConsumerMetadataCache.cs" />
@@ -506,7 +502,6 @@
     <Compile Include="Configuration\InstanceSubscriptionExtensions.cs" />
     <Compile Include="Configuration\BusConfigurators\PostCreateBusBuilderConfigurator.cs" />
     <Compile Include="Configuration\Configurators\Configurator.cs" />
-    <Compile Include="Configuration\EndpointConfigurators\EndpointFactoryBuilderConfigurator.cs" />
     <Compile Include="Configuration\SerializerConfigurationExtensions.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\ConsumerConnectorCache.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\InstanceConnectorCache.cs" />
@@ -674,20 +669,20 @@
     <Compile Include="Transports\IInboundMessageTracker.cs" />
     <Compile Include="Transports\IMessageNameFormatter.cs" />
     <Compile Include="Transports\DictionaryContextHeaderProvider.cs" />
-    <Compile Include="Transports\InMemoryPublishEndpoint.cs" />
-    <Compile Include="Transports\InMemoryReceiveContext.cs" />
-    <Compile Include="Transports\InMemorySendEndpointProvider.cs" />
-    <Compile Include="Transports\InMemoryTransport.cs" />
-    <Compile Include="Transports\InMemorySendContext.cs" />
-    <Compile Include="Transports\InMemorySendContextHeaders.cs" />
-    <Compile Include="Transports\InMemoryTransportMessage.cs" />
-    <Compile Include="Transports\InMemoryTransportCache.cs" />
+    <Compile Include="Transports\InMemory\InMemoryInboundMessageTracker.cs" />
+    <Compile Include="Transports\InMemory\InMemoryPublishEndpoint.cs" />
+    <Compile Include="Transports\InMemory\InMemoryReceiveContext.cs" />
+    <Compile Include="Transports\InMemory\InMemorySendContext.cs" />
+    <Compile Include="Transports\InMemory\InMemorySendContextHeaders.cs" />
+    <Compile Include="Transports\InMemory\InMemorySendEndpointProvider.cs" />
+    <Compile Include="Transports\InMemory\InMemoryTransport.cs" />
+    <Compile Include="Transports\InMemory\InMemoryTransportCache.cs" />
+    <Compile Include="Transports\InMemory\InMemoryTransportMessage.cs" />
     <Compile Include="Transports\IReceiveEndpoint.cs" />
     <Compile Include="Transports\IReceiveTransport.cs" />
     <Compile Include="Transports\InvalidConnectionException.cs" />
     <Compile Include="Transports\ISendTransport.cs" />
     <Compile Include="Transports\MessageName.cs" />
-    <Compile Include="Transports\MessageTrackerFactory.cs" />
     <Compile Include="Transports\PublishPipeContextAdapter.cs" />
     <Compile Include="Transports\ReceiveContextBase.cs" />
     <Compile Include="Transports\ReceiveEndpoint.cs" />
@@ -696,7 +691,6 @@
     <Compile Include="Transports\ReceiveTransportHandle.cs" />
     <Compile Include="Transports\SendEndpoint.cs" />
     <Compile Include="Transports\SendEndpointCache.cs" />
-    <Compile Include="Transports\IEndpointFactory.cs" />
     <Compile Include="Consumes.cs" />
     <Compile Include="CorrelatedBy.cs" />
     <Compile Include="Exceptions\ConventionException.cs" />
@@ -715,7 +709,6 @@
     <Compile Include="Util\ITypeMetadataCache.cs" />
     <Compile Include="Util\LambdaEqualityComparer.cs" />
     <Compile Include="Util\MultipleConnectHandle.cs" />
-    <Compile Include="Util\ObjectExtensions.cs" />
     <Compile Include="Util\TypeMetadataCache.cs" />
     <Compile Include="Util\UriExtensions.cs" />
   </ItemGroup>
@@ -731,11 +724,9 @@
     <Compile Include="Monitoring\ServiceBusPerformanceCounters.cs" />
     <Compile Include="Saga\Observes.cs" />
     <Compile Include="Saga\ISagaPolicy.cs" />
-    <Compile Include="Transports\InMemoryInboundMessageTracker.cs" />
     <Compile Include="Util\IndexedAttribute.cs" />
     <Compile Include="Util\IndexedSagaDictionary.cs" />
     <Compile Include="Serialization\XmlMessageSerializer.cs" />
-    <Compile Include="IEndpointCache.cs" />
     <Compile Include="Exceptions\ConfigurationException.cs" />
     <Compile Include="Serialization\ExtensionsToMessageEnvelope.cs" />
     <Compile Include="ServiceBusExtensions.cs" />
@@ -745,7 +736,6 @@
     <Compile Include="Util\QueryStringExtensions.cs" />
     <Compile Include="Exceptions\PipelineException.cs" />
     <Compile Include="Serialization\BinaryMessageSerializer.cs" />
-    <Compile Include="Util\SequenceNumberGenerator.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config">

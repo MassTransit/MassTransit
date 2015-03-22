@@ -14,6 +14,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
 {
     using System.Threading;
     using System.Threading.Tasks;
+    using Integration;
     using Policies;
     using Transports;
 
@@ -57,7 +58,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
             get { return _hostSettings; }
         }
 
-        public async Task Close(CancellationToken cancellationToken = new CancellationToken())
+        public async Task Stop(CancellationToken cancellationToken = new CancellationToken())
         {
             await _connectionCache.Stop();
             await _sendConnectionCache.Stop();

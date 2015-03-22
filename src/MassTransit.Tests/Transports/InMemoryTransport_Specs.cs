@@ -20,6 +20,7 @@ namespace MassTransit.Tests.Transports
         using MassTransit.Pipeline;
         using MassTransit.Serialization;
         using MassTransit.Transports;
+        using MassTransit.Transports.InMemory;
         using NUnit.Framework;
         using TestFramework;
 
@@ -49,7 +50,7 @@ namespace MassTransit.Tests.Transports
                     }));
                 });
 
-                Task receiveTask = ((IReceiveTransport)transport).Start(receivePipe, shutdown.Token);
+                ReceiveTransportHandle receiveHandle = ((IReceiveTransport)transport).Start(receivePipe);
 
                 var sendEndpoint = new SendEndpoint(transport, new JsonMessageSerializer(), inputAddress,
                     inputAddress);
@@ -60,7 +61,7 @@ namespace MassTransit.Tests.Transports
 
                 shutdown.Cancel();
 
-                await receiveTask;
+                await receiveHandle.Stop();
             }
         }
 

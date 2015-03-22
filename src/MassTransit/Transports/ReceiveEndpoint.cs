@@ -47,13 +47,11 @@ namespace MassTransit.Transports
             get { return _consumePipe; }
         }
 
-        async Task<ReceiveEndpointHandle> IReceiveEndpoint.Start(CancellationToken cancellationToken)
+        ReceiveEndpointHandle IReceiveEndpoint.Start()
         {
-            ReceiveTransportHandle transportHandle = await _receiveTransport.Start(_receivePipe, cancellationToken);
+            ReceiveTransportHandle transportHandle = _receiveTransport.Start(_receivePipe);
 
-            var handle = new Handle(this, transportHandle);
-
-            return handle;
+            return new Handle(this, transportHandle);
         }
 
 

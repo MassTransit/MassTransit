@@ -24,6 +24,7 @@ namespace MassTransit.Serialization
     using System.Xml.Linq;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Converters;
+    using Util;
 
 
     public class XmlMessageSerializer :
@@ -77,7 +78,7 @@ namespace MassTransit.Serialization
             {
                 context.ContentType = XmlContentType;
 
-                var envelope = new JsonMessageEnvelope(context, context.Message, typeof(T).GetMessageTypes());
+                var envelope = new JsonMessageEnvelope(context, context.Message, TypeMetadataCache<T>.MessageTypes);
 
                 var json = new StringBuilder(1024);
 

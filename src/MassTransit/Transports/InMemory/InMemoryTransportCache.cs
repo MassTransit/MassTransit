@@ -10,7 +10,7 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Transports
+namespace MassTransit.Transports.InMemory
 {
     using System;
     using System.Collections.Concurrent;
@@ -41,7 +41,7 @@ namespace MassTransit.Transports
             get { return _transports.Keys.Select(x => new Uri(_baseUri, x)); }
         }
 
-        public async Task Close(CancellationToken cancellationToken = default(CancellationToken))
+        public async Task Stop(CancellationToken cancellationToken = default(CancellationToken))
         {
             Parallel.ForEach(_transports.Values, x => x.Dispose());
         }

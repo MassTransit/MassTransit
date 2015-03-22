@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,13 +13,12 @@
 namespace MassTransit.TestFramework
 {
     using System;
-    using System.Threading;
     using System.Threading.Tasks;
     using Logging;
     using NUnit.Framework;
     using Testing;
     using Testing.TestDecorators;
-    using Transports;
+    using Transports.InMemory;
 
 
     [TestFixture]
@@ -92,20 +91,22 @@ namespace MassTransit.TestFramework
         {
             _bus = CreateBus(_transportCache);
 
-            Task<BusHandle> startTask = _bus.Start(TestCancellationToken);
+            _busHandle = _bus.Start();
 
-            startTask.Wait(TestCancellationToken);
+            SetupEndpoints()
+                .Wait();
+        }
 
-            _busHandle = startTask.Result;
+        async Task SetupEndpoints()
+        {
+            _busSendEndpoint = await GetSendEndpoint(_bus.Address).ConfigureAwait(false);
 
-            _busSendEndpoint = GetSendEndpoint(_bus.Address).Result;
-
-            _inputQueueSendEndpoint = GetSendEndpoint(InputQueueAddress).Result;
+            _inputQueueSendEndpoint = await GetSendEndpoint(InputQueueAddress).ConfigureAwait(false);
         }
 
         protected async Task<ISendEndpoint> GetSendEndpoint(Uri address)
         {
-            var sendEndpoint = await _bus.GetSendEndpoint(address);
+            ISendEndpoint sendEndpoint = await _bus.GetSendEndpoint(address);
             sendEndpoint.Connect(_sendObserver);
 
             return sendEndpoint;
@@ -128,8 +129,10 @@ namespace MassTransit.TestFramework
             try
             {
                 if (_transportCache != null)
-                    _transportCache.Close()
+                {
+                    _transportCache.Stop()
                         .Wait(TestTimeout);
+                }
             }
             catch (Exception ex)
             {

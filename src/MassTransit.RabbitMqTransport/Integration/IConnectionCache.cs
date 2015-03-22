@@ -10,7 +10,7 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.RabbitMqTransport
+namespace MassTransit.RabbitMqTransport.Integration
 {
     using System.Threading;
     using System.Threading.Tasks;
@@ -18,10 +18,16 @@ namespace MassTransit.RabbitMqTransport
 
 
     /// <summary>
-    /// Attaches a model context to the value
+    /// Attaches a connection context to the value (shared, of course)
     /// </summary>
-    public interface IModelCache
+    public interface IConnectionCache
     {
-        Task Send(IPipe<ModelContext> modelPipe, CancellationToken cancellationToken);
+        Task Send(IPipe<ConnectionContext> connectionPipe, CancellationToken cancellationToken);
+
+        /// <summary>
+        /// Stop the cache, including the cached connection
+        /// </summary>
+        /// <returns></returns>
+        Task Stop();
     }
 }

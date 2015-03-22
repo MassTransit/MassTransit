@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,7 +12,9 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Util
 {
+    using System;
     using Internals.Mapping;
+    using Internals.Reflection;
 
 
     public interface ITypeMetadataCache<T>
@@ -27,6 +29,18 @@ namespace MassTransit.Util
         IDictionaryConverter DictionaryConverter { get; }
 
         IObjectConverter ObjectConverter { get; }
+
+        ReadOnlyPropertyCache<T> ReadOnlyPropertyCache { get; }
+
+        /// <summary>
+        /// True if the message type is a valid message type
+        /// </summary>
+        bool IsValidMessageType { get; }
+
+        /// <summary>
+        /// Returns all valid message types that are contained within the s
+        /// </summary>
+        Type[] MessageTypes { get; }
 
         T InitializeFromObject(object values);
     }

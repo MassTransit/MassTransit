@@ -14,7 +14,6 @@ namespace MassTransit.RabbitMqTransport.Tests
 {
     using System;
     using System.Threading;
-    using System.Threading.Tasks;
     using Configuration;
     using Logging;
     using MassTransit.Testing;
@@ -104,11 +103,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         {
             _bus = CreateBus();
 
-            Task<BusHandle> startTask = _bus.Start(TestCancellationToken);
-
-            startTask.Wait(TestCancellationToken);
-
-            _busHandle = startTask.Result;
+            _busHandle = _bus.Start();
             try
             {
                 _busSendEndpoint = _bus.GetSendEndpoint(_bus.Address).Result;
@@ -131,8 +126,10 @@ namespace MassTransit.RabbitMqTransport.Tests
             try
             {
                 if (_busHandle != null)
+                {
                     _busHandle.Stop(new CancellationTokenSource(TestTimeout).Token)
                         .Wait(TestTimeout);
+                }
             }
             catch (AggregateException ex)
             {
@@ -157,7 +154,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             {
                 ConfigureBus(x);
 
-                var host = x.Host(_hostAddress, h =>
+                IRabbitMqHost host = x.Host(_hostAddress, h =>
                 {
                     h.Username("guest");
                     h.Password("guest");

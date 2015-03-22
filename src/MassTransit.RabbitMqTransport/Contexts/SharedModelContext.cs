@@ -15,6 +15,7 @@ namespace MassTransit.RabbitMqTransport.Contexts
     using System;
     using System.Threading;
     using Context;
+    using Integration;
 
 
     public class SharedModelContext :
