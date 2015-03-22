@@ -15,6 +15,7 @@ namespace MassTransit.Tests
     using System;
     using System.Collections.Generic;
     using MassTransit.Transports;
+    using MassTransit.Transports.InMemory;
     using NUnit.Framework;
 
     [TestFixture]

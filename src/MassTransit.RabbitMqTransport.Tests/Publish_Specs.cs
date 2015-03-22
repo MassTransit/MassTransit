@@ -115,7 +115,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             }
         }
 
-        [TestFixture]
+        [TestFixture, Explicit]
         public class WhenAMessageIsPublishedToTheConsumer :
             RabbitMqTestFixture
         {

@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,8 +13,6 @@
 namespace MassTransit.Transports
 {
     using System;
-    using System.Threading;
-    using System.Threading.Tasks;
     using Pipeline;
 
 
@@ -33,9 +31,8 @@ namespace MassTransit.Transports
         /// <summary>
         /// Starts recieving from the inbound transport.
         /// </summary>
-        /// <param name="cancellationToken">Cancel the start operation</param>
         /// <returns>A handle to the receiving endpoint, which is used to stop it</returns>
-        Task<ReceiveEndpointHandle> Start(CancellationToken cancellationToken = default(CancellationToken));
+        ReceiveEndpointHandle Start();
     }
 
 

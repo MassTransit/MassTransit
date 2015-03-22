@@ -10,16 +10,18 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Transports
+namespace MassTransit.RabbitMqTransport.Integration
 {
-    using System;
+    using System.Threading;
+    using System.Threading.Tasks;
+    using MassTransit.Pipeline;
 
 
     /// <summary>
-    /// Implementors are responsible for creating endpoints based on passed uris.
+    /// Attaches a model context to the value
     /// </summary>
-    public interface IEndpointFactory :
-        IDisposable
+    public interface IModelCache
     {
+        Task Send(IPipe<ModelContext> modelPipe, CancellationToken cancellationToken);
     }
 }

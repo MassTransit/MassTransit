@@ -12,6 +12,9 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RabbitMqTransport
 {
+    using Integration;
+
+
     /// <summary>
     /// With a connect, and a model from RabbitMQ, this context is passed forward to allow
     /// the model to be configured and connected

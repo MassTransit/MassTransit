@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,18 +12,13 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
-    using System.Threading;
-    using System.Threading.Tasks;
-
-
     public interface IBusControl :
         IBus
     {
         /// <summary>
         /// Starts the bus (assuming the battery isn't dead)
         /// </summary>
-        /// <param name="cancellationToken">Cancels the start operation</param>
         /// <returns>A handle to the started bus instance</returns>
-        Task<BusHandle> Start(CancellationToken cancellationToken = default(CancellationToken));
+        BusHandle Start();
     }
 }

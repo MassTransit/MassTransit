@@ -23,13 +23,6 @@ namespace MassTransit
 
 
     /// <summary>
-    ///   The action to call to unregister a previously registered component
-    /// </summary>
-    /// <returns></returns>
-    public delegate bool UnregisterAction();
-
-
-    /// <summary>
     ///   The base service bus interface
     /// </summary>
     public interface IServiceBus :
@@ -40,12 +33,6 @@ namespace MassTransit
         ///   The endpoint from which messages are received
         /// </summary>
         IEndpoint Endpoint { get; }
-
-        /// <summary>
-        /// Gets the endpoint cache. This property is used
-        /// by <see cref="GetEndpoint"/> method in turn.
-        /// </summary>
-        IEndpointCache EndpointCache { get; }
 
         /// <summary>
         /// Gets or Sets the timeout used to wait for consumers to finish when shutting the bus down.

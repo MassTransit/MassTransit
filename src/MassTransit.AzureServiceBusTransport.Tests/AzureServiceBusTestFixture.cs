@@ -93,11 +93,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
         {
             _bus = CreateBus();
 
-            var startTask = _bus.Start(TestCancellationToken);
-
-            startTask.Wait(TestCancellationToken);
-
-            _busHandle = startTask.Result;
+            _busHandle = _bus.Start();
             try
             {
                 _busSendEndpoint = _bus.GetSendEndpoint(_bus.Address).Result;

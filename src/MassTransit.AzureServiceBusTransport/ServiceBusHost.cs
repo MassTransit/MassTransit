@@ -70,7 +70,7 @@ namespace MassTransit.AzureServiceBusTransport
             return string.Join("/", _settings.ServiceUri.AbsolutePath.Trim(new[] {'/'}), queueDescription.Path);
         }
 
-        public async Task Close(CancellationToken cancellationToken)
+        public async Task Stop(CancellationToken cancellationToken)
         {
             if (_messagingFactory.IsValueCreated)
             {

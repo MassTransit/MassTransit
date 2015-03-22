@@ -19,12 +19,13 @@ namespace MassTransit.Transports
     using System.Threading;
     using System.Threading.Tasks;
     using Context;
+    using Serialization;
 
 
     public abstract class ReceiveContextBase :
         ReceiveContext
     {
-        static readonly ContentType DefaultContentType = new ContentType("application/vnd.masstransit+json");
+        static readonly ContentType DefaultContentType = JsonMessageSerializer.JsonContentType;
 
         readonly CancellationTokenSource _cancellationTokenSource;
         readonly Lazy<ContentType> _contentType;

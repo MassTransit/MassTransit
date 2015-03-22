@@ -18,6 +18,7 @@ namespace MassTransit
     using System.Threading.Tasks;
     using Pipeline;
     using Scheduling;
+    using Util;
 
 
     /// <summary>
@@ -171,7 +172,7 @@ namespace MassTransit
                 Destination = destination;
                 Payload = payload;
 
-                PayloadType = typeof(T).GetMessageTypes()
+                PayloadType = TypeMetadataCache<T>.MessageTypes
                     .Select(x => new MessageUrn(x).ToString())
                     .ToArray();
             }

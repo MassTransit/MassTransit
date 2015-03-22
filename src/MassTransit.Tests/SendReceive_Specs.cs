@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests
 {
+    using System;
     using System.Threading.Tasks;
     using NUnit.Framework;
     using TestFramework;
@@ -47,7 +48,11 @@ namespace MassTransit.Tests
         [Test]
         public async void Should_receive_the_interface_of_the_message()
         {
-            Task<ConsumeContext<IMessageA>> handler = SubscribeHandler<IMessageA>();
+            Task<ConsumeContext<IMessageA>> handler = SubscribeHandler<IMessageA>(context =>
+            {
+                Console.WriteLine("{0}", context.MessageId);
+                return true;
+            });
 
             var message = new MessageA();
             await BusSendEndpoint.Send(message);

@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -16,6 +16,7 @@ namespace MassTransit.RabbitMqTransport
     using System.Threading;
     using System.Threading.Tasks;
     using Configuration;
+    using Integration;
     using Internals.Extensions;
     using Logging;
     using MassTransit.Pipeline;
@@ -55,33 +56,32 @@ namespace MassTransit.RabbitMqTransport
         /// completely shutdown once the cancellation token is cancelled.
         /// </summary>
         /// <param name="receivePipe"></param>
-        /// <param name="cancellationToken">The cancellation token that is cancelled to terminate the receive transport</param>
         /// <returns>A task that is completed once the transport is shut down</returns>
-        public async Task<ReceiveTransportHandle> Start(IPipe<ReceiveContext> receivePipe, CancellationToken cancellationToken)
+        public ReceiveTransportHandle Start(IPipe<ReceiveContext> receivePipe)
         {
-            var handle = new Handle();
+            var stopTokenSource = new CancellationTokenSource();
 
             IPipe<ConnectionContext> transportPipe = Pipe.New<ConnectionContext>(x =>
             {
                 // we want to retry the connection at intervals defined by the retry policy in the event of connection failures
-                x.Retry(_retryPolicy, handle.StopToken);
+                x.Retry(_retryPolicy, stopTokenSource.Token);
 
                 // we want our consumer to connect to the transport once connected
                 x.RabbitMqConsumer(receivePipe, _settings, _exchangeBindings);
             });
 
-            Receiver(handle, transportPipe);
+            Task receiverTask = Receiver(transportPipe, stopTokenSource.Token);
 
-            return handle;
+            return new Handle(stopTokenSource, receiverTask);
         }
 
-        async void Receiver(Handle handle, IPipe<ConnectionContext> transportPipe)
+        async Task Receiver(IPipe<ConnectionContext> transportPipe, CancellationToken stopToken)
         {
-            await Repeat.UntilCancelled(handle.StopToken, async () =>
+            await Repeat.UntilCancelled(stopToken, async () =>
             {
                 try
                 {
-                    await _connectionCache.Send(transportPipe, handle.StopToken);
+                    await _connectionCache.Send(transportPipe, stopToken);
                 }
                 catch (RabbitMqConnectionException ex)
                 {
@@ -97,26 +97,19 @@ namespace MassTransit.RabbitMqTransport
                         _log.ErrorFormat("RabbitMQ receive transport failed: {0}", ex.Message);
                 }
             });
-
-            handle.Stopped();
         }
 
 
         class Handle :
             ReceiveTransportHandle
         {
+            readonly Task _receiverTask;
             readonly CancellationTokenSource _stop;
-            readonly TaskCompletionSource<bool> _stopped;
 
-            public Handle()
+            public Handle(CancellationTokenSource cancellationTokenSource, Task receiverTask)
             {
-                _stop = new CancellationTokenSource();
-                _stopped = new TaskCompletionSource<bool>();
-            }
-
-            public CancellationToken StopToken
-            {
-                get { return _stop.Token; }
+                _stop = cancellationTokenSource;
+                _receiverTask = receiverTask;
             }
 
             void IDisposable.Dispose()
@@ -128,12 +121,7 @@ namespace MassTransit.RabbitMqTransport
             {
                 _stop.Cancel();
 
-                await _stopped.Task.WithCancellation(cancellationToken);
-            }
-
-            public void Stopped()
-            {
-                _stopped.TrySetResult(true);
+                await _receiverTask.WithCancellation(cancellationToken);
             }
         }
     }

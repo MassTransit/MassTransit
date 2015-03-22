@@ -18,6 +18,7 @@ namespace MassTransit.Builders
     using Pipeline;
     using Pipeline.Pipes;
     using Transports;
+    using Transports.InMemory;
 
 
     public class InMemoryBusBuilder :

@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -56,6 +56,16 @@ namespace MassTransit.Util
             return Cached.ImplementationBuilder.GetImplementationType(type);
         }
 
+        public static bool IsValidMessageType(Type type)
+        {
+            return GetOrAdd(type).IsValidMessageType;
+        }
+
+        public static Type[] GetMessageTypes(Type type)
+        {
+            return GetOrAdd(type).MessageTypes;
+        }
+
 
         static class Cached
         {
@@ -68,16 +78,28 @@ namespace MassTransit.Util
 
         interface CachedType
         {
+            bool IsValidMessageType { get; }
             string ShortName { get; }
+            Type[] MessageTypes { get; }
         }
 
 
         class CachedType<T> :
             CachedType
         {
+            public bool IsValidMessageType
+            {
+                get { return TypeMetadataCache<T>.IsValidMessageType; }
+            }
+
             public string ShortName
             {
                 get { return TypeMetadataCache<T>.ShortName; }
+            }
+
+            public Type[] MessageTypes
+            {
+                get { return TypeMetadataCache<T>.MessageTypes; }
             }
         }
     }
@@ -89,8 +111,10 @@ namespace MassTransit.Util
         readonly Lazy<IDictionaryConverter> _dictionaryConverter;
         readonly Lazy<bool> _hasSagaInterfaces;
         readonly Lazy<Type> _implementationType;
+        readonly Lazy<bool> _isValidMessageType;
+        readonly Lazy<Type[]> _messageTypes;
         readonly Lazy<IObjectConverter> _objectConverter;
-
+        readonly Lazy<ReadOnlyPropertyCache<T>> _propertyCache;
         readonly string _shortName;
 
         TypeMetadataCache()
@@ -103,6 +127,11 @@ namespace MassTransit.Util
 
             _dictionaryConverter = new Lazy<IDictionaryConverter>(() => TypeMetadataCache.GetDictionaryConverter(typeof(T)));
             _objectConverter = new Lazy<IObjectConverter>(() => TypeMetadataCache.GetObjectConverter(typeof(T)));
+
+            _propertyCache = new Lazy<ReadOnlyPropertyCache<T>>(() => new ReadOnlyPropertyCache<T>());
+
+            _isValidMessageType = new Lazy<bool>(CheckIfValidMessageType);
+            _messageTypes = new Lazy<Type[]>(() => GetMessageTypes().ToArray());
         }
 
         public static string ShortName
@@ -123,6 +152,36 @@ namespace MassTransit.Util
         public static IObjectConverter ObjectConverter
         {
             get { return Cached.Metadata.Value.ObjectConverter; }
+        }
+
+        public static ReadOnlyPropertyCache<T> ReadOnlyPropertyCache
+        {
+            get { return Cached.Metadata.Value.ReadOnlyPropertyCache; }
+        }
+
+        public static bool IsValidMessageType
+        {
+            get { return Cached.Metadata.Value.IsValidMessageType; }
+        }
+
+        public static Type[] MessageTypes
+        {
+            get { return Cached.Metadata.Value.MessageTypes; }
+        }
+
+        bool ITypeMetadataCache<T>.IsValidMessageType
+        {
+            get { return _isValidMessageType.Value; }
+        }
+
+        Type[] ITypeMetadataCache<T>.MessageTypes
+        {
+            get { return _messageTypes.Value; }
+        }
+
+        ReadOnlyPropertyCache<T> ITypeMetadataCache<T>.ReadOnlyPropertyCache
+        {
+            get { return _propertyCache.Value; }
         }
 
         T ITypeMetadataCache<T>.InitializeFromObject(object values)
@@ -154,6 +213,62 @@ namespace MassTransit.Util
         string ITypeMetadataCache<T>.ShortName
         {
             get { return _shortName; }
+        }
+
+        /// <summary>
+        /// Returns true if the specified type is an allowed message type, i.e.
+        /// that it doesn't come from the .Net core assemblies or is without a namespace,
+        /// amongst others.
+        /// </summary>
+        /// <param name="type">The type to inspect</param>
+        /// <returns>True if the message can be sent, otherwise false</returns>
+        bool CheckIfValidMessageType()
+        {
+            if (typeof(T).Namespace == null)
+                return false;
+
+            if (typeof(T).Assembly == typeof(object).Assembly)
+                return false;
+
+            if (typeof(T).Namespace == "System")
+                return false;
+
+            string ns = typeof(T).Namespace;
+            if (ns != null && ns.StartsWith("System."))
+                return false;
+
+            if (typeof(T).IsGenericType && typeof(T).GetGenericTypeDefinition() == typeof(CorrelatedBy<>))
+                return false;
+
+            return _propertyCache.Value.Any();
+        }
+
+        /// <summary>
+        /// Returns all the message types that are available for the specified type. This will
+        /// return any base classes or interfaces implemented by the type that are allowed
+        /// message types.
+        /// </summary>
+        /// <param name="type">The type to inspect</param>
+        /// <returns>An enumeration of valid message types implemented by the specified type</returns>
+        static IEnumerable<Type> GetMessageTypes()
+        {
+            if (IsValidMessageType)
+                yield return typeof(T);
+
+            Type baseType = typeof(T).BaseType;
+            while ((baseType != null) && TypeMetadataCache.IsValidMessageType(baseType))
+            {
+                yield return baseType;
+
+                baseType = baseType.BaseType;
+            }
+
+            IEnumerable<Type> interfaces = typeof(T)
+                .GetInterfaces()
+                .Where(TypeMetadataCache.IsValidMessageType);
+
+            foreach (Type interfaceType in interfaces)
+                yield return interfaceType;
         }
 
         public static T InitializeFromObject(object values)

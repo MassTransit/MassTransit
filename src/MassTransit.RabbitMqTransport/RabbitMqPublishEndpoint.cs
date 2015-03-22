@@ -19,10 +19,12 @@ namespace MassTransit.RabbitMqTransport
     using System.Threading.Tasks;
     using Configuration;
     using Context;
+    using Integration;
     using MassTransit.Pipeline;
     using Pipeline;
     using Serialization;
     using Transports;
+    using Util;
 
 
     public class RabbitMqPublishEndpoint :
@@ -124,7 +126,7 @@ namespace MassTransit.RabbitMqTransport
         {
             SendSettings sendSettings = _host.GetSendSettings(messageType, _messageNameFormatter);
 
-            ExchangeBindingSettings[] bindings = messageType.GetMessageTypes()
+            ExchangeBindingSettings[] bindings = TypeMetadataCache.GetMessageTypes(messageType)
                 .Select(type => type.GetExchangeBinding(_messageNameFormatter))
                 .Where(binding => !sendSettings.ExchangeName.Equals(binding.Exchange.ExchangeName))
                 .ToArray();
