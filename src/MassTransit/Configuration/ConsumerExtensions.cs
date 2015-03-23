@@ -13,12 +13,12 @@
 namespace MassTransit
 {
     using System;
+    using ConsumeConfigurators;
     using EndpointConfigurators;
     using Internals.Extensions;
     using Logging;
     using Pipeline;
     using Policies;
-    using SubscriptionConfigurators;
     using Util;
 
 
@@ -43,7 +43,7 @@ namespace MassTransit
 
             var consumerConfigurator = new ConsumerConfigurator<TConsumer>(consumerFactory, retryPolicy ?? Retry.None);
 
-            configurator.AddConfigurator(consumerConfigurator);
+            configurator.AddEndpointSpecification(consumerConfigurator);
 
             return consumerConfigurator;
         }
@@ -86,7 +86,7 @@ namespace MassTransit
 
             var consumerConfigurator = new ConsumerConfigurator<TConsumer>(consumerFactory, retryPolicy ?? Retry.None);
 
-            configurator.AddConfigurator(consumerConfigurator);
+            configurator.AddEndpointSpecification(consumerConfigurator);
 
             return consumerConfigurator;
         }
@@ -127,7 +127,7 @@ namespace MassTransit
             var consumerConfigurator = new ConsumerConfigurator<TConsumer>(delegateConsumerFactory,
                 retryPolicy ?? Retry.None);
 
-            configurator.AddConfigurator(consumerConfigurator);
+            configurator.AddEndpointSpecification(consumerConfigurator);
 
             return consumerConfigurator;
         }
@@ -167,7 +167,7 @@ namespace MassTransit
             var consumerConfigurator = (IReceiveEndpointSpecification)Activator.CreateInstance(
                 typeof(UntypedConsumerConfigurator<>).MakeGenericType(consumerType), consumerFactory, retryPolicy ?? Retry.None);
 
-            configurator.AddConfigurator(consumerConfigurator);
+            configurator.AddEndpointSpecification(consumerConfigurator);
 
             return consumerConfigurator as IConsumerConfigurator;
         }

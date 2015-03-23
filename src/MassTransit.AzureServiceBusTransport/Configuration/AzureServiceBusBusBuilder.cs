@@ -17,7 +17,6 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
     using System.Linq;
     using Builders;
     using MassTransit.Pipeline;
-    using MassTransit.Pipeline.Pipes;
     using PipeConfigurators;
     using Transports;
 
@@ -26,12 +25,13 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
         BusBuilder,
         IBusBuilder
     {
+        readonly IConsumePipe _busConsumePipe;
+        readonly ServiceBusReceiveEndpointConfigurator _busEndpointConfigurator;
         readonly IServiceBusHost[] _hosts;
         readonly Uri _inputAddress;
         readonly Lazy<ISendEndpointProvider> _publishSendEndpointProvider;
 
-        public AzureServiceBusBusBuilder(IEnumerable<IServiceBusHost> hosts, Uri inputAddress,
-            IEnumerable<IPipeSpecification<ConsumeContext>> endpointPipeSpecifications)
+        public AzureServiceBusBusBuilder(IEnumerable<IServiceBusHost> hosts, IEnumerable<IPipeSpecification<ConsumeContext>> endpointPipeSpecifications)
             : base(endpointPipeSpecifications)
         {
             if (hosts == null)
@@ -39,13 +39,29 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
 
             _hosts = hosts.ToArray();
 
-            _inputAddress = inputAddress;
             _publishSendEndpointProvider = new Lazy<ISendEndpointProvider>(CreatePublishSendEndpointProvider);
+
+            string queueName = string.Format("bus_{0}", NewId.Next().ToString("NS"));
+
+            _busConsumePipe = CreateConsumePipe(Enumerable.Empty<IPipeSpecification<ConsumeContext>>());
+
+            _busEndpointConfigurator = new ServiceBusReceiveEndpointConfigurator(_hosts[0], queueName, _busConsumePipe)
+            {
+                EnableExpress = true,
+                AutoDeleteOnIdle = TimeSpan.FromMinutes(5),
+            };
+
+            _inputAddress = _busEndpointConfigurator.InputAddress;
         }
 
         protected ISendEndpointProvider PublishSendEndpointProvider
         {
             get { return _publishSendEndpointProvider.Value; }
+        }
+
+        protected override Uri GetInputAddress()
+        {
+            return _inputAddress;
         }
 
         protected override ISendEndpointProvider CreateSendEndpointProvider()
@@ -69,10 +85,9 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
 
         public virtual IBusControl Build()
         {
-            IConsumePipe consumePipe = ReceiveEndpoints.Where(x => x.InputAddress.Equals(_inputAddress))
-                .Select(x => x.ConsumePipe).FirstOrDefault() ?? new ConsumePipe();
+            _busEndpointConfigurator.Apply(this);
 
-            return new MassTransitBus(_inputAddress, consumePipe, SendEndpointProvider, PublishEndpoint, ReceiveEndpoints, _hosts);
+            return new MassTransitBus(_inputAddress, _busConsumePipe, SendEndpointProvider, PublishEndpoint, ReceiveEndpoints, _hosts);
         }
     }
 }

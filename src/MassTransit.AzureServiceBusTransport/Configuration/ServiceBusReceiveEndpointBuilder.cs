@@ -13,7 +13,6 @@
 namespace MassTransit.AzureServiceBusTransport.Configuration
 {
     using System.Collections.Generic;
-    using EndpointConfigurators;
     using MassTransit.Pipeline;
     using Transports;
 
@@ -22,8 +21,8 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
         IReceiveEndpointBuilder
     {
         readonly IConsumePipe _consumePipe;
-        readonly List<TopicSubscriptionSettings> _topicSubscriptions;
         readonly IMessageNameFormatter _messageNameFormatter;
+        readonly List<TopicSubscriptionSettings> _topicSubscriptions;
 
         public ServiceBusReceiveEndpointBuilder(IConsumePipe consumePipe, IMessageNameFormatter messageNameFormatter)
         {
@@ -42,11 +41,6 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
         ConnectHandle IConsumeMessageObserverConnector.ConnectConsumeMessageObserver<T>(IConsumeMessageObserver<T> observer)
         {
             return _consumePipe.ConnectConsumeMessageObserver(observer);
-        }
-
-        IConsumePipe IReceiveEndpointBuilder.InputPipe
-        {
-            get { return _consumePipe; }
         }
 
         public IEnumerable<TopicSubscriptionSettings> GetTopicSubscriptions()

@@ -13,9 +13,9 @@
 namespace MassTransit
 {
     using System;
+    using ConsumeConfigurators;
+    using ConsumeConnectors;
     using Policies;
-    using SubscriptionConfigurators;
-    using SubscriptionConnectors;
 
 
     /// <summary>
@@ -37,7 +37,7 @@ namespace MassTransit
         {
             var instanceConfigurator = new InstanceConfigurator(instance, retryPolicy ?? Retry.None);
 
-            configurator.AddConfigurator(instanceConfigurator);
+            configurator.AddEndpointSpecification(instanceConfigurator);
 
             return instanceConfigurator;
         }

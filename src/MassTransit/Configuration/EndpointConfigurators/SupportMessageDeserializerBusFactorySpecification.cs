@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,7 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.EndpointConfigurators
 {
-    using System;
     using System.Collections.Generic;
     using System.Net.Mime;
     using Builders;
@@ -23,10 +22,10 @@ namespace MassTransit.EndpointConfigurators
         IBusFactorySpecification
     {
         readonly ContentType _contentType;
-        readonly Func<ISendEndpointProvider, IPublishEndpoint, IMessageDeserializer> _deserializerFactory;
+        readonly DeserializerFactory _deserializerFactory;
 
         public SupportMessageDeserializerBusFactorySpecification(ContentType contentType,
-            Func<ISendEndpointProvider, IPublishEndpoint, IMessageDeserializer> deserializerFactory)
+            DeserializerFactory deserializerFactory)
         {
             _contentType = contentType;
             _deserializerFactory = deserializerFactory;
@@ -42,7 +41,7 @@ namespace MassTransit.EndpointConfigurators
                 yield return this.Failure("DeserializerFactory", "must not be null");
         }
 
-        public void Configure(IBusBuilder builder)
+        public void Apply(IBusBuilder builder)
         {
             builder.AddMessageDeserializer(_contentType, _deserializerFactory);
         }

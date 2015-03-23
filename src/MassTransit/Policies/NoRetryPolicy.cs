@@ -32,7 +32,7 @@ namespace MassTransit.Policies
 
         public bool CanRetry(Exception exception)
         {
-            return false;
+            return true;
         }
 
         public override string ToString()

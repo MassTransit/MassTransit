@@ -31,16 +31,14 @@ namespace MassTransit.AzureServiceBusTransport
         readonly IServiceBusHost _host;
         readonly Uri _inputAddress;
         readonly ILog _log = Logger.Get<AzureServiceBusReceiveTransport>();
-        readonly IRetryPolicy _retryPolicy;
         readonly ReceiveSettings _settings;
         readonly TopicSubscriptionSettings[] _subscriptionSettings;
 
-        public AzureServiceBusReceiveTransport(IServiceBusHost host, ReceiveSettings settings, IRetryPolicy retryPolicy,
+        public AzureServiceBusReceiveTransport(IServiceBusHost host, ReceiveSettings settings,
             params TopicSubscriptionSettings[] subscriptionSettings)
         {
             _host = host;
             _settings = settings;
-            _retryPolicy = retryPolicy;
             _subscriptionSettings = subscriptionSettings;
 
             _inputAddress = host.Settings.GetInputAddress(settings.QueueDescription);
@@ -60,9 +58,6 @@ namespace MassTransit.AzureServiceBusTransport
 
             IPipe<ConnectionContext> connectionPipe = Pipe.New<ConnectionContext>(x =>
             {
-                x.Repeat(stopTokenSource.Token);
-                x.Retry(_retryPolicy, stopTokenSource.Token);
-
                 x.Filter(new PrepareReceiveQueueFilter(_settings));
 
                 foreach (TopicSubscriptionSettings subscriptionSetting in _subscriptionSettings)

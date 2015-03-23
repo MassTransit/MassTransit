@@ -13,6 +13,7 @@
 namespace MassTransit.Testing.ScenarioBuilders
 {
     using System;
+    using BusConfigurators;
     using MassTransit.Configurators;
     using Scenarios;
 

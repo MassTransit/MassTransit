@@ -35,7 +35,7 @@ namespace MassTransit.AzureServiceBusTransport.Contexts
             _payloadCache = new PayloadCache();
             _payloadCache.GetOrAddPayload<AzureServiceBusSendContext<T>>(() => this);
 
-            Headers = new AzureServiceBusSendContextHeaders();
+            Headers = new AzureServiceBusSendHeaders();
 
             Message = message;
             _cancellationToken = cancellationToken;
@@ -49,7 +49,7 @@ namespace MassTransit.AzureServiceBusTransport.Contexts
         public Guid? RequestId { get; set; }
         public Guid? CorrelationId { get; set; }
 
-        public SendContextHeaders Headers { get; set; }
+        public SendHeaders Headers { get; set; }
 
         public Uri SourceAddress { get; set; }
         public Uri DestinationAddress { get; set; }

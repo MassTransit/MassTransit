@@ -18,10 +18,10 @@ namespace MassTransit
     using Autofac;
     using Autofac.Core;
     using AutofacIntegration;
+    using ConsumeConfigurators;
     using Internals.Extensions;
     using Saga;
     using Saga.SubscriptionConfigurators;
-    using SubscriptionConfigurators;
 
 
     public static class AutofacExtensions

@@ -48,7 +48,7 @@ namespace MassTransit
         Guid? MessageId { get; set; }
         Guid? CorrelationId { get; set; }
 
-        SendContextHeaders Headers { get; }
+        SendHeaders Headers { get; }
 
         TimeSpan? TimeToLive { get; set; }
 

@@ -50,6 +50,24 @@ namespace MassTransit.RabbitMqTransport.Tests
             }
         }
 
+        [TestFixture]
+        public class When_a_message_is_send_to_the_bus_itself :
+            RabbitMqTestFixture
+        {
+            [Test]
+            public async void Should_be_received()
+            {
+                var receivedA = SubscribeHandler<A>();
+
+                var message = new A {Id = Guid.NewGuid()};
+                await BusSendEndpoint.Send(message);
+
+                ConsumeContext<A> received = await receivedA;
+
+                Assert.AreEqual(message.Id, received.Message.Id);
+            }
+        }
+
 
         [TestFixture]
         public class WhenAMessageIsSendToTheEndpointEncrypted :

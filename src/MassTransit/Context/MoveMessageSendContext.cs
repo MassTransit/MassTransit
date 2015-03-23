@@ -22,13 +22,13 @@ namespace MassTransit.Context
     public class MoveMessageSendContext :
         SendContext
     {
-        readonly SendContextHeaders _headers;
+        readonly SendHeaders _headers;
         readonly ReceiveContext _receiveContext;
 
         public MoveMessageSendContext(ReceiveContext receiveContext)
         {
             _receiveContext = receiveContext;
-            _headers = new InMemorySendContextHeaders();
+            _headers = new InMemorySendHeaders();
             Serializer = new CopyBodyMessageSerializer(_receiveContext.Body, _receiveContext.ContentType);
             ContentType = _receiveContext.ContentType;
 
@@ -83,7 +83,7 @@ namespace MassTransit.Context
 
         public Guid? CorrelationId { get; set; }
 
-        public SendContextHeaders Headers
+        public SendHeaders Headers
         {
             get { return _headers; }
         }

@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.PipeConfigurators
 {
+    using Configurators;
     using PipeBuilders;
 
 
@@ -21,7 +22,7 @@ namespace MassTransit.PipeConfigurators
     /// </summary>
     /// <typeparam name="T"></typeparam>
     public interface IPipeSpecification<T> :
-        IConfigurable<T>
+        Configurator
         where T : class, PipeContext
     {
         /// <summary>

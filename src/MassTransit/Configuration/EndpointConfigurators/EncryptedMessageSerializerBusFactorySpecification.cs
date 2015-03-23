@@ -33,7 +33,7 @@ namespace MassTransit.EndpointConfigurators
             yield break;
         }
 
-        public void Configure(IBusBuilder builder)
+        public void Apply(IBusBuilder builder)
         {
             builder.SetMessageSerializer(CreateSerializer);
 

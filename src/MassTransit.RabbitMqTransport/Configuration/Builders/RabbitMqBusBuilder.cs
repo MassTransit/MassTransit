@@ -15,46 +15,76 @@ namespace MassTransit.RabbitMqTransport.Configuration.Builders
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Text;
     using MassTransit.Builders;
     using MassTransit.Pipeline;
-    using MassTransit.Pipeline.Pipes;
     using PipeConfigurators;
     using Transports;
+    using Util;
 
 
     public class RabbitMqBusBuilder :
         BusBuilder,
         IBusBuilder
     {
+        readonly IConsumePipe _busConsumePipe;
+        readonly RabbitMqReceiveEndpointConfigurator _busEndpointConfigurator;
         readonly IRabbitMqHost[] _hosts;
-        readonly Uri _sourceAddress;
 
-        public RabbitMqBusBuilder(IEnumerable<IRabbitMqHost> hosts, Uri sourceAddress, IEnumerable<IPipeSpecification<ConsumeContext>> endpointPipeSpecifications)
+        public RabbitMqBusBuilder(IEnumerable<IRabbitMqHost> hosts, IEnumerable<IPipeSpecification<ConsumeContext>> endpointPipeSpecifications)
             : base(endpointPipeSpecifications)
         {
             _hosts = hosts.ToArray();
-            _sourceAddress = sourceAddress;
+
+            string machineName = GetSanitizedQueueNameString(HostMetadataCache.Host.MachineName);
+            string processName = GetSanitizedQueueNameString(HostMetadataCache.Host.ProcessName);
+            string queueName = string.Format("bus-{0}-{1}-{2}", processName, machineName, NewId.Next().ToString("NS"));
+
+            _busConsumePipe = CreateConsumePipe(Enumerable.Empty<IPipeSpecification<ConsumeContext>>());
+
+            _busEndpointConfigurator = new RabbitMqReceiveEndpointConfigurator(_hosts[0], queueName, _busConsumePipe);
+            _busEndpointConfigurator.Exclusive();
+            _busEndpointConfigurator.Durable(false);
+            _busEndpointConfigurator.AutoDelete();
         }
 
         public IBusControl Build()
         {
-            IConsumePipe consumePipe = ReceiveEndpoints.Where(x => x.InputAddress.Equals(_sourceAddress))
-                .Select(x => x.ConsumePipe).FirstOrDefault() ?? new ConsumePipe();
+            _busEndpointConfigurator.Apply(this);
 
-            ISendEndpointProvider sendEndpointProvider = SendEndpointProvider;
-            return new MassTransitBus(_sourceAddress, consumePipe, sendEndpointProvider, PublishEndpoint, ReceiveEndpoints, _hosts);
+            return new MassTransitBus(_busEndpointConfigurator.InputAddress, _busConsumePipe, SendEndpointProvider, PublishEndpoint, ReceiveEndpoints, _hosts);
+        }
+
+        protected override Uri GetInputAddress()
+        {
+            return _busEndpointConfigurator.InputAddress;
         }
 
         protected override ISendEndpointProvider CreateSendEndpointProvider()
         {
-            var sendEndpointProvider = new RabbitMqSendEndpointProvider(MessageSerializer, _hosts, _sourceAddress);
+            var sendEndpointProvider = new RabbitMqSendEndpointProvider(MessageSerializer, _hosts, InputAddress);
 
             return new SendEndpointCache(sendEndpointProvider);
         }
 
         protected override IPublishEndpoint CreatePublishEndpoint()
         {
-            return new RabbitMqPublishEndpoint(_hosts[0], MessageSerializer, _sourceAddress);
+            return new RabbitMqPublishEndpoint(_hosts[0], MessageSerializer, InputAddress);
+        }
+
+        string GetSanitizedQueueNameString(string input)
+        {
+            var sb = new StringBuilder(input.Length);
+
+            foreach (char c in input)
+            {
+                if (char.IsLetterOrDigit(c))
+                    sb.Append(c);
+                else if (c == '.' || c == '_' || c == '-' || c == ':')
+                    sb.Append(c);
+            }
+
+            return sb.ToString();
         }
     }
 }

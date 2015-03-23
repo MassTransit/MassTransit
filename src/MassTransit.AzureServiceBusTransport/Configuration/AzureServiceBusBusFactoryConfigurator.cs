@@ -27,8 +27,6 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
         readonly IList<IServiceBusHost> _hosts;
         readonly IList<IBusFactorySpecification> _transportSpecifications;
         readonly IList<IPipeSpecification<ConsumeContext>> _endpointPipeSpecifications;
-//        ServiceBusReceiveEndpointConfigurator _defaultEndpointConfigurator;
-        Uri _inputAddress;
 
         public AzureServiceBusBusFactoryConfigurator()
         {
@@ -44,10 +42,10 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
 
         public IBusControl CreateBus()
         {
-            var builder = new AzureServiceBusBusBuilder(_hosts, _inputAddress, _endpointPipeSpecifications);
+            var builder = new AzureServiceBusBusBuilder(_hosts, _endpointPipeSpecifications);
 
             foreach (IBusFactorySpecification configurator in _transportSpecifications)
-                configurator.Configure(builder);
+                configurator.Apply(builder);
 
             return builder.Build();
         }
@@ -59,21 +57,6 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
 
             var host = new ServiceBusHost(settings);
             _hosts.Add(host);
-
-            if (_hosts.Count == 1)
-            {
-                string queueName = string.Format("bus_{0}", NewId.Next().ToString("NS"));
-
-                _defaultEndpointConfigurator = new ServiceBusReceiveEndpointConfigurator(host, queueName)
-                {
-                    EnableExpress = true,
-                    AutoDeleteOnIdle = TimeSpan.FromMinutes(5),
-                };
-
-                _transportSpecifications.Add(_defaultEndpointConfigurator);
-
-                _inputAddress = settings.GetInputAddress(_defaultEndpointConfigurator.QueueDescription);
-            }
 
             return host;
         }

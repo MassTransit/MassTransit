@@ -22,7 +22,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
         /// </summary>
         public static IBusControl CreateUsingRabbitMq(this IBusFactory selector, Action<IRabbitMqBusFactoryConfigurator> configure)
         {
-            return RabbitMq.Create(configure);
+            return RabbitMqBusFactory.Create(configure);
         }
     }
 }

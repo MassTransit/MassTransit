@@ -19,25 +19,23 @@ namespace MassTransit
     using System.Threading.Tasks;
     using Builders;
     using Configurators;
-    using EndpointConfigurators;
     using Logging;
     using PipeConfigurators;
     using Pipeline;
     using Pipeline.Filters;
-    using Pipeline.Pipes;
     using Transports;
 
 
     public class InMemoryReceiveEndpointConfigurator :
         IReceiveEndpointConfigurator,
-        IInMemoryServiceBusFactorySpecification
+        IInMemoryBusFactorySpecification
     {
         static readonly ILog _log = Logger.Get<InMemoryReceiveEndpointConfigurator>();
 
         readonly IList<IReceiveEndpointSpecification> _configurators;
+        readonly IConsumePipe _consumePipe;
         readonly IList<IPipeSpecification<ConsumeContext>> _consumePipeSpecifications;
         readonly string _queueName;
-        readonly IConsumePipe _consumePipe;
         readonly IBuildPipeConfigurator<ReceiveContext> _receivePipeConfigurator;
 
         public InMemoryReceiveEndpointConfigurator(string queueName, IConsumePipe consumePipe = null)
@@ -65,7 +63,7 @@ namespace MassTransit
             _consumePipeSpecifications.Add(specification);
         }
 
-        public void AddConfigurator(IReceiveEndpointSpecification configurator)
+        public void AddEndpointSpecification(IReceiveEndpointSpecification configurator)
         {
             _configurators.Add(configurator);
         }

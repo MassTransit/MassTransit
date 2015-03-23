@@ -53,7 +53,7 @@ namespace MassTransit.Builders
         /// </summary>
         /// <param name="contentType">The content type of the deserializer</param>
         /// <param name="deserializerFactory">The factory to create the deserializer</param>
-        void AddMessageDeserializer(ContentType contentType, Func<ISendEndpointProvider, IPublishEndpoint, IMessageDeserializer> deserializerFactory);
+        void AddMessageDeserializer(ContentType contentType, DeserializerFactory deserializerFactory);
 
         /// <summary>
         /// Create a consume pipe for the endpoint, using the bus builder. The bus builder may add additional filters

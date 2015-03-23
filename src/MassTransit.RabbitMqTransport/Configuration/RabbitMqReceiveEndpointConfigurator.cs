@@ -18,13 +18,11 @@ namespace MassTransit.RabbitMqTransport.Configuration
     using System.Runtime.Serialization;
     using System.Threading.Tasks;
     using Builders;
-    using EndpointConfigurators;
     using Integration;
     using MassTransit.Builders;
     using MassTransit.Configurators;
     using MassTransit.Pipeline;
     using MassTransit.Pipeline.Filters;
-    using MassTransit.Pipeline.Pipes;
     using PipeConfigurators;
     using Pipeline;
     using Policies;
@@ -37,14 +35,16 @@ namespace MassTransit.RabbitMqTransport.Configuration
         IBusFactorySpecification
     {
         readonly IList<IReceiveEndpointSpecification> _configurators;
+        readonly IConsumePipe _consumePipe;
         readonly IList<IPipeSpecification<ConsumeContext>> _consumePipeSpecifications;
         readonly IRabbitMqHost _host;
         readonly IBuildPipeConfigurator<ReceiveContext> _receivePipeConfigurator;
         readonly RabbitMqReceiveSettings _settings;
 
-        public RabbitMqReceiveEndpointConfigurator(IRabbitMqHost host, string queueName = null)
+        public RabbitMqReceiveEndpointConfigurator(IRabbitMqHost host, string queueName = null, IConsumePipe consumePipe = null)
         {
             _host = host;
+            _consumePipe = consumePipe;
             _consumePipeSpecifications = new List<IPipeSpecification<ConsumeContext>>();
             _receivePipeConfigurator = new PipeConfigurator<ReceiveContext>();
             _configurators = new List<IReceiveEndpointSpecification>();
@@ -56,9 +56,9 @@ namespace MassTransit.RabbitMqTransport.Configuration
             };
         }
 
-        public ReceiveSettings Settings
+        public Uri InputAddress
         {
-            get { return _settings; }
+            get { return _host.Settings.GetInputAddress(_settings); }
         }
 
         public IEnumerable<ValidationResult> Validate()
@@ -66,9 +66,9 @@ namespace MassTransit.RabbitMqTransport.Configuration
             return _configurators.SelectMany(x => x.Validate());
         }
 
-        public void Configure(IBusBuilder builder)
+        public void Apply(IBusBuilder builder)
         {
-            ReceiveEndpoint receiveEndpoint = CreateReceiveEndpoint(builder.MessageDeserializer);
+            ReceiveEndpoint receiveEndpoint = CreateReceiveEndpoint(builder);
 
             builder.AddReceiveEndpoint(receiveEndpoint);
         }
@@ -123,7 +123,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
             _settings.ExchangeArguments[key] = value;
         }
 
-        public void AddConfigurator(IReceiveEndpointSpecification configurator)
+        public void AddEndpointSpecification(IReceiveEndpointSpecification configurator)
         {
             _configurators.Add(configurator);
         }
@@ -133,17 +133,14 @@ namespace MassTransit.RabbitMqTransport.Configuration
             _consumePipeSpecifications.Add(specification);
         }
 
-        ReceiveEndpoint CreateReceiveEndpoint(IMessageDeserializer deserializer)
+        ReceiveEndpoint CreateReceiveEndpoint(IBusBuilder builder)
         {
-            IRetryPolicy retryPolicy = Retry.Exponential(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(1));
+            IConsumePipe consumePipe = _consumePipe ?? builder.CreateConsumePipe(_consumePipeSpecifications);
 
-            var consumePipe = new ConsumePipe(_consumePipeSpecifications);
-
-
-            var builder = new RabbitMqReceiveEndpointBuilder(consumePipe, _host.MessageNameFormatter);
+            var endpointBuilder = new RabbitMqReceiveEndpointBuilder(consumePipe, _host.MessageNameFormatter);
 
             foreach (IReceiveEndpointSpecification builderConfigurator in _configurators)
-                builderConfigurator.Configure(builder);
+                builderConfigurator.Configure(endpointBuilder);
 
             var modelCache = new RabbitMqModelCache(_host.SendConnectionCache);
 
@@ -167,14 +164,12 @@ namespace MassTransit.RabbitMqTransport.Configuration
 
             _receivePipeConfigurator.Rescue(moveToErrorPipe, typeof(SerializationException));
 
-
-            _receivePipeConfigurator.Filter(new DeserializeFilter(deserializer, consumePipe));
+            _receivePipeConfigurator.Filter(new DeserializeFilter(builder.MessageDeserializer, consumePipe));
 
             IPipe<ReceiveContext> receivePipe = _receivePipeConfigurator.Build();
 
-
-            var transport = new RabbitMqReceiveTransport(_host.ConnectionCache, _settings,
-                inputAddress, Retry.None, builder.GetExchangeBindings().ToArray());
+            var transport = new RabbitMqReceiveTransport(_host.ConnectionCache, _settings, InputAddress, Retry.None,
+                endpointBuilder.GetExchangeBindings().ToArray());
 
             return new ReceiveEndpoint(transport, receivePipe, consumePipe);
         }

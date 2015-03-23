@@ -102,7 +102,7 @@ namespace MassTransit.Context
             set { _context.CorrelationId = value; }
         }
 
-        public SendContextHeaders Headers
+        public SendHeaders Headers
         {
             get { return _context.Headers; }
         }
