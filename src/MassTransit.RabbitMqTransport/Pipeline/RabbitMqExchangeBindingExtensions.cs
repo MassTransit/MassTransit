@@ -32,6 +32,15 @@ namespace MassTransit.RabbitMqTransport.Pipeline
             return binding;
         }
 
+        public static ExchangeBindingSettings GetErrorExchangeBinding(this SendSettings settings)
+        {
+            var exchange = new Exchange(settings.ExchangeName, true, false);
+
+            var binding = new ExchangeBinding(exchange);
+
+            return binding;
+        }
+
         public static bool IsTemporaryMessageType(this Type messageType)
         {
             return (!messageType.IsPublic && messageType.IsClass)

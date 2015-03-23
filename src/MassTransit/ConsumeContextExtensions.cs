@@ -91,7 +91,7 @@ namespace MassTransit
                 if (context.ExpirationTime.HasValue)
                     target.TimeToLive = context.ExpirationTime.Value.ToUniversalTime() - DateTime.UtcNow;
 
-                foreach (var header in context.Headers.Headers)
+                foreach (var header in context.Headers.GetAll())
                     target.Headers.Set(header.Item1, header.Item2);
 
                 foreach (var additionalHeader in getAdditionalHeaders(context))

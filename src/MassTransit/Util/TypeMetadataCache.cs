@@ -220,7 +220,6 @@ namespace MassTransit.Util
         /// that it doesn't come from the .Net core assemblies or is without a namespace,
         /// amongst others.
         /// </summary>
-        /// <param name="type">The type to inspect</param>
         /// <returns>True if the message can be sent, otherwise false</returns>
         bool CheckIfValidMessageType()
         {
@@ -240,7 +239,7 @@ namespace MassTransit.Util
             if (typeof(T).IsGenericType && typeof(T).GetGenericTypeDefinition() == typeof(CorrelatedBy<>))
                 return false;
 
-            return _propertyCache.Value.Any();
+            return true;
         }
 
         /// <summary>
@@ -248,7 +247,6 @@ namespace MassTransit.Util
         /// return any base classes or interfaces implemented by the type that are allowed
         /// message types.
         /// </summary>
-        /// <param name="type">The type to inspect</param>
         /// <returns>An enumeration of valid message types implemented by the specified type</returns>
         static IEnumerable<Type> GetMessageTypes()
         {

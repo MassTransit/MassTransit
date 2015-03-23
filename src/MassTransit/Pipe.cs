@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,6 +13,7 @@
 namespace MassTransit
 {
     using System;
+    using System.Threading.Tasks;
     using PipeConfigurators;
     using Pipeline;
     using Pipeline.Pipes;
@@ -32,6 +33,38 @@ namespace MassTransit
             var configurator = new PipeConfigurator<T>();
 
             callback(configurator);
+
+            return configurator.Build();
+        }
+
+        /// <summary>
+        /// Constructs a simple pipe that executes the specified action
+        /// </summary>
+        /// <typeparam name="T">The pipe context type</typeparam>
+        /// <param name="action">The method to execute</param>
+        /// <returns>The constructed pipe</returns>
+        public static IPipe<T> Execute<T>(Action<T> action)
+            where T : class, PipeContext
+        {
+            var configurator = new PipeConfigurator<T>();
+
+            configurator.Execute(action);
+
+            return configurator.Build();
+        }
+
+        /// <summary>
+        /// Constructs a simple pipe that executes the specified action
+        /// </summary>
+        /// <typeparam name="T">The pipe context type</typeparam>
+        /// <param name="action">The method to execute</param>
+        /// <returns>The constructed pipe</returns>
+        public static IPipe<T> ExecuteAsync<T>(Func<T, Task> action)
+            where T : class, PipeContext
+        {
+            var configurator = new PipeConfigurator<T>();
+
+            configurator.ExecuteAsync(action);
 
             return configurator.Build();
         }

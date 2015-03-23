@@ -24,13 +24,13 @@ namespace MassTransit.Context
     /// to convert data types to objects as required. If the original headers are Json objects, those headers
     /// are deserialized as well
     /// </summary>
-    public class JsonContextHeaders :
-        ContextHeaders
+    public class JsonHeaders :
+        Headers
     {
         readonly JsonSerializer _deserializer;
-        readonly IContextHeaderProvider _provider;
+        readonly IHeaderProvider _provider;
 
-        public JsonContextHeaders(IContextHeaderProvider provider)
+        public JsonHeaders(IHeaderProvider provider)
         {
             if (provider == null)
                 throw new ArgumentNullException("provider");
@@ -40,12 +40,12 @@ namespace MassTransit.Context
             _deserializer = JsonMessageSerializer.Deserializer;
         }
 
-        public IEnumerable<Tuple<string, object>> Headers
+        public IEnumerable<Tuple<string, object>> GetAll()
         {
-            get { return _provider.Headers; }
+            return _provider.GetAll();
         }
 
-        T ContextHeaders.Get<T>(string key, T defaultValue)
+        T Headers.Get<T>(string key, T defaultValue)
         {
             if (key == null)
                 throw new ArgumentNullException("key");
@@ -66,14 +66,14 @@ namespace MassTransit.Context
                 return (T)_deserializer.Deserialize(jsonReader, typeof(T)) ?? defaultValue;
         }
 
-        T? ContextHeaders.Get<T>(string key, T? defaultValue)
+        T? Headers.Get<T>(string key, T? defaultValue)
         {
             if (key == null)
                 throw new ArgumentNullException("key");
 
             object obj;
             if (!_provider.TryGetHeader(key, out obj))
-                throw new KeyNotFoundException("The header is not present: " + key);
+                return defaultValue;
 
             if (obj == null)
                 return defaultValue;
@@ -90,7 +90,7 @@ namespace MassTransit.Context
                 return (T)_deserializer.Deserialize(jsonReader, typeof(T));
         }
 
-        bool ContextHeaders.TryGetHeader(string key, out object value)
+        bool Headers.TryGetHeader(string key, out object value)
         {
             if (key == null)
                 throw new ArgumentNullException("key");

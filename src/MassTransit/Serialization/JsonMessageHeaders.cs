@@ -19,21 +19,21 @@ namespace MassTransit.Serialization
     using Newtonsoft.Json.Linq;
 
 
-    public class JsonMessageContextHeaders :
-        ContextHeaders
+    public class JsonMessageHeaders :
+        Headers
     {
         readonly JsonSerializer _deserializer;
         readonly IDictionary<string, object> _headers;
 
-        public JsonMessageContextHeaders(JsonSerializer deserializer, IDictionary<string, object> headers)
+        public JsonMessageHeaders(JsonSerializer deserializer, IDictionary<string, object> headers)
         {
             _deserializer = deserializer;
             _headers = headers ?? new Dictionary<string, object>();
         }
 
-        public IEnumerable<Tuple<string, object>> Headers
+        public IEnumerable<Tuple<string, object>> GetAll()
         {
-            get { return _headers.Select(x => Tuple.Create(x.Key, x.Value)); }
+            return _headers.Select(x => Tuple.Create(x.Key, x.Value));
         }
 
         public T Get<T>(string key, T defaultValue = default(T))

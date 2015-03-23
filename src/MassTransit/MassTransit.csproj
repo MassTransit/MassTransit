@@ -103,7 +103,7 @@
     <Compile Include="Configuration\EndpointConfigurators\IEndpointConfigurator.cs" />
     <Compile Include="Configuration\EndpointConfigurators\IReceiveEndpointSpecification.cs" />
     <Compile Include="Configuration\EndpointConfigurators\IReceiveEndpointBuilder.cs" />
-    <Compile Include="Configuration\EndpointConfigurators\ReceiveEndpointBuilder.cs" />
+    <Compile Include="Configuration\EndpointConfigurators\InMemoryReceiveEndpointBuilder.cs" />
     <Compile Include="Configuration\EndpointConfigurators\SetMessageSerializerBusFactorySpecification.cs" />
     <Compile Include="Configuration\FilterPipeConfiguratorExtensions.cs" />
     <Compile Include="Configuration\IBuildPipeConfigurator.cs" />
@@ -160,9 +160,9 @@
     <Compile Include="ConsumerConsumeContext.cs" />
     <Compile Include="Context\ConsumeContextScope.cs" />
     <Compile Include="Context\ConsumerConsumeContextProxy.cs" />
-    <Compile Include="Context\IContextHeaderProvider.cs" />
+    <Compile Include="Context\IHeaderProvider.cs" />
     <Compile Include="Context\IPublishEndpointConverter.cs" />
-    <Compile Include="Context\JsonContextHeaders.cs" />
+    <Compile Include="Context\JsonHeaders.cs" />
     <Compile Include="Context\PayloadCache.cs" />
     <Compile Include="Context\PayloadFactory.cs" />
     <Compile Include="Context\PublishContextProxy.cs" />
@@ -269,7 +269,7 @@
     <Compile Include="Context\SendEndpointConverterCache.cs" />
     <Compile Include="Context\SendEndpointConverter.cs" />
     <Compile Include="Exceptions\ConsumerMessageException.cs" />
-    <Compile Include="ContextHeaders.cs" />
+    <Compile Include="Headers.cs" />
     <Compile Include="IBusControl.cs" />
     <Compile Include="IConsumer.cs" />
     <Compile Include="IFault.cs" />
@@ -468,6 +468,7 @@
     <Compile Include="Serialization\AesCryptoStreamProvider.cs" />
     <Compile Include="Serialization\BinaryMessageDeserializer.cs" />
     <Compile Include="Serialization\BsonMessageDeserializer.cs" />
+    <Compile Include="Serialization\CopyBodyMessageSerializer.cs" />
     <Compile Include="Serialization\EncryptedMessageDeserializer.cs" />
     <Compile Include="Serialization\EncryptedMessageSerializer.cs" />
     <Compile Include="Serialization\ICryptoStreamProvider.cs" />
@@ -480,13 +481,14 @@
     <Compile Include="Serialization\JsonConverters\JsonContractResolver.cs" />
     <Compile Include="Serialization\JsonConverters\StringDecimalConverter.cs" />
     <Compile Include="Serialization\MessageConsumeContext.cs" />
-    <Compile Include="Serialization\JsonMessageContextHeaders.cs" />
+    <Compile Include="Serialization\JsonMessageHeaders.cs" />
     <Compile Include="Serialization\JsonMessageDeserializer.cs" />
     <Compile Include="Serialization\JsonMessageEnvelope.cs" />
     <Compile Include="Serialization\ListConverterCache.cs" />
     <Compile Include="Serialization\MessageEnvelope.cs" />
+    <Compile Include="Serialization\ResponsePipe.cs" />
     <Compile Include="Serialization\StaticConsumeContext.cs" />
-    <Compile Include="Serialization\StaticContextHeaders.cs" />
+    <Compile Include="Serialization\StaticHeaders.cs" />
     <Compile Include="Serialization\SupportedMessageDeserializers.cs" />
     <Compile Include="Configuration\SubscriptionConfigurators\ConsumerFactoryConfiguratorExtensions.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\MessageInterfaceType.cs" />
@@ -562,7 +564,6 @@
     <Compile Include="Serialization\IMessageTypeConverter.cs" />
     <Compile Include="Serialization\JsonMessageSerializer.cs" />
     <Compile Include="Serialization\ListJsonConverter.cs" />
-    <Compile Include="Serialization\StaticMessageTypeConverter.cs" />
     <Compile Include="Saga\ISagaRepository.cs" />
     <Compile Include="Saga\ISaga.cs" />
     <Compile Include="Saga\Orchestrates.cs" />
@@ -668,7 +669,7 @@
     <Compile Include="Transports\IBusHost.cs" />
     <Compile Include="Transports\IInboundMessageTracker.cs" />
     <Compile Include="Transports\IMessageNameFormatter.cs" />
-    <Compile Include="Transports\DictionaryContextHeaderProvider.cs" />
+    <Compile Include="Transports\DictionaryHeaderProvider.cs" />
     <Compile Include="Transports\InMemory\InMemoryInboundMessageTracker.cs" />
     <Compile Include="Transports\InMemory\InMemoryPublishEndpoint.cs" />
     <Compile Include="Transports\InMemory\InMemoryReceiveContext.cs" />

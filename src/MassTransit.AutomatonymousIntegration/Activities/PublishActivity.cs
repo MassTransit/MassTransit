@@ -40,10 +40,7 @@ namespace Automatonymous.Activities
         {
             _messageFactory = messageFactory;
 
-            _publishPipe = Pipe.New<PublishContext<TMessage>>(x =>
-            {
-                x.Execute(contextCallback);
-            });
+            _publishPipe = Pipe.Execute(contextCallback);
         }
 
         public void Accept(StateMachineVisitor inspector)
@@ -104,10 +101,7 @@ namespace Automatonymous.Activities
         {
             _messageFactory = messageFactory;
 
-            _publishPipe = Pipe.New<PublishContext<TMessage>>(x =>
-            {
-                x.Execute(contextCallback);
-            });
+            _publishPipe = Pipe.Execute(contextCallback);
         }
 
         public PublishActivity(Func<ConsumeEventContext<TInstance, TData>, TMessage> messageFactory)

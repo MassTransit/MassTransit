@@ -23,8 +23,8 @@ namespace MassTransit.Serialization
         IMessageSerializer
     {
         public const string ContentTypeHeaderValue = "application/vnd.masstransit+aes";
-        public static readonly ContentType EncryptedContentType = new ContentType(ContentTypeHeaderValue);
         public const string EncryptionKeyHeader = "EncryptionKeyId";
+        public static readonly ContentType EncryptedContentType = new ContentType(ContentTypeHeaderValue);
         readonly JsonSerializer _serializer;
         readonly ICryptoStreamProvider _streamProvider;
 
@@ -34,12 +34,12 @@ namespace MassTransit.Serialization
             _serializer = BsonMessageSerializer.Serializer;
         }
 
-        public ContentType ContentType
+        ContentType IMessageSerializer.ContentType
         {
             get { return EncryptedContentType; }
         }
 
-        public void Serialize<T>(Stream stream, SendContext<T> context) where T : class
+        void IMessageSerializer.Serialize<T>(Stream stream, SendContext<T> context)
         {
             context.ContentType = EncryptedContentType;
 

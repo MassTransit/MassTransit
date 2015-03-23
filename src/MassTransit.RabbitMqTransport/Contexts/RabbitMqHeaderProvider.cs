@@ -18,30 +18,27 @@ namespace MassTransit.RabbitMqTransport.Contexts
     using Context;
 
 
-    public class RabbitMqContextHeaderProvider :
-        IContextHeaderProvider
+    public class RabbitMqHeaderProvider :
+        IHeaderProvider
     {
         readonly RabbitMqBasicConsumeContext _context;
 
-        public RabbitMqContextHeaderProvider(RabbitMqBasicConsumeContext context)
+        public RabbitMqHeaderProvider(RabbitMqBasicConsumeContext context)
         {
             _context = context;
         }
 
-        public IEnumerable<Tuple<string, object>> Headers
+        public IEnumerable<Tuple<string, object>> GetAll()
         {
-            get
-            {
-                yield return Tuple.Create(RabbitMqHeaders.Exchange, (object)_context.Exchange);
-                yield return Tuple.Create(RabbitMqHeaders.RoutingKey, (object)_context.RoutingKey);
-                yield return Tuple.Create(RabbitMqHeaders.DeliveryTag, (object)_context.DeliveryTag);
-                yield return Tuple.Create(RabbitMqHeaders.ConsumerTag, (object)_context.ConsumerTag);
+            yield return Tuple.Create(RabbitMqHeaders.Exchange, (object)_context.Exchange);
+            yield return Tuple.Create(RabbitMqHeaders.RoutingKey, (object)_context.RoutingKey);
+            yield return Tuple.Create(RabbitMqHeaders.DeliveryTag, (object)_context.DeliveryTag);
+            yield return Tuple.Create(RabbitMqHeaders.ConsumerTag, (object)_context.ConsumerTag);
 
-                if (_context.Properties.IsHeadersPresent())
-                {
-                    foreach (var header in _context.Properties.Headers)
-                        yield return Tuple.Create(header.Key, header.Value);
-                }
+            if (_context.Properties.IsHeadersPresent())
+            {
+                foreach (var header in _context.Properties.Headers)
+                    yield return Tuple.Create(header.Key, header.Value);
             }
         }
 

@@ -59,6 +59,13 @@ namespace MassTransit.Pipeline.Filters
             }
             catch (Exception ex)
             {
+                if (!_retryPolicy.CanRetry(ex))
+                {
+                    throw;
+                }
+
+                // by not adding the retry payload until the exception occurs, the deepest retry filter
+                // is the one to set the actual retry context with the deepest configured policy
                 IRetryContext retryContext = context.GetOrAddPayload(() => _retryPolicy.GetRetryContext());
                 if (!retryContext.CanRetry(ex, out delay))
                     throw;

@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -32,6 +32,11 @@ namespace MassTransit.Serialization
         {
             _context = context;
             _message = message;
+        }
+
+        public Task RespondAsync<T>(T message, IPipe<SendContext<T>> sendPipe) where T : class
+        {
+            return _context.RespondAsync(message, sendPipe);
         }
 
         public Task CompleteTask
@@ -152,7 +157,7 @@ namespace MassTransit.Serialization
             get { return _context.FaultAddress; }
         }
 
-        public ContextHeaders Headers
+        public Headers Headers
         {
             get { return _context.Headers; }
         }
@@ -205,7 +210,7 @@ namespace MassTransit.Serialization
             _context.NotifyConsumed(elapsed, messageType, consumerType);
         }
 
-        public void NotifyFaulted<T>(T message, string consumerType, Exception exception) 
+        public void NotifyFaulted<T>(T message, string consumerType, Exception exception)
             where T : class
         {
             _context.NotifyFaulted(message, consumerType, exception);

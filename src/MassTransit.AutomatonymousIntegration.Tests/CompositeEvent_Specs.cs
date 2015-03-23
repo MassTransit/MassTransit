@@ -72,9 +72,9 @@ namespace MassTransit.AutomatonymousTests
 
                 Event(() => Start, x => x.CorrelateById(m => m.Message.CorrelationId));
                 Event(() => First, x => x.CorrelateById(m => m.Message.CorrelationId));
+                CompositeEvent(() => Third, x => x.CompositeStatus, First, Second);
                 Event(() => Second, x => x.CorrelateById(m => m.Message.CorrelationId));
 
-                CompositeEvent(() => Third, x => x.CompositeStatus, First, Second);
 
                 Initially(
                     When(Start)

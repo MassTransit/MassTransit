@@ -20,24 +20,24 @@ namespace MassTransit.Serialization
     using Newtonsoft.Json.Linq;
 
 
-    public class StaticContextHeaders :
-        ContextHeaders
+    public class StaticHeaders :
+        Headers
     {
         readonly JsonSerializer _deserializer;
         readonly Header[] _headers;
 
-        public StaticContextHeaders(JsonSerializer deserializer, Header[] headers)
+        public StaticHeaders(JsonSerializer deserializer, Header[] headers)
         {
             _deserializer = deserializer;
             _headers = headers;
         }
 
-        IEnumerable<Tuple<string, object>> ContextHeaders.Headers
+        IEnumerable<Tuple<string, object>> Headers.GetAll()
         {
-            get { return _headers.Select(x => Tuple.Create(x.Name, x.Value)); }
+            return _headers.Select(x => Tuple.Create(x.Name, x.Value));
         }
 
-        T ContextHeaders.Get<T>(string key, T defaultValue)
+        T Headers.Get<T>(string key, T defaultValue)
         {
             if (key == null)
                 throw new ArgumentNullException("key");
@@ -58,7 +58,7 @@ namespace MassTransit.Serialization
                 return (T)_deserializer.Deserialize(jsonReader, typeof(T)) ?? defaultValue;
         }
 
-        T? ContextHeaders.Get<T>(string key, T? defaultValue)
+        T? Headers.Get<T>(string key, T? defaultValue)
         {
             if (key == null)
                 throw new ArgumentNullException("key");

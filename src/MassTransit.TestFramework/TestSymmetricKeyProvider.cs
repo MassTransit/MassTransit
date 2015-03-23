@@ -16,6 +16,9 @@ namespace MassTransit.TestFramework
     using Serialization;
 
 
+    /// <summary>
+    /// Creates a single symmetric key and returns that key for every id specified
+    /// </summary>
     public class TestSymmetricKeyProvider :
         ISymmetricKeyProvider
     {
@@ -47,7 +50,7 @@ namespace MassTransit.TestFramework
         }
 
 
-        public class TestSymmetricKey :
+        class TestSymmetricKey :
             SymmetricKey
         {
             readonly byte[] _iv;

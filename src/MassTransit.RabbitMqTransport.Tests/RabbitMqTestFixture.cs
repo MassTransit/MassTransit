@@ -106,15 +106,15 @@ namespace MassTransit.RabbitMqTransport.Tests
             _busHandle = _bus.Start();
             try
             {
-                _busSendEndpoint = _bus.GetSendEndpoint(_bus.Address).Result;
+                _busSendEndpoint = Await(() => _bus.GetSendEndpoint(_bus.Address));
                 _busSendEndpoint.Connect(_sendObserver);
 
-                _inputQueueSendEndpoint = _bus.GetSendEndpoint(_inputQueueAddress).Result;
+                _inputQueueSendEndpoint = Await(() => _bus.GetSendEndpoint(_inputQueueAddress));
                 _inputQueueSendEndpoint.Connect(_sendObserver);
             }
             catch (Exception)
             {
-                _busHandle.Stop();
+                Await(() => _busHandle.Stop(new CancellationTokenSource(TestTimeout).Token));
 
                 throw;
             }
@@ -127,8 +127,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             {
                 if (_busHandle != null)
                 {
-                    _busHandle.Stop(new CancellationTokenSource(TestTimeout).Token)
-                        .Wait(TestTimeout);
+                    Await(() => _busHandle.Stop(new CancellationTokenSource(TestTimeout).Token));
                 }
             }
             catch (AggregateException ex)
@@ -141,6 +140,10 @@ namespace MassTransit.RabbitMqTransport.Tests
         }
 
         protected virtual void ConfigureBus(IRabbitMqBusFactoryConfigurator configurator)
+        {
+        }   
+        
+        protected virtual void ConfigureBusHost(IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host)
         {
         }
 
@@ -159,6 +162,8 @@ namespace MassTransit.RabbitMqTransport.Tests
                     h.Username("guest");
                     h.Password("guest");
                 });
+
+                ConfigureBusHost(x, host);
 
                 x.ReceiveEndpoint(host, "input_queue", e =>
                 {

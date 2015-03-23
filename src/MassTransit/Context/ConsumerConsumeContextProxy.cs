@@ -156,7 +156,7 @@ namespace MassTransit.Context
             get { return _context.FaultAddress; }
         }
 
-        public ContextHeaders Headers
+        public Headers Headers
         {
             get { return _context.Headers; }
         }
@@ -192,6 +192,11 @@ namespace MassTransit.Context
             where T : class
         {
             return _context.RespondAsync(message);
+        }
+
+        Task ConsumeContext.RespondAsync<T>(T message, IPipe<SendContext<T>> sendPipe)
+        {
+            return _context.RespondAsync(message, sendPipe);
         }
 
         public void Respond<T>(T message)

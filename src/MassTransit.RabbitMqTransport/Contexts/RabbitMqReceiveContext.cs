@@ -44,9 +44,9 @@ namespace MassTransit.RabbitMqTransport.Contexts
             ((ReceiveContext)this).GetOrAddPayload<RabbitMqBasicConsumeContext>(() => this);
         }
 
-        protected override IContextHeaderProvider HeaderProvider
+        protected override IHeaderProvider HeaderProvider
         {
-            get { return new RabbitMqContextHeaderProvider(this); }
+            get { return new RabbitMqHeaderProvider(this); }
         }
 
         public string ConsumerTag

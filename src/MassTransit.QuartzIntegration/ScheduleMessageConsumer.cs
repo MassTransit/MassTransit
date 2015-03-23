@@ -83,7 +83,7 @@ namespace MassTransit.QuartzIntegration
                 builder = builder.UsingJobData("ExpirationTime", context.ExpirationTime.Value.ToString());
 
             IJobDetail jobDetail = builder
-                .UsingJobData("HeadersAsJson", JsonConvert.SerializeObject(context.Headers.Headers))
+                .UsingJobData("HeadersAsJson", JsonConvert.SerializeObject(context.Headers.GetAll()))
                 .Build();
 
             ITrigger trigger = TriggerBuilder.Create()

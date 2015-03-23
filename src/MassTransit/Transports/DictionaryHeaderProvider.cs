@@ -21,19 +21,19 @@ namespace MassTransit.Transports
     /// <summary>
     /// A simple in-memory header collection for use with the in memory transport
     /// </summary>
-    public class DictionaryContextHeaderProvider :
-        IContextHeaderProvider
+    public class DictionaryHeaderProvider :
+        IHeaderProvider
     {
         readonly IDictionary<string, object> _headers;
 
-        public DictionaryContextHeaderProvider(IDictionary<string, object> headers)
+        public DictionaryHeaderProvider(IDictionary<string, object> headers)
         {
             _headers = headers;
         }
 
-        public IEnumerable<Tuple<string, object>> Headers
+        public IEnumerable<Tuple<string, object>> GetAll()
         {
-            get { return _headers.Select(x => Tuple.Create(x.Key, x.Value)); }
+            return _headers.Select(x => Tuple.Create(x.Key, x.Value));
         }
 
         public bool TryGetHeader(string key, out object value)

@@ -28,7 +28,7 @@ namespace MassTransit.TestFramework
     {
         PayloadCache _cache = new PayloadCache();
         CancellationToken _cancellationToken;
-        ContextHeaders _headers;
+        Headers _headers;
         Guid? _correlationId;
         Uri _destinationAddress;
         DateTime? _expirationTime;
@@ -112,7 +112,7 @@ namespace MassTransit.TestFramework
             get { return _faultAddress; }
         }
 
-        public ContextHeaders Headers
+        public Headers Headers
         {
             get { return _headers; }
         }
@@ -197,6 +197,11 @@ namespace MassTransit.TestFramework
         }
 
         public Task RespondAsync<T>(T message) where T : class
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task RespondAsync<T>(T message, IPipe<SendContext<T>> sendPipe) where T : class
         {
             throw new NotImplementedException();
         }

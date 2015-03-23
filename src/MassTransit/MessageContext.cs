@@ -68,6 +68,6 @@ namespace MassTransit
         /// Additional application-specific headers that are added to the message by the application
         /// or by features within MassTransit, such as when a message is moved to an error queue.
         /// </summary>
-        ContextHeaders Headers { get; }
+        Headers Headers { get; }
     }
 }
