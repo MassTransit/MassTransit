@@ -14,6 +14,7 @@ namespace MassTransit.Pipeline.Filters
 {
     using System;
     using System.Threading.Tasks;
+    using Logging;
     using Transports;
 
 
@@ -24,6 +25,7 @@ namespace MassTransit.Pipeline.Filters
         IFilter<ReceiveContext>
     {
         readonly Func<Task<ISendTransport>> _getErrorTransport;
+        readonly ILog _log = Logger.Get<MoveToErrorTransportFilter>();
 
         public MoveToErrorTransportFilter(Func<Task<ISendTransport>> getErrorTransport)
         {

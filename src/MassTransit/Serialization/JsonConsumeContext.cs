@@ -32,7 +32,6 @@ namespace MassTransit.Serialization
         readonly MessageEnvelope _envelope;
         readonly JToken _messageToken;
         readonly IDictionary<Type, object> _messageTypes;
-        readonly IList<Task> _pendingTasks;
         readonly IPublishEndpoint _publishEndpoint;
         readonly ReceiveContext _receiveContext;
         readonly ISendEndpointProvider _sendEndpointProvider;
@@ -57,7 +56,6 @@ namespace MassTransit.Serialization
             _supportedTypes = envelope.MessageType.ToArray();
             _messageTypes = new Dictionary<Type, object>();
             _publishEndpoint = publishEndpoint;
-            _pendingTasks = new List<Task>();
         }
 
         public bool HasPayloadType(Type contextType)
@@ -134,7 +132,7 @@ namespace MassTransit.Serialization
 
         public Task CompleteTask
         {
-            get { return Task.WhenAll(_pendingTasks); }
+            get { return _receiveContext.CompleteTask; }
         }
 
         public IEnumerable<string> SupportedMessageTypes
@@ -231,7 +229,7 @@ namespace MassTransit.Serialization
         {
             Task task = RespondAsync(message);
 
-            _pendingTasks.Add(task);
+            _receiveContext.AddPendingTask(task);
         }
 
         public void RetryLater()
@@ -254,11 +252,11 @@ namespace MassTransit.Serialization
         {
             Task faultTask = GenerateFault(message, exception);
 
-            _pendingTasks.Add(faultTask);
+            _receiveContext.AddPendingTask(faultTask);
 
             Task receiveTask = _receiveContext.NotifyFaulted(message, consumerType, exception);
 
-            _pendingTasks.Add(receiveTask);
+            _receiveContext.AddPendingTask(receiveTask);
         }
 
         Task IPublishEndpoint.Publish<T>(T message, CancellationToken cancellationToken)

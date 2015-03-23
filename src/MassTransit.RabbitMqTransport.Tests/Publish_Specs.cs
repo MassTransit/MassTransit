@@ -12,6 +12,12 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RabbitMqTransport.Tests
 {
+    using System;
+    using System.Threading.Tasks;
+    using Configuration;
+    using NUnit.Framework;
+    using Shouldly;
+
     namespace Send_Specs
     {
         using System;
@@ -212,4 +218,64 @@ namespace MassTransit.RabbitMqTransport.Tests
             }
         }
     }
+
+    [TestFixture]
+    public class When_publishing_an_interface_message :
+        RabbitMqTestFixture
+    {
+        [Test]
+        public async void Should_have_correlation_id()
+        {
+            ConsumeContext<IProxyMe> message = await _handler;
+
+            message.Message.CorrelationId.ShouldBe(_correlationId);
+        }
+
+        [Test]
+        public async void Should_have_integer_value()
+        {
+            ConsumeContext<IProxyMe> message = await _handler;
+
+            message.Message.IntValue.ShouldBe(IntValue);
+        }
+
+        [Test]
+        public async void Should_have_received_message()
+        {
+            await _handler;
+        }
+
+        [Test]
+        public async void Should_have_string_value()
+        {
+            ConsumeContext<IProxyMe> message = await _handler;
+
+            message.Message.StringValue.ShouldBe(StringValue);
+        }
+
+        const int IntValue = 42;
+        const string StringValue = "Hello";
+        readonly Guid _correlationId = Guid.NewGuid();
+        Task<ConsumeContext<IProxyMe>> _handler;
+
+        [TestFixtureSetUp]
+        public void Setup()
+        {
+            Await(() => InputQueueSendEndpoint.Send<IProxyMe>(new { IntValue, StringValue, CorrelationId = _correlationId }));
+        }
+
+        protected override void ConfigureInputQueueEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
+        {
+            _handler = Handler<IProxyMe>(configurator);
+        }
+
+
+        public interface IProxyMe :
+            CorrelatedBy<Guid>
+        {
+            int IntValue { get; }
+            string StringValue { get; }
+        }
+    }
+
 }

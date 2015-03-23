@@ -120,17 +120,13 @@ namespace MassTransit.Transports.InMemory
 
         Task StartReceiveTask(IPipe<ReceiveContext> receivePipe, CancellationTokenSource stopTokenSource)
         {
-            var completed = new TaskCompletionSource<bool>();
-
-            Task.Run(() =>
+            return Task.Run(() =>
             {
                 _log.DebugFormat("Starting InMemory Transport: {0}", _inputAddress);
                 using (RegisterShutdown(stopTokenSource.Token))
                 {
                     try
                     {
-                        completed.TrySetResult(true);
-
                         Parallel.ForEach(GetConsumingPartitioner(_collection), async message =>
                         {
                             if (stopTokenSource.Token.IsCancellationRequested)
@@ -141,6 +137,8 @@ namespace MassTransit.Transports.InMemory
                             try
                             {
                                 await receivePipe.Send(context);
+
+                                await context.CompleteTask;
 
                                 _log.DebugFormat("RCVD: {0} {1}", _inputAddress, message.MessageId);
                             }
@@ -156,14 +154,8 @@ namespace MassTransit.Transports.InMemory
                     catch (OperationCanceledException)
                     {
                     }
-                    finally
-                    {
-                        completed.TrySetResult(true);
-                    }
                 }
             }, stopTokenSource.Token);
-
-            return completed.Task;
         }
 
         async Task<byte[]> GetMessageBody(Stream body)

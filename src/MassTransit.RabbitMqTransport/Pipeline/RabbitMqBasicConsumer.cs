@@ -120,16 +120,18 @@ namespace MassTransit.RabbitMqTransport.Pipeline
 
                 await _receivePipe.Send(context);
 
-                Interlocked.Decrement(ref _currentPendingDeliveryCount);
+                await context.CompleteTask;
+
                 _model.BasicAck(deliveryTag, false);
             }
             catch (Exception)
             {
-                Interlocked.Decrement(ref _currentPendingDeliveryCount);
                 _model.BasicNack(deliveryTag, false, true);
             }
             finally
             {
+                Interlocked.Decrement(ref _currentPendingDeliveryCount);
+
                 RabbitMqReceiveContext ignored;
                 _pending.TryRemove(deliveryTag, out ignored);
             }

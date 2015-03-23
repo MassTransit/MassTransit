@@ -48,9 +48,7 @@ namespace MassTransit.RabbitMqTransport
 
             _filters.Add(new PrepareSendExchangeFilter(_sendSettings));
             foreach (ExchangeBindingSettings binding in exchangeBindings)
-            {
                 _filters.Add(new SendExchangeBindingModelFilter(binding));
-            }
         }
 
         Task ISendTransport.Send<T>(T message, IPipe<SendContext<T>> pipe, CancellationToken cancelSend)
@@ -63,19 +61,39 @@ namespace MassTransit.RabbitMqTransport
             IPipe<ModelContext> modelPipe = Pipe.New<ModelContext>(p =>
             {
                 foreach (var filter in _filters)
-                {
                     p.Filter(filter);
-                }
 
                 p.ExecuteAsync(async modelContext =>
                 {
-//                    if (_log.IsDebugEnabled)
-//                        _log.DebugFormat("Sending {0} to {1}", TypeMetadataCache<T>.ShortName, _sendSettings.ExchangeName);
+                    Guid? messageId = context.TransportHeaders.Get("MessageId", default(Guid?));
 
                     IBasicProperties properties = modelContext.Model.CreateBasicProperties();
                     properties.Headers = new Dictionary<string, object>();
 
-                    // var context = new MoveMessageSendContext(receiveContext);
+                    RabbitMqBasicConsumeContext basicConsumeContext;
+                    if (context.TryGetPayload(out basicConsumeContext))
+                    {
+                        if (basicConsumeContext.Properties.IsMessageIdPresent())
+                        {
+                            Guid transportMessageId;
+                            if (Guid.TryParse(basicConsumeContext.Properties.MessageId, out transportMessageId))
+                                messageId = transportMessageId;
+
+                            properties.MessageId = basicConsumeContext.Properties.MessageId;
+                        }
+                        properties.DeliveryMode = basicConsumeContext.Properties.IsDeliveryModePresent()
+                            ? basicConsumeContext.Properties.DeliveryMode
+                            : (byte)2;
+
+                        if (basicConsumeContext.Properties.IsContentTypePresent())
+                            properties.ContentType = basicConsumeContext.Properties.ContentType;
+
+                        if (basicConsumeContext.Properties.IsCorrelationIdPresent())
+                            properties.CorrelationId = basicConsumeContext.Properties.CorrelationId;
+
+                        if (basicConsumeContext.Properties.IsExpirationPresent())
+                            properties.Expiration = basicConsumeContext.Properties.Expiration;
+                    }
 
                     try
                     {
@@ -83,18 +101,10 @@ namespace MassTransit.RabbitMqTransport
 
                         properties.SetPersistent(_sendSettings.Durable);
 
-                        Guid? messageId = context.TransportHeaders.Get("MessageId", default(Guid?));
-
                         if (messageId.HasValue)
                             properties.MessageId = messageId.ToString();
 
-//                        if (context.CorrelationId.HasValue)
-//                            properties.CorrelationId = context.CorrelationId.ToString();
-//
-//                        if (context.TimeToLive.HasValue)
-//                            properties.Expiration = context.TimeToLive.Value.TotalMilliseconds.ToString("F0", CultureInfo.InvariantCulture);
-
-                        byte[] body = null;
+                        byte[] body;
                         using (var memoryStream = new MemoryStream())
                         {
                             context.Body.CopyTo(memoryStream);
@@ -102,7 +112,14 @@ namespace MassTransit.RabbitMqTransport
                             body = memoryStream.ToArray();
                         }
 
-                        await modelContext.Model.BasicPublishAsync(_sendSettings.ExchangeName, "", true, true, properties, body);
+                        Task task = modelContext.Model.BasicPublishAsync(_sendSettings.ExchangeName, "", true, false, properties, body);
+                        context.AddPendingTask(task);
+
+                        if (_log.IsDebugEnabled)
+                        {
+                            _log.DebugFormat("MOVE {0} ({1} to {2})", messageId.HasValue ? messageId.Value.ToString() : "N/A", context.InputAddress,
+                                modelContext.ConnectionContext.GetAddress(_sendSettings.ExchangeName));
+                        }
 
 //                        context.DestinationAddress.LogSent(context.MessageId.HasValue ? context.MessageId.Value.ToString("N") : "",
 //                            TypeMetadataCache<T>.ShortName);
@@ -136,9 +153,7 @@ namespace MassTransit.RabbitMqTransport
             IPipe<ModelContext> modelPipe = Pipe.New<ModelContext>(p =>
             {
                 foreach (var filter in _filters)
-                {
                     p.Filter(filter);
-                }
 
                 p.ExecuteAsync(async modelContext =>
                 {

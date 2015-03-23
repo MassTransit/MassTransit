@@ -273,6 +273,7 @@
     <Compile Include="IConsumer.cs" />
     <Compile Include="IFault.cs" />
     <Compile Include="IMessageDeserializer.cs" />
+    <Compile Include="IMessageSerializer.cs" />
     <Compile Include="Internals\Extensions\CastExtensions.cs" />
     <Compile Include="Internals\Extensions\DbCommandExtensions.cs" />
     <Compile Include="Internals\Extensions\ExpressionExtensions.cs" />
@@ -472,7 +473,6 @@
     <Compile Include="Serialization\EncryptedMessageDeserializer.cs" />
     <Compile Include="Serialization\EncryptedMessageSerializer.cs" />
     <Compile Include="Serialization\ICryptoStreamProvider.cs" />
-    <Compile Include="Serialization\IMessageSerializer.cs" />
     <Compile Include="Serialization\ISymmetricKeyProvider.cs" />
     <Compile Include="Serialization\JsonConsumeContext.cs" />
     <Compile Include="Serialization\JsonConverters\ByteArrayConverter.cs" />

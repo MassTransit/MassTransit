@@ -53,6 +53,11 @@ namespace MassTransit
         Headers TransportHeaders { get; }
 
         /// <summary>
+        /// The task that is completed once all pending tasks are completed
+        /// </summary>
+        Task CompleteTask { get; }
+
+        /// <summary>
         /// Notify that a message has been consumed from the received context
         /// </summary>
         /// <param name="elapsed"></param>
@@ -70,5 +75,11 @@ namespace MassTransit
 
         // TODO to tie sends back to the receiver?
         //void NotifySend(string messageType, Uri destinationAddress);
+
+        /// <summary>
+        /// Adds a pending Task to the completion of the message receiver
+        /// </summary>
+        /// <param name="task"></param>
+        void AddPendingTask(Task task);
     }
 }

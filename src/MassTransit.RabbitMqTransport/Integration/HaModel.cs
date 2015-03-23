@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -436,48 +436,42 @@ namespace MassTransit.RabbitMqTransport.Integration
 
         void ModelOnBasicNacks(IModel model, BasicNackEventArgs args)
         {
-            Task.Run(() =>
+            if (args.Multiple)
             {
-                if (args.Multiple)
-                {
-                    ulong[] ids = _published.Keys.Where(x => x <= args.DeliveryTag).ToArray();
-                    foreach (ulong id in ids)
-                    {
-                        PendingPublish value;
-                        if (_published.TryRemove(id, out value))
-                            value.Nack();
-                    }
-                }
-                else
+                ulong[] ids = _published.Keys.Where(x => x <= args.DeliveryTag).ToArray();
+                foreach (ulong id in ids)
                 {
                     PendingPublish value;
-                    if (_published.TryRemove(args.DeliveryTag, out value))
+                    if (_published.TryRemove(id, out value))
                         value.Nack();
                 }
-            });
+            }
+            else
+            {
+                PendingPublish value;
+                if (_published.TryRemove(args.DeliveryTag, out value))
+                    value.Nack();
+            }
         }
 
         void ModelOnBasicAcks(IModel model, BasicAckEventArgs args)
         {
-            Task.Run(() =>
+            if (args.Multiple)
             {
-                if (args.Multiple)
-                {
-                    ulong[] ids = _published.Keys.Where(x => x <= args.DeliveryTag).ToArray();
-                    foreach (ulong id in ids)
-                    {
-                        PendingPublish value;
-                        if (_published.TryRemove(id, out value))
-                            value.Ack();
-                    }
-                }
-                else
+                ulong[] ids = _published.Keys.Where(x => x <= args.DeliveryTag).ToArray();
+                foreach (ulong id in ids)
                 {
                     PendingPublish value;
-                    if (_published.TryRemove(args.DeliveryTag, out value))
+                    if (_published.TryRemove(id, out value))
                         value.Ack();
                 }
-            });
+            }
+            else
+            {
+                PendingPublish value;
+                if (_published.TryRemove(args.DeliveryTag, out value))
+                    value.Ack();
+            }
         }
     }
 }
