@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RabbitMqTransport
 {
+    using System;
     using System.Collections.Generic;
 
 
@@ -23,6 +24,8 @@ namespace MassTransit.RabbitMqTransport
             QueueArguments = new Dictionary<string, object>();
             ExchangeArguments = new Dictionary<string, object>();
             ExchangeType = RabbitMQ.Client.ExchangeType.Fanout;
+
+            PrefetchCount = (ushort)Math.Min(Environment.ProcessorCount * 2, 16);
 
             Durable = true;
             Exclusive = false;

@@ -13,6 +13,7 @@
 namespace MassTransit.Transports
 {
     using System;
+    using System.Collections.Generic;
     using System.Diagnostics;
     using System.IO;
     using System.Net.Mime;
@@ -32,6 +33,7 @@ namespace MassTransit.Transports
         readonly Lazy<Headers> _headers;
         readonly Uri _inputAddress;
         readonly PayloadCache _payloadCache;
+        readonly IList<Task> _pendingTasks;
         readonly Stopwatch _receiveTimer;
         readonly bool _redelivered;
 
@@ -49,9 +51,21 @@ namespace MassTransit.Transports
             _headers = new Lazy<Headers>(() => new JsonHeaders(HeaderProvider));
 
             _contentType = new Lazy<ContentType>(GetContentType);
+
+            _pendingTasks = new List<Task>();
         }
 
         protected abstract IHeaderProvider HeaderProvider { get; }
+
+        public Task CompleteTask
+        {
+            get { return Task.WhenAll(_pendingTasks); }
+        }
+
+        public void AddPendingTask(Task task)
+        {
+            _pendingTasks.Add(task);
+        }
 
         bool PipeContext.HasPayloadType(Type contextType)
         {

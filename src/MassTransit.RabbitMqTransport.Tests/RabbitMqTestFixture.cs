@@ -127,7 +127,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             {
                 if (_busHandle != null)
                 {
-                    Await(() => _busHandle.Stop(new CancellationTokenSource(TestTimeout).Token));
+                    _busHandle.Stop(new CancellationTokenSource(TestTimeout).Token);
                 }
             }
             catch (AggregateException ex)

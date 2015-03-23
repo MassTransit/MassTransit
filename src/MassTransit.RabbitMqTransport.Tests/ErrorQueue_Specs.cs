@@ -25,36 +25,6 @@ namespace MassTransit.RabbitMqTransport.Tests
     public class A_serialization_exception :
         RabbitMqTestFixture
     {
-        Task<ConsumeContext<PingMessage>> _errorHandler;
-        readonly Guid? _correlationId = NewId.NextGuid();
-
-        [TestFixtureSetUp]
-        public void Setup()
-        {
-             InputQueueSendEndpoint.Send(new PingMessage(), Pipe.Execute<SendContext<PingMessage>>(context =>
-            {
-                context.CorrelationId = _correlationId;
-                context.ResponseAddress = context.SourceAddress;
-                context.FaultAddress = context.SourceAddress;
-            }));
-        }
-
-        protected override void ConfigureBusHost(IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host)
-        {
-            configurator.ReceiveEndpoint(host, "input_queue_error", x =>
-            {
-                _errorHandler = Handler<PingMessage>(x);
-            });
-        }
-
-        protected override void ConfigureInputQueueEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
-        {
-            Handler<PingMessage>(configurator, async context =>
-            {
-                throw new SerializationException("This is fine, forcing death");
-            });
-        }
-
         [Test]
         public async void Should_have_the_correlation_id()
         {
@@ -99,6 +69,36 @@ namespace MassTransit.RabbitMqTransport.Tests
         public async void Should_move_the_message_to_the_error_queue()
         {
             await _errorHandler;
+        }
+
+        Task<ConsumeContext<PingMessage>> _errorHandler;
+        readonly Guid? _correlationId = NewId.NextGuid();
+
+        [TestFixtureSetUp]
+        public void Setup()
+        {
+            Await(() => InputQueueSendEndpoint.Send(new PingMessage(), Pipe.Execute<SendContext<PingMessage>>(context =>
+            {
+                context.CorrelationId = _correlationId;
+                context.ResponseAddress = context.SourceAddress;
+                context.FaultAddress = context.SourceAddress;
+            })));
+        }
+
+        protected override void ConfigureBusHost(IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host)
+        {
+            configurator.ReceiveEndpoint(host, "input_queue_error", x =>
+            {
+                _errorHandler = Handler<PingMessage>(x);
+            });
+        }
+
+        protected override void ConfigureInputQueueEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
+        {
+            Handler<PingMessage>(configurator, async context =>
+            {
+                throw new SerializationException("This is fine, forcing death");
+            });
         }
     }
 }

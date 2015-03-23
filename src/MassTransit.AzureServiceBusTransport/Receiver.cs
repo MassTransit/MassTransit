@@ -141,6 +141,8 @@ namespace MassTransit.AzureServiceBusTransport
 
                 await _receivePipe.Send(context);
 
+                await context.CompleteTask;
+
                 await message.CompleteAsync();
 
                 if (_log.IsDebugEnabled)

@@ -210,7 +210,14 @@ namespace MassTransit.TestFramework
                 if (d == null)
                     throw new ArgumentNullException("d");
 
-                _queue.Add(new KeyValuePair<SendOrPostCallback, object>(d, state));
+                try
+                {
+                    _queue.Add(new KeyValuePair<SendOrPostCallback, object>(d, state), _cancellationToken);
+                }
+                catch (InvalidOperationException ex)
+                {
+                    // if we have completed the collection, this will throw
+                }
             }
 
             public override void Send(SendOrPostCallback d, object state)
