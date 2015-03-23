@@ -15,8 +15,8 @@ namespace MassTransit.Builders
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using PipeConfigurators;
     using Pipeline;
-    using Pipeline.Pipes;
     using Transports;
     using Transports.InMemory;
 
@@ -25,22 +25,25 @@ namespace MassTransit.Builders
         BusBuilder,
         IInMemoryBusBuilder
     {
+        readonly string _busQueueName;
+        readonly IBusHost[] _hosts;
         readonly Uri _inputAddress;
         readonly IReceiveTransportProvider _receiveTransportProvider;
         readonly ISendTransportProvider _sendTransportProvider;
-        IBusHost[] _hosts;
 
-        public InMemoryBusBuilder(Uri inputAddress, IReceiveTransportProvider receiveTransportProvider,
-            ISendTransportProvider sendTransportProvider, IEnumerable<IBusHost> hosts)
+        public InMemoryBusBuilder(IReceiveTransportProvider receiveTransportProvider,
+            ISendTransportProvider sendTransportProvider, IEnumerable<IBusHost> hosts,
+            IEnumerable<IPipeSpecification<ConsumeContext>> endpointPipeSpecifications)
+            : base(endpointPipeSpecifications)
         {
-            if (inputAddress == null)
-                throw new ArgumentNullException("inputAddress");
             if (receiveTransportProvider == null)
                 throw new ArgumentNullException("receiveTransportProvider");
             if (sendTransportProvider == null)
                 throw new ArgumentNullException("sendTransportProvider");
 
-            _inputAddress = inputAddress;
+            _busQueueName = GenerateBusQueueName();
+            _inputAddress = new Uri(string.Format("loopback://localhost/{0}", _busQueueName));
+
             _receiveTransportProvider = receiveTransportProvider;
             _sendTransportProvider = sendTransportProvider;
             _hosts = hosts.ToArray();
@@ -68,12 +71,19 @@ namespace MassTransit.Builders
             return new InMemoryPublishEndpoint(SendEndpointProvider, _sendTransportProvider);
         }
 
-        public virtual IBusControl Build()
+        public IBusControl Build()
         {
-            IConsumePipe consumePipe = ReceiveEndpoints.Where(x => x.InputAddress.Equals(_inputAddress))
-                .Select(x => x.ConsumePipe).FirstOrDefault() ?? new ConsumePipe();
+            IConsumePipe busConsumePipe = CreateConsumePipe(Enumerable.Empty<IPipeSpecification<ConsumeContext>>());
 
-            return new MassTransitBus(_inputAddress, consumePipe, SendEndpointProvider, PublishEndpoint, ReceiveEndpoints, _hosts);
+            var busEndpointConfigurator = new InMemoryReceiveEndpointConfigurator(_busQueueName, busConsumePipe);
+            busEndpointConfigurator.Apply(this);
+
+            return new MassTransitBus(_inputAddress, busConsumePipe, SendEndpointProvider, PublishEndpoint, ReceiveEndpoints, _hosts);
+        }
+
+        static string GenerateBusQueueName()
+        {
+            return NewId.Next().ToString("NS");
         }
     }
 }

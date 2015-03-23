@@ -15,10 +15,14 @@ namespace MassTransit
     using Pipeline;
 
 
-    public interface IBuildPipeConfigurator<T> :
-        IPipeConfigurator<T>
-        where T : class, PipeContext
+    public interface IBuildPipeConfigurator<TContext> :
+        IPipeConfigurator<TContext>
+        where TContext : class, PipeContext
     {
-        IPipe<T> Build();
+        /// <summary>
+        /// Builds the pipe, applying any initial specifications to the front of the pipe
+        /// </summary>
+        /// <returns></returns>
+        IPipe<TContext> Build();
     }
 }

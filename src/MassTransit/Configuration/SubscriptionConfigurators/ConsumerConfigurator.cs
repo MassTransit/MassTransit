@@ -39,9 +39,9 @@ namespace MassTransit.SubscriptionConfigurators
             _pipeBuilderConfigurators = new List<IPipeSpecification<ConsumerConsumeContext<TConsumer>>>();
         }
 
-        public void AddPipeSpecification(IPipeSpecification<ConsumerConsumeContext<TConsumer>> configurator)
+        public void AddPipeSpecification(IPipeSpecification<ConsumerConsumeContext<TConsumer>> specification)
         {
-            _pipeBuilderConfigurators.Add(configurator);
+            _pipeBuilderConfigurators.Add(specification);
         }
 
         public IEnumerable<ValidationResult> Validate()

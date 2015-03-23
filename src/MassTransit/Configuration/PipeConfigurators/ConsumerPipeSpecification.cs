@@ -31,7 +31,7 @@ namespace MassTransit.PipeConfigurators
             _filter = filter;
         }
 
-        public void Build(IPipeBuilder<ConsumerConsumeContext<TConsumer, TMessage>> builder)
+        public void Apply(IPipeBuilder<ConsumerConsumeContext<TConsumer, TMessage>> builder)
         {
             builder.AddFilter(new ConsumerSplitFilter<TConsumer, TMessage>(_filter));
         }

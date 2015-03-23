@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -16,6 +16,9 @@ namespace MassTransit.Builders
     using System.Collections.Generic;
     using System.Linq;
     using System.Net.Mime;
+    using PipeConfigurators;
+    using Pipeline;
+    using Pipeline.Pipes;
     using Serialization;
     using Transports;
 
@@ -24,13 +27,14 @@ namespace MassTransit.Builders
     {
         readonly Lazy<IMessageDeserializer> _deserializer;
         readonly IDictionary<string, Func<ISendEndpointProvider, IPublishEndpoint, IMessageDeserializer>> _deserializerFactories;
+        readonly IList<IPipeSpecification<ConsumeContext>> _endpointPipeSpecifications;
         readonly IList<IReceiveEndpoint> _endpoints;
         readonly Lazy<IPublishEndpoint> _publishEndpointProvider;
         readonly Lazy<ISendEndpointProvider> _sendEndpointProvider;
         readonly Lazy<IMessageSerializer> _serializer;
         Func<IMessageSerializer> _serializerFactory;
 
-        protected BusBuilder()
+        protected BusBuilder(IEnumerable<IPipeSpecification<ConsumeContext>> endpointPipeSpecifications)
         {
             _endpoints = new List<IReceiveEndpoint>();
             _deserializer = new Lazy<IMessageDeserializer>(CreateDeserializer);
@@ -40,6 +44,7 @@ namespace MassTransit.Builders
             _deserializerFactories =
                 new Dictionary<string, Func<ISendEndpointProvider, IPublishEndpoint, IMessageDeserializer>>(StringComparer.OrdinalIgnoreCase);
 
+            _endpointPipeSpecifications = endpointPipeSpecifications.ToList();
             _serializerFactory = () => new JsonMessageSerializer();
 
             AddMessageDeserializer(JsonMessageSerializer.JsonContentType,
@@ -101,6 +106,11 @@ namespace MassTransit.Builders
                 throw new ConfigurationException("The serializer has already been created, the serializer cannot be changed at this time.");
 
             _serializerFactory = serializerFactory;
+        }
+
+        public IConsumePipe CreateConsumePipe(IEnumerable<IPipeSpecification<ConsumeContext>> specifications)
+        {
+            return new ConsumePipe(_endpointPipeSpecifications.Concat(specifications));
         }
 
         IMessageSerializer CreateSerializer()

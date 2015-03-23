@@ -46,7 +46,7 @@ namespace MassTransit.Saga.Connectors
 
             var builder = new SagaPipeBuilder<T>();
             for (int i = 0; i < pipeSpecifications.Length; i++)
-                pipeSpecifications[i].Build(builder);
+                pipeSpecifications[i].Apply(builder);
 
             var builders = builder as SagaPipeBuilder<TSaga>;
             if (builders == null)

@@ -32,7 +32,7 @@ namespace MassTransit.PipeConfigurators
             _exceptionFilter = exceptionFilter;
         }
 
-        public void Build(IPipeBuilder<T> builder)
+        public void Apply(IPipeBuilder<T> builder)
         {
             builder.AddFilter(new RescueFilter<T>(_rescuePipe, _exceptionFilter));
         }

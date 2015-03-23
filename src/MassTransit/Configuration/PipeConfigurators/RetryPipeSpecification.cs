@@ -30,7 +30,7 @@ namespace MassTransit.PipeConfigurators
             _retryPolicy = retryPolicy;
         }
 
-        public void Build(IPipeBuilder<T> builder)
+        public void Apply(IPipeBuilder<T> builder)
         {
             builder.AddFilter(new RetryFilter<T>(_retryPolicy));
         }

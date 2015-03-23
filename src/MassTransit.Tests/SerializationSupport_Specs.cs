@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -21,6 +21,18 @@ namespace MassTransit.Tests
     public class When_using_mixed_serialization_types :
         InMemoryTestFixture
     {
+        [Test]
+        public async void Should_be_able_to_read_xml_when_using_json()
+        {
+            _responseReceived = SubscribeHandler<B>();
+
+            await InputQueueSendEndpoint.Send(new A {Key = "Hello"});
+
+            await _requestReceived;
+
+            await _responseReceived;
+        }
+
         Task<ConsumeContext<A>> _requestReceived;
         Task<ConsumeContext<B>> _responseReceived;
 
@@ -49,19 +61,6 @@ namespace MassTransit.Tests
         {
             public string Key { get; set; }
             public string Value { get; set; }
-        }
-
-
-        [Test]
-        public async void Should_be_able_to_read_xml_when_using_json()
-        {
-            _responseReceived = SubscribeHandler<B>();
-
-            await InputQueueSendEndpoint.Send(new A {Key = "Hello"});
-
-            await _requestReceived;
-
-            await _responseReceived;
         }
     }
 }

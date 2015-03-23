@@ -32,18 +32,22 @@ namespace MassTransit
         IReceiveEndpointConfigurator,
         IInMemoryServiceBusFactorySpecification
     {
+        static readonly ILog _log = Logger.Get<InMemoryReceiveEndpointConfigurator>();
+
         readonly IList<IReceiveEndpointSpecification> _configurators;
-        readonly ILog _log = Logger.Get<InMemoryReceiveEndpointConfigurator>();
-        readonly IBuildPipeConfigurator<ConsumeContext> _pipeConfigurator;
+        readonly IList<IPipeSpecification<ConsumeContext>> _consumePipeSpecifications;
         readonly string _queueName;
+        readonly IConsumePipe _consumePipe;
         readonly IBuildPipeConfigurator<ReceiveContext> _receivePipeConfigurator;
 
-        public InMemoryReceiveEndpointConfigurator(string queueName)
+        public InMemoryReceiveEndpointConfigurator(string queueName, IConsumePipe consumePipe = null)
         {
             _queueName = queueName;
-            _pipeConfigurator = new PipeConfigurator<ConsumeContext>();
+            _consumePipe = consumePipe;
             _receivePipeConfigurator = new PipeConfigurator<ReceiveContext>();
             _configurators = new List<IReceiveEndpointSpecification>();
+
+            _consumePipeSpecifications = new List<IPipeSpecification<ConsumeContext>>();
         }
 
         public IEnumerable<ValidationResult> Validate()
@@ -51,14 +55,14 @@ namespace MassTransit
             return _configurators.SelectMany(x => x.Validate());
         }
 
-        public void Configure(IInMemoryBusBuilder builder)
+        public void Apply(IInMemoryBusBuilder builder)
         {
             builder.AddReceiveEndpoint(CreateReceiveEndpoint(builder));
         }
 
-        public void AddPipeSpecification(IPipeSpecification<ConsumeContext> configurator)
+        public void AddPipeSpecification(IPipeSpecification<ConsumeContext> specification)
         {
-            _pipeConfigurator.AddPipeSpecification(configurator);
+            _consumePipeSpecifications.Add(specification);
         }
 
         public void AddConfigurator(IReceiveEndpointSpecification configurator)
@@ -70,12 +74,12 @@ namespace MassTransit
         {
             IReceiveTransport transport = builder.ReceiveTransportProvider.GetReceiveTransport(_queueName);
 
-            ConsumePipe consumePipe = CreateInboundPipe();
+            IConsumePipe consumePipe = _consumePipe ?? builder.CreateConsumePipe(_consumePipeSpecifications);
 
             if (_log.IsDebugEnabled)
             {
                 var inspector = new StringPipeVisitor();
-                ((IPipe<ConsumeContext>)consumePipe).Visit(inspector);
+                consumePipe.Visit(inspector);
 
                 _log.Debug(inspector.ToString());
             }
@@ -85,7 +89,7 @@ namespace MassTransit
             return new ReceiveEndpoint(transport, receivePipe, consumePipe);
         }
 
-        IPipe<ReceiveContext> CreateReceivePipe(IInMemoryBusBuilder builder, ConsumePipe consumePipe)
+        IPipe<ReceiveContext> CreateReceivePipe(IInMemoryBusBuilder builder, IConsumePipe consumePipe)
         {
             IReceiveEndpointBuilder endpointBuilder = new InMemoryReceiveEndpointBuilder(consumePipe);
 
@@ -106,11 +110,6 @@ namespace MassTransit
             _receivePipeConfigurator.Filter(new DeserializeFilter(builder.MessageDeserializer, consumePipe));
 
             return _receivePipeConfigurator.Build();
-        }
-
-        ConsumePipe CreateInboundPipe()
-        {
-            return new ConsumePipe(_pipeConfigurator);
         }
     }
 }

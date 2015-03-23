@@ -18,6 +18,7 @@ namespace MassTransit.RabbitMqTransport.Configuration.Builders
     using MassTransit.Builders;
     using MassTransit.Pipeline;
     using MassTransit.Pipeline.Pipes;
+    using PipeConfigurators;
     using Transports;
 
 
@@ -28,7 +29,8 @@ namespace MassTransit.RabbitMqTransport.Configuration.Builders
         readonly IRabbitMqHost[] _hosts;
         readonly Uri _sourceAddress;
 
-        public RabbitMqBusBuilder(IEnumerable<IRabbitMqHost> hosts, Uri sourceAddress)
+        public RabbitMqBusBuilder(IEnumerable<IRabbitMqHost> hosts, Uri sourceAddress, IEnumerable<IPipeSpecification<ConsumeContext>> endpointPipeSpecifications)
+            : base(endpointPipeSpecifications)
         {
             _hosts = hosts.ToArray();
             _sourceAddress = sourceAddress;

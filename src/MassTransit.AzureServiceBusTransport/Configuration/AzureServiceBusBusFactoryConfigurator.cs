@@ -26,13 +26,15 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
     {
         readonly IList<IServiceBusHost> _hosts;
         readonly IList<IBusFactorySpecification> _transportSpecifications;
-        ServiceBusReceiveEndpointConfigurator _defaultEndpointConfigurator;
+        readonly IList<IPipeSpecification<ConsumeContext>> _endpointPipeSpecifications;
+//        ServiceBusReceiveEndpointConfigurator _defaultEndpointConfigurator;
         Uri _inputAddress;
 
         public AzureServiceBusBusFactoryConfigurator()
         {
             _hosts = new List<IServiceBusHost>();
             _transportSpecifications = new List<IBusFactorySpecification>();
+            _endpointPipeSpecifications = new List<IPipeSpecification<ConsumeContext>>();
         }
 
         public IEnumerable<ValidationResult> Validate()
@@ -42,7 +44,7 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
 
         public IBusControl CreateBus()
         {
-            var builder = new AzureServiceBusBusBuilder(_hosts, _inputAddress);
+            var builder = new AzureServiceBusBusBuilder(_hosts, _inputAddress, _endpointPipeSpecifications);
 
             foreach (IBusFactorySpecification configurator in _transportSpecifications)
                 configurator.Configure(builder);
@@ -84,13 +86,12 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
             _transportSpecifications.Add(configurator);
         }
 
-        void IPipeConfigurator<ConsumeContext>.AddPipeSpecification(IPipeSpecification<ConsumeContext> configurator)
+        void IPipeConfigurator<ConsumeContext>.AddPipeSpecification(IPipeSpecification<ConsumeContext> specification)
         {
-            if (configurator == null)
-                throw new ArgumentNullException("configurator");
+            if (specification == null)
+                throw new ArgumentNullException("specification");
 
-            if (_defaultEndpointConfigurator != null)
-                _defaultEndpointConfigurator.AddPipeSpecification(configurator);
+            _endpointPipeSpecifications.Add(specification);
         }
     }
 }
