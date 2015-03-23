@@ -14,12 +14,27 @@ namespace MassTransit.Serialization
 {
     using System.IO;
 
-
+    /// <summary>
+    /// Provides a crypto stream for the purpose of encrypting or decrypting 
+    /// </summary>
     public interface ICryptoStreamProvider
     {
+        /// <summary>
+        /// Returns a stream with the encryption bits in place to ensure proper message encryption
+        /// </summary>
+        /// <typeparam name="T">The message type</typeparam>
+        /// <param name="stream">The original stream to which the encrypted message content is written</param>
+        /// <param name="context">The message send context</param>
+        /// <returns>A stream for serializing the message which will be encrypted</returns>
         Stream GetEncryptStream<T>(Stream stream, SendContext<T> context)
             where T : class;
 
+        /// <summary>
+        /// Returns a stream for decrypting the message
+        /// </summary>
+        /// <param name="stream">The input stream of the encrypted message</param>
+        /// <param name="context">The receive context from the transport</param>
+        /// <returns>A stream for deserializing the encrypted message</returns>
         Stream GetDecryptStream(Stream stream, ReceiveContext context);
     }
 }

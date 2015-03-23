@@ -15,6 +15,7 @@ namespace MassTransit.RabbitMqTransport
     using System;
     using System.Collections.Generic;
     using System.Globalization;
+    using System.IO;
     using System.Threading;
     using System.Threading.Tasks;
     using Contexts;
@@ -31,7 +32,7 @@ namespace MassTransit.RabbitMqTransport
         ISendTransport
     {
         static readonly ILog _log = Logger.Get<RabbitMqSendTransport>();
-        readonly ExchangeBindingSettings[] _exchangeBindings;
+        readonly IList<IFilter<ModelContext>> _filters;
 
         readonly IModelCache _modelCache;
         readonly Connectable<ISendObserver> _observers;
@@ -41,8 +42,15 @@ namespace MassTransit.RabbitMqTransport
         {
             _observers = new Connectable<ISendObserver>();
             _sendSettings = sendSettings;
-            _exchangeBindings = exchangeBindings;
             _modelCache = modelCache;
+
+            _filters = new List<IFilter<ModelContext>>();
+
+            _filters.Add(new PrepareSendExchangeFilter(_sendSettings));
+            foreach (ExchangeBindingSettings binding in exchangeBindings)
+            {
+                _filters.Add(new SendExchangeBindingModelFilter(binding));
+            }
         }
 
         Task ISendTransport.Send<T>(T message, IPipe<SendContext<T>> pipe, CancellationToken cancelSend)
@@ -50,9 +58,66 @@ namespace MassTransit.RabbitMqTransport
             return SendMessage(message, pipe, cancelSend);
         }
 
-        public Task Move(ReceiveContext context)
+        public async Task Move(ReceiveContext context)
         {
-            throw new NotImplementedException();
+            IPipe<ModelContext> modelPipe = Pipe.New<ModelContext>(p =>
+            {
+                foreach (var filter in _filters)
+                {
+                    p.Filter(filter);
+                }
+
+                p.ExecuteAsync(async modelContext =>
+                {
+//                    if (_log.IsDebugEnabled)
+//                        _log.DebugFormat("Sending {0} to {1}", TypeMetadataCache<T>.ShortName, _sendSettings.ExchangeName);
+
+                    IBasicProperties properties = modelContext.Model.CreateBasicProperties();
+                    properties.Headers = new Dictionary<string, object>();
+
+                    // var context = new MoveMessageSendContext(receiveContext);
+
+                    try
+                    {
+                        properties.Headers["Content-Type"] = context.ContentType.MediaType;
+
+                        properties.SetPersistent(_sendSettings.Durable);
+
+                        Guid? messageId = context.TransportHeaders.Get("MessageId", default(Guid?));
+
+                        if (messageId.HasValue)
+                            properties.MessageId = messageId.ToString();
+
+//                        if (context.CorrelationId.HasValue)
+//                            properties.CorrelationId = context.CorrelationId.ToString();
+//
+//                        if (context.TimeToLive.HasValue)
+//                            properties.Expiration = context.TimeToLive.Value.TotalMilliseconds.ToString("F0", CultureInfo.InvariantCulture);
+
+                        byte[] body = null;
+                        using (var memoryStream = new MemoryStream())
+                        {
+                            context.Body.CopyTo(memoryStream);
+
+                            body = memoryStream.ToArray();
+                        }
+
+                        await modelContext.Model.BasicPublishAsync(_sendSettings.ExchangeName, "", true, true, properties, body);
+
+//                        context.DestinationAddress.LogSent(context.MessageId.HasValue ? context.MessageId.Value.ToString("N") : "",
+//                            TypeMetadataCache<T>.ShortName);
+                    }
+                    catch (Exception ex)
+                    {
+                        if (_log.IsErrorEnabled)
+                            _log.Error("Move To Error Queue Fault: " + _sendSettings.ExchangeName, ex);
+
+                        throw;
+                    }
+                });
+            });
+
+            await _modelCache.Send(modelPipe, context.CancellationToken);
         }
 
         public ConnectHandle Connect(ISendObserver observer)
@@ -60,16 +125,19 @@ namespace MassTransit.RabbitMqTransport
             return _observers.Connect(observer);
         }
 
+        public void AddModelFilter(IFilter<ModelContext> filter)
+        {
+            _filters.Add(filter);
+        }
+
         async Task SendMessage<T>(T message, IPipe<SendContext<T>> pipe, CancellationToken cancelSend)
             where T : class
         {
             IPipe<ModelContext> modelPipe = Pipe.New<ModelContext>(p =>
             {
-                p.Filter(new PrepareSendExchangeFilter(_sendSettings));
-
-                foreach (ExchangeBindingSettings binding in _exchangeBindings)
+                foreach (var filter in _filters)
                 {
-                    p.Filter(new SendExchangeBindingModelFilter(binding));
+                    p.Filter(filter);
                 }
 
                 p.ExecuteAsync(async modelContext =>

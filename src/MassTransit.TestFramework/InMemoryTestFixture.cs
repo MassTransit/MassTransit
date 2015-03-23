@@ -93,15 +93,9 @@ namespace MassTransit.TestFramework
 
             _busHandle = _bus.Start();
 
-            SetupEndpoints()
-                .Wait();
-        }
+            _busSendEndpoint =  Await(() => GetSendEndpoint(_bus.Address));
 
-        async Task SetupEndpoints()
-        {
-            _busSendEndpoint = await GetSendEndpoint(_bus.Address).ConfigureAwait(false);
-
-            _inputQueueSendEndpoint = await GetSendEndpoint(InputQueueAddress).ConfigureAwait(false);
+            _inputQueueSendEndpoint = Await(() => GetSendEndpoint(InputQueueAddress));
         }
 
         protected async Task<ISendEndpoint> GetSendEndpoint(Uri address)
@@ -118,7 +112,7 @@ namespace MassTransit.TestFramework
             try
             {
                 if (_busHandle != null)
-                    _busHandle.Stop().Wait(TestTimeout);
+                    Await(() => _busHandle.Stop(TestCancellationToken));
             }
             catch (AggregateException ex)
             {
@@ -130,8 +124,7 @@ namespace MassTransit.TestFramework
             {
                 if (_transportCache != null)
                 {
-                    _transportCache.Stop()
-                        .Wait(TestTimeout);
+                    Await(() => _transportCache.Stop(TestCancellationToken));
                 }
             }
             catch (Exception ex)

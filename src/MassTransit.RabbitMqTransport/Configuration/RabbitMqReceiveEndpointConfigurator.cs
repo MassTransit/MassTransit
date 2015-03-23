@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -15,14 +15,18 @@ namespace MassTransit.RabbitMqTransport.Configuration
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Runtime.Serialization;
+    using System.Threading.Tasks;
     using Builders;
     using EndpointConfigurators;
+    using Integration;
     using MassTransit.Builders;
     using MassTransit.Configurators;
     using MassTransit.Pipeline;
     using MassTransit.Pipeline.Filters;
     using MassTransit.Pipeline.Pipes;
     using PipeConfigurators;
+    using Pipeline;
     using Policies;
     using RabbitMQ.Client;
     using Transports;
@@ -55,6 +59,18 @@ namespace MassTransit.RabbitMqTransport.Configuration
         public ReceiveSettings Settings
         {
             get { return _settings; }
+        }
+
+        public IEnumerable<ValidationResult> Validate()
+        {
+            return _configurators.SelectMany(x => x.Validate());
+        }
+
+        public void Configure(IBusBuilder builder)
+        {
+            ReceiveEndpoint receiveEndpoint = CreateReceiveEndpoint(builder.MessageDeserializer);
+
+            builder.AddReceiveEndpoint(receiveEndpoint);
         }
 
         public void Durable(bool durable = true)
@@ -117,21 +133,11 @@ namespace MassTransit.RabbitMqTransport.Configuration
             _pipeConfigurator.AddPipeSpecification(configurator);
         }
 
-        public IEnumerable<ValidationResult> Validate()
-        {
-            return _configurators.SelectMany(x => x.Validate());
-        }
-
-        public void Configure(IBusBuilder builder)
-        {
-            ReceiveEndpoint receiveEndpoint = CreateReceiveEndpoint(builder.MessageDeserializer);
-
-            builder.AddReceiveEndpoint(receiveEndpoint);
-        }
-
         ReceiveEndpoint CreateReceiveEndpoint(IMessageDeserializer deserializer)
         {
             IRetryPolicy retryPolicy = Retry.Exponential(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(1));
+
+            Uri inputAddress = _host.Settings.GetInputAddress(_settings);
 
             var consumePipe = new ConsumePipe(_pipeConfigurator);
 
@@ -140,12 +146,36 @@ namespace MassTransit.RabbitMqTransport.Configuration
             foreach (IReceiveEndpointSpecification builderConfigurator in _configurators)
                 builderConfigurator.Configure(builder);
 
+            var modelCache = new RabbitMqModelCache(_host.SendConnectionCache);
+
+            string errorQueueName = _settings.QueueName + "_error";
+            var sendSettings = new RabbitMqSendSettings(errorQueueName, RabbitMQ.Client.ExchangeType.Fanout, true,
+                false);
+
+            var sendTransport = new RabbitMqSendTransport(modelCache, sendSettings);
+
+            var errorSettings = new RabbitMqErrorQueueSettings
+            {
+                QueueName = errorQueueName,
+                ExchangeName = errorQueueName,
+                AutoDelete = sendSettings.AutoDelete,
+                Durable = sendSettings.Durable
+            };
+            sendTransport.AddModelFilter(new PrepareErrorQueueFilter(errorSettings));
+
+            IPipe<ReceiveContext> moveToErrorPipe = Pipe.New<ReceiveContext>(
+                x => x.Filter(new MoveToErrorTransportFilter(() => Task.FromResult<ISendTransport>(sendTransport))));
+
+            _receivePipeConfigurator.Rescue(moveToErrorPipe, typeof(SerializationException));
+
+
             _receivePipeConfigurator.Filter(new DeserializeFilter(deserializer, consumePipe));
 
             IPipe<ReceiveContext> receivePipe = _receivePipeConfigurator.Build();
 
+
             var transport = new RabbitMqReceiveTransport(_host.ConnectionCache, _settings,
-                _host.Settings.GetInputAddress(_settings), Retry.None, builder.GetExchangeBindings().ToArray());
+                inputAddress, Retry.None, builder.GetExchangeBindings().ToArray());
 
             return new ReceiveEndpoint(transport, receivePipe, consumePipe);
         }

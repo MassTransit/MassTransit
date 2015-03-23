@@ -41,8 +41,10 @@ namespace MassTransit.Tests
 
         protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
         {
-            configurator.Consumer<Consumer>()
-                .UseLog(Console.Out, async context => string.Format("Consumer: {0}", TypeMetadataCache<Consumer>.ShortName));
+//            configurator.Consumer<Consumer>()
+//                .UseLog(Console.Out, async context => string.Format("Consumer: {0}", TypeMetadataCache<Consumer>.ShortName));
+
+            Handler<PingMessage>(configurator, context => context.RespondAsync(new PongMessage(context.Message.CorrelationId)));
         }
 
 

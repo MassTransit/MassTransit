@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,57 +13,87 @@
 namespace MassTransit.Context
 {
     using System;
-    using System.IO;
+    using System.Net.Mime;
     using System.Threading;
+    using Serialization;
+    using Transports.InMemory;
 
 
-    public class MoveMessageSendContext 
+    public class MoveMessageSendContext :
+        SendContext
     {
-        readonly Action<Stream> _bodyWriter;
-        readonly Action<EndpointAddress> _notifySend;
+        readonly SendContextHeaders _headers;
+        readonly ReceiveContext _receiveContext;
 
-        public MoveMessageSendContext(ReceiveContext context)
+        public MoveMessageSendContext(ReceiveContext receiveContext)
         {
-//            SetUsing(context);
-            CopyOrInitializeOriginalMessageId(context);
+            _receiveContext = receiveContext;
+            _headers = new InMemorySendContextHeaders();
+            Serializer = new CopyBodyMessageSerializer(_receiveContext.Body, _receiveContext.ContentType);
+            ContentType = _receiveContext.ContentType;
 
-          //  Id = context.Id;
-
-        //    _notifySend = address => context.NotifySend(this, address);
-
-          //  _bodyWriter = stream => context.CopyBodyTo(stream);
-        }
-
-        public Guid Id { get; set; }
-
-
-        void CopyOrInitializeOriginalMessageId(ReceiveContext context)
-        {
-//            SetOriginalMessageId(context.OriginalMessageId);
-//
-//            if (string.IsNullOrEmpty(OriginalMessageId))
-//                SetOriginalMessageId(context.MessageId);
-        }
-
-        public CancellationToken CancellationToken
-        {
-            get { throw new NotImplementedException(); }
+            Guid? messageId = _receiveContext.TransportHeaders.Get("MessageId", default(Guid?));
+            MessageId = messageId.HasValue ? messageId.Value : NewId.NextGuid();
         }
 
         public bool HasPayloadType(Type contextType)
         {
-            throw new NotImplementedException();
+            return _receiveContext.HasPayloadType(contextType);
         }
 
         public bool TryGetPayload<TPayload>(out TPayload payload) where TPayload : class
         {
-            throw new NotImplementedException();
+            return _receiveContext.TryGetPayload(out payload);
         }
 
         public TPayload GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory) where TPayload : class
         {
-            throw new NotImplementedException();
+            return _receiveContext.GetOrAddPayload(payloadFactory);
         }
 
+        public CancellationToken CancellationToken
+        {
+            get { return _receiveContext.CancellationToken; }
+        }
+
+//            CopyOrInitializeOriginalMessageId(context);
+//
+//          //  Id = context.Id;
+//
+//        //    _notifySend = address => context.NotifySend(this, address);
+//        void CopyOrInitializeOriginalMessageId(ReceiveContext context)
+//        {
+////            SetOriginalMessageId(context.OriginalMessageId);
+////
+////            if (string.IsNullOrEmpty(OriginalMessageId))
+////                SetOriginalMessageId(context.MessageId);
+//        }
+//
+        public Uri SourceAddress { get; set; }
+
+        public Uri DestinationAddress { get; set; }
+
+        public Uri ResponseAddress { get; set; }
+
+        public Uri FaultAddress { get; set; }
+
+        public Guid? RequestId { get; set; }
+
+        public Guid? MessageId { get; set; }
+
+        public Guid? CorrelationId { get; set; }
+
+        public SendContextHeaders Headers
+        {
+            get { return _headers; }
+        }
+
+        public TimeSpan? TimeToLive { get; set; }
+
+        public ContentType ContentType { get; set; }
+
+        public bool Durable { get; set; }
+
+        public IMessageSerializer Serializer { get; set; }
     }
 }

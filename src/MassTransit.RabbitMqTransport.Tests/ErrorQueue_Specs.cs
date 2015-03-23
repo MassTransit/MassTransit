@@ -10,20 +10,20 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Tests
+namespace MassTransit.RabbitMqTransport.Tests
 {
     using System;
     using System.Runtime.Serialization;
     using System.Threading.Tasks;
+    using Configuration;
     using NUnit.Framework;
     using Shouldly;
-    using TestFramework;
     using TestFramework.Messages;
 
 
     [TestFixture]
     public class A_serialization_exception :
-        InMemoryTestFixture
+        RabbitMqTestFixture
     {
         Task<ConsumeContext<PingMessage>> _errorHandler;
         readonly Guid? _correlationId = NewId.NextGuid();
@@ -31,23 +31,23 @@ namespace MassTransit.Tests
         [TestFixtureSetUp]
         public void Setup()
         {
-            Await(() => InputQueueSendEndpoint.Send(new PingMessage(), Pipe.Execute<SendContext<PingMessage>>(context =>
+             InputQueueSendEndpoint.Send(new PingMessage(), Pipe.Execute<SendContext<PingMessage>>(context =>
             {
                 context.CorrelationId = _correlationId;
                 context.ResponseAddress = context.SourceAddress;
                 context.FaultAddress = context.SourceAddress;
-            })));
+            }));
         }
 
-        protected override void ConfigureBus(IInMemoryBusFactoryConfigurator configurator)
+        protected override void ConfigureBusHost(IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host)
         {
-            configurator.ReceiveEndpoint("input_queue_error", x =>
+            configurator.ReceiveEndpoint(host, "input_queue_error", x =>
             {
                 _errorHandler = Handler<PingMessage>(x);
             });
         }
 
-        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInputQueueEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
             Handler<PingMessage>(configurator, async context =>
             {

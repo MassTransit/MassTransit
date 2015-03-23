@@ -12,18 +12,30 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Serialization
 {
-    /// <summary>
-    /// Returns the symmetric key used to encrypt or decrypt messages
-    /// </summary>
-    public interface ISymmetricKeyProvider
+    using System.IO;
+    using System.Net.Mime;
+
+
+    public class CopyBodyMessageSerializer :
+        IMessageSerializer
     {
-        /// <summary>
-        /// Return the specified key, if found. When using Symmetric key encryption, the default key is used
-        /// unless the transport header contains a specific key identifier for the message.
-        /// </summary>
-        /// <param name="id">The key id</param>
-        /// <param name="key">The symmetric key</param>
-        /// <returns></returns>
-        bool TryGetKey(string id, out SymmetricKey key);
+        readonly Stream _body;
+        readonly ContentType _contentType;
+
+        public CopyBodyMessageSerializer(Stream body, ContentType contentType)
+        {
+            _body = body;
+            _contentType = contentType;
+        }
+
+        ContentType IMessageSerializer.ContentType
+        {
+            get { return _contentType; }
+        }
+
+        void IMessageSerializer.Serialize<T>(Stream stream, SendContext<T> context)
+        {
+            _body.CopyTo(stream);
+        }
     }
 }

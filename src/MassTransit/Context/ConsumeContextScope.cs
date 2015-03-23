@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -23,18 +23,23 @@ namespace MassTransit.Context
     /// A consume context proxy creates a payload scope, such that anything added to the payload
     /// of the context is only added at the scope level and below.
     /// </summary>
-    /// <typeparam name="T"></typeparam>
-    public class ConsumeContextScope<T> :
-        ConsumeContext<T>
-        where T : class
+    /// <typeparam name="TMessage"></typeparam>
+    public class ConsumeContextScope<TMessage> :
+        ConsumeContext<TMessage>
+        where TMessage : class
     {
-        readonly ConsumeContext<T> _context;
+        readonly ConsumeContext<TMessage> _context;
         readonly PayloadCache _payloadCache;
 
-        public ConsumeContextScope(ConsumeContext<T> context)
+        public ConsumeContextScope(ConsumeContext<TMessage> context)
         {
             _context = context;
             _payloadCache = new PayloadCache();
+        }
+
+        Task ConsumeContext.RespondAsync<T>(T message, IPipe<SendContext<T>> sendPipe)
+        {
+            return _context.RespondAsync(message, sendPipe);
         }
 
         public CancellationToken CancellationToken
@@ -109,97 +114,96 @@ namespace MassTransit.Context
             get { return _context.FaultAddress; }
         }
 
-        public ContextHeaders Headers
+        public Headers Headers
         {
             get { return _context.Headers; }
         }
 
-        public Task Publish<T1>(T1 message, CancellationToken cancellationToken = new CancellationToken()) where T1 : class
+        Task IPublishEndpoint.Publish<T>(T message, CancellationToken cancellationToken)
         {
             return _context.Publish(message, cancellationToken);
         }
 
-        public Task Publish<T1>(T1 message, IPipe<PublishContext<T1>> publishPipe,
-            CancellationToken cancellationToken = new CancellationToken()) where T1 : class
+        Task IPublishEndpoint.Publish<T>(T message, IPipe<PublishContext<T>> publishPipe,
+            CancellationToken cancellationToken)
         {
             return _context.Publish(message, publishPipe, cancellationToken);
         }
 
-        public Task Publish<T1>(T1 message, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken = new CancellationToken())
-            where T1 : class
+        Task IPublishEndpoint.Publish<T>(T message, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
         {
             return _context.Publish(message, publishPipe, cancellationToken);
         }
 
-        public Task Publish(object message, CancellationToken cancellationToken = new CancellationToken())
+        Task IPublishEndpoint.Publish(object message, CancellationToken cancellationToken)
         {
             return _context.Publish(message, cancellationToken);
         }
 
-        public Task Publish(object message, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken = new CancellationToken())
+        Task IPublishEndpoint.Publish(object message, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
         {
             return _context.Publish(message, publishPipe, cancellationToken);
         }
 
-        public Task Publish(object message, Type messageType, CancellationToken cancellationToken = new CancellationToken())
+        Task IPublishEndpoint.Publish(object message, Type messageType, CancellationToken cancellationToken)
         {
             return _context.Publish(message, messageType, cancellationToken);
         }
 
-        public Task Publish(object message, Type messageType, IPipe<PublishContext> publishPipe,
-            CancellationToken cancellationToken = new CancellationToken())
+        Task IPublishEndpoint.Publish(object message, Type messageType, IPipe<PublishContext> publishPipe,
+            CancellationToken cancellationToken)
         {
             return _context.Publish(message, messageType, publishPipe, cancellationToken);
         }
 
-        public Task Publish<T1>(object values, CancellationToken cancellationToken = new CancellationToken()) where T1 : class
+        Task IPublishEndpoint.Publish<T>(object values, CancellationToken cancellationToken)
         {
-            return _context.Publish<T1>(values, cancellationToken);
+            return _context.Publish<T>(values, cancellationToken);
         }
 
-        public Task Publish<T1>(object values, IPipe<PublishContext<T1>> publishPipe,
-            CancellationToken cancellationToken = new CancellationToken()) where T1 : class
+        Task IPublishEndpoint.Publish<T>(object values, IPipe<PublishContext<T>> publishPipe,
+            CancellationToken cancellationToken)
         {
             return _context.Publish(values, publishPipe, cancellationToken);
         }
 
-        public Task Publish<T1>(object values, IPipe<PublishContext> publishPipe,
-            CancellationToken cancellationToken = new CancellationToken()) where T1 : class
+        Task IPublishEndpoint.Publish<T>(object values, IPipe<PublishContext> publishPipe,
+            CancellationToken cancellationToken)
         {
-            return _context.Publish<T1>(values, publishPipe, cancellationToken);
+            return _context.Publish<T>(values, publishPipe, cancellationToken);
         }
 
-        public ReceiveContext ReceiveContext
+        ReceiveContext ConsumeContext.ReceiveContext
         {
             get { return _context.ReceiveContext; }
         }
 
-        public Task CompleteTask
+        Task ConsumeContext.CompleteTask
         {
             get { return _context.CompleteTask; }
         }
 
-        public IEnumerable<string> SupportedMessageTypes
+        IEnumerable<string> ConsumeContext.SupportedMessageTypes
         {
             get { return _context.SupportedMessageTypes; }
         }
 
-        public bool HasMessageType(Type messageType)
+        bool ConsumeContext.HasMessageType(Type messageType)
         {
             return _context.HasMessageType(messageType);
         }
 
-        public bool TryGetMessage<T1>(out ConsumeContext<T1> consumeContext) where T1 : class
+        bool ConsumeContext.TryGetMessage<T>(out ConsumeContext<T> consumeContext)
         {
             return _context.TryGetMessage(out consumeContext);
         }
 
-        public Task RespondAsync<T1>(T1 message) where T1 : class
+        Task ConsumeContext.RespondAsync<T>(T message)
         {
             return _context.RespondAsync(message);
         }
 
-        public void Respond<T1>(T1 message) where T1 : class
+        void ConsumeContext.Respond<T>(T message)
         {
             _context.Respond(message);
         }
@@ -209,32 +213,32 @@ namespace MassTransit.Context
             _context.RetryLater();
         }
 
-        public Task<ISendEndpoint> GetSendEndpoint(Uri address)
+        Task<ISendEndpoint> ConsumeContext.GetSendEndpoint(Uri address)
         {
             return _context.GetSendEndpoint(address);
         }
 
-        public void NotifyConsumed(TimeSpan elapsed, string messageType, string consumerType)
+        void ConsumeContext.NotifyConsumed(TimeSpan elapsed, string messageType, string consumerType)
         {
             _context.NotifyConsumed(elapsed, messageType, consumerType);
         }
 
-        public void NotifyFaulted<T1>(T1 message, string consumerType, Exception exception) where T1 : class
+        void ConsumeContext.NotifyFaulted<T>(T message, string consumerType, Exception exception)
         {
             _context.NotifyFaulted(message, consumerType, exception);
         }
 
-        public T Message
+        TMessage ConsumeContext<TMessage>.Message
         {
             get { return _context.Message; }
         }
 
-        public void NotifyConsumed(TimeSpan elapsed, string consumerType)
+        void ConsumeContext<TMessage>.NotifyConsumed(TimeSpan elapsed, string consumerType)
         {
             _context.NotifyConsumed(elapsed, consumerType);
         }
 
-        public void NotifyFaulted(string consumerType, Exception exception)
+        void ConsumeContext<TMessage>.NotifyFaulted(string consumerType, Exception exception)
         {
             _context.NotifyFaulted(consumerType, exception);
         }

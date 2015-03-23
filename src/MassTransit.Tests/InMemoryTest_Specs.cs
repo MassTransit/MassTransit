@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests
 {
+    using System;
     using System.Linq;
     using System.Threading.Tasks;
     using EndpointConfigurators;
@@ -52,7 +53,7 @@ namespace MassTransit.Tests
 
         protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
         {
-            _receivedA = Handler<A>(configurator);
+            _receivedA = Handler<A>(configurator, async (context) => Console.WriteLine("Hi"));
         }
     }
 

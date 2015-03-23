@@ -12,31 +12,33 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RabbitMqTransport.Pipeline
 {
+    using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
     using Logging;
     using MassTransit.Pipeline;
+    using RabbitMQ.Client;
 
 
     /// <summary>
     /// Prepares a queue for receiving messages using the ReceiveSettings specified.
     /// </summary>
-    public class PrepareSendExchangeFilter :
+    public class PrepareErrorQueueFilter :
         IFilter<ModelContext>
     {
         readonly ILog _log = Logger.Get<PrepareSendExchangeFilter>();
 
-        readonly SendSettings _settings;
+        readonly ErrorQueueSettings _settings;
 
-        public PrepareSendExchangeFilter(SendSettings settings)
+        public PrepareErrorQueueFilter(ErrorQueueSettings settings)
         {
             _settings = settings;
         }
 
         Task IFilter<ModelContext>.Send(ModelContext context, IPipe<ModelContext> next)
         {
-            if (!context.HasPayloadType(typeof(SendSettings)))
-                DeclareExchange(context);
+            if (!context.HasPayloadType(typeof(ErrorQueueSettings)))
+                DeclareAndBindQueue(context);
 
             return next.Send(context);
         }
@@ -46,11 +48,16 @@ namespace MassTransit.RabbitMqTransport.Pipeline
             return visitor.Visit(this);
         }
 
-        void DeclareExchange(ModelContext context)
+        void DeclareAndBindQueue(ModelContext context)
         {
+            QueueDeclareOk queueOk = context.Model.QueueDeclare(_settings.ExchangeName, _settings.Durable, false,
+                _settings.AutoDelete, new Dictionary<string, object>());
+
+            string queueName = queueOk.QueueName;
+
             if (_log.IsDebugEnabled)
             {
-                _log.DebugFormat("Exchange: {0} ({1})", _settings.ExchangeName,
+                _log.DebugFormat("Queue: {0} ({1})", queueName,
                     string.Join(", ", new[]
                     {
                         _settings.Durable ? "durable" : "",
@@ -58,11 +65,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
                     }.Where(x => !string.IsNullOrWhiteSpace(x))));
             }
 
-            if (!string.IsNullOrWhiteSpace(_settings.ExchangeName))
-            {
-                context.Model.ExchangeDeclare(_settings.ExchangeName, _settings.ExchangeType, _settings.Durable, _settings.AutoDelete,
-                    _settings.ExchangeArguments);
-            }
+            context.Model.QueueBind(queueName, _settings.ExchangeName, "");
 
             context.GetOrAddPayload(() => _settings);
         }

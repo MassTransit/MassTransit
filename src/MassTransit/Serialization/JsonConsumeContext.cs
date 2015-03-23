@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -40,13 +40,14 @@ namespace MassTransit.Serialization
         Guid? _correlationId;
         Uri _destinationAddress;
         Uri _faultAddress;
-        ContextHeaders _headers;
+        Headers _headers;
         Guid? _messageId;
         Guid? _requestId;
         Uri _responseAddress;
         Uri _sourceAddress;
 
-        public JsonConsumeContext(JsonSerializer deserializer, ISendEndpointProvider sendEndpointProvider, IPublishEndpoint publishEndpoint, ReceiveContext receiveContext, MessageEnvelope envelope)
+        public JsonConsumeContext(JsonSerializer deserializer, ISendEndpointProvider sendEndpointProvider, IPublishEndpoint publishEndpoint,
+            ReceiveContext receiveContext, MessageEnvelope envelope)
         {
             _receiveContext = receiveContext;
             _envelope = envelope;
@@ -116,9 +117,9 @@ namespace MassTransit.Serialization
             get { return _faultAddress ?? (_faultAddress = ConvertToUri(_envelope.FaultAddress)); }
         }
 
-        public ContextHeaders Headers
+        public Headers Headers
         {
-            get { return _headers ?? (_headers = new JsonMessageContextHeaders(_deserializer, _envelope.Headers)); }
+            get { return _headers ?? (_headers = new JsonMessageHeaders(_deserializer, _envelope.Headers)); }
         }
 
         public CancellationToken CancellationToken
@@ -203,29 +204,25 @@ namespace MassTransit.Serialization
             {
                 ISendEndpoint endpoint = await GetSendEndpoint(ResponseAddress);
 
-                IPipe<SendContext<T>> sendPipe = Pipe.New<SendContext<T>>(x =>
-                {
-                    x.Filter(new DelegateFilter<SendContext<T>>(v =>
-                    {
-                        v.SourceAddress = ReceiveContext.InputAddress;
-                        v.RequestId = RequestId;
-                    }));
-                });
-
-                await endpoint.Send(message, sendPipe, CancellationToken);
+                await endpoint.Send(message, new ResponsePipe<T>(this), CancellationToken);
             }
             else
             {
-                IPipe<PublishContext<T>> publishPipe = Pipe.New<PublishContext<T>>(x =>
-                {
-                    x.Filter(new DelegateFilter<PublishContext<T>>(v =>
-                    {
-                        v.SourceAddress = ReceiveContext.InputAddress;
-                        v.RequestId = RequestId;
-                    }));
-                });
+                await _publishEndpoint.Publish(message, new ResponsePipe<T>(this), CancellationToken);
+            }
+        }
 
-                await _publishEndpoint.Publish(message, publishPipe, CancellationToken);
+        async Task ConsumeContext.RespondAsync<T>(T message, IPipe<SendContext<T>> sendPipe)
+        {
+            if (ResponseAddress != null)
+            {
+                ISendEndpoint endpoint = await GetSendEndpoint(ResponseAddress);
+
+                await endpoint.Send(message, new ResponsePipe<T>(this, sendPipe), CancellationToken);
+            }
+            else
+            {
+                await _publishEndpoint.Publish(message, new ResponsePipe<T>(this, sendPipe), CancellationToken);
             }
         }
 
@@ -320,15 +317,15 @@ namespace MassTransit.Serialization
         {
             Fault<T> fault = new FaultEvent<T>(message, HostMetadataCache.Host, exception);
 
-            IPipe<SendContext<Fault<T>>> faultPipe = Pipe.New<SendContext<Fault<T>>>(x => x.Execute(v =>
+            IPipe<SendContext<Fault<T>>> faultPipe = Pipe.Execute<SendContext<Fault<T>>>(x =>
             {
-                v.SourceAddress = ReceiveContext.InputAddress;
-                v.CorrelationId = CorrelationId;
-                v.RequestId = RequestId;
+                x.SourceAddress = ReceiveContext.InputAddress;
+                x.CorrelationId = CorrelationId;
+                x.RequestId = RequestId;
 
-                foreach (var header in Headers.Headers)
-                    v.Headers.Set(header.Item1, header.Item2);
-            }));
+                foreach (var header in Headers.GetAll())
+                    x.Headers.Set(header.Item1, header.Item2);
+            });
 
             if (ResponseAddress != null)
             {

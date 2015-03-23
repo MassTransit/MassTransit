@@ -27,24 +27,21 @@ namespace Automatonymous.Activities
         where TMessage : class
     {
         readonly Func<ConsumeEventContext<TInstance, TData>, TMessage> _messageFactory;
-        readonly IPipe<SendContext<TMessage>> _publishPipe;
+        readonly IPipe<SendContext<TMessage>> _sendPipe;
 
         public RespondActivity(Func<ConsumeEventContext<TInstance, TData>, TMessage> messageFactory,
             Action<SendContext<TMessage>> contextCallback)
         {
             _messageFactory = messageFactory;
 
-            _publishPipe = Pipe.New<SendContext<TMessage>>(x =>
-            {
-                x.Execute(contextCallback);
-            });
+            _sendPipe = Pipe.Execute(contextCallback);
         }
 
         public RespondActivity(Func<ConsumeEventContext<TInstance, TData>, TMessage> messageFactory)
         {
             _messageFactory = messageFactory;
 
-            _publishPipe = Pipe.Empty<SendContext<TMessage>>();
+            _sendPipe = Pipe.Empty<SendContext<TMessage>>();
         }
 
         void Visitable.Accept(StateMachineVisitor inspector)

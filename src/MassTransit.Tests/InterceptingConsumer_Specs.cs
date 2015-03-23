@@ -43,8 +43,7 @@ namespace MassTransit.Tests
         [TestFixtureSetUp]
         public void Setup()
         {
-            InputQueueSendEndpoint.Send(new A())
-                .Wait(TestCancellationToken);
+            Await(() => InputQueueSendEndpoint.Send(new A()));
         }
 
         MyConsumer _myConsumer;

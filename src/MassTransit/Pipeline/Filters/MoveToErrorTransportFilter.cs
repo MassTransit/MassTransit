@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,8 +12,10 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Pipeline.Filters
 {
+    using System;
     using System.Threading.Tasks;
     using Transports;
+
 
     /// <summary>
     /// Moves a message received to an error transport without any deserialization
@@ -21,16 +23,16 @@ namespace MassTransit.Pipeline.Filters
     public class MoveToErrorTransportFilter :
         IFilter<ReceiveContext>
     {
-        readonly Task<ISendTransport> _errorTransport;
+        readonly Func<Task<ISendTransport>> _getErrorTransport;
 
-        public MoveToErrorTransportFilter(Task<ISendTransport> errorTransport)
+        public MoveToErrorTransportFilter(Func<Task<ISendTransport>> getErrorTransport)
         {
-            _errorTransport = errorTransport;
+            _getErrorTransport = getErrorTransport;
         }
 
         async Task IFilter<ReceiveContext>.Send(ReceiveContext context, IPipe<ReceiveContext> next)
         {
-            ISendTransport transport = await _errorTransport;
+            ISendTransport transport = await _getErrorTransport();
 
             await transport.Move(context);
 

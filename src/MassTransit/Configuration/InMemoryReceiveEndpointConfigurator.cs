@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -33,10 +33,10 @@ namespace MassTransit
         IInMemoryServiceBusFactorySpecification
     {
         readonly IList<IReceiveEndpointSpecification> _configurators;
+        readonly ILog _log = Logger.Get<InMemoryReceiveEndpointConfigurator>();
         readonly IBuildPipeConfigurator<ConsumeContext> _pipeConfigurator;
         readonly string _queueName;
         readonly IBuildPipeConfigurator<ReceiveContext> _receivePipeConfigurator;
-        readonly ILog _log = Logger.Get<InMemoryReceiveEndpointConfigurator>();
 
         public InMemoryReceiveEndpointConfigurator(string queueName)
         {
@@ -87,7 +87,7 @@ namespace MassTransit
 
         IPipe<ReceiveContext> CreateReceivePipe(IInMemoryBusBuilder builder, ConsumePipe consumePipe)
         {
-            IReceiveEndpointBuilder endpointBuilder = new ReceiveEndpointBuilder(consumePipe);
+            IReceiveEndpointBuilder endpointBuilder = new InMemoryReceiveEndpointBuilder(consumePipe);
 
             foreach (IReceiveEndpointSpecification builderConfigurator in _configurators)
                 builderConfigurator.Configure(endpointBuilder);
@@ -96,10 +96,10 @@ namespace MassTransit
             // TODO insert dead-letter filter so that no message consumers moves to "_skipped"
 
             var errorAddress = new Uri(string.Format("loopback://localhost/{0}_error", _queueName));
-            ISendTransport errorTransport = builder.SendTransportProvider.GetSendTransport(errorAddress);
+            ISendTransportProvider sendTransportProvider = builder.SendTransportProvider;
 
-            IPipe<ReceiveContext> moveToErrorPipe =
-                Pipe.New<ReceiveContext>(x => x.Filter(new MoveToErrorTransportFilter(Task.FromResult(errorTransport))));
+            IPipe<ReceiveContext> moveToErrorPipe = Pipe.New<ReceiveContext>(
+                x => x.Filter(new MoveToErrorTransportFilter(() => Task.FromResult(sendTransportProvider.GetSendTransport(errorAddress)))));
 
             _receivePipeConfigurator.Rescue(moveToErrorPipe, typeof(SerializationException));
 

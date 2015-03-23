@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -44,7 +44,7 @@ namespace MassTransit.Serialization
         Guid? _correlationId;
         Uri _destinationAddress;
         Uri _faultAddress;
-        ContextHeaders _headers;
+        Headers _headers;
         Guid? _messageId;
         Guid? _requestId;
         Uri _responseAddress;
@@ -95,10 +95,7 @@ namespace MassTransit.Serialization
 
         public Guid? CorrelationId
         {
-            get
-            {
-                return _correlationId.HasValue ? _correlationId : (_correlationId = GetHeaderGuid(BinaryMessageSerializer.CorrelationIdKey));
-            }
+            get { return _correlationId.HasValue ? _correlationId : (_correlationId = GetHeaderGuid(BinaryMessageSerializer.CorrelationIdKey)); }
         }
 
         public DateTime? ExpirationTime
@@ -126,9 +123,9 @@ namespace MassTransit.Serialization
             get { return _faultAddress ?? (_faultAddress = GetHeaderUri(BinaryMessageSerializer.FaultAddressKey)); }
         }
 
-        public ContextHeaders Headers
+        public Headers Headers
         {
-            get { return _headers ?? (_headers = new StaticContextHeaders(_deserializer, _binaryHeaders)); }
+            get { return _headers ?? (_headers = new StaticHeaders(_deserializer, _binaryHeaders)); }
         }
 
         public CancellationToken CancellationToken
@@ -203,29 +200,25 @@ namespace MassTransit.Serialization
             {
                 ISendEndpoint endpoint = await GetSendEndpoint(ResponseAddress);
 
-                IPipe<SendContext<T>> sendPipe = Pipe.New<SendContext<T>>(x =>
-                {
-                    x.Filter(new DelegateFilter<SendContext<T>>(v =>
-                    {
-                        v.SourceAddress = ReceiveContext.InputAddress;
-                        v.RequestId = RequestId;
-                    }));
-                });
-
-                await endpoint.Send(message, sendPipe, CancellationToken);
+                await endpoint.Send(message, new ResponsePipe<T>(this), CancellationToken);
             }
             else
             {
-                IPipe<PublishContext<T>> publishPipe = Pipe.New<PublishContext<T>>(x =>
-                {
-                    x.Filter(new DelegateFilter<PublishContext<T>>(v =>
-                    {
-                        v.SourceAddress = ReceiveContext.InputAddress;
-                        v.RequestId = RequestId;
-                    }));
-                });
+                await _publishEndpoint.Publish(message, new ResponsePipe<T>(this), CancellationToken);
+            }
+        }
 
-                await _publishEndpoint.Publish(message, publishPipe, CancellationToken);
+        async Task ConsumeContext.RespondAsync<T>(T message, IPipe<SendContext<T>> sendPipe)
+        {
+            if (ResponseAddress != null)
+            {
+                ISendEndpoint endpoint = await GetSendEndpoint(ResponseAddress);
+
+                await endpoint.Send(message, new ResponsePipe<T>(this, sendPipe), CancellationToken);
+            }
+            else
+            {
+                await _publishEndpoint.Publish(message, new ResponsePipe<T>(this, sendPipe), CancellationToken);
             }
         }
 
@@ -326,7 +319,7 @@ namespace MassTransit.Serialization
                 v.CorrelationId = CorrelationId;
                 v.RequestId = RequestId;
 
-                foreach (var header in Headers.Headers)
+                foreach (var header in Headers.GetAll())
                     v.Headers.Set(header.Item1, header.Item2);
             }));
 

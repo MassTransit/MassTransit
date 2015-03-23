@@ -10,24 +10,18 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit
+namespace MassTransit.Context
 {
     using System;
     using System.Collections.Generic;
 
 
-    public interface ContextHeaders
+    /// <summary>
+    /// Used to read a header from a transport message
+    /// </summary>
+    public interface IHeaderProvider
     {
-        /// <summary>
-        /// Enumerate all available headers
-        /// </summary>
-        IEnumerable<Tuple<string, object>> Headers { get; }
-
-        T Get<T>(string key, T defaultValue = default(T))
-            where T : class;
-
-        T? Get<T>(string key, T? defaultValue = default(T?))
-            where T : struct;
+        IEnumerable<Tuple<string, object>> GetAll();
 
         bool TryGetHeader(string key, out object value);
     }

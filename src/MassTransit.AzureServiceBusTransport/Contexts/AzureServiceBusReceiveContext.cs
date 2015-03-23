@@ -36,9 +36,9 @@ namespace MassTransit.AzureServiceBusTransport.Contexts
             ((ReceiveContext)this).GetOrAddPayload<BrokeredMessageContext>(() => this);
         }
 
-        protected override IContextHeaderProvider HeaderProvider
+        protected override IHeaderProvider HeaderProvider
         {
-            get { return new DictionaryContextHeaderProvider(_message.Properties); }
+            get { return new DictionaryHeaderProvider(_message.Properties); }
         }
 
         public IDictionary<string, object> Properties

@@ -15,6 +15,7 @@ namespace MassTransit
     using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
+    using Pipeline;
 
 
     public interface ConsumeContext :
@@ -60,6 +61,17 @@ namespace MassTransit
         /// <typeparam name="T">The type of the message to respond with.</typeparam>
         /// <param name="message">The message to send in response</param>
         Task RespondAsync<T>(T message)
+            where T : class;
+
+        /// <summary>
+        /// Responds to the current message immediately, returning the Task for the
+        /// sending message. The caller may choose to await the response to ensure it was sent, or 
+        /// allow the framework to wait for it (which will happen automatically before the message is acked)
+        /// </summary>
+        /// <typeparam name="T">The type of the message to respond with.</typeparam>
+        /// <param name="message">The message to send in response</param>
+        /// <param name="sendPipe">The pipe used to customize the response send context</param>
+        Task RespondAsync<T>(T message, IPipe<SendContext<T>> sendPipe)
             where T : class;
 
         /// <summary>

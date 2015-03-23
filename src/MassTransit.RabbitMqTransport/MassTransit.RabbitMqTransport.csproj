@@ -70,13 +70,14 @@
     <Compile Include="Configuration\RabbitMqHostSettingsEqualityComparer.cs" />
     <Compile Include="Contexts\RabbitMqSendContextHeaders.cs" />
     <Compile Include="Contexts\RabbitMqConnectionContext.cs" />
-    <Compile Include="Contexts\RabbitMqContextHeaderProvider.cs" />
+    <Compile Include="Contexts\RabbitMqHeaderProvider.cs" />
     <Compile Include="Contexts\RabbitMqModelContext.cs" />
     <Compile Include="Contexts\RabbitMqReceiveContext.cs" />
     <Compile Include="Contexts\RabbitMqSendContextImpl.cs" />
     <Compile Include="Contexts\SharedConnectionContext.cs" />
     <Compile Include="Contexts\SharedModelContext.cs" />
     <Compile Include="EndpointAddressBuilder.cs" />
+    <Compile Include="ErrorQueueSettings.cs" />
     <Compile Include="Exceptions\MessageNotConfirmedException.cs" />
     <Compile Include="Exceptions\PublishNegativeAckException.cs" />
     <Compile Include="Exceptions\RabbitMqAddressException.cs" />
@@ -91,6 +92,7 @@
     <Compile Include="Integration\RabbitMqModelCache.cs" />
     <Compile Include="Pipeline\ExchangeSettings.cs" />
     <Compile Include="Pipeline\IRabbitMqConnector.cs" />
+    <Compile Include="Pipeline\PrepareErrorQueueFilter.cs" />
     <Compile Include="Pipeline\RabbitMqConsumerFilter.cs" />
     <Compile Include="Pipeline\PrepareSendExchangeFilter.cs" />
     <Compile Include="Pipeline\RabbitMqBasicConsumer.cs" />

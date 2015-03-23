@@ -29,7 +29,7 @@ namespace MassTransit.Transports
 
         readonly CancellationTokenSource _cancellationTokenSource;
         readonly Lazy<ContentType> _contentType;
-        readonly Lazy<ContextHeaders> _headers;
+        readonly Lazy<Headers> _headers;
         readonly Uri _inputAddress;
         readonly PayloadCache _payloadCache;
         readonly Stopwatch _receiveTimer;
@@ -46,12 +46,12 @@ namespace MassTransit.Transports
 
             _cancellationTokenSource = new CancellationTokenSource();
 
-            _headers = new Lazy<ContextHeaders>(() => new JsonContextHeaders(HeaderProvider));
+            _headers = new Lazy<Headers>(() => new JsonHeaders(HeaderProvider));
 
             _contentType = new Lazy<ContentType>(GetContentType);
         }
 
-        protected abstract IContextHeaderProvider HeaderProvider { get; }
+        protected abstract IHeaderProvider HeaderProvider { get; }
 
         bool PipeContext.HasPayloadType(Type contextType)
         {
@@ -78,7 +78,7 @@ namespace MassTransit.Transports
             get { return _redelivered; }
         }
 
-        ContextHeaders ReceiveContext.TransportHeaders
+        Headers ReceiveContext.TransportHeaders
         {
             get { return _headers.Value; }
         }

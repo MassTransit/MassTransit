@@ -30,9 +30,9 @@ namespace MassTransit.Transports.InMemory
             _message = message;
         }
 
-        protected override IContextHeaderProvider HeaderProvider
+        protected override IHeaderProvider HeaderProvider
         {
-            get { return new DictionaryContextHeaderProvider(_message.Headers); }
+            get { return new DictionaryHeaderProvider(_message.Headers); }
         }
 
         protected override Stream GetBodyStream()

@@ -15,12 +15,12 @@ namespace MassTransit.EndpointConfigurators
     using Pipeline;
 
 
-    public class ReceiveEndpointBuilder :
+    public class InMemoryReceiveEndpointBuilder :
         IReceiveEndpointBuilder
     {
         readonly IConsumePipe _consumePipe;
 
-        public ReceiveEndpointBuilder(IConsumePipe consumePipe)
+        public InMemoryReceiveEndpointBuilder(IConsumePipe consumePipe)
         {
             _consumePipe = consumePipe;
         }
