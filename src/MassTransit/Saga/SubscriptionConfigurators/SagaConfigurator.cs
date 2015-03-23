@@ -35,7 +35,7 @@ namespace MassTransit.Saga.SubscriptionConfigurators
 
         public void Configure(IReceiveEndpointBuilder builder)
         {
-            SagaConnectorCache<TSaga>.Connector.Connect(builder.InputPipe, _sagaRepository, _retryPolicy ?? Retry.None);
+            SagaConnectorCache<TSaga>.Connector.Connect(builder, _sagaRepository, _retryPolicy ?? Retry.None);
         }
 
         public IEnumerable<ValidationResult> Validate()

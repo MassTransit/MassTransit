@@ -13,10 +13,10 @@
 namespace MassTransit.Pipeline
 {
     using System;
+    using ConsumeConnectors;
     using Filters;
     using PipeConfigurators;
     using Policies;
-    using SubscriptionConnectors;
 
 
     public static class ConsumePipeExtensions

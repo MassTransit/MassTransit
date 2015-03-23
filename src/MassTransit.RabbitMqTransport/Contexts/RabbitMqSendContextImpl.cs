@@ -42,7 +42,7 @@ namespace MassTransit.RabbitMqTransport.Contexts
             _payloadCache.GetOrAddPayload<RabbitMqSendContext<T>>(() => this);
             _payloadCache.GetOrAddPayload<RabbitMqSendContext>(() => this);
 
-            Headers = new RabbitMqSendContextHeaders(basicProperties);
+            Headers = new RabbitMqSendHeaders(basicProperties);
             BasicProperties = basicProperties;
             Message = message;
             Exchange = sendSettings.ExchangeName;
@@ -59,7 +59,7 @@ namespace MassTransit.RabbitMqTransport.Contexts
         public Guid? RequestId { get; set; }
         public Guid? CorrelationId { get; set; }
 
-        public SendContextHeaders Headers { get; set; }
+        public SendHeaders Headers { get; set; }
 
         public Uri SourceAddress { get; set; }
         public Uri DestinationAddress { get; set; }

@@ -16,10 +16,10 @@ namespace MassTransit
     using System.Collections.Generic;
     using System.Linq;
     using Castle.Windsor;
+    using ConsumeConfigurators;
     using Internals.Extensions;
     using Saga;
     using Saga.SubscriptionConfigurators;
-    using SubscriptionConfigurators;
     using WindsorIntegration;
 
 

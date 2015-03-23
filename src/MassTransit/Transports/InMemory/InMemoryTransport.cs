@@ -65,19 +65,9 @@ namespace MassTransit.Transports.InMemory
         {
             var stopTokenSource = new CancellationTokenSource();
 
-            SynchronizationContext previousContext = SynchronizationContext.Current;
-            SynchronizationContext.SetSynchronizationContext(null);
+            Task receiveTask = StartReceiveTask(receivePipe, stopTokenSource);
 
-            try
-            {
-                Task receiveTask = StartReceiveTask(receivePipe, stopTokenSource);
-
-                return new Handle(receiveTask, stopTokenSource);
-            }
-            finally
-            {
-                SynchronizationContext.SetSynchronizationContext(previousContext);
-            }
+            return new Handle(receiveTask, stopTokenSource);
         }
 
         async Task ISendTransport.Send<T>(T message, IPipe<SendContext<T>> pipe, CancellationToken cancelSend)
@@ -97,7 +87,7 @@ namespace MassTransit.Transports.InMemory
 
                 _collection.Add(transportMessage, cancelSend);
 
-                _log.DebugFormat("SEND: {0} {1} {2}", _inputAddress, transportMessage.MessageId, TypeMetadataCache<T>.ShortName);
+                _log.DebugFormat("SENT: {0} {1} {2}", _inputAddress, transportMessage.MessageId, TypeMetadataCache<T>.ShortName);
 
                 await _observers.ForEach(x => x.PostSend(context));
             }
@@ -152,12 +142,12 @@ namespace MassTransit.Transports.InMemory
                             {
                                 await receivePipe.Send(context);
 
-                                _log.DebugFormat("RECV: {0} {1}", _inputAddress, message.MessageId);
+                                _log.DebugFormat("RCVD: {0} {1}", _inputAddress, message.MessageId);
                             }
                             catch (Exception ex)
                             {
                                 message.DeliveryCount++;
-                                _log.Error(string.Format("Receive Fault: {0}", message.MessageId), ex);
+                                _log.Error(string.Format("RCV FAULT: {0}", message.MessageId), ex);
 
                                 _collection.Add(message, stopTokenSource.Token);
                             }

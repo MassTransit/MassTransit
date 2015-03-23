@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,15 +12,29 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
+    using System;
     using Builders;
 
 
     public interface IInMemoryBusFactoryConfigurator :
         IBusFactoryConfigurator
     {
+        /// <summary>
+        /// Sets the transport provider for the InMemory bus, used to share a transport cache between multiple
+        /// bus instances.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="transportProvider"></param>
         void SetTransportProvider<T>(T transportProvider)
             where T : ISendTransportProvider, IReceiveTransportProvider;
 
-        void AddBusFactorySpecification(IInMemoryServiceBusFactorySpecification configurator);
+        void AddBusFactorySpecification(IInMemoryBusFactorySpecification configurator);
+
+        /// <summary>
+        /// Specify a receive endpoint for the bus, with the specified queue name
+        /// </summary>
+        /// <param name="queueName">The queue name for the receiving endpoint</param>
+        /// <param name="configure">The configuration callback</param>
+        void ReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configure);
     }
 }

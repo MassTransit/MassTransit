@@ -13,8 +13,8 @@
 namespace MassTransit.Courier
 {
     using System;
+    using ConsumeConfigurators;
     using Hosts;
-    using SubscriptionConfigurators;
 
 
     public static class HostSubscriptionExtensions

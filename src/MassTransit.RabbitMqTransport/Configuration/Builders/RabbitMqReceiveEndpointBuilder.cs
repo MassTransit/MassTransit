@@ -13,7 +13,6 @@
 namespace MassTransit.RabbitMqTransport.Configuration.Builders
 {
     using System.Collections.Generic;
-    using EndpointConfigurators;
     using MassTransit.Pipeline;
     using Pipeline;
     using Transports;
@@ -43,11 +42,6 @@ namespace MassTransit.RabbitMqTransport.Configuration.Builders
         ConnectHandle IConsumeMessageObserverConnector.ConnectConsumeMessageObserver<T>(IConsumeMessageObserver<T> observer)
         {
             return _consumePipe.ConnectConsumeMessageObserver(observer);
-        }
-
-        IConsumePipe IReceiveEndpointBuilder.InputPipe
-        {
-            get { return _consumePipe; }
         }
 
         public IEnumerable<ExchangeBindingSettings> GetExchangeBindings()

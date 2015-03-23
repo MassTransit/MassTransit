@@ -43,7 +43,7 @@ namespace Automatonymous
             var stateMachineConfigurator = new StateMachineSagaConfigurator<TInstance>(stateMachine,
                 repository);
 
-            configurator.AddConfigurator(stateMachineConfigurator);
+            configurator.AddEndpointSpecification(stateMachineConfigurator);
 
             return stateMachineConfigurator;
         }

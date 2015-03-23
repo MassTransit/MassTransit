@@ -58,14 +58,14 @@
     <Compile Include="..\SolutionVersion.cs">
       <Link>Properties\SolutionVersion.cs</Link>
     </Compile>
-    <Compile Include="AzureServiceBus.cs" />
+    <Compile Include="AzureBusFactory.cs" />
     <Compile Include="AzureServiceBusAddressExtensions.cs" />
+    <Compile Include="AzureServiceBusPublishEndpoint.cs" />
     <Compile Include="AzureServiceBusSendContext.cs" />
     <Compile Include="ServiceBusSendEndpointProvider.cs" />
     <Compile Include="AzureServiceBusSendTransport.cs" />
     <Compile Include="BrokeredMessageContext.cs" />
     <Compile Include="Configuration\AzureServiceBusHostConfigurator.cs" />
-    <Compile Include="Configuration\AzureServiceBusPublishEndpoint.cs" />
     <Compile Include="Configuration\AzureServiceBusBusBuilder.cs" />
     <Compile Include="Configuration\AzureServiceBusBusFactoryConfigurator.cs" />
     <Compile Include="Configuration\IServiceBusBusFactoryConfigurator.cs" />
@@ -77,7 +77,7 @@
     <Compile Include="Configuration\SharedAccessSignatureTokenProviderConfigurator.cs" />
     <Compile Include="Configuration\TopicSubscriptionSettings.cs" />
     <Compile Include="Contexts\AzureServiceBusReceiveContext.cs" />
-    <Compile Include="Contexts\AzureServiceBusSendContextHeaders.cs" />
+    <Compile Include="Contexts\AzureServiceBusSendHeaders.cs" />
     <Compile Include="Contexts\AzureServiceBusSendContextImpl.cs" />
     <Compile Include="Contexts\ConnectionContext.cs" />
     <Compile Include="Contexts\ServiceBusConnectionContext.cs" />

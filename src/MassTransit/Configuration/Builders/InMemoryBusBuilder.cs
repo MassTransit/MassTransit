@@ -59,6 +59,11 @@ namespace MassTransit.Builders
             get { return _receiveTransportProvider; }
         }
 
+        protected override Uri GetInputAddress()
+        {
+            return _inputAddress;
+        }
+
         protected override ISendEndpointProvider CreateSendEndpointProvider()
         {
             var provider = new InMemorySendEndpointProvider(_inputAddress, _sendTransportProvider, MessageSerializer);
@@ -73,12 +78,18 @@ namespace MassTransit.Builders
 
         public IBusControl Build()
         {
+            IConsumePipe busConsumePipe = CreateBusReceiveEndpoint();
+
+            return new MassTransitBus(_inputAddress, busConsumePipe, SendEndpointProvider, PublishEndpoint, ReceiveEndpoints, _hosts);
+        }
+
+        IConsumePipe CreateBusReceiveEndpoint()
+        {
             IConsumePipe busConsumePipe = CreateConsumePipe(Enumerable.Empty<IPipeSpecification<ConsumeContext>>());
 
             var busEndpointConfigurator = new InMemoryReceiveEndpointConfigurator(_busQueueName, busConsumePipe);
             busEndpointConfigurator.Apply(this);
-
-            return new MassTransitBus(_inputAddress, busConsumePipe, SendEndpointProvider, PublishEndpoint, ReceiveEndpoints, _hosts);
+            return busConsumePipe;
         }
 
         static string GenerateBusQueueName()

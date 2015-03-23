@@ -20,32 +20,34 @@ namespace MassTransit.Builders
     using Pipeline;
     using Pipeline.Pipes;
     using Serialization;
-    using Transports;
 
 
     public abstract class BusBuilder
     {
         readonly Lazy<IMessageDeserializer> _deserializer;
-        readonly IDictionary<string, Func<ISendEndpointProvider, IPublishEndpoint, IMessageDeserializer>> _deserializerFactories;
+        readonly IDictionary<string, DeserializerFactory> _deserializerFactories;
         readonly IList<IPipeSpecification<ConsumeContext>> _endpointPipeSpecifications;
-        readonly IList<IReceiveEndpoint> _endpoints;
+        readonly Lazy<Uri> _inputAddress;
         readonly Lazy<IPublishEndpoint> _publishEndpointProvider;
+        readonly IList<IReceiveEndpoint> _receiveEndpoints;
         readonly Lazy<ISendEndpointProvider> _sendEndpointProvider;
         readonly Lazy<IMessageSerializer> _serializer;
         Func<IMessageSerializer> _serializerFactory;
 
         protected BusBuilder(IEnumerable<IPipeSpecification<ConsumeContext>> endpointPipeSpecifications)
         {
-            _endpoints = new List<IReceiveEndpoint>();
-            _deserializer = new Lazy<IMessageDeserializer>(CreateDeserializer);
-            _serializer = new Lazy<IMessageSerializer>(CreateSerializer);
-            _sendEndpointProvider = new Lazy<ISendEndpointProvider>(CreateSendEndpointProvider);
-            _publishEndpointProvider = new Lazy<IPublishEndpoint>(CreatePublishEndpoint);
-            _deserializerFactories =
-                new Dictionary<string, Func<ISendEndpointProvider, IPublishEndpoint, IMessageDeserializer>>(StringComparer.OrdinalIgnoreCase);
+            _deserializerFactories = new Dictionary<string, DeserializerFactory>(StringComparer.OrdinalIgnoreCase);
+            _receiveEndpoints = new List<IReceiveEndpoint>();
+            _serializerFactory = () => new JsonMessageSerializer();
 
             _endpointPipeSpecifications = endpointPipeSpecifications.ToList();
-            _serializerFactory = () => new JsonMessageSerializer();
+
+            _serializer = new Lazy<IMessageSerializer>(CreateSerializer);
+            _deserializer = new Lazy<IMessageDeserializer>(CreateDeserializer);
+            _sendEndpointProvider = new Lazy<ISendEndpointProvider>(CreateSendEndpointProvider);
+            _publishEndpointProvider = new Lazy<IPublishEndpoint>(CreatePublishEndpoint);
+
+            _inputAddress = new Lazy<Uri>(GetInputAddress);
 
             AddMessageDeserializer(JsonMessageSerializer.JsonContentType,
                 (s, p) => new JsonMessageDeserializer(JsonMessageSerializer.Deserializer, s, p));
@@ -57,7 +59,7 @@ namespace MassTransit.Builders
 
         protected IEnumerable<IReceiveEndpoint> ReceiveEndpoints
         {
-            get { return _endpoints; }
+            get { return _receiveEndpoints; }
         }
 
         public IMessageSerializer MessageSerializer
@@ -80,8 +82,14 @@ namespace MassTransit.Builders
             get { return _publishEndpointProvider.Value; }
         }
 
-        public void AddMessageDeserializer(ContentType contentType,
-            Func<ISendEndpointProvider, IPublishEndpoint, IMessageDeserializer> deserializerFactory)
+        protected Uri InputAddress
+        {
+            get { return _inputAddress.Value; }
+        }
+
+        protected abstract Uri GetInputAddress();
+
+        public void AddMessageDeserializer(ContentType contentType, DeserializerFactory deserializerFactory)
         {
             if (contentType == null)
                 throw new ArgumentNullException("contentType");
@@ -128,7 +136,7 @@ namespace MassTransit.Builders
 
         public void AddReceiveEndpoint(IReceiveEndpoint receiveEndpoint)
         {
-            _endpoints.Add(receiveEndpoint);
+            _receiveEndpoints.Add(receiveEndpoint);
         }
 
         protected abstract ISendEndpointProvider CreateSendEndpointProvider();

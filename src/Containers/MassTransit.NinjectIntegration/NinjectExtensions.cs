@@ -15,12 +15,12 @@ namespace MassTransit
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using ConsumeConfigurators;
     using Internals.Extensions;
     using Ninject;
     using NinjectIntegration;
     using Saga;
     using Saga.SubscriptionConfigurators;
-    using SubscriptionConfigurators;
 
 
     /// <summary>

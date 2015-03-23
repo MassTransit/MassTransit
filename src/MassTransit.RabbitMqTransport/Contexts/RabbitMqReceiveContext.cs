@@ -20,7 +20,7 @@ namespace MassTransit.RabbitMqTransport.Contexts
 
 
     public class RabbitMqReceiveContext :
-        ReceiveContextBase,
+        BaseReceiveContext,
         RabbitMqBasicConsumeContext
     {
         readonly byte[] _body;

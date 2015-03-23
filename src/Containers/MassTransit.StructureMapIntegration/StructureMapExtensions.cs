@@ -15,12 +15,12 @@ namespace MassTransit
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using ConsumeConfigurators;
     using Internals.Extensions;
     using Saga;
     using Saga.SubscriptionConfigurators;
     using StructureMap;
     using StructureMapIntegration;
-    using SubscriptionConfigurators;
 
 
     public static class StructureMapExtensions

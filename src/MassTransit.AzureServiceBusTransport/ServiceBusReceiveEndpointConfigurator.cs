@@ -18,13 +18,10 @@ namespace MassTransit.AzureServiceBusTransport
     using Builders;
     using Configuration;
     using Configurators;
-    using EndpointConfigurators;
     using MassTransit.Pipeline;
     using MassTransit.Pipeline.Filters;
-    using MassTransit.Pipeline.Pipes;
     using Microsoft.ServiceBus.Messaging;
     using PipeConfigurators;
-    using Policies;
     using Transports;
 
 
@@ -33,15 +30,16 @@ namespace MassTransit.AzureServiceBusTransport
         IBusFactorySpecification
     {
         readonly IList<IReceiveEndpointSpecification> _configurators;
+        readonly IList<IPipeSpecification<ConsumeContext>> _consumePipeSpecifications;
         readonly IServiceBusHost _host;
         readonly QueueDescription _queueDescription;
         readonly IBuildPipeConfigurator<ReceiveContext> _receivePipeConfigurator;
-        readonly IList<IPipeSpecification<ConsumeContext>> _consumePipeSpecifications;
-        int _prefetchCount;
+        IConsumePipe _consumePipe;
         int _maxConcurrentCalls;
+        int _prefetchCount;
 
-        public ServiceBusReceiveEndpointConfigurator(IServiceBusHost host, string queueName)
-            : this(host, new QueueDescription(queueName))
+        public ServiceBusReceiveEndpointConfigurator(IServiceBusHost host, string queueName, IConsumePipe consumePipe = null)
+            : this(host, new QueueDescription(queueName), consumePipe)
         {
             _queueDescription.EnableBatchedOperations = true;
             _queueDescription.MaxDeliveryCount = 5;
@@ -51,7 +49,7 @@ namespace MassTransit.AzureServiceBusTransport
             EnableDeadLetteringOnMessageExpiration = true;
         }
 
-        public ServiceBusReceiveEndpointConfigurator(IServiceBusHost host, QueueDescription queueDescription)
+        public ServiceBusReceiveEndpointConfigurator(IServiceBusHost host, QueueDescription queueDescription, IConsumePipe consumePipe = null)
         {
             _consumePipeSpecifications = new List<IPipeSpecification<ConsumeContext>>();
             _receivePipeConfigurator = new PipeConfigurator<ReceiveContext>();
@@ -59,8 +57,14 @@ namespace MassTransit.AzureServiceBusTransport
 
             _host = host;
             _queueDescription = queueDescription;
+            _consumePipe = consumePipe;
             _maxConcurrentCalls = Math.Max(Environment.ProcessorCount, 8);
             _prefetchCount = Math.Max(_maxConcurrentCalls, 32);
+        }
+
+        public Uri InputAddress
+        {
+            get { return _host.Settings.GetInputAddress(_queueDescription); }
         }
 
         public bool DuplicateDetection
@@ -79,9 +83,9 @@ namespace MassTransit.AzureServiceBusTransport
                 yield return this.Failure("PrefetchCount", "must be > 0");
         }
 
-        public void Configure(IBusBuilder builder)
+        public void Apply(IBusBuilder builder)
         {
-            builder.AddReceiveEndpoint(CreateReceiveEndpoint(builder.MessageDeserializer));
+            builder.AddReceiveEndpoint(CreateReceiveEndpoint(builder));
         }
 
         public void AddPipeSpecification(IPipeSpecification<ConsumeContext> specification)
@@ -89,7 +93,7 @@ namespace MassTransit.AzureServiceBusTransport
             _consumePipeSpecifications.Add(specification);
         }
 
-        public void AddConfigurator(IReceiveEndpointSpecification configurator)
+        public void AddEndpointSpecification(IReceiveEndpointSpecification configurator)
         {
             _configurators.Add(configurator);
         }
@@ -145,10 +149,8 @@ namespace MassTransit.AzureServiceBusTransport
             set { _queueDescription.AutoDeleteOnIdle = value; }
         }
 
-        ReceiveEndpoint CreateReceiveEndpoint(IMessageDeserializer deserializer)
+        ReceiveEndpoint CreateReceiveEndpoint(IBusBuilder builder)
         {
-            IRetryPolicy retryPolicy = Retry.Exponential(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(60), TimeSpan.FromSeconds(2));
-
             ReceiveSettings settings = new ReceiveEndpointSettings
             {
                 AutoRenewTimeout = TimeSpan.FromMinutes(5),
@@ -157,21 +159,33 @@ namespace MassTransit.AzureServiceBusTransport
                 QueueDescription = _queueDescription,
             };
 
+            IConsumePipe consumePipe = _consumePipe ?? builder.CreateConsumePipe(_consumePipeSpecifications);
 
-            var inboundPipe = new ConsumePipe(_consumePipeSpecifications);
-
-            var builder = new ServiceBusReceiveEndpointBuilder(inboundPipe, _host.MessageNameFormatter);
+            var endpointBuilder = new ServiceBusReceiveEndpointBuilder(consumePipe, _host.MessageNameFormatter);
 
             foreach (IReceiveEndpointSpecification builderConfigurator in _configurators)
-                builderConfigurator.Configure(builder);
+                builderConfigurator.Configure(endpointBuilder);
 
-            _receivePipeConfigurator.Filter(new DeserializeFilter(deserializer, inboundPipe));
+//            string errorQueueName = _queueDescription.Path + "_error";
+//            var sendSettings = new RabbitMqSendSettings(errorQueueName, RabbitMQ.Client.ExchangeType.Fanout, true,
+//                false);
+//
+//            var sendTransport = new AzureServiceBusSendTransport();
+//
+//            sendTransport.AddModelFilter(new PrepareErrorQueueFilter(errorSettings));
+
+//            IPipe<ReceiveContext> moveToErrorPipe = Pipe.New<ReceiveContext>(
+//                x => x.Filter(new MoveToErrorTransportFilter(() => Task.FromResult<ISendTransport>(sendTransport))));
+//
+//            _receivePipeConfigurator.Rescue(moveToErrorPipe, typeof(SerializationException));
+
+            _receivePipeConfigurator.Filter(new DeserializeFilter(builder.MessageDeserializer, consumePipe));
 
             IPipe<ReceiveContext> receivePipe = _receivePipeConfigurator.Build();
 
-            var transport = new AzureServiceBusReceiveTransport(_host, settings, retryPolicy, builder.GetTopicSubscriptions().ToArray());
+            var transport = new AzureServiceBusReceiveTransport(_host, settings, endpointBuilder.GetTopicSubscriptions().ToArray());
 
-            return new ReceiveEndpoint(transport, receivePipe, inboundPipe);
+            return new ReceiveEndpoint(transport, receivePipe, consumePipe);
         }
 
 

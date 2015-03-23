@@ -18,7 +18,7 @@ namespace MassTransit.Transports.InMemory
 
 
     public class InMemoryReceiveContext :
-        ReceiveContextBase
+        BaseReceiveContext
     {
         readonly byte[] _body;
         readonly InMemoryTransportMessage _message;

@@ -19,9 +19,8 @@ namespace MassTransit
     /// Configure a receiving endpoint
     /// </summary>
     public interface IReceiveEndpointConfigurator :
-        IEndpointConfigurator,
         IPipeConfigurator<ConsumeContext>
     {
-        void AddConfigurator(IReceiveEndpointSpecification configurator);
+        void AddEndpointSpecification(IReceiveEndpointSpecification configurator);
     }
 }

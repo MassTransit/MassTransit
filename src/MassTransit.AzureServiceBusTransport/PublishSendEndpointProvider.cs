@@ -85,6 +85,17 @@ namespace MassTransit.AzureServiceBusTransport
                 catch (MessagingEntityAlreadyExistsException)
                 {
                 }
+                catch (MessagingException mex)
+                {
+                    // seems a conflict occurs rather than an already exists exception
+                    if (mex.Detail.ErrorCode == 409)
+                    {
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
                 if (!created)
                     topicDescription = await namespaceManager.GetTopicAsync(topicPath);
             }

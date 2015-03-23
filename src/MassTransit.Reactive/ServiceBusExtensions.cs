@@ -15,7 +15,7 @@ namespace MassTransit.Reactive
     using System;
     using System.Reactive;
     using System.Reactive.Linq;
-    using SubscriptionConfigurators;
+    using ConsumeConfigurators;
 
 
     public static class ServiceBusExtensions

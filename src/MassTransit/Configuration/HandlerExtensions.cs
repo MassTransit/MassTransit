@@ -13,8 +13,8 @@
 namespace MassTransit
 {
     using System;
-    using SubscriptionConfigurators;
-    using SubscriptionConnectors;
+    using ConsumeConfigurators;
+    using ConsumeConnectors;
 
 
     public static class HandlerExtensions
@@ -30,7 +30,7 @@ namespace MassTransit
         {
             var handlerConfigurator = new HandlerConfigurator<T>(handler);
 
-            configurator.AddConfigurator(handlerConfigurator);
+            configurator.AddEndpointSpecification(handlerConfigurator);
         }
 
         /// <summary>
@@ -48,7 +48,7 @@ namespace MassTransit
 
             configure(handlerConfigurator);
 
-            configurator.AddConfigurator(handlerConfigurator);
+            configurator.AddEndpointSpecification(handlerConfigurator);
         }
 
         /// <summary>

@@ -49,7 +49,7 @@ namespace RapidTransit
             _pipeConfigurators = new List<IPipeSpecification<ConsumeContext>>();
         }
 
-        void IReceiveEndpointConfigurator.AddConfigurator(IReceiveEndpointSpecification configurator)
+        void IReceiveEndpointConfigurator.AddEndpointSpecification(IReceiveEndpointSpecification configurator)
         {
             _configurators.Add(configurator);
         }
@@ -65,7 +65,7 @@ namespace RapidTransit
                 _consumerLimit);
 
             foreach (IReceiveEndpointSpecification builderConfigurator in _configurators)
-                configurator.AddConfigurator(builderConfigurator);
+                configurator.AddEndpointSpecification(builderConfigurator);
 
             foreach (var pipeConfigurator in _pipeConfigurators)
                 configurator.AddPipeSpecification(pipeConfigurator);

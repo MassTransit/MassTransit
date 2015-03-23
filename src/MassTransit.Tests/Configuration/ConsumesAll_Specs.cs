@@ -13,13 +13,12 @@
 namespace MassTransit.Tests.Configuration
 {
     using System.Linq;
+    using ConsumeConnectors;
     using MassTransit.Pipeline;
     using NUnit.Framework;
     using Shouldly;
-    using SubscriptionConnectors;
 
 
-    
     public class When_a_consumer_with_consumes_all_interfaces_is_inspected
     {
         DelegateConsumerFactory<Consumer> _consumerFactory;

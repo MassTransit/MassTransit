@@ -22,7 +22,7 @@ namespace MassTransit.AzureServiceBusTransport.Contexts
 
 
     public class AzureServiceBusReceiveContext :
-        ReceiveContextBase,
+        BaseReceiveContext,
         BrokeredMessageContext
     {
         readonly BrokeredMessage _message;

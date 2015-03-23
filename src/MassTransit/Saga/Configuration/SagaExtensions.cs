@@ -43,7 +43,7 @@ namespace MassTransit
 
             var sagaConfigurator = new SagaConfigurator<TSaga>(sagaRepository, retryPolicy);
 
-            configurator.AddConfigurator(sagaConfigurator);
+            configurator.AddEndpointSpecification(sagaConfigurator);
 
             return sagaConfigurator;
         }
