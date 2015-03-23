@@ -32,7 +32,7 @@ namespace MassTransit.Saga.Configuration
             _filter = filter;
         }
 
-        public void Build(IPipeBuilder<SagaConsumeContext<TSaga, TMessage>> builder)
+        public void Apply(IPipeBuilder<SagaConsumeContext<TSaga, TMessage>> builder)
         {
             builder.AddFilter(new SagaSplitFilter<TSaga, TMessage>(_filter));
         }

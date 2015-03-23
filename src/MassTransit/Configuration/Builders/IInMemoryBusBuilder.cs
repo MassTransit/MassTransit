@@ -12,6 +12,11 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Builders
 {
+    using System.Collections.Generic;
+    using PipeConfigurators;
+    using Pipeline.Pipes;
+
+
     public interface IInMemoryBusBuilder :
         IBusBuilder
     {

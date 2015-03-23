@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -16,12 +16,16 @@ namespace MassTransit
 
 
     /// <summary>
-    /// Configure a pipe with filters
+    /// Configures a pipe with specifications
     /// </summary>
-    /// <typeparam name="T"></typeparam>
-    public interface IPipeConfigurator<T>
-        where T : class, PipeContext
+    /// <typeparam name="TContext"></typeparam>
+    public interface IPipeConfigurator<TContext>
+        where TContext : class, PipeContext
     {
-        void AddPipeSpecification(IPipeSpecification<T> configurator);
+        /// <summary>
+        /// Adds a pipe specification to the pipe configurator at the end of the chain
+        /// </summary>
+        /// <param name="specification">The pipe specification to add</param>
+        void AddPipeSpecification(IPipeSpecification<TContext> specification);
     }
 }

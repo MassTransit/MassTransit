@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,6 +13,8 @@
 namespace MassTransit.Pipeline.Pipes
 {
     using System;
+    using System.Collections.Generic;
+    using System.Linq;
     using System.Threading.Tasks;
     using Filters;
     using PipeConfigurators;
@@ -25,20 +27,23 @@ namespace MassTransit.Pipeline.Pipes
         readonly IPipe<ConsumeContext> _pipe;
 
         public ConsumePipe()
-            : this(new PipeConfigurator<ConsumeContext>())
+            : this(Enumerable.Empty<IPipeSpecification<ConsumeContext>>())
         {
         }
 
-        public ConsumePipe(IBuildPipeConfigurator<ConsumeContext> configurator)
+        public ConsumePipe(IEnumerable<IPipeSpecification<ConsumeContext>> specifications)
         {
-            if (configurator == null)
-                throw new ArgumentNullException("configurator");
+            if (specifications == null)
+                throw new ArgumentNullException("specifications");
 
             _filter = new MessageTypeConsumeFilter();
+            _pipe = Pipe.New<ConsumeContext>(x =>
+            {
+                foreach (var specification in specifications)
+                    x.AddPipeSpecification(specification);
 
-            configurator.Filter(_filter);
-
-            _pipe = configurator.Build();
+                x.Filter(_filter);
+            });
         }
 
         Task IPipe<ConsumeContext>.Send(ConsumeContext context)

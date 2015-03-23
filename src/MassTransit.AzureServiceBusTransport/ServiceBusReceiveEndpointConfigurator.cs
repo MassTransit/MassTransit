@@ -34,9 +34,9 @@ namespace MassTransit.AzureServiceBusTransport
     {
         readonly IList<IReceiveEndpointSpecification> _configurators;
         readonly IServiceBusHost _host;
-        readonly IBuildPipeConfigurator<ConsumeContext> _pipeConfigurator;
         readonly QueueDescription _queueDescription;
         readonly IBuildPipeConfigurator<ReceiveContext> _receivePipeConfigurator;
+        readonly IList<IPipeSpecification<ConsumeContext>> _consumePipeSpecifications;
         int _prefetchCount;
         int _maxConcurrentCalls;
 
@@ -53,7 +53,7 @@ namespace MassTransit.AzureServiceBusTransport
 
         public ServiceBusReceiveEndpointConfigurator(IServiceBusHost host, QueueDescription queueDescription)
         {
-            _pipeConfigurator = new PipeConfigurator<ConsumeContext>();
+            _consumePipeSpecifications = new List<IPipeSpecification<ConsumeContext>>();
             _receivePipeConfigurator = new PipeConfigurator<ReceiveContext>();
             _configurators = new List<IReceiveEndpointSpecification>();
 
@@ -84,9 +84,9 @@ namespace MassTransit.AzureServiceBusTransport
             builder.AddReceiveEndpoint(CreateReceiveEndpoint(builder.MessageDeserializer));
         }
 
-        public void AddPipeSpecification(IPipeSpecification<ConsumeContext> configurator)
+        public void AddPipeSpecification(IPipeSpecification<ConsumeContext> specification)
         {
-            _pipeConfigurator.AddPipeSpecification(configurator);
+            _consumePipeSpecifications.Add(specification);
         }
 
         public void AddConfigurator(IReceiveEndpointSpecification configurator)
@@ -158,7 +158,7 @@ namespace MassTransit.AzureServiceBusTransport
             };
 
 
-            var inboundPipe = new ConsumePipe(_pipeConfigurator);
+            var inboundPipe = new ConsumePipe(_consumePipeSpecifications);
 
             var builder = new ServiceBusReceiveEndpointBuilder(inboundPipe, _host.MessageNameFormatter);
 

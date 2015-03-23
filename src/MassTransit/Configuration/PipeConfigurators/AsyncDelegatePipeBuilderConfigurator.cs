@@ -31,7 +31,7 @@ namespace MassTransit.PipeConfigurators
             _callback = callback;
         }
 
-        public void Build(IPipeBuilder<T> builder)
+        public void Apply(IPipeBuilder<T> builder)
         {
             builder.AddFilter(new AsyncDelegateFilter<T>(_callback));
         }

@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -28,24 +28,24 @@ namespace MassTransit.PipeConfigurators
     {
         static readonly ILog _log = Logger.Get<PipeConfigurator<TContext>>();
 
-        readonly List<IPipeSpecification<TContext>> _configurators;
+        readonly List<IPipeSpecification<TContext>> _specifications;
 
         public PipeConfigurator()
         {
-            _configurators = new List<IPipeSpecification<TContext>>();
+            _specifications = new List<IPipeSpecification<TContext>>();
         }
 
         IEnumerable<ValidationResult> Configurator.Validate()
         {
-            return _configurators.SelectMany(x => x.Validate());
+            return _specifications.SelectMany(x => x.Validate());
         }
 
-        void IPipeConfigurator<TContext>.AddPipeSpecification(IPipeSpecification<TContext> configurator)
+        void IPipeConfigurator<TContext>.AddPipeSpecification(IPipeSpecification<TContext> specification)
         {
-            if (configurator == null)
-                throw new ArgumentNullException("configurator");
+            if (specification == null)
+                throw new ArgumentNullException("specification");
 
-            _configurators.Add(configurator);
+            _specifications.Add(specification);
         }
 
         public IPipe<TContext> Build()
@@ -54,15 +54,15 @@ namespace MassTransit.PipeConfigurators
 
             var builder = new PipeBuilder<TContext>();
 
-            foreach (var configurator in _configurators)
-                configurator.Build(builder);
+            foreach (var configurator in _specifications)
+                configurator.Apply(builder);
 
             return builder.Build();
         }
 
         void ValidatePipeConfiguration()
         {
-            IPipeConfigurationResult result = new PipeConfigurationResult(_configurators.SelectMany(x => x.Validate()));
+            IPipeConfigurationResult result = new PipeConfigurationResult(_specifications.SelectMany(x => x.Validate()));
             if (result.ContainsFailure)
                 throw new ConfigurationException(result.GetMessage("The pipe configuration was invalid"));
 

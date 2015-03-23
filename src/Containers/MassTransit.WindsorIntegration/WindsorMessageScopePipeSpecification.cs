@@ -22,7 +22,7 @@ namespace MassTransit.WindsorIntegration
         IPipeSpecification<T>
         where T : class, PipeContext
     {
-        public void Build(IPipeBuilder<T> builder)
+        public void Apply(IPipeBuilder<T> builder)
         {
             builder.AddFilter(new WindsorMessageScopeFilter<T>());
         }

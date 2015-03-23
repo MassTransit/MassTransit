@@ -34,7 +34,7 @@ namespace MassTransit.PipeConfigurators
             _timeout = TimeSpan.FromSeconds(30);
         }
 
-        public void Build(IPipeBuilder<T> builder)
+        public void Apply(IPipeBuilder<T> builder)
         {
             builder.AddFilter(new TransactionFilter<T>(_isolationLevel, _timeout));
         }

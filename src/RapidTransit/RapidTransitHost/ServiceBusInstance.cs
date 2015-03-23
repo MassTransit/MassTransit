@@ -54,9 +54,9 @@ namespace RapidTransit
             _configurators.Add(configurator);
         }
 
-        void IPipeConfigurator<ConsumeContext>.AddPipeSpecification(IPipeSpecification<ConsumeContext> configurator)
+        void IPipeConfigurator<ConsumeContext>.AddPipeSpecification(IPipeSpecification<ConsumeContext> specification)
         {
-            _pipeConfigurators.Add(configurator);
+            _pipeConfigurators.Add(specification);
         }
 
         public void Configure(IReceiveEndpointConfigurator configurator)

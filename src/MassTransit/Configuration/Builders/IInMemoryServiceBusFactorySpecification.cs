@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -18,6 +18,10 @@ namespace MassTransit.Builders
     public interface IInMemoryServiceBusFactorySpecification :
         Configurator
     {
-        void Configure(IInMemoryBusBuilder builder);
+        /// <summary>
+        /// Apply the specification to the builder
+        /// </summary>
+        /// <param name="builder"></param>
+        void Apply(IInMemoryBusBuilder builder);
     }
 }

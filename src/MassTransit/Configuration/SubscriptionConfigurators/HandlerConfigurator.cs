@@ -38,9 +38,9 @@ namespace MassTransit.SubscriptionConfigurators
             _handlerConfigurator = new HandlerPipeSpecification<TMessage>(handler);
         }
 
-        public void AddPipeSpecification(IPipeSpecification<ConsumeContext<TMessage>> configurator)
+        public void AddPipeSpecification(IPipeSpecification<ConsumeContext<TMessage>> specification)
         {
-            _pipeConfigurator.AddPipeSpecification(configurator);
+            _pipeConfigurator.AddPipeSpecification(specification);
         }
 
         public IEnumerable<ValidationResult> Validate()

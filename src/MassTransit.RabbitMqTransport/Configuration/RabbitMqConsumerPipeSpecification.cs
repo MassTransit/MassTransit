@@ -35,7 +35,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
             _receivePipe = receivePipe;
         }
 
-        public void Build(IPipeBuilder<ConnectionContext> builder)
+        public void Apply(IPipeBuilder<ConnectionContext> builder)
         {
             IPipe<ModelContext> pipe = Pipe.New<ModelContext>(x =>
             {

@@ -29,7 +29,8 @@ namespace MassTransit.RabbitMqTransport.Configuration
     {
         readonly IList<IRabbitMqHost> _hosts;
         readonly IList<IBusFactorySpecification> _transportBuilderConfigurators;
-        RabbitMqReceiveEndpointConfigurator _defaultEndpointConfigurator;
+        readonly IList<IPipeSpecification<ConsumeContext>> _endpointPipeSpecifications;
+//        RabbitMqReceiveEndpointConfigurator _defaultEndpointConfigurator;
         IRabbitMqHost _defaultHost;
         Uri _localAddress;
 
@@ -37,11 +38,12 @@ namespace MassTransit.RabbitMqTransport.Configuration
         {
             _hosts = new List<IRabbitMqHost>();
             _transportBuilderConfigurators = new List<IBusFactorySpecification>();
+            _endpointPipeSpecifications = new List<IPipeSpecification<ConsumeContext>>();
         }
 
         public IBusControl CreateBus()
         {
-            var builder = new RabbitMqBusBuilder(_hosts, _localAddress);
+            var builder = new RabbitMqBusBuilder(_hosts, _localAddress, _endpointPipeSpecifications);
 
             foreach (IBusFactorySpecification configurator in _transportBuilderConfigurators)
                 configurator.Configure(builder);
@@ -58,7 +60,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
 
             foreach (ValidationResult result in _transportBuilderConfigurators.SelectMany(x => x.Validate()))
                 yield return result;
-            foreach (ValidationResult result in _defaultEndpointConfigurator.Validate())
+            foreach (ValidationResult result in _endpointPipeSpecifications.SelectMany(x => x.Validate()))
                 yield return result;
         }
 
@@ -112,10 +114,9 @@ namespace MassTransit.RabbitMqTransport.Configuration
             AddBusFactorySpecification(endpointConfigurator);
         }
 
-        public void AddPipeSpecification(IPipeSpecification<ConsumeContext> configurator)
+        public void AddPipeSpecification(IPipeSpecification<ConsumeContext> specification)
         {
-            if (_defaultEndpointConfigurator != null)
-                _defaultEndpointConfigurator.AddPipeSpecification(configurator);
+            _endpointPipeSpecifications.Add(specification);
         }
 
         string GetSanitizedQueueNameString(string input)

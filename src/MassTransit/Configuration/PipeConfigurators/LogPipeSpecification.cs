@@ -34,7 +34,7 @@ namespace MassTransit.PipeConfigurators
             _formatter = formatter;
         }
 
-        void IPipeSpecification<T>.Build(IPipeBuilder<T> builder)
+        void IPipeSpecification<T>.Apply(IPipeBuilder<T> builder)
         {
             builder.AddFilter(new LogFilter<T>(_writer, _formatter));
         }

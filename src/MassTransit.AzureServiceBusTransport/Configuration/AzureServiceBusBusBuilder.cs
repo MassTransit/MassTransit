@@ -18,6 +18,7 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
     using Builders;
     using MassTransit.Pipeline;
     using MassTransit.Pipeline.Pipes;
+    using PipeConfigurators;
     using Transports;
 
 
@@ -29,7 +30,9 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
         readonly Uri _inputAddress;
         readonly Lazy<ISendEndpointProvider> _publishSendEndpointProvider;
 
-        public AzureServiceBusBusBuilder(IEnumerable<IServiceBusHost> hosts, Uri inputAddress)
+        public AzureServiceBusBusBuilder(IEnumerable<IServiceBusHost> hosts, Uri inputAddress,
+            IEnumerable<IPipeSpecification<ConsumeContext>> endpointPipeSpecifications)
+            : base(endpointPipeSpecifications)
         {
             if (hosts == null)
                 throw new ArgumentNullException("hosts");

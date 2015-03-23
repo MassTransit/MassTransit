@@ -37,15 +37,15 @@ namespace MassTransit.RabbitMqTransport.Configuration
         IBusFactorySpecification
     {
         readonly IList<IReceiveEndpointSpecification> _configurators;
+        readonly IList<IPipeSpecification<ConsumeContext>> _consumePipeSpecifications;
         readonly IRabbitMqHost _host;
-        readonly IBuildPipeConfigurator<ConsumeContext> _pipeConfigurator;
         readonly IBuildPipeConfigurator<ReceiveContext> _receivePipeConfigurator;
         readonly RabbitMqReceiveSettings _settings;
 
         public RabbitMqReceiveEndpointConfigurator(IRabbitMqHost host, string queueName = null)
         {
             _host = host;
-            _pipeConfigurator = new PipeConfigurator<ConsumeContext>();
+            _consumePipeSpecifications = new List<IPipeSpecification<ConsumeContext>>();
             _receivePipeConfigurator = new PipeConfigurator<ReceiveContext>();
             _configurators = new List<IReceiveEndpointSpecification>();
 
@@ -128,18 +128,17 @@ namespace MassTransit.RabbitMqTransport.Configuration
             _configurators.Add(configurator);
         }
 
-        public void AddPipeSpecification(IPipeSpecification<ConsumeContext> configurator)
+        public void AddPipeSpecification(IPipeSpecification<ConsumeContext> specification)
         {
-            _pipeConfigurator.AddPipeSpecification(configurator);
+            _consumePipeSpecifications.Add(specification);
         }
 
         ReceiveEndpoint CreateReceiveEndpoint(IMessageDeserializer deserializer)
         {
             IRetryPolicy retryPolicy = Retry.Exponential(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(1));
 
-            Uri inputAddress = _host.Settings.GetInputAddress(_settings);
+            var consumePipe = new ConsumePipe(_consumePipeSpecifications);
 
-            var consumePipe = new ConsumePipe(_pipeConfigurator);
 
             var builder = new RabbitMqReceiveEndpointBuilder(consumePipe, _host.MessageNameFormatter);
 

@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -25,21 +25,16 @@ namespace MassTransit.Configurators
         IInMemoryBusFactoryConfigurator,
         IBusFactory
     {
-        readonly InMemoryReceiveEndpointConfigurator _busEndpointConfigurator;
         readonly IList<IInMemoryServiceBusFactorySpecification> _configurators;
-        readonly Uri _inputAddress;
+        readonly IList<IPipeSpecification<ConsumeContext>> _endpointPipeSpecifications;
+        readonly IList<IBusHost> _hosts;
         IReceiveTransportProvider _receiveTransportProvider;
         ISendTransportProvider _sendTransportProvider;
-        readonly IList<IBusHost> _hosts;
 
         public InMemoryBusFactoryConfigurator()
         {
-            string queueName = NewId.Next().ToString("NS");
-
-            _inputAddress = new Uri(string.Format("loopback://localhost/{0}", queueName));
-
             _configurators = new List<IInMemoryServiceBusFactorySpecification>();
-            _busEndpointConfigurator = new InMemoryReceiveEndpointConfigurator(queueName);
+            _endpointPipeSpecifications = new List<IPipeSpecification<ConsumeContext>>();
 
             _hosts = new List<IBusHost>();
         }
@@ -55,24 +50,23 @@ namespace MassTransit.Configurators
                 _sendTransportProvider = _sendTransportProvider ?? transportProvider;
             }
 
-            var builder = new InMemoryBusBuilder(_inputAddress, _receiveTransportProvider, _sendTransportProvider, _hosts);
+            var builder = new InMemoryBusBuilder(_receiveTransportProvider, _sendTransportProvider, _hosts, _endpointPipeSpecifications);
 
             foreach (IInMemoryServiceBusFactorySpecification configurator in _configurators)
-                configurator.Configure(builder);
-
-            _busEndpointConfigurator.Configure(builder);
+                configurator.Apply(builder);
 
             return builder.Build();
         }
 
         public IEnumerable<ValidationResult> Validate()
         {
-            return _busEndpointConfigurator.Validate().Concat(_configurators.SelectMany(x => x.Validate()));
+            return _endpointPipeSpecifications.SelectMany(x => x.Validate())
+                .Concat(_configurators.SelectMany(x => x.Validate()));
         }
 
-        public void AddPipeSpecification(IPipeSpecification<ConsumeContext> configurator)
+        public void AddPipeSpecification(IPipeSpecification<ConsumeContext> specification)
         {
-            _busEndpointConfigurator.AddPipeSpecification(configurator);
+            _endpointPipeSpecifications.Add(specification);
         }
 
         public void AddBusFactorySpecification(IBusFactorySpecification configurator)
@@ -108,7 +102,7 @@ namespace MassTransit.Configurators
                 return _configurator.Validate();
             }
 
-            public void Configure(IInMemoryBusBuilder builder)
+            public void Apply(IInMemoryBusBuilder builder)
             {
                 _configurator.Configure(builder);
             }

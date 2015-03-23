@@ -33,7 +33,7 @@ namespace MassTransit.PipeConfigurators
             _handler = handler;
         }
 
-        void IPipeSpecification<ConsumeContext<T>>.Build(IPipeBuilder<ConsumeContext<T>> builder)
+        void IPipeSpecification<ConsumeContext<T>>.Apply(IPipeBuilder<ConsumeContext<T>> builder)
         {
             builder.AddFilter(new HandlerMessageFilter<T>(_handler));
         }

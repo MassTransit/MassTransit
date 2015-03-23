@@ -13,7 +13,10 @@
 namespace MassTransit.Builders
 {
     using System;
+    using System.Collections.Generic;
     using System.Net.Mime;
+    using PipeConfigurators;
+    using Pipeline;
     using Serialization;
     using Transports;
 
@@ -51,5 +54,13 @@ namespace MassTransit.Builders
         /// <param name="contentType">The content type of the deserializer</param>
         /// <param name="deserializerFactory">The factory to create the deserializer</param>
         void AddMessageDeserializer(ContentType contentType, Func<ISendEndpointProvider, IPublishEndpoint, IMessageDeserializer> deserializerFactory);
+
+        /// <summary>
+        /// Create a consume pipe for the endpoint, using the bus builder. The bus builder may add additional filters
+        /// from the bus configuration to the endpoint which can be overridden by the endpoint.
+        /// </summary>
+        /// <param name="consumePipeSpecifications"></param>
+        /// <returns></returns>
+        IConsumePipe CreateConsumePipe(IEnumerable<IPipeSpecification<ConsumeContext>> consumePipeSpecifications);
     }
 }
