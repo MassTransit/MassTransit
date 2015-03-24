@@ -21,14 +21,14 @@ namespace MassTransit.AzureServiceBusTransport
     using Transports;
 
 
-    public class AzureServiceBusPublishEndpoint :
+    public class ServiceBusPublishEndpoint :
         IPublishEndpoint
     {
         readonly IServiceBusHost _host;
         readonly IMessageNameFormatter _nameFormatter;
         readonly ISendEndpointProvider _sendEndpointProvider;
 
-        public AzureServiceBusPublishEndpoint(IServiceBusHost host, ISendEndpointProvider sendEndpointProvider)
+        public ServiceBusPublishEndpoint(IServiceBusHost host, ISendEndpointProvider sendEndpointProvider)
         {
             _host = host;
             _sendEndpointProvider = sendEndpointProvider;

@@ -42,7 +42,7 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
 
         public IBusControl CreateBus()
         {
-            var builder = new AzureServiceBusBusBuilder(_hosts, _endpointPipeSpecifications);
+            var builder = new ServiceBusBusBuilder(_hosts, _endpointPipeSpecifications);
 
             foreach (IBusFactorySpecification configurator in _transportSpecifications)
                 configurator.Apply(builder);

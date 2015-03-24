@@ -12,9 +12,15 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.AzureServiceBusTransport
 {
-    public interface AzureServiceBusSendContext<out T> :
-        SendContext<T>
-        where T : class
+    using System;
+    using Microsoft.ServiceBus;
+
+
+    public interface ServiceBusTokenProviderSettings
     {
+        string KeyName { get; }
+        string SharedAccessKey { get; }
+        TimeSpan TokenTimeToLive { get; }
+        TokenScope TokenScope { get; }
     }
 }

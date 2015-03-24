@@ -13,11 +13,12 @@
 namespace MassTransit
 {
     using System;
+    using System.Threading.Tasks;
     using Transports;
 
 
     public interface ISendTransportProvider
     {
-        ISendTransport GetSendTransport(Uri address);
+        Task<ISendTransport> GetSendTransport(Uri address);
     }
 }

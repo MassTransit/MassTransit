@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -22,7 +22,10 @@ namespace MassTransit.RabbitMqTransport
         readonly bool _durable;
         readonly string _exchangeName;
         readonly string _exchangeType;
+        bool _bindToQueue;
         IDictionary<string, object> _exchangeArguments;
+        IDictionary<string, object> _queueArguments;
+        string _queueName;
 
         public RabbitMqSendSettings(string exchangeName, string exchangeType, bool durable, bool autoDelete)
         {
@@ -55,6 +58,35 @@ namespace MassTransit.RabbitMqTransport
         public string ExchangeType
         {
             get { return _exchangeType; }
+        }
+
+        bool SendSettings.BindToQueue
+        {
+            get { return _bindToQueue; }
+        }
+
+        public string QueueName
+        {
+            get { return _queueName; }
+        }
+
+        public IDictionary<string, object> QueueArguments
+        {
+            get { return _queueArguments; }
+        }
+
+        public void BindToQueue(string queueName)
+        {
+            _bindToQueue = true;
+            _queueName = queueName;
+        }
+
+        public void SetQueueArgument(string key, object value)
+        {
+            if (_queueArguments == null)
+                _queueArguments = new Dictionary<string, object>();
+
+            _queueArguments[key] = value;
         }
 
         public void SetExchangeArgument(string key, object value)

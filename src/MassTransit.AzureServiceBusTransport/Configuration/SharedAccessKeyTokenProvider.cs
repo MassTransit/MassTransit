@@ -18,9 +18,9 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
     public class SharedAccessKeyTokenProvider :
         IAzureServiceBusTokenProvider
     {
-        readonly AzureServiceBusTokenProviderSettings _settings;
+        readonly ServiceBusTokenProviderSettings _settings;
 
-        public SharedAccessKeyTokenProvider(AzureServiceBusTokenProviderSettings settings)
+        public SharedAccessKeyTokenProvider(ServiceBusTokenProviderSettings settings)
         {
             _settings = settings;
         }

@@ -130,6 +130,7 @@
     <Compile Include="ModelContext.cs" />
     <Compile Include="RabbitMqSendEndpointProvider.cs" />
     <Compile Include="RabbitMqSendSettings.cs" />
+    <Compile Include="RabbitMqSendTransportProvider.cs" />
     <Compile Include="ReceiveSettings.cs" />
     <Compile Include="RabbitMqReceiveTransport.cs" />
     <Compile Include="RabbitMqSendContext.cs" />

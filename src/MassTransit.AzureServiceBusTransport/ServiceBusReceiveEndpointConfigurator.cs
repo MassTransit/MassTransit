@@ -30,11 +30,11 @@ namespace MassTransit.AzureServiceBusTransport
         IBusFactorySpecification
     {
         readonly IList<IReceiveEndpointSpecification> _configurators;
+        readonly IConsumePipe _consumePipe;
         readonly IList<IPipeSpecification<ConsumeContext>> _consumePipeSpecifications;
         readonly IServiceBusHost _host;
         readonly QueueDescription _queueDescription;
         readonly IBuildPipeConfigurator<ReceiveContext> _receivePipeConfigurator;
-        IConsumePipe _consumePipe;
         int _maxConcurrentCalls;
         int _prefetchCount;
 
@@ -166,26 +166,29 @@ namespace MassTransit.AzureServiceBusTransport
             foreach (IReceiveEndpointSpecification builderConfigurator in _configurators)
                 builderConfigurator.Configure(endpointBuilder);
 
-//            string errorQueueName = _queueDescription.Path + "_error";
-//            var sendSettings = new RabbitMqSendSettings(errorQueueName, RabbitMQ.Client.ExchangeType.Fanout, true,
-//                false);
-//
-//            var sendTransport = new AzureServiceBusSendTransport();
-//
-//            sendTransport.AddModelFilter(new PrepareErrorQueueFilter(errorSettings));
+            string errorQueueName = _queueDescription.Path + "_error";
+            var errorQueueDescription = new QueueDescription(errorQueueName);
 
-//            IPipe<ReceiveContext> moveToErrorPipe = Pipe.New<ReceiveContext>(
-//                x => x.Filter(new MoveToErrorTransportFilter(() => Task.FromResult<ISendTransport>(sendTransport))));
-//
-//            _receivePipeConfigurator.Rescue(moveToErrorPipe, typeof(SerializationException));
+            Uri errorAddress = _host.Settings.GetInputAddress(errorQueueDescription);
+
+            ISendTransportProvider transportProvider = builder.SendTransportProvider;
+            IPipe<ReceiveContext> moveToErrorPipe = Pipe.New<ReceiveContext>(
+                x => x.Filter(new MoveToErrorTransportFilter(() => transportProvider.GetSendTransport(errorAddress))));
+
+            _receivePipeConfigurator.Rescue(moveToErrorPipe, typeof(Exception));
 
             _receivePipeConfigurator.Filter(new DeserializeFilter(builder.MessageDeserializer, consumePipe));
 
             IPipe<ReceiveContext> receivePipe = _receivePipeConfigurator.Build();
 
-            var transport = new AzureServiceBusReceiveTransport(_host, settings, endpointBuilder.GetTopicSubscriptions().ToArray());
+            var transport = GetReceiveTransport(settings, endpointBuilder.GetTopicSubscriptions());
 
             return new ReceiveEndpoint(transport, receivePipe);
+        }
+
+        ServiceBusReceiveTransport GetReceiveTransport(ReceiveSettings settings, IEnumerable<TopicSubscriptionSettings> topicSubscriptionSettings)
+        {
+            return new ServiceBusReceiveTransport(_host, settings, topicSubscriptionSettings.ToArray());
         }
 
 

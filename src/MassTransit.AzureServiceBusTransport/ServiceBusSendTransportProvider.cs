@@ -18,52 +18,46 @@ namespace MassTransit.AzureServiceBusTransport
     using Logging;
     using Microsoft.ServiceBus;
     using Microsoft.ServiceBus.Messaging;
-    using Serialization;
     using Transports;
 
 
-    public class PublishSendEndpointProvider :
-        ISendEndpointProvider
+    public class ServiceBusSendTransportProvider :
+        ISendTransportProvider
     {
         readonly IServiceBusHost[] _hosts;
         readonly ILog _log = Logger.Get<ServiceBusSendEndpointProvider>();
-        readonly IMessageSerializer _serializer;
-        readonly Uri _sourceAddress;
 
-        public PublishSendEndpointProvider(IMessageSerializer serializer, Uri sourceAddress, IServiceBusHost[] hosts)
+        public ServiceBusSendTransportProvider(IServiceBusHost[] hosts)
         {
             _hosts = hosts;
-            _sourceAddress = sourceAddress;
-            _serializer = serializer;
         }
 
-        public async Task<ISendEndpoint> GetSendEndpoint(Uri address)
+        public async Task<ISendTransport> GetSendTransport(Uri address)
         {
-            IServiceBusHost host =
-                _hosts.FirstOrDefault(x => x.Settings.ServiceUri.Host.Equals(address.Host, StringComparison.OrdinalIgnoreCase));
+            IServiceBusHost host = _hosts.FirstOrDefault(
+                x => address.ToString().StartsWith(x.Settings.ServiceUri.ToString(), StringComparison.OrdinalIgnoreCase));
             if (host == null)
                 throw new EndpointNotFoundException("The endpoint address specified an unknown host: " + address);
 
-            TopicDescription topicDescription = await CreateTopic(await host.RootNamespaceManager, address);
+            QueueDescription queueDescription = await CreateQueue(await host.NamespaceManager, address);
 
             MessagingFactory messagingFactory = await host.MessagingFactory;
 
-            MessageSender messageSender = await messagingFactory.CreateMessageSenderAsync(topicDescription.Path);
+            string queuePath = host.GetQueuePath(queueDescription);
+
+            MessageSender messageSender = await messagingFactory.CreateMessageSenderAsync(queuePath);
 
             var sendTransport = new ServiceBusSendTransport(messageSender);
-
-            return new SendEndpoint(sendTransport, _serializer, address, _sourceAddress);
+            return sendTransport;
         }
 
-        async Task<TopicDescription> CreateTopic(NamespaceManager namespaceManager, Uri address)
+        async Task<QueueDescription> CreateQueue(NamespaceManager namespaceManager, Uri address)
         {
-            TopicDescription topicDescription = address.GetTopicDescription();
-            string topicPath = topicDescription.Path;
-
+            QueueDescription queueDescription = address.GetQueueDescription();
             bool create = true;
             try
             {
-                topicDescription = await namespaceManager.GetTopicAsync(topicPath);
+                queueDescription = await namespaceManager.GetQueueAsync(queueDescription.Path);
 
                 create = false;
             }
@@ -77,9 +71,10 @@ namespace MassTransit.AzureServiceBusTransport
                 try
                 {
                     if (_log.IsDebugEnabled)
-                        _log.DebugFormat("Creating topic {0}", topicPath);
+                        _log.DebugFormat("Creating queue {0}", queueDescription.Path);
 
-                    topicDescription = await namespaceManager.CreateTopicAsync(topicDescription);
+                    queueDescription = await namespaceManager.CreateQueueAsync(queueDescription);
+
                     created = true;
                 }
                 catch (MessagingEntityAlreadyExistsException)
@@ -92,25 +87,25 @@ namespace MassTransit.AzureServiceBusTransport
                     {
                     }
                     else
-                    {
                         throw;
-                    }
                 }
+
                 if (!created)
-                    topicDescription = await namespaceManager.GetTopicAsync(topicPath);
+                    queueDescription = await namespaceManager.GetQueueAsync(queueDescription.Path);
             }
 
             if (_log.IsDebugEnabled)
             {
-                _log.DebugFormat("Topic: {0} ({1})", topicDescription.Path,
+                _log.DebugFormat("Queue: {0} ({1})", queueDescription.Path,
                     string.Join(", ", new[]
                     {
-                        topicDescription.EnableExpress ? "express" : "",
-                        topicDescription.RequiresDuplicateDetection ? "dupe detect" : "",
+                        queueDescription.EnableExpress ? "express" : "",
+                        queueDescription.RequiresDuplicateDetection ? "dupe detect" : "",
+                        queueDescription.EnableDeadLetteringOnMessageExpiration ? "dead letter" : ""
                     }.Where(x => !string.IsNullOrWhiteSpace(x))));
             }
 
-            return topicDescription;
+            return queueDescription;
         }
     }
 }

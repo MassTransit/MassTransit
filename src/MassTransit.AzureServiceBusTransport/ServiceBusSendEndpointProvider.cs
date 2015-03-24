@@ -13,107 +13,29 @@
 namespace MassTransit.AzureServiceBusTransport
 {
     using System;
-    using System.Linq;
     using System.Threading.Tasks;
-    using Logging;
-    using Microsoft.ServiceBus;
-    using Microsoft.ServiceBus.Messaging;
-    using Serialization;
     using Transports;
 
 
     public class ServiceBusSendEndpointProvider :
         ISendEndpointProvider
     {
-        readonly IServiceBusHost[] _hosts;
-        readonly ILog _log = Logger.Get<ServiceBusSendEndpointProvider>();
         readonly IMessageSerializer _serializer;
         readonly Uri _sourceAddress;
+        readonly ISendTransportProvider _transportProvider;
 
-        public ServiceBusSendEndpointProvider(IMessageSerializer serializer, Uri sourceAddress, IServiceBusHost[] hosts)
+        public ServiceBusSendEndpointProvider(IMessageSerializer serializer, Uri sourceAddress, ISendTransportProvider transportProvider)
         {
-            _hosts = hosts;
+            _transportProvider = transportProvider;
             _sourceAddress = sourceAddress;
             _serializer = serializer;
         }
 
         public async Task<ISendEndpoint> GetSendEndpoint(Uri address)
         {
-            IServiceBusHost host = _hosts.FirstOrDefault(
-                x => address.ToString().StartsWith(x.Settings.ServiceUri.ToString(), StringComparison.OrdinalIgnoreCase));
-            if (host == null)
-                throw new EndpointNotFoundException("The endpoint address specified an unknown host: " + address);
-
-            QueueDescription queueDescription = await CreateQueue(await host.NamespaceManager, address);
-
-            MessagingFactory messagingFactory = await host.MessagingFactory;
-
-            var queuePath = host.GetQueuePath(queueDescription);
-
-            MessageSender messageSender = await messagingFactory.CreateMessageSenderAsync(queuePath);
-
-            var sendTransport = new AzureServiceBusSendTransport(messageSender);
+            ISendTransport sendTransport = await _transportProvider.GetSendTransport(address);
 
             return new SendEndpoint(sendTransport, _serializer, address, _sourceAddress);
-        }
-
-        async Task<QueueDescription> CreateQueue(NamespaceManager namespaceManager, Uri address)
-        {
-            QueueDescription queueDescription = address.GetQueueDescription();
-            bool create = true;
-            try
-            {
-                queueDescription = await namespaceManager.GetQueueAsync(queueDescription.Path);
-
-                create = false;
-            }
-            catch (MessagingEntityNotFoundException)
-            {
-            }
-
-            if (create)
-            {
-                bool created = false;
-                try
-                {
-                    if (_log.IsDebugEnabled)
-                        _log.DebugFormat("Creating queue {0}", queueDescription.Path);
-
-                    queueDescription = await namespaceManager.CreateQueueAsync(queueDescription);
-
-                    created = true;
-                }
-                catch (MessagingEntityAlreadyExistsException)
-                {
-                }
-                catch (MessagingException mex)
-                {
-                    // seems a conflict occurs rather than an already exists exception
-                    if (mex.Detail.ErrorCode == 409)
-                    {
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-
-                if (!created)
-                    queueDescription = await namespaceManager.GetQueueAsync(queueDescription.Path);
-            }
-
-            if (_log.IsDebugEnabled)
-            {
-                _log.DebugFormat("Queue: {0} ({1})", queueDescription.Path,
-                    string.Join(", ", new[]
-                    {
-                        queueDescription.EnableExpress ? "express" : "",
-                        queueDescription.RequiresDuplicateDetection ? "dupe detect" : "",
-                        queueDescription.EnableDeadLetteringOnMessageExpiration ? "dead letter" : ""
-                    }.Where(x => !string.IsNullOrWhiteSpace(x))));
-            }
-
-            return queueDescription;
         }
     }
 }

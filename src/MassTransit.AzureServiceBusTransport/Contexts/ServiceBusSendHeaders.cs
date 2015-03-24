@@ -16,12 +16,12 @@ namespace MassTransit.AzureServiceBusTransport.Contexts
     using System.Collections.Generic;
 
 
-    public class AzureServiceBusSendHeaders :
+    public class ServiceBusSendHeaders :
         SendHeaders
     {
         readonly IDictionary<string, object> _headers;
 
-        public AzureServiceBusSendHeaders()
+        public ServiceBusSendHeaders()
         {
             _headers = new Dictionary<string, object>();
         }

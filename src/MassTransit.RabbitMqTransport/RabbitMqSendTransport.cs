@@ -120,9 +120,6 @@ namespace MassTransit.RabbitMqTransport
                             _log.DebugFormat("MOVE {0} ({1} to {2})", messageId.HasValue ? messageId.Value.ToString() : "N/A", context.InputAddress,
                                 modelContext.ConnectionContext.GetAddress(_sendSettings.ExchangeName));
                         }
-
-//                        context.DestinationAddress.LogSent(context.MessageId.HasValue ? context.MessageId.Value.ToString("N") : "",
-//                            TypeMetadataCache<T>.ShortName);
                     }
                     catch (Exception ex)
                     {
@@ -140,11 +137,6 @@ namespace MassTransit.RabbitMqTransport
         public ConnectHandle Connect(ISendObserver observer)
         {
             return _observers.Connect(observer);
-        }
-
-        public void AddModelFilter(IFilter<ModelContext> filter)
-        {
-            _filters.Add(filter);
         }
 
         async Task SendMessage<T>(T message, IPipe<SendContext<T>> pipe, CancellationToken cancelSend)

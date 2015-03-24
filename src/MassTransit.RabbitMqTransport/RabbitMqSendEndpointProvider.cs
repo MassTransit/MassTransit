@@ -13,41 +13,27 @@
 namespace MassTransit.RabbitMqTransport
 {
     using System;
-    using System.Linq;
     using System.Threading.Tasks;
-    using Configuration;
-    using Integration;
-    using Serialization;
     using Transports;
 
 
     public class RabbitMqSendEndpointProvider :
         ISendEndpointProvider
     {
-        readonly IRabbitMqHost[] _hosts;
         readonly Uri _inputAddress;
         readonly IMessageSerializer _serializer;
+        readonly ISendTransportProvider _transportProvider;
 
-        public RabbitMqSendEndpointProvider(IMessageSerializer serializer, IRabbitMqHost[] hosts, Uri inputAddress)
+        public RabbitMqSendEndpointProvider(IMessageSerializer serializer, Uri inputAddress, ISendTransportProvider transportProvider)
         {
-            _hosts = hosts;
             _inputAddress = inputAddress;
+            _transportProvider = transportProvider;
             _serializer = serializer;
         }
 
         public async Task<ISendEndpoint> GetSendEndpoint(Uri address)
         {
-            SendSettings sendSettings = address.GetSendSettings();
-
-            RabbitMqHostSettings hostSettings = address.GetHostSettings();
-
-            IRabbitMqHost host = _hosts.FirstOrDefault(x => RabbitMqHostEqualityComparer.Default.Equals(hostSettings, x.Settings));
-            if (host == null)
-                throw new EndpointNotFoundException("The endpoint address specified an unknown host: " + address);
-
-            var modelCache = new RabbitMqModelCache(host.SendConnectionCache);
-
-            var sendTransport = new RabbitMqSendTransport(modelCache, sendSettings);
+            ISendTransport sendTransport = await _transportProvider.GetSendTransport(address);
 
             return new SendEndpoint(sendTransport, _serializer, address, _inputAddress);
         }

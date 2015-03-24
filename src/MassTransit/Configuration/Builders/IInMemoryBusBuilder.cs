@@ -19,10 +19,5 @@ namespace MassTransit.Builders
         /// The receive transport provider
         /// </summary>
         IReceiveTransportProvider ReceiveTransportProvider { get; }
-
-        /// <summary>
-        /// The send transport provider
-        /// </summary>
-        ISendTransportProvider SendTransportProvider { get; }
     }
 }
