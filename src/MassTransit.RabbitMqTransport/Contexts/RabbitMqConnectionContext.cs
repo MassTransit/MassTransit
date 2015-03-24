@@ -90,7 +90,7 @@ namespace MassTransit.RabbitMqTransport.Contexts
             Close();
         }
 
-        void OnConnectionShutdown(IConnection connection, ShutdownEventArgs reason)
+        void OnConnectionShutdown(object connection, ShutdownEventArgs reason)
         {
             _tokenSource.Cancel();
 

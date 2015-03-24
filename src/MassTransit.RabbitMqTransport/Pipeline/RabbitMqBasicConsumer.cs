@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -43,7 +43,6 @@ namespace MassTransit.RabbitMqTransport.Pipeline
         int _maxPendingDeliveryCount;
         CancellationTokenRegistration _registration;
 
-
         public RabbitMqBasicConsumer(IModel model, Uri inputAddress, IPipe<ReceiveContext> receivePipe, CancellationToken cancellationToken)
         {
             _model = model;
@@ -87,7 +86,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
             Complete();
         }
 
-        public void HandleModelShutdown(IModel model, ShutdownEventArgs reason)
+        public void HandleModelShutdown(object model, ShutdownEventArgs reason)
         {
             if (_log.IsDebugEnabled)
             {
@@ -142,7 +141,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
             get { return _model; }
         }
 
-        public event ConsumerCancelledEventHandler ConsumerCancelled;
+        public event EventHandler<ConsumerEventArgs> ConsumerCancelled;
 
         public void Dispose()
         {

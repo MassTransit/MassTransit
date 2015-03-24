@@ -50,7 +50,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
         /// Specify the exchange type for the endpoint
         /// </summary>
         /// <param name="exchangeType"></param>
-        void ExchangeType(ExchangeType exchangeType);
+        void ExchangeType(string exchangeType);
 
         /// <summary>
         /// Purge the messages from an existing queue on startup (note that upon reconnection to the server
