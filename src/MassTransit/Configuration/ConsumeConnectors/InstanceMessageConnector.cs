@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -16,7 +16,6 @@ namespace MassTransit.ConsumeConnectors
     using Internals.Extensions;
     using Pipeline;
     using Pipeline.Filters;
-    using Policies;
     using Util;
 
 
@@ -55,7 +54,7 @@ namespace MassTransit.ConsumeConnectors
             get { return typeof(TMessage); }
         }
 
-        public ConnectHandle Connect(IConsumePipeConnector pipe, object instance, IRetryPolicy retryPolicy)
+        public ConnectHandle Connect(IConsumePipeConnector pipe, object instance)
         {
             if (instance == null)
                 throw new ArgumentNullException("instance");
@@ -69,7 +68,6 @@ namespace MassTransit.ConsumeConnectors
 
             IPipe<ConsumeContext<TMessage>> instancePipe = Pipe.New<ConsumeContext<TMessage>>(x =>
             {
-                x.Retry(retryPolicy);
                 x.Filter(new InstanceMessageFilter<TConsumer, TMessage>(consumer, _consumeFilter));
             });
 

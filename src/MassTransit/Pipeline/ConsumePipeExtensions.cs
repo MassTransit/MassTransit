@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,9 +14,8 @@ namespace MassTransit.Pipeline
 {
     using System;
     using ConsumeConnectors;
-    using Filters;
+    using ConsumerFactories;
     using PipeConfigurators;
-    using Policies;
 
 
     public static class ConsumePipeExtensions
@@ -27,59 +26,48 @@ namespace MassTransit.Pipeline
             return HandlerConnectorCache<T>.Connector.Connect(filter, handler);
         }
 
-        public static ConnectHandle ConnectHandler<T>(this IConsumePipe filter, MessageHandler<T> handler,
-            IRetryPolicy retryPolicy)
-            where T : class
-        {
-            var retryFilter = new RetryFilter<ConsumeContext<T>>(retryPolicy);
-
-            return HandlerConnectorCache<T>.Connector.Connect(filter, handler, retryFilter);
-        }
-
         public static ConnectHandle ConnectConsumer<T>(this IConsumePipeConnector connector, IConsumerFactory<T> consumerFactory,
-            IRetryPolicy retryPolicy = null, params IPipeSpecification<ConsumerConsumeContext<T>>[] pipeSpecifications)
+            params IPipeSpecification<ConsumerConsumeContext<T>>[] pipeSpecifications)
             where T : class
         {
-            return ConsumerConnectorCache<T>.Connector.Connect(connector, consumerFactory, retryPolicy ?? Retry.None, pipeSpecifications);
+            return ConsumerConnectorCache<T>.Connector.Connect(connector, consumerFactory, pipeSpecifications);
         }
 
         public static ConnectHandle ConnectConsumer<T>(this IConsumePipeConnector filter,
-            IRetryPolicy retryPolicy = null, params IPipeSpecification<ConsumerConsumeContext<T>>[] pipeSpecifications)
+            params IPipeSpecification<ConsumerConsumeContext<T>>[] pipeSpecifications)
             where T : class, new()
         {
             var consumerFactory = new DefaultConstructorConsumerFactory<T>();
 
             ConsumerConnector connector = ConsumerConnectorCache.GetConsumerConnector<T>();
 
-            return connector.Connect(filter, consumerFactory, retryPolicy ?? Retry.None, pipeSpecifications);
+            return connector.Connect(filter, consumerFactory, pipeSpecifications);
         }
 
-        public static ConnectHandle ConnectConsumer<T>(this IConsumePipeConnector filter, Func<T> factoryMethod,
-            IRetryPolicy retryPolicy = null)
+        public static ConnectHandle ConnectConsumer<T>(this IConsumePipeConnector filter, Func<T> factoryMethod)
             where T : class
         {
             var consumerFactory = new DelegateConsumerFactory<T>(factoryMethod);
 
             ConsumerConnector connector = ConsumerConnectorCache.GetConsumerConnector<T>();
 
-            return connector.Connect(filter, consumerFactory, retryPolicy ?? Retry.None);
+            return connector.Connect(filter, consumerFactory);
         }
 
-        public static ConnectHandle ConnectConsumer(this IConsumePipeConnector filter, Type consumerType, Func<Type, object> objectFactory,
-            IRetryPolicy retryPolicy = null)
+        public static ConnectHandle ConnectConsumer(this IConsumePipeConnector filter, Type consumerType, Func<Type, object> objectFactory)
         {
-            return ConsumerConnectorCache.Connect(filter, consumerType, objectFactory, retryPolicy ?? Retry.None);
+            return ConsumerConnectorCache.Connect(filter, consumerType, objectFactory);
         }
 
-        public static ConnectHandle ConnectInstance<T>(this IConsumePipeConnector filter, T instance, IRetryPolicy retryPolicy = null)
+        public static ConnectHandle ConnectInstance<T>(this IConsumePipeConnector filter, T instance)
             where T : class
         {
-            return InstanceConnectorCache<T>.Connector.Connect(filter, instance, retryPolicy ?? Retry.None);
+            return InstanceConnectorCache<T>.Connector.Connect(filter, instance);
         }
 
-        public static ConnectHandle ConnectInstance(this IConsumePipeConnector filter, object instance, IRetryPolicy retryPolicy = null)
+        public static ConnectHandle ConnectInstance(this IConsumePipeConnector filter, object instance)
         {
-            return InstanceConnectorCache.GetInstanceConnector(instance.GetType()).Connect(filter, instance, retryPolicy ?? Retry.None);
+            return InstanceConnectorCache.GetInstanceConnector(instance.GetType()).Connect(filter, instance);
         }
     }
 }

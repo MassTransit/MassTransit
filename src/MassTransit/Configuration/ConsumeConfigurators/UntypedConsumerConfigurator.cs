@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -17,8 +17,7 @@ namespace MassTransit.ConsumeConfigurators
     using Configurators;
     using ConsumeConnectors;
     using Internals.Extensions;
-    using Pipeline;
-    using Policies;
+    using Pipeline.ConsumerFactories;
     using Util;
 
 
@@ -28,11 +27,9 @@ namespace MassTransit.ConsumeConfigurators
         where TConsumer : class
     {
         readonly IConsumerFactory<TConsumer> _consumerFactory;
-        readonly IRetryPolicy _retryPolicy;
 
-        public UntypedConsumerConfigurator(Func<Type, object> consumerFactory, IRetryPolicy retryPolicy)
+        public UntypedConsumerConfigurator(Func<Type, object> consumerFactory)
         {
-            _retryPolicy = retryPolicy;
             _consumerFactory = new DelegateConsumerFactory<TConsumer>(() => (TConsumer)consumerFactory(typeof(TConsumer)));
         }
 
@@ -52,7 +49,7 @@ namespace MassTransit.ConsumeConfigurators
 
         public void Configure(IReceiveEndpointBuilder builder)
         {
-            ConsumerConnectorCache<TConsumer>.Connector.Connect(builder, _consumerFactory, _retryPolicy);
+            ConsumerConnectorCache<TConsumer>.Connector.Connect(builder, _consumerFactory);
         }
     }
 }

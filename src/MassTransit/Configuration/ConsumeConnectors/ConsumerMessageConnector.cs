@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -18,7 +18,6 @@ namespace MassTransit.ConsumeConnectors
     using PipeConfigurators;
     using Pipeline;
     using Pipeline.Filters;
-    using Policies;
     using Util;
 
 
@@ -46,7 +45,7 @@ namespace MassTransit.ConsumeConnectors
             get { return typeof(TMessage); }
         }
 
-        ConnectHandle ConsumerConnector.Connect<T>(IConsumePipeConnector consumePipe, IConsumerFactory<T> consumerFactory, IRetryPolicy retryPolicy,
+        ConnectHandle ConsumerConnector.Connect<T>(IConsumePipeConnector consumePipe, IConsumerFactory<T> consumerFactory,
             params IPipeSpecification<ConsumerConsumeContext<T>>[] pipeSpecifications)
         {
             var factory = consumerFactory as IConsumerFactory<TConsumer>;
@@ -68,11 +67,8 @@ namespace MassTransit.ConsumeConnectors
                 x.Filter(_consumeFilter);
             });
 
-            IPipe<ConsumeContext<TMessage>> pipe = Pipe.New<ConsumeContext<TMessage>>(x =>
-            {
-                x.Retry(retryPolicy);
-                x.Filter(new ConsumerMessageFilter<TConsumer, TMessage>(factory, messagePipe));
-            });
+            IPipe<ConsumeContext<TMessage>> pipe =
+                Pipe.New<ConsumeContext<TMessage>>(x => x.Filter(new ConsumerMessageFilter<TConsumer, TMessage>(factory, messagePipe)));
 
             return consumePipe.ConnectConsumePipe(pipe);
         }

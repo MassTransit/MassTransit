@@ -13,6 +13,7 @@
 namespace MassTransit.ConsumeConnectors
 {
     using Pipeline;
+    using Pipeline.Filters;
 
 
     public class LegacyConsumeConnectorFactory<TConsumer, TMessage> :

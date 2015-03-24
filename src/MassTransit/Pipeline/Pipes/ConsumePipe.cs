@@ -56,7 +56,7 @@ namespace MassTransit.Pipeline.Pipes
             return _filter.ConnectConsumeMessageObserver(observer);
         }
 
-        bool IPipe<ConsumeContext>.Visit(IPipeVisitor visitor)
+        bool IPipe<ConsumeContext>.Visit(IPipelineVisitor visitor)
         {
             return _pipe.Visit(visitor);
         }

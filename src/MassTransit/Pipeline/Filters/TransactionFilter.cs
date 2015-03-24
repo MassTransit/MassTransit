@@ -67,7 +67,7 @@ namespace MassTransit.Pipeline.Filters
             }
         }
 
-        bool IFilter<T>.Visit(IPipeVisitor visitor)
+        bool IFilter<T>.Visit(IPipelineVisitor visitor)
         {
             return visitor.Visit(this);
         }

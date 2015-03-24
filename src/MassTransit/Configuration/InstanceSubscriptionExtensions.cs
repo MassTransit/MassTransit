@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -15,7 +15,6 @@ namespace MassTransit
     using System;
     using ConsumeConfigurators;
     using ConsumeConnectors;
-    using Policies;
 
 
     /// <summary>
@@ -30,12 +29,10 @@ namespace MassTransit
         /// - the item that is passed as a parameter to
         /// the action that is calling the configurator.</param>
         /// <param name="instance">The instance to subscribe.</param>
-        /// <param name="retryPolicy"></param>
         /// <returns>An instance subscription configurator.</returns>
-        public static IInstanceConfigurator Instance(this IReceiveEndpointConfigurator configurator, object instance,
-            IRetryPolicy retryPolicy = null)
+        public static IInstanceConfigurator Instance(this IReceiveEndpointConfigurator configurator, object instance)
         {
-            var instanceConfigurator = new InstanceConfigurator(instance, retryPolicy ?? Retry.None);
+            var instanceConfigurator = new InstanceConfigurator(instance);
 
             configurator.AddEndpointSpecification(instanceConfigurator);
 
@@ -47,10 +44,9 @@ namespace MassTransit
         /// </summary>
         /// <param name="bus">The service bus to configure</param>
         /// <param name="instance"></param>
-        /// <param name="retryPolicy"></param>
         /// <returns>The unsubscribe action that can be called to unsubscribe the instance
         /// passed as an argument.</returns>
-        public static ConnectHandle ConnectInstance(this IBus bus, object instance, IRetryPolicy retryPolicy = null)
+        public static ConnectHandle ConnectInstance(this IBus bus, object instance)
         {
             if (bus == null)
                 throw new ArgumentNullException("bus");
@@ -59,7 +55,7 @@ namespace MassTransit
 
             InstanceConnector connector = InstanceConnectorCache.GetInstanceConnector(instance.GetType());
 
-            return connector.Connect(bus, instance, retryPolicy ?? Retry.None);
+            return connector.Connect(bus, instance);
         }
 
         /// <summary>
@@ -68,15 +64,14 @@ namespace MassTransit
         /// <typeparam name="T">The consumer type</typeparam>
         /// <param name="bus">The service bus instance to call this method on.</param>
         /// <param name="instance">The instance to subscribe.</param>
-        /// <param name="retryPolicy"></param>
         /// <returns>The unsubscribe action that can be called to unsubscribe the instance
         /// passed as an argument.</returns>
-        public static ConnectHandle ConnectInstance<T>(this IServiceBus bus, T instance, IRetryPolicy retryPolicy = null)
+        public static ConnectHandle ConnectInstance<T>(this IServiceBus bus, T instance)
             where T : class, IConsumer
         {
             InstanceConnector connector = InstanceConnectorCache.GetInstanceConnector<T>();
 
-            return connector.Connect(bus, instance, retryPolicy ?? Retry.None);
+            return connector.Connect(bus, instance);
         }
     }
 }

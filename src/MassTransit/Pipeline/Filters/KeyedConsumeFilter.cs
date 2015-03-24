@@ -53,7 +53,7 @@ namespace MassTransit.Pipeline.Filters
                 await filter.Send(context, next);
         }
 
-        public bool Visit(IPipeVisitor visitor)
+        public bool Visit(IPipelineVisitor visitor)
         {
             return visitor.Visit(this, x => _pipes.Values.Cast<IFilter<ConsumeContext<T>>>().All(pipe => pipe.Visit(x)));
         }

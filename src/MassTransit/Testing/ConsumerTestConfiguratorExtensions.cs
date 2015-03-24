@@ -14,6 +14,7 @@ namespace MassTransit.Testing
 {
     using System;
     using Pipeline;
+    using Pipeline.ConsumerFactories;
     using TestInstanceConfigurators;
 
 

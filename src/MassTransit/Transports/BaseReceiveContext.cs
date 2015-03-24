@@ -67,17 +67,19 @@ namespace MassTransit.Transports
             _pendingTasks.Add(task);
         }
 
-        bool PipeContext.HasPayloadType(Type contextType)
+        public bool HasPayloadType(Type contextType)
         {
             return _payloadCache.HasPayloadType(contextType);
         }
 
-        bool PipeContext.TryGetPayload<TPayload>(out TPayload context)
+        public bool TryGetPayload<TPayload>(out TPayload context) 
+            where TPayload : class
         {
             return _payloadCache.TryGetPayload(out context);
         }
 
-        TPayload PipeContext.GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory)
+        public TPayload GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory) 
+            where TPayload : class
         {
             return _payloadCache.GetOrAddPayload(payloadFactory);
         }

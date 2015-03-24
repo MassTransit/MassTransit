@@ -15,8 +15,6 @@ namespace Automatonymous.SubscriptionConfigurators
     using System.Collections.Generic;
     using MassTransit;
     using MassTransit.Configurators;
-    using MassTransit.EndpointConfigurators;
-    using MassTransit.Policies;
     using MassTransit.Saga;
     using SubscriptionConnectors;
 
@@ -47,7 +45,7 @@ namespace Automatonymous.SubscriptionConfigurators
         public void Configure(IReceiveEndpointBuilder builder)
         {
             var connector = new StateMachineConnector<TInstance>(_stateMachine, _repository);
-            connector.Connect(builder, _repository, Retry.None);
+            connector.Connect(builder, _repository);
         }
     }
 }

@@ -57,7 +57,7 @@ namespace MassTransit.Pipeline.Filters
             await _rescuePipe.Send(context);
         }
 
-        bool IFilter<T>.Visit(IPipeVisitor visitor)
+        bool IFilter<T>.Visit(IPipelineVisitor visitor)
         {
             return visitor.Visit(this, x => _rescuePipe.Visit(x));
         }

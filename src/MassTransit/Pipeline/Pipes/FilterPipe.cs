@@ -10,7 +10,7 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Pipeline
+namespace MassTransit.Pipeline.Pipes
 {
     using System.Threading.Tasks;
 
@@ -33,7 +33,7 @@ namespace MassTransit.Pipeline
             return _filter.Send(context, _next);
         }
 
-        public bool Visit(IPipeVisitor visitor)
+        public bool Visit(IPipelineVisitor visitor)
         {
             return _filter.Visit(visitor) && _next.Visit(visitor);
         }

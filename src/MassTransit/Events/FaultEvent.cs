@@ -21,6 +21,9 @@ namespace MassTransit.Events
     {
         public FaultEvent(T message, HostInfo host, Exception exception)
         {
+            Timestamp = DateTime.UtcNow;
+            FaultId = NewId.NextGuid();
+
             Message = message;
             Host = host;
 

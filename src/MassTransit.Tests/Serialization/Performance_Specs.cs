@@ -20,6 +20,7 @@ namespace MassTransit.Tests.Serialization
     using MassTransit.Transports.InMemory;
     using Messages;
     using NUnit.Framework;
+    using Util;
 
 
     [TestFixture(typeof(JsonMessageSerializer))]
@@ -81,7 +82,7 @@ namespace MassTransit.Tests.Serialization
             {
                 byte[] data = Serialize(sendContext);
 
-                var transportMessage = new InMemoryTransportMessage(Guid.NewGuid(), data, Serializer.ContentType.MediaType);
+                var transportMessage = new InMemoryTransportMessage(Guid.NewGuid(), data, Serializer.ContentType.MediaType, TypeMetadataCache<SerializationTestMessage>.ShortName);
                 receiveContext = new InMemoryReceiveContext(new Uri("loopback://localhost/input_queue"), transportMessage);
 
                 Deserialize<SerializationTestMessage>(receiveContext);

@@ -10,10 +10,33 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Pipeline
+namespace MassTransit.Pipeline.Filters
 {
-    public interface IReceivePipe :
-        IPipe<ReceiveContext>
+    using System;
+    using System.Threading.Tasks;
+
+
+    public class DelegateFilter<T> :
+        IFilter<T>
+        where T : class, PipeContext
     {
+        readonly Action<T> _callback;
+
+        public DelegateFilter(Action<T> callback)
+        {
+            _callback = callback;
+        }
+
+        public Task Send(T context, IPipe<T> next)
+        {
+            _callback(context);
+
+            return next.Send(context);
+        }
+
+        public bool Visit(IPipelineVisitor visitor)
+        {
+            return visitor.Visit(this);
+        }
     }
 }

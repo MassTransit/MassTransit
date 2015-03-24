@@ -83,11 +83,12 @@ namespace MassTransit.Transports.InMemory
 
                 await _observers.ForEach(x => x.PreSend(context));
 
-                var transportMessage = new InMemoryTransportMessage(messageId, context.Body, context.ContentType.MediaType);
+                var transportMessage = new InMemoryTransportMessage(messageId, context.Body, context.ContentType.MediaType, TypeMetadataCache<T>.ShortName);
 
                 _collection.Add(transportMessage, cancelSend);
 
-                _log.DebugFormat("SENT: {0} {1} {2}", _inputAddress, transportMessage.MessageId, TypeMetadataCache<T>.ShortName);
+                context.DestinationAddress.LogSent(context.MessageId.HasValue ? context.MessageId.Value.ToString("N") : "",
+                    TypeMetadataCache<T>.ShortName);
 
                 await _observers.ForEach(x => x.PostSend(context));
             }
@@ -108,7 +109,12 @@ namespace MassTransit.Transports.InMemory
 
             byte[] body = await GetMessageBody(context.Body);
 
-            var transportMessage = new InMemoryTransportMessage(messageId, body, context.ContentType.MediaType);
+            string messageType = "Unknown";
+            InMemoryTransportMessage receivedMessage;
+            if (context.TryGetPayload(out receivedMessage))
+                messageType = receivedMessage.MessageType;
+
+            var transportMessage = new InMemoryTransportMessage(messageId, body, context.ContentType.MediaType, messageType);
 
             _collection.Add(transportMessage, context.CancellationToken);
         }
@@ -140,14 +146,12 @@ namespace MassTransit.Transports.InMemory
 
                                 await context.CompleteTask;
 
-                                _log.DebugFormat("RCVD: {0} {1}", _inputAddress, message.MessageId);
+                                _inputAddress.LogReceived(message.MessageId.ToString("N"), message.MessageType);
                             }
                             catch (Exception ex)
                             {
                                 message.DeliveryCount++;
                                 _log.Error(string.Format("RCV FAULT: {0}", message.MessageId), ex);
-
-                                _collection.Add(message, stopTokenSource.Token);
                             }
                         });
                     }

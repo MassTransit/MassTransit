@@ -12,8 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
-    using System;
-    using Pipeline;
     using Transports;
 
 
@@ -22,13 +20,6 @@ namespace MassTransit
     /// </summary>
     public interface IReceiveEndpoint
     {
-        Uri InputAddress { get; }
-
-        /// <summary>
-        /// The input pipe for the endpoint
-        /// </summary>
-        IConsumePipe ConsumePipe { get; }
-
         /// <summary>
         /// Starts recieving from the inbound transport.
         /// </summary>

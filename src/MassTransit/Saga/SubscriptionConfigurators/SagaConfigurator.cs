@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -15,8 +15,6 @@ namespace MassTransit.Saga.SubscriptionConfigurators
     using System.Collections.Generic;
     using Configurators;
     using Connectors;
-    using EndpointConfigurators;
-    using MassTransit.Policies;
 
 
     public class SagaConfigurator<TSaga> :
@@ -24,18 +22,16 @@ namespace MassTransit.Saga.SubscriptionConfigurators
         IReceiveEndpointSpecification
         where TSaga : class, ISaga
     {
-        readonly IRetryPolicy _retryPolicy;
         readonly ISagaRepository<TSaga> _sagaRepository;
 
-        public SagaConfigurator(ISagaRepository<TSaga> sagaRepository, IRetryPolicy retryPolicy)
+        public SagaConfigurator(ISagaRepository<TSaga> sagaRepository)
         {
             _sagaRepository = sagaRepository;
-            _retryPolicy = retryPolicy;
         }
 
         public void Configure(IReceiveEndpointBuilder builder)
         {
-            SagaConnectorCache<TSaga>.Connector.Connect(builder, _sagaRepository, _retryPolicy ?? Retry.None);
+            SagaConnectorCache<TSaga>.Connector.Connect(builder, _sagaRepository);
         }
 
         public IEnumerable<ValidationResult> Validate()

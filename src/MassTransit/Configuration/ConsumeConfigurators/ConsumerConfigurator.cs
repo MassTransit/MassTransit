@@ -17,7 +17,6 @@ namespace MassTransit.ConsumeConfigurators
     using Configurators;
     using PipeConfigurators;
     using Pipeline;
-    using Policies;
 
 
     public class ConsumerConfigurator<TConsumer> :
@@ -27,30 +26,28 @@ namespace MassTransit.ConsumeConfigurators
     {
         readonly IConsumerFactory<TConsumer> _consumerFactory;
 
-        readonly List<IPipeSpecification<ConsumerConsumeContext<TConsumer>>> _pipeBuilderConfigurators;
-        readonly IRetryPolicy _retryPolicy;
+        readonly List<IPipeSpecification<ConsumerConsumeContext<TConsumer>>> _pipeSpecifications;
 
-        public ConsumerConfigurator(IConsumerFactory<TConsumer> consumerFactory, IRetryPolicy retryPolicy)
+        public ConsumerConfigurator(IConsumerFactory<TConsumer> consumerFactory)
         {
             _consumerFactory = consumerFactory;
-            _retryPolicy = retryPolicy;
 
-            _pipeBuilderConfigurators = new List<IPipeSpecification<ConsumerConsumeContext<TConsumer>>>();
+            _pipeSpecifications = new List<IPipeSpecification<ConsumerConsumeContext<TConsumer>>>();
         }
 
         public void AddPipeSpecification(IPipeSpecification<ConsumerConsumeContext<TConsumer>> specification)
         {
-            _pipeBuilderConfigurators.Add(specification);
+            _pipeSpecifications.Add(specification);
         }
 
         public IEnumerable<ValidationResult> Validate()
         {
-            return _consumerFactory.Validate().Concat(_pipeBuilderConfigurators.SelectMany(x => x.Validate()));
+            return _consumerFactory.Validate().Concat(_pipeSpecifications.SelectMany(x => x.Validate()));
         }
 
         public void Configure(IReceiveEndpointBuilder builder)
         {
-            builder.ConnectConsumer(_consumerFactory, _retryPolicy, _pipeBuilderConfigurators.ToArray());
+            builder.ConnectConsumer(_consumerFactory, _pipeSpecifications.ToArray());
         }
     }
 }

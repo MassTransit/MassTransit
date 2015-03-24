@@ -18,6 +18,7 @@ namespace MassTransit.Pipeline
 
     /// <summary>
     /// Allows a message to be intercepted during Send
+    /// this is probably a bad idea given the use of middleware as a better method
     /// </summary>
     /// <typeparam name="T"></typeparam>
     public interface ISendInterceptor<in T>

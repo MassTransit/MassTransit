@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,9 +13,7 @@
 namespace MassTransit
 {
     using System;
-    using Internals.Extensions;
     using Logging;
-    using Policies;
     using Saga;
     using Saga.Connectors;
     using Saga.SubscriptionConfigurators;
@@ -32,16 +30,15 @@ namespace MassTransit
         /// <typeparam name="TSaga"></typeparam>
         /// <param name="configurator"></param>
         /// <param name="sagaRepository"></param>
-        /// <param name="retryPolicy"></param>
         /// <returns></returns>
         public static ISagaConfigurator<TSaga> Saga<TSaga>(this IReceiveEndpointConfigurator configurator,
-            ISagaRepository<TSaga> sagaRepository, IRetryPolicy retryPolicy = null)
+            ISagaRepository<TSaga> sagaRepository)
             where TSaga : class, ISaga
         {
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Subscribing Saga: {0}", TypeMetadataCache<TSaga>.ShortName);
 
-            var sagaConfigurator = new SagaConfigurator<TSaga>(sagaRepository, retryPolicy);
+            var sagaConfigurator = new SagaConfigurator<TSaga>(sagaRepository);
 
             configurator.AddEndpointSpecification(sagaConfigurator);
 
@@ -54,7 +51,7 @@ namespace MassTransit
         /// <typeparam name="TSaga">The saga type</typeparam>
         /// <param name="bus">The bus to which the saga is to be connected</param>
         /// <param name="sagaRepository">The saga repository</param>
-        public static ConnectHandle ConnectSaga<TSaga>(this IBus bus, ISagaRepository<TSaga> sagaRepository, IRetryPolicy retryPolicy = null)
+        public static ConnectHandle ConnectSaga<TSaga>(this IBus bus, ISagaRepository<TSaga> sagaRepository)
             where TSaga : class, ISaga
         {
             if (bus == null)
@@ -65,7 +62,7 @@ namespace MassTransit
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Subscribing Saga: {0}", TypeMetadataCache<TSaga>.ShortName);
 
-            return SagaConnectorCache<TSaga>.Connector.Connect(bus, sagaRepository, retryPolicy ?? Retry.None);
+            return SagaConnectorCache<TSaga>.Connector.Connect(bus, sagaRepository);
         }
     }
 }

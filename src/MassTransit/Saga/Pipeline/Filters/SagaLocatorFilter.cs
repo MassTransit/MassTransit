@@ -64,7 +64,7 @@ namespace MassTransit.Saga.Pipeline.Filters
             }
         }
 
-        bool IFilter<ConsumeContext<TMessage>>.Visit(IPipeVisitor visitor)
+        bool IFilter<ConsumeContext<TMessage>>.Visit(IPipelineVisitor visitor)
         {
             return visitor.Visit(this);
         }

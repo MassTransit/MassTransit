@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,7 +13,6 @@
 namespace MassTransit.Tests
 {
     using System.Threading.Tasks;
-    using System.Transactions;
     using MassTransit.Pipeline;
     using NUnit.Framework;
     using TestFramework;
@@ -22,24 +21,6 @@ namespace MassTransit.Tests
     public class Intercepting_a_consumer_factory :
         InMemoryTestFixture
     {
-        [Test]
-        public async void Should_call_the_consumer_method()
-        {
-            await _myConsumer.Called.Task;
-        }
-
-        [Test]
-        public async void Should_call_the_interceptor_first()
-        {
-            await _transactionFilter.First.Task;
-        }
-
-        [Test]
-        public async void Should_call_the_interceptor_second()
-        {
-            await _transactionFilter.Second.Task;
-        }
-
         [TestFixtureSetUp]
         public void Setup()
         {
@@ -74,16 +55,13 @@ namespace MassTransit.Tests
             public async Task Send(ConsumerConsumeContext<MyConsumer> context, IPipe<ConsumerConsumeContext<MyConsumer>> next)
             {
                 First.TrySetResult(true);
-                using (var scope = new TransactionScope(TransactionScopeOption.RequiresNew))
-                {
-                    await next.Send(context);
 
-                    scope.Complete();
-                }
+                await next.Send(context);
+
                 Second.TrySetResult(true);
             }
 
-            public bool Visit(IPipeVisitor visitor)
+            public bool Visit(IPipelineVisitor visitor)
             {
                 return visitor.Visit(this);
             }
@@ -109,6 +87,25 @@ namespace MassTransit.Tests
 
         class A
         {
+        }
+
+
+        [Test]
+        public async void Should_call_the_consumer_method()
+        {
+            await _myConsumer.Called.Task;
+        }
+
+        [Test]
+        public async void Should_call_the_interceptor_first()
+        {
+            await _transactionFilter.First.Task;
+        }
+
+        [Test]
+        public async void Should_call_the_interceptor_second()
+        {
+            await _transactionFilter.Second.Task;
         }
     }
 }

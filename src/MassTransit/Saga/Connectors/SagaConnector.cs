@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -16,14 +16,13 @@ namespace MassTransit.Saga.Connectors
     using System.Collections.Generic;
     using System.Linq;
     using MassTransit.Pipeline;
-    using MassTransit.Policies;
     using PipeConfigurators;
     using Util;
 
 
     public interface SagaConnector
     {
-        ConnectHandle Connect<T>(IConsumePipeConnector consumePipe, ISagaRepository<T> sagaRepository, IRetryPolicy retryPolicy,
+        ConnectHandle Connect<T>(IConsumePipeConnector consumePipe, ISagaRepository<T> sagaRepository,
             params IPipeSpecification<SagaConsumeContext<T>>[] pipeSpecifications)
             where T : class, ISaga;
     }
@@ -62,15 +61,16 @@ namespace MassTransit.Saga.Connectors
             get { return _connectors; }
         }
 
-        public ConnectHandle Connect<T>(IConsumePipeConnector consumePipe, ISagaRepository<T> sagaRepository, IRetryPolicy retryPolicy,
-            params IPipeSpecification<SagaConsumeContext<T>>[] pipeSpecifications) where T : class, ISaga
+        public ConnectHandle Connect<T>(IConsumePipeConnector consumePipe, ISagaRepository<T> sagaRepository,
+            params IPipeSpecification<SagaConsumeContext<T>>[] pipeSpecifications) 
+            where T : class, ISaga
         {
             var handles = new List<ConnectHandle>();
             try
             {
                 foreach (SagaMessageConnector connector in _connectors)
                 {
-                    ConnectHandle handle = connector.Connect(consumePipe, sagaRepository, retryPolicy, pipeSpecifications);
+                    ConnectHandle handle = connector.Connect(consumePipe, sagaRepository, pipeSpecifications);
 
                     handles.Add(handle);
                 }

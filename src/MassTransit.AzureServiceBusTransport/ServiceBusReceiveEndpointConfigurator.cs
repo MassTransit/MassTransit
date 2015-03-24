@@ -185,7 +185,7 @@ namespace MassTransit.AzureServiceBusTransport
 
             var transport = new AzureServiceBusReceiveTransport(_host, settings, endpointBuilder.GetTopicSubscriptions().ToArray());
 
-            return new ReceiveEndpoint(transport, receivePipe, consumePipe);
+            return new ReceiveEndpoint(transport, receivePipe);
         }
 
 

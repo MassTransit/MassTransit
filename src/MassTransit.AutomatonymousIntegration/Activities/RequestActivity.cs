@@ -106,7 +106,7 @@ namespace Automatonymous.Activities
                 context.ResponseAddress = _responseAddress;
             }
 
-            public bool Visit(IPipeVisitor visitor)
+            public bool Visit(IPipelineVisitor visitor)
             {
                 return visitor.Visit(this);
             }

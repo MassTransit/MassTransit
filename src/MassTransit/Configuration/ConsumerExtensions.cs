@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,11 +14,9 @@ namespace MassTransit
 {
     using System;
     using ConsumeConfigurators;
-    using EndpointConfigurators;
     using Internals.Extensions;
     using Logging;
-    using Pipeline;
-    using Policies;
+    using Pipeline.ConsumerFactories;
     using Util;
 
 
@@ -32,16 +30,15 @@ namespace MassTransit
         /// <typeparam name="TConsumer"></typeparam>
         /// <param name="configurator"></param>
         /// <param name="consumerFactory"></param>
-        /// <param name="retryPolicy"></param>
         /// <returns></returns>
         public static IConsumerConfigurator<TConsumer> Consumer<TConsumer>(this IReceiveEndpointConfigurator configurator,
-            IConsumerFactory<TConsumer> consumerFactory, IRetryPolicy retryPolicy = null)
+            IConsumerFactory<TConsumer> consumerFactory)
             where TConsumer : class, IConsumer
         {
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Subscribing Consumer: {0} (using supplied consumer factory)", TypeMetadataCache<TConsumer>.ShortName);
 
-            var consumerConfigurator = new ConsumerConfigurator<TConsumer>(consumerFactory, retryPolicy ?? Retry.None);
+            var consumerConfigurator = new ConsumerConfigurator<TConsumer>(consumerFactory);
 
             configurator.AddEndpointSpecification(consumerConfigurator);
 
@@ -54,10 +51,8 @@ namespace MassTransit
         /// <typeparam name="TConsumer"></typeparam>
         /// <param name="bus"></param>
         /// <param name="consumerFactory"></param>
-        /// <param name="retryPolicy"></param>
         /// <returns></returns>
-        public static ConnectHandle ConnectConsumer<TConsumer>(this IBus bus, IConsumerFactory<TConsumer> consumerFactory,
-            IRetryPolicy retryPolicy = null)
+        public static ConnectHandle ConnectConsumer<TConsumer>(this IBus bus, IConsumerFactory<TConsumer> consumerFactory)
             where TConsumer : class, IConsumer
         {
             if (bus == null)
@@ -65,7 +60,7 @@ namespace MassTransit
             if (consumerFactory == null)
                 throw new ArgumentNullException("consumerFactory");
 
-            return bus.ConnectConsumer(consumerFactory, retryPolicy);
+            return bus.ConnectConsumer(consumerFactory);
         }
 
         /// <summary>
@@ -73,10 +68,8 @@ namespace MassTransit
         /// </summary>
         /// <typeparam name="TConsumer">The consumer type</typeparam>
         /// <param name="configurator"></param>
-        /// <param name="retryPolicy"></param>
         /// <returns></returns>
-        public static IConsumerConfigurator<TConsumer> Consumer<TConsumer>(this IReceiveEndpointConfigurator configurator,
-            IRetryPolicy retryPolicy = null)
+        public static IConsumerConfigurator<TConsumer> Consumer<TConsumer>(this IReceiveEndpointConfigurator configurator)
             where TConsumer : class, IConsumer, new()
         {
             if (_log.IsDebugEnabled)
@@ -84,7 +77,7 @@ namespace MassTransit
 
             var consumerFactory = new DefaultConstructorConsumerFactory<TConsumer>();
 
-            var consumerConfigurator = new ConsumerConfigurator<TConsumer>(consumerFactory, retryPolicy ?? Retry.None);
+            var consumerConfigurator = new ConsumerConfigurator<TConsumer>(consumerFactory);
 
             configurator.AddEndpointSpecification(consumerConfigurator);
 
@@ -96,15 +89,14 @@ namespace MassTransit
         /// </summary>
         /// <typeparam name="TConsumer"></typeparam>
         /// <param name="bus"></param>
-        /// <param name="retryPolicy"></param>
         /// <returns></returns>
-        public static ConnectHandle ConnectConsumer<TConsumer>(this IBus bus, IRetryPolicy retryPolicy = null)
+        public static ConnectHandle ConnectConsumer<TConsumer>(this IBus bus)
             where TConsumer : class, IConsumer, new()
         {
             if (bus == null)
                 throw new ArgumentNullException("bus");
 
-            return bus.ConnectConsumer<TConsumer>(retryPolicy);
+            return bus.ConnectConsumer<TConsumer>();
         }
 
         /// <summary>
@@ -113,10 +105,9 @@ namespace MassTransit
         /// <typeparam name="TConsumer"></typeparam>
         /// <param name="configurator"></param>
         /// <param name="consumerFactoryMethod"></param>
-        /// <param name="retryPolicy"></param>
         /// <returns></returns>
         public static IConsumerConfigurator<TConsumer> Consumer<TConsumer>(this IReceiveEndpointConfigurator configurator,
-            Func<TConsumer> consumerFactoryMethod, IRetryPolicy retryPolicy = null)
+            Func<TConsumer> consumerFactoryMethod)
             where TConsumer : class, IConsumer
         {
             if (_log.IsDebugEnabled)
@@ -124,8 +115,7 @@ namespace MassTransit
 
             var delegateConsumerFactory = new DelegateConsumerFactory<TConsumer>(consumerFactoryMethod);
 
-            var consumerConfigurator = new ConsumerConfigurator<TConsumer>(delegateConsumerFactory,
-                retryPolicy ?? Retry.None);
+            var consumerConfigurator = new ConsumerConfigurator<TConsumer>(delegateConsumerFactory);
 
             configurator.AddEndpointSpecification(consumerConfigurator);
 
@@ -138,16 +128,16 @@ namespace MassTransit
         /// <typeparam name="TConsumer"></typeparam>
         /// <param name="bus"></param>
         /// <param name="consumerFactoryMethod"></param>
-        /// <param name="retryPolicy"></param>
         /// <returns></returns>
-        public static ConnectHandle ConnectConsumer<TConsumer>(this IBus bus, Func<TConsumer> consumerFactoryMethod,
-            IRetryPolicy retryPolicy = null)
+        public static ConnectHandle ConnectConsumer<TConsumer>(this IBus bus, Func<TConsumer> consumerFactoryMethod)
             where TConsumer : class, IConsumer
         {
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Subscribing Consumer: {0} (using delegate consumer factory)", typeof(TConsumer));
 
-            return bus.ConnectConsumer(consumerFactoryMethod, retryPolicy);
+            var consumerFactory = new DelegateConsumerFactory<TConsumer>(consumerFactoryMethod);
+
+            return bus.ConnectConsumer(consumerFactory);
         }
 
         /// <summary>
@@ -156,16 +146,15 @@ namespace MassTransit
         /// <param name="configurator"></param>
         /// <param name="consumerType"></param>
         /// <param name="consumerFactory"></param>
-        /// <param name="retryPolicy"></param>
         /// <returns></returns>
         public static IConsumerConfigurator Consumer(this IReceiveEndpointConfigurator configurator, Type consumerType,
-            Func<Type, object> consumerFactory, IRetryPolicy retryPolicy = null)
+            Func<Type, object> consumerFactory)
         {
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Subscribing Consumer: {0} (by type, using object consumer factory)", consumerType.GetTypeName());
 
             var consumerConfigurator = (IReceiveEndpointSpecification)Activator.CreateInstance(
-                typeof(UntypedConsumerConfigurator<>).MakeGenericType(consumerType), consumerFactory, retryPolicy ?? Retry.None);
+                typeof(UntypedConsumerConfigurator<>).MakeGenericType(consumerType), consumerFactory);
 
             configurator.AddEndpointSpecification(consumerConfigurator);
 
@@ -178,10 +167,8 @@ namespace MassTransit
         /// <param name="bus"></param>
         /// <param name="consumerType"></param>
         /// <param name="objectFactory"></param>
-        /// <param name="retryPolicy"></param>
         /// <returns></returns>
-        public static ConnectHandle ConnectConsumer(this IBus bus, Type consumerType, Func<Type, object> objectFactory,
-            IRetryPolicy retryPolicy = null)
+        public static ConnectHandle ConnectConsumer(this IBus bus, Type consumerType, Func<Type, object> objectFactory)
         {
             if (bus == null)
                 throw new ArgumentNullException("bus");
@@ -195,7 +182,7 @@ namespace MassTransit
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Subscribing Consumer: {0} (by type, using object consumer factory)", consumerType);
 
-            return bus.ConnectConsumer(consumerType, objectFactory, retryPolicy);
+            return bus.ConnectConsumer(consumerType, objectFactory);
         }
     }
 }

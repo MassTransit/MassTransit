@@ -17,7 +17,6 @@ namespace MassTransit.ConsumeConnectors
     using System.Linq;
     using PipeConfigurators;
     using Pipeline;
-    using Policies;
     using Util;
 
 
@@ -27,7 +26,7 @@ namespace MassTransit.ConsumeConnectors
     /// </summary>
     public interface ConsumerConnector
     {
-        ConnectHandle Connect<TConsumer>(IConsumePipeConnector consumePipe, IConsumerFactory<TConsumer> consumerFactory, IRetryPolicy retryPolicy,
+        ConnectHandle Connect<TConsumer>(IConsumePipeConnector consumePipe, IConsumerFactory<TConsumer> consumerFactory,
             params IPipeSpecification<ConsumerConsumeContext<TConsumer>>[] pipeSpecifications)
             where TConsumer : class;
     }
@@ -55,8 +54,7 @@ namespace MassTransit.ConsumeConnectors
             get { return _connectors; }
         }
 
-        public ConnectHandle Connect<TConsumer>(IConsumePipeConnector consumePipe, IConsumerFactory<TConsumer> consumerFactory,
-            IRetryPolicy retryPolicy, params IPipeSpecification<ConsumerConsumeContext<TConsumer>>[] pipeSpecifications)
+        public ConnectHandle Connect<TConsumer>(IConsumePipeConnector consumePipe, IConsumerFactory<TConsumer> consumerFactory, params IPipeSpecification<ConsumerConsumeContext<TConsumer>>[] pipeSpecifications)
             where TConsumer : class
         {
             var handles = new List<ConnectHandle>();
@@ -64,7 +62,7 @@ namespace MassTransit.ConsumeConnectors
             {
                 foreach (ConsumerMessageConnector connector in _connectors)
                 {
-                    ConnectHandle handle = connector.Connect(consumePipe, consumerFactory, retryPolicy, pipeSpecifications);
+                    ConnectHandle handle = connector.Connect(consumePipe, consumerFactory, pipeSpecifications);
 
                     handles.Add(handle);
                 }

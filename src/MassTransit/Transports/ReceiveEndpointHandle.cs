@@ -24,11 +24,6 @@ namespace MassTransit.Transports
         IDisposable
     {
         /// <summary>
-        /// The receive endpoint
-        /// </summary>
-        IReceiveEndpoint Endpoint { get; }
-
-        /// <summary>
         /// Stop the endpoint, releasing any resources associated with the endpoint
         /// </summary>
         /// <param name="cancellationToken"></param>

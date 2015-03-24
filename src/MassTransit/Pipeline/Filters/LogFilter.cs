@@ -37,7 +37,7 @@ namespace MassTransit.Pipeline.Filters
             return Task.WhenAll(logTask, next.Send(context));
         }
 
-        public bool Visit(IPipeVisitor visitor)
+        public bool Visit(IPipelineVisitor visitor)
         {
             return visitor.Visit(this);
         }

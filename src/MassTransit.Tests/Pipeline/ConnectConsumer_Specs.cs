@@ -16,7 +16,6 @@ namespace MassTransit.Tests.Pipeline
     using MassTransit.Pipeline;
     using MassTransit.Pipeline.Pipes;
     using NUnit.Framework;
-    using Policies;
     using TestFramework;
     using TestFramework.Messages;
 
@@ -34,7 +33,7 @@ namespace MassTransit.Tests.Pipeline
 
             IConsumerFactory<OneMessageConsumer> factory = GetInstanceConsumerFactory(consumer);
 
-            filter.ConnectConsumer(factory, retryPolicy: Retry.None);
+            filter.ConnectConsumer(factory);
 
             var consumeContext = new TestConsumeContext<MessageA>(new MessageA());
 
@@ -52,7 +51,7 @@ namespace MassTransit.Tests.Pipeline
 
             object subscribeConsumer = consumer;
 
-            filter.ConnectInstance(subscribeConsumer, Retry.None);
+            filter.ConnectInstance(subscribeConsumer);
 
             var consumeContext = new TestConsumeContext<MessageA>(new MessageA());
 
@@ -70,9 +69,9 @@ namespace MassTransit.Tests.Pipeline
 
             IConsumerFactory<OneMessageConsumer> factory = GetInstanceConsumerFactory(consumer);
 
-            filter.ConnectConsumer(factory, retryPolicy: Retry.None);
+            filter.ConnectConsumer(factory);
 
-            var inspector = new StringPipeVisitor();
+            var inspector = new StringPipelineVisitor();
             filter.Visit(inspector);
 
             Console.WriteLine(inspector.ToString());
@@ -87,7 +86,7 @@ namespace MassTransit.Tests.Pipeline
 
             IConsumerFactory<TwoMessageConsumer> factory = GetInstanceConsumerFactory(consumer);
 
-            filter.ConnectConsumer(factory, retryPolicy: Retry.None);
+            filter.ConnectConsumer(factory);
 
             await filter.Send(new TestConsumeContext<MessageA>(new MessageA()));
 

@@ -15,6 +15,7 @@ namespace MassTransit.Tests.Configuration
     using System.Linq;
     using ConsumeConnectors;
     using MassTransit.Pipeline;
+    using MassTransit.Pipeline.ConsumerFactories;
     using NUnit.Framework;
     using Shouldly;
 
