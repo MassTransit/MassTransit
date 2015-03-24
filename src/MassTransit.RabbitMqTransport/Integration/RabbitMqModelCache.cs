@@ -66,8 +66,8 @@ namespace MassTransit.RabbitMqTransport.Integration
 
                     var scope = new ModelScope(modelContext);
 
-                    ModelShutdownEventHandler modelShutdown = null;
-                    modelShutdown = (connection, reason) =>
+                    EventHandler<ShutdownEventArgs> modelShutdown = null;
+                    modelShutdown = (obj, reason) =>
                     {
                         scope.ModelContext.Model.ModelShutdown -= modelShutdown;
                         scope.ModelClosed.TrySetResult(true);

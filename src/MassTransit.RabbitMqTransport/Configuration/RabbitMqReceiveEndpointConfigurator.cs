@@ -97,9 +97,9 @@ namespace MassTransit.RabbitMqTransport.Configuration
             set { _settings.PrefetchCount = value; }
         }
 
-        public void ExchangeType(ExchangeType exchangeType)
+        public void ExchangeType(string exchangeType)
         {
-            _settings.ExchangeType = exchangeType.ToString();
+            _settings.ExchangeType = exchangeType;
         }
 
         public void SetQueueArgument(string key, object value)

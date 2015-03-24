@@ -19,6 +19,7 @@ namespace MassTransit.RabbitMqTransport.Integration
     using Logging;
     using MassTransit.Pipeline;
     using Pipeline;
+    using RabbitMQ.Client;
     using RabbitMQ.Client.Events;
 
 
@@ -71,8 +72,10 @@ namespace MassTransit.RabbitMqTransport.Integration
             {
                 x.ExecuteAsync(async connectionContext =>
                 {
-                    ConnectionShutdownEventHandler connectionShutdown = null;
-                    connectionShutdown = (connection, reason) =>
+                    var connection = connectionContext.Connection;
+
+                    EventHandler<ShutdownEventArgs> connectionShutdown = null;
+                    connectionShutdown = (obj, reason) =>
                     {
                         connection.ConnectionShutdown -= connectionShutdown;
                         scope.ConnectionClosed.TrySetResult(true);

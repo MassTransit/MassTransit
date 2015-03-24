@@ -18,6 +18,7 @@ namespace MassTransit.RabbitMqTransport.Tests
     using Magnum.Extensions;
     using NUnit.Framework;
     using Policies;
+    using RabbitMQ.Client;
     using TestFramework;
 
 
@@ -52,6 +53,8 @@ namespace MassTransit.RabbitMqTransport.Tests
                     e.PrefetchCount = 16;
                     e.Durable(false);
                     e.Exclusive();
+
+                    e.ExchangeType(ExchangeType.Fanout);
 
                     e.UseLog(Console.Out, async c => string.Format("Logging: {0}", c.MessageId.Value));
 

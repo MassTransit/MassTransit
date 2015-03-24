@@ -211,6 +211,11 @@ namespace MassTransit.RabbitMqTransport.Integration
             _model.WaitForConfirmsOrDie(timeout);
         }
 
+        public int ChannelNumber
+        {
+            get { return _model.ChannelNumber; }
+        }
+
         public string BasicConsume(string queue, bool noAck, IBasicConsumer consumer)
         {
             return _model.BasicConsume(queue, noAck, consumer);
@@ -388,53 +393,53 @@ namespace MassTransit.RabbitMqTransport.Integration
             get { return _model.NextPublishSeqNo; }
         }
 
-        public event ModelShutdownEventHandler ModelShutdown
+        public event EventHandler<ShutdownEventArgs> ModelShutdown
         {
             add { _model.ModelShutdown += value; }
             remove { _model.ModelShutdown -= value; }
         }
 
-        public event BasicReturnEventHandler BasicReturn
+        public event EventHandler<BasicReturnEventArgs> BasicReturn
         {
             add { _model.BasicReturn += value; }
             remove { _model.BasicReturn -= value; }
         }
 
-        public event BasicAckEventHandler BasicAcks
+        public event EventHandler<BasicAckEventArgs> BasicAcks
         {
             add { _model.BasicAcks += value; }
             remove { _model.BasicAcks -= value; }
         }
 
-        public event BasicNackEventHandler BasicNacks
+        public event EventHandler<BasicNackEventArgs> BasicNacks
         {
             add { _model.BasicNacks += value; }
             remove { _model.BasicNacks -= value; }
         }
 
-        public event CallbackExceptionEventHandler CallbackException
+        public event EventHandler<CallbackExceptionEventArgs> CallbackException
         {
             add { _model.CallbackException += value; }
             remove { _model.CallbackException -= value; }
         }
 
-        public event FlowControlEventHandler FlowControl
+        public event EventHandler<FlowControlEventArgs> FlowControl
         {
             add { _model.FlowControl += value; }
             remove { _model.FlowControl -= value; }
         }
 
-        public event BasicRecoverOkEventHandler BasicRecoverOk
+        public event EventHandler<EventArgs> BasicRecoverOk
         {
             add { _model.BasicRecoverOk += value; }
             remove { _model.BasicRecoverOk -= value; }
         }
 
-        void ModelOnBasicReturn(IModel model, BasicReturnEventArgs args)
+        void ModelOnBasicReturn(object model, BasicReturnEventArgs args)
         {
         }
 
-        void ModelOnBasicNacks(IModel model, BasicNackEventArgs args)
+        void ModelOnBasicNacks(object model, BasicNackEventArgs args)
         {
             if (args.Multiple)
             {
@@ -454,7 +459,7 @@ namespace MassTransit.RabbitMqTransport.Integration
             }
         }
 
-        void ModelOnBasicAcks(IModel model, BasicAckEventArgs args)
+        void ModelOnBasicAcks(object model, BasicAckEventArgs args)
         {
             if (args.Multiple)
             {

@@ -85,7 +85,7 @@ namespace MassTransit.RabbitMqTransport.Contexts
             get { return _tokenSource.Token; }
         }
 
-        void OnModelShutdown(IModel model, ShutdownEventArgs reason)
+        void OnModelShutdown(object model, ShutdownEventArgs reason)
         {
             _tokenSource.Cancel();
 
