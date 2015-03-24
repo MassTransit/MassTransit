@@ -20,8 +20,18 @@ namespace MassTransit
 
     public static class RetryPipeConfiguratorExtensions
     {
-        public static void Retry<T>(this IPipeConfigurator<T> configurator, IRetryPolicy retryPolicy)
-            where T : class, PipeContext
+        public static void Retry(this IPipeConfigurator<ConsumeContext> configurator, IRetryPolicy retryPolicy)
+        {
+            if (configurator == null)
+                throw new ArgumentNullException("configurator");
+
+            var pipeBuilderConfigurator = new RetryPipeSpecification(retryPolicy);
+
+            configurator.AddPipeSpecification(pipeBuilderConfigurator);
+        }
+
+        public static void Retry<T>(this IPipeConfigurator<ConsumeContext<T>> configurator, IRetryPolicy retryPolicy)
+            where T : class
         {
             if (configurator == null)
                 throw new ArgumentNullException("configurator");
@@ -38,8 +48,7 @@ namespace MassTransit
         /// <param name="configurator">The pipe configurator</param>
         /// <param name="retryPolicy">The retry policy</param>
         /// <param name="cancellationToken">The cancellation token to end the retry operations</param>
-        public static void Retry<T>(this IPipeConfigurator<T> configurator, IRetryPolicy retryPolicy, CancellationToken cancellationToken)
-            where T : class, PipeContext
+        public static void Retry(this IPipeConfigurator<ConsumeContext> configurator, IRetryPolicy retryPolicy, CancellationToken cancellationToken)
         {
             if (configurator == null)
                 throw new ArgumentNullException("configurator");
@@ -48,7 +57,7 @@ namespace MassTransit
 
             retryPolicy = new CancelRetryPolicy(retryPolicy, cancellationToken);
 
-            var pipeBuilderConfigurator = new RetryPipeSpecification<T>(retryPolicy);
+            var pipeBuilderConfigurator = new RetryPipeSpecification(retryPolicy);
 
             configurator.AddPipeSpecification(pipeBuilderConfigurator);
         }

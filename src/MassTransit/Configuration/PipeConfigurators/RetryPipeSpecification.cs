@@ -19,9 +19,8 @@ namespace MassTransit.PipeConfigurators
     using Policies;
 
 
-    public class RetryPipeSpecification<T> :
-        IPipeSpecification<T>
-        where T : class, PipeContext
+    public class RetryPipeSpecification :
+        IPipeSpecification<ConsumeContext>
     {
         readonly IRetryPolicy _retryPolicy;
 
@@ -30,7 +29,30 @@ namespace MassTransit.PipeConfigurators
             _retryPolicy = retryPolicy;
         }
 
-        public void Apply(IPipeBuilder<T> builder)
+        public void Apply(IPipeBuilder<ConsumeContext> builder)
+        {
+            builder.AddFilter(new RetryFilter(_retryPolicy));
+        }
+
+        public IEnumerable<ValidationResult> Validate()
+        {
+            if (_retryPolicy == null)
+                yield return this.Failure("RetryPolicy", "must not be null");
+        }
+    }
+
+    public class RetryPipeSpecification<T> :
+        IPipeSpecification<ConsumeContext<T>>
+        where T : class
+    {
+        readonly IRetryPolicy _retryPolicy;
+
+        public RetryPipeSpecification(IRetryPolicy retryPolicy)
+        {
+            _retryPolicy = retryPolicy;
+        }
+
+        public void Apply(IPipeBuilder<ConsumeContext<T>> builder)
         {
             builder.AddFilter(new RetryFilter<T>(_retryPolicy));
         }

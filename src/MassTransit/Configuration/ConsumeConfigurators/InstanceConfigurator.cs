@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -16,7 +16,6 @@ namespace MassTransit.ConsumeConfigurators
     using Configurators;
     using ConsumeConnectors;
     using Internals.Extensions;
-    using Policies;
 
 
     public class InstanceConfigurator :
@@ -24,17 +23,15 @@ namespace MassTransit.ConsumeConfigurators
         IReceiveEndpointSpecification
     {
         readonly object _instance;
-        readonly IRetryPolicy _retryPolicy;
 
-        public InstanceConfigurator(object instance, IRetryPolicy retryPolicy)
+        public InstanceConfigurator(object instance)
         {
             _instance = instance;
-            _retryPolicy = retryPolicy;
         }
 
         public void Configure(IReceiveEndpointBuilder builder)
         {
-            InstanceConnectorCache.GetInstanceConnector(_instance.GetType()).Connect(builder, _instance, _retryPolicy);
+            InstanceConnectorCache.GetInstanceConnector(_instance.GetType()).Connect(builder, _instance);
         }
 
         public IEnumerable<ValidationResult> Validate()

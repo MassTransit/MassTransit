@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -21,15 +21,22 @@ namespace MassTransit.Transports.InMemory
         readonly byte[] _body;
         readonly IDictionary<string, object> _headers;
         readonly Guid _messageId;
+        readonly string _messageType;
 
-        public InMemoryTransportMessage(Guid messageId, byte[] body, string contentType)
+        public InMemoryTransportMessage(Guid messageId, byte[] body, string contentType, string messageType)
         {
             _headers = new Dictionary<string, object>();
             _messageId = messageId;
             _body = body;
+            _messageType = messageType;
 
             _headers["MessageId"] = messageId.ToString();
             _headers["Content-Type"] = contentType;
+        }
+
+        public string MessageType
+        {
+            get { return _messageType; }
         }
 
         public Guid MessageId

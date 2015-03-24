@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -16,7 +16,7 @@ namespace MassTransit.ConsumeConnectors
     using System.Collections.Concurrent;
     using System.Threading;
     using Pipeline;
-    using Policies;
+    using Pipeline.ConsumerFactories;
 
 
     public class ConsumerConnectorCache<TConsumer> :
@@ -64,10 +64,9 @@ namespace MassTransit.ConsumeConnectors
                 (CachedConnector)Activator.CreateInstance(typeof(CachedConnector<>).MakeGenericType(type)));
         }
 
-        public static ConnectHandle Connect(IConsumePipeConnector consumePipe, Type consumerType, Func<Type, object> objectFactory,
-            IRetryPolicy retryPolicy)
+        public static ConnectHandle Connect(IConsumePipeConnector consumePipe, Type consumerType, Func<Type, object> objectFactory)
         {
-            return GetOrAdd(consumerType).Connect(consumePipe, objectFactory, retryPolicy);
+            return GetOrAdd(consumerType).Connect(consumePipe, objectFactory);
         }
 
 
@@ -82,7 +81,7 @@ namespace MassTransit.ConsumeConnectors
         {
             ConsumerConnector Connector { get; }
 
-            ConnectHandle Connect(IConsumePipeConnector consumePipe, Func<Type, object> objectFactory, IRetryPolicy retryPolicy);
+            ConnectHandle Connect(IConsumePipeConnector consumePipe, Func<Type, object> objectFactory);
         }
 
 
@@ -102,11 +101,11 @@ namespace MassTransit.ConsumeConnectors
                 get { return _connector.Value; }
             }
 
-            public ConnectHandle Connect(IConsumePipeConnector consumePipe, Func<Type, object> objectFactory, IRetryPolicy retryPolicy)
+            public ConnectHandle Connect(IConsumePipeConnector consumePipe, Func<Type, object> objectFactory)
             {
                 var consumerFactory = new ObjectConsumerFactory<T>(objectFactory);
 
-                return _connector.Value.Connect(consumePipe, consumerFactory, retryPolicy);
+                return _connector.Value.Connect(consumePipe, consumerFactory);
             }
         }
     }

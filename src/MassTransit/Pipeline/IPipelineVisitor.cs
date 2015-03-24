@@ -12,7 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Pipeline
 {
-    public interface IPipeVisitor
+    public interface IPipelineVisitor
     {
         bool Visit<T>(IFilter<T> filter)
             where T : class, PipeContext;

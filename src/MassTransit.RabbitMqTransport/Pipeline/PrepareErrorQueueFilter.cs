@@ -43,7 +43,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
             return next.Send(context);
         }
 
-        bool IFilter<ModelContext>.Visit(IPipeVisitor visitor)
+        bool IFilter<ModelContext>.Visit(IPipelineVisitor visitor)
         {
             return visitor.Visit(this);
         }

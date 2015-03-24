@@ -76,7 +76,7 @@ namespace MassTransit
 
             if (_log.IsDebugEnabled)
             {
-                var inspector = new StringPipeVisitor();
+                var inspector = new StringPipelineVisitor();
                 consumePipe.Visit(inspector);
 
                 _log.Debug(inspector.ToString());
@@ -84,7 +84,7 @@ namespace MassTransit
 
             IPipe<ReceiveContext> receivePipe = CreateReceivePipe(builder, consumePipe);
 
-            return new ReceiveEndpoint(transport, receivePipe, consumePipe);
+            return new ReceiveEndpoint(transport, receivePipe);
         }
 
         IPipe<ReceiveContext> CreateReceivePipe(IInMemoryBusBuilder builder, IConsumePipe consumePipe)

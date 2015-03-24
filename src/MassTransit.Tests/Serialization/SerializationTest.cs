@@ -22,6 +22,7 @@ namespace MassTransit.Tests.Serialization
     using NUnit.Framework;
     using Shouldly;
     using TestFramework;
+    using Util;
 
 
     public abstract class SerializationTest :
@@ -94,7 +95,7 @@ namespace MassTransit.Tests.Serialization
                 Trace.WriteLine(Encoding.UTF8.GetString(serializedMessageData));
             }
 
-            var message = new InMemoryTransportMessage(Guid.NewGuid(), serializedMessageData, Serializer.ContentType.MediaType);
+            var message = new InMemoryTransportMessage(Guid.NewGuid(), serializedMessageData, Serializer.ContentType.MediaType, TypeMetadataCache<T>.ShortName);
             var receiveContext = new InMemoryReceiveContext(new Uri("loopback://localhost/input_queue"), message);
 
             ConsumeContext consumeContext = Deserializer.Deserialize(receiveContext);

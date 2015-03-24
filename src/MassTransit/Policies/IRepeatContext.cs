@@ -10,16 +10,17 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Pipeline
+namespace MassTransit.Policies
 {
-    public interface IConsumerFilterVisitor :
-        IPipelineVisitor
-    {
-        bool Visit<TConsumer>(IFilter<ConsumerConsumeContext<TConsumer>> filter, FilterVisitorCallback callback)
-            where TConsumer : class, IConsumer;
+    using System;
+    using System.Threading;
 
-        bool Visit<TConsumer, TMessage>(IFilter<ConsumerConsumeContext<TConsumer, TMessage>> filter, FilterVisitorCallback callback)
-            where TConsumer : class, IConsumer<TMessage>
-            where TMessage : class;
+
+    public interface IRepeatContext :
+        IDisposable
+    {
+        CancellationToken CancellationToken { get; }
+
+        bool CanRepeat(out TimeSpan delay);
     }
 }

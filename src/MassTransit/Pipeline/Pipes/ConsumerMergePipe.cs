@@ -37,7 +37,7 @@ namespace MassTransit.Pipeline.Pipes
             return _output.Send(context.PopContext<TMessage>());
         }
 
-        public bool Visit(IPipeVisitor visitor)
+        public bool Visit(IPipelineVisitor visitor)
         {
             return visitor.Visit(this, x => _output.Visit(x));
         }

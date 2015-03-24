@@ -40,7 +40,7 @@ namespace MassTransit.Pipeline.Pipes
             return _filter.Send(context, Cache.LastPipe);
         }
 
-        public bool Visit(IPipeVisitor visitor)
+        public bool Visit(IPipelineVisitor visitor)
         {
             return _filter.Visit(visitor);
         }
@@ -59,7 +59,7 @@ namespace MassTransit.Pipeline.Pipes
             {
             }
 
-            public bool Visit(IPipeVisitor visitor)
+            public bool Visit(IPipelineVisitor visitor)
             {
                 return true;
             }

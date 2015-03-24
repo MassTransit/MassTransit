@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -26,65 +26,40 @@ namespace MassTransit.Transports
     public class ReceiveEndpoint :
         IReceiveEndpoint
     {
-        readonly IConsumePipe _consumePipe;
         readonly IPipe<ReceiveContext> _receivePipe;
         readonly IReceiveTransport _receiveTransport;
 
-        public ReceiveEndpoint(IReceiveTransport receiveTransport, IPipe<ReceiveContext> receivePipe, IConsumePipe consumePipe)
+        public ReceiveEndpoint(IReceiveTransport receiveTransport, IPipe<ReceiveContext> receivePipe)
         {
             _receiveTransport = receiveTransport;
             _receivePipe = receivePipe;
-            _consumePipe = consumePipe;
-        }
-
-        Uri IReceiveEndpoint.InputAddress
-        {
-            get { return _receiveTransport.InputAddress; }
-        }
-
-        IConsumePipe IReceiveEndpoint.ConsumePipe
-        {
-            get { return _consumePipe; }
         }
 
         ReceiveEndpointHandle IReceiveEndpoint.Start()
         {
             ReceiveTransportHandle transportHandle = _receiveTransport.Start(_receivePipe);
 
-            return new Handle(this, transportHandle);
+            return new Handle(transportHandle);
         }
 
 
         class Handle :
             ReceiveEndpointHandle
         {
-            readonly IReceiveEndpoint _endpoint;
-            readonly CancellationTokenSource _stop;
             readonly ReceiveTransportHandle _transportHandle;
 
-            public Handle(IReceiveEndpoint endpoint, ReceiveTransportHandle transportHandle)
+            public Handle(ReceiveTransportHandle transportHandle)
             {
-                _endpoint = endpoint;
                 _transportHandle = transportHandle;
-                _stop = new CancellationTokenSource();
-            }
-
-            IReceiveEndpoint ReceiveEndpointHandle.Endpoint
-            {
-                get { return _endpoint; }
             }
 
             void IDisposable.Dispose()
             {
-                _stop.Cancel();
-
                 _transportHandle.Dispose();
             }
 
             async Task ReceiveEndpointHandle.Stop(CancellationToken cancellationToken)
             {
-                _stop.Cancel();
-
                 await _transportHandle.Stop(cancellationToken);
             }
         }

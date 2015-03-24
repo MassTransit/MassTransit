@@ -28,6 +28,8 @@ namespace MassTransit.Transports.InMemory
         {
             _body = message.Body;
             _message = message;
+
+            GetOrAddPayload(() => this);
         }
 
         protected override IHeaderProvider HeaderProvider

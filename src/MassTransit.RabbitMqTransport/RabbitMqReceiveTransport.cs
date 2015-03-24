@@ -33,14 +33,12 @@ namespace MassTransit.RabbitMqTransport
         readonly IConnectionCache _connectionCache;
         readonly ExchangeBindingSettings[] _exchangeBindings;
         readonly Uri _inputAddress;
-        readonly IRetryPolicy _retryPolicy;
         readonly ReceiveSettings _settings;
 
         public RabbitMqReceiveTransport(IConnectionCache connectionCache, ReceiveSettings settings, Uri inputAddress,
-            IRetryPolicy retryPolicy, params ExchangeBindingSettings[] exchangeBindings)
+            params ExchangeBindingSettings[] exchangeBindings)
         {
             _connectionCache = connectionCache;
-            _retryPolicy = retryPolicy;
             _settings = settings;
             _inputAddress = inputAddress;
             _exchangeBindings = exchangeBindings;
@@ -61,16 +59,9 @@ namespace MassTransit.RabbitMqTransport
         {
             var stopTokenSource = new CancellationTokenSource();
 
-            IPipe<ConnectionContext> transportPipe = Pipe.New<ConnectionContext>(x =>
-            {
-                // we want to retry the connection at intervals defined by the retry policy in the event of connection failures
-                x.Retry(_retryPolicy, stopTokenSource.Token);
+            IPipe<ConnectionContext> pipe = Pipe.New<ConnectionContext>(x => x.RabbitMqConsumer(receivePipe, _settings, _exchangeBindings));
 
-                // we want our consumer to connect to the transport once connected
-                x.RabbitMqConsumer(receivePipe, _settings, _exchangeBindings);
-            });
-
-            Task receiverTask = Receiver(transportPipe, stopTokenSource.Token);
+            Task receiverTask = Receiver(pipe, stopTokenSource.Token);
 
             return new Handle(stopTokenSource, receiverTask);
         }

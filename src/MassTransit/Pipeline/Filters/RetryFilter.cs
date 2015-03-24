@@ -14,6 +14,7 @@ namespace MassTransit.Pipeline.Filters
 {
     using System;
     using System.Threading.Tasks;
+    using Context;
     using Policies;
 
 
@@ -22,9 +23,8 @@ namespace MassTransit.Pipeline.Filters
     /// with the policy
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class RetryFilter<T> :
-        IFilter<T>
-        where T : class, PipeContext
+    public class RetryFilter :
+        IFilter<ConsumeContext>
     {
         readonly IRetryPolicy _retryPolicy;
 
@@ -38,18 +38,22 @@ namespace MassTransit.Pipeline.Filters
             get { return _retryPolicy; }
         }
 
-        async Task IFilter<T>.Send(T context, IPipe<T> next)
+        async Task IFilter<ConsumeContext>.Send(ConsumeContext context, IPipe<ConsumeContext> next)
         {
-            await Attempt(context, next);
+            var retryContext = new RetryConsumeContext(context);
+
+            await Attempt(retryContext, next);
         }
 
-        bool IFilter<T>.Visit(IPipeVisitor visitor)
+        bool IFilter<ConsumeContext>.Visit(IPipelineVisitor visitor)
         {
             return visitor.Visit(this);
         }
 
-        async Task Attempt(T context, IPipe<T> next)
+        async Task Attempt(RetryConsumeContext context, IPipe<ConsumeContext> next)
         {
+            context.ClearPendingFaults();
+
             TimeSpan delay;
             try
             {
@@ -61,6 +65,7 @@ namespace MassTransit.Pipeline.Filters
             {
                 if (!_retryPolicy.CanRetry(ex))
                 {
+                    context.NotifyPendingFaults();
                     throw;
                 }
 
@@ -68,7 +73,79 @@ namespace MassTransit.Pipeline.Filters
                 // is the one to set the actual retry context with the deepest configured policy
                 IRetryContext retryContext = context.GetOrAddPayload(() => _retryPolicy.GetRetryContext());
                 if (!retryContext.CanRetry(ex, out delay))
+                {
+                    context.NotifyPendingFaults();
                     throw;
+                }
+            }
+
+            await Task.Delay(delay);
+
+            await Attempt(context, next);
+        }
+    }
+
+
+    /// <summary>
+    /// Uses a retry policy to handle exceptions, retrying the operation in according
+    /// with the policy
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    public class RetryFilter<T> :
+        IFilter<ConsumeContext<T>>
+        where T : class
+    {
+        readonly IRetryPolicy _retryPolicy;
+
+        public RetryFilter(IRetryPolicy retryPolicy)
+        {
+            _retryPolicy = retryPolicy;
+        }
+
+        public IRetryPolicy RetryPolicy
+        {
+            get { return _retryPolicy; }
+        }
+
+        async Task IFilter<ConsumeContext<T>>.Send(ConsumeContext<T> context, IPipe<ConsumeContext<T>> next)
+        {
+            var retryContext = new RetryConsumeContext<T>(context);
+
+            await Attempt(retryContext, next);
+        }
+
+        bool IFilter<ConsumeContext<T>>.Visit(IPipelineVisitor visitor)
+        {
+            return visitor.Visit(this);
+        }
+
+        async Task Attempt(RetryConsumeContext<T> context, IPipe<ConsumeContext<T>> next)
+        {
+            context.ClearPendingFaults();
+
+            TimeSpan delay;
+            try
+            {
+                await next.Send(context);
+
+                return;
+            }
+            catch (Exception ex)
+            {
+                if (!_retryPolicy.CanRetry(ex))
+                {
+                    context.NotifyPendingFaults();
+                    throw;
+                }
+
+                // by not adding the retry payload until the exception occurs, the deepest retry filter
+                // is the one to set the actual retry context with the deepest configured policy
+                IRetryContext retryContext = context.GetOrAddPayload(() => _retryPolicy.GetRetryContext());
+                if (!retryContext.CanRetry(ex, out delay))
+                {
+                    context.NotifyPendingFaults();
+                    throw;
+                }
             }
 
             await Task.Delay(delay);

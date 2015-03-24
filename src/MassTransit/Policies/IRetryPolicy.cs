@@ -13,7 +13,6 @@
 namespace MassTransit.Policies
 {
     using System;
-    using System.Threading;
 
 
     public interface IRetryPolicy
@@ -30,20 +29,5 @@ namespace MassTransit.Policies
         /// <param name="exception">The exception that occurred</param>
         /// <returns>True if the task should be retried</returns>
         bool CanRetry(Exception exception);
-    }
-
-
-    public interface IRepeatPolicy
-    {
-        IRepeatContext GetRepeatContext();
-    }
-
-
-    public interface IRepeatContext : 
-        IDisposable
-    {
-        CancellationToken CancellationToken { get; }
-
-        bool CanRepeat(out TimeSpan delay);
     }
 }

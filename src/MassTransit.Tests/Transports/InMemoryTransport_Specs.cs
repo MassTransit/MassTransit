@@ -18,6 +18,7 @@ namespace MassTransit.Tests.Transports
         using System.Threading;
         using System.Threading.Tasks;
         using MassTransit.Pipeline;
+        using MassTransit.Pipeline.Filters;
         using MassTransit.Serialization;
         using MassTransit.Transports;
         using MassTransit.Transports.InMemory;

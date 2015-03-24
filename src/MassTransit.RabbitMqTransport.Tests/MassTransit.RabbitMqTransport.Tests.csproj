@@ -95,7 +95,6 @@
     <Compile Include="TestFactory.cs" />
     <Compile Include="MessageName_Specs.cs" />
     <Compile Include="Testing\HandlerTest_Specs.cs" />
-    <Compile Include="TestReceivePipe.cs" />
     <Compile Include="When_a_message_consumer_throws_an_exception.cs" />
     <Compile Include="When_a_message_is_published.cs" />
     <Compile Include="RabbitMqAddress_Specs.cs" />

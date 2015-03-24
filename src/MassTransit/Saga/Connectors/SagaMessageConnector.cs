@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -15,7 +15,6 @@ namespace MassTransit.Saga.Connectors
     using System;
     using System.Collections.Generic;
     using MassTransit.Pipeline;
-    using MassTransit.Policies;
     using PipeBuilders;
     using PipeConfigurators;
     using Pipeline.Filters;
@@ -28,15 +27,13 @@ namespace MassTransit.Saga.Connectors
         Type MessageType { get; }
     }
 
+
     public abstract class SagaMessageConnector<TSaga, TMessage> :
         SagaMessageConnector
         where TSaga : class, ISaga
         where TMessage : class
     {
-        protected abstract IFilter<SagaConsumeContext<TSaga, TMessage>> GetMessageFilter();
-        protected abstract IFilter<ConsumeContext<TMessage>> GetLocatorFilter(ISagaRepository<TSaga> repository);
-
-        public ConnectHandle Connect<T>(IConsumePipeConnector consumePipe, ISagaRepository<T> sagaRepository, IRetryPolicy retryPolicy,
+        public ConnectHandle Connect<T>(IConsumePipeConnector consumePipe, ISagaRepository<T> sagaRepository,
             params IPipeSpecification<SagaConsumeContext<T>>[] pipeSpecifications)
             where T : class, ISaga
         {
@@ -62,7 +59,6 @@ namespace MassTransit.Saga.Connectors
             IPipe<ConsumeContext<TMessage>> pipe = Pipe.New<ConsumeContext<TMessage>>(x =>
             {
                 x.Filter(GetLocatorFilter(repository));
-                x.Retry(retryPolicy);
                 x.Filter(new SagaMessageFilter<TSaga, TMessage>(repository, messagePipe));
             });
 
@@ -73,6 +69,9 @@ namespace MassTransit.Saga.Connectors
         {
             get { return typeof(TMessage); }
         }
+
+        protected abstract IFilter<SagaConsumeContext<TSaga, TMessage>> GetMessageFilter();
+        protected abstract IFilter<ConsumeContext<TMessage>> GetLocatorFilter(ISagaRepository<TSaga> repository);
 
 
         class SagaPipeBuilder<T> :

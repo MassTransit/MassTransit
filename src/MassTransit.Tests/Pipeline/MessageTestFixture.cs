@@ -13,6 +13,7 @@
 namespace MassTransit.Tests.Pipeline
 {
     using MassTransit.Pipeline;
+    using MassTransit.Pipeline.ConsumerFactories;
     using TestFramework;
     using TestFramework.Messages;
 

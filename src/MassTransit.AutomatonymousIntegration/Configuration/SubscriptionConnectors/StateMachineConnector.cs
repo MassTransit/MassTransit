@@ -16,10 +16,8 @@ namespace Automatonymous.SubscriptionConnectors
     using System.Collections.Generic;
     using System.Linq;
     using MassTransit;
-    using MassTransit.Internals.Extensions;
     using MassTransit.PipeConfigurators;
     using MassTransit.Pipeline;
-    using MassTransit.Policies;
     using MassTransit.Saga;
     using MassTransit.Saga.Connectors;
     using MassTransit.Util;
@@ -54,7 +52,7 @@ namespace Automatonymous.SubscriptionConnectors
             get { return _connectors; }
         }
 
-        public ConnectHandle Connect<T>(IConsumePipeConnector consumePipe, ISagaRepository<T> sagaRepository, IRetryPolicy retryPolicy,
+        public ConnectHandle Connect<T>(IConsumePipeConnector consumePipe, ISagaRepository<T> sagaRepository,
             params IPipeSpecification<SagaConsumeContext<T>>[] pipeSpecifications)
             where T : class, ISaga
         {
@@ -63,7 +61,7 @@ namespace Automatonymous.SubscriptionConnectors
             {
                 foreach (SagaMessageConnector connector in _connectors)
                 {
-                    ConnectHandle handle = connector.Connect(consumePipe, sagaRepository, retryPolicy, pipeSpecifications);
+                    ConnectHandle handle = connector.Connect(consumePipe, sagaRepository, pipeSpecifications);
 
                     handles.Add(handle);
                 }

@@ -16,7 +16,7 @@ namespace MassTransit.Pipeline
     /// A visitor that closes a message type
     /// </summary>
     public interface IConsumeMessageFilterVisitor :
-        IPipeVisitor
+        IPipelineVisitor
     {
         bool Visit<TMessage>(IFilter<ConsumeContext<TMessage>> filter, FilterVisitorCallback callback)
             where TMessage : class;

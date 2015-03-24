@@ -10,25 +10,26 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Pipeline
+namespace MassTransit.Pipeline.Filters
 {
     using System.Threading.Tasks;
     using Util;
 
 
     /// <summary>
-    /// Dispatches the ConsumeContext to the consumer method for the specified message type
+    ///     Dispatches the ConsumeContext to the consumer method for the specified message type
     /// </summary>
     /// <typeparam name="TConsumer">The consumer type</typeparam>
     /// <typeparam name="TMessage">The message type</typeparam>
-    public class MethodConsumerMessageFilter<TConsumer, TMessage> :
+    public class LegacyMethodConsumerMessageFilter<TConsumer, TMessage> :
         IConsumerMessageFilter<TConsumer, TMessage>
-        where TConsumer : class, IConsumer<TMessage>
+        where TConsumer : class, IMessageConsumer<TMessage>
         where TMessage : class
     {
-        public Task Send(ConsumerConsumeContext<TConsumer, TMessage> context, IPipe<ConsumerConsumeContext<TConsumer, TMessage>> next)
+        public async Task Send(ConsumerConsumeContext<TConsumer, TMessage> context,
+            IPipe<ConsumerConsumeContext<TConsumer, TMessage>> next)
         {
-            var messageConsumer = context.Consumer as IConsumer<TMessage>;
+            var messageConsumer = context.Consumer as IMessageConsumer<TMessage>;
             if (messageConsumer == null)
             {
                 string message = string.Format("Consumer type {0} is not a consumer of message type {1}",
@@ -37,10 +38,10 @@ namespace MassTransit.Pipeline
                 throw new ConsumerMessageException(message);
             }
 
-            return messageConsumer.Consume(context);
+            messageConsumer.Consume(context.Message);
         }
 
-        public bool Visit(IPipeVisitor visitor)
+        public bool Visit(IPipelineVisitor visitor)
         {
             return visitor.Visit(this);
         }

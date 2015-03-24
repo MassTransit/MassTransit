@@ -34,7 +34,7 @@ namespace MassTransit.Transports
             return _pipe.Send(publishContext);
         }
 
-        public bool Visit(IPipeVisitor visitor)
+        public bool Visit(IPipelineVisitor visitor)
         {
             return visitor.Visit(this, x => _pipe.Visit(x));
         }
@@ -59,7 +59,7 @@ namespace MassTransit.Transports
             return _pipe.Send(publishContext);
         }
 
-        public bool Visit(IPipeVisitor visitor)
+        public bool Visit(IPipelineVisitor visitor)
         {
             return visitor.Visit(this, x => _pipe.Visit(x));
         }

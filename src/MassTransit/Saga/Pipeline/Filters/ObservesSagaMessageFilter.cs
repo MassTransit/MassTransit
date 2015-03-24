@@ -43,7 +43,7 @@ namespace MassTransit.Saga.Pipeline.Filters
             await next.Send(context);
         }
 
-        public bool Visit(IPipeVisitor visitor)
+        public bool Visit(IPipelineVisitor visitor)
         {
             return visitor.Visit(this);
         }

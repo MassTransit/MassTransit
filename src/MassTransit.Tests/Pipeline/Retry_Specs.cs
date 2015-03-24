@@ -23,11 +23,16 @@ namespace MassTransit.Tests.Pipeline
     [TestFixture]
     public class Using_the_retry_filter
     {
+        class A
+        {
+        }
+
+
         [Test]
         public void Should_retry_the_specified_times_and_fail()
         {
             int count = 0;
-            IPipe<TestPipeContext> pipe = Pipe.New<TestPipeContext>(x =>
+            IPipe<ConsumeContext<A>> pipe = Pipe.New<ConsumeContext<A>>(x =>
             {
                 x.Retry(Retry.Interval(4, TimeSpan.FromMilliseconds(2)));
                 x.Execute(payload =>
@@ -37,7 +42,7 @@ namespace MassTransit.Tests.Pipeline
                 });
             });
 
-            var context = new TestPipeContext();
+            var context = new TestConsumeContext<A>(new A());
 
             var exception = Assert.Throws<IntentionalTestException>(async () => await pipe.Send(context));
 
@@ -48,7 +53,7 @@ namespace MassTransit.Tests.Pipeline
         public void Should_support_overloading_downstream()
         {
             int count = 0;
-            IPipe<TestPipeContext> pipe = Pipe.New<TestPipeContext>(x =>
+            IPipe<ConsumeContext<A>> pipe = Pipe.New<ConsumeContext<A>>(x =>
             {
                 x.Retry(Retry.Interval(4, TimeSpan.FromMilliseconds(2)));
                 x.Retry(Retry.None);
@@ -59,7 +64,7 @@ namespace MassTransit.Tests.Pipeline
                 });
             });
 
-            var context = new TestPipeContext();
+            var context = new TestConsumeContext<A>(new A());
 
             var exception = Assert.Throws<IntentionalTestException>(async () => await pipe.Send(context));
 
@@ -70,7 +75,7 @@ namespace MassTransit.Tests.Pipeline
         public void Should_support_overloading_downstream_either_way()
         {
             int count = 0;
-            IPipe<TestPipeContext> pipe = Pipe.New<TestPipeContext>(x =>
+            IPipe<ConsumeContext<A>> pipe = Pipe.New<ConsumeContext<A>>(x =>
             {
                 x.Retry(Retry.None);
                 x.Retry(Retry.Interval(4, TimeSpan.FromMilliseconds(2)));
@@ -81,7 +86,7 @@ namespace MassTransit.Tests.Pipeline
                 });
             });
 
-            var context = new TestPipeContext();
+            var context = new TestConsumeContext<A>(new A());
 
             var exception = Assert.Throws<IntentionalTestException>(async () => await pipe.Send(context));
 

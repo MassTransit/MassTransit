@@ -36,6 +36,6 @@ namespace MassTransit.Pipeline
         /// </summary>
         /// <param name="visitor"></param>
         /// <returns></returns>
-        bool Visit(IPipeVisitor visitor);
+        bool Visit(IPipelineVisitor visitor);
     }
 }

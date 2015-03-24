@@ -60,7 +60,7 @@ namespace MassTransit.Serialization
                 await _sendPipe.Send(context);
         }
 
-        public bool Visit(IPipeVisitor visitor)
+        public bool Visit(IPipelineVisitor visitor)
         {
             return visitor.Visit<SendContext<T>>(this,
                 x => (_pipe != null && _pipe.Visit(visitor)) || (_sendPipe != null && _sendPipe.Visit(visitor)));

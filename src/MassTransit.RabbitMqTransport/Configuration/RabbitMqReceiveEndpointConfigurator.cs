@@ -25,7 +25,6 @@ namespace MassTransit.RabbitMqTransport.Configuration
     using MassTransit.Pipeline.Filters;
     using PipeConfigurators;
     using Pipeline;
-    using Policies;
     using RabbitMQ.Client;
     using Transports;
 
@@ -168,10 +167,10 @@ namespace MassTransit.RabbitMqTransport.Configuration
 
             IPipe<ReceiveContext> receivePipe = _receivePipeConfigurator.Build();
 
-            var transport = new RabbitMqReceiveTransport(_host.ConnectionCache, _settings, InputAddress, Retry.None,
+            var transport = new RabbitMqReceiveTransport(_host.ConnectionCache, _settings, InputAddress,
                 endpointBuilder.GetExchangeBindings().ToArray());
 
-            return new ReceiveEndpoint(transport, receivePipe, consumePipe);
+            return new ReceiveEndpoint(transport, receivePipe);
         }
     }
 }

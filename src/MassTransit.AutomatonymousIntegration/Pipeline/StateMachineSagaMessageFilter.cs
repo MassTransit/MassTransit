@@ -64,7 +64,7 @@ namespace Automatonymous.Pipeline
             }
         }
 
-        public bool Visit(IPipeVisitor visitor)
+        public bool Visit(IPipelineVisitor visitor)
         {
             return visitor.Visit(this);
         }

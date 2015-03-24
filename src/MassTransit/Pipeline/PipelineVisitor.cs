@@ -17,7 +17,7 @@ namespace MassTransit.Pipeline
     using Internals.Extensions;
 
 
-    public class PipeVisitor :
+    public class PipelineVisitor :
         IConsumerFilterVisitor,
         IConsumeMessageFilterVisitor
     {
@@ -32,22 +32,22 @@ namespace MassTransit.Pipeline
             return VisitConsumerConsumeFilter(filter, callback);
         }
 
-        bool IPipeVisitor.Visit<T>(IFilter<T> filter)
+        bool IPipelineVisitor.Visit<T>(IFilter<T> filter)
         {
             return VisitFilter(filter, _ => true);
         }
 
-        bool IPipeVisitor.Visit<T>(IFilter<T> filter, FilterVisitorCallback callback)
+        bool IPipelineVisitor.Visit<T>(IFilter<T> filter, FilterVisitorCallback callback)
         {
             return VisitFilter(filter, callback);
         }
 
-        bool IPipeVisitor.Visit<T>(IPipe<T> pipe)
+        bool IPipelineVisitor.Visit<T>(IPipe<T> pipe)
         {
             return VisitPipe(pipe, _ => true);
         }
 
-        bool IPipeVisitor.Visit<T>(IPipe<T> pipe, PipeVisitorCallback callback)
+        bool IPipelineVisitor.Visit<T>(IPipe<T> pipe, PipeVisitorCallback callback)
         {
             return VisitPipe(pipe, callback);
         }
@@ -58,6 +58,10 @@ namespace MassTransit.Pipeline
             var consumeFilter = filter as MessageTypeConsumeFilter;
             if (consumeFilter != null)
                 return VisitMessageTypeConsumeFilter(consumeFilter, callback);
+
+            if (filter is RetryFilter)
+                return VisitRetryConsumeFilter((RetryFilter)filter, callback);
+
 
             if (typeof(T).HasInterface(typeof(ConsumerConsumeContext<,>)))
             {
@@ -82,9 +86,7 @@ namespace MassTransit.Pipeline
                 return VisitTeeConsumeFilter((TeeConsumeFilter<T>)filter, callback);
             if (filter is HandlerMessageFilter<T>)
                 return VisitHandlerMessageFilter((HandlerMessageFilter<T>)filter, callback);
-            if (filter is RetryFilter<ConsumeContext<T>>)
-                return VisitRetryConsumeFilter((RetryFilter<ConsumeContext<T>>)filter, callback);
-
+          
             return VisitUnknownFilter(filter, callback);
         }
 
@@ -117,8 +119,7 @@ namespace MassTransit.Pipeline
             return callback(this);
         }
 
-        protected virtual bool VisitRetryConsumeFilter<T>(RetryFilter<ConsumeContext<T>> filter, FilterVisitorCallback callback)
-            where T : class
+        protected virtual bool VisitRetryConsumeFilter(RetryFilter filter, FilterVisitorCallback callback)
         {
             return callback(this);
         }

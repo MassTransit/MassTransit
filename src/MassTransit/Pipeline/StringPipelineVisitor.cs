@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -15,12 +15,11 @@ namespace MassTransit.Pipeline
     using System.Text;
     using Filters;
     using Internals.Extensions;
-    using Policies;
     using Util;
 
 
-    public class StringPipeVisitor :
-        PipeVisitor
+    public class StringPipelineVisitor :
+        PipelineVisitor
     {
         readonly StringBuilder _builder = new StringBuilder();
 
@@ -52,21 +51,23 @@ namespace MassTransit.Pipeline
 
         protected override bool VisitHandlerMessageFilter<T>(HandlerMessageFilter<T> filter, FilterVisitorCallback callback)
         {
-            _builder.AppendFormat("Handler({0})", TypeMetadataCache<T>.ShortName).AppendLine(); ;
+            _builder.AppendFormat("Handler({0})", TypeMetadataCache<T>.ShortName).AppendLine();
+            ;
 
             return base.VisitHandlerMessageFilter(filter, callback);
         }
 
-        protected override bool VisitRetryConsumeFilter<T>(RetryFilter<ConsumeContext<T>> filter, FilterVisitorCallback callback)
+        protected override bool VisitRetryConsumeFilter(RetryFilter filter, FilterVisitorCallback callback)
         {
-            _builder.AppendFormat("Retry({0}) - {1}", TypeMetadataCache<T>.ShortName, filter.RetryPolicy).AppendLine();
+            _builder.AppendFormat("Retry({0}) - {1}", TypeMetadataCache<ConsumeContext>.ShortName, filter.RetryPolicy).AppendLine();
 
             return base.VisitRetryConsumeFilter(filter, callback);
         }
 
         protected override bool VisitMethodConsumerMessageFilter<TConsumer, T>(MethodConsumerMessageFilter<TConsumer, T> filter, FilterVisitorCallback callback)
         {
-            _builder.AppendFormat("Task {0}.Consume(ConsumeContext<{1}> context)", TypeMetadataCache<TConsumer>.ShortName, TypeMetadataCache<T>.ShortName).AppendLine();
+            _builder.AppendFormat("Task {0}.Consume(ConsumeContext<{1}> context)", TypeMetadataCache<TConsumer>.ShortName, TypeMetadataCache<T>.ShortName)
+                .AppendLine();
 
             return base.VisitMethodConsumerMessageFilter(filter, callback);
         }

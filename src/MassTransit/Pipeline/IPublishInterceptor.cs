@@ -5,6 +5,7 @@ namespace MassTransit.Pipeline
 
     /// <summary>
     /// Allows a message to be intercepted during Publish
+    /// this is probably a bad idea given the use of middleware as a better method
     /// </summary>
     /// <typeparam name="T"></typeparam>
     public interface IPublishInterceptor<in T>
