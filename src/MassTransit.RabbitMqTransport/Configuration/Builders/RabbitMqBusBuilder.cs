@@ -60,9 +60,14 @@ namespace MassTransit.RabbitMqTransport.Configuration.Builders
             return _busEndpointConfigurator.InputAddress;
         }
 
+        protected override ISendTransportProvider CreateSendTransportProvider()
+        {
+            return new RabbitMqSendTransportProvider(_hosts);
+        }
+
         protected override ISendEndpointProvider CreateSendEndpointProvider()
         {
-            var sendEndpointProvider = new RabbitMqSendEndpointProvider(MessageSerializer, _hosts, InputAddress);
+            var sendEndpointProvider = new RabbitMqSendEndpointProvider(MessageSerializer, InputAddress, SendTransportProvider);
 
             return new SendEndpointCache(sendEndpointProvider);
         }

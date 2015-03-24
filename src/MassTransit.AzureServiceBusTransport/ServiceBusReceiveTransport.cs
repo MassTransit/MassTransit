@@ -25,16 +25,16 @@ namespace MassTransit.AzureServiceBusTransport
     using Transports;
 
 
-    public class AzureServiceBusReceiveTransport :
+    public class ServiceBusReceiveTransport :
         IReceiveTransport
     {
+        static readonly ILog _log = Logger.Get<ServiceBusReceiveTransport>();
         readonly IServiceBusHost _host;
         readonly Uri _inputAddress;
-        readonly ILog _log = Logger.Get<AzureServiceBusReceiveTransport>();
         readonly ReceiveSettings _settings;
         readonly TopicSubscriptionSettings[] _subscriptionSettings;
 
-        public AzureServiceBusReceiveTransport(IServiceBusHost host, ReceiveSettings settings,
+        public ServiceBusReceiveTransport(IServiceBusHost host, ReceiveSettings settings,
             params TopicSubscriptionSettings[] subscriptionSettings)
         {
             _host = host;
@@ -66,7 +66,7 @@ namespace MassTransit.AzureServiceBusTransport
                 x.Filter(new MessageReceiverFilter(receivePipe));
             });
 
-            var receiveTask = Receiver(stopTokenSource.Token, connectionPipe);
+            Task receiveTask = Receiver(stopTokenSource.Token, connectionPipe);
 
             return new Handle(stopTokenSource, receiveTask);
         }
@@ -99,8 +99,8 @@ namespace MassTransit.AzureServiceBusTransport
         class Handle :
             ReceiveTransportHandle
         {
-            readonly CancellationTokenSource _stop;
             readonly Task _receiveTask;
+            readonly CancellationTokenSource _stop;
 
             public Handle(CancellationTokenSource cancellationTokenSource, Task receiveTask)
             {

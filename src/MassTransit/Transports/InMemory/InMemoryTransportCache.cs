@@ -51,7 +51,7 @@ namespace MassTransit.Transports.InMemory
             return _transports.GetOrAdd(queueName, name => new InMemoryTransport(new Uri(_baseUri, name)));
         }
 
-        public ISendTransport GetSendTransport(Uri address)
+        public async Task<ISendTransport> GetSendTransport(Uri address)
         {
             string queueName = address.AbsolutePath;
             if (queueName.StartsWith("/"))

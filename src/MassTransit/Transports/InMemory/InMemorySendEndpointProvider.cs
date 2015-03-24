@@ -14,7 +14,6 @@ namespace MassTransit.Transports.InMemory
 {
     using System;
     using System.Threading.Tasks;
-    using Serialization;
 
 
     public class InMemorySendEndpointProvider :
@@ -34,7 +33,7 @@ namespace MassTransit.Transports.InMemory
 
         public async Task<ISendEndpoint> GetSendEndpoint(Uri address)
         {
-            ISendTransport sendTransport = _transportProvider.GetSendTransport(address);
+            ISendTransport sendTransport = await _transportProvider.GetSendTransport(address);
 
             return new SendEndpoint(sendTransport, _defaultSerializer, address, _sourceAddress);
         }

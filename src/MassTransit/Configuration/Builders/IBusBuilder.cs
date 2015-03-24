@@ -35,6 +35,11 @@ namespace MassTransit.Builders
         IMessageSerializer MessageSerializer { get; }
 
         /// <summary>
+        /// The Send Transport Provider
+        /// </summary>
+        ISendTransportProvider SendTransportProvider { get; }
+
+        /// <summary>
         /// Adds a receive endpoint to the bus
         /// </summary>
         /// <param name="receiveEndpoint"></param>

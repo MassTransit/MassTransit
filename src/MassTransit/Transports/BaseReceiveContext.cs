@@ -94,7 +94,7 @@ namespace MassTransit.Transports
             get { return _redelivered; }
         }
 
-        Headers ReceiveContext.TransportHeaders
+        public Headers TransportHeaders
         {
             get { return _headers.Value; }
         }

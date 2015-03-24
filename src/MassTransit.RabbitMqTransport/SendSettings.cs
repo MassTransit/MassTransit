@@ -41,5 +41,20 @@ namespace MassTransit.RabbitMqTransport
         /// The RabbitMQ exchange type
         /// </summary>
         string ExchangeType { get; }
+
+        /// <summary>
+        /// True if the exchange should be bound to a queue on send (for error queues, etc.)
+        /// </summary>
+        bool BindToQueue { get; }
+
+        /// <summary>
+        /// The queue to create/bind to the exchange
+        /// </summary>
+        string QueueName { get; }
+
+        /// <summary>
+        /// Arguments passed to QueueDeclare
+        /// </summary>
+        IDictionary<string, object> QueueArguments { get; }
     }
 }

@@ -49,11 +49,6 @@ namespace MassTransit.Builders
             _hosts = hosts.ToArray();
         }
 
-        public ISendTransportProvider SendTransportProvider
-        {
-            get { return _sendTransportProvider; }
-        }
-
         public IReceiveTransportProvider ReceiveTransportProvider
         {
             get { return _receiveTransportProvider; }
@@ -62,6 +57,11 @@ namespace MassTransit.Builders
         protected override Uri GetInputAddress()
         {
             return _inputAddress;
+        }
+
+        protected override ISendTransportProvider CreateSendTransportProvider()
+        {
+            return _sendTransportProvider;
         }
 
         protected override ISendEndpointProvider CreateSendEndpointProvider()

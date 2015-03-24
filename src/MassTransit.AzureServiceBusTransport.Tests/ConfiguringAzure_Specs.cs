@@ -29,7 +29,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
             [Test]
             public async void Should_support_the_new_syntax()
             {
-                AzureServiceBusTokenProviderSettings settings = new TestAzureServiceBusAccountSettings();
+                ServiceBusTokenProviderSettings settings = new TestAzureServiceBusAccountSettings();
 
                 Uri serviceUri = ServiceBusEnvironment.CreateServiceUri("sb", "masstransit-build",
                     "MassTransit.AzureServiceBusTransport.Tests");

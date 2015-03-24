@@ -101,9 +101,9 @@ namespace MassTransit
             ISendTransportProvider sendTransportProvider = builder.SendTransportProvider;
 
             IPipe<ReceiveContext> moveToErrorPipe = Pipe.New<ReceiveContext>(
-                x => x.Filter(new MoveToErrorTransportFilter(() => Task.FromResult(sendTransportProvider.GetSendTransport(errorAddress)))));
+                x => x.Filter(new MoveToErrorTransportFilter(() => sendTransportProvider.GetSendTransport(errorAddress))));
 
-            _receivePipeConfigurator.Rescue(moveToErrorPipe, typeof(SerializationException));
+            _receivePipeConfigurator.Rescue(moveToErrorPipe, typeof(Exception));
 
             _receivePipeConfigurator.Filter(new DeserializeFilter(builder.MessageDeserializer, consumePipe));
 

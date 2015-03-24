@@ -17,6 +17,7 @@ namespace MassTransit.RabbitMqTransport
     using System.Globalization;
     using System.Net.Security;
     using System.Security.Authentication;
+    using System.Security.Policy;
     using System.Text.RegularExpressions;
     using Configuration;
     using Pipeline;
@@ -81,6 +82,10 @@ namespace MassTransit.RabbitMqTransport
                 yield return "durable=false";
             if (settings.AutoDelete)
                 yield return "autodelete=true";
+            if (settings.BindToQueue)
+                yield return "bind=true";
+            if (!string.IsNullOrWhiteSpace(settings.QueueName))
+                yield return "queue=" + System.Net.WebUtility.UrlEncode(settings.QueueName);
         }
 
         public static ReceiveSettings GetReceiveSettings(this Uri address)
@@ -190,7 +195,14 @@ namespace MassTransit.RabbitMqTransport
             bool durable = address.Query.GetValueFromQueryString("durable", !isTemporary);
             bool autoDelete = address.Query.GetValueFromQueryString("autodelete", isTemporary);
 
-            SendSettings settings = new RabbitMqSendSettings(name, ExchangeType.Fanout, durable, autoDelete);
+            var settings = new RabbitMqSendSettings(name, ExchangeType.Fanout, durable, autoDelete);
+
+            bool bindToQueue = address.Query.GetValueFromQueryString("bind", false);
+            if (bindToQueue)
+            {
+                string queueName = System.Net.WebUtility.UrlDecode(address.Query.GetValueFromQueryString("queue"));
+                settings.BindToQueue(queueName);
+            }
 
             return settings;
         }

@@ -31,6 +31,7 @@ namespace MassTransit.Builders
         readonly Lazy<IPublishEndpoint> _publishEndpointProvider;
         readonly IList<IReceiveEndpoint> _receiveEndpoints;
         readonly Lazy<ISendEndpointProvider> _sendEndpointProvider;
+        readonly Lazy<ISendTransportProvider> _sendTransportProvider;
         readonly Lazy<IMessageSerializer> _serializer;
         Func<IMessageSerializer> _serializerFactory;
 
@@ -44,6 +45,7 @@ namespace MassTransit.Builders
 
             _serializer = new Lazy<IMessageSerializer>(CreateSerializer);
             _deserializer = new Lazy<IMessageDeserializer>(CreateDeserializer);
+            _sendTransportProvider = new Lazy<ISendTransportProvider>(CreateSendTransportProvider);
             _sendEndpointProvider = new Lazy<ISendEndpointProvider>(CreateSendEndpointProvider);
             _publishEndpointProvider = new Lazy<IPublishEndpoint>(CreatePublishEndpoint);
 
@@ -75,6 +77,11 @@ namespace MassTransit.Builders
         protected ISendEndpointProvider SendEndpointProvider
         {
             get { return _sendEndpointProvider.Value; }
+        }
+
+        public ISendTransportProvider SendTransportProvider
+        {
+            get { return _sendTransportProvider.Value; }
         }
 
         protected IPublishEndpoint PublishEndpoint
@@ -138,6 +145,8 @@ namespace MassTransit.Builders
         {
             _receiveEndpoints.Add(receiveEndpoint);
         }
+
+        protected abstract ISendTransportProvider CreateSendTransportProvider();
 
         protected abstract ISendEndpointProvider CreateSendEndpointProvider();
 

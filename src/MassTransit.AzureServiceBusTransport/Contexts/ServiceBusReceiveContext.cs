@@ -21,14 +21,14 @@ namespace MassTransit.AzureServiceBusTransport.Contexts
     using Transports;
 
 
-    public class AzureServiceBusReceiveContext :
+    public class ServiceBusReceiveContext :
         BaseReceiveContext,
         BrokeredMessageContext
     {
         readonly BrokeredMessage _message;
         byte[] _body;
 
-        public AzureServiceBusReceiveContext(Uri inputAddress, BrokeredMessage message)
+        public ServiceBusReceiveContext(Uri inputAddress, BrokeredMessage message)
             : base(inputAddress, message.DeliveryCount > 0)
         {
             _message = message;
@@ -39,6 +39,21 @@ namespace MassTransit.AzureServiceBusTransport.Contexts
         protected override IHeaderProvider HeaderProvider
         {
             get { return new DictionaryHeaderProvider(_message.Properties); }
+        }
+
+        public string MessageId
+        {
+            get { return _message.MessageId; }
+        }
+
+        public string CorrelationId
+        {
+            get { return _message.CorrelationId; }
+        }
+
+        public TimeSpan TimeToLive
+        {
+            get { return _message.TimeToLive; }
         }
 
         public IDictionary<string, object> Properties

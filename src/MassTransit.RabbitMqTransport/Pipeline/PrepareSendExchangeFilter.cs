@@ -16,6 +16,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
     using System.Threading.Tasks;
     using Logging;
     using MassTransit.Pipeline;
+    using RabbitMQ.Client;
 
 
     /// <summary>
@@ -36,7 +37,11 @@ namespace MassTransit.RabbitMqTransport.Pipeline
         Task IFilter<ModelContext>.Send(ModelContext context, IPipe<ModelContext> next)
         {
             if (!context.HasPayloadType(typeof(SendSettings)))
+            {
                 DeclareExchange(context);
+                if (_settings.BindToQueue)
+                    DeclareAndBindQueue(context);
+            }
 
             return next.Send(context);
         }
@@ -65,6 +70,29 @@ namespace MassTransit.RabbitMqTransport.Pipeline
             }
 
             context.GetOrAddPayload(() => _settings);
+        }
+
+        void DeclareAndBindQueue(ModelContext context)
+        {
+            QueueDeclareOk queueOk = context.Model.QueueDeclare(_settings.QueueName, _settings.Durable, false,
+                _settings.AutoDelete, _settings.QueueArguments);
+
+            string queueName = queueOk.QueueName;
+
+            if (_log.IsDebugEnabled)
+            {
+                _log.DebugFormat("Queue: {0} ({1})", queueName,
+                    string.Join(", ", new[]
+                    {
+                        _settings.Durable ? "durable" : "",
+                        _settings.AutoDelete ? "auto-delete" : ""
+                    }.Where(x => !string.IsNullOrWhiteSpace(x))));
+            }
+
+            context.Model.QueueBind(queueName, _settings.ExchangeName, "");
+
+            if (_log.IsDebugEnabled)
+                _log.DebugFormat("Exchange:Queue Binding: {0} ({1})", _settings.ExchangeName, queueName);
         }
     }
 }

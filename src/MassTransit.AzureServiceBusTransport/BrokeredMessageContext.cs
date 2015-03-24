@@ -41,5 +41,8 @@ namespace MassTransit.AzureServiceBusTransport
         DateTime EnqueuedTime { get; }
         DateTime ScheduledEnqueueTime { get; }
         IDictionary<string, object> Properties { get; }
+        TimeSpan TimeToLive { get; }
+        string CorrelationId { get; }
+        string MessageId { get; }
     }
 }

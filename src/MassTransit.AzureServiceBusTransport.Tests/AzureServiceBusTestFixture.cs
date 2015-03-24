@@ -133,6 +133,10 @@ namespace MassTransit.AzureServiceBusTransport.Tests
         {
         }
 
+        protected virtual void ConfigureBusHost(IServiceBusBusFactoryConfigurator configurator, IServiceBusHost host)
+        {
+        }
+
         protected virtual void ConfigureInputQueueEndpoint(IServiceBusReceiveEndpointConfigurator configurator)
         {
         }
@@ -143,7 +147,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
             {
                 ConfigureBus(x);
 
-                AzureServiceBusTokenProviderSettings settings = new TestAzureServiceBusAccountSettings();
+                ServiceBusTokenProviderSettings settings = new TestAzureServiceBusAccountSettings();
 
                 var host = x.Host(_serviceUri, h =>
                 {
@@ -155,6 +159,8 @@ namespace MassTransit.AzureServiceBusTransport.Tests
                         s.TokenScope = settings.TokenScope;
                     });
                 });
+
+                ConfigureBusHost(x, host);
 
                 x.ReceiveEndpoint(host, "input_queue", e =>
                 {

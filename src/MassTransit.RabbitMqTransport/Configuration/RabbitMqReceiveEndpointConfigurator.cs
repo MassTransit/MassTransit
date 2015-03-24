@@ -15,17 +15,12 @@ namespace MassTransit.RabbitMqTransport.Configuration
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Runtime.Serialization;
-    using System.Threading.Tasks;
     using Builders;
-    using Integration;
     using MassTransit.Builders;
     using MassTransit.Configurators;
     using MassTransit.Pipeline;
     using MassTransit.Pipeline.Filters;
     using PipeConfigurators;
-    using Pipeline;
-    using RabbitMQ.Client;
     using Transports;
 
 
@@ -141,27 +136,20 @@ namespace MassTransit.RabbitMqTransport.Configuration
             foreach (IReceiveEndpointSpecification builderConfigurator in _configurators)
                 builderConfigurator.Configure(endpointBuilder);
 
-            var modelCache = new RabbitMqModelCache(_host.SendConnectionCache);
-
             string errorQueueName = _settings.QueueName + "_error";
             var sendSettings = new RabbitMqSendSettings(errorQueueName, RabbitMQ.Client.ExchangeType.Fanout, true,
                 false);
 
-            var sendTransport = new RabbitMqSendTransport(modelCache, sendSettings);
+            sendSettings.BindToQueue(errorQueueName);
 
-            var errorSettings = new RabbitMqErrorQueueSettings
-            {
-                QueueName = errorQueueName,
-                ExchangeName = errorQueueName,
-                AutoDelete = sendSettings.AutoDelete,
-                Durable = sendSettings.Durable
-            };
-            sendTransport.AddModelFilter(new PrepareErrorQueueFilter(errorSettings));
+            Uri errorQueueAddress = _host.Settings.GetInputAddress(_settings);
+
+            ISendTransportProvider sendTransportProvider = builder.SendTransportProvider;
 
             IPipe<ReceiveContext> moveToErrorPipe = Pipe.New<ReceiveContext>(
-                x => x.Filter(new MoveToErrorTransportFilter(() => Task.FromResult<ISendTransport>(sendTransport))));
+                x => x.Filter(new MoveToErrorTransportFilter(() => sendTransportProvider.GetSendTransport(errorQueueAddress))));
 
-            _receivePipeConfigurator.Rescue(moveToErrorPipe, typeof(SerializationException));
+            _receivePipeConfigurator.Rescue(moveToErrorPipe, typeof(Exception));
 
             _receivePipeConfigurator.Filter(new DeserializeFilter(builder.MessageDeserializer, consumePipe));
 

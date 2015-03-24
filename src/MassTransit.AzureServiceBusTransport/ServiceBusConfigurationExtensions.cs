@@ -16,7 +16,7 @@ namespace MassTransit.AzureServiceBusTransport
     using Configuration;
 
 
-    public static class AzureServiceBusConfigurationExtensions
+    public static class ServiceBusConfigurationExtensions
     {
         /// <summary>
         /// Configure and create a bus for Azure Service Bus

@@ -21,8 +21,8 @@ namespace MassTransit.AzureServiceBusTransport.Contexts
     using Serialization;
 
 
-    public class AzureServiceBusSendContextImpl<T> :
-        AzureServiceBusSendContext<T>
+    public class ServiceBusSendContextImpl<T> :
+        ServiceBusSendContext<T>
         where T : class
     {
         readonly CancellationToken _cancellationToken;
@@ -30,12 +30,12 @@ namespace MassTransit.AzureServiceBusTransport.Contexts
         byte[] _body;
         IMessageSerializer _serializer;
 
-        public AzureServiceBusSendContextImpl(T message, CancellationToken cancellationToken)
+        public ServiceBusSendContextImpl(T message, CancellationToken cancellationToken)
         {
             _payloadCache = new PayloadCache();
-            _payloadCache.GetOrAddPayload<AzureServiceBusSendContext<T>>(() => this);
+            _payloadCache.GetOrAddPayload<ServiceBusSendContext<T>>(() => this);
 
-            Headers = new AzureServiceBusSendHeaders();
+            Headers = new ServiceBusSendHeaders();
 
             Message = message;
             _cancellationToken = cancellationToken;

@@ -51,6 +51,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\NUnit.2.6.4\lib\nunit.framework.dll</HintPath>
     </Reference>
+    <Reference Include="Shouldly">
+      <HintPath>..\packages\Shouldly.2.4.0\lib\net40\Shouldly.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data" />
@@ -65,6 +68,7 @@
     <Compile Include="AzureServiceBusTestFixture.cs" />
     <Compile Include="ConfiguringAzure_Specs.cs" />
     <Compile Include="ContextSetup.cs" />
+    <Compile Include="ErrorQueue_Specs.cs" />
     <Compile Include="Performance_Specs.cs" />
     <Compile Include="Publish_Specs.cs" />
     <Compile Include="Send_Specs.cs" />

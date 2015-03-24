@@ -17,7 +17,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
 
 
     public class TestAzureServiceBusAccountSettings :
-        AzureServiceBusTokenProviderSettings
+        ServiceBusTokenProviderSettings
     {
         const string KeyName = "MassTransitBuild";
         const string SharedAccessKey = "3HniuVqwtpYWU4q0Bz2QIb3cjzBT6nQsUXkzOAjMeHU=";
@@ -30,22 +30,22 @@ namespace MassTransit.AzureServiceBusTransport.Tests
             _tokenScope = TokenScope.Namespace;
         }
 
-        string AzureServiceBusTokenProviderSettings.KeyName
+        string ServiceBusTokenProviderSettings.KeyName
         {
             get { return KeyName; }
         }
 
-        string AzureServiceBusTokenProviderSettings.SharedAccessKey
+        string ServiceBusTokenProviderSettings.SharedAccessKey
         {
             get { return SharedAccessKey; }
         }
 
-        TimeSpan AzureServiceBusTokenProviderSettings.TokenTimeToLive
+        TimeSpan ServiceBusTokenProviderSettings.TokenTimeToLive
         {
             get { return _tokenTimeToLive; }
         }
 
-        TokenScope AzureServiceBusTokenProviderSettings.TokenScope
+        TokenScope ServiceBusTokenProviderSettings.TokenScope
         {
             get { return _tokenScope; }
         }

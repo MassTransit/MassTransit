@@ -18,7 +18,7 @@ namespace MassTransit.AzureServiceBusTransport
     using Microsoft.ServiceBus.Messaging;
 
 
-    public static class AzureServiceBusAddressExtensions
+    public static class ServiceBusAddressExtensions
     {
         public static QueueDescription GetQueueDescription(this Uri address)
         {
