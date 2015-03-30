@@ -36,6 +36,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
         readonly ILog _log = Logger.Get<RabbitMqBasicConsumer>();
         readonly IModel _model;
         readonly ConcurrentDictionary<ulong, RabbitMqReceiveContext> _pending;
+        readonly INotifyReceiveObserver _receiveObserver;
         readonly IPipe<ReceiveContext> _receivePipe;
         string _consumerTag;
         int _currentPendingDeliveryCount;
@@ -43,11 +44,13 @@ namespace MassTransit.RabbitMqTransport.Pipeline
         int _maxPendingDeliveryCount;
         CancellationTokenRegistration _registration;
 
-        public RabbitMqBasicConsumer(IModel model, Uri inputAddress, IPipe<ReceiveContext> receivePipe, CancellationToken cancellationToken)
+        public RabbitMqBasicConsumer(IModel model, Uri inputAddress, IPipe<ReceiveContext> receivePipe, INotifyReceiveObserver receiveObserver,
+            CancellationToken cancellationToken)
         {
             _model = model;
             _inputAddress = inputAddress;
             _receivePipe = receivePipe;
+            _receiveObserver = receiveObserver;
             _pending = new ConcurrentDictionary<ulong, RabbitMqReceiveContext>();
 
             _consumerComplete = new TaskCompletionSource<RabbitMqConsumerMetrics>();
@@ -107,25 +110,30 @@ namespace MassTransit.RabbitMqTransport.Pipeline
             while (current > _maxPendingDeliveryCount)
                 Interlocked.CompareExchange(ref _maxPendingDeliveryCount, current, _maxPendingDeliveryCount);
 
+            var context = new RabbitMqReceiveContext(_inputAddress, exchange,
+                routingKey, _consumerTag, deliveryTag, body, redelivered, properties, _receiveObserver);
+
             try
             {
-                var context = new RabbitMqReceiveContext(_inputAddress, exchange,
-                    routingKey, _consumerTag, deliveryTag, body, redelivered, properties);
-
                 if (!_pending.TryAdd(deliveryTag, context))
                 {
                     // should not happen, duplicate delivery tag??
                 }
+
+                _receiveObserver.NotifyPreReceive(context);
 
                 await _receivePipe.Send(context);
 
                 await context.CompleteTask;
 
                 _model.BasicAck(deliveryTag, false);
+
+                _receiveObserver.NotifyPostReceive(context);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 _model.BasicNack(deliveryTag, false, true);
+                _receiveObserver.NotifyReceiveFault(context, ex);
             }
             finally
             {
@@ -134,6 +142,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
                 RabbitMqReceiveContext ignored;
                 _pending.TryRemove(deliveryTag, out ignored);
             }
+
         }
 
         public IModel Model

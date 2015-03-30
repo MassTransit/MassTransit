@@ -242,19 +242,19 @@ namespace MassTransit.Serialization
             return _sendEndpointProvider.GetSendEndpoint(address);
         }
 
-        public void NotifyConsumed(TimeSpan elapsed, string messageType, string consumerType)
+        void ConsumeContext.NotifyConsumed<T>(ConsumeContext<T> context, TimeSpan elapsed, string consumerType)
         {
-            _receiveContext.NotifyConsumed(elapsed, messageType, consumerType);
+            _receiveContext.NotifyConsumed(context, elapsed, consumerType);
         }
 
-        public void NotifyFaulted<T>(T message, string consumerType, Exception exception)
+        public void NotifyFaulted<T>(ConsumeContext<T> context, string consumerType, Exception exception)
             where T : class
         {
-            Task faultTask = GenerateFault(message, exception);
+            Task faultTask = GenerateFault(context, exception);
 
             _receiveContext.AddPendingTask(faultTask);
 
-            Task receiveTask = _receiveContext.NotifyFaulted(message, consumerType, exception);
+            Task receiveTask = _receiveContext.NotifyFaulted(context, consumerType, exception);
 
             _receiveContext.AddPendingTask(receiveTask);
         }

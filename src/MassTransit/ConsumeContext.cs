@@ -98,18 +98,19 @@ namespace MassTransit
         /// <summary>
         /// Notify that the message has been consumed
         /// </summary>
+        /// <param name="context"></param>
         /// <param name="elapsed"></param>
-        /// <param name="messageType">The message type</param>
         /// <param name="consumerType">The consumer type</param>
-        void NotifyConsumed(TimeSpan elapsed, string messageType, string consumerType);
+        void NotifyConsumed<T>(ConsumeContext<T> context, TimeSpan elapsed, string consumerType)
+            where T : class;
 
         /// <summary>
         /// Notify that a message consumer has faulted
         /// </summary>
-        /// <param name="message">The message that faulted</param>
+        /// <param name="context"></param>
         /// <param name="consumerType">The message consumer type</param>
         /// <param name="exception">The exception that occurred</param>
-        void NotifyFaulted<T>(T message, string consumerType, Exception exception)
+        void NotifyFaulted<T>(ConsumeContext<T> context, string consumerType, Exception exception)
             where T : class;
     }
 

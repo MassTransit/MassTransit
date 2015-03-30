@@ -26,19 +26,19 @@ namespace MassTransit.Pipeline
         IConsumeMessageObserver<T>
         where T : class
     {
-        public Task PreDispatch(ConsumeContext<T> context)
+        public Task PreConsume(ConsumeContext<T> context)
         {
-            return ForEach(x => x.PreDispatch(context));
+            return ForEach(x => x.PreConsume(context));
         }
 
-        public Task PostDispatch(ConsumeContext<T> context)
+        public Task PostConsume(ConsumeContext<T> context)
         {
-            return ForEach(x => x.PostDispatch(context));
+            return ForEach(x => x.PostConsume(context));
         }
 
-        public Task DispatchFault(ConsumeContext<T> context, Exception exception)
+        public Task ConsumeFault(ConsumeContext<T> context, Exception exception)
         {
-            return ForEach(x => x.DispatchFault(context, exception));
+            return ForEach(x => x.ConsumeFault(context, exception));
         }
     }
 }

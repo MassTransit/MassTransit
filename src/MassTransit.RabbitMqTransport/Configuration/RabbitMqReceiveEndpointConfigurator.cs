@@ -155,7 +155,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
 
             IPipe<ReceiveContext> receivePipe = _receivePipeConfigurator.Build();
 
-            var transport = new RabbitMqReceiveTransport(_host.ConnectionCache, _settings, InputAddress,
+            var transport = new RabbitMqReceiveTransport(_host.ConnectionCache, _settings,
                 endpointBuilder.GetExchangeBindings().ToArray());
 
             return new ReceiveEndpoint(transport, receivePipe);

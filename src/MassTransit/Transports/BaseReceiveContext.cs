@@ -20,6 +20,7 @@ namespace MassTransit.Transports
     using System.Threading;
     using System.Threading.Tasks;
     using Context;
+    using Pipeline;
     using Serialization;
 
 
@@ -34,10 +35,11 @@ namespace MassTransit.Transports
         readonly Uri _inputAddress;
         readonly PayloadCache _payloadCache;
         readonly IList<Task> _pendingTasks;
+        readonly INotifyReceiveObserver _receiveObserver;
         readonly Stopwatch _receiveTimer;
         readonly bool _redelivered;
 
-        protected BaseReceiveContext(Uri inputAddress, bool redelivered)
+        protected BaseReceiveContext(Uri inputAddress, bool redelivered, INotifyReceiveObserver receiveObserver)
         {
             _receiveTimer = Stopwatch.StartNew();
 
@@ -45,6 +47,7 @@ namespace MassTransit.Transports
 
             _inputAddress = inputAddress;
             _redelivered = redelivered;
+            _receiveObserver = receiveObserver;
 
             _cancellationTokenSource = new CancellationTokenSource();
 
@@ -72,13 +75,13 @@ namespace MassTransit.Transports
             return _payloadCache.HasPayloadType(contextType);
         }
 
-        public bool TryGetPayload<TPayload>(out TPayload context) 
+        public bool TryGetPayload<TPayload>(out TPayload context)
             where TPayload : class
         {
             return _payloadCache.TryGetPayload(out context);
         }
 
-        public TPayload GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory) 
+        public TPayload GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory)
             where TPayload : class
         {
             return _payloadCache.GetOrAddPayload(payloadFactory);
@@ -99,12 +102,14 @@ namespace MassTransit.Transports
             get { return _headers.Value; }
         }
 
-        void ReceiveContext.NotifyConsumed(TimeSpan elapsed, string messageType, string consumerType)
+        void ReceiveContext.NotifyConsumed<T>(ConsumeContext<T> context, TimeSpan elapsed, string consumerType)
         {
+            _receiveObserver.NotifyPostConsume(context, elapsed, consumerType);
         }
 
-        async Task ReceiveContext.NotifyFaulted<T>(T message, string consumerType, Exception exception)
+        async Task ReceiveContext.NotifyFaulted<T>(ConsumeContext<T> context, string consumerType, Exception exception)
         {
+            _receiveObserver.NotifyConsumeFault(context, consumerType, exception);
         }
 
         Stream ReceiveContext.Body

@@ -26,10 +26,12 @@ namespace MassTransit.RabbitMqTransport.Pipeline
     {
         static readonly ILog _log = Logger.Get<RabbitMqConsumerFilter>();
         readonly IPipe<ReceiveContext> _receivePipe;
+        readonly INotifyReceiveObserver _receiveObserver;
 
-        public RabbitMqConsumerFilter(IPipe<ReceiveContext> receivePipe)
+        public RabbitMqConsumerFilter(IPipe<ReceiveContext> receivePipe, INotifyReceiveObserver receiveObserver)
         {
             _receivePipe = receivePipe;
+            _receiveObserver = receiveObserver;
         }
 
         async Task IFilter<ModelContext>.Send(ModelContext context, IPipe<ModelContext> next)
@@ -38,7 +40,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
 
             Uri inputAddress = context.ConnectionContext.GetAddress(receiveSettings.QueueName);
 
-            using (var consumer = new RabbitMqBasicConsumer(context.Model, inputAddress, _receivePipe, context.CancellationToken))
+            using (var consumer = new RabbitMqBasicConsumer(context.Model, inputAddress, _receivePipe, _receiveObserver, context.CancellationToken))
             {
                 context.Model.BasicConsume(receiveSettings.QueueName, false, consumer);
 

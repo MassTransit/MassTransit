@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,7 +14,6 @@ namespace MassTransit.Tests
 {
     using System;
     using System.Threading.Tasks;
-    using NUnit.Framework;
     using MassTransit.Pipeline;
     using NUnit.Framework;
     using Shouldly;
@@ -39,20 +38,6 @@ namespace MassTransit.Tests
         }
 
         [Test]
-        public async void Should_not_invoke_post_sent_on_exception()
-        {
-            var observer = new Observer();
-            using (InputQueueSendEndpoint.Connect(observer))
-            {
-                await InputQueueSendEndpoint.Send(new PingMessage(), Pipe.New<SendContext>(v => v.Execute(x => x.Serializer = null)));
-
-                await observer.SendFaulted;
-
-                observer.PostSent.Status.ShouldBe(TaskStatus.WaitingForActivation);
-            }
-        }
-
-        [Test]
         public async void Should_invoke_the_observer_after_send()
         {
             var observer = new Observer();
@@ -73,6 +58,20 @@ namespace MassTransit.Tests
                 await InputQueueSendEndpoint.Send(new PingMessage());
 
                 await observer.PreSent;
+            }
+        }
+
+        [Test]
+        public async void Should_not_invoke_post_sent_on_exception()
+        {
+            var observer = new Observer();
+            using (InputQueueSendEndpoint.Connect(observer))
+            {
+                await InputQueueSendEndpoint.Send(new PingMessage(), Pipe.New<SendContext>(v => v.Execute(x => x.Serializer = null)));
+
+                await observer.SendFaulted;
+
+                observer.PostSent.Status.ShouldBe(TaskStatus.WaitingForActivation);
             }
         }
 

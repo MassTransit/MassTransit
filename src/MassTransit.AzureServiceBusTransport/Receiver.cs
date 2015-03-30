@@ -30,6 +30,7 @@ namespace MassTransit.AzureServiceBusTransport
         readonly TaskCompletionSource<ReceiverMetrics> _completeTask;
         readonly Uri _inputAddress;
         readonly MessageReceiver _messageReceiver;
+        readonly INotifyReceiveObserver _receiveObserver;
         readonly IPipe<ReceiveContext> _receivePipe;
         readonly ReceiveSettings _receiveSettings;
         int _currentPendingDeliveryCount;
@@ -39,12 +40,13 @@ namespace MassTransit.AzureServiceBusTransport
         bool _shuttingDown;
 
         public Receiver(MessageReceiver messageReceiver, Uri inputAddress, IPipe<ReceiveContext> receivePipe,
-            ReceiveSettings receiveSettings, CancellationToken cancellationToken)
+            ReceiveSettings receiveSettings, INotifyReceiveObserver receiveObserver, CancellationToken cancellationToken)
         {
             _messageReceiver = messageReceiver;
             _inputAddress = inputAddress;
             _receivePipe = receivePipe;
             _receiveSettings = receiveSettings;
+            _receiveObserver = receiveObserver;
 
             _completeTask = new TaskCompletionSource<ReceiverMetrics>();
 
@@ -128,7 +130,9 @@ namespace MassTransit.AzureServiceBusTransport
                 _log.DebugFormat("Receiving {0}:{1} - {2}", deliveryCount, message.MessageId, _receiveSettings.QueueDescription.Path);
 
             Exception exception = null;
-            var context = new ServiceBusReceiveContext(_inputAddress, message);
+            var context = new ServiceBusReceiveContext(_inputAddress, message, _receiveObserver);
+
+            _receiveObserver.NotifyPreReceive(context);
 
             try
             {
@@ -145,6 +149,8 @@ namespace MassTransit.AzureServiceBusTransport
 
                 await message.CompleteAsync();
 
+                _receiveObserver.NotifyPostReceive(context);
+
                 if (_log.IsDebugEnabled)
                     _log.DebugFormat("Receive completed: {0}", message.MessageId);
             }
@@ -158,7 +164,10 @@ namespace MassTransit.AzureServiceBusTransport
             try
             {
                 if (exception != null)
+                {
                     await message.AbandonAsync();
+                    _receiveObserver.NotifyReceiveFault(context, exception);
+                }
             }
             finally
             {

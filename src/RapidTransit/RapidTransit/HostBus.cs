@@ -128,9 +128,9 @@ namespace RapidTransit
             get { return _bus.Address; }
         }
 
-        public BusHandle Start()
+        public ObserverHandle ConnectReceiveObserver(IReceiveObserver observer)
         {
-            return _bus.Start();
+            return _bus.ConnectReceiveObserver(observer);
         }
     }
 }

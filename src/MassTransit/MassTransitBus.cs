@@ -30,6 +30,7 @@ namespace MassTransit
         readonly IBusHost[] _hosts;
         readonly IPublishEndpoint _publishEndpoint;
         readonly IReceiveEndpoint[] _receiveEndpoints;
+        readonly ReceiveObservable _receiveObservers;
         readonly ISendEndpointProvider _sendEndpointProvider;
 
         public MassTransitBus(Uri address, IConsumePipe consumePipe, ISendEndpointProvider sendEndpointProvider,
@@ -41,6 +42,7 @@ namespace MassTransit
             _publishEndpoint = publishEndpoint;
             _receiveEndpoints = receiveEndpoints.ToArray();
             _hosts = hosts.ToArray();
+            _receiveObservers = new ReceiveObservable();
         }
 
         ConnectHandle IConsumePipeConnector.ConnectConsumePipe<T>(IPipe<ConsumeContext<T>> pipe)
@@ -127,6 +129,7 @@ namespace MassTransit
         BusHandle IBusControl.Start()
         {
             var receiveEndpointHandles = new List<ReceiveEndpointHandle>();
+            var observerHandles = new List<ObserverHandle>();
 
             Exception exception = null;
             try
@@ -135,6 +138,9 @@ namespace MassTransit
                 {
                     try
                     {
+                        ObserverHandle observerHandle = endpoint.ConnectReceiveObserver(_receiveObservers);
+                        observerHandles.Add(observerHandle);
+
                         ReceiveEndpointHandle handle = endpoint.Start();
 
                         receiveEndpointHandles.Add(handle);
@@ -152,12 +158,18 @@ namespace MassTransit
 
             if (exception != null)
             {
-                var stops = receiveEndpointHandles.Select(x => x.Stop()).ToArray();
+                Task[] stops = receiveEndpointHandles.Select(x => x.Stop()).ToArray();
+                Task[] handles = observerHandles.Select(x => x.Disconnect()).ToArray();
 
                 throw new MassTransitException("The service bus could not be started.", exception);
             }
 
-            return new Handle(receiveEndpointHandles.ToArray(), _hosts);
+            return new Handle(receiveEndpointHandles.ToArray(), _hosts, observerHandles.ToArray());
+        }
+
+        public ObserverHandle ConnectReceiveObserver(IReceiveObserver observer)
+        {
+            return _receiveObservers.Connect(observer);
         }
 
 
@@ -165,12 +177,14 @@ namespace MassTransit
             BusHandle
         {
             readonly IBusHost[] _hosts;
+            readonly ObserverHandle[] _observers;
             readonly ReceiveEndpointHandle[] _receiveEndpoints;
 
-            public Handle(ReceiveEndpointHandle[] receiveEndpoints, IBusHost[] hosts)
+            public Handle(ReceiveEndpointHandle[] receiveEndpoints, IBusHost[] hosts, ObserverHandle[] observers)
             {
                 _receiveEndpoints = receiveEndpoints;
                 _hosts = hosts;
+                _observers = observers;
             }
 
             public void Dispose()
@@ -182,6 +196,7 @@ namespace MassTransit
             {
                 await Task.WhenAll(_receiveEndpoints.Select(x => x.Stop(cancellationToken)));
                 await Task.WhenAll(_hosts.Select(x => x.Stop(cancellationToken)));
+                await Task.WhenAll(_observers.Select(x => x.Disconnect()));
             }
         }
     }

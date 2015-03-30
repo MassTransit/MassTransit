@@ -15,6 +15,7 @@ namespace MassTransit.Tests.Serialization
     using System;
     using System.Diagnostics;
     using System.IO;
+    using MassTransit.Pipeline;
     using MassTransit.Serialization;
     using MassTransit.Transports;
     using MassTransit.Transports.InMemory;
@@ -83,7 +84,7 @@ namespace MassTransit.Tests.Serialization
                 byte[] data = Serialize(sendContext);
 
                 var transportMessage = new InMemoryTransportMessage(Guid.NewGuid(), data, Serializer.ContentType.MediaType, TypeMetadataCache<SerializationTestMessage>.ShortName);
-                receiveContext = new InMemoryReceiveContext(new Uri("loopback://localhost/input_queue"), transportMessage);
+                receiveContext = new InMemoryReceiveContext(new Uri("loopback://localhost/input_queue"), transportMessage, new ReceiveObservable());
 
                 Deserialize<SerializationTestMessage>(receiveContext);
             }

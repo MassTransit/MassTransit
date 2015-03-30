@@ -15,6 +15,7 @@ namespace MassTransit.Transports.InMemory
     using System;
     using System.IO;
     using Context;
+    using Pipeline;
 
 
     public class InMemoryReceiveContext :
@@ -23,8 +24,8 @@ namespace MassTransit.Transports.InMemory
         readonly byte[] _body;
         readonly InMemoryTransportMessage _message;
 
-        public InMemoryReceiveContext(Uri inputAddress, InMemoryTransportMessage message)
-            : base(inputAddress, message.DeliveryCount > 0)
+        public InMemoryReceiveContext(Uri inputAddress, InMemoryTransportMessage message, INotifyReceiveObserver observer)
+            : base(inputAddress, message.DeliveryCount > 0, observer)
         {
             _body = message.Body;
             _message = message;

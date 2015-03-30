@@ -28,11 +28,13 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
         IFilter<ConnectionContext>
     {
         static readonly ILog _log = Logger.Get<MessageReceiverFilter>();
+        readonly INotifyReceiveObserver _receiveObserver;
         readonly IPipe<ReceiveContext> _receivePipe;
 
-        public MessageReceiverFilter(IPipe<ReceiveContext> receivePipe)
+        public MessageReceiverFilter(IPipe<ReceiveContext> receivePipe, INotifyReceiveObserver receiveObserver)
         {
             _receivePipe = receivePipe;
+            _receiveObserver = receiveObserver;
         }
 
         async Task IFilter<ConnectionContext>.Send(ConnectionContext context, IPipe<ConnectionContext> next)
@@ -44,9 +46,7 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
             Uri inputAddress = context.GetQueueAddress(receiveSettings.QueueDescription);
 
             if (_log.IsDebugEnabled)
-            {
                 _log.DebugFormat("Creating message receiver for {0}", inputAddress);
-            }
 
             MessagingFactory messagingFactory = await context.MessagingFactory;
             MessageReceiver messageReceiver = await messagingFactory.CreateMessageReceiverAsync(queuePath, ReceiveMode.PeekLock);
@@ -56,7 +56,7 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
                 messageReceiver.PrefetchCount = receiveSettings.PrefetchCount;
                 messageReceiver.RetryPolicy = RetryPolicy.Default;
 
-                using (var receiver = new Receiver(messageReceiver, inputAddress, _receivePipe, receiveSettings, context.CancellationToken))
+                using (var receiver = new Receiver(messageReceiver, inputAddress, _receivePipe, receiveSettings, _receiveObserver, context.CancellationToken))
                 {
                     ReceiverMetrics metrics = await receiver.CompleteTask;
 

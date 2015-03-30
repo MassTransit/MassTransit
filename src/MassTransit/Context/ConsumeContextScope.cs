@@ -218,14 +218,14 @@ namespace MassTransit.Context
             return _context.GetSendEndpoint(address);
         }
 
-        void ConsumeContext.NotifyConsumed(TimeSpan elapsed, string messageType, string consumerType)
+        void ConsumeContext.NotifyConsumed<T>(ConsumeContext<T> context, TimeSpan elapsed, string consumerType)
         {
-            _context.NotifyConsumed(elapsed, messageType, consumerType);
+            _context.NotifyConsumed(context, elapsed, consumerType);
         }
 
-        void ConsumeContext.NotifyFaulted<T>(T message, string consumerType, Exception exception)
+        void ConsumeContext.NotifyFaulted<T>(ConsumeContext<T> context, string consumerType, Exception exception)
         {
-            _context.NotifyFaulted(message, consumerType, exception);
+            _context.NotifyFaulted(context, consumerType, exception);
         }
 
         TMessage ConsumeContext<TMessage>.Message

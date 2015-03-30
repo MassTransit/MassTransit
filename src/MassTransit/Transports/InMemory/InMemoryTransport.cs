@@ -39,12 +39,14 @@ namespace MassTransit.Transports.InMemory
         readonly BlockingCollection<InMemoryTransportMessage> _collection;
         readonly Uri _inputAddress;
         readonly Connectable<ISendObserver> _observers;
+        readonly ReceiveObservable _receiveObservers;
 
         public InMemoryTransport(Uri inputAddress)
         {
             _inputAddress = inputAddress;
 
             _observers = new Connectable<ISendObserver>();
+            _receiveObservers = new ReceiveObservable();
 
             var queue = new ConcurrentQueue<InMemoryTransportMessage>();
             _collection = new BlockingCollection<InMemoryTransportMessage>(queue);
@@ -56,11 +58,6 @@ namespace MassTransit.Transports.InMemory
                 _collection.Dispose();
         }
 
-        public Uri InputAddress
-        {
-            get { return _inputAddress; }
-        }
-
         ReceiveTransportHandle IReceiveTransport.Start(IPipe<ReceiveContext> receivePipe)
         {
             var stopTokenSource = new CancellationTokenSource();
@@ -68,6 +65,11 @@ namespace MassTransit.Transports.InMemory
             Task receiveTask = StartReceiveTask(receivePipe, stopTokenSource);
 
             return new Handle(receiveTask, stopTokenSource);
+        }
+
+        public ObserverHandle ConnectReceiveObserver(IReceiveObserver observer)
+        {
+            return _receiveObservers.Connect(observer);
         }
 
         async Task ISendTransport.Send<T>(T message, IPipe<SendContext<T>> pipe, CancellationToken cancelSend)
@@ -138,13 +140,17 @@ namespace MassTransit.Transports.InMemory
                             if (stopTokenSource.Token.IsCancellationRequested)
                                 return;
 
-                            var context = new InMemoryReceiveContext(_inputAddress, message);
+                            var context = new InMemoryReceiveContext(_inputAddress, message, _receiveObservers);
 
                             try
                             {
+                                _receiveObservers.NotifyPreReceive(context);
+
                                 await receivePipe.Send(context);
 
                                 await context.CompleteTask;
+
+                                _receiveObservers.NotifyPostReceive(context);
 
                                 _inputAddress.LogReceived(message.MessageId.ToString("N"), message.MessageType);
                             }
@@ -152,6 +158,8 @@ namespace MassTransit.Transports.InMemory
                             {
                                 message.DeliveryCount++;
                                 _log.Error(string.Format("RCV FAULT: {0}", message.MessageId), ex);
+
+                                _receiveObservers.NotifyReceiveFault(context, ex);
                             }
                         });
                     }

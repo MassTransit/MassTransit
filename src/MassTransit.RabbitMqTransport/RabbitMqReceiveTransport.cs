@@ -32,21 +32,16 @@ namespace MassTransit.RabbitMqTransport
 
         readonly IConnectionCache _connectionCache;
         readonly ExchangeBindingSettings[] _exchangeBindings;
-        readonly Uri _inputAddress;
+        readonly ReceiveObservable _receiveObservers;
         readonly ReceiveSettings _settings;
 
-        public RabbitMqReceiveTransport(IConnectionCache connectionCache, ReceiveSettings settings, Uri inputAddress,
+        public RabbitMqReceiveTransport(IConnectionCache connectionCache, ReceiveSettings settings,
             params ExchangeBindingSettings[] exchangeBindings)
         {
             _connectionCache = connectionCache;
             _settings = settings;
-            _inputAddress = inputAddress;
             _exchangeBindings = exchangeBindings;
-        }
-
-        public Uri InputAddress
-        {
-            get { return _inputAddress; }
+            _receiveObservers = new ReceiveObservable();
         }
 
         /// <summary>
@@ -59,11 +54,16 @@ namespace MassTransit.RabbitMqTransport
         {
             var stopTokenSource = new CancellationTokenSource();
 
-            IPipe<ConnectionContext> pipe = Pipe.New<ConnectionContext>(x => x.RabbitMqConsumer(receivePipe, _settings, _exchangeBindings));
+            IPipe<ConnectionContext> pipe = Pipe.New<ConnectionContext>(x => x.RabbitMqConsumer(receivePipe, _settings, _receiveObservers, _exchangeBindings));
 
             Task receiverTask = Receiver(pipe, stopTokenSource.Token);
 
             return new Handle(stopTokenSource, receiverTask);
+        }
+
+        public ObserverHandle ConnectReceiveObserver(IReceiveObserver observer)
+        {
+            return _receiveObservers.Connect(observer);
         }
 
         async Task Receiver(IPipe<ConnectionContext> transportPipe, CancellationToken stopToken)

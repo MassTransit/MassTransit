@@ -25,7 +25,8 @@ namespace MassTransit
         IConsumePipeConnector,
         IRequestPipeConnector,
         IConsumeMessageObserverConnector,
-        IConsumeObserverConnector
+        IConsumeObserverConnector,
+        IConnectReceiveObserver
     {
         /// <summary>
         /// The receive address of the bus itself, versus any receive endpoints that were created
