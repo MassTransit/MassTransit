@@ -28,7 +28,7 @@ namespace MassTransit.Pipeline
         /// </summary>
         /// <param name="context">The consume context</param>
         /// <returns></returns>
-        Task PreDispatch(ConsumeContext<T> context);
+        Task PreConsume(ConsumeContext<T> context);
 
         /// <summary>
         /// Called after the message has been dispatched to all consumers - note that in the case of an exception
@@ -36,7 +36,7 @@ namespace MassTransit.Pipeline
         /// </summary>
         /// <param name="context"></param>
         /// <returns></returns>
-        Task PostDispatch(ConsumeContext<T> context);
+        Task PostConsume(ConsumeContext<T> context);
 
         /// <summary>
         /// Called after the message has been dispatched to all consumers when one or more exceptions have occurred
@@ -44,6 +44,6 @@ namespace MassTransit.Pipeline
         /// <param name="context"></param>
         /// <param name="exception"></param>
         /// <returns></returns>
-        Task DispatchFault(ConsumeContext<T> context, Exception exception);
+        Task ConsumeFault(ConsumeContext<T> context, Exception exception);
     }
 }

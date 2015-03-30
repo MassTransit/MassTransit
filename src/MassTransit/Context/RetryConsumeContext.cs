@@ -205,15 +205,15 @@ namespace MassTransit.Context
             return _context.GetSendEndpoint(address);
         }
 
-        public void NotifyConsumed(TimeSpan elapsed, string messageType, string consumerType)
+        void ConsumeContext.NotifyConsumed<T>(ConsumeContext<T> context, TimeSpan elapsed, string consumerType)
         {
-            _context.NotifyConsumed(elapsed, messageType, consumerType);
+            _context.NotifyConsumed(context, elapsed, consumerType);
         }
 
-        public void NotifyFaulted<T>(T message, string consumerType, Exception exception)
+        public void NotifyFaulted<T>(ConsumeContext<T> context, string consumerType, Exception exception)
             where T : class
         {
-            _pendingFaults.Add(new PendingFault<T>(message, consumerType, exception));
+            _pendingFaults.Add(new PendingFault<T>(context, consumerType, exception));
         }
 
         public void ClearPendingFaults()
@@ -242,18 +242,18 @@ namespace MassTransit.Context
         {
             readonly string _consumerType;
             readonly Exception _exception;
-            readonly T _message;
+            readonly ConsumeContext<T> _context;
 
-            public PendingFault(T message, string consumerType, Exception exception)
+            public PendingFault(ConsumeContext<T> context, string consumerType, Exception exception)
             {
-                _message = message;
+                _context = context;
                 _consumerType = consumerType;
                 _exception = exception;
             }
 
             public void Notify(ConsumeContext context)
             {
-                context.NotifyFaulted(_message, _consumerType, _exception);
+                context.NotifyFaulted(_context, _consumerType, _exception);
             }
         }
     }
@@ -284,7 +284,7 @@ namespace MassTransit.Context
 
         public void NotifyFaulted(string consumerType, Exception exception)
         {
-            NotifyFaulted(_context.Message, consumerType, exception);
+            NotifyFaulted(_context, consumerType, exception);
         }
     }
 }

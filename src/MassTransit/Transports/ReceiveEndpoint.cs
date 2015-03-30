@@ -42,6 +42,11 @@ namespace MassTransit.Transports
             return new Handle(transportHandle);
         }
 
+        public ObserverHandle ConnectReceiveObserver(IReceiveObserver observer)
+        {
+            return _receiveTransport.ConnectReceiveObserver(observer);
+        }
+
 
         class Handle :
             ReceiveEndpointHandle

@@ -271,6 +271,7 @@
     <Compile Include="Exceptions\ConsumerMessageException.cs" />
     <Compile Include="Headers.cs" />
     <Compile Include="IBusControl.cs" />
+    <Compile Include="IConnectReceiveObserver.cs" />
     <Compile Include="IConsumer.cs" />
     <Compile Include="IFault.cs" />
     <Compile Include="IMessageDeserializer.cs" />
@@ -327,11 +328,13 @@
     <Compile Include="Internals\Reflection\TypeNameFormatter.cs" />
     <Compile Include="IPublishEndpoint.cs" />
     <Compile Include="IReceiveEndpoint.cs" />
+    <Compile Include="IReceiveObserver.cs" />
     <Compile Include="ISendEndpoint.cs" />
     <Compile Include="ISendEndpointProvider.cs" />
     <Compile Include="MessageContext.cs" />
     <Compile Include="MessageHandler.cs" />
     <Compile Include="MessageRequestClient.cs" />
+    <Compile Include="ObserverHandle.cs" />
     <Compile Include="Pipe.cs" />
     <Compile Include="PipeContext.cs" />
     <Compile Include="PipeExtensions.cs" />
@@ -376,6 +379,7 @@
     <Compile Include="Pipeline\IConsumerFilterVisitorAdapter.cs" />
     <Compile Include="Pipeline\IConsumeMessageObserver.cs" />
     <Compile Include="Pipeline\IConsumeMessageObserverConnector.cs" />
+    <Compile Include="Pipeline\INotifyReceiveObserver.cs" />
     <Compile Include="Pipeline\IPipe.cs" />
     <Compile Include="Pipeline\IPipelineVisitor.cs" />
     <Compile Include="Pipeline\IConsumePipe.cs" />
@@ -395,6 +399,7 @@
     <Compile Include="Pipeline\Pipes\ConsumerMergePipe.cs" />
     <Compile Include="Pipeline\Pipes\EmptyPipe.cs" />
     <Compile Include="Pipeline\Pipes\LastPipe.cs" />
+    <Compile Include="Pipeline\ReceiveObservable.cs" />
     <Compile Include="Pipeline\StringPipelineVisitor.cs" />
     <Compile Include="Policies\CancelRetryContext.cs" />
     <Compile Include="Policies\CancelRetryPolicy.cs" />
@@ -701,6 +706,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ServiceBus.cs" />
     <Compile Include="Transports\ITransportSettings.cs" />
+    <Compile Include="Util\AsyncObservable.cs" />
     <Compile Include="Util\BusHostInfo.cs" />
     <Compile Include="Util\Connectable.cs" />
     <Compile Include="Util\HostMetadataCache.cs" />

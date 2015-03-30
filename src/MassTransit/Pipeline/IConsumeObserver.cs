@@ -26,7 +26,7 @@ namespace MassTransit.Pipeline
         /// </summary>
         /// <param name="context">The consume context</param>
         /// <returns></returns>
-        Task PreDispatch<T>(ConsumeContext<T> context)
+        Task PreConsume<T>(ConsumeContext<T> context)
             where T : class;
 
         /// <summary>
@@ -35,7 +35,7 @@ namespace MassTransit.Pipeline
         /// </summary>
         /// <param name="context"></param>
         /// <returns></returns>
-        Task PostDispatch<T>(ConsumeContext<T> context)
+        Task PostConsume<T>(ConsumeContext<T> context)
             where T : class;
 
         /// <summary>
@@ -44,7 +44,7 @@ namespace MassTransit.Pipeline
         /// <param name="context"></param>
         /// <param name="exception"></param>
         /// <returns></returns>
-        Task DispatchFault<T>(ConsumeContext<T> context, Exception exception)
+        Task ConsumeFault<T>(ConsumeContext<T> context, Exception exception)
             where T : class;
     }
 }

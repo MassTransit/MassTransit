@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -60,18 +60,20 @@ namespace MassTransit
         /// <summary>
         /// Notify that a message has been consumed from the received context
         /// </summary>
+        /// <param name="context">The consume context of the message</param>
         /// <param name="elapsed"></param>
-        /// <param name="messageType"></param>
         /// <param name="consumerType"></param>
-        void NotifyConsumed(TimeSpan elapsed, string messageType, string consumerType);
+        void NotifyConsumed<T>(ConsumeContext<T> context, TimeSpan elapsed, string consumerType)
+            where T : class;
 
         /// <summary>
         /// Notify that a message consumer faulted
         /// </summary>
-        /// <param name="message">The message that was faulted</param>
+        /// <param name="context"></param>
         /// <param name="consumerType">The messsage consumer type that faulted</param>
         /// <param name="exception">The exception that occurred</param>
-        Task NotifyFaulted<T>(T message, string consumerType, Exception exception);
+        Task NotifyFaulted<T>(ConsumeContext<T> context, string consumerType, Exception exception)
+            where T : class;
 
         // TODO to tie sends back to the receiver?
         //void NotifySend(string messageType, Uri destinationAddress);

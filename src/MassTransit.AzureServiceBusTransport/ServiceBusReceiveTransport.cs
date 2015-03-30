@@ -30,7 +30,7 @@ namespace MassTransit.AzureServiceBusTransport
     {
         static readonly ILog _log = Logger.Get<ServiceBusReceiveTransport>();
         readonly IServiceBusHost _host;
-        readonly Uri _inputAddress;
+        readonly ReceiveObservable _receiveObservers;
         readonly ReceiveSettings _settings;
         readonly TopicSubscriptionSettings[] _subscriptionSettings;
 
@@ -40,13 +40,7 @@ namespace MassTransit.AzureServiceBusTransport
             _host = host;
             _settings = settings;
             _subscriptionSettings = subscriptionSettings;
-
-            _inputAddress = host.Settings.GetInputAddress(settings.QueueDescription);
-        }
-
-        public Uri InputAddress
-        {
-            get { return _inputAddress; }
+            _receiveObservers = new ReceiveObservable();
         }
 
         public ReceiveTransportHandle Start(IPipe<ReceiveContext> receivePipe)
@@ -63,12 +57,17 @@ namespace MassTransit.AzureServiceBusTransport
                 foreach (TopicSubscriptionSettings subscriptionSetting in _subscriptionSettings)
                     x.Filter(new BindTopicSubscriptionFilter(subscriptionSetting));
 
-                x.Filter(new MessageReceiverFilter(receivePipe));
+                x.Filter(new MessageReceiverFilter(receivePipe, _receiveObservers));
             });
 
             Task receiveTask = Receiver(stopTokenSource.Token, connectionPipe);
 
             return new Handle(stopTokenSource, receiveTask);
+        }
+
+        public ObserverHandle ConnectReceiveObserver(IReceiveObserver observer)
+        {
+            return _receiveObservers.Connect(observer);
         }
 
         async Task Receiver(CancellationToken stopTokenSource, IPipe<ConnectionContext> connectionPipe)

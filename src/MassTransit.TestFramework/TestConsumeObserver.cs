@@ -48,17 +48,17 @@ namespace MassTransit.TestFramework
             get { return _dispatchFaulted.Task; }
         }
 
-        async Task IConsumeMessageObserver<T>.PreDispatch(ConsumeContext<T> context)
+        async Task IConsumeMessageObserver<T>.PreConsume(ConsumeContext<T> context)
         {
             _preDispatched.TrySetResult(context.Message);
         }
 
-        async Task IConsumeMessageObserver<T>.PostDispatch(ConsumeContext<T> context)
+        async Task IConsumeMessageObserver<T>.PostConsume(ConsumeContext<T> context)
         {
             _postDispatched.TrySetResult(context.Message);
         }
 
-        async Task IConsumeMessageObserver<T>.DispatchFault(ConsumeContext<T> context, Exception exception)
+        async Task IConsumeMessageObserver<T>.ConsumeFault(ConsumeContext<T> context, Exception exception)
         {
             _dispatchFaulted.TrySetException(exception);
         }

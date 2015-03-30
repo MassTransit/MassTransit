@@ -15,6 +15,7 @@ namespace MassTransit.RabbitMqTransport.Contexts
     using System;
     using System.IO;
     using Context;
+    using MassTransit.Pipeline;
     using RabbitMQ.Client;
     using Transports;
 
@@ -30,9 +31,8 @@ namespace MassTransit.RabbitMqTransport.Contexts
         readonly IBasicProperties _properties;
         readonly string _routingKey;
 
-        public RabbitMqReceiveContext(Uri inputAddress, string exchange, string routingKey, string consumerTag, ulong deliveryTag,
-            byte[] body, bool redelivered, IBasicProperties properties)
-            : base(inputAddress, redelivered)
+        public RabbitMqReceiveContext(Uri inputAddress, string exchange, string routingKey, string consumerTag, ulong deliveryTag, byte[] body, bool redelivered, IBasicProperties properties, INotifyReceiveObserver observer)
+            : base(inputAddress, redelivered, observer)
         {
             _exchange = exchange;
             _routingKey = routingKey;

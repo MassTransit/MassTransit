@@ -133,19 +133,19 @@ namespace MassTransit.Pipeline.Filters
                 return _filter as TResult;
             }
 
-            public Task PreDispatch(ConsumeContext<T> context)
+            public Task PreConsume(ConsumeContext<T> context)
             {
-                return _observer.PreDispatch(context);
+                return _observer.PreConsume(context);
             }
 
-            public Task PostDispatch(ConsumeContext<T> context)
+            public Task PostConsume(ConsumeContext<T> context)
             {
-                return _observer.PostDispatch(context);
+                return _observer.PostConsume(context);
             }
 
-            public Task DispatchFault(ConsumeContext<T> context, Exception exception)
+            public Task ConsumeFault(ConsumeContext<T> context, Exception exception)
             {
-                return _observer.DispatchFault(context, exception);
+                return _observer.ConsumeFault(context, exception);
             }
         }
     }
