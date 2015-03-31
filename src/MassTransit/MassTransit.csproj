@@ -481,6 +481,7 @@
     <Compile Include="Scheduling\SchedulerContext.cs" />
     <Compile Include="Scheduling\SchedulerFilter.cs" />
     <Compile Include="SendContext.cs" />
+    <Compile Include="SendEndpointExtensions.cs" />
     <Compile Include="SendHeaders.cs" />
     <Compile Include="SerializationFault.cs" />
     <Compile Include="Serialization\AesCryptoStreamProvider.cs" />
