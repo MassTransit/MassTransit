@@ -51,10 +51,11 @@ namespace MassTransit.Pipeline
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="context"></param>
+        /// <param name="duration"></param>
         /// <param name="consumerType"></param>
         /// <param name="exception"></param>
         /// <returns></returns>
-        void NotifyConsumeFault<T>(ConsumeContext<T> context, string consumerType, Exception exception)
+        void NotifyConsumeFault<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType, Exception exception)
             where T : class;
 
         /// <summary>

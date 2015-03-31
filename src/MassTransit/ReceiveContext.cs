@@ -61,18 +61,19 @@ namespace MassTransit
         /// Notify that a message has been consumed from the received context
         /// </summary>
         /// <param name="context">The consume context of the message</param>
-        /// <param name="elapsed"></param>
+        /// <param name="duration"></param>
         /// <param name="consumerType"></param>
-        void NotifyConsumed<T>(ConsumeContext<T> context, TimeSpan elapsed, string consumerType)
+        void NotifyConsumed<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType)
             where T : class;
 
         /// <summary>
         /// Notify that a message consumer faulted
         /// </summary>
         /// <param name="context"></param>
+        /// <param name="duration"></param>
         /// <param name="consumerType">The messsage consumer type that faulted</param>
         /// <param name="exception">The exception that occurred</param>
-        Task NotifyFaulted<T>(ConsumeContext<T> context, string consumerType, Exception exception)
+        Task NotifyFaulted<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType, Exception exception)
             where T : class;
 
         // TODO to tie sends back to the receiver?

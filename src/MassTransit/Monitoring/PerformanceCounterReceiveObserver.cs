@@ -37,7 +37,7 @@ namespace MassTransit.Monitoring
             MessagePerformanceCounterCache<T>.Counter.Consumed(duration);
         }
 
-        async Task IReceiveObserver.ConsumeFault<T>(ConsumeContext<T> context, string consumerType, Exception exception)
+        async Task IReceiveObserver.ConsumeFault<T>(ConsumeContext<T> context, TimeSpan elapsed, string consumerType, Exception exception)
         {
             ConsumerPerformanceCounterCache.GetCounter(consumerType).Faulted();
             MessagePerformanceCounterCache<T>.Counter.Faulted();

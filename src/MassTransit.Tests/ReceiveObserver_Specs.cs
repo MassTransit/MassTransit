@@ -155,7 +155,7 @@ namespace MassTransit.Tests
                 _postConsume.TrySetResult(context);
             }
 
-            public async Task ConsumeFault<T>(ConsumeContext<T> context, string consumerType, Exception exception) where T : class
+            public async Task ConsumeFault<T>(ConsumeContext<T> context, TimeSpan elapsed, string consumerType, Exception exception) where T : class
             {
                 _consumeFault.TrySetResult(context);
             }

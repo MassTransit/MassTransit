@@ -216,15 +216,15 @@ namespace MassTransit.Context
             return _context.GetSendEndpoint(address);
         }
 
-        void ConsumeContext.NotifyConsumed<T>(ConsumeContext<T> context, TimeSpan elapsed, string consumerType)
+        void ConsumeContext.NotifyConsumed<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType)
         {
-            _context.NotifyConsumed(context, elapsed, consumerType);
+            _context.NotifyConsumed(context, duration, consumerType);
         }
 
-        public void NotifyFaulted<T>(ConsumeContext<T> context, string consumerType, Exception exception)
+        public void NotifyFaulted<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType, Exception exception)
             where T : class
         {
-            _context.NotifyFaulted(context, consumerType, exception);
+            _context.NotifyFaulted(context, duration, consumerType, exception);
         }
 
         TMessage ConsumeContext<TMessage>.Message
@@ -232,14 +232,14 @@ namespace MassTransit.Context
             get { return _context.Message; }
         }
 
-        public void NotifyConsumed(TimeSpan elapsed, string consumerType)
+        public void NotifyConsumed(TimeSpan duration, string consumerType)
         {
-            _context.NotifyConsumed(elapsed, consumerType);
+            _context.NotifyConsumed(duration, consumerType);
         }
 
-        public void NotifyFaulted(string consumerType, Exception exception)
+        public void NotifyFaulted(TimeSpan duration, string consumerType, Exception exception)
         {
-            NotifyFaulted(_context, consumerType, exception);
+            NotifyFaulted(_context, duration, consumerType, exception);
         }
 
         public TSaga Saga

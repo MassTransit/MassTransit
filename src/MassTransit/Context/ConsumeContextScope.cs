@@ -218,14 +218,14 @@ namespace MassTransit.Context
             return _context.GetSendEndpoint(address);
         }
 
-        void ConsumeContext.NotifyConsumed<T>(ConsumeContext<T> context, TimeSpan elapsed, string consumerType)
+        void ConsumeContext.NotifyConsumed<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType)
         {
-            _context.NotifyConsumed(context, elapsed, consumerType);
+            _context.NotifyConsumed(context, duration, consumerType);
         }
 
-        void ConsumeContext.NotifyFaulted<T>(ConsumeContext<T> context, string consumerType, Exception exception)
+        void ConsumeContext.NotifyFaulted<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType, Exception exception)
         {
-            _context.NotifyFaulted(context, consumerType, exception);
+            _context.NotifyFaulted(context, duration, consumerType, exception);
         }
 
         TMessage ConsumeContext<TMessage>.Message
@@ -233,14 +233,14 @@ namespace MassTransit.Context
             get { return _context.Message; }
         }
 
-        void ConsumeContext<TMessage>.NotifyConsumed(TimeSpan elapsed, string consumerType)
+        void ConsumeContext<TMessage>.NotifyConsumed(TimeSpan duration, string consumerType)
         {
-            _context.NotifyConsumed(elapsed, consumerType);
+            _context.NotifyConsumed(duration, consumerType);
         }
 
-        void ConsumeContext<TMessage>.NotifyFaulted(string consumerType, Exception exception)
+        void ConsumeContext<TMessage>.NotifyFaulted(TimeSpan duration, string consumerType, Exception exception)
         {
-            _context.NotifyFaulted(consumerType, exception);
+            _context.NotifyFaulted(duration, consumerType, exception);
         }
     }
 }

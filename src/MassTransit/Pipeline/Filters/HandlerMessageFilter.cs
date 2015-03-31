@@ -49,7 +49,7 @@ namespace MassTransit.Pipeline.Filters
             }
             catch (Exception ex)
             {
-                context.NotifyFaulted(TypeMetadataCache<MessageHandler<TMessage>>.ShortName, ex);
+                context.NotifyFaulted(timer.Elapsed, TypeMetadataCache<MessageHandler<TMessage>>.ShortName, ex);
                 throw;
             }
         }

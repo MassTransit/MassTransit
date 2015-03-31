@@ -38,10 +38,10 @@ namespace MassTransit.Pipeline
             Notify(x => x.PostConsume(context, duration, consumerType));
         }
 
-        public void NotifyConsumeFault<T>(ConsumeContext<T> context, string consumerType, Exception exception)
+        public void NotifyConsumeFault<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType, Exception exception)
             where T : class
         {
-            Notify(x => x.ConsumeFault(context, consumerType, exception));
+            Notify(x => x.ConsumeFault(context, duration, consumerType, exception));
         }
 
         public void NotifyReceiveFault(ReceiveContext context, Exception exception)
@@ -64,9 +64,9 @@ namespace MassTransit.Pipeline
             NotifyPostConsume(context, duration, consumerType);
         }
 
-        async Task IReceiveObserver.ConsumeFault<T>(ConsumeContext<T> context, string consumerType, Exception exception)
+        async Task IReceiveObserver.ConsumeFault<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType, Exception exception)
         {
-            NotifyConsumeFault(context, consumerType, exception);
+            NotifyConsumeFault(context, duration, consumerType, exception);
         }
 
         async Task IReceiveObserver.ReceiveFault(ReceiveContext context, Exception exception)

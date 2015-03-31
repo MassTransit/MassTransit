@@ -14,6 +14,7 @@ namespace MassTransit.Saga.Pipeline.Filters
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Threading.Tasks;
     using Context;
     using MassTransit.Pipeline;
@@ -41,26 +42,28 @@ namespace MassTransit.Saga.Pipeline.Filters
 
         async Task IFilter<ConsumeContext<TMessage>>.Send(ConsumeContext<TMessage> context, IPipe<ConsumeContext<TMessage>> next)
         {
+            Stopwatch timer = Stopwatch.StartNew();
+            IEnumerable<Guid> sagaIds;
             try
             {
-                IEnumerable<Guid> sagaIds = await _locator.Find(context);
-
-                foreach (Guid sagaId in sagaIds)
-                {
-                    // create a nested scope for each saga instance
-                    var consumeContext = new ConsumeContextScope<TMessage>(context);
-
-                    SagaContext<TSaga, TMessage> sagaContext = new SagaContextImpl<TSaga, TMessage>(sagaId, _policy);
-
-                    consumeContext.GetOrAddPayload(() => sagaContext);
-
-                    await next.Send(consumeContext);
-                }
+                sagaIds = await _locator.Find(context);
             }
             catch (Exception ex)
             {
-                context.NotifyFaulted(TypeMetadataCache<TSaga>.ShortName, ex);
+                context.NotifyFaulted(context, timer.Elapsed, TypeMetadataCache<TSaga>.ShortName, ex);
                 throw;
+            }
+
+            foreach (Guid sagaId in sagaIds)
+            {
+                // create a nested scope for each saga instance
+                var consumeContext = new ConsumeContextScope<TMessage>(context);
+
+                SagaContext<TSaga, TMessage> sagaContext = new SagaContextImpl<TSaga, TMessage>(sagaId, _policy);
+
+                consumeContext.GetOrAddPayload(() => sagaContext);
+
+                await next.Send(consumeContext);
             }
         }
 
