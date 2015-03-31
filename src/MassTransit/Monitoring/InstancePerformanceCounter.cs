@@ -1,12 +1,12 @@
-// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
 // License at 
 // 
 //     http://www.apache.org/licenses/LICENSE-2.0 
 // 
-// Unless required by applicable law or agreed to in writing, software distributed 
+// Unless required by applicable law or agreed to in writing, software distributed
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
@@ -15,48 +15,25 @@ namespace MassTransit.Monitoring
     using System;
     using System.Diagnostics;
 
+
     public class InstancePerformanceCounter :
         IPerformanceCounter
     {
-        bool _disposed;
-        PerformanceCounter _performanceCounter;
+        PerformanceCounter _counter;
 
-        public InstancePerformanceCounter(string name, string categoryName, string instanceName)
+        public InstancePerformanceCounter(PerformanceCounter counter)
         {
-            _performanceCounter = new PerformanceCounter(categoryName, name, instanceName, false)
-                {
-                    RawValue = 0
-                };
-        }
-
-        public string Name
-        {
-            get { return _performanceCounter.CounterName; }
-        }
-
-        public string InstanceName
-        {
-            get { return _performanceCounter.InstanceName; }
-        }
-
-        public string CategoryName
-        {
-            get { return _performanceCounter.CategoryName; }
+            _counter = counter;
         }
 
         public void Dispose()
         {
-            Dispose(true);
-        }
-
-        public void Close()
-        {
-            if (_performanceCounter != null)
+            if (_counter != null)
             {
                 try
                 {
-                    _performanceCounter.RemoveInstance();
-                    _performanceCounter.Close();
+                    _counter.RemoveInstance();
+                    _counter.Close();
                 }
                 catch (NotImplementedException)
                 {
@@ -64,35 +41,25 @@ namespace MassTransit.Monitoring
                 }
                 finally
                 {
-                    _performanceCounter = null;
+                    _counter.Dispose();
+                    _counter = null;
                 }
             }
         }
 
         public virtual void Increment()
         {
-            _performanceCounter.Increment();
+            _counter.Increment();
         }
 
         public virtual void IncrementBy(long val)
         {
-            _performanceCounter.IncrementBy(val);
+            _counter.IncrementBy(val);
         }
 
         public virtual void Set(long val)
         {
-            _performanceCounter.RawValue = val;
-        }
-
-        void Dispose(bool disposing)
-        {
-            if (_disposed) return;
-            if (disposing)
-            {
-                Close();
-            }
-
-            _disposed = true;
+            _counter.RawValue = val;
         }
     }
 }

@@ -29,7 +29,6 @@ namespace MassTransit
     {
         static readonly ILog _log;
 
-        ServiceBusInstancePerformanceCounters _counters;
         volatile bool _disposed;
         volatile bool _started;
 
@@ -152,12 +151,6 @@ namespace MassTransit
             {
                 Endpoint = null;
 
-                if (_counters != null)
-                {
-                    _counters.Dispose();
-                    _counters = null;
-                }
-
 //                EndpointCache.Dispose();
             }
             _disposed = true;
@@ -170,7 +163,6 @@ namespace MassTransit
                 string instanceName = string.Format("{0}_{1}{2}",
                     Endpoint.Address.Scheme, Endpoint.Address.Host, Endpoint.Address.AbsolutePath.Replace("/", "_"));
 
-                _counters = new ServiceBusInstancePerformanceCounters(instanceName);
 
 //                _performanceCounterConnection = _eventChannel.Connect(x =>
 //                    {

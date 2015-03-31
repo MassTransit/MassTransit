@@ -39,10 +39,7 @@ namespace MassTransit.QuartzService
                             // this will force the performance counters to register during service installation
                             // making them created - of course using the InstallUtil stuff completely skips
                             // this part of the install :(
-                            ServiceBusPerformanceCounters counters = ServiceBusPerformanceCounters.Instance;
-
-                            string name = counters.ConsumerThreadCount.Name;
-                            Console.WriteLine("Consumer Thread Count Counter Installed: {0}", name);
+                            BusPerformanceCounters.Install();
                         });
 
                     x.Service(CreateService);
