@@ -5,7 +5,6 @@
     using System.Diagnostics;
     using System.Linq;
     using System.Threading;
-    using Magnum.Extensions;
     using NUnit.Framework;
     using TestFramework;
 
@@ -30,7 +29,7 @@
 //                s.Handler<A>(async msg =>
 //                    {
 //                        _before.Release();
-//                        _wait.WaitOne(30.Seconds());
+//                        _wait.WaitOne(TimeSpan.FromSeconds(30));
 //                        _after.Release();
 //                    }));
         }
@@ -50,7 +49,7 @@
             {
                 var timer = Stopwatch.StartNew();
                 Bus.Publish(new A());
-                Assert.IsTrue(_before.WaitOne(30.Seconds()), "Consumer thread failed to start");
+                Assert.IsTrue(_before.WaitOne(TimeSpan.FromSeconds(30)), "Consumer thread failed to start");
                 timer.Stop();
                 latency.Add(timer.ElapsedMilliseconds);
             }
@@ -61,7 +60,7 @@
 
             for (int i = 0; i < 100; i++)
             {
-                Assert.IsTrue(_after.WaitOne(30.Seconds()), "Consumer thread failed to complete");
+                Assert.IsTrue(_after.WaitOne(TimeSpan.FromSeconds(30)), "Consumer thread failed to complete");
             }
 
             Console.WriteLine("Elapsed Time: {0}", DateTime.Now - now);

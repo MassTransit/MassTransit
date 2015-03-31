@@ -14,7 +14,6 @@ namespace MassTransit.Tests.Serialization
 {
     using System;
     using System.Linq;
-    using Magnum.Extensions;
     using MassTransit.Serialization;
     using Messages;
     using NUnit.Framework;
@@ -179,7 +178,7 @@ namespace MassTransit.Tests.Serialization
                 ByteValue = 127,
                 IntValue = 123,
                 DateTimeValue = new DateTime(2008, 9, 8, 7, 6, 5, 4),
-                TimeSpanValue = 30.Seconds(),
+                TimeSpanValue = TimeSpan.FromSeconds(30),
                 GuidValue = Guid.NewGuid(),
                 StringValue = "Chris's Sample Code",
                 DoubleValue = 1823.172,

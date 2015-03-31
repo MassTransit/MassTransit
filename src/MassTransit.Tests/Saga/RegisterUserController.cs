@@ -14,7 +14,6 @@ namespace MassTransit.Tests.Saga
 {
 	using System;
 	using System.Threading;
-	using Magnum.Extensions;
 	using Messages;
 
 	public class RegisterUserController :
@@ -55,14 +54,14 @@ namespace MassTransit.Tests.Saga
 
 		    _bus.Publish(message);
 
-		    return _registrationPending.WaitOne(8.Seconds());
+		    return _registrationPending.WaitOne(TimeSpan.FromSeconds(8));
 		}
 
 		public bool ValidateUser()
 		{
 		    _bus.Publish(new UserValidated(CorrelationId));
 
-		    return WaitOn(_registrationComplete, 8.Seconds(), "Timeout waiting for registration to complete");
+		    return WaitOn(_registrationComplete, TimeSpan.FromSeconds(8), "Timeout waiting for registration to complete");
 		}
 
         bool WaitOn(WaitHandle handle, TimeSpan timeout, string message)

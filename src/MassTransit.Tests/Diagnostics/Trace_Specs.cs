@@ -45,7 +45,7 @@ namespace MassTransit.Tests.Diagnostics
 //            _future = new FutureMessage<ReceivedMessageTraceList>();
 //            _test.Scenario.Bus.GetMessageTrace(_test.Scenario.Bus.Endpoint, _future.Set);
 //
-//            _future.IsAvailable(8.Seconds()).ShouldBe(true);
+//            _future.IsAvailable(TimeSpan.FromSeconds(8)).ShouldBe(true);
 //            _list = _future.Message;
 //        }
 //

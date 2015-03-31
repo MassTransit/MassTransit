@@ -16,7 +16,6 @@ namespace MassTransit.Tests.TestConsumers
     using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
-    using Magnum.Extensions;
     using NUnit.Framework;
 
     public class TestConsumerBase<TMessage>
@@ -72,7 +71,7 @@ namespace MassTransit.Tests.TestConsumers
 
 		public void ShouldHaveReceivedMessage(TMessage message)
 		{
-			ShouldHaveReceivedMessage(message, 0.Seconds());
+			ShouldHaveReceivedMessage(message, TimeSpan.Zero);
 		}
 
     	public void ShouldHaveReceivedMessage(TMessage message, TimeSpan timeout)
@@ -82,7 +81,7 @@ namespace MassTransit.Tests.TestConsumers
 
         public void ShouldNotHaveReceivedMessage(TMessage message)
         {
-            Assert.That(ReceivedMessage(message, 0.Seconds()), Is.False, "Message should not have been received");
+            Assert.That(ReceivedMessage(message, TimeSpan.Zero), Is.False, "Message should not have been received");
         }
 
         public void ShouldNotHaveReceivedMessage(TMessage message, TimeSpan timeout)

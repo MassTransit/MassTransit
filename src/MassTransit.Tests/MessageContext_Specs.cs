@@ -14,7 +14,6 @@ namespace MassTransit.Tests
 {
     using System;
     using System.Threading.Tasks;
-    using Magnum.Extensions;
     using NUnit.Framework;
     using Shouldly;
     using TestFramework;
@@ -257,7 +256,7 @@ namespace MassTransit.Tests
         {
             _request = Bus.Request(InputQueueAddress, new PingMessage(), x =>
             {
-                x.Timeout = 1.Seconds();
+                x.Timeout = TimeSpan.FromSeconds(1);
 
                 _response = x.Handle<PongMessage>(async _ =>
                 {
