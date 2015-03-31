@@ -221,11 +221,11 @@ namespace MassTransit.TestFramework
             throw new NotImplementedException();
         }
 
-        void ConsumeContext.NotifyConsumed<T>(ConsumeContext<T> context, TimeSpan elapsed, string consumerType)
+        void ConsumeContext.NotifyConsumed<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType)
         {
         }
 
-        public void NotifyFaulted<T>(ConsumeContext<T> context, string consumerType, Exception exception) 
+        public void NotifyFaulted<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType, Exception exception) 
             where T : class
         {
 
@@ -236,13 +236,13 @@ namespace MassTransit.TestFramework
             get { return _message; }
         }
 
-        public void NotifyConsumed(TimeSpan elapsed, string consumerType)
+        public void NotifyConsumed(TimeSpan duration, string consumerType)
         {
         }
 
-        public void NotifyFaulted(string consumerType, Exception exception)
+        public void NotifyFaulted(TimeSpan duration, string consumerType, Exception exception)
         {
-            NotifyFaulted(this, consumerType, exception);
+            NotifyFaulted(this, duration, consumerType, exception);
         }
     }
 }

@@ -99,18 +99,19 @@ namespace MassTransit
         /// Notify that the message has been consumed
         /// </summary>
         /// <param name="context"></param>
-        /// <param name="elapsed"></param>
+        /// <param name="duration"></param>
         /// <param name="consumerType">The consumer type</param>
-        void NotifyConsumed<T>(ConsumeContext<T> context, TimeSpan elapsed, string consumerType)
+        void NotifyConsumed<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType)
             where T : class;
 
         /// <summary>
         /// Notify that a message consumer has faulted
         /// </summary>
         /// <param name="context"></param>
+        /// <param name="duration"></param>
         /// <param name="consumerType">The message consumer type</param>
         /// <param name="exception">The exception that occurred</param>
-        void NotifyFaulted<T>(ConsumeContext<T> context, string consumerType, Exception exception)
+        void NotifyFaulted<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType, Exception exception)
             where T : class;
     }
 
@@ -124,15 +125,16 @@ namespace MassTransit
         /// <summary>
         /// Notify that the message has been consumed
         /// </summary>
-        /// <param name="elapsed"></param>
+        /// <param name="duration"></param>
         /// <param name="consumerType">The consumer type</param>
-        void NotifyConsumed(TimeSpan elapsed, string consumerType);
+        void NotifyConsumed(TimeSpan duration, string consumerType);
 
         /// <summary>
         /// Notify that a fault occurred during message consumption
         /// </summary>
+        /// <param name="duration"></param>
         /// <param name="consumerType"></param>
         /// <param name="exception"></param>
-        void NotifyFaulted(string consumerType, Exception exception);
+        void NotifyFaulted(TimeSpan duration, string consumerType, Exception exception);
     }
 }

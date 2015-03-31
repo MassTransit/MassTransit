@@ -22,7 +22,6 @@ namespace MassTransit.Pipeline.Filters
     /// Uses a retry policy to handle exceptions, retrying the operation in according
     /// with the policy
     /// </summary>
-    /// <typeparam name="T"></typeparam>
     public class RetryFilter :
         IFilter<ConsumeContext>
     {

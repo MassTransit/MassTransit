@@ -102,14 +102,14 @@ namespace MassTransit.Transports
             get { return _headers.Value; }
         }
 
-        void ReceiveContext.NotifyConsumed<T>(ConsumeContext<T> context, TimeSpan elapsed, string consumerType)
+        void ReceiveContext.NotifyConsumed<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType)
         {
-            _receiveObserver.NotifyPostConsume(context, elapsed, consumerType);
+            _receiveObserver.NotifyPostConsume(context, duration, consumerType);
         }
 
-        async Task ReceiveContext.NotifyFaulted<T>(ConsumeContext<T> context, string consumerType, Exception exception)
+        async Task ReceiveContext.NotifyFaulted<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType, Exception exception)
         {
-            _receiveObserver.NotifyConsumeFault(context, consumerType, exception);
+            _receiveObserver.NotifyConsumeFault(context, duration, consumerType, exception);
         }
 
         Stream ReceiveContext.Body

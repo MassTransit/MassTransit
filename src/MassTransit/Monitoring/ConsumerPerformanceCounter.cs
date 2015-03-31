@@ -14,34 +14,37 @@ namespace MassTransit.Monitoring
 {
     using System;
 
-
+    /// <summary>
+    /// Tracks the consumption and failure of a consumer processing messages. The message types
+    /// in this case are not included in the counter, only the consumer itself.
+    /// </summary>
     public class ConsumerPerformanceCounter :
         IDisposable,
         IConsumerPerformanceCounter
     {
-        readonly IPerformanceCounter _consumeDuration;
-        readonly IPerformanceCounter _consumeDurationBase;
-        readonly IPerformanceCounter _consumedPerSecond;
+        readonly IPerformanceCounter _duration;
+        readonly IPerformanceCounter _durationBase;
+        readonly IPerformanceCounter _consumeRate;
         readonly IPerformanceCounter _faultPercentage;
         readonly IPerformanceCounter _faultPercentageBase;
-        readonly IPerformanceCounter _faulted;
-        readonly IPerformanceCounter _totalConsumed;
+        readonly IPerformanceCounter _totalFaults;
+        readonly IPerformanceCounter _totalMessages;
 
         public ConsumerPerformanceCounter(string consumerType)
         {
             if (consumerType.Length > 127)
                 consumerType = consumerType.Substring(consumerType.Length - 127);
 
-            _totalConsumed = ConsumerPerformanceCounters.CreateCounter(
-                ConsumerPerformanceCounters.TotalReceived.CounterName, consumerType);
-            _consumedPerSecond = ConsumerPerformanceCounters.CreateCounter(
-                ConsumerPerformanceCounters.ConsumedPerSecond.CounterName, consumerType);
-            _consumeDuration = ConsumerPerformanceCounters.CreateCounter(
-                ConsumerPerformanceCounters.ConsumeDuration.CounterName, consumerType);
-            _consumeDurationBase = ConsumerPerformanceCounters.CreateCounter(
-                ConsumerPerformanceCounters.ConsumeDurationBase.CounterName, consumerType);
-            _faulted = ConsumerPerformanceCounters.CreateCounter(
-                ConsumerPerformanceCounters.Faulted.CounterName, consumerType);
+            _totalMessages = ConsumerPerformanceCounters.CreateCounter(
+                ConsumerPerformanceCounters.TotalMessages.CounterName, consumerType);
+            _consumeRate = ConsumerPerformanceCounters.CreateCounter(
+                ConsumerPerformanceCounters.ConsumeRate.CounterName, consumerType);
+            _duration = ConsumerPerformanceCounters.CreateCounter(
+                ConsumerPerformanceCounters.Duration.CounterName, consumerType);
+            _durationBase = ConsumerPerformanceCounters.CreateCounter(
+                ConsumerPerformanceCounters.DurationBase.CounterName, consumerType);
+            _totalFaults = ConsumerPerformanceCounters.CreateCounter(
+                ConsumerPerformanceCounters.TotalFaults.CounterName, consumerType);
             _faultPercentage = ConsumerPerformanceCounters.CreateCounter(
                 ConsumerPerformanceCounters.FaultPercentage.CounterName, consumerType);
             _faultPercentageBase = ConsumerPerformanceCounters.CreateCounter(
@@ -50,21 +53,21 @@ namespace MassTransit.Monitoring
 
         public void Consumed(TimeSpan duration)
         {
-            _totalConsumed.Increment();
-            _consumedPerSecond.Increment();
+            _totalMessages.Increment();
+            _consumeRate.Increment();
 
-            _consumeDuration.IncrementBy((long)duration.TotalMilliseconds);
-            _consumeDurationBase.Increment();
+            _duration.IncrementBy((long)duration.TotalMilliseconds);
+            _durationBase.Increment();
 
             _faultPercentageBase.Increment();
         }
 
         public void Faulted()
         {
-            _totalConsumed.Increment();
-            _consumedPerSecond.Increment();
+            _totalMessages.Increment();
+            _consumeRate.Increment();
 
-            _faulted.Increment();
+            _totalFaults.Increment();
 
             _faultPercentage.Increment();
             _faultPercentageBase.Increment();
@@ -72,13 +75,13 @@ namespace MassTransit.Monitoring
 
         public void Dispose()
         {
-            _consumeDuration.Dispose();
-            _consumeDurationBase.Dispose();
-            _consumedPerSecond.Dispose();
+            _duration.Dispose();
+            _durationBase.Dispose();
+            _consumeRate.Dispose();
             _faultPercentage.Dispose();
             _faultPercentageBase.Dispose();
-            _faulted.Dispose();
-            _totalConsumed.Dispose();
+            _totalFaults.Dispose();
+            _totalMessages.Dispose();
         }
     }
 }

@@ -15,6 +15,7 @@ namespace MassTransit
     using System;
     using System.Threading.Tasks;
 
+
     /// <summary>
     /// An observer that can monitor a receive endpoint to track message consumption at the 
     /// endpoint level.
@@ -43,18 +44,19 @@ namespace MassTransit
         /// <param name="duration">The consumer duration</param>
         /// <param name="consumerType">The consumer type</param>
         /// <returns></returns>
-        Task PostConsume<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType) 
+        Task PostConsume<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType)
             where T : class;
 
         /// <summary>
         /// Called when a message being consumed produced a fault
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="context"></param>
-        /// <param name="consumerType"></param>
-        /// <param name="exception"></param>
+        /// <typeparam name="T">The message type</typeparam>
+        /// <param name="context">The message consume context</param>
+        /// <param name="duration">The consumer duration</param>
+        /// <param name="consumerType">The consumer type</param>
+        /// <param name="exception">The exception from the consumer</param>
         /// <returns></returns>
-        Task ConsumeFault<T>(ConsumeContext<T> context, string consumerType, Exception exception)
+        Task ConsumeFault<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType, Exception exception)
             where T : class;
 
         /// <summary>

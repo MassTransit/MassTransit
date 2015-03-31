@@ -51,7 +51,7 @@ namespace MassTransit.Saga.Pipeline.Filters
             }
             catch (Exception ex)
             {
-                context.NotifyFaulted(TypeMetadataCache<TSaga>.ShortName, ex);
+                context.NotifyFaulted(timer.Elapsed, TypeMetadataCache<TSaga>.ShortName, ex);
                 throw;
             }
         }

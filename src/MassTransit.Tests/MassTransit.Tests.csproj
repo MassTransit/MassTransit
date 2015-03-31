@@ -117,7 +117,6 @@
     <Compile Include="Load\Messages\FirstCommand.cs" />
     <Compile Include="Load\Messages\FirstPending.cs" />
     <Compile Include="Load\Messages\FirstResponse.cs" />
-    <Compile Include="FutureMessage.cs" />
     <Compile Include="Groups\Group_Specs.cs" />
     <Compile Include="InterfaceSubscription_Specs.cs" />
     <Compile Include="MessageContext_Specs.cs" />

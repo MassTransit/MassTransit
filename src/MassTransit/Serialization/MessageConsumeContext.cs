@@ -205,14 +205,14 @@ namespace MassTransit.Serialization
             return _context.GetSendEndpoint(address);
         }
 
-        void ConsumeContext.NotifyConsumed<T>(ConsumeContext<T> context, TimeSpan elapsed, string consumerType)
+        void ConsumeContext.NotifyConsumed<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType)
         {
-            _context.NotifyConsumed(context, elapsed, consumerType);
+            _context.NotifyConsumed(context, duration, consumerType);
         }
 
-        void ConsumeContext.NotifyFaulted<T>(ConsumeContext<T> context, string consumerType, Exception exception)
+        void ConsumeContext.NotifyFaulted<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType, Exception exception)
         {
-            _context.NotifyFaulted(context, consumerType, exception);
+            _context.NotifyFaulted(context, duration, consumerType, exception);
         }
 
         public TMessage Message
@@ -220,14 +220,14 @@ namespace MassTransit.Serialization
             get { return _message; }
         }
 
-        public void NotifyConsumed(TimeSpan elapsed, string consumerType)
+        public void NotifyConsumed(TimeSpan duration, string consumerType)
         {
-            _context.NotifyConsumed(this, elapsed, consumerType);
+            _context.NotifyConsumed(this, duration, consumerType);
         }
 
-        public void NotifyFaulted(string consumerType, Exception exception)
+        public void NotifyFaulted(TimeSpan duration, string consumerType, Exception exception)
         {
-            _context.NotifyFaulted(this, consumerType, exception);
+            _context.NotifyFaulted(this, duration, consumerType, exception);
         }
     }
 }

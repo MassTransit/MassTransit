@@ -28,27 +28,27 @@ namespace MassTransit.Monitoring
         {
         }
 
-        public static CounterCreationData ConsumedPerSecond
+        public static CounterCreationData ConsumeRate
         {
             get { return Cached.Instance.Value.Data[0]; }
         }
 
-        public static CounterCreationData TotalReceived
+        public static CounterCreationData TotalMessages
         {
             get { return Cached.Instance.Value.Data[1]; }
         }
 
-        public static CounterCreationData ConsumeDuration
+        public static CounterCreationData Duration
         {
             get { return Cached.Instance.Value.Data[2]; }
         }
 
-        public static CounterCreationData ConsumeDurationBase
+        public static CounterCreationData DurationBase
         {
             get { return Cached.Instance.Value.Data[3]; }
         }
 
-        public static CounterCreationData Faulted
+        public static CounterCreationData TotalFaults
         {
             get { return Cached.Instance.Value.Data[4]; }
         }

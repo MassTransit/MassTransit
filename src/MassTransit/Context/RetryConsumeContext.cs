@@ -205,15 +205,15 @@ namespace MassTransit.Context
             return _context.GetSendEndpoint(address);
         }
 
-        void ConsumeContext.NotifyConsumed<T>(ConsumeContext<T> context, TimeSpan elapsed, string consumerType)
+        void ConsumeContext.NotifyConsumed<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType)
         {
-            _context.NotifyConsumed(context, elapsed, consumerType);
+            _context.NotifyConsumed(context, duration, consumerType);
         }
 
-        public void NotifyFaulted<T>(ConsumeContext<T> context, string consumerType, Exception exception)
+        public void NotifyFaulted<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType, Exception exception)
             where T : class
         {
-            _pendingFaults.Add(new PendingFault<T>(context, consumerType, exception));
+            _pendingFaults.Add(new PendingFault<T>(context, duration, consumerType, exception));
         }
 
         public void ClearPendingFaults()
@@ -243,17 +243,19 @@ namespace MassTransit.Context
             readonly string _consumerType;
             readonly Exception _exception;
             readonly ConsumeContext<T> _context;
+            readonly TimeSpan _elapsed;
 
-            public PendingFault(ConsumeContext<T> context, string consumerType, Exception exception)
+            public PendingFault(ConsumeContext<T> context, TimeSpan elapsed, string consumerType, Exception exception)
             {
                 _context = context;
+                _elapsed = elapsed;
                 _consumerType = consumerType;
                 _exception = exception;
             }
 
             public void Notify(ConsumeContext context)
             {
-                context.NotifyFaulted(_context, _consumerType, _exception);
+                context.NotifyFaulted(_context, _elapsed, _consumerType, _exception);
             }
         }
     }
@@ -277,14 +279,14 @@ namespace MassTransit.Context
             get { return _context.Message; }
         }
 
-        public void NotifyConsumed(TimeSpan elapsed, string consumerType)
+        public void NotifyConsumed(TimeSpan duration, string consumerType)
         {
-            _context.NotifyConsumed(elapsed, consumerType);
+            _context.NotifyConsumed(duration, consumerType);
         }
 
-        public void NotifyFaulted(string consumerType, Exception exception)
+        public void NotifyFaulted(TimeSpan duration, string consumerType, Exception exception)
         {
-            NotifyFaulted(_context, consumerType, exception);
+            NotifyFaulted(_context, duration, consumerType, exception);
         }
     }
 }
