@@ -13,45 +13,37 @@
 namespace MassTransit.Monitoring
 {
     using System;
-    using System.Collections;
-    using System.Collections.Concurrent;
     using System.Threading.Tasks;
 
 
+    /// <summary>
+    /// An observer that updates the performance counters using the bus events
+    /// generated.
+    /// </summary>
     public class PerformanceCounterReceiveObserver :
         IReceiveObserver
     {
-        readonly ConcurrentDictionary<string, ConsumerPerformanceCounter> _consumers;
- 
-        public PerformanceCounterReceiveObserver()
-        {
-            _consumers = new ConcurrentDictionary<string, ConsumerPerformanceCounter>();
-        }
-
-        public async Task PreReceive(ReceiveContext context)
+        async Task IReceiveObserver.PreReceive(ReceiveContext context)
         {
         }
 
-        public async Task PostReceive(ReceiveContext context)
+        async Task IReceiveObserver.PostReceive(ReceiveContext context)
         {
         }
 
-        public async Task PostConsume<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType) where T : class
+        async Task IReceiveObserver.PostConsume<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType)
         {
-            GetConsumer(consumerType).Consumed(duration);
+            ConsumerPerformanceCounterCache.GetCounter(consumerType).Consumed(duration);
+            MessagePerformanceCounterCache<T>.Counter.Consumed(duration);
         }
 
-        ConsumerPerformanceCounter GetConsumer(string consumerType)
+        async Task IReceiveObserver.ConsumeFault<T>(ConsumeContext<T> context, string consumerType, Exception exception)
         {
-            return _consumers.GetOrAdd(consumerType, x => new ConsumerPerformanceCounter(x));
+            ConsumerPerformanceCounterCache.GetCounter(consumerType).Faulted();
+            MessagePerformanceCounterCache<T>.Counter.Faulted();
         }
 
-        public async Task ConsumeFault<T>(ConsumeContext<T> context, string consumerType, Exception exception) where T : class
-        {
-            GetConsumer(consumerType).Faulted();
-        }
-
-        public async Task ReceiveFault(ReceiveContext context, Exception exception)
+        async Task IReceiveObserver.ReceiveFault(ReceiveContext context, Exception exception)
         {
         }
     }

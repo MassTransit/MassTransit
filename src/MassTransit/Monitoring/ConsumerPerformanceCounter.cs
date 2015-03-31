@@ -13,42 +13,39 @@
 namespace MassTransit.Monitoring
 {
     using System;
-    using System.Diagnostics;
 
 
     public class ConsumerPerformanceCounter :
-        IDisposable
+        IDisposable,
+        IConsumerPerformanceCounter
     {
-        readonly PerformanceCounter _consumeDuration;
-        readonly PerformanceCounter _consumeDurationBase;
-        readonly PerformanceCounter _totalConsumed;
-        readonly PerformanceCounter _consumedPerSecond;
+        readonly IPerformanceCounter _consumeDuration;
+        readonly IPerformanceCounter _consumeDurationBase;
+        readonly IPerformanceCounter _consumedPerSecond;
+        readonly IPerformanceCounter _faultPercentage;
+        readonly IPerformanceCounter _faultPercentageBase;
+        readonly IPerformanceCounter _faulted;
+        readonly IPerformanceCounter _totalConsumed;
 
         public ConsumerPerformanceCounter(string consumerType)
         {
-            _totalConsumed = new PerformanceCounter(ConsumerPerformanceCounterCreationData.CategoryName,
-                ConsumerPerformanceCounterCreationData.TotalReceived.CounterName, consumerType, false);
-            _consumedPerSecond = new PerformanceCounter(ConsumerPerformanceCounterCreationData.CategoryName,
-                ConsumerPerformanceCounterCreationData.ConsumedPerSecond.CounterName, consumerType, false);
-            _consumeDuration = new PerformanceCounter(ConsumerPerformanceCounterCreationData.CategoryName,
-                ConsumerPerformanceCounterCreationData.ConsumeDuration.CounterName, consumerType, false);
-            _consumeDurationBase = new PerformanceCounter(ConsumerPerformanceCounterCreationData.CategoryName,
-                ConsumerPerformanceCounterCreationData.ConsumeDurationBase.CounterName, consumerType, false);
-        }
+            if (consumerType.Length > 127)
+                consumerType = consumerType.Substring(consumerType.Length - 127);
 
-        public void Dispose()
-        {
-            _totalConsumed.Close();
-            _totalConsumed.Dispose();
-
-            _consumedPerSecond.Close();
-            _consumedPerSecond.Dispose();
-
-            _consumeDuration.Close();
-            _consumeDuration.Dispose();
-
-            _consumeDurationBase.Close();
-            _consumeDurationBase.Dispose();
+            _totalConsumed = ConsumerPerformanceCounters.CreateCounter(
+                ConsumerPerformanceCounters.TotalReceived.CounterName, consumerType);
+            _consumedPerSecond = ConsumerPerformanceCounters.CreateCounter(
+                ConsumerPerformanceCounters.ConsumedPerSecond.CounterName, consumerType);
+            _consumeDuration = ConsumerPerformanceCounters.CreateCounter(
+                ConsumerPerformanceCounters.ConsumeDuration.CounterName, consumerType);
+            _consumeDurationBase = ConsumerPerformanceCounters.CreateCounter(
+                ConsumerPerformanceCounters.ConsumeDurationBase.CounterName, consumerType);
+            _faulted = ConsumerPerformanceCounters.CreateCounter(
+                ConsumerPerformanceCounters.Faulted.CounterName, consumerType);
+            _faultPercentage = ConsumerPerformanceCounters.CreateCounter(
+                ConsumerPerformanceCounters.FaultPercentage.CounterName, consumerType);
+            _faultPercentageBase = ConsumerPerformanceCounters.CreateCounter(
+                ConsumerPerformanceCounters.FaultPercentageBase.CounterName, consumerType);
         }
 
         public void Consumed(TimeSpan duration)
@@ -58,6 +55,8 @@ namespace MassTransit.Monitoring
 
             _consumeDuration.IncrementBy((long)duration.TotalMilliseconds);
             _consumeDurationBase.Increment();
+
+            _faultPercentageBase.Increment();
         }
 
         public void Faulted()
@@ -66,6 +65,20 @@ namespace MassTransit.Monitoring
             _consumedPerSecond.Increment();
 
             _faulted.Increment();
+
+            _faultPercentage.Increment();
+            _faultPercentageBase.Increment();
+        }
+
+        public void Dispose()
+        {
+            _consumeDuration.Dispose();
+            _consumeDurationBase.Dispose();
+            _consumedPerSecond.Dispose();
+            _faultPercentage.Dispose();
+            _faultPercentageBase.Dispose();
+            _faulted.Dispose();
+            _totalConsumed.Dispose();
         }
     }
 }
