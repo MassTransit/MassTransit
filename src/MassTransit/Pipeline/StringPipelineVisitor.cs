@@ -12,6 +12,8 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Pipeline
 {
+    using System;
+    using System.Linq;
     using System.Text;
     using Filters;
     using Internals.Extensions;
@@ -64,6 +66,13 @@ namespace MassTransit.Pipeline
             return base.VisitRetryConsumeFilter(filter, callback);
         }
 
+        protected override bool VisitRetryConsumeFilter<T>(RetryFilter<T> filter, FilterVisitorCallback callback)
+        {
+            _builder.AppendFormat("Retry({0}) - {1}", TypeMetadataCache<ConsumeContext<T>>.ShortName, filter.RetryPolicy).AppendLine();
+
+            return base.VisitRetryConsumeFilter(filter, callback);
+        }
+
         protected override bool VisitMethodConsumerMessageFilter<TConsumer, T>(MethodConsumerMessageFilter<TConsumer, T> filter, FilterVisitorCallback callback)
         {
             _builder.AppendFormat("Task {0}.Consume(ConsumeContext<{1}> context)", TypeMetadataCache<TConsumer>.ShortName, TypeMetadataCache<T>.ShortName)
@@ -77,6 +86,15 @@ namespace MassTransit.Pipeline
             _builder.AppendFormat("{0}", TypeMetadataCache<ConsumerSplitFilter<TConsumer, T>>.ShortName).AppendLine();
 
             return base.VisitConsumerSplitFilter(filter, callback);
+        }
+
+        protected override bool VisitConsumerMessageFilter<T>(IFilter<ConsumeContext<T>> filter, FilterVisitorCallback callback)
+        {
+            Type consumerType = filter.GetType().GetGenericArguments().First();
+            _builder.AppendFormat("Consumer {0} of {1}", consumerType.GetTypeName(), TypeMetadataCache<T>.ShortName)
+                .AppendLine();
+
+            return base.VisitConsumerMessageFilter(filter, callback);
         }
     }
 }
