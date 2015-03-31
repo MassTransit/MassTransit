@@ -61,10 +61,6 @@
     <Reference Include="log4net">
       <HintPath>..\packages\log4net.2.0.3\lib\net40-full\log4net.dll</HintPath>
     </Reference>
-    <Reference Include="Magnum, Version=2.1.3.0, Culture=neutral, PublicKeyToken=b800c4cfcdeea87b, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Magnum.2.1.3\lib\NET40\Magnum.dll</HintPath>
-    </Reference>
     <Reference Include="NewId">
       <HintPath>..\packages\NewId.2.1.2\lib\net45\NewId.dll</HintPath>
     </Reference>
@@ -75,10 +71,6 @@
     <Reference Include="nunit.framework, Version=2.6.4.14350, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\NUnit.2.6.4\lib\nunit.framework.dll</HintPath>
-    </Reference>
-    <Reference Include="Rhino.Mocks, Version=3.6.0.0, Culture=neutral, PublicKeyToken=0b3305902db7183f, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\RhinoMocks.3.6.1\lib\net\Rhino.Mocks.dll</HintPath>
     </Reference>
     <Reference Include="Shouldly, Version=2.4.0.0, Culture=neutral, PublicKeyToken=6042cbcb05cbc941, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -112,11 +104,6 @@
     <Compile Include="Configuration\InstanceSubscription_Specs.cs" />
     <Compile Include="Configuration\SagaConnector_Specs.cs" />
     <Compile Include="ContextSetup.cs" />
-    <Compile Include="Load\CommandInstance.cs" />
-    <Compile Include="Load\Messages\First.cs" />
-    <Compile Include="Load\Messages\FirstCommand.cs" />
-    <Compile Include="Load\Messages\FirstPending.cs" />
-    <Compile Include="Load\Messages\FirstResponse.cs" />
     <Compile Include="Groups\Group_Specs.cs" />
     <Compile Include="InterfaceSubscription_Specs.cs" />
     <Compile Include="MessageContext_Specs.cs" />
@@ -174,7 +161,6 @@
     <Compile Include="Serialization\Performance_Specs.cs" />
     <Compile Include="Serialization\PropertyType_Specs.cs" />
     <Compile Include="Serialization\SerializationTest.cs" />
-    <Compile Include="TestExtensions.cs" />
     <Compile Include="Saga\InitiateSaga_Specs.cs" />
     <Compile Include="PublishSubscribe_Specs.cs" />
     <Compile Include="Saga\Messages\CorrelatedMessage.cs" />
@@ -232,7 +218,6 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Internal\" />
     <Folder Include="TextFixtures\" />
   </ItemGroup>
   <ItemGroup>
