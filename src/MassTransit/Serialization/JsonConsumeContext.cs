@@ -310,10 +310,10 @@ namespace MassTransit.Serialization
             return _publishEndpoint.Publish(values, publishPipe, cancellationToken);
         }
 
-        async Task GenerateFault<T>(T message, Exception exception)
+        async Task GenerateFault<T>(ConsumeContext<T> context, Exception exception)
             where T : class
         {
-            Fault<T> fault = new FaultEvent<T>(message, HostMetadataCache.Host, exception);
+            Fault<T> fault = new FaultEvent<T>(context.Message, HostMetadataCache.Host, exception);
 
             IPipe<SendContext<Fault<T>>> faultPipe = Pipe.Execute<SendContext<Fault<T>>>(x =>
             {
