@@ -334,6 +334,9 @@
     <Compile Include="MessageContext.cs" />
     <Compile Include="MessageHandler.cs" />
     <Compile Include="MessageRequestClient.cs" />
+    <Compile Include="Monitoring\ConsumerPerformanceCounter.cs" />
+    <Compile Include="Monitoring\ConsumerPerformanceCounterCreationData.cs" />
+    <Compile Include="Monitoring\PerformanceCounterReceiveObserver.cs" />
     <Compile Include="ObserverHandle.cs" />
     <Compile Include="Pipe.cs" />
     <Compile Include="PipeContext.cs" />
