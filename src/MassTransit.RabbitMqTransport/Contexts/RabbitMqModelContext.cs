@@ -49,7 +49,7 @@ namespace MassTransit.RabbitMqTransport.Contexts
 
             _registration.Dispose();
 
-            _model.Cleanup();
+            _model.Cleanup(200, "ModelContext Disposed");
         }
 
         public bool HasPayloadType(Type contextType)
@@ -89,7 +89,7 @@ namespace MassTransit.RabbitMqTransport.Contexts
         {
             _tokenSource.Cancel();
 
-            _model.Cleanup();
+            _model.Cleanup(reason.ReplyCode, reason.ReplyText);
         }
 
         void OnCancellationRequested()

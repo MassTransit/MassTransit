@@ -19,7 +19,9 @@ namespace MassTransit.RabbitMqTransport.Tests
     using MassTransit.Testing;
     using MassTransit.Testing.TestDecorators;
     using NUnit.Framework;
+    using RabbitMQ.Client;
     using TestFramework;
+    using Transports;
 
 
     [TestFixture]
@@ -34,6 +36,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         readonly TestSendObserver _sendObserver;
         Uri _hostAddress;
         BusHandle _busHandle;
+        IMessageNameFormatter _nameFormatter;
 
         public RabbitMqTestFixture()
         {
@@ -126,9 +129,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             try
             {
                 if (_busHandle != null)
-                {
                     _busHandle.Stop(new CancellationTokenSource(TestTimeout).Token);
-                }
             }
             catch (AggregateException ex)
             {
@@ -141,13 +142,17 @@ namespace MassTransit.RabbitMqTransport.Tests
 
         protected virtual void ConfigureBus(IRabbitMqBusFactoryConfigurator configurator)
         {
-        }   
-        
+        }
+
         protected virtual void ConfigureBusHost(IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host)
         {
         }
 
         protected virtual void ConfigureInputQueueEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
+        {
+        }
+
+        protected virtual void OnCleanupVirtualHost(IModel model)
         {
         }
 
@@ -163,6 +168,8 @@ namespace MassTransit.RabbitMqTransport.Tests
                     h.Password("guest");
                 });
 
+                CleanUpVirtualHost(host);
+
                 ConfigureBusHost(x, host);
 
                 x.ReceiveEndpoint(host, "input_queue", e =>
@@ -173,6 +180,26 @@ namespace MassTransit.RabbitMqTransport.Tests
                     ConfigureInputQueueEndpoint(e);
                 });
             });
+        }
+
+        protected IMessageNameFormatter NameFormatter
+        {
+            get { return _nameFormatter; }
+        }
+
+        void CleanUpVirtualHost(IRabbitMqHost host)
+        {
+            _nameFormatter = new RabbitMqMessageNameFormatter();
+
+            ConnectionFactory connectionFactory = host.Settings.GetConnectionFactory();
+            using (IConnection connection = connectionFactory.CreateConnection())
+            using (IModel model = connection.CreateModel())
+            {
+                model.ExchangeDelete("input_queue");
+                model.QueueDelete("input_queue");
+
+                OnCleanupVirtualHost(model);
+            }
         }
     }
 }

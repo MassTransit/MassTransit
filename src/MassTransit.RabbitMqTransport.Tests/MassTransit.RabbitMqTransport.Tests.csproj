@@ -81,6 +81,7 @@
     <Compile Include="Bytes_Specs.cs" />
     <Compile Include="ConfiguringRabbitMQ_Specs.cs" />
     <Compile Include="Connector_Specs.cs" />
+    <Compile Include="ConsumerBind_Specs.cs" />
     <Compile Include="ContextSetup.cs" />
     <Compile Include="ErrorQueue_Specs.cs" />
     <Compile Include="Performance_Specs.cs" />
