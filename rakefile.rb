@@ -392,8 +392,8 @@ task :all_nuspecs => [:versioning, :mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :m
     nuspec.dependency "MassTransit", NUGET_VERSION
     nuspec.dependency "Newtonsoft.Json", "6.0.8"
     nuspec.dependency "NewId", "2.1.2"
-    nuspec.dependency "WindowsAzure.ServiceBus", "2.6.1"
-    nuspec.dependency "Microsoft.WindowsAzure.ConfigurationManager", "2.0.3"
+    nuspec.dependency "WindowsAzure.ServiceBus", "2.6.4"
+    nuspec.dependency "Microsoft.WindowsAzure.ConfigurationManager", "3.1.0"
     nuspec.output_file = 'nuspecs/MassTransit.AzureServiceBus.nuspec'
 
   add_files props[:stage], "#{File.join('Transports', 'AzureServiceBus', 'MassTransit.AzureServiceBusTransport.{dll,pdb,xml}')}", nuspec
@@ -608,7 +608,6 @@ task :all_nuspecs => [:versioning, :mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :m
     nuspec.dependency "MassTransit", NUGET_VERSION
     nuspec.dependency "NewId", "2.1.2"
     nuspec.dependency "NUnit", "2.6.4"
-    nuspec.dependency "RhinoMocks", "3.6.1"
     nuspec.output_file = 'nuspecs/MassTransit.TestFramework.nuspec'
 
   add_files props[:stage], "#{File.join('Testing', 'MassTransit.TestFramework.{dll,pdb,xml}')}", nuspec
