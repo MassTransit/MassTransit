@@ -5,21 +5,17 @@
 	</configSections>
 	<log4net>
 		<root>
-			<level value="DEBUG" />
+			<level value="INFO" />
 			<appender-ref ref="LogFileAppender" />
 			<appender-ref ref="console" />
 		</root>
 
 		<logger name="MassTransit">
-			<level value="DEBUG" />
+			<level value="INFO" />
 		</logger>
 
 		<logger name="MassTransit.RabbitMqTransport">
-			<level value="DEBUG" />
-		</logger>
-
-		<logger name="MassTransit.Subscriptions">
-			<level value="ERROR" />
+			<level value="INFO" />
 		</logger>
 
 		<logger name="NHibernate">
@@ -27,7 +23,7 @@
 		</logger>
 
 		<logger name="MassTransit.Messages" additivity="false">
-			<level value="DEBUG" />
+			<level value="ERROR" />
 			<appender-ref ref="MessageLogAppender" />
             <appender-ref ref="console" />
         </logger>

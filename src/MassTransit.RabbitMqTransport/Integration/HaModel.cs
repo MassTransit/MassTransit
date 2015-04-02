@@ -27,6 +27,7 @@ namespace MassTransit.RabbitMqTransport.Integration
         readonly ConnectionContext _connectionContext;
         readonly IModel _model;
         readonly object _publishLock = new object();
+        readonly object _rpcLock = new object();
         readonly ConcurrentDictionary<ulong, PendingPublish> _published;
 
         public HaModel(ConnectionContext connectionContext, IModel model)
@@ -42,42 +43,50 @@ namespace MassTransit.RabbitMqTransport.Integration
 
         public void ExchangeBindNoWait(string destination, string source, string routingKey, IDictionary<string, object> arguments)
         {
+            lock(_rpcLock)
             _model.ExchangeBindNoWait(destination, source, routingKey, arguments);
         }
 
         public void ExchangeUnbindNoWait(string destination, string source, string routingKey, IDictionary<string, object> arguments)
         {
-            _model.ExchangeUnbindNoWait(destination, source, routingKey, arguments);
+            lock (_rpcLock)
+                _model.ExchangeUnbindNoWait(destination, source, routingKey, arguments);
         }
 
         public void QueueDeclareNoWait(string queue, bool durable, bool exclusive, bool autoDelete, IDictionary<string, object> arguments)
         {
-            _model.QueueDeclareNoWait(queue, durable, exclusive, autoDelete, arguments);
+            lock (_rpcLock)
+                _model.QueueDeclareNoWait(queue, durable, exclusive, autoDelete, arguments);
         }
 
         public void QueueBindNoWait(string queue, string exchange, string routingKey, IDictionary<string, object> arguments)
         {
-            _model.QueueBindNoWait(queue, exchange, routingKey, arguments);
+            lock (_rpcLock)
+                _model.QueueBindNoWait(queue, exchange, routingKey, arguments);
         }
 
         public void QueueDeleteNoWait(string queue, bool ifUnused, bool ifEmpty)
         {
-            _model.QueueDeleteNoWait(queue, ifUnused, ifEmpty);
+            lock (_rpcLock)
+                _model.QueueDeleteNoWait(queue, ifUnused, ifEmpty);
         }
 
         public void ExchangeDeleteNoWait(string exchange, bool ifUnused)
         {
-            _model.ExchangeDeleteNoWait(exchange, ifUnused);
+            lock (_rpcLock)
+                _model.ExchangeDeleteNoWait(exchange, ifUnused);
         }
 
         public void ExchangeDeclareNoWait(string exchange, string type, bool durable, bool autoDelete, IDictionary<string, object> arguments)
         {
-            _model.ExchangeDeclareNoWait(exchange, type, durable, autoDelete, arguments);
+            lock (_rpcLock)
+                _model.ExchangeDeclareNoWait(exchange, type, durable, autoDelete, arguments);
         }
 
         public void Dispose()
         {
-            _model.Dispose();
+            lock (_rpcLock)
+                _model.Dispose();
         }
 
         public IBasicProperties CreateBasicProperties()
@@ -87,103 +96,123 @@ namespace MassTransit.RabbitMqTransport.Integration
 
         public void ExchangeDeclare(string exchange, string type, bool durable, bool autoDelete, IDictionary<string, object> arguments)
         {
-            _model.ExchangeDeclare(exchange, type, durable, autoDelete, arguments);
+            lock (_rpcLock)
+                _model.ExchangeDeclare(exchange, type, durable, autoDelete, arguments);
         }
 
         public void ExchangeDeclare(string exchange, string type, bool durable)
         {
-            _model.ExchangeDeclare(exchange, type, durable);
+            lock (_rpcLock)
+                _model.ExchangeDeclare(exchange, type, durable);
         }
 
         public void ExchangeDeclare(string exchange, string type)
         {
-            _model.ExchangeDeclare(exchange, type);
+            lock (_rpcLock)
+                _model.ExchangeDeclare(exchange, type);
         }
 
         public void ExchangeDeclarePassive(string exchange)
         {
-            _model.ExchangeDeclarePassive(exchange);
+            lock (_rpcLock)
+                _model.ExchangeDeclarePassive(exchange);
         }
 
         public void ExchangeDelete(string exchange, bool ifUnused)
         {
-            _model.ExchangeDelete(exchange, ifUnused);
+            lock (_rpcLock)
+                _model.ExchangeDelete(exchange, ifUnused);
         }
 
         public void ExchangeDelete(string exchange)
         {
-            _model.ExchangeDelete(exchange);
+            lock (_rpcLock)
+                _model.ExchangeDelete(exchange);
         }
 
         public void ExchangeBind(string destination, string source, string routingKey, IDictionary<string, object> arguments)
         {
-            _model.ExchangeBind(destination, source, routingKey, arguments);
+            lock (_rpcLock)
+                _model.ExchangeBind(destination, source, routingKey, arguments);
         }
 
         public void ExchangeBind(string destination, string source, string routingKey)
         {
-            _model.ExchangeBind(destination, source, routingKey);
+            lock (_rpcLock)
+                _model.ExchangeBind(destination, source, routingKey);
         }
 
         public void ExchangeUnbind(string destination, string source, string routingKey, IDictionary<string, object> arguments)
         {
-            _model.ExchangeUnbind(destination, source, routingKey, arguments);
+            lock (_rpcLock)
+                _model.ExchangeUnbind(destination, source, routingKey, arguments);
         }
 
         public void ExchangeUnbind(string destination, string source, string routingKey)
         {
-            _model.ExchangeUnbind(destination, source, routingKey);
+            lock (_rpcLock)
+                _model.ExchangeUnbind(destination, source, routingKey);
         }
 
         public QueueDeclareOk QueueDeclare()
         {
-            return _model.QueueDeclare();
+            lock (_rpcLock)
+                return _model.QueueDeclare();
         }
 
         public QueueDeclareOk QueueDeclarePassive(string queue)
         {
-            return _model.QueueDeclarePassive(queue);
+            lock (_rpcLock)
+                return _model.QueueDeclarePassive(queue);
         }
 
         public QueueDeclareOk QueueDeclare(string queue, bool durable, bool exclusive, bool autoDelete,
             IDictionary<string, object> arguments)
         {
-            return _model.QueueDeclare(queue, durable, exclusive, autoDelete, arguments);
+            lock (_rpcLock)
+                return _model.QueueDeclare(queue, durable, exclusive, autoDelete, arguments);
         }
 
         public void QueueBind(string queue, string exchange, string routingKey, IDictionary<string, object> arguments)
         {
-            _model.QueueBind(queue, exchange, routingKey, arguments);
+            lock (_rpcLock)
+                _model.QueueBind(queue, exchange, routingKey, arguments);
         }
 
         public void QueueBind(string queue, string exchange, string routingKey)
         {
-            _model.QueueBind(queue, exchange, routingKey);
+            lock (_rpcLock)
+                _model.QueueBind(queue, exchange, routingKey);
         }
 
         public void QueueUnbind(string queue, string exchange, string routingKey, IDictionary<string, object> arguments)
         {
-            _model.QueueUnbind(queue, exchange, routingKey, arguments);
+            lock (_rpcLock)
+                _model.QueueUnbind(queue, exchange, routingKey, arguments);
         }
 
         public uint QueuePurge(string queue)
         {
-            return _model.QueuePurge(queue);
+            lock (_rpcLock)
+                return _model.QueuePurge(queue);
         }
 
         public uint QueueDelete(string queue, bool ifUnused, bool ifEmpty)
         {
-            return _model.QueueDelete(queue, ifUnused, ifEmpty);
+            lock (_rpcLock)
+                return _model.QueueDelete(queue, ifUnused, ifEmpty);
         }
 
         public uint QueueDelete(string queue)
         {
-            return _model.QueueDelete(queue);
+            lock (_rpcLock)
+                return _model.QueueDelete(queue);
         }
 
         public void ConfirmSelect()
         {
-            _model.ConfirmSelect();
+            lock (_rpcLock)
+                _model.ConfirmSelect();
         }
 
         public bool WaitForConfirms()
@@ -218,35 +247,41 @@ namespace MassTransit.RabbitMqTransport.Integration
 
         public string BasicConsume(string queue, bool noAck, IBasicConsumer consumer)
         {
-            return _model.BasicConsume(queue, noAck, consumer);
+            lock (_rpcLock)
+                return _model.BasicConsume(queue, noAck, consumer);
         }
 
         public string BasicConsume(string queue, bool noAck, string consumerTag, IBasicConsumer consumer)
         {
-            return _model.BasicConsume(queue, noAck, consumerTag, consumer);
+            lock (_rpcLock)
+                return _model.BasicConsume(queue, noAck, consumerTag, consumer);
         }
 
         public string BasicConsume(string queue, bool noAck, string consumerTag, IDictionary<string, object> arguments,
             IBasicConsumer consumer)
         {
-            return _model.BasicConsume(queue, noAck, consumerTag, arguments, consumer);
+            lock (_rpcLock)
+                return _model.BasicConsume(queue, noAck, consumerTag, arguments, consumer);
         }
 
         public string BasicConsume(string queue, bool noAck, string consumerTag, bool noLocal, bool exclusive,
             IDictionary<string, object> arguments,
             IBasicConsumer consumer)
         {
-            return _model.BasicConsume(queue, noAck, consumerTag, noLocal, exclusive, arguments, consumer);
+            lock (_rpcLock)
+                return _model.BasicConsume(queue, noAck, consumerTag, noLocal, exclusive, arguments, consumer);
         }
 
         public void BasicCancel(string consumerTag)
         {
-            _model.BasicCancel(consumerTag);
+            lock (_rpcLock)
+                _model.BasicCancel(consumerTag);
         }
 
         public void BasicQos(uint prefetchSize, ushort prefetchCount, bool global)
         {
-            _model.BasicQos(prefetchSize, prefetchCount, global);
+            lock (_rpcLock)
+                _model.BasicQos(prefetchSize, prefetchCount, global);
         }
 
         public void BasicPublish(PublicationAddress addr, IBasicProperties basicProperties, byte[] body)
@@ -304,27 +339,32 @@ namespace MassTransit.RabbitMqTransport.Integration
 
         public void BasicAck(ulong deliveryTag, bool multiple)
         {
-            _model.BasicAck(deliveryTag, multiple);
+            lock (_rpcLock)
+                _model.BasicAck(deliveryTag, multiple);
         }
 
         public void BasicReject(ulong deliveryTag, bool requeue)
         {
-            _model.BasicReject(deliveryTag, requeue);
+            lock (_rpcLock)
+                _model.BasicReject(deliveryTag, requeue);
         }
 
         public void BasicNack(ulong deliveryTag, bool multiple, bool requeue)
         {
-            _model.BasicNack(deliveryTag, multiple, requeue);
+            lock (_rpcLock)
+                _model.BasicNack(deliveryTag, multiple, requeue);
         }
 
         public void BasicRecover(bool requeue)
         {
-            _model.BasicRecover(requeue);
+            lock (_rpcLock)
+                _model.BasicRecover(requeue);
         }
 
         public void BasicRecoverAsync(bool requeue)
         {
-            _model.BasicRecoverAsync(requeue);
+            lock (_rpcLock)
+                _model.BasicRecoverAsync(requeue);
         }
 
         public BasicGetResult BasicGet(string queue, bool noAck)
@@ -334,37 +374,44 @@ namespace MassTransit.RabbitMqTransport.Integration
 
         public void TxSelect()
         {
-            _model.TxSelect();
+            lock (_rpcLock)
+                _model.TxSelect();
         }
 
         public void TxCommit()
         {
-            _model.TxCommit();
+            lock (_rpcLock)
+                _model.TxCommit();
         }
 
         public void TxRollback()
         {
-            _model.TxRollback();
+            lock (_rpcLock)
+                _model.TxRollback();
         }
 
         public void Close()
         {
-            _model.Close();
+            lock (_rpcLock)
+                _model.Close();
         }
 
         public void Close(ushort replyCode, string replyText)
         {
-            _model.Close(replyCode, replyText);
+            lock (_rpcLock)
+                _model.Close(replyCode, replyText);
         }
 
         public void Abort()
         {
-            _model.Abort();
+            lock (_rpcLock)
+                _model.Abort();
         }
 
         public void Abort(ushort replyCode, string replyText)
         {
-            _model.Abort(replyCode, replyText);
+            lock (_rpcLock)
+                _model.Abort(replyCode, replyText);
         }
 
         public IBasicConsumer DefaultConsumer
