@@ -106,6 +106,7 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Array_Specs.cs" />
     <Compile Include="Configuration\Diagnostics_Specs.cs" />
     <Compile Include="Configuration\ShutdownTimeout_Specs.cs" />
     <Compile Include="InterceptingConsumer_Specs.cs" />
