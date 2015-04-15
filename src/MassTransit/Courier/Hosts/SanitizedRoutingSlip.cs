@@ -159,7 +159,7 @@ namespace MassTransit.Courier.Hosts
                 if (activityException.ExceptionInfo == null)
                     throw new SerializationException("An Activity ExceptionInfo is required");
 
-                ActivityTrackingNumber = activityException.ActivityTrackingNumber;
+                ExecutionId = activityException.ExecutionId;
                 Timestamp = activityException.Timestamp;
                 Duration = activityException.Duration;
                 Name = activityException.Name;
@@ -167,7 +167,7 @@ namespace MassTransit.Courier.Hosts
                 ExceptionInfo = activityException.ExceptionInfo;
             }
 
-            public Guid ActivityTrackingNumber { get; private set; }
+            public Guid ExecutionId { get; private set; }
             public DateTime Timestamp { get; private set; }
             public TimeSpan Duration { get; private set; }
             public string Name { get; private set; }
@@ -184,14 +184,14 @@ namespace MassTransit.Courier.Hosts
                 if (string.IsNullOrEmpty(activityLog.Name))
                     throw new SerializationException("An ActivityLog Name is required");
 
-                ActivityTrackingNumber = activityLog.ActivityTrackingNumber;
+                ExecutionId = activityLog.ExecutionId;
                 Name = activityLog.Name;
                 Timestamp = activityLog.Timestamp;
                 Duration = activityLog.Duration;
                 Host = activityLog.Host;
             }
 
-            public Guid ActivityTrackingNumber { get; private set; }
+            public Guid ExecutionId { get; private set; }
             public string Name { get; private set; }
             public DateTime Timestamp { get; private set; }
             public TimeSpan Duration { get; private set; }
@@ -207,12 +207,12 @@ namespace MassTransit.Courier.Hosts
                 if (compensateLog.Address == null)
                     throw new SerializationException("An CompensateLog CompensateAddress is required");
 
-                ActivityTrackingNumber = compensateLog.ActivityTrackingNumber;
+                ExecutionId = compensateLog.ExecutionId;
                 Address = compensateLog.Address;
                 Data = compensateLog.Data ?? GetEmptyObject();
             }
 
-            public Guid ActivityTrackingNumber { get; private set; }
+            public Guid ExecutionId { get; private set; }
             public Uri Address { get; private set; }
             public IDictionary<string, object> Data { get; private set; }
         }

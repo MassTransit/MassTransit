@@ -194,6 +194,8 @@
     <Compile Include="Courier\Contracts\RoutingSlipEventContents.cs" />
     <Compile Include="Courier\Contracts\RoutingSlipEvents.cs" />
     <Compile Include="Courier\Contracts\RoutingSlipFaulted.cs" />
+    <Compile Include="Courier\Contracts\RoutingSlipRevised.cs" />
+    <Compile Include="Courier\Contracts\RoutingSlipTerminated.cs" />
     <Compile Include="Courier\Contracts\Subscription.cs" />
     <Compile Include="Courier\Events\IRoutingSlipEventFilter.cs" />
     <Compile Include="Courier\Events\IRoutingSlipEventPublisher.cs" />

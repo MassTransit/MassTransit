@@ -20,15 +20,15 @@ namespace MassTransit.Courier.InternalMessages
     class CompensateLogImpl :
         CompensateLog
     {
-        public CompensateLogImpl(Guid activityTrackingNumber, Uri address,
+        public CompensateLogImpl(Guid executionId, Uri address,
             IDictionary<string, object> data)
         {
-            ActivityTrackingNumber = activityTrackingNumber;
+            ExecutionId = executionId;
             Address = address;
             Data = data;
         }
 
-        public Guid ActivityTrackingNumber { get; private set; }
+        public Guid ExecutionId { get; private set; }
         public Uri Address { get; private set; }
         public IDictionary<string, object> Data { get; private set; }
     }

@@ -19,16 +19,16 @@ namespace MassTransit.Courier.InternalMessages
     class ActivityLogImpl :
         ActivityLog
     {
-        public ActivityLogImpl(HostInfo host, Guid activityTrackingNumber, string name, DateTime timestamp, TimeSpan duration)
+        public ActivityLogImpl(HostInfo host, Guid executionId, string name, DateTime timestamp, TimeSpan duration)
         {
-            ActivityTrackingNumber = activityTrackingNumber;
+            ExecutionId = executionId;
             Name = name;
             Timestamp = timestamp;
             Duration = duration;
             Host = host;
         }
 
-        public Guid ActivityTrackingNumber { get; private set; }
+        public Guid ExecutionId { get; private set; }
         public string Name { get; private set; }
         public DateTime Timestamp { get; private set; }
         public TimeSpan Duration { get; private set; }
