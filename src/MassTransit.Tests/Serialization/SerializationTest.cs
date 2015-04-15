@@ -43,18 +43,23 @@ namespace MassTransit.Tests.Serialization
 				//		Trace.WriteLine(Encoding.UTF8.GetString(serializedMessageData));
 			}
 
-			using (var input = new MemoryStream(serializedMessageData))
-			{
-				IReceiveContext receiveContext = ReceiveContext.FromBodyStream(input);
-				_serializer.Deserialize(receiveContext);
-
-				IConsumeContext<T> context;
-				receiveContext.TryGetContext(out context).ShouldBeTrue();
-
-				context.ShouldNotBeNull();
-
-				return context.Message;
-			}
+			return Return<T>(serializedMessageData);
 		}
+
+	    protected T Return<T>(byte[] serializedMessageData) where T : class
+	    {
+	        using (var input = new MemoryStream(serializedMessageData))
+	        {
+	            IReceiveContext receiveContext = ReceiveContext.FromBodyStream(input);
+	            _serializer.Deserialize(receiveContext);
+
+	            IConsumeContext<T> context;
+	            receiveContext.TryGetContext(out context).ShouldBeTrue();
+
+	            context.ShouldNotBeNull();
+
+	            return context.Message;
+	        }
+	    }
 	}
 }
