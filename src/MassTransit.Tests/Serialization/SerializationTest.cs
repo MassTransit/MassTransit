@@ -36,7 +36,7 @@ namespace MassTransit.Tests.Serialization
         readonly Uri _destinationAddress = new Uri("loopback://localhost/destination");
         readonly Uri _responseAddress = new Uri("loopback://localhost/response");
         readonly Uri _faultAddress = new Uri("loopback://localhost/fault");
-        readonly Guid _requestId = Guid.NewGuid();
+        protected readonly Guid _requestId = Guid.NewGuid();
 
         public SerializationTest(Type serializerType)
         {
@@ -96,6 +96,12 @@ namespace MassTransit.Tests.Serialization
                 Trace.WriteLine(Encoding.UTF8.GetString(serializedMessageData));
             }
 
+            return Return<T>(serializedMessageData);
+        }
+
+        protected T Return<T>(byte[] serializedMessageData) 
+            where T : class
+        {
             var message = new InMemoryTransportMessage(Guid.NewGuid(), serializedMessageData, Serializer.ContentType.MediaType, TypeMetadataCache<T>.ShortName);
             var receiveContext = new InMemoryReceiveContext(new Uri("loopback://localhost/input_queue"), message, new ReceiveObservable());
 

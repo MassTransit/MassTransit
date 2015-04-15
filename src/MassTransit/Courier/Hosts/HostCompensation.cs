@@ -50,11 +50,11 @@ namespace MassTransit.Courier.Hosts
 
             _compensateLog = _routingSlip.CompensateLogs.Last();
 
-            _activityLog = _routingSlip.ActivityLogs.SingleOrDefault(x => x.ActivityTrackingNumber == _compensateLog.ActivityTrackingNumber);
+            _activityLog = _routingSlip.ActivityLogs.SingleOrDefault(x => x.ExecutionId == _compensateLog.ExecutionId);
             if (_activityLog == null)
             {
                 throw new RoutingSlipException("The compensation log did not have a matching activity log entry: "
-                    + _compensateLog.ActivityTrackingNumber);
+                    + _compensateLog.ExecutionId);
             }
 
             _data = _routingSlip.GetCompensateLogData<TLog>();
@@ -153,7 +153,7 @@ namespace MassTransit.Courier.Hosts
 
         public Guid ActivityTrackingNumber
         {
-            get { return _activityLog.ActivityTrackingNumber; }
+            get { return _activityLog.ExecutionId; }
         }
 
         CompensationResult Compensation<TLog>.Compensated()

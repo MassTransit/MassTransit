@@ -19,10 +19,10 @@ namespace MassTransit.Courier.InternalMessages
     class ActivityExceptionImpl :
         ActivityException
     {
-        public ActivityExceptionImpl(string activityName, HostInfo host, Guid activityTrackingNumber, DateTime timestamp, TimeSpan duration,
+        public ActivityExceptionImpl(string activityName, HostInfo host, Guid executionId, DateTime timestamp, TimeSpan duration,
             ExceptionInfo exceptionInfo)
         {
-            ActivityTrackingNumber = activityTrackingNumber;
+            ExecutionId = executionId;
 
             Timestamp = timestamp;
             Duration = duration;
@@ -31,7 +31,7 @@ namespace MassTransit.Courier.InternalMessages
             ExceptionInfo = exceptionInfo;
         }
 
-        public Guid ActivityTrackingNumber { get; private set; }
+        public Guid ExecutionId { get; private set; }
         public DateTime Timestamp { get; private set; }
         public TimeSpan Duration { get; private set; }
         public string Name { get; private set; }

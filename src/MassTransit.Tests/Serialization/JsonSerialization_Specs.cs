@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -18,9 +18,7 @@ namespace MassTransit.Tests.Serialization
     using System.IO;
     using System.Linq;
     using System.Text;
-    using System.Windows.Forms;
     using System.Xml.Linq;
-    using Internals.Reflection;
     using MassTransit.Serialization;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
@@ -117,7 +115,7 @@ namespace MassTransit.Tests.Serialization
 
             using (var jsonReader = new JTokenReader(result.Message as JToken))
             {
-                Type proxyType = TypeMetadataCache.GetImplementationType(typeof(MessageA)); 
+                Type proxyType = TypeMetadataCache.GetImplementationType(typeof(MessageA));
                 var message = (MessageA)Activator.CreateInstance(proxyType);
 
                 _serializer.Populate(jsonReader, message);
@@ -186,9 +184,7 @@ namespace MassTransit.Tests.Serialization
             const int iterations = 50000;
 
             for (int i = 0; i < iterations; i++)
-            {
                 DoSerialize();
-            }
 
             timer.Stop();
 
@@ -200,9 +196,7 @@ namespace MassTransit.Tests.Serialization
             timer = Stopwatch.StartNew();
 
             for (int i = 0; i < 50000; i++)
-            {
                 DoDeserialize();
-            }
 
             timer.Stop();
 
@@ -248,9 +242,7 @@ namespace MassTransit.Tests.Serialization
         {
             object obj = JsonConvert.DeserializeObject(s);
             if (obj is string)
-            {
                 return obj as string;
-            }
 
             return ConvertJson((JToken)obj);
         }
@@ -258,9 +250,7 @@ namespace MassTransit.Tests.Serialization
         static object ConvertJson(JToken token)
         {
             if (token is JValue)
-            {
                 return ((JValue)token).Value;
-            }
 
             if (token is JObject)
             {
@@ -275,9 +265,7 @@ namespace MassTransit.Tests.Serialization
             }
 
             if (token is JArray)
-            {
                 return (token).Select(ConvertJson).ToList();
-            }
 
             throw new ArgumentException(string.Format("VisitUnknownFilter token type '{0}'", token.GetType()), "token");
         }
@@ -328,12 +316,31 @@ namespace MassTransit.Tests.Serialization
     }
 
 
-    [TestFixture(typeof(JsonMessageSerializer))]
-    [TestFixture(typeof(BsonMessageSerializer))]
-    [TestFixture(typeof(XmlMessageSerializer))]
+    [TestFixture(typeof(JsonMessageSerializer)), TestFixture(typeof(BsonMessageSerializer)), TestFixture(typeof(XmlMessageSerializer))]
     public class Using_JsonConverterAttribute_on_a_class :
         SerializationTest
     {
+        [Test]
+        public void Should_use_converter_for_deserialization()
+        {
+            var obj = new MessageB {Value = "Joe"};
+
+            MessageB result = SerializeAndReturn(obj);
+
+            result.Value.ShouldBe("Monster");
+        }
+
+        [Test]
+        public void Should_use_converter_for_serialization()
+        {
+            var obj = new MessageA {Value = "Joe"};
+
+            MessageA result = SerializeAndReturn(obj);
+
+            result.Value.ShouldBe("Monster");
+        }
+
+
         public class ModifyWhenSerializingConverter : JsonConverter
         {
             public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
@@ -405,35 +412,34 @@ namespace MassTransit.Tests.Serialization
             : base(serializerType)
         {
         }
+    }
 
+
+    [TestFixture(typeof(JsonMessageSerializer)), TestFixture(typeof(BsonMessageSerializer)), TestFixture(typeof(XmlMessageSerializer))]
+    public class Using_JsonConverterAttribute_on_a_property :
+        SerializationTest
+    {
         [Test]
         public void Should_use_converter_for_deserialization()
         {
-            var obj = new MessageB {Value = "Joe"};
+            var obj = new SimpleMessage {ValueB = "Joe"};
 
-            MessageB result = SerializeAndReturn(obj);
+            SimpleMessage result = SerializeAndReturn(obj);
 
-            result.Value.ShouldBe("Monster");
+            result.ValueB.ShouldBe("Monster");
         }
 
         [Test]
         public void Should_use_converter_for_serialization()
         {
-            var obj = new MessageA {Value = "Joe"};
+            var obj = new SimpleMessage {ValueA = "Joe"};
 
-            MessageA result = SerializeAndReturn(obj);
+            SimpleMessage result = SerializeAndReturn(obj);
 
-            result.Value.ShouldBe("Monster");
+            result.ValueA.ShouldBe("Monster");
         }
-    }
 
 
-    [TestFixture(typeof(JsonMessageSerializer))]
-    [TestFixture(typeof(BsonMessageSerializer))]
-    [TestFixture(typeof(XmlMessageSerializer))]
-    public class Using_JsonConverterAttribute_on_a_property :
-        SerializationTest
-    {
         public class ModifyWhenSerializingConverter : JsonConverter
         {
             public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
@@ -485,26 +491,6 @@ namespace MassTransit.Tests.Serialization
         public Using_JsonConverterAttribute_on_a_property(Type serializerType)
             : base(serializerType)
         {
-        }
-
-        [Test]
-        public void Should_use_converter_for_deserialization()
-        {
-            var obj = new SimpleMessage {ValueB = "Joe"};
-
-            SimpleMessage result = SerializeAndReturn(obj);
-
-            result.ValueB.ShouldBe("Monster");
-        }
-
-        [Test]
-        public void Should_use_converter_for_serialization()
-        {
-            var obj = new SimpleMessage {ValueA = "Joe"};
-
-            SimpleMessage result = SerializeAndReturn(obj);
-
-            result.ValueA.ShouldBe("Monster");
         }
     }
 }

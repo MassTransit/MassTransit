@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2013 Chris Patterson
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,41 +13,44 @@
 namespace MassTransit.Courier.Contracts
 {
     using System;
+    using System.Collections.Generic;
 
 
     /// <summary>
-    /// Capture the exception information thrown by an activity
+    /// Published when a routing slip is revised during execution
     /// </summary>
-    public interface ActivityException
+    public interface RoutingSlipRevised
     {
         /// <summary>
-        /// The tracking number of the activity that threw the exception
+        /// The tracking number of the routing slip that completed
         /// </summary>
-        Guid ExecutionId { get; }
+        Guid TrackingNumber { get; }
 
         /// <summary>
-        /// The point in time when the exception occurred
+        /// The date/time when the routing slip completed
         /// </summary>
         DateTime Timestamp { get; }
 
         /// <summary>
-        /// The time from when the routing slip was created until the exception occurred
+        /// The time from when the routing slip was created until the completion
         /// </summary>
         TimeSpan Duration { get; }
 
         /// <summary>
-        /// The name of the activity that caused the exception
+        /// The variables that were present once the routing slip completed, can be used
+        /// to capture the output of the slip - real events should likely be used for real
+        /// completion items but this is useful for some cases
         /// </summary>
-        string Name { get; }
+        IDictionary<string, object> Variables { get; }
 
         /// <summary>
-        /// The host where the activity was executed
+        /// The new itinerary for the routing slip
         /// </summary>
-        HostInfo Host { get; }
+        IList<Activity> Itinerary { get; }
 
         /// <summary>
-        /// The exception details
+        /// The previous itinerary of the routing slip that is no longer included
         /// </summary>
-        ExceptionInfo ExceptionInfo { get; }
+        IList<Activity> PreviousItinerary { get; }
     }
 }
