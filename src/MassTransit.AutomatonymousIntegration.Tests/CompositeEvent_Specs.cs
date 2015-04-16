@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -25,6 +25,29 @@ namespace MassTransit.AutomatonymousTests
     public class When_combining_events_into_a_single_event :
         InMemoryTestFixture
     {
+        [Test]
+        public async void Should_have_called_combined_event()
+        {
+            var message = new StartMessage();
+
+            Task<ConsumeContext<CompleteMessage>> received = SubscribeHandler<CompleteMessage>(x => x.Message.CorrelationId == message.CorrelationId);
+
+            await Bus.Publish(message);
+
+            Guid? saga = await _repository.ShouldContainSaga(x => x.CorrelationId == message.CorrelationId
+                && GetCurrentState(x).Result == _machine.Waiting, TestTimeout);
+            Assert.IsTrue(saga.HasValue);
+
+            await Bus.Publish(new FirstMessage(message.CorrelationId));
+            saga = await _repository.ShouldContainSaga(x => x.CorrelationId == message.CorrelationId
+                && GetCurrentState(x).Result == _machine.WaitingForSecond, TestTimeout);
+            Assert.IsTrue(saga.HasValue);
+
+            await Bus.Publish(new SecondMessage(message.CorrelationId));
+
+            await received;
+        }
+
         InMemorySagaRepository<Instance> _repository;
 
         protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
@@ -43,6 +66,7 @@ namespace MassTransit.AutomatonymousTests
 
             return await ((StateMachine<Instance>)_machine).InstanceStateAccessor.Get(context);
         }
+
 
         class Instance :
             SagaStateMachineInstance
@@ -70,11 +94,9 @@ namespace MassTransit.AutomatonymousTests
             {
                 InstanceState(x => x.CurrentState);
 
-                Event(() => Start, x => x.CorrelateById(m => m.Message.CorrelationId));
-                Event(() => First, x => x.CorrelateById(m => m.Message.CorrelationId));
-                CompositeEvent(() => Third, x => x.CompositeStatus, First, Second);
                 Event(() => Second, x => x.CorrelateById(m => m.Message.CorrelationId));
 
+                CompositeEvent(() => Third, x => x.CompositeStatus, First, Second);
 
                 Initially(
                     When(Start)
@@ -144,30 +166,6 @@ namespace MassTransit.AutomatonymousTests
             }
 
             public Guid CorrelationId { get; set; }
-        }
-
-
-        [Test]
-        public async void Should_have_called_combined_event()
-        {
-            var message = new StartMessage();
-
-            Task<ConsumeContext<CompleteMessage>> received = SubscribeHandler<CompleteMessage>(x => x.Message.CorrelationId == message.CorrelationId);
-
-            await Bus.Publish(message);
-
-            Guid? saga = await _repository.ShouldContainSaga(x => x.CorrelationId == message.CorrelationId
-                && GetCurrentState(x).Result == _machine.Waiting, TestTimeout);
-            Assert.IsTrue(saga.HasValue);
-
-            await Bus.Publish(new FirstMessage(message.CorrelationId));
-            saga = await _repository.ShouldContainSaga(x => x.CorrelationId == message.CorrelationId
-                && GetCurrentState(x).Result == _machine.WaitingForSecond, TestTimeout);
-            Assert.IsTrue(saga.HasValue);
-
-            await Bus.Publish(new SecondMessage(message.CorrelationId));
-
-            await received;
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -15,7 +15,6 @@ namespace MassTransit.AutomatonymousTests
     using System;
     using System.Threading.Tasks;
     using Automatonymous;
-    using Automatonymous.Contexts;
     using NUnit.Framework;
     using Saga;
     using TestFramework;
@@ -25,7 +24,6 @@ namespace MassTransit.AutomatonymousTests
     public class When_an_activity_throws_an_exception :
         InMemoryTestFixture
     {
-
         [Test]
         public async void Should_be_able_to_observe_its_own_event_fault()
         {
@@ -33,16 +31,56 @@ namespace MassTransit.AutomatonymousTests
             await InputQueueSendEndpoint.Send(message);
 
             Guid? saga = await _repository.ShouldContainSaga(x => x.CorrelationId == message.CorrelationId
-    && GetCurrentState(x) == _machine.WaitingToStart, TestTimeout);
+                && GetCurrentState(x) == _machine.WaitingToStart, TestTimeout);
             Assert.IsTrue(saga.HasValue);
 
 
             await InputQueueSendEndpoint.Send(new Start(message.CorrelationId));
 
-             saga = await _repository.ShouldContainSaga(x => x.CorrelationId == message.CorrelationId
-&& GetCurrentState(x) == _machine.FailedToStart, TestTimeout);
+            saga = await _repository.ShouldContainSaga(x => x.CorrelationId == message.CorrelationId
+                && GetCurrentState(x) == _machine.FailedToStart, TestTimeout);
             Assert.IsTrue(saga.HasValue);
+        }
 
+        [Test]
+        public async void Should_be_received_as_a_fault_message()
+        {
+            var message = new Start();
+
+            Task<ConsumeContext<Fault<Start>>> faultReceived =
+                SubscribeHandler<Fault<Start>>(x => (message.CorrelationId == x.Message.Message.CorrelationId));
+
+            await InputQueueSendEndpoint.Send(message);
+
+            ConsumeContext<Fault<Start>> fault = await faultReceived;
+
+            Assert.AreEqual(message.CorrelationId, fault.Message.Message.CorrelationId);
+        }
+
+        [Test]
+        public async void Should_observe_the_fault_message()
+        {
+            var message = new Initialize();
+
+            Task<ConsumeContext<Fault<Start>>> faultReceived =
+                SubscribeHandler<Fault<Start>>(x => (message.CorrelationId == x.Message.Message.CorrelationId));
+
+            await InputQueueSendEndpoint.Send(message);
+
+            Guid? saga = await _repository.ShouldContainSaga(
+                x => x.CorrelationId == message.CorrelationId && x.CurrentState == _machine.WaitingToStart, TestTimeout);
+
+
+            await InputQueueSendEndpoint.Send(new Start(message.CorrelationId));
+
+            ConsumeContext<Fault<Start>> fault = await faultReceived;
+
+            Assert.AreEqual(message.CorrelationId, fault.Message.Message.CorrelationId);
+
+            saga = await _repository.ShouldContainSaga(
+                x => x.CorrelationId == message.CorrelationId && x.CurrentState == _machine.FailedToStart, TestTimeout);
+
+            Assert.IsTrue(saga.HasValue);
         }
 
         protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
@@ -53,12 +91,10 @@ namespace MassTransit.AutomatonymousTests
             configurator.StateMachineSaga(_machine, _repository);
         }
 
-
         State GetCurrentState(Instance state)
         {
             return ((StateMachine<Instance>)_machine).InstanceStateAccessor.GetState(state);
         }
-
 
         TestStateMachine _machine;
         InMemorySagaRepository<Instance> _repository;
@@ -88,13 +124,6 @@ namespace MassTransit.AutomatonymousTests
             {
                 InstanceState(x => x.CurrentState);
 
-                State(() => Running);
-                State(() => WaitingToStart);
-                State(() => FailedToStart);
-
-                Event(() => Started, x => x.CorrelateById(context => context.Message.CorrelationId));
-                Event(() => Initialized, x => x.CorrelateById(context => context.Message.CorrelationId));
-                Event(() => Created, x => x.CorrelateById(context => context.Message.CorrelationId));
                 Event(() => StartFaulted, x => x.CorrelateById(context => context.Message.Message.CorrelationId));
 
                 Initially(
@@ -179,48 +208,6 @@ namespace MassTransit.AutomatonymousTests
         public class StartupComplete
         {
             public Guid TransactionId { get; set; }
-        }
-
-
-        [Test]
-        public async void Should_be_received_as_a_fault_message()
-        {
-            var message = new Start();
-
-            Task<ConsumeContext<Fault<Start>>> faultReceived =
-                SubscribeHandler<Fault<Start>>(x => (message.CorrelationId == x.Message.Message.CorrelationId));
-
-            await InputQueueSendEndpoint.Send(message);
-
-            ConsumeContext<Fault<Start>> fault = await faultReceived;
-
-            Assert.AreEqual(message.CorrelationId, fault.Message.Message.CorrelationId);
-        }
-
-        [Test]
-        public async void Should_observe_the_fault_message()
-        {
-            var message = new Initialize();
-
-            Task<ConsumeContext<Fault<Start>>> faultReceived =
-                SubscribeHandler<Fault<Start>>(x => (message.CorrelationId == x.Message.Message.CorrelationId));
-
-            await InputQueueSendEndpoint.Send(message);
-
-            Guid? saga = await _repository.ShouldContainSaga(
-    x => x.CorrelationId == message.CorrelationId && x.CurrentState == _machine.WaitingToStart, TestTimeout);
-
-
-            await InputQueueSendEndpoint.Send(new Start(message.CorrelationId));
-
-            ConsumeContext<Fault<Start>> fault = await faultReceived;
-
-            Assert.AreEqual(message.CorrelationId, fault.Message.Message.CorrelationId);
-
-             saga = await _repository.ShouldContainSaga(
-                x => x.CorrelationId == message.CorrelationId && x.CurrentState == _machine.FailedToStart, TestTimeout);
-
-            Assert.IsTrue(saga.HasValue);
         }
     }
 }

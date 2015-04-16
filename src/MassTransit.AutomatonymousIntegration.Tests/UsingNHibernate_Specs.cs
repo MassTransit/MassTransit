@@ -169,8 +169,6 @@ namespace MassTransit.AutomatonymousTests
             {
                 InstanceState(x => x.CurrentState);
 
-                State(() => OnTheWayToTheStore);
-
                 Event(() => ExitFrontDoor, x => x.CorrelateById(context => context.Message.CorrelationId));
                 Event(() => GotHitByCar, x => x.CorrelateById(context => context.Message.CorrelationId));
 

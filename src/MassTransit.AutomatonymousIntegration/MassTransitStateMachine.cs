@@ -14,6 +14,7 @@ namespace Automatonymous
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Linq.Expressions;
     using System.Reflection;
     using CorrelationConfigurators;
@@ -34,12 +35,17 @@ namespace Automatonymous
         where TInstance : class, SagaStateMachineInstance
     {
         readonly Dictionary<Event, EventCorrelation<TInstance>> _eventCorrelations;
+        readonly Lazy<StateMachineRegistration[]> _registrations;
         Func<TInstance, bool> _isCompleted;
 
         protected MassTransitStateMachine()
         {
+            _registrations = new Lazy<StateMachineRegistration[]>(GetRegistrations);
+
             _eventCorrelations = new Dictionary<Event, EventCorrelation<TInstance>>();
             _isCompleted = NotCompletedByDefault;
+
+            RegisterImplicit();
         }
 
         public IEnumerable<EventCorrelation<TInstance>> Correlations
@@ -153,7 +159,6 @@ namespace Automatonymous
 
                 var @event = (Event<T>)propertyInfo.GetValue(this);
 
-
                 Type builderType = typeof(CorrelatedByEventCorrelationBuilder<,>).MakeGenericType(typeof(TInstance), typeof(T));
                 var builder = (EventCorrelationBuilder<TInstance>)Activator.CreateInstance(builderType, this, @event);
 
@@ -224,6 +229,97 @@ namespace Automatonymous
         static bool NotCompletedByDefault(TInstance instance)
         {
             return false;
+        }
+
+        /// <summary>
+        /// Register all remaining events and states that have not been explicitly declared.
+        /// </summary>
+        void RegisterImplicit()
+        {
+            foreach (StateMachineRegistration declaration in _registrations.Value)
+                declaration.Declare(this);
+        }
+
+        static IEnumerable<PropertyInfo> GetStateMachineProperties(TypeInfo typeInfo)
+        {
+            if (typeInfo.IsInterface)
+                yield break;
+
+            if (typeInfo.BaseType != null)
+            {
+                foreach (PropertyInfo propertyInfo in GetStateMachineProperties(typeInfo.BaseType.GetTypeInfo()))
+                    yield return propertyInfo;
+            }
+
+            IEnumerable<PropertyInfo> properties = typeInfo.DeclaredMethods
+                .Where(x => x.IsSpecialName && x.Name.StartsWith("get_") && !x.IsStatic)
+                .Select(x => typeInfo.GetDeclaredProperty(x.Name.Substring("get_".Length)))
+                .Where(x => x.CanRead && x.CanWrite);
+
+            foreach (PropertyInfo propertyInfo in properties)
+                yield return propertyInfo;
+        }
+
+        StateMachineRegistration[] GetRegistrations()
+        {
+            var events = new List<StateMachineRegistration>();
+
+            Type machineType = GetType();
+
+            IEnumerable<PropertyInfo> properties = GetStateMachineProperties(machineType.GetTypeInfo());
+
+            foreach (PropertyInfo propertyInfo in properties)
+            {
+                if (propertyInfo.PropertyType.IsGenericType)
+                {
+                    if (propertyInfo.PropertyType.GetGenericTypeDefinition() == typeof(Event<>))
+                    {
+                        Type messageType = propertyInfo.PropertyType.GetGenericArguments().First();
+                        if (messageType.HasInterface<CorrelatedBy<Guid>>())
+                        {
+                            Type declarationType = typeof(CorrelatedEventRegistration<,>).MakeGenericType(typeof(TInstance), machineType,
+                                messageType);
+                            object declaration = Activator.CreateInstance(declarationType, propertyInfo);
+                            events.Add((StateMachineRegistration)declaration);
+                        }
+                    }
+                }
+            }
+
+            return events.ToArray();
+        }
+
+
+        class CorrelatedEventRegistration<TStateMachine, TData> :
+            StateMachineRegistration
+            where TStateMachine : MassTransitStateMachine<TInstance>
+            where TData : CorrelatedBy<Guid>
+        {
+            readonly PropertyInfo _propertyInfo;
+
+            public CorrelatedEventRegistration(PropertyInfo propertyInfo)
+            {
+                _propertyInfo = propertyInfo;
+            }
+
+            public void Declare(object stateMachine)
+            {
+                var machine = ((TStateMachine)stateMachine);
+                var @event = (Event<TData>)_propertyInfo.GetValue(machine);
+                if (@event != null)
+                {
+                    Type builderType = typeof(CorrelatedByEventCorrelationBuilder<,>).MakeGenericType(typeof(TInstance), typeof(TData));
+                    var builder = (EventCorrelationBuilder<TInstance>)Activator.CreateInstance(builderType, machine, @event);
+
+                    machine._eventCorrelations[@event] = builder.Build();
+                }
+            }
+        }
+
+
+        interface StateMachineRegistration
+        {
+            void Declare(object stateMachine);
         }
     }
 }

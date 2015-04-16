@@ -55,6 +55,8 @@
     <Compile Include="Activities\RequestActivity.cs" />
     <Compile Include="Activities\RespondActivity.cs" />
     <Compile Include="Activities\RetryLaterActivity.cs" />
+    <Compile Include="Configuration\CorrelationConfigurators\CorrelatedByEventCorrelationBuilder.cs" />
+    <Compile Include="Configuration\CorrelationConfigurators\EventCorrelationBuilder.cs" />
     <Compile Include="Configuration\CorrelationConfigurators\EventCorrelationExpressionConverter.cs" />
     <Compile Include="Configuration\CorrelationConfigurators\EventCorrelationSagaLocator.cs" />
     <Compile Include="Configuration\CorrelationConfigurators\ExpressionCorrelationSagaFilterFactory.cs" />

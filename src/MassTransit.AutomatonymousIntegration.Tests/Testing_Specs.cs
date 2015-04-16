@@ -19,7 +19,7 @@ namespace MassTransit.AutomatonymousTests
     using Testing;
 
 
-    [TestFixture]
+    [TestFixture, Explicit]
     public class Using_the_testing_framework_built_into_masstransit
     {
         [Test]
@@ -111,7 +111,6 @@ namespace MassTransit.AutomatonymousTests
             {
                 InstanceState(x => x.CurrentState);
 
-                State(() => Running);
                 Event(() => Started);
                 Event(() => Stopped, x => x.CorrelateById(context => context.Message.CorrelationId));
 
