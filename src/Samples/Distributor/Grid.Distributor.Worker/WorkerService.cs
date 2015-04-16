@@ -1,5 +1,6 @@
 namespace Grid.Distributor.Worker
 {
+    using System.Diagnostics;
     using MassTransit;
     using Topshelf;
 
@@ -13,7 +14,7 @@ namespace Grid.Distributor.Worker
         {
             _dataBus = ServiceBusFactory.New(x =>
                 {
-                    x.ReceiveFrom("rabbitmq://localhost/mt_grid_worker?prefetch=20");
+                    x.ReceiveFrom(string.Format("rabbitmq://localhost/mt_grid_worker{0}?prefetch=20", Process.GetCurrentProcess().Id));
 
                     x.UseRabbitMq();
                     x.SetConcurrentConsumerLimit(20);
