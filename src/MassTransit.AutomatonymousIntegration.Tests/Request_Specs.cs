@@ -279,15 +279,6 @@ namespace MassTransit.AutomatonymousTests
         {
             public TestStateMachine(RequestSettings settings)
             {
-                InstanceState(x => x.CurrentState);
-
-
-                State(() => Registered);
-                State(() => AddressValidationFaulted);
-                State(() => AddressValidationTimeout);
-
-                Event(() => Register, x => x.CorrelateById(context => context.Message.CorrelationId));
-
                 Request(() => ValidateAddress, x => x.ValidateAddressRequestId, settings);
 
                 Initially(

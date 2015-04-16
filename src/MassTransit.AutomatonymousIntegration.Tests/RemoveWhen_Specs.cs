@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -23,6 +23,44 @@ namespace MassTransit.AutomatonymousTests
     public class When_a_remove_expression_is_specified :
         InMemoryTestFixture
     {
+        [Test]
+        public async void Should_handle_the_initial_state()
+        {
+            Guid sagaId = Guid.NewGuid();
+
+            await Bus.Publish(new Start
+            {
+                CorrelationId = sagaId
+            });
+
+
+            Guid? saga =
+                await _repository.ShouldContainSaga(x => x.CorrelationId == sagaId && x.CurrentState == _machine.Running, TestTimeout);
+            Assert.IsTrue(saga.HasValue);
+        }
+
+        [Test]
+        public async void Should_remove_the_saga_once_completed()
+        {
+            Guid sagaId = Guid.NewGuid();
+
+            await Bus.Publish(new Start
+            {
+                CorrelationId = sagaId
+            });
+
+            Guid? saga = await _repository.ShouldContainSaga(sagaId, TestTimeout);
+            Assert.IsTrue(saga.HasValue);
+
+            await Bus.Publish(new Stop
+            {
+                CorrelationId = sagaId
+            });
+
+            saga = await _repository.ShouldNotContainSaga(sagaId, TestTimeout);
+            Assert.IsFalse(saga.HasValue);
+        }
+
         protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
         {
             configurator.StateMachineSaga(_machine, _repository);
@@ -61,12 +99,6 @@ namespace MassTransit.AutomatonymousTests
         {
             public TestStateMachine()
             {
-                InstanceState(x => x.CurrentState);
-
-                State(() => Running);
-                Event(() => Started);
-                Event(() => Stopped);
-
                 Initially(
                     When(Started)
                         .TransitionTo(Running));
@@ -95,45 +127,6 @@ namespace MassTransit.AutomatonymousTests
             CorrelatedBy<Guid>
         {
             public Guid CorrelationId { get; set; }
-        }
-
-
-        [Test]
-        public async void Should_handle_the_initial_state()
-        {
-            Guid sagaId = Guid.NewGuid();
-
-            await Bus.Publish(new Start
-            {
-                CorrelationId = sagaId
-            });
-
-
-            Guid? saga =
-                await _repository.ShouldContainSaga(x => x.CorrelationId == sagaId && x.CurrentState == _machine.Running, TestTimeout);
-            Assert.IsTrue(saga.HasValue);
-        }
-
-        [Test]
-        public async void Should_remove_the_saga_once_completed()
-        {
-            Guid sagaId = Guid.NewGuid();
-
-            await Bus.Publish(new Start
-            {
-                CorrelationId = sagaId
-            });
-
-            Guid? saga = await _repository.ShouldContainSaga(sagaId, TestTimeout);
-            Assert.IsTrue(saga.HasValue);
-
-            await Bus.Publish(new Stop
-            {
-                CorrelationId = sagaId
-            });
-
-            saga = await _repository.ShouldNotContainSaga(sagaId, TestTimeout);
-            Assert.IsFalse(saga.HasValue);
         }
     }
 }

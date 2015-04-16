@@ -63,7 +63,6 @@ namespace MassTransit.AutomatonymousTests
             {
                 InstanceState(x => x.CurrentState);
 
-                State(() => Running);
                 Event(() => Started);
                 Event(() => Stopped);
 

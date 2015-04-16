@@ -51,7 +51,7 @@ namespace MassTransit.AutomatonymousTests
                 x.Timeout = TestTimeout;
             }, TestCancellationToken);
 
-            var startupComplete = await startupCompletedTask;
+            StartupComplete startupComplete = await startupCompletedTask;
 
             Task<Status> statusTask = null;
             await Bus.Request(InputQueueAddress, new CheckStatus("A"), x =>
@@ -68,7 +68,7 @@ namespace MassTransit.AutomatonymousTests
         [Test]
         public async void Should_start_and_handle_the_status_request_awaited()
         {
-            var request = await Bus.Request(InputQueueAddress, new Start("B", Guid.NewGuid()), x =>
+            Request<Start> request = await Bus.Request(InputQueueAddress, new Start("B", Guid.NewGuid()), x =>
             {
                 x.Handle<StartupComplete>();
                 x.Timeout = TestTimeout;
@@ -87,8 +87,6 @@ namespace MassTransit.AutomatonymousTests
 
             Assert.AreEqual("B", status.ServiceName);
         }
-
-
 
         protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
         {
@@ -126,8 +124,6 @@ namespace MassTransit.AutomatonymousTests
             public TestStateMachine()
             {
                 InstanceState(x => x.CurrentState);
-
-                State(() => Running);
 
                 Event(() => Started, x => x
                     .CorrelateBy(instance => instance.ServiceName, context => context.Message.ServiceName)
@@ -208,7 +204,5 @@ namespace MassTransit.AutomatonymousTests
             public Guid ServiceId { get; set; }
             public string ServiceName { get; set; }
         }
-
-
     }
 }
