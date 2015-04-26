@@ -21,7 +21,10 @@ namespace MassTransit.Courier.Hosts
     using Newtonsoft.Json.Linq;
     using Serialization;
 
-
+    /// <summary>
+    /// A sanitized routing slip is one that has been read from and ensured to be safe for use, cleaning up any
+    /// missing or null properties, as well as making it safe to avoid excessive validity checks across the solution
+    /// </summary>
     public class SanitizedRoutingSlip :
         RoutingSlip
     {
@@ -159,7 +162,7 @@ namespace MassTransit.Courier.Hosts
 
                 ExecutionId = activityException.ExecutionId;
                 Timestamp = activityException.Timestamp;
-                Duration = activityException.Duration;
+                Elapsed = activityException.Elapsed;
                 Name = activityException.Name;
                 Host = activityException.Host;
                 ExceptionInfo = activityException.ExceptionInfo;
@@ -167,7 +170,7 @@ namespace MassTransit.Courier.Hosts
 
             public Guid ExecutionId { get; private set; }
             public DateTime Timestamp { get; private set; }
-            public TimeSpan Duration { get; private set; }
+            public TimeSpan Elapsed { get; private set; }
             public string Name { get; private set; }
             public HostInfo Host { get; private set; }
             public ExceptionInfo ExceptionInfo { get; private set; }

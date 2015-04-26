@@ -24,16 +24,16 @@ namespace MassTransit.Courier.Results
     {
         readonly Action<ItineraryBuilder> _itineraryBuilder;
 
-        public ReviseItineraryExecutionResult(Execution<TArguments> execution, Activity activity, RoutingSlip routingSlip,
+        public ReviseItineraryExecutionResult(ExecuteContext<TArguments> executeContext, IRoutingSlipEventPublisher publisher, Activity activity, RoutingSlip routingSlip,
             Action<ItineraryBuilder> itineraryBuilder)
-            : base(execution, activity, routingSlip)
+            : base(executeContext, publisher, activity, routingSlip)
         {
             _itineraryBuilder = itineraryBuilder;
         }
 
-        public ReviseItineraryExecutionResult(Execution<TArguments> execution, Activity activity, RoutingSlip routingSlip,
+        public ReviseItineraryExecutionResult(ExecuteContext<TArguments> executeContext, IRoutingSlipEventPublisher publisher, Activity activity, RoutingSlip routingSlip,
             IDictionary<string, object> data, Action<ItineraryBuilder> itineraryBuilder)
-            : base(execution, activity, routingSlip, data)
+            : base(executeContext, publisher, activity, routingSlip, data)
         {
             _itineraryBuilder = itineraryBuilder;
         }
@@ -47,11 +47,7 @@ namespace MassTransit.Courier.Results
 
         protected override RoutingSlipBuilder CreateRoutingSlipBuilder(RoutingSlip routingSlip)
         {
-            var builder = new RoutingSlipBuilder(routingSlip, x => Enumerable.Empty<Activity>());
-
-            builder.SetSourceItinerary(routingSlip.Itinerary.Skip(1));
-
-            return builder;
+            return new RoutingSlipBuilder(routingSlip, Enumerable.Empty<Activity>(), routingSlip.Itinerary.Skip(1));
         }
     }
 
@@ -62,27 +58,23 @@ namespace MassTransit.Courier.Results
     {
         readonly Uri _compensationAddress;
 
-        public ReviseItineraryExecutionResult(Execution<TArguments> execution, Activity activity, RoutingSlip routingSlip,
+        public ReviseItineraryExecutionResult(ExecuteContext<TArguments> executeContext, IRoutingSlipEventPublisher publisher, Activity activity, RoutingSlip routingSlip,
             Uri compensationAddress, TLog log, Action<ItineraryBuilder> itineraryBuilder)
-            : base(execution, activity, routingSlip, RoutingSlipBuilder.GetObjectAsDictionary(log), itineraryBuilder)
+            : base(executeContext, publisher, activity, routingSlip, RoutingSlipBuilder.GetObjectAsDictionary(log), itineraryBuilder)
         {
             _compensationAddress = compensationAddress;
         }
 
         protected override void Build(RoutingSlipBuilder builder)
         {
-            builder.AddCompensateLog(Execution.ExecutionId, _compensationAddress, Data);
+            builder.AddCompensateLog(ExecuteContext.ExecutionId, _compensationAddress, Data);
 
             base.Build(builder);
         }
 
         protected override RoutingSlipBuilder CreateRoutingSlipBuilder(RoutingSlip routingSlip)
         {
-            var builder = new RoutingSlipBuilder(routingSlip, x => Enumerable.Empty<Activity>());
-
-            builder.SetSourceItinerary(routingSlip.Itinerary.Skip(1));
-
-            return builder;
+            return new RoutingSlipBuilder(routingSlip, Enumerable.Empty<Activity>(), routingSlip.Itinerary.Skip(1));
         }
     }
 }

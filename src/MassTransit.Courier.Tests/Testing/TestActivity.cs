@@ -19,24 +19,24 @@ namespace MassTransit.Courier.Tests.Testing
     public class TestActivity :
         Activity<TestArguments, TestLog>
     {
-        public async Task<ExecutionResult> Execute(Execution<TestArguments> execution)
+        public async Task<ExecutionResult> Execute(ExecuteContext<TestArguments> context)
         {
-            Console.WriteLine("TestActivity: Execute: {0}", execution.Arguments.Value);
+            Console.WriteLine("TestActivity: Execute: {0}", context.Arguments.Value);
 
-            TestLog log = new TestLogImpl(execution.Arguments.Value);
+            TestLog log = new TestLogImpl(context.Arguments.Value);
 
-            return execution.CompletedWithVariables(log, new
+            return context.CompletedWithVariables(log, new
                 {
                     Value = "Hello, World!",
                     NullValue = (string)null,
                 });
         }
 
-        public async Task<CompensationResult> Compensate(Compensation<TestLog> compensation)
+        public async Task<CompensationResult> Compensate(CompensateContext<TestLog> context)
         {
-            Console.WriteLine("TestActivity: Compensate original value: {0}", compensation.Log.OriginalValue);
+            Console.WriteLine("TestActivity: Compensate original value: {0}", context.Log.OriginalValue);
 
-            return compensation.Compensated();
+            return context.Compensated();
         }
 
 

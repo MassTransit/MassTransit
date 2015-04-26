@@ -32,12 +32,12 @@ namespace MassTransit.Courier.Tests.Testing
             _names = names;
         }
 
-        public async Task<ExecutionResult> Execute(Execution<ObjectGraphActivityArguments> execution)
+        public async Task<ExecutionResult> Execute(ExecuteContext<ObjectGraphActivityArguments> context)
         {
-            int intValue = execution.Arguments.Outer.IntValue;
-            string stringValue = execution.Arguments.Outer.StringValue;
-            decimal decimalValue = execution.Arguments.Outer.DecimalValue;
-            string[] names = execution.Arguments.Names;
+            int intValue = context.Arguments.Outer.IntValue;
+            string stringValue = context.Arguments.Outer.StringValue;
+            decimal decimalValue = context.Arguments.Outer.DecimalValue;
+            string[] names = context.Arguments.Names;
 
             Console.WriteLine("TestActivity: Execute: {0}, {1}, {2}, [{3}]", intValue, stringValue, decimalValue,
                 string.Join(",", names));
@@ -51,14 +51,14 @@ namespace MassTransit.Courier.Tests.Testing
 
             TestLog log = new TestLogImpl(stringValue);
 
-            return execution.Completed(log);
+            return context.Completed(log);
         }
 
-        public async Task<CompensationResult> Compensate(Compensation<TestLog> compensation)
+        public async Task<CompensationResult> Compensate(CompensateContext<TestLog> context)
         {
-            Console.WriteLine("TestActivity: Compensate original value: {0}", compensation.Log.OriginalValue);
+            Console.WriteLine("TestActivity: Compensate original value: {0}", context.Log.OriginalValue);
 
-            return compensation.Compensated();
+            return context.Compensated();
         }
 
 

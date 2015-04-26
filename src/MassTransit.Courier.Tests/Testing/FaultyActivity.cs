@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -18,19 +18,24 @@ namespace MassTransit.Courier.Tests.Testing
 
 
     public class FaultyActivity :
-        Activity<FaultyArguments, FaultyLog>
+        Activity<FaultyArguments, FaultyLog>,
+        IDisposable
     {
-        public async Task<ExecutionResult> Execute(Execution<FaultyArguments> execution)
+        public async Task<ExecutionResult> Execute(ExecuteContext<FaultyArguments> context)
         {
             Console.WriteLine("FaultyActivity: Execute");
             Console.WriteLine("FaultyActivity: About to blow this up!");
 
-            return execution.Faulted(new IntentionalTestException("Things that make you go boom!"));
+            return context.Faulted(new IntentionalTestException("Things that make you go boom!"));
         }
 
-        public async Task<CompensationResult> Compensate(Compensation<FaultyLog> compensation)
+        public async Task<CompensationResult> Compensate(CompensateContext<FaultyLog> context)
         {
-            return compensation.Compensated();
+            return context.Compensated();
+        }
+
+        public void Dispose()
+        {
         }
     }
 }

@@ -14,12 +14,21 @@ namespace MassTransit.Courier
 {
     using System.Threading.Tasks;
     using MassTransit.Pipeline;
-    using Pipeline;
 
-
+    /// <summary>
+    /// A factory that creates an execute activity and thenn invokes the pipe for the activity context
+    /// </summary>
+    /// <typeparam name="TArguments"></typeparam>
     public interface ExecuteActivityFactory<TArguments>
         where TArguments : class
     {
-        Task Execute(Execution<TArguments> execution, IPipe<ExecuteActivityContext<TArguments>> next);
+        /// <summary>
+        /// Executes the activity context by passing it to the activity factory, which creates the activity
+        /// and then invokes the next pipe with the combined activity context
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="next"></param>
+        /// <returns></returns>
+        Task Execute(ExecuteContext<TArguments> context, IPipe<ExecuteActivityContext<TArguments>> next);
     }
 }

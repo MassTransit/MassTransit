@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -17,7 +17,6 @@ namespace MassTransit.Courier.Tests
     using Contracts;
     using NUnit.Framework;
     using TestFramework;
-    using TestFramework.Fixtures;
     using Testing;
 
 
@@ -25,6 +24,49 @@ namespace MassTransit.Courier.Tests
     public class Executing_a_faulting_routing_slip_with_compensating_activities :
         ActivityTestFixture
     {
+        Task<ConsumeContext<RoutingSlipFaulted>> _faulted;
+        Task<ConsumeContext<RoutingSlipActivityCompleted>> _activityCompleted;
+        Task<ConsumeContext<RoutingSlipActivityFaulted>> _activityFaulted;
+        Guid _trackingNumber;
+        Task<ConsumeContext<RoutingSlipActivityCompleted>> _secondActivityCompleted;
+        Task<ConsumeContext<RoutingSlipActivityCompensated>> _activityCompensated;
+
+        [TestFixtureSetUp]
+        public async void Setup()
+        {
+            _faulted = SubscribeHandler<RoutingSlipFaulted>();
+            _activityCompleted = SubscribeHandler<RoutingSlipActivityCompleted>(x => x.Message.ActivityName.Equals("Test"));
+            _activityCompensated = SubscribeHandler<RoutingSlipActivityCompensated>(x => x.Message.ActivityName.Equals("Test"));
+            _secondActivityCompleted = SubscribeHandler<RoutingSlipActivityCompleted>(x => x.Message.ActivityName.Equals("SecondTest"));
+            _activityFaulted = SubscribeHandler<RoutingSlipActivityFaulted>(x => x.Message.ActivityName.Equals("Faulty"));
+
+            _trackingNumber = NewId.NextGuid();
+            var builder = new RoutingSlipBuilder(_trackingNumber);
+            builder.AddSubscription(Bus.Address, RoutingSlipEvents.All);
+
+            ActivityTestContext testActivity = GetActivityContext<TestActivity>();
+            builder.AddActivity(testActivity.Name, testActivity.ExecuteUri, new
+            {
+                Value = "Hello",
+            });
+
+            testActivity = GetActivityContext<SecondTestActivity>();
+            builder.AddActivity(testActivity.Name, testActivity.ExecuteUri);
+            testActivity = GetActivityContext<FaultyActivity>();
+            builder.AddActivity(testActivity.Name, testActivity.ExecuteUri);
+
+            builder.AddVariable("Variable", "Knife");
+
+            await Bus.Execute(builder.Build());
+        }
+
+        protected override void SetupActivities()
+        {
+            AddActivityContext<TestActivity, TestArguments, TestLog>(() => new TestActivity());
+            AddActivityContext<SecondTestActivity, TestArguments, TestLog>(() => new SecondTestActivity());
+            AddActivityContext<FaultyActivity, FaultyArguments, FaultyLog>(() => new FaultyActivity());
+        }
+
         [Test]
         public async void Should_compensate_completed_activity()
         {
@@ -96,49 +138,6 @@ namespace MassTransit.Courier.Tests
             ConsumeContext<RoutingSlipFaulted> context = await _faulted;
 
             Assert.AreEqual("Knife", context.Message.GetVariable<string>("Variable"));
-        }
-
-        Task<ConsumeContext<RoutingSlipFaulted>> _faulted;
-        Task<ConsumeContext<RoutingSlipActivityCompleted>> _activityCompleted;
-        Task<ConsumeContext<RoutingSlipActivityFaulted>> _activityFaulted;
-        Guid _trackingNumber;
-        Task<ConsumeContext<RoutingSlipActivityCompleted>> _secondActivityCompleted;
-        Task<ConsumeContext<RoutingSlipActivityCompensated>> _activityCompensated;
-
-        [TestFixtureSetUp]
-        public async void Setup()
-        {
-            _faulted = SubscribeHandler<RoutingSlipFaulted>();
-            _activityCompleted = SubscribeHandler<RoutingSlipActivityCompleted>(x => x.Message.ActivityName.Equals("Test"));
-            _activityCompensated = SubscribeHandler<RoutingSlipActivityCompensated>(x => x.Message.ActivityName.Equals("Test"));
-            _secondActivityCompleted = SubscribeHandler<RoutingSlipActivityCompleted>(x => x.Message.ActivityName.Equals("SecondTest"));
-            _activityFaulted = SubscribeHandler<RoutingSlipActivityFaulted>(x => x.Message.ActivityName.Equals("Faulty"));
-
-            _trackingNumber = NewId.NextGuid();
-            var builder = new RoutingSlipBuilder(_trackingNumber);
-            builder.AddSubscription(Bus.Address, RoutingSlipEvents.All);
-
-            ActivityTestContext testActivity = GetActivityContext<TestActivity>();
-            builder.AddActivity(testActivity.Name, testActivity.ExecuteUri, new
-            {
-                Value = "Hello",
-            });
-
-            testActivity = GetActivityContext<SecondTestActivity>();
-            builder.AddActivity(testActivity.Name, testActivity.ExecuteUri);
-            testActivity = GetActivityContext<FaultyActivity>();
-            builder.AddActivity(testActivity.Name, testActivity.ExecuteUri);
-
-            builder.AddVariable("Variable", "Knife");
-
-            await Bus.Execute(builder.Build());
-        }
-
-        protected override void SetupActivities()
-        {
-            AddActivityContext<TestActivity, TestArguments, TestLog>(() => new TestActivity());
-            AddActivityContext<SecondTestActivity, TestArguments, TestLog>(() => new SecondTestActivity());
-            AddActivityContext<FaultyActivity, FaultyArguments, FaultyLog>(() => new FaultyActivity());
         }
     }
 }

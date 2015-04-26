@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2013 Chris Patterson
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -56,7 +56,7 @@ namespace MassTransit.Courier
             where TArguments : class
         {
             var factory = new FactoryMethodExecuteActivityFactory<TActivity, TArguments>(controllerFactory);
-            var host = new ExecuteActivityHost<TActivity, TArguments>(compensateAddress, factory);
+            var host = new ExecuteActivityHost<TActivity, TArguments>(factory, compensateAddress);
 
             return configurator.Instance(host);
         }
@@ -78,7 +78,7 @@ namespace MassTransit.Courier
             where TActivity : ExecuteActivity<TArguments>
             where TArguments : class
         {
-            var host = new ExecuteActivityHost<TActivity, TArguments>(compensateAddress, factory);
+            var host = new ExecuteActivityHost<TActivity, TArguments>(factory, compensateAddress);
 
             return configurator.Instance(host);
         }
@@ -96,7 +96,7 @@ namespace MassTransit.Courier
 
         public static IInstanceConfigurator CompensateActivityHost<TActivity, TLog>(
             this IReceiveEndpointConfigurator configurator)
-            where TActivity : CompensateActivity<TLog>, new()
+            where TActivity : class, CompensateActivity<TLog>, new()
             where TLog : class
         {
             return CompensateActivityHost<TActivity, TLog>(configurator,
@@ -105,7 +105,7 @@ namespace MassTransit.Courier
 
         public static IInstanceConfigurator CompensateActivityHost<TActivity, TLog>(
             this IReceiveEndpointConfigurator configurator, Func<TActivity> controllerFactory)
-            where TActivity : CompensateActivity<TLog>
+            where TActivity : class, CompensateActivity<TLog>
             where TLog : class
         {
             return CompensateActivityHost<TActivity, TLog>(configurator, _ => controllerFactory());
@@ -113,7 +113,7 @@ namespace MassTransit.Courier
 
         public static IInstanceConfigurator CompensateActivityHost<TActivity, TLog>(
             this IReceiveEndpointConfigurator configurator, Func<TLog, TActivity> controllerFactory)
-            where TActivity : CompensateActivity<TLog>
+            where TActivity : class, CompensateActivity<TLog>
             where TLog : class
         {
             var factory = new FactoryMethodCompensateActivityFactory<TActivity, TLog>(controllerFactory);

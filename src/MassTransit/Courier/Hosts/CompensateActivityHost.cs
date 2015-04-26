@@ -12,10 +12,11 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Courier.Hosts
 {
-    using System;
     using System.Threading.Tasks;
     using Contracts;
     using Logging;
+    using MassTransit.Pipeline;
+    using Pipeline;
     using Util;
 
 
@@ -24,35 +25,26 @@ namespace MassTransit.Courier.Hosts
         where TActivity : CompensateActivity<TLog>
         where TLog : class
     {
+        static readonly ILog _log = Logger.Get<CompensateActivityHost<TActivity, TLog>>();
         readonly CompensateActivityFactory<TLog> _activityFactory;
-        readonly HostInfo _host;
-        readonly ILog _log = Logger.Get<CompensateActivityHost<TActivity, TLog>>();
+        readonly IPipe<CompensateActivityContext<TLog>> _compensatePipe;
 
         public CompensateActivityHost(CompensateActivityFactory<TLog> activityFactory)
         {
             _activityFactory = activityFactory;
-            _host = HostMetadataCache.Host;
+
+            _compensatePipe = Pipe.New<CompensateActivityContext<TLog>>(x => x.Filter(new CompensateActivityFilter<TLog>()));
         }
 
-        async Task IConsumer<RoutingSlip>.Consume(ConsumeContext<RoutingSlip> context)
+        Task IConsumer<RoutingSlip>.Consume(ConsumeContext<RoutingSlip> context)
         {
-            Compensation<TLog> compensation = new HostCompensation<TLog>(HostMetadataCache.Host, context);
+            CompensateContext<TLog> compensateContext = new HostCompensateContext<TLog>(HostMetadataCache.Host, context);
 
             if (_log.IsDebugEnabled)
-                _log.DebugFormat("Host: {0} Compensating: {1}", context.ReceiveContext.InputAddress, compensation.TrackingNumber);
+                _log.DebugFormat("Host: {0} Activity: {1} Compensating: {2}", context.ReceiveContext.InputAddress, TypeMetadataCache<TActivity>.ShortName,
+                    compensateContext.TrackingNumber);
 
-            CompensationResult result;
-            try
-            {
-                // TODO: MassTransit Async Support
-                result = _activityFactory.CompensateActivity(compensation).Result;
-            }
-            catch (Exception ex)
-            {
-                result = compensation.Failed(ex);
-            }
-
-            await result.Evaluate();
+            return _activityFactory.Compensate(compensateContext, _compensatePipe);
         }
     }
 }

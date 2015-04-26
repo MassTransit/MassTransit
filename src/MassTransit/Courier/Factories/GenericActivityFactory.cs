@@ -29,14 +29,14 @@ namespace MassTransit.Courier.Factories
             _activityFactory = activityFactory;
         }
 
-        public Task<CompensationResult> CompensateActivity(Compensation<TLog> compensation)
+        public Task Execute(ExecuteContext<TArguments> context, IPipe<ExecuteActivityContext<TArguments>> next)
         {
-            return _activityFactory.CompensateActivity<TActivity, TLog>(compensation);
+            return _activityFactory.Execute<TActivity, TArguments>(context, next);
         }
 
-        public Task Execute(Execution<TArguments> execution, IPipe<ExecuteActivityContext<TArguments>> next)
+        public Task Compensate(CompensateContext<TLog> context, IPipe<CompensateActivityContext<TLog>> next)
         {
-            return _activityFactory.Send<TActivity, TArguments>(execution, next);
+            return _activityFactory.Compensate<TActivity, TLog>(context, next);
         }
     }
 }

@@ -13,11 +13,12 @@
 namespace MassTransit.Courier
 {
     using System.Threading.Tasks;
+    using MassTransit.Pipeline;
 
 
-    public interface CompensateActivityFactory<in TLog>
+    public interface CompensateActivityFactory<TLog>
         where TLog : class
     {
-        Task<CompensationResult> CompensateActivity(Compensation<TLog> compensation);
+        Task Compensate(CompensateContext<TLog> context, IPipe<CompensateActivityContext<TLog>> next);
     }
 }

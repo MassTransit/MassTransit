@@ -22,10 +22,10 @@ namespace MassTransit.Courier.Results
     {
         readonly IDictionary<string, object> _variables;
 
-        public CompensatedWithVariablesCompensationResult(Compensation<TLog> compensation, CompensateLog compensateLog,
+        public CompensatedWithVariablesCompensationResult(CompensateContext<TLog> compensateContext, IRoutingSlipEventPublisher publisher, CompensateLog compensateLog,
             RoutingSlip routingSlip,
             IDictionary<string, object> variables)
-            : base(compensation, compensateLog, routingSlip)
+            : base(compensateContext, publisher, compensateLog, routingSlip)
         {
             _variables = variables;
         }

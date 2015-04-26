@@ -13,11 +13,9 @@
 namespace MassTransit.Courier.Results
 {
     using System;
-    using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
     using Contracts;
-    using Events;
     using InternalMessages;
 
 
@@ -27,32 +25,30 @@ namespace MassTransit.Courier.Results
     {
         readonly Activity _activity;
         readonly ActivityException _activityException;
-        readonly TimeSpan _duration;
+        readonly TimeSpan _elapsed;
         readonly ExceptionInfo _exceptionInfo;
-        readonly Execution<TArguments> _execution;
+        readonly ExecuteContext<TArguments> _executeContext;
+        readonly IRoutingSlipEventPublisher _publisher;
         readonly RoutingSlip _routingSlip;
 
-        public FaultedExecutionResult(Execution<TArguments> execution, Activity activity, RoutingSlip routingSlip,
-            ExceptionInfo exceptionInfo)
+        public FaultedExecutionResult(ExecuteContext<TArguments> executeContext, IRoutingSlipEventPublisher publisher, Activity activity,
+            RoutingSlip routingSlip, ExceptionInfo exceptionInfo)
         {
-            _execution = execution;
+            _executeContext = executeContext;
+            _publisher = publisher;
             _activity = activity;
             _routingSlip = routingSlip;
             _exceptionInfo = exceptionInfo;
-            _duration = _execution.Elapsed;
+            _elapsed = _executeContext.Elapsed;
 
-            _activityException = new ActivityExceptionImpl(_activity.Name, _execution.Host, _execution.ExecutionId,
-                _execution.Timestamp, _duration, _exceptionInfo);
+            _activityException = new ActivityExceptionImpl(_activity.Name, _executeContext.Host, _executeContext.ExecutionId,
+                _executeContext.Timestamp, _elapsed, _exceptionInfo);
         }
 
         public async Task Evaluate()
         {
-            IRoutingSlipEventPublisher publisher = new RoutingSlipEventPublisher(_execution, _execution, _routingSlip);
-
-            RoutingSlipActivityFaulted activityFaulted = new RoutingSlipActivityFaultedMessage(_execution.Host, _execution.TrackingNumber,
-                _execution.ActivityName, _execution.ExecutionId, _execution.Timestamp,
-                _duration, _exceptionInfo, _routingSlip.Variables, _activity.Arguments);
-            await publisher.Publish(activityFaulted);
+            await _publisher.PublishRoutingSlipActivityFaulted(_executeContext.ActivityName, _executeContext.ExecutionId, _executeContext.Timestamp,
+                _elapsed, _exceptionInfo, _routingSlip.Variables, _activity.Arguments);
 
             if (HasCompensationLogs())
             {
@@ -62,16 +58,15 @@ namespace MassTransit.Courier.Results
 
                 RoutingSlip routingSlip = builder.Build();
 
-                await _execution.ConsumeContext.Forward(routingSlip.GetNextCompensateAddress(), routingSlip);
+                await _executeContext.ConsumeContext.Forward(routingSlip.GetNextCompensateAddress(), routingSlip);
             }
             else
             {
-                DateTime faultedTimestamp = _execution.Timestamp + _duration;
+                DateTime faultedTimestamp = _executeContext.Timestamp + _elapsed;
                 TimeSpan faultedDuration = faultedTimestamp - _routingSlip.CreateTimestamp;
 
-                RoutingSlipFaulted routingSlipFaulted = new RoutingSlipFaultedMessage(_execution.TrackingNumber, faultedTimestamp,
-                    faultedDuration, Enumerable.Repeat(_activityException, 1), _routingSlip.Variables);
-                await publisher.Publish(routingSlipFaulted);
+                await _publisher.PublishRoutingSlipFaulted(faultedTimestamp, faultedDuration, _routingSlip.Variables,
+                    _activityException);
             }
         }
 
@@ -87,7 +82,7 @@ namespace MassTransit.Courier.Results
 
         protected virtual RoutingSlipBuilder CreateRoutingSlipBuilder(RoutingSlip routingSlip)
         {
-            return new RoutingSlipBuilder(routingSlip, (IEnumerable<Activity> x) => x);
+            return new RoutingSlipBuilder(routingSlip, routingSlip.Itinerary, Enumerable.Empty<Activity>());
         }
     }
 }

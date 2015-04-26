@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -15,13 +15,18 @@ namespace RapidTransit
     using System.Threading.Tasks;
     using Autofac;
     using MassTransit.Courier;
+    using MassTransit.Courier.Hosts;
+    using MassTransit.Logging;
+    using MassTransit.Pipeline;
+    using MassTransit.Util;
 
 
     public class AutofacCompensateActivityFactory<TActivity, TLog> :
         CompensateActivityFactory<TLog>
-        where TActivity : CompensateActivity<TLog>
+        where TActivity : class, CompensateActivity<TLog>
         where TLog : class
     {
+        static readonly ILog _log = Logger.Get<AutofacCompensateActivityFactory<TActivity, TLog>>();
         readonly ILifetimeScope _lifetimeScope;
 
         public AutofacCompensateActivityFactory(ILifetimeScope lifetimeScope)
@@ -29,19 +34,24 @@ namespace RapidTransit
             _lifetimeScope = lifetimeScope;
         }
 
-        public async Task<CompensationResult> CompensateActivity(Compensation<TLog> compensation)
+        public async Task Compensate(CompensateContext<TLog> context, IPipe<CompensateActivityContext<TLog>> next)
         {
-            using (ILifetimeScope scope = _lifetimeScope.BeginLifetimeScope(x => ConfigureScope(x, compensation)))
+            using (ILifetimeScope scope = _lifetimeScope.BeginLifetimeScope(x => ConfigureScope(x, context)))
             {
-                var activity = scope.Resolve<TActivity>(TypedParameter.From(compensation.Log));
+                if (_log.IsDebugEnabled)
+                    _log.DebugFormat("CompensateActivityFactory: Compensating: {0}", TypeMetadataCache<TActivity>.ShortName);
 
-                return await activity.Compensate(compensation);
+                var activity = scope.Resolve<TActivity>(TypedParameter.From(context.Log));
+
+                var activityContext = new HostCompensateActivityContext<TActivity, TLog>(activity, context);
+
+                await next.Send(activityContext);
             }
         }
 
-        static void ConfigureScope(ContainerBuilder containerBuilder, Compensation<TLog> compensation)
+        static void ConfigureScope(ContainerBuilder containerBuilder, CompensateContext<TLog> compensateContext)
         {
-            containerBuilder.RegisterInstance(compensation.ConsumeContext)
+            containerBuilder.RegisterInstance(compensateContext.ConsumeContext)
                 .ExternallyOwned();
         }
     }

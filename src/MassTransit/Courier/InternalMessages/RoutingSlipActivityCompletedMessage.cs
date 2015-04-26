@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -20,7 +20,7 @@ namespace MassTransit.Courier.InternalMessages
     class RoutingSlipActivityCompletedMessage :
         RoutingSlipActivityCompleted
     {
-        public RoutingSlipActivityCompletedMessage(HostInfo host, Guid trackingNumber, string activityName, Guid activityTrackingNumber,
+        public RoutingSlipActivityCompletedMessage(HostInfo host, Guid trackingNumber, string activityName, Guid executionId,
             DateTime timestamp, TimeSpan duration, IDictionary<string, object> variables, IDictionary<string, object> arguments,
             IDictionary<string, object> data)
         {
@@ -29,7 +29,7 @@ namespace MassTransit.Courier.InternalMessages
             Duration = duration;
 
             TrackingNumber = trackingNumber;
-            ActivityTrackingNumber = activityTrackingNumber;
+            ExecutionId = executionId;
             ActivityName = activityName;
             Data = data;
             Variables = variables;
@@ -39,7 +39,7 @@ namespace MassTransit.Courier.InternalMessages
         public Guid TrackingNumber { get; private set; }
         public DateTime Timestamp { get; private set; }
         public TimeSpan Duration { get; private set; }
-        public Guid ActivityTrackingNumber { get; private set; }
+        public Guid ExecutionId { get; private set; }
         public string ActivityName { get; private set; }
         public HostInfo Host { get; private set; }
         public IDictionary<string, object> Arguments { get; private set; }

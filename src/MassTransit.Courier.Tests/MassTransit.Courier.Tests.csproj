@@ -62,6 +62,7 @@
     <Compile Include="..\SolutionVersion.cs">
       <Link>SolutionVersion.cs</Link>
     </Compile>
+    <Compile Include="ArgumentOverload_Specs.cs" />
     <Compile Include="Configuration_Specs.cs" />
     <Compile Include="ContextSetup.cs" />
     <Compile Include="EncryptedArgument_Specs.cs" />
@@ -86,6 +87,8 @@
     <Compile Include="Testing\ReviseToEmptyItineraryActivity.cs" />
     <Compile Include="Testing\ReviseWithNoChangeItineraryActivity.cs" />
     <Compile Include="Testing\SecondTestActivity.cs" />
+    <Compile Include="Testing\SetVariableActivity.cs" />
+    <Compile Include="Testing\SetVariableArguments.cs" />
     <Compile Include="Testing\TestActivity.cs" />
     <Compile Include="Testing\TestArguments.cs" />
     <Compile Include="Testing\TestLog.cs" />

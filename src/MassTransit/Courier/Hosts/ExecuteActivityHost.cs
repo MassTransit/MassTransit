@@ -26,12 +26,12 @@ namespace MassTransit.Courier.Hosts
         where TActivity : ExecuteActivity<TArguments>
         where TArguments : class
     {
+        static readonly ILog _log = Logger.Get<ExecuteActivityHost<TActivity, TArguments>>();
         readonly ExecuteActivityFactory<TArguments> _activityFactory;
         readonly Uri _compensateAddress;
-        readonly ILog _log = Logger.Get<ExecuteActivityHost<TActivity, TArguments>>();
-        IPipe<ExecuteActivityContext<TArguments>> _executePipe;
+        readonly IPipe<ExecuteActivityContext<TArguments>> _executePipe;
 
-        public ExecuteActivityHost(Uri compensateAddress, ExecuteActivityFactory<TArguments> activityFactory)
+        public ExecuteActivityHost(ExecuteActivityFactory<TArguments> activityFactory, Uri compensateAddress)
         {
             if (compensateAddress == null)
                 throw new ArgumentNullException("compensateAddress");
@@ -50,19 +50,21 @@ namespace MassTransit.Courier.Hosts
                 throw new ArgumentNullException("activityFactory");
 
             _activityFactory = activityFactory;
+
+            _executePipe = Pipe.New<ExecuteActivityContext<TArguments>>(x => x.Filter(new ExecuteActivityFilter<TArguments>()));
         }
 
         Task IConsumer<RoutingSlip>.Consume(ConsumeContext<RoutingSlip> context)
         {
-            Execution<TArguments> execution = new HostExecution<TArguments>(HostMetadataCache.Host, _compensateAddress, context);
+            ExecuteContext<TArguments> executeContext = new HostExecuteContext<TArguments>(HostMetadataCache.Host, _compensateAddress, context);
 
             if (_log.IsDebugEnabled)
             {
                 _log.DebugFormat("Host: {0} Activity: {1} Executing: {2}", context.ReceiveContext.InputAddress, TypeMetadataCache<TActivity>.ShortName,
-                    execution.TrackingNumber);
+                    executeContext.TrackingNumber);
             }
 
-            return _activityFactory.Execute(execution, _executePipe);
+            return _activityFactory.Execute(executeContext, _executePipe);
         }
     }
 }

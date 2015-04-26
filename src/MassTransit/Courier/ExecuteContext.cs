@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -16,17 +16,11 @@ namespace MassTransit.Courier
     using System.Collections.Generic;
 
 
-    public interface Execution<out TArguments> :
+    public interface ExecuteContext :
         PipeContext,
         IPublishEndpoint,
         ISendEndpointProvider
-        where TArguments : class
     {
-        /// <summary>
-        /// The arguments from the routing slip for this activity
-        /// </summary>
-        TArguments Arguments { get; }
-
         /// <summary>
         /// The tracking number for this routing slip
         /// </summary>
@@ -122,5 +116,16 @@ namespace MassTransit.Courier
         /// <param name="exception"></param>
         /// <returns></returns>
         ExecutionResult Faulted(Exception exception);
+    }
+
+
+    public interface ExecuteContext<out TArguments> :
+        ExecuteContext
+        where TArguments : class
+    {
+        /// <summary>
+        /// The arguments from the routing slip for this activity
+        /// </summary>
+        TArguments Arguments { get; }
     }
 }

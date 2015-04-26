@@ -39,23 +39,33 @@ namespace MassTransit.Courier.Contracts
         CompensationFailed = 0x0004,
 
         /// <summary>
+        /// Send the routing slip terminated event
+        /// </summary>
+        Terminated = 0x0008,
+
+        /// <summary>
+        /// Send the routing slip revised event
+        /// </summary>
+        Revised = 0x0010,
+
+        /// <summary>
         /// Send the RoutingSlipActivityCompleted event
         /// </summary>
-        ActivityCompleted = 0x0010,
+        ActivityCompleted = 0x0100,
 
         /// <summary>
         /// Send the RoutingSlipActivityFaulted event
         /// </summary>
-        ActivityFaulted = 0x0020,
+        ActivityFaulted = 0x0200,
 
         /// <summary>
         /// Send the RoutingSlipActivityCompensated event
         /// </summary>
-        ActivityCompensated = 0x0040,
+        ActivityCompensated = 0x0400,
 
         /// <summary>
         /// Send the RoutingSlipCompensationFailed event
         /// </summary>
-        ActivityCompensationFailed = 0x0080,
+        ActivityCompensationFailed = 0x0800,
     }
 }

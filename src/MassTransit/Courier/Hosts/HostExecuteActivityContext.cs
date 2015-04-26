@@ -27,194 +27,184 @@ namespace MassTransit.Courier.Hosts
     {
         readonly TActivity _activity;
         readonly ConsumeContext _consumeContext;
-        readonly Execution<TArguments> _context;
+        readonly ExecuteContext<TArguments> _context;
 
-        public HostExecuteActivityContext(TActivity activity, Execution<TArguments> context)
+        public HostExecuteActivityContext(TActivity activity, ExecuteContext<TArguments> context)
         {
             _activity = activity;
             _context = context;
             _consumeContext = _context.ConsumeContext;
         }
 
-        public CancellationToken CancellationToken
+        Guid ExecuteContext.TrackingNumber
+        {
+            get { return _context.TrackingNumber; }
+        }
+
+        Guid ExecuteContext.ExecutionId
+        {
+            get { return _context.ExecutionId; }
+        }
+
+        HostInfo ExecuteContext.Host
+        {
+            get { return _context.Host; }
+        }
+
+        DateTime ExecuteContext.Timestamp
+        {
+            get { return _context.Timestamp; }
+        }
+
+        TimeSpan ExecuteContext.Elapsed
+        {
+            get { return _context.Elapsed; }
+        }
+
+        ConsumeContext ExecuteContext.ConsumeContext
+        {
+            get { return _context.ConsumeContext; }
+        }
+
+        string ExecuteContext.ActivityName
+        {
+            get { return _context.ActivityName; }
+        }
+
+        ExecutionResult ExecuteContext.Completed()
+        {
+            return _context.Completed();
+        }
+
+        ExecutionResult ExecuteContext.CompletedWithVariables(IEnumerable<KeyValuePair<string, object>> variables)
+        {
+            return _context.CompletedWithVariables(variables);
+        }
+
+        ExecutionResult ExecuteContext.CompletedWithVariables(object variables)
+        {
+            return _context.CompletedWithVariables(variables);
+        }
+
+        ExecutionResult ExecuteContext.Completed<TLog>(TLog log)
+        {
+            return _context.Completed(log);
+        }
+
+        ExecutionResult ExecuteContext.CompletedWithVariables<TLog>(TLog log, object variables)
+        {
+            return _context.CompletedWithVariables(log, variables);
+        }
+
+        ExecutionResult ExecuteContext.CompletedWithVariables<TLog>(TLog log, IEnumerable<KeyValuePair<string, object>> variables)
+        {
+            return _context.CompletedWithVariables(log, variables);
+        }
+
+        ExecutionResult ExecuteContext.ReviseItinerary(Action<ItineraryBuilder> buildItinerary)
+        {
+            return _context.ReviseItinerary(buildItinerary);
+        }
+
+        ExecutionResult ExecuteContext.ReviseItinerary<TLog>(TLog log, Action<ItineraryBuilder> buildItinerary)
+        {
+            return _context.ReviseItinerary(log, buildItinerary);
+        }
+
+        ExecutionResult ExecuteContext.ReviseItinerary<TLog>(TLog log, object variables, Action<ItineraryBuilder> buildItinerary)
+        {
+            return _context.ReviseItinerary(log, variables, buildItinerary);
+        }
+
+        ExecutionResult ExecuteContext.ReviseItinerary<TLog>(TLog log, IEnumerable<KeyValuePair<string, object>> variables,
+            Action<ItineraryBuilder> buildItinerary)
+        {
+            return _context.ReviseItinerary(log, variables, buildItinerary);
+        }
+
+        ExecutionResult ExecuteContext.Faulted()
+        {
+            return _context.Faulted();
+        }
+
+        ExecutionResult ExecuteContext.Faulted(Exception exception)
+        {
+            return _context.Faulted(exception);
+        }
+
+        CancellationToken PipeContext.CancellationToken
         {
             get { return _context.CancellationToken; }
         }
 
-        public bool HasPayloadType(Type contextType)
+        bool PipeContext.HasPayloadType(Type contextType)
         {
             return _context.HasPayloadType(contextType);
         }
 
-        public bool TryGetPayload<TPayload>(out TPayload payload) where TPayload : class
+        bool PipeContext.TryGetPayload<TPayload>(out TPayload payload)
         {
             return _context.TryGetPayload(out payload);
         }
 
-        public TPayload GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory) where TPayload : class
+        TPayload PipeContext.GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory)
         {
             return _context.GetOrAddPayload(payloadFactory);
         }
 
-        public Task Publish<T>(T message, CancellationToken cancellationToken = new CancellationToken()) where T : class
+        Task IPublishEndpoint.Publish<T>(T message, CancellationToken cancellationToken)
         {
             return _context.Publish(message, cancellationToken);
         }
 
-        public Task Publish<T>(T message, IPipe<PublishContext<T>> publishPipe, CancellationToken cancellationToken = new CancellationToken()) where T : class
+        Task IPublishEndpoint.Publish<T>(T message, IPipe<PublishContext<T>> publishPipe, CancellationToken cancellationToken)
         {
             return _context.Publish(message, publishPipe, cancellationToken);
         }
 
-        public Task Publish<T>(T message, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken = new CancellationToken()) where T : class
+        Task IPublishEndpoint.Publish<T>(T message, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
         {
             return _context.Publish(message, publishPipe, cancellationToken);
         }
 
-        public Task Publish(object message, CancellationToken cancellationToken = new CancellationToken())
+        Task IPublishEndpoint.Publish(object message, CancellationToken cancellationToken)
         {
             return _context.Publish(message, cancellationToken);
         }
 
-        public Task Publish(object message, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken = new CancellationToken())
+        Task IPublishEndpoint.Publish(object message, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
         {
             return _context.Publish(message, publishPipe, cancellationToken);
         }
 
-        public Task Publish(object message, Type messageType, CancellationToken cancellationToken = new CancellationToken())
+        Task IPublishEndpoint.Publish(object message, Type messageType, CancellationToken cancellationToken)
         {
             return _context.Publish(message, messageType, cancellationToken);
         }
 
-        public Task Publish(object message, Type messageType, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken = new CancellationToken())
+        Task IPublishEndpoint.Publish(object message, Type messageType, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
         {
             return _context.Publish(message, messageType, publishPipe, cancellationToken);
         }
 
-        public Task Publish<T>(object values, CancellationToken cancellationToken = new CancellationToken()) where T : class
+        Task IPublishEndpoint.Publish<T>(object values, CancellationToken cancellationToken)
         {
             return _context.Publish<T>(values, cancellationToken);
         }
 
-        public Task Publish<T>(object values, IPipe<PublishContext<T>> publishPipe, CancellationToken cancellationToken = new CancellationToken())
-            where T : class
+        Task IPublishEndpoint.Publish<T>(object values, IPipe<PublishContext<T>> publishPipe, CancellationToken cancellationToken)
         {
             return _context.Publish(values, publishPipe, cancellationToken);
         }
 
-        public Task Publish<T>(object values, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken = new CancellationToken()) where T : class
+        Task IPublishEndpoint.Publish<T>(object values, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
         {
             return _context.Publish<T>(values, publishPipe, cancellationToken);
         }
 
-        public Guid? MessageId
-        {
-            get { return _consumeContext.MessageId; }
-        }
-
-        public Guid? RequestId
-        {
-            get { return _consumeContext.RequestId; }
-        }
-
-        public Guid? CorrelationId
-        {
-            get { return _consumeContext.CorrelationId; }
-        }
-
-        public DateTime? ExpirationTime
-        {
-            get { return _consumeContext.ExpirationTime; }
-        }
-
-        public Uri SourceAddress
-        {
-            get { return _consumeContext.SourceAddress; }
-        }
-
-        public Uri DestinationAddress
-        {
-            get { return _consumeContext.DestinationAddress; }
-        }
-
-        public Uri ResponseAddress
-        {
-            get { return _consumeContext.ResponseAddress; }
-        }
-
-        public Uri FaultAddress
-        {
-            get { return _consumeContext.FaultAddress; }
-        }
-
-        public Headers Headers
-        {
-            get { return _consumeContext.Headers; }
-        }
-
-        public ReceiveContext ReceiveContext
-        {
-            get { return _consumeContext.ReceiveContext; }
-        }
-
-        public Task CompleteTask
-        {
-            get { return _consumeContext.CompleteTask; }
-        }
-
-        public IEnumerable<string> SupportedMessageTypes
-        {
-            get { return _consumeContext.SupportedMessageTypes; }
-        }
-
-        public bool HasMessageType(Type messageType)
-        {
-            return _consumeContext.HasMessageType(messageType);
-        }
-
-        public bool TryGetMessage<T>(out ConsumeContext<T> consumeContext) where T : class
-        {
-            return _consumeContext.TryGetMessage(out consumeContext);
-        }
-
-        public Task RespondAsync<T>(T message) where T : class
-        {
-            return _consumeContext.RespondAsync(message);
-        }
-
-        public Task RespondAsync<T>(T message, IPipe<SendContext<T>> sendPipe) where T : class
-        {
-            return _consumeContext.RespondAsync(message, sendPipe);
-        }
-
-        public void Respond<T>(T message) where T : class
-        {
-            _consumeContext.Respond(message);
-        }
-
-        public void RetryLater()
-        {
-            _consumeContext.RetryLater();
-        }
-
-        public Task<ISendEndpoint> GetSendEndpoint(Uri address)
+        Task<ISendEndpoint> ISendEndpointProvider.GetSendEndpoint(Uri address)
         {
             return _consumeContext.GetSendEndpoint(address);
-        }
-
-        public void NotifyConsumed<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType) where T : class
-        {
-            _consumeContext.NotifyConsumed(context, duration, consumerType);
-        }
-
-        public void NotifyFaulted<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType, Exception exception) where T : class
-        {
-            _consumeContext.NotifyFaulted(context, duration, consumerType, exception);
-        }
-
-        public Execution<TArguments> Execution
-        {
-            get { return _context; }
         }
 
         ExecuteActivity<TArguments> ExecuteActivityContext<TArguments>.Activity
@@ -222,9 +212,14 @@ namespace MassTransit.Courier.Hosts
             get { return _activity; }
         }
 
-        public TActivity Activity
+        TActivity ExecuteActivityContext<TActivity, TArguments>.Activity
         {
             get { return _activity; }
+        }
+
+        TArguments ExecuteContext<TArguments>.Arguments
+        {
+            get { return _context.Arguments; }
         }
     }
 }

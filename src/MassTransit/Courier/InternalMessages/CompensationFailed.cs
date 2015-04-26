@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -15,7 +15,6 @@ namespace MassTransit.Courier.InternalMessages
     using System;
     using System.Collections.Generic;
     using Contracts;
-    using MassTransit.Events;
 
 
     public class CompensationFailed :
@@ -29,15 +28,7 @@ namespace MassTransit.Courier.InternalMessages
 
         public CompensationFailed(HostInfo host, Guid trackingNumber, string activityName, Guid activityTrackingNumber,
             DateTime timestamp, TimeSpan duration, DateTime failureTimestamp, TimeSpan routingSlipDuration,
-            IDictionary<string, object> variables, IDictionary<string, object> data, Exception exception)
-            : this(host, trackingNumber, activityName, activityTrackingNumber, timestamp, duration, failureTimestamp, routingSlipDuration,
-                variables, data, new FaultExceptionInfo(exception))
-        {
-        }
-
-        public CompensationFailed(HostInfo host, Guid trackingNumber, string activityName, Guid activityTrackingNumber,
-            DateTime timestamp, TimeSpan duration, DateTime failureTimestamp, TimeSpan routingSlipDuration,
-            IDictionary<string, object> variables, IDictionary<string, object> data, ExceptionInfo exceptionInfo)
+            ExceptionInfo exceptionInfo, IDictionary<string, object> variables, IDictionary<string, object> data)
         {
             _failureTimestamp = failureTimestamp;
             _routingSlipDuration = routingSlipDuration;

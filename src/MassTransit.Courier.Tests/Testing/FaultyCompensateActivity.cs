@@ -19,20 +19,20 @@ namespace MassTransit.Courier.Tests.Testing
     public class FaultyCompensateActivity :
         Activity<TestArguments, TestLog>
     {
-        public async Task<ExecutionResult> Execute(Execution<TestArguments> execution)
+        public async Task<ExecutionResult> Execute(ExecuteContext<TestArguments> context)
         {
-            Console.WriteLine("FaultyCompensateActivity: Execute: {0}", execution.Arguments.Value);
+            Console.WriteLine("FaultyCompensateActivity: Execute: {0}", context.Arguments.Value);
 
-            TestLog log = new TestLogImpl(execution.Arguments.Value);
+            TestLog log = new TestLogImpl(context.Arguments.Value);
 
-            return execution.Completed(log);
+            return context.Completed(log);
         }
 
-        public async Task<CompensationResult> Compensate(Compensation<TestLog> compensation)
+        public async Task<CompensationResult> Compensate(CompensateContext<TestLog> context)
         {
-            Console.WriteLine("FaultyCompensateActivity: Compensate: {0}", compensation.Log.OriginalValue);
+            Console.WriteLine("FaultyCompensateActivity: Compensate: {0}", context.Log.OriginalValue);
 
-            return compensation.Failed();
+            return context.Failed();
         }
 
 

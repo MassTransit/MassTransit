@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2013 Chris Patterson
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,23 +12,20 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Courier.Tests.Testing
 {
-    using System;
+    using System.Collections.Generic;
     using System.Threading.Tasks;
+    using Exceptions;
 
 
-    public class ReviseWithNoChangeItineraryActivity :
-        Activity<TestArguments, TestLog>
+    public class SetVariableActivity :
+        ExecuteActivity<SetVariableArguments>
     {
-        public async Task<ExecutionResult> Execute(ExecuteContext<TestArguments> context)
+        public async Task<ExecutionResult> Execute(ExecuteContext<SetVariableArguments> context)
         {
-            Console.WriteLine("ReviseWithNoChangeItineraryActivity: Execute: {0}", context.Arguments.Value);
+            if (context.Arguments == null)
+                throw new RoutingSlipException("The arguments for execution were null");
 
-            return context.ReviseItinerary(x => x.AddSourceItinerary());
-        }
-
-        public async Task<CompensationResult> Compensate(CompensateContext<TestLog> context)
-        {
-            return context.Compensated();
+            return context.CompletedWithVariables(new Dictionary<string, object> {{context.Arguments.Key, context.Arguments.Value}});
         }
     }
 }

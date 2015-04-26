@@ -26,16 +26,16 @@ namespace MassTransit.Courier.Tests.Testing
             _callback = callback;
         }
 
-        public async Task<ExecutionResult> Execute(Execution<TestArguments> execution)
+        public async Task<ExecutionResult> Execute(ExecuteContext<TestArguments> context)
         {
-            Console.WriteLine("ReviseToEmptyItineraryActivity: Execute: {0}", execution.Arguments.Value);
+            Console.WriteLine("ReviseToEmptyItineraryActivity: Execute: {0}", context.Arguments.Value);
 
-            return execution.ReviseItinerary(_callback);
+            return context.ReviseItinerary(_callback);
         }
 
-        public async Task<CompensationResult> Compensate(Compensation<TestLog> compensation)
+        public async Task<CompensationResult> Compensate(CompensateContext<TestLog> context)
         {
-            return compensation.Compensated();
+            return context.Compensated();
         }
     }
 }

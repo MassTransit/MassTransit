@@ -16,7 +16,6 @@ namespace MassTransit.Courier.Results
     using System.Threading.Tasks;
     using Contracts;
     using Events;
-    using InternalMessages;
 
 
     class FailedCompensationResult<TLog> :
@@ -24,32 +23,32 @@ namespace MassTransit.Courier.Results
         where TLog : class
     {
         readonly CompensateLog _compensateLog;
-        readonly Compensation<TLog> _compensation;
+        readonly CompensateContext<TLog> _compensateContext;
         readonly TimeSpan _duration;
         readonly Exception _exception;
+        readonly IRoutingSlipEventPublisher _publisher;
         readonly RoutingSlip _routingSlip;
 
-        public FailedCompensationResult(Compensation<TLog> compensation, CompensateLog compensateLog, RoutingSlip routingSlip,
+        public FailedCompensationResult(CompensateContext<TLog> compensateContext, IRoutingSlipEventPublisher publisher, CompensateLog compensateLog,
+            RoutingSlip routingSlip,
             Exception exception)
         {
-            _compensation = compensation;
+            _compensateContext = compensateContext;
+            _publisher = publisher;
             _compensateLog = compensateLog;
             _routingSlip = routingSlip;
             _exception = exception;
-            _duration = _compensation.ElapsedTime;
+            _duration = _compensateContext.ElapsedTime;
         }
 
         public async Task Evaluate()
         {
-            DateTime faultedTimestamp = _compensation.StartTimestamp + _duration;
+            DateTime faultedTimestamp = _compensateContext.StartTimestamp + _duration;
             TimeSpan faultedDuration = faultedTimestamp - _routingSlip.CreateTimestamp;
 
-            IRoutingSlipEventPublisher publisher = new RoutingSlipEventPublisher(_compensation, _compensation, _routingSlip);
-
-            var activityCompensationFailed = new CompensationFailed(_compensation.Host,
-                _compensation.TrackingNumber, _compensation.ActivityName, _compensation.ExecutionId, _compensation.StartTimestamp,
-                _duration, faultedTimestamp, faultedDuration, _routingSlip.Variables, _compensateLog.Data, _exception);
-            await publisher.Publish(activityCompensationFailed);
+            await _publisher.PublishRoutingSlipActivityCompensationFailed(_compensateContext.ActivityName, _compensateContext.ExecutionId,
+                _compensateContext.StartTimestamp, _duration, faultedTimestamp, faultedDuration, new FaultExceptionInfo(_exception), _routingSlip.Variables,
+                _compensateLog.Data);
         }
     }
 }

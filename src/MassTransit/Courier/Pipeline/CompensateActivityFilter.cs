@@ -20,26 +20,26 @@ namespace MassTransit.Courier.Pipeline
 
 
     /// <summary>
-    /// Executes an activity as part of an activity execute host pipe
+    /// Compensates an activity as part of an activity execute host pipe
     /// </summary>
-    /// <typeparam name="TArguments"></typeparam>
-    public class ExecuteActivityFilter<TArguments> :
-        IFilter<ExecuteActivityContext<TArguments>>
-        where TArguments : class
+    /// <typeparam name="TLog"></typeparam>
+    public class CompensateActivityFilter<TLog> :
+        IFilter<CompensateActivityContext<TLog>>
+        where TLog : class
     {
-        static readonly ILog _log = Logger.Get<ExecuteActivityFilter<TArguments>>();
+        static readonly ILog _log = Logger.Get<ExecuteActivityFilter<TLog>>();
 
-        public async Task Send(ExecuteActivityContext<TArguments> context, IPipe<ExecuteActivityContext<TArguments>> next)
+        public async Task Send(CompensateActivityContext<TLog> context, IPipe<CompensateActivityContext<TLog>> next)
         {
             if (_log.IsDebugEnabled)
-                _log.DebugFormat("Executing: {0}",  context.TrackingNumber);
+                _log.DebugFormat("Compensating: {0}", context.TrackingNumber);
 
             try
             {
                 Exception exception = null;
                 try
                 {
-                    ExecutionResult result = await context.Activity.Execute(context);
+                    CompensationResult result = await context.Activity.Compensate(context);
 
                     await result.Evaluate();
 
@@ -52,7 +52,7 @@ namespace MassTransit.Courier.Pipeline
 
                 if (exception != null)
                 {
-                    ExecutionResult result = context.Faulted(exception);
+                    CompensationResult result = context.Failed(exception);
 
                     await result.Evaluate();
                 }

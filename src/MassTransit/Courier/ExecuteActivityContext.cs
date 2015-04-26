@@ -13,14 +13,9 @@
 namespace MassTransit.Courier
 {
     public interface ExecuteActivityContext<TArguments> :
-        ConsumeContext
+        ExecuteContext<TArguments>
         where TArguments : class
     {
-        /// <summary>
-        /// The execution context for this activity
-        /// </summary>
-        Execution<TArguments> Execution { get; }
-
         ExecuteActivity<TArguments> Activity { get; } 
     }
 
