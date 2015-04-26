@@ -41,7 +41,7 @@ namespace MassTransit.TestFramework
         protected void AddActivityContext<T, TArguments, TLog>(Func<T> activityFactory)
             where TArguments : class
             where TLog : class
-            where T : Activity<TArguments, TLog>
+            where T : class, Activity<TArguments, TLog>
         {
             var context = new ActivityTestContext<T, TArguments, TLog>(new Uri("loopback://localhost/"), activityFactory);
 

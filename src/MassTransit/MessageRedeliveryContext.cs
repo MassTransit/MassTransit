@@ -10,16 +10,16 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Scheduling
+namespace MassTransit
 {
     using System;
     using System.Threading.Tasks;
-    using Pipeline;
 
 
-    public interface SchedulerContext<T> :
-        SchedulerContext
-        where T : class
+    /// <summary>
+    /// Used to reschedule delivery of the current message
+    /// </summary>
+    public interface MessageRedeliveryContext
     {
         /// <summary>
         /// Schedule the message to be redelivered after the specified delay.
@@ -27,15 +27,5 @@ namespace MassTransit.Scheduling
         /// <param name="delay">The minimum delay before the message will be redelivered to the queue</param>
         /// <returns></returns>
         Task ScheduleRedelivery(TimeSpan delay);
-    }
-
-
-    public interface SchedulerContext
-    {
-        Task ScheduleSend<T>(T message, TimeSpan deliveryDelay, IPipe<SendContext<T>> sendPipe)
-            where T : class;
-
-        Task ScheduleSend<T>(T message, DateTime deliveryTime, IPipe<SendContext<T>> sendPipe)
-            where T : class;
     }
 }

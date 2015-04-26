@@ -17,10 +17,14 @@ namespace MassTransit.Courier
 
 
     public interface Execution<out TArguments> :
+        PipeContext,
         IPublishEndpoint,
         ISendEndpointProvider
         where TArguments : class
     {
+        /// <summary>
+        /// The arguments from the routing slip for this activity
+        /// </summary>
         TArguments Arguments { get; }
 
         /// <summary>
@@ -31,7 +35,7 @@ namespace MassTransit.Courier
         /// <summary>
         /// The tracking number for this activity within the routing slip
         /// </summary>
-        Guid ActivityTrackingNumber { get; }
+        Guid ExecutionId { get; }
 
         HostInfo Host { get; }
 

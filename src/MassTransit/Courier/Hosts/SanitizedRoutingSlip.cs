@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -65,7 +65,6 @@ namespace MassTransit.Courier.Hosts
                 .ToList();
         }
 
-
         public Guid TrackingNumber { get; private set; }
         public DateTime CreateTimestamp { get; private set; }
         public IList<Activity> Itinerary { get; private set; }
@@ -74,7 +73,6 @@ namespace MassTransit.Courier.Hosts
         public IDictionary<string, object> Variables { get; private set; }
         public IList<ActivityException> ActivityExceptions { get; private set; }
         public IList<Subscription> Subscriptions { get; private set; }
-
 
         public T GetActivityArguments<T>()
             where T : class

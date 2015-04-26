@@ -158,6 +158,8 @@
     <Compile Include="ConsumeContextExtensions.cs" />
     <Compile Include="ConsumerConsumeContext.cs" />
     <Compile Include="Context\ConsumeContextScope.cs" />
+    <Compile Include="Context\ConsumeMessageRedeliveryContext.cs" />
+    <Compile Include="Context\ConsumeMessageSchedulerContext.cs" />
     <Compile Include="Context\ConsumerConsumeContextProxy.cs" />
     <Compile Include="Context\IHeaderProvider.cs" />
     <Compile Include="Context\IPublishEndpointConverter.cs" />
@@ -213,30 +215,33 @@
     <Compile Include="Courier\Exceptions\InvalidCompensationAddressException.cs" />
     <Compile Include="Courier\Exceptions\RoutingSlipException.cs" />
     <Compile Include="Courier\ExecuteActivity.cs" />
+    <Compile Include="Courier\ExecuteActivityContext.cs" />
     <Compile Include="Courier\ExecuteActivityFactory.cs" />
     <Compile Include="Courier\Execution.cs" />
     <Compile Include="Courier\ExecutionResult.cs" />
     <Compile Include="Courier\Extensions\LinqExtensions.cs" />
     <Compile Include="Courier\HostSubscriptionExtensions.cs" />
     <Compile Include="Courier\Hosts\CompensateActivityHost.cs" />
-    <Compile Include="Courier\Hosts\CompensatedCompensationResult.cs" />
-    <Compile Include="Courier\Hosts\CompensatedWithVariablesCompensationResult.cs" />
-    <Compile Include="Courier\Hosts\CompletedExecutionResult.cs" />
-    <Compile Include="Courier\Hosts\DefaultConstructorActivityFactory.cs" />
-    <Compile Include="Courier\Hosts\DefaultConstructorCompensateActivityFactory.cs" />
+    <Compile Include="Courier\Results\CompensatedCompensationResult.cs" />
+    <Compile Include="Courier\Results\CompensatedWithVariablesCompensationResult.cs" />
+    <Compile Include="Courier\Results\CompletedExecutionResult.cs" />
+    <Compile Include="Courier\Factories\DefaultConstructorActivityFactory.cs" />
+    <Compile Include="Courier\Factories\DefaultConstructorCompensateActivityFactory.cs" />
+    <Compile Include="Courier\Pipeline\ExecuteActivityFilter.cs" />
     <Compile Include="Courier\Hosts\ExecuteActivityHost.cs" />
-    <Compile Include="Courier\Hosts\FactoryMethodActivityFactory.cs" />
-    <Compile Include="Courier\Hosts\FactoryMethodCompensateActivityFactory.cs" />
-    <Compile Include="Courier\Hosts\FactoryMethodExecuteActivityFactory.cs" />
-    <Compile Include="Courier\Hosts\FailedCompensationResult.cs" />
-    <Compile Include="Courier\Hosts\FaultedExecutionResult.cs" />
-    <Compile Include="Courier\Hosts\GenericActivityFactory.cs" />
+    <Compile Include="Courier\Factories\FactoryMethodActivityFactory.cs" />
+    <Compile Include="Courier\Factories\FactoryMethodCompensateActivityFactory.cs" />
+    <Compile Include="Courier\Factories\FactoryMethodExecuteActivityFactory.cs" />
+    <Compile Include="Courier\Results\FailedCompensationResult.cs" />
+    <Compile Include="Courier\Results\FaultedExecutionResult.cs" />
+    <Compile Include="Courier\Factories\GenericActivityFactory.cs" />
     <Compile Include="Courier\Hosts\HostCompensation.cs" />
-    <Compile Include="Courier\Hosts\HostExecuteContext.cs" />
-    <Compile Include="Courier\Hosts\NextActivityExecutionResult.cs" />
-    <Compile Include="Courier\Hosts\NextActivityWithVariablesExecutionResult.cs" />
-    <Compile Include="Courier\Hosts\ReviseItineraryExecutionResult.cs" />
-    <Compile Include="Courier\Hosts\ReviseItineraryWithVariablesExecutionResult.cs" />
+    <Compile Include="Courier\Hosts\HostExecuteActivityContext.cs" />
+    <Compile Include="Courier\Hosts\HostExecution.cs" />
+    <Compile Include="Courier\Results\NextActivityExecutionResult.cs" />
+    <Compile Include="Courier\Results\NextActivityWithVariablesExecutionResult.cs" />
+    <Compile Include="Courier\Results\ReviseItineraryExecutionResult.cs" />
+    <Compile Include="Courier\Results\ReviseItineraryWithVariablesExecutionResult.cs" />
     <Compile Include="Courier\Hosts\SanitizedRoutingSlip.cs" />
     <Compile Include="Courier\InternalMessages\ActivityExceptionImpl.cs" />
     <Compile Include="Courier\InternalMessages\ActivityImpl.cs" />
@@ -335,7 +340,9 @@
     <Compile Include="ISendEndpointProvider.cs" />
     <Compile Include="MessageContext.cs" />
     <Compile Include="MessageHandler.cs" />
+    <Compile Include="MessageRedeliveryContext.cs" />
     <Compile Include="MessageRequestClient.cs" />
+    <Compile Include="MessageSchedulerContext.cs" />
     <Compile Include="Monitoring\BusPerformanceCounters.cs" />
     <Compile Include="Monitoring\ConsumerPerformanceCounter.cs" />
     <Compile Include="Monitoring\ConsumerPerformanceCounterCache.cs" />
@@ -362,6 +369,7 @@
     <Compile Include="Pipeline\Filters\AsyncDelegateFilter.cs" />
     <Compile Include="Pipeline\Filters\ConsumerMessageFilter.cs" />
     <Compile Include="Pipeline\Filters\ConsumerSplitFilter.cs" />
+    <Compile Include="Pipeline\Filters\DelayedRetryFilter.cs" />
     <Compile Include="Pipeline\Filters\DelegateFilter.cs" />
     <Compile Include="Pipeline\Filters\DeserializeFilter.cs" />
     <Compile Include="Pipeline\Filters\HandlerMessageFilter.cs" />
@@ -370,6 +378,7 @@
     <Compile Include="Pipeline\Filters\LegacyMethodConsumerMessageFilter.cs" />
     <Compile Include="Pipeline\Filters\LogFilter.cs" />
     <Compile Include="Pipeline\Filters\MessageConsumeFilter.cs" />
+    <Compile Include="Pipeline\Filters\MessageSchedulerFilter.cs" />
     <Compile Include="Pipeline\Filters\MessageTypeConsumeFilter.cs" />
     <Compile Include="Pipeline\Filters\MethodConsumerMessageFilter.cs" />
     <Compile Include="Pipeline\Filters\MoveToErrorTransportFilter.cs" />
@@ -480,8 +489,6 @@
     <Compile Include="Scheduling\CancelScheduledMessage.cs" />
     <Compile Include="Scheduling\ScheduledMessage.cs" />
     <Compile Include="Scheduling\ScheduleMessage.cs" />
-    <Compile Include="Scheduling\SchedulerContext.cs" />
-    <Compile Include="Scheduling\SchedulerFilter.cs" />
     <Compile Include="SendContext.cs" />
     <Compile Include="SendEndpointExtensions.cs" />
     <Compile Include="SendHeaders.cs" />
@@ -775,7 +782,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Configuration\Configuration\" />
-    <Folder Include="Subscriptions\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />

@@ -15,21 +15,75 @@ namespace MassTransit.QuartzIntegration.Tests
     using System;
     using System.Threading.Tasks;
     using NUnit.Framework;
-    using Quartz;
-    using Quartz.Impl;
-    using TestFramework;
 
 
     [TestFixture]
     public class Specifying_an_event_in_the_past :
-        InMemoryTestFixture
+        QuartzInMemoryTestFixture
     {
+        [Test]
+        public async void Should_handle_now_properly()
+        {
+            Task<ConsumeContext<A>> handler = SubscribeHandler<A>();
+
+            ISendEndpoint endpoint = await Bus.GetSendEndpoint(new Uri("loopback://localhost/quartz"));
+
+            await endpoint.ScheduleSend(Bus.Address, DateTime.UtcNow, new A {Name = "Joe"});
+
+            await handler;
+        }
+
+        [Test]
+        public async void Should_handle_slightly_in_the_future_properly()
+        {
+            Task<ConsumeContext<A>> handler = SubscribeHandler<A>();
+
+            ISendEndpoint endpoint = await Bus.GetSendEndpoint(new Uri("loopback://localhost/quartz"));
+
+            await endpoint.ScheduleSend(Bus.Address, DateTime.UtcNow + TimeSpan.FromSeconds(2), new A {Name = "Joe"});
+
+            await handler;
+        }
+
+        [Test]
+        public async void Should_include_message_headers()
+        {
+            Task<ConsumeContext<A>> handler = SubscribeHandler<A>();
+
+            ISendEndpoint endpoint = await Bus.GetSendEndpoint(new Uri("loopback://localhost/quartz"));
+
+            Guid requestId = Guid.NewGuid();
+            Guid correlationId = Guid.NewGuid();
+            await endpoint.ScheduleSend(Bus.Address, DateTime.UtcNow, new A {Name = "Joe"}, Pipe.Execute<SendContext>(x =>
+            {
+                x.FaultAddress = Bus.Address;
+                x.ResponseAddress = InputQueueAddress;
+                x.RequestId = requestId;
+                x.CorrelationId = correlationId;
+
+                x.Headers.Set("Hello", "World");
+            }));
+
+            ConsumeContext<A> context = await handler;
+
+            Assert.AreEqual(Bus.Address, context.FaultAddress);
+            Assert.AreEqual(InputQueueAddress, context.ResponseAddress);
+            Assert.IsTrue(context.RequestId.HasValue);
+            Assert.AreEqual(requestId, context.RequestId.Value);
+            Assert.IsTrue(context.CorrelationId.HasValue);
+            Assert.AreEqual(correlationId, context.CorrelationId.Value);
+
+            object value;
+            Assert.IsTrue(context.Headers.TryGetHeader("Hello", out value));
+            Assert.AreEqual("World", value);
+        }
+
         [Test]
         public async void Should_properly_send_the_message()
         {
             Task<ConsumeContext<A>> handler = SubscribeHandler<A>();
 
-            var endpoint = await Bus.GetSendEndpoint(new Uri("loopback://localhost/quartz"));
+            ISendEndpoint endpoint = await Bus.GetSendEndpoint(new Uri("loopback://localhost/quartz"));
 
             await endpoint.ScheduleSend(Bus.Address, DateTime.UtcNow + TimeSpan.FromHours(-1), new A {Name = "Joe"});
 
@@ -41,119 +95,5 @@ namespace MassTransit.QuartzIntegration.Tests
         {
             public string Name { get; set; }
         }
-
-
-        IScheduler _scheduler;
-
-        protected override void ConfigureBus(IInMemoryBusFactoryConfigurator configurator)
-        {
-            ISchedulerFactory schedulerFactory = new StdSchedulerFactory();
-            _scheduler = schedulerFactory.GetScheduler();
-
-            configurator.ReceiveEndpoint("quartz", x =>
-            {
-                x.Consumer(() => new ScheduleMessageConsumer(_scheduler));
-            });
-        }
-
-        [TestFixtureSetUp]
-        public void Setup_quartz_service()
-        {
-            _scheduler.JobFactory = new MassTransitJobFactory(Bus);
-            _scheduler.Start();
-        }
-
-        [TestFixtureTearDown]
-        public void Teardown_quartz_service()
-        {
-            if (_scheduler != null)
-                _scheduler.Standby();
-            if (_scheduler != null)
-                _scheduler.Shutdown();
-        }
     }
-
-
-//    [TestFixture, Explicit]
-//    public class Sending_past_events_to_quartz
-//    {
-//        [Test]
-//        public void Should_properly_send_the_message()
-//        {
-//            _bus.ScheduleMessage((-1).Minutes().FromUtcNow(), new A { Name = "Joe" }, x =>
-//            {
-//                x.SetHeader("TestHeader", "Test");
-//            });
-//
-//            Assert.IsTrue(_receivedA.WaitOne(TimeSpan.FromMinutes(1)), "Message A not handled");
-//
-//            Assert.IsTrue(_received.Headers["TestHeader"].Equals("Test"));
-//        }
-//
-//        [Test]
-//        public void Should_not_handle_now()
-//        {
-//            _bus.ScheduleMessage(DateTime.UtcNow, new A { Name = "Joe" }, x =>
-//            {
-//                x.SetHeader("TestHeader", "Test");
-//            });
-//
-//            Assert.IsTrue(_receivedA.WaitOne(Utils.Timeout), "Message A not handled");
-//
-//            Assert.IsTrue(_received.Headers["TestHeader"].Equals("Test"));
-//        }
-//
-//        [Test]
-//        public void Should_send_a_future_message()
-//        {
-//            _bus.ScheduleMessage((1).Seconds().FromUtcNow(), new A { Name = "Joe" }, x =>
-//            {
-//                x.SetHeader("TestHeader", "Test");
-//            });
-//
-//            Assert.IsTrue(_receivedA.WaitOne(Utils.Timeout), "Message A not handled");
-//
-//            Assert.IsTrue(_received.Headers["TestHeader"].Equals("Test"));
-//        }
-//
-//
-//        class A 
-//        {
-//            public string Name { get; set; }
-//        }
-//
-//        IServiceBus _bus;
-//        ManualResetEvent _receivedA;
-//        IConsumeContext<A> _received;
-//
-//        [TestFixtureSetUp]
-//        public void Setup_quartz_service()
-//        {
-//            _receivedA = new ManualResetEvent(false);
-//
-//            _bus = ServiceBusFactory.New(x =>
-//            {
-//                x.ReceiveFrom("rabbitmq://localhost/test_quartz_client");
-//                x.UseJsonSerializer();
-//                x.UseRabbitMq();
-//
-//                x.Subscribe(s =>
-//                {
-//                    s.Handler<A>((msg, context) =>
-//                    {
-//                        _received = msg;
-//                        _receivedA.Set();
-//                    });
-//                });
-//            });
-//
-//        }
-//
-//        [TestFixtureTearDown]
-//        public void Teardown_quartz_service()
-//        {
-//            if (_bus != null)
-//                _bus.Dispose();
-//        }
-//    }
 }

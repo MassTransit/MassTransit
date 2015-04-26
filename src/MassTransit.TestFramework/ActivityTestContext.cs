@@ -14,6 +14,7 @@ namespace MassTransit.TestFramework
 {
     using System;
     using Courier;
+    using Courier.Factories;
     using Courier.Hosts;
 
 
@@ -30,7 +31,7 @@ namespace MassTransit.TestFramework
 
     public class ActivityTestContext<T, TArguments, TLog> :
         ActivityTestContext
-        where T : Activity<TArguments, TLog>
+        where T : class, Activity<TArguments, TLog>
         where TArguments : class
         where TLog : class
     {

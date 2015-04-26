@@ -59,7 +59,7 @@ namespace MassTransit
         public static Task Forward<T>(this ConsumeContext context, ISendEndpoint endpoint, T message)
             where T : class
         {
-            return endpoint.Send(message, CreateCopyContextPipe<T>(context, GetForwardHeaders));
+            return endpoint.Send(message, CreateCopyContextPipe(context, GetForwardHeaders));
         }
 
         static IEnumerable<Tuple<string, object>> GetForwardHeaders(ConsumeContext context)
@@ -74,13 +74,12 @@ namespace MassTransit
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="context"></param>
-        /// <param name="getAdditionalHeaders">Returns additional headers for the pipe that should be added to the message</param>
+        /// <param name="additionalHeaders">Returns additional headers for the pipe that should be added to the message</param>
         /// <returns></returns>
-        public static IPipe<SendContext<T>> CreateCopyContextPipe<T>(this ConsumeContext context,
-            Func<ConsumeContext, IEnumerable<Tuple<string, object>>> getAdditionalHeaders)
-            where T : class
+        public static IPipe<SendContext> CreateCopyContextPipe(this ConsumeContext context,
+            Func<ConsumeContext, IEnumerable<Tuple<string, object>>> additionalHeaders)
         {
-            return Pipe.New<SendContext<T>>(x => x.Execute(target =>
+            return Pipe.New<SendContext>(x => x.Execute(target =>
             {
                 target.RequestId = context.RequestId;
                 target.CorrelationId = context.CorrelationId;
@@ -94,7 +93,7 @@ namespace MassTransit
                 foreach (var header in context.Headers.GetAll())
                     target.Headers.Set(header.Item1, header.Item2);
 
-                foreach (var additionalHeader in getAdditionalHeaders(context))
+                foreach (var additionalHeader in additionalHeaders(context))
                     target.Headers.Set(additionalHeader.Item1, additionalHeader.Item2);
             }));
         }
