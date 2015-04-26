@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -16,6 +16,8 @@ namespace MassTransit.Courier.Hosts
     using System.Threading.Tasks;
     using Contracts;
     using Logging;
+    using MassTransit.Pipeline;
+    using Pipeline;
     using Util;
 
 
@@ -27,6 +29,7 @@ namespace MassTransit.Courier.Hosts
         readonly ExecuteActivityFactory<TArguments> _activityFactory;
         readonly Uri _compensateAddress;
         readonly ILog _log = Logger.Get<ExecuteActivityHost<TActivity, TArguments>>();
+        IPipe<ExecuteActivityContext<TArguments>> _executePipe;
 
         public ExecuteActivityHost(Uri compensateAddress, ExecuteActivityFactory<TArguments> activityFactory)
         {
@@ -37,6 +40,8 @@ namespace MassTransit.Courier.Hosts
 
             _compensateAddress = compensateAddress;
             _activityFactory = activityFactory;
+
+            _executePipe = Pipe.New<ExecuteActivityContext<TArguments>>(x => x.Filter(new ExecuteActivityFilter<TArguments>()));
         }
 
         public ExecuteActivityHost(ExecuteActivityFactory<TArguments> activityFactory)
@@ -47,38 +52,17 @@ namespace MassTransit.Courier.Hosts
             _activityFactory = activityFactory;
         }
 
-        async Task IConsumer<RoutingSlip>.Consume(ConsumeContext<RoutingSlip> context)
+        Task IConsumer<RoutingSlip>.Consume(ConsumeContext<RoutingSlip> context)
         {
             Execution<TArguments> execution = new HostExecution<TArguments>(HostMetadataCache.Host, _compensateAddress, context);
 
             if (_log.IsDebugEnabled)
-                _log.DebugFormat("Host: {0} Executing: {1}", context.ReceiveContext.InputAddress, execution.TrackingNumber);
-
-            try
             {
-                Exception exception = null;
-                try
-                {
-                    ExecutionResult result = await _activityFactory.ExecuteActivity(execution);
-
-                    await result.Evaluate();
-                }
-                catch (Exception ex)
-                {
-                    exception = ex;
-                }
-
-                if (exception != null)
-                {
-                    ExecutionResult result = execution.Faulted(exception);
-
-                    await result.Evaluate();
-                }
+                _log.DebugFormat("Host: {0} Activity: {1} Executing: {2}", context.ReceiveContext.InputAddress, TypeMetadataCache<TActivity>.ShortName,
+                    execution.TrackingNumber);
             }
-            catch (Exception ex)
-            {
-                _log.Error("The activity threw an unexpected exception", ex);
-            }
+
+            return _activityFactory.Execute(execution, _executePipe);
         }
     }
 }

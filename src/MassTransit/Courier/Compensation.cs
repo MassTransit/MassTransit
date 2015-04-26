@@ -56,7 +56,7 @@ namespace MassTransit.Courier
         /// <summary>
         /// The tracking number for this activity within the routing slip
         /// </summary>
-        Guid ActivityTrackingNumber { get; }
+        Guid ExecutionId { get; }
 
         /// <summary>
         /// The compensation was successful

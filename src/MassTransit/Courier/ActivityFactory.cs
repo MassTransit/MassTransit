@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2013 Chris Patterson
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,6 +13,7 @@
 namespace MassTransit.Courier
 {
     using System.Threading.Tasks;
+    using MassTransit.Pipeline;
 
 
     /// <summary>
@@ -21,12 +22,7 @@ namespace MassTransit.Courier
     /// </summary>
     public interface ActivityFactory
     {
-        /// <summary>
-        /// Create and execute the activity
-        /// </summary>
-        /// <param name="execution"></param>
-        /// <returns></returns>
-        Task<ExecutionResult> ExecuteActivity<TActivity, TArguments>(Execution<TArguments> execution)
+        Task Send<TActivity, TArguments>(Execution<TArguments> context, IPipe<ExecuteActivityContext<TArguments>> next)
             where TActivity : ExecuteActivity<TArguments>
             where TArguments : class;
 
@@ -41,7 +37,7 @@ namespace MassTransit.Courier
     }
 
 
-    public interface ActivityFactory<in TArguments, in TLog> :
+    public interface ActivityFactory<TArguments, in TLog> :
         ExecuteActivityFactory<TArguments>,
         CompensateActivityFactory<TLog>
         where TArguments : class

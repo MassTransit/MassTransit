@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,7 +13,6 @@
 namespace MassTransit
 {
     using System;
-    using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
     using Pipeline;
@@ -46,6 +45,26 @@ namespace MassTransit
             return new ScheduledMessageHandle<T>(command.CorrelationId, command.ScheduledTime, command.Destination, command.Payload);
         }
 
+        /// <summary>
+        /// Sends a ScheduleMessage command to the endpoint, using the specified arguments
+        /// </summary>
+        /// <typeparam name="T">The scheduled message type</typeparam>
+        /// <param name="endpoint">The endpoint of the message scheduling service</param>
+        /// <param name="destinationAddress">The destination address where the schedule message should be sent</param>
+        /// <param name="scheduledTime">The time when the message should be sent to the endpoint</param>
+        /// <param name="message">The message to send</param>
+        /// <param name="sendPipe"></param>
+        /// <returns>A handled to the scheduled message</returns>
+        public static async Task<ScheduledMessage<T>> ScheduleSend<T>(this ISendEndpoint endpoint, Uri destinationAddress,
+            DateTime scheduledTime, T message, IPipe<SendContext<ScheduleMessage<T>>> sendPipe)
+            where T : class
+        {
+            var command = new ScheduleMessageCommand<T>(scheduledTime, destinationAddress, message);
+
+            await endpoint.Send(command, sendPipe);
+
+            return new ScheduledMessageHandle<T>(command.CorrelationId, command.ScheduledTime, command.Destination, command.Payload);
+        }
 
         /// <summary>
         /// Cancel a scheduled message using the scheduled message instance
@@ -84,7 +103,8 @@ namespace MassTransit
         /// <param name="message">The message to send</param>
         /// <param name="contextCallback">Optional: A callback that gives the caller access to the publish context.</param>
         /// <returns>A handled to the scheduled message</returns>
-        public static async Task<ScheduledMessage<T>> ScheduleMessage<T>(this IPublishEndpoint publishEndpoint, Uri destinationAddress, DateTime scheduledTime, T message,
+        public static async Task<ScheduledMessage<T>> ScheduleMessage<T>(this IPublishEndpoint publishEndpoint, Uri destinationAddress, DateTime scheduledTime,
+            T message,
             IPipe<PublishContext<ScheduleMessage<T>>> contextCallback = null)
             where T : class
         {

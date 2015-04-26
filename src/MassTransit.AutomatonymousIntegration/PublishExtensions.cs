@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -38,7 +38,7 @@ namespace Automatonymous
 
         public static EventActivityBinder<TInstance> Publish<TInstance, TMessage>(
             this EventActivityBinder<TInstance> source,
-            Func<ConsumeEventContext<TInstance>, TMessage> messageFactory)
+            PublishMessageFactory<TInstance, TMessage> messageFactory)
             where TInstance : class, SagaStateMachineInstance
             where TMessage : class
         {
@@ -47,7 +47,7 @@ namespace Automatonymous
 
         public static EventActivityBinder<TInstance> Publish<TInstance, TMessage>(
             this EventActivityBinder<TInstance> source,
-            Func<ConsumeEventContext<TInstance>, TMessage> messageFactory, Action<PublishContext<TMessage>> contextCallback)
+            PublishMessageFactory<TInstance, TMessage> messageFactory, Action<PublishContext<TMessage>> contextCallback)
             where TInstance : class, SagaStateMachineInstance
             where TMessage : class
         {
@@ -74,7 +74,7 @@ namespace Automatonymous
         }
 
         public static EventActivityBinder<TInstance, TData> Publish<TInstance, TData, TMessage>(
-            this EventActivityBinder<TInstance, TData> source, Func<ConsumeEventContext<TInstance, TData>, TMessage> messageFactory)
+            this EventActivityBinder<TInstance, TData> source, PublishMessageFactory<TInstance, TData, TMessage> messageFactory)
             where TInstance : class, SagaStateMachineInstance
             where TData : class
             where TMessage : class
@@ -83,7 +83,7 @@ namespace Automatonymous
         }
 
         public static EventActivityBinder<TInstance, TData> Publish<TInstance, TData, TMessage>(
-            this EventActivityBinder<TInstance, TData> source, Func<ConsumeEventContext<TInstance, TData>, TMessage> messageFactory,
+            this EventActivityBinder<TInstance, TData> source, PublishMessageFactory<TInstance, TData, TMessage> messageFactory,
             Action<PublishContext<TMessage>> contextCallback)
             where TInstance : class, SagaStateMachineInstance
             where TData : class

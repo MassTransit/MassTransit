@@ -23,7 +23,7 @@ namespace MassTransit.QuartzIntegration.Tests
 
     [TestFixture]
     public class Using_the_quartz_service_with_json :
-        InMemoryTestFixture
+        QuartzInMemoryTestFixture
     {
         [Test]
         public async void Should_properly_send_the_message()
@@ -47,45 +47,13 @@ namespace MassTransit.QuartzIntegration.Tests
         class IA
         {
             string Id { get; set; }
-        }
-
-
-        IScheduler _scheduler;
-
-        protected override void ConfigureBus(IInMemoryBusFactoryConfigurator configurator)
-        {
-            configurator.UseJsonSerializer();
-
-            ISchedulerFactory schedulerFactory = new StdSchedulerFactory();
-            _scheduler = schedulerFactory.GetScheduler();
-
-            configurator.ReceiveEndpoint("quartz", x =>
-            {
-                x.Consumer(() => new ScheduleMessageConsumer(_scheduler));
-            });
-        }
-
-        [TestFixtureSetUp]
-        public void Setup_quartz_service()
-        {
-            _scheduler.JobFactory = new MassTransitJobFactory(Bus);
-            _scheduler.Start();
-        }
-
-        [TestFixtureTearDown]
-        public void Teardown_quartz_service()
-        {
-            if (_scheduler != null)
-                _scheduler.Standby();
-            if (_scheduler != null)
-                _scheduler.Shutdown();
         }
     }
 
 
     [TestFixture]
     public class Using_the_quartz_service_with_xml :
-        InMemoryTestFixture
+        QuartzInMemoryTestFixture
     {
         [Test]
         public async void Should_properly_send_the_message()
@@ -112,35 +80,11 @@ namespace MassTransit.QuartzIntegration.Tests
         }
 
 
-        IScheduler _scheduler;
-
         protected override void ConfigureBus(IInMemoryBusFactoryConfigurator configurator)
         {
             configurator.UseXmlSerializer();
 
-            ISchedulerFactory schedulerFactory = new StdSchedulerFactory();
-            _scheduler = schedulerFactory.GetScheduler();
-
-            configurator.ReceiveEndpoint("quartz", x =>
-            {
-                x.Consumer(() => new ScheduleMessageConsumer(_scheduler));
-            });
-        }
-
-        [TestFixtureSetUp]
-        public void Setup_quartz_service()
-        {
-            _scheduler.JobFactory = new MassTransitJobFactory(Bus);
-            _scheduler.Start();
-        }
-
-        [TestFixtureTearDown]
-        public void Teardown_quartz_service()
-        {
-            if (_scheduler != null)
-                _scheduler.Standby();
-            if (_scheduler != null)
-                _scheduler.Shutdown();
+            base.ConfigureBus(configurator);
         }
     }
 

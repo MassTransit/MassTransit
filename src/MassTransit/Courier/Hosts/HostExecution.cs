@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -18,10 +18,12 @@ namespace MassTransit.Courier.Hosts
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
+    using Context;
     using Contracts;
     using Exceptions;
     using MassTransit.Events;
-    using Pipeline;
+    using MassTransit.Pipeline;
+    using Results;
 
 
     public class HostExecution<TArguments> :
@@ -29,10 +31,11 @@ namespace MassTransit.Courier.Hosts
         where TArguments : class
     {
         readonly Activity _activity;
-        readonly Guid _activityTrackingNumber;
         readonly TArguments _arguments;
         readonly Uri _compensationAddress;
         readonly ConsumeContext<RoutingSlip> _context;
+        readonly Guid _executionId;
+
         readonly HostInfo _host;
         readonly SanitizedRoutingSlip _routingSlip;
         readonly Stopwatch _timer;
@@ -47,7 +50,7 @@ namespace MassTransit.Courier.Hosts
             _timer = Stopwatch.StartNew();
             NewId newId = NewId.Next();
 
-            _activityTrackingNumber = newId.ToGuid();
+            _executionId = newId.ToGuid();
             _timestamp = newId.Timestamp;
 
             _routingSlip = new SanitizedRoutingSlip(context);
@@ -56,6 +59,26 @@ namespace MassTransit.Courier.Hosts
 
             _activity = _routingSlip.Itinerary[0];
             _arguments = _routingSlip.GetActivityArguments<TArguments>();
+        }
+
+        CancellationToken PipeContext.CancellationToken
+        {
+            get { return _context.CancellationToken; }
+        }
+
+        bool PipeContext.HasPayloadType(Type contextType)
+        {
+            return _context.HasPayloadType(contextType);
+        }
+
+        bool PipeContext.TryGetPayload<TPayload>(out TPayload payload)
+        {
+            return _context.TryGetPayload(out payload);
+        }
+
+        TPayload PipeContext.GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory)
+        {
+            return _context.GetOrAddPayload(payloadFactory);
         }
 
         Task IPublishEndpoint.Publish<T>(T message, CancellationToken cancellationToken)
@@ -142,9 +165,9 @@ namespace MassTransit.Courier.Hosts
             get { return _routingSlip.TrackingNumber; }
         }
 
-        Guid Execution<TArguments>.ActivityTrackingNumber
+        Guid Execution<TArguments>.ExecutionId
         {
-            get { return _activityTrackingNumber; }
+            get { return _executionId; }
         }
 
         public string ActivityName
@@ -285,14 +308,14 @@ namespace MassTransit.Courier.Hosts
             return Faulted(exception);
         }
 
-        ExecutionResult Faulted(Exception exception)
-        {
-            return new FaultedExecutionResult<TArguments>(this, _activity, _routingSlip, new FaultExceptionInfo(exception));
-        }
-
         public Task<ISendEndpoint> GetSendEndpoint(Uri address)
         {
             return _context.GetSendEndpoint(address);
+        }
+
+        ExecutionResult Faulted(Exception exception)
+        {
+            return new FaultedExecutionResult<TArguments>(this, _activity, _routingSlip, new FaultExceptionInfo(exception));
         }
     }
 }

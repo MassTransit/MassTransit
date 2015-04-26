@@ -65,6 +65,7 @@
     <Compile Include="ContextSetup.cs" />
     <Compile Include="JobDetail_Specs.cs" />
     <Compile Include="PastEvent_Specs.cs" />
+    <Compile Include="QuartzInMemoryTestFixture.cs" />
     <Compile Include="Service_Specs.cs" />
     <Compile Include="Utils.cs" />
   </ItemGroup>

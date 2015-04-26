@@ -14,6 +14,7 @@ namespace MassTransit.Courier
 {
     using System;
     using ConsumeConfigurators;
+    using Factories;
     using Hosts;
 
 
@@ -22,7 +23,7 @@ namespace MassTransit.Courier
         public static IInstanceConfigurator ExecuteActivityHost<TActivity, TArguments>(
             this IReceiveEndpointConfigurator configurator,
             Uri compensateAddress)
-            where TActivity : ExecuteActivity<TArguments>, new()
+            where TActivity : class, ExecuteActivity<TArguments>, new()
             where TArguments : class
         {
             return ExecuteActivityHost<TActivity, TArguments>(configurator, compensateAddress,
@@ -32,7 +33,7 @@ namespace MassTransit.Courier
         public static IInstanceConfigurator ExecuteActivityHost<TActivity, TArguments>(
             this IReceiveEndpointConfigurator configurator,
             Uri compensateAddress, Func<TActivity> controllerFactory)
-            where TActivity : ExecuteActivity<TArguments>
+            where TActivity : class, ExecuteActivity<TArguments>
             where TArguments : class
         {
             return ExecuteActivityHost<TActivity, TArguments>(configurator, compensateAddress,
@@ -42,7 +43,7 @@ namespace MassTransit.Courier
         public static IInstanceConfigurator ExecuteActivityHost<TActivity, TArguments>(
             this IReceiveEndpointConfigurator configurator,
             Func<TActivity> controllerFactory)
-            where TActivity : ExecuteActivity<TArguments>
+            where TActivity : class, ExecuteActivity<TArguments>
             where TArguments : class
         {
             return ExecuteActivityHost<TActivity, TArguments>(configurator, _ => controllerFactory());
@@ -51,7 +52,7 @@ namespace MassTransit.Courier
         public static IInstanceConfigurator ExecuteActivityHost<TActivity, TArguments>(
             this IReceiveEndpointConfigurator configurator,
             Uri compensateAddress, Func<TArguments, TActivity> controllerFactory)
-            where TActivity : ExecuteActivity<TArguments>
+            where TActivity : class, ExecuteActivity<TArguments>
             where TArguments : class
         {
             var factory = new FactoryMethodExecuteActivityFactory<TActivity, TArguments>(controllerFactory);
@@ -62,7 +63,7 @@ namespace MassTransit.Courier
 
         public static IInstanceConfigurator ExecuteActivityHost<TActivity, TArguments>(
             this IReceiveEndpointConfigurator configurator, Func<TArguments, TActivity> controllerFactory)
-            where TActivity : ExecuteActivity<TArguments>
+            where TActivity : class, ExecuteActivity<TArguments>
             where TArguments : class
         {
             var factory = new FactoryMethodExecuteActivityFactory<TActivity, TArguments>(controllerFactory);

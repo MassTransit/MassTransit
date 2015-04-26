@@ -20,7 +20,8 @@ namespace MassTransit
 
     public interface ConsumeContext :
         MessageContext,
-        IPublishEndpoint
+        IPublishEndpoint,
+        ISendEndpointProvider
     {
         /// <summary>
         /// The original receive context
@@ -87,13 +88,6 @@ namespace MassTransit
         /// Resend the message to the end of the queue with the RetryCount incremented
         /// </summary>
         void RetryLater();
-
-        /// <summary>
-        /// Return an endpoint to which messages can be sent
-        /// </summary>
-        /// <param name="address"></param>
-        /// <returns></returns>
-        Task<ISendEndpoint> GetSendEndpoint(Uri address);
 
         /// <summary>
         /// Notify that the message has been consumed

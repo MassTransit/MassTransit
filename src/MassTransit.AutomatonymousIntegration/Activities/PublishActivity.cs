@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -25,17 +25,17 @@ namespace Automatonymous.Activities
         where TInstance : SagaStateMachineInstance
         where TMessage : class
     {
-        readonly Func<ConsumeEventContext<TInstance>, TMessage> _messageFactory;
+        readonly PublishMessageFactory<TInstance, TMessage> _messageFactory;
         readonly IPipe<PublishContext<TMessage>> _publishPipe;
 
-        public PublishActivity(Func<ConsumeEventContext<TInstance>, TMessage> messageFactory)
+        public PublishActivity(PublishMessageFactory<TInstance, TMessage> messageFactory)
         {
             _messageFactory = messageFactory;
 
             _publishPipe = Pipe.Empty<PublishContext<TMessage>>();
         }
 
-        public PublishActivity(Func<ConsumeEventContext<TInstance>, TMessage> messageFactory,
+        public PublishActivity(PublishMessageFactory<TInstance, TMessage> messageFactory,
             Action<PublishContext<TMessage>> contextCallback)
         {
             _messageFactory = messageFactory;
@@ -62,6 +62,16 @@ namespace Automatonymous.Activities
             await next.Execute(context);
         }
 
+        Task Activity<TInstance>.Faulted<TException>(BehaviorExceptionContext<TInstance, TException> context, Behavior<TInstance> next)
+        {
+            return next.Faulted(context);
+        }
+
+        Task Activity<TInstance>.Faulted<T, TException>(BehaviorExceptionContext<TInstance, T, TException> context, Behavior<TInstance, T> next)
+        {
+            return next.Faulted(context);
+        }
+
         async Task Execute(BehaviorContext<TInstance> context)
         {
             ConsumeContext consumeContext;
@@ -74,16 +84,6 @@ namespace Automatonymous.Activities
 
             await consumeContext.Publish(message, _publishPipe);
         }
-
-        Task Activity<TInstance>.Faulted<TException>(BehaviorExceptionContext<TInstance, TException> context, Behavior<TInstance> next)
-        {
-            return next.Faulted(context);
-        }
-
-        Task Activity<TInstance>.Faulted<T, TException>(BehaviorExceptionContext<TInstance, T, TException> context, Behavior<TInstance, T> next)
-        {
-            return next.Faulted(context);
-        }
     }
 
 
@@ -93,10 +93,10 @@ namespace Automatonymous.Activities
         where TData : class
         where TMessage : class
     {
-        readonly Func<ConsumeEventContext<TInstance, TData>, TMessage> _messageFactory;
+        readonly PublishMessageFactory<TInstance, TData, TMessage> _messageFactory;
         readonly IPipe<PublishContext<TMessage>> _publishPipe;
 
-        public PublishActivity(Func<ConsumeEventContext<TInstance, TData>, TMessage> messageFactory,
+        public PublishActivity(PublishMessageFactory<TInstance, TData, TMessage> messageFactory,
             Action<PublishContext<TMessage>> contextCallback)
         {
             _messageFactory = messageFactory;
@@ -104,7 +104,7 @@ namespace Automatonymous.Activities
             _publishPipe = Pipe.Execute(contextCallback);
         }
 
-        public PublishActivity(Func<ConsumeEventContext<TInstance, TData>, TMessage> messageFactory)
+        public PublishActivity(PublishMessageFactory<TInstance, TData, TMessage> messageFactory)
         {
             _messageFactory = messageFactory;
 

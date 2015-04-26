@@ -213,7 +213,7 @@ namespace MassTransit.Context
             _context.RetryLater();
         }
 
-        Task<ISendEndpoint> ConsumeContext.GetSendEndpoint(Uri address)
+        Task<ISendEndpoint> ISendEndpointProvider.GetSendEndpoint(Uri address)
         {
             return _context.GetSendEndpoint(address);
         }

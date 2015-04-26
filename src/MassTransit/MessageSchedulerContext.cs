@@ -10,16 +10,19 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Courier
+namespace MassTransit
 {
+    using System;
     using System.Threading.Tasks;
-    using MassTransit.Pipeline;
     using Pipeline;
 
 
-    public interface ExecuteActivityFactory<TArguments>
-        where TArguments : class
+    public interface MessageSchedulerContext
     {
-        Task Execute(Execution<TArguments> execution, IPipe<ExecuteActivityContext<TArguments>> next);
+        Task ScheduleSend<T>(T message, TimeSpan deliveryDelay, IPipe<SendContext> sendPipe)
+            where T : class;
+
+        Task ScheduleSend<T>(T message, DateTime deliveryTime, IPipe<SendContext> sendPipe)
+            where T : class;
     }
 }
