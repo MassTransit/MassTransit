@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,29 +13,28 @@
 namespace MassTransit.Courier.InternalMessages
 {
     using System;
+    using System.Collections.Generic;
     using Contracts;
 
 
-    class ActivityExceptionImpl :
-        ActivityException
+    class RoutingSlipTerminatedMessage :
+        RoutingSlipTerminated
     {
-        public ActivityExceptionImpl(string activityName, HostInfo host, Guid executionId, DateTime timestamp, TimeSpan elapsed,
-            ExceptionInfo exceptionInfo)
+        public RoutingSlipTerminatedMessage(Guid trackingNumber, DateTime timestamp, TimeSpan duration, IDictionary<string, object> variables,
+            Activity[] skippedItinerary)
         {
-            ExecutionId = executionId;
-
+            Duration = duration;
             Timestamp = timestamp;
-            Elapsed = elapsed;
-            Name = activityName;
-            Host = host;
-            ExceptionInfo = exceptionInfo;
+
+            TrackingNumber = trackingNumber;
+            Variables = variables;
+            SkippedItinerary = skippedItinerary;
         }
 
-        public Guid ExecutionId { get; private set; }
+        public Guid TrackingNumber { get; private set; }
         public DateTime Timestamp { get; private set; }
-        public TimeSpan Elapsed { get; private set; }
-        public string Name { get; private set; }
-        public HostInfo Host { get; private set; }
-        public ExceptionInfo ExceptionInfo { get; private set; }
+        public TimeSpan Duration { get; private set; }
+        public IDictionary<string, object> Variables { get; private set; }
+        public Activity[] SkippedItinerary { get; private set; }
     }
 }

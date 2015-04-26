@@ -48,6 +48,15 @@ namespace MassTransit.TestFramework
             ActivityTestContexts.Add(typeof(T), context);
         }
 
+        protected void AddActivityContext<T, TArguments>(Func<T> activityFactory)
+            where TArguments : class
+            where T : class, ExecuteActivity<TArguments>
+        {
+            var context = new ActivityTestContext<T, TArguments>(new Uri("loopback://localhost/"), activityFactory);
+
+            ActivityTestContexts.Add(typeof(T), context);
+        }
+
         protected ActivityTestContext GetActivityContext<T>()
         {
             return ActivityTestContexts[typeof(T)];

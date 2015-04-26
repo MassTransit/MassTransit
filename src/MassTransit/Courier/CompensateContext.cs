@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -16,13 +16,11 @@ namespace MassTransit.Courier
     using System.Collections.Generic;
 
 
-    public interface Compensation<out TLog> :
+    public interface CompensateContext :
+        PipeContext,
         IPublishEndpoint,
         ISendEndpointProvider
-        where TLog : class
     {
-        TLog Log { get; }
-
         /// <summary>
         /// The tracking number for this routing slip
         /// </summary>
@@ -90,5 +88,13 @@ namespace MassTransit.Courier
         /// <param name="exception"></param>
         /// <returns></returns>
         CompensationResult Failed(Exception exception);
+    }
+
+
+    public interface CompensateContext<out TLog> :
+        CompensateContext
+        where TLog : class
+    {
+        TLog Log { get; }
     }
 }

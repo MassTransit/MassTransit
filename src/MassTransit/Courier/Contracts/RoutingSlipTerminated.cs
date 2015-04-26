@@ -46,6 +46,6 @@ namespace MassTransit.Courier.Contracts
         /// <summary>
         /// The remainder of the itinerary that will not be executed by the routing slip engine.
         /// </summary>
-        IList<Activity> SkippedItinerary { get; }
+        Activity[] SkippedItinerary { get; }
     }
 }

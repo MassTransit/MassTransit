@@ -14,7 +14,6 @@ namespace MassTransit.Courier.Factories
 {
     using System;
     using System.Threading.Tasks;
-    using Hosts;
     using MassTransit.Pipeline;
 
 
@@ -24,40 +23,24 @@ namespace MassTransit.Courier.Factories
         where TArguments : class
         where TLog : class
     {
-        readonly Func<TLog, TActivity> _compensateFactory;
-        readonly Func<TArguments, TActivity> _executeFactory;
+        readonly CompensateActivityFactory<TLog> _compensateFactory;
+        readonly ExecuteActivityFactory<TArguments> _executeFactory;
 
         public FactoryMethodActivityFactory(Func<TArguments, TActivity> executeFactory,
             Func<TLog, TActivity> compensateFactory)
         {
-            _executeFactory = executeFactory;
-            _compensateFactory = compensateFactory;
+            _executeFactory = new FactoryMethodExecuteActivityFactory<TActivity, TArguments>(executeFactory);
+            _compensateFactory = new FactoryMethodCompensateActivityFactory<TActivity, TLog>(compensateFactory);
         }
 
-        public Task<CompensationResult> CompensateActivity(Compensation<TLog> compensation)
+        public Task Execute(ExecuteContext<TArguments> context, IPipe<ExecuteActivityContext<TArguments>> next)
         {
-            TActivity activity = _compensateFactory(compensation.Log);
-
-            return activity.Compensate(compensation);
+            return _executeFactory.Execute(context, next);
         }
 
-        public async Task Execute(Execution<TArguments> execution, IPipe<ExecuteActivityContext<TArguments>> next)
+        public Task Compensate(CompensateContext<TLog> context, IPipe<CompensateActivityContext<TLog>> next)
         {
-            TActivity activity = null;
-            try
-            {
-                activity = _executeFactory(execution.Arguments);
-
-                var activityContext = new HostExecuteActivityContext<TActivity, TArguments>(activity, execution);
-
-                await next.Send(activityContext);
-            }
-            finally
-            {
-                var disposable = activity as IDisposable;
-                if (disposable != null)
-                    disposable.Dispose();
-            }
+            return _compensateFactory.Compensate(context, next);
         }
     }
 }

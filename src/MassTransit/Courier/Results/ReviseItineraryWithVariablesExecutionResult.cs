@@ -24,9 +24,9 @@ namespace MassTransit.Courier.Results
     {
         readonly IDictionary<string, object> _variables;
 
-        public ReviseItineraryWithVariablesExecutionResult(Execution<TArguments> execution, Activity activity, RoutingSlip routingSlip,
+        public ReviseItineraryWithVariablesExecutionResult(ExecuteContext<TArguments> executeContext, IRoutingSlipEventPublisher publisher, Activity activity, RoutingSlip routingSlip,
             Uri compensationAddress, TLog log, IDictionary<string, object> variables, Action<ItineraryBuilder> itineraryBuilder)
-            : base(execution, activity, routingSlip, compensationAddress, log, itineraryBuilder)
+            : base(executeContext, publisher, activity, routingSlip, compensationAddress, log, itineraryBuilder)
         {
             _variables = variables;
         }

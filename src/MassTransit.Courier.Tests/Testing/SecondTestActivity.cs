@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2013 Chris Patterson
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -17,20 +17,25 @@ namespace MassTransit.Courier.Tests.Testing
 
 
     public class SecondTestActivity :
-        Activity<TestArguments, TestLog>
+        Activity<TestArguments, TestLog>,
+        IDisposable
     {
-        public async Task<ExecutionResult> Execute(Execution<TestArguments> execution)
+        public async Task<ExecutionResult> Execute(ExecuteContext<TestArguments> context)
         {
-            Console.WriteLine("SecondTestActivity: Execute: {0}", execution.Arguments.Value);
+            Console.WriteLine("SecondTestActivity: Execute: {0}", context.Arguments.Value);
 
-            return execution.Completed();
+            return context.Completed();
         }
 
-        public async Task<CompensationResult> Compensate(Compensation<TestLog> compensation)
+        public async Task<CompensationResult> Compensate(CompensateContext<TestLog> context)
         {
-            Console.WriteLine("SecondTestActivity: Compensate: {0}", compensation.Log.OriginalValue);
+            Console.WriteLine("SecondTestActivity: Compensate: {0}", context.Log.OriginalValue);
 
-            return compensation.Compensated();
+            return context.Compensated();
+        }
+
+        public void Dispose()
+        {
         }
     }
 }

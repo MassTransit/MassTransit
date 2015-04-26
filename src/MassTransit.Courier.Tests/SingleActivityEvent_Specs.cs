@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -17,7 +17,6 @@ namespace MassTransit.Courier.Tests
     using Contracts;
     using NUnit.Framework;
     using TestFramework;
-    using TestFramework.Fixtures;
     using Testing;
 
 
@@ -25,6 +24,38 @@ namespace MassTransit.Courier.Tests
     public class Executing_a_routing_slip_with_a_single_activity :
         ActivityTestFixture
     {
+        Task<ConsumeContext<RoutingSlipCompleted>> _completed;
+        Task<ConsumeContext<RoutingSlipActivityCompleted>> _activityCompleted;
+        Guid _trackingNumber;
+
+        [TestFixtureSetUp]
+        public async void Should_publish_the_completed_event()
+        {
+            _completed = SubscribeHandler<RoutingSlipCompleted>();
+            _activityCompleted = SubscribeHandler<RoutingSlipActivityCompleted>();
+
+            _trackingNumber = NewId.NextGuid();
+            var builder = new RoutingSlipBuilder(_trackingNumber);
+            builder.AddSubscription(Bus.Address, RoutingSlipEvents.All);
+
+            ActivityTestContext testActivity = GetActivityContext<TestActivity>();
+            builder.AddActivity(testActivity.Name, testActivity.ExecuteUri, new
+            {
+                Value = "Hello",
+            });
+
+            builder.AddVariable("Variable", "Knife");
+
+            await Bus.Execute(builder.Build());
+
+            await _completed;
+        }
+
+        protected override void SetupActivities()
+        {
+            AddActivityContext<TestActivity, TestArguments, TestLog>(() => new TestActivity());
+        }
+
         [Test]
         public async void Should_receive_the_routing_slip_activity_completed_event()
         {
@@ -72,38 +103,6 @@ namespace MassTransit.Courier.Tests
             ConsumeContext<RoutingSlipCompleted> context = await _completed;
 
             Assert.AreEqual("Knife", context.Message.GetVariable<string>("Variable"));
-        }
-
-        Task<ConsumeContext<RoutingSlipCompleted>> _completed;
-        Task<ConsumeContext<RoutingSlipActivityCompleted>> _activityCompleted;
-        Guid _trackingNumber;
-
-        [TestFixtureSetUp]
-        public async void Should_publish_the_completed_event()
-        {
-            _completed = SubscribeHandler<RoutingSlipCompleted>();
-            _activityCompleted = SubscribeHandler<RoutingSlipActivityCompleted>();
-
-            _trackingNumber = NewId.NextGuid();
-            var builder = new RoutingSlipBuilder(_trackingNumber);
-            builder.AddSubscription(Bus.Address, RoutingSlipEvents.All);
-
-            ActivityTestContext testActivity = GetActivityContext<TestActivity>();
-            builder.AddActivity(testActivity.Name, testActivity.ExecuteUri, new
-            {
-                Value = "Hello",
-            });
-
-            builder.AddVariable("Variable", "Knife");
-
-            await Bus.Execute(builder.Build());
-
-            await _completed;
-        }
-
-        protected override void SetupActivities()
-        {
-            AddActivityContext<TestActivity, TestArguments, TestLog>(() => new TestActivity());
         }
     }
 }

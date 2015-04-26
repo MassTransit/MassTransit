@@ -21,8 +21,8 @@ namespace MassTransit.Courier
         /// <summary>
         /// Compensate the activity and return the remaining compensation items
         /// </summary>
-        /// <param name="compensation">The compensation information for the activity</param>
+        /// <param name="context">The compensation information for the activity</param>
         /// <returns></returns>
-        Task<CompensationResult> Compensate(Compensation<TLog> compensation);
+        Task<CompensationResult> Compensate(CompensateContext<TLog> context);
     }
 }

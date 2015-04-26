@@ -34,37 +34,25 @@ namespace RapidTransit
             _lifetimeScope = lifetimeScope;
         }
 
-        public async Task Execute(Execution<TArguments> execution, IPipe<ExecuteActivityContext<TArguments>> next)
+        public async Task Execute(ExecuteContext<TArguments> context, IPipe<ExecuteActivityContext<TArguments>> next)
         {
-            using (ILifetimeScope scope = _lifetimeScope.BeginLifetimeScope(x => ConfigureScope(x, execution)))
+            using (ILifetimeScope scope = _lifetimeScope.BeginLifetimeScope(x => ConfigureScope(x, context)))
             {
                 if (_log.IsDebugEnabled)
                     _log.DebugFormat("ExecuteActivityFactory: Executing: {0}", TypeMetadataCache<TActivity>.ShortName);
 
-                var activity = scope.Resolve<TActivity>(TypedParameter.From(execution.Arguments));
+                var activity = scope.Resolve<TActivity>(TypedParameter.From(context.Arguments));
 
-                var activityContext = new HostExecuteActivityContext<TActivity, TArguments>(activity, execution);
+                var activityContext = new HostExecuteActivityContext<TActivity, TArguments>(activity, context);
 
                 await next.Send(activityContext);
             }
         }
 
-        public async Task<ExecutionResult> ExecuteActivity(Execution<TArguments> execution)
+
+        static void ConfigureScope(ContainerBuilder containerBuilder, ExecuteContext<TArguments> executeContext)
         {
-            using (ILifetimeScope scope = _lifetimeScope.BeginLifetimeScope(x => ConfigureScope(x, execution)))
-            {
-                if (_log.IsDebugEnabled)
-                    _log.DebugFormat("ExecuteActivityFactory: Executing: {0}", typeof(TActivity).Name);
-
-                var activity = scope.Resolve<TActivity>(TypedParameter.From(execution.Arguments));
-
-                return await activity.Execute(execution);
-            }
-        }
-
-        static void ConfigureScope(ContainerBuilder containerBuilder, Execution<TArguments> execution)
-        {
-            containerBuilder.RegisterInstance(execution.ConsumeContext)
+            containerBuilder.RegisterInstance(executeContext.ConsumeContext)
                 .ExternallyOwned();
         }
     }

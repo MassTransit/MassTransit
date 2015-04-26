@@ -33,7 +33,7 @@ namespace MassTransit.Courier.Contracts
         /// <summary>
         /// The time from when the routing slip was created until the exception occurred
         /// </summary>
-        TimeSpan Duration { get; }
+        TimeSpan Elapsed { get; }
 
         /// <summary>
         /// The name of the activity that caused the exception
@@ -41,7 +41,7 @@ namespace MassTransit.Courier.Contracts
         string Name { get; }
 
         /// <summary>
-        /// The host where the activity was executed
+        /// The host where the exception was thrown
         /// </summary>
         HostInfo Host { get; }
 

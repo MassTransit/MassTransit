@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,17 +12,22 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Courier
 {
-    using System.Threading.Tasks;
+    public interface CompensateActivityContext<TLog> :
+        CompensateContext<TLog>
+        where TLog : class
+    {
+        CompensateActivity<TLog> Activity { get; }
+    }
 
 
-    public interface ExecuteActivity<in TArguments>
-        where TArguments : class
+    public interface CompensateActivityContext<out TActivity, TLog> :
+        CompensateActivityContext<TLog>
+        where TLog : class
+        where TActivity : class, CompensateActivity<TLog>
     {
         /// <summary>
-        /// Execute the activity
+        /// The activity that was created/used for this compensation
         /// </summary>
-        /// <param name="context">The execution context</param>
-        /// <returns>An execution result, created from the execution passed to the activity</returns>
-        Task<ExecutionResult> Execute(ExecuteContext<TArguments> context);
+        new TActivity Activity { get; }
     }
 }

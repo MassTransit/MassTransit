@@ -14,11 +14,13 @@ namespace MassTransit.Courier.Factories
 {
     using System;
     using System.Threading.Tasks;
+    using Hosts;
+    using MassTransit.Pipeline;
 
 
     public class FactoryMethodCompensateActivityFactory<TActivity, TLog> :
         CompensateActivityFactory<TLog>
-        where TActivity : CompensateActivity<TLog>
+        where TActivity : class, CompensateActivity<TLog>
         where TLog : class
     {
         readonly Func<TLog, TActivity> _compensateFactory;
@@ -28,11 +30,23 @@ namespace MassTransit.Courier.Factories
             _compensateFactory = compensateFactory;
         }
 
-        public Task<CompensationResult> CompensateActivity(Compensation<TLog> compensation)
+        public async Task Compensate(CompensateContext<TLog> context, IPipe<CompensateActivityContext<TLog>> next)
         {
-            TActivity activity = _compensateFactory(compensation.Log);
+            TActivity activity = null;
+            try
+            {
+                activity = _compensateFactory(context.Log);
 
-            return activity.Compensate(compensation);
+                var activityContext = new HostCompensateActivityContext<TActivity, TLog>(activity, context);
+
+                await next.Send(activityContext);
+            }
+            finally
+            {
+                var disposable = activity as IDisposable;
+                if (disposable != null)
+                    disposable.Dispose();
+            }
         }
     }
 }

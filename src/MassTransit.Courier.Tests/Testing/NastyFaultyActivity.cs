@@ -19,7 +19,7 @@ namespace MassTransit.Courier.Tests.Testing
     public class NastyFaultyActivity :
         Activity<FaultyArguments, FaultyLog>
     {
-        public Task<ExecutionResult> Execute(Execution<FaultyArguments> execution)
+        public Task<ExecutionResult> Execute(ExecuteContext<FaultyArguments> context)
         {
             Console.WriteLine("NastyFaultyActivity: Execute");
             Console.WriteLine("NastyFaultyActivity: About to blow this up!");
@@ -27,9 +27,9 @@ namespace MassTransit.Courier.Tests.Testing
             throw new InvalidOperationException("Things that make you go boom!");
         }
 
-        public async Task<CompensationResult> Compensate(Compensation<FaultyLog> compensation)
+        public async Task<CompensationResult> Compensate(CompensateContext<FaultyLog> context)
         {
-            return compensation.Compensated();
+            return context.Compensated();
         }
     }
 }

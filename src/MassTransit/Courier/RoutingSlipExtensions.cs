@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -18,8 +18,6 @@ namespace MassTransit.Courier
     using System.Text;
     using System.Threading.Tasks;
     using Contracts;
-    using Events;
-    using InternalMessages;
     using Newtonsoft.Json;
 
 
@@ -35,29 +33,14 @@ namespace MassTransit.Courier
             return routingSlip.Itinerary == null || routingSlip.Itinerary.Count == 0;
         }
 
-        /// <summary>
-        /// Returns true if at least one activity log is present, signifying that activities have
-        /// been executed with compensation logs
-        /// </summary>
-        /// <param name="routingSlip"></param>
-        /// <returns></returns>
-        public static bool IsRunning(this RoutingSlip routingSlip)
-        {
-            return routingSlip.ActivityLogs != null && routingSlip.ActivityLogs.Count > 0;
-        }
-
         public static Uri GetNextExecuteAddress(this RoutingSlip routingSlip)
         {
-            Activity activity = routingSlip.Itinerary.First();
-
-            return activity.Address;
+            return routingSlip.Itinerary.Select(x => x.Address).First();
         }
 
         public static Uri GetNextCompensateAddress(this RoutingSlip routingSlip)
         {
-            CompensateLog activity = routingSlip.CompensateLogs.Last();
-
-            return activity.Address;
+            return routingSlip.CompensateLogs.Select(x => x.Address).Last();
         }
 
         public static async Task Execute(this IBus bus, RoutingSlip routingSlip)
@@ -67,10 +50,9 @@ namespace MassTransit.Courier
                 DateTime timestamp = DateTime.UtcNow;
                 TimeSpan duration = timestamp - routingSlip.CreateTimestamp;
 
-                IRoutingSlipEventPublisher publisher = new RoutingSlipEventPublisher(bus, bus, routingSlip);
+                IRoutingSlipEventPublisher publisher = new RoutingSlipEventPublisher(bus, routingSlip);
 
-                await
-                    publisher.Publish(new RoutingSlipCompletedMessage(routingSlip.TrackingNumber, timestamp, duration, routingSlip.Variables));
+                await publisher.PublishRoutingSlipCompleted(timestamp, duration, routingSlip.Variables);
             }
             else
             {

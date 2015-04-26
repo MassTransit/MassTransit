@@ -22,22 +22,31 @@ namespace MassTransit.Courier
     /// </summary>
     public interface ActivityFactory
     {
-        Task Send<TActivity, TArguments>(Execution<TArguments> context, IPipe<ExecuteActivityContext<TArguments>> next)
+        /// <summary>
+        /// Create and execute the activity
+        /// </summary>
+        /// <typeparam name="TActivity"></typeparam>
+        /// <typeparam name="TArguments"></typeparam>
+        /// <param name="context"></param>
+        /// <param name="next"></param>
+        /// <returns></returns>
+        Task Execute<TActivity, TArguments>(ExecuteContext<TArguments> context, IPipe<ExecuteActivityContext<TArguments>> next)
             where TActivity : ExecuteActivity<TArguments>
             where TArguments : class;
 
         /// <summary>
         /// Create and compensate the activity
         /// </summary>
-        /// <param name="compensation"></param>
+        /// <param name="compensateContext"></param>
+        /// <param name="next"></param>
         /// <returns></returns>
-        Task<CompensationResult> CompensateActivity<TActivity, TLog>(Compensation<TLog> compensation)
+        Task Compensate<TActivity, TLog>(CompensateContext<TLog> compensateContext, IPipe<CompensateActivityContext<TLog>> next)
             where TActivity : CompensateActivity<TLog>
             where TLog : class;
     }
 
 
-    public interface ActivityFactory<TArguments, in TLog> :
+    public interface ActivityFactory<TArguments, TLog> :
         ExecuteActivityFactory<TArguments>,
         CompensateActivityFactory<TLog>
         where TArguments : class

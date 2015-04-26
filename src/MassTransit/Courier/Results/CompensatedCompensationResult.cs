@@ -13,29 +13,30 @@
 namespace MassTransit.Courier.Results
 {
     using System;
-    using System.Collections.Generic;
+    using System.Linq;
     using System.Threading.Tasks;
     using Contracts;
-    using Events;
     using Extensions;
-    using InternalMessages;
 
 
     class CompensatedCompensationResult<TLog> :
         CompensationResult
         where TLog : class
     {
+        readonly CompensateContext<TLog> _compensateContext;
         readonly CompensateLog _compensateLog;
-        readonly Compensation<TLog> _compensation;
         readonly TimeSpan _duration;
+        readonly IRoutingSlipEventPublisher _publisher;
         readonly RoutingSlip _routingSlip;
 
-        public CompensatedCompensationResult(Compensation<TLog> compensation, CompensateLog compensateLog, RoutingSlip routingSlip)
+        public CompensatedCompensationResult(CompensateContext<TLog> compensateContext, IRoutingSlipEventPublisher publisher, CompensateLog compensateLog,
+            RoutingSlip routingSlip)
         {
-            _compensation = compensation;
+            _compensateContext = compensateContext;
+            _publisher = publisher;
             _compensateLog = compensateLog;
             _routingSlip = routingSlip;
-            _duration = _compensation.ElapsedTime;
+            _duration = _compensateContext.ElapsedTime;
         }
 
         public async Task Evaluate()
@@ -46,27 +47,22 @@ namespace MassTransit.Courier.Results
 
             RoutingSlip routingSlip = builder.Build();
 
-            IRoutingSlipEventPublisher publisher = new RoutingSlipEventPublisher(_compensation, _compensation, routingSlip);
-
-            RoutingSlipActivityCompensated activityCompensated = new RoutingSlipActivityCompensatedMessage(_compensation.Host,
-                _compensation.TrackingNumber, _compensation.ActivityName, _compensation.ExecutionId, _compensation.StartTimestamp,
-                _duration, _routingSlip.Variables, _compensateLog.Data);
-            await publisher.Publish(activityCompensated);
+            await _publisher.PublishRoutingSlipActivityCompensated(_compensateContext.ActivityName, _compensateContext.ExecutionId,
+                _compensateContext.StartTimestamp, _duration, _routingSlip.Variables, _compensateLog.Data);
 
             if (HasMoreCompensations(routingSlip))
             {
-                ISendEndpoint endpoint = await _compensation.GetSendEndpoint(routingSlip.GetNextCompensateAddress());
+                ISendEndpoint endpoint = await _compensateContext.GetSendEndpoint(routingSlip.GetNextCompensateAddress());
 
-                await _compensation.ConsumeContext.Forward(endpoint, routingSlip);
+                await _compensateContext.ConsumeContext.Forward(endpoint, routingSlip);
             }
             else
             {
-                DateTime faultedTimestamp = _compensation.StartTimestamp + _duration;
+                DateTime faultedTimestamp = _compensateContext.StartTimestamp + _duration;
                 TimeSpan faultedDuration = faultedTimestamp - _routingSlip.CreateTimestamp;
 
-                RoutingSlipFaulted routingSlipFaulted = new RoutingSlipFaultedMessage(_compensation.TrackingNumber, faultedTimestamp,
-                    faultedDuration, _routingSlip.ActivityExceptions, _routingSlip.Variables);
-                await publisher.Publish(routingSlipFaulted);
+                await _publisher.PublishRoutingSlipFaulted(faultedTimestamp, faultedDuration, _routingSlip.Variables,
+                    _routingSlip.ActivityExceptions.ToArray());
             }
         }
 
@@ -81,7 +77,7 @@ namespace MassTransit.Courier.Results
 
         protected virtual RoutingSlipBuilder CreateRoutingSlipBuilder(RoutingSlip routingSlip)
         {
-            return new RoutingSlipBuilder(routingSlip, (IEnumerable<CompensateLog> x) => x.SkipLast());
+            return new RoutingSlipBuilder(routingSlip, routingSlip.CompensateLogs.SkipLast());
         }
     }
 }

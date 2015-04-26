@@ -23,9 +23,9 @@ namespace MassTransit.Courier.Results
     {
         readonly IDictionary<string, object> _variables;
 
-        public NextActivityWithVariablesExecutionResult(Execution<TArguments> execution, Activity activity, RoutingSlip routingSlip,
+        public NextActivityWithVariablesExecutionResult(ExecuteContext<TArguments> executeContext, IRoutingSlipEventPublisher publisher, Activity activity, RoutingSlip routingSlip,
             IDictionary<string, object> variables)
-            : base(execution, activity, routingSlip)
+            : base(executeContext, publisher, activity, routingSlip)
         {
             _variables = variables;
         }
@@ -47,9 +47,9 @@ namespace MassTransit.Courier.Results
         readonly Uri _compensationAddress;
         readonly IDictionary<string, object> _variables;
 
-        public NextActivityWithVariablesExecutionResult(Execution<TArguments> execution, Activity activity, RoutingSlip routingSlip,
+        public NextActivityWithVariablesExecutionResult(ExecuteContext<TArguments> executeContext, IRoutingSlipEventPublisher publisher, Activity activity, RoutingSlip routingSlip,
             Uri compensationAddress, TLog log, IDictionary<string, object> variables)
-            : base(execution, activity, routingSlip, RoutingSlipBuilder.GetObjectAsDictionary(log))
+            : base(executeContext, publisher, activity, routingSlip, RoutingSlipBuilder.GetObjectAsDictionary(log))
         {
             _compensationAddress = compensationAddress;
             _variables = variables;
@@ -59,7 +59,7 @@ namespace MassTransit.Courier.Results
         {
             base.Build(builder);
 
-            builder.AddCompensateLog(Execution.ExecutionId, _compensationAddress, Data);
+            builder.AddCompensateLog(ExecuteContext.ExecutionId, _compensationAddress, Data);
             builder.SetVariables(_variables);
         }
     }

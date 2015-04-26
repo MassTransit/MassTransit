@@ -30,14 +30,14 @@ namespace MassTransit.Courier.Factories
             _executeFactory = executeFactory;
         }
 
-        public async Task Execute(Execution<TArguments> execution, IPipe<ExecuteActivityContext<TArguments>> next)
+        public async Task Execute(ExecuteContext<TArguments> context, IPipe<ExecuteActivityContext<TArguments>> next)
         {
             TActivity activity = null;
             try
             {
-                activity = _executeFactory(execution.Arguments);
+                activity = _executeFactory(context.Arguments);
 
-                var activityContext = new HostExecuteActivityContext<TActivity, TArguments>(activity, execution);
+                var activityContext = new HostExecuteActivityContext<TActivity, TArguments>(activity, context);
 
                 await next.Send(activityContext);
             }
