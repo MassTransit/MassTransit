@@ -104,6 +104,11 @@ namespace MassTransit.Courier
             get { return _trackingNumber; }
         }
 
+        public IList<Activity> SourceItinerary
+        {
+            get { return _sourceItinerary; }
+        }
+
         /// <summary>
         /// Adds an activity to the routing slip without specifying any arguments
         /// </summary>
@@ -211,12 +216,18 @@ namespace MassTransit.Courier
             SetVariablesFromDictionary(values);
         }
 
-        public int AddSourceItinerary()
+        /// <summary>
+        /// Adds the activities from the source itinerary to the new routing slip and removes them from the
+        /// source itinerary.
+        /// </summary>
+        /// <returns></returns>
+        public int AddActivitiesFromSourceItinerary()
         {
             int count = _sourceItinerary.Count;
 
             foreach (Activity activity in _sourceItinerary)
                 _itinerary.Add(activity);
+
             _sourceItinerary.Clear();
 
             return count;

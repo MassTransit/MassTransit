@@ -38,5 +38,7 @@ namespace MassTransit.Courier
 
         Task PublishRoutingSlipActivityCompensated(string activityName, Guid executionId, DateTime timestamp, TimeSpan duration,
             IDictionary<string, object> variables, IDictionary<string, object> data);
+
+        Task PublishRoutingSlipRevised(Guid executionId, DateTime timestamp, TimeSpan duration, IDictionary<string, object> variables, IList<Activity> itinerary, IList<Activity> previousItinerary);
     }
 }

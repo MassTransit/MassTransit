@@ -15,6 +15,7 @@ namespace MassTransit.Courier.Results
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Threading.Tasks;
     using Contracts;
 
 
@@ -24,16 +25,18 @@ namespace MassTransit.Courier.Results
     {
         readonly Action<ItineraryBuilder> _itineraryBuilder;
 
-        public ReviseItineraryExecutionResult(ExecuteContext<TArguments> executeContext, IRoutingSlipEventPublisher publisher, Activity activity, RoutingSlip routingSlip,
+        public ReviseItineraryExecutionResult(ExecuteContext<TArguments> context, IRoutingSlipEventPublisher publisher, Activity activity,
+            RoutingSlip routingSlip,
             Action<ItineraryBuilder> itineraryBuilder)
-            : base(executeContext, publisher, activity, routingSlip)
+            : base(context, publisher, activity, routingSlip)
         {
             _itineraryBuilder = itineraryBuilder;
         }
 
-        public ReviseItineraryExecutionResult(ExecuteContext<TArguments> executeContext, IRoutingSlipEventPublisher publisher, Activity activity, RoutingSlip routingSlip,
+        public ReviseItineraryExecutionResult(ExecuteContext<TArguments> context, IRoutingSlipEventPublisher publisher, Activity activity,
+            RoutingSlip routingSlip,
             IDictionary<string, object> data, Action<ItineraryBuilder> itineraryBuilder)
-            : base(executeContext, publisher, activity, routingSlip, data)
+            : base(context, publisher, activity, routingSlip, data)
         {
             _itineraryBuilder = itineraryBuilder;
         }
@@ -49,6 +52,14 @@ namespace MassTransit.Courier.Results
         {
             return new RoutingSlipBuilder(routingSlip, Enumerable.Empty<Activity>(), routingSlip.Itinerary.Skip(1));
         }
+
+        protected override async Task PublishActivityEvents(RoutingSlip routingSlip, RoutingSlipBuilder builder)
+        {
+            await base.PublishActivityEvents(routingSlip, builder);
+
+            await Publisher.PublishRoutingSlipRevised(Context.ExecutionId, Context.Timestamp, Context.Elapsed, routingSlip.Variables,
+                routingSlip.Itinerary, builder.SourceItinerary);
+        }
     }
 
 
@@ -58,23 +69,20 @@ namespace MassTransit.Courier.Results
     {
         readonly Uri _compensationAddress;
 
-        public ReviseItineraryExecutionResult(ExecuteContext<TArguments> executeContext, IRoutingSlipEventPublisher publisher, Activity activity, RoutingSlip routingSlip,
+        public ReviseItineraryExecutionResult(ExecuteContext<TArguments> context, IRoutingSlipEventPublisher publisher, Activity activity,
+            RoutingSlip routingSlip,
             Uri compensationAddress, TLog log, Action<ItineraryBuilder> itineraryBuilder)
-            : base(executeContext, publisher, activity, routingSlip, RoutingSlipBuilder.GetObjectAsDictionary(log), itineraryBuilder)
+            : base(context, publisher, activity, routingSlip, RoutingSlipBuilder.GetObjectAsDictionary(log), itineraryBuilder)
         {
             _compensationAddress = compensationAddress;
         }
 
         protected override void Build(RoutingSlipBuilder builder)
         {
-            builder.AddCompensateLog(ExecuteContext.ExecutionId, _compensationAddress, Data);
+            builder.AddCompensateLog(Context.ExecutionId, _compensationAddress, Data);
 
             base.Build(builder);
         }
 
-        protected override RoutingSlipBuilder CreateRoutingSlipBuilder(RoutingSlip routingSlip)
-        {
-            return new RoutingSlipBuilder(routingSlip, Enumerable.Empty<Activity>(), routingSlip.Itinerary.Skip(1));
-        }
     }
 }

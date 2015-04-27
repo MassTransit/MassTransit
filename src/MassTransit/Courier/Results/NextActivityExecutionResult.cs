@@ -20,8 +20,8 @@ namespace MassTransit.Courier.Results
         CompletedExecutionResult<TArguments>
         where TArguments : class
     {
-        public NextActivityExecutionResult(ExecuteContext<TArguments> executeContext, IRoutingSlipEventPublisher publisher, Activity activity, RoutingSlip routingSlip)
-            : base(executeContext, publisher, activity, routingSlip)
+        public NextActivityExecutionResult(ExecuteContext<TArguments> context, IRoutingSlipEventPublisher publisher, Activity activity, RoutingSlip routingSlip)
+            : base(context, publisher, activity, routingSlip)
         {
         }
     }
@@ -34,9 +34,9 @@ namespace MassTransit.Courier.Results
     {
         readonly Uri _compensationAddress;
 
-        public NextActivityExecutionResult(ExecuteContext<TArguments> executeContext, IRoutingSlipEventPublisher publisher, Activity activity, RoutingSlip routingSlip,
+        public NextActivityExecutionResult(ExecuteContext<TArguments> context, IRoutingSlipEventPublisher publisher, Activity activity, RoutingSlip routingSlip,
             Uri compensationAddress, TLog log)
-            : base(executeContext, publisher, activity, routingSlip, RoutingSlipBuilder.GetObjectAsDictionary(log))
+            : base(context, publisher, activity, routingSlip, RoutingSlipBuilder.GetObjectAsDictionary(log))
         {
             _compensationAddress = compensationAddress;
         }
@@ -45,7 +45,7 @@ namespace MassTransit.Courier.Results
         {
             base.Build(builder);
 
-            builder.AddCompensateLog(ExecuteContext.ExecutionId, _compensationAddress, Data);
+            builder.AddCompensateLog(Context.ExecutionId, _compensationAddress, Data);
         }
     }
 }

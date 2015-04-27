@@ -23,27 +23,39 @@ namespace MassTransit.Courier.Results
         ExecutionResult
         where TArguments : class
     {
-        readonly IRoutingSlipEventPublisher _publisher;
         readonly Activity _activity;
         readonly IDictionary<string, object> _data;
         readonly TimeSpan _duration;
-        readonly ExecuteContext<TArguments> _executeContext;
+        readonly ExecuteContext<TArguments> _context;
+        readonly IRoutingSlipEventPublisher _publisher;
         readonly RoutingSlip _routingSlip;
 
-        protected CompletedExecutionResult(ExecuteContext<TArguments> executeContext, IRoutingSlipEventPublisher publisher, Activity activity, RoutingSlip routingSlip)
-            : this(executeContext, publisher, activity, routingSlip, RoutingSlipBuilder.NoArguments)
+        protected CompletedExecutionResult(ExecuteContext<TArguments> context, IRoutingSlipEventPublisher publisher, Activity activity,
+            RoutingSlip routingSlip)
+            : this(context, publisher, activity, routingSlip, RoutingSlipBuilder.NoArguments)
         {
         }
 
-        protected CompletedExecutionResult(ExecuteContext<TArguments> executeContext, IRoutingSlipEventPublisher publisher, Activity activity, RoutingSlip routingSlip,
+        protected CompletedExecutionResult(ExecuteContext<TArguments> context, IRoutingSlipEventPublisher publisher, Activity activity,
+            RoutingSlip routingSlip,
             IDictionary<string, object> data)
         {
-            _executeContext = executeContext;
+            _context = context;
             _publisher = publisher;
             _activity = activity;
             _routingSlip = routingSlip;
             _data = data;
-            _duration = _executeContext.Elapsed;
+            _duration = _context.Elapsed;
+        }
+
+        protected RoutingSlip RoutingSlip
+        {
+            get { return _routingSlip; }
+        }
+
+        protected IRoutingSlipEventPublisher Publisher
+        {
+            get { return _publisher; }
         }
 
         protected IDictionary<string, object> Data
@@ -51,9 +63,9 @@ namespace MassTransit.Courier.Results
             get { return _data; }
         }
 
-        protected ExecuteContext<TArguments> ExecuteContext
+        protected ExecuteContext<TArguments> Context
         {
-            get { return _executeContext; }
+            get { return _context; }
         }
 
         protected Activity Activity
@@ -74,21 +86,26 @@ namespace MassTransit.Courier.Results
 
             RoutingSlip routingSlip = builder.Build();
 
-            await _publisher.PublishRoutingSlipActivityCompleted(_executeContext.ActivityName, _executeContext.ExecutionId, _executeContext.Timestamp, _duration,
-                routingSlip.Variables, _activity.Arguments, _data);
+            await PublishActivityEvents(routingSlip, builder);
 
             if (HasNextActivity(routingSlip))
             {
-                ISendEndpoint endpoint = await _executeContext.GetSendEndpoint(routingSlip.GetNextExecuteAddress());
-                await _executeContext.ConsumeContext.Forward(endpoint, routingSlip);
+                ISendEndpoint endpoint = await _context.GetSendEndpoint(routingSlip.GetNextExecuteAddress());
+                await _context.ConsumeContext.Forward(endpoint, routingSlip);
             }
             else
             {
-                DateTime completedTimestamp = _executeContext.Timestamp + _duration;
+                DateTime completedTimestamp = _context.Timestamp + _duration;
                 TimeSpan completedDuration = completedTimestamp - _routingSlip.CreateTimestamp;
 
                 await _publisher.PublishRoutingSlipCompleted(completedTimestamp, completedDuration, routingSlip.Variables);
             }
+        }
+
+        protected virtual async Task PublishActivityEvents(RoutingSlip routingSlip, RoutingSlipBuilder builder)
+        {
+            await Publisher.PublishRoutingSlipActivityCompleted(Context.ActivityName, Context.ExecutionId, Context.Timestamp, _duration,
+                routingSlip.Variables, _activity.Arguments, _data);
         }
 
         static bool HasNextActivity(RoutingSlip routingSlip)
@@ -98,7 +115,7 @@ namespace MassTransit.Courier.Results
 
         protected virtual void Build(RoutingSlipBuilder builder)
         {
-            builder.AddActivityLog(ExecuteContext.Host, Activity.Name, ExecuteContext.ExecutionId, ExecuteContext.Timestamp, Duration);
+            builder.AddActivityLog(Context.Host, Activity.Name, Context.ExecutionId, Context.Timestamp, Duration);
         }
 
         protected virtual RoutingSlipBuilder CreateRoutingSlipBuilder(RoutingSlip routingSlip)

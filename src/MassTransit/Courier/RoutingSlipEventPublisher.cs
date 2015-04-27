@@ -139,6 +139,22 @@ namespace MassTransit.Courier
                     : GetEmptyObject()));
         }
 
+        public Task PublishRoutingSlipRevised(Guid executionId, DateTime timestamp, TimeSpan duration, IDictionary<string, object> variables, IList<Activity> itinerary, IList<Activity> previousItinerary)
+        {
+            return PublishEvent<RoutingSlipRevised>(RoutingSlipEvents.ActivityCompensated, contents => new RoutingSlipRevisedMessage(
+               _routingSlip.TrackingNumber,
+               executionId,
+               timestamp,
+               duration, 
+                   (contents == RoutingSlipEventContents.All || contents.HasFlag(RoutingSlipEventContents.Variables))
+                       ? variables
+                       : GetEmptyObject(), (contents == RoutingSlipEventContents.All || contents.HasFlag(RoutingSlipEventContents.Itinerary))
+                           ? itinerary
+                           : new List<Activity>(), (contents == RoutingSlipEventContents.All || contents.HasFlag(RoutingSlipEventContents.Itinerary))
+                               ? previousItinerary
+                               : new List<Activity>()));
+        }
+
         public Task PublishRoutingSlipActivityCompensationFailed(string activityName, Guid executionId,
             DateTime timestamp, TimeSpan duration, DateTime failureTimestamp, TimeSpan routingSlipDuration,
             ExceptionInfo exceptionInfo, IDictionary<string, object> variables, IDictionary<string, object> data)

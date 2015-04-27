@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -25,6 +25,21 @@ namespace MassTransit.Courier.Tests
     public class When_an_itinerary_is_revised :
         ActivityTestFixture
     {
+        protected override void SetupActivities()
+        {
+            AddActivityContext<TestActivity, TestArguments, TestLog>(() => new TestActivity());
+            AddActivityContext<ReviseToEmptyItineraryActivity, TestArguments, TestLog>(
+                () => new ReviseToEmptyItineraryActivity());
+            AddActivityContext<ReviseWithNoChangeItineraryActivity, TestArguments, TestLog>(
+                () => new ReviseWithNoChangeItineraryActivity());
+
+            ActivityTestContext testActivity = GetActivityContext<TestActivity>();
+            AddActivityContext<ReviseItineraryActivity, TestArguments, TestLog>(
+                () =>
+                    new ReviseItineraryActivity(
+                        x => x.AddActivity(testActivity.Name, testActivity.ExecuteUri, new {Value = "Added"})));
+        }
+
         [Test]
         public async void Should_complete_the_additional_item()
         {
@@ -42,6 +57,9 @@ namespace MassTransit.Courier.Tests
             Task<ConsumeContext<RoutingSlipActivityCompleted>> reviseActivityCompleted = SubscribeHandler<RoutingSlipActivityCompleted>(
                 context => context.Message.TrackingNumber == trackingNumber && context.Message.ActivityName.Equals(reviseActivity.Name));
 
+            Task<ConsumeContext<RoutingSlipRevised>> revised = SubscribeHandler<RoutingSlipRevised>(
+                context => context.Message.TrackingNumber == trackingNumber);
+
             var builder = new RoutingSlipBuilder(trackingNumber);
             builder.AddActivity(reviseActivity.Name, reviseActivity.ExecuteUri, new
             {
@@ -53,6 +71,9 @@ namespace MassTransit.Courier.Tests
             await completed;
             await testActivityCompleted;
             await reviseActivityCompleted;
+            
+            var revisions = await revised;
+            Assert.AreEqual(0, revisions.Message.DiscardedItinerary.Count);
         }
 
         [Test]
@@ -104,6 +125,9 @@ namespace MassTransit.Courier.Tests
             Task<ConsumeContext<RoutingSlipActivityCompleted>> reviseActivityCompleted = SubscribeHandler<RoutingSlipActivityCompleted>(
                 context => context.Message.TrackingNumber == trackingNumber && context.Message.ActivityName.Equals(reviseActivity.Name));
 
+            Task<ConsumeContext<RoutingSlipRevised>> revised = SubscribeHandler<RoutingSlipRevised>(
+                context => context.Message.TrackingNumber == trackingNumber);
+
             var builder = new RoutingSlipBuilder(trackingNumber);
             builder.AddActivity(reviseActivity.Name, reviseActivity.ExecuteUri, new
             {
@@ -119,22 +143,11 @@ namespace MassTransit.Courier.Tests
             await completed;
             await reviseActivityCompleted;
 
+            var revisions = await revised;
+            Assert.AreEqual(1, revisions.Message.DiscardedItinerary.Count);
+            Assert.AreEqual(0, revisions.Message.Itinerary.Count);
+
             testActivityCompleted.Wait(TimeSpan.FromSeconds(3)).ShouldBe(false);
-        }
-
-        protected override void SetupActivities()
-        {
-            AddActivityContext<TestActivity, TestArguments, TestLog>(() => new TestActivity());
-            AddActivityContext<ReviseToEmptyItineraryActivity, TestArguments, TestLog>(
-                () => new ReviseToEmptyItineraryActivity());
-            AddActivityContext<ReviseWithNoChangeItineraryActivity, TestArguments, TestLog>(
-                () => new ReviseWithNoChangeItineraryActivity());
-
-            ActivityTestContext testActivity = GetActivityContext<TestActivity>();
-            AddActivityContext<ReviseItineraryActivity, TestArguments, TestLog>(
-                () =>
-                    new ReviseItineraryActivity(
-                        x => x.AddActivity(testActivity.Name, testActivity.ExecuteUri, new {Value = "Added"})));
         }
     }
 }

@@ -214,6 +214,7 @@
     <Compile Include="Courier\HostSubscriptionExtensions.cs" />
     <Compile Include="Courier\Hosts\CompensateActivityHost.cs" />
     <Compile Include="Courier\Hosts\HostCompensateActivityContext.cs" />
+    <Compile Include="Courier\InternalMessages\RoutingSlipRevisedMessage.cs" />
     <Compile Include="Courier\InternalMessages\RoutingSlipTerminatedMessage.cs" />
     <Compile Include="Courier\IRoutingSlipEventPublisher.cs" />
     <Compile Include="Courier\Pipeline\CompensateActivityFilter.cs" />
