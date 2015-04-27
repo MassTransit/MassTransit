@@ -14,6 +14,7 @@ namespace MassTransit.Courier.InternalMessages
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using Contracts;
 
 
@@ -21,15 +22,15 @@ namespace MassTransit.Courier.InternalMessages
         RoutingSlipRevised
     {
         public RoutingSlipRevisedMessage(Guid trackingNumber, Guid executionId, DateTime timestamp, TimeSpan duration, IDictionary<string, object> variables,
-            IList<Activity> itinerary, IList<Activity> discardedItinerary)
+            IEnumerable<Activity> itinerary, IEnumerable<Activity> discardedItinerary)
         {
             TrackingNumber = trackingNumber;
             Timestamp = timestamp;
             Duration = duration;
             ExecutionId = executionId;
             Variables = variables;
-            Itinerary = itinerary;
-            DiscardedItinerary = discardedItinerary;
+            Itinerary = itinerary.ToArray();
+            DiscardedItinerary = discardedItinerary.ToArray();
         }
 
         public Guid TrackingNumber { get; set; }
@@ -42,8 +43,8 @@ namespace MassTransit.Courier.InternalMessages
 
         public IDictionary<string, object> Variables { get; set; }
 
-        public IList<Activity> Itinerary { get; set; }
+        public Activity[] Itinerary { get; set; }
 
-        public IList<Activity> DiscardedItinerary { get; set; }
+        public Activity[] DiscardedItinerary { get; set; }
     }
 }

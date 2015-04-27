@@ -298,6 +298,29 @@ namespace MassTransit.Courier.Hosts
                 log, variables.ToDictionary(x => x.Key, x => x.Value), buildItinerary);
         }
 
+        public ExecutionResult Terminate()
+        {
+            return new TerminateExecutionResult<TArguments>(this, _publisher, _activity, _routingSlip);
+        }
+
+        public ExecutionResult Terminate(object variables)
+        {
+            if (variables == null)
+                throw new ArgumentNullException("variables");
+
+            return new TerminateWithVariablesExecutionResult<TArguments>(this, _publisher, _activity, _routingSlip,
+                RoutingSlipBuilder.GetObjectAsDictionary(variables));
+        }
+
+        public ExecutionResult Terminate(IEnumerable<KeyValuePair<string, object>> variables)
+        {
+            if (variables == null)
+                throw new ArgumentNullException("variables");
+
+            return new TerminateWithVariablesExecutionResult<TArguments>(this, _publisher, _activity, _routingSlip,
+                variables.ToDictionary(x => x.Key, x => x.Value));
+        }
+
         ExecutionResult ExecuteContext.Faulted()
         {
             return Faulted(new ActivityExecutionFaultedException());

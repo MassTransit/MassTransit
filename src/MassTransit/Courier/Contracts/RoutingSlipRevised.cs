@@ -51,11 +51,11 @@ namespace MassTransit.Courier.Contracts
         /// <summary>
         /// The new itinerary for the routing slip
         /// </summary>
-        IList<Activity> Itinerary { get; }
+        Activity[] Itinerary { get; }
 
         /// <summary>
         /// The previous itinerary of the routing slip that is no longer included
         /// </summary>
-        IList<Activity> DiscardedItinerary { get; }
+        Activity[] DiscardedItinerary { get; }
     }
 }

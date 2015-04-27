@@ -122,6 +122,21 @@ namespace MassTransit.Courier.Hosts
             return _context.ReviseItinerary(log, variables, buildItinerary);
         }
 
+        ExecutionResult ExecuteContext.Terminate()
+        {
+            return _context.Terminate();
+        }
+
+        ExecutionResult ExecuteContext.Terminate(object variables)
+        {
+            return _context.Terminate(variables);
+        }
+
+        ExecutionResult ExecuteContext.Terminate(IEnumerable<KeyValuePair<string, object>> variables)
+        {
+            return _context.Terminate(variables);
+        }
+
         ExecutionResult ExecuteContext.Faulted()
         {
             return _context.Faulted();

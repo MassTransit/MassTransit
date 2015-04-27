@@ -105,6 +105,26 @@ namespace MassTransit.Courier
             where TLog : class;
 
         /// <summary>
+        /// Terminate the routing slip (with extreme prejudice), completing it but discarding any remaining itinerary
+        /// activities.
+        /// </summary>
+        ExecutionResult Terminate();
+
+        /// <summary>
+        /// Terminate the routing slip (with extreme prejudice), completing it but discarding any remaining itinerary
+        /// activities.
+        /// <param name="variables">An dictionary of values to add/set as variables on the routing slip</param>
+        /// </summary>
+        ExecutionResult Terminate(object variables);
+
+        /// <summary>
+        /// Terminate the routing slip (with extreme prejudice), completing it but discarding any remaining itinerary
+        /// activities.
+        /// <param name="variables">An dictionary of values to add/set as variables on the routing slip</param>
+        /// </summary>
+        ExecutionResult Terminate(IEnumerable<KeyValuePair<string, object>> variables);
+
+        /// <summary>
         /// The activity Faulted for an unknown reason, but compensation should be triggered
         /// </summary>
         /// <returns></returns>

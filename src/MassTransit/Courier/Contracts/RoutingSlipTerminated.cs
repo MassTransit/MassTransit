@@ -37,6 +37,11 @@ namespace MassTransit.Courier.Contracts
         TimeSpan Duration { get; }
 
         /// <summary>
+        /// The execution that terminated the routing slip
+        /// </summary>
+        Guid ExecutionId { get; }
+
+        /// <summary>
         /// The variables that were present once the routing slip completed, can be used
         /// to capture the output of the slip - real events should likely be used for real
         /// completion items but this is useful for some cases
@@ -46,6 +51,6 @@ namespace MassTransit.Courier.Contracts
         /// <summary>
         /// The remainder of the itinerary that will not be executed by the routing slip engine.
         /// </summary>
-        Activity[] SkippedItinerary { get; }
+        Activity[] DiscardedItinerary { get; }
     }
 }

@@ -139,20 +139,39 @@ namespace MassTransit.Courier
                     : GetEmptyObject()));
         }
 
-        public Task PublishRoutingSlipRevised(Guid executionId, DateTime timestamp, TimeSpan duration, IDictionary<string, object> variables, IList<Activity> itinerary, IList<Activity> previousItinerary)
+        public Task PublishRoutingSlipRevised(Guid executionId, DateTime timestamp, TimeSpan duration, IDictionary<string, object> variables,
+            IList<Activity> itinerary, IList<Activity> previousItinerary)
         {
-            return PublishEvent<RoutingSlipRevised>(RoutingSlipEvents.ActivityCompensated, contents => new RoutingSlipRevisedMessage(
-               _routingSlip.TrackingNumber,
-               executionId,
-               timestamp,
-               duration, 
-                   (contents == RoutingSlipEventContents.All || contents.HasFlag(RoutingSlipEventContents.Variables))
-                       ? variables
-                       : GetEmptyObject(), (contents == RoutingSlipEventContents.All || contents.HasFlag(RoutingSlipEventContents.Itinerary))
-                           ? itinerary
-                           : new List<Activity>(), (contents == RoutingSlipEventContents.All || contents.HasFlag(RoutingSlipEventContents.Itinerary))
-                               ? previousItinerary
-                               : new List<Activity>()));
+            return PublishEvent<RoutingSlipRevised>(RoutingSlipEvents.Revised, contents => new RoutingSlipRevisedMessage(
+                _routingSlip.TrackingNumber,
+                executionId,
+                timestamp,
+                duration,
+                (contents == RoutingSlipEventContents.All || contents.HasFlag(RoutingSlipEventContents.Variables))
+                    ? variables
+                    : GetEmptyObject(),
+                (contents == RoutingSlipEventContents.All || contents.HasFlag(RoutingSlipEventContents.Itinerary))
+                    ? itinerary
+                    : Enumerable.Empty<Activity>(),
+                (contents == RoutingSlipEventContents.All || contents.HasFlag(RoutingSlipEventContents.Itinerary))
+                    ? previousItinerary
+                    : Enumerable.Empty<Activity>()));
+        }
+
+        public Task PublishRoutingSlipTerminated(Guid executionId, DateTime timestamp, TimeSpan duration, IDictionary<string, object> variables,
+            IList<Activity> previousItinerary)
+        {
+            return PublishEvent<RoutingSlipTerminated>(RoutingSlipEvents.Terminated, contents => new RoutingSlipTerminatedMessage(
+                _routingSlip.TrackingNumber,
+                executionId,
+                timestamp,
+                duration,
+                (contents == RoutingSlipEventContents.All || contents.HasFlag(RoutingSlipEventContents.Variables))
+                    ? variables
+                    : GetEmptyObject(),
+                (contents == RoutingSlipEventContents.All || contents.HasFlag(RoutingSlipEventContents.Itinerary))
+                    ? previousItinerary
+                    : Enumerable.Empty<Activity>()));
         }
 
         public Task PublishRoutingSlipActivityCompensationFailed(string activityName, Guid executionId,
@@ -176,8 +195,6 @@ namespace MassTransit.Courier
                     ? data
                     : GetEmptyObject()));
         }
-
-       
 
         static IDictionary<string, object> GetEmptyObject()
         {

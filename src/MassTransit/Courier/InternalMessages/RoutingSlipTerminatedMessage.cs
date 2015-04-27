@@ -14,27 +14,32 @@ namespace MassTransit.Courier.InternalMessages
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using Contracts;
 
 
     class RoutingSlipTerminatedMessage :
         RoutingSlipTerminated
     {
-        public RoutingSlipTerminatedMessage(Guid trackingNumber, DateTime timestamp, TimeSpan duration, IDictionary<string, object> variables,
-            Activity[] skippedItinerary)
+        public RoutingSlipTerminatedMessage(Guid trackingNumber, Guid executionId, DateTime timestamp, TimeSpan duration,
+            IDictionary<string, object> variables, IEnumerable<Activity> discardedItinerary)
         {
             Duration = duration;
             Timestamp = timestamp;
 
             TrackingNumber = trackingNumber;
             Variables = variables;
-            SkippedItinerary = skippedItinerary;
+            DiscardedItinerary = discardedItinerary.ToArray();
+            ExecutionId = executionId;
         }
 
         public Guid TrackingNumber { get; private set; }
         public DateTime Timestamp { get; private set; }
         public TimeSpan Duration { get; private set; }
+
+        public Guid ExecutionId { get; private set; }
+
         public IDictionary<string, object> Variables { get; private set; }
-        public Activity[] SkippedItinerary { get; private set; }
+        public Activity[] DiscardedItinerary { get; private set; }
     }
 }

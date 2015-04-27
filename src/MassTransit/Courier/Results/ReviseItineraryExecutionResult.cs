@@ -83,6 +83,5 @@ namespace MassTransit.Courier.Results
 
             base.Build(builder);
         }
-
     }
 }

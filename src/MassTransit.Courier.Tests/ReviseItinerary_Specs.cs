@@ -73,7 +73,7 @@ namespace MassTransit.Courier.Tests
             await reviseActivityCompleted;
             
             var revisions = await revised;
-            Assert.AreEqual(0, revisions.Message.DiscardedItinerary.Count);
+            Assert.AreEqual(0, revisions.Message.DiscardedItinerary.Length);
         }
 
         [Test]
@@ -144,8 +144,8 @@ namespace MassTransit.Courier.Tests
             await reviseActivityCompleted;
 
             var revisions = await revised;
-            Assert.AreEqual(1, revisions.Message.DiscardedItinerary.Count);
-            Assert.AreEqual(0, revisions.Message.Itinerary.Count);
+            Assert.AreEqual(1, revisions.Message.DiscardedItinerary.Length);
+            Assert.AreEqual(0, revisions.Message.Itinerary.Length);
 
             testActivityCompleted.Wait(TimeSpan.FromSeconds(3)).ShouldBe(false);
         }

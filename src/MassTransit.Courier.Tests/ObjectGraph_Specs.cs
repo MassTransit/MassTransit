@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -20,7 +20,6 @@ namespace MassTransit.Courier.Tests
     using NUnit.Framework;
     using Shouldly;
     using TestFramework;
-    using TestFramework.Fixtures;
     using Testing;
 
 
@@ -28,6 +27,18 @@ namespace MassTransit.Courier.Tests
     public class Storing_an_object_graph_as_a_variable_or_argument :
         ActivityTestFixture
     {
+        int _intValue;
+        string _stringValue;
+        decimal _decimalValue;
+
+        protected override void SetupActivities()
+        {
+            AddActivityContext<ObjectGraphTestActivity, ObjectGraphActivityArguments, TestLog>(
+                () => new ObjectGraphTestActivity(_intValue, _stringValue, _decimalValue, new[] {"Albert", "Chris"}));
+            AddActivityContext<TestActivity, TestArguments, TestLog>(
+                () => new TestActivity());
+        }
+
         [Test]
         public async void Should_work_for_activity_arguments()
         {
@@ -64,18 +75,6 @@ namespace MassTransit.Courier.Tests
             }
 
             completed.Status.ShouldBe(TaskStatus.RanToCompletion);
-        }
-
-        int _intValue;
-        string _stringValue;
-        decimal _decimalValue;
-
-        protected override void SetupActivities()
-        {
-            AddActivityContext<ObjectGraphTestActivity, ObjectGraphActivityArguments, TestLog>(
-                () => new ObjectGraphTestActivity(_intValue, _stringValue, _decimalValue, new[] {"Albert", "Chris"}));
-            AddActivityContext<TestActivity, TestArguments, TestLog>(
-                () => new TestActivity());
         }
     }
 }
