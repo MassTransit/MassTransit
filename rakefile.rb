@@ -392,7 +392,7 @@ task :all_nuspecs => [:versioning, :mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :m
     nuspec.dependency "MassTransit", NUGET_VERSION
     nuspec.dependency "Newtonsoft.Json", "6.0.8"
     nuspec.dependency "NewId", "2.1.2"
-    nuspec.dependency "WindowsAzure.ServiceBus", "2.6.4"
+    nuspec.dependency "WindowsAzure.ServiceBus", "2.6.5"
     nuspec.dependency "Microsoft.WindowsAzure.ConfigurationManager", "3.1.0"
     nuspec.output_file = 'nuspecs/MassTransit.AzureServiceBus.nuspec'
 
@@ -451,7 +451,7 @@ task :all_nuspecs => [:versioning, :mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :m
     nuspec.license_url = "http://www.apache.org/licenses/LICENSE-2.0"
     nuspec.require_license_acceptance
     nuspec.dependency "MassTransit", NUGET_VERSION
-    nuspec.dependency "NLog", "3.2.0"
+    nuspec.dependency "NLog", "3.2.1"
     nuspec.output_file = 'nuspecs/MassTransit.NLog.nuspec'
 
     add_files props[:stage], File.join('Logging', 'MassTransit.NLogIntegration.{dll,pdb,xml}'), nuspec
@@ -492,7 +492,7 @@ task :all_nuspecs => [:versioning, :mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :m
     nuspec.dependency "MassTransit", NUGET_VERSION
     nuspec.dependency "Newtonsoft.Json", "6.0.8"
     nuspec.dependency "NewId", "2.1.2"
-    nuspec.dependency "RabbitMQ.Client", "3.5.0"
+    nuspec.dependency "RabbitMQ.Client", "3.5.1"
     nuspec.output_file = 'nuspecs/MassTransit.RabbitMQ.nuspec'
 
   add_files props[:stage], "#{File.join('Transports', 'RabbitMQ', 'MassTransit.RabbitMqTransport.{dll,pdb,xml}')}", nuspec
@@ -569,7 +569,7 @@ task :all_nuspecs => [:versioning, :mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :m
     nuspec.license_url = "http://www.apache.org/licenses/LICENSE-2.0"
     nuspec.require_license_acceptance
     nuspec.dependency "MassTransit", NUGET_VERSION
-    nuspec.dependency "StructureMap", "3.1.4.143"
+    nuspec.dependency "StructureMap", "3.1.5.154"
     nuspec.output_file = 'nuspecs/MassTransit.StructureMap.nuspec'
 
   add_files props[:stage], "#{File.join('Containers', 'MassTransit.StructureMapIntegration.{dll,pdb,xml}')}", nuspec
@@ -649,9 +649,10 @@ nuspec :mtquartz_nuspec do |nuspec|
   nuspec.require_license_acceptance
   nuspec.dependency "MassTransit", NUGET_VERSION
   nuspec.dependency "NewId", "2.1.2"
-  nuspec.dependency "Common.Logging", "3.0.0"
+  nuspec.dependency "Common.Logging.Core", "3.1.0"
+  nuspec.dependency "Common.Logging", "3.1.0"
   nuspec.dependency "Newtonsoft.Json", "6.0.8"
-  nuspec.dependency "Quartz", "2.3.1"
+  nuspec.dependency "Quartz", "2.3.2"
   nuspec.output_file = 'nuspecs/MassTransit.QuartzIntegration.nuspec'
   add_files props[:stage], "#{File.join('QuartzIntegration', 'MassTransit.QuartzIntegration.{dll,pdb,xml}')}", nuspec
   nuspec.file(File.join(props[:src], "MassTransit.QuartzIntegration\\**\\*.cs").gsub("/","\\"), "src")
