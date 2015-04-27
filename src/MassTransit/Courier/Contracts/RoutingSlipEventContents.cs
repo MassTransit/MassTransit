@@ -47,8 +47,13 @@ namespace MassTransit.Courier.Contracts
         Data = 0x0004,
 
         /// <summary>
+        /// The itinerary that was added/removed from the routing slip when revised
+        /// </summary>
+        Itinerary = 0x0008,
+
+        /// <summary>
         /// If specified, encrypted content is excluded from the event
         /// </summary>
-        SkipEncrypted = 0x0008,
+        SkipEncrypted = 0x0100,
     }
 }

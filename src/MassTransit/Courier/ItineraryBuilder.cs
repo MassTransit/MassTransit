@@ -79,6 +79,6 @@ namespace MassTransit.Courier
         /// Add the original itinerary to the routing slip (if present)
         /// </summary>
         /// <returns>The number of activities added to the itinerary</returns>
-        int AddSourceItinerary();
+        int AddActivitiesFromSourceItinerary();
     }
 }
