@@ -252,6 +252,7 @@
     <Compile Include="Courier\InternalMessages\RoutingSlipImpl.cs" />
     <Compile Include="Courier\InternalMessages\SubscriptionImpl.cs" />
     <Compile Include="Courier\ItineraryBuilder.cs" />
+    <Compile Include="Courier\Results\TerminateExecutionResult.cs" />
     <Compile Include="Courier\RoutingSlipBuilder.cs" />
     <Compile Include="Courier\RoutingSlipEventExtensions.cs" />
     <Compile Include="Courier\RoutingSlipEventPublisher.cs" />
