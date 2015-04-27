@@ -142,7 +142,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
 
             sendSettings.BindToQueue(errorQueueName);
 
-            Uri errorQueueAddress = _host.Settings.GetInputAddress(_settings);
+            Uri errorQueueAddress = _host.Settings.GetSendAddress(sendSettings);
 
             ISendTransportProvider sendTransportProvider = builder.SendTransportProvider;
 
