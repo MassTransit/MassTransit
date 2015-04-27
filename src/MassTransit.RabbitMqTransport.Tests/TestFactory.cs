@@ -24,7 +24,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 				UserName = "guest",
 				Password = "guest",
 				Port = 5672,
-				VirtualHost = "mttest",
+				VirtualHost = "test",
 				HostName = "localhost",
 				Protocol = Protocols.AMQP_0_9_1,
 			};

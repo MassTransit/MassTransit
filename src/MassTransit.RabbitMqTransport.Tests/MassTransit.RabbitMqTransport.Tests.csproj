@@ -72,14 +72,12 @@
     <Compile Include="..\SolutionVersion.cs">
       <Link>Properties\SolutionVersion.cs</Link>
     </Compile>
-    <Compile Include="Assumptions\BasicExchangePerformanceDifferences.cs" />
     <Compile Include="Assumptions\GivenAChannel.cs" />
     <Compile Include="Assumptions\ExchangeQueueBinding_Specs.cs" />
     <Compile Include="Assumptions\PerformanceAssumptions.cs" />
     <Compile Include="Assumptions\RoutingAssumptions.cs" />
     <Compile Include="Assumptions\TransactionAssumptions.cs" />
     <Compile Include="Bytes_Specs.cs" />
-    <Compile Include="ConfiguringRabbitMQ_Specs.cs" />
     <Compile Include="Connector_Specs.cs" />
     <Compile Include="ConsumerBind_Specs.cs" />
     <Compile Include="ContextSetup.cs" />
