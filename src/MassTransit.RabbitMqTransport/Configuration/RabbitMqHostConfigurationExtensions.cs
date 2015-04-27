@@ -40,7 +40,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
         /// of this type (created automatically upon the first receiver binding).
         /// </summary>
         /// <param name="configurator"></param>
-        /// <param name="hostSettings"></param>
+        /// <param name="host"></param>
         /// <param name="configure"></param>
         public static void ReceiveEndpoint(this IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host,
             Action<IRabbitMqReceiveEndpointConfigurator> configure)
