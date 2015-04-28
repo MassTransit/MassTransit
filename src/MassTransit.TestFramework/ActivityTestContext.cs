@@ -13,8 +13,8 @@
 namespace MassTransit.TestFramework
 {
     using System;
-    using Courier;
-    using Courier.Factories;
+    using MassTransit.Courier;
+    using MassTransit.Courier.Factories;
 
 
     public interface ActivityTestContext

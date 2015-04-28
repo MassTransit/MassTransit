@@ -56,8 +56,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.AzureServiceBus
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.AzureServiceBusTransport.Tests", "MassTransit.AzureServiceBusTransport.Tests\MassTransit.AzureServiceBusTransport.Tests.csproj", "{6C9F5793-6DE0-4330-B3F9-6D3AC2A22E30}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Courier.Tests", "MassTransit.Courier.Tests\MassTransit.Courier.Tests.csproj", "{A8251DE0-A8AD-4EB9-A37D-BFD0CFA0A5CF}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "RapidTransit", "RapidTransit", "{76F5F3F7-35AD-4D3B-A445-0A6A55C03147}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RapidTransit.Host", "RapidTransit\RapidTransitHost\RapidTransit.Host.csproj", "{D1172BB0-EF5F-4D56-9A3F-13A63DBD4D22}"
@@ -247,14 +245,6 @@ Global
 		{6C9F5793-6DE0-4330-B3F9-6D3AC2A22E30}.Release|x86.ActiveCfg = Release|Any CPU
 		{6C9F5793-6DE0-4330-B3F9-6D3AC2A22E30}.ReleaseUnsigned|Any CPU.ActiveCfg = Release|Any CPU
 		{6C9F5793-6DE0-4330-B3F9-6D3AC2A22E30}.ReleaseUnsigned|x86.ActiveCfg = Release|Any CPU
-		{A8251DE0-A8AD-4EB9-A37D-BFD0CFA0A5CF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A8251DE0-A8AD-4EB9-A37D-BFD0CFA0A5CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A8251DE0-A8AD-4EB9-A37D-BFD0CFA0A5CF}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{A8251DE0-A8AD-4EB9-A37D-BFD0CFA0A5CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A8251DE0-A8AD-4EB9-A37D-BFD0CFA0A5CF}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A8251DE0-A8AD-4EB9-A37D-BFD0CFA0A5CF}.Release|x86.ActiveCfg = Release|Any CPU
-		{A8251DE0-A8AD-4EB9-A37D-BFD0CFA0A5CF}.ReleaseUnsigned|Any CPU.ActiveCfg = Release|Any CPU
-		{A8251DE0-A8AD-4EB9-A37D-BFD0CFA0A5CF}.ReleaseUnsigned|x86.ActiveCfg = Release|Any CPU
 		{D1172BB0-EF5F-4D56-9A3F-13A63DBD4D22}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{D1172BB0-EF5F-4D56-9A3F-13A63DBD4D22}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D1172BB0-EF5F-4D56-9A3F-13A63DBD4D22}.Debug|x86.ActiveCfg = Debug|Any CPU
