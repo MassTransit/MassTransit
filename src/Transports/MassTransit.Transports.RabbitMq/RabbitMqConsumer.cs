@@ -1,4 +1,4 @@
-// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,7 +13,6 @@
 namespace MassTransit.Transports.RabbitMq
 {
     using System;
-    using System.Collections.Generic;
     using RabbitMQ.Client;
     using RabbitMQ.Client.Events;
     using RabbitMQ.Util;
@@ -23,17 +22,20 @@ namespace MassTransit.Transports.RabbitMq
         ConnectionBinding<RabbitMqConnection>
     {
         readonly IRabbitMqEndpointAddress _address;
+        readonly string _consumerTag;
         readonly object _lock = new object();
         IModel _channel;
         QueueingBasicConsumer _consumer;
+        ushort _prefetchCount;
         bool _purgeOnBind;
-        readonly string _consumerTag;
 
         public RabbitMqConsumer(IRabbitMqEndpointAddress address, bool purgeOnBind)
         {
             _address = address;
             _purgeOnBind = purgeOnBind;
             _consumerTag = NewId.NextGuid().ToString();
+
+            _prefetchCount = address.PrefetchCount;
         }
 
         public void Bind(RabbitMqConnection connection)
@@ -47,7 +49,7 @@ namespace MassTransit.Transports.RabbitMq
 
                 PurgeIfRequested(channel);
 
-                channel.BasicQos(0, _address.PrefetchCount, false);
+                channel.BasicQos(0, _prefetchCount, false);
 
                 var consumer = new QueueingBasicConsumer(channel);
                 channel.BasicConsume(_address.Name, false, _consumerTag, consumer);
@@ -75,6 +77,14 @@ namespace MassTransit.Transports.RabbitMq
                 _channel.Cleanup(200, "Unbind Consumer");
                 _channel = null;
             }
+        }
+
+        public void SetPrefetchCount(ushort prefetchCount)
+        {
+            _prefetchCount = prefetchCount;
+            IModel channel = _channel;
+            if (channel != null)
+                channel.BasicQos(0, _prefetchCount, false);
         }
 
         void PurgeIfRequested(IModel channel)
@@ -117,11 +127,10 @@ namespace MassTransit.Transports.RabbitMq
         {
             lock (_lock)
             {
-                if(_channel == null)
+                if (_channel == null)
                     throw new InvalidConnectionException(_address.Uri, "No connection to RabbitMQ Host");
 
                 _channel.BasicAck(result.DeliveryTag, false);
-                
             }
         }
 

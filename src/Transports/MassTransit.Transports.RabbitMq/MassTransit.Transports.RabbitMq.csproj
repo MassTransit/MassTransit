@@ -121,6 +121,7 @@
     <Compile Include="RabbitMqSubscriptionBinder.cs" />
     <Compile Include="RabbitMqTransportFactory.cs" />
     <Compile Include="Configuration\RabbitMqServiceBusExtensions.cs" />
+    <Compile Include="SetPrefetchCountExtensions.cs" />
     <Compile Include="Testing\BusTestScenarioExtensions.cs" />
     <Compile Include="Testing\RabbitMqBusScenarioBuilder.cs" />
   </ItemGroup>
