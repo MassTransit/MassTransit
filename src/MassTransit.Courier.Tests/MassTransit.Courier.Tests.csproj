@@ -63,6 +63,7 @@
       <Link>SolutionVersion.cs</Link>
     </Compile>
     <Compile Include="ArgumentOverload_Specs.cs" />
+    <Compile Include="Builder_Specs.cs" />
     <Compile Include="Configuration_Specs.cs" />
     <Compile Include="ContextSetup.cs" />
     <Compile Include="EncryptedArgument_Specs.cs" />
