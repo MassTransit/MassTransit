@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -21,6 +21,7 @@ namespace MassTransit.Transports.RabbitMq
     using Logging;
     using RabbitMQ.Client.Events;
     using RabbitMQ.Client.Exceptions;
+
 
     public class InboundRabbitMqTransport :
         IInboundTransport
@@ -61,76 +62,81 @@ namespace MassTransit.Transports.RabbitMq
             AddConsumerBinding();
 
             _connectionHandler.Use(connection =>
+            {
+                BasicDeliverEventArgs result = null;
+                try
                 {
-                    BasicDeliverEventArgs result = null;
-                    try
+                    result = _consumer.Get(timeout);
+                    if (result == null)
+                        return;
+
+                    using (var body = new MemoryStream(result.Body, false))
                     {
-                        result = _consumer.Get(timeout);
-                        if (result == null)
-                            return;
+                        ReceiveContext context = ReceiveContext.FromBodyStream(body, true);
+                        context.SetMessageId(result.BasicProperties.MessageId ?? result.DeliveryTag.ToString());
+                        result.BasicProperties.MessageId = context.MessageId;
+                        context.SetInputAddress(_address);
 
-                        using (var body = new MemoryStream(result.Body, false))
+                        if (result.BasicProperties.IsHeadersPresent())
                         {
-                            ReceiveContext context = ReceiveContext.FromBodyStream(body, true);
-                            context.SetMessageId(result.BasicProperties.MessageId ?? result.DeliveryTag.ToString());
-                            result.BasicProperties.MessageId = context.MessageId;
-                            context.SetInputAddress(_address);
-
-                            if (result.BasicProperties.IsHeadersPresent())
+                            object value;
+                            if (result.BasicProperties.Headers.TryGetValue("Content-Type", out value))
                             {
-                                object value;
-                                if (result.BasicProperties.Headers.TryGetValue("Content-Type", out value))
-                                {
-                                    var contentType = value as byte[];
-                                    if (contentType != null)
-                                    {
-                                        context.SetContentType(Encoding.UTF8.GetString(contentType));
-                                    }
-                                }
-                            }
-
-                            Action<IReceiveContext> receive = lookupSinkChain(context);
-                            if (receive == null)
-                            {
-                                Address.LogSkipped(result.BasicProperties.MessageId);
-
-                                _consumer.MessageSkipped(result);
-                            }
-                            else
-                            {
-                                receive(context);
-
-                                _consumer.MessageCompleted(result);
+                                var contentType = value as byte[];
+                                if (contentType != null)
+                                    context.SetContentType(Encoding.UTF8.GetString(contentType));
                             }
                         }
-                    }
-                    catch (AlreadyClosedException ex)
-                    {
-                        throw new InvalidConnectionException(_address.Uri, "Connection was already closed", ex);
-                    }
-                    catch (EndOfStreamException ex)
-                    {
-                        throw new InvalidConnectionException(_address.Uri, "Connection was closed", ex);
-                    }
-                    catch (OperationInterruptedException ex)
-                    {
-                        throw new InvalidConnectionException(_address.Uri, "Operation was interrupted", ex);
-                    }
-                    catch (Exception ex)
-                    {
-                        _log.Error("Failed to consume message from endpoint", ex);
 
-                        if (result != null)
-                            _consumer.MessageFailed(result);
+                        Action<IReceiveContext> receive = lookupSinkChain(context);
+                        if (receive == null)
+                        {
+                            Address.LogSkipped(result.BasicProperties.MessageId);
 
-                        throw;
+                            _consumer.MessageSkipped(result);
+                        }
+                        else
+                        {
+                            receive(context);
+
+                            _consumer.MessageCompleted(result);
+                        }
                     }
-                });
+                }
+                catch (AlreadyClosedException ex)
+                {
+                    throw new InvalidConnectionException(_address.Uri, "Connection was already closed", ex);
+                }
+                catch (EndOfStreamException ex)
+                {
+                    throw new InvalidConnectionException(_address.Uri, "Connection was closed", ex);
+                }
+                catch (OperationInterruptedException ex)
+                {
+                    throw new InvalidConnectionException(_address.Uri, "Operation was interrupted", ex);
+                }
+                catch (Exception ex)
+                {
+                    _log.Error("Failed to consume message from endpoint", ex);
+
+                    if (result != null)
+                        _consumer.MessageFailed(result);
+
+                    throw;
+                }
+            });
         }
 
         public void Dispose()
         {
             Dispose(true);
+        }
+
+        public void SetPrefetchCount(ushort prefetchCount)
+        {
+            RabbitMqConsumer consumer = _consumer;
+            if (consumer != null)
+                consumer.SetPrefetchCount(prefetchCount);
         }
 
         public IEnumerable<Type> BindExchangesForPublisher(Type messageType, IMessageNameFormatter messageNameFormatter)
@@ -139,25 +145,25 @@ namespace MassTransit.Transports.RabbitMq
 
             IList<Type> messageTypes = new List<Type>();
             _connectionHandler.Use(connection =>
+            {
+                MessageName messageName = messageNameFormatter.GetMessageName(messageType);
+
+                bool temporary = IsTemporaryMessageType(messageType);
+
+                _publisher.ExchangeDeclare(messageName.ToString(), temporary);
+
+                messageTypes.Add(messageType);
+
+                foreach (Type type in messageType.GetMessageTypes().Skip(1))
                 {
-                    MessageName messageName = messageNameFormatter.GetMessageName(messageType);
+                    MessageName interfaceName = messageNameFormatter.GetMessageName(type);
 
-                    bool temporary = IsTemporaryMessageType(messageType);
+                    bool isTemporary = IsTemporaryMessageType(type);
 
-                    _publisher.ExchangeDeclare(messageName.ToString(), temporary);
-
-                    messageTypes.Add(messageType);
-
-                    foreach (Type type in messageType.GetMessageTypes().Skip(1))
-                    {
-                        MessageName interfaceName = messageNameFormatter.GetMessageName(type);
-
-                        bool isTemporary = IsTemporaryMessageType(type);
-
-                        _publisher.ExchangeBind(interfaceName.ToString(), messageName.ToString(), isTemporary, temporary);
-                        messageTypes.Add(type);
-                    }
-                });
+                    _publisher.ExchangeBind(interfaceName.ToString(), messageName.ToString(), isTemporary, temporary);
+                    messageTypes.Add(type);
+                }
+            });
 
             return messageTypes;
         }
@@ -172,19 +178,13 @@ namespace MassTransit.Transports.RabbitMq
         public void BindSubscriberExchange(IRabbitMqEndpointAddress address, string exchangeName, bool temporary)
         {
             AddPublisherBinding();
-            _connectionHandler.Use(connection =>
-                {
-                    _publisher.ExchangeBind(address.Name, exchangeName, false, temporary);
-                });
+            _connectionHandler.Use(connection => { _publisher.ExchangeBind(address.Name, exchangeName, false, temporary); });
         }
 
         public void UnbindSubscriberExchange(string exchangeName)
         {
             AddPublisherBinding();
-            _connectionHandler.Use(connection =>
-            {
-                _publisher.ExchangeUnbind(_address.Name, exchangeName);
-            });            
+            _connectionHandler.Use(connection => { _publisher.ExchangeUnbind(_address.Name, exchangeName); });
         }
 
         void AddConsumerBinding()

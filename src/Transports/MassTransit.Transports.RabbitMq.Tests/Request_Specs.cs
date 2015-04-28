@@ -80,6 +80,21 @@ namespace MassTransit.Transports.RabbitMq.Tests
         }
 
         [Test]
+        public void Should_respond_after_changing_qos()
+        {
+            LocalBus.SetPrefetchCount(197);
+
+            bool result = LocalBus.GetEndpoint(LocalBus.Endpoint.Address.Uri)
+                .SendRequest<PingMessage>(new PingImpl(), LocalBus, req =>
+                {
+                    req.Handle<PongMessage>(x => { });
+                    req.SetTimeout(10.Seconds());
+                });
+
+            result.ShouldBeTrue("No response was received.");            
+        }
+
+        [Test]
         public void Should_timeout_for_unhandled_request()
         {
             Assert.Throws<RequestTimeoutException>(() =>
