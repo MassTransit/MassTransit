@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.PipeConfigurators
 {
+    using System;
     using System.Collections.Generic;
     using Configurators;
     using PipeBuilders;
@@ -22,25 +23,25 @@ namespace MassTransit.PipeConfigurators
     /// Adds a message handler to the consuming pipe builder
     /// </summary>
     /// <typeparam name="T">The message type</typeparam>
-    public class HandlerPipeSpecification<T> :
+    public class ObserverPipeSpecification<T> :
         IPipeSpecification<ConsumeContext<T>>
         where T : class
     {
-        readonly MessageHandler<T> _handler;
+        readonly IObserver<ConsumeContext<T>> _observer;
 
-        public HandlerPipeSpecification(MessageHandler<T> handler)
+        public ObserverPipeSpecification(IObserver<ConsumeContext<T>> observer)
         {
-            _handler = handler;
+            _observer = observer;
         }
 
         void IPipeSpecification<ConsumeContext<T>>.Apply(IPipeBuilder<ConsumeContext<T>> builder)
         {
-            builder.AddFilter(new HandlerMessageFilter<T>(_handler));
+            builder.AddFilter(new ObserverMessageFilter<T>(_observer));
         }
 
         IEnumerable<ValidationResult> Configurator.Validate()
         {
-            if (_handler == null)
+            if (_observer == null)
                 yield return this.Failure("Handler", "must not be null");
         }
     }

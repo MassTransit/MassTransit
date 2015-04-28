@@ -97,6 +97,8 @@
     <Compile Include="Configuration\BusConfigurators\InMemoryBusFactoryConfigurator.cs" />
     <Compile Include="Configuration\Configurators\IPipeConfigurationResult.cs" />
     <Compile Include="Configuration\Configurators\PipeConfigurationResult.cs" />
+    <Compile Include="Configuration\ConsumeConfigurators\IObserverConfigurator.cs" />
+    <Compile Include="Configuration\ConsumeConfigurators\ObserverConfigurator.cs" />
     <Compile Include="Configuration\ConsumerPipeConfiguratorExtensions.cs" />
     <Compile Include="Configuration\DelegatePipeConfiguratorExtensions.cs" />
     <Compile Include="Configuration\EndpointConfigurators\EncryptedMessageSerializerBusFactorySpecification.cs" />
@@ -118,6 +120,7 @@
     <Compile Include="Configuration\IBusFactoryConfigurator.cs" />
     <Compile Include="Configuration\ITransactionConfigurator.cs" />
     <Compile Include="Configuration\LogPipeConfiguratorExtensions.cs" />
+    <Compile Include="Configuration\ObserverExtensions.cs" />
     <Compile Include="Configuration\PipeBuilders\IPipeBuilder.cs" />
     <Compile Include="Configuration\PipeBuilders\PipeBuilder.cs" />
     <Compile Include="Configuration\PipeConfigurators\AsyncDelegatePipeBuilderConfigurator.cs" />
@@ -128,6 +131,7 @@
     <Compile Include="Configuration\PipeConfigurators\IBuildPipeConfigurator.cs" />
     <Compile Include="Configuration\PipeConfigurators\IPipeSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\LogPipeSpecification.cs" />
+    <Compile Include="Configuration\PipeConfigurators\ObserverPipeSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\PipeConfigurator.cs" />
     <Compile Include="Configuration\PipeConfigurators\RepeatPipeSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\RescuePipeSpecification.cs" />
@@ -380,6 +384,7 @@
     <Compile Include="Pipeline\Filters\MessageTypeConsumeFilter.cs" />
     <Compile Include="Pipeline\Filters\MethodConsumerMessageFilter.cs" />
     <Compile Include="Pipeline\Filters\MoveToErrorTransportFilter.cs" />
+    <Compile Include="Pipeline\Filters\ObserverMessageFilter.cs" />
     <Compile Include="Pipeline\Filters\RepeatFilter.cs" />
     <Compile Include="Pipeline\Filters\RescueExceptionFilter.cs" />
     <Compile Include="Pipeline\Filters\RescueFilter.cs" />
