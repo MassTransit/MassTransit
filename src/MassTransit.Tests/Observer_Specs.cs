@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,7 +13,7 @@
 namespace MassTransit.Tests
 {
     using System;
-    using System.Threading.Tasks;
+    using System.Collections.Concurrent;
     using NUnit.Framework;
     using TestFramework;
     using TestFramework.Messages;
@@ -21,7 +21,7 @@ namespace MassTransit.Tests
 
 
     [TestFixture]
-    public class Sending_a_message_to_a_consumer :
+    public class Sending_a_message_to_a_observer :
         InMemoryTestFixture
     {
         [Test]
@@ -31,6 +31,7 @@ namespace MassTransit.Tests
         }
 
         IRequestClient<PingMessage, PongMessage> _requestClient;
+        PingObserver _observer;
 
         [TestFixtureSetUp]
         public void Setup()
@@ -40,17 +41,35 @@ namespace MassTransit.Tests
 
         protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
         {
-            configurator.Consumer<Consumer>()
-                .UseLog(Console.Out, async context => string.Format("Consumer: {0}", TypeMetadataCache<Consumer>.ShortName));
+            _observer = new PingObserver();
+            configurator.Observer(_observer)
+                .UseLog(Console.Out, async context => string.Format("Observer: {0}", TypeMetadataCache<PingObserver>.ShortName));
         }
 
 
-        class Consumer :
-            IConsumer<PingMessage>
+        class PingObserver :
+            IObserver<ConsumeContext<PingMessage>>
         {
-            public async Task Consume(ConsumeContext<PingMessage> context)
+            readonly ConcurrentBag<PingMessage> _received;
+
+            public PingObserver()
             {
-                await context.RespondAsync(new PongMessage(context.Message.CorrelationId));
+                _received = new ConcurrentBag<PingMessage>();
+            }
+
+            public void OnNext(ConsumeContext<PingMessage> context)
+            {
+                _received.Add(context.Message);
+
+                context.Respond(new PongMessage(context.Message.CorrelationId));
+            }
+
+            public void OnError(Exception error)
+            {
+            }
+
+            public void OnCompleted()
+            {
             }
         }
     }
