@@ -18,7 +18,7 @@
 
         public void WritePropertyToDictionary(IDictionary<string, object> dictionary, T obj)
         {
-            IDictionary<string, object> value = _converter.GetDictionary(obj);
+            IDictionary<string, object> value = _converter.GetDictionary(_property.Get(obj));
 
             dictionary.Add(_property.Property.Name, value);
         }
