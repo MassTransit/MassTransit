@@ -47,6 +47,36 @@ namespace MassTransit.Containers.Tests
         }
     }
 
+    public class Autofac_Consumer_by_interface :
+        When_registering_a_consumer_by_interface
+    {
+        readonly IContainer _container;
+
+        public Autofac_Consumer_by_interface()
+        {
+            var builder = new ContainerBuilder();
+            builder.RegisterType<SimpleConsumer>()
+                .As<IConsumer<SimpleMessageInterface>>();
+            builder.RegisterType<SimpleConsumerDependency>()
+                .As<ISimpleConsumerDependency>();
+            builder.RegisterType<AnotherMessageConsumerImpl>()
+                .As<AnotherMessageConsumer>();
+
+            _container = builder.Build();
+        }
+
+        [TestFixtureTearDown]
+        public void Close_container()
+        {
+            _container.Dispose();
+        }
+
+        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+        {
+            configurator.LoadFrom(_container);
+        }
+    }
+
 
     public class Autofac_Saga :
         When_registering_a_saga
