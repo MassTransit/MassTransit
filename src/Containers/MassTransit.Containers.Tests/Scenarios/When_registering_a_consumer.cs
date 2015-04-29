@@ -41,4 +41,30 @@ namespace MassTransit.Containers.Tests.Scenarios
                 .ShouldBe(true); //Dependency was disposed before consumer executed");
         }
     }
+
+    [TestFixture]
+    public abstract class When_registering_a_consumer_by_interface :
+        Given_a_service_bus_instance
+    {
+        [Test]
+        public async void Should_receive_using_the_first_consumer()
+        {
+            const string name = "Joe";
+
+            await InputQueueSendEndpoint.Send(new SimpleMessageClass(name));
+
+            SimpleConsumer lastConsumer = await SimpleConsumer.LastConsumer;
+            lastConsumer.ShouldNotBe(null);
+
+            SimpleMessageInterface last = await lastConsumer.Last;
+            last.Name
+                .ShouldBe(name);
+
+            lastConsumer.Dependency.WasDisposed
+                .ShouldBe(true); //Dependency was not disposed");
+
+            lastConsumer.Dependency.SomethingDone
+                .ShouldBe(true); //Dependency was disposed before consumer executed");
+        }
+    }
 }
