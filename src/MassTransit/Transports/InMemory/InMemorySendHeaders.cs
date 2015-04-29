@@ -29,8 +29,13 @@ namespace MassTransit.Transports.InMemory
 
         public void Set(string key, string value)
         {
-            object stringValue = value;
-            Set(key, stringValue);
+            if (key == null)
+                throw new ArgumentNullException("key");
+
+            if (value == null)
+                _headers.Remove(key);
+            else
+                _headers[key] = value;
         }
 
         public void Set(string key, object value)
@@ -38,7 +43,10 @@ namespace MassTransit.Transports.InMemory
             if (key == null)
                 throw new ArgumentNullException("key");
 
-            _headers[key] = value;
+            if (value == null)
+                _headers.Remove(key);
+            else
+                _headers[key] = value;
         }
 
         public bool TryGetHeader(string key, out object value)

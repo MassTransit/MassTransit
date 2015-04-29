@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RabbitMqTransport.Contexts
 {
+    using System;
     using System.Collections;
     using System.Collections.Generic;
     using System.Linq;
@@ -31,18 +32,30 @@ namespace MassTransit.RabbitMqTransport.Contexts
 
         public void Set(string key, string value)
         {
+            if (key == null)
+                throw new ArgumentNullException("key");
+
             if (_basicProperties.Headers == null)
                 _basicProperties.Headers = new Dictionary<string, object>();
 
-            _basicProperties.Headers.Add(key, value);
+            if (value == null)
+                _basicProperties.Headers.Remove(key);
+            else
+                _basicProperties.Headers[key] = value;
         }
 
         public void Set(string key, object value)
         {
+            if (key == null)
+                throw new ArgumentNullException("key");
+
             if (_basicProperties.Headers == null)
                 _basicProperties.Headers = new Dictionary<string, object>();
 
-            _basicProperties.Headers.Add(key, value);
+            if (value == null)
+                _basicProperties.Headers.Remove(key);
+            else
+                _basicProperties.Headers[key] = value;
         }
 
         public bool TryGetHeader(string key, out object value)
@@ -53,13 +66,11 @@ namespace MassTransit.RabbitMqTransport.Contexts
                 return false;
             }
 
-            var found = _basicProperties.Headers.TryGetValue(key, out value);
+            bool found = _basicProperties.Headers.TryGetValue(key, out value);
             if (found)
             {
                 if (value is byte[])
-                {
                     value = Encoding.UTF8.GetString((byte[])value);
-                }
             }
             return found;
         }
