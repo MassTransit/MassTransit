@@ -47,13 +47,15 @@ namespace MassTransit.Serialization
             ObjectCreationHandling = ObjectCreationHandling.Auto,
             ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor,
             ContractResolver = new JsonContractResolver(),
+            TypeNameHandling = TypeNameHandling.None,
+            DateParseHandling = DateParseHandling.None,
+            DateTimeZoneHandling = DateTimeZoneHandling.RoundtripKind,
             Converters = new List<JsonConverter>(new JsonConverter[]
             {
                 new ByteArrayConverter(),
                 new ListJsonConverter(),
                 new InterfaceProxyConverter(TypeMetadataCache.ImplementationBuilder),
                 new StringDecimalConverter(),
-                new IsoDateTimeConverter {DateTimeStyles = DateTimeStyles.RoundtripKind},
             })
         };
 
@@ -65,10 +67,12 @@ namespace MassTransit.Serialization
             ObjectCreationHandling = ObjectCreationHandling.Auto,
             ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor,
             ContractResolver = new JsonContractResolver(),
+            TypeNameHandling = TypeNameHandling.None,
+            DateParseHandling = DateParseHandling.None,
+            DateTimeZoneHandling = DateTimeZoneHandling.RoundtripKind,
             Converters = new List<JsonConverter>(new JsonConverter[]
             {
                 new ByteArrayConverter(),
-                new IsoDateTimeConverter {DateTimeStyles = DateTimeStyles.RoundtripKind},
             }),
         };
 
