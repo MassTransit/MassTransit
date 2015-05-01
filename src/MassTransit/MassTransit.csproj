@@ -83,6 +83,14 @@
     <Compile Include="..\SolutionVersion.cs">
       <Link>SolutionVersion.cs</Link>
     </Compile>
+    <Compile Include="Exceptions\MessageDataException.cs" />
+    <Compile Include="Exceptions\MessageDataNotFoundException.cs" />
+    <Compile Include="IMessageData.cs" />
+    <Compile Include="MessageData\InMemoryMessageDataId.cs" />
+    <Compile Include="MessageData\BigPropertyException.cs" />
+    <Compile Include="MessageData\IMessageDataRepository.cs" />
+    <Compile Include="MessageData\InMemoryMessageDataRepository.cs" />
+    <Compile Include="MessageData\ReadStringBigProperty.cs" />
     <Compile Include="Bus.cs" />
     <Compile Include="BusHandle.cs" />
     <Compile Include="BusHandleExtensions.cs" />
@@ -269,6 +277,7 @@
     <Compile Include="Courier\Serialization\JsonExtensions.cs" />
     <Compile Include="Courier\Serialization\JsonTypeConverter.cs" />
     <Compile Include="Courier\SerializerCache.cs" />
+    <Compile Include="MessageData.cs" />
     <Compile Include="Events\FaultEvent.cs" />
     <Compile Include="Events\FaultExceptionInfo.cs" />
     <Compile Include="ExceptionInfo.cs" />
@@ -345,6 +354,7 @@
     <Compile Include="ISendEndpoint.cs" />
     <Compile Include="ISendEndpointProvider.cs" />
     <Compile Include="MessageContext.cs" />
+    <Compile Include="MessageData\StringMessageData.cs" />
     <Compile Include="MessageHandler.cs" />
     <Compile Include="MessageRedeliveryContext.cs" />
     <Compile Include="MessageRequestClient.cs" />
@@ -515,6 +525,7 @@
     <Compile Include="Serialization\JsonConverters\DictionaryJsonConverter.cs" />
     <Compile Include="Serialization\JsonConverters\InterfaceProxyConverter.cs" />
     <Compile Include="Serialization\JsonConverters\JsonContractResolver.cs" />
+    <Compile Include="Serialization\JsonConverters\MessageDataConverter.cs" />
     <Compile Include="Serialization\JsonConverters\StringDecimalConverter.cs" />
     <Compile Include="Serialization\MessageConsumeContext.cs" />
     <Compile Include="Serialization\JsonMessageHeaders.cs" />

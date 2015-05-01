@@ -18,7 +18,6 @@ namespace MassTransit.Tests.Serialization
     using System.Text;
     using MassTransit.Pipeline;
     using MassTransit.Serialization;
-    using MassTransit.Transports;
     using MassTransit.Transports.InMemory;
     using NUnit.Framework;
     using Shouldly;
@@ -99,7 +98,29 @@ namespace MassTransit.Tests.Serialization
             return Return<T>(serializedMessageData);
         }
 
-        protected T Return<T>(byte[] serializedMessageData) 
+        protected void Serialize<T>(T obj)
+            where T : class
+        {
+            using (var output = new MemoryStream())
+            {
+                var sendContext = new InMemorySendContext<T>(obj);
+
+                sendContext.SourceAddress = _sourceAddress;
+                sendContext.DestinationAddress = _destinationAddress;
+                sendContext.FaultAddress = _faultAddress;
+                sendContext.ResponseAddress = _responseAddress;
+                sendContext.RequestId = _requestId;
+
+
+                Serializer.Serialize(output, sendContext);
+
+                byte[] serializedMessageData = output.ToArray();
+
+                Trace.WriteLine(Encoding.UTF8.GetString(serializedMessageData));
+            }
+        }
+
+        protected T Return<T>(byte[] serializedMessageData)
             where T : class
         {
             var message = new InMemoryTransportMessage(Guid.NewGuid(), serializedMessageData, Serializer.ContentType.MediaType, TypeMetadataCache<T>.ShortName);
