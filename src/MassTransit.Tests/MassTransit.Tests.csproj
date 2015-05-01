@@ -103,6 +103,7 @@
     <Compile Include="Courier\SingleActivityEvent_Specs.cs" />
     <Compile Include="Courier\Subscription_Specs.cs" />
     <Compile Include="Courier\TwoActivityEvent_Specs.cs" />
+    <Compile Include="DataBus_Specs.cs" />
     <Compile Include="DelayRetry_Specs.cs" />
     <Compile Include="Diagnostics\PerformanceCounter_Specs.cs" />
     <Compile Include="DictionaryToObject_Specs.cs" />
@@ -150,6 +151,7 @@
     <Compile Include="SerializationSupport_Specs.cs" />
     <Compile Include="Serialization\Array_Specs.cs" />
     <Compile Include="Serialization\DateTimeFormat_Specs.cs" />
+    <Compile Include="Serialization\MessageDataSerialization_Specs.cs" />
     <Compile Include="Serialization\SerializationException_Specs.cs" />
     <Compile Include="InMemoryTest_Specs.cs" />
     <Compile Include="Serialization\TypeHandling_Specs.cs" />
