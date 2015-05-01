@@ -93,6 +93,7 @@
     <Compile Include="Configuration\Builders\IBusBuilder.cs" />
     <Compile Include="Configuration\Builders\IBusFactorySpecification.cs" />
     <Compile Include="Configuration\Builders\BusBuilder.cs" />
+    <Compile Include="Configuration\ConcurrencyLimitExtensions.cs" />
     <Compile Include="Configuration\Configurators\BusFactory.cs" />
     <Compile Include="Configuration\BusConfigurators\InMemoryBusFactoryConfigurator.cs" />
     <Compile Include="Configuration\Configurators\IPipeConfigurationResult.cs" />
@@ -124,6 +125,7 @@
     <Compile Include="Configuration\PipeBuilders\IPipeBuilder.cs" />
     <Compile Include="Configuration\PipeBuilders\PipeBuilder.cs" />
     <Compile Include="Configuration\PipeConfigurators\AsyncDelegatePipeBuilderConfigurator.cs" />
+    <Compile Include="Configuration\PipeConfigurators\ConcurrencyLimitPipeSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\ConsumerPipeSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\DelegatePipeSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\FilterPipeSpecification.cs" />
@@ -133,10 +135,12 @@
     <Compile Include="Configuration\PipeConfigurators\LogPipeSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\ObserverPipeSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\PipeConfigurator.cs" />
+    <Compile Include="Configuration\PipeConfigurators\RateLimitPipeSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\RepeatPipeSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\RescuePipeSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\RetryPipeSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\TransactionPipeSpecification.cs" />
+    <Compile Include="Configuration\RateLimitExtensions.cs" />
     <Compile Include="Configuration\RepeatPipeConfiguratorExtensions.cs" />
     <Compile Include="Configuration\RescueFilterConfiguratorExtensions.cs" />
     <Compile Include="Configuration\RetryPipeConfiguratorExtensions.cs" />
@@ -369,6 +373,7 @@
     <Compile Include="Pipeline\ConsumerFilterVisitorAdapter.cs" />
     <Compile Include="Pipeline\ConsumerFilterVisitorAdapterCache.cs" />
     <Compile Include="Pipeline\Filters\AsyncDelegateFilter.cs" />
+    <Compile Include="Pipeline\Filters\ConcurrencyLimitFilter.cs" />
     <Compile Include="Pipeline\Filters\ConsumerMessageFilter.cs" />
     <Compile Include="Pipeline\Filters\ConsumerSplitFilter.cs" />
     <Compile Include="Pipeline\Filters\DelayedRetryFilter.cs" />
@@ -385,6 +390,7 @@
     <Compile Include="Pipeline\Filters\MethodConsumerMessageFilter.cs" />
     <Compile Include="Pipeline\Filters\MoveToErrorTransportFilter.cs" />
     <Compile Include="Pipeline\Filters\ObserverMessageFilter.cs" />
+    <Compile Include="Pipeline\Filters\RateLimitFilter.cs" />
     <Compile Include="Pipeline\Filters\RepeatFilter.cs" />
     <Compile Include="Pipeline\Filters\RescueExceptionFilter.cs" />
     <Compile Include="Pipeline\Filters\RescueFilter.cs" />
