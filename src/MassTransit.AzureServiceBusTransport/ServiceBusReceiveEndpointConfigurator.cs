@@ -16,6 +16,7 @@ namespace MassTransit.AzureServiceBusTransport
     using System.Collections.Generic;
     using System.Linq;
     using Builders;
+    using BusConfigurators;
     using Configuration;
     using Configurators;
     using MassTransit.Pipeline;
@@ -31,7 +32,7 @@ namespace MassTransit.AzureServiceBusTransport
     {
         readonly IList<IReceiveEndpointSpecification> _configurators;
         readonly IConsumePipe _consumePipe;
-        readonly IList<IPipeSpecification<ConsumeContext>> _consumePipeSpecifications;
+        readonly ConsumePipeSpecification _consumePipeSpecification;
         readonly IServiceBusHost _host;
         readonly QueueDescription _queueDescription;
         readonly IBuildPipeConfigurator<ReceiveContext> _receivePipeConfigurator;
@@ -51,7 +52,7 @@ namespace MassTransit.AzureServiceBusTransport
 
         public ServiceBusReceiveEndpointConfigurator(IServiceBusHost host, QueueDescription queueDescription, IConsumePipe consumePipe = null)
         {
-            _consumePipeSpecifications = new List<IPipeSpecification<ConsumeContext>>();
+            _consumePipeSpecification = new ConsumePipeSpecification();
             _receivePipeConfigurator = new PipeConfigurator<ReceiveContext>();
             _configurators = new List<IReceiveEndpointSpecification>();
 
@@ -88,9 +89,14 @@ namespace MassTransit.AzureServiceBusTransport
             builder.AddReceiveEndpoint(CreateReceiveEndpoint(builder));
         }
 
-        public void AddPipeSpecification(IPipeSpecification<ConsumeContext> specification)
+        void IPipeConfigurator<ConsumeContext>.AddPipeSpecification(IPipeSpecification<ConsumeContext> specification)
         {
-            _consumePipeSpecifications.Add(specification);
+            _consumePipeSpecification.Add(specification);
+        }
+
+        void IConsumePipeConfigurator.AddPipeSpecification<T>(IPipeSpecification<ConsumeContext<T>> specification)
+        {
+            _consumePipeSpecification.Add(specification);
         }
 
         public void AddEndpointSpecification(IReceiveEndpointSpecification configurator)
@@ -159,7 +165,7 @@ namespace MassTransit.AzureServiceBusTransport
                 QueueDescription = _queueDescription,
             };
 
-            IConsumePipe consumePipe = _consumePipe ?? builder.CreateConsumePipe(_consumePipeSpecifications);
+            IConsumePipe consumePipe = _consumePipe ?? builder.CreateConsumePipe(_consumePipeSpecification);
 
             var endpointBuilder = new ServiceBusReceiveEndpointBuilder(consumePipe, _host.MessageNameFormatter);
 
@@ -181,7 +187,7 @@ namespace MassTransit.AzureServiceBusTransport
 
             IPipe<ReceiveContext> receivePipe = _receivePipeConfigurator.Build();
 
-            var transport = GetReceiveTransport(settings, endpointBuilder.GetTopicSubscriptions());
+            ServiceBusReceiveTransport transport = GetReceiveTransport(settings, endpointBuilder.GetTopicSubscriptions());
 
             return new ReceiveEndpoint(transport, receivePipe);
         }

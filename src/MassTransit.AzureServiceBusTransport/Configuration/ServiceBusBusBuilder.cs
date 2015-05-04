@@ -16,8 +16,8 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
     using System.Collections.Generic;
     using System.Linq;
     using Builders;
+    using BusConfigurators;
     using MassTransit.Pipeline;
-    using PipeConfigurators;
     using Transports;
 
 
@@ -31,8 +31,8 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
         readonly Uri _inputAddress;
         readonly Lazy<ISendEndpointProvider> _publishSendEndpointProvider;
 
-        public ServiceBusBusBuilder(IEnumerable<IServiceBusHost> hosts, IEnumerable<IPipeSpecification<ConsumeContext>> endpointPipeSpecifications)
-            : base(endpointPipeSpecifications)
+        public ServiceBusBusBuilder(IEnumerable<IServiceBusHost> hosts, IConsumePipeSpecification consumePipeSpecification)
+            : base(consumePipeSpecification)
         {
             if (hosts == null)
                 throw new ArgumentNullException("hosts");
@@ -43,7 +43,7 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
 
             string queueName = string.Format("bus_{0}", NewId.Next().ToString("NS"));
 
-            _busConsumePipe = CreateConsumePipe(Enumerable.Empty<IPipeSpecification<ConsumeContext>>());
+            _busConsumePipe = CreateConsumePipe();
 
             _busEndpointConfigurator = new ServiceBusReceiveEndpointConfigurator(_hosts[0], queueName, _busConsumePipe)
             {

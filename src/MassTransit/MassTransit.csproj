@@ -83,9 +83,21 @@
     <Compile Include="..\SolutionVersion.cs">
       <Link>SolutionVersion.cs</Link>
     </Compile>
+    <Compile Include="Configuration\BusConfigurators\ConsumePipeBuilder.cs" />
+    <Compile Include="Configuration\BusConfigurators\ConsumePipeSpecification.cs" />
+    <Compile Include="Configuration\BusConfigurators\IConsumePipeBuilder.cs" />
+    <Compile Include="Configuration\BusConfigurators\IConsumePipeSpecification.cs" />
+    <Compile Include="Configuration\IConsumePipeConfigurator.cs" />
+    <Compile Include="Configuration\ITransformConfigurator.cs" />
+    <Compile Include="Configuration\PipeConfigurators\TransformPipeSpecification.cs" />
+    <Compile Include="Configuration\TransformConfiguratorExtensions.cs" />
+    <Compile Include="Context\MessageConsumeContext.cs" />
     <Compile Include="Exceptions\MessageDataException.cs" />
     <Compile Include="Exceptions\MessageDataNotFoundException.cs" />
     <Compile Include="IMessageData.cs" />
+    <Compile Include="MessageDataExtensions.cs" />
+    <Compile Include="MessageData\EmptyMessageData.cs" />
+    <Compile Include="MessageData\FileSystemMessageDataRepository.cs" />
     <Compile Include="MessageData\InMemoryMessageDataId.cs" />
     <Compile Include="MessageData\BigPropertyException.cs" />
     <Compile Include="MessageData\IMessageDataRepository.cs" />
@@ -407,6 +419,7 @@
     <Compile Include="Pipeline\Filters\RetryFilter.cs" />
     <Compile Include="Pipeline\Filters\TeeConsumeFilter.cs" />
     <Compile Include="Pipeline\Filters\TransactionFilter.cs" />
+    <Compile Include="Pipeline\Filters\TransformFilter.cs" />
     <Compile Include="Pipeline\FilterVisitorCallback.cs" />
     <Compile Include="Pipeline\IConnectPipeById.cs" />
     <Compile Include="Pipeline\IConsumeMessageFilterVisitor.cs" />
@@ -527,7 +540,6 @@
     <Compile Include="Serialization\JsonConverters\JsonContractResolver.cs" />
     <Compile Include="Serialization\JsonConverters\MessageDataConverter.cs" />
     <Compile Include="Serialization\JsonConverters\StringDecimalConverter.cs" />
-    <Compile Include="Serialization\MessageConsumeContext.cs" />
     <Compile Include="Serialization\JsonMessageHeaders.cs" />
     <Compile Include="Serialization\JsonMessageDeserializer.cs" />
     <Compile Include="Serialization\JsonMessageEnvelope.cs" />
@@ -709,6 +721,13 @@
     <Compile Include="Testing\ITestSubject.cs" />
     <Compile Include="TransactionContext.cs" />
     <Compile Include="TransactionContextExtensions.cs" />
+    <Compile Include="Transformation\ConsumeTransformContext.cs" />
+    <Compile Include="Transformation\IMessageTransform.cs" />
+    <Compile Include="Transformation\IPropertyTransform.cs" />
+    <Compile Include="Transformation\OriginalMessageTransform.cs" />
+    <Compile Include="Transformation\PropertyTransforms\ReplacePropertyTransform.cs" />
+    <Compile Include="Transformation\TransformContext.cs" />
+    <Compile Include="Transformation\TransformResult.cs" />
     <Compile Include="Transports\AddressEqualityComparer.cs" />
     <Compile Include="Transports\DefaultMessageNameFormatter.cs" />
     <Compile Include="Transports\IBusHost.cs" />
@@ -745,7 +764,6 @@
     <Compile Include="IEndpoint.cs" />
     <Compile Include="IServiceBus.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ServiceBus.cs" />
     <Compile Include="Transports\ITransportSettings.cs" />
     <Compile Include="Util\AsyncObservable.cs" />
     <Compile Include="Util\BusHostInfo.cs" />

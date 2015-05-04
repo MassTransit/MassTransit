@@ -16,6 +16,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
     using System.Collections.Generic;
     using System.Linq;
     using Builders;
+    using BusConfigurators;
     using MassTransit.Builders;
     using MassTransit.Configurators;
     using PipeConfigurators;
@@ -25,7 +26,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
         IRabbitMqBusFactoryConfigurator,
         IBusFactory
     {
-        readonly IList<IPipeSpecification<ConsumeContext>> _endpointPipeSpecifications;
+        readonly ConsumePipeSpecification _consumePipeSpecification;
         readonly IList<IRabbitMqHost> _hosts;
         readonly IList<IBusFactorySpecification> _transportBuilderConfigurators;
 
@@ -33,12 +34,12 @@ namespace MassTransit.RabbitMqTransport.Configuration
         {
             _hosts = new List<IRabbitMqHost>();
             _transportBuilderConfigurators = new List<IBusFactorySpecification>();
-            _endpointPipeSpecifications = new List<IPipeSpecification<ConsumeContext>>();
+            _consumePipeSpecification = new ConsumePipeSpecification();
         }
 
         public IBusControl CreateBus()
         {
-            var builder = new RabbitMqBusBuilder(_hosts, _endpointPipeSpecifications);
+            var builder = new RabbitMqBusBuilder(_hosts, _consumePipeSpecification);
 
             foreach (IBusFactorySpecification configurator in _transportBuilderConfigurators)
                 configurator.Apply(builder);
@@ -55,7 +56,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
 
             foreach (ValidationResult result in _transportBuilderConfigurators.SelectMany(x => x.Validate()))
                 yield return result;
-            foreach (ValidationResult result in _endpointPipeSpecifications.SelectMany(x => x.Validate()))
+            foreach (ValidationResult result in _consumePipeSpecification.Validate())
                 yield return result;
         }
 
@@ -90,11 +91,16 @@ namespace MassTransit.RabbitMqTransport.Configuration
             AddBusFactorySpecification(endpointConfigurator);
         }
 
-        public void AddPipeSpecification(IPipeSpecification<ConsumeContext> specification)
+
+        void IPipeConfigurator<ConsumeContext>.AddPipeSpecification(IPipeSpecification<ConsumeContext> specification)
         {
-            _endpointPipeSpecifications.Add(specification);
+            _consumePipeSpecification.Add(specification);
         }
 
+        void IConsumePipeConfigurator.AddPipeSpecification<T>(IPipeSpecification<ConsumeContext<T>> specification)
+        {
+            _consumePipeSpecification.Add(specification);
+        }
         public void OnPublish<T>(Action<RabbitMqPublishContext<T>> callback)
             where T : class
         {

@@ -18,6 +18,7 @@ namespace MassTransit.Tests
         using System.IO;
         using System.Text;
         using System.Threading;
+        using MassTransit.MessageData;
         using MessageData;
         using NUnit.Framework;
         using TestFramework;

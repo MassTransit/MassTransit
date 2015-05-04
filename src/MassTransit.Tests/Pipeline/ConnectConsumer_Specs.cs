@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,7 +14,6 @@ namespace MassTransit.Tests.Pipeline
 {
     using System;
     using MassTransit.Pipeline;
-    using MassTransit.Pipeline.Pipes;
     using NUnit.Framework;
     using TestFramework;
     using TestFramework.Messages;
@@ -27,7 +26,7 @@ namespace MassTransit.Tests.Pipeline
         [Test]
         public async void Should_receive_a_message()
         {
-            IConsumePipe filter = new ConsumePipe();
+            IConsumePipe filter = CreateConsumePipe();
 
             OneMessageConsumer consumer = GetOneMessageConsumer();
 
@@ -42,28 +41,10 @@ namespace MassTransit.Tests.Pipeline
             await consumer.Task;
         }
 
-        [Test]
-        public async void Should_receive_a_message_via_object()
-        {
-            IConsumePipe filter = new ConsumePipe();
-
-            OneMessageConsumer consumer = GetOneMessageConsumer();
-
-            object subscribeConsumer = consumer;
-
-            filter.ConnectInstance(subscribeConsumer);
-
-            var consumeContext = new TestConsumeContext<MessageA>(new MessageA());
-
-            await filter.Send(consumeContext);
-
-            await consumer.Task;
-        }
-
         [Test, Explicit]
         public void Should_receive_a_message_pipeline_view()
         {
-            IConsumePipe filter = new ConsumePipe();
+            IConsumePipe filter = CreateConsumePipe();
 
             OneMessageConsumer consumer = GetOneMessageConsumer();
 
@@ -78,9 +59,27 @@ namespace MassTransit.Tests.Pipeline
         }
 
         [Test]
+        public async void Should_receive_a_message_via_object()
+        {
+            IConsumePipe filter = CreateConsumePipe();
+
+            OneMessageConsumer consumer = GetOneMessageConsumer();
+
+            object subscribeConsumer = consumer;
+
+            filter.ConnectInstance(subscribeConsumer);
+
+            var consumeContext = new TestConsumeContext<MessageA>(new MessageA());
+
+            await filter.Send(consumeContext);
+
+            await consumer.Task;
+        }
+
+        [Test]
         public async void Should_receive_a_two_messages()
         {
-            IConsumePipe filter = new ConsumePipe();
+            IConsumePipe filter = CreateConsumePipe();
 
             TwoMessageConsumer consumer = GetTwoMessageConsumer();
 

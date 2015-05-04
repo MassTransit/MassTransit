@@ -16,6 +16,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
     using System.Collections.Generic;
     using System.Linq;
     using Builders;
+    using BusConfigurators;
     using MassTransit.Builders;
     using MassTransit.Configurators;
     using MassTransit.Pipeline;
@@ -30,7 +31,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
     {
         readonly IList<IReceiveEndpointSpecification> _configurators;
         readonly IConsumePipe _consumePipe;
-        readonly IList<IPipeSpecification<ConsumeContext>> _consumePipeSpecifications;
+        readonly ConsumePipeSpecification _consumePipeSpecification;
         readonly IRabbitMqHost _host;
         readonly IBuildPipeConfigurator<ReceiveContext> _receivePipeConfigurator;
         readonly RabbitMqReceiveSettings _settings;
@@ -39,7 +40,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
         {
             _host = host;
             _consumePipe = consumePipe;
-            _consumePipeSpecifications = new List<IPipeSpecification<ConsumeContext>>();
+            _consumePipeSpecification = new ConsumePipeSpecification();
             _receivePipeConfigurator = new PipeConfigurator<ReceiveContext>();
             _configurators = new List<IReceiveEndpointSpecification>();
 
@@ -122,14 +123,19 @@ namespace MassTransit.RabbitMqTransport.Configuration
             _configurators.Add(configurator);
         }
 
-        public void AddPipeSpecification(IPipeSpecification<ConsumeContext> specification)
+        void IPipeConfigurator<ConsumeContext>.AddPipeSpecification(IPipeSpecification<ConsumeContext> specification)
         {
-            _consumePipeSpecifications.Add(specification);
+            _consumePipeSpecification.Add(specification);
+        }
+
+        void IConsumePipeConfigurator.AddPipeSpecification<T>(IPipeSpecification<ConsumeContext<T>> specification)
+        {
+            _consumePipeSpecification.Add(specification);
         }
 
         ReceiveEndpoint CreateReceiveEndpoint(IBusBuilder builder)
         {
-            IConsumePipe consumePipe = _consumePipe ?? builder.CreateConsumePipe(_consumePipeSpecifications);
+            IConsumePipe consumePipe = _consumePipe ?? builder.CreateConsumePipe(_consumePipeSpecification);
 
             var endpointBuilder = new RabbitMqReceiveEndpointBuilder(consumePipe, _host.MessageNameFormatter);
 

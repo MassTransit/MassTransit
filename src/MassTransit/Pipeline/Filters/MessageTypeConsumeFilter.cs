@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,8 +14,10 @@ namespace MassTransit.Pipeline.Filters
 {
     using System;
     using System.Collections.Concurrent;
+    using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
+    using Util;
 
 
     public class MessageTypeConsumeFilter :
@@ -26,12 +28,28 @@ namespace MassTransit.Pipeline.Filters
         IConsumeObserverConnector
     {
         readonly ConsumeObserverConnectable _observers;
-        readonly ConcurrentDictionary<Type, IMessageFilter> _pipes;
+        readonly ConcurrentDictionary<Type, IMessagePipe> _pipes;
 
         public MessageTypeConsumeFilter()
         {
-            _pipes = new ConcurrentDictionary<Type, IMessageFilter>();
+            _pipes = new ConcurrentDictionary<Type, IMessagePipe>();
             _observers = new ConsumeObserverConnectable();
+        }
+
+        public ConnectHandle ConnectConsumeMessageObserver<T>(IConsumeMessageObserver<T> observer)
+            where T : class
+        {
+            if (observer == null)
+                throw new ArgumentNullException("observer");
+
+            IConsumeMessageObserverConnector messagePipe = GetPipe<T, IConsumeMessageObserverConnector>();
+
+            return messagePipe.ConnectConsumeMessageObserver(observer);
+        }
+
+        public ConnectHandle ConnectConsumeObserver(IConsumeObserver observer)
+        {
+            return _observers.Connect(observer);
         }
 
         public ConnectHandle ConnectConsumePipe<T>(IPipe<ConsumeContext<T>> pipe)
@@ -45,12 +63,7 @@ namespace MassTransit.Pipeline.Filters
             return messagePipe.ConnectConsumePipe(pipe);
         }
 
-        public ConnectHandle ConnectConsumeObserver(IConsumeObserver observer)
-        {
-            return _observers.Connect(observer);
-        }
-
-        public  Task Send(ConsumeContext context, IPipe<ConsumeContext> next)
+        public Task Send(ConsumeContext context, IPipe<ConsumeContext> next)
         {
             return Task.WhenAll(_pipes.Values.Select(x => x.Filter.Send(context, next)));
         }
@@ -58,17 +71,6 @@ namespace MassTransit.Pipeline.Filters
         public bool Visit(IPipelineVisitor visitor)
         {
             return visitor.Visit(this, x => _pipes.Values.All(pipe => pipe.Filter.Visit(x)));
-        }
-
-        public ConnectHandle ConnectConsumeMessageObserver<T>(IConsumeMessageObserver<T> observer)
-            where T : class
-        {
-            if (observer == null)
-                throw new ArgumentNullException("observer");
-
-            IConsumeMessageObserverConnector messagePipe = GetPipe<T, IConsumeMessageObserverConnector>();
-
-            return messagePipe.ConnectConsumeMessageObserver(observer);
         }
 
         public ConnectHandle ConnectRequestPipe<T>(Guid requestId, IPipe<ConsumeContext<T>> pipe)
@@ -86,66 +88,97 @@ namespace MassTransit.Pipeline.Filters
             where T : class
             where TResult : class
         {
-            return _pipes.GetOrAdd(typeof(T), x =>
-            {
-                var messageConsumeFilter = new MessageConsumeFilter<T>();
+            return GetPipe<T>().As<TResult>();
+        }
 
-                return new MessageFilter<T>(messageConsumeFilter, _observers);
-            }).As<TResult>();
+        IMessagePipe GetPipe<T>()
+            where T : class
+        {
+            return _pipes.GetOrAdd(typeof(T), x => new MessagePipe<T>(_observers));
+        }
+
+        public void AddFilter<T>(IFilter<ConsumeContext<T>> filter)
+            where T : class
+        {
+            GetPipe<T>().AddFilter(filter);
         }
 
 
-        interface IMessageFilter
+        interface IMessagePipe
         {
             IFilter<ConsumeContext> Filter { get; }
 
             TResult As<TResult>()
                 where TResult : class;
+
+            void AddFilter<T>(IFilter<ConsumeContext<T>> filter)
+                where T : class;
         }
 
 
-        class MessageFilter<T> :
-            IMessageFilter,
-            IConsumeMessageObserver<T>
-            where T : class
+        class MessagePipe<TMessage> :
+            IMessagePipe,
+            IConsumeMessageObserver<TMessage>
+            where TMessage : class
         {
-            readonly MessageConsumeFilter<T> _filter;
+            readonly Lazy<IFilter<ConsumeContext>> _filter;
             readonly IConsumeObserver _observer;
+            readonly IList<IFilter<ConsumeContext<TMessage>>> _pipeFilters;
             ConnectHandle _filterHandle;
 
-            public MessageFilter(MessageConsumeFilter<T> filter, IConsumeObserver observer)
+            public MessagePipe(IConsumeObserver observer)
             {
-                _filter = filter;
+                _filter = new Lazy<IFilter<ConsumeContext>>(CreateFilter);
                 _observer = observer;
 
-                // we subscribe to any events so that they are pushed up the stack
-                _filterHandle = ((IConsumeMessageObserverConnector)filter).ConnectConsumeMessageObserver(this);
+                _pipeFilters = new List<IFilter<ConsumeContext<TMessage>>>();
             }
 
-            public IFilter<ConsumeContext> Filter
-            {
-                get { return _filter; }
-            }
-
-            public TResult As<TResult>()
-                where TResult : class
-            {
-                return _filter as TResult;
-            }
-
-            public Task PreConsume(ConsumeContext<T> context)
+            public Task PreConsume(ConsumeContext<TMessage> context)
             {
                 return _observer.PreConsume(context);
             }
 
-            public Task PostConsume(ConsumeContext<T> context)
+            public Task PostConsume(ConsumeContext<TMessage> context)
             {
                 return _observer.PostConsume(context);
             }
 
-            public Task ConsumeFault(ConsumeContext<T> context, Exception exception)
+            public Task ConsumeFault(ConsumeContext<TMessage> context, Exception exception)
             {
                 return _observer.ConsumeFault(context, exception);
+            }
+
+            public IFilter<ConsumeContext> Filter
+            {
+                get { return _filter.Value; }
+            }
+
+            TResult IMessagePipe.As<TResult>()
+            {
+                return _filter.Value as TResult;
+            }
+
+            void IMessagePipe.AddFilter<T>(IFilter<ConsumeContext<T>> filter)
+            {
+                if (_filter.IsValueCreated)
+                    throw new ConfigurationException("The filter has already been created, no additional filters can be added");
+
+                var self = this as MessagePipe<T>;
+                if (self == null)
+                    throw new ArgumentException("The message type is invalid: " + TypeMetadataCache<T>.ShortName);
+
+                self._pipeFilters.Add(filter);
+            }
+
+            IFilter<ConsumeContext> CreateFilter()
+            {
+                var messageConsumeFilter = new MessageConsumeFilter<TMessage>(_pipeFilters);
+
+                // we subscribe to any events so that they are pushed up the stack
+                _filterHandle = ((IConsumeMessageObserverConnector)messageConsumeFilter).ConnectConsumeMessageObserver(this);
+
+                return messageConsumeFilter;
             }
         }
     }

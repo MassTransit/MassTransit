@@ -13,19 +13,13 @@
 namespace MassTransit
 {
     using System;
-    using System.Threading.Tasks;
+    using System.Linq.Expressions;
 
 
-    public interface IMessageData
+    public interface ITransformConfigurator<TInput>
+        where TInput : class
     {
-        /// <summary>
-        /// Returns the address of the message data
-        /// </summary>
-        Uri Address { get; }
-
-        /// <summary>
-        /// True if the value is present in the message, and not null
-        /// </summary>
-        bool HasValue { get; }
+        void Replace<TProperty>(Expression<Func<TInput, TProperty>> propertyExpression, TProperty value)
+            where TProperty : class;
     }
 }

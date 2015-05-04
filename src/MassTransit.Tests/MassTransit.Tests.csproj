@@ -114,6 +114,7 @@
     <Compile Include="Enrichment_Specs.cs" />
     <Compile Include="InterfaceProxy_Specs.cs" />
     <Compile Include="JsonToken_Specs.cs" />
+    <Compile Include="MessageData\FileSystem_Specs.cs" />
     <Compile Include="MessageUrnSpecs.cs" />
     <Compile Include="Configuration\ConsumesAll_Specs.cs" />
     <Compile Include="Configuration\InstanceSubscription_Specs.cs" />
@@ -162,6 +163,7 @@
     <Compile Include="Testing\HandlerTest_Specs.cs" />
     <Compile Include="Testing\SagaTest_Specs.cs" />
     <Compile Include="Threading_Specs.cs" />
+    <Compile Include="Transforms\SetProperty_Specs.cs" />
     <Compile Include="Transports\InMemoryTransport_Specs.cs" />
     <Compile Include="Uri_Specs.cs" />
     <None Include="app.config" />

@@ -13,9 +13,8 @@
 namespace MassTransit.Builders
 {
     using System;
-    using System.Collections.Generic;
     using System.Net.Mime;
-    using PipeConfigurators;
+    using BusConfigurators;
     using Pipeline;
 
 
@@ -62,8 +61,8 @@ namespace MassTransit.Builders
         /// Create a consume pipe for the endpoint, using the bus builder. The bus builder may add additional filters
         /// from the bus configuration to the endpoint which can be overridden by the endpoint.
         /// </summary>
-        /// <param name="consumePipeSpecifications"></param>
+        /// <param name="specifications"></param>
         /// <returns></returns>
-        IConsumePipe CreateConsumePipe(IEnumerable<IPipeSpecification<ConsumeContext>> consumePipeSpecifications);
+        IConsumePipe CreateConsumePipe(params IConsumePipeSpecification[] specifications);
     }
 }

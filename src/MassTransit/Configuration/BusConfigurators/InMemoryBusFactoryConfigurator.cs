@@ -27,7 +27,7 @@ namespace MassTransit.BusConfigurators
         IBusFactory
     {
         readonly IList<IInMemoryBusFactorySpecification> _configurators;
-        readonly IList<IPipeSpecification<ConsumeContext>> _endpointPipeSpecifications;
+        readonly ConsumePipeSpecification _consumePipeSpecification;
         readonly IList<IBusHost> _hosts;
         IReceiveTransportProvider _receiveTransportProvider;
         ISendTransportProvider _sendTransportProvider;
@@ -35,7 +35,7 @@ namespace MassTransit.BusConfigurators
         public InMemoryBusFactoryConfigurator()
         {
             _configurators = new List<IInMemoryBusFactorySpecification>();
-            _endpointPipeSpecifications = new List<IPipeSpecification<ConsumeContext>>();
+            _consumePipeSpecification = new ConsumePipeSpecification();
 
             _hosts = new List<IBusHost>();
         }
@@ -51,7 +51,7 @@ namespace MassTransit.BusConfigurators
                 _sendTransportProvider = _sendTransportProvider ?? transportProvider;
             }
 
-            var builder = new InMemoryBusBuilder(_receiveTransportProvider, _sendTransportProvider, _hosts, _endpointPipeSpecifications);
+            var builder = new InMemoryBusBuilder(_receiveTransportProvider, _sendTransportProvider, _hosts, _consumePipeSpecification);
 
             foreach (IInMemoryBusFactorySpecification configurator in _configurators)
                 configurator.Apply(builder);
@@ -61,22 +61,26 @@ namespace MassTransit.BusConfigurators
 
         public IEnumerable<ValidationResult> Validate()
         {
-            return _endpointPipeSpecifications.SelectMany(x => x.Validate())
+            return _consumePipeSpecification.Validate()
                 .Concat(_configurators.SelectMany(x => x.Validate()));
         }
 
-        public void AddPipeSpecification(IPipeSpecification<ConsumeContext> specification)
+        void IPipeConfigurator<ConsumeContext>.AddPipeSpecification(IPipeSpecification<ConsumeContext> specification)
         {
-            _endpointPipeSpecifications.Add(specification);
+            _consumePipeSpecification.Add(specification);
         }
 
-        public void AddBusFactorySpecification(IBusFactorySpecification configurator)
+        void IConsumePipeConfigurator.AddPipeSpecification<T>(IPipeSpecification<ConsumeContext<T>> specification)
+        {
+            _consumePipeSpecification.Add(specification);
+        }
+
+        void IBusFactoryConfigurator.AddBusFactorySpecification(IBusFactorySpecification configurator)
         {
             _configurators.Add(new ConfiguratorProxy(configurator));
         }
 
-        public void SetTransportProvider<T>(T transportProvider)
-            where T : ISendTransportProvider, IReceiveTransportProvider
+        void IInMemoryBusFactoryConfigurator.SetTransportProvider<T>(T transportProvider)
         {
             _receiveTransportProvider = transportProvider;
             _sendTransportProvider = transportProvider;

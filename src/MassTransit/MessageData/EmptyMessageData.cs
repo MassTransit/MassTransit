@@ -10,22 +10,33 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit
+namespace MassTransit.MessageData
 {
     using System;
     using System.Threading.Tasks;
 
 
-    public interface IMessageData
+    public class EmptyMessageData<T> :
+        MessageData<T>
     {
-        /// <summary>
-        /// Returns the address of the message data
-        /// </summary>
-        Uri Address { get; }
+        public Uri Address
+        {
+            get { throw new MessageDataException("The message data is empty"); }
+        }
 
-        /// <summary>
-        /// True if the value is present in the message, and not null
-        /// </summary>
-        bool HasValue { get; }
+        public bool HasValue
+        {
+            get { return false; }
+        }
+
+        public Task<T> Value
+        {
+            get { return NoValue(); }
+        }
+
+        async Task<T> NoValue()
+        {
+            throw new MessageDataException("The message data is empty");
+        }
     }
 }
