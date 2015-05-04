@@ -1,6 +1,7 @@
 ﻿namespace MassTransit.Tests.Serialization
 {
     using System;
+    using MassTransit.MessageData;
     using MassTransit.Serialization;
     using MessageData;
     using NUnit.Framework;
@@ -24,9 +25,13 @@
         }
 
         [Test]
-        public void Should_handle_a_string_null()
+        public async void Should_handle_a_string_null()
         {
-            var obj = new SampleMessage { Value = new StringMessageData(new Uri("urn:msgdata:098098120983123"), "Hello, World!") };
+            var repository = new InMemoryMessageDataRepository();
+
+            var dataId = new InMemoryMessageDataId().Uri;
+
+            var obj = new SampleMessage { Value = await repository.PutString("Hello, World!") };
 
             Serialize(obj);
         }

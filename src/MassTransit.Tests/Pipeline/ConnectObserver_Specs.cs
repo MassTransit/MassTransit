@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -15,7 +15,6 @@ namespace MassTransit.Tests.Pipeline
     using System;
     using System.Threading.Tasks;
     using MassTransit.Pipeline;
-    using MassTransit.Pipeline.Pipes;
     using NUnit.Framework;
     using TestFramework;
     using TestFramework.Messages;
@@ -28,7 +27,7 @@ namespace MassTransit.Tests.Pipeline
         [Test]
         public void Should_invoke_faulted()
         {
-            IConsumePipe filter = new ConsumePipe();
+            IConsumePipe filter = CreateConsumePipe();
 
             filter.ConnectHandler<MessageA>(async context =>
             {
@@ -50,7 +49,7 @@ namespace MassTransit.Tests.Pipeline
         [Test]
         public async void Should_invoke_post()
         {
-            IConsumePipe filter = new ConsumePipe();
+            IConsumePipe filter = CreateConsumePipe();
 
             TaskCompletionSource<MessageA> received = GetTask<MessageA>();
 
@@ -71,7 +70,7 @@ namespace MassTransit.Tests.Pipeline
         [Test]
         public async void Should_invoke_post_consumer()
         {
-            IConsumePipe filter = new ConsumePipe();
+            IConsumePipe filter = CreateConsumePipe();
 
             TaskCompletionSource<MessageA> received = GetTask<MessageA>();
 
@@ -92,7 +91,7 @@ namespace MassTransit.Tests.Pipeline
         [Test]
         public async void Should_invoke_pre()
         {
-            IConsumePipe filter = new ConsumePipe();
+            IConsumePipe filter = CreateConsumePipe();
 
             TaskCompletionSource<MessageA> received = GetTask<MessageA>();
 

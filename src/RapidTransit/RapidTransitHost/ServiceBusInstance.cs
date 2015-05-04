@@ -59,6 +59,11 @@ namespace RapidTransit
             _pipeConfigurators.Add(specification);
         }
 
+        void IConsumePipeConfigurator.AddPipeSpecification<T>(IPipeSpecification<ConsumeContext<T>> specification)
+        {
+            throw new System.NotImplementedException();
+        }
+
         public void Configure(IReceiveEndpointConfigurator configurator)
         {
             _log.InfoFormat("{0} Configuring Receive Endpoint for Queue: {1}({2})", GetType().GetServiceDescription(), _queueName,

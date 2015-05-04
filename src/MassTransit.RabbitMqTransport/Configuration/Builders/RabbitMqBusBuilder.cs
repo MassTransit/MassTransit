@@ -16,9 +16,9 @@ namespace MassTransit.RabbitMqTransport.Configuration.Builders
     using System.Collections.Generic;
     using System.Linq;
     using System.Text;
+    using BusConfigurators;
     using MassTransit.Builders;
     using MassTransit.Pipeline;
-    using PipeConfigurators;
     using Transports;
     using Util;
 
@@ -31,8 +31,8 @@ namespace MassTransit.RabbitMqTransport.Configuration.Builders
         readonly RabbitMqReceiveEndpointConfigurator _busEndpointConfigurator;
         readonly IRabbitMqHost[] _hosts;
 
-        public RabbitMqBusBuilder(IEnumerable<IRabbitMqHost> hosts, IEnumerable<IPipeSpecification<ConsumeContext>> endpointPipeSpecifications)
-            : base(endpointPipeSpecifications)
+        public RabbitMqBusBuilder(IEnumerable<IRabbitMqHost> hosts, IConsumePipeSpecification consumePipeSpecification)
+            : base(consumePipeSpecification)
         {
             _hosts = hosts.ToArray();
 
@@ -40,7 +40,7 @@ namespace MassTransit.RabbitMqTransport.Configuration.Builders
             string processName = GetSanitizedQueueNameString(HostMetadataCache.Host.ProcessName);
             string queueName = string.Format("bus-{0}-{1}-{2}", processName, machineName, NewId.Next().ToString("NS"));
 
-            _busConsumePipe = CreateConsumePipe(Enumerable.Empty<IPipeSpecification<ConsumeContext>>());
+            _busConsumePipe = CreateConsumePipe();
 
             _busEndpointConfigurator = new RabbitMqReceiveEndpointConfigurator(_hosts[0], queueName, _busConsumePipe);
             _busEndpointConfigurator.Exclusive();

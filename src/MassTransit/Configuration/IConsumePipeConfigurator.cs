@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,20 +12,18 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
-    using System;
-    using System.Threading.Tasks;
+    using PipeConfigurators;
 
 
-    public interface IMessageData
+    public interface IConsumePipeConfigurator :
+        IPipeConfigurator<ConsumeContext>
     {
         /// <summary>
-        /// Returns the address of the message data
+        /// Adds a type-specific pipe specification to the consume pipe
         /// </summary>
-        Uri Address { get; }
-
-        /// <summary>
-        /// True if the value is present in the message, and not null
-        /// </summary>
-        bool HasValue { get; }
+        /// <typeparam name="T">The message type</typeparam>
+        /// <param name="specification"></param>
+        void AddPipeSpecification<T>(IPipeSpecification<ConsumeContext<T>> specification)
+            where T : class;
     }
 }

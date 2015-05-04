@@ -13,19 +13,26 @@
 namespace MassTransit
 {
     using System;
-    using System.Threading.Tasks;
+    using PipeConfigurators;
 
 
-    public interface IMessageData
+    public static class TransformConfiguratorExtensions
     {
         /// <summary>
-        /// Returns the address of the message data
+        /// Encapsulate the pipe behavior in a transaction
         /// </summary>
-        Uri Address { get; }
+        /// <typeparam name="T"></typeparam>
+        /// <param name="configurator"></param>
+        /// <param name="configureCallback"></param>
+        public static void UseTransform<T>(this IConsumePipeConfigurator configurator,
+            Action<ITransformConfigurator<T>> configureCallback)
+            where T : class
+        {
+            var transformConfigurator = new TransformPipeSpecification<T>();
 
-        /// <summary>
-        /// True if the value is present in the message, and not null
-        /// </summary>
-        bool HasValue { get; }
+            configureCallback(transformConfigurator);
+
+            configurator.AddPipeSpecification(transformConfigurator);
+        }
     }
 }

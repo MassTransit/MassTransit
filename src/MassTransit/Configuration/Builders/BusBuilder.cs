@@ -16,9 +16,8 @@ namespace MassTransit.Builders
     using System.Collections.Generic;
     using System.Linq;
     using System.Net.Mime;
-    using PipeConfigurators;
+    using BusConfigurators;
     using Pipeline;
-    using Pipeline.Pipes;
     using Serialization;
 
 
@@ -26,22 +25,21 @@ namespace MassTransit.Builders
     {
         readonly Lazy<IMessageDeserializer> _deserializer;
         readonly IDictionary<string, DeserializerFactory> _deserializerFactories;
-        readonly IList<IPipeSpecification<ConsumeContext>> _endpointPipeSpecifications;
         readonly Lazy<Uri> _inputAddress;
         readonly Lazy<IPublishEndpoint> _publishEndpointProvider;
         readonly IList<IReceiveEndpoint> _receiveEndpoints;
         readonly Lazy<ISendEndpointProvider> _sendEndpointProvider;
         readonly Lazy<ISendTransportProvider> _sendTransportProvider;
         readonly Lazy<IMessageSerializer> _serializer;
+        IConsumePipeSpecification _consumePipeSpecification;
         Func<IMessageSerializer> _serializerFactory;
 
-        protected BusBuilder(IEnumerable<IPipeSpecification<ConsumeContext>> endpointPipeSpecifications)
+        protected BusBuilder(IConsumePipeSpecification consumePipeSpecification)
         {
+            _consumePipeSpecification = consumePipeSpecification;
             _deserializerFactories = new Dictionary<string, DeserializerFactory>(StringComparer.OrdinalIgnoreCase);
             _receiveEndpoints = new List<IReceiveEndpoint>();
             _serializerFactory = () => new JsonMessageSerializer();
-
-            _endpointPipeSpecifications = endpointPipeSpecifications.ToList();
 
             _serializer = new Lazy<IMessageSerializer>(CreateSerializer);
             _deserializer = new Lazy<IMessageDeserializer>(CreateDeserializer);
@@ -123,9 +121,16 @@ namespace MassTransit.Builders
             _serializerFactory = serializerFactory;
         }
 
-        public IConsumePipe CreateConsumePipe(IEnumerable<IPipeSpecification<ConsumeContext>> specifications)
+        public IConsumePipe CreateConsumePipe(params IConsumePipeSpecification[] specifications)
         {
-            return new ConsumePipe(_endpointPipeSpecifications.Concat(specifications));
+            var builder = new ConsumePipeBuilder();
+
+            _consumePipeSpecification.Apply(builder);
+
+            for (int i = 0; i < specifications.Length; i++)
+                specifications[i].Apply(builder);
+
+            return builder.Build();
         }
 
         IMessageSerializer CreateSerializer()

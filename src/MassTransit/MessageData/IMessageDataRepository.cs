@@ -37,8 +37,9 @@ namespace MassTransit.MessageData
         /// Puts message data into the repository
         /// </summary>
         /// <param name="stream">The stream of data for the message</param>
+        /// <param name="timeToLive"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task<Uri> Put(Stream stream, CancellationToken cancellationToken = default(CancellationToken));
+        Task<Uri> Put(Stream stream, TimeSpan? timeToLive = default(TimeSpan?), CancellationToken cancellationToken = default(CancellationToken));
     }
 }

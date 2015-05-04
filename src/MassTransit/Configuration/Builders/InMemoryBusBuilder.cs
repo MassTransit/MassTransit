@@ -15,7 +15,7 @@ namespace MassTransit.Builders
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using PipeConfigurators;
+    using BusConfigurators;
     using Pipeline;
     using Transports;
     using Transports.InMemory;
@@ -33,8 +33,8 @@ namespace MassTransit.Builders
 
         public InMemoryBusBuilder(IReceiveTransportProvider receiveTransportProvider,
             ISendTransportProvider sendTransportProvider, IEnumerable<IBusHost> hosts,
-            IEnumerable<IPipeSpecification<ConsumeContext>> endpointPipeSpecifications)
-            : base(endpointPipeSpecifications)
+            IConsumePipeSpecification consumePipeSpecification)
+            : base(consumePipeSpecification)
         {
             if (receiveTransportProvider == null)
                 throw new ArgumentNullException("receiveTransportProvider");
@@ -85,7 +85,7 @@ namespace MassTransit.Builders
 
         IConsumePipe CreateBusReceiveEndpoint()
         {
-            IConsumePipe busConsumePipe = CreateConsumePipe(Enumerable.Empty<IPipeSpecification<ConsumeContext>>());
+            IConsumePipe busConsumePipe = CreateConsumePipe();
 
             var busEndpointConfigurator = new InMemoryReceiveEndpointConfigurator(_busQueueName, busConsumePipe);
             busEndpointConfigurator.Apply(this);

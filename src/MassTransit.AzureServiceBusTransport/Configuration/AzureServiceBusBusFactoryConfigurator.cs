@@ -16,6 +16,7 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
     using System.Collections.Generic;
     using System.Linq;
     using Builders;
+    using BusConfigurators;
     using Configurators;
     using PipeConfigurators;
 
@@ -24,15 +25,15 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
         IServiceBusBusFactoryConfigurator,
         IBusFactory
     {
+        readonly ConsumePipeSpecification _consumePipeSpecification;
         readonly IList<IServiceBusHost> _hosts;
         readonly IList<IBusFactorySpecification> _transportSpecifications;
-        readonly IList<IPipeSpecification<ConsumeContext>> _endpointPipeSpecifications;
 
         public AzureServiceBusBusFactoryConfigurator()
         {
             _hosts = new List<IServiceBusHost>();
             _transportSpecifications = new List<IBusFactorySpecification>();
-            _endpointPipeSpecifications = new List<IPipeSpecification<ConsumeContext>>();
+            _consumePipeSpecification = new ConsumePipeSpecification();
         }
 
         public IEnumerable<ValidationResult> Validate()
@@ -42,7 +43,7 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
 
         public IBusControl CreateBus()
         {
-            var builder = new ServiceBusBusBuilder(_hosts, _endpointPipeSpecifications);
+            var builder = new ServiceBusBusBuilder(_hosts, _consumePipeSpecification);
 
             foreach (IBusFactorySpecification configurator in _transportSpecifications)
                 configurator.Apply(builder);
@@ -71,10 +72,12 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
 
         void IPipeConfigurator<ConsumeContext>.AddPipeSpecification(IPipeSpecification<ConsumeContext> specification)
         {
-            if (specification == null)
-                throw new ArgumentNullException("specification");
+            _consumePipeSpecification.Add(specification);
+        }
 
-            _endpointPipeSpecifications.Add(specification);
+        void IConsumePipeConfigurator.AddPipeSpecification<T>(IPipeSpecification<ConsumeContext<T>> specification)
+        {
+            _consumePipeSpecification.Add(specification);
         }
     }
 }

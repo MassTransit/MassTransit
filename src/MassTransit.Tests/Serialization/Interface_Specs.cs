@@ -13,8 +13,8 @@
 namespace MassTransit.Tests.Serialization
 {
 	using System;
+	using BusConfigurators;
 	using MassTransit.Pipeline;
-	using MassTransit.Pipeline.Pipes;
 	using MassTransit.Serialization;
 	using NUnit.Framework;
 	using Shouldly;
@@ -50,7 +50,7 @@ namespace MassTransit.Tests.Serialization
 		[Test]
 		public async void Should_dispatch_an_interface_via_the_pipeline()
 		{
-		    IConsumePipe pipe = new ConsumePipe();
+		    IConsumePipe pipe = new ConsumePipeBuilder().Build();
 			var consumer = new TestMessageConsumer<ComplaintAdded>();
 
 			pipe.ConnectInstance(consumer);

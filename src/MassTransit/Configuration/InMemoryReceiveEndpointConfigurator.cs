@@ -15,9 +15,8 @@ namespace MassTransit
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Runtime.Serialization;
-    using System.Threading.Tasks;
     using Builders;
+    using BusConfigurators;
     using Configurators;
     using Logging;
     using PipeConfigurators;
@@ -34,18 +33,17 @@ namespace MassTransit
 
         readonly IList<IReceiveEndpointSpecification> _configurators;
         readonly IConsumePipe _consumePipe;
-        readonly IList<IPipeSpecification<ConsumeContext>> _consumePipeSpecifications;
+        readonly ConsumePipeSpecification _consumePipeSpecification; 
         readonly string _queueName;
         readonly IBuildPipeConfigurator<ReceiveContext> _receivePipeConfigurator;
 
         public InMemoryReceiveEndpointConfigurator(string queueName, IConsumePipe consumePipe = null)
         {
+            _consumePipeSpecification = new ConsumePipeSpecification();
             _queueName = queueName;
             _consumePipe = consumePipe;
             _receivePipeConfigurator = new PipeConfigurator<ReceiveContext>();
             _configurators = new List<IReceiveEndpointSpecification>();
-
-            _consumePipeSpecifications = new List<IPipeSpecification<ConsumeContext>>();
         }
 
         public IEnumerable<ValidationResult> Validate()
@@ -58,9 +56,14 @@ namespace MassTransit
             builder.AddReceiveEndpoint(CreateReceiveEndpoint(builder));
         }
 
-        public void AddPipeSpecification(IPipeSpecification<ConsumeContext> specification)
+        void IPipeConfigurator<ConsumeContext>.AddPipeSpecification(IPipeSpecification<ConsumeContext> specification)
         {
-            _consumePipeSpecifications.Add(specification);
+            _consumePipeSpecification.Add(specification);
+        }
+
+        void IConsumePipeConfigurator.AddPipeSpecification<T>(IPipeSpecification<ConsumeContext<T>> specification)
+        {
+            _consumePipeSpecification.Add(specification);
         }
 
         public void AddEndpointSpecification(IReceiveEndpointSpecification configurator)
@@ -72,7 +75,7 @@ namespace MassTransit
         {
             IReceiveTransport transport = builder.ReceiveTransportProvider.GetReceiveTransport(_queueName);
 
-            IConsumePipe consumePipe = _consumePipe ?? builder.CreateConsumePipe(_consumePipeSpecifications);
+            IConsumePipe consumePipe = _consumePipe ?? builder.CreateConsumePipe(_consumePipeSpecification);
 
             if (_log.IsDebugEnabled)
             {
@@ -94,7 +97,6 @@ namespace MassTransit
             foreach (IReceiveEndpointSpecification builderConfigurator in _configurators)
                 builderConfigurator.Configure(endpointBuilder);
 
-            // TODO insert filter that if other excpetion 'n' times move to error
             // TODO insert dead-letter filter so that no message consumers moves to "_skipped"
 
             var errorAddress = new Uri(string.Format("loopback://localhost/{0}_error", _queueName));

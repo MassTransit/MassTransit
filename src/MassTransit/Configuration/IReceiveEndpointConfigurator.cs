@@ -12,14 +12,11 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
-    using EndpointConfigurators;
-
-
     /// <summary>
     /// Configure a receiving endpoint
     /// </summary>
     public interface IReceiveEndpointConfigurator :
-        IPipeConfigurator<ConsumeContext>
+        IConsumePipeConfigurator
     {
         void AddEndpointSpecification(IReceiveEndpointSpecification configurator);
     }

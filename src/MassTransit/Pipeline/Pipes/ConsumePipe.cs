@@ -13,11 +13,8 @@
 namespace MassTransit.Pipeline.Pipes
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
     using System.Threading.Tasks;
     using Filters;
-    using PipeConfigurators;
 
 
     public class ConsumePipe :
@@ -26,24 +23,15 @@ namespace MassTransit.Pipeline.Pipes
         readonly MessageTypeConsumeFilter _filter;
         readonly IPipe<ConsumeContext> _pipe;
 
-        public ConsumePipe()
-            : this(Enumerable.Empty<IPipeSpecification<ConsumeContext>>())
+        public ConsumePipe(MessageTypeConsumeFilter messageTypeConsumeFilter, IPipe<ConsumeContext> pipe)
         {
-        }
+            if (messageTypeConsumeFilter == null)
+                throw new ArgumentNullException("messageTypeConsumeFilter");
+            if (pipe == null)
+                throw new ArgumentNullException("pipe");
 
-        public ConsumePipe(IEnumerable<IPipeSpecification<ConsumeContext>> specifications)
-        {
-            if (specifications == null)
-                throw new ArgumentNullException("specifications");
-
-            _filter = new MessageTypeConsumeFilter();
-            _pipe = Pipe.New<ConsumeContext>(x =>
-            {
-                foreach (var specification in specifications)
-                    x.AddPipeSpecification(specification);
-
-                x.Filter(_filter);
-            });
+            _filter = messageTypeConsumeFilter;
+            _pipe = pipe;
         }
 
         Task IPipe<ConsumeContext>.Send(ConsumeContext context)

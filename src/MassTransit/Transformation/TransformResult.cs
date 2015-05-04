@@ -10,22 +10,25 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit
+namespace MassTransit.Transformation
 {
-    using System;
-    using System.Threading.Tasks;
-
-
-    public interface IMessageData
+    /// <summary>
+    /// The result of a message transformation
+    /// </summary>
+    /// <typeparam name="TResult"></typeparam>
+    public interface TransformResult<out TResult>
+        where TResult : class
     {
         /// <summary>
-        /// Returns the address of the message data
+        /// The transformed message
         /// </summary>
-        Uri Address { get; }
+        TResult Value { get; }
 
         /// <summary>
-        /// True if the value is present in the message, and not null
+        /// True if the transform has returned a new value, otherwise false. Some transforms
+        /// actually apply to the original message, versus creating a new message leaving the
+        /// original message unmodified.
         /// </summary>
-        bool HasValue { get; }
+        bool IsNewValue { get; }
     }
 }
