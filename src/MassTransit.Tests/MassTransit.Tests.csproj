@@ -106,7 +106,7 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Array_Specs.cs" />
+    <Compile Include="Serialization\Array_Specs.cs" />
     <Compile Include="Configuration\Diagnostics_Specs.cs" />
     <Compile Include="Configuration\ShutdownTimeout_Specs.cs" />
     <Compile Include="InterceptingConsumer_Specs.cs" />
@@ -199,6 +199,7 @@
     <Compile Include="Serialization\DateTime_Specs.cs" />
     <Compile Include="Serialization\GenericMessageType_Specs.cs" />
     <Compile Include="Serialization\DefaultConstructor_Specs.cs" />
+    <Compile Include="Serialization\Issue284_Array.cs" />
     <Compile Include="Serialization\SerializationException_Specs.cs" />
     <Compile Include="Services\HealthMonitoring\HealthClient_Integration_Specs.cs" />
     <Compile Include="Services\Timeout\TimeoutService_Specs.cs" />
