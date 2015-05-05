@@ -13,9 +13,7 @@
 namespace MassTransit.Transformation
 {
     using System;
-    using System.Collections.Generic;
     using System.Threading;
-    using System.Threading.Tasks;
     using Context;
 
 
@@ -35,11 +33,6 @@ namespace MassTransit.Transformation
         {
             _context = context;
             _payloadCache = new PayloadCache();
-        }
-
-        IEnumerable<string> TransformContext.SupportedMessageTypes
-        {
-            get { return _context.SupportedMessageTypes; }
         }
 
         CancellationToken TransformContext.CancellationToken
@@ -77,53 +70,37 @@ namespace MassTransit.Transformation
             get { return _context.Message; }
         }
 
-        public bool HasInput
+        bool TransformContext<TMessage>.HasInput
         {
             get { return true; }
         }
 
-        public async Task<TransformResult<TMessage>> ReturnOriginal()
+        TransformResult<TResult> TransformContext<TMessage>.Return<TResult>(TResult value, bool isNewValue)
         {
-            return new OriginalResult(_context.Message);
-        }
-
-        bool TransformContext.HasMessageType(Type messageType)
-        {
-            return _context.HasMessageType(messageType);
-        }
-
-        bool TransformContext.TryGetMessage<T>(out T message)
-        {
-            ConsumeContext<T> consumeContext;
-            if (_context.TryGetMessage(out consumeContext))
-            {
-                message = consumeContext.Message;
-                return true;
-            }
-
-            message = null;
-            return false;
+            return new Result<TResult>(value, isNewValue);
         }
 
 
-        class OriginalResult :
-            TransformResult<TMessage>
+        class Result<TResult> :
+            TransformResult<TResult>
         {
-            readonly TMessage _value;
+            readonly bool _isNewValue;
+            readonly TResult _value;
 
-            public OriginalResult(TMessage value)
+            public Result(TResult value, bool isNewValue)
             {
                 _value = value;
+                _isNewValue = isNewValue;
             }
 
-            public TMessage Value
+            public TResult Value
             {
                 get { return _value; }
             }
 
             public bool IsNewValue
             {
-                get { return false; }
+                get { return _isNewValue; }
             }
         }
     }

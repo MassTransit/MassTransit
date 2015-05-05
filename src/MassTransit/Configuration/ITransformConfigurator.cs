@@ -14,12 +14,35 @@ namespace MassTransit
 {
     using System;
     using System.Linq.Expressions;
+    using System.Reflection;
+    using Transformation;
+    using TransformConfigurators;
 
 
     public interface ITransformConfigurator<TInput>
-        where TInput : class
     {
-        void Replace<TProperty>(Expression<Func<TInput, TProperty>> propertyExpression, TProperty value)
-            where TProperty : class;
+        /// <summary>
+        /// Replace the value on the input with the specified value
+        /// </summary>
+        /// <typeparam name="TProperty"></typeparam>
+        /// <param name="propertyExpression"></param>
+        /// <param name="valueProvider">The method to return the property</param>
+        void Replace<TProperty>(Expression<Func<TInput, TProperty>> propertyExpression, Func<SourceContext<TProperty, TInput>, TProperty> valueProvider);
+
+        /// <summary>
+        /// Set the property to the value, using the source context to create/select the value
+        /// </summary>
+        /// <typeparam name="TProperty">The property type</typeparam>
+        /// <param name="propertyExpression">The property select expression</param>
+        /// <param name="valueProvider">The method to return the property</param>
+        void Set<TProperty>(Expression<Func<TInput, TProperty>> propertyExpression, Func<SourceContext<TProperty, TInput>, TProperty> valueProvider);
+
+        /// <summary>
+        /// Set the property to the value, using the source context to create/select the value
+        /// </summary>
+        /// <typeparam name="TProperty">The property type</typeparam>
+        /// <param name="property"></param>
+        /// <param name="propertyProvider"></param>
+        void Set<TProperty>(PropertyInfo property, IPropertyProvider<TProperty, TInput> propertyProvider);
     }
 }

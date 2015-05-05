@@ -10,30 +10,24 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Transformation.PropertyTransforms
+namespace MassTransit.Transformation.PropertyProviders
 {
-    using System.Reflection;
-    using System.Threading.Tasks;
-    using Internals.Reflection;
+    using TransformConfigurators;
 
 
-    public class ReplacePropertyTransform<TProperty, TInput> :
-        IPropertyTransform<TInput>
-        where TInput : class
+    public class ValuePropertyProvider<TResult, TInput> :
+        IPropertyProvider<TResult, TInput>
     {
-        readonly ReadWriteProperty<TInput, TProperty> _property;
-        readonly TProperty _value;
+        readonly TResult _value;
 
-        public ReplacePropertyTransform(PropertyInfo property, TProperty value)
+        public ValuePropertyProvider(TResult value)
         {
-            _property = new ReadWriteProperty<TInput, TProperty>(property);
             _value = value;
         }
 
-        public async Task Apply(TransformContext<TInput> context)
+        public TResult GetProperty(TransformContext<TInput> context)
         {
-            if (context.HasInput)
-                _property.Set(context.Input, _value);
+            return _value;
         }
     }
 }

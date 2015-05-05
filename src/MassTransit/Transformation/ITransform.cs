@@ -12,12 +12,14 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transformation
 {
-    using System.Threading.Tasks;
-
-
-    public interface IMessageTransform<TMessage>
-        where TMessage : class
+    public interface ITransform<TMessage> :
+        ITransform<TMessage, TMessage>
     {
-        Task<TransformResult<TMessage>> ApplyTo(TransformContext<TMessage> context);
+    }
+
+
+    public interface ITransform<out TResult, in TInput>
+    {
+        TransformResult<TResult> ApplyTo(TransformContext<TInput> context);
     }
 }

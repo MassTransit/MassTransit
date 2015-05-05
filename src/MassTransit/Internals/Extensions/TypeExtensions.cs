@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -39,19 +39,16 @@ namespace MassTransit.Internals.Extensions
             }
 
             List<PropertyInfo> properties = typeInfo.DeclaredMethods
-                .Where(
-                    x => x.IsSpecialName && x.Name.StartsWith("get_") && !x.IsStatic)
-                .Select(
-                    x =>
-                        typeInfo.GetDeclaredProperty(x.Name.Substring("get_".Length)))
+                .Where(x => x.IsSpecialName && x.Name.StartsWith("get_") && !x.IsStatic)
+                .Select(x => typeInfo.GetDeclaredProperty(x.Name.Substring("get_".Length)))
                 .ToList();
 
             if (typeInfo.IsInterface)
             {
-                foreach (
-                    PropertyInfo prop in
-                        properties.Concat(
-                            typeInfo.ImplementedInterfaces.SelectMany(x => x.GetTypeInfo().DeclaredProperties)))
+                IEnumerable<PropertyInfo> sourceProperties = properties
+                    .Concat(typeInfo.ImplementedInterfaces.SelectMany(x => x.GetTypeInfo().DeclaredProperties));
+                
+                foreach (PropertyInfo prop in sourceProperties)
                     yield return prop;
 
                 yield break;

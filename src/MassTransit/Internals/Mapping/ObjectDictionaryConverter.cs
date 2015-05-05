@@ -5,6 +5,7 @@
     using System.Linq;
     using Extensions;
     using Reflection;
+    using Util;
 
 
     public class ObjectDictionaryConverter<T> :
@@ -13,13 +14,11 @@
     {
         readonly DictionaryConverterCache _cache;
         readonly IDictionaryMapper<T>[] _mappers;
-        readonly ReadOnlyPropertyCache<T> _propertyCache;
 
         public ObjectDictionaryConverter(DictionaryConverterCache cache)
         {
             _cache = cache;
-            _propertyCache = new ReadOnlyPropertyCache<T>();
-            _mappers = _propertyCache
+            _mappers = TypeMetadataCache<T>.ReadOnlyPropertyCache
                 .Select(property => GetDictionaryMapper(property, property.Property.PropertyType))
                 .ToArray();
         }

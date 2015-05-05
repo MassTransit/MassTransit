@@ -13,7 +13,7 @@
 namespace MassTransit
 {
     using System;
-    using PipeConfigurators;
+    using TransformConfigurators;
 
 
     public static class TransformConfiguratorExtensions
@@ -24,11 +24,26 @@ namespace MassTransit
         /// <typeparam name="T"></typeparam>
         /// <param name="configurator"></param>
         /// <param name="configureCallback"></param>
-        public static void UseTransform<T>(this IConsumePipeConfigurator configurator,
-            Action<ITransformConfigurator<T>> configureCallback)
+        public static void UseTransform<T>(this IConsumePipeConfigurator configurator, Action<ITransformConfigurator<T>> configureCallback)
             where T : class
         {
-            var transformConfigurator = new TransformPipeSpecification<T>();
+            var transformConfigurator = new TransformConsumePipeSpecification<T>();
+
+            configureCallback(transformConfigurator);
+
+            configurator.AddPipeSpecification(transformConfigurator);
+        }
+
+        /// <summary>
+        /// Encapsulate the pipe behavior in a transaction
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="configurator"></param>
+        /// <param name="configureCallback"></param>
+        public static void UseTransform<T>(this IPipeConfigurator<ConsumeContext<T>> configurator, Action<ITransformConfigurator<T>> configureCallback)
+            where T : class
+        {
+            var transformConfigurator = new TransformConsumePipeSpecification<T>();
 
             configureCallback(transformConfigurator);
 
