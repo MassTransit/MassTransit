@@ -27,6 +27,11 @@ namespace MassTransit.TransformConfigurators
         {
         }
 
+        public InputPropertyTransformSpecification(PropertyInfo property, IPropertyProvider<TProperty, TInput> propertyProvider)
+            : base(property, propertyProvider)
+        {
+        }
+
         protected override void Build(ITransformBuilder<TResult, TInput> builder, IPropertyProvider<TProperty, TInput> propertyProvider, PropertyInfo property)
         {
             var transform = new InputPropertyTransform<TProperty, TInput>(property, propertyProvider);

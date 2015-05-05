@@ -13,28 +13,19 @@
 namespace MassTransit.MessageData
 {
     using System;
-    using System.IO;
-    using System.Threading;
     using System.Threading.Tasks;
 
 
-    public class LoadMessageData<T> :
+    public class ConstantMessageData<T> :
         MessageData<T>
     {
         readonly Uri _address;
-        readonly CancellationToken _cancellationToken;
-        readonly IMessageDataConverter<T> _converter;
-        readonly IMessageDataRepository _repository;
-        readonly Lazy<Task<T>> _value;
+        readonly Task<T> _value;
 
-        public LoadMessageData(Uri address, IMessageDataRepository repository, IMessageDataConverter<T> converter, CancellationToken cancellationToken)
+        public ConstantMessageData(Uri address, T value)
         {
             _address = address;
-            _repository = repository;
-            _converter = converter;
-            _cancellationToken = cancellationToken;
-
-            _value = new Lazy<Task<T>>(GetValue);
+            _value = Task.FromResult(value);
         }
 
         public Uri Address
@@ -49,15 +40,7 @@ namespace MassTransit.MessageData
 
         public Task<T> Value
         {
-            get { return _value.Value; }
-        }
-
-        async Task<T> GetValue()
-        {
-            using (Stream valueStream = await _repository.Get(_address, _cancellationToken))
-            {
-                return await _converter.Convert(valueStream, _cancellationToken);
-            }
+            get { return _value; }
         }
     }
 }

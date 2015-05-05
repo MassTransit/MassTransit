@@ -12,35 +12,9 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.MessageData
 {
-    using System;
-    using System.Threading.Tasks;
-
-
-    public class StringMessageData :
-        MessageData<string>
+    public static class MessageDataConverter
     {
-        readonly Uri _address;
-        readonly Task<string> _value;
-
-        public StringMessageData(Uri address, string value)
-        {
-            _address = address;
-            _value = Task.FromResult(value);
-        }
-
-        public Uri Address
-        {
-            get { return _address; }
-        }
-
-        public bool HasValue
-        {
-            get { return true; }
-        }
-
-        public Task<string> Value
-        {
-            get { return _value; }
-        }
+        public static readonly IMessageDataConverter<string> String = new StringMessageDataConverter();
+        public static readonly IMessageDataConverter<byte[]> ByteArray = new ByteArrayMessageDataConverter();
     }
 }

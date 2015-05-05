@@ -35,7 +35,7 @@ namespace MassTransit
             {
                 Uri address = await repository.Put(ms, default(TimeSpan?), cancellationToken);
 
-                return new StringMessageData(address, value);
+                return new ConstantMessageData<string>(address, value);
             }
         }
 
@@ -52,7 +52,7 @@ namespace MassTransit
             {
                 Uri address = await repository.Put(ms, timeToLive, cancellationToken);
 
-                return new StringMessageData(address, value);
+                return new ConstantMessageData<string>(address, value);
             }
         }
 
@@ -67,7 +67,7 @@ namespace MassTransit
                 Stream stream = await repository.Get(address, cancellationToken);
                 await stream.CopyToAsync(ms);
 
-                return new StringMessageData(address, Encoding.UTF8.GetString(ms.ToArray()));
+                return new ConstantMessageData<string>(address, Encoding.UTF8.GetString(ms.ToArray()));
             }
         }
     }

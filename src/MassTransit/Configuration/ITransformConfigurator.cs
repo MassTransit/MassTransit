@@ -29,6 +29,14 @@ namespace MassTransit
         void Replace<TProperty>(Expression<Func<TInput, TProperty>> propertyExpression, Func<SourceContext<TProperty, TInput>, TProperty> valueProvider);
 
         /// <summary>
+        /// Replace the value on the input with the specified value
+        /// </summary>
+        /// <typeparam name="TProperty"></typeparam>
+        /// <param name="property"></param>
+        /// <param name="propertyProvider"></param>
+        void Replace<TProperty>(PropertyInfo property, IPropertyProvider<TProperty, TInput> propertyProvider);
+
+        /// <summary>
         /// Set the property to the value, using the source context to create/select the value
         /// </summary>
         /// <typeparam name="TProperty">The property type</typeparam>

@@ -56,7 +56,7 @@ namespace MassTransit.Serialization
                 new ListJsonConverter(),
                 new InterfaceProxyConverter(TypeMetadataCache.ImplementationBuilder),
                 new StringDecimalConverter(),
-                new MessageDataConverter(),
+                new MessageDataJsonConverter(),
             })
         };
 
@@ -74,7 +74,7 @@ namespace MassTransit.Serialization
             Converters = new List<JsonConverter>(new JsonConverter[]
             {
                 new ByteArrayConverter(),
-                new MessageDataConverter(),
+                new MessageDataJsonConverter(),
             }),
         };
 

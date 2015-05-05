@@ -13,28 +13,19 @@
 namespace MassTransit.MessageData
 {
     using System;
-    using System.IO;
-    using System.Threading;
     using System.Threading.Tasks;
 
 
-    public class LoadMessageData<T> :
+    public class DeserializedMessageData<T> :
         MessageData<T>
     {
         readonly Uri _address;
-        readonly CancellationToken _cancellationToken;
-        readonly IMessageDataConverter<T> _converter;
-        readonly IMessageDataRepository _repository;
-        readonly Lazy<Task<T>> _value;
+        readonly bool _hasValue;
 
-        public LoadMessageData(Uri address, IMessageDataRepository repository, IMessageDataConverter<T> converter, CancellationToken cancellationToken)
+        public DeserializedMessageData(Uri address)
         {
             _address = address;
-            _repository = repository;
-            _converter = converter;
-            _cancellationToken = cancellationToken;
-
-            _value = new Lazy<Task<T>>(GetValue);
+            _hasValue = true;
         }
 
         public Uri Address
@@ -44,19 +35,17 @@ namespace MassTransit.MessageData
 
         public bool HasValue
         {
-            get { return true; }
+            get { return _hasValue; }
         }
 
         public Task<T> Value
         {
-            get { return _value.Value; }
-        }
-
-        async Task<T> GetValue()
-        {
-            using (Stream valueStream = await _repository.Get(_address, _cancellationToken))
+            get
             {
-                return await _converter.Convert(valueStream, _cancellationToken);
+                if (_hasValue == false)
+                    throw new MessageDataException("The message data has no value");
+
+                throw new MessageDataException("The message data was not loaded: " + _address);
             }
         }
     }
