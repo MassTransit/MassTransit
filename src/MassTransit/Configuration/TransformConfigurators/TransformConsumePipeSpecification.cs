@@ -39,14 +39,14 @@ namespace MassTransit.TransformConfigurators
             _specifications = new List<ITransformSpecification<TMessage, TMessage>>();
         }
 
-        public void Apply(IPipeBuilder<ConsumeContext<TMessage>> builder)
+        void IPipeSpecification<ConsumeContext<TMessage>>.Apply(IPipeBuilder<ConsumeContext<TMessage>> builder)
         {
             ITransform<TMessage, TMessage> transform = Build();
 
             builder.AddFilter(new TransformFilter<TMessage>(transform));
         }
 
-        public IEnumerable<ValidationResult> Validate()
+        IEnumerable<ValidationResult> Configurator.Validate()
         {
             return _specifications.SelectMany(x => x.Validate());
         }
@@ -54,6 +54,13 @@ namespace MassTransit.TransformConfigurators
         void ITransformConfigurator<TMessage>.Replace<TProperty>(Expression<Func<TMessage, TProperty>> propertyExpression, Func<SourceContext<TProperty, TMessage>, TProperty> valueProvider)
         {
             var specification = new InputPropertyTransformSpecification<TMessage, TMessage, TProperty>(propertyExpression.GetPropertyInfo(), valueProvider);
+
+            _specifications.Add(specification);
+        }
+
+        void ITransformConfigurator<TMessage>.Replace<TProperty>(PropertyInfo property, IPropertyProvider<TProperty, TMessage> propertyProvider)
+        {
+            var specification = new InputPropertyTransformSpecification<TMessage, TMessage, TProperty>(property, propertyProvider);
 
             _specifications.Add(specification);
         }
@@ -66,7 +73,7 @@ namespace MassTransit.TransformConfigurators
             _specifications.Add(specification);
         }
 
-        public void Set<TProperty>(PropertyInfo property, IPropertyProvider<TProperty, TMessage> propertyProvider)
+        void ITransformConfigurator<TMessage>.Set<TProperty>(PropertyInfo property, IPropertyProvider<TProperty, TMessage> propertyProvider)
         {
             var specification = new SourcePropertyTransformSpecification<TMessage, TMessage, TProperty>(property, propertyProvider);
 
