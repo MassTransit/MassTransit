@@ -14,32 +14,25 @@ namespace MassTransit.Transformation
 {
     using System.Collections.Generic;
     using System.Linq;
-    using System.Threading.Tasks;
 
 
-    /// <summary>
-    /// Transforms the original message, in-place, without generating a new message result.
-    /// This is best used for lazy, one-time replacement of message properties that have
-    /// an immutable value.
-    /// </summary>
-    /// <typeparam name="TMessage">The message type</typeparam>
-    public class OriginalMessageTransform<TMessage> :
-        IMessageTransform<TMessage>
-        where TMessage : class
+    public class CopyMessageTransform<TResult, TInput> :
+        ITransform<TResult, TInput>
+        where TInput : TResult
     {
-        readonly IPropertyTransform<TMessage>[] _propertyTransforms;
+        readonly IPropertyTransform<TInput, TInput>[] _propertyTransforms;
 
-        public OriginalMessageTransform(IEnumerable<IPropertyTransform<TMessage>> propertyTransforms)
+        public CopyMessageTransform(IEnumerable<IPropertyTransform<TInput, TInput>> propertyTransforms)
         {
             _propertyTransforms = propertyTransforms.ToArray();
         }
 
-        public Task<TransformResult<TMessage>> ApplyTo(TransformContext<TMessage> context)
+        public TransformResult<TResult> ApplyTo(TransformContext<TInput> context)
         {
             foreach (var propertyTransform in _propertyTransforms)
-                propertyTransform.Apply(context);
+                propertyTransform.Apply(context.Input, context);
 
-            return context.ReturnOriginal();
+            return context.Return<TResult>(context.Input, false);
         }
     }
 }

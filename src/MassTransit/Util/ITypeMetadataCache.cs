@@ -13,6 +13,8 @@
 namespace MassTransit.Util
 {
     using System;
+    using System.Collections.Generic;
+    using System.Reflection;
     using Internals.Mapping;
     using Internals.Reflection;
 
@@ -41,6 +43,10 @@ namespace MassTransit.Util
         /// Returns all valid message types that are contained within the s
         /// </summary>
         Type[] MessageTypes { get; }
+
+        ReadWritePropertyCache<T> ReadWritePropertyCache { get; }
+
+        IEnumerable<PropertyInfo> Properties { get; }
 
         T InitializeFromObject(object values);
     }

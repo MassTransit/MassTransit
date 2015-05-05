@@ -16,6 +16,7 @@ namespace MassTransit.Util
     using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Reflection;
     using System.Threading;
     using Internals.Extensions;
     using Internals.Mapping;
@@ -114,8 +115,10 @@ namespace MassTransit.Util
         readonly Lazy<bool> _isValidMessageType;
         readonly Lazy<Type[]> _messageTypes;
         readonly Lazy<IObjectConverter> _objectConverter;
-        readonly Lazy<ReadOnlyPropertyCache<T>> _propertyCache;
+        readonly Lazy<List<PropertyInfo>> _properties;
+        readonly Lazy<ReadOnlyPropertyCache<T>> _readPropertyCache;
         readonly string _shortName;
+        readonly Lazy<ReadWritePropertyCache<T>> _writePropertyCache;
 
         TypeMetadataCache()
         {
@@ -128,7 +131,10 @@ namespace MassTransit.Util
             _dictionaryConverter = new Lazy<IDictionaryConverter>(() => TypeMetadataCache.GetDictionaryConverter(typeof(T)));
             _objectConverter = new Lazy<IObjectConverter>(() => TypeMetadataCache.GetObjectConverter(typeof(T)));
 
-            _propertyCache = new Lazy<ReadOnlyPropertyCache<T>>(() => new ReadOnlyPropertyCache<T>());
+            _readPropertyCache = new Lazy<ReadOnlyPropertyCache<T>>(() => new ReadOnlyPropertyCache<T>());
+            _writePropertyCache = new Lazy<ReadWritePropertyCache<T>>(() => new ReadWritePropertyCache<T>());
+
+            _properties = new Lazy<List<PropertyInfo>>(() => typeof(T).GetAllProperties().ToList());
 
             _isValidMessageType = new Lazy<bool>(CheckIfValidMessageType);
             _messageTypes = new Lazy<Type[]>(() => GetMessageTypes().ToArray());
@@ -159,6 +165,16 @@ namespace MassTransit.Util
             get { return Cached.Metadata.Value.ReadOnlyPropertyCache; }
         }
 
+        public static ReadWritePropertyCache<T> ReadWritePropertyCache
+        {
+            get { return Cached.Metadata.Value.ReadWritePropertyCache; }
+        }
+
+        public static IEnumerable<PropertyInfo> Properties
+        {
+            get { return Cached.Metadata.Value.Properties; }
+        }
+
         public static bool IsValidMessageType
         {
             get { return Cached.Metadata.Value.IsValidMessageType; }
@@ -167,6 +183,11 @@ namespace MassTransit.Util
         public static Type[] MessageTypes
         {
             get { return Cached.Metadata.Value.MessageTypes; }
+        }
+
+        IEnumerable<PropertyInfo> ITypeMetadataCache<T>.Properties
+        {
+            get { return _properties.Value; }
         }
 
         bool ITypeMetadataCache<T>.IsValidMessageType
@@ -181,7 +202,12 @@ namespace MassTransit.Util
 
         ReadOnlyPropertyCache<T> ITypeMetadataCache<T>.ReadOnlyPropertyCache
         {
-            get { return _propertyCache.Value; }
+            get { return _readPropertyCache.Value; }
+        }
+
+        ReadWritePropertyCache<T> ITypeMetadataCache<T>.ReadWritePropertyCache
+        {
+            get { return _writePropertyCache.Value; }
         }
 
         T ITypeMetadataCache<T>.InitializeFromObject(object values)

@@ -16,6 +16,7 @@ namespace MassTransit.Pipeline.Filters
     using Context;
     using Transformation;
 
+
     /// <summary>
     /// Applies a transform to the message
     /// </summary>
@@ -24,9 +25,9 @@ namespace MassTransit.Pipeline.Filters
         IFilter<ConsumeContext<T>>
         where T : class
     {
-        readonly IMessageTransform<T> _transform;
+        readonly ITransform<T, T> _transform;
 
-        public TransformFilter(IMessageTransform<T> transform)
+        public TransformFilter(ITransform<T, T> transform)
         {
             _transform = transform;
         }
@@ -35,7 +36,7 @@ namespace MassTransit.Pipeline.Filters
         {
             var transformContext = new ConsumeTransformContext<T>(context);
 
-            TransformResult<T> result = await _transform.ApplyTo(transformContext);
+            TransformResult<T> result = _transform.ApplyTo(transformContext);
             if (result.IsNewValue)
             {
                 var transformedContext = new MessageConsumeContext<T>(context, result.Value);
@@ -43,9 +44,7 @@ namespace MassTransit.Pipeline.Filters
                 await next.Send(transformedContext);
             }
             else
-            {
                 await next.Send(context);
-            }
         }
 
         public bool Visit(IPipelineVisitor visitor)

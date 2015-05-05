@@ -12,28 +12,23 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transformation
 {
-    using System.Threading.Tasks;
-
-
     /// <summary>
-    /// A property transform where the input is different from the property type
+    /// A property transform that is not dependent upon the input type
     /// </summary>
-    /// <typeparam name="TProperty"></typeparam>
-    /// <typeparam name="TInput"></typeparam>
-    public interface IPropertyTransform<in TProperty, TInput>
-        where TInput : class
+    /// <typeparam name="TResult"></typeparam>
+    public interface IPropertyTransform<in TResult>
     {
-        Task Apply(TProperty property, TransformContext<TInput> context);
+        void Apply(TResult result, TransformContext context);
     }
 
 
     /// <summary>
-    /// A property transform that is like for like type
+    /// A property transform that uses the input type
     /// </summary>
     /// <typeparam name="TInput"></typeparam>
-    public interface IPropertyTransform<TInput>
-        where TInput : class
+    /// <typeparam name="TResult"></typeparam>
+    public interface IPropertyTransform<in TResult, in TInput>
     {
-        Task Apply(TransformContext<TInput> context);
+        void Apply(TResult result, TransformContext<TInput> context);
     }
 }

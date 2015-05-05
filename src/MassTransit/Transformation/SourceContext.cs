@@ -12,22 +12,43 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transformation
 {
-    /// <summary>
-    /// The result of a message transformation
-    /// </summary>
-    /// <typeparam name="TResult"></typeparam>
-    public interface TransformResult<out TResult>
+    public interface SourceContext :
+        TransformContext
+    {
+    }
+
+
+    public interface SourceContext<out TInput> :
+        SourceContext
     {
         /// <summary>
-        /// The transformed message
+        /// The input of the transform
         /// </summary>
-        TResult Value { get; }
+        TInput Input { get; }
 
         /// <summary>
-        /// True if the transform has returned a new value, otherwise false. Some transforms
-        /// actually apply to the original message, versus creating a new message leaving the
-        /// original message unmodified.
+        /// True if the input is present
         /// </summary>
-        bool IsNewValue { get; }
+        bool HasInput { get; }
+    }
+
+
+    /// <summary>
+    /// Provides the context for a property transform
+    /// </summary>
+    /// <typeparam name="TProperty"></typeparam>
+    /// <typeparam name="TInput"></typeparam>
+    public interface SourceContext<out TProperty, out TInput> :
+        SourceContext<TInput>
+    {
+        /// <summary>
+        /// True if the value is present from the source
+        /// </summary>
+        bool HasValue { get; }
+
+        /// <summary>
+        /// The value
+        /// </summary>
+        TProperty Value { get; }
     }
 }

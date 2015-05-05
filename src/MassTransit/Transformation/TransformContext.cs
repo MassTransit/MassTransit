@@ -13,9 +13,7 @@
 namespace MassTransit.Transformation
 {
     using System;
-    using System.Collections.Generic;
     using System.Threading;
-    using System.Threading.Tasks;
     using Context;
 
 
@@ -29,7 +27,7 @@ namespace MassTransit.Transformation
         /// </summary>
         CancellationToken CancellationToken { get; }
 
-        IEnumerable<string> SupportedMessageTypes { get; }
+//        IEnumerable<string> SupportedMessageTypes { get; }
 
         /// <summary>
         /// Checks if a payload is present in the context
@@ -56,10 +54,10 @@ namespace MassTransit.Transformation
         TPayload GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory)
             where TPayload : class;
 
-        bool HasMessageType(Type messageType);
-
-        bool TryGetMessage<T>(out T message)
-            where T : class;
+//        bool HasMessageType(Type messageType);
+//
+//        bool TryGetMessage<T>(out T message)
+//            where T : class;
     }
 
 
@@ -67,9 +65,8 @@ namespace MassTransit.Transformation
     /// Context used by a message transform
     /// </summary>
     /// <typeparam name="TInput"></typeparam>
-    public interface TransformContext<TInput> :
+    public interface TransformContext<out TInput> :
         TransformContext
-        where TInput : class
     {
         /// <summary>
         /// The input message to be transformed
@@ -84,7 +81,9 @@ namespace MassTransit.Transformation
         /// <summary>
         /// Returns the original message as a transform result
         /// </summary>
+        /// <param name="value"></param>
+        /// <param name="isNewValue"></param>
         /// <returns></returns>
-        Task<TransformResult<TInput>> ReturnOriginal();
+        TransformResult<TResult> Return<TResult>(TResult value, bool isNewValue = true);
     }
 }
