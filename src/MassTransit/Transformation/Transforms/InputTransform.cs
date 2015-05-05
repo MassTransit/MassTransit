@@ -10,34 +10,29 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Transformation
+namespace MassTransit.Transformation.Transforms
 {
     using System.Collections.Generic;
     using System.Linq;
 
 
-    /// <summary>
-    /// Transforms the original message, in-place, without generating a new message result.
-    /// This is best used for lazy, one-time replacement of message properties that have
-    /// an immutable value.
-    /// </summary>
-    /// <typeparam name="TMessage">The message type</typeparam>
-    public class OriginalTransform<TMessage> :
-        ITransform<TMessage>
+    public class InputTransform<TResult, TInput> :
+        ITransform<TResult, TInput>
+        where TInput : TResult
     {
-        readonly IPropertyTransform<TMessage>[] _propertyTransforms;
+        readonly IPropertyTransform<TInput, TInput>[] _propertyTransforms;
 
-        public OriginalTransform(IEnumerable<IPropertyTransform<TMessage>> propertyTransforms)
+        public InputTransform(IEnumerable<IPropertyTransform<TInput, TInput>> propertyTransforms)
         {
             _propertyTransforms = propertyTransforms.ToArray();
         }
 
-        public TransformResult<TMessage> ApplyTo(TransformContext<TMessage> context)
+        public TransformResult<TResult> ApplyTo(TransformContext<TInput> context)
         {
             foreach (var propertyTransform in _propertyTransforms)
                 propertyTransform.Apply(context.Input, context);
 
-            return context.Return(context.Input);
+            return context.Return<TResult>(context.Input, false);
         }
     }
 }

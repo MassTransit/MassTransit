@@ -16,7 +16,6 @@ namespace MassTransit
     using System.Linq.Expressions;
     using System.Reflection;
     using Transformation;
-    using TransformConfigurators;
 
 
     public interface ITransformConfigurator<TInput>

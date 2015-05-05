@@ -14,6 +14,7 @@ namespace MassTransit.Transformation.PropertyProviders
 {
     using System;
     using System.Reflection;
+    using Contexts;
     using Internals.Reflection;
     using TransformConfigurators;
 

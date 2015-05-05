@@ -18,6 +18,7 @@ namespace MassTransit.TransformBuilders
     using System.Reflection;
     using Configurators;
     using Transformation;
+    using Transformation.Transforms;
     using TransformConfigurators;
     using Util;
 
@@ -75,7 +76,7 @@ namespace MassTransit.TransformBuilders
             {
                 if (_resultTransforms.Count == 0)
                 {
-                    Type transformType = typeof(CopyMessageTransform<,>).MakeGenericType(typeof(TResult), typeof(TInput));
+                    Type transformType = typeof(InputTransform<,>).MakeGenericType(typeof(TResult), typeof(TInput));
                     return (ITransform<TResult, TInput>)Activator.CreateInstance(transformType, _inputTransforms.Values);
                 }
 
