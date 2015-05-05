@@ -80,6 +80,8 @@ namespace MassTransit
 
         void SetHeader(string key, string value);
 
+        void SetWaitForAck(bool wait = true);
+
         /// <summary>
         /// Set the delivery mode of the message
         /// </summary>
@@ -87,6 +89,11 @@ namespace MassTransit
         void SetDeliveryMode(DeliveryMode deliveryMode);
 
         DeliveryMode DeliveryMode { get; }
+
+        /// <summary>
+        /// True if the send should wait for an ack
+        /// </summary>
+        bool WaitForAck { get; }
 
         /// <summary>
         /// Serializes the message to the stream

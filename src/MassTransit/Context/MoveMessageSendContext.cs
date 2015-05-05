@@ -22,6 +22,7 @@ namespace MassTransit.Context
     {
         readonly Action<Stream> _bodyWriter;
         readonly Action<IEndpointAddress> _notifySend;
+        bool _waitForAck = true;
 
         public MoveMessageSendContext(IReceiveContext context)
         {
@@ -42,12 +43,22 @@ namespace MassTransit.Context
             get { return typeof(object); }
         }
 
+        public void SetWaitForAck(bool wait = true)
+        {
+            _waitForAck = wait;
+        }
+
         public void SetDeliveryMode(DeliveryMode deliveryMode)
         {
             DeliveryMode = deliveryMode;
         }
 
         public DeliveryMode DeliveryMode { get; private set; }
+
+        public bool WaitForAck
+        {
+            get { return _waitForAck; }
+        }
 
         public void SerializeTo(Stream stream)
         {

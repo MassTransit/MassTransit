@@ -24,6 +24,7 @@ namespace MassTransit.Context
         Action<Stream> _bodyWriter;
         Guid _id;
         IReceiveContext _receiveContext;
+        bool _waitForAck = true;
 
         SendContext(Guid messageId, T message, Type declaringMessageType)
         {
@@ -60,12 +61,22 @@ namespace MassTransit.Context
 
         public Type DeclaringMessageType { get; private set; }
 
+        public void SetWaitForAck(bool wait = true)
+        {
+            _waitForAck = wait;
+        }
+
         public void SetDeliveryMode(DeliveryMode deliveryMode)
         {
             DeliveryMode = deliveryMode;
         }
 
         public DeliveryMode DeliveryMode { get; private set; }
+
+        public bool WaitForAck
+        {
+            get { return _waitForAck; }
+        }
 
         public void SerializeTo(Stream stream)
         {
