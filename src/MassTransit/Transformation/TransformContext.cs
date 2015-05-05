@@ -27,8 +27,6 @@ namespace MassTransit.Transformation
         /// </summary>
         CancellationToken CancellationToken { get; }
 
-//        IEnumerable<string> SupportedMessageTypes { get; }
-
         /// <summary>
         /// Checks if a payload is present in the context
         /// </summary>
@@ -53,11 +51,6 @@ namespace MassTransit.Transformation
         /// <returns>The payload</returns>
         TPayload GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory)
             where TPayload : class;
-
-//        bool HasMessageType(Type messageType);
-//
-//        bool TryGetMessage<T>(out T message)
-//            where T : class;
     }
 
 

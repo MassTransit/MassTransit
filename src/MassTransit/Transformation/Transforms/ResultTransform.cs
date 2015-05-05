@@ -10,29 +10,38 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Transformation
+namespace MassTransit.Transformation.Transforms
 {
     using System.Collections.Generic;
     using System.Linq;
+    using TransformBuilders;
 
 
-    public class CopyMessageTransform<TResult, TInput> :
+    /// <summary>
+    /// Transforms the message by creating a new message and copying/setting/ignoring the original properties
+    /// </summary>
+    /// <typeparam name="TResult">The message type</typeparam>
+    /// <typeparam name="TInput"></typeparam>
+    public class ResultTransform<TResult, TInput> :
         ITransform<TResult, TInput>
-        where TInput : TResult
     {
-        readonly IPropertyTransform<TInput, TInput>[] _propertyTransforms;
+        readonly IPropertyTransform<TResult, TInput>[] _propertyTransforms;
+        readonly TransformResultFactory<TResult> _resultFactory;
 
-        public CopyMessageTransform(IEnumerable<IPropertyTransform<TInput, TInput>> propertyTransforms)
+        public ResultTransform(TransformResultFactory<TResult> resultFactory, IEnumerable<IPropertyTransform<TResult, TInput>> propertyTransforms)
         {
+            _resultFactory = resultFactory;
             _propertyTransforms = propertyTransforms.ToArray();
         }
 
         public TransformResult<TResult> ApplyTo(TransformContext<TInput> context)
         {
-            foreach (var propertyTransform in _propertyTransforms)
-                propertyTransform.Apply(context.Input, context);
+            TResult result = _resultFactory();
 
-            return context.Return<TResult>(context.Input, false);
+            foreach (var propertyTransform in _propertyTransforms)
+                propertyTransform.Apply(result, context);
+
+            return context.Return(result);
         }
     }
 }
