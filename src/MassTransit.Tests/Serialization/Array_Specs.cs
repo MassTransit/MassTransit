@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,24 +14,22 @@ namespace MassTransit.Tests.Serialization
 {
     namespace Array_Specs
     {
-        using System;
         using System.Collections.Generic;
         using System.Text;
+        using Magnum.TestFramework;
         using MassTransit.Serialization;
         using NUnit.Framework;
-        using Shouldly;
 
 
-        [TestFixture(typeof(JsonMessageSerializer))]
+        [TestFixture]
         public class A_null_array :
-            SerializationTest
+            SerializationTest<JsonMessageSerializer>
         {
             [Test]
             public void Should_come_from_json_as_null()
             {
                 string source = @"{
   ""messageId"": ""e655000040d800fff4f808d245dca3c8"",
-  ""requestId"": """ + _requestId.ToString("N") + @""",
   ""sourceAddress"": ""loopback://localhost/source"",
   ""destinationAddress"": ""loopback://localhost/destination"",
   ""responseAddress"": ""loopback://localhost/response"",
@@ -45,7 +43,7 @@ namespace MassTransit.Tests.Serialization
 
                 var result = Return<SomeArray>(Encoding.UTF8.GetBytes(source));
 
-                result.Elements.ShouldBe(null);
+                result.Elements.ShouldBeNull();
             }
 
             [Test]
@@ -53,7 +51,6 @@ namespace MassTransit.Tests.Serialization
             {
                 string source = @"{
   ""messageId"": ""e655000040d800fff4f808d245dca3c8"",
-  ""requestId"": """ + _requestId.ToString("N") + @""",
   ""sourceAddress"": ""loopback://localhost/source"",
   ""destinationAddress"": ""loopback://localhost/destination"",
   ""responseAddress"": ""loopback://localhost/response"",
@@ -73,8 +70,8 @@ namespace MassTransit.Tests.Serialization
                 var result = Return<SomeArray>(Encoding.UTF8.GetBytes(source));
 
 
-                result.Elements.ShouldNotBe(null);
-                result.Elements.Length.ShouldBe(1);
+                result.Elements.ShouldNotBeNull();
+                result.Elements.Length.ShouldEqual(1);
             }
 
             [Test]
@@ -84,8 +81,8 @@ namespace MassTransit.Tests.Serialization
 
                 SomeArray result = SerializeAndReturn(someArray);
 
-                someArray.Elements.ShouldBe(null);
-                result.Elements.ShouldBe(null);
+                someArray.Elements.ShouldBeNull();
+                result.Elements.ShouldBeNull();
             }
 
             [Test]
@@ -98,8 +95,8 @@ namespace MassTransit.Tests.Serialization
 
                 SomeArray result = SerializeAndReturn(someArray);
 
-                result.Elements.ShouldNotBe(null);
-                result.Elements.Length.ShouldBe(1);
+                result.Elements.ShouldNotBeNull();
+                result.Elements.Length.ShouldEqual(1);
             }
 
             [Test]
@@ -113,13 +110,8 @@ namespace MassTransit.Tests.Serialization
 
                 SomeCollection result = SerializeAndReturn(someArray);
 
-                result.Elements.ShouldNotBe(null);
-                result.Elements.Count.ShouldBe(1);
-            }
-
-            public A_null_array(Type serializerType)
-                : base(serializerType)
-            {
+                result.Elements.ShouldNotBeNull();
+                result.Elements.Count.ShouldEqual(1);
             }
         }
 
