@@ -74,7 +74,8 @@ namespace MassTransit.Transports.RabbitMq
 
 #if NET40
                             var task = _producer.PublishAsync(_address.Name, properties, body.ToArray());
-                            task.Wait();
+                            if(context.WaitForAck)
+                                task.Wait();
 #else
                             _producer.Publish(_address.Name, properties, body.ToArray());
 #endif

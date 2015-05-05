@@ -124,6 +124,7 @@ namespace BusDriver.Commands
         {
             readonly byte[] _body;
             readonly Action<Stream> _bodyWriter;
+            bool _waitForAck = true;
 
             public LoadMessageSendContext(string contentType, byte[] body)
             {
@@ -140,12 +141,22 @@ namespace BusDriver.Commands
                 get { return typeof(object); }
             }
 
+            public void SetWaitForAck(bool wait = true)
+            {
+                _waitForAck = wait;
+            }
+
             public void SetDeliveryMode(DeliveryMode deliveryMode)
             {
                 DeliveryMode = deliveryMode;
             }
 
             public DeliveryMode DeliveryMode { get; private set; }
+
+            public bool WaitForAck
+            {
+                get { return _waitForAck; }
+            }
 
             public void SerializeTo(Stream stream)
             {
