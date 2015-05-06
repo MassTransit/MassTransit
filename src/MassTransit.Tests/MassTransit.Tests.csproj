@@ -170,7 +170,6 @@
     <Compile Include="Saga\CompleteSimpleSaga.cs" />
     <Compile Include="Saga\InitiateSimpleSaga.cs" />
     <Compile Include="Saga\Locator\SagaExpression_Specs.cs" />
-    <Compile Include="Saga\Locator\SomeClass.cs" />
     <Compile Include="Saga\ObservableSagaMessage.cs" />
     <Compile Include="Saga\SimpleSaga.cs" />
     <Compile Include="Saga\SimpleSagaMessageBase.cs" />

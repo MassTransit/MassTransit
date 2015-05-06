@@ -76,9 +76,9 @@
     <Compile Include="..\SolutionVersion.cs">
       <Link>SolutionVersion.cs</Link>
     </Compile>
-    <Compile Include="ObserverInstanceConsumer.cs" />
-    <Compile Include="ServiceBusExtensions.cs" />
-    <Compile Include="ServiceBusSubscription.cs" />
+    <Compile Include="ConsumeObserver.cs" />
+    <Compile Include="BusExtensions.cs" />
+    <Compile Include="ObserverConnection.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MassTransit\MassTransit.csproj">

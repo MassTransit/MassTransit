@@ -33,7 +33,6 @@ namespace MassTransit.Tests.Saga
         public string Name { get; private set; }
         public IDependency Dependency { get; set; }
 
-        public IServiceBus Bus { get; set; }
         public Guid CorrelationId { get; set; }
 
         public async Task Consume(ConsumeContext<InitiateSimpleSaga> context)

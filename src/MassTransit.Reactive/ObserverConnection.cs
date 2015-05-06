@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -16,34 +16,31 @@ namespace MassTransit.Reactive
     using System.Reactive;
 
 
-    public class ServiceBusSubscription<T> :
+    public class ObserverConnection<T> :
         IDisposable
         where T : class
     {
-        readonly IObserver<T> _observer;
-        readonly ConnectHandle _unsubscribeAction;
+        readonly ConnectHandle _handle;
+        readonly IObserver<ConsumeContext<T>> _observer;
 
-        public ServiceBusSubscription(IBus bus, IObserver<T> observer, Predicate<T> condition)
+        public ObserverConnection(IBus bus, IObserver<T> observer)
+        {
+            _observer = Observer.Synchronize(new ConsumeObserver<T>(observer));
+
+            _handle = bus.ConnectObserver(_observer);
+        }
+
+        public ObserverConnection(IBus bus, IObserver<ConsumeContext<T>> observer)
         {
             _observer = Observer.Synchronize(observer);
 
-            _unsubscribeAction = bus.ConnectHandler<T>(async m =>
-            {
-                try
-                {
-                    if (condition(m.Message))
-                        observer.OnNext(m.Message);
-                }
-                catch (Exception ex)
-                {
-                    observer.OnError(ex);
-                }
-            });
+            _handle = bus.ConnectObserver(_observer);
         }
 
         public void Dispose()
         {
-            _unsubscribeAction.Dispose();
+            _observer.OnCompleted();
+            _handle.Dispose();
         }
     }
 }

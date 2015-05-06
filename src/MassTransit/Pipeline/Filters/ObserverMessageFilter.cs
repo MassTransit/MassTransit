@@ -50,6 +50,9 @@ namespace MassTransit.Pipeline.Filters
             catch (Exception ex)
             {
                 context.NotifyFaulted(timer.Elapsed, TypeMetadataCache.ShortName(_observer.GetType()), ex);
+                
+                _observer.OnError(ex);
+
                 throw;
             }
         }

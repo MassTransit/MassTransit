@@ -87,6 +87,10 @@
     <Compile Include="Configuration\BusConfigurators\ConsumePipeSpecification.cs" />
     <Compile Include="Configuration\BusConfigurators\IConsumePipeBuilder.cs" />
     <Compile Include="Configuration\BusConfigurators\IConsumePipeSpecification.cs" />
+    <Compile Include="Configuration\ConsumeConnectors\IObserverConnectorCache.cs" />
+    <Compile Include="Configuration\ConsumeConnectors\MessageObserverConnector.cs" />
+    <Compile Include="Configuration\ConsumeConnectors\ObserverConnector.cs" />
+    <Compile Include="Configuration\ConsumeConnectors\ObserverConnectorCache.cs" />
     <Compile Include="Configuration\IConsumePipeConfigurator.cs" />
     <Compile Include="Configuration\ITransformConfigurator.cs" />
     <Compile Include="Configuration\MessageDataConfiguratorExtensions.cs" />
@@ -789,7 +793,6 @@
     <Compile Include="Exceptions\ShutDownException.cs" />
     <Compile Include="Exceptions\EndpointException.cs" />
     <Compile Include="IEndpoint.cs" />
-    <Compile Include="IServiceBus.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Transports\ITransportSettings.cs" />
     <Compile Include="Util\AsyncObservable.cs" />
