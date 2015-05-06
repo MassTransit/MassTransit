@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -15,6 +15,7 @@ namespace MassTransit
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using Castle.MicroKernel;
     using Castle.Windsor;
     using ConsumeConfigurators;
     using Internals.Extensions;
@@ -34,6 +35,19 @@ namespace MassTransit
         /// <param name="configurator">The configurator the extension method works on.</param>
         /// <param name="container">The Windsor container.</param>
         public static void LoadFrom(this IReceiveEndpointConfigurator configurator, IWindsorContainer container)
+        {
+            if (container == null)
+                throw new ArgumentNullException("container");
+
+            LoadFrom(configurator, container.Kernel);
+        }
+
+        /// <summary>
+        /// Specify that the service bus should load its subscribers from the container passed as an argument.
+        /// </summary>
+        /// <param name="configurator">The configurator the extension method works on.</param>
+        /// <param name="container">The Windsor container.</param>
+        public static void LoadFrom(this IReceiveEndpointConfigurator configurator, IKernel container)
         {
             if (configurator == null)
                 throw new ArgumentNullException("configurator");
@@ -63,7 +77,7 @@ namespace MassTransit
         /// <param name="container">The container that the consumer should be loaded from.</param>
         /// <returns>The configurator</returns>
         public static IConsumerConfigurator<TConsumer> Consumer<TConsumer>(this IReceiveEndpointConfigurator configurator,
-            IWindsorContainer container)
+            IKernel container)
             where TConsumer : class, IConsumer
         {
             if (configurator == null)
@@ -85,7 +99,7 @@ namespace MassTransit
         /// <param name="container">The windsor container</param>
         /// <returns>The configurator</returns>
         public static ISagaConfigurator<TSaga> Saga<TSaga>(this IReceiveEndpointConfigurator configurator,
-            IWindsorContainer container)
+            IKernel container)
             where TSaga : class, ISaga
         {
             if (configurator == null)
@@ -116,9 +130,9 @@ namespace MassTransit
             configurator.AddPipeSpecification(pipeBuilderConfigurator);
         }
 
-        static IList<Type> FindTypes<T>(IWindsorContainer container, Func<Type, bool> filter)
+        static IList<Type> FindTypes<T>(IKernel container, Func<Type, bool> filter)
         {
-            return container.Kernel
+            return container
                 .GetAssignableHandlers(typeof(T))
                 .Select(h => h.ComponentModel.Implementation)
                 .Where(filter)
