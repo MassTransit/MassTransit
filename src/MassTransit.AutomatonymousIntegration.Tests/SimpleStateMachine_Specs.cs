@@ -51,7 +51,6 @@ namespace MassTransit.AutomatonymousTests
             }
 
             public State CurrentState { get; set; }
-            public IServiceBus Bus { get; set; }
             public Guid CorrelationId { get; set; }
         }
 

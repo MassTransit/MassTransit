@@ -66,7 +66,7 @@ namespace MassTransit
         /// <param name="instance">The instance to subscribe.</param>
         /// <returns>The unsubscribe action that can be called to unsubscribe the instance
         /// passed as an argument.</returns>
-        public static ConnectHandle ConnectInstance<T>(this IServiceBus bus, T instance)
+        public static ConnectHandle ConnectInstance<T>(this IBus bus, T instance)
             where T : class, IConsumer
         {
             InstanceConnector connector = InstanceConnectorCache.GetInstanceConnector<T>();

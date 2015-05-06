@@ -12,9 +12,9 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.ConsumeConnectors
 {
-    public interface IHandlerConnectorCache<T>
+    public interface IObserverConnectorCache<T>
         where T : class
     {
-        HandlerConnector<T> Connector { get; }
+        ObserverConnector<T> Connector { get; }
     }
 }

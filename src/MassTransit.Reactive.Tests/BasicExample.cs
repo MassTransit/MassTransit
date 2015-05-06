@@ -19,7 +19,7 @@ namespace MassTransit.Reactive.Tests
     using TestFramework.Messages;
 
 
-    [TestFixture, Explicit("Fails from command-line build, don't know why, so I'm removing it from the build")]
+    [TestFixture]
     public class BasicExample :
         InMemoryTestFixture
     {

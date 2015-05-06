@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,31 +13,32 @@
 namespace MassTransit.Reactive
 {
     using System;
-    using System.Reactive;
-    using System.Threading.Tasks;
 
 
-    public class ObserverInstanceConsumer<T> :
-        IConsumer<T>
+    public class ConsumeObserver<T> :
+        IObserver<ConsumeContext<T>>
         where T : class
     {
         readonly IObserver<T> _observer;
 
-        public ObserverInstanceConsumer(IObserver<T> observer)
+        public ConsumeObserver(IObserver<T> observer)
         {
-            _observer = Observer.Synchronize(observer);
+            _observer = observer;
         }
 
-        public async Task Consume(ConsumeContext<T> context)
+        public void OnNext(ConsumeContext<T> value)
         {
-            try
-            {
-                _observer.OnNext(context.Message);
-            }
-            catch (Exception ex)
-            {
-                _observer.OnError(ex);
-            }
+            _observer.OnNext(value.Message);
+        }
+
+        public void OnError(Exception error)
+        {
+            _observer.OnError(error);
+        }
+
+        public void OnCompleted()
+        {
+            _observer.OnCompleted();
         }
     }
 }

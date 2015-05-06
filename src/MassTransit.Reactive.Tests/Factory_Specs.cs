@@ -43,9 +43,9 @@ namespace MassTransit.Reactive.Tests
         {
             _observer = GetObserver<A>();
 
-            configurator.Observe(_observer);
+            configurator.Observer(_observer);
 
-            configurator.Observe(Observer.Create<A>(m => Console.WriteLine(m.Name)));
+            configurator.Observer(Observer.Create<ConsumeContext<A>>(m => Console.WriteLine(m.Message.Name)));
         }
     }
 }
