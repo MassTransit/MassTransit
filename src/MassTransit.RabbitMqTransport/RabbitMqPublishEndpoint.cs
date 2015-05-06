@@ -22,7 +22,6 @@ namespace MassTransit.RabbitMqTransport
     using Integration;
     using MassTransit.Pipeline;
     using Pipeline;
-    using Serialization;
     using Transports;
     using Util;
 

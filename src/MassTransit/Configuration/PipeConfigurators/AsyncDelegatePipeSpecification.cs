@@ -20,13 +20,13 @@ namespace MassTransit.PipeConfigurators
     using Pipeline.Filters;
 
 
-    public class AsyncDelegatePipeBuilderConfigurator<T> :
+    public class AsyncDelegatePipeSpecification<T> :
         IPipeSpecification<T>
         where T : class, PipeContext
     {
         readonly Func<T, Task> _callback;
 
-        public AsyncDelegatePipeBuilderConfigurator(Func<T, Task> callback)
+        public AsyncDelegatePipeSpecification(Func<T, Task> callback)
         {
             _callback = callback;
         }
