@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,7 +14,7 @@ namespace MassTransit.WindsorIntegration
 {
     using System;
     using System.Collections.Concurrent;
-    using Castle.Windsor;
+    using Castle.MicroKernel;
     using Saga;
 
 
@@ -26,7 +26,7 @@ namespace MassTransit.WindsorIntegration
                 (CachedConfigurator)Activator.CreateInstance(typeof(CachedConfigurator<>).MakeGenericType(type)));
         }
 
-        public static void Configure(Type sagaType, IReceiveEndpointConfigurator configurator, IWindsorContainer container)
+        public static void Configure(Type sagaType, IReceiveEndpointConfigurator configurator, IKernel container)
         {
             GetOrAdd(sagaType).Configure(configurator, container);
         }
@@ -41,7 +41,7 @@ namespace MassTransit.WindsorIntegration
 
         interface CachedConfigurator
         {
-            void Configure(IReceiveEndpointConfigurator configurator, IWindsorContainer container);
+            void Configure(IReceiveEndpointConfigurator configurator, IKernel container);
         }
 
 
@@ -49,7 +49,7 @@ namespace MassTransit.WindsorIntegration
             CachedConfigurator
             where T : class, ISaga
         {
-            public void Configure(IReceiveEndpointConfigurator configurator, IWindsorContainer container)
+            public void Configure(IReceiveEndpointConfigurator configurator, IKernel container)
             {
                 var sagaRepository = container.Resolve<ISagaRepository<T>>();
 

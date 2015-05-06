@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,7 +14,7 @@ namespace MassTransit.WindsorIntegration
 {
     using System;
     using System.Collections.Concurrent;
-    using Castle.Windsor;
+    using Castle.MicroKernel;
 
 
     public static class ConsumerConfiguratorCache
@@ -25,7 +25,7 @@ namespace MassTransit.WindsorIntegration
                 (CachedConfigurator)Activator.CreateInstance(typeof(CachedConfigurator<>).MakeGenericType(type)));
         }
 
-        public static void Configure(Type consumerType, IReceiveEndpointConfigurator configurator, IWindsorContainer container)
+        public static void Configure(Type consumerType, IReceiveEndpointConfigurator configurator, IKernel container)
         {
             GetOrAdd(consumerType).Configure(configurator, container);
         }
@@ -40,7 +40,7 @@ namespace MassTransit.WindsorIntegration
 
         interface CachedConfigurator
         {
-            void Configure(IReceiveEndpointConfigurator configurator, IWindsorContainer container);
+            void Configure(IReceiveEndpointConfigurator configurator, IKernel container);
         }
 
 
@@ -48,7 +48,7 @@ namespace MassTransit.WindsorIntegration
             CachedConfigurator
             where T : class, IConsumer
         {
-            public void Configure(IReceiveEndpointConfigurator configurator, IWindsorContainer container)
+            public void Configure(IReceiveEndpointConfigurator configurator, IKernel container)
             {
                 configurator.Consumer(new WindsorConsumerFactory<T>(container));
             }

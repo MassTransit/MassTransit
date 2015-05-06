@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -15,8 +15,8 @@ namespace MassTransit.WindsorIntegration
     using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
+    using Castle.MicroKernel;
     using Castle.MicroKernel.Lifestyle;
-    using Castle.Windsor;
     using Pipeline;
     using Saga;
 
@@ -25,10 +25,10 @@ namespace MassTransit.WindsorIntegration
         ISagaRepository<TSaga>
         where TSaga : class, ISaga
     {
-        readonly IWindsorContainer _container;
+        readonly IKernel _container;
         readonly ISagaRepository<TSaga> _repository;
 
-        public WindsorSagaRepository(ISagaRepository<TSaga> repository, IWindsorContainer container)
+        public WindsorSagaRepository(ISagaRepository<TSaga> repository, IKernel container)
         {
             _repository = repository;
             _container = container;
