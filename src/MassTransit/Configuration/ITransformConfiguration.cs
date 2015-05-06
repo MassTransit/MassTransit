@@ -10,21 +10,14 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Transformation.PropertyProviders
+namespace MassTransit
 {
-    public class ValuePropertyProvider<TResult, TInput> :
-        IPropertyProvider<TResult, TInput>
+    using PipeConfigurators;
+
+
+    public interface ITransformConfiguration<TMessage> :
+        IPipeSpecification<ConsumeContext<TMessage>>
+        where TMessage : class
     {
-        readonly TResult _value;
-
-        public ValuePropertyProvider(TResult value)
-        {
-            _value = value;
-        }
-
-        public TResult GetProperty(TransformContext<TInput> context)
-        {
-            return _value;
-        }
     }
 }

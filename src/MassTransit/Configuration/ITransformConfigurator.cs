@@ -21,6 +21,22 @@ namespace MassTransit
     public interface ITransformConfigurator<TInput>
     {
         /// <summary>
+        /// Copy the specified message property from the input to the result (all properties are copied by default).
+        /// Only use this to copy specific properties, ignoring others. This is really just for completeness, it's
+        /// not necessary to use it.
+        /// </summary>
+        /// <typeparam name="TProperty"></typeparam>
+        /// <param name="propertyExpression"></param>
+        void Copy<TProperty>(Expression<Func<TInput, TProperty>> propertyExpression);
+
+        /// <summary>
+        /// Set the specified message property to the default value (ignoring the input value)
+        /// </summary>
+        /// <typeparam name="TProperty"></typeparam>
+        /// <param name="propertyExpression"></param>
+        void Default<TProperty>(Expression<Func<TInput, TProperty>> propertyExpression);
+
+        /// <summary>
         /// Replace the value on the input with the specified value
         /// </summary>
         /// <typeparam name="TProperty"></typeparam>
