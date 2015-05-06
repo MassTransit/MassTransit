@@ -13,6 +13,7 @@
 namespace MassTransit
 {
     using System;
+    using PipeConfigurators;
     using TransformConfigurators;
 
 
@@ -24,7 +25,7 @@ namespace MassTransit
         /// <typeparam name="T"></typeparam>
         /// <param name="configurator"></param>
         /// <param name="configureCallback"></param>
-        public static void UseTransform<T>(this IConsumePipeConfigurator configurator, Action<ITransformConfigurator<T>> configureCallback)
+        public static void Transform<T>(this IConsumePipeConfigurator configurator, Action<ITransformConfigurator<T>> configureCallback)
             where T : class
         {
             var transformConfigurator = new TransformConsumePipeSpecification<T>();
@@ -39,8 +40,24 @@ namespace MassTransit
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="configurator"></param>
+        /// <param name="configureTransform"></param>
+        public static void UseTransform<T>(this IConsumePipeConfigurator configurator, Func<ITransformSpecificationConfigurator<T>, ITransformConfiguration<T>> configureTransform)
+            where T : class
+        {
+            var specificationConfigurator = new TransformSpecificationConfigurator<T>();
+
+            var specification = configureTransform(specificationConfigurator);
+
+            configurator.AddPipeSpecification(specification);
+        }
+
+        /// <summary>
+        /// Encapsulate the pipe behavior in a transaction
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="configurator"></param>
         /// <param name="configureCallback"></param>
-        public static void UseTransform<T>(this IPipeConfigurator<ConsumeContext<T>> configurator, Action<ITransformConfigurator<T>> configureCallback)
+        public static void Transform<T>(this IPipeConfigurator<ConsumeContext<T>> configurator, Action<ITransformConfigurator<T>> configureCallback)
             where T : class
         {
             var transformConfigurator = new TransformConsumePipeSpecification<T>();
@@ -49,5 +66,22 @@ namespace MassTransit
 
             configurator.AddPipeSpecification(transformConfigurator);
         }
+
+        /// <summary>
+        /// Encapsulate the pipe behavior in a transaction
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="configurator"></param>
+        /// <param name="configureTransform"></param>
+        public static void UseTransform<T>(this IPipeConfigurator<ConsumeContext<T>> configurator, Func<ITransformSpecificationConfigurator<T>, ITransformConfiguration<T>> configureTransform)
+            where T : class
+        {
+            var specificationConfigurator = new TransformSpecificationConfigurator<T>();
+
+            var specification = configureTransform(specificationConfigurator);
+
+            configurator.AddPipeSpecification(specification);
+        }
+
     }
 }

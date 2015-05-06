@@ -39,7 +39,7 @@ namespace MassTransit.Tests.Transforms
         {
             base.ConfigureInputQueueEndpoint(configurator);
 
-            configurator.UseTransform<A>(t =>
+            configurator.Transform<A>(t =>
             {
                 // Replace modifies the original message, versus Set which leaves the original message unmodified
                 t.Replace(x => x.Second, context => "World");
@@ -78,7 +78,7 @@ namespace MassTransit.Tests.Transforms
         {
             base.ConfigureInputQueueEndpoint(configurator);
 
-            configurator.UseTransform<A>(t =>
+            configurator.Transform<A>(t =>
             {
                 t.Set(x => x.Second, context => "World");
             });
@@ -129,7 +129,7 @@ namespace MassTransit.Tests.Transforms
 
             _tweaked = GetTask<IA>();
 
-            configurator.Handler<IA>(async context => _tweaked.TrySetResult(context.Message), x => x.UseTransform(t => t.Replace(p => p.Second, _ => "World")));
+            configurator.Handler<IA>(async context => _tweaked.TrySetResult(context.Message), x => x.Transform(t => t.Replace(p => p.Second, _ => "World")));
         }
 
 
@@ -184,7 +184,7 @@ namespace MassTransit.Tests.Transforms
 
             configurator.Handler<IA>(async context => _tweaked.TrySetResult(context.Message), x =>
             {
-                x.UseTransform(t =>
+                x.Transform(t =>
                 {
                     t.Set(p => p.Second, context => "World");
                 });

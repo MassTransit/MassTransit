@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -10,21 +10,19 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Transformation.PropertyProviders
+namespace MassTransit.TransformConfigurators
 {
-    public class ValuePropertyProvider<TResult, TInput> :
-        IPropertyProvider<TResult, TInput>
+    using PipeConfigurators;
+
+
+    public class TransformSpecificationConfigurator<TMessage> :
+        ITransformSpecificationConfigurator<TMessage>
+        where TMessage : class
     {
-        readonly TResult _value;
-
-        public ValuePropertyProvider(TResult value)
+        public ITransformConfiguration<TMessage> Get<T>()
+            where T : ITransformConfiguration<TMessage>, new()
         {
-            _value = value;
-        }
-
-        public TResult GetProperty(TransformContext<TInput> context)
-        {
-            return _value;
+            return new T();
         }
     }
 }

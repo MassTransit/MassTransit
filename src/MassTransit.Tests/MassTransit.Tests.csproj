@@ -164,6 +164,7 @@
     <Compile Include="Testing\SagaTest_Specs.cs" />
     <Compile Include="Threading_Specs.cs" />
     <Compile Include="Transforms\SetProperty_Specs.cs" />
+    <Compile Include="Transforms\TransformClass_Specs.cs" />
     <Compile Include="Transports\InMemoryTransport_Specs.cs" />
     <Compile Include="Uri_Specs.cs" />
     <None Include="app.config" />

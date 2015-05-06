@@ -51,6 +51,20 @@ namespace MassTransit.TransformConfigurators
             return _specifications.SelectMany(x => x.Validate());
         }
 
+        void ITransformConfigurator<TMessage>.Copy<TProperty>(Expression<Func<TMessage, TProperty>> propertyExpression)
+        {
+            var specification = new CopyPropertyTransformSpecification<TMessage, TMessage, TProperty>(propertyExpression.GetPropertyInfo());
+
+            _specifications.Add(specification);
+        }
+
+        void ITransformConfigurator<TMessage>.Default<TProperty>(Expression<Func<TMessage, TProperty>> propertyExpression)
+        {
+            var specification = new DefaultPropertyTransformSpecification<TMessage, TMessage, TProperty>(propertyExpression.GetPropertyInfo());
+
+            _specifications.Add(specification);
+        }
+
         void ITransformConfigurator<TMessage>.Replace<TProperty>(Expression<Func<TMessage, TProperty>> propertyExpression, Func<SourceContext<TProperty, TMessage>, TProperty> valueProvider)
         {
             var specification = new InputPropertyTransformSpecification<TMessage, TMessage, TProperty>(propertyExpression.GetPropertyInfo(), valueProvider);

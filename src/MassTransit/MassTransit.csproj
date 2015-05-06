@@ -92,10 +92,12 @@
     <Compile Include="Configuration\ConsumeConnectors\ObserverConnector.cs" />
     <Compile Include="Configuration\ConsumeConnectors\ObserverConnectorCache.cs" />
     <Compile Include="Configuration\IConsumePipeConfigurator.cs" />
+    <Compile Include="Configuration\ITransformConfiguration.cs" />
     <Compile Include="Configuration\ITransformConfigurator.cs" />
     <Compile Include="Configuration\MessageDataConfiguratorExtensions.cs" />
     <Compile Include="Configuration\TransformBuilders\ITransformBuilder.cs" />
     <Compile Include="Configuration\TransformBuilders\MessageTransformBuilder.cs" />
+    <Compile Include="Configuration\TransformConfiguration.cs" />
     <Compile Include="Configuration\TransformConfiguratorExtensions.cs" />
     <Compile Include="Configuration\TransformConfigurators\CopyPropertyTransformSpecification.cs" />
     <Compile Include="Configuration\TransformConfigurators\DefaultPropertyTransformSpecification.cs" />
@@ -106,6 +108,8 @@
     <Compile Include="Configuration\TransformConfigurators\SourcePropertyTransformSpecification.cs" />
     <Compile Include="Configuration\TransformConfigurators\ITransformSpecification.cs" />
     <Compile Include="Configuration\TransformConfigurators\PropertyTransformSpecification.cs" />
+    <Compile Include="Configuration\TransformConfigurators\ITransformSpecificationConfigurator.cs" />
+    <Compile Include="Configuration\TransformConfigurators\TransformSpecificationConfigurator.cs" />
     <Compile Include="Configuration\TransformConfigurators\ValuePropertyTransformSpecification.cs" />
     <Compile Include="Context\MessageConsumeContext.cs" />
     <Compile Include="Exceptions\MessageDataException.cs" />
