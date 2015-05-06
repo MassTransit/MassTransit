@@ -20,6 +20,7 @@ namespace MassTransit.Tests.Serialization
     using System.Text;
     using System.Xml.Linq;
     using MassTransit.Serialization;
+    using MassTransit.Serialization.JsonConverters;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
     using Newtonsoft.Json.Serialization;

@@ -22,6 +22,7 @@ namespace MassTransit.Serialization
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
     using Pipeline;
+    using Pipeline.Pipes;
     using Util;
 
 
