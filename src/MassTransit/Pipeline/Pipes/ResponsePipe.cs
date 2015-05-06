@@ -10,13 +10,12 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Serialization
+namespace MassTransit.Pipeline.Pipes
 {
     using System.Threading.Tasks;
-    using Pipeline;
 
 
-    class ResponsePipe<T> :
+    public class ResponsePipe<T> :
         IPipe<SendContext<T>>,
         IPipe<PublishContext<T>>
         where T : class

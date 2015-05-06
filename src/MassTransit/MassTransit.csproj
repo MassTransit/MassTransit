@@ -466,6 +466,7 @@
     <Compile Include="Pipeline\ConsumeObserverConnectable.cs" />
     <Compile Include="Pipeline\PipelineVisitor.cs" />
     <Compile Include="Pipeline\Pipes\FilterPipe.cs" />
+    <Compile Include="Pipeline\Pipes\ResponsePipe.cs" />
     <Compile Include="Pipeline\PipeVisitorCallback.cs" />
     <Compile Include="Pipeline\Pipes\ConsumePipe.cs" />
     <Compile Include="Pipeline\Pipes\ConsumerMergePipe.cs" />
@@ -556,15 +557,15 @@
     <Compile Include="Serialization\JsonConverters\DictionaryJsonConverter.cs" />
     <Compile Include="Serialization\JsonConverters\InterfaceProxyConverter.cs" />
     <Compile Include="Serialization\JsonConverters\JsonContractResolver.cs" />
+    <Compile Include="Serialization\JsonConverters\ListConverterCache.cs" />
+    <Compile Include="Serialization\JsonConverters\ListJsonConverter.cs" />
     <Compile Include="Serialization\JsonConverters\MessageDataJsonConverter.cs" />
     <Compile Include="Serialization\JsonConverters\MessageDataReference.cs" />
     <Compile Include="Serialization\JsonConverters\StringDecimalConverter.cs" />
     <Compile Include="Serialization\JsonMessageHeaders.cs" />
     <Compile Include="Serialization\JsonMessageDeserializer.cs" />
     <Compile Include="Serialization\JsonMessageEnvelope.cs" />
-    <Compile Include="Serialization\ListConverterCache.cs" />
     <Compile Include="Serialization\MessageEnvelope.cs" />
-    <Compile Include="Serialization\ResponsePipe.cs" />
     <Compile Include="Serialization\StaticConsumeContext.cs" />
     <Compile Include="Serialization\StaticHeaders.cs" />
     <Compile Include="Serialization\SupportedMessageDeserializers.cs" />
@@ -639,7 +640,6 @@
     <Compile Include="Serialization\ExtensionsForBinaryMessageSerializer.cs" />
     <Compile Include="Serialization\IMessageTypeConverter.cs" />
     <Compile Include="Serialization\JsonMessageSerializer.cs" />
-    <Compile Include="Serialization\ListJsonConverter.cs" />
     <Compile Include="Saga\ISagaRepository.cs" />
     <Compile Include="Saga\ISaga.cs" />
     <Compile Include="Saga\Orchestrates.cs" />
