@@ -215,13 +215,6 @@ desc "restores missing packages"
 msbuild :restore do |msb|
   msb.use :net4
   msb.targets :RestorePackages
-  msb.solution = 'src/MassTransit.Courier.Tests/MassTransit.Courier.Tests.csproj'
-end
-
-desc "restores missing packages"
-msbuild :restore do |msb|
-  msb.use :net4
-  msb.targets :RestorePackages
   msb.solution = 'src/MassTransit.RabbitMqTransport/MassTransit.RabbitMqTransport.csproj'
 end
 
