@@ -48,7 +48,7 @@ namespace MassTransit
             if (configurator == null)
                 throw new ArgumentNullException("configurator");
 
-            var pipeBuilderConfigurator = new AsyncDelegatePipeBuilderConfigurator<T>(callback);
+            var pipeBuilderConfigurator = new AsyncDelegatePipeSpecification<T>(callback);
 
             configurator.AddPipeSpecification(pipeBuilderConfigurator);
         }

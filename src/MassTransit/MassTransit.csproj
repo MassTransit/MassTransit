@@ -165,7 +165,7 @@
     <Compile Include="Configuration\ObserverExtensions.cs" />
     <Compile Include="Configuration\PipeBuilders\IPipeBuilder.cs" />
     <Compile Include="Configuration\PipeBuilders\PipeBuilder.cs" />
-    <Compile Include="Configuration\PipeConfigurators\AsyncDelegatePipeBuilderConfigurator.cs" />
+    <Compile Include="Configuration\PipeConfigurators\AsyncDelegatePipeSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\ConcurrencyLimitPipeSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\ConsumerPipeSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\DelegatePipeSpecification.cs" />
