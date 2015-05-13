@@ -77,7 +77,7 @@
         {
             configurator.ReceiveEndpoint(host, "input_queue_error", x =>
             {
-                _errorHandler = Handler<PingMessage>(x);
+                _errorHandler = Handled<PingMessage>(x);
             });
         }
 

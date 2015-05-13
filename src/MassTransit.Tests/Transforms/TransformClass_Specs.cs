@@ -41,7 +41,7 @@ namespace MassTransit.Tests.Transforms
 
             configurator.UseTransform<A>(x => x.Get<FullTransform>());
 
-            _received = Handler<A>(configurator);
+            _received = Handled<A>(configurator);
         }
 
 

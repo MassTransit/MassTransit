@@ -64,7 +64,7 @@ namespace MassTransit.Tests
                     _credentials.SetResult(credentials.Message);
             });
 
-            _credentialsHandler = Handler<UserCredentials>(configurator);
+            _credentialsHandler = Handled<UserCredentials>(configurator);
         }
 
 

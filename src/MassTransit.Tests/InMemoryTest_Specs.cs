@@ -84,7 +84,7 @@ namespace MassTransit.Tests
 
         protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
         {
-            _receivedA = Handler<A>(configurator);
+            _receivedA = Handled<A>(configurator);
         }
     }
 }

@@ -43,7 +43,7 @@ namespace MassTransit.Tests
         {
             configurator.ReceiveEndpoint("input_queue_error", x =>
             {
-                _errorHandler = Handler<PingMessage>(x);
+                _errorHandler = Handled<PingMessage>(x);
             });
         }
 

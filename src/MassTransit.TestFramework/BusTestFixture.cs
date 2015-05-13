@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -93,12 +93,36 @@ namespace MassTransit.TestFramework
         /// <typeparam name="T">The message type</typeparam>
         /// <param name="configurator">The endpoint configurator</param>
         /// <returns></returns>
-        protected Task<ConsumeContext<T>> Handler<T>(IReceiveEndpointConfigurator configurator)
+        protected Task<ConsumeContext<T>> Handled<T>(IReceiveEndpointConfigurator configurator)
             where T : class
         {
             var source = new TaskCompletionSource<ConsumeContext<T>>();
 
             configurator.Handler<T>(async context => source.SetResult(context));
+
+            TestCancelledTask.ContinueWith(x => source.TrySetCanceled(), TaskContinuationOptions.OnlyOnCanceled);
+
+            return source.Task;
+        }
+
+        /// <summary>
+        /// Registers a handler on the receive endpoint that is cancelled when the test is canceled
+        /// and completed when the message is received.
+        /// </summary>
+        /// <typeparam name="T">The message type</typeparam>
+        /// <param name="configurator">The endpoint configurator</param>
+        /// <param name="filter">Filter the messages based on the handled consume context</param>
+        /// <returns></returns>
+        protected Task<ConsumeContext<T>> Handled<T>(IReceiveEndpointConfigurator configurator, Func<ConsumeContext<T>, bool> filter)
+            where T : class
+        {
+            var source = new TaskCompletionSource<ConsumeContext<T>>();
+
+            configurator.Handler<T>(async context =>
+            {
+                if (filter(context))
+                    source.SetResult(context);
+            });
 
             TestCancelledTask.ContinueWith(x => source.TrySetCanceled(), TaskContinuationOptions.OnlyOnCanceled);
 

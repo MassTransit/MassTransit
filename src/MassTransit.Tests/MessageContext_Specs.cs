@@ -92,7 +92,7 @@ namespace MassTransit.Tests
 
         protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
         {
-            _ping = Handler<PingMessage>(configurator);
+            _ping = Handled<PingMessage>(configurator);
         }
     }
 

@@ -39,7 +39,7 @@ namespace MassTransit.Tests.Courier
 
         protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
         {
-            _received = Handler<RoutingSlip>(configurator);
+            _received = Handled<RoutingSlip>(configurator);
         }
     }
 }

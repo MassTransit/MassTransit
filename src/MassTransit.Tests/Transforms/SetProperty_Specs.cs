@@ -45,7 +45,7 @@ namespace MassTransit.Tests.Transforms
                 t.Replace(x => x.Second, context => "World");
             });
 
-            _received = Handler<A>(configurator);
+            _received = Handled<A>(configurator);
         }
 
 
@@ -83,7 +83,7 @@ namespace MassTransit.Tests.Transforms
                 t.Set(x => x.Second, context => "World");
             });
 
-            _received = Handler<A>(configurator);
+            _received = Handled<A>(configurator);
         }
 
 
@@ -125,7 +125,7 @@ namespace MassTransit.Tests.Transforms
         {
             base.ConfigureInputQueueEndpoint(configurator);
 
-            _received = Handler<IA>(configurator);
+            _received = Handled<IA>(configurator);
 
             _tweaked = GetTask<IA>();
 
@@ -178,7 +178,7 @@ namespace MassTransit.Tests.Transforms
         {
             base.ConfigureInputQueueEndpoint(configurator);
 
-            _received = Handler<IA>(configurator);
+            _received = Handled<IA>(configurator);
 
             _tweaked = GetTask<IA>();
 

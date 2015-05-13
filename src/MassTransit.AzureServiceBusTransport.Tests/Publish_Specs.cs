@@ -36,7 +36,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
 
         protected override void ConfigureInputQueueEndpoint(IServiceBusReceiveEndpointConfigurator configurator)
         {
-            _handler = Handler<PingMessage>(configurator);
+            _handler = Handled<PingMessage>(configurator);
         }
     }
 
@@ -59,7 +59,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
 
         protected override void ConfigureInputQueueEndpoint(IServiceBusReceiveEndpointConfigurator configurator)
         {
-            _handler = Handler<PingMessage>(configurator);
+            _handler = Handled<PingMessage>(configurator);
         }
 
         protected override void ConfigureBus(IServiceBusBusFactoryConfigurator configurator)
