@@ -385,7 +385,7 @@ task :all_nuspecs => [:versioning, :mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :m
     nuspec.dependency "MassTransit", NUGET_VERSION
     nuspec.dependency "Newtonsoft.Json", "6.0.8"
     nuspec.dependency "NewId", "2.1.2"
-    nuspec.dependency "WindowsAzure.ServiceBus", "2.6.5"
+    nuspec.dependency "WindowsAzure.ServiceBus", "2.6.6"
     nuspec.dependency "Microsoft.WindowsAzure.ConfigurationManager", "3.1.0"
     nuspec.output_file = 'nuspecs/MassTransit.AzureServiceBus.nuspec'
 
@@ -485,7 +485,7 @@ task :all_nuspecs => [:versioning, :mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :m
     nuspec.dependency "MassTransit", NUGET_VERSION
     nuspec.dependency "Newtonsoft.Json", "6.0.8"
     nuspec.dependency "NewId", "2.1.2"
-    nuspec.dependency "RabbitMQ.Client", "3.5.1"
+    nuspec.dependency "RabbitMQ.Client", "3.5.2"
     nuspec.output_file = 'nuspecs/MassTransit.RabbitMQ.nuspec'
 
   add_files props[:stage], "#{File.join('Transports', 'RabbitMQ', 'MassTransit.RabbitMqTransport.{dll,pdb,xml}')}", nuspec
