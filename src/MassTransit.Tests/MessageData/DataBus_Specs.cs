@@ -60,7 +60,7 @@ namespace MassTransit.Tests.MessageData
 
                 configurator.UseMessageData<MessageWithBigData>(_messageDataRepository);
 
-                _received = Handler<MessageWithBigData>(configurator);
+                _received = Handled<MessageWithBigData>(configurator);
             }
         }
 
@@ -102,7 +102,7 @@ namespace MassTransit.Tests.MessageData
 
                 configurator.UseMessageData<MessageWithByteArray>(_messageDataRepository);
 
-                _received = Handler<MessageWithByteArray>(configurator);
+                _received = Handled<MessageWithByteArray>(configurator);
             }
         }
 

@@ -67,7 +67,7 @@ namespace MassTransit.Tests
 
         protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
         {
-            _handler = Handler<IProxyMe>(configurator);
+            _handler = Handled<IProxyMe>(configurator);
         }
 
 

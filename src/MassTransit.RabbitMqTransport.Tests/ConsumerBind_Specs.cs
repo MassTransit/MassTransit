@@ -132,8 +132,8 @@ namespace MassTransit.RabbitMqTransport.Tests
 
             protected override void ConfigureInputQueueEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
             {
-                _a = Handler<A>(configurator);
-                _b = Handler<B>(configurator);
+                _a = Handled<A>(configurator);
+                _b = Handled<B>(configurator);
             }
         }
 

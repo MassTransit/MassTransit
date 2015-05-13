@@ -41,7 +41,7 @@ namespace MassTransit.Tests.Serialization
 
         protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
         {
-            Handler<BadMessage>(configurator);
+            Handled<BadMessage>(configurator);
         }
 
 

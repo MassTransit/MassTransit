@@ -52,7 +52,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             {
                 base.ConfigureInputQueueEndpoint(configurator);
 
-                _receivedA = Handler<A>(configurator);
+                _receivedA = Handled<A>(configurator);
             }
         }
 
@@ -100,7 +100,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             {
                 base.ConfigureInputQueueEndpoint(configurator);
 
-                _receivedA = Handler<A>(configurator);
+                _receivedA = Handled<A>(configurator);
             }
 
             protected override void ConfigureBus(IRabbitMqBusFactoryConfigurator configurator)
@@ -135,7 +135,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             {
                 base.ConfigureInputQueueEndpoint(configurator);
 
-                _receivedA = Handler<A>(configurator);
+                _receivedA = Handled<A>(configurator);
             }
         }
 
@@ -266,7 +266,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
         protected override void ConfigureInputQueueEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
-            _handler = Handler<IProxyMe>(configurator);
+            _handler = Handled<IProxyMe>(configurator);
         }
 
 

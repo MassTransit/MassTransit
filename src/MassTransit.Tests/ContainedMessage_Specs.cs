@@ -54,7 +54,7 @@ namespace MassTransit.Tests
 
         protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
         {
-            _secureCommandHandler = Handler<SecureCommand<ExecuteSql>>(configurator);
+            _secureCommandHandler = Handled<SecureCommand<ExecuteSql>>(configurator);
 
             _commandHandler = Handler<ExecuteSql>(configurator, async context =>
             {

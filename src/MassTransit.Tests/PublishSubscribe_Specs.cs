@@ -37,7 +37,7 @@ namespace MassTransit.Tests
 
         protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
         {
-            _received = Handler<PingMessage>(configurator);
+            _received = Handled<PingMessage>(configurator);
         }
     }
 
@@ -59,7 +59,7 @@ namespace MassTransit.Tests
 
         protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
         {
-            _received = Handler<PingMessage>(configurator);
+            _received = Handled<PingMessage>(configurator);
         }
     }
 
@@ -85,7 +85,7 @@ namespace MassTransit.Tests
 
         protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
         {
-            _received = Handler<PingMessage>(configurator);
+            _received = Handled<PingMessage>(configurator);
         }
     }
 
@@ -111,7 +111,7 @@ namespace MassTransit.Tests
 
         protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
         {
-            _received = Handler<PingMessage>(configurator);
+            _received = Handled<PingMessage>(configurator);
         }
     }
 
@@ -137,7 +137,7 @@ namespace MassTransit.Tests
 
         protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
         {
-            _received = Handler<PingMessage>(configurator);
+            _received = Handled<PingMessage>(configurator);
         }
     }
 
@@ -158,7 +158,7 @@ namespace MassTransit.Tests
 
         protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
         {
-            _received = Handler<PingMessage>(configurator);
+            _received = Handled<PingMessage>(configurator);
         }
     }
 
@@ -183,7 +183,7 @@ namespace MassTransit.Tests
 
         protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
         {
-            _received = Handler<PingMessage>(configurator);
+            _received = Handled<PingMessage>(configurator);
         }
     }
 }
