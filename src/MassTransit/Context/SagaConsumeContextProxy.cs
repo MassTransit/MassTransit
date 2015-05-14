@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -79,15 +79,14 @@ namespace MassTransit.Context
             return _context.Publish(message, messageType, cancellationToken);
         }
 
-        Task IPublishEndpoint.Publish(object message, Type messageType, IPipe<PublishContext> publishPipe,
-            CancellationToken cancellationToken)
+        Task IPublishEndpoint.Publish(object message, Type messageType, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
         {
             return _context.Publish(message, messageType, publishPipe, cancellationToken);
         }
 
         Task IPublishEndpoint.Publish<T>(object values, CancellationToken cancellationToken)
         {
-            return _context.Publish(values, cancellationToken);
+            return _context.Publish<T>(values, cancellationToken);
         }
 
         Task IPublishEndpoint.Publish<T>(object values, IPipe<PublishContext<T>> publishPipe, CancellationToken cancellationToken)
@@ -97,7 +96,7 @@ namespace MassTransit.Context
 
         Task IPublishEndpoint.Publish<T>(object values, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
         {
-            return _context.Publish(values, publishPipe, cancellationToken);
+            return _context.Publish<T>(values, publishPipe, cancellationToken);
         }
 
         public bool HasPayloadType(Type contextType)

@@ -23,7 +23,7 @@ namespace MassTransit.Tests.Courier
 
     [TestFixture]
     public class Executing_a_routing_slip_with_a_single_activity :
-        ActivityTestFixture
+        InMemoryActivityTestFixture
     {
         Task<ConsumeContext<RoutingSlipCompleted>> _completed;
         Task<ConsumeContext<RoutingSlipActivityCompleted>> _activityCompleted;

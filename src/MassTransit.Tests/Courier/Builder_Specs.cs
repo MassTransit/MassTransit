@@ -20,7 +20,7 @@ namespace MassTransit.Tests.Courier
 
     [TestFixture]
     public class Using_a_class_on_a_routing_slip :
-        ActivityTestFixture
+        InMemoryActivityTestFixture
     {
         [Test]
         public void Should_properly_map_the_types()

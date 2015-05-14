@@ -23,7 +23,7 @@ namespace MassTransit.TestFramework
 
         Uri ExecuteUri { get; }
 
-        void Configure(IInMemoryBusFactoryConfigurator configurator);
+        void Configure(ActivityTestContextConfigurator configurator);
     }
 
 
@@ -54,7 +54,7 @@ namespace MassTransit.TestFramework
         public string Name { get; private set; }
         public Uri ExecuteUri { get; private set; }
 
-        public void Configure(IInMemoryBusFactoryConfigurator configurator)
+        public void Configure(ActivityTestContextConfigurator configurator)
         {
             configurator.ReceiveEndpoint(ExecuteQueueName, x => x.ExecuteActivityHost<T, TArguments>(CompensateUri, _activityFactory));
 
@@ -103,7 +103,7 @@ namespace MassTransit.TestFramework
         public string Name { get; private set; }
         public Uri ExecuteUri { get; private set; }
 
-        public void Configure(IInMemoryBusFactoryConfigurator configurator)
+        public void Configure(ActivityTestContextConfigurator configurator)
         {
             configurator.ReceiveEndpoint(ExecuteQueueName, x => x.ExecuteActivityHost<T, TArguments>(_activityFactory));
         }

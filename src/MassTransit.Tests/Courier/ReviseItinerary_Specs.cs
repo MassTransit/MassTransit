@@ -24,7 +24,7 @@ namespace MassTransit.Tests.Courier
 
     [TestFixture]
     public class When_an_itinerary_is_revised :
-        ActivityTestFixture
+        InMemoryActivityTestFixture
     {
         protected override void SetupActivities()
         {

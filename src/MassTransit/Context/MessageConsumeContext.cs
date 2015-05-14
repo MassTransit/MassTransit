@@ -85,7 +85,7 @@ namespace MassTransit.Context
 
         Task IPublishEndpoint.Publish<T>(object values, CancellationToken cancellationToken)
         {
-            return _context.Publish(values, cancellationToken);
+            return _context.Publish<T>(values, cancellationToken);
         }
 
         Task IPublishEndpoint.Publish<T>(object values, IPipe<PublishContext<T>> publishPipe, CancellationToken cancellationToken)
@@ -95,7 +95,7 @@ namespace MassTransit.Context
 
         Task IPublishEndpoint.Publish<T>(object values, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
         {
-            return _context.Publish(values, publishPipe, cancellationToken);
+            return _context.Publish<T>(values, publishPipe, cancellationToken);
         }
 
         public bool HasPayloadType(Type contextType)

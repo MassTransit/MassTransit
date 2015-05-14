@@ -23,7 +23,7 @@ namespace MassTransit.Tests.Courier
 
     [TestFixture]
     public class Executing_a_routing_slip_with_two_activities :
-        ActivityTestFixture
+        InMemoryActivityTestFixture
     {
         [Test]
         public async void Should_include_the_activity_log_data()

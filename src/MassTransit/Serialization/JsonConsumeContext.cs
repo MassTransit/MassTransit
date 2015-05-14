@@ -298,7 +298,7 @@ namespace MassTransit.Serialization
 
         Task IPublishEndpoint.Publish<T>(object values, CancellationToken cancellationToken)
         {
-            return _publishEndpoint.Publish(values, cancellationToken);
+            return _publishEndpoint.Publish<T>(values, cancellationToken);
         }
 
         Task IPublishEndpoint.Publish<T>(object values, IPipe<PublishContext<T>> publishPipe, CancellationToken cancellationToken)
@@ -308,7 +308,7 @@ namespace MassTransit.Serialization
 
         Task IPublishEndpoint.Publish<T>(object values, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
         {
-            return _publishEndpoint.Publish(values, publishPipe, cancellationToken);
+            return _publishEndpoint.Publish<T>(values, publishPipe, cancellationToken);
         }
 
         async Task GenerateFault<T>(ConsumeContext<T> context, Exception exception)

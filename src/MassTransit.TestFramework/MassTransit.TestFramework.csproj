@@ -77,7 +77,8 @@
       <Link>SolutionVersion.cs</Link>
     </Compile>
     <Compile Include="ActivityTestContext.cs" />
-    <Compile Include="ActivityTestFixture.cs" />
+    <Compile Include="ActivityTestContextConfigurator.cs" />
+    <Compile Include="InMemoryActivityTestFixture.cs" />
     <Compile Include="AsyncTestFixture.cs" />
     <Compile Include="Courier\FaultyActivity.cs" />
     <Compile Include="Courier\FaultyArguments.cs" />
