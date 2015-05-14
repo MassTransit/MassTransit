@@ -13,9 +13,13 @@
 namespace MassTransit.Pipeline.Filters
 {
     using System;
+    using System.Diagnostics;
+    using System.Reflection;
     using System.Threading.Tasks;
+    using Context;
     using Logging;
     using Transports;
+    using Util;
 
 
     /// <summary>
@@ -36,7 +40,22 @@ namespace MassTransit.Pipeline.Filters
         {
             ISendTransport transport = await _getErrorTransport();
 
-            await transport.Move(context);
+            var pipe = Pipe.Execute<SendContext>(sendContext =>
+            {
+//                if (exception != null)
+//                {
+                        // if exception is AggregateException, get InnerException
+//                    moveContext.Headers.Set("MT-Fault-Message", exception.Message);
+//                    moveContext.Headers.Set("MT-Fault-StackTrace", exception.StackTrace);
+//                }
+
+                sendContext.Headers.Set("MT-Error-MachineName", HostMetadataCache.Host.MachineName);
+                sendContext.Headers.Set("MT-Error-ProcessName", HostMetadataCache.Host.ProcessName);
+                sendContext.Headers.Set("MT-Error-Assembly", HostMetadataCache.Host.Assembly);
+                sendContext.Headers.Set("MT-Error-AssemblyVersion", HostMetadataCache.Host.AssemblyVersion);
+            });
+
+            await transport.Move(context, pipe);
 
             await next.Send(context);
         }

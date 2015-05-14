@@ -87,7 +87,7 @@ namespace MassTransit.AzureServiceBusTransport
             }
         }
 
-        public async Task Move(ReceiveContext context)
+        async Task ISendTransport.Move(ReceiveContext context, IPipe<SendContext> pipe)
         {
             BrokeredMessageContext messageContext;
             if (context.TryGetPayload(out messageContext))

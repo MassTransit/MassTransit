@@ -38,7 +38,8 @@ namespace MassTransit.Transports
         /// Move a message from a receive transport to the transport
         /// </summary>
         /// <param name="context">The original receive context</param>
+        /// <param name="pipe"></param>
         /// <returns>A task completed once the message has been sent</returns>
-        Task Move(ReceiveContext context);
+        Task Move(ReceiveContext context, IPipe<SendContext> pipe);
     }
 }

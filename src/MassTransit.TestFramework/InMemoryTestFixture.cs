@@ -13,6 +13,7 @@
 namespace MassTransit.TestFramework
 {
     using System;
+    using System.Threading;
     using System.Threading.Tasks;
     using Logging;
     using NUnit.Framework;
@@ -112,7 +113,7 @@ namespace MassTransit.TestFramework
             try
             {
                 if (_busHandle != null)
-                    Await(() => _busHandle.Stop(TestCancellationToken));
+                    Await(() => _busHandle.Stop(new CancellationTokenSource(TestTimeout).Token));
             }
             catch (AggregateException ex)
             {
@@ -124,7 +125,7 @@ namespace MassTransit.TestFramework
             {
                 if (_transportCache != null)
                 {
-                    Await(() => _transportCache.Stop(TestCancellationToken));
+                    Await(() => _transportCache.Stop(new CancellationTokenSource(TestTimeout).Token));
                 }
             }
             catch (Exception ex)

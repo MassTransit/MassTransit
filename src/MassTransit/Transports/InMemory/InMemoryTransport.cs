@@ -105,11 +105,15 @@ namespace MassTransit.Transports.InMemory
                 await _observers.ForEach(x => x.SendFault(context, fault));
         }
 
-        async Task ISendTransport.Move(ReceiveContext context)
+        async Task ISendTransport.Move(ReceiveContext context, IPipe<SendContext> pipe)
         {
             Guid messageId = GetMessageId(context);
 
-            byte[] body = await GetMessageBody(context.GetBody());
+            byte[] body;
+            using (var bodyStream = context.GetBody())
+            {
+                body = await GetMessageBody(bodyStream);
+            }
 
             string messageType = "Unknown";
             InMemoryTransportMessage receivedMessage;
