@@ -23,7 +23,7 @@ namespace MassTransit.Tests.Courier
 
     [TestFixture]
     public class When_an_activity_faults :
-        ActivityTestFixture
+        InMemoryActivityTestFixture
     {
         [Test]
         public async void Should_capture_a_thrown_exception()

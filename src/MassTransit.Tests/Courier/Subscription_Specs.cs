@@ -46,7 +46,7 @@ namespace MassTransit.Tests.Courier
 
     [TestFixture]
     public class Subscription_without_variables :
-        ActivityTestFixture
+        InMemoryActivityTestFixture
     {
         [Test]
         public async void Should_not_receive_the_routing_slip_activity_log()

@@ -19,10 +19,10 @@ namespace MassTransit.TestFramework
 
 
     [TestFixture]
-    public abstract class ActivityTestFixture :
+    public abstract class InMemoryActivityTestFixture :
         InMemoryTestFixture
     {
-        protected ActivityTestFixture()
+        protected InMemoryActivityTestFixture()
         {
             ActivityTestContexts = new Dictionary<Type, ActivityTestContext>();
         }
@@ -33,9 +33,29 @@ namespace MassTransit.TestFramework
         {
             SetupActivities();
 
+            var factoryConfigurator = new BusFactoryConfigurator(configurator);
+
             foreach (ActivityTestContext activityTestContext in ActivityTestContexts.Values)
-                activityTestContext.Configure(configurator);
+                activityTestContext.Configure(factoryConfigurator);
         }
+
+
+        class BusFactoryConfigurator :
+            ActivityTestContextConfigurator
+        {
+            readonly IInMemoryBusFactoryConfigurator _configurator;
+
+            public BusFactoryConfigurator(IInMemoryBusFactoryConfigurator configurator)
+            {
+                _configurator = configurator;
+            }
+
+            public void ReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configure)
+            {
+                _configurator.ReceiveEndpoint(queueName, configure);
+            }
+        }
+
 
         protected void AddActivityContext<T, TArguments, TLog>(Func<T> activityFactory)
             where TArguments : class

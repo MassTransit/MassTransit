@@ -17,7 +17,6 @@ namespace MassTransit.Context
     using System.Threading;
     using System.Threading.Tasks;
     using Pipeline;
-    using Serialization;
 
 
     public class RetryConsumeContext :
@@ -224,9 +223,7 @@ namespace MassTransit.Context
         public void NotifyPendingFaults()
         {
             foreach (PendingFault pendingFault in _pendingFaults)
-            {
                 pendingFault.Notify(_context);
-            }
         }
 
 
@@ -241,9 +238,9 @@ namespace MassTransit.Context
             where T : class
         {
             readonly string _consumerType;
-            readonly Exception _exception;
             readonly ConsumeContext<T> _context;
             readonly TimeSpan _elapsed;
+            readonly Exception _exception;
 
             public PendingFault(ConsumeContext<T> context, TimeSpan elapsed, string consumerType, Exception exception)
             {

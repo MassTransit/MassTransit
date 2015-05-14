@@ -22,7 +22,7 @@ namespace MassTransit.Tests.Courier
 
     [TestFixture]
     public class When_an_activity_runs_to_completion :
-        ActivityTestFixture
+        InMemoryActivityTestFixture
     {
         [Test]
         public async void Should_immediately_complete_an_empty_list()

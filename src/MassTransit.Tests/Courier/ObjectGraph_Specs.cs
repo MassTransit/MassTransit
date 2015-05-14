@@ -26,7 +26,7 @@ namespace MassTransit.Tests.Courier
 
     [TestFixture]
     public class Storing_an_object_graph_as_a_variable_or_argument :
-        ActivityTestFixture
+        InMemoryActivityTestFixture
     {
         int _intValue;
         string _stringValue;

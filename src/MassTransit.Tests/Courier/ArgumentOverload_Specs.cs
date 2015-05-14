@@ -23,7 +23,7 @@ namespace MassTransit.Tests.Courier
 
     [TestFixture]
     public class Arguments_in_an_activity :
-        ActivityTestFixture
+        InMemoryActivityTestFixture
     {
         Task<ConsumeContext<RoutingSlipCompleted>> _completed;
         Task<ConsumeContext<RoutingSlipActivityCompleted>> _activityCompleted;
@@ -79,7 +79,7 @@ namespace MassTransit.Tests.Courier
 
     [TestFixture]
     public class Arguments_missing_from_an_activity :
-        ActivityTestFixture
+        InMemoryActivityTestFixture
     {
         Task<ConsumeContext<RoutingSlipCompleted>> _completed;
         Task<ConsumeContext<RoutingSlipActivityCompleted>> _activityCompleted;
