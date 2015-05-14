@@ -56,7 +56,7 @@ namespace MassTransit.RabbitMqTransport
             return SendMessage(message, pipe, cancelSend);
         }
 
-        public async Task Move(ReceiveContext context)
+        async Task ISendTransport.Move(ReceiveContext context, IPipe<SendContext> pipe)
         {
             IPipe<ModelContext> modelPipe = Pipe.New<ModelContext>(p =>
             {
@@ -107,7 +107,10 @@ namespace MassTransit.RabbitMqTransport
                         byte[] body;
                         using (var memoryStream = new MemoryStream())
                         {
-                            context.GetBody().CopyTo(memoryStream);
+                            using (var bodyStream = context.GetBody())
+                            {
+                                bodyStream.CopyTo(memoryStream);
+                            }
 
                             body = memoryStream.ToArray();
                         }

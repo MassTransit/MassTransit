@@ -49,7 +49,10 @@ namespace MassTransit.QuartzIntegration
             string body;
             using (var ms = new MemoryStream())
             {
-                await context.ReceiveContext.GetBody().CopyToAsync(ms);
+                using (var bodyStream = context.ReceiveContext.GetBody())
+                {
+                    await bodyStream.CopyToAsync(ms);
+                }
 
                 body = Encoding.UTF8.GetString(ms.ToArray());
             }

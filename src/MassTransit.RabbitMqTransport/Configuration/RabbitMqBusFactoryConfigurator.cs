@@ -101,15 +101,5 @@ namespace MassTransit.RabbitMqTransport.Configuration
         {
             _consumePipeSpecification.Add(specification);
         }
-        public void OnPublish<T>(Action<RabbitMqPublishContext<T>> callback)
-            where T : class
-        {
-            throw new NotImplementedException();
-        }
-
-        public void OnPublish(Action<RabbitMqPublishContext> callback)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

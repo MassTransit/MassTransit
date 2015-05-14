@@ -36,6 +36,21 @@ namespace MassTransit.Transports
             _sourceAddress = sourceAddress;
         }
 
+        IMessageSerializer Serializer
+        {
+            get { return _serializer; }
+        }
+
+        Uri DestinationAddress
+        {
+            get { return _destinationAddress; }
+        }
+
+        Uri SourceAddress
+        {
+            get { return _sourceAddress; }
+        }
+
         public ConnectHandle Connect(ISendObserver observer)
         {
             return _transport.Connect(observer);
@@ -185,11 +200,11 @@ namespace MassTransit.Transports
 
             public async Task Send(SendContext<T> context)
             {
-                context.Serializer = _endpoint._serializer;
-                context.DestinationAddress = _endpoint._destinationAddress;
+                context.Serializer = _endpoint.Serializer;
+                context.DestinationAddress = _endpoint.DestinationAddress;
 
                 if (context.SourceAddress == null)
-                    context.SourceAddress = _endpoint._sourceAddress;
+                    context.SourceAddress = _endpoint.SourceAddress;
 
                 if (_pipe != null)
                     await _pipe.Send(context);
