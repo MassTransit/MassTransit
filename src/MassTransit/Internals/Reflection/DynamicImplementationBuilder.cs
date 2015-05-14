@@ -62,8 +62,8 @@ namespace MassTransit.Internals.Reflection
         {
             string typeName = _proxyNamespaceSuffix + "." +
                 (interfaceType.IsNested && interfaceType.DeclaringType != null
-                    ? (interfaceType.DeclaringType.Name + '+' + TypeMetadataCache.ShortName(interfaceType))
-                    : TypeMetadataCache.ShortName(interfaceType));
+                    ? (interfaceType.DeclaringType.Name + '+' + TypeMetadataCache.GetShortName(interfaceType))
+                    : TypeMetadataCache.GetShortName(interfaceType));
             try
             {
                 TypeBuilder typeBuilder = builder.DefineType(typeName,
@@ -94,7 +94,7 @@ namespace MassTransit.Internals.Reflection
             catch (Exception ex)
             {
                 string message = string.Format("Exception creating proxy ({0}) for {1}", typeName,
-                    TypeMetadataCache.ShortName(interfaceType));
+                    TypeMetadataCache.GetShortName(interfaceType));
 
                 throw new InvalidOperationException(message, ex);
             }

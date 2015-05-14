@@ -48,7 +48,7 @@ namespace MassTransit.Serialization
             try
             {
                 XDocument document;
-                using (Stream body = receiveContext.Body)
+                using (Stream body = receiveContext.GetBody())
                 using (var xmlReader = new XmlTextReader(body))
                     document = XDocument.Load(xmlReader);
 

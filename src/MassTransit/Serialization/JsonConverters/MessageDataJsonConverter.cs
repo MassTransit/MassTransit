@@ -47,7 +47,7 @@ namespace MassTransit.Serialization.JsonConverters
             if (dataType == typeof(byte[]))
                 return new DeserializedMessageData<byte[]>(reference.Reference);
 
-            throw new MessageDataException("The message data type was unknown: " + TypeMetadataCache.ShortName(dataType));
+            throw new MessageDataException("The message data type was unknown: " + TypeMetadataCache.GetShortName(dataType));
         }
 
         public override bool CanConvert(Type objectType)

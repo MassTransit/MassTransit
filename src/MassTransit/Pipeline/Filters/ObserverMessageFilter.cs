@@ -43,13 +43,13 @@ namespace MassTransit.Pipeline.Filters
             {
                 _observer.OnNext(context);
 
-                context.NotifyConsumed(timer.Elapsed, TypeMetadataCache.ShortName(_observer.GetType()));
+                context.NotifyConsumed(timer.Elapsed, TypeMetadataCache.GetShortName(_observer.GetType()));
 
                 await next.Send(context);
             }
             catch (Exception ex)
             {
-                context.NotifyFaulted(timer.Elapsed, TypeMetadataCache.ShortName(_observer.GetType()), ex);
+                context.NotifyFaulted(timer.Elapsed, TypeMetadataCache.GetShortName(_observer.GetType()), ex);
                 
                 _observer.OnError(ex);
 

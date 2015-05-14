@@ -37,7 +37,7 @@ namespace MassTransit.Util
                 (CachedType)Activator.CreateInstance(typeof(CachedType<>).MakeGenericType(type)));
         }
 
-        public static string ShortName(Type type)
+        public static string GetShortName(Type type)
         {
             return GetOrAdd(type).ShortName;
         }

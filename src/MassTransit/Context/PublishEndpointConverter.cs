@@ -36,7 +36,7 @@ namespace MassTransit.Context
 
             var msg = message as T;
             if (msg == null)
-                throw new ArgumentException("Unexpected message type: " + TypeMetadataCache.ShortName(message.GetType()));
+                throw new ArgumentException("Unexpected message type: " + TypeMetadataCache.GetShortName(message.GetType()));
 
             await endpoint.Publish(msg, cancellationToken);
         }
@@ -53,7 +53,7 @@ namespace MassTransit.Context
 
             var msg = message as T;
             if (msg == null)
-                throw new ArgumentException("Unexpected message type: " + TypeMetadataCache.ShortName(message.GetType()));
+                throw new ArgumentException("Unexpected message type: " + TypeMetadataCache.GetShortName(message.GetType()));
 
             await endpoint.Publish(msg, pipe, cancellationToken);
         }

@@ -107,7 +107,7 @@ namespace MassTransit.RabbitMqTransport
                         byte[] body;
                         using (var memoryStream = new MemoryStream())
                         {
-                            context.Body.CopyTo(memoryStream);
+                            context.GetBody().CopyTo(memoryStream);
 
                             body = memoryStream.ToArray();
                         }

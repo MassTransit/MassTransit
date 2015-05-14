@@ -112,9 +112,9 @@ namespace MassTransit.Transports
             _receiveObserver.NotifyConsumeFault(context, duration, consumerType, exception);
         }
 
-        Stream ReceiveContext.Body
+        Stream ReceiveContext.GetBody()
         {
-            get { return GetBodyStream(); }
+            return GetBodyStream();
         }
 
         TimeSpan ReceiveContext.ElapsedTime

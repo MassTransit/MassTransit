@@ -92,7 +92,7 @@ namespace MassTransit.AzureServiceBusTransport
             BrokeredMessageContext messageContext;
             if (context.TryGetPayload(out messageContext))
             {
-                using (Stream messageBodyStream = context.Body)
+                using (Stream messageBodyStream = context.GetBody())
                 {
                     using (var brokeredMessage = new BrokeredMessage(messageBodyStream))
                     {

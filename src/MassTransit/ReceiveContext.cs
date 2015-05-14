@@ -29,7 +29,7 @@ namespace MassTransit
         /// Returns the message body as a stream that can be deserialized. The stream
         /// must be disposed by the caller, a reference is not retained
         /// </summary>
-        Stream Body { get; }
+        Stream GetBody();
 
         // the amount of time elapsed since the message was read from the queue
         TimeSpan ElapsedTime { get; }

@@ -29,7 +29,7 @@ namespace MassTransit.Context
         {
             _receiveContext = receiveContext;
             _headers = new InMemorySendHeaders();
-            Serializer = new CopyBodyMessageSerializer(_receiveContext.Body, _receiveContext.ContentType);
+            Serializer = new CopyBodyMessageSerializer(_receiveContext.GetBody(), _receiveContext.ContentType);
             ContentType = _receiveContext.ContentType;
 
             Guid? messageId = _receiveContext.TransportHeaders.Get("MessageId", default(Guid?));

@@ -41,7 +41,7 @@ namespace MassTransit.ConsumeConfigurators
                 .Select(x => string.Format("The {0} message should have a public or protected default constructor." +
                     " Without an available constructor, MassTransit will initialize new message instances" +
                     " without calling a constructor, which can lead to unpredictable behavior if the message" +
-                    " depends upon logic in the constructor to be executed.", TypeMetadataCache.ShortName(x.MessageType)))
+                    " depends upon logic in the constructor to be executed.", TypeMetadataCache.GetShortName(x.MessageType)))
                 .Select(message => configurator.Warning("Message", message));
 
             foreach (ValidationResult message in warningForMessages)
