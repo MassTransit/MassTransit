@@ -64,7 +64,7 @@ namespace RapidTransit
                 .Select(x => new {Assembly = Assembly.Load(x.Key.GetName()), Types = x})
                 .SelectMany(x => x.Types.Select(y =>
                 {
-                    _log.DebugFormat("Registering consumer type: {0}", TypeMetadataCache.ShortName(y.Type));
+                    _log.DebugFormat("Registering consumer type: {0}", TypeMetadataCache.GetShortName(y.Type));
 
                     return builder.RegisterType(y.Type);
                 }))

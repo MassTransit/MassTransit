@@ -59,7 +59,7 @@ namespace MassTransit.Courier.Pipeline
             }
             catch (Exception ex)
             {
-                _log.Error(string.Format("The activity {0} threw an exception", TypeMetadataCache.ShortName(context.Activity.GetType())), ex);
+                _log.Error(string.Format("The activity {0} threw an exception", TypeMetadataCache.GetShortName(context.Activity.GetType())), ex);
 
                 throw;
             }

@@ -17,9 +17,11 @@ namespace MassTransit.Courier.Hosts
     using System.Linq;
     using System.Runtime.Serialization;
     using Contracts;
+    using Exceptions;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
     using Serialization;
+
 
     /// <summary>
     /// A sanitized routing slip is one that has been read from and ensured to be safe for use, cleaning up any
@@ -35,7 +37,7 @@ namespace MassTransit.Courier.Hosts
         {
             ConsumeContext<JToken> messageTokenContext;
             if (!context.TryGetMessage(out messageTokenContext))
-                throw new InvalidOperationException("Unable to retrieve JSON token");
+                throw new RoutingSlipException("Unable to retrieve JSON token");
 
             _messageToken = messageTokenContext.Message;
 
@@ -86,40 +88,54 @@ namespace MassTransit.Courier.Hosts
         public T GetActivityArguments<T>(JsonTypeConverter<T> converter)
             where T : class
         {
-            JToken itineraryToken = _messageToken["itinerary"];
-            if (itineraryToken == null)
-                throw new ArgumentException("Itinerary not found in the routing slip");
+            try
+            {
+                JToken itineraryToken = _messageToken["itinerary"];
+                if (itineraryToken == null)
+                    throw new ArgumentException("Itinerary not found in the routing slip");
 
-            JToken activityToken = itineraryToken is JArray ? itineraryToken[0] : itineraryToken;
-            if (activityToken == null)
-                throw new ArgumentException("Activity not found in the routing slip");
+                JToken activityToken = itineraryToken is JArray ? itineraryToken[0] : itineraryToken;
+                if (activityToken == null)
+                    throw new ArgumentException("Activity not found in the routing slip");
 
-            JToken token = _variablesToken.Merge(activityToken["arguments"]);
+                JToken token = _variablesToken.Merge(activityToken["arguments"]);
 
-            return converter.Convert(token);
+                return converter.Convert(token);
+            }
+            catch (Exception ex)
+            {
+                throw new RoutingSlipArgumentException("The activity arguments could not be read", ex);
+            }
         }
 
         public T GetCompensateLogData<T>()
         {
-            JToken activityLogsToken = _messageToken["compensateLogs"];
-
-            JToken activityLogToken;
-            if (activityLogsToken is JArray)
+            try
             {
-                var logsToken = activityLogsToken as JArray;
-                activityLogToken = activityLogsToken[logsToken.Count - 1];
+                JToken activityLogsToken = _messageToken["compensateLogs"];
+
+                JToken activityLogToken;
+                if (activityLogsToken is JArray)
+                {
+                    var logsToken = activityLogsToken as JArray;
+                    activityLogToken = activityLogsToken[logsToken.Count - 1];
+                }
+                else
+                    activityLogToken = activityLogsToken;
+
+                // give data priority over variables, duh
+                JToken token = _variablesToken.Merge(activityLogToken["data"]);
+                if (token.Type == JTokenType.Null)
+                    token = new JObject();
+
+                using (var jsonReader = new JTokenReader(token))
+                {
+                    return (T)SerializerCache.Deserializer.Deserialize(jsonReader, typeof(T));
+                }
             }
-            else
-                activityLogToken = activityLogsToken;
-
-            // give data priority over variables, duh
-            JToken token = _variablesToken.Merge(activityLogToken["data"]);
-            if (token.Type == JTokenType.Null)
-                token = new JObject();
-
-            using (var jsonReader = new JTokenReader(token))
+            catch (Exception ex)
             {
-                return (T)SerializerCache.Deserializer.Deserialize(jsonReader, typeof(T));
+                throw new RoutingSlipArgumentException("The compensate log could not be read", ex);
             }
         }
 

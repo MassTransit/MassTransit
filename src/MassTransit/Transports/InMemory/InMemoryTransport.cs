@@ -109,7 +109,7 @@ namespace MassTransit.Transports.InMemory
         {
             Guid messageId = GetMessageId(context);
 
-            byte[] body = await GetMessageBody(context.Body);
+            byte[] body = await GetMessageBody(context.GetBody());
 
             string messageType = "Unknown";
             InMemoryTransportMessage receivedMessage;

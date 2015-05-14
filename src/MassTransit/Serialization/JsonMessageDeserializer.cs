@@ -45,7 +45,7 @@ namespace MassTransit.Serialization
             try
             {
                 MessageEnvelope envelope;
-                using (Stream body = receiveContext.Body)
+                using (Stream body = receiveContext.GetBody())
                 using (var reader = new StreamReader(body, Encoding.UTF8, false, 1024, true))
                 using (var jsonReader = new JsonTextReader(reader))
                 {

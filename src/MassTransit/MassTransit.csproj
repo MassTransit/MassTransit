@@ -112,6 +112,7 @@
     <Compile Include="Configuration\TransformConfigurators\TransformSpecificationConfigurator.cs" />
     <Compile Include="Configuration\TransformConfigurators\ValuePropertyTransformSpecification.cs" />
     <Compile Include="Context\MessageConsumeContext.cs" />
+    <Compile Include="Courier\Exceptions\RoutingSlipArgumentException.cs" />
     <Compile Include="Exceptions\MessageDataException.cs" />
     <Compile Include="Exceptions\MessageDataNotFoundException.cs" />
     <Compile Include="IMessageData.cs" />

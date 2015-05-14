@@ -10,41 +10,33 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Logging
+namespace MassTransit.Courier.Exceptions
 {
     using System;
-    using Tracing;
-    using Util;
+    using System.Runtime.Serialization;
 
 
-    public static class Logger
+    [Serializable]
+    public class RoutingSlipArgumentException :
+        RoutingSlipException
     {
-        static ILogger _logger;
-
-        public static ILogger Current
+        public RoutingSlipArgumentException()
         {
-            get { return _logger ?? (_logger = new TraceLogger()); }
         }
 
-        public static ILog Get<T>()
-            where T : class
+        public RoutingSlipArgumentException(string message)
+            : base(message)
         {
-            return Get(TypeMetadataCache<T>.ShortName);
         }
 
-        public static ILog Get(Type type)
+        public RoutingSlipArgumentException(string message, Exception innerException)
+            : base(message, innerException)
         {
-            return Get(TypeMetadataCache.GetShortName(type));
         }
 
-        public static ILog Get(string name)
+        protected RoutingSlipArgumentException(SerializationInfo info, StreamingContext context)
+            : base(info, context)
         {
-            return Current.Get(name);
-        }
-
-        public static void UseLogger(ILogger logger)
-        {
-            _logger = logger;
         }
     }
 }
