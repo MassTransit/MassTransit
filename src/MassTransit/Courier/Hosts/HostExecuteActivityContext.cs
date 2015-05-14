@@ -236,5 +236,10 @@ namespace MassTransit.Courier.Hosts
         {
             get { return _context.Arguments; }
         }
+
+        public ConnectHandle Connect(IPublishObserver observer)
+        {
+            return _consumeContext.Connect(observer);
+        }
     }
 }

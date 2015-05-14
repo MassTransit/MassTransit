@@ -199,5 +199,11 @@ namespace MassTransit
                 await Task.WhenAll(_hosts.Select(x => x.Stop(cancellationToken)));
             }
         }
+
+
+        public ConnectHandle Connect(IPublishObserver observer)
+        {
+            return _publishEndpoint.Connect(observer);
+        }
     }
 }

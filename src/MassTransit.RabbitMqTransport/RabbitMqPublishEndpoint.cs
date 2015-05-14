@@ -14,20 +14,18 @@ namespace MassTransit.RabbitMqTransport
 {
     using System;
     using System.Collections.Concurrent;
+    using System.Collections.Generic;
     using System.Linq;
-    using System.Threading;
     using System.Threading.Tasks;
     using Configuration;
-    using Context;
     using Integration;
-    using MassTransit.Pipeline;
     using Pipeline;
     using Transports;
     using Util;
 
 
     public class RabbitMqPublishEndpoint :
-        IPublishEndpoint
+        PublishEndpoint
     {
         readonly ConcurrentDictionary<Type, Lazy<ISendEndpoint>> _cachedEndpoints;
         readonly IRabbitMqHost _host;
@@ -44,81 +42,9 @@ namespace MassTransit.RabbitMqTransport
             _cachedEndpoints = new ConcurrentDictionary<Type, Lazy<ISendEndpoint>>();
         }
 
-        async Task IPublishEndpoint.Publish<T>(T message, CancellationToken cancellationToken)
+        protected override async Task<IEnumerable<ISendEndpoint>> GetEndpoints(Type messageType)
         {
-            ISendEndpoint endpoint = await GetEndpoint(typeof(T));
-            await endpoint.Send(message, cancellationToken);
-        }
-
-        async Task IPublishEndpoint.Publish<T>(T message, IPipe<PublishContext<T>> publishPipe,
-            CancellationToken cancellationToken)
-        {
-            ISendEndpoint endpoint = await GetEndpoint(typeof(T));
-            await endpoint.Send(message, new PublishPipeContextAdapter<T>(publishPipe), cancellationToken);
-        }
-
-        async Task IPublishEndpoint.Publish<T>(T message, IPipe<PublishContext> publishPipe,
-            CancellationToken cancellationToken)
-        {
-            ISendEndpoint endpoint = await GetEndpoint(typeof(T));
-            await endpoint.Send(message, new PublishPipeContextAdapter(publishPipe), cancellationToken);
-        }
-
-        Task IPublishEndpoint.Publish(object message, CancellationToken cancellationToken)
-        {
-            if (message == null)
-                throw new ArgumentNullException("message");
-
-            Type messageType = message.GetType();
-
-            return PublishEndpointConverterCache.Publish(this, message, messageType, cancellationToken);
-        }
-
-        Task IPublishEndpoint.Publish(object message, IPipe<PublishContext> publishPipe,
-            CancellationToken cancellationToken)
-        {
-            if (message == null)
-                throw new ArgumentNullException("message");
-
-            Type messageType = message.GetType();
-
-            return PublishEndpointConverterCache.Publish(this, message, messageType, cancellationToken);
-        }
-
-        Task IPublishEndpoint.Publish(object message, Type messageType, CancellationToken cancellationToken)
-        {
-            return PublishEndpointConverterCache.Publish(this, message, messageType, cancellationToken);
-        }
-
-        Task IPublishEndpoint.Publish(object message, Type messageType, IPipe<PublishContext> publishPipe,
-            CancellationToken cancellationToken)
-        {
-            return PublishEndpointConverterCache.Publish(this, message, messageType, publishPipe, cancellationToken);
-        }
-
-        async Task IPublishEndpoint.Publish<T>(object values, CancellationToken cancellationToken)
-        {
-            ISendEndpoint endpoint = await GetEndpoint(typeof(T));
-            await endpoint.Send<T>(values, cancellationToken);
-        }
-
-        async Task IPublishEndpoint.Publish<T>(object values, IPipe<PublishContext<T>> publishPipe,
-            CancellationToken cancellationToken)
-        {
-            ISendEndpoint endpoint = await GetEndpoint(typeof(T));
-            await endpoint.Send(values, new PublishPipeContextAdapter<T>(publishPipe), cancellationToken);
-        }
-
-        async Task IPublishEndpoint.Publish<T>(object values, IPipe<PublishContext> publishPipe,
-            CancellationToken cancellationToken)
-        {
-            ISendEndpoint endpoint = await GetEndpoint(typeof(T));
-            await endpoint.Send<T>(values, new PublishPipeContextAdapter(publishPipe), cancellationToken);
-        }
-
-        async Task<ISendEndpoint> GetEndpoint(Type messageType)
-        {
-            return _cachedEndpoints.GetOrAdd(messageType, x => new Lazy<ISendEndpoint>(() => CreateSendEndpoint(x))).Value;
+            return new[] {_cachedEndpoints.GetOrAdd(messageType, x => new Lazy<ISendEndpoint>(() => CreateSendEndpoint(x))).Value};
         }
 
         ISendEndpoint CreateSendEndpoint(Type messageType)

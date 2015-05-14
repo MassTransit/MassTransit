@@ -255,6 +255,12 @@ namespace MassTransit.Context
                 context.NotifyFaulted(_context, _elapsed, _consumerType, _exception);
             }
         }
+
+
+        public ConnectHandle Connect(IPublishObserver observer)
+        {
+            return _context.Connect(observer);
+        }
     }
 
 

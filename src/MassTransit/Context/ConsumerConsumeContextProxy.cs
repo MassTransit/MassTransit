@@ -244,5 +244,10 @@ namespace MassTransit.Context
         {
             get { return _consumer; }
         }
+
+        public ConnectHandle Connect(IPublishObserver observer)
+        {
+            return _context.Connect(observer);
+        }
     }
 }

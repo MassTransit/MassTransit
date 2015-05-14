@@ -466,6 +466,8 @@
     <Compile Include="Pipeline\IConsumePipe.cs" />
     <Compile Include="Pipeline\ConsumePipeExtensions.cs" />
     <Compile Include="Pipeline\IPublishInterceptor.cs" />
+    <Compile Include="Pipeline\IPublishObserver.cs" />
+    <Compile Include="Pipeline\IPublishObserverConnector.cs" />
     <Compile Include="Pipeline\IRequestPipeConnector.cs" />
     <Compile Include="Pipeline\ISendInterceptor.cs" />
     <Compile Include="Pipeline\ISendObserver.cs" />
@@ -783,6 +785,7 @@
     <Compile Include="Transports\InvalidConnectionException.cs" />
     <Compile Include="Transports\ISendTransport.cs" />
     <Compile Include="Transports\MessageName.cs" />
+    <Compile Include="Transports\PublishEndpoint.cs" />
     <Compile Include="Transports\PublishPipeContextAdapter.cs" />
     <Compile Include="Transports\BaseReceiveContext.cs" />
     <Compile Include="Transports\ReceiveEndpoint.cs" />

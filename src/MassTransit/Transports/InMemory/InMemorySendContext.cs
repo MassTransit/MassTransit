@@ -92,7 +92,8 @@ namespace MassTransit.Transports.InMemory
             set
             {
                 _serializer = value;
-                ContentType = _serializer.ContentType;
+                if(_serializer != null)
+                    ContentType = _serializer.ContentType;
             }
         }
 
