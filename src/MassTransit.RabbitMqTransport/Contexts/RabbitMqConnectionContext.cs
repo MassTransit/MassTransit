@@ -87,14 +87,14 @@ namespace MassTransit.RabbitMqTransport.Contexts
         {
             _connection.ConnectionShutdown -= OnConnectionShutdown;
 
-            Close();
+            Close(200, "Connection disposed");
         }
 
         void OnConnectionShutdown(object connection, ShutdownEventArgs reason)
         {
             _tokenSource.Cancel();
 
-            Close();
+            Close(reason.ReplyCode, reason.ReplyText);
         }
 
         void OnCancellationRequested()
@@ -102,13 +102,13 @@ namespace MassTransit.RabbitMqTransport.Contexts
             _tokenSource.Cancel();
         }
 
-        void Close()
+        void Close(ushort replyCode, string message)
         {
             lock (_lock)
             {
                 _registration.Dispose();
 
-                _connection.Cleanup();
+                _connection.Cleanup(replyCode, message);
                 _connection = null;
             }
         }
