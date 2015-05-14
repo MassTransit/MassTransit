@@ -12,56 +12,66 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports
 {
+    using System;
+    using System.Threading;
     using System.Threading.Tasks;
     using Context;
     using Pipeline;
-
-
-    public class PublishPipeContextAdapter :
-        IPipe<SendContext>
-    {
-        readonly IPipe<PublishContext> _pipe;
-
-        public PublishPipeContextAdapter(IPipe<PublishContext> pipe)
-        {
-            _pipe = pipe;
-        }
-
-        public Task Send(SendContext context)
-        {
-            var publishContext = new PublishContextProxy(context);
-
-            return _pipe.Send(publishContext);
-        }
-
-        public bool Visit(IPipelineVisitor visitor)
-        {
-            return visitor.Visit(this, x => _pipe.Visit(x));
-        }
-    }
 
 
     public class PublishPipeContextAdapter<T> :
         IPipe<SendContext<T>>
         where T : class
     {
+        readonly IPublishObserver _observer;
         readonly IPipe<PublishContext<T>> _pipe;
 
-        public PublishPipeContextAdapter(IPipe<PublishContext<T>> pipe)
+        PublishContext<T> _context;
+
+        public PublishPipeContextAdapter(IPipe<PublishContext<T>> pipe, IPublishObserver observer)
         {
             _pipe = pipe;
+            _observer = observer;
         }
 
-        public Task Send(SendContext<T> context)
+        public PublishPipeContextAdapter(IPipe<PublishContext> pipe, IPublishObserver observer)
+        {
+            _pipe = pipe;
+            _observer = observer;
+        }
+
+        public PublishPipeContextAdapter(IPublishObserver observer)
+        {
+            _observer = observer;
+            _pipe = Pipe.Empty<PublishContext<T>>();
+        }
+
+        public async Task Send(SendContext<T> context)
         {
             var publishContext = new PublishContextProxy<T>(context);
+            bool firstTime = Interlocked.CompareExchange(ref _context, publishContext, null) == null;
 
-            return _pipe.Send(publishContext);
+            await _pipe.Send(publishContext);
+
+            if (firstTime)
+                await _observer.PrePublish(publishContext);
         }
 
         public bool Visit(IPipelineVisitor visitor)
         {
             return visitor.Visit(this, x => _pipe.Visit(x));
+        }
+
+        public async Task PostSend()
+        {
+            if (_context != null)
+                await _observer.PostPublish(_context);
+        }
+
+        public async Task SendFaulted(Exception exception)
+        {
+            if (_context != null)
+                await _observer.PublishFault(_context, exception);
         }
     }
 }

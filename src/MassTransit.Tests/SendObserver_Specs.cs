@@ -13,6 +13,7 @@
 namespace MassTransit.Tests
 {
     using System;
+    using System.Runtime.Serialization;
     using System.Threading.Tasks;
     using MassTransit.Pipeline;
     using NUnit.Framework;
@@ -31,7 +32,7 @@ namespace MassTransit.Tests
             var observer = new Observer();
             using (InputQueueSendEndpoint.Connect(observer))
             {
-                await InputQueueSendEndpoint.Send(new PingMessage(), Pipe.New<SendContext>(v => v.Execute(x => x.Serializer = null)));
+                Assert.Throws<SerializationException>(async () => await InputQueueSendEndpoint.Send(new PingMessage(), Pipe.Execute<SendContext>(x => x.Serializer = null)));
 
                 await observer.SendFaulted;
             }
@@ -67,7 +68,7 @@ namespace MassTransit.Tests
             var observer = new Observer();
             using (InputQueueSendEndpoint.Connect(observer))
             {
-                await InputQueueSendEndpoint.Send(new PingMessage(), Pipe.New<SendContext>(v => v.Execute(x => x.Serializer = null)));
+                Assert.Throws<SerializationException>(async () => await InputQueueSendEndpoint.Send(new PingMessage(), Pipe.Execute<SendContext>(x => x.Serializer = null)));
 
                 await observer.SendFaulted;
 

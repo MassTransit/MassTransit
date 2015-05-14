@@ -378,5 +378,10 @@ namespace MassTransit.Serialization
 
             return new Uri(uri);
         }
+
+        public ConnectHandle Connect(IPublishObserver observer)
+        {
+            return _publishEndpoint.Connect(observer);
+        }
     }
 }

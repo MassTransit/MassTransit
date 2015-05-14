@@ -132,5 +132,10 @@ namespace RapidTransit
         {
             return _bus.ConnectReceiveObserver(observer);
         }
+
+        public ConnectHandle Connect(IPublishObserver observer)
+        {
+            return _bus.Connect(observer);
+        }
     }
 }

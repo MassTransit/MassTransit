@@ -20,6 +20,7 @@ namespace MassTransit.TestFramework
     using System.Threading.Tasks;
     using Context;
     using Pipeline;
+    using Util;
 
 
     public class TestConsumeContext<TMessage> :
@@ -243,6 +244,11 @@ namespace MassTransit.TestFramework
         public void NotifyFaulted(TimeSpan duration, string consumerType, Exception exception)
         {
             NotifyFaulted(this, duration, consumerType, exception);
+        }
+
+        public ConnectHandle Connect(IPublishObserver observer)
+        {
+            return new Connectable<IPublishObserver>().Connect(observer);
         }
     }
 }

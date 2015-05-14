@@ -14,14 +14,11 @@ namespace MassTransit.Transports.InMemory
 {
     using System;
     using System.Collections.Generic;
-    using System.Threading;
     using System.Threading.Tasks;
-    using Context;
-    using Pipeline;
 
 
     public class InMemoryPublishEndpoint :
-        IPublishEndpoint
+        PublishEndpoint
     {
         readonly ISendEndpointProvider _sendEndpointProvider;
         readonly InMemoryTransportCache _transportCache;
@@ -32,71 +29,7 @@ namespace MassTransit.Transports.InMemory
             _transportCache = transportProvider as InMemoryTransportCache;
         }
 
-        async Task IPublishEndpoint.Publish<T>(T message, CancellationToken cancellationToken)
-        {
-            foreach (ISendEndpoint endpoint in await GetEndpoints())
-                await endpoint.Send(message, cancellationToken);
-        }
-
-        async Task IPublishEndpoint.Publish<T>(T message, IPipe<PublishContext<T>> publishPipe,
-            CancellationToken cancellationToken)
-        {
-            foreach (ISendEndpoint endpoint in await GetEndpoints())
-                await endpoint.Send(message, new PublishPipeContextAdapter<T>(publishPipe), cancellationToken);
-        }
-
-        async Task IPublishEndpoint.Publish<T>(T message, IPipe<PublishContext> publishPipe,
-            CancellationToken cancellationToken)
-        {
-            foreach (ISendEndpoint endpoint in await GetEndpoints())
-                await endpoint.Send(message, new PublishPipeContextAdapter(publishPipe), cancellationToken);
-        }
-
-        async Task IPublishEndpoint.Publish(object message, CancellationToken cancellationToken)
-        {
-            foreach (ISendEndpoint endpoint in await GetEndpoints())
-                await endpoint.Send(message, cancellationToken);
-        }
-
-        async Task IPublishEndpoint.Publish(object message, IPipe<PublishContext> publishPipe,
-            CancellationToken cancellationToken)
-        {
-            foreach (ISendEndpoint endpoint in await GetEndpoints())
-                await endpoint.Send(message, new PublishPipeContextAdapter(publishPipe), cancellationToken);
-        }
-
-        Task IPublishEndpoint.Publish(object message, Type messageType, CancellationToken cancellationToken)
-        {
-            return PublishEndpointConverterCache.Publish(this, message, messageType, cancellationToken);
-        }
-
-        Task IPublishEndpoint.Publish(object message, Type messageType, IPipe<PublishContext> publishPipe,
-            CancellationToken cancellationToken)
-        {
-            return PublishEndpointConverterCache.Publish(this, message, messageType, publishPipe, cancellationToken);
-        }
-
-        async Task IPublishEndpoint.Publish<T>(object values, CancellationToken cancellationToken)
-        {
-            foreach (ISendEndpoint endpoint in await GetEndpoints())
-                await endpoint.Send<T>(values, cancellationToken);
-        }
-
-        async Task IPublishEndpoint.Publish<T>(object values, IPipe<PublishContext<T>> publishPipe,
-            CancellationToken cancellationToken)
-        {
-            foreach (ISendEndpoint endpoint in await GetEndpoints())
-                await endpoint.Send(values, new PublishPipeContextAdapter<T>(publishPipe), cancellationToken);
-        }
-
-        async Task IPublishEndpoint.Publish<T>(object values, IPipe<PublishContext> publishPipe,
-            CancellationToken cancellationToken)
-        {
-            foreach (ISendEndpoint endpoint in await GetEndpoints())
-                await endpoint.Send<T>(values, new PublishPipeContextAdapter(publishPipe), cancellationToken);
-        }
-
-        async Task<IEnumerable<ISendEndpoint>> GetEndpoints()
+        protected override async Task<IEnumerable<ISendEndpoint>> GetEndpoints(Type messageType)
         {
             var endpoints = new List<ISendEndpoint>();
             foreach (Uri transport in _transportCache.TransportAddresses)

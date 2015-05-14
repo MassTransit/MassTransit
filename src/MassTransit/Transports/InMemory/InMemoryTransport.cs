@@ -76,7 +76,6 @@ namespace MassTransit.Transports.InMemory
         {
             var context = new InMemorySendContext<T>(message, cancelSend);
 
-            Exception fault = null;
             try
             {
                 await pipe.Send(context);
@@ -98,11 +97,10 @@ namespace MassTransit.Transports.InMemory
             {
                 _log.Error(string.Format("SEND FAULT: {0} {1} {2}", _inputAddress, context.MessageId, TypeMetadataCache<T>.ShortName));
 
-                fault = ex;
-            }
+                _observers.ForEach(x => x.SendFault(context, ex)).Wait(cancelSend);
 
-            if (fault != null)
-                await _observers.ForEach(x => x.SendFault(context, fault));
+                throw;
+            }
         }
 
         async Task ISendTransport.Move(ReceiveContext context, IPipe<SendContext> pipe)
@@ -110,7 +108,7 @@ namespace MassTransit.Transports.InMemory
             Guid messageId = GetMessageId(context);
 
             byte[] body;
-            using (var bodyStream = context.GetBody())
+            using (Stream bodyStream = context.GetBody())
             {
                 body = await GetMessageBody(bodyStream);
             }

@@ -140,6 +140,7 @@
     <Compile Include="Pipeline\TestPipeContext.cs" />
     <Compile Include="Pipeline\Transaction_Specs.cs" />
     <Compile Include="Pipeline\TwoMessageConsumer.cs" />
+    <Compile Include="PublishObserver_Specs.cs" />
     <Compile Include="ReceiveObserver_Specs.cs" />
     <Compile Include="RequestClient_Specs.cs" />
     <Compile Include="Retry_Specs.cs" />
