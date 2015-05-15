@@ -39,7 +39,7 @@ namespace MassTransit.Pipeline.Filters
             context.GetOrAddPayload(() => schedulerContext);
             context.GetOrAddPayload<MessageRedeliveryContext>(() => new ConsumeMessageRedeliveryContext<TMessage>(context, schedulerContext));
 
-            await next.Send(context);
+            await next.Send(context).ConfigureAwait(false);
         }
 
         bool IFilter<ConsumeContext<TMessage>>.Visit(IPipelineVisitor visitor)

@@ -39,7 +39,7 @@ namespace MassTransit.Context
             if (msg == null)
                 throw new ArgumentException("Unexpected message type: " + message.GetType().GetTypeName());
 
-            await endpoint.Send(msg, cancellationToken);
+            await endpoint.Send(msg, cancellationToken).ConfigureAwait(false);
         }
 
         async Task ISendEndpointConverter.Send(ISendEndpoint endpoint, object message, IPipe<SendContext> pipe,
@@ -56,7 +56,7 @@ namespace MassTransit.Context
             if (msg == null)
                 throw new ArgumentException("Unexpected message type: " + message.GetType().GetTypeName());
 
-            await endpoint.Send(msg, pipe, cancellationToken);
+            await endpoint.Send(msg, pipe, cancellationToken).ConfigureAwait(false);
         }
     }
 }

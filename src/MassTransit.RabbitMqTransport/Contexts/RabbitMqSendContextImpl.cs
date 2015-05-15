@@ -19,7 +19,6 @@ namespace MassTransit.RabbitMqTransport.Contexts
     using System.Threading;
     using Context;
     using RabbitMQ.Client;
-    using Serialization;
 
 
     public class RabbitMqSendContextImpl<T> :

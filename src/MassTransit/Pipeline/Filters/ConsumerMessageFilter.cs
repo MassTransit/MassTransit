@@ -44,11 +44,11 @@ namespace MassTransit.Pipeline.Filters
             Stopwatch timer = Stopwatch.StartNew();
             try
             {
-                await _consumerFactory.Send(context, _consumerPipe);
+                await _consumerFactory.Send(context, _consumerPipe).ConfigureAwait(false);
 
                 context.NotifyConsumed(timer.Elapsed, TypeMetadataCache<TConsumer>.ShortName);
 
-                await next.Send(context);
+                await next.Send(context).ConfigureAwait(false);
             }
             catch (Exception ex)
             {

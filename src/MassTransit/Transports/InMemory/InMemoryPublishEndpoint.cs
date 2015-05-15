@@ -33,7 +33,7 @@ namespace MassTransit.Transports.InMemory
         {
             var endpoints = new List<ISendEndpoint>();
             foreach (Uri transport in _transportCache.TransportAddresses)
-                endpoints.Add(await _sendEndpointProvider.GetSendEndpoint(transport));
+                endpoints.Add(await _sendEndpointProvider.GetSendEndpoint(transport).ConfigureAwait(false));
 
             return endpoints;
         }

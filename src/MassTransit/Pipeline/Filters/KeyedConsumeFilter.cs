@@ -50,7 +50,7 @@ namespace MassTransit.Pipeline.Filters
 
             TeeConsumeFilter<T> filter;
             if (_pipes.TryGetValue(key, out filter))
-                await filter.Send(context, next);
+                await filter.Send(context, next).ConfigureAwait(false);
         }
 
         public bool Visit(IPipelineVisitor visitor)

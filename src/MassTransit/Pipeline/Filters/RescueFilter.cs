@@ -42,7 +42,7 @@ namespace MassTransit.Pipeline.Filters
             Exception exception = null;
             try
             {
-                await next.Send(context);
+                await next.Send(context).ConfigureAwait(false);
             }
             catch (AggregateException ex)
             {
@@ -66,7 +66,7 @@ namespace MassTransit.Pipeline.Filters
             }
 
             if (exception != null)
-                await _rescuePipe.Send(context);
+                await _rescuePipe.Send(context).ConfigureAwait(false);
         }
 
         bool IFilter<T>.Visit(IPipelineVisitor visitor)

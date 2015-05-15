@@ -39,7 +39,7 @@ namespace MassTransit.Courier.Factories
 
                 var activityContext = new HostExecuteActivityContext<TActivity, TArguments>(activity, context);
 
-                await next.Send(activityContext);
+                await next.Send(activityContext).ConfigureAwait(false);
             }
             finally
             {

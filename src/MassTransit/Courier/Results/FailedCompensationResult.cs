@@ -46,7 +46,7 @@ namespace MassTransit.Courier.Results
             DateTime faultedTimestamp = _compensateContext.StartTimestamp + _duration;
             TimeSpan faultedDuration = faultedTimestamp - _routingSlip.CreateTimestamp;
 
-            await _publisher.PublishRoutingSlipActivityCompensationFailed(_compensateContext.ActivityName, _compensateContext.ExecutionId,
+             _publisher.PublishRoutingSlipActivityCompensationFailed(_compensateContext.ActivityName, _compensateContext.ExecutionId,
                 _compensateContext.StartTimestamp, _duration, faultedTimestamp, faultedDuration, new FaultExceptionInfo(_exception), _routingSlip.Variables,
                 _compensateLog.Data);
         }

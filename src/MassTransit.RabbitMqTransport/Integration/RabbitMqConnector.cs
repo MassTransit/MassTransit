@@ -43,9 +43,9 @@ namespace MassTransit.RabbitMqTransport.Integration
             _connectionFactory = hostSettings.GetConnectionFactory();
         }
 
-        public Task Connect(IPipe<ConnectionContext> pipe, CancellationToken cancellationToken)
+        public async Task Connect(IPipe<ConnectionContext> pipe, CancellationToken cancellationToken)
         {
-            return _retryPolicy.Retry(async () =>
+            await _retryPolicy.Retry(async () =>
             {
                 if (_log.IsDebugEnabled)
                     _log.DebugFormat("Connecting: {0}", _connectionFactory.ToDebugString());
@@ -61,7 +61,7 @@ namespace MassTransit.RabbitMqTransport.Integration
                         {
                             connectionContext.GetOrAddPayload(() => _hostSettings);
 
-                            await pipe.Send(connectionContext);
+                            await pipe.Send(connectionContext).ConfigureAwait(false);
                         }
 
                         if (_log.IsDebugEnabled)
@@ -75,7 +75,7 @@ namespace MassTransit.RabbitMqTransport.Integration
                 {
                     throw new RabbitMqConnectionException("Connect failed: " + _connectionFactory.ToDebugString(), ex);
                 }
-            }, cancellationToken);
+            }, cancellationToken).ConfigureAwait(false);
         }
     }
 }

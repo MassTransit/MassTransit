@@ -49,9 +49,9 @@ namespace MassTransit.Pipeline.Filters
 
         public async Task Send(ConsumeContext<T> context, IPipe<ConsumeContext<T>> next)
         {
-            await _connections.ForEach(async pipe => await pipe.Send(context));
+            await _connections.ForEach(async pipe => await pipe.Send(context).ConfigureAwait(false)).ConfigureAwait(false);
 
-            await next.Send(context);
+            await next.Send(context).ConfigureAwait(false);
         }
 
         public bool Visit(IPipelineVisitor visitor)

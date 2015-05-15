@@ -56,7 +56,7 @@ namespace MassTransit.Saga
 
             var sagaFilter = new SagaFilter<TSaga>(filter);
 
-            Guid[] sagaIds = (await _repository.Find(sagaFilter)).ToArray();
+            Guid[] sagaIds = (await _repository.Find(sagaFilter).ConfigureAwait(false)).ToArray();
             if (sagaIds.Length > 0)
                 return sagaIds;
 

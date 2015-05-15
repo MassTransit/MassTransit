@@ -57,7 +57,7 @@ namespace MassTransit.Courier.Results
         {
             await base.PublishActivityEvents(routingSlip, builder);
 
-            await Publisher.PublishRoutingSlipRevised(Context.ExecutionId, Context.Timestamp, Context.Elapsed, routingSlip.Variables,
+             Publisher.PublishRoutingSlipRevised(Context.ExecutionId, Context.Timestamp, Context.Elapsed, routingSlip.Variables,
                 routingSlip.Itinerary, builder.SourceItinerary);
         }
     }

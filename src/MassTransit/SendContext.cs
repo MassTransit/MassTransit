@@ -14,7 +14,6 @@ namespace MassTransit
 {
     using System;
     using System.Net.Mime;
-    using Serialization;
 
 
     /// <summary>

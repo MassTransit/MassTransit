@@ -91,20 +91,20 @@ namespace MassTransit.Courier.Results
             if (HasNextActivity(routingSlip))
             {
                 ISendEndpoint endpoint = await _context.GetSendEndpoint(routingSlip.GetNextExecuteAddress());
-                await _context.ConsumeContext.Forward(endpoint, routingSlip);
+                 _context.ConsumeContext.Forward(endpoint, routingSlip);
             }
             else
             {
                 DateTime completedTimestamp = _context.Timestamp + _duration;
                 TimeSpan completedDuration = completedTimestamp - _routingSlip.CreateTimestamp;
 
-                await _publisher.PublishRoutingSlipCompleted(completedTimestamp, completedDuration, routingSlip.Variables);
+                 _publisher.PublishRoutingSlipCompleted(completedTimestamp, completedDuration, routingSlip.Variables);
             }
         }
 
         protected virtual async Task PublishActivityEvents(RoutingSlip routingSlip, RoutingSlipBuilder builder)
         {
-            await Publisher.PublishRoutingSlipActivityCompleted(Context.ActivityName, Context.ExecutionId, Context.Timestamp, _duration,
+             Publisher.PublishRoutingSlipActivityCompleted(Context.ActivityName, Context.ExecutionId, Context.Timestamp, _duration,
                 routingSlip.Variables, _activity.Arguments, _data);
         }
 

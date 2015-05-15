@@ -36,11 +36,11 @@ namespace MassTransit
         {
             SynchronizationContext synchronizationContext = SynchronizationContext.Current;
 
-            ISendEndpoint endpoint = await bus.GetSendEndpoint(address);
+            ISendEndpoint endpoint = await bus.GetSendEndpoint(address).ConfigureAwait(false);
 
             var pipe = new SendRequest<TRequest>(bus, synchronizationContext, callback);
 
-            await endpoint.Send(message, pipe, cancellationToken);
+            await endpoint.Send(message, pipe, cancellationToken).ConfigureAwait(false);
 
             return pipe;
         }

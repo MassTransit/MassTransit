@@ -122,9 +122,9 @@ namespace MassTransit.RabbitMqTransport.Pipeline
 
                 _receiveObserver.NotifyPreReceive(context);
 
-                await _receivePipe.Send(context);
+                await _receivePipe.Send(context).ConfigureAwait(false);
 
-                await context.CompleteTask;
+                await context.CompleteTask.ConfigureAwait(false);
 
                 _model.BasicAck(deliveryTag, false);
 

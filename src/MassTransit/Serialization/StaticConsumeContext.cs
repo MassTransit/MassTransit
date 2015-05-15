@@ -199,13 +199,13 @@ namespace MassTransit.Serialization
         {
             if (ResponseAddress != null)
             {
-                ISendEndpoint endpoint = await GetSendEndpoint(ResponseAddress);
+                ISendEndpoint endpoint = await GetSendEndpoint(ResponseAddress).ConfigureAwait(false);
 
-                await endpoint.Send(message, new ResponsePipe<T>(this), CancellationToken);
+                await endpoint.Send(message, new ResponsePipe<T>(this), CancellationToken).ConfigureAwait(false);
             }
             else
             {
-                await _publishEndpoint.Publish(message, new ResponsePipe<T>(this), CancellationToken);
+                await _publishEndpoint.Publish(message, new ResponsePipe<T>(this), CancellationToken).ConfigureAwait(false);
             }
         }
 
@@ -213,13 +213,13 @@ namespace MassTransit.Serialization
         {
             if (ResponseAddress != null)
             {
-                ISendEndpoint endpoint = await GetSendEndpoint(ResponseAddress);
+                ISendEndpoint endpoint = await GetSendEndpoint(ResponseAddress).ConfigureAwait(false);
 
-                await endpoint.Send(message, new ResponsePipe<T>(this, sendPipe), CancellationToken);
+                await endpoint.Send(message, new ResponsePipe<T>(this, sendPipe), CancellationToken).ConfigureAwait(false);
             }
             else
             {
-                await _publishEndpoint.Publish(message, new ResponsePipe<T>(this, sendPipe), CancellationToken);
+                await _publishEndpoint.Publish(message, new ResponsePipe<T>(this, sendPipe), CancellationToken).ConfigureAwait(false);
             }
         }
 
@@ -326,12 +326,12 @@ namespace MassTransit.Serialization
 
             if (ResponseAddress != null)
             {
-                ISendEndpoint endpoint = await GetSendEndpoint(ResponseAddress);
+                ISendEndpoint endpoint = await GetSendEndpoint(ResponseAddress).ConfigureAwait(false);
 
-                await endpoint.Send(fault, faultPipe, CancellationToken);
+                await endpoint.Send(fault, faultPipe, CancellationToken).ConfigureAwait(false);
             }
             else
-                await _publishEndpoint.Publish(fault, faultPipe, CancellationToken);
+                await _publishEndpoint.Publish(fault, faultPipe, CancellationToken).ConfigureAwait(false);
         }
 
         static JToken GetMessageToken(object message)

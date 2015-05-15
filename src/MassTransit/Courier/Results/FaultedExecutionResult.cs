@@ -47,7 +47,7 @@ namespace MassTransit.Courier.Results
 
         public async Task Evaluate()
         {
-            await _publisher.PublishRoutingSlipActivityFaulted(_executeContext.ActivityName, _executeContext.ExecutionId, _executeContext.Timestamp,
+             _publisher.PublishRoutingSlipActivityFaulted(_executeContext.ActivityName, _executeContext.ExecutionId, _executeContext.Timestamp,
                 _elapsed, _exceptionInfo, _routingSlip.Variables, _activity.Arguments);
 
             if (HasCompensationLogs())
@@ -58,14 +58,14 @@ namespace MassTransit.Courier.Results
 
                 RoutingSlip routingSlip = builder.Build();
 
-                await _executeContext.ConsumeContext.Forward(routingSlip.GetNextCompensateAddress(), routingSlip);
+                 _executeContext.ConsumeContext.Forward(routingSlip.GetNextCompensateAddress(), routingSlip);
             }
             else
             {
                 DateTime faultedTimestamp = _executeContext.Timestamp + _elapsed;
                 TimeSpan faultedDuration = faultedTimestamp - _routingSlip.CreateTimestamp;
 
-                await _publisher.PublishRoutingSlipFaulted(faultedTimestamp, faultedDuration, _routingSlip.Variables,
+                 _publisher.PublishRoutingSlipFaulted(faultedTimestamp, faultedDuration, _routingSlip.Variables,
                     _activityException);
             }
         }

@@ -51,10 +51,10 @@ namespace MassTransit.Transports
             var publishContext = new PublishContextProxy<T>(context);
             bool firstTime = Interlocked.CompareExchange(ref _context, publishContext, null) == null;
 
-            await _pipe.Send(publishContext);
+            await _pipe.Send(publishContext).ConfigureAwait(false);
 
             if (firstTime)
-                await _observer.PrePublish(publishContext);
+                await _observer.PrePublish(publishContext).ConfigureAwait(false);
         }
 
         public bool Visit(IPipelineVisitor visitor)
@@ -65,13 +65,13 @@ namespace MassTransit.Transports
         public async Task PostSend()
         {
             if (_context != null)
-                await _observer.PostPublish(_context);
+                await _observer.PostPublish(_context).ConfigureAwait(false);
         }
 
         public async Task SendFaulted(Exception exception)
         {
             if (_context != null)
-                await _observer.PublishFault(_context, exception);
+                await _observer.PublishFault(_context, exception).ConfigureAwait(false);
         }
     }
 }

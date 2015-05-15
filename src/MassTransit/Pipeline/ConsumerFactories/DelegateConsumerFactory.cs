@@ -41,7 +41,7 @@ namespace MassTransit.Pipeline.ConsumerFactories
                         TypeMetadataCache<TConsumer>.ShortName));
                 }
 
-                await next.Send(context.PushConsumer(consumer));
+                await next.Send(context.PushConsumer(consumer)).ConfigureAwait(false);
             }
             finally
             {

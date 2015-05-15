@@ -39,11 +39,11 @@ namespace MassTransit.Courier.Pipeline
                 Exception exception = null;
                 try
                 {
-                    ExecutionResult result = await context.Activity.Execute(context);
+                    ExecutionResult result = await context.Activity.Execute(context).ConfigureAwait(false);
 
-                    await result.Evaluate();
+                    await result.Evaluate().ConfigureAwait(false);
 
-                    await next.Send(context);
+                    await next.Send(context).ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {
@@ -54,7 +54,7 @@ namespace MassTransit.Courier.Pipeline
                 {
                     ExecutionResult result = context.Faulted(exception);
 
-                    await result.Evaluate();
+                    await result.Evaluate().ConfigureAwait(false);
                 }
             }
             catch (Exception ex)

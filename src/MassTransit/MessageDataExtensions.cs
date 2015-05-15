@@ -33,7 +33,7 @@ namespace MassTransit
             byte[] bytes = Encoding.UTF8.GetBytes(value);
             using (var ms = new MemoryStream(bytes, false))
             {
-                Uri address = await repository.Put(ms, default(TimeSpan?), cancellationToken);
+                Uri address = await repository.Put(ms, default(TimeSpan?), cancellationToken).ConfigureAwait(false);
 
                 return new ConstantMessageData<string>(address, value);
             }
@@ -50,7 +50,7 @@ namespace MassTransit
             byte[] bytes = Encoding.UTF8.GetBytes(value);
             using (var ms = new MemoryStream(bytes, false))
             {
-                Uri address = await repository.Put(ms, timeToLive, cancellationToken);
+                Uri address = await repository.Put(ms, timeToLive, cancellationToken).ConfigureAwait(false);
 
                 return new ConstantMessageData<string>(address, value);
             }
@@ -64,8 +64,8 @@ namespace MassTransit
 
             using (var ms = new MemoryStream())
             {
-                Stream stream = await repository.Get(address, cancellationToken);
-                await stream.CopyToAsync(ms);
+                Stream stream = await repository.Get(address, cancellationToken).ConfigureAwait(false);
+                await stream.CopyToAsync(ms).ConfigureAwait(false);
 
                 return new ConstantMessageData<string>(address, Encoding.UTF8.GetString(ms.ToArray()));
             }

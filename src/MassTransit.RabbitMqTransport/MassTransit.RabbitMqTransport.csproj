@@ -120,7 +120,6 @@
     <Compile Include="Configuration\TransportConfiguratorExtensions.cs" />
     <Compile Include="RabbitMqPublishEndpoint.cs" />
     <Compile Include="ConnectionContext.cs" />
-    <Compile Include="RabbitMqConnectionEventSource.cs" />
     <Compile Include="RabbitMqConfigurationExtensions.cs" />
     <Compile Include="RabbitMqExtensions.cs" />
     <Compile Include="RabbitMqHeaders.cs" />

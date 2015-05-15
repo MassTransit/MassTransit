@@ -29,9 +29,9 @@ namespace MassTransit.Pipeline.Filters
 
         public async Task Send(T context, IPipe<T> next)
         {
-            await _callback(context);
+            await _callback(context).ConfigureAwait(false);
 
-            await next.Send(context);
+            await next.Send(context).ConfigureAwait(false);
         }
 
         public bool Visit(IPipelineVisitor visitor)

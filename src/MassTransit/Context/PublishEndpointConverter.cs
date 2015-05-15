@@ -38,7 +38,7 @@ namespace MassTransit.Context
             if (msg == null)
                 throw new ArgumentException("Unexpected message type: " + TypeMetadataCache.GetShortName(message.GetType()));
 
-            await endpoint.Publish(msg, cancellationToken);
+            await endpoint.Publish(msg, cancellationToken).ConfigureAwait(false);
         }
 
         async Task IPublishEndpointConverter.Publish(IPublishEndpoint endpoint, object message, IPipe<PublishContext> pipe,
@@ -55,7 +55,7 @@ namespace MassTransit.Context
             if (msg == null)
                 throw new ArgumentException("Unexpected message type: " + TypeMetadataCache.GetShortName(message.GetType()));
 
-            await endpoint.Publish(msg, pipe, cancellationToken);
+            await endpoint.Publish(msg, pipe, cancellationToken).ConfigureAwait(false);
         }
     }
 }

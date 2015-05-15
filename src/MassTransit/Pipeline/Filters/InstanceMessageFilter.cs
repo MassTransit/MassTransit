@@ -47,11 +47,11 @@ namespace MassTransit.Pipeline.Filters
             Stopwatch timer = Stopwatch.StartNew();
             try
             {
-                await _instancePipe.Send(context.PushConsumer(_instance));
+                await _instancePipe.Send(context.PushConsumer(_instance)).ConfigureAwait(false);
 
                 context.NotifyConsumed(timer.Elapsed, TypeMetadataCache<TConsumer>.ShortName);
 
-                await next.Send(context);
+                await next.Send(context).ConfigureAwait(false);
             }
             catch (Exception ex)
             {

@@ -43,11 +43,11 @@ namespace MassTransit.Saga.Pipeline.Filters
             Stopwatch timer = Stopwatch.StartNew();
             try
             {
-                await _sagaRepository.Send(context, _sagaPipe);
+                await _sagaRepository.Send(context, _sagaPipe).ConfigureAwait(false);
 
                 context.NotifyConsumed(timer.Elapsed, TypeMetadataCache<TSaga>.ShortName);
 
-                await next.Send(context);
+                await next.Send(context).ConfigureAwait(false);
             }
             catch (Exception ex)
             {

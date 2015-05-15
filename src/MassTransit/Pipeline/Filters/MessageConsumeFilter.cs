@@ -65,15 +65,15 @@ namespace MassTransit.Pipeline.Filters
             if (context.TryGetMessage(out consumeContext))
             {
                 if (_messageObservers.Count > 0)
-                    await _messageObservers.PreConsume(consumeContext);
+                    await _messageObservers.PreConsume(consumeContext).ConfigureAwait(false);
                 try
                 {
-                    await _outputPipe.Send(consumeContext);
+                    await _outputPipe.Send(consumeContext).ConfigureAwait(false);
 
                     if (_messageObservers.Count > 0)
-                        await _messageObservers.PostConsume(consumeContext);
+                        await _messageObservers.PostConsume(consumeContext).ConfigureAwait(false);
 
-                    await next.Send(context);
+                    await next.Send(context).ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {

@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -20,7 +20,6 @@ namespace MassTransit.RabbitMqTransport.Integration
     using MassTransit.Pipeline;
     using Pipeline;
     using RabbitMQ.Client;
-    using RabbitMQ.Client.Events;
 
 
     public class RabbitMqConnectionCache :
@@ -60,7 +59,7 @@ namespace MassTransit.RabbitMqTransport.Integration
 
             ConnectionScope existingScope = _scope;
             if (existingScope != null)
-                await existingScope.ConnectionClosed.Task;
+                await existingScope.ConnectionClosed.Task.ConfigureAwait(false);
         }
 
         async Task SendUsingNewConnection(IPipe<ConnectionContext> connectionPipe,
@@ -72,18 +71,19 @@ namespace MassTransit.RabbitMqTransport.Integration
             {
                 x.ExecuteAsync(async connectionContext =>
                 {
-                    var connection = connectionContext.Connection;
+                    IConnection connection = connectionContext.Connection;
 
                     EventHandler<ShutdownEventArgs> connectionShutdown = null;
                     connectionShutdown = (obj, reason) =>
                     {
                         connection.ConnectionShutdown -= connectionShutdown;
-                        scope.ConnectionClosed.TrySetResult(true);
 
                         Interlocked.CompareExchange(ref _scope, null, scope);
+
+                        scope.ConnectionClosed.TrySetResult(true);
                     };
 
-                    var registration = _stop.Token.Register(() =>
+                    CancellationTokenRegistration registration = _stop.Token.Register(() =>
                     {
                         scope.ConnectionClosed.TrySetResult(false);
                     });
@@ -92,19 +92,19 @@ namespace MassTransit.RabbitMqTransport.Integration
 
                     Interlocked.CompareExchange(ref _scope, scope, null);
 
-                    await scope.Connected(connectionContext);
+                    await scope.Connected(connectionContext).ConfigureAwait(false);
                 });
             });
 
-            _connector.Connect(connectPipe, _stop.Token);
+            _connector.Connect(connectPipe, _stop.Token).ConfigureAwait(false);
 
             try
             {
-                var connectionContext = await scope.ConnectionContext;
+                ConnectionContext connectionContext = await scope.ConnectionContext.ConfigureAwait(false);
 
                 var context = new SharedConnectionContext(connectionContext, cancellationToken);
 
-                await connectionPipe.Send(context);
+                await connectionPipe.Send(context).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -113,7 +113,6 @@ namespace MassTransit.RabbitMqTransport.Integration
 
                 throw;
             }
-
         }
 
         static async Task SendUsingExistingConnection(IPipe<ConnectionContext> connectionPipe,
@@ -121,11 +120,11 @@ namespace MassTransit.RabbitMqTransport.Integration
         {
             try
             {
-                var connectionContext = await existingScope.ConnectionContext;
+                ConnectionContext connectionContext = await existingScope.ConnectionContext.ConfigureAwait(false);
 
                 var context = new SharedConnectionContext(connectionContext, cancellationToken);
 
-                await connectionPipe.Send(context);
+                await connectionPipe.Send(context).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -152,11 +151,11 @@ namespace MassTransit.RabbitMqTransport.Integration
                 ConnectionClosed = new TaskCompletionSource<bool>();
             }
 
-            public Task Connected(ConnectionContext context)
+            public async Task Connected(ConnectionContext context)
             {
                 _contextSource.TrySetResult(context);
 
-                return ConnectionClosed.Task;
+                await ConnectionClosed.Task.ConfigureAwait(false);
             }
         }
     }

@@ -201,28 +201,24 @@ namespace MassTransit.Serialization
         {
             if (ResponseAddress != null)
             {
-                ISendEndpoint endpoint = await GetSendEndpoint(ResponseAddress);
+                ISendEndpoint endpoint = await GetSendEndpoint(ResponseAddress).ConfigureAwait(false);
 
-                await endpoint.Send(message, new ResponsePipe<T>(this), CancellationToken);
+                await endpoint.Send(message, new ResponsePipe<T>(this), CancellationToken).ConfigureAwait(false);
             }
             else
-            {
-                await _publishEndpoint.Publish(message, new ResponsePipe<T>(this), CancellationToken);
-            }
+                await _publishEndpoint.Publish(message, new ResponsePipe<T>(this), CancellationToken).ConfigureAwait(false);
         }
 
         async Task ConsumeContext.RespondAsync<T>(T message, IPipe<SendContext<T>> sendPipe)
         {
             if (ResponseAddress != null)
             {
-                ISendEndpoint endpoint = await GetSendEndpoint(ResponseAddress);
+                ISendEndpoint endpoint = await GetSendEndpoint(ResponseAddress).ConfigureAwait(false);
 
-                await endpoint.Send(message, new ResponsePipe<T>(this, sendPipe), CancellationToken);
+                await endpoint.Send(message, new ResponsePipe<T>(this, sendPipe), CancellationToken).ConfigureAwait(false);
             }
             else
-            {
-                await _publishEndpoint.Publish(message, new ResponsePipe<T>(this, sendPipe), CancellationToken);
-            }
+                await _publishEndpoint.Publish(message, new ResponsePipe<T>(this, sendPipe), CancellationToken).ConfigureAwait(false);
         }
 
         public void Respond<T>(T message)
@@ -238,9 +234,11 @@ namespace MassTransit.Serialization
             throw new NotImplementedException();
         }
 
-        public Task<ISendEndpoint> GetSendEndpoint(Uri address)
+        public async Task<ISendEndpoint> GetSendEndpoint(Uri address)
         {
-            return _sendEndpointProvider.GetSendEndpoint(address);
+            ISendEndpoint sendEndpoint = await _sendEndpointProvider.GetSendEndpoint(address).ConfigureAwait(false);
+
+            return new SendEndpointCapture(_receiveContext, sendEndpoint);
         }
 
         void ConsumeContext.NotifyConsumed<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType)
@@ -262,53 +260,77 @@ namespace MassTransit.Serialization
 
         Task IPublishEndpoint.Publish<T>(T message, CancellationToken cancellationToken)
         {
-            return _publishEndpoint.Publish(message, cancellationToken);
+            Task task = _publishEndpoint.Publish(message, cancellationToken);
+            _receiveContext.AddPendingTask(task);
+            return task;
         }
 
         Task IPublishEndpoint.Publish<T>(T message, IPipe<PublishContext<T>> publishPipe, CancellationToken cancellationToken)
         {
-            return _publishEndpoint.Publish(message, publishPipe, cancellationToken);
+            Task task = _publishEndpoint.Publish(message, publishPipe, cancellationToken);
+            _receiveContext.AddPendingTask(task);
+            return task;
         }
 
         Task IPublishEndpoint.Publish<T>(T message, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
         {
-            return _publishEndpoint.Publish(message, publishPipe, cancellationToken);
+            Task task = _publishEndpoint.Publish(message, publishPipe, cancellationToken);
+            _receiveContext.AddPendingTask(task);
+            return task;
         }
 
         Task IPublishEndpoint.Publish(object message, CancellationToken cancellationToken)
         {
-            return _publishEndpoint.Publish(message, cancellationToken);
+            Task task = _publishEndpoint.Publish(message, cancellationToken);
+            _receiveContext.AddPendingTask(task);
+            return task;
         }
 
         Task IPublishEndpoint.Publish(object message, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
         {
-            return _publishEndpoint.Publish(message, publishPipe, cancellationToken);
+            Task task = _publishEndpoint.Publish(message, publishPipe, cancellationToken);
+            _receiveContext.AddPendingTask(task);
+            return task;
         }
 
         Task IPublishEndpoint.Publish(object message, Type messageType, CancellationToken cancellationToken)
         {
-            return _publishEndpoint.Publish(message, messageType, cancellationToken);
+            Task task = _publishEndpoint.Publish(message, messageType, cancellationToken);
+            _receiveContext.AddPendingTask(task);
+            return task;
         }
 
-        Task IPublishEndpoint.Publish(object message, Type messageType, IPipe<PublishContext> publishPipe,
-            CancellationToken cancellationToken)
+        Task IPublishEndpoint.Publish(object message, Type messageType, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
         {
-            return _publishEndpoint.Publish(message, messageType, publishPipe, cancellationToken);
+            Task task = _publishEndpoint.Publish(message, messageType, publishPipe, cancellationToken);
+            _receiveContext.AddPendingTask(task);
+            return task;
         }
 
         Task IPublishEndpoint.Publish<T>(object values, CancellationToken cancellationToken)
         {
-            return _publishEndpoint.Publish<T>(values, cancellationToken);
+            Task task = _publishEndpoint.Publish<T>(values, cancellationToken);
+            _receiveContext.AddPendingTask(task);
+            return task;
         }
 
         Task IPublishEndpoint.Publish<T>(object values, IPipe<PublishContext<T>> publishPipe, CancellationToken cancellationToken)
         {
-            return _publishEndpoint.Publish(values, publishPipe, cancellationToken);
+            Task task = _publishEndpoint.Publish(values, publishPipe, cancellationToken);
+            _receiveContext.AddPendingTask(task);
+            return task;
         }
 
         Task IPublishEndpoint.Publish<T>(object values, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
         {
-            return _publishEndpoint.Publish<T>(values, publishPipe, cancellationToken);
+            Task task = _publishEndpoint.Publish<T>(values, publishPipe, cancellationToken);
+            _receiveContext.AddPendingTask(task);
+            return task;
+        }
+
+        public ConnectHandle Connect(IPublishObserver observer)
+        {
+            return _publishEndpoint.Connect(observer);
         }
 
         async Task GenerateFault<T>(ConsumeContext<T> context, Exception exception)
@@ -328,12 +350,12 @@ namespace MassTransit.Serialization
 
             if (ResponseAddress != null)
             {
-                ISendEndpoint endpoint = await GetSendEndpoint(ResponseAddress);
+                ISendEndpoint endpoint = await GetSendEndpoint(ResponseAddress).ConfigureAwait(false);
 
-                await endpoint.Send(fault, faultPipe, CancellationToken);
+                await endpoint.Send(fault, faultPipe, CancellationToken).ConfigureAwait(false);
             }
             else
-                await _publishEndpoint.Publish(fault, faultPipe, CancellationToken);
+                await _publishEndpoint.Publish(fault, faultPipe, CancellationToken).ConfigureAwait(false);
         }
 
         static JToken GetMessageToken(object message)
@@ -379,9 +401,93 @@ namespace MassTransit.Serialization
             return new Uri(uri);
         }
 
-        public ConnectHandle Connect(IPublishObserver observer)
+
+        class SendEndpointCapture :
+            ISendEndpoint
         {
-            return _publishEndpoint.Connect(observer);
+            readonly ISendEndpoint _endpoint;
+            readonly ReceiveContext _receiveContext;
+
+            public SendEndpointCapture(ReceiveContext receiveContext, ISendEndpoint endpoint)
+            {
+                _receiveContext = receiveContext;
+                _endpoint = endpoint;
+            }
+
+            public ConnectHandle Connect(ISendObserver observer)
+            {
+                return _endpoint.Connect(observer);
+            }
+
+            public Task Send<T>(T message, CancellationToken cancellationToken = new CancellationToken()) where T : class
+            {
+                Task task = _endpoint.Send(message, cancellationToken);
+                _receiveContext.AddPendingTask(task);
+                return task;
+            }
+
+            public Task Send<T>(T message, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken = new CancellationToken()) where T : class
+            {
+                Task task = _endpoint.Send(message, pipe, cancellationToken);
+                _receiveContext.AddPendingTask(task);
+                return task;
+            }
+
+            public Task Send<T>(T message, IPipe<SendContext> pipe, CancellationToken cancellationToken = new CancellationToken()) where T : class
+            {
+                Task task = _endpoint.Send(message, pipe, cancellationToken);
+                _receiveContext.AddPendingTask(task);
+                return task;
+            }
+
+            public Task Send(object message, CancellationToken cancellationToken = new CancellationToken())
+            {
+                Task task = _endpoint.Send(message, cancellationToken);
+                _receiveContext.AddPendingTask(task);
+                return task;
+            }
+
+            public Task Send(object message, Type messageType, CancellationToken cancellationToken = new CancellationToken())
+            {
+                Task task = _endpoint.Send(message, messageType, cancellationToken);
+                _receiveContext.AddPendingTask(task);
+                return task;
+            }
+
+            public Task Send(object message, IPipe<SendContext> pipe, CancellationToken cancellationToken = new CancellationToken())
+            {
+                Task task = _endpoint.Send(message, pipe, cancellationToken);
+                _receiveContext.AddPendingTask(task);
+                return task;
+            }
+
+            public Task Send(object message, Type messageType, IPipe<SendContext> pipe, CancellationToken cancellationToken = new CancellationToken())
+            {
+                Task task = _endpoint.Send(message, messageType, pipe, cancellationToken);
+                _receiveContext.AddPendingTask(task);
+                return task;
+            }
+
+            public Task Send<T>(object values, CancellationToken cancellationToken = new CancellationToken()) where T : class
+            {
+                Task task = _endpoint.Send<T>(values, cancellationToken);
+                _receiveContext.AddPendingTask(task);
+                return task;
+            }
+
+            public Task Send<T>(object values, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken = new CancellationToken()) where T : class
+            {
+                Task task = _endpoint.Send(values, pipe, cancellationToken);
+                _receiveContext.AddPendingTask(task);
+                return task;
+            }
+
+            public Task Send<T>(object values, IPipe<SendContext> pipe, CancellationToken cancellationToken = new CancellationToken()) where T : class
+            {
+                Task task = _endpoint.Send<T>(values, pipe, cancellationToken);
+                _receiveContext.AddPendingTask(task);
+                return task;
+            }
         }
     }
 }

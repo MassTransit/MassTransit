@@ -28,7 +28,7 @@ namespace MassTransit.Pipeline.ConsumerFactories
             {
                 consumer = new TConsumer();
 
-                await next.Send(context.PushConsumer(consumer));
+                await next.Send(context.PushConsumer(consumer)).ConfigureAwait(false);
             }
             finally
             {

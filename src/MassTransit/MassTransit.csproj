@@ -603,12 +603,8 @@
     <Compile Include="Configuration\ConsumeConfigurators\UntypedConsumerConfigurator.cs" />
     <Compile Include="Configuration\ConsumeConnectors\ConsumerConnector.cs" />
     <Compile Include="Configuration\ConsumeConnectors\InstanceConnector.cs" />
-    <Compile Include="Context\IPublished.cs" />
-    <Compile Include="Context\IReceived.cs" />
-    <Compile Include="Context\ISent.cs" />
     <Compile Include="Context\ContextException.cs" />
     <Compile Include="Context\MoveMessageSendContext.cs" />
-    <Compile Include="Context\Sent.cs" />
     <Compile Include="EndpointLoggerExtensions.cs" />
     <Compile Include="Exceptions\MessageRetryLimitExceededException.cs" />
     <Compile Include="Exceptions\PublishException.cs" />
@@ -802,7 +798,6 @@
     <Compile Include="Exceptions\EndpointException.cs" />
     <Compile Include="IEndpoint.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Transports\ITransportSettings.cs" />
     <Compile Include="Util\AsyncObservable.cs" />
     <Compile Include="Util\BusHostInfo.cs" />
     <Compile Include="Util\Connectable.cs" />

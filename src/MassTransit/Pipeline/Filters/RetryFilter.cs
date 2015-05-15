@@ -41,7 +41,7 @@ namespace MassTransit.Pipeline.Filters
         {
             var retryContext = new RetryConsumeContext(context);
 
-            await Attempt(retryContext, next);
+            await Attempt(retryContext, next).ConfigureAwait(false);
         }
 
         bool IFilter<ConsumeContext>.Visit(IPipelineVisitor visitor)
@@ -56,7 +56,7 @@ namespace MassTransit.Pipeline.Filters
             TimeSpan delay;
             try
             {
-                await next.Send(context);
+                await next.Send(context).ConfigureAwait(false);
 
                 return;
             }
@@ -78,9 +78,9 @@ namespace MassTransit.Pipeline.Filters
                 }
             }
 
-            await Task.Delay(delay);
+            await Task.Delay(delay).ConfigureAwait(false);
 
-            await Attempt(context, next);
+            await Attempt(context, next).ConfigureAwait(false);
         }
     }
 
@@ -110,7 +110,7 @@ namespace MassTransit.Pipeline.Filters
         {
             var retryContext = new RetryConsumeContext<T>(context);
 
-            await Attempt(retryContext, next);
+            await Attempt(retryContext, next).ConfigureAwait(false);
         }
 
         bool IFilter<ConsumeContext<T>>.Visit(IPipelineVisitor visitor)
@@ -125,7 +125,7 @@ namespace MassTransit.Pipeline.Filters
             TimeSpan delay;
             try
             {
-                await next.Send(context);
+                await next.Send(context).ConfigureAwait(false);
 
                 return;
             }
@@ -147,9 +147,9 @@ namespace MassTransit.Pipeline.Filters
                 }
             }
 
-            await Task.Delay(delay);
+            await Task.Delay(delay).ConfigureAwait(false);
 
-            await Attempt(context, next);
+            await Attempt(context, next).ConfigureAwait(false);
         }
     }
 }

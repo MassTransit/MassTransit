@@ -40,17 +40,17 @@ namespace MassTransit.Context
         public async Task ScheduleSend<T>(T message, TimeSpan deliveryDelay, IPipe<SendContext> sendPipe)
             where T : class
         {
-            ISendEndpoint endpoint = await _schedulerEndpoint.Value;
+            ISendEndpoint endpoint = await _schedulerEndpoint.Value.ConfigureAwait(false);
 
-            await endpoint.ScheduleSend(_consumeContext.ReceiveContext.InputAddress, DateTime.UtcNow + deliveryDelay, message, sendPipe);
+            await endpoint.ScheduleSend(_consumeContext.ReceiveContext.InputAddress, DateTime.UtcNow + deliveryDelay, message, sendPipe).ConfigureAwait(false);
         }
 
         public async Task ScheduleSend<T>(T message, DateTime deliveryTime, IPipe<SendContext> sendPipe)
             where T : class
         {
-            ISendEndpoint endpoint = await _schedulerEndpoint.Value;
+            ISendEndpoint endpoint = await _schedulerEndpoint.Value.ConfigureAwait(false);
 
-            await endpoint.ScheduleSend(_consumeContext.ReceiveContext.InputAddress, deliveryTime, message, sendPipe);
+            await endpoint.ScheduleSend(_consumeContext.ReceiveContext.InputAddress, deliveryTime, message, sendPipe).ConfigureAwait(false);
         }
 
         Task<ISendEndpoint> GetSchedulerEndpoint()

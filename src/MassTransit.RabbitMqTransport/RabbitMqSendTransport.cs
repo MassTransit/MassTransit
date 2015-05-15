@@ -134,7 +134,7 @@ namespace MassTransit.RabbitMqTransport
                 });
             });
 
-            await _modelCache.Send(modelPipe, context.CancellationToken);
+            await _modelCache.Send(modelPipe, context.CancellationToken).ConfigureAwait(false);
         }
 
         public ConnectHandle Connect(ISendObserver observer)
@@ -162,7 +162,7 @@ namespace MassTransit.RabbitMqTransport
 
                     try
                     {
-                        await pipe.Send(context);
+                        await pipe.Send(context).ConfigureAwait(false);
 
                         properties.Headers["Content-Type"] = context.ContentType.MediaType;
 
@@ -177,20 +177,19 @@ namespace MassTransit.RabbitMqTransport
                         if (context.TimeToLive.HasValue)
                             properties.Expiration = context.TimeToLive.Value.TotalMilliseconds.ToString("F0", CultureInfo.InvariantCulture);
 
-                        await _observers.ForEach(x => x.PreSend(context));
+                        await _observers.ForEach(x => x.PreSend(context)).ConfigureAwait(false);
 
                         await modelContext.Model.BasicPublishAsync(context.Exchange, context.RoutingKey, context.Mandatory,
-                            context.Immediate, context.BasicProperties, context.Body);
+                            context.Immediate, context.BasicProperties, context.Body).ConfigureAwait(false);
 
                         context.DestinationAddress.LogSent(context.MessageId.HasValue ? context.MessageId.Value.ToString("N") : "",
                             TypeMetadataCache<T>.ShortName);
 
-                        await _observers.ForEach(x => x.PostSend(context));
+                        await _observers.ForEach(x => x.PostSend(context)).ConfigureAwait(false);
                     }
                     catch (Exception ex)
                     {
-                        _observers.ForEach(x => x.SendFault(context, ex))
-                            .Wait(cancelSend);
+                        _observers.ForEach(x => x.SendFault(context, ex));
 
                         if (_log.IsErrorEnabled)
                             _log.Error("Send Fault: " + context.DestinationAddress, ex);
@@ -200,7 +199,7 @@ namespace MassTransit.RabbitMqTransport
                 });
             });
 
-            await _modelCache.Send(modelPipe, cancelSend);
+            await _modelCache.Send(modelPipe, cancelSend).ConfigureAwait(false);
         }
     }
 }

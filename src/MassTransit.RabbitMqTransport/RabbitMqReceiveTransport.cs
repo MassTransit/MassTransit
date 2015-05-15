@@ -72,7 +72,7 @@ namespace MassTransit.RabbitMqTransport
             {
                 try
                 {
-                    await _connectionCache.Send(transportPipe, stopToken);
+                    await _connectionCache.Send(transportPipe, stopToken).ConfigureAwait(false);
                 }
                 catch (RabbitMqConnectionException ex)
                 {
@@ -87,7 +87,7 @@ namespace MassTransit.RabbitMqTransport
                     if (_log.IsErrorEnabled)
                         _log.ErrorFormat("RabbitMQ receive transport failed: {0}", ex.Message);
                 }
-            });
+            }).ConfigureAwait(false);
         }
 
 
@@ -112,7 +112,7 @@ namespace MassTransit.RabbitMqTransport
             {
                 _stop.Cancel();
 
-                await _receiverTask.WithCancellation(cancellationToken);
+                await _receiverTask.WithCancellation(cancellationToken).ConfigureAwait(false);
             }
         }
     }
