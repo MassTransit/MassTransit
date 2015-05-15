@@ -65,7 +65,7 @@ namespace MassTransit.Transports
 
             async Task ReceiveEndpointHandle.Stop(CancellationToken cancellationToken)
             {
-                await _transportHandle.Stop(cancellationToken);
+                await _transportHandle.Stop(cancellationToken).ConfigureAwait(false);
             }
         }
     }

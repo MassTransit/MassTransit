@@ -194,9 +194,9 @@ namespace MassTransit
 
             public async Task Stop(CancellationToken cancellationToken)
             {
-                await Task.WhenAll(_receiveEndpoints.Select(x => x.Stop(cancellationToken)));
-                await Task.WhenAll(_observers.Select(x => x.Disconnect()));
-                await Task.WhenAll(_hosts.Select(x => x.Stop(cancellationToken)));
+                await Task.WhenAll(_receiveEndpoints.Select(x => x.Stop(cancellationToken))).ConfigureAwait(false);
+                await Task.WhenAll(_observers.Select(x => x.Disconnect())).ConfigureAwait(false);
+                await Task.WhenAll(_hosts.Select(x => x.Stop(cancellationToken))).ConfigureAwait(false);
             }
         }
 

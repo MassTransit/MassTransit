@@ -44,10 +44,10 @@ namespace MassTransit.Pipeline.Filters
 
         public async Task Send(T context, IPipe<T> next)
         {
-            await _limit.WaitAsync(context.CancellationToken);
+            await _limit.WaitAsync(context.CancellationToken).ConfigureAwait(false);
             try
             {
-                await next.Send(context);
+                await next.Send(context).ConfigureAwait(false);
             }
             finally
             {
@@ -71,7 +71,7 @@ namespace MassTransit.Pipeline.Filters
             else
             {
                 for (; previousLimit > concurrencyLimit; previousLimit--)
-                    await _limit.WaitAsync();
+                    await _limit.WaitAsync().ConfigureAwait(false);
             }
         }
 
@@ -85,7 +85,7 @@ namespace MassTransit.Pipeline.Filters
         {
             int slot;
             for (slot = 0; slot < _concurrencyLimit; slot++)
-                await _limit.WaitAsync(cancellationToken);
+                await _limit.WaitAsync(cancellationToken).ConfigureAwait(false);
 
             _limit.Release(slot);
         }

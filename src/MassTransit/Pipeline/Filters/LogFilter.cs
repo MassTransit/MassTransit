@@ -44,9 +44,9 @@ namespace MassTransit.Pipeline.Filters
 
         async Task CreateLogTask(T context)
         {
-            string text = await _formatter(context);
+            string text = await _formatter(context).ConfigureAwait(false);
 
-            await _writer.WriteLineAsync(text);
+            await _writer.WriteLineAsync(text).ConfigureAwait(false);
         }
     }
 }

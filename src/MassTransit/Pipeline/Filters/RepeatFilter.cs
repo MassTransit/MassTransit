@@ -42,7 +42,7 @@ namespace MassTransit.Pipeline.Filters
         {
             using (IRepeatContext repeatContext = _repeatPolicy.GetRepeatContext())
             {
-                await Attempt(repeatContext, context, next);
+                await Attempt(repeatContext, context, next).ConfigureAwait(false);
             }
         }
 
@@ -57,9 +57,9 @@ namespace MassTransit.Pipeline.Filters
             do
             {
                 if (delay > TimeSpan.Zero)
-                    await Task.Delay(delay, repeatContext.CancellationToken);
+                    await Task.Delay(delay, repeatContext.CancellationToken).ConfigureAwait(false);
 
-                await next.Send(context);
+                await next.Send(context).ConfigureAwait(false);
             }
             while (repeatContext.CanRepeat(out delay));
         }

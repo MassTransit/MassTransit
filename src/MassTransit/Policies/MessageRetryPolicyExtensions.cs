@@ -24,7 +24,7 @@ namespace MassTransit.Policies
         {
             using (IRetryContext retryContext = retryPolicy.GetRetryContext())
             {
-                await Attempt(retryContext, context, retryMethod);
+                await Attempt(retryContext, context, retryMethod).ConfigureAwait(false);
             }
         }
 
@@ -35,7 +35,7 @@ namespace MassTransit.Policies
             TimeSpan delay;
             try
             {
-                await retryMethod(context);
+                await retryMethod(context).ConfigureAwait(false);
 
                 return;
             }
@@ -45,9 +45,9 @@ namespace MassTransit.Policies
                     throw;
             }
 
-            await Task.Delay(delay);
+            await Task.Delay(delay).ConfigureAwait(false);
 
-            await Attempt(retryContext, context, retryMethod);
+            await Attempt(retryContext, context, retryMethod).ConfigureAwait(false);
         }
     }
 }

@@ -54,9 +54,9 @@ namespace MassTransit.Pipeline.Pipes
             context.SourceAddress = _context.ReceiveContext.InputAddress;
 
             if (_pipe != null)
-                await _pipe.Send(context);
+                await _pipe.Send(context).ConfigureAwait(false);
             if (_sendPipe != null)
-                await _sendPipe.Send(context);
+                await _sendPipe.Send(context).ConfigureAwait(false);
         }
 
         public bool Visit(IPipelineVisitor visitor)

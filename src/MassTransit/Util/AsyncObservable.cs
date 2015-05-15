@@ -147,7 +147,7 @@ namespace MassTransit.Util
 
                             try
                             {
-                                await notification(_observer);
+                                await notification(_observer).ConfigureAwait(false);
                             }
                             catch (Exception ex)
                             {

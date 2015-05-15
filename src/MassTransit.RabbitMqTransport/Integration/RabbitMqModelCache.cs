@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -19,7 +19,6 @@ namespace MassTransit.RabbitMqTransport.Integration
     using Logging;
     using MassTransit.Pipeline;
     using RabbitMQ.Client;
-    using RabbitMQ.Client.Events;
 
 
     /// <summary>
@@ -53,49 +52,46 @@ namespace MassTransit.RabbitMqTransport.Integration
             return SendUsingNewConnection(connectionPipe, cancellationToken);
         }
 
-        Task SendUsingNewConnection(IPipe<ModelContext> modelPipe, CancellationToken cancellationToken)
+        async Task SendUsingNewConnection(IPipe<ModelContext> modelPipe, CancellationToken cancellationToken)
         {
-            IPipe<ConnectionContext> connectionPipe = Pipe.New<ConnectionContext>(x =>
+            IPipe<ConnectionContext> connectionPipe = Pipe.ExecuteAsync<ConnectionContext>(async connectionContext =>
             {
-                x.ExecuteAsync(async connectionContext =>
+                IModel model;
+                lock (connectionContext.Connection)
+                    model = connectionContext.Connection.CreateModel();
+                var modelContext = new RabbitMqModelContext(connectionContext, model, connectionContext.CancellationToken);
+
+                var scope = new ModelScope(modelContext);
+
+                EventHandler<ShutdownEventArgs> modelShutdown = null;
+                modelShutdown = (obj, reason) =>
                 {
-                    IModel model;
-                    lock(connectionContext.Connection)
-                        model = connectionContext.Connection.CreateModel();
-                    var modelContext = new RabbitMqModelContext(connectionContext, model, connectionContext.CancellationToken);
+                    scope.ModelContext.Model.ModelShutdown -= modelShutdown;
+                    scope.ModelClosed.TrySetResult(true);
 
-                    var scope = new ModelScope(modelContext);
+                    Interlocked.CompareExchange(ref _scope, null, scope);
+                };
 
-                    EventHandler<ShutdownEventArgs> modelShutdown = null;
-                    modelShutdown = (obj, reason) =>
-                    {
-                        scope.ModelContext.Model.ModelShutdown -= modelShutdown;
-                        scope.ModelClosed.TrySetResult(true);
+                scope.ModelContext.Model.ModelShutdown += modelShutdown;
 
-                        Interlocked.CompareExchange(ref _scope, null, scope);
-                    };
+                Interlocked.CompareExchange(ref _scope, scope, null);
 
-                    scope.ModelContext.Model.ModelShutdown += modelShutdown;
+                try
+                {
+                    var context = new SharedModelContext(scope.ModelContext, cancellationToken);
 
-                    Interlocked.CompareExchange(ref _scope, scope, null);
+                    await modelPipe.Send(context).ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    if (_log.IsDebugEnabled)
+                        _log.Debug(string.Format("The existing connection usage threw an exception"), ex);
 
-                    try
-                    {
-                        var context = new SharedModelContext(scope.ModelContext, cancellationToken);
-
-                        await modelPipe.Send(context);
-                    }
-                    catch (Exception ex)
-                    {
-                        if (_log.IsDebugEnabled)
-                            _log.Debug(string.Format("The existing connection usage threw an exception"), ex);
-
-                        throw;
-                    }
-                });
+                    throw;
+                }
             });
 
-            return _connectionCache.Send(connectionPipe, new CancellationToken());
+            await _connectionCache.Send(connectionPipe, new CancellationToken()).ConfigureAwait(false);
         }
 
         static async Task SendUsingExistingConnection(IPipe<ModelContext> connectionPipe,
@@ -105,7 +101,7 @@ namespace MassTransit.RabbitMqTransport.Integration
             {
                 var context = new SharedModelContext(existingScope.ModelContext, cancellationToken);
 
-                await connectionPipe.Send(context);
+                await connectionPipe.Send(context).ConfigureAwait(false);
             }
             catch (Exception ex)
             {

@@ -16,7 +16,6 @@ namespace MassTransit.Pipeline.Filters
     using System.Threading.Tasks;
     using Context;
     using Policies;
-    using Scheduling;
 
 
     public class DelayedRetryFilter<T> :
@@ -35,7 +34,7 @@ namespace MassTransit.Pipeline.Filters
             Exception exception = null;
             try
             {
-                await next.Send(context);
+                await next.Send(context).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -59,7 +58,7 @@ namespace MassTransit.Pipeline.Filters
                         retryContext.CanRetry(exception, out delay);
                     }
 
-                    await schedulerContext.ScheduleRedelivery(delay);
+                    await schedulerContext.ScheduleRedelivery(delay).ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {

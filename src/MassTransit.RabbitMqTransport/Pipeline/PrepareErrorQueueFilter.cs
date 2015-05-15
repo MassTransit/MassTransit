@@ -35,12 +35,12 @@ namespace MassTransit.RabbitMqTransport.Pipeline
             _settings = settings;
         }
 
-        Task IFilter<ModelContext>.Send(ModelContext context, IPipe<ModelContext> next)
+        async Task IFilter<ModelContext>.Send(ModelContext context, IPipe<ModelContext> next)
         {
             if (!context.HasPayloadType(typeof(ErrorQueueSettings)))
                 DeclareAndBindQueue(context);
 
-            return next.Send(context);
+            await next.Send(context).ConfigureAwait(false);
         }
 
         bool IFilter<ModelContext>.Visit(IPipelineVisitor visitor)

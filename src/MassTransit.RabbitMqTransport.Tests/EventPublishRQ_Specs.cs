@@ -15,13 +15,14 @@ namespace MassTransit.Tests
     using System;
     using System.Threading.Tasks;
     using NUnit.Framework;
-    using TestFramework;
+    using RabbitMqTransport.Configuration;
+    using RabbitMqTransport.Tests;
     using TestFramework.Messages;
 
 
     [TestFixture]
-    public class EventPublish_Specs :
-        InMemoryTestFixture
+    public class EventPublishRQ_Specs :
+        RabbitMqTestFixture
     {
         [Test]
         public async void Should_publish_first_event()
@@ -41,15 +42,8 @@ namespace MassTransit.Tests
             ConsumeContext<PingConsumed> consumed = await _consumed;
         }
 
-        [Test]
-        public async void Should_publish_fourth_event()
-        {
-            ConsumeContext<PingCompleted> consumed = await _completed;
-        }
-
         Task<ConsumeContext<PingReceived>> _received;
         Task<ConsumeContext<PingConsumed>> _consumed;
-        Task<ConsumeContext<PingCompleted>> _completed;
         Task<ConsumeContext<PingProcessing>> _processing;
 
         [TestFixtureSetUp]
@@ -58,14 +52,13 @@ namespace MassTransit.Tests
             Await(() => InputQueueSendEndpoint.Send(new PingMessage()));
         }
 
-        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInputQueueEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
             configurator.Consumer<Consumar>();
 
             _received = Handled<PingReceived>(configurator);
             _processing = Handled<PingProcessing>(configurator);
             _consumed = Handled<PingConsumed>(configurator);
-            _completed = Handled<PingCompleted>(configurator);
         }
 
 
@@ -74,33 +67,27 @@ namespace MassTransit.Tests
         {
             public async Task Consume(ConsumeContext<PingMessage> context)
             {
-                await context.Publish<PingReceived>(new
+                context.Publish<PingReceived>(new
                 {
                     PingId = context.Message.CorrelationId,
                     Timestamp = DateTime.UtcNow,
-                });
+                }).ConfigureAwait(false);
 
                 Console.WriteLine("Ping: {0}", context.Message.CorrelationId);
 
-                await context.Publish<PingProcessing>(new
+                context.Publish<PingProcessing>(new
                 {
                     PingId = context.Message.CorrelationId,
                     Timestamp = DateTime.UtcNow,
-                });
+                }).ConfigureAwait(false);
 
                 Console.WriteLine("Prcessing: {0}", context.Message.CorrelationId);
 
-                await context.Publish<PingConsumed>(new
+                context.Publish<PingConsumed>(new
                 {
                     PingId = context.Message.CorrelationId,
                     Timestamp = DateTime.UtcNow,
-                });
-
-                await context.Publish<PingCompleted>(new
-                {
-                    PingId = context.Message.CorrelationId,
-                    Timestamp = DateTime.UtcNow,
-                });
+                }).ConfigureAwait(false);
             }
         }
 
@@ -122,13 +109,6 @@ namespace MassTransit.Tests
 
 
         public interface PingConsumed
-        {
-            Guid PingId { get; }
-
-            DateTime Timestamp { get; }
-        }
-
-        public interface PingCompleted
         {
             Guid PingId { get; }
 

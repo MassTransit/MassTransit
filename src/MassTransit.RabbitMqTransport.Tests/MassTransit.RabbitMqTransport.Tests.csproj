@@ -82,8 +82,10 @@
     <Compile Include="ConsumerBind_Specs.cs" />
     <Compile Include="ContextSetup.cs" />
     <Compile Include="ErrorQueue_Specs.cs" />
+    <Compile Include="EventPublishRQ_Specs.cs" />
     <Compile Include="HammerTime_Specs.cs" />
     <Compile Include="Performance_Specs.cs" />
+    <Compile Include="RabbitMqActivityTestFixture.cs" />
     <Compile Include="RabbitMqTestFixture.cs" />
     <Compile Include="PublisherConfirm_Specs.cs" />
     <Compile Include="Publish_Specs.cs" />
@@ -95,6 +97,7 @@
     <Compile Include="TestFactory.cs" />
     <Compile Include="MessageName_Specs.cs" />
     <Compile Include="Testing\HandlerTest_Specs.cs" />
+    <Compile Include="TwoActivityCourier_Specs.cs" />
     <Compile Include="When_a_message_consumer_throws_an_exception.cs" />
     <Compile Include="When_a_message_is_published.cs" />
     <Compile Include="RabbitMqAddress_Specs.cs" />

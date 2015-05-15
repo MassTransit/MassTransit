@@ -53,9 +53,9 @@ namespace MassTransit
                 x.Timeout = _timeout;
 
                 responseTask = x.Handle<TResponse>();
-            }, cancellationToken);
+            }, cancellationToken).ConfigureAwait(false);
 
-            return await responseTask;
+            return await responseTask.ConfigureAwait(false);
         }
     }
 }

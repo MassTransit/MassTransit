@@ -31,17 +31,17 @@ namespace MassTransit
         public static async Task Forward<T>(this ConsumeContext<T> context, Uri address)
             where T : class
         {
-            ISendEndpoint endpoint = await context.GetSendEndpoint(address);
+            ISendEndpoint endpoint = await context.GetSendEndpoint(address).ConfigureAwait(false);
 
-            await Forward(context, endpoint, context.Message);
+            await Forward(context, endpoint, context.Message).ConfigureAwait(false);
         }
 
         public static async Task Forward<T>(this ConsumeContext context, Uri address, T message)
             where T : class
         {
-            ISendEndpoint endpoint = await context.GetSendEndpoint(address);
+            ISendEndpoint endpoint = await context.GetSendEndpoint(address).ConfigureAwait(false);
 
-            await Forward(context, endpoint, message);
+            await Forward(context, endpoint, message).ConfigureAwait(false);
         }
 
         /// <summary>

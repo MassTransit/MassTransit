@@ -34,7 +34,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
             _settings = settings;
         }
 
-        Task IFilter<ModelContext>.Send(ModelContext context, IPipe<ModelContext> next)
+        async Task IFilter<ModelContext>.Send(ModelContext context, IPipe<ModelContext> next)
         {
             context.Model.BasicQos(0, _settings.PrefetchCount, false);
 
@@ -93,7 +93,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
 
             context.GetOrAddPayload(() => settings);
 
-            return next.Send(context);
+            await next.Send(context).ConfigureAwait(false);
         }
 
         public bool Visit(IPipelineVisitor visitor)

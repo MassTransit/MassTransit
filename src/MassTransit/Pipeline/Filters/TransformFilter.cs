@@ -42,10 +42,10 @@ namespace MassTransit.Pipeline.Filters
             {
                 var transformedContext = new MessageConsumeContext<T>(context, result.Value);
 
-                await next.Send(transformedContext);
+                await next.Send(transformedContext).ConfigureAwait(false);
             }
             else
-                await next.Send(context);
+                await next.Send(context).ConfigureAwait(false);
         }
 
         public bool Visit(IPipelineVisitor visitor)

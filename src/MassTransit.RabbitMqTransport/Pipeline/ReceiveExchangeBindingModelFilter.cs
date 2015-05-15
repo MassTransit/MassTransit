@@ -30,7 +30,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
             _exchangeBindingSettings = exchangeBindingSettings;
         }
 
-        Task IFilter<ModelContext>.Send(ModelContext context, IPipe<ModelContext> next)
+        async Task IFilter<ModelContext>.Send(ModelContext context, IPipe<ModelContext> next)
         {
             ReceiveSettings receiveSettings;
             if (!context.TryGetPayload(out receiveSettings))
@@ -43,7 +43,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
 
             context.Model.ExchangeBind(receiveSettings.ExchangeName, exchange.ExchangeName, _exchangeBindingSettings.RoutingKey);
 
-            return next.Send(context);
+            await next.Send(context).ConfigureAwait(false);
         }
 
         public bool Visit(IPipelineVisitor visitor)

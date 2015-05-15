@@ -78,11 +78,11 @@ namespace MassTransit.Transports.InMemory
 
             try
             {
-                await pipe.Send(context);
+                await pipe.Send(context).ConfigureAwait(false);
 
                 Guid messageId = context.MessageId ?? NewId.NextGuid();
 
-                await _observers.ForEach(x => x.PreSend(context));
+                await _observers.ForEach(x => x.PreSend(context)).ConfigureAwait(false);
 
                 var transportMessage = new InMemoryTransportMessage(messageId, context.Body, context.ContentType.MediaType, TypeMetadataCache<T>.ShortName);
 
@@ -91,7 +91,7 @@ namespace MassTransit.Transports.InMemory
                 context.DestinationAddress.LogSent(context.MessageId.HasValue ? context.MessageId.Value.ToString("N") : "",
                     TypeMetadataCache<T>.ShortName);
 
-                await _observers.ForEach(x => x.PostSend(context));
+                await _observers.ForEach(x => x.PostSend(context)).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -110,7 +110,7 @@ namespace MassTransit.Transports.InMemory
             byte[] body;
             using (Stream bodyStream = context.GetBody())
             {
-                body = await GetMessageBody(bodyStream);
+                body = await GetMessageBody(bodyStream).ConfigureAwait(false);
             }
 
             string messageType = "Unknown";
@@ -148,9 +148,9 @@ namespace MassTransit.Transports.InMemory
                             {
                                 _receiveObservers.NotifyPreReceive(context);
 
-                                await receivePipe.Send(context);
+                                await receivePipe.Send(context).ConfigureAwait(false);
 
-                                await context.CompleteTask;
+                                await context.CompleteTask.ConfigureAwait(false);
 
                                 _receiveObservers.NotifyPostReceive(context);
 
@@ -176,7 +176,7 @@ namespace MassTransit.Transports.InMemory
         {
             using (var ms = new MemoryStream())
             {
-                await body.CopyToAsync(ms);
+                await body.CopyToAsync(ms).ConfigureAwait(false);
 
                 return ms.ToArray();
             }
@@ -260,7 +260,7 @@ namespace MassTransit.Transports.InMemory
             {
                 _stop.Cancel();
 
-                await _receiverTask.WithCancellation(cancellationToken);
+                await _receiverTask.WithCancellation(cancellationToken).ConfigureAwait(false);
             }
         }
     }

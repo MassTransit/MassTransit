@@ -40,7 +40,7 @@ namespace MassTransit
         {
             var command = new ScheduleMessageCommand<T>(scheduledTime, destinationAddress, message);
 
-            await endpoint.Send<ScheduleMessage<T>>(command);
+            await endpoint.Send<ScheduleMessage<T>>(command).ConfigureAwait(false);
 
             return new ScheduledMessageHandle<T>(command.CorrelationId, command.ScheduledTime, command.Destination, command.Payload);
         }
@@ -61,7 +61,7 @@ namespace MassTransit
         {
             var command = new ScheduleMessageCommand<T>(scheduledTime, destinationAddress, message);
 
-            await endpoint.Send(command, sendPipe);
+            await endpoint.Send(command, sendPipe).ConfigureAwait(false);
 
             return new ScheduledMessageHandle<T>(command.CorrelationId, command.ScheduledTime, command.Destination, command.Payload);
         }
@@ -89,7 +89,7 @@ namespace MassTransit
         {
             var command = new CancelScheduledMessageCommand(tokenId);
 
-            await endpoint.Send<CancelScheduledMessage>(command);
+            await endpoint.Send<CancelScheduledMessage>(command).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -110,7 +110,7 @@ namespace MassTransit
         {
             var command = new ScheduleMessageCommand<T>(scheduledTime, destinationAddress, message);
 
-            await publishEndpoint.Publish(command, contextCallback ?? Pipe.Empty<PublishContext<ScheduleMessage<T>>>());
+            await publishEndpoint.Publish(command, contextCallback ?? Pipe.Empty<PublishContext<ScheduleMessage<T>>>()).ConfigureAwait(false);
 
             return new ScheduledMessageHandle<T>(command.CorrelationId, command.ScheduledTime, command.Destination,
                 command.Payload);
@@ -156,7 +156,7 @@ namespace MassTransit
         {
             var command = new CancelScheduledMessageCommand(tokenId);
 
-            await bus.Publish<CancelScheduledMessage>(command);
+            await bus.Publish<CancelScheduledMessage>(command).ConfigureAwait(false);
         }
 
 

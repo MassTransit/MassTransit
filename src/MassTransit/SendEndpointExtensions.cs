@@ -30,9 +30,9 @@ namespace MassTransit
         public static async Task Send<T>(this ConsumeContext context, Uri endpointAddress, T message)
             where T : class
         {
-            ISendEndpoint endpoint = await context.GetSendEndpoint(endpointAddress);
+            ISendEndpoint endpoint = await context.GetSendEndpoint(endpointAddress).ConfigureAwait(false);
 
-            await endpoint.Send(message, context.CancellationToken);
+            await endpoint.Send(message, context.CancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -47,9 +47,9 @@ namespace MassTransit
         public static async Task Send<T>(this ConsumeContext context, Uri endpointAddress, T message, IPipe<SendContext<T>> pipe)
             where T : class
         {
-            ISendEndpoint endpoint = await context.GetSendEndpoint(endpointAddress);
+            ISendEndpoint endpoint = await context.GetSendEndpoint(endpointAddress).ConfigureAwait(false);
 
-            await endpoint.Send(message, pipe, context.CancellationToken);
+            await endpoint.Send(message, pipe, context.CancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -64,9 +64,9 @@ namespace MassTransit
         public static async Task Send<T>(this ConsumeContext context, Uri endpointAddress, T message, IPipe<SendContext> pipe)
             where T : class
         {
-            ISendEndpoint endpoint = await context.GetSendEndpoint(endpointAddress);
+            ISendEndpoint endpoint = await context.GetSendEndpoint(endpointAddress).ConfigureAwait(false);
 
-            await endpoint.Send(message, pipe, context.CancellationToken);
+            await endpoint.Send(message, pipe, context.CancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -78,9 +78,9 @@ namespace MassTransit
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
         public static async Task Send(this ConsumeContext context, Uri endpointAddress, object message)
         {
-            ISendEndpoint endpoint = await context.GetSendEndpoint(endpointAddress);
+            ISendEndpoint endpoint = await context.GetSendEndpoint(endpointAddress).ConfigureAwait(false);
 
-            await endpoint.Send(message, context.CancellationToken);
+            await endpoint.Send(message, context.CancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -93,9 +93,9 @@ namespace MassTransit
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
         public static async Task Send(this ConsumeContext context, Uri endpointAddress, object message, Type messageType)
         {
-            ISendEndpoint endpoint = await context.GetSendEndpoint(endpointAddress);
+            ISendEndpoint endpoint = await context.GetSendEndpoint(endpointAddress).ConfigureAwait(false);
 
-            await endpoint.Send(message, messageType, context.CancellationToken);
+            await endpoint.Send(message, messageType, context.CancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -108,9 +108,9 @@ namespace MassTransit
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
         public static async Task Send(this ConsumeContext context, Uri endpointAddress, object message, Type messageType, IPipe<SendContext> pipe)
         {
-            ISendEndpoint endpoint = await context.GetSendEndpoint(endpointAddress);
+            ISendEndpoint endpoint = await context.GetSendEndpoint(endpointAddress).ConfigureAwait(false);
 
-            await endpoint.Send(message, messageType, pipe, context.CancellationToken);
+            await endpoint.Send(message, messageType, pipe, context.CancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -123,9 +123,9 @@ namespace MassTransit
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
         public static async Task Send(this ConsumeContext context, Uri endpointAddress, object message, IPipe<SendContext> pipe)
         {
-            ISendEndpoint endpoint = await context.GetSendEndpoint(endpointAddress);
+            ISendEndpoint endpoint = await context.GetSendEndpoint(endpointAddress).ConfigureAwait(false);
 
-            await endpoint.Send(message, pipe, context.CancellationToken);
+            await endpoint.Send(message, pipe, context.CancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -139,9 +139,9 @@ namespace MassTransit
         public static async Task Send<T>(this ConsumeContext context, Uri endpointAddress, object values)
             where T : class
         {
-            ISendEndpoint endpoint = await context.GetSendEndpoint(endpointAddress);
+            ISendEndpoint endpoint = await context.GetSendEndpoint(endpointAddress).ConfigureAwait(false);
 
-            await endpoint.Send<T>(values, context.CancellationToken);
+            await endpoint.Send<T>(values, context.CancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -156,9 +156,9 @@ namespace MassTransit
         public static async Task Send<T>(this ConsumeContext context, Uri endpointAddress, object values, IPipe<SendContext<T>> pipe)
             where T : class
         {
-            ISendEndpoint endpoint = await context.GetSendEndpoint(endpointAddress);
+            ISendEndpoint endpoint = await context.GetSendEndpoint(endpointAddress).ConfigureAwait(false);
 
-            await endpoint.Send(values, pipe, context.CancellationToken);
+            await endpoint.Send(values, pipe, context.CancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -173,9 +173,9 @@ namespace MassTransit
         public static async Task Send<T>(this ConsumeContext context, Uri endpointAddress, object values, IPipe<SendContext> pipe)
             where T : class
         {
-            ISendEndpoint endpoint = await context.GetSendEndpoint(endpointAddress);
+            ISendEndpoint endpoint = await context.GetSendEndpoint(endpointAddress).ConfigureAwait(false);
 
-            await endpoint.Send<T>(values, pipe, context.CancellationToken);
+            await endpoint.Send<T>(values, pipe, context.CancellationToken).ConfigureAwait(false);
         }
     }
 }

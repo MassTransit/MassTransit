@@ -46,7 +46,7 @@ namespace MassTransit.Saga.Pipeline.Filters
             IEnumerable<Guid> sagaIds;
             try
             {
-                sagaIds = await _locator.Find(context);
+                sagaIds = await _locator.Find(context).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -63,7 +63,7 @@ namespace MassTransit.Saga.Pipeline.Filters
 
                 consumeContext.GetOrAddPayload(() => sagaContext);
 
-                await next.Send(consumeContext);
+                await next.Send(consumeContext).ConfigureAwait(false);
             }
         }
 

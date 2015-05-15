@@ -37,10 +37,10 @@ namespace MassTransit.Transports
             var adapter = new PublishPipeContextAdapter<T>(this);
             try
             {
-                foreach (ISendEndpoint endpoint in await GetEndpoints(typeof(T)))
-                    await endpoint.Send(message, adapter, cancellationToken);
+                foreach (ISendEndpoint endpoint in await GetEndpoints(typeof(T)).ConfigureAwait(false))
+                    await endpoint.Send(message, adapter, cancellationToken).ConfigureAwait(false);
 
-                await adapter.PostSend();
+                await adapter.PostSend().ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -54,10 +54,10 @@ namespace MassTransit.Transports
             var adapter = new PublishPipeContextAdapter<T>(publishPipe, this);
             try
             {
-                foreach (ISendEndpoint endpoint in await GetEndpoints(typeof(T)))
-                    await endpoint.Send(message, adapter, cancellationToken);
+                foreach (ISendEndpoint endpoint in await GetEndpoints(typeof(T)).ConfigureAwait(false))
+                    await endpoint.Send(message, adapter, cancellationToken).ConfigureAwait(false);
 
-                await adapter.PostSend();
+                await adapter.PostSend().ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -71,10 +71,10 @@ namespace MassTransit.Transports
             var adapter = new PublishPipeContextAdapter<T>(publishPipe, this);
             try
             {
-                foreach (ISendEndpoint endpoint in await GetEndpoints(typeof(T)))
-                    await endpoint.Send(message, adapter, cancellationToken);
+                foreach (ISendEndpoint endpoint in await GetEndpoints(typeof(T)).ConfigureAwait(false))
+                    await endpoint.Send(message, adapter, cancellationToken).ConfigureAwait(false);
 
-                await adapter.PostSend();
+                await adapter.PostSend().ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -118,10 +118,10 @@ namespace MassTransit.Transports
             var adapter = new PublishPipeContextAdapter<T>(this);
             try
             {
-                foreach (ISendEndpoint endpoint in await GetEndpoints(typeof(T)))
-                    await endpoint.Send(values, adapter, cancellationToken);
+                foreach (ISendEndpoint endpoint in await GetEndpoints(typeof(T)).ConfigureAwait(false))
+                    await endpoint.Send(values, adapter, cancellationToken).ConfigureAwait(false);
 
-                await adapter.PostSend();
+                await adapter.PostSend().ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -136,10 +136,10 @@ namespace MassTransit.Transports
             var adapter = new PublishPipeContextAdapter<T>(publishPipe, this);
             try
             {
-                foreach (ISendEndpoint endpoint in await GetEndpoints(typeof(T)))
-                    await endpoint.Send(values, adapter, cancellationToken);
+                foreach (ISendEndpoint endpoint in await GetEndpoints(typeof(T)).ConfigureAwait(false))
+                    await endpoint.Send(values, adapter, cancellationToken).ConfigureAwait(false);
 
-                await adapter.PostSend();
+                await adapter.PostSend().ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -154,10 +154,10 @@ namespace MassTransit.Transports
             var adapter = new PublishPipeContextAdapter<T>(publishPipe, this);
             try
             {
-                foreach (ISendEndpoint endpoint in await GetEndpoints(typeof(T)))
-                    await endpoint.Send(values, adapter, cancellationToken);
+                foreach (ISendEndpoint endpoint in await GetEndpoints(typeof(T)).ConfigureAwait(false))
+                    await endpoint.Send(values, adapter, cancellationToken).ConfigureAwait(false);
 
-                await adapter.PostSend();
+                await adapter.PostSend().ConfigureAwait(false);
             }
             catch (Exception ex)
             {
