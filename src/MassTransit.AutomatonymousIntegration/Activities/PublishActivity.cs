@@ -50,16 +50,16 @@ namespace Automatonymous.Activities
 
         async Task Activity<TInstance>.Execute(BehaviorContext<TInstance> context, Behavior<TInstance> next)
         {
-            await Execute(context);
+            await Execute(context).ConfigureAwait(false);
 
-            await next.Execute(context);
+            await next.Execute(context).ConfigureAwait(false);
         }
 
         async Task Activity<TInstance>.Execute<T>(BehaviorContext<TInstance, T> context, Behavior<TInstance, T> next)
         {
-            await Execute(context);
+            await Execute(context).ConfigureAwait(false);
 
-            await next.Execute(context);
+            await next.Execute(context).ConfigureAwait(false);
         }
 
         Task Activity<TInstance>.Faulted<TException>(BehaviorExceptionContext<TInstance, TException> context, Behavior<TInstance> next)
@@ -82,7 +82,7 @@ namespace Automatonymous.Activities
 
             TMessage message = _messageFactory(consumeEventContext);
 
-            await consumeContext.Publish(message, _publishPipe);
+            await consumeContext.Publish(message, _publishPipe).ConfigureAwait(false);
         }
     }
 
@@ -126,9 +126,9 @@ namespace Automatonymous.Activities
 
             TMessage message = _messageFactory(consumeEventContext);
 
-            await consumeContext.Publish(message, _publishPipe);
+            await consumeContext.Publish(message, _publishPipe).ConfigureAwait(false);
 
-            await next.Execute(context);
+            await next.Execute(context).ConfigureAwait(false);
         }
 
         Task Activity<TInstance, TData>.Faulted<TException>(BehaviorExceptionContext<TInstance, TData, TException> context, Behavior<TInstance, TData> next)

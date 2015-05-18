@@ -52,11 +52,11 @@ namespace Automatonymous.Pipeline
             eventContext.GetOrAddPayload(() => (ConsumeContext<TData>)context);
             eventContext.GetOrAddPayload(() => (ConsumeContext)context);
 
-            State<TInstance> currentState = await _stateMachine.InstanceStateAccessor.Get(eventContext);
+            State<TInstance> currentState = await _stateMachine.InstanceStateAccessor.Get(eventContext).ConfigureAwait(false);
 
             IEnumerable<Event> nextEvents = _stateMachine.NextEvents(currentState);
             if (nextEvents.Contains(_event))
-                await _stateMachine.RaiseEvent(eventContext);
+                await _stateMachine.RaiseEvent(eventContext).ConfigureAwait(false);
             else
             {
                 _log.DebugFormat("{0} {1} in {2} does not accept {3}", _stateMachine.GetType().Name, context.Saga.CorrelationId,
