@@ -134,7 +134,7 @@ namespace MassTransit.RabbitMqTransport.Tests
     }
 
 
-    [TestFixture, Explicit]
+    [TestFixture]
     public class Executing_many_activities_in_a_row :
         RabbitMqActivityTestFixture
     {
@@ -203,7 +203,7 @@ namespace MassTransit.RabbitMqTransport.Tests
     }
 
 
-    [TestFixture, Explicit]
+    [TestFixture]
     public class Executing_many_activities_in_a_row_with_a_fault_one :
         RabbitMqActivityTestFixture
     {
@@ -237,7 +237,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         {
             _allDone = GetTask<int>();
 
-            Handler<RoutingSlipCompleted>(configurator, async context =>
+            Handler<RoutingSlipFaulted>(configurator, async context =>
             {
                 _completedRoutingSlips.Add(context.Message.TrackingNumber);
                 int count = Interlocked.Increment(ref _count);
@@ -257,10 +257,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             for (int i = 0; i < _limit; i++)
             {
                 var builder = new RoutingSlipBuilder(Guid.NewGuid());
-                builder.AddActivity(testActivity.Name, testActivity.ExecuteUri, new
-                {
-                    Value = "Hello"
-                });
+                builder.AddActivity(testActivity.Name, testActivity.ExecuteUri);
                 builder.AddActivity(secondActivity.Name, secondActivity.ExecuteUri);
 
                 RoutingSlip routingSlip = builder.Build();
