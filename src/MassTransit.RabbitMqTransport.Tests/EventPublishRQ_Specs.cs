@@ -10,13 +10,12 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Tests
+namespace MassTransit.RabbitMqTransport.Tests
 {
     using System;
     using System.Threading.Tasks;
+    using Configuration;
     using NUnit.Framework;
-    using RabbitMqTransport.Configuration;
-    using RabbitMqTransport.Tests;
     using TestFramework.Messages;
 
 
@@ -24,24 +23,6 @@ namespace MassTransit.Tests
     public class EventPublishRQ_Specs :
         RabbitMqTestFixture
     {
-        [Test]
-        public async void Should_publish_first_event()
-        {
-            ConsumeContext<PingReceived> received = await _received;
-        }
-
-        [Test]
-        public async void Should_publish_second_event()
-        {
-            ConsumeContext<PingProcessing> consumed = await _processing;
-        }
-
-        [Test]
-        public async void Should_publish_third_event()
-        {
-            ConsumeContext<PingConsumed> consumed = await _consumed;
-        }
-
         Task<ConsumeContext<PingReceived>> _received;
         Task<ConsumeContext<PingConsumed>> _consumed;
         Task<ConsumeContext<PingProcessing>> _processing;
@@ -113,6 +94,25 @@ namespace MassTransit.Tests
             Guid PingId { get; }
 
             DateTime Timestamp { get; }
+        }
+
+
+        [Test]
+        public async void Should_publish_first_event()
+        {
+            ConsumeContext<PingReceived> received = await _received;
+        }
+
+        [Test]
+        public async void Should_publish_second_event()
+        {
+            ConsumeContext<PingProcessing> consumed = await _processing;
+        }
+
+        [Test]
+        public async void Should_publish_third_event()
+        {
+            ConsumeContext<PingConsumed> consumed = await _consumed;
         }
     }
 }
