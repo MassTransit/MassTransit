@@ -64,6 +64,25 @@ namespace MassTransit.Tests
                     (received, message) => message.CorrelationId == pingMessage.CorrelationId).ShouldBeTrue();
             }
         }
+
+        [Test]
+        public void Should_distinguish_multiple_events()
+        {
+            var consumer = new PingPongConsumer();
+
+            using (IUnsubscribeAction unsubscribe = consumer.Subscribe(LocalBus).Disposable())
+            {
+                var pingMessage = new PingMessage();
+                var pingMessage2 = new PingMessage();
+                LocalBus.Publish(pingMessage);
+                LocalBus.Publish(pingMessage2);
+
+                consumer.Received.Any<PingMessage>(
+                    (received, message) => message.CorrelationId == pingMessage.CorrelationId).ShouldBeTrue();
+                consumer.Received.Any<PingMessage>(
+                    (received, message) => message.CorrelationId == pingMessage2.CorrelationId).ShouldBeTrue();
+            }
+        }
     }
 #endif
 }
