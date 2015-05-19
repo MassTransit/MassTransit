@@ -237,7 +237,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         {
             _allDone = GetTask<int>();
 
-            Handler<RoutingSlipFaulted>(configurator, async context =>
+            Handler<RoutingSlipCompleted>(configurator, async context =>
             {
                 _completedRoutingSlips.Add(context.Message.TrackingNumber);
                 int count = Interlocked.Increment(ref _count);
