@@ -22,6 +22,9 @@ namespace MassTransit.TestFramework.Courier
     {
         public async Task<ExecutionResult> Execute(ExecuteContext<TestArguments> context)
         {
+            if (context.Arguments.Value == null)
+                throw new ArgumentNullException("value");
+
             Console.WriteLine("TestActivity: Execute: {0}", context.Arguments.Value);
 
             TestLog log = new TestLogImpl(context.Arguments.Value);
