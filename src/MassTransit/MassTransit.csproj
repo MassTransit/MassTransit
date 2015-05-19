@@ -607,6 +607,7 @@
     <Compile Include="Testing\Factories\SagaTestFactoryImpl.cs" />
     <Compile Include="Testing\Instances\SagaTestInstance.cs" />
     <Compile Include="Testing\LocalRemoteTestScenario.cs" />
+    <Compile Include="Testing\MultiConsumer.cs" />
     <Compile Include="Testing\PipelineSinkLocator.cs" />
     <Compile Include="Testing\PublishedMessage.cs" />
     <Compile Include="Testing\PublishedMessageImpl.cs" />
