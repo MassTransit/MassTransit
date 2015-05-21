@@ -6,6 +6,9 @@ MassTransit.
 
 .. sourcecode:: csharp
     :linenos:
+    
+    using MassTransit;
+    using MassTransit.RabbitMqTransport.Configuration;
 
     public class YourMessage { public string Text { get; set; } }
     public class Program
