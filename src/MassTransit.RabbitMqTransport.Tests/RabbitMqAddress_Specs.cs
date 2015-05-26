@@ -13,7 +13,6 @@
 namespace MassTransit.RabbitMqTransport.Tests
 {
     using System;
-    using Configuration;
     using NUnit.Framework;
     using Shouldly;
 

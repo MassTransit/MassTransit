@@ -14,7 +14,6 @@ namespace MassTransit.RabbitMqTransport.Tests
 {
     using System;
     using System.Collections.Generic;
-    using Configuration;
     using Courier;
     using NUnit.Framework;
     using TestFramework;

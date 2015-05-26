@@ -17,9 +17,8 @@ namespace MassTransit.RabbitMqTransport.Tests
     using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
-    using Configuration;
-    using MassTransit.Courier;
-    using MassTransit.Courier.Contracts;
+    using Courier;
+    using Courier.Contracts;
     using NUnit.Framework;
     using TestFramework;
     using TestFramework.Courier;

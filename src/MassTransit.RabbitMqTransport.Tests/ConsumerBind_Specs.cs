@@ -16,7 +16,6 @@ namespace MassTransit.RabbitMqTransport.Tests
     {
         using System;
         using System.Threading.Tasks;
-        using Configuration;
         using NUnit.Framework;
         using RabbitMQ.Client;
         using Saga;
@@ -103,6 +102,7 @@ namespace MassTransit.RabbitMqTransport.Tests
                 configurator.Consumer(() => _testConsumer);
             }
         }
+
 
         [TestFixture]
         public class Binding_a_handler :
