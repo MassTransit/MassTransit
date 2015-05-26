@@ -39,7 +39,7 @@ namespace MassTransit.Tests
         [TestFixtureSetUp]
         public void Setup()
         {
-            _requestClient = new MessageRequestClient<PingMessage, PongMessage>(Bus, InputQueueAddress, TimeSpan.FromSeconds(8));
+            _requestClient = CreateRequestClient<PingMessage, PongMessage>();
 
             _response = _requestClient.Request(new PingMessage());
         }
@@ -92,7 +92,7 @@ namespace MassTransit.Tests
         [TestFixtureSetUp]
         public void Setup()
         {
-            _requestClient = new MessageRequestClient<PingMessage, PongMessage>(Bus, InputQueueAddress, TimeSpan.FromSeconds(8));
+            _requestClient = CreateRequestClient<PingMessage, PongMessage>();
 
             _response = _requestClient.Request(new PingMessage());
         }

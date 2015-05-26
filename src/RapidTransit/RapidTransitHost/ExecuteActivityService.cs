@@ -32,26 +32,24 @@ namespace RapidTransit
         where TArguments : class
     {
         readonly string _activityName;
-        readonly IActivityQueueNameProvider _activityUriProvider;
         readonly ExecuteActivityFactory<TArguments> _executeActivityFactory;
         readonly int _executeConsumerLimit;
         readonly string _executeQueueName;
         readonly ILog _log;
-        readonly ITransportConfigurator _transportFactory;
+        readonly IServiceConfigurator _serviceFactory;
         bool _disposed;
 
-        public ExecuteActivityService(IConfigurationProvider configuration, ITransportConfigurator transportFactory,
+        public ExecuteActivityService(IConfigurationProvider configuration, IServiceConfigurator serviceFactory,
             IActivityQueueNameProvider activityUriProvider, ExecuteActivityFactory<TArguments> executeActivityFactory)
         {
             _log = Logger.Get(GetType());
 
-            _transportFactory = transportFactory;
-            _activityUriProvider = activityUriProvider;
+            _serviceFactory = serviceFactory;
             _executeActivityFactory = executeActivityFactory;
 
             _activityName = GetActivityName();
 
-            _executeQueueName = _activityUriProvider.GetExecuteActivityQueueName(_activityName);
+            _executeQueueName = activityUriProvider.GetExecuteActivityQueueName(_activityName);
             _executeConsumerLimit = GetExecuteConsumerLimit(configuration);
         }
 
@@ -64,7 +62,7 @@ namespace RapidTransit
 
         public virtual bool Start(HostControl hostControl)
         {
-
+            
             return true;
         }
 
@@ -92,11 +90,9 @@ namespace RapidTransit
         {
             _log.InfoFormat("Creating Execute {0} Receive Endpoint", _activityName);
 
-            Uri compensateAddress = null; // compensateServiceBus.Endpoint.Address;
-
-            _transportFactory.Configure(_executeQueueName, _executeConsumerLimit, x =>
+            _serviceFactory.Configure(_executeQueueName, _executeConsumerLimit, x =>
             {
-                x.ExecuteActivityHost<TActivity, TArguments>(compensateAddress, _executeActivityFactory);
+                x.ExecuteActivityHost<TActivity, TArguments>(_executeActivityFactory);
             });
         }
     }

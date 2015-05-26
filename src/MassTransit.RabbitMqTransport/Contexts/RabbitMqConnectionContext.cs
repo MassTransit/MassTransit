@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -22,23 +22,28 @@ namespace MassTransit.RabbitMqTransport.Contexts
         ConnectionContext,
         IDisposable
     {
-        readonly ConnectionFactory _connectionFactory;
+        readonly RabbitMqHostSettings _hostSettings;
         readonly object _lock = new object();
         readonly PayloadCache _payloadCache;
         readonly CancellationTokenSource _tokenSource;
         IConnection _connection;
         CancellationTokenRegistration _registration;
 
-        public RabbitMqConnectionContext(IConnection connection, ConnectionFactory connectionFactory, CancellationToken cancellationToken)
+        public RabbitMqConnectionContext(IConnection connection, RabbitMqHostSettings hostSettings, CancellationToken cancellationToken)
         {
             _connection = connection;
-            _connectionFactory = connectionFactory;
+            _hostSettings = hostSettings;
             _payloadCache = new PayloadCache();
 
             _tokenSource = new CancellationTokenSource();
             _registration = cancellationToken.Register(OnCancellationRequested);
 
             connection.ConnectionShutdown += OnConnectionShutdown;
+        }
+
+        public RabbitMqHostSettings HostSettings
+        {
+            get { return _hostSettings; }
         }
 
         public bool HasPayloadType(Type contextType)
@@ -58,7 +63,6 @@ namespace MassTransit.RabbitMqTransport.Contexts
             return _payloadCache.GetOrAddPayload(payloadFactory);
         }
 
-
         public IConnection Connection
         {
             get
@@ -76,11 +80,6 @@ namespace MassTransit.RabbitMqTransport.Contexts
         public CancellationToken CancellationToken
         {
             get { return _tokenSource.Token; }
-        }
-
-        public Uri GetAddress(string queueName)
-        {
-            return new EndpointAddressBuilder().GetAddress(_connectionFactory, queueName);
         }
 
         public void Dispose()

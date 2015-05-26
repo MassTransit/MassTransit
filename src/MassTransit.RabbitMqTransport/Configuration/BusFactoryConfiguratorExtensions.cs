@@ -10,18 +10,20 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.RabbitMqTransport.Configuration
+namespace MassTransit
 {
-    using Integration;
-    using Transports;
+    using System;
+    using RabbitMqTransport;
 
 
-    public interface IRabbitMqHost :
-        IBusHost
+    public static class BusFactoryConfiguratorExtensions
     {
-        IMessageNameFormatter MessageNameFormatter { get; }
-        IConnectionCache SendConnectionCache { get; }
-        IConnectionCache ConnectionCache { get; }
-        RabbitMqHostSettings Settings { get; }
+        /// <summary>
+        /// Select RabbitMQ as the transport for the service bus
+        /// </summary>
+        public static IBusControl CreateUsingRabbitMq(this IBusFactory factory, Action<IRabbitMqBusFactoryConfigurator> configure)
+        {
+            return RabbitMqBusFactory.Create(configure);
+        }
     }
 }

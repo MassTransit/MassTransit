@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,20 +13,21 @@
 namespace RapidTransit
 {
     using System;
-    using MassTransit.RabbitMqTransport.Configuration;
+    using MassTransit;
+    using MassTransit.RabbitMqTransport;
 
 
     /// <summary>
     /// Configures the transport for a service bus instance to use RabbitMQ, including
     /// the ReceiveFrom address
     /// </summary>
-    public class RabbitMqTransportConfigurator :
-        ITransportConfigurator
+    public class RabbitMqServiceConfigurator :
+        IServiceConfigurator
     {
         readonly IRabbitMqBusFactoryConfigurator _configurator;
         readonly IRabbitMqHost _host;
 
-        public RabbitMqTransportConfigurator(IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host)
+        public RabbitMqServiceConfigurator(IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host)
         {
             _configurator = configurator;
             _host = host;

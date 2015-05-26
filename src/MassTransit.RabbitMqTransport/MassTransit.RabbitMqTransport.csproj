@@ -48,9 +48,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Newtonsoft.Json.6.0.8\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
-    <Reference Include="RabbitMQ.Client, Version=3.5.2.0, Culture=neutral, PublicKeyToken=89e7d7c5feba84ce, processorArchitecture=MSIL">
+    <Reference Include="RabbitMQ.Client, Version=3.5.3.0, Culture=neutral, PublicKeyToken=89e7d7c5feba84ce, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\RabbitMQ.Client.3.5.2\lib\net40\RabbitMQ.Client.dll</HintPath>
+      <HintPath>..\packages\RabbitMQ.Client.3.5.3\lib\net40\RabbitMQ.Client.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
@@ -63,10 +63,8 @@
     <Compile Include="Configuration\Builders\RabbitMqBusBuilder.cs" />
     <Compile Include="Configuration\Builders\RabbitMqReceiveEndpointBuilder.cs" />
     <Compile Include="Configuration\Configurators\RabbitMqHostConfigurator.cs" />
-    <Compile Include="Configuration\IRabbitMqHost.cs" />
     <Compile Include="Configuration\RabbitMqConsumerPipeSpecification.cs" />
     <Compile Include="Configuration\ConsumerPipeConfiguratorExtensions.cs" />
-    <Compile Include="Configuration\RabbitMqHost.cs" />
     <Compile Include="Configuration\RabbitMqHostSettingsEqualityComparer.cs" />
     <Compile Include="Contexts\RabbitMqSendHeaders.cs" />
     <Compile Include="Contexts\RabbitMqConnectionContext.cs" />
@@ -90,6 +88,7 @@
     <Compile Include="Integration\RabbitMqConnectionCache.cs" />
     <Compile Include="Integration\RabbitMqConnector.cs" />
     <Compile Include="Integration\RabbitMqModelCache.cs" />
+    <Compile Include="IRabbitMqHost.cs" />
     <Compile Include="Pipeline\ExchangeSettings.cs" />
     <Compile Include="Pipeline\IRabbitMqConnector.cs" />
     <Compile Include="Pipeline\PrepareErrorQueueFilter.cs" />
@@ -112,12 +111,12 @@
     <Compile Include="Configuration\IRabbitMqReceiveEndpointConfigurator.cs" />
     <Compile Include="Configuration\RabbitMqReceiveEndpointConfigurator.cs" />
     <Compile Include="Configuration\RabbitMqHostConfigurationExtensions.cs" />
-    <Compile Include="Configuration\RabbitMqHostConfigurator.cs" />
-    <Compile Include="Configuration\RabbitMqPublishContext.cs" />
+    <Compile Include="Configuration\IRabbitMqHostConfigurator.cs" />
     <Compile Include="Configuration\IRabbitMqBusFactoryConfigurator.cs" />
     <Compile Include="Configuration\RabbitMqBusFactoryConfigurator.cs" />
-    <Compile Include="Configuration\RabbitMqHostSettings.cs" />
-    <Compile Include="Configuration\TransportConfiguratorExtensions.cs" />
+    <Compile Include="Configuration\BusFactoryConfiguratorExtensions.cs" />
+    <Compile Include="RabbitMqHost.cs" />
+    <Compile Include="RabbitMqHostSettings.cs" />
     <Compile Include="RabbitMqPublishEndpoint.cs" />
     <Compile Include="ConnectionContext.cs" />
     <Compile Include="RabbitMqConfigurationExtensions.cs" />

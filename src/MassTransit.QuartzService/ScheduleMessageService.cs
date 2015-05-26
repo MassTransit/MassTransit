@@ -18,6 +18,7 @@ namespace MassTransit.QuartzService
     using Quartz;
     using Quartz.Impl;
     using QuartzIntegration;
+    using RabbitMqTransport;
     using RabbitMqTransport.Configuration;
     using Topshelf;
 

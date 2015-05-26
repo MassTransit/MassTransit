@@ -18,7 +18,7 @@ namespace RapidTransit
     using MassTransit;
     using MassTransit.Logging;
     using MassTransit.Pipeline;
-    using MassTransit.RabbitMqTransport.Configuration;
+    using MassTransit.RabbitMqTransport;
 
 
     /// <summary>

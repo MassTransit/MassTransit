@@ -14,7 +14,6 @@ namespace MassTransit.RabbitMqTransport.Tests
 {
     using System;
     using System.Threading.Tasks;
-    using Configuration;
     using NUnit.Framework;
     using TestFramework.Messages;
 
@@ -23,6 +22,24 @@ namespace MassTransit.RabbitMqTransport.Tests
     public class EventPublishRQ_Specs :
         RabbitMqTestFixture
     {
+        [Test]
+        public async void Should_publish_first_event()
+        {
+            ConsumeContext<PingReceived> received = await _received;
+        }
+
+        [Test]
+        public async void Should_publish_second_event()
+        {
+            ConsumeContext<PingProcessing> consumed = await _processing;
+        }
+
+        [Test]
+        public async void Should_publish_third_event()
+        {
+            ConsumeContext<PingConsumed> consumed = await _consumed;
+        }
+
         Task<ConsumeContext<PingReceived>> _received;
         Task<ConsumeContext<PingConsumed>> _consumed;
         Task<ConsumeContext<PingProcessing>> _processing;
@@ -94,25 +111,6 @@ namespace MassTransit.RabbitMqTransport.Tests
             Guid PingId { get; }
 
             DateTime Timestamp { get; }
-        }
-
-
-        [Test]
-        public async void Should_publish_first_event()
-        {
-            ConsumeContext<PingReceived> received = await _received;
-        }
-
-        [Test]
-        public async void Should_publish_second_event()
-        {
-            ConsumeContext<PingProcessing> consumed = await _processing;
-        }
-
-        [Test]
-        public async void Should_publish_third_event()
-        {
-            ConsumeContext<PingConsumed> consumed = await _consumed;
         }
     }
 }
