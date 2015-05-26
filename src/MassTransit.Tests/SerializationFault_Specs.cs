@@ -35,7 +35,7 @@ namespace MassTransit.Tests
         [TestFixtureSetUp]
         public void Setup()
         {
-            _requestClient = new MessageRequestClient<PingMessage, PongMessage>(Bus, InputQueueAddress, TestTimeout);
+            _requestClient = CreateRequestClient<PingMessage, PongMessage>();
 
             _response = _requestClient.Request(new PingMessage());
         }

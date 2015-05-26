@@ -513,6 +513,7 @@
     <Compile Include="ReceiveContext.cs" />
     <Compile Include="Request.cs" />
     <Compile Include="IRequestClient.cs" />
+    <Compile Include="RequestClientExtensions.cs" />
     <Compile Include="RequestContext.cs" />
     <Compile Include="RequestExtensions.cs" />
     <Compile Include="SagaConsumeContext.cs" />

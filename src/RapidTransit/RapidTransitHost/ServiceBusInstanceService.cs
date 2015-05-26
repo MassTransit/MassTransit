@@ -14,13 +14,13 @@ namespace RapidTransit
     {
         readonly IServiceBusInstance[] _instances;
         readonly string _serviceName;
-        readonly ITransportConfigurator _transportConfigurator;
+        readonly IServiceConfigurator _serviceConfigurator;
         bool _disposed;
 
-        public ServiceBusInstanceService(ITransportConfigurator transportConfigurator, IEnumerable<IServiceBusInstance> instances,
+        public ServiceBusInstanceService(IServiceConfigurator serviceConfigurator, IEnumerable<IServiceBusInstance> instances,
             string serviceName)
         {
-            _transportConfigurator = transportConfigurator;
+            _serviceConfigurator = serviceConfigurator;
             _serviceName = serviceName;
             _instances = instances.ToArray();
         }

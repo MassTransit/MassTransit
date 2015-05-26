@@ -26,7 +26,6 @@ namespace RapidTransit
         where TLog : class
     {
         readonly string _activityName;
-        readonly IActivityQueueNameProvider _activityUriProvider;
         readonly CompensateActivityFactory<TLog> _compensateActivityFactory;
         readonly int _compensateConsumerLimit;
         readonly string _compensateQueueName;
@@ -34,26 +33,26 @@ namespace RapidTransit
         readonly int _executeConsumerLimit;
         readonly string _executeQueueName;
         readonly ILog _log;
-        readonly ITransportConfigurator _transportFactory;
+        readonly IServiceConfigurator _serviceConfigurator;
 
-        public ActivityService(IConfigurationProvider configuration, ITransportConfigurator transportFactory,
-            IActivityQueueNameProvider activityUriProvider,
+        public ActivityService(IConfigurationProvider configuration, IServiceConfigurator serviceConfigurator,
+            IActivityQueueNameProvider queueNameProvider,
             ExecuteActivityFactory<TArguments> executeActivityFactory,
             CompensateActivityFactory<TLog> compensateActivityFactory)
         {
             _log = Logger.Get(GetType());
 
-            _transportFactory = transportFactory;
-            _activityUriProvider = activityUriProvider;
+            _serviceConfigurator = serviceConfigurator;
+            IActivityQueueNameProvider activityUriProvider1 = queueNameProvider;
             _executeActivityFactory = executeActivityFactory;
             _compensateActivityFactory = compensateActivityFactory;
 
             _activityName = GetActivityName();
 
-            _executeQueueName = _activityUriProvider.GetExecuteActivityQueueName(_activityName);
+            _executeQueueName = activityUriProvider1.GetExecuteActivityQueueName(_activityName);
             _executeConsumerLimit = GetExecuteConsumerLimit(configuration);
 
-            _compensateQueueName = _activityUriProvider.GetCompensateActivityQueueName(_activityName);
+            _compensateQueueName = activityUriProvider1.GetCompensateActivityQueueName(_activityName);
             _compensateConsumerLimit = GetCompensateConsumerLimit(configuration);
         }
 
@@ -95,7 +94,7 @@ namespace RapidTransit
 
             Uri compensateAddress = null; // compensateServiceBus.Endpoint.Address;
 
-            _transportFactory.Configure(_executeQueueName, _executeConsumerLimit, x =>
+            _serviceConfigurator.Configure(_executeQueueName, _executeConsumerLimit, x =>
             {
                 x.ExecuteActivityHost<TActivity, TArguments>(compensateAddress, _executeActivityFactory);
             });
@@ -105,7 +104,7 @@ namespace RapidTransit
         {
             _log.InfoFormat("Creating Compensate {0} Receive Endpoint", _activityName);
 
-            _transportFactory.Configure(_compensateQueueName, _compensateConsumerLimit, x =>
+            _serviceConfigurator.Configure(_compensateQueueName, _compensateConsumerLimit, x =>
             {
                 x.CompensateActivityHost<TActivity, TLog>(_compensateActivityFactory);
             });

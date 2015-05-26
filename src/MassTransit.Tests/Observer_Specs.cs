@@ -36,7 +36,7 @@ namespace MassTransit.Tests
         [TestFixtureSetUp]
         public void Setup()
         {
-            _requestClient = new MessageRequestClient<PingMessage, PongMessage>(Bus, InputQueueAddress, TestTimeout);
+            _requestClient = CreateRequestClient<PingMessage, PongMessage>();
         }
 
         protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)

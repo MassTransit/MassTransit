@@ -76,7 +76,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RabbitMqConfigurationModule.cs" />
-    <Compile Include="RabbitMqTransportConfigurator.cs" />
+    <Compile Include="RabbitMqServiceConfigurator.cs" />
     <Compile Include="RapidTransitHostConfigurator.cs" />
     <Compile Include="ScopedServiceFactory.cs" />
     <Compile Include="ServiceBootstrapper.cs" />

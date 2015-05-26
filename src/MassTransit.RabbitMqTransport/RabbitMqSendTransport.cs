@@ -121,7 +121,7 @@ namespace MassTransit.RabbitMqTransport
                         if (_log.IsDebugEnabled)
                         {
                             _log.DebugFormat("MOVE {0} ({1} to {2})", messageId.HasValue ? messageId.Value.ToString() : "N/A", context.InputAddress,
-                                modelContext.ConnectionContext.GetAddress(_sendSettings.ExchangeName));
+                                modelContext.ConnectionContext.HostSettings.GetSendAddress(_sendSettings));
                         }
                     }
                     catch (Exception ex)

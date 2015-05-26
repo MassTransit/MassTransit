@@ -57,7 +57,7 @@ namespace MassTransit.RabbitMqTransport.Integration
                         if (_log.IsDebugEnabled)
                             _log.DebugFormat("Connected: {0}", _connectionFactory.ToDebugString());
 
-                        using (var connectionContext = new RabbitMqConnectionContext(connection, _connectionFactory, cancellationToken))
+                        using (var connectionContext = new RabbitMqConnectionContext(connection, _hostSettings, cancellationToken))
                         {
                             connectionContext.GetOrAddPayload(() => _hostSettings);
 

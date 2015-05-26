@@ -38,7 +38,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
         {
             var receiveSettings = context.GetPayload<ReceiveSettings>();
 
-            Uri inputAddress = context.ConnectionContext.GetAddress(receiveSettings.QueueName);
+            Uri inputAddress = context.ConnectionContext.HostSettings.GetInputAddress(receiveSettings);
 
             using (var consumer = new RabbitMqBasicConsumer(context.Model, inputAddress, _receivePipe, _receiveObserver, context.CancellationToken))
             {

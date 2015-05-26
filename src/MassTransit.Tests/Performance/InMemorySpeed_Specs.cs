@@ -99,7 +99,7 @@ namespace MassTransit.Tests.Performance
         [TestFixtureSetUp]
         public void Setup()
         {
-            _requestClient = new MessageRequestClient<PerformanceRequest, PerformanceResult>(Bus, InputQueueAddress, TestTimeout);
+            _requestClient = CreateRequestClient<PerformanceRequest, PerformanceResult>();
         }
 
         protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)

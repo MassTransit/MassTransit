@@ -87,6 +87,13 @@ namespace MassTransit.TestFramework
             get { return _bus; }
         }
 
+        protected IRequestClient<TRequest, TResponse> CreateRequestClient<TRequest, TResponse>()
+            where TRequest : class
+            where TResponse : class
+        {
+            return Bus.CreateRequestClient<TRequest, TResponse>(InputQueueAddress, TestTimeout);
+        }
+
         [TestFixtureSetUp]
         public void SetupInMemoryTestFixture()
         {
@@ -94,7 +101,7 @@ namespace MassTransit.TestFramework
 
             _busHandle = _bus.Start();
 
-            _busSendEndpoint =  Await(() => GetSendEndpoint(_bus.Address));
+            _busSendEndpoint = Await(() => GetSendEndpoint(_bus.Address));
 
             _inputQueueSendEndpoint = Await(() => GetSendEndpoint(InputQueueAddress));
         }
@@ -124,9 +131,7 @@ namespace MassTransit.TestFramework
             try
             {
                 if (_transportCache != null)
-                {
                     Await(() => _transportCache.Stop(new CancellationTokenSource(TestTimeout).Token));
-                }
             }
             catch (Exception ex)
             {

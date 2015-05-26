@@ -15,11 +15,10 @@ namespace MassTransit.RabbitMqTransport
     using System;
     using System.Collections.Generic;
     using System.Globalization;
+    using System.Net;
     using System.Net.Security;
     using System.Security.Authentication;
-    using System.Security.Policy;
     using System.Text.RegularExpressions;
-    using Configuration;
     using Pipeline;
     using RabbitMQ.Client;
     using Transports;
@@ -37,12 +36,27 @@ namespace MassTransit.RabbitMqTransport
                 Scheme = "rabbitmq",
                 Host = hostSettings.Host,
                 Port = hostSettings.Port,
-                Path = hostSettings.VirtualHost != "/"
-                    ? string.Join("/", hostSettings.VirtualHost, receiveSettings.QueueName)
-                    : receiveSettings.QueueName
+                Path = (string.IsNullOrWhiteSpace(hostSettings.VirtualHost) || hostSettings.VirtualHost == "/")
+                    ? receiveSettings.QueueName
+                    : string.Join("/", hostSettings.VirtualHost, receiveSettings.QueueName)
             };
 
             builder.Query += string.Join("&", GetQueryStringOptions(receiveSettings));
+
+            return builder.Uri;
+        }
+
+        public static Uri GetQueueAddress(this RabbitMqHostSettings hostSettings, string queueName)
+        {
+            var builder = new UriBuilder
+            {
+                Scheme = "rabbitmq",
+                Host = hostSettings.Host,
+                Port = hostSettings.Port,
+                Path = (string.IsNullOrWhiteSpace(hostSettings.VirtualHost) || hostSettings.VirtualHost == "/")
+                    ? queueName
+                    : string.Join("/", hostSettings.VirtualHost, queueName)
+            };
 
             return builder.Uri;
         }
@@ -85,7 +99,7 @@ namespace MassTransit.RabbitMqTransport
             if (settings.BindToQueue)
                 yield return "bind=true";
             if (!string.IsNullOrWhiteSpace(settings.QueueName))
-                yield return "queue=" + System.Net.WebUtility.UrlEncode(settings.QueueName);
+                yield return "queue=" + WebUtility.UrlEncode(settings.QueueName);
         }
 
         public static ReceiveSettings GetReceiveSettings(this Uri address)
@@ -200,7 +214,7 @@ namespace MassTransit.RabbitMqTransport
             bool bindToQueue = address.Query.GetValueFromQueryString("bind", false);
             if (bindToQueue)
             {
-                string queueName = System.Net.WebUtility.UrlDecode(address.Query.GetValueFromQueryString("queue"));
+                string queueName = WebUtility.UrlDecode(address.Query.GetValueFromQueryString("queue"));
                 settings.BindToQueue(queueName);
             }
 
