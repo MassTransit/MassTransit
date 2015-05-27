@@ -72,8 +72,12 @@ namespace MassTransit.RabbitMqTransport
             if (factory.Port != -1)
                 sb.Append(':').Append(factory.Port);
 
-            if (!string.IsNullOrWhiteSpace(factory.VirtualHost))
-                sb.Append('/').Append(factory.VirtualHost);
+            if (string.IsNullOrWhiteSpace(factory.VirtualHost))
+                sb.Append('/');
+            else if (factory.VirtualHost.StartsWith("/"))
+                sb.Append(factory.VirtualHost);
+            else
+                sb.Append("/").Append(factory.VirtualHost);
 
             return sb.ToString();
         }

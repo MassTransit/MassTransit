@@ -70,7 +70,7 @@ namespace MassTransit.RabbitMqTransport.Configuration.Configurators
             string[] segments = address.AbsolutePath.Split(_pathSeparator, StringSplitOptions.RemoveEmptyEntries);
 
             if (segments.Length == 0)
-                return null;
+                return "/";
             if (segments.Length == 1)
                 return segments[0];
 
