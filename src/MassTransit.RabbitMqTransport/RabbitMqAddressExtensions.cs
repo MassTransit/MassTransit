@@ -244,7 +244,7 @@ namespace MassTransit.RabbitMqTransport
                 TopologyRecoveryEnabled = true,
                 HostName = settings.Host,
                 Port = settings.Port,
-                VirtualHost = settings.VirtualHost,
+                VirtualHost = settings.VirtualHost ?? "/",
                 RequestedHeartbeat = settings.Heartbeat
             };
 
