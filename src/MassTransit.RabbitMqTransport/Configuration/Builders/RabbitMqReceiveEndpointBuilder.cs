@@ -14,7 +14,7 @@ namespace MassTransit.RabbitMqTransport.Configuration.Builders
 {
     using System.Collections.Generic;
     using MassTransit.Pipeline;
-    using Pipeline;
+    using Topology;
     using Transports;
 
 

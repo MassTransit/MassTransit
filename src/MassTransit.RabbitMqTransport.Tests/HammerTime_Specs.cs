@@ -12,8 +12,9 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RabbitMqTransport.Tests
 {
+    using System;
+    using System.Threading;
     using System.Threading.Tasks;
-    using Configuration;
     using NUnit.Framework;
     using TestFramework.Messages;
 
@@ -22,10 +23,29 @@ namespace MassTransit.RabbitMqTransport.Tests
     public class Pounding_the_crap_out_of_the_send_endpoint :
         RabbitMqTestFixture
     {
+        TaskCompletionSource<int> _completed;
+
+        public Pounding_the_crap_out_of_the_send_endpoint()
+        {
+            TestTimeout = TimeSpan.FromSeconds(180);
+        }
+
+        protected override void ConfigureInputQueueEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
+        {
+            _completed = GetTask<int>();
+            int count = 0;
+
+            configurator.Handler<PingMessage>(async context =>
+            {
+                if (Interlocked.Increment(ref count) == 100000)
+                    _completed.TrySetResult(count);
+            });
+        }
+
         [Test]
         public async void Should_end_well()
         {
-            Parallel.For(0, 100, async i =>
+            Parallel.For(0, 100, i =>
             {
                 for (int j = 0; j < 1000; j++)
                 {
@@ -33,13 +53,8 @@ namespace MassTransit.RabbitMqTransport.Tests
                     Bus.Publish(ping);
                 }
             });
-        }
 
-        protected override void ConfigureInputQueueEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
-        {
-            configurator.Handler<PingMessage>(async context =>
-            {
-            });
+            await _completed.Task;
         }
     }
 }

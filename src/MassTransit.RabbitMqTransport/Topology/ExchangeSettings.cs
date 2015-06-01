@@ -10,28 +10,38 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.RabbitMqTransport.Pipeline
+namespace MassTransit.RabbitMqTransport.Topology
 {
     using System.Collections.Generic;
 
 
     /// <summary>
-    /// Settings for a subscription to be bound into the RabbitMQ exchanges
+    /// The details of an exchange to be bound
     /// </summary>
-    public interface ExchangeBindingSettings
+    public interface ExchangeSettings
     {
         /// <summary>
-        /// The exchange settings
+        /// The name of the exchange
         /// </summary>
-        ExchangeSettings Exchange { get; }
+        string ExchangeName { get; }
 
         /// <summary>
-        /// A routing key for the exchange binding
+        /// The exchange type (fanout,etc.)
         /// </summary>
-        string RoutingKey { get; }
+        string ExchangeType { get; }
 
         /// <summary>
-        /// The arguments for the binding
+        /// True if the exchange should be durable, and survive a broker restart
+        /// </summary>
+        bool Durable { get; }
+
+        /// <summary>
+        /// True if the exchange should be deleted when the connection is closed
+        /// </summary>
+        bool AutoDelete { get; }
+
+        /// <summary>
+        /// Additional exchange arguments
         /// </summary>
         IDictionary<string, object> Arguments { get; }
     }

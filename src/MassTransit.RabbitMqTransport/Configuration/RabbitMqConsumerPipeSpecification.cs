@@ -18,6 +18,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
     using PipeBuilders;
     using PipeConfigurators;
     using Pipeline;
+    using Topology;
 
 
     public class RabbitMqConsumerPipeSpecification :

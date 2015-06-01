@@ -10,7 +10,7 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.RabbitMqTransport.Pipeline
+namespace MassTransit.RabbitMqTransport.Topology
 {
     using System;
     using System.Collections.Generic;
@@ -20,8 +20,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
 
     public static class RabbitMqExchangeBindingExtensions
     {
-        public static ExchangeBindingSettings GetExchangeBinding(this Type messageType,
-            IMessageNameFormatter messageNameFormatter)
+        public static ExchangeBindingSettings GetExchangeBinding(this Type messageType, IMessageNameFormatter messageNameFormatter)
         {
             bool temporary = IsTemporaryMessageType(messageType);
 

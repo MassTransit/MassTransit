@@ -10,23 +10,29 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.RabbitMqTransport.Pipeline
+namespace MassTransit.RabbitMqTransport.Topology
 {
-    public interface RabbitMqConsumerMetrics
+    using System.Collections.Generic;
+
+
+    /// <summary>
+    /// Settings for a subscription to be bound into the RabbitMQ exchanges
+    /// </summary>
+    public interface ExchangeBindingSettings
     {
         /// <summary>
-        /// The consumer tag that was assigned to the consumer by the broker
+        /// The exchange settings
         /// </summary>
-        string ConsumerTag { get; }
+        ExchangeSettings Exchange { get; }
 
         /// <summary>
-        /// The number of messages consumed by the consumer
+        /// A routing key for the exchange binding
         /// </summary>
-        long DeliveryCount { get; }
+        string RoutingKey { get; }
 
         /// <summary>
-        /// The highest concurrent message count that was received by the consumer
+        /// The arguments for the binding
         /// </summary>
-        int ConcurrentDeliveryCount { get; }
+        IDictionary<string, object> Arguments { get; }
     }
 }

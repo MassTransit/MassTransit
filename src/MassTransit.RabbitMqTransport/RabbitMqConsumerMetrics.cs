@@ -10,39 +10,23 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.RabbitMqTransport.Pipeline
+namespace MassTransit.RabbitMqTransport
 {
-    using System.Collections.Generic;
-
-
-    /// <summary>
-    /// The details of an exchange to be bound
-    /// </summary>
-    public interface ExchangeSettings
+    public interface RabbitMqConsumerMetrics
     {
         /// <summary>
-        /// The name of the exchange
+        /// The consumer tag that was assigned to the consumer by the broker
         /// </summary>
-        string ExchangeName { get; }
+        string ConsumerTag { get; }
 
         /// <summary>
-        /// The exchange type (fanout,etc.)
+        /// The number of messages consumed by the consumer
         /// </summary>
-        string ExchangeType { get; }
+        long DeliveryCount { get; }
 
         /// <summary>
-        /// True if the exchange should be durable, and survive a broker restart
+        /// The highest concurrent message count that was received by the consumer
         /// </summary>
-        bool Durable { get; }
-
-        /// <summary>
-        /// True if the exchange should be deleted when the connection is closed
-        /// </summary>
-        bool AutoDelete { get; }
-
-        /// <summary>
-        /// Additional exchange arguments
-        /// </summary>
-        IDictionary<string, object> Arguments { get; }
+        int ConcurrentDeliveryCount { get; }
     }
 }

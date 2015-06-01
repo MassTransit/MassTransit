@@ -18,6 +18,7 @@ namespace MassTransit
     using RabbitMqTransport;
     using RabbitMqTransport.Configuration;
     using RabbitMqTransport.Pipeline;
+    using RabbitMqTransport.Topology;
 
 
     public static class ConsumerPipeConfiguratorExtensions

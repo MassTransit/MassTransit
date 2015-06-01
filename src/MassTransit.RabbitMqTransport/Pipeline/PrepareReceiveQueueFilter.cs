@@ -17,6 +17,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
     using Logging;
     using MassTransit.Pipeline;
     using RabbitMQ.Client;
+    using Topology;
 
 
     /// <summary>
@@ -27,7 +28,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
     {
         readonly ILog _log = Logger.Get<PrepareReceiveQueueFilter>();
         readonly ReceiveSettings _settings;
-        bool _queuePurged;
+        bool _queueAlreadyPurged;
 
         public PrepareReceiveQueueFilter(ReceiveSettings settings)
         {
@@ -56,7 +57,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
 
             if (_settings.PurgeOnStartup)
             {
-                if (!_queuePurged)
+                if (!_queueAlreadyPurged)
                 {
                     if (_log.IsDebugEnabled)
                         _log.DebugFormat("Purging {0} messages from queue {1}", queueOk.MessageCount, queueName);
@@ -66,7 +67,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
                     if (_log.IsDebugEnabled)
                         _log.DebugFormat("Purged {0} messages from queue {1}", purgedMessageCount, queueName);
 
-                    _queuePurged = true;
+                    _queueAlreadyPurged = true;
                 }
                 else
                 {

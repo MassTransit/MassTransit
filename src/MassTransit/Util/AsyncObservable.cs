@@ -124,9 +124,7 @@ namespace MassTransit.Util
                 _notifications.CompleteAdding();
 
                 BlockingCollection<ObserverNotification> notifications = _notifications;
-                _notifyTask.ContinueWith(x => notifications.Dispose());
-
-                return _notifyTask;
+                return _notifyTask.ContinueWith(x => notifications.Dispose(), TaskScheduler.Default);
             }
 
             public void Notify(ObserverNotification notification)
