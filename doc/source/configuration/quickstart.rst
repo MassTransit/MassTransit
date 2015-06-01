@@ -14,8 +14,7 @@ MassTransit.
         {
             Bus.Initialize(sbc =>
             {
-                sbc.UseMsmq();
-                sbc.VerifyMsmqConfiguration();
+                sbc.UseMsmq(msmq => msmq.VerifyMsmqConfiguration());
                 sbc.UseMulticastSubscriptionClient();
                 sbc.ReceiveFrom("msmq://localhost/test_queue");
                 sbc.Subscribe(subs=>
