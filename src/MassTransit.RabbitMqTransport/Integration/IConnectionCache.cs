@@ -23,11 +23,5 @@ namespace MassTransit.RabbitMqTransport.Integration
     public interface IConnectionCache
     {
         Task Send(IPipe<ConnectionContext> connectionPipe, CancellationToken cancellationToken);
-
-        /// <summary>
-        /// Stop the cache, including the cached connection
-        /// </summary>
-        /// <returns></returns>
-        Task Stop();
     }
 }

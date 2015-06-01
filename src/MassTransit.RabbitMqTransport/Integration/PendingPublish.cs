@@ -48,7 +48,14 @@ namespace MassTransit.RabbitMqTransport.Integration
         {
             Uri address = _connectionContext.HostSettings.GetQueueAddress(_exchange);
 
-            _source.TrySetException(new PublishNegativeAckException(address, "The message was nacked by RabbitMQ"));
+            _source.TrySetException(new PublishNackException(address, "The message was nacked by RabbitMQ"));
+        }
+
+        public void PublishNotConfirmed()
+        {
+            Uri address = _connectionContext.HostSettings.GetQueueAddress(_exchange);
+
+            _source.TrySetException(new MessageNotConfirmedException(address));
         }
     }
 }

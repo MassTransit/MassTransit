@@ -15,7 +15,6 @@ namespace MassTransit.RabbitMqTransport.Tests
     namespace Connector_Specs
     {
         using System;
-        using Configuration;
         using Integration;
         using NUnit.Framework;
         using Pipeline;

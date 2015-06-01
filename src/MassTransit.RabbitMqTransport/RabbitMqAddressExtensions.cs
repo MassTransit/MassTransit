@@ -19,8 +19,8 @@ namespace MassTransit.RabbitMqTransport
     using System.Net.Security;
     using System.Security.Authentication;
     using System.Text.RegularExpressions;
-    using Pipeline;
     using RabbitMQ.Client;
+    using Topology;
     using Transports;
     using Util;
 

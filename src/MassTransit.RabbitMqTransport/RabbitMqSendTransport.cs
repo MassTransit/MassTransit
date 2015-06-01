@@ -24,6 +24,7 @@ namespace MassTransit.RabbitMqTransport
     using MassTransit.Pipeline;
     using Pipeline;
     using RabbitMQ.Client;
+    using Topology;
     using Transports;
     using Util;
 
@@ -115,7 +116,7 @@ namespace MassTransit.RabbitMqTransport
                             body = memoryStream.ToArray();
                         }
 
-                        Task task = modelContext.Model.BasicPublishAsync(_sendSettings.ExchangeName, "", true, false, properties, body);
+                        Task task = modelContext.BasicPublishAsync(_sendSettings.ExchangeName, "", true, false, properties, body);
                         context.AddPendingTask(task);
 
                         if (_log.IsDebugEnabled)
@@ -179,7 +180,7 @@ namespace MassTransit.RabbitMqTransport
 
                         await _observers.ForEach(x => x.PreSend(context)).ConfigureAwait(false);
 
-                        await modelContext.Model.BasicPublishAsync(context.Exchange, context.RoutingKey, context.Mandatory,
+                        await modelContext.BasicPublishAsync(context.Exchange, context.RoutingKey, context.Mandatory,
                             context.Immediate, context.BasicProperties, context.Body).ConfigureAwait(false);
 
                         context.DestinationAddress.LogSent(context.MessageId.HasValue ? context.MessageId.Value.ToString("N") : "",

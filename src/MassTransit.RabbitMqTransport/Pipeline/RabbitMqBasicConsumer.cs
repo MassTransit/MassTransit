@@ -110,8 +110,8 @@ namespace MassTransit.RabbitMqTransport.Pipeline
             while (current > _maxPendingDeliveryCount)
                 Interlocked.CompareExchange(ref _maxPendingDeliveryCount, current, _maxPendingDeliveryCount);
 
-            var context = new RabbitMqReceiveContext(_inputAddress, exchange,
-                routingKey, _consumerTag, deliveryTag, body, redelivered, properties, _receiveObserver);
+            var context = new RabbitMqReceiveContext(_inputAddress, exchange, routingKey, _consumerTag, deliveryTag, body, redelivered, properties,
+                _receiveObserver);
 
             try
             {
@@ -142,7 +142,6 @@ namespace MassTransit.RabbitMqTransport.Pipeline
                 RabbitMqReceiveContext ignored;
                 _pending.TryRemove(deliveryTag, out ignored);
             }
-
         }
 
         public IModel Model

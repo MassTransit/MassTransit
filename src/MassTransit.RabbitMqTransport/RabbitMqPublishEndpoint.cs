@@ -17,9 +17,8 @@ namespace MassTransit.RabbitMqTransport
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
-    using Configuration;
     using Integration;
-    using Pipeline;
+    using Topology;
     using Transports;
     using Util;
 
@@ -56,13 +55,13 @@ namespace MassTransit.RabbitMqTransport
                 .Where(binding => !sendSettings.ExchangeName.Equals(binding.Exchange.ExchangeName))
                 .ToArray();
 
-            Uri sendAddress = _host.Settings.GetSendAddress(sendSettings);
+            Uri destinationAddress = _host.Settings.GetSendAddress(sendSettings);
 
             var modelCache = new RabbitMqModelCache(_host.SendConnectionCache);
 
             var sendTransport = new RabbitMqSendTransport(modelCache, sendSettings, bindings);
 
-            return new SendEndpoint(sendTransport, _serializer, sendAddress, _inputAddress);
+            return new SendEndpoint(sendTransport, _serializer, destinationAddress, _inputAddress);
         }
     }
 }

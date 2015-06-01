@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -15,7 +15,6 @@ namespace MassTransit.RabbitMqTransport.Tests
     using System;
     using System.Linq;
     using System.Threading.Tasks;
-    using Configuration;
     using NUnit.Framework;
     using Shouldly;
 
@@ -24,25 +23,6 @@ namespace MassTransit.RabbitMqTransport.Tests
     public class Bytes_Specs :
         RabbitMqTestFixture
     {
-        [Test]
-        public async void Should_receive_byte_array_of_bigness()
-        {
-            var random = new Random();
-            var bytes = new byte[512];
-            for (int i = 0; i < 512; i++)
-                bytes[i] = (byte)random.Next(255);
-
-            var sent = new A
-            {
-                Contents = bytes
-            };
-            await InputQueueSendEndpoint.Send(sent);
-
-            ConsumeContext<A> context = await _received;
-
-            context.Message.ShouldBe(sent);
-        }
-
         Task<ConsumeContext<A>> _received;
 
         protected override void ConfigureInputQueueEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
@@ -79,6 +59,26 @@ namespace MassTransit.RabbitMqTransport.Tests
             {
                 return (Contents != null ? Contents.GetHashCode() : 0);
             }
+        }
+
+
+        [Test]
+        public async void Should_receive_byte_array_of_bigness()
+        {
+            var random = new Random();
+            var bytes = new byte[512];
+            for (int i = 0; i < 512; i++)
+                bytes[i] = (byte)random.Next(255);
+
+            var sent = new A
+            {
+                Contents = bytes
+            };
+            await InputQueueSendEndpoint.Send(sent);
+
+            ConsumeContext<A> context = await _received;
+
+            context.Message.ShouldBe(sent);
         }
     }
 }

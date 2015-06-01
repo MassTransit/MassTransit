@@ -15,7 +15,9 @@ namespace MassTransit.RabbitMqTransport
     using System;
     using System.Runtime.Serialization;
 
-
+    /// <summary>
+    /// Published when a RabbitMQ channel is closed and the message was not confirmed by the broker.
+    /// </summary>
     [Serializable]
     public class MessageNotConfirmedException :
         TransportException
@@ -24,12 +26,7 @@ namespace MassTransit.RabbitMqTransport
         {
         }
 
-        public MessageNotConfirmedException(Uri uri)
-            : base(uri)
-        {
-        }
-
-        public MessageNotConfirmedException(Uri uri, string message)
+        public MessageNotConfirmedException(Uri uri, string message = "The message was not confirmed by RabbitMQ")
             : base(uri, message)
         {
         }
