@@ -36,6 +36,8 @@ namespace MassTransit.RabbitMqTransport.Tests
             _completed = GetTask<int>();
             int count = 0;
 
+            configurator.PrefetchCount = 1000;
+
             configurator.Handler<PingMessage>(async context =>
             {
                 if (Interlocked.Increment(ref count) == 100000)
@@ -67,15 +69,15 @@ namespace MassTransit.RabbitMqTransport.Tests
 
             var confirmed = timer.Elapsed;
 
-            Console.WriteLine("Published {0} messages in {1}ms", 100 * 1000, published.TotalMilliseconds);
+            Console.WriteLine("Published {0} messages in {1}ms ({2:F0}/s)", 100 * 1000, published.TotalMilliseconds, 100L * 1000L * 1000L / published.TotalMilliseconds);
 
-            Console.WriteLine("Confirmed {0} messages in {1}ms", 100 * 1000, confirmed.TotalMilliseconds);
+            Console.WriteLine("Confirmed {0} messages in {1}ms ({2:F0}/s)", 100 * 1000, confirmed.TotalMilliseconds, 100L * 1000L * 1000L / confirmed.TotalMilliseconds);
 
             await _completed.Task;
 
             var completed = timer.Elapsed;
 
-            Console.WriteLine("Completed {0} messages in {1}ms", 100 * 1000, completed.TotalMilliseconds);
+            Console.WriteLine("Completed {0} messages in {1}ms ({2:F0}/s)", 100 * 1000, completed.TotalMilliseconds, 100L * 1000L * 1000L / completed.TotalMilliseconds);
         }
     }
 }
