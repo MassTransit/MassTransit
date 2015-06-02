@@ -13,10 +13,10 @@
 namespace MassTransit.RabbitMqTransport.Contexts
 {
     using System;
+    using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
     using Context;
-    using Integration;
     using RabbitMQ.Client;
 
 
@@ -55,6 +55,51 @@ namespace MassTransit.RabbitMqTransport.Contexts
         Task ModelContext.BasicPublishAsync(string exchange, string routingKey, bool mandatory, bool immediate, IBasicProperties basicProperties, byte[] body)
         {
             return _context.BasicPublishAsync(exchange, routingKey, mandatory, immediate, basicProperties, body);
+        }
+
+        public Task ExchangeBind(string destination, string source, string routingKey, IDictionary<string, object> arguments)
+        {
+            return _context.ExchangeBind(destination, source, routingKey, arguments);
+        }
+
+        public Task ExchangeDeclare(string exchange, string type, bool durable, bool autoDelete, IDictionary<string, object> arguments)
+        {
+            return _context.ExchangeDeclare(exchange, type, durable, autoDelete, arguments);
+        }
+
+        public Task QueueBind(string queue, string exchange, string routingKey, IDictionary<string, object> arguments)
+        {
+            return _context.QueueBind(queue, exchange, routingKey, arguments);
+        }
+
+        public Task<QueueDeclareOk> QueueDeclare(string queue, bool durable, bool exclusive, bool autoDelete, IDictionary<string, object> arguments)
+        {
+            return _context.QueueDeclare(queue, durable, exclusive, autoDelete, arguments);
+        }
+
+        public Task<uint> QueuePurge(string queue)
+        {
+            return _context.QueuePurge(queue);
+        }
+
+        public Task BasicQos(uint prefetchSize, ushort prefetchCount, bool global)
+        {
+            return _context.BasicQos(prefetchSize, prefetchCount, global);
+        }
+
+        public Task BasicAck(ulong deliveryTag, bool multiple)
+        {
+            return _context.BasicAck(deliveryTag, multiple);
+        }
+
+        public Task BasicNack(ulong deliveryTag, bool multiple, bool requeue)
+        {
+            return _context.BasicNack(deliveryTag, multiple, requeue);
+        }
+
+        public Task<string> BasicConsume(string queue, bool noAck, IBasicConsumer consumer)
+        {
+            return _context.BasicConsume(queue, noAck, consumer);
         }
 
         IModel ModelContext.Model

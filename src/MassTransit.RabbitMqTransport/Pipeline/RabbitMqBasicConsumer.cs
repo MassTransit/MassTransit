@@ -34,7 +34,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
         readonly TaskCompletionSource<RabbitMqConsumerMetrics> _consumerComplete;
         readonly Uri _inputAddress;
         readonly ILog _log = Logger.Get<RabbitMqBasicConsumer>();
-        readonly IModel _model;
+        readonly ModelContext _model;
         readonly ConcurrentDictionary<ulong, RabbitMqReceiveContext> _pending;
         readonly INotifyReceiveObserver _receiveObserver;
         readonly IPipe<ReceiveContext> _receivePipe;
@@ -44,7 +44,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
         int _maxPendingDeliveryCount;
         CancellationTokenRegistration _registration;
 
-        public RabbitMqBasicConsumer(IModel model, Uri inputAddress, IPipe<ReceiveContext> receivePipe, INotifyReceiveObserver receiveObserver,
+        public RabbitMqBasicConsumer(ModelContext model, Uri inputAddress, IPipe<ReceiveContext> receivePipe, INotifyReceiveObserver receiveObserver,
             CancellationToken cancellationToken)
         {
             _model = model;
@@ -115,6 +115,9 @@ namespace MassTransit.RabbitMqTransport.Pipeline
 
             try
             {
+                if (_log.IsDebugEnabled)
+                    _log.DebugFormat("{0} Adding pending delivery", deliveryTag);
+
                 if (!_pending.TryAdd(deliveryTag, context))
                 {
                     // should not happen, duplicate delivery tag??
@@ -122,17 +125,37 @@ namespace MassTransit.RabbitMqTransport.Pipeline
 
                 _receiveObserver.NotifyPreReceive(context);
 
+                if (_log.IsDebugEnabled)
+                    _log.DebugFormat("{0} Sending to receive pipe", deliveryTag);
+
                 await _receivePipe.Send(context).ConfigureAwait(false);
+
+                if (_log.IsDebugEnabled)
+                    _log.DebugFormat("{0} Completing task", deliveryTag);
 
                 await context.CompleteTask.ConfigureAwait(false);
 
-                _model.BasicAck(deliveryTag, false);
+                if (_log.IsDebugEnabled)
+                    _log.DebugFormat("{0} Acking message", deliveryTag);
+
+                await _model.BasicAck(deliveryTag, false);
+
+                if (_log.IsDebugEnabled)
+                    _log.DebugFormat("{0} Notifying post receive", deliveryTag);
 
                 _receiveObserver.NotifyPostReceive(context);
             }
             catch (Exception ex)
             {
-                _model.BasicNack(deliveryTag, false, true);
+                if (_log.IsDebugEnabled)
+                    _log.DebugFormat("{0} Nacking message", deliveryTag);
+
+                _model.BasicNack(deliveryTag, false, true)
+                    .Wait(((PipeContext)context).CancellationToken);
+
+                if (_log.IsDebugEnabled)
+                    _log.DebugFormat("{0} Notifying receive fault", deliveryTag);
+
                 _receiveObserver.NotifyReceiveFault(context, ex);
             }
             finally
@@ -146,7 +169,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
 
         public IModel Model
         {
-            get { return _model; }
+            get { return _model.Model; }
         }
 
         public event EventHandler<ConsumerEventArgs> ConsumerCancelled;

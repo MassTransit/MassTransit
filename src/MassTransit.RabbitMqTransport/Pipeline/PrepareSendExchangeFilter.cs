@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RabbitMqTransport.Pipeline
 {
+    using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
     using Logging;
@@ -38,9 +39,10 @@ namespace MassTransit.RabbitMqTransport.Pipeline
         {
             if (!context.HasPayloadType(typeof(SendSettings)))
             {
-                DeclareExchange(context);
+                await DeclareExchange(context);
+
                 if (_settings.BindToQueue)
-                    DeclareAndBindQueue(context);
+                    await DeclareAndBindQueue(context);
             }
 
             await next.Send(context).ConfigureAwait(false);
@@ -51,7 +53,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
             return visitor.Visit(this);
         }
 
-        void DeclareExchange(ModelContext context)
+        async Task DeclareExchange(ModelContext context)
         {
             if (_log.IsDebugEnabled)
             {
@@ -65,16 +67,16 @@ namespace MassTransit.RabbitMqTransport.Pipeline
 
             if (!string.IsNullOrWhiteSpace(_settings.ExchangeName))
             {
-                context.Model.ExchangeDeclare(_settings.ExchangeName, _settings.ExchangeType, _settings.Durable, _settings.AutoDelete,
+                await context.ExchangeDeclare(_settings.ExchangeName, _settings.ExchangeType, _settings.Durable, _settings.AutoDelete,
                     _settings.ExchangeArguments);
             }
 
             context.GetOrAddPayload(() => _settings);
         }
 
-        void DeclareAndBindQueue(ModelContext context)
+        async Task DeclareAndBindQueue(ModelContext context)
         {
-            QueueDeclareOk queueOk = context.Model.QueueDeclare(_settings.QueueName, _settings.Durable, false,
+            QueueDeclareOk queueOk = await context.QueueDeclare(_settings.QueueName, _settings.Durable, false,
                 _settings.AutoDelete, _settings.QueueArguments);
 
             string queueName = queueOk.QueueName;
@@ -89,7 +91,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
                     }.Where(x => !string.IsNullOrWhiteSpace(x))));
             }
 
-            context.Model.QueueBind(queueName, _settings.ExchangeName, "");
+            await context.QueueBind(queueName, _settings.ExchangeName, "", new Dictionary<string, object>());
 
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Exchange:Queue Binding: {0} ({1})", _settings.ExchangeName, queueName);

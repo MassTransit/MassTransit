@@ -14,7 +14,6 @@ namespace MassTransit.RabbitMqTransport.Tests
 {
     using System;
     using System.Threading.Tasks;
-    using Configuration;
     using Magnum.Extensions;
     using NUnit.Framework;
     using Shouldly;

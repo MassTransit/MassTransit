@@ -126,6 +126,7 @@
     <Compile Include="MessageContext_Specs.cs" />
     <Compile Include="MessageRetryTracker_Specs.cs" />
     <Compile Include="Messages\PartialSerializationTestMessage.cs" />
+    <Compile Include="MultiTestConsumer_Specs.cs" />
     <Compile Include="ObjectToDictionary_Specs.cs" />
     <Compile Include="Observer_Specs.cs" />
     <Compile Include="OrderedNotification_Specs.cs" />
@@ -204,9 +205,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Messages\UpdateMessage.cs" />
     <Compile Include="Messages\UpdateAcceptedMessage.cs" />
-    <Compile Include="TestConsumers\TestConsumerBase.cs" />
-    <Compile Include="TestConsumers\TestCorrelatedConsumer.cs" />
-    <Compile Include="TestConsumers\TestMessageConsumer.cs" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
@@ -239,6 +237,7 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="TestConsumers\" />
     <Folder Include="TextFixtures\" />
   </ItemGroup>
   <ItemGroup>

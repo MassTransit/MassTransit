@@ -38,7 +38,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
         async Task IFilter<ModelContext>.Send(ModelContext context, IPipe<ModelContext> next)
         {
             if (!context.HasPayloadType(typeof(ErrorQueueSettings)))
-                DeclareAndBindQueue(context);
+                await DeclareAndBindQueue(context);
 
             await next.Send(context).ConfigureAwait(false);
         }
@@ -48,9 +48,9 @@ namespace MassTransit.RabbitMqTransport.Pipeline
             return visitor.Visit(this);
         }
 
-        void DeclareAndBindQueue(ModelContext context)
+        async Task DeclareAndBindQueue(ModelContext context)
         {
-            QueueDeclareOk queueOk = context.Model.QueueDeclare(_settings.ExchangeName, _settings.Durable, false,
+            QueueDeclareOk queueOk = await context.QueueDeclare(_settings.ExchangeName, _settings.Durable, false,
                 _settings.AutoDelete, new Dictionary<string, object>());
 
             string queueName = queueOk.QueueName;
@@ -65,7 +65,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
                     }.Where(x => !string.IsNullOrWhiteSpace(x))));
             }
 
-            context.Model.QueueBind(queueName, _settings.ExchangeName, "");
+            await context.QueueBind(queueName, _settings.ExchangeName, "", new Dictionary<string, object>());
 
             context.GetOrAddPayload(() => _settings);
         }

@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RabbitMqTransport
 {
+    using System.Collections.Generic;
     using System.Threading.Tasks;
     using Integration;
     using RabbitMQ.Client;
@@ -46,5 +47,15 @@ namespace MassTransit.RabbitMqTransport
         /// <returns>An awaitable Task that is completed when the message is acknowledged by the broker</returns>
         Task BasicPublishAsync(string exchange, string routingKey, bool mandatory, bool immediate, IBasicProperties basicProperties,
             byte[] body);
+
+        Task ExchangeBind(string destination, string source, string routingKey, IDictionary<string, object> arguments);
+        Task ExchangeDeclare(string exchange, string type, bool durable, bool autoDelete, IDictionary<string, object> arguments);
+        Task QueueBind(string queue, string exchange, string routingKey, IDictionary<string, object> arguments);
+        Task<QueueDeclareOk> QueueDeclare(string queue, bool durable, bool exclusive, bool autoDelete, IDictionary<string, object> arguments);
+        Task<uint> QueuePurge(string queue);
+        Task BasicQos(uint prefetchSize, ushort prefetchCount, bool global);
+        Task BasicAck(ulong deliveryTag, bool multiple);
+        Task BasicNack(ulong deliveryTag, bool multiple, bool requeue);
+        Task<string> BasicConsume(string queue, bool noAck, IBasicConsumer consumer);
     }
 }
