@@ -13,6 +13,7 @@
 namespace MassTransit.RabbitMqTransport.Tests
 {
     using System;
+    using System.Diagnostics;
     using System.Threading;
     using System.Threading.Tasks;
     using NUnit.Framework;
@@ -45,16 +46,36 @@ namespace MassTransit.RabbitMqTransport.Tests
         [Test]
         public async void Should_end_well()
         {
+            var timer = Stopwatch.StartNew();
+
+            Task[] publishers = new Task[100*1000];
             Parallel.For(0, 100, i =>
             {
+                var offset = i * 1000;
+
                 for (int j = 0; j < 1000; j++)
                 {
                     var ping = new PingMessage();
-                    Bus.Publish(ping);
+                    var task = Bus.Publish(ping);
+                    publishers[offset + j] = task;
                 }
             });
 
+            var published = timer.Elapsed;
+
+            await Task.WhenAll(publishers);
+
+            var confirmed = timer.Elapsed;
+
+            Console.WriteLine("Published {0} messages in {1}ms", 100 * 1000, published.TotalMilliseconds);
+
+            Console.WriteLine("Confirmed {0} messages in {1}ms", 100 * 1000, confirmed.TotalMilliseconds);
+
             await _completed.Task;
+
+            var completed = timer.Elapsed;
+
+            Console.WriteLine("Completed {0} messages in {1}ms", 100 * 1000, completed.TotalMilliseconds);
         }
     }
 }
