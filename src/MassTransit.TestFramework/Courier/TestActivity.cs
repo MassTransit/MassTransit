@@ -25,8 +25,6 @@ namespace MassTransit.TestFramework.Courier
             if (context.Arguments.Value == null)
                 throw new ArgumentNullException("value");
 
-            Console.WriteLine("TestActivity: Execute: {0}", context.Arguments.Value);
-
             TestLog log = new TestLogImpl(context.Arguments.Value);
 
             return context.CompletedWithVariables(log, new

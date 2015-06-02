@@ -23,15 +23,11 @@ namespace MassTransit.TestFramework.Courier
     {
         public async Task<ExecutionResult> Execute(ExecuteContext<TestArguments> context)
         {
-            Console.WriteLine("SecondTestActivity: Execute: {0}", context.Arguments.Value);
-
             return context.Completed();
         }
 
         public async Task<CompensationResult> Compensate(CompensateContext<TestLog> context)
         {
-            Console.WriteLine("SecondTestActivity: Compensate: {0}", context.Log.OriginalValue);
-
             return context.Compensated();
         }
 
