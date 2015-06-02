@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RabbitMqTransport.Pipeline
 {
+    using System.Collections.Generic;
     using System.Threading.Tasks;
     using MassTransit.Pipeline;
     using Topology;
@@ -39,10 +40,10 @@ namespace MassTransit.RabbitMqTransport.Pipeline
 
             ExchangeSettings exchange = _exchangeBindingSettings.Exchange;
 
-            context.Model.ExchangeDeclare(exchange.ExchangeName, exchange.ExchangeType, exchange.Durable, exchange.AutoDelete,
+            await context.ExchangeDeclare(exchange.ExchangeName, exchange.ExchangeType, exchange.Durable, exchange.AutoDelete,
                 exchange.Arguments);
 
-            context.Model.ExchangeBind(receiveSettings.ExchangeName, exchange.ExchangeName, _exchangeBindingSettings.RoutingKey);
+            await context.ExchangeBind(receiveSettings.ExchangeName, exchange.ExchangeName, _exchangeBindingSettings.RoutingKey, new Dictionary<string, object>());
 
             await next.Send(context).ConfigureAwait(false);
         }

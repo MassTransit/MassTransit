@@ -1,5 +1,8 @@
-namespace RapidTransit.Configuration
+namespace RapidTransit
 {
+    using Configuration;
+
+
     public static class ConfigurationProviderExtensions
     {
         public static string GetSetting(this IConfigurationProvider configuration, string key, string defaultValue)

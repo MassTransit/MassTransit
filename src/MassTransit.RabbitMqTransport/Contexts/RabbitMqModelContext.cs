@@ -14,6 +14,7 @@ namespace MassTransit.RabbitMqTransport.Contexts
 {
     using System;
     using System.Collections.Concurrent;
+    using System.Collections.Generic;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
@@ -22,6 +23,7 @@ namespace MassTransit.RabbitMqTransport.Contexts
     using Logging;
     using RabbitMQ.Client;
     using RabbitMQ.Client.Events;
+    using Util;
 
 
     public class RabbitMqModelContext :
@@ -32,29 +34,30 @@ namespace MassTransit.RabbitMqTransport.Contexts
 
         readonly ConnectionContext _connectionContext;
         readonly IModel _model;
+
         readonly PayloadCache _payloadCache;
-        readonly object _publishLock = new object();
         readonly ConcurrentDictionary<ulong, PendingPublish> _published;
+        readonly QueuedTaskScheduler _taskScheduler;
         readonly CancellationTokenSource _tokenSource;
         CancellationTokenRegistration _registration;
 
-        public RabbitMqModelContext(ConnectionContext connectionContext, IModel model, CancellationToken cancellationToken)
+        public RabbitMqModelContext(ConnectionContext connectionContext, CancellationToken cancellationToken)
         {
             _connectionContext = connectionContext;
-            _model = model;
+            _model = connectionContext.Connection.CreateModel();
 
             _payloadCache = new PayloadCache();
             _published = new ConcurrentDictionary<ulong, PendingPublish>();
-
+            _taskScheduler = new QueuedTaskScheduler(TaskScheduler.Default, 1);
 
             _tokenSource = new CancellationTokenSource();
             _registration = cancellationToken.Register(OnCancellationRequested);
 
-            model.ModelShutdown += OnModelShutdown;
-            model.BasicAcks += OnBasicAcks;
-            model.BasicNacks += OnBasicNacks;
-            model.BasicReturn += OnBasicReturn;
-            model.ConfirmSelect();
+            _model.ModelShutdown += OnModelShutdown;
+            _model.BasicAcks += OnBasicAcks;
+            _model.BasicNacks += OnBasicNacks;
+            _model.BasicReturn += OnBasicReturn;
+            _model.ConfirmSelect();
         }
 
         public void Dispose()
@@ -98,34 +101,93 @@ namespace MassTransit.RabbitMqTransport.Contexts
             get { return _tokenSource.Token; }
         }
 
-        public Task BasicPublishAsync(string exchange, string routingKey, bool mandatory, bool immediate, IBasicProperties basicProperties,
+        public async Task BasicPublishAsync(string exchange, string routingKey, bool mandatory, bool immediate, IBasicProperties basicProperties,
             byte[] body)
         {
-            PendingPublish pendingPublish;
-            lock (_publishLock)
+            var pendingPublish = await Task.Factory.StartNew(() => PublishAsync(exchange, routingKey, mandatory, immediate, basicProperties, body),
+                _tokenSource.Token, TaskCreationOptions.HideScheduler, _taskScheduler);
+
+            await pendingPublish.Task;
+        }
+
+        PendingPublish PublishAsync(string exchange, string routingKey, bool mandatory, bool immediate, IBasicProperties basicProperties,byte[] body)
+        {
+            ulong publishTag = _model.NextPublishSeqNo;
+            var pendingPublish = new PendingPublish(_connectionContext, exchange, publishTag);
+            try
             {
-                ulong publishTag = _model.NextPublishSeqNo;
-                pendingPublish = new PendingPublish(_connectionContext, exchange, publishTag);
-                try
+                _published.AddOrUpdate(publishTag, key => pendingPublish, (key, existing) =>
                 {
-                    _published.AddOrUpdate(publishTag, key => pendingPublish, (key, existing) =>
-                    {
-                        existing.PublishNotConfirmed();
-                        return pendingPublish;
-                    });
+                    existing.PublishNotConfirmed();
+                    return pendingPublish;
+                });
 
-                    _model.BasicPublish(exchange, routingKey, mandatory, immediate, basicProperties, body);
-                }
-                catch
-                {
-                    PendingPublish ignored;
-                    _published.TryRemove(publishTag, out ignored);
+                _model.BasicPublish(exchange, routingKey, mandatory, immediate, basicProperties, body);
+            }
+            catch
+            {
+                PendingPublish ignored;
+                _published.TryRemove(publishTag, out ignored);
 
-                    throw;
-                }
+                throw;
             }
 
-            return pendingPublish.Task;
+            return pendingPublish;
+
+        }
+
+        public async Task ExchangeBind(string destination, string source, string routingKey, IDictionary<string, object> arguments)
+        {
+            await Task.Factory.StartNew(() => _model.ExchangeBind(destination, source, routingKey, arguments),
+                _tokenSource.Token, TaskCreationOptions.HideScheduler, _taskScheduler);
+        }
+
+        public async Task ExchangeDeclare(string exchange, string type, bool durable, bool autoDelete, IDictionary<string, object> arguments)
+        {
+            await Task.Factory.StartNew(() => _model.ExchangeDeclare(exchange, type, durable, autoDelete, arguments),
+                _tokenSource.Token, TaskCreationOptions.HideScheduler, _taskScheduler);
+        }
+
+        public async Task QueueBind(string queue, string exchange, string routingKey, IDictionary<string, object> arguments)
+        {
+            await Task.Factory.StartNew(() => _model.QueueBind(queue, exchange, routingKey, arguments),
+                _tokenSource.Token, TaskCreationOptions.HideScheduler, _taskScheduler);
+        }
+
+        public async Task<QueueDeclareOk> QueueDeclare(string queue, bool durable, bool exclusive, bool autoDelete, IDictionary<string, object> arguments)
+        {
+            return await Task.Factory.StartNew(() => _model.QueueDeclare(queue, durable, exclusive, autoDelete, arguments),
+                _tokenSource.Token, TaskCreationOptions.HideScheduler, _taskScheduler);
+        }
+
+        public async Task<uint> QueuePurge(string queue)
+        {
+            return await Task.Factory.StartNew(() => _model.QueuePurge(queue),
+                _tokenSource.Token, TaskCreationOptions.HideScheduler, _taskScheduler);
+        }
+
+        public async Task BasicQos(uint prefetchSize, ushort prefetchCount, bool global)
+        {
+            await Task.Factory.StartNew(() => _model.BasicQos(prefetchSize, prefetchCount, global),
+                _tokenSource.Token, TaskCreationOptions.HideScheduler, _taskScheduler);
+        }
+
+        public async Task BasicAck(ulong deliveryTag, bool multiple)
+        {
+            await Task.Factory.StartNew(() => _model.BasicAck(deliveryTag, multiple),
+                _tokenSource.Token, TaskCreationOptions.HideScheduler, _taskScheduler);
+        }
+
+        public async Task BasicNack(ulong deliveryTag, bool multiple, bool requeue)
+        {
+            await Task.Factory.StartNew(() => _model.BasicNack(deliveryTag, multiple, requeue),
+                _tokenSource.Token, TaskCreationOptions.HideScheduler, _taskScheduler);
+        }
+
+        public async Task<string> BasicConsume(string queue, bool noAck, IBasicConsumer consumer)
+        {
+            return await Task.Factory.StartNew(() => _model.BasicConsume(queue, noAck, consumer),
+                _tokenSource.Token, TaskCreationOptions.HideScheduler, _taskScheduler);
         }
 
         void OnBasicReturn(object model, BasicReturnEventArgs args)

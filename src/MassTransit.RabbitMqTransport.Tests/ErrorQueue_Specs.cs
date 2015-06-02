@@ -79,8 +79,8 @@ namespace MassTransit.RabbitMqTransport.Tests
             Await(() => InputQueueSendEndpoint.Send(new PingMessage(), Pipe.Execute<SendContext<PingMessage>>(context =>
             {
                 context.CorrelationId = _correlationId;
-                context.ResponseAddress = context.SourceAddress;
-                context.FaultAddress = context.SourceAddress;
+                context.ResponseAddress = Bus.Address;
+                context.FaultAddress = Bus.Address;
             })));
         }
 

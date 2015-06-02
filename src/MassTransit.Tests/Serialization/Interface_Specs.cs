@@ -13,12 +13,13 @@
 namespace MassTransit.Tests.Serialization
 {
 	using System;
+	using System.Linq;
 	using BusConfigurators;
 	using MassTransit.Pipeline;
 	using MassTransit.Serialization;
+	using MassTransit.Testing;
 	using NUnit.Framework;
 	using Shouldly;
-	using TestConsumers;
 	using TestFramework;
 
     [TestFixture(typeof(JsonMessageSerializer))]
@@ -51,9 +52,11 @@ namespace MassTransit.Tests.Serialization
 		public async void Should_dispatch_an_interface_via_the_pipeline()
 		{
 		    IConsumePipe pipe = new ConsumePipeBuilder().Build();
-			var consumer = new TestMessageConsumer<ComplaintAdded>();
 
-			pipe.ConnectInstance(consumer);
+		    var consumer = new MultiTestConsumer(TestTimeout);
+		    consumer.Consume<ComplaintAdded>();
+
+		    consumer.Connect(pipe);
 
 			var user = new UserImpl("Chris", "noone@nowhere.com");
 			ComplaintAdded complaint = new ComplaintAddedImpl(user, "No toilet paper", BusinessArea.Appearance)
@@ -64,7 +67,7 @@ namespace MassTransit.Tests.Serialization
 
 			await pipe.Send(new TestConsumeContext<ComplaintAdded>(complaint));
 
-			consumer.ShouldHaveReceivedMessage(complaint);
+		    consumer.Received.Select<ComplaintAdded>().Any().ShouldBe(true);
 		}
 	}
 

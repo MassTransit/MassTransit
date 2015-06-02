@@ -14,16 +14,16 @@ namespace MassTransit.RabbitMqTransport.Tests
 {
     using System;
     using System.Threading.Tasks;
-    using Configuration;
     using NUnit.Framework;
     using Shouldly;
 
     namespace Send_Specs
     {
         using System;
+        using System.Collections.Generic;
         using System.Linq;
         using System.Threading.Tasks;
-        using Configuration;
+        using MassTransit.Testing;
         using NUnit.Framework;
         using Serialization;
         using TestFramework;
@@ -56,6 +56,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             }
         }
 
+
         [TestFixture]
         public class When_a_message_is_send_to_the_bus_itself :
             RabbitMqTestFixture
@@ -63,7 +64,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             [Test]
             public async void Should_be_received()
             {
-                var receivedA = SubscribeHandler<A>();
+                Task<ConsumeContext<A>> receivedA = SubscribeHandler<A>();
 
                 var message = new A {Id = Guid.NewGuid()};
                 await BusSendEndpoint.Send(message);
@@ -139,26 +140,35 @@ namespace MassTransit.RabbitMqTransport.Tests
             }
         }
 
-        [TestFixture, Explicit]
+
+        [TestFixture]
         public class WhenAMessageIsPublishedToTheConsumer :
             RabbitMqTestFixture
         {
+            MultiTestConsumer _consumer;
+
             [Test]
             public async void Should_be_received()
             {
                 var message = new B {Id = Guid.NewGuid()};
+
                 await Bus.Publish(message);
 
-                var received = ConsumerOf<B>.AnyShouldHaveReceivedMessage(message, TestTimeout).ToList();
+                _consumer.Received.Select<B>().Any().ShouldBe(true);
 
-                Assert.AreEqual(message.Id, received[0].Message.Id);
+                var receivedMessage = _consumer.Received.Select<B>().First();
+
+                Assert.AreEqual(message.Id, receivedMessage.Context.Message.Id);
             }
 
             protected override void ConfigureInputQueueEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
             {
                 base.ConfigureInputQueueEndpoint(configurator);
 
-                configurator.Consumer<ConsumerOf<B>>();
+                _consumer = new MultiTestConsumer(TestTimeout);
+                _consumer.Consume<B>();
+
+                _consumer.Configure(configurator);
             }
         }
 
@@ -188,6 +198,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             public Guid Id { get; set; }
         }
 
+
         class B : IEquatable<B>
         {
             public Guid Id { get; set; }
@@ -207,7 +218,7 @@ namespace MassTransit.RabbitMqTransport.Tests
                     return false;
                 if (ReferenceEquals(this, obj))
                     return true;
-                if (obj.GetType() != this.GetType())
+                if (obj.GetType() != GetType())
                     return false;
                 return Equals((B)obj);
             }
@@ -218,6 +229,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             }
         }
     }
+
 
     [TestFixture]
     public class When_publishing_an_interface_message :
@@ -261,7 +273,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         [TestFixtureSetUp]
         public void Setup()
         {
-            Await(() => InputQueueSendEndpoint.Send<IProxyMe>(new { IntValue, StringValue, CorrelationId = _correlationId }));
+            Await(() => InputQueueSendEndpoint.Send<IProxyMe>(new {IntValue, StringValue, CorrelationId = _correlationId}));
         }
 
         protected override void ConfigureInputQueueEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
@@ -277,5 +289,4 @@ namespace MassTransit.RabbitMqTransport.Tests
             string StringValue { get; }
         }
     }
-
 }

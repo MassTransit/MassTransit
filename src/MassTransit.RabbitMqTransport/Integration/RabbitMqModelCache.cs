@@ -56,10 +56,7 @@ namespace MassTransit.RabbitMqTransport.Integration
         {
             IPipe<ConnectionContext> connectionPipe = Pipe.ExecuteAsync<ConnectionContext>(async connectionContext =>
             {
-                IModel model;
-                lock (connectionContext.Connection)
-                    model = connectionContext.Connection.CreateModel();
-                var modelContext = new RabbitMqModelContext(connectionContext, model, connectionContext.CancellationToken);
+                var modelContext = new RabbitMqModelContext(connectionContext, connectionContext.CancellationToken);
 
                 var scope = new ModelScope(modelContext);
 

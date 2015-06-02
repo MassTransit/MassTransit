@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RabbitMqTransport.Pipeline
 {
+    using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
     using Logging;
@@ -37,9 +38,9 @@ namespace MassTransit.RabbitMqTransport.Pipeline
 
         async Task IFilter<ModelContext>.Send(ModelContext context, IPipe<ModelContext> next)
         {
-            context.Model.BasicQos(0, _settings.PrefetchCount, false);
+            await context.BasicQos(0, _settings.PrefetchCount, false);
 
-            QueueDeclareOk queueOk = context.Model.QueueDeclare(_settings.QueueName, _settings.Durable, _settings.Exclusive,
+            QueueDeclareOk queueOk = await context.QueueDeclare(_settings.QueueName, _settings.Durable, _settings.Exclusive,
                 _settings.AutoDelete, _settings.QueueArguments);
 
             string queueName = queueOk.QueueName;
@@ -62,7 +63,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
                     if (_log.IsDebugEnabled)
                         _log.DebugFormat("Purging {0} messages from queue {1}", queueOk.MessageCount, queueName);
 
-                    var purgedMessageCount = context.Model.QueuePurge(queueName);
+                    var purgedMessageCount = await context.QueuePurge(queueName);
 
                     if (_log.IsDebugEnabled)
                         _log.DebugFormat("Purged {0} messages from queue {1}", purgedMessageCount, queueName);
@@ -80,10 +81,10 @@ namespace MassTransit.RabbitMqTransport.Pipeline
 
             if (!string.IsNullOrWhiteSpace(_settings.ExchangeName) || string.IsNullOrWhiteSpace(_settings.QueueName))
             {
-                context.Model.ExchangeDeclare(exchangeName, _settings.ExchangeType, _settings.Durable, _settings.AutoDelete,
+                await context.ExchangeDeclare(exchangeName, _settings.ExchangeType, _settings.Durable, _settings.AutoDelete,
                     _settings.ExchangeArguments);
 
-                context.Model.QueueBind(queueName, exchangeName, "");
+                await context.QueueBind(queueName, exchangeName, "", new Dictionary<string, object>());
             }
 
             ReceiveSettings settings = new RabbitMqReceiveSettings(_settings)

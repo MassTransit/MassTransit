@@ -686,6 +686,7 @@
     <Compile Include="Testing\ISentMessageList.cs" />
     <Compile Include="Testing\ITestScenario.cs" />
     <Compile Include="Testing\MessageList.cs" />
+    <Compile Include="Testing\MultiTestConsumer.cs" />
     <Compile Include="Testing\ObservedSentMessage.cs" />
     <Compile Include="Testing\ObservedSentMessageList.cs" />
     <Compile Include="Testing\IPublishedMessage.cs" />
@@ -807,6 +808,7 @@
     <Compile Include="Util\ITypeMetadataCache.cs" />
     <Compile Include="Util\LambdaEqualityComparer.cs" />
     <Compile Include="Util\MultipleConnectHandle.cs" />
+    <Compile Include="Util\QueuedTaskScheduler.cs" />
     <Compile Include="Util\TypeMetadataCache.cs" />
     <Compile Include="Util\UriExtensions.cs" />
   </ItemGroup>

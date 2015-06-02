@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -15,7 +15,6 @@ namespace MassTransit.RabbitMqTransport.Pipeline
     using System.Threading.Tasks;
     using Contexts;
     using MassTransit.Pipeline;
-    using RabbitMQ.Client;
 
 
     /// <summary>
@@ -33,15 +32,12 @@ namespace MassTransit.RabbitMqTransport.Pipeline
 
         public async Task Send(ConnectionContext context, IPipe<ConnectionContext> next)
         {
-            using (IModel model = context.Connection.CreateModel())
+            using (var modelContext = new RabbitMqModelContext(context, context.CancellationToken))
             {
-                using (var modelContext = new RabbitMqModelContext(context, model, context.CancellationToken))
-                {
-                    await _pipe.Send(modelContext).ConfigureAwait(false);
-                }
-
-                await next.Send(context).ConfigureAwait(false);
+                await _pipe.Send(modelContext).ConfigureAwait(false);
             }
+
+            await next.Send(context).ConfigureAwait(false);
         }
 
         public bool Visit(IPipelineVisitor visitor)

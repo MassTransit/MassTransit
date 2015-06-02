@@ -39,9 +39,9 @@
     <Reference Include="System.XML" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ConfigurationProviderExtensions.cs" />
     <Compile Include="Configuration\ConfigurationObjectValueProvider.cs" />
     <Compile Include="Configuration\ConfigurationProviderBase.cs" />
-    <Compile Include="Configuration\ConfigurationProviderExtensions.cs" />
     <Compile Include="Configuration\ConfigurationSettingsProvider.cs" />
     <Compile Include="Configuration\ConnectionStringProvider.cs" />
     <Compile Include="Configuration\FileConfigurationProvider.cs" />
@@ -69,9 +69,6 @@
       <Project>{6c7149d7-4d97-45df-a05d-61ec7374491d}</Project>
       <Name>MassTransit.RabbitMqTransport</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="app.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
