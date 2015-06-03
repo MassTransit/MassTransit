@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.AzureServiceBusTransport.Tests
 {
+    using System.Security.Cryptography;
     using System.Threading.Tasks;
     using Configuration;
     using NUnit.Framework;

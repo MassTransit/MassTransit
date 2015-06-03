@@ -56,9 +56,16 @@ namespace MassTransit.RabbitMqTransport.Tests
             _requestClient = new MessageRequestClient<PingMessage, PongMessage>(Bus, InputQueueAddress, TestTimeout);
         }
 
+        protected override void ConfigureBus(IRabbitMqBusFactoryConfigurator configurator)
+        {
+            base.ConfigureBus(configurator);
+
+            configurator.PrefetchCount = 100;
+        }
+
         protected override void ConfigureInputQueueEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
-            configurator.PrefetchCount = 64;
+            configurator.PrefetchCount = 100;
 
             configurator.Handler<PingMessage>(async context =>
             {

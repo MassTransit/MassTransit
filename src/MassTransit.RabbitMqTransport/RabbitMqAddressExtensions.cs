@@ -18,6 +18,7 @@ namespace MassTransit.RabbitMqTransport
     using System.Net;
     using System.Net.Security;
     using System.Security.Authentication;
+    using System.Text;
     using System.Text.RegularExpressions;
     using RabbitMQ.Client;
     using Topology;
@@ -28,6 +29,31 @@ namespace MassTransit.RabbitMqTransport
     public static class RabbitMqAddressExtensions
     {
         static readonly Regex _regex = new Regex(@"^[A-Za-z0-9\-_\.:]+$");
+
+        public static string GetTemporaryQueueName(this HostInfo host)
+        {
+            var sb = new StringBuilder("bus-");
+
+            foreach (char c in host.MachineName)
+            {
+                if (char.IsLetterOrDigit(c))
+                    sb.Append(c);
+                else if (c == '.' || c == '_' || c == '-' || c == ':')
+                    sb.Append(c);
+            }
+            sb.Append('-');
+            foreach (char c in host.ProcessName)
+            {
+                if (char.IsLetterOrDigit(c))
+                    sb.Append(c);
+                else if (c == '.' || c == '_' || c == '-' || c == ':')
+                    sb.Append(c);
+            }
+            sb.Append('-');
+            sb.Append(NewId.Next().ToString("NS"));
+
+            return sb.ToString();
+        }
 
         public static Uri GetInputAddress(this RabbitMqHostSettings hostSettings, ReceiveSettings receiveSettings)
         {

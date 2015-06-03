@@ -52,6 +52,17 @@ namespace MassTransit.RabbitMqTransport.Configuration
             };
         }
 
+        public RabbitMqReceiveEndpointConfigurator(IRabbitMqHost host, RabbitMqReceiveSettings settings, IConsumePipe consumePipe)
+        {
+            _host = host;
+            _consumePipe = consumePipe;
+            _consumePipeSpecification = new ConsumePipeSpecification();
+            _receivePipeConfigurator = new PipeConfigurator<ReceiveContext>();
+            _configurators = new List<IReceiveEndpointSpecification>();
+
+            _settings = settings;
+        }
+
         public Uri InputAddress
         {
             get { return _host.Settings.GetInputAddress(_settings); }

@@ -22,6 +22,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         using System;
         using System.Collections.Generic;
         using System.Linq;
+        using System.Security.Cryptography;
         using System.Threading.Tasks;
         using MassTransit.Testing;
         using NUnit.Framework;
