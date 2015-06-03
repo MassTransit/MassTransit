@@ -17,17 +17,11 @@ namespace MassTransit
 
 
     public interface IRabbitMqBusFactoryConfigurator :
-        IBusFactoryConfigurator
+        IBusFactoryConfigurator,
+        IQueueConfigurator
     {
         // change this to return an IRabbitMqHost 
         IRabbitMqHost Host(RabbitMqHostSettings settings);
-
-        /// <summary>
-        ///     Specifies that any message sent to an exchange must be delivered to a queue or it
-        ///     will be returned to the publisher with an exception
-        /// </summary>
-        /// <param name="mandatory">True if the message is mandatory, otherwise false</param>
-        void Mandatory(bool mandatory = true);
 
 //        /// <summary>
 //        ///     Intercept the publishing of a message type that is assignable to T

@@ -15,12 +15,11 @@ namespace MassTransit.RabbitMqTransport.Configuration.Builders
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Text;
     using BusConfigurators;
     using MassTransit.Builders;
     using MassTransit.Pipeline;
+    using Topology;
     using Transports;
-    using Util;
 
 
     public class RabbitMqBusBuilder :
@@ -31,21 +30,14 @@ namespace MassTransit.RabbitMqTransport.Configuration.Builders
         readonly RabbitMqReceiveEndpointConfigurator _busEndpointConfigurator;
         readonly IRabbitMqHost[] _hosts;
 
-        public RabbitMqBusBuilder(IEnumerable<IRabbitMqHost> hosts, IConsumePipeSpecification consumePipeSpecification)
+        public RabbitMqBusBuilder(IEnumerable<IRabbitMqHost> hosts, IConsumePipeSpecification consumePipeSpecification, RabbitMqReceiveSettings busSettings)
             : base(consumePipeSpecification)
         {
             _hosts = hosts.ToArray();
 
-            string machineName = GetSanitizedQueueNameString(HostMetadataCache.Host.MachineName);
-            string processName = GetSanitizedQueueNameString(HostMetadataCache.Host.ProcessName);
-            string queueName = string.Format("bus-{0}-{1}-{2}", processName, machineName, NewId.Next().ToString("NS"));
-
             _busConsumePipe = CreateConsumePipe();
 
-            _busEndpointConfigurator = new RabbitMqReceiveEndpointConfigurator(_hosts[0], queueName, _busConsumePipe);
-            _busEndpointConfigurator.Exclusive();
-            _busEndpointConfigurator.Durable(false);
-            _busEndpointConfigurator.AutoDelete();
+            _busEndpointConfigurator = new RabbitMqReceiveEndpointConfigurator(_hosts[0], busSettings, _busConsumePipe);
         }
 
         public IBusControl Build()
@@ -75,21 +67,6 @@ namespace MassTransit.RabbitMqTransport.Configuration.Builders
         protected override IPublishEndpoint CreatePublishEndpoint()
         {
             return new RabbitMqPublishEndpoint(_hosts[0], MessageSerializer, InputAddress);
-        }
-
-        string GetSanitizedQueueNameString(string input)
-        {
-            var sb = new StringBuilder(input.Length);
-
-            foreach (char c in input)
-            {
-                if (char.IsLetterOrDigit(c))
-                    sb.Append(c);
-                else if (c == '.' || c == '_' || c == '-' || c == ':')
-                    sb.Append(c);
-            }
-
-            return sb.ToString();
         }
     }
 }

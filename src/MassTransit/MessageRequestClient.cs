@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -15,6 +15,7 @@ namespace MassTransit
     using System;
     using System.Threading;
     using System.Threading.Tasks;
+    using Context;
 
 
     /// <summary>
@@ -28,8 +29,8 @@ namespace MassTransit
         where TRequest : class
         where TResponse : class
     {
-        readonly Uri _address;
         readonly IBus _bus;
+        readonly Lazy<Task<ISendEndpoint>> _requestEndpoint;
         readonly TimeSpan _timeout;
 
         /// <summary>
@@ -41,21 +42,29 @@ namespace MassTransit
         public MessageRequestClient(IBus bus, Uri address, TimeSpan timeout)
         {
             _bus = bus;
-            _address = address;
             _timeout = timeout;
+            _requestEndpoint = new Lazy<Task<ISendEndpoint>>(async () => await _bus.GetSendEndpoint(address));
         }
 
         async Task<TResponse> IRequestClient<TRequest, TResponse>.Request(TRequest request, CancellationToken cancellationToken)
         {
+            var taskScheduler = SynchronizationContext.Current == null
+                ? TaskScheduler.Default
+                : TaskScheduler.FromCurrentSynchronizationContext();
+
             Task<TResponse> responseTask = null;
-            await _bus.Request(_address, request, x =>
+            var pipe = new SendRequest<TRequest>(_bus, taskScheduler, x =>
             {
                 x.Timeout = _timeout;
 
                 responseTask = x.Handle<TResponse>();
-            }, cancellationToken).ConfigureAwait(false);
+            });
 
-            return await responseTask.ConfigureAwait(false);
+            ISendEndpoint endpoint = await _requestEndpoint.Value;
+
+            await endpoint.Send(request, pipe, cancellationToken);
+
+            return await responseTask;
         }
     }
 }

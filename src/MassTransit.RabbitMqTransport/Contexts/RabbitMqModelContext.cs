@@ -104,8 +104,7 @@ namespace MassTransit.RabbitMqTransport.Contexts
         public async Task BasicPublishAsync(string exchange, string routingKey, bool mandatory, bool immediate, IBasicProperties basicProperties,
             byte[] body)
         {
-            var pendingPublish = await Task.Factory.StartNew(() => PublishAsync(exchange, routingKey, mandatory, immediate, basicProperties, body),
-                _tokenSource.Token, TaskCreationOptions.HideScheduler, _taskScheduler);
+            var pendingPublish = PublishAsync(exchange, routingKey, mandatory, immediate, basicProperties, body);
 
             await pendingPublish.Task;
         }
@@ -174,14 +173,12 @@ namespace MassTransit.RabbitMqTransport.Contexts
 
         public async Task BasicAck(ulong deliveryTag, bool multiple)
         {
-            await Task.Factory.StartNew(() => _model.BasicAck(deliveryTag, multiple),
-                _tokenSource.Token, TaskCreationOptions.HideScheduler, _taskScheduler);
+            _model.BasicAck(deliveryTag, multiple);
         }
 
         public async Task BasicNack(ulong deliveryTag, bool multiple, bool requeue)
         {
-            await Task.Factory.StartNew(() => _model.BasicNack(deliveryTag, multiple, requeue),
-                _tokenSource.Token, TaskCreationOptions.HideScheduler, _taskScheduler);
+            _model.BasicNack(deliveryTag, multiple, requeue);
         }
 
         public async Task<string> BasicConsume(string queue, bool noAck, IBasicConsumer consumer)

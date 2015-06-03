@@ -27,13 +27,12 @@ namespace MassTransit.Context
         readonly IBus _bus;
         readonly List<HandlerHandle> _connections;
         readonly SendContext<TRequest> _context;
-        readonly SynchronizationContext _currentSynchronizationContext;
         readonly Guid _requestId;
         readonly TaskCompletionSource<TRequest> _requestTask;
-        SynchronizationContext _synchronizationContext;
+        TaskScheduler _taskScheduler;
         TimeSpan _timeout;
 
-        public SendRequestContext(IBus bus, SendContext<TRequest> context, SynchronizationContext currentSynchronizationContext)
+        public SendRequestContext(IBus bus, SendContext<TRequest> context, TaskScheduler taskScheduler)
         {
             if (bus == null)
                 throw new ArgumentNullException("bus");
@@ -47,14 +46,14 @@ namespace MassTransit.Context
             _requestId = context.RequestId.Value;
             _bus = bus;
             _context = context;
-            _currentSynchronizationContext = currentSynchronizationContext;
+            _taskScheduler = taskScheduler;
 
             _requestTask = new TaskCompletionSource<TRequest>(context.CancellationToken);
 
             HandleFault();
         }
 
-        public Task<TRequest> Task
+        Task RequestContext.Task
         {
             get { return _requestTask.Task; }
         }
@@ -165,12 +164,12 @@ namespace MassTransit.Context
 
         public void UseCurrentSynchronizationContext()
         {
-            _synchronizationContext = _currentSynchronizationContext;
+            _taskScheduler = TaskScheduler.FromCurrentSynchronizationContext();
         }
 
-        public void SetSynchronizationContext(SynchronizationContext synchronizationContext)
+        public void SetTaskScheduler(TaskScheduler taskScheduler)
         {
-            _synchronizationContext = synchronizationContext;
+            _taskScheduler = taskScheduler;
         }
 
         public void Watch<T>(MessageHandler<T> handler)
@@ -188,42 +187,19 @@ namespace MassTransit.Context
 
             MessageHandler<T> messageHandler = async context =>
             {
-                if (_synchronizationContext != null)
+                try
                 {
-                    _synchronizationContext.Post(state =>
-                    {
-                        try
-                        {
-                            handler(context).Wait(CancellationToken);
+                    await Task.Factory.StartNew(() => handler(context), context.CancellationToken, TaskCreationOptions.None, _taskScheduler);
 
-                            source.TrySetResult(context.Message);
+                    source.TrySetResult(context.Message);
 
-                            Complete();
-                        }
-                        catch (Exception ex)
-                        {
-                            source.TrySetException(ex);
-
-                            Fail(ex);
-                        }
-                    }, null);
+                    Complete();
                 }
-                else
+                catch (Exception ex)
                 {
-                    try
-                    {
-                        await handler(context).ConfigureAwait(false);
+                    source.TrySetException(ex);
 
-                        source.TrySetResult(context.Message);
-
-                        Complete();
-                    }
-                    catch (Exception ex)
-                    {
-                        source.TrySetException(ex);
-
-                        Fail(ex);
-                    }
+                    Fail(ex);
                 }
             };
 

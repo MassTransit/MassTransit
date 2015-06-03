@@ -161,6 +161,7 @@ namespace MassTransit.Tests
             {
                 _response = x.Handle<PongMessage>(async _ =>
                 {
+                    Console.WriteLine("Response received");
                 });
             });
         }

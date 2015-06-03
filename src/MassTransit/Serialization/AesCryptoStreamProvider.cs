@@ -23,9 +23,11 @@ namespace MassTransit.Serialization
     {
         readonly string _defaultKeyId;
         readonly ISymmetricKeyProvider _keyProvider;
+        readonly PaddingMode _paddingMode;
 
-        public AesCryptoStreamProvider(ISymmetricKeyProvider keyProvider, string defaultKeyId)
+        public AesCryptoStreamProvider(ISymmetricKeyProvider keyProvider, string defaultKeyId, PaddingMode paddingMode = PaddingMode.PKCS7)
         {
+            _paddingMode = paddingMode;
             _keyProvider = keyProvider;
             _defaultKeyId = defaultKeyId;
         }
@@ -52,7 +54,7 @@ namespace MassTransit.Serialization
             return new DisposingCryptoStream(stream, encryptor, CryptoStreamMode.Write);
         }
 
-        public Stream GetDecryptStream(Stream stream, ReceiveContext context)
+        Stream ICryptoStreamProvider.GetDecryptStream(Stream stream, ReceiveContext context)
         {
             if (stream == null)
                 throw new ArgumentNullException("stream");
@@ -76,7 +78,7 @@ namespace MassTransit.Serialization
 
         ICryptoTransform CreateDecryptor(byte[] key, byte[] iv)
         {
-            using (var provider = new AesCryptoServiceProvider {Padding = PaddingMode.PKCS7})
+            using (var provider = new AesCryptoServiceProvider {Padding = _paddingMode})
             {
                 return provider.CreateDecryptor(key, iv);
             }
@@ -84,7 +86,7 @@ namespace MassTransit.Serialization
 
         public ICryptoTransform CreateEncryptor(byte[] key, byte[] iv)
         {
-            using (var provider = new AesCryptoServiceProvider {Padding = PaddingMode.PKCS7})
+            using (var provider = new AesCryptoServiceProvider {Padding = _paddingMode})
             {
                 return provider.CreateEncryptor(key, iv);
             }

@@ -20,6 +20,8 @@ namespace MassTransit.RabbitMqTransport.Configuration
     using MassTransit.Builders;
     using MassTransit.Configurators;
     using PipeConfigurators;
+    using Topology;
+    using Util;
 
 
     public class RabbitMqBusFactoryConfigurator :
@@ -28,6 +30,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
     {
         readonly ConsumePipeSpecification _consumePipeSpecification;
         readonly IList<IRabbitMqHost> _hosts;
+        readonly RabbitMqReceiveSettings _settings;
         readonly IList<IBusFactorySpecification> _transportBuilderConfigurators;
 
         public RabbitMqBusFactoryConfigurator()
@@ -35,11 +38,21 @@ namespace MassTransit.RabbitMqTransport.Configuration
             _hosts = new List<IRabbitMqHost>();
             _transportBuilderConfigurators = new List<IBusFactorySpecification>();
             _consumePipeSpecification = new ConsumePipeSpecification();
+
+            string queueName = HostMetadataCache.Host.GetTemporaryQueueName();
+            _settings = new RabbitMqReceiveSettings
+            {
+                QueueName = queueName,
+                ExchangeName = queueName,
+                AutoDelete = true,
+                Durable = false,
+                Exclusive = true,
+            };
         }
 
         public IBusControl CreateBus()
         {
-            var builder = new RabbitMqBusBuilder(_hosts, _consumePipeSpecification);
+            var builder = new RabbitMqBusBuilder(_hosts, _consumePipeSpecification, _settings);
 
             foreach (IBusFactorySpecification configurator in _transportBuilderConfigurators)
                 configurator.Apply(builder);
@@ -60,6 +73,56 @@ namespace MassTransit.RabbitMqTransport.Configuration
                 yield return result;
         }
 
+        public ushort PrefetchCount
+        {
+            set { _settings.PrefetchCount = value; }
+        }
+
+        public void Durable(bool durable = true)
+        {
+            _settings.Durable = durable;
+        }
+
+        public void Exclusive(bool exclusive = true)
+        {
+            _settings.Exclusive = exclusive;
+        }
+
+        public void AutoDelete(bool autoDelete = true)
+        {
+            _settings.AutoDelete = autoDelete;
+        }
+
+        public void PurgeOnStartup(bool purgeOnStartup = true)
+        {
+            _settings.PurgeOnStartup = purgeOnStartup;
+        }
+
+        public void ExchangeType(string exchangeType)
+        {
+            _settings.ExchangeType = exchangeType;
+        }
+
+        public void SetQueueArgument(string key, object value)
+        {
+            if (key == null)
+                throw new ArgumentNullException("key");
+            if (value == null)
+                throw new ArgumentNullException("value");
+
+            _settings.QueueArguments[key] = value;
+        }
+
+        public void SetExchangeArgument(string key, object value)
+        {
+            if (key == null)
+                throw new ArgumentNullException("key");
+            if (value == null)
+                throw new ArgumentNullException("value");
+
+            _settings.ExchangeArguments[key] = value;
+        }
+
         public IRabbitMqHost Host(RabbitMqHostSettings settings)
         {
             var host = new RabbitMqHost(settings);
@@ -71,11 +134,6 @@ namespace MassTransit.RabbitMqTransport.Configuration
         public void AddBusFactorySpecification(IBusFactorySpecification configurator)
         {
             _transportBuilderConfigurators.Add(configurator);
-        }
-
-        public void Mandatory(bool mandatory = true)
-        {
-//            _publishSettings.Mandatory = mandatory;
         }
 
         public void ReceiveEndpoint(IRabbitMqHost host, string queueName,
@@ -90,7 +148,6 @@ namespace MassTransit.RabbitMqTransport.Configuration
 
             AddBusFactorySpecification(endpointConfigurator);
         }
-
 
         void IPipeConfigurator<ConsumeContext>.AddPipeSpecification(IPipeSpecification<ConsumeContext> specification)
         {
