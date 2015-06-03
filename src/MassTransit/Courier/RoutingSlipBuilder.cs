@@ -14,11 +14,11 @@ namespace MassTransit.Courier
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
     using Contracts;
     using Events;
     using InternalMessages;
-    using Util;
+    using MassTransit.Serialization;
+    using Newtonsoft.Json.Linq;
 
 
     /// <summary>
@@ -96,17 +96,17 @@ namespace MassTransit.Courier
             _sourceItinerary = new List<Activity>();
         }
 
+        public IList<Activity> SourceItinerary
+        {
+            get { return _sourceItinerary; }
+        }
+
         /// <summary>
         /// The tracking number of the routing slip
         /// </summary>
         public Guid TrackingNumber
         {
             get { return _trackingNumber; }
-        }
-
-        public IList<Activity> SourceItinerary
-        {
-            get { return _sourceItinerary; }
         }
 
         /// <summary>
@@ -330,9 +330,9 @@ namespace MassTransit.Courier
             if (values == null)
                 return new Dictionary<string, object>();
 
-            IDictionary<string, object> dictionary = TypeMetadataCache.GetDictionaryConverter(values.GetType()).GetDictionary(values);
+            JObject dictionary = JObject.FromObject(values, SerializerCache.Serializer);
 
-            return dictionary.ToDictionary(x => x.Key, x => x.Value);
+            return dictionary.ToObject<IDictionary<string, object>>();
         }
 
         /// <summary>

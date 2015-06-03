@@ -30,7 +30,7 @@ namespace MassTransit.Tests.Courier
         {
             RoutingSlipActivityCompleted activityCompleted = (await _firstActivityCompleted).Message;
 
-            Assert.AreEqual("Hello", activityCompleted.Data["OriginalValue"]);
+            Assert.AreEqual("Hello", activityCompleted.GetResult<string>("OriginalValue"));
         }
 
         [Test]
@@ -38,7 +38,7 @@ namespace MassTransit.Tests.Courier
         {
             RoutingSlipCompleted completed = (await _completed).Message;
 
-            Assert.AreEqual("Hello, World!", completed.Variables["Value"]);
+            Assert.AreEqual("Hello, World!", completed.GetVariable<string>("Value"));
         }
 
         [Test]

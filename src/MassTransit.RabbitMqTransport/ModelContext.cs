@@ -54,8 +54,8 @@ namespace MassTransit.RabbitMqTransport
         Task<QueueDeclareOk> QueueDeclare(string queue, bool durable, bool exclusive, bool autoDelete, IDictionary<string, object> arguments);
         Task<uint> QueuePurge(string queue);
         Task BasicQos(uint prefetchSize, ushort prefetchCount, bool global);
-        Task BasicAck(ulong deliveryTag, bool multiple);
-        Task BasicNack(ulong deliveryTag, bool multiple, bool requeue);
+        void BasicAck(ulong deliveryTag, bool multiple);
+        void BasicNack(ulong deliveryTag, bool multiple, bool requeue);
         Task<string> BasicConsume(string queue, bool noAck, IBasicConsumer consumer);
     }
 }

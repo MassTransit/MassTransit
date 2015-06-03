@@ -115,9 +115,6 @@ namespace MassTransit.RabbitMqTransport.Pipeline
 
             try
             {
-                if (_log.IsDebugEnabled)
-                    _log.DebugFormat("{0} Adding pending delivery", deliveryTag);
-
                 if (!_pending.TryAdd(deliveryTag, context))
                 {
                     // should not happen, duplicate delivery tag??
@@ -125,36 +122,17 @@ namespace MassTransit.RabbitMqTransport.Pipeline
 
                 _receiveObserver.NotifyPreReceive(context);
 
-                if (_log.IsDebugEnabled)
-                    _log.DebugFormat("{0} Sending to receive pipe", deliveryTag);
-
                 await _receivePipe.Send(context).ConfigureAwait(false);
-
-                if (_log.IsDebugEnabled)
-                    _log.DebugFormat("{0} Completing task", deliveryTag);
 
                 await context.CompleteTask.ConfigureAwait(false);
 
-                if (_log.IsDebugEnabled)
-                    _log.DebugFormat("{0} Acking message", deliveryTag);
-
-                await _model.BasicAck(deliveryTag, false);
-
-                if (_log.IsDebugEnabled)
-                    _log.DebugFormat("{0} Notifying post receive", deliveryTag);
+                _model.BasicAck(deliveryTag, false);
 
                 _receiveObserver.NotifyPostReceive(context);
             }
             catch (Exception ex)
             {
-                if (_log.IsDebugEnabled)
-                    _log.DebugFormat("{0} Nacking message", deliveryTag);
-
-                _model.BasicNack(deliveryTag, false, true)
-                    .Wait(((PipeContext)context).CancellationToken);
-
-                if (_log.IsDebugEnabled)
-                    _log.DebugFormat("{0} Notifying receive fault", deliveryTag);
+                _model.BasicNack(deliveryTag, false, true);
 
                 _receiveObserver.NotifyReceiveFault(context, ex);
             }
