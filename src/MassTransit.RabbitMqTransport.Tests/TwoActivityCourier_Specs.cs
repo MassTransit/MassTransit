@@ -33,7 +33,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         {
             RoutingSlipActivityCompleted activityCompleted = (await _firstActivityCompleted).Message;
 
-            Assert.AreEqual("Hello", activityCompleted.Data["OriginalValue"]);
+            Assert.AreEqual("Hello", activityCompleted.GetResult<string>("OriginalValue"));
         }
 
         [Test]
@@ -41,7 +41,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         {
             RoutingSlipCompleted completed = (await _completed).Message;
 
-            Assert.AreEqual("Hello, World!", completed.Variables["Value"]);
+            Assert.AreEqual("Hello, World!", completed.GetVariable<string>("Value"));
         }
 
         [Test]
@@ -180,7 +180,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         [TestFixtureSetUp]
         public void Setup()
         {
-            _limit = 1000;
+            _limit = 100;
 
             ActivityTestContext testActivity = GetActivityContext<TestActivity>();
             ActivityTestContext secondActivity = GetActivityContext<SecondTestActivity>();

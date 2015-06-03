@@ -87,14 +87,14 @@ namespace MassTransit.RabbitMqTransport.Contexts
             return _context.BasicQos(prefetchSize, prefetchCount, global);
         }
 
-        public Task BasicAck(ulong deliveryTag, bool multiple)
+        public void BasicAck(ulong deliveryTag, bool multiple)
         {
-            return _context.BasicAck(deliveryTag, multiple);
+            _context.BasicAck(deliveryTag, multiple);
         }
 
-        public Task BasicNack(ulong deliveryTag, bool multiple, bool requeue)
+        public void BasicNack(ulong deliveryTag, bool multiple, bool requeue)
         {
-            return _context.BasicNack(deliveryTag, multiple, requeue);
+            _context.BasicNack(deliveryTag, multiple, requeue);
         }
 
         public Task<string> BasicConsume(string queue, bool noAck, IBasicConsumer consumer)
