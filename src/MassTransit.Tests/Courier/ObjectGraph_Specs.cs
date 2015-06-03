@@ -61,7 +61,10 @@ namespace MassTransit.Tests.Courier
                 {"Names", new[] {"Albert", "Chris"}},
             };
             builder.AddActivity(testActivity.Name, testActivity.ExecuteUri, dictionary);
-            builder.AddActivity(testActivity2.Name, testActivity2.ExecuteUri);
+            builder.AddActivity(testActivity2.Name, testActivity2.ExecuteUri, new
+            {
+                Value = "Howdy!"
+            });
 
             await Bus.Execute(builder.Build());
 
