@@ -7,11 +7,11 @@
   </root>
 
   <logger name="MassTransit">
-    <level value="INFO" />
+    <level value="WARN" />
   </logger>
 
   <logger name="MassTransit.Messages" additivity="false">
-    <level value="DEBUG" />
+    <level value="ERROR" />
     <appender-ref ref="MessageLogAppender" />
     <appender-ref ref="console" />
   </logger>

@@ -70,7 +70,7 @@ namespace MassTransit.TestFramework
             {
                 if (filter(context))
                 {
-                    source.TrySetResult(context);
+                    source.SetResult(context);
 
                     handler.Disconnect();
                 }
@@ -98,7 +98,7 @@ namespace MassTransit.TestFramework
         {
             var source = new TaskCompletionSource<ConsumeContext<T>>();
 
-            configurator.Handler<T>(async context => source.SetResult(context));
+            configurator.Handler<T>(async context => source.TrySetResult(context));
 
             TestCancelledTask.ContinueWith(x => source.TrySetCanceled(), TaskContinuationOptions.OnlyOnCanceled);
 
@@ -121,7 +121,7 @@ namespace MassTransit.TestFramework
             configurator.Handler<T>(async context =>
             {
                 if (filter(context))
-                    source.SetResult(context);
+                    source.TrySetResult(context);
             });
 
             TestCancelledTask.ContinueWith(x => source.TrySetCanceled(), TaskContinuationOptions.OnlyOnCanceled);
