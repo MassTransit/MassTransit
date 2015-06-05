@@ -16,9 +16,7 @@ namespace MassTransit.AzureServiceBusTransport
     using System.Linq;
     using System.Threading.Tasks;
     using Logging;
-    using Microsoft.ServiceBus;
     using Microsoft.ServiceBus.Messaging;
-    using Serialization;
     using Transports;
 
 
@@ -44,7 +42,7 @@ namespace MassTransit.AzureServiceBusTransport
             if (host == null)
                 throw new EndpointNotFoundException("The endpoint address specified an unknown host: " + address);
 
-            TopicDescription topicDescription = await CreateTopic(await host.RootNamespaceManager, address);
+            TopicDescription topicDescription = await (await host.RootNamespaceManager).CreateTopicSafeAsync(address.GetTopicDescription());
 
             MessagingFactory messagingFactory = await host.MessagingFactory;
 
@@ -53,64 +51,6 @@ namespace MassTransit.AzureServiceBusTransport
             var sendTransport = new ServiceBusSendTransport(messageSender);
 
             return new SendEndpoint(sendTransport, _serializer, address, _sourceAddress);
-        }
-
-        async Task<TopicDescription> CreateTopic(NamespaceManager namespaceManager, Uri address)
-        {
-            TopicDescription topicDescription = address.GetTopicDescription();
-            string topicPath = topicDescription.Path;
-
-            bool create = true;
-            try
-            {
-                topicDescription = await namespaceManager.GetTopicAsync(topicPath);
-
-                create = false;
-            }
-            catch (MessagingEntityNotFoundException)
-            {
-            }
-
-            if (create)
-            {
-                bool created = false;
-                try
-                {
-                    if (_log.IsDebugEnabled)
-                        _log.DebugFormat("Creating topic {0}", topicPath);
-
-                    topicDescription = await namespaceManager.CreateTopicAsync(topicDescription);
-                    created = true;
-                }
-                catch (MessagingEntityAlreadyExistsException)
-                {
-                }
-                catch (MessagingException mex)
-                {
-                    // seems a conflict occurs rather than an already exists exception
-                    if (mex.Detail.ErrorCode == 409)
-                    {
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                if (!created)
-                    topicDescription = await namespaceManager.GetTopicAsync(topicPath);
-            }
-
-            if (_log.IsDebugEnabled)
-            {
-                _log.DebugFormat("Topic: {0} ({1})", topicDescription.Path,
-                    string.Join(", ", new[]
-                    {
-                        topicDescription.EnableExpress ? "express" : "",
-                        topicDescription.RequiresDuplicateDetection ? "dupe detect" : "",
-                    }.Where(x => !string.IsNullOrWhiteSpace(x))));
-            }
-
-            return topicDescription;
         }
     }
 }

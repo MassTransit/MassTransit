@@ -14,6 +14,7 @@ namespace MassTransit.RabbitMqTransport.Contexts
 {
     using System;
     using System.Threading;
+    using System.Threading.Tasks;
     using Context;
     using RabbitMQ.Client;
 
@@ -58,6 +59,11 @@ namespace MassTransit.RabbitMqTransport.Contexts
         public RabbitMqHostSettings HostSettings
         {
             get { return _context.HostSettings; }
+        }
+
+        public Task<IModel> CreateModel()
+        {
+            return _context.CreateModel();
         }
     }
 }

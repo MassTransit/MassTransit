@@ -60,6 +60,7 @@
       <Link>Properties\SolutionVersion.cs</Link>
     </Compile>
     <Compile Include="AzureBusFactory.cs" />
+    <Compile Include="NamespaceManagerExtensions.cs" />
     <Compile Include="ServiceBusAddressExtensions.cs" />
     <Compile Include="ServiceBusPublishEndpoint.cs" />
     <Compile Include="ServiceBusSendContext.cs" />

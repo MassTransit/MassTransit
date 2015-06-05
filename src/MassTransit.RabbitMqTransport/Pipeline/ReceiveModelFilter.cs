@@ -15,6 +15,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
     using System.Threading.Tasks;
     using Contexts;
     using MassTransit.Pipeline;
+    using RabbitMQ.Client;
 
 
     /// <summary>
@@ -32,7 +33,9 @@ namespace MassTransit.RabbitMqTransport.Pipeline
 
         public async Task Send(ConnectionContext context, IPipe<ConnectionContext> next)
         {
-            using (var modelContext = new RabbitMqModelContext(context, context.CancellationToken))
+            IModel model = await context.CreateModel();
+
+            using (var modelContext = new RabbitMqModelContext(context, model, context.CancellationToken))
             {
                 await _pipe.Send(modelContext).ConfigureAwait(false);
             }

@@ -46,17 +46,19 @@ namespace MassTransit.RabbitMqTransport.Integration
             if (existingScope != null)
             {
                 if (existingScope.ModelClosed.Task.Wait(TimeSpan.Zero) == false)
-                    return SendUsingExistingConnection(connectionPipe, cancellationToken, existingScope);
+                    return SendUsingExistingModel(connectionPipe, cancellationToken, existingScope);
             }
 
-            return SendUsingNewConnection(connectionPipe, cancellationToken);
+            return SendUsingNewModel(connectionPipe, cancellationToken);
         }
 
-        async Task SendUsingNewConnection(IPipe<ModelContext> modelPipe, CancellationToken cancellationToken)
+        async Task SendUsingNewModel(IPipe<ModelContext> modelPipe, CancellationToken cancellationToken)
         {
             IPipe<ConnectionContext> connectionPipe = Pipe.ExecuteAsync<ConnectionContext>(async connectionContext =>
             {
-                var modelContext = new RabbitMqModelContext(connectionContext, connectionContext.CancellationToken);
+                IModel model = await connectionContext.CreateModel();
+
+                var modelContext = new RabbitMqModelContext(connectionContext, model, connectionContext.CancellationToken);
 
                 var scope = new ModelScope(modelContext);
 
@@ -82,7 +84,7 @@ namespace MassTransit.RabbitMqTransport.Integration
                 catch (Exception ex)
                 {
                     if (_log.IsDebugEnabled)
-                        _log.Debug(string.Format("The existing connection usage threw an exception"), ex);
+                        _log.Debug(string.Format("The existing model usage threw an exception"), ex);
 
                     throw;
                 }
@@ -91,7 +93,7 @@ namespace MassTransit.RabbitMqTransport.Integration
             await _connectionCache.Send(connectionPipe, new CancellationToken()).ConfigureAwait(false);
         }
 
-        static async Task SendUsingExistingConnection(IPipe<ModelContext> connectionPipe,
+        static async Task SendUsingExistingModel(IPipe<ModelContext> connectionPipe,
             CancellationToken cancellationToken, ModelScope existingScope)
         {
             try

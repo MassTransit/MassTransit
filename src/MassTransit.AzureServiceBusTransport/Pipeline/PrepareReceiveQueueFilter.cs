@@ -12,13 +12,10 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.AzureServiceBusTransport.Pipeline
 {
-    using System.Linq;
     using System.Threading.Tasks;
     using Contexts;
-    using Logging;
     using MassTransit.Pipeline;
     using Microsoft.ServiceBus;
-    using Microsoft.ServiceBus.Messaging;
 
 
     /// <summary>
@@ -27,7 +24,6 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
     public class PrepareReceiveQueueFilter :
         IFilter<ConnectionContext>
     {
-        readonly ILog _log = Logger.Get<PrepareReceiveQueueFilter>();
         readonly ReceiveSettings _settings;
 
         public PrepareReceiveQueueFilter(ReceiveSettings settings)
@@ -37,49 +33,9 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
 
         public async Task Send(ConnectionContext context, IPipe<ConnectionContext> next)
         {
-            QueueDescription queueDescription = null;
-
             NamespaceManager namespaceManager = await context.NamespaceManager;
 
-            bool create = true;
-            try
-            {
-                queueDescription = await namespaceManager.GetQueueAsync(_settings.QueueDescription.Path);
-
-                create = false;
-            }
-            catch (MessagingEntityNotFoundException)
-            {
-            }
-
-            if (create)
-            {
-                bool created = false;
-                try
-                {
-                    if (_log.IsDebugEnabled)
-                        _log.DebugFormat("Creating queue {0}", _settings.QueueDescription.Path);
-
-                    queueDescription = await namespaceManager.CreateQueueAsync(_settings.QueueDescription);
-                    created = true;
-                }
-                catch (MessagingEntityAlreadyExistsException)
-                {
-                }
-                if (!created)
-                    queueDescription = await namespaceManager.GetQueueAsync(_settings.QueueDescription.Path);
-            }
-
-            if (_log.IsDebugEnabled)
-            {
-                _log.DebugFormat("Queue: {0} ({1})", queueDescription.Path,
-                    string.Join(", ", new[]
-                    {
-                        queueDescription.EnableExpress ? "express" : "",
-                        queueDescription.RequiresDuplicateDetection ? "dupe detect" : "",
-                        queueDescription.EnableDeadLetteringOnMessageExpiration ? "dead letter" : ""
-                    }.Where(x => !string.IsNullOrWhiteSpace(x))));
-            }
+            await namespaceManager.CreateQueueSafeAsync(_settings.QueueDescription);
 
             context.GetOrAddPayload(() => _settings);
 

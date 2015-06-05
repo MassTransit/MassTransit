@@ -20,6 +20,7 @@ namespace MassTransit.RabbitMqTransport.Integration
     using MassTransit.Pipeline;
     using Pipeline;
     using RabbitMQ.Client;
+    using Util;
 
 
     public class RabbitMqConnectionCache :
@@ -30,17 +31,18 @@ namespace MassTransit.RabbitMqTransport.Integration
         readonly IRabbitMqConnector _connector;
         readonly CancellationTokenSource _stop;
         ConnectionScope _scope;
+        QueuedTaskScheduler _taskScheduler;
 
         public RabbitMqConnectionCache(IRabbitMqConnector connector)
         {
             _connector = connector;
             _stop = new CancellationTokenSource();
+            _taskScheduler = new QueuedTaskScheduler(TaskScheduler.Default, 1);
+
         }
 
         public Task Send(IPipe<ConnectionContext> connectionPipe, CancellationToken cancellationToken)
         {
-            Interlocked.MemoryBarrier();
-
             ConnectionScope existingScope = _scope;
             if (existingScope != null)
             {
@@ -67,33 +69,30 @@ namespace MassTransit.RabbitMqTransport.Integration
         {
             var scope = new ConnectionScope();
 
-            IPipe<ConnectionContext> connectPipe = Pipe.New<ConnectionContext>(x =>
+            IPipe<ConnectionContext> connectPipe = Pipe.ExecuteAsync<ConnectionContext>(async connectionContext =>
             {
-                x.ExecuteAsync(async connectionContext =>
+                IConnection connection = connectionContext.Connection;
+
+                EventHandler<ShutdownEventArgs> connectionShutdown = null;
+                connectionShutdown = (obj, reason) =>
                 {
-                    IConnection connection = connectionContext.Connection;
+                    connection.ConnectionShutdown -= connectionShutdown;
 
-                    EventHandler<ShutdownEventArgs> connectionShutdown = null;
-                    connectionShutdown = (obj, reason) =>
-                    {
-                        connection.ConnectionShutdown -= connectionShutdown;
+                    Interlocked.CompareExchange(ref _scope, null, scope);
 
-                        Interlocked.CompareExchange(ref _scope, null, scope);
+                    scope.ConnectionClosed.TrySetResult(true);
+                };
 
-                        scope.ConnectionClosed.TrySetResult(true);
-                    };
-
-                    CancellationTokenRegistration registration = _stop.Token.Register(() =>
-                    {
-                        scope.ConnectionClosed.TrySetResult(false);
-                    });
-
-                    connectionContext.Connection.ConnectionShutdown += connectionShutdown;
-
-                    Interlocked.CompareExchange(ref _scope, scope, null);
-
-                    await scope.Connected(connectionContext).ConfigureAwait(false);
+                CancellationTokenRegistration registration = _stop.Token.Register(() =>
+                {
+                    scope.ConnectionClosed.TrySetResult(false);
                 });
+
+                connectionContext.Connection.ConnectionShutdown += connectionShutdown;
+
+                Interlocked.CompareExchange(ref _scope, scope, null);
+
+                await scope.Connected(connectionContext).ConfigureAwait(false);
             });
 
             _connector.Connect(connectPipe, _stop.Token).ConfigureAwait(false);

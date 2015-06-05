@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -37,7 +37,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
         public AzureServiceBusTestFixture()
         {
             ServiceBusEnvironment.SystemConnectivity.Mode = ConnectivityMode.Http;
-            
+
             TestTimeout = Debugger.IsAttached ? TimeSpan.FromMinutes(5) : TimeSpan.FromSeconds(60);
 
             _serviceUri = ServiceBusEnvironment.CreateServiceUri("sb", "masstransit-build", "MassTransit.AzureServiceBusTransport.Tests");
@@ -89,7 +89,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
         }
 
         [TestFixtureSetUp]
-        public void SetupInMemoryTestFixture()
+        public void SetupAzureServiceBusTestFixture()
         {
             _bus = CreateBus();
 
@@ -106,8 +106,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
             {
                 Console.WriteLine("The bus creation failed: {0}", ex);
 
-
-                _busHandle.Stop().Wait(TestTimeout);
+                Await(() => _busHandle.Stop());
 
                 throw;
             }
@@ -116,15 +115,8 @@ namespace MassTransit.AzureServiceBusTransport.Tests
         [TestFixtureTearDown]
         public void TearDownInMemoryTestFixture()
         {
-            try
-            {
-                if (_busHandle != null)
-                    _busHandle.Stop().Wait(TestTimeout);
-            }
-            catch (AggregateException ex)
-            {
-                throw;
-            }
+            if (_busHandle != null)
+                Await(() => _busHandle.Stop());
 
             _bus = null;
         }
@@ -149,7 +141,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
 
                 ServiceBusTokenProviderSettings settings = new TestAzureServiceBusAccountSettings();
 
-                var host = x.Host(_serviceUri, h =>
+                IServiceBusHost host = x.Host(_serviceUri, h =>
                 {
                     h.SharedAccessSignature(s =>
                     {

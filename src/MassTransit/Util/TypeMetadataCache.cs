@@ -19,9 +19,10 @@ namespace MassTransit.Util
     using System.Reflection;
     using System.Threading;
     using Internals.Extensions;
-    using Internals.Mapping;
     using Internals.Reflection;
+    using Newtonsoft.Json.Linq;
     using Saga;
+    using Serialization;
 
 
     public static class TypeMetadataCache
@@ -42,16 +43,6 @@ namespace MassTransit.Util
             return GetOrAdd(type).ShortName;
         }
 
-        public static IDictionaryConverter GetDictionaryConverter(Type type)
-        {
-            return Cached.DictionaryConverterCache.GetConverter(type);
-        }
-
-        public static IObjectConverter GetObjectConverter(Type type)
-        {
-            return Cached.ObjectConverterCache.GetConverter(type);
-        }
-
         public static Type GetImplementationType(Type type)
         {
             return Cached.ImplementationBuilder.GetImplementationType(type);
@@ -70,10 +61,8 @@ namespace MassTransit.Util
 
         static class Cached
         {
-            internal static readonly IDictionaryConverterCache DictionaryConverterCache = new DictionaryConverterCache();
             internal static readonly IImplementationBuilder ImplementationBuilder = new DynamicImplementationBuilder();
             internal static readonly ConcurrentDictionary<Type, CachedType> Instance = new ConcurrentDictionary<Type, CachedType>();
-            internal static readonly IObjectConverterCache ObjectConverterCache = new DynamicObjectConverterCache(ImplementationBuilder);
         }
 
 
@@ -109,12 +98,9 @@ namespace MassTransit.Util
     public class TypeMetadataCache<T> :
         ITypeMetadataCache<T>
     {
-        readonly Lazy<IDictionaryConverter> _dictionaryConverter;
         readonly Lazy<bool> _hasSagaInterfaces;
-        readonly Lazy<Type> _implementationType;
         readonly Lazy<bool> _isValidMessageType;
         readonly Lazy<Type[]> _messageTypes;
-        readonly Lazy<IObjectConverter> _objectConverter;
         readonly Lazy<List<PropertyInfo>> _properties;
         readonly Lazy<ReadOnlyPropertyCache<T>> _readPropertyCache;
         readonly string _shortName;
@@ -125,11 +111,6 @@ namespace MassTransit.Util
             _shortName = typeof(T).GetTypeName();
 
             _hasSagaInterfaces = new Lazy<bool>(ScanForSagaInterfaces, LazyThreadSafetyMode.PublicationOnly);
-
-            _implementationType = new Lazy<Type>(() => TypeMetadataCache.GetImplementationType(typeof(T)));
-
-            _dictionaryConverter = new Lazy<IDictionaryConverter>(() => TypeMetadataCache.GetDictionaryConverter(typeof(T)));
-            _objectConverter = new Lazy<IObjectConverter>(() => TypeMetadataCache.GetObjectConverter(typeof(T)));
 
             _readPropertyCache = new Lazy<ReadOnlyPropertyCache<T>>(() => new ReadOnlyPropertyCache<T>());
             _writePropertyCache = new Lazy<ReadWritePropertyCache<T>>(() => new ReadWritePropertyCache<T>());
@@ -148,16 +129,6 @@ namespace MassTransit.Util
         public static bool HasSagaInterfaces
         {
             get { return Cached.Metadata.Value.HasSagaInterfaces; }
-        }
-
-        public static IDictionaryConverter DictionaryConverter
-        {
-            get { return Cached.Metadata.Value.DictionaryConverter; }
-        }
-
-        public static IObjectConverter ObjectConverter
-        {
-            get { return Cached.Metadata.Value.ObjectConverter; }
         }
 
         public static ReadOnlyPropertyCache<T> ReadOnlyPropertyCache
@@ -215,20 +186,9 @@ namespace MassTransit.Util
             if (values == null)
                 throw new ArgumentNullException("values");
 
-            IDictionary<string, object> dictionary = TypeMetadataCache.GetDictionaryConverter(values.GetType())
-                .GetDictionary(values);
+            JObject objValues = JObject.FromObject(values, JsonMessageSerializer.Serializer);
 
-            return (T)_objectConverter.Value.GetObject(dictionary);
-        }
-
-        IDictionaryConverter ITypeMetadataCache<T>.DictionaryConverter
-        {
-            get { return _dictionaryConverter.Value; }
-        }
-
-        IObjectConverter ITypeMetadataCache<T>.ObjectConverter
-        {
-            get { return _objectConverter.Value; }
+            return objValues.ToObject<T>(JsonMessageSerializer.Deserializer);
         }
 
         bool ITypeMetadataCache<T>.HasSagaInterfaces

@@ -110,6 +110,8 @@ namespace MassTransit.RabbitMqTransport.Pipeline
             while (current > _maxPendingDeliveryCount)
                 Interlocked.CompareExchange(ref _maxPendingDeliveryCount, current, _maxPendingDeliveryCount);
 
+            await Task.Yield();
+
             var context = new RabbitMqReceiveContext(_inputAddress, exchange, routingKey, _consumerTag, deliveryTag, body, redelivered, properties,
                 _receiveObserver);
 
@@ -117,7 +119,8 @@ namespace MassTransit.RabbitMqTransport.Pipeline
             {
                 if (!_pending.TryAdd(deliveryTag, context))
                 {
-                    // should not happen, duplicate delivery tag??
+                    if (_log.IsErrorEnabled)
+                        _log.ErrorFormat("Duplicate BasicDeliver: {0}", deliveryTag);
                 }
 
                 _receiveObserver.NotifyPreReceive(context);

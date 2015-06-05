@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RabbitMqTransport
 {
+    using System.Threading.Tasks;
     using RabbitMQ.Client;
 
 
@@ -30,5 +31,11 @@ namespace MassTransit.RabbitMqTransport
         /// The host settings for the connection
         /// </summary>
         RabbitMqHostSettings HostSettings { get; }
+
+        /// <summary>
+        /// Create a model on the connection
+        /// </summary>
+        /// <returns></returns>
+        Task<IModel> CreateModel();
     }
 }

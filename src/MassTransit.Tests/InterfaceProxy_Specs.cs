@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -40,6 +40,14 @@ namespace MassTransit.Tests
         }
 
         [Test]
+        public async void Should_have_address_value()
+        {
+            ConsumeContext<IProxyMe> message = await _handler;
+
+            message.Message.Address.OriginalString.ShouldBe(UriString);
+        }
+
+        [Test]
         public async void Should_have_received_message()
         {
             await _handler;
@@ -57,11 +65,18 @@ namespace MassTransit.Tests
         const string StringValue = "Hello";
         readonly Guid _correlationId = Guid.NewGuid();
         Task<ConsumeContext<IProxyMe>> _handler;
+        const string UriString = "http://localhost/";
 
         [TestFixtureSetUp]
         public void Setup()
         {
-            InputQueueSendEndpoint.Send<IProxyMe>(new {IntValue, StringValue, CorrelationId = _correlationId})
+            InputQueueSendEndpoint.Send<IProxyMe>(new
+            {
+                IntValue,
+                StringValue,
+                Address = new Uri(UriString),
+                CorrelationId = _correlationId
+            })
                 .Wait(TestCancellationToken);
         }
 
@@ -76,6 +91,7 @@ namespace MassTransit.Tests
         {
             int IntValue { get; }
             string StringValue { get; }
+            Uri Address { get; }
         }
     }
 }

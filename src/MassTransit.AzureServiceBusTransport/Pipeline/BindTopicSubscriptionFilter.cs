@@ -12,8 +12,12 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.AzureServiceBusTransport.Pipeline
 {
+    using System;
     using System.IO;
     using System.Linq;
+    using System.Security.Cryptography;
+    using System.Security.Policy;
+    using System.Text;
     using System.Threading.Tasks;
     using Configuration;
     using Contexts;
@@ -21,6 +25,7 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
     using MassTransit.Pipeline;
     using Microsoft.ServiceBus;
     using Microsoft.ServiceBus.Messaging;
+    using NewIdFormatters;
 
 
     /// <summary>
@@ -29,6 +34,7 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
     public class BindTopicSubscriptionFilter :
         IFilter<ConnectionContext>
     {
+        static readonly INewIdFormatter _formatter = new ZBase32Formatter();
         readonly ILog _log = Logger.Get<BindTopicSubscriptionFilter>();
         readonly TopicSubscriptionSettings _settings;
 
@@ -45,18 +51,37 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
 
             NamespaceManager rootNamespaceManager = await context.RootNamespaceManager;
 
-            var namespaceManager = await context.NamespaceManager;
+            NamespaceManager namespaceManager = await context.NamespaceManager;
 
             await GetOrAddTopic(rootNamespaceManager);
 
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Creating subscription {0}", _settings.Topic.Path);
 
-            string name = string.Format("{0}-{1}", (uint)receiveSettings.QueueDescription.Path.GetHashCode(), (uint)_settings.Topic.Path.GetHashCode());
+            string queuePath = Path.Combine(namespaceManager.Address.AbsolutePath.TrimStart(new[] {'/'}), receiveSettings.QueueDescription.Path)
+                .Replace('\\', '/');
+
+            string subscriptionPath = string.Format("{0}-{1}", receiveSettings.QueueDescription.Path,
+                namespaceManager.Address.AbsolutePath.Split(new[] {'/'}, StringSplitOptions.RemoveEmptyEntries).Last());
+
+            string name;
+            if (subscriptionPath.Length > 50)
+            {
+                string hashed;
+                using (var hasher = new SHA1Managed())
+                {
+                    byte[] buffer = Encoding.UTF8.GetBytes(subscriptionPath);
+                    byte[] hash = hasher.ComputeHash(buffer);
+                    hashed = _formatter.Format(hash).Substring(0, 6);
+                }
+
+                name = string.Format("{0}-{1}", subscriptionPath.Substring(0, 43), hashed);
+            }
+            else
+                name = subscriptionPath;
 
             try
             {
-                string queuePath = Path.Combine(namespaceManager.Address.AbsolutePath.TrimStart(new[]{'/'}), receiveSettings.QueueDescription.Path);
                 var description = new SubscriptionDescription(_settings.Topic.Path, name)
                 {
                     ForwardTo = queuePath,

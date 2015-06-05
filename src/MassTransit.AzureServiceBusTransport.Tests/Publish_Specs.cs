@@ -12,7 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.AzureServiceBusTransport.Tests
 {
-    using System.Security.Cryptography;
     using System.Threading.Tasks;
     using Configuration;
     using NUnit.Framework;
@@ -38,6 +37,34 @@ namespace MassTransit.AzureServiceBusTransport.Tests
         protected override void ConfigureInputQueueEndpoint(IServiceBusReceiveEndpointConfigurator configurator)
         {
             _handler = Handled<PingMessage>(configurator);
+        }
+    }
+
+    [TestFixture]
+    public class Publishing_a_message_to_an_endpoint_from_another_scope :
+        TwoScopeAzureServiceBusTestFixture
+    {
+        [Test]
+        public async void Should_succeed()
+        {
+            await SecondBus.Publish(new PingMessage());
+
+            await _handler;
+
+            await _secondHandler;
+        }
+
+        Task<ConsumeContext<PingMessage>> _handler;
+        Task<ConsumeContext<PingMessage>> _secondHandler;
+
+        protected override void ConfigureInputQueueEndpoint(IServiceBusReceiveEndpointConfigurator configurator)
+        {
+            _handler = Handled<PingMessage>(configurator);
+        }
+
+        protected override void ConfigureSecondInputQueueEndpoint(IServiceBusReceiveEndpointConfigurator configurator)
+        {
+            _secondHandler = Handled<PingMessage>(configurator);
         }
     }
 
