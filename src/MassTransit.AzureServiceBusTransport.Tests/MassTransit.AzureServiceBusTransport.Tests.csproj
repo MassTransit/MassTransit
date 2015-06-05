@@ -74,6 +74,7 @@
     <Compile Include="Publish_Specs.cs" />
     <Compile Include="Send_Specs.cs" />
     <Compile Include="TestAzureServiceBusAccountSettings.cs" />
+    <Compile Include="TwoScopeAzureServiceBusTestFixture.cs" />
     <Compile Include="Verify_account_settings.cs" />
   </ItemGroup>
   <ItemGroup>

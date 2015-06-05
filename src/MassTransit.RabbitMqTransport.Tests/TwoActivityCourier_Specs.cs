@@ -132,6 +132,63 @@ namespace MassTransit.RabbitMqTransport.Tests
         }
     }
 
+    [TestFixture]
+    public class Executing_with_no_observers :
+        RabbitMqActivityTestFixture
+    {
+        public Executing_with_no_observers()
+        {
+            TestTimeout = TimeSpan.FromSeconds(60);
+        }
+
+        [Test]
+        public async void Should_receive_the_routing_slip_completed_event()
+        {
+            RoutingSlipCompleted completed = (await _completed).Message;
+
+            Assert.AreEqual(_routingSlip.TrackingNumber, completed.TrackingNumber);
+        }
+
+        Task<ConsumeContext<RoutingSlipCompleted>> _completed;
+        RoutingSlip _routingSlip;
+
+        protected override void SetupActivities()
+        {
+            AddActivityContext<TestActivity, TestArguments, TestLog>(() => new TestActivity());
+            AddActivityContext<SecondTestActivity, TestArguments, TestLog>(() => new SecondTestActivity());
+        }
+
+        protected override void ConfigureInputQueueEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
+        {
+            _completed = Handled<RoutingSlipCompleted>(configurator);
+        }
+
+        [TestFixtureSetUp]
+        public void Setup()
+        {
+            var builder = new RoutingSlipBuilder(Guid.NewGuid());
+
+            ActivityTestContext testActivity = GetActivityContext<TestActivity>();
+            ActivityTestContext secondActivity = GetActivityContext<SecondTestActivity>();
+            builder.AddActivity(testActivity.Name, testActivity.ExecuteUri, new
+            {
+                Value = "Hello",
+                NullValue = (string)null,
+            });
+
+            builder.AddActivity(secondActivity.Name, secondActivity.ExecuteUri);
+
+            builder.AddVariable("Variable", "Knife");
+            builder.AddVariable("Nothing", null);
+
+            _routingSlip = builder.Build();
+
+            Await(() => Bus.Execute(_routingSlip));
+
+            Console.WriteLine("Routing slip executed");
+        }
+    }
+
 
     [TestFixture]
     public class Executing_many_activities_in_a_row :

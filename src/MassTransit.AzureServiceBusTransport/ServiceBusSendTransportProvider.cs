@@ -39,7 +39,7 @@ namespace MassTransit.AzureServiceBusTransport
             if (host == null)
                 throw new EndpointNotFoundException("The endpoint address specified an unknown host: " + address);
 
-            QueueDescription queueDescription = await CreateQueue(await host.NamespaceManager, address);
+            QueueDescription queueDescription = await (await host.NamespaceManager).CreateQueueSafeAsync(address.GetQueueDescription());
 
             MessagingFactory messagingFactory = await host.MessagingFactory;
 
@@ -49,63 +49,6 @@ namespace MassTransit.AzureServiceBusTransport
 
             var sendTransport = new ServiceBusSendTransport(messageSender);
             return sendTransport;
-        }
-
-        async Task<QueueDescription> CreateQueue(NamespaceManager namespaceManager, Uri address)
-        {
-            QueueDescription queueDescription = address.GetQueueDescription();
-            bool create = true;
-            try
-            {
-                queueDescription = await namespaceManager.GetQueueAsync(queueDescription.Path);
-
-                create = false;
-            }
-            catch (MessagingEntityNotFoundException)
-            {
-            }
-
-            if (create)
-            {
-                bool created = false;
-                try
-                {
-                    if (_log.IsDebugEnabled)
-                        _log.DebugFormat("Creating queue {0}", queueDescription.Path);
-
-                    queueDescription = await namespaceManager.CreateQueueAsync(queueDescription);
-
-                    created = true;
-                }
-                catch (MessagingEntityAlreadyExistsException)
-                {
-                }
-                catch (MessagingException mex)
-                {
-                    // seems a conflict occurs rather than an already exists exception
-                    if (mex.Detail.ErrorCode == 409)
-                    {
-                    }
-                    else
-                        throw;
-                }
-
-                if (!created)
-                    queueDescription = await namespaceManager.GetQueueAsync(queueDescription.Path);
-            }
-
-            if (_log.IsDebugEnabled)
-            {
-                _log.DebugFormat("Queue: {0} ({1})", queueDescription.Path,
-                    string.Join(", ", new[]
-                    {
-                        queueDescription.EnableExpress ? "express" : "",
-                        queueDescription.RequiresDuplicateDetection ? "dupe detect" : "",
-                        queueDescription.EnableDeadLetteringOnMessageExpiration ? "dead letter" : ""
-                    }.Where(x => !string.IsNullOrWhiteSpace(x))));
-            }
-
-            return queueDescription;
         }
     }
 }

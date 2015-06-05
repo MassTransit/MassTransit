@@ -41,10 +41,10 @@ namespace MassTransit.RabbitMqTransport.Contexts
         readonly CancellationTokenSource _tokenSource;
         CancellationTokenRegistration _registration;
 
-        public RabbitMqModelContext(ConnectionContext connectionContext, CancellationToken cancellationToken)
+        public RabbitMqModelContext(ConnectionContext connectionContext, IModel model, CancellationToken cancellationToken)
         {
             _connectionContext = connectionContext;
-            _model = connectionContext.Connection.CreateModel();
+            _model = model;
 
             _payloadCache = new PayloadCache();
             _published = new ConcurrentDictionary<ulong, PendingPublish>();
@@ -189,6 +189,8 @@ namespace MassTransit.RabbitMqTransport.Contexts
 
         void OnBasicReturn(object model, BasicReturnEventArgs args)
         {
+            if (_log.IsDebugEnabled)
+                _log.DebugFormat("BasicReturn: {0}-{1} {2}", args.ReplyCode, args.ReplyText, args.BasicProperties.MessageId);
         }
 
         void OnModelShutdown(object model, ShutdownEventArgs reason)

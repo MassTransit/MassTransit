@@ -14,8 +14,10 @@ namespace MassTransit.RabbitMqTransport.Contexts
 {
     using System;
     using System.Threading;
+    using System.Threading.Tasks;
     using Context;
     using RabbitMQ.Client;
+    using Util;
 
 
     public class RabbitMqConnectionContext :
@@ -26,6 +28,7 @@ namespace MassTransit.RabbitMqTransport.Contexts
         readonly object _lock = new object();
         readonly PayloadCache _payloadCache;
         readonly CancellationTokenSource _tokenSource;
+        readonly QueuedTaskScheduler _taskScheduler;
         IConnection _connection;
         CancellationTokenRegistration _registration;
 
@@ -37,6 +40,7 @@ namespace MassTransit.RabbitMqTransport.Contexts
 
             _tokenSource = new CancellationTokenSource();
             _registration = cancellationToken.Register(OnCancellationRequested);
+            _taskScheduler = new QueuedTaskScheduler(TaskScheduler.Default, 1);
 
             connection.ConnectionShutdown += OnConnectionShutdown;
         }
@@ -44,6 +48,12 @@ namespace MassTransit.RabbitMqTransport.Contexts
         public RabbitMqHostSettings HostSettings
         {
             get { return _hostSettings; }
+        }
+
+        public async Task<IModel> CreateModel()
+        {
+            return await Task.Factory.StartNew(() => _connection.CreateModel(),
+                _tokenSource.Token, TaskCreationOptions.HideScheduler, _taskScheduler);
         }
 
         public bool HasPayloadType(Type contextType)

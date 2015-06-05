@@ -96,11 +96,9 @@ namespace MassTransit.TestFramework
         protected Task<ConsumeContext<T>> Handled<T>(IReceiveEndpointConfigurator configurator)
             where T : class
         {
-            var source = new TaskCompletionSource<ConsumeContext<T>>();
+            var source = GetTask<ConsumeContext<T>>();
 
             configurator.Handler<T>(async context => source.TrySetResult(context));
-
-            TestCancelledTask.ContinueWith(x => source.TrySetCanceled(), TaskContinuationOptions.OnlyOnCanceled);
 
             return source.Task;
         }
@@ -116,15 +114,13 @@ namespace MassTransit.TestFramework
         protected Task<ConsumeContext<T>> Handled<T>(IReceiveEndpointConfigurator configurator, Func<ConsumeContext<T>, bool> filter)
             where T : class
         {
-            var source = new TaskCompletionSource<ConsumeContext<T>>();
+            var source = GetTask<ConsumeContext<T>>();
 
             configurator.Handler<T>(async context =>
             {
                 if (filter(context))
                     source.TrySetResult(context);
             });
-
-            TestCancelledTask.ContinueWith(x => source.TrySetCanceled(), TaskContinuationOptions.OnlyOnCanceled);
 
             return source.Task;
         }
@@ -140,15 +136,13 @@ namespace MassTransit.TestFramework
         protected Task<ConsumeContext<T>> Handler<T>(IReceiveEndpointConfigurator configurator, MessageHandler<T> handler)
             where T : class
         {
-            var source = new TaskCompletionSource<ConsumeContext<T>>();
+            var source = GetTask<ConsumeContext<T>>();
 
             configurator.Handler<T>(async context =>
             {
                 await handler(context);
                 source.TrySetResult(context);
             });
-
-            TestCancelledTask.ContinueWith(x => source.TrySetCanceled(), TaskContinuationOptions.OnlyOnCanceled);
 
             return source.Task;
         }

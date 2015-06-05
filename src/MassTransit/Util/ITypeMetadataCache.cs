@@ -15,7 +15,6 @@ namespace MassTransit.Util
     using System;
     using System.Collections.Generic;
     using System.Reflection;
-    using Internals.Mapping;
     using Internals.Reflection;
 
 
@@ -27,10 +26,6 @@ namespace MassTransit.Util
         /// True if the type implements any known saga interfaces
         /// </summary>
         bool HasSagaInterfaces { get; }
-
-        IDictionaryConverter DictionaryConverter { get; }
-
-        IObjectConverter ObjectConverter { get; }
 
         ReadOnlyPropertyCache<T> ReadOnlyPropertyCache { get; }
 

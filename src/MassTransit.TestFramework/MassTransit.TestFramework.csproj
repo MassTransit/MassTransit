@@ -78,6 +78,9 @@
     </Compile>
     <Compile Include="ActivityTestContext.cs" />
     <Compile Include="ActivityTestContextConfigurator.cs" />
+    <Compile Include="Courier\AddressActivity.cs" />
+    <Compile Include="Courier\AddressArguments.cs" />
+    <Compile Include="Courier\AddressLog.cs" />
     <Compile Include="InMemoryActivityTestFixture.cs" />
     <Compile Include="AsyncTestFixture.cs" />
     <Compile Include="Courier\FaultyActivity.cs" />

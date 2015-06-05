@@ -25,7 +25,6 @@ namespace MassTransit.RabbitMqTransport
         readonly RabbitMqConnectionCache _connectionCache;
         readonly RabbitMqHostSettings _hostSettings;
         readonly IMessageNameFormatter _messageNameFormatter;
-        readonly RabbitMqConnectionCache _sendConnectionCache;
 
         public RabbitMqHost(RabbitMqHostSettings hostSettings)
         {
@@ -34,7 +33,6 @@ namespace MassTransit.RabbitMqTransport
             var connector = new RabbitMqConnector(hostSettings, Retry.None);
 
             _connectionCache = new RabbitMqConnectionCache(connector);
-            _sendConnectionCache = new RabbitMqConnectionCache(connector);
             _messageNameFormatter = new RabbitMqMessageNameFormatter();
         }
 
@@ -45,7 +43,7 @@ namespace MassTransit.RabbitMqTransport
 
         public IConnectionCache SendConnectionCache
         {
-            get { return _sendConnectionCache; }
+            get { return _connectionCache; }
         }
 
         public IConnectionCache ConnectionCache
@@ -61,7 +59,6 @@ namespace MassTransit.RabbitMqTransport
         public async Task Stop(CancellationToken cancellationToken = new CancellationToken())
         {
             await _connectionCache.Stop();
-            await _sendConnectionCache.Stop();
         }
     }
 }
