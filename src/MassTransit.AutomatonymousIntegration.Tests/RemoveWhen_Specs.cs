@@ -13,6 +13,7 @@
 namespace MassTransit.AutomatonymousTests
 {
     using System;
+    using System.Threading.Tasks;
     using Automatonymous;
     using NUnit.Framework;
     using Saga;
@@ -124,6 +125,94 @@ namespace MassTransit.AutomatonymousTests
 
         class Stop :
             CorrelatedBy<Guid>
+        {
+            public Guid CorrelationId { get; set; }
+        }
+    }
+
+    [TestFixture]
+    public class When_a_saga_goes_straight_to_finalized :
+        InMemoryTestFixture
+    {
+        [Test]
+        public async void Should_remove_the_saga_once_completed()
+        {
+            Guid sagaId = Guid.NewGuid();
+
+            Task<Answer> responseTask = null;
+            await Bus.Request(InputQueueSendEndpoint, new Ask{CorrelationId = sagaId}, x =>
+            {
+                responseTask = x.Handle<Answer>();
+            }, TestCancellationToken);
+
+            var response = await responseTask;
+
+            await Task.Delay(50);
+
+            Guid? saga = await _repository.ShouldNotContainSaga(sagaId, TestTimeout);
+            Assert.IsFalse(saga.HasValue);
+
+            Assert.AreEqual(sagaId, response.CorrelationId);
+        }
+
+        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+        {
+            configurator.StateMachineSaga(_machine, _repository);
+        }
+
+        readonly TestStateMachine _machine;
+        readonly InMemorySagaRepository<Instance> _repository;
+
+        public When_a_saga_goes_straight_to_finalized()
+        {
+            _machine = new TestStateMachine();
+            _repository = new InMemorySagaRepository<Instance>();
+        }
+
+
+        class Instance :
+            SagaStateMachineInstance
+        {
+            public Instance(Guid correlationId)
+            {
+                CorrelationId = correlationId;
+            }
+
+            protected Instance()
+            {
+            }
+
+            public State CurrentState { get; set; }
+            public Guid CorrelationId { get; set; }
+        }
+
+
+        class TestStateMachine :
+            MassTransitStateMachine<Instance>
+        {
+            public TestStateMachine()
+            {
+                Event(() => Asked, x => x.CorrelateById(context => context.Message.CorrelationId));
+
+                Initially(
+                    When(Asked)
+                        .Respond(context => new Answer{CorrelationId = context.Data.CorrelationId})
+                        .Finalize());
+
+                SetCompletedWhenFinalized();
+            }
+
+            public Event<Ask> Asked { get; private set; }
+        }
+
+
+        class Ask 
+        {
+            public Guid CorrelationId { get; set; }
+        }
+
+
+        class Answer
         {
             public Guid CorrelationId { get; set; }
         }

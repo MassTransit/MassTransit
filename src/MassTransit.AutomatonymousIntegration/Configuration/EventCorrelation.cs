@@ -13,7 +13,9 @@
 namespace Automatonymous
 {
     using System;
+    using CorrelationConfigurators;
     using MassTransit;
+    using MassTransit.Pipeline;
     using MassTransit.Saga;
 
 
@@ -36,20 +38,20 @@ namespace Automatonymous
     {
         new Event<TData> Event { get; }
 
-        ISagaLocator<TData> GetSagaLocator(ISagaRepository<TInstance> sagaRepository);
-
-        /// <summary>
-        /// Attempt to return the correlationId of the saga from the message
-        /// </summary>
-        /// <typeparam name="TData"></typeparam>
-        /// <param name="context">The event context</param>
-        /// <returns>True if the correlationId is available, otherwise false</returns>
-        Guid GetCorrelationId(ConsumeContext<TData> context);
-
         /// <summary>
         /// Returns the saga policy for the event correlation
         /// </summary>
         /// <value></value>
         ISagaPolicy<TInstance, TData> Policy { get; }
+
+        /// <summary>
+        /// The filter factory creates the filter when requested by the connector
+        /// </summary>
+        SagaFilterFactory<TInstance, TData> FilterFactory { get; }
+
+        /// <summary>
+        /// The message filter which extracts the correlationId from the message
+        /// </summary>
+        IFilter<ConsumeContext<TData>> MessageFilter { get; }
     }
 }

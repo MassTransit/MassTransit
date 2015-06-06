@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,8 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.NinjectIntegration
 {
-    using System;
-    using System.Collections.Generic;
     using System.Threading.Tasks;
     using Ninject;
     using Pipeline;
@@ -33,14 +31,15 @@ namespace MassTransit.NinjectIntegration
             _kernel = kernel;
         }
 
-        async Task ISagaRepository<TSaga>.Send<T>(ConsumeContext<T> context, IPipe<SagaConsumeContext<TSaga, T>> next)
+        public Task Send<T>(ConsumeContext<T> context, ISagaPolicy<TSaga, T> policy, IPipe<SagaConsumeContext<TSaga, T>> next) where T : class
         {
-            await _repository.Send(context, next);
+            return _repository.Send(context, policy, next);
         }
 
-        Task<IEnumerable<Guid>> ISagaRepository<TSaga>.Find(ISagaFilter<TSaga> filter)
+        public Task SendQuery<T>(SagaQueryConsumeContext<TSaga, T> context, ISagaPolicy<TSaga, T> policy, IPipe<SagaConsumeContext<TSaga, T>> next)
+            where T : class
         {
-            return _repository.Find(filter);
+            return _repository.SendQuery(context, policy, next);
         }
     }
 }

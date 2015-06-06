@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -16,7 +16,7 @@ namespace MassTransit.Tests.Saga.Locator
     using System.Diagnostics;
     using System.Linq.Expressions;
     using MassTransit.Saga;
-    using MassTransit.Saga.Pipeline;
+    using Messages;
     using NUnit.Framework;
     using TestFramework;
 
@@ -25,6 +25,35 @@ namespace MassTransit.Tests.Saga.Locator
     public class SagaExpression_Specs :
         InMemoryTestFixture
     {
+        [Test]
+        public async void Matching_by_property_should_be_happy()
+        {
+            Expression<Func<SimpleSaga, ObservableSagaMessage, bool>> selector = (s, m) => s.Name == m.Name;
+
+            Expression<Func<SimpleSaga, bool>> filter =
+                new SagaFilterExpressionConverter<SimpleSaga, ObservableSagaMessage>(_observeSaga).Convert(selector);
+            Trace.WriteLine(filter.ToString());
+
+            Guid? matches = await _repository.ShouldContainSaga(filter, TestTimeout);
+
+            Assert.IsTrue(matches.HasValue);
+        }
+
+        [Test]
+        public async void The_saga_expression_should_be_converted_down_to_a_saga_only_filter()
+        {
+            Expression<Func<SimpleSaga, InitiateSimpleSaga, bool>> selector =
+                (s, m) => s.CorrelationId == m.CorrelationId;
+
+            Expression<Func<SimpleSaga, bool>> filter =
+                new SagaFilterExpressionConverter<SimpleSaga, InitiateSimpleSaga>(_initiateSaga).Convert(selector);
+            Trace.WriteLine(filter.ToString());
+
+            Guid? matches = await _repository.ShouldContainSaga(filter, TestTimeout);
+
+            Assert.IsTrue(matches.HasValue);
+        }
+
         public SagaExpression_Specs()
         {
             _repository = new InMemorySagaRepository<SimpleSaga>();
@@ -65,34 +94,5 @@ namespace MassTransit.Tests.Saga.Locator
         Guid _otherSagaId;
         ObservableSagaMessage _observeSaga;
         InitiateSimpleSaga _initiateOtherSaga;
-
-        [Test]
-        public async void Matching_by_property_should_be_happy()
-        {
-            Expression<Func<SimpleSaga, ObservableSagaMessage, bool>> selector = (s, m) => s.Name == m.Name;
-
-            Expression<Func<SimpleSaga, bool>> filter =
-                new SagaFilterExpressionConverter<SimpleSaga, ObservableSagaMessage>(_observeSaga).Convert(selector);
-            Trace.WriteLine(filter.ToString());
-
-            Guid? matches = await _repository.ShouldContainSaga(filter, TestTimeout);
-
-            Assert.IsTrue(matches.HasValue);
-        }
-
-        [Test]
-        public async void The_saga_expression_should_be_converted_down_to_a_saga_only_filter()
-        {
-            Expression<Func<SimpleSaga, InitiateSimpleSaga, bool>> selector =
-                (s, m) => s.CorrelationId == m.CorrelationId;
-
-            Expression<Func<SimpleSaga, bool>> filter =
-                new SagaFilterExpressionConverter<SimpleSaga, InitiateSimpleSaga>(_initiateSaga).Convert(selector);
-            Trace.WriteLine(filter.ToString());
-
-            Guid? matches = await _repository.ShouldContainSaga(filter, TestTimeout);
-
-            Assert.IsTrue(matches.HasValue);
-        }
     }
 }

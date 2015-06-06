@@ -80,6 +80,7 @@
     <Compile Include="BinaryGuidType.cs" />
     <Compile Include="NHibernateSessionFactoryProvider.cs" />
     <Compile Include="SagaClassMapping.cs" />
+    <Compile Include="Saga\NHibernateSagaConsumeContext.cs" />
     <Compile Include="Saga\NHibernateSagaRepository.cs" />
     <Compile Include="SqlServerSessionFactoryProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

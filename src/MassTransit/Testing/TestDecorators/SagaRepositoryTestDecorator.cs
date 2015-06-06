@@ -12,9 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Testing.TestDecorators
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Threading.Tasks;
+    using System.Threading.Tasks;
 	using Pipeline;
 	using Saga;
 
@@ -78,14 +76,14 @@ namespace MassTransit.Testing.TestDecorators
 //			}
 //		}
 
-	    public Task Send<T>(ConsumeContext<T> context, IPipe<SagaConsumeContext<TSaga, T>> next) where T : class
+	    public Task Send<T>(ConsumeContext<T> context, ISagaPolicy<TSaga, T> policy, IPipe<SagaConsumeContext<TSaga, T>> next) where T : class
 	    {
-	        return _sagaRepository.Send(context, next);
+	        return _sagaRepository.Send(context, policy, next);
 	    }
 
-	    public Task<IEnumerable<Guid>> Find(ISagaFilter<TSaga> filter)
-		{
-			return _sagaRepository.Find(filter);
-		}
+	    public Task SendQuery<T>(SagaQueryConsumeContext<TSaga, T> context, ISagaPolicy<TSaga, T> policy, IPipe<SagaConsumeContext<TSaga, T>> next) where T : class
+	    {
+	        return _sagaRepository.SendQuery(context, policy, next);
+	    }
 	}
 }

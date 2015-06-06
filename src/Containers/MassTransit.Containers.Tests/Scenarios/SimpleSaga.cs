@@ -66,9 +66,9 @@ namespace MassTransit.Containers.Tests.Scenarios
             _third.TrySetResult(context.Message);
         }
 
-        public Expression<Func<SimpleSaga, ThirdSagaMessage, bool>> GetBindExpression()
+        Expression<Func<SimpleSaga, ThirdSagaMessage, bool>> Observes<ThirdSagaMessage, SimpleSaga>.CorrelationExpression
         {
-            return (saga, message) => saga.CorrelationId == message.CorrelationId;
+            get { return (saga, message) => saga.CorrelationId == message.CorrelationId; }
         }
 
         public async Task Consume(ConsumeContext<SecondSagaMessage> context)

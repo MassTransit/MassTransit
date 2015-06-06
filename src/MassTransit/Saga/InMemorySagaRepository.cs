@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -17,14 +17,14 @@ namespace MassTransit.Saga
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
-    using Context;
     using Logging;
     using MassTransit.Pipeline;
     using Util;
 
 
     public class InMemorySagaRepository<TSaga> :
-        ISagaRepository<TSaga>
+        ISagaRepository<TSaga>,
+        IQuerySagaRepository<TSaga>
         where TSaga : class, ISaga
     {
         static readonly ILog _log = Logger.Get(typeof(InMemorySagaRepository<TSaga>));
@@ -40,14 +40,17 @@ namespace MassTransit.Saga
             get { return _sagas[id]; }
         }
 
-        async Task ISagaRepository<TSaga>.Send<T>(ConsumeContext<T> context, IPipe<SagaConsumeContext<TSaga, T>> next)
+        public async Task<IEnumerable<Guid>> Find(ISagaQuery<TSaga> query)
         {
-            SagaContext<TSaga, T> sagaContext;
-            if (!context.TryGetPayload(out sagaContext))
-                throw new SagaException("Failed to load saga context", typeof(TSaga), typeof(T));
+            return _sagas.Where(query).Select(x => x.CorrelationId);
+        }
 
-            ISagaPolicy<TSaga, T> policy = sagaContext.Policy;
-            Guid sagaId = sagaContext.Id;
+        async Task ISagaRepository<TSaga>.Send<T>(ConsumeContext<T> context, ISagaPolicy<TSaga, T> policy, IPipe<SagaConsumeContext<TSaga, T>> next)
+        {
+            if (!context.CorrelationId.HasValue)
+                throw new SagaException("The CorrelationId was not specified", typeof(TSaga), typeof(T));
+
+            Guid sagaId = context.CorrelationId.Value;
 
             bool needToLeaveSagas = true;
             Monitor.Enter(_sagas);
@@ -56,110 +59,33 @@ namespace MassTransit.Saga
                 TSaga instance = _sagas[sagaId];
                 if (instance == null)
                 {
-                    if (policy.CanCreateInstance(context))
-                    {
-                        instance = policy.CreateInstance(context, sagaId);
-                        _sagas.Add(instance);
+                    Monitor.Exit(_sagas);
+                    needToLeaveSagas = false;
 
-                        if (_log.IsDebugEnabled)
-                        {
-                            _log.DebugFormat("SAGA: {0} Created {1} for {2}", TypeMetadataCache<TSaga>.ShortName, instance.CorrelationId,
-                                TypeMetadataCache<T>.ShortName);
-                        }
+                    var missingSagaPipe = new MissingPipe<T>(this, next);
 
-                        Monitor.Enter(instance);
-                        try
-                        {
-                            Monitor.Exit(_sagas);
-                            needToLeaveSagas = false;
-
-                            SagaConsumeContext<TSaga, T> sagaConsumeContext = new SagaConsumeContextProxy<TSaga, T>(context, instance);
-
-                            await next.Send(sagaConsumeContext);
-
-                            if (policy.CanRemoveInstance(instance))
-                                _sagas.Remove(instance);
-                        }
-                        catch (SagaException sex)
-                        {
-                            if (_log.IsErrorEnabled)
-                                _log.Error("Created Saga Exception", sex);
-                            throw;
-                        }
-                        catch (Exception ex)
-                        {
-                            var sagaException = new SagaException("Created Saga Instance Exception", typeof(TSaga), typeof(T),
-                                instance.CorrelationId, ex);
-                            if (_log.IsErrorEnabled)
-                                _log.Error("Created Saga Exception", sagaException);
-
-                            throw sagaException;
-                        }
-                        finally
-                        {
-                            Monitor.Exit(instance);
-                        }
-                    }
-                    else
-                    {
-                        if (_log.IsWarnEnabled)
-                        {
-                            _log.WarnFormat("SAGA: {0} Ignoring Missing {1} for {2}", TypeMetadataCache<TSaga>.ShortName, sagaId,
-                                TypeMetadataCache<T>.ShortName);
-                        }
-                    }
+                    await policy.Missing(context, missingSagaPipe);
                 }
                 else
                 {
-                    if (policy.CanUseExistingInstance(context))
+                    Monitor.Enter(instance);
+                    try
                     {
-                        Monitor.Enter(instance);
-                        try
+                        Monitor.Exit(_sagas);
+                        needToLeaveSagas = false;
+
+                        if (_log.IsDebugEnabled)
                         {
-                            Monitor.Exit(_sagas);
-                            needToLeaveSagas = false;
-
-                            if (_log.IsDebugEnabled)
-                            {
-                                _log.DebugFormat("SAGA: {0} Existing {1} for {2}", TypeMetadataCache<TSaga>.ShortName,
-                                    instance.CorrelationId,
-                                    TypeMetadataCache<T>.ShortName);
-                            }
-
-                            SagaConsumeContext<TSaga, T> sagaConsumeContext = new SagaConsumeContextProxy<TSaga, T>(context, instance);
-
-                            await next.Send(sagaConsumeContext);
-
-                            if (policy.CanRemoveInstance(instance))
-                                _sagas.Remove(instance);
+                            _log.DebugFormat("SAGA:{0}:{1} Used {2}", TypeMetadataCache<TSaga>.ShortName, sagaId,TypeMetadataCache<T>.ShortName);
                         }
-                        catch (SagaException sex)
-                        {
-                            if (_log.IsErrorEnabled)
-                                _log.Error("Existing Saga Exception", sex);
-                            throw;
-                        }
-                        catch (Exception ex)
-                        {
-                            var sagaException = new SagaException("Existing Saga Instance Exception", typeof(TSaga), typeof(T),
-                                instance.CorrelationId, ex);
-                            if (_log.IsErrorEnabled)
-                                _log.Error("Created Saga Exception", sagaException);
 
-                            throw sagaException;
-                        }
-                        finally
-                        {
-                            Monitor.Exit(instance);
-                        }
+                        SagaConsumeContext<TSaga, T> sagaConsumeContext = new InMemorySagaConsumeContext<TSaga, T>(this, context, instance);
+
+                        await policy.Existing(sagaConsumeContext, next);
                     }
-                    else
+                    finally
                     {
-                        if (_log.IsWarnEnabled)
-                        {
-                            _log.WarnFormat("SAGA: {0} Ignoring Existing {1} for {2}", TypeMetadataCache<TSaga>.ShortName, sagaId,
-                                TypeMetadataCache<T>.ShortName);
-                        }
+                        Monitor.Exit(instance);
                     }
                 }
             }
@@ -170,9 +96,39 @@ namespace MassTransit.Saga
             }
         }
 
-        async Task<IEnumerable<Guid>> ISagaRepository<TSaga>.Find(ISagaFilter<TSaga> filter)
+        async Task ISagaRepository<TSaga>.SendQuery<T>(SagaQueryConsumeContext<TSaga, T> context, ISagaPolicy<TSaga, T> policy,
+            IPipe<SagaConsumeContext<TSaga, T>> next)
         {
-            return _sagas.Where(filter).Select(x => x.CorrelationId);
+            TSaga[] existingSagas = _sagas.Where(context.Query).ToArray();
+            if (existingSagas.Length == 0)
+            {
+                var missingSagaPipe = new MissingPipe<T>(this, next);
+                await policy.Missing(context, missingSagaPipe);
+            }
+            else
+                await Task.WhenAll(existingSagas.Select(instance => SendToInstance(context, policy, instance, next)));
+        }
+
+        async Task SendToInstance<T>(SagaQueryConsumeContext<TSaga, T> context, ISagaPolicy<TSaga, T> policy, TSaga instance,
+            IPipe<SagaConsumeContext<TSaga, T>> next)
+            where T : class
+        {
+            Monitor.Enter(instance);
+            try
+            {
+                if (_log.IsDebugEnabled)
+                {
+                    _log.DebugFormat("SAGA:{0}:{1} Used {2}", TypeMetadataCache<TSaga>.ShortName, instance.CorrelationId, TypeMetadataCache<T>.ShortName);
+                }
+
+                SagaConsumeContext<TSaga, T> sagaConsumeContext = new InMemorySagaConsumeContext<TSaga, T>(this, context, instance);
+
+                await policy.Existing(sagaConsumeContext, next);
+            }
+            finally
+            {
+                Monitor.Exit(instance);
+            }
         }
 
         public void Add(TSaga newSaga)
@@ -185,6 +141,46 @@ namespace MassTransit.Saga
         {
             lock (_sagas)
                 _sagas.Remove(saga);
+        }
+
+
+        /// <summary>
+        /// Once the message pipe has processed the saga instance, add it to the saga repository
+        /// </summary>
+        /// <typeparam name="TMessage"></typeparam>
+        class MissingPipe<TMessage> :
+            IPipe<SagaConsumeContext<TSaga, TMessage>>
+            where TMessage : class
+        {
+            readonly IPipe<SagaConsumeContext<TSaga, TMessage>> _next;
+            readonly InMemorySagaRepository<TSaga> _repository;
+
+            public MissingPipe(InMemorySagaRepository<TSaga> repository, IPipe<SagaConsumeContext<TSaga, TMessage>> next)
+            {
+                _repository = repository;
+                _next = next;
+            }
+
+            public async Task Send(SagaConsumeContext<TSaga, TMessage> context)
+            {
+                if (_log.IsDebugEnabled)
+                {
+                    _log.DebugFormat("SAGA:{0}:{1} Added {2}", TypeMetadataCache<TSaga>.ShortName, context.Saga.CorrelationId,
+                        TypeMetadataCache<TMessage>.ShortName);
+                }
+
+                var proxy = new InMemorySagaConsumeContext<TSaga, TMessage>(_repository, context, context.Saga);
+
+                await _next.Send(proxy);
+
+                if (!proxy.IsCompleted)
+                    _repository.Add(proxy.Saga);
+            }
+
+            public bool Visit(IPipelineVisitor visitor)
+            {
+                return visitor.Visit(this);
+            }
         }
     }
 }

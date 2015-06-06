@@ -17,25 +17,16 @@ namespace MassTransit.Saga.Connectors
     using MassTransit.Pipeline;
     using PipeBuilders;
     using PipeConfigurators;
-    using Pipeline.Filters;
     using Util;
 
 
-    public interface SagaMessageConnector :
-        SagaConnector
-    {
-        Type MessageType { get; }
-    }
-
-
     public abstract class SagaMessageConnector<TSaga, TMessage> :
-        SagaMessageConnector
+        ISagaMessageConnector
         where TSaga : class, ISaga
         where TMessage : class
     {
-        public ConnectHandle Connect<T>(IConsumePipeConnector consumePipe, ISagaRepository<T> sagaRepository,
+        ConnectHandle ISagaConnector.Connect<T>(IConsumePipeConnector consumePipe, ISagaRepository<T> sagaRepository,
             params IPipeSpecification<SagaConsumeContext<T>>[] pipeSpecifications)
-            where T : class, ISaga
         {
             var repository = sagaRepository as ISagaRepository<TSaga>;
             if (repository == null)
@@ -49,20 +40,20 @@ namespace MassTransit.Saga.Connectors
             if (builders == null)
                 throw new InvalidOperationException("Should not be null, ever");
 
-            IPipe<SagaConsumeContext<TSaga, TMessage>> messagePipe = Pipe.New<SagaConsumeContext<TSaga, TMessage>>(x =>
+            IPipe<SagaConsumeContext<TSaga, TMessage>> sagaPipe = Pipe.New<SagaConsumeContext<TSaga, TMessage>>(x =>
             {
                 foreach (var filter in builders.Filters)
                     x.Filter(filter);
-                x.Filter(GetMessageFilter());
+
+                ConfigureSagaPipe(x);
             });
 
-            IPipe<ConsumeContext<TMessage>> pipe = Pipe.New<ConsumeContext<TMessage>>(x =>
+            IPipe<ConsumeContext<TMessage>> messagePipe = Pipe.New<ConsumeContext<TMessage>>(x =>
             {
-                x.Filter(GetLocatorFilter(repository));
-                x.Filter(new SagaMessageFilter<TSaga, TMessage>(repository, messagePipe));
+                ConfigureMessagePipe(x, repository, sagaPipe);
             });
 
-            return consumePipe.ConnectConsumePipe(pipe);
+            return consumePipe.ConnectConsumePipe(messagePipe);
         }
 
         public Type MessageType
@@ -70,8 +61,20 @@ namespace MassTransit.Saga.Connectors
             get { return typeof(TMessage); }
         }
 
-        protected abstract IFilter<SagaConsumeContext<TSaga, TMessage>> GetMessageFilter();
-        protected abstract IFilter<ConsumeContext<TMessage>> GetLocatorFilter(ISagaRepository<TSaga> repository);
+        /// <summary>
+        /// Configure the saga pipe to which the saga instance is sent
+        /// </summary>
+        /// <param name="configurator"></param>
+        protected abstract void ConfigureSagaPipe(IPipeConfigurator<SagaConsumeContext<TSaga, TMessage>> configurator);
+
+        /// <summary>
+        /// Configure the message pipe that is prior to the saga repository
+        /// </summary>
+        /// <param name="configurator">The pipe configurator</param>
+        /// <param name="repository"></param>
+        /// <param name="sagaPipe"></param>
+        protected abstract void ConfigureMessagePipe(IPipeConfigurator<ConsumeContext<TMessage>> configurator, ISagaRepository<TSaga> repository,
+            IPipe<SagaConsumeContext<TSaga, TMessage>> sagaPipe);
 
 
         class SagaPipeBuilder<T> :

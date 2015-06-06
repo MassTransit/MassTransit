@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -21,10 +21,10 @@ namespace MassTransit
 
     public static class SagaFilterExtensions
     {
-        public static Task<IEnumerable<Guid>> Where<TSaga>(this ISagaRepository<TSaga> source, Expression<Func<TSaga, bool>> filter)
+        public static Task<IEnumerable<Guid>> Where<TSaga>(this IQuerySagaRepository<TSaga> source, Expression<Func<TSaga, bool>> filter)
             where TSaga : class, ISaga
         {
-            return source.Find(new SagaFilter<TSaga>(filter));
+            return source.Find(new SagaQuery<TSaga>(filter));
         }
     }
 }

@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -25,7 +25,7 @@ namespace Automatonymous
 
 
     public class AutomatonymousStateMachineSagaRepository<TInstance> :
-        StateMachineSagaRepository<TInstance>
+        IStateMachineSagaRepository<TInstance>
         where TInstance : class, SagaStateMachineInstance
     {
         readonly Expression<Func<TInstance, bool>> _completedExpression;
@@ -51,45 +51,15 @@ namespace Automatonymous
                 _messageTypes.Add(eventCorrelation.Event.GetType().GetClosingArguments(typeof(Event<>)).Single(), eventCorrelation);
         }
 
-//        public IEnumerable<Action<IConsumeContext<TMessage>>> GetSaga<TMessage>(IConsumeContext<TMessage> context,
-//            Guid sagaId, InstanceHandlerSelector<TInstance, TMessage> selector, ISagaPolicy<TInstance, TMessage> policy)
-//            where TMessage : class
-//        {
-//            IEnumerable<Action<IConsumeContext<TMessage>>> handlers = _repository.GetSaga(context, sagaId, selector, policy);
-//
-//            int handlerCount = 0;
-//            foreach (var handler in handlers)
-//            {
-//                handlerCount++;
-//                yield return handler;
-//            }
-//
-//            int retryLimit;
-//            if (handlerCount == 0 && IsRetryEvent(context.Message, out retryLimit))
-//            {
-//                int attempts = context.RetryCount;
-//                if (attempts < retryLimit)
-//                {
-//                    yield return msgContext =>
-//                    {
-//                        _log.DebugFormat("Queuing {0} {1} for retry {2}", typeof(TMessage).Name, context.MessageId, attempts + 1);
-//                        msgContext.RetryLater();
-//                    };
-//                }
-//                else
-//                    _log.DebugFormat("Retry limit for {0} {1} reached {2}", typeof(TMessage).Name, context.MessageId, attempts + 1);
-//            }
-//        }
-
-        public Task Send<T>(ConsumeContext<T> context, IPipe<SagaConsumeContext<TInstance, T>> next)
-            where T : class
+        public Task Send<T>(ConsumeContext<T> context, ISagaPolicy<TInstance, T> policy, IPipe<SagaConsumeContext<TInstance, T>> next) where T : class
         {
-            return _repository.Send(context, next);
+            return _repository.Send(context, policy, next);
         }
 
-        public Task<IEnumerable<Guid>> Find(ISagaFilter<TInstance> filter)
+        public Task SendQuery<T>(SagaQueryConsumeContext<TInstance, T> context, ISagaPolicy<TInstance, T> policy, IPipe<SagaConsumeContext<TInstance, T>> next)
+            where T : class
         {
-            return _repository.Find(filter);
+            return _repository.SendQuery(context, policy, next);
         }
 
         public bool TryGetCorrelationExpressionForEvent<TData>(Event<TData> @event,
@@ -112,19 +82,6 @@ namespace Automatonymous
         public Expression<Func<TInstance, bool>> GetCompletedExpression()
         {
             return _completedExpression;
-        }
-
-        bool IsRetryEvent<TMessage>(TMessage message, out int retryLimit)
-        {
-            StateMachineEventCorrelation<TInstance> correlation;
-            if (_messageTypes.TryGetValue(typeof(TMessage), out correlation))
-            {
-                retryLimit = correlation.RetryLimit;
-                return retryLimit > 0;
-            }
-
-            retryLimit = 0;
-            return false;
         }
     }
 }

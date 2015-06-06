@@ -60,17 +60,17 @@ namespace MassTransit.Util
                     index.Remove(item);
         }
 
-        public IEnumerable<TSaga> Where(ISagaFilter<TSaga> filter)
+        public IEnumerable<TSaga> Where(ISagaQuery<TSaga> query)
         {
             lock (_lock)
             {
-                IndexedSagaProperty<TSaga> index = HasIndexFor(filter.FilterExpression);
+                IndexedSagaProperty<TSaga> index = HasIndexFor(query.FilterExpression);
                 if (index == null)
-                    return _indexById.Where(filter.Filter).ToList();
+                    return _indexById.Where(query.GetFilter()).ToList();
 
-                object rightValue = GetRightValue(filter.FilterExpression);
+                object rightValue = GetRightValue(query.FilterExpression);
 
-                return index.Where(rightValue, filter.Filter).ToList();
+                return index.Where(rightValue, query.GetFilter()).ToList();
             }
         }
 

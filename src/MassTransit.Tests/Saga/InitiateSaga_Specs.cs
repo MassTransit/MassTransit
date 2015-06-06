@@ -15,6 +15,7 @@ namespace MassTransit.Tests.Saga
     using System;
     using System.Threading.Tasks;
     using MassTransit.Saga;
+    using Messages;
     using NUnit.Framework;
     using Shouldly;
     using TestFramework;
@@ -128,9 +129,11 @@ namespace MassTransit.Tests.Saga
         {
             await InputQueueSendEndpoint.Send(new InitiateSimpleSaga(_sagaId));
 
+            Guid? sagaId = await _repository.ShouldContainSaga(x => x.Initiated, TestTimeout);
+
             await InputQueueSendEndpoint.Send(new CompleteSimpleSaga(_sagaId));
 
-            Guid? sagaId = await _repository.ShouldContainSaga(x => x.Completed, TestTimeout);
+            sagaId = await _repository.ShouldContainSaga(x => x.Completed, TestTimeout);
 
             sagaId.HasValue.ShouldBe(true);
         }
@@ -165,9 +168,11 @@ namespace MassTransit.Tests.Saga
         {
             await InputQueueSendEndpoint.Send(new InitiateSimpleSaga(_sagaId) {Name = "Chris"});
 
+            Guid? sagaId = await _repository.ShouldContainSaga(x => x.Initiated, TestTimeout);
+
             await InputQueueSendEndpoint.Send(new ObservableSagaMessage {Name = "Chris"});
 
-            Guid? sagaId = await _repository.ShouldContainSaga(x => x.Observed, TestTimeout);
+            sagaId = await _repository.ShouldContainSaga(x => x.Observed, TestTimeout);
 
             sagaId.HasValue.ShouldBe(true);
         }

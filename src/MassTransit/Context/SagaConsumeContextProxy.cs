@@ -32,6 +32,7 @@ namespace MassTransit.Context
     {
         readonly ConsumeContext<TMessage> _context;
         readonly TSaga _instance;
+        bool _completed;
 
         public SagaConsumeContextProxy(ConsumeContext<TMessage> context, TSaga instance)
         {
@@ -128,7 +129,7 @@ namespace MassTransit.Context
 
         public Guid? CorrelationId
         {
-            get { return _context.CorrelationId; }
+            get { return _instance.CorrelationId; }
         }
 
         public DateTime? ExpirationTime
@@ -165,6 +166,16 @@ namespace MassTransit.Context
             where T : class
         {
             return (SagaConsumeContext<TSaga, T>)this;
+        }
+
+        async Task SagaConsumeContext<TSaga>.SetCompleted()
+        {
+            _completed = true;
+        }
+
+        public bool IsCompleted
+        {
+            get { return _completed; }
         }
 
         public CancellationToken CancellationToken

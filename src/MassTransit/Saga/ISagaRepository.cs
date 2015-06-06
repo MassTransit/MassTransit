@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,8 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Saga
 {
-    using System;
-    using System.Collections.Generic;
     using System.Threading.Tasks;
     using MassTransit.Pipeline;
 
@@ -26,21 +24,27 @@ namespace MassTransit.Saga
         where TSaga : class, ISaga
     {
         /// <summary>
-        /// Send a message to the saga repository, which can then hydrate available sagas and deliver the message
-        /// to the saga instances.
+        /// Send the message to the saga repository where the context.CorrelationId has the CorrelationId
+        /// of the saga instance.
         /// </summary>
         /// <typeparam name="T">The message type</typeparam>
-        /// <param name="context">The consume context</param>
-        /// <param name="next">The next pipe to deliver the saga/message context to</param>
-        /// <returns>An awaitable task, of course</returns>
-        Task Send<T>(ConsumeContext<T> context, IPipe<SagaConsumeContext<TSaga, T>> next)
+        /// <param name="context">The message consume context</param>
+        /// <param name="policy">The saga policy for the message</param>
+        /// <param name="next">The saga consume pipe</param>
+        /// <returns></returns>
+        Task Send<T>(ConsumeContext<T> context, ISagaPolicy<TSaga, T> policy, IPipe<SagaConsumeContext<TSaga, T>> next)
             where T : class;
 
         /// <summary>
-        /// Finds the CorrelationIds for the sagas that match the filter
+        /// Send the message to the saga repository where the query is used to find matching saga instances,
+        /// which are invoked concurrently.
         /// </summary>
-        /// <param name="filter">effectively a LINQ expression</param>
+        /// <typeparam name="T">The message type</typeparam>
+        /// <param name="context">The saga query consume context</param>
+        /// <param name="policy">The saga policy for the message</param>
+        /// <param name="next">The saga consume pipe</param>
         /// <returns></returns>
-        Task<IEnumerable<Guid>> Find(ISagaFilter<TSaga> filter);
+        Task SendQuery<T>(SagaQueryConsumeContext<TSaga, T> context, ISagaPolicy<TSaga, T> policy, IPipe<SagaConsumeContext<TSaga, T>> next)
+            where T : class;
     }
 }

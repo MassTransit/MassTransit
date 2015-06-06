@@ -52,18 +52,17 @@
       <Link>Properties\SolutionVersion.cs</Link>
     </Compile>
     <Compile Include="Activities\PublishActivity.cs" />
-    <Compile Include="Activities\PublishMessageFactory.cs" />
+    <Compile Include="PublishMessageFactory.cs" />
     <Compile Include="Activities\RequestActivity.cs" />
     <Compile Include="Activities\RespondActivity.cs" />
     <Compile Include="Activities\RetryLaterActivity.cs" />
     <Compile Include="Configuration\CorrelationConfigurators\CorrelatedByEventCorrelationBuilder.cs" />
     <Compile Include="Configuration\CorrelationConfigurators\EventCorrelationBuilder.cs" />
     <Compile Include="Configuration\CorrelationConfigurators\EventCorrelationExpressionConverter.cs" />
-    <Compile Include="Configuration\CorrelationConfigurators\EventCorrelationSagaLocator.cs" />
-    <Compile Include="Configuration\CorrelationConfigurators\ExpressionCorrelationSagaFilterFactory.cs" />
-    <Compile Include="Configuration\CorrelationConfigurators\ISagaFilterFactory.cs" />
+    <Compile Include="Configuration\CorrelationConfigurators\ExpressionCorrelationSagaQueryFactory.cs" />
     <Compile Include="Configuration\CorrelationConfigurators\MassTransitEventCorrelation.cs" />
-    <Compile Include="Configuration\CorrelationConfigurators\PropertyExpressionSagaLocator.cs" />
+    <Compile Include="Configuration\CorrelationConfigurators\PropertyExpressionSagaQueryFactory.cs" />
+    <Compile Include="Configuration\CorrelationConfigurators\SagaFilterFactory.cs" />
     <Compile Include="Configuration\EventCorrelation.cs" />
     <Compile Include="Configuration\EventCorrelationConfigurator.cs" />
     <Compile Include="Configuration\IStateMachineInterfaceType.cs" />
@@ -96,7 +95,6 @@
     <Compile Include="Configuration\RepositoryConfigurators\StateMachineSagaRepositoryConfigurator.cs" />
     <Compile Include="Configuration\RepositoryConfigurators\StateMachineSagaRepositoryConfiguratorImpl.cs" />
     <Compile Include="Configuration\RetryLaterExtensions.cs" />
-    <Compile Include="Configuration\StateMachinePolicyFactory.cs" />
     <Compile Include="Configuration\StateMachineSubscriptionExtensions.cs" />
     <Compile Include="Configuration\SubscriptionConfigurators\IStateMachineSagaConfigurator.cs" />
     <Compile Include="Configuration\SubscriptionConfigurators\StateMachineSagaConfigurator.cs" />
@@ -104,7 +102,7 @@
     <Compile Include="Configuration\SubscriptionConnectors\StateMachineConnector.cs" />
     <Compile Include="SagaStateMachineInstance.cs" />
     <Compile Include="Pipeline\StateMachineSagaMessageFilter.cs" />
-    <Compile Include="StateMachineSagaRepository.cs" />
+    <Compile Include="IStateMachineSagaRepository.cs" />
     <Compile Include="AutomatonymousStateMachineSagaRepository.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -12,8 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.WindsorIntegration
 {
-    using System;
-    using System.Collections.Generic;
     using System.Threading.Tasks;
     using Castle.MicroKernel;
     using Castle.MicroKernel.Lifestyle;
@@ -34,18 +32,21 @@ namespace MassTransit.WindsorIntegration
             _container = container;
         }
 
-        public async Task Send<T>(ConsumeContext<T> context, IPipe<SagaConsumeContext<TSaga, T>> next)
+        public async Task Send<T>(ConsumeContext<T> context, ISagaPolicy<TSaga, T> policy, IPipe<SagaConsumeContext<TSaga, T>> next) where T : class
+        {
+            using (_container.BeginScope())
+            {
+                await _repository.Send(context, policy, next);
+            }
+        }
+
+        public async Task SendQuery<T>(SagaQueryConsumeContext<TSaga, T> context, ISagaPolicy<TSaga, T> policy, IPipe<SagaConsumeContext<TSaga, T>> next)
             where T : class
         {
             using (_container.BeginScope())
             {
-                await _repository.Send(context, next);
+                await _repository.SendQuery(context, policy, next);
             }
-        }
-
-        public Task<IEnumerable<Guid>> Find(ISagaFilter<TSaga> filter)
-        {
-            return _repository.Find(filter);
         }
     }
 }

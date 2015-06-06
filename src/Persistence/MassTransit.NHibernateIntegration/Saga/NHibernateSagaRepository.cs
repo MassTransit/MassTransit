@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,9 +14,9 @@ namespace MassTransit.NHibernateIntegration.Saga
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Threading.Tasks;
     using System.Transactions;
-    using Context;
     using Logging;
     using MassTransit.Saga;
     using NHibernate;
@@ -25,10 +25,11 @@ namespace MassTransit.NHibernateIntegration.Saga
 
 
     public class NHibernateSagaRepository<TSaga> :
-        ISagaRepository<TSaga>
+        ISagaRepository<TSaga>,
+        IQuerySagaRepository<TSaga>
         where TSaga : class, ISaga
     {
-        static readonly ILog _log = Logger.Get(TypeMetadataCache<NHibernateSagaRepository<TSaga>>.ShortName);
+        static readonly ILog _log = Logger.Get<NHibernateSagaRepository<TSaga>>();
 
         readonly ISessionFactory _sessionFactory;
 
@@ -37,138 +38,168 @@ namespace MassTransit.NHibernateIntegration.Saga
             _sessionFactory = sessionFactory;
         }
 
-        async Task ISagaRepository<TSaga>.Send<T>(ConsumeContext<T> context, IPipe<SagaConsumeContext<TSaga, T>> next)
-        {
-            SagaContext<TSaga, T> sagaContext;
-            if (!context.TryGetPayload(out sagaContext))
-                throw new SagaException("Failed to load saga context", typeof(TSaga), typeof(T));
-
-            ISagaPolicy<TSaga, T> policy = sagaContext.Policy;
-            Guid sagaId = sagaContext.Id;
-
-            using (ISession session = _sessionFactory.OpenSession())
-            using (ITransaction transaction = session.BeginTransaction())
-            {
-                var instance = session.Get<TSaga>(sagaId, LockMode.Upgrade);
-                if (instance == null)
-                {
-                    if (policy.CanCreateInstance(context))
-                    {
-                        instance = policy.CreateInstance(context, sagaId);
-
-                        if (_log.IsDebugEnabled)
-                        {
-                            _log.DebugFormat("SAGA: {0} Created {1} for {2}", TypeMetadataCache<TSaga>.ShortName, instance.CorrelationId,
-                                TypeMetadataCache<T>.ShortName);
-                        }
-                        try
-                        {
-                            SagaConsumeContext<TSaga, T> sagaConsumeContext = new SagaConsumeContextProxy<TSaga, T>(context, instance);
-
-                            await next.Send(sagaConsumeContext);
-
-                            if (!policy.CanRemoveInstance(instance))
-                                session.Save(instance);
-                        }
-                        catch (SagaException sex)
-                        {
-                            if (_log.IsErrorEnabled)
-                                _log.Error("Created Saga Exception", sex);
-
-                            if (transaction.IsActive)
-                                transaction.Rollback();
-                            throw;
-                        }
-                        catch (Exception ex)
-                        {
-                            var sagaException = new SagaException("Created Saga Instance Exception", typeof(TSaga), typeof(T),
-                                instance.CorrelationId, ex);
-                            if (_log.IsErrorEnabled)
-                                _log.Error("Created Saga Exception", sagaException);
-
-                            if (transaction.IsActive)
-                                transaction.Rollback();
-
-                            throw sagaException;
-                        }
-                    }
-                    else
-                    {
-                        if (_log.IsWarnEnabled)
-                        {
-                            _log.WarnFormat("SAGA: {0} Ignoring Missing {1} for {2}", TypeMetadataCache<TSaga>.ShortName, sagaId,
-                                TypeMetadataCache<T>.ShortName);
-                        }
-                    }
-                }
-                else
-                {
-                    if (policy.CanUseExistingInstance(context))
-                    {
-                        try
-                        {
-                            if (_log.IsDebugEnabled)
-                            {
-                                _log.DebugFormat("SAGA: {0} Existing {1} for {2}", TypeMetadataCache<TSaga>.ShortName,
-                                    instance.CorrelationId,
-                                    TypeMetadataCache<T>.ShortName);
-                            }
-
-                            SagaConsumeContext<TSaga, T> sagaConsumeContext = new SagaConsumeContextProxy<TSaga, T>(context, instance);
-
-                            await next.Send(sagaConsumeContext);
-
-                            if (policy.CanRemoveInstance(instance))
-                                session.Delete(instance);
-                        }
-                        catch (SagaException sex)
-                        {
-                            if (_log.IsErrorEnabled)
-                                _log.Error("Existing Saga Exception", sex);
-                            if (transaction.IsActive)
-                                transaction.Rollback();
-                            throw;
-                        }
-                        catch (Exception ex)
-                        {
-                            var sagaException = new SagaException("Existing Saga Instance Exception", typeof(TSaga), typeof(T),
-                                instance.CorrelationId, ex);
-                            if (_log.IsErrorEnabled)
-                                _log.Error("Created Saga Exception", sagaException);
-
-                            if (transaction.IsActive)
-                                transaction.Rollback();
-                            throw sagaException;
-                        }
-                    }
-                    else
-                    {
-                        if (_log.IsWarnEnabled)
-                        {
-                            _log.WarnFormat("SAGA: {0} Ignoring Existing {1} for {2}", TypeMetadataCache<TSaga>.ShortName, sagaId,
-                                TypeMetadataCache<T>.ShortName);
-                        }
-                    }
-                }
-
-                if (transaction.IsActive)
-                    transaction.Commit();
-            }
-        }
-
-        async Task<IEnumerable<Guid>> ISagaRepository<TSaga>.Find(ISagaFilter<TSaga> filter)
+        public async Task<IEnumerable<Guid>> Find(ISagaQuery<TSaga> query)
         {
             using (var scope = new TransactionScope(TransactionScopeOption.RequiresNew))
             using (ISession session = _sessionFactory.OpenSession())
             {
                 IList<Guid> result = session.QueryOver<TSaga>()
-                    .Where(filter.FilterExpression)
+                    .Where(query.FilterExpression)
                     .Select(x => x.CorrelationId)
                     .List<Guid>();
 
                 scope.Complete();
 
                 return result;
+            }
+        }
+
+        public async Task Send<T>(ConsumeContext<T> context, ISagaPolicy<TSaga, T> policy, IPipe<SagaConsumeContext<TSaga, T>> next) where T : class
+        {
+            if (!context.CorrelationId.HasValue)
+                throw new SagaException("The CorrelationId was not specified", typeof(TSaga), typeof(T));
+
+            Guid sagaId = context.CorrelationId.Value;
+
+            using (ISession session = _sessionFactory.OpenSession())
+            using (ITransaction transaction = session.BeginTransaction())
+            {
+                try
+                {
+                    var instance = session.Get<TSaga>(sagaId, LockMode.Upgrade);
+                    if (instance == null)
+                    {
+                        var missingSagaPipe = new MissingPipe<T>(session, next);
+
+                        await policy.Missing(context, missingSagaPipe);
+                    }
+                    else
+                    {
+                        if (_log.IsDebugEnabled)
+                            _log.DebugFormat("SAGA:{0}:{1} Used {2}", TypeMetadataCache<TSaga>.ShortName, instance.CorrelationId, TypeMetadataCache<T>.ShortName);
+
+                        var sagaConsumeContext = new NHibernateSagaConsumeContext<TSaga, T>(session, context, instance);
+
+                        await policy.Existing(sagaConsumeContext, next);
+                    }
+
+
+                    if (transaction.IsActive)
+                        transaction.Commit();
+                }
+                catch (Exception)
+                {
+                    if (transaction.IsActive)
+                        transaction.Rollback();
+
+                    throw;
+                }
+            }
+        }
+
+        public async Task SendQuery<T>(SagaQueryConsumeContext<TSaga, T> context, ISagaPolicy<TSaga, T> policy, IPipe<SagaConsumeContext<TSaga, T>> next)
+            where T : class
+        {
+            using (ISession session = _sessionFactory.OpenSession())
+            using (ITransaction transaction = session.BeginTransaction())
+            {
+                try
+                {
+                    IList<TSaga> instances = session.QueryOver<TSaga>()
+                        .Where(context.Query.FilterExpression)
+                        .List<TSaga>();
+
+                    if (instances.Count == 0)
+                    {
+                        var missingSagaPipe = new MissingPipe<T>(session, next);
+                        await policy.Missing(context, missingSagaPipe);
+                    }
+                    else
+                        await Task.WhenAll(instances.Select(instance => SendToInstance(context, policy, instance, next, session)));
+
+                    // TODO partial failure should not affect them all
+
+                    if (transaction.IsActive)
+                        transaction.Commit();
+                }
+                catch (SagaException sex)
+                {
+                    if (_log.IsErrorEnabled)
+                        _log.Error("Saga Exception Occurred", sex);
+                }
+                catch (Exception ex)
+                {
+                    if (_log.IsErrorEnabled)
+                        _log.Error(string.Format("SAGA:{0} Exception {1}", TypeMetadataCache<TSaga>.ShortName, TypeMetadataCache<T>.ShortName), ex);
+
+                    if (transaction.IsActive)
+                        transaction.Rollback();
+
+                    throw new SagaException(ex.Message, typeof(TSaga), typeof(T), Guid.Empty, ex);
+                }
+            }
+        }
+
+        async Task SendToInstance<T>(SagaQueryConsumeContext<TSaga, T> context, ISagaPolicy<TSaga, T> policy, TSaga instance,
+            IPipe<SagaConsumeContext<TSaga, T>> next, ISession session)
+            where T : class
+        {
+            try
+            {
+                if (_log.IsDebugEnabled)
+                    _log.DebugFormat("SAGA:{0}:{1} Used {2}", TypeMetadataCache<TSaga>.ShortName, instance.CorrelationId, TypeMetadataCache<T>.ShortName);
+
+                var sagaConsumeContext = new NHibernateSagaConsumeContext<TSaga, T>(session, context, instance);
+
+                await policy.Existing(sagaConsumeContext, next);
+            }
+            catch (SagaException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw new SagaException(ex.Message, typeof(TSaga), typeof(T), instance.CorrelationId, ex);
+            }
+        }
+
+
+        /// <summary>
+        /// Once the message pipe has processed the saga instance, add it to the saga repository
+        /// </summary>
+        /// <typeparam name="TMessage"></typeparam>
+        class MissingPipe<TMessage> :
+            IPipe<SagaConsumeContext<TSaga, TMessage>>
+            where TMessage : class
+        {
+            readonly IPipe<SagaConsumeContext<TSaga, TMessage>> _next;
+            readonly ISession _session;
+
+            public MissingPipe(ISession session, IPipe<SagaConsumeContext<TSaga, TMessage>> next)
+            {
+                _session = session;
+                _next = next;
+            }
+
+            public async Task Send(SagaConsumeContext<TSaga, TMessage> context)
+            {
+                if (_log.IsDebugEnabled)
+                {
+                    _log.DebugFormat("SAGA:{0}:{1} Added {2}", TypeMetadataCache<TSaga>.ShortName, context.Saga.CorrelationId,
+                        TypeMetadataCache<TMessage>.ShortName);
+                }
+
+                var proxy = new NHibernateSagaConsumeContext<TSaga, TMessage>(_session, context, context.Saga);
+
+                await _next.Send(proxy);
+
+                if (!proxy.IsCompleted)
+                    _session.Save(context.Saga);
+            }
+
+            public bool Visit(IPipelineVisitor visitor)
+            {
+                return visitor.Visit(this);
             }
         }
     }

@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,32 +12,44 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Saga.Connectors
 {
+    using System;
     using MassTransit.Pipeline;
+    using Pipeline.Filters;
 
 
+    /// <summary>
+    /// Connects a message that has an exact CorrelationId to the saga instance
+    /// to the saga repository.
+    /// </summary>
+    /// <typeparam name="TSaga"></typeparam>
+    /// <typeparam name="TMessage"></typeparam>
     public class CorrelatedSagaMessageConnector<TSaga, TMessage> :
         SagaMessageConnector<TSaga, TMessage>
         where TSaga : class, ISaga
         where TMessage : class
     {
         readonly IFilter<SagaConsumeContext<TSaga, TMessage>> _consumeFilter;
-        readonly IFilter<ConsumeContext<TMessage>> _locatorFilter;
+        readonly Func<ConsumeContext<TMessage>, Guid> _correlationIdSelector;
+        readonly ISagaPolicy<TSaga, TMessage> _policy;
 
-        public CorrelatedSagaMessageConnector(IFilter<SagaConsumeContext<TSaga, TMessage>> consumeFilter,
-            IFilter<ConsumeContext<TMessage>> locatorFilter)
+        public CorrelatedSagaMessageConnector(IFilter<SagaConsumeContext<TSaga, TMessage>> consumeFilter, ISagaPolicy<TSaga, TMessage> policy,
+            Func<ConsumeContext<TMessage>, Guid> correlationIdSelector)
         {
             _consumeFilter = consumeFilter;
-            _locatorFilter = locatorFilter;
+            _policy = policy;
+            _correlationIdSelector = correlationIdSelector;
         }
 
-        protected override IFilter<SagaConsumeContext<TSaga, TMessage>> GetMessageFilter()
+        protected override void ConfigureSagaPipe(IPipeConfigurator<SagaConsumeContext<TSaga, TMessage>> configurator)
         {
-            return _consumeFilter;
+            configurator.Filter(_consumeFilter);
         }
 
-        protected override IFilter<ConsumeContext<TMessage>> GetLocatorFilter(ISagaRepository<TSaga> repository)
+        protected override void ConfigureMessagePipe(IPipeConfigurator<ConsumeContext<TMessage>> configurator, ISagaRepository<TSaga> repository,
+            IPipe<SagaConsumeContext<TSaga, TMessage>> sagaPipe)
         {
-            return _locatorFilter;
+            configurator.Filter(new CorrelationIdMessageFilter<TMessage>(_correlationIdSelector));
+            configurator.Filter(new CorrelatedSagaFilter<TSaga, TMessage>(repository, _policy, sagaPipe));
         }
     }
 }

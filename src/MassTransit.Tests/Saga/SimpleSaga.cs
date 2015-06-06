@@ -16,6 +16,7 @@ namespace MassTransit.Tests.Saga
     using System.Linq.Expressions;
     using System.Threading.Tasks;
     using MassTransit.Saga;
+    using Messages;
 
 
     public class SimpleSaga :
@@ -51,9 +52,9 @@ namespace MassTransit.Tests.Saga
             Observed = true;
         }
 
-        public Expression<Func<SimpleSaga, ObservableSagaMessage, bool>> GetBindExpression()
+        public Expression<Func<SimpleSaga, ObservableSagaMessage, bool>> CorrelationExpression
         {
-            return (saga, message) => saga.Name == message.Name;
+            get { return (saga, message) => saga.Name == message.Name; }
         }
 
         public async Task Consume(ConsumeContext<CompleteSimpleSaga> message)

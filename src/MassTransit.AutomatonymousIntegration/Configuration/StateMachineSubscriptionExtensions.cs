@@ -38,7 +38,7 @@ namespace Automatonymous
             var stateMachineSagaRepositoryConfigurator = new StateMachineSagaRepositoryConfiguratorImpl<TInstance>(stateMachine,
                 sagaRepository);
 
-            StateMachineSagaRepository<TInstance> repository = stateMachineSagaRepositoryConfigurator.Configure();
+            IStateMachineSagaRepository<TInstance> repository = stateMachineSagaRepositoryConfigurator.Configure();
 
             var stateMachineConfigurator = new StateMachineSagaConfigurator<TInstance>(stateMachine,
                 repository);
@@ -55,7 +55,7 @@ namespace Automatonymous
             var stateMachineSagaRepositoryConfigurator = new StateMachineSagaRepositoryConfiguratorImpl<TInstance>(stateMachine,
                 sagaRepository);
 
-            StateMachineSagaRepository<TInstance> repository = stateMachineSagaRepositoryConfigurator.Configure();
+            IStateMachineSagaRepository<TInstance> repository = stateMachineSagaRepositoryConfigurator.Configure();
 
             var connector = new StateMachineConnector<TInstance>(stateMachine, repository);
 
