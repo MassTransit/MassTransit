@@ -19,6 +19,6 @@ namespace Automatonymous
     public interface IStateMachineInterfaceType<TInstance>
         where TInstance : class, ISaga, SagaStateMachineInstance
     {
-        SagaMessageConnector GetConnector();
+        ISagaMessageConnector GetConnector();
     }
 }

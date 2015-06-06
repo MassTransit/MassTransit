@@ -15,7 +15,8 @@ namespace Automatonymous.CorrelationConfigurators
     using System;
     using System.Linq.Expressions;
     using MassTransit;
-    using MassTransit.Saga;
+    using MassTransit.Pipeline;
+    using MassTransit.Saga.Pipeline.Filters;
 
 
     public class MassTransitEventCorrelationConfigurator<TInstance, TData> :
@@ -26,8 +27,8 @@ namespace Automatonymous.CorrelationConfigurators
     {
         readonly Event<TData> _event;
         readonly SagaStateMachine<TInstance> _machine;
-        Func<ConsumeContext<TData>, Guid> _initialSagaIdSelector;
-        Func<ISagaRepository<TInstance>, ISagaPolicy<TInstance, TData>, ISagaLocator<TData>> _locatorFactory;
+        IFilter<ConsumeContext<TData>> _messageFilter;
+        SagaFilterFactory<TInstance, TData> _sagaFilterFactory;
 
         public MassTransitEventCorrelationConfigurator(SagaStateMachine<TInstance> machine, Event<TData> @event)
         {
@@ -35,11 +36,15 @@ namespace Automatonymous.CorrelationConfigurators
             _machine = machine;
         }
 
+        public EventCorrelation<TInstance> Build()
+        {
+            return new MassTransitEventCorrelation<TInstance, TData>(_machine, _event, _sagaFilterFactory, _messageFilter);
+        }
+
         public EventCorrelationConfigurator<TInstance, TData> CorrelateById(Func<ConsumeContext<TData>, Guid> selector)
         {
-            _locatorFactory = (_, __) => new CorrelationIdSagaLocator<TData>(selector);
-
-            _initialSagaIdSelector = selector;
+            _messageFilter = new CorrelationIdMessageFilter<TData>(selector);
+            _sagaFilterFactory = (repository, policy, sagaPipe) => new CorrelatedSagaFilter<TInstance, TData>(repository, policy, sagaPipe);
 
             return this;
         }
@@ -53,9 +58,12 @@ namespace Automatonymous.CorrelationConfigurators
             if (selector == null)
                 throw new ArgumentNullException("selector");
 
-            var filterFactory = new PropertyExpressionSagaFilterFactory<TInstance, TData, T?>(propertyExpression, selector);
+            _sagaFilterFactory = (repository, policy, sagaPipe) =>
+            {
+                var queryFactory = new PropertyExpressionSagaQueryFactory<TInstance, TData, T?>(propertyExpression, selector);
 
-            _locatorFactory = (repository, policy) => new EventCorrelationSagaLocator<TInstance, TData>(repository, filterFactory, policy);
+                return new QuerySagaFilter<TInstance, TData>(repository, policy, queryFactory, sagaPipe);
+            };
 
             return this;
         }
@@ -69,9 +77,12 @@ namespace Automatonymous.CorrelationConfigurators
             if (selector == null)
                 throw new ArgumentNullException("selector");
 
-            var filterFactory = new PropertyExpressionSagaFilterFactory<TInstance, TData, T>(propertyExpression, selector);
+            _sagaFilterFactory = (repository, policy, sagaPipe) =>
+            {
+                var queryFactory = new PropertyExpressionSagaQueryFactory<TInstance, TData, T>(propertyExpression, selector);
 
-            _locatorFactory = (repository, policy) => new EventCorrelationSagaLocator<TInstance, TData>(repository, filterFactory, policy);
+                return new QuerySagaFilter<TInstance, TData>(repository, policy, queryFactory, sagaPipe);
+            };
 
             return this;
         }
@@ -81,7 +92,7 @@ namespace Automatonymous.CorrelationConfigurators
             if (selector == null)
                 throw new ArgumentNullException("selector");
 
-            _initialSagaIdSelector = selector;
+            _messageFilter = new CorrelationIdMessageFilter<TData>(selector);
 
             return this;
         }
@@ -91,16 +102,14 @@ namespace Automatonymous.CorrelationConfigurators
             if (correlationExpression == null)
                 throw new ArgumentNullException("correlationExpression");
 
-            var filterFactory = new ExpressionCorrelationSagaFilterFactory<TInstance, TData>(correlationExpression);
+            _sagaFilterFactory = (repository, policy, sagaPipe) =>
+            {
+                var queryFactory = new ExpressionCorrelationSagaQueryFactory<TInstance, TData>(correlationExpression);
 
-            _locatorFactory = (repository, policy) => new EventCorrelationSagaLocator<TInstance, TData>(repository, filterFactory, policy);
+                return new QuerySagaFilter<TInstance, TData>(repository, policy, queryFactory, sagaPipe);
+            };
 
             return this;
-        }
-
-        public EventCorrelation<TInstance> Build()
-        {
-            return new MassTransitEventCorrelation<TInstance, TData>(_event, _initialSagaIdSelector, _machine, _locatorFactory);
         }
     }
 }

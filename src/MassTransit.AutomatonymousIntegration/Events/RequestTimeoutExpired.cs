@@ -18,19 +18,19 @@ namespace Automatonymous.Events
     public interface RequestTimeoutExpired
     {
         /// <summary>
-        /// When the expiration message was scheduled
+        /// The correlationId of the state machine
         /// </summary>
-        DateTime CreateTimestamp { get; }
+        Guid CorrelationId { get; }
+
+        /// <summary>
+        /// When the request expired
+        /// </summary>
+        DateTime Timestamp { get; }
 
         /// <summary>
         /// The expiration time that was scheduled for the request
         /// </summary>
         DateTime ExpirationTime { get; }
-
-        /// <summary>
-        /// The correlationId of the state machine
-        /// </summary>
-        Guid CorrelationId { get; }
 
         /// <summary>
         /// The requestId of the request

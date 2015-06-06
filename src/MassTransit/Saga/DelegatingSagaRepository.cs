@@ -13,7 +13,6 @@
 namespace MassTransit.Saga
 {
     using System;
-    using System.Collections.Generic;
     using System.Threading.Tasks;
     using MassTransit.Pipeline;
 
@@ -36,7 +35,7 @@ namespace MassTransit.Saga
             _callback = callback;
         }
 
-        Task ISagaRepository<TSaga>.Send<T>(ConsumeContext<T> context, IPipe<SagaConsumeContext<TSaga, T>> next)
+        public async Task Send<T>(ConsumeContext<T> context, ISagaPolicy<TSaga, T> policy, IPipe<SagaConsumeContext<TSaga, T>> next) where T : class
         {
             IPipe<SagaConsumeContext<TSaga, T>> callbackPipe = Pipe.New<SagaConsumeContext<TSaga, T>>(x =>
             {
@@ -44,12 +43,18 @@ namespace MassTransit.Saga
                 x.ExecuteAsync(next.Send);
             });
 
-            return _repository.Send(context, callbackPipe);
+            await _repository.Send(context, policy, callbackPipe);
         }
 
-        public Task<IEnumerable<Guid>> Find(ISagaFilter<TSaga> filter)
+        public async Task SendQuery<T>(SagaQueryConsumeContext<TSaga, T> context, ISagaPolicy<TSaga, T> policy, IPipe<SagaConsumeContext<TSaga, T>> next) where T : class
         {
-            return _repository.Find(filter);
+            IPipe<SagaConsumeContext<TSaga, T>> callbackPipe = Pipe.New<SagaConsumeContext<TSaga, T>>(x =>
+            {
+                x.Execute(_callback);
+                x.ExecuteAsync(next.Send);
+            });
+
+            await _repository.SendQuery(context, policy, callbackPipe);
         }
     }
 }

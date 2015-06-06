@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace Automatonymous.SubscriptionConnectors
 {
+    using CorrelationConfigurators;
     using MassTransit;
     using MassTransit.Pipeline;
     using MassTransit.Saga;
@@ -23,24 +24,32 @@ namespace Automatonymous.SubscriptionConnectors
         where TInstance : class, ISaga, SagaStateMachineInstance
         where TMessage : class
     {
-        readonly IFilter<ConsumeContext<TMessage>> _locatorFilter;
-        readonly IFilter<SagaConsumeContext<TInstance, TMessage>> _messageFilter;
+        readonly IFilter<SagaConsumeContext<TInstance, TMessage>> _consumeFilter;
+        readonly ISagaPolicy<TInstance, TMessage> _policy;
+        readonly SagaFilterFactory<TInstance, TMessage> _sagaFilterFactory;
+        IFilter<ConsumeContext<TMessage>> _messageFilter;
 
-        public StateMachineSagaMessageConnector(IFilter<SagaConsumeContext<TInstance, TMessage>> messageFilter,
-            IFilter<ConsumeContext<TMessage>> locatorFilter)
+        public StateMachineSagaMessageConnector(IFilter<SagaConsumeContext<TInstance, TMessage>> consumeFilter, ISagaPolicy<TInstance, TMessage> policy,
+            SagaFilterFactory<TInstance, TMessage> sagaFilterFactory, IFilter<ConsumeContext<TMessage>> messageFilter)
         {
+            _consumeFilter = consumeFilter;
+            _policy = policy;
+            _sagaFilterFactory = sagaFilterFactory;
             _messageFilter = messageFilter;
-            _locatorFilter = locatorFilter;
         }
 
-        protected override IFilter<SagaConsumeContext<TInstance, TMessage>> GetMessageFilter()
+        protected override void ConfigureSagaPipe(IPipeConfigurator<SagaConsumeContext<TInstance, TMessage>> configurator)
         {
-            return _messageFilter;
+            configurator.Filter(_consumeFilter);
         }
 
-        protected override IFilter<ConsumeContext<TMessage>> GetLocatorFilter(ISagaRepository<TInstance> repository)
+        protected override void ConfigureMessagePipe(IPipeConfigurator<ConsumeContext<TMessage>> configurator, ISagaRepository<TInstance> repository,
+            IPipe<SagaConsumeContext<TInstance, TMessage>> sagaPipe)
         {
-            return _locatorFilter;
+            if (_messageFilter != null)
+                configurator.Filter(_messageFilter);
+
+            configurator.Filter(_sagaFilterFactory(repository, _policy, sagaPipe));
         }
     }
 }

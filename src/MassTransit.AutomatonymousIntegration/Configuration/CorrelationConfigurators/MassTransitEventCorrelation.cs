@@ -15,6 +15,7 @@ namespace Automatonymous.CorrelationConfigurators
     using System;
     using System.Linq;
     using MassTransit;
+    using MassTransit.Pipeline;
     using MassTransit.Saga;
     using MassTransit.Saga.Policies;
 
@@ -24,20 +25,26 @@ namespace Automatonymous.CorrelationConfigurators
         where TInstance : class, SagaStateMachineInstance
         where TData : class
     {
-        readonly Func<ConsumeContext<TData>, Guid> _correlationIdSelector;
         readonly Event<TData> _event;
-        readonly Func<ISagaRepository<TInstance>, ISagaPolicy<TInstance, TData>, ISagaLocator<TData>> _locatorFactory;
         readonly SagaStateMachine<TInstance> _machine;
-        Lazy<ISagaPolicy<TInstance, TData>> _policy;
+        readonly IFilter<ConsumeContext<TData>> _messageFilter;
+        readonly Lazy<ISagaPolicy<TInstance, TData>> _policy;
+        readonly SagaFilterFactory<TInstance, TData> _sagaFilterFactory;
 
-        public MassTransitEventCorrelation(Event<TData> @event, Func<ConsumeContext<TData>, Guid> correlationIdSelector, SagaStateMachine<TInstance> machine,
-            Func<ISagaRepository<TInstance>, ISagaPolicy<TInstance, TData>, ISagaLocator<TData>> locatorFactory)
+        public MassTransitEventCorrelation(SagaStateMachine<TInstance> machine, Event<TData> @event, SagaFilterFactory<TInstance, TData> sagaFilterFactory,
+            IFilter<ConsumeContext<TData>> messageFilter)
         {
             _event = @event;
-            _correlationIdSelector = correlationIdSelector;
+            _sagaFilterFactory = sagaFilterFactory;
+            _messageFilter = messageFilter;
             _machine = machine;
-            _locatorFactory = locatorFactory;
+
             _policy = new Lazy<ISagaPolicy<TInstance, TData>>(GetSagaPolicy);
+        }
+
+        public SagaFilterFactory<TInstance, TData> FilterFactory
+        {
+            get { return _sagaFilterFactory; }
         }
 
         public Event Event
@@ -55,18 +62,9 @@ namespace Automatonymous.CorrelationConfigurators
             get { return typeof(TData); }
         }
 
-        public ISagaLocator<TData> GetSagaLocator(ISagaRepository<TInstance> sagaRepository)
+        public IFilter<ConsumeContext<TData>> MessageFilter
         {
-            return _locatorFactory(sagaRepository, _policy.Value);
-        }
-
-        Guid EventCorrelation<TInstance, TData>.GetCorrelationId(ConsumeContext<TData> context)
-        {
-            Guid correlationId = _correlationIdSelector(context);
-            if (correlationId == Guid.Empty)
-                throw new SagaException("The message CorrelationId is empty", typeof(TInstance), typeof(TData), correlationId);
-
-            return correlationId;
+            get { return _messageFilter; }
         }
 
         ISagaPolicy<TInstance, TData> EventCorrelation<TInstance, TData>.Policy
@@ -83,14 +81,13 @@ namespace Automatonymous.CorrelationConfigurators
             bool includesInitial = states.Any(x => x.Name.Equals(_machine.Initial.Name));
             bool includesOther = states.Any(x => !x.Name.Equals(_machine.Initial.Name));
 
-
             if (includesInitial && includesOther)
-                return new CreateOrUseExistingSagaPolicy<TInstance, TData>(_correlationIdSelector, _machine.IsCompleted);
+                return new NewOrExistingSagaPolicy<TInstance, TData>(new DefaultSagaFactory<TInstance, TData>());
 
             if (includesInitial)
-                return new InitiatingSagaPolicy<TInstance, TData>(_correlationIdSelector, _machine.IsCompleted);
+                return new NewSagaPolicy<TInstance, TData>(new DefaultSagaFactory<TInstance, TData>());
 
-            return new ExistingOrIgnoreSagaPolicy<TInstance, TData>(_machine.IsCompleted);
+            return new AnyExistingSagaPolicy<TInstance, TData>();
         }
     }
 }

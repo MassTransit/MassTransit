@@ -13,30 +13,31 @@
 namespace MassTransit.Saga
 {
     using System;
+    using ConnectorFactories;
     using Connectors;
 
 
     public class SagaInterfaceType
     {
-        readonly Lazy<SagaConnectorFactory> _initiatedByConnectorFactory;
-        readonly Lazy<SagaConnectorFactory> _orchestratesConnectorFactory;
-        readonly Lazy<SagaConnectorFactory> _observesConnectorFactory;
+        readonly Lazy<ISagaConnectorFactory> _initiatedByConnectorFactory;
+        readonly Lazy<ISagaConnectorFactory> _orchestratesConnectorFactory;
+        readonly Lazy<ISagaConnectorFactory> _observesConnectorFactory;
 
         public SagaInterfaceType(Type interfaceType, Type messageType, Type sagaType)
         {
             InterfaceType = interfaceType;
             MessageType = messageType;
 
-            _initiatedByConnectorFactory = new Lazy<SagaConnectorFactory>(() => (SagaConnectorFactory)
+            _initiatedByConnectorFactory = new Lazy<ISagaConnectorFactory>(() => (ISagaConnectorFactory)
                 Activator.CreateInstance(typeof(InitiatedBySagaConnectorFactory<,>).MakeGenericType(sagaType,
                     messageType)));
 
-            _observesConnectorFactory = new Lazy<SagaConnectorFactory>(() => (SagaConnectorFactory)
+            _observesConnectorFactory = new Lazy<ISagaConnectorFactory>(() => (ISagaConnectorFactory)
                 Activator.CreateInstance(typeof(ObservesSagaConnectorFactory<,>).MakeGenericType(sagaType,
                     messageType)));
 
             _orchestratesConnectorFactory =
-                new Lazy<SagaConnectorFactory>(() => (SagaConnectorFactory)
+                new Lazy<ISagaConnectorFactory>(() => (ISagaConnectorFactory)
                     Activator.CreateInstance(typeof(OrchestratesSagaConnectorFactory<,>).MakeGenericType(
                         sagaType, messageType)));
         }
@@ -44,17 +45,17 @@ namespace MassTransit.Saga
         public Type InterfaceType { get; private set; }
         public Type MessageType { get; private set; }
 
-        public SagaMessageConnector GetInitiatedByConnector()
+        public ISagaMessageConnector GetInitiatedByConnector()
         {
             return _initiatedByConnectorFactory.Value.CreateMessageConnector();
         }
 
-        public SagaMessageConnector GetOrchestratesConnector()
+        public ISagaMessageConnector GetOrchestratesConnector()
         {
             return _orchestratesConnectorFactory.Value.CreateMessageConnector();
         }
 
-        public SagaMessageConnector GetObservesConnector()
+        public ISagaMessageConnector GetObservesConnector()
         {
             return _observesConnectorFactory.Value.CreateMessageConnector();
         }

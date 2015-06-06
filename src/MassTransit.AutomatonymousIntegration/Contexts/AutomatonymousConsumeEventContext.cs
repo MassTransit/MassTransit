@@ -50,7 +50,7 @@ namespace Automatonymous.Contexts
             return _context.TryGetPayload(out payload);
         }
 
-        public TPayload GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory) where TPayload : class
+        public TPayload GetOrAddPayload<TPayload>(Automatonymous.PayloadFactory<TPayload> payloadFactory) where TPayload : class
         {
             return _context.GetOrAddPayload(payloadFactory);
         }
@@ -109,7 +109,7 @@ namespace Automatonymous.Contexts
             return _context.TryGetPayload(out payload);
         }
 
-        public TPayload GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory) where TPayload : class
+        public TPayload GetOrAddPayload<TPayload>(Automatonymous.PayloadFactory<TPayload> payloadFactory) where TPayload : class
         {
             return _context.GetOrAddPayload(payloadFactory);
         }

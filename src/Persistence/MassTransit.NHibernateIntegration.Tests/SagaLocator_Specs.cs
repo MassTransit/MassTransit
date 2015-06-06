@@ -15,6 +15,7 @@ namespace MassTransit.NHibernateIntegration.Tests
     using System;
     using MassTransit.Saga;
     using MassTransit.Tests.Saga;
+    using MassTransit.Tests.Saga.Messages;
     using NHibernate;
     using NUnit.Framework;
     using Saga;

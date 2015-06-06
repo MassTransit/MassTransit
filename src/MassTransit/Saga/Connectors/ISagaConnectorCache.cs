@@ -14,6 +14,6 @@ namespace MassTransit.Saga.Connectors
 {
     public interface ISagaConnectorCache
     {
-        SagaConnector Connector { get; }
+        ISagaConnector Connector { get; }
     }
 }

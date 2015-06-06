@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,9 +12,15 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
+    using System.Threading.Tasks;
     using Saga;
 
 
+    /// <summary>
+    /// Consume context including the saga instance consuming the message
+    /// </summary>
+    /// <typeparam name="TSaga">The saga type</typeparam>
+    /// <typeparam name="TMessage">The message type</typeparam>
     public interface SagaConsumeContext<TSaga, out TMessage> :
         SagaConsumeContext<TSaga>,
         ConsumeContext<TMessage>
@@ -24,6 +30,11 @@ namespace MassTransit
     }
 
 
+    /// <summary>
+    /// Consume context including the saga instance consuming the message. Note
+    /// this does not expose the message type, for filters that do not care about message type.
+    /// </summary>
+    /// <typeparam name="TSaga">The saga type</typeparam>
     public interface SagaConsumeContext<TSaga> :
         ConsumeContext
         where TSaga : class, ISaga
@@ -35,5 +46,18 @@ namespace MassTransit
 
         SagaConsumeContext<TSaga, T> PopContext<T>()
             where T : class;
+
+        /// <summary>
+        /// Mark the saga instance as completed, which may remove it from the repository or archive it, etc.
+        /// Once completed, a saga instance should never again be visible, even if the same CorrelationId is
+        /// specified.
+        /// </summary>
+        /// <returns></returns>
+        Task SetCompleted();
+
+        /// <summary>
+        /// True if the saga has been completed, signaling that the repository may remove it.
+        /// </summary>
+        bool IsCompleted { get; }
     }
 }

@@ -35,9 +35,9 @@ namespace Automatonymous.Pipeline
     {
         static readonly ILog _log = Logger.Get<StateMachineSagaMessageFilter<TInstance, TData>>();
         readonly Event<TData> _event;
-        readonly StateMachine<TInstance> _stateMachine;
+        readonly SagaStateMachine<TInstance> _stateMachine;
 
-        public StateMachineSagaMessageFilter(StateMachine<TInstance> stateMachine, Event<TData> @event)
+        public StateMachineSagaMessageFilter(SagaStateMachine<TInstance> stateMachine, Event<TData> @event)
         {
             _stateMachine = stateMachine;
             _event = @event;
@@ -56,7 +56,12 @@ namespace Automatonymous.Pipeline
 
             IEnumerable<Event> nextEvents = _stateMachine.NextEvents(currentState);
             if (nextEvents.Contains(_event))
+            {
                 await _stateMachine.RaiseEvent(eventContext).ConfigureAwait(false);
+
+                if (_stateMachine.IsCompleted(context.Saga))
+                    await context.SetCompleted();
+            }
             else
             {
                 _log.DebugFormat("{0} {1} in {2} does not accept {3}", _stateMachine.GetType().Name, context.Saga.CorrelationId,

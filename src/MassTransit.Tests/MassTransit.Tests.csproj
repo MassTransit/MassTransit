@@ -172,12 +172,12 @@
     <Compile Include="Transports\InMemoryTransport_Specs.cs" />
     <Compile Include="Uri_Specs.cs" />
     <None Include="app.config" />
-    <Compile Include="Saga\CompleteSimpleSaga.cs" />
-    <Compile Include="Saga\InitiateSimpleSaga.cs" />
+    <Compile Include="Saga\Messages\CompleteSimpleSaga.cs" />
+    <Compile Include="Saga\Messages\InitiateSimpleSaga.cs" />
     <Compile Include="Saga\Locator\SagaExpression_Specs.cs" />
-    <Compile Include="Saga\ObservableSagaMessage.cs" />
+    <Compile Include="Saga\Messages\ObservableSagaMessage.cs" />
     <Compile Include="Saga\SimpleSaga.cs" />
-    <Compile Include="Saga\SimpleSagaMessageBase.cs" />
+    <Compile Include="Saga\Messages\SimpleSagaMessageBase.cs" />
     <Compile Include="Messages\ResponseMessage.cs" />
     <Compile Include="Messages\RequestMessage.cs" />
     <Compile Include="Messages\SerializationTestMessage.cs" />

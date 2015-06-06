@@ -61,7 +61,7 @@ namespace Automatonymous.RepositoryConfigurators
             return correlation;
         }
 
-        public StateMachineSagaRepository<TInstance> Configure()
+        public IStateMachineSagaRepository<TInstance> Configure()
         {
             var builder = new StateMachineSagaRepositoryBuilderImpl<TInstance>(_stateMachine, _repository, _correlations);
 

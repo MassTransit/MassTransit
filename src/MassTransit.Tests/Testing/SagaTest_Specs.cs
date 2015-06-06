@@ -123,12 +123,12 @@ namespace MassTransit.Tests.Testing
 			{
 			}
 
-			public Expression<Func<TestSaga, C, bool>> GetBindExpression()
-			{
-				return (saga, message) => saga.CorrelationId.ToString() == message.CorrelationId;
-			}
+		    public Expression<Func<TestSaga, C, bool>> CorrelationExpression
+		    {
+		        get { return (saga, message) => saga.CorrelationId.ToString() == message.CorrelationId; }
+		    }
 
-            public async Task Consume(ConsumeContext<B> message)
+		    public async Task Consume(ConsumeContext<B> message)
 			{
 			}
 		}

@@ -56,6 +56,28 @@ namespace MassTransit.AutomatonymousTests
             Assert.IsTrue(instance.Screwed);
         }
 
+        [Test]
+        public async void Should_have_removed_the_state_machine()
+        {
+            Guid correlationId = Guid.NewGuid();
+
+            await InputQueueSendEndpoint.Send(new GirlfriendYelling
+            {
+                CorrelationId = correlationId
+            });
+
+            Guid? sagaId = await _repository.ShouldContainSaga(correlationId, TestTimeout);
+            Assert.IsTrue(sagaId.HasValue);
+
+            await InputQueueSendEndpoint.Send(new SodOff
+            {
+                CorrelationId = correlationId
+            });
+
+            sagaId = await _repository.ShouldNotContainSaga(correlationId, TestTimeout);
+            Assert.IsFalse(sagaId.HasValue);
+        }
+
         SuperShopper _machine;
         ISessionFactory _sessionFactory;
         ISagaRepository<ShoppingChore> _repository;
@@ -142,6 +164,11 @@ namespace MassTransit.AutomatonymousTests
             public Guid CorrelationId { get; set; }
         }
 
+        class SodOff
+        {
+            public Guid CorrelationId { get; set; }
+        }
+
 
         class ShoppingChore :
             SagaStateMachineInstance
@@ -171,6 +198,7 @@ namespace MassTransit.AutomatonymousTests
 
                 Event(() => ExitFrontDoor, x => x.CorrelateById(context => context.Message.CorrelationId));
                 Event(() => GotHitByCar, x => x.CorrelateById(context => context.Message.CorrelationId));
+                Event(() => JustSodOff, x => x.CorrelateById(context => context.Message.CorrelationId));
 
                 CompositeEvent(() => EndOfTheWorld, x => x.Everything, CompositeEventOptions.IncludeInitial, ExitFrontDoor, GotHitByCar);
 
@@ -188,10 +216,17 @@ namespace MassTransit.AutomatonymousTests
                     When(EndOfTheWorld)
                         .Then(context => Console.WriteLine("Screwed!!"))
                         .Then(context => context.Instance.Screwed = true));
+
+                DuringAny(
+                    When(JustSodOff)
+                    .Finalize());
+
+                SetCompletedWhenFinalized();
             }
 
             public Event<GirlfriendYelling> ExitFrontDoor { get; private set; }
             public Event<GotHitByACar> GotHitByCar { get; private set; }
+            public Event<SodOff> JustSodOff { get; private set; }
             public Event EndOfTheWorld { get; private set; }
 
             public State OnTheWayToTheStore { get; private set; }

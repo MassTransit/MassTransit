@@ -29,7 +29,7 @@ namespace MassTransit.TestFramework
 
             while (DateTime.Now < giveUpAt)
             {
-                Guid saga = (await repository.Where(x => x.CorrelationId == sagaId)).FirstOrDefault();
+                Guid saga = (await (repository as IQuerySagaRepository<TSaga>).Where(x => x.CorrelationId == sagaId)).FirstOrDefault();
                 if (saga != Guid.Empty)
                     return saga;
 
@@ -47,7 +47,7 @@ namespace MassTransit.TestFramework
             Guid? saga = default(Guid?);
             while (DateTime.Now < giveUpAt)
             {
-                saga = (await repository.Where(x => x.CorrelationId == sagaId)).FirstOrDefault();
+                saga = (await (repository as IQuerySagaRepository<TSaga>).Where(x => x.CorrelationId == sagaId)).FirstOrDefault();
                 if (saga == Guid.Empty)
                     return default(Guid?);
 
@@ -64,11 +64,11 @@ namespace MassTransit.TestFramework
         {
             DateTime giveUpAt = DateTime.Now + timeout;
 
-            var sagaFilter = new SagaFilter<TSaga>(filter);
+            var query = new SagaQuery<TSaga>(filter);
 
             while (DateTime.Now < giveUpAt)
             {
-                List<Guid> sagas = (await repository.Find(sagaFilter)).ToList();
+                List<Guid> sagas = (await (repository as IQuerySagaRepository<TSaga>).Where(query.FilterExpression)).ToList();
                 if (sagas.Count > 0)
                     return sagas.Single();
 

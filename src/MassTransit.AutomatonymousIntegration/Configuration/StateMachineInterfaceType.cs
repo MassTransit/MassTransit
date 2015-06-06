@@ -13,6 +13,7 @@
 namespace Automatonymous
 {
     using MassTransit.Saga;
+    using MassTransit.Saga.ConnectorFactories;
     using MassTransit.Saga.Connectors;
     using SubscriptionConnectors;
 
@@ -22,15 +23,15 @@ namespace Automatonymous
         where TInstance : class, ISaga, SagaStateMachineInstance
         where TData : class
     {
-        readonly SagaConnectorFactory _connectorFactory;
+        readonly ISagaConnectorFactory _connectorFactory;
 
         public StateMachineInterfaceType(SagaStateMachine<TInstance> machine, ISagaRepository<TInstance> repository,
             EventCorrelation<TInstance, TData> correlation)
         {
-            _connectorFactory = new StateMachineEventConnectorFactory<TInstance, TData>(machine, correlation, correlation.GetSagaLocator(repository));
+            _connectorFactory = new StateMachineEventConnectorFactory<TInstance, TData>(machine, correlation);
         }
 
-        public SagaMessageConnector GetConnector()
+        public ISagaMessageConnector GetConnector()
         {
             return _connectorFactory.CreateMessageConnector();
         }

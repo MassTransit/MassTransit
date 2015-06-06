@@ -16,6 +16,7 @@ namespace MassTransit.Tests.Configuration
     using MassTransit.Saga.Connectors;
     using NUnit.Framework;
     using Saga;
+    using Saga.Messages;
     using Shouldly;
 
 

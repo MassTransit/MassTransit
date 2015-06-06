@@ -47,7 +47,7 @@ namespace Automatonymous.Configuration.RepositoryBuilders
             _completedExpression = completedExpression;
         }
 
-        public StateMachineSagaRepository<TInstance> Build()
+        public IStateMachineSagaRepository<TInstance> Build()
         {
             return new AutomatonymousStateMachineSagaRepository<TInstance>(_repository, _completedExpression, _correlations.Values);
         }

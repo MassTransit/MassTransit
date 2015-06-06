@@ -24,10 +24,10 @@ namespace Automatonymous.SubscriptionConnectors
 
 
     public class StateMachineConnector<TInstance> :
-        SagaConnector
+        ISagaConnector
         where TInstance : class, ISaga, SagaStateMachineInstance
     {
-        readonly IEnumerable<SagaMessageConnector> _connectors;
+        readonly IEnumerable<ISagaMessageConnector> _connectors;
         readonly ISagaRepository<TInstance> _repository;
         readonly SagaStateMachine<TInstance> _stateMachine;
 
@@ -47,7 +47,7 @@ namespace Automatonymous.SubscriptionConnectors
             }
         }
 
-        public IEnumerable<SagaMessageConnector> Connectors
+        public IEnumerable<ISagaMessageConnector> Connectors
         {
             get { return _connectors; }
         }
@@ -59,7 +59,7 @@ namespace Automatonymous.SubscriptionConnectors
             var handles = new List<ConnectHandle>();
             try
             {
-                foreach (SagaMessageConnector connector in _connectors)
+                foreach (ISagaMessageConnector connector in _connectors)
                 {
                     ConnectHandle handle = connector.Connect(consumePipe, sagaRepository, pipeSpecifications);
 
@@ -76,7 +76,7 @@ namespace Automatonymous.SubscriptionConnectors
             }
         }
 
-        IEnumerable<SagaMessageConnector> StateMachineEvents()
+        IEnumerable<ISagaMessageConnector> StateMachineEvents()
         {
             foreach (var correlation in _stateMachine.Correlations)
             {

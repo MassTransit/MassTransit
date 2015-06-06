@@ -30,8 +30,8 @@ namespace MassTransit.Saga.Pipeline.Filters
     {
         public async Task Send(SagaConsumeContext<TSaga, TMessage> context, IPipe<SagaConsumeContext<TSaga, TMessage>> next)
         {
-            var initiator = context.Saga as InitiatedBy<TMessage>;
-            if (initiator == null)
+            var consumer = context.Saga as InitiatedBy<TMessage>;
+            if (consumer == null)
             {
                 string message = string.Format("Saga type {0} is not initiated by message type {1}",
                     TypeMetadataCache<TSaga>.ShortName, TypeMetadataCache<TMessage>.ShortName);
@@ -39,9 +39,9 @@ namespace MassTransit.Saga.Pipeline.Filters
                 throw new ConsumerMessageException(message);
             }
 
-            await initiator.Consume(context).ConfigureAwait(false);
+            await consumer.Consume(context);
 
-            await next.Send(context).ConfigureAwait(false);
+            await next.Send(context);
         }
 
         public bool Visit(IPipelineVisitor visitor)

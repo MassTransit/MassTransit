@@ -5,7 +5,7 @@ namespace MassTransit.Saga.Pipeline.Pipes
 
 
     /// <summary>
-    /// Merges the out-of-band consumer back into the pipe
+    /// Merges the out-of-band message back into the pipe
     /// </summary>
     /// <typeparam name="TSaga"></typeparam>
     /// <typeparam name="TMessage"></typeparam>

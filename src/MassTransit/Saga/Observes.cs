@@ -19,6 +19,6 @@ namespace MassTransit.Saga
 		IConsumer<TMessage>
 		where TMessage : class
 	{
-		Expression<Func<TSaga, TMessage, bool>> GetBindExpression();
+	    Expression<Func<TSaga, TMessage, bool>> CorrelationExpression { get; }
 	}
 }

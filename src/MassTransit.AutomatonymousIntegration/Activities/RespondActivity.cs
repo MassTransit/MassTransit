@@ -27,21 +27,21 @@ namespace Automatonymous.Activities
         where TMessage : class
     {
         readonly Func<ConsumeEventContext<TInstance, TData>, TMessage> _messageFactory;
-        readonly IPipe<SendContext<TMessage>> _sendPipe;
+        readonly IPipe<SendContext<TMessage>> _responsePipe;
 
         public RespondActivity(Func<ConsumeEventContext<TInstance, TData>, TMessage> messageFactory,
             Action<SendContext<TMessage>> contextCallback)
         {
             _messageFactory = messageFactory;
 
-            _sendPipe = Pipe.Execute(contextCallback);
+            _responsePipe = Pipe.Execute(contextCallback);
         }
 
         public RespondActivity(Func<ConsumeEventContext<TInstance, TData>, TMessage> messageFactory)
         {
             _messageFactory = messageFactory;
 
-            _sendPipe = Pipe.Empty<SendContext<TMessage>>();
+            _responsePipe = Pipe.Empty<SendContext<TMessage>>();
         }
 
         void Visitable.Accept(StateMachineVisitor inspector)
@@ -59,15 +59,15 @@ namespace Automatonymous.Activities
 
             TMessage message = _messageFactory(consumeEventContext);
 
-            await consumeContext.RespondAsync(message);
+            await consumeContext.RespondAsync(message, _responsePipe);
 
             await next.Execute(context);
         }
 
-        Task Activity<TInstance, TData>.Faulted<TException>(BehaviorExceptionContext<TInstance, TData, TException> context,
+        async Task Activity<TInstance, TData>.Faulted<TException>(BehaviorExceptionContext<TInstance, TData, TException> context,
             Behavior<TInstance, TData> next)
         {
-            return next.Faulted(context);
+            await next.Faulted(context);
         }
     }
 }

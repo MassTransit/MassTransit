@@ -12,33 +12,37 @@
 // specific language governing permissions and limitations under the License.
 namespace Automatonymous.SubscriptionConnectors
 {
+    using CorrelationConfigurators;
+    using MassTransit;
+    using MassTransit.Pipeline;
     using MassTransit.Saga;
+    using MassTransit.Saga.ConnectorFactories;
     using MassTransit.Saga.Connectors;
-    using MassTransit.Saga.Pipeline.Filters;
     using Pipeline;
 
 
     public class StateMachineEventConnectorFactory<TInstance, TMessage> :
-        SagaConnectorFactory
+        ISagaConnectorFactory
         where TInstance : class, ISaga, SagaStateMachineInstance
         where TMessage : class
     {
         readonly StateMachineSagaMessageFilter<TInstance, TMessage> _consumeFilter;
-        readonly SagaLocatorFilter<TInstance, TMessage> _locatorFilter;
+        readonly IFilter<ConsumeContext<TMessage>> _messageFilter;
+        readonly ISagaPolicy<TInstance, TMessage> _policy;
+        readonly SagaFilterFactory<TInstance, TMessage> _sagaFilterFactory;
 
-        public StateMachineEventConnectorFactory(SagaStateMachine<TInstance> stateMachine, EventCorrelation<TInstance, TMessage> correlation,
-            ISagaLocator<TMessage> locator)
+        public StateMachineEventConnectorFactory(SagaStateMachine<TInstance> stateMachine, EventCorrelation<TInstance, TMessage> correlation)
         {
-            ISagaPolicy<TInstance, TMessage> policy = correlation.Policy;
-
             _consumeFilter = new StateMachineSagaMessageFilter<TInstance, TMessage>(stateMachine, correlation.Event);
 
-            _locatorFilter = new SagaLocatorFilter<TInstance, TMessage>(locator, policy);
+            _sagaFilterFactory = correlation.FilterFactory;
+            _policy = correlation.Policy;
+            _messageFilter = correlation.MessageFilter;
         }
 
-        public SagaMessageConnector CreateMessageConnector()
+        public ISagaMessageConnector CreateMessageConnector()
         {
-            return new StateMachineSagaMessageConnector<TInstance, TMessage>(_consumeFilter, _locatorFilter);
+            return new StateMachineSagaMessageConnector<TInstance, TMessage>(_consumeFilter, _policy, _sagaFilterFactory, _messageFilter);
         }
     }
 }

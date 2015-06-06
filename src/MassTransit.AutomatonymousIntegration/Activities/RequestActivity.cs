@@ -72,10 +72,10 @@ namespace Automatonymous.Activities
             await next.Execute(context);
         }
 
-        public Task Faulted<TException>(BehaviorExceptionContext<TInstance, TData, TException> context, Behavior<TInstance, TData> next)
+        public async Task Faulted<TException>(BehaviorExceptionContext<TInstance, TData, TException> context, Behavior<TInstance, TData> next)
             where TException : Exception
         {
-            return next.Faulted(context);
+            await next.Faulted(context);
         }
 
 
@@ -129,7 +129,7 @@ namespace Automatonymous.Activities
                 _requestId = requestId;
             }
 
-            public DateTime CreateTimestamp
+            public DateTime Timestamp
             {
                 get { return _timestamp; }
             }

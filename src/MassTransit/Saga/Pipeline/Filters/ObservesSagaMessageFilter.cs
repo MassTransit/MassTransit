@@ -38,9 +38,9 @@ namespace MassTransit.Saga.Pipeline.Filters
                 throw new ConsumerMessageException(message);
             }
 
-            await consumer.Consume(context).ConfigureAwait(false);
+            await consumer.Consume(context);
 
-            await next.Send(context).ConfigureAwait(false);
+            await next.Send(context);
         }
 
         public bool Visit(IPipelineVisitor visitor)
