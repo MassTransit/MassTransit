@@ -16,6 +16,7 @@ namespace MassTransit.NHibernateIntegration.Saga
     using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
+    using Context;
     using Logging;
     using MassTransit.Saga;
     using NHibernate;
@@ -33,12 +34,15 @@ namespace MassTransit.NHibernateIntegration.Saga
         readonly TSaga _instance;
         readonly ISession _session;
         bool _completed;
+        readonly PayloadCache _payloadCache;
 
         public NHibernateSagaConsumeContext(ISession session, ConsumeContext<TMessage> context, TSaga instance)
         {
             _context = context;
             _instance = instance;
             _session = session;
+
+            _payloadCache = new PayloadCache();
         }
 
         public Task CompleteTask
@@ -103,19 +107,29 @@ namespace MassTransit.NHibernateIntegration.Saga
 
         public bool HasPayloadType(Type contextType)
         {
-            return _context.HasPayloadType(contextType);
+            return _payloadCache.HasPayloadType(contextType) || _context.HasPayloadType(contextType);
         }
 
-        public bool TryGetPayload<TPayload>(out TPayload payload)
+        public bool TryGetPayload<TPayload>(out TPayload context)
             where TPayload : class
         {
-            return _context.TryGetPayload(out payload);
+            if (_payloadCache.TryGetPayload(out context))
+                return true;
+
+            return _context.TryGetPayload(out context);
         }
 
         public TPayload GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory)
             where TPayload : class
         {
-            return _context.GetOrAddPayload(payloadFactory);
+            TPayload payload;
+            if (_payloadCache.TryGetPayload(out payload))
+                return payload;
+
+            if (_context.TryGetPayload(out payload))
+                return payload;
+
+            return _payloadCache.GetOrAddPayload(payloadFactory);
         }
 
         public Guid? MessageId

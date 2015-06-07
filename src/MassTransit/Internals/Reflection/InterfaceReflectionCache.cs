@@ -45,16 +45,9 @@ namespace MassTransit.Internals.Reflection
                     return type;
             }
             Type[] interfaces = type.GetTypeInfo().ImplementedInterfaces.ToArray();
-            for (int i = 0; i < interfaces.Length; i++)
-            {
-                if (interfaces[i].GetTypeInfo().IsGenericType)
-                {
-                    if (interfaces[i].GetGenericTypeDefinition() == interfaceType)
-                        return interfaces[i];
-                }
-            }
-
-            return null;
+            
+            return interfaces.Where(t => t.GetTypeInfo().IsGenericType)
+                .FirstOrDefault(t => t.GetGenericTypeDefinition() == interfaceType);
         }
 
         public Type Get(Type type, Type interfaceType)
@@ -70,13 +63,8 @@ namespace MassTransit.Internals.Reflection
                 return GetGenericInterface(type, interfaceType);
 
             Type[] interfaces = type.GetTypeInfo().ImplementedInterfaces.ToArray();
-            for (int i = 0; i < interfaces.Length; i++)
-            {
-                if (interfaces[i] == interfaceType)
-                    return interfaces[i];
-            }
-
-            return null;
+            
+            return interfaces.FirstOrDefault(t => t == interfaceType);
         }
     }
 }

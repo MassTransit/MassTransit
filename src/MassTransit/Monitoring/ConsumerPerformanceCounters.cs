@@ -92,7 +92,7 @@ namespace MassTransit.Monitoring
         }
 
 
-        class Cached
+        static class Cached
         {
             internal static readonly Lazy<ConsumerPerformanceCounters> Instance = new Lazy<ConsumerPerformanceCounters>(() => new ConsumerPerformanceCounters());
         }

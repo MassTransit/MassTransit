@@ -12,9 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.TransformConfigurators
 {
-    using PipeConfigurators;
-
-
     public class TransformSpecificationConfigurator<TMessage> :
         ITransformSpecificationConfigurator<TMessage>
         where TMessage : class

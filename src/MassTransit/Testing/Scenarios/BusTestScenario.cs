@@ -14,6 +14,7 @@ namespace MassTransit.Testing.Scenarios
 {
     using System;
     using System.Threading;
+    using TestDecorators;
 
 
     /// <summary>
@@ -25,12 +26,13 @@ namespace MassTransit.Testing.Scenarios
         readonly IBusControl _busControl;
         readonly CancellationToken _cancellationToken;
         readonly PublishedMessageList _published;
-        readonly ReceivedMessageList _received;
-        readonly ObservedSentMessageList _sent;
+        readonly IReceivedMessageList _received;
+        readonly ISentMessageList _sent;
         readonly ReceivedMessageList _skipped;
         readonly TimeSpan _timeout;
         readonly CancellationTokenSource _tokenSource;
         BusHandle _busHandle;
+        ISendEndpoint _subjectSendEndpoint;
 
         public BusTestScenario(TimeSpan timeout, IBusControl busControl)
         {
@@ -38,19 +40,28 @@ namespace MassTransit.Testing.Scenarios
             _busControl = busControl;
 
             _received = new ReceivedMessageList(timeout);
-            _sent = new ObservedSentMessageList(timeout);
             _skipped = new ReceivedMessageList(timeout);
             _published = new PublishedMessageList(timeout);
 
             _tokenSource = new CancellationTokenSource(timeout);
             _cancellationToken = _tokenSource.Token;
 
+            _subjectSendEndpoint = _busControl.GetSendEndpoint(new Uri("loopback://localhost/input_queue")).Result;
+
+            var testSendObserver = new TestSendObserver(timeout);
+            _sent = testSendObserver.Messages;
+            _subjectSendEndpoint.Connect(testSendObserver);
+
+            var consumeObserver = new TestConsumeObserver(timeout);
+            _received = consumeObserver.Messages;
+            busControl.ConnectConsumeObserver(consumeObserver);
+
             _busHandle = _busControl.Start();
         }
 
         public virtual ISendEndpoint SubjectSendEndpoint
         {
-            get { return Bus.GetSendEndpoint(new Uri("loopback://localhost/input_queue")).Result; }
+            get { return _subjectSendEndpoint; }
         }
 
         public ISentMessageList Sent
@@ -92,7 +103,7 @@ namespace MassTransit.Testing.Scenarios
         {
             if (_busHandle != null)
             {
-                _busHandle.Dispose();
+                _busHandle.Stop(_timeout);
                 _busHandle = null;
             }
         }

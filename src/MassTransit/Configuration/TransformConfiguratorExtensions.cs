@@ -13,7 +13,6 @@
 namespace MassTransit
 {
     using System;
-    using PipeConfigurators;
     using TransformConfigurators;
 
 
@@ -41,12 +40,13 @@ namespace MassTransit
         /// <typeparam name="T"></typeparam>
         /// <param name="configurator"></param>
         /// <param name="configureTransform"></param>
-        public static void UseTransform<T>(this IConsumePipeConfigurator configurator, Func<ITransformSpecificationConfigurator<T>, ITransformConfiguration<T>> configureTransform)
+        public static void UseTransform<T>(this IConsumePipeConfigurator configurator,
+            Func<ITransformSpecificationConfigurator<T>, ITransformConfiguration<T>> configureTransform)
             where T : class
         {
             var specificationConfigurator = new TransformSpecificationConfigurator<T>();
 
-            var specification = configureTransform(specificationConfigurator);
+            ITransformConfiguration<T> specification = configureTransform(specificationConfigurator);
 
             configurator.AddPipeSpecification(specification);
         }
@@ -73,15 +73,15 @@ namespace MassTransit
         /// <typeparam name="T"></typeparam>
         /// <param name="configurator"></param>
         /// <param name="configureTransform"></param>
-        public static void UseTransform<T>(this IPipeConfigurator<ConsumeContext<T>> configurator, Func<ITransformSpecificationConfigurator<T>, ITransformConfiguration<T>> configureTransform)
+        public static void UseTransform<T>(this IPipeConfigurator<ConsumeContext<T>> configurator,
+            Func<ITransformSpecificationConfigurator<T>, ITransformConfiguration<T>> configureTransform)
             where T : class
         {
             var specificationConfigurator = new TransformSpecificationConfigurator<T>();
 
-            var specification = configureTransform(specificationConfigurator);
+            ITransformConfiguration<T> specification = configureTransform(specificationConfigurator);
 
             configurator.AddPipeSpecification(specification);
         }
-
     }
 }

@@ -16,6 +16,7 @@ namespace MassTransit.Saga
     using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
+    using Context;
     using Logging;
     using MassTransit.Pipeline;
     using Util;
@@ -29,6 +30,7 @@ namespace MassTransit.Saga
         static readonly ILog _log = Logger.Get<InMemorySagaRepository<TSaga>>();
         readonly ConsumeContext<TMessage> _context;
         readonly TSaga _instance;
+        readonly PayloadCache _payloadCache;
         readonly InMemorySagaRepository<TSaga> _repository;
         bool _completed;
 
@@ -37,6 +39,8 @@ namespace MassTransit.Saga
             _repository = repository;
             _context = context;
             _instance = instance;
+
+            _payloadCache = new PayloadCache();
         }
 
         public Task CompleteTask
@@ -101,19 +105,29 @@ namespace MassTransit.Saga
 
         public bool HasPayloadType(Type contextType)
         {
-            return _context.HasPayloadType(contextType);
+            return _payloadCache.HasPayloadType(contextType) || _context.HasPayloadType(contextType);
         }
 
-        public bool TryGetPayload<TPayload>(out TPayload payload)
+        public bool TryGetPayload<TPayload>(out TPayload context)
             where TPayload : class
         {
-            return _context.TryGetPayload(out payload);
+            if (_payloadCache.TryGetPayload(out context))
+                return true;
+
+            return _context.TryGetPayload(out context);
         }
 
         public TPayload GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory)
             where TPayload : class
         {
-            return _context.GetOrAddPayload(payloadFactory);
+            TPayload payload;
+            if (_payloadCache.TryGetPayload(out payload))
+                return payload;
+
+            if (_context.TryGetPayload(out payload))
+                return payload;
+
+            return _payloadCache.GetOrAddPayload(payloadFactory);
         }
 
         public Guid? MessageId

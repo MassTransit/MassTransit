@@ -18,7 +18,6 @@ namespace MassTransit.Courier.Hosts
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
-    using Context;
     using Contracts;
     using Events;
     using Exceptions;
@@ -339,14 +338,14 @@ namespace MassTransit.Courier.Hosts
             return _context.GetSendEndpoint(address);
         }
 
-        ExecutionResult Faulted(Exception exception)
-        {
-            return new FaultedExecutionResult<TArguments>(this, _publisher, _activity, _routingSlip, new FaultExceptionInfo(exception));
-        }
-
         public ConnectHandle Connect(IPublishObserver observer)
         {
             return _context.Connect(observer);
+        }
+
+        ExecutionResult Faulted(Exception exception)
+        {
+            return new FaultedExecutionResult<TArguments>(this, _publisher, _activity, _routingSlip, new FaultExceptionInfo(exception));
         }
     }
 }

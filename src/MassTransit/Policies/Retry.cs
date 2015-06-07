@@ -152,7 +152,6 @@ namespace MassTransit.Policies
         /// Create an exponential retry policy that never gives up
         /// intervals
         /// </summary>
-        /// <param name="retryLimit"></param>
         /// <param name="minInterval"></param>
         /// <param name="maxInterval"></param>
         /// <param name="intervalDelta"></param>

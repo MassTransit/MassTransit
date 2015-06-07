@@ -1,12 +1,12 @@
-// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
 // License at 
 // 
 //     http://www.apache.org/licenses/LICENSE-2.0 
 // 
-// Unless required by applicable law or agreed to in writing, software distributed 
+// Unless required by applicable law or agreed to in writing, software distributed
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
@@ -15,6 +15,7 @@ namespace MassTransit
     using System;
     using Logging;
 
+
     public static class EndpointLoggerExtensions
     {
         static readonly ILog _messages = Logger.Get("MassTransit.Messages");
@@ -22,9 +23,7 @@ namespace MassTransit
         public static void LogSkipped(this Uri sourceAddress, string messageId)
         {
             if (_messages.IsDebugEnabled)
-            {
                 _messages.DebugFormat("SKIP:{0}:{1}", sourceAddress, messageId);
-            }
         }
 
         /// <summary>
@@ -34,13 +33,10 @@ namespace MassTransit
         /// <param name="destinationAddress"></param>
         /// <param name="messageId"></param>
         /// <param name="description"> </param>
-        public static void LogMoved(this Uri sourceAddress, EndpointAddress destinationAddress,
-                                    string messageId, string description)
+        public static void LogMoved(this Uri sourceAddress, Uri destinationAddress, string messageId, string description)
         {
             if (_messages.IsInfoEnabled)
-            {
                 _messages.InfoFormat("MOVE:{0}:{1}:{2}:{3}", sourceAddress, destinationAddress, messageId, description);
-            }
         }
 
         /// <summary>
@@ -50,29 +46,22 @@ namespace MassTransit
         /// <param name="destinationAddress"></param>
         /// <param name="messageId"></param>
         /// <param name="description"> </param>
-        public static void LogReQueued(this Uri sourceAddress, EndpointAddress destinationAddress,
-                                    string messageId, string description)
+        public static void LogReQueued(this Uri sourceAddress, Uri destinationAddress, string messageId, string description)
         {
             if (_messages.IsInfoEnabled)
-            {
                 _messages.InfoFormat("RQUE:{0}:{1}:{2}:{3}", sourceAddress, destinationAddress, messageId, description);
-            }
         }
 
         public static void LogReceived(this Uri sourceAddress, string messageId, string description)
         {
             if (_messages.IsDebugEnabled)
-            {
                 _messages.DebugFormat("RECV:{0}:{1}:{2}", sourceAddress, messageId, description);
-            }
         }
 
         public static void LogSent(this Uri address, string messageId, string description)
         {
             if (_messages.IsDebugEnabled)
-            {
                 _messages.DebugFormat("SEND:{0}:{1}:{2}", address, messageId, description);
-            }
         }
     }
 }
