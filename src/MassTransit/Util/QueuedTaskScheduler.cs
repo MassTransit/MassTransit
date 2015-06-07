@@ -232,7 +232,7 @@ namespace MassTransit.Util
                                     Task targetTask;
                                     QueuedTaskSchedulerQueue queueForTargetTask;
                                     lock (_queueGroups)
-                                        FindNextTask_NeedsLock(out targetTask, out queueForTargetTask);
+                                        FindNextTaskNeedsLock(out targetTask, out queueForTargetTask);
 
                                     // ... and if we found one, run it
                                     if (targetTask != null)
@@ -269,7 +269,7 @@ namespace MassTransit.Util
         /// The scheduler associated with the found task.  Due to security checks inside of TPL,  
         /// this scheduler needs to be used to execute that task.
         /// </param>
-        void FindNextTask_NeedsLock(out Task targetTask, out QueuedTaskSchedulerQueue queueForTargetTask)
+        void FindNextTaskNeedsLock(out Task targetTask, out QueuedTaskSchedulerQueue queueForTargetTask)
         {
             targetTask = null;
             queueForTargetTask = null;
@@ -291,7 +291,7 @@ namespace MassTransit.Util
                     {
                         targetTask = items.Dequeue();
                         if (queueForTargetTask._disposed && items.Count == 0)
-                            RemoveQueue_NeedsLock(queueForTargetTask);
+                            RemoveQueueNeedsLock(queueForTargetTask);
                         queues.NextQueueIndex = (queues.NextQueueIndex + 1) % queueGroup.Value.Count;
                         return;
                     }
@@ -372,7 +372,7 @@ namespace MassTransit.Util
                         if (targetTask == null)
                         {
                             lock (_queueGroups)
-                                FindNextTask_NeedsLock(out targetTask, out queueForTargetTask);
+                                FindNextTaskNeedsLock(out targetTask, out queueForTargetTask);
                         }
 
                         // Now if we finally have a task, run it.  If the task
@@ -470,7 +470,7 @@ namespace MassTransit.Util
 
         /// <summary>Removes a scheduler from the group.</summary>
         /// <param name="queue">The scheduler to be removed.</param>
-        void RemoveQueue_NeedsLock(QueuedTaskSchedulerQueue queue)
+        void RemoveQueueNeedsLock(QueuedTaskSchedulerQueue queue)
         {
             // Find the group that contains the queue and the queue's index within the group
             QueueGroup queueGroup = _queueGroups[queue._priority];
@@ -595,7 +595,7 @@ namespace MassTransit.Util
                         // we still mark it as disposed, and the associated QueuedTaskScheduler
                         // will remove the queue when its count hits 0 and its _disposed is true.
                         if (_workItems.Count == 0)
-                            _pool.RemoveQueue_NeedsLock(this);
+                            _pool.RemoveQueueNeedsLock(this);
                     }
                     _disposed = true;
                 }

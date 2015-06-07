@@ -12,7 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Util
 {
-    public class HostMetadataCache
+    public static class HostMetadataCache
     {
         public static HostInfo Host
         {

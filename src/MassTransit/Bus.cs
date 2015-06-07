@@ -18,13 +18,9 @@ namespace MassTransit
     /// <summary>
     /// used to get access to the bus factories
     /// </summary>
-    public class Bus
+    public static class Bus
     {
         static readonly IBusFactory _selector = new BusFactory();
-
-        Bus()
-        {
-        }
 
         /// <summary>
         /// Access a bus factory from this main factory interface (easy extension method support)

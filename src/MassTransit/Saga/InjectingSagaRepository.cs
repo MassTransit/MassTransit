@@ -39,7 +39,7 @@ namespace MassTransit.Saga
             Expression<Func<TSaga, T1>> propertyExpression,
             Func<TSaga, T1> valueProvider)
         {
-            var property = new ReadWriteProperty(propertyExpression.GetPropertyInfo(), true);
+            var property = new ReadWriteProperty(propertyExpression.GetPropertyInfo());
 
             return new DelegatingSagaRepository<TSaga>(repository, context =>
             {

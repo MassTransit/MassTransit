@@ -41,7 +41,7 @@ namespace MassTransit.MessageData
             throw new MessageDataNotFoundException(address);
         }
 
-        async Task<Uri> IMessageDataRepository.Put(Stream stream, TimeSpan? timeToLive, CancellationToken cancellationToken = default(CancellationToken))
+        async Task<Uri> IMessageDataRepository.Put(Stream stream, TimeSpan? timeToLive, CancellationToken cancellationToken)
         {
             Uri address = new InMemoryMessageDataId().Uri;
 

@@ -1,6 +1,7 @@
 ﻿namespace MassTransit.Internals.Mapping
 {
     using System.Collections.Generic;
+    using System.Linq;
     using Reflection;
 
 
@@ -26,11 +27,10 @@
             if (values == null)
                 return;
 
-            var elements = new List<object>();
-            foreach (var element in values)
-                elements.Add(new object[] {element.Key, _elementConverter.GetDictionary(element.Value)});
+            var elementArray = values.Select(element => new object[] {element.Key, _elementConverter.GetDictionary(element.Value)})
+                .ToArray<object>();
 
-            dictionary.Add(_property.Property.Name, elements.ToArray());
+            dictionary.Add(_property.Property.Name, elementArray);
         }
     }
 }

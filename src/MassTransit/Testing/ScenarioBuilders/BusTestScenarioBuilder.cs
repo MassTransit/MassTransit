@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,13 +14,12 @@ namespace MassTransit.Testing.ScenarioBuilders
 {
     using System;
     using BusConfigurators;
-    using MassTransit.Configurators;
     using Scenarios;
 
 
     /// <summary>
     /// Implementation for the test scenario, but abstract for others to customize it. Sets some defaults in the c'tor, which you
-    /// can override with the <see cref="ConfigureBus"/> and <see cref="ConfigureSubscriptions"/> methods.
+    /// can override with the <see cref="ConfigureBus"/> and <see cref="ConfigureReceiveEndpoint"/> methods.
     /// </summary>
     public class BusTestScenarioBuilder :
         IBusTestScenarioBuilder

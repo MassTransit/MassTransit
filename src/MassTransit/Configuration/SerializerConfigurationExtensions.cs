@@ -92,7 +92,6 @@ namespace MassTransit
         /// <summary>
         /// Add support for the binary message deserializer to the bus
         /// </summary>
-        /// <typeparam name="T"></typeparam>
         /// <param name="configurator"></param>
         /// <returns></returns>
         public static void SupportBinaryMessageDeserializer(this IBusFactoryConfigurator configurator)

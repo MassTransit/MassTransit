@@ -1,89 +1,148 @@
-// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
 // License at 
 // 
 //     http://www.apache.org/licenses/LICENSE-2.0 
 // 
-// Unless required by applicable law or agreed to in writing, software distributed 
+// Unless required by applicable law or agreed to in writing, software distributed
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Testing.TestDecorators
 {
+    using System;
     using System.Threading.Tasks;
-	using Pipeline;
-	using Saga;
+    using Pipeline;
+    using Saga;
 
-	public class SagaRepositoryTestDecorator<TSaga> :
-		ISagaRepository<TSaga>
-		where TSaga : class, ISaga
-	{
-		readonly ReceivedMessageList _received;
-		readonly ISagaRepository<TSaga> _sagaRepository;
-		readonly SagaListImpl<TSaga> _sagas;
-		SagaListImpl<TSaga> _created;
 
-		public SagaRepositoryTestDecorator(ISagaRepository<TSaga> sagaRepository,
-		                                   ReceivedMessageList received, SagaListImpl<TSaga> created,
-		                                   SagaListImpl<TSaga> sagas)
-		{
-			_sagaRepository = sagaRepository;
-			_received = received;
-			_created = created;
-			_sagas = sagas;
-		}
+    public class SagaRepositoryTestDecorator<TSaga> :
+        ISagaRepository<TSaga>
+        where TSaga : class, ISaga
+    {
+        readonly SagaListImpl<TSaga> _created;
+        readonly ReceivedMessageList _received;
+        readonly ISagaRepository<TSaga> _sagaRepository;
+        readonly SagaListImpl<TSaga> _sagas;
 
-//		public IEnumerable<Action<IConsumeContext<TMessage>>> GetSaga<TMessage>(IConsumeContext<TMessage> context, Guid sagaId,
-//		                                                                        InstanceHandlerSelector<TSaga, TMessage>
-//		                                                                        	selector, ISagaPolicy<TSaga, TMessage> policy)
-//			where TMessage : class
-//		{
-//			ISagaPolicy<TSaga, TMessage> sagaPolicy = new SagaPolicyTestDecorator<TSaga, TMessage>(policy, _created);
-//
-//			InstanceHandlerSelector<TSaga, TMessage> interceptSelector = (s, c) =>
-//				{
-//					IEnumerable<Action<IConsumeContext<TMessage>>> result = selector(s, c);
-//
-//					return DecorateSelector(s, result);
-//				};
-//
-//			IEnumerable<Action<IConsumeContext<TMessage>>> consumers = _sagaRepository.GetSaga(context, sagaId, interceptSelector,
-//				sagaPolicy);
-//
-//			foreach (var action in consumers)
-//			{
-//				Action<IConsumeContext<TMessage>> consumer = action;
-//
-//				yield return message =>
-//					{
-//						var received = new ObservedReceivedMessage<TMessage>(message);
-//
-//						try
-//						{
-//							consumer(message);
-//						}
-//						catch (Exception ex)
-//						{
-//							received.SetException(ex);
-//						}
-//						finally
-//						{
-//							_received.Add(received);
-//						}
-//					};
-//			}
-//		}
+        public SagaRepositoryTestDecorator(ISagaRepository<TSaga> sagaRepository, ReceivedMessageList received, SagaListImpl<TSaga> created,
+            SagaListImpl<TSaga> sagas)
+        {
+            _sagaRepository = sagaRepository;
+            _received = received;
+            _created = created;
+            _sagas = sagas;
+        }
 
-	    public Task Send<T>(ConsumeContext<T> context, ISagaPolicy<TSaga, T> policy, IPipe<SagaConsumeContext<TSaga, T>> next) where T : class
-	    {
-	        return _sagaRepository.Send(context, policy, next);
-	    }
+        Task ISagaRepository<TSaga>.Send<T>(ConsumeContext<T> context, ISagaPolicy<TSaga, T> policy, IPipe<SagaConsumeContext<TSaga, T>> next)
+        {
+            var interceptPipe = new InterceptPipe<T>(_sagas, _received, next);
+            var interceptPolicy = new InterceptPolicy<T>(_created, policy);
 
-	    public Task SendQuery<T>(SagaQueryConsumeContext<TSaga, T> context, ISagaPolicy<TSaga, T> policy, IPipe<SagaConsumeContext<TSaga, T>> next) where T : class
-	    {
-	        return _sagaRepository.SendQuery(context, policy, next);
-	    }
-	}
+            return _sagaRepository.Send(context, interceptPolicy, interceptPipe);
+        }
+
+        Task ISagaRepository<TSaga>.SendQuery<T>(SagaQueryConsumeContext<TSaga, T> context, ISagaPolicy<TSaga, T> policy,
+            IPipe<SagaConsumeContext<TSaga, T>> next)
+        {
+            var interceptPipe = new InterceptPipe<T>(_sagas, _received, next);
+            var interceptPolicy = new InterceptPolicy<T>(_created, policy);
+
+            return _sagaRepository.SendQuery(context, interceptPolicy, interceptPipe);
+        }
+
+
+        class InterceptPipe<TMessage> :
+            IPipe<SagaConsumeContext<TSaga, TMessage>>
+            where TMessage : class
+        {
+            readonly IPipe<SagaConsumeContext<TSaga, TMessage>> _pipe;
+            readonly ReceivedMessageList _received;
+            readonly SagaListImpl<TSaga> _sagas;
+
+            public InterceptPipe(SagaListImpl<TSaga> sagas, ReceivedMessageList received, IPipe<SagaConsumeContext<TSaga, TMessage>> pipe)
+            {
+                _sagas = sagas;
+                _received = received;
+                _pipe = pipe;
+            }
+
+            public async Task Send(SagaConsumeContext<TSaga, TMessage> context)
+            {
+                _sagas.Add(context);
+
+                try
+                {
+                    await _pipe.Send(context);
+
+                    _received.Add(context);
+                }
+                catch (Exception ex)
+                {
+                    _received.Add(context, ex);
+                    throw;
+                }
+            }
+
+            public bool Visit(IPipelineVisitor visitor)
+            {
+                return _pipe.Visit(visitor);
+            }
+        }
+
+
+        class InterceptPolicy<TMessage> :
+            ISagaPolicy<TSaga, TMessage>
+            where TMessage : class
+        {
+            readonly SagaListImpl<TSaga> _created;
+            readonly ISagaPolicy<TSaga, TMessage> _policy;
+
+            public InterceptPolicy(SagaListImpl<TSaga> created, ISagaPolicy<TSaga, TMessage> policy)
+            {
+                _created = created;
+                _policy = policy;
+            }
+
+            public Task Existing(SagaConsumeContext<TSaga, TMessage> context, IPipe<SagaConsumeContext<TSaga, TMessage>> next)
+            {
+                return _policy.Existing(context, next);
+            }
+
+            public async Task Missing(ConsumeContext<TMessage> context, IPipe<SagaConsumeContext<TSaga, TMessage>> next)
+            {
+                var interceptPipe = new InterceptPolicyPipe(_created, next);
+
+                await _policy.Missing(context, interceptPipe);
+            }
+
+
+            class InterceptPolicyPipe :
+                IPipe<SagaConsumeContext<TSaga, TMessage>>
+            {
+                readonly SagaListImpl<TSaga> _created;
+                readonly IPipe<SagaConsumeContext<TSaga, TMessage>> _pipe;
+
+                public InterceptPolicyPipe(SagaListImpl<TSaga> created, IPipe<SagaConsumeContext<TSaga, TMessage>> pipe)
+                {
+                    _created = created;
+                    _pipe = pipe;
+                }
+
+                public async Task Send(SagaConsumeContext<TSaga, TMessage> context)
+                {
+                    _created.Add(context);
+
+                    await _pipe.Send(context);
+                }
+
+                public bool Visit(IPipelineVisitor visitor)
+                {
+                    return _pipe.Visit(visitor);
+                }
+            }
+        }
+    }
 }

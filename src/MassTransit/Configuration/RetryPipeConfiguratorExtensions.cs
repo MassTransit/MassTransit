@@ -44,7 +44,6 @@ namespace MassTransit
         /// <summary>
         /// Retry the subsequent filter pipe using the specified retry policy
         /// </summary>
-        /// <typeparam name="T">The pipe type</typeparam>
         /// <param name="configurator">The pipe configurator</param>
         /// <param name="retryPolicy">The retry policy</param>
         /// <param name="cancellationToken">The cancellation token to end the retry operations</param>

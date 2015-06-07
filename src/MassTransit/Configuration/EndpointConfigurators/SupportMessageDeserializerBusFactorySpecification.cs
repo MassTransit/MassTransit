@@ -24,8 +24,7 @@ namespace MassTransit.EndpointConfigurators
         readonly ContentType _contentType;
         readonly DeserializerFactory _deserializerFactory;
 
-        public SupportMessageDeserializerBusFactorySpecification(ContentType contentType,
-            DeserializerFactory deserializerFactory)
+        public SupportMessageDeserializerBusFactorySpecification(ContentType contentType, DeserializerFactory deserializerFactory)
         {
             _contentType = contentType;
             _deserializerFactory = deserializerFactory;
@@ -35,8 +34,12 @@ namespace MassTransit.EndpointConfigurators
         {
             if (_contentType == null)
                 yield return this.Failure("ContentType", "must not be null");
-            if (string.IsNullOrWhiteSpace(_contentType.MediaType))
-                yield return this.Failure("MediaType", "must be specified");
+            else
+            {
+                if (string.IsNullOrWhiteSpace(_contentType.MediaType))
+                    yield return this.Failure("MediaType", "must be specified");
+            }
+
             if (_deserializerFactory == null)
                 yield return this.Failure("DeserializerFactory", "must not be null");
         }

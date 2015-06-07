@@ -33,7 +33,7 @@ namespace MassTransit.Monitoring
         }
 
 
-        class Cached
+        static class Cached
         {
             public static readonly Lazy<ConsumerPerformanceCounterCache> Counter =
                 new Lazy<ConsumerPerformanceCounterCache>(() => new ConsumerPerformanceCounterCache());

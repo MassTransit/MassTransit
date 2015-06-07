@@ -124,7 +124,6 @@ namespace MassTransit.Pipeline.Filters
             readonly Lazy<IFilter<ConsumeContext>> _filter;
             readonly IConsumeObserver _observer;
             readonly IList<IFilter<ConsumeContext<TMessage>>> _pipeFilters;
-            ConnectHandle _filterHandle;
 
             public MessagePipe(IConsumeObserver observer)
             {
@@ -176,7 +175,7 @@ namespace MassTransit.Pipeline.Filters
                 var messageConsumeFilter = new MessageConsumeFilter<TMessage>(_pipeFilters);
 
                 // we subscribe to any events so that they are pushed up the stack
-                _filterHandle = ((IConsumeMessageObserverConnector)messageConsumeFilter).ConnectConsumeMessageObserver(this);
+                ((IConsumeMessageObserverConnector)messageConsumeFilter).ConnectConsumeMessageObserver(this);
 
                 return messageConsumeFilter;
             }

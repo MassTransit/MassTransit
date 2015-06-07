@@ -17,12 +17,16 @@ namespace MassTransit.Saga
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
+    using Logging;
+    using Util;
 
 
     public class SagaMetadataCache<TSaga> :
         ISagaMetadataCache<TSaga>
         where TSaga : class, ISaga
     {
+        static readonly ILog _log = Logger.Get<SagaMetadataCache<TSaga>>();
+
         readonly SagaInterfaceType[] _initiatedByTypes;
         readonly SagaInterfaceType[] _observesTypes;
         readonly SagaInterfaceType[] _orchestratesTypes;
@@ -34,8 +38,9 @@ namespace MassTransit.Saga
             _orchestratesTypes = GetOrchestratingTypes().ToArray();
             _observesTypes = GetObservingTypes().ToArray();
 
-            _factoryMethod = (Guid correlationId) => (TSaga)Activator.CreateInstance(typeof(TSaga), correlationId);
+            _factoryMethod = correlationId => (TSaga)Activator.CreateInstance(typeof(TSaga), correlationId);
 
+            // ReSharper disable once CSharpWarnings::CS4014
             GenerateFactoryMethodAsynchronously();
         }
 
@@ -84,7 +89,7 @@ namespace MassTransit.Saga
         /// regular Activator, but doing this asynchronously ensures we don't slow down startup
         /// </summary>
         /// <returns></returns>
-        async Task GenerateFactoryMethodAsynchronously()
+        async void GenerateFactoryMethodAsynchronously()
         {
             await Task.Yield();
 
@@ -94,8 +99,10 @@ namespace MassTransit.Saga
 
                 Interlocked.Exchange(ref _factoryMethod, factory.FactoryMethod);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                if (_log.IsErrorEnabled)
+                    _log.Error(string.Format("Failed to generate constructor instance factory for {0}", TypeMetadataCache<TSaga>.ShortName), ex);
             }
         }
 

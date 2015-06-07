@@ -1,4 +1,4 @@
-// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -44,19 +44,10 @@ namespace MassTransit
                 messageName += "]";
             }
             else
-            {
                 messageName = messageType.FullName;
-            }
 
             string assembly = messageType.Assembly.FullName;
-            if (assembly != null)
-            {
-                assembly = ", " + assembly.Substring(0, assembly.IndexOf(','));
-            }
-            else
-            {
-                assembly = String.Empty;
-            }
+            assembly = ", " + assembly.Substring(0, assembly.IndexOf(','));
 
             return String.Format("{0}{1}", messageName, assembly);
         }

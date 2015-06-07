@@ -104,6 +104,7 @@ namespace MassTransit
         /// <param name="context"></param>
         /// <param name="endpointAddress"></param>
         /// <param name="message">The message</param>
+        /// <param name="messageType"></param>
         /// <param name="pipe"></param>
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
         public static async Task Send(this ConsumeContext context, Uri endpointAddress, object message, Type messageType, IPipe<SendContext> pipe)

@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -24,14 +24,9 @@ namespace MassTransit.Internals.Reflection
         public readonly Action<object, object> SetProperty;
 
         public ReadWriteProperty(PropertyInfo property)
-            : this(property, false)
-        {
-        }
-
-        public ReadWriteProperty(PropertyInfo property, bool includeReadOnly)
             : base(property)
         {
-            SetProperty = GetSetMethod(Property, includeReadOnly);
+            SetProperty = GetSetMethod(Property);
         }
 
         public void Set(object instance, object value)
@@ -39,23 +34,22 @@ namespace MassTransit.Internals.Reflection
             SetProperty(instance, value);
         }
 
-        static Action<object, object> GetSetMethod(PropertyInfo property, bool includeNonPublic)
+        static Action<object, object> GetSetMethod(PropertyInfo property)
         {
+            if (property.DeclaringType == null)
+                throw new ArgumentException("DeclaringType is null", "property");
+
             ParameterExpression instance = Expression.Parameter(typeof(object), "instance");
             ParameterExpression value = Expression.Parameter(typeof(object), "value");
 
             // value as T is slightly faster than (T)value, so if it's not a value type, use that
-            UnaryExpression instanceCast;
-            if (property.DeclaringType.GetTypeInfo().IsValueType)
-                instanceCast = Expression.Convert(instance, property.DeclaringType);
-            else
-                instanceCast = Expression.TypeAs(instance, property.DeclaringType);
+            UnaryExpression instanceCast = property.DeclaringType.GetTypeInfo().IsValueType
+                ? Expression.Convert(instance, property.DeclaringType)
+                : Expression.TypeAs(instance, property.DeclaringType);
 
-            UnaryExpression valueCast;
-            if (property.PropertyType.GetTypeInfo().IsValueType)
-                valueCast = Expression.Convert(value, property.PropertyType);
-            else
-                valueCast = Expression.TypeAs(value, property.PropertyType);
+            UnaryExpression valueCast = property.PropertyType.GetTypeInfo().IsValueType
+                ? Expression.Convert(value, property.PropertyType)
+                : Expression.TypeAs(value, property.PropertyType);
 
             MethodCallExpression call = Expression.Call(instanceCast, property.SetMethod, valueCast);
 

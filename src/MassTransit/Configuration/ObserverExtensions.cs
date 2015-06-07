@@ -77,7 +77,7 @@ namespace MassTransit
         /// <typeparam name="T"></typeparam>
         /// <param name="bus"></param>
         /// <param name="requestId"></param>
-        /// <param name="handler"></param>
+        /// <param name="observer"></param>
         /// <returns></returns>
         public static ConnectHandle ConnectRequestObserver<T>(this IBus bus, Guid requestId, IObserver<ConsumeContext<T>> observer)
             where T : class

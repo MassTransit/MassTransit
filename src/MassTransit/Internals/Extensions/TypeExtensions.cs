@@ -80,12 +80,9 @@ namespace MassTransit.Internals.Extensions
         {
             TypeInfo info = type.GetTypeInfo();
 
-            IEnumerable<PropertyInfo> props = info.DeclaredMethods
+            return info.DeclaredMethods
                 .Where(x => x.IsSpecialName && x.Name.StartsWith("get_") && x.IsStatic)
                 .Select(x => info.GetDeclaredProperty(x.Name.Substring("get_".Length)));
-
-            foreach (PropertyInfo propertyInfo in props)
-                yield return propertyInfo;
         }
 
         /// <summary>

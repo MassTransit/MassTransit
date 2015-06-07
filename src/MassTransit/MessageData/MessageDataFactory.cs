@@ -17,7 +17,7 @@ namespace MassTransit.MessageData
     using Util;
 
 
-    public class MessageDataFactory
+    public static class MessageDataFactory
     {
         public static MessageData<T> Load<T>(IMessageDataRepository repository, Uri address, CancellationToken cancellationToken)
         {

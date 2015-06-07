@@ -191,7 +191,7 @@
     <Compile Include="Configuration\RepeatPipeConfiguratorExtensions.cs" />
     <Compile Include="Configuration\RescueFilterConfiguratorExtensions.cs" />
     <Compile Include="Configuration\RetryPipeConfiguratorExtensions.cs" />
-    <Compile Include="Configuration\ServiceBusFactoryExtensions.cs" />
+    <Compile Include="Configuration\BusFactoryExtensions.cs" />
     <Compile Include="Configuration\ConsumeConfigurators\HandlerConfigurator.cs" />
     <Compile Include="Configuration\ConsumeConfigurators\IHandlerConfigurator.cs" />
     <Compile Include="Configuration\ConsumeConfigurators\IConsumeConfigurator.cs" />
@@ -518,8 +518,10 @@
     <Compile Include="RequestContext.cs" />
     <Compile Include="RequestExtensions.cs" />
     <Compile Include="SagaConsumeContext.cs" />
+    <Compile Include="SagaExtensions.cs" />
+    <Compile Include="SagaFilterExtensions.cs" />
+    <Compile Include="SagaPipeConfiguratorExtensions.cs" />
     <Compile Include="Saga\Configuration\SagaFilterSpecification.cs" />
-    <Compile Include="Saga\Configuration\SagaPipeConfiguratorExtensions.cs" />
     <Compile Include="Saga\ConnectorFactories\InitiatedBySagaConnectorFactory.cs" />
     <Compile Include="Saga\ConnectorFactories\ISagaConnectorFactory.cs" />
     <Compile Include="Saga\ConnectorFactories\ObservesSagaConnectorFactory.cs" />
@@ -600,7 +602,7 @@
     <Compile Include="Configuration\ConsumeConnectors\MessageInterfaceType.cs" />
     <Compile Include="Configuration\ConsumeConnectors\IConsumerMetadataCache.cs" />
     <Compile Include="Configuration\Configurators\ConfigurationResult.cs" />
-    <Compile Include="Configuration\Configurators\ConfigurationResultImpl.cs" />
+    <Compile Include="Configuration\Configurators\BusConfigurationResult.cs" />
     <Compile Include="Configuration\Configurators\ValidationResultExtensions.cs" />
     <Compile Include="Configuration\Configurators\ValidationResult.cs" />
     <Compile Include="Configuration\Configurators\ValidationResultDisposition.cs" />
@@ -638,7 +640,6 @@
     <Compile Include="Logging\Tracing\TraceLogger.cs" />
     <Compile Include="Saga\DelegatingSagaRepository.cs" />
     <Compile Include="Saga\InjectingSagaRepository.cs" />
-    <Compile Include="Saga\SagaFilterExtensions.cs" />
     <Compile Include="Saga\SagaRepositoryQuery.cs" />
     <Compile Include="Exceptions\MassTransitException.cs" />
     <Compile Include="Exceptions\NotImplementedByDesignException.cs" />
@@ -647,7 +648,6 @@
     <Compile Include="IMessageConsumer.cs" />
     <Compile Include="IConsumerFactory.cs" />
     <Compile Include="MessageUrn.cs" />
-    <Compile Include="Saga\Configuration\SagaExtensions.cs" />
     <Compile Include="Saga\SubscriptionConfigurators\ISagaConfigurator.cs" />
     <Compile Include="Saga\SubscriptionConfigurators\SagaConfigurator.cs" />
     <Compile Include="Saga\Connectors\ISagaConnector.cs" />
@@ -735,6 +735,7 @@
     <Compile Include="Testing\TestActions\SendTestAction.cs" />
     <Compile Include="Testing\TestActions\ITestAction.cs" />
     <Compile Include="Testing\TestConfiguratorResultExtensions.cs" />
+    <Compile Include="Testing\TestDecorators\TestConsumeObserver.cs" />
     <Compile Include="Testing\TestDecorators\TestConsumerFactoryDecorator.cs" />
     <Compile Include="Testing\Instances\HandlerTest.cs" />
     <Compile Include="Testing\Factories\HandlerTestFactory.cs" />
@@ -807,7 +808,6 @@
     <Compile Include="Exceptions\MessageException.cs" />
     <Compile Include="Exceptions\ShutDownException.cs" />
     <Compile Include="Exceptions\EndpointException.cs" />
-    <Compile Include="IEndpoint.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Util\AsyncObservable.cs" />
     <Compile Include="Util\BusHostInfo.cs" />
@@ -824,7 +824,6 @@
   <ItemGroup>
     <Compile Include="Exceptions\AbstractUriException.cs" />
     <Compile Include="Exceptions\TransportException.cs" />
-    <Compile Include="EndpointAddress.cs" />
     <Compile Include="Monitoring\InstancePerformanceCounter.cs" />
     <Compile Include="Monitoring\IPerformanceCounter.cs" />
     <Compile Include="Monitoring\NullPerformanceCounter.cs" />

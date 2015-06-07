@@ -29,7 +29,6 @@ namespace MassTransit.Pipeline.Filters
     {
         readonly Connectable<IPipe<ConsumeContext<T>>> _connections;
         readonly Lazy<IConnectPipeById<ConsumeContext<T>, Guid>> _requestConnections;
-        ConnectHandle _requestFilterHandle;
 
         public TeeConsumeFilter()
         {
@@ -70,7 +69,7 @@ namespace MassTransit.Pipeline.Filters
 
             IPipe<ConsumeContext<T>> pipe = Pipe.New<ConsumeContext<T>>(x => x.Filter(filter));
 
-            _requestFilterHandle = _connections.Connect(pipe);
+            _connections.Connect(pipe);
 
             return filter;
         }

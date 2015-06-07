@@ -19,7 +19,6 @@ namespace MassTransit
     using System.Reflection;
     using Internals.Extensions;
     using MessageData;
-    using TransformBuilders;
     using TransformConfigurators;
     using Util;
 
@@ -31,6 +30,7 @@ namespace MassTransit
         /// stored outside of the messaging system.
         /// </summary>
         /// <typeparam name="T">The message type</typeparam>
+        /// <param name="configurator"></param>
         /// <param name="repository">The message data repository</param>
         public static void UseMessageData<T>(this IConsumePipeConfigurator configurator, IMessageDataRepository repository)
             where T : class

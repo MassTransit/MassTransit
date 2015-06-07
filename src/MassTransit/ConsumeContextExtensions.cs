@@ -66,7 +66,6 @@ namespace MassTransit
         /// <summary>
         /// Create a send pipe that copies the source message headers to the message being sent
         /// </summary>
-        /// <typeparam name="T"></typeparam>
         /// <param name="context"></param>
         /// <param name="additionalHeaders">Returns additional headers for the pipe that should be added to the message</param>
         /// <returns></returns>
