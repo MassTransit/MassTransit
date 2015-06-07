@@ -14,7 +14,6 @@ namespace MassTransit.RabbitMqTransport.Tests
 {
     using System;
     using System.Threading.Tasks;
-    using Magnum.Extensions;
     using NUnit.Framework;
     using Shouldly;
     using TestFramework.Messages;
@@ -39,7 +38,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         [TestFixtureSetUp]
         public void Setup()
         {
-            _requestClient = new MessageRequestClient<PingMessage, PongMessage>(Bus, InputQueueAddress, 8.Seconds());
+            _requestClient = new MessageRequestClient<PingMessage, PongMessage>(Bus, InputQueueAddress, TimeSpan.FromSeconds(8));
 
             _response = _requestClient.Request(new PingMessage());
         }
@@ -68,7 +67,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         [TestFixtureSetUp]
         public void Setup()
         {
-            _requestClient = new MessageRequestClient<PingMessage, PongMessage>(Bus, InputQueueAddress, 1.Seconds());
+            _requestClient = new MessageRequestClient<PingMessage, PongMessage>(Bus, InputQueueAddress, TimeSpan.FromSeconds(1));
 
             _response = _requestClient.Request(new PingMessage());
         }
@@ -92,7 +91,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         [TestFixtureSetUp]
         public void Setup()
         {
-            _requestClient = new MessageRequestClient<PingMessage, PongMessage>(Bus, InputQueueAddress, 8.Seconds());
+            _requestClient = new MessageRequestClient<PingMessage, PongMessage>(Bus, InputQueueAddress, TimeSpan.FromSeconds(8));
 
             _response = _requestClient.Request(new PingMessage());
         }

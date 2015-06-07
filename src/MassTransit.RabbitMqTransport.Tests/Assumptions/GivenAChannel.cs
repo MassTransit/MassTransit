@@ -14,7 +14,6 @@ namespace MassTransit.RabbitMqTransport.Tests.Assumptions
 {
     using System;
     using System.Diagnostics;
-    using Magnum.Extensions;
     using NUnit.Framework;
     using RabbitMQ.Client;
 
@@ -43,7 +42,7 @@ namespace MassTransit.RabbitMqTransport.Tests.Assumptions
 			sw.Start();
 			action();
 			sw.Stop();
-			Trace.WriteLine("'{0}' took '{1}' seconds".FormatWith(name, sw.Elapsed.TotalSeconds));
+			Trace.WriteLine(string.Format("'{0}' took '{1}' seconds", name, sw.Elapsed.TotalSeconds));
 		}
 
 		public void WithChannel(Action<IModel> action)
