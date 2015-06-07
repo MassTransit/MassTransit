@@ -40,10 +40,6 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Magnum, Version=2.1.3.0, Culture=neutral, PublicKeyToken=b800c4cfcdeea87b, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Magnum.2.1.3\lib\NET40\Magnum.dll</HintPath>
-    </Reference>
     <Reference Include="NewId">
       <HintPath>..\packages\NewId.2.1.2\lib\net45\NewId.dll</HintPath>
     </Reference>
