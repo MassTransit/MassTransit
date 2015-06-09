@@ -96,6 +96,8 @@ namespace MassTransit.Tests.Courier
             ConsumeContext<RoutingSlipCompleted> completeContext = await _completed;
 
             Assert.AreEqual(completeContext.Message.Timestamp, context.Message.Timestamp + context.Message.Duration);
+
+            Console.WriteLine("Duration: {0}", context.Message.Duration);
         }
 
         [Test]

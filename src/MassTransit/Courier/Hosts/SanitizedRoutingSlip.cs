@@ -44,10 +44,10 @@ namespace MassTransit.Courier.Hosts
             RoutingSlip routingSlip = context.Message;
 
             TrackingNumber = routingSlip.TrackingNumber;
+            CreateTimestamp = routingSlip.CreateTimestamp;
 
             _variablesToken = _messageToken["variables"] ?? new JObject();
 
-            Variables = routingSlip.Variables ?? GetEmptyObject();
 
             Itinerary = (routingSlip.Itinerary ?? Enumerable.Empty<Activity>())
                 .Select(x => (Activity)new SanitizedActivity(x))
@@ -60,6 +60,8 @@ namespace MassTransit.Courier.Hosts
             CompensateLogs = (routingSlip.CompensateLogs ?? Enumerable.Empty<CompensateLog>())
                 .Select(x => (CompensateLog)new SanitizedCompensateLog(x))
                 .ToList();
+
+            Variables = routingSlip.Variables ?? GetEmptyObject();
 
             ActivityExceptions = (routingSlip.ActivityExceptions ?? Enumerable.Empty<ActivityException>())
                 .Select(x => (ActivityException)new SanitizedActivityException(x))

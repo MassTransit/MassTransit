@@ -71,6 +71,8 @@ namespace MassTransit.Tests.Courier
             RoutingSlipCompleted completed = (await _completed).Message;
 
             Assert.AreEqual(_routingSlip.TrackingNumber, completed.TrackingNumber);
+
+            Console.WriteLine("Duration: {0}", completed.Duration);
         }
 
         [Test]
