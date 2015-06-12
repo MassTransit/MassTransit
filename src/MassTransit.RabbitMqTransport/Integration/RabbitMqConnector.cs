@@ -60,7 +60,18 @@ namespace MassTransit.RabbitMqTransport.Integration
                         {
                             connectionContext.GetOrAddPayload(() => _hostSettings);
 
-                            await pipe.Send(connectionContext).ConfigureAwait(false);
+                            if (_log.IsDebugEnabled)
+                                _log.DebugFormat("Connected to {0} using local address {1}", connection.RemoteEndPoint, connection.LocalEndPoint);
+
+                            await pipe.Send(connectionContext);
+
+                            if (_log.IsDebugEnabled)
+                                _log.DebugFormat("Waiting for connection completion: {0}", _connectionFactory.ToDebugString());
+
+                            await connectionContext.Completed;
+
+                            if (_log.IsDebugEnabled)
+                                _log.DebugFormat("Connection completed: {0}", _connectionFactory.ToDebugString());
                         }
 
                         if (_log.IsDebugEnabled)
@@ -74,7 +85,7 @@ namespace MassTransit.RabbitMqTransport.Integration
                 {
                     throw new RabbitMqConnectionException("Connect failed: " + _connectionFactory.ToDebugString(), ex);
                 }
-            }, cancellationToken).ConfigureAwait(false);
+            }, cancellationToken);
         }
     }
 }

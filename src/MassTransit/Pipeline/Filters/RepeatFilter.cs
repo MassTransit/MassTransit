@@ -13,6 +13,7 @@
 namespace MassTransit.Pipeline.Filters
 {
     using System;
+    using System.Diagnostics;
     using System.Threading.Tasks;
     using Policies;
 
@@ -38,11 +39,12 @@ namespace MassTransit.Pipeline.Filters
             get { return _repeatPolicy; }
         }
 
+        [DebuggerNonUserCode]
         public async Task Send(T context, IPipe<T> next)
         {
             using (IRepeatContext repeatContext = _repeatPolicy.GetRepeatContext())
             {
-                await Attempt(repeatContext, context, next).ConfigureAwait(false);
+                await Attempt(repeatContext, context, next);
             }
         }
 
@@ -51,15 +53,16 @@ namespace MassTransit.Pipeline.Filters
             return visitor.Visit(this);
         }
 
+        [DebuggerNonUserCode]
         static async Task Attempt(IRepeatContext repeatContext, T context, IPipe<T> next)
         {
             TimeSpan delay = TimeSpan.Zero;
             do
             {
                 if (delay > TimeSpan.Zero)
-                    await Task.Delay(delay, repeatContext.CancellationToken).ConfigureAwait(false);
+                    await Task.Delay(delay, repeatContext.CancellationToken);
 
-                await next.Send(context).ConfigureAwait(false);
+                await next.Send(context);
             }
             while (repeatContext.CanRepeat(out delay));
         }

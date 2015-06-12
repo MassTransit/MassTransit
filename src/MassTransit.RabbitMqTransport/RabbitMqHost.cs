@@ -12,38 +12,61 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RabbitMqTransport
 {
+    using System;
     using System.Threading;
     using System.Threading.Tasks;
     using Integration;
-    using Policies;
+    using Logging;
+    using MassTransit.Pipeline;
     using Transports;
+    using Util;
 
 
     public class RabbitMqHost :
-        IRabbitMqHost
+        IRabbitMqHost,
+        IBusHostControl
     {
         readonly RabbitMqConnectionCache _connectionCache;
         readonly RabbitMqHostSettings _hostSettings;
+        readonly ILog _log = Logger.Get<RabbitMqHost>();
         readonly IMessageNameFormatter _messageNameFormatter;
 
         public RabbitMqHost(RabbitMqHostSettings hostSettings)
         {
             _hostSettings = hostSettings;
 
-            var connector = new RabbitMqConnector(hostSettings, Retry.None);
-
-            _connectionCache = new RabbitMqConnectionCache(connector);
+            _connectionCache = new RabbitMqConnectionCache(hostSettings);
             _messageNameFormatter = new RabbitMqMessageNameFormatter();
+        }
+
+        public HostHandle Start()
+        {
+            var signal = new StopSignal();
+
+            IPipe<ConnectionContext> connectionPipe = Pipe.ExecuteAsync<ConnectionContext>(async context =>
+            {
+                if (_log.IsDebugEnabled)
+                    _log.DebugFormat("Connection established to {0}", _hostSettings.ToDebugString());
+
+                await signal.Stopped;
+
+                if (_log.IsDebugEnabled)
+                    _log.DebugFormat("Closing connection to host {0}", _hostSettings.ToDebugString());
+
+                context.Connection.Close(200, "Host stopped");
+            });
+
+            if (_log.IsDebugEnabled)
+                _log.DebugFormat("Starting connection to {0}", _hostSettings.ToDebugString());
+
+            _connectionCache.Send(connectionPipe, signal.CancellationToken);
+
+            return new Handle(signal);
         }
 
         public IMessageNameFormatter MessageNameFormatter
         {
             get { return _messageNameFormatter; }
-        }
-
-        public IConnectionCache SendConnectionCache
-        {
-            get { return _connectionCache; }
         }
 
         public IConnectionCache ConnectionCache
@@ -56,9 +79,26 @@ namespace MassTransit.RabbitMqTransport
             get { return _hostSettings; }
         }
 
-        public async Task Stop(CancellationToken cancellationToken = new CancellationToken())
+
+        class Handle :
+            HostHandle
         {
-            await _connectionCache.Stop();
+            readonly StopSignal _stopSignal;
+
+            public Handle(StopSignal stopSignal)
+            {
+                _stopSignal = stopSignal;
+            }
+
+            void IDisposable.Dispose()
+            {
+                _stopSignal.Stop();
+            }
+
+            async Task HostHandle.Stop(CancellationToken cancellationToken)
+            {
+                _stopSignal.Stop();
+            }
         }
     }
 }

@@ -15,6 +15,7 @@ namespace MassTransit.Pipeline.Filters
     using System;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Linq;
     using System.Threading.Tasks;
     using Util;
@@ -63,6 +64,7 @@ namespace MassTransit.Pipeline.Filters
             return messagePipe.ConnectConsumePipe(pipe);
         }
 
+        [DebuggerNonUserCode]
         public Task Send(ConsumeContext context, IPipe<ConsumeContext> next)
         {
             return Task.WhenAll(_pipes.Values.Select(x => x.Filter.Send(context, next)));

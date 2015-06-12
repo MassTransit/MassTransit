@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Pipeline.Pipes
 {
+    using System.Diagnostics;
     using System.Threading.Tasks;
 
 
@@ -19,6 +20,7 @@ namespace MassTransit.Pipeline.Pipes
         IPipe<T>
         where T : class, PipeContext
     {
+        [DebuggerNonUserCode]
         public async Task Send(T context)
         {
         }

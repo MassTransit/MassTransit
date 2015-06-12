@@ -26,13 +26,13 @@ namespace MassTransit.Builders
         IInMemoryBusBuilder
     {
         readonly string _busQueueName;
-        readonly IBusHost[] _hosts;
+        readonly IBusHostControl[] _hosts;
         readonly Uri _inputAddress;
         readonly IReceiveTransportProvider _receiveTransportProvider;
         readonly ISendTransportProvider _sendTransportProvider;
 
         public InMemoryBusBuilder(IReceiveTransportProvider receiveTransportProvider,
-            ISendTransportProvider sendTransportProvider, IEnumerable<IBusHost> hosts,
+            ISendTransportProvider sendTransportProvider, IEnumerable<IBusHostControl> hosts,
             IConsumePipeSpecification consumePipeSpecification)
             : base(consumePipeSpecification)
         {

@@ -15,6 +15,7 @@ namespace MassTransit.AzureServiceBusTransport
     using System;
     using System.Threading;
     using System.Threading.Tasks;
+    using Logging;
     using Microsoft.ServiceBus;
     using Microsoft.ServiceBus.Messaging;
     using Microsoft.ServiceBus.Messaging.Amqp;
@@ -22,8 +23,10 @@ namespace MassTransit.AzureServiceBusTransport
 
 
     public class ServiceBusHost :
-        IServiceBusHost
+        IServiceBusHost,
+        IBusHostControl
     {
+        static readonly ILog _log = Logger.Get<ServiceBusHost>();
         readonly IMessageNameFormatter _messageNameFormatter;
         readonly Lazy<Task<MessagingFactory>> _messagingFactory;
         readonly Lazy<Task<NamespaceManager>> _namespaceManager;
@@ -38,6 +41,11 @@ namespace MassTransit.AzureServiceBusTransport
             _rootNamespaceManager = new Lazy<Task<NamespaceManager>>(CreateRootNamespaceManager);
 
             _messageNameFormatter = new ServiceBusMessageNameFormatter();
+        }
+
+        public HostHandle Start()
+        {
+            return new Handle(_messagingFactory.Value);
         }
 
         ServiceBusHostSettings IServiceBusHost.Settings
@@ -80,7 +88,7 @@ namespace MassTransit.AzureServiceBusTransport
             }
         }
 
-        async Task<MessagingFactory> CreateMessagingFactory()
+        Task<MessagingFactory> CreateMessagingFactory()
         {
             var mfs = new MessagingFactorySettings
             {
@@ -95,7 +103,7 @@ namespace MassTransit.AzureServiceBusTransport
 
             var builder = new UriBuilder(_settings.ServiceUri) {Path = ""};
 
-            return await MessagingFactory.CreateAsync(builder.Uri, mfs);
+            return MessagingFactory.CreateAsync(builder.Uri, mfs);
         }
 
         async Task<NamespaceManager> CreateNamespaceManager()
@@ -124,6 +132,37 @@ namespace MassTransit.AzureServiceBusTransport
             };
 
             return new NamespaceManager(builder.Uri, nms);
+        }
+
+
+        class Handle :
+            HostHandle
+        {
+            readonly Task<MessagingFactory> _messagingFactoryTask;
+
+            public Handle(Task<MessagingFactory> messagingFactoryTask)
+            {
+                _messagingFactoryTask = messagingFactoryTask;
+            }
+
+            public void Dispose()
+            {
+                Stop().Wait();
+            }
+
+            public async Task Stop(CancellationToken cancellationToken = new CancellationToken())
+            {
+                try
+                {
+                    MessagingFactory factory = await _messagingFactoryTask;
+                    if (!factory.IsClosed)
+                        await factory.CloseAsync();
+                }
+                catch (Exception ex)
+                {
+                    _log.Error("Exception closing messaging factory", ex);
+                }
+            }
         }
     }
 }

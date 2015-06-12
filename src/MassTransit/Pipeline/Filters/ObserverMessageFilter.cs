@@ -36,6 +36,7 @@ namespace MassTransit.Pipeline.Filters
             _observer = observer;
         }
 
+        [DebuggerNonUserCode]
         async Task IFilter<ConsumeContext<TMessage>>.Send(ConsumeContext<TMessage> context, IPipe<ConsumeContext<TMessage>> next)
         {
             Stopwatch timer = Stopwatch.StartNew();
@@ -45,7 +46,7 @@ namespace MassTransit.Pipeline.Filters
 
                 context.NotifyConsumed(timer.Elapsed, TypeMetadataCache.GetShortName(_observer.GetType()));
 
-                await next.Send(context).ConfigureAwait(false);
+                await next.Send(context);
             }
             catch (Exception ex)
             {

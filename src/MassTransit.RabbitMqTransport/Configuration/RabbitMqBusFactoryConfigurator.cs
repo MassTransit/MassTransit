@@ -29,13 +29,13 @@ namespace MassTransit.RabbitMqTransport.Configuration
         IBusFactory
     {
         readonly ConsumePipeSpecification _consumePipeSpecification;
-        readonly IList<IRabbitMqHost> _hosts;
+        readonly IList<RabbitMqHost> _hosts;
         readonly RabbitMqReceiveSettings _settings;
         readonly IList<IBusFactorySpecification> _transportBuilderConfigurators;
 
         public RabbitMqBusFactoryConfigurator()
         {
-            _hosts = new List<IRabbitMqHost>();
+            _hosts = new List<RabbitMqHost>();
             _transportBuilderConfigurators = new List<IBusFactorySpecification>();
             _consumePipeSpecification = new ConsumePipeSpecification();
 

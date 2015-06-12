@@ -13,6 +13,8 @@
 namespace MassTransit.RabbitMqTransport.Integration
 {
     using System;
+    using System.Collections.Concurrent;
+    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using Contexts;
@@ -31,6 +33,7 @@ namespace MassTransit.RabbitMqTransport.Integration
         static readonly ILog _log = Logger.Get<RabbitMqModelCache>();
 
         readonly IConnectionCache _connectionCache;
+        readonly object _scopeLock = new object();
         ModelScope _scope;
 
         public RabbitMqModelCache(IConnectionCache connectionCache)
@@ -40,46 +43,53 @@ namespace MassTransit.RabbitMqTransport.Integration
 
         public Task Send(IPipe<ModelContext> connectionPipe, CancellationToken cancellationToken)
         {
-            Interlocked.MemoryBarrier();
+            ModelScope newScope = null;
+            ModelScope existingScope;
 
-            ModelScope existingScope = _scope;
-            if (existingScope != null)
+            lock (_scopeLock)
             {
-                if (existingScope.ModelClosed.Task.Wait(TimeSpan.Zero) == false)
-                    return SendUsingExistingModel(connectionPipe, cancellationToken, existingScope);
+                existingScope = _scope;
+                if (existingScope == null)
+                {
+                    newScope = new ModelScope();
+                    _scope = newScope;
+                }
             }
+            if (existingScope != null)
+                return SendUsingExistingModel(connectionPipe, existingScope, cancellationToken);
 
-            return SendUsingNewModel(connectionPipe, cancellationToken);
+            return SendUsingNewModel(connectionPipe, newScope, cancellationToken);
         }
 
-        async Task SendUsingNewModel(IPipe<ModelContext> modelPipe, CancellationToken cancellationToken)
+        async Task SendUsingNewModel(IPipe<ModelContext> modelPipe, ModelScope scope, CancellationToken cancellationToken)
         {
             IPipe<ConnectionContext> connectionPipe = Pipe.ExecuteAsync<ConnectionContext>(async connectionContext =>
             {
                 IModel model = await connectionContext.CreateModel();
 
-                var modelContext = new RabbitMqModelContext(connectionContext, model, connectionContext.CancellationToken);
-
-                var scope = new ModelScope(modelContext);
-
                 EventHandler<ShutdownEventArgs> modelShutdown = null;
                 modelShutdown = (obj, reason) =>
                 {
-                    scope.ModelContext.Model.ModelShutdown -= modelShutdown;
-                    scope.ModelClosed.TrySetResult(true);
+                    model.ModelShutdown -= modelShutdown;
 
                     Interlocked.CompareExchange(ref _scope, null, scope);
+
+                    scope.Close();
                 };
 
-                scope.ModelContext.Model.ModelShutdown += modelShutdown;
+                model.ModelShutdown += modelShutdown;
 
-                Interlocked.CompareExchange(ref _scope, scope, null);
+                var modelContext = new RabbitMqModelContext(connectionContext, model, connectionContext.CancellationToken);
+
+                scope.Connected(modelContext);
 
                 try
                 {
-                    var context = new SharedModelContext(scope.ModelContext, cancellationToken);
+                    using (var context = await scope.Attach(cancellationToken))
+                    {
+                        await modelPipe.Send(context);
+                    }
 
-                    await modelPipe.Send(context).ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {
@@ -90,17 +100,16 @@ namespace MassTransit.RabbitMqTransport.Integration
                 }
             });
 
-            await _connectionCache.Send(connectionPipe, new CancellationToken()).ConfigureAwait(false);
+            await _connectionCache.Send(connectionPipe, new CancellationToken());
         }
 
-        static async Task SendUsingExistingModel(IPipe<ModelContext> connectionPipe,
-            CancellationToken cancellationToken, ModelScope existingScope)
+        static async Task SendUsingExistingModel(IPipe<ModelContext> connectionPipe, ModelScope existingScope, CancellationToken cancellationToken)
         {
             try
             {
-                var context = new SharedModelContext(existingScope.ModelContext, cancellationToken);
+                using(var context = await existingScope.Attach(cancellationToken))
 
-                await connectionPipe.Send(context).ConfigureAwait(false);
+                await connectionPipe.Send(context);
             }
             catch (Exception ex)
             {
@@ -111,16 +120,41 @@ namespace MassTransit.RabbitMqTransport.Integration
             }
         }
 
-
         class ModelScope
         {
-            public readonly TaskCompletionSource<bool> ModelClosed;
-            public readonly ModelContext ModelContext;
+            readonly ConcurrentBag<SharedModelContext> _attached;
+            readonly TaskCompletionSource<RabbitMqModelContext> _connectionContext;
 
-            public ModelScope(ModelContext modelContext)
+            public ModelScope()
             {
-                ModelContext = modelContext;
-                ModelClosed = new TaskCompletionSource<bool>();
+                _attached = new ConcurrentBag<SharedModelContext>();
+                _connectionContext = new TaskCompletionSource<RabbitMqModelContext>();
+            }
+
+            public void Connected(RabbitMqModelContext connectionContext)
+            {
+                _connectionContext.TrySetResult(connectionContext);
+            }
+
+            public async Task<SharedModelContext> Attach(CancellationToken cancellationToken)
+            {
+                var context = new SharedModelContext(await _connectionContext.Task, cancellationToken);
+
+                _attached.Add(context);
+                return context;
+            }
+
+            public async void Close()
+            {
+                try
+                {
+                    await Task.WhenAll(_attached.Select(x => x.Completed));
+                }
+                catch (Exception ex)
+                {
+                }
+
+                (await _connectionContext.Task).Dispose();
             }
         }
     }

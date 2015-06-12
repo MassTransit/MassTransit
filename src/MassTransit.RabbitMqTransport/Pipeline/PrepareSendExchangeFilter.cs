@@ -18,6 +18,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
     using Logging;
     using MassTransit.Pipeline;
     using RabbitMQ.Client;
+    using Topology;
 
 
     /// <summary>
@@ -26,26 +27,64 @@ namespace MassTransit.RabbitMqTransport.Pipeline
     public class PrepareSendExchangeFilter :
         IFilter<ModelContext>
     {
+        readonly ExchangeBindingSettings[] _exchangeBindings;
         readonly ILog _log = Logger.Get<PrepareSendExchangeFilter>();
 
         readonly SendSettings _settings;
 
-        public PrepareSendExchangeFilter(SendSettings settings)
+        public PrepareSendExchangeFilter(SendSettings settings, params ExchangeBindingSettings[] exchangeBindings)
         {
             _settings = settings;
+            _exchangeBindings = exchangeBindings;
         }
 
         async Task IFilter<ModelContext>.Send(ModelContext context, IPipe<ModelContext> next)
         {
-            if (!context.HasPayloadType(typeof(SendSettings)))
+            if (IsFirstTime(context))
             {
                 await DeclareExchange(context);
 
                 if (_settings.BindToQueue)
                     await DeclareAndBindQueue(context);
+
+                for (int i = 0; i < _exchangeBindings.Length; i++)
+                {
+                    ExchangeBindingSettings binding = _exchangeBindings[i];
+
+                    ExchangeSettings exchange = binding.Exchange;
+
+                    if (_log.IsDebugEnabled)
+                    {
+                        _log.DebugFormat("Exchange: {0} ({1})", exchange.ExchangeName,
+                            string.Join(", ", new[]
+                            {
+                                exchange.Durable ? "durable" : "",
+                                exchange.AutoDelete ? "auto-delete" : ""
+                            }.Where(x => !string.IsNullOrWhiteSpace(x))));
+                    }
+
+                    await context.ExchangeDeclare(exchange.ExchangeName, exchange.ExchangeType, exchange.Durable, exchange.AutoDelete,
+                        exchange.Arguments);
+
+                    await context.ExchangeBind(exchange.ExchangeName, _settings.ExchangeName, binding.RoutingKey, new Dictionary<string, object>());
+
+                    if (_log.IsDebugEnabled)
+                        _log.DebugFormat("Exchange:Exchange Binding: {0} ({1})", exchange.ExchangeName, _settings.ExchangeName);
+                }
             }
 
-            await next.Send(context).ConfigureAwait(false);
+            await next.Send(context);
+        }
+
+        bool IsFirstTime(ModelContext context)
+        {
+            bool added = false;
+            context.GetOrAddPayload(() =>
+            {
+                added = true;
+                return _settings;
+            });
+            return added;
         }
 
         bool IFilter<ModelContext>.Visit(IPipelineVisitor visitor)

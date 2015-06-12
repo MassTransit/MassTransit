@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Pipeline.Filters
 {
+    using System.Diagnostics;
     using System.Threading.Tasks;
     using Util;
 
@@ -26,7 +27,9 @@ namespace MassTransit.Pipeline.Filters
         where TConsumer : class, IConsumer<TMessage>
         where TMessage : class
     {
-        public Task Send(ConsumerConsumeContext<TConsumer, TMessage> context, IPipe<ConsumerConsumeContext<TConsumer, TMessage>> next)
+        [DebuggerNonUserCode]
+        Task IFilter<ConsumerConsumeContext<TConsumer, TMessage>>.Send(ConsumerConsumeContext<TConsumer, TMessage> context,
+            IPipe<ConsumerConsumeContext<TConsumer, TMessage>> next)
         {
             var messageConsumer = context.Consumer as IConsumer<TMessage>;
             if (messageConsumer == null)

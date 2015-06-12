@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports
 {
+    using System;
     using System.Threading;
     using System.Threading.Tasks;
 
@@ -21,8 +22,26 @@ namespace MassTransit.Transports
     /// </summary>
     public interface IBusHost
     {
+    }
+
+
+    public interface IBusHostControl :
+        IBusHost
+    {
         /// <summary>
-        /// Close the bus, freeing any resources that may be in use
+        /// Starts the Host, initiating the connection.
+        /// TODO maybe this should be Task&lt;HostHandle&gt; after all 
+        /// </summary>
+        /// <returns></returns>
+        HostHandle Start();
+    }
+
+
+    public interface HostHandle :
+        IDisposable
+    {
+        /// <summary>
+        /// Close the Host, shutting it down for good.
         /// </summary>
         /// <returns></returns>
         Task Stop(CancellationToken cancellationToken = default(CancellationToken));

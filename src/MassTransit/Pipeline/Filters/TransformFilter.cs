@@ -33,7 +33,7 @@ namespace MassTransit.Pipeline.Filters
             _transform = transform;
         }
 
-        async Task IFilter<ConsumeContext<T>>.Send(ConsumeContext<T> context, IPipe<ConsumeContext<T>> next)
+        Task IFilter<ConsumeContext<T>>.Send(ConsumeContext<T> context, IPipe<ConsumeContext<T>> next)
         {
             var transformContext = new ConsumeTransformContext<T>(context);
 
@@ -42,10 +42,10 @@ namespace MassTransit.Pipeline.Filters
             {
                 var transformedContext = new MessageConsumeContext<T>(context, result.Value);
 
-                await next.Send(transformedContext).ConfigureAwait(false);
+                return next.Send(transformedContext);
             }
-            else
-                await next.Send(context).ConfigureAwait(false);
+
+            return next.Send(context);
         }
 
         public bool Visit(IPipelineVisitor visitor)

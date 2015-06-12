@@ -33,7 +33,7 @@ namespace MassTransit.RabbitMqTransport
         ISendTransport
     {
         static readonly ILog _log = Logger.Get<RabbitMqSendTransport>();
-        readonly IList<IFilter<ModelContext>> _filters;
+        readonly PrepareSendExchangeFilter _filter;
 
         readonly IModelCache _modelCache;
         readonly Connectable<ISendObserver> _observers;
@@ -45,24 +45,72 @@ namespace MassTransit.RabbitMqTransport
             _sendSettings = sendSettings;
             _modelCache = modelCache;
 
-            _filters = new List<IFilter<ModelContext>>();
-
-            _filters.Add(new PrepareSendExchangeFilter(_sendSettings));
-            foreach (ExchangeBindingSettings binding in exchangeBindings)
-                _filters.Add(new SendExchangeBindingModelFilter(binding));
+            _filter = new PrepareSendExchangeFilter(_sendSettings, exchangeBindings);
         }
 
-        Task ISendTransport.Send<T>(T message, IPipe<SendContext<T>> pipe, CancellationToken cancelSend)
+        async Task ISendTransport.Send<T>(T message, IPipe<SendContext<T>> pipe, CancellationToken cancelSend)
         {
-            return SendMessage(message, pipe, cancelSend);
+            IPipe<ModelContext> modelPipe = Pipe.New<ModelContext>(p =>
+            {
+                p.Filter(_filter);
+
+                p.ExecuteAsync(async modelContext =>
+                {
+                    if (_log.IsDebugEnabled)
+                        _log.DebugFormat("Sending {0} to {1}", TypeMetadataCache<T>.ShortName, _sendSettings.ExchangeName);
+
+                    IBasicProperties properties = modelContext.Model.CreateBasicProperties();
+                    properties.Headers = new Dictionary<string, object>();
+
+                    var context = new RabbitMqSendContextImpl<T>(properties, message, _sendSettings, cancelSend);
+
+                    try
+                    {
+                        await pipe.Send(context);
+
+                        properties.Headers["Content-Type"] = context.ContentType.MediaType;
+
+                        properties.SetPersistent(context.Durable);
+
+                        if (context.MessageId.HasValue)
+                            properties.MessageId = context.MessageId.ToString();
+
+                        if (context.CorrelationId.HasValue)
+                            properties.CorrelationId = context.CorrelationId.ToString();
+
+                        if (context.TimeToLive.HasValue)
+                            properties.Expiration = context.TimeToLive.Value.TotalMilliseconds.ToString("F0", CultureInfo.InvariantCulture);
+
+                        await _observers.ForEach(x => x.PreSend(context));
+
+                        await modelContext.BasicPublishAsync(context.Exchange, context.RoutingKey, context.Mandatory,
+                            context.Immediate, context.BasicProperties, context.Body);
+
+                        context.DestinationAddress.LogSent(context.MessageId.HasValue ? context.MessageId.Value.ToString("N") : "",
+                            TypeMetadataCache<T>.ShortName);
+
+                        await _observers.ForEach(x => x.PostSend(context));
+                    }
+                    catch (Exception ex)
+                    {
+                        _observers.ForEach(x => x.SendFault(context, ex));
+
+                        if (_log.IsErrorEnabled)
+                            _log.Error("Send Fault: " + context.DestinationAddress, ex);
+
+                        throw;
+                    }
+                });
+            });
+
+            await _modelCache.Send(modelPipe, cancelSend);
         }
 
         async Task ISendTransport.Move(ReceiveContext context, IPipe<SendContext> pipe)
         {
             IPipe<ModelContext> modelPipe = Pipe.New<ModelContext>(p =>
             {
-                foreach (var filter in _filters)
-                    p.Filter(filter);
+                p.Filter(_filter);
 
                 p.ExecuteAsync(async modelContext =>
                 {
@@ -108,7 +156,7 @@ namespace MassTransit.RabbitMqTransport
                         byte[] body;
                         using (var memoryStream = new MemoryStream())
                         {
-                            using (var bodyStream = context.GetBody())
+                            using (Stream bodyStream = context.GetBody())
                             {
                                 bodyStream.CopyTo(memoryStream);
                             }
@@ -135,72 +183,12 @@ namespace MassTransit.RabbitMqTransport
                 });
             });
 
-            await _modelCache.Send(modelPipe, context.CancellationToken).ConfigureAwait(false);
+            await _modelCache.Send(modelPipe, context.CancellationToken);
         }
 
         public ConnectHandle Connect(ISendObserver observer)
         {
             return _observers.Connect(observer);
-        }
-
-        async Task SendMessage<T>(T message, IPipe<SendContext<T>> pipe, CancellationToken cancelSend)
-            where T : class
-        {
-            IPipe<ModelContext> modelPipe = Pipe.New<ModelContext>(p =>
-            {
-                foreach (var filter in _filters)
-                    p.Filter(filter);
-
-                p.ExecuteAsync(async modelContext =>
-                {
-                    if (_log.IsDebugEnabled)
-                        _log.DebugFormat("Sending {0} to {1}", TypeMetadataCache<T>.ShortName, _sendSettings.ExchangeName);
-
-                    IBasicProperties properties = modelContext.Model.CreateBasicProperties();
-                    properties.Headers = new Dictionary<string, object>();
-
-                    var context = new RabbitMqSendContextImpl<T>(properties, message, _sendSettings, cancelSend);
-
-                    try
-                    {
-                        await pipe.Send(context).ConfigureAwait(false);
-
-                        properties.Headers["Content-Type"] = context.ContentType.MediaType;
-
-                        properties.SetPersistent(context.Durable);
-
-                        if (context.MessageId.HasValue)
-                            properties.MessageId = context.MessageId.ToString();
-
-                        if (context.CorrelationId.HasValue)
-                            properties.CorrelationId = context.CorrelationId.ToString();
-
-                        if (context.TimeToLive.HasValue)
-                            properties.Expiration = context.TimeToLive.Value.TotalMilliseconds.ToString("F0", CultureInfo.InvariantCulture);
-
-                        await _observers.ForEach(x => x.PreSend(context)).ConfigureAwait(false);
-
-                        await modelContext.BasicPublishAsync(context.Exchange, context.RoutingKey, context.Mandatory,
-                            context.Immediate, context.BasicProperties, context.Body).ConfigureAwait(false);
-
-                        context.DestinationAddress.LogSent(context.MessageId.HasValue ? context.MessageId.Value.ToString("N") : "",
-                            TypeMetadataCache<T>.ShortName);
-
-                        await _observers.ForEach(x => x.PostSend(context)).ConfigureAwait(false);
-                    }
-                    catch (Exception ex)
-                    {
-                        _observers.ForEach(x => x.SendFault(context, ex));
-
-                        if (_log.IsErrorEnabled)
-                            _log.Error("Send Fault: " + context.DestinationAddress, ex);
-
-                        throw;
-                    }
-                });
-            });
-
-            await _modelCache.Send(modelPipe, cancelSend).ConfigureAwait(false);
         }
     }
 }

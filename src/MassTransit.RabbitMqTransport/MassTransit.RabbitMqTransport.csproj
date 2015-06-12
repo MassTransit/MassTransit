@@ -91,10 +91,8 @@
     <Compile Include="Pipeline\RabbitMqConsumerFilter.cs" />
     <Compile Include="Pipeline\PrepareSendExchangeFilter.cs" />
     <Compile Include="Pipeline\RabbitMqBasicConsumer.cs" />
-    <Compile Include="Pipeline\ReceiveExchangeBindingModelFilter.cs" />
     <Compile Include="Pipeline\ReceiveModelFilter.cs" />
     <Compile Include="Pipeline\PrepareReceiveQueueFilter.cs" />
-    <Compile Include="Pipeline\SendExchangeBindingModelFilter.cs" />
     <Compile Include="PublishSettings.cs" />
     <Compile Include="RabbitMqBusFactory.cs" />
     <Compile Include="RabbitMqAddressExtensions.cs" />

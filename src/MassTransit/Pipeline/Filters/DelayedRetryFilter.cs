@@ -34,7 +34,7 @@ namespace MassTransit.Pipeline.Filters
             Exception exception = null;
             try
             {
-                await next.Send(context).ConfigureAwait(false);
+                await next.Send(context);
             }
             catch (Exception ex)
             {

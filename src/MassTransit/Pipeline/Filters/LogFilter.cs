@@ -13,6 +13,7 @@
 namespace MassTransit.Pipeline.Filters
 {
     using System;
+    using System.Diagnostics;
     using System.IO;
     using System.Threading.Tasks;
 
@@ -30,6 +31,7 @@ namespace MassTransit.Pipeline.Filters
             _formatter = formatter;
         }
 
+        [DebuggerNonUserCode]
         Task IFilter<T>.Send(T context, IPipe<T> next)
         {
             Task logTask = CreateLogTask(context);

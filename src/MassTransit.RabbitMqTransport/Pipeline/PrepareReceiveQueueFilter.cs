@@ -29,11 +29,13 @@ namespace MassTransit.RabbitMqTransport.Pipeline
     {
         readonly ILog _log = Logger.Get<PrepareReceiveQueueFilter>();
         readonly ReceiveSettings _settings;
+        readonly ExchangeBindingSettings[] _exchangeBindings;
         bool _queueAlreadyPurged;
 
-        public PrepareReceiveQueueFilter(ReceiveSettings settings)
+        public PrepareReceiveQueueFilter(ReceiveSettings settings, params ExchangeBindingSettings[] exchangeBindings)
         {
             _settings = settings;
+            _exchangeBindings = exchangeBindings;
         }
 
         async Task IFilter<ModelContext>.Send(ModelContext context, IPipe<ModelContext> next)
@@ -56,6 +58,46 @@ namespace MassTransit.RabbitMqTransport.Pipeline
                     }.Where(x => !string.IsNullOrWhiteSpace(x))));
             }
 
+            await PurgeIfRequested(context, queueOk, queueName);
+
+            string exchangeName = _settings.ExchangeName ?? queueName;
+
+            if (!string.IsNullOrWhiteSpace(_settings.ExchangeName) || string.IsNullOrWhiteSpace(_settings.QueueName))
+            {
+                await context.ExchangeDeclare(exchangeName, _settings.ExchangeType, _settings.Durable, _settings.AutoDelete,
+                    _settings.ExchangeArguments);
+
+                await context.QueueBind(queueName, exchangeName, "", new Dictionary<string, object>());
+            }
+
+            await ApplyExchangeBindings(context, exchangeName);
+
+            ReceiveSettings settings = new RabbitMqReceiveSettings(_settings)
+            {
+                QueueName = queueName,
+                ExchangeName = exchangeName
+            };
+
+            context.GetOrAddPayload(() => settings);
+
+            await next.Send(context);
+        }
+
+        async Task ApplyExchangeBindings(ModelContext context, string exchangeName)
+        {
+            foreach (var binding in _exchangeBindings)
+            {
+                ExchangeSettings exchange = binding.Exchange;
+
+                await context.ExchangeDeclare(exchange.ExchangeName, exchange.ExchangeType, exchange.Durable, exchange.AutoDelete,
+                    exchange.Arguments);
+
+                await context.ExchangeBind(exchangeName, exchange.ExchangeName, binding.RoutingKey, binding.Arguments);
+            }
+        }
+
+        async Task PurgeIfRequested(ModelContext context, QueueDeclareOk queueOk, string queueName)
+        {
             if (_settings.PurgeOnStartup)
             {
                 if (!_queueAlreadyPurged)
@@ -76,26 +118,6 @@ namespace MassTransit.RabbitMqTransport.Pipeline
                         _log.DebugFormat("Queue {0} already purged at startup, skipping", queueName);
                 }
             }
-
-            string exchangeName = _settings.ExchangeName ?? queueName;
-
-            if (!string.IsNullOrWhiteSpace(_settings.ExchangeName) || string.IsNullOrWhiteSpace(_settings.QueueName))
-            {
-                await context.ExchangeDeclare(exchangeName, _settings.ExchangeType, _settings.Durable, _settings.AutoDelete,
-                    _settings.ExchangeArguments);
-
-                await context.QueueBind(queueName, exchangeName, "", new Dictionary<string, object>());
-            }
-
-            ReceiveSettings settings = new RabbitMqReceiveSettings(_settings)
-            {
-                QueueName = queueName,
-                ExchangeName = exchangeName
-            };
-
-            context.GetOrAddPayload(() => settings);
-
-            await next.Send(context).ConfigureAwait(false);
         }
 
         public bool Visit(IPipelineVisitor visitor)

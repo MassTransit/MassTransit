@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Pipeline.Filters
 {
+    using System.Diagnostics;
     using System.Threading.Tasks;
 
 
@@ -31,15 +32,16 @@ namespace MassTransit.Pipeline.Filters
             _output = output;
         }
 
+        [DebuggerNonUserCode]
         public async Task Send(ReceiveContext context, IPipe<ReceiveContext> next)
         {
             ConsumeContext consumeContext = _deserializer.Deserialize(context);
 
-            await _output.Send(consumeContext).ConfigureAwait(false);
+            await _output.Send(consumeContext);
 
-            await next.Send(context).ConfigureAwait(false);
+            await next.Send(context);
 
-            await consumeContext.CompleteTask.ConfigureAwait(false);
+            await consumeContext.CompleteTask;
         }
 
         public bool Visit(IPipelineVisitor visitor)

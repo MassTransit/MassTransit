@@ -57,7 +57,7 @@ namespace MassTransit.RabbitMqTransport
 
             Uri destinationAddress = _host.Settings.GetSendAddress(sendSettings);
 
-            var modelCache = new RabbitMqModelCache(_host.SendConnectionCache);
+            var modelCache = new RabbitMqModelCache(_host.ConnectionCache);
 
             var sendTransport = new RabbitMqSendTransport(modelCache, sendSettings, bindings);
 
