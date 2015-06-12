@@ -13,6 +13,7 @@
 namespace MassTransit.Pipeline.Filters
 {
     using System;
+    using System.Diagnostics;
     using System.Threading;
     using System.Threading.Tasks;
 
@@ -42,12 +43,14 @@ namespace MassTransit.Pipeline.Filters
                 _limit.Dispose();
         }
 
+        [DebuggerNonUserCode]
         public async Task Send(T context, IPipe<T> next)
         {
-            await _limit.WaitAsync(context.CancellationToken).ConfigureAwait(false);
+            await _limit.WaitAsync(context.CancellationToken);
+
             try
             {
-                await next.Send(context).ConfigureAwait(false);
+                await next.Send(context);
             }
             finally
             {

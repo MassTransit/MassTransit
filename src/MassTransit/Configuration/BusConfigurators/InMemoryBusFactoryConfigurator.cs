@@ -28,7 +28,7 @@ namespace MassTransit.BusConfigurators
     {
         readonly IList<IInMemoryBusFactorySpecification> _configurators;
         readonly ConsumePipeSpecification _consumePipeSpecification;
-        readonly IList<IBusHost> _hosts;
+        readonly IList<IBusHostControl> _hosts;
         IReceiveTransportProvider _receiveTransportProvider;
         ISendTransportProvider _sendTransportProvider;
 
@@ -37,7 +37,7 @@ namespace MassTransit.BusConfigurators
             _configurators = new List<IInMemoryBusFactorySpecification>();
             _consumePipeSpecification = new ConsumePipeSpecification();
 
-            _hosts = new List<IBusHost>();
+            _hosts = new List<IBusHostControl>();
         }
 
         public IBusControl CreateBus()

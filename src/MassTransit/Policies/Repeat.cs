@@ -38,9 +38,9 @@ namespace MassTransit.Policies
                 do
                 {
                     if (delay > TimeSpan.Zero)
-                        await Task.Delay(delay, repeatContext.CancellationToken).ConfigureAwait(false);
+                        await Task.Delay(delay, repeatContext.CancellationToken);
 
-                    await callback().ConfigureAwait(false);
+                    await callback();
                 }
                 while (repeatContext.CanRepeat(out delay));
             }

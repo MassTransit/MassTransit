@@ -44,7 +44,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
             {
                 await context.BasicConsume(receiveSettings.QueueName, false, consumer);
 
-                RabbitMqConsumerMetrics metrics = await consumer.CompleteTask.ConfigureAwait(false);
+                RabbitMqConsumerMetrics metrics = await consumer.CompleteTask;
 
                 if (_log.IsDebugEnabled)
                 {

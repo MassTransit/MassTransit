@@ -26,7 +26,7 @@ namespace MassTransit.Transports.InMemory
     public class InMemoryTransportCache :
         IReceiveTransportProvider,
         ISendTransportProvider,
-        IBusHost
+        IBusHostControl
     {
         readonly Uri _baseUri = new Uri("loopback://localhost/");
         readonly ConcurrentDictionary<string, InMemoryTransport> _transports;
@@ -41,9 +41,9 @@ namespace MassTransit.Transports.InMemory
             get { return _transports.Keys.Select(x => new Uri(_baseUri, x)); }
         }
 
-        public async Task Stop(CancellationToken cancellationToken = default(CancellationToken))
+        public HostHandle Start()
         {
-            Parallel.ForEach(_transports.Values, x => x.Dispose());
+            return new Handle(this);
         }
 
         public IReceiveTransport GetReceiveTransport(string queueName)
@@ -58,6 +58,28 @@ namespace MassTransit.Transports.InMemory
                 queueName = queueName.Substring(1);
 
             return _transports.GetOrAdd(queueName, name => new InMemoryTransport(new Uri(_baseUri, name)));
+        }
+
+
+        class Handle :
+            HostHandle
+        {
+            readonly InMemoryTransportCache _cache;
+
+            public Handle(InMemoryTransportCache cache)
+            {
+                _cache = cache;
+            }
+
+            public async Task Stop(CancellationToken cancellationToken = default(CancellationToken))
+            {
+                Parallel.ForEach(_cache._transports.Values, x => x.Dispose());
+            }
+
+            public void Dispose()
+            {
+                Parallel.ForEach(_cache._transports.Values, x => x.Dispose());
+            }
         }
     }
 }

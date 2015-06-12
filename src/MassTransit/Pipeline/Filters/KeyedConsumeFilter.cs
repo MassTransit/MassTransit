@@ -14,6 +14,7 @@ namespace MassTransit.Pipeline.Filters
 {
     using System;
     using System.Collections.Concurrent;
+    using System.Diagnostics;
     using System.Linq;
     using System.Threading.Tasks;
 
@@ -44,13 +45,14 @@ namespace MassTransit.Pipeline.Filters
             return new Handle(key, handle, RemovePipe);
         }
 
+        [DebuggerNonUserCode]
         public async Task Send(ConsumeContext<T> context, IPipe<ConsumeContext<T>> next)
         {
             TKey key = _keyAccessor(context);
 
             TeeConsumeFilter<T> filter;
             if (_pipes.TryGetValue(key, out filter))
-                await filter.Send(context, next).ConfigureAwait(false);
+                await filter.Send(context, next);
         }
 
         public bool Visit(IPipelineVisitor visitor)

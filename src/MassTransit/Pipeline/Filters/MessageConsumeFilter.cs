@@ -14,6 +14,7 @@ namespace MassTransit.Pipeline.Filters
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Linq;
     using System.Threading.Tasks;
     using Pipes;
@@ -59,21 +60,22 @@ namespace MassTransit.Pipeline.Filters
             return _output.ConnectConsumePipe(pipe);
         }
 
+        [DebuggerNonUserCode]
         async Task IFilter<ConsumeContext>.Send(ConsumeContext context, IPipe<ConsumeContext> next)
         {
             ConsumeContext<TMessage> consumeContext;
             if (context.TryGetMessage(out consumeContext))
             {
                 if (_messageObservers.Count > 0)
-                    await _messageObservers.PreConsume(consumeContext).ConfigureAwait(false);
+                    await _messageObservers.PreConsume(consumeContext);
                 try
                 {
-                    await _outputPipe.Send(consumeContext).ConfigureAwait(false);
+                    await _outputPipe.Send(consumeContext);
 
                     if (_messageObservers.Count > 0)
-                        await _messageObservers.PostConsume(consumeContext).ConfigureAwait(false);
+                        await _messageObservers.PostConsume(consumeContext);
 
-                    await next.Send(context).ConfigureAwait(false);
+                    await next.Send(context);
                 }
                 catch (Exception ex)
                 {

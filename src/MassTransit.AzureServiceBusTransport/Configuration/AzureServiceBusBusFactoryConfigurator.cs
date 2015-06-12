@@ -26,12 +26,12 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
         IBusFactory
     {
         readonly ConsumePipeSpecification _consumePipeSpecification;
-        readonly IList<IServiceBusHost> _hosts;
+        readonly IList<ServiceBusHost> _hosts;
         readonly IList<IBusFactorySpecification> _transportSpecifications;
 
         public AzureServiceBusBusFactoryConfigurator()
         {
-            _hosts = new List<IServiceBusHost>();
+            _hosts = new List<ServiceBusHost>();
             _transportSpecifications = new List<IBusFactorySpecification>();
             _consumePipeSpecification = new ConsumePipeSpecification();
         }

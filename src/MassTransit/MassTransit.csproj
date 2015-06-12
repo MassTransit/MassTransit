@@ -818,6 +818,7 @@
     <Compile Include="Util\LambdaEqualityComparer.cs" />
     <Compile Include="Util\MultipleConnectHandle.cs" />
     <Compile Include="Util\QueuedTaskScheduler.cs" />
+    <Compile Include="Util\StopSignal.cs" />
     <Compile Include="Util\TypeMetadataCache.cs" />
     <Compile Include="Util\UriExtensions.cs" />
   </ItemGroup>

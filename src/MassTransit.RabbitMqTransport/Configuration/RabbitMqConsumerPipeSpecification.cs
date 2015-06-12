@@ -13,6 +13,7 @@
 namespace MassTransit.RabbitMqTransport.Configuration
 {
     using System.Collections.Generic;
+    using System.Linq;
     using MassTransit.Configurators;
     using MassTransit.Pipeline;
     using PipeBuilders;
@@ -27,7 +28,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
         readonly IPipe<ReceiveContext> _receivePipe;
         readonly ReceiveSettings _settings;
         readonly INotifyReceiveObserver _receiveObserver;
-        readonly IEnumerable<ExchangeBindingSettings> _exchangeBindings;
+        readonly ExchangeBindingSettings[] _exchangeBindings;
 
         public RabbitMqConsumerPipeSpecification(IPipe<ReceiveContext> receivePipe, ReceiveSettings settings,
             INotifyReceiveObserver receiveObserver,
@@ -35,7 +36,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
         {
             _settings = settings;
             _receiveObserver = receiveObserver;
-            _exchangeBindings = exchangeBindings;
+            _exchangeBindings = exchangeBindings.ToArray();
             _receivePipe = receivePipe;
         }
 
@@ -43,10 +44,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
         {
             IPipe<ModelContext> pipe = Pipe.New<ModelContext>(x =>
             {
-                x.Filter(new PrepareReceiveQueueFilter(_settings));
-
-                foreach (ExchangeBindingSettings binding in _exchangeBindings)
-                    x.Filter(new ReceiveExchangeBindingModelFilter(binding));
+                x.Filter(new PrepareReceiveQueueFilter(_settings, _exchangeBindings));
 
                 x.Filter(new RabbitMqConsumerFilter(_receivePipe, _receiveObserver));
             });

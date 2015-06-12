@@ -40,7 +40,7 @@ namespace MassTransit.RabbitMqTransport
             if (host == null)
                 throw new EndpointNotFoundException("The endpoint address specified an unknown host: " + address);
 
-            var modelCache = new RabbitMqModelCache(host.SendConnectionCache);
+            var modelCache = new RabbitMqModelCache(host.ConnectionCache);
 
             return new RabbitMqSendTransport(modelCache, sendSettings);
         }

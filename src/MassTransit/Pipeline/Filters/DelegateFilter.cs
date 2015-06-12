@@ -13,6 +13,7 @@
 namespace MassTransit.Pipeline.Filters
 {
     using System;
+    using System.Diagnostics;
     using System.Threading.Tasks;
 
 
@@ -27,6 +28,7 @@ namespace MassTransit.Pipeline.Filters
             _callback = callback;
         }
 
+        [DebuggerNonUserCode]
         public Task Send(T context, IPipe<T> next)
         {
             _callback(context);

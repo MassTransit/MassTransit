@@ -16,6 +16,7 @@ namespace MassTransit.RabbitMqTransport.Contexts
     using System.Threading;
     using System.Threading.Tasks;
     using Context;
+    using Logging;
     using RabbitMQ.Client;
     using Util;
 
@@ -24,11 +25,12 @@ namespace MassTransit.RabbitMqTransport.Contexts
         ConnectionContext,
         IDisposable
     {
+        static readonly ILog _log = Logger.Get<RabbitMqConnectionContext>();
+        readonly TaskCompletionSource<bool> _completed;
         readonly RabbitMqHostSettings _hostSettings;
-        readonly object _lock = new object();
         readonly PayloadCache _payloadCache;
-        readonly CancellationTokenSource _tokenSource;
         readonly QueuedTaskScheduler _taskScheduler;
+        readonly CancellationTokenSource _tokenSource;
         IConnection _connection;
         CancellationTokenRegistration _registration;
 
@@ -38,11 +40,17 @@ namespace MassTransit.RabbitMqTransport.Contexts
             _hostSettings = hostSettings;
             _payloadCache = new PayloadCache();
 
+            _completed = new TaskCompletionSource<bool>();
             _tokenSource = new CancellationTokenSource();
             _registration = cancellationToken.Register(OnCancellationRequested);
             _taskScheduler = new QueuedTaskScheduler(TaskScheduler.Default, 1);
 
             connection.ConnectionShutdown += OnConnectionShutdown;
+        }
+
+        public Task Completed
+        {
+            get { return _completed.Task; }
         }
 
         public RabbitMqHostSettings HostSettings
@@ -75,16 +83,7 @@ namespace MassTransit.RabbitMqTransport.Contexts
 
         public IConnection Connection
         {
-            get
-            {
-                lock (_lock)
-                {
-                    if (_connection == null)
-                        throw new InvalidOperationException("The connection was closed");
-
-                    return _connection;
-                }
-            }
+            get { return _connection; }
         }
 
         public CancellationToken CancellationToken
@@ -96,7 +95,17 @@ namespace MassTransit.RabbitMqTransport.Contexts
         {
             _connection.ConnectionShutdown -= OnConnectionShutdown;
 
-            Close(200, "Connection disposed");
+            _registration.Dispose();
+
+            if (_log.IsDebugEnabled)
+                _log.DebugFormat("Disconnecting: {0}", _hostSettings.ToDebugString());
+
+            Close(200, "Connection Disposed");
+
+            if (_log.IsDebugEnabled)
+                _log.DebugFormat("Disconnected: {0}", _hostSettings.ToDebugString());
+
+            _completed.TrySetResult(true);
         }
 
         void OnConnectionShutdown(object connection, ShutdownEventArgs reason)
@@ -113,13 +122,7 @@ namespace MassTransit.RabbitMqTransport.Contexts
 
         void Close(ushort replyCode, string message)
         {
-            lock (_lock)
-            {
-                _registration.Dispose();
-
-                _connection.Cleanup(replyCode, message);
-                _connection = null;
-            }
+            _connection.Cleanup(replyCode, message);
         }
     }
 }

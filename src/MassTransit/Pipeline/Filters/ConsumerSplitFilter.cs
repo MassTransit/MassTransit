@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Pipeline.Filters
 {
+    using System.Diagnostics;
     using System.Threading.Tasks;
     using Pipes;
 
@@ -34,6 +35,7 @@ namespace MassTransit.Pipeline.Filters
             _next = next;
         }
 
+        [DebuggerNonUserCode]
         public Task Send(ConsumerConsumeContext<TConsumer, TMessage> context, IPipe<ConsumerConsumeContext<TConsumer, TMessage>> next)
         {
             var mergePipe = new ConsumerMergePipe<TConsumer, TMessage>(next);

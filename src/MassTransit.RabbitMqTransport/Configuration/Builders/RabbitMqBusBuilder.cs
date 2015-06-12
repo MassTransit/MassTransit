@@ -28,9 +28,9 @@ namespace MassTransit.RabbitMqTransport.Configuration.Builders
     {
         readonly IConsumePipe _busConsumePipe;
         readonly RabbitMqReceiveEndpointConfigurator _busEndpointConfigurator;
-        readonly IRabbitMqHost[] _hosts;
+        readonly RabbitMqHost[] _hosts;
 
-        public RabbitMqBusBuilder(IEnumerable<IRabbitMqHost> hosts, IConsumePipeSpecification consumePipeSpecification, RabbitMqReceiveSettings busSettings)
+        public RabbitMqBusBuilder(IEnumerable<RabbitMqHost> hosts, IConsumePipeSpecification consumePipeSpecification, RabbitMqReceiveSettings busSettings)
             : base(consumePipeSpecification)
         {
             _hosts = hosts.ToArray();

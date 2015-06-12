@@ -15,12 +15,10 @@ namespace MassTransit.RabbitMqTransport
     using System;
     using System.Threading;
     using System.Threading.Tasks;
-    using Configuration;
     using Integration;
     using Internals.Extensions;
     using Logging;
     using MassTransit.Pipeline;
-    using Pipeline;
     using Policies;
     using Topology;
     using Transports;
@@ -73,7 +71,7 @@ namespace MassTransit.RabbitMqTransport
             {
                 try
                 {
-                    await _connectionCache.Send(transportPipe, stopToken).ConfigureAwait(false);
+                    await _connectionCache.Send(transportPipe, stopToken);
                 }
                 catch (RabbitMqConnectionException ex)
                 {
@@ -88,7 +86,7 @@ namespace MassTransit.RabbitMqTransport
                     if (_log.IsErrorEnabled)
                         _log.ErrorFormat("RabbitMQ receive transport failed: {0}", ex.Message);
                 }
-            }).ConfigureAwait(false);
+            });
         }
 
 
@@ -113,7 +111,7 @@ namespace MassTransit.RabbitMqTransport
             {
                 _stop.Cancel();
 
-                await _receiverTask.WithCancellation(cancellationToken).ConfigureAwait(false);
+                await _receiverTask.WithCancellation(cancellationToken);
             }
         }
     }

@@ -13,6 +13,7 @@
 namespace MassTransit.Pipeline.Filters
 {
     using System;
+    using System.Diagnostics;
     using System.Linq;
     using System.Threading.Tasks;
     using Logging;
@@ -37,12 +38,13 @@ namespace MassTransit.Pipeline.Filters
             _exceptionFilter = exceptionFilter;
         }
 
+        [DebuggerNonUserCode]
         async Task IFilter<T>.Send(T context, IPipe<T> next)
         {
             Exception exception = null;
             try
             {
-                await next.Send(context).ConfigureAwait(false);
+                await next.Send(context);
             }
             catch (AggregateException ex)
             {
@@ -66,7 +68,7 @@ namespace MassTransit.Pipeline.Filters
             }
 
             if (exception != null)
-                await _rescuePipe.Send(context).ConfigureAwait(false);
+                await _rescuePipe.Send(context);
         }
 
         bool IFilter<T>.Visit(IPipelineVisitor visitor)

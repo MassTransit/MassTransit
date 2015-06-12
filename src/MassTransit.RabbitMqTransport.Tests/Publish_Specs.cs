@@ -20,13 +20,12 @@ namespace MassTransit.RabbitMqTransport.Tests
     namespace Send_Specs
     {
         using System;
-        using System.Collections.Generic;
         using System.Linq;
-        using System.Security.Cryptography;
         using System.Threading.Tasks;
         using MassTransit.Testing;
         using NUnit.Framework;
         using Serialization;
+        using Shouldly;
         using TestFramework;
 
 
@@ -146,8 +145,6 @@ namespace MassTransit.RabbitMqTransport.Tests
         public class WhenAMessageIsPublishedToTheConsumer :
             RabbitMqTestFixture
         {
-            MultiTestConsumer _consumer;
-
             [Test]
             public async void Should_be_received()
             {
@@ -157,10 +154,12 @@ namespace MassTransit.RabbitMqTransport.Tests
 
                 _consumer.Received.Select<B>().Any().ShouldBe(true);
 
-                var receivedMessage = _consumer.Received.Select<B>().First();
+                IReceivedMessage<B> receivedMessage = _consumer.Received.Select<B>().First();
 
                 Assert.AreEqual(message.Id, receivedMessage.Context.Message.Id);
             }
+
+            MultiTestConsumer _consumer;
 
             protected override void ConfigureInputQueueEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
             {

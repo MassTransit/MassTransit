@@ -39,16 +39,17 @@ namespace MassTransit.Pipeline.Filters
             _consumerPipe = consumerPipe;
         }
 
+        [DebuggerNonUserCode]
         async Task IFilter<ConsumeContext<TMessage>>.Send(ConsumeContext<TMessage> context, IPipe<ConsumeContext<TMessage>> next)
         {
             Stopwatch timer = Stopwatch.StartNew();
             try
             {
-                await _consumerFactory.Send(context, _consumerPipe).ConfigureAwait(false);
+                await _consumerFactory.Send(context, _consumerPipe);
 
                 context.NotifyConsumed(timer.Elapsed, TypeMetadataCache<TConsumer>.ShortName);
 
-                await next.Send(context).ConfigureAwait(false);
+                await next.Send(context);
             }
             catch (Exception ex)
             {

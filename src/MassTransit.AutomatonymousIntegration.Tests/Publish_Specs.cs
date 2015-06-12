@@ -35,6 +35,11 @@ namespace MassTransit.AutomatonymousTests
             ConsumeContext<StartupComplete> received = await messageReceived;
 
             Assert.AreEqual(message.CorrelationId, received.Message.TransactionId);
+
+            Guid? saga =
+                await _repository.ShouldContainSaga(x => x.CorrelationId == message.CorrelationId && Equals(x.CurrentState, _machine.Running), TestTimeout);
+
+            Assert.IsTrue(saga.HasValue);
         }
 
         protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)

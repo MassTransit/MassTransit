@@ -15,55 +15,67 @@ namespace MassTransit.RabbitMqTransport.Contexts
     using System;
     using System.Threading;
     using System.Threading.Tasks;
-    using Context;
     using RabbitMQ.Client;
 
 
     public class SharedConnectionContext :
-        ConnectionContext
+        ConnectionContext,
+        IDisposable
     {
         readonly CancellationToken _cancellationToken;
+        readonly TaskCompletionSource<bool> _completed;
         readonly ConnectionContext _context;
 
         public SharedConnectionContext(ConnectionContext context, CancellationToken cancellationToken)
         {
             _context = context;
             _cancellationToken = cancellationToken;
+            _completed = new TaskCompletionSource<bool>();
         }
 
-        public CancellationToken CancellationToken
+        public Task Completed
+        {
+            get { return _completed.Task; }
+        }
+
+        CancellationToken PipeContext.CancellationToken
         {
             get { return _cancellationToken; }
         }
 
-        public bool HasPayloadType(Type contextType)
+        bool PipeContext.HasPayloadType(Type contextType)
         {
             return _context.HasPayloadType(contextType);
         }
 
-        public bool TryGetPayload<TPayload>(out TPayload payload) where TPayload : class
+        bool PipeContext.TryGetPayload<TPayload>(out TPayload payload)
         {
             return _context.TryGetPayload(out payload);
         }
 
-        public TPayload GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory) where TPayload : class
+        TPayload PipeContext.GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory)
         {
             return _context.GetOrAddPayload(payloadFactory);
         }
 
-        public IConnection Connection
+        IConnection ConnectionContext.Connection
         {
             get { return _context.Connection; }
         }
 
-        public RabbitMqHostSettings HostSettings
+        RabbitMqHostSettings ConnectionContext.HostSettings
         {
             get { return _context.HostSettings; }
         }
 
-        public Task<IModel> CreateModel()
+        Task<IModel> ConnectionContext.CreateModel()
         {
             return _context.CreateModel();
+        }
+
+        void IDisposable.Dispose()
+        {
+            _completed.TrySetResult(true);
         }
     }
 }

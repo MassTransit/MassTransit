@@ -71,18 +71,28 @@ namespace MassTransit.RabbitMqTransport.Contexts
 
         public bool HasPayloadType(Type contextType)
         {
-            return _payloadCache.HasPayloadType(contextType);
+            return _payloadCache.HasPayloadType(contextType) || _connectionContext.HasPayloadType(contextType);
         }
 
         public bool TryGetPayload<TPayload>(out TPayload context)
             where TPayload : class
         {
-            return _payloadCache.TryGetPayload(out context);
+            if (_payloadCache.TryGetPayload(out context))
+                return true;
+
+            return _connectionContext.TryGetPayload(out context);
         }
 
         public TPayload GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory)
             where TPayload : class
         {
+            TPayload payload;
+            if (_payloadCache.TryGetPayload(out payload))
+                return payload;
+
+            if (_connectionContext.TryGetPayload(out payload))
+                return payload;
+
             return _payloadCache.GetOrAddPayload(payloadFactory);
         }
 

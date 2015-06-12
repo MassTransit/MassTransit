@@ -27,11 +27,11 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
     {
         readonly IConsumePipe _busConsumePipe;
         readonly ServiceBusReceiveEndpointConfigurator _busEndpointConfigurator;
-        readonly IServiceBusHost[] _hosts;
+        readonly ServiceBusHost[] _hosts;
         readonly Uri _inputAddress;
         readonly Lazy<ISendEndpointProvider> _publishSendEndpointProvider;
 
-        public ServiceBusBusBuilder(IEnumerable<IServiceBusHost> hosts, IConsumePipeSpecification consumePipeSpecification)
+        public ServiceBusBusBuilder(IEnumerable<ServiceBusHost> hosts, IConsumePipeSpecification consumePipeSpecification)
             : base(consumePipeSpecification)
         {
             if (hosts == null)

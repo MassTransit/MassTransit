@@ -37,10 +37,10 @@ namespace MassTransit.RabbitMqTransport.Pipeline
 
             using (var modelContext = new RabbitMqModelContext(context, model, context.CancellationToken))
             {
-                await _pipe.Send(modelContext).ConfigureAwait(false);
+                await _pipe.Send(modelContext);
             }
 
-            await next.Send(context).ConfigureAwait(false);
+            await next.Send(context);
         }
 
         public bool Visit(IPipelineVisitor visitor)

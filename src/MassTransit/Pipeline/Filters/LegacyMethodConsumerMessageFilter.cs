@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Pipeline.Filters
 {
+    using System.Diagnostics;
     using System.Threading.Tasks;
     using Util;
 
@@ -26,7 +27,8 @@ namespace MassTransit.Pipeline.Filters
         where TConsumer : class, IMessageConsumer<TMessage>
         where TMessage : class
     {
-        public async Task Send(ConsumerConsumeContext<TConsumer, TMessage> context,
+        [DebuggerNonUserCode]
+        async Task IFilter<ConsumerConsumeContext<TConsumer, TMessage>>.Send(ConsumerConsumeContext<TConsumer, TMessage> context,
             IPipe<ConsumerConsumeContext<TConsumer, TMessage>> next)
         {
             var messageConsumer = context.Consumer as IMessageConsumer<TMessage>;

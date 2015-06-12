@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Pipeline.Pipes
 {
+    using System.Diagnostics;
     using System.Threading.Tasks;
 
 
@@ -35,6 +36,7 @@ namespace MassTransit.Pipeline.Pipes
             get { return Cache.LastPipe; }
         }
 
+        [DebuggerNonUserCode]
         public Task Send(T context)
         {
             return _filter.Send(context, Cache.LastPipe);

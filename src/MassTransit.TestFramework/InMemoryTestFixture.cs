@@ -130,8 +130,8 @@ namespace MassTransit.TestFramework
 
             try
             {
-                if (_transportCache != null)
-                    Await(() => _transportCache.Stop(new CancellationTokenSource(TestTimeout).Token));
+//                if (_transportCache != null)
+//                    Await(() => _transportCache.Stop(new CancellationTokenSource(TestTimeout).Token));
             }
             catch (Exception ex)
             {

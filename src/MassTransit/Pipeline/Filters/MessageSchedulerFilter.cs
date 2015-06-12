@@ -13,6 +13,7 @@
 namespace MassTransit.Pipeline.Filters
 {
     using System;
+    using System.Diagnostics;
     using System.Threading.Tasks;
     using Context;
 
@@ -32,14 +33,15 @@ namespace MassTransit.Pipeline.Filters
             _schedulerAddress = schedulerAddress;
         }
 
-        async Task IFilter<ConsumeContext<TMessage>>.Send(ConsumeContext<TMessage> context, IPipe<ConsumeContext<TMessage>> next)
+        [DebuggerNonUserCode]
+        Task IFilter<ConsumeContext<TMessage>>.Send(ConsumeContext<TMessage> context, IPipe<ConsumeContext<TMessage>> next)
         {
             MessageSchedulerContext schedulerContext = new ConsumeMessageSchedulerContext(context, _schedulerAddress);
 
             context.GetOrAddPayload(() => schedulerContext);
             context.GetOrAddPayload<MessageRedeliveryContext>(() => new ConsumeMessageRedeliveryContext<TMessage>(context, schedulerContext));
 
-            await next.Send(context).ConfigureAwait(false);
+            return next.Send(context);
         }
 
         bool IFilter<ConsumeContext<TMessage>>.Visit(IPipelineVisitor visitor)

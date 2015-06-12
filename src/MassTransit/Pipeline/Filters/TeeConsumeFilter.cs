@@ -13,6 +13,7 @@
 namespace MassTransit.Pipeline.Filters
 {
     using System;
+    using System.Diagnostics;
     using System.Threading.Tasks;
     using Util;
 
@@ -46,11 +47,12 @@ namespace MassTransit.Pipeline.Filters
             return _connections.Connect(pipe);
         }
 
+        [DebuggerNonUserCode]
         public async Task Send(ConsumeContext<T> context, IPipe<ConsumeContext<T>> next)
         {
-            await _connections.ForEach(async pipe => await pipe.Send(context).ConfigureAwait(false)).ConfigureAwait(false);
+            await _connections.ForEach(async pipe => await pipe.Send(context));
 
-            await next.Send(context).ConfigureAwait(false);
+            await next.Send(context);
         }
 
         public bool Visit(IPipelineVisitor visitor)
