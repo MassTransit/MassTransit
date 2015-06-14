@@ -25,7 +25,7 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
         IServiceBusBusFactoryConfigurator,
         IBusFactory
     {
-        readonly ConsumePipeSpecification _consumePipeSpecification;
+        readonly ConsumePipeSpecificationList _consumePipeSpecification;
         readonly IList<ServiceBusHost> _hosts;
         readonly IList<IBusFactorySpecification> _transportSpecifications;
 
@@ -33,7 +33,7 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
         {
             _hosts = new List<ServiceBusHost>();
             _transportSpecifications = new List<IBusFactorySpecification>();
-            _consumePipeSpecification = new ConsumePipeSpecification();
+            _consumePipeSpecification = new ConsumePipeSpecificationList();
         }
 
         public IEnumerable<ValidationResult> Validate()

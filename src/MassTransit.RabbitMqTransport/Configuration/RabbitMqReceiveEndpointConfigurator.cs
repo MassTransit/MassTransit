@@ -13,37 +13,27 @@
 namespace MassTransit.RabbitMqTransport.Configuration
 {
     using System;
-    using System.Collections.Generic;
     using System.Linq;
     using Builders;
-    using BusConfigurators;
+    using EndpointConfigurators;
     using MassTransit.Builders;
-    using MassTransit.Configurators;
     using MassTransit.Pipeline;
-    using MassTransit.Pipeline.Filters;
-    using PipeConfigurators;
     using Topology;
     using Transports;
 
 
     public class RabbitMqReceiveEndpointConfigurator :
+        ReceiveEndpointConfigurator,
         IRabbitMqReceiveEndpointConfigurator,
         IBusFactorySpecification
     {
-        readonly IList<IReceiveEndpointSpecification> _configurators;
-        readonly IConsumePipe _consumePipe;
-        readonly ConsumePipeSpecification _consumePipeSpecification;
         readonly IRabbitMqHost _host;
-        readonly IBuildPipeConfigurator<ReceiveContext> _receivePipeConfigurator;
         readonly RabbitMqReceiveSettings _settings;
 
         public RabbitMqReceiveEndpointConfigurator(IRabbitMqHost host, string queueName = null, IConsumePipe consumePipe = null)
+            : base(consumePipe)
         {
             _host = host;
-            _consumePipe = consumePipe;
-            _consumePipeSpecification = new ConsumePipeSpecification();
-            _receivePipeConfigurator = new PipeConfigurator<ReceiveContext>();
-            _configurators = new List<IReceiveEndpointSpecification>();
 
             _settings = new RabbitMqReceiveSettings
             {
@@ -53,12 +43,9 @@ namespace MassTransit.RabbitMqTransport.Configuration
         }
 
         public RabbitMqReceiveEndpointConfigurator(IRabbitMqHost host, RabbitMqReceiveSettings settings, IConsumePipe consumePipe)
+            : base(consumePipe)
         {
             _host = host;
-            _consumePipe = consumePipe;
-            _consumePipeSpecification = new ConsumePipeSpecification();
-            _receivePipeConfigurator = new PipeConfigurator<ReceiveContext>();
-            _configurators = new List<IReceiveEndpointSpecification>();
 
             _settings = settings;
         }
@@ -68,16 +55,21 @@ namespace MassTransit.RabbitMqTransport.Configuration
             get { return _host.Settings.GetInputAddress(_settings); }
         }
 
-        public IEnumerable<ValidationResult> Validate()
-        {
-            return _configurators.SelectMany(x => x.Validate());
-        }
-
         public void Apply(IBusBuilder builder)
         {
-            ReceiveEndpoint receiveEndpoint = CreateReceiveEndpoint(builder);
+            RabbitMqReceiveEndpointBuilder endpointBuilder = null;
+            IPipe<ReceiveContext> receivePipe = CreateReceivePipe(builder, consumePipe =>
+            {
+                endpointBuilder = new RabbitMqReceiveEndpointBuilder(consumePipe, _host.MessageNameFormatter);
+                return endpointBuilder;
+            });
 
-            builder.AddReceiveEndpoint(receiveEndpoint);
+            if (endpointBuilder == null)
+                throw new InvalidOperationException("The endpoint builder was not initialized");
+
+            var transport = new RabbitMqReceiveTransport(_host.ConnectionCache, _settings, endpointBuilder.GetExchangeBindings().ToArray());
+
+            builder.AddReceiveEndpoint(new ReceiveEndpoint(transport, receivePipe));
         }
 
         public void Durable(bool durable = true)
@@ -130,30 +122,8 @@ namespace MassTransit.RabbitMqTransport.Configuration
             _settings.ExchangeArguments[key] = value;
         }
 
-        public void AddEndpointSpecification(IReceiveEndpointSpecification configurator)
+        protected override Uri GetErrorAddress()
         {
-            _configurators.Add(configurator);
-        }
-
-        void IPipeConfigurator<ConsumeContext>.AddPipeSpecification(IPipeSpecification<ConsumeContext> specification)
-        {
-            _consumePipeSpecification.Add(specification);
-        }
-
-        void IConsumePipeConfigurator.AddPipeSpecification<T>(IPipeSpecification<ConsumeContext<T>> specification)
-        {
-            _consumePipeSpecification.Add(specification);
-        }
-
-        ReceiveEndpoint CreateReceiveEndpoint(IBusBuilder builder)
-        {
-            IConsumePipe consumePipe = _consumePipe ?? builder.CreateConsumePipe(_consumePipeSpecification);
-
-            var endpointBuilder = new RabbitMqReceiveEndpointBuilder(consumePipe, _host.MessageNameFormatter);
-
-            foreach (IReceiveEndpointSpecification builderConfigurator in _configurators)
-                builderConfigurator.Configure(endpointBuilder);
-
             string errorQueueName = _settings.QueueName + "_error";
             var sendSettings = new RabbitMqSendSettings(errorQueueName, RabbitMQ.Client.ExchangeType.Fanout, true,
                 false);
@@ -162,21 +132,8 @@ namespace MassTransit.RabbitMqTransport.Configuration
 
             Uri errorQueueAddress = _host.Settings.GetSendAddress(sendSettings);
 
-            ISendTransportProvider sendTransportProvider = builder.SendTransportProvider;
 
-            IPipe<ReceiveContext> moveToErrorPipe = Pipe.New<ReceiveContext>(
-                x => x.Filter(new MoveToErrorTransportFilter(() => sendTransportProvider.GetSendTransport(errorQueueAddress))));
-
-            _receivePipeConfigurator.Rescue(moveToErrorPipe, typeof(Exception));
-
-            _receivePipeConfigurator.Filter(new DeserializeFilter(builder.MessageDeserializer, consumePipe));
-
-            IPipe<ReceiveContext> receivePipe = _receivePipeConfigurator.Build();
-
-            var transport = new RabbitMqReceiveTransport(_host.ConnectionCache, _settings,
-                endpointBuilder.GetExchangeBindings().ToArray());
-
-            return new ReceiveEndpoint(transport, receivePipe);
+            return errorQueueAddress;
         }
     }
 }

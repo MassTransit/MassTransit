@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -18,6 +18,7 @@ namespace MassTransit
     using Pipeline;
     using Pipeline.Filters;
 
+
     public static class RescueFilterConfiguratorExtensions
     {
         /// <summary>
@@ -33,7 +34,9 @@ namespace MassTransit
             if (configurator == null)
                 throw new ArgumentNullException("configurator");
 
-            RescueExceptionFilter exceptionFilter = exception => exceptionTypes.Any(x => x.IsInstanceOfType(exception));
+            RescueExceptionFilter exceptionFilter = exceptionTypes.Length == 0
+                ? (RescueExceptionFilter)(exception => true)
+                : (exception => exceptionTypes.Any(x => x.IsInstanceOfType(exception)));
 
             var rescueConfigurator = new RescuePipeSpecification<T>(rescuePipe, exceptionFilter);
 

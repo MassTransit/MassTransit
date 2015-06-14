@@ -84,26 +84,28 @@
       <Link>SolutionVersion.cs</Link>
     </Compile>
     <Compile Include="Configuration\BusConfigurators\ConsumePipeBuilder.cs" />
-    <Compile Include="Configuration\BusConfigurators\ConsumePipeSpecification.cs" />
+    <Compile Include="Configuration\BusConfigurators\ConsumePipeSpecificationList.cs" />
     <Compile Include="Configuration\BusConfigurators\IConsumePipeBuilder.cs" />
     <Compile Include="Configuration\BusConfigurators\IConsumePipeSpecification.cs" />
     <Compile Include="Configuration\ConsumeConnectors\IObserverConnectorCache.cs" />
     <Compile Include="Configuration\ConsumeConnectors\MessageObserverConnector.cs" />
     <Compile Include="Configuration\ConsumeConnectors\ObserverConnector.cs" />
     <Compile Include="Configuration\ConsumeConnectors\ObserverConnectorCache.cs" />
+    <Compile Include="Configuration\EndpointConfigurators\InMemoryReceiveEndpointConfigurator.cs" />
+    <Compile Include="Configuration\EndpointConfigurators\ReceiveEndpointConfigurator.cs" />
     <Compile Include="Configuration\IConsumePipeConfigurator.cs" />
     <Compile Include="Configuration\ITransformConfiguration.cs" />
     <Compile Include="Configuration\ITransformConfigurator.cs" />
     <Compile Include="Configuration\MessageDataConfiguratorExtensions.cs" />
     <Compile Include="Configuration\TransformBuilders\ITransformBuilder.cs" />
     <Compile Include="Configuration\TransformBuilders\MessageTransformBuilder.cs" />
-    <Compile Include="Configuration\TransformConfiguration.cs" />
     <Compile Include="Configuration\TransformConfiguratorExtensions.cs" />
     <Compile Include="Configuration\TransformConfigurators\CopyPropertyTransformSpecification.cs" />
     <Compile Include="Configuration\TransformConfigurators\DefaultPropertyTransformSpecification.cs" />
     <Compile Include="Configuration\TransformConfigurators\IMessageDataTransformConfiguration.cs" />
     <Compile Include="Configuration\TransformConfigurators\InputPropertyTransformSpecification.cs" />
     <Compile Include="Configuration\TransformConfigurators\LoadMessageDataTransformConfiguration.cs" />
+    <Compile Include="Configuration\TransformConfigurators\TransformConfiguration.cs" />
     <Compile Include="Configuration\TransformConfigurators\TransformConsumePipeSpecification.cs" />
     <Compile Include="Configuration\TransformConfigurators\SourcePropertyTransformSpecification.cs" />
     <Compile Include="Configuration\TransformConfigurators\ITransformSpecification.cs" />
@@ -161,7 +163,6 @@
     <Compile Include="Configuration\IReceiveEndpointConfigurator.cs" />
     <Compile Include="Configuration\IReceiveTransportProvider.cs" />
     <Compile Include="Configuration\InMemoryConfigurationExtensions.cs" />
-    <Compile Include="Configuration\InMemoryReceiveEndpointConfigurator.cs" />
     <Compile Include="Configuration\ISendTransportProvider.cs" />
     <Compile Include="Configuration\IPipeConfigurator.cs" />
     <Compile Include="Configuration\IBusFactory.cs" />

@@ -17,6 +17,7 @@ namespace MassTransit.BusConfigurators
     using System.Linq;
     using Builders;
     using Configurators;
+    using EndpointConfigurators;
     using PipeConfigurators;
     using Transports;
     using Transports.InMemory;
@@ -27,7 +28,7 @@ namespace MassTransit.BusConfigurators
         IBusFactory
     {
         readonly IList<IInMemoryBusFactorySpecification> _configurators;
-        readonly ConsumePipeSpecification _consumePipeSpecification;
+        readonly ConsumePipeSpecificationList _consumePipeSpecification;
         readonly IList<IBusHostControl> _hosts;
         IReceiveTransportProvider _receiveTransportProvider;
         ISendTransportProvider _sendTransportProvider;
@@ -35,7 +36,7 @@ namespace MassTransit.BusConfigurators
         public InMemoryBusFactoryConfigurator()
         {
             _configurators = new List<IInMemoryBusFactorySpecification>();
-            _consumePipeSpecification = new ConsumePipeSpecification();
+            _consumePipeSpecification = new ConsumePipeSpecificationList();
 
             _hosts = new List<IBusHostControl>();
         }
