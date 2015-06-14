@@ -12,6 +12,7 @@ BUILD_PLATFORM = ''
 TARGET_FRAMEWORK_VERSION = "v4.5"
 MSB_USE = :net4
 OUTPUT_PATH = 'net-4.5'
+NUGET = 'src/.nuget/nuget.exe'
 
 props = {
   :src => File.expand_path("src"),
@@ -134,124 +135,12 @@ task :copy_samples => [:compile_samples] do
     copyOutputFiles File.join(src, "Grid.Distributor.Worker/bin/#{BUILD_CONFIG}"), "*.config", targ
 end
 
-desc "restores missing packages"
-msbuild :restore do |msb|
-  msb.use :net4
-  msb.targets :RestorePackages
-  msb.solution = 'src/MassTransit/MassTransit.csproj'
+task :restore => NUGET do
+  sh NUGET, 'restore', "src/#{PRODUCT}.sln"
 end
 
-desc "restores missing packages"
-msbuild :restore do |msb|
-  msb.use :net4
-  msb.targets :RestorePackages
-  msb.solution = 'src/MassTransit.Tests/MassTransit.Tests.csproj'
-end
-
-desc "restores missing packages"
-msbuild :restore do |msb|
-  msb.use :net4
-  msb.targets :RestorePackages
-  msb.solution = 'src/Containers/MassTransit.AutofacIntegration/MassTransit.AutofacIntegration.csproj'
-end
-
-desc "restores missing packages"
-msbuild :restore do |msb|
-  msb.use :net4
-  msb.targets :RestorePackages
-  msb.solution = 'src/Containers/MassTransit.Containers.Tests/MassTransit.Containers.Tests.csproj'
-end
-
-desc "restores missing packages"
-msbuild :restore do |msb|
-  msb.use :net4
-  msb.targets :RestorePackages
-  msb.solution = 'src/Containers/MassTransit.NinjectIntegration/MassTransit.NinjectIntegration.csproj'
-end
-
-desc "restores missing packages"
-msbuild :restore do |msb|
-  msb.use :net4
-  msb.targets :RestorePackages
-  msb.solution = 'src/Containers/MassTransit.UnityIntegration/MassTransit.UnityIntegration.csproj'
-end
-
-desc "restores missing packages"
-msbuild :restore do |msb|
-  msb.use :net4
-  msb.targets :RestorePackages
-  msb.solution = 'src/Containers/MassTransit.StructureMapIntegration/MassTransit.StructureMapIntegration.csproj'
-end
-
-desc "restores missing packages"
-msbuild :restore do |msb|
-  msb.use :net4
-  msb.targets :RestorePackages
-  msb.solution = 'src/Loggers/MassTransit.Log4NetIntegration/MassTransit.Log4NetIntegration.csproj'
-end
-
-desc "restores missing packages"
-msbuild :restore do |msb|
-  msb.use :net4
-  msb.targets :RestorePackages
-  msb.solution = 'src/Loggers/MassTransit.NLogIntegration/MassTransit.NLogIntegration.csproj'
-end
-
-desc "restores missing packages"
-msbuild :restore do |msb|
-  msb.use :net4
-  msb.targets :RestorePackages
-  msb.solution = 'src/Persistence/MassTransit.NHibernateIntegration/MassTransit.NHibernateIntegration.csproj'
-end
-
-desc "restores missing packages"
-msbuild :restore do |msb|
-  msb.use :net4
-  msb.targets :RestorePackages
-  msb.solution = 'src/Persistence/MassTransit.NHibernateIntegration.Tests/MassTransit.NHibernateIntegration.Tests.csproj'
-end
-
-desc "restores missing packages"
-msbuild :restore do |msb|
-  msb.use :net4
-  msb.targets :RestorePackages
-  msb.solution = 'src/MassTransit.RabbitMqTransport/MassTransit.RabbitMqTransport.csproj'
-end
-
-desc "restores missing packages"
-msbuild :restore do |msb|
-  msb.use :net4
-  msb.targets :RestorePackages
-  msb.solution = 'src/MassTransit.RabbitMqTransport.Tests/MassTransit.RabbitMqTransport.Tests.csproj'
-end
-
-desc "restores missing packages"
-msbuild :restore do |msb|
-  msb.use :net4
-  msb.targets :RestorePackages
-  msb.solution = 'src/MassTransit.AzureServiceBusTransport/MassTransit.AzureServiceBusTransport.csproj'
-end
-
-desc "restores missing packages"
-msbuild :restore do |msb|
-  msb.use :net4
-  msb.targets :RestorePackages
-  msb.solution = 'src/MassTransit.AzureServiceBusTransport.Tests/MassTransit.AzureServiceBusTransport.Tests.csproj'
-end
-
-
-desc "restores missing packages"
-msbuild :restore do |msb|
-  msb.use :net4
-  msb.targets :RestorePackages
-  msb.solution = 'src/MassTransit.Reactive/MassTransit.Reactive.csproj'
-end
-
-desc "restores missing packages"
-msbuild :restore do |msb|
-  msb.use :net4
-  msb.targets :RestorePackages
-  msb.solution = 'src/MassTransit.Reactive.Tests/MassTransit.Reactive.Tests.csproj'
+file NUGET do
+  sh 'powershell', '-Command', "& { Invoke-RestMethod https://www.nuget.org/nuget.exe -OutFile '#{NUGET}' }"
 end
 
 desc "Only compiles the application."
@@ -385,7 +274,7 @@ task :all_nuspecs => [:versioning, :mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :m
     nuspec.dependency "MassTransit", NUGET_VERSION
     nuspec.dependency "Newtonsoft.Json", "6.0.8"
     nuspec.dependency "NewId", "2.1.2"
-    nuspec.dependency "WindowsAzure.ServiceBus", "2.6.7"
+    nuspec.dependency "WindowsAzure.ServiceBus", "2.7.0"
     nuspec.dependency "Microsoft.WindowsAzure.ConfigurationManager", "3.1.0"
     nuspec.output_file = 'nuspecs/MassTransit.AzureServiceBus.nuspec'
 
@@ -444,7 +333,7 @@ task :all_nuspecs => [:versioning, :mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :m
     nuspec.license_url = "http://www.apache.org/licenses/LICENSE-2.0"
     nuspec.require_license_acceptance
     nuspec.dependency "MassTransit", NUGET_VERSION
-    nuspec.dependency "NLog", "3.2.1"
+    nuspec.dependency "NLog", "4.0.0"
     nuspec.output_file = 'nuspecs/MassTransit.NLog.nuspec'
 
     add_files props[:stage], File.join('Logging', 'MassTransit.NLogIntegration.{dll,pdb,xml}'), nuspec
