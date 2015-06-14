@@ -60,6 +60,7 @@
       <Link>Properties\SolutionVersion.cs</Link>
     </Compile>
     <Compile Include="AzureBusFactory.cs" />
+    <Compile Include="Configuration\ServiceBusReceiveEndpointConfigurator.cs" />
     <Compile Include="NamespaceManagerExtensions.cs" />
     <Compile Include="ServiceBusAddressExtensions.cs" />
     <Compile Include="ServiceBusPublishEndpoint.cs" />
@@ -101,7 +102,6 @@
     <Compile Include="ReceiveSettings.cs" />
     <Compile Include="ServiceBusHostSettingsExtensions.cs" />
     <Compile Include="ServiceBusMessageNameFormatter.cs" />
-    <Compile Include="ServiceBusReceiveEndpointConfigurator.cs" />
     <Compile Include="TransportConfiguratorExtensions.cs" />
     <Compile Include="ServiceBusConfigurationExtensions.cs" />
   </ItemGroup>

@@ -28,7 +28,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
         IRabbitMqBusFactoryConfigurator,
         IBusFactory
     {
-        readonly ConsumePipeSpecification _consumePipeSpecification;
+        readonly ConsumePipeSpecificationList _consumePipeSpecification;
         readonly IList<RabbitMqHost> _hosts;
         readonly RabbitMqReceiveSettings _settings;
         readonly IList<IBusFactorySpecification> _transportBuilderConfigurators;
@@ -37,7 +37,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
         {
             _hosts = new List<RabbitMqHost>();
             _transportBuilderConfigurators = new List<IBusFactorySpecification>();
-            _consumePipeSpecification = new ConsumePipeSpecification();
+            _consumePipeSpecification = new ConsumePipeSpecificationList();
 
             string queueName = HostMetadataCache.Host.GetTemporaryQueueName();
             _settings = new RabbitMqReceiveSettings

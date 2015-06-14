@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -10,32 +10,26 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.AzureServiceBusTransport
+namespace MassTransit.AzureServiceBusTransport.Configuration
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using Builders;
-    using BusConfigurators;
-    using Configuration;
     using Configurators;
+    using EndpointConfigurators;
     using MassTransit.Pipeline;
-    using MassTransit.Pipeline.Filters;
     using Microsoft.ServiceBus.Messaging;
-    using PipeConfigurators;
     using Transports;
 
 
     public class ServiceBusReceiveEndpointConfigurator :
+        ReceiveEndpointConfigurator,
         IServiceBusReceiveEndpointConfigurator,
         IBusFactorySpecification
     {
-        readonly IList<IReceiveEndpointSpecification> _configurators;
-        readonly IConsumePipe _consumePipe;
-        readonly ConsumePipeSpecification _consumePipeSpecification;
         readonly IServiceBusHost _host;
         readonly QueueDescription _queueDescription;
-        readonly IBuildPipeConfigurator<ReceiveContext> _receivePipeConfigurator;
         int _maxConcurrentCalls;
         int _prefetchCount;
 
@@ -51,14 +45,10 @@ namespace MassTransit.AzureServiceBusTransport
         }
 
         public ServiceBusReceiveEndpointConfigurator(IServiceBusHost host, QueueDescription queueDescription, IConsumePipe consumePipe = null)
+            : base(consumePipe)
         {
-            _consumePipeSpecification = new ConsumePipeSpecification();
-            _receivePipeConfigurator = new PipeConfigurator<ReceiveContext>();
-            _configurators = new List<IReceiveEndpointSpecification>();
-
             _host = host;
             _queueDescription = queueDescription;
-            _consumePipe = consumePipe;
             _maxConcurrentCalls = Math.Max(Environment.ProcessorCount, 8);
             _prefetchCount = Math.Max(_maxConcurrentCalls, 32);
         }
@@ -78,30 +68,38 @@ namespace MassTransit.AzureServiceBusTransport
             get { return _queueDescription; }
         }
 
-        public IEnumerable<ValidationResult> Validate()
+        public override IEnumerable<ValidationResult> Validate()
         {
+            foreach (ValidationResult result in base.Validate())
+                yield return result;
+
             if (_prefetchCount <= 0)
                 yield return this.Failure("PrefetchCount", "must be > 0");
         }
 
         public void Apply(IBusBuilder builder)
         {
-            builder.AddReceiveEndpoint(CreateReceiveEndpoint(builder));
-        }
+            ReceiveSettings settings = new ReceiveEndpointSettings
+            {
+                AutoRenewTimeout = TimeSpan.FromMinutes(5),
+                MaxConcurrentCalls = _maxConcurrentCalls,
+                PrefetchCount = _prefetchCount,
+                QueueDescription = _queueDescription,
+            };
 
-        void IPipeConfigurator<ConsumeContext>.AddPipeSpecification(IPipeSpecification<ConsumeContext> specification)
-        {
-            _consumePipeSpecification.Add(specification);
-        }
+            ServiceBusReceiveEndpointBuilder endpointBuilder = null;
+            IPipe<ReceiveContext> receivePipe = CreateReceivePipe(builder, consumePipe =>
+            {
+                endpointBuilder = new ServiceBusReceiveEndpointBuilder(consumePipe, _host.MessageNameFormatter);
+                return endpointBuilder;
+            });
 
-        void IConsumePipeConfigurator.AddPipeSpecification<T>(IPipeSpecification<ConsumeContext<T>> specification)
-        {
-            _consumePipeSpecification.Add(specification);
-        }
+            if (endpointBuilder == null)
+                throw new InvalidOperationException("The endpoint builder was not initialized");
 
-        public void AddEndpointSpecification(IReceiveEndpointSpecification configurator)
-        {
-            _configurators.Add(configurator);
+            var transport = new ServiceBusReceiveTransport(_host, settings, endpointBuilder.GetTopicSubscriptions().ToArray());
+
+            builder.AddReceiveEndpoint(new ReceiveEndpoint(transport, receivePipe));
         }
 
         public bool EnableExpress
@@ -155,46 +153,12 @@ namespace MassTransit.AzureServiceBusTransport
             set { _queueDescription.AutoDeleteOnIdle = value; }
         }
 
-        ReceiveEndpoint CreateReceiveEndpoint(IBusBuilder builder)
+        protected override Uri GetErrorAddress()
         {
-            ReceiveSettings settings = new ReceiveEndpointSettings
-            {
-                AutoRenewTimeout = TimeSpan.FromMinutes(5),
-                MaxConcurrentCalls = _maxConcurrentCalls,
-                PrefetchCount = _prefetchCount,
-                QueueDescription = _queueDescription,
-            };
-
-            IConsumePipe consumePipe = _consumePipe ?? builder.CreateConsumePipe(_consumePipeSpecification);
-
-            var endpointBuilder = new ServiceBusReceiveEndpointBuilder(consumePipe, _host.MessageNameFormatter);
-
-            foreach (IReceiveEndpointSpecification builderConfigurator in _configurators)
-                builderConfigurator.Configure(endpointBuilder);
-
             string errorQueueName = _queueDescription.Path + "_error";
             var errorQueueDescription = new QueueDescription(errorQueueName);
 
-            Uri errorAddress = _host.Settings.GetInputAddress(errorQueueDescription);
-
-            ISendTransportProvider transportProvider = builder.SendTransportProvider;
-            IPipe<ReceiveContext> moveToErrorPipe = Pipe.New<ReceiveContext>(
-                x => x.Filter(new MoveToErrorTransportFilter(() => transportProvider.GetSendTransport(errorAddress))));
-
-            _receivePipeConfigurator.Rescue(moveToErrorPipe, typeof(Exception));
-
-            _receivePipeConfigurator.Filter(new DeserializeFilter(builder.MessageDeserializer, consumePipe));
-
-            IPipe<ReceiveContext> receivePipe = _receivePipeConfigurator.Build();
-
-            ServiceBusReceiveTransport transport = GetReceiveTransport(settings, endpointBuilder.GetTopicSubscriptions());
-
-            return new ReceiveEndpoint(transport, receivePipe);
-        }
-
-        ServiceBusReceiveTransport GetReceiveTransport(ReceiveSettings settings, IEnumerable<TopicSubscriptionSettings> topicSubscriptionSettings)
-        {
-            return new ServiceBusReceiveTransport(_host, settings, topicSubscriptionSettings.ToArray());
+            return _host.Settings.GetInputAddress(errorQueueDescription);
         }
 
 

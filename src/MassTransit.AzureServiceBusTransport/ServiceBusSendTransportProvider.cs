@@ -15,8 +15,6 @@ namespace MassTransit.AzureServiceBusTransport
     using System;
     using System.Linq;
     using System.Threading.Tasks;
-    using Logging;
-    using Microsoft.ServiceBus;
     using Microsoft.ServiceBus.Messaging;
     using Transports;
 
@@ -25,7 +23,6 @@ namespace MassTransit.AzureServiceBusTransport
         ISendTransportProvider
     {
         readonly IServiceBusHost[] _hosts;
-        readonly ILog _log = Logger.Get<ServiceBusSendEndpointProvider>();
 
         public ServiceBusSendTransportProvider(IServiceBusHost[] hosts)
         {

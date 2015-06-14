@@ -21,20 +21,25 @@ namespace MassTransit.BusConfigurators
     using Pipeline;
 
 
-    public class ConsumePipeSpecification :
+    public class ConsumePipeSpecificationList :
         IConsumePipeSpecification
     {
-        readonly IList<IConsumePipeSpecification> _pipeSpecifications;
+        readonly IList<IConsumePipeSpecification> _specifications;
 
-        public ConsumePipeSpecification()
+        public ConsumePipeSpecificationList()
         {
-            _pipeSpecifications = new List<IConsumePipeSpecification>();
+            _specifications = new List<IConsumePipeSpecification>();
         }
 
         public void Apply(IConsumePipeBuilder builder)
         {
-            foreach (IConsumePipeSpecification specification in _pipeSpecifications)
+            foreach (IConsumePipeSpecification specification in _specifications)
                 specification.Apply(builder);
+        }
+
+        public IEnumerable<ValidationResult> Validate()
+        {
+            return _specifications.SelectMany(x => x.Validate());
         }
 
         public void Add(IPipeSpecification<ConsumeContext> specification)
@@ -42,16 +47,16 @@ namespace MassTransit.BusConfigurators
             if (specification == null)
                 throw new ArgumentNullException("specification");
 
-            _pipeSpecifications.Add(new Proxy(specification));
+            _specifications.Add(new Proxy(specification));
         }
 
-        public void Add<T>(IPipeSpecification<ConsumeContext<T>> specification) 
+        public void Add<T>(IPipeSpecification<ConsumeContext<T>> specification)
             where T : class
         {
             if (specification == null)
                 throw new ArgumentNullException("specification");
 
-            _pipeSpecifications.Add(new Proxy<T>(specification));
+            _specifications.Add(new Proxy<T>(specification));
         }
 
 
@@ -75,6 +80,7 @@ namespace MassTransit.BusConfigurators
                 return _specification.Validate();
             }
         }
+
 
         class Proxy<T> :
             IConsumePipeSpecification
@@ -113,12 +119,6 @@ namespace MassTransit.BusConfigurators
                     _builder.AddFilter(filter);
                 }
             }
-        }
-
-
-        public IEnumerable<ValidationResult> Validate()
-        {
-            return _pipeSpecifications.SelectMany(x => x.Validate());
         }
     }
 }

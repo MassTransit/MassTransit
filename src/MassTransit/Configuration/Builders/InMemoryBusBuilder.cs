@@ -16,6 +16,7 @@ namespace MassTransit.Builders
     using System.Collections.Generic;
     using System.Linq;
     using BusConfigurators;
+    using EndpointConfigurators;
     using Pipeline;
     using Transports;
     using Transports.InMemory;
