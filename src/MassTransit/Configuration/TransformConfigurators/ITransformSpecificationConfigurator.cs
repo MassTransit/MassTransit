@@ -15,7 +15,7 @@ namespace MassTransit.TransformConfigurators
     public interface ITransformSpecificationConfigurator<TMessage>
         where TMessage : class
     {
-        ITransformConfiguration<TMessage> Get<T>()
-            where T : ITransformConfiguration<TMessage>, new();
+        IConsumeTransformSpecification<TMessage> Get<T>()
+            where T : IConsumeTransformSpecification<TMessage>, new();
     }
 }

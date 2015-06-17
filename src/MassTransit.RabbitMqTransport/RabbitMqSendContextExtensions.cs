@@ -10,16 +10,19 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.TransformConfigurators
+namespace MassTransit.RabbitMqTransport
 {
-    public class TransformSpecificationConfigurator<TMessage> :
-        ITransformSpecificationConfigurator<TMessage>
-        where TMessage : class
+    using System.Collections.Generic;
+
+
+    public static class RabbitMqSendContextExtensions
     {
-        public IConsumeTransformSpecification<TMessage> Get<T>()
-            where T : IConsumeTransformSpecification<TMessage>, new()
+        public static void SetTransportHeader(this RabbitMqSendContext context, string key, object value)
         {
-            return new T();
+            if (context.BasicProperties.Headers == null)
+                context.BasicProperties.Headers = new Dictionary<string, object>();
+
+            context.BasicProperties.Headers[key] = value;
         }
     }
 }

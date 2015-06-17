@@ -106,7 +106,6 @@
     <Compile Include="Courier\UriArgument_Specs.cs" />
     <Compile Include="EventPublish_Specs.cs" />
     <Compile Include="MessageData\DataBus_Specs.cs" />
-    <Compile Include="DelayRetry_Specs.cs" />
     <Compile Include="Diagnostics\PerformanceCounter_Specs.cs" />
     <Compile Include="DictionaryToObject_Specs.cs" />
     <Compile Include="ErrorQueue_Specs.cs" />

@@ -25,6 +25,71 @@ namespace MassTransit.Tests.MessageData
 
 
         [TestFixture]
+        public class Sending_a_large_message_through_the_file_system :
+            InMemoryTestFixture
+        {
+            [Test]
+            public async void Should_load_the_data_from_the_repository()
+            {
+                string data = NewId.NextGuid().ToString();
+
+                var message = new SendMessageWithBigData
+                {
+                    Body = await _repository.PutString(data)
+                };
+
+                await InputQueueSendEndpoint.Send(message);
+
+                ConsumeContext<MessageWithBigData> received = await _received;
+
+                string value = await received.Message.Body.Value;
+                value.ShouldBe(data);
+            }
+
+            [Test]
+            public async void Should_be_able_to_write_bytes_too ()
+            {
+                byte[] data = NewId.NextGuid().ToByteArray();
+
+                var message = new MessageWithByteArrayImpl
+                {
+                    Bytes = await _repository.PutBytes(data)
+                };
+
+                await InputQueueSendEndpoint.Send(message);
+
+                ConsumeContext<MessageWithByteArray> received = await _receivedBytes;
+
+                byte[] value = await received.Message.Bytes.Value;
+                value.ShouldBe(data);
+            }
+
+            IMessageDataRepository _repository;
+            Task<ConsumeContext<MessageWithBigData>> _received;
+            Task<ConsumeContext<MessageWithByteArray>> _receivedBytes;
+
+            protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+            {
+                string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
+
+                string messageDataPath = Path.Combine(baseDirectory, "MessageData");
+
+                var dataDirectory = new DirectoryInfo(messageDataPath);
+
+                _repository = new FileSystemMessageDataRepository(dataDirectory);
+
+                configurator.UseMessageData<MessageWithBigData>(_repository);
+
+                _received = Handled<MessageWithBigData>(configurator);
+
+                configurator.UseMessageData<MessageWithByteArray>(_repository);
+
+                _receivedBytes = Handled<MessageWithByteArray>(configurator);
+            }
+        }
+
+
+        [TestFixture]
         public class Receiving_a_large_message_with_data :
             InMemoryTestFixture
         {
@@ -64,6 +129,7 @@ namespace MassTransit.Tests.MessageData
             }
         }
 
+
         [TestFixture]
         public class Receiving_a_large_message_with_data_bytes :
             InMemoryTestFixture
@@ -71,7 +137,7 @@ namespace MassTransit.Tests.MessageData
             [Test]
             public async void Should_load_the_data_from_the_repository()
             {
-                var nextGuid = NewId.NextGuid();
+                Guid nextGuid = NewId.NextGuid();
                 string data = nextGuid.ToString();
                 Uri dataAddress;
                 using (var stream = new MemoryStream(nextGuid.ToByteArray(), false))
@@ -79,7 +145,7 @@ namespace MassTransit.Tests.MessageData
                     dataAddress = await _messageDataRepository.Put(stream);
                 }
 
-                var message = new MessageWithByteArrayImpl { Bytes = new ConstantMessageData<byte[]>(dataAddress, nextGuid.ToByteArray()) };
+                var message = new MessageWithByteArrayImpl {Bytes = new ConstantMessageData<byte[]>(dataAddress, nextGuid.ToByteArray())};
 
                 await InputQueueSendEndpoint.Send(message);
 
@@ -113,7 +179,7 @@ namespace MassTransit.Tests.MessageData
         }
 
 
-        class MessageWithByteArrayImpl : 
+        class MessageWithByteArrayImpl :
             MessageWithByteArray
         {
             public MessageData<byte[]> Bytes { get; set; }

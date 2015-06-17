@@ -22,7 +22,7 @@ namespace MassTransit.TransformConfigurators
 
 
     public abstract class PropertyTransformSpecification<TResult, TInput, TProperty> :
-        ITransformSpecification<TResult, TInput>
+        IPropertyTransformSpecification<TResult, TInput>
     {
         readonly PropertyInfo _property;
         readonly bool _validateInputProperty;
@@ -49,7 +49,7 @@ namespace MassTransit.TransformConfigurators
             return Validate().Concat(ValidateConfiguration());
         }
 
-        void ITransformSpecification<TResult, TInput>.Configure(ITransformBuilder<TResult, TInput> builder)
+        void IPropertyTransformSpecification<TResult, TInput>.Configure(ITransformBuilder<TResult, TInput> builder)
         {
             IPropertyProvider<TProperty, TInput> propertyProvider = GetPropertyProvider(builder);
 

@@ -95,7 +95,7 @@ namespace MassTransit.TransformBuilders
                 Type specificationType = typeof(CopyPropertyTransformSpecification<,,>).MakeGenericType(typeof(TResult), typeof(TInput),
                     propertyInfo.PropertyType);
 
-                var specification = (ITransformSpecification<TResult, TInput>)Activator.CreateInstance(specificationType, propertyInfo);
+                var specification = (IPropertyTransformSpecification<TResult, TInput>)Activator.CreateInstance(specificationType, propertyInfo);
                 ValidationResult[] validationResults = specification.Validate().ToArray();
 
                 specification.Configure(this);
@@ -109,7 +109,7 @@ namespace MassTransit.TransformBuilders
                 Type specificationType = typeof(DefaultPropertyTransformSpecification<,,>).MakeGenericType(typeof(TResult), typeof(TInput),
                     propertyInfo.PropertyType);
 
-                var specification = (ITransformSpecification<TResult, TInput>)Activator.CreateInstance(specificationType, propertyInfo);
+                var specification = (IPropertyTransformSpecification<TResult, TInput>)Activator.CreateInstance(specificationType, propertyInfo);
                 ValidationResult[] validationResults = specification.Validate().ToArray();
 
                 specification.Configure(this);

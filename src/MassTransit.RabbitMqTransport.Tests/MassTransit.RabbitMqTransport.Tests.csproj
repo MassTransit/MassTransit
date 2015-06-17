@@ -77,6 +77,7 @@
     <Compile Include="Connector_Specs.cs" />
     <Compile Include="ConsumerBind_Specs.cs" />
     <Compile Include="ContextSetup.cs" />
+    <Compile Include="DelayRetry_Specs.cs" />
     <Compile Include="ErrorQueue_Specs.cs" />
     <Compile Include="EventPublishRQ_Specs.cs" />
     <Compile Include="HammerTime_Specs.cs" />

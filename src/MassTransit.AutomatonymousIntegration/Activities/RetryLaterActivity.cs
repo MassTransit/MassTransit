@@ -33,7 +33,7 @@ namespace Automatonymous.Activities
             if (!context.TryGetPayload(out consumeContext))
                 throw new ContextException("The consume context could not be retrieved.");
 
-            consumeContext.RetryLater();
+            await consumeContext.RetryLater();
         }
 
         Task Activity<TInstance, TData>.Faulted<TException>(BehaviorExceptionContext<TInstance, TData, TException> context,

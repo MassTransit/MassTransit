@@ -72,22 +72,36 @@ namespace MassTransit
         public static IPipe<SendContext> CreateCopyContextPipe(this ConsumeContext context,
             Func<ConsumeContext, IEnumerable<Tuple<string, object>>> additionalHeaders)
         {
-            return Pipe.New<SendContext>(x => x.Execute(target =>
+            return CreateCopyContextPipe(context, (consumeContext, sendContext) =>
             {
-                target.RequestId = context.RequestId;
-                target.CorrelationId = context.CorrelationId;
-                target.SourceAddress = context.SourceAddress;
-                target.ResponseAddress = context.ResponseAddress;
-                target.FaultAddress = context.FaultAddress;
+                foreach (var additionalHeader in additionalHeaders(consumeContext))
+                    sendContext.Headers.Set(additionalHeader.Item1, additionalHeader.Item2);
+            });
+        }
+
+        /// <summary>
+        /// Create a send pipe that copies the source message headers to the message being sent
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="callback">A callback to modify the send context</param>
+        /// <returns></returns>
+        public static IPipe<SendContext> CreateCopyContextPipe(this ConsumeContext context, Action<ConsumeContext, SendContext> callback)
+        {
+            return Pipe.New<SendContext>(x => x.Execute(sendContext =>
+            {
+                sendContext.RequestId = context.RequestId;
+                sendContext.CorrelationId = context.CorrelationId;
+                sendContext.SourceAddress = context.SourceAddress;
+                sendContext.ResponseAddress = context.ResponseAddress;
+                sendContext.FaultAddress = context.FaultAddress;
 
                 if (context.ExpirationTime.HasValue)
-                    target.TimeToLive = context.ExpirationTime.Value.ToUniversalTime() - DateTime.UtcNow;
+                    sendContext.TimeToLive = context.ExpirationTime.Value.ToUniversalTime() - DateTime.UtcNow;
 
                 foreach (var header in context.Headers.GetAll())
-                    target.Headers.Set(header.Item1, header.Item2);
+                    sendContext.Headers.Set(header.Item1, header.Item2);
 
-                foreach (var additionalHeader in additionalHeaders(context))
-                    target.Headers.Set(additionalHeader.Item1, additionalHeader.Item2);
+                callback(context, sendContext);
             }));
         }
     }

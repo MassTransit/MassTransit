@@ -237,11 +237,6 @@ namespace MassTransit.NHibernateIntegration.Saga
             _context.Respond(message);
         }
 
-        public void RetryLater()
-        {
-            _context.RetryLater();
-        }
-
         public Task<ISendEndpoint> GetSendEndpoint(Uri address)
         {
             return _context.GetSendEndpoint(address);

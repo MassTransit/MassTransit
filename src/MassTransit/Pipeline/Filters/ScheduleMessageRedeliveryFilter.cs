@@ -12,7 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Pipeline.Filters
 {
-    using System;
     using System.Diagnostics;
     using System.Threading.Tasks;
     using Context;
@@ -21,28 +20,21 @@ namespace MassTransit.Pipeline.Filters
     /// <summary>
     /// Adds the scheduler to the consume context, so that it can be used for message redelivery
     /// </summary>
-    public class MessageSchedulerFilter :
-        IFilter<ConsumeContext>
+    public class ScheduleMessageRedeliveryFilter<TMessage> :
+        IFilter<ConsumeContext<TMessage>>
+        where TMessage : class
     {
-        readonly Uri _schedulerAddress;
-
-        public MessageSchedulerFilter(Uri schedulerAddress)
-        {
-            _schedulerAddress = schedulerAddress;
-        }
-
         [DebuggerNonUserCode]
-        Task IFilter<ConsumeContext>.Send(ConsumeContext context, IPipe<ConsumeContext> next)
+        Task IFilter<ConsumeContext<TMessage>>.Send(ConsumeContext<TMessage> context, IPipe<ConsumeContext<TMessage>> next)
         {
-            MessageSchedulerContext schedulerContext = new ConsumeMessageSchedulerContext(context, _schedulerAddress);
+            var schedulerContext = context.GetPayload<MessageSchedulerContext>();
 
-            context.GetOrAddPayload(() => schedulerContext);
-//            context.GetOrAddPayload<MessageRedeliveryContext>(() => new ScheduleMessageRedeliveryContext<TMessage>(context, schedulerContext));
+            context.GetOrAddPayload<MessageRedeliveryContext>(() => new ScheduleMessageRedeliveryContext<TMessage>(context, schedulerContext));
 
             return next.Send(context);
         }
 
-        bool IFilter<ConsumeContext>.Visit(IPipelineVisitor visitor)
+        bool IFilter<ConsumeContext<TMessage>>.Visit(IPipelineVisitor visitor)
         {
             return visitor.Visit(this);
         }

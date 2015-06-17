@@ -27,16 +27,16 @@ namespace MassTransit.TransformConfigurators
     using Util;
 
 
-    public class TransformConsumePipeSpecification<TMessage> :
+    public class ConsumeTransformSpecification<TMessage> :
         ITransformConfigurator<TMessage>,
-        IPipeSpecification<ConsumeContext<TMessage>>
+        IConsumeTransformSpecification<TMessage>
         where TMessage : class
     {
-        readonly IList<ITransformSpecification<TMessage, TMessage>> _specifications;
+        readonly IList<IPropertyTransformSpecification<TMessage, TMessage>> _specifications;
 
-        public TransformConsumePipeSpecification()
+        public ConsumeTransformSpecification()
         {
-            _specifications = new List<ITransformSpecification<TMessage, TMessage>>();
+            _specifications = new List<IPropertyTransformSpecification<TMessage, TMessage>>();
         }
 
         void IPipeSpecification<ConsumeContext<TMessage>>.Apply(IPipeBuilder<ConsumeContext<TMessage>> builder)
@@ -51,35 +51,36 @@ namespace MassTransit.TransformConfigurators
             return _specifications.SelectMany(x => x.Validate());
         }
 
-        void ITransformConfigurator<TMessage>.Copy<TProperty>(Expression<Func<TMessage, TProperty>> propertyExpression)
+        public void Copy<TProperty>(Expression<Func<TMessage, TProperty>> propertyExpression)
         {
             var specification = new CopyPropertyTransformSpecification<TMessage, TMessage, TProperty>(propertyExpression.GetPropertyInfo());
 
             _specifications.Add(specification);
         }
 
-        void ITransformConfigurator<TMessage>.Default<TProperty>(Expression<Func<TMessage, TProperty>> propertyExpression)
+        public void Default<TProperty>(Expression<Func<TMessage, TProperty>> propertyExpression)
         {
             var specification = new DefaultPropertyTransformSpecification<TMessage, TMessage, TProperty>(propertyExpression.GetPropertyInfo());
 
             _specifications.Add(specification);
         }
 
-        void ITransformConfigurator<TMessage>.Replace<TProperty>(Expression<Func<TMessage, TProperty>> propertyExpression, Func<SourceContext<TProperty, TMessage>, TProperty> valueProvider)
+        public void Replace<TProperty>(Expression<Func<TMessage, TProperty>> propertyExpression,
+            Func<SourceContext<TProperty, TMessage>, TProperty> valueProvider)
         {
             var specification = new InputPropertyTransformSpecification<TMessage, TMessage, TProperty>(propertyExpression.GetPropertyInfo(), valueProvider);
 
             _specifications.Add(specification);
         }
 
-        void ITransformConfigurator<TMessage>.Replace<TProperty>(PropertyInfo property, IPropertyProvider<TProperty, TMessage> propertyProvider)
+        public void Replace<TProperty>(PropertyInfo property, IPropertyProvider<TProperty, TMessage> propertyProvider)
         {
             var specification = new InputPropertyTransformSpecification<TMessage, TMessage, TProperty>(property, propertyProvider);
 
             _specifications.Add(specification);
         }
 
-        void ITransformConfigurator<TMessage>.Set<TProperty>(Expression<Func<TMessage, TProperty>> propertyExpression,
+        public void Set<TProperty>(Expression<Func<TMessage, TProperty>> propertyExpression,
             Func<SourceContext<TProperty, TMessage>, TProperty> valueProvider)
         {
             var specification = new SourcePropertyTransformSpecification<TMessage, TMessage, TProperty>(propertyExpression.GetPropertyInfo(), valueProvider);
@@ -87,7 +88,7 @@ namespace MassTransit.TransformConfigurators
             _specifications.Add(specification);
         }
 
-        void ITransformConfigurator<TMessage>.Set<TProperty>(PropertyInfo property, IPropertyProvider<TProperty, TMessage> propertyProvider)
+        public void Set<TProperty>(PropertyInfo property, IPropertyProvider<TProperty, TMessage> propertyProvider)
         {
             var specification = new SourcePropertyTransformSpecification<TMessage, TMessage, TProperty>(property, propertyProvider);
 

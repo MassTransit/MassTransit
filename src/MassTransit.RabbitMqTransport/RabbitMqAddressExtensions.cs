@@ -147,6 +147,10 @@ namespace MassTransit.RabbitMqTransport
                 yield return "bind=true";
             if (!string.IsNullOrWhiteSpace(settings.QueueName))
                 yield return "queue=" + WebUtility.UrlEncode(settings.QueueName);
+            if (settings.ExchangeType != RabbitMQ.Client.ExchangeType.Fanout)
+                yield return "type=" + settings.ExchangeType;
+            if (settings.ExchangeArguments != null && settings.ExchangeArguments.ContainsKey("x-delayed-type"))
+                yield return "delayedType=" + settings.ExchangeArguments["x-delayed-type"];
         }
 
         public static ReceiveSettings GetReceiveSettings(this Uri address)
@@ -256,7 +260,9 @@ namespace MassTransit.RabbitMqTransport
             bool durable = address.Query.GetValueFromQueryString("durable", !isTemporary);
             bool autoDelete = address.Query.GetValueFromQueryString("autodelete", isTemporary);
 
-            var settings = new RabbitMqSendSettings(name, ExchangeType.Fanout, durable, autoDelete);
+            string exchangeType = address.Query.GetValueFromQueryString("type") ?? ExchangeType.Fanout;
+
+            var settings = new RabbitMqSendSettings(name, exchangeType, durable, autoDelete);
 
             bool bindToQueue = address.Query.GetValueFromQueryString("bind", false);
             if (bindToQueue)
@@ -264,6 +270,10 @@ namespace MassTransit.RabbitMqTransport
                 string queueName = WebUtility.UrlDecode(address.Query.GetValueFromQueryString("queue"));
                 settings.BindToQueue(queueName);
             }
+
+            string delayedType = address.Query.GetValueFromQueryString("delayedType");
+            if (!string.IsNullOrWhiteSpace(delayedType))
+                settings.SetExchangeArgument("x-delayed-type", delayedType);
 
             return settings;
         }

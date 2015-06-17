@@ -47,7 +47,7 @@ namespace MassTransit.Tests.Transforms
 
 
         class FullTransform :
-            TransformConfiguration<A>
+            ConsumeTransformSpecification<A>
         {
             public FullTransform()
             {

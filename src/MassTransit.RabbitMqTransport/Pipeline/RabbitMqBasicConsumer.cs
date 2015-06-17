@@ -38,6 +38,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
         readonly ConcurrentDictionary<ulong, RabbitMqReceiveContext> _pending;
         readonly INotifyReceiveObserver _receiveObserver;
         readonly IPipe<ReceiveContext> _receivePipe;
+        readonly ReceiveSettings _receiveSettings;
         string _consumerTag;
         int _currentPendingDeliveryCount;
         long _deliveryCount;
@@ -51,6 +52,9 @@ namespace MassTransit.RabbitMqTransport.Pipeline
             _inputAddress = inputAddress;
             _receivePipe = receivePipe;
             _receiveObserver = receiveObserver;
+
+            _receiveSettings = model.GetPayload<ReceiveSettings>();
+
             _pending = new ConcurrentDictionary<ulong, RabbitMqReceiveContext>();
 
             _consumerComplete = new TaskCompletionSource<RabbitMqConsumerMetrics>();
@@ -114,6 +118,9 @@ namespace MassTransit.RabbitMqTransport.Pipeline
 
             var context = new RabbitMqReceiveContext(_inputAddress, exchange, routingKey, _consumerTag, deliveryTag, body, redelivered, properties,
                 _receiveObserver);
+
+            context.GetOrAddPayload(() => _receiveSettings);
+            context.GetOrAddPayload(() => _model);
 
             try
             {

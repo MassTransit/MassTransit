@@ -229,11 +229,6 @@ namespace MassTransit.Serialization
             _receiveContext.AddPendingTask(task);
         }
 
-        public void RetryLater()
-        {
-            throw new NotImplementedException();
-        }
-
         public async Task<ISendEndpoint> GetSendEndpoint(Uri address)
         {
             ISendEndpoint sendEndpoint = await _sendEndpointProvider.GetSendEndpoint(address).ConfigureAwait(false);

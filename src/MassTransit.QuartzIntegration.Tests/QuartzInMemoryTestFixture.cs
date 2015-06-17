@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.QuartzIntegration.Tests
 {
+    using System;
     using NUnit.Framework;
     using Quartz;
     using Quartz.Impl;
@@ -22,6 +23,23 @@ namespace MassTransit.QuartzIntegration.Tests
         InMemoryTestFixture
     {
         IScheduler _scheduler;
+        readonly Uri _quartzAddress;
+        ISendEndpoint _quartzEndpoint;
+
+        public QuartzInMemoryTestFixture()
+        {
+            _quartzAddress = new Uri("loopback://localhost/quartz");
+        }
+
+        protected Uri QuartzAddress
+        {
+            get { return _quartzAddress; }
+        }
+
+        protected ISendEndpoint QuartzEndpoint
+        {
+            get { return _quartzEndpoint; }
+        }
 
         protected override void ConfigureBus(IInMemoryBusFactoryConfigurator configurator)
         {
@@ -42,6 +60,8 @@ namespace MassTransit.QuartzIntegration.Tests
         {
             _scheduler.JobFactory = new MassTransitJobFactory(Bus);
             _scheduler.Start();
+
+            _quartzEndpoint = Await(() => GetSendEndpoint(QuartzAddress));
         }
 
         [TestFixtureTearDown]
