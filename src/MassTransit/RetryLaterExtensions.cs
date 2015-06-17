@@ -12,7 +12,9 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
+    using System;
     using System.Threading.Tasks;
+    using Context;
 
 
     public static class RetryLaterExtensions
@@ -31,6 +33,26 @@ namespace MassTransit
             ISendEndpoint endpoint = await context.GetSendEndpoint(context.ReceiveContext.InputAddress);
 
             await endpoint.Send(context.Message, context.CreateCopyContextPipe(UpdateDeliveryContext));
+        }
+
+        /// <summary>
+        /// This version of RetryLater requires a message scheduler to be configured on the bus, but
+        /// schedules the message for redelivery at the scheduled time.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="context"></param>
+        /// <param name="delay"></param>
+        /// <returns></returns>
+        public static Task Redeliver<T>(this ConsumeContext<T> context, TimeSpan delay)
+            where T : class
+        {
+            MessageSchedulerContext schedulerContext;
+            if (!context.TryGetPayload(out schedulerContext))
+                throw new MessageException(typeof(T), "No scheduler context was available to redeliver the message");
+
+            MessageRedeliveryContext redeliverContext = new ScheduleMessageRedeliveryContext<T>(context, schedulerContext);
+
+            return redeliverContext.ScheduleRedelivery(delay);
         }
 
         static void UpdateDeliveryContext(ConsumeContext context, SendContext sendContext)

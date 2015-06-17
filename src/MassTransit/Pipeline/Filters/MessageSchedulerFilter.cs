@@ -37,7 +37,6 @@ namespace MassTransit.Pipeline.Filters
             MessageSchedulerContext schedulerContext = new ConsumeMessageSchedulerContext(context, _schedulerAddress);
 
             context.GetOrAddPayload(() => schedulerContext);
-//            context.GetOrAddPayload<MessageRedeliveryContext>(() => new ScheduleMessageRedeliveryContext<TMessage>(context, schedulerContext));
 
             return next.Send(context);
         }
