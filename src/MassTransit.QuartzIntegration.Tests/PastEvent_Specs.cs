@@ -26,9 +26,7 @@ namespace MassTransit.QuartzIntegration.Tests
         {
             Task<ConsumeContext<A>> handler = SubscribeHandler<A>();
 
-            ISendEndpoint endpoint = await Bus.GetSendEndpoint(new Uri("loopback://localhost/quartz"));
-
-            await endpoint.ScheduleSend(Bus.Address, DateTime.UtcNow, new A {Name = "Joe"});
+            await QuartzEndpoint.ScheduleSend(Bus.Address, DateTime.UtcNow, new A { Name = "Joe" });
 
             await handler;
         }
@@ -38,9 +36,7 @@ namespace MassTransit.QuartzIntegration.Tests
         {
             Task<ConsumeContext<A>> handler = SubscribeHandler<A>();
 
-            ISendEndpoint endpoint = await Bus.GetSendEndpoint(new Uri("loopback://localhost/quartz"));
-
-            await endpoint.ScheduleSend(Bus.Address, DateTime.UtcNow + TimeSpan.FromSeconds(2), new A {Name = "Joe"});
+            await QuartzEndpoint.ScheduleSend(Bus.Address, DateTime.UtcNow + TimeSpan.FromSeconds(2), new A { Name = "Joe" });
 
             await handler;
         }
@@ -50,11 +46,9 @@ namespace MassTransit.QuartzIntegration.Tests
         {
             Task<ConsumeContext<A>> handler = SubscribeHandler<A>();
 
-            ISendEndpoint endpoint = await Bus.GetSendEndpoint(new Uri("loopback://localhost/quartz"));
-
             Guid requestId = Guid.NewGuid();
             Guid correlationId = Guid.NewGuid();
-            await endpoint.ScheduleSend(Bus.Address, DateTime.UtcNow, new A {Name = "Joe"}, Pipe.Execute<SendContext>(x =>
+            await QuartzEndpoint.ScheduleSend(Bus.Address, DateTime.UtcNow, new A { Name = "Joe" }, Pipe.Execute<SendContext>(x =>
             {
                 x.FaultAddress = Bus.Address;
                 x.ResponseAddress = InputQueueAddress;
@@ -83,9 +77,7 @@ namespace MassTransit.QuartzIntegration.Tests
         {
             Task<ConsumeContext<A>> handler = SubscribeHandler<A>();
 
-            ISendEndpoint endpoint = await Bus.GetSendEndpoint(new Uri("loopback://localhost/quartz"));
-
-            await endpoint.ScheduleSend(Bus.Address, DateTime.UtcNow + TimeSpan.FromHours(-1), new A {Name = "Joe"});
+            await QuartzEndpoint.ScheduleSend(Bus.Address, DateTime.UtcNow + TimeSpan.FromHours(-1), new A { Name = "Joe" });
 
             await handler;
         }

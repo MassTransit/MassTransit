@@ -33,9 +33,23 @@ namespace MassTransit
             byte[] bytes = Encoding.UTF8.GetBytes(value);
             using (var ms = new MemoryStream(bytes, false))
             {
-                Uri address = await repository.Put(ms, default(TimeSpan?), cancellationToken).ConfigureAwait(false);
+                Uri address = await repository.Put(ms, default(TimeSpan?), cancellationToken);
 
                 return new ConstantMessageData<string>(address, value);
+            }
+        }
+
+        public static async Task<MessageData<byte[]>> PutBytes(this IMessageDataRepository repository, byte[] bytes,
+            CancellationToken cancellationToken = default(CancellationToken))
+        {
+            if (repository == null)
+                throw new ArgumentNullException("repository");
+
+            using (var ms = new MemoryStream(bytes, false))
+            {
+                Uri address = await repository.Put(ms, default(TimeSpan?), cancellationToken);
+
+                return new ConstantMessageData<byte[]>(address, bytes);
             }
         }
 
@@ -50,9 +64,23 @@ namespace MassTransit
             byte[] bytes = Encoding.UTF8.GetBytes(value);
             using (var ms = new MemoryStream(bytes, false))
             {
-                Uri address = await repository.Put(ms, timeToLive, cancellationToken).ConfigureAwait(false);
+                Uri address = await repository.Put(ms, timeToLive, cancellationToken);
 
                 return new ConstantMessageData<string>(address, value);
+            }
+        }
+
+        public static async Task<MessageData<byte[]>> PutBytes(this IMessageDataRepository repository, byte[] bytes, TimeSpan timeToLive,
+            CancellationToken cancellationToken = default(CancellationToken))
+        {
+            if (repository == null)
+                throw new ArgumentNullException("repository");
+
+            using (var ms = new MemoryStream(bytes, false))
+            {
+                Uri address = await repository.Put(ms, timeToLive, cancellationToken);
+
+                return new ConstantMessageData<byte[]>(address, bytes);
             }
         }
 
@@ -64,10 +92,25 @@ namespace MassTransit
 
             using (var ms = new MemoryStream())
             {
-                Stream stream = await repository.Get(address, cancellationToken).ConfigureAwait(false);
-                await stream.CopyToAsync(ms).ConfigureAwait(false);
+                Stream stream = await repository.Get(address, cancellationToken);
+                await stream.CopyToAsync(ms);
 
                 return new ConstantMessageData<string>(address, Encoding.UTF8.GetString(ms.ToArray()));
+            }
+        }
+
+        public static async Task<MessageData<byte[]>> GetBytes(this IMessageDataRepository repository, Uri address,
+            CancellationToken cancellationToken = default(CancellationToken))
+        {
+            if (repository == null)
+                throw new ArgumentNullException("repository");
+
+            using (var ms = new MemoryStream())
+            {
+                Stream stream = await repository.Get(address, cancellationToken);
+                await stream.CopyToAsync(ms);
+
+                return new ConstantMessageData<byte[]>(address, ms.ToArray());
             }
         }
     }

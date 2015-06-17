@@ -27,7 +27,7 @@ namespace MassTransit
         public static void Transform<T>(this IConsumePipeConfigurator configurator, Action<ITransformConfigurator<T>> configureCallback)
             where T : class
         {
-            var transformConfigurator = new TransformConsumePipeSpecification<T>();
+            var transformConfigurator = new ConsumeTransformSpecification<T>();
 
             configureCallback(transformConfigurator);
 
@@ -41,12 +41,12 @@ namespace MassTransit
         /// <param name="configurator"></param>
         /// <param name="configureTransform"></param>
         public static void UseTransform<T>(this IConsumePipeConfigurator configurator,
-            Func<ITransformSpecificationConfigurator<T>, ITransformConfiguration<T>> configureTransform)
+            Func<ITransformSpecificationConfigurator<T>, IConsumeTransformSpecification<T>> configureTransform)
             where T : class
         {
             var specificationConfigurator = new TransformSpecificationConfigurator<T>();
 
-            ITransformConfiguration<T> specification = configureTransform(specificationConfigurator);
+            IConsumeTransformSpecification<T> specification = configureTransform(specificationConfigurator);
 
             configurator.AddPipeSpecification(specification);
         }
@@ -60,7 +60,7 @@ namespace MassTransit
         public static void Transform<T>(this IPipeConfigurator<ConsumeContext<T>> configurator, Action<ITransformConfigurator<T>> configureCallback)
             where T : class
         {
-            var transformConfigurator = new TransformConsumePipeSpecification<T>();
+            var transformConfigurator = new ConsumeTransformSpecification<T>();
 
             configureCallback(transformConfigurator);
 
@@ -74,12 +74,12 @@ namespace MassTransit
         /// <param name="configurator"></param>
         /// <param name="configureTransform"></param>
         public static void UseTransform<T>(this IPipeConfigurator<ConsumeContext<T>> configurator,
-            Func<ITransformSpecificationConfigurator<T>, ITransformConfiguration<T>> configureTransform)
+            Func<ITransformSpecificationConfigurator<T>, IConsumeTransformSpecification<T>> configureTransform)
             where T : class
         {
             var specificationConfigurator = new TransformSpecificationConfigurator<T>();
 
-            ITransformConfiguration<T> specification = configureTransform(specificationConfigurator);
+            IConsumeTransformSpecification<T> specification = configureTransform(specificationConfigurator);
 
             configurator.AddPipeSpecification(specification);
         }

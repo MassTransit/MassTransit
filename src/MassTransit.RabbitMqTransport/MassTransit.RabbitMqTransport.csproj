@@ -63,9 +63,11 @@
     <Compile Include="Configuration\Builders\RabbitMqBusBuilder.cs" />
     <Compile Include="Configuration\Builders\RabbitMqReceiveEndpointBuilder.cs" />
     <Compile Include="Configuration\Configurators\RabbitMqHostConfigurator.cs" />
+    <Compile Include="Configuration\DelayedExchangeRedeliveryPipeSpecification.cs" />
     <Compile Include="Configuration\IQueueConfigurator.cs" />
     <Compile Include="Configuration\RabbitMqConsumerPipeSpecification.cs" />
     <Compile Include="Configuration\ConsumerPipeConfiguratorExtensions.cs" />
+    <Compile Include="Contexts\DelayedExchangeMessageRedeliveryContext.cs" />
     <Compile Include="Contexts\RabbitMqSendHeaders.cs" />
     <Compile Include="Contexts\RabbitMqConnectionContext.cs" />
     <Compile Include="Contexts\RabbitMqHeaderProvider.cs" />
@@ -74,6 +76,8 @@
     <Compile Include="Contexts\RabbitMqSendContextImpl.cs" />
     <Compile Include="Contexts\SharedConnectionContext.cs" />
     <Compile Include="Contexts\SharedModelContext.cs" />
+    <Compile Include="DeferExtensions.cs" />
+    <Compile Include="DelayedExchangeRetryExtensions.cs" />
     <Compile Include="ErrorQueueSettings.cs" />
     <Compile Include="Exceptions\MessageNotConfirmedException.cs" />
     <Compile Include="Exceptions\PublishNackException.cs" />
@@ -86,6 +90,7 @@
     <Compile Include="Integration\RabbitMqConnector.cs" />
     <Compile Include="Integration\RabbitMqModelCache.cs" />
     <Compile Include="IRabbitMqHost.cs" />
+    <Compile Include="Pipeline\DelayedExchangeMessageRedeliveryFilter.cs" />
     <Compile Include="Pipeline\IRabbitMqConnector.cs" />
     <Compile Include="Pipeline\PrepareErrorQueueFilter.cs" />
     <Compile Include="Pipeline\RabbitMqConsumerFilter.cs" />
@@ -115,6 +120,7 @@
     <Compile Include="RabbitMqHeaders.cs" />
     <Compile Include="RabbitMqMessageNameFormatter.cs" />
     <Compile Include="ModelContext.cs" />
+    <Compile Include="RabbitMqSendContextExtensions.cs" />
     <Compile Include="RabbitMqSendEndpointProvider.cs" />
     <Compile Include="RabbitMqSendTransportProvider.cs" />
     <Compile Include="ReceiveSettings.cs" />

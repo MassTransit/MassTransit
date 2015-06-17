@@ -94,9 +94,14 @@
     <Compile Include="Configuration\EndpointConfigurators\InMemoryReceiveEndpointConfigurator.cs" />
     <Compile Include="Configuration\EndpointConfigurators\ReceiveEndpointConfigurator.cs" />
     <Compile Include="Configuration\IConsumePipeConfigurator.cs" />
-    <Compile Include="Configuration\ITransformConfiguration.cs" />
+    <Compile Include="Configuration\IConsumeTransformSpecification.cs" />
     <Compile Include="Configuration\ITransformConfigurator.cs" />
     <Compile Include="Configuration\MessageDataConfiguratorExtensions.cs" />
+    <Compile Include="Configuration\MessageSchedulerExtensions.cs" />
+    <Compile Include="Configuration\PipeConfigurators\MessageSchedulerPipeSpecification.cs" />
+    <Compile Include="Configuration\PipeConfigurators\RedeliveryRetryPipeSpecification.cs" />
+    <Compile Include="Configuration\PipeConfigurators\ScheduleMessageRedeliveryPipeSpecification.cs" />
+    <Compile Include="Configuration\ScheduledRetryExtensions.cs" />
     <Compile Include="Configuration\TransformBuilders\ITransformBuilder.cs" />
     <Compile Include="Configuration\TransformBuilders\MessageTransformBuilder.cs" />
     <Compile Include="Configuration\TransformConfiguratorExtensions.cs" />
@@ -106,9 +111,9 @@
     <Compile Include="Configuration\TransformConfigurators\InputPropertyTransformSpecification.cs" />
     <Compile Include="Configuration\TransformConfigurators\LoadMessageDataTransformConfiguration.cs" />
     <Compile Include="Configuration\TransformConfigurators\TransformConfiguration.cs" />
-    <Compile Include="Configuration\TransformConfigurators\TransformConsumePipeSpecification.cs" />
+    <Compile Include="Configuration\TransformConfigurators\ConsumeTransformSpecification.cs" />
     <Compile Include="Configuration\TransformConfigurators\SourcePropertyTransformSpecification.cs" />
-    <Compile Include="Configuration\TransformConfigurators\ITransformSpecification.cs" />
+    <Compile Include="Configuration\TransformConfigurators\IPropertyTransformSpecification.cs" />
     <Compile Include="Configuration\TransformConfigurators\PropertyTransformSpecification.cs" />
     <Compile Include="Configuration\TransformConfigurators\ITransformSpecificationConfigurator.cs" />
     <Compile Include="Configuration\TransformConfigurators\TransformSpecificationConfigurator.cs" />
@@ -214,7 +219,7 @@
     <Compile Include="ConsumeContextExtensions.cs" />
     <Compile Include="ConsumerConsumeContext.cs" />
     <Compile Include="Context\ConsumeContextScope.cs" />
-    <Compile Include="Context\ConsumeMessageRedeliveryContext.cs" />
+    <Compile Include="Context\ScheduleMessageRedeliveryContext.cs" />
     <Compile Include="Context\ConsumeMessageSchedulerContext.cs" />
     <Compile Include="Context\ConsumerConsumeContextProxy.cs" />
     <Compile Include="Context\IHeaderProvider.cs" />
@@ -427,7 +432,7 @@
     <Compile Include="Pipeline\Filters\ConcurrencyLimitFilter.cs" />
     <Compile Include="Pipeline\Filters\ConsumerMessageFilter.cs" />
     <Compile Include="Pipeline\Filters\ConsumerSplitFilter.cs" />
-    <Compile Include="Pipeline\Filters\DelayedRetryFilter.cs" />
+    <Compile Include="Pipeline\Filters\RedeliveryRetryFilter.cs" />
     <Compile Include="Pipeline\Filters\DelegateFilter.cs" />
     <Compile Include="Pipeline\Filters\DeserializeFilter.cs" />
     <Compile Include="Pipeline\Filters\HandlerMessageFilter.cs" />
@@ -446,6 +451,7 @@
     <Compile Include="Pipeline\Filters\RescueExceptionFilter.cs" />
     <Compile Include="Pipeline\Filters\RescueFilter.cs" />
     <Compile Include="Pipeline\Filters\RetryFilter.cs" />
+    <Compile Include="Pipeline\Filters\ScheduleMessageRedeliveryFilter.cs" />
     <Compile Include="Pipeline\Filters\TeeConsumeFilter.cs" />
     <Compile Include="Pipeline\Filters\TransactionFilter.cs" />
     <Compile Include="Pipeline\Filters\TransformFilter.cs" />
@@ -518,6 +524,7 @@
     <Compile Include="RequestClientExtensions.cs" />
     <Compile Include="RequestContext.cs" />
     <Compile Include="RequestExtensions.cs" />
+    <Compile Include="RetryLaterExtensions.cs" />
     <Compile Include="SagaConsumeContext.cs" />
     <Compile Include="SagaExtensions.cs" />
     <Compile Include="SagaFilterExtensions.cs" />

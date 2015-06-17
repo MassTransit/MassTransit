@@ -17,14 +17,17 @@ namespace MassTransit.Pipeline.Filters
     using Context;
     using Policies;
 
-
-    public class DelayedRetryFilter<T> :
+    /// <summary>
+    /// Uses the message redelivery mechanism, if available, to delay a retry without blocking message delivery
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    public class RedeliveryRetryFilter<T> :
         IFilter<ConsumeContext<T>>
         where T : class
     {
         readonly IRetryPolicy _retryPolicy;
 
-        public DelayedRetryFilter(IRetryPolicy retryPolicy)
+        public RedeliveryRetryFilter(IRetryPolicy retryPolicy)
         {
             _retryPolicy = retryPolicy;
         }
@@ -50,7 +53,7 @@ namespace MassTransit.Pipeline.Filters
                 {
                     MessageRedeliveryContext schedulerContext;
                     if (!context.TryGetPayload(out schedulerContext))
-                        throw new ContextException("The scheduler context was not available to delay the message", exception);
+                        throw new ContextException("The message redelivery context was not available to delay the message", exception);
 
                     TimeSpan delay;
                     using (IRetryContext retryContext = _retryPolicy.GetRetryContext())
@@ -58,11 +61,11 @@ namespace MassTransit.Pipeline.Filters
                         retryContext.CanRetry(exception, out delay);
                     }
 
-                    await schedulerContext.ScheduleRedelivery(delay).ConfigureAwait(false);
+                    await schedulerContext.ScheduleRedelivery(delay);
                 }
                 catch (Exception ex)
                 {
-                    throw new ContextException("The scheduler could not reschedule the message delivery", new AggregateException(ex, exception));
+                    throw new ContextException("The message delivery could not be rescheduled", new AggregateException(ex, exception));
                 }
             }
         }

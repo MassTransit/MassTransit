@@ -10,16 +10,26 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.TransformConfigurators
+namespace MassTransit.PipeConfigurators
 {
-    public class TransformSpecificationConfigurator<TMessage> :
-        ITransformSpecificationConfigurator<TMessage>
+    using System.Collections.Generic;
+    using Configurators;
+    using PipeBuilders;
+    using Pipeline.Filters;
+
+
+    public class ScheduleMessageRedeliveryPipeSpecification<TMessage> :
+        IPipeSpecification<ConsumeContext<TMessage>>
         where TMessage : class
     {
-        public IConsumeTransformSpecification<TMessage> Get<T>()
-            where T : IConsumeTransformSpecification<TMessage>, new()
+        public void Apply(IPipeBuilder<ConsumeContext<TMessage>> builder)
         {
-            return new T();
+            builder.AddFilter(new ScheduleMessageRedeliveryFilter<TMessage>());
+        }
+
+        public IEnumerable<ValidationResult> Validate()
+        {
+            yield break;
         }
     }
 }

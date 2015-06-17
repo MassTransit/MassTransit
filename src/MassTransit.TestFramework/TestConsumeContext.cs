@@ -212,11 +212,6 @@ namespace MassTransit.TestFramework
             throw new NotImplementedException();
         }
 
-        public void RetryLater()
-        {
-            throw new NotImplementedException();
-        }
-
         public Task<ISendEndpoint> GetSendEndpoint(Uri address)
         {
             throw new NotImplementedException();

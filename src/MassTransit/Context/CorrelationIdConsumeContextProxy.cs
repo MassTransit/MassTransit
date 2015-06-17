@@ -192,11 +192,6 @@ namespace MassTransit.Context
             _context.Respond(message);
         }
 
-        void ConsumeContext.RetryLater()
-        {
-            _context.RetryLater();
-        }
-
         Task<ISendEndpoint> ISendEndpointProvider.GetSendEndpoint(Uri address)
         {
             return _context.GetSendEndpoint(address);

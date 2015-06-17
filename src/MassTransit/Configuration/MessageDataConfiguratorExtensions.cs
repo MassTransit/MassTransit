@@ -35,7 +35,7 @@ namespace MassTransit
         public static void UseMessageData<T>(this IConsumePipeConfigurator configurator, IMessageDataRepository repository)
             where T : class
         {
-            var transformConfigurator = new TransformConsumePipeSpecification<T>();
+            var transformConfigurator = new ConsumeTransformSpecification<T>();
 
             transformConfigurator.LoadMessageData(repository);
 
@@ -54,7 +54,7 @@ namespace MassTransit
             Action<ITransformConfigurator<T>> configureCallback)
             where T : class
         {
-            var transformConfigurator = new TransformConsumePipeSpecification<T>();
+            var transformConfigurator = new ConsumeTransformSpecification<T>();
 
             transformConfigurator.LoadMessageData(repository);
 
@@ -73,7 +73,7 @@ namespace MassTransit
         public static void UseMessageData<T>(this IPipeConfigurator<ConsumeContext<T>> configurator, IMessageDataRepository repository)
             where T : class
         {
-            var transformConfigurator = new TransformConsumePipeSpecification<T>();
+            var transformConfigurator = new ConsumeTransformSpecification<T>();
 
             transformConfigurator.LoadMessageData(repository);
 
@@ -92,7 +92,7 @@ namespace MassTransit
             Action<ITransformConfigurator<T>> configureCallback)
             where T : class
         {
-            var transformConfigurator = new TransformConsumePipeSpecification<T>();
+            var transformConfigurator = new ConsumeTransformSpecification<T>();
 
             transformConfigurator.LoadMessageData(repository);
 

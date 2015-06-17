@@ -85,11 +85,6 @@ namespace MassTransit
             where T : class;
 
         /// <summary>
-        /// Resend the message to the end of the queue with the RetryCount incremented
-        /// </summary>
-        void RetryLater();
-
-        /// <summary>
         /// Notify that the message has been consumed
         /// </summary>
         /// <param name="context"></param>

@@ -17,14 +17,18 @@ namespace MassTransit.Context
     using System.Threading.Tasks;
 
 
-    public class ConsumeMessageRedeliveryContext<TMessage> :
+    /// <summary>
+    /// Used to schedule message redelivery using the message scheduler
+    /// </summary>
+    /// <typeparam name="TMessage">The message type</typeparam>
+    public class ScheduleMessageRedeliveryContext<TMessage> :
         MessageRedeliveryContext
         where TMessage : class
     {
         readonly ConsumeContext<TMessage> _context;
         readonly MessageSchedulerContext _scheduler;
 
-        public ConsumeMessageRedeliveryContext(ConsumeContext<TMessage> context, MessageSchedulerContext scheduler)
+        public ScheduleMessageRedeliveryContext(ConsumeContext<TMessage> context, MessageSchedulerContext scheduler)
         {
             _scheduler = scheduler;
             _context = context;
@@ -40,6 +44,11 @@ namespace MassTransit.Context
             Uri inputAddress = context.ReceiveContext.InputAddress ?? context.DestinationAddress;
             if (inputAddress != null)
                 yield return Tuple.Create<string, object>("MT-Scheduling-DeliveredAddress", inputAddress.ToString());
+
+            int? previousDeliveryCount = context.Headers.Get("MT-Redelivery-Count", default(int?));
+            if (!previousDeliveryCount.HasValue)
+                previousDeliveryCount = 0;
+            yield return Tuple.Create<string, object>("MT-Redelivery-Count", previousDeliveryCount.Value + 1);
         }
     }
 }
