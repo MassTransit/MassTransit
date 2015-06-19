@@ -111,6 +111,7 @@
     <Compile Include="Scenarios\SimpleConsumer.cs" />
     <Compile Include="Scenarios\SimpleMessageClass.cs" />
     <Compile Include="Scenarios\SimpleMessageInterface.cs" />
+    <Compile Include="StructureMap_Idiomatic.cs" />
     <Compile Include="StructureMap_Specs.cs" />
     <Compile Include="Unity_Specs.cs" />
   </ItemGroup>

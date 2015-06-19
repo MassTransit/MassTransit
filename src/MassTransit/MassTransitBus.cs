@@ -221,15 +221,11 @@ namespace MassTransit
                 Address,
             });
 
-            foreach (var host in _hosts)
-            {
+            foreach (IBusHostControl host in _hosts)
                 await host.Probe(scope);
-            }
 
-            foreach (var receiveEndpoint in _receiveEndpoints)
-            {
+            foreach (IReceiveEndpoint receiveEndpoint in _receiveEndpoints)
                 await receiveEndpoint.Probe(scope);
-            }
         }
 
 
@@ -239,6 +235,8 @@ namespace MassTransit
             readonly ReceiveEndpointHandle[] _endpointHandles;
             readonly HostHandle[] _hostHandles;
             readonly ObserverHandle[] _observerHandles;
+            bool _disposed;
+            bool _stopped;
 
             public Handle(HostHandle[] hostHandles, ReceiveEndpointHandle[] endpointHandles, ObserverHandle[] observerHandles)
             {
@@ -249,14 +247,24 @@ namespace MassTransit
 
             public void Dispose()
             {
+                if (_disposed)
+                    return;
+
                 Stop(default(CancellationToken)).Wait();
+
+                _disposed = true;
             }
 
             public async Task Stop(CancellationToken cancellationToken)
             {
+                if (_stopped)
+                    return;
+
                 await Task.WhenAll(_observerHandles.Select(x => x.Disconnect())).ConfigureAwait(false);
                 await Task.WhenAll(_endpointHandles.Select(x => x.Stop(cancellationToken))).ConfigureAwait(false);
                 await Task.WhenAll(_hostHandles.Select(x => x.Stop(cancellationToken))).ConfigureAwait(false);
+
+                _stopped = true;
             }
         }
     }

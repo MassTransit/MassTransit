@@ -47,13 +47,9 @@ namespace MassTransit.RabbitMqTransport
         async Task IProbeSite.Probe(ProbeContext context)
         {
             ProbeContext scope = context.CreateScope("transport");
-            scope.Set(new
-            {
-                Type = "RabbitMQ",
-                _settings.QueueName,
-                _settings.PrefetchCount,
-                _settings.ExchangeName,
-            });
+            scope.Add("type", "RabbitMQ");
+            scope.Set(_settings);
+            scope.Add("bindings", _exchangeBindings);
         }
 
         /// <summary>

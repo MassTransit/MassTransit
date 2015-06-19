@@ -19,6 +19,7 @@ namespace MassTransit.AzureServiceBusTransport
     using Microsoft.ServiceBus;
     using Microsoft.ServiceBus.Messaging;
     using Microsoft.ServiceBus.Messaging.Amqp;
+    using Monitoring.Introspection;
     using Transports;
 
 
@@ -46,6 +47,17 @@ namespace MassTransit.AzureServiceBusTransport
         public HostHandle Start()
         {
             return new Handle(_messagingFactory.Value);
+        }
+
+        async Task IProbeSite.Probe(ProbeContext context)
+        {
+            ProbeContext scope = context.CreateScope("host");
+            scope.Set(new
+            {
+                Type = "Azure Service Bus",
+                _settings.ServiceUri,
+                _settings.OperationTimeout,
+            });
         }
 
         ServiceBusHostSettings IServiceBusHost.Settings
@@ -76,16 +88,6 @@ namespace MassTransit.AzureServiceBusTransport
         public string GetQueuePath(QueueDescription queueDescription)
         {
             return string.Join("/", _settings.ServiceUri.AbsolutePath.Trim(new[] {'/'}), queueDescription.Path);
-        }
-
-        public async Task Stop(CancellationToken cancellationToken)
-        {
-            if (_messagingFactory.IsValueCreated)
-            {
-                MessagingFactory factory = await _messagingFactory.Value;
-                if (!factory.IsClosed)
-                    await factory.CloseAsync();
-            }
         }
 
         Task<MessagingFactory> CreateMessagingFactory()

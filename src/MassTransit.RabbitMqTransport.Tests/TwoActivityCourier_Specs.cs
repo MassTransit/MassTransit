@@ -19,6 +19,7 @@ namespace MassTransit.RabbitMqTransport.Tests
     using System.Threading.Tasks;
     using Courier;
     using Courier.Contracts;
+    using Monitoring.Introspection.Contracts;
     using NUnit.Framework;
     using TestFramework;
     using TestFramework.Courier;
@@ -84,6 +85,15 @@ namespace MassTransit.RabbitMqTransport.Tests
             Assert.AreEqual(_routingSlip.TrackingNumber, activityCompleted.TrackingNumber);
         }
 
+            [Test]
+            public async void Should_return_a_wonderful_breakdown_of_the_guts_inside_it()
+            {
+                ProbeResult result = await Bus.GetProbeResult();
+
+                Console.WriteLine(result.ToJsonString());
+            }
+
+
         Task<ConsumeContext<RoutingSlipCompleted>> _completed;
         Task<ConsumeContext<RoutingSlipActivityCompleted>> _firstActivityCompleted;
         Task<ConsumeContext<RoutingSlipActivityCompleted>> _secondActivityCompleted;
@@ -128,7 +138,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
             _routingSlip = builder.Build();
 
-            Bus.Execute(_routingSlip);
+            Await(() => Bus.Execute(_routingSlip));
         }
     }
 

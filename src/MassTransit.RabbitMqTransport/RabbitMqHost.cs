@@ -18,6 +18,7 @@ namespace MassTransit.RabbitMqTransport
     using Integration;
     using Logging;
     using MassTransit.Pipeline;
+    using Monitoring.Introspection;
     using Transports;
     using Util;
 
@@ -37,6 +38,30 @@ namespace MassTransit.RabbitMqTransport
 
             _connectionCache = new RabbitMqConnectionCache(hostSettings);
             _messageNameFormatter = new RabbitMqMessageNameFormatter();
+        }
+
+        async Task IProbeSite.Probe(ProbeContext context)
+        {
+            ProbeContext scope = context.CreateScope("host");
+            scope.Set(new
+            {
+                Type = "RabbitMQ",
+                _hostSettings.Host,
+                _hostSettings.Port,
+                _hostSettings.VirtualHost,
+                _hostSettings.Username,
+                Password = new string('*', _hostSettings.Password.Length),
+                _hostSettings.Heartbeat,
+                _hostSettings.Ssl,
+            });
+
+            if(_hostSettings.Ssl)
+                scope.Set(new
+                {
+                    _hostSettings.SslServerName,
+                });
+
+            await _connectionCache.Probe(scope);
         }
 
         public HostHandle Start()
