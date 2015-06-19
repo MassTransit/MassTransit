@@ -274,7 +274,7 @@ task :all_nuspecs => [:versioning, :mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :m
     nuspec.dependency "MassTransit", NUGET_VERSION
     nuspec.dependency "Newtonsoft.Json", "6.0.8"
     nuspec.dependency "NewId", "2.1.2"
-    nuspec.dependency "WindowsAzure.ServiceBus", "2.7.0"
+    nuspec.dependency "WindowsAzure.ServiceBus", "2.7.2"
     nuspec.dependency "Microsoft.WindowsAzure.ConfigurationManager", "3.1.0"
     nuspec.output_file = 'nuspecs/MassTransit.AzureServiceBus.nuspec'
 
@@ -333,7 +333,7 @@ task :all_nuspecs => [:versioning, :mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :m
     nuspec.license_url = "http://www.apache.org/licenses/LICENSE-2.0"
     nuspec.require_license_acceptance
     nuspec.dependency "MassTransit", NUGET_VERSION
-    nuspec.dependency "NLog", "4.0.0"
+    nuspec.dependency "NLog", "4.0.1"
     nuspec.output_file = 'nuspecs/MassTransit.NLog.nuspec'
 
     add_files props[:stage], File.join('Logging', 'MassTransit.NLogIntegration.{dll,pdb,xml}'), nuspec
