@@ -31,14 +31,12 @@ namespace MassTransit.TestFramework
         IBusControl _bus;
         Uri _inputQueueAddress;
         ISendEndpoint _inputQueueSendEndpoint;
-        readonly InMemoryTransportCache _transportCache;
         ISendEndpoint _busSendEndpoint;
         readonly TestSendObserver _sendObserver;
         BusHandle _busHandle;
 
         public InMemoryTestFixture()
         {
-            _transportCache = new InMemoryTransportCache();
             _sendObserver = new TestSendObserver(TestTimeout);
 
             _inputQueueAddress = new Uri("loopback://localhost/input_queue");
@@ -97,7 +95,7 @@ namespace MassTransit.TestFramework
         [TestFixtureSetUp]
         public void SetupInMemoryTestFixture()
         {
-            _bus = CreateBus(_transportCache);
+            _bus = CreateBus();
 
             _busHandle = _bus.Start();
 
@@ -128,17 +126,6 @@ namespace MassTransit.TestFramework
                 throw;
             }
 
-            try
-            {
-//                if (_transportCache != null)
-//                    Await(() => _transportCache.Stop(new CancellationTokenSource(TestTimeout).Token));
-            }
-            catch (Exception ex)
-            {
-                _log.Error("TransportCache.Dispose failed", ex);
-                throw;
-            }
-
             _bus = null;
         }
 
@@ -150,12 +137,10 @@ namespace MassTransit.TestFramework
         {
         }
 
-        IBusControl CreateBus(InMemoryTransportCache transportCache)
+        IBusControl CreateBus()
         {
             return MassTransit.Bus.Factory.CreateUsingInMemory(x =>
             {
-                x.SetTransportProvider(transportCache);
-
                 ConfigureBus(x);
 
                 x.ReceiveEndpoint("input_queue", ConfigureInputQueueEndpoint);

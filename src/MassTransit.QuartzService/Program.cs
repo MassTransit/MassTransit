@@ -16,7 +16,7 @@ namespace MassTransit.QuartzService
     using System.Diagnostics;
     using Configuration;
     using Log4NetIntegration.Logging;
-    using Monitoring;
+    using Monitoring.Performance;
     using Topshelf;
     using Topshelf.Logging;
     using Topshelf.Runtime;

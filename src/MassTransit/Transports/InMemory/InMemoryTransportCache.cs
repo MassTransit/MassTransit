@@ -18,6 +18,7 @@ namespace MassTransit.Transports.InMemory
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
+    using Monitoring.Introspection;
 
 
     /// <summary>
@@ -39,6 +40,24 @@ namespace MassTransit.Transports.InMemory
         public IEnumerable<Uri> TransportAddresses
         {
             get { return _transports.Keys.Select(x => new Uri(_baseUri, x)); }
+        }
+
+        async Task IProbeSite.Probe(ProbeContext context)
+        {
+            ProbeContext scope = context.CreateScope("host");
+            scope.Set(new
+            {
+                Type = "In Memory",
+            });
+
+            foreach (var transport in _transports)
+            {
+                var transportScope = scope.CreateScope("queue");
+                transportScope.Set(new
+                {
+                    Name = transport.Key,
+                });
+            }
         }
 
         public HostHandle Start()
