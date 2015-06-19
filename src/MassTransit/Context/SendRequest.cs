@@ -13,7 +13,6 @@
 namespace MassTransit.Context
 {
     using System;
-    using System.Threading;
     using System.Threading.Tasks;
     using Pipeline;
 
@@ -47,12 +46,6 @@ namespace MassTransit.Context
             _requestContext = new SendRequestContext<TRequest>(_bus, context, _taskScheduler);
 
             _callback(_requestContext);
-
-            if (_requestContext.Timeout > TimeSpan.Zero)
-            {
-                var timeoutToken = new CancellationTokenSource(_requestContext.Timeout);
-                timeoutToken.Token.Register(() => _requestContext.TimeoutExpired());
-            }
         }
 
         public bool Visit(IPipelineVisitor visitor)

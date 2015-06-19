@@ -26,10 +26,14 @@ namespace MassTransit.RabbitMqTransport.Contexts
         readonly CancellationToken _cancellationToken;
         readonly TaskCompletionSource<bool> _completed;
         readonly ModelContext _context;
+        readonly Action<long> _disconnect;
+        readonly long _id;
 
-        public SharedModelContext(ModelContext context, CancellationToken cancellationToken)
+        public SharedModelContext(ModelContext context, long id, Action<long> disconnect, CancellationToken cancellationToken)
         {
             _context = context;
+            _id = id;
+            _disconnect = disconnect;
             _cancellationToken = cancellationToken;
             _completed = new TaskCompletionSource<bool>();
         }
@@ -42,6 +46,8 @@ namespace MassTransit.RabbitMqTransport.Contexts
         void IDisposable.Dispose()
         {
             _completed.TrySetResult(true);
+
+            _disconnect(_id);
         }
 
         bool PipeContext.HasPayloadType(Type contextType)
