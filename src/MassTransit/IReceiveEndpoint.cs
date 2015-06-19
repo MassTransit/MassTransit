@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
+    using Monitoring.Introspection;
     using Transports;
 
 
@@ -19,7 +20,8 @@ namespace MassTransit
     /// A service endpoint has a inbound transport that pushes messages to consumers
     /// </summary>
     public interface IReceiveEndpoint :
-        IConnectReceiveObserver
+        IConnectReceiveObserver,
+        IProbeSite
     {
         /// <summary>
         /// Starts recieving from the inbound transport.

@@ -2,7 +2,7 @@ namespace RapidTransit
 {
     using System;
     using System.Diagnostics;
-    using MassTransit.Monitoring;
+    using MassTransit.Monitoring.Performance;
     using Topshelf;
     using Topshelf.HostConfigurators;
     using Topshelf.Runtime;

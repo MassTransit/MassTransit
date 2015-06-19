@@ -21,6 +21,7 @@ namespace MassTransit.Transports.InMemory
     using System.Threading.Tasks;
     using Internals.Extensions;
     using Logging;
+    using Monitoring.Introspection;
     using Pipeline;
     using Util;
 
@@ -40,6 +41,7 @@ namespace MassTransit.Transports.InMemory
         readonly Uri _inputAddress;
         readonly Connectable<ISendObserver> _observers;
         readonly ReceiveObservable _receiveObservers;
+        ConcurrentQueue<InMemoryTransportMessage> _queue;
 
         public InMemoryTransport(Uri inputAddress)
         {
@@ -48,8 +50,18 @@ namespace MassTransit.Transports.InMemory
             _observers = new Connectable<ISendObserver>();
             _receiveObservers = new ReceiveObservable();
 
-            var queue = new ConcurrentQueue<InMemoryTransportMessage>();
-            _collection = new BlockingCollection<InMemoryTransportMessage>(queue);
+            _queue = new ConcurrentQueue<InMemoryTransportMessage>();
+            _collection = new BlockingCollection<InMemoryTransportMessage>(_queue);
+        }
+
+        public async Task Probe(ProbeContext context)
+        {
+            ProbeContext scope = context.CreateScope("transport");
+            scope.Set(new
+            {
+                Address = _inputAddress,
+                QueueLength = _queue.Count,
+            });
         }
 
         public void Dispose()

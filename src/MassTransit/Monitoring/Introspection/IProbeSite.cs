@@ -10,14 +10,13 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Monitoring
+namespace MassTransit.Monitoring.Introspection
 {
-    using System;
+    using System.Threading.Tasks;
 
 
-    public interface IConsumerPerformanceCounter
+    public interface IProbeSite
     {
-        void Consumed(TimeSpan duration);
-        void Faulted();
+        Task Probe(ProbeContext context);
     }
 }

@@ -19,6 +19,7 @@ namespace MassTransit.RabbitMqTransport
     using Internals.Extensions;
     using Logging;
     using MassTransit.Pipeline;
+    using Monitoring.Introspection;
     using Policies;
     using Topology;
     using Transports;
@@ -41,6 +42,18 @@ namespace MassTransit.RabbitMqTransport
             _settings = settings;
             _exchangeBindings = exchangeBindings;
             _receiveObservers = new ReceiveObservable();
+        }
+
+        async Task IProbeSite.Probe(ProbeContext context)
+        {
+            ProbeContext scope = context.CreateScope("transport");
+            scope.Set(new
+            {
+                Type = "RabbitMQ",
+                _settings.QueueName,
+                _settings.PrefetchCount,
+                _settings.ExchangeName,
+            });
         }
 
         /// <summary>

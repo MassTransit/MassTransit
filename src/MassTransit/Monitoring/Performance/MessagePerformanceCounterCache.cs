@@ -10,21 +10,23 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Transports
+namespace MassTransit.Monitoring.Performance
 {
-    using Monitoring.Introspection;
-    using Pipeline;
+    using System;
 
 
-    public interface IReceiveTransport :
-        IConnectReceiveObserver,
-        IProbeSite
+    public class MessagePerformanceCounterCache<T>
     {
-        /// <summary>
-        /// Start receiving on a transport, sending messages to the specified pipe.
-        /// </summary>
-        /// <param name="receivePipe">The receiving pipe</param>
-        /// <returns></returns>
-        ReceiveTransportHandle Start(IPipe<ReceiveContext> receivePipe);
+        public static IMessagePerformanceCounter Counter
+        {
+            get { return Cached.Counter.Value; }
+        }
+
+
+        static class Cached
+        {
+            public static readonly Lazy<MessagePerformanceCounter<T>> Counter =
+                new Lazy<MessagePerformanceCounter<T>>(() => new MessagePerformanceCounter<T>());
+        }
     }
 }

@@ -19,6 +19,7 @@ namespace MassTransit
     using System.Threading.Tasks;
     using Context;
     using Logging;
+    using Monitoring.Introspection;
     using Pipeline;
     using Transports;
 
@@ -210,6 +211,25 @@ namespace MassTransit
         public ConnectHandle Connect(IPublishObserver observer)
         {
             return _publishEndpoint.Connect(observer);
+        }
+
+        async Task IProbeSite.Probe(ProbeContext context)
+        {
+            ProbeContext scope = context.CreateScope("bus");
+            scope.Set(new
+            {
+                Address,
+            });
+
+            foreach (var host in _hosts)
+            {
+                await host.Probe(scope);
+            }
+
+            foreach (var receiveEndpoint in _receiveEndpoints)
+            {
+                await receiveEndpoint.Probe(scope);
+            }
         }
 
 

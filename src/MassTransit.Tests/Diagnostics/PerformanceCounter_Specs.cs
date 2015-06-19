@@ -14,7 +14,7 @@ namespace MassTransit.Tests.Diagnostics
 {
     using System.Threading;
     using System.Threading.Tasks;
-    using Monitoring;
+    using Monitoring.Performance;
     using NUnit.Framework;
     using TestFramework;
     using TestFramework.Messages;

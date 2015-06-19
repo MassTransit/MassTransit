@@ -10,29 +10,30 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit
+namespace MassTransit.Tests
 {
     using System;
-    using Monitoring.Introspection;
-    using Pipeline;
+    using Monitoring.Introspection.Contracts;
+    using NUnit.Framework;
+    using TestFramework;
+    using TestFramework.Messages;
 
 
-    /// <summary>
-    /// A bus is a logical element that includes a local endpoint and zero or more receive endpoints
-    /// </summary>
-    public interface IBus :
-        IPublishEndpoint,
-        ISendEndpointProvider,
-        IConsumePipeConnector,
-        IRequestPipeConnector,
-        IConsumeMessageObserverConnector,
-        IConsumeObserverConnector,
-        IConnectReceiveObserver,
-        IProbeSite
+    [TestFixture]
+    public class Probing_the_bus :
+        InMemoryTestFixture
     {
-        /// <summary>
-        /// The receive address of the bus itself, versus any receive endpoints that were created
-        /// </summary>
-        Uri Address { get; }
+        [Test]
+        public async void Should_return_a_wonderful_breakdown_of_the_guts_inside_it()
+        {
+            ProbeResult result = await Bus.GetProbeResult();
+
+            Console.WriteLine(result.ToJsonString());
+        }
+
+        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+        {
+            Handled<PingMessage>(configurator);
+        }
     }
 }

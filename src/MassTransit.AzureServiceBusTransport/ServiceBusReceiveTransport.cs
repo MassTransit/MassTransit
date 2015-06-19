@@ -20,6 +20,7 @@ namespace MassTransit.AzureServiceBusTransport
     using Internals.Extensions;
     using Logging;
     using MassTransit.Pipeline;
+    using Monitoring.Introspection;
     using Pipeline;
     using Policies;
     using Transports;
@@ -41,6 +42,18 @@ namespace MassTransit.AzureServiceBusTransport
             _settings = settings;
             _subscriptionSettings = subscriptionSettings;
             _receiveObservers = new ReceiveObservable();
+        }
+
+        async Task IProbeSite.Probe(ProbeContext context)
+        {
+            ProbeContext scope = context.CreateScope("transport");
+            scope.Set(new
+            {
+                Type = "Azure Service Bus",
+                _settings.QueueDescription,
+                _settings.PrefetchCount,
+                _settings.MaxConcurrentCalls,
+            });
         }
 
         public ReceiveTransportHandle Start(IPipe<ReceiveContext> receivePipe)

@@ -10,42 +10,43 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Transports
+namespace MassTransit.Monitoring.Introspection.Contracts
 {
     using System;
-    using System.Threading;
-    using System.Threading.Tasks;
-    using Monitoring.Introspection;
+    using System.Collections.Generic;
 
 
     /// <summary>
-    /// A Bus Host is a transport-neutral reference to a host
+    /// The result of a probe
     /// </summary>
-    public interface IBusHost :
-        IProbeSite
-    {
-    }
-
-
-    public interface IBusHostControl :
-        IBusHost
+    public interface ProbeResult
     {
         /// <summary>
-        /// Starts the Host, initiating the connection.
-        /// TODO maybe this should be Task&lt;HostHandle&gt; after all 
+        /// Unique identifies this result
         /// </summary>
-        /// <returns></returns>
-        HostHandle Start();
-    }
+        Guid ResultId { get; }
 
-
-    public interface HostHandle :
-        IDisposable
-    {
         /// <summary>
-        /// Close the Host, shutting it down for good.
+        /// Identifies the initiator of the probe
         /// </summary>
-        /// <returns></returns>
-        Task Stop(CancellationToken cancellationToken = default(CancellationToken));
+        Guid ProbeId { get; }
+
+        /// <summary>
+        /// When the probe was initiated through the system
+        /// </summary>
+        DateTime StartTimestamp { get; }
+
+        /// <summary>
+        /// How long the probe took to execute
+        /// </summary>
+        TimeSpan Duration { get; }
+
+        /// <summary>
+        /// The host from which the result was generated
+        /// </summary>
+        HostInfo Host { get; }
+
+
+        IDictionary<string, object> Content { get; }
     }
 }
