@@ -47,6 +47,18 @@ namespace MassTransit
             }
         }
 
+        /// <summary>
+        /// Specify that the service bus should load its subscribers from the container passed as an argument.
+        /// </summary>
+        /// <param name="configurator">The configurator the extension method works on.</param>
+        /// <param name="context"></param>
+        public static void LoadFrom(this IReceiveEndpointConfigurator configurator, IContext context)
+        {
+            var container = context.GetInstance<IContainer>();
+
+            configurator.LoadFrom(container);
+        }
+
         public static IConsumerConfigurator<TConsumer> Consumer<TConsumer>(this IReceiveEndpointConfigurator configurator,
             IContainer container)
             where TConsumer : class, IConsumer

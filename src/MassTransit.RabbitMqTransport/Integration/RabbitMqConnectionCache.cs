@@ -20,12 +20,14 @@ namespace MassTransit.RabbitMqTransport.Integration
     using Contexts;
     using Logging;
     using MassTransit.Pipeline;
+    using Monitoring.Introspection;
     using RabbitMQ.Client;
     using RabbitMQ.Client.Exceptions;
 
 
     public class RabbitMqConnectionCache :
-        IConnectionCache
+        IConnectionCache,
+        IProbeSite
     {
         static readonly ILog _log = Logger.Get<RabbitMqConnectionCache>();
         readonly ConnectionFactory _connectionFactory;
@@ -59,6 +61,20 @@ namespace MassTransit.RabbitMqTransport.Integration
                 return SendUsingExistingConnection(connectionPipe, cancellationToken, existingScope);
 
             return SendUsingNewConnection(connectionPipe, newScope, cancellationToken);
+        }
+
+        public async Task Probe(ProbeContext context)
+        {
+            if (_scope != null)
+            {
+                using (SharedConnectionContext connectionContext = await _scope.Attach(context.CancellationToken))
+                {
+                    context.Set(new
+                    {
+                        Connected = true,
+                    });
+                }
+            }
         }
 
         async Task SendUsingNewConnection(IPipe<ConnectionContext> connectionPipe, ConnectionScope scope, CancellationToken cancellationToken)
