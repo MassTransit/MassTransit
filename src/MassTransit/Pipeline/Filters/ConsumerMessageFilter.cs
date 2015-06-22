@@ -15,6 +15,7 @@ namespace MassTransit.Pipeline.Filters
     using System;
     using System.Diagnostics;
     using System.Threading.Tasks;
+    using Monitoring.Introspection;
     using Util;
 
 
@@ -37,6 +38,14 @@ namespace MassTransit.Pipeline.Filters
         {
             _consumerFactory = consumerFactory;
             _consumerPipe = consumerPipe;
+        }
+
+        Task IProbeSite.Probe(ProbeContext context)
+        {
+            var scope = context.CreateScope("consumer");
+            scope.Add("type", TypeMetadataCache<TConsumer>.ShortName);
+
+            return _consumerPipe.Probe(scope);
         }
 
         [DebuggerNonUserCode]

@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,6 +14,7 @@ namespace MassTransit.Testing.TestDecorators
 {
     using System;
     using System.Threading.Tasks;
+    using Monitoring.Introspection;
     using Pipeline;
 
 
@@ -49,6 +50,11 @@ namespace MassTransit.Testing.TestDecorators
             {
                 _received = received;
                 _next = next;
+            }
+
+            Task IProbeSite.Probe(ProbeContext context)
+            {
+                return _next.Probe(context);
             }
 
             public async Task Send(ConsumerConsumeContext<TConsumer, TMessage> context)

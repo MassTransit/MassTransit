@@ -53,6 +53,8 @@ namespace MassTransit.Transports
             ProbeContext scope = context.CreateScope("receiveEndpoint");
 
             await _receiveTransport.Probe(scope);
+
+            await _receivePipe.Probe(scope);
         }
 
 

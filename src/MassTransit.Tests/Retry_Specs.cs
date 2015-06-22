@@ -12,7 +12,9 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests
 {
+    using System;
     using System.Threading.Tasks;
+    using Monitoring.Introspection.Contracts;
     using NUnit.Framework;
     using Policies;
     using Shouldly;
@@ -35,6 +37,15 @@ namespace MassTransit.Tests
                 _attempts++;
                 throw new IntentionalTestException();
             });
+        }
+
+
+        [Test]
+        public async void Should_return_a_wonderful_breakdown_of_the_guts_inside_it()
+        {
+            ProbeResult result = await Bus.GetProbeResult();
+
+            Console.WriteLine(result.ToJsonString());
         }
 
         [Test]
@@ -68,7 +79,13 @@ namespace MassTransit.Tests
                 throw new IntentionalTestException();
             });
         }
+        [Test]
+        public async void Should_return_a_wonderful_breakdown_of_the_guts_inside_it()
+        {
+            ProbeResult result = await Bus.GetProbeResult();
 
+            Console.WriteLine(result.ToJsonString());
+        }
         [Test]
         public async void Should_only_call_the_handler_once()
         {
@@ -107,7 +124,13 @@ namespace MassTransit.Tests
                 throw new IntentionalTestException();
             });
         }
+        [Test]
+        public async void Should_return_a_wonderful_breakdown_of_the_guts_inside_it()
+        {
+            ProbeResult result = await Bus.GetProbeResult();
 
+            Console.WriteLine(result.ToJsonString());
+        }
         [Test]
         public async void Should_only_call_the_handler_twice()
         {
@@ -148,7 +171,13 @@ namespace MassTransit.Tests
                 throw new IntentionalTestException();
             });
         }
+        [Test]
+        public async void Should_return_a_wonderful_breakdown_of_the_guts_inside_it()
+        {
+            ProbeResult result = await Bus.GetProbeResult();
 
+            Console.WriteLine(result.ToJsonString());
+        }
         [Test]
         public async void Should_only_call_the_inner_policy()
         {

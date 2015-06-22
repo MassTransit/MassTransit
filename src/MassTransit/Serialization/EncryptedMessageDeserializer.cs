@@ -16,6 +16,8 @@ namespace MassTransit.Serialization
     using System.IO;
     using System.Net.Mime;
     using System.Runtime.Serialization;
+    using System.Threading.Tasks;
+    using Monitoring.Introspection;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Bson;
 
@@ -35,6 +37,12 @@ namespace MassTransit.Serialization
             _sendEndpointProvider = sendEndpointProvider;
             _publishEndpoint = publishEndpoint;
             _provider = provider;
+        }
+
+        async Task IProbeSite.Probe(ProbeContext context)
+        {
+            var scope = context.CreateScope("encrypted");
+            scope.Add("contentType", EncryptedMessageSerializer.EncryptedContentType.MediaType);
         }
 
         public ContentType ContentType

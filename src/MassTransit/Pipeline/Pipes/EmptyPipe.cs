@@ -14,6 +14,7 @@ namespace MassTransit.Pipeline.Pipes
 {
     using System.Diagnostics;
     using System.Threading.Tasks;
+    using Monitoring.Introspection;
 
 
     public class EmptyPipe<T> :
@@ -28,6 +29,10 @@ namespace MassTransit.Pipeline.Pipes
         public bool Visit(IPipelineVisitor visitor)
         {
             return visitor.Visit(this);
+        }
+
+        public async Task Probe(ProbeContext context)
+        {
         }
     }
 }

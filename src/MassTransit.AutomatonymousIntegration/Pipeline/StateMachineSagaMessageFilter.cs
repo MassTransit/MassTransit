@@ -18,9 +18,11 @@ namespace Automatonymous.Pipeline
     using Contexts;
     using MassTransit;
     using MassTransit.Logging;
+    using MassTransit.Monitoring.Introspection;
     using MassTransit.Pipeline;
     using MassTransit.Saga;
     using MassTransit.Saga.Pipeline.Filters;
+    using MassTransit.Util;
 
 
     /// <summary>
@@ -41,6 +43,16 @@ namespace Automatonymous.Pipeline
         {
             _stateMachine = stateMachine;
             _event = @event;
+        }
+        async Task IProbeSite.Probe(ProbeContext context)
+        {
+            var scope = context.CreateScope("automatonymous");
+            scope.Set(new
+            {
+                Event = _event.Name,
+                DataType = TypeMetadataCache<TData>.ShortName,
+                InstanceType = TypeMetadataCache<TInstance>.ShortName,
+            });
         }
 
         public async Task Send(SagaConsumeContext<TInstance, TData> context, IPipe<SagaConsumeContext<TInstance, TData>> next)

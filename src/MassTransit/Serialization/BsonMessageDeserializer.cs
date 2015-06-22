@@ -16,6 +16,8 @@ namespace MassTransit.Serialization
     using System.IO;
     using System.Net.Mime;
     using System.Runtime.Serialization;
+    using System.Threading.Tasks;
+    using Monitoring.Introspection;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Bson;
 
@@ -33,6 +35,12 @@ namespace MassTransit.Serialization
             _deserializer = deserializer;
             _sendEndpointProvider = sendEndpointProvider;
             _publishEndpoint = publishEndpoint;
+        }
+
+        async Task IProbeSite.Probe(ProbeContext context)
+        {
+            var scope = context.CreateScope("bson");
+            scope.Add("contentType", BsonMessageSerializer.BsonContentType.MediaType);
         }
 
         ContentType IMessageDeserializer.ContentType

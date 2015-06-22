@@ -14,6 +14,7 @@ namespace MassTransit.Saga.Pipeline.Filters
 {
     using System.Threading.Tasks;
     using MassTransit.Pipeline;
+    using Monitoring.Introspection;
     using Util;
 
 
@@ -27,6 +28,10 @@ namespace MassTransit.Saga.Pipeline.Filters
         where TSaga : class, ISaga, Observes<TMessage, TSaga>
         where TMessage : class
     {
+        async Task IProbeSite.Probe(ProbeContext context)
+        {
+        }
+
         public async Task Send(SagaConsumeContext<TSaga, TMessage> context, IPipe<SagaConsumeContext<TSaga, TMessage>> next)
         {
             var consumer = context.Saga as Observes<TMessage, TSaga>;

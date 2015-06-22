@@ -14,6 +14,7 @@ namespace MassTransit.Pipeline.Pipes
 {
     using System.Diagnostics;
     using System.Threading.Tasks;
+    using Monitoring.Introspection;
 
 
     public class FilterPipe<T> :
@@ -28,6 +29,13 @@ namespace MassTransit.Pipeline.Pipes
             _filter = filter;
             _next = next;
         }
+
+        async Task IProbeSite.Probe(ProbeContext context)
+        {
+            await _filter.Probe(context);
+            await _next.Probe(context);
+        }
+
 
         [DebuggerNonUserCode]
         public Task Send(T context)

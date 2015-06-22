@@ -16,6 +16,7 @@ namespace Automatonymous.Activities
     using System.Threading.Tasks;
     using Events;
     using MassTransit;
+    using MassTransit.Monitoring.Introspection;
     using MassTransit.Pipeline;
 
 
@@ -96,6 +97,10 @@ namespace Automatonymous.Activities
             public Guid RequestId
             {
                 get { return _requestId; }
+            }
+
+            async Task IProbeSite.Probe(ProbeContext context)
+            {
             }
 
             public async Task Send(SendContext<TRequest> context)

@@ -14,6 +14,8 @@ namespace MassTransit.Policies
 {
     using System;
     using System.Linq;
+    using System.Threading.Tasks;
+    using Monitoring.Introspection;
 
 
     public class IntervalRetryPolicy :
@@ -44,6 +46,18 @@ namespace MassTransit.Policies
             _intervals = intervals.Select(x => TimeSpan.FromMilliseconds(x)).ToArray();
         }
 
+        Task IProbeSite.Probe(ProbeContext context)
+        {
+            ProbeContext scope = context.CreateScope("retry");
+            scope.Set(new
+            {
+                Type = "Interval",
+                Limit = _intervals.Length,
+                Intervals = _intervals,
+            });
+
+            return _filter.Probe(scope);
+        }
         public IRetryContext GetRetryContext()
         {
             return new IntervalRetryContext(this, _intervals);

@@ -15,6 +15,7 @@ namespace MassTransit.Pipeline.Filters
     using System.Diagnostics;
     using System.Threading.Tasks;
     using Context;
+    using Monitoring.Introspection;
 
 
     /// <summary>
@@ -24,6 +25,11 @@ namespace MassTransit.Pipeline.Filters
         IFilter<ConsumeContext<TMessage>>
         where TMessage : class
     {
+        async Task IProbeSite.Probe(ProbeContext context)
+        {
+            context.CreateScope("scheduleMessageRedelivery");
+        }
+
         [DebuggerNonUserCode]
         Task IFilter<ConsumeContext<TMessage>>.Send(ConsumeContext<TMessage> context, IPipe<ConsumeContext<TMessage>> next)
         {

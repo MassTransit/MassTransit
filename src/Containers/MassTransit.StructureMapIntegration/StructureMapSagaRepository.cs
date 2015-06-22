@@ -13,6 +13,7 @@
 namespace MassTransit.StructureMapIntegration
 {
     using System.Threading.Tasks;
+    using Monitoring.Introspection;
     using Pipeline;
     using Saga;
     using StructureMap;
@@ -29,6 +30,13 @@ namespace MassTransit.StructureMapIntegration
         {
             _repository = repository;
             _container = container;
+        }
+
+        Task IProbeSite.Probe(ProbeContext context)
+        {
+            var scope = context.CreateScope("structuremap");
+
+            return _repository.Probe(scope);
         }
 
         public async Task Send<T>(ConsumeContext<T> context, ISagaPolicy<TSaga, T> policy, IPipe<SagaConsumeContext<TSaga, T>> next) where T : class

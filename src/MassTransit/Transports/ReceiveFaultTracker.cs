@@ -16,6 +16,7 @@ namespace MassTransit.Transports
     using System.Collections.Generic;
     using System.Runtime.Serialization;
     using System.Threading.Tasks;
+    using Monitoring.Introspection;
     using Pipeline;
 
 
@@ -29,6 +30,10 @@ namespace MassTransit.Transports
         {
             _tracker = tracker;
             _faultPipe = faultPipe;
+        }
+
+        async Task IProbeSite.Probe(ProbeContext context)
+        {
         }
 
         public async Task Send(ReceiveContext context, IPipe<ReceiveContext> next)

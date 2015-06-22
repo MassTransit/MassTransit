@@ -17,6 +17,8 @@ namespace MassTransit.Serialization
     using System.Net.Mime;
     using System.Runtime.Serialization;
     using System.Text;
+    using System.Threading.Tasks;
+    using Monitoring.Introspection;
     using Newtonsoft.Json;
 
 
@@ -33,6 +35,12 @@ namespace MassTransit.Serialization
             _deserializer = deserializer;
             _sendEndpointProvider = sendEndpointProvider;
             _publishEndpoint = publishEndpoint;
+        }
+
+        async Task IProbeSite.Probe(ProbeContext context)
+        {
+            var scope = context.CreateScope("json");
+            scope.Add("contentType", JsonMessageSerializer.JsonContentType.MediaType);
         }
 
         ContentType IMessageDeserializer.ContentType

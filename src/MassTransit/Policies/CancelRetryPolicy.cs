@@ -14,6 +14,8 @@ namespace MassTransit.Policies
 {
     using System;
     using System.Threading;
+    using System.Threading.Tasks;
+    using Monitoring.Introspection;
 
 
     public class CancelRetryPolicy :
@@ -26,6 +28,13 @@ namespace MassTransit.Policies
         {
             _retryPolicy = retryPolicy;
             _cancellationToken = cancellationToken;
+        }
+
+        Task IProbeSite.Probe(ProbeContext context)
+        {
+            var scope = context.CreateScope("cancel");
+
+            return _retryPolicy.Probe(scope);
         }
 
         public IRetryContext GetRetryContext()

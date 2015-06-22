@@ -16,6 +16,7 @@ namespace MassTransit.Pipeline.Filters
     using System.Diagnostics;
     using System.Threading.Tasks;
     using Context;
+    using Monitoring.Introspection;
 
 
     /// <summary>
@@ -29,6 +30,10 @@ namespace MassTransit.Pipeline.Filters
         public MessageSchedulerFilter(Uri schedulerAddress)
         {
             _schedulerAddress = schedulerAddress;
+        }
+
+        async Task IProbeSite.Probe(ProbeContext context)
+        {
         }
 
         [DebuggerNonUserCode]

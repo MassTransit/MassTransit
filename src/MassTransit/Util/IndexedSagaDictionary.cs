@@ -46,6 +46,16 @@ namespace MassTransit.Util
             }
         }
 
+        public int Count
+        {
+
+            get
+            {
+                lock(_lock)
+                return _indexById.Count;
+            }
+        }
+
         public void Add(TSaga newItem)
         {
             lock (_lock)

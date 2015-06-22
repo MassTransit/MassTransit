@@ -16,6 +16,7 @@ namespace MassTransit.Saga.Pipeline.Filters
     using System.Diagnostics;
     using System.Threading.Tasks;
     using MassTransit.Pipeline;
+    using Monitoring.Introspection;
     using Util;
 
 
@@ -41,6 +42,16 @@ namespace MassTransit.Saga.Pipeline.Filters
             _messagePipe = messagePipe;
             _policy = policy;
             _queryFactory = queryFactory;
+        }
+
+        Task IProbeSite.Probe(ProbeContext context)
+        {
+            ProbeContext scope = context.CreateScope("saga");
+            scope.Set(new
+            {
+                Correlation = "Query"
+            });
+            return _sagaRepository.Probe(scope);
         }
 
         async Task IFilter<ConsumeContext<TMessage>>.Send(ConsumeContext<TMessage> context, IPipe<ConsumeContext<TMessage>> next)

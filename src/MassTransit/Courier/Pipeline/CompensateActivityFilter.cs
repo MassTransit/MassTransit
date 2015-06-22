@@ -16,6 +16,7 @@ namespace MassTransit.Courier.Pipeline
     using System.Threading.Tasks;
     using Logging;
     using MassTransit.Pipeline;
+    using Monitoring.Introspection;
     using Util;
 
 
@@ -29,6 +30,15 @@ namespace MassTransit.Courier.Pipeline
     {
         static readonly ILog _log = Logger.Get<ExecuteActivityFilter<TLog>>();
 
+        async Task IProbeSite.Probe(ProbeContext context)
+        {
+            var scope = context.CreateScope("compensate");
+            scope.Set(new
+            {
+                LogType = TypeMetadataCache<TLog>.ShortName,
+            });
+        }
+
         public async Task Send(CompensateActivityContext<TLog> context, IPipe<CompensateActivityContext<TLog>> next)
         {
             if (_log.IsDebugEnabled)
@@ -39,11 +49,11 @@ namespace MassTransit.Courier.Pipeline
                 Exception exception = null;
                 try
                 {
-                    CompensationResult result = await context.Activity.Compensate(context).ConfigureAwait(false);
+                    CompensationResult result = await context.Activity.Compensate(context);
 
-                    await result.Evaluate().ConfigureAwait(false);
+                    await result.Evaluate();
 
-                    await next.Send(context).ConfigureAwait(false);
+                    await next.Send(context);
                 }
                 catch (Exception ex)
                 {
@@ -54,7 +64,7 @@ namespace MassTransit.Courier.Pipeline
                 {
                     CompensationResult result = context.Failed(exception);
 
-                    await result.Evaluate().ConfigureAwait(false);
+                    await result.Evaluate();
                 }
             }
             catch (Exception ex)

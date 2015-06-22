@@ -15,6 +15,7 @@ namespace MassTransit.AutomatonymousTests
     using System;
     using System.Threading.Tasks;
     using Automatonymous;
+    using Monitoring.Introspection.Contracts;
     using NUnit.Framework;
     using Saga;
     using TestFramework;
@@ -39,6 +40,14 @@ namespace MassTransit.AutomatonymousTests
             Status status = await statusTask;
 
             Assert.AreEqual("A", status.ServiceName);
+        }
+
+        [Test]
+        public async void Should_return_a_wonderful_breakdown_of_the_guts_inside_it()
+        {
+            ProbeResult result = await Bus.GetProbeResult();
+
+            Console.WriteLine(result.ToJsonString());
         }
 
         [Test]

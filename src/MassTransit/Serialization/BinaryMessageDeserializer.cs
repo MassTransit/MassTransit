@@ -16,6 +16,8 @@ namespace MassTransit.Serialization
     using System.Net.Mime;
     using System.Runtime.Remoting.Messaging;
     using System.Runtime.Serialization.Formatters.Binary;
+    using System.Threading.Tasks;
+    using Monitoring.Introspection;
     using Newtonsoft.Json;
 
 
@@ -50,6 +52,13 @@ namespace MassTransit.Serialization
             }
 
             return new StaticConsumeContext(_deserializer, _sendEndpointProvider, _publishEndpoint, receiveContext, obj, headers);
+        }
+
+        async Task IProbeSite.Probe(ProbeContext context)
+        {
+            var scope = context.CreateScope("binary");
+            scope.Add("contentType", BinaryMessageSerializer.BinaryContentType.MediaType);
+
         }
     }
 }

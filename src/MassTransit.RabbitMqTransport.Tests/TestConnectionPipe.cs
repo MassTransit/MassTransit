@@ -3,6 +3,7 @@ namespace MassTransit.RabbitMqTransport.Tests
     using System.Threading;
     using System.Threading.Tasks;
     using MassTransit.Pipeline;
+    using Monitoring.Introspection;
     using RabbitMqTransport;
 
 
@@ -21,6 +22,10 @@ namespace MassTransit.RabbitMqTransport.Tests
         public Task<ConnectionContext> Called
         {
             get { return _called.Task; }
+        }
+
+        async Task IProbeSite.Probe(ProbeContext context)
+        {
         }
 
         public async Task Send(ConnectionContext context)

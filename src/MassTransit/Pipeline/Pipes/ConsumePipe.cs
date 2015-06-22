@@ -15,6 +15,7 @@ namespace MassTransit.Pipeline.Pipes
     using System;
     using System.Threading.Tasks;
     using Filters;
+    using Monitoring.Introspection;
 
 
     public class ConsumePipe :
@@ -32,6 +33,13 @@ namespace MassTransit.Pipeline.Pipes
 
             _filter = messageTypeConsumeFilter;
             _pipe = pipe;
+        }
+
+        Task IProbeSite.Probe(ProbeContext context)
+        {
+            ProbeContext scope = context.CreateScope("consumePipe");
+
+            return _pipe.Probe(scope);
         }
 
         Task IPipe<ConsumeContext>.Send(ConsumeContext context)

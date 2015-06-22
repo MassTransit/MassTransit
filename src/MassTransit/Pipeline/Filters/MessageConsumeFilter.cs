@@ -17,6 +17,7 @@ namespace MassTransit.Pipeline.Filters
     using System.Diagnostics;
     using System.Linq;
     using System.Threading.Tasks;
+    using Monitoring.Introspection;
     using Pipes;
     using Util;
 
@@ -44,6 +45,13 @@ namespace MassTransit.Pipeline.Filters
             _outputPipe = BuildOutputPipe(filters.Concat(Enumerable.Repeat(_output, 1)).ToArray());
 
             _messageObservers = new MessageObserverConnectable<TMessage>();
+        }
+
+        async Task IProbeSite.Probe(ProbeContext context)
+        {
+            var scope = context.CreateScope(TypeMetadataCache<TMessage>.ShortName);
+
+            await _outputPipe.Probe(scope);
         }
 
         ConnectHandle IConsumeMessageObserverConnector.ConnectConsumeMessageObserver<T>(IConsumeMessageObserver<T> observer)

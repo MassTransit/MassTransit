@@ -14,6 +14,8 @@ namespace MassTransit.Policies
 {
     using System;
     using System.Collections.Generic;
+    using System.Threading.Tasks;
+    using Monitoring.Introspection;
 
 
     public class ImmediateRetryPolicy :
@@ -28,6 +30,17 @@ namespace MassTransit.Policies
             _retryLimit = retryLimit;
         }
 
+        Task IProbeSite.Probe(ProbeContext context)
+        {
+            ProbeContext scope = context.CreateScope("retry");
+            scope.Set(new
+            {
+                Type = "Immediate",
+                Limit = _retryLimit,
+            });
+
+            return _filter.Probe(scope);
+        }
         public IRetryContext GetRetryContext()
         {
             return new IntervalRetryContext(this, GetIntervals());

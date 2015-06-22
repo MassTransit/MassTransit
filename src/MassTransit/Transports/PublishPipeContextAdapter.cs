@@ -16,6 +16,7 @@ namespace MassTransit.Transports
     using System.Threading;
     using System.Threading.Tasks;
     using Context;
+    using Monitoring.Introspection;
     using Pipeline;
 
 
@@ -46,15 +47,20 @@ namespace MassTransit.Transports
             _pipe = Pipe.Empty<PublishContext<T>>();
         }
 
+        Task IProbeSite.Probe(ProbeContext context)
+        {
+            return _pipe.Probe(context);
+        }
+
         public async Task Send(SendContext<T> context)
         {
             var publishContext = new PublishContextProxy<T>(context);
             bool firstTime = Interlocked.CompareExchange(ref _context, publishContext, null) == null;
 
-            await _pipe.Send(publishContext).ConfigureAwait(false);
+            await _pipe.Send(publishContext);
 
             if (firstTime)
-                await _observer.PrePublish(publishContext).ConfigureAwait(false);
+                await _observer.PrePublish(publishContext);
         }
 
         public bool Visit(IPipelineVisitor visitor)
@@ -65,13 +71,13 @@ namespace MassTransit.Transports
         public async Task PostSend()
         {
             if (_context != null)
-                await _observer.PostPublish(_context).ConfigureAwait(false);
+                await _observer.PostPublish(_context);
         }
 
         public async Task SendFaulted(Exception exception)
         {
             if (_context != null)
-                await _observer.PublishFault(_context, exception).ConfigureAwait(false);
+                await _observer.PublishFault(_context, exception);
         }
     }
 }

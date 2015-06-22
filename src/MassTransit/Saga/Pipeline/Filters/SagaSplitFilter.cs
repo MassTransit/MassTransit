@@ -2,6 +2,7 @@
 {
     using System.Threading.Tasks;
     using MassTransit.Pipeline;
+    using Monitoring.Introspection;
     using Pipes;
 
 
@@ -21,6 +22,10 @@
         public SagaSplitFilter(IFilter<SagaConsumeContext<TSaga>> next)
         {
             _next = next;
+        }
+
+        async Task IProbeSite.Probe(ProbeContext context)
+        {
         }
 
         public Task Send(SagaConsumeContext<TSaga, TMessage> context, IPipe<SagaConsumeContext<TSaga, TMessage>> next)

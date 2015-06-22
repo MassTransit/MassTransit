@@ -15,6 +15,7 @@ namespace MassTransit.Saga
     using System;
     using System.Threading.Tasks;
     using MassTransit.Pipeline;
+    using Monitoring.Introspection;
 
 
     /// <summary>
@@ -33,6 +34,13 @@ namespace MassTransit.Saga
         {
             _repository = repository;
             _callback = callback;
+        }
+
+        Task IProbeSite.Probe(ProbeContext context)
+        {
+            var scope = context.CreateScope("delegate");
+
+            return _repository.Probe(scope);
         }
 
         public async Task Send<T>(ConsumeContext<T> context, ISagaPolicy<TSaga, T> policy, IPipe<SagaConsumeContext<TSaga, T>> next) where T : class

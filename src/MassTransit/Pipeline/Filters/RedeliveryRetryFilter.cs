@@ -15,6 +15,7 @@ namespace MassTransit.Pipeline.Filters
     using System;
     using System.Threading.Tasks;
     using Context;
+    using Monitoring.Introspection;
     using Policies;
 
     /// <summary>
@@ -30,6 +31,14 @@ namespace MassTransit.Pipeline.Filters
         public RedeliveryRetryFilter(IRetryPolicy retryPolicy)
         {
             _retryPolicy = retryPolicy;
+        }
+
+        async Task IProbeSite.Probe(ProbeContext context)
+        {
+            ProbeContext scope = context.CreateScope("retry");
+            scope.Add("type", "redelivery");
+
+
         }
 
         public async Task Send(ConsumeContext<T> context, IPipe<ConsumeContext<T>> next)

@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,6 +14,8 @@ namespace MassTransit.Policies
 {
     using System;
     using System.Collections.Generic;
+    using System.Threading.Tasks;
+    using Monitoring.Introspection;
 
 
     public class IncrementalRetryPolicy :
@@ -43,6 +45,20 @@ namespace MassTransit.Policies
             _retryLimit = retryLimit;
             _initialInterval = initialInterval;
             _intervalIncrement = intervalIncrement;
+        }
+
+        Task IProbeSite.Probe(ProbeContext context)
+        {
+            ProbeContext scope = context.CreateScope("retry");
+            scope.Set(new
+            {
+                Type = "Incremental",
+                Limit = _retryLimit,
+                Initial = _initialInterval,
+                Increment = _intervalIncrement,
+            });
+
+            return _filter.Probe(scope);
         }
 
         public IRetryContext GetRetryContext()

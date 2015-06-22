@@ -13,13 +13,16 @@
 namespace MassTransit.Pipeline
 {
     using System.Threading.Tasks;
+    using Monitoring.Introspection;
+
 
     /// <summary>
     /// A filter is a functional node in a pipeline, connected by pipes to
     /// other filters.
     /// </summary>
     /// <typeparam name="T">The pipe context type</typeparam>
-    public interface IFilter<T>
+    public interface IFilter<T> :
+        IProbeSite
         where T : class, PipeContext
     {
         /// <summary>

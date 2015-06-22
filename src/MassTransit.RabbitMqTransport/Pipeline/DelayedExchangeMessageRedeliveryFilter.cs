@@ -16,6 +16,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
     using System.Threading.Tasks;
     using Contexts;
     using MassTransit.Pipeline;
+    using Monitoring.Introspection;
 
 
     /// <summary>
@@ -26,6 +27,10 @@ namespace MassTransit.RabbitMqTransport.Pipeline
         IFilter<ConsumeContext<TMessage>>
         where TMessage : class
     {
+        async Task IProbeSite.Probe(ProbeContext context)
+        {
+        }
+
         [DebuggerNonUserCode]
         Task IFilter<ConsumeContext<TMessage>>.Send(ConsumeContext<TMessage> context, IPipe<ConsumeContext<TMessage>> next)
         {

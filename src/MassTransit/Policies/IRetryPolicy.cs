@@ -13,9 +13,11 @@
 namespace MassTransit.Policies
 {
     using System;
+    using Monitoring.Introspection;
 
 
-    public interface IRetryPolicy
+    public interface IRetryPolicy :
+        IProbeSite
     {
         /// <summary>
         /// Returns a context that can be used to go through the retries

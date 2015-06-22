@@ -14,13 +14,15 @@ namespace MassTransit.Saga
 {
     using System.Threading.Tasks;
     using MassTransit.Pipeline;
+    using Monitoring.Introspection;
 
 
     /// <summary>
     /// A saga repository is used by the service bus to dispatch messages to sagas
     /// </summary>
     /// <typeparam name="TSaga"></typeparam>
-    public interface ISagaRepository<TSaga>
+    public interface ISagaRepository<TSaga> :
+        IProbeSite
         where TSaga : class, ISaga
     {
         /// <summary>

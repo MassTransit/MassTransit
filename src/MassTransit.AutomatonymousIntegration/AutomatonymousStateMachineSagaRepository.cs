@@ -19,8 +19,10 @@ namespace Automatonymous
     using System.Threading.Tasks;
     using MassTransit;
     using MassTransit.Internals.Extensions;
+    using MassTransit.Monitoring.Introspection;
     using MassTransit.Pipeline;
     using MassTransit.Saga;
+    using MassTransit.Util;
     using RepositoryBuilders;
 
 
@@ -49,6 +51,21 @@ namespace Automatonymous
             _messageTypes = new Dictionary<Type, StateMachineEventCorrelation<TInstance>>();
             foreach (var eventCorrelation in eventCorrelations)
                 _messageTypes.Add(eventCorrelation.Event.GetType().GetClosingArguments(typeof(Event<>)).Single(), eventCorrelation);
+        }
+
+        async Task IProbeSite.Probe(ProbeContext context)
+        {
+            ProbeContext scope = context.CreateScope("sagaRepository");
+            scope.Set(new
+            {
+                InstanceType = TypeMetadataCache<TInstance>.ShortName,
+                Events = _messageTypes.ToDictionary(x => x.Value.Event.Name, x => new
+                {
+                    DataType = TypeMetadataCache.GetShortName(x.Key)
+                })
+            });
+
+            await _repository.Probe(scope);
         }
 
         public Task Send<T>(ConsumeContext<T> context, ISagaPolicy<TInstance, T> policy, IPipe<SagaConsumeContext<TInstance, T>> next) where T : class

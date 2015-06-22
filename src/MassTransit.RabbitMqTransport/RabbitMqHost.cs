@@ -40,7 +40,7 @@ namespace MassTransit.RabbitMqTransport
             _messageNameFormatter = new RabbitMqMessageNameFormatter();
         }
 
-        async Task IProbeSite.Probe(ProbeContext context)
+        Task IProbeSite.Probe(ProbeContext context)
         {
             ProbeContext scope = context.CreateScope("host");
             scope.Set(new
@@ -61,7 +61,7 @@ namespace MassTransit.RabbitMqTransport
                     _hostSettings.SslServerName,
                 });
 
-            await _connectionCache.Probe(scope);
+            return _connectionCache.Probe(scope);
         }
 
         public HostHandle Start()

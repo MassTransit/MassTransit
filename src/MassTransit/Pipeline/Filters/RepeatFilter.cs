@@ -15,6 +15,7 @@ namespace MassTransit.Pipeline.Filters
     using System;
     using System.Diagnostics;
     using System.Threading.Tasks;
+    using Monitoring.Introspection;
     using Policies;
 
 
@@ -38,6 +39,11 @@ namespace MassTransit.Pipeline.Filters
         {
             get { return _repeatPolicy; }
         }
+
+        async Task IProbeSite.Probe(ProbeContext context)
+        {
+        }
+
 
         [DebuggerNonUserCode]
         public async Task Send(T context, IPipe<T> next)

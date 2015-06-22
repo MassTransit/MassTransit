@@ -85,14 +85,13 @@ namespace MassTransit.RabbitMqTransport.Tests
             Assert.AreEqual(_routingSlip.TrackingNumber, activityCompleted.TrackingNumber);
         }
 
-            [Test]
-            public async void Should_return_a_wonderful_breakdown_of_the_guts_inside_it()
-            {
-                ProbeResult result = await Bus.GetProbeResult();
+        [Test]
+        public async void Should_return_a_wonderful_breakdown_of_the_guts_inside_it()
+        {
+            ProbeResult result = await Bus.GetProbeResult();
 
-                Console.WriteLine(result.ToJsonString());
-            }
-
+            Console.WriteLine(result.ToJsonString());
+        }
 
         Task<ConsumeContext<RoutingSlipCompleted>> _completed;
         Task<ConsumeContext<RoutingSlipActivityCompleted>> _firstActivityCompleted;
@@ -142,21 +141,22 @@ namespace MassTransit.RabbitMqTransport.Tests
         }
     }
 
+
     [TestFixture]
     public class Executing_with_no_observers :
         RabbitMqActivityTestFixture
     {
-        public Executing_with_no_observers()
-        {
-            TestTimeout = TimeSpan.FromSeconds(60);
-        }
-
         [Test]
         public async void Should_receive_the_routing_slip_completed_event()
         {
             RoutingSlipCompleted completed = (await _completed).Message;
 
             Assert.AreEqual(_routingSlip.TrackingNumber, completed.TrackingNumber);
+        }
+
+        public Executing_with_no_observers()
+        {
+            TestTimeout = TimeSpan.FromSeconds(60);
         }
 
         Task<ConsumeContext<RoutingSlipCompleted>> _completed;

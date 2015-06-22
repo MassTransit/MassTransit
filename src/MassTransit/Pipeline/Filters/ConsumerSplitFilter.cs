@@ -14,7 +14,9 @@ namespace MassTransit.Pipeline.Filters
 {
     using System.Diagnostics;
     using System.Threading.Tasks;
+    using Monitoring.Introspection;
     using Pipes;
+    using Util;
 
 
     /// <summary>
@@ -33,6 +35,17 @@ namespace MassTransit.Pipeline.Filters
         public ConsumerSplitFilter(IFilter<ConsumerConsumeContext<TConsumer>> next)
         {
             _next = next;
+        }
+
+        Task IProbeSite.Probe(ProbeContext context)
+        {
+            ProbeContext scope = context.CreateScope("split");
+            scope.Set(new
+            {
+                ConsumerType = TypeMetadataCache<TConsumer>.ShortName,
+            });
+
+            return _next.Probe(scope);
         }
 
         [DebuggerNonUserCode]

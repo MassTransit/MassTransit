@@ -13,9 +13,11 @@
 namespace MassTransit.Pipeline
 {
     using System.Threading.Tasks;
+    using Monitoring.Introspection;
 
 
-    public interface IPipe<in T>
+    public interface IPipe<in T> :
+        IProbeSite
         where T : class, PipeContext
     {
         /// <summary>

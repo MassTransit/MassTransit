@@ -13,6 +13,7 @@
 namespace MassTransit.NinjectIntegration
 {
     using System.Threading.Tasks;
+    using Monitoring.Introspection;
     using Ninject;
     using Pipeline;
     using Saga;
@@ -29,6 +30,13 @@ namespace MassTransit.NinjectIntegration
         {
             _repository = repository;
             _kernel = kernel;
+        }
+
+        Task IProbeSite.Probe(ProbeContext context)
+        {
+            ProbeContext scope = context.CreateScope("ninject");
+
+            return _repository.Probe(scope);
         }
 
         public Task Send<T>(ConsumeContext<T> context, ISagaPolicy<TSaga, T> policy, IPipe<SagaConsumeContext<TSaga, T>> next) where T : class

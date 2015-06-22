@@ -19,6 +19,7 @@ namespace MassTransit.Saga
     using System.Threading.Tasks;
     using Logging;
     using MassTransit.Pipeline;
+    using Monitoring.Introspection;
     using Util;
 
 
@@ -28,7 +29,7 @@ namespace MassTransit.Saga
         where TSaga : class, ISaga
     {
         static readonly ILog _log = Logger.Get(typeof(InMemorySagaRepository<TSaga>));
-        IndexedSagaDictionary<TSaga> _sagas;
+        readonly IndexedSagaDictionary<TSaga> _sagas;
 
         public InMemorySagaRepository()
         {
@@ -43,6 +44,16 @@ namespace MassTransit.Saga
         public async Task<IEnumerable<Guid>> Find(ISagaQuery<TSaga> query)
         {
             return _sagas.Where(query).Select(x => x.CorrelationId);
+        }
+
+        async Task IProbeSite.Probe(ProbeContext context)
+        {
+            ProbeContext scope = context.CreateScope("sagaRepository");
+            scope.Set(new
+            {
+                Count = _sagas.Count,
+                Persistence = "memory",
+            });
         }
 
         async Task ISagaRepository<TSaga>.Send<T>(ConsumeContext<T> context, ISagaPolicy<TSaga, T> policy, IPipe<SagaConsumeContext<TSaga, T>> next)
@@ -75,9 +86,7 @@ namespace MassTransit.Saga
                         needToLeaveSagas = false;
 
                         if (_log.IsDebugEnabled)
-                        {
-                            _log.DebugFormat("SAGA:{0}:{1} Used {2}", TypeMetadataCache<TSaga>.ShortName, sagaId,TypeMetadataCache<T>.ShortName);
-                        }
+                            _log.DebugFormat("SAGA:{0}:{1} Used {2}", TypeMetadataCache<TSaga>.ShortName, sagaId, TypeMetadataCache<T>.ShortName);
 
                         SagaConsumeContext<TSaga, T> sagaConsumeContext = new InMemorySagaConsumeContext<TSaga, T>(this, context, instance);
 
@@ -117,9 +126,7 @@ namespace MassTransit.Saga
             try
             {
                 if (_log.IsDebugEnabled)
-                {
                     _log.DebugFormat("SAGA:{0}:{1} Used {2}", TypeMetadataCache<TSaga>.ShortName, instance.CorrelationId, TypeMetadataCache<T>.ShortName);
-                }
 
                 SagaConsumeContext<TSaga, T> sagaConsumeContext = new InMemorySagaConsumeContext<TSaga, T>(this, context, instance);
 
@@ -159,6 +166,11 @@ namespace MassTransit.Saga
             {
                 _repository = repository;
                 _next = next;
+            }
+
+            async Task IProbeSite.Probe(ProbeContext context)
+            {
+                await _next.Probe(context);
             }
 
             public async Task Send(SagaConsumeContext<TSaga, TMessage> context)
