@@ -15,6 +15,7 @@ namespace MassTransit.Pipeline.Filters
     using System;
     using System.Diagnostics;
     using System.Threading.Tasks;
+    using Monitoring.Introspection;
 
 
     public class DelegateFilter<T> :
@@ -26,6 +27,11 @@ namespace MassTransit.Pipeline.Filters
         public DelegateFilter(Action<T> callback)
         {
             _callback = callback;
+        }
+
+        async Task IProbeSite.Probe(ProbeContext context)
+        {
+            context.CreateScope("delegate");
         }
 
         [DebuggerNonUserCode]

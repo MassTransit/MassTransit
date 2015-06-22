@@ -13,11 +13,17 @@
 namespace MassTransit.Policies
 {
     using System;
+    using System.Threading.Tasks;
+    using Monitoring.Introspection;
 
 
     public class RetryAllRetryExceptionFilter :
         IRetryExceptionFilter
     {
+        async Task IProbeSite.Probe(ProbeContext context)
+        {
+        }
+
         public bool CanRetry(Exception exception)
         {
             return true;

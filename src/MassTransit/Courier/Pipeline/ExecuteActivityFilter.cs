@@ -16,6 +16,7 @@ namespace MassTransit.Courier.Pipeline
     using System.Threading.Tasks;
     using Logging;
     using MassTransit.Pipeline;
+    using Monitoring.Introspection;
     using Util;
 
 
@@ -29,21 +30,30 @@ namespace MassTransit.Courier.Pipeline
     {
         static readonly ILog _log = Logger.Get<ExecuteActivityFilter<TArguments>>();
 
+        async Task IProbeSite.Probe(ProbeContext context)
+        {
+            ProbeContext scope = context.CreateScope("execute");
+            scope.Set(new
+            {
+                LogType = TypeMetadataCache<TArguments>.ShortName,
+            });
+        }
+
         public async Task Send(ExecuteActivityContext<TArguments> context, IPipe<ExecuteActivityContext<TArguments>> next)
         {
             if (_log.IsDebugEnabled)
-                _log.DebugFormat("Executing: {0}",  context.TrackingNumber);
+                _log.DebugFormat("Executing: {0}", context.TrackingNumber);
 
             try
             {
                 Exception exception = null;
                 try
                 {
-                    ExecutionResult result = await context.Activity.Execute(context).ConfigureAwait(false);
+                    ExecutionResult result = await context.Activity.Execute(context);
 
-                    await result.Evaluate().ConfigureAwait(false);
+                    await result.Evaluate();
 
-                    await next.Send(context).ConfigureAwait(false);
+                    await next.Send(context);
                 }
                 catch (Exception ex)
                 {
@@ -54,7 +64,7 @@ namespace MassTransit.Courier.Pipeline
                 {
                     ExecutionResult result = context.Faulted(exception);
 
-                    await result.Evaluate().ConfigureAwait(false);
+                    await result.Evaluate();
                 }
             }
             catch (Exception ex)

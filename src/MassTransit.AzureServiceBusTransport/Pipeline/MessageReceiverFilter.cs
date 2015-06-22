@@ -19,6 +19,7 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
     using MassTransit.Pipeline;
     using Microsoft.ServiceBus;
     using Microsoft.ServiceBus.Messaging;
+    using Monitoring.Introspection;
 
 
     /// <summary>
@@ -35,6 +36,9 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
         {
             _receivePipe = receivePipe;
             _receiveObserver = receiveObserver;
+        }
+        async Task IProbeSite.Probe(ProbeContext context)
+        {
         }
 
         async Task IFilter<ConnectionContext>.Send(ConnectionContext context, IPipe<ConnectionContext> next)

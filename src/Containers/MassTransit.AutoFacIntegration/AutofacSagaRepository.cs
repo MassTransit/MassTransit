@@ -14,6 +14,7 @@ namespace MassTransit.AutofacIntegration
 {
     using System.Threading.Tasks;
     using Autofac;
+    using Monitoring.Introspection;
     using Pipeline;
     using Saga;
 
@@ -31,6 +32,14 @@ namespace MassTransit.AutofacIntegration
             _repository = repository;
             _scope = scope;
             _name = name;
+        }
+
+        Task IProbeSite.Probe(ProbeContext context)
+        {
+            var scope = context.CreateScope("autofac");
+            scope.Add("name", _name);
+
+            return _repository.Probe(scope);
         }
 
         async Task ISagaRepository<TSaga>.Send<T>(ConsumeContext<T> context, ISagaPolicy<TSaga, T> policy, IPipe<SagaConsumeContext<TSaga, T>> next)

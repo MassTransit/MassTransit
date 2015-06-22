@@ -17,6 +17,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
     using System.Threading.Tasks;
     using Logging;
     using MassTransit.Pipeline;
+    using Monitoring.Introspection;
     using RabbitMQ.Client;
 
 
@@ -33,6 +34,10 @@ namespace MassTransit.RabbitMqTransport.Pipeline
         public PrepareErrorQueueFilter(ErrorQueueSettings settings)
         {
             _settings = settings;
+        }
+
+        async Task IProbeSite.Probe(ProbeContext context)
+        {
         }
 
         async Task IFilter<ModelContext>.Send(ModelContext context, IPipe<ModelContext> next)

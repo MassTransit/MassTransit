@@ -14,6 +14,7 @@ namespace MassTransit.Tests
 {
     using System.Threading.Tasks;
     using MassTransit.Pipeline;
+    using Monitoring.Introspection;
     using NUnit.Framework;
     using TestFramework;
 
@@ -50,6 +51,10 @@ namespace MassTransit.Tests
             {
                 First = first;
                 Second = second;
+            }
+
+            async Task IProbeSite.Probe(ProbeContext context)
+            {
             }
 
             public async Task Send(ConsumerConsumeContext<MyConsumer> context, IPipe<ConsumerConsumeContext<MyConsumer>> next)

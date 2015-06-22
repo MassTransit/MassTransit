@@ -1,12 +1,12 @@
-﻿// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
 // License at 
 // 
 //     http://www.apache.org/licenses/LICENSE-2.0 
 // 
-// Unless required by applicable law or agreed to in writing, software distributed 
+// Unless required by applicable law or agreed to in writing, software distributed
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
@@ -18,6 +18,7 @@ namespace MassTransit.Util
     using System.Linq.Expressions;
     using System.Reflection;
     using Saga;
+
 
     /// <summary>
     /// For the in-memory saga repository, this maintains an index of saga properties
@@ -32,6 +33,8 @@ namespace MassTransit.Util
         /// </summary>
         /// <param name="key"></param>
         TSaga this[object key] { get; }
+
+        int Count { get; }
 
         /// <summary>
         /// Adds a new saga to the index
@@ -69,6 +72,7 @@ namespace MassTransit.Util
         IEnumerable<TResult> Select<TResult>(Func<TSaga, TResult> transformer);
     }
 
+
     /// <summary>
     /// A dictionary index of the sagas
     /// </summary>
@@ -91,11 +95,16 @@ namespace MassTransit.Util
             _getProperty = GetGetMethod(propertyInfo);
         }
 
+        public int Count
+        {
+            get { return _values.Count; }
+        }
+
         public TSaga this[object key]
         {
             get
             {
-                var keyValue = (TProperty) key;
+                var keyValue = (TProperty)key;
 
                 HashSet<TSaga> result;
                 if (_values.TryGetValue(keyValue, out result))
@@ -137,13 +146,11 @@ namespace MassTransit.Util
 
         public IEnumerable<TSaga> Where(object key, Func<TSaga, bool> filter)
         {
-            var keyValue = (TProperty) key;
+            var keyValue = (TProperty)key;
 
             HashSet<TSaga> resultSet;
             if (_values.TryGetValue(keyValue, out resultSet))
-            {
                 return resultSet.Where(filter);
-            }
 
             return Enumerable.Empty<TSaga>();
         }
@@ -155,7 +162,7 @@ namespace MassTransit.Util
 
         static Func<TSaga, TProperty> GetGetMethod(PropertyInfo property)
         {
-            ParameterExpression parameterExpression = Expression.Parameter(typeof (TSaga), "instance");
+            ParameterExpression parameterExpression = Expression.Parameter(typeof(TSaga), "instance");
             return Expression.Lambda<Func<TSaga, TProperty>>(
                 Expression.Call(parameterExpression, property.GetGetMethod()), new[] {parameterExpression}).Compile();
         }

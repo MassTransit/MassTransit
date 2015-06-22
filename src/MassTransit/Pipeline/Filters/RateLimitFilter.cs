@@ -16,6 +16,7 @@ namespace MassTransit.Pipeline.Filters
     using System.Diagnostics;
     using System.Threading;
     using System.Threading.Tasks;
+    using Monitoring.Introspection;
 
 
     /// <summary>
@@ -51,6 +52,14 @@ namespace MassTransit.Pipeline.Filters
         public int RateLimit
         {
             get { return _rateLimit; }
+        }
+
+        async Task IProbeSite.Probe(ProbeContext context)
+        {
+            var scope = context.CreateScope("rateLimit");
+            scope.Add("limit", _rateLimit);
+            scope.Add("available", _limit.CurrentCount);
+            scope.Add("interval", _interval);
         }
 
         public void Dispose()

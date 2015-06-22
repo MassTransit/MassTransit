@@ -16,6 +16,7 @@ namespace MassTransit.Pipeline.Filters
     using System.Diagnostics;
     using System.IO;
     using System.Threading.Tasks;
+    using Monitoring.Introspection;
 
 
     public class LogFilter<T> :
@@ -29,6 +30,10 @@ namespace MassTransit.Pipeline.Filters
         {
             _writer = writer;
             _formatter = formatter;
+        }
+
+        async Task IProbeSite.Probe(ProbeContext context)
+        {
         }
 
         [DebuggerNonUserCode]

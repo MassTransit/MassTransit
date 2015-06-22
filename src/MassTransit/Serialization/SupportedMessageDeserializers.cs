@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -17,6 +17,8 @@ namespace MassTransit.Serialization
     using System.Linq;
     using System.Net.Mime;
     using System.Runtime.Serialization;
+    using System.Threading.Tasks;
+    using Monitoring.Introspection;
 
 
     public class SupportedMessageDeserializers :
@@ -33,6 +35,15 @@ namespace MassTransit.Serialization
                 AddSerializer(deserializer);
         }
 
+        async Task IProbeSite.Probe(ProbeContext context)
+        {
+            var scope = context.CreateScope("supportedContentTypes");
+            foreach (var deserializer in _deserializers.Values)
+            {
+                await deserializer.Probe(scope);
+            }
+        }
+
         public ContentType ContentType
         {
             get { return _contentType; }
@@ -42,9 +53,11 @@ namespace MassTransit.Serialization
         {
             IMessageDeserializer deserializer;
             if (!TryGetSerializer(receiveContext.ContentType, out deserializer))
+            {
                 throw new SerializationException(
                     string.Format("No deserializer was registered for the message content type: {0}. Supported content types include {1}",
                         receiveContext.ContentType, string.Join(", ", _deserializers.Values.Select(x => x.ContentType))));
+            }
 
             return deserializer.Deserialize(receiveContext);
         }

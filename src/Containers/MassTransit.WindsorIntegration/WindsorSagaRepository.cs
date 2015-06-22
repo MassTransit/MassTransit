@@ -15,6 +15,7 @@ namespace MassTransit.WindsorIntegration
     using System.Threading.Tasks;
     using Castle.MicroKernel;
     using Castle.MicroKernel.Lifestyle;
+    using Monitoring.Introspection;
     using Pipeline;
     using Saga;
 
@@ -30,6 +31,13 @@ namespace MassTransit.WindsorIntegration
         {
             _repository = repository;
             _container = container;
+        }
+
+        Task IProbeSite.Probe(ProbeContext context)
+        {
+            ProbeContext scope = context.CreateScope("windsor");
+
+            return _repository.Probe(scope);
         }
 
         public async Task Send<T>(ConsumeContext<T> context, ISagaPolicy<TSaga, T> policy, IPipe<SagaConsumeContext<TSaga, T>> next) where T : class

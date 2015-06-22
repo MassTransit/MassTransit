@@ -13,6 +13,10 @@
 namespace MassTransit.Policies
 {
     using System;
+    using System.Linq;
+    using System.Threading.Tasks;
+    using Monitoring.Introspection;
+    using Util;
 
 
     public class RetrySelectedRetryExceptionFilter :
@@ -23,6 +27,15 @@ namespace MassTransit.Policies
         public RetrySelectedRetryExceptionFilter(params Type[] exceptionTypes)
         {
             _exceptionTypes = exceptionTypes;
+        }
+
+        async Task IProbeSite.Probe(ProbeContext context)
+        {
+            var scope = context.CreateScope("selected");
+            scope.Set(new
+            {
+                ExceptionTypes = _exceptionTypes.Select(TypeMetadataCache.GetShortName).ToArray(),
+            });
         }
 
         public bool CanRetry(Exception exception)

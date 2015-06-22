@@ -2,6 +2,7 @@ namespace MassTransit.Saga.Pipeline.Pipes
 {
     using System.Threading.Tasks;
     using MassTransit.Pipeline;
+    using Monitoring.Introspection;
 
 
     /// <summary>
@@ -19,6 +20,11 @@ namespace MassTransit.Saga.Pipeline.Pipes
         public SagaMergePipe(IPipe<SagaConsumeContext<TSaga, TMessage>> output)
         {
             _output = output;
+        }
+
+        Task IProbeSite.Probe(ProbeContext context)
+        {
+            return _output.Probe(context);
         }
 
         public Task Send(SagaConsumeContext<TSaga> context)

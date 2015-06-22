@@ -15,6 +15,7 @@ namespace MassTransit.Saga.Pipeline.Filters
     using System;
     using System.Threading.Tasks;
     using MassTransit.Pipeline;
+    using Monitoring.Introspection;
     using Util;
 
 
@@ -28,6 +29,10 @@ namespace MassTransit.Saga.Pipeline.Filters
         where TSaga : class, ISaga, Orchestrates<TMessage>
         where TMessage : class, CorrelatedBy<Guid>
     {
+        async Task IProbeSite.Probe(ProbeContext context)
+        {
+        }
+
         public async Task Send(SagaConsumeContext<TSaga, TMessage> context, IPipe<SagaConsumeContext<TSaga, TMessage>> next)
         {
             var consumer = context.Saga as Orchestrates<TMessage>;

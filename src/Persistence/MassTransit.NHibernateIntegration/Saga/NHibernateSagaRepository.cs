@@ -19,6 +19,7 @@ namespace MassTransit.NHibernateIntegration.Saga
     using System.Transactions;
     using Logging;
     using MassTransit.Saga;
+    using Monitoring.Introspection;
     using NHibernate;
     using Pipeline;
     using Util;
@@ -52,6 +53,16 @@ namespace MassTransit.NHibernateIntegration.Saga
 
                 return result;
             }
+        }
+
+        async Task IProbeSite.Probe(ProbeContext context)
+        {
+            ProbeContext scope = context.CreateScope("sagaRepository");
+            scope.Set(new
+            {
+                Persistence = "nhibernate",
+                Entities = _sessionFactory.GetAllClassMetadata().Select(x => x.Value.EntityName).ToArray(),
+            });
         }
 
         public async Task Send<T>(ConsumeContext<T> context, ISagaPolicy<TSaga, T> policy, IPipe<SagaConsumeContext<TSaga, T>> next) where T : class
@@ -179,6 +190,11 @@ namespace MassTransit.NHibernateIntegration.Saga
             {
                 _session = session;
                 _next = next;
+            }
+
+            Task IProbeSite.Probe(ProbeContext context)
+            {
+                return _next.Probe(context);
             }
 
             public async Task Send(SagaConsumeContext<TSaga, TMessage> context)

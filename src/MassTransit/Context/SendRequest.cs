@@ -14,6 +14,7 @@ namespace MassTransit.Context
 {
     using System;
     using System.Threading.Tasks;
+    using Monitoring.Introspection;
     using Pipeline;
 
 
@@ -36,6 +37,10 @@ namespace MassTransit.Context
             _taskScheduler = taskScheduler;
             _callback = callback;
             _bus = bus;
+        }
+
+        async Task IProbeSite.Probe(ProbeContext context)
+        {
         }
 
         public async Task Send(SendContext<TRequest> context)

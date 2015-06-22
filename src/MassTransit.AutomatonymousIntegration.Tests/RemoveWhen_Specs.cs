@@ -15,6 +15,7 @@ namespace MassTransit.AutomatonymousTests
     using System;
     using System.Threading.Tasks;
     using Automatonymous;
+    using Monitoring.Introspection.Contracts;
     using NUnit.Framework;
     using Saga;
     using TestFramework;
@@ -38,6 +39,15 @@ namespace MassTransit.AutomatonymousTests
             Guid? saga =
                 await _repository.ShouldContainSaga(x => x.CorrelationId == sagaId && x.CurrentState == _machine.Running, TestTimeout);
             Assert.IsTrue(saga.HasValue);
+        }
+
+
+        [Test]
+        public async void Should_return_a_wonderful_breakdown_of_the_guts_inside_it()
+        {
+            ProbeResult result = await Bus.GetProbeResult();
+
+            Console.WriteLine(result.ToJsonString());
         }
 
         [Test]

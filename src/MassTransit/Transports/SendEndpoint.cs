@@ -16,6 +16,7 @@ namespace MassTransit.Transports
     using System.Threading;
     using System.Threading.Tasks;
     using Context;
+    using Monitoring.Introspection;
     using Pipeline;
     using Util;
 
@@ -196,6 +197,14 @@ namespace MassTransit.Transports
             {
                 _endpoint = endpoint;
                 _sendPipe = pipe;
+            }
+
+            async Task IProbeSite.Probe(ProbeContext context)
+            {
+                if(_pipe != null)
+                    await _pipe.Probe(context);
+                if (_sendPipe != null)
+                    await _sendPipe.Probe(context);
             }
 
             public async Task Send(SendContext<T> context)

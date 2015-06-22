@@ -13,6 +13,7 @@
 namespace MassTransit.WindsorIntegration
 {
     using System.Threading.Tasks;
+    using Monitoring.Introspection;
     using Pipeline;
 
 
@@ -24,6 +25,10 @@ namespace MassTransit.WindsorIntegration
         IFilter<T>
         where T : class, PipeContext
     {
+        async Task IProbeSite.Probe(ProbeContext context)
+        {
+        }
+
         async Task IFilter<T>.Send(T context, IPipe<T> next)
         {
             try

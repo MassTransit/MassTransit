@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,8 +14,11 @@ namespace MassTransit.Pipeline.Filters
 {
     using System;
     using System.Diagnostics;
+    using System.Threading;
     using System.Threading.Tasks;
+    using Monitoring.Introspection;
     using Util;
+
 
     /// <summary>
     /// Consumes a message via a message handler and reports the message as consumed or faulted
@@ -26,6 +29,8 @@ namespace MassTransit.Pipeline.Filters
         where TMessage : class
     {
         readonly MessageHandler<TMessage> _handler;
+        long _completed;
+        long _faulted;
 
         // TODO this needs a pipe like instance and consumer, to handle things like retry, etc.
         public HandlerMessageFilter(MessageHandler<TMessage> handler)
@@ -34,6 +39,13 @@ namespace MassTransit.Pipeline.Filters
                 throw new ArgumentNullException("handler");
 
             _handler = handler;
+        }
+
+        async Task IProbeSite.Probe(ProbeContext context)
+        {
+            ProbeContext scope = context.CreateScope("handler");
+            scope.Add("completed", _completed);
+            scope.Add("faulted", _faulted);
         }
 
         [DebuggerNonUserCode]
@@ -46,11 +58,15 @@ namespace MassTransit.Pipeline.Filters
 
                 context.NotifyConsumed(timer.Elapsed, TypeMetadataCache<MessageHandler<TMessage>>.ShortName);
 
+                Interlocked.Increment(ref _completed);
+
                 await next.Send(context);
             }
             catch (Exception ex)
             {
                 context.NotifyFaulted(timer.Elapsed, TypeMetadataCache<MessageHandler<TMessage>>.ShortName, ex);
+
+                Interlocked.Increment(ref _faulted);
                 throw;
             }
         }

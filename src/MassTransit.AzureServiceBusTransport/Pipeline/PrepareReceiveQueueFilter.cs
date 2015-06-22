@@ -16,6 +16,7 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
     using Contexts;
     using MassTransit.Pipeline;
     using Microsoft.ServiceBus;
+    using Monitoring.Introspection;
 
 
     /// <summary>
@@ -29,6 +30,10 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
         public PrepareReceiveQueueFilter(ReceiveSettings settings)
         {
             _settings = settings;
+        }
+
+        async Task IProbeSite.Probe(ProbeContext context)
+        {
         }
 
         public async Task Send(ConnectionContext context, IPipe<ConnectionContext> next)

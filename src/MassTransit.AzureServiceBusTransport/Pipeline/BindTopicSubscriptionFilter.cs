@@ -25,6 +25,7 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
     using MassTransit.Pipeline;
     using Microsoft.ServiceBus;
     using Microsoft.ServiceBus.Messaging;
+    using Monitoring.Introspection;
     using NewIdFormatters;
 
 
@@ -41,6 +42,10 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
         public BindTopicSubscriptionFilter(TopicSubscriptionSettings settings)
         {
             _settings = settings;
+        }
+
+        async Task IProbeSite.Probe(ProbeContext context)
+        {
         }
 
         public async Task Send(ConnectionContext context, IPipe<ConnectionContext> next)

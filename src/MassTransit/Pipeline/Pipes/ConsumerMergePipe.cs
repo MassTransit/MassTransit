@@ -13,6 +13,8 @@
 namespace MassTransit.Pipeline.Pipes
 {
     using System.Threading.Tasks;
+    using Monitoring.Introspection;
+    using Util;
 
 
     /// <summary>
@@ -30,6 +32,18 @@ namespace MassTransit.Pipeline.Pipes
         public ConsumerMergePipe(IPipe<ConsumerConsumeContext<TConsumer, TMessage>> output)
         {
             _output = output;
+        }
+
+        Task IProbeSite.Probe(ProbeContext context)
+        {
+            ProbeContext scope = context.CreateScope("merge");
+            scope.Set(new
+            {
+                ConsumerType = TypeMetadataCache<TConsumer>.ShortName,
+                MessageType = TypeMetadataCache<TMessage>.ShortName,
+            });
+
+            return _output.Probe(scope);
         }
 
         public Task Send(ConsumerConsumeContext<TConsumer> context)

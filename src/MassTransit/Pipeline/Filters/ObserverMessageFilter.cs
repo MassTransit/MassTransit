@@ -15,6 +15,7 @@ namespace MassTransit.Pipeline.Filters
     using System;
     using System.Diagnostics;
     using System.Threading.Tasks;
+    using Monitoring.Introspection;
     using Util;
 
 
@@ -34,6 +35,10 @@ namespace MassTransit.Pipeline.Filters
                 throw new ArgumentNullException("observer");
 
             _observer = observer;
+        }
+
+        async Task IProbeSite.Probe(ProbeContext context)
+        {
         }
 
         [DebuggerNonUserCode]

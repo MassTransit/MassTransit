@@ -13,12 +13,14 @@
 namespace MassTransit.Policies
 {
     using System;
+    using Monitoring.Introspection;
 
 
     /// <summary>
     /// Filters exceptions for retry
     /// </summary>
-    public interface IRetryExceptionFilter
+    public interface IRetryExceptionFilter :
+        IProbeSite
     {
         /// <summary>
         /// Returns true if the exception can be retried

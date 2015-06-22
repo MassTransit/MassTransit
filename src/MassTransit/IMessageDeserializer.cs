@@ -13,9 +13,11 @@
 namespace MassTransit
 {
     using System.Net.Mime;
+    using Monitoring.Introspection;
 
 
-    public interface IMessageDeserializer
+    public interface IMessageDeserializer :
+        IProbeSite
     {
         ContentType ContentType { get; }
 

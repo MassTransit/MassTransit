@@ -13,6 +13,8 @@
 namespace MassTransit.Tests
 {
     using System;
+    using System.Threading.Tasks;
+    using MassTransit.Testing;
     using Monitoring.Introspection.Contracts;
     using NUnit.Framework;
     using TestFramework;
@@ -23,9 +25,15 @@ namespace MassTransit.Tests
     public class Probing_the_bus :
         InMemoryTestFixture
     {
+        Task<ConsumeContext<PingMessage>> _handled;
+
         [Test]
         public async void Should_return_a_wonderful_breakdown_of_the_guts_inside_it()
         {
+            await Bus.Publish(new PingMessage());
+
+            await _handled;
+
             ProbeResult result = await Bus.GetProbeResult();
 
             Console.WriteLine(result.ToJsonString());
@@ -33,7 +41,22 @@ namespace MassTransit.Tests
 
         protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
         {
-            Handled<PingMessage>(configurator);
+            configurator.Handler<PingMessage>(async context =>
+            {
+            }, x =>
+            {
+                x.UseRateLimit(100, TimeSpan.FromSeconds(1));
+                x.UseConcurrencyLimit(32);
+            });
+
+            _handled = Handled<PingMessage>(configurator);
+
+            var consumer = new MultiTestConsumer(TestTimeout);
+
+            consumer.Consume<PingMessage>();
+            consumer.Consume<PongMessage>();
+
+            consumer.Configure(configurator);
         }
     }
 }

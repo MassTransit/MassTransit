@@ -15,6 +15,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
     using System.Threading.Tasks;
     using Contexts;
     using MassTransit.Pipeline;
+    using Monitoring.Introspection;
     using RabbitMQ.Client;
 
 
@@ -29,6 +30,9 @@ namespace MassTransit.RabbitMqTransport.Pipeline
         public ReceiveModelFilter(IPipe<ModelContext> pipe)
         {
             _pipe = pipe;
+        }
+        async Task IProbeSite.Probe(ProbeContext context)
+        {
         }
 
         public async Task Send(ConnectionContext context, IPipe<ConnectionContext> next)

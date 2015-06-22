@@ -17,6 +17,7 @@ namespace MassTransit.Pipeline.Filters
     using System.Diagnostics;
     using System.Linq;
     using System.Threading.Tasks;
+    using Monitoring.Introspection;
 
 
     public class KeyedConsumeFilter<T, TKey> :
@@ -31,6 +32,10 @@ namespace MassTransit.Pipeline.Filters
         {
             _keyAccessor = keyAccessor;
             _pipes = new ConcurrentDictionary<TKey, TeeConsumeFilter<T>>();
+        }
+
+        async Task IProbeSite.Probe(ProbeContext context)
+        {
         }
 
         public ConnectHandle Connect(TKey key, IPipe<ConsumeContext<T>> pipe)

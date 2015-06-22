@@ -13,6 +13,8 @@
 namespace MassTransit.Policies
 {
     using System;
+    using System.Threading.Tasks;
+    using Monitoring.Introspection;
 
 
     public class NoRetryPolicy :
@@ -23,6 +25,15 @@ namespace MassTransit.Policies
         public NoRetryPolicy()
         {
             _retryContext = new NoRetryContext();
+        }
+
+        async Task IProbeSite.Probe(ProbeContext context)
+        {
+            ProbeContext scope = context.CreateScope("retry");
+            scope.Set(new
+            {
+                Type = "None",
+            });
         }
 
         public IRetryContext GetRetryContext()
