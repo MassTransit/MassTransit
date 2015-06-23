@@ -92,11 +92,6 @@ namespace MassTransit.RabbitMqTransport.Pipeline
             return added;
         }
 
-        bool IFilter<ModelContext>.Visit(IPipelineVisitor visitor)
-        {
-            return visitor.Visit(this);
-        }
-
         async Task DeclareExchange(ModelContext context)
         {
             if (_log.IsDebugEnabled)

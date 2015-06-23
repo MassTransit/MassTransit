@@ -47,10 +47,5 @@ namespace MassTransit.Saga.Pipeline.Filters
 
             await next.Send(context);
         }
-
-        public bool Visit(IPipelineVisitor visitor)
-        {
-            return visitor.Visit(this);
-        }
     }
 }

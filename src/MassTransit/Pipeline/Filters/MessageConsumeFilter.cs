@@ -99,11 +99,6 @@ namespace MassTransit.Pipeline.Filters
             }
         }
 
-        bool IFilter<ConsumeContext>.Visit(IPipelineVisitor visitor)
-        {
-            return visitor.Visit(this, x => _output.Visit(x));
-        }
-
         ConnectHandle IRequestPipeConnector<TMessage>.ConnectRequestPipe(Guid requestId, IPipe<ConsumeContext<TMessage>> pipe)
         {
             return _output.ConnectRequestPipe(requestId, pipe);

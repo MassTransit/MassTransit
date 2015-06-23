@@ -54,11 +54,6 @@ namespace MassTransit.Pipeline.Filters
             }
         }
 
-        public bool Visit(IPipelineVisitor visitor)
-        {
-            return visitor.Visit(this);
-        }
-
         [DebuggerNonUserCode]
         static async Task Attempt(IRepeatContext repeatContext, T context, IPipe<T> next)
         {

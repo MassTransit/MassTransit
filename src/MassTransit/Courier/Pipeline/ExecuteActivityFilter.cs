@@ -32,11 +32,7 @@ namespace MassTransit.Courier.Pipeline
 
         async Task IProbeSite.Probe(ProbeContext context)
         {
-            ProbeContext scope = context.CreateScope("execute");
-            scope.Set(new
-            {
-                LogType = TypeMetadataCache<TArguments>.ShortName,
-            });
+            context.CreateScope("execute");
         }
 
         public async Task Send(ExecuteActivityContext<TArguments> context, IPipe<ExecuteActivityContext<TArguments>> next)
@@ -73,11 +69,6 @@ namespace MassTransit.Courier.Pipeline
 
                 throw;
             }
-        }
-
-        public bool Visit(IPipelineVisitor visitor)
-        {
-            return visitor.Visit(this);
         }
     }
 }

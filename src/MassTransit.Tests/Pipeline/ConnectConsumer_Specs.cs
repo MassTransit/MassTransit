@@ -51,11 +51,6 @@ namespace MassTransit.Tests.Pipeline
             IConsumerFactory<OneMessageConsumer> factory = GetInstanceConsumerFactory(consumer);
 
             filter.ConnectConsumer(factory);
-
-            var inspector = new StringPipelineVisitor();
-            filter.Visit(inspector);
-
-            Console.WriteLine(inspector.ToString());
         }
 
         [Test]

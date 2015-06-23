@@ -52,11 +52,6 @@ namespace MassTransit.Pipeline.Filters
             await Attempt(retryContext, next);
         }
 
-        bool IFilter<ConsumeContext>.Visit(IPipelineVisitor visitor)
-        {
-            return visitor.Visit(this);
-        }
-
         [DebuggerNonUserCode]
         async Task Attempt(RetryConsumeContext context, IPipe<ConsumeContext> next)
         {
@@ -124,11 +119,6 @@ namespace MassTransit.Pipeline.Filters
             var retryContext = new RetryConsumeContext<T>(context);
 
             await Attempt(retryContext, next).ConfigureAwait(false);
-        }
-
-        bool IFilter<ConsumeContext<T>>.Visit(IPipelineVisitor visitor)
-        {
-            return visitor.Visit(this);
         }
 
         async Task Attempt(RetryConsumeContext<T> context, IPipe<ConsumeContext<T>> next)

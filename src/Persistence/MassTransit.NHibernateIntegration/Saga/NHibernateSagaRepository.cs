@@ -212,11 +212,6 @@ namespace MassTransit.NHibernateIntegration.Saga
                 if (!proxy.IsCompleted)
                     _session.Save(context.Saga);
             }
-
-            public bool Visit(IPipelineVisitor visitor)
-            {
-                return visitor.Visit(this);
-            }
         }
     }
 }

@@ -43,11 +43,6 @@ namespace MassTransit.Pipeline.Pipes
             return _filter.Send(context, Cache.LastPipe);
         }
 
-        public bool Visit(IPipelineVisitor visitor)
-        {
-            return _filter.Visit(visitor);
-        }
-
 
         static class Cache
         {
@@ -66,11 +61,6 @@ namespace MassTransit.Pipeline.Pipes
 
             async Task IPipe<T>.Send(T context)
             {
-            }
-
-            public bool Visit(IPipelineVisitor visitor)
-            {
-                return true;
             }
         }
     }

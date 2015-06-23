@@ -48,11 +48,6 @@ namespace MassTransit.RabbitMqTransport.Pipeline
             await next.Send(context).ConfigureAwait(false);
         }
 
-        bool IFilter<ModelContext>.Visit(IPipelineVisitor visitor)
-        {
-            return visitor.Visit(this);
-        }
-
         async Task DeclareAndBindQueue(ModelContext context)
         {
             QueueDeclareOk queueOk = await context.QueueDeclare(_settings.ExchangeName, _settings.Durable, false,

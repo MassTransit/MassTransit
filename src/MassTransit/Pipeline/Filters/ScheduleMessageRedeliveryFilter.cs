@@ -39,10 +39,5 @@ namespace MassTransit.Pipeline.Filters
 
             return next.Send(context);
         }
-
-        bool IFilter<ConsumeContext<TMessage>>.Visit(IPipelineVisitor visitor)
-        {
-            return visitor.Visit(this);
-        }
     }
 }

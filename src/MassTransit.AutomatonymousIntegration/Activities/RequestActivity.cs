@@ -110,11 +110,6 @@ namespace Automatonymous.Activities
                 context.RequestId = _requestId;
                 context.ResponseAddress = _responseAddress;
             }
-
-            public bool Visit(IPipelineVisitor visitor)
-            {
-                return visitor.Visit(this);
-            }
         }
 
 

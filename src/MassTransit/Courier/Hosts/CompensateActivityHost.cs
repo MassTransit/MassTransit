@@ -12,16 +12,19 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Courier.Hosts
 {
+    using System;
+    using System.Diagnostics;
     using System.Threading.Tasks;
     using Contracts;
     using Logging;
     using MassTransit.Pipeline;
+    using Monitoring.Introspection;
     using Pipeline;
     using Util;
 
 
     public class CompensateActivityHost<TActivity, TLog> :
-        IConsumer<RoutingSlip>
+        IFilter<ConsumeContext<RoutingSlip>>
         where TActivity : CompensateActivity<TLog>
         where TLog : class
     {
@@ -36,15 +39,42 @@ namespace MassTransit.Courier.Hosts
             _compensatePipe = Pipe.New<CompensateActivityContext<TLog>>(x => x.Filter(new CompensateActivityFilter<TLog>()));
         }
 
-        Task IConsumer<RoutingSlip>.Consume(ConsumeContext<RoutingSlip> context)
+        public async Task Send(ConsumeContext<RoutingSlip> context, IPipe<ConsumeContext<RoutingSlip>> next)
         {
-            CompensateContext<TLog> compensateContext = new HostCompensateContext<TLog>(HostMetadataCache.Host, context);
+            Stopwatch timer = Stopwatch.StartNew();
+            try
+            {
+                CompensateContext<TLog> compensateContext = new HostCompensateContext<TLog>(HostMetadataCache.Host, context);
 
-            if (_log.IsDebugEnabled)
-                _log.DebugFormat("Host: {0} Activity: {1} Compensating: {2}", context.ReceiveContext.InputAddress, TypeMetadataCache<TActivity>.ShortName,
-                    compensateContext.TrackingNumber);
+                if (_log.IsDebugEnabled)
+                {
+                    _log.DebugFormat("Host: {0} Activity: {1} Compensating: {2}", context.ReceiveContext.InputAddress, TypeMetadataCache<TActivity>.ShortName,
+                        compensateContext.TrackingNumber);
+                }
 
-            return _activityFactory.Compensate(compensateContext, _compensatePipe);
+                await _activityFactory.Compensate(compensateContext, _compensatePipe);
+
+                context.NotifyConsumed(timer.Elapsed, TypeMetadataCache<TActivity>.ShortName);
+
+                await next.Send(context);
+            }
+            catch (Exception ex)
+            {
+                context.NotifyFaulted(timer.Elapsed, TypeMetadataCache<TActivity>.ShortName, ex);
+                throw;
+            }
+        }
+
+        public async Task Probe(ProbeContext context)
+        {
+            ProbeContext scope = context.CreateScope("compensateActivity");
+            scope.Set(new
+            {
+                ActivityType = TypeMetadataCache<TActivity>.ShortName,
+                LogType = TypeMetadataCache<TLog>.ShortName,
+            });
+
+            await _compensatePipe.Probe(scope);
         }
     }
 }

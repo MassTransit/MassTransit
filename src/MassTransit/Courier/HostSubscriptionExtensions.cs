@@ -13,123 +13,113 @@
 namespace MassTransit.Courier
 {
     using System;
-    using ConsumeConfigurators;
     using Factories;
-    using Hosts;
+    using PipeConfigurators;
 
 
     public static class HostSubscriptionExtensions
     {
-        public static IInstanceConfigurator ExecuteActivityHost<TActivity, TArguments>(
+        public static void ExecuteActivityHost<TActivity, TArguments>(
             this IReceiveEndpointConfigurator configurator,
             Uri compensateAddress)
             where TActivity : class, ExecuteActivity<TArguments>, new()
             where TArguments : class
         {
-            return ExecuteActivityHost<TActivity, TArguments>(configurator, compensateAddress,
+            ExecuteActivityHost<TActivity, TArguments>(configurator, compensateAddress,
                 DefaultConstructorExecuteActivityFactory<TActivity, TArguments>.ExecuteFactory);
         }
 
-        public static IInstanceConfigurator ExecuteActivityHost<TActivity, TArguments>(
+        public static void ExecuteActivityHost<TActivity, TArguments>(
             this IReceiveEndpointConfigurator configurator,
             Uri compensateAddress, Func<TActivity> controllerFactory)
             where TActivity : class, ExecuteActivity<TArguments>
             where TArguments : class
         {
-            return ExecuteActivityHost<TActivity, TArguments>(configurator, compensateAddress,
-                _ => controllerFactory());
+            ExecuteActivityHost<TActivity, TArguments>(configurator, compensateAddress, _ => controllerFactory());
         }
 
-        public static IInstanceConfigurator ExecuteActivityHost<TActivity, TArguments>(
+        public static void ExecuteActivityHost<TActivity, TArguments>(
             this IReceiveEndpointConfigurator configurator,
             Func<TActivity> controllerFactory)
             where TActivity : class, ExecuteActivity<TArguments>
             where TArguments : class
         {
-            return ExecuteActivityHost<TActivity, TArguments>(configurator, _ => controllerFactory());
+            ExecuteActivityHost<TActivity, TArguments>(configurator, _ => controllerFactory());
         }
 
-        public static IInstanceConfigurator ExecuteActivityHost<TActivity, TArguments>(
+        public static void ExecuteActivityHost<TActivity, TArguments>(
             this IReceiveEndpointConfigurator configurator,
             Uri compensateAddress, Func<TArguments, TActivity> controllerFactory)
             where TActivity : class, ExecuteActivity<TArguments>
             where TArguments : class
         {
             var factory = new FactoryMethodExecuteActivityFactory<TActivity, TArguments>(controllerFactory);
-            var host = new ExecuteActivityHost<TActivity, TArguments>(factory, compensateAddress);
+            var specification = new ExecuteActivityHostSpecification<TActivity, TArguments>(factory, compensateAddress);
 
-            return configurator.Instance(host);
+            configurator.AddEndpointSpecification(specification);
         }
 
-        public static IInstanceConfigurator ExecuteActivityHost<TActivity, TArguments>(
+        public static void ExecuteActivityHost<TActivity, TArguments>(
             this IReceiveEndpointConfigurator configurator, Func<TArguments, TActivity> controllerFactory)
             where TActivity : class, ExecuteActivity<TArguments>
             where TArguments : class
         {
             var factory = new FactoryMethodExecuteActivityFactory<TActivity, TArguments>(controllerFactory);
-            var host = new ExecuteActivityHost<TActivity, TArguments>(factory);
+            var specification = new ExecuteActivityHostSpecification<TActivity, TArguments>(factory);
 
-            return configurator.Instance(host);
+            configurator.AddEndpointSpecification(specification);
         }
 
-        public static IInstanceConfigurator ExecuteActivityHost<TActivity, TArguments>(
-            this IReceiveEndpointConfigurator configurator,
-            Uri compensateAddress, ExecuteActivityFactory<TArguments> factory)
-            where TActivity : ExecuteActivity<TArguments>
-            where TArguments : class
-        {
-            var host = new ExecuteActivityHost<TActivity, TArguments>(factory, compensateAddress);
-
-            return configurator.Instance(host);
-        }
-
-        public static IInstanceConfigurator ExecuteActivityHost<TActivity, TArguments>(
-            this IReceiveEndpointConfigurator configurator,
+        public static void ExecuteActivityHost<TActivity, TArguments>(this IReceiveEndpointConfigurator configurator, Uri compensateAddress,
             ExecuteActivityFactory<TArguments> factory)
             where TActivity : ExecuteActivity<TArguments>
             where TArguments : class
         {
-            var host = new ExecuteActivityHost<TActivity, TArguments>(factory);
+            var specification = new ExecuteActivityHostSpecification<TActivity, TArguments>(factory, compensateAddress);
 
-            return configurator.Instance(host);
+            configurator.AddEndpointSpecification(specification);
         }
 
-        public static IInstanceConfigurator CompensateActivityHost<TActivity, TLog>(
-            this IReceiveEndpointConfigurator configurator)
+        public static void ExecuteActivityHost<TActivity, TArguments>(this IReceiveEndpointConfigurator configurator, ExecuteActivityFactory<TArguments> factory)
+            where TActivity : ExecuteActivity<TArguments>
+            where TArguments : class
+        {
+            var specification = new ExecuteActivityHostSpecification<TActivity, TArguments>(factory);
+
+            configurator.AddEndpointSpecification(specification);
+        }
+
+        public static void CompensateActivityHost<TActivity, TLog>(this IReceiveEndpointConfigurator configurator)
             where TActivity : class, CompensateActivity<TLog>, new()
             where TLog : class
         {
-            return CompensateActivityHost<TActivity, TLog>(configurator,
-                DefaultConstructorCompensateActivityFactory<TActivity, TLog>.CompensateFactory);
+            CompensateActivityHost<TActivity, TLog>(configurator, DefaultConstructorCompensateActivityFactory<TActivity, TLog>.CompensateFactory);
         }
 
-        public static IInstanceConfigurator CompensateActivityHost<TActivity, TLog>(
-            this IReceiveEndpointConfigurator configurator, Func<TActivity> controllerFactory)
+        public static void CompensateActivityHost<TActivity, TLog>(this IReceiveEndpointConfigurator configurator, Func<TActivity> controllerFactory)
             where TActivity : class, CompensateActivity<TLog>
             where TLog : class
         {
-            return CompensateActivityHost<TActivity, TLog>(configurator, _ => controllerFactory());
+            CompensateActivityHost<TActivity, TLog>(configurator, _ => controllerFactory());
         }
 
-        public static IInstanceConfigurator CompensateActivityHost<TActivity, TLog>(
-            this IReceiveEndpointConfigurator configurator, Func<TLog, TActivity> controllerFactory)
+        public static void CompensateActivityHost<TActivity, TLog>(this IReceiveEndpointConfigurator configurator, Func<TLog, TActivity> controllerFactory)
             where TActivity : class, CompensateActivity<TLog>
             where TLog : class
         {
             var factory = new FactoryMethodCompensateActivityFactory<TActivity, TLog>(controllerFactory);
-            var host = new CompensateActivityHost<TActivity, TLog>(factory);
+            var specification = new CompensateActivityHostSpecification<TActivity, TLog>(factory);
 
-            return configurator.Instance(host);
+            configurator.AddEndpointSpecification(specification);
         }
 
-        public static IInstanceConfigurator CompensateActivityHost<TActivity, TLog>(
-            this IReceiveEndpointConfigurator configurator, CompensateActivityFactory<TLog> factory)
+        public static void CompensateActivityHost<TActivity, TLog>(this IReceiveEndpointConfigurator configurator, CompensateActivityFactory<TLog> factory)
             where TActivity : CompensateActivity<TLog>
             where TLog : class
         {
-            var host = new CompensateActivityHost<TActivity, TLog>(factory);
+            var specification = new CompensateActivityHostSpecification<TActivity, TLog>(factory);
 
-            return configurator.Instance(host);
+            configurator.AddEndpointSpecification(specification);
         }
     }
 }

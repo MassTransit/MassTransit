@@ -32,10 +32,5 @@ namespace MassTransit.RabbitMqTransport.Tests
         {
             _called.TrySetResult(context);
         }
-
-        public bool Visit(IPipelineVisitor visitor)
-        {
-            return visitor.Visit(this);
-        }
     }
 }

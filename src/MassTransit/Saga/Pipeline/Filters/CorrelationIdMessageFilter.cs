@@ -50,10 +50,5 @@ namespace MassTransit.Saga.Pipeline.Filters
 
             await next.Send(proxy);
         }
-
-        public bool Visit(IPipelineVisitor visitor)
-        {
-            return visitor.Visit(this);
-        }
     }
 }

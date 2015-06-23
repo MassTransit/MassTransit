@@ -26,11 +26,6 @@ namespace MassTransit.Pipeline.Pipes
         {
         }
 
-        public bool Visit(IPipelineVisitor visitor)
-        {
-            return visitor.Visit(this);
-        }
-
         public async Task Probe(ProbeContext context)
         {
         }

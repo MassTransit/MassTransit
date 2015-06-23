@@ -33,12 +33,5 @@ namespace MassTransit.Pipeline
         /// <param name="next">The next pipe in the pipeline</param>
         /// <returns>An awaitable Task</returns>
         Task Send(T context, IPipe<T> next);
-
-        /// <summary>
-        /// Inspects the filter, allowing a graph of the pipeline to be built
-        /// </summary>
-        /// <param name="visitor"></param>
-        /// <returns></returns>
-        bool Visit(IPipelineVisitor visitor);
     }
 }

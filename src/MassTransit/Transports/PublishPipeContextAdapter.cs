@@ -63,11 +63,6 @@ namespace MassTransit.Transports
                 await _observer.PrePublish(publishContext);
         }
 
-        public bool Visit(IPipelineVisitor visitor)
-        {
-            return visitor.Visit(this, x => _pipe.Visit(x));
-        }
-
         public async Task PostSend()
         {
             if (_context != null)

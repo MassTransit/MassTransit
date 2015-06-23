@@ -80,10 +80,5 @@ namespace Automatonymous.Pipeline
                     currentState.Name, _event.Name);
             }
         }
-
-        public bool Visit(IPipelineVisitor visitor)
-        {
-            return visitor.Visit(this);
-        }
     }
 }

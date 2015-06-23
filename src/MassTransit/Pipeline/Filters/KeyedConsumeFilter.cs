@@ -15,7 +15,6 @@ namespace MassTransit.Pipeline.Filters
     using System;
     using System.Collections.Concurrent;
     using System.Diagnostics;
-    using System.Linq;
     using System.Threading.Tasks;
     using Monitoring.Introspection;
 
@@ -58,11 +57,6 @@ namespace MassTransit.Pipeline.Filters
             TeeConsumeFilter<T> filter;
             if (_pipes.TryGetValue(key, out filter))
                 await filter.Send(context, next);
-        }
-
-        public bool Visit(IPipelineVisitor visitor)
-        {
-            return visitor.Visit(this, x => _pipes.Values.Cast<IFilter<ConsumeContext<T>>>().All(pipe => pipe.Visit(x)));
         }
 
         void RemovePipe(TKey key, ConnectHandle connectHandle)

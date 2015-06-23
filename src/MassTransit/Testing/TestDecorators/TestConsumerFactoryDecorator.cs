@@ -70,11 +70,6 @@ namespace MassTransit.Testing.TestDecorators
                     _received.Add(context, ex);
                 }
             }
-
-            public bool Visit(IPipelineVisitor visitor)
-            {
-                return visitor.Visit(this, x => _next.Visit(x));
-            }
         }
     }
 }
