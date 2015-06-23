@@ -61,11 +61,6 @@ namespace MassTransit.Pipeline.Filters
             await next.Send(context);
         }
 
-        public bool Visit(IPipelineVisitor visitor)
-        {
-            return visitor.Visit(this, x => _connections.All(pipe => pipe.Visit(x)));
-        }
-
         public ConnectHandle ConnectRequestPipe(Guid requestId, IPipe<ConsumeContext<T>> pipe)
         {
             return _requestConnections.Value.Connect(requestId, pipe);

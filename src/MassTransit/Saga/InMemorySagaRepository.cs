@@ -188,11 +188,6 @@ namespace MassTransit.Saga
                 if (!proxy.IsCompleted)
                     _repository.Add(proxy.Saga);
             }
-
-            public bool Visit(IPipelineVisitor visitor)
-            {
-                return visitor.Visit(this);
-            }
         }
     }
 }

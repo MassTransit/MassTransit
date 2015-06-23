@@ -53,11 +53,6 @@ namespace MassTransit.Context
             _callback(_requestContext);
         }
 
-        public bool Visit(IPipelineVisitor visitor)
-        {
-            return visitor.Visit(this);
-        }
-
         public Task Task
         {
             get { return ((RequestContext)_requestContext).Task; }

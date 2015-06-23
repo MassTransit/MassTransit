@@ -125,10 +125,5 @@ namespace MassTransit.RabbitMqTransport.Pipeline
                 }
             }
         }
-
-        public bool Visit(IPipelineVisitor visitor)
-        {
-            return visitor.Visit(this);
-        }
     }
 }

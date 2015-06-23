@@ -79,11 +79,6 @@ namespace MassTransit.Pipeline.Filters
             return Task.WhenAll(_pipes.Values.Select(x => x.Filter.Send(context, next)));
         }
 
-        public bool Visit(IPipelineVisitor visitor)
-        {
-            return visitor.Visit(this, x => _pipes.Values.All(pipe => pipe.Filter.Visit(x)));
-        }
-
         public ConnectHandle ConnectRequestPipe<T>(Guid requestId, IPipe<ConsumeContext<T>> pipe)
             where T : class
         {

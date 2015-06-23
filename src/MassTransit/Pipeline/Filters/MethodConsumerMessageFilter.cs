@@ -47,10 +47,5 @@ namespace MassTransit.Pipeline.Filters
 
             return messageConsumer.Consume(context);
         }
-
-        public bool Visit(IPipelineVisitor visitor)
-        {
-            return visitor.Visit(this);
-        }
     }
 }

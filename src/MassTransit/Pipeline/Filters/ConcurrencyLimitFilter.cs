@@ -66,11 +66,6 @@ namespace MassTransit.Pipeline.Filters
             }
         }
 
-        public bool Visit(IPipelineVisitor visitor)
-        {
-            return visitor.Visit(this);
-        }
-
         public async Task SetConcurrencyLimit(int concurrencyLimit)
         {
             if (concurrencyLimit < 1)

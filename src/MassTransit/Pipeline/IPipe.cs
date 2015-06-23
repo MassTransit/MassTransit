@@ -26,12 +26,5 @@ namespace MassTransit.Pipeline
         /// <param name="context">The pipe context of type T</param>
         /// <returns>A task which is completed once the pipe has processed the context</returns>
         Task Send(T context);
-
-        /// <summary>
-        /// Used to inspect/visit the pipe via a typical visitor pattern to discover the contents of the pipe
-        /// </summary>
-        /// <param name="visitor"></param>
-        /// <returns></returns>
-        bool Visit(IPipelineVisitor visitor);
     }
 }

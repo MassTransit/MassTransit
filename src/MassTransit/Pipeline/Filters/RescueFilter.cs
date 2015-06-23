@@ -75,10 +75,5 @@ namespace MassTransit.Pipeline.Filters
             if (exception != null)
                 await _rescuePipe.Send(context);
         }
-
-        bool IFilter<T>.Visit(IPipelineVisitor visitor)
-        {
-            return visitor.Visit(this, x => _rescuePipe.Visit(x));
-        }
     }
 }

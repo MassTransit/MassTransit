@@ -42,10 +42,5 @@ namespace MassTransit.WindsorIntegration
                 MessageScope.EndScope();
             }
         }
-
-        public bool Visit(IPipelineVisitor visitor)
-        {
-            return visitor.Visit(this);
-        }
     }
 }

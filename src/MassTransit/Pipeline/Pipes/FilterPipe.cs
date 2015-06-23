@@ -42,10 +42,5 @@ namespace MassTransit.Pipeline.Pipes
         {
             return _filter.Send(context, _next);
         }
-
-        public bool Visit(IPipelineVisitor visitor)
-        {
-            return _filter.Visit(visitor) && _next.Visit(visitor);
-        }
     }
 }

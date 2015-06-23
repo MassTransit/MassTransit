@@ -74,10 +74,5 @@ namespace MassTransit.Pipeline.Filters
                     systemTransactionContext.Dispose();
             }
         }
-
-        bool IFilter<T>.Visit(IPipelineVisitor visitor)
-        {
-            return visitor.Visit(this);
-        }
     }
 }

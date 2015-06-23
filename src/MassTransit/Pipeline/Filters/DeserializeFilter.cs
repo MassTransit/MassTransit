@@ -52,10 +52,5 @@ namespace MassTransit.Pipeline.Filters
 
             await consumeContext.CompleteTask;
         }
-
-        public bool Visit(IPipelineVisitor visitor)
-        {
-            return visitor.Visit(this, x => _output.Visit(x));
-        }
     }
 }

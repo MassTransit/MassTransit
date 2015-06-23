@@ -109,11 +109,6 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
             await next.Send(context);
         }
 
-        public bool Visit(IPipelineVisitor visitor)
-        {
-            return visitor.Visit(this);
-        }
-
         async Task GetOrAddTopic(NamespaceManager namespaceManager)
         {
             TopicDescription topicDescription = null;

@@ -39,11 +39,6 @@ namespace MassTransit.RabbitMqTransport.Tests
             await _callback(context);
         }
 
-        public bool Visit(IPipelineVisitor visitor)
-        {
-            return true;
-        }
-
         public ConnectHandle ConnectConsumePipe<T>(IPipe<ConsumeContext<T>> pipe) where T : class
         {
             throw new NotImplementedException();

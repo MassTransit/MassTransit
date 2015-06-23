@@ -65,11 +65,6 @@ namespace MassTransit.Tests
 
                 Second.TrySetResult(true);
             }
-
-            public bool Visit(IPipelineVisitor visitor)
-            {
-                return visitor.Visit(this);
-            }
         }
 
 

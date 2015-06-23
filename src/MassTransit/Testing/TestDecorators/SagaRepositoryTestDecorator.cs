@@ -96,11 +96,6 @@ namespace MassTransit.Testing.TestDecorators
                     throw;
                 }
             }
-
-            public bool Visit(IPipelineVisitor visitor)
-            {
-                return _pipe.Visit(visitor);
-            }
         }
 
 
@@ -152,11 +147,6 @@ namespace MassTransit.Testing.TestDecorators
                     _created.Add(context);
 
                     await _pipe.Send(context);
-                }
-
-                public bool Visit(IPipelineVisitor visitor)
-                {
-                    return _pipe.Visit(visitor);
                 }
             }
         }

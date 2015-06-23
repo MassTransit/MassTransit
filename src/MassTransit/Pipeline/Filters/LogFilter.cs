@@ -44,11 +44,6 @@ namespace MassTransit.Pipeline.Filters
             return Task.WhenAll(logTask, next.Send(context));
         }
 
-        public bool Visit(IPipelineVisitor visitor)
-        {
-            return visitor.Visit(this);
-        }
-
         async Task CreateLogTask(T context)
         {
             string text = await _formatter(context).ConfigureAwait(false);

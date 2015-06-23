@@ -88,11 +88,6 @@ namespace MassTransit.Pipeline.Filters
             }
         }
 
-        public bool Visit(IPipelineVisitor visitor)
-        {
-            return visitor.Visit(this);
-        }
-
         void Reset(object state)
         {
             int processed = Interlocked.Exchange(ref _successCount, 0);

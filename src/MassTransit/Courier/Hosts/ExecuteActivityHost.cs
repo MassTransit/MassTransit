@@ -13,16 +13,18 @@
 namespace MassTransit.Courier.Hosts
 {
     using System;
+    using System.Diagnostics;
     using System.Threading.Tasks;
     using Contracts;
     using Logging;
     using MassTransit.Pipeline;
+    using Monitoring.Introspection;
     using Pipeline;
     using Util;
 
 
     public class ExecuteActivityHost<TActivity, TArguments> :
-        IConsumer<RoutingSlip>
+        IFilter<ConsumeContext<RoutingSlip>>
         where TActivity : ExecuteActivity<TArguments>
         where TArguments : class
     {
@@ -54,17 +56,44 @@ namespace MassTransit.Courier.Hosts
             _executePipe = Pipe.New<ExecuteActivityContext<TArguments>>(x => x.Filter(new ExecuteActivityFilter<TArguments>()));
         }
 
-        Task IConsumer<RoutingSlip>.Consume(ConsumeContext<RoutingSlip> context)
+        public async Task Probe(ProbeContext context)
         {
-            ExecuteContext<TArguments> executeContext = new HostExecuteContext<TArguments>(HostMetadataCache.Host, _compensateAddress, context);
-
-            if (_log.IsDebugEnabled)
+            ProbeContext scope = context.CreateScope("executeActivity");
+            scope.Set(new
             {
-                _log.DebugFormat("Host: {0} Activity: {1} Executing: {2}", context.ReceiveContext.InputAddress, TypeMetadataCache<TActivity>.ShortName,
-                    executeContext.TrackingNumber);
-            }
+                ActivityType = TypeMetadataCache<TActivity>.ShortName,
+                ArgumentType = TypeMetadataCache<TArguments>.ShortName,
+            });
+            if (_compensateAddress != null)
+                scope.Add("compensateAddress", _compensateAddress);
 
-            return _activityFactory.Execute(executeContext, _executePipe);
+            await _executePipe.Probe(scope);
+        }
+
+        public async Task Send(ConsumeContext<RoutingSlip> context, IPipe<ConsumeContext<RoutingSlip>> next)
+        {
+            Stopwatch timer = Stopwatch.StartNew();
+            try
+            {
+                ExecuteContext<TArguments> executeContext = new HostExecuteContext<TArguments>(HostMetadataCache.Host, _compensateAddress, context);
+
+                if (_log.IsDebugEnabled)
+                {
+                    _log.DebugFormat("Host: {0} Activity: {1} Executing: {2}", context.ReceiveContext.InputAddress, TypeMetadataCache<TActivity>.ShortName,
+                        executeContext.TrackingNumber);
+                }
+
+                await _activityFactory.Execute(executeContext, _executePipe);
+
+                context.NotifyConsumed(timer.Elapsed, TypeMetadataCache<TActivity>.ShortName);
+
+                await next.Send(context);
+            }
+            catch (Exception ex)
+            {
+                context.NotifyFaulted(timer.Elapsed, TypeMetadataCache<TActivity>.ShortName, ex);
+                throw;
+            }
         }
     }
 }

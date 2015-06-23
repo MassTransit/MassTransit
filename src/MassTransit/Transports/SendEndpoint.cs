@@ -220,12 +220,6 @@ namespace MassTransit.Transports
                 if (_sendPipe != null)
                     await _sendPipe.Send(context);
             }
-
-            public bool Visit(IPipelineVisitor visitor)
-            {
-                return visitor.Visit(this,
-                    x => (_pipe != null && _pipe.Visit(visitor)) || (_sendPipe != null && _sendPipe.Visit(visitor)));
-            }
         }
     }
 }
