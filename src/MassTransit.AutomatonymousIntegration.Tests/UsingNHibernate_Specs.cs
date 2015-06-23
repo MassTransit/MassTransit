@@ -47,7 +47,7 @@ namespace MassTransit.AutomatonymousTests
                 CorrelationId = correlationId
             });
 
-            sagaId = await _repository.ShouldContainSaga(x => x.CorrelationId == correlationId && x.CurrentState == _machine.Final, TestTimeout);
+            sagaId = await _repository.ShouldContainSaga(x => x.CorrelationId == correlationId && x.CurrentState == _machine.Dead, TestTimeout);
 
             Assert.IsTrue(sagaId.HasValue);
 
@@ -210,7 +210,7 @@ namespace MassTransit.AutomatonymousTests
                 During(OnTheWayToTheStore,
                     When(GotHitByCar)
                         .Then(context => Console.WriteLine("Ouch!!"))
-                        .Finalize());
+                        .TransitionTo(Dead));
 
                 DuringAny(
                     When(EndOfTheWorld)
@@ -230,6 +230,7 @@ namespace MassTransit.AutomatonymousTests
             public Event EndOfTheWorld { get; private set; }
 
             public State OnTheWayToTheStore { get; private set; }
+            public State Dead { get; private set; }
         }
     }
 }
