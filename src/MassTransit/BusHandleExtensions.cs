@@ -25,10 +25,11 @@ namespace MassTransit
         /// <param name="stopTimeout">The wait time before throwing an exception</param>
         public static void Stop(this BusHandle handle, TimeSpan stopTimeout)
         {
-            var cancellationTokenSource = new CancellationTokenSource(stopTimeout);
-
-            handle.Stop(cancellationTokenSource.Token)
-                .Wait(cancellationTokenSource.Token);
+            using (var cancellationTokenSource = new CancellationTokenSource(stopTimeout))
+            {
+                handle.Stop(cancellationTokenSource.Token)
+                    .Wait(cancellationTokenSource.Token);
+            }
         }
     }
 }

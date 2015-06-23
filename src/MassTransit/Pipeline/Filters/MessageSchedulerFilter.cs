@@ -16,7 +16,6 @@ namespace MassTransit.Pipeline.Filters
     using System.Diagnostics;
     using System.Threading.Tasks;
     using Context;
-    using Monitoring.Introspection;
 
 
     /// <summary>
@@ -34,6 +33,7 @@ namespace MassTransit.Pipeline.Filters
 
         async Task IProbeSite.Probe(ProbeContext context)
         {
+            context.CreateFilterScope("scheduler");
         }
 
         [DebuggerNonUserCode]

@@ -16,7 +16,6 @@ namespace MassTransit.Pipeline.Filters
     using System.Diagnostics;
     using System.Threading;
     using System.Threading.Tasks;
-    using Monitoring.Introspection;
 
 
     /// <summary>
@@ -38,17 +37,17 @@ namespace MassTransit.Pipeline.Filters
             _limit = new SemaphoreSlim(concurrencyLimit);
         }
 
-        async Task IProbeSite.Probe(ProbeContext context)
-        {
-            var scope = context.CreateScope("concurrencyLimit");
-            scope.Add("limit", _concurrencyLimit);
-            scope.Add("available", _limit.CurrentCount);
-        }
-
         public void Dispose()
         {
             if (_limit != null)
                 _limit.Dispose();
+        }
+
+        async Task IProbeSite.Probe(ProbeContext context)
+        {
+            ProbeContext scope = context.CreateFilterScope("concurrencyLimit");
+            scope.Add("limit", _concurrencyLimit);
+            scope.Add("available", _limit.CurrentCount);
         }
 
         [DebuggerNonUserCode]

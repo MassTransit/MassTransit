@@ -29,10 +29,9 @@ namespace MassTransit.Policies
 
         async Task IProbeSite.Probe(ProbeContext context)
         {
-            ProbeContext scope = context.CreateScope("retry");
-            scope.Set(new
+            context.Set(new
             {
-                Type = "None",
+                Policy = "None",
             });
         }
 

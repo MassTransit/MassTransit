@@ -14,7 +14,6 @@ namespace MassTransit.Testing.TestDecorators
 {
     using System;
     using System.Threading.Tasks;
-    using Monitoring.Introspection;
     using Pipeline;
 
 
@@ -36,6 +35,13 @@ namespace MassTransit.Testing.TestDecorators
             where TMessage : class
         {
             return _consumerFactory.Send(context, new TestDecoratorPipe<TMessage>(_received, next));
+        }
+
+        async Task IProbeSite.Probe(ProbeContext context)
+        {
+            ProbeContext scope = context.CreateScope("testDecorator");
+
+            await _consumerFactory.Probe(scope);
         }
 
 

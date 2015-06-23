@@ -14,7 +14,6 @@ namespace MassTransit.Policies
 {
     using System.Threading;
     using System.Threading.Tasks;
-    using Monitoring.Introspection;
 
 
     public class UntilCancelledRepeatPolicy :

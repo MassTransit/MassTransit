@@ -16,7 +16,6 @@ namespace MassTransit.Courier.Pipeline
     using System.Threading.Tasks;
     using Logging;
     using MassTransit.Pipeline;
-    using Monitoring.Introspection;
     using Util;
 
 
@@ -32,11 +31,7 @@ namespace MassTransit.Courier.Pipeline
 
         async Task IProbeSite.Probe(ProbeContext context)
         {
-            var scope = context.CreateScope("compensate");
-            scope.Set(new
-            {
-                LogType = TypeMetadataCache<TLog>.ShortName,
-            });
+            context.CreateFilterScope("compensate");
         }
 
         public async Task Send(CompensateActivityContext<TLog> context, IPipe<CompensateActivityContext<TLog>> next)

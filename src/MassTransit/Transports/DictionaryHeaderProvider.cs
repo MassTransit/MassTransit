@@ -12,9 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports
 {
-    using System;
     using System.Collections.Generic;
-    using System.Linq;
     using Context;
 
 
@@ -31,9 +29,9 @@ namespace MassTransit.Transports
             _headers = headers;
         }
 
-        public IEnumerable<Tuple<string, object>> GetAll()
+        public IEnumerable<KeyValuePair<string, object>> GetAll()
         {
-            return _headers.Select(x => Tuple.Create(x.Key, x.Value));
+            return _headers;
         }
 
         public bool TryGetHeader(string key, out object value)

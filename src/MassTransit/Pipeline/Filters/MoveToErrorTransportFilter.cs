@@ -15,7 +15,6 @@ namespace MassTransit.Pipeline.Filters
     using System;
     using System.Threading.Tasks;
     using Logging;
-    using Monitoring.Introspection;
     using Transports;
     using Util;
 
@@ -36,6 +35,7 @@ namespace MassTransit.Pipeline.Filters
 
         async Task IProbeSite.Probe(ProbeContext context)
         {
+            ProbeContext scope = context.CreateFilterScope("moveToErrorTransport");
         }
 
         async Task IFilter<ReceiveContext>.Send(ReceiveContext context, IPipe<ReceiveContext> next)

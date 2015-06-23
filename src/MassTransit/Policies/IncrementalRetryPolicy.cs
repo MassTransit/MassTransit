@@ -49,16 +49,15 @@ namespace MassTransit.Policies
 
         Task IProbeSite.Probe(ProbeContext context)
         {
-            ProbeContext scope = context.CreateScope("retry");
-            scope.Set(new
+            context.Set(new
             {
-                Type = "Incremental",
+                Policy = "Incremental",
                 Limit = _retryLimit,
                 Initial = _initialInterval,
                 Increment = _intervalIncrement,
             });
 
-            return _filter.Probe(scope);
+            return _filter.Probe(context);
         }
 
         public IRetryContext GetRetryContext()

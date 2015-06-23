@@ -40,7 +40,7 @@ namespace MassTransit.Context
             _deserializer = JsonMessageSerializer.Deserializer;
         }
 
-        public IEnumerable<Tuple<string, object>> GetAll()
+        public IEnumerable<KeyValuePair<string, object>> GetAll()
         {
             return _provider.GetAll();
         }

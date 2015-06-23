@@ -15,8 +15,8 @@ namespace MassTransit.Pipeline.Filters
     using System;
     using System.Threading.Tasks;
     using Context;
-    using Monitoring.Introspection;
     using Policies;
+
 
     /// <summary>
     /// Uses the message redelivery mechanism, if available, to delay a retry without blocking message delivery
@@ -35,10 +35,8 @@ namespace MassTransit.Pipeline.Filters
 
         async Task IProbeSite.Probe(ProbeContext context)
         {
-            ProbeContext scope = context.CreateScope("retry");
+            ProbeContext scope = context.CreateFilterScope("retry");
             scope.Add("type", "redelivery");
-
-
         }
 
         public async Task Send(ConsumeContext<T> context, IPipe<ConsumeContext<T>> next)
@@ -60,8 +58,8 @@ namespace MassTransit.Pipeline.Filters
             {
                 try
                 {
-                    MessageRedeliveryContext schedulerContext;
-                    if (!context.TryGetPayload(out schedulerContext))
+                    MessageRedeliveryContext redeliveryContext;
+                    if (!context.TryGetPayload(out redeliveryContext))
                         throw new ContextException("The message redelivery context was not available to delay the message", exception);
 
                     TimeSpan delay;
@@ -70,7 +68,7 @@ namespace MassTransit.Pipeline.Filters
                         retryContext.CanRetry(exception, out delay);
                     }
 
-                    await schedulerContext.ScheduleRedelivery(delay);
+                    await redeliveryContext.ScheduleRedelivery(delay);
                 }
                 catch (Exception ex)
                 {

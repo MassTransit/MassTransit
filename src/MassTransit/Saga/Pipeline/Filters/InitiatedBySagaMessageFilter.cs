@@ -15,7 +15,6 @@ namespace MassTransit.Saga.Pipeline.Filters
     using System;
     using System.Threading.Tasks;
     using MassTransit.Pipeline;
-    using Monitoring.Introspection;
     using Util;
 
 
@@ -31,12 +30,13 @@ namespace MassTransit.Saga.Pipeline.Filters
     {
         async Task IProbeSite.Probe(ProbeContext context)
         {
+            context.CreateFilterScope("initiatedBy");
         }
 
         public async Task Send(SagaConsumeContext<TSaga, TMessage> context, IPipe<SagaConsumeContext<TSaga, TMessage>> next)
         {
-            var consumer = context.Saga as InitiatedBy<TMessage>;
-            if (consumer == null)
+            var saga = context.Saga as InitiatedBy<TMessage>;
+            if (saga == null)
             {
                 string message = string.Format("Saga type {0} is not initiated by message type {1}",
                     TypeMetadataCache<TSaga>.ShortName, TypeMetadataCache<TMessage>.ShortName);
@@ -44,7 +44,7 @@ namespace MassTransit.Saga.Pipeline.Filters
                 throw new ConsumerMessageException(message);
             }
 
-            await consumer.Consume(context);
+            await saga.Consume(context);
 
             await next.Send(context);
         }

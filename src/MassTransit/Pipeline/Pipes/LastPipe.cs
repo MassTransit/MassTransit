@@ -14,7 +14,6 @@ namespace MassTransit.Pipeline.Pipes
 {
     using System.Diagnostics;
     using System.Threading.Tasks;
-    using Monitoring.Introspection;
 
 
     /// <summary>
@@ -55,8 +54,6 @@ namespace MassTransit.Pipeline.Pipes
         {
             async Task IProbeSite.Probe(ProbeContext context)
             {
-                //            await _filter.Probe(context);
-//                await _next.Probe(context);
             }
 
             async Task IPipe<T>.Send(T context)

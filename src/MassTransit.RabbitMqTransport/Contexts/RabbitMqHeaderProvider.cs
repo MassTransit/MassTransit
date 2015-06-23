@@ -28,17 +28,17 @@ namespace MassTransit.RabbitMqTransport.Contexts
             _context = context;
         }
 
-        public IEnumerable<Tuple<string, object>> GetAll()
+        public IEnumerable<KeyValuePair<string, object>> GetAll()
         {
-            yield return Tuple.Create(RabbitMqHeaders.Exchange, (object)_context.Exchange);
-            yield return Tuple.Create(RabbitMqHeaders.RoutingKey, (object)_context.RoutingKey);
-            yield return Tuple.Create(RabbitMqHeaders.DeliveryTag, (object)_context.DeliveryTag);
-            yield return Tuple.Create(RabbitMqHeaders.ConsumerTag, (object)_context.ConsumerTag);
+            yield return new KeyValuePair<string, object>(RabbitMqHeaders.Exchange, _context.Exchange);
+            yield return new KeyValuePair<string, object>(RabbitMqHeaders.RoutingKey, _context.RoutingKey);
+            yield return new KeyValuePair<string, object>(RabbitMqHeaders.DeliveryTag, _context.DeliveryTag);
+            yield return new KeyValuePair<string, object>(RabbitMqHeaders.ConsumerTag, _context.ConsumerTag);
 
             if (_context.Properties.IsHeadersPresent())
             {
                 foreach (var header in _context.Properties.Headers)
-                    yield return Tuple.Create(header.Key, header.Value);
+                    yield return header;
             }
         }
 

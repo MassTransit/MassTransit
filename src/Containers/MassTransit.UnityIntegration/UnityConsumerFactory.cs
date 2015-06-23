@@ -44,5 +44,10 @@ namespace MassTransit.UnityIntegration
                 await next.Send(context.PushConsumer(consumer));
             }
         }
+
+        async Task IProbeSite.Probe(ProbeContext context)
+        {
+            context.CreateConsumerFactoryScope<TConsumer>("unity");
+        }
     }
 }

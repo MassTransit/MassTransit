@@ -39,16 +39,16 @@ namespace MassTransit.Context
             return _scheduler.ScheduleSend(_context.Message, delay, _context.CreateCopyContextPipe(GetScheduledMessageHeaders));
         }
 
-        static IEnumerable<Tuple<string, object>> GetScheduledMessageHeaders(ConsumeContext context)
+        static IEnumerable<KeyValuePair<string, object>> GetScheduledMessageHeaders(ConsumeContext context)
         {
             Uri inputAddress = context.ReceiveContext.InputAddress ?? context.DestinationAddress;
             if (inputAddress != null)
-                yield return Tuple.Create<string, object>("MT-Scheduling-DeliveredAddress", inputAddress.ToString());
+                yield return new KeyValuePair<string, object>(MessageHeaders.DeliveredAddress, inputAddress.ToString());
 
             int? previousDeliveryCount = context.Headers.Get("MT-Redelivery-Count", default(int?));
             if (!previousDeliveryCount.HasValue)
                 previousDeliveryCount = 0;
-            yield return Tuple.Create<string, object>("MT-Redelivery-Count", previousDeliveryCount.Value + 1);
+            yield return new KeyValuePair<string, object>(MessageHeaders.RedeliveryCount, previousDeliveryCount.Value + 1);
         }
     }
 }

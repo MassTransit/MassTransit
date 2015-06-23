@@ -15,7 +15,6 @@ namespace MassTransit.Pipeline.Filters
     using System;
     using System.Diagnostics;
     using System.Threading.Tasks;
-    using Monitoring.Introspection;
     using Util;
 
 
@@ -39,6 +38,7 @@ namespace MassTransit.Pipeline.Filters
 
         async Task IProbeSite.Probe(ProbeContext context)
         {
+            context.CreateFilterScope("observer");
         }
 
         [DebuggerNonUserCode]
@@ -56,7 +56,7 @@ namespace MassTransit.Pipeline.Filters
             catch (Exception ex)
             {
                 context.NotifyFaulted(timer.Elapsed, TypeMetadataCache.GetShortName(_observer.GetType()), ex);
-                
+
                 _observer.OnError(ex);
 
                 throw;

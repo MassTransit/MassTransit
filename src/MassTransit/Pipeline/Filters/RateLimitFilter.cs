@@ -44,19 +44,9 @@ namespace MassTransit.Pipeline.Filters
             _timer = new Timer(Reset, null, interval, interval);
         }
 
-        public TimeSpan Interval
-        {
-            get { return _interval; }
-        }
-
-        public int RateLimit
-        {
-            get { return _rateLimit; }
-        }
-
         async Task IProbeSite.Probe(ProbeContext context)
         {
-            var scope = context.CreateScope("rateLimit");
+            var scope = context.CreateFilterScope("rateLimit");
             scope.Add("limit", _rateLimit);
             scope.Add("available", _limit.CurrentCount);
             scope.Add("interval", _interval);

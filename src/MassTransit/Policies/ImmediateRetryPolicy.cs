@@ -32,14 +32,13 @@ namespace MassTransit.Policies
 
         Task IProbeSite.Probe(ProbeContext context)
         {
-            ProbeContext scope = context.CreateScope("retry");
-            scope.Set(new
+            context.Set(new
             {
-                Type = "Immediate",
+                Policy = "Immediate",
                 Limit = _retryLimit,
             });
 
-            return _filter.Probe(scope);
+            return _filter.Probe(context);
         }
         public IRetryContext GetRetryContext()
         {

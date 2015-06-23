@@ -18,7 +18,6 @@ namespace MassTransit.Courier.Hosts
     using Contracts;
     using Logging;
     using MassTransit.Pipeline;
-    using Monitoring.Introspection;
     using Pipeline;
     using Util;
 
@@ -58,7 +57,7 @@ namespace MassTransit.Courier.Hosts
 
         public async Task Probe(ProbeContext context)
         {
-            ProbeContext scope = context.CreateScope("executeActivity");
+            ProbeContext scope = context.CreateFilterScope("executeActivity");
             scope.Set(new
             {
                 ActivityType = TypeMetadataCache<TActivity>.ShortName,

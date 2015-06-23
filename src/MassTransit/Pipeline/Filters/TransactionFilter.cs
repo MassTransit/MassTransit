@@ -17,7 +17,6 @@ namespace MassTransit.Pipeline.Filters
     using System.Threading.Tasks;
     using System.Transactions;
     using Context;
-    using Monitoring.Introspection;
 
 
     public class TransactionFilter<T> :
@@ -41,8 +40,10 @@ namespace MassTransit.Pipeline.Filters
 
         async Task IProbeSite.Probe(ProbeContext context)
         {
+            var step = context.CreateFilterScope("transaction");
+            step.Add("isolationLevel", _options.IsolationLevel.ToString());
+            step.Add("timeout", _options.Timeout);
         }
-
 
         [DebuggerNonUserCode]
         public async Task Send(T context, IPipe<T> next)

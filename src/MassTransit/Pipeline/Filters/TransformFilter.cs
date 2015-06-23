@@ -14,7 +14,6 @@ namespace MassTransit.Pipeline.Filters
 {
     using System.Threading.Tasks;
     using Context;
-    using Monitoring.Introspection;
     using Transformation;
     using Transformation.Contexts;
 
@@ -36,7 +35,7 @@ namespace MassTransit.Pipeline.Filters
 
         async Task IProbeSite.Probe(ProbeContext context)
         {
-            context.CreateScope("transform");
+            context.CreateFilterScope("transform");
         }
 
         Task IFilter<ConsumeContext<T>>.Send(ConsumeContext<T> context, IPipe<ConsumeContext<T>> next)

@@ -15,7 +15,6 @@ namespace MassTransit.Pipeline.Filters
     using System;
     using System.Diagnostics;
     using System.Threading.Tasks;
-    using Monitoring.Introspection;
     using Util;
 
 
@@ -43,14 +42,14 @@ namespace MassTransit.Pipeline.Filters
             get { return _connections.Count; }
         }
 
-        async Task IProbeSite.Probe(ProbeContext context)
-        {
-            await _connections.ForEach(pipe => pipe.Probe(context));
-        }
-
         public ConnectHandle ConnectConsumePipe(IPipe<ConsumeContext<T>> pipe)
         {
             return _connections.Connect(pipe);
+        }
+
+        async Task IProbeSite.Probe(ProbeContext context)
+        {
+            await _connections.ForEach(pipe => pipe.Probe(context));
         }
 
         [DebuggerNonUserCode]
@@ -68,7 +67,7 @@ namespace MassTransit.Pipeline.Filters
 
         IConnectPipeById<ConsumeContext<T>, Guid> ConnectRequestFilter()
         {
-            var filter = new KeyedConsumeFilter<T, Guid>(GetRequestId);
+            var filter = new RequestConsumeFilter<T, Guid>(GetRequestId);
 
             IPipe<ConsumeContext<T>> pipe = Pipe.New<ConsumeContext<T>>(x => x.Filter(filter));
 

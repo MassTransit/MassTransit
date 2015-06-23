@@ -14,7 +14,6 @@ namespace MassTransit.Context
 {
     using System;
     using System.Threading.Tasks;
-    using Monitoring.Introspection;
     using Pipeline;
 
 
@@ -48,9 +47,7 @@ namespace MassTransit.Context
             context.RequestId = NewId.NextGuid();
             context.ResponseAddress = _bus.Address;
 
-            _requestContext = new SendRequestContext<TRequest>(_bus, context, _taskScheduler);
-
-            _callback(_requestContext);
+            _requestContext = new SendRequestContext<TRequest>(_bus, context, _taskScheduler, _callback);
         }
 
         public Task Task

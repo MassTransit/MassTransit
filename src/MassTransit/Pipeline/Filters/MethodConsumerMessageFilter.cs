@@ -14,7 +14,6 @@ namespace MassTransit.Pipeline.Filters
 {
     using System.Diagnostics;
     using System.Threading.Tasks;
-    using Monitoring.Introspection;
     using Util;
 
 

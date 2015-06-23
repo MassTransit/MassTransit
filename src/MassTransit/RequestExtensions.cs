@@ -34,17 +34,9 @@ namespace MassTransit
             Action<RequestContext<TRequest>> callback, CancellationToken cancellationToken = default(CancellationToken))
             where TRequest : class
         {
-            TaskScheduler taskScheduler = SynchronizationContext.Current == null
-                ? TaskScheduler.Default
-                : TaskScheduler.FromCurrentSynchronizationContext();
+            ISendEndpoint endpoint = await bus.GetSendEndpoint(address);
 
-            ISendEndpoint endpoint = await bus.GetSendEndpoint(address).ConfigureAwait(false);
-
-            var pipe = new SendRequest<TRequest>(bus, taskScheduler, callback);
-
-            await endpoint.Send(message, pipe, cancellationToken).ConfigureAwait(false);
-
-            return pipe;
+            return await Request(bus, endpoint, message, callback, cancellationToken);
         }
 
         /// <summary>
@@ -67,7 +59,7 @@ namespace MassTransit
 
             var pipe = new SendRequest<TRequest>(bus, taskScheduler, callback);
 
-            await sendEndpoint.Send(message, pipe, cancellationToken).ConfigureAwait(false);
+            await sendEndpoint.Send(message, pipe, cancellationToken);
 
             return pipe;
         }

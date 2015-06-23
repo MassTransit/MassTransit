@@ -32,9 +32,9 @@ namespace MassTransit.Serialization
             _headers = headers;
         }
 
-        IEnumerable<Tuple<string, object>> Headers.GetAll()
+        IEnumerable<KeyValuePair<string, object>> Headers.GetAll()
         {
-            return _headers.Select(x => Tuple.Create(x.Name, x.Value));
+            return _headers.Select(x => new KeyValuePair<string, object>(x.Name, x.Value));
         }
 
         T Headers.Get<T>(string key, T defaultValue)

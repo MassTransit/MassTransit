@@ -12,26 +12,22 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
-    using System;
-    using Pipeline;
-
-
-    /// <summary>
-    /// A bus is a logical element that includes a local endpoint and zero or more receive endpoints
-    /// </summary>
-    public interface IBus :
-        IPublishEndpoint,
-        ISendEndpointProvider,
-        IConsumePipeConnector,
-        IRequestPipeConnector,
-        IConsumeMessageObserverConnector,
-        IConsumeObserverConnector,
-        IConnectReceiveObserver,
-        IProbeSite
+    public static class MessageHeaders
     {
         /// <summary>
-        /// The receive address of the bus itself, versus any receive endpoints that were created
+        /// The endpoint that forwarded the message to the new destination
         /// </summary>
-        Uri Address { get; }
+        public const string ForwarderAddress = "MT-Forwarder-Address";
+
+        /// <summary>
+        /// The address where the message was originally delivered before being rescheduled
+        /// </summary>
+        public const string DeliveredAddress = "MT-Scheduling-DeliveredAddress";
+
+
+        /// <summary>
+        /// The number of times the message has been redelivered (zero if never)
+        /// </summary>
+        public const string RedeliveryCount = "MT-Redelivery-Count";
     }
 }

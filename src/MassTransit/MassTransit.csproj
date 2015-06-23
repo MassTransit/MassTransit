@@ -127,6 +127,7 @@
     <Compile Include="Exceptions\MessageDataNotFoundException.cs" />
     <Compile Include="IMessageData.cs" />
     <Compile Include="IntrospectionExtensions.cs" />
+    <Compile Include="IProbeSite.cs" />
     <Compile Include="MessageDataExtensions.cs" />
     <Compile Include="MessageData\ByteArrayMessageDataConverter.cs" />
     <Compile Include="MessageData\DeserializedMessageData.cs" />
@@ -404,11 +405,10 @@
     <Compile Include="MessageData\ConstantMessageData.cs" />
     <Compile Include="MessageData\StringMessageDataConverter.cs" />
     <Compile Include="MessageHandler.cs" />
+    <Compile Include="MessageHeaders.cs" />
     <Compile Include="MessageRedeliveryContext.cs" />
     <Compile Include="MessageRequestClient.cs" />
     <Compile Include="MessageSchedulerContext.cs" />
-    <Compile Include="Monitoring\Introspection\ProbeContext.cs" />
-    <Compile Include="Monitoring\Introspection\IProbeSite.cs" />
     <Compile Include="Monitoring\Introspection\Contracts\ProbeResult.cs" />
     <Compile Include="Monitoring\Introspection\ProbeResultBuilder.cs" />
     <Compile Include="Monitoring\Introspection\ScopeProbeContext.cs" />
@@ -444,7 +444,7 @@
     <Compile Include="Pipeline\Filters\DeserializeFilter.cs" />
     <Compile Include="Pipeline\Filters\HandlerMessageFilter.cs" />
     <Compile Include="Pipeline\Filters\InstanceMessageFilter.cs" />
-    <Compile Include="Pipeline\Filters\KeyedConsumeFilter.cs" />
+    <Compile Include="Pipeline\Filters\RequestConsumeFilter.cs" />
     <Compile Include="Pipeline\Filters\LegacyMethodConsumerMessageFilter.cs" />
     <Compile Include="Pipeline\Filters\LogFilter.cs" />
     <Compile Include="Pipeline\Filters\MessageConsumeFilter.cs" />
@@ -514,6 +514,8 @@
     <Compile Include="Policies\RetrySelectedRetryExceptionFilter.cs" />
     <Compile Include="Policies\UntilCancelledRepeatContext.cs" />
     <Compile Include="Policies\UntilCancelledRepeatPolicy.cs" />
+    <Compile Include="ProbeContext.cs" />
+    <Compile Include="ProbeContextExtensions.cs" />
     <Compile Include="PublishContext.cs" />
     <Compile Include="IPublishConvention.cs" />
     <Compile Include="ReceiveContext.cs" />

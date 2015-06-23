@@ -19,7 +19,6 @@ namespace MassTransit
     using System.Threading.Tasks;
     using Context;
     using Logging;
-    using Monitoring.Introspection;
     using Pipeline;
     using Transports;
 

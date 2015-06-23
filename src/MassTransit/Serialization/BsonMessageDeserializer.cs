@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -17,7 +17,6 @@ namespace MassTransit.Serialization
     using System.Net.Mime;
     using System.Runtime.Serialization;
     using System.Threading.Tasks;
-    using Monitoring.Introspection;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Bson;
 
@@ -39,7 +38,7 @@ namespace MassTransit.Serialization
 
         async Task IProbeSite.Probe(ProbeContext context)
         {
-            var scope = context.CreateScope("bson");
+            ProbeContext scope = context.CreateScope("bson");
             scope.Add("contentType", BsonMessageSerializer.BsonContentType.MediaType);
         }
 

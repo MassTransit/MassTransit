@@ -33,7 +33,7 @@ namespace MassTransit.Context
         TimeSpan _timeout;
         CancellationTokenSource _timeoutToken;
 
-        public SendRequestContext(IBus bus, SendContext<TRequest> context, TaskScheduler taskScheduler)
+        public SendRequestContext(IBus bus, SendContext<TRequest> context, TaskScheduler taskScheduler, Action<RequestContext<TRequest>> callback)
         {
             if (bus == null)
                 throw new ArgumentNullException("bus");
@@ -52,6 +52,8 @@ namespace MassTransit.Context
             _requestTask = new TaskCompletionSource<TRequest>(context.CancellationToken);
 
             HandleFault();
+
+            callback(this);
 
             if (_timeout > TimeSpan.Zero)
             {
@@ -272,8 +274,14 @@ namespace MassTransit.Context
             return source.Task;
         }
 
-        public void TimeoutExpired()
+        void TimeoutExpired()
         {
+            if (_timeoutToken != null)
+            {
+                _timeoutToken.Dispose();
+                _timeoutToken = null;
+            }
+
             var timeoutException = new RequestTimeoutException(_requestId.ToString());
 
             _connections.ForEach(x =>

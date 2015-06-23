@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,12 +14,12 @@ namespace MassTransit.Pipeline.Filters
 {
     using System;
     using System.Collections.Concurrent;
+    using System.Collections.Generic;
     using System.Diagnostics;
     using System.Threading.Tasks;
-    using Monitoring.Introspection;
 
 
-    public class KeyedConsumeFilter<T, TKey> :
+    public class RequestConsumeFilter<T, TKey> :
         IFilter<ConsumeContext<T>>,
         IConnectPipeById<ConsumeContext<T>, TKey>
         where T : class
@@ -27,14 +27,10 @@ namespace MassTransit.Pipeline.Filters
         readonly KeyAccessor<ConsumeContext<T>, TKey> _keyAccessor;
         readonly ConcurrentDictionary<TKey, TeeConsumeFilter<T>> _pipes;
 
-        public KeyedConsumeFilter(KeyAccessor<ConsumeContext<T>, TKey> keyAccessor)
+        public RequestConsumeFilter(KeyAccessor<ConsumeContext<T>, TKey> keyAccessor)
         {
             _keyAccessor = keyAccessor;
             _pipes = new ConcurrentDictionary<TKey, TeeConsumeFilter<T>>();
-        }
-
-        async Task IProbeSite.Probe(ProbeContext context)
-        {
         }
 
         public ConnectHandle Connect(TKey key, IPipe<ConsumeContext<T>> pipe)
@@ -47,6 +43,17 @@ namespace MassTransit.Pipeline.Filters
             ConnectHandle handle = added.ConnectConsumePipe(pipe);
 
             return new Handle(key, handle, RemovePipe);
+        }
+
+        async Task IProbeSite.Probe(ProbeContext context)
+        {
+            ProbeContext scope = context.CreateScope("request");
+
+            ICollection<TeeConsumeFilter<T>> filters = _pipes.Values;
+            scope.Add("count", filters.Count);
+
+            foreach (IProbeSite filter in filters)
+                await filter.Probe(scope);
         }
 
         [DebuggerNonUserCode]
