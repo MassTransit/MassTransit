@@ -18,7 +18,6 @@ namespace MassTransit.Pipeline.Filters
     using System.Diagnostics;
     using System.Linq;
     using System.Threading.Tasks;
-    using Monitoring.Introspection;
     using Util;
 
 
@@ -36,14 +35,6 @@ namespace MassTransit.Pipeline.Filters
         {
             _pipes = new ConcurrentDictionary<Type, IMessagePipe>();
             _observers = new ConsumeObserverConnectable();
-        }
-
-        async Task IProbeSite.Probe(ProbeContext context)
-        {
-            foreach (var pipe in _pipes.Values)
-            {
-                await pipe.Filter.Probe(context);
-            }
         }
 
         public ConnectHandle ConnectConsumeMessageObserver<T>(IConsumeMessageObserver<T> observer)
@@ -71,6 +62,12 @@ namespace MassTransit.Pipeline.Filters
             IConsumePipeConnector<T> messagePipe = GetPipe<T, IConsumePipeConnector<T>>();
 
             return messagePipe.ConnectConsumePipe(pipe);
+        }
+
+        async Task IProbeSite.Probe(ProbeContext context)
+        {
+            foreach (IMessagePipe pipe in _pipes.Values)
+                await pipe.Filter.Probe(context);
         }
 
         [DebuggerNonUserCode]
@@ -110,7 +107,7 @@ namespace MassTransit.Pipeline.Filters
         }
 
 
-        interface IMessagePipe 
+        interface IMessagePipe
         {
             IFilter<ConsumeContext> Filter { get; }
 

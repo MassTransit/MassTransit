@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -15,7 +15,6 @@ namespace MassTransit.Pipeline.Filters
     using System;
     using System.Diagnostics;
     using System.Threading.Tasks;
-    using Monitoring.Introspection;
     using Util;
 
 
@@ -40,12 +39,14 @@ namespace MassTransit.Pipeline.Filters
             _consumerPipe = consumerPipe;
         }
 
-        Task IProbeSite.Probe(ProbeContext context)
+        async Task IProbeSite.Probe(ProbeContext context)
         {
-            var scope = context.CreateScope("consumer");
+            ProbeContext scope = context.CreateScope("consumer");
             scope.Add("type", TypeMetadataCache<TConsumer>.ShortName);
 
-            return _consumerPipe.Probe(scope);
+            await _consumerFactory.Probe(scope);
+
+            await _consumerPipe.Probe(scope);
         }
 
         [DebuggerNonUserCode]

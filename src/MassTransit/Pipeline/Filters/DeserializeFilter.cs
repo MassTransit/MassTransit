@@ -14,7 +14,6 @@ namespace MassTransit.Pipeline.Filters
 {
     using System.Diagnostics;
     using System.Threading.Tasks;
-    using Monitoring.Introspection;
 
 
     /// <summary>
@@ -35,7 +34,7 @@ namespace MassTransit.Pipeline.Filters
 
         async Task IProbeSite.Probe(ProbeContext context)
         {
-            ProbeContext scope = context.CreateScope("deserialize");
+            ProbeContext scope = context.CreateFilterScope("deserialize");
 
             await _deserializer.Probe(scope);
             await _output.Probe(scope);

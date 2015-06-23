@@ -52,5 +52,10 @@ namespace MassTransit.WindsorIntegration
                 }
             }
         }
+
+        async Task IProbeSite.Probe(ProbeContext context)
+        {
+            context.CreateConsumerFactoryScope<TConsumer>("windsor");
+        }
     }
 }

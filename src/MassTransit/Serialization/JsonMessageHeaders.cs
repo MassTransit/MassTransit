@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,7 +14,6 @@ namespace MassTransit.Serialization
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
 
@@ -31,9 +30,9 @@ namespace MassTransit.Serialization
             _headers = headers ?? new Dictionary<string, object>();
         }
 
-        public IEnumerable<Tuple<string, object>> GetAll()
+        public IEnumerable<KeyValuePair<string, object>> GetAll()
         {
-            return _headers.Select(x => Tuple.Create(x.Key, x.Value));
+            return _headers;
         }
 
         public T Get<T>(string key, T defaultValue = default(T))

@@ -49,21 +49,21 @@ namespace MassTransit.Monitoring.Introspection
         class Result :
             ProbeResult
         {
-            readonly IDictionary<string, object> _content;
+            readonly IDictionary<string, object> _results;
             readonly TimeSpan _duration;
             readonly HostInfo _host;
             readonly Guid _probeId;
             readonly Guid _resultId;
             readonly DateTime _startTimestamp;
 
-            public Result(Guid probeId, Guid resultId, DateTime startTimestamp, TimeSpan duration, HostInfo host, IDictionary<string, object> content)
+            public Result(Guid probeId, Guid resultId, DateTime startTimestamp, TimeSpan duration, HostInfo host, IDictionary<string, object> results)
             {
                 _probeId = probeId;
                 _resultId = resultId;
                 _startTimestamp = startTimestamp;
                 _duration = duration;
                 _host = host;
-                _content = content;
+                _results = results;
             }
 
             public Guid ResultId
@@ -91,10 +91,10 @@ namespace MassTransit.Monitoring.Introspection
                 get { return _host; }
             }
 
-            public IDictionary<string, object> Content
+            public IDictionary<string, object> Results
 
             {
-                get { return _content; }
+                get { return _results; }
             }
         }
     }

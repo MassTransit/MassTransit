@@ -16,7 +16,6 @@ namespace MassTransit.Pipeline.Filters
     using System.Diagnostics;
     using System.Threading;
     using System.Threading.Tasks;
-    using Monitoring.Introspection;
     using Util;
 
 
@@ -43,7 +42,7 @@ namespace MassTransit.Pipeline.Filters
 
         async Task IProbeSite.Probe(ProbeContext context)
         {
-            ProbeContext scope = context.CreateScope("handler");
+            ProbeContext scope = context.CreateFilterScope("handler");
             scope.Add("completed", _completed);
             scope.Add("faulted", _faulted);
         }

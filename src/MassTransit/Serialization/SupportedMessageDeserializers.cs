@@ -18,7 +18,6 @@ namespace MassTransit.Serialization
     using System.Net.Mime;
     using System.Runtime.Serialization;
     using System.Threading.Tasks;
-    using Monitoring.Introspection;
 
 
     public class SupportedMessageDeserializers :
@@ -37,11 +36,9 @@ namespace MassTransit.Serialization
 
         async Task IProbeSite.Probe(ProbeContext context)
         {
-            var scope = context.CreateScope("supportedContentTypes");
-            foreach (var deserializer in _deserializers.Values)
-            {
+            ProbeContext scope = context.CreateScope("deserializers");
+            foreach (IMessageDeserializer deserializer in _deserializers.Values)
                 await deserializer.Probe(scope);
-            }
         }
 
         public ContentType ContentType

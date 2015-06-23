@@ -15,7 +15,6 @@ namespace MassTransit.Policies
     using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
-    using Monitoring.Introspection;
 
 
     public class ExponentialRetryPolicy :
@@ -42,10 +41,9 @@ namespace MassTransit.Policies
 
         Task IProbeSite.Probe(ProbeContext context)
         {
-            ProbeContext scope = context.CreateScope("retry");
-            scope.Set(new
+            context.Set(new
             {
-                Type = "Exponential",
+                Policy = "Exponential",
                 Limit = _retryLimit,
                 Min = _minInterval,
                 Max = _maxInterval,
@@ -53,7 +51,7 @@ namespace MassTransit.Policies
                 High = _highInterval,
             });
 
-            return _filter.Probe(scope);
+            return _filter.Probe(context);
         }
 
         public IRetryContext GetRetryContext()

@@ -13,7 +13,6 @@
 namespace MassTransit
 {
     using System.Net.Mime;
-    using Monitoring.Introspection;
 
 
     public interface IMessageDeserializer :

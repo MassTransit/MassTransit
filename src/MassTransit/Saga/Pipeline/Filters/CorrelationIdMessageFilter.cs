@@ -16,7 +16,6 @@ namespace MassTransit.Saga.Pipeline.Filters
     using System.Threading.Tasks;
     using Context;
     using MassTransit.Pipeline;
-    using Monitoring.Introspection;
 
 
     /// <summary>
@@ -38,8 +37,10 @@ namespace MassTransit.Saga.Pipeline.Filters
 
             _getCorrelationId = getCorrelationId;
         }
+
         async Task IProbeSite.Probe(ProbeContext context)
         {
+            context.CreateFilterScope("correlationId");
         }
 
         public async Task Send(ConsumeContext<TMessage> context, IPipe<ConsumeContext<TMessage>> next)

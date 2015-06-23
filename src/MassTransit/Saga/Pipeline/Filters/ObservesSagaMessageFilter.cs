@@ -14,7 +14,6 @@ namespace MassTransit.Saga.Pipeline.Filters
 {
     using System.Threading.Tasks;
     using MassTransit.Pipeline;
-    using Monitoring.Introspection;
     using Util;
 
 
@@ -30,6 +29,7 @@ namespace MassTransit.Saga.Pipeline.Filters
     {
         async Task IProbeSite.Probe(ProbeContext context)
         {
+            context.CreateFilterScope("observes");
         }
 
         public async Task Send(SagaConsumeContext<TSaga, TMessage> context, IPipe<SagaConsumeContext<TSaga, TMessage>> next)

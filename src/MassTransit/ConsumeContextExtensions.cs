@@ -28,20 +28,36 @@ namespace MassTransit
             return new ConsumerConsumeContextProxy<TConsumer, T>(context, consumer);
         }
 
+        public static Task Forward<T>(this ConsumeContext<T> context, ISendEndpoint endpoint)
+            where T : class
+        {
+            if (context == null)
+                throw new ArgumentNullException("context");
+            if (endpoint == null)
+                throw new ArgumentNullException("endpoint");
+
+            return Forward(context, endpoint, context.Message);
+        }
+
         public static async Task Forward<T>(this ConsumeContext<T> context, Uri address)
             where T : class
         {
-            ISendEndpoint endpoint = await context.GetSendEndpoint(address).ConfigureAwait(false);
+            if (context == null)
+                throw new ArgumentNullException("context");
+            if (address == null)
+                throw new ArgumentNullException("address");
 
-            await Forward(context, endpoint, context.Message).ConfigureAwait(false);
+            ISendEndpoint endpoint = await context.GetSendEndpoint(address);
+
+            await Forward(context, endpoint, context.Message);
         }
 
         public static async Task Forward<T>(this ConsumeContext context, Uri address, T message)
             where T : class
         {
-            ISendEndpoint endpoint = await context.GetSendEndpoint(address).ConfigureAwait(false);
+            ISendEndpoint endpoint = await context.GetSendEndpoint(address);
 
-            await Forward(context, endpoint, message).ConfigureAwait(false);
+            await Forward(context, endpoint, message);
         }
 
         /// <summary>
@@ -56,11 +72,11 @@ namespace MassTransit
             return endpoint.Send(message, CreateCopyContextPipe(context, GetForwardHeaders));
         }
 
-        static IEnumerable<Tuple<string, object>> GetForwardHeaders(ConsumeContext context)
+        static IEnumerable<KeyValuePair<string, object>> GetForwardHeaders(ConsumeContext context)
         {
             Uri inputAddress = context.ReceiveContext.InputAddress ?? context.DestinationAddress;
             if (inputAddress != null)
-                yield return Tuple.Create<string, object>("MT-Forwarder-Address", inputAddress.ToString());
+                yield return new KeyValuePair<string, object>(MessageHeaders.ForwarderAddress, inputAddress.ToString());
         }
 
         /// <summary>
@@ -70,12 +86,12 @@ namespace MassTransit
         /// <param name="additionalHeaders">Returns additional headers for the pipe that should be added to the message</param>
         /// <returns></returns>
         public static IPipe<SendContext> CreateCopyContextPipe(this ConsumeContext context,
-            Func<ConsumeContext, IEnumerable<Tuple<string, object>>> additionalHeaders)
+            Func<ConsumeContext, IEnumerable<KeyValuePair<string, object>>> additionalHeaders)
         {
             return CreateCopyContextPipe(context, (consumeContext, sendContext) =>
             {
                 foreach (var additionalHeader in additionalHeaders(consumeContext))
-                    sendContext.Headers.Set(additionalHeader.Item1, additionalHeader.Item2);
+                    sendContext.Headers.Set(additionalHeader.Key, additionalHeader.Value);
             });
         }
 
@@ -99,7 +115,7 @@ namespace MassTransit
                     sendContext.TimeToLive = context.ExpirationTime.Value.ToUniversalTime() - DateTime.UtcNow;
 
                 foreach (var header in context.Headers.GetAll())
-                    sendContext.Headers.Set(header.Item1, header.Item2);
+                    sendContext.Headers.Set(header.Key, header.Value);
 
                 callback(context, sendContext);
             }));

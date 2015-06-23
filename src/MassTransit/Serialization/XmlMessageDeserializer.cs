@@ -21,7 +21,6 @@ namespace MassTransit.Serialization
     using System.Threading.Tasks;
     using System.Xml;
     using System.Xml.Linq;
-    using Monitoring.Introspection;
     using Newtonsoft.Json;
 
 
@@ -42,7 +41,7 @@ namespace MassTransit.Serialization
 
         async Task IProbeSite.Probe(ProbeContext context)
         {
-            var scope = context.CreateScope("xml");
+            ProbeContext scope = context.CreateScope("xml");
             scope.Add("contentType", XmlMessageSerializer.XmlContentType.MediaType);
         }
 

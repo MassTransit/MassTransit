@@ -17,7 +17,6 @@ namespace MassTransit.Pipeline.Filters
     using System.Linq;
     using System.Threading.Tasks;
     using Logging;
-    using Monitoring.Introspection;
 
 
     /// <summary>
@@ -39,8 +38,11 @@ namespace MassTransit.Pipeline.Filters
             _exceptionFilter = exceptionFilter;
         }
 
-        async Task IProbeSite.Probe(ProbeContext context)
+        Task IProbeSite.Probe(ProbeContext context)
         {
+            ProbeContext scope = context.CreateFilterScope("rescue");
+
+            return _rescuePipe.Probe(scope);
         }
 
         [DebuggerNonUserCode]

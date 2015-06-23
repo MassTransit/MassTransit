@@ -14,7 +14,6 @@ namespace MassTransit.Pipeline.Pipes
 {
     using System.Diagnostics;
     using System.Threading.Tasks;
-    using Monitoring.Introspection;
 
 
     public class ResponsePipe<T> :
@@ -43,21 +42,20 @@ namespace MassTransit.Pipeline.Pipes
             _sendPipe = pipe;
         }
 
-        async Task IProbeSite.Probe(ProbeContext context)
-        {
-            //            await _filter.Probe(context);
-            if(_pipe != null)
-                await _pipe.Probe(context);
-            if (_sendPipe != null)
-                await _sendPipe.Probe(context);
-        }
-
         [DebuggerNonUserCode]
         public Task Send(PublishContext<T> context)
         {
             SendContext<T> sendContext = context;
 
             return Send(sendContext);
+        }
+
+        async Task IProbeSite.Probe(ProbeContext context)
+        {
+            if (_pipe != null)
+                await _pipe.Probe(context);
+            if (_sendPipe != null)
+                await _sendPipe.Probe(context);
         }
 
         public async Task Send(SendContext<T> context)

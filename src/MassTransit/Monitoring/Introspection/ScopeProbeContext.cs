@@ -92,9 +92,9 @@ namespace MassTransit.Monitoring.Introspection
             return scope;
         }
 
-        protected IDictionary<string,object> Build()
+        protected IDictionary<string, object> Build()
         {
-            return _variables.ToDictionary(x => x.Key, item => 
+            return _variables.ToDictionary(x => x.Key, item =>
             {
                 var list = item.Value as IList<ScopeProbeContext>;
                 if (list != null)

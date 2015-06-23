@@ -48,5 +48,10 @@ namespace MassTransit.NinjectIntegration
                 _kernel.Release(consumer);
             }
         }
+
+        async Task IProbeSite.Probe(ProbeContext context)
+        {
+            context.CreateConsumerFactoryScope<TConsumer>("ninject");
+        }
     }
 }

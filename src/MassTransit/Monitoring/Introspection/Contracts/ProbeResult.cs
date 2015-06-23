@@ -46,7 +46,9 @@ namespace MassTransit.Monitoring.Introspection.Contracts
         /// </summary>
         HostInfo Host { get; }
 
-
-        IDictionary<string, object> Content { get; }
+        /// <summary>
+        /// The results returned by the probe
+        /// </summary>
+        IDictionary<string, object> Results { get; }
     }
 }

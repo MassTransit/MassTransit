@@ -16,7 +16,6 @@ namespace MassTransit.Courier.Pipeline
     using System.Threading.Tasks;
     using Logging;
     using MassTransit.Pipeline;
-    using Monitoring.Introspection;
     using Util;
 
 
@@ -32,7 +31,7 @@ namespace MassTransit.Courier.Pipeline
 
         async Task IProbeSite.Probe(ProbeContext context)
         {
-            context.CreateScope("execute");
+            context.CreateFilterScope("execute");
         }
 
         public async Task Send(ExecuteActivityContext<TArguments> context, IPipe<ExecuteActivityContext<TArguments>> next)
