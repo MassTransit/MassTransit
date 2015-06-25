@@ -254,7 +254,7 @@ task :all_nuspecs => [:versioning, :mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :m
     nuspec.license_url = "http://www.apache.org/licenses/LICENSE-2.0"
     nuspec.require_license_acceptance
     nuspec.dependency "Newtonsoft.Json", "6.0.8"
-    nuspec.dependency "NewId", "2.1.2"
+    nuspec.dependency "NewId", "2.1.3"
     nuspec.output_file = 'nuspecs/MassTransit.nuspec'
 
     add_files props[:stage], 'MassTransit.{dll,pdb,xml}', nuspec
@@ -273,7 +273,7 @@ task :all_nuspecs => [:versioning, :mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :m
     nuspec.require_license_acceptance
     nuspec.dependency "MassTransit", NUGET_VERSION
     nuspec.dependency "Newtonsoft.Json", "6.0.8"
-    nuspec.dependency "NewId", "2.1.2"
+    nuspec.dependency "NewId", "2.1.3"
     nuspec.dependency "WindowsAzure.ServiceBus", "2.7.2"
     nuspec.dependency "Microsoft.WindowsAzure.ConfigurationManager", "3.1.0"
     nuspec.output_file = 'nuspecs/MassTransit.AzureServiceBus.nuspec'
@@ -294,7 +294,7 @@ task :all_nuspecs => [:versioning, :mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :m
     nuspec.license_url = "http://www.apache.org/licenses/LICENSE-2.0"
     nuspec.require_license_acceptance
     nuspec.dependency "MassTransit", NUGET_VERSION
-    nuspec.dependency "NewId", "2.1.2"
+    nuspec.dependency "NewId", "2.1.3"
     nuspec.dependency "Automatonymous", "3.0.4-beta"
     nuspec.output_file = 'nuspecs/MassTransit.Automatonymous.nuspec'
 
@@ -373,7 +373,7 @@ task :all_nuspecs => [:versioning, :mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :m
     nuspec.require_license_acceptance
     nuspec.dependency "MassTransit", NUGET_VERSION
     nuspec.dependency "Newtonsoft.Json", "6.0.8"
-    nuspec.dependency "NewId", "2.1.2"
+    nuspec.dependency "NewId", "2.1.3"
     nuspec.dependency "RabbitMQ.Client", "3.5.3"
     nuspec.output_file = 'nuspecs/MassTransit.RabbitMQ.nuspec'
 
@@ -488,7 +488,7 @@ task :all_nuspecs => [:versioning, :mt_nuspec, :mtl4n_nuspec, :mtnlog_nuspec, :m
     nuspec.license_url = "http://www.apache.org/licenses/LICENSE-2.0"
     nuspec.require_license_acceptance
     nuspec.dependency "MassTransit", NUGET_VERSION
-    nuspec.dependency "NewId", "2.1.2"
+    nuspec.dependency "NewId", "2.1.3"
     nuspec.dependency "NUnit", "2.6.4"
     nuspec.output_file = 'nuspecs/MassTransit.TestFramework.nuspec'
 
@@ -530,7 +530,7 @@ nuspec :mtquartz_nuspec do |nuspec|
   nuspec.license_url = "http://www.apache.org/licenses/LICENSE-2.0"
   nuspec.require_license_acceptance
   nuspec.dependency "MassTransit", NUGET_VERSION
-  nuspec.dependency "NewId", "2.1.2"
+  nuspec.dependency "NewId", "2.1.3"
   nuspec.dependency "Common.Logging.Core", "3.1.0"
   nuspec.dependency "Common.Logging", "3.1.0"
   nuspec.dependency "Newtonsoft.Json", "6.0.8"
