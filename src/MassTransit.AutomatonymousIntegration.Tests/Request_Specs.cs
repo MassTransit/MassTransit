@@ -106,8 +106,6 @@ namespace MassTransit.AutomatonymousTests
                     context.Respond(new AddressValidatedResponse(context.Message));
                 });
             }
-
-
         }
 
 
@@ -176,6 +174,7 @@ namespace MassTransit.AutomatonymousTests
                 get { return _message.CorrelationId; }
             }
         }
+
 
         class TestState :
             SagaStateMachineInstance
@@ -291,7 +290,7 @@ namespace MassTransit.AutomatonymousTests
 
                             context.Instance.Name = context.Data.Name;
                         })
-                        .Request(ValidateAddress, context => new ValidateAddressRequest(context.Message))
+                        .Request(ValidateAddress, context => new ValidateAddressRequest(context.Data))
                         .TransitionTo(ValidateAddress.Pending));
 
                 During(ValidateAddress.Pending,

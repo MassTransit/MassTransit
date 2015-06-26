@@ -14,26 +14,83 @@ namespace Automatonymous.Activities
 {
     using System;
     using System.Threading.Tasks;
-    using Events;
+    using Contexts;
     using MassTransit;
-    using MassTransit.Monitoring.Introspection;
-    using MassTransit.Pipeline;
+
+
+    public class RequestActivity<TInstance, TRequest, TResponse> :
+        RequestActivityImpl<TInstance, TRequest, TResponse>,
+        Activity<TInstance>
+        where TInstance : class, SagaStateMachineInstance
+        where TRequest : class
+        where TResponse : class
+    {
+        readonly EventMessageFactory<TInstance, TRequest> _messageFactory;
+
+        public RequestActivity(Request<TInstance, TRequest, TResponse> request, EventMessageFactory<TInstance, TRequest> messageFactory)
+            : base(request)
+        {
+            _messageFactory = messageFactory;
+        }
+
+        public void Accept(StateMachineVisitor visitor)
+        {
+            visitor.Visit(this);
+        }
+
+        async Task Activity<TInstance>.Execute(BehaviorContext<TInstance> context, Behavior<TInstance> next)
+        {
+            await Execute(context);
+
+            await next.Execute(context);
+        }
+
+        async Task Activity<TInstance>.Execute<T>(BehaviorContext<TInstance, T> context, Behavior<TInstance, T> next)
+        {
+            await Execute(context);
+
+            await next.Execute(context);
+        }
+
+        async Task Activity<TInstance>.Faulted<TException>(BehaviorExceptionContext<TInstance, TException> context, Behavior<TInstance> next)
+        {
+            await next.Faulted(context);
+        }
+
+        async Task Activity<TInstance>.Faulted<T, TException>(BehaviorExceptionContext<TInstance, T, TException> context, Behavior<TInstance, T> next)
+        {
+            await next.Faulted(context);
+        }
+
+        async Task Execute(BehaviorContext<TInstance> context)
+        {
+            ConsumeContext consumeContext;
+            if (!context.TryGetPayload(out consumeContext))
+                throw new ArgumentException("The ConsumeContext was not available");
+
+            var consumeEventContext = new AutomatonymousConsumeEventContext<TInstance>(context, consumeContext);
+
+            TRequest requestMessage = _messageFactory(consumeEventContext);
+
+            await SendRequest(context, consumeContext, requestMessage);
+        }
+    }
 
 
     public class RequestActivity<TInstance, TData, TRequest, TResponse> :
+        RequestActivityImpl<TInstance, TRequest, TResponse>,
         Activity<TInstance, TData>
         where TInstance : class, SagaStateMachineInstance
         where TData : class
         where TRequest : class
         where TResponse : class
     {
-        readonly Request<TInstance, TRequest, TResponse> _request;
-        readonly Func<ConsumeContext<TData>, TRequest> _requestMessageFactory;
+        readonly EventMessageFactory<TInstance, TData, TRequest> _messageFactory;
 
-        public RequestActivity(Request<TInstance, TRequest, TResponse> request, Func<ConsumeContext<TData>, TRequest> requestMessageFactory)
+        public RequestActivity(Request<TInstance, TRequest, TResponse> request, EventMessageFactory<TInstance, TData, TRequest> messageFactory)
+            : base(request)
         {
-            _request = request;
-            _requestMessageFactory = requestMessageFactory;
+            _messageFactory = messageFactory;
         }
 
         public void Accept(StateMachineVisitor visitor)
@@ -47,28 +104,11 @@ namespace Automatonymous.Activities
             if (!context.TryGetPayload(out consumeContext))
                 throw new ArgumentException("The ConsumeContext was not available");
 
-            TRequest requestMessage = _requestMessageFactory(consumeContext);
+            var consumeEventContext = new AutomatonymousConsumeEventContext<TInstance, TData>(context, consumeContext);
 
-            var pipe = new SendRequestPipe(consumeContext.ReceiveContext.InputAddress);
+            TRequest requestMessage = _messageFactory(consumeEventContext);
 
-            ISendEndpoint endpoint = await consumeContext.GetSendEndpoint(_request.Settings.ServiceAddress);
-
-            Task sendTask = endpoint.Send(requestMessage, pipe);
-
-            _request.SetRequestId(context.Instance, pipe.RequestId);
-
-            if (_request.Settings.SchedulingServiceAddress != null)
-            {
-                ISendEndpoint scheduleEndpoint = await consumeContext.GetSendEndpoint(_request.Settings.SchedulingServiceAddress);
-                DateTime now = DateTime.UtcNow;
-                DateTime expirationTime = now + _request.Settings.Timeout;
-
-                RequestTimeoutExpired message = new TimeoutExpired(now, expirationTime, context.Instance.CorrelationId, pipe.RequestId);
-
-                await scheduleEndpoint.ScheduleSend(consumeContext.ReceiveContext.InputAddress, expirationTime, message);
-            }
-
-            await sendTask;
+            await SendRequest(context, consumeContext, requestMessage);
 
             await next.Execute(context);
         }
@@ -77,77 +117,6 @@ namespace Automatonymous.Activities
             where TException : Exception
         {
             await next.Faulted(context);
-        }
-
-
-        /// <summary>
-        /// Handles the sending of a request to the endpoint specified
-        /// </summary>
-        class SendRequestPipe :
-            IPipe<SendContext<TRequest>>
-        {
-            readonly Uri _responseAddress;
-            Guid _requestId;
-
-            public SendRequestPipe(Uri responseAddress)
-            {
-                _responseAddress = responseAddress;
-            }
-
-            public Guid RequestId
-            {
-                get { return _requestId; }
-            }
-
-            async Task IProbeSite.Probe(ProbeContext context)
-            {
-            }
-
-            public async Task Send(SendContext<TRequest> context)
-            {
-                _requestId = NewId.NextGuid();
-
-                context.RequestId = _requestId;
-                context.ResponseAddress = _responseAddress;
-            }
-        }
-
-
-        class TimeoutExpired :
-            RequestTimeoutExpired
-        {
-            readonly Guid _correlationId;
-            readonly DateTime _expirationTime;
-            readonly Guid _requestId;
-            readonly DateTime _timestamp;
-
-            public TimeoutExpired(DateTime timestamp, DateTime expirationTime, Guid correlationId, Guid requestId)
-            {
-                _timestamp = timestamp;
-                _expirationTime = expirationTime;
-                _correlationId = correlationId;
-                _requestId = requestId;
-            }
-
-            public DateTime Timestamp
-            {
-                get { return _timestamp; }
-            }
-
-            public DateTime ExpirationTime
-            {
-                get { return _expirationTime; }
-            }
-
-            public Guid CorrelationId
-            {
-                get { return _correlationId; }
-            }
-
-            public Guid RequestId
-            {
-                get { return _requestId; }
-            }
         }
     }
 }

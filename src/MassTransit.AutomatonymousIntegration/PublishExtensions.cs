@@ -38,7 +38,7 @@ namespace Automatonymous
 
         public static EventActivityBinder<TInstance> Publish<TInstance, TMessage>(
             this EventActivityBinder<TInstance> source,
-            PublishMessageFactory<TInstance, TMessage> messageFactory)
+            EventMessageFactory<TInstance, TMessage> messageFactory)
             where TInstance : class, SagaStateMachineInstance
             where TMessage : class
         {
@@ -47,7 +47,7 @@ namespace Automatonymous
 
         public static EventActivityBinder<TInstance> Publish<TInstance, TMessage>(
             this EventActivityBinder<TInstance> source,
-            PublishMessageFactory<TInstance, TMessage> messageFactory, Action<PublishContext<TMessage>> contextCallback)
+            EventMessageFactory<TInstance, TMessage> messageFactory, Action<PublishContext<TMessage>> contextCallback)
             where TInstance : class, SagaStateMachineInstance
             where TMessage : class
         {
@@ -74,7 +74,7 @@ namespace Automatonymous
         }
 
         public static EventActivityBinder<TInstance, TData> Publish<TInstance, TData, TMessage>(
-            this EventActivityBinder<TInstance, TData> source, PublishMessageFactory<TInstance, TData, TMessage> messageFactory)
+            this EventActivityBinder<TInstance, TData> source, EventMessageFactory<TInstance, TData, TMessage> messageFactory)
             where TInstance : class, SagaStateMachineInstance
             where TData : class
             where TMessage : class
@@ -83,7 +83,7 @@ namespace Automatonymous
         }
 
         public static EventActivityBinder<TInstance, TData> Publish<TInstance, TData, TMessage>(
-            this EventActivityBinder<TInstance, TData> source, PublishMessageFactory<TInstance, TData, TMessage> messageFactory,
+            this EventActivityBinder<TInstance, TData> source, EventMessageFactory<TInstance, TData, TMessage> messageFactory,
             Action<PublishContext<TMessage>> contextCallback)
             where TInstance : class, SagaStateMachineInstance
             where TData : class

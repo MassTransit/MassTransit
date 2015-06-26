@@ -12,9 +12,9 @@
 // specific language governing permissions and limitations under the License.
 namespace Automatonymous
 {
-    public delegate TMessage PublishMessageFactory<in TInstance, out TMessage>(ConsumeEventContext<TInstance> context);
+    public delegate TMessage EventMessageFactory<in TInstance, out TMessage>(ConsumeEventContext<TInstance> context);
 
 
-    public delegate TMessage PublishMessageFactory<in TInstance, in TData, out TMessage>(ConsumeEventContext<TInstance, TData> context)
+    public delegate TMessage EventMessageFactory<in TInstance, in TData, out TMessage>(ConsumeEventContext<TInstance, TData> context)
         where TData : class;
 }

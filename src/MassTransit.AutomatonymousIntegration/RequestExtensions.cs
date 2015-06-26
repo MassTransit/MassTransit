@@ -12,10 +12,8 @@
 // specific language governing permissions and limitations under the License.
 namespace Automatonymous
 {
-    using System;
     using Activities;
     using Binders;
-    using MassTransit;
 
 
     public static class RequestExtensions
@@ -29,17 +27,40 @@ namespace Automatonymous
         /// <typeparam name="TResponse">The response message type</typeparam>
         /// <param name="binder">The event binder</param>
         /// <param name="request">The configured request to use</param>
-        /// <param name="requestMessageFactory">The request message factory</param>
+        /// <param name="messageFactory">The request message factory</param>
         /// <returns></returns>
         public static EventActivityBinder<TInstance, TData> Request<TInstance, TData, TRequest, TResponse>(
             this EventActivityBinder<TInstance, TData> binder, Request<TInstance, TRequest, TResponse> request,
-            Func<ConsumeContext<TData>, TRequest> requestMessageFactory)
+            EventMessageFactory<TInstance, TData, TRequest> messageFactory)
             where TInstance : class, SagaStateMachineInstance
             where TData : class
             where TRequest : class
             where TResponse : class
         {
-            var activity = new RequestActivity<TInstance, TData, TRequest, TResponse>(request, requestMessageFactory);
+            var activity = new RequestActivity<TInstance, TData, TRequest, TResponse>(request, messageFactory);
+
+            return binder.Add(activity);
+        }
+
+        /// <summary>
+        /// Send a request to the configured service endpoint, and setup the state machine to accept the response.
+        /// </summary>
+        /// <typeparam name="TInstance">The state instance type</typeparam>
+        /// <typeparam name="TData">The event data type</typeparam>
+        /// <typeparam name="TRequest">The request message type</typeparam>
+        /// <typeparam name="TResponse">The response message type</typeparam>
+        /// <param name="binder">The event binder</param>
+        /// <param name="request">The configured request to use</param>
+        /// <param name="messageFactory">The request message factory</param>
+        /// <returns></returns>
+        public static EventActivityBinder<TInstance> Request<TInstance, TRequest, TResponse>(
+            this EventActivityBinder<TInstance> binder, Request<TInstance, TRequest, TResponse> request,
+            EventMessageFactory<TInstance, TRequest> messageFactory)
+            where TInstance : class, SagaStateMachineInstance
+            where TRequest : class
+            where TResponse : class
+        {
+            var activity = new RequestActivity<TInstance, TRequest, TResponse>(request, messageFactory);
 
             return binder.Add(activity);
         }
