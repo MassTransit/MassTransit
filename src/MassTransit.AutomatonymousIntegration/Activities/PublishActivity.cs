@@ -25,17 +25,17 @@ namespace Automatonymous.Activities
         where TInstance : SagaStateMachineInstance
         where TMessage : class
     {
-        readonly PublishMessageFactory<TInstance, TMessage> _messageFactory;
+        readonly EventMessageFactory<TInstance, TMessage> _messageFactory;
         readonly IPipe<PublishContext<TMessage>> _publishPipe;
 
-        public PublishActivity(PublishMessageFactory<TInstance, TMessage> messageFactory)
+        public PublishActivity(EventMessageFactory<TInstance, TMessage> messageFactory)
         {
             _messageFactory = messageFactory;
 
             _publishPipe = Pipe.Empty<PublishContext<TMessage>>();
         }
 
-        public PublishActivity(PublishMessageFactory<TInstance, TMessage> messageFactory,
+        public PublishActivity(EventMessageFactory<TInstance, TMessage> messageFactory,
             Action<PublishContext<TMessage>> contextCallback)
         {
             _messageFactory = messageFactory;
@@ -93,10 +93,10 @@ namespace Automatonymous.Activities
         where TData : class
         where TMessage : class
     {
-        readonly PublishMessageFactory<TInstance, TData, TMessage> _messageFactory;
+        readonly EventMessageFactory<TInstance, TData, TMessage> _messageFactory;
         readonly IPipe<PublishContext<TMessage>> _publishPipe;
 
-        public PublishActivity(PublishMessageFactory<TInstance, TData, TMessage> messageFactory,
+        public PublishActivity(EventMessageFactory<TInstance, TData, TMessage> messageFactory,
             Action<PublishContext<TMessage>> contextCallback)
         {
             _messageFactory = messageFactory;
@@ -104,7 +104,7 @@ namespace Automatonymous.Activities
             _publishPipe = Pipe.Execute(contextCallback);
         }
 
-        public PublishActivity(PublishMessageFactory<TInstance, TData, TMessage> messageFactory)
+        public PublishActivity(EventMessageFactory<TInstance, TData, TMessage> messageFactory)
         {
             _messageFactory = messageFactory;
 

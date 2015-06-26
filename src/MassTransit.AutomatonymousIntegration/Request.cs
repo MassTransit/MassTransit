@@ -34,6 +34,9 @@ namespace Automatonymous
         /// </summary>
         string Name { get; }
 
+        /// <summary>
+        /// The settings that are used for the request, including the timeout
+        /// </summary>
         RequestSettings Settings { get; }
 
         /// <summary>

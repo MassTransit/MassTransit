@@ -53,7 +53,8 @@
       <Link>Properties\SolutionVersion.cs</Link>
     </Compile>
     <Compile Include="Activities\PublishActivity.cs" />
-    <Compile Include="PublishMessageFactory.cs" />
+    <Compile Include="Activities\RequestActivityImpl.cs" />
+    <Compile Include="EventMessageFactory.cs" />
     <Compile Include="Activities\RequestActivity.cs" />
     <Compile Include="Activities\RespondActivity.cs" />
     <Compile Include="Activities\RetryLaterActivity.cs" />
