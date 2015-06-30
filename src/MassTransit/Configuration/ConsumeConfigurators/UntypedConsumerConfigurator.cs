@@ -17,6 +17,7 @@ namespace MassTransit.ConsumeConfigurators
     using Configurators;
     using ConsumeConnectors;
     using Internals.Extensions;
+    using PipeConfigurators;
     using Pipeline.ConsumerFactories;
     using Util;
 
@@ -49,7 +50,7 @@ namespace MassTransit.ConsumeConfigurators
 
         public void Configure(IReceiveEndpointBuilder builder)
         {
-            ConsumerConnectorCache<TConsumer>.Connector.Connect(builder, _consumerFactory);
+            ConsumerConnectorCache<TConsumer>.Connector.Connect(builder, _consumerFactory, new IPipeSpecification<ConsumerConsumeContext<TConsumer>>[0]);
         }
     }
 }

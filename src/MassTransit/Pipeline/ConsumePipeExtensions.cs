@@ -44,14 +44,14 @@ namespace MassTransit.Pipeline
             return connector.Connect(filter, consumerFactory, pipeSpecifications);
         }
 
-        public static ConnectHandle ConnectConsumer<T>(this IConsumePipeConnector filter, Func<T> factoryMethod)
+        public static ConnectHandle ConnectConsumer<T>(this IConsumePipeConnector filter, Func<T> factoryMethod, params IPipeSpecification<ConsumerConsumeContext<T>>[] specifications)
             where T : class
         {
             var consumerFactory = new DelegateConsumerFactory<T>(factoryMethod);
 
             ConsumerConnector connector = ConsumerConnectorCache.GetConsumerConnector<T>();
 
-            return connector.Connect(filter, consumerFactory);
+            return connector.Connect(filter, consumerFactory, specifications);
         }
 
         public static ConnectHandle ConnectConsumer(this IConsumePipeConnector filter, Type consumerType, Func<Type, object> objectFactory)

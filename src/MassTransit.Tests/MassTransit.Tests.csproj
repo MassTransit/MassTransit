@@ -161,6 +161,7 @@
     <Compile Include="Serialization\SerializationException_Specs.cs" />
     <Compile Include="InMemoryTest_Specs.cs" />
     <Compile Include="Serialization\TypeHandling_Specs.cs" />
+    <Compile Include="SimpleConfiguration_Specs.cs" />
     <Compile Include="StaticProperty_Specs.cs" />
     <Compile Include="Testing\ConsumerMultiple_Specs.cs" />
     <Compile Include="Testing\ConsumerTest_Specs.cs" />

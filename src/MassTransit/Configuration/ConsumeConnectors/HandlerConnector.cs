@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,6 +13,7 @@
 namespace MassTransit.ConsumeConnectors
 {
     using System;
+    using PipeConfigurators;
     using Pipeline;
 
 
@@ -28,10 +29,9 @@ namespace MassTransit.ConsumeConnectors
         /// </summary>
         /// <param name="consumePipe"></param>
         /// <param name="handler"></param>
-        /// <param name="filters"></param>
+        /// <param name="pipeSpecifications"></param>
         /// <returns></returns>
-        ConnectHandle Connect(IConsumePipeConnector consumePipe, MessageHandler<T> handler,
-            params IFilter<ConsumeContext<T>>[] filters);
+        ConnectHandle Connect(IConsumePipeConnector consumePipe, MessageHandler<T> handler, params IPipeSpecification<ConsumeContext<T>>[] pipeSpecifications);
 
         /// <summary>
         /// Connect a message handler for messages with the specified RequestId
@@ -42,6 +42,6 @@ namespace MassTransit.ConsumeConnectors
         /// <param name="filters"></param>
         /// <returns></returns>
         ConnectHandle Connect(IRequestPipeConnector consumePipe, Guid requestId, MessageHandler<T> handler,
-            params IFilter<ConsumeContext<T>>[] filters);
+            params IPipeSpecification<ConsumeContext<T>>[] pipeSpecifications);
     }
 }

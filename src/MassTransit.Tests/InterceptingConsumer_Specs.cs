@@ -36,8 +36,7 @@ namespace MassTransit.Tests
             _myConsumer = new MyConsumer(GetTask<A>());
             _transactionFilter = new TransactionFilter(GetTask<bool>(), GetTask<bool>());
 
-            configurator.Consumer(() => _myConsumer)
-                .Filter(_transactionFilter);
+            configurator.Consumer(() => _myConsumer, x => x.Filter(_transactionFilter));
         }
 
 

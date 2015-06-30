@@ -72,46 +72,46 @@ namespace MassTransit
         /// <summary>
         /// Register the type as a type to load from the container as a consumer.
         /// </summary>
-        /// <typeparam name="TConsumer">The type of the consumer that consumes messages</typeparam>
+        /// <typeparam name="T">The type of the consumer that consumes messages</typeparam>
         /// <param name="configurator">configurator</param>
         /// <param name="container">The container that the consumer should be loaded from.</param>
+        /// <param name="configure"></param>
         /// <returns>The configurator</returns>
-        public static IConsumerConfigurator<TConsumer> Consumer<TConsumer>(this IReceiveEndpointConfigurator configurator,
-            IKernel container)
-            where TConsumer : class, IConsumer
+        public static void Consumer<T>(this IReceiveEndpointConfigurator configurator, IKernel container, Action<IConsumerConfigurator<T>> configure = null)
+            where T : class, IConsumer
         {
             if (configurator == null)
                 throw new ArgumentNullException("configurator");
             if (container == null)
                 throw new ArgumentNullException("container");
 
-            var consumerFactory = new WindsorConsumerFactory<TConsumer>(container);
+            var consumerFactory = new WindsorConsumerFactory<T>(container);
 
-            return configurator.Consumer(consumerFactory);
+            configurator.Consumer(consumerFactory, configure);
         }
 
         /// <summary>
         /// Load the saga of the generic type from the windsor container,
         /// by loading it directly from the container.
         /// </summary>
-        /// <typeparam name="TSaga">The type of the saga</typeparam>
+        /// <typeparam name="T">The type of the saga</typeparam>
         /// <param name="configurator">The configurator</param>
         /// <param name="container">The windsor container</param>
+        /// <param name="configure"></param>
         /// <returns>The configurator</returns>
-        public static ISagaConfigurator<TSaga> Saga<TSaga>(this IReceiveEndpointConfigurator configurator,
-            IKernel container)
-            where TSaga : class, ISaga
+        public static void Saga<T>(this IReceiveEndpointConfigurator configurator, IKernel container, Action<ISagaConfigurator<T>> configure = null)
+            where T : class, ISaga
         {
             if (configurator == null)
                 throw new ArgumentNullException("configurator");
             if (container == null)
                 throw new ArgumentNullException("container");
 
-            var sagaRepository = container.Resolve<ISagaRepository<TSaga>>();
+            var sagaRepository = container.Resolve<ISagaRepository<T>>();
 
-            var windsorSagaRepository = new WindsorSagaRepository<TSaga>(sagaRepository, container);
+            var windsorSagaRepository = new WindsorSagaRepository<T>(sagaRepository, container);
 
-            return configurator.Saga(windsorSagaRepository);
+            configurator.Saga(windsorSagaRepository, configure);
         }
 
         /// <summary>

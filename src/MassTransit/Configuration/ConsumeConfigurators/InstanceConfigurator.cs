@@ -39,7 +39,7 @@ namespace MassTransit.ConsumeConfigurators
             if (_instance == null)
                 yield return this.Failure("The instance cannot be null. This should have come in the ctor.");
 
-            if (_instance != null && !_instance.HasInterface<IConsumer>())
+            if (_instance != null && !_instance.GetType().HasInterface<IConsumer>())
             {
                 yield return this.Warning(string.Format("The instance of {0} does not implement any consumer interfaces",
                     _instance.GetType().GetTypeName()));

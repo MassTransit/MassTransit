@@ -14,7 +14,9 @@ namespace MassTransit.ConsumeConnectors
 {
     using System;
     using System.Collections.Concurrent;
+    using System.Linq;
     using System.Threading;
+    using PipeConfigurators;
     using Pipeline;
     using Pipeline.ConsumerFactories;
 
@@ -105,7 +107,7 @@ namespace MassTransit.ConsumeConnectors
             {
                 var consumerFactory = new ObjectConsumerFactory<T>(objectFactory);
 
-                return _connector.Value.Connect(consumePipe, consumerFactory);
+                return _connector.Value.Connect(consumePipe, consumerFactory, Enumerable.Empty<IPipeSpecification<ConsumerConsumeContext<T>>>().ToArray());
             }
         }
     }

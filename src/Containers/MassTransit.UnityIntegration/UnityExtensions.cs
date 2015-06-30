@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -42,24 +42,24 @@ namespace MassTransit
             }
         }
 
-        public static IConsumerConfigurator<TConsumer> Consumer<TConsumer>(this IReceiveEndpointConfigurator configurator,
-            IUnityContainer container)
-            where TConsumer : class, IConsumer
+        public static void Consumer<T>(this IReceiveEndpointConfigurator configurator, IUnityContainer container,
+            Action<IConsumerConfigurator<T>> configure = null)
+            where T : class, IConsumer
         {
-            var consumerFactory = new UnityConsumerFactory<TConsumer>(container);
+            var consumerFactory = new UnityConsumerFactory<T>(container);
 
-            return configurator.Consumer(consumerFactory);
+            configurator.Consumer(consumerFactory, configure);
         }
 
-        public static ISagaConfigurator<TSaga> Saga<TSaga>(this IReceiveEndpointConfigurator configurator,
-            IUnityContainer container)
-            where TSaga : class, ISaga
+        public static void Saga<T>(this IReceiveEndpointConfigurator configurator, IUnityContainer container,
+            Action<ISagaConfigurator<T>> configure = null)
+            where T : class, ISaga
         {
-            var sagaRepository = container.Resolve<ISagaRepository<TSaga>>();
+            var sagaRepository = container.Resolve<ISagaRepository<T>>();
 
-            var unitySagaRepository = new UnitySagaRepository<TSaga>(sagaRepository, container);
+            var unitySagaRepository = new UnitySagaRepository<T>(sagaRepository, container);
 
-            return configurator.Saga(unitySagaRepository);
+            configurator.Saga(unitySagaRepository, configure);
         }
 
         static IList<Type> FindTypes<T>(IUnityContainer container, Func<Type, bool> filter)

@@ -14,6 +14,7 @@ namespace MassTransit
 {
     using System;
     using Logging;
+    using PipeConfigurators;
     using Saga;
     using Saga.Connectors;
     using Saga.SubscriptionConfigurators;
@@ -27,32 +28,36 @@ namespace MassTransit
         /// <summary>
         /// Configure a saga subscription
         /// </summary>
-        /// <typeparam name="TSaga"></typeparam>
+        /// <typeparam name="T"></typeparam>
         /// <param name="configurator"></param>
         /// <param name="sagaRepository"></param>
+        /// <param name="configure"></param>
         /// <returns></returns>
-        public static ISagaConfigurator<TSaga> Saga<TSaga>(this IReceiveEndpointConfigurator configurator,
-            ISagaRepository<TSaga> sagaRepository)
-            where TSaga : class, ISaga
+        public static void Saga<T>(this IReceiveEndpointConfigurator configurator, ISagaRepository<T> sagaRepository,
+            Action<ISagaConfigurator<T>> configure = null)
+            where T : class, ISaga
         {
             if (_log.IsDebugEnabled)
-                _log.DebugFormat("Subscribing Saga: {0}", TypeMetadataCache<TSaga>.ShortName);
+                _log.DebugFormat("Subscribing Saga: {0}", TypeMetadataCache<T>.ShortName);
 
-            var sagaConfigurator = new SagaConfigurator<TSaga>(sagaRepository);
+            var sagaConfigurator = new SagaConfigurator<T>(sagaRepository);
+
+            if (configure != null)
+                configure(sagaConfigurator);
 
             configurator.AddEndpointSpecification(sagaConfigurator);
-
-            return sagaConfigurator;
         }
 
         /// <summary>
         /// Connects the saga to the bus
         /// </summary>
-        /// <typeparam name="TSaga">The saga type</typeparam>
+        /// <typeparam name="T">The saga type</typeparam>
         /// <param name="bus">The bus to which the saga is to be connected</param>
         /// <param name="sagaRepository">The saga repository</param>
-        public static ConnectHandle ConnectSaga<TSaga>(this IBus bus, ISagaRepository<TSaga> sagaRepository)
-            where TSaga : class, ISaga
+        /// <param name="pipeSpecifications"></param>
+        public static ConnectHandle ConnectSaga<T>(this IBus bus, ISagaRepository<T> sagaRepository,
+            params IPipeSpecification<SagaConsumeContext<T>>[] pipeSpecifications)
+            where T : class, ISaga
         {
             if (bus == null)
                 throw new ArgumentNullException("bus");
@@ -60,9 +65,9 @@ namespace MassTransit
                 throw new ArgumentNullException("sagaRepository");
 
             if (_log.IsDebugEnabled)
-                _log.DebugFormat("Subscribing Saga: {0}", TypeMetadataCache<TSaga>.ShortName);
+                _log.DebugFormat("Subscribing Saga: {0}", TypeMetadataCache<T>.ShortName);
 
-            return SagaConnectorCache<TSaga>.Connector.Connect(bus, sagaRepository);
+            return SagaConnectorCache<T>.Connector.Connect(bus, sagaRepository, pipeSpecifications);
         }
     }
 }

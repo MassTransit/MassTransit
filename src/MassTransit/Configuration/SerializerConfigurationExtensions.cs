@@ -90,7 +90,8 @@ namespace MassTransit
         }
 
         /// <summary>
-        /// Add support for the binary message deserializer to the bus
+        /// Add support for the binary message deserializer to the bus. This serializer is not supported
+        /// by default.
         /// </summary>
         /// <param name="configurator"></param>
         /// <returns></returns>

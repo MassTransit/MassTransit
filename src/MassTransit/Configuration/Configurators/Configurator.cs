@@ -25,6 +25,7 @@ namespace MassTransit.Configurators
 		/// that you haven't done silly mistakes.
 		/// </summary>
 		/// <returns></returns>
-		IEnumerable<ValidationResult> Validate();
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+        IEnumerable<ValidationResult> Validate();
 	}
 }

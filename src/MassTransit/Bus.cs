@@ -20,12 +20,12 @@ namespace MassTransit
     /// </summary>
     public static class Bus
     {
-        static readonly IBusFactory _selector = new BusFactory();
+        static readonly IBusFactorySelector _selector = new BusFactory();
 
         /// <summary>
         /// Access a bus factory from this main factory interface (easy extension method support)
         /// </summary>
-        public static IBusFactory Factory
+        public static IBusFactorySelector Factory
         {
             get { return _selector; }
         }
