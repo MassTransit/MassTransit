@@ -18,6 +18,7 @@ namespace MassTransit
     public interface IReceiveEndpointConfigurator :
         IConsumePipeConfigurator
     {
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
         void AddEndpointSpecification(IReceiveEndpointSpecification configurator);
     }
 }

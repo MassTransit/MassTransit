@@ -26,6 +26,7 @@ namespace MassTransit
         /// Adds a pipe specification to the pipe configurator at the end of the chain
         /// </summary>
         /// <param name="specification">The pipe specification to add</param>
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
         void AddPipeSpecification(IPipeSpecification<TContext> specification);
     }
 }

@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -22,7 +22,6 @@ namespace MassTransit.ConsumeConnectors
         where T : class
     {
         readonly Lazy<InstanceConnector<T>> _connector;
-
 
         InstanceConnectorCache()
         {
@@ -60,10 +59,8 @@ namespace MassTransit.ConsumeConnectors
 
         public static InstanceConnector GetInstanceConnector(Type type)
         {
-            return InstanceCache.Cached.Value.GetOrAdd(type,
-                _ => new Lazy<InstanceConnector>(() =>
-                    (InstanceConnector)Activator.CreateInstance(typeof(InstanceConnector<>).MakeGenericType(type))))
-                .Value;
+            return InstanceCache.Cached.Value.GetOrAdd(type, _ => new Lazy<InstanceConnector>(() =>
+                (InstanceConnector)Activator.CreateInstance(typeof(InstanceConnector<>).MakeGenericType(type)))).Value;
         }
 
 
@@ -71,8 +68,7 @@ namespace MassTransit.ConsumeConnectors
         {
             internal static readonly Lazy<ConcurrentDictionary<Type, Lazy<InstanceConnector>>> Cached =
                 new Lazy<ConcurrentDictionary<Type, Lazy<InstanceConnector>>>(
-                    () => new ConcurrentDictionary<Type, Lazy<InstanceConnector>>(),
-                    LazyThreadSafetyMode.PublicationOnly);
+                    () => new ConcurrentDictionary<Type, Lazy<InstanceConnector>>(), LazyThreadSafetyMode.PublicationOnly);
         }
     }
 }

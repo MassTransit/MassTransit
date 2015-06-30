@@ -13,8 +13,10 @@
 namespace MassTransit.Saga.SubscriptionConfigurators
 {
     using System.Collections.Generic;
+    using System.Linq;
     using Configurators;
     using Connectors;
+    using PipeConfigurators;
 
 
     public class SagaConfigurator<TSaga> :
@@ -22,22 +24,32 @@ namespace MassTransit.Saga.SubscriptionConfigurators
         IReceiveEndpointSpecification
         where TSaga : class, ISaga
     {
+        readonly IList<IPipeSpecification<SagaConsumeContext<TSaga>>> _pipeSpecifications;
         readonly ISagaRepository<TSaga> _sagaRepository;
 
         public SagaConfigurator(ISagaRepository<TSaga> sagaRepository)
         {
             _sagaRepository = sagaRepository;
+            _pipeSpecifications = new List<IPipeSpecification<SagaConsumeContext<TSaga>>>();
         }
 
         public void Configure(IReceiveEndpointBuilder builder)
         {
-            SagaConnectorCache<TSaga>.Connector.Connect(builder, _sagaRepository);
+            SagaConnectorCache<TSaga>.Connector.Connect(builder, _sagaRepository, _pipeSpecifications.ToArray());
         }
 
         public IEnumerable<ValidationResult> Validate()
         {
             if (_sagaRepository == null)
                 yield return this.Failure("The saga repository cannot be null. How else are we going to save stuff? #facetopalm");
+
+            foreach (ValidationResult result in _pipeSpecifications.SelectMany(x => x.Validate()))
+                yield return result;
+        }
+
+        public void AddPipeSpecification(IPipeSpecification<SagaConsumeContext<TSaga>> specification)
+        {
+            _pipeSpecifications.Add(specification);
         }
     }
 }

@@ -30,9 +30,10 @@ namespace MassTransit
         /// <typeparam name="TConsumer"></typeparam>
         /// <param name="configurator"></param>
         /// <param name="consumerFactory"></param>
+        /// <param name="configure">Optional, configure the consumer</param>
         /// <returns></returns>
-        public static IConsumerConfigurator<TConsumer> Consumer<TConsumer>(this IReceiveEndpointConfigurator configurator,
-            IConsumerFactory<TConsumer> consumerFactory)
+        public static void Consumer<TConsumer>(this IReceiveEndpointConfigurator configurator, IConsumerFactory<TConsumer> consumerFactory,
+            Action<IConsumerConfigurator<TConsumer>> configure = null)
             where TConsumer : class, IConsumer
         {
             if (_log.IsDebugEnabled)
@@ -40,9 +41,10 @@ namespace MassTransit
 
             var consumerConfigurator = new ConsumerConfigurator<TConsumer>(consumerFactory);
 
-            configurator.AddEndpointSpecification(consumerConfigurator);
+            if (configure != null)
+                configure(consumerConfigurator);
 
-            return consumerConfigurator;
+            configurator.AddEndpointSpecification(consumerConfigurator);
         }
 
         /// <summary>
@@ -68,8 +70,9 @@ namespace MassTransit
         /// </summary>
         /// <typeparam name="TConsumer">The consumer type</typeparam>
         /// <param name="configurator"></param>
+        /// <param name="configure"></param>
         /// <returns></returns>
-        public static IConsumerConfigurator<TConsumer> Consumer<TConsumer>(this IReceiveEndpointConfigurator configurator)
+        public static void Consumer<TConsumer>(this IReceiveEndpointConfigurator configurator, Action<IConsumerConfigurator<TConsumer>> configure = null)
             where TConsumer : class, IConsumer, new()
         {
             if (_log.IsDebugEnabled)
@@ -79,9 +82,10 @@ namespace MassTransit
 
             var consumerConfigurator = new ConsumerConfigurator<TConsumer>(consumerFactory);
 
-            configurator.AddEndpointSpecification(consumerConfigurator);
+            if (configure != null)
+                configure(consumerConfigurator);
 
-            return consumerConfigurator;
+            configurator.AddEndpointSpecification(consumerConfigurator);
         }
 
         /// <summary>
@@ -106,8 +110,8 @@ namespace MassTransit
         /// <param name="configurator"></param>
         /// <param name="consumerFactoryMethod"></param>
         /// <returns></returns>
-        public static IConsumerConfigurator<TConsumer> Consumer<TConsumer>(this IReceiveEndpointConfigurator configurator,
-            Func<TConsumer> consumerFactoryMethod)
+        public static void Consumer<TConsumer>(this IReceiveEndpointConfigurator configurator, Func<TConsumer> consumerFactoryMethod,
+            Action<IConsumerConfigurator<TConsumer>> configure = null)
             where TConsumer : class, IConsumer
         {
             if (_log.IsDebugEnabled)
@@ -117,9 +121,10 @@ namespace MassTransit
 
             var consumerConfigurator = new ConsumerConfigurator<TConsumer>(delegateConsumerFactory);
 
-            configurator.AddEndpointSpecification(consumerConfigurator);
+            if (configure != null)
+                configure(consumerConfigurator);
 
-            return consumerConfigurator;
+            configurator.AddEndpointSpecification(consumerConfigurator);
         }
 
         /// <summary>
@@ -147,8 +152,7 @@ namespace MassTransit
         /// <param name="consumerType"></param>
         /// <param name="consumerFactory"></param>
         /// <returns></returns>
-        public static IConsumerConfigurator Consumer(this IReceiveEndpointConfigurator configurator, Type consumerType,
-            Func<Type, object> consumerFactory)
+        public static void Consumer(this IReceiveEndpointConfigurator configurator, Type consumerType, Func<Type, object> consumerFactory)
         {
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Subscribing Consumer: {0} (by type, using object consumer factory)", consumerType.GetTypeName());
@@ -157,8 +161,6 @@ namespace MassTransit
                 typeof(UntypedConsumerConfigurator<>).MakeGenericType(consumerType), consumerFactory);
 
             configurator.AddEndpointSpecification(consumerConfigurator);
-
-            return consumerConfigurator as IConsumerConfigurator;
         }
 
         /// <summary>

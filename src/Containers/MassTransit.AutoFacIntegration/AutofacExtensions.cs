@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -53,36 +53,75 @@ namespace MassTransit
         /// <summary>
         /// Registers a consumer given the lifetime scope specified
         /// </summary>
-        /// <typeparam name="TConsumer">The consumer type</typeparam>
+        /// <typeparam name="T">The consumer type</typeparam>
         /// <param name="configurator">The service bus configurator</param>
         /// <param name="scope">The LifetimeScope of the container</param>
         /// <param name="name">The name of the scope created per-message</param>
         /// <returns></returns>
-        public static IConsumerConfigurator<TConsumer> Consumer<TConsumer>(this IReceiveEndpointConfigurator configurator,
+        public static void Consumer<T>(this IReceiveEndpointConfigurator configurator,
             ILifetimeScope scope, string name = "message")
-            where TConsumer : class, IConsumer
+            where T : class, IConsumer
         {
-            var consumerFactory = new AutofacConsumerFactory<TConsumer>(scope, name);
+            var consumerFactory = new AutofacConsumerFactory<T>(scope, name);
 
-            return configurator.Consumer(consumerFactory);
+            configurator.Consumer(consumerFactory);
+        }
+
+        /// <summary>
+        /// Registers a consumer given the lifetime scope specified
+        /// </summary>
+        /// <typeparam name="T">The consumer type</typeparam>
+        /// <param name="configurator">The service bus configurator</param>
+        /// <param name="scope">The LifetimeScope of the container</param>
+        /// <param name="configure"></param>
+        /// <param name="name">The name of the scope created per-message</param>
+        /// <returns></returns>
+        public static void Consumer<T>(this IReceiveEndpointConfigurator configurator,
+            ILifetimeScope scope, Action<IConsumerConfigurator<T>> configure, string name = "message")
+            where T : class, IConsumer
+        {
+            var consumerFactory = new AutofacConsumerFactory<T>(scope, name);
+
+            configurator.Consumer(consumerFactory, configure);
         }
 
         /// <summary>
         /// Registers a saga using the container that has the repository resolved from the container
         /// </summary>
-        /// <typeparam name="TSaga"></typeparam>
+        /// <typeparam name="T"></typeparam>
         /// <param name="configurator"></param>
         /// <param name="scope"></param>
+        /// <param name="name"></param>
         /// <returns></returns>
-        public static ISagaConfigurator<TSaga> Saga<TSaga>(this IReceiveEndpointConfigurator configurator, ILifetimeScope scope,
+        public static void Saga<T>(this IReceiveEndpointConfigurator configurator, ILifetimeScope scope,
             string name = "message")
-            where TSaga : class, ISaga
+            where T : class, ISaga
         {
-            var sagaRepository = scope.Resolve<ISagaRepository<TSaga>>();
+            var sagaRepository = scope.Resolve<ISagaRepository<T>>();
 
-            var autofacSagaRepository = new AutofacSagaRepository<TSaga>(sagaRepository, scope, name);
+            var autofacSagaRepository = new AutofacSagaRepository<T>(sagaRepository, scope, name);
 
-            return configurator.Saga(autofacSagaRepository);
+            configurator.Saga(autofacSagaRepository);
+        }
+
+        /// <summary>
+        /// Registers a saga using the container that has the repository resolved from the container
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="configurator"></param>
+        /// <param name="scope"></param>
+        /// <param name="configure"></param>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public static void Saga<T>(this IReceiveEndpointConfigurator configurator, ILifetimeScope scope,
+            Action<ISagaConfigurator<T>> configure, string name = "message")
+            where T : class, ISaga
+        {
+            var sagaRepository = scope.Resolve<ISagaRepository<T>>();
+
+            var autofacSagaRepository = new AutofacSagaRepository<T>(sagaRepository, scope, name);
+
+            configurator.Saga(autofacSagaRepository, configure);
         }
 
         static IList<Type> FindTypes<T>(ILifetimeScope scope, Func<Type, bool> filter)

@@ -20,7 +20,7 @@ namespace MassTransit
     /// <summary>
     /// Extensions for subscribing object instances.
     /// </summary>
-    public static class InstanceSubscriptionExtensions
+    public static class InstanceExtensions
     {
         /// <summary>
         /// Subscribes an object instance to the bus

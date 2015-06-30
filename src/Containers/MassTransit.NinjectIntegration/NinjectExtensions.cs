@@ -51,23 +51,22 @@ namespace MassTransit
             }
         }
 
-        public static IConsumerConfigurator<TConsumer> Consumer<TConsumer>(this IReceiveEndpointConfigurator configurator,
-            IKernel kernel)
-            where TConsumer : class, IConsumer
+        public static void Consumer<T>(this IReceiveEndpointConfigurator configurator,IKernel kernel, Action<IConsumerConfigurator<T>> configure = null)
+            where T : class, IConsumer
         {
-            var consumerFactory = new NinjectConsumerFactory<TConsumer>(kernel);
+            var consumerFactory = new NinjectConsumerFactory<T>(kernel);
 
-            return configurator.Consumer(consumerFactory);
+            configurator.Consumer(consumerFactory, configure);
         }
 
-        public static ISagaConfigurator<TSaga> Saga<TSaga>(this IReceiveEndpointConfigurator configurator, IKernel kernel)
-            where TSaga : class, ISaga
+        public static void Saga<T>(this IReceiveEndpointConfigurator configurator, IKernel kernel, Action<ISagaConfigurator<T>> configure = null)
+            where T : class, ISaga
         {
-            var sagaRepository = kernel.Get<ISagaRepository<TSaga>>();
+            var sagaRepository = kernel.Get<ISagaRepository<T>>();
 
-            var ninjectSagaRepository = new NinjectSagaRepository<TSaga>(sagaRepository, kernel);
+            var ninjectSagaRepository = new NinjectSagaRepository<T>(sagaRepository, kernel);
 
-            return configurator.Saga(ninjectSagaRepository);
+            configurator.Saga(ninjectSagaRepository, configure);
         }
 
         static IList<Type> FindTypes<T>(IKernel kernel, Func<Type, bool> filter)

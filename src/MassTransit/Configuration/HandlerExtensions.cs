@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -15,24 +15,11 @@ namespace MassTransit
     using System;
     using ConsumeConfigurators;
     using ConsumeConnectors;
+    using PipeConfigurators;
 
 
     public static class HandlerExtensions
     {
-        /// <summary>
-        /// Subscribes a message handler to the receive endpoint
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="configurator"></param>
-        /// <param name="handler"></param>
-        public static void Handler<T>(this IReceiveEndpointConfigurator configurator, MessageHandler<T> handler)
-            where T : class
-        {
-            var handlerConfigurator = new HandlerConfigurator<T>(handler);
-
-            configurator.AddEndpointSpecification(handlerConfigurator);
-        }
-
         /// <summary>
         /// Adds a handler to the receive endpoint with additional configuration specified
         /// </summary>
@@ -41,12 +28,13 @@ namespace MassTransit
         /// <param name="handler"></param>
         /// <param name="configure"></param>
         public static void Handler<T>(this IReceiveEndpointConfigurator configurator, MessageHandler<T> handler,
-            Action<IHandlerConfigurator<T>> configure)
+            Action<IHandlerConfigurator<T>> configure = null)
             where T : class
         {
             var handlerConfigurator = new HandlerConfigurator<T>(handler);
 
-            configure(handlerConfigurator);
+            if (configure != null)
+                configure(handlerConfigurator);
 
             configurator.AddEndpointSpecification(handlerConfigurator);
         }
@@ -57,10 +45,11 @@ namespace MassTransit
         /// <typeparam name="T">The message type to handle, often inferred from the callback specified</typeparam>
         /// <param name="bus"></param>
         /// <param name="handler">The callback to invoke when messages of the specified type arrive on the service bus</param>
-        public static ConnectHandle ConnectHandler<T>(this IBus bus, MessageHandler<T> handler)
+        /// <param name="specifications"></param>
+        public static ConnectHandle ConnectHandler<T>(this IBus bus, MessageHandler<T> handler, params IPipeSpecification<ConsumeContext<T>>[] specifications)
             where T : class
         {
-            return HandlerConnectorCache<T>.Connector.Connect(bus, handler);
+            return HandlerConnectorCache<T>.Connector.Connect(bus, handler, specifications);
         }
 
         /// <summary>

@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -27,7 +27,7 @@ namespace MassTransit.ConsumeConnectors
     public interface ConsumerConnector
     {
         ConnectHandle Connect<TConsumer>(IConsumePipeConnector consumePipe, IConsumerFactory<TConsumer> consumerFactory,
-            params IPipeSpecification<ConsumerConsumeContext<TConsumer>>[] pipeSpecifications)
+            IPipeSpecification<ConsumerConsumeContext<TConsumer>>[] pipeSpecifications)
             where TConsumer : class;
     }
 
@@ -54,8 +54,8 @@ namespace MassTransit.ConsumeConnectors
             get { return _connectors; }
         }
 
-        public ConnectHandle Connect<TConsumer>(IConsumePipeConnector consumePipe, IConsumerFactory<TConsumer> consumerFactory, params IPipeSpecification<ConsumerConsumeContext<TConsumer>>[] pipeSpecifications)
-            where TConsumer : class
+        ConnectHandle ConsumerConnector.Connect<TConsumer>(IConsumePipeConnector consumePipe, IConsumerFactory<TConsumer> consumerFactory,
+            IPipeSpecification<ConsumerConsumeContext<TConsumer>>[] pipeSpecifications)
         {
             var handles = new List<ConnectHandle>();
             try

@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -26,12 +26,12 @@ namespace MassTransit.ConsumeConnectors
         where TMessage : class
     {
         public ConnectHandle Connect(IConsumePipeConnector consumePipe, MessageHandler<TMessage> handler,
-            params IFilter<ConsumeContext<TMessage>>[] filters)
+            params IPipeSpecification<ConsumeContext<TMessage>>[] pipeSpecifications)
         {
             IPipe<ConsumeContext<TMessage>> pipe = Pipe.New<ConsumeContext<TMessage>>(x =>
             {
-                foreach (var filter in filters)
-                    x.Filter(filter);
+                foreach (var specification in pipeSpecifications)
+                    x.AddPipeSpecification(specification);
 
                 x.AddPipeSpecification(new HandlerPipeSpecification<TMessage>(handler));
             });
@@ -40,12 +40,12 @@ namespace MassTransit.ConsumeConnectors
         }
 
         public ConnectHandle Connect(IRequestPipeConnector consumePipe, Guid requestId, MessageHandler<TMessage> handler,
-            params IFilter<ConsumeContext<TMessage>>[] filters)
+            params IPipeSpecification<ConsumeContext<TMessage>>[] pipeSpecifications)
         {
             IPipe<ConsumeContext<TMessage>> pipe = Pipe.New<ConsumeContext<TMessage>>(x =>
             {
-                foreach (var filter in filters)
-                    x.Filter(filter);
+                foreach (var specification in pipeSpecifications)
+                    x.AddPipeSpecification(specification);
 
                 x.AddPipeSpecification(new HandlerPipeSpecification<TMessage>(handler));
             });

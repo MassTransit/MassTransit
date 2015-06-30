@@ -28,15 +28,6 @@ namespace MassTransit.Internals.Extensions
             _cache = new InterfaceReflectionCache();
         }
 
-        public static bool HasInterface<T>(this object obj)
-        {
-            if (obj == null)
-                throw new ArgumentNullException("obj");
-            Type type = obj.GetType();
-
-            return HasInterface(type, typeof(T));
-        }
-
         public static bool HasInterface<T>(this Type type)
         {
             return HasInterface(type, typeof(T));
@@ -57,24 +48,6 @@ namespace MassTransit.Internals.Extensions
                 return _cache.GetGenericInterface(type, interfaceType) != null;
 
             return interfaceTypeInfo.IsAssignableFrom(type.GetTypeInfo());
-        }
-
-        public static bool HasInterface(this object obj, Type interfaceType)
-        {
-            if (obj == null)
-                throw new ArgumentNullException("obj");
-            Type type = obj.GetType();
-
-            return HasInterface(type, interfaceType);
-        }
-
-        public static Type GetInterface<T>(this object obj)
-        {
-            if (obj == null)
-                throw new ArgumentNullException("obj");
-            Type type = obj.GetType();
-
-            return GetInterface(type, typeof(T));
         }
 
         public static Type GetInterface<T>(this Type type)
@@ -173,14 +146,5 @@ namespace MassTransit.Internals.Extensions
             throw new ArgumentException("Could not find open type in type: " + type.Name);
         }
 
-        public static IEnumerable<Type> GetClosingArguments(this object obj, Type openType)
-        {
-            if (obj == null)
-                throw new ArgumentNullException("obj");
-
-            Type objectType = obj.GetType();
-
-            return GetClosingArguments(objectType, openType);
-        }
     }
 }

@@ -21,13 +21,15 @@ namespace MassTransit
     {
         /// <summary>
         /// Sets the transport provider for the InMemory bus, used to share a transport cache between multiple
-        /// bus instances.
+        /// bus instances. Normally this method is not used.
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="transportProvider"></param>
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Advanced)]
         void SetTransportProvider<T>(T transportProvider)
             where T : ISendTransportProvider, IReceiveTransportProvider;
 
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
         void AddBusFactorySpecification(IInMemoryBusFactorySpecification configurator);
 
         /// <summary>

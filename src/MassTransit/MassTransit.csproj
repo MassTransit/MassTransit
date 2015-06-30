@@ -126,6 +126,7 @@
     <Compile Include="Courier\Exceptions\RoutingSlipArgumentException.cs" />
     <Compile Include="Exceptions\MessageDataException.cs" />
     <Compile Include="Exceptions\MessageDataNotFoundException.cs" />
+    <Compile Include="IBusFactorySelector.cs" />
     <Compile Include="IMessageData.cs" />
     <Compile Include="IntrospectionExtensions.cs" />
     <Compile Include="IProbeSite.cs" />
@@ -347,7 +348,6 @@
     <Compile Include="IFault.cs" />
     <Compile Include="IMessageDeserializer.cs" />
     <Compile Include="IMessageSerializer.cs" />
-    <Compile Include="Internals\Extensions\CastExtensions.cs" />
     <Compile Include="Internals\Extensions\DbCommandExtensions.cs" />
     <Compile Include="Internals\Extensions\ExpressionExtensions.cs" />
     <Compile Include="Internals\Extensions\InterfaceExtensions.cs" />
@@ -618,7 +618,7 @@
     <Compile Include="Configuration\Configurators\ValidationResultImpl.cs" />
     <Compile Include="Configuration\ConsumerExtensions.cs" />
     <Compile Include="Configuration\HandlerExtensions.cs" />
-    <Compile Include="Configuration\InstanceSubscriptionExtensions.cs" />
+    <Compile Include="Configuration\InstanceExtensions.cs" />
     <Compile Include="Configuration\Configurators\Configurator.cs" />
     <Compile Include="Configuration\SerializerConfigurationExtensions.cs" />
     <Compile Include="Configuration\ConsumeConnectors\ConsumerConnectorCache.cs" />

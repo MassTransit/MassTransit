@@ -23,6 +23,7 @@ namespace MassTransit
         /// </summary>
         /// <typeparam name="T">The message type</typeparam>
         /// <param name="specification"></param>
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
         void AddPipeSpecification<T>(IPipeSpecification<ConsumeContext<T>> specification)
             where T : class;
     }

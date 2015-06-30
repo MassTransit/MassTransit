@@ -46,7 +46,7 @@ namespace MassTransit.ConsumeConnectors
         }
 
         ConnectHandle ConsumerConnector.Connect<T>(IConsumePipeConnector consumePipe, IConsumerFactory<T> consumerFactory,
-            params IPipeSpecification<ConsumerConsumeContext<T>>[] pipeSpecifications)
+            IPipeSpecification<ConsumerConsumeContext<T>>[] pipeSpecifications)
         {
             var factory = consumerFactory as IConsumerFactory<TConsumer>;
             if (factory == null)

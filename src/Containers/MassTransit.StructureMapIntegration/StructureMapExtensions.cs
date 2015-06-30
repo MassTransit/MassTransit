@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -59,23 +59,22 @@ namespace MassTransit
             configurator.LoadFrom(container);
         }
 
-        public static IConsumerConfigurator<TConsumer> Consumer<TConsumer>(this IReceiveEndpointConfigurator configurator,
-            IContainer container)
-            where TConsumer : class, IConsumer
+        public static void Consumer<T>(this IReceiveEndpointConfigurator configurator, IContainer container, Action<IConsumerConfigurator<T>> configure = null)
+            where T : class, IConsumer
         {
-            var consumerFactory = new StructureMapConsumerFactory<TConsumer>(container);
+            var consumerFactory = new StructureMapConsumerFactory<T>(container);
 
-            return configurator.Consumer(consumerFactory);
+            configurator.Consumer(consumerFactory, configure);
         }
 
-        public static ISagaConfigurator<TSaga> Saga<TSaga>(this IReceiveEndpointConfigurator configurator, IContainer container)
-            where TSaga : class, ISaga
+        public static void Saga<T>(this IReceiveEndpointConfigurator configurator, IContainer container, Action<ISagaConfigurator<T>> configure = null)
+            where T : class, ISaga
         {
-            var sagaRepository = container.GetInstance<ISagaRepository<TSaga>>();
+            var sagaRepository = container.GetInstance<ISagaRepository<T>>();
 
-            var structureMapSagaRepository = new StructureMapSagaRepository<TSaga>(sagaRepository, container);
+            var structureMapSagaRepository = new StructureMapSagaRepository<T>(sagaRepository, container);
 
-            return configurator.Saga(structureMapSagaRepository);
+            configurator.Saga(structureMapSagaRepository, configure);
         }
 
         static IList<Type> FindTypes<T>(IContainer container, Func<Type, bool> filter)
