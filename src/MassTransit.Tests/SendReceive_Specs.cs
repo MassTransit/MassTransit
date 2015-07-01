@@ -71,7 +71,7 @@ namespace MassTransit.Tests
             Task<ConsumeContext<MessageA>> handler = SubscribeHandler<MessageA>(x => x.RequestId.HasValue);
 
             var message = new MessageA();
-            await BusSendEndpoint.Send(message, Pipe.New<SendContext>(x => x.Execute(c => c.RequestId = NewId.NextGuid())));
+            await BusSendEndpoint.Send(message, Pipe.New<SendContext>(x => x.UseExecute(c => c.RequestId = NewId.NextGuid())));
 
             await handler;
         }

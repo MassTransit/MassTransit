@@ -25,7 +25,7 @@ namespace MassTransit
         /// <typeparam name="T">The pipe type</typeparam>
         /// <param name="configurator">The pipe configurator</param>
         /// <param name="cancellationToken">The cancellationToken to cancel the repetition</param>
-        public static void Repeat<T>(this IPipeConfigurator<T> configurator, CancellationToken cancellationToken)
+        public static void UseRepeat<T>(this IPipeConfigurator<T> configurator, CancellationToken cancellationToken)
             where T : class, PipeContext
         {
             if (configurator == null)

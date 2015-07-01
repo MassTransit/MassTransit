@@ -68,7 +68,7 @@ namespace MassTransit.ConsumeConnectors
 
             IPipe<ConsumeContext<TMessage>> instancePipe = Pipe.New<ConsumeContext<TMessage>>(x =>
             {
-                x.Filter(new InstanceMessageFilter<TConsumer, TMessage>(consumer, _consumeFilter));
+                x.UseFilter(new InstanceMessageFilter<TConsumer, TMessage>(consumer, _consumeFilter));
             });
 
             return pipe.ConnectConsumePipe(instancePipe);

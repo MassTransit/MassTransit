@@ -39,7 +39,7 @@ namespace MassTransit.Pipeline.Filters
                 throw new ArgumentNullException("instanceFilter");
 
             _instance = instance;
-            _instancePipe = Pipe.New<ConsumerConsumeContext<TConsumer, TMessage>>(x => x.Filter(instanceFilter));
+            _instancePipe = Pipe.New<ConsumerConsumeContext<TConsumer, TMessage>>(x => x.UseFilter(instanceFilter));
         }
 
         async Task IProbeSite.Probe(ProbeContext context)

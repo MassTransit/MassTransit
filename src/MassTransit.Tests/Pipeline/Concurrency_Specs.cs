@@ -36,7 +36,7 @@ namespace MassTransit.Tests.Pipeline
             IPipe<ConsumeContext<A>> pipe = Pipe.New<ConsumeContext<A>>(x =>
             {
                 x.UseConcurrencyLimit(1);
-                x.ExecuteAsync(async payload =>
+                x.UseExecuteAsync(async payload =>
                 {
                     int current = Interlocked.Increment(ref currentCount);
                     while (current > maxCount)
@@ -68,7 +68,7 @@ namespace MassTransit.Tests.Pipeline
             IPipe<ConsumeContext<A>> pipe = Pipe.New<ConsumeContext<A>>(x =>
             {
                 x.UseConcurrencyLimit(32);
-                x.ExecuteAsync(async payload =>
+                x.UseExecuteAsync(async payload =>
                 {
                     int current = Interlocked.Increment(ref currentCount);
                     while (current > maxCount)
@@ -102,7 +102,7 @@ namespace MassTransit.Tests.Pipeline
             IPipe<ConsumeContext<A>> pipe = Pipe.New<ConsumeContext<A>>(x =>
             {
                 x.UseRateLimit(10, TimeSpan.FromSeconds(1));
-                x.Execute(payload =>
+                x.UseExecute(payload =>
                 {
                     Interlocked.Increment(ref count);
                 });

@@ -28,7 +28,7 @@ namespace MassTransit
         /// <param name="configurator"></param>
         /// <param name="rescuePipe"></param>
         /// <param name="exceptionTypes"></param>
-        public static void Rescue<T>(this IPipeConfigurator<T> configurator, IPipe<T> rescuePipe, params Type[] exceptionTypes)
+        public static void UseRescue<T>(this IPipeConfigurator<T> configurator, IPipe<T> rescuePipe, params Type[] exceptionTypes)
             where T : class, PipeContext
         {
             if (configurator == null)

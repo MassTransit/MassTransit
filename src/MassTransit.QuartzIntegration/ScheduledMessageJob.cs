@@ -81,7 +81,7 @@ namespace MassTransit.QuartzIntegration
         {
             IPipe<SendContext> sendPipe = Pipe.New<SendContext>(x =>
             {
-                x.Execute(context =>
+                x.UseExecute(context =>
                 {
                     context.DestinationAddress = (destinationAddress);
                     context.SourceAddress = (sourceAddress);

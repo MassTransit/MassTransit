@@ -20,7 +20,7 @@ namespace MassTransit
 
     public static class RetryPipeConfiguratorExtensions
     {
-        public static void Retry(this IPipeConfigurator<ConsumeContext> configurator, IRetryPolicy retryPolicy)
+        public static void UseRetry(this IPipeConfigurator<ConsumeContext> configurator, IRetryPolicy retryPolicy)
         {
             if (configurator == null)
                 throw new ArgumentNullException("configurator");
@@ -30,7 +30,7 @@ namespace MassTransit
             configurator.AddPipeSpecification(pipeBuilderConfigurator);
         }
 
-        public static void Retry<T>(this IPipeConfigurator<ConsumeContext<T>> configurator, IRetryPolicy retryPolicy)
+        public static void UseRetry<T>(this IPipeConfigurator<ConsumeContext<T>> configurator, IRetryPolicy retryPolicy)
             where T : class
         {
             if (configurator == null)
@@ -47,7 +47,7 @@ namespace MassTransit
         /// <param name="configurator">The pipe configurator</param>
         /// <param name="retryPolicy">The retry policy</param>
         /// <param name="cancellationToken">The cancellation token to end the retry operations</param>
-        public static void Retry(this IPipeConfigurator<ConsumeContext> configurator, IRetryPolicy retryPolicy, CancellationToken cancellationToken)
+        public static void UseRetry(this IPipeConfigurator<ConsumeContext> configurator, IRetryPolicy retryPolicy, CancellationToken cancellationToken)
         {
             if (configurator == null)
                 throw new ArgumentNullException("configurator");

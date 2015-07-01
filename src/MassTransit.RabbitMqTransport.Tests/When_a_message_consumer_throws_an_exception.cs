@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,7 +14,6 @@ namespace MassTransit.RabbitMqTransport.Tests
 {
     using System;
     using System.Threading.Tasks;
-    using Configuration;
     using NUnit.Framework;
     using Shouldly;
     using TestFramework;
@@ -33,23 +32,17 @@ namespace MassTransit.RabbitMqTransport.Tests
                 StringA = "ValueA",
             };
 
-            await InputQueueSendEndpoint.Send(_message);
+            await InputQueueSendEndpoint.Send(_message, Pipe.Execute<SendContext>(x => x.FaultAddress = BusAddress));
+
+            await _received.Task;
 
             ConsumeContext<Fault<A>> fault = await faultHandled;
 
             fault.Message.Message.StringA.ShouldBe("ValueA");
         }
 
-        [Test]
-        public void Should_have_a_copy_of_the_error_in_the_error_queue()
-        {
-//            _received.WaitUntilCompleted(Debugger.IsAttached ? 5.Minutes() : 8.Seconds());
-            //          LocalBus.GetEndpoint(LocalErrorUri).ShouldContain(_message, Debugger.IsAttached ? 5.Minutes() : 8.Seconds());
-        }
-
         TaskCompletionSource<A> _received;
         A _message;
-        TaskCompletionSource<Fault<A>> _faultReceived;
 
         protected override void ConfigureInputQueueEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
@@ -64,7 +57,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         }
 
 
-        class A :
+        public class A :
             CorrelatedBy<Guid>
         {
             public string StringA { get; set; }

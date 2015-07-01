@@ -16,7 +16,7 @@ namespace MassTransit.Tests.Transforms
     using NUnit.Framework;
     using Shouldly;
     using TestFramework;
-    using TransformConfigurators;
+    using Transformation.TransformConfigurators;
 
 
     [TestFixture]

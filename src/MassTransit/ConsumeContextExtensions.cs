@@ -103,7 +103,7 @@ namespace MassTransit
         /// <returns></returns>
         public static IPipe<SendContext> CreateCopyContextPipe(this ConsumeContext context, Action<ConsumeContext, SendContext> callback)
         {
-            return Pipe.New<SendContext>(x => x.Execute(sendContext =>
+            return Pipe.New<SendContext>(x => x.UseExecute(sendContext =>
             {
                 sendContext.RequestId = context.RequestId;
                 sendContext.CorrelationId = context.CorrelationId;

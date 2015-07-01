@@ -75,7 +75,6 @@
     <Compile Include="Assumptions\RoutingAssumptions.cs" />
     <Compile Include="Assumptions\TransactionAssumptions.cs" />
     <Compile Include="Bytes_Specs.cs" />
-    <Compile Include="Connector_Specs.cs" />
     <Compile Include="ConsumerBind_Specs.cs" />
     <Compile Include="ContextSetup.cs" />
     <Compile Include="DelayRetry_Specs.cs" />

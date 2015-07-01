@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,8 +12,11 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.Saga
 {
+    using System;
     using MassTransit.Saga;
+    using Messages;
     using NUnit.Framework;
+    using Shouldly;
     using TestFramework;
 
 
@@ -21,32 +24,43 @@ namespace MassTransit.Tests.Saga
     public class Injecting_properties_into_a_saga :
         InMemoryTestFixture
     {
-        protected override void ConfigureBus(IInMemoryBusFactoryConfigurator configurator)
+        [Test]
+        public async void The_saga_should_be_created_when_an_initiating_message_is_received()
         {
-            // this is our dependency, but could be dynamically resolved from a container in method
-            // below is so desired.
-            var dependency = new Dependency();
+            var message = new InitiateSimpleSaga(_sagaId);
 
-            // create the actual saga repository
-            ISagaRepository<InjectingSampleSaga> sagaRepository = SetupSagaRepository<InjectingSampleSaga>();
+            await InputQueueSendEndpoint.Send(message);
 
-            // decorate the saga repository with the injecting repository, specifying the property and a
-            // lambda method to return the property value given the saga instance that was loaded
-            // allows properties of the saga to be used in the resolution of the dependency
-            ISagaRepository<InjectingSampleSaga> injectingRepository =
-                InjectingSagaRepository<InjectingSampleSaga>.Create(sagaRepository,
-                    x => x.Dependency, saga => dependency);
+            Guid? sagaId = await _repository.ShouldContainSaga(_sagaId, TestTimeout);
 
-            // subscribe the decorated saga repository to the bus during configuration
-            //configurator.Subscribe(x => x.Saga(injectingRepository));
+            sagaId.HasValue.ShouldBe(true);
         }
 
-        protected static InMemorySagaRepository<TSaga> SetupSagaRepository<TSaga>()
+        ISagaRepository<InjectingSampleSaga> _repository;
+        Dependency _dependency;
+        Guid _sagaId;
+
+        protected override void ConfigureBus(IInMemoryBusFactoryConfigurator configurator)
+        {
+            _sagaId = NewId.NextGuid();
+
+            // this is our dependency, but could be dynamically resolved from a container in method
+            // below is so desired.
+            _dependency = new Dependency();
+
+            // create the actual saga repository
+            _repository = SetupSagaRepository<InjectingSampleSaga>();
+        }
+
+        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+        {
+            configurator.Saga(_repository, x => x.UseExecute(context => context.Saga.Dependency = _dependency));
+        }
+
+        static InMemorySagaRepository<TSaga> SetupSagaRepository<TSaga>()
             where TSaga : class, ISaga
         {
-            var sagaRepository = new InMemorySagaRepository<TSaga>();
-
-            return sagaRepository;
+            return new InMemorySagaRepository<TSaga>();
         }
 
 

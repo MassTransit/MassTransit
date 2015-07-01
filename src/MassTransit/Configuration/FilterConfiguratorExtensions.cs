@@ -13,24 +13,25 @@
 namespace MassTransit
 {
     using System;
-    using System.IO;
-    using System.Threading.Tasks;
     using PipeConfigurators;
+    using Pipeline;
 
 
-    public static class LogPipeConfiguratorExtensions
+    public static class FilterConfiguratorExtensions
     {
-        public static void UseLog<T>(this IPipeConfigurator<T> configurator, TextWriter textWriter, Func<T, Task<string>> formatter)
+        /// <summary>
+        /// Adds a filter to the pipe
+        /// </summary>
+        /// <typeparam name="T">The context type</typeparam>
+        /// <param name="configurator">The pipe configurator</param>
+        /// <param name="filter">The filter to add</param>
+        public static void UseFilter<T>(this IPipeConfigurator<T> configurator, IFilter<T> filter)
             where T : class, PipeContext
         {
             if (configurator == null)
                 throw new ArgumentNullException("configurator");
-            if (textWriter == null)
-                throw new ArgumentNullException("textWriter");
-            if (formatter == null)
-                throw new ArgumentNullException("formatter");
 
-            var pipeBuilderConfigurator = new LogPipeSpecification<T>(textWriter, formatter);
+            var pipeBuilderConfigurator = new FilterPipeSpecification<T>(filter);
 
             configurator.AddPipeSpecification(pipeBuilderConfigurator);
         }

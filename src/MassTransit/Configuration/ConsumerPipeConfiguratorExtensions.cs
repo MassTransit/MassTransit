@@ -26,7 +26,7 @@ namespace MassTransit
         /// <typeparam name="TConsumer"></typeparam>
         /// <param name="configurator">The pipe configurator</param>
         /// <param name="filter">The already built pipe</param>
-        public static void Filter<TConsumer, T>(this IPipeConfigurator<ConsumerConsumeContext<TConsumer, T>> configurator,
+        public static void UseFilter<TConsumer, T>(this IPipeConfigurator<ConsumerConsumeContext<TConsumer, T>> configurator,
             IFilter<ConsumerConsumeContext<TConsumer>> filter)
             where T : class
             where TConsumer : class

@@ -65,12 +65,12 @@ namespace MassTransit.AzureServiceBusTransport
 
             IPipe<ConnectionContext> connectionPipe = Pipe.New<ConnectionContext>(x =>
             {
-                x.Filter(new PrepareReceiveQueueFilter(_settings));
+                x.UseFilter(new PrepareReceiveQueueFilter(_settings));
 
                 foreach (TopicSubscriptionSettings subscriptionSetting in _subscriptionSettings)
-                    x.Filter(new BindTopicSubscriptionFilter(subscriptionSetting));
+                    x.UseFilter(new BindTopicSubscriptionFilter(subscriptionSetting));
 
-                x.Filter(new MessageReceiverFilter(receivePipe, _receiveObservers));
+                x.UseFilter(new MessageReceiverFilter(receivePipe, _receiveObservers));
             });
 
             Task receiveTask = Receiver(stopTokenSource.Token, connectionPipe);

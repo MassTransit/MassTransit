@@ -31,7 +31,7 @@ namespace MassTransit.ConsumeConnectors
             IPipe<ConsumeContext<TMessage>> pipe = Pipe.New<ConsumeContext<TMessage>>(x =>
             {
                 foreach (var filter in filters)
-                    x.Filter(filter);
+                    x.UseFilter(filter);
 
                 x.AddPipeSpecification(new ObserverPipeSpecification<TMessage>(observer));
             });
@@ -45,7 +45,7 @@ namespace MassTransit.ConsumeConnectors
             IPipe<ConsumeContext<TMessage>> pipe = Pipe.New<ConsumeContext<TMessage>>(x =>
             {
                 foreach (var filter in filters)
-                    x.Filter(filter);
+                    x.UseFilter(filter);
 
                 x.AddPipeSpecification(new ObserverPipeSpecification<TMessage>(observer));
             });

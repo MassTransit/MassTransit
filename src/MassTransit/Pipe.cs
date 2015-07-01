@@ -48,7 +48,7 @@ namespace MassTransit
         {
             var configurator = new PipeConfigurator<T>();
 
-            configurator.Execute(action);
+            configurator.UseExecute(action);
 
             return configurator.Build();
         }
@@ -64,7 +64,7 @@ namespace MassTransit
         {
             var configurator = new PipeConfigurator<T>();
 
-            configurator.ExecuteAsync(action);
+            configurator.UseExecuteAsync(action);
 
             return configurator.Build();
         }

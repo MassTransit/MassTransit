@@ -42,7 +42,7 @@ namespace MassTransit.Courier.Hosts
             _compensateAddress = compensateAddress;
             _activityFactory = activityFactory;
 
-            _executePipe = Pipe.New<ExecuteActivityContext<TArguments>>(x => x.Filter(new ExecuteActivityFilter<TArguments>()));
+            _executePipe = Pipe.New<ExecuteActivityContext<TArguments>>(x => x.UseFilter(new ExecuteActivityFilter<TArguments>()));
         }
 
         public ExecuteActivityHost(ExecuteActivityFactory<TArguments> activityFactory)
@@ -52,7 +52,7 @@ namespace MassTransit.Courier.Hosts
 
             _activityFactory = activityFactory;
 
-            _executePipe = Pipe.New<ExecuteActivityContext<TArguments>>(x => x.Filter(new ExecuteActivityFilter<TArguments>()));
+            _executePipe = Pipe.New<ExecuteActivityContext<TArguments>>(x => x.UseFilter(new ExecuteActivityFilter<TArguments>()));
         }
 
         public async Task Probe(ProbeContext context)

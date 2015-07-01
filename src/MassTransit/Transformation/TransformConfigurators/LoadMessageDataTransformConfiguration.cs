@@ -1,4 +1,4 @@
-namespace MassTransit.TransformConfigurators
+namespace MassTransit.Transformation.TransformConfigurators
 {
     using System.Reflection;
     using MessageData;

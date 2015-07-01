@@ -69,7 +69,7 @@ namespace MassTransit.Pipeline.Filters
         {
             var filter = new RequestConsumeFilter<T, Guid>(GetRequestId);
 
-            IPipe<ConsumeContext<T>> pipe = Pipe.New<ConsumeContext<T>>(x => x.Filter(filter));
+            IPipe<ConsumeContext<T>> pipe = Pipe.New<ConsumeContext<T>>(x => x.UseFilter(filter));
 
             _connections.Connect(pipe);
 

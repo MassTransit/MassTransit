@@ -72,9 +72,9 @@ namespace MassTransit.PipeConfigurators
             IPipe<ConsumeContext<RoutingSlip>> messagePipe = Pipe.New<ConsumeContext<RoutingSlip>>(x =>
             {
                 foreach (var filter in builders.Filters)
-                    x.Filter(filter);
+                    x.UseFilter(filter);
 
-                x.Filter(_filterFactory());
+                x.UseFilter(_filterFactory());
             });
 
             builder.ConnectConsumePipe(messagePipe);

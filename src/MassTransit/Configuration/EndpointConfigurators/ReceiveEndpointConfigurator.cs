@@ -75,7 +75,7 @@ namespace MassTransit.EndpointConfigurators
 
             ConfigureRescueFilter(builder);
 
-            _receiveConfigurator.Filter(new DeserializeFilter(builder.MessageDeserializer, consumePipe));
+            _receiveConfigurator.UseFilter(new DeserializeFilter(builder.MessageDeserializer, consumePipe));
 
             return _receiveConfigurator.Build();
         }
@@ -90,10 +90,10 @@ namespace MassTransit.EndpointConfigurators
 
                 Func<Task<ISendTransport>> getErrorTransport = () => transportProvider.GetSendTransport(errorAddress);
 
-                x.Filter(new MoveToErrorTransportFilter(getErrorTransport));
+                x.UseFilter(new MoveToErrorTransportFilter(getErrorTransport));
             });
 
-            _receiveConfigurator.Rescue(moveToErrorPipe);
+            _receiveConfigurator.UseRescue(moveToErrorPipe);
         }
 
         protected abstract Uri GetErrorAddress();

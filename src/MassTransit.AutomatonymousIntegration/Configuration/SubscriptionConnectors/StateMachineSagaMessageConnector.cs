@@ -40,16 +40,16 @@ namespace Automatonymous.SubscriptionConnectors
 
         protected override void ConfigureSagaPipe(IPipeConfigurator<SagaConsumeContext<TInstance, TMessage>> configurator)
         {
-            configurator.Filter(_consumeFilter);
+            configurator.UseFilter(_consumeFilter);
         }
 
         protected override void ConfigureMessagePipe(IPipeConfigurator<ConsumeContext<TMessage>> configurator, ISagaRepository<TInstance> repository,
             IPipe<SagaConsumeContext<TInstance, TMessage>> sagaPipe)
         {
             if (_messageFilter != null)
-                configurator.Filter(_messageFilter);
+                configurator.UseFilter(_messageFilter);
 
-            configurator.Filter(_sagaFilterFactory(repository, _policy, sagaPipe));
+            configurator.UseFilter(_sagaFilterFactory(repository, _policy, sagaPipe));
         }
     }
 }

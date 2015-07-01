@@ -38,7 +38,7 @@ namespace MassTransit.Testing.TestActions
         {
             ISendEndpoint endpoint = _endpointAccessor(scenario);
 
-            return endpoint.Send(_message, Pipe.New<SendContext<TMessage>>(x => x.Execute(context => _callback(scenario, context))),
+            return endpoint.Send(_message, Pipe.New<SendContext<TMessage>>(x => x.UseExecute(context => _callback(scenario, context))),
                 cancellationToken);
         }
 

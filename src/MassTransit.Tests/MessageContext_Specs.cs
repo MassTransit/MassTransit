@@ -82,7 +82,7 @@ namespace MassTransit.Tests
         {
             _correlationId = Guid.NewGuid();
 
-            InputQueueSendEndpoint.Send(new PingMessage(), Pipe.New<SendContext<PingMessage>>(x => x.Execute(context =>
+            InputQueueSendEndpoint.Send(new PingMessage(), Pipe.New<SendContext<PingMessage>>(x => x.UseExecute(context =>
             {
                 context.CorrelationId = _correlationId;
                 context.Headers.Set("One", "1");

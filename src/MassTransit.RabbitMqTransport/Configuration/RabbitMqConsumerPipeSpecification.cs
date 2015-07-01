@@ -44,9 +44,9 @@ namespace MassTransit.RabbitMqTransport.Configuration
         {
             IPipe<ModelContext> pipe = Pipe.New<ModelContext>(x =>
             {
-                x.Filter(new PrepareReceiveQueueFilter(_settings, _exchangeBindings));
+                x.UseFilter(new PrepareReceiveQueueFilter(_settings, _exchangeBindings));
 
-                x.Filter(new RabbitMqConsumerFilter(_receivePipe, _receiveObserver));
+                x.UseFilter(new RabbitMqConsumerFilter(_receivePipe, _receiveObserver));
             });
 
             IFilter<ConnectionContext> modelFilter = new ReceiveModelFilter(pipe);

@@ -16,7 +16,6 @@ namespace MassTransit.Transformation.PropertyProviders
     using System.Reflection;
     using Contexts;
     using Internals.Reflection;
-    using TransformConfigurators;
 
 
     public class SourcePropertyProvider<TProperty, TInput> :
