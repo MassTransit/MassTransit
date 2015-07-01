@@ -40,7 +40,7 @@ namespace MassTransit.Testing.TestActions
             IPublishEndpoint publishEndpoint = _busAccessor(scenario);
 
             return publishEndpoint.Publish(_message,
-                Pipe.New<PublishContext<TMessage>>(x => x.Execute(context => _callback(scenario, context))), cancellationToken);
+                Pipe.New<PublishContext<TMessage>>(x => x.UseExecute(context => _callback(scenario, context))), cancellationToken);
         }
 
         static void DefaultCallback(TScenario scenario, PublishContext<TMessage> context)

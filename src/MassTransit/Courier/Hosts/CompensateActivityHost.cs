@@ -35,7 +35,7 @@ namespace MassTransit.Courier.Hosts
         {
             _activityFactory = activityFactory;
 
-            _compensatePipe = Pipe.New<CompensateActivityContext<TLog>>(x => x.Filter(new CompensateActivityFilter<TLog>()));
+            _compensatePipe = Pipe.New<CompensateActivityContext<TLog>>(x => x.UseFilter(new CompensateActivityFilter<TLog>()));
         }
 
         public async Task Send(ConsumeContext<RoutingSlip> context, IPipe<ConsumeContext<RoutingSlip>> next)

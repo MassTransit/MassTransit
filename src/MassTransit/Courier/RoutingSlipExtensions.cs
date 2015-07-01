@@ -58,7 +58,7 @@ namespace MassTransit.Courier
             {
                 ISendEndpoint endpoint = await bus.GetSendEndpoint(routingSlip.GetNextExecuteAddress());
 
-                await endpoint.Send(routingSlip, Pipe.New<SendContext>(x => x.Execute(context => context.SourceAddress = bus.Address)));
+                await endpoint.Send(routingSlip, Pipe.New<SendContext>(x => x.UseExecute(context => context.SourceAddress = bus.Address)));
             }
         }
 

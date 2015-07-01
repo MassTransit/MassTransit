@@ -21,29 +21,16 @@ namespace MassTransit
         /// <summary>
         /// Encapsulate the pipe behavior in a transaction
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="configurator"></param>
-        /// <param name="configureCallback"></param>
-        public static void UseTransaction<T>(this IPipeConfigurator<T> configurator,
-            Action<ITransactionConfigurator> configureCallback)
+        /// <typeparam name="T">The pipe context type</typeparam>
+        /// <param name="configurator">The pipe configurator</param>
+        /// <param name="configure">Configure the transaction pipe</param>
+        public static void UseTransaction<T>(this IPipeConfigurator<T> configurator, Action<ITransactionConfigurator> configure = null)
             where T : class, PipeContext
         {
             var transactionConfigurator = new TransactionPipeSpecification<T>();
 
-            configureCallback(transactionConfigurator);
-
-            configurator.AddPipeSpecification(transactionConfigurator);
-        }
-
-        /// <summary>
-        /// Encapsulate the pipe behavior in a transaction (using the default transaction options)
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="configurator"></param>
-        public static void UseTransaction<T>(this IPipeConfigurator<T> configurator)
-            where T : class, PipeContext
-        {
-            var transactionConfigurator = new TransactionPipeSpecification<T>();
+            if (configure != null)
+                configure(transactionConfigurator);
 
             configurator.AddPipeSpecification(transactionConfigurator);
         }

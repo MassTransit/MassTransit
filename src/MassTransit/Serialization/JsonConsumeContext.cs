@@ -343,14 +343,20 @@ namespace MassTransit.Serialization
                     x.Headers.Set(header.Key, header.Value);
             });
 
-            if (ResponseAddress != null)
+            if (FaultAddress != null)
             {
-                ISendEndpoint endpoint = await GetSendEndpoint(ResponseAddress).ConfigureAwait(false);
+                ISendEndpoint endpoint = await GetSendEndpoint(FaultAddress);
 
-                await endpoint.Send(fault, faultPipe, CancellationToken).ConfigureAwait(false);
+                await endpoint.Send(fault, faultPipe, CancellationToken);
+            }
+            else if (ResponseAddress != null)
+            {
+                ISendEndpoint endpoint = await GetSendEndpoint(ResponseAddress);
+
+                await endpoint.Send(fault, faultPipe, CancellationToken);
             }
             else
-                await _publishEndpoint.Publish(fault, faultPipe, CancellationToken).ConfigureAwait(false);
+                await _publishEndpoint.Publish(fault, faultPipe, CancellationToken);
         }
 
         static JToken GetMessageToken(object message)

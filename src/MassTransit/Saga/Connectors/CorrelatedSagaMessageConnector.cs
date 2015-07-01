@@ -42,14 +42,14 @@ namespace MassTransit.Saga.Connectors
 
         protected override void ConfigureSagaPipe(IPipeConfigurator<SagaConsumeContext<TSaga, TMessage>> configurator)
         {
-            configurator.Filter(_consumeFilter);
+            configurator.UseFilter(_consumeFilter);
         }
 
         protected override void ConfigureMessagePipe(IPipeConfigurator<ConsumeContext<TMessage>> configurator, ISagaRepository<TSaga> repository,
             IPipe<SagaConsumeContext<TSaga, TMessage>> sagaPipe)
         {
-            configurator.Filter(new CorrelationIdMessageFilter<TMessage>(_correlationIdSelector));
-            configurator.Filter(new CorrelatedSagaFilter<TSaga, TMessage>(repository, _policy, sagaPipe));
+            configurator.UseFilter(new CorrelationIdMessageFilter<TMessage>(_correlationIdSelector));
+            configurator.UseFilter(new CorrelatedSagaFilter<TSaga, TMessage>(repository, _policy, sagaPipe));
         }
     }
 }

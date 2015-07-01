@@ -61,7 +61,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
                         // if an exception is thrown
                         e.Handler<A>(Handle, h =>
                         {
-                            h.Retry(Retry.Interval(5, 100));
+                            h.UseRetry(Retry.Interval(5, 100));
                         });
                     });
                 });

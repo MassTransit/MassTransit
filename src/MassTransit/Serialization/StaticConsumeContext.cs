@@ -309,7 +309,7 @@ namespace MassTransit.Serialization
         {
             Fault<T> fault = new FaultEvent<T>(message, HostMetadataCache.Host, exception);
 
-            IPipe<SendContext<Fault<T>>> faultPipe = Pipe.New<SendContext<Fault<T>>>(x => x.Execute(v =>
+            IPipe<SendContext<Fault<T>>> faultPipe = Pipe.New<SendContext<Fault<T>>>(x => x.UseExecute(v =>
             {
                 v.SourceAddress = ReceiveContext.InputAddress;
                 v.CorrelationId = CorrelationId;

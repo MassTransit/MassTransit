@@ -14,7 +14,6 @@ namespace MassTransit.Transformation
 {
     using System;
     using System.Threading;
-    using Context;
 
 
     /// <summary>
@@ -70,13 +69,5 @@ namespace MassTransit.Transformation
         /// True if the input is present, otherwise false
         /// </summary>
         bool HasInput { get; }
-
-        /// <summary>
-        /// Returns the original message as a transform result
-        /// </summary>
-        /// <param name="value"></param>
-        /// <param name="isNewValue"></param>
-        /// <returns></returns>
-        TransformResult<TResult> Return<TResult>(TResult value, bool isNewValue = true);
     }
 }

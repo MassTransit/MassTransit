@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -10,16 +10,14 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.TransformConfigurators
+namespace MassTransit
 {
-    public class TransformSpecificationConfigurator<TMessage> :
-        ITransformSpecificationConfigurator<TMessage>
-        where TMessage : class
+    using Policies;
+
+
+    public interface IRepeatPolicy :
+        IProbeSite
     {
-        public IConsumeTransformSpecification<TMessage> Get<T>()
-            where T : IConsumeTransformSpecification<TMessage>, new()
-        {
-            return new T();
-        }
+        IRepeatContext GetRepeatContext();
     }
 }

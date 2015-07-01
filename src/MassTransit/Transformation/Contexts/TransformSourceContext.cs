@@ -14,15 +14,14 @@ namespace MassTransit.Transformation.Contexts
 {
     using System;
     using System.Threading;
-    using Context;
 
 
     public class TransformSourceContext<TProperty, TInput> :
         SourceContext<TProperty, TInput>
     {
         readonly TransformContext<TInput> _context;
-        readonly TProperty _value;
         readonly bool _hasValue;
+        readonly TProperty _value;
 
         public TransformSourceContext(TransformContext<TInput> context)
         {

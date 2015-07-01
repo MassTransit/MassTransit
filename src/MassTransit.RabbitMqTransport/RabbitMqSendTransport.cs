@@ -52,9 +52,9 @@ namespace MassTransit.RabbitMqTransport
         {
             IPipe<ModelContext> modelPipe = Pipe.New<ModelContext>(p =>
             {
-                p.Filter(_filter);
+                p.UseFilter(_filter);
 
-                p.ExecuteAsync(async modelContext =>
+                p.UseExecuteAsync(async modelContext =>
                 {
                     if (_log.IsDebugEnabled)
                         _log.DebugFormat("Sending {0} to {1}", TypeMetadataCache<T>.ShortName, _sendSettings.ExchangeName);
@@ -110,9 +110,9 @@ namespace MassTransit.RabbitMqTransport
         {
             IPipe<ModelContext> modelPipe = Pipe.New<ModelContext>(p =>
             {
-                p.Filter(_filter);
+                p.UseFilter(_filter);
 
-                p.ExecuteAsync(async modelContext =>
+                p.UseExecuteAsync(async modelContext =>
                 {
                     Guid? messageId = context.TransportHeaders.Get("MessageId", default(Guid?));
 

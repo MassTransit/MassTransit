@@ -12,34 +12,13 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transformation
 {
-    public interface SourceContext :
-        TransformContext
-    {
-    }
-
-
-    public interface SourceContext<out TInput> :
-        SourceContext
-    {
-        /// <summary>
-        /// The input of the transform
-        /// </summary>
-        TInput Input { get; }
-
-        /// <summary>
-        /// True if the input is present
-        /// </summary>
-        bool HasInput { get; }
-    }
-
-
     /// <summary>
     /// Provides the context for a property transform
     /// </summary>
     /// <typeparam name="TProperty"></typeparam>
     /// <typeparam name="TInput"></typeparam>
     public interface SourceContext<out TProperty, out TInput> :
-        SourceContext<TInput>
+        TransformContext<TInput>
     {
         /// <summary>
         /// True if the value is present from the source

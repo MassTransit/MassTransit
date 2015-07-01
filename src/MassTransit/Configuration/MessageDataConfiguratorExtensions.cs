@@ -19,7 +19,7 @@ namespace MassTransit
     using System.Reflection;
     using Internals.Extensions;
     using MessageData;
-    using TransformConfigurators;
+    using Transformation.TransformConfigurators;
     using Util;
 
 

@@ -63,12 +63,12 @@ namespace MassTransit.ConsumeConnectors
             IPipe<ConsumerConsumeContext<TConsumer, TMessage>> messagePipe = Pipe.New<ConsumerConsumeContext<TConsumer, TMessage>>(x =>
             {
                 foreach (var filter in builders.Filters)
-                    x.Filter(filter);
-                x.Filter(_consumeFilter);
+                    x.UseFilter(filter);
+                x.UseFilter(_consumeFilter);
             });
 
             IPipe<ConsumeContext<TMessage>> pipe =
-                Pipe.New<ConsumeContext<TMessage>>(x => x.Filter(new ConsumerMessageFilter<TConsumer, TMessage>(factory, messagePipe)));
+                Pipe.New<ConsumeContext<TMessage>>(x => x.UseFilter(new ConsumerMessageFilter<TConsumer, TMessage>(factory, messagePipe)));
 
             return consumePipe.ConnectConsumePipe(pipe);
         }

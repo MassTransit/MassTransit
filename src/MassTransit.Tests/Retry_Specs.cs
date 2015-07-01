@@ -16,7 +16,6 @@ namespace MassTransit.Tests
     using System.Threading.Tasks;
     using Monitoring.Introspection.Contracts;
     using NUnit.Framework;
-    using Policies;
     using Shouldly;
     using TestFramework;
     using TestFramework.Messages;
@@ -26,28 +25,6 @@ namespace MassTransit.Tests
     public class When_specifying_no_retry_policy :
         InMemoryTestFixture
     {
-        int _attempts;
-
-        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
-        {
-            configurator.Retry(Retry.None);
-
-            Handler<PingMessage>(configurator, async context =>
-            {
-                _attempts++;
-                throw new IntentionalTestException();
-            });
-        }
-
-
-        [Test]
-        public async void Should_return_a_wonderful_breakdown_of_the_guts_inside_it()
-        {
-            ProbeResult result = await Bus.GetProbeResult();
-
-            Console.WriteLine(result.ToJsonString());
-        }
-
         [Test]
         public async void Should_only_call_the_handler_once()
         {
@@ -61,6 +38,27 @@ namespace MassTransit.Tests
             await fault;
 
             _attempts.ShouldBe(1);
+        }
+
+        [Test]
+        public async void Should_return_a_wonderful_breakdown_of_the_guts_inside_it()
+        {
+            ProbeResult result = await Bus.GetProbeResult();
+
+            Console.WriteLine(result.ToJsonString());
+        }
+
+        int _attempts;
+
+        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+        {
+            configurator.UseRetry(Retry.None);
+
+            Handler<PingMessage>(configurator, async context =>
+            {
+                _attempts++;
+                throw new IntentionalTestException();
+            });
         }
     }
 
@@ -69,23 +67,6 @@ namespace MassTransit.Tests
     public class When_specifying_the_default_retry_policy :
         InMemoryTestFixture
     {
-        int _attempts;
-
-        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
-        {
-            Handler<PingMessage>(configurator, async context =>
-            {
-                _attempts++;
-                throw new IntentionalTestException();
-            });
-        }
-        [Test]
-        public async void Should_return_a_wonderful_breakdown_of_the_guts_inside_it()
-        {
-            ProbeResult result = await Bus.GetProbeResult();
-
-            Console.WriteLine(result.ToJsonString());
-        }
         [Test]
         public async void Should_only_call_the_handler_once()
         {
@@ -100,21 +81,16 @@ namespace MassTransit.Tests
 
             _attempts.ShouldBe(1);
         }
-    }
 
-
-    [TestFixture]
-    public class When_specifying_the_bus_level_retry_policy :
-        InMemoryTestFixture
-    {
-        int _attempts;
-
-        protected override void ConfigureBus(IInMemoryBusFactoryConfigurator configurator)
+        [Test]
+        public async void Should_return_a_wonderful_breakdown_of_the_guts_inside_it()
         {
-            configurator.Retry(Retry.Immediate(1));
+            ProbeResult result = await Bus.GetProbeResult();
 
-            base.ConfigureBus(configurator);
+            Console.WriteLine(result.ToJsonString());
         }
+
+        int _attempts;
 
         protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
         {
@@ -124,13 +100,13 @@ namespace MassTransit.Tests
                 throw new IntentionalTestException();
             });
         }
-        [Test]
-        public async void Should_return_a_wonderful_breakdown_of_the_guts_inside_it()
-        {
-            ProbeResult result = await Bus.GetProbeResult();
+    }
 
-            Console.WriteLine(result.ToJsonString());
-        }
+
+    [TestFixture]
+    public class When_specifying_the_bus_level_retry_policy :
+        InMemoryTestFixture
+    {
         [Test]
         public async void Should_only_call_the_handler_twice()
         {
@@ -146,31 +122,7 @@ namespace MassTransit.Tests
 
             _attempts.ShouldBe(2);
         }
-    }
 
-
-    [TestFixture]
-    public class When_both_levels_of_retry_are_specified :
-        InMemoryTestFixture
-    {
-        int _attempts;
-
-        protected override void ConfigureBus(IInMemoryBusFactoryConfigurator configurator)
-        {
-            configurator.Retry(Retry.Immediate(1));
-
-            base.ConfigureBus(configurator);
-        }
-
-        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
-        {
-            configurator.Retry(Retry.Immediate(3));
-            Handler<PingMessage>(configurator, async context =>
-            {
-                _attempts++;
-                throw new IntentionalTestException();
-            });
-        }
         [Test]
         public async void Should_return_a_wonderful_breakdown_of_the_guts_inside_it()
         {
@@ -178,6 +130,31 @@ namespace MassTransit.Tests
 
             Console.WriteLine(result.ToJsonString());
         }
+
+        int _attempts;
+
+        protected override void ConfigureBus(IInMemoryBusFactoryConfigurator configurator)
+        {
+            configurator.UseRetry(Retry.Immediate(1));
+
+            base.ConfigureBus(configurator);
+        }
+
+        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+        {
+            Handler<PingMessage>(configurator, async context =>
+            {
+                _attempts++;
+                throw new IntentionalTestException();
+            });
+        }
+    }
+
+
+    [TestFixture]
+    public class When_both_levels_of_retry_are_specified :
+        InMemoryTestFixture
+    {
         [Test]
         public async void Should_only_call_the_inner_policy()
         {
@@ -191,6 +168,33 @@ namespace MassTransit.Tests
             await fault;
 
             _attempts.ShouldBe(4);
+        }
+
+        [Test]
+        public async void Should_return_a_wonderful_breakdown_of_the_guts_inside_it()
+        {
+            ProbeResult result = await Bus.GetProbeResult();
+
+            Console.WriteLine(result.ToJsonString());
+        }
+
+        int _attempts;
+
+        protected override void ConfigureBus(IInMemoryBusFactoryConfigurator configurator)
+        {
+            configurator.UseRetry(Retry.Immediate(1));
+
+            base.ConfigureBus(configurator);
+        }
+
+        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+        {
+            configurator.UseRetry(Retry.Immediate(3));
+            Handler<PingMessage>(configurator, async context =>
+            {
+                _attempts++;
+                throw new IntentionalTestException();
+            });
         }
     }
 }

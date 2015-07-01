@@ -27,11 +27,11 @@ namespace MassTransit.RabbitMqTransport.Contexts
     {
         static readonly ILog _log = Logger.Get<RabbitMqConnectionContext>();
         readonly TaskCompletionSource<bool> _completed;
+        readonly IConnection _connection;
         readonly RabbitMqHostSettings _hostSettings;
         readonly PayloadCache _payloadCache;
         readonly QueuedTaskScheduler _taskScheduler;
         readonly CancellationTokenSource _tokenSource;
-        IConnection _connection;
         CancellationTokenRegistration _registration;
 
         public RabbitMqConnectionContext(IConnection connection, RabbitMqHostSettings hostSettings, CancellationToken cancellationToken)

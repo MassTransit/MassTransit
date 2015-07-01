@@ -207,6 +207,7 @@ namespace MassTransit.RabbitMqTransport.Integration
                 }
                 catch (Exception ex)
                 {
+                    _log.Error("Close faulted waiting for attached models", ex);
                 }
 
                 (await _connectionContext.Task).Dispose();

@@ -29,8 +29,8 @@ namespace MassTransit.Tests.Pipeline
             IPipe<TestPipeContext> pipe = Pipe.New<TestPipeContext>(x =>
             {
                 x.UseTransaction();
-                x.Execute(payload => Console.WriteLine("Execute: {0}", Thread.CurrentThread.ManagedThreadId));
-                x.ExecuteAsync(payload => Task.Run(() =>
+                x.UseExecute(payload => Console.WriteLine("Execute: {0}", Thread.CurrentThread.ManagedThreadId));
+                x.UseExecuteAsync(payload => Task.Run(() =>
                 {
                     using (TransactionScope scope = payload.CreateTransactionScope())
                     {
@@ -55,8 +55,8 @@ namespace MassTransit.Tests.Pipeline
             IPipe<TestPipeContext> pipe = Pipe.New<TestPipeContext>(x =>
             {
                 x.UseTransaction();
-                x.Execute(payload => Console.WriteLine("Execute: {0}", Thread.CurrentThread.ManagedThreadId));
-                x.ExecuteAsync(async payload =>
+                x.UseExecute(payload => Console.WriteLine("Execute: {0}", Thread.CurrentThread.ManagedThreadId));
+                x.UseExecuteAsync(async payload =>
                 {
                     using (TransactionScope scope = payload.CreateTransactionScope())
                     {
@@ -70,7 +70,7 @@ namespace MassTransit.Tests.Pipeline
 
                     throw new InvalidOperationException("This is a friendly boom");
                 });
-                x.Execute(payload => Console.WriteLine("After Transaction: {0}", Thread.CurrentThread.ManagedThreadId));
+                x.UseExecute(payload => Console.WriteLine("After Transaction: {0}", Thread.CurrentThread.ManagedThreadId));
             });
 
             var context = new TestPipeContext();
@@ -86,8 +86,8 @@ namespace MassTransit.Tests.Pipeline
             IPipe<TestPipeContext> pipe = Pipe.New<TestPipeContext>(x =>
             {
                 x.UseTransaction();
-                x.Execute(payload => Console.WriteLine("Execute: {0}", Thread.CurrentThread.ManagedThreadId));
-                x.ExecuteAsync(payload => Task.Run(() =>
+                x.UseExecute(payload => Console.WriteLine("Execute: {0}", Thread.CurrentThread.ManagedThreadId));
+                x.UseExecuteAsync(payload => Task.Run(() =>
                 {
                     using (TransactionScope scope = payload.CreateTransactionScope())
                     {
@@ -111,8 +111,8 @@ namespace MassTransit.Tests.Pipeline
             IPipe<TestPipeContext> pipe = Pipe.New<TestPipeContext>(x =>
             {
                 x.UseTransaction(t => t.Timeout = TimeSpan.FromSeconds(1));
-                x.Execute(payload => Console.WriteLine("Execute: {0}", Thread.CurrentThread.ManagedThreadId));
-                x.ExecuteAsync(async payload =>
+                x.UseExecute(payload => Console.WriteLine("Execute: {0}", Thread.CurrentThread.ManagedThreadId));
+                x.UseExecuteAsync(async payload =>
                 {
                     using (TransactionScope scope = payload.CreateTransactionScope())
                     {
@@ -128,7 +128,7 @@ namespace MassTransit.Tests.Pipeline
 
                     Console.WriteLine("Exited Scope");
                 });
-                x.Execute(payload => Console.WriteLine("After Transaction: {0}", Thread.CurrentThread.ManagedThreadId));
+                x.UseExecute(payload => Console.WriteLine("After Transaction: {0}", Thread.CurrentThread.ManagedThreadId));
             });
 
             var context = new TestPipeContext();

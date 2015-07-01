@@ -23,6 +23,7 @@ namespace MassTransit.Builders
 
     public abstract class BusBuilder
     {
+        readonly IConsumePipeSpecification _consumePipeSpecification;
         readonly Lazy<IMessageDeserializer> _deserializer;
         readonly IDictionary<string, DeserializerFactory> _deserializerFactories;
         readonly Lazy<Uri> _inputAddress;
@@ -31,7 +32,6 @@ namespace MassTransit.Builders
         readonly Lazy<ISendEndpointProvider> _sendEndpointProvider;
         readonly Lazy<ISendTransportProvider> _sendTransportProvider;
         readonly Lazy<IMessageSerializer> _serializer;
-        IConsumePipeSpecification _consumePipeSpecification;
         Func<IMessageSerializer> _serializerFactory;
 
         protected BusBuilder(IConsumePipeSpecification consumePipeSpecification)

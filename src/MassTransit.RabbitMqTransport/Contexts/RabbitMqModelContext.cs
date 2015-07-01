@@ -207,7 +207,14 @@ namespace MassTransit.RabbitMqTransport.Contexts
         {
             _tokenSource.Cancel();
 
-            _model.WaitForConfirms(TimeSpan.FromSeconds(30));
+            try
+            {
+                _model.WaitForConfirms(TimeSpan.FromSeconds(30));
+            }
+            catch (Exception ex)
+            {
+                _log.Error("Fault waiting for confirms", ex);
+            }
 
             _model.ModelShutdown -= OnModelShutdown;
             _model.BasicAcks -= OnBasicAcks;

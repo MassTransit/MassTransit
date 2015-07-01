@@ -20,7 +20,6 @@ namespace MassTransit.RabbitMqTransport.Integration
     using Contexts;
     using Logging;
     using MassTransit.Pipeline;
-    using Monitoring.Introspection;
     using RabbitMQ.Client;
     using RabbitMQ.Client.Exceptions;
 
@@ -65,9 +64,10 @@ namespace MassTransit.RabbitMqTransport.Integration
 
         public async Task Probe(ProbeContext context)
         {
-            if (_scope != null)
+            ConnectionScope connectionScope = _scope;
+            if (connectionScope != null)
             {
-                using (SharedConnectionContext connectionContext = await _scope.Attach(context.CancellationToken))
+                using (await connectionScope.Attach(context.CancellationToken))
                 {
                     context.Set(new
                     {
@@ -81,6 +81,9 @@ namespace MassTransit.RabbitMqTransport.Integration
         {
             try
             {
+                if (_log.IsDebugEnabled)
+                    _log.DebugFormat("Connecting: {0}", _connectionFactory.ToDebugString());
+                
                 IConnection connection = _connectionFactory.CreateConnection();
 
                 if (_log.IsDebugEnabled)
@@ -189,6 +192,7 @@ namespace MassTransit.RabbitMqTransport.Integration
                 }
                 catch (Exception ex)
                 {
+                    _log.Error("Close faulted waiting for attached connections", ex);
                 }
 
                 (await _connectionContext.Task).Dispose();

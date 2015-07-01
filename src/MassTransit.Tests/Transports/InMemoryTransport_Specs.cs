@@ -43,7 +43,7 @@ namespace MassTransit.Tests.Transports
 
                 IPipe<ReceiveContext> receivePipe = Pipe.New<ReceiveContext>(x =>
                 {
-                    x.Filter(new DelegateFilter<ReceiveContext>(context =>
+                    x.UseFilter(new DelegateFilter<ReceiveContext>(context =>
                     {
                         Console.WriteLine("Message: {0}", context.TransportHeaders.Get("MessageId", "N/A"));
 

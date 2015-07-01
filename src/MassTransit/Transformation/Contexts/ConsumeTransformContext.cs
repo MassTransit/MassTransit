@@ -74,34 +74,5 @@ namespace MassTransit.Transformation.Contexts
         {
             get { return true; }
         }
-
-        TransformResult<TResult> TransformContext<TMessage>.Return<TResult>(TResult value, bool isNewValue)
-        {
-            return new Result<TResult>(value, isNewValue);
-        }
-
-
-        class Result<TResult> :
-            TransformResult<TResult>
-        {
-            readonly bool _isNewValue;
-            readonly TResult _value;
-
-            public Result(TResult value, bool isNewValue)
-            {
-                _value = value;
-                _isNewValue = isNewValue;
-            }
-
-            public TResult Value
-            {
-                get { return _value; }
-            }
-
-            public bool IsNewValue
-            {
-                get { return _isNewValue; }
-            }
-        }
     }
 }

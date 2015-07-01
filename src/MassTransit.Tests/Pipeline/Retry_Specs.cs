@@ -34,8 +34,8 @@ namespace MassTransit.Tests.Pipeline
             int count = 0;
             IPipe<ConsumeContext<A>> pipe = Pipe.New<ConsumeContext<A>>(x =>
             {
-                x.Retry(Retry.Interval(4, TimeSpan.FromMilliseconds(2)));
-                x.Execute(payload =>
+                x.UseRetry(Retry.Interval(4, TimeSpan.FromMilliseconds(2)));
+                x.UseExecute(payload =>
                 {
                     count++;
                     throw new IntentionalTestException("Kaboom!");
@@ -55,9 +55,9 @@ namespace MassTransit.Tests.Pipeline
             int count = 0;
             IPipe<ConsumeContext<A>> pipe = Pipe.New<ConsumeContext<A>>(x =>
             {
-                x.Retry(Retry.Interval(4, TimeSpan.FromMilliseconds(2)));
-                x.Retry(Retry.None);
-                x.Execute(payload =>
+                x.UseRetry(Retry.Interval(4, TimeSpan.FromMilliseconds(2)));
+                x.UseRetry(Retry.None);
+                x.UseExecute(payload =>
                 {
                     count++;
                     throw new IntentionalTestException("Kaboom!");
@@ -77,9 +77,9 @@ namespace MassTransit.Tests.Pipeline
             int count = 0;
             IPipe<ConsumeContext<A>> pipe = Pipe.New<ConsumeContext<A>>(x =>
             {
-                x.Retry(Retry.None);
-                x.Retry(Retry.Interval(4, TimeSpan.FromMilliseconds(2)));
-                x.Execute(payload =>
+                x.UseRetry(Retry.None);
+                x.UseRetry(Retry.Interval(4, TimeSpan.FromMilliseconds(2)));
+                x.UseExecute(payload =>
                 {
                     count++;
                     throw new IntentionalTestException("Kaboom!");
