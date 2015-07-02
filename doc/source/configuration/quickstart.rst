@@ -14,9 +14,12 @@ MassTransit.
         {
             Bus.Initialize(sbc =>
             {
-                sbc.UseMsmq();
-                sbc.VerifyMsmqConfiguration();
-                sbc.UseMulticastSubscriptionClient();
+                sbc.UseMsmq(msmq =>
+                {
+                    msmq.VerifyMsmqConfiguration();
+                    msmq.UseMulticastSubscriptionClient();
+                });
+
                 sbc.ReceiveFrom("msmq://localhost/test_queue");
                 sbc.Subscribe(subs=>
                 {
@@ -76,7 +79,6 @@ you covered too. Instead of using ``Bus.Initialize`` you can use the code below:
     
     var bus = ServiceBusFactory.New(sbc =>
     {
-        sbc.UseMsmq();
-        sbc.UseMulticastSubscriptionClient();
+        sbc.UseMsmq(msmq => msmq.UseMulticastSubscriptionClient());
         sbc.ReceiveFrom("msmq://localhost/test_queue");
     });
