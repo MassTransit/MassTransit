@@ -62,7 +62,7 @@ namespace MassTransit.TestFramework
             where TLog : class
             where T : class, Activity<TArguments, TLog>
         {
-            var context = new ActivityTestContext<T, TArguments, TLog>(new Uri("loopback://localhost/"), activityFactory);
+            var context = new ActivityTestContext<T, TArguments, TLog>(BaseAddress, activityFactory);
 
             ActivityTestContexts.Add(typeof(T), context);
         }
@@ -71,7 +71,7 @@ namespace MassTransit.TestFramework
             where TArguments : class
             where T : class, ExecuteActivity<TArguments>
         {
-            var context = new ActivityTestContext<T, TArguments>(new Uri("loopback://localhost/"), activityFactory);
+            var context = new ActivityTestContext<T, TArguments>(BaseAddress, activityFactory);
 
             ActivityTestContexts.Add(typeof(T), context);
         }

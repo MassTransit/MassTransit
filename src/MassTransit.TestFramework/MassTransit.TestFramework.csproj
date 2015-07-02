@@ -75,7 +75,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\SolutionVersion.cs">
-      <Link>SolutionVersion.cs</Link>
+      <Link>Properties\SolutionVersion.cs</Link>
     </Compile>
     <Compile Include="ActivityTestContext.cs" />
     <Compile Include="ActivityTestContextConfigurator.cs" />
@@ -112,7 +112,6 @@
     <Compile Include="Messages\PingMessage.cs" />
     <Compile Include="Messages\PingNotSupported.cs" />
     <Compile Include="Messages\PongMessage.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ExtensionMethodsForSagas.cs" />
     <Compile Include="RandomMagnumAssertion.cs" />
     <Compile Include="TestConsumeContext.cs" />

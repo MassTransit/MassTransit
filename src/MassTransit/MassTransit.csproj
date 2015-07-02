@@ -82,7 +82,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\SolutionVersion.cs">
-      <Link>SolutionVersion.cs</Link>
+      <Link>Properties\SolutionVersion.cs</Link>
     </Compile>
     <Compile Include="Configuration\BusConfigurators\ConsumePipeBuilder.cs" />
     <Compile Include="Configuration\BusConfigurators\ConsumePipeSpecificationList.cs" />
@@ -424,6 +424,13 @@
     <Compile Include="Pipeline\ConsumerFactories\InstanceConsumerFactory.cs" />
     <Compile Include="Pipeline\ConsumerFactories\ObjectConsumerFactory.cs" />
     <Compile Include="Pipeline\Filters\AsyncDelegateFilter.cs" />
+    <Compile Include="Pipeline\Filters\CircuitBreakerFilter.cs" />
+    <Compile Include="Pipeline\Filters\CircuitBreaker\ICircuitBreaker.cs" />
+    <Compile Include="Pipeline\Filters\CircuitBreaker\CircuitBreakerState.cs" />
+    <Compile Include="Pipeline\Filters\CircuitBreaker\CircuitOpenException.cs" />
+    <Compile Include="Pipeline\Filters\CircuitBreaker\ClosedCircuitBreakerState.cs" />
+    <Compile Include="Pipeline\Filters\CircuitBreaker\OpenCircuitBreakerState.cs" />
+    <Compile Include="Pipeline\Filters\CircuitBreaker\PartiallyClosedCircuitBreakerState.cs" />
     <Compile Include="Pipeline\Filters\ConcurrencyLimitFilter.cs" />
     <Compile Include="Pipeline\Filters\ConsumerMessageFilter.cs" />
     <Compile Include="Pipeline\Filters\ConsumerSplitFilter.cs" />
@@ -815,7 +822,6 @@
     <Compile Include="Exceptions\MessageException.cs" />
     <Compile Include="Exceptions\ShutDownException.cs" />
     <Compile Include="Exceptions\EndpointException.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Util\AsyncObservable.cs" />
     <Compile Include="Util\BusHostInfo.cs" />
     <Compile Include="Util\Connectable.cs" />

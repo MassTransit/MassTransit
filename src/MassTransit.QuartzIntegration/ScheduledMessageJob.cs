@@ -22,7 +22,6 @@ namespace MassTransit.QuartzIntegration
     using Newtonsoft.Json;
     using Pipeline;
     using Quartz;
-    using Serialization;
 
 
     public class ScheduledMessageJob :
@@ -114,7 +113,7 @@ namespace MassTransit.QuartzIntegration
             if (string.IsNullOrEmpty(HeadersAsJson))
                 return;
 
-            var headers = JsonConvert.DeserializeObject<IDictionary<string,object>>(HeadersAsJson);
+            var headers = JsonConvert.DeserializeObject<IDictionary<string, object>>(HeadersAsJson);
             foreach (var header in headers)
                 context.Headers.Set(header.Key, header.Value);
         }
