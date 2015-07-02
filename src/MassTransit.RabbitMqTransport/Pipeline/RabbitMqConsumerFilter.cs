@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -16,7 +16,6 @@ namespace MassTransit.RabbitMqTransport.Pipeline
     using System.Threading.Tasks;
     using Logging;
     using MassTransit.Pipeline;
-    using Monitoring.Introspection;
 
 
     /// <summary>
@@ -26,8 +25,8 @@ namespace MassTransit.RabbitMqTransport.Pipeline
         IFilter<ModelContext>
     {
         static readonly ILog _log = Logger.Get<RabbitMqConsumerFilter>();
-        readonly IPipe<ReceiveContext> _receivePipe;
         readonly INotifyReceiveObserver _receiveObserver;
+        readonly IPipe<ReceiveContext> _receivePipe;
 
         public RabbitMqConsumerFilter(IPipe<ReceiveContext> receivePipe, INotifyReceiveObserver receiveObserver)
         {

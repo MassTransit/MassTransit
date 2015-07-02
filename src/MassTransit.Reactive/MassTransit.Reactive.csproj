@@ -74,7 +74,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\SolutionVersion.cs">
-      <Link>SolutionVersion.cs</Link>
+      <Link>Properties\SolutionVersion.cs</Link>
     </Compile>
     <Compile Include="ConsumeObserver.cs" />
     <Compile Include="BusExtensions.cs" />
@@ -86,9 +86,7 @@
       <Name>MassTransit</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Properties\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <None Include="app.config" />
     <None Include="packages.config" />

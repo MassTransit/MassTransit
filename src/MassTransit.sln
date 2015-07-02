@@ -76,6 +76,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.QuartzIntegrati
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.QuartzService", "MassTransit.QuartzService\MassTransit.QuartzService.csproj", "{989BA511-C126-4C88-A74B-BAD83DF2291B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Futures", "MassTransit.Futures\MassTransit.Futures.csproj", "{29BC6AB5-2697-45EC-8172-475AB8ACE834}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Futures.Tests", "MassTransit.Futures.Tests\MassTransit.Futures.Tests.csproj", "{941A22AD-C791-4111-9B67-CD576977C95A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -307,6 +311,24 @@ Global
 		{989BA511-C126-4C88-A74B-BAD83DF2291B}.ReleaseUnsigned|Any CPU.Build.0 = Release|Any CPU
 		{989BA511-C126-4C88-A74B-BAD83DF2291B}.ReleaseUnsigned|x86.ActiveCfg = Release|x86
 		{989BA511-C126-4C88-A74B-BAD83DF2291B}.ReleaseUnsigned|x86.Build.0 = Release|x86
+		{29BC6AB5-2697-45EC-8172-475AB8ACE834}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{29BC6AB5-2697-45EC-8172-475AB8ACE834}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{29BC6AB5-2697-45EC-8172-475AB8ACE834}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{29BC6AB5-2697-45EC-8172-475AB8ACE834}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{29BC6AB5-2697-45EC-8172-475AB8ACE834}.Release|Any CPU.Build.0 = Release|Any CPU
+		{29BC6AB5-2697-45EC-8172-475AB8ACE834}.Release|x86.ActiveCfg = Release|Any CPU
+		{29BC6AB5-2697-45EC-8172-475AB8ACE834}.ReleaseUnsigned|Any CPU.ActiveCfg = Release|Any CPU
+		{29BC6AB5-2697-45EC-8172-475AB8ACE834}.ReleaseUnsigned|Any CPU.Build.0 = Release|Any CPU
+		{29BC6AB5-2697-45EC-8172-475AB8ACE834}.ReleaseUnsigned|x86.ActiveCfg = Release|Any CPU
+		{941A22AD-C791-4111-9B67-CD576977C95A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{941A22AD-C791-4111-9B67-CD576977C95A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{941A22AD-C791-4111-9B67-CD576977C95A}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{941A22AD-C791-4111-9B67-CD576977C95A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{941A22AD-C791-4111-9B67-CD576977C95A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{941A22AD-C791-4111-9B67-CD576977C95A}.Release|x86.ActiveCfg = Release|Any CPU
+		{941A22AD-C791-4111-9B67-CD576977C95A}.ReleaseUnsigned|Any CPU.ActiveCfg = Release|Any CPU
+		{941A22AD-C791-4111-9B67-CD576977C95A}.ReleaseUnsigned|Any CPU.Build.0 = Release|Any CPU
+		{941A22AD-C791-4111-9B67-CD576977C95A}.ReleaseUnsigned|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

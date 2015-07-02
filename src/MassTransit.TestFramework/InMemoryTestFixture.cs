@@ -19,7 +19,6 @@ namespace MassTransit.TestFramework
     using NUnit.Framework;
     using Testing;
     using Testing.TestDecorators;
-    using Transports.InMemory;
 
 
     [TestFixture]
@@ -34,10 +33,18 @@ namespace MassTransit.TestFramework
         ISendEndpoint _busSendEndpoint;
         readonly TestSendObserver _sendObserver;
         BusHandle _busHandle;
+        readonly Uri _baseAddress;
+
+        public Uri BaseAddress
+        {
+            get { return _baseAddress; }
+        }
 
         public InMemoryTestFixture()
         {
             _sendObserver = new TestSendObserver(TestTimeout);
+
+            _baseAddress = new Uri("loopback://localhost/");
 
             _inputQueueAddress = new Uri("loopback://localhost/input_queue");
         }

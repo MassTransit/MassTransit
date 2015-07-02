@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("MassTransit.Reactive.Tests")]
+[assembly: AssemblyTitle("MassTransit.Futures.Tests")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("MassTransit.Reactive.Tests")]
-[assembly: AssemblyCopyright("Copyright ©  2012")]
+[assembly: AssemblyCompany("RelayHealth")]
+[assembly: AssemblyProduct("MassTransit.Futures.Tests")]
+[assembly: AssemblyCopyright("Copyright © RelayHealth 2015")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("8d233c3b-af44-4337-9d57-b5d7c5e40e46")]
+[assembly: Guid("2c924593-18c8-451d-9d4f-5127db32b56b")]
 
 // Version information for an assembly consists of the following four values:
 //
