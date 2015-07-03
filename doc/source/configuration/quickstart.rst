@@ -47,10 +47,10 @@ of the bus.
 
 One of your first decisions is going to be "What transport do I want to run on?"
 Here we have choosen MSMQ (``sbc.UseMsmq()``) because its easy to install on a
-Windows machines (``sbc.VerifyMsmqConfiguration()``), will do just that
+Windows machines (``msmq.VerifyMsmqConfiguration()``), will do just that
 and its most likely what you will use.
 
-After that we have the ``sbc.UseMulticastSubscriptionClient()`` this tells the
+After that we have the ``msmq.UseMulticastSubscriptionClient()`` this tells the
 bus to pass subscription information around using PGM over MSMQ giving us a
 way to talk to all of the other bus instances on the network. This eliminates
 the need for a central control point.
