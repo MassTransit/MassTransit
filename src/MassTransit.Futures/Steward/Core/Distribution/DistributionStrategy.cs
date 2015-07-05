@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2013 Chris Patterson
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -21,13 +21,6 @@ namespace MassTransit.Steward.Core.Distribution
     /// <typeparam name="T"></typeparam>
     public interface DistributionStrategy<T>
     {
-        /// <summary>
-        /// Returns the node for the given key
-        /// </summary>
-        /// <param name="key"></param>
-        /// <returns></returns>
-        T this[string key] { get; }
-
         /// <summary>
         /// Adds a range of nodes to the distribution pool
         /// </summary>

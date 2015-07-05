@@ -43,7 +43,7 @@ namespace MassTransit.Tests
         {
             _observer = new PingObserver();
             configurator.Observer(_observer)
-                .UseLog(Console.Out, async context => string.Format("Observer: {0}", TypeMetadataCache<PingObserver>.ShortName));
+                .UseLog(Console.Out, async (context, logContext) => string.Format("Observer: {0}", TypeMetadataCache<PingObserver>.ShortName));
         }
 
 

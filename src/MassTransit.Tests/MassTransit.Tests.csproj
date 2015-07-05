@@ -136,10 +136,12 @@
     <Compile Include="Observer_Specs.cs" />
     <Compile Include="OrderedNotification_Specs.cs" />
     <Compile Include="Performance\InMemorySpeed_Specs.cs" />
+    <Compile Include="Pipeline\CircuitBreaker_Specs.cs" />
     <Compile Include="Pipeline\Concurrency_Specs.cs" />
     <Compile Include="Pipeline\ConnectConsumer_Specs.cs" />
     <Compile Include="Pipeline\ConnectHandler_Specs.cs" />
     <Compile Include="Pipeline\ConnectObserver_Specs.cs" />
+    <Compile Include="Pipeline\LatestFilter_Specs.cs" />
     <Compile Include="Pipeline\MessageTestFixture.cs" />
     <Compile Include="Pipeline\OneMessageConsumer.cs" />
     <Compile Include="Pipeline\Retry_Specs.cs" />

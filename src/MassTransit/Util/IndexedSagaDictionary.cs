@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -17,15 +17,72 @@ namespace MassTransit.Util
     using System.Linq;
     using System.Linq.Expressions;
     using System.Reflection;
+    using System.Threading;
+    using System.Threading.Tasks;
     using Internals.Extensions;
     using Saga;
+
+
+    public class SagaInstance<TSaga> :
+        IEquatable<SagaInstance<TSaga>>
+    {
+        readonly SemaphoreSlim _inUse;
+        readonly TSaga _instance;
+
+        public SagaInstance(TSaga instance)
+        {
+            _instance = instance;
+            _inUse = new SemaphoreSlim(1);
+        }
+
+        public TSaga Instance
+        {
+            get { return _instance; }
+        }
+
+        public bool Equals(SagaInstance<TSaga> other)
+        {
+            if (ReferenceEquals(null, other))
+                return false;
+            if (ReferenceEquals(this, other))
+                return true;
+            return EqualityComparer<TSaga>.Default.Equals(_instance, other._instance);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj))
+                return false;
+            if (ReferenceEquals(this, obj))
+                return true;
+            if (obj.GetType() != GetType())
+                return false;
+            return Equals((SagaInstance<TSaga>)obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return EqualityComparer<TSaga>.Default.GetHashCode(_instance);
+        }
+
+        public async Task MarkInUse(CancellationToken cancellationToken)
+        {
+            await _inUse.WaitAsync(cancellationToken);
+        }
+
+        public void Release()
+        {
+            _inUse.Release();
+        }
+    }
 
 
     public class IndexedSagaDictionary<TSaga>
         where TSaga : class, ISaga
     {
-        readonly Dictionary<string, IndexedSagaProperty<TSaga>> _indices;
+        readonly SemaphoreSlim _inUse = new SemaphoreSlim(1);
         readonly IndexedSagaProperty<TSaga> _indexById;
+        readonly Dictionary<string, IndexedSagaProperty<TSaga>> _indices;
         readonly object _lock = new object();
 
         public IndexedSagaDictionary()
@@ -37,7 +94,7 @@ namespace MassTransit.Util
             _indexById = _indices["CorrelationId"];
         }
 
-        public TSaga this[Guid sagaId]
+        public SagaInstance<TSaga> this[Guid sagaId]
         {
             get
             {
@@ -48,12 +105,21 @@ namespace MassTransit.Util
 
         public int Count
         {
-
             get
             {
-                lock(_lock)
-                return _indexById.Count;
+                lock (_lock)
+                    return _indexById.Count;
             }
+        }
+
+        public async Task MarkInUse(CancellationToken cancellationToken)
+        {
+            await _inUse.WaitAsync(cancellationToken);
+        }
+
+        public void Release()
+        {
+            _inUse.Release();
         }
 
         public void Add(TSaga newItem)
@@ -63,14 +129,14 @@ namespace MassTransit.Util
                     index.Add(newItem);
         }
 
-        public void Remove(TSaga item)
+        public void Remove(SagaInstance<TSaga> item)
         {
             lock (_lock)
                 foreach (var index in _indices.Values)
                     index.Remove(item);
         }
 
-        public IEnumerable<TSaga> Where(ISagaQuery<TSaga> query)
+        public IEnumerable<SagaInstance<TSaga>> Where(ISagaQuery<TSaga> query)
         {
             lock (_lock)
             {

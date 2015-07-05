@@ -20,29 +20,45 @@ namespace MassTransit.Pipeline.Filters.CircuitBreaker
     /// <summary>
     /// Represents a closed, normally operating circuit breaker state
     /// </summary>
-    class ClosedCircuitBreakerBehavior :
+    class ClosedBehavior :
         ICircuitBreakerBehavior
     {
         readonly ICircuitBreaker _breaker;
+        readonly Timer _timer;
+        int _attemptCount;
         int _failureCount;
+        int _successCount;
 
-        public ClosedCircuitBreakerBehavior(ICircuitBreaker breaker)
+        public ClosedBehavior(ICircuitBreaker breaker)
         {
             _breaker = breaker;
+            _timer = new Timer(Reset, null, breaker.Duration, breaker.Duration);
         }
 
-        void ICircuitBreakerBehavior.SendFault(Exception exception)
+        bool IsActive
         {
-            if (Interlocked.Increment(ref _failureCount) >= _breaker.OpenThreshold)
-                _breaker.Open(exception, this);
+            get { return _attemptCount > _breaker.ActiveThreshold; }
         }
 
         void ICircuitBreakerBehavior.PreSend()
         {
+            Interlocked.Increment(ref _attemptCount);
         }
 
         void ICircuitBreakerBehavior.PostSend()
         {
+            Interlocked.Increment(ref _successCount);
+        }
+
+        void ICircuitBreakerBehavior.SendFault(Exception exception)
+        {
+            int failureCount = Interlocked.Increment(ref _failureCount);
+
+            if (IsActive && TripThresholdExceeded(failureCount))
+            {
+                _timer.Dispose();
+                _breaker.Open(exception, this);
+            }
         }
 
         async Task IProbeSite.Probe(ProbeContext context)
@@ -50,8 +66,25 @@ namespace MassTransit.Pipeline.Filters.CircuitBreaker
             context.Set(new
             {
                 State = "closed",
+                AttemptCount = _attemptCount,
+                SuccessCount = _successCount,
                 FailureCount = _failureCount,
             });
+        }
+
+        bool TripThresholdExceeded(int failureCount)
+        {
+            return failureCount * 100L / _attemptCount >= _breaker.TripThreshold;
+        }
+
+        void Reset(object state)
+        {
+            lock (_breaker)
+            {
+                _attemptCount = 0;
+                _successCount = 0;
+                _failureCount = 0;
+            }
         }
     }
 }

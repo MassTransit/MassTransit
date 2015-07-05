@@ -78,7 +78,7 @@ namespace MassTransit.Serialization
             {
                 context.ContentType = XmlContentType;
 
-                var envelope = new JsonMessageEnvelope(context, context.Message, TypeMetadataCache<T>.MessageTypes);
+                var envelope = new JsonMessageEnvelope(context, context.Message, TypeMetadataCache<T>.MessageTypeNames);
 
                 var json = new StringBuilder(1024);
 

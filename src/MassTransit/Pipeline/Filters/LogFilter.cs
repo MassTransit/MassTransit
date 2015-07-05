@@ -22,10 +22,10 @@ namespace MassTransit.Pipeline.Filters
         IFilter<T>
         where T : class, PipeContext
     {
-        readonly Func<T, Task<string>> _formatter;
+        readonly LogFormatter<T> _formatter;
         readonly TextWriter _writer;
 
-        public LogFilter(TextWriter writer, Func<T, Task<string>> formatter)
+        public LogFilter(TextWriter writer, LogFormatter<T> formatter)
         {
             _writer = writer;
             _formatter = formatter;
@@ -37,18 +37,20 @@ namespace MassTransit.Pipeline.Filters
         }
 
         [DebuggerNonUserCode]
-        Task IFilter<T>.Send(T context, IPipe<T> next)
+        async Task IFilter<T>.Send(T context, IPipe<T> next)
         {
-            Task logTask = CreateLogTask(context);
+            DateTime startTime = DateTime.UtcNow;
+            Stopwatch timer = Stopwatch.StartNew();
 
-            return Task.WhenAll(logTask, next.Send(context));
-        }
+            await next.Send(context);
 
-        async Task CreateLogTask(T context)
-        {
-            string text = await _formatter(context).ConfigureAwait(false);
+            timer.Stop();
 
-            await _writer.WriteLineAsync(text).ConfigureAwait(false);
+            var logContext = new LogContext(startTime, timer.Elapsed);
+
+            string text = await _formatter(context, logContext);
+
+            await _writer.WriteLineAsync(text);
         }
     }
 }

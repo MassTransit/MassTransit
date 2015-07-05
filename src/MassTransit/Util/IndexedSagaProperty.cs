@@ -32,7 +32,7 @@ namespace MassTransit.Util
         /// Returns the saga with the specified key
         /// </summary>
         /// <param name="key"></param>
-        TSaga this[object key] { get; }
+        SagaInstance<TSaga> this[object key] { get; }
 
         int Count { get; }
 
@@ -46,14 +46,14 @@ namespace MassTransit.Util
         /// Removes a saga from the index
         /// </summary>
         /// <param name="item"></param>
-        void Remove(TSaga item);
+        void Remove(SagaInstance<TSaga> item);
 
         /// <summary>
         /// Returns sagas matching the filter function
         /// </summary>
         /// <param name="filter"></param>
         /// <returns></returns>
-        IEnumerable<TSaga> Where(Func<TSaga, bool> filter);
+        IEnumerable<SagaInstance<TSaga>> Where(Func<TSaga, bool> filter);
 
         /// <summary>
         /// Returns sagas matching the filter function where the key also matches
@@ -61,7 +61,7 @@ namespace MassTransit.Util
         /// <param name="key"></param>
         /// <param name="filter"></param>
         /// <returns></returns>
-        IEnumerable<TSaga> Where(object key, Func<TSaga, bool> filter);
+        IEnumerable<SagaInstance<TSaga>> Where(object key, Func<TSaga, bool> filter);
 
         /// <summary>
         /// Selects sagas from the index, running the transformation function and returning the output type
@@ -83,7 +83,7 @@ namespace MassTransit.Util
         where TSaga : class, ISaga
     {
         readonly Func<TSaga, TProperty> _getProperty;
-        readonly IDictionary<TProperty, HashSet<TSaga>> _values;
+        readonly IDictionary<TProperty, HashSet<SagaInstance<TSaga> >> _values;
 
         /// <summary>
         /// Creates an index for the specified property of a saga
@@ -91,7 +91,7 @@ namespace MassTransit.Util
         /// <param name="propertyInfo"></param>
         public IndexedSagaProperty(PropertyInfo propertyInfo)
         {
-            _values = new Dictionary<TProperty, HashSet<TSaga>>();
+            _values = new Dictionary<TProperty, HashSet<SagaInstance<TSaga>>>();
             _getProperty = GetGetMethod(propertyInfo);
         }
 
@@ -100,13 +100,13 @@ namespace MassTransit.Util
             get { return _values.Count; }
         }
 
-        public TSaga this[object key]
+        public SagaInstance<TSaga> this[object key]
         {
             get
             {
                 var keyValue = (TProperty)key;
 
-                HashSet<TSaga> result;
+                HashSet<SagaInstance<TSaga>> result;
                 if (_values.TryGetValue(keyValue, out result))
                     return result.Single();
 
@@ -118,46 +118,46 @@ namespace MassTransit.Util
         {
             TProperty key = _getProperty(newItem);
 
-            HashSet<TSaga> hashSet;
+            HashSet<SagaInstance<TSaga>> hashSet;
             if (!_values.TryGetValue(key, out hashSet))
             {
-                hashSet = new HashSet<TSaga>();
+                hashSet = new HashSet<SagaInstance<TSaga>>();
                 _values.Add(key, hashSet);
             }
 
-            hashSet.Add(newItem);
+            hashSet.Add(new SagaInstance<TSaga>(newItem));
         }
 
-        public void Remove(TSaga item)
+        public void Remove(SagaInstance<TSaga> instance)
         {
-            TProperty key = _getProperty(item);
+            TProperty key = _getProperty(instance.Instance);
 
-            HashSet<TSaga> hashSet;
+            HashSet<SagaInstance<TSaga>> hashSet;
             if (!_values.TryGetValue(key, out hashSet))
                 return;
 
-            hashSet.Remove(item);
+            hashSet.Remove(instance);
         }
 
-        public IEnumerable<TSaga> Where(Func<TSaga, bool> filter)
+        public IEnumerable<SagaInstance<TSaga>> Where(Func<TSaga, bool> filter)
         {
-            return _values.Values.SelectMany(x => x).Where(filter);
+            return _values.Values.SelectMany(x => x).Where(x => filter(x.Instance));
         }
 
-        public IEnumerable<TSaga> Where(object key, Func<TSaga, bool> filter)
+        public IEnumerable<SagaInstance<TSaga>> Where(object key, Func<TSaga, bool> filter)
         {
             var keyValue = (TProperty)key;
 
-            HashSet<TSaga> resultSet;
+            HashSet<SagaInstance<TSaga>> resultSet;
             if (_values.TryGetValue(keyValue, out resultSet))
-                return resultSet.Where(filter);
+                return resultSet.Where(x => filter(x.Instance));
 
-            return Enumerable.Empty<TSaga>();
+            return Enumerable.Empty<SagaInstance<TSaga>>();
         }
 
         public IEnumerable<TResult> Select<TResult>(Func<TSaga, TResult> transformer)
         {
-            return _values.Values.SelectMany(x => x).Select(transformer);
+            return _values.Values.SelectMany(x => x).Select(x => transformer(x.Instance));
         }
 
         static Func<TSaga, TProperty> GetGetMethod(PropertyInfo property)

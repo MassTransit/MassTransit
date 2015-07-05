@@ -10,35 +10,37 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.PipeConfigurators
+namespace MassTransit.Pipeline.Filters
 {
-    using System.Collections.Generic;
-    using Configurators;
-    using PipeBuilders;
-    using Pipeline.Filters;
+    using System.Threading.Tasks;
 
 
-
-    public class ConcurrencyLimitPipeSpecification<T> :
-        IPipeSpecification<T>
+    /// <summary>
+    /// A wiretap allows an asynchronous pipe to process the message while the original pipe continues to process
+    /// the message.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    public class WireTapFilter<T> :
+        IFilter<T>
         where T : class, PipeContext
     {
-        readonly int _concurrencyLimit;
+        readonly IPipe<T> _pipe;
 
-        public ConcurrencyLimitPipeSpecification(int concurrencyLimit)
+        public WireTapFilter(IPipe<T> pipe)
         {
-            _concurrencyLimit = concurrencyLimit;
+            _pipe = pipe;
         }
 
-        public void Apply(IPipeBuilder<T> builder)
+        Task IFilter<T>.Send(T context, IPipe<T> next)
         {
-            builder.AddFilter(new ConcurrencyLimitFilter<T>(_concurrencyLimit));
+            return Task.WhenAll(next.Send(context), _pipe.Send(context));
         }
 
-        public IEnumerable<ValidationResult> Validate()
+        Task IProbeSite.Probe(ProbeContext context)
         {
-            if (_concurrencyLimit < 1)
-                yield return this.Failure("ConcurrencyLimit", "must be >= 1");
+            ProbeContext scope = context.CreateFilterScope("wiretap");
+
+            return _pipe.Probe(scope);
         }
     }
 }

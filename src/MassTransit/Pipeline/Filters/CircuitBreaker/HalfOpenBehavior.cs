@@ -22,28 +22,34 @@ namespace MassTransit.Pipeline.Filters.CircuitBreaker
     /// Executes until the success count is met. If a fault occurs before the success 
     /// count is reached, the circuit reopens.
     /// </summary>
-    class HalfClosedCircuitBreakerBehavior :
+    class HalfOpenBehavior :
         ICircuitBreakerBehavior
     {
         readonly ICircuitBreaker _breaker;
         readonly Exception _exception;
-        readonly IEnumerator<int> _timeoutEnumerator;
-        int _successCount;
+        readonly IEnumerator<TimeSpan> _timeoutEnumerator;
+        int _attemptCount;
 
-        public HalfClosedCircuitBreakerBehavior(ICircuitBreaker breaker, Exception exception, IEnumerator<int> timeoutEnumerator)
+        public HalfOpenBehavior(ICircuitBreaker breaker, Exception exception, IEnumerator<TimeSpan> timeoutEnumerator)
         {
             _breaker = breaker;
             _exception = exception;
             _timeoutEnumerator = timeoutEnumerator;
         }
 
+        bool IsActive
+        {
+            get { return _attemptCount > _breaker.ActiveThreshold; }
+        }
+
         void ICircuitBreakerBehavior.PreSend()
         {
+            Interlocked.Increment(ref _attemptCount);
         }
 
         void ICircuitBreakerBehavior.PostSend()
         {
-            if (Interlocked.Increment(ref _successCount) >= _breaker.CloseThreshold)
+            if (IsActive)
             {
                 _breaker.Close(this);
                 _timeoutEnumerator.Dispose();
@@ -59,8 +65,8 @@ namespace MassTransit.Pipeline.Filters.CircuitBreaker
         {
             context.Set(new
             {
-                State = "halfClosed",
-                SuccessCount = _successCount,
+                State = "halfOpen",
+                AttempCount = _attemptCount,
             });
         }
     }

@@ -39,6 +39,11 @@ namespace MassTransit.Util
         /// </summary>
         Type[] MessageTypes { get; }
 
+        /// <summary>
+        /// The names of all the message types supported by the message type
+        /// </summary>
+        string[] MessageTypeNames { get; }
+
         ReadWritePropertyCache<T> ReadWritePropertyCache { get; }
 
         IEnumerable<PropertyInfo> Properties { get; }

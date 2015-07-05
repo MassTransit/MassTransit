@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,36 +13,31 @@
 namespace MassTransit.PipeConfigurators
 {
     using System.Collections.Generic;
-    using System.IO;
     using Configurators;
     using PipeBuilders;
     using Pipeline.Filters;
 
 
-    public class LogPipeSpecification<T> :
-        IPipeSpecification<T>
+    public class LatestPipeSpecification<T> :
+        IPipeSpecification<T>,
+        ILatestConfigurator<T>
         where T : class, PipeContext
     {
-        readonly LogFormatter<T> _formatter;
-        readonly TextWriter _writer;
-
-        public LogPipeSpecification(TextWriter writer, LogFormatter<T> formatter)
-        {
-            _writer = writer;
-            _formatter = formatter;
-        }
+        public event LatestFilterCreated<T> Created;
 
         void IPipeSpecification<T>.Apply(IPipeBuilder<T> builder)
         {
-            builder.AddFilter(new LogFilter<T>(_writer, _formatter));
+            var filter = new LatestFilter<T>();
+
+            builder.AddFilter(filter);
+
+            if (Created != null)
+                Created(filter);
         }
 
         IEnumerable<ValidationResult> Configurator.Validate()
         {
-            if (_writer == null)
-                yield return this.Failure("TextWriter", "must not be null");
-            if (_formatter == null)
-                yield return this.Failure("Formatter", "must not be null");
+            yield break;
         }
     }
 }

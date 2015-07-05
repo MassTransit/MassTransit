@@ -100,6 +100,7 @@ namespace MassTransit.Util
     {
         readonly Lazy<bool> _hasSagaInterfaces;
         readonly Lazy<bool> _isValidMessageType;
+        readonly Lazy<string[]> _messageTypeNames;
         readonly Lazy<Type[]> _messageTypes;
         readonly Lazy<List<PropertyInfo>> _properties;
         readonly Lazy<ReadOnlyPropertyCache<T>> _readPropertyCache;
@@ -119,6 +120,7 @@ namespace MassTransit.Util
 
             _isValidMessageType = new Lazy<bool>(CheckIfValidMessageType);
             _messageTypes = new Lazy<Type[]>(() => GetMessageTypes().ToArray());
+            _messageTypeNames = new Lazy<string[]>(() => GetMessageTypeNames().ToArray());
         }
 
         public static string ShortName
@@ -154,6 +156,16 @@ namespace MassTransit.Util
         public static Type[] MessageTypes
         {
             get { return Cached.Metadata.Value.MessageTypes; }
+        }
+
+        public static string[] MessageTypeNames
+        {
+            get { return Cached.Metadata.Value.MessageTypeNames; }
+        }
+
+        string[] ITypeMetadataCache<T>.MessageTypeNames
+        {
+            get { return _messageTypeNames.Value; }
         }
 
         IEnumerable<PropertyInfo> ITypeMetadataCache<T>.Properties
@@ -253,6 +265,11 @@ namespace MassTransit.Util
 
             foreach (Type interfaceType in interfaces)
                 yield return interfaceType;
+        }
+
+        static IEnumerable<string> GetMessageTypeNames()
+        {
+            return MessageTypes.Select(x => new MessageUrn(x).ToString());
         }
 
         public static T InitializeFromObject(object values)

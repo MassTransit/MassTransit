@@ -14,6 +14,7 @@ namespace MassTransit.Pipeline.Filters
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using CircuitBreaker;
@@ -24,59 +25,47 @@ namespace MassTransit.Pipeline.Filters
         ICircuitBreaker
         where T : class, PipeContext
     {
-        readonly int _closeThreshold;
-        readonly object _lock = new object();
-        readonly int _openThreshold;
+        readonly CircuitBreakerSettings _settings;
         ICircuitBreakerBehavior _behavior;
 
-        public CircuitBreakerFilter(int openThreshold, int closeThreshold)
+        public CircuitBreakerFilter(CircuitBreakerSettings settings)
         {
-            _openThreshold = openThreshold;
-            _closeThreshold = closeThreshold;
+            _settings = settings;
 
-            _behavior = new ClosedCircuitBreakerBehavior(this);
+            _behavior = new ClosedBehavior(this);
         }
 
-        static IEnumerable<int> Timeouts
+        public TimeSpan Duration
         {
-            get
-            {
-                yield return 100;
-                yield return 1000;
-                yield return 2000;
-                yield return 5000;
-                yield return 10000;
-                while (true)
-                    yield return 30000;
-            }
+            get { return _settings.Duration; }
         }
 
-        void ICircuitBreaker.Open(Exception exception, ICircuitBreakerBehavior behavior, IEnumerator<int> timeoutEnumerator = null)
+        void ICircuitBreaker.Open(Exception exception, ICircuitBreakerBehavior behavior, IEnumerator<TimeSpan> timeoutEnumerator)
         {
             if (timeoutEnumerator == null)
-                timeoutEnumerator = Timeouts.GetEnumerator();
+                timeoutEnumerator = _settings.ResetTimeout.GetEnumerator();
 
-            Interlocked.CompareExchange(ref _behavior, new OpenCircuitBreakerBehavior(this, exception, timeoutEnumerator), behavior);
+            Interlocked.CompareExchange(ref _behavior, new OpenBehavior(this, exception, timeoutEnumerator), behavior);
         }
 
         void ICircuitBreaker.Close(ICircuitBreakerBehavior behavior)
         {
-            Interlocked.CompareExchange(ref _behavior, new ClosedCircuitBreakerBehavior(this), behavior);
+            Interlocked.CompareExchange(ref _behavior, new ClosedBehavior(this), behavior);
         }
 
-        void ICircuitBreaker.ClosePartially(Exception exception, IEnumerator<int> timeoutEnumerator, ICircuitBreakerBehavior behavior)
+        void ICircuitBreaker.ClosePartially(Exception exception, IEnumerator<TimeSpan> timeoutEnumerator, ICircuitBreakerBehavior behavior)
         {
-            Interlocked.CompareExchange(ref _behavior, new HalfClosedCircuitBreakerBehavior(this, exception, timeoutEnumerator), behavior);
+            Interlocked.CompareExchange(ref _behavior, new HalfOpenBehavior(this, exception, timeoutEnumerator), behavior);
         }
 
-        public int OpenThreshold
+        public int TripThreshold
         {
-            get { return _openThreshold; }
+            get { return _settings.TripThreshold; }
         }
 
-        public int CloseThreshold
+        public int ActiveThreshold
         {
-            get { return _closeThreshold; }
+            get { return _settings.ActiveCount; }
         }
 
         public async Task Send(T context, IPipe<T> next)
@@ -100,6 +89,13 @@ namespace MassTransit.Pipeline.Filters
         Task IProbeSite.Probe(ProbeContext context)
         {
             ProbeContext scope = context.CreateFilterScope("circuitBreaker");
+            scope.Set(new
+            {
+                _settings.ActiveCount,
+                _settings.TripThreshold,
+                _settings.Duration,
+                ResetTimeout = _settings.ResetTimeout.Take(10).ToArray(),
+            });
 
             return _behavior.Probe(scope);
         }

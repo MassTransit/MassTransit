@@ -183,7 +183,7 @@ namespace MassTransit.Saga
 
         async Task SagaConsumeContext<TSaga>.SetCompleted()
         {
-            _repository.Remove(_instance);
+            await _repository.Remove(_instance, _context.CancellationToken);
             _completed = true;
             if (_log.IsDebugEnabled)
             {

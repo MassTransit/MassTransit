@@ -99,7 +99,7 @@ namespace MassTransit.Serialization
             {
                 context.ContentType = JsonContentType;
 
-                var envelope = new JsonMessageEnvelope(context, context.Message, TypeMetadataCache<T>.MessageTypes);
+                var envelope = new JsonMessageEnvelope(context, context.Message, TypeMetadataCache<T>.MessageTypeNames);
 
                 using (var writer = new StreamWriter(stream, _encoding.Value, 1024, true))
                 using (var jsonWriter = new JsonTextWriter(writer))
