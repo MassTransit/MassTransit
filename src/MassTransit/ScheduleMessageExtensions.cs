@@ -192,9 +192,7 @@ namespace MassTransit
                 Destination = destination;
                 Payload = payload;
 
-                PayloadType = TypeMetadataCache<T>.MessageTypes
-                    .Select(x => new MessageUrn(x).ToString())
-                    .ToArray();
+                PayloadType = TypeMetadataCache<T>.MessageTypeNames;
             }
 
             public Guid CorrelationId { get; private set; }

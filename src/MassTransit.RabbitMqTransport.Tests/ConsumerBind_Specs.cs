@@ -148,7 +148,7 @@ namespace MassTransit.RabbitMqTransport.Tests
                 Guid? sagaId = await _repository.ShouldContainSaga(_sagaId, TestTimeout);
                 Assert.IsTrue(sagaId.HasValue);
 
-                TestSaga saga = _repository[sagaId.Value];
+                TestSaga saga = _repository[sagaId.Value].Instance;
 
                 await saga.A.Task;
             }
@@ -159,7 +159,7 @@ namespace MassTransit.RabbitMqTransport.Tests
                 Guid? sagaId = await _repository.ShouldContainSaga(_sagaId, TestTimeout);
                 Assert.IsTrue(sagaId.HasValue);
 
-                TestSaga saga = _repository[sagaId.Value];
+                TestSaga saga = _repository[sagaId.Value].Instance;
 
                 await saga.B.Task;
             }

@@ -12,7 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests
 {
-    using System;
     using System.Threading.Tasks;
     using NUnit.Framework;
     using TestFramework;
@@ -40,7 +39,9 @@ namespace MassTransit.Tests
 
         protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
         {
-            configurator.Consumer<Consumer>(x => x.UseLog(Console.Out, async context => string.Format("Consumer: {0}", TypeMetadataCache<Consumer>.ShortName)));
+            configurator.Consumer<Consumer>(
+                x => x.UseConsoleLog(async (context, logContext) => string.Format("{1:u} {2:F0} Consumer: {0}", TypeMetadataCache<Consumer>.ShortName,
+                    logContext.StartTime, logContext.Duration.TotalMilliseconds)));
         }
 
 

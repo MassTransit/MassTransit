@@ -46,7 +46,7 @@ namespace MassTransit.AutomatonymousTests
                     && GetCurrentState(x) == _machine.Registered, TestTimeout);
                 Assert.IsTrue(saga.HasValue);
 
-                TestState sagaInstance = _repository[saga.Value];
+                TestState sagaInstance = _repository[saga.Value].Instance;
                 Assert.IsTrue(sagaInstance.ValidateAddressRequestId.HasValue);
             }
 

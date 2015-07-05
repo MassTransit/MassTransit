@@ -43,7 +43,7 @@ namespace MassTransit.Serialization
         {
             context.ContentType = EncryptedContentType;
 
-            var envelope = new JsonMessageEnvelope(context, context.Message, TypeMetadataCache<T>.MessageTypes);
+            var envelope = new JsonMessageEnvelope(context, context.Message, TypeMetadataCache<T>.MessageTypeNames);
 
             using (Stream cryptoStream = _streamProvider.GetEncryptStream(stream, context))
             using (var jsonWriter = new BsonWriter(cryptoStream))

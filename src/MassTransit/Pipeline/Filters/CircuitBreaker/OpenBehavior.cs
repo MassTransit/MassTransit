@@ -24,16 +24,16 @@ namespace MassTransit.Pipeline.Filters.CircuitBreaker
     /// Represents a circuit that is unavailable, with a timer waiting to partially close
     /// the circuit.
     /// </summary>
-    class OpenCircuitBreakerBehavior :
+    class OpenBehavior :
         ICircuitBreakerBehavior
     {
         readonly ICircuitBreaker _breaker;
+        readonly Stopwatch _elapsed;
         readonly Exception _exception;
-        readonly IEnumerator<int> _timeoutEnumerator;
+        readonly IEnumerator<TimeSpan> _timeoutEnumerator;
         readonly Timer _timer;
-        Stopwatch _elapsed;
 
-        public OpenCircuitBreakerBehavior(ICircuitBreaker breaker, Exception exception, IEnumerator<int> timeoutEnumerator)
+        public OpenBehavior(ICircuitBreaker breaker, Exception exception, IEnumerator<TimeSpan> timeoutEnumerator)
         {
             _breaker = breaker;
             _exception = exception;
@@ -45,7 +45,7 @@ namespace MassTransit.Pipeline.Filters.CircuitBreaker
 
         void ICircuitBreakerBehavior.PreSend()
         {
-            throw new CircuitOpenException("The circuit breaker is open", _exception);
+            throw _exception;
         }
 
         void ICircuitBreakerBehavior.PostSend()
@@ -56,29 +56,29 @@ namespace MassTransit.Pipeline.Filters.CircuitBreaker
         {
         }
 
-        Timer GetTimer(IEnumerator<int> timeoutEnumerator)
+        async Task IProbeSite.Probe(ProbeContext context)
+        {
+            TimeSpan timeout = _timeoutEnumerator.Current;
+            context.Set(new
+            {
+                State = "open",
+                ExceptionInfo = new FaultExceptionInfo(_exception),
+                Timeout = timeout,
+                Remaining = timeout - _elapsed.Elapsed
+            });
+        }
+
+        Timer GetTimer(IEnumerator<TimeSpan> timeoutEnumerator)
         {
             timeoutEnumerator.MoveNext();
 
-            return new Timer(PartiallyCloseCircuit, this, timeoutEnumerator.Current, -1);
+            return new Timer(PartiallyCloseCircuit, this, timeoutEnumerator.Current, TimeSpan.FromMilliseconds(-1));
         }
 
         void PartiallyCloseCircuit(object state)
         {
             _timer.Dispose();
             _breaker.ClosePartially(_exception, _timeoutEnumerator, this);
-        }
-
-        async Task IProbeSite.Probe(ProbeContext context)
-        {
-            var timeout = _timeoutEnumerator.Current;
-            context.Set(new
-            {
-                State = "open",
-                ExceptionInfo = new FaultExceptionInfo(_exception),
-                Timeout = timeout,
-                Remaining = timeout - _elapsed.ElapsedMilliseconds
-            });
         }
     }
 }
