@@ -564,7 +564,6 @@
     <Compile Include="Saga\Pipeline\Pipes\SagaMergePipe.cs" />
     <Compile Include="Saga\SagaFilterExpressionConverter.cs" />
     <Compile Include="Saga\Policies\AnyExistingSagaPolicy.cs" />
-    <Compile Include="Saga\Policies\ExistingSagaPolicy.cs" />
     <Compile Include="Saga\Policies\NewSagaPolicy.cs" />
     <Compile Include="Saga\Policies\NewOrExistingSagaPolicy.cs" />
     <Compile Include="Saga\SagaInstanceFactoryMethod.cs" />

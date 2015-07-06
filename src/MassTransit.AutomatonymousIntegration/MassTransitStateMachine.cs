@@ -106,7 +106,10 @@ namespace Automatonymous
 
             var @event = (Event<T>)propertyInfo.GetValue(this);
 
-            var configurator = new MassTransitEventCorrelationConfigurator<TInstance, T>(this, @event);
+            EventCorrelation<TInstance> existingCorrelation;
+            _eventCorrelations.TryGetValue(@event, out existingCorrelation);
+
+            var configurator = new MassTransitEventCorrelationConfigurator<TInstance, T>(this, @event, existingCorrelation);
 
             configureEventCorrelation(configurator);
 
@@ -135,7 +138,10 @@ namespace Automatonymous
             PropertyInfo eventPropertyInfo = eventPropertyExpression.GetPropertyInfo();
             var @event = (Event<T>)eventPropertyInfo.GetValue(property);
 
-            var configurator = new MassTransitEventCorrelationConfigurator<TInstance, T>(this, @event);
+            EventCorrelation<TInstance> existingCorrelation;
+            _eventCorrelations.TryGetValue(@event, out existingCorrelation);
+
+            var configurator = new MassTransitEventCorrelationConfigurator<TInstance, T>(this, @event, existingCorrelation);
 
             configureEventCorrelation(configurator);
 

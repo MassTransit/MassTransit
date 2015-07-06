@@ -28,15 +28,17 @@ namespace Automatonymous.CorrelationConfigurators
         readonly Event<TData> _event;
         readonly SagaStateMachine<TInstance> _machine;
         readonly IFilter<ConsumeContext<TData>> _messageFilter;
+        readonly IPipe<ConsumeContext<TData>> _missingPipe;
         readonly Lazy<ISagaPolicy<TInstance, TData>> _policy;
         readonly SagaFilterFactory<TInstance, TData> _sagaFilterFactory;
 
         public MassTransitEventCorrelation(SagaStateMachine<TInstance> machine, Event<TData> @event, SagaFilterFactory<TInstance, TData> sagaFilterFactory,
-            IFilter<ConsumeContext<TData>> messageFilter)
+            IFilter<ConsumeContext<TData>> messageFilter, IPipe<ConsumeContext<TData>> missingPipe)
         {
             _event = @event;
             _sagaFilterFactory = sagaFilterFactory;
             _messageFilter = messageFilter;
+            _missingPipe = missingPipe;
             _machine = machine;
 
             _policy = new Lazy<ISagaPolicy<TInstance, TData>>(GetSagaPolicy);
@@ -87,7 +89,7 @@ namespace Automatonymous.CorrelationConfigurators
             if (includesInitial)
                 return new NewSagaPolicy<TInstance, TData>(new DefaultSagaFactory<TInstance, TData>());
 
-            return new AnyExistingSagaPolicy<TInstance, TData>();
+            return new AnyExistingSagaPolicy<TInstance, TData>(_missingPipe);
         }
     }
 }

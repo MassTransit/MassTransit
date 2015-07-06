@@ -54,6 +54,8 @@
     </Compile>
     <Compile Include="Activities\PublishActivity.cs" />
     <Compile Include="Activities\RequestActivityImpl.cs" />
+    <Compile Include="Configuration\EventMissingInstanceConfigurator.cs" />
+    <Compile Include="Configuration\MissingInstanceConfigurator.cs" />
     <Compile Include="EventMessageFactory.cs" />
     <Compile Include="Activities\RequestActivity.cs" />
     <Compile Include="Activities\RespondActivity.cs" />

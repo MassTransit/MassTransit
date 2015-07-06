@@ -25,7 +25,7 @@ namespace Automatonymous.CorrelationConfigurators
 
         public CorrelatedByEventCorrelationBuilder(SagaStateMachine<TInstance> machine, Event<TData> @event)
         {
-            var configurator = new MassTransitEventCorrelationConfigurator<TInstance, TData>(machine, @event);
+            var configurator = new MassTransitEventCorrelationConfigurator<TInstance, TData>(machine, @event, null);
             configurator.CorrelateById(x => x.Message.CorrelationId);
 
             _configurator = configurator;
