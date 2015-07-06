@@ -33,7 +33,7 @@ namespace MassTransit.AutomatonymousTests
 
                 RegisterMember registerMember = new RegisterMemberCommand
                 {
-                    CorrelationId = NewId.NextGuid(),
+                    MemberNumber = Guid.NewGuid().ToString(),
                     Name = "Frank",
                     Address = "123 american way",
                 };
@@ -42,7 +42,7 @@ namespace MassTransit.AutomatonymousTests
 
                 ConsumeContext<MemberRegistered> registered = await handler;
 
-                Guid? saga = await _repository.ShouldContainSaga(x => x.CorrelationId == registerMember.CorrelationId
+                Guid? saga = await _repository.ShouldContainSaga(x => x.MemberNumber == registerMember.MemberNumber
                     && GetCurrentState(x) == _machine.Registered, TestTimeout);
                 Assert.IsTrue(saga.HasValue);
 
@@ -112,7 +112,7 @@ namespace MassTransit.AutomatonymousTests
         class RegisterMemberCommand :
             RegisterMember
         {
-            public Guid CorrelationId { get; set; }
+            public string MemberNumber { get; set; }
             public string Name { get; set; }
             public string Address { get; set; }
         }
@@ -190,17 +190,19 @@ namespace MassTransit.AutomatonymousTests
 
             public State CurrentState { get; set; }
 
+            public string MemberNumber { get; set; }
             public string Name { get; set; }
             public string Address { get; set; }
 
             public Guid? ValidateAddressRequestId { get; set; }
+
             public Guid CorrelationId { get; set; }
         }
 
 
-        public interface RegisterMember :
-            CorrelatedBy<Guid>
+        public interface RegisterMember
         {
+            string MemberNumber { get; }
             string Name { get; }
             string Address { get; }
         }
@@ -254,21 +256,21 @@ namespace MassTransit.AutomatonymousTests
         class ValidateAddressRequest :
             ValidateAddress
         {
-            readonly RegisterMember _message;
+            readonly TestState _instance;
 
-            public ValidateAddressRequest(RegisterMember message)
+            public ValidateAddressRequest(TestState instance)
             {
-                _message = message;
+                _instance = instance;
             }
 
             public Guid CorrelationId
             {
-                get { return _message.CorrelationId; }
+                get { return _instance.CorrelationId; }
             }
 
             public string Address
             {
-                get { return _message.Address; }
+                get { return _instance.Address; }
             }
         }
 
@@ -278,19 +280,25 @@ namespace MassTransit.AutomatonymousTests
         {
             public TestStateMachine(RequestSettings settings)
             {
+                Event(() => Register, x => 
+                    x.CorrelateBy(p => p.MemberNumber, p => p.Message.MemberNumber)
+                    .SelectId(context => NewId.NextGuid()));
+
                 Request(() => ValidateAddress, x => x.ValidateAddressRequestId, settings);
 
                 Initially(
                     When(Register)
                         .Then(context =>
                         {
-                            Console.WriteLine("Registration received: {0}", context.Data.CorrelationId);
+                            Console.WriteLine("Registration received: {0}", context.Data.MemberNumber);
 
                             Console.WriteLine("TestState ID: {0}", context.Instance.CorrelationId);
 
                             context.Instance.Name = context.Data.Name;
+                            context.Instance.Address = context.Data.Address;
+                            context.Instance.MemberNumber = context.Data.MemberNumber;
                         })
-                        .Request(ValidateAddress, context => new ValidateAddressRequest(context.Data))
+                        .Request(ValidateAddress, context => new ValidateAddressRequest(context.Instance))
                         .TransitionTo(ValidateAddress.Pending));
 
                 During(ValidateAddress.Pending,

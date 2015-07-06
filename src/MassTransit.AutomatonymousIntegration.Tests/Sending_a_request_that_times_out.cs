@@ -30,14 +30,14 @@ namespace MassTransit.AutomatonymousTests
         {
             RegisterMember registerMember = new RegisterMemberCommand
             {
-                CorrelationId = NewId.NextGuid(),
+                MemberNumber = Guid.NewGuid().ToString(),
                 Name = "Frank",
                 Address = "123 american way",
             };
 
             await InputQueueSendEndpoint.Send(registerMember);
 
-            Guid? saga = await _repository.ShouldContainSaga(x => x.CorrelationId == registerMember.CorrelationId
+            Guid? saga = await _repository.ShouldContainSaga(x => x.MemberNumber == registerMember.MemberNumber
                 && GetCurrentState(x) == _machine.AddressValidationTimeout, TestTimeout);
             Assert.IsTrue(saga.HasValue);
         }
