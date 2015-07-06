@@ -14,7 +14,6 @@ namespace MassTransit.Saga
 {
     using System.Threading.Tasks;
     using MassTransit.Pipeline;
-    using Monitoring.Introspection;
 
 
     /// <summary>

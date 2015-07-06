@@ -15,6 +15,7 @@ namespace Automatonymous
     using System;
     using System.Linq.Expressions;
     using MassTransit;
+    using MassTransit.Pipeline;
 
 
     public interface EventCorrelationConfigurator<TInstance, TData>
@@ -61,5 +62,13 @@ namespace Automatonymous
         /// <param name="correlationExpression"></param>
         /// <returns></returns>
         EventCorrelationConfigurator<TInstance, TData> CorrelateBy(Expression<Func<TInstance, ConsumeContext<TData>, bool>> correlationExpression);
+
+        /// <summary>
+        /// If an event is consumed that is not matched to an existing saga instance, discard the event without throwing an exception.
+        /// The default behavior is to throw an exception, which moves the event into the error queue for later processing
+        /// </summary>
+        /// <param name="getBehavior">The configuration call to specify the behavior on missing instance</param>
+        /// <returns></returns>
+        EventCorrelationConfigurator<TInstance, TData> OnMissingInstance(Func<MissingInstanceConfigurator<TData>, IPipe<ConsumeContext<TData>>> getBehavior);
     }
 }

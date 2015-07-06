@@ -28,17 +28,25 @@ namespace Automatonymous.CorrelationConfigurators
         readonly Event<TData> _event;
         readonly SagaStateMachine<TInstance> _machine;
         IFilter<ConsumeContext<TData>> _messageFilter;
+        IPipe<ConsumeContext<TData>> _missingPipe;
         SagaFilterFactory<TInstance, TData> _sagaFilterFactory;
 
-        public MassTransitEventCorrelationConfigurator(SagaStateMachine<TInstance> machine, Event<TData> @event)
+        public MassTransitEventCorrelationConfigurator(SagaStateMachine<TInstance> machine, Event<TData> @event, EventCorrelation<TInstance> existingCorrelation)
         {
             _event = @event;
             _machine = machine;
+
+            var correlation = existingCorrelation as EventCorrelation<TInstance, TData>;
+            if (correlation != null)
+            {
+                _sagaFilterFactory = correlation.FilterFactory;
+                _messageFilter = correlation.MessageFilter;
+            }
         }
 
         public EventCorrelation<TInstance> Build()
         {
-            return new MassTransitEventCorrelation<TInstance, TData>(_machine, _event, _sagaFilterFactory, _messageFilter);
+            return new MassTransitEventCorrelation<TInstance, TData>(_machine, _event, _sagaFilterFactory, _messageFilter, _missingPipe);
         }
 
         public EventCorrelationConfigurator<TInstance, TData> CorrelateById(Func<ConsumeContext<TData>, Guid> selector)
@@ -108,6 +116,19 @@ namespace Automatonymous.CorrelationConfigurators
 
                 return new QuerySagaFilter<TInstance, TData>(repository, policy, queryFactory, sagaPipe);
             };
+
+            return this;
+        }
+
+        public EventCorrelationConfigurator<TInstance, TData> OnMissingInstance(
+            Func<MissingInstanceConfigurator<TData>, IPipe<ConsumeContext<TData>>> getMissingPipe)
+        {
+            if (getMissingPipe == null)
+                throw new ArgumentNullException("getMissingPipe");
+
+            var configurator = new EventMissingInstanceConfigurator<TInstance, TData>();
+
+            _missingPipe = getMissingPipe(configurator);
 
             return this;
         }
