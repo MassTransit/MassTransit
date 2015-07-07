@@ -23,25 +23,25 @@ namespace MassTransit.RabbitMqTransport
     using Util;
 
 
-    public class RabbitMqPublishEndpoint :
-        PublishEndpoint
+    public class RabbitMqPublishSendEndpointProvider :
+        IPublishSendEndpointProvider
     {
         readonly ConcurrentDictionary<Type, Lazy<ISendEndpoint>> _cachedEndpoints;
         readonly IRabbitMqHost _host;
-        readonly Uri _inputAddress;
         readonly IMessageNameFormatter _messageNameFormatter;
         readonly IMessageSerializer _serializer;
+        readonly Uri _sourceAddress;
 
-        public RabbitMqPublishEndpoint(IRabbitMqHost host, IMessageSerializer serializer, Uri inputAddress)
+        public RabbitMqPublishSendEndpointProvider(IRabbitMqHost host, IMessageSerializer serializer, Uri sourceAddress)
         {
             _host = host;
             _serializer = serializer;
-            _inputAddress = inputAddress;
+            _sourceAddress = sourceAddress;
             _messageNameFormatter = host.MessageNameFormatter;
             _cachedEndpoints = new ConcurrentDictionary<Type, Lazy<ISendEndpoint>>();
         }
 
-        protected override async Task<IEnumerable<ISendEndpoint>> GetEndpoints(Type messageType)
+        public async Task<IEnumerable<ISendEndpoint>> GetPublishEndpoints(Type messageType)
         {
             return new[] {_cachedEndpoints.GetOrAdd(messageType, x => new Lazy<ISendEndpoint>(() => CreateSendEndpoint(x))).Value};
         }
@@ -61,7 +61,7 @@ namespace MassTransit.RabbitMqTransport
 
             var sendTransport = new RabbitMqSendTransport(modelCache, sendSettings, bindings);
 
-            return new SendEndpoint(sendTransport, _serializer, destinationAddress, _inputAddress);
+            return new SendEndpoint(sendTransport, _serializer, destinationAddress, _sourceAddress);
         }
     }
 }

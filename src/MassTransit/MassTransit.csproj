@@ -123,6 +123,7 @@
     <Compile Include="IMessageData.cs" />
     <Compile Include="IntrospectionExtensions.cs" />
     <Compile Include="IProbeSite.cs" />
+    <Compile Include="IPublishSendEndpointProvider.cs" />
     <Compile Include="IRepeatPolicy.cs" />
     <Compile Include="IRetryPolicy.cs" />
     <Compile Include="LogContext.cs" />

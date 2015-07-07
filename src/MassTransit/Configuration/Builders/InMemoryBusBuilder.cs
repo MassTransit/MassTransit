@@ -72,9 +72,9 @@ namespace MassTransit.Builders
             return new SendEndpointCache(provider);
         }
 
-        protected override IPublishEndpoint CreatePublishEndpoint()
+        protected override IPublishSendEndpointProvider CreatePublishSendEndpointProvider()
         {
-            return new InMemoryPublishEndpoint(SendEndpointProvider, _sendTransportProvider);
+            return new InMemoryPublishSendEndpointProvider(SendEndpointProvider, _sendTransportProvider);
         }
 
         public IBusControl Build()

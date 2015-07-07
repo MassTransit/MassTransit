@@ -24,6 +24,7 @@ namespace MassTransit.Serialization
     using Newtonsoft.Json.Linq;
     using Pipeline;
     using Pipeline.Pipes;
+    using Transports;
     using Util;
 
 
@@ -52,14 +53,14 @@ namespace MassTransit.Serialization
         Uri _sourceAddress;
 
         public StaticConsumeContext(JsonSerializer deserializer, ISendEndpointProvider sendEndpointProvider,
-            IPublishEndpoint publishEndpoint,
+            IPublishSendEndpointProvider publishEndpoint,
             ReceiveContext receiveContext, object message, Header[] headers)
         {
             _deserializer = deserializer;
             _receiveContext = receiveContext;
             _sendEndpointProvider = sendEndpointProvider;
             _messageTypes = new Dictionary<Type, object>();
-            _publishEndpoint = publishEndpoint;
+            _publishEndpoint = new PublishEndpoint(receiveContext.InputAddress, publishEndpoint);
             _pendingTasks = new List<Task>();
             _message = message;
             _binaryHeaders = headers;

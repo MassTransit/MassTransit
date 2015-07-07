@@ -16,7 +16,6 @@ namespace MassTransit.Transports
     using System.Threading;
     using System.Threading.Tasks;
     using Context;
-    using Monitoring.Introspection;
     using Pipeline;
 
 
@@ -26,24 +25,27 @@ namespace MassTransit.Transports
     {
         readonly IPublishObserver _observer;
         readonly IPipe<PublishContext<T>> _pipe;
-
+        readonly Uri _sourceAddress;
         PublishContext<T> _context;
 
-        public PublishPipeContextAdapter(IPipe<PublishContext<T>> pipe, IPublishObserver observer)
+        public PublishPipeContextAdapter(IPipe<PublishContext<T>> pipe, IPublishObserver observer, Uri sourceAddress)
         {
             _pipe = pipe;
             _observer = observer;
+            _sourceAddress = sourceAddress;
         }
 
-        public PublishPipeContextAdapter(IPipe<PublishContext> pipe, IPublishObserver observer)
+        public PublishPipeContextAdapter(IPipe<PublishContext> pipe, IPublishObserver observer, Uri sourceAddress)
         {
             _pipe = pipe;
             _observer = observer;
+            _sourceAddress = sourceAddress;
         }
 
-        public PublishPipeContextAdapter(IPublishObserver observer)
+        public PublishPipeContextAdapter(IPublishObserver observer, Uri sourceAddress)
         {
             _observer = observer;
+            _sourceAddress = sourceAddress;
             _pipe = Pipe.Empty<PublishContext<T>>();
         }
 
@@ -54,6 +56,8 @@ namespace MassTransit.Transports
 
         public async Task Send(SendContext<T> context)
         {
+            context.SourceAddress = _sourceAddress;
+
             var publishContext = new PublishContextProxy<T>(context);
             bool firstTime = Interlocked.CompareExchange(ref _context, publishContext, null) == null;
 

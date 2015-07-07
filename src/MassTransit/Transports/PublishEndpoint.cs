@@ -13,7 +13,6 @@
 namespace MassTransit.Transports
 {
     using System;
-    using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
     using Context;
@@ -21,23 +20,27 @@ namespace MassTransit.Transports
     using Util;
 
 
-    public abstract class PublishEndpoint :
+    public class PublishEndpoint :
         IPublishEndpoint,
         IPublishObserver
     {
+        readonly IPublishSendEndpointProvider _endpointProvider;
         readonly Connectable<IPublishObserver> _observers;
+        readonly Uri _sourceAddress;
 
-        protected PublishEndpoint()
+        public PublishEndpoint(Uri sourceAddress, IPublishSendEndpointProvider endpointProvider)
         {
+            _sourceAddress = sourceAddress;
+            _endpointProvider = endpointProvider;
             _observers = new Connectable<IPublishObserver>();
         }
 
         async Task IPublishEndpoint.Publish<T>(T message, CancellationToken cancellationToken)
         {
-            var adapter = new PublishPipeContextAdapter<T>(this);
+            var adapter = new PublishPipeContextAdapter<T>(this, _sourceAddress);
             try
             {
-                foreach (ISendEndpoint endpoint in await GetEndpoints(typeof(T)).ConfigureAwait(false))
+                foreach (ISendEndpoint endpoint in await _endpointProvider.GetPublishEndpoints(typeof(T)).ConfigureAwait(false))
                     await endpoint.Send(message, adapter, cancellationToken).ConfigureAwait(false);
 
                 await adapter.PostSend().ConfigureAwait(false);
@@ -51,10 +54,10 @@ namespace MassTransit.Transports
 
         async Task IPublishEndpoint.Publish<T>(T message, IPipe<PublishContext<T>> publishPipe, CancellationToken cancellationToken)
         {
-            var adapter = new PublishPipeContextAdapter<T>(publishPipe, this);
+            var adapter = new PublishPipeContextAdapter<T>(publishPipe, this, _sourceAddress);
             try
             {
-                foreach (ISendEndpoint endpoint in await GetEndpoints(typeof(T)).ConfigureAwait(false))
+                foreach (ISendEndpoint endpoint in await _endpointProvider.GetPublishEndpoints(typeof(T)).ConfigureAwait(false))
                     await endpoint.Send(message, adapter, cancellationToken).ConfigureAwait(false);
 
                 await adapter.PostSend().ConfigureAwait(false);
@@ -68,10 +71,10 @@ namespace MassTransit.Transports
 
         async Task IPublishEndpoint.Publish<T>(T message, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
         {
-            var adapter = new PublishPipeContextAdapter<T>(publishPipe, this);
+            var adapter = new PublishPipeContextAdapter<T>(publishPipe, this, _sourceAddress);
             try
             {
-                foreach (ISendEndpoint endpoint in await GetEndpoints(typeof(T)).ConfigureAwait(false))
+                foreach (ISendEndpoint endpoint in await _endpointProvider.GetPublishEndpoints(typeof(T)).ConfigureAwait(false))
                     await endpoint.Send(message, adapter, cancellationToken).ConfigureAwait(false);
 
                 await adapter.PostSend().ConfigureAwait(false);
@@ -115,10 +118,10 @@ namespace MassTransit.Transports
 
         async Task IPublishEndpoint.Publish<T>(object values, CancellationToken cancellationToken)
         {
-            var adapter = new PublishPipeContextAdapter<T>(this);
+            var adapter = new PublishPipeContextAdapter<T>(this, _sourceAddress);
             try
             {
-                foreach (ISendEndpoint endpoint in await GetEndpoints(typeof(T)).ConfigureAwait(false))
+                foreach (ISendEndpoint endpoint in await _endpointProvider.GetPublishEndpoints(typeof(T)).ConfigureAwait(false))
                     await endpoint.Send(values, adapter, cancellationToken).ConfigureAwait(false);
 
                 await adapter.PostSend().ConfigureAwait(false);
@@ -133,10 +136,10 @@ namespace MassTransit.Transports
         async Task IPublishEndpoint.Publish<T>(object values, IPipe<PublishContext<T>> publishPipe,
             CancellationToken cancellationToken)
         {
-            var adapter = new PublishPipeContextAdapter<T>(publishPipe, this);
+            var adapter = new PublishPipeContextAdapter<T>(publishPipe, this, _sourceAddress);
             try
             {
-                foreach (ISendEndpoint endpoint in await GetEndpoints(typeof(T)).ConfigureAwait(false))
+                foreach (ISendEndpoint endpoint in await _endpointProvider.GetPublishEndpoints(typeof(T)).ConfigureAwait(false))
                     await endpoint.Send(values, adapter, cancellationToken).ConfigureAwait(false);
 
                 await adapter.PostSend().ConfigureAwait(false);
@@ -151,10 +154,10 @@ namespace MassTransit.Transports
         async Task IPublishEndpoint.Publish<T>(object values, IPipe<PublishContext> publishPipe,
             CancellationToken cancellationToken)
         {
-            var adapter = new PublishPipeContextAdapter<T>(publishPipe, this);
+            var adapter = new PublishPipeContextAdapter<T>(publishPipe, this, _sourceAddress);
             try
             {
-                foreach (ISendEndpoint endpoint in await GetEndpoints(typeof(T)).ConfigureAwait(false))
+                foreach (ISendEndpoint endpoint in await _endpointProvider.GetPublishEndpoints(typeof(T)).ConfigureAwait(false))
                     await endpoint.Send(values, adapter, cancellationToken).ConfigureAwait(false);
 
                 await adapter.PostSend().ConfigureAwait(false);
@@ -185,7 +188,5 @@ namespace MassTransit.Transports
         {
             return _observers.ForEach(observer => observer.PublishFault(context, exception));
         }
-
-        protected abstract Task<IEnumerable<ISendEndpoint>> GetEndpoints(Type messageType);
     }
 }

@@ -26,11 +26,11 @@ namespace MassTransit.Serialization
     {
         readonly JsonSerializer _deserializer;
         readonly ICryptoStreamProvider _provider;
-        readonly IPublishEndpoint _publishEndpoint;
+        readonly IPublishSendEndpointProvider _publishEndpoint;
         readonly ISendEndpointProvider _sendEndpointProvider;
 
         public EncryptedMessageDeserializer(JsonSerializer deserializer, ISendEndpointProvider sendEndpointProvider,
-            IPublishEndpoint publishEndpoint, ICryptoStreamProvider provider)
+            IPublishSendEndpointProvider publishEndpoint, ICryptoStreamProvider provider)
         {
             _deserializer = deserializer;
             _sendEndpointProvider = sendEndpointProvider;
