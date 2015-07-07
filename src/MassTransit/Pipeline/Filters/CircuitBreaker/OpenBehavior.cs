@@ -56,7 +56,7 @@ namespace MassTransit.Pipeline.Filters.CircuitBreaker
         {
         }
 
-        async Task IProbeSite.Probe(ProbeContext context)
+        async void IProbeSite.Probe(ProbeContext context)
         {
             TimeSpan timeout = _timeoutEnumerator.Current;
             context.Set(new

@@ -15,6 +15,7 @@ namespace MassTransit.Context
     using System;
     using System.Threading.Tasks;
     using Pipeline;
+    using Util;
 
 
     /// <summary>
@@ -38,16 +39,18 @@ namespace MassTransit.Context
             _bus = bus;
         }
 
-        async Task IProbeSite.Probe(ProbeContext context)
+        void IProbeSite.Probe(ProbeContext context)
         {
         }
 
-        public async Task Send(SendContext<TRequest> context)
+        Task IPipe<SendContext<TRequest>>.Send(SendContext<TRequest> context)
         {
             context.RequestId = NewId.NextGuid();
             context.ResponseAddress = _bus.Address;
 
             _requestContext = new SendRequestContext<TRequest>(_bus, context, _taskScheduler, _callback);
+
+            return TaskUtil.Completed;
         }
 
         public Task Task

@@ -55,7 +55,7 @@ namespace MassTransit.NHibernateIntegration.Saga
             }
         }
 
-        async Task IProbeSite.Probe(ProbeContext context)
+        async void IProbeSite.Probe(ProbeContext context)
         {
             ProbeContext scope = context.CreateScope("sagaRepository");
             scope.Set(new
@@ -192,9 +192,9 @@ namespace MassTransit.NHibernateIntegration.Saga
                 _next = next;
             }
 
-            Task IProbeSite.Probe(ProbeContext context)
+            void IProbeSite.Probe(ProbeContext context)
             {
-                return _next.Probe(context);
+                _next.Probe(context);
             }
 
             public async Task Send(SagaConsumeContext<TSaga, TMessage> context)

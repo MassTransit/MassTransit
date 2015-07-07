@@ -13,6 +13,7 @@
 namespace MassTransit
 {
     using System;
+    using System.ComponentModel;
     using Builders;
 
 
@@ -20,16 +21,22 @@ namespace MassTransit
         IBusFactoryConfigurator
     {
         /// <summary>
+        /// Sets the maximum number of threads used by an in-memory transport, for partitioning
+        /// the input queue.
+        /// </summary>
+        int ConcurrencyLimit { set; }
+
+        /// <summary>
         /// Sets the transport provider for the InMemory bus, used to share a transport cache between multiple
         /// bus instances. Normally this method is not used.
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="transportProvider"></param>
-        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Advanced)]
+        [EditorBrowsable(EditorBrowsableState.Advanced)]
         void SetTransportProvider<T>(T transportProvider)
             where T : ISendTransportProvider, IReceiveTransportProvider;
 
-        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         void AddBusFactorySpecification(IInMemoryBusFactorySpecification configurator);
 
         /// <summary>

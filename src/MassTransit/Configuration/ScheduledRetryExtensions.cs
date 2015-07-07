@@ -14,7 +14,6 @@ namespace MassTransit
 {
     using System;
     using PipeConfigurators;
-    using Policies;
 
 
     public static class ScheduledRetryExtensions

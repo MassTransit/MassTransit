@@ -14,6 +14,7 @@ namespace MassTransit.Monitoring.Performance
 {
     using System;
     using System.Threading.Tasks;
+    using Util;
 
 
     /// <summary>
@@ -23,28 +24,33 @@ namespace MassTransit.Monitoring.Performance
     public class PerformanceCounterReceiveObserver :
         IReceiveObserver
     {
-        async Task IReceiveObserver.PreReceive(ReceiveContext context)
+        Task IReceiveObserver.PreReceive(ReceiveContext context)
         {
+            return TaskUtil.Completed;
         }
 
-        async Task IReceiveObserver.PostReceive(ReceiveContext context)
+        Task IReceiveObserver.PostReceive(ReceiveContext context)
         {
+            return TaskUtil.Completed;
         }
 
-        async Task IReceiveObserver.PostConsume<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType)
+        Task IReceiveObserver.PostConsume<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType)
         {
             ConsumerPerformanceCounterCache.GetCounter(consumerType).Consumed(duration);
             MessagePerformanceCounterCache<T>.Counter.Consumed(duration);
+            return TaskUtil.Completed;
         }
 
-        async Task IReceiveObserver.ConsumeFault<T>(ConsumeContext<T> context, TimeSpan elapsed, string consumerType, Exception exception)
+        Task IReceiveObserver.ConsumeFault<T>(ConsumeContext<T> context, TimeSpan elapsed, string consumerType, Exception exception)
         {
             ConsumerPerformanceCounterCache.GetCounter(consumerType).Faulted();
             MessagePerformanceCounterCache<T>.Counter.Faulted();
+            return TaskUtil.Completed;
         }
 
-        async Task IReceiveObserver.ReceiveFault(ReceiveContext context, Exception exception)
+        Task IReceiveObserver.ReceiveFault(ReceiveContext context, Exception exception)
         {
+            return TaskUtil.Completed;
         }
     }
 

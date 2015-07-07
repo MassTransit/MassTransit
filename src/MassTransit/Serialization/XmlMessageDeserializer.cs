@@ -39,7 +39,7 @@ namespace MassTransit.Serialization
             _publishEndpoint = publishEndpoint;
         }
 
-        async Task IProbeSite.Probe(ProbeContext context)
+        async void IProbeSite.Probe(ProbeContext context)
         {
             ProbeContext scope = context.CreateScope("xml");
             scope.Add("contentType", XmlMessageSerializer.XmlContentType.MediaType);

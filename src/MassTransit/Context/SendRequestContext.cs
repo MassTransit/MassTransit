@@ -224,7 +224,7 @@ namespace MassTransit.Context
         {
             var source = new TaskCompletionSource<T>();
 
-            MessageHandler<T> messageHandler = async context =>
+            MessageHandler<T> messageHandler = context =>
             {
                 try
                 {
@@ -238,6 +238,8 @@ namespace MassTransit.Context
 
                     Fail(ex);
                 }
+
+                return TaskUtil.Completed;
             };
 
             ConnectHandle connectHandle = _bus.ConnectRequestHandler(_requestId, messageHandler);
@@ -251,7 +253,7 @@ namespace MassTransit.Context
         {
             var source = new TaskCompletionSource<Fault<TRequest>>();
 
-            MessageHandler<Fault<TRequest>> messageHandler = async context =>
+            MessageHandler<Fault<TRequest>> messageHandler = context =>
             {
                 try
                 {
@@ -265,6 +267,8 @@ namespace MassTransit.Context
 
                     Fail(ex);
                 }
+
+                return TaskUtil.Completed;
             };
 
             ConnectHandle connectHandle = _bus.ConnectRequestHandler(_requestId, messageHandler);

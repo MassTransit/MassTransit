@@ -28,7 +28,7 @@ namespace MassTransit.Saga.Pipeline.Filters
         where TSaga : class, ISaga, InitiatedBy<TMessage>
         where TMessage : class, CorrelatedBy<Guid>
     {
-        async Task IProbeSite.Probe(ProbeContext context)
+        async void IProbeSite.Probe(ProbeContext context)
         {
             context.CreateFilterScope("initiatedBy");
         }

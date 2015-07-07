@@ -35,12 +35,12 @@ namespace MassTransit.AzureServiceBusTransport
     {
         static readonly ILog _log = Logger.Get<ServiceBusSendTransport>();
 
-        readonly Connectable<ISendObserver> _observers;
+        readonly SendObservable _observers;
         readonly MessageSender _sender;
 
         public ServiceBusSendTransport(MessageSender sender)
         {
-            _observers = new Connectable<ISendObserver>();
+            _observers = new SendObservable();
             _sender = sender;
         }
 
@@ -68,20 +68,19 @@ namespace MassTransit.AzureServiceBusTransport
                         if (context.CorrelationId.HasValue)
                             brokeredMessage.CorrelationId = context.CorrelationId.Value.ToString("N");
 
-                        await _observers.ForEach(x => x.PreSend(context));
+                        _observers.NotifyPreSend(context);
 
                         await _sender.SendAsync(brokeredMessage);
 
                         _log.DebugFormat("SEND {0} ({1})", brokeredMessage.MessageId, _sender.Path);
 
-                        await _observers.ForEach(x => x.PostSend(context));
+                        _observers.NotifyPostSend(context);
                     }
                 }
             }
             catch (Exception ex)
             {
-                _observers.ForEach(x => x.SendFault(context, ex))
-                    .Wait(cancelSend);
+                _observers.NotifySendFault(context, ex);
 
                 throw;
             }

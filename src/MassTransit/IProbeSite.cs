@@ -21,6 +21,6 @@ namespace MassTransit
     /// </summary>
     public interface IProbeSite
     {
-        Task Probe(ProbeContext context);
+        void Probe(ProbeContext context);
     }
 }

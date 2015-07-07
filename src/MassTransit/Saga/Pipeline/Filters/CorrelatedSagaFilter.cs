@@ -41,7 +41,7 @@ namespace MassTransit.Saga.Pipeline.Filters
             _policy = policy;
         }
 
-        async Task IProbeSite.Probe(ProbeContext context)
+        void IProbeSite.Probe(ProbeContext context)
         {
             ProbeContext scope = context.CreateFilterScope("saga");
             scope.Set(new
@@ -49,9 +49,9 @@ namespace MassTransit.Saga.Pipeline.Filters
                 Correlation = "Id"
             });
 
-            await _sagaRepository.Probe(scope);
+             _sagaRepository.Probe(scope);
 
-            await _messagePipe.Probe(scope);
+             _messagePipe.Probe(scope);
         }
 
         async Task IFilter<ConsumeContext<TMessage>>.Send(ConsumeContext<TMessage> context, IPipe<ConsumeContext<TMessage>> next)

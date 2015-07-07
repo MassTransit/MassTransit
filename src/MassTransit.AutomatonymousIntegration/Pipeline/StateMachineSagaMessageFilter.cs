@@ -44,7 +44,7 @@ namespace Automatonymous.Pipeline
             _stateMachine = stateMachine;
             _event = @event;
         }
-        async Task IProbeSite.Probe(ProbeContext context)
+        async void IProbeSite.Probe(ProbeContext context)
         {
             var scope = context.CreateScope("automatonymous");
             scope.Set(new

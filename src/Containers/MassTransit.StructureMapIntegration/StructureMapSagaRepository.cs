@@ -32,11 +32,11 @@ namespace MassTransit.StructureMapIntegration
             _container = container;
         }
 
-        Task IProbeSite.Probe(ProbeContext context)
+        void IProbeSite.Probe(ProbeContext context)
         {
             var scope = context.CreateScope("structuremap");
 
-            return _repository.Probe(scope);
+            _repository.Probe(scope);
         }
 
         public async Task Send<T>(ConsumeContext<T> context, ISagaPolicy<TSaga, T> policy, IPipe<SagaConsumeContext<TSaga, T>> next) where T : class

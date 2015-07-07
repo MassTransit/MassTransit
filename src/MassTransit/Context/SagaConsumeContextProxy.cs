@@ -18,6 +18,7 @@ namespace MassTransit.Context
     using System.Threading.Tasks;
     using Pipeline;
     using Saga;
+    using Util;
 
 
     /// <summary>
@@ -168,9 +169,11 @@ namespace MassTransit.Context
             return (SagaConsumeContext<TSaga, T>)this;
         }
 
-        async Task SagaConsumeContext<TSaga>.SetCompleted()
+        Task SagaConsumeContext<TSaga>.SetCompleted()
         {
             _completed = true;
+
+            return TaskUtil.Completed;
         }
 
         public bool IsCompleted

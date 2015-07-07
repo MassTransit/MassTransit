@@ -36,7 +36,7 @@ namespace MassTransit.Pipeline.Filters
             _observer = observer;
         }
 
-        async Task IProbeSite.Probe(ProbeContext context)
+        async void IProbeSite.Probe(ProbeContext context)
         {
             context.CreateFilterScope("observer");
         }

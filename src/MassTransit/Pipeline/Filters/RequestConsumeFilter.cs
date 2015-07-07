@@ -18,19 +18,23 @@ namespace MassTransit.Pipeline.Filters
     using System.Diagnostics;
     using System.Threading.Tasks;
 
-
+    /// <summary>
+    /// Handles the registration of requests and connecting them to the consume pipe
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <typeparam name="TKey"></typeparam>
     public class RequestConsumeFilter<T, TKey> :
         IFilter<ConsumeContext<T>>,
         IConnectPipeById<ConsumeContext<T>, TKey>
         where T : class
     {
         readonly KeyAccessor<ConsumeContext<T>, TKey> _keyAccessor;
-        readonly ConcurrentDictionary<TKey, TeeConsumeFilter<T>> _pipes;
+        readonly ConcurrentDictionary<TKey, RequestPipeFilter<T, TKey>> _pipes;
 
         public RequestConsumeFilter(KeyAccessor<ConsumeContext<T>, TKey> keyAccessor)
         {
             _keyAccessor = keyAccessor;
-            _pipes = new ConcurrentDictionary<TKey, TeeConsumeFilter<T>>();
+            _pipes = new ConcurrentDictionary<TKey, RequestPipeFilter<T, TKey>>();
         }
 
         public ConnectHandle Connect(TKey key, IPipe<ConsumeContext<T>> pipe)
@@ -38,22 +42,22 @@ namespace MassTransit.Pipeline.Filters
             if (pipe == null)
                 throw new ArgumentNullException("pipe");
 
-            TeeConsumeFilter<T> added = _pipes.GetOrAdd(key, x => new TeeConsumeFilter<T>());
+            bool added = _pipes.TryAdd(key, new RequestPipeFilter<T, TKey>(key, pipe));
+            if (!added)
+                throw new RequestException("A consumer for the requestId is already connected");
 
-            ConnectHandle handle = added.ConnectConsumePipe(pipe);
-
-            return new Handle(key, handle, RemovePipe);
+            return new Handle(key, RemovePipe);
         }
 
-        async Task IProbeSite.Probe(ProbeContext context)
+        void IProbeSite.Probe(ProbeContext context)
         {
             ProbeContext scope = context.CreateScope("request");
 
-            ICollection<TeeConsumeFilter<T>> filters = _pipes.Values;
+            ICollection<RequestPipeFilter<T, TKey>> filters = _pipes.Values;
             scope.Add("count", filters.Count);
 
             foreach (IProbeSite filter in filters)
-                await filter.Probe(scope);
+                filter.Probe(scope);
         }
 
         [DebuggerNonUserCode]
@@ -61,45 +65,33 @@ namespace MassTransit.Pipeline.Filters
         {
             TKey key = _keyAccessor(context);
 
-            TeeConsumeFilter<T> filter;
+            RequestPipeFilter<T, TKey> filter;
             if (_pipes.TryGetValue(key, out filter))
                 await filter.Send(context, next);
         }
 
-        void RemovePipe(TKey key, ConnectHandle connectHandle)
+        void RemovePipe(TKey key)
         {
-            connectHandle.Disconnect();
-
-            TeeConsumeFilter<T> filter;
-            if (_pipes.TryGetValue(key, out filter) && filter.Count == 0)
-            {
-                TeeConsumeFilter<T> removedFilter;
-                if (_pipes.TryRemove(key, out removedFilter))
-                {
-                    if (removedFilter.Count > 0)
-                        throw new InvalidOperationException("Keys must not be reused");
-                }
-            }
+            RequestPipeFilter<T, TKey> filter;
+            _pipes.TryRemove(key, out filter);
         }
 
 
         class Handle :
             ConnectHandle
         {
-            readonly ConnectHandle _handle;
             readonly TKey _key;
-            readonly Action<TKey, ConnectHandle> _removeKey;
+            readonly Action<TKey> _removeKey;
 
-            public Handle(TKey key, ConnectHandle handle, Action<TKey, ConnectHandle> removeKey)
+            public Handle(TKey key, Action<TKey> removeKey)
             {
                 _key = key;
-                _handle = handle;
                 _removeKey = removeKey;
             }
 
             public void Disconnect()
             {
-                _removeKey(_key, _handle);
+                _removeKey(_key);
             }
 
             public void Dispose()

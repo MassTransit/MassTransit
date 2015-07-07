@@ -10,17 +10,31 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit
+namespace MassTransit.Pipeline
 {
-    using System.Threading.Tasks;
+    using System;
+    using Util;
 
 
-    public interface ObserverHandle
+    public class SendObservable :
+        AsyncObservable<ISendObserver>
     {
-        /// <summary>
-        /// Disconnect from the observable source
-        /// </summary>
-        /// <returns></returns>
-        Task Disconnect();
+        public void NotifyPreSend<T>(SendContext<T> context)
+            where T : class
+        {
+            Notify(x => x.PreSend(context));
+        }
+
+        public void NotifyPostSend<T>(SendContext<T> context)
+            where T : class
+        {
+            Notify(x => x.PostSend(context));
+        }
+
+        public void NotifySendFault<T>(SendContext<T> context, Exception exception)
+            where T : class
+        {
+            Notify(x => x.SendFault(context, exception));
+        }
     }
 }

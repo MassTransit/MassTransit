@@ -32,12 +32,12 @@ namespace MassTransit.Pipeline.Filters
             _output = output;
         }
 
-        async Task IProbeSite.Probe(ProbeContext context)
+        void IProbeSite.Probe(ProbeContext context)
         {
             ProbeContext scope = context.CreateFilterScope("deserialize");
 
-            await _deserializer.Probe(scope);
-            await _output.Probe(scope);
+            _deserializer.Probe(scope);
+            _output.Probe(scope);
         }
 
         [DebuggerNonUserCode]

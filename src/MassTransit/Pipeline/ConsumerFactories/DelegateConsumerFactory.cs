@@ -51,7 +51,7 @@ namespace MassTransit.Pipeline.ConsumerFactories
             }
         }
 
-        async Task IProbeSite.Probe(ProbeContext context)
+        void IProbeSite.Probe(ProbeContext context)
         {
             context.CreateConsumerFactoryScope<TConsumer>("delegate");
         }

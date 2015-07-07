@@ -28,7 +28,7 @@ namespace MassTransit.Tests
 
             var observable = new AsyncObservable<List<int>>();
 
-            ObserverHandle observer = observable.Connect(values);
+            ConnectHandle observer = observable.Connect(values);
 
             for (int i = 0; i < 10000; i++)
             {
@@ -36,7 +36,7 @@ namespace MassTransit.Tests
                 observable.Notify(async x => x.Add(index));
             }
 
-            await observer.Disconnect();
+            observer.Disconnect();
 
             Assert.AreEqual(10000, values.Count);
 

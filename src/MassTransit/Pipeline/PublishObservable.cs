@@ -10,30 +10,31 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Policies
+namespace MassTransit.Pipeline
 {
-    using System.Threading;
-    using System.Threading.Tasks;
+    using System;
+    using Util;
 
 
-    public class UntilCancelledRepeatPolicy :
-        IRepeatPolicy
+    public class PublishObservable :
+        AsyncObservable<IPublishObserver>
     {
-        readonly CancellationToken _cancellationToken;
-
-        public UntilCancelledRepeatPolicy(CancellationToken cancellationToken)
+        public void NotifyPrePublish<T>(PublishContext<T> context)
+            where T : class
         {
-            _cancellationToken = cancellationToken;
+            Notify(x => x.PrePublish(context));
         }
 
-        public IRepeatContext GetRepeatContext()
+        public void NotifyPostPublish<T>(PublishContext<T> context)
+            where T : class
         {
-            return new UntilCancelledRepeatContext(_cancellationToken);
+            Notify(x => x.PostPublish(context));
         }
 
-        async void IProbeSite.Probe(ProbeContext context)
+        public void NotifyPublishFault<T>(PublishContext<T> context, Exception exception)
+            where T : class
         {
-            context.CreateScope("untilCancelled");
+            Notify(x => x.PublishFault(context, exception));
         }
     }
 }

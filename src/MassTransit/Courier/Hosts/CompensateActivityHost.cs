@@ -64,7 +64,7 @@ namespace MassTransit.Courier.Hosts
             }
         }
 
-        public async Task Probe(ProbeContext context)
+        public void Probe(ProbeContext context)
         {
             ProbeContext scope = context.CreateFilterScope("compensateActivity");
             scope.Set(new
@@ -73,7 +73,7 @@ namespace MassTransit.Courier.Hosts
                 LogType = TypeMetadataCache<TLog>.ShortName,
             });
 
-            await _compensatePipe.Probe(scope);
+            _compensatePipe.Probe(scope);
         }
     }
 }

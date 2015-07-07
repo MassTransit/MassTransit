@@ -29,7 +29,7 @@ namespace MassTransit.Tests.Performance
         [Test]
         public async void Should_be_wicked_fast()
         {
-            int limit = 10000;
+            int limit = 50000;
             int count = 0;
 
             await _requestClient.Request(new PingMessage());

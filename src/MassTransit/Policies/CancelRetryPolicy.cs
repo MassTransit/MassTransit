@@ -29,9 +29,9 @@ namespace MassTransit.Policies
             _cancellationToken = cancellationToken;
         }
 
-        Task IProbeSite.Probe(ProbeContext context)
+        void IProbeSite.Probe(ProbeContext context)
         {
-            return _retryPolicy.Probe(context);
+            _retryPolicy.Probe(context);
         }
 
         public IRetryContext GetRetryContext()

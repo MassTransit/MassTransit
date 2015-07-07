@@ -33,7 +33,7 @@ namespace MassTransit.Pipeline.Filters
             _getErrorTransport = getErrorTransport;
         }
 
-        async Task IProbeSite.Probe(ProbeContext context)
+        async void IProbeSite.Probe(ProbeContext context)
         {
             ProbeContext scope = context.CreateFilterScope("moveToErrorTransport");
         }

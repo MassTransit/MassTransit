@@ -15,7 +15,6 @@ namespace MassTransit.Transports
     using System;
     using System.Threading;
     using System.Threading.Tasks;
-    using Monitoring.Introspection;
     using Pipeline;
 
 
@@ -43,18 +42,18 @@ namespace MassTransit.Transports
             return new Handle(transportHandle);
         }
 
-        public ObserverHandle ConnectReceiveObserver(IReceiveObserver observer)
+        public ConnectHandle ConnectReceiveObserver(IReceiveObserver observer)
         {
             return _receiveTransport.ConnectReceiveObserver(observer);
         }
 
-        async Task IProbeSite.Probe(ProbeContext context)
+        void IProbeSite.Probe(ProbeContext context)
         {
             ProbeContext scope = context.CreateScope("receiveEndpoint");
 
-            await _receiveTransport.Probe(scope);
+            _receiveTransport.Probe(scope);
 
-            await _receivePipe.Probe(scope);
+            _receivePipe.Probe(scope);
         }
 
 

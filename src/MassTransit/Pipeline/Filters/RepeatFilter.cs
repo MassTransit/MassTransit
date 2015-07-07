@@ -34,9 +34,9 @@ namespace MassTransit.Pipeline.Filters
             _repeatPolicy = repeatPolicy;
         }
 
-        Task IProbeSite.Probe(ProbeContext context)
+        void IProbeSite.Probe(ProbeContext context)
         {
-            return _repeatPolicy.Probe(context.CreateFilterScope("repeat"));
+            _repeatPolicy.Probe(context.CreateFilterScope("repeat"));
         }
 
         [DebuggerNonUserCode]

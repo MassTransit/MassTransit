@@ -33,7 +33,7 @@ namespace MassTransit.Pipeline.Filters
         IConsumeMessageObserverConnector
         where TMessage : class
     {
-        readonly MessageObserverConnectable<TMessage> _messageObservers;
+        readonly ConsumeMessageObservable<TMessage> _messageObservers;
         readonly TeeConsumeFilter<TMessage> _output;
         readonly IPipe<ConsumeContext<TMessage>> _outputPipe;
 
@@ -43,12 +43,12 @@ namespace MassTransit.Pipeline.Filters
 
             _outputPipe = BuildOutputPipe(filters.Concat(Enumerable.Repeat(_output, 1)).ToArray());
 
-            _messageObservers = new MessageObserverConnectable<TMessage>();
+            _messageObservers = new ConsumeMessageObservable<TMessage>();
         }
 
         ConnectHandle IConsumeMessageObserverConnector.ConnectConsumeMessageObserver<T>(IConsumeMessageObserver<T> observer)
         {
-            var self = _messageObservers as MessageObserverConnectable<T>;
+            var self = _messageObservers as ConsumeMessageObservable<T>;
             if (self == null)
                 throw new InvalidOperationException("The connection type is invalid: " + TypeMetadataCache<T>.ShortName);
 
@@ -60,11 +60,11 @@ namespace MassTransit.Pipeline.Filters
             return _output.ConnectConsumePipe(pipe);
         }
 
-        async Task IProbeSite.Probe(ProbeContext context)
+        void IProbeSite.Probe(ProbeContext context)
         {
             ProbeContext scope = context.CreateMessageScope(TypeMetadataCache<TMessage>.ShortName);
 
-            await _outputPipe.Probe(scope);
+            _outputPipe.Probe(scope);
         }
 
         [DebuggerNonUserCode]
@@ -74,13 +74,13 @@ namespace MassTransit.Pipeline.Filters
             if (context.TryGetMessage(out consumeContext))
             {
                 if (_messageObservers.Count > 0)
-                    await _messageObservers.PreConsume(consumeContext);
+                    _messageObservers.NotifyPreConsume(consumeContext);
                 try
                 {
                     await _outputPipe.Send(consumeContext);
 
                     if (_messageObservers.Count > 0)
-                        await _messageObservers.PostConsume(consumeContext);
+                        _messageObservers.NotifyPostConsume(consumeContext);
 
                     await next.Send(context);
                 }
@@ -89,8 +89,7 @@ namespace MassTransit.Pipeline.Filters
                     // we can't await in a catch block, so we have to wait explicitly on this one
                     if (_messageObservers.Count > 0)
                     {
-                        _messageObservers.ConsumeFault(consumeContext, ex)
-                            .Wait(context.CancellationToken);
+                        _messageObservers.NotifyConsumeFault(consumeContext, ex);
                     }
 
                     throw;

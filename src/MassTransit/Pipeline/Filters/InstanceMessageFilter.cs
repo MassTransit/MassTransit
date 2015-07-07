@@ -42,12 +42,12 @@ namespace MassTransit.Pipeline.Filters
             _instancePipe = Pipe.New<ConsumerConsumeContext<TConsumer, TMessage>>(x => x.UseFilter(instanceFilter));
         }
 
-        async Task IProbeSite.Probe(ProbeContext context)
+        void IProbeSite.Probe(ProbeContext context)
         {
             ProbeContext scope = context.CreateFilterScope("instance");
             scope.Add("type", TypeMetadataCache<TConsumer>.ShortName);
 
-            await _instancePipe.Probe(scope);
+            _instancePipe.Probe(scope);
         }
 
         [DebuggerNonUserCode]

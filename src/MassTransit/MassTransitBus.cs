@@ -135,7 +135,7 @@ namespace MassTransit
 
             var endpoints = new List<ReceiveEndpointHandle>();
             var hosts = new List<HostHandle>();
-            var observers = new List<ObserverHandle>();
+            var observers = new List<ConnectHandle>();
             try
             {
                 if (_log.IsDebugEnabled)
@@ -162,7 +162,7 @@ namespace MassTransit
                 {
                     try
                     {
-                        ObserverHandle observerHandle = endpoint.ConnectReceiveObserver(_receiveObservers);
+                        ConnectHandle observerHandle = endpoint.ConnectReceiveObserver(_receiveObservers);
                         observers.Add(observerHandle);
 
                         ReceiveEndpointHandle handle = endpoint.Start();
@@ -184,11 +184,11 @@ namespace MassTransit
             {
                 try
                 {
-                    Task[] observerTasks = observers.Select(x => x.Disconnect()).ToArray();
+                    observers.ForEach(x => x.Disconnect());
+
                     Task[] endpointTasks = endpoints.Select(x => x.Stop()).ToArray();
                     Task[] hostTasks = hosts.Select(x => x.Stop()).ToArray();
 
-                    Task.WaitAll(observerTasks);
                     Task.WaitAll(endpointTasks);
                     Task.WaitAll(hostTasks);
                 }
@@ -202,7 +202,7 @@ namespace MassTransit
             return new Handle(hosts.ToArray(), endpoints.ToArray(), observers.ToArray());
         }
 
-        public ObserverHandle ConnectReceiveObserver(IReceiveObserver observer)
+        public ConnectHandle ConnectReceiveObserver(IReceiveObserver observer)
         {
             return _receiveObservers.Connect(observer);
         }
@@ -212,7 +212,7 @@ namespace MassTransit
             return _publishEndpoint.Connect(observer);
         }
 
-        async Task IProbeSite.Probe(ProbeContext context)
+        void IProbeSite.Probe(ProbeContext context)
         {
             ProbeContext scope = context.CreateScope("bus");
             scope.Set(new
@@ -221,10 +221,10 @@ namespace MassTransit
             });
 
             foreach (IBusHostControl host in _hosts)
-                await host.Probe(scope);
+                host.Probe(scope);
 
             foreach (IReceiveEndpoint receiveEndpoint in _receiveEndpoints)
-                await receiveEndpoint.Probe(scope);
+                receiveEndpoint.Probe(scope);
         }
 
 
@@ -233,11 +233,11 @@ namespace MassTransit
         {
             readonly ReceiveEndpointHandle[] _endpointHandles;
             readonly HostHandle[] _hostHandles;
-            readonly ObserverHandle[] _observerHandles;
+            readonly ConnectHandle[] _observerHandles;
             bool _disposed;
             bool _stopped;
 
-            public Handle(HostHandle[] hostHandles, ReceiveEndpointHandle[] endpointHandles, ObserverHandle[] observerHandles)
+            public Handle(HostHandle[] hostHandles, ReceiveEndpointHandle[] endpointHandles, ConnectHandle[] observerHandles)
             {
                 _endpointHandles = endpointHandles;
                 _hostHandles = hostHandles;
@@ -259,7 +259,11 @@ namespace MassTransit
                 if (_stopped)
                     return;
 
-                await Task.WhenAll(_observerHandles.Select(x => x.Disconnect())).ConfigureAwait(false);
+                foreach (var observerHandle in _observerHandles)
+                {
+                    observerHandle.Disconnect();
+                }
+
                 await Task.WhenAll(_endpointHandles.Select(x => x.Stop(cancellationToken))).ConfigureAwait(false);
                 await Task.WhenAll(_hostHandles.Select(x => x.Stop(cancellationToken))).ConfigureAwait(false);
 

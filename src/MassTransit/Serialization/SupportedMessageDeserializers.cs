@@ -34,11 +34,11 @@ namespace MassTransit.Serialization
                 AddSerializer(deserializer);
         }
 
-        async Task IProbeSite.Probe(ProbeContext context)
+        void IProbeSite.Probe(ProbeContext context)
         {
             ProbeContext scope = context.CreateScope("deserializers");
             foreach (IMessageDeserializer deserializer in _deserializers.Values)
-                await deserializer.Probe(scope);
+                deserializer.Probe(scope);
         }
 
         public ContentType ContentType

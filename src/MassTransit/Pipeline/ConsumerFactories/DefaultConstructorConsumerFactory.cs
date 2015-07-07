@@ -14,6 +14,7 @@ namespace MassTransit.Pipeline.ConsumerFactories
 {
     using System;
     using System.Threading.Tasks;
+    using Util;
 
 
     public class DefaultConstructorConsumerFactory<TConsumer> :
@@ -38,7 +39,7 @@ namespace MassTransit.Pipeline.ConsumerFactories
             }
         }
 
-        async Task IProbeSite.Probe(ProbeContext context)
+        void IProbeSite.Probe(ProbeContext context)
         {
             context.CreateConsumerFactoryScope<TConsumer>("defaultConstructor");
         }

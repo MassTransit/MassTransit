@@ -65,7 +65,7 @@ namespace MassTransit.RabbitMqTransport
             return new Handle(signal);
         }
 
-        Task IProbeSite.Probe(ProbeContext context)
+        void IProbeSite.Probe(ProbeContext context)
         {
             ProbeContext scope = context.CreateScope("host");
             scope.Set(new
@@ -88,7 +88,7 @@ namespace MassTransit.RabbitMqTransport
                 });
             }
 
-            return _connectionCache.Probe(scope);
+            _connectionCache.Probe(scope);
         }
 
         public IMessageNameFormatter MessageNameFormatter

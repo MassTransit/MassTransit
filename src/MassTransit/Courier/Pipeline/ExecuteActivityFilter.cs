@@ -29,7 +29,7 @@ namespace MassTransit.Courier.Pipeline
     {
         static readonly ILog _log = Logger.Get<ExecuteActivityFilter<TArguments>>();
 
-        async Task IProbeSite.Probe(ProbeContext context)
+        async void IProbeSite.Probe(ProbeContext context)
         {
             context.CreateFilterScope("execute");
         }

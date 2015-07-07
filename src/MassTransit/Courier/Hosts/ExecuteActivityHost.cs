@@ -55,7 +55,7 @@ namespace MassTransit.Courier.Hosts
             _executePipe = Pipe.New<ExecuteActivityContext<TArguments>>(x => x.UseFilter(new ExecuteActivityFilter<TArguments>()));
         }
 
-        public async Task Probe(ProbeContext context)
+        public void Probe(ProbeContext context)
         {
             ProbeContext scope = context.CreateFilterScope("executeActivity");
             scope.Set(new
@@ -66,7 +66,7 @@ namespace MassTransit.Courier.Hosts
             if (_compensateAddress != null)
                 scope.Add("compensateAddress", _compensateAddress);
 
-            await _executePipe.Probe(scope);
+            _executePipe.Probe(scope);
         }
 
         public async Task Send(ConsumeContext<RoutingSlip> context, IPipe<ConsumeContext<RoutingSlip>> next)

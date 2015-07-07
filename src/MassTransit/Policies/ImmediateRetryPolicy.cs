@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -15,7 +15,6 @@ namespace MassTransit.Policies
     using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
-    using Monitoring.Introspection;
 
 
     public class ImmediateRetryPolicy :
@@ -30,7 +29,7 @@ namespace MassTransit.Policies
             _retryLimit = retryLimit;
         }
 
-        Task IProbeSite.Probe(ProbeContext context)
+        void IProbeSite.Probe(ProbeContext context)
         {
             context.Set(new
             {
@@ -38,8 +37,9 @@ namespace MassTransit.Policies
                 Limit = _retryLimit,
             });
 
-            return _filter.Probe(context);
+            _filter.Probe(context);
         }
+
         public IRetryContext GetRetryContext()
         {
             return new IntervalRetryContext(this, GetIntervals());

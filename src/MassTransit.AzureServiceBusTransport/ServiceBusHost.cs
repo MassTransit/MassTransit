@@ -49,7 +49,7 @@ namespace MassTransit.AzureServiceBusTransport
             return new Handle(_messagingFactory.Value);
         }
 
-        async Task IProbeSite.Probe(ProbeContext context)
+        async void IProbeSite.Probe(ProbeContext context)
         {
             ProbeContext scope = context.CreateScope("host");
             scope.Set(new

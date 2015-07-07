@@ -45,7 +45,7 @@ namespace MassTransit.Policies
             _intervals = intervals.Select(x => TimeSpan.FromMilliseconds(x)).ToArray();
         }
 
-        Task IProbeSite.Probe(ProbeContext context)
+        void IProbeSite.Probe(ProbeContext context)
         {
             context.Set(new
             {
@@ -54,7 +54,7 @@ namespace MassTransit.Policies
                 Intervals = _intervals,
             });
 
-            return _filter.Probe(context);
+            _filter.Probe(context);
         }
 
         public IRetryContext GetRetryContext()

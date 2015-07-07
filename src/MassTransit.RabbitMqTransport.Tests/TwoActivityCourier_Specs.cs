@@ -86,9 +86,9 @@ namespace MassTransit.RabbitMqTransport.Tests
         }
 
         [Test]
-        public async void Should_return_a_wonderful_breakdown_of_the_guts_inside_it()
+        public void Should_return_a_wonderful_breakdown_of_the_guts_inside_it()
         {
-            ProbeResult result = await Bus.GetProbeResult();
+            ProbeResult result = Bus.GetProbeResult();
 
             Console.WriteLine(result.ToJsonString());
         }

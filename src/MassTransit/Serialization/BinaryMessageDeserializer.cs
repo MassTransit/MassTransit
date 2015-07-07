@@ -53,7 +53,7 @@ namespace MassTransit.Serialization
             return new StaticConsumeContext(_deserializer, _sendEndpointProvider, _publishEndpoint, receiveContext, obj, headers);
         }
 
-        async Task IProbeSite.Probe(ProbeContext context)
+        async void IProbeSite.Probe(ProbeContext context)
         {
             ProbeContext scope = context.CreateScope("binary");
             scope.Add("contentType", BinaryMessageSerializer.BinaryContentType.MediaType);

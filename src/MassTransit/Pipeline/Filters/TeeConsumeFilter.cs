@@ -47,9 +47,13 @@ namespace MassTransit.Pipeline.Filters
             return _connections.Connect(pipe);
         }
 
-        async Task IProbeSite.Probe(ProbeContext context)
+        void IProbeSite.Probe(ProbeContext context)
         {
-            await _connections.ForEach(pipe => pipe.Probe(context));
+            _connections.All(pipe =>
+            {
+                pipe.Probe(context);
+                return true;
+            });
         }
 
         [DebuggerNonUserCode]

@@ -36,11 +36,11 @@ namespace MassTransit.Pipeline.Filters
             return Task.WhenAll(next.Send(context), _pipe.Send(context));
         }
 
-        Task IProbeSite.Probe(ProbeContext context)
+        void IProbeSite.Probe(ProbeContext context)
         {
             ProbeContext scope = context.CreateFilterScope("wiretap");
 
-            return _pipe.Probe(scope);
+            _pipe.Probe(scope);
         }
     }
 }

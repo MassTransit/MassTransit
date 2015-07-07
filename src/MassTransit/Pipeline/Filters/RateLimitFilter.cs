@@ -51,7 +51,7 @@ namespace MassTransit.Pipeline.Filters
                 _timer.Dispose();
         }
 
-        async Task IProbeSite.Probe(ProbeContext context)
+        async void IProbeSite.Probe(ProbeContext context)
         {
             ProbeContext scope = context.CreateFilterScope("rateLimit");
             scope.Add("limit", _rateLimit);

@@ -34,7 +34,7 @@ namespace MassTransit.MessageData
             get { return NoValue(); }
         }
 
-        async Task<T> NoValue()
+        Task<T> NoValue()
         {
             throw new MessageDataException("The message data is empty");
         }

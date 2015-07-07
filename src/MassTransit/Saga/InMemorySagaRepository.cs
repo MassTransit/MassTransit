@@ -40,12 +40,12 @@ namespace MassTransit.Saga
             get { return _sagas[id]; }
         }
 
-        public async Task<IEnumerable<Guid>> Find(ISagaQuery<TSaga> query)
+        public Task<IEnumerable<Guid>> Find(ISagaQuery<TSaga> query)
         {
-            return _sagas.Where(query).Select(x => x.Instance.CorrelationId);
+            return Task.FromResult(_sagas.Where(query).Select(x => x.Instance.CorrelationId));
         }
 
-        async Task IProbeSite.Probe(ProbeContext context)
+        async void IProbeSite.Probe(ProbeContext context)
         {
             ProbeContext scope = context.CreateScope("sagaRepository");
             scope.Set(new
@@ -181,9 +181,9 @@ namespace MassTransit.Saga
                 _next = next;
             }
 
-            async Task IProbeSite.Probe(ProbeContext context)
+            void IProbeSite.Probe(ProbeContext context)
             {
-                await _next.Probe(context);
+                 _next.Probe(context);
             }
 
             public async Task Send(SagaConsumeContext<TSaga, TMessage> context)

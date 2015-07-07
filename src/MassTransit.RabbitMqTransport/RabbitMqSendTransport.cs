@@ -36,12 +36,12 @@ namespace MassTransit.RabbitMqTransport
         readonly PrepareSendExchangeFilter _filter;
 
         readonly IModelCache _modelCache;
-        readonly Connectable<ISendObserver> _observers;
+        readonly SendObservable _observers;
         readonly SendSettings _sendSettings;
 
         public RabbitMqSendTransport(IModelCache modelCache, SendSettings sendSettings, params ExchangeBindingSettings[] exchangeBindings)
         {
-            _observers = new Connectable<ISendObserver>();
+            _observers = new SendObservable();
             _sendSettings = sendSettings;
             _modelCache = modelCache;
 
@@ -81,7 +81,7 @@ namespace MassTransit.RabbitMqTransport
                         if (context.TimeToLive.HasValue)
                             properties.Expiration = context.TimeToLive.Value.TotalMilliseconds.ToString("F0", CultureInfo.InvariantCulture);
 
-                        await _observers.ForEach(x => x.PreSend(context));
+                        _observers.NotifyPreSend(context);
 
                         await modelContext.BasicPublishAsync(context.Exchange, context.RoutingKey, context.Mandatory,
                             context.Immediate, context.BasicProperties, context.Body);
@@ -89,11 +89,11 @@ namespace MassTransit.RabbitMqTransport
                         context.DestinationAddress.LogSent(context.MessageId.HasValue ? context.MessageId.Value.ToString("N") : "",
                             TypeMetadataCache<T>.ShortName);
 
-                        await _observers.ForEach(x => x.PostSend(context));
+                        _observers.NotifyPostSend(context);
                     }
                     catch (Exception ex)
                     {
-                        _observers.ForEach(x => x.SendFault(context, ex));
+                        _observers.NotifySendFault(context, ex);
 
                         if (_log.IsErrorEnabled)
                             _log.Error("Send Fault: " + context.DestinationAddress, ex);

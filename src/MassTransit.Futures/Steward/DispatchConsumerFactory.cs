@@ -48,11 +48,11 @@ namespace MassTransit.Steward
             }
         }
 
-        Task IProbeSite.Probe(ProbeContext context)
+        void IProbeSite.Probe(ProbeContext context)
         {
             ProbeContext scope = context.CreateConsumerFactoryScope<TConsumer>("dispatch");
 
-            return _consumerFactory.Probe(scope);
+            _consumerFactory.Probe(scope);
         }
     }
 }

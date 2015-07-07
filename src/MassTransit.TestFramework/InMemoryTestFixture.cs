@@ -155,7 +155,7 @@ namespace MassTransit.TestFramework
         {
             return MassTransit.Bus.Factory.CreateUsingInMemory(x =>
             {
-                _inMemoryTransportCache = new InMemoryTransportCache();
+                _inMemoryTransportCache = new InMemoryTransportCache(Environment.ProcessorCount);
 
                 x.SetTransportProvider(_inMemoryTransportCache);
                 ConfigureBus(x);

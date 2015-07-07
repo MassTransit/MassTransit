@@ -19,6 +19,6 @@ namespace MassTransit
         /// </summary>
         /// <param name="observer"></param>
         /// <returns></returns>
-        ObserverHandle ConnectReceiveObserver(IReceiveObserver observer);
+        ConnectHandle ConnectReceiveObserver(IReceiveObserver observer);
     }
 }

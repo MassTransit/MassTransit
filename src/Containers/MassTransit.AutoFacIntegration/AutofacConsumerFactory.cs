@@ -47,7 +47,7 @@ namespace MassTransit.AutofacIntegration
             }
         }
 
-        async Task IProbeSite.Probe(ProbeContext context)
+        async void IProbeSite.Probe(ProbeContext context)
         {
             ProbeContext scope = context.CreateConsumerFactoryScope<TConsumer>("autofac");
             scope.Add("scopeTag", _name);
