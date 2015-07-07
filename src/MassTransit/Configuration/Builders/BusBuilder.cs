@@ -27,7 +27,7 @@ namespace MassTransit.Builders
         readonly Lazy<IMessageDeserializer> _deserializer;
         readonly IDictionary<string, DeserializerFactory> _deserializerFactories;
         readonly Lazy<Uri> _inputAddress;
-        readonly Lazy<IPublishEndpoint> _publishEndpointProvider;
+        readonly Lazy<IPublishSendEndpointProvider> _publishSendEndpointProvider;
         readonly IList<IReceiveEndpoint> _receiveEndpoints;
         readonly Lazy<ISendEndpointProvider> _sendEndpointProvider;
         readonly Lazy<ISendTransportProvider> _sendTransportProvider;
@@ -45,7 +45,7 @@ namespace MassTransit.Builders
             _deserializer = new Lazy<IMessageDeserializer>(CreateDeserializer);
             _sendTransportProvider = new Lazy<ISendTransportProvider>(CreateSendTransportProvider);
             _sendEndpointProvider = new Lazy<ISendEndpointProvider>(CreateSendEndpointProvider);
-            _publishEndpointProvider = new Lazy<IPublishEndpoint>(CreatePublishEndpoint);
+            _publishSendEndpointProvider = new Lazy<IPublishSendEndpointProvider>(CreatePublishSendEndpointProvider);
 
             _inputAddress = new Lazy<Uri>(GetInputAddress);
 
@@ -82,9 +82,9 @@ namespace MassTransit.Builders
             get { return _sendTransportProvider.Value; }
         }
 
-        protected IPublishEndpoint PublishEndpoint
+        protected IPublishSendEndpointProvider PublishEndpoint
         {
-            get { return _publishEndpointProvider.Value; }
+            get { return _publishSendEndpointProvider.Value; }
         }
 
         protected Uri InputAddress
@@ -155,6 +155,6 @@ namespace MassTransit.Builders
 
         protected abstract ISendEndpointProvider CreateSendEndpointProvider();
 
-        protected abstract IPublishEndpoint CreatePublishEndpoint();
+        protected abstract IPublishSendEndpointProvider CreatePublishSendEndpointProvider();
     }
 }

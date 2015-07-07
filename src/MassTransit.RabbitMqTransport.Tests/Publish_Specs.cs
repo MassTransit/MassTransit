@@ -142,6 +142,49 @@ namespace MassTransit.RabbitMqTransport.Tests
 
 
         [TestFixture]
+        public class When_a_message_is_published_from_the_queue :
+            RabbitMqTestFixture
+        {
+            [Test]
+            public async void Should_have_the_receive_endpoint_input_address()
+            {
+                var message = new A {Id = Guid.NewGuid()};
+                await Bus.Publish(message);
+
+                ConsumeContext<A> received = await _receivedA;
+
+                Assert.AreEqual(message.Id, received.Message.Id);
+
+                var consumeContext = await _receivedGotA;
+
+                consumeContext.SourceAddress.ToString().ShouldBe("rabbitmq://[::1]:5672/test/input_queue?prefetch=16");
+            }
+
+            Task<ConsumeContext<A>> _receivedA;
+            Task<ConsumeContext<GotA>> _receivedGotA;
+
+            protected override void ConfigureInputQueueEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
+            {
+                base.ConfigureInputQueueEndpoint(configurator);
+
+                configurator.PrefetchCount = 16;
+
+                _receivedA = Handler<A>(configurator, context => context.Publish(new GotA {Id = context.Message.Id}));
+            }
+
+            protected override void ConfigureBusHost(IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host)
+            {
+                base.ConfigureBusHost(configurator, host);
+
+                configurator.ReceiveEndpoint(host, "ack_queue", x =>
+                {
+                    _receivedGotA = Handled<GotA>(x);
+                });
+            }
+        }
+
+
+        [TestFixture]
         public class WhenAMessageIsPublishedToTheConsumer :
             RabbitMqTestFixture
         {
@@ -194,6 +237,12 @@ namespace MassTransit.RabbitMqTransport.Tests
 
 
         class A
+        {
+            public Guid Id { get; set; }
+        }
+
+
+        class GotA
         {
             public Guid Id { get; set; }
         }

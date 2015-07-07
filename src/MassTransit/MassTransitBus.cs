@@ -36,13 +36,13 @@ namespace MassTransit
         readonly ISendEndpointProvider _sendEndpointProvider;
 
         public MassTransitBus(Uri address, IConsumePipe consumePipe, ISendEndpointProvider sendEndpointProvider,
-            IPublishEndpoint publishEndpoint, IEnumerable<IReceiveEndpoint> receiveEndpoints, IEnumerable<IBusHostControl> hosts)
+            IPublishSendEndpointProvider publishEndpoint, IEnumerable<IReceiveEndpoint> receiveEndpoints, IEnumerable<IBusHostControl> hosts)
         {
             _log = Logger.Get<MassTransitBus>();
             _address = address;
             _consumePipe = consumePipe;
             _sendEndpointProvider = sendEndpointProvider;
-            _publishEndpoint = publishEndpoint;
+            _publishEndpoint = new PublishEndpoint(address, publishEndpoint);
             _receiveEndpoints = receiveEndpoints.ToArray();
             _hosts = hosts.ToArray();
             _receiveObservers = new ReceiveObservable();

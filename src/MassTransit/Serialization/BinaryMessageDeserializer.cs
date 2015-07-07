@@ -25,11 +25,11 @@ namespace MassTransit.Serialization
     {
         static readonly BinaryFormatter _formatter = new BinaryFormatter();
         readonly JsonSerializer _deserializer;
-        readonly IPublishEndpoint _publishEndpoint;
+        readonly IPublishSendEndpointProvider _publishEndpoint;
         readonly ISendEndpointProvider _sendEndpointProvider;
 
         public BinaryMessageDeserializer(JsonSerializer deserializer, ISendEndpointProvider sendEndpointProvider,
-            IPublishEndpoint publishEndpoint)
+            IPublishSendEndpointProvider publishEndpoint)
         {
             _deserializer = deserializer;
             _sendEndpointProvider = sendEndpointProvider;

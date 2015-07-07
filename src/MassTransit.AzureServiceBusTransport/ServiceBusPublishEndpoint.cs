@@ -19,21 +19,21 @@ namespace MassTransit.AzureServiceBusTransport
     using Transports;
 
 
-    public class ServiceBusPublishEndpoint :
-        PublishEndpoint
+    public class ServiceBusPublishSendEndpointProvider :
+        IPublishSendEndpointProvider
     {
         readonly IServiceBusHost _host;
         readonly IMessageNameFormatter _nameFormatter;
         readonly ISendEndpointProvider _sendEndpointProvider;
 
-        public ServiceBusPublishEndpoint(IServiceBusHost host, ISendEndpointProvider sendEndpointProvider)
+        public ServiceBusPublishSendEndpointProvider(IServiceBusHost host, ISendEndpointProvider sendEndpointProvider)
         {
             _host = host;
             _sendEndpointProvider = sendEndpointProvider;
             _nameFormatter = host.MessageNameFormatter;
         }
 
-        protected override async Task<IEnumerable<ISendEndpoint>> GetEndpoints(Type messageType)
+        public async Task<IEnumerable<ISendEndpoint>> GetPublishEndpoints(Type messageType)
         {
             Uri address = _nameFormatter.GetTopicAddress(_host, messageType);
 

@@ -19,6 +19,7 @@ namespace MassTransit.TestFramework
     using NUnit.Framework;
     using Testing;
     using Testing.TestDecorators;
+    using Transports.InMemory;
 
 
     [TestFixture]
@@ -34,6 +35,7 @@ namespace MassTransit.TestFramework
         readonly TestSendObserver _sendObserver;
         BusHandle _busHandle;
         readonly Uri _baseAddress;
+        InMemoryTransportCache _inMemoryTransportCache;
 
         public Uri BaseAddress
         {
@@ -119,6 +121,11 @@ namespace MassTransit.TestFramework
             return sendEndpoint;
         }
 
+        protected IPublishSendEndpointProvider PublishSendEndpointProvider
+        {
+            get { return new InMemoryPublishSendEndpointProvider(Bus, _inMemoryTransportCache); }
+        }
+
         [TestFixtureTearDown]
         public void TearDownInMemoryTestFixture()
         {
@@ -148,6 +155,9 @@ namespace MassTransit.TestFramework
         {
             return MassTransit.Bus.Factory.CreateUsingInMemory(x =>
             {
+                _inMemoryTransportCache = new InMemoryTransportCache();
+
+                x.SetTransportProvider(_inMemoryTransportCache);
                 ConfigureBus(x);
 
                 x.ReceiveEndpoint("input_queue", ConfigureInputQueueEndpoint);

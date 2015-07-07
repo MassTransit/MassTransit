@@ -17,19 +17,19 @@ namespace MassTransit.Transports.InMemory
     using System.Threading.Tasks;
 
 
-    public class InMemoryPublishEndpoint :
-        PublishEndpoint
+    public class InMemoryPublishSendEndpointProvider :
+        IPublishSendEndpointProvider
     {
         readonly ISendEndpointProvider _sendEndpointProvider;
         readonly InMemoryTransportCache _transportCache;
 
-        public InMemoryPublishEndpoint(ISendEndpointProvider sendEndpointProvider, ISendTransportProvider transportProvider)
+        public InMemoryPublishSendEndpointProvider(ISendEndpointProvider sendEndpointProvider, ISendTransportProvider transportProvider)
         {
             _sendEndpointProvider = sendEndpointProvider;
             _transportCache = transportProvider as InMemoryTransportCache;
         }
 
-        protected override async Task<IEnumerable<ISendEndpoint>> GetEndpoints(Type messageType)
+        public async Task<IEnumerable<ISendEndpoint>> GetPublishEndpoints(Type messageType)
         {
             var endpoints = new List<ISendEndpoint>();
             foreach (Uri transport in _transportCache.TransportAddresses)

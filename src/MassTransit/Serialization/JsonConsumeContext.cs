@@ -23,6 +23,7 @@ namespace MassTransit.Serialization
     using Newtonsoft.Json.Linq;
     using Pipeline;
     using Pipeline.Pipes;
+    using Transports;
     using Util;
 
 
@@ -46,7 +47,7 @@ namespace MassTransit.Serialization
         Uri _responseAddress;
         Uri _sourceAddress;
 
-        public JsonConsumeContext(JsonSerializer deserializer, ISendEndpointProvider sendEndpointProvider, IPublishEndpoint publishEndpoint,
+        public JsonConsumeContext(JsonSerializer deserializer, ISendEndpointProvider sendEndpointProvider, IPublishSendEndpointProvider publishEndpoint,
             ReceiveContext receiveContext, MessageEnvelope envelope)
         {
             _receiveContext = receiveContext;
@@ -56,7 +57,7 @@ namespace MassTransit.Serialization
             _messageToken = GetMessageToken(envelope.Message);
             _supportedTypes = envelope.MessageType.ToArray();
             _messageTypes = new Dictionary<Type, object>();
-            _publishEndpoint = publishEndpoint;
+            _publishEndpoint = new PublishEndpoint(receiveContext.InputAddress, publishEndpoint);
         }
 
         public bool HasPayloadType(Type contextType)

@@ -29,7 +29,6 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
         readonly ServiceBusReceiveEndpointConfigurator _busEndpointConfigurator;
         readonly ServiceBusHost[] _hosts;
         readonly Uri _inputAddress;
-        readonly Lazy<ISendEndpointProvider> _publishSendEndpointProvider;
 
         public ServiceBusBusBuilder(IEnumerable<ServiceBusHost> hosts, IConsumePipeSpecification consumePipeSpecification)
             : base(consumePipeSpecification)
@@ -38,8 +37,6 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
                 throw new ArgumentNullException("hosts");
 
             _hosts = hosts.ToArray();
-
-            _publishSendEndpointProvider = new Lazy<ISendEndpointProvider>(CreatePublishSendEndpointProvider);
 
             string queueName = string.Format("bus_{0}", NewId.Next().ToString("NS"));
 
@@ -52,11 +49,6 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
             };
 
             _inputAddress = _busEndpointConfigurator.InputAddress;
-        }
-
-        protected ISendEndpointProvider PublishSendEndpointProvider
-        {
-            get { return _publishSendEndpointProvider.Value; }
         }
 
         protected override Uri GetInputAddress()
@@ -76,16 +68,13 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
             return new SendEndpointCache(provider);
         }
 
-        ISendEndpointProvider CreatePublishSendEndpointProvider()
+        protected override IPublishSendEndpointProvider CreatePublishSendEndpointProvider()
         {
-            var provider = new PublishSendEndpointProvider(MessageSerializer, _inputAddress, _hosts);
+            var sendEndpointProvider = new PublishSendEndpointProvider(MessageSerializer, _inputAddress, _hosts);
 
-            return new SendEndpointCache(provider);
-        }
+            var endpointCache = new SendEndpointCache(sendEndpointProvider);
 
-        protected override IPublishEndpoint CreatePublishEndpoint()
-        {
-            return new ServiceBusPublishEndpoint(_hosts[0], PublishSendEndpointProvider);
+            return new ServiceBusPublishSendEndpointProvider(_hosts[0], endpointCache);
         }
 
         public virtual IBusControl Build()
