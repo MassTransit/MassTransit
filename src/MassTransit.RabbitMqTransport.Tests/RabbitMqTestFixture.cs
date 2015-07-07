@@ -39,7 +39,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
         public RabbitMqTestFixture()
         {
-            _hostAddress = new Uri("rabbitmq://localhost/test/");
+            _hostAddress = new Uri("rabbitmq://[::1]/test/");
             _inputQueueAddress = new Uri(_hostAddress, "input_queue");
 
             _sendObserver = new TestSendObserver(TestTimeout);

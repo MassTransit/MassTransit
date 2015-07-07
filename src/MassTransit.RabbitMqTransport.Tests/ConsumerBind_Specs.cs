@@ -161,6 +161,8 @@ namespace MassTransit.RabbitMqTransport.Tests
 
                 TestSaga saga = _repository[sagaId.Value].Instance;
 
+                await InputQueueSendEndpoint.Send(new B { CorrelationId = _sagaId });
+
                 await saga.B.Task;
             }
 
@@ -174,7 +176,6 @@ namespace MassTransit.RabbitMqTransport.Tests
                 _sagaId = NewId.NextGuid();
 
                 Await(() => InputQueueSendEndpoint.Send(new A {CorrelationId = _sagaId}));
-                Await(() => InputQueueSendEndpoint.Send(new B {CorrelationId = _sagaId}));
             }
 
             protected override void ConfigureInputQueueEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)

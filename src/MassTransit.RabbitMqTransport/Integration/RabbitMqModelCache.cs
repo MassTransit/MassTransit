@@ -124,14 +124,14 @@ namespace MassTransit.RabbitMqTransport.Integration
 
         class ModelScope
         {
-            readonly TaskCompletionSource<RabbitMqModelContext> _connectionContext;
-            readonly ConcurrentDictionary<long, SharedModelContext> _connections;
+            readonly TaskCompletionSource<RabbitMqModelContext> _modelContext;
+            readonly ConcurrentDictionary<long, SharedModelContext> _models;
             long _nextId;
 
             public ModelScope()
             {
-                _connections = new ConcurrentDictionary<long, SharedModelContext>();
-                _connectionContext = new TaskCompletionSource<RabbitMqModelContext>();
+                _models = new ConcurrentDictionary<long, SharedModelContext>();
+                _modelContext = new TaskCompletionSource<RabbitMqModelContext>();
             }
 
             /// <summary>
@@ -143,9 +143,9 @@ namespace MassTransit.RabbitMqTransport.Integration
             {
                 long id = Interlocked.Increment(ref _nextId);
 
-                var context = new SharedModelContext(await _connectionContext.Task, id, Disconnect, cancellationToken);
+                var context = new SharedModelContext(await _modelContext.Task, id, Disconnect, cancellationToken);
 
-                bool added = _connections.TryAdd(id, context);
+                bool added = _models.TryAdd(id, context);
                 if (!added)
                     throw new InvalidOperationException("The connection could not be added");
 
@@ -162,12 +162,12 @@ namespace MassTransit.RabbitMqTransport.Integration
                 if (callback == null)
                     throw new ArgumentNullException("callback");
 
-                if (_connections.Count == 0)
+                if (_models.Count == 0)
                     return;
 
                 var exceptions = new List<Exception>();
 
-                foreach (SharedModelContext connection in _connections.Values)
+                foreach (SharedModelContext connection in _models.Values)
                 {
                     try
                     {
@@ -185,32 +185,32 @@ namespace MassTransit.RabbitMqTransport.Integration
 
             public bool All(Func<SharedModelContext, bool> callback)
             {
-                return _connections.Values.All(callback);
+                return _models.Values.All(callback);
             }
 
             void Disconnect(long id)
             {
                 SharedModelContext ignored;
-                _connections.TryRemove(id, out ignored);
+                _models.TryRemove(id, out ignored);
             }
 
             public void Connected(RabbitMqModelContext connectionContext)
             {
-                _connectionContext.TrySetResult(connectionContext);
+                _modelContext.TrySetResult(connectionContext);
             }
 
             public async void Close()
             {
                 try
                 {
-                    await Task.WhenAll(_connections.Values.Select(x => x.Completed));
+                    await Task.WhenAll(_models.Values.Select(x => x.Completed));
                 }
                 catch (Exception ex)
                 {
                     _log.Error("Close faulted waiting for attached models", ex);
                 }
 
-                (await _connectionContext.Task).Dispose();
+                (await _modelContext.Task).Dispose();
             }
         }
     }
