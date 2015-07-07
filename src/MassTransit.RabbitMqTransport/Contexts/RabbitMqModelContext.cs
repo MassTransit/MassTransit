@@ -40,6 +40,7 @@ namespace MassTransit.RabbitMqTransport.Contexts
         readonly QueuedTaskScheduler _taskScheduler;
         readonly CancellationTokenSource _tokenSource;
         CancellationTokenRegistration _registration;
+        ulong _publishTagMax;
 
         public RabbitMqModelContext(ConnectionContext connectionContext, IModel model, CancellationToken cancellationToken)
         {
@@ -62,11 +63,9 @@ namespace MassTransit.RabbitMqTransport.Contexts
 
         public void Dispose()
         {
-            _model.ModelShutdown -= OnModelShutdown;
-
             _registration.Dispose();
 
-            _model.Cleanup(200, "ModelContext Disposed");
+            Close("ModelContext Disposed");
         }
 
         public bool HasPayloadType(Type contextType)
@@ -172,9 +171,35 @@ namespace MassTransit.RabbitMqTransport.Contexts
                 _tokenSource.Token, TaskCreationOptions.HideScheduler, _taskScheduler);
         }
 
+        void Close(string reason)
+        {
+            try
+            {
+                _log.DebugFormat("Close: {0} ({1} messages published)", _connectionContext.HostSettings.ToDebugString(), _publishTagMax);
+                if (_model.IsOpen && _published.Count > 0)
+                {
+                    bool timedOut;
+                    _model.WaitForConfirms(TimeSpan.FromSeconds(30), out timedOut);
+                    if (timedOut)
+                        _log.WarnFormat("Timeout waiting for pending confirms: {0}", _connectionContext.HostSettings.ToDebugString());
+                    else
+                    {
+                        _log.DebugFormat("Pending confirms complete: {0}", _connectionContext.HostSettings.ToDebugString());
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _log.Error("Fault waiting for confirms", ex);
+            }
+
+            _model.Cleanup(200, reason);
+        }
+
         PendingPublish PublishAsync(string exchange, string routingKey, bool mandatory, bool immediate, IBasicProperties basicProperties, byte[] body)
         {
             ulong publishTag = _model.NextPublishSeqNo;
+            _publishTagMax = Math.Max(_publishTagMax, publishTag);
             var pendingPublish = new PendingPublish(_connectionContext, exchange, publishTag);
             try
             {
@@ -206,15 +231,6 @@ namespace MassTransit.RabbitMqTransport.Contexts
         void OnModelShutdown(object model, ShutdownEventArgs reason)
         {
             _tokenSource.Cancel();
-
-            try
-            {
-                _model.WaitForConfirms(TimeSpan.FromSeconds(30));
-            }
-            catch (Exception ex)
-            {
-                _log.Error("Fault waiting for confirms", ex);
-            }
 
             _model.ModelShutdown -= OnModelShutdown;
             _model.BasicAcks -= OnBasicAcks;
@@ -283,6 +299,8 @@ namespace MassTransit.RabbitMqTransport.Contexts
         void OnCancellationRequested()
         {
             _tokenSource.Cancel();
+
+            Close("Cancellation Requested");
         }
     }
 }

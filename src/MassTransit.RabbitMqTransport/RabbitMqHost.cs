@@ -18,7 +18,6 @@ namespace MassTransit.RabbitMqTransport
     using Integration;
     using Logging;
     using MassTransit.Pipeline;
-    using Monitoring.Introspection;
     using Transports;
     using Util;
 
@@ -40,6 +39,32 @@ namespace MassTransit.RabbitMqTransport
             _messageNameFormatter = new RabbitMqMessageNameFormatter();
         }
 
+        public HostHandle Start()
+        {
+            var signal = new StopSignal();
+
+            IPipe<ConnectionContext> connectionPipe = Pipe.ExecuteAsync<ConnectionContext>(async context =>
+            {
+                if (_log.IsDebugEnabled)
+                    _log.DebugFormat("Connection established to {0}", _hostSettings.ToDebugString());
+
+                await signal.Stopped;
+
+                if (_log.IsDebugEnabled)
+                    _log.DebugFormat("Closing connection to host {0}", _hostSettings.ToDebugString());
+
+                // this is a bad thing, we need to cascade everything to a stopped state before closing.
+                context.Connection.Close(200, "Host stopped");
+            });
+
+            if (_log.IsDebugEnabled)
+                _log.DebugFormat("Starting connection to {0}", _hostSettings.ToDebugString());
+
+            _connectionCache.Send(connectionPipe, signal.CancellationToken);
+
+            return new Handle(signal);
+        }
+
         Task IProbeSite.Probe(ProbeContext context)
         {
             ProbeContext scope = context.CreateScope("host");
@@ -55,38 +80,15 @@ namespace MassTransit.RabbitMqTransport
                 _hostSettings.Ssl,
             });
 
-            if(_hostSettings.Ssl)
+            if (_hostSettings.Ssl)
+            {
                 scope.Set(new
                 {
                     _hostSettings.SslServerName,
                 });
+            }
 
             return _connectionCache.Probe(scope);
-        }
-
-        public HostHandle Start()
-        {
-            var signal = new StopSignal();
-
-            IPipe<ConnectionContext> connectionPipe = Pipe.ExecuteAsync<ConnectionContext>(async context =>
-            {
-                if (_log.IsDebugEnabled)
-                    _log.DebugFormat("Connection established to {0}", _hostSettings.ToDebugString());
-
-                await signal.Stopped;
-
-                if (_log.IsDebugEnabled)
-                    _log.DebugFormat("Closing connection to host {0}", _hostSettings.ToDebugString());
-
-                context.Connection.Close(200, "Host stopped");
-            });
-
-            if (_log.IsDebugEnabled)
-                _log.DebugFormat("Starting connection to {0}", _hostSettings.ToDebugString());
-
-            _connectionCache.Send(connectionPipe, signal.CancellationToken);
-
-            return new Handle(signal);
         }
 
         public IMessageNameFormatter MessageNameFormatter
