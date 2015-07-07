@@ -38,7 +38,7 @@ namespace MassTransit.Serialization
             _provider = provider;
         }
 
-        async Task IProbeSite.Probe(ProbeContext context)
+        async void IProbeSite.Probe(ProbeContext context)
         {
             ProbeContext scope = context.CreateScope("encrypted");
             scope.Add("contentType", EncryptedMessageSerializer.EncryptedContentType.MediaType);

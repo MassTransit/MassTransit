@@ -23,35 +23,35 @@ namespace MassTransit.Transports
         IPipe<SendContext<T>>
         where T : class
     {
-        readonly IPublishObserver _observer;
+        readonly PublishObservable _observer;
         readonly IPipe<PublishContext<T>> _pipe;
         readonly Uri _sourceAddress;
         PublishContext<T> _context;
 
-        public PublishPipeContextAdapter(IPipe<PublishContext<T>> pipe, IPublishObserver observer, Uri sourceAddress)
+        public PublishPipeContextAdapter(IPipe<PublishContext<T>> pipe, PublishObservable observer, Uri sourceAddress)
         {
             _pipe = pipe;
             _observer = observer;
             _sourceAddress = sourceAddress;
         }
 
-        public PublishPipeContextAdapter(IPipe<PublishContext> pipe, IPublishObserver observer, Uri sourceAddress)
+        public PublishPipeContextAdapter(IPipe<PublishContext> pipe, PublishObservable observer, Uri sourceAddress)
         {
             _pipe = pipe;
             _observer = observer;
             _sourceAddress = sourceAddress;
         }
 
-        public PublishPipeContextAdapter(IPublishObserver observer, Uri sourceAddress)
+        public PublishPipeContextAdapter(PublishObservable observer, Uri sourceAddress)
         {
             _observer = observer;
             _sourceAddress = sourceAddress;
             _pipe = Pipe.Empty<PublishContext<T>>();
         }
 
-        Task IProbeSite.Probe(ProbeContext context)
+        void IProbeSite.Probe(ProbeContext context)
         {
-            return _pipe.Probe(context);
+            _pipe.Probe(context);
         }
 
         public async Task Send(SendContext<T> context)
@@ -64,19 +64,19 @@ namespace MassTransit.Transports
             await _pipe.Send(publishContext);
 
             if (firstTime)
-                await _observer.PrePublish(publishContext);
+                _observer.NotifyPrePublish(publishContext);
         }
 
-        public async Task PostSend()
+        public void PostPublish()
         {
             if (_context != null)
-                await _observer.PostPublish(_context);
+                _observer.NotifyPostPublish(_context);
         }
 
-        public async Task SendFaulted(Exception exception)
+        public void PublishFaulted(Exception exception)
         {
             if (_context != null)
-                await _observer.PublishFault(_context, exception);
+                _observer.NotifyPublishFault(_context, exception);
         }
     }
 }

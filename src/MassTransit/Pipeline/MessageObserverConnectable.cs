@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,32 +13,26 @@
 namespace MassTransit.Pipeline
 {
     using System;
-    using System.Threading.Tasks;
     using Util;
 
 
-    /// <summary>
-    /// Observes the consumption of a specific message type
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
-    public class MessageObserverConnectable<T> :
-        Connectable<IConsumeMessageObserver<T>>,
-        IConsumeMessageObserver<T>
+    public class ConsumeMessageObservable<T> :
+        AsyncObservable<IConsumeMessageObserver<T>>
         where T : class
     {
-        public Task PreConsume(ConsumeContext<T> context)
+        public void NotifyPreConsume(ConsumeContext<T> context)
         {
-            return ForEach(x => x.PreConsume(context));
+            Notify(x => x.PreConsume(context));
         }
 
-        public Task PostConsume(ConsumeContext<T> context)
+        public void NotifyPostConsume(ConsumeContext<T> context)
         {
-            return ForEach(x => x.PostConsume(context));
+            Notify(x => x.PostConsume(context));
         }
 
-        public Task ConsumeFault(ConsumeContext<T> context, Exception exception)
+        public void NotifyConsumeFault(ConsumeContext<T> context, Exception exception)
         {
-            return ForEach(x => x.ConsumeFault(context, exception));
+            Notify(x => x.ConsumeFault(context, exception));
         }
     }
 }

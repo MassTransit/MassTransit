@@ -31,7 +31,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
         {
             _pipe = pipe;
         }
-        async Task IProbeSite.Probe(ProbeContext context)
+        async void IProbeSite.Probe(ProbeContext context)
         {
         }
 

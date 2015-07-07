@@ -10,33 +10,40 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.PipeConfigurators
+namespace MassTransit.Util
 {
-    using System.Collections.Generic;
-    using Configurators;
-    using PipeBuilders;
-    using Pipeline.Filters;
+    using System.Threading.Tasks;
 
 
-    public class RedeliveryRetryPipeSpecification<TMessage> :
-        IPipeSpecification<ConsumeContext<TMessage>>
-        where TMessage : class
+    static class TaskUtil
     {
-        readonly IRetryPolicy _retryPolicy;
-
-        public RedeliveryRetryPipeSpecification(IRetryPolicy retryPolicy)
+        internal static Task Canceled
         {
-            _retryPolicy = retryPolicy;
+            get { return Cached<bool>.CanceledTask; }
         }
 
-        public void Apply(IPipeBuilder<ConsumeContext<TMessage>> builder)
+        internal static Task Completed
         {
-            builder.AddFilter(new RedeliveryRetryFilter<TMessage>(_retryPolicy));
+            get { return Cached.CompletedTask; }
         }
 
-        public IEnumerable<ValidationResult> Validate()
+
+        static class Cached
         {
-            yield break;
+            public static readonly Task CompletedTask = Task.FromResult(true);
+        }
+
+
+        static class Cached<T>
+        {
+            public static readonly Task<T> CanceledTask = GetCanceledTask();
+
+            static Task<T> GetCanceledTask()
+            {
+                var source = new TaskCompletionSource<T>();
+                source.SetCanceled();
+                return source.Task;
+            }
         }
     }
 }

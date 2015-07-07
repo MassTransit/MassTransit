@@ -34,12 +34,12 @@ namespace MassTransit.AutofacIntegration
             _name = name;
         }
 
-        Task IProbeSite.Probe(ProbeContext context)
+        void IProbeSite.Probe(ProbeContext context)
         {
             var scope = context.CreateScope("autofac");
             scope.Add("name", _name);
 
-            return _repository.Probe(scope);
+            _repository.Probe(scope);
         }
 
         async Task ISagaRepository<TSaga>.Send<T>(ConsumeContext<T> context, ISagaPolicy<TSaga, T> policy, IPipe<SagaConsumeContext<TSaga, T>> next)

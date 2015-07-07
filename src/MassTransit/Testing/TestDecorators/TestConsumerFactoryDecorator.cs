@@ -37,11 +37,11 @@ namespace MassTransit.Testing.TestDecorators
             return _consumerFactory.Send(context, new TestDecoratorPipe<TMessage>(_received, next));
         }
 
-        async Task IProbeSite.Probe(ProbeContext context)
+        void IProbeSite.Probe(ProbeContext context)
         {
             ProbeContext scope = context.CreateScope("testDecorator");
 
-            await _consumerFactory.Probe(scope);
+             _consumerFactory.Probe(scope);
         }
 
 
@@ -58,9 +58,9 @@ namespace MassTransit.Testing.TestDecorators
                 _next = next;
             }
 
-            Task IProbeSite.Probe(ProbeContext context)
+            void IProbeSite.Probe(ProbeContext context)
             {
-                return _next.Probe(context);
+                _next.Probe(context);
             }
 
             public async Task Send(ConsumerConsumeContext<TConsumer, TMessage> context)

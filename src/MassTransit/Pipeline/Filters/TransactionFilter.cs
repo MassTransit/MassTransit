@@ -38,7 +38,7 @@ namespace MassTransit.Pipeline.Filters
             };
         }
 
-        async Task IProbeSite.Probe(ProbeContext context)
+        async void IProbeSite.Probe(ProbeContext context)
         {
             var step = context.CreateFilterScope("transaction");
             step.Add("isolationLevel", _options.IsolationLevel.ToString());

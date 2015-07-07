@@ -28,7 +28,7 @@ namespace MassTransit.Policies
             _exceptionTypes = exceptionTypes;
         }
 
-        async Task IProbeSite.Probe(ProbeContext context)
+        async void IProbeSite.Probe(ProbeContext context)
         {
             ProbeContext scope = context.CreateScope("selected");
             scope.Set(new

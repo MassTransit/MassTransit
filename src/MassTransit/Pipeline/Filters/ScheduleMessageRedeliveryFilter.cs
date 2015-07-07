@@ -24,7 +24,7 @@ namespace MassTransit.Pipeline.Filters
         IFilter<ConsumeContext<TMessage>>
         where TMessage : class
     {
-        async Task IProbeSite.Probe(ProbeContext context)
+        async void IProbeSite.Probe(ProbeContext context)
         {
             context.CreateFilterScope("scheduleRedeliveryContext");
         }

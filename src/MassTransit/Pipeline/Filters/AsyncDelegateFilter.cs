@@ -15,6 +15,7 @@ namespace MassTransit.Pipeline.Filters
     using System;
     using System.Diagnostics;
     using System.Threading.Tasks;
+    using Util;
 
 
     public class AsyncDelegateFilter<T> :
@@ -28,7 +29,7 @@ namespace MassTransit.Pipeline.Filters
             _callback = callback;
         }
 
-        async Task IProbeSite.Probe(ProbeContext context)
+        void IProbeSite.Probe(ProbeContext context)
         {
             context.CreateFilterScope("asyncDelegate");
         }

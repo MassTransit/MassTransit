@@ -40,7 +40,7 @@ namespace MassTransit.Pipeline.Filters
             _handler = handler;
         }
 
-        async Task IProbeSite.Probe(ProbeContext context)
+        async void IProbeSite.Probe(ProbeContext context)
         {
             ProbeContext scope = context.CreateFilterScope("handler");
             scope.Add("completed", _completed);

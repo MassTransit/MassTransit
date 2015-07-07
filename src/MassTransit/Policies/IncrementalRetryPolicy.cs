@@ -15,7 +15,6 @@ namespace MassTransit.Policies
     using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
-    using Monitoring.Introspection;
 
 
     public class IncrementalRetryPolicy :
@@ -47,7 +46,7 @@ namespace MassTransit.Policies
             _intervalIncrement = intervalIncrement;
         }
 
-        Task IProbeSite.Probe(ProbeContext context)
+        void IProbeSite.Probe(ProbeContext context)
         {
             context.Set(new
             {
@@ -57,7 +56,7 @@ namespace MassTransit.Policies
                 Increment = _intervalIncrement,
             });
 
-            return _filter.Probe(context);
+            _filter.Probe(context);
         }
 
         public IRetryContext GetRetryContext()

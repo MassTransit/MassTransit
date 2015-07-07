@@ -33,9 +33,9 @@ namespace MassTransit.Pipeline.Filters
             _retryPolicy = retryPolicy;
         }
 
-        Task IProbeSite.Probe(ProbeContext context)
+        void IProbeSite.Probe(ProbeContext context)
         {
-            return _retryPolicy.Probe(context.CreateFilterScope("retry"));
+            _retryPolicy.Probe(context.CreateFilterScope("retry"));
         }
 
         [DebuggerNonUserCode]
@@ -99,9 +99,9 @@ namespace MassTransit.Pipeline.Filters
             _retryPolicy = retryPolicy;
         }
 
-        Task IProbeSite.Probe(ProbeContext context)
+        void IProbeSite.Probe(ProbeContext context)
         {
-            return _retryPolicy.Probe(context.CreateFilterScope("retry"));
+            _retryPolicy.Probe(context.CreateFilterScope("retry"));
         }
 
         async Task IFilter<ConsumeContext<T>>.Send(ConsumeContext<T> context, IPipe<ConsumeContext<T>> next)

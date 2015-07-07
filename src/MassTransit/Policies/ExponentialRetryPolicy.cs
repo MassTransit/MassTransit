@@ -39,7 +39,7 @@ namespace MassTransit.Policies
             _highInterval = (int)(intervalDelta.TotalMilliseconds * 1.2);
         }
 
-        Task IProbeSite.Probe(ProbeContext context)
+        void IProbeSite.Probe(ProbeContext context)
         {
             context.Set(new
             {
@@ -51,7 +51,7 @@ namespace MassTransit.Policies
                 High = _highInterval,
             });
 
-            return _filter.Probe(context);
+            _filter.Probe(context);
         }
 
         public IRetryContext GetRetryContext()

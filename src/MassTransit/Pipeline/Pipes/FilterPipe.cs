@@ -29,10 +29,10 @@ namespace MassTransit.Pipeline.Pipes
             _next = next;
         }
 
-        async Task IProbeSite.Probe(ProbeContext context)
+        void IProbeSite.Probe(ProbeContext context)
         {
-            await _filter.Probe(context);
-            await _next.Probe(context);
+            _filter.Probe(context);
+            _next.Probe(context);
         }
 
         [DebuggerNonUserCode]

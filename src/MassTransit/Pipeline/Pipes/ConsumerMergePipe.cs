@@ -33,7 +33,7 @@ namespace MassTransit.Pipeline.Pipes
             _output = output;
         }
 
-        Task IProbeSite.Probe(ProbeContext context)
+        void IProbeSite.Probe(ProbeContext context)
         {
             ProbeContext scope = context.CreateFilterScope("merge");
             scope.Set(new
@@ -42,7 +42,7 @@ namespace MassTransit.Pipeline.Pipes
                 MessageType = TypeMetadataCache<TMessage>.ShortName,
             });
 
-            return _output.Probe(scope);
+            _output.Probe(scope);
         }
 
         public Task Send(ConsumerConsumeContext<TConsumer> context)

@@ -14,6 +14,7 @@ namespace MassTransit.Pipeline.ConsumerFactories
 {
     using System;
     using System.Threading.Tasks;
+    using Util;
 
 
     public class ObjectConsumerFactory<TConsumer> :
@@ -33,7 +34,7 @@ namespace MassTransit.Pipeline.ConsumerFactories
             return _delegate.Send(context, next);
         }
 
-        async Task IProbeSite.Probe(ProbeContext context)
+        void IProbeSite.Probe(ProbeContext context)
         {
             context.CreateConsumerFactoryScope<TConsumer>("objectFactory");
         }

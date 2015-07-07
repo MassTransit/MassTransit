@@ -13,15 +13,11 @@
 namespace MassTransit.Transports.InMemory
 {
     using System;
-    using System.Collections.Concurrent;
-    using System.Collections.Generic;
     using System.IO;
-    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using Internals.Extensions;
     using Logging;
-    using Monitoring.Introspection;
     using Pipeline;
     using Util;
 
@@ -36,50 +32,51 @@ namespace MassTransit.Transports.InMemory
         IDisposable
     {
         static readonly ILog _log = Logger.Get<InMemoryTransport>();
+        readonly int _concurrencyLimit;
 
-        readonly BlockingCollection<InMemoryTransportMessage> _collection;
         readonly Uri _inputAddress;
-        readonly Connectable<ISendObserver> _observers;
+        readonly SendObservable _observers;
         readonly ReceiveObservable _receiveObservers;
-        ConcurrentQueue<InMemoryTransportMessage> _queue;
+        readonly QueuedTaskScheduler _scheduler;
+        IPipe<ReceiveContext> _receivePipe;
+        CancellationToken _stopToken;
 
-        public InMemoryTransport(Uri inputAddress)
+        public InMemoryTransport(Uri inputAddress, int concurrencyLimit)
         {
             _inputAddress = inputAddress;
+            _concurrencyLimit = concurrencyLimit;
 
-            _observers = new Connectable<ISendObserver>();
+            _observers = new SendObservable();
             _receiveObservers = new ReceiveObservable();
 
-            _queue = new ConcurrentQueue<InMemoryTransportMessage>();
-            _collection = new BlockingCollection<InMemoryTransportMessage>(_queue);
+            _scheduler = new QueuedTaskScheduler(TaskScheduler.Default, concurrencyLimit);
         }
 
-        public async Task Probe(ProbeContext context)
+        public void Dispose()
+        {
+            _scheduler.Dispose();
+        }
+
+        public async void Probe(ProbeContext context)
         {
             ProbeContext scope = context.CreateScope("transport");
             scope.Set(new
             {
                 Address = _inputAddress,
-                QueueLength = _queue.Count,
             });
-        }
-
-        public void Dispose()
-        {
-            if (_collection != null)
-                _collection.Dispose();
         }
 
         ReceiveTransportHandle IReceiveTransport.Start(IPipe<ReceiveContext> receivePipe)
         {
             var stopTokenSource = new CancellationTokenSource();
 
-            Task receiveTask = StartReceiveTask(receivePipe, stopTokenSource);
+            _receivePipe = receivePipe;
+            _stopToken = stopTokenSource.Token;
 
-            return new Handle(receiveTask, stopTokenSource);
+            return new Handle(stopTokenSource);
         }
 
-        public ObserverHandle ConnectReceiveObserver(IReceiveObserver observer)
+        public ConnectHandle ConnectReceiveObserver(IReceiveObserver observer)
         {
             return _receiveObservers.Connect(observer);
         }
@@ -94,22 +91,22 @@ namespace MassTransit.Transports.InMemory
 
                 Guid messageId = context.MessageId ?? NewId.NextGuid();
 
-                await _observers.ForEach(x => x.PreSend(context)).ConfigureAwait(false);
+                _observers.NotifyPreSend(context);
 
                 var transportMessage = new InMemoryTransportMessage(messageId, context.Body, context.ContentType.MediaType, TypeMetadataCache<T>.ShortName);
 
-                _collection.Add(transportMessage, cancelSend);
+                Task.Factory.StartNew(() => DispatchMessage(transportMessage), _stopToken, TaskCreationOptions.HideScheduler, _scheduler);
 
                 context.DestinationAddress.LogSent(context.MessageId.HasValue ? context.MessageId.Value.ToString("N") : "",
                     TypeMetadataCache<T>.ShortName);
 
-                await _observers.ForEach(x => x.PostSend(context)).ConfigureAwait(false);
+                _observers.NotifyPostSend(context);
             }
             catch (Exception ex)
             {
                 _log.Error(string.Format("SEND FAULT: {0} {1} {2}", _inputAddress, context.MessageId, TypeMetadataCache<T>.ShortName));
 
-                _observers.ForEach(x => x.SendFault(context, ex)).Wait(cancelSend);
+                _observers.NotifySendFault(context, ex);
 
                 throw;
             }
@@ -132,7 +129,7 @@ namespace MassTransit.Transports.InMemory
 
             var transportMessage = new InMemoryTransportMessage(messageId, body, context.ContentType.MediaType, messageType);
 
-            _collection.Add(transportMessage, context.CancellationToken);
+            Task.Factory.StartNew(() => DispatchMessage(transportMessage), _stopToken, TaskCreationOptions.HideScheduler, _scheduler);
         }
 
         public ConnectHandle Connect(ISendObserver observer)
@@ -140,48 +137,35 @@ namespace MassTransit.Transports.InMemory
             return _observers.Connect(observer);
         }
 
-        Task StartReceiveTask(IPipe<ReceiveContext> receivePipe, CancellationTokenSource stopTokenSource)
+        async Task DispatchMessage(InMemoryTransportMessage message)
         {
-            return Task.Run(() =>
+            if (_stopToken.IsCancellationRequested)
+                return;
+
+            if (_receivePipe == null)
+                throw new ArgumentNullException("ReceivePipe not configured");
+
+            var context = new InMemoryReceiveContext(_inputAddress, message, _receiveObservers);
+
+            try
             {
-                _log.DebugFormat("Starting InMemory Transport: {0}", _inputAddress);
-                using (RegisterShutdown(stopTokenSource.Token))
-                {
-                    try
-                    {
-                        Parallel.ForEach(GetConsumingPartitioner(_collection), async message =>
-                        {
-                            if (stopTokenSource.Token.IsCancellationRequested)
-                                return;
+                _receiveObservers.NotifyPreReceive(context);
 
-                            var context = new InMemoryReceiveContext(_inputAddress, message, _receiveObservers);
+                _receivePipe.Send(context).ConfigureAwait(false);
 
-                            try
-                            {
-                                _receiveObservers.NotifyPreReceive(context);
+                await context.CompleteTask.ConfigureAwait(false);
 
-                                await receivePipe.Send(context).ConfigureAwait(false);
+                _receiveObservers.NotifyPostReceive(context);
 
-                                await context.CompleteTask.ConfigureAwait(false);
+                _inputAddress.LogReceived(message.MessageId.ToString("N"), message.MessageType);
+            }
+            catch (Exception ex)
+            {
+                message.DeliveryCount++;
+                _log.Error(string.Format("RCV FAULT: {0}", message.MessageId), ex);
 
-                                _receiveObservers.NotifyPostReceive(context);
-
-                                _inputAddress.LogReceived(message.MessageId.ToString("N"), message.MessageType);
-                            }
-                            catch (Exception ex)
-                            {
-                                message.DeliveryCount++;
-                                _log.Error(string.Format("RCV FAULT: {0}", message.MessageId), ex);
-
-                                _receiveObservers.NotifyReceiveFault(context, ex);
-                            }
-                        });
-                    }
-                    catch (OperationCanceledException)
-                    {
-                    }
-                }
-            }, stopTokenSource.Token);
+                _receiveObservers.NotifyReceiveFault(context, ex);
+            }
         }
 
         async Task<byte[]> GetMessageBody(Stream body)
@@ -202,65 +186,15 @@ namespace MassTransit.Transports.InMemory
                 : NewId.NextGuid();
         }
 
-        CancellationTokenRegistration RegisterShutdown(CancellationToken cancellationToken)
-        {
-            return cancellationToken.Register(() =>
-            {
-                // signal collection that no more messages will be added, ending it
-                _collection.CompleteAdding();
-            });
-        }
-
-        Partitioner<T> GetConsumingPartitioner<T>(BlockingCollection<T> collection)
-        {
-            return new BlockingCollectionPartitioner<T>(collection);
-        }
-
-
-        class BlockingCollectionPartitioner<T> :
-            Partitioner<T>
-        {
-            readonly BlockingCollection<T> _collection;
-
-            internal BlockingCollectionPartitioner(BlockingCollection<T> collection)
-            {
-                if (collection == null)
-                    throw new ArgumentNullException("collection");
-                _collection = collection;
-            }
-
-            public override bool SupportsDynamicPartitions
-            {
-                get { return true; }
-            }
-
-            public override IList<IEnumerator<T>> GetPartitions(int partitionCount)
-            {
-                if (partitionCount < 1)
-                    throw new ArgumentOutOfRangeException("partitionCount");
-
-                IEnumerable<T> dynamicPartitioner = GetDynamicPartitions();
-
-                return Enumerable.Range(0, partitionCount).Select(_ => dynamicPartitioner.GetEnumerator()).ToArray();
-            }
-
-            public override IEnumerable<T> GetDynamicPartitions()
-            {
-                return _collection.GetConsumingEnumerable();
-            }
-        }
-
 
         class Handle :
             ReceiveTransportHandle
         {
-            readonly Task _receiverTask;
             readonly CancellationTokenSource _stop;
 
-            public Handle(Task receiverTask, CancellationTokenSource cancellationTokenSource)
+            public Handle(CancellationTokenSource cancellationTokenSource)
             {
                 _stop = cancellationTokenSource;
-                _receiverTask = receiverTask;
             }
 
             void IDisposable.Dispose()
@@ -271,8 +205,6 @@ namespace MassTransit.Transports.InMemory
             async Task ReceiveTransportHandle.Stop(CancellationToken cancellationToken)
             {
                 _stop.Cancel();
-
-                await _receiverTask.WithCancellation(cancellationToken).ConfigureAwait(false);
             }
         }
     }

@@ -34,7 +34,7 @@ namespace MassTransit.Tests
 
             await _handled;
 
-            ProbeResult result = await Bus.GetProbeResult();
+            ProbeResult result = Bus.GetProbeResult();
 
             Console.WriteLine(result.ToJsonString());
         }

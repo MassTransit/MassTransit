@@ -28,7 +28,7 @@ namespace MassTransit.Pipeline.Filters
             _callback = callback;
         }
 
-        async Task IProbeSite.Probe(ProbeContext context)
+        async void IProbeSite.Probe(ProbeContext context)
         {
             context.CreateFilterScope("delegate");
         }

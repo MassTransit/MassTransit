@@ -24,7 +24,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             get { return _called.Task; }
         }
 
-        async Task IProbeSite.Probe(ProbeContext context)
+        async void IProbeSite.Probe(ProbeContext context)
         {
         }
 

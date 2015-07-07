@@ -36,7 +36,7 @@ namespace MassTransit.Saga.Pipeline.Filters
             _next = next;
         }
 
-        Task IProbeSite.Probe(ProbeContext context)
+        void IProbeSite.Probe(ProbeContext context)
         {
             ProbeContext scope = context.CreateFilterScope("split");
             scope.Set(new
@@ -44,7 +44,7 @@ namespace MassTransit.Saga.Pipeline.Filters
                 ConsumerType = TypeMetadataCache<TSaga>.ShortName,
             });
 
-            return _next.Probe(scope);
+            _next.Probe(scope);
         }
 
         public Task Send(SagaConsumeContext<TSaga, TMessage> context, IPipe<SagaConsumeContext<TSaga, TMessage>> next)

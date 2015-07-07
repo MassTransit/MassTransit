@@ -32,11 +32,13 @@ namespace MassTransit.BusConfigurators
         readonly IList<IBusHostControl> _hosts;
         IReceiveTransportProvider _receiveTransportProvider;
         ISendTransportProvider _sendTransportProvider;
+        int _concurrencyLimit;
 
         public InMemoryBusFactoryConfigurator()
         {
             _configurators = new List<IInMemoryBusFactorySpecification>();
             _consumePipeSpecification = new ConsumePipeSpecificationList();
+            _concurrencyLimit = Environment.ProcessorCount;
 
             _hosts = new List<IBusHostControl>();
         }
@@ -45,7 +47,7 @@ namespace MassTransit.BusConfigurators
         {
             if (_receiveTransportProvider == null || _sendTransportProvider == null)
             {
-                var transportProvider = new InMemoryTransportCache();
+                var transportProvider = new InMemoryTransportCache(_concurrencyLimit);
                 _hosts.Add(transportProvider);
 
                 _receiveTransportProvider = _receiveTransportProvider ?? transportProvider;
@@ -79,6 +81,11 @@ namespace MassTransit.BusConfigurators
         void IBusFactoryConfigurator.AddBusFactorySpecification(IBusFactorySpecification configurator)
         {
             _configurators.Add(new ConfiguratorProxy(configurator));
+        }
+
+        public int ConcurrencyLimit
+        {
+            set { _concurrencyLimit = value; }
         }
 
         void IInMemoryBusFactoryConfigurator.SetTransportProvider<T>(T transportProvider)

@@ -32,11 +32,11 @@ namespace MassTransit.NinjectIntegration
             _kernel = kernel;
         }
 
-        Task IProbeSite.Probe(ProbeContext context)
+        void IProbeSite.Probe(ProbeContext context)
         {
             ProbeContext scope = context.CreateScope("ninject");
 
-            return _repository.Probe(scope);
+            _repository.Probe(scope);
         }
 
         public Task Send<T>(ConsumeContext<T> context, ISagaPolicy<TSaga, T> policy, IPipe<SagaConsumeContext<TSaga, T>> next) where T : class

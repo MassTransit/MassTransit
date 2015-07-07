@@ -28,13 +28,13 @@ namespace MassTransit.Pipeline.Filters
         IConsumeMessageObserverConnector,
         IConsumeObserverConnector
     {
-        readonly ConsumeObserverConnectable _observers;
+        readonly ConsumeObservable _observers;
         readonly ConcurrentDictionary<Type, IMessagePipe> _pipes;
 
         public MessageTypeConsumeFilter()
         {
             _pipes = new ConcurrentDictionary<Type, IMessagePipe>();
-            _observers = new ConsumeObserverConnectable();
+            _observers = new ConsumeObservable();
         }
 
         public ConnectHandle ConnectConsumeMessageObserver<T>(IConsumeMessageObserver<T> observer)
@@ -64,10 +64,10 @@ namespace MassTransit.Pipeline.Filters
             return messagePipe.ConnectConsumePipe(pipe);
         }
 
-        async Task IProbeSite.Probe(ProbeContext context)
+        void IProbeSite.Probe(ProbeContext context)
         {
             foreach (IMessagePipe pipe in _pipes.Values)
-                await pipe.Filter.Probe(context);
+                pipe.Filter.Probe(context);
         }
 
         [DebuggerNonUserCode]
@@ -125,10 +125,10 @@ namespace MassTransit.Pipeline.Filters
             where TMessage : class
         {
             readonly Lazy<IFilter<ConsumeContext>> _filter;
-            readonly IConsumeObserver _observer;
+            readonly ConsumeObservable _observer;
             readonly IList<IFilter<ConsumeContext<TMessage>>> _pipeFilters;
 
-            public MessagePipe(IConsumeObserver observer)
+            public MessagePipe(ConsumeObservable observer)
             {
                 _filter = new Lazy<IFilter<ConsumeContext>>(CreateFilter);
                 _observer = observer;
@@ -138,17 +138,20 @@ namespace MassTransit.Pipeline.Filters
 
             public Task PreConsume(ConsumeContext<TMessage> context)
             {
-                return _observer.PreConsume(context);
+                _observer.NotifyPreConsume(context);
+                return TaskUtil.Completed;
             }
 
             public Task PostConsume(ConsumeContext<TMessage> context)
             {
-                return _observer.PostConsume(context);
+                _observer.NotifyPostConsume(context);
+                return TaskUtil.Completed;
             }
 
             public Task ConsumeFault(ConsumeContext<TMessage> context, Exception exception)
             {
-                return _observer.ConsumeFault(context, exception);
+                _observer.NotifyConsumeFault(context, exception);
+                return TaskUtil.Completed;
             }
 
             public IFilter<ConsumeContext> Filter

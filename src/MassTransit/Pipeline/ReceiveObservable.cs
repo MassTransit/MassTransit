@@ -49,29 +49,39 @@ namespace MassTransit.Pipeline
             Notify(x => x.ReceiveFault(context, exception));
         }
 
-        async Task IReceiveObserver.PreReceive(ReceiveContext context)
+        Task IReceiveObserver.PreReceive(ReceiveContext context)
         {
             NotifyPreReceive(context);
+
+            return TaskUtil.Completed;
         }
 
-        async Task IReceiveObserver.PostReceive(ReceiveContext context)
+        Task IReceiveObserver.PostReceive(ReceiveContext context)
         {
             NotifyPostReceive(context);
+
+            return TaskUtil.Completed;
         }
 
-        async Task IReceiveObserver.PostConsume<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType)
+        Task IReceiveObserver.PostConsume<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType)
         {
             NotifyPostConsume(context, duration, consumerType);
+
+            return TaskUtil.Completed;
         }
 
-        async Task IReceiveObserver.ConsumeFault<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType, Exception exception)
+        Task IReceiveObserver.ConsumeFault<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType, Exception exception)
         {
             NotifyConsumeFault(context, duration, consumerType, exception);
+
+            return TaskUtil.Completed;
         }
 
-        async Task IReceiveObserver.ReceiveFault(ReceiveContext context, Exception exception)
+        Task IReceiveObserver.ReceiveFault(ReceiveContext context, Exception exception)
         {
             NotifyReceiveFault(context, exception);
+
+            return TaskUtil.Completed;
         }
     }
 }

@@ -39,7 +39,7 @@ namespace MassTransit.Tests.Diagnostics
 
             await _completed.Task;
 
-            await observerHandle.Disconnect();
+            observerHandle.Disconnect();
         }
 
         TaskCompletionSource<bool> _completed;

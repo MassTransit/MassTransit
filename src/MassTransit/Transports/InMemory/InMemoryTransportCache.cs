@@ -31,9 +31,11 @@ namespace MassTransit.Transports.InMemory
     {
         readonly Uri _baseUri = new Uri("loopback://localhost/");
         readonly ConcurrentDictionary<string, InMemoryTransport> _transports;
+        readonly int _concurrencyLimit;
 
-        public InMemoryTransportCache()
+        public InMemoryTransportCache(int concurrencyLimit)
         {
+            _concurrencyLimit = concurrencyLimit;
             _transports = new ConcurrentDictionary<string, InMemoryTransport>(StringComparer.OrdinalIgnoreCase);
         }
 
@@ -42,7 +44,7 @@ namespace MassTransit.Transports.InMemory
             get { return _transports.Keys.Select(x => new Uri(_baseUri, x)); }
         }
 
-        async Task IProbeSite.Probe(ProbeContext context)
+        async void IProbeSite.Probe(ProbeContext context)
         {
             ProbeContext scope = context.CreateScope("host");
             scope.Set(new
@@ -67,7 +69,7 @@ namespace MassTransit.Transports.InMemory
 
         public IReceiveTransport GetReceiveTransport(string queueName)
         {
-            return _transports.GetOrAdd(queueName, name => new InMemoryTransport(new Uri(_baseUri, name)));
+            return _transports.GetOrAdd(queueName, name => new InMemoryTransport(new Uri(_baseUri, name), _concurrencyLimit));
         }
 
         public async Task<ISendTransport> GetSendTransport(Uri address)
@@ -76,7 +78,7 @@ namespace MassTransit.Transports.InMemory
             if (queueName.StartsWith("/"))
                 queueName = queueName.Substring(1);
 
-            return _transports.GetOrAdd(queueName, name => new InMemoryTransport(new Uri(_baseUri, name)));
+            return _transports.GetOrAdd(queueName, name => new InMemoryTransport(new Uri(_baseUri, name), _concurrencyLimit));
         }
 
 

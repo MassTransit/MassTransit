@@ -51,7 +51,7 @@ namespace MassTransit.Util
         /// </summary>
         /// <param name="observer">The connection to add</param>
         /// <returns>The connection handle</returns>
-        public ObserverHandle Connect(T observer)
+        public ConnectHandle Connect(T observer)
         {
             if (observer == null)
                 throw new ArgumentNullException("observer");
@@ -92,15 +92,15 @@ namespace MassTransit.Util
 
 
         class Handle :
-            ObserverHandle
+            ConnectHandle
         {
             static readonly ILog _log = Logger.Get<AsyncObservable<T>>();
             readonly CancellationTokenSource _cancellation;
             readonly Action<long> _disconnect;
             readonly long _id;
-            readonly BlockingCollection<ObserverNotification> _notifications;
             readonly Task _notifyTask;
             readonly T _observer;
+            readonly QueuedTaskScheduler _scheduler;
 
             public Handle(long id, T observer, Action<long> disconnect)
             {
@@ -110,53 +110,25 @@ namespace MassTransit.Util
 
                 _cancellation = new CancellationTokenSource();
 
-
-                var queue = new ConcurrentQueue<ObserverNotification>();
-                _notifications = new BlockingCollection<ObserverNotification>(queue);
-
-                _notifyTask = StartNotificationTask();
+                _scheduler = new QueuedTaskScheduler(TaskScheduler.Default, 1);
             }
 
-            public Task Disconnect()
+            public void Disconnect()
             {
                 _disconnect(_id);
+            }
 
-                _notifications.CompleteAdding();
+            void IDisposable.Dispose()
+            {
+                Disconnect();
 
-                BlockingCollection<ObserverNotification> notifications = _notifications;
-                return _notifyTask.ContinueWith(x => notifications.Dispose(), TaskScheduler.Default);
+                _scheduler.Dispose();
             }
 
             public void Notify(ObserverNotification notification)
             {
-                _notifications.Add(notification, _cancellation.Token);
-            }
-
-            Task StartNotificationTask()
-            {
-                return Task.Run(async () =>
-                {
-                    try
-                    {
-                        foreach (ObserverNotification notification in _notifications.GetConsumingEnumerable(_cancellation.Token))
-                        {
-                            if (_cancellation.Token.IsCancellationRequested)
-                                break;
-
-                            try
-                            {
-                                await notification(_observer).ConfigureAwait(false);
-                            }
-                            catch (Exception ex)
-                            {
-                                _log.Error(string.Format("The {0} observer threw an exception", TypeMetadataCache<T>.ShortName), ex);
-                            }
-                        }
-                    }
-                    catch (OperationCanceledException)
-                    {
-                    }
-                }, _cancellation.Token);
+                Task.Factory.StartNew(() => notification(_observer),
+                    _cancellation.Token, TaskCreationOptions.HideScheduler, _scheduler);
             }
         }
     }

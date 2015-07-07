@@ -13,6 +13,7 @@
 namespace MassTransit.Pipeline.ConsumerFactories
 {
     using System.Threading.Tasks;
+    using Util;
 
 
     /// <summary>
@@ -37,7 +38,7 @@ namespace MassTransit.Pipeline.ConsumerFactories
             return next.Send(context.PushConsumer(_consumer));
         }
 
-        async Task IProbeSite.Probe(ProbeContext context)
+        void IProbeSite.Probe(ProbeContext context)
         {
             context.CreateConsumerFactoryScope<TConsumer>("instance");
         }

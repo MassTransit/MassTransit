@@ -37,9 +37,9 @@ namespace MassTransit.Testing.TestDecorators
             _sagas = sagas;
         }
 
-        Task IProbeSite.Probe(ProbeContext context)
+        void IProbeSite.Probe(ProbeContext context)
         {
-            return _sagaRepository.Probe(context);
+            _sagaRepository.Probe(context);
         }
 
         Task ISagaRepository<TSaga>.Send<T>(ConsumeContext<T> context, ISagaPolicy<TSaga, T> policy, IPipe<SagaConsumeContext<TSaga, T>> next)
@@ -75,9 +75,9 @@ namespace MassTransit.Testing.TestDecorators
                 _pipe = pipe;
             }
 
-            async Task IProbeSite.Probe(ProbeContext context)
+            void IProbeSite.Probe(ProbeContext context)
             {
-                await _pipe.Probe(context);
+                 _pipe.Probe(context);
             }
 
             public async Task Send(SagaConsumeContext<TSaga, TMessage> context)
@@ -137,9 +137,9 @@ namespace MassTransit.Testing.TestDecorators
                     _pipe = pipe;
                 }
 
-                Task IProbeSite.Probe(ProbeContext context)
+                void IProbeSite.Probe(ProbeContext context)
                 {
-                    return _pipe.Probe(context);
+                    _pipe.Probe(context);
                 }
 
                 public async Task Send(SagaConsumeContext<TSaga, TMessage> context)

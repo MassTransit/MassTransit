@@ -39,14 +39,14 @@ namespace MassTransit.Pipeline.Filters
             _consumerPipe = consumerPipe;
         }
 
-        async Task IProbeSite.Probe(ProbeContext context)
+        void IProbeSite.Probe(ProbeContext context)
         {
             ProbeContext scope = context.CreateScope("consumer");
             scope.Add("type", TypeMetadataCache<TConsumer>.ShortName);
 
-            await _consumerFactory.Probe(scope);
+            _consumerFactory.Probe(scope);
 
-            await _consumerPipe.Probe(scope);
+            _consumerPipe.Probe(scope);
         }
 
         [DebuggerNonUserCode]

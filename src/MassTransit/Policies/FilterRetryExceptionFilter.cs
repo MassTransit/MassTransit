@@ -14,7 +14,6 @@ namespace MassTransit.Policies
 {
     using System;
     using System.Threading.Tasks;
-    using Monitoring.Introspection;
 
 
     public class FilterRetryExceptionFilter<T> :
@@ -28,7 +27,7 @@ namespace MassTransit.Policies
             _filter = filter;
         }
 
-        async Task IProbeSite.Probe(ProbeContext context)
+        async void IProbeSite.Probe(ProbeContext context)
         {
             ProbeContext scope = context.CreateScope("filter");
         }

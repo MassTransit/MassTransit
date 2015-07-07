@@ -129,7 +129,7 @@ namespace RapidTransit
             get { return _bus.Address; }
         }
 
-        public ObserverHandle ConnectReceiveObserver(IReceiveObserver observer)
+        public ConnectHandle ConnectReceiveObserver(IReceiveObserver observer)
         {
             return _bus.ConnectReceiveObserver(observer);
         }
@@ -139,7 +139,7 @@ namespace RapidTransit
             return _bus.Connect(observer);
         }
 
-        public async Task Probe(ProbeContext context)
+        public async void Probe(ProbeContext context)
         {
             
         }

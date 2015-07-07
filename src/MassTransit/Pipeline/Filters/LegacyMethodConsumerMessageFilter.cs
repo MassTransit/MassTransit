@@ -27,12 +27,12 @@ namespace MassTransit.Pipeline.Filters
         where TConsumer : class, IMessageConsumer<TMessage>
         where TMessage : class
     {
-        async Task IProbeSite.Probe(ProbeContext context)
+        async void IProbeSite.Probe(ProbeContext context)
         {
         }
 
         [DebuggerNonUserCode]
-        async Task IFilter<ConsumerConsumeContext<TConsumer, TMessage>>.Send(ConsumerConsumeContext<TConsumer, TMessage> context,
+        Task IFilter<ConsumerConsumeContext<TConsumer, TMessage>>.Send(ConsumerConsumeContext<TConsumer, TMessage> context,
             IPipe<ConsumerConsumeContext<TConsumer, TMessage>> next)
         {
             var messageConsumer = context.Consumer as IMessageConsumer<TMessage>;
@@ -45,6 +45,8 @@ namespace MassTransit.Pipeline.Filters
             }
 
             messageConsumer.Consume(context.Message);
+
+            return TaskUtil.Completed;
         }
     }
 }

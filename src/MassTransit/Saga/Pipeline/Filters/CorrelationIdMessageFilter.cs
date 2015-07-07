@@ -38,7 +38,7 @@ namespace MassTransit.Saga.Pipeline.Filters
             _getCorrelationId = getCorrelationId;
         }
 
-        async Task IProbeSite.Probe(ProbeContext context)
+        async void IProbeSite.Probe(ProbeContext context)
         {
             context.CreateFilterScope("correlationId");
         }

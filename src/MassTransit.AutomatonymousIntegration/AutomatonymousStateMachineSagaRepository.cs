@@ -53,7 +53,7 @@ namespace Automatonymous
                 _messageTypes.Add(eventCorrelation.Event.GetType().GetClosingArguments(typeof(Event<>)).Single(), eventCorrelation);
         }
 
-        async Task IProbeSite.Probe(ProbeContext context)
+        void IProbeSite.Probe(ProbeContext context)
         {
             ProbeContext scope = context.CreateScope("sagaRepository");
             scope.Set(new
@@ -65,7 +65,7 @@ namespace Automatonymous
                 })
             });
 
-            await _repository.Probe(scope);
+            _repository.Probe(scope);
         }
 
         public Task Send<T>(ConsumeContext<T> context, ISagaPolicy<TInstance, T> policy, IPipe<SagaConsumeContext<TInstance, T>> next) where T : class

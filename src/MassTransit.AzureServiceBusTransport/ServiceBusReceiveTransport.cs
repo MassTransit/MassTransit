@@ -44,7 +44,7 @@ namespace MassTransit.AzureServiceBusTransport
             _receiveObservers = new ReceiveObservable();
         }
 
-        async Task IProbeSite.Probe(ProbeContext context)
+        async void IProbeSite.Probe(ProbeContext context)
         {
             ProbeContext scope = context.CreateScope("transport");
             scope.Set(new
@@ -78,7 +78,7 @@ namespace MassTransit.AzureServiceBusTransport
             return new Handle(stopTokenSource, receiveTask);
         }
 
-        public ObserverHandle ConnectReceiveObserver(IReceiveObserver observer)
+        public ConnectHandle ConnectReceiveObserver(IReceiveObserver observer)
         {
             return _receiveObservers.Connect(observer);
         }

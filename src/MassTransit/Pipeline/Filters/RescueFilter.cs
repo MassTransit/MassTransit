@@ -38,11 +38,11 @@ namespace MassTransit.Pipeline.Filters
             _exceptionFilter = exceptionFilter;
         }
 
-        Task IProbeSite.Probe(ProbeContext context)
+        void IProbeSite.Probe(ProbeContext context)
         {
             ProbeContext scope = context.CreateFilterScope("rescue");
 
-            return _rescuePipe.Probe(scope);
+            _rescuePipe.Probe(scope);
         }
 
         [DebuggerNonUserCode]

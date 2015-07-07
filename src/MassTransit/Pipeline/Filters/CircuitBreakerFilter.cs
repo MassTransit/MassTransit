@@ -86,7 +86,7 @@ namespace MassTransit.Pipeline.Filters
             }
         }
 
-        Task IProbeSite.Probe(ProbeContext context)
+        void IProbeSite.Probe(ProbeContext context)
         {
             ProbeContext scope = context.CreateFilterScope("circuitBreaker");
             scope.Set(new
@@ -97,7 +97,7 @@ namespace MassTransit.Pipeline.Filters
                 ResetTimeout = _settings.ResetTimeout.Take(10).ToArray(),
             });
 
-            return _behavior.Probe(scope);
+            _behavior.Probe(scope);
         }
     }
 }

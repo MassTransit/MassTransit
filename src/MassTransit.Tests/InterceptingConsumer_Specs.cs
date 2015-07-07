@@ -52,7 +52,7 @@ namespace MassTransit.Tests
                 Second = second;
             }
 
-            async Task IProbeSite.Probe(ProbeContext context)
+            async void IProbeSite.Probe(ProbeContext context)
             {
             }
 

@@ -34,11 +34,11 @@ namespace MassTransit.Pipeline.Pipes
             _pipe = pipe;
         }
 
-        Task IProbeSite.Probe(ProbeContext context)
+        void IProbeSite.Probe(ProbeContext context)
         {
             ProbeContext scope = context.CreateScope("pipe");
 
-            return _pipe.Probe(scope);
+            _pipe.Probe(scope);
         }
 
         Task IPipe<ConsumeContext>.Send(ConsumeContext context)

@@ -29,14 +29,14 @@ namespace MassTransit.MessageData
             _values = new ConcurrentDictionary<Uri, byte[]>();
         }
 
-        async Task<Stream> IMessageDataRepository.Get(Uri address, CancellationToken cancellationToken)
+        Task<Stream> IMessageDataRepository.Get(Uri address, CancellationToken cancellationToken)
         {
             if (address == null)
                 throw new ArgumentNullException("address");
 
             byte[] value;
             if (_values.TryGetValue(address, out value))
-                return new MemoryStream(value, false);
+                return Task.FromResult<Stream>(new MemoryStream(value, false));
 
             throw new MessageDataNotFoundException(address);
         }

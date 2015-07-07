@@ -30,7 +30,7 @@ namespace MassTransit.Tests
             {
                 var observer = new ReceiveObserver(GetTask<ReceiveContext>(), GetTask<ReceiveContext>(), GetTask<Tuple<ReceiveContext, Exception>>(), GetTask<ConsumeContext>(), GetTask<ConsumeContext>());
 
-                ObserverHandle observerHandle = Bus.ConnectReceiveObserver(observer);
+                ConnectHandle observerHandle = Bus.ConnectReceiveObserver(observer);
 
                 await InputQueueSendEndpoint.Send(new PingMessage());
 
@@ -42,7 +42,7 @@ namespace MassTransit.Tests
             {
                 var observer = new ReceiveObserver(GetTask<ReceiveContext>(), GetTask<ReceiveContext>(), GetTask<Tuple<ReceiveContext, Exception>>(), GetTask<ConsumeContext>(), GetTask<ConsumeContext>());
 
-                ObserverHandle observerHandle = Bus.ConnectReceiveObserver(observer);
+                ConnectHandle observerHandle = Bus.ConnectReceiveObserver(observer);
 
                 await InputQueueSendEndpoint.Send(new PingMessage());
 
@@ -65,7 +65,7 @@ namespace MassTransit.Tests
             {
                 var observer = new ReceiveObserver(GetTask<ReceiveContext>(), GetTask<ReceiveContext>(), GetTask<Tuple<ReceiveContext, Exception>>(), GetTask<ConsumeContext>(), GetTask<ConsumeContext>());
 
-                ObserverHandle observerHandle = Bus.ConnectReceiveObserver(observer);
+                ConnectHandle observerHandle = Bus.ConnectReceiveObserver(observer);
 
                 await InputQueueSendEndpoint.Send(new PingMessage());
 
@@ -77,7 +77,7 @@ namespace MassTransit.Tests
             {
                 var observer = new ReceiveObserver(GetTask<ReceiveContext>(), GetTask<ReceiveContext>(), GetTask<Tuple<ReceiveContext, Exception>>(), GetTask<ConsumeContext>(), GetTask<ConsumeContext>());
 
-                ObserverHandle observerHandle = Bus.ConnectReceiveObserver(observer);
+                ConnectHandle observerHandle = Bus.ConnectReceiveObserver(observer);
 
                 await InputQueueSendEndpoint.Send(new PingMessage());
 

@@ -44,7 +44,7 @@ namespace MassTransit.StructureMapIntegration
             }
         }
 
-        async Task IProbeSite.Probe(ProbeContext context)
+        async void IProbeSite.Probe(ProbeContext context)
         {
             context.CreateConsumerFactoryScope<TConsumer>("structuremap");
         }

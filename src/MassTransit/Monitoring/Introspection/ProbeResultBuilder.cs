@@ -42,7 +42,7 @@ namespace MassTransit.Monitoring.Introspection
         {
             TimeSpan duration = DateTime.UtcNow - _startTimestamp;
 
-            return new Result(_probeId, _resultId, _startTimestamp, duration, _host, base.Build());
+            return new Result(_probeId, _resultId, _startTimestamp, duration, _host, Build());
         }
 
 

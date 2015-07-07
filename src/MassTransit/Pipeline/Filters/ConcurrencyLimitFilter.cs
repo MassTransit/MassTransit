@@ -43,7 +43,7 @@ namespace MassTransit.Pipeline.Filters
                 _limit.Dispose();
         }
 
-        async Task IProbeSite.Probe(ProbeContext context)
+        async void IProbeSite.Probe(ProbeContext context)
         {
             ProbeContext scope = context.CreateFilterScope("concurrencyLimit");
             scope.Add("limit", _concurrencyLimit);

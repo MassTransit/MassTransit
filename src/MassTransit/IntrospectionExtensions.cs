@@ -15,7 +15,6 @@ namespace MassTransit
     using System.IO;
     using System.Text;
     using System.Threading;
-    using System.Threading.Tasks;
     using Monitoring.Introspection;
     using Monitoring.Introspection.Contracts;
     using Newtonsoft.Json;
@@ -24,11 +23,11 @@ namespace MassTransit
 
     public static class IntrospectionExtensions
     {
-        public static async Task<ProbeResult> GetProbeResult(this IProbeSite probeSite, CancellationToken cancellationToken = default(CancellationToken))
+        public static ProbeResult GetProbeResult(this IProbeSite probeSite, CancellationToken cancellationToken = default(CancellationToken))
         {
             var builder = new ProbeResultBuilder(NewId.NextGuid(), cancellationToken);
 
-            await probeSite.Probe(builder);
+            probeSite.Probe(builder);
 
             return ((IProbeResultBuilder)builder).Build();
         }
