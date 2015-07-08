@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -45,22 +45,19 @@ namespace MassTransit.Serialization.JsonConverters
 
         public override bool CanConvert(Type objectType)
         {
-            return IsList(objectType) || IsArray(objectType);
-        }
+            if (objectType.IsGenericType
+                && (objectType.GetGenericTypeDefinition() == typeof(IList<>) || objectType.GetGenericTypeDefinition() == typeof(List<>)))
+                return true;
 
-        static bool IsArray(Type objectType)
-        {
-            // leave byte arrays alone, okay?
-            if (objectType.IsArray && objectType.HasElementType && objectType.GetElementType() == typeof(byte))
-                return false;
+            if (objectType.IsArray)
+            {
+                if (objectType.HasElementType && objectType.GetElementType() == typeof(byte))
+                    return false;
 
-            return (objectType.IsArray && objectType.HasInterface<IEnumerable>());
-        }
+                return objectType.HasInterface<IEnumerable>();
+            }
 
-        static bool IsList(Type objectType)
-        {
-            return objectType.IsGenericType && (objectType.GetGenericTypeDefinition() == typeof(IList<>)
-                || objectType.GetGenericTypeDefinition() == typeof(List<>));
+            return false;
         }
     }
 }
