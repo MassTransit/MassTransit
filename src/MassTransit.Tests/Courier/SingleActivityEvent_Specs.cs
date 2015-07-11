@@ -30,7 +30,7 @@ namespace MassTransit.Tests.Courier
         Guid _trackingNumber;
 
         [TestFixtureSetUp]
-        public async void Should_publish_the_completed_event()
+        public async Task Should_publish_the_completed_event()
         {
             _completed = SubscribeHandler<RoutingSlipCompleted>();
             _activityCompleted = SubscribeHandler<RoutingSlipActivityCompleted>();
@@ -58,7 +58,7 @@ namespace MassTransit.Tests.Courier
         }
 
         [Test]
-        public async void Should_receive_the_routing_slip_activity_completed_event()
+        public async Task Should_receive_the_routing_slip_activity_completed_event()
         {
             ConsumeContext<RoutingSlipActivityCompleted> context = await _activityCompleted;
 
@@ -66,7 +66,7 @@ namespace MassTransit.Tests.Courier
         }
 
         [Test]
-        public async void Should_receive_the_routing_slip_activity_log()
+        public async Task Should_receive_the_routing_slip_activity_log()
         {
             ConsumeContext<RoutingSlipActivityCompleted> context = await _activityCompleted;
 
@@ -74,7 +74,7 @@ namespace MassTransit.Tests.Courier
         }
 
         [Test]
-        public async void Should_receive_the_routing_slip_activity_variable()
+        public async Task Should_receive_the_routing_slip_activity_variable()
         {
             ConsumeContext<RoutingSlipActivityCompleted> context = await _activityCompleted;
 
@@ -82,7 +82,7 @@ namespace MassTransit.Tests.Courier
         }
 
         [Test]
-        public async void Should_receive_the_routing_slip_completed_event()
+        public async Task Should_receive_the_routing_slip_completed_event()
         {
             ConsumeContext<RoutingSlipCompleted> context = await _completed;
 
@@ -90,7 +90,7 @@ namespace MassTransit.Tests.Courier
         }
 
         [Test]
-        public async void Should_receive_the_routing_slip_timestamps()
+        public async Task Should_receive_the_routing_slip_timestamps()
         {
             ConsumeContext<RoutingSlipActivityCompleted> context = await _activityCompleted;
             ConsumeContext<RoutingSlipCompleted> completeContext = await _completed;
@@ -101,7 +101,7 @@ namespace MassTransit.Tests.Courier
         }
 
         [Test]
-        public async void Should_receive_the_routing_slip_variable()
+        public async Task Should_receive_the_routing_slip_variable()
         {
             ConsumeContext<RoutingSlipCompleted> context = await _completed;
 

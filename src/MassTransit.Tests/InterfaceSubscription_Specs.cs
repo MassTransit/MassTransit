@@ -22,7 +22,7 @@ namespace MassTransit.Tests
         InMemoryTestFixture
     {
         [Test]
-        public async void Should_deliver_the_message_to_an_both_interested_consumers()
+        public async Task Should_deliver_the_message_to_an_both_interested_consumers()
         {
             Task<ConsumeContext<FirstMessageContract>> first = SubscribeHandler<FirstMessageContract>();
             Task<ConsumeContext<SecondMessageContract>> second = SubscribeHandler<SecondMessageContract>();
@@ -38,7 +38,7 @@ namespace MassTransit.Tests
         }
 
         [Test]
-        public async void Should_deliver_the_message_to_an_interested_consumer()
+        public async Task Should_deliver_the_message_to_an_interested_consumer()
         {
             Task<ConsumeContext<FirstMessageContract>> first = SubscribeHandler<FirstMessageContract>();
 

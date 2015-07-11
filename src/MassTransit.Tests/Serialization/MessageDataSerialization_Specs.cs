@@ -1,6 +1,7 @@
 ﻿namespace MassTransit.Tests.Serialization
 {
     using System;
+    using System.Threading.Tasks;
     using MassTransit.MessageData;
     using MassTransit.Serialization;
     using MessageData;
@@ -25,7 +26,7 @@
         }
 
         [Test]
-        public async void Should_handle_a_string_null()
+        public async Task Should_handle_a_string_null()
         {
             var repository = new InMemoryMessageDataRepository();
 

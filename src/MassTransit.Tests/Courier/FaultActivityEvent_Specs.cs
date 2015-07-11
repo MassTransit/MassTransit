@@ -33,7 +33,7 @@ namespace MassTransit.Tests.Courier
         Task<ConsumeContext<RoutingSlipActivityCompensated>> _activityCompensated;
 
         [TestFixtureSetUp]
-        public async void Setup()
+        public async Task Setup()
         {
             _faulted = SubscribeHandler<RoutingSlipFaulted>();
             _activityCompleted = SubscribeHandler<RoutingSlipActivityCompleted>(x => x.Message.ActivityName.Equals("Test"));
@@ -69,7 +69,7 @@ namespace MassTransit.Tests.Courier
         }
 
         [Test]
-        public async void Should_compensate_completed_activity()
+        public async Task Should_compensate_completed_activity()
         {
             ConsumeContext<RoutingSlipActivityCompensated> compensated = await _activityCompensated;
             ConsumeContext<RoutingSlipActivityCompleted> completed = await _activityCompleted;
@@ -78,7 +78,7 @@ namespace MassTransit.Tests.Courier
         }
 
         [Test]
-        public async void Should_compensate_first_activity()
+        public async Task Should_compensate_first_activity()
         {
             ConsumeContext<RoutingSlipActivityCompensated> context = await _activityCompensated;
 
@@ -86,7 +86,7 @@ namespace MassTransit.Tests.Courier
         }
 
         [Test]
-        public async void Should_complete_activity_with_log()
+        public async Task Should_complete_activity_with_log()
         {
             ConsumeContext<RoutingSlipActivityCompleted> context = await _activityCompleted;
 
@@ -94,7 +94,7 @@ namespace MassTransit.Tests.Courier
         }
 
         [Test]
-        public async void Should_complete_first_activity()
+        public async Task Should_complete_first_activity()
         {
             ConsumeContext<RoutingSlipActivityCompleted> context = await _activityCompleted;
 
@@ -102,7 +102,7 @@ namespace MassTransit.Tests.Courier
         }
 
         [Test]
-        public async void Should_complete_second_activity()
+        public async Task Should_complete_second_activity()
         {
             ConsumeContext<RoutingSlipActivityCompleted> context = await _secondActivityCompleted;
 
@@ -110,7 +110,7 @@ namespace MassTransit.Tests.Courier
         }
 
         [Test]
-        public async void Should_complete_with_variable()
+        public async Task Should_complete_with_variable()
         {
             ConsumeContext<RoutingSlipActivityCompleted> context = await _activityCompleted;
 
@@ -118,7 +118,7 @@ namespace MassTransit.Tests.Courier
         }
 
         [Test]
-        public async void Should_fault_activity_with_variable()
+        public async Task Should_fault_activity_with_variable()
         {
             ConsumeContext<RoutingSlipActivityFaulted> context = await _activityFaulted;
 
@@ -126,7 +126,7 @@ namespace MassTransit.Tests.Courier
         }
 
         [Test]
-        public async void Should_fault_third_activity()
+        public async Task Should_fault_third_activity()
         {
             ConsumeContext<RoutingSlipActivityFaulted> context = await _activityFaulted;
 
@@ -134,7 +134,7 @@ namespace MassTransit.Tests.Courier
         }
 
         [Test]
-        public async void Should_fault_with_variable()
+        public async Task Should_fault_with_variable()
         {
             ConsumeContext<RoutingSlipFaulted> context = await _faulted;
 

@@ -47,7 +47,7 @@ namespace MassTransit.Tests.Pipeline
         }
 
         [Test]
-        public async void Should_invoke_post()
+        public async Task Should_invoke_post()
         {
             IConsumePipe filter = CreateConsumePipe();
 
@@ -68,7 +68,7 @@ namespace MassTransit.Tests.Pipeline
         }
 
         [Test]
-        public async void Should_invoke_post_consumer()
+        public async Task Should_invoke_post_consumer()
         {
             IConsumePipe filter = CreateConsumePipe();
 
@@ -89,7 +89,7 @@ namespace MassTransit.Tests.Pipeline
         }
 
         [Test]
-        public async void Should_invoke_pre()
+        public async Task Should_invoke_pre()
         {
             IConsumePipe filter = CreateConsumePipe();
 

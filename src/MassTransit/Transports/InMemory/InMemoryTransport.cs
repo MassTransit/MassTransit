@@ -57,7 +57,7 @@ namespace MassTransit.Transports.InMemory
             _scheduler.Dispose();
         }
 
-        public async void Probe(ProbeContext context)
+        public void Probe(ProbeContext context)
         {
             ProbeContext scope = context.CreateScope("transport");
             scope.Set(new

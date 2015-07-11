@@ -21,7 +21,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         RabbitMqTestFixture
     {
         [Test]
-        public async void Should_call_the_ack_method_upon_delivery()
+        public async Task Should_call_the_ack_method_upon_delivery()
         {
             await InputQueueSendEndpoint.Send(new A
             {

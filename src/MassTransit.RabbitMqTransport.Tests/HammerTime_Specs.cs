@@ -46,7 +46,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         }
 
         [Test]
-        public async void Should_end_well()
+        public async Task Should_end_well()
         {
             var timer = Stopwatch.StartNew();
 

@@ -15,7 +15,7 @@
         InMemoryTestFixture
     {
         [Test]
-        public async void Should_invoke_the_exception_after_send_failure()
+        public async Task Should_invoke_the_exception_after_send_failure()
         {
             var observer = new Observer();
             using (Bus.ConnectPublishObserver(observer))
@@ -27,7 +27,7 @@
         }
 
         [Test]
-        public async void Should_invoke_the_observer_after_send()
+        public async Task Should_invoke_the_observer_after_send()
         {
             var observer = new Observer();
             using (Bus.ConnectPublishObserver(observer))
@@ -39,7 +39,7 @@
         }
 
         [Test]
-        public async void Should_invoke_the_observer_prior_to_send()
+        public async Task Should_invoke_the_observer_prior_to_send()
         {
             var observer = new Observer();
             using (Bus.ConnectPublishObserver(observer))
@@ -51,7 +51,7 @@
         }
 
         [Test]
-        public async void Should_not_invoke_post_sent_on_exception()
+        public async Task Should_not_invoke_post_sent_on_exception()
         {
             var observer = new Observer();
             using (Bus.ConnectPublishObserver(observer))

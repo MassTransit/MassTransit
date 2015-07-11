@@ -29,7 +29,7 @@ namespace MassTransit.Tests.MessageData
             InMemoryTestFixture
         {
             [Test]
-            public async void Should_load_the_data_from_the_repository()
+            public async Task Should_load_the_data_from_the_repository()
             {
                 string data = NewId.NextGuid().ToString();
 
@@ -47,7 +47,7 @@ namespace MassTransit.Tests.MessageData
             }
 
             [Test]
-            public async void Should_be_able_to_write_bytes_too ()
+            public async Task Should_be_able_to_write_bytes_too ()
             {
                 byte[] data = NewId.NextGuid().ToByteArray();
 
@@ -94,7 +94,7 @@ namespace MassTransit.Tests.MessageData
             InMemoryTestFixture
         {
             [Test]
-            public async void Should_load_the_data_from_the_repository()
+            public async Task Should_load_the_data_from_the_repository()
             {
                 string data = NewId.NextGuid().ToString();
                 Uri dataAddress;
@@ -135,7 +135,7 @@ namespace MassTransit.Tests.MessageData
             InMemoryTestFixture
         {
             [Test]
-            public async void Should_load_the_data_from_the_repository()
+            public async Task Should_load_the_data_from_the_repository()
             {
                 Guid nextGuid = NewId.NextGuid();
                 string data = nextGuid.ToString();

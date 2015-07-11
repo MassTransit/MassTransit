@@ -13,6 +13,7 @@
 namespace MassTransit.Tests.Saga
 {
     using System;
+    using System.Threading.Tasks;
     using MassTransit.Saga;
     using Messages;
     using NUnit.Framework;
@@ -25,7 +26,7 @@ namespace MassTransit.Tests.Saga
         InMemoryTestFixture
     {
         [Test]
-        public async void The_saga_should_be_created_when_an_initiating_message_is_received()
+        public async Task The_saga_should_be_created_when_an_initiating_message_is_received()
         {
             var message = new InitiateSimpleSaga(_sagaId);
 

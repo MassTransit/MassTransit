@@ -16,6 +16,7 @@ namespace MassTransit.RabbitMqTransport
     using System.Collections.Generic;
     using System.Globalization;
     using System.IO;
+    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using Contexts;
@@ -60,7 +61,6 @@ namespace MassTransit.RabbitMqTransport
                         _log.DebugFormat("Sending {0} to {1}", TypeMetadataCache<T>.ShortName, _sendSettings.ExchangeName);
 
                     IBasicProperties properties = modelContext.Model.CreateBasicProperties();
-                    properties.Headers = new Dictionary<string, object>();
 
                     var context = new RabbitMqSendContextImpl<T>(properties, message, _sendSettings, cancelSend);
 
@@ -68,6 +68,9 @@ namespace MassTransit.RabbitMqTransport
                     {
                         await pipe.Send(context);
 
+                        properties.Headers = context.Headers
+                            .Where(x => x.Value != null && (x.Value is string || x.Value.GetType().IsValueType))
+                            .ToDictionary(entry => entry.Key, entry => entry.Value);
                         properties.Headers["Content-Type"] = context.ContentType.MediaType;
 
                         properties.SetPersistent(context.Durable);

@@ -25,7 +25,7 @@ namespace MassTransit.Tests.Diagnostics
         InMemoryTestFixture
     {
         [Test]
-        public async void Should_update_performance_counters()
+        public async Task Should_update_performance_counters()
         {
             _completed = GetTask<bool>();
             var receiveObserver = new PerformanceCounterReceiveObserver();

@@ -63,7 +63,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
 
         [Test]
-        public async void Should_receive_byte_array_of_bigness()
+        public async Task Should_receive_byte_array_of_bigness()
         {
             var random = new Random();
             var bytes = new byte[512];

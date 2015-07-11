@@ -56,7 +56,7 @@ namespace MassTransit.Tests
         }
 
         [Test]
-        public async void Should_have_the_correlation_id()
+        public async Task Should_have_the_correlation_id()
         {
             ConsumeContext<PingMessage> context = await _errorHandler;
 
@@ -64,7 +64,7 @@ namespace MassTransit.Tests
         }
 
         [Test]
-        public async void Should_have_the_original_destination_address()
+        public async Task Should_have_the_original_destination_address()
         {
             ConsumeContext<PingMessage> context = await _errorHandler;
 
@@ -72,7 +72,7 @@ namespace MassTransit.Tests
         }
 
         [Test]
-        public async void Should_have_the_original_fault_address()
+        public async Task Should_have_the_original_fault_address()
         {
             ConsumeContext<PingMessage> context = await _errorHandler;
 
@@ -80,7 +80,7 @@ namespace MassTransit.Tests
         }
 
         [Test]
-        public async void Should_have_the_original_response_address()
+        public async Task Should_have_the_original_response_address()
         {
             ConsumeContext<PingMessage> context = await _errorHandler;
 
@@ -88,7 +88,7 @@ namespace MassTransit.Tests
         }
 
         [Test]
-        public async void Should_have_the_original_source_address()
+        public async Task Should_have_the_original_source_address()
         {
             ConsumeContext<PingMessage> context = await _errorHandler;
 
@@ -96,7 +96,7 @@ namespace MassTransit.Tests
         }
 
         [Test]
-        public async void Should_move_the_message_to_the_error_queue()
+        public async Task Should_move_the_message_to_the_error_queue()
         {
             await _errorHandler;
         }

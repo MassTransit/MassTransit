@@ -32,7 +32,7 @@ namespace MassTransit.Transports
             _faultPipe = faultPipe;
         }
 
-        async void IProbeSite.Probe(ProbeContext context)
+        void IProbeSite.Probe(ProbeContext context)
         {
         }
 

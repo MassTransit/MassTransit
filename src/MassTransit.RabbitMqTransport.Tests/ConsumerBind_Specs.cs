@@ -38,13 +38,13 @@ namespace MassTransit.RabbitMqTransport.Tests
             ConsumerBindingTestFixture
         {
             [Test]
-            public async void Should_receive_the_message_a()
+            public async Task Should_receive_the_message_a()
             {
                 await _testConsumer.A.Task;
             }
 
             [Test]
-            public async void Should_receive_the_message_b()
+            public async Task Should_receive_the_message_b()
             {
                 await _testConsumer.B.Task;
             }
@@ -75,13 +75,13 @@ namespace MassTransit.RabbitMqTransport.Tests
             ConsumerBindingTestFixture
         {
             [Test]
-            public async void Should_receive_the_message_a()
+            public async Task Should_receive_the_message_a()
             {
                 await _testConsumer.A.Task;
             }
 
             [Test]
-            public async void Should_receive_the_message_b()
+            public async Task Should_receive_the_message_b()
             {
                 await _testConsumer.B.Task;
             }
@@ -109,13 +109,13 @@ namespace MassTransit.RabbitMqTransport.Tests
             ConsumerBindingTestFixture
         {
             [Test]
-            public async void Should_receive_the_message_a()
+            public async Task Should_receive_the_message_a()
             {
                 await _a;
             }
 
             [Test]
-            public async void Should_receive_the_message_b()
+            public async Task Should_receive_the_message_b()
             {
                 await _b;
             }
@@ -143,7 +143,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             ConsumerBindingTestFixture
         {
             [Test]
-            public async void Should_receive_the_message_a()
+            public async Task Should_receive_the_message_a()
             {
                 Guid? sagaId = await _repository.ShouldContainSaga(_sagaId, TestTimeout);
                 Assert.IsTrue(sagaId.HasValue);
@@ -154,7 +154,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             }
 
             [Test]
-            public async void Should_receive_the_message_b()
+            public async Task Should_receive_the_message_b()
             {
                 Guid? sagaId = await _repository.ShouldContainSaga(_sagaId, TestTimeout);
                 Assert.IsTrue(sagaId.HasValue);

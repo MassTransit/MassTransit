@@ -14,6 +14,7 @@ namespace MassTransit.Tests
 {
     using System;
     using System.Collections.Concurrent;
+    using System.Threading.Tasks;
     using NUnit.Framework;
     using TestFramework;
     using TestFramework.Messages;
@@ -25,7 +26,7 @@ namespace MassTransit.Tests
         InMemoryTestFixture
     {
         [Test]
-        public async void Should_be_received()
+        public async Task Should_be_received()
         {
             await _requestClient.Request(new PingMessage());
         }

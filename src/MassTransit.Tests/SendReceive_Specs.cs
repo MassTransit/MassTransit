@@ -23,7 +23,7 @@ namespace MassTransit.Tests
         InMemoryTestFixture
     {
         [Test]
-        public async void Should_receive_the_interface_of_the_message()
+        public async Task Should_receive_the_interface_of_the_message()
         {
             Task<ConsumeContext<IMessageA>> handler = SubscribeHandler<IMessageA>();
 
@@ -34,7 +34,7 @@ namespace MassTransit.Tests
         }
 
         [Test]
-        public async void Should_receive_the_interface_proxy()
+        public async Task Should_receive_the_interface_proxy()
         {
             Task<ConsumeContext<IMessageA>> handler = SubscribeHandler<IMessageA>();
 
@@ -44,7 +44,7 @@ namespace MassTransit.Tests
         }
 
         [Test]
-        public async void Should_receive_the_proper_message()
+        public async Task Should_receive_the_proper_message()
         {
             Task<ConsumeContext<MessageA>> handler = SubscribeHandler<MessageA>();
 
@@ -55,7 +55,7 @@ namespace MassTransit.Tests
         }
 
         [Test]
-        public async void Should_receive_the_proper_message_as_a()
+        public async Task Should_receive_the_proper_message_as_a()
         {
             Task<ConsumeContext<MessageA>> handler = SubscribeHandler<MessageA>();
 
@@ -66,7 +66,7 @@ namespace MassTransit.Tests
         }
 
         [Test]
-        public async void Should_receive_the_proper_message_as_a_with_request_id()
+        public async Task Should_receive_the_proper_message_as_a_with_request_id()
         {
             Task<ConsumeContext<MessageA>> handler = SubscribeHandler<MessageA>(x => x.RequestId.HasValue);
 
@@ -77,7 +77,7 @@ namespace MassTransit.Tests
         }
 
         [Test]
-        public async void Should_receive_the_proper_message_type()
+        public async Task Should_receive_the_proper_message_type()
         {
             Task<ConsumeContext<MessageA>> handler = SubscribeHandler<MessageA>();
 

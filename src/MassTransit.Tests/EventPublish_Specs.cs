@@ -24,25 +24,25 @@ namespace MassTransit.Tests
         InMemoryTestFixture
     {
         [Test]
-        public async void Should_publish_first_event()
+        public async Task Should_publish_first_event()
         {
             ConsumeContext<PingReceived> received = await _received;
         }
 
         [Test]
-        public async void Should_publish_second_event()
+        public async Task Should_publish_second_event()
         {
             ConsumeContext<PingProcessing> consumed = await _processing;
         }
 
         [Test]
-        public async void Should_publish_third_event()
+        public async Task Should_publish_third_event()
         {
             ConsumeContext<PingConsumed> consumed = await _consumed;
         }
 
         [Test]
-        public async void Should_publish_fourth_event()
+        public async Task Should_publish_fourth_event()
         {
             ConsumeContext<PingCompleted> consumed = await _completed;
         }

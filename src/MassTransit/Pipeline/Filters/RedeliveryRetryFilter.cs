@@ -33,7 +33,7 @@ namespace MassTransit.Pipeline.Filters
             _retryPolicy = retryPolicy;
         }
 
-        async void IProbeSite.Probe(ProbeContext context)
+        void IProbeSite.Probe(ProbeContext context)
         {
             ProbeContext scope = context.CreateFilterScope("retry");
             scope.Add("type", "redelivery");

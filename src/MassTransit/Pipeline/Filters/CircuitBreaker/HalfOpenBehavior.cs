@@ -61,7 +61,7 @@ namespace MassTransit.Pipeline.Filters.CircuitBreaker
             _breaker.Open(_exception, this, _timeoutEnumerator);
         }
 
-        async void IProbeSite.Probe(ProbeContext context)
+        void IProbeSite.Probe(ProbeContext context)
         {
             context.Set(new
             {

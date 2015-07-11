@@ -34,7 +34,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             RabbitMqTestFixture
         {
             [Test]
-            public async void Should_be_received()
+            public async Task Should_be_received()
             {
                 ISendEndpoint endpoint = await Bus.GetSendEndpoint(InputQueueAddress);
 
@@ -62,7 +62,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             RabbitMqTestFixture
         {
             [Test]
-            public async void Should_be_received()
+            public async Task Should_be_received()
             {
                 Task<ConsumeContext<A>> receivedA = SubscribeHandler<A>();
 
@@ -81,7 +81,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             RabbitMqTestFixture
         {
             [Test]
-            public async void Should_be_received()
+            public async Task Should_be_received()
             {
                 ISendEndpoint endpoint = await Bus.GetSendEndpoint(InputQueueAddress);
 
@@ -120,7 +120,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             RabbitMqTestFixture
         {
             [Test]
-            public async void Should_be_received()
+            public async Task Should_be_received()
             {
                 var message = new A {Id = Guid.NewGuid()};
                 await Bus.Publish(message);
@@ -146,7 +146,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             RabbitMqTestFixture
         {
             [Test]
-            public async void Should_have_the_receive_endpoint_input_address()
+            public async Task Should_have_the_receive_endpoint_input_address()
             {
                 var message = new A {Id = Guid.NewGuid()};
                 await Bus.Publish(message);
@@ -189,7 +189,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             RabbitMqTestFixture
         {
             [Test]
-            public async void Should_be_received()
+            public async Task Should_be_received()
             {
                 var message = new B {Id = Guid.NewGuid()};
 
@@ -221,7 +221,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             RabbitMqTestFixture
         {
             [Test]
-            public async void Should_not_throw_an_exception()
+            public async Task Should_not_throw_an_exception()
             {
                 var message = new UnboundMessage {Id = Guid.NewGuid()};
 
@@ -285,7 +285,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         RabbitMqTestFixture
     {
         [Test]
-        public async void Should_have_correlation_id()
+        public async Task Should_have_correlation_id()
         {
             ConsumeContext<IProxyMe> message = await _handler;
 
@@ -293,7 +293,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         }
 
         [Test]
-        public async void Should_have_integer_value()
+        public async Task Should_have_integer_value()
         {
             ConsumeContext<IProxyMe> message = await _handler;
 
@@ -301,13 +301,13 @@ namespace MassTransit.RabbitMqTransport.Tests
         }
 
         [Test]
-        public async void Should_have_received_message()
+        public async Task Should_have_received_message()
         {
             await _handler;
         }
 
         [Test]
-        public async void Should_have_string_value()
+        public async Task Should_have_string_value()
         {
             ConsumeContext<IProxyMe> message = await _handler;
 

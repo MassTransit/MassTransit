@@ -26,7 +26,7 @@ namespace MassTransit.Policies
             _retryContext = new NoRetryContext();
         }
 
-        async void IProbeSite.Probe(ProbeContext context)
+        void IProbeSite.Probe(ProbeContext context)
         {
             context.Set(new
             {

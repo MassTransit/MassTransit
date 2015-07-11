@@ -57,7 +57,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
 
         [Test]
-        public async void Should_be_received_by_the_queue()
+        public async Task Should_be_received_by_the_queue()
         {
             ConsumeContext<A> context = await _received;
 
@@ -65,7 +65,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         }
 
         [Test]
-        public async void Should_receive_the_inherited_version()
+        public async Task Should_receive_the_inherited_version()
         {
             ConsumeContext<B> context = await _receivedB;
 

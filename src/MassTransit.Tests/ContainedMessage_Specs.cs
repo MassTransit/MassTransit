@@ -25,13 +25,13 @@ namespace MassTransit.Tests
         InMemoryTestFixture
     {
         [Test]
-        public async void Should_receive_the_outer_command()
+        public async Task Should_receive_the_outer_command()
         {
             await _commandHandler;
         }
 
         [Test]
-        public async void Should_receive_the_secure_command()
+        public async Task Should_receive_the_secure_command()
         {
             var context = await _secureCommandHandler;
 

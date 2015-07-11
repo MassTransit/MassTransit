@@ -3,6 +3,7 @@
     using System;
     using System.IO;
     using System.Linq;
+    using System.Threading.Tasks;
     using MassTransit.MessageData;
     using NUnit.Framework;
 
@@ -13,7 +14,7 @@
         IMessageDataRepository _repository;
 
         [Test]
-        public async void Should_generate_the_folder_and_file()
+        public async Task Should_generate_the_folder_and_file()
         {
             var property = await _repository.PutString("Hello, World.");
 
@@ -23,7 +24,7 @@
         }
 
         [Test]
-        public async void Should_generate_time_based_folder()
+        public async Task Should_generate_time_based_folder()
         {
             var property = await _repository.PutString("Hello, World.", TimeSpan.FromDays(30));
 

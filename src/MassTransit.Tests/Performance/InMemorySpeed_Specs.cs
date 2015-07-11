@@ -27,7 +27,7 @@ namespace MassTransit.Tests.Performance
         InMemoryTestFixture
     {
         [Test]
-        public async void Should_be_wicked_fast()
+        public async Task Should_be_wicked_fast()
         {
             int limit = 50000;
             int count = 0;
@@ -72,7 +72,7 @@ namespace MassTransit.Tests.Performance
         InMemoryTestFixture
     {
         [Test]
-        public async void Should_be_also_really_fast()
+        public async Task Should_be_also_really_fast()
         {
             int limit = 50000;
             int count = 0;

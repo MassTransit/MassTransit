@@ -23,19 +23,19 @@ namespace MassTransit.Tests
         InMemoryTestFixture
     {
         [Test]
-        public async void Should_receive_the_credentials_alone()
+        public async Task Should_receive_the_credentials_alone()
         {
             await _credentialsHandler;
         }
 
         [Test]
-        public async void Should_receive_the_secure_command()
+        public async Task Should_receive_the_secure_command()
         {
             await _commandHandler;
         }
 
         [Test]
-        public async void Should_receive_the_user_credentials()
+        public async Task Should_receive_the_user_credentials()
         {
             await _credentials.Task;
         }

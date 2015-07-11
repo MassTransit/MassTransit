@@ -15,6 +15,7 @@ namespace MassTransit.Tests.Saga.Locator
     using System;
     using System.Diagnostics;
     using System.Linq.Expressions;
+    using System.Threading.Tasks;
     using MassTransit.Saga;
     using Messages;
     using NUnit.Framework;
@@ -26,7 +27,7 @@ namespace MassTransit.Tests.Saga.Locator
         InMemoryTestFixture
     {
         [Test]
-        public async void Matching_by_property_should_be_happy()
+        public async Task Matching_by_property_should_be_happy()
         {
             Expression<Func<SimpleSaga, ObservableSagaMessage, bool>> selector = (s, m) => s.Name == m.Name;
 
@@ -40,7 +41,7 @@ namespace MassTransit.Tests.Saga.Locator
         }
 
         [Test]
-        public async void The_saga_expression_should_be_converted_down_to_a_saga_only_filter()
+        public async Task The_saga_expression_should_be_converted_down_to_a_saga_only_filter()
         {
             Expression<Func<SimpleSaga, InitiateSimpleSaga, bool>> selector =
                 (s, m) => s.CorrelationId == m.CorrelationId;

@@ -40,7 +40,7 @@ namespace MassTransit.Pipeline.Filters
             return next.Send(context);
         }
 
-        async void IProbeSite.Probe(ProbeContext context)
+        void IProbeSite.Probe(ProbeContext context)
         {
             context.CreateFilterScope("last");
         }

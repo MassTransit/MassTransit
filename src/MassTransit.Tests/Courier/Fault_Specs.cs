@@ -26,7 +26,7 @@ namespace MassTransit.Tests.Courier
         InMemoryActivityTestFixture
     {
         [Test]
-        public async void Should_capture_a_thrown_exception()
+        public async Task Should_capture_a_thrown_exception()
         {
             Task<ConsumeContext<RoutingSlipFaulted>> handled = SubscribeHandler<RoutingSlipFaulted>();
 
@@ -41,7 +41,7 @@ namespace MassTransit.Tests.Courier
         }
 
         [Test]
-        public async void Should_compensate_both_activities()
+        public async Task Should_compensate_both_activities()
         {
             Task<ConsumeContext<RoutingSlipFaulted>> handled = SubscribeHandler<RoutingSlipFaulted>();
 
@@ -65,7 +65,7 @@ namespace MassTransit.Tests.Courier
         }
 
         [Test]
-        public async void Should_handle_the_failed_to_compensate_event()
+        public async Task Should_handle_the_failed_to_compensate_event()
         {
             Task<ConsumeContext<RoutingSlipActivityCompensationFailed>> handledCompensationFailure =
                 SubscribeHandler<RoutingSlipActivityCompensationFailed>();
@@ -90,7 +90,7 @@ namespace MassTransit.Tests.Courier
         }
 
         [Test]
-        public async void Should_publish_the_faulted_routing_slip_event()
+        public async Task Should_publish_the_faulted_routing_slip_event()
         {
             ActivityTestContext testActivity = GetActivityContext<TestActivity>();
             ActivityTestContext secondTestActivity = GetActivityContext<SecondTestActivity>();

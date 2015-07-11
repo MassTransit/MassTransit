@@ -44,7 +44,7 @@ namespace MassTransit.RabbitMqTransport
             _receiveObservers = new ReceiveObservable();
         }
 
-        async void IProbeSite.Probe(ProbeContext context)
+        void IProbeSite.Probe(ProbeContext context)
         {
             ProbeContext scope = context.CreateScope("transport");
             scope.Add("type", "RabbitMQ");

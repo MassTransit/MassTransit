@@ -22,7 +22,7 @@ namespace MassTransit.Tests
         InMemoryTestFixture
     {
         [Test]
-        public async void Should_be_able_to_read_xml_when_using_json()
+        public async Task Should_be_able_to_read_xml_when_using_json()
         {
             _responseReceived = SubscribeHandler<B>();
 

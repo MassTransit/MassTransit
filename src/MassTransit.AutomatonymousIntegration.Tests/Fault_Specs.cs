@@ -25,7 +25,7 @@ namespace MassTransit.AutomatonymousTests
         InMemoryTestFixture
     {
         [Test]
-        public async void Should_be_able_to_observe_its_own_event_fault()
+        public async Task Should_be_able_to_observe_its_own_event_fault()
         {
             var message = new Initialize();
             await InputQueueSendEndpoint.Send(message);
@@ -43,7 +43,7 @@ namespace MassTransit.AutomatonymousTests
         }
 
         [Test]
-        public async void Should_be_received_as_a_fault_message()
+        public async Task Should_be_received_as_a_fault_message()
         {
             var message = new Start();
 
@@ -58,7 +58,7 @@ namespace MassTransit.AutomatonymousTests
         }
 
         [Test]
-        public async void Should_observe_the_fault_message()
+        public async Task Should_observe_the_fault_message()
         {
             var message = new Initialize();
 

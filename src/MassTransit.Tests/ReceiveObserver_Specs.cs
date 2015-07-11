@@ -26,7 +26,7 @@ namespace MassTransit.Tests
             InMemoryTestFixture
         {
             [Test]
-            public async void Should_call_the_post_receive_notification()
+            public async Task Should_call_the_post_receive_notification()
             {
                 var observer = new ReceiveObserver(GetTask<ReceiveContext>(), GetTask<ReceiveContext>(), GetTask<Tuple<ReceiveContext, Exception>>(), GetTask<ConsumeContext>(), GetTask<ConsumeContext>());
 
@@ -38,7 +38,7 @@ namespace MassTransit.Tests
             }
 
             [Test]
-            public async void Should_call_the_pre_receive_notification()
+            public async Task Should_call_the_pre_receive_notification()
             {
                 var observer = new ReceiveObserver(GetTask<ReceiveContext>(), GetTask<ReceiveContext>(), GetTask<Tuple<ReceiveContext, Exception>>(), GetTask<ConsumeContext>(), GetTask<ConsumeContext>());
 
@@ -61,7 +61,7 @@ namespace MassTransit.Tests
             InMemoryTestFixture
         {
             [Test]
-            public async void Should_call_the_pre_receive_notification()
+            public async Task Should_call_the_pre_receive_notification()
             {
                 var observer = new ReceiveObserver(GetTask<ReceiveContext>(), GetTask<ReceiveContext>(), GetTask<Tuple<ReceiveContext, Exception>>(), GetTask<ConsumeContext>(), GetTask<ConsumeContext>());
 
@@ -73,7 +73,7 @@ namespace MassTransit.Tests
             }
 
             [Test]
-            public async void Should_call_the_receive_fault_notification()
+            public async Task Should_call_the_receive_fault_notification()
             {
                 var observer = new ReceiveObserver(GetTask<ReceiveContext>(), GetTask<ReceiveContext>(), GetTask<Tuple<ReceiveContext, Exception>>(), GetTask<ConsumeContext>(), GetTask<ConsumeContext>());
 

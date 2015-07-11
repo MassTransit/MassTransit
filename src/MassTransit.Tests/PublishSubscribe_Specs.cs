@@ -25,7 +25,7 @@ namespace MassTransit.Tests
         InMemoryTestFixture
     {
         [Test]
-        public async void Should_be_received_properly()
+        public async Task Should_be_received_properly()
         {
             var message = new PingMessage();
             await Bus.Publish(message);
@@ -47,7 +47,7 @@ namespace MassTransit.Tests
         InMemoryTestFixture
     {
         [Test]
-        public async void Should_be_received_properly()
+        public async Task Should_be_received_properly()
         {
             object message = new PingMessage();
             await Bus.Publish(message);
@@ -69,7 +69,7 @@ namespace MassTransit.Tests
         InMemoryTestFixture
     {
         [Test]
-        public async void Should_be_received_properly()
+        public async Task Should_be_received_properly()
         {
             var message = new PingMessage();
             await Bus.Publish(message, Pipe.New<PublishContext>(x => x.UseExecute(v => v.RequestId = _requestId)));
@@ -95,7 +95,7 @@ namespace MassTransit.Tests
         InMemoryTestFixture
     {
         [Test]
-        public async void Should_be_received_properly()
+        public async Task Should_be_received_properly()
         {
             var message = new PingMessage();
             await Bus.Publish(message, Pipe.New<PublishContext<PingMessage>>(x => x.UseExecute(v => v.RequestId = _requestId)));
@@ -121,7 +121,7 @@ namespace MassTransit.Tests
         InMemoryTestFixture
     {
         [Test]
-        public async void Should_be_received_properly()
+        public async Task Should_be_received_properly()
         {
             object message = new PingMessage();
             await Bus.Publish(message, Pipe.New<PublishContext>(x => x.UseExecute(v => v.RequestId = _requestId)));
@@ -147,7 +147,7 @@ namespace MassTransit.Tests
         InMemoryTestFixture
     {
         [Test]
-        public async void Should_be_received_properly()
+        public async Task Should_be_received_properly()
         {
             await Bus.Publish<PingMessage>(new {});
 
@@ -168,7 +168,7 @@ namespace MassTransit.Tests
         InMemoryTestFixture
     {
         [Test]
-        public async void Should_be_received_properly()
+        public async Task Should_be_received_properly()
         {
             await Bus.Publish<PingMessage>(new {}, Pipe.New<PublishContext>(x => x.UseExecute(v => v.RequestId = _requestId)));
 

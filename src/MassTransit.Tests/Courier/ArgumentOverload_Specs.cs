@@ -30,7 +30,7 @@ namespace MassTransit.Tests.Courier
         Guid _trackingNumber;
 
         [TestFixtureSetUp]
-        public async void Should_publish_the_completed_event()
+        public async Task Should_publish_the_completed_event()
         {
             _completed = SubscribeHandler<RoutingSlipCompleted>();
             _activityCompleted = SubscribeHandler<RoutingSlipActivityCompleted>();
@@ -59,7 +59,7 @@ namespace MassTransit.Tests.Courier
         }
 
         [Test]
-        public async void Should_override_variables_in_the_routing_slip()
+        public async Task Should_override_variables_in_the_routing_slip()
         {
             ConsumeContext<RoutingSlipCompleted> context = await _completed;
 
@@ -69,7 +69,7 @@ namespace MassTransit.Tests.Courier
         }
 
         [Test]
-        public async void Should_receive_the_routing_slip_activity_completed_event()
+        public async Task Should_receive_the_routing_slip_activity_completed_event()
         {
             ConsumeContext<RoutingSlipActivityCompleted> context = await _activityCompleted;
 
@@ -86,7 +86,7 @@ namespace MassTransit.Tests.Courier
         Guid _trackingNumber;
 
         [TestFixtureSetUp]
-        public async void Should_publish_the_completed_event()
+        public async Task Should_publish_the_completed_event()
         {
             _completed = SubscribeHandler<RoutingSlipCompleted>();
             _activityCompleted = SubscribeHandler<RoutingSlipActivityCompleted>();
@@ -114,7 +114,7 @@ namespace MassTransit.Tests.Courier
         }
 
         [Test]
-        public async void Should_use_variables_in_the_routing_slip()
+        public async Task Should_use_variables_in_the_routing_slip()
         {
             ConsumeContext<RoutingSlipCompleted> context = await _completed;
 
@@ -124,7 +124,7 @@ namespace MassTransit.Tests.Courier
         }
 
         [Test]
-        public async void Should_receive_the_routing_slip_activity_completed_event()
+        public async Task Should_receive_the_routing_slip_activity_completed_event()
         {
             ConsumeContext<RoutingSlipActivityCompleted> context = await _activityCompleted;
 

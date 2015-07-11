@@ -42,7 +42,7 @@ namespace MassTransit.Tests.Courier
         }
 
         [Test]
-        public async void Should_complete_the_additional_item()
+        public async Task Should_complete_the_additional_item()
         {
             Guid trackingNumber = Guid.NewGuid();
 
@@ -78,7 +78,7 @@ namespace MassTransit.Tests.Courier
         }
 
         [Test]
-        public async void Should_continue_with_the_source_itinerary()
+        public async Task Should_continue_with_the_source_itinerary()
         {
             Guid trackingNumber = Guid.NewGuid();
 
@@ -110,7 +110,7 @@ namespace MassTransit.Tests.Courier
         }
 
         [Test]
-        public async void Should_immediately_complete_an_empty_list()
+        public async Task Should_immediately_complete_an_empty_list()
         {
             Guid trackingNumber = Guid.NewGuid();
 

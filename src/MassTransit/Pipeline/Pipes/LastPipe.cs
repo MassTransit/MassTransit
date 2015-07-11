@@ -52,7 +52,7 @@ namespace MassTransit.Pipeline.Pipes
         class Last :
             IPipe<T>
         {
-            async void IProbeSite.Probe(ProbeContext context)
+            void IProbeSite.Probe(ProbeContext context)
             {
             }
 

@@ -45,7 +45,7 @@ namespace MassTransit.Saga
             return Task.FromResult(_sagas.Where(query).Select(x => x.Instance.CorrelationId));
         }
 
-        async void IProbeSite.Probe(ProbeContext context)
+        void IProbeSite.Probe(ProbeContext context)
         {
             ProbeContext scope = context.CreateScope("sagaRepository");
             scope.Set(new

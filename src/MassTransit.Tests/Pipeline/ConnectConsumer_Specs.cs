@@ -13,6 +13,7 @@
 namespace MassTransit.Tests.Pipeline
 {
     using System;
+    using System.Threading.Tasks;
     using MassTransit.Pipeline;
     using NUnit.Framework;
     using TestFramework;
@@ -24,7 +25,7 @@ namespace MassTransit.Tests.Pipeline
         MessageTestFixture
     {
         [Test]
-        public async void Should_receive_a_message()
+        public async Task Should_receive_a_message()
         {
             IConsumePipe filter = CreateConsumePipe();
 
@@ -54,7 +55,7 @@ namespace MassTransit.Tests.Pipeline
         }
 
         [Test]
-        public async void Should_receive_a_message_via_object()
+        public async Task Should_receive_a_message_via_object()
         {
             IConsumePipe filter = CreateConsumePipe();
 
@@ -72,7 +73,7 @@ namespace MassTransit.Tests.Pipeline
         }
 
         [Test]
-        public async void Should_receive_a_two_messages()
+        public async Task Should_receive_a_two_messages()
         {
             IConsumePipe filter = CreateConsumePipe();
 

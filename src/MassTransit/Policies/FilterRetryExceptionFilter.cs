@@ -27,7 +27,7 @@ namespace MassTransit.Policies
             _filter = filter;
         }
 
-        async void IProbeSite.Probe(ProbeContext context)
+        void IProbeSite.Probe(ProbeContext context)
         {
             ProbeContext scope = context.CreateScope("filter");
         }

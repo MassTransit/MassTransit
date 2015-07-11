@@ -29,7 +29,7 @@ namespace MassTransit.AutomatonymousTests
         InMemoryTestFixture
     {
         [Test]
-        public async void Should_have_the_state_machine()
+        public async Task Should_have_the_state_machine()
         {
             Guid correlationId = Guid.NewGuid();
 
@@ -57,7 +57,7 @@ namespace MassTransit.AutomatonymousTests
         }
 
         [Test]
-        public async void Should_have_removed_the_state_machine()
+        public async Task Should_have_removed_the_state_machine()
         {
             Guid correlationId = Guid.NewGuid();
 

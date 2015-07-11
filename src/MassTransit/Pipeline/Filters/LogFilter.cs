@@ -31,7 +31,7 @@ namespace MassTransit.Pipeline.Filters
             _formatter = formatter;
         }
 
-        async void IProbeSite.Probe(ProbeContext context)
+        void IProbeSite.Probe(ProbeContext context)
         {
             context.CreateFilterScope("log");
         }

@@ -25,7 +25,7 @@ namespace MassTransit.Tests
         InMemoryTestFixture
     {
         [Test]
-        public async void Should_receive_the_response()
+        public async Task Should_receive_the_response()
         {
             PongMessage message = await _response;
 

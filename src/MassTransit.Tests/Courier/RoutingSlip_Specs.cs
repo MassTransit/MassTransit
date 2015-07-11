@@ -25,7 +25,7 @@ namespace MassTransit.Tests.Courier
         InMemoryTestFixture
     {
         [Test]
-        public async void Should_be_properly_serialized_as_a_message()
+        public async Task Should_be_properly_serialized_as_a_message()
         {
             var builder = new RoutingSlipBuilder(NewId.NextGuid());
             builder.AddActivity("test", new Uri("loopback://localhost/execute_testactivity"), new {});

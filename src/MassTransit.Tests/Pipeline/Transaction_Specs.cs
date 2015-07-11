@@ -81,7 +81,7 @@ namespace MassTransit.Tests.Pipeline
         }
 
         [Test]
-        public async void Should_properly_succeed()
+        public async Task Should_properly_succeed()
         {
             IPipe<TestPipeContext> pipe = Pipe.New<TestPipeContext>(x =>
             {

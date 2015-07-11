@@ -13,6 +13,7 @@
 namespace MassTransit.Tests.Pipeline
 {
     using System.Threading;
+    using System.Threading.Tasks;
     using MassTransit.Pipeline;
     using NUnit.Framework;
     using Shouldly;
@@ -24,7 +25,7 @@ namespace MassTransit.Tests.Pipeline
     public class Specifying_a_circuit_breaker
     {
         [Test, Explicit]
-        public async void Should_allow_the_first_call()
+        public async Task Should_allow_the_first_call()
         {
             int count = 0;
             IPipe<ConsumeContext<A>> pipe = Pipe.New<ConsumeContext<A>>(x =>
