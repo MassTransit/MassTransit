@@ -45,7 +45,7 @@ namespace Automatonymous.SubscriptionConfigurators
         public void Configure(IReceiveEndpointBuilder builder)
         {
             var connector = new StateMachineConnector<TInstance>(_stateMachine, _repository);
-            connector.Connect(builder, _repository);
+            connector.ConnectSaga(builder, _repository);
         }
     }
 }

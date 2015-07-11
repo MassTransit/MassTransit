@@ -23,14 +23,14 @@ namespace MassTransit.Pipeline
         public static ConnectHandle ConnectHandler<T>(this IConsumePipe filter, MessageHandler<T> handler)
             where T : class
         {
-            return HandlerConnectorCache<T>.Connector.Connect(filter, handler);
+            return HandlerConnectorCache<T>.Connector.ConnectHandler(filter, handler);
         }
 
         public static ConnectHandle ConnectConsumer<T>(this IConsumePipeConnector connector, IConsumerFactory<T> consumerFactory,
             params IPipeSpecification<ConsumerConsumeContext<T>>[] pipeSpecifications)
             where T : class
         {
-            return ConsumerConnectorCache<T>.Connector.Connect(connector, consumerFactory, pipeSpecifications);
+            return ConsumerConnectorCache<T>.Connector.ConnectConsumer(connector, consumerFactory, pipeSpecifications);
         }
 
         public static ConnectHandle ConnectConsumer<T>(this IConsumePipeConnector filter,
@@ -39,9 +39,9 @@ namespace MassTransit.Pipeline
         {
             var consumerFactory = new DefaultConstructorConsumerFactory<T>();
 
-            ConsumerConnector connector = ConsumerConnectorCache.GetConsumerConnector<T>();
+            IConsumerConnector connector = ConsumerConnectorCache.GetConsumerConnector<T>();
 
-            return connector.Connect(filter, consumerFactory, pipeSpecifications);
+            return connector.ConnectConsumer(filter, consumerFactory, pipeSpecifications);
         }
 
         public static ConnectHandle ConnectConsumer<T>(this IConsumePipeConnector filter, Func<T> factoryMethod, params IPipeSpecification<ConsumerConsumeContext<T>>[] specifications)
@@ -49,9 +49,9 @@ namespace MassTransit.Pipeline
         {
             var consumerFactory = new DelegateConsumerFactory<T>(factoryMethod);
 
-            ConsumerConnector connector = ConsumerConnectorCache.GetConsumerConnector<T>();
+            IConsumerConnector connector = ConsumerConnectorCache.GetConsumerConnector<T>();
 
-            return connector.Connect(filter, consumerFactory, specifications);
+            return connector.ConnectConsumer(filter, consumerFactory, specifications);
         }
 
         public static ConnectHandle ConnectConsumer(this IConsumePipeConnector filter, Type consumerType, Func<Type, object> objectFactory)
@@ -62,12 +62,12 @@ namespace MassTransit.Pipeline
         public static ConnectHandle ConnectInstance<T>(this IConsumePipeConnector filter, T instance)
             where T : class
         {
-            return InstanceConnectorCache<T>.Connector.Connect(filter, instance);
+            return InstanceConnectorCache<T>.Connector.ConnectInstance(filter, instance);
         }
 
         public static ConnectHandle ConnectInstance(this IConsumePipeConnector filter, object instance)
         {
-            return InstanceConnectorCache.GetInstanceConnector(instance.GetType()).Connect(filter, instance);
+            return InstanceConnectorCache.GetInstanceConnector(instance.GetType()).ConnectInstance(filter, instance);
         }
     }
 }

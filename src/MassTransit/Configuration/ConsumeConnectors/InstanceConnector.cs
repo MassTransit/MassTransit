@@ -18,17 +18,11 @@ namespace MassTransit.ConsumeConnectors
     using Util;
 
 
-    public interface InstanceConnector
-    {
-        ConnectHandle Connect(IConsumePipeConnector pipe, object instance);
-    }
-
-
     public class InstanceConnector<TConsumer> :
-        InstanceConnector
+        IInstanceConnector
         where TConsumer : class
     {
-        readonly IEnumerable<InstanceMessageConnector> _connectors;
+        readonly IEnumerable<IInstanceMessageConnector> _connectors;
 
         public InstanceConnector()
         {
@@ -41,17 +35,17 @@ namespace MassTransit.ConsumeConnectors
                 .ToList();
         }
 
-        public ConnectHandle Connect(IConsumePipeConnector pipe, object instance)
+        public ConnectHandle ConnectInstance(IConsumePipeConnector pipe, object instance)
         {
-            return new MultipleConnectHandle(_connectors.Select(x => x.Connect(pipe, instance)));
+            return new MultipleConnectHandle(_connectors.Select(x => x.ConnectInstance(pipe, instance)));
         }
 
-        static IEnumerable<InstanceMessageConnector> Consumes()
+        static IEnumerable<IInstanceMessageConnector> Consumes()
         {
             return ConsumerMetadataCache<TConsumer>.ConsumerTypes.Select(x => x.GetInstanceConnector());
         }
 
-        static IEnumerable<InstanceMessageConnector> ConsumesAll()
+        static IEnumerable<IInstanceMessageConnector> ConsumesAll()
         {
             return ConsumerMetadataCache<TConsumer>.MessageConsumerTypes.Select(x => x.GetInstanceMessageConnector());
         }

@@ -50,7 +50,7 @@ namespace MassTransit.Testing.Scenarios
 
             var testSendObserver = new TestSendObserver(timeout);
             _sent = testSendObserver.Messages;
-            _subjectSendEndpoint.Connect(testSendObserver);
+            _subjectSendEndpoint.ConnectSendObserver(testSendObserver);
 
             var consumeObserver = new TestConsumeObserver(timeout);
             _received = consumeObserver.Messages;

@@ -18,7 +18,7 @@ namespace MassTransit.Saga.Connectors
 
     public interface ISagaConnector
     {
-        ConnectHandle Connect<T>(IConsumePipeConnector consumePipe, ISagaRepository<T> sagaRepository,
+        ConnectHandle ConnectSaga<T>(IConsumePipeConnector consumePipe, ISagaRepository<T> sagaRepository,
             params IPipeSpecification<SagaConsumeContext<T>>[] pipeSpecifications)
             where T : class, ISaga;
     }

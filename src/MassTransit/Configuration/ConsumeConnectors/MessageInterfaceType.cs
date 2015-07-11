@@ -19,18 +19,18 @@ namespace MassTransit.ConsumeConnectors
     public class MessageInterfaceType
     {
         static readonly IEqualityComparer<MessageInterfaceType> MessageTypeComparerInstance = new MessageTypeEqualityComparer();
-        readonly Lazy<MessageConnectorFactory> _consumeConnectorFactory;
-        readonly Lazy<MessageConnectorFactory> _consumeMessageConnectorFactory;
+        readonly Lazy<IMessageConnectorFactory> _consumeConnectorFactory;
+        readonly Lazy<IMessageConnectorFactory> _consumeMessageConnectorFactory;
 
         public MessageInterfaceType(Type messageType, Type consumerType)
         {
             MessageType = messageType;
 
-            _consumeConnectorFactory = new Lazy<MessageConnectorFactory>(() => (MessageConnectorFactory)
+            _consumeConnectorFactory = new Lazy<IMessageConnectorFactory>(() => (IMessageConnectorFactory)
                 Activator.CreateInstance(typeof(ConsumeMessageConnectorFactory<,>).MakeGenericType(consumerType,
                     messageType)));
 
-            _consumeMessageConnectorFactory = new Lazy<MessageConnectorFactory>(() => (MessageConnectorFactory)
+            _consumeMessageConnectorFactory = new Lazy<IMessageConnectorFactory>(() => (IMessageConnectorFactory)
                 Activator.CreateInstance(typeof(LegacyConsumeConnectorFactory<,>).MakeGenericType(
                     consumerType, messageType)));
         }
@@ -42,22 +42,22 @@ namespace MassTransit.ConsumeConnectors
 
         public Type MessageType { get; private set; }
 
-        public ConsumerMessageConnector GetConsumerConnector()
+        public IConsumerMessageConnector GetConsumerConnector()
         {
             return _consumeConnectorFactory.Value.CreateConsumerConnector();
         }
 
-        public ConsumerMessageConnector GetConsumerMessageConnector()
+        public IConsumerMessageConnector GetConsumerMessageConnector()
         {
             return _consumeMessageConnectorFactory.Value.CreateConsumerConnector();
         }
 
-        public InstanceMessageConnector GetInstanceConnector()
+        public IInstanceMessageConnector GetInstanceConnector()
         {
             return _consumeConnectorFactory.Value.CreateInstanceConnector();
         }
 
-        public InstanceMessageConnector GetInstanceMessageConnector()
+        public IInstanceMessageConnector GetInstanceMessageConnector()
         {
             return _consumeMessageConnectorFactory.Value.CreateInstanceConnector();
         }

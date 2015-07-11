@@ -15,6 +15,6 @@ namespace MassTransit.Pipeline
     public interface IConnectPipeById<out T, in TKey>
         where T : class, PipeContext
     {
-        ConnectHandle Connect(TKey key, IPipe<T> pipe);
+        ConnectHandle ConnectById(TKey key, IPipe<T> pipe);
     }
 }

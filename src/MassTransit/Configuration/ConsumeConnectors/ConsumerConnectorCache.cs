@@ -33,12 +33,12 @@ namespace MassTransit.ConsumeConnectors
                 LazyThreadSafetyMode.PublicationOnly);
         }
 
-        public static ConsumerConnector Connector
+        public static IConsumerConnector Connector
         {
             get { return Cached.Instance.Value.Connector; }
         }
 
-        ConsumerConnector IConsumerConnectorCache.Connector
+        IConsumerConnector IConsumerConnectorCache.Connector
         {
             get { return _connector.Value; }
         }
@@ -54,7 +54,7 @@ namespace MassTransit.ConsumeConnectors
 
     public static class ConsumerConnectorCache
     {
-        public static ConsumerConnector GetConsumerConnector<T>()
+        public static IConsumerConnector GetConsumerConnector<T>()
             where T : class
         {
             return Cached.Instance.GetOrAdd(typeof(T), x => new CachedConnector<T>()).Connector;
@@ -81,7 +81,7 @@ namespace MassTransit.ConsumeConnectors
 
         interface CachedConnector
         {
-            ConsumerConnector Connector { get; }
+            IConsumerConnector Connector { get; }
 
             ConnectHandle Connect(IConsumePipeConnector consumePipe, Func<Type, object> objectFactory);
         }
@@ -91,14 +91,14 @@ namespace MassTransit.ConsumeConnectors
             CachedConnector
             where T : class
         {
-            readonly Lazy<ConsumerConnector> _connector;
+            readonly Lazy<IConsumerConnector> _connector;
 
             public CachedConnector()
             {
-                _connector = new Lazy<ConsumerConnector>(() => ConsumerConnectorCache<T>.Connector);
+                _connector = new Lazy<IConsumerConnector>(() => ConsumerConnectorCache<T>.Connector);
             }
 
-            public ConsumerConnector Connector
+            public IConsumerConnector Connector
             {
                 get { return _connector.Value; }
             }
@@ -107,7 +107,7 @@ namespace MassTransit.ConsumeConnectors
             {
                 var consumerFactory = new ObjectConsumerFactory<T>(objectFactory);
 
-                return _connector.Value.Connect(consumePipe, consumerFactory, Enumerable.Empty<IPipeSpecification<ConsumerConsumeContext<T>>>().ToArray());
+                return _connector.Value.ConnectConsumer(consumePipe, consumerFactory, Enumerable.Empty<IPipeSpecification<ConsumerConsumeContext<T>>>().ToArray());
             }
         }
     }

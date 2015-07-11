@@ -17,6 +17,6 @@ namespace MassTransit.Pipeline
     /// </summary>
     public interface IPublishObserverConnector
     {
-        ConnectHandle Connect(IPublishObserver observer);
+        ConnectHandle ConnectPublishObserver(IPublishObserver observer);
     }
 }

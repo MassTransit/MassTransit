@@ -52,7 +52,7 @@ namespace Automatonymous.SubscriptionConnectors
             get { return _connectors; }
         }
 
-        public ConnectHandle Connect<T>(IConsumePipeConnector consumePipe, ISagaRepository<T> sagaRepository,
+        public ConnectHandle ConnectSaga<T>(IConsumePipeConnector consumePipe, ISagaRepository<T> sagaRepository,
             params IPipeSpecification<SagaConsumeContext<T>>[] pipeSpecifications)
             where T : class, ISaga
         {
@@ -61,7 +61,7 @@ namespace Automatonymous.SubscriptionConnectors
             {
                 foreach (ISagaMessageConnector connector in _connectors)
                 {
-                    ConnectHandle handle = connector.Connect(consumePipe, sagaRepository, pipeSpecifications);
+                    ConnectHandle handle = connector.ConnectSaga(consumePipe, sagaRepository, pipeSpecifications);
 
                     handles.Add(handle);
                 }

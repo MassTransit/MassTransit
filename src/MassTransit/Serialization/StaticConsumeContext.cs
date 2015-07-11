@@ -449,9 +449,9 @@ namespace MassTransit.Serialization
             return _binaryHeaders.Where(x => x.Name == headerName).Select(x => x.Value).FirstOrDefault();
         }
 
-        public ConnectHandle Connect(IPublishObserver observer)
+        public ConnectHandle ConnectPublishObserver(IPublishObserver observer)
         {
-            return _publishEndpoint.Connect(observer);
+            return _publishEndpoint.ConnectPublishObserver(observer);
         }
     }
 }

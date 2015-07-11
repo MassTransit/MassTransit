@@ -51,9 +51,9 @@ namespace MassTransit.Transports
             get { return _sourceAddress; }
         }
 
-        public ConnectHandle Connect(ISendObserver observer)
+        public ConnectHandle ConnectSendObserver(ISendObserver observer)
         {
-            return _transport.Connect(observer);
+            return _transport.ConnectSendObserver(observer);
         }
 
         public Task Send<T>(T message, CancellationToken cancellationToken)

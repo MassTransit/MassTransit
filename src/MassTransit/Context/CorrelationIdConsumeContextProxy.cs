@@ -222,9 +222,9 @@ namespace MassTransit.Context
             _context.NotifyFaulted(this, duration, consumerType, exception);
         }
 
-        ConnectHandle IPublishObserverConnector.Connect(IPublishObserver observer)
+        ConnectHandle IPublishObserverConnector.ConnectPublishObserver(IPublishObserver observer)
         {
-            return _context.Connect(observer);
+            return _context.ConnectPublishObserver(observer);
         }
     }
 }

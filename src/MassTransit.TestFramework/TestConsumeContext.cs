@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,7 +13,6 @@
 namespace MassTransit.TestFramework
 {
     using System;
-    using System.Collections;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading;
@@ -29,18 +28,18 @@ namespace MassTransit.TestFramework
     {
         PayloadCache _cache = new PayloadCache();
         CancellationToken _cancellationToken;
-        Headers _headers;
+        Task _completeTask;
         Guid? _correlationId;
         Uri _destinationAddress;
         DateTime? _expirationTime;
         Uri _faultAddress;
+        Headers _headers;
         TMessage _message;
         Guid? _messageId;
         ReceiveContext _receiveContext;
         Guid? _requestId;
         Uri _responseAddress;
         Uri _sourceAddress;
-        Task _completeTask;
 
         public TestConsumeContext(TMessage message)
         {
@@ -169,7 +168,6 @@ namespace MassTransit.TestFramework
             throw new NotImplementedException();
         }
 
-
         public ReceiveContext ReceiveContext
         {
             get { return _receiveContext; }
@@ -221,10 +219,9 @@ namespace MassTransit.TestFramework
         {
         }
 
-        public void NotifyFaulted<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType, Exception exception) 
+        public void NotifyFaulted<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType, Exception exception)
             where T : class
         {
-
         }
 
         public TMessage Message
@@ -241,7 +238,7 @@ namespace MassTransit.TestFramework
             NotifyFaulted(this, duration, consumerType, exception);
         }
 
-        public ConnectHandle Connect(IPublishObserver observer)
+        public ConnectHandle ConnectPublishObserver(IPublishObserver observer)
         {
             return new Connectable<IPublishObserver>().Connect(observer);
         }

@@ -20,19 +20,19 @@ namespace MassTransit.ConsumeConnectors
         IHandlerConnectorCache<TMessage>
         where TMessage : class
     {
-        readonly Lazy<MessageHandlerConnector<TMessage>> _connector;
+        readonly Lazy<HandlerConnector<TMessage>> _connector;
 
         HandlerConnectorCache()
         {
-            _connector = new Lazy<MessageHandlerConnector<TMessage>>(() => new MessageHandlerConnector<TMessage>());
+            _connector = new Lazy<HandlerConnector<TMessage>>(() => new HandlerConnector<TMessage>());
         }
 
-        public static HandlerConnector<TMessage> Connector
+        public static IHandlerConnector<TMessage> Connector
         {
             get { return InstanceCache.Cached.Value.Connector; }
         }
 
-        HandlerConnector<TMessage> IHandlerConnectorCache<TMessage>.Connector
+        IHandlerConnector<TMessage> IHandlerConnectorCache<TMessage>.Connector
         {
             get { return _connector.Value; }
         }

@@ -338,9 +338,9 @@ namespace MassTransit.Courier.Hosts
             return _context.GetSendEndpoint(address);
         }
 
-        public ConnectHandle Connect(IPublishObserver observer)
+        public ConnectHandle ConnectPublishObserver(IPublishObserver observer)
         {
-            return _context.Connect(observer);
+            return _context.ConnectPublishObserver(observer);
         }
 
         ExecutionResult Faulted(Exception exception)

@@ -26,7 +26,7 @@ namespace MassTransit
         IRequestPipeConnector,
         IConsumeMessageObserverConnector,
         IConsumeObserverConnector,
-        IConnectReceiveObserver,
+        IReceiveObserverConnector,
         IProbeSite
     {
         /// <summary>

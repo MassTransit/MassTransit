@@ -29,7 +29,7 @@ namespace MassTransit.Tests.Pipeline
 
             IPipe<ConsumeContext<A>> pipe = Pipe.New<ConsumeContext<A>>(x =>
             {
-                x.UseLatest(l => l.Created += filter => latestFilter = filter);
+                x.UseLatest(l => l.Created = filter => latestFilter = filter);
                 x.UseExecute(payload =>
                 {
                 });

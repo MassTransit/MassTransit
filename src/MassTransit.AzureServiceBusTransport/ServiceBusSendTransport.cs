@@ -114,7 +114,7 @@ namespace MassTransit.AzureServiceBusTransport
             }
         }
 
-        public ConnectHandle Connect(ISendObserver observer)
+        public ConnectHandle ConnectSendObserver(ISendObserver observer)
         {
             return _observers.Connect(observer);
         }

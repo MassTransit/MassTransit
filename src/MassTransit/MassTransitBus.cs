@@ -207,9 +207,9 @@ namespace MassTransit
             return _receiveObservers.Connect(observer);
         }
 
-        public ConnectHandle Connect(IPublishObserver observer)
+        public ConnectHandle ConnectPublishObserver(IPublishObserver observer)
         {
-            return _publishEndpoint.Connect(observer);
+            return _publishEndpoint.ConnectPublishObserver(observer);
         }
 
         void IProbeSite.Probe(ProbeContext context)

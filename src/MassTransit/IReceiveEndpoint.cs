@@ -19,7 +19,7 @@ namespace MassTransit
     /// A service endpoint has a inbound transport that pushes messages to consumers
     /// </summary>
     public interface IReceiveEndpoint :
-        IConnectReceiveObserver,
+        IReceiveObserverConnector,
         IProbeSite
     {
         /// <summary>

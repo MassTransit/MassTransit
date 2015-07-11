@@ -132,7 +132,7 @@ namespace MassTransit.Transports.InMemory
             Task.Factory.StartNew(() => DispatchMessage(transportMessage), _stopToken, TaskCreationOptions.HideScheduler, _scheduler);
         }
 
-        public ConnectHandle Connect(ISendObserver observer)
+        public ConnectHandle ConnectSendObserver(ISendObserver observer)
         {
             return _observers.Connect(observer);
         }

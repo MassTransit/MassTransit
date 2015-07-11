@@ -50,7 +50,7 @@ namespace MassTransit.ConsumeConfigurators
 
         public void Configure(IReceiveEndpointBuilder builder)
         {
-            ConsumerConnectorCache<TConsumer>.Connector.Connect(builder, _consumerFactory, new IPipeSpecification<ConsumerConsumeContext<TConsumer>>[0]);
+            ConsumerConnectorCache<TConsumer>.Connector.ConnectConsumer(builder, _consumerFactory, new IPipeSpecification<ConsumerConsumeContext<TConsumer>>[0]);
         }
     }
 }

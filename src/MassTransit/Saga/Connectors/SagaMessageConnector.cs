@@ -25,7 +25,7 @@ namespace MassTransit.Saga.Connectors
         where TSaga : class, ISaga
         where TMessage : class
     {
-        ConnectHandle ISagaConnector.Connect<T>(IConsumePipeConnector consumePipe, ISagaRepository<T> sagaRepository,
+        ConnectHandle ISagaConnector.ConnectSaga<T>(IConsumePipeConnector consumePipe, ISagaRepository<T> sagaRepository,
             params IPipeSpecification<SagaConsumeContext<T>>[] pipeSpecifications)
         {
             var repository = sagaRepository as ISagaRepository<TSaga>;

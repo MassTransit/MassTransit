@@ -16,7 +16,7 @@ namespace MassTransit.ConsumeConnectors
 
 
     public class LegacyConsumeConnectorFactory<TConsumer, TMessage> :
-        MessageConnectorFactory
+        IMessageConnectorFactory
         where TConsumer : class, IMessageConsumer<TMessage>
         where TMessage : class
     {
@@ -27,12 +27,12 @@ namespace MassTransit.ConsumeConnectors
             _filter = new LegacyMethodConsumerMessageFilter<TConsumer, TMessage>();
         }
 
-        public ConsumerMessageConnector CreateConsumerConnector()
+        public IConsumerMessageConnector CreateConsumerConnector()
         {
             return new ConsumerMessageConnector<TConsumer, TMessage>(_filter);
         }
 
-        public InstanceMessageConnector CreateInstanceConnector()
+        public IInstanceMessageConnector CreateInstanceConnector()
         {
             return new InstanceMessageConnector<TConsumer, TMessage>(_filter);
         }

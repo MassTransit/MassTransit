@@ -324,9 +324,9 @@ namespace MassTransit.Serialization
             return task;
         }
 
-        public ConnectHandle Connect(IPublishObserver observer)
+        public ConnectHandle ConnectPublishObserver(IPublishObserver observer)
         {
-            return _publishEndpoint.Connect(observer);
+            return _publishEndpoint.ConnectPublishObserver(observer);
         }
 
         async Task GenerateFault<T>(ConsumeContext<T> context, Exception exception)
@@ -416,9 +416,9 @@ namespace MassTransit.Serialization
                 _endpoint = endpoint;
             }
 
-            public ConnectHandle Connect(ISendObserver observer)
+            public ConnectHandle ConnectSendObserver(ISendObserver observer)
             {
-                return _endpoint.Connect(observer);
+                return _endpoint.ConnectSendObserver(observer);
             }
 
             public Task Send<T>(T message, CancellationToken cancellationToken = new CancellationToken()) where T : class

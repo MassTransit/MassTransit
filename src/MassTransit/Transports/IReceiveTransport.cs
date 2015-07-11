@@ -17,7 +17,7 @@ namespace MassTransit.Transports
 
 
     public interface IReceiveTransport :
-        IConnectReceiveObserver,
+        IReceiveObserverConnector,
         IProbeSite
     {
         /// <summary>

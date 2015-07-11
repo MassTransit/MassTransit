@@ -273,9 +273,9 @@ namespace MassTransit.NHibernateIntegration.Saga
             get { return _instance; }
         }
 
-        public ConnectHandle Connect(IPublishObserver observer)
+        public ConnectHandle ConnectPublishObserver(IPublishObserver observer)
         {
-            return _context.Connect(observer);
+            return _context.ConnectPublishObserver(observer);
         }
     }
 }

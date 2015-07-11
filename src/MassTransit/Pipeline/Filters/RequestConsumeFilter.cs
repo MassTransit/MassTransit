@@ -37,7 +37,7 @@ namespace MassTransit.Pipeline.Filters
             _pipes = new ConcurrentDictionary<TKey, RequestPipeFilter<T, TKey>>();
         }
 
-        public ConnectHandle Connect(TKey key, IPipe<ConsumeContext<T>> pipe)
+        public ConnectHandle ConnectById(TKey key, IPipe<ConsumeContext<T>> pipe)
         {
             if (pipe == null)
                 throw new ArgumentNullException("pipe");
