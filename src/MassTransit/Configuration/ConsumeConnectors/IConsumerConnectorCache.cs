@@ -14,6 +14,6 @@ namespace MassTransit.ConsumeConnectors
 {
     public interface IConsumerConnectorCache
     {
-        ConsumerConnector Connector { get; }
+        IConsumerConnector Connector { get; }
     }
 }

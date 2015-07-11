@@ -220,9 +220,9 @@ namespace MassTransit.Courier.Hosts
             return _context.GetOrAddPayload(payloadFactory);
         }
 
-        public ConnectHandle Connect(IPublishObserver observer)
+        public ConnectHandle ConnectPublishObserver(IPublishObserver observer)
         {
-            return _context.Connect(observer);
+            return _context.ConnectPublishObserver(observer);
         }
     }
 }

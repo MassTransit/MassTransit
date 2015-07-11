@@ -134,9 +134,9 @@ namespace RapidTransit
             return _bus.ConnectReceiveObserver(observer);
         }
 
-        public ConnectHandle Connect(IPublishObserver observer)
+        public ConnectHandle ConnectPublishObserver(IPublishObserver observer)
         {
-            return _bus.Connect(observer);
+            return _bus.ConnectPublishObserver(observer);
         }
 
         public async void Probe(ProbeContext context)

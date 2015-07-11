@@ -66,7 +66,7 @@ namespace MassTransit.Pipeline.Filters
 
         public ConnectHandle ConnectRequestPipe(Guid requestId, IPipe<ConsumeContext<T>> pipe)
         {
-            return _requestConnections.Value.Connect(requestId, pipe);
+            return _requestConnections.Value.ConnectById(requestId, pipe);
         }
 
         IConnectPipeById<ConsumeContext<T>, Guid> ConnectRequestFilter()

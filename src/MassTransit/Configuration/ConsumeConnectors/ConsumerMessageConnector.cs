@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -21,15 +21,8 @@ namespace MassTransit.ConsumeConnectors
     using Util;
 
 
-    public interface ConsumerMessageConnector :
-        ConsumerConnector
-    {
-        Type MessageType { get; }
-    }
-
-
     public class ConsumerMessageConnector<TConsumer, TMessage> :
-        ConsumerMessageConnector
+        IConsumerMessageConnector
         where TConsumer : class
         where TMessage : class
     {
@@ -45,7 +38,7 @@ namespace MassTransit.ConsumeConnectors
             get { return typeof(TMessage); }
         }
 
-        ConnectHandle ConsumerConnector.Connect<T>(IConsumePipeConnector consumePipe, IConsumerFactory<T> consumerFactory,
+        ConnectHandle IConsumerConnector.ConnectConsumer<T>(IConsumePipeConnector consumePipe, IConsumerFactory<T> consumerFactory,
             IPipeSpecification<ConsumerConsumeContext<T>>[] pipeSpecifications)
         {
             var factory = consumerFactory as IConsumerFactory<TConsumer>;

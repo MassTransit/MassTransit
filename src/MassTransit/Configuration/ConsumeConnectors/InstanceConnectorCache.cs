@@ -29,12 +29,12 @@ namespace MassTransit.ConsumeConnectors
                 LazyThreadSafetyMode.PublicationOnly);
         }
 
-        public static InstanceConnector Connector
+        public static IInstanceConnector Connector
         {
             get { return InstanceCache.Cached.Value.Connector; }
         }
 
-        InstanceConnector IInstanceConnectorCache<T>.Connector
+        IInstanceConnector IInstanceConnectorCache<T>.Connector
         {
             get { return _connector.Value; }
         }
@@ -50,25 +50,25 @@ namespace MassTransit.ConsumeConnectors
 
     public static class InstanceConnectorCache
     {
-        public static InstanceConnector GetInstanceConnector<T>()
+        public static IInstanceConnector GetInstanceConnector<T>()
             where T : class
         {
             return InstanceCache.Cached.Value.GetOrAdd(typeof(T),
-                _ => new Lazy<InstanceConnector>(() => InstanceConnectorCache<T>.Connector)).Value;
+                _ => new Lazy<IInstanceConnector>(() => InstanceConnectorCache<T>.Connector)).Value;
         }
 
-        public static InstanceConnector GetInstanceConnector(Type type)
+        public static IInstanceConnector GetInstanceConnector(Type type)
         {
-            return InstanceCache.Cached.Value.GetOrAdd(type, _ => new Lazy<InstanceConnector>(() =>
-                (InstanceConnector)Activator.CreateInstance(typeof(InstanceConnector<>).MakeGenericType(type)))).Value;
+            return InstanceCache.Cached.Value.GetOrAdd(type, _ => new Lazy<IInstanceConnector>(() =>
+                (IInstanceConnector)Activator.CreateInstance(typeof(InstanceConnector<>).MakeGenericType(type)))).Value;
         }
 
 
         static class InstanceCache
         {
-            internal static readonly Lazy<ConcurrentDictionary<Type, Lazy<InstanceConnector>>> Cached =
-                new Lazy<ConcurrentDictionary<Type, Lazy<InstanceConnector>>>(
-                    () => new ConcurrentDictionary<Type, Lazy<InstanceConnector>>(), LazyThreadSafetyMode.PublicationOnly);
+            internal static readonly Lazy<ConcurrentDictionary<Type, Lazy<IInstanceConnector>>> Cached =
+                new Lazy<ConcurrentDictionary<Type, Lazy<IInstanceConnector>>>(
+                    () => new ConcurrentDictionary<Type, Lazy<IInstanceConnector>>(), LazyThreadSafetyMode.PublicationOnly);
         }
     }
 }

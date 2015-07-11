@@ -13,35 +13,36 @@
 namespace MassTransit.ConsumeConnectors
 {
     using System;
+    using PipeConfigurators;
     using Pipeline;
 
 
     /// <summary>
     /// Connects a message handler to the ConsumePipe
     /// </summary>
-    /// <typeparam name="TMessage">The message type</typeparam>
-    public interface ObserverConnector<TMessage>
-        where TMessage : class
+    /// <typeparam name="T">The message type</typeparam>
+    public interface IHandlerConnector<T>
+        where T : class
     {
         /// <summary>
         /// Connect a message handler for all messages of type T 
         /// </summary>
         /// <param name="consumePipe"></param>
-        /// <param name="observer"></param>
-        /// <param name="filters"></param>
+        /// <param name="handler"></param>
+        /// <param name="pipeSpecifications"></param>
         /// <returns></returns>
-        ConnectHandle Connect(IConsumePipeConnector consumePipe, IObserver<ConsumeContext<TMessage>> observer,
-            params IFilter<ConsumeContext<TMessage>>[] filters);
+        ConnectHandle ConnectHandler(IConsumePipeConnector consumePipe, MessageHandler<T> handler,
+            params IPipeSpecification<ConsumeContext<T>>[] pipeSpecifications);
 
         /// <summary>
         /// Connect a message handler for messages with the specified RequestId
         /// </summary>
         /// <param name="consumePipe"></param>
         /// <param name="requestId"></param>
-        /// <param name="observer"></param>
-        /// <param name="filters"></param>
+        /// <param name="handler"></param>
+        /// <param name="pipeSpecifications"></param>
         /// <returns></returns>
-        ConnectHandle Connect(IRequestPipeConnector consumePipe, Guid requestId, IObserver<ConsumeContext<TMessage>> observer,
-            params IFilter<ConsumeContext<TMessage>>[] filters);
+        ConnectHandle ConnectRequestHandler(IRequestPipeConnector consumePipe, Guid requestId, MessageHandler<T> handler,
+            params IPipeSpecification<ConsumeContext<T>>[] pipeSpecifications);
     }
 }

@@ -22,10 +22,10 @@ namespace MassTransit.ConsumeConnectors
     /// </summary>
     /// <typeparam name="TMessage"></typeparam>
     public class MessageObserverConnector<TMessage> :
-        ObserverConnector<TMessage>
+        IObserverConnector<TMessage>
         where TMessage : class
     {
-        public ConnectHandle Connect(IConsumePipeConnector consumePipe, IObserver<ConsumeContext<TMessage>> observer,
+        public ConnectHandle ConnectObserver(IConsumePipeConnector consumePipe, IObserver<ConsumeContext<TMessage>> observer,
             params IFilter<ConsumeContext<TMessage>>[] filters)
         {
             IPipe<ConsumeContext<TMessage>> pipe = Pipe.New<ConsumeContext<TMessage>>(x =>
@@ -39,7 +39,7 @@ namespace MassTransit.ConsumeConnectors
             return consumePipe.ConnectConsumePipe(pipe);
         }
 
-        public ConnectHandle Connect(IRequestPipeConnector consumePipe, Guid requestId, IObserver<ConsumeContext<TMessage>> observer,
+        public ConnectHandle ConnectRequestObserver(IRequestPipeConnector consumePipe, Guid requestId, IObserver<ConsumeContext<TMessage>> observer,
             params IFilter<ConsumeContext<TMessage>>[] filters)
         {
             IPipe<ConsumeContext<TMessage>> pipe = Pipe.New<ConsumeContext<TMessage>>(x =>

@@ -167,7 +167,7 @@ namespace MassTransit.Transports
             }
         }
 
-        public ConnectHandle Connect(IPublishObserver observer)
+        public ConnectHandle ConnectPublishObserver(IPublishObserver observer)
         {
             return _observers.Connect(observer);
         }

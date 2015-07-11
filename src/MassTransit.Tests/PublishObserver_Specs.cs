@@ -18,7 +18,7 @@
         public async void Should_invoke_the_exception_after_send_failure()
         {
             var observer = new Observer();
-            using (Bus.Connect(observer))
+            using (Bus.ConnectPublishObserver(observer))
             {
                 Assert.Throws<SerializationException>(async () => await Bus.Publish(new PingMessage(), Pipe.Execute<SendContext>(x => x.Serializer = null)));
 
@@ -30,7 +30,7 @@
         public async void Should_invoke_the_observer_after_send()
         {
             var observer = new Observer();
-            using (Bus.Connect(observer))
+            using (Bus.ConnectPublishObserver(observer))
             {
                 await Bus.Publish(new PingMessage());
 
@@ -42,7 +42,7 @@
         public async void Should_invoke_the_observer_prior_to_send()
         {
             var observer = new Observer();
-            using (Bus.Connect(observer))
+            using (Bus.ConnectPublishObserver(observer))
             {
                 await Bus.Publish(new PingMessage());
 
@@ -54,7 +54,7 @@
         public async void Should_not_invoke_post_sent_on_exception()
         {
             var observer = new Observer();
-            using (Bus.Connect(observer))
+            using (Bus.ConnectPublishObserver(observer))
             {
                 Assert.Throws<SerializationException>(async () => await Bus.Publish(new PingMessage(), Pipe.Execute<SendContext>(x => x.Serializer = null)));
 

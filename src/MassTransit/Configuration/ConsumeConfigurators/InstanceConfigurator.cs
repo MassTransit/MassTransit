@@ -31,7 +31,7 @@ namespace MassTransit.ConsumeConfigurators
 
         public void Configure(IReceiveEndpointBuilder builder)
         {
-            InstanceConnectorCache.GetInstanceConnector(_instance.GetType()).Connect(builder, _instance);
+            InstanceConnectorCache.GetInstanceConnector(_instance.GetType()).ConnectInstance(builder, _instance);
         }
 
         public IEnumerable<ValidationResult> Validate()

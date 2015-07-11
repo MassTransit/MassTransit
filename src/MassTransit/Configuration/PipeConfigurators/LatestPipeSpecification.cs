@@ -23,7 +23,12 @@ namespace MassTransit.PipeConfigurators
         ILatestConfigurator<T>
         where T : class, PipeContext
     {
-        public event LatestFilterCreated<T> Created;
+        LatestFilterCreated<T> _created;
+
+        public LatestFilterCreated<T> Created
+        {
+            set { _created = value; }
+        }
 
         void IPipeSpecification<T>.Apply(IPipeBuilder<T> builder)
         {
@@ -31,8 +36,8 @@ namespace MassTransit.PipeConfigurators
 
             builder.AddFilter(filter);
 
-            if (Created != null)
-                Created(filter);
+            if (_created != null)
+                _created(filter);
         }
 
         IEnumerable<ValidationResult> Configurator.Validate()

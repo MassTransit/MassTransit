@@ -240,9 +240,9 @@ namespace MassTransit.Context
             get { return _consumer; }
         }
 
-        public ConnectHandle Connect(IPublishObserver observer)
+        public ConnectHandle ConnectPublishObserver(IPublishObserver observer)
         {
-            return _context.Connect(observer);
+            return _context.ConnectPublishObserver(observer);
         }
     }
 }

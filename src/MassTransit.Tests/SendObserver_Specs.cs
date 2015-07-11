@@ -30,7 +30,7 @@ namespace MassTransit.Tests
         public async void Should_invoke_the_exception_after_send_failure()
         {
             var observer = new Observer();
-            using (InputQueueSendEndpoint.Connect(observer))
+            using (InputQueueSendEndpoint.ConnectSendObserver(observer))
             {
                 Assert.Throws<SerializationException>(async () => await InputQueueSendEndpoint.Send(new PingMessage(), Pipe.Execute<SendContext>(x => x.Serializer = null)));
 
@@ -42,7 +42,7 @@ namespace MassTransit.Tests
         public async void Should_invoke_the_observer_after_send()
         {
             var observer = new Observer();
-            using (InputQueueSendEndpoint.Connect(observer))
+            using (InputQueueSendEndpoint.ConnectSendObserver(observer))
             {
                 await InputQueueSendEndpoint.Send(new PingMessage());
 
@@ -54,7 +54,7 @@ namespace MassTransit.Tests
         public async void Should_invoke_the_observer_prior_to_send()
         {
             var observer = new Observer();
-            using (InputQueueSendEndpoint.Connect(observer))
+            using (InputQueueSendEndpoint.ConnectSendObserver(observer))
             {
                 await InputQueueSendEndpoint.Send(new PingMessage());
 
@@ -66,7 +66,7 @@ namespace MassTransit.Tests
         public async void Should_not_invoke_post_sent_on_exception()
         {
             var observer = new Observer();
-            using (InputQueueSendEndpoint.Connect(observer))
+            using (InputQueueSendEndpoint.ConnectSendObserver(observer))
             {
                 Assert.Throws<SerializationException>(async () => await InputQueueSendEndpoint.Send(new PingMessage(), Pipe.Execute<SendContext>(x => x.Serializer = null)));
 

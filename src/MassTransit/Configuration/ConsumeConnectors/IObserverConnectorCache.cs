@@ -15,6 +15,6 @@ namespace MassTransit.ConsumeConnectors
     public interface IObserverConnectorCache<T>
         where T : class
     {
-        ObserverConnector<T> Connector { get; }
+        IObserverConnector<T> Connector { get; }
     }
 }

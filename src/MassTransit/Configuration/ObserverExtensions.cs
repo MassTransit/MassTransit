@@ -68,7 +68,7 @@ namespace MassTransit
         public static ConnectHandle ConnectObserver<T>(this IBus bus, IObserver<ConsumeContext<T>> observer)
             where T : class
         {
-            return ObserverConnectorCache<T>.Connector.Connect(bus, observer);
+            return ObserverConnectorCache<T>.Connector.ConnectObserver(bus, observer);
         }
 
         /// <summary>
@@ -82,7 +82,7 @@ namespace MassTransit
         public static ConnectHandle ConnectRequestObserver<T>(this IBus bus, Guid requestId, IObserver<ConsumeContext<T>> observer)
             where T : class
         {
-            return ObserverConnectorCache<T>.Connector.Connect(bus, requestId, observer);
+            return ObserverConnectorCache<T>.Connector.ConnectRequestObserver(bus, requestId, observer);
         }
     }
 }

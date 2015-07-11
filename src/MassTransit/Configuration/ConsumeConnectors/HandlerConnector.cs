@@ -18,30 +18,39 @@ namespace MassTransit.ConsumeConnectors
 
 
     /// <summary>
-    /// Connects a message handler to the ConsumePipe
+    /// Connects a message handler to a pipe
     /// </summary>
-    /// <typeparam name="T">The message type</typeparam>
-    public interface HandlerConnector<T>
-        where T : class
+    /// <typeparam name="TMessage"></typeparam>
+    public class HandlerConnector<TMessage> :
+        IHandlerConnector<TMessage>
+        where TMessage : class
     {
-        /// <summary>
-        /// Connect a message handler for all messages of type T 
-        /// </summary>
-        /// <param name="consumePipe"></param>
-        /// <param name="handler"></param>
-        /// <param name="pipeSpecifications"></param>
-        /// <returns></returns>
-        ConnectHandle Connect(IConsumePipeConnector consumePipe, MessageHandler<T> handler, params IPipeSpecification<ConsumeContext<T>>[] pipeSpecifications);
+        public ConnectHandle ConnectHandler(IConsumePipeConnector consumePipe, MessageHandler<TMessage> handler,
+            params IPipeSpecification<ConsumeContext<TMessage>>[] pipeSpecifications)
+        {
+            IPipe<ConsumeContext<TMessage>> pipe = Pipe.New<ConsumeContext<TMessage>>(x =>
+            {
+                foreach (var specification in pipeSpecifications)
+                    x.AddPipeSpecification(specification);
 
-        /// <summary>
-        /// Connect a message handler for messages with the specified RequestId
-        /// </summary>
-        /// <param name="consumePipe"></param>
-        /// <param name="requestId"></param>
-        /// <param name="handler"></param>
-        /// <param name="filters"></param>
-        /// <returns></returns>
-        ConnectHandle Connect(IRequestPipeConnector consumePipe, Guid requestId, MessageHandler<T> handler,
-            params IPipeSpecification<ConsumeContext<T>>[] pipeSpecifications);
+                x.AddPipeSpecification(new HandlerPipeSpecification<TMessage>(handler));
+            });
+
+            return consumePipe.ConnectConsumePipe(pipe);
+        }
+
+        public ConnectHandle ConnectRequestHandler(IRequestPipeConnector consumePipe, Guid requestId, MessageHandler<TMessage> handler,
+            params IPipeSpecification<ConsumeContext<TMessage>>[] pipeSpecifications)
+        {
+            IPipe<ConsumeContext<TMessage>> pipe = Pipe.New<ConsumeContext<TMessage>>(x =>
+            {
+                foreach (var specification in pipeSpecifications)
+                    x.AddPipeSpecification(specification);
+
+                x.AddPipeSpecification(new HandlerPipeSpecification<TMessage>(handler));
+            });
+
+            return consumePipe.ConnectRequestPipe(requestId, pipe);
+        }
     }
 }

@@ -14,6 +14,6 @@ namespace MassTransit.ConsumeConnectors
 {
     public interface IInstanceConnectorCache<T>
     {
-        InstanceConnector Connector { get; }
+        IInstanceConnector Connector { get; }
     }
 }

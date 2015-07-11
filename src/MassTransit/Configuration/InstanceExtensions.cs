@@ -53,9 +53,9 @@ namespace MassTransit
             if (instance == null)
                 throw new ArgumentNullException("instance");
 
-            InstanceConnector connector = InstanceConnectorCache.GetInstanceConnector(instance.GetType());
+            IInstanceConnector connector = InstanceConnectorCache.GetInstanceConnector(instance.GetType());
 
-            return connector.Connect(bus, instance);
+            return connector.ConnectInstance(bus, instance);
         }
 
         /// <summary>
@@ -69,9 +69,9 @@ namespace MassTransit
         public static ConnectHandle ConnectInstance<T>(this IBus bus, T instance)
             where T : class, IConsumer
         {
-            InstanceConnector connector = InstanceConnectorCache.GetInstanceConnector<T>();
+            IInstanceConnector connector = InstanceConnectorCache.GetInstanceConnector<T>();
 
-            return connector.Connect(bus, instance);
+            return connector.ConnectInstance(bus, instance);
         }
     }
 }

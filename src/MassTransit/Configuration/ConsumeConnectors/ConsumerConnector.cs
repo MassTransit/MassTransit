@@ -20,23 +20,11 @@ namespace MassTransit.ConsumeConnectors
     using Util;
 
 
-    /// <summary>
-    ///     Interface implemented by objects that tie an inbound pipeline together with
-    ///     consumers (by means of calling a consumer factory).
-    /// </summary>
-    public interface ConsumerConnector
-    {
-        ConnectHandle Connect<TConsumer>(IConsumePipeConnector consumePipe, IConsumerFactory<TConsumer> consumerFactory,
-            IPipeSpecification<ConsumerConsumeContext<TConsumer>>[] pipeSpecifications)
-            where TConsumer : class;
-    }
-
-
     public class ConsumerConnector<T> :
-        ConsumerConnector
+        IConsumerConnector
         where T : class
     {
-        readonly IEnumerable<ConsumerMessageConnector> _connectors;
+        readonly IEnumerable<IConsumerMessageConnector> _connectors;
 
         public ConsumerConnector()
         {
@@ -49,20 +37,20 @@ namespace MassTransit.ConsumeConnectors
                 .ToList();
         }
 
-        public IEnumerable<ConsumerMessageConnector> Connectors
+        public IEnumerable<IConsumerMessageConnector> Connectors
         {
             get { return _connectors; }
         }
 
-        ConnectHandle ConsumerConnector.Connect<TConsumer>(IConsumePipeConnector consumePipe, IConsumerFactory<TConsumer> consumerFactory,
+        ConnectHandle IConsumerConnector.ConnectConsumer<TConsumer>(IConsumePipeConnector consumePipe, IConsumerFactory<TConsumer> consumerFactory,
             IPipeSpecification<ConsumerConsumeContext<TConsumer>>[] pipeSpecifications)
         {
             var handles = new List<ConnectHandle>();
             try
             {
-                foreach (ConsumerMessageConnector connector in _connectors)
+                foreach (IConsumerMessageConnector connector in _connectors)
                 {
-                    ConnectHandle handle = connector.Connect(consumePipe, consumerFactory, pipeSpecifications);
+                    ConnectHandle handle = connector.ConnectConsumer(consumePipe, consumerFactory, pipeSpecifications);
 
                     handles.Add(handle);
                 }
@@ -77,12 +65,12 @@ namespace MassTransit.ConsumeConnectors
             }
         }
 
-        static IEnumerable<ConsumerMessageConnector> Consumes()
+        static IEnumerable<IConsumerMessageConnector> Consumes()
         {
             return ConsumerMetadataCache<T>.ConsumerTypes.Select(x => x.GetConsumerConnector());
         }
 
-        static IEnumerable<ConsumerMessageConnector> ConsumesAll()
+        static IEnumerable<IConsumerMessageConnector> ConsumesAll()
         {
             return ConsumerMetadataCache<T>.MessageConsumerTypes.Select(x => x.GetConsumerMessageConnector());
         }

@@ -116,7 +116,7 @@ namespace MassTransit.TestFramework
         protected async Task<ISendEndpoint> GetSendEndpoint(Uri address)
         {
             ISendEndpoint sendEndpoint = await _bus.GetSendEndpoint(address);
-            sendEndpoint.Connect(_sendObserver);
+            sendEndpoint.ConnectSendObserver(_sendObserver);
 
             return sendEndpoint;
         }

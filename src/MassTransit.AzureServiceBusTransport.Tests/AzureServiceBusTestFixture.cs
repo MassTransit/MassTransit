@@ -97,10 +97,10 @@ namespace MassTransit.AzureServiceBusTransport.Tests
             try
             {
                 _busSendEndpoint = _bus.GetSendEndpoint(_bus.Address).Result;
-                _busSendEndpoint.Connect(_sendObserver);
+                _busSendEndpoint.ConnectSendObserver(_sendObserver);
 
                 _inputQueueSendEndpoint = _bus.GetSendEndpoint(_inputQueueAddress).Result;
-                _inputQueueSendEndpoint.Connect(_sendObserver);
+                _inputQueueSendEndpoint.ConnectSendObserver(_sendObserver);
             }
             catch (Exception ex)
             {

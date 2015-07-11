@@ -27,12 +27,12 @@ namespace MassTransit.ConsumeConnectors
             _connector = new Lazy<MessageObserverConnector<TMessage>>(() => new MessageObserverConnector<TMessage>());
         }
 
-        public static ObserverConnector<TMessage> Connector
+        public static IObserverConnector<TMessage> Connector
         {
             get { return InstanceCache.Cached.Value.Connector; }
         }
 
-        ObserverConnector<TMessage> IObserverConnectorCache<TMessage>.Connector
+        IObserverConnector<TMessage> IObserverConnectorCache<TMessage>.Connector
         {
             get { return _connector.Value; }
         }

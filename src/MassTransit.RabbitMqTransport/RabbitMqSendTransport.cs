@@ -186,7 +186,7 @@ namespace MassTransit.RabbitMqTransport
             await _modelCache.Send(modelPipe, context.CancellationToken);
         }
 
-        public ConnectHandle Connect(ISendObserver observer)
+        public ConnectHandle ConnectSendObserver(ISendObserver observer)
         {
             return _observers.Connect(observer);
         }

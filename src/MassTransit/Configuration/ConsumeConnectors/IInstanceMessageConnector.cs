@@ -19,8 +19,8 @@ namespace MassTransit.ConsumeConnectors
     using Util;
 
 
-    public interface InstanceMessageConnector :
-        InstanceConnector
+    public interface IInstanceMessageConnector :
+        IInstanceConnector
     {
         Type MessageType { get; }
     }
@@ -34,7 +34,7 @@ namespace MassTransit.ConsumeConnectors
     /// <typeparam name="TConsumer">The consumer type</typeparam>
     /// <typeparam name="TMessage">The message type</typeparam>
     public class InstanceMessageConnector<TConsumer, TMessage> :
-        InstanceMessageConnector
+        IInstanceMessageConnector
         where TConsumer : class
         where TMessage : class
     {
@@ -54,7 +54,7 @@ namespace MassTransit.ConsumeConnectors
             get { return typeof(TMessage); }
         }
 
-        public ConnectHandle Connect(IConsumePipeConnector pipe, object instance)
+        public ConnectHandle ConnectInstance(IConsumePipeConnector pipe, object instance)
         {
             if (instance == null)
                 throw new ArgumentNullException("instance");

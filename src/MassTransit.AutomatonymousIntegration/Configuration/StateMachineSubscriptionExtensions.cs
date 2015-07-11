@@ -59,7 +59,7 @@ namespace Automatonymous
 
             var connector = new StateMachineConnector<TInstance>(stateMachine, repository);
 
-            return connector.Connect(bus, repository);
+            return connector.ConnectSaga(bus, repository);
         }
     }
 }
