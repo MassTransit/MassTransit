@@ -28,7 +28,7 @@ namespace MassTransit.Tests.Pipeline
     public class Specifying_a_concurrency_limit
     {
         [Test, Explicit]
-        public async void Should_prevent_too_many_threads_at_one_time()
+        public async Task Should_prevent_too_many_threads_at_one_time()
         {
             int currentCount = 0;
             int maxCount = 0;
@@ -60,7 +60,7 @@ namespace MassTransit.Tests.Pipeline
         }
 
         [Test, Explicit]
-        public async void Should_allow_just_enough_threads_at_once()
+        public async Task Should_allow_just_enough_threads_at_once()
         {
             int currentCount = 0;
             int maxCount = 0;
@@ -96,7 +96,7 @@ namespace MassTransit.Tests.Pipeline
     public class Specifying_a_rate_limit
     {
         [Test, Explicit]
-        public async void Should_only_do_n_messages_per_interval()
+        public async Task Should_only_do_n_messages_per_interval()
         {
             int count = 0;
             IPipe<ConsumeContext<A>> pipe = Pipe.New<ConsumeContext<A>>(x =>

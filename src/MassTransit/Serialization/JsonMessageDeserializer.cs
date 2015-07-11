@@ -36,7 +36,7 @@ namespace MassTransit.Serialization
             _publishEndpoint = publishEndpoint;
         }
 
-        async void IProbeSite.Probe(ProbeContext context)
+        void IProbeSite.Probe(ProbeContext context)
         {
             ProbeContext scope = context.CreateScope("json");
             scope.Add("contentType", JsonMessageSerializer.JsonContentType.MediaType);

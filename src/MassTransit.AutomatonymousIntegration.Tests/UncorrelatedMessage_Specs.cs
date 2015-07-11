@@ -26,7 +26,7 @@ namespace MassTransit.AutomatonymousTests
         InMemoryTestFixture
     {
         [Test, Explicit]
-        public async void Should_retry_the_status_message()
+        public async Task Should_retry_the_status_message()
         {
             Task<Status> statusTask = null;
             Request<CheckStatus> request = await Bus.Request(InputQueueAddress, new CheckStatus("A"), x =>
@@ -51,7 +51,7 @@ namespace MassTransit.AutomatonymousTests
         }
 
         [Test]
-        public async void Should_start_and_handle_the_status_request()
+        public async Task Should_start_and_handle_the_status_request()
         {
             Task<StartupComplete> startupCompletedTask = null;
             await Bus.Request(InputQueueAddress, new Start("A", Guid.NewGuid()), x =>
@@ -75,7 +75,7 @@ namespace MassTransit.AutomatonymousTests
         }
 
         [Test]
-        public async void Should_start_and_handle_the_status_request_awaited()
+        public async Task Should_start_and_handle_the_status_request_awaited()
         {
             Request<Start> request = await Bus.Request(InputQueueAddress, new Start("B", Guid.NewGuid()), x =>
             {

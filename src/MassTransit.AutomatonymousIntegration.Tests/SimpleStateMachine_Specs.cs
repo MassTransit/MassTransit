@@ -13,6 +13,7 @@
 namespace MassTransit.AutomatonymousTests
 {
     using System;
+    using System.Threading.Tasks;
     using Automatonymous;
     using NUnit.Framework;
     using Saga;
@@ -95,7 +96,7 @@ namespace MassTransit.AutomatonymousTests
 
 
         [Test]
-        public async void Should_handle_a_double_state()
+        public async Task Should_handle_a_double_state()
         {
             Guid sagaId = Guid.NewGuid();
 
@@ -118,7 +119,7 @@ namespace MassTransit.AutomatonymousTests
         }
 
         [Test]
-        public async void Should_handle_the_initial_state()
+        public async Task Should_handle_the_initial_state()
         {
             Guid sagaId = Guid.NewGuid();
 

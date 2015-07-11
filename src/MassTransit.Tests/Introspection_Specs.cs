@@ -28,7 +28,7 @@ namespace MassTransit.Tests
         Task<ConsumeContext<PingMessage>> _handled;
 
         [Test]
-        public async void Should_return_a_wonderful_breakdown_of_the_guts_inside_it()
+        public async Task Should_return_a_wonderful_breakdown_of_the_guts_inside_it()
         {
             await Bus.Publish(new PingMessage());
 

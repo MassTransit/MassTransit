@@ -27,7 +27,7 @@ namespace MassTransit.Pipeline.Filters
         where TConsumer : class, IMessageConsumer<TMessage>
         where TMessage : class
     {
-        async void IProbeSite.Probe(ProbeContext context)
+        void IProbeSite.Probe(ProbeContext context)
         {
         }
 

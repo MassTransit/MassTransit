@@ -31,7 +31,7 @@ namespace MassTransit.Policies
             return new UntilCancelledRepeatContext(_cancellationToken);
         }
 
-        async void IProbeSite.Probe(ProbeContext context)
+        void IProbeSite.Probe(ProbeContext context)
         {
             context.CreateScope("untilCancelled");
         }

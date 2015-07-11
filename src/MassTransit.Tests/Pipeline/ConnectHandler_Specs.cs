@@ -24,7 +24,7 @@ namespace MassTransit.Tests.Pipeline
         MessageTestFixture
     {
         [Test]
-        public async void Should_receive_a_test_message()
+        public async Task Should_receive_a_test_message()
         {
             IConsumePipe filter = CreateConsumePipe();
 

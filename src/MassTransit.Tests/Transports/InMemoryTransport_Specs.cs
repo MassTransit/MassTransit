@@ -31,7 +31,7 @@ namespace MassTransit.Tests.Transports
             AsyncTestFixture
         {
             [Test]
-            public async void Should_be_asynchronous()
+            public async Task Should_be_asynchronous()
             {
                 var shutdown = new CancellationTokenSource();
 

@@ -13,6 +13,7 @@
 namespace MassTransit.Tests.Serialization
 {
     using System;
+    using System.Threading.Tasks;
     using NUnit.Framework;
     using TestFramework;
 
@@ -21,7 +22,7 @@ namespace MassTransit.Tests.Serialization
         : InMemoryTestFixture
     {
         [Test]
-        public async void Should_put_message_in_error_queue()
+        public async Task Should_put_message_in_error_queue()
         {
             await InputQueueSendEndpoint.Send(new BadMessage("Good"));
 

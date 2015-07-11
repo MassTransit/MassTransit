@@ -14,6 +14,7 @@ namespace MassTransit.Tests
 {
     using System.Collections.Generic;
     using System.Linq;
+    using System.Threading.Tasks;
     using NUnit.Framework;
     using Util;
 
@@ -22,7 +23,7 @@ namespace MassTransit.Tests
     public class Sending_ordered_notifications_from_a_receive_endpoint
     {
         [Test]
-        public async void Should_remain_in_order()
+        public async Task Should_remain_in_order()
         {
             var values = new List<int>();
 

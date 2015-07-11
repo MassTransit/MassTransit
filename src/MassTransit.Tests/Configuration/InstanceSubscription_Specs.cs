@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.Configuration
 {
+    using System.Threading.Tasks;
     using NUnit.Framework;
     using Pipeline;
     using TestFramework;
@@ -22,7 +23,7 @@ namespace MassTransit.Tests.Configuration
         InMemoryTestFixture
     {
         [Test]
-        public async void Should_have_received_the_message()
+        public async Task Should_have_received_the_message()
         {
             _message = new MessageA();
 
@@ -49,7 +50,7 @@ namespace MassTransit.Tests.Configuration
         InMemoryTestFixture
     {
         [Test]
-        public async void Should_have_received_the_message()
+        public async Task Should_have_received_the_message()
         {
             _message = new MessageA();
 
@@ -74,7 +75,7 @@ namespace MassTransit.Tests.Configuration
         InMemoryTestFixture
     {
         [Test]
-        public async void Should_have_received_the_message()
+        public async Task Should_have_received_the_message()
         {
             _message = new MessageA();
 

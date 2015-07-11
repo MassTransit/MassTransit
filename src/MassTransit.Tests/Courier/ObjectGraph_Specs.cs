@@ -41,7 +41,7 @@ namespace MassTransit.Tests.Courier
         }
 
         [Test]
-        public async void Should_work_for_activity_arguments()
+        public async Task Should_work_for_activity_arguments()
         {
             _intValue = 27;
             _stringValue = "Hello, World.";

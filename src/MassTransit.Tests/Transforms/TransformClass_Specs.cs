@@ -24,7 +24,7 @@ namespace MassTransit.Tests.Transforms
         InMemoryTestFixture
     {
         [Test]
-        public async void Should_have_the_message_property()
+        public async Task Should_have_the_message_property()
         {
             await InputQueueSendEndpoint.Send(new A {First = "Hello"});
 

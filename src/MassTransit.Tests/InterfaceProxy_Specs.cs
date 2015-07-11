@@ -24,7 +24,7 @@ namespace MassTransit.Tests
         InMemoryTestFixture
     {
         [Test]
-        public async void Should_have_correlation_id()
+        public async Task Should_have_correlation_id()
         {
             ConsumeContext<IProxyMe> message = await _handler;
 
@@ -32,7 +32,7 @@ namespace MassTransit.Tests
         }
 
         [Test]
-        public async void Should_have_integer_value()
+        public async Task Should_have_integer_value()
         {
             ConsumeContext<IProxyMe> message = await _handler;
 
@@ -40,7 +40,7 @@ namespace MassTransit.Tests
         }
 
         [Test]
-        public async void Should_have_address_value()
+        public async Task Should_have_address_value()
         {
             ConsumeContext<IProxyMe> message = await _handler;
 
@@ -48,13 +48,13 @@ namespace MassTransit.Tests
         }
 
         [Test]
-        public async void Should_have_received_message()
+        public async Task Should_have_received_message()
         {
             await _handler;
         }
 
         [Test]
-        public async void Should_have_string_value()
+        public async Task Should_have_string_value()
         {
             ConsumeContext<IProxyMe> message = await _handler;
 

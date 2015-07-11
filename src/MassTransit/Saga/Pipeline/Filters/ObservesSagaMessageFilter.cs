@@ -27,7 +27,7 @@ namespace MassTransit.Saga.Pipeline.Filters
         where TSaga : class, ISaga, Observes<TMessage, TSaga>
         where TMessage : class
     {
-        async void IProbeSite.Probe(ProbeContext context)
+        void IProbeSite.Probe(ProbeContext context)
         {
             context.CreateFilterScope("observes");
         }

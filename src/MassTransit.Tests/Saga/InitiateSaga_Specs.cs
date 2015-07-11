@@ -35,7 +35,7 @@ namespace MassTransit.Tests.Saga
         }
 
         [Test]
-        public async void The_saga_should_be_created_when_an_initiating_message_is_received()
+        public async Task The_saga_should_be_created_when_an_initiating_message_is_received()
         {
             var message = new InitiateSimpleSaga(_sagaId);
 
@@ -80,7 +80,7 @@ namespace MassTransit.Tests.Saga
         InMemoryTestFixture
     {
         [Test]
-        public async void The_message_should_fault()
+        public async Task The_message_should_fault()
         {
             Task<ConsumeContext<Fault<InitiateSimpleSaga>>> faulted = SubscribeHandler<Fault<InitiateSimpleSaga>>();
 
@@ -123,7 +123,7 @@ namespace MassTransit.Tests.Saga
         InMemoryTestFixture
     {
         [Test]
-        public async void The_saga_should_be_loaded()
+        public async Task The_saga_should_be_loaded()
         {
             await InputQueueSendEndpoint.Send(new InitiateSimpleSaga(_sagaId));
 
@@ -162,7 +162,7 @@ namespace MassTransit.Tests.Saga
         InMemoryTestFixture
     {
         [Test]
-        public async void The_saga_should_be_loaded()
+        public async Task The_saga_should_be_loaded()
         {
             await InputQueueSendEndpoint.Send(new InitiateSimpleSaga(_sagaId) {Name = "Chris"});
 
@@ -201,7 +201,7 @@ namespace MassTransit.Tests.Saga
         InMemoryTestFixture
     {
         [Test]
-        public async void An_exception_should_be_thrown()
+        public async Task An_exception_should_be_thrown()
         {
             var message = new InitiateSimpleSaga(_sagaId);
 

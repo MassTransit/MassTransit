@@ -26,7 +26,7 @@ namespace MassTransit.Tests
         InMemoryTestFixture
     {
         [Test]
-        public async void Should_only_call_the_handler_once()
+        public async Task Should_only_call_the_handler_once()
         {
             Task<ConsumeContext<Fault<PingMessage>>> fault = SubscribeHandler<Fault<PingMessage>>();
 
@@ -68,7 +68,7 @@ namespace MassTransit.Tests
         InMemoryTestFixture
     {
         [Test]
-        public async void Should_only_call_the_handler_once()
+        public async Task Should_only_call_the_handler_once()
         {
             Task<ConsumeContext<Fault<PingMessage>>> fault = SubscribeHandler<Fault<PingMessage>>();
 
@@ -108,7 +108,7 @@ namespace MassTransit.Tests
         InMemoryTestFixture
     {
         [Test]
-        public async void Should_only_call_the_handler_twice()
+        public async Task Should_only_call_the_handler_twice()
         {
             Task<ConsumeContext<Fault<PingMessage>>> fault = SubscribeHandler<Fault<PingMessage>>();
 
@@ -156,7 +156,7 @@ namespace MassTransit.Tests
         InMemoryTestFixture
     {
         [Test]
-        public async void Should_only_call_the_inner_policy()
+        public async Task Should_only_call_the_inner_policy()
         {
             Task<ConsumeContext<Fault<PingMessage>>> fault = SubscribeHandler<Fault<PingMessage>>();
 

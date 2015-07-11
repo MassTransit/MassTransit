@@ -25,7 +25,7 @@ namespace MassTransit.Tests.Courier
         InMemoryActivityTestFixture
     {
         [Test]
-        public async void Should_immediately_complete_an_empty_list()
+        public async Task Should_immediately_complete_an_empty_list()
         {
             Task<ConsumeContext<RoutingSlipCompleted>> completed = SubscribeHandler<RoutingSlipCompleted>();
 
@@ -38,7 +38,7 @@ namespace MassTransit.Tests.Courier
         }
 
         [Test]
-        public async void Should_publish_the_completed_event()
+        public async Task Should_publish_the_completed_event()
         {
             Task<ConsumeContext<RoutingSlipCompleted>> completed = SubscribeHandler<RoutingSlipCompleted>();
 

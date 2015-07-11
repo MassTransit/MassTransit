@@ -25,7 +25,7 @@ namespace MassTransit.AutomatonymousTests
         InMemoryTestFixture
     {
         [Test]
-        public async void Should_receive_the_published_message()
+        public async Task Should_receive_the_published_message()
         {
             Task<ConsumeContext<StartupComplete>> messageReceived = SubscribeHandler<StartupComplete>();
 

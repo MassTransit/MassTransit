@@ -26,7 +26,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         RabbitMqTestFixture
     {
         [Test]
-        public async void Should_be_wicked_fast()
+        public async Task Should_be_wicked_fast()
         {
             int limit = 10000;
             int count = 0;

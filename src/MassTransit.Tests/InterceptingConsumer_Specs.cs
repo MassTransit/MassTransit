@@ -90,19 +90,19 @@ namespace MassTransit.Tests
 
 
         [Test]
-        public async void Should_call_the_consumer_method()
+        public async Task Should_call_the_consumer_method()
         {
             await _myConsumer.Called.Task;
         }
 
         [Test]
-        public async void Should_call_the_interceptor_first()
+        public async Task Should_call_the_interceptor_first()
         {
             await _transactionFilter.First.Task;
         }
 
         [Test]
-        public async void Should_call_the_interceptor_second()
+        public async Task Should_call_the_interceptor_second()
         {
             await _transactionFilter.Second.Task;
         }

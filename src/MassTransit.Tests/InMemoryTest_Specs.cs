@@ -30,7 +30,7 @@ namespace MassTransit.Tests
         }
 
         [Test]
-        public async void Should_be_received_by_the_handler()
+        public async Task Should_be_received_by_the_handler()
         {
             await InputQueueSendEndpoint.Send(new A());
 
@@ -63,7 +63,7 @@ namespace MassTransit.Tests
         InMemoryTestFixture
     {
         [Test]
-        public async void Should_be_received_by_the_handler()
+        public async Task Should_be_received_by_the_handler()
         {
             object message = new A();
 

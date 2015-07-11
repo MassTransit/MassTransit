@@ -25,7 +25,7 @@ namespace MassTransit.Pipeline.Pipes
         {
         }
 
-        public async void Probe(ProbeContext context)
+        public void Probe(ProbeContext context)
         {
         }
     }

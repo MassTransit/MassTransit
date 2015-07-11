@@ -44,7 +44,7 @@ namespace MassTransit.Transports.InMemory
             get { return _transports.Keys.Select(x => new Uri(_baseUri, x)); }
         }
 
-        async void IProbeSite.Probe(ProbeContext context)
+        void IProbeSite.Probe(ProbeContext context)
         {
             ProbeContext scope = context.CreateScope("host");
             scope.Set(new

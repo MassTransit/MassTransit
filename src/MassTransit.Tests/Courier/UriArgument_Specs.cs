@@ -26,7 +26,7 @@ namespace MassTransit.Tests.Courier
         InMemoryActivityTestFixture
     {
         [Test]
-        public async void Should_publish_the_completed_event()
+        public async Task Should_publish_the_completed_event()
         {
             Task<ConsumeContext<RoutingSlipCompleted>> completed = SubscribeHandler<RoutingSlipCompleted>();
             Task<ConsumeContext<RoutingSlipActivityCompleted>> activity = SubscribeHandler<RoutingSlipActivityCompleted>();
@@ -52,7 +52,7 @@ namespace MassTransit.Tests.Courier
         }
 
         [Test]
-        public async void Should_compensate_with_the_log()
+        public async Task Should_compensate_with_the_log()
         {
             Task<ConsumeContext<RoutingSlipFaulted>> faulted = SubscribeHandler<RoutingSlipFaulted>();
             Task<ConsumeContext<RoutingSlipActivityCompleted>> activity = SubscribeHandler<RoutingSlipActivityCompleted>();

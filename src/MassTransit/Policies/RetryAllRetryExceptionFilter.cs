@@ -19,7 +19,7 @@ namespace MassTransit.Policies
     public class RetryAllRetryExceptionFilter :
         IRetryExceptionFilter
     {
-        async void IProbeSite.Probe(ProbeContext context)
+        void IProbeSite.Probe(ProbeContext context)
         {
         }
 

@@ -13,6 +13,7 @@
 namespace MassTransit.AutomatonymousTests
 {
     using System;
+    using System.Threading.Tasks;
     using Automatonymous;
     using NUnit.Framework;
     using Saga;
@@ -25,13 +26,13 @@ namespace MassTransit.AutomatonymousTests
         InMemoryTestFixture
     {
         [Test]
-        public async void Should_receive_the_response_message()
+        public async Task Should_receive_the_response_message()
         {
             StartupComplete complete = await _client.Request(new Start(), TestCancellationToken);
         }
 
         [Test]
-        public async void Should_start_and_report_status()
+        public async Task Should_start_and_report_status()
         {
             var start = new Start();
 
@@ -43,7 +44,7 @@ namespace MassTransit.AutomatonymousTests
         }
 
         [Test]
-        public async void Should_fault_on_a_missing_instance()
+        public async Task Should_fault_on_a_missing_instance()
         {
             Assert.Throws<RequestFaultException>(async () => await _statusClient.Request(new StatusRequested(NewId.NextGuid()), TestCancellationToken));
         }

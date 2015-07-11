@@ -26,7 +26,7 @@ namespace MassTransit.AutomatonymousTests
         InMemoryTestFixture
     {
         [Test]
-        public async void Should_have_called_combined_event()
+        public async Task Should_have_called_combined_event()
         {
             var message = new StartMessage();
 

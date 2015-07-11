@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.Pipeline
 {
+    using System.Threading.Tasks;
     using MassTransit.Pipeline;
     using MassTransit.Pipeline.Filters.Latest;
     using NUnit.Framework;
@@ -23,7 +24,7 @@ namespace MassTransit.Tests.Pipeline
     public class Using_the_latest_filter_on_the_pipe
     {
         [Test, Explicit]
-        public async void Should_keep_track_of_only_the_last_value()
+        public async Task Should_keep_track_of_only_the_last_value()
         {
             ILatestFilter<ConsumeContext<A>> latestFilter = null;
 

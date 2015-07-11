@@ -26,7 +26,7 @@ namespace MassTransit.AutomatonymousTests
         InMemoryTestFixture
     {
         [Test]
-        public async void Should_handle_the_initial_state()
+        public async Task Should_handle_the_initial_state()
         {
             Guid sagaId = Guid.NewGuid();
 
@@ -51,7 +51,7 @@ namespace MassTransit.AutomatonymousTests
         }
 
         [Test]
-        public async void Should_remove_the_saga_once_completed()
+        public async Task Should_remove_the_saga_once_completed()
         {
             Guid sagaId = Guid.NewGuid();
 
@@ -145,7 +145,7 @@ namespace MassTransit.AutomatonymousTests
         InMemoryTestFixture
     {
         [Test]
-        public async void Should_remove_the_saga_once_completed()
+        public async Task Should_remove_the_saga_once_completed()
         {
             Guid sagaId = Guid.NewGuid();
 

@@ -23,7 +23,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         RabbitMqTestFixture
     {
         [Test]
-        public async void Should_be_received_by_the_handler()
+        public async Task Should_be_received_by_the_handler()
         {
             Task<ConsumeContext<Fault<A>>> faultHandled = SubscribeHandler<Fault<A>>();
 

@@ -25,7 +25,7 @@ namespace MassTransit.Tests
         InMemoryTestFixture
     {
         [Test]
-        public async void Should_have_an_empty_fault_address()
+        public async Task Should_have_an_empty_fault_address()
         {
             ConsumeContext<PingMessage> ping = await _ping;
 
@@ -33,7 +33,7 @@ namespace MassTransit.Tests
         }
 
         [Test]
-        public async void Should_have_an_empty_response_address()
+        public async Task Should_have_an_empty_response_address()
         {
             ConsumeContext<PingMessage> ping = await _ping;
 
@@ -41,7 +41,7 @@ namespace MassTransit.Tests
         }
 
         [Test]
-        public async void Should_include_the_correlation_id()
+        public async Task Should_include_the_correlation_id()
         {
             ConsumeContext<PingMessage> ping = await _ping;
 
@@ -49,7 +49,7 @@ namespace MassTransit.Tests
         }
 
         [Test]
-        public async void Should_include_the_destination_address()
+        public async Task Should_include_the_destination_address()
         {
             ConsumeContext<PingMessage> ping = await _ping;
 
@@ -57,7 +57,7 @@ namespace MassTransit.Tests
         }
 
         [Test]
-        public async void Should_include_the_header()
+        public async Task Should_include_the_header()
         {
             ConsumeContext<PingMessage> ping = await _ping;
 
@@ -67,7 +67,7 @@ namespace MassTransit.Tests
         }
 
         [Test]
-        public async void Should_include_the_source_address()
+        public async Task Should_include_the_source_address()
         {
             ConsumeContext<PingMessage> ping = await _ping;
 
@@ -102,7 +102,7 @@ namespace MassTransit.Tests
         InMemoryTestFixture
     {
         [Test]
-        public async void Should_have_received_the_response_on_the_handler()
+        public async Task Should_have_received_the_response_on_the_handler()
         {
             PongMessage message = await _response;
 
@@ -110,7 +110,7 @@ namespace MassTransit.Tests
         }
 
         [Test]
-        public async void Should_have_the_matching_correlation_id()
+        public async Task Should_have_the_matching_correlation_id()
         {
             ConsumeContext<PongMessage> context = await _responseHandler;
 
@@ -118,7 +118,7 @@ namespace MassTransit.Tests
         }
 
         [Test]
-        public async void Should_include_the_destination_address()
+        public async Task Should_include_the_destination_address()
         {
             ConsumeContext<PingMessage> ping = await _ping;
 
@@ -126,7 +126,7 @@ namespace MassTransit.Tests
         }
 
         [Test]
-        public async void Should_include_the_response_address()
+        public async Task Should_include_the_response_address()
         {
             ConsumeContext<PingMessage> ping = await _ping;
 
@@ -134,7 +134,7 @@ namespace MassTransit.Tests
         }
 
         [Test]
-        public async void Should_include_the_source_address()
+        public async Task Should_include_the_source_address()
         {
             ConsumeContext<PingMessage> ping = await _ping;
 
@@ -142,7 +142,7 @@ namespace MassTransit.Tests
         }
 
         [Test]
-        public async void Should_receive_the_response()
+        public async Task Should_receive_the_response()
         {
             ConsumeContext<PongMessage> context = await _responseHandler;
         }
@@ -178,7 +178,7 @@ namespace MassTransit.Tests
         InMemoryTestFixture
     {
         [Test]
-        public async void Should_have_received_the_actual_response()
+        public async Task Should_have_received_the_actual_response()
         {
             PingNotSupported message = await _notSupported;
 
@@ -186,7 +186,7 @@ namespace MassTransit.Tests
         }
 
         [Test]
-        public async void Should_not_complete_the_handler()
+        public async Task Should_not_complete_the_handler()
         {
             await _notSupported;
 
@@ -233,13 +233,13 @@ namespace MassTransit.Tests
         InMemoryTestFixture
     {
         [Test]
-        public async void Should_receive_a_request_timeout_exception_on_the_handler()
+        public async Task Should_receive_a_request_timeout_exception_on_the_handler()
         {
             Assert.Throws<RequestTimeoutException>(async () => await _response);
         }
 
         [Test]
-        public async void Should_receive_a_request_timeout_exception_on_the_request()
+        public async Task Should_receive_a_request_timeout_exception_on_the_request()
         {
             Assert.Throws<RequestTimeoutException>(async () =>
             {

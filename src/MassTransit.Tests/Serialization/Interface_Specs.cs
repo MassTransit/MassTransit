@@ -14,6 +14,7 @@ namespace MassTransit.Tests.Serialization
 {
 	using System;
 	using System.Linq;
+	using System.Threading.Tasks;
 	using BusConfigurators;
 	using MassTransit.Pipeline;
 	using MassTransit.Serialization;
@@ -49,7 +50,7 @@ namespace MassTransit.Tests.Serialization
 		}
 
 		[Test]
-		public async void Should_dispatch_an_interface_via_the_pipeline()
+		public async Task Should_dispatch_an_interface_via_the_pipeline()
 		{
 		    IConsumePipe pipe = new ConsumePipeBuilder().Build();
 

@@ -33,7 +33,7 @@ namespace MassTransit.Pipeline.Filters
             _transform = transform;
         }
 
-        async void IProbeSite.Probe(ProbeContext context)
+        void IProbeSite.Probe(ProbeContext context)
         {
             context.CreateFilterScope("transform");
         }

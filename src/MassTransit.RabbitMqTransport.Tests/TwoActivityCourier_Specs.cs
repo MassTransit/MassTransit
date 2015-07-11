@@ -30,7 +30,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         RabbitMqActivityTestFixture
     {
         [Test]
-        public async void Should_include_the_activity_log_data()
+        public async Task Should_include_the_activity_log_data()
         {
             RoutingSlipActivityCompleted activityCompleted = (await _firstActivityCompleted).Message;
 
@@ -38,7 +38,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         }
 
         [Test]
-        public async void Should_include_the_variable_set_by_the_activity()
+        public async Task Should_include_the_variable_set_by_the_activity()
         {
             RoutingSlipCompleted completed = (await _completed).Message;
 
@@ -46,7 +46,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         }
 
         [Test]
-        public async void Should_include_the_variables_of_the_completed_routing_slip()
+        public async Task Should_include_the_variables_of_the_completed_routing_slip()
         {
             RoutingSlipCompleted completed = (await _completed).Message;
 
@@ -54,7 +54,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         }
 
         [Test]
-        public async void Should_include_the_variables_with_the_activity_log()
+        public async Task Should_include_the_variables_with_the_activity_log()
         {
             RoutingSlipActivityCompleted activityCompleted = (await _firstActivityCompleted).Message;
 
@@ -62,7 +62,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         }
 
         [Test]
-        public async void Should_receive_the_first_routing_slip_activity_completed_event()
+        public async Task Should_receive_the_first_routing_slip_activity_completed_event()
         {
             RoutingSlipActivityCompleted activityCompleted = (await _firstActivityCompleted).Message;
 
@@ -70,7 +70,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         }
 
         [Test]
-        public async void Should_receive_the_routing_slip_completed_event()
+        public async Task Should_receive_the_routing_slip_completed_event()
         {
             RoutingSlipCompleted completed = (await _completed).Message;
 
@@ -78,7 +78,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         }
 
         [Test]
-        public async void Should_receive_the_second_routing_slip_activity_completed_event()
+        public async Task Should_receive_the_second_routing_slip_activity_completed_event()
         {
             RoutingSlipActivityCompleted activityCompleted = (await _secondActivityCompleted).Message;
 
@@ -147,7 +147,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         RabbitMqActivityTestFixture
     {
         [Test]
-        public async void Should_receive_the_routing_slip_completed_event()
+        public async Task Should_receive_the_routing_slip_completed_event()
         {
             RoutingSlipCompleted completed = (await _completed).Message;
 
@@ -205,7 +205,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         RabbitMqActivityTestFixture
     {
         [Test]
-        public async void Should_receive_the_routing_slip_completed_event()
+        public async Task Should_receive_the_routing_slip_completed_event()
         {
             int completed = await _allDone.Task;
         }
@@ -274,7 +274,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         RabbitMqActivityTestFixture
     {
         [Test]
-        public async void Should_receive_the_routing_slip_completed_event()
+        public async Task Should_receive_the_routing_slip_completed_event()
         {
             int completed = await _allDone.Task;
         }

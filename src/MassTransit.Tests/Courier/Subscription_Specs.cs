@@ -49,7 +49,7 @@ namespace MassTransit.Tests.Courier
         InMemoryActivityTestFixture
     {
         [Test]
-        public async void Should_not_receive_the_routing_slip_activity_log()
+        public async Task Should_not_receive_the_routing_slip_activity_log()
         {
             ConsumeContext<RoutingSlipActivityCompleted> context = await _activityCompleted;
 
@@ -57,7 +57,7 @@ namespace MassTransit.Tests.Courier
         }
 
         [Test]
-        public async void Should_not_receive_the_routing_slip_activity_variable()
+        public async Task Should_not_receive_the_routing_slip_activity_variable()
         {
             ConsumeContext<RoutingSlipActivityCompleted> context = await _activityCompleted;
 
@@ -65,7 +65,7 @@ namespace MassTransit.Tests.Courier
         }
 
         [Test]
-        public async void Should_receive_the_routing_slip_activity_completed_event()
+        public async Task Should_receive_the_routing_slip_activity_completed_event()
         {
             ConsumeContext<RoutingSlipActivityCompleted> context = await _activityCompleted;
 
@@ -77,7 +77,7 @@ namespace MassTransit.Tests.Courier
         Guid _trackingNumber;
 
         [TestFixtureSetUp]
-        public async void Should_publish_the_completed_event()
+        public async Task Should_publish_the_completed_event()
         {
             _completed = SubscribeHandler<RoutingSlipCompleted>();
             _activityCompleted = SubscribeHandler<RoutingSlipActivityCompleted>();
