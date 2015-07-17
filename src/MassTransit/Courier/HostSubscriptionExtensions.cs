@@ -20,6 +20,14 @@ namespace MassTransit.Courier
     public static class HostSubscriptionExtensions
     {
         public static void ExecuteActivityHost<TActivity, TArguments>(
+            this IReceiveEndpointConfigurator configurator)
+            where TActivity : class, ExecuteActivity<TArguments>, new()
+            where TArguments : class
+        {
+            ExecuteActivityHost<TActivity, TArguments>(configurator, DefaultConstructorExecuteActivityFactory<TActivity, TArguments>.ExecuteFactory);
+        }
+
+        public static void ExecuteActivityHost<TActivity, TArguments>(
             this IReceiveEndpointConfigurator configurator,
             Uri compensateAddress)
             where TActivity : class, ExecuteActivity<TArguments>, new()
