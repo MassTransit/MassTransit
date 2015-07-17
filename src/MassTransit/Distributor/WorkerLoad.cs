@@ -85,7 +85,7 @@ namespace MassTransit.Distributor
 
                 _updatePending = false;
 
-                _worker.Bus.Publish(message, x => x.ExpiresAt(DateTime.UtcNow + timeToLive));
+                _worker.Bus.ControlBus.Publish(message, x => x.ExpiresAt(DateTime.UtcNow + timeToLive));
 
                 if (_log.IsDebugEnabled)
                     _log.DebugFormat("Worker {0}: {1} in progress, {2} pending", _worker.DataUri,
