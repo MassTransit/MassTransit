@@ -8,6 +8,10 @@ using System.Security;
 [assembly: AssemblyVersion("2.10.0")]
 [assembly: AssemblyFileVersion("2.10.1")]
 
+<<<<<<< HEAD
 [assembly: AssemblyInformationalVersion("2.10.1.a86f75")]
+=======
+[assembly: AssemblyInformationalVersion("2.10.1.64a3ac")]
+>>>>>>> 59cb310... Tasks that timeout shouldn't be cancelled
 [assembly: ComVisibleAttribute(false)]
 [assembly: CLSCompliantAttribute(true)]
