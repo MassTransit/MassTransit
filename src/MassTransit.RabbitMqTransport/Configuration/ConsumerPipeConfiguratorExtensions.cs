@@ -17,7 +17,6 @@ namespace MassTransit
     using Pipeline;
     using RabbitMqTransport;
     using RabbitMqTransport.Configuration;
-    using RabbitMqTransport.Pipeline;
     using RabbitMqTransport.Topology;
 
 

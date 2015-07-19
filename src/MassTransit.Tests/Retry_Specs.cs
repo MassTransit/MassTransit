@@ -13,6 +13,7 @@
 namespace MassTransit.Tests
 {
     using System;
+    using System.Threading;
     using System.Threading.Tasks;
     using Monitoring.Introspection.Contracts;
     using NUnit.Framework;
@@ -192,7 +193,7 @@ namespace MassTransit.Tests
             configurator.UseRetry(Retry.Immediate(3));
             Handler<PingMessage>(configurator, async context =>
             {
-                _attempts++;
+                Interlocked.Increment(ref _attempts);
                 throw new IntentionalTestException();
             });
         }

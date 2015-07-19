@@ -17,8 +17,6 @@ namespace MassTransit.TestFramework
     using System.Threading.Tasks;
     using Logging;
     using NUnit.Framework;
-    using Testing;
-    using Testing.TestDecorators;
     using Transports.InMemory;
 
 
@@ -32,7 +30,6 @@ namespace MassTransit.TestFramework
         Uri _inputQueueAddress;
         ISendEndpoint _inputQueueSendEndpoint;
         ISendEndpoint _busSendEndpoint;
-        readonly TestSendObserver _sendObserver;
         BusHandle _busHandle;
         readonly Uri _baseAddress;
         InMemoryTransportCache _inMemoryTransportCache;
@@ -44,8 +41,6 @@ namespace MassTransit.TestFramework
 
         public InMemoryTestFixture()
         {
-            _sendObserver = new TestSendObserver(TestTimeout);
-
             _baseAddress = new Uri("loopback://localhost/");
 
             _inputQueueAddress = new Uri("loopback://localhost/input_queue");
@@ -65,11 +60,6 @@ namespace MassTransit.TestFramework
         protected ISendEndpoint BusSendEndpoint
         {
             get { return _busSendEndpoint; }
-        }
-
-        protected ISentMessageList Sent
-        {
-            get { return _sendObserver.Messages; }
         }
 
         protected Uri BusAddress
@@ -116,7 +106,6 @@ namespace MassTransit.TestFramework
         protected async Task<ISendEndpoint> GetSendEndpoint(Uri address)
         {
             ISendEndpoint sendEndpoint = await _bus.GetSendEndpoint(address);
-            sendEndpoint.ConnectSendObserver(_sendObserver);
 
             return sendEndpoint;
         }

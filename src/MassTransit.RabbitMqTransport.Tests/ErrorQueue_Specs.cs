@@ -18,6 +18,7 @@ namespace MassTransit.RabbitMqTransport.Tests
     using NUnit.Framework;
     using Shouldly;
     using TestFramework.Messages;
+    using Util;
 
 
     [TestFixture]
@@ -62,6 +63,30 @@ namespace MassTransit.RabbitMqTransport.Tests
             ConsumeContext<PingMessage> context = await _errorHandler;
 
             context.SourceAddress.ShouldBe(BusAddress);
+        }
+
+        [Test]
+        public async Task Should_have_the_host_machine_name()
+        {
+            ConsumeContext<PingMessage> context = await _errorHandler;
+
+            context.ReceiveContext.TransportHeaders.Get<string>("MT-Host-MachineName").ShouldBe(HostMetadataCache.Host.MachineName);
+        }
+
+        [Test]
+        public async Task Should_have_the_reason()
+        {
+            ConsumeContext<PingMessage> context = await _errorHandler;
+
+            context.ReceiveContext.TransportHeaders.Get<string>("MT-Reason").ShouldBe("fault");
+        }
+
+        [Test]
+        public async Task Should_have_the_exception()
+        {
+            ConsumeContext<PingMessage> context = await _errorHandler;
+
+            context.ReceiveContext.TransportHeaders.Get<string>("MT-Fault-Message").ShouldBe("This is fine, forcing death");
         }
 
         [Test]

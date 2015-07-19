@@ -18,70 +18,60 @@ namespace MassTransit.Pipeline
 
 
     public class ReceiveObservable :
-        AsyncObservable<IReceiveObserver>,
+        Connectable<IReceiveObserver>,
         INotifyReceiveObserver,
         IReceiveObserver
     {
-        public void NotifyPreReceive(ReceiveContext context)
+        public Task NotifyPreReceive(ReceiveContext context)
         {
-            Notify(x => x.PreReceive(context));
+            return ForEachAsync(x => x.PreReceive(context));
         }
 
-        public void NotifyPostReceive(ReceiveContext context)
+        public Task NotifyPostReceive(ReceiveContext context)
         {
-            Notify(x => x.PostReceive(context));
+            return ForEachAsync(x => x.PostReceive(context));
         }
 
-        public void NotifyPostConsume<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType)
+        public Task NotifyPostConsume<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType)
             where T : class
         {
-            Notify(x => x.PostConsume(context, duration, consumerType));
+            return ForEachAsync(x => x.PostConsume(context, duration, consumerType));
         }
 
-        public void NotifyConsumeFault<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType, Exception exception)
+        public Task NotifyConsumeFault<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType, Exception exception)
             where T : class
         {
-            Notify(x => x.ConsumeFault(context, duration, consumerType, exception));
+            return ForEachAsync(x => x.ConsumeFault(context, duration, consumerType, exception));
         }
 
-        public void NotifyReceiveFault(ReceiveContext context, Exception exception)
+        public Task NotifyReceiveFault(ReceiveContext context, Exception exception)
         {
-            Notify(x => x.ReceiveFault(context, exception));
+            return ForEachAsync(x => x.ReceiveFault(context, exception));
         }
 
         Task IReceiveObserver.PreReceive(ReceiveContext context)
         {
-            NotifyPreReceive(context);
-
-            return TaskUtil.Completed;
+            return NotifyPreReceive(context);
         }
 
         Task IReceiveObserver.PostReceive(ReceiveContext context)
         {
-            NotifyPostReceive(context);
-
-            return TaskUtil.Completed;
+            return NotifyPostReceive(context);
         }
 
         Task IReceiveObserver.PostConsume<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType)
         {
-            NotifyPostConsume(context, duration, consumerType);
-
-            return TaskUtil.Completed;
+            return NotifyPostConsume(context, duration, consumerType);
         }
 
         Task IReceiveObserver.ConsumeFault<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType, Exception exception)
         {
-            NotifyConsumeFault(context, duration, consumerType, exception);
-
-            return TaskUtil.Completed;
+            return NotifyConsumeFault(context, duration, consumerType, exception);
         }
 
         Task IReceiveObserver.ReceiveFault(ReceiveContext context, Exception exception)
         {
-            NotifyReceiveFault(context, exception);
-
-            return TaskUtil.Completed;
+            return NotifyReceiveFault(context, exception);
         }
     }
 }

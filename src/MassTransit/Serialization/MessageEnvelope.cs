@@ -25,7 +25,7 @@ namespace MassTransit.Serialization
         string DestinationAddress { get; }
         string ResponseAddress { get; }
         string FaultAddress { get; }
-        IList<string> MessageType { get; }
+        string[] MessageType { get; }
         object Message { get; }
         DateTime? ExpirationTime { get; }
         IDictionary<string, object> Headers { get; }

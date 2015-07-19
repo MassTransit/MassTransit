@@ -16,7 +16,6 @@ namespace MassTransit.Transports.InMemory
     using System.IO;
     using System.Threading;
     using System.Threading.Tasks;
-    using Internals.Extensions;
     using Logging;
     using Pipeline;
     using Util;
@@ -32,7 +31,6 @@ namespace MassTransit.Transports.InMemory
         IDisposable
     {
         static readonly ILog _log = Logger.Get<InMemoryTransport>();
-        readonly int _concurrencyLimit;
 
         readonly Uri _inputAddress;
         readonly SendObservable _observers;
@@ -44,7 +42,6 @@ namespace MassTransit.Transports.InMemory
         public InMemoryTransport(Uri inputAddress, int concurrencyLimit)
         {
             _inputAddress = inputAddress;
-            _concurrencyLimit = concurrencyLimit;
 
             _observers = new SendObservable();
             _receiveObservers = new ReceiveObservable();
@@ -91,7 +88,7 @@ namespace MassTransit.Transports.InMemory
 
                 Guid messageId = context.MessageId ?? NewId.NextGuid();
 
-                _observers.NotifyPreSend(context);
+                await _observers.NotifyPreSend(context);
 
                 var transportMessage = new InMemoryTransportMessage(messageId, context.Body, context.ContentType.MediaType, TypeMetadataCache<T>.ShortName);
 
@@ -100,13 +97,13 @@ namespace MassTransit.Transports.InMemory
                 context.DestinationAddress.LogSent(context.MessageId.HasValue ? context.MessageId.Value.ToString("N") : "",
                     TypeMetadataCache<T>.ShortName);
 
-                _observers.NotifyPostSend(context);
+                await _observers.NotifyPostSend(context);
             }
             catch (Exception ex)
             {
                 _log.Error(string.Format("SEND FAULT: {0} {1} {2}", _inputAddress, context.MessageId, TypeMetadataCache<T>.ShortName));
 
-                _observers.NotifySendFault(context, ex);
+                _observers.NotifySendFault(context, ex).Wait(cancelSend);
 
                 throw;
             }
@@ -147,25 +144,28 @@ namespace MassTransit.Transports.InMemory
 
             var context = new InMemoryReceiveContext(_inputAddress, message, _receiveObservers);
 
+            Exception exception = null;
             try
             {
-                _receiveObservers.NotifyPreReceive(context);
+                await _receiveObservers.NotifyPreReceive(context);
 
                 _receivePipe.Send(context).ConfigureAwait(false);
 
                 await context.CompleteTask.ConfigureAwait(false);
 
-                _receiveObservers.NotifyPostReceive(context);
+                await _receiveObservers.NotifyPostReceive(context);
 
                 _inputAddress.LogReceived(message.MessageId.ToString("N"), message.MessageType);
             }
             catch (Exception ex)
             {
+                exception = ex;
                 message.DeliveryCount++;
                 _log.Error(string.Format("RCV FAULT: {0}", message.MessageId), ex);
-
-                _receiveObservers.NotifyReceiveFault(context, ex);
             }
+
+            if (exception != null)
+                await _receiveObservers.NotifyReceiveFault(context, exception);
         }
 
         async Task<byte[]> GetMessageBody(Stream body)

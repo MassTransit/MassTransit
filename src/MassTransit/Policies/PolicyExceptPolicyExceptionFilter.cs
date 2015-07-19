@@ -13,30 +13,36 @@
 namespace MassTransit.Policies
 {
     using System;
-    using System.Threading.Tasks;
+    using System.Linq;
+    using Util;
 
 
-    public class FilterRetryExceptionFilter<T> :
-        IRetryExceptionFilter
-        where T : Exception
+    public class PolicyExceptPolicyExceptionFilter :
+        IPolicyExceptionFilter
     {
-        readonly Func<T, bool> _filter;
+        readonly Type[] _exceptionTypes;
 
-        public FilterRetryExceptionFilter(Func<T, bool> filter)
+        public PolicyExceptPolicyExceptionFilter(params Type[] exceptionTypes)
         {
-            _filter = filter;
+            _exceptionTypes = exceptionTypes;
         }
 
         void IProbeSite.Probe(ProbeContext context)
         {
-            ProbeContext scope = context.CreateScope("filter");
+            ProbeContext scope = context.CreateScope("except");
+            scope.Set(new
+            {
+                ExceptionTypes = _exceptionTypes.Select(TypeMetadataCache.GetShortName).ToArray(),
+            });
         }
 
-        public bool CanRetry(Exception exception)
+        public bool Match(Exception exception)
         {
-            var ex = exception as T;
-            if (ex != null)
-                return _filter(ex);
+            for (int i = 0; i < _exceptionTypes.Length; i++)
+            {
+                if (_exceptionTypes[i].IsInstanceOfType(exception))
+                    return false;
+            }
 
             return true;
         }

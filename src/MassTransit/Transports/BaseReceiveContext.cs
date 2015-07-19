@@ -38,6 +38,8 @@ namespace MassTransit.Transports
         readonly INotifyReceiveObserver _receiveObserver;
         readonly Stopwatch _receiveTimer;
         readonly bool _redelivered;
+        bool _isDelivered;
+        bool _isFaulted;
 
         protected BaseReceiveContext(Uri inputAddress, bool redelivered, INotifyReceiveObserver receiveObserver)
         {
@@ -59,6 +61,16 @@ namespace MassTransit.Transports
         }
 
         protected abstract IHeaderProvider HeaderProvider { get; }
+
+        bool ReceiveContext.IsDelivered
+        {
+            get { return _isDelivered; }
+        }
+
+        bool ReceiveContext.IsFaulted
+        {
+            get { return _isFaulted; }
+        }
 
         public Task CompleteTask
         {
@@ -104,11 +116,13 @@ namespace MassTransit.Transports
 
         void ReceiveContext.NotifyConsumed<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType)
         {
+            _isDelivered = true;
             _receiveObserver.NotifyPostConsume(context, duration, consumerType);
         }
 
         async Task ReceiveContext.NotifyFaulted<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType, Exception exception)
         {
+            _isFaulted = true;
             _receiveObserver.NotifyConsumeFault(context, duration, consumerType, exception);
         }
 

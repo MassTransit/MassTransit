@@ -27,7 +27,7 @@ namespace MassTransit.Util
     public class AsyncObservable<T>
         where T : class
     {
-        public delegate Task ObserverNotification(T observer);
+        public delegate void ObserverNotification(T observer);
 
 
         readonly ConcurrentDictionary<long, Handle> _connections;
@@ -100,7 +100,6 @@ namespace MassTransit.Util
             readonly long _id;
             readonly Task _notifyTask;
             readonly T _observer;
-            readonly QueuedTaskScheduler _scheduler;
 
             public Handle(long id, T observer, Action<long> disconnect)
             {
@@ -109,8 +108,6 @@ namespace MassTransit.Util
                 _observer = observer;
 
                 _cancellation = new CancellationTokenSource();
-
-                _scheduler = new QueuedTaskScheduler(TaskScheduler.Default, 1);
             }
 
             public void Disconnect()
@@ -121,14 +118,11 @@ namespace MassTransit.Util
             void IDisposable.Dispose()
             {
                 Disconnect();
-
-                _scheduler.Dispose();
             }
 
             public void Notify(ObserverNotification notification)
             {
-                Task.Factory.StartNew(() => notification(_observer),
-                    _cancellation.Token, TaskCreationOptions.HideScheduler, _scheduler);
+                notification(_observer);
             }
         }
     }

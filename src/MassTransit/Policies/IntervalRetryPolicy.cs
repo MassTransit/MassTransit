@@ -20,10 +20,10 @@ namespace MassTransit.Policies
     public class IntervalRetryPolicy :
         IRetryPolicy
     {
-        readonly IRetryExceptionFilter _filter;
+        readonly IPolicyExceptionFilter _filter;
         readonly TimeSpan[] _intervals;
 
-        public IntervalRetryPolicy(IRetryExceptionFilter filter, params TimeSpan[] intervals)
+        public IntervalRetryPolicy(IPolicyExceptionFilter filter, params TimeSpan[] intervals)
         {
             if (intervals == null)
                 throw new ArgumentNullException("intervals");
@@ -34,7 +34,7 @@ namespace MassTransit.Policies
             _intervals = intervals;
         }
 
-        public IntervalRetryPolicy(IRetryExceptionFilter filter, params int[] intervals)
+        public IntervalRetryPolicy(IPolicyExceptionFilter filter, params int[] intervals)
         {
             if (intervals == null)
                 throw new ArgumentNullException("intervals");
@@ -64,7 +64,7 @@ namespace MassTransit.Policies
 
         public bool CanRetry(Exception exception)
         {
-            return _filter.CanRetry(exception);
+            return _filter.Match(exception);
         }
 
         public override string ToString()

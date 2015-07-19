@@ -122,6 +122,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
             context.GetOrAddPayload(() => _receiveSettings);
             context.GetOrAddPayload(() => _model);
 
+            Exception exception = null;
             try
             {
                 if (!_pending.TryAdd(deliveryTag, context))
@@ -130,7 +131,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
                         _log.ErrorFormat("Duplicate BasicDeliver: {0}", deliveryTag);
                 }
 
-                _receiveObserver.NotifyPreReceive(context);
+                await _receiveObserver.NotifyPreReceive(context);
 
                 await _receivePipe.Send(context);
 
@@ -138,13 +139,12 @@ namespace MassTransit.RabbitMqTransport.Pipeline
 
                 _model.BasicAck(deliveryTag, false);
 
-                _receiveObserver.NotifyPostReceive(context);
+                await _receiveObserver.NotifyPostReceive(context);
             }
             catch (Exception ex)
             {
+                exception = ex;
                 _model.BasicNack(deliveryTag, false, true);
-
-                _receiveObserver.NotifyReceiveFault(context, ex);
             }
             finally
             {
@@ -153,6 +153,9 @@ namespace MassTransit.RabbitMqTransport.Pipeline
                 RabbitMqReceiveContext ignored;
                 _pending.TryRemove(deliveryTag, out ignored);
             }
+
+            if (exception != null)
+                await _receiveObserver.NotifyReceiveFault(context, exception);
         }
 
         public IModel Model

@@ -44,5 +44,10 @@ namespace MassTransit.EndpointConfigurators
         {
             return new Uri(string.Format("loopback://localhost/{0}_error", _queueName));
         }
+
+        protected override Uri GetDeadLetterAddress()
+        {
+            return new Uri(string.Format("loopback://localhost/{0}_skipped", _queueName));
+        }
     }
 }

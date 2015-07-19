@@ -161,6 +161,14 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
             return _host.Settings.GetInputAddress(errorQueueDescription);
         }
 
+        protected override Uri GetDeadLetterAddress()
+        {
+            string errorQueueName = _queueDescription.Path + "_skipped";
+            var errorQueueDescription = new QueueDescription(errorQueueName);
+
+            return _host.Settings.GetInputAddress(errorQueueDescription);
+        }
+
 
         class ReceiveEndpointSettings :
             ReceiveSettings

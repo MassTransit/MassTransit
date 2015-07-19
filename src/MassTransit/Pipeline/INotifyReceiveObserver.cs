@@ -13,6 +13,7 @@
 namespace MassTransit.Pipeline
 {
     using System;
+    using System.Threading.Tasks;
 
 
     /// <summary>
@@ -26,14 +27,14 @@ namespace MassTransit.Pipeline
         /// </summary>
         /// <param name="context">The receive context of the message</param>
         /// <returns></returns>
-        void NotifyPreReceive(ReceiveContext context);
+        Task NotifyPreReceive(ReceiveContext context);
 
         /// <summary>
         /// Called when the message has been received and acknowledged on the transport
         /// </summary>
         /// <param name="context">The receive context of the message</param>
         /// <returns></returns>
-        void NotifyPostReceive(ReceiveContext context);
+        Task NotifyPostReceive(ReceiveContext context);
 
         /// <summary>
         /// Called when a message has been consumed by a consumer
@@ -43,7 +44,7 @@ namespace MassTransit.Pipeline
         /// <param name="duration">The consumer duration</param>
         /// <param name="consumerType">The consumer type</param>
         /// <returns></returns>
-        void NotifyPostConsume<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType)
+        Task NotifyPostConsume<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType)
             where T : class;
 
         /// <summary>
@@ -55,7 +56,7 @@ namespace MassTransit.Pipeline
         /// <param name="consumerType"></param>
         /// <param name="exception"></param>
         /// <returns></returns>
-        void NotifyConsumeFault<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType, Exception exception)
+        Task NotifyConsumeFault<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType, Exception exception)
             where T : class;
 
         /// <summary>
@@ -64,6 +65,6 @@ namespace MassTransit.Pipeline
         /// <param name="context">The receive context of the message</param>
         /// <param name="exception">The exception that was thrown</param>
         /// <returns></returns>
-        void NotifyReceiveFault(ReceiveContext context, Exception exception);
+        Task NotifyReceiveFault(ReceiveContext context, Exception exception);
     }
 }

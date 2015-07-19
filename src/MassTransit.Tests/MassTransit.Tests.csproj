@@ -162,6 +162,7 @@
     <Compile Include="SerializationSupport_Specs.cs" />
     <Compile Include="Serialization\Array_Specs.cs" />
     <Compile Include="Serialization\DateTimeFormat_Specs.cs" />
+    <Compile Include="Serialization\IEnumerable_Specs.cs" />
     <Compile Include="Serialization\MessageDataSerialization_Specs.cs" />
     <Compile Include="Serialization\SerializationException_Specs.cs" />
     <Compile Include="InMemoryTest_Specs.cs" />

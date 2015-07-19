@@ -155,7 +155,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
                 Assert.AreEqual(message.Id, received.Message.Id);
 
-                var consumeContext = await _receivedGotA;
+                ConsumeContext<GotA> consumeContext = await _receivedGotA;
 
                 consumeContext.SourceAddress.ToString().ShouldBe("rabbitmq://[::1]:5672/test/input_queue?prefetch=16");
             }
@@ -226,6 +226,44 @@ namespace MassTransit.RabbitMqTransport.Tests
                 var message = new UnboundMessage {Id = Guid.NewGuid()};
 
                 await Bus.Publish(message);
+            }
+
+
+            class UnboundMessage
+            {
+                public Guid Id { get; set; }
+            }
+        }
+
+
+        [TestFixture]
+        public class When_a_message_is_sent_with_no_subscriber :
+            RabbitMqTestFixture
+        {
+            [Test]
+            public async Task Should_not_throw_an_exception()
+            {
+                var message = new UnboundMessage {Id = Guid.NewGuid()};
+
+                await InputQueueSendEndpoint.Send(message);
+
+                await InputQueueSendEndpoint.Send(new B());
+
+                _consumer.Received.Select<B>().Any().ShouldBe(true);
+            }
+
+            MultiTestConsumer _consumer;
+
+            protected override void ConfigureInputQueueEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
+            {
+                base.ConfigureInputQueueEndpoint(configurator);
+
+                configurator.UseConcurrencyLimit(1);
+
+                _consumer = new MultiTestConsumer(TestTimeout);
+                _consumer.Consume<B>();
+
+                _consumer.Configure(configurator);
             }
 
 

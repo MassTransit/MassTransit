@@ -41,11 +41,11 @@ namespace MassTransit.Transports
                 foreach (ISendEndpoint endpoint in await _endpointProvider.GetPublishEndpoints(typeof(T)).ConfigureAwait(false))
                     await endpoint.Send(message, adapter, cancellationToken).ConfigureAwait(false);
 
-                adapter.PostPublish();
+                await adapter.PostPublish();
             }
             catch (Exception ex)
             {
-                adapter.PublishFaulted(ex);
+                adapter.PublishFaulted(ex).Wait(cancellationToken);
                 throw;
             }
         }
@@ -58,11 +58,11 @@ namespace MassTransit.Transports
                 foreach (ISendEndpoint endpoint in await _endpointProvider.GetPublishEndpoints(typeof(T)).ConfigureAwait(false))
                     await endpoint.Send(message, adapter, cancellationToken).ConfigureAwait(false);
 
-                adapter.PostPublish();
+                await adapter.PostPublish();
             }
             catch (Exception ex)
             {
-                adapter.PublishFaulted(ex);
+                adapter.PublishFaulted(ex).Wait(cancellationToken);
                 throw;
             }
         }
@@ -75,11 +75,11 @@ namespace MassTransit.Transports
                 foreach (ISendEndpoint endpoint in await _endpointProvider.GetPublishEndpoints(typeof(T)).ConfigureAwait(false))
                     await endpoint.Send(message, adapter, cancellationToken).ConfigureAwait(false);
 
-                adapter.PostPublish();
+                await adapter.PostPublish();
             }
             catch (Exception ex)
             {
-                adapter.PublishFaulted(ex);
+                adapter.PublishFaulted(ex).Wait(cancellationToken);
                 throw;
             }
         }
@@ -122,11 +122,11 @@ namespace MassTransit.Transports
                 foreach (ISendEndpoint endpoint in await _endpointProvider.GetPublishEndpoints(typeof(T)).ConfigureAwait(false))
                     await endpoint.Send(values, adapter, cancellationToken).ConfigureAwait(false);
 
-                adapter.PostPublish();
+                await adapter.PostPublish();
             }
             catch (Exception ex)
             {
-                adapter.PublishFaulted(ex);
+                adapter.PublishFaulted(ex).Wait(cancellationToken);
                 throw;
             }
         }
@@ -140,11 +140,11 @@ namespace MassTransit.Transports
                 foreach (ISendEndpoint endpoint in await _endpointProvider.GetPublishEndpoints(typeof(T)).ConfigureAwait(false))
                     await endpoint.Send(values, adapter, cancellationToken).ConfigureAwait(false);
 
-                adapter.PostPublish();
+                await adapter.PostPublish();
             }
             catch (Exception ex)
             {
-                adapter.PublishFaulted(ex);
+                adapter.PublishFaulted(ex).Wait(cancellationToken);
                 throw;
             }
         }
@@ -158,11 +158,11 @@ namespace MassTransit.Transports
                 foreach (ISendEndpoint endpoint in await _endpointProvider.GetPublishEndpoints(typeof(T)).ConfigureAwait(false))
                     await endpoint.Send(values, adapter, cancellationToken).ConfigureAwait(false);
 
-                adapter.PostPublish();
+                await adapter.PostPublish();
             }
             catch (Exception ex)
             {
-                adapter.PublishFaulted(ex);
+                adapter.PublishFaulted(ex).Wait(cancellationToken);
                 throw;
             }
         }

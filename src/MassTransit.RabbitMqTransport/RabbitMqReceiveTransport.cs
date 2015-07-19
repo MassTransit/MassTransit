@@ -19,7 +19,6 @@ namespace MassTransit.RabbitMqTransport
     using Internals.Extensions;
     using Logging;
     using MassTransit.Pipeline;
-    using Monitoring.Introspection;
     using Policies;
     using Topology;
     using Transports;

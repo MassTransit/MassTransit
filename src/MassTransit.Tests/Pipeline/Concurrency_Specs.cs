@@ -27,7 +27,7 @@ namespace MassTransit.Tests.Pipeline
     [TestFixture]
     public class Specifying_a_concurrency_limit
     {
-        [Test, Explicit]
+        [Test]
         public async Task Should_prevent_too_many_threads_at_one_time()
         {
             int currentCount = 0;
@@ -59,7 +59,7 @@ namespace MassTransit.Tests.Pipeline
             maxCount.ShouldBe(1);
         }
 
-        [Test, Explicit]
+        [Test]
         public async Task Should_allow_just_enough_threads_at_once()
         {
             int currentCount = 0;

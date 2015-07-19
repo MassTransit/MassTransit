@@ -58,6 +58,16 @@ namespace MassTransit
         Task CompleteTask { get; }
 
         /// <summary>
+        /// Returns true if the message was successfully consumed by at least one consumer
+        /// </summary>
+        bool IsDelivered { get; }
+
+        /// <summary>
+        /// Returns true if a fault occurred during the message delivery
+        /// </summary>
+        bool IsFaulted { get; }
+
+        /// <summary>
         /// Notify that a message has been consumed from the received context
         /// </summary>
         /// <param name="context">The consume context of the message</param>

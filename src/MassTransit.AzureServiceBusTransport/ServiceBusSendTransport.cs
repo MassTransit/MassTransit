@@ -68,19 +68,19 @@ namespace MassTransit.AzureServiceBusTransport
                         if (context.CorrelationId.HasValue)
                             brokeredMessage.CorrelationId = context.CorrelationId.Value.ToString("N");
 
-                        _observers.NotifyPreSend(context);
+                        await _observers.NotifyPreSend(context);
 
                         await _sender.SendAsync(brokeredMessage);
 
                         _log.DebugFormat("SEND {0} ({1})", brokeredMessage.MessageId, _sender.Path);
 
-                        _observers.NotifyPostSend(context);
+                        await _observers.NotifyPostSend(context);
                     }
                 }
             }
             catch (Exception ex)
             {
-                _observers.NotifySendFault(context, ex);
+                _observers.NotifySendFault(context, ex).Wait(cancelSend);
 
                 throw;
             }

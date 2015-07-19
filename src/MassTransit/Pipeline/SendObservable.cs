@@ -13,28 +13,29 @@
 namespace MassTransit.Pipeline
 {
     using System;
+    using System.Threading.Tasks;
     using Util;
 
 
     public class SendObservable :
-        AsyncObservable<ISendObserver>
+        Connectable<ISendObserver>
     {
-        public void NotifyPreSend<T>(SendContext<T> context)
+        public Task NotifyPreSend<T>(SendContext<T> context)
             where T : class
         {
-            Notify(x => x.PreSend(context));
+            return ForEachAsync(x => x.PreSend(context));
         }
 
-        public void NotifyPostSend<T>(SendContext<T> context)
+        public Task NotifyPostSend<T>(SendContext<T> context)
             where T : class
         {
-            Notify(x => x.PostSend(context));
+            return ForEachAsync(x => x.PostSend(context));
         }
 
-        public void NotifySendFault<T>(SendContext<T> context, Exception exception)
+        public Task NotifySendFault<T>(SendContext<T> context, Exception exception)
             where T : class
         {
-            Notify(x => x.SendFault(context, exception));
+            return ForEachAsync(x => x.SendFault(context, exception));
         }
     }
 }

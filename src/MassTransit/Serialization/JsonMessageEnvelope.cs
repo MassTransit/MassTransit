@@ -19,7 +19,7 @@ namespace MassTransit.Serialization
     class JsonMessageEnvelope :
         MessageEnvelope
     {
-        public JsonMessageEnvelope(SendContext context, object message, IEnumerable<string> messageTypeNames)
+        public JsonMessageEnvelope(SendContext context, object message, string[] messageTypeNames)
         {
             if (context.MessageId.HasValue)
                 MessageId = context.MessageId.Value.ToString("N");
@@ -42,7 +42,7 @@ namespace MassTransit.Serialization
             if (context.FaultAddress != null)
                 FaultAddress = context.FaultAddress.ToString();
 
-            MessageType = new List<string>(messageTypeNames);
+            MessageType = messageTypeNames;
 
             Message = message;
 
@@ -62,7 +62,7 @@ namespace MassTransit.Serialization
         public string DestinationAddress { get; private set; }
         public string ResponseAddress { get; private set; }
         public string FaultAddress { get; private set; }
-        public IList<string> MessageType { get; private set; }
+        public string[] MessageType { get; private set; }
         public object Message { get; private set; }
         public DateTime? ExpirationTime { get; private set; }
         public IDictionary<string, object> Headers { get; private set; }
