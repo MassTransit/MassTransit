@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,7 +13,6 @@
 namespace MassTransit.Util
 {
     using System;
-    using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading;
@@ -27,12 +26,14 @@ namespace MassTransit.Util
     public class Connectable<T>
         where T : class
     {
-        readonly ConcurrentDictionary<long, T> _connections;
+        readonly Dictionary<long, T> _connections;
+        T[] _connected;
         long _nextId;
 
         public Connectable()
         {
-            _connections = new ConcurrentDictionary<long, T>();
+            _connections = new Dictionary<long, T>();
+            _connected = new T[0];
         }
 
         /// <summary>
@@ -40,7 +41,7 @@ namespace MassTransit.Util
         /// </summary>
         public int Count
         {
-            get { return _connections.Count; }
+            get { return _connected.Length; }
         }
 
         /// <summary>
@@ -55,9 +56,11 @@ namespace MassTransit.Util
 
             long id = Interlocked.Increment(ref _nextId);
 
-            bool added = _connections.TryAdd(id, connection);
-            if (!added)
-                throw new InvalidOperationException("The connection could not be added");
+            lock (_connections)
+            {
+                _connections.Add(id, connection);
+                _connected = _connections.Values.ToArray();
+            }
 
             return new Handle(id, Disconnect);
         }
@@ -67,41 +70,43 @@ namespace MassTransit.Util
         /// </summary>
         /// <param name="callback">The callback</param>
         /// <returns>An awaitable Task for the operation</returns>
-        public async Task ForEach(Func<T, Task> callback)
+        public Task ForEachAsync(Func<T, Task> callback)
         {
             if (callback == null)
                 throw new ArgumentNullException("callback");
 
-            if (_connections.Count == 0)
-                return;
-
-            var exceptions = new List<Exception>();
-
-            foreach (T connection in _connections.Values)
+            T[] connected;
+            lock (_connections)
             {
-                try
-                {
-                    await callback(connection);
-                }
-                catch (Exception ex)
-                {
-                    exceptions.Add(ex);
-                }
+                connected = _connected;
             }
 
-            if (exceptions.Count > 0)
-                throw new AggregateException(exceptions);
+            if (connected.Length == 0)
+                return TaskUtil.Completed;
+
+            if (connected.Length == 1)
+                return callback(_connections.First().Value);
+
+            return Task.WhenAll(connected.Select(callback));
         }
 
         public bool All(Func<T, bool> callback)
         {
-            return _connections.Values.All(callback);
+            T[] connected;
+            lock (_connections)
+            {
+                connected = _connected;
+            }
+            return connected.All(callback);
         }
 
         void Disconnect(long id)
         {
-            T ignored;
-            _connections.TryRemove(id, out ignored);
+            lock (_connections)
+            {
+                _connections.Remove(id);
+                _connected = _connections.Values.ToArray();
+            }
         }
 
 

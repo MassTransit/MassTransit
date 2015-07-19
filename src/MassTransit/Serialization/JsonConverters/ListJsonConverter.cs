@@ -45,16 +45,19 @@ namespace MassTransit.Serialization.JsonConverters
 
         public override bool CanConvert(Type objectType)
         {
-            if (objectType.IsGenericType
-                && (objectType.GetGenericTypeDefinition() == typeof(IList<>) || objectType.GetGenericTypeDefinition() == typeof(List<>)))
-                return true;
-
             if (objectType.IsArray)
             {
                 if (objectType.HasElementType && objectType.GetElementType() == typeof(byte))
                     return false;
 
                 return objectType.HasInterface<IEnumerable>();
+            }
+
+            if (objectType.IsGenericType)
+            {
+                Type definition = objectType.GetGenericTypeDefinition();
+                if ((definition == typeof(IList<>) || definition == typeof(List<>) || definition == typeof(IEnumerable<>)))
+                    return true;
             }
 
             return false;

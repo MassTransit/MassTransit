@@ -17,22 +17,25 @@ namespace MassTransit.Pipeline.Filters
     using System.Linq;
     using System.Threading.Tasks;
     using Logging;
+    using Policies;
+    using Util;
 
 
     /// <summary>
-    /// Catches a pipeline exception and determines if the rescue pipe should be passed
-    /// control of the context.
+    /// Rescue catches an exception, and if the exception matches the exception filter,
+    /// passes control to the rescue pipe.
     /// </summary>
-    /// <typeparam name="T">The filter type</typeparam>
-    public class RescueFilter<T> :
-        IFilter<T>
-        where T : class, PipeContext
+    /// <typeparam name="T">The message type</typeparam>
+    public class RescueConsumeFilter<T> :
+        IFilter<ConsumeContext<T>>
+        where T : class
     {
-        readonly RescueExceptionFilter _exceptionFilter;
-        readonly ILog _log = Logger.Get<RescueFilter<T>>();
-        readonly IPipe<T> _rescuePipe;
+        static readonly ILog _log = Logger.Get<RescueConsumeFilter<T>>();
 
-        public RescueFilter(IPipe<T> rescuePipe, RescueExceptionFilter exceptionFilter)
+        readonly IPolicyExceptionFilter _exceptionFilter;
+        readonly IPipe<ConsumeContext<T>> _rescuePipe;
+
+        public RescueConsumeFilter(IPipe<ConsumeContext<T>> rescuePipe, IPolicyExceptionFilter exceptionFilter)
         {
             _rescuePipe = rescuePipe;
             _exceptionFilter = exceptionFilter;
@@ -46,7 +49,7 @@ namespace MassTransit.Pipeline.Filters
         }
 
         [DebuggerNonUserCode]
-        async Task IFilter<T>.Send(T context, IPipe<T> next)
+        async Task IFilter<ConsumeContext<T>>.Send(ConsumeContext<T> context, IPipe<ConsumeContext<T>> next)
         {
             Exception exception = null;
             try
@@ -55,27 +58,26 @@ namespace MassTransit.Pipeline.Filters
             }
             catch (AggregateException ex)
             {
-                if (!ex.InnerExceptions.Any(x => _exceptionFilter(x)))
+                if (ex.InnerExceptions.Any(x => _exceptionFilter.Match(x)))
+                    exception = ex;
+                else
                     throw;
-
-                exception = ex;
-
-                if (_log.IsErrorEnabled)
-                    _log.Error("Rescuing exception", ex);
             }
             catch (Exception ex)
             {
-                if (!_exceptionFilter(ex))
+                if (_exceptionFilter.Match(ex))
+                    exception = ex;
+                else
                     throw;
-
-                exception = ex;
-
-                if (_log.IsErrorEnabled)
-                    _log.Error("Rescuing exception", ex);
             }
 
             if (exception != null)
+            {
+                if (_log.IsErrorEnabled)
+                    _log.Error(string.Format("Rescue<{0}>", TypeMetadataCache<T>.ShortName), exception);
+
                 await _rescuePipe.Send(context);
+            }
         }
     }
 }

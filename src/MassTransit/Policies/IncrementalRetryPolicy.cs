@@ -20,12 +20,12 @@ namespace MassTransit.Policies
     public class IncrementalRetryPolicy :
         IRetryPolicy
     {
-        readonly IRetryExceptionFilter _filter;
+        readonly IPolicyExceptionFilter _filter;
         readonly TimeSpan _initialInterval;
         readonly TimeSpan _intervalIncrement;
         readonly int _retryLimit;
 
-        public IncrementalRetryPolicy(IRetryExceptionFilter filter, int retryLimit, TimeSpan initialInterval,
+        public IncrementalRetryPolicy(IPolicyExceptionFilter filter, int retryLimit, TimeSpan initialInterval,
             TimeSpan intervalIncrement)
         {
             if (initialInterval < TimeSpan.Zero)
@@ -66,7 +66,7 @@ namespace MassTransit.Policies
 
         public bool CanRetry(Exception exception)
         {
-            return _filter.CanRetry(exception);
+            return _filter.Match(exception);
         }
 
         IEnumerable<TimeSpan> GetIntervals(int retryLimit, TimeSpan initialInterval, TimeSpan intervalIncrement)

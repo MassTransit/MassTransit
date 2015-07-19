@@ -15,25 +15,21 @@ namespace MassTransit
     using System;
     using PipeConfigurators;
     using Pipeline;
-    using Policies;
 
 
-    public static class RescueFilterConfiguratorExtensions
+    public static class DeadLetterExtensions
     {
         /// <summary>
         /// Rescue exceptions via the alternate pipe
         /// </summary>
-        /// <typeparam name="T"></typeparam>
         /// <param name="configurator"></param>
         /// <param name="rescuePipe"></param>
-        /// <param name="exceptionFilter"></param>
-        public static void UseRescue(this IPipeConfigurator<ReceiveContext> configurator, IPipe<ExceptionReceiveContext> rescuePipe,
-            IPolicyExceptionFilter exceptionFilter = null)
+        public static void UseDeadLetterQueue(this IPipeConfigurator<ReceiveContext> configurator, IPipe<ReceiveContext> rescuePipe)
         {
             if (configurator == null)
                 throw new ArgumentNullException("configurator");
 
-            var rescueConfigurator = new ReceiveContextRescuePipeSpecification(rescuePipe, exceptionFilter);
+            var rescueConfigurator = new DeadLetterPipeSpecification(rescuePipe);
 
             configurator.AddPipeSpecification(rescueConfigurator);
         }

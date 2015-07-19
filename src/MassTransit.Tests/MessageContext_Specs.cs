@@ -163,6 +163,7 @@ namespace MassTransit.Tests
                 {
                     Console.WriteLine("Response received");
                 });
+                x.Timeout = TestTimeout;
             });
         }
 

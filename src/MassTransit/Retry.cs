@@ -19,7 +19,7 @@ namespace MassTransit
 
     public static class Retry
     {
-        static readonly IRetryExceptionFilter _all = new RetryAllRetryExceptionFilter();
+        static readonly IPolicyExceptionFilter _all = new AllPolicyExceptionFilter();
         static readonly IRetryPolicy _none = new NoRetryPolicy();
 
         /// <summary>
@@ -48,7 +48,7 @@ namespace MassTransit
         /// <param name="filter"></param>
         /// <param name="retryLimit">The number of retries to attempt</param>
         /// <returns></returns>
-        public static IRetryPolicy Immediate(this IRetryExceptionFilter filter, int retryLimit)
+        public static IRetryPolicy Immediate(this IPolicyExceptionFilter filter, int retryLimit)
         {
             return new ImmediateRetryPolicy(filter, retryLimit);
         }
@@ -71,7 +71,7 @@ namespace MassTransit
         /// <param name="filter"></param>
         /// <param name="intervals">The intervals before each subsequent retry attempt</param>
         /// <returns></returns>
-        public static IRetryPolicy Intervals(this IRetryExceptionFilter filter, params TimeSpan[] intervals)
+        public static IRetryPolicy Intervals(this IPolicyExceptionFilter filter, params TimeSpan[] intervals)
         {
             return new IntervalRetryPolicy(filter, intervals);
         }
@@ -95,7 +95,7 @@ namespace MassTransit
         /// <param name="filter"></param>
         /// <param name="intervals">The intervals before each subsequent retry attempt</param>
         /// <returns></returns>
-        public static IRetryPolicy Intervals(this IRetryExceptionFilter filter, params int[] intervals)
+        public static IRetryPolicy Intervals(this IPolicyExceptionFilter filter, params int[] intervals)
         {
             return new IntervalRetryPolicy(filter, intervals);
         }
@@ -129,7 +129,7 @@ namespace MassTransit
         /// <param name="retryCount">The number of retry attempts</param>
         /// <param name="interval">The interval between each retry attempt</param>
         /// <returns></returns>
-        public static IRetryPolicy Interval(this IRetryExceptionFilter filter, int retryCount, TimeSpan interval)
+        public static IRetryPolicy Interval(this IPolicyExceptionFilter filter, int retryCount, TimeSpan interval)
         {
             return new IntervalRetryPolicy(filter, Enumerable.Repeat(interval, retryCount).ToArray());
         }
@@ -172,7 +172,7 @@ namespace MassTransit
         /// <param name="maxInterval"></param>
         /// <param name="intervalDelta"></param>
         /// <returns></returns>
-        public static IRetryPolicy Exponential(this IRetryExceptionFilter filter, int retryLimit,
+        public static IRetryPolicy Exponential(this IPolicyExceptionFilter filter, int retryLimit,
             TimeSpan minInterval, TimeSpan maxInterval,
             TimeSpan intervalDelta)
         {
@@ -202,7 +202,7 @@ namespace MassTransit
         /// <param name="initialInterval">The initial retry interval</param>
         /// <param name="intervalIncrement">The interval to add to the retry interval with each subsequent retry</param>
         /// <returns></returns>
-        public static IRetryPolicy Incremental(this IRetryExceptionFilter filter, int retryLimit,
+        public static IRetryPolicy Incremental(this IPolicyExceptionFilter filter, int retryLimit,
             TimeSpan initialInterval,
             TimeSpan intervalIncrement)
         {
@@ -214,36 +214,36 @@ namespace MassTransit
         /// </summary>
         /// <param name="exceptionTypes"></param>
         /// <returns></returns>
-        public static IRetryExceptionFilter Except(params Type[] exceptionTypes)
+        public static IPolicyExceptionFilter Except(params Type[] exceptionTypes)
         {
-            return new RetryExceptRetryExceptionFilter(exceptionTypes);
+            return new PolicyExceptPolicyExceptionFilter(exceptionTypes);
         }
 
         /// <summary>
         /// Retry all exceptions except for the exception types specified
         /// </summary>
         /// <returns></returns>
-        public static IRetryExceptionFilter Except<T1>()
+        public static IPolicyExceptionFilter Except<T1>()
         {
-            return new RetryExceptRetryExceptionFilter(typeof(T1));
+            return new PolicyExceptPolicyExceptionFilter(typeof(T1));
         }
 
         /// <summary>
         /// Retry all exceptions except for the exception types specified
         /// </summary>
         /// <returns></returns>
-        public static IRetryExceptionFilter Except<T1, T2>()
+        public static IPolicyExceptionFilter Except<T1, T2>()
         {
-            return new RetryExceptRetryExceptionFilter(typeof(T1), typeof(T2));
+            return new PolicyExceptPolicyExceptionFilter(typeof(T1), typeof(T2));
         }
 
         /// <summary>
         /// Retry all exceptions except for the exception types specified
         /// </summary>
         /// <returns></returns>
-        public static IRetryExceptionFilter Except<T1, T2, T3>()
+        public static IPolicyExceptionFilter Except<T1, T2, T3>()
         {
-            return new RetryExceptRetryExceptionFilter(typeof(T1), typeof(T2), typeof(T3));
+            return new PolicyExceptPolicyExceptionFilter(typeof(T1), typeof(T2), typeof(T3));
         }
 
         /// <summary>
@@ -251,43 +251,43 @@ namespace MassTransit
         /// </summary>
         /// <param name="exceptionTypes"></param>
         /// <returns></returns>
-        public static IRetryExceptionFilter Selected(params Type[] exceptionTypes)
+        public static IPolicyExceptionFilter Selected(params Type[] exceptionTypes)
         {
-            return new RetrySelectedRetryExceptionFilter(exceptionTypes);
+            return new PolicySelectedPolicyExceptionFilter(exceptionTypes);
         }
 
         /// <summary>
         /// Retry only the exception types specified
         /// </summary>
         /// <returns></returns>
-        public static IRetryExceptionFilter Selected<T1>()
+        public static IPolicyExceptionFilter Selected<T1>()
         {
-            return new RetrySelectedRetryExceptionFilter(typeof(T1));
+            return new PolicySelectedPolicyExceptionFilter(typeof(T1));
         }
 
         /// <summary>
         /// Retry only the exception types specified
         /// </summary>
         /// <returns></returns>
-        public static IRetryExceptionFilter Selected<T1, T2>()
+        public static IPolicyExceptionFilter Selected<T1, T2>()
         {
-            return new RetrySelectedRetryExceptionFilter(typeof(T1), typeof(T2));
+            return new PolicySelectedPolicyExceptionFilter(typeof(T1), typeof(T2));
         }
 
         /// <summary>
         /// Retry only the exception types specified
         /// </summary>
         /// <returns></returns>
-        public static IRetryExceptionFilter Selected<T1, T2, T3>()
+        public static IPolicyExceptionFilter Selected<T1, T2, T3>()
         {
-            return new RetrySelectedRetryExceptionFilter(typeof(T1), typeof(T2), typeof(T3));
+            return new PolicySelectedPolicyExceptionFilter(typeof(T1), typeof(T2), typeof(T3));
         }
 
         /// <summary>
         /// Retry all exceptions
         /// </summary>
         /// <returns></returns>
-        public static IRetryExceptionFilter All()
+        public static IPolicyExceptionFilter All()
         {
             return _all;
         }
@@ -298,10 +298,10 @@ namespace MassTransit
         /// <typeparam name="T">The exception type</typeparam>
         /// <param name="filter">The filter expression</param>
         /// <returns>True if the exception should be retried, otherwise false</returns>
-        public static IRetryExceptionFilter Filter<T>(Func<T, bool> filter)
+        public static IPolicyExceptionFilter Filter<T>(Func<T, bool> filter)
             where T : Exception
         {
-            return new FilterRetryExceptionFilter<T>(filter);
+            return new FilterPolicyExceptionFilter<T>(filter);
         }
     }
 }

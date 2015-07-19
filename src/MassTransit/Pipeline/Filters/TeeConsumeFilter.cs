@@ -59,7 +59,7 @@ namespace MassTransit.Pipeline.Filters
         [DebuggerNonUserCode]
         public async Task Send(ConsumeContext<T> context, IPipe<ConsumeContext<T>> next)
         {
-            await _connections.ForEach(async pipe => await pipe.Send(context));
+            await _connections.ForEachAsync(async pipe => await pipe.Send(context));
 
             await next.Send(context);
         }

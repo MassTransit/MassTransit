@@ -132,8 +132,6 @@ namespace MassTransit.AzureServiceBusTransport
             Exception exception = null;
             var context = new ServiceBusReceiveContext(_inputAddress, message, _receiveObserver);
 
-            _receiveObserver.NotifyPreReceive(context);
-
             try
             {
                 if (_shuttingDown)
@@ -143,13 +141,15 @@ namespace MassTransit.AzureServiceBusTransport
                     throw new TransportException(_inputAddress, "Transport shutdown in progress, abandoning message");
                 }
 
+                await _receiveObserver.NotifyPreReceive(context);
+
                 await _receivePipe.Send(context);
 
                 await context.CompleteTask;
 
                 await message.CompleteAsync();
 
-                _receiveObserver.NotifyPostReceive(context);
+                await _receiveObserver.NotifyPostReceive(context);
 
                 if (_log.IsDebugEnabled)
                     _log.DebugFormat("Receive completed: {0}", message.MessageId);
@@ -166,7 +166,7 @@ namespace MassTransit.AzureServiceBusTransport
                 if (exception != null)
                 {
                     await message.AbandonAsync();
-                    _receiveObserver.NotifyReceiveFault(context, exception);
+                    await _receiveObserver.NotifyReceiveFault(context, exception);
                 }
             }
             finally

@@ -12,7 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.Pipeline
 {
-    using System;
     using System.Threading.Tasks;
     using MassTransit.Pipeline;
     using NUnit.Framework;
@@ -31,7 +30,7 @@ namespace MassTransit.Tests.Pipeline
 
             filter.ConnectHandler<MessageA>(async context =>
             {
-                throw new InvalidOperationException("This is a test");
+                throw new IntentionalTestException("This is a test");
             });
 
             TestConsumeObserver<MessageA> interceptor = GetConsumeObserver<MessageA>();
@@ -39,11 +38,9 @@ namespace MassTransit.Tests.Pipeline
 
             ConsumeContext consumeContext = GetConsumeContext(new MessageA());
 
-            Assert.Throws<AggregateException>(async () => await filter.Send(consumeContext));
+            Assert.Throws<IntentionalTestException>(async () => await filter.Send(consumeContext));
 
-            var exception = Assert.Throws<AggregateException>(async () => await interceptor.DispatchedFaulted);
-
-            Assert.IsInstanceOf<InvalidOperationException>(exception.InnerException);
+            Assert.Throws<IntentionalTestException>(async () => await interceptor.DispatchedFaulted);
         }
 
         [Test]

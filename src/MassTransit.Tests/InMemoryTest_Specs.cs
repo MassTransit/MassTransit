@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -15,7 +15,6 @@ namespace MassTransit.Tests
     using System;
     using System.Linq;
     using System.Threading.Tasks;
-    using EndpointConfigurators;
     using NUnit.Framework;
     using TestFramework;
 
@@ -25,22 +24,16 @@ namespace MassTransit.Tests
         InMemoryTestFixture
     {
         [Test]
-        public void Should_start_the_handler_properly()
-        {
-        }
-
-        [Test]
         public async Task Should_be_received_by_the_handler()
         {
             await InputQueueSendEndpoint.Send(new A());
 
             await _receivedA;
-        
-            Assert.IsTrue(Sent.Select<A>().Any());
+        }
 
-            var message = Sent.Select<A>().First();
-
-            Assert.AreEqual(InputQueueAddress, message.Context.DestinationAddress);
+        [Test]
+        public void Should_start_the_handler_properly()
+        {
         }
 
         Task<ConsumeContext<A>> _receivedA;
@@ -53,7 +46,7 @@ namespace MassTransit.Tests
 
         protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
         {
-            _receivedA = Handler<A>(configurator, async (context) => Console.WriteLine("Hi"));
+            _receivedA = Handler<A>(configurator, async context => Console.WriteLine("Hi"));
         }
     }
 
@@ -70,8 +63,6 @@ namespace MassTransit.Tests
             await InputQueueSendEndpoint.Send(message);
 
             await _receivedA;
-
-            Assert.IsTrue(Sent.Select<A>().Any());
         }
 
         Task<ConsumeContext<A>> _receivedA;

@@ -14,20 +14,19 @@ namespace MassTransit.Policies
 {
     using System;
     using System.Collections.Generic;
-    using System.Threading.Tasks;
 
 
     public class ExponentialRetryPolicy :
         IRetryPolicy
     {
-        readonly IRetryExceptionFilter _filter;
+        readonly IPolicyExceptionFilter _filter;
         readonly int _highInterval;
         readonly int _lowInterval;
         readonly int _maxInterval;
         readonly int _minInterval;
         readonly int _retryLimit;
 
-        public ExponentialRetryPolicy(IRetryExceptionFilter filter, int retryLimit, TimeSpan minInterval,
+        public ExponentialRetryPolicy(IPolicyExceptionFilter filter, int retryLimit, TimeSpan minInterval,
             TimeSpan maxInterval, TimeSpan intervalDelta)
         {
             _filter = filter;
@@ -61,7 +60,7 @@ namespace MassTransit.Policies
 
         public bool CanRetry(Exception exception)
         {
-            return _filter.CanRetry(exception);
+            return _filter.Match(exception);
         }
 
         IEnumerable<TimeSpan> GetIntervals()

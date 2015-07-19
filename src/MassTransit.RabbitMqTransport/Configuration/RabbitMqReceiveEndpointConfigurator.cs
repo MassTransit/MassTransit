@@ -130,10 +130,18 @@ namespace MassTransit.RabbitMqTransport.Configuration
 
             sendSettings.BindToQueue(errorQueueName);
 
-            Uri errorQueueAddress = _host.Settings.GetSendAddress(sendSettings);
+            return _host.Settings.GetSendAddress(sendSettings);
+        }
 
+        protected override Uri GetDeadLetterAddress()
+        {
+            string errorQueueName = _settings.QueueName + "_skipped";
+            var sendSettings = new RabbitMqSendSettings(errorQueueName, RabbitMQ.Client.ExchangeType.Fanout, true,
+                false);
 
-            return errorQueueAddress;
+            sendSettings.BindToQueue(errorQueueName);
+
+            return _host.Settings.GetSendAddress(sendSettings);
         }
     }
 }

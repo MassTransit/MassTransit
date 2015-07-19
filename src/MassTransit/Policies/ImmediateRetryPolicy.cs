@@ -20,10 +20,10 @@ namespace MassTransit.Policies
     public class ImmediateRetryPolicy :
         IRetryPolicy
     {
-        readonly IRetryExceptionFilter _filter;
+        readonly IPolicyExceptionFilter _filter;
         readonly int _retryLimit;
 
-        public ImmediateRetryPolicy(IRetryExceptionFilter filter, int retryLimit)
+        public ImmediateRetryPolicy(IPolicyExceptionFilter filter, int retryLimit)
         {
             _filter = filter;
             _retryLimit = retryLimit;
@@ -47,7 +47,7 @@ namespace MassTransit.Policies
 
         public bool CanRetry(Exception exception)
         {
-            return _filter.CanRetry(exception);
+            return _filter.Match(exception);
         }
 
         IEnumerable<TimeSpan> GetIntervals()

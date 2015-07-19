@@ -16,19 +16,40 @@ namespace MassTransit.Context
     using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
+    using Events;
     using Pipeline;
 
 
-    public class RetryConsumeContext :
-        ConsumeContext
+    public class RescueExceptionConsumeContext<TMessage> :
+        ExceptionConsumeContext<TMessage>
+        where TMessage : class
     {
-        readonly ConsumeContext _context;
-        readonly IList<PendingFault> _pendingFaults;
+        readonly ConsumeContext<TMessage> _context;
+        readonly Exception _exception;
+        ExceptionInfo _exceptionInfo;
 
-        public RetryConsumeContext(ConsumeContext context)
+        public RescueExceptionConsumeContext(ConsumeContext<TMessage> context, Exception exception)
         {
             _context = context;
-            _pendingFaults = new List<PendingFault>();
+            _exception = exception;
+        }
+
+        Exception ExceptionConsumeContext.Exception
+        {
+            get { return _exception; }
+        }
+
+        ExceptionInfo ExceptionConsumeContext.ExceptionInfo
+        {
+            get
+            {
+                if (_exceptionInfo != null)
+                    return _exceptionInfo;
+
+                _exceptionInfo = new FaultExceptionInfo(_exception);
+
+                return _exceptionInfo;
+            }
         }
 
         Task ConsumeContext.CompleteTask
@@ -102,7 +123,7 @@ namespace MassTransit.Context
             return _context.TryGetPayload(out payload);
         }
 
-        public TPayload GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory) where TPayload : class
+        TPayload PipeContext.GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory)
         {
             return _context.GetOrAddPayload(payloadFactory);
         }
@@ -197,97 +218,29 @@ namespace MassTransit.Context
             _context.NotifyConsumed(context, duration, consumerType);
         }
 
-        ConnectHandle IPublishObserverConnector.ConnectPublishObserver(IPublishObserver observer)
+        void ConsumeContext.NotifyFaulted<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType, Exception exception)
         {
-            return _context.ConnectPublishObserver(observer);
+            _context.NotifyFaulted(context, duration, consumerType, exception);
         }
 
-        public void NotifyFaulted<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType, Exception exception) where T : class
-        {
-            _pendingFaults.Add(new PendingFault<T>(context, duration, consumerType, exception));
-        }
-
-        public bool TryGetMessage<T>(out ConsumeContext<T> consumeContext) where T : class
-        {
-            ConsumeContext<T> messageContext;
-            if (_context.TryGetMessage(out messageContext))
-            {
-                consumeContext = new MessageConsumeContext<T>(this, messageContext.Message);
-                return true;
-            }
-            consumeContext = null;
-            return false;
-        }
-
-        public void ClearPendingFaults()
-        {
-            _pendingFaults.Clear();
-        }
-
-        public void NotifyPendingFaults()
-        {
-            foreach (PendingFault pendingFault in _pendingFaults)
-                pendingFault.Notify(_context);
-        }
-
-
-        interface PendingFault
-        {
-            void Notify(ConsumeContext context);
-        }
-
-
-        class PendingFault<T> :
-            PendingFault
-            where T : class
-        {
-            readonly string _consumerType;
-            readonly ConsumeContext<T> _context;
-            readonly TimeSpan _elapsed;
-            readonly Exception _exception;
-
-            public PendingFault(ConsumeContext<T> context, TimeSpan elapsed, string consumerType, Exception exception)
-            {
-                _context = context;
-                _elapsed = elapsed;
-                _consumerType = consumerType;
-                _exception = exception;
-            }
-
-            public void Notify(ConsumeContext context)
-            {
-                context.NotifyFaulted(_context, _elapsed, _consumerType, _exception);
-            }
-        }
-    }
-
-
-    public class RetryConsumeContext<T> :
-        RetryConsumeContext,
-        ConsumeContext<T>
-        where T : class
-    {
-        readonly ConsumeContext<T> _context;
-
-        public RetryConsumeContext(ConsumeContext<T> context)
-            : base(context)
-        {
-            _context = context;
-        }
-
-        public T Message
+        TMessage ConsumeContext<TMessage>.Message
         {
             get { return _context.Message; }
         }
 
-        public void NotifyConsumed(TimeSpan duration, string consumerType)
+        void ConsumeContext<TMessage>.NotifyConsumed(TimeSpan duration, string consumerType)
         {
             _context.NotifyConsumed(duration, consumerType);
         }
 
-        public void NotifyFaulted(TimeSpan duration, string consumerType, Exception exception)
+        void ConsumeContext<TMessage>.NotifyFaulted(TimeSpan duration, string consumerType, Exception exception)
         {
-            NotifyFaulted(_context, duration, consumerType, exception);
+            _context.NotifyFaulted(this, duration, consumerType, exception);
+        }
+
+        ConnectHandle IPublishObserverConnector.ConnectPublishObserver(IPublishObserver observer)
+        {
+            return _context.ConnectPublishObserver(observer);
         }
     }
 }

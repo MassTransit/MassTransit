@@ -23,7 +23,7 @@ namespace MassTransit.Tests.Pipeline
     [TestFixture]
     public class Using_the_latest_filter_on_the_pipe
     {
-        [Test, Explicit]
+        [Test]
         public async Task Should_keep_track_of_only_the_last_value()
         {
             ILatestFilter<ConsumeContext<A>> latestFilter = null;

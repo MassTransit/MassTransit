@@ -57,6 +57,13 @@ namespace MassTransit.Tests.Performance
             _requestClient = new MessageRequestClient<PingMessage, PongMessage>(Bus, InputQueueAddress, TestTimeout);
         }
 
+        protected override void ConfigureBus(IInMemoryBusFactoryConfigurator configurator)
+        {
+            configurator.UseBsonSerializer();
+
+            base.ConfigureBus(configurator);
+        }
+
         protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
         {
             configurator.Handler<PingMessage>(async context =>

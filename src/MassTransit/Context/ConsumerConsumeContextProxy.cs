@@ -38,12 +38,12 @@ namespace MassTransit.Context
             _consumer = consumer;
         }
 
-        public Task CompleteTask
+        Task ConsumeContext.CompleteTask
         {
             get { return _context.CompleteTask; }
         }
 
-        public IEnumerable<string> SupportedMessageTypes
+        IEnumerable<string> ConsumeContext.SupportedMessageTypes
         {
             get { return _context.SupportedMessageTypes; }
         }
@@ -99,97 +99,92 @@ namespace MassTransit.Context
             return _context.Publish<T>(values, publishPipe, cancellationToken);
         }
 
-        public bool HasPayloadType(Type contextType)
+        bool PipeContext.HasPayloadType(Type contextType)
         {
             return _context.HasPayloadType(contextType);
         }
 
-        public bool TryGetPayload<TPayload>(out TPayload payload)
-            where TPayload : class
+        bool PipeContext.TryGetPayload<TPayload>(out TPayload payload)
         {
             return _context.TryGetPayload(out payload);
         }
 
-        public TPayload GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory)
-            where TPayload : class
+        TPayload PipeContext.GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory)
         {
             return _context.GetOrAddPayload(payloadFactory);
         }
 
-        public Guid? MessageId
+        Guid? MessageContext.MessageId
         {
             get { return _context.MessageId; }
         }
 
-        public Guid? RequestId
+        Guid? MessageContext.RequestId
         {
             get { return _context.RequestId; }
         }
 
-        public Guid? CorrelationId
+        Guid? MessageContext.CorrelationId
         {
             get { return _context.CorrelationId; }
         }
 
-        public DateTime? ExpirationTime
+        DateTime? MessageContext.ExpirationTime
         {
             get { return _context.ExpirationTime; }
         }
 
-        public Uri SourceAddress
+        Uri MessageContext.SourceAddress
         {
             get { return _context.SourceAddress; }
         }
 
-        public Uri DestinationAddress
+        Uri MessageContext.DestinationAddress
         {
             get { return _context.DestinationAddress; }
         }
 
-        public Uri ResponseAddress
+        Uri MessageContext.ResponseAddress
         {
             get { return _context.ResponseAddress; }
         }
 
-        public Uri FaultAddress
+        Uri MessageContext.FaultAddress
         {
             get { return _context.FaultAddress; }
         }
 
-        public Headers Headers
+        Headers MessageContext.Headers
         {
             get { return _context.Headers; }
         }
 
-        public ConsumerConsumeContext<TConsumer, T> PopContext<T>()
-            where T : class
+        ConsumerConsumeContext<TConsumer, T> ConsumerConsumeContext<TConsumer>.PopContext<T>()
         {
             return (ConsumerConsumeContext<TConsumer, T>)this;
         }
 
-        public CancellationToken CancellationToken
+        CancellationToken PipeContext.CancellationToken
         {
             get { return _context.CancellationToken; }
         }
 
-        public ReceiveContext ReceiveContext
+        ReceiveContext ConsumeContext.ReceiveContext
         {
             get { return _context.ReceiveContext; }
         }
 
-        public bool HasMessageType(Type messageType)
+        bool ConsumeContext.HasMessageType(Type messageType)
         {
             return _context.HasMessageType(messageType);
         }
 
-        public bool TryGetMessage<T>(out ConsumeContext<T> consumeContext)
-            where T : class
+        bool ConsumeContext.TryGetMessage<T>(out ConsumeContext<T> consumeContext)
         {
             return _context.TryGetMessage(out consumeContext);
         }
 
-        public Task RespondAsync<T>(T message)
-            where T : class
+        Task ConsumeContext.RespondAsync<T>(T message)
         {
             return _context.RespondAsync(message);
         }
@@ -199,13 +194,12 @@ namespace MassTransit.Context
             return _context.RespondAsync(message, sendPipe);
         }
 
-        public void Respond<T>(T message)
-            where T : class
+        void ConsumeContext.Respond<T>(T message)
         {
             _context.Respond(message);
         }
 
-        public Task<ISendEndpoint> GetSendEndpoint(Uri address)
+        Task<ISendEndpoint> ISendEndpointProvider.GetSendEndpoint(Uri address)
         {
             return _context.GetSendEndpoint(address);
         }
@@ -225,22 +219,22 @@ namespace MassTransit.Context
             get { return _context.Message; }
         }
 
-        public void NotifyConsumed(TimeSpan duration, string consumerType)
+        void ConsumeContext<TMessage>.NotifyConsumed(TimeSpan duration, string consumerType)
         {
             _context.NotifyConsumed(duration, consumerType);
         }
 
-        public void NotifyFaulted(TimeSpan duration, string consumerType, Exception exception)
+        void ConsumeContext<TMessage>.NotifyFaulted(TimeSpan duration, string consumerType, Exception exception)
         {
             _context.NotifyFaulted(this, duration, consumerType, exception);
         }
 
-        public TConsumer Consumer
+        TConsumer ConsumerConsumeContext<TConsumer>.Consumer
         {
             get { return _consumer; }
         }
 
-        public ConnectHandle ConnectPublishObserver(IPublishObserver observer)
+        ConnectHandle IPublishObserverConnector.ConnectPublishObserver(IPublishObserver observer)
         {
             return _context.ConnectPublishObserver(observer);
         }

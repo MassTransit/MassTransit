@@ -17,6 +17,7 @@ namespace MassTransit.RabbitMqTransport
     using System.Globalization;
     using System.IO;
     using System.Linq;
+    using System.Net.Mime;
     using System.Threading;
     using System.Threading.Tasks;
     using Contexts;
@@ -68,6 +69,8 @@ namespace MassTransit.RabbitMqTransport
                     {
                         await pipe.Send(context);
 
+                        properties.ContentType = context.ContentType.MediaType;
+
                         properties.Headers = context.Headers
                             .Where(x => x.Value != null && (x.Value is string || x.Value.GetType().IsValueType))
                             .ToDictionary(entry => entry.Key, entry => entry.Value);
@@ -84,7 +87,7 @@ namespace MassTransit.RabbitMqTransport
                         if (context.TimeToLive.HasValue)
                             properties.Expiration = context.TimeToLive.Value.TotalMilliseconds.ToString("F0", CultureInfo.InvariantCulture);
 
-                        _observers.NotifyPreSend(context);
+                        await _observers.NotifyPreSend(context);
 
                         await modelContext.BasicPublishAsync(context.Exchange, context.RoutingKey, context.Mandatory,
                             context.Immediate, context.BasicProperties, context.Body);
@@ -92,11 +95,11 @@ namespace MassTransit.RabbitMqTransport
                         context.DestinationAddress.LogSent(context.MessageId.HasValue ? context.MessageId.Value.ToString("N") : "",
                             TypeMetadataCache<T>.ShortName);
 
-                        _observers.NotifyPostSend(context);
+                        await _observers.NotifyPostSend(context);
                     }
                     catch (Exception ex)
                     {
-                        _observers.NotifySendFault(context, ex);
+                        _observers.NotifySendFault(context, ex).Wait(cancelSend);
 
                         if (_log.IsErrorEnabled)
                             _log.Error("Send Fault: " + context.DestinationAddress, ex);
@@ -119,42 +122,28 @@ namespace MassTransit.RabbitMqTransport
                 {
                     Guid? messageId = context.TransportHeaders.Get("MessageId", default(Guid?));
 
-                    IBasicProperties properties = modelContext.Model.CreateBasicProperties();
-                    properties.Headers = new Dictionary<string, object>();
-
-                    RabbitMqBasicConsumeContext basicConsumeContext;
-                    if (context.TryGetPayload(out basicConsumeContext))
-                    {
-                        if (basicConsumeContext.Properties.IsMessageIdPresent())
-                        {
-                            Guid transportMessageId;
-                            if (Guid.TryParse(basicConsumeContext.Properties.MessageId, out transportMessageId))
-                                messageId = transportMessageId;
-
-                            properties.MessageId = basicConsumeContext.Properties.MessageId;
-                        }
-                        properties.DeliveryMode = basicConsumeContext.Properties.IsDeliveryModePresent()
-                            ? basicConsumeContext.Properties.DeliveryMode
-                            : (byte)2;
-
-                        if (basicConsumeContext.Properties.IsContentTypePresent())
-                            properties.ContentType = basicConsumeContext.Properties.ContentType;
-
-                        if (basicConsumeContext.Properties.IsCorrelationIdPresent())
-                            properties.CorrelationId = basicConsumeContext.Properties.CorrelationId;
-
-                        if (basicConsumeContext.Properties.IsExpirationPresent())
-                            properties.Expiration = basicConsumeContext.Properties.Expiration;
-                    }
-
                     try
                     {
-                        properties.Headers["Content-Type"] = context.ContentType.MediaType;
+                        IBasicProperties properties;
 
-                        properties.SetPersistent(_sendSettings.Durable);
+                        RabbitMqBasicConsumeContext basicConsumeContext;
+                        if (context.TryGetPayload(out basicConsumeContext))
+                            properties = basicConsumeContext.Properties;
+                        else
+                        {
+                            properties = modelContext.Model.CreateBasicProperties();
+                            properties.Headers = new Dictionary<string, object>();
+                        }
 
-                        if (messageId.HasValue)
-                            properties.MessageId = messageId.ToString();
+                        var moveContext = new RabbitMqMoveContext(context, properties);
+
+                        await pipe.Send(moveContext);
+
+
+//                        properties.Headers["Content-Type"] = context.ContentType.MediaType;
+
+//                        if (messageId.HasValue)
+//                            properties.MessageId = messageId.ToString();
 
                         byte[] body;
                         using (var memoryStream = new MemoryStream())
@@ -172,8 +161,8 @@ namespace MassTransit.RabbitMqTransport
 
                         if (_log.IsDebugEnabled)
                         {
-                            _log.DebugFormat("MOVE {0} ({1} to {2})", messageId.HasValue ? messageId.Value.ToString() : "N/A", context.InputAddress,
-                                modelContext.ConnectionContext.HostSettings.GetSendAddress(_sendSettings));
+                            context.InputAddress.LogMoved(modelContext.ConnectionContext.HostSettings.GetSendAddress(_sendSettings),
+                                messageId.HasValue ? messageId.Value.ToString() : "N/A", "Moved");
                         }
                     }
                     catch (Exception ex)
@@ -192,6 +181,101 @@ namespace MassTransit.RabbitMqTransport
         public ConnectHandle ConnectSendObserver(ISendObserver observer)
         {
             return _observers.Connect(observer);
+        }
+
+
+        class RabbitMqMoveContext :
+            RabbitMqSendContext
+        {
+            readonly ReceiveContext _context;
+            IMessageSerializer _serializer;
+
+            public RabbitMqMoveContext(ReceiveContext context, IBasicProperties properties)
+            {
+                _context = context;
+                BasicProperties = properties;
+                Headers = new RabbitMqSendHeaders(properties);
+                _serializer = new CopyBodySerializer(context);
+            }
+
+            CancellationToken PipeContext.CancellationToken
+            {
+                get { return _context.CancellationToken; }
+            }
+
+            bool PipeContext.HasPayloadType(Type contextType)
+            {
+                return _context.HasPayloadType(contextType);
+            }
+
+            bool PipeContext.TryGetPayload<TPayload>(out TPayload payload)
+            {
+                return _context.TryGetPayload(out payload);
+            }
+
+            TPayload PipeContext.GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory)
+            {
+                return _context.GetOrAddPayload(payloadFactory);
+            }
+
+            public Guid? MessageId { get; set; }
+            public Guid? RequestId { get; set; }
+            public Guid? CorrelationId { get; set; }
+
+            public SendHeaders Headers { get; set; }
+
+            public Uri SourceAddress { get; set; }
+            public Uri DestinationAddress { get; set; }
+            public Uri ResponseAddress { get; set; }
+            public Uri FaultAddress { get; set; }
+
+            public TimeSpan? TimeToLive { get; set; }
+
+            public ContentType ContentType { get; set; }
+
+            public IMessageSerializer Serializer
+            {
+                get { return _serializer; }
+                set
+                {
+                    _serializer = value;
+                    ContentType = _serializer.ContentType;
+                }
+            }
+
+            public bool Durable { get; set; }
+            public bool Immediate { get; set; }
+            public bool Mandatory { get; set; }
+
+            public string Exchange { get; private set; }
+            public string RoutingKey { get; set; }
+
+            public IBasicProperties BasicProperties { get; private set; }
+
+
+            class CopyBodySerializer : IMessageSerializer
+            {
+                readonly ReceiveContext _context;
+                ContentType _contentType;
+
+                public CopyBodySerializer(ReceiveContext context)
+                {
+                    _context = context;
+                }
+
+                public ContentType ContentType
+                {
+                    get { return _contentType; }
+                }
+
+                public void Serialize<T>(Stream stream, SendContext<T> context) where T : class
+                {
+                    using (Stream bodyStream = _context.GetBody())
+                    {
+                        bodyStream.CopyTo(stream);
+                    }
+                }
+            }
         }
     }
 }

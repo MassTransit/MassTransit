@@ -24,7 +24,7 @@ namespace MassTransit.Tests.Pipeline
     [TestFixture]
     public class Specifying_a_circuit_breaker
     {
-        [Test, Explicit]
+        [Test]
         public async Task Should_allow_the_first_call()
         {
             int count = 0;

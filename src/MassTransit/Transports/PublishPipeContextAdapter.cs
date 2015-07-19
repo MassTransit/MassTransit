@@ -17,6 +17,7 @@ namespace MassTransit.Transports
     using System.Threading.Tasks;
     using Context;
     using Pipeline;
+    using Util;
 
 
     public class PublishPipeContextAdapter<T> :
@@ -64,19 +65,23 @@ namespace MassTransit.Transports
             await _pipe.Send(publishContext);
 
             if (firstTime)
-                _observer.NotifyPrePublish(publishContext);
+                await _observer.NotifyPrePublish(publishContext);
         }
 
-        public void PostPublish()
+        public Task PostPublish()
         {
             if (_context != null)
-                _observer.NotifyPostPublish(_context);
+                return _observer.NotifyPostPublish(_context);
+
+            return TaskUtil.Completed;
         }
 
-        public void PublishFaulted(Exception exception)
+        public Task PublishFaulted(Exception exception)
         {
             if (_context != null)
-                _observer.NotifyPublishFault(_context, exception);
+                return _observer.NotifyPublishFault(_context, exception);
+
+            return TaskUtil.Completed;
         }
     }
 }
