@@ -19,6 +19,7 @@ namespace MassTransit.Tests
         using NUnit.Framework;
         using TestFramework;
         using TestFramework.Messages;
+        using Util;
 
 
         [TestFixture]
@@ -26,9 +27,24 @@ namespace MassTransit.Tests
             InMemoryTestFixture
         {
             [Test]
+            public async Task Should_call_the_post_consume_notification()
+            {
+                ReceiveObserver observer = GetObserver();
+
+                using (ConnectHandle observerHandle = Bus.ConnectReceiveObserver(observer))
+                {
+                    await InputQueueSendEndpoint.Send(new PingMessage());
+
+                    Tuple<ConsumeContext, string> context = await observer.PostConsumed;
+
+                    Assert.AreEqual(TypeMetadataCache<MessageHandler<PingMessage>>.ShortName, context.Item2);
+                }
+            }
+
+            [Test]
             public async Task Should_call_the_post_receive_notification()
             {
-                var observer = new ReceiveObserver(GetTask<ReceiveContext>(), GetTask<ReceiveContext>(), GetTask<Tuple<ReceiveContext, Exception>>(), GetTask<ConsumeContext>(), GetTask<ConsumeContext>());
+                ReceiveObserver observer = GetObserver();
 
                 ConnectHandle observerHandle = Bus.ConnectReceiveObserver(observer);
 
@@ -40,7 +56,7 @@ namespace MassTransit.Tests
             [Test]
             public async Task Should_call_the_pre_receive_notification()
             {
-                var observer = new ReceiveObserver(GetTask<ReceiveContext>(), GetTask<ReceiveContext>(), GetTask<Tuple<ReceiveContext, Exception>>(), GetTask<ConsumeContext>(), GetTask<ConsumeContext>());
+                ReceiveObserver observer = GetObserver();
 
                 ConnectHandle observerHandle = Bus.ConnectReceiveObserver(observer);
 
@@ -49,9 +65,55 @@ namespace MassTransit.Tests
                 await observer.PreReceived;
             }
 
+            ReceiveObserver GetObserver()
+            {
+                return new ReceiveObserver(GetTask<ReceiveContext>(), GetTask<ReceiveContext>(), GetTask<Tuple<ReceiveContext, Exception>>(),
+                    GetTask<Tuple<ConsumeContext, string>>(), GetTask<ConsumeContext>());
+            }
+
             protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
             {
                 Handled<PingMessage>(configurator);
+            }
+        }
+
+        [TestFixture]
+        public class Receiving_messages_at_the_endpoint_by_consumer :
+            InMemoryTestFixture
+        {
+            [Test]
+            public async Task Should_call_the_post_consume_notification()
+            {
+                ReceiveObserver observer = GetObserver();
+
+                using (ConnectHandle observerHandle = Bus.ConnectReceiveObserver(observer))
+                {
+                    await InputQueueSendEndpoint.Send(new PingMessage());
+
+                    Tuple<ConsumeContext, string> context = await observer.PostConsumed;
+
+                    Assert.AreEqual(TypeMetadataCache<PingConsumerDude>.ShortName, context.Item2);
+                }
+            }
+
+            ReceiveObserver GetObserver()
+            {
+                return new ReceiveObserver(GetTask<ReceiveContext>(), GetTask<ReceiveContext>(), GetTask<Tuple<ReceiveContext, Exception>>(),
+                    GetTask<Tuple<ConsumeContext, string>>(), GetTask<ConsumeContext>());
+            }
+
+            protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+            {
+                configurator.Consumer<PingConsumerDude>();
+            }
+
+
+            class PingConsumerDude :
+                IConsumer<PingMessage>
+            {
+                public async Task Consume(ConsumeContext<PingMessage> context)
+                {
+                }
             }
         }
 
@@ -63,7 +125,7 @@ namespace MassTransit.Tests
             [Test]
             public async Task Should_call_the_pre_receive_notification()
             {
-                var observer = new ReceiveObserver(GetTask<ReceiveContext>(), GetTask<ReceiveContext>(), GetTask<Tuple<ReceiveContext, Exception>>(), GetTask<ConsumeContext>(), GetTask<ConsumeContext>());
+                ReceiveObserver observer = GetObserver();
 
                 ConnectHandle observerHandle = Bus.ConnectReceiveObserver(observer);
 
@@ -75,13 +137,19 @@ namespace MassTransit.Tests
             [Test]
             public async Task Should_call_the_receive_fault_notification()
             {
-                var observer = new ReceiveObserver(GetTask<ReceiveContext>(), GetTask<ReceiveContext>(), GetTask<Tuple<ReceiveContext, Exception>>(), GetTask<ConsumeContext>(), GetTask<ConsumeContext>());
+                ReceiveObserver observer = GetObserver();
 
                 ConnectHandle observerHandle = Bus.ConnectReceiveObserver(observer);
 
                 await InputQueueSendEndpoint.Send(new PingMessage());
 
                 await observer.ConsumeFaulted;
+            }
+
+            ReceiveObserver GetObserver()
+            {
+                return new ReceiveObserver(GetTask<ReceiveContext>(), GetTask<ReceiveContext>(), GetTask<Tuple<ReceiveContext, Exception>>(),
+                    GetTask<Tuple<ConsumeContext, string>>(), GetTask<ConsumeContext>());
             }
 
             protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
@@ -98,13 +166,13 @@ namespace MassTransit.Tests
             IReceiveObserver
         {
             readonly TaskCompletionSource<ConsumeContext> _consumeFault;
-            readonly TaskCompletionSource<ConsumeContext> _postConsume;
+            readonly TaskCompletionSource<Tuple<ConsumeContext, string>> _postConsume;
             readonly TaskCompletionSource<ReceiveContext> _postReceive;
             readonly TaskCompletionSource<ReceiveContext> _preReceive;
             readonly TaskCompletionSource<Tuple<ReceiveContext, Exception>> _receiveFault;
 
             public ReceiveObserver(TaskCompletionSource<ReceiveContext> preReceive, TaskCompletionSource<ReceiveContext> postReceive,
-                TaskCompletionSource<Tuple<ReceiveContext, Exception>> receiveFault, TaskCompletionSource<ConsumeContext> postConsume,
+                TaskCompletionSource<Tuple<ReceiveContext, Exception>> receiveFault, TaskCompletionSource<Tuple<ConsumeContext, string>> postConsume,
                 TaskCompletionSource<ConsumeContext> consumeFault)
             {
                 _preReceive = preReceive;
@@ -124,7 +192,7 @@ namespace MassTransit.Tests
                 get { return _postReceive.Task; }
             }
 
-            public Task<ConsumeContext> PostConsumed
+            public Task<Tuple<ConsumeContext, string>> PostConsumed
             {
                 get { return _postConsume.Task; }
             }
@@ -152,7 +220,7 @@ namespace MassTransit.Tests
             public async Task PostConsume<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType)
                 where T : class
             {
-                _postConsume.TrySetResult(context);
+                _postConsume.TrySetResult(Tuple.Create<ConsumeContext, string>(context, consumerType));
             }
 
             public async Task ConsumeFault<T>(ConsumeContext<T> context, TimeSpan elapsed, string consumerType, Exception exception) where T : class
