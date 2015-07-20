@@ -15,7 +15,7 @@ namespace MassTransit.Scheduling
     using System;
 
 
-    public interface CancelScheduledMessage
+    public interface CancelScheduledRecurringMessage
     {
         /// <summary>
         /// The cancel scheduled message correlationId
@@ -27,9 +27,8 @@ namespace MassTransit.Scheduling
         /// </summary>
         DateTime Timestamp { get; }
 
-        /// <summary>
-        /// The token of the scheduled message
-        /// </summary>
-        Guid TokenId { get; }
+        string ScheduleId { get; }
+
+        string ScheduleGroup { get; }
     }
 }

@@ -15,21 +15,39 @@ namespace MassTransit.Scheduling
     using System;
 
 
-    public interface CancelScheduledMessage
+    public interface RecurringSchedule
     {
         /// <summary>
-        /// The cancel scheduled message correlationId
+        /// The timezone of the schedule
         /// </summary>
-        Guid CorrelationId { get; }
+        string TimeZoneId { get; }
 
         /// <summary>
-        /// The date/time this message was created
+        /// The time the recurring schedule is enabled
         /// </summary>
-        DateTime Timestamp { get; }
+        DateTimeOffset StartTime { get; }
 
         /// <summary>
-        /// The token of the scheduled message
+        /// The time the recurring schedule is disabled
+        /// If null then the job is repeated forever
         /// </summary>
-        Guid TokenId { get; }
+        DateTimeOffset? EndTime { get; }
+
+        /// <summary>
+        /// A unique name that idenifies this schedule.
+        /// </summary>
+        string ScheduleId { get; }
+
+        /// <summary>
+        /// A
+        /// </summary>
+        string ScheduleGroup { get; }
+
+        /// <summary>
+        /// The Cron Schedule Expression in Cron Syntax
+        /// </summary>
+        string CronExpression { get; }
+
+        MissedEventPolicy MisfirePolicy { get; }
     }
 }

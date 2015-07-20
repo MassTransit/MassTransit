@@ -12,24 +12,25 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Scheduling
 {
-    using System;
-
-
-    public interface CancelScheduledMessage
+    /// <summary>
+    /// If the scheduler is offline and comes back online, the policy determines how
+    /// a missed scheduled message is handled.
+    /// </summary>
+    public enum MissedEventPolicy
     {
         /// <summary>
-        /// The cancel scheduled message correlationId
+        /// use the default handling of the scheduler
         /// </summary>
-        Guid CorrelationId { get; }
+        Default,
 
         /// <summary>
-        /// The date/time this message was created
+        /// Skip the event, waiting for the next scheduled interval
         /// </summary>
-        DateTime Timestamp { get; }
+        Skip,
 
         /// <summary>
-        /// The token of the scheduled message
+        /// Send the message immediately and then continue the schedule as planned
         /// </summary>
-        Guid TokenId { get; }
+        Send
     }
 }

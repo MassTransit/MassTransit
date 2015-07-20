@@ -19,7 +19,8 @@ namespace MassTransit.QuartzIntegration
 
 
     public class CancelScheduledMessageConsumer :
-        IConsumer<CancelScheduledMessage>
+        IConsumer<CancelScheduledMessage>,
+        IConsumer<CancelScheduledRecurringMessage>
     {
         static readonly ILog _log = Logger.Get<CancelScheduledMessageConsumer>();
         readonly IScheduler _scheduler;
@@ -36,12 +37,25 @@ namespace MassTransit.QuartzIntegration
             if (_log.IsDebugEnabled)
             {
                 if (unscheduledJob)
+                    _log.DebugFormat("CancelScheduledMessage: {0} at {1}", context.Message.TokenId, context.Message.Timestamp);
+                else
+                    _log.DebugFormat("CancelScheduledMessage: no message found {0}", context.Message.TokenId);
+            }
+        }
+
+        public async Task Consume(ConsumeContext<CancelScheduledRecurringMessage> context)
+        {
+            bool unscheduledJob = _scheduler.UnscheduleJob(new TriggerKey(context.Message.ScheduleId, context.Message.ScheduleGroup));
+
+            if (_log.IsDebugEnabled)
+            {
+                if (unscheduledJob)
                 {
-                    _log.DebugFormat("CancelScheduledMessage: {0} at {1}", context.Message.TokenId,
+                    _log.DebugFormat("CancelRecurringScheduledMessage: {0}/{1} at {2}", context.Message.ScheduleId, context.Message.ScheduleGroup,
                         context.Message.Timestamp);
                 }
                 else
-                    _log.DebugFormat("CancelScheduledMessage: no message found {0}", context.Message.TokenId);
+                    _log.DebugFormat("CancelRecurringScheduledMessage: no message found {0}", context.Message);
             }
         }
     }

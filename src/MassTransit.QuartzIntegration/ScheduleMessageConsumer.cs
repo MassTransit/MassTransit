@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -28,7 +28,8 @@ namespace MassTransit.QuartzIntegration
 
 
     public class ScheduleMessageConsumer :
-        IConsumer<ScheduleMessage>
+        IConsumer<ScheduleMessage>,
+        IConsumer<ScheduleRecurringMessage>
     {
         static readonly ILog _log = Logger.Get<ScheduleMessageConsumer>();
         readonly IScheduler _scheduler;
@@ -41,15 +42,76 @@ namespace MassTransit.QuartzIntegration
         public async Task Consume(ConsumeContext<ScheduleMessage> context)
         {
             if (_log.IsDebugEnabled)
-            {
-                _log.DebugFormat("ScheduleMessage: {0} at {1}", context.Message.CorrelationId,
-                    context.Message.ScheduledTime);
-            }
+                _log.DebugFormat("ScheduleMessage: {0} at {1}", context.Message.CorrelationId, context.Message.ScheduledTime);
 
+            var jobKey = new JobKey(context.Message.CorrelationId.ToString("N"));
+            IJobDetail jobDetail = await CreateJobDetail(context, context.Message.Destination, jobKey);
+
+            ITrigger trigger = TriggerBuilder.Create()
+                .ForJob(jobDetail)
+                .StartAt(context.Message.ScheduledTime)
+                .WithSchedule(SimpleScheduleBuilder.Create().WithMisfireHandlingInstructionFireNow())
+                .WithIdentity(new TriggerKey(context.Message.CorrelationId.ToString("N")))
+                .Build();
+
+            _scheduler.ScheduleJob(jobDetail, trigger);
+        }
+
+        public async Task Consume(ConsumeContext<ScheduleRecurringMessage> context)
+        {
+            if (_log.IsDebugEnabled)
+                _log.DebugFormat("ScheduleRecurringMessage: {0} at {1}", context.Message.CorrelationId, context.Message.Schedule.ScheduleId);
+
+            var jobKey = new JobKey(context.Message.Schedule.ScheduleId, context.Message.Schedule.ScheduleGroup);
+
+            IJobDetail jobDetail = await CreateJobDetail(context, context.Message.Destination, jobKey);
+
+            var triggerKey = new TriggerKey("Recurring.Trigger." + context.Message.Schedule.ScheduleId, context.Message.Schedule.ScheduleGroup);
+
+            ITrigger trigger = CreateTrigger(context.Message.Schedule, jobDetail, triggerKey);
+
+            if (_scheduler.CheckExists(triggerKey))
+                _scheduler.RescheduleJob(triggerKey, trigger);
+            else
+                _scheduler.ScheduleJob(jobDetail, trigger);
+        }
+
+        ITrigger CreateTrigger(RecurringSchedule message, IJobDetail jobDetail, TriggerKey triggerKey)
+        {
+            TimeZoneInfo tz = TimeZoneInfo.Local;
+            if (!string.IsNullOrWhiteSpace(message.TimeZoneId) && message.TimeZoneId != tz.Id)
+                tz = TimeZoneInfo.FindSystemTimeZoneById(message.TimeZoneId);
+
+            TriggerBuilder triggerBuilder = TriggerBuilder.Create()
+                .ForJob(jobDetail)
+                .WithIdentity(triggerKey)
+                .StartAt(message.StartTime)
+                .WithCronSchedule(message.CronExpression, x =>
+                {
+                    x.InTimeZone(tz);
+                    switch (message.MisfirePolicy)
+                    {
+                        case MissedEventPolicy.Skip:
+                            x.WithMisfireHandlingInstructionDoNothing();
+                            break;
+                        case MissedEventPolicy.Send:
+                            x.WithMisfireHandlingInstructionFireAndProceed();
+                            break;
+                    }
+                });
+
+            if (message.EndTime.HasValue)
+                triggerBuilder.EndAt(message.EndTime);
+
+            return triggerBuilder.Build();
+        }
+
+        static async Task<IJobDetail> CreateJobDetail(ConsumeContext context, Uri destination, JobKey jobKey)
+        {
             string body;
             using (var ms = new MemoryStream())
             {
-                using (var bodyStream = context.ReceiveContext.GetBody())
+                using (Stream bodyStream = context.ReceiveContext.GetBody())
                 {
                     await bodyStream.CopyToAsync(ms);
                 }
@@ -60,17 +122,17 @@ namespace MassTransit.QuartzIntegration
             if (string.Compare(context.ReceiveContext.ContentType.MediaType, JsonMessageSerializer.JsonContentType.MediaType,
                 StringComparison.OrdinalIgnoreCase)
                 == 0)
-                body = TranslateJsonBody(body, context.Message.Destination.ToString());
+                body = TranslateJsonBody(body, destination.ToString());
             else if (string.Compare(context.ReceiveContext.ContentType.MediaType, XmlMessageSerializer.XmlContentType.MediaType,
                 StringComparison.OrdinalIgnoreCase) == 0)
-                body = TranslateXmlBody(body, context.Message.Destination.ToString());
+                body = TranslateXmlBody(body, destination.ToString());
             else
                 throw new InvalidOperationException("Only JSON and XML messages can be scheduled");
 
-            var builder = JobBuilder.Create<ScheduledMessageJob>()
+            JobBuilder builder = JobBuilder.Create<ScheduledMessageJob>()
                 .RequestRecovery(true)
-                .WithIdentity(context.Message.CorrelationId.ToString("N"))
-                .UsingJobData("Destination", ToString(context.Message.Destination))
+                .WithIdentity(jobKey)
+                .UsingJobData("Destination", ToString(destination))
                 .UsingJobData("ResponseAddress", ToString(context.ResponseAddress))
                 .UsingJobData("FaultAddress", ToString(context.FaultAddress))
                 .UsingJobData("Body", body)
@@ -89,14 +151,7 @@ namespace MassTransit.QuartzIntegration
                 .UsingJobData("HeadersAsJson", JsonConvert.SerializeObject(context.Headers.GetAll()))
                 .Build();
 
-            ITrigger trigger = TriggerBuilder.Create()
-                .ForJob(jobDetail)
-                .StartAt(context.Message.ScheduledTime)
-                .WithSchedule(SimpleScheduleBuilder.Create().WithMisfireHandlingInstructionFireNow())
-                .WithIdentity(new TriggerKey(context.Message.CorrelationId.ToString("N")))
-                .Build();
-
-            _scheduler.ScheduleJob(jobDetail, trigger);
+            return jobDetail;
         }
 
         static string ToString(Uri uri)
@@ -106,7 +161,6 @@ namespace MassTransit.QuartzIntegration
 
             return uri.ToString();
         }
-
 
         static string TranslateJsonBody(string body, string destination)
         {
