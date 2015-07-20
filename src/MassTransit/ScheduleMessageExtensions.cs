@@ -103,8 +103,7 @@ namespace MassTransit
         /// <param name="contextCallback">Optional: A callback that gives the caller access to the publish context.</param>
         /// <returns>A handled to the scheduled message</returns>
         public static async Task<ScheduledMessage<T>> ScheduleMessage<T>(this IPublishEndpoint publishEndpoint, Uri destinationAddress, DateTime scheduledTime,
-            T message,
-            IPipe<PublishContext<ScheduleMessage<T>>> contextCallback = null)
+            T message, IPipe<PublishContext<ScheduleMessage<T>>> contextCallback = null)
             where T : class
         {
             var command = new ScheduleMessageCommand<T>(scheduledTime, destinationAddress, message);

@@ -593,9 +593,16 @@
     <Compile Include="Saga\SagaQueryConsumeContext.cs" />
     <Compile Include="Saga\SagaQueryConsumeContextProxy.cs" />
     <Compile Include="ScheduleMessageExtensions.cs" />
+    <Compile Include="ScheduleRecurringMessageExtensions.cs" />
     <Compile Include="Scheduling\CancelScheduledMessage.cs" />
+    <Compile Include="Scheduling\CancelScheduledRecurringMessage.cs" />
+    <Compile Include="Scheduling\DefaultRecurringSchedule.cs" />
+    <Compile Include="Scheduling\MissedEventPolicy.cs" />
+    <Compile Include="Scheduling\RecurringSchedule.cs" />
     <Compile Include="Scheduling\ScheduledMessage.cs" />
+    <Compile Include="Scheduling\ScheduledRecurringMessage.cs" />
     <Compile Include="Scheduling\ScheduleMessage.cs" />
+    <Compile Include="Scheduling\ScheduleRecurringMessage.cs" />
     <Compile Include="SendContext.cs" />
     <Compile Include="SendContextExtensions.cs" />
     <Compile Include="SendEndpointExtensions.cs" />

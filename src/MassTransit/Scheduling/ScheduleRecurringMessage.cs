@@ -15,21 +15,31 @@ namespace MassTransit.Scheduling
     using System;
 
 
-    public interface CancelScheduledMessage
+    public interface ScheduleRecurringMessage
     {
-        /// <summary>
-        /// The cancel scheduled message correlationId
-        /// </summary>
         Guid CorrelationId { get; }
 
-        /// <summary>
-        /// The date/time this message was created
-        /// </summary>
-        DateTime Timestamp { get; }
+        RecurringSchedule Schedule { get; }
 
         /// <summary>
-        /// The token of the scheduled message
+        /// The message types implemented by the message
         /// </summary>
-        Guid TokenId { get; }
+        string[] PayloadType { get; }
+
+        /// <summary>
+        /// The destination where the message should be sent
+        /// </summary>
+        Uri Destination { get; }
+    }
+
+
+    public interface ScheduleRecurringMessage<out T> :
+        ScheduleRecurringMessage
+        where T : class
+    {
+        /// <summary>
+        /// The message to be published 
+        /// </summary>
+        T Payload { get; }
     }
 }
