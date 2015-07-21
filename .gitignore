@@ -1,11 +1,10 @@
 build_output/*
 build_artifacts/*
+build_temp/*
 *.suo
 *.user
 packages
 *.dotCover
-
-Gemfile.lock
 
 *.ncrunch*
 
@@ -15,7 +14,6 @@ src/logs/*
 bin
 obj
 _ReSharper*
-src/Samples/HeavyLoad/logs
 
 *.csproj.user
 *.resharper.user
@@ -28,7 +26,6 @@ src/Samples/HeavyLoad/logs
 *.orig
 
 NuGet.exe
-
 packages
 
 TestResult.xml
@@ -41,6 +38,3 @@ doc/build/*
 
 # osx noise
 .DS_Store
-NuGet.Exe
-
-nuspecs/
