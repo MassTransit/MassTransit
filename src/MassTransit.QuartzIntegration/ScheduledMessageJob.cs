@@ -136,18 +136,14 @@ namespace MassTransit.QuartzIntegration
             IMessageSerializer
         {
             readonly byte[] _body;
-            readonly ContentType _contentType;
 
             public ScheduledBodySerializer(ContentType contentType, byte[] body)
             {
-                _contentType = contentType;
+                ContentType = contentType;
                 _body = body;
             }
 
-            public ContentType ContentType
-            {
-                get { return _contentType; }
-            }
+            public ContentType ContentType { get; }
 
             public void Serialize<T>(Stream stream, SendContext<T> context)
                 where T : class
