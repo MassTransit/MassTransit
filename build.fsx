@@ -17,14 +17,14 @@ let semVersion : SemVerInfo = parse baseVersion
 let Version = semVersion.ToString()
 
 let branch = (fun _ ->
-  (environVarOrDefault "TEAMCITY_BUILD_BRANCH" "develop")
+  (environVarOrDefault "TEAMCITY_BUILD_BRANCH" (getBranchName "."))
 )
 
 let fileVersion = (Version + "." + (environVarOrDefault "BUILD_NUMBER" "0"))
 
 let informationalVersion = (fun _ ->
   let branchName = (branch ".")
-  let label = if branchName="master" then "" else "-" + branchName
+  let label = if branchName="master" then "" else " (" + branchName + "/" + (getCurrentSHA1 ".").[0..7] + ")"
   (fileVersion + label)
 )
 
