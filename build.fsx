@@ -78,10 +78,6 @@ Target "Build" (fun _ ->
       |> DoNothing
 )
 
-Target "CopyOutput" (fun _ ->
-    Copy (buildOutputPath @@ "net-4.5") !! (@".\src\MassTransit/bin/Release/MassTransit.*")
-)
-
 type packageInfo = {
     Project: string
     PackageFile: string
@@ -199,7 +195,6 @@ Target "Default" (fun _ ->
 
 "Clean"
   ==> "Build"
-  ==> "CopyOutput"
   ==> "Package"
   ==> "Default"
 
