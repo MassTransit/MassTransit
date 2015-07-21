@@ -39,10 +39,7 @@ namespace MassTransit.Util
         /// <summary>
         /// The number of connections
         /// </summary>
-        public int Count
-        {
-            get { return _connected.Length; }
-        }
+        public int Count => _connected.Length;
 
         /// <summary>
         /// Connect a connectable type
@@ -52,7 +49,7 @@ namespace MassTransit.Util
         public ConnectHandle Connect(T connection)
         {
             if (connection == null)
-                throw new ArgumentNullException("connection");
+                throw new ArgumentNullException(nameof(connection));
 
             long id = Interlocked.Increment(ref _nextId);
 
@@ -73,7 +70,7 @@ namespace MassTransit.Util
         public Task ForEachAsync(Func<T, Task> callback)
         {
             if (callback == null)
-                throw new ArgumentNullException("callback");
+                throw new ArgumentNullException(nameof(callback));
 
             T[] connected;
             lock (_connections)

@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -28,19 +28,14 @@ namespace MassTransit.Events
             Host = host;
 
             var aggregateException = exception as AggregateException;
-            Exceptions = aggregateException != null
-                ? aggregateException.InnerExceptions.Select(x => ((ExceptionInfo)new FaultExceptionInfo(x))).ToArray()
-                : new ExceptionInfo[] {new FaultExceptionInfo(exception)};
+            Exceptions = aggregateException?.InnerExceptions.Select(x => ((ExceptionInfo)new FaultExceptionInfo(x))).ToArray()
+                ?? new ExceptionInfo[] {new FaultExceptionInfo(exception)};
         }
 
-        public Guid FaultId { get; private set; }
-
-        public DateTime Timestamp { get; private set; }
-
-        public ExceptionInfo[] Exceptions { get; private set; }
-
-        public HostInfo Host { get; private set; }
-
-        public T Message { get; private set; }
+        public Guid FaultId { get; }
+        public DateTime Timestamp { get; }
+        public ExceptionInfo[] Exceptions { get; }
+        public HostInfo Host { get; }
+        public T Message { get; }
     }
 }

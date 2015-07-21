@@ -28,10 +28,7 @@ namespace MassTransit.Serialization
             _contentType = contentType;
         }
 
-        ContentType IMessageSerializer.ContentType
-        {
-            get { return _contentType; }
-        }
+        ContentType IMessageSerializer.ContentType => _contentType;
 
         void IMessageSerializer.Serialize<T>(Stream stream, SendContext<T> context)
         {

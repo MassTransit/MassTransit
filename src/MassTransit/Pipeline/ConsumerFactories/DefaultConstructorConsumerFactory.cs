@@ -14,7 +14,6 @@ namespace MassTransit.Pipeline.ConsumerFactories
 {
     using System;
     using System.Threading.Tasks;
-    using Util;
 
 
     public class DefaultConstructorConsumerFactory<TConsumer> :
@@ -34,8 +33,7 @@ namespace MassTransit.Pipeline.ConsumerFactories
             finally
             {
                 var disposable = consumer as IDisposable;
-                if (disposable != null)
-                    disposable.Dispose();
+                disposable?.Dispose();
             }
         }
 

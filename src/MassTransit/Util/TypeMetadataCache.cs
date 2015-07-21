@@ -27,10 +27,7 @@ namespace MassTransit.Util
 
     public static class TypeMetadataCache
     {
-        public static IImplementationBuilder ImplementationBuilder
-        {
-            get { return Cached.ImplementationBuilder; }
-        }
+        public static IImplementationBuilder ImplementationBuilder => Cached.Builder;
 
         static CachedType GetOrAdd(Type type)
         {
@@ -45,7 +42,7 @@ namespace MassTransit.Util
 
         public static Type GetImplementationType(Type type)
         {
-            return Cached.ImplementationBuilder.GetImplementationType(type);
+            return Cached.Builder.GetImplementationType(type);
         }
 
         public static bool IsValidMessageType(Type type)
@@ -61,7 +58,7 @@ namespace MassTransit.Util
 
         static class Cached
         {
-            internal static readonly IImplementationBuilder ImplementationBuilder = new DynamicImplementationBuilder();
+            internal static readonly IImplementationBuilder Builder = new DynamicImplementationBuilder();
             internal static readonly ConcurrentDictionary<Type, CachedType> Instance = new ConcurrentDictionary<Type, CachedType>();
         }
 
@@ -123,95 +120,33 @@ namespace MassTransit.Util
             _messageTypeNames = new Lazy<string[]>(() => GetMessageTypeNames().ToArray());
         }
 
-        public static string ShortName
-        {
-            get { return Cached.Metadata.Value.ShortName; }
-        }
-
-        public static bool HasSagaInterfaces
-        {
-            get { return Cached.Metadata.Value.HasSagaInterfaces; }
-        }
-
-        public static ReadOnlyPropertyCache<T> ReadOnlyPropertyCache
-        {
-            get { return Cached.Metadata.Value.ReadOnlyPropertyCache; }
-        }
-
-        public static ReadWritePropertyCache<T> ReadWritePropertyCache
-        {
-            get { return Cached.Metadata.Value.ReadWritePropertyCache; }
-        }
-
-        public static IEnumerable<PropertyInfo> Properties
-        {
-            get { return Cached.Metadata.Value.Properties; }
-        }
-
-        public static bool IsValidMessageType
-        {
-            get { return Cached.Metadata.Value.IsValidMessageType; }
-        }
-
-        public static Type[] MessageTypes
-        {
-            get { return Cached.Metadata.Value.MessageTypes; }
-        }
-
-        public static string[] MessageTypeNames
-        {
-            get { return Cached.Metadata.Value.MessageTypeNames; }
-        }
-
-        string[] ITypeMetadataCache<T>.MessageTypeNames
-        {
-            get { return _messageTypeNames.Value; }
-        }
-
-        IEnumerable<PropertyInfo> ITypeMetadataCache<T>.Properties
-        {
-            get { return _properties.Value; }
-        }
-
-        bool ITypeMetadataCache<T>.IsValidMessageType
-        {
-            get { return _isValidMessageType.Value; }
-        }
-
-        Type[] ITypeMetadataCache<T>.MessageTypes
-        {
-            get { return _messageTypes.Value; }
-        }
-
-        ReadOnlyPropertyCache<T> ITypeMetadataCache<T>.ReadOnlyPropertyCache
-        {
-            get { return _readPropertyCache.Value; }
-        }
-
-        ReadWritePropertyCache<T> ITypeMetadataCache<T>.ReadWritePropertyCache
-        {
-            get { return _writePropertyCache.Value; }
-        }
+        public static string ShortName => Cached.Metadata.Value.ShortName;
+        public static bool HasSagaInterfaces => Cached.Metadata.Value.HasSagaInterfaces;
+        public static ReadOnlyPropertyCache<T> ReadOnlyPropertyCache => Cached.Metadata.Value.ReadOnlyPropertyCache;
+        public static ReadWritePropertyCache<T> ReadWritePropertyCache => Cached.Metadata.Value.ReadWritePropertyCache;
+        public static IEnumerable<PropertyInfo> Properties => Cached.Metadata.Value.Properties;
+        public static bool IsValidMessageType => Cached.Metadata.Value.IsValidMessageType;
+        public static Type[] MessageTypes => Cached.Metadata.Value.MessageTypes;
+        public static string[] MessageTypeNames => Cached.Metadata.Value.MessageTypeNames;
+        string[] ITypeMetadataCache<T>.MessageTypeNames => _messageTypeNames.Value;
+        IEnumerable<PropertyInfo> ITypeMetadataCache<T>.Properties => _properties.Value;
+        bool ITypeMetadataCache<T>.IsValidMessageType => _isValidMessageType.Value;
+        Type[] ITypeMetadataCache<T>.MessageTypes => _messageTypes.Value;
+        ReadOnlyPropertyCache<T> ITypeMetadataCache<T>.ReadOnlyPropertyCache => _readPropertyCache.Value;
+        ReadWritePropertyCache<T> ITypeMetadataCache<T>.ReadWritePropertyCache => _writePropertyCache.Value;
 
         T ITypeMetadataCache<T>.InitializeFromObject(object values)
         {
             if (values == null)
-                throw new ArgumentNullException("values");
+                throw new ArgumentNullException(nameof(values));
 
             JObject objValues = JObject.FromObject(values, JsonMessageSerializer.Serializer);
 
             return objValues.ToObject<T>(JsonMessageSerializer.Deserializer);
         }
 
-        bool ITypeMetadataCache<T>.HasSagaInterfaces
-        {
-            get { return _hasSagaInterfaces.Value; }
-        }
-
-        string ITypeMetadataCache<T>.ShortName
-        {
-            get { return _shortName; }
-        }
+        bool ITypeMetadataCache<T>.HasSagaInterfaces => _hasSagaInterfaces.Value;
+        string ITypeMetadataCache<T>.ShortName => _shortName;
 
         /// <summary>
         /// Returns true if the specified type is an allowed message type, i.e.

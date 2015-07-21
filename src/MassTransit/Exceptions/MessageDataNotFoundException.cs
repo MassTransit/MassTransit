@@ -24,7 +24,7 @@ namespace MassTransit
         }
 
         public MessageDataNotFoundException(Uri address)
-            : base(string.Format("The message data was not found: {0}", address))
+            : base($"The message data was not found: {address}")
         {
         }
     }

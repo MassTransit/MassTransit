@@ -37,8 +37,7 @@ namespace MassTransit.Testing.ScenarioConfigurators
         public ITestScenarioBuilder<IBusTestScenario> Configure(ITestScenarioBuilder<IBusTestScenario> builder)
         {
             var busBuilder = builder as IBusTestScenarioBuilder;
-            if (busBuilder != null)
-                busBuilder.ConfigureBus(_configureAction);
+            busBuilder?.ConfigureBus(_configureAction);
 
             return builder;
         }

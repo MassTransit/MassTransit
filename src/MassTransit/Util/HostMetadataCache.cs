@@ -14,10 +14,7 @@ namespace MassTransit.Util
 {
     public static class HostMetadataCache
     {
-        public static HostInfo Host
-        {
-            get { return Cached.HostInfo; }
-        }
+        public static HostInfo Host => Cached.HostInfo;
 
 
         static class Cached

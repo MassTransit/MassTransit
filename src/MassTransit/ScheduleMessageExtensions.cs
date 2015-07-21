@@ -74,7 +74,7 @@ namespace MassTransit
             where T : class
         {
             if (message == null)
-                throw new ArgumentNullException("message");
+                throw new ArgumentNullException(nameof(message));
 
             return CancelScheduledSend(endpoint, message.TokenId);
         }
@@ -140,7 +140,7 @@ namespace MassTransit
             where T : class
         {
             if (message == null)
-                throw new ArgumentNullException("message");
+                throw new ArgumentNullException(nameof(message));
 
             return CancelScheduledMessage(bus, message.TokenId);
         }
@@ -169,9 +169,9 @@ namespace MassTransit
                 TokenId = tokenId;
             }
 
-            public Guid TokenId { get; private set; }
-            public DateTime Timestamp { get; private set; }
-            public Guid CorrelationId { get; private set; }
+            public Guid TokenId { get; }
+            public DateTime Timestamp { get; }
+            public Guid CorrelationId { get; }
         }
 
 
@@ -193,11 +193,11 @@ namespace MassTransit
                 PayloadType = TypeMetadataCache<T>.MessageTypeNames;
             }
 
-            public Guid CorrelationId { get; private set; }
-            public DateTime ScheduledTime { get; private set; }
-            public string[] PayloadType { get; private set; }
-            public Uri Destination { get; private set; }
-            public T Payload { get; private set; }
+            public Guid CorrelationId { get; }
+            public DateTime ScheduledTime { get; }
+            public string[] PayloadType { get; }
+            public Uri Destination { get; }
+            public T Payload { get; }
         }
 
 
@@ -213,10 +213,10 @@ namespace MassTransit
                 Payload = payload;
             }
 
-            public Guid TokenId { get; private set; }
-            public DateTime ScheduledTime { get; private set; }
-            public Uri Destination { get; private set; }
-            public T Payload { get; private set; }
+            public Guid TokenId { get; }
+            public DateTime ScheduledTime { get; }
+            public Uri Destination { get; }
+            public T Payload { get; }
         }
     }
 }

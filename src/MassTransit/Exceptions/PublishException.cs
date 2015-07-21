@@ -49,11 +49,10 @@ namespace MassTransit
 
             if (sendException != null)
             {
-                return string.Format("At least one exception occurred publishing {0} to {1}",
-                    sendException.MessageType.GetTypeName(), sendException.Uri);
+                return $"At least one exception occurred publishing {sendException.MessageType.GetTypeName()} to {sendException.Uri}";
             }
 
-            return string.Format("At least one exception occurred publishing {0}", messageType.GetTypeName());
+            return $"At least one exception occurred publishing {messageType.GetTypeName()}";
         }
     }
 }

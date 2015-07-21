@@ -27,7 +27,7 @@ namespace MassTransit
             where T : class
         {
             if (configurator == null)
-                throw new ArgumentNullException("configurator");
+                throw new ArgumentNullException(nameof(configurator));
 
             var redeliverySpecification = new ScheduleMessageRedeliveryPipeSpecification<T>();
 

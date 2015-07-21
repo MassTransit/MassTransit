@@ -38,12 +38,9 @@ namespace MassTransit.Transformation.PropertyProviders
 
         public TProperty GetProperty(TransformContext<TInput> context)
         {
-            TransformSourceContext<TProperty, TInput> sourceContext;
-            if (context.HasInput)
-                sourceContext = new TransformSourceContext<TProperty, TInput>(context, _getValue(context.Input));
-            else
-                sourceContext = new TransformSourceContext<TProperty, TInput>(context);
-
+            var sourceContext = context.HasInput
+                ? new TransformSourceContext<TProperty, TInput>(context, _getValue(context.Input))
+                : new TransformSourceContext<TProperty, TInput>(context);
 
             return _valueProvider(sourceContext);
         }

@@ -33,10 +33,7 @@ namespace MassTransit.Testing.Instances
             _subject = subject;
         }
 
-        public IHandlerTestSubject<TMessage> Handler
-        {
-            get { return _subject; }
-        }
+        public IHandlerTestSubject<TMessage> Handler => _subject;
 
         protected override void Dispose(bool disposing)
         {

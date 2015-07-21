@@ -35,10 +35,7 @@ namespace MassTransit.Internals.Reflection
             _properties = CreatePropertyCache(includeNonPublic);
         }
 
-        public ReadWriteProperty<T> this[string name]
-        {
-            get { return _properties[name]; }
-        }
+        public ReadWriteProperty<T> this[string name] => _properties[name];
 
         public IEnumerator<ReadWriteProperty<T>> GetEnumerator()
         {
@@ -55,7 +52,7 @@ namespace MassTransit.Internals.Reflection
             return new Dictionary<string, ReadWriteProperty<T>>(typeof(T).GetAllProperties()
                 .Where(x => x.CanRead && (includeNonPublic || x.CanWrite))
                 .Where(x => x.SetMethod != null)
-                .Select(x => new ReadWriteProperty<T>(x, includeNonPublic))
+                .Select(x => new ReadWriteProperty<T>(x))
                 .ToDictionary(x => x.Property.Name));
         }
 

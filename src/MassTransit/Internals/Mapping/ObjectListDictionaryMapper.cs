@@ -19,8 +19,6 @@
         public void WritePropertyToDictionary(IDictionary<string, object> dictionary, T obj)
         {
             object value = _property.Get(obj);
-            if (value == null)
-                return;
 
             var values = value as IList<TElement>;
             if (values == null)

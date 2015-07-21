@@ -38,7 +38,7 @@ namespace MassTransit.Serialization
 
         static readonly Lazy<JsonSerializer> _xmlSerializer;
 
-        public static JsonSerializerSettings XmlSerializerSettings = new JsonSerializerSettings
+        public static readonly JsonSerializerSettings XmlSerializerSettings = new JsonSerializerSettings
         {
             NullValueHandling = NullValueHandling.Include,
             DefaultValueHandling = DefaultValueHandling.Include,
@@ -61,15 +61,9 @@ namespace MassTransit.Serialization
             _xmlSerializer = new Lazy<JsonSerializer>(() => JsonSerializer.Create(XmlSerializerSettings));
         }
 
-        public static JsonSerializer XmlSerializer
-        {
-            get { return _xmlSerializer.Value; }
-        }
+        public static JsonSerializer XmlSerializer => _xmlSerializer.Value;
 
-        public ContentType ContentType
-        {
-            get { return XmlContentType; }
-        }
+        public ContentType ContentType => XmlContentType;
 
         public void Serialize<T>(Stream stream, SendContext<T> context)
             where T : class

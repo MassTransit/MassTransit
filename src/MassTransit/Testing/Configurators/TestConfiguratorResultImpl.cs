@@ -41,14 +41,14 @@ namespace MassTransit.Testing.Configurators
 			Message = message;
 		}
 
-		public TestConfiguratorResultDisposition Disposition { get; private set; }
-		public string Key { get; private set; }
-		public string Message { get; private set; }
-		public string Value { get; set; }
+		public TestConfiguratorResultDisposition Disposition { get; }
+		public string Key { get; }
+		public string Message { get; }
+		public string Value { get; }
 
 		public override string ToString()
 		{
-			return string.Format("[{0}] {1}", Disposition, string.IsNullOrEmpty(Key) ? Message : Key + " " + Message);
+			return $"[{Disposition}] {(string.IsNullOrEmpty(Key) ? Message : Key + " " + Message)}";
 		}
 	}
 }

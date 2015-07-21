@@ -41,7 +41,7 @@ namespace MassTransit.Pipeline.Filters
             where T : class
         {
             if (observer == null)
-                throw new ArgumentNullException("observer");
+                throw new ArgumentNullException(nameof(observer));
 
             IConsumeMessageObserverConnector messagePipe = GetPipe<T, IConsumeMessageObserverConnector>();
 
@@ -57,7 +57,7 @@ namespace MassTransit.Pipeline.Filters
             where T : class
         {
             if (pipe == null)
-                throw new ArgumentNullException("pipe");
+                throw new ArgumentNullException(nameof(pipe));
 
             IConsumePipeConnector<T> messagePipe = GetPipe<T, IConsumePipeConnector<T>>();
 
@@ -80,7 +80,7 @@ namespace MassTransit.Pipeline.Filters
             where T : class
         {
             if (pipe == null)
-                throw new ArgumentNullException("pipe");
+                throw new ArgumentNullException(nameof(pipe));
 
             IRequestPipeConnector<T> messagePipe = GetPipe<T, IRequestPipeConnector<T>>();
 
@@ -151,10 +151,7 @@ namespace MassTransit.Pipeline.Filters
                 return _observer.NotifyConsumeFault(context, exception);
             }
 
-            public IFilter<ConsumeContext> Filter
-            {
-                get { return _filter.Value; }
-            }
+            public IFilter<ConsumeContext> Filter => _filter.Value;
 
             TResult IMessagePipe.As<TResult>()
             {

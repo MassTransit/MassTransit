@@ -30,9 +30,9 @@ namespace MassTransit.Util
 		public LambdaEqualityComparer(Func<T, T, bool> comparer, Func<T, int> hash)
 		{
 			if (comparer == null)
-				throw new ArgumentNullException("comparer");
+				throw new ArgumentNullException(nameof(comparer));
 			if (hash == null)
-				throw new ArgumentNullException("hash");
+				throw new ArgumentNullException(nameof(hash));
 
 			_comparer = comparer;
 			_hash = hash;

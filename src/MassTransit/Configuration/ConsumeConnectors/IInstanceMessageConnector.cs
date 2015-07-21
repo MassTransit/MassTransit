@@ -49,21 +49,18 @@ namespace MassTransit.ConsumeConnectors
             _consumeFilter = consumeFilter;
         }
 
-        public Type MessageType
-        {
-            get { return typeof(TMessage); }
-        }
+        Type IInstanceMessageConnector.MessageType => typeof(TMessage);
 
-        public ConnectHandle ConnectInstance(IConsumePipeConnector pipe, object instance)
+        ConnectHandle IInstanceConnector.ConnectInstance(IConsumePipeConnector pipe, object instance)
         {
             if (instance == null)
-                throw new ArgumentNullException("instance");
+                throw new ArgumentNullException(nameof(instance));
 
             var consumer = instance as TConsumer;
             if (consumer == null)
             {
-                throw new ConsumerException(string.Format("The instance type {0} does not match the consumer type: {1}",
-                    instance.GetType().GetTypeName(), TypeMetadataCache<TConsumer>.ShortName));
+                throw new ConsumerException(
+                    $"The instance type {instance.GetType().GetTypeName()} does not match the consumer type: {TypeMetadataCache<TConsumer>.ShortName}");
             }
 
             IPipe<ConsumeContext<TMessage>> instancePipe = Pipe.New<ConsumeContext<TMessage>>(x =>

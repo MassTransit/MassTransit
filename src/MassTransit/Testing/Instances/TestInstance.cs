@@ -30,30 +30,15 @@ namespace MassTransit.Testing.Instances
             _actions = actions;
         }
 
-        public IReceivedMessageList Received
-        {
-            get { return _scenario.Received; }
-        }
+        public IReceivedMessageList Received => _scenario.Received;
 
-        public ISentMessageList Sent
-        {
-            get { return _scenario.Sent; }
-        }
+        public ISentMessageList Sent => _scenario.Sent;
 
-        public IPublishedMessageList Published
-        {
-            get { return _scenario.Published; }
-        }
+        public IPublishedMessageList Published => _scenario.Published;
 
-        public IReceivedMessageList Skipped
-        {
-            get { return _scenario.Skipped; }
-        }
+        public IReceivedMessageList Skipped => _scenario.Skipped;
 
-        public TScenario Scenario
-        {
-            get { return _scenario; }
-        }
+        public TScenario Scenario => _scenario;
 
         public void Execute()
         {

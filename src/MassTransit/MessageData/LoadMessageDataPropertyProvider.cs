@@ -34,7 +34,7 @@ namespace MassTransit.MessageData
             if (context.HasInput)
             {
                 MessageData<TValue> value = _property.Get(context.Input);
-                if (value != null && value.Address != null)
+                if (value?.Address != null)
                     return MessageDataFactory.Load<TValue>(_repository, value.Address, context.CancellationToken);
             }
 

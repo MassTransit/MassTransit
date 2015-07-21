@@ -20,8 +20,6 @@ namespace MassTransit.Transformation.Contexts
         SourceContext<TProperty, TInput>
     {
         readonly TransformContext<TInput> _context;
-        readonly bool _hasValue;
-        readonly TProperty _value;
 
         public TransformSourceContext(TransformContext<TInput> context)
         {
@@ -31,14 +29,11 @@ namespace MassTransit.Transformation.Contexts
         public TransformSourceContext(TransformContext<TInput> context, TProperty value)
         {
             _context = context;
-            _value = value;
-            _hasValue = true;
+            Value = value;
+            HasValue = true;
         }
 
-        CancellationToken TransformContext.CancellationToken
-        {
-            get { return _context.CancellationToken; }
-        }
+        CancellationToken TransformContext.CancellationToken => _context.CancellationToken;
 
         bool TransformContext.HasPayloadType(Type contextType)
         {
@@ -55,24 +50,12 @@ namespace MassTransit.Transformation.Contexts
             return _context.GetOrAddPayload(payloadFactory);
         }
 
-        public TInput Input
-        {
-            get { return _context.Input; }
-        }
+        public TInput Input => _context.Input;
 
-        public bool HasInput
-        {
-            get { return _context.HasInput; }
-        }
+        public bool HasInput => _context.HasInput;
 
-        public bool HasValue
-        {
-            get { return _hasValue; }
-        }
+        public bool HasValue { get; }
 
-        public TProperty Value
-        {
-            get { return _value; }
-        }
+        public TProperty Value { get; }
     }
 }

@@ -15,7 +15,6 @@ namespace MassTransit.Testing
     using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
-    using ConsumeConfigurators;
     using Pipeline;
     using Util;
 
@@ -23,26 +22,18 @@ namespace MassTransit.Testing
     public class MultiTestConsumer
     {
         readonly IList<IConsumerConfigurator> _configures;
-        internal readonly ReceivedMessageList _received;
-        readonly TimeSpan _timeout;
+        readonly ReceivedMessageList _received;
 
         public MultiTestConsumer(TimeSpan timeout)
         {
-            _timeout = timeout;
+            Timeout = timeout;
             _configures = new List<IConsumerConfigurator>();
 
             _received = new ReceivedMessageList(timeout);
         }
 
-        public IReceivedMessageList Received
-        {
-            get { return _received; }
-        }
-
-        public TimeSpan Timeout
-        {
-            get { return _timeout; }
-        }
+        public IReceivedMessageList Received => _received;
+        public TimeSpan Timeout { get; }
 
         public ReceivedMessageList<T> Consume<T>()
             where T : class
@@ -79,9 +70,7 @@ namespace MassTransit.Testing
         public void Configure(IReceiveEndpointConfigurator configurator)
         {
             foreach (IConsumerConfigurator configure in _configures)
-            {
-                IInstanceConfigurator instanceConfigurator = configure.Configure(configurator);
-            }
+                configure.Configure(configurator);
         }
 
 
@@ -101,9 +90,9 @@ namespace MassTransit.Testing
                 return bus.ConnectInstance(_consumer);
             }
 
-            public IInstanceConfigurator Configure(IReceiveEndpointConfigurator configurator)
+            public void Configure(IReceiveEndpointConfigurator configurator)
             {
-                return configurator.Instance(_consumer);
+                configurator.Instance(_consumer);
             }
         }
 
@@ -111,7 +100,7 @@ namespace MassTransit.Testing
         interface IConsumerConfigurator
         {
             ConnectHandle Connect(IConsumePipeConnector bus);
-            IInstanceConfigurator Configure(IReceiveEndpointConfigurator configurator);
+            void Configure(IReceiveEndpointConfigurator configurator);
         }
 
 
@@ -128,10 +117,7 @@ namespace MassTransit.Testing
                 _received = new ReceivedMessageList<T>(multiConsumer.Timeout);
             }
 
-            public ReceivedMessageList<T> Received
-            {
-                get { return _received; }
-            }
+            public ReceivedMessageList<T> Received => _received;
 
             public async Task Consume(ConsumeContext<T> context)
             {

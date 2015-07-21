@@ -41,8 +41,7 @@ namespace MassTransit.ConsumeConfigurators
 
             if (_instance != null && !_instance.GetType().HasInterface<IConsumer>())
             {
-                yield return this.Warning(string.Format("The instance of {0} does not implement any consumer interfaces",
-                    _instance.GetType().GetTypeName()));
+                yield return this.Warning($"The instance of {_instance.GetType().GetTypeName()} does not implement any consumer interfaces");
             }
         }
     }

@@ -43,15 +43,8 @@ namespace MassTransit.Saga
             _payloadCache = new PayloadCache();
         }
 
-        public Task CompleteTask
-        {
-            get { return _context.CompleteTask; }
-        }
-
-        public IEnumerable<string> SupportedMessageTypes
-        {
-            get { return _context.SupportedMessageTypes; }
-        }
+        public Task CompleteTask => _context.CompleteTask;
+        public IEnumerable<string> SupportedMessageTypes => _context.SupportedMessageTypes;
 
         Task IPublishEndpoint.Publish<T>(T message, CancellationToken cancellationToken)
         {
@@ -130,50 +123,15 @@ namespace MassTransit.Saga
             return _payloadCache.GetOrAddPayload(payloadFactory);
         }
 
-        public Guid? MessageId
-        {
-            get { return _context.MessageId; }
-        }
-
-        public Guid? RequestId
-        {
-            get { return _context.RequestId; }
-        }
-
-        public Guid? CorrelationId
-        {
-            get { return _instance.CorrelationId; }
-        }
-
-        public DateTime? ExpirationTime
-        {
-            get { return _context.ExpirationTime; }
-        }
-
-        public Uri SourceAddress
-        {
-            get { return _context.SourceAddress; }
-        }
-
-        public Uri DestinationAddress
-        {
-            get { return _context.DestinationAddress; }
-        }
-
-        public Uri ResponseAddress
-        {
-            get { return _context.ResponseAddress; }
-        }
-
-        public Uri FaultAddress
-        {
-            get { return _context.FaultAddress; }
-        }
-
-        public Headers Headers
-        {
-            get { return _context.Headers; }
-        }
+        public Guid? MessageId => _context.MessageId;
+        public Guid? RequestId => _context.RequestId;
+        public Guid? CorrelationId => _instance.CorrelationId;
+        public DateTime? ExpirationTime => _context.ExpirationTime;
+        public Uri SourceAddress => _context.SourceAddress;
+        public Uri DestinationAddress => _context.DestinationAddress;
+        public Uri ResponseAddress => _context.ResponseAddress;
+        public Uri FaultAddress => _context.FaultAddress;
+        public Headers Headers => _context.Headers;
 
         public SagaConsumeContext<TSaga, T> PopContext<T>()
             where T : class
@@ -192,20 +150,9 @@ namespace MassTransit.Saga
             }
         }
 
-        public bool IsCompleted
-        {
-            get { return _completed; }
-        }
-
-        public CancellationToken CancellationToken
-        {
-            get { return _context.CancellationToken; }
-        }
-
-        public ReceiveContext ReceiveContext
-        {
-            get { return _context.ReceiveContext; }
-        }
+        public bool IsCompleted => _completed;
+        public CancellationToken CancellationToken => _context.CancellationToken;
+        public ReceiveContext ReceiveContext => _context.ReceiveContext;
 
         public bool HasMessageType(Type messageType)
         {
@@ -251,25 +198,19 @@ namespace MassTransit.Saga
             return _context.NotifyFaulted(context, duration, consumerType, exception);
         }
 
-        TMessage ConsumeContext<TMessage>.Message
-        {
-            get { return _context.Message; }
-        }
+        TMessage ConsumeContext<TMessage>.Message => _context.Message;
 
         public Task NotifyConsumed(TimeSpan duration, string consumerType)
         {
             return _context.NotifyConsumed(duration, consumerType);
         }
 
-        public Task NotifyFaulted(TimeSpan duration, string consumerType, Exception exception)
+        Task ConsumeContext<TMessage>.NotifyFaulted(TimeSpan duration, string consumerType, Exception exception)
         {
             return NotifyFaulted(_context, duration, consumerType, exception);
         }
 
-        public TSaga Saga
-        {
-            get { return _instance; }
-        }
+        public TSaga Saga => _instance;
 
         public ConnectHandle ConnectPublishObserver(IPublishObserver observer)
         {

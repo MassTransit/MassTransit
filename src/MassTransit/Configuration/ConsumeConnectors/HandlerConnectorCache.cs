@@ -27,15 +27,9 @@ namespace MassTransit.ConsumeConnectors
             _connector = new Lazy<HandlerConnector<TMessage>>(() => new HandlerConnector<TMessage>());
         }
 
-        public static IHandlerConnector<TMessage> Connector
-        {
-            get { return InstanceCache.Cached.Value.Connector; }
-        }
+        public static IHandlerConnector<TMessage> Connector => InstanceCache.Cached.Value.Connector;
 
-        IHandlerConnector<TMessage> IHandlerConnectorCache<TMessage>.Connector
-        {
-            get { return _connector.Value; }
-        }
+        IHandlerConnector<TMessage> IHandlerConnectorCache<TMessage>.Connector => _connector.Value;
 
 
         static class InstanceCache

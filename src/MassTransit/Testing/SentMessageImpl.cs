@@ -26,34 +26,22 @@ namespace MassTransit.Testing
 			_context = context;
 		}
 
-		public SendContext<T> Context
-		{
-			get { return _context; }
-		}
+		public SendContext<T> Context => _context;
 
-		public Exception Exception
-		{
-			get { return _exception; }
-		}
+	    public Exception Exception => _exception;
 
-		public Type MessageType
-		{
-			get { return typeof (T); }
-		}
+	    public Type MessageType => typeof (T);
 
-		SendContext SentMessage.Context
-		{
-			get { return Context; }
-		}
+	    SendContext SentMessage.Context => Context;
 
-		public void SetException(Exception exception)
+	    public void SetException(Exception exception)
 		{
 			_exception = exception;
 		}
 
 		public override int GetHashCode()
 		{
-			return (_context != null ? _context.GetHashCode() : 0);
+			return _context?.GetHashCode() ?? 0;
 		}
 
 		public bool Equals(SentMessageImpl<T> other)

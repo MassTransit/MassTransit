@@ -36,9 +36,9 @@ namespace MassTransit.Context
         public SendRequestContext(IBus bus, SendContext<TRequest> context, TaskScheduler taskScheduler, Action<RequestContext<TRequest>> callback)
         {
             if (bus == null)
-                throw new ArgumentNullException("bus");
+                throw new ArgumentNullException(nameof(bus));
             if (context == null)
-                throw new ArgumentNullException("context");
+                throw new ArgumentNullException(nameof(context));
             if (!context.RequestId.HasValue)
                 throw new ArgumentException("The requestId must be initialized");
 
@@ -62,135 +62,119 @@ namespace MassTransit.Context
             }
         }
 
-        Task RequestContext.Task
-        {
-            get { return _requestTask.Task; }
-        }
+        Task RequestContext.Task => _requestTask.Task;
 
-        public Uri SourceAddress
+        Uri SendContext.SourceAddress
         {
             get { return _context.SourceAddress; }
             set { _context.SourceAddress = value; }
         }
 
-        public Uri DestinationAddress
+        Uri SendContext.DestinationAddress
         {
             get { return _context.DestinationAddress; }
             set { _context.DestinationAddress = value; }
         }
 
-        public Uri ResponseAddress
+        Uri SendContext.ResponseAddress
         {
             get { return _context.ResponseAddress; }
             set { _context.ResponseAddress = value; }
         }
 
-        public Uri FaultAddress
+        Uri SendContext.FaultAddress
         {
             get { return _context.FaultAddress; }
             set { _context.FaultAddress = value; }
         }
 
-        public Guid? RequestId
+        Guid? SendContext.RequestId
         {
             get { return _context.RequestId; }
             set { _context.RequestId = value; }
         }
 
-        public Guid? MessageId
+        Guid? SendContext.MessageId
         {
             get { return _context.MessageId; }
             set { _context.MessageId = value; }
         }
 
-        public Guid? CorrelationId
+        Guid? SendContext.CorrelationId
         {
             get { return _context.CorrelationId; }
             set { _context.CorrelationId = value; }
         }
 
-        public SendHeaders Headers
-        {
-            get { return _context.Headers; }
-        }
+        SendHeaders SendContext.Headers => _context.Headers;
 
-        public TimeSpan? TimeToLive
+        TimeSpan? SendContext.TimeToLive
         {
             get { return _context.TimeToLive; }
             set { _context.TimeToLive = value; }
         }
 
-        public ContentType ContentType
+        ContentType SendContext.ContentType
         {
             get { return _context.ContentType; }
             set { _context.ContentType = value; }
         }
 
-        public bool Durable
+        bool SendContext.Durable
         {
             get { return _context.Durable; }
             set { _context.Durable = value; }
         }
 
-        public IMessageSerializer Serializer
+        IMessageSerializer SendContext.Serializer
         {
             get { return _context.Serializer; }
             set { _context.Serializer = value; }
         }
 
-        public TRequest Message
-        {
-            get { return _context.Message; }
-        }
+        TRequest SendContext<TRequest>.Message => _context.Message;
 
-        public CancellationToken CancellationToken
-        {
-            get { return _context.CancellationToken; }
-        }
+        CancellationToken PipeContext.CancellationToken => _context.CancellationToken;
 
-        public bool HasPayloadType(Type contextType)
+        bool PipeContext.HasPayloadType(Type contextType)
         {
             return _context.HasPayloadType(contextType);
         }
 
-        public bool TryGetPayload<TPayload>(out TPayload payload)
-            where TPayload : class
+        bool PipeContext.TryGetPayload<TPayload>(out TPayload payload)
         {
             return _context.TryGetPayload(out payload);
         }
 
-        public TPayload GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory)
-            where TPayload : class
+        TPayload PipeContext.GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory)
         {
             return _context.GetOrAddPayload(payloadFactory);
         }
 
-        public TimeSpan Timeout
+        TimeSpan RequestContext.Timeout
         {
             get { return _timeout; }
             set { _timeout = value; }
         }
 
-        public void UseCurrentSynchronizationContext()
+        void RequestContext.UseCurrentSynchronizationContext()
         {
             _taskScheduler = TaskScheduler.FromCurrentSynchronizationContext();
         }
 
-        public void SetTaskScheduler(TaskScheduler taskScheduler)
+        void RequestContext.SetTaskScheduler(TaskScheduler taskScheduler)
         {
             _taskScheduler = taskScheduler;
         }
 
-        public void Watch<T>(MessageHandler<T> handler)
-            where T : class
+        void RequestContext.Watch<T>(MessageHandler<T> handler)
         {
             ConnectHandle connectHandle = _bus.ConnectRequestHandler(_requestId, handler);
 
             _connections.Add(new HandlerHandle<T>(connectHandle));
         }
 
-        public Task<T> Handle<T>(MessageHandler<T> handler)
-            where T : class
+        Task<T> RequestContext.Handle<T>(MessageHandler<T> handler)
         {
             var source = new TaskCompletionSource<T>();
 
@@ -219,8 +203,7 @@ namespace MassTransit.Context
             return source.Task;
         }
 
-        public Task<T> Handle<T>()
-            where T : class
+        Task<T> RequestContext.Handle<T>()
         {
             var source = new TaskCompletionSource<T>();
 
@@ -249,7 +232,7 @@ namespace MassTransit.Context
             return source.Task;
         }
 
-        public Task<Fault<TRequest>> HandleFault()
+        void HandleFault()
         {
             var source = new TaskCompletionSource<Fault<TRequest>>();
 
@@ -274,8 +257,6 @@ namespace MassTransit.Context
             ConnectHandle connectHandle = _bus.ConnectRequestHandler(_requestId, messageHandler);
 
             _connections.Add(new HandlerHandle<Fault<TRequest>>(connectHandle, source));
-
-            return source.Task;
         }
 
         void TimeoutExpired()

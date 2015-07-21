@@ -32,7 +32,7 @@ namespace MassTransit.Tests
                 .First();
 
 
-            var fastProperty = new ReadWriteProperty<PrivateSetter>(property, true);
+            var fastProperty = new ReadWriteProperty<PrivateSetter>(property);
 
             const string expectedValue = "Chris";
             fastProperty.Set(instance, expectedValue);

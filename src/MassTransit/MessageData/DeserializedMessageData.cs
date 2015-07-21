@@ -28,15 +28,9 @@ namespace MassTransit.MessageData
             _hasValue = true;
         }
 
-        public Uri Address
-        {
-            get { return _address; }
-        }
+        public Uri Address => _address;
 
-        public bool HasValue
-        {
-            get { return _hasValue; }
-        }
+        public bool HasValue => _hasValue;
 
         public Task<T> Value
         {

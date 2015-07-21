@@ -10,25 +10,13 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.MessageData
+namespace MassTransit.Monitoring.Introspection
 {
-    using System;
-    using System.Threading.Tasks;
+    using Contracts;
 
 
-    public class ConstantMessageData<T> :
-        MessageData<T>
+    public interface IProbeResultBuilder
     {
-        public ConstantMessageData(Uri address, T value)
-        {
-            Address = address;
-            Value = Task.FromResult(value);
-        }
-
-        public Uri Address { get; }
-
-        public bool HasValue => true;
-
-        public Task<T> Value { get; }
+        ProbeResult Build();
     }
 }

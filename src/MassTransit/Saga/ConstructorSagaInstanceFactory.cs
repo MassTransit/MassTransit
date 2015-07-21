@@ -26,8 +26,6 @@ namespace MassTransit.Saga
     public class ConstructorSagaInstanceFactory<TSaga>
         where TSaga : class, ISaga
     {
-        readonly SagaInstanceFactoryMethod<TSaga> _factoryMethod;
-
         public ConstructorSagaInstanceFactory()
         {
             ConstructorInfo constructorInfo = typeof(TSaga).GetConstructor(new[] {typeof(Guid)});
@@ -40,12 +38,9 @@ namespace MassTransit.Saga
             ParameterExpression correlationId = Expression.Parameter(typeof(Guid), "correlationId");
             NewExpression @new = Expression.New(constructorInfo, correlationId);
 
-            _factoryMethod = Expression.Lambda<SagaInstanceFactoryMethod<TSaga>>(@new, correlationId).Compile();
+            FactoryMethod = Expression.Lambda<SagaInstanceFactoryMethod<TSaga>>(@new, correlationId).Compile();
         }
 
-        public SagaInstanceFactoryMethod<TSaga> FactoryMethod
-        {
-            get { return _factoryMethod; }
-        }
+        public SagaInstanceFactoryMethod<TSaga> FactoryMethod { get; }
     }
 }

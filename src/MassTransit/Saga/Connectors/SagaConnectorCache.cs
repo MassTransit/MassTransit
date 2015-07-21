@@ -31,15 +31,9 @@ namespace MassTransit.Saga.Connectors
             _connector = new Lazy<SagaConnector<TSaga>>(() => new SagaConnector<TSaga>(), LazyThreadSafetyMode.PublicationOnly);
         }
 
-        public static ISagaConnector Connector
-        {
-            get { return Cached.Instance.Value.Connector; }
-        }
+        public static ISagaConnector Connector => Cached.Instance.Value.Connector;
 
-        ISagaConnector ISagaConnectorCache.Connector
-        {
-            get { return _connector.Value; }
-        }
+        ISagaConnector ISagaConnectorCache.Connector => _connector.Value;
 
 
         static class Cached

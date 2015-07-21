@@ -18,7 +18,6 @@ namespace MassTransit.ConsumeConnectors
 
     public class MessageInterfaceType
     {
-        static readonly IEqualityComparer<MessageInterfaceType> MessageTypeComparerInstance = new MessageTypeEqualityComparer();
         readonly Lazy<IMessageConnectorFactory> _consumeConnectorFactory;
         readonly Lazy<IMessageConnectorFactory> _consumeMessageConnectorFactory;
 
@@ -35,12 +34,9 @@ namespace MassTransit.ConsumeConnectors
                     consumerType, messageType)));
         }
 
-        public static IEqualityComparer<MessageInterfaceType> MessageTypeComparer
-        {
-            get { return MessageTypeComparerInstance; }
-        }
+        public static IEqualityComparer<MessageInterfaceType> MessageTypeComparer { get; } = new MessageTypeEqualityComparer();
 
-        public Type MessageType { get; private set; }
+        public Type MessageType { get; }
 
         public IConsumerMessageConnector GetConsumerConnector()
         {

@@ -29,7 +29,7 @@ namespace MassTransit
             where T : class, PipeContext
         {
             if (configurator == null)
-                throw new ArgumentNullException("configurator");
+                throw new ArgumentNullException(nameof(configurator));
 
             var specification = new RateLimitPipeSpecification<T>(rateLimit, TimeSpan.FromSeconds(1));
 
@@ -48,7 +48,7 @@ namespace MassTransit
             where T : class, PipeContext
         {
             if (configurator == null)
-                throw new ArgumentNullException("configurator");
+                throw new ArgumentNullException(nameof(configurator));
 
             var specification = new RateLimitPipeSpecification<T>(rateLimit, interval);
 

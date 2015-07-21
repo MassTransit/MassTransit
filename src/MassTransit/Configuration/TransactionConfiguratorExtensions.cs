@@ -29,8 +29,7 @@ namespace MassTransit
         {
             var transactionConfigurator = new TransactionPipeSpecification<T>();
 
-            if (configure != null)
-                configure(transactionConfigurator);
+            configure?.Invoke(transactionConfigurator);
 
             configurator.AddPipeSpecification(transactionConfigurator);
         }

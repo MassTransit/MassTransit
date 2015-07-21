@@ -53,9 +53,6 @@ namespace MassTransit.Context
             return TaskUtil.Completed;
         }
 
-        public Task Task
-        {
-            get { return ((RequestContext)_requestContext).Task; }
-        }
+        Task Request<TRequest>.Task => ((RequestContext)_requestContext).Task;
     }
 }

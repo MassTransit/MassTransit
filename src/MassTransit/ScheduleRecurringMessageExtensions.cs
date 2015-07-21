@@ -80,7 +80,7 @@ namespace MassTransit
             where T : class
         {
             if (message == null)
-                throw new ArgumentNullException("message");
+                throw new ArgumentNullException(nameof(message));
 
             return CancelScheduledRecurringMessage(bus, message.Schedule.ScheduleId, message.Schedule.ScheduleGroup);
         }
@@ -143,9 +143,8 @@ namespace MassTransit
 
             public override string ToString()
             {
-                return string.Format("ScheduleGroup: {0}, ScheduleId: {1}, StartTime: {2}, EndTime: {3}, CronExpression: {4}, TimeZone: {5}",
-                    Schedule.ScheduleGroup,
-                    Schedule.ScheduleId, Schedule.StartTime, Schedule.EndTime, Schedule.CronExpression, Schedule.TimeZoneId);
+                return
+                    $"ScheduleGroup: {Schedule.ScheduleGroup}, ScheduleId: {Schedule.ScheduleId}, StartTime: {Schedule.StartTime}, EndTime: {Schedule.EndTime}, CronExpression: {Schedule.CronExpression}, TimeZone: {Schedule.TimeZoneId}";
             }
         }
 

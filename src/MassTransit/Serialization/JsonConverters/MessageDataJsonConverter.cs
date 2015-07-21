@@ -39,7 +39,7 @@ namespace MassTransit.Serialization.JsonConverters
             Type dataType = objectType.GetClosingArguments(typeof(MessageData<>)).First();
 
             var reference = serializer.Deserialize<MessageDataReference>(reader);
-            if (reference == null || reference.Reference == null)
+            if (reference?.Reference == null)
                 return Activator.CreateInstance(typeof(EmptyMessageData<>).MakeGenericType(dataType));
 
             if (dataType == typeof(string))

@@ -49,7 +49,7 @@ namespace MassTransit.Util
 			}
 			catch (UriFormatException ex)
 			{
-				throw new ConfigurationException(string.Format("{0}: {1}", message, uriString), ex);
+				throw new ConfigurationException($"{message}: {uriString}", ex);
 			}
 		}
 	}

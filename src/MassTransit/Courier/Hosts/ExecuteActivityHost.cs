@@ -35,9 +35,9 @@ namespace MassTransit.Courier.Hosts
         public ExecuteActivityHost(ExecuteActivityFactory<TArguments> activityFactory, Uri compensateAddress)
         {
             if (compensateAddress == null)
-                throw new ArgumentNullException("compensateAddress");
+                throw new ArgumentNullException(nameof(compensateAddress));
             if (activityFactory == null)
-                throw new ArgumentNullException("activityFactory");
+                throw new ArgumentNullException(nameof(activityFactory));
 
             _compensateAddress = compensateAddress;
             _activityFactory = activityFactory;
@@ -48,7 +48,7 @@ namespace MassTransit.Courier.Hosts
         public ExecuteActivityHost(ExecuteActivityFactory<TArguments> activityFactory)
         {
             if (activityFactory == null)
-                throw new ArgumentNullException("activityFactory");
+                throw new ArgumentNullException(nameof(activityFactory));
 
             _activityFactory = activityFactory;
 
@@ -84,13 +84,13 @@ namespace MassTransit.Courier.Hosts
 
                 await _activityFactory.Execute(executeContext, _executePipe);
 
-                context.NotifyConsumed(timer.Elapsed, TypeMetadataCache<TActivity>.ShortName);
+                await context.NotifyConsumed(timer.Elapsed, TypeMetadataCache<TActivity>.ShortName);
 
                 await next.Send(context);
             }
             catch (Exception ex)
             {
-                context.NotifyFaulted(timer.Elapsed, TypeMetadataCache<TActivity>.ShortName, ex);
+                await context.NotifyFaulted(timer.Elapsed, TypeMetadataCache<TActivity>.ShortName, ex);
                 throw;
             }
         }

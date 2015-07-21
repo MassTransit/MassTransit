@@ -19,7 +19,7 @@ namespace MassTransit.Serialization
     {
         public static string ToStringOrNull(this Uri uri)
         {
-            return uri == null ? null : uri.ToString();
+            return uri?.ToString();
         }
 
         public static Uri ToUriOrNull(this string uriString)

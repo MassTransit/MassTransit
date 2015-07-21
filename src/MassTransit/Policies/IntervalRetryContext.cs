@@ -31,8 +31,7 @@ namespace MassTransit.Policies
 
         public void Dispose()
         {
-            if (_enumerator != null)
-                _enumerator.Dispose();
+            _enumerator?.Dispose();
         }
 
         public bool CanRetry(Exception exception, out TimeSpan delay)

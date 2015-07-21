@@ -27,7 +27,7 @@ namespace MassTransit
         public static void UseDeadLetterQueue(this IPipeConfigurator<ReceiveContext> configurator, IPipe<ReceiveContext> rescuePipe)
         {
             if (configurator == null)
-                throw new ArgumentNullException("configurator");
+                throw new ArgumentNullException(nameof(configurator));
 
             var rescueConfigurator = new DeadLetterPipeSpecification(rescuePipe);
 

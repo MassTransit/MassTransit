@@ -33,10 +33,7 @@ namespace MassTransit.Courier.Hosts
             _activity = activity;
         }
 
-        CancellationToken PipeContext.CancellationToken
-        {
-            get { return _context.CancellationToken; }
-        }
+        CancellationToken PipeContext.CancellationToken => _context.CancellationToken;
 
         bool PipeContext.HasPayloadType(Type contextType)
         {
@@ -109,40 +106,13 @@ namespace MassTransit.Courier.Hosts
             return _context.GetSendEndpoint(address);
         }
 
-        Guid CompensateContext.TrackingNumber
-        {
-            get { return _context.TrackingNumber; }
-        }
-
-        HostInfo CompensateContext.Host
-        {
-            get { return _context.Host; }
-        }
-
-        DateTime CompensateContext.StartTimestamp
-        {
-            get { return _context.StartTimestamp; }
-        }
-
-        TimeSpan CompensateContext.ElapsedTime
-        {
-            get { return _context.ElapsedTime; }
-        }
-
-        ConsumeContext CompensateContext.ConsumeContext
-        {
-            get { return _context.ConsumeContext; }
-        }
-
-        string CompensateContext.ActivityName
-        {
-            get { return _context.ActivityName; }
-        }
-
-        Guid CompensateContext.ExecutionId
-        {
-            get { return _context.ExecutionId; }
-        }
+        Guid CompensateContext.TrackingNumber => _context.TrackingNumber;
+        HostInfo CompensateContext.Host => _context.Host;
+        DateTime CompensateContext.StartTimestamp => _context.StartTimestamp;
+        TimeSpan CompensateContext.ElapsedTime => _context.ElapsedTime;
+        ConsumeContext CompensateContext.ConsumeContext => _context.ConsumeContext;
+        string CompensateContext.ActivityName => _context.ActivityName;
+        Guid CompensateContext.ExecutionId => _context.ExecutionId;
 
         CompensationResult CompensateContext.Compensated()
         {
@@ -169,22 +139,11 @@ namespace MassTransit.Courier.Hosts
             return _context.Failed(exception);
         }
 
-        TLog CompensateContext<TLog>.Log
-        {
-            get { return _context.Log; }
-        }
+        TLog CompensateContext<TLog>.Log => _context.Log;
+        CompensateActivity<TLog> CompensateActivityContext<TLog>.Activity => _activity;
+        TActivity CompensateActivityContext<TActivity, TLog>.Activity => _activity;
 
-        CompensateActivity<TLog> CompensateActivityContext<TLog>.Activity
-        {
-            get { return _activity; }
-        }
-
-        TActivity CompensateActivityContext<TActivity, TLog>.Activity
-        {
-            get { return _activity; }
-        }
-
-        public ConnectHandle ConnectPublishObserver(IPublishObserver observer)
+        ConnectHandle IPublishObserverConnector.ConnectPublishObserver(IPublishObserver observer)
         {
             return _context.ConnectPublishObserver(observer);
         }

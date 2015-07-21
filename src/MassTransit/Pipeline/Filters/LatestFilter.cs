@@ -45,10 +45,7 @@ namespace MassTransit.Pipeline.Filters
             context.CreateFilterScope("last");
         }
 
-        public Task<T> Latest
-        {
-            get { return GetLatest(); }
-        }
+        public Task<T> Latest => GetLatest();
 
         async Task<T> GetLatest()
         {

@@ -41,7 +41,7 @@ namespace MassTransit
 
         static string FormatMessage(string requestId)
         {
-            return string.Format("The request was cancelled, RequestId: {0}", requestId);
+            return $"The request was cancelled, RequestId: {requestId}";
         }
     }
 }

@@ -60,19 +60,18 @@ namespace MassTransit.Pipeline.Filters
                 await next.Send(context);
 
                 if (systemTransactionContext != null)
-                    systemTransactionContext.Commit();
+                    ((TransactionContext)systemTransactionContext).Commit();
             }
             catch (Exception ex)
             {
                 if (systemTransactionContext != null)
-                    systemTransactionContext.Rollback(ex);
+                    ((TransactionContext)systemTransactionContext).Rollback(ex);
 
                 throw;
             }
             finally
             {
-                if (systemTransactionContext != null)
-                    systemTransactionContext.Dispose();
+                systemTransactionContext?.Dispose();
             }
         }
     }

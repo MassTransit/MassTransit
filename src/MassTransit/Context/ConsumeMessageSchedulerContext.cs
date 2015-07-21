@@ -27,9 +27,9 @@ namespace MassTransit.Context
         public ConsumeMessageSchedulerContext(ConsumeContext consumeContext, Uri schedulerAddress)
         {
             if (consumeContext == null)
-                throw new ArgumentNullException("consumeContext");
+                throw new ArgumentNullException(nameof(consumeContext));
             if (schedulerAddress == null)
-                throw new ArgumentNullException("schedulerAddress");
+                throw new ArgumentNullException(nameof(schedulerAddress));
 
             _consumeContext = consumeContext;
             _schedulerAddress = schedulerAddress;

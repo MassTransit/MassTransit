@@ -28,40 +28,13 @@ namespace MassTransit.Monitoring.Performance
         {
         }
 
-        public static CounterCreationData ConsumedPerSecond
-        {
-            get { return Cached.Instance.Value.Data[0]; }
-        }
-
-        public static CounterCreationData TotalReceived
-        {
-            get { return Cached.Instance.Value.Data[1]; }
-        }
-
-        public static CounterCreationData ConsumeDuration
-        {
-            get { return Cached.Instance.Value.Data[2]; }
-        }
-
-        public static CounterCreationData ConsumeDurationBase
-        {
-            get { return Cached.Instance.Value.Data[3]; }
-        }
-
-        public static CounterCreationData Faulted
-        {
-            get { return Cached.Instance.Value.Data[4]; }
-        }
-
-        public static CounterCreationData FaultPercentage
-        {
-            get { return Cached.Instance.Value.Data[5]; }
-        }
-
-        public static CounterCreationData FaultPercentageBase
-        {
-            get { return Cached.Instance.Value.Data[6]; }
-        }
+        public static CounterCreationData ConsumedPerSecond => Cached.Instance.Value.Data[0];
+        public static CounterCreationData TotalReceived => Cached.Instance.Value.Data[1];
+        public static CounterCreationData ConsumeDuration => Cached.Instance.Value.Data[2];
+        public static CounterCreationData ConsumeDurationBase => Cached.Instance.Value.Data[3];
+        public static CounterCreationData Faulted => Cached.Instance.Value.Data[4];
+        public static CounterCreationData FaultPercentage => Cached.Instance.Value.Data[5];
+        public static CounterCreationData FaultPercentageBase => Cached.Instance.Value.Data[6];
 
         public static IPerformanceCounter CreateCounter(string counterName, string instanceName)
         {

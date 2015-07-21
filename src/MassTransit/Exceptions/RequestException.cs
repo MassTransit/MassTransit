@@ -53,9 +53,6 @@ namespace MassTransit
             _response = response;
         }
 
-        public object Response
-        {
-            get { return _response; }
-        }
+        public object Response => _response;
     }
 }

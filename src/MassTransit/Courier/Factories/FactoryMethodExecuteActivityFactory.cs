@@ -44,8 +44,7 @@ namespace MassTransit.Courier.Factories
             finally
             {
                 var disposable = activity as IDisposable;
-                if (disposable != null)
-                    disposable.Dispose();
+                disposable?.Dispose();
             }
         }
     }

@@ -28,12 +28,11 @@ namespace MassTransit
             where T : class, PipeContext
         {
             if (configurator == null)
-                throw new ArgumentNullException("configurator");
+                throw new ArgumentNullException(nameof(configurator));
 
             var pipeBuilderConfigurator = new LatestPipeSpecification<T>();
 
-            if (configure != null)
-                configure(pipeBuilderConfigurator);
+            configure?.Invoke(pipeBuilderConfigurator);
 
             configurator.AddPipeSpecification(pipeBuilderConfigurator);
         }

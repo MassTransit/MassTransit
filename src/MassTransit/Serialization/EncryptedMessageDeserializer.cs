@@ -16,7 +16,6 @@ namespace MassTransit.Serialization
     using System.IO;
     using System.Net.Mime;
     using System.Runtime.Serialization;
-    using System.Threading.Tasks;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Bson;
 
@@ -44,10 +43,7 @@ namespace MassTransit.Serialization
             scope.Add("contentType", EncryptedMessageSerializer.EncryptedContentType.MediaType);
         }
 
-        public ContentType ContentType
-        {
-            get { return EncryptedMessageSerializer.EncryptedContentType; }
-        }
+        public ContentType ContentType => EncryptedMessageSerializer.EncryptedContentType;
 
         public ConsumeContext Deserialize(ReceiveContext receiveContext)
         {

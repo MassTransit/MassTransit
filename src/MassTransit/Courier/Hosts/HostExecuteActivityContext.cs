@@ -35,40 +35,13 @@ namespace MassTransit.Courier.Hosts
             _consumeContext = _context.ConsumeContext;
         }
 
-        Guid ExecuteContext.TrackingNumber
-        {
-            get { return _context.TrackingNumber; }
-        }
-
-        Guid ExecuteContext.ExecutionId
-        {
-            get { return _context.ExecutionId; }
-        }
-
-        HostInfo ExecuteContext.Host
-        {
-            get { return _context.Host; }
-        }
-
-        DateTime ExecuteContext.Timestamp
-        {
-            get { return _context.Timestamp; }
-        }
-
-        TimeSpan ExecuteContext.Elapsed
-        {
-            get { return _context.Elapsed; }
-        }
-
-        ConsumeContext ExecuteContext.ConsumeContext
-        {
-            get { return _context.ConsumeContext; }
-        }
-
-        string ExecuteContext.ActivityName
-        {
-            get { return _context.ActivityName; }
-        }
+        Guid ExecuteContext.TrackingNumber => _context.TrackingNumber;
+        Guid ExecuteContext.ExecutionId => _context.ExecutionId;
+        HostInfo ExecuteContext.Host => _context.Host;
+        DateTime ExecuteContext.Timestamp => _context.Timestamp;
+        TimeSpan ExecuteContext.Elapsed => _context.Elapsed;
+        ConsumeContext ExecuteContext.ConsumeContext => _context.ConsumeContext;
+        string ExecuteContext.ActivityName => _context.ActivityName;
 
         ExecutionResult ExecuteContext.Completed()
         {
@@ -146,10 +119,7 @@ namespace MassTransit.Courier.Hosts
             return _context.Faulted(exception);
         }
 
-        CancellationToken PipeContext.CancellationToken
-        {
-            get { return _context.CancellationToken; }
-        }
+        CancellationToken PipeContext.CancellationToken => _context.CancellationToken;
 
         bool PipeContext.HasPayloadType(Type contextType)
         {
@@ -221,22 +191,11 @@ namespace MassTransit.Courier.Hosts
             return _consumeContext.GetSendEndpoint(address);
         }
 
-        ExecuteActivity<TArguments> ExecuteActivityContext<TArguments>.Activity
-        {
-            get { return _activity; }
-        }
+        ExecuteActivity<TArguments> ExecuteActivityContext<TArguments>.Activity => _activity;
+        TActivity ExecuteActivityContext<TActivity, TArguments>.Activity => _activity;
+        TArguments ExecuteContext<TArguments>.Arguments => _context.Arguments;
 
-        TActivity ExecuteActivityContext<TActivity, TArguments>.Activity
-        {
-            get { return _activity; }
-        }
-
-        TArguments ExecuteContext<TArguments>.Arguments
-        {
-            get { return _context.Arguments; }
-        }
-
-        public ConnectHandle ConnectPublishObserver(IPublishObserver observer)
+        ConnectHandle IPublishObserverConnector.ConnectPublishObserver(IPublishObserver observer)
         {
             return _consumeContext.ConnectPublishObserver(observer);
         }

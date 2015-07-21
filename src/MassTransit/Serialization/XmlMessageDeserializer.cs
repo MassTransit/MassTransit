@@ -18,7 +18,6 @@ namespace MassTransit.Serialization
     using System.Net.Mime;
     using System.Runtime.Serialization;
     using System.Text;
-    using System.Threading.Tasks;
     using System.Xml;
     using System.Xml.Linq;
     using Newtonsoft.Json;
@@ -45,10 +44,7 @@ namespace MassTransit.Serialization
             scope.Add("contentType", XmlMessageSerializer.XmlContentType.MediaType);
         }
 
-        ContentType IMessageDeserializer.ContentType
-        {
-            get { return XmlMessageSerializer.XmlContentType; }
-        }
+        ContentType IMessageDeserializer.ContentType => XmlMessageSerializer.XmlContentType;
 
         ConsumeContext IMessageDeserializer.Deserialize(ReceiveContext receiveContext)
         {

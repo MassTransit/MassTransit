@@ -34,10 +34,7 @@ namespace MassTransit.Context
             _exception = exception;
         }
 
-        Exception ExceptionConsumeContext.Exception
-        {
-            get { return _exception; }
-        }
+        Exception ExceptionConsumeContext.Exception => _exception;
 
         ExceptionInfo ExceptionConsumeContext.ExceptionInfo
         {
@@ -52,15 +49,8 @@ namespace MassTransit.Context
             }
         }
 
-        Task ConsumeContext.CompleteTask
-        {
-            get { return _context.CompleteTask; }
-        }
-
-        IEnumerable<string> ConsumeContext.SupportedMessageTypes
-        {
-            get { return _context.SupportedMessageTypes; }
-        }
+        Task ConsumeContext.CompleteTask => _context.CompleteTask;
+        IEnumerable<string> ConsumeContext.SupportedMessageTypes => _context.SupportedMessageTypes;
 
         Task IPublishEndpoint.Publish<T>(T message, CancellationToken cancellationToken)
         {
@@ -128,60 +118,17 @@ namespace MassTransit.Context
             return _context.GetOrAddPayload(payloadFactory);
         }
 
-        Guid? MessageContext.MessageId
-        {
-            get { return _context.MessageId; }
-        }
-
-        Guid? MessageContext.RequestId
-        {
-            get { return _context.RequestId; }
-        }
-
-        Guid? MessageContext.CorrelationId
-        {
-            get { return _context.CorrelationId; }
-        }
-
-        DateTime? MessageContext.ExpirationTime
-        {
-            get { return _context.ExpirationTime; }
-        }
-
-        Uri MessageContext.SourceAddress
-        {
-            get { return _context.SourceAddress; }
-        }
-
-        Uri MessageContext.DestinationAddress
-        {
-            get { return _context.DestinationAddress; }
-        }
-
-        Uri MessageContext.ResponseAddress
-        {
-            get { return _context.ResponseAddress; }
-        }
-
-        Uri MessageContext.FaultAddress
-        {
-            get { return _context.FaultAddress; }
-        }
-
-        Headers MessageContext.Headers
-        {
-            get { return _context.Headers; }
-        }
-
-        CancellationToken PipeContext.CancellationToken
-        {
-            get { return _context.CancellationToken; }
-        }
-
-        ReceiveContext ConsumeContext.ReceiveContext
-        {
-            get { return _context.ReceiveContext; }
-        }
+        Guid? MessageContext.MessageId => _context.MessageId;
+        Guid? MessageContext.RequestId => _context.RequestId;
+        Guid? MessageContext.CorrelationId => _context.CorrelationId;
+        DateTime? MessageContext.ExpirationTime => _context.ExpirationTime;
+        Uri MessageContext.SourceAddress => _context.SourceAddress;
+        Uri MessageContext.DestinationAddress => _context.DestinationAddress;
+        Uri MessageContext.ResponseAddress => _context.ResponseAddress;
+        Uri MessageContext.FaultAddress => _context.FaultAddress;
+        Headers MessageContext.Headers => _context.Headers;
+        CancellationToken PipeContext.CancellationToken => _context.CancellationToken;
+        ReceiveContext ConsumeContext.ReceiveContext => _context.ReceiveContext;
 
         bool ConsumeContext.HasMessageType(Type messageType)
         {
@@ -223,10 +170,7 @@ namespace MassTransit.Context
             return _context.NotifyFaulted(context, duration, consumerType, exception);
         }
 
-        TMessage ConsumeContext<TMessage>.Message
-        {
-            get { return _context.Message; }
-        }
+        TMessage ConsumeContext<TMessage>.Message => _context.Message;
 
         Task ConsumeContext<TMessage>.NotifyConsumed(TimeSpan duration, string consumerType)
         {

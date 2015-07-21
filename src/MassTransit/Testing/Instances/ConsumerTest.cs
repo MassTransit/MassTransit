@@ -33,10 +33,7 @@ namespace MassTransit.Testing.Instances
             _subject = subject;
         }
 
-        public IConsumerTestSubject<TConsumer> Consumer
-        {
-            get { return _subject; }
-        }
+        public IConsumerTestSubject<TConsumer> Consumer => _subject;
 
         protected override void Dispose(bool disposing)
         {

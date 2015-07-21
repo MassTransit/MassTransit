@@ -26,10 +26,7 @@ namespace MassTransit.Events
             _exception = exception;
         }
 
-        public string ExceptionType
-        {
-            get { return _exception.GetType().GetTypeName(); }
-        }
+        public string ExceptionType => _exception.GetType().GetTypeName();
 
         public ExceptionInfo InnerException
         {
@@ -41,19 +38,10 @@ namespace MassTransit.Events
             }
         }
 
-        public string StackTrace
-        {
-            get { return _exception.StackTrace; }
-        }
+        public string StackTrace => _exception.StackTrace;
 
-        public string Message
-        {
-            get { return _exception.Message; }
-        }
+        public string Message => _exception.Message;
 
-        public string Source
-        {
-            get { return _exception.Source; }
-        }
+        public string Source => _exception.Source;
     }
 }

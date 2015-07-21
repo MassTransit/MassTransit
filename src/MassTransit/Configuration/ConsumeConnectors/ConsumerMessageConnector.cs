@@ -33,10 +33,7 @@ namespace MassTransit.ConsumeConnectors
             _consumeFilter = consumeFilter;
         }
 
-        public Type MessageType
-        {
-            get { return typeof(TMessage); }
-        }
+        public Type MessageType => typeof(TMessage);
 
         ConnectHandle IConsumerConnector.ConnectConsumer<T>(IConsumePipeConnector consumePipe, IConsumerFactory<T> consumerFactory,
             IPipeSpecification<ConsumerConsumeContext<T>>[] pipeSpecifications)
@@ -78,10 +75,7 @@ namespace MassTransit.ConsumeConnectors
                 _filters = new List<IFilter<ConsumerConsumeContext<T>>>();
             }
 
-            public IEnumerable<IFilter<ConsumerConsumeContext<T>>> Filters
-            {
-                get { return _filters; }
-            }
+            public IEnumerable<IFilter<ConsumerConsumeContext<T>>> Filters => _filters;
 
             public void AddFilter(IFilter<ConsumerConsumeContext<T>> filter)
             {

@@ -41,10 +41,7 @@ namespace MassTransit.Serialization
             scope.Add("contentType", JsonMessageSerializer.JsonContentType.MediaType);
         }
 
-        ContentType IMessageDeserializer.ContentType
-        {
-            get { return JsonMessageSerializer.JsonContentType; }
-        }
+        ContentType IMessageDeserializer.ContentType => JsonMessageSerializer.JsonContentType;
 
         ConsumeContext IMessageDeserializer.Deserialize(ReceiveContext receiveContext)
         {

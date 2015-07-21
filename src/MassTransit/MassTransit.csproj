@@ -417,6 +417,7 @@
     <Compile Include="MessageRequestClient.cs" />
     <Compile Include="MessageSchedulerContext.cs" />
     <Compile Include="Monitoring\Introspection\Contracts\ProbeResult.cs" />
+    <Compile Include="Monitoring\Introspection\IProbeResultBuilder.cs" />
     <Compile Include="Monitoring\Introspection\ProbeResultBuilder.cs" />
     <Compile Include="Monitoring\Introspection\ScopeProbeContext.cs" />
     <Compile Include="Monitoring\Performance\BusPerformanceCounters.cs" />
@@ -657,7 +658,6 @@
     <Compile Include="Configuration\ConsumeConnectors\IConsumerConnector.cs" />
     <Compile Include="Configuration\ConsumeConnectors\IInstanceConnector.cs" />
     <Compile Include="Context\ContextException.cs" />
-    <Compile Include="Context\MoveMessageSendContext.cs" />
     <Compile Include="Exceptions\MessageRetryLimitExceededException.cs" />
     <Compile Include="Exceptions\PublishException.cs" />
     <Compile Include="Exceptions\RequestCancelledException.cs" />
@@ -684,8 +684,6 @@
     <Compile Include="Saga\SubscriptionConfigurators\SagaConfigurator.cs" />
     <Compile Include="Saga\Connectors\ISagaConnector.cs" />
     <Compile Include="Serialization\BsonMessageSerializer.cs" />
-    <Compile Include="Serialization\Envelope.cs" />
-    <Compile Include="Serialization\EnvelopeExtensions.cs" />
     <Compile Include="Serialization\ExtensionsForBinaryMessageSerializer.cs" />
     <Compile Include="Serialization\IMessageTypeConverter.cs" />
     <Compile Include="Serialization\JsonMessageSerializer.cs" />

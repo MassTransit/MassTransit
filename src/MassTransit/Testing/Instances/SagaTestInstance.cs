@@ -34,10 +34,7 @@ namespace MassTransit.Testing.Instances
             _subject = new SagaTestSubjectImpl<TScenario, TSaga>(sagaRepository);
         }
 
-        public SagaTestSubject<TSaga> Saga
-        {
-            get { return _subject; }
-        }
+        public SagaTestSubject<TSaga> Saga => _subject;
 
         protected override void Dispose(bool disposing)
         {

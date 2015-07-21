@@ -53,7 +53,7 @@
         public static MemberExpression GetMemberExpression<T, TMember>(this Expression<Func<T, TMember>> expression)
         {
             if (expression == null)
-                throw new ArgumentNullException("expression");
+                throw new ArgumentNullException(nameof(expression));
 
             return GetMemberExpression(expression.Body);
         }
@@ -61,21 +61,21 @@
         public static MemberExpression GetMemberExpression<T>(this Expression<Action<T>> expression)
         {
             if (expression == null)
-                throw new ArgumentNullException("expression");
+                throw new ArgumentNullException(nameof(expression));
             return GetMemberExpression(expression.Body);
         }
 
         public static MemberExpression GetMemberExpression<T>(this Expression<Func<T>> expression)
         {
             if (expression == null)
-                throw new ArgumentNullException("expression");
+                throw new ArgumentNullException(nameof(expression));
             return GetMemberExpression(expression.Body);
         }
 
         public static MemberExpression GetMemberExpression<T1, T2>(this Expression<Action<T1, T2>> expression)
         {
             if (expression == null)
-                throw new ArgumentNullException("expression");
+                throw new ArgumentNullException(nameof(expression));
 
             return GetMemberExpression(expression.Body);
         }
@@ -83,7 +83,7 @@
         static MemberExpression GetMemberExpression(Expression body)
         {
             if (body == null)
-                throw new ArgumentNullException("body");
+                throw new ArgumentNullException(nameof(body));
 
             MemberExpression memberExpression = null;
             if (body.NodeType == ExpressionType.Convert)

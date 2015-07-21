@@ -38,7 +38,7 @@ namespace MassTransit.Saga.Policies
         Task ISagaPolicy<TSaga, TMessage>.Existing(SagaConsumeContext<TSaga, TMessage> context, IPipe<SagaConsumeContext<TSaga, TMessage>> next)
         {
             throw new SagaException("The message cannot be accepted by an existing saga", typeof(TSaga), typeof(TMessage),
-                context.CorrelationId.HasValue ? context.CorrelationId.Value : Guid.Empty);
+                context.CorrelationId ?? Guid.Empty);
         }
 
         async Task ISagaPolicy<TSaga, TMessage>.Missing(ConsumeContext<TMessage> context, IPipe<SagaConsumeContext<TSaga, TMessage>> next)

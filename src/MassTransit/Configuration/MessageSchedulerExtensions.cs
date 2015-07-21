@@ -26,7 +26,7 @@ namespace MassTransit
         public static void UseMessageScheduler(this IPipeConfigurator<ConsumeContext> configurator, Uri schedulerAddress)
         {
             if (configurator == null)
-                throw new ArgumentNullException("configurator");
+                throw new ArgumentNullException(nameof(configurator));
 
             var pipeBuilderConfigurator = new MessageSchedulerPipeSpecification(schedulerAddress);
 

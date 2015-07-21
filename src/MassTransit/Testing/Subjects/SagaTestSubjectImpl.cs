@@ -47,8 +47,7 @@ namespace MassTransit.Testing.Subjects
             var decoratedSagaRepository = new SagaRepositoryTestDecorator<TSaga>(_sagaRepository, _received, _created, _sagas);
 
             var scenarioBuilder = builder as IBusTestScenarioBuilder;
-            if (scenarioBuilder != null)
-                scenarioBuilder.ConfigureReceiveEndpoint(x => x.Saga(decoratedSagaRepository));
+            scenarioBuilder?.ConfigureReceiveEndpoint(x => x.Saga(decoratedSagaRepository));
 
             return builder;
         }
@@ -73,15 +72,9 @@ namespace MassTransit.Testing.Subjects
             return _created.Contains(sagaId);
         }
 
-        public IReceivedMessageList Received
-        {
-            get { return _received; }
-        }
+        public IReceivedMessageList Received => _received;
 
-        public ISagaList<TSaga> Created
-        {
-            get { return _created; }
-        }
+        public ISagaList<TSaga> Created => _created;
 
         public IEnumerator<ISagaInstance<TSaga>> GetEnumerator()
         {

@@ -36,10 +36,7 @@
             }
         }
 
-        public IEnumerable<ISagaMessageConnector> Connectors
-        {
-            get { return _connectors; }
-        }
+        public IEnumerable<ISagaMessageConnector> Connectors => _connectors;
 
         public ConnectHandle ConnectSaga<T>(IConsumePipeConnector consumePipe, ISagaRepository<T> sagaRepository,
             params IPipeSpecification<SagaConsumeContext<T>>[] pipeSpecifications) 

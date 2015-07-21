@@ -38,8 +38,7 @@ namespace MassTransit.Saga.Pipeline.Filters
             var consumer = context.Saga as Orchestrates<TMessage>;
             if (consumer == null)
             {
-                string message = string.Format("Saga type {0} does not orchestrate message type {1}",
-                    TypeMetadataCache<TSaga>.ShortName, TypeMetadataCache<TMessage>.ShortName);
+                string message = $"Saga type {TypeMetadataCache<TSaga>.ShortName} does not orchestrate message type {TypeMetadataCache<TMessage>.ShortName}";
 
                 throw new ConsumerMessageException(message);
             }

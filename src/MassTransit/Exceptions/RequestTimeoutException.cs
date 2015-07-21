@@ -41,7 +41,7 @@ namespace MassTransit
 
         static string FormatMessage(string requestId)
         {
-            return string.Format("Timeout waiting for response, RequestId: {0}", requestId);
+            return $"Timeout waiting for response, RequestId: {requestId}";
         }
     }
 }

@@ -21,11 +21,10 @@ namespace MassTransit.Saga
         where TSaga : class, ISaga
     {
         readonly Lazy<Func<TSaga, bool>> _filter;
-        readonly Expression<Func<TSaga, bool>> _filterExpression;
 
         public SagaQuery(Expression<Func<TSaga, bool>> filterExpression)
         {
-            _filterExpression = filterExpression;
+            FilterExpression = filterExpression;
             _filter = new Lazy<Func<TSaga, bool>>(filterExpression.Compile);
         }
 
@@ -34,9 +33,6 @@ namespace MassTransit.Saga
             return _filter.Value;
         }
 
-        public Expression<Func<TSaga, bool>> FilterExpression
-        {
-            get { return _filterExpression; }
-        }
+        public Expression<Func<TSaga, bool>> FilterExpression { get; }
     }
 }

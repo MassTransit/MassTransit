@@ -37,8 +37,7 @@ namespace MassTransit.Saga.Pipeline.Filters
             var consumer = context.Saga as Observes<TMessage, TSaga>;
             if (consumer == null)
             {
-                string message = string.Format("Saga type {0} does not observe message type {1}",
-                    TypeMetadataCache<TSaga>.ShortName, TypeMetadataCache<TMessage>.ShortName);
+                string message = $"Saga type {TypeMetadataCache<TSaga>.ShortName} does not observe message type {TypeMetadataCache<TMessage>.ShortName}";
 
                 throw new ConsumerMessageException(message);
             }

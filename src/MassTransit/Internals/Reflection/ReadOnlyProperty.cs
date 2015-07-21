@@ -38,7 +38,7 @@ namespace MassTransit.Internals.Reflection
         static Func<object, object> GetGetMethod(PropertyInfo property)
         {
             if (property.DeclaringType == null)
-                throw new ArgumentException("DeclaringType is null", "property");
+                throw new ArgumentException("DeclaringType is null", nameof(property));
 
             ParameterExpression instance = Expression.Parameter(typeof(object), "instance");
             UnaryExpression instanceCast = property.DeclaringType.GetTypeInfo().IsValueType

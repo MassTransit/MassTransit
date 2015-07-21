@@ -69,15 +69,9 @@ namespace MassTransit.Serialization
             _serializer = new Lazy<JsonSerializer>(() => JsonSerializer.Create(SerializerSettings));
         }
 
-        public static JsonSerializer Deserializer
-        {
-            get { return _deserializer.Value; }
-        }
+        public static JsonSerializer Deserializer => _deserializer.Value;
 
-        public static JsonSerializer Serializer
-        {
-            get { return _serializer.Value; }
-        }
+        public static JsonSerializer Serializer => _serializer.Value;
 
         public void Serialize<T>(Stream stream, SendContext<T> context)
             where T : class
@@ -94,9 +88,6 @@ namespace MassTransit.Serialization
             }
         }
 
-        public ContentType ContentType
-        {
-            get { return BsonContentType; }
-        }
+        public ContentType ContentType => BsonContentType;
     }
 }

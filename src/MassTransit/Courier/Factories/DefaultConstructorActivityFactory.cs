@@ -16,10 +16,7 @@ namespace MassTransit.Courier.Factories
         where TActivity : class, ExecuteActivity<TArguments>, new()
         where TArguments : class
     {
-        public static ExecuteActivityFactory<TArguments> ExecuteFactory
-        {
-            get { return ActivityFactoryCache.Factory; }
-        }
+        public static ExecuteActivityFactory<TArguments> ExecuteFactory => ActivityFactoryCache.Factory;
 
 
         static class ActivityFactoryCache

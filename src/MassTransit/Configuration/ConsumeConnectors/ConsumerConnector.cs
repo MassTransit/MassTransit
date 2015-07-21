@@ -37,10 +37,7 @@ namespace MassTransit.ConsumeConnectors
                 .ToList();
         }
 
-        public IEnumerable<IConsumerMessageConnector> Connectors
-        {
-            get { return _connectors; }
-        }
+        public IEnumerable<IConsumerMessageConnector> Connectors => _connectors;
 
         ConnectHandle IConsumerConnector.ConnectConsumer<TConsumer>(IConsumePipeConnector consumePipe, IConsumerFactory<TConsumer> consumerFactory,
             IPipeSpecification<ConsumerConsumeContext<TConsumer>>[] pipeSpecifications)

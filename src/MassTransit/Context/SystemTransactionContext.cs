@@ -39,12 +39,9 @@ namespace MassTransit.Context
             _disposed = true;
         }
 
-        public Transaction Transaction
-        {
-            get { return _transaction; }
-        }
+        Transaction TransactionContext.Transaction => _transaction;
 
-        public void Commit()
+        void TransactionContext.Commit()
         {
             if (_completed)
                 return;
@@ -54,7 +51,7 @@ namespace MassTransit.Context
             _completed = true;
         }
 
-        public void Rollback()
+        void TransactionContext.Rollback()
         {
             if (_completed)
                 return;
@@ -64,7 +61,7 @@ namespace MassTransit.Context
             _completed = true;
         }
 
-        public void Rollback(Exception exception)
+        void TransactionContext.Rollback(Exception exception)
         {
             if (_completed)
                 return;

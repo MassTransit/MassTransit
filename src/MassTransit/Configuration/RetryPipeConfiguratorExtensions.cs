@@ -23,7 +23,7 @@ namespace MassTransit
         public static void UseRetry(this IPipeConfigurator<ConsumeContext> configurator, IRetryPolicy retryPolicy)
         {
             if (configurator == null)
-                throw new ArgumentNullException("configurator");
+                throw new ArgumentNullException(nameof(configurator));
 
             var pipeBuilderConfigurator = new RetryPipeSpecification(retryPolicy);
 
@@ -34,7 +34,7 @@ namespace MassTransit
             where T : class
         {
             if (configurator == null)
-                throw new ArgumentNullException("configurator");
+                throw new ArgumentNullException(nameof(configurator));
 
             var pipeBuilderConfigurator = new RetryPipeSpecification<T>(retryPolicy);
 
@@ -50,9 +50,9 @@ namespace MassTransit
         public static void UseRetry(this IPipeConfigurator<ConsumeContext> configurator, IRetryPolicy retryPolicy, CancellationToken cancellationToken)
         {
             if (configurator == null)
-                throw new ArgumentNullException("configurator");
+                throw new ArgumentNullException(nameof(configurator));
             if (retryPolicy == null)
-                throw new ArgumentNullException("retryPolicy");
+                throw new ArgumentNullException(nameof(retryPolicy));
 
             retryPolicy = new CancelRetryPolicy(retryPolicy, cancellationToken);
 

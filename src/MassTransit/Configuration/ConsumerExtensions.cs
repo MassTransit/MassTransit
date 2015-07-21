@@ -14,8 +14,10 @@ namespace MassTransit
 {
     using System;
     using ConsumeConfigurators;
+    using ConsumeConnectors;
     using Internals.Extensions;
     using Logging;
+    using PipeConfigurators;
     using Pipeline.ConsumerFactories;
     using Util;
 
@@ -41,8 +43,7 @@ namespace MassTransit
 
             var consumerConfigurator = new ConsumerConfigurator<TConsumer>(consumerFactory);
 
-            if (configure != null)
-                configure(consumerConfigurator);
+            configure?.Invoke(consumerConfigurator);
 
             configurator.AddEndpointSpecification(consumerConfigurator);
         }
@@ -53,16 +54,18 @@ namespace MassTransit
         /// <typeparam name="TConsumer"></typeparam>
         /// <param name="bus"></param>
         /// <param name="consumerFactory"></param>
+        /// <param name="pipeSpecifications"></param>
         /// <returns></returns>
-        public static ConnectHandle ConnectConsumer<TConsumer>(this IBus bus, IConsumerFactory<TConsumer> consumerFactory)
+        public static ConnectHandle ConnectConsumer<TConsumer>(this IBus bus, IConsumerFactory<TConsumer> consumerFactory,
+            params IPipeSpecification<ConsumerConsumeContext<TConsumer>>[] pipeSpecifications)
             where TConsumer : class, IConsumer
         {
             if (bus == null)
-                throw new ArgumentNullException("bus");
+                throw new ArgumentNullException(nameof(bus));
             if (consumerFactory == null)
-                throw new ArgumentNullException("consumerFactory");
+                throw new ArgumentNullException(nameof(consumerFactory));
 
-            return bus.ConnectConsumer(consumerFactory);
+            return ConsumerConnectorCache<TConsumer>.Connector.ConnectConsumer(bus, consumerFactory, pipeSpecifications);
         }
 
         /// <summary>
@@ -82,8 +85,7 @@ namespace MassTransit
 
             var consumerConfigurator = new ConsumerConfigurator<TConsumer>(consumerFactory);
 
-            if (configure != null)
-                configure(consumerConfigurator);
+            configure?.Invoke(consumerConfigurator);
 
             configurator.AddEndpointSpecification(consumerConfigurator);
         }
@@ -93,14 +95,15 @@ namespace MassTransit
         /// </summary>
         /// <typeparam name="TConsumer"></typeparam>
         /// <param name="bus"></param>
+        /// <param name="pipeSpecifications"></param>
         /// <returns></returns>
-        public static ConnectHandle ConnectConsumer<TConsumer>(this IBus bus)
+        public static ConnectHandle ConnectConsumer<TConsumer>(this IBus bus, params IPipeSpecification<ConsumerConsumeContext<TConsumer>>[] pipeSpecifications)
             where TConsumer : class, IConsumer, new()
         {
             if (bus == null)
-                throw new ArgumentNullException("bus");
+                throw new ArgumentNullException(nameof(bus));
 
-            return bus.ConnectConsumer<TConsumer>();
+            return bus.ConnectConsumer(new DefaultConstructorConsumerFactory<TConsumer>(), pipeSpecifications);
         }
 
         /// <summary>
@@ -109,6 +112,7 @@ namespace MassTransit
         /// <typeparam name="TConsumer"></typeparam>
         /// <param name="configurator"></param>
         /// <param name="consumerFactoryMethod"></param>
+        /// <param name="configure"></param>
         /// <returns></returns>
         public static void Consumer<TConsumer>(this IReceiveEndpointConfigurator configurator, Func<TConsumer> consumerFactoryMethod,
             Action<IConsumerConfigurator<TConsumer>> configure = null)
@@ -121,8 +125,7 @@ namespace MassTransit
 
             var consumerConfigurator = new ConsumerConfigurator<TConsumer>(delegateConsumerFactory);
 
-            if (configure != null)
-                configure(consumerConfigurator);
+            configure?.Invoke(consumerConfigurator);
 
             configurator.AddEndpointSpecification(consumerConfigurator);
         }
@@ -173,18 +176,18 @@ namespace MassTransit
         public static ConnectHandle ConnectConsumer(this IBus bus, Type consumerType, Func<Type, object> objectFactory)
         {
             if (bus == null)
-                throw new ArgumentNullException("bus");
+                throw new ArgumentNullException(nameof(bus));
             if (consumerType == null)
-                throw new ArgumentNullException("consumerType");
+                throw new ArgumentNullException(nameof(consumerType));
             if (objectFactory == null)
-                throw new ArgumentNullException("objectFactory");
+                throw new ArgumentNullException(nameof(objectFactory));
             if (!consumerType.HasInterface<IConsumer>())
                 throw new ArgumentException("The consumer type must implement an IConsumer interface");
 
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Subscribing Consumer: {0} (by type, using object consumer factory)", consumerType);
 
-            return bus.ConnectConsumer(consumerType, objectFactory);
+            return ConsumerConnectorCache.Connect(bus, consumerType, objectFactory);
         }
     }
 }

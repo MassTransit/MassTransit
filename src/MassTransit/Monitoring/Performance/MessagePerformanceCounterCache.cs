@@ -15,12 +15,9 @@ namespace MassTransit.Monitoring.Performance
     using System;
 
 
-    public class MessagePerformanceCounterCache<T>
+    public static class MessagePerformanceCounterCache<T>
     {
-        public static IMessagePerformanceCounter Counter
-        {
-            get { return Cached.Counter.Value; }
-        }
+        public static IMessagePerformanceCounter Counter => Cached.Counter.Value;
 
 
         static class Cached

@@ -47,7 +47,7 @@ namespace MassTransit.Configurators
 
 		public override string ToString()
 		{
-			return string.Format("[{0}] {1}", Disposition, string.IsNullOrEmpty(Key) ? Message : Key + " " + Message);
+			return $"[{Disposition}] {(string.IsNullOrEmpty(Key) ? Message : Key + " " + Message)}";
 		}
 	}
 }

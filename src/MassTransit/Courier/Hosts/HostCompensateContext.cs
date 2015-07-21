@@ -120,45 +120,14 @@ namespace MassTransit.Courier.Hosts
             return _context.Publish<T>(values, publishPipe, cancellationToken);
         }
 
-        TLog CompensateContext<TLog>.Log
-        {
-            get { return _data; }
-        }
-
-        Guid CompensateContext.TrackingNumber
-        {
-            get { return _routingSlip.TrackingNumber; }
-        }
-
-        public HostInfo Host
-        {
-            get { return _host; }
-        }
-
-        public DateTime StartTimestamp
-        {
-            get { return _startTimestamp; }
-        }
-
-        public TimeSpan ElapsedTime
-        {
-            get { return _timer.Elapsed; }
-        }
-
-        public ConsumeContext ConsumeContext
-        {
-            get { return _context; }
-        }
-
-        public string ActivityName
-        {
-            get { return _activityLog.Name; }
-        }
-
-        public Guid ExecutionId
-        {
-            get { return _activityLog.ExecutionId; }
-        }
+        TLog CompensateContext<TLog>.Log => _data;
+        Guid CompensateContext.TrackingNumber => _routingSlip.TrackingNumber;
+        HostInfo CompensateContext.Host => _host;
+        DateTime CompensateContext.StartTimestamp => _startTimestamp;
+        TimeSpan CompensateContext.ElapsedTime => _timer.Elapsed;
+        ConsumeContext CompensateContext.ConsumeContext => _context;
+        string CompensateContext.ActivityName => _activityLog.Name;
+        Guid CompensateContext.ExecutionId => _activityLog.ExecutionId;
 
         CompensationResult CompensateContext.Compensated()
         {
@@ -168,7 +137,7 @@ namespace MassTransit.Courier.Hosts
         CompensationResult CompensateContext.Compensated(object values)
         {
             if (values == null)
-                throw new ArgumentNullException("values");
+                throw new ArgumentNullException(nameof(values));
 
             return new CompensatedWithVariablesCompensationResult<TLog>(this, _publisher, _compensateLog, _routingSlip,
                 RoutingSlipBuilder.GetObjectAsDictionary(values));
@@ -177,7 +146,7 @@ namespace MassTransit.Courier.Hosts
         CompensationResult CompensateContext.Compensated(IDictionary<string, object> variables)
         {
             if (variables == null)
-                throw new ArgumentNullException("variables");
+                throw new ArgumentNullException(nameof(variables));
 
             return new CompensatedWithVariablesCompensationResult<TLog>(this, _publisher, _compensateLog, _routingSlip, variables);
         }
@@ -200,10 +169,7 @@ namespace MassTransit.Courier.Hosts
             return _context.GetSendEndpoint(address);
         }
 
-        CancellationToken PipeContext.CancellationToken
-        {
-            get { return _context.CancellationToken; }
-        }
+        CancellationToken PipeContext.CancellationToken => _context.CancellationToken;
 
         bool PipeContext.HasPayloadType(Type contextType)
         {

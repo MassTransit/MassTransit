@@ -35,10 +35,7 @@ namespace MassTransit.Saga
             _sagas = new IndexedSagaDictionary<TSaga>();
         }
 
-        public SagaInstance<TSaga> this[Guid id]
-        {
-            get { return _sagas[id]; }
-        }
+        public SagaInstance<TSaga> this[Guid id] => _sagas[id];
 
         public Task<IEnumerable<Guid>> Find(ISagaQuery<TSaga> query)
         {

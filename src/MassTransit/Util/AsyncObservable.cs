@@ -15,7 +15,6 @@ namespace MassTransit.Util
     using System;
     using System.Collections.Concurrent;
     using System.Threading;
-    using System.Threading.Tasks;
     using Logging;
 
 
@@ -41,10 +40,7 @@ namespace MassTransit.Util
         /// <summary>
         /// The number of connections
         /// </summary>
-        public int Count
-        {
-            get { return _connections.Count; }
-        }
+        public int Count => _connections.Count;
 
         /// <summary>
         /// Connect a connectable type
@@ -54,7 +50,7 @@ namespace MassTransit.Util
         public ConnectHandle Connect(T observer)
         {
             if (observer == null)
-                throw new ArgumentNullException("observer");
+                throw new ArgumentNullException(nameof(observer));
 
             long id = Interlocked.Increment(ref _nextId);
 
@@ -75,7 +71,7 @@ namespace MassTransit.Util
         public void Notify(ObserverNotification callback)
         {
             if (callback == null)
-                throw new ArgumentNullException("callback");
+                throw new ArgumentNullException(nameof(callback));
 
             if (_connections.Count == 0)
                 return;
@@ -94,11 +90,8 @@ namespace MassTransit.Util
         class Handle :
             ConnectHandle
         {
-            static readonly ILog _log = Logger.Get<AsyncObservable<T>>();
-            readonly CancellationTokenSource _cancellation;
             readonly Action<long> _disconnect;
             readonly long _id;
-            readonly Task _notifyTask;
             readonly T _observer;
 
             public Handle(long id, T observer, Action<long> disconnect)
@@ -106,8 +99,6 @@ namespace MassTransit.Util
                 _id = id;
                 _disconnect = disconnect;
                 _observer = observer;
-
-                _cancellation = new CancellationTokenSource();
             }
 
             public void Disconnect()

@@ -36,8 +36,7 @@ namespace MassTransit.PipeConfigurators
 
             builder.AddFilter(filter);
 
-            if (_created != null)
-                _created(filter);
+            _created?.Invoke(filter);
         }
 
         IEnumerable<ValidationResult> Configurator.Validate()

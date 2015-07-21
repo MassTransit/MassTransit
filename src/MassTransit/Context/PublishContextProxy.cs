@@ -17,111 +17,6 @@ namespace MassTransit.Context
     using System.Threading;
 
 
-    public class PublishContextProxy :
-        PublishContext
-    {
-        readonly SendContext _context;
-
-        public PublishContextProxy(SendContext context)
-        {
-            _context = context;
-        }
-
-        public bool Mandatory { get; set; }
-
-        public CancellationToken CancellationToken
-        {
-            get { return _context.CancellationToken; }
-        }
-
-        public bool HasPayloadType(Type contextType)
-        {
-            return _context.HasPayloadType(contextType);
-        }
-
-        public bool TryGetPayload<TPayload>(out TPayload payload) where TPayload : class
-        {
-            return _context.TryGetPayload(out payload);
-        }
-
-        public TPayload GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory) where TPayload : class
-        {
-            return _context.GetOrAddPayload(payloadFactory);
-        }
-
-        public Uri SourceAddress
-        {
-            get { return _context.SourceAddress; }
-            set { _context.SourceAddress = value; }
-        }
-
-        public Uri DestinationAddress
-        {
-            get { return _context.DestinationAddress; }
-            set { _context.DestinationAddress = value; }
-        }
-
-        public Uri ResponseAddress
-        {
-            get { return _context.ResponseAddress; }
-            set { _context.ResponseAddress = value; }
-        }
-
-        public Uri FaultAddress
-        {
-            get { return _context.FaultAddress; }
-            set { _context.FaultAddress = value; }
-        }
-
-        public Guid? RequestId
-        {
-            get { return _context.RequestId; }
-            set { _context.RequestId = value; }
-        }
-
-        public Guid? MessageId
-        {
-            get { return _context.MessageId; }
-            set { _context.MessageId = value; }
-        }
-
-        public Guid? CorrelationId
-        {
-            get { return _context.CorrelationId; }
-            set { _context.CorrelationId = value; }
-        }
-
-        public SendHeaders Headers
-        {
-            get { return _context.Headers; }
-        }
-
-        public TimeSpan? TimeToLive
-        {
-            get { return _context.TimeToLive; }
-            set { _context.TimeToLive = value; }
-        }
-
-        public ContentType ContentType
-        {
-            get { return _context.ContentType; }
-            set { _context.ContentType = value; }
-        }
-
-        public bool Durable
-        {
-            get { return _context.Durable; }
-            set { _context.Durable = value; }
-        }
-
-        public IMessageSerializer Serializer
-        {
-            get { return _context.Serializer; }
-            set { _context.Serializer = value; }
-        }
-    }
-
-
     public class PublishContextProxy<T> :
         PublishContext<T>
         where T : class
@@ -133,102 +28,93 @@ namespace MassTransit.Context
             _context = context;
         }
 
-        public bool Mandatory { get; set; }
+        bool PublishContext.Mandatory { get; set; }
 
-        public CancellationToken CancellationToken
-        {
-            get { return _context.CancellationToken; }
-        }
+        CancellationToken PipeContext.CancellationToken => _context.CancellationToken;
 
-        public bool HasPayloadType(Type contextType)
+        bool PipeContext.HasPayloadType(Type contextType)
         {
             return _context.HasPayloadType(contextType);
         }
 
-        public bool TryGetPayload<TPayload>(out TPayload payload) where TPayload : class
+        bool PipeContext.TryGetPayload<TPayload>(out TPayload payload)
         {
             return _context.TryGetPayload(out payload);
         }
 
-        public TPayload GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory) where TPayload : class
+        TPayload PipeContext.GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory)
         {
             return _context.GetOrAddPayload(payloadFactory);
         }
 
-        public Uri SourceAddress
+        Uri SendContext.SourceAddress
         {
             get { return _context.SourceAddress; }
             set { _context.SourceAddress = value; }
         }
 
-        public Uri DestinationAddress
+        Uri SendContext.DestinationAddress
         {
             get { return _context.DestinationAddress; }
             set { _context.DestinationAddress = value; }
         }
 
-        public Uri ResponseAddress
+        Uri SendContext.ResponseAddress
         {
             get { return _context.ResponseAddress; }
             set { _context.ResponseAddress = value; }
         }
 
-        public Uri FaultAddress
+        Uri SendContext.FaultAddress
         {
             get { return _context.FaultAddress; }
             set { _context.FaultAddress = value; }
         }
 
-        public Guid? RequestId
+        Guid? SendContext.RequestId
         {
             get { return _context.RequestId; }
             set { _context.RequestId = value; }
         }
 
-        public Guid? MessageId
+        Guid? SendContext.MessageId
         {
             get { return _context.MessageId; }
             set { _context.MessageId = value; }
         }
 
-        public Guid? CorrelationId
+        Guid? SendContext.CorrelationId
         {
             get { return _context.CorrelationId; }
             set { _context.CorrelationId = value; }
         }
 
-        public SendHeaders Headers
-        {
-            get { return _context.Headers; }
-        }
+        SendHeaders SendContext.Headers => _context.Headers;
 
-        public TimeSpan? TimeToLive
+        TimeSpan? SendContext.TimeToLive
         {
             get { return _context.TimeToLive; }
             set { _context.TimeToLive = value; }
         }
 
-        public ContentType ContentType
+        ContentType SendContext.ContentType
         {
             get { return _context.ContentType; }
             set { _context.ContentType = value; }
         }
 
-        public bool Durable
+        bool SendContext.Durable
         {
             get { return _context.Durable; }
             set { _context.Durable = value; }
         }
 
-        public IMessageSerializer Serializer
+        IMessageSerializer SendContext.Serializer
         {
             get { return _context.Serializer; }
             set { _context.Serializer = value; }
         }
 
-        public T Message
-        {
-            get { return _context.Message; }
-        }
+        T SendContext<T>.Message => _context.Message;
     }
 }

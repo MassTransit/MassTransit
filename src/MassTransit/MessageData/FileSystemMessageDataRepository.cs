@@ -63,7 +63,7 @@ namespace MassTransit.MessageData
                 await stream.CopyToAsync(fileStream, DefaultBufferSize, cancellationToken);
             }
 
-            return new Uri(string.Format("urn:file:{0}", filePath.Replace(Path.DirectorySeparatorChar, ':')));
+            return new Uri($"urn:file:{filePath.Replace(Path.DirectorySeparatorChar, ':')}");
         }
 
         static void VerifyDirectory(string fullPath)

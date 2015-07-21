@@ -38,11 +38,8 @@ namespace MassTransit.Serialization.JsonConverters
             if (!property.Writable)
             {
                 var propertyInfo = member as PropertyInfo;
-                if (propertyInfo != null)
-                {
-                    if (propertyInfo.GetSetMethod(true) != null)
-                        property.Writable = true;
-                }
+                if (propertyInfo?.GetSetMethod(true) != null)
+                    property.Writable = true;
             }
 
             return property;

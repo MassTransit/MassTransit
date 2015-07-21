@@ -41,10 +41,8 @@ namespace MassTransit.ConsumeConfigurators
 
             if (!typeof(TConsumer).HasInterface<IConsumer>())
             {
-                yield return
-                    this.Warning(
-                        string.Format("The consumer class {0} does not implement any IMessageConsumer interfaces",
-                            TypeMetadataCache<TConsumer>.ShortName));
+                yield return this.Warning(
+                    $"The consumer class {TypeMetadataCache<TConsumer>.ShortName} does not implement any IMessageConsumer interfaces");
             }
         }
 

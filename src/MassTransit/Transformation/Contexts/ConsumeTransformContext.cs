@@ -35,10 +35,7 @@ namespace MassTransit.Transformation.Contexts
             _payloadCache = new PayloadCache();
         }
 
-        CancellationToken TransformContext.CancellationToken
-        {
-            get { return _context.CancellationToken; }
-        }
+        CancellationToken TransformContext.CancellationToken => _context.CancellationToken;
 
         bool TransformContext.HasPayloadType(Type contextType)
         {
@@ -65,14 +62,8 @@ namespace MassTransit.Transformation.Contexts
             return _payloadCache.GetOrAddPayload(payloadFactory);
         }
 
-        TMessage TransformContext<TMessage>.Input
-        {
-            get { return _context.Message; }
-        }
+        TMessage TransformContext<TMessage>.Input => _context.Message;
 
-        bool TransformContext<TMessage>.HasInput
-        {
-            get { return true; }
-        }
+        bool TransformContext<TMessage>.HasInput => true;
     }
 }

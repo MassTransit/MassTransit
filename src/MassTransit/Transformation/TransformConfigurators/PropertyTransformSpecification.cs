@@ -33,15 +33,9 @@ namespace MassTransit.Transformation.TransformConfigurators
             _property = property;
         }
 
-        protected PropertyInfo Property
-        {
-            get { return _property; }
-        }
+        protected PropertyInfo Property => _property;
 
-        protected PropertyInfo InputProperty
-        {
-            get { return _inputProperty; }
-        }
+        protected PropertyInfo InputProperty => _inputProperty;
 
         IEnumerable<ValidationResult> Configurator.Validate()
         {

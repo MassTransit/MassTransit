@@ -35,7 +35,7 @@ namespace MassTransit.Pipeline.Filters
         public HandlerMessageFilter(MessageHandler<TMessage> handler)
         {
             if (handler == null)
-                throw new ArgumentNullException("handler");
+                throw new ArgumentNullException(nameof(handler));
 
             _handler = handler;
         }
@@ -55,7 +55,7 @@ namespace MassTransit.Pipeline.Filters
             {
                 await _handler(context);
 
-                context.NotifyConsumed(timer.Elapsed, TypeMetadataCache<MessageHandler<TMessage>>.ShortName);
+                await context.NotifyConsumed(timer.Elapsed, TypeMetadataCache<MessageHandler<TMessage>>.ShortName);
 
                 Interlocked.Increment(ref _completed);
 
@@ -63,7 +63,7 @@ namespace MassTransit.Pipeline.Filters
             }
             catch (Exception ex)
             {
-                context.NotifyFaulted(timer.Elapsed, TypeMetadataCache<MessageHandler<TMessage>>.ShortName, ex);
+                await context.NotifyFaulted(timer.Elapsed, TypeMetadataCache<MessageHandler<TMessage>>.ShortName, ex);
 
                 Interlocked.Increment(ref _faulted);
                 throw;

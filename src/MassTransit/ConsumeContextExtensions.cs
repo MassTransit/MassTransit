@@ -32,9 +32,9 @@ namespace MassTransit
             where T : class
         {
             if (context == null)
-                throw new ArgumentNullException("context");
+                throw new ArgumentNullException(nameof(context));
             if (endpoint == null)
-                throw new ArgumentNullException("endpoint");
+                throw new ArgumentNullException(nameof(endpoint));
 
             return Forward(context, endpoint, context.Message);
         }
@@ -43,9 +43,9 @@ namespace MassTransit
             where T : class
         {
             if (context == null)
-                throw new ArgumentNullException("context");
+                throw new ArgumentNullException(nameof(context));
             if (address == null)
-                throw new ArgumentNullException("address");
+                throw new ArgumentNullException(nameof(address));
 
             ISendEndpoint endpoint = await context.GetSendEndpoint(address);
 

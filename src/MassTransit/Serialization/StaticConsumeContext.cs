@@ -85,70 +85,31 @@ namespace MassTransit.Serialization
             return _receiveContext.GetOrAddPayload(payloadFactory);
         }
 
-        public Guid? MessageId
-        {
-            get { return _messageId.HasValue ? _messageId : (_messageId = GetHeaderGuid(BinaryMessageSerializer.MessageIdKey)); }
-        }
+        public Guid? MessageId => _messageId.HasValue ? _messageId : (_messageId = GetHeaderGuid(BinaryMessageSerializer.MessageIdKey));
 
-        public Guid? RequestId
-        {
-            get { return _requestId.HasValue ? _requestId : (_requestId = GetHeaderGuid(BinaryMessageSerializer.RequestIdKey)); }
-        }
+        public Guid? RequestId => _requestId.HasValue ? _requestId : (_requestId = GetHeaderGuid(BinaryMessageSerializer.RequestIdKey));
 
-        public Guid? CorrelationId
-        {
-            get { return _correlationId.HasValue ? _correlationId : (_correlationId = GetHeaderGuid(BinaryMessageSerializer.CorrelationIdKey)); }
-        }
+        public Guid? CorrelationId => _correlationId.HasValue ? _correlationId : (_correlationId = GetHeaderGuid(BinaryMessageSerializer.CorrelationIdKey));
 
-        public DateTime? ExpirationTime
-        {
-            get { return GetHeaderDateTime(BinaryMessageSerializer.ExpirationTimeKey); }
-        }
+        public DateTime? ExpirationTime => GetHeaderDateTime(BinaryMessageSerializer.ExpirationTimeKey);
 
-        public Uri SourceAddress
-        {
-            get { return _sourceAddress ?? (_sourceAddress = GetHeaderUri(BinaryMessageSerializer.SourceAddressKey)); }
-        }
+        public Uri SourceAddress => _sourceAddress ?? (_sourceAddress = GetHeaderUri(BinaryMessageSerializer.SourceAddressKey));
 
-        public Uri DestinationAddress
-        {
-            get { return _destinationAddress ?? (_destinationAddress = GetHeaderUri(BinaryMessageSerializer.DestinationAddressKey)); }
-        }
+        public Uri DestinationAddress => _destinationAddress ?? (_destinationAddress = GetHeaderUri(BinaryMessageSerializer.DestinationAddressKey));
 
-        public Uri ResponseAddress
-        {
-            get { return _responseAddress ?? (_responseAddress = GetHeaderUri(BinaryMessageSerializer.ResponseAddressKey)); }
-        }
+        public Uri ResponseAddress => _responseAddress ?? (_responseAddress = GetHeaderUri(BinaryMessageSerializer.ResponseAddressKey));
 
-        public Uri FaultAddress
-        {
-            get { return _faultAddress ?? (_faultAddress = GetHeaderUri(BinaryMessageSerializer.FaultAddressKey)); }
-        }
+        public Uri FaultAddress => _faultAddress ?? (_faultAddress = GetHeaderUri(BinaryMessageSerializer.FaultAddressKey));
 
-        public Headers Headers
-        {
-            get { return _headers ?? (_headers = new StaticHeaders(_deserializer, _binaryHeaders)); }
-        }
+        public Headers Headers => _headers ?? (_headers = new StaticHeaders(_deserializer, _binaryHeaders));
 
-        public CancellationToken CancellationToken
-        {
-            get { return _receiveContext.CancellationToken; }
-        }
+        public CancellationToken CancellationToken => _receiveContext.CancellationToken;
 
-        public ReceiveContext ReceiveContext
-        {
-            get { return _receiveContext; }
-        }
+        public ReceiveContext ReceiveContext => _receiveContext;
 
-        public Task CompleteTask
-        {
-            get { return Task.WhenAll(_pendingTasks); }
-        }
+        public Task CompleteTask => Task.WhenAll(_pendingTasks);
 
-        public IEnumerable<string> SupportedMessageTypes
-        {
-            get { return _supportedTypes; }
-        }
+        public IEnumerable<string> SupportedMessageTypes => _supportedTypes;
 
         public bool HasMessageType(Type messageType)
         {

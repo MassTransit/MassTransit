@@ -95,10 +95,7 @@ namespace MassTransit.Util
             _getProperty = GetGetMethod(propertyInfo);
         }
 
-        public int Count
-        {
-            get { return _values.Count; }
-        }
+        public int Count => _values.Count;
 
         public SagaInstance<TSaga> this[object key]
         {

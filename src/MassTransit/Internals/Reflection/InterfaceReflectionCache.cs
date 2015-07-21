@@ -33,7 +33,7 @@ namespace MassTransit.Internals.Reflection
             {
                 throw new ArgumentException(
                     "The interface must be a generic interface definition: " + interfaceType.Name,
-                    "interfaceType");
+                    nameof(interfaceType));
             }
 
             // our contract states that we will not return generic interface definitions without generic type arguments

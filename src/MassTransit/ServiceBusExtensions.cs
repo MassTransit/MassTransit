@@ -49,7 +49,7 @@ namespace MassTransit
             string assembly = messageType.Assembly.FullName;
             assembly = ", " + assembly.Substring(0, assembly.IndexOf(','));
 
-            return String.Format("{0}{1}", messageName, assembly);
+            return $"{messageName}{assembly}";
         }
     }
 }

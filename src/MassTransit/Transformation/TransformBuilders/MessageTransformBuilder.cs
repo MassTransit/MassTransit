@@ -25,14 +25,13 @@ namespace MassTransit.Transformation.TransformBuilders
     public class MessageTransformBuilder<TResult, TInput> :
         ITransformBuilder<TResult, TInput>
     {
-        readonly Type _implementationType;
         readonly IDictionary<string, IPropertyTransform<TInput, TInput>> _inputTransforms;
         readonly TransformResultFactory<TResult> _resultFactory;
         readonly IDictionary<string, IPropertyTransform<TResult, TInput>> _resultTransforms;
 
         public MessageTransformBuilder(TransformResultFactory<TResult> resultFactory)
         {
-            _implementationType = typeof(TResult).IsInterface
+            ImplementationType = typeof(TResult).IsInterface
                 ? TypeMetadataCache.ImplementationBuilder.GetImplementationType(typeof(TResult))
                 : typeof(TResult);
 
@@ -47,10 +46,7 @@ namespace MassTransit.Transformation.TransformBuilders
             _resultTransforms[propertyName] = propertyTransform;
         }
 
-        public Type ImplementationType
-        {
-            get { return _implementationType; }
-        }
+        public Type ImplementationType { get; }
 
         public void Set(string propertyName, IPropertyTransform<TInput, TInput> propertyTransform)
         {

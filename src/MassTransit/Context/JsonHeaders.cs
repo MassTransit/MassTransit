@@ -33,7 +33,7 @@ namespace MassTransit.Context
         public JsonHeaders(IHeaderProvider provider)
         {
             if (provider == null)
-                throw new ArgumentNullException("provider");
+                throw new ArgumentNullException(nameof(provider));
 
             _provider = provider;
 
@@ -48,7 +48,7 @@ namespace MassTransit.Context
         T Headers.Get<T>(string key, T defaultValue)
         {
             if (key == null)
-                throw new ArgumentNullException("key");
+                throw new ArgumentNullException(nameof(key));
 
             object obj;
             if (!_provider.TryGetHeader(key, out obj))
@@ -69,7 +69,7 @@ namespace MassTransit.Context
         T? Headers.Get<T>(string key, T? defaultValue)
         {
             if (key == null)
-                throw new ArgumentNullException("key");
+                throw new ArgumentNullException(nameof(key));
 
             object obj;
             if (!_provider.TryGetHeader(key, out obj))
@@ -93,7 +93,7 @@ namespace MassTransit.Context
         bool Headers.TryGetHeader(string key, out object value)
         {
             if (key == null)
-                throw new ArgumentNullException("key");
+                throw new ArgumentNullException(nameof(key));
 
             return _provider.TryGetHeader(key, out value);
         }

@@ -35,10 +35,7 @@ namespace MassTransit.Pipeline.Filters
             _behavior = new ClosedBehavior(this);
         }
 
-        public TimeSpan Duration
-        {
-            get { return _settings.Duration; }
-        }
+        public TimeSpan Duration => _settings.Duration;
 
         void ICircuitBreaker.Open(Exception exception, ICircuitBreakerBehavior behavior, IEnumerator<TimeSpan> timeoutEnumerator)
         {
@@ -58,15 +55,9 @@ namespace MassTransit.Pipeline.Filters
             Interlocked.CompareExchange(ref _behavior, new HalfOpenBehavior(this, exception, timeoutEnumerator), behavior);
         }
 
-        public int TripThreshold
-        {
-            get { return _settings.TripThreshold; }
-        }
+        public int TripThreshold => _settings.TripThreshold;
 
-        public int ActiveThreshold
-        {
-            get { return _settings.ActiveCount; }
-        }
+        public int ActiveThreshold => _settings.ActiveCount;
 
         public async Task Send(T context, IPipe<T> next)
         {

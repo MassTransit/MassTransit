@@ -31,25 +31,13 @@ namespace MassTransit.ConsumeConnectors
             _messageConsumerTypes = GetMessageConsumerTypes().ToArray();
         }
 
-        public static MessageInterfaceType[] ConsumerTypes
-        {
-            get { return Cached.Metadata.Value.ConsumerTypes; }
-        }
+        public static MessageInterfaceType[] ConsumerTypes => Cached.Metadata.Value.ConsumerTypes;
 
-        public static MessageInterfaceType[] MessageConsumerTypes
-        {
-            get { return Cached.Metadata.Value.MessageConsumerTypes; }
-        }
+        public static MessageInterfaceType[] MessageConsumerTypes => Cached.Metadata.Value.MessageConsumerTypes;
 
-        MessageInterfaceType[] IConsumerMetadataCache<T>.ConsumerTypes
-        {
-            get { return _consumerTypes; }
-        }
+        MessageInterfaceType[] IConsumerMetadataCache<T>.ConsumerTypes => _consumerTypes;
 
-        MessageInterfaceType[] IConsumerMetadataCache<T>.MessageConsumerTypes
-        {
-            get { return _messageConsumerTypes; }
-        }
+        MessageInterfaceType[] IConsumerMetadataCache<T>.MessageConsumerTypes => _messageConsumerTypes;
 
         static IEnumerable<MessageInterfaceType> GetConsumerMessageTypes()
         {

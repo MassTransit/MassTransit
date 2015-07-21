@@ -32,7 +32,7 @@ namespace MassTransit.MessageData
         Task<Stream> IMessageDataRepository.Get(Uri address, CancellationToken cancellationToken)
         {
             if (address == null)
-                throw new ArgumentNullException("address");
+                throw new ArgumentNullException(nameof(address));
 
             byte[] value;
             if (_values.TryGetValue(address, out value))
