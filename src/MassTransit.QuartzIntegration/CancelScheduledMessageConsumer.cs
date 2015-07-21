@@ -16,6 +16,7 @@ namespace MassTransit.QuartzIntegration
     using Logging;
     using Quartz;
     using Scheduling;
+    using Util;
 
 
     public class CancelScheduledMessageConsumer :
@@ -30,7 +31,7 @@ namespace MassTransit.QuartzIntegration
             _scheduler = scheduler;
         }
 
-        public async Task Consume(ConsumeContext<CancelScheduledMessage> context)
+        public Task Consume(ConsumeContext<CancelScheduledMessage> context)
         {
             bool unscheduledJob = _scheduler.UnscheduleJob(new TriggerKey(context.Message.TokenId.ToString("N")));
 
@@ -41,9 +42,11 @@ namespace MassTransit.QuartzIntegration
                 else
                     _log.DebugFormat("CancelScheduledMessage: no message found {0}", context.Message.TokenId);
             }
+
+            return TaskUtil.Completed;
         }
 
-        public async Task Consume(ConsumeContext<CancelScheduledRecurringMessage> context)
+        public Task Consume(ConsumeContext<CancelScheduledRecurringMessage> context)
         {
             bool unscheduledJob = _scheduler.UnscheduleJob(new TriggerKey(context.Message.ScheduleId, context.Message.ScheduleGroup));
 
@@ -57,6 +60,8 @@ namespace MassTransit.QuartzIntegration
                 else
                     _log.DebugFormat("CancelRecurringScheduledMessage: no message found {0}", context.Message);
             }
+
+            return TaskUtil.Completed;
         }
     }
 }
