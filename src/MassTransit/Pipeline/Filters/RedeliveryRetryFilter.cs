@@ -41,7 +41,6 @@ namespace MassTransit.Pipeline.Filters
 
         public async Task Send(ConsumeContext<T> context, IPipe<ConsumeContext<T>> next)
         {
-            Exception exception = null;
             try
             {
                 await next.Send(context);
@@ -51,28 +50,23 @@ namespace MassTransit.Pipeline.Filters
                 if (!_retryPolicy.CanRetry(ex))
                     throw;
 
-                exception = ex;
-            }
-
-            if (exception != null)
-            {
                 try
                 {
                     MessageRedeliveryContext redeliveryContext;
                     if (!context.TryGetPayload(out redeliveryContext))
-                        throw new ContextException("The message redelivery context was not available to delay the message", exception);
+                        throw new ContextException("The message redelivery context was not available to delay the message", ex);
 
                     TimeSpan delay;
                     using (IRetryContext retryContext = _retryPolicy.GetRetryContext())
                     {
-                        retryContext.CanRetry(exception, out delay);
+                        retryContext.CanRetry(ex, out delay);
                     }
 
                     await redeliveryContext.ScheduleRedelivery(delay);
                 }
-                catch (Exception ex)
+                catch (Exception redeliveryException)
                 {
-                    throw new ContextException("The message delivery could not be rescheduled", new AggregateException(ex, exception));
+                    throw new ContextException("The message delivery could not be rescheduled", new AggregateException(redeliveryException, ex));
                 }
             }
         }

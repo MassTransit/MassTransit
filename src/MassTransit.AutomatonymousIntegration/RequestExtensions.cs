@@ -46,7 +46,6 @@ namespace Automatonymous
         /// Send a request to the configured service endpoint, and setup the state machine to accept the response.
         /// </summary>
         /// <typeparam name="TInstance">The state instance type</typeparam>
-        /// <typeparam name="TData">The event data type</typeparam>
         /// <typeparam name="TRequest">The request message type</typeparam>
         /// <typeparam name="TResponse">The response message type</typeparam>
         /// <param name="binder">The event binder</param>

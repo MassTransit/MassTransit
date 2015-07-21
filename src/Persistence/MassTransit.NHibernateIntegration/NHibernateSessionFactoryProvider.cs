@@ -34,7 +34,6 @@ namespace MassTransit.NHibernateIntegration
         static readonly ILog _log = Logger.Get<NHibernateSessionFactoryProvider>();
         readonly IEnumerable<Type> _mappedTypes;
         bool _computed;
-        Configuration _configuration;
         Action<IDbIntegrationConfigurationProperties> _databaseIntegration;
         ISessionFactory _sessionFactory;
 
@@ -42,7 +41,7 @@ namespace MassTransit.NHibernateIntegration
         {
             _mappedTypes = mappedTypes;
 
-            _configuration = CreateConfiguration();
+            Configuration = CreateConfiguration();
         }
 
         public NHibernateSessionFactoryProvider(IEnumerable<Type> mappedTypes,
@@ -50,13 +49,10 @@ namespace MassTransit.NHibernateIntegration
         {
             _mappedTypes = mappedTypes;
             _databaseIntegration = databaseIntegration;
-            _configuration = CreateConfiguration();
+            Configuration = CreateConfiguration();
         }
 
-        public Configuration Configuration
-        {
-            get { return _configuration; }
-        }
+        public Configuration Configuration { get; }
 
         /// <summary>
         /// Builds the session factory and returns the ISessionFactory. If it was already
@@ -76,9 +72,9 @@ namespace MassTransit.NHibernateIntegration
         /// </summary>
         public void UpdateSchema()
         {
-            _log.DebugFormat("Updating schema for connection: {0}", _configuration);
+            _log.DebugFormat("Updating schema for connection: {0}", Configuration);
 
-            new SchemaUpdate(_configuration).Execute(false, true);
+            new SchemaUpdate(Configuration).Execute(false, true);
         }
 
         ModelMapper CreateModelMapper()
@@ -121,7 +117,7 @@ namespace MassTransit.NHibernateIntegration
                 if (!acquired)
                     throw new InvalidOperationException("Waiting for access to create session factory failed.");
 
-                ISessionFactory sessionFactory = _configuration.BuildSessionFactory();
+                ISessionFactory sessionFactory = Configuration.BuildSessionFactory();
 
                 _sessionFactory = sessionFactory;
                 _computed = true;
@@ -147,8 +143,7 @@ namespace MassTransit.NHibernateIntegration
 
             configuration.DataBaseIntegration(c =>
                 {
-                    if (_databaseIntegration != null)
-                        _databaseIntegration(c);
+                    _databaseIntegration?.Invoke(c);
 
                     c.KeywordsAutoImport = Hbm2DDLKeyWords.AutoQuote;
                     c.SchemaAction = SchemaAutoAction.Update;

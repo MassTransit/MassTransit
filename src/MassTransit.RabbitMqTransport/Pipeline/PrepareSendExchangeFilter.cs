@@ -17,7 +17,6 @@ namespace MassTransit.RabbitMqTransport.Pipeline
     using System.Threading.Tasks;
     using Logging;
     using MassTransit.Pipeline;
-    using Monitoring.Introspection;
     using RabbitMQ.Client;
     using Topology;
 
@@ -30,7 +29,6 @@ namespace MassTransit.RabbitMqTransport.Pipeline
     {
         readonly ExchangeBindingSettings[] _exchangeBindings;
         readonly ILog _log = Logger.Get<PrepareSendExchangeFilter>();
-
         readonly SendSettings _settings;
 
         public PrepareSendExchangeFilter(SendSettings settings, params ExchangeBindingSettings[] exchangeBindings)
@@ -39,7 +37,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
             _exchangeBindings = exchangeBindings;
         }
 
-        async void IProbeSite.Probe(ProbeContext context)
+        void IProbeSite.Probe(ProbeContext context)
         {
         }
 

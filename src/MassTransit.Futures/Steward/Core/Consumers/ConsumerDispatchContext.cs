@@ -237,14 +237,14 @@ namespace MassTransit.Steward.Core.Consumers
             return _context.GetSendEndpoint(address);
         }
 
-        void ConsumeContext.NotifyConsumed<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType)
+        Task ConsumeContext.NotifyConsumed<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType)
         {
-            _context.NotifyConsumed(context, duration, consumerType);
+            return _context.NotifyConsumed(context, duration, consumerType);
         }
 
-        void ConsumeContext.NotifyFaulted<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType, Exception exception)
+        Task ConsumeContext.NotifyFaulted<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType, Exception exception)
         {
-            _context.NotifyFaulted(context, duration, consumerType, exception);
+            return _context.NotifyFaulted(context, duration, consumerType, exception);
         }
 
         public ConnectHandle ConnectPublishObserver(IPublishObserver observer)

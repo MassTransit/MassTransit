@@ -30,13 +30,12 @@ namespace Automatonymous.CorrelationConfigurators
         readonly IFilter<ConsumeContext<TData>> _messageFilter;
         readonly IPipe<ConsumeContext<TData>> _missingPipe;
         readonly Lazy<ISagaPolicy<TInstance, TData>> _policy;
-        readonly SagaFilterFactory<TInstance, TData> _sagaFilterFactory;
 
         public MassTransitEventCorrelation(SagaStateMachine<TInstance> machine, Event<TData> @event, SagaFilterFactory<TInstance, TData> sagaFilterFactory,
             IFilter<ConsumeContext<TData>> messageFilter, IPipe<ConsumeContext<TData>> missingPipe)
         {
             _event = @event;
-            _sagaFilterFactory = sagaFilterFactory;
+            FilterFactory = sagaFilterFactory;
             _messageFilter = messageFilter;
             _missingPipe = missingPipe;
             _machine = machine;
@@ -44,35 +43,15 @@ namespace Automatonymous.CorrelationConfigurators
             _policy = new Lazy<ISagaPolicy<TInstance, TData>>(GetSagaPolicy);
         }
 
-        public SagaFilterFactory<TInstance, TData> FilterFactory
-        {
-            get { return _sagaFilterFactory; }
-        }
+        public SagaFilterFactory<TInstance, TData> FilterFactory { get; }
 
-        public Event Event
-        {
-            get { return _event; }
-        }
+        Event<TData> EventCorrelation<TInstance, TData>.Event => _event;
 
-        Event<TData> EventCorrelation<TInstance, TData>.Event
-        {
-            get { return _event; }
-        }
+        Type EventCorrelation.DataType => typeof(TData);
 
-        public Type DataType
-        {
-            get { return typeof(TData); }
-        }
+        IFilter<ConsumeContext<TData>> EventCorrelation<TInstance, TData>.MessageFilter => _messageFilter;
 
-        public IFilter<ConsumeContext<TData>> MessageFilter
-        {
-            get { return _messageFilter; }
-        }
-
-        ISagaPolicy<TInstance, TData> EventCorrelation<TInstance, TData>.Policy
-        {
-            get { return _policy.Value; }
-        }
+        ISagaPolicy<TInstance, TData> EventCorrelation<TInstance, TData>.Policy => _policy.Value;
 
         ISagaPolicy<TInstance, TData> GetSagaPolicy()
         {

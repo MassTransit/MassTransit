@@ -30,8 +30,7 @@ namespace Automatonymous
         {
             return Pipe.Execute<ConsumeContext<TData>>(context =>
             {
-                throw new SagaException("An existing saga instance was not found", typeof(TInstance), typeof(TData),
-                    context.CorrelationId.HasValue ? context.CorrelationId.Value : Guid.Empty);
+                throw new SagaException("An existing saga instance was not found", typeof(TInstance), typeof(TData), context.CorrelationId ?? Guid.Empty);
             });
         }
     }

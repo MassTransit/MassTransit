@@ -198,14 +198,14 @@ namespace MassTransit.Context
             return _context.GetSendEndpoint(address);
         }
 
-        void ConsumeContext.NotifyConsumed<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType)
+        Task ConsumeContext.NotifyConsumed<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType)
         {
-            _context.NotifyConsumed(context, duration, consumerType);
+            return _context.NotifyConsumed(context, duration, consumerType);
         }
 
-        void ConsumeContext.NotifyFaulted<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType, Exception exception)
+        Task ConsumeContext.NotifyFaulted<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType, Exception exception)
         {
-            _context.NotifyFaulted(context, duration, consumerType, exception);
+            return _context.NotifyFaulted(context, duration, consumerType, exception);
         }
 
         public TMessage Message
@@ -213,14 +213,14 @@ namespace MassTransit.Context
             get { return _message; }
         }
 
-        public void NotifyConsumed(TimeSpan duration, string consumerType)
+        public Task NotifyConsumed(TimeSpan duration, string consumerType)
         {
-            _context.NotifyConsumed(this, duration, consumerType);
+            return _context.NotifyConsumed(this, duration, consumerType);
         }
 
-        public void NotifyFaulted(TimeSpan duration, string consumerType, Exception exception)
+        public Task NotifyFaulted(TimeSpan duration, string consumerType, Exception exception)
         {
-            _context.NotifyFaulted(this, duration, consumerType, exception);
+            return _context.NotifyFaulted(this, duration, consumerType, exception);
         }
 
         public ConnectHandle ConnectPublishObserver(IPublishObserver observer)

@@ -32,13 +32,18 @@ namespace Automatonymous.CorrelationConfigurators
             _selector = selector;
         }
 
-        public ISagaQuery<TInstance> CreateQuery(ConsumeContext<TData> context)
+        ISagaQuery<TInstance> ISagaQueryFactory<TInstance, TData>.CreateQuery(ConsumeContext<TData> context)
         {
             TProperty propertyValue = _selector(context);
 
             Expression<Func<TInstance, bool>> filterExpression = CreateExpression(propertyValue);
 
             return new SagaQuery<TInstance>(filterExpression);
+        }
+
+        void IProbeSite.Probe(ProbeContext context)
+        {
+            context.Add("property", _propertyExpression.ToString());
         }
 
         Expression<Func<TInstance, bool>> CreateExpression(TProperty propertyValue)

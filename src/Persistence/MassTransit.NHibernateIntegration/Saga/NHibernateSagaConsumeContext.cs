@@ -32,9 +32,9 @@ namespace MassTransit.NHibernateIntegration.Saga
         static readonly ILog _log = Logger.Get<NHibernateSagaRepository<TSaga>>();
         readonly ConsumeContext<TMessage> _context;
         readonly TSaga _instance;
+        readonly PayloadCache _payloadCache;
         readonly ISession _session;
         bool _completed;
-        readonly PayloadCache _payloadCache;
 
         public NHibernateSagaConsumeContext(ISession session, ConsumeContext<TMessage> context, TSaga instance)
         {
@@ -45,15 +45,8 @@ namespace MassTransit.NHibernateIntegration.Saga
             _payloadCache = new PayloadCache();
         }
 
-        public Task CompleteTask
-        {
-            get { return _context.CompleteTask; }
-        }
-
-        public IEnumerable<string> SupportedMessageTypes
-        {
-            get { return _context.SupportedMessageTypes; }
-        }
+        Task ConsumeContext.CompleteTask => _context.CompleteTask;
+        IEnumerable<string> ConsumeContext.SupportedMessageTypes => _context.SupportedMessageTypes;
 
         Task IPublishEndpoint.Publish<T>(T message, CancellationToken cancellationToken)
         {
@@ -105,13 +98,12 @@ namespace MassTransit.NHibernateIntegration.Saga
             return _context.Publish<T>(values, publishPipe, cancellationToken);
         }
 
-        public bool HasPayloadType(Type contextType)
+        bool PipeContext.HasPayloadType(Type contextType)
         {
             return _payloadCache.HasPayloadType(contextType) || _context.HasPayloadType(contextType);
         }
 
-        public bool TryGetPayload<TPayload>(out TPayload context)
-            where TPayload : class
+        bool PipeContext.TryGetPayload<TPayload>(out TPayload context)
         {
             if (_payloadCache.TryGetPayload(out context))
                 return true;
@@ -119,8 +111,7 @@ namespace MassTransit.NHibernateIntegration.Saga
             return _context.TryGetPayload(out context);
         }
 
-        public TPayload GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory)
-            where TPayload : class
+        TPayload PipeContext.GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory)
         {
             TPayload payload;
             if (_payloadCache.TryGetPayload(out payload))
@@ -132,96 +123,49 @@ namespace MassTransit.NHibernateIntegration.Saga
             return _payloadCache.GetOrAddPayload(payloadFactory);
         }
 
-        public Guid? MessageId
-        {
-            get { return _context.MessageId; }
-        }
+        Guid? MessageContext.MessageId => _context.MessageId;
+        Guid? MessageContext.RequestId => _context.RequestId;
+        Guid? MessageContext.CorrelationId => _instance.CorrelationId;
+        DateTime? MessageContext.ExpirationTime => _context.ExpirationTime;
+        Uri MessageContext.SourceAddress => _context.SourceAddress;
+        Uri MessageContext.DestinationAddress => _context.DestinationAddress;
+        Uri MessageContext.ResponseAddress => _context.ResponseAddress;
+        Uri MessageContext.FaultAddress => _context.FaultAddress;
+        Headers MessageContext.Headers => _context.Headers;
 
-        public Guid? RequestId
-        {
-            get { return _context.RequestId; }
-        }
-
-        public Guid? CorrelationId
-        {
-            get { return _instance.CorrelationId; }
-        }
-
-        public DateTime? ExpirationTime
-        {
-            get { return _context.ExpirationTime; }
-        }
-
-        public Uri SourceAddress
-        {
-            get { return _context.SourceAddress; }
-        }
-
-        public Uri DestinationAddress
-        {
-            get { return _context.DestinationAddress; }
-        }
-
-        public Uri ResponseAddress
-        {
-            get { return _context.ResponseAddress; }
-        }
-
-        public Uri FaultAddress
-        {
-            get { return _context.FaultAddress; }
-        }
-
-        public Headers Headers
-        {
-            get { return _context.Headers; }
-        }
-
-        public SagaConsumeContext<TSaga, T> PopContext<T>()
-            where T : class
+        SagaConsumeContext<TSaga, T> SagaConsumeContext<TSaga>.PopContext<T>()
         {
             return (SagaConsumeContext<TSaga, T>)this;
         }
 
-        async Task SagaConsumeContext<TSaga>.SetCompleted()
+        Task SagaConsumeContext<TSaga>.SetCompleted()
         {
             _session.Delete(_instance);
             _completed = true;
             if (_log.IsDebugEnabled)
             {
-                _log.DebugFormat("SAGA:{0}:{1} Removed {2}", TypeMetadataCache<TSaga>.ShortName, _instance.CorrelationId,
-                    TypeMetadataCache<TMessage>.ShortName);
+                _log.DebugFormat("SAGA:{0}:{1} Removed {2}", TypeMetadataCache<TSaga>.ShortName, TypeMetadataCache<TMessage>.ShortName,
+                    _instance.CorrelationId);
             }
+
+            return TaskUtil.Completed;
         }
 
-        public bool IsCompleted
-        {
-            get { return _completed; }
-        }
+        bool SagaConsumeContext<TSaga>.IsCompleted => _completed;
+        CancellationToken PipeContext.CancellationToken => _context.CancellationToken;
+        ReceiveContext ConsumeContext.ReceiveContext => _context.ReceiveContext;
 
-        public CancellationToken CancellationToken
-        {
-            get { return _context.CancellationToken; }
-        }
-
-        public ReceiveContext ReceiveContext
-        {
-            get { return _context.ReceiveContext; }
-        }
-
-        public bool HasMessageType(Type messageType)
+        bool ConsumeContext.HasMessageType(Type messageType)
         {
             return _context.HasMessageType(messageType);
         }
 
-        public bool TryGetMessage<T>(out ConsumeContext<T> consumeContext)
-            where T : class
+        bool ConsumeContext.TryGetMessage<T>(out ConsumeContext<T> consumeContext)
         {
             return _context.TryGetMessage(out consumeContext);
         }
 
-        public Task RespondAsync<T>(T message)
-            where T : class
+        Task ConsumeContext.RespondAsync<T>(T message)
         {
             return _context.RespondAsync(message);
         }
@@ -231,49 +175,42 @@ namespace MassTransit.NHibernateIntegration.Saga
             return _context.RespondAsync(message, sendPipe);
         }
 
-        public void Respond<T>(T message)
-            where T : class
+        void ConsumeContext.Respond<T>(T message)
         {
             _context.Respond(message);
         }
 
-        public Task<ISendEndpoint> GetSendEndpoint(Uri address)
+        Task<ISendEndpoint> ISendEndpointProvider.GetSendEndpoint(Uri address)
         {
             return _context.GetSendEndpoint(address);
         }
 
-        void ConsumeContext.NotifyConsumed<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType)
+        Task ConsumeContext.NotifyConsumed<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType)
         {
-            _context.NotifyConsumed(context, duration, consumerType);
+            return _context.NotifyConsumed(context, duration, consumerType);
         }
 
-        public void NotifyFaulted<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType, Exception exception)
+        public Task NotifyFaulted<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType, Exception exception)
             where T : class
         {
-            _context.NotifyFaulted(context, duration, consumerType, exception);
+            return _context.NotifyFaulted(context, duration, consumerType, exception);
         }
 
-        TMessage ConsumeContext<TMessage>.Message
+        TMessage ConsumeContext<TMessage>.Message => _context.Message;
+
+        Task ConsumeContext<TMessage>.NotifyConsumed(TimeSpan duration, string consumerType)
         {
-            get { return _context.Message; }
+            return _context.NotifyConsumed(duration, consumerType);
         }
 
-        public void NotifyConsumed(TimeSpan duration, string consumerType)
+        Task ConsumeContext<TMessage>.NotifyFaulted(TimeSpan duration, string consumerType, Exception exception)
         {
-            _context.NotifyConsumed(duration, consumerType);
+            return NotifyFaulted(_context, duration, consumerType, exception);
         }
 
-        public void NotifyFaulted(TimeSpan duration, string consumerType, Exception exception)
-        {
-            NotifyFaulted(_context, duration, consumerType, exception);
-        }
+        public TSaga Saga => _instance;
 
-        public TSaga Saga
-        {
-            get { return _instance; }
-        }
-
-        public ConnectHandle ConnectPublishObserver(IPublishObserver observer)
+        ConnectHandle IPublishObserverConnector.ConnectPublishObserver(IPublishObserver observer)
         {
             return _context.ConnectPublishObserver(observer);
         }

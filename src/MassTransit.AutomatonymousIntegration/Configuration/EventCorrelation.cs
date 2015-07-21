@@ -19,11 +19,8 @@ namespace Automatonymous
     using MassTransit.Saga;
 
 
-    public interface EventCorrelation<TInstance>
-        where TInstance : class, SagaStateMachineInstance
+    public interface EventCorrelation
     {
-        Event Event { get; }
-
         /// <summary>
         /// The data type for the event
         /// </summary>
@@ -32,11 +29,11 @@ namespace Automatonymous
 
 
     public interface EventCorrelation<TInstance, TData> :
-        EventCorrelation<TInstance>
+        EventCorrelation
         where TInstance : class, SagaStateMachineInstance
         where TData : class
     {
-        new Event<TData> Event { get; }
+         Event<TData> Event { get; }
 
         /// <summary>
         /// Returns the saga policy for the event correlation

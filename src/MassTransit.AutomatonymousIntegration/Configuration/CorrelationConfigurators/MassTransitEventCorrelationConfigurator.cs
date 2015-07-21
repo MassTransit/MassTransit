@@ -31,7 +31,7 @@ namespace Automatonymous.CorrelationConfigurators
         IPipe<ConsumeContext<TData>> _missingPipe;
         SagaFilterFactory<TInstance, TData> _sagaFilterFactory;
 
-        public MassTransitEventCorrelationConfigurator(SagaStateMachine<TInstance> machine, Event<TData> @event, EventCorrelation<TInstance> existingCorrelation)
+        public MassTransitEventCorrelationConfigurator(SagaStateMachine<TInstance> machine, Event<TData> @event, EventCorrelation existingCorrelation)
         {
             _event = @event;
             _machine = machine;
@@ -44,7 +44,7 @@ namespace Automatonymous.CorrelationConfigurators
             }
         }
 
-        public EventCorrelation<TInstance> Build()
+        public EventCorrelation Build()
         {
             return new MassTransitEventCorrelation<TInstance, TData>(_machine, _event, _sagaFilterFactory, _messageFilter, _missingPipe);
         }
@@ -62,9 +62,9 @@ namespace Automatonymous.CorrelationConfigurators
             where T : struct
         {
             if (propertyExpression == null)
-                throw new ArgumentNullException("propertyExpression");
+                throw new ArgumentNullException(nameof(propertyExpression));
             if (selector == null)
-                throw new ArgumentNullException("selector");
+                throw new ArgumentNullException(nameof(selector));
 
             _sagaFilterFactory = (repository, policy, sagaPipe) =>
             {
@@ -81,9 +81,9 @@ namespace Automatonymous.CorrelationConfigurators
             where T : class
         {
             if (propertyExpression == null)
-                throw new ArgumentNullException("propertyExpression");
+                throw new ArgumentNullException(nameof(propertyExpression));
             if (selector == null)
-                throw new ArgumentNullException("selector");
+                throw new ArgumentNullException(nameof(selector));
 
             _sagaFilterFactory = (repository, policy, sagaPipe) =>
             {
@@ -98,7 +98,7 @@ namespace Automatonymous.CorrelationConfigurators
         public EventCorrelationConfigurator<TInstance, TData> SelectId(Func<ConsumeContext<TData>, Guid> selector)
         {
             if (selector == null)
-                throw new ArgumentNullException("selector");
+                throw new ArgumentNullException(nameof(selector));
 
             _messageFilter = new CorrelationIdMessageFilter<TData>(selector);
 
@@ -108,7 +108,7 @@ namespace Automatonymous.CorrelationConfigurators
         public EventCorrelationConfigurator<TInstance, TData> CorrelateBy(Expression<Func<TInstance, ConsumeContext<TData>, bool>> correlationExpression)
         {
             if (correlationExpression == null)
-                throw new ArgumentNullException("correlationExpression");
+                throw new ArgumentNullException(nameof(correlationExpression));
 
             _sagaFilterFactory = (repository, policy, sagaPipe) =>
             {
@@ -124,7 +124,7 @@ namespace Automatonymous.CorrelationConfigurators
             Func<MissingInstanceConfigurator<TData>, IPipe<ConsumeContext<TData>>> getMissingPipe)
         {
             if (getMissingPipe == null)
-                throw new ArgumentNullException("getMissingPipe");
+                throw new ArgumentNullException(nameof(getMissingPipe));
 
             var configurator = new EventMissingInstanceConfigurator<TInstance, TData>();
 

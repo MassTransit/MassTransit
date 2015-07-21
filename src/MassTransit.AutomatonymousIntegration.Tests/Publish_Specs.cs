@@ -15,6 +15,7 @@ namespace MassTransit.AutomatonymousTests
     using System;
     using System.Threading.Tasks;
     using Automatonymous;
+    using Monitoring.Introspection.Contracts;
     using NUnit.Framework;
     using Saga;
     using TestFramework;
@@ -40,6 +41,14 @@ namespace MassTransit.AutomatonymousTests
                 await _repository.ShouldContainSaga(x => x.CorrelationId == message.CorrelationId && Equals(x.CurrentState, _machine.Running), TestTimeout);
 
             Assert.IsTrue(saga.HasValue);
+        }
+
+        [Test]
+        public void Should_return_a_wonderful_breakdown_of_the_guts_inside_it()
+        {
+            ProbeResult result = Bus.GetProbeResult();
+
+            Console.WriteLine(result.ToJsonString());
         }
 
         protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)

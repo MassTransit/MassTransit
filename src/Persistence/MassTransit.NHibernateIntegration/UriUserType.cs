@@ -83,19 +83,10 @@ namespace MassTransit.NHibernateIntegration
 			return value;
 		}
 
-		public SqlType[] SqlTypes
-		{
-			get { return new[] {NHibernateUtil.String.SqlType}; }
-		}
+		public SqlType[] SqlTypes => new[] {NHibernateUtil.String.SqlType};
 
-		public Type ReturnedType
-		{
-			get { return typeof (Uri); }
-		}
+	    public Type ReturnedType => typeof (Uri);
 
-		public bool IsMutable
-		{
-			get { return false; }
-		}
+	    public bool IsMutable => false;
 	}
 }

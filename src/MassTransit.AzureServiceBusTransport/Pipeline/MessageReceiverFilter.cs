@@ -37,7 +37,8 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
             _receivePipe = receivePipe;
             _receiveObserver = receiveObserver;
         }
-        async void IProbeSite.Probe(ProbeContext context)
+
+        void IProbeSite.Probe(ProbeContext context)
         {
         }
 

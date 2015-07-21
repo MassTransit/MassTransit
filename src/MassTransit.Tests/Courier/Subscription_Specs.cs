@@ -77,7 +77,7 @@ namespace MassTransit.Tests.Courier
         Guid _trackingNumber;
 
         [TestFixtureSetUp]
-        public async Task Should_publish_the_completed_event()
+        public void Should_publish_the_completed_event()
         {
             _completed = SubscribeHandler<RoutingSlipCompleted>();
             _activityCompleted = SubscribeHandler<RoutingSlipActivityCompleted>();
@@ -94,9 +94,7 @@ namespace MassTransit.Tests.Courier
 
             builder.AddVariable("Variable", "Knife");
 
-            await Bus.Execute(builder.Build());
-
-            await _completed;
+            Await(() =>  Bus.Execute(builder.Build()));
         }
 
         protected override void SetupActivities()

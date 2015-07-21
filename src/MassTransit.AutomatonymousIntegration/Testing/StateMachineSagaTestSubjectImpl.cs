@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -52,9 +52,8 @@ namespace Automatonymous.Testing
             var decoratedSagaRepository = new SagaRepositoryTestDecorator<TSaga>(_sagaRepository, _received, _created,
                 _sagas);
             var scenarioBuilder = builder as IBusTestScenarioBuilder;
-            if (scenarioBuilder != null)
-                scenarioBuilder.ConfigureReceiveEndpoint(
-                    x => x.StateMachineSaga(_stateMachine, decoratedSagaRepository));
+
+            scenarioBuilder?.ConfigureReceiveEndpoint(x => x.StateMachineSaga(_stateMachine, decoratedSagaRepository));
 
             return builder;
         }
@@ -64,15 +63,8 @@ namespace Automatonymous.Testing
             yield break;
         }
 
-        public IReceivedMessageList Received
-        {
-            get { return _received; }
-        }
-
-        public ISagaList<TSaga> Created
-        {
-            get { return _created; }
-        }
+        IReceivedMessageList SagaTestSubject<TSaga>.Received => _received;
+        ISagaList<TSaga> SagaTestSubject<TSaga>.Created => _created;
 
         public void Dispose()
         {

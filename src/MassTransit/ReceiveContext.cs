@@ -73,7 +73,7 @@ namespace MassTransit
         /// <param name="context">The consume context of the message</param>
         /// <param name="duration"></param>
         /// <param name="consumerType"></param>
-        void NotifyConsumed<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType)
+        Task NotifyConsumed<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType)
             where T : class;
 
         /// <summary>

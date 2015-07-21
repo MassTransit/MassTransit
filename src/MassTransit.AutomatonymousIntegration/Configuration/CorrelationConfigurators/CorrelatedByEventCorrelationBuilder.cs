@@ -31,7 +31,7 @@ namespace Automatonymous.CorrelationConfigurators
             _configurator = configurator;
         }
 
-        public EventCorrelation<TInstance> Build()
+        public EventCorrelation Build()
         {
             return _configurator.Build();
         }

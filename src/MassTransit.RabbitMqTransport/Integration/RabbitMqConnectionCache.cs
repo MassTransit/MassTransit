@@ -62,18 +62,15 @@ namespace MassTransit.RabbitMqTransport.Integration
             return SendUsingNewConnection(connectionPipe, newScope, cancellationToken);
         }
 
-        public async void Probe(ProbeContext context)
+        public void Probe(ProbeContext context)
         {
             ConnectionScope connectionScope = _scope;
             if (connectionScope != null)
             {
-                using (await connectionScope.Attach(context.CancellationToken))
+                context.Set(new
                 {
-                    context.Set(new
-                    {
-                        Connected = true,
-                    });
-                }
+                    Connected = true,
+                });
             }
         }
 

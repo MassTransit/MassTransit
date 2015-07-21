@@ -44,7 +44,7 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
             _settings = settings;
         }
 
-        async void IProbeSite.Probe(ProbeContext context)
+        void IProbeSite.Probe(ProbeContext context)
         {
         }
 

@@ -31,7 +31,6 @@ namespace MassTransit.Transports.InMemory
         IDisposable
     {
         static readonly ILog _log = Logger.Get<InMemoryTransport>();
-
         readonly Uri _inputAddress;
         readonly SendObservable _observers;
         readonly ReceiveObservable _receiveObservers;
@@ -59,7 +58,7 @@ namespace MassTransit.Transports.InMemory
             ProbeContext scope = context.CreateScope("transport");
             scope.Set(new
             {
-                Address = _inputAddress,
+                Address = _inputAddress
             });
         }
 
@@ -92,7 +91,9 @@ namespace MassTransit.Transports.InMemory
 
                 var transportMessage = new InMemoryTransportMessage(messageId, context.Body, context.ContentType.MediaType, TypeMetadataCache<T>.ShortName);
 
+#pragma warning disable 4014
                 Task.Factory.StartNew(() => DispatchMessage(transportMessage), _stopToken, TaskCreationOptions.HideScheduler, _scheduler);
+#pragma warning restore 4014
 
                 context.DestinationAddress.LogSent(context.MessageId.HasValue ? context.MessageId.Value.ToString("N") : "",
                     TypeMetadataCache<T>.ShortName);
@@ -101,9 +102,9 @@ namespace MassTransit.Transports.InMemory
             }
             catch (Exception ex)
             {
-                _log.Error(string.Format("SEND FAULT: {0} {1} {2}", _inputAddress, context.MessageId, TypeMetadataCache<T>.ShortName));
+                _log.Error($"SEND FAULT: {_inputAddress} {context.MessageId} {TypeMetadataCache<T>.ShortName}", ex);
 
-                _observers.NotifySendFault(context, ex).Wait(cancelSend);
+                await _observers.NotifySendFault(context, ex);
 
                 throw;
             }
@@ -116,7 +117,7 @@ namespace MassTransit.Transports.InMemory
             byte[] body;
             using (Stream bodyStream = context.GetBody())
             {
-                body = await GetMessageBody(bodyStream).ConfigureAwait(false);
+                body = await GetMessageBody(bodyStream);
             }
 
             string messageType = "Unknown";
@@ -126,7 +127,9 @@ namespace MassTransit.Transports.InMemory
 
             var transportMessage = new InMemoryTransportMessage(messageId, body, context.ContentType.MediaType, messageType);
 
+#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
             Task.Factory.StartNew(() => DispatchMessage(transportMessage), _stopToken, TaskCreationOptions.HideScheduler, _scheduler);
+#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
         }
 
         public ConnectHandle ConnectSendObserver(ISendObserver observer)
@@ -140,18 +143,17 @@ namespace MassTransit.Transports.InMemory
                 return;
 
             if (_receivePipe == null)
-                throw new ArgumentNullException("ReceivePipe not configured");
+                throw new ArgumentException("ReceivePipe not configured");
 
             var context = new InMemoryReceiveContext(_inputAddress, message, _receiveObservers);
 
-            Exception exception = null;
             try
             {
                 await _receiveObservers.NotifyPreReceive(context);
 
-                _receivePipe.Send(context).ConfigureAwait(false);
+                await _receivePipe.Send(context);
 
-                await context.CompleteTask.ConfigureAwait(false);
+                await context.CompleteTask;
 
                 await _receiveObservers.NotifyPostReceive(context);
 
@@ -159,13 +161,12 @@ namespace MassTransit.Transports.InMemory
             }
             catch (Exception ex)
             {
-                exception = ex;
-                message.DeliveryCount++;
-                _log.Error(string.Format("RCV FAULT: {0}", message.MessageId), ex);
-            }
+                _log.Error($"RCV FAULT: {message.MessageId}", ex);
 
-            if (exception != null)
-                await _receiveObservers.NotifyReceiveFault(context, exception);
+                await _receiveObservers.NotifyReceiveFault(context, ex);
+
+                message.DeliveryCount++;
+            }
         }
 
         async Task<byte[]> GetMessageBody(Stream body)
@@ -202,9 +203,11 @@ namespace MassTransit.Transports.InMemory
                 _stop.Cancel();
             }
 
-            async Task ReceiveTransportHandle.Stop(CancellationToken cancellationToken)
+            Task ReceiveTransportHandle.Stop(CancellationToken cancellationToken)
             {
                 _stop.Cancel();
+
+                return TaskUtil.Completed;
             }
         }
     }

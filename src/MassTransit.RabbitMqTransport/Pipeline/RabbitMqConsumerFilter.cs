@@ -34,7 +34,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
             _receiveObserver = receiveObserver;
         }
 
-        async void IProbeSite.Probe(ProbeContext context)
+        void IProbeSite.Probe(ProbeContext context)
         {
         }
 

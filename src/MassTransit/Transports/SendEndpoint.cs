@@ -23,33 +23,21 @@ namespace MassTransit.Transports
     public class SendEndpoint :
         ISendEndpoint
     {
-        readonly Uri _destinationAddress;
-        readonly IMessageSerializer _serializer;
-        readonly Uri _sourceAddress;
         readonly ISendTransport _transport;
 
         public SendEndpoint(ISendTransport transport, IMessageSerializer serializer, Uri destinationAddress, Uri sourceAddress)
         {
             _transport = transport;
-            _serializer = serializer;
-            _destinationAddress = destinationAddress;
-            _sourceAddress = sourceAddress;
+            Serializer = serializer;
+            DestinationAddress = destinationAddress;
+            SourceAddress = sourceAddress;
         }
 
-        IMessageSerializer Serializer
-        {
-            get { return _serializer; }
-        }
+        IMessageSerializer Serializer { get; }
 
-        Uri DestinationAddress
-        {
-            get { return _destinationAddress; }
-        }
+        Uri DestinationAddress { get; }
 
-        Uri SourceAddress
-        {
-            get { return _sourceAddress; }
-        }
+        Uri SourceAddress { get; }
 
         public ConnectHandle ConnectSendObserver(ISendObserver observer)
         {
@@ -60,7 +48,7 @@ namespace MassTransit.Transports
             where T : class
         {
             if (message == null)
-                throw new ArgumentNullException("message");
+                throw new ArgumentNullException(nameof(message));
 
             var settingsPipe = new EndpointSendContextPipe<T>(this);
 
@@ -71,9 +59,9 @@ namespace MassTransit.Transports
             where T : class
         {
             if (message == null)
-                throw new ArgumentNullException("message");
+                throw new ArgumentNullException(nameof(message));
             if (pipe == null)
-                throw new ArgumentNullException("pipe");
+                throw new ArgumentNullException(nameof(pipe));
 
             var settingsPipe = new EndpointSendContextPipe<T>(this, pipe);
 
@@ -83,7 +71,7 @@ namespace MassTransit.Transports
         public Task Send(object message, CancellationToken cancellationToken)
         {
             if (message == null)
-                throw new ArgumentNullException("message");
+                throw new ArgumentNullException(nameof(message));
 
             Type messageType = message.GetType();
 
@@ -93,9 +81,9 @@ namespace MassTransit.Transports
         public Task Send(object message, Type messageType, CancellationToken cancellationToken)
         {
             if (message == null)
-                throw new ArgumentNullException("message");
+                throw new ArgumentNullException(nameof(message));
             if (messageType == null)
-                throw new ArgumentNullException("messageType");
+                throw new ArgumentNullException(nameof(messageType));
 
             return SendEndpointConverterCache.Send(this, message, messageType, cancellationToken);
         }
@@ -104,7 +92,7 @@ namespace MassTransit.Transports
             where T : class
         {
             if (values == null)
-                throw new ArgumentNullException("values");
+                throw new ArgumentNullException(nameof(values));
 
             T message = TypeMetadataCache<T>.InitializeFromObject(values);
 
@@ -115,9 +103,9 @@ namespace MassTransit.Transports
             where T : class
         {
             if (message == null)
-                throw new ArgumentNullException("message");
+                throw new ArgumentNullException(nameof(message));
             if (pipe == null)
-                throw new ArgumentNullException("pipe");
+                throw new ArgumentNullException(nameof(pipe));
 
             var settingsPipe = new EndpointSendContextPipe<T>(this, pipe);
 
@@ -127,9 +115,9 @@ namespace MassTransit.Transports
         public Task Send(object message, IPipe<SendContext> pipe, CancellationToken cancellationToken)
         {
             if (message == null)
-                throw new ArgumentNullException("message");
+                throw new ArgumentNullException(nameof(message));
             if (pipe == null)
-                throw new ArgumentNullException("pipe");
+                throw new ArgumentNullException(nameof(pipe));
 
             Type messageType = message.GetType();
 
@@ -139,11 +127,11 @@ namespace MassTransit.Transports
         public Task Send(object message, Type messageType, IPipe<SendContext> pipe, CancellationToken cancellationToken)
         {
             if (message == null)
-                throw new ArgumentNullException("message");
+                throw new ArgumentNullException(nameof(message));
             if (messageType == null)
-                throw new ArgumentNullException("messageType");
+                throw new ArgumentNullException(nameof(messageType));
             if (pipe == null)
-                throw new ArgumentNullException("pipe");
+                throw new ArgumentNullException(nameof(pipe));
 
             return SendEndpointConverterCache.Send(this, message, messageType, pipe, cancellationToken);
         }
@@ -152,7 +140,7 @@ namespace MassTransit.Transports
             where T : class
         {
             if (values == null)
-                throw new ArgumentNullException("values");
+                throw new ArgumentNullException(nameof(values));
 
             T message = TypeMetadataCache<T>.InitializeFromObject(values);
 
@@ -163,9 +151,9 @@ namespace MassTransit.Transports
             where T : class
         {
             if (values == null)
-                throw new ArgumentNullException("values");
+                throw new ArgumentNullException(nameof(values));
             if (pipe == null)
-                throw new ArgumentNullException("pipe");
+                throw new ArgumentNullException(nameof(pipe));
 
             T message = TypeMetadataCache<T>.InitializeFromObject(values);
 
@@ -200,10 +188,8 @@ namespace MassTransit.Transports
 
             void IProbeSite.Probe(ProbeContext context)
             {
-                if (_pipe != null)
-                     _pipe.Probe(context);
-                if (_sendPipe != null)
-                     _sendPipe.Probe(context);
+                _pipe?.Probe(context);
+                _sendPipe?.Probe(context);
             }
 
             public async Task Send(SendContext<T> context)

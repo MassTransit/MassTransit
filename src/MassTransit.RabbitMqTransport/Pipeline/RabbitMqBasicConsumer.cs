@@ -62,12 +62,9 @@ namespace MassTransit.RabbitMqTransport.Pipeline
             _registration = cancellationToken.Register(Complete);
         }
 
-        public Task<RabbitMqConsumerMetrics> CompleteTask
-        {
-            get { return _consumerComplete.Task; }
-        }
+        public Task<RabbitMqConsumerMetrics> CompleteTask => _consumerComplete.Task;
 
-        public void HandleBasicConsumeOk(string consumerTag)
+        void IBasicConsumer.HandleBasicConsumeOk(string consumerTag)
         {
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("ConsumerOk: {0} - {1}", _inputAddress, consumerTag);
@@ -75,11 +72,11 @@ namespace MassTransit.RabbitMqTransport.Pipeline
             _consumerTag = consumerTag;
         }
 
-        public void HandleBasicCancelOk(string consumerTag)
+        void IBasicConsumer.HandleBasicCancelOk(string consumerTag)
         {
         }
 
-        public void HandleBasicCancel(string consumerTag)
+        void IBasicConsumer.HandleBasicCancel(string consumerTag)
         {
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Consumer Cancelled: {0}", consumerTag);
@@ -87,13 +84,12 @@ namespace MassTransit.RabbitMqTransport.Pipeline
             foreach (RabbitMqReceiveContext context in _pending.Values)
                 context.Cancel();
 
-            if (ConsumerCancelled != null)
-                ConsumerCancelled(this, new ConsumerEventArgs(consumerTag));
+            ConsumerCancelled?.Invoke(this, new ConsumerEventArgs(consumerTag));
 
             Complete();
         }
 
-        public void HandleModelShutdown(object model, ShutdownEventArgs reason)
+        void IBasicConsumer.HandleModelShutdown(object model, ShutdownEventArgs reason)
         {
             if (_log.IsDebugEnabled)
             {
@@ -104,7 +100,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
             Complete();
         }
 
-        public async void HandleBasicDeliver(string consumerTag, ulong deliveryTag, bool redelivered, string exchange,
+        async void IBasicConsumer.HandleBasicDeliver(string consumerTag, ulong deliveryTag, bool redelivered, string exchange,
             string routingKey,
             IBasicProperties properties, byte[] body)
         {
@@ -158,34 +154,22 @@ namespace MassTransit.RabbitMqTransport.Pipeline
                 await _receiveObserver.NotifyReceiveFault(context, exception);
         }
 
-        public IModel Model
-        {
-            get { return _model.Model; }
-        }
+        IModel IBasicConsumer.Model => _model.Model;
 
         public event EventHandler<ConsumerEventArgs> ConsumerCancelled;
 
-        public void Dispose()
+        void IDisposable.Dispose()
         {
             _registration.Dispose();
 
             Complete();
         }
 
-        public string ConsumerTag
-        {
-            get { return _consumerTag; }
-        }
+        string RabbitMqConsumerMetrics.ConsumerTag => _consumerTag;
 
-        public long DeliveryCount
-        {
-            get { return _deliveryCount; }
-        }
+        long RabbitMqConsumerMetrics.DeliveryCount => _deliveryCount;
 
-        public int ConcurrentDeliveryCount
-        {
-            get { return _maxPendingDeliveryCount; }
-        }
+        int RabbitMqConsumerMetrics.ConcurrentDeliveryCount => _maxPendingDeliveryCount;
 
         void Complete()
         {

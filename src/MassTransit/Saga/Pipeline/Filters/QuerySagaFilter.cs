@@ -51,6 +51,7 @@ namespace MassTransit.Saga.Pipeline.Filters
                 Correlation = "Query"
             });
 
+            _queryFactory.Probe(scope);
              _sagaRepository.Probe(scope);
 
              _messagePipe.Probe(scope);

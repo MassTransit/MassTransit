@@ -44,45 +44,21 @@ namespace MassTransit.Saga
             GenerateFactoryMethodAsynchronously();
         }
 
-        public static SagaInterfaceType[] InitiatedByTypes
-        {
-            get { return Cached.Instance.Value.InitiatedByTypes; }
-        }
+        public static SagaInterfaceType[] InitiatedByTypes => Cached.Instance.Value.InitiatedByTypes;
 
-        public static SagaInterfaceType[] OrchestratesTypes
-        {
-            get { return Cached.Instance.Value.OrchestratesTypes; }
-        }
+        public static SagaInterfaceType[] OrchestratesTypes => Cached.Instance.Value.OrchestratesTypes;
 
-        public static SagaInterfaceType[] ObservesTypes
-        {
-            get { return Cached.Instance.Value.ObservesTypes; }
-        }
+        public static SagaInterfaceType[] ObservesTypes => Cached.Instance.Value.ObservesTypes;
 
-        public static SagaInstanceFactoryMethod<TSaga> FactoryMethod
-        {
-            get { return Cached.Instance.Value.FactoryMethod; }
-        }
+        public static SagaInstanceFactoryMethod<TSaga> FactoryMethod => Cached.Instance.Value.FactoryMethod;
 
-        SagaInstanceFactoryMethod<TSaga> ISagaMetadataCache<TSaga>.FactoryMethod
-        {
-            get { return _factoryMethod; }
-        }
+        SagaInstanceFactoryMethod<TSaga> ISagaMetadataCache<TSaga>.FactoryMethod => _factoryMethod;
 
-        SagaInterfaceType[] ISagaMetadataCache<TSaga>.InitiatedByTypes
-        {
-            get { return _initiatedByTypes; }
-        }
+        SagaInterfaceType[] ISagaMetadataCache<TSaga>.InitiatedByTypes => _initiatedByTypes;
 
-        SagaInterfaceType[] ISagaMetadataCache<TSaga>.OrchestratesTypes
-        {
-            get { return _orchestratesTypes; }
-        }
+        SagaInterfaceType[] ISagaMetadataCache<TSaga>.OrchestratesTypes => _orchestratesTypes;
 
-        SagaInterfaceType[] ISagaMetadataCache<TSaga>.ObservesTypes
-        {
-            get { return _observesTypes; }
-        }
+        SagaInterfaceType[] ISagaMetadataCache<TSaga>.ObservesTypes => _observesTypes;
 
         /// <summary>
         /// Creates a task to generate a compiled saga factory method that is faster than the 
@@ -102,7 +78,7 @@ namespace MassTransit.Saga
             catch (Exception ex)
             {
                 if (_log.IsErrorEnabled)
-                    _log.Error(string.Format("Failed to generate constructor instance factory for {0}", TypeMetadataCache<TSaga>.ShortName), ex);
+                    _log.Error($"Failed to generate constructor instance factory for {TypeMetadataCache<TSaga>.ShortName}", ex);
             }
         }
 

@@ -71,7 +71,6 @@
     <Compile Include="Configuration\EventCorrelationConfigurator.cs" />
     <Compile Include="Configuration\IStateMachineInterfaceType.cs" />
     <Compile Include="Configuration\CorrelationConfigurators\MassTransitEventCorrelationConfigurator.cs" />
-    <Compile Include="Configuration\RepositoryConfigurators\StateMachineEventCorrelationConfigurator.cs" />
     <Compile Include="Configuration\RequestConfigurator.cs" />
     <Compile Include="Configuration\StateMachineInterfaceType.cs" />
     <Compile Include="Configuration\StateMachineRequestConfigurator.cs" />
@@ -91,23 +90,13 @@
     <Compile Include="Testing\StateMachineSagaTestInstance.cs" />
     <Compile Include="Testing\StateMachineSagaTestSubjectImpl.cs" />
     <Compile Include="Testing\StateMachineSagaTestingExtensions.cs" />
-    <Compile Include="Configuration\BuilderConfigurators\StateMachineSagaRepositoryBuilderConfigurator.cs" />
-    <Compile Include="Configuration\RepositoryBuilders\StateMachineEventCorrelation.cs" />
-    <Compile Include="Configuration\RepositoryBuilders\StateMachineEventCorrelationImpl.cs" />
-    <Compile Include="Configuration\RepositoryBuilders\StateMachineSagaRepositoryBuilder.cs" />
-    <Compile Include="Configuration\RepositoryBuilders\StateMachineSagaRepositoryBuilderImpl.cs" />
-    <Compile Include="Configuration\RepositoryConfigurators\StateMachineSagaRepositoryConfigurator.cs" />
-    <Compile Include="Configuration\RepositoryConfigurators\StateMachineSagaRepositoryConfiguratorImpl.cs" />
     <Compile Include="Configuration\RetryLaterExtensions.cs" />
     <Compile Include="Configuration\StateMachineSubscriptionExtensions.cs" />
-    <Compile Include="Configuration\SubscriptionConfigurators\IStateMachineSagaConfigurator.cs" />
-    <Compile Include="Configuration\SubscriptionConfigurators\StateMachineSagaConfigurator.cs" />
+    <Compile Include="Configuration\SubscriptionConfigurators\StateMachineSagaSpecification.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\StateMachineSagaMessageConnector.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\StateMachineConnector.cs" />
     <Compile Include="SagaStateMachineInstance.cs" />
     <Compile Include="Pipeline\StateMachineSagaMessageFilter.cs" />
-    <Compile Include="IStateMachineSagaRepository.cs" />
-    <Compile Include="AutomatonymousStateMachineSagaRepository.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MassTransit\MassTransit.csproj">
@@ -115,7 +104,11 @@
       <Name>MassTransit</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Configuration\BuilderConfigurators\" />
+    <Folder Include="Configuration\RepositoryBuilders\" />
+    <Folder Include="Configuration\RepositoryConfigurators\" />
+  </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>

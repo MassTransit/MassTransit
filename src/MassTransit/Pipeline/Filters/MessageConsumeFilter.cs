@@ -89,8 +89,7 @@ namespace MassTransit.Pipeline.Filters
                     // we can't await in a catch block, so we have to wait explicitly on this one
                     if (_messageObservers.Count > 0)
                     {
-                        _messageObservers.NotifyConsumeFault(consumeContext, ex)
-                            .Wait(context.CancellationToken);
+                        await _messageObservers.NotifyConsumeFault(consumeContext, ex);
                     }
 
                     throw;

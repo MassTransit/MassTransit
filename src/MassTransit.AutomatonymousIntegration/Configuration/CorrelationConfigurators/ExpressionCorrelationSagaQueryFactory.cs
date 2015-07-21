@@ -30,12 +30,17 @@ namespace Automatonymous.CorrelationConfigurators
             _correlationExpression = correlationExpression;
         }
 
-        public ISagaQuery<TInstance> CreateQuery(ConsumeContext<TData> context)
+        ISagaQuery<TInstance> ISagaQueryFactory<TInstance, TData>.CreateQuery(ConsumeContext<TData> context)
         {
             Expression<Func<TInstance, bool>> filter = new EventCorrelationExpressionConverter<TInstance, TData>(context)
                 .Convert(_correlationExpression);
 
             return new SagaQuery<TInstance>(filter);
+        }
+
+        void IProbeSite.Probe(ProbeContext context)
+        {
+            context.Add("expression", _correlationExpression.ToString());
         }
     }
 }

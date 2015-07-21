@@ -25,7 +25,7 @@ namespace MassTransit.WindsorIntegration
         IFilter<T>
         where T : class, PipeContext
     {
-        async void IProbeSite.Probe(ProbeContext context)
+        void IProbeSite.Probe(ProbeContext context)
         {
         }
 

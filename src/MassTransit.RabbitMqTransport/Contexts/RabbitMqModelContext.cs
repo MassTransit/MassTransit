@@ -68,13 +68,12 @@ namespace MassTransit.RabbitMqTransport.Contexts
             Close("ModelContext Disposed");
         }
 
-        public bool HasPayloadType(Type contextType)
+        bool PipeContext.HasPayloadType(Type contextType)
         {
             return _payloadCache.HasPayloadType(contextType) || _connectionContext.HasPayloadType(contextType);
         }
 
-        public bool TryGetPayload<TPayload>(out TPayload context)
-            where TPayload : class
+        bool PipeContext.TryGetPayload<TPayload>(out TPayload context)
         {
             if (_payloadCache.TryGetPayload(out context))
                 return true;
@@ -82,8 +81,7 @@ namespace MassTransit.RabbitMqTransport.Contexts
             return _connectionContext.TryGetPayload(out context);
         }
 
-        public TPayload GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory)
-            where TPayload : class
+        TPayload PipeContext.GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory)
         {
             TPayload payload;
             if (_payloadCache.TryGetPayload(out payload))
@@ -95,22 +93,13 @@ namespace MassTransit.RabbitMqTransport.Contexts
             return _payloadCache.GetOrAddPayload(payloadFactory);
         }
 
-        public IModel Model
-        {
-            get { return _model; }
-        }
+        IModel ModelContext.Model => _model;
 
-        public ConnectionContext ConnectionContext
-        {
-            get { return _connectionContext; }
-        }
+        ConnectionContext ModelContext.ConnectionContext => _connectionContext;
 
-        public CancellationToken CancellationToken
-        {
-            get { return _tokenSource.Token; }
-        }
+        CancellationToken PipeContext.CancellationToken => _tokenSource.Token;
 
-        public async Task BasicPublishAsync(string exchange, string routingKey, bool mandatory, bool immediate, IBasicProperties basicProperties,
+        async Task ModelContext.BasicPublishAsync(string exchange, string routingKey, bool mandatory, bool immediate, IBasicProperties basicProperties,
             byte[] body)
         {
             PendingPublish pendingPublish = await Task.Factory.StartNew(() => PublishAsync(exchange, routingKey, mandatory, immediate, basicProperties, body),
@@ -119,53 +108,53 @@ namespace MassTransit.RabbitMqTransport.Contexts
             await pendingPublish.Task;
         }
 
-        public async Task ExchangeBind(string destination, string source, string routingKey, IDictionary<string, object> arguments)
+        async Task ModelContext.ExchangeBind(string destination, string source, string routingKey, IDictionary<string, object> arguments)
         {
             await Task.Factory.StartNew(() => _model.ExchangeBind(destination, source, routingKey, arguments),
                 _tokenSource.Token, TaskCreationOptions.HideScheduler, _taskScheduler);
         }
 
-        public async Task ExchangeDeclare(string exchange, string type, bool durable, bool autoDelete, IDictionary<string, object> arguments)
+        async Task ModelContext.ExchangeDeclare(string exchange, string type, bool durable, bool autoDelete, IDictionary<string, object> arguments)
         {
             await Task.Factory.StartNew(() => _model.ExchangeDeclare(exchange, type, durable, autoDelete, arguments),
                 _tokenSource.Token, TaskCreationOptions.HideScheduler, _taskScheduler);
         }
 
-        public async Task QueueBind(string queue, string exchange, string routingKey, IDictionary<string, object> arguments)
+        async Task ModelContext.QueueBind(string queue, string exchange, string routingKey, IDictionary<string, object> arguments)
         {
             await Task.Factory.StartNew(() => _model.QueueBind(queue, exchange, routingKey, arguments),
                 _tokenSource.Token, TaskCreationOptions.HideScheduler, _taskScheduler);
         }
 
-        public async Task<QueueDeclareOk> QueueDeclare(string queue, bool durable, bool exclusive, bool autoDelete, IDictionary<string, object> arguments)
+        async Task<QueueDeclareOk> ModelContext.QueueDeclare(string queue, bool durable, bool exclusive, bool autoDelete, IDictionary<string, object> arguments)
         {
             return await Task.Factory.StartNew(() => _model.QueueDeclare(queue, durable, exclusive, autoDelete, arguments),
                 _tokenSource.Token, TaskCreationOptions.HideScheduler, _taskScheduler);
         }
 
-        public async Task<uint> QueuePurge(string queue)
+        async Task<uint> ModelContext.QueuePurge(string queue)
         {
             return await Task.Factory.StartNew(() => _model.QueuePurge(queue),
                 _tokenSource.Token, TaskCreationOptions.HideScheduler, _taskScheduler);
         }
 
-        public async Task BasicQos(uint prefetchSize, ushort prefetchCount, bool global)
+        async Task ModelContext.BasicQos(uint prefetchSize, ushort prefetchCount, bool global)
         {
             await Task.Factory.StartNew(() => _model.BasicQos(prefetchSize, prefetchCount, global),
                 _tokenSource.Token, TaskCreationOptions.HideScheduler, _taskScheduler);
         }
 
-        public void BasicAck(ulong deliveryTag, bool multiple)
+        void ModelContext.BasicAck(ulong deliveryTag, bool multiple)
         {
             _model.BasicAck(deliveryTag, multiple);
         }
 
-        public void BasicNack(ulong deliveryTag, bool multiple, bool requeue)
+        void ModelContext.BasicNack(ulong deliveryTag, bool multiple, bool requeue)
         {
             _model.BasicNack(deliveryTag, multiple, requeue);
         }
 
-        public async Task<string> BasicConsume(string queue, bool noAck, IBasicConsumer consumer)
+        async Task<string> ModelContext.BasicConsume(string queue, bool noAck, IBasicConsumer consumer)
         {
             return await Task.Factory.StartNew(() => _model.BasicConsume(queue, noAck, consumer),
                 _tokenSource.Token, TaskCreationOptions.HideScheduler, _taskScheduler);

@@ -33,7 +33,7 @@ namespace MassTransit.Saga.Pipeline.Filters
         public CorrelationIdMessageFilter(Func<ConsumeContext<TMessage>, Guid> getCorrelationId)
         {
             if (getCorrelationId == null)
-                throw new ArgumentNullException("getCorrelationId");
+                throw new ArgumentNullException(nameof(getCorrelationId));
 
             _getCorrelationId = getCorrelationId;
         }

@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -30,50 +30,28 @@ namespace Automatonymous.Contexts
             _consumeContext = consumeContext;
         }
 
-        public CancellationToken CancellationToken
-        {
-            get { return _context.CancellationToken; }
-        }
+        CancellationToken InstanceContext<TInstance>.CancellationToken => _context.CancellationToken;
+        TInstance InstanceContext<TInstance>.Instance => _context.Instance;
 
-        public TInstance Instance
-        {
-            get { return _context.Instance; }
-        }
-
-        public bool HasPayloadType(Type contextType)
+        bool InstanceContext<TInstance>.HasPayloadType(Type contextType)
         {
             return _context.HasPayloadType(contextType);
         }
 
-        public bool TryGetPayload<TPayload>(out TPayload payload) where TPayload : class
+        bool InstanceContext<TInstance>.TryGetPayload<TPayload>(out TPayload payload)
         {
             return _context.TryGetPayload(out payload);
         }
 
-        public TPayload GetOrAddPayload<TPayload>(Automatonymous.PayloadFactory<TPayload> payloadFactory) where TPayload : class
+        TPayload InstanceContext<TInstance>.GetOrAddPayload<TPayload>(Automatonymous.PayloadFactory<TPayload> payloadFactory)
         {
             return _context.GetOrAddPayload(payloadFactory);
         }
 
-        public Event<TData> Event
-        {
-            get { return _context.Event; }
-        }
-
-        public TData Data
-        {
-            get { return _context.Data; }
-        }
-
-        public ConsumeContext<TData> ConsumeContext
-        {
-            get { return _consumeContext; }
-        }
-
-        Event EventContext<TInstance>.Event
-        {
-            get { return Event; }
-        }
+        Event<TData> EventContext<TInstance, TData>.Event => _context.Event;
+        TData EventContext<TInstance, TData>.Data => _context.Data;
+        ConsumeContext<TData> ConsumeEventContext<TInstance, TData>.ConsumeContext => _consumeContext;
+        Event EventContext<TInstance>.Event => _context.Event;
     }
 
 
@@ -89,39 +67,25 @@ namespace Automatonymous.Contexts
             _consumeContext = consumeContext;
         }
 
-        public CancellationToken CancellationToken
-        {
-            get { return _context.CancellationToken; }
-        }
+        CancellationToken InstanceContext<TInstance>.CancellationToken => _context.CancellationToken;
+        TInstance InstanceContext<TInstance>.Instance => _context.Instance;
 
-        public TInstance Instance
-        {
-            get { return _context.Instance; }
-        }
-
-        public bool HasPayloadType(Type contextType)
+        bool InstanceContext<TInstance>.HasPayloadType(Type contextType)
         {
             return _context.HasPayloadType(contextType);
         }
 
-        public bool TryGetPayload<TPayload>(out TPayload payload) where TPayload : class
+        bool InstanceContext<TInstance>.TryGetPayload<TPayload>(out TPayload payload)
         {
             return _context.TryGetPayload(out payload);
         }
 
-        public TPayload GetOrAddPayload<TPayload>(Automatonymous.PayloadFactory<TPayload> payloadFactory) where TPayload : class
+        TPayload InstanceContext<TInstance>.GetOrAddPayload<TPayload>(Automatonymous.PayloadFactory<TPayload> payloadFactory)
         {
             return _context.GetOrAddPayload(payloadFactory);
         }
 
-        public ConsumeContext ConsumeContext
-        {
-            get { return _consumeContext; }
-        }
-
-        public Event Event
-        {
-            get { return _context.Event; }
-        }
+        ConsumeContext ConsumeEventContext<TInstance>.ConsumeContext => _consumeContext;
+        Event EventContext<TInstance>.Event => _context.Event;
     }
 }

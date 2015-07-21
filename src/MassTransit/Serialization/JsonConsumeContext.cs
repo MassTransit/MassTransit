@@ -237,12 +237,16 @@ namespace MassTransit.Serialization
             return new SendEndpointCapture(_receiveContext, sendEndpoint);
         }
 
-        void ConsumeContext.NotifyConsumed<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType)
+        Task ConsumeContext.NotifyConsumed<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType)
         {
-            _receiveContext.NotifyConsumed(context, duration, consumerType);
+            Task receiveTask = _receiveContext.NotifyConsumed(context, duration, consumerType);
+
+            _receiveContext.AddPendingTask(receiveTask);
+
+            return TaskUtil.Completed;
         }
 
-        public void NotifyFaulted<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType, Exception exception)
+        public Task NotifyFaulted<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType, Exception exception)
             where T : class
         {
             Task faultTask = GenerateFault(context, exception);
@@ -252,6 +256,8 @@ namespace MassTransit.Serialization
             Task receiveTask = _receiveContext.NotifyFaulted(context, duration, consumerType, exception);
 
             _receiveContext.AddPendingTask(receiveTask);
+
+            return TaskUtil.Completed;
         }
 
         Task IPublishEndpoint.Publish<T>(T message, CancellationToken cancellationToken)
