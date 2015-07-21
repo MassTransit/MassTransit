@@ -30,7 +30,7 @@ namespace MassTransit.RabbitMqTransport
             _hosts = hosts;
         }
 
-        public async Task<ISendTransport> GetSendTransport(Uri address)
+        public Task<ISendTransport> GetSendTransport(Uri address)
         {
             SendSettings sendSettings = address.GetSendSettings();
 
@@ -42,7 +42,7 @@ namespace MassTransit.RabbitMqTransport
 
             var modelCache = new RabbitMqModelCache(host.ConnectionCache);
 
-            return new RabbitMqSendTransport(modelCache, sendSettings);
+            return Task.FromResult<ISendTransport>(new RabbitMqSendTransport(modelCache, sendSettings));
         }
     }
 }

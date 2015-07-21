@@ -28,7 +28,6 @@ namespace MassTransit.RabbitMqTransport
         IReceiveTransport
     {
         static readonly ILog _log = Logger.Get<RabbitMqReceiveTransport>();
-
         readonly IConnectionCache _connectionCache;
         readonly ExchangeBindingSettings[] _exchangeBindings;
         readonly ReceiveObservable _receiveObservers;
@@ -73,9 +72,9 @@ namespace MassTransit.RabbitMqTransport
             return _receiveObservers.Connect(observer);
         }
 
-        async Task Receiver(IPipe<ConnectionContext> transportPipe, CancellationToken stopToken)
+        Task Receiver(IPipe<ConnectionContext> transportPipe, CancellationToken stopToken)
         {
-            await Repeat.UntilCancelled(stopToken, async () =>
+            return Repeat.UntilCancelled(stopToken, async () =>
             {
                 try
                 {

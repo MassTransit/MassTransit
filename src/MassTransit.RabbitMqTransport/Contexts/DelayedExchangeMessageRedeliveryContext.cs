@@ -14,7 +14,6 @@ namespace MassTransit.RabbitMqTransport.Contexts
 {
     using System;
     using System.Threading.Tasks;
-    using RabbitMQ.Client;
     using Topology;
 
 

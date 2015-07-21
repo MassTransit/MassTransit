@@ -19,12 +19,7 @@ namespace MassTransit.RabbitMqTransport.Topology
     public sealed class RabbitMqHostEqualityComparer :
         IEqualityComparer<RabbitMqHostSettings>
     {
-        static readonly IEqualityComparer<RabbitMqHostSettings> _instance = new RabbitMqHostEqualityComparer();
-
-        public static IEqualityComparer<RabbitMqHostSettings> Default
-        {
-            get { return _instance; }
-        }
+        public static IEqualityComparer<RabbitMqHostSettings> Default { get; } = new RabbitMqHostEqualityComparer();
 
         public bool Equals(RabbitMqHostSettings x, RabbitMqHostSettings y)
         {
@@ -41,9 +36,9 @@ namespace MassTransit.RabbitMqTransport.Topology
         {
             unchecked
             {
-                int hashCode = (obj.Host != null ? obj.Host.GetHashCode() : 0);
+                int hashCode = obj.Host?.GetHashCode() ?? 0;
                 hashCode = (hashCode * 397) ^ obj.Port;
-                hashCode = (hashCode * 397) ^ (obj.VirtualHost != null ? obj.VirtualHost.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ (obj.VirtualHost?.GetHashCode() ?? 0);
                 return hashCode;
             }
         }

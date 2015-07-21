@@ -48,15 +48,9 @@ namespace MassTransit.RabbitMqTransport.Contexts
             connection.ConnectionShutdown += OnConnectionShutdown;
         }
 
-        public Task Completed
-        {
-            get { return _completed.Task; }
-        }
+        public Task Completed => _completed.Task;
 
-        public RabbitMqHostSettings HostSettings
-        {
-            get { return _hostSettings; }
-        }
+        public RabbitMqHostSettings HostSettings => _hostSettings;
 
         public async Task<IModel> CreateModel()
         {
@@ -81,15 +75,9 @@ namespace MassTransit.RabbitMqTransport.Contexts
             return _payloadCache.GetOrAddPayload(payloadFactory);
         }
 
-        public IConnection Connection
-        {
-            get { return _connection; }
-        }
+        public IConnection Connection => _connection;
 
-        public CancellationToken CancellationToken
-        {
-            get { return _tokenSource.Token; }
-        }
+        public CancellationToken CancellationToken => _tokenSource.Token;
 
         public void Dispose()
         {

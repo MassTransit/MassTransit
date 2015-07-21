@@ -29,14 +29,13 @@ namespace MassTransit.RabbitMqTransport
         readonly RabbitMqConnectionCache _connectionCache;
         readonly RabbitMqHostSettings _hostSettings;
         readonly ILog _log = Logger.Get<RabbitMqHost>();
-        readonly IMessageNameFormatter _messageNameFormatter;
 
         public RabbitMqHost(RabbitMqHostSettings hostSettings)
         {
             _hostSettings = hostSettings;
 
             _connectionCache = new RabbitMqConnectionCache(hostSettings);
-            _messageNameFormatter = new RabbitMqMessageNameFormatter();
+            MessageNameFormatter = new RabbitMqMessageNameFormatter();
         }
 
         public HostHandle Start()
@@ -77,34 +76,23 @@ namespace MassTransit.RabbitMqTransport
                 _hostSettings.Username,
                 Password = new string('*', _hostSettings.Password.Length),
                 _hostSettings.Heartbeat,
-                _hostSettings.Ssl,
+                _hostSettings.Ssl
             });
 
             if (_hostSettings.Ssl)
             {
                 scope.Set(new
                 {
-                    _hostSettings.SslServerName,
+                    _hostSettings.SslServerName
                 });
             }
 
             _connectionCache.Probe(scope);
         }
 
-        public IMessageNameFormatter MessageNameFormatter
-        {
-            get { return _messageNameFormatter; }
-        }
-
-        public IConnectionCache ConnectionCache
-        {
-            get { return _connectionCache; }
-        }
-
-        public RabbitMqHostSettings Settings
-        {
-            get { return _hostSettings; }
-        }
+        public IMessageNameFormatter MessageNameFormatter { get; }
+        public IConnectionCache ConnectionCache => _connectionCache;
+        public RabbitMqHostSettings Settings => _hostSettings;
 
 
         class Handle :
@@ -122,9 +110,11 @@ namespace MassTransit.RabbitMqTransport
                 _stopSignal.Stop();
             }
 
-            async Task HostHandle.Stop(CancellationToken cancellationToken)
+            Task HostHandle.Stop(CancellationToken cancellationToken)
             {
                 _stopSignal.Stop();
+
+                return TaskUtil.Completed;
             }
         }
     }

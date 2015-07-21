@@ -79,7 +79,6 @@
     <Compile Include="Contexts\SharedModelContext.cs" />
     <Compile Include="DeferExtensions.cs" />
     <Compile Include="DelayedExchangeRetryExtensions.cs" />
-    <Compile Include="ErrorQueueSettings.cs" />
     <Compile Include="Exceptions\MessageNotConfirmedException.cs" />
     <Compile Include="Exceptions\PublishNackException.cs" />
     <Compile Include="Exceptions\RabbitMqAddressException.cs" />

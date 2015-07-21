@@ -28,10 +28,7 @@ namespace MassTransit.RabbitMqTransport.Configuration.Configurators
             _acceptablePolicyErrors = settings.AcceptablePolicyErrors | SslPolicyErrors.RemoteCertificateChainErrors;
         }
 
-        public SslPolicyErrors AcceptablePolicyErrors
-        {
-            get { return _acceptablePolicyErrors; }
-        }
+        public SslPolicyErrors AcceptablePolicyErrors => _acceptablePolicyErrors;
 
         public string CertificatePath { get; set; }
 

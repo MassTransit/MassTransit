@@ -56,13 +56,14 @@ namespace MassTransit.RabbitMqTransport.Topology
                 Durable = durable;
                 AutoDelete = autoDelete;
                 ExchangeType = RabbitMQ.Client.ExchangeType.Fanout;
+                Arguments = new Dictionary<string, object>();
             }
 
-            public string ExchangeName { get; private set; }
-            public string ExchangeType { get; set; }
-            public bool Durable { get; private set; }
-            public bool AutoDelete { get; private set; }
-            public IDictionary<string, object> Arguments { get; private set; }
+            public string ExchangeName { get; }
+            public string ExchangeType { get; }
+            public bool Durable { get; }
+            public bool AutoDelete { get; }
+            public IDictionary<string, object> Arguments { get; }
         }
 
 
@@ -76,9 +77,9 @@ namespace MassTransit.RabbitMqTransport.Topology
                 Arguments = new Dictionary<string, object>();
             }
 
-            public ExchangeSettings Exchange { get; private set; }
-            public string RoutingKey { get; private set; }
-            public IDictionary<string, object> Arguments { get; private set; }
+            public ExchangeSettings Exchange { get; }
+            public string RoutingKey { get; }
+            public IDictionary<string, object> Arguments { get; }
         }
     }
 }

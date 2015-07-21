@@ -289,7 +289,7 @@ namespace MassTransit.RabbitMqTransport.Contexts
         {
             _tokenSource.Cancel();
 
-            Close("Cancellation Requested");
+            Close("Transport Stopped");
         }
     }
 }

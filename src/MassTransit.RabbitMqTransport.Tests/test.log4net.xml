@@ -15,7 +15,7 @@
 		</logger>
 
 		<logger name="MassTransit.RabbitMqTransport">
-			<level value="ERROR" />
+			<level value="DEBUG" />
 		</logger>
 
 		<logger name="NHibernate">

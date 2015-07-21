@@ -38,10 +38,7 @@ namespace MassTransit.RabbitMqTransport.Contexts
             _completed = new TaskCompletionSource<bool>();
         }
 
-        public Task Completed
-        {
-            get { return _completed.Task; }
-        }
+        public Task Completed => _completed.Task;
 
         void IDisposable.Dispose()
         {
@@ -65,10 +62,7 @@ namespace MassTransit.RabbitMqTransport.Contexts
             return _context.GetOrAddPayload(payloadFactory);
         }
 
-        ConnectionContext ModelContext.ConnectionContext
-        {
-            get { return _context.ConnectionContext; }
-        }
+        ConnectionContext ModelContext.ConnectionContext => _context.ConnectionContext;
 
         Task ModelContext.BasicPublishAsync(string exchange, string routingKey, bool mandatory, bool immediate, IBasicProperties basicProperties, byte[] body)
         {
@@ -120,14 +114,8 @@ namespace MassTransit.RabbitMqTransport.Contexts
             return _context.BasicConsume(queue, noAck, consumer);
         }
 
-        IModel ModelContext.Model
-        {
-            get { return _context.Model; }
-        }
+        IModel ModelContext.Model => _context.Model;
 
-        CancellationToken PipeContext.CancellationToken
-        {
-            get { return _cancellationToken; }
-        }
+        CancellationToken PipeContext.CancellationToken => _cancellationToken;
     }
 }

@@ -32,10 +32,7 @@ namespace MassTransit.RabbitMqTransport.Configuration.Configurators
             };
         }
 
-        public RabbitMqHostSettings Settings
-        {
-            get { return _settings; }
-        }
+        public RabbitMqHostSettings Settings => _settings;
 
         public void UseSsl(Action<IRabbitMqSslConfigurator> configureSsl)
         {

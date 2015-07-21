@@ -129,7 +129,7 @@ namespace MassTransit.RabbitMqTransport.Integration
             catch (Exception ex)
             {
                 if (_log.IsDebugEnabled)
-                    _log.Debug(string.Format("The connection usage threw an exception"), ex);
+                    _log.Debug("The connection usage threw an exception", ex);
 
                 throw;
             }
@@ -150,7 +150,7 @@ namespace MassTransit.RabbitMqTransport.Integration
             catch (Exception ex)
             {
                 if (_log.IsDebugEnabled)
-                    _log.Debug(string.Format("The existing connection usage threw an exception"), ex);
+                    _log.Debug("The existing connection usage threw an exception", ex);
 
                 throw;
             }
@@ -192,7 +192,11 @@ namespace MassTransit.RabbitMqTransport.Integration
                     _log.Error("Close faulted waiting for attached connections", ex);
                 }
 
-                (await _connectionContext.Task).Dispose();
+                var connectionContext = await _connectionContext.Task;
+
+                connectionContext.Dispose();
+
+                await connectionContext.Completed;
             }
 
             public void ConnectFaulted(Exception exception)

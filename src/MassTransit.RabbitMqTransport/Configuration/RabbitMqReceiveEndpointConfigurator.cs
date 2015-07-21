@@ -50,10 +50,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
             _settings = settings;
         }
 
-        public Uri InputAddress
-        {
-            get { return _host.Settings.GetInputAddress(_settings); }
-        }
+        public Uri InputAddress => _host.Settings.GetInputAddress(_settings);
 
         public void Apply(IBusBuilder builder)
         {
@@ -105,9 +102,9 @@ namespace MassTransit.RabbitMqTransport.Configuration
         public void SetQueueArgument(string key, object value)
         {
             if (key == null)
-                throw new ArgumentNullException("key");
+                throw new ArgumentNullException(nameof(key));
             if (value == null)
-                throw new ArgumentNullException("value");
+                throw new ArgumentNullException(nameof(value));
 
             _settings.QueueArguments[key] = value;
         }
@@ -115,9 +112,9 @@ namespace MassTransit.RabbitMqTransport.Configuration
         public void SetExchangeArgument(string key, object value)
         {
             if (key == null)
-                throw new ArgumentNullException("key");
+                throw new ArgumentNullException(nameof(key));
             if (value == null)
-                throw new ArgumentNullException("value");
+                throw new ArgumentNullException(nameof(value));
 
             _settings.ExchangeArguments[key] = value;
         }

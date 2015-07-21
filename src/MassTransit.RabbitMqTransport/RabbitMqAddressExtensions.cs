@@ -147,7 +147,7 @@ namespace MassTransit.RabbitMqTransport
                 yield return "bind=true";
             if (!string.IsNullOrWhiteSpace(settings.QueueName))
                 yield return "queue=" + WebUtility.UrlEncode(settings.QueueName);
-            if (settings.ExchangeType != RabbitMQ.Client.ExchangeType.Fanout)
+            if (settings.ExchangeType != ExchangeType.Fanout)
                 yield return "type=" + settings.ExchangeType;
             if (settings.ExchangeArguments != null && settings.ExchangeArguments.ContainsKey("x-delayed-type"))
                 yield return "delayedType=" + settings.ExchangeArguments["x-delayed-type"];
