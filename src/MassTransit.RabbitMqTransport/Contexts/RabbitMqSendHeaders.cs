@@ -33,7 +33,7 @@ namespace MassTransit.RabbitMqTransport.Contexts
         public void Set(string key, string value)
         {
             if (key == null)
-                throw new ArgumentNullException("key");
+                throw new ArgumentNullException(nameof(key));
 
             if (_basicProperties.Headers == null)
                 _basicProperties.Headers = new Dictionary<string, object>();
@@ -47,7 +47,7 @@ namespace MassTransit.RabbitMqTransport.Contexts
         public void Set(string key, object value)
         {
             if (key == null)
-                throw new ArgumentNullException("key");
+                throw new ArgumentNullException(nameof(key));
 
             if (_basicProperties.Headers == null)
                 _basicProperties.Headers = new Dictionary<string, object>();

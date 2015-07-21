@@ -18,10 +18,6 @@ namespace MassTransit.RabbitMqTransport.Topology
     public class RabbitMqSendSettings :
         SendSettings
     {
-        readonly bool _autoDelete;
-        readonly bool _durable;
-        readonly string _exchangeName;
-        readonly string _exchangeType;
         bool _bindToQueue;
         IDictionary<string, object> _exchangeArguments;
         IDictionary<string, object> _queueArguments;
@@ -29,51 +25,27 @@ namespace MassTransit.RabbitMqTransport.Topology
 
         public RabbitMqSendSettings(string exchangeName, string exchangeType, bool durable, bool autoDelete)
         {
-            _exchangeName = exchangeName;
-            _exchangeType = exchangeType;
-            _durable = durable;
-            _autoDelete = autoDelete;
+            ExchangeName = exchangeName;
+            ExchangeType = exchangeType;
+            Durable = durable;
+            AutoDelete = autoDelete;
         }
 
-        public string ExchangeName
-        {
-            get { return _exchangeName; }
-        }
+        public string ExchangeName { get; }
 
-        public bool Durable
-        {
-            get { return _durable; }
-        }
+        public bool Durable { get; }
 
-        public bool AutoDelete
-        {
-            get { return _autoDelete; }
-        }
+        public bool AutoDelete { get; }
 
-        public IDictionary<string, object> ExchangeArguments
-        {
-            get { return _exchangeArguments; }
-        }
+        public IDictionary<string, object> ExchangeArguments => _exchangeArguments;
 
-        public string ExchangeType
-        {
-            get { return _exchangeType; }
-        }
+        public string ExchangeType { get; }
 
-        bool SendSettings.BindToQueue
-        {
-            get { return _bindToQueue; }
-        }
+        bool SendSettings.BindToQueue => _bindToQueue;
 
-        public string QueueName
-        {
-            get { return _queueName; }
-        }
+        public string QueueName => _queueName;
 
-        public IDictionary<string, object> QueueArguments
-        {
-            get { return _queueArguments; }
-        }
+        public IDictionary<string, object> QueueArguments => _queueArguments;
 
         public void BindToQueue(string queueName)
         {

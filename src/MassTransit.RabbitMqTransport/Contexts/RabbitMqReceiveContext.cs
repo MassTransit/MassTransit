@@ -25,55 +25,27 @@ namespace MassTransit.RabbitMqTransport.Contexts
         RabbitMqBasicConsumeContext
     {
         readonly byte[] _body;
-        readonly string _consumerTag;
-        readonly ulong _deliveryTag;
-        readonly string _exchange;
-        readonly IBasicProperties _properties;
-        readonly string _routingKey;
 
         public RabbitMqReceiveContext(Uri inputAddress, string exchange, string routingKey, string consumerTag, ulong deliveryTag, byte[] body, bool redelivered,
             IBasicProperties properties, INotifyReceiveObserver observer)
             : base(inputAddress, redelivered, observer)
         {
-            _exchange = exchange;
-            _routingKey = routingKey;
-            _consumerTag = consumerTag;
-            _deliveryTag = deliveryTag;
+            Exchange = exchange;
+            RoutingKey = routingKey;
+            ConsumerTag = consumerTag;
+            DeliveryTag = deliveryTag;
             _body = body;
-            _properties = properties;
+            Properties = properties;
 
             ((ReceiveContext)this).GetOrAddPayload<RabbitMqBasicConsumeContext>(() => this);
         }
 
-        protected override IHeaderProvider HeaderProvider
-        {
-            get { return new RabbitMqHeaderProvider(this); }
-        }
-
-        public string ConsumerTag
-        {
-            get { return _consumerTag; }
-        }
-
-        public ulong DeliveryTag
-        {
-            get { return _deliveryTag; }
-        }
-
-        public string Exchange
-        {
-            get { return _exchange; }
-        }
-
-        public string RoutingKey
-        {
-            get { return _routingKey; }
-        }
-
-        public IBasicProperties Properties
-        {
-            get { return _properties; }
-        }
+        protected override IHeaderProvider HeaderProvider => new RabbitMqHeaderProvider(this);
+        public string ConsumerTag { get; }
+        public ulong DeliveryTag { get; }
+        public string Exchange { get; }
+        public string RoutingKey { get; }
+        public IBasicProperties Properties { get; }
 
         protected override Stream GetBodyStream()
         {

@@ -34,7 +34,7 @@ namespace MassTransit
             ReceiveSettings settings, INotifyReceiveObserver receiveObserver, IEnumerable<ExchangeBindingSettings> exchangeBindings)
         {
             if (configurator == null)
-                throw new ArgumentNullException("configurator");
+                throw new ArgumentNullException(nameof(configurator));
 
             var pipeBuilderConfigurator = new RabbitMqConsumerPipeSpecification(pipe, settings, receiveObserver, exchangeBindings);
 

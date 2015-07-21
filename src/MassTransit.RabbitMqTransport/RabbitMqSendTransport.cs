@@ -58,8 +58,8 @@ namespace MassTransit.RabbitMqTransport
 
                 p.UseExecuteAsync(async modelContext =>
                 {
-                    if (_log.IsDebugEnabled)
-                        _log.DebugFormat("Sending {0} to {1}", TypeMetadataCache<T>.ShortName, _sendSettings.ExchangeName);
+//                    if (_log.IsDebugEnabled)
+//                        _log.DebugFormat("Sending {0} to {1}", TypeMetadataCache<T>.ShortName, _sendSettings.ExchangeName);
 
                     IBasicProperties properties = modelContext.Model.CreateBasicProperties();
 
@@ -92,8 +92,7 @@ namespace MassTransit.RabbitMqTransport
                         await modelContext.BasicPublishAsync(context.Exchange, context.RoutingKey, context.Mandatory,
                             context.Immediate, context.BasicProperties, context.Body);
 
-                        context.DestinationAddress.LogSent(context.MessageId.HasValue ? context.MessageId.Value.ToString("N") : "",
-                            TypeMetadataCache<T>.ShortName);
+                        context.DestinationAddress.LogSent(context.MessageId?.ToString("N") ?? "",TypeMetadataCache<T>.ShortName);
 
                         await _observers.NotifyPostSend(context);
                     }
@@ -162,7 +161,7 @@ namespace MassTransit.RabbitMqTransport
                         if (_log.IsDebugEnabled)
                         {
                             context.InputAddress.LogMoved(modelContext.ConnectionContext.HostSettings.GetSendAddress(_sendSettings),
-                                messageId.HasValue ? messageId.Value.ToString() : "N/A", "Moved");
+                                messageId?.ToString() ?? "N/A", "Moved");
                         }
                     }
                     catch (Exception ex)
@@ -198,10 +197,7 @@ namespace MassTransit.RabbitMqTransport
                 _serializer = new CopyBodySerializer(context);
             }
 
-            CancellationToken PipeContext.CancellationToken
-            {
-                get { return _context.CancellationToken; }
-            }
+            CancellationToken PipeContext.CancellationToken => _context.CancellationToken;
 
             bool PipeContext.HasPayloadType(Type contextType)
             {
@@ -222,7 +218,7 @@ namespace MassTransit.RabbitMqTransport
             public Guid? RequestId { get; set; }
             public Guid? CorrelationId { get; set; }
 
-            public SendHeaders Headers { get; set; }
+            public SendHeaders Headers { get; }
 
             public Uri SourceAddress { get; set; }
             public Uri DestinationAddress { get; set; }
@@ -250,25 +246,22 @@ namespace MassTransit.RabbitMqTransport
             public string Exchange { get; private set; }
             public string RoutingKey { get; set; }
 
-            public IBasicProperties BasicProperties { get; private set; }
+            public IBasicProperties BasicProperties { get; }
 
 
             class CopyBodySerializer : IMessageSerializer
             {
                 readonly ReceiveContext _context;
-                ContentType _contentType;
 
                 public CopyBodySerializer(ReceiveContext context)
                 {
                     _context = context;
+                    ContentType = context.ContentType;
                 }
 
-                public ContentType ContentType
-                {
-                    get { return _contentType; }
-                }
+                public ContentType ContentType { get; }
 
-                public void Serialize<T>(Stream stream, SendContext<T> context) where T : class
+                void IMessageSerializer.Serialize<T>(Stream stream, SendContext<T> context)
                 {
                     using (Stream bodyStream = _context.GetBody())
                     {

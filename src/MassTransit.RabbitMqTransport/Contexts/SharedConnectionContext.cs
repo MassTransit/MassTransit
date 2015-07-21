@@ -33,15 +33,8 @@ namespace MassTransit.RabbitMqTransport.Contexts
             _completed = new TaskCompletionSource<bool>();
         }
 
-        public Task Completed
-        {
-            get { return _completed.Task; }
-        }
-
-        CancellationToken PipeContext.CancellationToken
-        {
-            get { return _cancellationToken; }
-        }
+        public Task Completed => _completed.Task;
+        CancellationToken PipeContext.CancellationToken => _cancellationToken;
 
         bool PipeContext.HasPayloadType(Type contextType)
         {
@@ -58,15 +51,8 @@ namespace MassTransit.RabbitMqTransport.Contexts
             return _context.GetOrAddPayload(payloadFactory);
         }
 
-        IConnection ConnectionContext.Connection
-        {
-            get { return _context.Connection; }
-        }
-
-        RabbitMqHostSettings ConnectionContext.HostSettings
-        {
-            get { return _context.HostSettings; }
-        }
+        IConnection ConnectionContext.Connection => _context.Connection;
+        RabbitMqHostSettings ConnectionContext.HostSettings => _context.HostSettings;
 
         Task<IModel> ConnectionContext.CreateModel()
         {

@@ -34,10 +34,7 @@ namespace MassTransit.RabbitMqTransport.Integration
             _source = new TaskCompletionSource<ulong>();
         }
 
-        public Task Task
-        {
-            get { return _source.Task; }
-        }
+        public Task Task => _source.Task;
 
         public void Ack()
         {

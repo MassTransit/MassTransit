@@ -41,9 +41,12 @@ namespace MassTransit.RabbitMqTransport
             _cachedEndpoints = new ConcurrentDictionary<Type, Lazy<ISendEndpoint>>();
         }
 
-        public async Task<IEnumerable<ISendEndpoint>> GetPublishEndpoints(Type messageType)
+        public Task<IEnumerable<ISendEndpoint>> GetPublishEndpoints(Type messageType)
         {
-            return new[] {_cachedEndpoints.GetOrAdd(messageType, x => new Lazy<ISendEndpoint>(() => CreateSendEndpoint(x))).Value};
+            return Task.FromResult<IEnumerable<ISendEndpoint>>(new[]
+            {
+                _cachedEndpoints.GetOrAdd(messageType, x => new Lazy<ISendEndpoint>(() => CreateSendEndpoint(x))).Value
+            });
         }
 
         ISendEndpoint CreateSendEndpoint(Type messageType)

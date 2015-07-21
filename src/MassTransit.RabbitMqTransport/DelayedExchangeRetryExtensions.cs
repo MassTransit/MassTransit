@@ -14,7 +14,6 @@ namespace MassTransit
 {
     using System;
     using PipeConfigurators;
-    using Policies;
     using RabbitMqTransport.Configuration;
 
 
@@ -29,7 +28,7 @@ namespace MassTransit
             where T : class
         {
             if (configurator == null)
-                throw new ArgumentNullException("configurator");
+                throw new ArgumentNullException(nameof(configurator));
 
             var redeliverySpecification = new DelayedExchangeRedeliveryPipeSpecification<T>();
 

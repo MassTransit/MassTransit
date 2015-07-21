@@ -94,7 +94,7 @@ namespace MassTransit.RabbitMqTransport.Integration
                 catch (Exception ex)
                 {
                     if (_log.IsDebugEnabled)
-                        _log.Debug(string.Format("The existing model usage threw an exception"), ex);
+                        _log.Debug("The existing model usage threw an exception", ex);
 
                     throw;
                 }
@@ -115,7 +115,7 @@ namespace MassTransit.RabbitMqTransport.Integration
             catch (Exception ex)
             {
                 if (_log.IsDebugEnabled)
-                    _log.Debug(string.Format("The existing model usage threw an exception"), ex);
+                    _log.Debug("The existing model usage threw an exception", ex);
 
                 throw;
             }
@@ -160,7 +160,7 @@ namespace MassTransit.RabbitMqTransport.Integration
             public async Task ForEach(Func<SharedModelContext, Task> callback)
             {
                 if (callback == null)
-                    throw new ArgumentNullException("callback");
+                    throw new ArgumentNullException(nameof(callback));
 
                 if (_models.Count == 0)
                     return;
