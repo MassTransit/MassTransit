@@ -213,14 +213,14 @@ namespace MassTransit.Context
             return _context.GetSendEndpoint(address);
         }
 
-        void ConsumeContext.NotifyConsumed<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType)
+        Task ConsumeContext.NotifyConsumed<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType)
         {
-            _context.NotifyConsumed(context, duration, consumerType);
+            return _context.NotifyConsumed(context, duration, consumerType);
         }
 
-        void ConsumeContext.NotifyFaulted<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType, Exception exception)
+        Task ConsumeContext.NotifyFaulted<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType, Exception exception)
         {
-            _context.NotifyFaulted(context, duration, consumerType, exception);
+            return _context.NotifyFaulted(context, duration, consumerType, exception);
         }
 
         TMessage ConsumeContext<TMessage>.Message
@@ -228,14 +228,14 @@ namespace MassTransit.Context
             get { return _context.Message; }
         }
 
-        void ConsumeContext<TMessage>.NotifyConsumed(TimeSpan duration, string consumerType)
+        Task ConsumeContext<TMessage>.NotifyConsumed(TimeSpan duration, string consumerType)
         {
-            _context.NotifyConsumed(duration, consumerType);
+            return _context.NotifyConsumed(duration, consumerType);
         }
 
-        void ConsumeContext<TMessage>.NotifyFaulted(TimeSpan duration, string consumerType, Exception exception)
+        Task ConsumeContext<TMessage>.NotifyFaulted(TimeSpan duration, string consumerType, Exception exception)
         {
-            _context.NotifyFaulted(this, duration, consumerType, exception);
+            return _context.NotifyFaulted(this, duration, consumerType, exception);
         }
 
         ConnectHandle IPublishObserverConnector.ConnectPublishObserver(IPublishObserver observer)

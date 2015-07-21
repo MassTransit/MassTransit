@@ -13,6 +13,8 @@
 namespace MassTransit.Transports
 {
     using System;
+    using System.Collections.Generic;
+    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using Context;
@@ -45,7 +47,7 @@ namespace MassTransit.Transports
             }
             catch (Exception ex)
             {
-                adapter.PublishFaulted(ex).Wait(cancellationToken);
+                await adapter.PublishFaulted(ex);
                 throw;
             }
         }
@@ -62,7 +64,7 @@ namespace MassTransit.Transports
             }
             catch (Exception ex)
             {
-                adapter.PublishFaulted(ex).Wait(cancellationToken);
+                await adapter.PublishFaulted(ex);
                 throw;
             }
         }
@@ -79,7 +81,7 @@ namespace MassTransit.Transports
             }
             catch (Exception ex)
             {
-                adapter.PublishFaulted(ex).Wait(cancellationToken);
+                await adapter.PublishFaulted(ex);
                 throw;
             }
         }
@@ -87,7 +89,7 @@ namespace MassTransit.Transports
         Task IPublishEndpoint.Publish(object message, CancellationToken cancellationToken)
         {
             if (message == null)
-                throw new ArgumentNullException("message");
+                throw new ArgumentNullException(nameof(message));
 
             Type messageType = message.GetType();
 
@@ -97,7 +99,7 @@ namespace MassTransit.Transports
         Task IPublishEndpoint.Publish(object message, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
         {
             if (message == null)
-                throw new ArgumentNullException("message");
+                throw new ArgumentNullException(nameof(message));
 
             Type messageType = message.GetType();
 
@@ -126,7 +128,7 @@ namespace MassTransit.Transports
             }
             catch (Exception ex)
             {
-                adapter.PublishFaulted(ex).Wait(cancellationToken);
+                await adapter.PublishFaulted(ex);
                 throw;
             }
         }
@@ -144,7 +146,7 @@ namespace MassTransit.Transports
             }
             catch (Exception ex)
             {
-                adapter.PublishFaulted(ex).Wait(cancellationToken);
+                await adapter.PublishFaulted(ex);
                 throw;
             }
         }
@@ -155,14 +157,15 @@ namespace MassTransit.Transports
             var adapter = new PublishPipeContextAdapter<T>(publishPipe, _observers, _sourceAddress);
             try
             {
-                foreach (ISendEndpoint endpoint in await _endpointProvider.GetPublishEndpoints(typeof(T)).ConfigureAwait(false))
-                    await endpoint.Send(values, adapter, cancellationToken).ConfigureAwait(false);
+                var endpoints = await _endpointProvider.GetPublishEndpoints(typeof(T)).ConfigureAwait(false);
+
+                await Task.WhenAll(endpoints.Select(x => x.Send(values, adapter, cancellationToken))).ConfigureAwait(false);
 
                 await adapter.PostPublish();
             }
             catch (Exception ex)
             {
-                adapter.PublishFaulted(ex).Wait(cancellationToken);
+                await adapter.PublishFaulted(ex);
                 throw;
             }
         }

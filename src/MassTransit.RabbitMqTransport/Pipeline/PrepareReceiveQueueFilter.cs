@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -17,7 +17,6 @@ namespace MassTransit.RabbitMqTransport.Pipeline
     using System.Threading.Tasks;
     using Logging;
     using MassTransit.Pipeline;
-    using Monitoring.Introspection;
     using RabbitMQ.Client;
     using Topology;
 
@@ -28,9 +27,9 @@ namespace MassTransit.RabbitMqTransport.Pipeline
     public class PrepareReceiveQueueFilter :
         IFilter<ModelContext>
     {
-        readonly ILog _log = Logger.Get<PrepareReceiveQueueFilter>();
-        readonly ReceiveSettings _settings;
+        static readonly ILog _log = Logger.Get<PrepareReceiveQueueFilter>();
         readonly ExchangeBindingSettings[] _exchangeBindings;
+        readonly ReceiveSettings _settings;
         bool _queueAlreadyPurged;
 
         public PrepareReceiveQueueFilter(ReceiveSettings settings, params ExchangeBindingSettings[] exchangeBindings)
@@ -39,10 +38,9 @@ namespace MassTransit.RabbitMqTransport.Pipeline
             _exchangeBindings = exchangeBindings;
         }
 
-        async void IProbeSite.Probe(ProbeContext context)
+        void IProbeSite.Probe(ProbeContext context)
         {
         }
-
 
         async Task IFilter<ModelContext>.Send(ModelContext context, IPipe<ModelContext> next)
         {
@@ -64,7 +62,8 @@ namespace MassTransit.RabbitMqTransport.Pipeline
                     }.Where(x => !string.IsNullOrWhiteSpace(x))));
             }
 
-            await PurgeIfRequested(context, queueOk, queueName);
+            if (_settings.PurgeOnStartup)
+                await PurgeIfRequested(context, queueOk, queueName);
 
             string exchangeName = _settings.ExchangeName ?? queueName;
 
@@ -104,25 +103,22 @@ namespace MassTransit.RabbitMqTransport.Pipeline
 
         async Task PurgeIfRequested(ModelContext context, QueueDeclareOk queueOk, string queueName)
         {
-            if (_settings.PurgeOnStartup)
+            if (!_queueAlreadyPurged)
             {
-                if (!_queueAlreadyPurged)
-                {
-                    if (_log.IsDebugEnabled)
-                        _log.DebugFormat("Purging {0} messages from queue {1}", queueOk.MessageCount, queueName);
+                if (_log.IsDebugEnabled)
+                    _log.DebugFormat("Purging {0} messages from queue {1}", queueOk.MessageCount, queueName);
 
-                    var purgedMessageCount = await context.QueuePurge(queueName);
+                var purgedMessageCount = await context.QueuePurge(queueName);
 
-                    if (_log.IsDebugEnabled)
-                        _log.DebugFormat("Purged {0} messages from queue {1}", purgedMessageCount, queueName);
+                if (_log.IsDebugEnabled)
+                    _log.DebugFormat("Purged {0} messages from queue {1}", purgedMessageCount, queueName);
 
-                    _queueAlreadyPurged = true;
-                }
-                else
-                {
-                    if (_log.IsDebugEnabled)
-                        _log.DebugFormat("Queue {0} already purged at startup, skipping", queueName);
-                }
+                _queueAlreadyPurged = true;
+            }
+            else
+            {
+                if (_log.IsDebugEnabled)
+                    _log.DebugFormat("Queue {0} already purged at startup, skipping", queueName);
             }
         }
     }

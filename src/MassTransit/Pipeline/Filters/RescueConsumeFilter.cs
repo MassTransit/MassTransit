@@ -31,7 +31,6 @@ namespace MassTransit.Pipeline.Filters
         where T : class
     {
         static readonly ILog _log = Logger.Get<RescueConsumeFilter<T>>();
-
         readonly IPolicyExceptionFilter _exceptionFilter;
         readonly IPipe<ConsumeContext<T>> _rescuePipe;
 
@@ -51,30 +50,27 @@ namespace MassTransit.Pipeline.Filters
         [DebuggerNonUserCode]
         async Task IFilter<ConsumeContext<T>>.Send(ConsumeContext<T> context, IPipe<ConsumeContext<T>> next)
         {
-            Exception exception = null;
             try
             {
                 await next.Send(context);
             }
             catch (AggregateException ex)
             {
-                if (ex.InnerExceptions.Any(x => _exceptionFilter.Match(x)))
-                    exception = ex;
-                else
+                if (!ex.InnerExceptions.Any(x => _exceptionFilter.Match(x)))
                     throw;
+
+                if (_log.IsErrorEnabled)
+                    _log.Error($"Rescue<{TypeMetadataCache<T>.ShortName}>", ex);
+
+                await _rescuePipe.Send(context);
             }
             catch (Exception ex)
             {
-                if (_exceptionFilter.Match(ex))
-                    exception = ex;
-                else
+                if (!_exceptionFilter.Match(ex))
                     throw;
-            }
 
-            if (exception != null)
-            {
                 if (_log.IsErrorEnabled)
-                    _log.Error(string.Format("Rescue<{0}>", TypeMetadataCache<T>.ShortName), exception);
+                    _log.Error($"Rescue<{TypeMetadataCache<T>.ShortName}>", ex);
 
                 await _rescuePipe.Send(context);
             }

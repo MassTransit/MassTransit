@@ -27,8 +27,8 @@ namespace Automatonymous.Requests
         where TResponse : class
     {
         readonly string _name;
-        readonly RequestSettings _settings;
         readonly ReadWriteProperty<TInstance, Guid?> _requestIdProperty;
+        readonly RequestSettings _settings;
 
         public StateMachineRequest(string requestName, Expression<Func<TInstance, Guid?>> requestIdExpression, RequestSettings settings)
         {
@@ -38,20 +38,11 @@ namespace Automatonymous.Requests
             _requestIdProperty = new ReadWriteProperty<TInstance, Guid?>(requestIdExpression.GetPropertyInfo());
         }
 
-        public string Name
-        {
-            get { return _name; }
-        }
-
-        public RequestSettings Settings
-        {
-            get { return _settings; }
-        }
-
+        string Request<TInstance, TRequest, TResponse>.Name => _name;
+        RequestSettings Request<TInstance, TRequest, TResponse>.Settings => _settings;
         public Event<TResponse> Completed { get; set; }
         public Event<Fault<TRequest>> Faulted { get; set; }
         public Event<RequestTimeoutExpired> TimeoutExpired { get; set; }
-
         public State Pending { get; set; }
 
         public void SetRequestId(TInstance instance, Guid requestId)

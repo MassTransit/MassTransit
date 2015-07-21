@@ -88,12 +88,9 @@
     <Compile Include="Integration\IModelCache.cs" />
     <Compile Include="Integration\PendingPublish.cs" />
     <Compile Include="Integration\RabbitMqConnectionCache.cs" />
-    <Compile Include="Integration\RabbitMqConnector.cs" />
     <Compile Include="Integration\RabbitMqModelCache.cs" />
     <Compile Include="IRabbitMqHost.cs" />
     <Compile Include="Pipeline\DelayedExchangeMessageRedeliveryFilter.cs" />
-    <Compile Include="Pipeline\IRabbitMqConnector.cs" />
-    <Compile Include="Pipeline\PrepareErrorQueueFilter.cs" />
     <Compile Include="Pipeline\RabbitMqConsumerFilter.cs" />
     <Compile Include="Pipeline\PrepareSendExchangeFilter.cs" />
     <Compile Include="Pipeline\RabbitMqBasicConsumer.cs" />

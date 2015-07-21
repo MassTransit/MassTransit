@@ -33,7 +33,7 @@ namespace MassTransit.Tests.Courier
         Task<ConsumeContext<RoutingSlipActivityCompensated>> _activityCompensated;
 
         [TestFixtureSetUp]
-        public async Task Setup()
+        public void Setup()
         {
             _faulted = SubscribeHandler<RoutingSlipFaulted>();
             _activityCompleted = SubscribeHandler<RoutingSlipActivityCompleted>(x => x.Message.ActivityName.Equals("Test"));
@@ -58,7 +58,7 @@ namespace MassTransit.Tests.Courier
 
             builder.AddVariable("Variable", "Knife");
 
-            await Bus.Execute(builder.Build());
+            Await(() => Bus.Execute(builder.Build()));
         }
 
         protected override void SetupActivities()

@@ -28,13 +28,11 @@ namespace Automatonymous.SubscriptionConnectors
         where TInstance : class, ISaga, SagaStateMachineInstance
     {
         readonly IEnumerable<ISagaMessageConnector> _connectors;
-        readonly ISagaRepository<TInstance> _repository;
         readonly SagaStateMachine<TInstance> _stateMachine;
 
-        public StateMachineConnector(SagaStateMachine<TInstance> stateMachine, ISagaRepository<TInstance> repository)
+        public StateMachineConnector(SagaStateMachine<TInstance> stateMachine)
         {
             _stateMachine = stateMachine;
-            _repository = repository;
 
             try
             {
@@ -42,14 +40,8 @@ namespace Automatonymous.SubscriptionConnectors
             }
             catch (Exception ex)
             {
-                throw new ConfigurationException(
-                    "Failed to create the state machine connector for " + typeof(TInstance).FullName, ex);
+                throw new ConfigurationException($"Failed to create the state machine connector for {TypeMetadataCache<TInstance>.ShortName}", ex);
             }
-        }
-
-        public IEnumerable<ISagaMessageConnector> Connectors
-        {
-            get { return _connectors; }
         }
 
         public ConnectHandle ConnectSaga<T>(IConsumePipeConnector consumePipe, ISagaRepository<T> sagaRepository,
@@ -85,8 +77,8 @@ namespace Automatonymous.SubscriptionConnectors
 
                 Type genericType = typeof(StateMachineInterfaceType<,>).MakeGenericType(typeof(TInstance), correlation.DataType);
 
-                var interfaceType = (IStateMachineInterfaceType<TInstance>)Activator.CreateInstance(genericType,
-                    _stateMachine, _repository, correlation);
+                var interfaceType = (IStateMachineInterfaceType)Activator.CreateInstance(genericType,
+                    _stateMachine, correlation);
 
                 yield return interfaceType.GetConnector();
             }

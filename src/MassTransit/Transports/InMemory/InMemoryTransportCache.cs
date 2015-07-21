@@ -18,7 +18,6 @@ namespace MassTransit.Transports.InMemory
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
-    using Monitoring.Introspection;
 
 
     /// <summary>
@@ -30,8 +29,8 @@ namespace MassTransit.Transports.InMemory
         IBusHostControl
     {
         readonly Uri _baseUri = new Uri("loopback://localhost/");
-        readonly ConcurrentDictionary<string, InMemoryTransport> _transports;
         readonly int _concurrencyLimit;
+        readonly ConcurrentDictionary<string, InMemoryTransport> _transports;
 
         public InMemoryTransportCache(int concurrencyLimit)
         {
@@ -49,7 +48,7 @@ namespace MassTransit.Transports.InMemory
             ProbeContext scope = context.CreateScope("host");
             scope.Set(new
             {
-                Type = "In Memory",
+                Type = "In Memory"
             });
 
             foreach (var transport in _transports)
@@ -57,7 +56,7 @@ namespace MassTransit.Transports.InMemory
                 var transportScope = scope.CreateScope("queue");
                 transportScope.Set(new
                 {
-                    Name = transport.Key,
+                    Name = transport.Key
                 });
             }
         }

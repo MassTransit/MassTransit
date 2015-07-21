@@ -50,7 +50,6 @@ namespace MassTransit.Pipeline.Filters
         [DebuggerNonUserCode]
         async Task IFilter<ReceiveContext>.Send(ReceiveContext context, IPipe<ReceiveContext> next)
         {
-            Exception exception = null;
             try
             {
                 await next.Send(context);
@@ -60,25 +59,22 @@ namespace MassTransit.Pipeline.Filters
                 if (!ex.InnerExceptions.Any(x => _exceptionFilter.Match(x)))
                     throw;
 
-                exception = ex;
-
                 if (_log.IsErrorEnabled)
                     _log.Error("Rescuing exception", ex);
+
+                var exceptionContext = new RescueExceptionReceiveContext(context, ex);
+
+                await _rescuePipe.Send(exceptionContext);
             }
             catch (Exception ex)
             {
                 if (!_exceptionFilter.Match(ex))
                     throw;
 
-                exception = ex;
-
                 if (_log.IsErrorEnabled)
                     _log.Error("Rescuing exception", ex);
-            }
 
-            if (exception != null)
-            {
-                var exceptionContext = new RescueExceptionReceiveContext(context, exception);
+                var exceptionContext = new RescueExceptionReceiveContext(context, ex);
 
                 await _rescuePipe.Send(exceptionContext);
             }

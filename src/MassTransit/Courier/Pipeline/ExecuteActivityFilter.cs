@@ -41,7 +41,6 @@ namespace MassTransit.Courier.Pipeline
 
             try
             {
-                Exception exception = null;
                 try
                 {
                     ExecutionResult result = await context.Activity.Execute(context);
@@ -52,19 +51,15 @@ namespace MassTransit.Courier.Pipeline
                 }
                 catch (Exception ex)
                 {
-                    exception = ex;
-                }
-
-                if (exception != null)
-                {
-                    ExecutionResult result = context.Faulted(exception);
+                    ExecutionResult result = context.Faulted(ex);
 
                     await result.Evaluate();
                 }
+
             }
             catch (Exception ex)
             {
-                _log.Error(string.Format("The activity {0} threw an exception", TypeMetadataCache.GetShortName(context.Activity.GetType())), ex);
+                _log.Error($"The activity {TypeMetadataCache.GetShortName(context.Activity.GetType())} threw an exception", ex);
 
                 throw;
             }

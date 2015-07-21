@@ -33,12 +33,17 @@ namespace MassTransit.Saga
             _filterExpression = filterExpression;
         }
 
-        public ISagaQuery<TSaga> CreateQuery(ConsumeContext<TMessage> context)
+        ISagaQuery<TSaga> ISagaQueryFactory<TSaga, TMessage>.CreateQuery(ConsumeContext<TMessage> context)
         {
             Expression<Func<TSaga, bool>> expression = new SagaFilterExpressionConverter<TSaga, TMessage>(context.Message)
                 .Convert(_filterExpression);
 
             return new SagaQuery<TSaga>(expression);
+        }
+
+        void IProbeSite.Probe(ProbeContext context)
+        {
+            context.Add("expression", _filterExpression.ToString());
         }
     }
 }

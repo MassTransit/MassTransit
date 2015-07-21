@@ -215,11 +215,12 @@ namespace MassTransit.TestFramework
             throw new NotImplementedException();
         }
 
-        void ConsumeContext.NotifyConsumed<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType)
+        public async Task NotifyConsumed<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType) where T : class
         {
+
         }
 
-        public void NotifyFaulted<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType, Exception exception)
+        async public Task NotifyFaulted<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType, Exception exception)
             where T : class
         {
         }
@@ -229,13 +230,14 @@ namespace MassTransit.TestFramework
             get { return _message; }
         }
 
-        public void NotifyConsumed(TimeSpan duration, string consumerType)
+        public Task NotifyConsumed(TimeSpan duration, string consumerType)
         {
+            return NotifyConsumed(this, duration, consumerType);
         }
 
-        public void NotifyFaulted(TimeSpan duration, string consumerType, Exception exception)
+        public Task NotifyFaulted(TimeSpan duration, string consumerType, Exception exception)
         {
-            NotifyFaulted(this, duration, consumerType, exception);
+            return NotifyFaulted(this, duration, consumerType, exception);
         }
 
         public ConnectHandle ConnectPublishObserver(IPublishObserver observer)

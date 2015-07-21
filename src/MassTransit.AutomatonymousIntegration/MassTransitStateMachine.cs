@@ -34,7 +34,7 @@ namespace Automatonymous
         SagaStateMachine<TInstance>
         where TInstance : class, SagaStateMachineInstance
     {
-        readonly Dictionary<Event, EventCorrelation<TInstance>> _eventCorrelations;
+        readonly Dictionary<Event, EventCorrelation> _eventCorrelations;
         readonly Lazy<StateMachineRegistration[]> _registrations;
         Func<TInstance, bool> _isCompleted;
 
@@ -42,19 +42,19 @@ namespace Automatonymous
         {
             _registrations = new Lazy<StateMachineRegistration[]>(GetRegistrations);
 
-            _eventCorrelations = new Dictionary<Event, EventCorrelation<TInstance>>();
+            _eventCorrelations = new Dictionary<Event, EventCorrelation>();
             _isCompleted = NotCompletedByDefault;
 
             RegisterImplicit();
         }
 
-        public IEnumerable<EventCorrelation<TInstance>> Correlations
+        public IEnumerable<EventCorrelation> Correlations
         {
             get
             {
                 foreach (Event @event in Events)
                 {
-                    EventCorrelation<TInstance> correlation;
+                    EventCorrelation correlation;
                     if (_eventCorrelations.TryGetValue(@event, out correlation))
                         yield return correlation;
                 }
@@ -106,7 +106,7 @@ namespace Automatonymous
 
             var @event = (Event<T>)propertyInfo.GetValue(this);
 
-            EventCorrelation<TInstance> existingCorrelation;
+            EventCorrelation existingCorrelation;
             _eventCorrelations.TryGetValue(@event, out existingCorrelation);
 
             var configurator = new MassTransitEventCorrelationConfigurator<TInstance, T>(this, @event, existingCorrelation);
@@ -138,7 +138,7 @@ namespace Automatonymous
             PropertyInfo eventPropertyInfo = eventPropertyExpression.GetPropertyInfo();
             var @event = (Event<T>)eventPropertyInfo.GetValue(property);
 
-            EventCorrelation<TInstance> existingCorrelation;
+            EventCorrelation existingCorrelation;
             _eventCorrelations.TryGetValue(@event, out existingCorrelation);
 
             var configurator = new MassTransitEventCorrelationConfigurator<TInstance, T>(this, @event, existingCorrelation);

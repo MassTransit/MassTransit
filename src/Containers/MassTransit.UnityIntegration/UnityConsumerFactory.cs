@@ -45,7 +45,7 @@ namespace MassTransit.UnityIntegration
             }
         }
 
-        async void IProbeSite.Probe(ProbeContext context)
+        void IProbeSite.Probe(ProbeContext context)
         {
             context.CreateConsumerFactoryScope<TConsumer>("unity");
         }

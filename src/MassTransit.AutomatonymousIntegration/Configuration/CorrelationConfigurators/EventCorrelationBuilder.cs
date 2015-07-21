@@ -15,6 +15,6 @@ namespace Automatonymous.CorrelationConfigurators
     public interface EventCorrelationBuilder<TInstance>
         where TInstance : class, SagaStateMachineInstance
     {
-        EventCorrelation<TInstance> Build();
+        EventCorrelation Build();
     }
 }

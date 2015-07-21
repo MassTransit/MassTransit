@@ -33,10 +33,7 @@ namespace MassTransit.Transports.InMemory
             GetOrAddPayload(() => this);
         }
 
-        protected override IHeaderProvider HeaderProvider
-        {
-            get { return new DictionaryHeaderProvider(_message.Headers); }
-        }
+        protected override IHeaderProvider HeaderProvider => new DictionaryHeaderProvider(_message.Headers);
 
         protected override Stream GetBodyStream()
         {

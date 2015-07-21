@@ -36,8 +36,8 @@ namespace MassTransit.Transports.InMemory
             _payloadCache = new PayloadCache();
 
             _headers = new InMemorySendHeaders();
-            Message = message;
 
+            Message = message;
             MessageId = NewId.NextGuid();
 
             Durable = true;
@@ -65,16 +65,13 @@ namespace MassTransit.Transports.InMemory
             }
         }
 
-        public CancellationToken CancellationToken { get; private set; }
+        public CancellationToken CancellationToken { get; }
 
         public Guid? MessageId { get; set; }
         public Guid? RequestId { get; set; }
         public Guid? CorrelationId { get; set; }
 
-        public SendHeaders Headers
-        {
-            get { return _headers; }
-        }
+        public SendHeaders Headers => _headers;
 
         public Uri SourceAddress { get; set; }
         public Uri DestinationAddress { get; set; }
@@ -98,7 +95,7 @@ namespace MassTransit.Transports.InMemory
 
         public bool Durable { get; set; }
 
-        public T Message { get; private set; }
+        public T Message { get; }
 
         public bool HasPayloadType(Type contextType)
         {

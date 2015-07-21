@@ -13,9 +13,7 @@
 namespace Automatonymous
 {
     using MassTransit;
-    using MassTransit.Policies;
     using MassTransit.Saga;
-    using RepositoryConfigurators;
     using SubscriptionConfigurators;
     using SubscriptionConnectors;
 
@@ -28,36 +26,23 @@ namespace Automatonymous
         /// <typeparam name="TInstance">The state machine instance type</typeparam>
         /// <param name="configurator"></param>
         /// <param name="stateMachine">The state machine</param>
-        /// <param name="sagaRepository">The saga repository for the instances</param>
+        /// <param name="repository">The saga repository for the instances</param>
         /// <returns></returns>
-        public static IStateMachineSagaConfigurator<TInstance> StateMachineSaga<TInstance>(
+        public static void StateMachineSaga<TInstance>(
             this IReceiveEndpointConfigurator configurator, SagaStateMachine<TInstance> stateMachine,
-            ISagaRepository<TInstance> sagaRepository)
+            ISagaRepository<TInstance> repository)
             where TInstance : class, SagaStateMachineInstance
         {
-            var stateMachineSagaRepositoryConfigurator = new StateMachineSagaRepositoryConfiguratorImpl<TInstance>(stateMachine,
-                sagaRepository);
-
-            IStateMachineSagaRepository<TInstance> repository = stateMachineSagaRepositoryConfigurator.Configure();
-
-            var stateMachineConfigurator = new StateMachineSagaConfigurator<TInstance>(stateMachine,
-                repository);
+            var stateMachineConfigurator = new StateMachineSagaSpecification<TInstance>(stateMachine, repository);
 
             configurator.AddEndpointSpecification(stateMachineConfigurator);
-
-            return stateMachineConfigurator;
         }
 
         public static ConnectHandle ConnectStateMachineSaga<TInstance>(this IBus bus, SagaStateMachine<TInstance> stateMachine,
-            ISagaRepository<TInstance> sagaRepository)
+            ISagaRepository<TInstance> repository)
             where TInstance : class, SagaStateMachineInstance
         {
-            var stateMachineSagaRepositoryConfigurator = new StateMachineSagaRepositoryConfiguratorImpl<TInstance>(stateMachine,
-                sagaRepository);
-
-            IStateMachineSagaRepository<TInstance> repository = stateMachineSagaRepositoryConfigurator.Configure();
-
-            var connector = new StateMachineConnector<TInstance>(stateMachine, repository);
+            var connector = new StateMachineConnector<TInstance>(stateMachine);
 
             return connector.ConnectSaga(bus, repository);
         }

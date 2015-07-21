@@ -15,17 +15,10 @@ namespace MassTransit.Util
     using System.Threading.Tasks;
 
 
-    static class TaskUtil
+    public static class TaskUtil
     {
-        internal static Task Canceled
-        {
-            get { return Cached<bool>.CanceledTask; }
-        }
-
-        internal static Task Completed
-        {
-            get { return Cached.CompletedTask; }
-        }
+        internal static Task Canceled => Cached<bool>.CanceledTask;
+        public static Task Completed => Cached.CompletedTask;
 
 
         static class Cached

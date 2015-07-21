@@ -55,7 +55,7 @@ namespace MassTransit.NHibernateIntegration.Saga
             }
         }
 
-        async void IProbeSite.Probe(ProbeContext context)
+        void IProbeSite.Probe(ProbeContext context)
         {
             ProbeContext scope = context.CreateScope("sagaRepository");
             scope.Set(new
@@ -141,7 +141,7 @@ namespace MassTransit.NHibernateIntegration.Saga
                 catch (Exception ex)
                 {
                     if (_log.IsErrorEnabled)
-                        _log.Error(string.Format("SAGA:{0} Exception {1}", TypeMetadataCache<TSaga>.ShortName, TypeMetadataCache<T>.ShortName), ex);
+                        _log.Error($"SAGA:{TypeMetadataCache<TSaga>.ShortName} Exception {TypeMetadataCache<T>.ShortName}", ex);
 
                     if (transaction.IsActive)
                         transaction.Rollback();
@@ -205,7 +205,7 @@ namespace MassTransit.NHibernateIntegration.Saga
                         TypeMetadataCache<TMessage>.ShortName);
                 }
 
-                var proxy = new NHibernateSagaConsumeContext<TSaga, TMessage>(_session, context, context.Saga);
+                SagaConsumeContext<TSaga,TMessage> proxy = new NHibernateSagaConsumeContext<TSaga, TMessage>(_session, context, context.Saga);
 
                 await _next.Send(proxy);
 

@@ -825,10 +825,8 @@
     <Compile Include="Transports\DefaultMessageNameFormatter.cs" />
     <Compile Include="Transports\EndpointLoggerExtensions.cs" />
     <Compile Include="Transports\IBusHost.cs" />
-    <Compile Include="Transports\IInboundMessageTracker.cs" />
     <Compile Include="Transports\IMessageNameFormatter.cs" />
     <Compile Include="Transports\DictionaryHeaderProvider.cs" />
-    <Compile Include="Transports\InMemory\InMemoryInboundMessageTracker.cs" />
     <Compile Include="Transports\InMemory\InMemoryPublishEndpoint.cs" />
     <Compile Include="Transports\InMemory\InMemoryReceiveContext.cs" />
     <Compile Include="Transports\InMemory\InMemorySendContext.cs" />
@@ -846,7 +844,6 @@
     <Compile Include="Transports\BaseReceiveContext.cs" />
     <Compile Include="Transports\ReceiveEndpoint.cs" />
     <Compile Include="Transports\ReceiveEndpointHandle.cs" />
-    <Compile Include="Transports\ReceiveFaultTracker.cs" />
     <Compile Include="Transports\ReceiveTransportHandle.cs" />
     <Compile Include="Transports\SendEndpoint.cs" />
     <Compile Include="Transports\SendEndpointCache.cs" />

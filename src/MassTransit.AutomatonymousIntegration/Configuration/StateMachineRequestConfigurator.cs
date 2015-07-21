@@ -22,45 +22,27 @@ namespace Automatonymous
         where TRequest : class
         where TResponse : class
     {
-        Uri _schedulingServiceAddress;
-        Uri _serviceAddress;
-        TimeSpan _timeout;
-
         public StateMachineRequestConfigurator()
         {
-            _timeout = TimeSpan.FromSeconds(30);
+            Timeout = TimeSpan.FromSeconds(30);
         }
 
         public RequestSettings Settings
         {
             get
             {
-                if (_serviceAddress == null)
+                if (ServiceAddress == null)
                     throw new AutomatonymousException("The ServiceAddress was not specified.");
 
-                if (_schedulingServiceAddress == null)
+                if (SchedulingServiceAddress == null)
                     throw new AutomatonymousException("The SchedulingServiceAdress was not specified");
 
                 return this;
             }
         }
 
-        public Uri ServiceAddress
-        {
-            get { return _serviceAddress; }
-            set { _serviceAddress = value; }
-        }
-
-        public TimeSpan Timeout
-        {
-            get { return _timeout; }
-            set { _timeout = value; }
-        }
-
-        public Uri SchedulingServiceAddress
-        {
-            get { return _schedulingServiceAddress; }
-            set { _schedulingServiceAddress = value; }
-        }
+        public Uri ServiceAddress { get; set; }
+        public TimeSpan Timeout { get; set; }
+        public Uri SchedulingServiceAddress { get; set; }
     }
 }

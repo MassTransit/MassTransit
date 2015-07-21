@@ -25,9 +25,9 @@ namespace Automatonymous.SubscriptionConnectors
         where TMessage : class
     {
         readonly IFilter<SagaConsumeContext<TInstance, TMessage>> _consumeFilter;
+        readonly IFilter<ConsumeContext<TMessage>> _messageFilter;
         readonly ISagaPolicy<TInstance, TMessage> _policy;
         readonly SagaFilterFactory<TInstance, TMessage> _sagaFilterFactory;
-        IFilter<ConsumeContext<TMessage>> _messageFilter;
 
         public StateMachineSagaMessageConnector(IFilter<SagaConsumeContext<TInstance, TMessage>> consumeFilter, ISagaPolicy<TInstance, TMessage> policy,
             SagaFilterFactory<TInstance, TMessage> sagaFilterFactory, IFilter<ConsumeContext<TMessage>> messageFilter)

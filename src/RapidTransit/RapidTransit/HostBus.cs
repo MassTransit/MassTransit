@@ -139,7 +139,7 @@ namespace RapidTransit
             return _bus.ConnectPublishObserver(observer);
         }
 
-        public async void Probe(ProbeContext context)
+        public void Probe(ProbeContext context)
         {
             
         }

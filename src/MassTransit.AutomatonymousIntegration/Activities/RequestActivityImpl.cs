@@ -17,6 +17,7 @@ namespace Automatonymous.Activities
     using Events;
     using MassTransit;
     using MassTransit.Pipeline;
+    using MassTransit.Util;
 
 
     public abstract class RequestActivityImpl<TInstance, TRequest, TResponse>
@@ -24,7 +25,7 @@ namespace Automatonymous.Activities
         where TRequest : class
         where TResponse : class
     {
-        Request<TInstance, TRequest, TResponse> _request;
+        readonly Request<TInstance, TRequest, TResponse> _request;
 
         protected RequestActivityImpl(Request<TInstance, TRequest, TResponse> request)
         {
@@ -77,21 +78,20 @@ namespace Automatonymous.Activities
                 _responseAddress = responseAddress;
             }
 
-            public Guid RequestId
-            {
-                get { return _requestId; }
-            }
+            public Guid RequestId => _requestId;
 
-            async void IProbeSite.Probe(ProbeContext context)
+            void IProbeSite.Probe(ProbeContext context)
             {
             }
 
-            public async Task Send(SendContext<TRequest> context)
+            Task IPipe<SendContext<TRequest>>.Send(SendContext<TRequest> context)
             {
                 _requestId = NewId.NextGuid();
 
                 context.RequestId = _requestId;
                 context.ResponseAddress = _responseAddress;
+
+                return TaskUtil.Completed;
             }
         }
 
@@ -99,38 +99,21 @@ namespace Automatonymous.Activities
         class TimeoutExpired :
             RequestTimeoutExpired
         {
-            readonly Guid _correlationId;
-            readonly DateTime _expirationTime;
-            readonly Guid _requestId;
-            readonly DateTime _timestamp;
-
             public TimeoutExpired(DateTime timestamp, DateTime expirationTime, Guid correlationId, Guid requestId)
             {
-                _timestamp = timestamp;
-                _expirationTime = expirationTime;
-                _correlationId = correlationId;
-                _requestId = requestId;
+                Timestamp = timestamp;
+                ExpirationTime = expirationTime;
+                CorrelationId = correlationId;
+                RequestId = requestId;
             }
 
-            public DateTime Timestamp
-            {
-                get { return _timestamp; }
-            }
+            public DateTime Timestamp { get; }
 
-            public DateTime ExpirationTime
-            {
-                get { return _expirationTime; }
-            }
+            public DateTime ExpirationTime { get; }
 
-            public Guid CorrelationId
-            {
-                get { return _correlationId; }
-            }
+            public Guid CorrelationId { get; }
 
-            public Guid RequestId
-            {
-                get { return _requestId; }
-            }
+            public Guid RequestId { get; }
         }
     }
 }

@@ -22,7 +22,7 @@ namespace Automatonymous
         /// <summary>
         /// Returns the event correlations for the state machine
         /// </summary>
-        IEnumerable<EventCorrelation<TInstance>> Correlations { get; }
+        IEnumerable<EventCorrelation> Correlations { get; }
 
         /// <summary>
         /// Returns true if the saga state machine instance is complete and can be removed from the repository

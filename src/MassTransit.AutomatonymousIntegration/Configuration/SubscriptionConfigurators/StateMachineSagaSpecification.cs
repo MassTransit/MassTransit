@@ -19,15 +19,14 @@ namespace Automatonymous.SubscriptionConfigurators
     using SubscriptionConnectors;
 
 
-    public class StateMachineSagaConfigurator<TInstance> :
-        IStateMachineSagaConfigurator<TInstance>,
+    public class StateMachineSagaSpecification<TInstance> :
         IReceiveEndpointSpecification
         where TInstance : class, SagaStateMachineInstance
     {
         readonly ISagaRepository<TInstance> _repository;
         readonly SagaStateMachine<TInstance> _stateMachine;
 
-        public StateMachineSagaConfigurator(SagaStateMachine<TInstance> stateMachine,
+        public StateMachineSagaSpecification(SagaStateMachine<TInstance> stateMachine,
             ISagaRepository<TInstance> repository)
         {
             _stateMachine = stateMachine;
@@ -44,7 +43,7 @@ namespace Automatonymous.SubscriptionConfigurators
 
         public void Configure(IReceiveEndpointBuilder builder)
         {
-            var connector = new StateMachineConnector<TInstance>(_stateMachine, _repository);
+            var connector = new StateMachineConnector<TInstance>(_stateMachine);
             connector.ConnectSaga(builder, _repository);
         }
     }

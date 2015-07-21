@@ -62,20 +62,11 @@ namespace MassTransit.Transports
 
         protected abstract IHeaderProvider HeaderProvider { get; }
 
-        bool ReceiveContext.IsDelivered
-        {
-            get { return _isDelivered; }
-        }
+        bool ReceiveContext.IsDelivered => _isDelivered;
 
-        bool ReceiveContext.IsFaulted
-        {
-            get { return _isFaulted; }
-        }
+        bool ReceiveContext.IsFaulted => _isFaulted;
 
-        public Task CompleteTask
-        {
-            get { return Task.WhenAll(_pendingTasks); }
-        }
+        public Task CompleteTask => Task.WhenAll(_pendingTasks);
 
         public void AddPendingTask(Task task)
         {
@@ -99,31 +90,23 @@ namespace MassTransit.Transports
             return _payloadCache.GetOrAddPayload(payloadFactory);
         }
 
-        CancellationToken PipeContext.CancellationToken
-        {
-            get { return _cancellationTokenSource.Token; }
-        }
+        CancellationToken PipeContext.CancellationToken => _cancellationTokenSource.Token;
 
-        bool ReceiveContext.Redelivered
-        {
-            get { return _redelivered; }
-        }
+        bool ReceiveContext.Redelivered => _redelivered;
 
-        public Headers TransportHeaders
-        {
-            get { return _headers.Value; }
-        }
+        public Headers TransportHeaders => _headers.Value;
 
-        void ReceiveContext.NotifyConsumed<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType)
+        Task ReceiveContext.NotifyConsumed<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType)
         {
             _isDelivered = true;
-            _receiveObserver.NotifyPostConsume(context, duration, consumerType);
+            return _receiveObserver.NotifyPostConsume(context, duration, consumerType);
         }
 
-        async Task ReceiveContext.NotifyFaulted<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType, Exception exception)
+         Task ReceiveContext.NotifyFaulted<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType, Exception exception)
         {
+
             _isFaulted = true;
-            _receiveObserver.NotifyConsumeFault(context, duration, consumerType, exception);
+            return _receiveObserver.NotifyConsumeFault(context, duration, consumerType, exception);
         }
 
         Stream ReceiveContext.GetBody()
@@ -131,20 +114,11 @@ namespace MassTransit.Transports
             return GetBodyStream();
         }
 
-        TimeSpan ReceiveContext.ElapsedTime
-        {
-            get { return _receiveTimer.Elapsed; }
-        }
+        TimeSpan ReceiveContext.ElapsedTime => _receiveTimer.Elapsed;
 
-        Uri ReceiveContext.InputAddress
-        {
-            get { return _inputAddress; }
-        }
+        Uri ReceiveContext.InputAddress => _inputAddress;
 
-        ContentType ReceiveContext.ContentType
-        {
-            get { return _contentType.Value; }
-        }
+        ContentType ReceiveContext.ContentType => _contentType.Value;
 
         protected abstract Stream GetBodyStream();
 

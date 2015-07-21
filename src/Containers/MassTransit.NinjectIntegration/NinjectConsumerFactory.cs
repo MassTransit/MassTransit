@@ -49,7 +49,7 @@ namespace MassTransit.NinjectIntegration
             }
         }
 
-        async void IProbeSite.Probe(ProbeContext context)
+        void IProbeSite.Probe(ProbeContext context)
         {
             context.CreateConsumerFactoryScope<TConsumer>("ninject");
         }

@@ -17,7 +17,8 @@ namespace MassTransit.Saga
     /// </summary>
     /// <typeparam name="TSaga"></typeparam>
     /// <typeparam name="TMessage"></typeparam>
-    public interface ISagaQueryFactory<TSaga, in TMessage>
+    public interface ISagaQueryFactory<TSaga, in TMessage> :
+        IProbeSite
         where TSaga : class, ISaga
         where TMessage : class
     {

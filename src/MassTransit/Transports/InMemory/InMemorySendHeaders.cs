@@ -30,7 +30,7 @@ namespace MassTransit.Transports.InMemory
         public void Set(string key, string value)
         {
             if (key == null)
-                throw new ArgumentNullException("key");
+                throw new ArgumentNullException(nameof(key));
 
             if (value == null)
                 _headers.Remove(key);
@@ -41,7 +41,7 @@ namespace MassTransit.Transports.InMemory
         public void Set(string key, object value)
         {
             if (key == null)
-                throw new ArgumentNullException("key");
+                throw new ArgumentNullException(nameof(key));
 
             if (value == null)
                 _headers.Remove(key);

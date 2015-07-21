@@ -18,7 +18,6 @@ namespace Automatonymous.Pipeline
     using Contexts;
     using MassTransit;
     using MassTransit.Logging;
-    using MassTransit.Monitoring.Introspection;
     using MassTransit.Pipeline;
     using MassTransit.Saga;
     using MassTransit.Saga.Pipeline.Filters;
@@ -44,14 +43,15 @@ namespace Automatonymous.Pipeline
             _stateMachine = stateMachine;
             _event = @event;
         }
-        async void IProbeSite.Probe(ProbeContext context)
+
+        void IProbeSite.Probe(ProbeContext context)
         {
             var scope = context.CreateScope("automatonymous");
             scope.Set(new
             {
                 Event = _event.Name,
                 DataType = TypeMetadataCache<TData>.ShortName,
-                InstanceType = TypeMetadataCache<TInstance>.ShortName,
+                InstanceType = TypeMetadataCache<TInstance>.ShortName
             });
         }
 

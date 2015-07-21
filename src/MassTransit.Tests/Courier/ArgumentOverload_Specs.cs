@@ -30,7 +30,7 @@ namespace MassTransit.Tests.Courier
         Guid _trackingNumber;
 
         [TestFixtureSetUp]
-        public async Task Should_publish_the_completed_event()
+        public void Should_publish_the_completed_event()
         {
             _completed = SubscribeHandler<RoutingSlipCompleted>();
             _activityCompleted = SubscribeHandler<RoutingSlipActivityCompleted>();
@@ -48,9 +48,9 @@ namespace MassTransit.Tests.Courier
 
             builder.AddVariable("Value", "Ignored");
 
-            await Bus.Execute(builder.Build());
+            Await(() =>  Bus.Execute(builder.Build()));
 
-            await _completed;
+            Await(() => _completed);
         }
 
         protected override void SetupActivities()
@@ -86,7 +86,7 @@ namespace MassTransit.Tests.Courier
         Guid _trackingNumber;
 
         [TestFixtureSetUp]
-        public async Task Should_publish_the_completed_event()
+        public void Should_publish_the_completed_event()
         {
             _completed = SubscribeHandler<RoutingSlipCompleted>();
             _activityCompleted = SubscribeHandler<RoutingSlipActivityCompleted>();
@@ -103,9 +103,9 @@ namespace MassTransit.Tests.Courier
 
             builder.AddVariable("Value", "Used");
 
-            await Bus.Execute(builder.Build());
+            Await(() => Bus.Execute(builder.Build()));
 
-            await _completed;
+            Await(() => _completed);
         }
 
         protected override void SetupActivities()

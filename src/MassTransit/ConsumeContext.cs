@@ -90,7 +90,7 @@ namespace MassTransit
         /// <param name="context"></param>
         /// <param name="duration"></param>
         /// <param name="consumerType">The consumer type</param>
-        void NotifyConsumed<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType)
+        Task NotifyConsumed<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType)
             where T : class;
 
         /// <summary>
@@ -100,7 +100,7 @@ namespace MassTransit
         /// <param name="duration"></param>
         /// <param name="consumerType">The message consumer type</param>
         /// <param name="exception">The exception that occurred</param>
-        void NotifyFaulted<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType, Exception exception)
+        Task NotifyFaulted<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType, Exception exception)
             where T : class;
     }
 
@@ -116,7 +116,7 @@ namespace MassTransit
         /// </summary>
         /// <param name="duration"></param>
         /// <param name="consumerType">The consumer type</param>
-        void NotifyConsumed(TimeSpan duration, string consumerType);
+        Task NotifyConsumed(TimeSpan duration, string consumerType);
 
         /// <summary>
         /// Notify that a fault occurred during message consumption
@@ -124,6 +124,6 @@ namespace MassTransit
         /// <param name="duration"></param>
         /// <param name="consumerType"></param>
         /// <param name="exception"></param>
-        void NotifyFaulted(TimeSpan duration, string consumerType, Exception exception);
+        Task NotifyFaulted(TimeSpan duration, string consumerType, Exception exception);
     }
 }

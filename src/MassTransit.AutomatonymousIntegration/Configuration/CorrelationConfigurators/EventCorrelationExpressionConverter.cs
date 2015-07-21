@@ -58,8 +58,8 @@ namespace Automatonymous.CorrelationConfigurators
         {
             var parameter = exp.Expression as ParameterExpression;
 
-            Delegate fn =
-                Expression.Lambda(typeof(Func<,>).MakeGenericType(typeof(ConsumeContext<TMessage>), exp.Type), exp, new[] {parameter}).Compile();
+            Delegate fn = Expression.Lambda(typeof(Func<,>).MakeGenericType(typeof(ConsumeContext<TMessage>), exp.Type), exp, parameter)
+                .Compile();
 
             return Expression.Constant(fn.DynamicInvoke(_context), exp.Type);
         }
