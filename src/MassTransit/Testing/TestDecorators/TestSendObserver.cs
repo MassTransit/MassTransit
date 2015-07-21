@@ -30,10 +30,7 @@ namespace MassTransit.Testing.TestDecorators
             _messages = new ObservedSentMessageList(timeout);
         }
 
-        public ISentMessageList Messages
-        {
-            get { return _messages; }
-        }
+        public ISentMessageList Messages => _messages;
 
         public async Task PreSend<T>(SendContext<T> context)
             where T : class

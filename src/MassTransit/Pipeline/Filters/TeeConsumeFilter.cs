@@ -37,10 +37,7 @@ namespace MassTransit.Pipeline.Filters
             _requestConnections = new Lazy<IConnectPipeById<ConsumeContext<T>, Guid>>(ConnectRequestFilter);
         }
 
-        public int Count
-        {
-            get { return _connections.Count; }
-        }
+        public int Count => _connections.Count;
 
         public ConnectHandle ConnectConsumePipe(IPipe<ConsumeContext<T>> pipe)
         {
@@ -82,7 +79,7 @@ namespace MassTransit.Pipeline.Filters
 
         static Guid GetRequestId(ConsumeContext<T> context)
         {
-            return context.RequestId.HasValue ? context.RequestId.Value : Guid.Empty;
+            return context.RequestId ?? Guid.Empty;
         }
     }
 }

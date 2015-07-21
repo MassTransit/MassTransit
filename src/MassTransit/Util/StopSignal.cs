@@ -35,15 +35,8 @@ namespace MassTransit.Util
             });
         }
 
-        public Task Stopped
-        {
-            get { return _stopTask.Task; }
-        }
-
-        public CancellationToken CancellationToken
-        {
-            get { return _stopToken.Token; }
-        }
+        public Task Stopped => _stopTask.Task;
+        public CancellationToken CancellationToken => _stopToken.Token;
 
         public void Stop()
         {

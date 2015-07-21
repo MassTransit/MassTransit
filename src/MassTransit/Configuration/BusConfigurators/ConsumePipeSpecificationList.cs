@@ -45,7 +45,7 @@ namespace MassTransit.BusConfigurators
         public void Add(IPipeSpecification<ConsumeContext> specification)
         {
             if (specification == null)
-                throw new ArgumentNullException("specification");
+                throw new ArgumentNullException(nameof(specification));
 
             _specifications.Add(new Proxy(specification));
         }
@@ -54,7 +54,7 @@ namespace MassTransit.BusConfigurators
             where T : class
         {
             if (specification == null)
-                throw new ArgumentNullException("specification");
+                throw new ArgumentNullException(nameof(specification));
 
             _specifications.Add(new Proxy<T>(specification));
         }

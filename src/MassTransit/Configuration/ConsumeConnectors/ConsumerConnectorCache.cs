@@ -33,15 +33,9 @@ namespace MassTransit.ConsumeConnectors
                 LazyThreadSafetyMode.PublicationOnly);
         }
 
-        public static IConsumerConnector Connector
-        {
-            get { return Cached.Instance.Value.Connector; }
-        }
+        public static IConsumerConnector Connector => Cached.Instance.Value.Connector;
 
-        IConsumerConnector IConsumerConnectorCache.Connector
-        {
-            get { return _connector.Value; }
-        }
+        IConsumerConnector IConsumerConnectorCache.Connector => _connector.Value;
 
 
         static class Cached
@@ -98,10 +92,7 @@ namespace MassTransit.ConsumeConnectors
                 _connector = new Lazy<IConsumerConnector>(() => ConsumerConnectorCache<T>.Connector);
             }
 
-            public IConsumerConnector Connector
-            {
-                get { return _connector.Value; }
-            }
+            public IConsumerConnector Connector => _connector.Value;
 
             public ConnectHandle Connect(IConsumePipeConnector consumePipe, Func<Type, object> objectFactory)
             {

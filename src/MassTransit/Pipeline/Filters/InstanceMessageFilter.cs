@@ -34,9 +34,9 @@ namespace MassTransit.Pipeline.Filters
         public InstanceMessageFilter(TConsumer instance, IFilter<ConsumerConsumeContext<TConsumer, TMessage>> instanceFilter)
         {
             if (instance == null)
-                throw new ArgumentNullException("instance");
+                throw new ArgumentNullException(nameof(instance));
             if (instanceFilter == null)
-                throw new ArgumentNullException("instanceFilter");
+                throw new ArgumentNullException(nameof(instanceFilter));
 
             _instance = instance;
             _instancePipe = Pipe.New<ConsumerConsumeContext<TConsumer, TMessage>>(x => x.UseFilter(instanceFilter));
@@ -58,13 +58,14 @@ namespace MassTransit.Pipeline.Filters
             {
                 await _instancePipe.Send(context.PushConsumer(_instance));
 
-                context.NotifyConsumed(timer.Elapsed, TypeMetadataCache<TConsumer>.ShortName);
+                await context.NotifyConsumed(timer.Elapsed, TypeMetadataCache<TConsumer>.ShortName);
 
                 await next.Send(context);
             }
             catch (Exception ex)
             {
-                context.NotifyFaulted(timer.Elapsed, TypeMetadataCache<TConsumer>.ShortName, ex);
+                await context.NotifyFaulted(timer.Elapsed, TypeMetadataCache<TConsumer>.ShortName, ex);
+
                 throw;
             }
         }

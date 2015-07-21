@@ -37,7 +37,7 @@ namespace MassTransit.Internals.Reflection
         static Action<object, object> GetSetMethod(PropertyInfo property)
         {
             if (property.DeclaringType == null)
-                throw new ArgumentException("DeclaringType is null", "property");
+                throw new ArgumentException("DeclaringType is null", nameof(property));
 
             ParameterExpression instance = Expression.Parameter(typeof(object), "instance");
             ParameterExpression value = Expression.Parameter(typeof(object), "value");
@@ -64,24 +64,19 @@ namespace MassTransit.Internals.Reflection
         public readonly Action<T, object> SetProperty;
 
         public ReadWriteProperty(Expression<Func<T, object>> propertyExpression)
-            : this(propertyExpression.GetPropertyInfo(), false)
+            : this(propertyExpression.GetPropertyInfo())
         {
         }
 
         public ReadWriteProperty(Expression<Func<T, object>> propertyExpression, bool includeNonPublic)
-            : this(propertyExpression.GetPropertyInfo(), includeNonPublic)
+            : this(propertyExpression.GetPropertyInfo())
         {
         }
 
         public ReadWriteProperty(PropertyInfo property)
-            : this(property, false)
-        {
-        }
-
-        public ReadWriteProperty(PropertyInfo property, bool includeNonPublic)
             : base(property)
         {
-            SetProperty = GetSetMethod(Property, includeNonPublic);
+            SetProperty = GetSetMethod(Property);
         }
 
         public void Set(T instance, object value)
@@ -89,7 +84,7 @@ namespace MassTransit.Internals.Reflection
             SetProperty(instance, value);
         }
 
-        static Action<T, object> GetSetMethod(PropertyInfo property, bool includeNonPublic)
+        static Action<T, object> GetSetMethod(PropertyInfo property)
         {
             if (!property.CanWrite)
             {
@@ -119,24 +114,19 @@ namespace MassTransit.Internals.Reflection
         public readonly Action<T, TProperty> SetProperty;
 
         public ReadWriteProperty(Expression<Func<T, object>> propertyExpression)
-            : this(propertyExpression.GetPropertyInfo(), false)
+            : this(propertyExpression.GetPropertyInfo())
         {
         }
 
         public ReadWriteProperty(Expression<Func<T, object>> propertyExpression, bool includeNonPublic)
-            : this(propertyExpression.GetPropertyInfo(), includeNonPublic)
+            : this(propertyExpression.GetPropertyInfo())
         {
         }
 
         public ReadWriteProperty(PropertyInfo property)
-            : this(property, false)
-        {
-        }
-
-        public ReadWriteProperty(PropertyInfo property, bool includeNonPublic)
             : base(property)
         {
-            SetProperty = GetSetMethod(Property, includeNonPublic);
+            SetProperty = GetSetMethod(Property);
         }
 
         public void Set(T instance, TProperty value)
@@ -144,7 +134,7 @@ namespace MassTransit.Internals.Reflection
             SetProperty(instance, value);
         }
 
-        static Action<T, TProperty> GetSetMethod(PropertyInfo property, bool includeNonPublic)
+        static Action<T, TProperty> GetSetMethod(PropertyInfo property)
         {
             ParameterExpression instance = Expression.Parameter(typeof(T), "instance");
             ParameterExpression value = Expression.Parameter(typeof(TProperty), "value");

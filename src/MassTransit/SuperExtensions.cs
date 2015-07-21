@@ -28,9 +28,7 @@ namespace MassTransit
                 return false;
             }
 
-            var token = obj as JToken;
-            if (token == null)
-                token = new JValue(obj);
+            var token = obj as JToken ?? new JValue(obj);
 
             if (token.Type == JTokenType.Null)
                 token = new JObject();

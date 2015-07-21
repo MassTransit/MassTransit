@@ -35,10 +35,7 @@ namespace MassTransit.Transports
             _name = info.GetString("Name");
         }
 
-        public string Name
-        {
-            get { return _name; }
-        }
+        public string Name => _name;
 
         public void GetObjectData(SerializationInfo info, StreamingContext context)
         {

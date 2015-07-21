@@ -27,15 +27,9 @@ namespace MassTransit.Courier
 
         static readonly Lazy<JsonSerializer> _serializer = new Lazy<JsonSerializer>(CreateSerializer, LazyThreadSafetyMode.PublicationOnly);
 
-        public static JsonSerializer Serializer
-        {
-            get { return _serializer.Value; }
-        }
+        public static JsonSerializer Serializer => _serializer.Value;
 
-        public static JsonSerializer Deserializer
-        {
-            get { return _deserializer.Value; }
-        }
+        public static JsonSerializer Deserializer => _deserializer.Value;
 
         static JsonSerializer CreateSerializer()
         {

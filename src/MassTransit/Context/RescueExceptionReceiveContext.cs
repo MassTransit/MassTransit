@@ -33,10 +33,7 @@ namespace MassTransit.Context
             _exception = exception;
         }
 
-        Exception ExceptionReceiveContext.Exception
-        {
-            get { return _exception; }
-        }
+        Exception ExceptionReceiveContext.Exception => _exception;
 
         ExceptionInfo ExceptionReceiveContext.ExceptionInfo
         {
@@ -51,10 +48,7 @@ namespace MassTransit.Context
             }
         }
 
-        CancellationToken PipeContext.CancellationToken
-        {
-            get { return _context.CancellationToken; }
-        }
+        CancellationToken PipeContext.CancellationToken => _context.CancellationToken;
 
         bool PipeContext.HasPayloadType(Type contextType)
         {
@@ -76,45 +70,14 @@ namespace MassTransit.Context
             return _context.GetBody();
         }
 
-        TimeSpan ReceiveContext.ElapsedTime
-        {
-            get { return _context.ElapsedTime; }
-        }
-
-        Uri ReceiveContext.InputAddress
-        {
-            get { return _context.InputAddress; }
-        }
-
-        ContentType ReceiveContext.ContentType
-        {
-            get { return _context.ContentType; }
-        }
-
-        bool ReceiveContext.Redelivered
-        {
-            get { return _context.Redelivered; }
-        }
-
-        Headers ReceiveContext.TransportHeaders
-        {
-            get { return _context.TransportHeaders; }
-        }
-
-        Task ReceiveContext.CompleteTask
-        {
-            get { return _context.CompleteTask; }
-        }
-
-        bool ReceiveContext.IsDelivered
-        {
-            get { return _context.IsDelivered; }
-        }
-
-        bool ReceiveContext.IsFaulted
-        {
-            get { return _context.IsFaulted; }
-        }
+        TimeSpan ReceiveContext.ElapsedTime => _context.ElapsedTime;
+        Uri ReceiveContext.InputAddress => _context.InputAddress;
+        ContentType ReceiveContext.ContentType => _context.ContentType;
+        bool ReceiveContext.Redelivered => _context.Redelivered;
+        Headers ReceiveContext.TransportHeaders => _context.TransportHeaders;
+        Task ReceiveContext.CompleteTask => _context.CompleteTask;
+        bool ReceiveContext.IsDelivered => _context.IsDelivered;
+        bool ReceiveContext.IsFaulted => _context.IsFaulted;
 
         Task ReceiveContext.NotifyConsumed<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType)
         {

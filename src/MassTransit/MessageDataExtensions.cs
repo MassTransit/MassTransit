@@ -26,7 +26,7 @@ namespace MassTransit
             CancellationToken cancellationToken = default(CancellationToken))
         {
             if (repository == null)
-                throw new ArgumentNullException("repository");
+                throw new ArgumentNullException(nameof(repository));
             if (value == null)
                 return new EmptyMessageData<string>();
 
@@ -43,7 +43,7 @@ namespace MassTransit
             CancellationToken cancellationToken = default(CancellationToken))
         {
             if (repository == null)
-                throw new ArgumentNullException("repository");
+                throw new ArgumentNullException(nameof(repository));
 
             using (var ms = new MemoryStream(bytes, false))
             {
@@ -57,7 +57,7 @@ namespace MassTransit
             CancellationToken cancellationToken = default(CancellationToken))
         {
             if (repository == null)
-                throw new ArgumentNullException("repository");
+                throw new ArgumentNullException(nameof(repository));
             if (value == null)
                 return new EmptyMessageData<string>();
 
@@ -74,7 +74,7 @@ namespace MassTransit
             CancellationToken cancellationToken = default(CancellationToken))
         {
             if (repository == null)
-                throw new ArgumentNullException("repository");
+                throw new ArgumentNullException(nameof(repository));
 
             using (var ms = new MemoryStream(bytes, false))
             {
@@ -88,7 +88,7 @@ namespace MassTransit
             CancellationToken cancellationToken = default(CancellationToken))
         {
             if (repository == null)
-                throw new ArgumentNullException("repository");
+                throw new ArgumentNullException(nameof(repository));
 
             using (var ms = new MemoryStream())
             {
@@ -103,7 +103,7 @@ namespace MassTransit
             CancellationToken cancellationToken = default(CancellationToken))
         {
             if (repository == null)
-                throw new ArgumentNullException("repository");
+                throw new ArgumentNullException(nameof(repository));
 
             using (var ms = new MemoryStream())
             {

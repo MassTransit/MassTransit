@@ -24,10 +24,7 @@ namespace MassTransit.Testing.Scenarios
         IBusTestScenario
     {
         readonly IBusControl _busControl;
-        readonly CancellationToken _cancellationToken;
         readonly PublishedMessageList _published;
-        readonly IReceivedMessageList _received;
-        readonly ISentMessageList _sent;
         readonly ReceivedMessageList _skipped;
         readonly TimeSpan _timeout;
         readonly CancellationTokenSource _tokenSource;
@@ -39,65 +36,44 @@ namespace MassTransit.Testing.Scenarios
             _timeout = timeout;
             _busControl = busControl;
 
-            _received = new ReceivedMessageList(timeout);
+            Received = new ReceivedMessageList(timeout);
             _skipped = new ReceivedMessageList(timeout);
             _published = new PublishedMessageList(timeout);
 
             _tokenSource = new CancellationTokenSource(timeout);
-            _cancellationToken = _tokenSource.Token;
+            CancellationToken = _tokenSource.Token;
 
             _subjectSendEndpoint = _busControl.GetSendEndpoint(new Uri("loopback://localhost/input_queue")).Result;
 
             var testSendObserver = new TestSendObserver(timeout);
-            _sent = testSendObserver.Messages;
+            Sent = testSendObserver.Messages;
             _subjectSendEndpoint.ConnectSendObserver(testSendObserver);
 
             var consumeObserver = new TestConsumeObserver(timeout);
-            _received = consumeObserver.Messages;
+            Received = consumeObserver.Messages;
             busControl.ConnectConsumeObserver(consumeObserver);
 
             _busHandle = _busControl.Start();
         }
 
-        public virtual ISendEndpoint SubjectSendEndpoint
-        {
-            get { return _subjectSendEndpoint; }
-        }
+        public virtual ISendEndpoint SubjectSendEndpoint => _subjectSendEndpoint;
 
-        public ISentMessageList Sent
-        {
-            get { return _sent; }
-        }
+        public ISentMessageList Sent { get; }
 
-        public IReceivedMessageList Skipped
-        {
-            get { return _skipped; }
-        }
+        public IReceivedMessageList Skipped => _skipped;
 
-        public CancellationToken CancellationToken
-        {
-            get { return _cancellationToken; }
-        }
+        public CancellationToken CancellationToken { get; }
 
-        public TimeSpan Timeout
-        {
-            get { return _timeout; }
-        }
+        public TimeSpan Timeout => _timeout;
 
         public void Cancel()
         {
             _tokenSource.Cancel();
         }
 
-        public IPublishedMessageList Published
-        {
-            get { return _published; }
-        }
+        public IPublishedMessageList Published => _published;
 
-        public IReceivedMessageList Received
-        {
-            get { return _received; }
-        }
+        public IReceivedMessageList Received { get; }
 
         public virtual void Dispose()
         {
@@ -108,9 +84,6 @@ namespace MassTransit.Testing.Scenarios
             }
         }
 
-        public virtual IBus Bus
-        {
-            get { return _busControl; }
-        }
+        public virtual IBus Bus => _busControl;
     }
 }

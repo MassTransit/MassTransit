@@ -30,10 +30,7 @@ namespace MassTransit.Policies
         {
         }
 
-        public CancellationToken CancellationToken
-        {
-            get { return _cancellationToken; }
-        }
+        public CancellationToken CancellationToken => _cancellationToken;
 
         public bool CanRepeat(out TimeSpan delay)
         {

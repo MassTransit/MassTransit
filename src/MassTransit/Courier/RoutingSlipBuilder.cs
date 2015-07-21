@@ -95,18 +95,12 @@ namespace MassTransit.Courier
             _sourceItinerary = new List<Activity>();
         }
 
-        public IList<Activity> SourceItinerary
-        {
-            get { return _sourceItinerary; }
-        }
+        public IList<Activity> SourceItinerary => _sourceItinerary;
 
         /// <summary>
         /// The tracking number of the routing slip
         /// </summary>
-        public Guid TrackingNumber
-        {
-            get { return _trackingNumber; }
-        }
+        public Guid TrackingNumber => _trackingNumber;
 
         /// <summary>
         /// Adds an activity to the routing slip without specifying any arguments
@@ -116,9 +110,9 @@ namespace MassTransit.Courier
         public void AddActivity(string name, Uri executeAddress)
         {
             if (name == null)
-                throw new ArgumentNullException("name");
+                throw new ArgumentNullException(nameof(name));
             if (executeAddress == null)
-                throw new ArgumentNullException("executeAddress");
+                throw new ArgumentNullException(nameof(executeAddress));
 
             Activity activity = new ActivityImpl(name, executeAddress, NoArguments);
             _itinerary.Add(activity);
@@ -133,11 +127,11 @@ namespace MassTransit.Courier
         public void AddActivity(string name, Uri executeAddress, object arguments)
         {
             if (name == null)
-                throw new ArgumentNullException("name");
+                throw new ArgumentNullException(nameof(name));
             if (executeAddress == null)
-                throw new ArgumentNullException("executeAddress");
+                throw new ArgumentNullException(nameof(executeAddress));
             if (arguments == null)
-                throw new ArgumentNullException("arguments");
+                throw new ArgumentNullException(nameof(arguments));
 
             IDictionary<string, object> argumentsDictionary = GetObjectAsDictionary(arguments);
 
@@ -154,11 +148,11 @@ namespace MassTransit.Courier
         public void AddActivity(string name, Uri executeAddress, IDictionary<string, object> arguments)
         {
             if (name == null)
-                throw new ArgumentNullException("name");
+                throw new ArgumentNullException(nameof(name));
             if (executeAddress == null)
-                throw new ArgumentNullException("executeAddress");
+                throw new ArgumentNullException(nameof(executeAddress));
             if (arguments == null)
-                throw new ArgumentNullException("arguments");
+                throw new ArgumentNullException(nameof(arguments));
 
             Activity activity = new ActivityImpl(name, executeAddress, arguments);
             _itinerary.Add(activity);
@@ -172,7 +166,7 @@ namespace MassTransit.Courier
         public void AddVariable(string key, string value)
         {
             if (key == null)
-                throw new ArgumentNullException("key");
+                throw new ArgumentNullException(nameof(key));
 
             if (string.IsNullOrEmpty(value))
                 _variables.Remove(key);
@@ -188,7 +182,7 @@ namespace MassTransit.Courier
         public void AddVariable(string key, object value)
         {
             if (key == null)
-                throw new ArgumentNullException("key");
+                throw new ArgumentNullException(nameof(key));
 
             if (value == null || (value is string && string.IsNullOrEmpty((string)value)))
                 _variables.Remove(key);
@@ -272,9 +266,9 @@ namespace MassTransit.Courier
             Exception exception)
         {
             if (name == null)
-                throw new ArgumentNullException("name");
+                throw new ArgumentNullException(nameof(name));
             if (exception == null)
-                throw new ArgumentNullException("exception");
+                throw new ArgumentNullException(nameof(exception));
 
             var exceptionInfo = new FaultExceptionInfo(exception);
 
@@ -296,9 +290,9 @@ namespace MassTransit.Courier
             ExceptionInfo exceptionInfo)
         {
             if (name == null)
-                throw new ArgumentNullException("name");
+                throw new ArgumentNullException(nameof(name));
             if (exceptionInfo == null)
-                throw new ArgumentNullException("exceptionInfo");
+                throw new ArgumentNullException(nameof(exceptionInfo));
 
             ActivityException activityException = new ActivityExceptionImpl(name, host, activityTrackingNumber, timestamp, elapsed,
                 exceptionInfo);
@@ -308,7 +302,7 @@ namespace MassTransit.Courier
         public void AddActivityException(ActivityException activityException)
         {
             if (activityException == null)
-                throw new ArgumentNullException("activityException");
+                throw new ArgumentNullException(nameof(activityException));
 
             _activityExceptions.Add(activityException);
         }

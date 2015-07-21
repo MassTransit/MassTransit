@@ -37,10 +37,7 @@ namespace MassTransit.Monitoring.Performance
             _createCounter = Initialize();
         }
 
-        protected CounterCreationData[] Data
-        {
-            get { return _counterCreationData.Value; }
-        }
+        protected CounterCreationData[] Data => _counterCreationData.Value;
 
         protected IPerformanceCounter CreatePerformanceCounter(string counterName, string instanceName)
         {

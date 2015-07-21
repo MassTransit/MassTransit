@@ -24,15 +24,9 @@ namespace MassTransit.MessageData
             get { throw new MessageDataException("The message data is empty"); }
         }
 
-        public bool HasValue
-        {
-            get { return false; }
-        }
+        public bool HasValue => false;
 
-        public Task<T> Value
-        {
-            get { return NoValue(); }
-        }
+        public Task<T> Value => NoValue();
 
         Task<T> NoValue()
         {

@@ -23,9 +23,9 @@ namespace MassTransit.Courier
         public static T GetResult<T>(this RoutingSlipActivityCompensated source, string key)
         {
             if (source == null)
-                throw new ArgumentNullException("source");
+                throw new ArgumentNullException(nameof(source));
             if (string.IsNullOrEmpty(key))
-                throw new ArgumentException("The key must not be empty", "key");
+                throw new ArgumentException("The key must not be empty", nameof(key));
 
             return DeserializeVariable<T>(key, source.Data);
         }
@@ -33,9 +33,9 @@ namespace MassTransit.Courier
         public static T GetVariable<T>(this RoutingSlipActivityCompensated source, string key)
         {
             if (source == null)
-                throw new ArgumentNullException("source");
+                throw new ArgumentNullException(nameof(source));
             if (string.IsNullOrEmpty(key))
-                throw new ArgumentException("The key must not be empty", "key");
+                throw new ArgumentException("The key must not be empty", nameof(key));
 
             return DeserializeVariable<T>(key, source.Variables);
         }
@@ -43,9 +43,9 @@ namespace MassTransit.Courier
         public static T GetResult<T>(this RoutingSlipActivityCompensationFailed source, string key)
         {
             if (source == null)
-                throw new ArgumentNullException("source");
+                throw new ArgumentNullException(nameof(source));
             if (string.IsNullOrEmpty(key))
-                throw new ArgumentException("The key must not be empty", "key");
+                throw new ArgumentException("The key must not be empty", nameof(key));
 
             return DeserializeVariable<T>(key, source.Data);
         }
@@ -53,9 +53,9 @@ namespace MassTransit.Courier
         public static T GetVariable<T>(this RoutingSlipActivityCompensationFailed source, string key)
         {
             if (source == null)
-                throw new ArgumentNullException("source");
+                throw new ArgumentNullException(nameof(source));
             if (string.IsNullOrEmpty(key))
-                throw new ArgumentException("The key must not be empty", "key");
+                throw new ArgumentException("The key must not be empty", nameof(key));
 
             return DeserializeVariable<T>(key, source.Variables);
         }
@@ -63,9 +63,9 @@ namespace MassTransit.Courier
         public static T GetArgument<T>(this RoutingSlipActivityCompleted source, string key)
         {
             if (source == null)
-                throw new ArgumentNullException("source");
+                throw new ArgumentNullException(nameof(source));
             if (string.IsNullOrEmpty(key))
-                throw new ArgumentException("The key must not be empty", "key");
+                throw new ArgumentException("The key must not be empty", nameof(key));
 
             return DeserializeVariable<T>(key, source.Arguments);
         }
@@ -73,9 +73,9 @@ namespace MassTransit.Courier
         public static T GetResult<T>(this RoutingSlipActivityCompleted source, string key)
         {
             if (source == null)
-                throw new ArgumentNullException("source");
+                throw new ArgumentNullException(nameof(source));
             if (string.IsNullOrEmpty(key))
-                throw new ArgumentException("The key must not be empty", "key");
+                throw new ArgumentException("The key must not be empty", nameof(key));
 
             return DeserializeVariable<T>(key, source.Data);
         }
@@ -83,9 +83,9 @@ namespace MassTransit.Courier
         public static T GetVariable<T>(this RoutingSlipActivityCompleted source, string key)
         {
             if (source == null)
-                throw new ArgumentNullException("source");
+                throw new ArgumentNullException(nameof(source));
             if (string.IsNullOrEmpty(key))
-                throw new ArgumentException("The key must not be empty", "key");
+                throw new ArgumentException("The key must not be empty", nameof(key));
 
             return DeserializeVariable<T>(key, source.Variables);
         }
@@ -93,9 +93,9 @@ namespace MassTransit.Courier
         public static T GetArgument<T>(this RoutingSlipActivityFaulted source, string key)
         {
             if (source == null)
-                throw new ArgumentNullException("source");
+                throw new ArgumentNullException(nameof(source));
             if (string.IsNullOrEmpty(key))
-                throw new ArgumentException("The key must not be empty", "key");
+                throw new ArgumentException("The key must not be empty", nameof(key));
 
             return DeserializeVariable<T>(key, source.Arguments);
         }
@@ -103,9 +103,9 @@ namespace MassTransit.Courier
         public static T GetVariable<T>(this RoutingSlipActivityFaulted source, string key)
         {
             if (source == null)
-                throw new ArgumentNullException("source");
+                throw new ArgumentNullException(nameof(source));
             if (string.IsNullOrEmpty(key))
-                throw new ArgumentException("The key must not be empty", "key");
+                throw new ArgumentException("The key must not be empty", nameof(key));
 
             return DeserializeVariable<T>(key, source.Variables);
         }
@@ -113,9 +113,9 @@ namespace MassTransit.Courier
         public static T GetVariable<T>(this RoutingSlipCompensationFailed source, string key)
         {
             if (source == null)
-                throw new ArgumentNullException("source");
+                throw new ArgumentNullException(nameof(source));
             if (string.IsNullOrEmpty(key))
-                throw new ArgumentException("The key must not be empty", "key");
+                throw new ArgumentException("The key must not be empty", nameof(key));
 
             return DeserializeVariable<T>(key, source.Variables);
         }
@@ -123,9 +123,9 @@ namespace MassTransit.Courier
         public static T GetVariable<T>(this RoutingSlipCompleted source, string key)
         {
             if (source == null)
-                throw new ArgumentNullException("source");
+                throw new ArgumentNullException(nameof(source));
             if (string.IsNullOrEmpty(key))
-                throw new ArgumentException("The key must not be empty", "key");
+                throw new ArgumentException("The key must not be empty", nameof(key));
 
             return DeserializeVariable<T>(key, source.Variables);
         }
@@ -133,9 +133,9 @@ namespace MassTransit.Courier
         public static T GetVariable<T>(this RoutingSlipFaulted source, string key)
         {
             if (source == null)
-                throw new ArgumentNullException("source");
+                throw new ArgumentNullException(nameof(source));
             if (string.IsNullOrEmpty(key))
-                throw new ArgumentException("The key must not be empty", "key");
+                throw new ArgumentException("The key must not be empty", nameof(key));
 
             return DeserializeVariable<T>(key, source.Variables);
         }

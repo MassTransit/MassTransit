@@ -35,10 +35,7 @@ namespace MassTransit.Pipeline.Filters.CircuitBreaker
             _timer = new Timer(Reset, null, breaker.Duration, breaker.Duration);
         }
 
-        bool IsActive
-        {
-            get { return _attemptCount > _breaker.ActiveThreshold; }
-        }
+        bool IsActive => _attemptCount > _breaker.ActiveThreshold;
 
         void ICircuitBreakerBehavior.PreSend()
         {

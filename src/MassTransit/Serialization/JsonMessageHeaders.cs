@@ -39,7 +39,7 @@ namespace MassTransit.Serialization
             where T : class
         {
             if (key == null)
-                throw new ArgumentNullException("key");
+                throw new ArgumentNullException(nameof(key));
 
             object obj;
             if (!_headers.TryGetValue(key, out obj))
@@ -61,7 +61,7 @@ namespace MassTransit.Serialization
             where T : struct
         {
             if (key == null)
-                throw new ArgumentNullException("key");
+                throw new ArgumentNullException(nameof(key));
 
             object obj;
             if (!_headers.TryGetValue(key, out obj))
@@ -85,7 +85,7 @@ namespace MassTransit.Serialization
         public bool TryGetHeader(string key, out object value)
         {
             if (key == null)
-                throw new ArgumentNullException("key");
+                throw new ArgumentNullException(nameof(key));
 
             return _headers.TryGetValue(key, out value);
         }

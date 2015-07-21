@@ -42,8 +42,7 @@ namespace MassTransit
 
             var sagaConfigurator = new SagaConfigurator<T>(sagaRepository);
 
-            if (configure != null)
-                configure(sagaConfigurator);
+            configure?.Invoke(sagaConfigurator);
 
             configurator.AddEndpointSpecification(sagaConfigurator);
         }
@@ -60,9 +59,9 @@ namespace MassTransit
             where T : class, ISaga
         {
             if (bus == null)
-                throw new ArgumentNullException("bus");
+                throw new ArgumentNullException(nameof(bus));
             if (sagaRepository == null)
-                throw new ArgumentNullException("sagaRepository");
+                throw new ArgumentNullException(nameof(sagaRepository));
 
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Subscribing Saga: {0}", TypeMetadataCache<T>.ShortName);

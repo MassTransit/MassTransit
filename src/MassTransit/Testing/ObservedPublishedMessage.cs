@@ -20,37 +20,24 @@ namespace MassTransit.Testing
         where T : class
     {
         readonly PublishContext<T> _context;
-        readonly Exception _exception;
 
         public ObservedPublishedMessage(PublishContext<T> context, Exception exception = null)
         {
             _context = context;
-            _exception = exception;
+            Exception = exception;
         }
 
-        public PublishContext<T> Context
-        {
-            get { return _context; }
-        }
+        public PublishContext<T> Context => _context;
 
-        SendContext IPublishedMessage.Context
-        {
-            get { return Context; }
-        }
+        SendContext IPublishedMessage.Context => Context;
 
-        public Exception Exception
-        {
-            get { return _exception; }
-        }
+        public Exception Exception { get; }
 
-        public Type MessageType
-        {
-            get { return typeof(T); }
-        }
+        public Type MessageType => typeof(T);
 
         public override int GetHashCode()
         {
-            return (_context != null ? _context.GetHashCode() : 0);
+            return _context?.GetHashCode() ?? 0;
         }
 
         public bool Equals(ObservedPublishedMessage<T> other)

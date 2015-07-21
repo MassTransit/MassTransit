@@ -41,15 +41,8 @@ namespace MassTransit.Context
             _instance = instance;
         }
 
-        public Task CompleteTask
-        {
-            get { return _context.CompleteTask; }
-        }
-
-        public IEnumerable<string> SupportedMessageTypes
-        {
-            get { return _context.SupportedMessageTypes; }
-        }
+        Task ConsumeContext.CompleteTask => _context.CompleteTask;
+        IEnumerable<string> ConsumeContext.SupportedMessageTypes => _context.SupportedMessageTypes;
 
         Task IPublishEndpoint.Publish<T>(T message, CancellationToken cancellationToken)
         {
@@ -101,70 +94,32 @@ namespace MassTransit.Context
             return _context.Publish<T>(values, publishPipe, cancellationToken);
         }
 
-        public bool HasPayloadType(Type contextType)
+        bool PipeContext.HasPayloadType(Type contextType)
         {
             return _context.HasPayloadType(contextType);
         }
 
-        public bool TryGetPayload<TPayload>(out TPayload payload)
-            where TPayload : class
+        bool PipeContext.TryGetPayload<TPayload>(out TPayload payload)
         {
             return _context.TryGetPayload(out payload);
         }
 
-        public TPayload GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory)
-            where TPayload : class
+        TPayload PipeContext.GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory)
         {
             return _context.GetOrAddPayload(payloadFactory);
         }
 
-        public Guid? MessageId
-        {
-            get { return _context.MessageId; }
-        }
+        Guid? MessageContext.MessageId => _context.MessageId;
+        Guid? MessageContext.RequestId => _context.RequestId;
+        Guid? MessageContext.CorrelationId => _instance.CorrelationId;
+        DateTime? MessageContext.ExpirationTime => _context.ExpirationTime;
+        Uri MessageContext.SourceAddress => _context.SourceAddress;
+        Uri MessageContext.DestinationAddress => _context.DestinationAddress;
+        Uri MessageContext.ResponseAddress => _context.ResponseAddress;
+        Uri MessageContext.FaultAddress => _context.FaultAddress;
+        Headers MessageContext.Headers => _context.Headers;
 
-        public Guid? RequestId
-        {
-            get { return _context.RequestId; }
-        }
-
-        public Guid? CorrelationId
-        {
-            get { return _instance.CorrelationId; }
-        }
-
-        public DateTime? ExpirationTime
-        {
-            get { return _context.ExpirationTime; }
-        }
-
-        public Uri SourceAddress
-        {
-            get { return _context.SourceAddress; }
-        }
-
-        public Uri DestinationAddress
-        {
-            get { return _context.DestinationAddress; }
-        }
-
-        public Uri ResponseAddress
-        {
-            get { return _context.ResponseAddress; }
-        }
-
-        public Uri FaultAddress
-        {
-            get { return _context.FaultAddress; }
-        }
-
-        public Headers Headers
-        {
-            get { return _context.Headers; }
-        }
-
-        public SagaConsumeContext<TSaga, T> PopContext<T>()
-            where T : class
+        SagaConsumeContext<TSaga, T> SagaConsumeContext<TSaga>.PopContext<T>()
         {
             return (SagaConsumeContext<TSaga, T>)this;
         }
@@ -176,34 +131,21 @@ namespace MassTransit.Context
             return TaskUtil.Completed;
         }
 
-        public bool IsCompleted
-        {
-            get { return _completed; }
-        }
+        bool SagaConsumeContext<TSaga>.IsCompleted => _completed;
+        CancellationToken PipeContext.CancellationToken => _context.CancellationToken;
+        ReceiveContext ConsumeContext.ReceiveContext => _context.ReceiveContext;
 
-        public CancellationToken CancellationToken
-        {
-            get { return _context.CancellationToken; }
-        }
-
-        public ReceiveContext ReceiveContext
-        {
-            get { return _context.ReceiveContext; }
-        }
-
-        public bool HasMessageType(Type messageType)
+        bool ConsumeContext.HasMessageType(Type messageType)
         {
             return _context.HasMessageType(messageType);
         }
 
-        public bool TryGetMessage<T>(out ConsumeContext<T> consumeContext)
-            where T : class
+        bool ConsumeContext.TryGetMessage<T>(out ConsumeContext<T> consumeContext)
         {
             return _context.TryGetMessage(out consumeContext);
         }
 
-        public Task RespondAsync<T>(T message)
-            where T : class
+        Task ConsumeContext.RespondAsync<T>(T message)
         {
             return _context.RespondAsync(message);
         }
@@ -213,13 +155,12 @@ namespace MassTransit.Context
             return _context.RespondAsync(message, sendPipe);
         }
 
-        public void Respond<T>(T message)
-            where T : class
+        void ConsumeContext.Respond<T>(T message)
         {
             _context.Respond(message);
         }
 
-        public Task<ISendEndpoint> GetSendEndpoint(Uri address)
+        Task<ISendEndpoint> ISendEndpointProvider.GetSendEndpoint(Uri address)
         {
             return _context.GetSendEndpoint(address);
         }
@@ -235,27 +176,21 @@ namespace MassTransit.Context
             return _context.NotifyFaulted(context, duration, consumerType, exception);
         }
 
-        TMessage ConsumeContext<TMessage>.Message
-        {
-            get { return _context.Message; }
-        }
+        TMessage ConsumeContext<TMessage>.Message => _context.Message;
 
-        public Task NotifyConsumed(TimeSpan duration, string consumerType)
+        Task ConsumeContext<TMessage>.NotifyConsumed(TimeSpan duration, string consumerType)
         {
             return _context.NotifyConsumed(duration, consumerType);
         }
 
-        public Task NotifyFaulted(TimeSpan duration, string consumerType, Exception exception)
+        Task ConsumeContext<TMessage>.NotifyFaulted(TimeSpan duration, string consumerType, Exception exception)
         {
             return NotifyFaulted(_context, duration, consumerType, exception);
         }
 
-        public TSaga Saga
-        {
-            get { return _instance; }
-        }
+        TSaga SagaConsumeContext<TSaga>.Saga => _instance;
 
-        public ConnectHandle ConnectPublishObserver(IPublishObserver observer)
+        ConnectHandle IPublishObserverConnector.ConnectPublishObserver(IPublishObserver observer)
         {
             return _context.ConnectPublishObserver(observer);
         }

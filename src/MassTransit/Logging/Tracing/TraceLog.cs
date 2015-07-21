@@ -28,30 +28,15 @@ namespace MassTransit.Logging.Tracing
             _level = LogLevel.FromSourceLevels(source.Switch.Level);
         }
 
-        public bool IsDebugEnabled
-        {
-            get { return _level >= LogLevel.Debug; }
-        }
+        public bool IsDebugEnabled => _level >= LogLevel.Debug;
 
-        public bool IsInfoEnabled
-        {
-            get { return _level >= LogLevel.Info; }
-        }
+        public bool IsInfoEnabled => _level >= LogLevel.Info;
 
-        public bool IsWarnEnabled
-        {
-            get { return _level >= LogLevel.Warn; }
-        }
+        public bool IsWarnEnabled => _level >= LogLevel.Warn;
 
-        public bool IsErrorEnabled
-        {
-            get { return _level >= LogLevel.Error; }
-        }
+        public bool IsErrorEnabled => _level >= LogLevel.Error;
 
-        public bool IsFatalEnabled
-        {
-            get { return _level >= LogLevel.Fatal; }
-        }
+        public bool IsFatalEnabled => _level >= LogLevel.Fatal;
 
         public void LogFormat(LogLevel level, string format, params object[] args)
         {
@@ -552,9 +537,7 @@ namespace MassTransit.Logging.Tracing
 
         void LogInternal(LogLevel level, object obj, Exception exception)
         {
-            string message = obj == null
-                                 ? ""
-                                 : obj.ToString();
+            string message = obj?.ToString() ?? "";
 
             if (exception == null)
                 _source.TraceEvent(level.TraceEventType, 0, message);

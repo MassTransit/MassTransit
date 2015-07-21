@@ -26,9 +26,9 @@ namespace MassTransit.Pipeline.Pipes
         public ConsumePipe(MessageTypeConsumeFilter messageTypeConsumeFilter, IPipe<ConsumeContext> pipe)
         {
             if (messageTypeConsumeFilter == null)
-                throw new ArgumentNullException("messageTypeConsumeFilter");
+                throw new ArgumentNullException(nameof(messageTypeConsumeFilter));
             if (pipe == null)
-                throw new ArgumentNullException("pipe");
+                throw new ArgumentNullException(nameof(pipe));
 
             _filter = messageTypeConsumeFilter;
             _pipe = pipe;

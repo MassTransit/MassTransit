@@ -77,7 +77,7 @@ namespace MassTransit.Policies
 
         public override string ToString()
         {
-            return string.Format("Exponential (limit {0}, min {1}ms, max {2}ms", _retryLimit, _minInterval, _maxInterval);
+            return $"Exponential (limit {_retryLimit}, min {_minInterval}ms, max {_maxInterval}ms";
         }
     }
 }

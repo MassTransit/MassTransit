@@ -36,9 +36,9 @@ namespace MassTransit.Internals.Extensions
         public static bool HasInterface(this Type type, Type interfaceType)
         {
             if (type == null)
-                throw new ArgumentNullException("type");
+                throw new ArgumentNullException(nameof(type));
             if (interfaceType == null)
-                throw new ArgumentNullException("interfaceType");
+                throw new ArgumentNullException(nameof(interfaceType));
 
             TypeInfo interfaceTypeInfo = interfaceType.GetTypeInfo();
             if (!interfaceTypeInfo.IsInterface)
@@ -58,9 +58,9 @@ namespace MassTransit.Internals.Extensions
         public static Type GetInterface(this Type type, Type interfaceType)
         {
             if (type == null)
-                throw new ArgumentNullException("type");
+                throw new ArgumentNullException(nameof(type));
             if (interfaceType == null)
-                throw new ArgumentNullException("interfaceType");
+                throw new ArgumentNullException(nameof(interfaceType));
 
             TypeInfo interfaceTypeInfo = interfaceType.GetTypeInfo();
             if (!interfaceTypeInfo.IsInterface)
@@ -72,9 +72,9 @@ namespace MassTransit.Internals.Extensions
         public static bool ClosesType(this Type type, Type openType)
         {
             if (type == null)
-                throw new ArgumentNullException("type");
+                throw new ArgumentNullException(nameof(type));
             if (openType == null)
-                throw new ArgumentNullException("openType");
+                throw new ArgumentNullException(nameof(openType));
 
             if (!openType.IsOpenGeneric())
                 throw new ArgumentException("The interface type must be an open generic interface: " + openType.Name);
@@ -111,9 +111,9 @@ namespace MassTransit.Internals.Extensions
         public static IEnumerable<Type> GetClosingArguments(this Type type, Type openType)
         {
             if (type == null)
-                throw new ArgumentNullException("type");
+                throw new ArgumentNullException(nameof(type));
             if (openType == null)
-                throw new ArgumentNullException("openType");
+                throw new ArgumentNullException(nameof(openType));
 
             if (!openType.IsOpenGeneric())
                 throw new ArgumentException("The interface type must be an open generic interface: " + openType.Name);

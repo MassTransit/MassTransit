@@ -18,38 +18,21 @@ namespace MassTransit.Saga
 	public class SagaRepositoryQuery<TSaga, TResult>
 		where TSaga : class, ISaga
 	{
-		readonly Func<TSaga, bool> _filter;
-		readonly Expression<Func<TSaga, bool>> _filterExpression;
-		readonly Func<TSaga, TResult> _projection;
-		readonly Expression<Func<TSaga, TResult>> _projectionExpression;
-
-		public SagaRepositoryQuery(Expression<Func<TSaga, bool>> filter, Expression<Func<TSaga, TResult>> projection)
+	    public SagaRepositoryQuery(Expression<Func<TSaga, bool>> filter, Expression<Func<TSaga, TResult>> projection)
 		{
-			_filter = filter.Compile();
-			_filterExpression = filter;
+			Filter = filter.Compile();
+			FilterExpression = filter;
 
-			_projection = projection.Compile();
-			_projectionExpression = projection;
+			Projection = projection.Compile();
+			ProjectionExpression = projection;
 		}
 
-		public Func<TSaga, bool> Filter
-		{
-			get { return _filter; }
-		}
+		public Func<TSaga, bool> Filter { get; }
 
-		public Expression<Func<TSaga, bool>> FilterExpression
-		{
-			get { return _filterExpression; }
-		}
+	    public Expression<Func<TSaga, bool>> FilterExpression { get; }
 
-		public Func<TSaga, TResult> Projection
-		{
-			get { return _projection; }
-		}
+	    public Func<TSaga, TResult> Projection { get; }
 
-		public Expression<Func<TSaga, TResult>> ProjectionExpression
-		{
-			get { return _projectionExpression; }
-		}
+	    public Expression<Func<TSaga, TResult>> ProjectionExpression { get; }
 	}
 }

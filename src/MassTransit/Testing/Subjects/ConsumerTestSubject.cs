@@ -33,10 +33,7 @@ namespace MassTransit.Testing.Subjects
             _consumerFactory = consumerFactory;
         }
 
-        public IReceivedMessageList Received
-        {
-            get { return _received; }
-        }
+        public IReceivedMessageList Received => _received;
 
         public void Dispose()
         {
@@ -48,8 +45,7 @@ namespace MassTransit.Testing.Subjects
             var decoratedConsumerFactory = new TestConsumerFactoryDecorator<TSubject>(_consumerFactory, _received);
 
             var scenarioBuilder = builder as IBusTestScenarioBuilder;
-            if (scenarioBuilder != null)
-                scenarioBuilder.ConfigureReceiveEndpoint(x => x.Consumer(decoratedConsumerFactory));
+            scenarioBuilder?.ConfigureReceiveEndpoint(x => x.Consumer(decoratedConsumerFactory));
 
             return builder;
         }

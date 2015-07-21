@@ -34,10 +34,7 @@ namespace MassTransit.Configurators
             get { return _results.Any(x => x.Disposition == ValidationResultDisposition.Failure); }
         }
 
-        public IEnumerable<ValidationResult> Results
-        {
-            get { return _results; }
-        }
+        public IEnumerable<ValidationResult> Results => _results;
 
         protected string DebuggerString()
         {

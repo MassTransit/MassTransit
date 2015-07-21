@@ -51,8 +51,7 @@ namespace MassTransit.Internals.Reflection
         {
             if (!interfaceType.IsInterface)
             {
-                throw new ArgumentException("Proxies can only be created for interfaces: " + interfaceType.Name,
-                    "interfaceType");
+                throw new ArgumentException("Proxies can only be created for interfaces: " + interfaceType.Name,nameof(interfaceType));
             }
 
             return GetModuleBuilderForType(interfaceType, moduleBuilder => CreateTypeFromInterface(moduleBuilder, interfaceType));
@@ -93,8 +92,7 @@ namespace MassTransit.Internals.Reflection
             }
             catch (Exception ex)
             {
-                string message = string.Format("Exception creating proxy ({0}) for {1}", typeName,
-                    TypeMetadataCache.GetShortName(interfaceType));
+                string message = $"Exception creating proxy ({typeName}) for {TypeMetadataCache.GetShortName(interfaceType)}";
 
                 throw new InvalidOperationException(message, ex);
             }

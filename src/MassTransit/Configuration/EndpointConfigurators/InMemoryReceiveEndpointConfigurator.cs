@@ -42,12 +42,12 @@ namespace MassTransit.EndpointConfigurators
 
         protected override Uri GetErrorAddress()
         {
-            return new Uri(string.Format("loopback://localhost/{0}_error", _queueName));
+            return new Uri($"loopback://localhost/{_queueName}_error");
         }
 
         protected override Uri GetDeadLetterAddress()
         {
-            return new Uri(string.Format("loopback://localhost/{0}_skipped", _queueName));
+            return new Uri($"loopback://localhost/{_queueName}_skipped");
         }
     }
 }

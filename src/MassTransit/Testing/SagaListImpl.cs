@@ -23,12 +23,9 @@ namespace MassTransit.Testing
         ISagaList<T>
         where T : class, ISaga
     {
-        readonly IDictionary<Guid, ISagaInstance<T>> _sagaIndex;
-
         public SagaListImpl(TimeSpan timeout)
             : base((int)timeout.TotalMilliseconds)
         {
-            _sagaIndex = new Dictionary<Guid, ISagaInstance<T>>();
         }
 
         public IEnumerable<ISagaInstance<T>> Select(Func<T, bool> filter)

@@ -49,9 +49,9 @@ namespace MassTransit
         public static ConnectHandle ConnectInstance(this IBus bus, object instance)
         {
             if (bus == null)
-                throw new ArgumentNullException("bus");
+                throw new ArgumentNullException(nameof(bus));
             if (instance == null)
-                throw new ArgumentNullException("instance");
+                throw new ArgumentNullException(nameof(instance));
 
             IInstanceConnector connector = InstanceConnectorCache.GetInstanceConnector(instance.GetType());
 

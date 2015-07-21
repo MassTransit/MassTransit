@@ -52,10 +52,8 @@ namespace MassTransit.Pipeline.Pipes
 
         void IProbeSite.Probe(ProbeContext context)
         {
-            if (_pipe != null)
-                _pipe.Probe(context);
-            if (_sendPipe != null)
-                _sendPipe.Probe(context);
+            _pipe?.Probe(context);
+            _sendPipe?.Probe(context);
         }
 
         public async Task Send(SendContext<T> context)

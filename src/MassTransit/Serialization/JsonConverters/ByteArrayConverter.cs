@@ -47,9 +47,7 @@ namespace MassTransit.Serialization.JsonConverters
             else if (reader.TokenType == JsonToken.String)
                 numArray = Convert.FromBase64String(reader.Value.ToString());
             else
-                throw new Exception(
-                    string.Format("Unexpected token parsing binary. Expected String or StartArray, got {0}.",
-                        reader.TokenType));
+                throw new Exception($"Unexpected token parsing binary. Expected String or StartArray, got {reader.TokenType}.");
 
             return numArray;
         }
@@ -82,7 +80,7 @@ namespace MassTransit.Serialization.JsonConverters
                     case JsonToken.EndArray:
                         return list.ToArray();
                     default:
-                        throw new Exception(string.Format("Unexpected token when reading bytes: {0}", reader.TokenType));
+                        throw new Exception($"Unexpected token when reading bytes: {reader.TokenType}");
                 }
             }
             throw new Exception("Unexpected end when reading bytes.");

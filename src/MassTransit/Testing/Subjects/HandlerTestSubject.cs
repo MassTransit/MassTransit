@@ -34,10 +34,7 @@ namespace MassTransit.Testing.Subjects
             _handler = handler;
         }
 
-        public IReceivedMessageList<TSubject> Received
-        {
-            get { return _received; }
-        }
+        public IReceivedMessageList<TSubject> Received => _received;
 
         public void Dispose()
         {
@@ -48,8 +45,7 @@ namespace MassTransit.Testing.Subjects
             _received = new ReceivedMessageList<TSubject>(builder.Timeout);
 
             var scenarioBuilder = builder as IBusTestScenarioBuilder;
-            if (scenarioBuilder != null)
-                scenarioBuilder.ConfigureReceiveEndpoint(x => x.Handler<TSubject>(HandleMessage));
+            scenarioBuilder?.ConfigureReceiveEndpoint(x => x.Handler<TSubject>(HandleMessage));
 
             return builder;
         }

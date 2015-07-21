@@ -32,7 +32,7 @@ namespace MassTransit
             where TConsumer : class
         {
             if (configurator == null)
-                throw new ArgumentNullException("configurator");
+                throw new ArgumentNullException(nameof(configurator));
 
             var specification = new ConsumerPipeSpecification<TConsumer, T>(filter);
 

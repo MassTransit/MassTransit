@@ -20,15 +20,11 @@ namespace MassTransit
     public static class Retry
     {
         static readonly IPolicyExceptionFilter _all = new AllPolicyExceptionFilter();
-        static readonly IRetryPolicy _none = new NoRetryPolicy();
 
         /// <summary>
         /// Create a policy that does not retry any messages
         /// </summary>
-        public static IRetryPolicy None
-        {
-            get { return _none; }
-        }
+        public static IRetryPolicy None { get; } = new NoRetryPolicy();
 
         /// <summary>
         /// Create an immediate retry policy with the specified number of retries, with no

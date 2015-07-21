@@ -35,10 +35,10 @@ namespace MassTransit.Serialization
         Stream ICryptoStreamProvider.GetEncryptStream<T>(Stream stream, SendContext<T> context)
         {
             if (stream == null)
-                throw new ArgumentNullException("stream");
+                throw new ArgumentNullException(nameof(stream));
 
             if (context == null)
-                throw new ArgumentNullException("context");
+                throw new ArgumentNullException(nameof(context));
 
             object keyIdObj;
             string keyId = context.Headers.TryGetHeader(EncryptedMessageSerializer.EncryptionKeyHeader, out keyIdObj)
@@ -57,10 +57,10 @@ namespace MassTransit.Serialization
         Stream ICryptoStreamProvider.GetDecryptStream(Stream stream, ReceiveContext context)
         {
             if (stream == null)
-                throw new ArgumentNullException("stream");
+                throw new ArgumentNullException(nameof(stream));
 
             if (context == null)
-                throw new ArgumentNullException("context");
+                throw new ArgumentNullException(nameof(context));
 
             object keyIdObj;
             string keyId = context.TransportHeaders.TryGetHeader(EncryptedMessageSerializer.EncryptionKeyHeader, out keyIdObj)

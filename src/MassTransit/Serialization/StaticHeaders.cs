@@ -40,7 +40,7 @@ namespace MassTransit.Serialization
         T Headers.Get<T>(string key, T defaultValue)
         {
             if (key == null)
-                throw new ArgumentNullException("key");
+                throw new ArgumentNullException(nameof(key));
 
             object obj;
             if (!TryGetHeader(key, out obj))
@@ -61,7 +61,7 @@ namespace MassTransit.Serialization
         T? Headers.Get<T>(string key, T? defaultValue)
         {
             if (key == null)
-                throw new ArgumentNullException("key");
+                throw new ArgumentNullException(nameof(key));
 
             object obj;
             if (!TryGetHeader(key, out obj))

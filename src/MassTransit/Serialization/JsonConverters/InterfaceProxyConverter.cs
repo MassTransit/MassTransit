@@ -26,7 +26,7 @@ namespace MassTransit.Serialization.JsonConverters
         public InterfaceProxyConverter(IImplementationBuilder builder)
         {
             if (builder == null)
-                throw new ArgumentNullException("builder");
+                throw new ArgumentNullException(nameof(builder));
             _builder = builder;
         }
 

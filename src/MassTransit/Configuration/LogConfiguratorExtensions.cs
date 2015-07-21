@@ -23,11 +23,11 @@ namespace MassTransit
             where T : class, PipeContext
         {
             if (configurator == null)
-                throw new ArgumentNullException("configurator");
+                throw new ArgumentNullException(nameof(configurator));
             if (textWriter == null)
-                throw new ArgumentNullException("textWriter");
+                throw new ArgumentNullException(nameof(textWriter));
             if (formatter == null)
-                throw new ArgumentNullException("formatter");
+                throw new ArgumentNullException(nameof(formatter));
 
             var pipeBuilderConfigurator = new LogPipeSpecification<T>(textWriter, formatter);
 
@@ -38,9 +38,9 @@ namespace MassTransit
             where T : class, PipeContext
         {
             if (configurator == null)
-                throw new ArgumentNullException("configurator");
+                throw new ArgumentNullException(nameof(configurator));
             if (formatter == null)
-                throw new ArgumentNullException("formatter");
+                throw new ArgumentNullException(nameof(formatter));
 
             var pipeBuilderConfigurator = new LogPipeSpecification<T>(Console.Out, formatter);
 

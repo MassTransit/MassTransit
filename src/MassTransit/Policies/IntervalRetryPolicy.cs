@@ -14,7 +14,6 @@ namespace MassTransit.Policies
 {
     using System;
     using System.Linq;
-    using System.Threading.Tasks;
 
 
     public class IntervalRetryPolicy :
@@ -26,9 +25,9 @@ namespace MassTransit.Policies
         public IntervalRetryPolicy(IPolicyExceptionFilter filter, params TimeSpan[] intervals)
         {
             if (intervals == null)
-                throw new ArgumentNullException("intervals");
+                throw new ArgumentNullException(nameof(intervals));
             if (intervals.Length == 0)
-                throw new ArgumentOutOfRangeException("intervals", "At least one interval must be specified");
+                throw new ArgumentOutOfRangeException(nameof(intervals), "At least one interval must be specified");
 
             _filter = filter;
             _intervals = intervals;
@@ -37,9 +36,9 @@ namespace MassTransit.Policies
         public IntervalRetryPolicy(IPolicyExceptionFilter filter, params int[] intervals)
         {
             if (intervals == null)
-                throw new ArgumentNullException("intervals");
+                throw new ArgumentNullException(nameof(intervals));
             if (intervals.Length == 0)
-                throw new ArgumentOutOfRangeException("intervals", "At least one interval must be specified");
+                throw new ArgumentOutOfRangeException(nameof(intervals), "At least one interval must be specified");
 
             _filter = filter;
             _intervals = intervals.Select(x => TimeSpan.FromMilliseconds(x)).ToArray();
@@ -69,8 +68,7 @@ namespace MassTransit.Policies
 
         public override string ToString()
         {
-            return string.Format("Interval (limit {0}, intervals {1})", _intervals.Length,
-                string.Join(";", _intervals.Take(5).Select(x => x.ToString())));
+            return $"Interval (limit {_intervals.Length}, intervals {string.Join(";", _intervals.Take(5).Select(x => x.ToString()))})";
         }
     }
 }

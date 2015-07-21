@@ -25,22 +25,17 @@ namespace MassTransit.Testing.ScenarioBuilders
         IBusTestScenarioBuilder
     {
         readonly InMemoryBusFactoryConfigurator _configurator;
-        TimeSpan _timeout;
 
         /// <summary>
         /// c'tor
         /// </summary>
         public BusTestScenarioBuilder()
         {
-            _timeout = TimeSpan.FromSeconds(30);
+            Timeout = TimeSpan.FromSeconds(30);
             _configurator = new InMemoryBusFactoryConfigurator();
         }
 
-        public TimeSpan Timeout
-        {
-            get { return _timeout; }
-            set { _timeout = value; }
-        }
+        public TimeSpan Timeout { get; }
 
         public void ConfigureBus(Action<IInMemoryBusFactoryConfigurator> configureCallback)
         {

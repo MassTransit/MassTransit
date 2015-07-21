@@ -33,7 +33,7 @@ namespace MassTransit
             where TSaga : class, ISaga
         {
             if (configurator == null)
-                throw new ArgumentNullException("configurator");
+                throw new ArgumentNullException(nameof(configurator));
 
             var pipeBuilderConfigurator = new SagaFilterSpecification<TSaga, T>(filter);
 

@@ -37,8 +37,7 @@ namespace MassTransit.Pipeline.ConsumerFactories
                 consumer = _factoryMethod();
                 if (consumer == null)
                 {
-                    throw new ConsumerException(string.Format("Unable to resolve consumer type '{0}'.",
-                        TypeMetadataCache<TConsumer>.ShortName));
+                    throw new ConsumerException($"Unable to resolve consumer type '{TypeMetadataCache<TConsumer>.ShortName}'.");
                 }
 
                 await next.Send(context.PushConsumer(consumer)).ConfigureAwait(false);
@@ -46,8 +45,7 @@ namespace MassTransit.Pipeline.ConsumerFactories
             finally
             {
                 var disposable = consumer as IDisposable;
-                if (disposable != null)
-                    disposable.Dispose();
+                disposable?.Dispose();
             }
         }
 

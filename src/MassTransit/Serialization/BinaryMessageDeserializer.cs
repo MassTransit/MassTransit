@@ -16,7 +16,6 @@ namespace MassTransit.Serialization
     using System.Net.Mime;
     using System.Runtime.Remoting.Messaging;
     using System.Runtime.Serialization.Formatters.Binary;
-    using System.Threading.Tasks;
     using Newtonsoft.Json;
 
 
@@ -36,10 +35,7 @@ namespace MassTransit.Serialization
             _publishEndpoint = publishEndpoint;
         }
 
-        public ContentType ContentType
-        {
-            get { return BinaryMessageSerializer.BinaryContentType; }
-        }
+        public ContentType ContentType => BinaryMessageSerializer.BinaryContentType;
 
         ConsumeContext IMessageDeserializer.Deserialize(ReceiveContext receiveContext)
         {

@@ -26,21 +26,18 @@ namespace MassTransit.Monitoring.Introspection
         readonly CancellationToken _cancellationToken;
         readonly IDictionary<string, object> _variables;
 
-        public ScopeProbeContext(CancellationToken cancellationToken)
+        protected ScopeProbeContext(CancellationToken cancellationToken)
         {
             _cancellationToken = cancellationToken;
             _variables = new Dictionary<string, object>();
         }
 
-        public CancellationToken CancellationToken
-        {
-            get { return _cancellationToken; }
-        }
+        CancellationToken ProbeContext.CancellationToken => _cancellationToken;
 
-        public void Add(string key, string value)
+        void ProbeContext.Add(string key, string value)
         {
             if (key == null)
-                throw new ArgumentNullException("key");
+                throw new ArgumentNullException(nameof(key));
 
             if (string.IsNullOrEmpty(value))
                 _variables.Remove(key);
@@ -48,10 +45,10 @@ namespace MassTransit.Monitoring.Introspection
                 _variables[key] = value;
         }
 
-        public void Add(string key, object value)
+        void ProbeContext.Add(string key, object value)
         {
             if (key == null)
-                throw new ArgumentNullException("key");
+                throw new ArgumentNullException(nameof(key));
 
             if (value == null || (value is string && string.IsNullOrEmpty((string)value)))
                 _variables.Remove(key);

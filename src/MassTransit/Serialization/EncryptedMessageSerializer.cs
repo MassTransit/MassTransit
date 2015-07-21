@@ -34,10 +34,7 @@ namespace MassTransit.Serialization
             _serializer = BsonMessageSerializer.Serializer;
         }
 
-        ContentType IMessageSerializer.ContentType
-        {
-            get { return EncryptedContentType; }
-        }
+        ContentType IMessageSerializer.ContentType => EncryptedContentType;
 
         void IMessageSerializer.Serialize<T>(Stream stream, SendContext<T> context)
         {

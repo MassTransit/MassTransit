@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -28,24 +28,9 @@ namespace MassTransit.Testing
             _exception = exception;
         }
 
-        SendContext ISentMessage.Context
-        {
-            get { return _context; }
-        }
-
-        SendContext<T> ISentMessage<T>.Context
-        {
-            get { return _context; }
-        }
-
-        Exception ISentMessage.Exception
-        {
-            get { return _exception; }
-        }
-
-        Type ISentMessage.MessageType
-        {
-            get { return typeof(T); }
-        }
+        SendContext ISentMessage.Context => _context;
+        SendContext<T> ISentMessage<T>.Context => _context;
+        Exception ISentMessage.Exception => _exception;
+        Type ISentMessage.MessageType => typeof(T);
     }
 }

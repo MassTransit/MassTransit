@@ -33,8 +33,7 @@ namespace MassTransit
         {
             var handlerConfigurator = new HandlerConfigurator<T>(handler);
 
-            if (configure != null)
-                configure(handlerConfigurator);
+            configure?.Invoke(handlerConfigurator);
 
             configurator.AddEndpointSpecification(handlerConfigurator);
         }

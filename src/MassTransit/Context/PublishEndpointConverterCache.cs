@@ -28,10 +28,7 @@ namespace MassTransit.Context
             return Cached.Converters.Value[messageType].Publish(endpoint, message, pipe, cancellationToken);
         }
 
-        IPublishEndpointConverter this[Type type]
-        {
-            get { return _types.GetOrAdd(type, CreateTypeConverter).Value; }
-        }
+        IPublishEndpointConverter this[Type type] => _types.GetOrAdd(type, CreateTypeConverter).Value;
 
         static Lazy<IPublishEndpointConverter> CreateTypeConverter(Type type)
         {

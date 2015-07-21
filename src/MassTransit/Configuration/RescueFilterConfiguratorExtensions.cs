@@ -31,7 +31,7 @@ namespace MassTransit
             IPolicyExceptionFilter exceptionFilter = null)
         {
             if (configurator == null)
-                throw new ArgumentNullException("configurator");
+                throw new ArgumentNullException(nameof(configurator));
 
             var rescueConfigurator = new ReceiveContextRescuePipeSpecification(rescuePipe, exceptionFilter);
 

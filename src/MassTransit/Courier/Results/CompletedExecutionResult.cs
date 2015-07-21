@@ -48,35 +48,17 @@ namespace MassTransit.Courier.Results
             _duration = _context.Elapsed;
         }
 
-        protected RoutingSlip RoutingSlip
-        {
-            get { return _routingSlip; }
-        }
+        protected RoutingSlip RoutingSlip => _routingSlip;
 
-        protected IRoutingSlipEventPublisher Publisher
-        {
-            get { return _publisher; }
-        }
+        protected IRoutingSlipEventPublisher Publisher => _publisher;
 
-        protected IDictionary<string, object> Data
-        {
-            get { return _data; }
-        }
+        protected IDictionary<string, object> Data => _data;
 
-        protected ExecuteContext<TArguments> Context
-        {
-            get { return _context; }
-        }
+        protected ExecuteContext<TArguments> Context => _context;
 
-        protected Activity Activity
-        {
-            get { return _activity; }
-        }
+        protected Activity Activity => _activity;
 
-        protected TimeSpan Duration
-        {
-            get { return _duration; }
-        }
+        protected TimeSpan Duration => _duration;
 
         public async Task Evaluate()
         {

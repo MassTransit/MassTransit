@@ -37,20 +37,11 @@ namespace MassTransit.MessageData
             _value = new Lazy<Task<T>>(GetValue);
         }
 
-        public Uri Address
-        {
-            get { return _address; }
-        }
+        public Uri Address => _address;
 
-        public bool HasValue
-        {
-            get { return true; }
-        }
+        public bool HasValue => true;
 
-        public Task<T> Value
-        {
-            get { return _value.Value; }
-        }
+        public Task<T> Value => _value.Value;
 
         async Task<T> GetValue()
         {

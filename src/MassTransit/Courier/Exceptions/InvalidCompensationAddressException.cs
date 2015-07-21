@@ -25,7 +25,7 @@ namespace MassTransit.Courier.Exceptions
         }
 
         public InvalidCompensationAddressException(Uri address)
-            : base(string.Format("An invalid compensation address was specified: {0}", address))
+            : base($"An invalid compensation address was specified: {address}")
         {
         }
 

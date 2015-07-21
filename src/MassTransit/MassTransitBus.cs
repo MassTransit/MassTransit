@@ -26,7 +26,6 @@ namespace MassTransit
     public class MassTransitBus :
         IBusControl
     {
-        readonly Uri _address;
         readonly IConsumePipe _consumePipe;
         readonly IBusHostControl[] _hosts;
         readonly ILog _log;
@@ -39,7 +38,7 @@ namespace MassTransit
             IPublishSendEndpointProvider publishEndpoint, IEnumerable<IReceiveEndpoint> receiveEndpoints, IEnumerable<IBusHostControl> hosts)
         {
             _log = Logger.Get<MassTransitBus>();
-            _address = address;
+            Address = address;
             _consumePipe = consumePipe;
             _sendEndpointProvider = sendEndpointProvider;
             _publishEndpoint = new PublishEndpoint(address, publishEndpoint);
@@ -119,10 +118,7 @@ namespace MassTransit
             return _publishEndpoint.Publish<T>(values, publishPipe, cancellationToken);
         }
 
-        public Uri Address
-        {
-            get { return _address; }
-        }
+        public Uri Address { get; }
 
         Task<ISendEndpoint> ISendEndpointProvider.GetSendEndpoint(Uri address)
         {

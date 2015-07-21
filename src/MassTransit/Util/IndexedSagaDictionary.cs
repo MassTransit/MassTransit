@@ -35,10 +35,7 @@ namespace MassTransit.Util
             _inUse = new SemaphoreSlim(1);
         }
 
-        public TSaga Instance
-        {
-            get { return _instance; }
-        }
+        public TSaga Instance => _instance;
 
         public bool Equals(SagaInstance<TSaga> other)
         {

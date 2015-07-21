@@ -107,8 +107,7 @@ namespace MassTransit.Testing.TestInstanceConfigurators
             public ITestScenarioBuilder<TScenario> Configure(ITestScenarioBuilder<TScenario> builder)
             {
                 var scenarioBuilder = builder as IBusTestScenarioBuilder;
-                if (scenarioBuilder != null)
-                    scenarioBuilder.ConfigureReceiveEndpoint(x => x.Consumer(_consumerFactory));
+                scenarioBuilder?.ConfigureReceiveEndpoint(x => x.Consumer(_consumerFactory));
 
                 return builder;
             }

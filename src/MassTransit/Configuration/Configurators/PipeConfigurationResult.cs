@@ -35,7 +35,7 @@ namespace MassTransit.Configurators
         public string GetMessage(string header)
         {
             if (header == null)
-                throw new ArgumentNullException("header");
+                throw new ArgumentNullException(nameof(header));
 
             string message = header +
                              Environment.NewLine +

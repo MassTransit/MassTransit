@@ -44,34 +44,22 @@ namespace MassTransit.Courier.InternalMessages
             ExceptionInfo = exceptionInfo;
         }
 
-        public Guid TrackingNumber { get; private set; }
+        public Guid TrackingNumber { get; }
 
-        DateTime RoutingSlipActivityCompensationFailed.Timestamp
-        {
-            get { return _timestamp; }
-        }
+        DateTime RoutingSlipActivityCompensationFailed.Timestamp => _timestamp;
 
-        public Guid ActivityTrackingNumber { get; private set; }
-        public string ActivityName { get; private set; }
-        public IDictionary<string, object> Data { get; private set; }
-        public ExceptionInfo ExceptionInfo { get; private set; }
-        public IDictionary<string, object> Variables { get; private set; }
+        public Guid ActivityTrackingNumber { get; }
+        public string ActivityName { get; }
+        public IDictionary<string, object> Data { get; }
+        public ExceptionInfo ExceptionInfo { get; }
+        public IDictionary<string, object> Variables { get; }
 
-        TimeSpan RoutingSlipActivityCompensationFailed.Duration
-        {
-            get { return _duration; }
-        }
+        TimeSpan RoutingSlipActivityCompensationFailed.Duration => _duration;
 
-        public HostInfo Host { get; private set; }
+        public HostInfo Host { get; }
 
-        DateTime RoutingSlipCompensationFailed.Timestamp
-        {
-            get { return _failureTimestamp; }
-        }
+        DateTime RoutingSlipCompensationFailed.Timestamp => _failureTimestamp;
 
-        TimeSpan RoutingSlipCompensationFailed.Duration
-        {
-            get { return _routingSlipDuration; }
-        }
+        TimeSpan RoutingSlipCompensationFailed.Duration => _routingSlipDuration;
     }
 }

@@ -29,7 +29,6 @@ namespace MassTransit.Builders
         readonly string _busQueueName;
         readonly IBusHostControl[] _hosts;
         readonly Uri _inputAddress;
-        readonly IReceiveTransportProvider _receiveTransportProvider;
         readonly ISendTransportProvider _sendTransportProvider;
 
         public InMemoryBusBuilder(IReceiveTransportProvider receiveTransportProvider,
@@ -38,22 +37,19 @@ namespace MassTransit.Builders
             : base(consumePipeSpecification)
         {
             if (receiveTransportProvider == null)
-                throw new ArgumentNullException("receiveTransportProvider");
+                throw new ArgumentNullException(nameof(receiveTransportProvider));
             if (sendTransportProvider == null)
-                throw new ArgumentNullException("sendTransportProvider");
+                throw new ArgumentNullException(nameof(sendTransportProvider));
 
             _busQueueName = GenerateBusQueueName();
-            _inputAddress = new Uri(string.Format("loopback://localhost/{0}", _busQueueName));
+            _inputAddress = new Uri($"loopback://localhost/{_busQueueName}");
 
-            _receiveTransportProvider = receiveTransportProvider;
+            ReceiveTransportProvider = receiveTransportProvider;
             _sendTransportProvider = sendTransportProvider;
             _hosts = hosts.ToArray();
         }
 
-        public IReceiveTransportProvider ReceiveTransportProvider
-        {
-            get { return _receiveTransportProvider; }
-        }
+        public IReceiveTransportProvider ReceiveTransportProvider { get; }
 
         protected override Uri GetInputAddress()
         {

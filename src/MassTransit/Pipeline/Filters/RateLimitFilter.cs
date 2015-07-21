@@ -45,10 +45,8 @@ namespace MassTransit.Pipeline.Filters
 
         public void Dispose()
         {
-            if (_limit != null)
-                _limit.Dispose();
-            if (_timer != null)
-                _timer.Dispose();
+            _limit?.Dispose();
+            _timer?.Dispose();
         }
 
         void IProbeSite.Probe(ProbeContext context)

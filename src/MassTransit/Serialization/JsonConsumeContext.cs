@@ -77,70 +77,31 @@ namespace MassTransit.Serialization
             return _receiveContext.GetOrAddPayload(payloadFactory);
         }
 
-        public Guid? MessageId
-        {
-            get { return _messageId.HasValue ? _messageId : (_messageId = ConvertIdToGuid(_envelope.MessageId)); }
-        }
+        public Guid? MessageId => _messageId.HasValue ? _messageId : (_messageId = ConvertIdToGuid(_envelope.MessageId));
 
-        public Guid? RequestId
-        {
-            get { return _requestId.HasValue ? _requestId : (_requestId = ConvertIdToGuid(_envelope.RequestId)); }
-        }
+        public Guid? RequestId => _requestId.HasValue ? _requestId : (_requestId = ConvertIdToGuid(_envelope.RequestId));
 
-        public Guid? CorrelationId
-        {
-            get { return _correlationId.HasValue ? _correlationId : (_correlationId = ConvertIdToGuid(_envelope.CorrelationId)); }
-        }
+        public Guid? CorrelationId => _correlationId.HasValue ? _correlationId : (_correlationId = ConvertIdToGuid(_envelope.CorrelationId));
 
-        public DateTime? ExpirationTime
-        {
-            get { return _envelope.ExpirationTime; }
-        }
+        public DateTime? ExpirationTime => _envelope.ExpirationTime;
 
-        public Uri SourceAddress
-        {
-            get { return _sourceAddress ?? (_sourceAddress = ConvertToUri(_envelope.SourceAddress)); }
-        }
+        public Uri SourceAddress => _sourceAddress ?? (_sourceAddress = ConvertToUri(_envelope.SourceAddress));
 
-        public Uri DestinationAddress
-        {
-            get { return _destinationAddress ?? (_destinationAddress = ConvertToUri(_envelope.DestinationAddress)); }
-        }
+        public Uri DestinationAddress => _destinationAddress ?? (_destinationAddress = ConvertToUri(_envelope.DestinationAddress));
 
-        public Uri ResponseAddress
-        {
-            get { return _responseAddress ?? (_responseAddress = ConvertToUri(_envelope.ResponseAddress)); }
-        }
+        public Uri ResponseAddress => _responseAddress ?? (_responseAddress = ConvertToUri(_envelope.ResponseAddress));
 
-        public Uri FaultAddress
-        {
-            get { return _faultAddress ?? (_faultAddress = ConvertToUri(_envelope.FaultAddress)); }
-        }
+        public Uri FaultAddress => _faultAddress ?? (_faultAddress = ConvertToUri(_envelope.FaultAddress));
 
-        public Headers Headers
-        {
-            get { return _headers ?? (_headers = new JsonMessageHeaders(_deserializer, _envelope.Headers)); }
-        }
+        public Headers Headers => _headers ?? (_headers = new JsonMessageHeaders(_deserializer, _envelope.Headers));
 
-        public CancellationToken CancellationToken
-        {
-            get { return _receiveContext.CancellationToken; }
-        }
+        public CancellationToken CancellationToken => _receiveContext.CancellationToken;
 
-        public ReceiveContext ReceiveContext
-        {
-            get { return _receiveContext; }
-        }
+        public ReceiveContext ReceiveContext => _receiveContext;
 
-        public Task CompleteTask
-        {
-            get { return _receiveContext.CompleteTask; }
-        }
+        public Task CompleteTask => _receiveContext.CompleteTask;
 
-        public IEnumerable<string> SupportedMessageTypes
-        {
-            get { return _supportedTypes; }
-        }
+        public IEnumerable<string> SupportedMessageTypes => _supportedTypes;
 
         public bool HasMessageType(Type messageType)
         {

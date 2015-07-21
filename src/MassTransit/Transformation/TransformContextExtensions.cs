@@ -30,24 +30,14 @@ namespace MassTransit.Transformation
         class Result<TResult> :
             TransformResult<TResult>
         {
-            readonly bool _isNewValue;
-            readonly TResult _value;
-
             public Result(TResult value, bool isNewValue)
             {
-                _value = value;
-                _isNewValue = isNewValue;
+                Value = value;
+                IsNewValue = isNewValue;
             }
 
-            public TResult Value
-            {
-                get { return _value; }
-            }
-
-            public bool IsNewValue
-            {
-                get { return _isNewValue; }
-            }
+            public TResult Value { get; }
+            public bool IsNewValue { get; }
         }
     }
 }

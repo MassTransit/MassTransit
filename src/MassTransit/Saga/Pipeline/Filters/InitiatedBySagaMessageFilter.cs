@@ -38,8 +38,7 @@ namespace MassTransit.Saga.Pipeline.Filters
             var saga = context.Saga as InitiatedBy<TMessage>;
             if (saga == null)
             {
-                string message = string.Format("Saga type {0} is not initiated by message type {1}",
-                    TypeMetadataCache<TSaga>.ShortName, TypeMetadataCache<TMessage>.ShortName);
+                string message = $"Saga type {TypeMetadataCache<TSaga>.ShortName} is not initiated by message type {TypeMetadataCache<TMessage>.ShortName}";
 
                 throw new ConsumerMessageException(message);
             }

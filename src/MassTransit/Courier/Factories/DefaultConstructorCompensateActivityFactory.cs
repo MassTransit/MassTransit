@@ -16,10 +16,7 @@ namespace MassTransit.Courier.Factories
         where TActivity : class, CompensateActivity<TLog>, new()
         where TLog : class
     {
-        public static CompensateActivityFactory<TLog> CompensateFactory
-        {
-            get { return ActivityFactoryCache.Factory; }
-        }
+        public static CompensateActivityFactory<TLog> CompensateFactory => ActivityFactoryCache.Factory;
 
 
         static class ActivityFactoryCache

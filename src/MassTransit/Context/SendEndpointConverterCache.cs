@@ -40,10 +40,7 @@ namespace MassTransit.Context
             return Cached.Converters.Value[messageType].Send(endpoint, message, pipe, cancellationToken);
         }
 
-        ISendEndpointConverter this[Type type]
-        {
-            get { return _types.GetOrAdd(type, CreateTypeConverter).Value; }
-        }
+        ISendEndpointConverter this[Type type] => _types.GetOrAdd(type, CreateTypeConverter).Value;
 
         static Lazy<ISendEndpointConverter> CreateTypeConverter(Type type)
         {

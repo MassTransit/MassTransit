@@ -57,49 +57,28 @@ namespace MassTransit.Builders
                 (s, p) => new XmlMessageDeserializer(JsonMessageSerializer.Deserializer, s, p));
         }
 
-        protected IEnumerable<IReceiveEndpoint> ReceiveEndpoints
-        {
-            get { return _receiveEndpoints; }
-        }
+        protected IEnumerable<IReceiveEndpoint> ReceiveEndpoints => _receiveEndpoints;
 
-        public IMessageSerializer MessageSerializer
-        {
-            get { return _serializer.Value; }
-        }
+        public IMessageSerializer MessageSerializer => _serializer.Value;
 
-        public IMessageDeserializer MessageDeserializer
-        {
-            get { return _deserializer.Value; }
-        }
+        public IMessageDeserializer MessageDeserializer => _deserializer.Value;
 
-        protected ISendEndpointProvider SendEndpointProvider
-        {
-            get { return _sendEndpointProvider.Value; }
-        }
+        protected ISendEndpointProvider SendEndpointProvider => _sendEndpointProvider.Value;
 
-        public ISendTransportProvider SendTransportProvider
-        {
-            get { return _sendTransportProvider.Value; }
-        }
+        public ISendTransportProvider SendTransportProvider => _sendTransportProvider.Value;
 
-        protected IPublishSendEndpointProvider PublishEndpoint
-        {
-            get { return _publishSendEndpointProvider.Value; }
-        }
+        protected IPublishSendEndpointProvider PublishEndpoint => _publishSendEndpointProvider.Value;
 
-        protected Uri InputAddress
-        {
-            get { return _inputAddress.Value; }
-        }
+        protected Uri InputAddress => _inputAddress.Value;
 
         protected abstract Uri GetInputAddress();
 
         public void AddMessageDeserializer(ContentType contentType, DeserializerFactory deserializerFactory)
         {
             if (contentType == null)
-                throw new ArgumentNullException("contentType");
+                throw new ArgumentNullException(nameof(contentType));
             if (deserializerFactory == null)
-                throw new ArgumentNullException("deserializerFactory");
+                throw new ArgumentNullException(nameof(deserializerFactory));
 
             if (_deserializer.IsValueCreated)
                 throw new ConfigurationException("The deserializer has already been created, no additional deserializers can be added.");
@@ -113,7 +92,7 @@ namespace MassTransit.Builders
         public void SetMessageSerializer(Func<IMessageSerializer> serializerFactory)
         {
             if (serializerFactory == null)
-                throw new ArgumentNullException("serializerFactory");
+                throw new ArgumentNullException(nameof(serializerFactory));
 
             if (_serializer.IsValueCreated)
                 throw new ConfigurationException("The serializer has already been created, the serializer cannot be changed at this time.");

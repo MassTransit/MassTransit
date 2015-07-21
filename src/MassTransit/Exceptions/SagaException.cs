@@ -33,14 +33,14 @@ namespace MassTransit
         }
 
         public SagaException(string message, Type sagaType, Type messageType, Expression findExpression)
-            : base(string.Format("{0} {1}({2}) - {3}", sagaType.FullName, message, messageType.FullName, findExpression))
+            : base($"{sagaType.FullName} {message}({messageType.FullName}) - {findExpression}")
         {
             _sagaType = sagaType;
             _messageType = messageType;
         }
 
         public SagaException(string message, Type sagaType, Type messageType, Expression findExpression, Exception innerException)
-            : base(string.Format("{0} {1}({2}) - {3}", sagaType.FullName, message, messageType.FullName, findExpression), innerException)
+            : base($"{sagaType.FullName} {message}({messageType.FullName}) - {findExpression}", innerException)
         {
             _sagaType = sagaType;
             _messageType = messageType;
@@ -62,29 +62,20 @@ namespace MassTransit
             _correlationId = Guid.Empty;
         }
 
-        public Type SagaType
-        {
-            get { return _sagaType; }
-        }
+        public Type SagaType => _sagaType;
 
-        public Type MessageType
-        {
-            get { return _messageType; }
-        }
+        public Type MessageType => _messageType;
 
-        public Guid CorrelationId
-        {
-            get { return _correlationId; }
-        }
+        public Guid CorrelationId => _correlationId;
 
         static string FormatMessage(Type sagaType, Type messageType, string message)
         {
-            return string.Format("{0} Saga exception on receipt of {1}: {2}", sagaType.FullName, messageType.FullName, message);
+            return $"{sagaType.FullName} Saga exception on receipt of {messageType.FullName}: {message}";
         }
 
         static string FormatMessage(Type sagaType, Guid correlationId, Type messageType, string message)
         {
-            return string.Format("{0}({1}) Saga exception on receipt of {2}: {3}", sagaType.FullName, correlationId, messageType.FullName, message);
+            return $"{sagaType.FullName}({correlationId}) Saga exception on receipt of {messageType.FullName}: {message}";
         }
     }
 }

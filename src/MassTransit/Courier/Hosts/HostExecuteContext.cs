@@ -34,7 +34,6 @@ namespace MassTransit.Courier.Hosts
         readonly Uri _compensationAddress;
         readonly ConsumeContext<RoutingSlip> _context;
         readonly Guid _executionId;
-
         readonly HostInfo _host;
         readonly IRoutingSlipEventPublisher _publisher;
         readonly SanitizedRoutingSlip _routingSlip;
@@ -63,10 +62,7 @@ namespace MassTransit.Courier.Hosts
             _publisher = new RoutingSlipEventPublisher(this, _routingSlip);
         }
 
-        CancellationToken PipeContext.CancellationToken
-        {
-            get { return _context.CancellationToken; }
-        }
+        CancellationToken PipeContext.CancellationToken => _context.CancellationToken;
 
         bool PipeContext.HasPayloadType(Type contextType)
         {
@@ -137,45 +133,14 @@ namespace MassTransit.Courier.Hosts
             return _context.Publish<T>(values, publishPipe, cancellationToken);
         }
 
-        public HostInfo Host
-        {
-            get { return _host; }
-        }
-
-        public DateTime Timestamp
-        {
-            get { return _timestamp; }
-        }
-
-        public TimeSpan Elapsed
-        {
-            get { return _timer.Elapsed; }
-        }
-
-        public ConsumeContext ConsumeContext
-        {
-            get { return _context; }
-        }
-
-        TArguments ExecuteContext<TArguments>.Arguments
-        {
-            get { return _arguments; }
-        }
-
-        Guid ExecuteContext.TrackingNumber
-        {
-            get { return _routingSlip.TrackingNumber; }
-        }
-
-        Guid ExecuteContext.ExecutionId
-        {
-            get { return _executionId; }
-        }
-
-        public string ActivityName
-        {
-            get { return _activity.Name; }
-        }
+        HostInfo ExecuteContext.Host => _host;
+        DateTime ExecuteContext.Timestamp => _timestamp;
+        TimeSpan ExecuteContext.Elapsed => _timer.Elapsed;
+        ConsumeContext ExecuteContext.ConsumeContext => _context;
+        TArguments ExecuteContext<TArguments>.Arguments => _arguments;
+        Guid ExecuteContext.TrackingNumber => _routingSlip.TrackingNumber;
+        Guid ExecuteContext.ExecutionId => _executionId;
+        string ExecuteContext.ActivityName => _activity.Name;
 
         ExecutionResult ExecuteContext.Completed()
         {
@@ -185,7 +150,7 @@ namespace MassTransit.Courier.Hosts
         ExecutionResult ExecuteContext.Completed<TLog>(TLog log)
         {
             if (log == null)
-                throw new ArgumentNullException("log");
+                throw new ArgumentNullException(nameof(log));
 
             if (_compensationAddress == null)
                 throw new InvalidCompensationAddressException(_compensationAddress);
@@ -196,7 +161,7 @@ namespace MassTransit.Courier.Hosts
         ExecutionResult ExecuteContext.CompletedWithVariables(IEnumerable<KeyValuePair<string, object>> variables)
         {
             if (variables == null)
-                throw new ArgumentNullException("variables");
+                throw new ArgumentNullException(nameof(variables));
 
             return new NextActivityWithVariablesExecutionResult<TArguments>(this, _publisher, _activity, _routingSlip,
                 variables.ToDictionary(x => x.Key, x => x.Value));
@@ -205,7 +170,7 @@ namespace MassTransit.Courier.Hosts
         ExecutionResult ExecuteContext.CompletedWithVariables(object variables)
         {
             if (variables == null)
-                throw new ArgumentNullException("variables");
+                throw new ArgumentNullException(nameof(variables));
 
             return new NextActivityWithVariablesExecutionResult<TArguments>(this, _publisher, _activity, _routingSlip,
                 RoutingSlipBuilder.GetObjectAsDictionary(variables));
@@ -214,9 +179,9 @@ namespace MassTransit.Courier.Hosts
         ExecutionResult ExecuteContext.CompletedWithVariables<TLog>(TLog log, object variables)
         {
             if (log == null)
-                throw new ArgumentNullException("log");
+                throw new ArgumentNullException(nameof(log));
             if (variables == null)
-                throw new ArgumentNullException("variables");
+                throw new ArgumentNullException(nameof(variables));
 
             if (_compensationAddress == null)
                 throw new InvalidCompensationAddressException(_compensationAddress);
@@ -228,9 +193,9 @@ namespace MassTransit.Courier.Hosts
         ExecutionResult ExecuteContext.CompletedWithVariables<TLog>(TLog log, IEnumerable<KeyValuePair<string, object>> variables)
         {
             if (log == null)
-                throw new ArgumentNullException("log");
+                throw new ArgumentNullException(nameof(log));
             if (variables == null)
-                throw new ArgumentNullException("variables");
+                throw new ArgumentNullException(nameof(variables));
 
             if (_compensationAddress == null)
                 throw new InvalidCompensationAddressException(_compensationAddress);
@@ -239,21 +204,20 @@ namespace MassTransit.Courier.Hosts
                 variables.ToDictionary(x => x.Key, x => x.Value));
         }
 
-        public ExecutionResult ReviseItinerary(Action<ItineraryBuilder> buildItinerary)
+        ExecutionResult ExecuteContext.ReviseItinerary(Action<ItineraryBuilder> buildItinerary)
         {
             if (buildItinerary == null)
-                throw new ArgumentNullException("buildItinerary");
+                throw new ArgumentNullException(nameof(buildItinerary));
 
             return new ReviseItineraryExecutionResult<TArguments>(this, _publisher, _activity, _routingSlip, buildItinerary);
         }
 
-        public ExecutionResult ReviseItinerary<TLog>(TLog log, Action<ItineraryBuilder> buildItinerary)
-            where TLog : class
+        ExecutionResult ExecuteContext.ReviseItinerary<TLog>(TLog log, Action<ItineraryBuilder> buildItinerary)
         {
             if (log == null)
-                throw new ArgumentNullException("log");
+                throw new ArgumentNullException(nameof(log));
             if (buildItinerary == null)
-                throw new ArgumentNullException("buildItinerary");
+                throw new ArgumentNullException(nameof(buildItinerary));
 
             if (_compensationAddress == null)
                 throw new InvalidCompensationAddressException(_compensationAddress);
@@ -262,15 +226,14 @@ namespace MassTransit.Courier.Hosts
                 buildItinerary);
         }
 
-        public ExecutionResult ReviseItinerary<TLog>(TLog log, object variables, Action<ItineraryBuilder> buildItinerary)
-            where TLog : class
+        ExecutionResult ExecuteContext.ReviseItinerary<TLog>(TLog log, object variables, Action<ItineraryBuilder> buildItinerary)
         {
             if (log == null)
-                throw new ArgumentNullException("log");
+                throw new ArgumentNullException(nameof(log));
             if (variables == null)
-                throw new ArgumentNullException("variables");
+                throw new ArgumentNullException(nameof(variables));
             if (buildItinerary == null)
-                throw new ArgumentNullException("buildItinerary");
+                throw new ArgumentNullException(nameof(buildItinerary));
 
             if (_compensationAddress == null)
                 throw new InvalidCompensationAddressException(_compensationAddress);
@@ -279,16 +242,15 @@ namespace MassTransit.Courier.Hosts
                 log, RoutingSlipBuilder.GetObjectAsDictionary(variables), buildItinerary);
         }
 
-        public ExecutionResult ReviseItinerary<TLog>(TLog log, IEnumerable<KeyValuePair<string, object>> variables,
+        ExecutionResult ExecuteContext.ReviseItinerary<TLog>(TLog log, IEnumerable<KeyValuePair<string, object>> variables,
             Action<ItineraryBuilder> buildItinerary)
-            where TLog : class
         {
             if (log == null)
-                throw new ArgumentNullException("log");
+                throw new ArgumentNullException(nameof(log));
             if (variables == null)
-                throw new ArgumentNullException("variables");
+                throw new ArgumentNullException(nameof(variables));
             if (buildItinerary == null)
-                throw new ArgumentNullException("buildItinerary");
+                throw new ArgumentNullException(nameof(buildItinerary));
 
             if (_compensationAddress == null)
                 throw new InvalidCompensationAddressException(_compensationAddress);
@@ -297,24 +259,24 @@ namespace MassTransit.Courier.Hosts
                 log, variables.ToDictionary(x => x.Key, x => x.Value), buildItinerary);
         }
 
-        public ExecutionResult Terminate()
+        ExecutionResult ExecuteContext.Terminate()
         {
             return new TerminateExecutionResult<TArguments>(this, _publisher, _activity, _routingSlip);
         }
 
-        public ExecutionResult Terminate(object variables)
+        ExecutionResult ExecuteContext.Terminate(object variables)
         {
             if (variables == null)
-                throw new ArgumentNullException("variables");
+                throw new ArgumentNullException(nameof(variables));
 
             return new TerminateWithVariablesExecutionResult<TArguments>(this, _publisher, _activity, _routingSlip,
                 RoutingSlipBuilder.GetObjectAsDictionary(variables));
         }
 
-        public ExecutionResult Terminate(IEnumerable<KeyValuePair<string, object>> variables)
+        ExecutionResult ExecuteContext.Terminate(IEnumerable<KeyValuePair<string, object>> variables)
         {
             if (variables == null)
-                throw new ArgumentNullException("variables");
+                throw new ArgumentNullException(nameof(variables));
 
             return new TerminateWithVariablesExecutionResult<TArguments>(this, _publisher, _activity, _routingSlip,
                 variables.ToDictionary(x => x.Key, x => x.Value));
@@ -328,17 +290,17 @@ namespace MassTransit.Courier.Hosts
         ExecutionResult ExecuteContext.Faulted(Exception exception)
         {
             if (exception == null)
-                throw new ArgumentNullException("exception");
+                throw new ArgumentNullException(nameof(exception));
 
             return Faulted(exception);
         }
 
-        public Task<ISendEndpoint> GetSendEndpoint(Uri address)
+        Task<ISendEndpoint> ISendEndpointProvider.GetSendEndpoint(Uri address)
         {
             return _context.GetSendEndpoint(address);
         }
 
-        public ConnectHandle ConnectPublishObserver(IPublishObserver observer)
+        ConnectHandle IPublishObserverConnector.ConnectPublishObserver(IPublishObserver observer)
         {
             return _context.ConnectPublishObserver(observer);
         }

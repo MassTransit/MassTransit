@@ -27,10 +27,7 @@ namespace MassTransit.Testing.TestDecorators
             _messages = new ReceivedMessageList(timeout);
         }
 
-        public IReceivedMessageList Messages
-        {
-            get { return _messages; }
-        }
+        public IReceivedMessageList Messages => _messages;
 
         async Task IConsumeObserver.PreConsume<T>(ConsumeContext<T> context)
         {

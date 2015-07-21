@@ -43,7 +43,7 @@ namespace MassTransit.PipeConfigurators
         void IPipeConfigurator<TContext>.AddPipeSpecification(IPipeSpecification<TContext> specification)
         {
             if (specification == null)
-                throw new ArgumentNullException("specification");
+                throw new ArgumentNullException(nameof(specification));
 
             _specifications.Add(specification);
         }

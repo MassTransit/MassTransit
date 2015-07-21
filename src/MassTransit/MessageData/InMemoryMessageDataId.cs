@@ -26,9 +26,6 @@ namespace MassTransit.MessageData
             _id = NewId.Next();
         }
 
-        public Uri Uri
-        {
-            get { return new Uri("urn:msgdata:" + _formatter.Format(_id.ToByteArray())); }
-        }
+        public Uri Uri => new Uri("urn:msgdata:" + _formatter.Format(_id.ToByteArray()));
     }
 }

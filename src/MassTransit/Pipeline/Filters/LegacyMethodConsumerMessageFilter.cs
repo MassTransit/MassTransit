@@ -38,8 +38,8 @@ namespace MassTransit.Pipeline.Filters
             var messageConsumer = context.Consumer as IMessageConsumer<TMessage>;
             if (messageConsumer == null)
             {
-                string message = string.Format("Consumer type {0} is not a consumer of message type {1}",
-                    TypeMetadataCache<TConsumer>.ShortName, TypeMetadataCache<TMessage>.ShortName);
+                string message =
+                    $"Consumer type {TypeMetadataCache<TConsumer>.ShortName} is not a consumer of message type {TypeMetadataCache<TMessage>.ShortName}";
 
                 throw new ConsumerMessageException(message);
             }

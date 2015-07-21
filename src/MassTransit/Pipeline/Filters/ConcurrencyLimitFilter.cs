@@ -39,8 +39,7 @@ namespace MassTransit.Pipeline.Filters
 
         public void Dispose()
         {
-            if (_limit != null)
-                _limit.Dispose();
+            _limit?.Dispose();
         }
 
         void IProbeSite.Probe(ProbeContext context)
@@ -68,7 +67,7 @@ namespace MassTransit.Pipeline.Filters
         public async Task SetConcurrencyLimit(int concurrencyLimit)
         {
             if (concurrencyLimit < 1)
-                throw new ArgumentOutOfRangeException("concurrencyLimit", "The concurrency limit must be >= 1");
+                throw new ArgumentOutOfRangeException(nameof(concurrencyLimit), "The concurrency limit must be >= 1");
 
             int previousLimit = _concurrencyLimit;
             if (concurrencyLimit > previousLimit)

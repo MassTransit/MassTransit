@@ -14,7 +14,6 @@ namespace MassTransit.Policies
 {
     using System;
     using System.Collections.Generic;
-    using System.Threading.Tasks;
 
 
     public class IncrementalRetryPolicy :
@@ -30,13 +29,13 @@ namespace MassTransit.Policies
         {
             if (initialInterval < TimeSpan.Zero)
             {
-                throw new ArgumentOutOfRangeException("initialInterval",
+                throw new ArgumentOutOfRangeException(nameof(initialInterval),
                     "The initialInterval must be non-negative or -1, and it must be less than or equal to TimeSpan.MaxValue.");
             }
 
             if (intervalIncrement < TimeSpan.Zero)
             {
-                throw new ArgumentOutOfRangeException("intervalIncrement",
+                throw new ArgumentOutOfRangeException(nameof(intervalIncrement),
                     "The intervalIncrement must be non-negative or -1, and it must be less than or equal to TimeSpan.MaxValue.");
             }
 

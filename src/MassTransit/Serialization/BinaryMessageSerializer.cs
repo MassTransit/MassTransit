@@ -46,14 +46,13 @@ namespace MassTransit.Serialization
         {
             object message = context.Message;
             if (message == null)
-                throw new ArgumentNullException("context", "The message must not be null");
+                throw new ArgumentNullException(nameof(context), "The message must not be null");
 
             Type t = message.GetType();
             if (!t.IsSerializable)
             {
                 throw new ConventionException(
-                    string.Format("Whoa, slow down buddy. The message '{0}' must be marked with the 'Serializable' attribute!",
-                        TypeMetadataCache<T>.ShortName));
+                    $"Whoa, slow down buddy. The message '{TypeMetadataCache<T>.ShortName}' must be marked with the 'Serializable' attribute!");
             }
 
             _formatter.Serialize(stream, context.Message, GetHeaders(context, new MessageUrn(typeof(T))));
@@ -61,10 +60,7 @@ namespace MassTransit.Serialization
             context.ContentType = BinaryContentType;
         }
 
-        ContentType IMessageSerializer.ContentType
-        {
-            get { return BinaryContentType; }
-        }
+        ContentType IMessageSerializer.ContentType => BinaryContentType;
 
         static Header[] GetHeaders(SendContext context, MessageUrn messageType)
         {

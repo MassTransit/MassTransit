@@ -29,16 +29,13 @@ namespace MassTransit.Logging
         public static readonly LogLevel Warn = new LogLevel("Warn", 3, SourceLevels.Warning, TraceEventType.Warning);
 
         readonly int _index;
-        readonly string _name;
-        readonly SourceLevels _sourceLevel;
-        readonly TraceEventType _traceEventType;
 
         LogLevel(string name, int index, SourceLevels sourceLevel, TraceEventType traceEventType)
         {
-            _name = name;
+            Name = name;
             _index = index;
-            _sourceLevel = sourceLevel;
-            _traceEventType = traceEventType;
+            SourceLevel = sourceLevel;
+            TraceEventType = traceEventType;
         }
 
         public static IEnumerable<LogLevel> Values
@@ -55,24 +52,15 @@ namespace MassTransit.Logging
             }
         }
 
-        public TraceEventType TraceEventType
-        {
-            get { return _traceEventType; }
-        }
+        public TraceEventType TraceEventType { get; }
 
-        public string Name
-        {
-            get { return _name; }
-        }
+        public string Name { get; }
 
-        public SourceLevels SourceLevel
-        {
-            get { return _sourceLevel; }
-        }
+        public SourceLevels SourceLevel { get; }
 
         public override string ToString()
         {
-            return _name;
+            return Name;
         }
 
         public static bool operator >(LogLevel left, LogLevel right)

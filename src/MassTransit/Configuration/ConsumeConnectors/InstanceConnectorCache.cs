@@ -29,15 +29,9 @@ namespace MassTransit.ConsumeConnectors
                 LazyThreadSafetyMode.PublicationOnly);
         }
 
-        public static IInstanceConnector Connector
-        {
-            get { return InstanceCache.Cached.Value.Connector; }
-        }
+        public static IInstanceConnector Connector => InstanceCache.Cached.Value.Connector;
 
-        IInstanceConnector IInstanceConnectorCache<T>.Connector
-        {
-            get { return _connector.Value; }
-        }
+        IInstanceConnector IInstanceConnectorCache<T>.Connector => _connector.Value;
 
 
         static class InstanceCache

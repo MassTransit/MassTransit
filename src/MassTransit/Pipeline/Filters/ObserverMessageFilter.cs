@@ -31,7 +31,7 @@ namespace MassTransit.Pipeline.Filters
         public ObserverMessageFilter(IObserver<ConsumeContext<TMessage>> observer)
         {
             if (observer == null)
-                throw new ArgumentNullException("observer");
+                throw new ArgumentNullException(nameof(observer));
 
             _observer = observer;
         }
@@ -49,13 +49,13 @@ namespace MassTransit.Pipeline.Filters
             {
                 _observer.OnNext(context);
 
-                context.NotifyConsumed(timer.Elapsed, TypeMetadataCache.GetShortName(_observer.GetType()));
+                await context.NotifyConsumed(timer.Elapsed, TypeMetadataCache.GetShortName(_observer.GetType()));
 
                 await next.Send(context);
             }
             catch (Exception ex)
             {
-                context.NotifyFaulted(timer.Elapsed, TypeMetadataCache.GetShortName(_observer.GetType()), ex);
+                await context.NotifyFaulted(timer.Elapsed, TypeMetadataCache.GetShortName(_observer.GetType()), ex);
 
                 _observer.OnError(ex);
 

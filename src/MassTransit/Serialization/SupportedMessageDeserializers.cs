@@ -22,7 +22,6 @@ namespace MassTransit.Serialization
     public class SupportedMessageDeserializers :
         IMessageDeserializer
     {
-        readonly ContentType _contentType = new ContentType("application/*");
         readonly IDictionary<string, IMessageDeserializer> _deserializers;
 
         public SupportedMessageDeserializers(params IMessageDeserializer[] deserializers)
@@ -40,10 +39,7 @@ namespace MassTransit.Serialization
                 deserializer.Probe(scope);
         }
 
-        public ContentType ContentType
-        {
-            get { return _contentType; }
-        }
+        public ContentType ContentType { get; } = new ContentType("application/*");
 
         public ConsumeContext Deserialize(ReceiveContext receiveContext)
         {
@@ -51,8 +47,7 @@ namespace MassTransit.Serialization
             if (!TryGetSerializer(receiveContext.ContentType, out deserializer))
             {
                 throw new SerializationException(
-                    string.Format("No deserializer was registered for the message content type: {0}. Supported content types include {1}",
-                        receiveContext.ContentType, string.Join(", ", _deserializers.Values.Select(x => x.ContentType))));
+                    $"No deserializer was registered for the message content type: {receiveContext.ContentType}. Supported content types include {string.Join(", ", _deserializers.Values.Select(x => x.ContentType))}");
             }
 
             return deserializer.Deserialize(receiveContext);
@@ -61,9 +56,9 @@ namespace MassTransit.Serialization
         bool TryGetSerializer(ContentType contentType, out IMessageDeserializer deserializer)
         {
             if (contentType == null)
-                throw new ArgumentNullException("contentType");
+                throw new ArgumentNullException(nameof(contentType));
             if (string.IsNullOrWhiteSpace(contentType.MediaType))
-                throw new ArgumentException("The media type must be specified", "contentType");
+                throw new ArgumentException("The media type must be specified", nameof(contentType));
 
             return _deserializers.TryGetValue(contentType.MediaType, out deserializer);
         }
@@ -71,7 +66,7 @@ namespace MassTransit.Serialization
         void AddSerializer(IMessageDeserializer deserializer)
         {
             if (deserializer == null)
-                throw new ArgumentNullException("deserializer");
+                throw new ArgumentNullException(nameof(deserializer));
 
             string contentType = deserializer.ContentType.MediaType;
 

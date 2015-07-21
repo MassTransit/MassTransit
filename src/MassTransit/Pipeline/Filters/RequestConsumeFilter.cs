@@ -40,7 +40,7 @@ namespace MassTransit.Pipeline.Filters
         public ConnectHandle ConnectById(TKey key, IPipe<ConsumeContext<T>> pipe)
         {
             if (pipe == null)
-                throw new ArgumentNullException("pipe");
+                throw new ArgumentNullException(nameof(pipe));
 
             bool added = _pipes.TryAdd(key, new RequestPipeFilter<T, TKey>(key, pipe));
             if (!added)

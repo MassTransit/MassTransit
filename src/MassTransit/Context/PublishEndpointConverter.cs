@@ -30,9 +30,9 @@ namespace MassTransit.Context
         async Task IPublishEndpointConverter.Publish(IPublishEndpoint endpoint, object message, CancellationToken cancellationToken)
         {
             if (endpoint == null)
-                throw new ArgumentNullException("endpoint");
+                throw new ArgumentNullException(nameof(endpoint));
             if (message == null)
-                throw new ArgumentNullException("message");
+                throw new ArgumentNullException(nameof(message));
 
             var msg = message as T;
             if (msg == null)
@@ -45,11 +45,11 @@ namespace MassTransit.Context
             CancellationToken cancellationToken)
         {
             if (endpoint == null)
-                throw new ArgumentNullException("endpoint");
+                throw new ArgumentNullException(nameof(endpoint));
             if (message == null)
-                throw new ArgumentNullException("message");
+                throw new ArgumentNullException(nameof(message));
             if (pipe == null)
-                throw new ArgumentNullException("pipe");
+                throw new ArgumentNullException(nameof(pipe));
 
             var msg = message as T;
             if (msg == null)

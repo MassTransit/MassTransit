@@ -95,8 +95,7 @@ namespace MassTransit.Transports.InMemory
                 Task.Factory.StartNew(() => DispatchMessage(transportMessage), _stopToken, TaskCreationOptions.HideScheduler, _scheduler);
 #pragma warning restore 4014
 
-                context.DestinationAddress.LogSent(context.MessageId.HasValue ? context.MessageId.Value.ToString("N") : "",
-                    TypeMetadataCache<T>.ShortName);
+                context.DestinationAddress.LogSent(context.MessageId?.ToString("N") ?? "", TypeMetadataCache<T>.ShortName);
 
                 await _observers.NotifyPostSend(context);
             }

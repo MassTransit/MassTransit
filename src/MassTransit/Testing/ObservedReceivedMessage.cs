@@ -20,32 +20,19 @@ namespace MassTransit.Testing
         where T : class
     {
         readonly ConsumeContext<T> _context;
-        readonly Exception _exception;
 
         public ObservedReceivedMessage(ConsumeContext<T> context, Exception exception = null)
         {
             _context = context;
-            _exception = exception;
+            Exception = exception;
         }
 
-        ConsumeContext IReceivedMessage.Context
-        {
-            get { return _context; }
-        }
+        ConsumeContext IReceivedMessage.Context => _context;
 
-        public Exception Exception
-        {
-            get { return _exception; }
-        }
+        public Exception Exception { get; }
 
-        public Type MessageType
-        {
-            get { return typeof(T); }
-        }
+        public Type MessageType => typeof(T);
 
-        public ConsumeContext<T> Context
-        {
-            get { return _context; }
-        }
+        public ConsumeContext<T> Context => _context;
     }
 }

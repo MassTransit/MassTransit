@@ -92,12 +92,9 @@ namespace MassTransit.PipeConfigurators
                 _filters = new List<IFilter<ConsumeContext<T>>>();
             }
 
-            public IEnumerable<IFilter<ConsumeContext<T>>> Filters
-            {
-                get { return _filters; }
-            }
+            public IEnumerable<IFilter<ConsumeContext<T>>> Filters => _filters;
 
-            public void AddFilter(IFilter<ConsumeContext<T>> filter)
+            void IPipeBuilder<ConsumeContext<T>>.AddFilter(IFilter<ConsumeContext<T>> filter)
             {
                 _filters.Add(filter);
             }

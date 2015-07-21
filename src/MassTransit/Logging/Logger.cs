@@ -21,10 +21,7 @@ namespace MassTransit.Logging
     {
         static ILogger _logger;
 
-        public static ILogger Current
-        {
-            get { return _logger ?? (_logger = new TraceLogger()); }
-        }
+        public static ILogger Current => _logger ?? (_logger = new TraceLogger());
 
         public static ILog Get<T>()
             where T : class

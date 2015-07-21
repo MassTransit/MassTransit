@@ -56,10 +56,7 @@ namespace MassTransit.Saga.Connectors
             return consumePipe.ConnectConsumePipe(messagePipe);
         }
 
-        public Type MessageType
-        {
-            get { return typeof(TMessage); }
-        }
+        public Type MessageType => typeof(TMessage);
 
         /// <summary>
         /// Configure the saga pipe to which the saga instance is sent
@@ -88,10 +85,7 @@ namespace MassTransit.Saga.Connectors
                 _filters = new List<IFilter<SagaConsumeContext<T>>>();
             }
 
-            public IEnumerable<IFilter<SagaConsumeContext<T>>> Filters
-            {
-                get { return _filters; }
-            }
+            public IEnumerable<IFilter<SagaConsumeContext<T>>> Filters => _filters;
 
             public void AddFilter(IFilter<SagaConsumeContext<T>> filter)
             {
