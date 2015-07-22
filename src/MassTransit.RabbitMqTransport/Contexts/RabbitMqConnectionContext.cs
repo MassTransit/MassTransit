@@ -84,6 +84,7 @@ namespace MassTransit.RabbitMqTransport.Contexts
             _connection.ConnectionShutdown -= OnConnectionShutdown;
 
             _registration.Dispose();
+            _tokenSource.Dispose();
 
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Disconnecting: {0}", _hostSettings.ToDebugString());

@@ -58,9 +58,6 @@ namespace MassTransit.RabbitMqTransport
 
                 p.UseExecuteAsync(async modelContext =>
                 {
-//                    if (_log.IsDebugEnabled)
-//                        _log.DebugFormat("Sending {0} to {1}", TypeMetadataCache<T>.ShortName, _sendSettings.ExchangeName);
-
                     IBasicProperties properties = modelContext.Model.CreateBasicProperties();
 
                     var context = new RabbitMqSendContextImpl<T>(properties, message, _sendSettings, cancelSend);

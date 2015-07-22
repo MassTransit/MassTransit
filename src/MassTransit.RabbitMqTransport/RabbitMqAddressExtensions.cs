@@ -296,9 +296,9 @@ namespace MassTransit.RabbitMqTransport
         {
             var factory = new ConnectionFactory
             {
-                AutomaticRecoveryEnabled = true,
+                AutomaticRecoveryEnabled = false,
                 NetworkRecoveryInterval = TimeSpan.FromSeconds(1),
-                TopologyRecoveryEnabled = true,
+                TopologyRecoveryEnabled = false,
                 HostName = settings.Host,
                 Port = settings.Port,
                 VirtualHost = settings.VirtualHost ?? "/",

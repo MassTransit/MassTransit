@@ -46,8 +46,10 @@ namespace MassTransit.RabbitMqTransport.Configuration
                 ExchangeName = queueName,
                 AutoDelete = true,
                 Durable = false,
-                Exclusive = true,
             };
+
+            _settings.QueueArguments["x-expires"] = 60000;
+            _settings.ExchangeArguments["x-expires"] = 60000;
         }
 
         public IBusControl CreateBus()

@@ -164,7 +164,6 @@ namespace MassTransit.RabbitMqTransport.Contexts
         {
             try
             {
-                _log.DebugFormat("Close: {0} ({1} messages published)", _connectionContext.HostSettings.ToDebugString(), _publishTagMax);
                 if (_model.IsOpen && _published.Count > 0)
                 {
                     bool timedOut;

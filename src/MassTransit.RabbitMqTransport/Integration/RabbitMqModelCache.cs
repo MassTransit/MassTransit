@@ -14,7 +14,6 @@ namespace MassTransit.RabbitMqTransport.Integration
 {
     using System;
     using System.Collections.Concurrent;
-    using System.Collections.Generic;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
@@ -150,42 +149,6 @@ namespace MassTransit.RabbitMqTransport.Integration
                     throw new InvalidOperationException("The connection could not be added");
 
                 return context;
-            }
-
-            /// <summary>
-            /// Enumerate the connections invoking the callback for each connection
-            /// </summary>
-            /// <param name="callback">The callback</param>
-            /// <returns>An awaitable Task for the operation</returns>
-            public async Task ForEach(Func<SharedModelContext, Task> callback)
-            {
-                if (callback == null)
-                    throw new ArgumentNullException(nameof(callback));
-
-                if (_models.Count == 0)
-                    return;
-
-                var exceptions = new List<Exception>();
-
-                foreach (SharedModelContext connection in _models.Values)
-                {
-                    try
-                    {
-                        await callback(connection);
-                    }
-                    catch (Exception ex)
-                    {
-                        exceptions.Add(ex);
-                    }
-                }
-
-                if (exceptions.Count > 0)
-                    throw new AggregateException(exceptions);
-            }
-
-            public bool All(Func<SharedModelContext, bool> callback)
-            {
-                return _models.Values.All(callback);
             }
 
             void Disconnect(long id)

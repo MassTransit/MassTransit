@@ -18,6 +18,7 @@ namespace MassTransit.RabbitMqTransport.Integration
     using System.Threading;
     using System.Threading.Tasks;
     using Contexts;
+    using Internals.Extensions;
     using Logging;
     using MassTransit.Pipeline;
     using RabbitMQ.Client;
@@ -31,7 +32,6 @@ namespace MassTransit.RabbitMqTransport.Integration
         static readonly ILog _log = Logger.Get<RabbitMqConnectionCache>();
         readonly ConnectionFactory _connectionFactory;
         readonly object _scopeLock = new object();
-
         readonly RabbitMqHostSettings _settings;
         ConnectionScope _scope;
 
@@ -69,7 +69,7 @@ namespace MassTransit.RabbitMqTransport.Integration
             {
                 context.Set(new
                 {
-                    Connected = true,
+                    Connected = true
                 });
             }
         }
@@ -80,11 +80,14 @@ namespace MassTransit.RabbitMqTransport.Integration
             {
                 if (_log.IsDebugEnabled)
                     _log.DebugFormat("Connecting: {0}", _connectionFactory.ToDebugString());
-                
+
                 IConnection connection = _connectionFactory.CreateConnection();
 
                 if (_log.IsDebugEnabled)
-                    _log.DebugFormat("Connected: {0}", _connectionFactory.ToDebugString());
+                {
+                    _log.DebugFormat("Connected: {0} (address: {1}, local: {2}", _connectionFactory.ToDebugString(),
+                        connection.RemoteEndPoint, connection.LocalEndPoint);
+                }
 
                 EventHandler<ShutdownEventArgs> connectionShutdown = null;
                 connectionShutdown = (obj, reason) =>
@@ -101,9 +104,6 @@ namespace MassTransit.RabbitMqTransport.Integration
                 var connectionContext = new RabbitMqConnectionContext(connection, _settings, cancellationToken);
 
                 connectionContext.GetOrAddPayload(() => _settings);
-
-                if (_log.IsDebugEnabled)
-                    _log.DebugFormat("Connected to {0} using local address {1}", connection.RemoteEndPoint, connection.LocalEndPoint);
 
                 scope.Connected(connectionContext);
             }
@@ -159,6 +159,7 @@ namespace MassTransit.RabbitMqTransport.Integration
 
         class ConnectionScope
         {
+            static readonly ILog _log = Logger.Get<ConnectionScope>();
             readonly ConcurrentBag<SharedConnectionContext> _attached;
             readonly TaskCompletionSource<RabbitMqConnectionContext> _connectionContext;
 
@@ -183,16 +184,30 @@ namespace MassTransit.RabbitMqTransport.Integration
 
             public async void Close()
             {
+                var connectionContext = await _connectionContext.Task;
+
                 try
                 {
+                    foreach (var context in _attached)
+                    {
+                        using (var source = new CancellationTokenSource(TimeSpan.FromSeconds(5)))
+                        {
+                            try
+                            {
+                                await context.Completed.WithCancellation(source.Token);
+                            }
+                            catch (OperationCanceledException)
+                            {
+                            }
+                        }
+                    }
+
                     await Task.WhenAll(_attached.Select(x => x.Completed));
                 }
                 catch (Exception ex)
                 {
-                    _log.Error("Close faulted waiting for attached connections", ex);
+                    _log.Error($"Close Faulted waiting for shared contexts", ex);
                 }
-
-                var connectionContext = await _connectionContext.Task;
 
                 connectionContext.Dispose();
 

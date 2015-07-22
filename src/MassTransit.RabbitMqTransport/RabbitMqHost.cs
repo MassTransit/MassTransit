@@ -16,8 +16,11 @@ namespace MassTransit.RabbitMqTransport
     using System.Threading;
     using System.Threading.Tasks;
     using Integration;
+    using Internals.Extensions;
     using Logging;
     using MassTransit.Pipeline;
+    using Policies;
+    using RabbitMQ.Client;
     using Transports;
     using Util;
 
@@ -29,10 +32,13 @@ namespace MassTransit.RabbitMqTransport
         readonly RabbitMqConnectionCache _connectionCache;
         readonly RabbitMqHostSettings _hostSettings;
         readonly ILog _log = Logger.Get<RabbitMqHost>();
+        StopSignal _stopSignal;
 
         public RabbitMqHost(RabbitMqHostSettings hostSettings)
         {
             _hostSettings = hostSettings;
+
+            _stopSignal = new StopSignal();
 
             _connectionCache = new RabbitMqConnectionCache(hostSettings);
             MessageNameFormatter = new RabbitMqMessageNameFormatter();
@@ -40,28 +46,45 @@ namespace MassTransit.RabbitMqTransport
 
         public HostHandle Start()
         {
-            var signal = new StopSignal();
-
             IPipe<ConnectionContext> connectionPipe = Pipe.ExecuteAsync<ConnectionContext>(async context =>
             {
                 if (_log.IsDebugEnabled)
                     _log.DebugFormat("Connection established to {0}", _hostSettings.ToDebugString());
 
-                await signal.Stopped;
+                using (var stopSource = new CancellationTokenSource())
+                using (_stopSignal.CancellationToken.Register(() => stopSource.Cancel()))
+                {
+                    EventHandler<ShutdownEventArgs> connectionShutdown = null;
+                    connectionShutdown = (obj, reason) =>
+                    {
+                        context.Connection.ConnectionShutdown -= connectionShutdown;
+                        stopSource.Cancel();
+                    };
+
+                    context.Connection.ConnectionShutdown += connectionShutdown;
+
+                    try
+                    {
+                        await _stopSignal.Stopped.WithCancellation(stopSource.Token);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                    }
+                }
 
                 if (_log.IsDebugEnabled)
                     _log.DebugFormat("Closing connection to host {0}", _hostSettings.ToDebugString());
 
                 // this is a bad thing, we need to cascade everything to a stopped state before closing.
-                context.Connection.Close(200, "Host stopped");
+                context.Connection.Cleanup(200, "Host stopped");
             });
 
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Starting connection to {0}", _hostSettings.ToDebugString());
 
-            _connectionCache.Send(connectionPipe, signal.CancellationToken);
+            Repeat.UntilCancelled(_stopSignal.CancellationToken, () => _connectionCache.Send(connectionPipe, _stopSignal.CancellationToken));
 
-            return new Handle(signal);
+            return new Handle(_stopSignal);
         }
 
         void IProbeSite.Probe(ProbeContext context)
