@@ -22,7 +22,7 @@ let branch = (fun _ ->
   (environVarOrDefault "APPVEYOR_REPO_BRANCH" (getBranchName "."))
 )
 
-let FileVersion = (Version + "." + (environVarOrDefault "APPVEYOR_BUILD_VERSION" "0"))
+let FileVersion = (environVarOrDefault "APPVEYOR_BUILD_VERSION" (Version + "." + "0"))
 
 let informationalVersion = (fun _ ->
   let branchName = (branch ".")
@@ -32,7 +32,7 @@ let informationalVersion = (fun _ ->
 
 let nugetVersion = (fun _ ->
   let branchName = (branch ".")
-  let label = if branchName="master" then "" else "-" + branchName
+  let label = if branchName="master" then "" else "-" + (if branchName="mt3" then "beta" else branchName)
   (Version + label)
 )
 
