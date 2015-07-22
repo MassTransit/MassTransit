@@ -3,7 +3,7 @@ Samples
 
 .. toctree::
 
-	courier.md
+    courier.md
     starbucks.rst
     heavyload.rst
     openallnight.rst
