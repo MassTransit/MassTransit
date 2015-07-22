@@ -19,10 +19,10 @@ let semVersion : SemVerInfo = parse baseVersion
 let Version = semVersion.ToString()
 
 let branch = (fun _ ->
-  (environVarOrDefault "TEAMCITY_BUILD_BRANCH" (getBranchName "."))
+  (environVarOrDefault "APPVEYOR_REPO_BRANCH" (getBranchName "."))
 )
 
-let FileVersion = (Version + "." + (environVarOrDefault "BUILD_NUMBER" "0"))
+let FileVersion = (Version + "." + (environVarOrDefault "APPVEYOR_BUILD_VERSION" "0"))
 
 let informationalVersion = (fun _ ->
   let branchName = (branch ".")
