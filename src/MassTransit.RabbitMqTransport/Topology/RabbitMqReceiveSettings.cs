@@ -51,8 +51,8 @@ namespace MassTransit.RabbitMqTransport.Topology
         public bool Durable { get; set; }
         public bool Exclusive { get; set; }
         public bool AutoDelete { get; set; }
-        public IDictionary<string, object> QueueArguments { get; private set; }
-        public IDictionary<string, object> ExchangeArguments { get; private set; }
+        public IDictionary<string, object> QueueArguments { get; }
+        public IDictionary<string, object> ExchangeArguments { get; }
         public bool PurgeOnStartup { get; set; }
         public string ExchangeType { get; set; }
     }

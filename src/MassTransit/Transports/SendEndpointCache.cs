@@ -43,7 +43,7 @@ namespace MassTransit.Transports
         Task<ISendEndpoint> GetSendEndpointFromProvider(Uri address)
         {
             if (_log.IsDebugEnabled)
-                _log.DebugFormat("Retrieving send endpoint: {0}", address);
+                _log.DebugFormat("GetSendEndpoint: {0}", address);
 
             return _sendEndpointProvider.GetSendEndpoint(address);
         }

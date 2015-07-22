@@ -93,7 +93,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
         {
             if (_log.IsDebugEnabled)
             {
-                _log.DebugFormat("ModelShutdown ({0}), Max: {1}, {2}-{3}", _consumerTag, _maxPendingDeliveryCount, reason.ReplyCode,
+                _log.DebugFormat("Consumer Model Shutdown ({0}), Concurrent Peak: {1}, {2}-{3}", _consumerTag, _maxPendingDeliveryCount, reason.ReplyCode,
                     reason.ReplyText);
             }
 
