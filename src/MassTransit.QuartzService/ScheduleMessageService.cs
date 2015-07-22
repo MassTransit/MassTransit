@@ -19,7 +19,6 @@ namespace MassTransit.QuartzService
     using Quartz.Impl;
     using QuartzIntegration;
     using RabbitMqTransport;
-    using RabbitMqTransport.Configuration;
     using Topshelf;
 
 
@@ -47,7 +46,7 @@ namespace MassTransit.QuartzService
         {
             try
             {
-                Uri serviceBusUri = _configurationProvider.GetServiceBusUri("ignored");
+                Uri serviceBusUri = _configurationProvider.GetServiceBusUri();
 
                 if (serviceBusUri.Scheme.Equals("rabbitmq", StringComparison.OrdinalIgnoreCase))
                 {

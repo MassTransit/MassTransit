@@ -10,6 +10,7 @@ let buildArtifactPath = "./build_artifacts"
 let nugetWorkingPath = FullName "./build_temp"
 let keyFile = FullName "./MassTransit.snk"
 
+let assemblyVersion = "3.0.0.0"
 let baseVersion = "3.0.11"
 
 let semVersion : SemVerInfo = parse baseVersion
@@ -20,12 +21,12 @@ let branch = (fun _ ->
   (environVarOrDefault "TEAMCITY_BUILD_BRANCH" (getBranchName "."))
 )
 
-let fileVersion = (Version + "." + (environVarOrDefault "BUILD_NUMBER" "0"))
+let FileVersion = (Version + "." + (environVarOrDefault "BUILD_NUMBER" "0"))
 
 let informationalVersion = (fun _ ->
   let branchName = (branch ".")
   let label = if branchName="master" then "" else " (" + branchName + "/" + (getCurrentSHA1 ".").[0..7] + ")"
-  (fileVersion + label)
+  (FileVersion + label)
 )
 
 let nugetVersion = (fun _ ->
@@ -33,6 +34,10 @@ let nugetVersion = (fun _ ->
   let label = if branchName="master" then "" else "-" + branchName
   (Version + label)
 )
+
+let InfoVersion = informationalVersion()
+let NuGetVersion = nugetVersion()
+
 
 printfn "Using version: %s" Version
 
@@ -52,16 +57,16 @@ Target "Build" (fun _ ->
     [ Attribute.Title "MassTransit"
       Attribute.Description "MassTransit is a distributed application framework for .NET http://masstransit-project.com"
       Attribute.Product "MassTransit"
-      Attribute.Version Version
-      Attribute.FileVersion (fileVersion)
-      Attribute.InformationalVersion (informationalVersion())
+      Attribute.Version assemblyVersion
+      Attribute.FileVersion FileVersion
+      Attribute.InformationalVersion InfoVersion
     ]
 
   let buildMode = getBuildParamOrDefault "buildMode" "Release"
   let setParams defaults = { 
     defaults with
         Verbosity = Some(Quiet)
-        Targets = ["Rebuild"]
+        Targets = ["Clean"; "Build"]
         Properties =
             [
                 "Optimize", "True"
@@ -169,7 +174,7 @@ Target "Package" (fun _ ->
 
       let getDeps daNug : NugetDependencies =
         if daNug.Project = "MassTransit" then (getDependencies daNug.PackageFile)
-        else ("MassTransit", (nugetVersion())) :: (getDependencies daNug.PackageFile)
+        else ("MassTransit", NuGetVersion) :: (getDependencies daNug.PackageFile)
 
       let setParams defaults = {
         defaults with 
@@ -180,7 +185,7 @@ Target "Package" (fun _ ->
           Dependencies = (getDeps nug)
           Summary = nug.Summary
           SymbolPackage = NugetSymbolPackage.Nuspec
-          Version = (nugetVersion())
+          Version = NuGetVersion
           WorkingDir = nugetWorkingPath
           Files = nug.Files
       } 

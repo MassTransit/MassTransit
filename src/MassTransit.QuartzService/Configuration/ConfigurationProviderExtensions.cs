@@ -28,7 +28,7 @@ namespace MassTransit.QuartzService.Configuration
             return configurationProvider.GetServiceBusUri(queueName);
         }
 
-        public static Uri GetServiceBusUri(this IConfigurationProvider configuration, string queueName)
+        public static Uri GetServiceBusUri(this IConfigurationProvider configuration, string queueName = null)
         {
             string scheme = configuration.GetSetting("Scheme", "rabbitmq");
             if (string.Compare("rabbitmq", scheme, StringComparison.OrdinalIgnoreCase) == 0)
@@ -41,9 +41,9 @@ namespace MassTransit.QuartzService.Configuration
 
                 string[] paths = vhost.Split(new[] {'/'}, StringSplitOptions.RemoveEmptyEntries);
 
-                string path = string.Join("/", paths.Concat(new[] {queueName}).ToArray());
+                string path = string.Join("/", queueName != null ? paths.Concat(new[] {queueName}).ToArray() : paths);
 
-                builder.Path = string.Format("/{0}", string.Join("/", paths));
+                builder.Path = $"/{string.Join("/", paths)}";
                 builder.Path = path;
                 builder.Query = queueOptions;
 

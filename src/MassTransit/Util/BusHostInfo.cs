@@ -23,7 +23,8 @@ namespace MassTransit.Util
         public BusHostInfo()
         {
             MachineName = Environment.MachineName;
-            MassTransitVersion = typeof(IBus).Assembly.GetName().Version.ToString();
+
+            MassTransitVersion = FileVersionInfo.GetVersionInfo(typeof(IBus).Assembly.Location).FileVersion;
             FrameworkVersion = Environment.Version.ToString();
             OperatingSystemVersion = Environment.OSVersion.ToString();
             Process currentProcess = Process.GetCurrentProcess();
@@ -33,7 +34,7 @@ namespace MassTransit.Util
             Assembly entryAssembly = System.Reflection.Assembly.GetEntryAssembly() ?? System.Reflection.Assembly.GetCallingAssembly();
             AssemblyName assemblyName = entryAssembly.GetName();
             Assembly = assemblyName.Name;
-            AssemblyVersion = assemblyName.Version.ToString();
+            AssemblyVersion = FileVersionInfo.GetVersionInfo(entryAssembly.Location).FileVersion;
         }
 
         public string MachineName { get; }
