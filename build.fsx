@@ -8,6 +8,7 @@ open Fake.SemVerHelper
 let buildOutputPath = "./build_output"
 let buildArtifactPath = "./build_artifacts"
 let nugetWorkingPath = FullName "./build_temp"
+let packagesPath = FullName "./src/packages"
 let keyFile = FullName "./MassTransit.snk"
 
 let assemblyVersion = "3.0.0.0"
@@ -51,6 +52,14 @@ Target "Clean" (fun _ ->
   CleanDir nugetWorkingPath
 )
 
+Target "RestorePackages" (fun _ -> 
+     "./src/MassTransit.sln"
+     |> RestoreMSSolutionPackages (fun p ->
+         { p with
+             OutputPath = packagesPath
+             Retries = 4 })
+)
+
 Target "Build" (fun _ ->
 
   CreateCSharpAssemblyInfo @".\src\SolutionVersion.cs"
@@ -71,6 +80,7 @@ Target "Build" (fun _ ->
             [
                 "Optimize", "True"
                 "DebugSymbols", "True"
+                "RestorePackages", "True"
                 "Configuration", buildMode
                 "SignAssembly", "True"
                 "AssemblyOriginatorKeyFile", keyFile
@@ -199,6 +209,7 @@ Target "Default" (fun _ ->
 )
 
 "Clean"
+  ==> "RestorePackages"
   ==> "Build"
   ==> "Package"
   ==> "Default"
