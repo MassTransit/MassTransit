@@ -52,7 +52,7 @@ namespace MassTransit.AutomatonymousTests
             {
             }
 
-            public Guid CorrelationId { get; private set; }
+            public Guid CorrelationId { get; set; }
         }
 
 

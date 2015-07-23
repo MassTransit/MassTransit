@@ -21,7 +21,7 @@ namespace MassTransit.EntityFrameworkIntegration
 
     public class SagaDbContext<TSaga, TSagaClassMapping> :
         DbContext
-        where TSaga : class, ISaga, ISagaEntity
+        where TSaga : class, ISaga
         where TSagaClassMapping : SagaClassMapping<TSaga>, new()
     {
         protected SagaDbContext()

@@ -20,7 +20,6 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
     using Context;
     using Logging;
     using MassTransit.Saga;
-    using Mehdime.Entity;
     using Pipeline;
     using Util;
 
@@ -32,16 +31,16 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
     {
         static readonly ILog _log = Logger.Get<EntityFrameworkSagaRepository<TSaga>>();
         readonly ConsumeContext<TMessage> _context;
-        readonly IDbContextScopeFactory _dbContextScopeFactory;
+        readonly DbContext _dbContext;
         readonly TSaga _instance;
         readonly PayloadCache _payloadCache;
         bool _completed;
 
-        public EntityFrameworkSagaConsumeContext(IDbContextScopeFactory dbContextScopeFactory, ConsumeContext<TMessage> context, TSaga instance)
+        public EntityFrameworkSagaConsumeContext(DbContext dbContext, ConsumeContext<TMessage> context, TSaga instance)
         {
             _context = context;
             _instance = instance;
-            _dbContextScopeFactory = dbContextScopeFactory;
+            _dbContext = dbContext;
 
             _payloadCache = new PayloadCache();
         }
@@ -141,22 +140,16 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
 
         async Task SagaConsumeContext<TSaga>.SetCompleted()
         {
-            // TODO should be existing dbContext, not a new one
-            using (var dbContextScope = _dbContextScopeFactory.Create())
+            _dbContext.Set<TSaga>().Remove(_instance);
+
+            _completed = true;
+            if (_log.IsDebugEnabled)
             {
-                var dbContext = dbContextScope.DbContexts.Get<DbContext>();
-
-                dbContext.Set<TSaga>().Remove(_instance);
-
-                _completed = true;
-                if (_log.IsDebugEnabled)
-                {
-                    _log.DebugFormat("SAGA:{0}:{1} Removed {2}", TypeMetadataCache<TSaga>.ShortName, TypeMetadataCache<TMessage>.ShortName,
-                        _instance.CorrelationId);
-                }
-
-                await dbContextScope.SaveChangesAsync(_context.CancellationToken);
+                _log.DebugFormat("SAGA:{0}:{1} Removed {2}", TypeMetadataCache<TSaga>.ShortName, TypeMetadataCache<TMessage>.ShortName,
+                    _instance.CorrelationId);
             }
+
+            await _dbContext.SaveChangesAsync(_context.CancellationToken);
         }
 
         public bool IsCompleted => _completed;

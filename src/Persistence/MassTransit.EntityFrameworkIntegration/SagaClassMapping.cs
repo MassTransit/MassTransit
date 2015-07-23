@@ -15,12 +15,13 @@ namespace MassTransit.EntityFrameworkIntegration
     using System.ComponentModel.DataAnnotations.Schema;
     using System.Data.Entity.ModelConfiguration;
     using Internals.Reflection;
+    using MassTransit.Saga;
     using Util;
 
 
     public abstract class SagaClassMapping<T> :
         EntityTypeConfiguration<T>
-        where T : class, ISagaEntity
+        where T : class, ISaga
     {
         protected SagaClassMapping()
         {

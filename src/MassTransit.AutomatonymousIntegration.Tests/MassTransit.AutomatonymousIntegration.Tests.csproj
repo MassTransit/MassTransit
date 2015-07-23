@@ -122,7 +122,7 @@
     <Compile Include="TestExtensions.cs" />
     <Compile Include="Testing_Specs.cs" />
     <Compile Include="UncorrelatedMessage_Specs.cs" />
-    <Compile Include="UsingNHibernate_Specs - Copy.cs" />
+    <Compile Include="UsingNHibernate_Specs.cs" />
     <Compile Include="UsingEntityFramework_Specs.cs" />
   </ItemGroup>
   <ItemGroup>

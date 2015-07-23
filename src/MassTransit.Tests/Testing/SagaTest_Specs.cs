@@ -117,7 +117,7 @@ namespace MassTransit.Tests.Testing
 				await context.Publish(new Aa {CorrelationId = CorrelationId});
 			}
 
-			public Guid CorrelationId { get; private set; }
+			public Guid CorrelationId { get; set; }
 
             public async Task Consume(ConsumeContext<C> message)
 			{
