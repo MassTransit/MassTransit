@@ -54,7 +54,7 @@
         public Locating_an_existing_ef_saga()
         {
             _dbContextScopeFactory = new DbContextScopeFactory(new SagaDbContextFactoryProvider());
-            _sagaRepository = new Lazy<ISagaRepository<SimpleSagaEntity>>(() => new EfSagaRepository<SimpleSagaEntity>(_dbContextScopeFactory));
+            _sagaRepository = new Lazy<ISagaRepository<SimpleSagaEntity>>(() => new EntityFrameworkSagaRepository<SimpleSagaEntity>(_dbContextScopeFactory));
         }
 
         [TestFixtureSetUp]

@@ -1,31 +1,43 @@
-﻿namespace MassTransit.EntityFrameworkIntegration.Saga
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+//  
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
+// this file except in compliance with the License. You may obtain a copy of the 
+// License at 
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0 
+// 
+// Unless required by applicable law or agreed to in writing, software distributed
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// specific language governing permissions and limitations under the License.
+namespace MassTransit.EntityFrameworkIntegration.Saga
 {
-    using System.Data.Entity;
-    using MassTransit.Pipeline;
-    using Mehdime.Entity;
     using System;
     using System.Collections.Generic;
+    using System.Data.Entity;
     using System.Threading;
     using System.Threading.Tasks;
     using Context;
     using Logging;
     using MassTransit.Saga;
+    using Mehdime.Entity;
+    using Pipeline;
     using Util;
 
 
-    public class EfSagaConsumeContext<TSaga, TMessage> :
+    public class EntityFrameworkSagaConsumeContext<TSaga, TMessage> :
         SagaConsumeContext<TSaga, TMessage>
         where TMessage : class
         where TSaga : class, ISaga
     {
-        static readonly ILog _log = Logger.Get<EfSagaRepository<TSaga>>();
+        static readonly ILog _log = Logger.Get<EntityFrameworkSagaRepository<TSaga>>();
         readonly ConsumeContext<TMessage> _context;
-        readonly TSaga _instance;
         readonly IDbContextScopeFactory _dbContextScopeFactory;
-        bool _completed;
+        readonly TSaga _instance;
         readonly PayloadCache _payloadCache;
+        bool _completed;
 
-        public EfSagaConsumeContext(IDbContextScopeFactory dbContextScopeFactory, ConsumeContext<TMessage> context, TSaga instance)
+        public EntityFrameworkSagaConsumeContext(IDbContextScopeFactory dbContextScopeFactory, ConsumeContext<TMessage> context, TSaga instance)
         {
             _context = context;
             _instance = instance;
@@ -129,6 +141,7 @@
 
         async Task SagaConsumeContext<TSaga>.SetCompleted()
         {
+            // TODO should be existing dbContext, not a new one
             using (var dbContextScope = _dbContextScopeFactory.Create())
             {
                 var dbContext = dbContextScope.DbContexts.Get<DbContext>();
@@ -142,38 +155,25 @@
                         _instance.CorrelationId);
                 }
 
-                await dbContextScope.SaveChangesAsync();
+                await dbContextScope.SaveChangesAsync(_context.CancellationToken);
             }
         }
 
-        public bool IsCompleted
-        {
-            get { return _completed; }
-        }
+        public bool IsCompleted => _completed;
+        public CancellationToken CancellationToken => _context.CancellationToken;
+        public ReceiveContext ReceiveContext => _context.ReceiveContext;
 
-        public CancellationToken CancellationToken
-        {
-            get { return _context.CancellationToken; }
-        }
-
-        public ReceiveContext ReceiveContext
-        {
-            get { return _context.ReceiveContext; }
-        }
-
-        public bool HasMessageType(Type messageType)
+        bool ConsumeContext.HasMessageType(Type messageType)
         {
             return _context.HasMessageType(messageType);
         }
 
-        public bool TryGetMessage<T>(out ConsumeContext<T> consumeContext)
-            where T : class
+        bool ConsumeContext.TryGetMessage<T>(out ConsumeContext<T> consumeContext)
         {
             return _context.TryGetMessage(out consumeContext);
         }
 
-        public Task RespondAsync<T>(T message)
-            where T : class
+        Task ConsumeContext.RespondAsync<T>(T message)
         {
             return _context.RespondAsync(message);
         }
@@ -183,13 +183,12 @@
             return _context.RespondAsync(message, sendPipe);
         }
 
-        public void Respond<T>(T message)
-            where T : class
+        void ConsumeContext.Respond<T>(T message)
         {
             _context.Respond(message);
         }
 
-        public Task<ISendEndpoint> GetSendEndpoint(Uri address)
+        Task<ISendEndpoint> ISendEndpointProvider.GetSendEndpoint(Uri address)
         {
             return _context.GetSendEndpoint(address);
         }
@@ -225,5 +224,3 @@
         }
     }
 }
-
-
