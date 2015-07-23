@@ -1,4 +1,16 @@
-﻿namespace MassTransit.EntityFrameworkIntegration.Saga
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+//  
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
+// this file except in compliance with the License. You may obtain a copy of the 
+// License at 
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0 
+// 
+// Unless required by applicable law or agreed to in writing, software distributed
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// specific language governing permissions and limitations under the License.
+namespace MassTransit.EntityFrameworkIntegration.Saga
 {
     using System;
     using System.Collections.Generic;
@@ -7,27 +19,27 @@
     using System.Data.Entity.Infrastructure;
     using System.Linq;
     using System.Threading.Tasks;
-    using MassTransit.Logging;
+    using Logging;
     using MassTransit.Saga;
-    using MassTransit.Pipeline;
-    using MassTransit.Util;
     using Mehdime.Entity;
+    using Pipeline;
+    using Util;
 
-    public class EfSagaRepository<TSaga> :
+
+    public class EntityFrameworkSagaRepository<TSaga> :
         ISagaRepository<TSaga>,
         IQuerySagaRepository<TSaga>
         where TSaga : class, ISaga
     {
-        private static readonly ILog _log = Logger.Get<EfSagaRepository<TSaga>>();
+        static readonly ILog _log = Logger.Get<EntityFrameworkSagaRepository<TSaga>>();
+        readonly IDbContextScopeFactory _dbContextScopeFactory;
 
-        private readonly IDbContextScopeFactory _dbContextScopeFactory;
-
-        public EfSagaRepository(IDbContextScopeFactory dbContextScopeFactory)
+        public EntityFrameworkSagaRepository(IDbContextScopeFactory dbContextScopeFactory)
         {
             _dbContextScopeFactory = dbContextScopeFactory;
         }
 
-        public async Task<IEnumerable<Guid>> Find(ISagaQuery<TSaga> query)
+        async Task<IEnumerable<Guid>> IQuerySagaRepository<TSaga>.Find(ISagaQuery<TSaga> query)
         {
             using (var dbContextScope = _dbContextScopeFactory.Create())
             {
@@ -40,7 +52,7 @@
             }
         }
 
-        public void Probe(ProbeContext context)
+        void IProbeSite.Probe(ProbeContext context)
         {
             ProbeContext scope = context.CreateScope("sagaRepository");
             using (var dbContextScope = _dbContextScopeFactory.Create())
@@ -52,14 +64,14 @@
 
                 scope.Set(new
                 {
-                    Persistence = "entityframework",
-                    Entities = workspace.GetItems<EntityType>(DataSpace.SSpace).Select(x => x.Name),
+                    Persistence = "entityFramework",
+                    Entities = workspace.GetItems<EntityType>(DataSpace.SSpace).Select(x => x.Name)
                 });
             }
         }
 
-        public async Task Send<T>(ConsumeContext<T> context, ISagaPolicy<TSaga, T> policy,
-            IPipe<SagaConsumeContext<TSaga, T>> next) where T : class
+        async Task ISagaRepository<TSaga>.Send<T>(ConsumeContext<T> context, ISagaPolicy<TSaga, T> policy,
+            IPipe<SagaConsumeContext<TSaga, T>> next)
         {
             if (!context.CorrelationId.HasValue)
                 throw new SagaException("The CorrelationId was not specified", typeof(TSaga), typeof(T));
@@ -69,7 +81,6 @@
             using (var dbContextScope = _dbContextScopeFactory.Create())
             {
                 var dbContext = dbContextScope.DbContexts.Get<DbContext>();
-
 
                 var sagaInstance = dbContext.Set<TSaga>().SingleOrDefault(x => x.CorrelationId == sagaId);
 
@@ -84,7 +95,7 @@
                     if (_log.IsDebugEnabled)
                         _log.DebugFormat("SAGA:{0}:{1} Used {2}", TypeMetadataCache<TSaga>.ShortName, sagaInstance.CorrelationId, TypeMetadataCache<T>.ShortName);
 
-                    var sagaConsumeContext = new EfSagaConsumeContext<TSaga, T>(_dbContextScopeFactory, context, sagaInstance);
+                    var sagaConsumeContext = new EntityFrameworkSagaConsumeContext<TSaga, T>(_dbContextScopeFactory, context, sagaInstance);
 
                     await policy.Existing(sagaConsumeContext, next);
                 }
@@ -107,14 +118,11 @@
                     if (sagaInstances.Count == 0)
                     {
                         var missingSagaPipe = new MissingPipe<T>(_dbContextScopeFactory, next);
+
                         await policy.Missing(context, missingSagaPipe);
                     }
                     else
-                    {
-                        await
-                            Task.WhenAll(
-                                sagaInstances.Select(instance => SendToInstance(context, policy, instance, next)));
-                    }
+                        await Task.WhenAll(sagaInstances.Select(instance => SendToInstance(context, policy, instance, next)));
 
                     await dbContextScope.SaveChangesAsync();
                 }
@@ -126,9 +134,9 @@
                 catch (Exception ex)
                 {
                     if (_log.IsErrorEnabled)
-                        _log.Error(
-                            string.Format("SAGA:{0} Exception {1}", TypeMetadataCache<TSaga>.ShortName,
-                                TypeMetadataCache<T>.ShortName), ex);
+                    {
+                        _log.Error($"SAGA:{TypeMetadataCache<TSaga>.ShortName} Exception {TypeMetadataCache<T>.ShortName}", ex);
+                    }
 
                     throw new SagaException(ex.Message, typeof(TSaga), typeof(T), Guid.Empty, ex);
                 }
@@ -144,7 +152,7 @@
                 if (_log.IsDebugEnabled)
                     _log.DebugFormat("SAGA:{0}:{1} Used {2}", TypeMetadataCache<TSaga>.ShortName, instance.CorrelationId, TypeMetadataCache<T>.ShortName);
 
-                var sagaConsumeContext = new EfSagaConsumeContext<TSaga, T>(_dbContextScopeFactory, context, instance);
+                var sagaConsumeContext = new EntityFrameworkSagaConsumeContext<TSaga, T>(_dbContextScopeFactory, context, instance);
 
                 await policy.Existing(sagaConsumeContext, next);
             }
@@ -158,6 +166,7 @@
             }
         }
 
+
         /// <summary>
         /// Once the message pipe has processed the saga instance, add it to the saga repository
         /// </summary>
@@ -166,8 +175,8 @@
             IPipe<SagaConsumeContext<TSaga, TMessage>>
             where TMessage : class
         {
-            readonly IPipe<SagaConsumeContext<TSaga, TMessage>> _next;
             readonly IDbContextScopeFactory _dbContextScopeFactory;
+            readonly IPipe<SagaConsumeContext<TSaga, TMessage>> _next;
 
             public MissingPipe(IDbContextScopeFactory dbContextScopeFactory, IPipe<SagaConsumeContext<TSaga, TMessage>> next)
             {
@@ -175,13 +184,15 @@
                 _next = next;
             }
 
-            async void IProbeSite.Probe(ProbeContext context)
+            void IProbeSite.Probe(ProbeContext context)
             {
                 _next.Probe(context);
             }
 
             public async Task Send(SagaConsumeContext<TSaga, TMessage> context)
             {
+                // TODO this should really be passing the dbContext, as it's expected
+                // a lock is already in place on the original transaction
                 using (var dbContextScope = _dbContextScopeFactory.Create())
                 {
                     var dbContext = dbContextScope.DbContexts.Get<DbContext>();
@@ -193,7 +204,7 @@
                             TypeMetadataCache<TMessage>.ShortName);
                     }
 
-                    var proxy = new EfSagaConsumeContext<TSaga, TMessage>(_dbContextScopeFactory, context, context.Saga);
+                    var proxy = new EntityFrameworkSagaConsumeContext<TSaga, TMessage>(_dbContextScopeFactory, context, context.Saga);
 
                     await _next.Send(proxy);
 
@@ -206,4 +217,3 @@
         }
     }
 }
-

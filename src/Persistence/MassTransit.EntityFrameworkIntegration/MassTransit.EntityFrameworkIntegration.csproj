@@ -32,11 +32,11 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\EntityFramework.6.0.0\lib\net45\EntityFramework.dll</HintPath>
+      <HintPath>..\..\packages\EntityFramework.6.1.3\lib\net45\EntityFramework.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="EntityFramework.SqlServer, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\EntityFramework.6.0.0\lib\net45\EntityFramework.SqlServer.dll</HintPath>
+      <HintPath>..\..\packages\EntityFramework.6.1.3\lib\net45\EntityFramework.SqlServer.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Mehdime.Entity, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
@@ -54,12 +54,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\..\SolutionVersion.cs">
+      <Link>Properties\SolutionVersion.cs</Link>
+    </Compile>
+    <Compile Include="ISagaEntity.cs" />
     <Compile Include="SagaClassMapping.cs" />
     <Compile Include="SagaDbContext.cs" />
     <Compile Include="SagaEntity.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Saga\EfSagaConsumeContext.cs" />
-    <Compile Include="Saga\EfSagaRepository.cs" />
+    <Compile Include="Saga\EntityFrameworkSagaConsumeContext.cs" />
+    <Compile Include="Saga\EntityFrameworkSagaRepository.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

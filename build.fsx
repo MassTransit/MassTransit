@@ -162,6 +162,11 @@ Target "Package" (fun _ ->
                   PackageFile = @".\src\Persistence\MassTransit.NHibernateIntegration\packages.config"
                   Files = [ (@"..\src\Persistence\MassTransit.NHibernateIntegration\bin\Release\MassTransit.NHibernateIntegration.*", Some @"lib\net45", None);
                             (@"..\src\Persistence\MassTransit.NHibernateIntegration\**\*.cs", Some @"src", None) ] } 
+                { Project = "MassTransit.EntityFramework"
+                  Summary = "MassTransit Entity Framework Saga Transport"
+                  PackageFile = @".\src\Persistence\MassTransit.EntityFrameworkIntegration\packages.config"
+                  Files = [ (@"..\src\Persistence\MassTransit.EntityFrameworkIntegration\bin\Release\MassTransit.EntityFrameworkIntegration.*", Some @"lib\net45", None);
+                            (@"..\src\Persistence\MassTransit.EntityFrameworkIntegration\**\*.cs", Some @"src", None) ] } 
                 { Project = "MassTransit.TestFramework"
                   Summary = "MassTransit NUnit Test Framework"
                   PackageFile = @".\src\MassTransit.TestFramework\packages.config"

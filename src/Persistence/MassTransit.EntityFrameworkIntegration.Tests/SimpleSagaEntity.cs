@@ -10,7 +10,7 @@
     /// Nearly a complete copy from MassTransit.Tests.Saga.SimpleSaga, but had to use SimpleSagaEntity with the setter available
     /// </summary>
     public class SimpleSagaEntity :
-        SagaEntity,
+        ISagaEntity,
         InitiatedBy<InitiateSimpleSaga>,
         Orchestrates<CompleteSimpleSaga>,
         Observes<ObservableSagaMessage, SimpleSagaEntity>,
@@ -36,7 +36,7 @@
             Name = context.Message.Name;
         }
 
-        public new Guid CorrelationId { get; set; }
+        public  Guid CorrelationId { get; set; }
 
         public async Task Consume(ConsumeContext<ObservableSagaMessage> message)
         {
