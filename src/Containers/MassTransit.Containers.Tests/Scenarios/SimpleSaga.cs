@@ -58,7 +58,7 @@ namespace MassTransit.Containers.Tests.Scenarios
             _first.TrySetResult(context.Message);
         }
 
-        public Guid CorrelationId { get; private set; }
+        public Guid CorrelationId { get; set; }
 
         public async Task Consume(ConsumeContext<ThirdSagaMessage> context)
         {

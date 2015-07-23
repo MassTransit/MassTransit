@@ -10,7 +10,6 @@
     /// Nearly a complete copy from MassTransit.Tests.Saga.SimpleSaga, but had to use SimpleSagaEntity with the setter available
     /// </summary>
     public class SimpleSagaEntity :
-        ISagaEntity,
         InitiatedBy<InitiateSimpleSaga>,
         Orchestrates<CompleteSimpleSaga>,
         Observes<ObservableSagaMessage, SimpleSagaEntity>,

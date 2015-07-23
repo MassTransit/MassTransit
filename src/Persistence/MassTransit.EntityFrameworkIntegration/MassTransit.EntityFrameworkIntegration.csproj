@@ -57,10 +57,8 @@
     <Compile Include="..\..\SolutionVersion.cs">
       <Link>Properties\SolutionVersion.cs</Link>
     </Compile>
-    <Compile Include="ISagaEntity.cs" />
     <Compile Include="SagaClassMapping.cs" />
     <Compile Include="SagaDbContext.cs" />
-    <Compile Include="SagaEntity.cs" />
     <Compile Include="Saga\EntityFrameworkSagaConsumeContext.cs" />
     <Compile Include="Saga\EntityFrameworkSagaRepository.cs" />
   </ItemGroup>

@@ -72,7 +72,7 @@ namespace MassTransit.Tests.Saga
             await context.Publish(new SendUserVerificationEmail(CorrelationId, Email));
         }
 
-        public Guid CorrelationId { get; private set; }
+        public Guid CorrelationId { get; set; }
 
         public async Task Consume(ConsumeContext<UserValidated> context)
         {

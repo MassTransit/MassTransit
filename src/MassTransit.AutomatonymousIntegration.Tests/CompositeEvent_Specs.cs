@@ -83,7 +83,7 @@ namespace MassTransit.AutomatonymousTests
             public int CompositeStatus { get; set; }
             public int CurrentState { get; set; }
 
-            public Guid CorrelationId { get; private set; }
+            public Guid CorrelationId { get; set; }
         }
 
 

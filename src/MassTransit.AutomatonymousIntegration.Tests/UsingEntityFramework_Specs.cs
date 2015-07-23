@@ -17,14 +17,12 @@ namespace MassTransit.AutomatonymousTests
     using System.Linq;
     using System.Threading.Tasks;
     using Automatonymous;
-    using Automatonymous.UserTypes;
     using EntityFrameworkIntegration;
     using EntityFrameworkIntegration.Saga;
     using Mehdime.Entity;
     using NUnit.Framework;
     using Saga;
     using TestFramework;
-    using Util;
 
 
     [TestFixture]
@@ -32,15 +30,12 @@ namespace MassTransit.AutomatonymousTests
         InMemoryTestFixture
     {
         SuperShopper _machine;
-        StateMachine<ShoppingChore> _stateMachine;
         readonly DbContextScopeFactory _dbContextScopeFactory;
         Lazy<ISagaRepository<ShoppingChore>> _repository;
 
         protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
         {
             _machine = new SuperShopper();
-            _stateMachine = _machine;
-            AutomatonymousStateUserType<SuperShopper>.SaveAsString(_machine);
 
             configurator.StateMachineSaga(_machine, _repository.Value);
         }
@@ -155,8 +150,7 @@ namespace MassTransit.AutomatonymousTests
 
 
     public class ShoppingChore :
-        SagaStateMachineInstance,
-        ISagaEntity
+        SagaStateMachineInstance
     {
         protected ShoppingChore()
         {
