@@ -81,83 +81,59 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
 
             Guid sagaId = context.CorrelationId.Value;
 
-            using (var dbContextScope = _dbContextScopeFactory.Create())
+            using (var dbContextScope = _dbContextScopeFactory.CreateWithTransaction(_isolationLevel))
             {
                 var dbContext = dbContextScope.DbContexts.Get<DbContext>();
-                using (var transaction = dbContext.Database.BeginTransaction(_isolationLevel))
+
+                var sagaInstance = dbContext.Set<TSaga>().SingleOrDefault(x => x.CorrelationId == sagaId);
+                if (sagaInstance == null)
                 {
-                    try
-                    {
-                        var sagaInstance = dbContext.Set<TSaga>().SingleOrDefault(x => x.CorrelationId == sagaId);
-                        if (sagaInstance == null)
-                        {
-                            var missingSagaPipe = new MissingPipe<T>(dbContext, next);
+                    var missingSagaPipe = new MissingPipe<T>(dbContext, next);
 
-                            await policy.Missing(context, missingSagaPipe);
-                        }
-                        else
-                        {
-                            if (_log.IsDebugEnabled)
-                            {
-                                _log.DebugFormat("SAGA:{0}:{1} Used {2}", TypeMetadataCache<TSaga>.ShortName, sagaInstance.CorrelationId,
-                                    TypeMetadataCache<T>.ShortName);
-                            }
-
-                            var sagaConsumeContext = new EntityFrameworkSagaConsumeContext<TSaga, T>(dbContext, context, sagaInstance);
-
-                            await policy.Existing(sagaConsumeContext, next);
-                        }
-
-                        await dbContextScope.SaveChangesAsync();
-
-                        transaction.Commit();
-                    }
-                    catch (Exception)
-                    {
-                        transaction.Rollback();
-                        throw;
-                    }
+                    await policy.Missing(context, missingSagaPipe);
                 }
+                else
+                {
+                    if (_log.IsDebugEnabled)
+                    {
+                        _log.DebugFormat("SAGA:{0}:{1} Used {2}", TypeMetadataCache<TSaga>.ShortName, sagaInstance.CorrelationId,
+                            TypeMetadataCache<T>.ShortName);
+                    }
+
+                    var sagaConsumeContext = new EntityFrameworkSagaConsumeContext<TSaga, T>(dbContext, context, sagaInstance);
+
+                    await policy.Existing(sagaConsumeContext, next);
+                }
+
+                await dbContextScope.SaveChangesAsync();
             }
         }
 
         public async Task SendQuery<T>(SagaQueryConsumeContext<TSaga, T> context, ISagaPolicy<TSaga, T> policy,
             IPipe<SagaConsumeContext<TSaga, T>> next) where T : class
         {
-            using (var dbContextScope = _dbContextScopeFactory.Create())
+            using (var dbContextScope = _dbContextScopeFactory.CreateWithTransaction(_isolationLevel))
             {
                 try
                 {
                     var dbContext = dbContextScope.DbContexts.Get<DbContext>();
-                    using (var transaction = dbContext.Database.BeginTransaction(_isolationLevel))
+                    
+                    var sagaInstances = await dbContext.Set<TSaga>().Where(context.Query.FilterExpression).ToListAsync();
+                    if (sagaInstances.Count == 0)
                     {
-                        try
+                        var missingSagaPipe = new MissingPipe<T>(dbContext, next);
+
+                        await policy.Missing(context, missingSagaPipe);
+                    }
+                    else
+                    {
+                        foreach (var instance in sagaInstances)
                         {
-                            var sagaInstances = await dbContext.Set<TSaga>().Where(context.Query.FilterExpression).ToListAsync();
-                            if (sagaInstances.Count == 0)
-                            {
-                                var missingSagaPipe = new MissingPipe<T>(dbContext, next);
-
-                                await policy.Missing(context, missingSagaPipe);
-                            }
-                            else
-                            {
-                                foreach (var instance in sagaInstances)
-                                {
-                                    await SendToInstance(context, dbContext, policy, instance, next);
-                                }
-                            }
-
-                            await dbContextScope.SaveChangesAsync();
-
-                            transaction.Commit();
-                        }
-                        catch (Exception)
-                        {
-                            transaction.Rollback();
-                            throw;
+                            await SendToInstance(context, dbContext, policy, instance, next);
                         }
                     }
+
+                    await dbContextScope.SaveChangesAsync();
                 }
                 catch (SagaException sex)
                 {
