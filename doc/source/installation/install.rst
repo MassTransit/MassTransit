@@ -22,8 +22,8 @@ Then you will need to add references to
 =======================================
 
  * MassTransit.dll
- * MassTransit.<Transport>.dll (Currently just RabbitMQ)
- * MassTransit.<ContainerSupport>.dll (If you are so inclined)
+ * MassTransit.<Transport>.dll (RabbitMQ and Azure Service Bus)
+ * MassTransit.<ContainerSupport>.dll (Castle, AutoFac, and StructureMap)
 
 
 Compiling From Source
@@ -36,10 +36,13 @@ To clone the repository using git try the following::
 
     git clone git://github.com/MassTransit/MassTransit.git
 
-If you want the development branch (where active development happens)::
 
-    git clone git://github.com/MassTransit/MassTransit.git
-    git checkout develop
+.. note::
+
+    The default branch for this project is develop. This is done to
+    make development easier. The master branch in this case represents
+    gold code.
+
 
 Build Dependencies
 ''''''''''''''''''

@@ -8,7 +8,10 @@ Loopback
 
 .. sourcecode:: csharp
 
-  ServiceBusFactory.New(sbc =>
-  {
-      //loopback is configured by default
+  using MassTransit;
+
+  //later
+
+  Bus.Factory.CreateUsingInMemory(cfg =>{
+    //this is in the base MassTransit.dll
   });
