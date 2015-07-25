@@ -26,6 +26,7 @@ will need to have one of those installed. We currently support:
 
     transports/inmemory.rst
     transports/rabbitmq.rst
+    transports/azure.rst
 
 .. _RabbitMQ: http://www.rabbitmq.com/
 .. _Azure Service Bus: http://azure.microsoft.com/en-us/services/service-bus/
