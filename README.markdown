@@ -7,6 +7,8 @@ MassTransit is lean service bus implementation for building loosely coupled appl
 
 MassTransit is Apache 2.0 licensed.
 
+![Build Status](https://ci.appveyor.com/api/projects/status/github/masstransit/masstransit)
+
 ## Getting started with Mass Transit
 
 In order to get started with MassTransit, you can have a look at the documentation, which is located at [http://docs.masstransit-project.com/](http://docs.masstransit-project.com/).
