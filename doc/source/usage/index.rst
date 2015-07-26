@@ -5,6 +5,7 @@ Using MassTransit
 
     messages.rst
     consumer.rst
+    locations.rst
     transactions.rst
     exceptions.rst
     retry.rst

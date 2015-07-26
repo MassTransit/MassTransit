@@ -1,4 +1,4 @@
-Subscription Options
+Subscription Configuration
 """"""""""""""""""""""""""""
 
 MassTransit has a lot of ways that you can provide subscription options.
