@@ -7,14 +7,22 @@ MassTransit has a lot of ways that you can provide subscription options.
 Subscription Options During Configuration
 '''''''''''''''''''''''''''''''''''''''''
 
+Now that we have a transport, an address, and some basic options figured out the meat of the work
+is in front of you. Establishing your subscriptions. As you can see there are a lot of options
+so I am going to save most of the explanation for the next page.
+
+.. note::
+
+    Permanent Subscriptions will NOT be automatically unsubscribed at bus shutdown. See :doc:`keyideas`
+
 .. sourcecode:: csharp
 
     Bus.Factory.CreateUsingInMemory(cfg =>
     {
         cfg.ReceiveEndpoint("queue_name", ep =>
         {
-            ep.Handler(async cxt => {});
-            ep.Handler(async cxt => {}, endpointConfig => {});
+            ep.Handler<YourMessage>(async cxt => {});
+            ep.Handler<YourMessage>(async cxt => {}, endpointConfig => {});
 
             s.Instance(yourObject);
             s.Instance(yourObject, retryPolicy: Retry.None);
@@ -32,14 +40,28 @@ Subscription Options During Configuration
         });
     });
 
-Now that we have a transport, an address, and some basic options figured out the meat of the work
-is in front of you. Establishing your subscriptions. As you can see there are a lot of options
-so I am going to save most of the explanation for the next page.
+Handler
+~~~~~~~
 
-.. note::
+This is the simplest of the options. You simple register a lambda method that
+will be called each time a message of type ``YourMessage`` arrives on the endpoint.
 
-    Permanent Subscriptions will NOT be automatically unsubscribed at bus shutdown. See :doc:`keyideas`
+Instance
+~~~~~~~~
 
+Passing MassTransit an object instance, MassTransit will subscribe any public method
+with a single input parameter and a void method.
+
+
+Consumer
+~~~~~~~~
+
+
+Saga
+~~~~
+
+LoadFrom
+~~~~~~~~
 
 Subscription Options With IoC Container
 ''''''''''''''''''''''''''''''''''''''''''''''
