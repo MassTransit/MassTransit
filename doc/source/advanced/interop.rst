@@ -24,18 +24,18 @@ This is a minimal message:
 
 .. sourcecode:: javascript
 
-	{
-		"destinationAddress": "rabbitmq://isomorphism/MassTransit.Test.Receiver",
-		"headers": {},
-		"message": {
-			"spoken": "Something wierd is going on!",
-			"seqId": 2
-		},
-		"messageType": [
-			"urn:message:MassTransit.Test.Messages:ChatMessage"
-		],
-		"retryCount": 0
-	}
+    {
+        "destinationAddress": "rabbitmq://isomorphism/MassTransit.Test.Receiver",
+        "headers": {},
+        "message": {
+            "spoken": "Something wierd is going on!",
+            "seqId": 2
+        },
+        "messageType": [
+            "urn:message:MassTransit.Test.Messages:ChatMessage"
+        ],
+        "retryCount": 0
+    }
 
 Which translates to these required properties:
 
