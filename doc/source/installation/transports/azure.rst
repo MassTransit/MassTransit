@@ -1,5 +1,5 @@
-RabbitMQ
-========
+Azure Service Bus
+=================
 
 A high volume queueing platform
 
