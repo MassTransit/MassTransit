@@ -14,6 +14,7 @@ which will be followed up with a few configuration examples.
     locations.rst
     logging.rst
     transports/index.rst
+    middleware/index.rst
     containers.rst
     gotchas.rst
     diagnostics.rst
