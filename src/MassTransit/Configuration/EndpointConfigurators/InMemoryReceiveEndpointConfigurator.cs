@@ -13,11 +13,13 @@
 namespace MassTransit.EndpointConfigurators
 {
     using System;
+    using System.Diagnostics;
     using Builders;
     using Pipeline;
     using Transports;
 
 
+    [DebuggerDisplay("{DebuggerDisplay()}")]
     public class InMemoryReceiveEndpointConfigurator :
         ReceiveEndpointConfigurator,
         IReceiveEndpointConfigurator,
@@ -48,6 +50,11 @@ namespace MassTransit.EndpointConfigurators
         protected override Uri GetDeadLetterAddress()
         {
             return new Uri($"loopback://localhost/{_queueName}_skipped");
+        }
+
+        string DebuggerDisplay()
+        {
+            return "InMemory: " + _queueName;
         }
     }
 }

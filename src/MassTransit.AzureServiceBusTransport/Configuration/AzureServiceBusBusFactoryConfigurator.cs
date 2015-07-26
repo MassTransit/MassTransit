@@ -14,6 +14,7 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Linq;
     using Builders;
     using BusConfigurators;
@@ -21,6 +22,7 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
     using PipeConfigurators;
 
 
+    [DebuggerDisplay("{DebuggerDisplay()}")]
     public class AzureServiceBusBusFactoryConfigurator :
         IServiceBusBusFactoryConfigurator,
         IBusFactory
@@ -78,6 +80,11 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
         void IConsumePipeConfigurator.AddPipeSpecification<T>(IPipeSpecification<ConsumeContext<T>> specification)
         {
             _consumePipeSpecification.Add(specification);
+        }
+
+        string DebuggerDisplay()
+        {
+            return "AzureSB: " + _hosts.Count + " Hosts";
         }
     }
 }

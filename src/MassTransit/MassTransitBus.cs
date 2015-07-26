@@ -14,6 +14,7 @@ namespace MassTransit
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
@@ -22,7 +23,7 @@ namespace MassTransit
     using Pipeline;
     using Transports;
 
-
+    [DebuggerDisplay("{DebuggerDisplay()}")]
     public class MassTransitBus :
         IBusControl
     {
@@ -224,6 +225,7 @@ namespace MassTransit
         }
 
 
+        [DebuggerDisplay("{DebuggerDisplay()}")]
         class Handle :
             BusHandle
         {
@@ -265,6 +267,18 @@ namespace MassTransit
 
                 _stopped = true;
             }
+
+            string DebuggerDisplay()
+            {
+                return _stopped ? "Stopped" : "Started";
+            }
+
+        }
+
+
+        string DebuggerDisplay()
+        {
+            return Address.ToString();
         }
     }
 }

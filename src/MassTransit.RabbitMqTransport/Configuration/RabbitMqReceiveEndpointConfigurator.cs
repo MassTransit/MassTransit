@@ -13,6 +13,7 @@
 namespace MassTransit.RabbitMqTransport.Configuration
 {
     using System;
+    using System.Diagnostics;
     using System.Linq;
     using Builders;
     using EndpointConfigurators;
@@ -22,6 +23,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
     using Transports;
 
 
+    [DebuggerDisplay("{DebuggerDisplay()}")]
     public class RabbitMqReceiveEndpointConfigurator :
         ReceiveEndpointConfigurator,
         IRabbitMqReceiveEndpointConfigurator,
@@ -139,6 +141,11 @@ namespace MassTransit.RabbitMqTransport.Configuration
             sendSettings.BindToQueue(errorQueueName);
 
             return _host.Settings.GetSendAddress(sendSettings);
+        }
+
+        string DebuggerDisplay()
+        {
+            return "RabbitMQ: " + _settings.QueueName;
         }
     }
 }
