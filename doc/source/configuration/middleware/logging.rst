@@ -70,6 +70,7 @@ from https://nuget.org/packages/MassTransit.NLog
 Then add logging to your service bus initialization
 
 .. sourcecode:: csharp
+
     using MassTransit.NLogIntegration;
 
     //configure NLog
