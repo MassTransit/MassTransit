@@ -5,18 +5,18 @@ This is the recommended approach for configuring MassTransit for use with Rabbit
 
 .. sourcecode:: csharp
 
-  ServiceBusFactory.New(sbc => 
+  ServiceBusFactory.New(sbc =>
   {
     // this is the recommended routing strategy, and will call 'sbc.UseRabbitMq()' on its own.
     sbc.UseRabbitMqRouting();
     // other options
   });
-  
+
 Alternatively you can use *raw* RabbitMQ routing.
 
 .. sourcecode:: csharp
 
-  ServiceBusFactory.New(sbc => 
+  ServiceBusFactory.New(sbc =>
   {
     // this is the recommended routing strategy, and will call 'sbc.UseRabbitMq()' on its own.
     sbc.UseRabbitMq();
@@ -24,27 +24,27 @@ Alternatively you can use *raw* RabbitMQ routing.
   });
 
 Have a look at this table for clarification:
-  
-``UseRabbitMq`` tells the MassTransit code to use RabbitMQ as the transport. 
+
+``UseRabbitMq`` tells the MassTransit code to use RabbitMQ as the transport.
 This also sets the default serializer to JSON.
 
 ``UseRabbitMqRouting`` configures the bus instance to use the default MassTransit
 convention based routing for RabbitMq
 
- ==================================  ================================      ==================================
-  Description                        Calling ``UseRabbitMqRouting``        Not calling ``UseRabbitMqRouting``
- ==================================  ================================      ==================================
- IServiceBus.Publish<T>(T, A<C<T>>)  Enables *Polymorphic routing* [#pr]   Will only route non-polymorphicly.
-                                     and *Interface-based routing* [#ir]   Will not route on interfaces.
-                                                                           Will not place message in any exchange.
- ==================================  ================================      ==================================
- 
- 
+ ==================================  ===================================      ==================================
+  Description                        Calling ``UseRabbitMqRouting``           Not calling ``UseRabbitMqRouting``
+ ==================================  ===================================      ==================================
+ IServiceBus.Publish<T>(T, A<C<T>>)  Enables *Polymorphic routing* [#pr]      Will only route non-polymorphicly.
+                                     and *Interface-based routing* [#ir]      Will not route on interfaces.
+                                                                              Will not place message in any exchange.
+ ==================================  ===================================      ==================================
+
+
  Routing Topology
  ----------------
- 
+
  About the RabbitMQ routing topology in place with MassTransit.
- 
+
   - networks are segregated by vhosts
   - we generate an exchange for each queue so that we can do direct sends to the queue. it is bound as a fanout exchange
   - for each message published we generate series of exchanges that go from concrete class to each of its subclass / interfaces these are linked together from most specific to least specific. This way if you subscribe to the base interface you get all the messages. or you can be more selective. all exchanges in this situation are bound as fanouts.
@@ -53,12 +53,12 @@ convention based routing for RabbitMq
   - control queues are exclusive and auto-delete – they go away when you go away and are not shared.
   - we also lose the routing keys. WIN!
 
- 
+
  RabbitMQ with SSL
  -----------------
- 
+
  .. sourceode:: csharp
- 
+
   ServiceBusFactory.New(c =>
       {
           c.ReceiveFrom(inputAddress);
@@ -76,10 +76,10 @@ convention based routing for RabbitMq
                       });
               });
       });
- 
+
 You will need to configure RabbitMQ to support SSL also http://www.rabbitmq.com/ssl.html.
- 
- 
+
+
 .. [#pr] *Polymorphic Routing* is routing where ``bus.Subscribe<B>( ... )`` would receive both ``class A {}`` and ``class B : A {}`` message.
 
-.. [#ir] *Interface Routing* is routing where ``bus.Subscribe<C>( ... )``  would receive 
+.. [#ir] *Interface Routing* is routing where ``bus.Subscribe<C>( ... )``  would receive

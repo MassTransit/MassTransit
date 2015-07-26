@@ -23,6 +23,7 @@ MassTransit's serializers do the main work of formatting the data that goes over
 This is a minimal message:
 
 .. sourcecode:: javascript
+
 	{
 		"destinationAddress": "rabbitmq://isomorphism/MassTransit.Test.Receiver",
 		"headers": {},
@@ -37,11 +38,11 @@ This is a minimal message:
 	}
 
 Which translates to these required properties:
-	
+
  * message
  * messageType
  * destinationAddress
- 
+
 MessageType is a list of urns. See MessageUrnSpecs for the format. Informally, it's like this::
 
 urn:message:NAMESPACE1.NAMESPACE2:TYPE
