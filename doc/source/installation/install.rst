@@ -5,7 +5,7 @@ NuGet
 '''''
 
 The simplest way to install MassTransit into your solution/project is to use
-NuGet.::
+NuGet.
 
 .. sourcecode:: powershell
 

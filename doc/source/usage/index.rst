@@ -3,6 +3,7 @@ Using MassTransit
 
 .. toctree::
 
+    messages.rst
     consumer.rst
     transactions.rst
     exceptions.rst

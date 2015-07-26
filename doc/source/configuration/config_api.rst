@@ -13,6 +13,10 @@ some of the options you have:
 Transport Factory Options
 '''''''''''''''''''''''''
 
+The first decision is what transport are you going to use? RabbitMQ or Azure Service Bus?
+If you don't know which one to choose I suggest reading up on the two and see
+which one works better for your environment.
+
 .. sourcecode:: csharp
 
     Bus.Factory.CreateUsingInMemory(cfg => {});
@@ -20,12 +24,17 @@ Transport Factory Options
     //coming soon
     //Bus.Factory.CreateUsingAzureServiceBus(cfg => {});
 
-The first decision is what transport are you going to use? RabbitMQ or Azure Service Bus?
-If you don't know which one to choose I suggest reading up on the two and see
-which one works better for your environment.
+
+.. warning::
+
+    In-Memory is for testing only.
 
 Basic Options
 '''''''''''''
+
+The next decision we have to make is what address are we going to listen on? Here
+we are using the In-Memory transport and specifing an queue
+to receive messages on.
 
 .. sourcecode:: csharp
 
@@ -37,13 +46,6 @@ Basic Options
         });
     });
 
-The next decision we have to make is what address are we going to listen on? Here
-we are using the In-Memory transport and specifing an queue
-to receive messages on.
-
-.. warning::
-
-    In-Memory is for testing only.
 
 The same endpoint but for rabbit mq.
 
@@ -66,6 +68,10 @@ The same endpoint but for rabbit mq.
 Serializer Options
 ''''''''''''''''''
 
+This is mostly optional, because the transports will set their preferred defaults, but if you
+need to override the default you can using these methods. With the ``SetDefaultSerializer`` you can
+provide a custom serializer that you created.
+
 .. sourcecode:: csharp
 
     Bus.Factory.CreateUsingInMemory(cfg =>
@@ -78,7 +84,4 @@ Serializer Options
         cfg.UseXmlSerializer();
     });
 
-This is mostly optional, because the transports will set their preferred defaults, but if you
-need to override the default you can using these methods. With the ``SetDefaultSerializer`` you can
-provide a custom serializer that you created.
 
