@@ -13,3 +13,30 @@ is that we need to respect the very asynchronus nature of messaging.
             //do stuff
         }
     }
+
+
+Observers
+---------
+
+.. sourcecode:: csharp
+
+    public class AnObserver :
+        IObserver<ConsumeContext<MyConsumer>>
+    {
+        public void OnNext(ConsumeContext<MyConsumer> value)
+        {
+            //do stuff
+        }
+
+        public void OnError(Exception error)
+        {
+            //error handling
+        }
+
+        public void OnCompleted()
+        {
+            //on complete
+        }
+
+    }
+

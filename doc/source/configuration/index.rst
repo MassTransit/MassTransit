@@ -8,8 +8,9 @@ which will be followed up with a few configuration examples.
 .. toctree::
 
     quickstart.rst
-    config_api.rst
-    sub_config_api.rst
+    bus_configuration.rst
+    subscription_configuration.rst
+    endpoint_configuration.rst
     locations.rst
     transports/index.rst
     middleware/index.rst

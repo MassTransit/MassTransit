@@ -1,4 +1,4 @@
-Common Configuration Options
+Bus Configuration
 """"""""""""""""""""""""""""
 
 Trying to get multiple applications to talk to each other is not a simple problem.
