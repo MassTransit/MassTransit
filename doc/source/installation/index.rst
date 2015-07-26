@@ -1,4 +1,4 @@
-MassTransit Installation
+Installing MassTransit
 """"""""""""""""""""""""
 
 This section of the online docs will explain how to get MassTransit into

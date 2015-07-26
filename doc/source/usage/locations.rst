@@ -1,0 +1,89 @@
+Hooking MassTransit Into Your Application
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+Sometimes we have people ask us where they should configure MassTransit. Our general
+advice is that it should be done at the same time as you configure your IoC
+container. But what if you aren't using an IoC container? Well, lets review
+some options.
+
+
+
+Configuring MassTransit in a Console Application / Windows Service
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+In a console application or a windows service the goal for me is to get
+the process started as early as possible. So its typically one of the
+first things I set up. Like this.
+
+.. sourcecode:: csharp
+
+    public class Program
+    {
+        public void static main(string[] args)
+        {
+            //configure MT
+
+            //execute program logic
+        }
+    }
+
+Now, since MassTransit is going to spin off a bunch of threads to do the work,
+you typically need some way to keep the main thread alive, so you might see
+something like
+
+.. sourcecode:: csharp
+
+    public class Program
+    {
+        public void static main(string[] args)
+        {
+            var bus = Bus.Factory.CreateUsingInMemory(cfg => {});
+            using(var handle = bus.Start())
+            {
+                Console.WriteLine("The bus has started!")
+                Console.ReadLine();
+                handle.Stop();
+            }
+        }
+    }
+
+From here you can hopefully fit this into your existing console / windows service
+application setup.
+
+.. note::
+
+    For Windows Services we strongly recommend using Topshelf, as it was built
+    for this task.
+
+Configuring MassTransit in a Website
+''''''''''''''''''''''''''''''''''''
+
+The setup for a website is not that much different than a console application.
+So, instead of the Console Main method, we will use the Global Application_Start
+method.
+
+.. note::
+
+    a lot of our samples show using MT with another open source project
+    Topshelf. This is a .Net Windows Service host. And should not be use
+    with web sites.
+
+.. sourcecode:: csharp
+
+    public class Global : HttpApplication
+    {
+        static BusHandle _handle;
+
+        protected void Application_Start()
+        {
+            var bus = Bus.Factory.CreateUsingInMemory(cfg => {});
+            _handle = bus.Start();
+
+        }
+
+        protected void Application_End()
+        {
+            _handle.Stop();
+            _handle.Dispose();
+        }
+    }
