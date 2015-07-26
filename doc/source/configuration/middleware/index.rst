@@ -8,5 +8,7 @@ with a ``Use`` and are implemented as extension methods off of ``IPipeConfigurat
 .. toctree::
 
     transactions.rst
+    logging.rst
     circuit_breaker.rst
     custom.rst
+

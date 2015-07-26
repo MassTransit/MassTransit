@@ -1,14 +1,15 @@
 Azure Service Bus
 =================
 
-A high volume queueing platform
 
-See https://www.rabbitmq.com/download.html for installing rabbitmq.
 
 NuGet
 '''''
 
+.. sourcecode:: powershell
+
   nuget Install-Package MassTransit.AzureServiceBus
+
 
 .. sourcecode:: csharp
 
