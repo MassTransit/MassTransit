@@ -12,7 +12,7 @@ MassTransit.
     {
         public static void Main()
         {
-            var busControl = Bus.Factory.CreateUsingRabbitMQ(sbc =>
+            var bus = Bus.Factory.CreateUsingRabbitMQ(sbc =>
             {
                 var host = sbc.Host(new Uri("rabbitmq://localhost"), h =>
                 {
@@ -29,9 +29,9 @@ MassTransit.
                 });
             });
 
-            var handle = await busControl.Start();
+            var handle = bus.Start();
 
-            busControl.Publish(new YourMessage{Text = "Hi"});
+            bus.Publish(new YourMessage{Text = "Hi"});
 
             handle.Stop();
         }

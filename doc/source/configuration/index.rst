@@ -9,9 +9,12 @@ which will be followed up with a few configuration examples.
 
     quickstart.rst
     config_api.rst
+    circuit_breaker.rst
     sub_config_api.rst
     locations.rst
     logging.rst
     transports/index.rst
     containers.rst
     gotchas.rst
+    diagnostics.rst
+    bus_tuning.rst
