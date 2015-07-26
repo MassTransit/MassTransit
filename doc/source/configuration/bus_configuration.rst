@@ -1,5 +1,5 @@
 Bus Configuration
-""""""""""""""""""""""""""""
+"""""""""""""""""
 
 Trying to get multiple applications to talk to each other is not a simple problem.
 Often times the biggest is just getting everything configured. With over eight
