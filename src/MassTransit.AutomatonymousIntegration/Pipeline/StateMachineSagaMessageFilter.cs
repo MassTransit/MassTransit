@@ -57,14 +57,13 @@ namespace Automatonymous.Pipeline
 
         public async Task Send(SagaConsumeContext<TInstance, TData> context, IPipe<SagaConsumeContext<TInstance, TData>> next)
         {
-            var eventContext = new StateMachineEventContext<TInstance, TData>(_stateMachine, context.Saga, _event, context.Message,
-                context.CancellationToken);
+            var eventContext = new StateMachineEventContext<TInstance, TData>(context.Saga, _event, context.Message,context.CancellationToken);
 
             eventContext.GetOrAddPayload(() => context);
             eventContext.GetOrAddPayload(() => (ConsumeContext<TData>)context);
             eventContext.GetOrAddPayload(() => (ConsumeContext)context);
 
-            State<TInstance> currentState = await _stateMachine.InstanceStateAccessor.Get(eventContext).ConfigureAwait(false);
+            State<TInstance> currentState = await _stateMachine.Accessor.Get(eventContext).ConfigureAwait(false);
 
             IEnumerable<Event> nextEvents = _stateMachine.NextEvents(currentState);
             if (nextEvents.Contains(_event))

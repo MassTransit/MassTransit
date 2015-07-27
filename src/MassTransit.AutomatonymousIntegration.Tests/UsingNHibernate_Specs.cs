@@ -65,7 +65,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
             }
         }
 
-        async Task<ShoppingChore> GetSaga(Guid id)
+        Task<ShoppingChore> GetSaga(Guid id)
         {
             using (ISession session = _sessionFactory.OpenSession())
             using (ITransaction transaction = session.BeginTransaction())
@@ -76,7 +76,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
 
                 transaction.Commit();
 
-                return result;
+                return Task.FromResult(result);
             }
         }
 

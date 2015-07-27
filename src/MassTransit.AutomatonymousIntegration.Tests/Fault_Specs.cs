@@ -102,7 +102,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
 
         State GetCurrentState(Instance state)
         {
-            return ((StateMachine<Instance>)_machine).InstanceStateAccessor.GetState(state);
+            return _machine.GetState(state).Result;
         }
 
         TestStateMachine _machine;
