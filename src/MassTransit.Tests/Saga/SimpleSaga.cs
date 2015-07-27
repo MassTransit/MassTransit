@@ -25,15 +25,6 @@ namespace MassTransit.Tests.Saga
         Observes<ObservableSagaMessage, SimpleSaga>,
         ISaga
     {
-        public SimpleSaga()
-        {
-        }
-
-        public SimpleSaga(Guid correlationId)
-        {
-            CorrelationId = correlationId;
-        }
-
         public bool Completed { get; private set; }
         public bool Initiated { get; private set; }
         public bool Observed { get; private set; }

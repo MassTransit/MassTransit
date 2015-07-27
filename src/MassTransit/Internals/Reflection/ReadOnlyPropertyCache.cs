@@ -40,6 +40,18 @@ namespace MassTransit.Internals.Reflection
             return GetEnumerator();
         }
 
+        public bool TryGetValue(string key, out ReadOnlyProperty<T> value)
+        {
+            try
+            {
+                return _properties.TryGetValue(key, out value);
+            }
+            catch (KeyNotFoundException)
+            {
+                throw new KeyNotFoundException($"The read only property {key} was not found.");
+            }
+        }
+
         static IDictionary<string, ReadOnlyProperty<T>> CreatePropertyCache()
         {
             return new Dictionary<string, ReadOnlyProperty<T>>(typeof(T).GetAllProperties()

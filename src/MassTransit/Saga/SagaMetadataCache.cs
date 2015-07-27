@@ -15,8 +15,10 @@ namespace MassTransit.Saga
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Reflection;
     using System.Threading;
     using System.Threading.Tasks;
+    using Internals.Reflection;
     using Logging;
     using Util;
 
@@ -26,7 +28,6 @@ namespace MassTransit.Saga
         where TSaga : class, ISaga
     {
         static readonly ILog _log = Logger.Get<SagaMetadataCache<TSaga>>();
-
         readonly SagaInterfaceType[] _initiatedByTypes;
         readonly SagaInterfaceType[] _observesTypes;
         readonly SagaInterfaceType[] _orchestratesTypes;
@@ -38,27 +39,55 @@ namespace MassTransit.Saga
             _orchestratesTypes = GetOrchestratingTypes().ToArray();
             _observesTypes = GetObservingTypes().ToArray();
 
-            _factoryMethod = correlationId => (TSaga)Activator.CreateInstance(typeof(TSaga), correlationId);
-
-            // ReSharper disable once CSharpWarnings::CS4014
-            GenerateFactoryMethodAsynchronously();
+             GetActivatorSagaInstanceFactoryMethod();
         }
 
         public static SagaInterfaceType[] InitiatedByTypes => Cached.Instance.Value.InitiatedByTypes;
-
         public static SagaInterfaceType[] OrchestratesTypes => Cached.Instance.Value.OrchestratesTypes;
-
         public static SagaInterfaceType[] ObservesTypes => Cached.Instance.Value.ObservesTypes;
-
         public static SagaInstanceFactoryMethod<TSaga> FactoryMethod => Cached.Instance.Value.FactoryMethod;
-
         SagaInstanceFactoryMethod<TSaga> ISagaMetadataCache<TSaga>.FactoryMethod => _factoryMethod;
-
         SagaInterfaceType[] ISagaMetadataCache<TSaga>.InitiatedByTypes => _initiatedByTypes;
-
         SagaInterfaceType[] ISagaMetadataCache<TSaga>.OrchestratesTypes => _orchestratesTypes;
-
         SagaInterfaceType[] ISagaMetadataCache<TSaga>.ObservesTypes => _observesTypes;
+
+        void GetActivatorSagaInstanceFactoryMethod()
+        {
+            var constructorInfo = typeof(TSaga).GetConstructor(new[] {typeof(Guid)});
+            if (constructorInfo != null)
+            {
+                // this takes zero compilation time and speeds up application startup time
+                // while the optimized method is generated asynchronously
+                _factoryMethod = correlationId => (TSaga)Activator.CreateInstance(typeof(TSaga), correlationId);
+
+                GenerateFactoryMethodAsynchronously();
+            }
+            else
+            {
+                constructorInfo = typeof(TSaga).GetConstructor(Type.EmptyTypes);
+                var propertyInfo = typeof(TSaga).GetProperty("CorrelationId", typeof(Guid));
+                if (constructorInfo != null && propertyInfo != null)
+                {
+                    // this takes zero compilation time and speeds up application startup time
+                    // while the optimized method is generated asynchronously
+                    _factoryMethod = correlationId =>
+                    {
+                        var saga = (TSaga)Activator.CreateInstance(typeof(TSaga));
+
+                        propertyInfo.SetValue(saga, correlationId);
+
+                        return saga;
+                    };
+
+                    GeneratePropertyFactoryMethodAsynchronously();
+                }
+                else
+                {
+                    throw new ConfigurationException(
+                        $"The saga {TypeMetadataCache<TSaga>.ShortName} must have either a default constructor and a writable CorrelationId property or a constructor with a single Guid argument to assign the CorrelationId");
+                }
+            }
+        }
 
         /// <summary>
         /// Creates a task to generate a compiled saga factory method that is faster than the 
@@ -79,6 +108,28 @@ namespace MassTransit.Saga
             {
                 if (_log.IsErrorEnabled)
                     _log.Error($"Failed to generate constructor instance factory for {TypeMetadataCache<TSaga>.ShortName}", ex);
+            }
+        }
+
+        /// <summary>
+        /// Creates a task to generate a compiled saga factory method that is faster than the 
+        /// regular Activator, but doing this asynchronously ensures we don't slow down startup
+        /// </summary>
+        /// <returns></returns>
+        async void GeneratePropertyFactoryMethodAsynchronously()
+        {
+            await Task.Yield();
+
+            try
+            {
+                var factory = new PropertySagaInstanceFactory<TSaga>();
+
+                Interlocked.Exchange(ref _factoryMethod, factory.FactoryMethod);
+            }
+            catch (Exception ex)
+            {
+                if (_log.IsErrorEnabled)
+                    _log.Error($"Failed to generate property instance factory for {TypeMetadataCache<TSaga>.ShortName}", ex);
             }
         }
 
