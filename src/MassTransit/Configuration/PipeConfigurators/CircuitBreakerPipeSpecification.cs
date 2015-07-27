@@ -33,9 +33,9 @@ namespace MassTransit.PipeConfigurators
             _settings = new Settings();
         }
 
-        public TimeSpan Duration
+        public TimeSpan TrackingPeriod
         {
-            set { _settings.Duration = value; }
+            set { _settings.TrackingPeriod = value; }
         }
 
         public int TripThreshold
@@ -43,9 +43,14 @@ namespace MassTransit.PipeConfigurators
             set { _settings.TripThreshold = value; }
         }
 
-        public int ActiveCount
+        public int ActiveThreshold
         {
-            set { _settings.ActiveCount = value; }
+            set { _settings.ActiveThreshold = value; }
+        }
+
+        public void ResetInterval(TimeSpan interval)
+        {
+            _settings.ResetTimeout = IntervalTimeout(interval);
         }
 
         public void Apply(IPipeBuilder<T> builder)
@@ -55,14 +60,20 @@ namespace MassTransit.PipeConfigurators
 
         public IEnumerable<ValidationResult> Validate()
         {
-            if (_settings.ActiveCount < 1)
-                yield return this.Failure("ActiveCount", "must be >= 1");
+            if (_settings.ActiveThreshold < 1)
+                yield return this.Failure(nameof(_settings.ActiveThreshold), "must be >= 1");
             if (_settings.TripThreshold < 0 || _settings.TripThreshold > 100)
-                yield return this.Failure("TripThreshold", "must be >= 0 and <= 100");
-            if (_settings.Duration <= TimeSpan.Zero)
-                yield return this.Failure("Duration", "must be > 0");
+                yield return this.Failure(nameof(_settings.TripThreshold), "must be >= 0 and <= 100");
+            if (_settings.TrackingPeriod <= TimeSpan.Zero)
+                yield return this.Failure(nameof(_settings.TrackingPeriod), "must be > 0");
             if (!_settings.ResetTimeout.Any())
-                yield return this.Failure("ResetTimeout", "must specify at least one value");
+                yield return this.Failure(nameof(_settings.ResetTimeout), "must specify at least one value");
+        }
+
+        IEnumerable<TimeSpan> IntervalTimeout(TimeSpan interval)
+        {
+            while (true)
+                yield return interval;
         }
 
 
@@ -71,9 +82,9 @@ namespace MassTransit.PipeConfigurators
         {
             public Settings()
             {
-                ActiveCount = 5;
+                ActiveThreshold = 5;
                 TripThreshold = 5;
-                Duration = TimeSpan.FromMinutes(1);
+                TrackingPeriod = TimeSpan.FromMinutes(1);
                 ResetTimeout = DefaultTimeout;
             }
 
@@ -94,13 +105,10 @@ namespace MassTransit.PipeConfigurators
                 }
             }
 
-            public TimeSpan Duration { get; set; }
-
-            public IEnumerable<TimeSpan> ResetTimeout { get; private set; }
-
+            public TimeSpan TrackingPeriod { get; set; }
+            public IEnumerable<TimeSpan> ResetTimeout { get; set; }
             public int TripThreshold { get; set; }
-
-            public int ActiveCount { get; set; }
+            public int ActiveThreshold { get; set; }
         }
     }
 }

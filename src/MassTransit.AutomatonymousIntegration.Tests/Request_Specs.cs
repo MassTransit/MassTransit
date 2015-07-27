@@ -294,19 +294,19 @@ namespace MassTransit.AutomatonymousTests
 
                 During(ValidateAddress.Pending,
                     When(ValidateAddress.Completed)
-                        .Then(context =>
+                        .ThenAsync(async context =>
                         {
-                            Console.WriteLine("Request Completed!");
+                            await Console.Out.WriteLineAsync("Request Completed!");
 
                             context.Instance.Address = context.Data.Address;
                         })
                         .Publish(context => new MemberRegisteredImpl(context.Instance))
                         .TransitionTo(Registered),
                     When(ValidateAddress.Faulted)
-                        .Then(context => Console.WriteLine("Request Faulted"))
+                        .ThenAsync(async context => await Console.Out.WriteLineAsync("Request Faulted"))
                         .TransitionTo(AddressValidationFaulted),
                     When(ValidateAddress.TimeoutExpired)
-                        .Then(context => Console.WriteLine("Request timed out"))
+                        .ThenAsync(async context => await Console.Out.WriteLineAsync("Request timed out"))
                         .TransitionTo(AddressValidationTimeout));
             }
 

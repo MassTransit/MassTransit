@@ -34,7 +34,7 @@ namespace MassTransit.Pipeline.Filters.CircuitBreaker
         /// <summary>
         /// Window duration before attempt/success/failure counts are reset
         /// </summary>
-        TimeSpan Duration { get; }
+        TimeSpan OpenDuration { get; }
 
         /// <summary>
         /// Open the circuit breaker, preventing any further access to the resource until

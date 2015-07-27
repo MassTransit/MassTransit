@@ -20,6 +20,7 @@ namespace MassTransit.RabbitMqTransport
     using System.Security.Authentication;
     using System.Text;
     using System.Text.RegularExpressions;
+    using Configuration.Configurators;
     using RabbitMQ.Client;
     using Topology;
     using Transports;
@@ -353,7 +354,7 @@ namespace MassTransit.RabbitMqTransport
             if (string.Compare("rabbitmq", address.Scheme, StringComparison.OrdinalIgnoreCase) != 0)
                 throw new RabbitMqAddressException("The invalid scheme was specified: " + address.Scheme);
 
-            var hostSettings = new HostSettings
+            var hostSettings = new ConfigurationHostSettings
             {
                 Host = address.Host,
                 Username = "",
@@ -395,23 +396,6 @@ namespace MassTransit.RabbitMqTransport
             Match match = _regex.Match(queueName);
             bool success = match.Success;
             return success;
-        }
-
-
-        class HostSettings :
-            RabbitMqHostSettings
-        {
-            public string Host { get; set; }
-            public int Port { get; set; }
-            public string VirtualHost { get; set; }
-            public string Username { get; set; }
-            public string Password { get; set; }
-            public ushort Heartbeat { get; set; }
-            public bool Ssl { get; private set; }
-            public string SslServerName { get; private set; }
-            public SslPolicyErrors AcceptablePolicyErrors { get; private set; }
-            public string ClientCertificatePath { get; private set; }
-            public string ClientCertificatePassphrase { get; private set; }
         }
     }
 }

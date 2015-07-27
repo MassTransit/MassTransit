@@ -21,7 +21,7 @@ namespace MassTransit.Pipeline.Filters.CircuitBreaker
         /// <summary>
         /// The window duration to keep track of errors before they fall off the breaker state
         /// </summary>
-        TimeSpan Duration { get; }
+        TimeSpan TrackingPeriod { get; }
 
         /// <summary>
         /// The time to wait after the breaker has opened before attempting to close it
@@ -37,6 +37,6 @@ namespace MassTransit.Pipeline.Filters.CircuitBreaker
         /// <summary>
         /// The active count of attempts before the circuit breaker can be tripped
         /// </summary>
-        int ActiveCount { get; }
+        int ActiveThreshold { get; }
     }
 }

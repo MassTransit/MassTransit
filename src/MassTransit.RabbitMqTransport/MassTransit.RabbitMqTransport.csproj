@@ -63,6 +63,7 @@
     </Compile>
     <Compile Include="Configuration\Builders\RabbitMqBusBuilder.cs" />
     <Compile Include="Configuration\Builders\RabbitMqReceiveEndpointBuilder.cs" />
+    <Compile Include="Configuration\Configurators\ConfigurationHostSettings.cs" />
     <Compile Include="Configuration\Configurators\RabbitMqHostConfigurator.cs" />
     <Compile Include="Configuration\DelayedExchangeRedeliveryPipeSpecification.cs" />
     <Compile Include="Configuration\IQueueConfigurator.cs" />

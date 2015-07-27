@@ -83,7 +83,7 @@ namespace MassTransit.BusConfigurators
             _configurators.Add(new ConfiguratorProxy(configurator));
         }
 
-        public int ConcurrencyLimit
+        public int TransportConcurrencyLimit
         {
             set { _concurrencyLimit = value; }
         }
