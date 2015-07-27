@@ -5,31 +5,21 @@ This is the recommended approach for configuring MassTransit for use with Rabbit
 
 .. sourcecode:: csharp
 
-  ServiceBusFactory.New(sbc =>
-  {
-    // this is the recommended routing strategy, and will call 'sbc.UseRabbitMq()' on its own.
-    sbc.UseRabbitMqRouting();
-    // other options
-  });
+    Bus.Factory.CreateUsingRabbitMq(cfg =>
+    {
+        cfg.Host(new Uri("rabbitmq://a-machine-name/a-virtual-host"), host =>
+        {
+            host.Username("username");
+            host.Password("password");
+        });
+    });
 
-Alternatively you can use *raw* RabbitMQ routing.
-
-.. sourcecode:: csharp
-
-  ServiceBusFactory.New(sbc =>
-  {
-    // this is the recommended routing strategy, and will call 'sbc.UseRabbitMq()' on its own.
-    sbc.UseRabbitMq();
-    // other options
-  });
 
 Have a look at this table for clarification:
 
-``UseRabbitMq`` tells the MassTransit code to use RabbitMQ as the transport.
+``CreateUsingRabbitMq`` tells the MassTransit code to use RabbitMQ as the transport.
 This also sets the default serializer to JSON.
 
-``UseRabbitMqRouting`` configures the bus instance to use the default MassTransit
-convention based routing for RabbitMq
 
  ==================================  ===================================      ==================================
   Description                        Calling ``UseRabbitMqRouting``           Not calling ``UseRabbitMqRouting``

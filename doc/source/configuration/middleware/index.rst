@@ -10,5 +10,6 @@ with a ``Use`` and are implemented as extension methods off of ``IPipeConfigurat
     transactions.rst
     logging.rst
     circuit_breaker.rst
+    message_scheduling.rst
     custom.rst
 

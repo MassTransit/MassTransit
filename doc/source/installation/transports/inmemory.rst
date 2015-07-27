@@ -12,6 +12,7 @@ Loopback
 
   //later
 
-  Bus.Factory.CreateUsingInMemory(cfg =>{
+  Bus.Factory.CreateUsingInMemory(cfg =>
+  {
     //this is in the base MassTransit.dll
   });

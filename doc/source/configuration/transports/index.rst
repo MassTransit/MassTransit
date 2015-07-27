@@ -7,4 +7,4 @@ Each transport has different configuration options.
 
   rabbitmq.rst
   azure.rst
-  loopback.rst
+  in_memory.rst
