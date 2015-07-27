@@ -10,18 +10,17 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.AutomatonymousTests
+namespace MassTransit.AutomatonymousIntegration.Tests
 {
+    using System;
+    using System.Threading.Tasks;
+    using Automatonymous;
+    using NUnit.Framework;
+    using Saga;
+    using TestFramework;
+
     namespace Request_Specs
     {
-        using System;
-        using System.Threading.Tasks;
-        using Automatonymous;
-        using NUnit.Framework;
-        using Saga;
-        using TestFramework;
-
-
         [TestFixture]
         public class Sending_a_request_from_a_state_machine :
             StateMachineTestFixture

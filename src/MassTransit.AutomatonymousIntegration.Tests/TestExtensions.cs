@@ -10,16 +10,8 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.AutomatonymousTests
+namespace MassTransit.AutomatonymousIntegration.Tests
 {
-    using System;
-    using System.Linq;
-    using System.Threading;
-    using Automatonymous;
-    using NUnit.Framework;
-    using Saga;
-
-
 //    public static class TestExtensions
 //    {
 //        public static TSaga ShouldContainSaga<TSaga>(this ISagaRepository<TSaga> repository, Guid sagaId,

@@ -8,8 +8,8 @@
     <ProjectGuid>{1DAB3D46-3386-48F8-8381-2F5B678D1DB6}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>MassTransit.AutomatonymousTests</RootNamespace>
-    <AssemblyName>MassTransit.AutomatonymousTests</AssemblyName>
+    <RootNamespace>MassTransit.AutomatonymousIntegration.Tests</RootNamespace>
+    <AssemblyName>MassTransit.AutomatonymousIntegration.Tests</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\..\src\</SolutionDir>
@@ -53,23 +53,11 @@
       <HintPath>..\packages\Common.Logging.Core.3.2.0\lib\net40\Common.Logging.Core.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
-      <HintPath>..\packages\EntityFramework.6.1.3\lib\net45\EntityFramework.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="EntityFramework.SqlServer, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
-      <HintPath>..\packages\EntityFramework.6.1.3\lib\net45\EntityFramework.SqlServer.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="Iesi.Collections">
       <HintPath>..\packages\Iesi.Collections.4.0.1.4000\lib\net40\Iesi.Collections.dll</HintPath>
     </Reference>
     <Reference Include="log4net">
       <HintPath>..\packages\log4net.2.0.3\lib\net40-full\log4net.dll</HintPath>
-    </Reference>
-    <Reference Include="Mehdime.Entity, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Mehdime.Entity.1.0.0\lib\Mehdime.Entity.dll</HintPath>
-      <Private>True</Private>
     </Reference>
     <Reference Include="NewId, Version=2.1.3.0, Culture=neutral, PublicKeyToken=b8e0e9f2f1e657fa, processorArchitecture=MSIL">
       <HintPath>..\packages\NewId.2.1.3\lib\net45\NewId.dll</HintPath>
@@ -109,7 +97,6 @@
     <Compile Include="ContextSetup.cs" />
     <Compile Include="CorrelationExpression_Specs.cs" />
     <Compile Include="Fault_Specs.cs" />
-    <Compile Include="SagaDbContextFactoryProvider.cs" />
     <Compile Include="Publish_Specs.cs" />
     <Compile Include="RemoveWhen_Specs.cs" />
     <Compile Include="Request_Specs.cs" />
@@ -122,8 +109,8 @@
     <Compile Include="TestExtensions.cs" />
     <Compile Include="Testing_Specs.cs" />
     <Compile Include="UncorrelatedMessage_Specs.cs" />
+    <Compile Include="StorageSpec_Types.cs" />
     <Compile Include="UsingNHibernate_Specs.cs" />
-    <Compile Include="UsingEntityFramework_Specs.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Loggers\MassTransit.Log4NetIntegration\MassTransit.Log4NetIntegration.csproj">

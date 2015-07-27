@@ -1,4 +1,4 @@
-﻿namespace MassTransit.AutomatonymousTests
+﻿namespace MassTransit.AutomatonymousIntegration.Tests
 {
     using System;
     using System.Collections.Generic;
