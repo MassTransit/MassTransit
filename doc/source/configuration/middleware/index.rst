@@ -11,5 +11,6 @@ with a ``Use`` and are implemented as extension methods off of ``IPipeConfigurat
     logging.rst
     circuit_breaker.rst
     message_scheduling.rst
+    retry.rst
     custom.rst
 
