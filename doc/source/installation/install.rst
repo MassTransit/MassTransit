@@ -52,9 +52,7 @@ Build Dependencies
 To compile MassTransit from source you will need the following developer tools
 installed:
 
- * .Net 4.0 sdk
- * ruby v 1.8.7
- * gems (rake, albacore)
+ * .NET 4.5 SDK or later
 
 Compiling
 '''''''''

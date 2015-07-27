@@ -72,6 +72,11 @@ This is mostly optional, because the transports will set their preferred default
 need to override the default you can using these methods. With the ``SetDefaultSerializer`` you can
 provide a custom serializer that you created.
 
+
+.. note::
+
+    JSON is the default serialization strategy
+
 .. sourcecode:: csharp
 
     Bus.Factory.CreateUsingInMemory(cfg =>
