@@ -15,15 +15,19 @@ namespace MassTransit.RabbitMqTransport.Configuration.Configurators
     using System.Net.Security;
 
 
-    /// <summary>
-    /// Configures SSL/TLS for RabbitMQ. See http://www.rabbitmq.com/ssl.html
-    /// for details on how to set up RabbitMQ for SSL.
-    /// </summary>
-    public interface IRabbitMqSslConfigurator
+    class ConfigurationHostSettings :
+        RabbitMqHostSettings
     {
-        string ServerName { get; set; }
-        string CertificatePath { get; set; }
-        string CertificatePassphrase { get; set; }
-        void AllowPolicyErrors(SslPolicyErrors policyErrors);
+        public string Host { get; set; }
+        public int Port { get; set; }
+        public string VirtualHost { get; set; }
+        public string Username { get; set; }
+        public string Password { get; set; }
+        public ushort Heartbeat { get; set; }
+        public bool Ssl { get; set; }
+        public string SslServerName { get; set; }
+        public SslPolicyErrors AcceptablePolicyErrors { get; set; }
+        public string ClientCertificatePath { get; set; }
+        public string ClientCertificatePassphrase { get; set; }
     }
 }

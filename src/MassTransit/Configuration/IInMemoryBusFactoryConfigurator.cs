@@ -22,9 +22,10 @@ namespace MassTransit
     {
         /// <summary>
         /// Sets the maximum number of threads used by an in-memory transport, for partitioning
-        /// the input queue.
+        /// the input queue. This setting also specifies how many threads will be used for dispatching
+        /// messages to consumers. 
         /// </summary>
-        int ConcurrencyLimit { set; }
+        int TransportConcurrencyLimit { set; }
 
         /// <summary>
         /// Sets the transport provider for the InMemory bus, used to share a transport cache between multiple

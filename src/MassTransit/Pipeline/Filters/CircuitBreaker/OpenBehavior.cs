@@ -16,7 +16,6 @@ namespace MassTransit.Pipeline.Filters.CircuitBreaker
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.Threading;
-    using System.Threading.Tasks;
     using Events;
 
 

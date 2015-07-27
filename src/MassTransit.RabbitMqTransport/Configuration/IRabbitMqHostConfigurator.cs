@@ -18,9 +18,30 @@ namespace MassTransit.RabbitMqTransport.Configuration
 
     public interface IRabbitMqHostConfigurator
     {
+        /// <summary>
+        /// Configure the use of SSL to connection to RabbitMQ
+        /// </summary>
+        /// <param name="configureSsl"></param>
         void UseSsl(Action<IRabbitMqSslConfigurator> configureSsl);
+
+        /// <summary>
+        /// Specifies the heartbeat interval, in seconds, used to maintain the connection to RabbitMQ.
+        /// Setting this value to zero will disable heartbeats, allowing the connection to timeout
+        /// after an inactivity period.
+        /// </summary>
+        /// <param name="requestedHeartbeat"></param>
         void Heartbeat(ushort requestedHeartbeat);
+
+        /// <summary>
+        /// Sets the username for the connection to RabbitMQ
+        /// </summary>
+        /// <param name="username"></param>
         void Username(string username);
+
+        /// <summary>
+        /// Sets the password for the connection to RabbitMQ
+        /// </summary>
+        /// <param name="password"></param>
         void Password(string password);
     }
 }

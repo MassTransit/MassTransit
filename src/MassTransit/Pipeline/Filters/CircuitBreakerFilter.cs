@@ -35,7 +35,7 @@ namespace MassTransit.Pipeline.Filters
             _behavior = new ClosedBehavior(this);
         }
 
-        public TimeSpan Duration => _settings.Duration;
+        public TimeSpan OpenDuration => _settings.TrackingPeriod;
 
         void ICircuitBreaker.Open(Exception exception, ICircuitBreakerBehavior behavior, IEnumerator<TimeSpan> timeoutEnumerator)
         {
@@ -57,7 +57,7 @@ namespace MassTransit.Pipeline.Filters
 
         public int TripThreshold => _settings.TripThreshold;
 
-        public int ActiveThreshold => _settings.ActiveCount;
+        public int ActiveThreshold => _settings.ActiveThreshold;
 
         public async Task Send(T context, IPipe<T> next)
         {
@@ -82,9 +82,9 @@ namespace MassTransit.Pipeline.Filters
             ProbeContext scope = context.CreateFilterScope("circuitBreaker");
             scope.Set(new
             {
-                _settings.ActiveCount,
+                ActiveCount = _settings.ActiveThreshold,
                 _settings.TripThreshold,
-                _settings.Duration,
+                Duration = _settings.TrackingPeriod,
                 ResetTimeout = _settings.ResetTimeout.Take(10).ToArray(),
             });
 

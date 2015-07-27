@@ -32,7 +32,7 @@ namespace MassTransit.Pipeline.Filters.CircuitBreaker
         public ClosedBehavior(ICircuitBreaker breaker)
         {
             _breaker = breaker;
-            _timer = new Timer(Reset, null, breaker.Duration, breaker.Duration);
+            _timer = new Timer(Reset, null, breaker.OpenDuration, breaker.OpenDuration);
         }
 
         bool IsActive => _attemptCount > _breaker.ActiveThreshold;
