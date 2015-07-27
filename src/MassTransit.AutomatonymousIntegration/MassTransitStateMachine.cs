@@ -87,7 +87,8 @@ namespace Automatonymous
 
         bool IsFinalized(TInstance instance)
         {
-            return Final.Equals(((StateMachine<TInstance>)this).InstanceStateAccessor.GetState(instance));
+            State<TInstance> currentState = this.GetState(instance).Result;
+            return Final.Equals(currentState);
         }
 
         /// <summary>

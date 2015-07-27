@@ -35,7 +35,7 @@ namespace MassTransit.Testing
             State state, SagaStateMachine<TSaga> machine)
             where TSaga : class, SagaStateMachineInstance
         {
-            bool any = sagas.Select(x => x.CorrelationId == sagaId && machine.InstanceStateAccessor.GetState(x).Equals(state)).Any();
+            bool any = sagas.Select(x => x.CorrelationId == sagaId && machine.Accessor.GetState(x).Result.Equals(state)).Any();
             return any ? sagas.Contains(sagaId) : null;
         }
     }

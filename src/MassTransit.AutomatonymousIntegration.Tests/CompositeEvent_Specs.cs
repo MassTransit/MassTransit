@@ -64,7 +64,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
         {
             var context = new StateMachineInstanceContext<Instance>(state);
 
-            return await ((StateMachine<Instance>)_machine).InstanceStateAccessor.Get(context);
+            return await _machine.GetState(context.Instance);
         }
 
 

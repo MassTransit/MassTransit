@@ -47,7 +47,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
 
         State GetCurrentState(Request_Specs.TestState state)
         {
-            return ((StateMachine<Request_Specs.TestState>)_machine).InstanceStateAccessor.GetState(state);
+            return _machine.GetState(state).Result;
         }
 
         public Sending_a_request_that_times_out()
