@@ -578,6 +578,7 @@
     <Compile Include="Saga\Pipeline\Filters\CorrelatedSagaFilter.cs" />
     <Compile Include="Saga\Pipeline\Filters\SagaSplitFilter.cs" />
     <Compile Include="Saga\Pipeline\Pipes\SagaMergePipe.cs" />
+    <Compile Include="Saga\PropertySagaInstanceFactory.cs" />
     <Compile Include="Saga\SagaFilterExpressionConverter.cs" />
     <Compile Include="Saga\Policies\AnyExistingSagaPolicy.cs" />
     <Compile Include="Saga\Policies\NewSagaPolicy.cs" />

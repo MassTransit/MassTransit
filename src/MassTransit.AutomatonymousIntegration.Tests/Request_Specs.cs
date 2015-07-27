@@ -179,15 +179,6 @@ namespace MassTransit.AutomatonymousTests
         class TestState :
             SagaStateMachineInstance
         {
-            public TestState(Guid correlationId)
-            {
-                CorrelationId = correlationId;
-            }
-
-            public TestState()
-            {
-            }
-
             public State CurrentState { get; set; }
 
             public string MemberNumber { get; set; }
