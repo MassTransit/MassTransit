@@ -119,10 +119,8 @@ namespace MassTransit.Transports.RabbitMq
                 if (_producer != null)
                     return;
 
-                var producer = new RabbitMqProducer(_address, _bindToQueue);
-                _connectionHandler.AddBinding(producer);
-
-                _producer = producer;
+                _producer = new RabbitMqProducer(_address, _bindToQueue);
+                _connectionHandler.AddBinding(_producer);
             }
         }
 

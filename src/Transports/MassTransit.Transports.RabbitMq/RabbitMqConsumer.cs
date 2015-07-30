@@ -13,6 +13,7 @@
 namespace MassTransit.Transports.RabbitMq
 {
     using System;
+    using System.IO;
     using RabbitMQ.Client;
     using RabbitMQ.Client.Events;
     using RabbitMQ.Util;
@@ -117,10 +118,17 @@ namespace MassTransit.Transports.RabbitMq
                 queue = _consumer.Queue;
             }
 
-            BasicDeliverEventArgs result;
-            queue.Dequeue((int)timeout.TotalMilliseconds, out result);
+            try
+            {
+                BasicDeliverEventArgs result;
+                queue.Dequeue((int)timeout.TotalMilliseconds, out result);
 
-            return result;
+                return result;
+            }
+            catch (EndOfStreamException ex)
+            {
+                throw new InvalidConnectionException(_address.Uri, "SharedQueue was closed", ex);
+            }
         }
 
         public void MessageCompleted(BasicDeliverEventArgs result)
