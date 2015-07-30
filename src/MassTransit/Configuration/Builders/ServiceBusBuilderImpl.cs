@@ -1,12 +1,12 @@
-﻿// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
 // License at 
 // 
 //     http://www.apache.org/licenses/LICENSE-2.0 
 // 
-// Unless required by applicable law or agreed to in writing, software distributed 
+// Unless required by applicable law or agreed to in writing, software distributed
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
@@ -23,6 +23,7 @@ namespace MassTransit.Builders
     using Magnum.Extensions;
     using Pipeline.Configuration;
     using Util;
+
 
     public class ServiceBusBuilderImpl :
         ServiceBusBuilder
@@ -64,9 +65,7 @@ namespace MassTransit.Builders
                 RunBusServiceConfigurators(bus);
 
                 if (_settings.AutoStart)
-                {
                     bus.Start();
-                }
 
                 return bus;
             }
@@ -85,7 +84,7 @@ namespace MassTransit.Builders
             }
         }
 
-        
+
         public void UseControlBus(IControlBus controlBus)
         {
             _postCreateActions.Add(bus => bus.ControlBus = controlBus);
@@ -106,7 +105,7 @@ namespace MassTransit.Builders
         {
             Guard.AgainstNull(callback);
 
-            if (typeof (T).IsAssignableFrom(GetType()))
+            if (typeof(T).IsAssignableFrom(GetType()))
                 callback(this as T);
         }
 
@@ -166,7 +165,7 @@ namespace MassTransit.Builders
 
         static void ConfigureThreadPool(int consumerThreads)
         {
-            var requiredThreads = CalculateRequiredThreads(consumerThreads);
+            int requiredThreads = CalculateRequiredThreads(consumerThreads);
 
             ConfigureMinThreads(requiredThreads);
 
@@ -177,11 +176,11 @@ namespace MassTransit.Builders
         {
             int workerThreads;
             int completionPortThreads;
-            ThreadPool.GetMinThreads(out workerThreads, out completionPortThreads);
+            ThreadPool.GetMaxThreads(out workerThreads, out completionPortThreads);
             int availableWorkerThreads;
             int availableCompletionPortThreads;
             ThreadPool.GetAvailableThreads(out availableWorkerThreads, out availableCompletionPortThreads);
-            var requiredThreads = consumerThreads + (workerThreads - availableWorkerThreads);
+            int requiredThreads = consumerThreads + (workerThreads - availableWorkerThreads);
             return requiredThreads;
         }
 
