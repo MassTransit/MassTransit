@@ -181,7 +181,7 @@ namespace MassTransit.Tests
 
                     pongTask = x.Handle<PongMessage>(message => { });
                     pongTask.ContinueWith(t => pongCompleted.Set(t.Result), TaskContinuationOptions.OnlyOnRanToCompletion);
-                    pongTask.ContinueWith((Task t) => pongCancelled.Set(t.IsCanceled), TaskContinuationOptions.OnlyOnCanceled);
+                    pongTask.ContinueWith((Task t) => pongCancelled.Set(t.IsCanceled), TaskContinuationOptions.OnlyOnFaulted);
                 });
 
             var aggregateException = Assert.Throws<AggregateException>(() => request.Task.Wait(8.Seconds()));

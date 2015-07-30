@@ -56,7 +56,7 @@ namespace MassTransit.RequestResponse
 
         public void HandleTimeout()
         {
-            CompletionSource.TrySetCanceled();
+            CompletionSource.TrySetException(new TimeoutException());
         }
     }
 #endif
