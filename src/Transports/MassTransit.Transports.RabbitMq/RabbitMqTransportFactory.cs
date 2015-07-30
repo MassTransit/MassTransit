@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -28,24 +28,19 @@ namespace MassTransit.Transports.RabbitMq
         ITransportFactory
     {
         readonly Cache<ConnectionFactory, ConnectionFactoryBuilder> _connectionFactoryBuilders;
-        readonly Cache<ConnectionFactory, ConnectionHandler<RabbitMqConnection>> _inboundConnections;
+        readonly Cache<ConnectionFactory, ConnectionHandler<RabbitMqConnection>> _connections;
         readonly ILog _log = Logger.Get<RabbitMqTransportFactory>();
         readonly IMessageNameFormatter _messageNameFormatter;
-        readonly Cache<ConnectionFactory, ConnectionHandler<RabbitMqConnection>> _outboundConnections;
         bool _disposed;
 
-        public RabbitMqTransportFactory(
-            IEnumerable<KeyValuePair<Uri, ConnectionFactoryBuilder>> connectionFactoryBuilders)
+        public RabbitMqTransportFactory(IEnumerable<KeyValuePair<Uri, ConnectionFactoryBuilder>> connectionFactoryBuilders)
         {
-            _inboundConnections = new ConcurrentCache<ConnectionFactory, ConnectionHandler<RabbitMqConnection>>(
-                new ConnectionFactoryEquality());
-
-            _outboundConnections = new ConcurrentCache<ConnectionFactory, ConnectionHandler<RabbitMqConnection>>(
+            _connections = new ConcurrentCache<ConnectionFactory, ConnectionHandler<RabbitMqConnection>>(
                 new ConnectionFactoryEquality());
 
             Dictionary<ConnectionFactory, ConnectionFactoryBuilder> builders = connectionFactoryBuilders
                 .Select(x => new KeyValuePair<ConnectionFactory, ConnectionFactoryBuilder>(
-                                 RabbitMqEndpointAddress.Parse(x.Key).ConnectionFactory, x.Value))
+                    RabbitMqEndpointAddress.Parse(x.Key).ConnectionFactory, x.Value))
                 .ToDictionary(x => x.Key, x => x.Value);
 
             _connectionFactoryBuilders = new ConcurrentCache<ConnectionFactory, ConnectionFactoryBuilder>(builders,
@@ -56,12 +51,8 @@ namespace MassTransit.Transports.RabbitMq
 
         public RabbitMqTransportFactory()
         {
-            _inboundConnections = new ConcurrentCache<ConnectionFactory, ConnectionHandler<RabbitMqConnection>>(
-                new ConnectionFactoryEquality());
-            _outboundConnections = new ConcurrentCache<ConnectionFactory, ConnectionHandler<RabbitMqConnection>>(
-                new ConnectionFactoryEquality());
-            _connectionFactoryBuilders =
-                new ConcurrentCache<ConnectionFactory, ConnectionFactoryBuilder>(new ConnectionFactoryEquality());
+            _connections = new ConcurrentCache<ConnectionFactory, ConnectionHandler<RabbitMqConnection>>(new ConnectionFactoryEquality());
+            _connectionFactoryBuilders = new ConcurrentCache<ConnectionFactory, ConnectionFactoryBuilder>(new ConnectionFactoryEquality());
             _messageNameFormatter = new RabbitMqMessageNameFormatter();
         }
 
@@ -102,10 +93,9 @@ namespace MassTransit.Transports.RabbitMq
 
             EnsureProtocolIsCorrect(address.Uri);
 
-            ConnectionHandler<RabbitMqConnection> connectionHandler = GetConnection(_inboundConnections, address);
+            ConnectionHandler<RabbitMqConnection> connectionHandler = GetConnection(_connections, address);
 
-            return new InboundRabbitMqTransport(address, connectionHandler, settings.PurgeExistingMessages,
-                _messageNameFormatter);
+            return new InboundRabbitMqTransport(address, connectionHandler, settings.PurgeExistingMessages, _messageNameFormatter);
         }
 
         public IOutboundTransport BuildOutbound(ITransportSettings settings)
@@ -117,7 +107,7 @@ namespace MassTransit.Transports.RabbitMq
 
             EnsureProtocolIsCorrect(address.Uri);
 
-            ConnectionHandler<RabbitMqConnection> connectionHandler = GetConnection(_outboundConnections, address);
+            ConnectionHandler<RabbitMqConnection> connectionHandler = GetConnection(_connections, address);
 
             return new OutboundRabbitMqTransport(address, connectionHandler, false);
         }
@@ -131,7 +121,7 @@ namespace MassTransit.Transports.RabbitMq
 
             EnsureProtocolIsCorrect(address.Uri);
 
-            ConnectionHandler<RabbitMqConnection> connection = GetConnection(_outboundConnections, address);
+            ConnectionHandler<RabbitMqConnection> connection = GetConnection(_connections, address);
 
             return new OutboundRabbitMqTransport(address, connection, true);
         }
@@ -157,19 +147,15 @@ namespace MassTransit.Transports.RabbitMq
             if (_disposed)
                 return;
             if (disposing)
-            {
-                _inboundConnections.Each(x => x.Dispose());
-                _outboundConnections.Each(x => x.Dispose());
-            }
-            _inboundConnections.Clear();
-            _outboundConnections.Clear();
+                _connections.Each(x => x.Dispose());
+            _connections.Clear();
 
             _disposed = true;
         }
 
         public int ConnectionCount()
         {
-            return _inboundConnections.Count() + _outboundConnections.Count;
+            return _connections.Count();
         }
 
         ConnectionHandler<RabbitMqConnection> GetConnection(
@@ -178,32 +164,32 @@ namespace MassTransit.Transports.RabbitMq
             ConnectionFactory factory = SanitizeConnectionFactory(address);
 
             return cache.Get(factory, _ =>
+            {
+                if (_log.IsDebugEnabled)
+                    _log.DebugFormat("Creating RabbitMQ connection: {0}", address.Uri);
+
+                ConnectionFactoryBuilder builder = _connectionFactoryBuilders.Get(factory, __ =>
                 {
                     if (_log.IsDebugEnabled)
-                        _log.DebugFormat("Creating RabbitMQ connection: {0}", address.Uri);
+                        _log.DebugFormat("Using default configurator for connection: {0}", address.Uri);
 
-                    ConnectionFactoryBuilder builder = _connectionFactoryBuilders.Get(factory, __ =>
-                        {
-                            if (_log.IsDebugEnabled)
-                                _log.DebugFormat("Using default configurator for connection: {0}", address.Uri);
+                    var configurator = new ConnectionFactoryConfiguratorImpl(address);
 
-                            var configurator = new ConnectionFactoryConfiguratorImpl(address);
-
-                            return configurator.CreateBuilder();
-                        });
-
-                    ConnectionFactory connectionFactory = builder.Build();
-
-                    if (_log.IsDebugEnabled)
-                    {
-                        _log.DebugFormat("RabbitMQ connection created: {0}:{1}/{2}", connectionFactory.HostName,
-                            connectionFactory.Port, connectionFactory.VirtualHost);
-                    }
-
-                    var connection = new RabbitMqConnection(connectionFactory);
-                    var connectionHandler = new ConnectionHandlerImpl<RabbitMqConnection>(connection);
-                    return connectionHandler;
+                    return configurator.CreateBuilder();
                 });
+
+                ConnectionFactory connectionFactory = builder.Build();
+
+                if (_log.IsDebugEnabled)
+                {
+                    _log.DebugFormat("RabbitMQ connection created: {0}:{1}/{2}", connectionFactory.HostName,
+                        connectionFactory.Port, connectionFactory.VirtualHost);
+                }
+
+                var connection = new RabbitMqConnection(connectionFactory);
+                var connectionHandler = new ConnectionHandlerImpl<RabbitMqConnection>(connection);
+                return connectionHandler;
+            });
         }
 
         ConnectionFactory SanitizeConnectionFactory(IRabbitMqEndpointAddress address)
@@ -258,20 +244,20 @@ namespace MassTransit.Transports.RabbitMq
                 unchecked
                 {
                     int hashCode = (x.UserName != null
-                                        ? x.UserName.GetHashCode()
-                                        : 0);
+                        ? x.UserName.GetHashCode()
+                        : 0);
                     hashCode = (hashCode * 397) ^ (x.Password != null
-                                                       ? x.Password.GetHashCode()
-                                                       : 0);
+                        ? x.Password.GetHashCode()
+                        : 0);
                     hashCode = (hashCode * 397) ^ (x.VirtualHost != null
-                                                       ? x.VirtualHost.GetHashCode()
-                                                       : 0);
+                        ? x.VirtualHost.GetHashCode()
+                        : 0);
                     hashCode = (hashCode * 397) ^ (x.Ssl != null
-                                                       ? GetHashCode(x.Ssl)
-                                                       : 0);
+                        ? GetHashCode(x.Ssl)
+                        : 0);
                     hashCode = (hashCode * 397) ^ (x.HostName != null
-                                                       ? x.HostName.GetHashCode()
-                                                       : 0);
+                        ? x.HostName.GetHashCode()
+                        : 0);
                     hashCode = (hashCode * 397) ^ x.Port;
                     return hashCode;
                 }
@@ -303,17 +289,17 @@ namespace MassTransit.Transports.RabbitMq
                     var hashCode = (int)x.Version;
                     hashCode = (hashCode * 397) ^ x.Enabled.GetHashCode();
                     hashCode = (hashCode * 397) ^ (x.CertPath != null
-                                                       ? x.CertPath.GetHashCode()
-                                                       : 0);
+                        ? x.CertPath.GetHashCode()
+                        : 0);
                     hashCode = (hashCode * 397) ^ (x.CertPassphrase != null
-                                                       ? x.CertPassphrase.GetHashCode()
-                                                       : 0);
+                        ? x.CertPassphrase.GetHashCode()
+                        : 0);
                     hashCode = (hashCode * 397) ^ (x.Certs != null
-                                                       ? x.Certs.GetHashCode()
-                                                       : 0);
+                        ? x.Certs.GetHashCode()
+                        : 0);
                     hashCode = (hashCode * 397) ^ (x.ServerName != null
-                                                       ? x.ServerName.GetHashCode()
-                                                       : 0);
+                        ? x.ServerName.GetHashCode()
+                        : 0);
                     hashCode = (hashCode * 397) ^ (int)x.AcceptablePolicyErrors;
                     return hashCode;
                 }

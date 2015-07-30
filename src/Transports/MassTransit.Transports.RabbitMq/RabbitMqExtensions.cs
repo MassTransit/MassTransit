@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -15,6 +15,7 @@ namespace MassTransit.Transports.RabbitMq
     using System;
     using Logging;
     using RabbitMQ.Client;
+    using RabbitMQ.Client.Exceptions;
 
 
     public static class RabbitMqExtensions
@@ -35,6 +36,9 @@ namespace MassTransit.Transports.RabbitMq
                 {
                     channel.Close(replyCode, message);
                 }
+                catch (AlreadyClosedException)
+                {
+                }
                 catch (Exception ex)
                 {
                     _log.Warn("Failed to close channel", ex);
@@ -43,6 +47,9 @@ namespace MassTransit.Transports.RabbitMq
                 try
                 {
                     channel.Dispose();
+                }
+                catch (ObjectDisposedException)
+                {
                 }
                 catch (Exception ex)
                 {
@@ -65,6 +72,9 @@ namespace MassTransit.Transports.RabbitMq
                 {
                     connection.Close(replyCode, message);
                 }
+                catch (AlreadyClosedException)
+                {
+                }
                 catch (Exception ex)
                 {
                     _log.Warn("Failed to close connection", ex);
@@ -73,6 +83,9 @@ namespace MassTransit.Transports.RabbitMq
                 try
                 {
                     connection.Dispose();
+                }
+                catch (ObjectDisposedException)
+                {
                 }
                 catch (Exception ex)
                 {
