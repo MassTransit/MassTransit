@@ -848,6 +848,8 @@
     <Compile Include="Transports\ReceiveEndpoint.cs" />
     <Compile Include="Transports\ReceiveEndpointHandle.cs" />
     <Compile Include="Transports\ReceiveTransportHandle.cs" />
+    <Compile Include="Transports\ScopePublishContextPipe.cs" />
+    <Compile Include="Transports\ScopePublishEndpoint.cs" />
     <Compile Include="Transports\SendEndpoint.cs" />
     <Compile Include="Transports\SendEndpointCache.cs" />
     <Compile Include="Consumes.cs" />

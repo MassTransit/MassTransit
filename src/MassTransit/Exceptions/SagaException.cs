@@ -14,6 +14,7 @@ namespace MassTransit
 {
     using System;
     using System.Linq.Expressions;
+    using Util;
 
 
     [Serializable]
@@ -70,12 +71,12 @@ namespace MassTransit
 
         static string FormatMessage(Type sagaType, Type messageType, string message)
         {
-            return $"{sagaType.FullName} Saga exception on receipt of {messageType.FullName}: {message}";
+            return $"{TypeMetadataCache.GetShortName(sagaType)} Saga exception on receipt of {TypeMetadataCache.GetShortName(messageType)}: {message}";
         }
 
         static string FormatMessage(Type sagaType, Guid correlationId, Type messageType, string message)
         {
-            return $"{sagaType.FullName}({correlationId}) Saga exception on receipt of {messageType.FullName}: {message}";
+            return $"{TypeMetadataCache.GetShortName(sagaType)}({correlationId}) Saga exception on receipt of {TypeMetadataCache.GetShortName(messageType)}: {message}";
         }
     }
 }

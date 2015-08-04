@@ -53,13 +53,13 @@ namespace MassTransit.Courier.Hosts
 
                 await _activityFactory.Compensate(compensateContext, _compensatePipe);
 
-                context.NotifyConsumed(timer.Elapsed, TypeMetadataCache<TActivity>.ShortName);
+                await context.NotifyConsumed(timer.Elapsed, TypeMetadataCache<TActivity>.ShortName);
 
                 await next.Send(context);
             }
             catch (Exception ex)
             {
-                context.NotifyFaulted(timer.Elapsed, TypeMetadataCache<TActivity>.ShortName, ex);
+                await context.NotifyFaulted(timer.Elapsed, TypeMetadataCache<TActivity>.ShortName, ex);
                 throw;
             }
         }

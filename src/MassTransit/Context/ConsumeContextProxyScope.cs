@@ -13,17 +13,23 @@
 namespace MassTransit.Context
 {
     using System;
+    using System.Threading;
+    using System.Threading.Tasks;
+    using Pipeline;
+    using Transports;
 
 
-    public class ConsumeContextProxyScope<TMessage> :
+    public abstract class ConsumeContextProxyScope<TMessage> :
         ConsumeContextProxy<TMessage>
         where TMessage : class
     {
         readonly PayloadCache _payloadCache = new PayloadCache();
+        readonly Lazy<IPublishEndpoint> _publishEndpoint;
 
-        public ConsumeContextProxyScope(ConsumeContext<TMessage> context)
+        protected ConsumeContextProxyScope(ConsumeContext<TMessage> context)
             : base(context)
         {
+            _publishEndpoint = new Lazy<IPublishEndpoint>(() => new ScopePublishEndpoint(this, context));
         }
 
         public override bool HasPayloadType(Type contextType)
@@ -49,6 +55,76 @@ namespace MassTransit.Context
                 return payload;
 
             return _payloadCache.GetOrAddPayload(payloadFactory);
+        }
+
+        public override Task Publish<T>(T message, CancellationToken cancellationToken)
+        {
+            Task task = _publishEndpoint.Value.Publish(message, cancellationToken);
+            ReceiveContext.AddPendingTask(task);
+            return task;
+        }
+
+        public override Task Publish<T>(T message, IPipe<PublishContext<T>> publishPipe, CancellationToken cancellationToken)
+        {
+            Task task = _publishEndpoint.Value.Publish(message, publishPipe, cancellationToken);
+            ReceiveContext.AddPendingTask(task);
+            return task;
+        }
+
+        public override Task Publish<T>(T message, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
+        {
+            Task task = _publishEndpoint.Value.Publish(message, publishPipe, cancellationToken);
+            ReceiveContext.AddPendingTask(task);
+            return task;
+        }
+
+        public override Task Publish(object message, CancellationToken cancellationToken)
+        {
+            Task task = _publishEndpoint.Value.Publish(message, cancellationToken);
+            ReceiveContext.AddPendingTask(task);
+            return task;
+        }
+
+        public override Task Publish(object message, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
+        {
+            Task task = _publishEndpoint.Value.Publish(message, publishPipe, cancellationToken);
+            ReceiveContext.AddPendingTask(task);
+            return task;
+        }
+
+        public override Task Publish(object message, Type messageType, CancellationToken cancellationToken)
+        {
+            Task task = _publishEndpoint.Value.Publish(message, messageType, cancellationToken);
+            ReceiveContext.AddPendingTask(task);
+            return task;
+        }
+
+        public override Task Publish(object message, Type messageType, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
+        {
+            Task task = _publishEndpoint.Value.Publish(message, messageType, publishPipe, cancellationToken);
+            ReceiveContext.AddPendingTask(task);
+            return task;
+        }
+
+        public override Task Publish<T>(object values, CancellationToken cancellationToken)
+        {
+            Task task = _publishEndpoint.Value.Publish<T>(values, cancellationToken);
+            ReceiveContext.AddPendingTask(task);
+            return task;
+        }
+
+        public override Task Publish<T>(object values, IPipe<PublishContext<T>> publishPipe, CancellationToken cancellationToken)
+        {
+            Task task = _publishEndpoint.Value.Publish(values, publishPipe, cancellationToken);
+            ReceiveContext.AddPendingTask(task);
+            return task;
+        }
+
+        public override Task Publish<T>(object values, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
+        {
+            Task task = _publishEndpoint.Value.Publish<T>(values, publishPipe, cancellationToken);
+            ReceiveContext.AddPendingTask(task);
+            return task;
         }
     }
 }

@@ -78,6 +78,7 @@
     <Compile Include="ConsumeEventContext.cs" />
     <Compile Include="Contexts\AutomatonymousConsumeEventContext.cs" />
     <Compile Include="Events\RequestTimeoutExpired.cs" />
+    <Compile Include="Exceptions\NotAcceptedStateMachineException.cs" />
     <Compile Include="MassTransitStateMachine.cs" />
     <Compile Include="PublishExtensions.cs" />
     <Compile Include="Request.cs" />
