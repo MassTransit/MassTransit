@@ -110,6 +110,8 @@ namespace MassTransit
                 sendContext.SourceAddress = context.SourceAddress;
                 sendContext.ResponseAddress = context.ResponseAddress;
                 sendContext.FaultAddress = context.FaultAddress;
+                sendContext.ConversationId = context.ConversationId;
+                sendContext.InitiatorId = context.InitiatorId;
 
                 if (context.ExpirationTime.HasValue)
                     sendContext.TimeToLive = context.ExpirationTime.Value.ToUniversalTime() - DateTime.UtcNow;

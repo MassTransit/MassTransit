@@ -57,13 +57,13 @@ namespace MassTransit.Pipeline.Filters
             {
                 await _consumerFactory.Send(context, _consumerPipe);
 
-                context.NotifyConsumed(timer.Elapsed, TypeMetadataCache<TConsumer>.ShortName);
+                await context.NotifyConsumed(timer.Elapsed, TypeMetadataCache<TConsumer>.ShortName);
 
                 await next.Send(context);
             }
             catch (Exception ex)
             {
-                context.NotifyFaulted(timer.Elapsed, TypeMetadataCache<TConsumer>.ShortName, ex);
+                await context.NotifyFaulted(timer.Elapsed, TypeMetadataCache<TConsumer>.ShortName, ex);
                 throw;
             }
         }

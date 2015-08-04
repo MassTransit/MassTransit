@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace Automatonymous.Pipeline
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
@@ -57,27 +58,24 @@ namespace Automatonymous.Pipeline
 
         public async Task Send(SagaConsumeContext<TInstance, TData> context, IPipe<SagaConsumeContext<TInstance, TData>> next)
         {
-            var eventContext = new StateMachineEventContext<TInstance, TData>(context.Saga, _event, context.Message,context.CancellationToken);
+            var eventContext = new StateMachineEventContext<TInstance, TData>(context.Saga, _event, context.Message, context.CancellationToken);
 
             eventContext.GetOrAddPayload(() => context);
             eventContext.GetOrAddPayload(() => (ConsumeContext<TData>)context);
             eventContext.GetOrAddPayload(() => (ConsumeContext)context);
 
-            State<TInstance> currentState = await _stateMachine.Accessor.Get(eventContext).ConfigureAwait(false);
+            State<TInstance> currentState = await _stateMachine.Accessor.Get(eventContext);
 
             IEnumerable<Event> nextEvents = _stateMachine.NextEvents(currentState);
             if (nextEvents.Contains(_event))
             {
-                await _stateMachine.RaiseEvent(eventContext).ConfigureAwait(false);
+                await _stateMachine.RaiseEvent(eventContext);
 
                 if (_stateMachine.IsCompleted(context.Saga))
                     await context.SetCompleted();
             }
             else
-            {
-                _log.DebugFormat("{0} {1} in {2} does not accept {3}", _stateMachine.GetType().Name, context.Saga.CorrelationId,
-                    currentState.Name, _event.Name);
-            }
+                throw new NotAcceptedStateMachineException(typeof(TInstance), typeof(TData), context.CorrelationId ?? Guid.Empty, currentState.Name);
         }
     }
 }

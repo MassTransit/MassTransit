@@ -63,11 +63,11 @@ namespace MassTransit.Saga.Pipeline.Filters
 
                 await next.Send(context);
 
-                context.NotifyConsumed(timer.Elapsed, TypeMetadataCache<TSaga>.ShortName);
+                await context.NotifyConsumed(timer.Elapsed, TypeMetadataCache<TSaga>.ShortName);
             }
             catch (Exception ex)
             {
-                context.NotifyFaulted(timer.Elapsed, TypeMetadataCache<TSaga>.ShortName, ex);
+                await context.NotifyFaulted(timer.Elapsed, TypeMetadataCache<TSaga>.ShortName, ex);
                 throw;
             }
         }

@@ -25,32 +25,6 @@ namespace MassTransit.AutomatonymousIntegration.Tests
     public class Publishing_a_message_from_a_saga_state_machine :
         InMemoryTestFixture
     {
-        [Test]
-        public async Task Should_receive_the_published_message()
-        {
-            Task<ConsumeContext<StartupComplete>> messageReceived = SubscribeHandler<StartupComplete>();
-
-            var message = new Start();
-            await InputQueueSendEndpoint.Send(message);
-
-            ConsumeContext<StartupComplete> received = await messageReceived;
-
-            Assert.AreEqual(message.CorrelationId, received.Message.TransactionId);
-
-            Guid? saga =
-                await _repository.ShouldContainSaga(x => x.CorrelationId == message.CorrelationId && Equals(x.CurrentState, _machine.Running), TestTimeout);
-
-            Assert.IsTrue(saga.HasValue);
-        }
-
-        [Test]
-        public void Should_return_a_wonderful_breakdown_of_the_guts_inside_it()
-        {
-            ProbeResult result = Bus.GetProbeResult();
-
-            Console.WriteLine(result.ToJsonString());
-        }
-
         protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
         {
             _machine = new TestStateMachine();
@@ -100,13 +74,47 @@ namespace MassTransit.AutomatonymousIntegration.Tests
                 CorrelationId = NewId.NextGuid();
             }
 
-            public Guid CorrelationId { get; set; }
+            public Guid CorrelationId { get; private set; }
         }
 
 
         class StartupComplete
         {
             public Guid TransactionId { get; set; }
+        }
+
+
+        [Test]
+        public async Task Should_receive_the_published_message()
+        {
+            Task<ConsumeContext<StartupComplete>> messageReceived = SubscribeHandler<StartupComplete>();
+
+            var message = new Start();
+
+            await InputQueueSendEndpoint.Send(message);
+
+            ConsumeContext<StartupComplete> received = await messageReceived;
+
+            Assert.AreEqual(message.CorrelationId, received.Message.TransactionId);
+
+            Assert.IsTrue(received.InitiatorId.HasValue, "The initiator should be copied from the CorrelationId");
+
+            Assert.AreEqual(received.InitiatorId.Value, message.CorrelationId, "The initiator should be the saga CorrelationId");
+
+            Assert.AreEqual(received.SourceAddress, InputQueueAddress, "The published message should have the input queue source address");
+
+            Guid? saga =
+                await _repository.ShouldContainSaga(x => x.CorrelationId == message.CorrelationId && Equals(x.CurrentState, _machine.Running), TestTimeout);
+
+            Assert.IsTrue(saga.HasValue);
+        }
+
+        [Test]
+        public void Should_return_a_wonderful_breakdown_of_the_guts_inside_it()
+        {
+            ProbeResult result = Bus.GetProbeResult();
+
+            Console.WriteLine(result.ToJsonString());
         }
     }
 }
