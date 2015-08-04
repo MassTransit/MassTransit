@@ -48,6 +48,7 @@ namespace MassTransit.Serialization
         Guid? _requestId;
         Uri _responseAddress;
         Uri _sourceAddress;
+        HostInfo _host;
 
         public JsonConsumeContext(JsonSerializer deserializer, ISendEndpointProvider sendEndpointProvider, IPublishEndpointProvider publishEndpointProvider,
             ReceiveContext receiveContext, MessageEnvelope envelope)
@@ -92,6 +93,7 @@ namespace MassTransit.Serialization
         public Uri ResponseAddress => _responseAddress ?? (_responseAddress = ConvertToUri(_envelope.ResponseAddress));
         public Uri FaultAddress => _faultAddress ?? (_faultAddress = ConvertToUri(_envelope.FaultAddress));
         public Headers Headers => _headers ?? (_headers = new JsonMessageHeaders(_deserializer, _envelope.Headers));
+        public HostInfo Host => _envelope.Host;
         public CancellationToken CancellationToken => _receiveContext.CancellationToken;
         public ReceiveContext ReceiveContext => _receiveContext;
         public Task CompleteTask => _receiveContext.CompleteTask;

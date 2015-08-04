@@ -31,5 +31,6 @@ namespace MassTransit.Serialization
         object Message { get; }
         DateTime? ExpirationTime { get; }
         IDictionary<string, object> Headers { get; }
+        HostInfo Host { get; }
     }
 }

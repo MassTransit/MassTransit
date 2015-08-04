@@ -82,5 +82,11 @@ namespace MassTransit
         /// or by features within MassTransit, such as when a message is moved to an error queue.
         /// </summary>
         Headers Headers { get; }
+
+        /// <summary>
+        /// The host information of the message producer. This may not be present if the message was sent
+        /// from an earlier version of MassTransit.
+        /// </summary>
+        HostInfo Host { get; }
     }
 }

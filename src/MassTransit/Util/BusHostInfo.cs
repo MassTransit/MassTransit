@@ -17,6 +17,7 @@ namespace MassTransit.Util
     using System.Reflection;
 
 
+    [Serializable]
     class BusHostInfo :
         HostInfo
     {

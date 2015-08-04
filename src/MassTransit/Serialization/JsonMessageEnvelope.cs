@@ -14,6 +14,7 @@ namespace MassTransit.Serialization
 {
     using System;
     using System.Collections.Generic;
+    using Util;
 
 
     class JsonMessageEnvelope :
@@ -59,6 +60,8 @@ namespace MassTransit.Serialization
 
             foreach (var header in context.Headers)
                 Headers[header.Key] = header.Value;
+
+            Host = HostMetadataCache.Host;
         }
 
         public string MessageId { get; }
@@ -74,5 +77,6 @@ namespace MassTransit.Serialization
         public object Message { get; }
         public DateTime? ExpirationTime { get; }
         public IDictionary<string, object> Headers { get; }
+        public HostInfo Host { get; }
     }
 }
