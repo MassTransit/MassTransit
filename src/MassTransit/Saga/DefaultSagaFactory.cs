@@ -43,7 +43,7 @@ namespace MassTransit.Saga
                 _log.DebugFormat("SAGA:{0}:{1} Created {2}", TypeMetadataCache<TSaga>.ShortName, instance.CorrelationId, TypeMetadataCache<TMessage>.ShortName);
             }
 
-            var proxy = new SagaConsumeContextProxy<TSaga, TMessage>(context, instance);
+            var proxy = new NewSagaConsumeContext<TSaga, TMessage>(context, instance);
 
             await next.Send(proxy);
         }

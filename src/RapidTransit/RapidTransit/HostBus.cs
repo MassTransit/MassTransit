@@ -17,7 +17,6 @@ namespace RapidTransit
     using System.Threading.Tasks;
     using MassTransit;
     using MassTransit.Logging;
-    using MassTransit.Monitoring.Introspection;
     using MassTransit.Pipeline;
     using MassTransit.RabbitMqTransport;
 
@@ -141,7 +140,12 @@ namespace RapidTransit
 
         public void Probe(ProbeContext context)
         {
-            
+            _bus.Probe(context);
+        }
+
+        public ConnectHandle ConnectSendObserver(ISendObserver observer)
+        {
+            return _bus.ConnectSendObserver(observer);
         }
     }
 }

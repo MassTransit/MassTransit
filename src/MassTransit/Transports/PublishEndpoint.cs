@@ -13,7 +13,6 @@
 namespace MassTransit.Transports
 {
     using System;
-    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using Context;
@@ -23,64 +22,71 @@ namespace MassTransit.Transports
     public class PublishEndpoint :
         IPublishEndpoint
     {
-        readonly IPublishSendEndpointProvider _endpointProvider;
-        readonly PublishObservable _observers;
+        readonly IPublishEndpointProvider _endpointProvider;
+        readonly IPublishObserver _publishObserver;
+        readonly Guid? _correlationId;
+        readonly Guid? _conversationId;
         readonly Uri _sourceAddress;
 
-        public PublishEndpoint(Uri sourceAddress, IPublishSendEndpointProvider endpointProvider)
+        public PublishEndpoint(Uri sourceAddress, IPublishEndpointProvider endpointProvider, IPublishObserver publishObserver, Guid? correlationId, Guid? conversationId)
         {
             _sourceAddress = sourceAddress;
             _endpointProvider = endpointProvider;
-            _observers = new PublishObservable();
+            _publishObserver = publishObserver;
+            _correlationId = correlationId;
+            _conversationId = conversationId;
         }
 
         async Task IPublishEndpoint.Publish<T>(T message, CancellationToken cancellationToken)
         {
-            var adapter = new PublishPipeContextAdapter<T>(_observers, _sourceAddress);
+            var adapter = new PublishPipeContextAdapter<T>(_publishObserver, _sourceAddress, _correlationId, _conversationId);
             try
             {
-                foreach (ISendEndpoint endpoint in await _endpointProvider.GetPublishEndpoints(typeof(T)).ConfigureAwait(false))
-                    await endpoint.Send(message, adapter, cancellationToken).ConfigureAwait(false);
+                var sendEndpoint = await _endpointProvider.GetPublishSendEndpoint(typeof(T)).ConfigureAwait(false);
 
-                await adapter.PostPublish();
+                await sendEndpoint.Send(message, adapter, cancellationToken).ConfigureAwait(false);
+
+                await adapter.PostPublish().ConfigureAwait(false);
             }
             catch (Exception ex)
             {
-                await adapter.PublishFaulted(ex);
+                await adapter.PublishFaulted(ex).ConfigureAwait(false);
                 throw;
             }
         }
 
         async Task IPublishEndpoint.Publish<T>(T message, IPipe<PublishContext<T>> publishPipe, CancellationToken cancellationToken)
         {
-            var adapter = new PublishPipeContextAdapter<T>(publishPipe, _observers, _sourceAddress);
+            var adapter = new PublishPipeContextAdapter<T>(publishPipe, _publishObserver, _sourceAddress, _correlationId, _conversationId);
             try
             {
-                foreach (ISendEndpoint endpoint in await _endpointProvider.GetPublishEndpoints(typeof(T)).ConfigureAwait(false))
-                    await endpoint.Send(message, adapter, cancellationToken).ConfigureAwait(false);
+                var sendEndpoint = await _endpointProvider.GetPublishSendEndpoint(typeof(T)).ConfigureAwait(false);
 
-                await adapter.PostPublish();
+                await sendEndpoint.Send(message, adapter, cancellationToken).ConfigureAwait(false);
+
+                await adapter.PostPublish().ConfigureAwait(false);
             }
             catch (Exception ex)
             {
-                await adapter.PublishFaulted(ex);
+                await adapter.PublishFaulted(ex).ConfigureAwait(false);
                 throw;
             }
         }
 
         async Task IPublishEndpoint.Publish<T>(T message, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
         {
-            var adapter = new PublishPipeContextAdapter<T>(publishPipe, _observers, _sourceAddress);
+            var adapter = new PublishPipeContextAdapter<T>(publishPipe, _publishObserver, _sourceAddress, _correlationId, _conversationId);
             try
             {
-                foreach (ISendEndpoint endpoint in await _endpointProvider.GetPublishEndpoints(typeof(T)).ConfigureAwait(false))
-                    await endpoint.Send(message, adapter, cancellationToken).ConfigureAwait(false);
+                var sendEndpoint = await _endpointProvider.GetPublishSendEndpoint(typeof(T)).ConfigureAwait(false);
 
-                await adapter.PostPublish();
+                await sendEndpoint.Send(message, adapter, cancellationToken).ConfigureAwait(false);
+
+                await adapter.PostPublish().ConfigureAwait(false);
             }
             catch (Exception ex)
             {
-                await adapter.PublishFaulted(ex);
+                await adapter.PublishFaulted(ex).ConfigureAwait(false);
                 throw;
             }
         }
@@ -117,17 +123,18 @@ namespace MassTransit.Transports
 
         async Task IPublishEndpoint.Publish<T>(object values, CancellationToken cancellationToken)
         {
-            var adapter = new PublishPipeContextAdapter<T>(_observers, _sourceAddress);
+            var adapter = new PublishPipeContextAdapter<T>(_publishObserver, _sourceAddress, _correlationId, _conversationId);
             try
             {
-                foreach (ISendEndpoint endpoint in await _endpointProvider.GetPublishEndpoints(typeof(T)).ConfigureAwait(false))
-                    await endpoint.Send(values, adapter, cancellationToken).ConfigureAwait(false);
+                var sendEndpoint = await _endpointProvider.GetPublishSendEndpoint(typeof(T)).ConfigureAwait(false);
 
-                await adapter.PostPublish();
+                await sendEndpoint.Send(values, adapter, cancellationToken).ConfigureAwait(false);
+
+                await adapter.PostPublish().ConfigureAwait(false);
             }
             catch (Exception ex)
             {
-                await adapter.PublishFaulted(ex);
+                await adapter.PublishFaulted(ex).ConfigureAwait(false);
                 throw;
             }
         }
@@ -135,17 +142,18 @@ namespace MassTransit.Transports
         async Task IPublishEndpoint.Publish<T>(object values, IPipe<PublishContext<T>> publishPipe,
             CancellationToken cancellationToken)
         {
-            var adapter = new PublishPipeContextAdapter<T>(publishPipe, _observers, _sourceAddress);
+            var adapter = new PublishPipeContextAdapter<T>(publishPipe, _publishObserver, _sourceAddress, _correlationId, _conversationId);
             try
             {
-                foreach (ISendEndpoint endpoint in await _endpointProvider.GetPublishEndpoints(typeof(T)).ConfigureAwait(false))
-                    await endpoint.Send(values, adapter, cancellationToken).ConfigureAwait(false);
+                var sendEndpoint = await _endpointProvider.GetPublishSendEndpoint(typeof(T)).ConfigureAwait(false);
 
-                await adapter.PostPublish();
+                await sendEndpoint.Send(values, adapter, cancellationToken).ConfigureAwait(false);
+
+                await adapter.PostPublish().ConfigureAwait(false);
             }
             catch (Exception ex)
             {
-                await adapter.PublishFaulted(ex);
+                await adapter.PublishFaulted(ex).ConfigureAwait(false);
                 throw;
             }
         }
@@ -153,14 +161,14 @@ namespace MassTransit.Transports
         async Task IPublishEndpoint.Publish<T>(object values, IPipe<PublishContext> publishPipe,
             CancellationToken cancellationToken)
         {
-            var adapter = new PublishPipeContextAdapter<T>(publishPipe, _observers, _sourceAddress);
+            var adapter = new PublishPipeContextAdapter<T>(publishPipe, _publishObserver, _sourceAddress, _correlationId, _conversationId);
             try
             {
-                var endpoints = await _endpointProvider.GetPublishEndpoints(typeof(T)).ConfigureAwait(false);
+                var sendEndpoint = await _endpointProvider.GetPublishSendEndpoint(typeof(T)).ConfigureAwait(false);
 
-                await Task.WhenAll(endpoints.Select(x => x.Send(values, adapter, cancellationToken))).ConfigureAwait(false);
+                await sendEndpoint.Send(values, adapter, cancellationToken).ConfigureAwait(false);
 
-                await adapter.PostPublish();
+                await adapter.PostPublish().ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -171,7 +179,7 @@ namespace MassTransit.Transports
 
         public ConnectHandle ConnectPublishObserver(IPublishObserver observer)
         {
-            return _observers.Connect(observer);
+            return _endpointProvider.ConnectPublishObserver(observer);
         }
     }
 }

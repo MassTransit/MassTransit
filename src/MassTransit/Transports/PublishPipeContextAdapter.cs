@@ -24,30 +24,38 @@ namespace MassTransit.Transports
         IPipe<SendContext<T>>
         where T : class
     {
-        readonly PublishObservable _observer;
+        readonly Guid? _conversationId;
+        readonly Guid? _correlationId;
+        readonly IPublishObserver _observer;
         readonly IPipe<PublishContext<T>> _pipe;
         readonly Uri _sourceAddress;
         PublishContext<T> _context;
 
-        public PublishPipeContextAdapter(IPipe<PublishContext<T>> pipe, PublishObservable observer, Uri sourceAddress)
+        public PublishPipeContextAdapter(IPipe<PublishContext<T>> pipe, IPublishObserver observer, Uri sourceAddress, Guid? correlationId, Guid? conversationId)
         {
             _pipe = pipe;
             _observer = observer;
             _sourceAddress = sourceAddress;
+            _correlationId = correlationId;
+            _conversationId = conversationId;
         }
 
-        public PublishPipeContextAdapter(IPipe<PublishContext> pipe, PublishObservable observer, Uri sourceAddress)
+        public PublishPipeContextAdapter(IPipe<PublishContext> pipe, IPublishObserver observer, Uri sourceAddress, Guid? correlationId, Guid? conversationId)
         {
             _pipe = pipe;
             _observer = observer;
             _sourceAddress = sourceAddress;
+            _correlationId = correlationId;
+            _conversationId = conversationId;
         }
 
-        public PublishPipeContextAdapter(PublishObservable observer, Uri sourceAddress)
+        public PublishPipeContextAdapter(IPublishObserver observer, Uri sourceAddress, Guid? correlationId, Guid? conversationId)
         {
-            _observer = observer;
-            _sourceAddress = sourceAddress;
             _pipe = Pipe.Empty<PublishContext<T>>();
+            _observer = observer;
+            _sourceAddress = sourceAddress;
+            _correlationId = correlationId;
+            _conversationId = conversationId;
         }
 
         void IProbeSite.Probe(ProbeContext context)
@@ -59,19 +67,25 @@ namespace MassTransit.Transports
         {
             context.SourceAddress = _sourceAddress;
 
+            if (_conversationId.HasValue)
+                context.ConversationId = _conversationId;
+
+            if (_correlationId.HasValue)
+                context.InitiatorId = _correlationId;
+
             var publishContext = new PublishContextProxy<T>(context);
             bool firstTime = Interlocked.CompareExchange(ref _context, publishContext, null) == null;
 
             await _pipe.Send(publishContext);
 
             if (firstTime)
-                await _observer.NotifyPrePublish(publishContext);
+                await _observer.PrePublish(publishContext);
         }
 
         public Task PostPublish()
         {
             if (_context != null)
-                return _observer.NotifyPostPublish(_context);
+                return _observer.PostPublish(_context);
 
             return TaskUtil.Completed;
         }
@@ -79,7 +93,7 @@ namespace MassTransit.Transports
         public Task PublishFaulted(Exception exception)
         {
             if (_context != null)
-                return _observer.NotifyPublishFault(_context, exception);
+                return _observer.PublishFault(_context, exception);
 
             return TaskUtil.Completed;
         }

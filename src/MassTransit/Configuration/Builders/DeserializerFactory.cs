@@ -12,5 +12,5 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Builders
 {
-    public delegate IMessageDeserializer DeserializerFactory(ISendEndpointProvider sendEndpointProvider, IPublishSendEndpointProvider publishEndpoint);
+    public delegate IMessageDeserializer DeserializerFactory(ISendEndpointProvider sendEndpointProvider, IPublishEndpointProvider publishEndpoint);
 }

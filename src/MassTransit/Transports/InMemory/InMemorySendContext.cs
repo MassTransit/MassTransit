@@ -71,6 +71,9 @@ namespace MassTransit.Transports.InMemory
         public Guid? RequestId { get; set; }
         public Guid? CorrelationId { get; set; }
 
+        public Guid? ConversationId { get; set; }
+        public Guid? InitiatorId { get; set; }
+
         public SendHeaders Headers => _headers;
 
         public Uri SourceAddress { get; set; }

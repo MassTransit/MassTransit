@@ -49,7 +49,10 @@ namespace MassTransit.AzureServiceBusTransport.Contexts
         public Guid? RequestId { get; set; }
         public Guid? CorrelationId { get; set; }
 
-        public SendHeaders Headers { get; set; }
+        public Guid? ConversationId { get; set; }
+        public Guid? InitiatorId { get; set; }
+
+        public SendHeaders Headers { get; }
 
         public Uri SourceAddress { get; set; }
         public Uri DestinationAddress { get; set; }

@@ -48,17 +48,17 @@ namespace MassTransit.Tests.Serialization
             if (_serializerType == typeof(JsonMessageSerializer))
             {
                 Serializer = new JsonMessageSerializer();
-                Deserializer = new JsonMessageDeserializer(JsonMessageSerializer.Deserializer, Bus, PublishSendEndpointProvider);
+                Deserializer = new JsonMessageDeserializer(JsonMessageSerializer.Deserializer, Bus, PublishEndpointProvider);
             }
             else if (_serializerType == typeof(BsonMessageSerializer))
             {
                 Serializer = new BsonMessageSerializer();
-                Deserializer = new BsonMessageDeserializer(BsonMessageSerializer.Deserializer, Bus, PublishSendEndpointProvider);
+                Deserializer = new BsonMessageDeserializer(BsonMessageSerializer.Deserializer, Bus, PublishEndpointProvider);
             }
             else if (_serializerType == typeof(XmlMessageSerializer))
             {
                 Serializer = new XmlMessageSerializer();
-                Deserializer = new XmlMessageDeserializer(JsonMessageSerializer.Deserializer, Bus, PublishSendEndpointProvider);
+                Deserializer = new XmlMessageDeserializer(JsonMessageSerializer.Deserializer, Bus, PublishEndpointProvider);
             }
             else if (_serializerType == typeof(EncryptedMessageSerializer))
             {
@@ -66,7 +66,7 @@ namespace MassTransit.Tests.Serialization
                 var streamProvider = new AesCryptoStreamProvider(keyProvider, "default");
 
                 Serializer = new EncryptedMessageSerializer(streamProvider);
-                Deserializer = new EncryptedMessageDeserializer(BsonMessageSerializer.Deserializer, Bus, PublishSendEndpointProvider, streamProvider);
+                Deserializer = new EncryptedMessageDeserializer(BsonMessageSerializer.Deserializer, Bus, PublishEndpointProvider, streamProvider);
             }
             else
                 throw new ArgumentException("The serializer type is unknown");

@@ -110,9 +110,9 @@ namespace MassTransit.TestFramework
             return sendEndpoint;
         }
 
-        protected IPublishSendEndpointProvider PublishSendEndpointProvider
+        protected IPublishEndpointProvider PublishEndpointProvider
         {
-            get { return new InMemoryPublishSendEndpointProvider(Bus, _inMemoryTransportCache); }
+            get { return new InMemoryPublishEndpointProvider(Bus, _inMemoryTransportCache); }
         }
 
         [TestFixtureTearDown]

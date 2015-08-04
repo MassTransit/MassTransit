@@ -28,7 +28,6 @@ namespace MassTransit.QuartzIntegration
         IJob
     {
         static readonly ILog _log = Logger.Get<ScheduledMessageJob>();
-
         readonly IBus _bus;
 
         public ScheduledMessageJob(IBus bus)
@@ -37,17 +36,17 @@ namespace MassTransit.QuartzIntegration
         }
 
         public string Destination { get; set; }
-
         public string ExpirationTime { get; set; }
         public string ResponseAddress { get; set; }
         public string FaultAddress { get; set; }
         public string Body { get; set; }
-
         public string MessageId { get; set; }
         public string MessageType { get; set; }
         public string ContentType { get; set; }
         public string RequestId { get; set; }
         public string CorrelationId { get; set; }
+        public string ConversationId { get; set; }
+        public string InitiatorId { get; set; }
         public string HeadersAsJson { get; set; }
 
         public void Execute(IJobExecutionContext context)
@@ -89,12 +88,11 @@ namespace MassTransit.QuartzIntegration
 
                     SetHeaders(context);
 
-                    if (!string.IsNullOrEmpty(MessageId))
-                        context.MessageId = new Guid(MessageId);
-                    if (!string.IsNullOrEmpty(RequestId))
-                        context.RequestId = new Guid(RequestId);
-                    if (!string.IsNullOrEmpty(CorrelationId))
-                        context.CorrelationId = new Guid(CorrelationId);
+                    context.MessageId = ConvertIdToGuid(MessageId);
+                    context.RequestId = ConvertIdToGuid(RequestId);
+                    context.CorrelationId = ConvertIdToGuid(CorrelationId);
+                    context.ConversationId = ConvertIdToGuid(ConversationId);
+                    context.InitiatorId = ConvertIdToGuid(InitiatorId);
 
                     if (!string.IsNullOrEmpty(ExpirationTime))
                         context.TimeToLive = DateTime.UtcNow - DateTime.Parse(ExpirationTime);
@@ -106,6 +104,18 @@ namespace MassTransit.QuartzIntegration
             });
 
             return sendPipe;
+        }
+
+        static Guid? ConvertIdToGuid(string id)
+        {
+            if (string.IsNullOrWhiteSpace(id))
+                return default(Guid?);
+
+            Guid messageId;
+            if (Guid.TryParse(id, out messageId))
+                return messageId;
+
+            throw new FormatException("The Id was not a Guid: " + id);
         }
 
         void SetHeaders(SendContext context)

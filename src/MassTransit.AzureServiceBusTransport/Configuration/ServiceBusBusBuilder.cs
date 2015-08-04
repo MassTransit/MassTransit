@@ -68,13 +68,13 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
             return new SendEndpointCache(provider);
         }
 
-        protected override IPublishSendEndpointProvider CreatePublishSendEndpointProvider()
+        protected override IPublishEndpointProvider CreatePublishSendEndpointProvider()
         {
             var sendEndpointProvider = new PublishSendEndpointProvider(MessageSerializer, _inputAddress, _hosts);
 
             var endpointCache = new SendEndpointCache(sendEndpointProvider);
 
-            return new ServiceBusPublishSendEndpointProvider(_hosts[0], endpointCache);
+            return new ServiceBusPublishEndpointProvider(_hosts[0], endpointCache);
         }
 
         public virtual IBusControl Build()

@@ -27,11 +27,11 @@ namespace MassTransit.Serialization
         IMessageDeserializer
     {
         readonly JsonSerializer _deserializer;
-        readonly IPublishSendEndpointProvider _publishEndpoint;
+        readonly IPublishEndpointProvider _publishEndpoint;
         readonly ISendEndpointProvider _sendEndpointProvider;
 
         public XmlMessageDeserializer(JsonSerializer deserializer, ISendEndpointProvider sendEndpointProvider,
-            IPublishSendEndpointProvider publishEndpoint)
+            IPublishEndpointProvider publishEndpoint)
         {
             _deserializer = deserializer;
             _sendEndpointProvider = sendEndpointProvider;

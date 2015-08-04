@@ -44,23 +44,25 @@ namespace MassTransit.Serialization
         readonly ISendEndpointProvider _sendEndpointProvider;
         readonly string[] _supportedTypes;
         Guid? _correlationId;
+        Guid? _conversationId;
         Uri _destinationAddress;
         Uri _faultAddress;
         Headers _headers;
+        Guid? _initiatorId;
         Guid? _messageId;
         Guid? _requestId;
         Uri _responseAddress;
         Uri _sourceAddress;
 
         public StaticConsumeContext(JsonSerializer deserializer, ISendEndpointProvider sendEndpointProvider,
-            IPublishSendEndpointProvider publishEndpoint,
+            IPublishEndpointProvider publishEndpointProvider,
             ReceiveContext receiveContext, object message, Header[] headers)
         {
             _deserializer = deserializer;
             _receiveContext = receiveContext;
             _sendEndpointProvider = sendEndpointProvider;
             _messageTypes = new Dictionary<Type, object>();
-            _publishEndpoint = new PublishEndpoint(receiveContext.InputAddress, publishEndpoint);
+            _publishEndpoint = publishEndpointProvider.CreatePublishEndpoint(receiveContext.InputAddress, CorrelationId, ConversationId);
             _pendingTasks = new List<Task>();
             _message = message;
             _binaryHeaders = headers;
@@ -90,6 +92,8 @@ namespace MassTransit.Serialization
         public Guid? RequestId => _requestId.HasValue ? _requestId : (_requestId = GetHeaderGuid(BinaryMessageSerializer.RequestIdKey));
 
         public Guid? CorrelationId => _correlationId.HasValue ? _correlationId : (_correlationId = GetHeaderGuid(BinaryMessageSerializer.CorrelationIdKey));
+        public Guid? ConversationId => _conversationId.HasValue ? _conversationId : (_conversationId = GetHeaderGuid(BinaryMessageSerializer.ConversationIdKey));
+        public Guid? InitiatorId => _initiatorId.HasValue ? _initiatorId : (_initiatorId = GetHeaderGuid(BinaryMessageSerializer.InitiatorIdKey));
 
         public DateTime? ExpirationTime => GetHeaderDateTime(BinaryMessageSerializer.ExpirationTimeKey);
 
@@ -419,6 +423,11 @@ namespace MassTransit.Serialization
         public ConnectHandle ConnectPublishObserver(IPublishObserver observer)
         {
             return _publishEndpoint.ConnectPublishObserver(observer);
+        }
+
+        public ConnectHandle ConnectSendObserver(ISendObserver observer)
+        {
+            return _sendEndpointProvider.ConnectSendObserver(observer);
         }
     }
 }

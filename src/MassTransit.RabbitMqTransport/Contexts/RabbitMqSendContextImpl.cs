@@ -52,13 +52,15 @@ namespace MassTransit.RabbitMqTransport.Contexts
             Durable = true;
         }
 
-        public CancellationToken CancellationToken { get; private set; }
+        public CancellationToken CancellationToken { get; }
 
         public Guid? MessageId { get; set; }
         public Guid? RequestId { get; set; }
         public Guid? CorrelationId { get; set; }
+        public Guid? ConversationId { get; set; }
+        public Guid? InitiatorId { get; set; }
 
-        public SendHeaders Headers { get; set; }
+        public SendHeaders Headers { get; }
 
         public Uri SourceAddress { get; set; }
         public Uri DestinationAddress { get; set; }
@@ -83,10 +85,10 @@ namespace MassTransit.RabbitMqTransport.Contexts
         public bool Immediate { get; set; }
         public bool Mandatory { get; set; }
 
-        public string Exchange { get; private set; }
+        public string Exchange { get; }
         public string RoutingKey { get; set; }
 
-        public IBasicProperties BasicProperties { get; private set; }
+        public IBasicProperties BasicProperties { get; }
 
         public byte[] Body
         {
@@ -110,7 +112,7 @@ namespace MassTransit.RabbitMqTransport.Contexts
             }
         }
 
-        public T Message { get; private set; }
+        public T Message { get; }
 
         public bool HasPayloadType(Type contextType)
         {

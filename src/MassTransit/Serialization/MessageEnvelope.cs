@@ -21,6 +21,8 @@ namespace MassTransit.Serialization
         string MessageId { get; }
         string RequestId { get; }
         string CorrelationId { get; }
+        string ConversationId { get; }
+        string InitiatorId { get; }
         string SourceAddress { get; }
         string DestinationAddress { get; }
         string ResponseAddress { get; }

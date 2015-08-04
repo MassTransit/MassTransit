@@ -204,6 +204,11 @@ namespace MassTransit.Transports
                     await _pipe.Send(context);
                 if (_sendPipe != null)
                     await _sendPipe.Send(context);
+
+                if (!context.ConversationId.HasValue)
+                {
+                    context.ConversationId = NewId.NextGuid();
+                }
             }
         }
     }

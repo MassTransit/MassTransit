@@ -40,6 +40,19 @@ namespace MassTransit
         Guid? CorrelationId { get; }
 
         /// <summary>
+        /// The conversationId of the message, which is copied and carried throughout the message
+        /// flow by the infrastructure.
+        /// </summary>
+        Guid? ConversationId { get; }
+
+        /// <summary>
+        /// If this message was produced within the context of a previous message, the CorrelationId
+        /// of the message is contained in this property. If the message was produced from a saga
+        /// instance, the CorrelationId of the saga is used.
+        /// </summary>
+        Guid? InitiatorId { get; }
+
+        /// <summary>
         /// The expiration time of the message if it is not intended to last forever.
         /// </summary>
         DateTime? ExpirationTime { get; }

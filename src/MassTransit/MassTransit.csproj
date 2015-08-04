@@ -119,10 +119,12 @@
     <Compile Include="Configuration\PipeConfigurators\ScheduleMessageRedeliveryPipeSpecification.cs" />
     <Compile Include="Configuration\ScheduledRetryExtensions.cs" />
     <Compile Include="Configuration\TransformConfiguratorExtensions.cs" />
+    <Compile Include="Context\ConsumeContextProxyScope.cs" />
     <Compile Include="Context\CorrelationIdConsumeContextProxy.cs" />
     <Compile Include="Context\MessageConsumeContext.cs" />
+    <Compile Include="Context\ReceiveContextProxy.cs" />
     <Compile Include="Context\RescueExceptionConsumeContext.cs" />
-    <Compile Include="Context\RescueExceptionReceiveContext.cs" />
+    <Compile Include="Context\ExceptionConsumeContext.cs" />
     <Compile Include="Courier\Exceptions\RoutingSlipArgumentException.cs" />
     <Compile Include="ExceptionConsumeContext.cs" />
     <Compile Include="ExceptionReceiveContext.cs" />
@@ -132,7 +134,7 @@
     <Compile Include="IMessageData.cs" />
     <Compile Include="IntrospectionExtensions.cs" />
     <Compile Include="IProbeSite.cs" />
-    <Compile Include="IPublishSendEndpointProvider.cs" />
+    <Compile Include="IPublishEndpointProvider.cs" />
     <Compile Include="IRepeatPolicy.cs" />
     <Compile Include="IRetryPolicy.cs" />
     <Compile Include="LogContext.cs" />
@@ -230,7 +232,7 @@
     <Compile Include="ConsumeContext.cs" />
     <Compile Include="ConsumeContextExtensions.cs" />
     <Compile Include="ConsumerConsumeContext.cs" />
-    <Compile Include="Context\ConsumeContextScope.cs" />
+    <Compile Include="Context\ConsumeContextProxy.cs" />
     <Compile Include="Context\ScheduleMessageRedeliveryContext.cs" />
     <Compile Include="Context\ConsumeMessageSchedulerContext.cs" />
     <Compile Include="Context\ConsumerConsumeContextProxy.cs" />
@@ -242,7 +244,7 @@
     <Compile Include="Context\PublishEndpointConverter.cs" />
     <Compile Include="Context\PublishEndpointConverterCache.cs" />
     <Compile Include="Context\RetryConsumeContext.cs" />
-    <Compile Include="Context\SagaConsumeContextProxy.cs" />
+    <Compile Include="Context\NewSagaConsumeContext.cs" />
     <Compile Include="Context\SendRequest.cs" />
     <Compile Include="Context\SendRequestContext.cs" />
     <Compile Include="Context\SystemTransactionContext.cs" />
@@ -613,6 +615,7 @@
     <Compile Include="Serialization\AesCryptoStreamProvider.cs" />
     <Compile Include="Serialization\BinaryMessageDeserializer.cs" />
     <Compile Include="Serialization\BsonMessageDeserializer.cs" />
+    <Compile Include="Serialization\ConsumeSendEndpoint.cs" />
     <Compile Include="Serialization\CopyBodyMessageSerializer.cs" />
     <Compile Include="Serialization\EncryptedMessageDeserializer.cs" />
     <Compile Include="Serialization\EncryptedMessageSerializer.cs" />
@@ -823,6 +826,7 @@
     <Compile Include="Transports\AddressEqualityComparer.cs" />
     <Compile Include="Transports\DefaultMessageNameFormatter.cs" />
     <Compile Include="Transports\EndpointLoggerExtensions.cs" />
+    <Compile Include="Transports\FanOutSendEndpoint.cs" />
     <Compile Include="Transports\IBusHost.cs" />
     <Compile Include="Transports\IMessageNameFormatter.cs" />
     <Compile Include="Transports\DictionaryHeaderProvider.cs" />

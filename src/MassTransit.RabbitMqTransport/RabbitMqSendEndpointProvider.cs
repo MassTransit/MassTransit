@@ -14,6 +14,7 @@ namespace MassTransit.RabbitMqTransport
 {
     using System;
     using System.Threading.Tasks;
+    using MassTransit.Pipeline;
     using Transports;
 
 
@@ -21,6 +22,7 @@ namespace MassTransit.RabbitMqTransport
         ISendEndpointProvider
     {
         readonly Uri _inputAddress;
+        readonly SendObservable _sendObservable;
         readonly IMessageSerializer _serializer;
         readonly ISendTransportProvider _transportProvider;
 
@@ -29,13 +31,21 @@ namespace MassTransit.RabbitMqTransport
             _inputAddress = inputAddress;
             _transportProvider = transportProvider;
             _serializer = serializer;
+            _sendObservable = new SendObservable();
         }
 
         public async Task<ISendEndpoint> GetSendEndpoint(Uri address)
         {
             ISendTransport sendTransport = await _transportProvider.GetSendTransport(address);
 
+            sendTransport.ConnectSendObserver(_sendObservable);
+
             return new SendEndpoint(sendTransport, _serializer, address, _inputAddress);
+        }
+
+        public ConnectHandle ConnectSendObserver(ISendObserver observer)
+        {
+            return _sendObservable.ConnectSendObserver(observer);
         }
     }
 }

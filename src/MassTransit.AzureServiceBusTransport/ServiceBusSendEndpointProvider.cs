@@ -14,12 +14,14 @@ namespace MassTransit.AzureServiceBusTransport
 {
     using System;
     using System.Threading.Tasks;
+    using MassTransit.Pipeline;
     using Transports;
 
 
     public class ServiceBusSendEndpointProvider :
         ISendEndpointProvider
     {
+        readonly SendObservable _sendObservable;
         readonly IMessageSerializer _serializer;
         readonly Uri _sourceAddress;
         readonly ISendTransportProvider _transportProvider;
@@ -29,6 +31,7 @@ namespace MassTransit.AzureServiceBusTransport
             _transportProvider = transportProvider;
             _sourceAddress = sourceAddress;
             _serializer = serializer;
+            _sendObservable = new SendObservable();
         }
 
         public async Task<ISendEndpoint> GetSendEndpoint(Uri address)
@@ -36,6 +39,11 @@ namespace MassTransit.AzureServiceBusTransport
             ISendTransport sendTransport = await _transportProvider.GetSendTransport(address);
 
             return new SendEndpoint(sendTransport, _serializer, address, _sourceAddress);
+        }
+
+        public ConnectHandle ConnectSendObserver(ISendObserver observer)
+        {
+            return _sendObservable.ConnectSendObserver(observer);
         }
     }
 }

@@ -89,6 +89,18 @@ namespace MassTransit.Context
             set { _context.CorrelationId = value; }
         }
 
+        public Guid? ConversationId
+        {
+            get { return _context.ConversationId; }
+            set { _context.ConversationId = value; }
+        }
+
+        public Guid? InitiatorId
+        {
+            get { return _context.InitiatorId; }
+            set { _context.InitiatorId = value; }
+        }
+
         SendHeaders SendContext.Headers => _context.Headers;
 
         TimeSpan? SendContext.TimeToLive

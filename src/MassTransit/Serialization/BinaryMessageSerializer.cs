@@ -30,6 +30,8 @@ namespace MassTransit.Serialization
     {
         public const string ContentTypeHeaderValue = "application/vnd.masstransit+binary";
         public const string CorrelationIdKey = "CorrelationId";
+        public const string ConversationIdKey = "ConversationId";
+        public const string InitiatorIdKey = "InitiatorId";
         public const string DestinationAddressKey = "DestinationAddress";
         public const string ExpirationTimeKey = "Expiration";
         public const string FaultAddressKey = "FaultAddress";
