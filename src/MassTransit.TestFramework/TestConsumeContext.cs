@@ -126,6 +126,11 @@ namespace MassTransit.TestFramework
             get { return _headers; }
         }
 
+        public HostInfo Host
+        {
+            get { return null; }
+        }
+
         Task IPublishEndpoint.Publish<T>(T message, CancellationToken cancellationToken)
         {
             throw new NotImplementedException();

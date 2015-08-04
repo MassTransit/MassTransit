@@ -69,6 +69,7 @@ namespace MassTransit.Context
         public virtual Uri ResponseAddress => _context.ResponseAddress;
         public virtual Uri FaultAddress => _context.FaultAddress;
         public virtual Headers Headers => _context.Headers;
+        public HostInfo Host => _context.Host;
 
         public virtual Task Publish<T>(T message, CancellationToken cancellationToken) where T : class
         {

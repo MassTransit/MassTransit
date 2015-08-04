@@ -24,7 +24,6 @@ namespace MassTransit.Serialization
     using Newtonsoft.Json.Linq;
     using Pipeline;
     using Pipeline.Pipes;
-    using Transports;
     using Util;
 
 
@@ -43,8 +42,8 @@ namespace MassTransit.Serialization
         readonly ReceiveContext _receiveContext;
         readonly ISendEndpointProvider _sendEndpointProvider;
         readonly string[] _supportedTypes;
-        Guid? _correlationId;
         Guid? _conversationId;
+        Guid? _correlationId;
         Uri _destinationAddress;
         Uri _faultAddress;
         Headers _headers;
@@ -53,6 +52,7 @@ namespace MassTransit.Serialization
         Guid? _requestId;
         Uri _responseAddress;
         Uri _sourceAddress;
+        HostInfo _host;
 
         public StaticConsumeContext(JsonSerializer deserializer, ISendEndpointProvider sendEndpointProvider,
             IPublishEndpointProvider publishEndpointProvider,
@@ -62,12 +62,13 @@ namespace MassTransit.Serialization
             _receiveContext = receiveContext;
             _sendEndpointProvider = sendEndpointProvider;
             _messageTypes = new Dictionary<Type, object>();
-            _publishEndpoint = publishEndpointProvider.CreatePublishEndpoint(receiveContext.InputAddress, CorrelationId, ConversationId);
             _pendingTasks = new List<Task>();
             _message = message;
             _binaryHeaders = headers;
 
             _supportedTypes = new[] {GetHeaderString(BinaryMessageSerializer.MessageTypeKey)};
+
+            _publishEndpoint = publishEndpointProvider.CreatePublishEndpoint(receiveContext.InputAddress, CorrelationId, ConversationId);
         }
 
         public bool HasPayloadType(Type contextType)
@@ -88,31 +89,23 @@ namespace MassTransit.Serialization
         }
 
         public Guid? MessageId => _messageId.HasValue ? _messageId : (_messageId = GetHeaderGuid(BinaryMessageSerializer.MessageIdKey));
-
         public Guid? RequestId => _requestId.HasValue ? _requestId : (_requestId = GetHeaderGuid(BinaryMessageSerializer.RequestIdKey));
-
         public Guid? CorrelationId => _correlationId.HasValue ? _correlationId : (_correlationId = GetHeaderGuid(BinaryMessageSerializer.CorrelationIdKey));
-        public Guid? ConversationId => _conversationId.HasValue ? _conversationId : (_conversationId = GetHeaderGuid(BinaryMessageSerializer.ConversationIdKey));
+
+        public Guid? ConversationId => _conversationId.HasValue ? _conversationId : (_conversationId = GetHeaderGuid(BinaryMessageSerializer.ConversationIdKey))
+            ;
+
         public Guid? InitiatorId => _initiatorId.HasValue ? _initiatorId : (_initiatorId = GetHeaderGuid(BinaryMessageSerializer.InitiatorIdKey));
-
         public DateTime? ExpirationTime => GetHeaderDateTime(BinaryMessageSerializer.ExpirationTimeKey);
-
         public Uri SourceAddress => _sourceAddress ?? (_sourceAddress = GetHeaderUri(BinaryMessageSerializer.SourceAddressKey));
-
         public Uri DestinationAddress => _destinationAddress ?? (_destinationAddress = GetHeaderUri(BinaryMessageSerializer.DestinationAddressKey));
-
         public Uri ResponseAddress => _responseAddress ?? (_responseAddress = GetHeaderUri(BinaryMessageSerializer.ResponseAddressKey));
-
         public Uri FaultAddress => _faultAddress ?? (_faultAddress = GetHeaderUri(BinaryMessageSerializer.FaultAddressKey));
-
         public Headers Headers => _headers ?? (_headers = new StaticHeaders(_deserializer, _binaryHeaders));
-
+        public HostInfo Host => _host ?? (_host = GetHeaderObject<HostInfo>(BinaryMessageSerializer.HostInfoKey));
         public CancellationToken CancellationToken => _receiveContext.CancellationToken;
-
         public ReceiveContext ReceiveContext => _receiveContext;
-
         public Task CompleteTask => Task.WhenAll(_pendingTasks);
-
         public IEnumerable<string> SupportedMessageTypes => _supportedTypes;
 
         public bool HasMessageType(Type messageType)
@@ -170,9 +163,7 @@ namespace MassTransit.Serialization
                 await endpoint.Send(message, new ResponsePipe<T>(this), CancellationToken).ConfigureAwait(false);
             }
             else
-            {
                 await _publishEndpoint.Publish(message, new ResponsePipe<T>(this), CancellationToken).ConfigureAwait(false);
-            }
         }
 
         async Task ConsumeContext.RespondAsync<T>(T message, IPipe<SendContext<T>> sendPipe)
@@ -184,9 +175,7 @@ namespace MassTransit.Serialization
                 await endpoint.Send(message, new ResponsePipe<T>(this, sendPipe), CancellationToken).ConfigureAwait(false);
             }
             else
-            {
                 await _publishEndpoint.Publish(message, new ResponsePipe<T>(this, sendPipe), CancellationToken).ConfigureAwait(false);
-            }
         }
 
         public void Respond<T>(T message)
@@ -274,6 +263,16 @@ namespace MassTransit.Serialization
         Task IPublishEndpoint.Publish<T>(object values, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
         {
             return _publishEndpoint.Publish<T>(values, publishPipe, cancellationToken);
+        }
+
+        public ConnectHandle ConnectPublishObserver(IPublishObserver observer)
+        {
+            return _publishEndpoint.ConnectPublishObserver(observer);
+        }
+
+        public ConnectHandle ConnectSendObserver(ISendObserver observer)
+        {
+            return _sendEndpointProvider.ConnectSendObserver(observer);
         }
 
         async Task GenerateFault<T>(T message, Exception exception)
@@ -371,6 +370,16 @@ namespace MassTransit.Serialization
             return null;
         }
 
+        T GetHeaderObject<T>(string headerName)
+            where T : class
+        {
+            object header = GetHeader(headerName);
+
+            var obj = header as T;
+
+            return obj;
+        }
+
         Guid? GetHeaderGuid(string headerName)
         {
             try
@@ -418,16 +427,6 @@ namespace MassTransit.Serialization
         object GetHeader(string headerName)
         {
             return _binaryHeaders.Where(x => x.Name == headerName).Select(x => x.Value).FirstOrDefault();
-        }
-
-        public ConnectHandle ConnectPublishObserver(IPublishObserver observer)
-        {
-            return _publishEndpoint.ConnectPublishObserver(observer);
-        }
-
-        public ConnectHandle ConnectSendObserver(ISendObserver observer)
-        {
-            return _sendEndpointProvider.ConnectSendObserver(observer);
         }
     }
 }

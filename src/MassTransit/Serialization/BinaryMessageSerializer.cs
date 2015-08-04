@@ -40,6 +40,7 @@ namespace MassTransit.Serialization
         public const string RequestIdKey = "RequestId";
         public const string ResponseAddressKey = "ResponseAddress";
         public const string SourceAddressKey = "SourceAddress";
+        public const string HostInfoKey = "HostInfo";
         public static readonly ContentType BinaryContentType = new ContentType(ContentTypeHeaderValue);
 
         static readonly BinaryFormatter _formatter = new BinaryFormatter();
@@ -74,6 +75,10 @@ namespace MassTransit.Serialization
                 headers.Add(RequestIdKey, context.CorrelationId.Value.ToString("N"));
             if (context.RequestId.HasValue)
                 headers.Add(RequestIdKey, context.RequestId.Value.ToString("N"));
+            if (context.ConversationId.HasValue)
+                headers.Add(ConversationIdKey, context.ConversationId.Value.ToString("N"));
+            if (context.InitiatorId.HasValue)
+                headers.Add(InitiatorIdKey, context.InitiatorId.Value.ToString("N"));
 
             headers.Add(SourceAddressKey, context.SourceAddress);
             headers.Add(DestinationAddressKey, context.DestinationAddress);
@@ -85,6 +90,8 @@ namespace MassTransit.Serialization
 
             if (context.TimeToLive.HasValue)
                 headers.Add(ExpirationTimeKey, DateTime.UtcNow + context.TimeToLive.Value);
+
+            headers.Add(new Header(HostInfoKey, HostMetadataCache.Host));
 
             return headers.ToArray();
         }
