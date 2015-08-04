@@ -14,12 +14,14 @@ namespace MassTransit.Transports.InMemory
 {
     using System;
     using System.Threading.Tasks;
+    using Pipeline;
 
 
     public class InMemorySendEndpointProvider :
         ISendEndpointProvider
     {
         readonly IMessageSerializer _defaultSerializer;
+        readonly SendObservable _sendObservable;
         readonly Uri _sourceAddress;
         readonly ISendTransportProvider _transportProvider;
 
@@ -29,13 +31,21 @@ namespace MassTransit.Transports.InMemory
             _transportProvider = transportProvider;
             _defaultSerializer = defaultSerializer;
             _sourceAddress = sourceAddress;
+            _sendObservable = new SendObservable();
         }
 
         public async Task<ISendEndpoint> GetSendEndpoint(Uri address)
         {
             ISendTransport sendTransport = await _transportProvider.GetSendTransport(address).ConfigureAwait(false);
 
+            sendTransport.ConnectSendObserver(_sendObservable);
+
             return new SendEndpoint(sendTransport, _defaultSerializer, address, _sourceAddress);
+        }
+
+        public ConnectHandle ConnectSendObserver(ISendObserver observer)
+        {
+            return _sendObservable.ConnectSendObserver(observer);
         }
     }
 }

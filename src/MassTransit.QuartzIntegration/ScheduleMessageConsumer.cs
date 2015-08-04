@@ -142,6 +142,10 @@ namespace MassTransit.QuartzIntegration
                 builder = builder.UsingJobData("MessageId", context.MessageId.Value.ToString());
             if (context.CorrelationId.HasValue)
                 builder = builder.UsingJobData("CorrelationId", context.CorrelationId.Value.ToString());
+            if (context.ConversationId.HasValue)
+                builder = builder.UsingJobData("ConversationId", context.ConversationId.Value.ToString());
+            if (context.InitiatorId.HasValue)
+                builder = builder.UsingJobData("InitiatorId", context.InitiatorId.Value.ToString());
             if (context.RequestId.HasValue)
                 builder = builder.UsingJobData("RequestId", context.RequestId.Value.ToString());
             if (context.ExpirationTime.HasValue)

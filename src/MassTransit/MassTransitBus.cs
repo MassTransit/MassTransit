@@ -29,19 +29,19 @@ namespace MassTransit
         readonly IConsumePipe _consumePipe;
         readonly IBusHostControl[] _hosts;
         readonly ILog _log;
-        readonly IPublishEndpoint _publishEndpoint;
+        readonly IPublishEndpointProvider _publishEndpointProvider;
         readonly IReceiveEndpoint[] _receiveEndpoints;
         readonly ReceiveObservable _receiveObservers;
         readonly ISendEndpointProvider _sendEndpointProvider;
 
         public MassTransitBus(Uri address, IConsumePipe consumePipe, ISendEndpointProvider sendEndpointProvider,
-            IPublishSendEndpointProvider publishEndpoint, IEnumerable<IReceiveEndpoint> receiveEndpoints, IEnumerable<IBusHostControl> hosts)
+            IPublishEndpointProvider publishEndpointProvider, IEnumerable<IReceiveEndpoint> receiveEndpoints, IEnumerable<IBusHostControl> hosts)
         {
             _log = Logger.Get<MassTransitBus>();
             Address = address;
             _consumePipe = consumePipe;
             _sendEndpointProvider = sendEndpointProvider;
-            _publishEndpoint = new PublishEndpoint(address, publishEndpoint);
+            _publishEndpointProvider = publishEndpointProvider;
             _receiveEndpoints = receiveEndpoints.ToArray();
             _hosts = hosts.ToArray();
             _receiveObservers = new ReceiveObservable();
@@ -69,27 +69,37 @@ namespace MassTransit
 
         Task IPublishEndpoint.Publish<T>(T message, CancellationToken cancellationToken)
         {
-            return _publishEndpoint.Publish(message, cancellationToken);
+            IPublishEndpoint publishEndpoint = _publishEndpointProvider.CreatePublishEndpoint(Address);
+
+            return publishEndpoint.Publish(message, cancellationToken);
         }
 
         Task IPublishEndpoint.Publish<T>(T message, IPipe<PublishContext<T>> publishPipe, CancellationToken cancellationToken)
         {
-            return _publishEndpoint.Publish(message, publishPipe, cancellationToken);
+            IPublishEndpoint publishEndpoint = _publishEndpointProvider.CreatePublishEndpoint(Address);
+
+            return publishEndpoint.Publish(message, publishPipe, cancellationToken);
         }
 
         Task IPublishEndpoint.Publish<T>(T message, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
         {
-            return _publishEndpoint.Publish(message, publishPipe, cancellationToken);
+            IPublishEndpoint publishEndpoint = _publishEndpointProvider.CreatePublishEndpoint(Address);
+
+            return publishEndpoint.Publish(message, publishPipe, cancellationToken);
         }
 
         Task IPublishEndpoint.Publish(object message, CancellationToken cancellationToken)
         {
-            return _publishEndpoint.Publish(message, cancellationToken);
+            IPublishEndpoint publishEndpoint = _publishEndpointProvider.CreatePublishEndpoint(Address);
+
+            return publishEndpoint.Publish(message, cancellationToken);
         }
 
         Task IPublishEndpoint.Publish(object message, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
         {
-            return _publishEndpoint.Publish(message, publishPipe, cancellationToken);
+            IPublishEndpoint publishEndpoint = _publishEndpointProvider.CreatePublishEndpoint(Address);
+
+            return publishEndpoint.Publish(message, publishPipe, cancellationToken);
         }
 
         Task IPublishEndpoint.Publish(object message, Type messageType, CancellationToken cancellationToken)
@@ -105,17 +115,23 @@ namespace MassTransit
 
         Task IPublishEndpoint.Publish<T>(object values, CancellationToken cancellationToken)
         {
-            return _publishEndpoint.Publish<T>(values, cancellationToken);
+            IPublishEndpoint publishEndpoint = _publishEndpointProvider.CreatePublishEndpoint(Address);
+
+            return publishEndpoint.Publish<T>(values, cancellationToken);
         }
 
         Task IPublishEndpoint.Publish<T>(object values, IPipe<PublishContext<T>> publishPipe, CancellationToken cancellationToken)
         {
-            return _publishEndpoint.Publish(values, publishPipe, cancellationToken);
+            IPublishEndpoint publishEndpoint = _publishEndpointProvider.CreatePublishEndpoint(Address);
+
+            return publishEndpoint.Publish(values, publishPipe, cancellationToken);
         }
 
         Task IPublishEndpoint.Publish<T>(object values, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
         {
-            return _publishEndpoint.Publish<T>(values, publishPipe, cancellationToken);
+            IPublishEndpoint publishEndpoint = _publishEndpointProvider.CreatePublishEndpoint(Address);
+
+            return publishEndpoint.Publish<T>(values, publishPipe, cancellationToken);
         }
 
         public Uri Address { get; }
@@ -205,7 +221,7 @@ namespace MassTransit
 
         public ConnectHandle ConnectPublishObserver(IPublishObserver observer)
         {
-            return _publishEndpoint.ConnectPublishObserver(observer);
+            return _publishEndpointProvider.ConnectPublishObserver(observer);
         }
 
         void IProbeSite.Probe(ProbeContext context)
@@ -213,7 +229,7 @@ namespace MassTransit
             ProbeContext scope = context.CreateScope("bus");
             scope.Set(new
             {
-                Address,
+                Address
             });
 
             foreach (IBusHostControl host in _hosts)
@@ -221,6 +237,11 @@ namespace MassTransit
 
             foreach (IReceiveEndpoint receiveEndpoint in _receiveEndpoints)
                 receiveEndpoint.Probe(scope);
+        }
+
+        public ConnectHandle ConnectSendObserver(ISendObserver observer)
+        {
+            return _sendEndpointProvider.ConnectSendObserver(observer);
         }
 
 
@@ -256,9 +277,7 @@ namespace MassTransit
                     return;
 
                 foreach (var observerHandle in _observerHandles)
-                {
                     observerHandle.Disconnect();
-                }
 
                 await Task.WhenAll(_endpointHandles.Select(x => x.Stop(cancellationToken))).ConfigureAwait(false);
                 await Task.WhenAll(_hostHandles.Select(x => x.Stop(cancellationToken))).ConfigureAwait(false);

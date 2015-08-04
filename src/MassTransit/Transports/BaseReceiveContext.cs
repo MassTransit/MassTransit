@@ -28,18 +28,13 @@ namespace MassTransit.Transports
         ReceiveContext
     {
         static readonly ContentType DefaultContentType = JsonMessageSerializer.JsonContentType;
-
         readonly CancellationTokenSource _cancellationTokenSource;
         readonly Lazy<ContentType> _contentType;
         readonly Lazy<Headers> _headers;
-        readonly Uri _inputAddress;
         readonly PayloadCache _payloadCache;
         readonly IList<Task> _pendingTasks;
         readonly INotifyReceiveObserver _receiveObserver;
         readonly Stopwatch _receiveTimer;
-        readonly bool _redelivered;
-        bool _isDelivered;
-        bool _isFaulted;
 
         protected BaseReceiveContext(Uri inputAddress, bool redelivered, INotifyReceiveObserver receiveObserver)
         {
@@ -47,8 +42,8 @@ namespace MassTransit.Transports
 
             _payloadCache = new PayloadCache();
 
-            _inputAddress = inputAddress;
-            _redelivered = redelivered;
+            InputAddress = inputAddress;
+            Redelivered = redelivered;
             _receiveObserver = receiveObserver;
 
             _cancellationTokenSource = new CancellationTokenSource();
@@ -61,11 +56,8 @@ namespace MassTransit.Transports
         }
 
         protected abstract IHeaderProvider HeaderProvider { get; }
-
-        bool ReceiveContext.IsDelivered => _isDelivered;
-
-        bool ReceiveContext.IsFaulted => _isFaulted;
-
+        public bool IsDelivered { get; private set; }
+        public bool IsFaulted { get; private set; }
         public Task CompleteTask => Task.WhenAll(_pendingTasks);
 
         public void AddPendingTask(Task task)
@@ -73,53 +65,49 @@ namespace MassTransit.Transports
             _pendingTasks.Add(task);
         }
 
-        public bool HasPayloadType(Type contextType)
+        public virtual bool HasPayloadType(Type contextType)
         {
             return _payloadCache.HasPayloadType(contextType);
         }
 
-        public bool TryGetPayload<TPayload>(out TPayload context)
+        public virtual bool TryGetPayload<TPayload>(out TPayload context)
             where TPayload : class
         {
             return _payloadCache.TryGetPayload(out context);
         }
 
-        public TPayload GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory)
+        public virtual TPayload GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory)
             where TPayload : class
         {
             return _payloadCache.GetOrAddPayload(payloadFactory);
         }
 
-        CancellationToken PipeContext.CancellationToken => _cancellationTokenSource.Token;
-
-        bool ReceiveContext.Redelivered => _redelivered;
-
+        public CancellationToken CancellationToken => _cancellationTokenSource.Token;
+        public bool Redelivered { get; }
         public Headers TransportHeaders => _headers.Value;
 
-        Task ReceiveContext.NotifyConsumed<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType)
+        public virtual Task NotifyConsumed<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType) where T : class
         {
-            _isDelivered = true;
+            IsDelivered = true;
+
             return _receiveObserver.NotifyPostConsume(context, duration, consumerType);
         }
 
-         Task ReceiveContext.NotifyFaulted<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType, Exception exception)
+        public virtual Task NotifyFaulted<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType, Exception exception) where T : class
         {
+            IsFaulted = true;
 
-            _isFaulted = true;
             return _receiveObserver.NotifyConsumeFault(context, duration, consumerType, exception);
         }
 
-        Stream ReceiveContext.GetBody()
+        public virtual Stream GetBody()
         {
             return GetBodyStream();
         }
 
-        TimeSpan ReceiveContext.ElapsedTime => _receiveTimer.Elapsed;
-
-        Uri ReceiveContext.InputAddress => _inputAddress;
-
-        ContentType ReceiveContext.ContentType => _contentType.Value;
-
+        public TimeSpan ElapsedTime => _receiveTimer.Elapsed;
+        public Uri InputAddress { get; }
+        public ContentType ContentType => _contentType.Value;
         protected abstract Stream GetBodyStream();
 
         public void Cancel()

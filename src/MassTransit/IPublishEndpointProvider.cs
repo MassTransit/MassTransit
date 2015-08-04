@@ -13,12 +13,20 @@
 namespace MassTransit
 {
     using System;
-    using System.Collections.Generic;
     using System.Threading.Tasks;
+    using Pipeline;
 
 
-    public interface IPublishSendEndpointProvider
+    public interface IPublishEndpointProvider :
+        IPublishObserverConnector
     {
-        Task<IEnumerable<ISendEndpoint>> GetPublishEndpoints(Type messageType);
+        IPublishEndpoint CreatePublishEndpoint(Uri sourceAddress, Guid? correlationId = default(Guid?), Guid? conversationId = default(Guid?));
+
+        /// <summary>
+        /// Returns the ISendEndpoint for the specified message type.
+        /// </summary>
+        /// <param name="messageType"></param>
+        /// <returns></returns>
+        Task<ISendEndpoint> GetPublishSendEndpoint(Type messageType);
     }
 }

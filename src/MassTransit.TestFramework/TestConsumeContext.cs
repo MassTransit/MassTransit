@@ -29,7 +29,9 @@ namespace MassTransit.TestFramework
         PayloadCache _cache = new PayloadCache();
         CancellationToken _cancellationToken;
         Task _completeTask;
+        Guid? _conversationId;
         Guid? _correlationId;
+        Guid? _initiatorId;
         Uri _destinationAddress;
         DateTime? _expirationTime;
         Uri _faultAddress;
@@ -85,6 +87,13 @@ namespace MassTransit.TestFramework
         public Guid? CorrelationId
         {
             get { return _correlationId; }
+        }
+
+        Guid? MessageContext.ConversationId => _conversationId;
+
+        public Guid? InitiatorId
+        {
+            get { return _initiatorId; }
         }
 
         public DateTime? ExpirationTime
@@ -217,10 +226,9 @@ namespace MassTransit.TestFramework
 
         public async Task NotifyConsumed<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType) where T : class
         {
-
         }
 
-        async public Task NotifyFaulted<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType, Exception exception)
+        public async Task NotifyFaulted<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType, Exception exception)
             where T : class
         {
         }
@@ -243,6 +251,11 @@ namespace MassTransit.TestFramework
         public ConnectHandle ConnectPublishObserver(IPublishObserver observer)
         {
             return new Connectable<IPublishObserver>().Connect(observer);
+        }
+
+        public ConnectHandle ConnectSendObserver(ISendObserver observer)
+        {
+            return new Connectable<ISendObserver>().Connect(observer);
         }
     }
 }

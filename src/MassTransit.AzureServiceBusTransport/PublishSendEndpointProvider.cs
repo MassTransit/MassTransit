@@ -16,6 +16,7 @@ namespace MassTransit.AzureServiceBusTransport
     using System.Linq;
     using System.Threading.Tasks;
     using Logging;
+    using MassTransit.Pipeline;
     using Microsoft.ServiceBus.Messaging;
     using Transports;
 
@@ -25,6 +26,7 @@ namespace MassTransit.AzureServiceBusTransport
     {
         readonly IServiceBusHost[] _hosts;
         readonly ILog _log = Logger.Get<ServiceBusSendEndpointProvider>();
+        readonly SendObservable _sendObservable;
         readonly IMessageSerializer _serializer;
         readonly Uri _sourceAddress;
 
@@ -33,6 +35,7 @@ namespace MassTransit.AzureServiceBusTransport
             _hosts = hosts;
             _sourceAddress = sourceAddress;
             _serializer = serializer;
+            _sendObservable = new SendObservable();
         }
 
         public async Task<ISendEndpoint> GetSendEndpoint(Uri address)
@@ -50,7 +53,14 @@ namespace MassTransit.AzureServiceBusTransport
 
             var sendTransport = new ServiceBusSendTransport(messageSender);
 
+            sendTransport.ConnectSendObserver(_sendObservable);
+
             return new SendEndpoint(sendTransport, _serializer, address, _sourceAddress);
+        }
+
+        public ConnectHandle ConnectSendObserver(ISendObserver observer)
+        {
+            return _sendObservable.ConnectSendObserver(observer);
         }
     }
 }

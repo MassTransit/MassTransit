@@ -13,29 +13,41 @@
 namespace MassTransit.Transports.InMemory
 {
     using System;
-    using System.Collections.Generic;
+    using System.Linq;
     using System.Threading.Tasks;
+    using Pipeline;
 
 
-    public class InMemoryPublishSendEndpointProvider :
-        IPublishSendEndpointProvider
+    public class InMemoryPublishEndpointProvider :
+        IPublishEndpointProvider
     {
+        readonly PublishObservable _publishObservable;
         readonly ISendEndpointProvider _sendEndpointProvider;
         readonly InMemoryTransportCache _transportCache;
 
-        public InMemoryPublishSendEndpointProvider(ISendEndpointProvider sendEndpointProvider, ISendTransportProvider transportProvider)
+        public InMemoryPublishEndpointProvider(ISendEndpointProvider sendEndpointProvider, ISendTransportProvider transportProvider)
         {
             _sendEndpointProvider = sendEndpointProvider;
             _transportCache = transportProvider as InMemoryTransportCache;
+            _publishObservable = new PublishObservable();
         }
 
-        public async Task<IEnumerable<ISendEndpoint>> GetPublishEndpoints(Type messageType)
+        public IPublishEndpoint CreatePublishEndpoint(Uri sourceAddress, Guid? correlationId, Guid? conversationId)
         {
-            var endpoints = new List<ISendEndpoint>();
-            foreach (Uri transport in _transportCache.TransportAddresses)
-                endpoints.Add(await _sendEndpointProvider.GetSendEndpoint(transport).ConfigureAwait(false));
+            return new PublishEndpoint(sourceAddress, this, _publishObservable, correlationId, conversationId);
+        }
 
-            return endpoints;
+        public async Task<ISendEndpoint> GetPublishSendEndpoint(Type messageType)
+        {
+            ISendEndpoint[] result = await Task.WhenAll(_transportCache.TransportAddresses.Select(x => _sendEndpointProvider.GetSendEndpoint(x)))
+                .ConfigureAwait(false);
+
+            return new FanOutSendEndpoint(result);
+        }
+
+        public ConnectHandle ConnectPublishObserver(IPublishObserver observer)
+        {
+            return _publishObservable.Connect(observer);
         }
     }
 }

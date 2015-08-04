@@ -13,31 +13,43 @@
 namespace MassTransit.AzureServiceBusTransport
 {
     using System;
-    using System.Collections.Generic;
     using System.Threading.Tasks;
     using Configuration;
+    using MassTransit.Pipeline;
     using Transports;
 
 
-    public class ServiceBusPublishSendEndpointProvider :
-        IPublishSendEndpointProvider
+    public class ServiceBusPublishEndpointProvider :
+        IPublishEndpointProvider
     {
         readonly IServiceBusHost _host;
         readonly IMessageNameFormatter _nameFormatter;
+        readonly PublishObservable _publishObservable;
         readonly ISendEndpointProvider _sendEndpointProvider;
 
-        public ServiceBusPublishSendEndpointProvider(IServiceBusHost host, ISendEndpointProvider sendEndpointProvider)
+        public ServiceBusPublishEndpointProvider(IServiceBusHost host, ISendEndpointProvider sendEndpointProvider)
         {
             _host = host;
             _sendEndpointProvider = sendEndpointProvider;
             _nameFormatter = host.MessageNameFormatter;
+            _publishObservable = new PublishObservable();
         }
 
-        public async Task<IEnumerable<ISendEndpoint>> GetPublishEndpoints(Type messageType)
+        public IPublishEndpoint CreatePublishEndpoint(Uri sourceAddress, Guid? correlationId, Guid? conversationId)
+        {
+            return new PublishEndpoint(sourceAddress, this, _publishObservable, correlationId, conversationId);
+        }
+
+        public Task<ISendEndpoint> GetPublishSendEndpoint(Type messageType)
         {
             Uri address = _nameFormatter.GetTopicAddress(_host, messageType);
 
-            return new[] {await _sendEndpointProvider.GetSendEndpoint(address)};
+            return _sendEndpointProvider.GetSendEndpoint(address);
+        }
+
+        public ConnectHandle ConnectPublishObserver(IPublishObserver observer)
+        {
+            return _publishObservable.Connect(observer);
         }
     }
 }

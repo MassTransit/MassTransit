@@ -14,39 +14,48 @@ namespace MassTransit.RabbitMqTransport
 {
     using System;
     using System.Collections.Concurrent;
-    using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
     using Integration;
+    using MassTransit.Pipeline;
     using Topology;
     using Transports;
     using Util;
 
 
-    public class RabbitMqPublishSendEndpointProvider :
-        IPublishSendEndpointProvider
+    public class RabbitMqPublishEndpointProvider :
+        IPublishEndpointProvider
     {
         readonly ConcurrentDictionary<Type, Lazy<ISendEndpoint>> _cachedEndpoints;
         readonly IRabbitMqHost _host;
         readonly IMessageNameFormatter _messageNameFormatter;
+        readonly PublishObservable _publishObservable;
         readonly IMessageSerializer _serializer;
         readonly Uri _sourceAddress;
 
-        public RabbitMqPublishSendEndpointProvider(IRabbitMqHost host, IMessageSerializer serializer, Uri sourceAddress)
+        public RabbitMqPublishEndpointProvider(IRabbitMqHost host, IMessageSerializer serializer, Uri sourceAddress)
         {
             _host = host;
             _serializer = serializer;
             _sourceAddress = sourceAddress;
             _messageNameFormatter = host.MessageNameFormatter;
             _cachedEndpoints = new ConcurrentDictionary<Type, Lazy<ISendEndpoint>>();
+            _publishObservable = new PublishObservable();
         }
 
-        public Task<IEnumerable<ISendEndpoint>> GetPublishEndpoints(Type messageType)
+        public IPublishEndpoint CreatePublishEndpoint(Uri sourceAddress, Guid? correlationId, Guid? conversationId)
         {
-            return Task.FromResult<IEnumerable<ISendEndpoint>>(new[]
-            {
-                _cachedEndpoints.GetOrAdd(messageType, x => new Lazy<ISendEndpoint>(() => CreateSendEndpoint(x))).Value
-            });
+            return new PublishEndpoint(sourceAddress, this, _publishObservable, correlationId, conversationId);
+        }
+
+        public Task<ISendEndpoint> GetPublishSendEndpoint(Type messageType)
+        {
+            return Task.FromResult(_cachedEndpoints.GetOrAdd(messageType, x => new Lazy<ISendEndpoint>(() => CreateSendEndpoint(x))).Value);
+        }
+
+        public ConnectHandle ConnectPublishObserver(IPublishObserver observer)
+        {
+            return _publishObservable.Connect(observer);
         }
 
         ISendEndpoint CreateSendEndpoint(Type messageType)

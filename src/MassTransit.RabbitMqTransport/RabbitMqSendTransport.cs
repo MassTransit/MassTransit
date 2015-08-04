@@ -36,7 +36,6 @@ namespace MassTransit.RabbitMqTransport
     {
         static readonly ILog _log = Logger.Get<RabbitMqSendTransport>();
         readonly PrepareSendExchangeFilter _filter;
-
         readonly IModelCache _modelCache;
         readonly SendObservable _observers;
         readonly SendSettings _sendSettings;
@@ -89,7 +88,7 @@ namespace MassTransit.RabbitMqTransport
                         await modelContext.BasicPublishAsync(context.Exchange, context.RoutingKey, context.Mandatory,
                             context.Immediate, context.BasicProperties, context.Body);
 
-                        context.DestinationAddress.LogSent(context.MessageId?.ToString("N") ?? "",TypeMetadataCache<T>.ShortName);
+                        context.DestinationAddress.LogSent(context.MessageId?.ToString("N") ?? "", TypeMetadataCache<T>.ShortName);
 
                         await _observers.NotifyPostSend(context);
                     }
@@ -134,7 +133,6 @@ namespace MassTransit.RabbitMqTransport
                         var moveContext = new RabbitMqMoveContext(context, properties);
 
                         await pipe.Send(moveContext);
-
 
 //                        properties.Headers["Content-Type"] = context.ContentType.MediaType;
 
@@ -214,16 +212,14 @@ namespace MassTransit.RabbitMqTransport
             public Guid? MessageId { get; set; }
             public Guid? RequestId { get; set; }
             public Guid? CorrelationId { get; set; }
-
+            public Guid? ConversationId { get; set; }
+            public Guid? InitiatorId { get; set; }
             public SendHeaders Headers { get; }
-
             public Uri SourceAddress { get; set; }
             public Uri DestinationAddress { get; set; }
             public Uri ResponseAddress { get; set; }
             public Uri FaultAddress { get; set; }
-
             public TimeSpan? TimeToLive { get; set; }
-
             public ContentType ContentType { get; set; }
 
             public IMessageSerializer Serializer
@@ -239,10 +235,8 @@ namespace MassTransit.RabbitMqTransport
             public bool Durable { get; set; }
             public bool Immediate { get; set; }
             public bool Mandatory { get; set; }
-
             public string Exchange { get; private set; }
             public string RoutingKey { get; set; }
-
             public IBasicProperties BasicProperties { get; }
 
 

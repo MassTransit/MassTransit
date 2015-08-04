@@ -190,5 +190,10 @@ namespace MassTransit.Courier.Hosts
         {
             return _context.ConnectPublishObserver(observer);
         }
+
+        public ConnectHandle ConnectSendObserver(ISendObserver observer)
+        {
+            return _context.ConnectSendObserver(observer);
+        }
     }
 }

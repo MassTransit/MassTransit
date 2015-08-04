@@ -40,7 +40,7 @@ namespace MassTransit.EndpointConfigurators
             builder.AddMessageDeserializer(EncryptedMessageSerializer.EncryptedContentType, CreateDeserializer);
         }
 
-        IMessageDeserializer CreateDeserializer(ISendEndpointProvider sendEndpointProvider, IPublishSendEndpointProvider publishEndpoint)
+        IMessageDeserializer CreateDeserializer(ISendEndpointProvider sendEndpointProvider, IPublishEndpointProvider publishEndpoint)
         {
             return new EncryptedMessageDeserializer(BsonMessageSerializer.Deserializer, sendEndpointProvider, publishEndpoint,
                 _streamProvider);

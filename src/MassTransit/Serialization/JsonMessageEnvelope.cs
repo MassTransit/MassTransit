@@ -30,6 +30,12 @@ namespace MassTransit.Serialization
             if (context.CorrelationId.HasValue)
                 CorrelationId = context.CorrelationId.Value.ToString("N");
 
+            if (context.ConversationId.HasValue)
+                ConversationId = context.ConversationId.Value.ToString("N");
+
+            if (context.InitiatorId.HasValue)
+                InitiatorId = context.InitiatorId.Value.ToString("N");
+
             if (context.SourceAddress != null)
                 SourceAddress = context.SourceAddress.ToString();
 
@@ -55,16 +61,18 @@ namespace MassTransit.Serialization
                 Headers[header.Key] = header.Value;
         }
 
-        public string MessageId { get; private set; }
-        public string RequestId { get; private set; }
-        public string CorrelationId { get; private set; }
-        public string SourceAddress { get; private set; }
-        public string DestinationAddress { get; private set; }
-        public string ResponseAddress { get; private set; }
-        public string FaultAddress { get; private set; }
-        public string[] MessageType { get; private set; }
-        public object Message { get; private set; }
-        public DateTime? ExpirationTime { get; private set; }
-        public IDictionary<string, object> Headers { get; private set; }
+        public string MessageId { get; }
+        public string RequestId { get; }
+        public string CorrelationId { get; }
+        public string ConversationId { get; }
+        public string InitiatorId { get; }
+        public string SourceAddress { get; }
+        public string DestinationAddress { get; }
+        public string ResponseAddress { get; }
+        public string FaultAddress { get; }
+        public string[] MessageType { get; }
+        public object Message { get; }
+        public DateTime? ExpirationTime { get; }
+        public IDictionary<string, object> Headers { get; }
     }
 }

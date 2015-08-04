@@ -64,9 +64,9 @@ namespace MassTransit.RabbitMqTransport.Configuration.Builders
             return new SendEndpointCache(sendEndpointProvider);
         }
 
-        protected override IPublishSendEndpointProvider CreatePublishSendEndpointProvider()
+        protected override IPublishEndpointProvider CreatePublishSendEndpointProvider()
         {
-            return new RabbitMqPublishSendEndpointProvider(_hosts[0], MessageSerializer, InputAddress);
+            return new RabbitMqPublishEndpointProvider(_hosts[0], MessageSerializer, InputAddress);
         }
     }
 }

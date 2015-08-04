@@ -18,22 +18,20 @@ namespace MassTransit.Pipeline
 
 
     public class PublishObservable :
-        Connectable<IPublishObserver>
+        Connectable<IPublishObserver>,
+        IPublishObserver
     {
-        public Task NotifyPrePublish<T>(PublishContext<T> context)
-            where T : class
+        public Task PrePublish<T>(PublishContext<T> context) where T : class
         {
             return ForEachAsync(x => x.PrePublish(context));
         }
 
-        public Task NotifyPostPublish<T>(PublishContext<T> context)
-            where T : class
+        public Task PostPublish<T>(PublishContext<T> context) where T : class
         {
             return ForEachAsync(x => x.PostPublish(context));
         }
 
-        public Task NotifyPublishFault<T>(PublishContext<T> context, Exception exception)
-            where T : class
+        public Task PublishFault<T>(PublishContext<T> context, Exception exception) where T : class
         {
             return ForEachAsync(x => x.PublishFault(context, exception));
         }

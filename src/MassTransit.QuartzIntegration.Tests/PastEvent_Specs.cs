@@ -48,12 +48,16 @@ namespace MassTransit.QuartzIntegration.Tests
 
             Guid requestId = Guid.NewGuid();
             Guid correlationId = Guid.NewGuid();
+            Guid conversationId = Guid.NewGuid();
+            Guid initiatorId = Guid.NewGuid();
             await QuartzEndpoint.ScheduleSend(Bus.Address, DateTime.UtcNow, new A { Name = "Joe" }, Pipe.Execute<SendContext>(x =>
             {
                 x.FaultAddress = Bus.Address;
                 x.ResponseAddress = InputQueueAddress;
                 x.RequestId = requestId;
                 x.CorrelationId = correlationId;
+                x.ConversationId = conversationId;
+                x.InitiatorId = initiatorId;
 
                 x.Headers.Set("Hello", "World");
             }));
@@ -66,6 +70,10 @@ namespace MassTransit.QuartzIntegration.Tests
             Assert.AreEqual(requestId, context.RequestId.Value);
             Assert.IsTrue(context.CorrelationId.HasValue);
             Assert.AreEqual(correlationId, context.CorrelationId.Value);
+            Assert.IsTrue(context.ConversationId.HasValue);
+            Assert.AreEqual(conversationId, context.ConversationId.Value);
+            Assert.IsTrue(context.InitiatorId.HasValue);
+            Assert.AreEqual(initiatorId, context.InitiatorId.Value);
 
             object value;
             Assert.IsTrue(context.Headers.TryGetHeader("Hello", out value));

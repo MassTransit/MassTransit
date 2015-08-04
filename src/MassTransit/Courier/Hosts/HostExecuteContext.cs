@@ -309,5 +309,10 @@ namespace MassTransit.Courier.Hosts
         {
             return new FaultedExecutionResult<TArguments>(this, _publisher, _activity, _routingSlip, new FaultExceptionInfo(exception));
         }
+
+        public ConnectHandle ConnectSendObserver(ISendObserver observer)
+        {
+            return _context.ConnectSendObserver(observer);
+        }
     }
 }

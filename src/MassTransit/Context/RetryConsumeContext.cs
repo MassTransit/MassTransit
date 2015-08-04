@@ -14,164 +14,24 @@ namespace MassTransit.Context
 {
     using System;
     using System.Collections.Generic;
-    using System.Threading;
     using System.Threading.Tasks;
-    using Pipeline;
     using Util;
 
 
     public class RetryConsumeContext :
-        ConsumeContext
+        ConsumeContextProxy
     {
         readonly ConsumeContext _context;
         readonly IList<PendingFault> _pendingFaults;
 
-        public RetryConsumeContext(ConsumeContext context)
+        public RetryConsumeContext(ConsumeContext context) 
+            : base(context)
         {
             _context = context;
             _pendingFaults = new List<PendingFault>();
         }
 
-        Task ConsumeContext.CompleteTask => _context.CompleteTask;
-
-        IEnumerable<string> ConsumeContext.SupportedMessageTypes => _context.SupportedMessageTypes;
-
-        Task IPublishEndpoint.Publish<T>(T message, CancellationToken cancellationToken)
-        {
-            return _context.Publish(message, cancellationToken);
-        }
-
-        Task IPublishEndpoint.Publish<T>(T message, IPipe<PublishContext<T>> publishPipe, CancellationToken cancellationToken)
-        {
-            return _context.Publish(message, publishPipe, cancellationToken);
-        }
-
-        Task IPublishEndpoint.Publish<T>(T message, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
-        {
-            return _context.Publish(message, publishPipe, cancellationToken);
-        }
-
-        Task IPublishEndpoint.Publish(object message, CancellationToken cancellationToken)
-        {
-            return _context.Publish(message, cancellationToken);
-        }
-
-        Task IPublishEndpoint.Publish(object message, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
-        {
-            return _context.Publish(message, publishPipe, cancellationToken);
-        }
-
-        Task IPublishEndpoint.Publish(object message, Type messageType, CancellationToken cancellationToken)
-        {
-            return _context.Publish(message, messageType, cancellationToken);
-        }
-
-        Task IPublishEndpoint.Publish(object message, Type messageType, IPipe<PublishContext> publishPipe,
-            CancellationToken cancellationToken)
-        {
-            return _context.Publish(message, messageType, publishPipe, cancellationToken);
-        }
-
-        Task IPublishEndpoint.Publish<T>(object values, CancellationToken cancellationToken)
-        {
-            return _context.Publish<T>(values, cancellationToken);
-        }
-
-        Task IPublishEndpoint.Publish<T>(object values, IPipe<PublishContext<T>> publishPipe, CancellationToken cancellationToken)
-        {
-            return _context.Publish(values, publishPipe, cancellationToken);
-        }
-
-        Task IPublishEndpoint.Publish<T>(object values, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
-        {
-            return _context.Publish<T>(values, publishPipe, cancellationToken);
-        }
-
-        bool PipeContext.HasPayloadType(Type contextType)
-        {
-            return _context.HasPayloadType(contextType);
-        }
-
-        bool PipeContext.TryGetPayload<TPayload>(out TPayload payload)
-        {
-            return _context.TryGetPayload(out payload);
-        }
-
-        public TPayload GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory) where TPayload : class
-        {
-            return _context.GetOrAddPayload(payloadFactory);
-        }
-
-        Guid? MessageContext.MessageId => _context.MessageId;
-
-        Guid? MessageContext.RequestId => _context.RequestId;
-
-        Guid? MessageContext.CorrelationId => _context.CorrelationId;
-
-        DateTime? MessageContext.ExpirationTime => _context.ExpirationTime;
-
-        Uri MessageContext.SourceAddress => _context.SourceAddress;
-
-        Uri MessageContext.DestinationAddress => _context.DestinationAddress;
-
-        Uri MessageContext.ResponseAddress => _context.ResponseAddress;
-
-        Uri MessageContext.FaultAddress => _context.FaultAddress;
-
-        Headers MessageContext.Headers => _context.Headers;
-
-        CancellationToken PipeContext.CancellationToken => _context.CancellationToken;
-
-        ReceiveContext ConsumeContext.ReceiveContext => _context.ReceiveContext;
-
-        bool ConsumeContext.HasMessageType(Type messageType)
-        {
-            return _context.HasMessageType(messageType);
-        }
-
-        bool ConsumeContext.TryGetMessage<T>(out ConsumeContext<T> consumeContext)
-        {
-            ConsumeContext<T> messageContext;
-            if (_context.TryGetMessage(out messageContext))
-            {
-                consumeContext = new MessageConsumeContext<T>(this, messageContext.Message);
-                return true;
-            }
-            consumeContext = null;
-            return false;
-        }
-
-        Task ConsumeContext.RespondAsync<T>(T message)
-        {
-            return _context.RespondAsync(message);
-        }
-
-        Task ConsumeContext.RespondAsync<T>(T message, IPipe<SendContext<T>> sendPipe)
-        {
-            return _context.RespondAsync(message, sendPipe);
-        }
-
-        void ConsumeContext.Respond<T>(T message)
-        {
-            _context.Respond(message);
-        }
-
-        Task<ISendEndpoint> ISendEndpointProvider.GetSendEndpoint(Uri address)
-        {
-            return _context.GetSendEndpoint(address);
-        }
-
-        Task ConsumeContext.NotifyConsumed<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType)
-        {
-            return _context.NotifyConsumed(context, duration, consumerType);
-        }
-
-        ConnectHandle IPublishObserverConnector.ConnectPublishObserver(IPublishObserver observer)
-        {
-            return _context.ConnectPublishObserver(observer);
-        }
-
-        public Task NotifyFaulted<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType, Exception exception) where T : class
+        public override Task NotifyFaulted<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType, Exception exception) 
         {
             _pendingFaults.Add(new PendingFault<T>(context, duration, consumerType, exception));
 

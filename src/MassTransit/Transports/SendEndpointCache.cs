@@ -16,6 +16,7 @@ namespace MassTransit.Transports
     using System.Collections.Concurrent;
     using System.Threading.Tasks;
     using Logging;
+    using Pipeline;
 
 
     /// <summary>
@@ -46,6 +47,11 @@ namespace MassTransit.Transports
                 _log.DebugFormat("GetSendEndpoint: {0}", address);
 
             return _sendEndpointProvider.GetSendEndpoint(address);
+        }
+
+        public ConnectHandle ConnectSendObserver(ISendObserver observer)
+        {
+            return _sendEndpointProvider.ConnectSendObserver(observer);
         }
     }
 }
