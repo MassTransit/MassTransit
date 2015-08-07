@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.Pipeline
 {
+    using System;
     using System.Threading;
     using System.Threading.Tasks;
     using MassTransit.Pipeline;
@@ -30,7 +31,7 @@ namespace MassTransit.Tests.Pipeline
             int count = 0;
             IPipe<ConsumeContext<A>> pipe = Pipe.New<ConsumeContext<A>>(x =>
             {
-                x.UseCircuitBreaker();
+                x.UseCircuitBreaker(v => v.ResetInterval(TimeSpan.FromSeconds(60)));
                 x.UseExecute(payload =>
                 {
                     Interlocked.Increment(ref count);
