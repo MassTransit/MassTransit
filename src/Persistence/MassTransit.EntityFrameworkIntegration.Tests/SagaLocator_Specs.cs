@@ -2,13 +2,12 @@
 {
     using System;
     using MassTransit.Saga;
+    using MassTransit.Tests.Saga;
     using MassTransit.Tests.Saga.Messages;
     using NUnit.Framework;
     using Saga;
     using Shouldly;
     using TestFramework;
-    using Mehdime.Entity;
-
 
     [TestFixture, Category("Integration")]
     public class Locating_an_existing_ef_saga :
@@ -48,13 +47,13 @@
             foundId.HasValue.ShouldBe(true);
         }
 
-        readonly IDbContextScopeFactory _dbContextScopeFactory;
-        readonly Lazy<ISagaRepository<SimpleSagaEntity>> _sagaRepository;
+        readonly SagaDbContextFactory sagaDbContextFactory;
+        readonly Lazy<ISagaRepository<SimpleSaga>> _sagaRepository;
 
         public Locating_an_existing_ef_saga()
         {
-            _dbContextScopeFactory = new DbContextScopeFactory(new SagaDbContextFactoryProvider());
-            _sagaRepository = new Lazy<ISagaRepository<SimpleSagaEntity>>(() => new EntityFrameworkSagaRepository<SimpleSagaEntity>(_dbContextScopeFactory));
+            sagaDbContextFactory = () => new SagaDbContext<SimpleSaga, SimpleSagaMap>(SagaDbContextFactoryProvider.GetLocalDbConnectionString());
+            _sagaRepository = new Lazy<ISagaRepository<SimpleSaga>>(() => new EntityFrameworkSagaRepository<SimpleSaga>(sagaDbContextFactory));
         }
 
         [TestFixtureSetUp]

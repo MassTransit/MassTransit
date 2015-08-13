@@ -1,18 +1,15 @@
 ﻿namespace MassTransit.EntityFrameworkIntegration.Tests
 {
     using System;
-    using System.Data.Entity;
     using System.Data.SqlClient;
-    using Mehdime.Entity;
 
-    public class SagaDbContextFactoryProvider :
-        IDbContextFactory
+    public static class SagaDbContextFactoryProvider
     {
         /// <summary>
         /// This is a list of the connection strings that we will attempt to find what LocalDb versions
         /// are on the local pc which we can run the unit tests against
         /// </summary>
-        private readonly string[] _possibleLocalDbConnectionStrings = new[]
+        private static readonly string[] _possibleLocalDbConnectionStrings = new[]
         {
             @"Data Source=(LocalDb)\MSSQLLocalDB;Integrated Security=True;Initial Catalog=MassTransitUnitTests_v12_2015;",  // the localdb installed with VS 2015
             @"Data Source=(LocalDb)\ProjectsV12;Integrated Security=True;Initial Catalog=MassTransitUnitTests_v12;",        // the localdb with VS 2013
@@ -22,17 +19,10 @@
         private static object _lockConnectionString = new object();
         private static string _connectionString;
 
-        public TDbContext CreateDbContext<TDbContext>() where TDbContext : DbContext
-        {
-            TrySetLocalDbConnectionString();
-
-            return new SagaDbContext<SimpleSagaEntity, SimpleSagaMap>(_connectionString) as TDbContext;
-        }
-
         /// <summary>
         /// Loops through the array of potential localdb connection strings to find one that we can use for the unit tests
         /// </summary>
-        private void TrySetLocalDbConnectionString()
+        public static string GetLocalDbConnectionString()
         {
             if (string.IsNullOrWhiteSpace(_connectionString))
             {
@@ -65,6 +55,8 @@
                     }
                 }
             }
+
+            return _connectionString;
         }
     }
 }
