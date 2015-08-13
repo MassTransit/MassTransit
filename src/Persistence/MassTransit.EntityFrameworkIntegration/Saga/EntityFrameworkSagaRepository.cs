@@ -22,7 +22,6 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
     using System.Threading.Tasks;
     using Logging;
     using MassTransit.Saga;
-    using Mehdime.Entity;
     using Pipeline;
     using Util;
 
@@ -33,21 +32,19 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
         where TSaga : class, ISaga
     {
         static readonly ILog _log = Logger.Get<EntityFrameworkSagaRepository<TSaga>>();
-        readonly IDbContextScopeFactory _dbContextScopeFactory;
+        readonly SagaDbContextFactory _sagaDbContextFactory;
         readonly IsolationLevel _isolationLevel;
 
-        public EntityFrameworkSagaRepository(IDbContextScopeFactory dbContextScopeFactory, IsolationLevel isolationLevel = IsolationLevel.Serializable)
+        public EntityFrameworkSagaRepository(SagaDbContextFactory sagaDbContextFactory, IsolationLevel isolationLevel = IsolationLevel.Serializable)
         {
-            _dbContextScopeFactory = dbContextScopeFactory;
+            _sagaDbContextFactory = sagaDbContextFactory;
             _isolationLevel = isolationLevel;
         }
 
         async Task<IEnumerable<Guid>> IQuerySagaRepository<TSaga>.Find(ISagaQuery<TSaga> query)
         {
-            using (var dbContextScope = _dbContextScopeFactory.Create())
+            using (var dbContext = _sagaDbContextFactory())
             {
-                var dbContext = dbContextScope.DbContexts.Get<DbContext>();
-
                 return await dbContext.Set<TSaga>()
                     .Where(query.FilterExpression)
                     .Select(x => x.CorrelationId)
@@ -58,10 +55,8 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
         void IProbeSite.Probe(ProbeContext context)
         {
             ProbeContext scope = context.CreateScope("sagaRepository");
-            using (var dbContextScope = _dbContextScopeFactory.Create())
+            using (var dbContext = _sagaDbContextFactory())
             {
-                var dbContext = dbContextScope.DbContexts.Get<DbContext>();
-
                 var objectContext = ((IObjectContextAdapter)dbContext).ObjectContext;
                 var workspace = objectContext.MetadataWorkspace;
 
@@ -81,43 +76,51 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
 
             Guid sagaId = context.CorrelationId.Value;
 
-            using (var dbContextScope = _dbContextScopeFactory.CreateWithTransaction(_isolationLevel))
+            using (var dbContext = _sagaDbContextFactory())
+            using(var transaction = dbContext.Database.BeginTransaction(_isolationLevel))
             {
-                var dbContext = dbContextScope.DbContexts.Get<DbContext>();
-
-                var sagaInstance = dbContext.Set<TSaga>().SingleOrDefault(x => x.CorrelationId == sagaId);
-                if (sagaInstance == null)
+                try
                 {
-                    var missingSagaPipe = new MissingPipe<T>(dbContext, next);
-
-                    await policy.Missing(context, missingSagaPipe);
-                }
-                else
-                {
-                    if (_log.IsDebugEnabled)
+                    var sagaInstance = dbContext.Set<TSaga>().SingleOrDefault(x => x.CorrelationId == sagaId);
+                    if (sagaInstance == null)
                     {
-                        _log.DebugFormat("SAGA:{0}:{1} Used {2}", TypeMetadataCache<TSaga>.ShortName, sagaInstance.CorrelationId,
-                            TypeMetadataCache<T>.ShortName);
+                        var missingSagaPipe = new MissingPipe<T>(dbContext, next);
+
+                        await policy.Missing(context, missingSagaPipe);
+                    }
+                    else
+                    {
+                        if (_log.IsDebugEnabled)
+                        {
+                            _log.DebugFormat("SAGA:{0}:{1} Used {2}", TypeMetadataCache<TSaga>.ShortName, sagaInstance.CorrelationId,
+                                TypeMetadataCache<T>.ShortName);
+                        }
+
+                        var sagaConsumeContext = new EntityFrameworkSagaConsumeContext<TSaga, T>(dbContext, context, sagaInstance);
+
+                        await policy.Existing(sagaConsumeContext, next);
                     }
 
-                    var sagaConsumeContext = new EntityFrameworkSagaConsumeContext<TSaga, T>(dbContext, context, sagaInstance);
+                    await dbContext.SaveChangesAsync();
 
-                    await policy.Existing(sagaConsumeContext, next);
+                    transaction.Commit();
                 }
-
-                await dbContextScope.SaveChangesAsync();
+                catch (Exception)
+                {
+                    transaction.Rollback();
+                    throw;
+                }
             }
         }
 
         public async Task SendQuery<T>(SagaQueryConsumeContext<TSaga, T> context, ISagaPolicy<TSaga, T> policy,
             IPipe<SagaConsumeContext<TSaga, T>> next) where T : class
         {
-            using (var dbContextScope = _dbContextScopeFactory.CreateWithTransaction(_isolationLevel))
+            using (var dbContext = _sagaDbContextFactory())
+            using (var transaction = dbContext.Database.BeginTransaction(_isolationLevel))
             {
                 try
                 {
-                    var dbContext = dbContextScope.DbContexts.Get<DbContext>();
-                    
                     var sagaInstances = await dbContext.Set<TSaga>().Where(context.Query.FilterExpression).ToListAsync();
                     if (sagaInstances.Count == 0)
                     {
@@ -133,15 +136,19 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
                         }
                     }
 
-                    await dbContextScope.SaveChangesAsync();
+                    await dbContext.SaveChangesAsync();
+
+                    transaction.Commit();
                 }
                 catch (SagaException sex)
                 {
+                    transaction.Rollback();
                     if (_log.IsErrorEnabled)
                         _log.Error("Saga Exception Occurred", sex);
                 }
                 catch (Exception ex)
                 {
+                    transaction.Rollback();
                     if (_log.IsErrorEnabled)
                         _log.Error($"SAGA:{TypeMetadataCache<TSaga>.ShortName} Exception {TypeMetadataCache<T>.ShortName}", ex);
 

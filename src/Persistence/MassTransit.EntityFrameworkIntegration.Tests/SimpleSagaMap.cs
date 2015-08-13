@@ -1,7 +1,9 @@
 ﻿namespace MassTransit.EntityFrameworkIntegration.Tests
 {
+    using MassTransit.Tests.Saga;
+
     public class SimpleSagaMap :
-        SagaClassMapping<SimpleSagaEntity>
+        SagaClassMapping<SimpleSaga>
     {
         public SimpleSagaMap()
         {
