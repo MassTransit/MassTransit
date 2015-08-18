@@ -19,6 +19,7 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
     using System.Data.Entity.Core.Metadata.Edm;
     using System.Data.Entity.Infrastructure;
     using System.Linq;
+    using System.Threading;
     using System.Threading.Tasks;
     using Logging;
     using MassTransit.Saga;
@@ -76,13 +77,22 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
 
             Guid sagaId = context.CorrelationId.Value;
 
-            using (var dbContext = _sagaDbContextFactory())
+            using (DbContext dbContext = _sagaDbContextFactory())
             using(var transaction = dbContext.Database.BeginTransaction(_isolationLevel))
             {
+                bool inserted = false;
+
+                TSaga instance;
+                if (policy.PreInsertInstance(context, out instance))
+                {
+                    inserted = await PreInsertSagaInstance<T>(dbContext, instance, context.CancellationToken);
+                }
+
                 try
                 {
-                    var sagaInstance = dbContext.Set<TSaga>().SingleOrDefault(x => x.CorrelationId == sagaId);
-                    if (sagaInstance == null)
+                    if (instance == null)
+                        instance = dbContext.Set<TSaga>().SingleOrDefault(x => x.CorrelationId == sagaId);
+                    if (instance == null)
                     {
                         var missingSagaPipe = new MissingPipe<T>(dbContext, next);
 
@@ -92,13 +102,16 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
                     {
                         if (_log.IsDebugEnabled)
                         {
-                            _log.DebugFormat("SAGA:{0}:{1} Used {2}", TypeMetadataCache<TSaga>.ShortName, sagaInstance.CorrelationId,
+                            _log.DebugFormat("SAGA:{0}:{1} Used {2}", TypeMetadataCache<TSaga>.ShortName, instance.CorrelationId,
                                 TypeMetadataCache<T>.ShortName);
                         }
 
-                        var sagaConsumeContext = new EntityFrameworkSagaConsumeContext<TSaga, T>(dbContext, context, sagaInstance);
+                        var sagaConsumeContext = new EntityFrameworkSagaConsumeContext<TSaga, T>(dbContext, context, instance);
 
                         await policy.Existing(sagaConsumeContext, next);
+
+//                        if (inserted && !sagaConsumeContext.IsCompleted)
+//                            dbContext.Set<TSaga>().Update(instance);
                     }
 
                     await dbContext.SaveChangesAsync();
@@ -111,6 +124,30 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
                     throw;
                 }
             }
+        }
+
+        static async Task<bool> PreInsertSagaInstance<T>(DbContext dbContext, TSaga instance, CancellationToken cancellationToken)
+        {
+            try
+            {
+                dbContext.Set<TSaga>().Add(instance);
+                await dbContext.SaveChangesAsync(cancellationToken);
+
+                _log.DebugFormat("SAGA:{0}:{1} Insert {2}", TypeMetadataCache<TSaga>.ShortName, instance.CorrelationId,
+                    TypeMetadataCache<T>.ShortName);
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                if (_log.IsDebugEnabled)
+                {
+                    _log.DebugFormat("SAGA:{0}:{1} Dupe {2} - {3}", TypeMetadataCache<TSaga>.ShortName, instance.CorrelationId,
+                        TypeMetadataCache<T>.ShortName, ex.Message);
+                }
+            }
+
+            return false;
         }
 
         public async Task SendQuery<T>(SagaQueryConsumeContext<TSaga, T> context, ISagaPolicy<TSaga, T> policy,
