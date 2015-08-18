@@ -17,16 +17,16 @@ namespace MassTransit.AutomatonymousIntegration.Tests
         using System;
         using System.Threading.Tasks;
         using Automatonymous;
+        using EntityFrameworkIntegration;
+        using EntityFrameworkIntegration.Saga;
         using NHibernate;
-        using NHibernateIntegration;
         using NHibernateIntegration.Saga;
         using NUnit.Framework;
         using Saga;
         using TestFramework;
 
 
-        class InstanceMap :
-            SagaClassMapping<Instance>
+        class InstanceMap : NHibernateIntegration.SagaClassMapping<Instance>
         {
             public InstanceMap()
             {
@@ -55,8 +55,8 @@ namespace MassTransit.AutomatonymousIntegration.Tests
         {
             public Start()
             {
-                
             }
+
             public Start(string name)
             {
                 CorrelationId = NewId.NextGuid();
@@ -76,13 +76,14 @@ namespace MassTransit.AutomatonymousIntegration.Tests
             public Guid CorrelationId { get; private set; }
         }
 
+
         class WarmUp :
             CorrelatedBy<Guid>
         {
             public WarmUp()
             {
-                
             }
+
             public WarmUp(Guid correlationId, string name)
             {
                 CorrelationId = correlationId;
@@ -180,6 +181,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
             }
         }
 
+
         [TestFixture]
         public class When_pre_inserting_in_an_invalid_state :
             InMemoryTestFixture
@@ -220,9 +222,115 @@ namespace MassTransit.AutomatonymousIntegration.Tests
 
                     Initially(
                         When(WarmedUp)
-                        .Then(context =>
+                            .Then(context =>
+                            {
+                            }),
+                        When(Started)
+                            .Publish(context => new StartupComplete
+                            {
+                                TransactionId = context.Data.CorrelationId
+                            })
+                            .TransitionTo(Running));
+                }
+
+                public State Running { get; private set; }
+                public Event<Start> Started { get; private set; }
+                public Event<WarmUp> WarmedUp { get; private set; }
+            }
+
+
+            [Test]
+            public async Task Should_receive_the_published_message()
+            {
+                Task<ConsumeContext<StartupComplete>> messageReceived = SubscribeHandler<StartupComplete>();
+
+                Guid sagaId = NewId.NextGuid();
+
+                var warmUpMessage = new WarmUp(sagaId, "Joe");
+
+                await InputQueueSendEndpoint.Send(warmUpMessage);
+
+                await _repository.ShouldContainSaga(sagaId, TestTimeout);
+
+                var message = new Start(sagaId, "Joe");
+
+                await InputQueueSendEndpoint.Send(message);
+
+                ConsumeContext<StartupComplete> received = await messageReceived;
+
+                Assert.AreEqual(sagaId, received.Message.TransactionId);
+
+                Assert.IsTrue(received.InitiatorId.HasValue, "The initiator should be copied from the CorrelationId");
+
+                Assert.AreEqual(received.InitiatorId.Value, message.CorrelationId, "The initiator should be the saga CorrelationId");
+
+                Assert.AreEqual(received.SourceAddress, InputQueueAddress, "The published message should have the input queue source address");
+
+                Guid? saga =
+                    await _repository.ShouldContainSaga(x => x.CorrelationId == message.CorrelationId && x.CurrentState == _machine.Running.Name, TestTimeout);
+
+                Assert.IsTrue(saga.HasValue);
+            }
+        }
+
+
+        class EntityFrameworkInstanceMap : EntityFrameworkIntegration.SagaClassMapping<Instance>
+        {
+            public EntityFrameworkInstanceMap()
+            {
+                Property(x => x.CurrentState);
+                Property(x => x.Name);
+                Property(x => x.CreateTimestamp);
+            }
+        }
+
+
+        [TestFixture]
+        public class When_pre_inserting_in_an_invalid_state_with_ef :
+            InMemoryTestFixture
+        {
+            public When_pre_inserting_in_an_invalid_state_with_ef()
+            {
+                SagaDbContextFactory sagaDbContextFactory =
+                    () => new SagaDbContext<Instance, EntityFrameworkInstanceMap>(SagaDbContextFactoryProvider.GetLocalDbConnectionString());
+                _repository = new EntityFrameworkSagaRepository<Instance>(sagaDbContextFactory);
+            }
+
+            protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+            {
+                _machine = new TestStateMachine();
+
+                configurator.StateMachineSaga(_machine, _repository);
+            }
+
+            TestStateMachine _machine;
+            readonly ISagaRepository<Instance> _repository;
+
+
+            class TestStateMachine :
+                MassTransitStateMachine<Instance>
+            {
+                public TestStateMachine()
+                {
+                    InstanceState(x => x.CurrentState);
+
+                    Event(() => WarmedUp, x =>
+                    {
+                        x.InsertOnInitial = true;
+                        x.SetSagaFactory(context => new Instance
                         {
-                        }),
+                            // the CorrelationId header is the value that should be used
+                            CorrelationId = context.CorrelationId.Value,
+                            CreateTimestamp = context.Message.Timestamp,
+                            Name = context.Message.Name
+                        });
+                    });
+
+                    Initially(
+                        When(WarmedUp)
+                            .Then(context =>
+                            {
+                            }),
                         When(Started)
                             .Publish(context => new StartupComplete
                             {

@@ -88,9 +88,7 @@ namespace MassTransit.NHibernateIntegration.Saga
 
                 TSaga instance;
                 if (policy.PreInsertInstance(context, out instance))
-                {
                     inserted = PreInsertSagaInstance<T>(session, instance, inserted);
-                }
 
                 try
                 {
@@ -126,29 +124,6 @@ namespace MassTransit.NHibernateIntegration.Saga
                     throw;
                 }
             }
-        }
-
-        static bool PreInsertSagaInstance<T>(ISession session, TSaga instance, bool inserted)
-        {
-            try
-            {
-                session.Save(instance);
-                session.Flush();
-
-                inserted = true;
-
-                _log.DebugFormat("SAGA:{0}:{1} Insert {2}", TypeMetadataCache<TSaga>.ShortName, instance.CorrelationId,
-                    TypeMetadataCache<T>.ShortName);
-            }
-            catch (GenericADOException ex)
-            {
-                if (_log.IsDebugEnabled)
-                {
-                    _log.DebugFormat("SAGA:{0}:{1} Dupe {2} - {3}", TypeMetadataCache<TSaga>.ShortName, instance.CorrelationId,
-                        TypeMetadataCache<T>.ShortName, ex.Message);
-                }
-            }
-            return inserted;
         }
 
         public async Task SendQuery<T>(SagaQueryConsumeContext<TSaga, T> context, ISagaPolicy<TSaga, T> policy, IPipe<SagaConsumeContext<TSaga, T>> next)
@@ -192,6 +167,29 @@ namespace MassTransit.NHibernateIntegration.Saga
                     throw new SagaException(ex.Message, typeof(TSaga), typeof(T), Guid.Empty, ex);
                 }
             }
+        }
+
+        static bool PreInsertSagaInstance<T>(ISession session, TSaga instance, bool inserted)
+        {
+            try
+            {
+                session.Save(instance);
+                session.Flush();
+
+                inserted = true;
+
+                _log.DebugFormat("SAGA:{0}:{1} Insert {2}", TypeMetadataCache<TSaga>.ShortName, instance.CorrelationId,
+                    TypeMetadataCache<T>.ShortName);
+            }
+            catch (GenericADOException ex)
+            {
+                if (_log.IsDebugEnabled)
+                {
+                    _log.DebugFormat("SAGA:{0}:{1} Dupe {2} - {3}", TypeMetadataCache<TSaga>.ShortName, instance.CorrelationId,
+                        TypeMetadataCache<T>.ShortName, ex.Message);
+                }
+            }
+            return inserted;
         }
 
         async Task SendToInstance<T>(SagaQueryConsumeContext<TSaga, T> context, ISagaPolicy<TSaga, T> policy, TSaga instance,
