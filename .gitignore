@@ -8,6 +8,8 @@ packages
 
 *.ncrunch*
 
+.fake
+
 src/logs/*
 
 **/*.sln*
