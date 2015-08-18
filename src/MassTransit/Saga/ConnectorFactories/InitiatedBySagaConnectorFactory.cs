@@ -32,7 +32,7 @@ namespace MassTransit.Saga.ConnectorFactories
 
             ISagaFactory<TSaga, TMessage> sagaFactory = new DefaultSagaFactory<TSaga, TMessage>();
 
-            _policy = new NewSagaPolicy<TSaga, TMessage>(sagaFactory);
+            _policy = new NewSagaPolicy<TSaga, TMessage>(sagaFactory, false);
         }
 
         public ISagaMessageConnector CreateMessageConnector()

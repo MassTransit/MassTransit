@@ -19,8 +19,8 @@ namespace MassTransit.NHibernateIntegration.Saga
     using System.Transactions;
     using Logging;
     using MassTransit.Saga;
-    using Monitoring.Introspection;
     using NHibernate;
+    using NHibernate.Exceptions;
     using Pipeline;
     using Util;
 
@@ -31,12 +31,21 @@ namespace MassTransit.NHibernateIntegration.Saga
         where TSaga : class, ISaga
     {
         static readonly ILog _log = Logger.Get<NHibernateSagaRepository<TSaga>>();
-
         readonly ISessionFactory _sessionFactory;
+        System.Data.IsolationLevel _insertIsolationLevel;
 
         public NHibernateSagaRepository(ISessionFactory sessionFactory)
         {
             _sessionFactory = sessionFactory;
+
+            _insertIsolationLevel = System.Data.IsolationLevel.ReadCommitted;
+        }
+
+        public NHibernateSagaRepository(ISessionFactory sessionFactory, System.Data.IsolationLevel isolationLevel)
+        {
+            _sessionFactory = sessionFactory;
+
+            _insertIsolationLevel = isolationLevel;
         }
 
         public async Task<IEnumerable<Guid>> Find(ISagaQuery<TSaga> query)
@@ -61,11 +70,11 @@ namespace MassTransit.NHibernateIntegration.Saga
             scope.Set(new
             {
                 Persistence = "nhibernate",
-                Entities = _sessionFactory.GetAllClassMetadata().Select(x => x.Value.EntityName).ToArray(),
+                Entities = _sessionFactory.GetAllClassMetadata().Select(x => x.Value.EntityName).ToArray()
             });
         }
 
-        public async Task Send<T>(ConsumeContext<T> context, ISagaPolicy<TSaga, T> policy, IPipe<SagaConsumeContext<TSaga, T>> next) where T : class
+        async Task ISagaRepository<TSaga>.Send<T>(ConsumeContext<T> context, ISagaPolicy<TSaga, T> policy, IPipe<SagaConsumeContext<TSaga, T>> next)
         {
             if (!context.CorrelationId.HasValue)
                 throw new SagaException("The CorrelationId was not specified", typeof(TSaga), typeof(T));
@@ -75,9 +84,18 @@ namespace MassTransit.NHibernateIntegration.Saga
             using (ISession session = _sessionFactory.OpenSession())
             using (ITransaction transaction = session.BeginTransaction())
             {
+                bool inserted = false;
+
+                TSaga instance;
+                if (policy.PreInsertInstance(context, out instance))
+                {
+                    inserted = PreInsertSagaInstance<T>(session, instance, inserted);
+                }
+
                 try
                 {
-                    var instance = session.Get<TSaga>(sagaId, LockMode.Upgrade);
+                    if (instance == null)
+                        instance = session.Get<TSaga>(sagaId, LockMode.Upgrade);
                     if (instance == null)
                     {
                         var missingSagaPipe = new MissingPipe<T>(session, next);
@@ -92,8 +110,10 @@ namespace MassTransit.NHibernateIntegration.Saga
                         var sagaConsumeContext = new NHibernateSagaConsumeContext<TSaga, T>(session, context, instance);
 
                         await policy.Existing(sagaConsumeContext, next);
-                    }
 
+                        if (inserted && !sagaConsumeContext.IsCompleted)
+                            session.Update(instance);
+                    }
 
                     if (transaction.IsActive)
                         transaction.Commit();
@@ -106,6 +126,29 @@ namespace MassTransit.NHibernateIntegration.Saga
                     throw;
                 }
             }
+        }
+
+        static bool PreInsertSagaInstance<T>(ISession session, TSaga instance, bool inserted)
+        {
+            try
+            {
+                session.Save(instance);
+                session.Flush();
+
+                inserted = true;
+
+                _log.DebugFormat("SAGA:{0}:{1} Insert {2}", TypeMetadataCache<TSaga>.ShortName, instance.CorrelationId,
+                    TypeMetadataCache<T>.ShortName);
+            }
+            catch (GenericADOException ex)
+            {
+                if (_log.IsDebugEnabled)
+                {
+                    _log.DebugFormat("SAGA:{0}:{1} Dupe {2} - {3}", TypeMetadataCache<TSaga>.ShortName, instance.CorrelationId,
+                        TypeMetadataCache<T>.ShortName, ex.Message);
+                }
+            }
+            return inserted;
         }
 
         public async Task SendQuery<T>(SagaQueryConsumeContext<TSaga, T> context, ISagaPolicy<TSaga, T> policy, IPipe<SagaConsumeContext<TSaga, T>> next)
@@ -205,7 +248,7 @@ namespace MassTransit.NHibernateIntegration.Saga
                         TypeMetadataCache<TMessage>.ShortName);
                 }
 
-                SagaConsumeContext<TSaga,TMessage> proxy = new NHibernateSagaConsumeContext<TSaga, TMessage>(_session, context, context.Saga);
+                SagaConsumeContext<TSaga, TMessage> proxy = new NHibernateSagaConsumeContext<TSaga, TMessage>(_session, context, context.Saga);
 
                 await _next.Send(proxy);
 

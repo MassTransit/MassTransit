@@ -25,6 +25,19 @@ namespace MassTransit.Saga
         where TSaga : class, ISaga
         where TMessage : class
     {
+        /// <summary>
+        /// Create a new saga instance using the supplied consume context
+        /// </summary>
+        /// <param name="context"></param>
+        /// <returns></returns>
+        TSaga Create(ConsumeContext<TMessage> context);
+
+        /// <summary>
+        /// Send the context through the factory, with the proper decorations
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="next"></param>
+        /// <returns></returns>
         Task Send(ConsumeContext<TMessage> context, IPipe<SagaConsumeContext<TSaga, TMessage>> next);
     }
 }
