@@ -112,6 +112,11 @@ namespace MassTransit.Testing.TestDecorators
                 _policy = policy;
             }
 
+            public bool PreInsertInstance(ConsumeContext<TMessage> context, out TSaga instance)
+            {
+                return _policy.PreInsertInstance(context, out instance);
+            }
+
             public Task Existing(SagaConsumeContext<TSaga, TMessage> context, IPipe<SagaConsumeContext<TSaga, TMessage>> next)
             {
                 return _policy.Existing(context, next);

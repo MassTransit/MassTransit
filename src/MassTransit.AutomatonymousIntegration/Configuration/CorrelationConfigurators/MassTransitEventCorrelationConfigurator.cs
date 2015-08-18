@@ -16,6 +16,7 @@ namespace Automatonymous.CorrelationConfigurators
     using System.Linq.Expressions;
     using MassTransit;
     using MassTransit.Pipeline;
+    using MassTransit.Saga;
     using MassTransit.Saga.Pipeline.Filters;
 
 
@@ -29,12 +30,17 @@ namespace Automatonymous.CorrelationConfigurators
         readonly SagaStateMachine<TInstance> _machine;
         IFilter<ConsumeContext<TData>> _messageFilter;
         IPipe<ConsumeContext<TData>> _missingPipe;
+        ISagaFactory<TInstance, TData> _sagaFactory;
         SagaFilterFactory<TInstance, TData> _sagaFilterFactory;
+        bool _insertOnInitial;
 
         public MassTransitEventCorrelationConfigurator(SagaStateMachine<TInstance> machine, Event<TData> @event, EventCorrelation existingCorrelation)
         {
             _event = @event;
             _machine = machine;
+            _insertOnInitial = false;
+
+            _sagaFactory = new DefaultSagaFactory<TInstance, TData>();
 
             var correlation = existingCorrelation as EventCorrelation<TInstance, TData>;
             if (correlation != null)
@@ -46,12 +52,18 @@ namespace Automatonymous.CorrelationConfigurators
 
         public EventCorrelation Build()
         {
-            return new MassTransitEventCorrelation<TInstance, TData>(_machine, _event, _sagaFilterFactory, _messageFilter, _missingPipe);
+            return new MassTransitEventCorrelation<TInstance, TData>(_machine, _event, _sagaFilterFactory, _messageFilter, _missingPipe, _sagaFactory, _insertOnInitial);
+        }
+
+        public bool InsertOnInitial
+        {
+            set { _insertOnInitial = value; }
         }
 
         public EventCorrelationConfigurator<TInstance, TData> CorrelateById(Func<ConsumeContext<TData>, Guid> selector)
         {
             _messageFilter = new CorrelationIdMessageFilter<TData>(selector);
+
             _sagaFilterFactory = (repository, policy, sagaPipe) => new CorrelatedSagaFilter<TInstance, TData>(repository, policy, sagaPipe);
 
             return this;
@@ -116,6 +128,13 @@ namespace Automatonymous.CorrelationConfigurators
 
                 return new QuerySagaFilter<TInstance, TData>(repository, policy, queryFactory, sagaPipe);
             };
+
+            return this;
+        }
+
+        public EventCorrelationConfigurator<TInstance, TData> SetSagaFactory(SagaFactoryMethod<TInstance, TData> factoryMethod)
+        {
+            _sagaFactory = new FactoryMethodSagaFactory<TInstance, TData>(factoryMethod);
 
             return this;
         }

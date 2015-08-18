@@ -33,6 +33,12 @@ namespace MassTransit.Saga.Policies
             _missingPipe = missingPipe ?? Pipe.Empty<ConsumeContext<TMessage>>();
         }
 
+        public bool PreInsertInstance(ConsumeContext<TMessage> context, out TSaga instance)
+        {
+            instance = null;
+            return false;
+        }
+
         async Task ISagaPolicy<TSaga, TMessage>.Existing(SagaConsumeContext<TSaga, TMessage> context, IPipe<SagaConsumeContext<TSaga, TMessage>> next)
         {
             await next.Send(context);

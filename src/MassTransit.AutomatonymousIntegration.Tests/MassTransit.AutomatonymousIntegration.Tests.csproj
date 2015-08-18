@@ -105,6 +105,8 @@
     <Compile Include="ContextSetup.cs" />
     <Compile Include="CorrelationExpression_Specs.cs" />
     <Compile Include="Fault_Specs.cs" />
+    <Compile Include="Initiator_Specs.cs" />
+    <Compile Include="NHibernateFactory_Specs.cs" />
     <Compile Include="Publish_Specs.cs" />
     <Compile Include="RemoveWhen_Specs.cs" />
     <Compile Include="Request_Specs.cs" />

@@ -29,15 +29,18 @@ namespace Automatonymous.CorrelationConfigurators
         readonly SagaStateMachine<TInstance> _machine;
         readonly IFilter<ConsumeContext<TData>> _messageFilter;
         readonly IPipe<ConsumeContext<TData>> _missingPipe;
+        readonly ISagaFactory<TInstance, TData> _sagaFactory;
+        readonly bool _insertOnInitial;
         readonly Lazy<ISagaPolicy<TInstance, TData>> _policy;
 
-        public MassTransitEventCorrelation(SagaStateMachine<TInstance> machine, Event<TData> @event, SagaFilterFactory<TInstance, TData> sagaFilterFactory,
-            IFilter<ConsumeContext<TData>> messageFilter, IPipe<ConsumeContext<TData>> missingPipe)
+        public MassTransitEventCorrelation(SagaStateMachine<TInstance> machine, Event<TData> @event, SagaFilterFactory<TInstance, TData> sagaFilterFactory, IFilter<ConsumeContext<TData>> messageFilter, IPipe<ConsumeContext<TData>> missingPipe, ISagaFactory<TInstance, TData> sagaFactory, bool insertOnInitial)
         {
             _event = @event;
             FilterFactory = sagaFilterFactory;
             _messageFilter = messageFilter;
             _missingPipe = missingPipe;
+            _sagaFactory = sagaFactory;
+            _insertOnInitial = insertOnInitial;
             _machine = machine;
 
             _policy = new Lazy<ISagaPolicy<TInstance, TData>>(GetSagaPolicy);
@@ -60,13 +63,9 @@ namespace Automatonymous.CorrelationConfigurators
                 .ToArray();
 
             bool includesInitial = states.Any(x => x.Name.Equals(_machine.Initial.Name));
-            bool includesOther = states.Any(x => !x.Name.Equals(_machine.Initial.Name));
-
-            if (includesInitial && includesOther)
-                return new NewOrExistingSagaPolicy<TInstance, TData>(new DefaultSagaFactory<TInstance, TData>());
 
             if (includesInitial)
-                return new NewSagaPolicy<TInstance, TData>(new DefaultSagaFactory<TInstance, TData>());
+                return new NewOrExistingSagaPolicy<TInstance, TData>(_sagaFactory, _insertOnInitial);
 
             return new AnyExistingSagaPolicy<TInstance, TData>(_missingPipe);
         }

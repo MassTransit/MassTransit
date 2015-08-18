@@ -562,6 +562,7 @@
     <Compile Include="Saga\ConstructorSagaInstanceFactory.cs" />
     <Compile Include="Saga\DefaultSagaFactory.cs" />
     <Compile Include="Saga\ExpressionSagaQueryFactory.cs" />
+    <Compile Include="Saga\FactoryMethodSagaFactory.cs" />
     <Compile Include="Saga\InMemorySagaConsumeContext.cs" />
     <Compile Include="Saga\IQuerySagaRepository.cs" />
     <Compile Include="Saga\ISagaCompletionPolicy.cs" />
@@ -571,6 +572,7 @@
     <Compile Include="Saga\ISagaQuery.cs" />
     <Compile Include="Saga\ISagaQueryFactory.cs" />
     <Compile Include="Saga\CorrelationExpressionToSagaIdVisitor.cs" />
+    <Compile Include="Saga\SagaFactoryMethod.cs" />
     <Compile Include="Saga\Pipeline\Filters\CorrelationIdMessageFilter.cs" />
     <Compile Include="Saga\Pipeline\Filters\QuerySagaFilter.cs" />
     <Compile Include="Saga\Pipeline\Filters\InitiatedBySagaMessageFilter.cs" />

@@ -16,12 +16,19 @@ namespace Automatonymous
     using System.Linq.Expressions;
     using MassTransit;
     using MassTransit.Pipeline;
+    using MassTransit.Saga;
 
 
     public interface EventCorrelationConfigurator<TInstance, TData>
         where TInstance : class, SagaStateMachineInstance
         where TData : class
     {
+        /// <summary>
+        /// If set to true, the state machine suggests that the saga instance be inserted blinding prior to the get/lock
+        /// using a weaker isolation level. This prevents range locks in the database from slowing inserts.
+        /// </summary>
+        bool InsertOnInitial { set; }
+
         /// <summary>
         /// Correlate to the saga instance by CorrelationId, using the id from the event data
         /// </summary>
@@ -62,6 +69,14 @@ namespace Automatonymous
         /// <param name="correlationExpression"></param>
         /// <returns></returns>
         EventCorrelationConfigurator<TInstance, TData> CorrelateBy(Expression<Func<TInstance, ConsumeContext<TData>, bool>> correlationExpression);
+
+        /// <summary>
+        /// Creates a new instance of the saga, and if appropriate, pre-inserts the saga intance to the database. If the saga already exists, any
+        /// exceptions from the insert are suppressed and processing continues normally.
+        /// </summary>
+        /// <param name="factoryMethod">The factory method for the saga</param>
+        /// <returns></returns>
+        EventCorrelationConfigurator<TInstance, TData> SetSagaFactory(SagaFactoryMethod<TInstance, TData> factoryMethod);
 
         /// <summary>
         /// If an event is consumed that is not matched to an existing saga instance, discard the event without throwing an exception.

@@ -15,10 +15,8 @@ namespace MassTransit.Saga
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Reflection;
     using System.Threading;
     using System.Threading.Tasks;
-    using Internals.Reflection;
     using Logging;
     using Util;
 
@@ -39,7 +37,7 @@ namespace MassTransit.Saga
             _orchestratesTypes = GetOrchestratingTypes().ToArray();
             _observesTypes = GetObservingTypes().ToArray();
 
-             GetActivatorSagaInstanceFactoryMethod();
+            GetActivatorSagaInstanceFactoryMethod();
         }
 
         public static SagaInterfaceType[] InitiatedByTypes => Cached.Instance.Value.InitiatedByTypes;

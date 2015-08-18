@@ -33,7 +33,7 @@ namespace Automatonymous
         where TInstance : class, SagaStateMachineInstance
         where TData : class
     {
-         Event<TData> Event { get; }
+        Event<TData> Event { get; }
 
         /// <summary>
         /// Returns the saga policy for the event correlation

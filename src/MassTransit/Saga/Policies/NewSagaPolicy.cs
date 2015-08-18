@@ -28,11 +28,25 @@ namespace MassTransit.Saga.Policies
         where TSaga : class, ISaga
         where TMessage : class
     {
+        readonly bool _insertOnInitial;
         readonly ISagaFactory<TSaga, TMessage> _sagaFactory;
 
-        public NewSagaPolicy(ISagaFactory<TSaga, TMessage> sagaFactory)
+        public NewSagaPolicy(ISagaFactory<TSaga, TMessage> sagaFactory, bool insertOnInitial)
         {
             _sagaFactory = sagaFactory;
+            _insertOnInitial = insertOnInitial;
+        }
+
+        public bool PreInsertInstance(ConsumeContext<TMessage> context, out TSaga instance)
+        {
+            if (_insertOnInitial)
+            {
+                instance = _sagaFactory.Create(context);
+                return true;
+            }
+
+            instance = null;
+            return false;
         }
 
         Task ISagaPolicy<TSaga, TMessage>.Existing(SagaConsumeContext<TSaga, TMessage> context, IPipe<SagaConsumeContext<TSaga, TMessage>> next)

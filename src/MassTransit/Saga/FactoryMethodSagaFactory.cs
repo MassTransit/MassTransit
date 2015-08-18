@@ -24,19 +24,25 @@ namespace MassTransit.Saga
     /// </summary>
     /// <typeparam name="TSaga"></typeparam>
     /// <typeparam name="TMessage"></typeparam>
-    public class DefaultSagaFactory<TSaga, TMessage> :
+    public class FactoryMethodSagaFactory<TSaga, TMessage> :
         ISagaFactory<TSaga, TMessage>
         where TSaga : class, ISaga
         where TMessage : class
     {
-        static readonly ILog _log = Logger.Get<DefaultSagaFactory<TSaga, TMessage>>();
+        static readonly ILog _log = Logger.Get<FactoryMethodSagaFactory<TSaga, TMessage>>();
+        readonly SagaFactoryMethod<TSaga, TMessage> _factoryMethod;
+
+        public FactoryMethodSagaFactory(SagaFactoryMethod<TSaga, TMessage> factoryMethod)
+        {
+            _factoryMethod = factoryMethod;
+        }
 
         public TSaga Create(ConsumeContext<TMessage> context)
         {
             if (!context.CorrelationId.HasValue)
                 throw new SagaException("The correlationId was not present and the saga could not be created", typeof(TSaga), typeof(TMessage));
 
-            return SagaMetadataCache<TSaga>.FactoryMethod(context.CorrelationId.Value);
+            return _factoryMethod(context);
         }
 
         public async Task Send(ConsumeContext<TMessage> context, IPipe<SagaConsumeContext<TSaga, TMessage>> next)
@@ -44,7 +50,7 @@ namespace MassTransit.Saga
             if (!context.CorrelationId.HasValue)
                 throw new SagaException("The correlationId was not present and the saga could not be created", typeof(TSaga), typeof(TMessage));
 
-            TSaga instance = SagaMetadataCache<TSaga>.FactoryMethod(context.CorrelationId.Value);
+            TSaga instance = _factoryMethod(context);
 
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("SAGA:{0}:{1} Created {2}", TypeMetadataCache<TSaga>.ShortName, instance.CorrelationId, TypeMetadataCache<TMessage>.ShortName);
