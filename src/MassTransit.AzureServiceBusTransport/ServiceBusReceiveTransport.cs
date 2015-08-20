@@ -20,7 +20,6 @@ namespace MassTransit.AzureServiceBusTransport
     using Internals.Extensions;
     using Logging;
     using MassTransit.Pipeline;
-    using Monitoring.Introspection;
     using Pipeline;
     using Policies;
     using Transports;
@@ -52,7 +51,7 @@ namespace MassTransit.AzureServiceBusTransport
                 Type = "Azure Service Bus",
                 _settings.QueueDescription,
                 _settings.PrefetchCount,
-                _settings.MaxConcurrentCalls,
+                _settings.MaxConcurrentCalls
             });
         }
 
@@ -65,10 +64,7 @@ namespace MassTransit.AzureServiceBusTransport
 
             IPipe<ConnectionContext> connectionPipe = Pipe.New<ConnectionContext>(x =>
             {
-                x.UseFilter(new PrepareReceiveQueueFilter(_settings));
-
-                foreach (TopicSubscriptionSettings subscriptionSetting in _subscriptionSettings)
-                    x.UseFilter(new BindTopicSubscriptionFilter(subscriptionSetting));
+                x.UseFilter(new PrepareReceiveQueueFilter(_settings, _subscriptionSettings));
 
                 x.UseFilter(new MessageReceiverFilter(receivePipe, _receiveObservers));
             });
