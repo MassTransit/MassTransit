@@ -131,5 +131,71 @@ namespace MassTransit.AzureServiceBusTransport
 
             return topicDescription;
         }
+
+        public static async Task<SubscriptionDescription> CreateTopicSubscriptionSafeAsync(this NamespaceManager namespaceManager, string subscriptionName, string topicPath, string queuePath)
+        {
+            bool create = true;
+            SubscriptionDescription subscriptionDescription = null;
+            try
+            {
+                subscriptionDescription = await namespaceManager.GetSubscriptionAsync(topicPath, subscriptionName);
+                if (!queuePath.Equals(subscriptionDescription.ForwardTo))
+                {
+                    if (_log.IsWarnEnabled)
+                    {
+                        _log.WarnFormat("Removing invalid subscription: {0} ({1} -> {2})", subscriptionDescription.Name, subscriptionDescription.TopicPath,
+                            subscriptionDescription.ForwardTo);
+                    }
+
+                    await namespaceManager.DeleteSubscriptionAsync(topicPath, subscriptionName);
+                }
+                else
+                    create = false;
+            }
+            catch (MessagingEntityNotFoundException)
+            {
+            }
+
+            if (create)
+            {
+                bool created = false;
+                try
+                {
+                    if (_log.IsDebugEnabled)
+                        _log.DebugFormat("Creating subscription {0} -> {1}", topicPath, queuePath);
+
+                    var description = new SubscriptionDescription(topicPath, subscriptionName)
+                    {
+                        ForwardTo = queuePath,
+                    };
+
+                    subscriptionDescription = await namespaceManager.CreateSubscriptionAsync(description);
+
+                    created = true;
+                }
+                catch (MessagingEntityAlreadyExistsException)
+                {
+                }
+                catch (MessagingException mex)
+                {
+                    if (mex.Message.Contains("(409)"))
+                    {
+                    }
+                    else
+                        throw;
+                }
+
+                if (!created)
+                    subscriptionDescription = await namespaceManager.GetSubscriptionAsync(topicPath, subscriptionName);
+            }
+
+            if (_log.IsDebugEnabled)
+            {
+                _log.DebugFormat("Subscription: {0} ({1} -> {2})", subscriptionDescription.Name, subscriptionDescription.TopicPath,
+                    subscriptionDescription.ForwardTo);
+            }
+
+            return subscriptionDescription;
+        }
     }
 }

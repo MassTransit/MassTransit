@@ -88,9 +88,9 @@ namespace MassTransit.RabbitMqTransport.Pipeline
             await next.Send(context);
         }
 
-        async Task ApplyExchangeBindings(ModelContext context, string exchangeName)
+        Task ApplyExchangeBindings(ModelContext context, string exchangeName)
         {
-            foreach (var binding in _exchangeBindings)
+            return Task.WhenAll(_exchangeBindings.Select(async binding =>
             {
                 ExchangeSettings exchange = binding.Exchange;
 
@@ -98,7 +98,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
                     exchange.Arguments);
 
                 await context.ExchangeBind(exchangeName, exchange.ExchangeName, binding.RoutingKey, binding.Arguments);
-            }
+            }));
         }
 
         async Task PurgeIfRequested(ModelContext context, QueueDeclareOk queueOk, string queueName)

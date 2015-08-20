@@ -19,7 +19,6 @@ namespace MassTransit.AzureServiceBusTransport
     using Microsoft.ServiceBus;
     using Microsoft.ServiceBus.Messaging;
     using Microsoft.ServiceBus.Messaging.Amqp;
-    using Monitoring.Introspection;
     using Transports;
 
 
@@ -56,7 +55,7 @@ namespace MassTransit.AzureServiceBusTransport
             {
                 Type = "Azure Service Bus",
                 _settings.ServiceUri,
-                _settings.OperationTimeout,
+                _settings.OperationTimeout
             });
         }
 
@@ -87,7 +86,7 @@ namespace MassTransit.AzureServiceBusTransport
 
         public string GetQueuePath(QueueDescription queueDescription)
         {
-            return string.Join("/", _settings.ServiceUri.AbsolutePath.Trim(new[] {'/'}), queueDescription.Path);
+            return string.Join("/", _settings.ServiceUri.AbsolutePath.Trim('/'), queueDescription.Path);
         }
 
         Task<MessagingFactory> CreateMessagingFactory()
@@ -99,8 +98,8 @@ namespace MassTransit.AzureServiceBusTransport
                 TransportType = TransportType.Amqp,
                 AmqpTransportSettings = new AmqpTransportSettings
                 {
-                    BatchFlushInterval = TimeSpan.FromMilliseconds(50),
-                },
+                    BatchFlushInterval = TimeSpan.FromMilliseconds(50)
+                }
             };
 
             var builder = new UriBuilder(_settings.ServiceUri) {Path = ""};
@@ -114,7 +113,7 @@ namespace MassTransit.AzureServiceBusTransport
             {
                 TokenProvider = _settings.TokenProvider,
                 OperationTimeout = TimeSpan.FromSeconds(10),
-                RetryPolicy = RetryPolicy.NoRetry,
+                RetryPolicy = RetryPolicy.NoRetry
             };
 
             return new NamespaceManager(_settings.ServiceUri, nms);
@@ -126,7 +125,7 @@ namespace MassTransit.AzureServiceBusTransport
             {
                 TokenProvider = _settings.TokenProvider,
                 OperationTimeout = TimeSpan.FromSeconds(10),
-                RetryPolicy = RetryPolicy.NoRetry,
+                RetryPolicy = RetryPolicy.NoRetry
             };
             var builder = new UriBuilder(_settings.ServiceUri)
             {
@@ -162,7 +161,8 @@ namespace MassTransit.AzureServiceBusTransport
                 }
                 catch (Exception ex)
                 {
-                    _log.Error("Exception closing messaging factory", ex);
+                    if (_log.IsWarnEnabled)
+                        _log.Warn("Exception closing messaging factory", ex);
                 }
             }
         }

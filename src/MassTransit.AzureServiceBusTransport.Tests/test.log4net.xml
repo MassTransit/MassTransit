@@ -15,7 +15,7 @@
 		</logger>
 
 		<logger name="MassTransit.AzureServiceBusTransport">
-			<level value="INFO" />
+			<level value="DEBUG" />
 		</logger>
 
 		<logger name="MassTransit.Subscriptions">

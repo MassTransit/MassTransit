@@ -12,11 +12,19 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.AzureServiceBusTransport.Pipeline
 {
+    using System;
+    using System.IO;
+    using System.Linq;
+    using System.Security.Cryptography;
+    using System.Text;
     using System.Threading.Tasks;
+    using Configuration;
     using Contexts;
+    using Logging;
     using MassTransit.Pipeline;
     using Microsoft.ServiceBus;
-    using Monitoring.Introspection;
+    using Microsoft.ServiceBus.Messaging;
+    using NewIdFormatters;
 
 
     /// <summary>
@@ -25,11 +33,15 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
     public class PrepareReceiveQueueFilter :
         IFilter<ConnectionContext>
     {
+        static readonly INewIdFormatter _formatter = new ZBase32Formatter();
+        readonly ILog _log = Logger.Get<PrepareReceiveQueueFilter>();
         readonly ReceiveSettings _settings;
+        readonly TopicSubscriptionSettings[] _subscriptionSettings;
 
-        public PrepareReceiveQueueFilter(ReceiveSettings settings)
+        public PrepareReceiveQueueFilter(ReceiveSettings settings, params TopicSubscriptionSettings[] subscriptionSettings)
         {
             _settings = settings;
+            _subscriptionSettings = subscriptionSettings;
         }
 
         void IProbeSite.Probe(ProbeContext context)
@@ -40,11 +52,53 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
         {
             NamespaceManager namespaceManager = await context.NamespaceManager;
 
-            await namespaceManager.CreateQueueSafeAsync(_settings.QueueDescription);
+            var queueDescription = await namespaceManager.CreateQueueSafeAsync(_settings.QueueDescription);
+
+            if (_subscriptionSettings.Length > 0)
+            {
+                NamespaceManager rootNamespaceManager = await context.RootNamespaceManager;
+
+                await Task.WhenAll(_subscriptionSettings.Select(subscription => CreateSubscription(rootNamespaceManager, namespaceManager, subscription)));
+            }
 
             context.GetOrAddPayload(() => _settings);
 
             await next.Send(context);
+        }
+
+        async Task CreateSubscription(NamespaceManager rootNamespaceManager, NamespaceManager namespaceManager, TopicSubscriptionSettings settings)
+        {
+            var topicDescription = await rootNamespaceManager.CreateTopicSafeAsync(settings.Topic);
+
+            string queuePath = Path.Combine(namespaceManager.Address.AbsoluteUri.TrimStart('/'), _settings.QueueDescription.Path)
+                .Replace('\\', '/');
+
+            var subscriptionName = GetSubscriptionName(namespaceManager, _settings.QueueDescription.Path);
+
+            await rootNamespaceManager.CreateTopicSubscriptionSafeAsync(subscriptionName, topicDescription.Path, queuePath);
+        }
+
+        static string GetSubscriptionName(NamespaceManager namespaceManager, string queuePath)
+        {
+            string subscriptionPath =
+                $"{queuePath}-{namespaceManager.Address.AbsolutePath.Split(new[] {'/'}, StringSplitOptions.RemoveEmptyEntries).Last()}";
+
+            string name;
+            if (subscriptionPath.Length > 50)
+            {
+                string hashed;
+                using (var hasher = new SHA1Managed())
+                {
+                    byte[] buffer = Encoding.UTF8.GetBytes(subscriptionPath);
+                    byte[] hash = hasher.ComputeHash(buffer);
+                    hashed = _formatter.Format(hash).Substring(0, 6);
+                }
+
+                name = $"{subscriptionPath.Substring(0, 43)}-{hashed}";
+            }
+            else
+                name = subscriptionPath;
+            return name;
         }
     }
 }
