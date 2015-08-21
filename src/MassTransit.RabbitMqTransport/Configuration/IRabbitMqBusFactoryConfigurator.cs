@@ -14,6 +14,7 @@ namespace MassTransit
 {
     using System;
     using RabbitMqTransport;
+    using RabbitMqTransport.Configuration;
 
 
     public interface IRabbitMqBusFactoryConfigurator :

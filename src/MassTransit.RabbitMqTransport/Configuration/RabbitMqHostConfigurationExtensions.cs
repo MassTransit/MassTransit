@@ -49,9 +49,8 @@ namespace MassTransit
         {
             configurator.ReceiveEndpoint(host, null, x =>
             {
-                x.AutoDelete();
-                x.Durable(false);
-                x.Exclusive();
+                x.AutoDelete = true;
+                x.Durable = false;
 
                 configure(x);
             });

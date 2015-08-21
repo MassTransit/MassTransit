@@ -174,7 +174,7 @@ namespace MassTransit.RabbitMqTransport.Tests
                 x.ReceiveEndpoint(host, "input_queue", e =>
                 {
                     e.PrefetchCount = 16;
-                    e.PurgeOnStartup();
+                    e.PurgeOnStartup = true;
 
                     ConfigureInputQueueEndpoint(e);
                 });

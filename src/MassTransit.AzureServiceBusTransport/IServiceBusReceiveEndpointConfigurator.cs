@@ -19,30 +19,9 @@ namespace MassTransit.AzureServiceBusTransport
     /// Configure an Azure Service Bus receive endpoint
     /// </summary>
     public interface IServiceBusReceiveEndpointConfigurator :
-        IReceiveEndpointConfigurator
+        IReceiveEndpointConfigurator,
+        IQueueConfigurator
     {
-        /// <summary>
-        /// Specify the queue should be durable (survives broker restart) or in-memory
-        /// </summary>
-        /// <value>True for a durable queue, False for an in-memory queue</value>
-        bool EnableExpress { set; }
-
-        /// <summary>
-        /// Specify the lock duration for messages read from the queue
-        /// </summary>
-        /// <value></value>
-        TimeSpan LockDuration { set; }
-
-        /// <summary>
-        /// Move messages to the dead letter queue on expiration (time to live exceeded)
-        /// </summary>
-        bool EnableDeadLetteringOnMessageExpiration { set; }
-
-        /// <summary>
-        /// Set the default message time to live in the queue
-        /// </summary>
-        TimeSpan DefaultMessageTimeToLive { set; }
-
         /// <summary>
         /// Specify the number of messages to prefetch from the queue to the service
         /// </summary>
@@ -55,19 +34,8 @@ namespace MassTransit.AzureServiceBusTransport
         int MaxConcurrentCalls { set; }
 
         /// <summary>
-        /// The path of the queue that's being configured
+        /// The address on Azure of the endpoint that's being configured
         /// </summary>
-        Uri QueuePath { get; }
-
-        /// <summary>
-        /// Enable duplicate detection on the queue, specifying the time window
-        /// </summary>
-        /// <param name="historyTimeWindow">The time window for duplicate history</param>
-        void EnableDuplicateDetection(TimeSpan historyTimeWindow);
-
-        /// <summary>
-        /// True if the queue should be deleted if idle
-        /// </summary>
-        TimeSpan AutoDeleteOnIdle { set; }
+        Uri InputAddress { get; }
     }
 }

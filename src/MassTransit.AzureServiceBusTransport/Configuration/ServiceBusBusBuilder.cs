@@ -30,23 +30,17 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
         readonly ServiceBusHost[] _hosts;
         readonly Uri _inputAddress;
 
-        public ServiceBusBusBuilder(IEnumerable<ServiceBusHost> hosts, IConsumePipeSpecification consumePipeSpecification)
+        public ServiceBusBusBuilder(IEnumerable<ServiceBusHost> hosts, IConsumePipeSpecification consumePipeSpecification, ReceiveEndpointSettings settings)
             : base(consumePipeSpecification)
         {
             if (hosts == null)
-                throw new ArgumentNullException("hosts");
+                throw new ArgumentNullException(nameof(hosts));
 
             _hosts = hosts.ToArray();
 
-            string queueName = string.Format("bus_{0}", NewId.Next().ToString("NS"));
-
             _busConsumePipe = CreateConsumePipe();
 
-            _busEndpointConfigurator = new ServiceBusReceiveEndpointConfigurator(_hosts[0], queueName, _busConsumePipe)
-            {
-                EnableExpress = true,
-                AutoDeleteOnIdle = TimeSpan.FromMinutes(5),
-            };
+            _busEndpointConfigurator = new ServiceBusReceiveEndpointConfigurator(_hosts[0], settings, _busConsumePipe);
 
             _inputAddress = _busEndpointConfigurator.InputAddress;
         }

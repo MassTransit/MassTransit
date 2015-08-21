@@ -61,7 +61,9 @@
       <Link>Properties\SolutionVersion.cs</Link>
     </Compile>
     <Compile Include="AzureBusFactory.cs" />
+    <Compile Include="Configuration\ReceiveEndpointSettings.cs" />
     <Compile Include="Configuration\ServiceBusReceiveEndpointConfigurator.cs" />
+    <Compile Include="IQueueConfigurator.cs" />
     <Compile Include="NamespaceManagerExtensions.cs" />
     <Compile Include="ServiceBusAddressExtensions.cs" />
     <Compile Include="ServiceBusPublishEndpoint.cs" />
@@ -71,7 +73,7 @@
     <Compile Include="BrokeredMessageContext.cs" />
     <Compile Include="Configuration\AzureServiceBusHostConfigurator.cs" />
     <Compile Include="Configuration\ServiceBusBusBuilder.cs" />
-    <Compile Include="Configuration\AzureServiceBusBusFactoryConfigurator.cs" />
+    <Compile Include="Configuration\ServiceBusBusFactoryConfigurator.cs" />
     <Compile Include="Configuration\IServiceBusBusFactoryConfigurator.cs" />
     <Compile Include="Configuration\ISharedAccessSignatureTokenProviderConfigurator.cs" />
     <Compile Include="Configuration\ITokenProviderConfigurator.cs" />
