@@ -17,7 +17,8 @@ namespace MassTransit.Serialization
     /// <summary>
     /// Provides a crypto stream for the purpose of encrypting or decrypting 
     /// </summary>
-    public interface ICryptoStreamProvider
+    public interface ICryptoStreamProvider :
+        IProbeSite
     {
         /// <summary>
         /// Returns a stream with the encryption bits in place to ensure proper message encryption

@@ -12,8 +12,10 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.AzureServiceBusTransport.Tests
 {
+    using System;
     using System.Threading.Tasks;
     using Configuration;
+    using Monitoring.Introspection.Contracts;
     using NUnit.Framework;
     using Serialization;
     using TestFramework;
@@ -24,6 +26,21 @@ namespace MassTransit.AzureServiceBusTransport.Tests
     public class Publishing_a_message_to_an_endpoint :
         AzureServiceBusTestFixture
     {
+        Task<ConsumeContext<PingMessage>> _handler;
+
+        protected override void ConfigureInputQueueEndpoint(IServiceBusReceiveEndpointConfigurator configurator)
+        {
+            _handler = Handled<PingMessage>(configurator);
+        }
+
+        [Test]
+        public void Should_return_a_wonderful_breakdown_of_the_guts_inside_it()
+        {
+            ProbeResult result = Bus.GetProbeResult();
+
+            Console.WriteLine(result.ToJsonString());
+        }
+
         [Test]
         public async void Should_succeed()
         {
@@ -31,29 +48,13 @@ namespace MassTransit.AzureServiceBusTransport.Tests
 
             await _handler;
         }
-
-        Task<ConsumeContext<PingMessage>> _handler;
-
-        protected override void ConfigureInputQueueEndpoint(IServiceBusReceiveEndpointConfigurator configurator)
-        {
-            _handler = Handled<PingMessage>(configurator);
-        }
     }
+
 
     [TestFixture]
     public class Publishing_a_message_to_an_endpoint_from_another_scope :
         TwoScopeAzureServiceBusTestFixture
     {
-        [Test]
-        public async void Should_succeed()
-        {
-            await SecondBus.Publish(new PingMessage());
-
-            await _handler;
-
-            await _secondHandler;
-        }
-
         Task<ConsumeContext<PingMessage>> _handler;
         Task<ConsumeContext<PingMessage>> _secondHandler;
 
@@ -66,6 +67,16 @@ namespace MassTransit.AzureServiceBusTransport.Tests
         {
             _secondHandler = Handled<PingMessage>(configurator);
         }
+
+        [Test]
+        public async void Should_succeed()
+        {
+            await SecondBus.Publish(new PingMessage());
+
+            await _handler;
+
+            await _secondHandler;
+        }
     }
 
 
@@ -73,16 +84,6 @@ namespace MassTransit.AzureServiceBusTransport.Tests
     public class Publishing_an_encrypted_message_to_an_endpoint :
         AzureServiceBusTestFixture
     {
-        [Test]
-        public async void Should_succeed()
-        {
-            await Bus.Publish(new PingMessage());
-
-            ConsumeContext<PingMessage> received = await _handler;
-
-            Assert.AreEqual(EncryptedMessageSerializer.EncryptedContentType, received.ReceiveContext.ContentType);
-        }
-
         Task<ConsumeContext<PingMessage>> _handler;
 
         protected override void ConfigureInputQueueEndpoint(IServiceBusReceiveEndpointConfigurator configurator)
@@ -97,6 +98,24 @@ namespace MassTransit.AzureServiceBusTransport.Tests
             configurator.UseEncryptedSerializer(streamProvider);
 
             base.ConfigureBus(configurator);
+        }
+
+        [Test]
+        public void Should_return_a_wonderful_breakdown_of_the_guts_inside_it()
+        {
+            ProbeResult result = Bus.GetProbeResult();
+
+            Console.WriteLine(result.ToJsonString());
+        }
+
+        [Test]
+        public async void Should_succeed()
+        {
+            await Bus.Publish(new PingMessage());
+
+            ConsumeContext<PingMessage> received = await _handler;
+
+            Assert.AreEqual(EncryptedMessageSerializer.EncryptedContentType, received.ReceiveContext.ContentType);
         }
     }
 }

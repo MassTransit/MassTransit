@@ -59,30 +59,15 @@ namespace MassTransit.AzureServiceBusTransport
             });
         }
 
-        ServiceBusHostSettings IServiceBusHost.Settings
-        {
-            get { return _settings; }
-        }
+        ServiceBusHostSettings IServiceBusHost.Settings => _settings;
 
-        Task<MessagingFactory> IServiceBusHost.MessagingFactory
-        {
-            get { return _messagingFactory.Value; }
-        }
+        Task<MessagingFactory> IServiceBusHost.MessagingFactory => _messagingFactory.Value;
 
-        Task<NamespaceManager> IServiceBusHost.NamespaceManager
-        {
-            get { return _namespaceManager.Value; }
-        }
+        Task<NamespaceManager> IServiceBusHost.NamespaceManager => _namespaceManager.Value;
 
-        public Task<NamespaceManager> RootNamespaceManager
-        {
-            get { return _rootNamespaceManager.Value; }
-        }
+        Task<NamespaceManager> IServiceBusHost.RootNamespaceManager => _rootNamespaceManager.Value;
 
-        public IMessageNameFormatter MessageNameFormatter
-        {
-            get { return _messageNameFormatter; }
-        }
+        IMessageNameFormatter IServiceBusHost.MessageNameFormatter => _messageNameFormatter;
 
         public string GetQueuePath(QueueDescription queueDescription)
         {
@@ -107,7 +92,7 @@ namespace MassTransit.AzureServiceBusTransport
             return MessagingFactory.CreateAsync(builder.Uri, mfs);
         }
 
-        async Task<NamespaceManager> CreateNamespaceManager()
+        Task<NamespaceManager> CreateNamespaceManager()
         {
             var nms = new NamespaceManagerSettings
             {
@@ -116,10 +101,10 @@ namespace MassTransit.AzureServiceBusTransport
                 RetryPolicy = RetryPolicy.NoRetry
             };
 
-            return new NamespaceManager(_settings.ServiceUri, nms);
+            return Task.FromResult(new NamespaceManager(_settings.ServiceUri, nms));
         }
 
-        async Task<NamespaceManager> CreateRootNamespaceManager()
+        Task<NamespaceManager> CreateRootNamespaceManager()
         {
             var nms = new NamespaceManagerSettings
             {
@@ -132,7 +117,7 @@ namespace MassTransit.AzureServiceBusTransport
                 Path = ""
             };
 
-            return new NamespaceManager(builder.Uri, nms);
+            return Task.FromResult(new NamespaceManager(builder.Uri, nms));
         }
 
 

@@ -13,6 +13,7 @@
 namespace MassTransit.AzureServiceBusTransport
 {
     using System;
+    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using Configuration;
@@ -49,9 +50,14 @@ namespace MassTransit.AzureServiceBusTransport
             scope.Set(new
             {
                 Type = "Azure Service Bus",
-                _settings.QueueDescription,
+                _settings.QueueDescription.Path,
                 _settings.PrefetchCount,
-                _settings.MaxConcurrentCalls
+                _settings.MaxConcurrentCalls,
+                _settings.QueueDescription,
+                Subscriptions = _subscriptionSettings.Select(subscription => new
+                {
+                    subscription.Topic.Path,
+                }).ToArray(),
             });
         }
 

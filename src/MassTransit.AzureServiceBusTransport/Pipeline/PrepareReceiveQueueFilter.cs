@@ -23,7 +23,6 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
     using Logging;
     using MassTransit.Pipeline;
     using Microsoft.ServiceBus;
-    using Microsoft.ServiceBus.Messaging;
     using NewIdFormatters;
 
 
