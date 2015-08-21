@@ -76,6 +76,12 @@ namespace MassTransit.Serialization
             return new DisposingCryptoStream(stream, encryptor, CryptoStreamMode.Read);
         }
 
+        public void Probe(ProbeContext context)
+        {
+            context.Add("defaultKeyId", _defaultKeyId);
+            context.Add("paddingMode", _paddingMode.ToString());
+        }
+
         ICryptoTransform CreateDecryptor(byte[] key, byte[] iv)
         {
             using (var provider = new AesCryptoServiceProvider {Padding = _paddingMode})

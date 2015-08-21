@@ -41,6 +41,7 @@ namespace MassTransit.Serialization
         {
             ProbeContext scope = context.CreateScope("encrypted");
             scope.Add("contentType", EncryptedMessageSerializer.EncryptedContentType.MediaType);
+            _provider.Probe(scope);
         }
 
         public ContentType ContentType => EncryptedMessageSerializer.EncryptedContentType;
