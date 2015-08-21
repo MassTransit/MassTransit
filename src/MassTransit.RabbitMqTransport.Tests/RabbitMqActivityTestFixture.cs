@@ -60,7 +60,7 @@ namespace MassTransit.RabbitMqTransport.Tests
                 _configurator.ReceiveEndpoint(_host, queueName, x =>
                 {
                     x.PrefetchCount = 1;
-                    x.PurgeOnStartup();
+                    x.PurgeOnStartup = true;
                     configure(x);
                 });
             }

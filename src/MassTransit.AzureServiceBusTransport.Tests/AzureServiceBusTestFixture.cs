@@ -156,7 +156,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
 
                 x.ReceiveEndpoint(host, "input_queue", e =>
                 {
-                    _inputQueueAddress = e.QueuePath;
+                    _inputQueueAddress = e.InputAddress;
 
                     ConfigureInputQueueEndpoint(e);
                 });

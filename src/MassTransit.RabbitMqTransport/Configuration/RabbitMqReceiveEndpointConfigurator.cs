@@ -38,7 +38,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
             _settings = new RabbitMqReceiveSettings
             {
                 QueueName = queueName,
-                ExchangeName = queueName,
+                ExchangeName = queueName
             };
         }
 
@@ -69,24 +69,29 @@ namespace MassTransit.RabbitMqTransport.Configuration
             builder.AddReceiveEndpoint(new ReceiveEndpoint(transport, receivePipe));
         }
 
-        public void Durable(bool durable = true)
+        public bool Durable
         {
-            _settings.Durable = durable;
+            set { _settings.Durable = value; }
         }
 
-        public void Exclusive(bool exclusive = true)
+        public bool Exclusive
         {
-            _settings.Exclusive = exclusive;
+            set { _settings.Exclusive = value; }
         }
 
-        public void AutoDelete(bool autoDelete = true)
+        public bool AutoDelete
         {
-            _settings.AutoDelete = autoDelete;
+            set { _settings.AutoDelete = value; }
         }
 
-        public void PurgeOnStartup(bool purgeOnStartup = true)
+        public string ExchangeType
         {
-            _settings.PurgeOnStartup = purgeOnStartup;
+            set { _settings.ExchangeType = value; }
+        }
+
+        public bool PurgeOnStartup
+        {
+            set { _settings.PurgeOnStartup = value; }
         }
 
         public ushort PrefetchCount
@@ -94,29 +99,26 @@ namespace MassTransit.RabbitMqTransport.Configuration
             set { _settings.PrefetchCount = value; }
         }
 
-        public void ExchangeType(string exchangeType)
-        {
-            _settings.ExchangeType = exchangeType;
-        }
-
         public void SetQueueArgument(string key, object value)
         {
             if (key == null)
                 throw new ArgumentNullException(nameof(key));
-            if (value == null)
-                throw new ArgumentNullException(nameof(value));
 
-            _settings.QueueArguments[key] = value;
+            if (value == null)
+                _settings.QueueArguments.Remove(key);
+            else
+                _settings.QueueArguments[key] = value;
         }
 
         public void SetExchangeArgument(string key, object value)
         {
             if (key == null)
                 throw new ArgumentNullException(nameof(key));
-            if (value == null)
-                throw new ArgumentNullException(nameof(value));
 
-            _settings.ExchangeArguments[key] = value;
+            if (value == null)
+                _settings.ExchangeArguments.Remove(key);
+            else
+                _settings.ExchangeArguments[key] = value;
         }
 
         protected override Uri GetErrorAddress()

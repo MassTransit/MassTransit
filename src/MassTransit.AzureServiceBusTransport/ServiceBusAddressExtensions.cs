@@ -14,18 +14,47 @@ namespace MassTransit.AzureServiceBusTransport
 {
     using System;
     using System.Linq;
+    using System.Text;
     using Internals.Extensions;
     using Microsoft.ServiceBus.Messaging;
+    using NewIdFormatters;
 
 
     public static class ServiceBusAddressExtensions
     {
+        static readonly INewIdFormatter _formatter = new ZBase32Formatter();
+
+        public static string GetTemporaryQueueName(this HostInfo host)
+        {
+            var sb = new StringBuilder();
+
+            foreach (char c in host.MachineName)
+            {
+                if (char.IsLetterOrDigit(c))
+                    sb.Append(c);
+                else if (c == '_')
+                    sb.Append(c);
+            }
+            sb.Append('_');
+            foreach (char c in host.ProcessName)
+            {
+                if (char.IsLetterOrDigit(c))
+                    sb.Append(c);
+                else if (c == '_')
+                    sb.Append(c);
+            }
+            sb.Append("_bus_");
+            sb.Append(NewId.Next().ToString(_formatter));
+
+            return sb.ToString();
+        }
+
         public static QueueDescription GetQueueDescription(this Uri address)
         {
             if (string.Compare("sb", address.Scheme, StringComparison.OrdinalIgnoreCase) != 0)
                 throw new ArgumentException("The invalid scheme was specified: " + address.Scheme);
 
-            string queueName = address.AbsolutePath.Split(new[] {'/'}).Last();
+            string queueName = address.AbsolutePath.Trim('/');
 
             var queueDescription = new QueueDescription(queueName)
             {

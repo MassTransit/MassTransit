@@ -29,43 +29,18 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
         IBusFactorySpecification
     {
         readonly IServiceBusHost _host;
-        readonly QueueDescription _queueDescription;
-        int _maxConcurrentCalls;
-        int _prefetchCount;
+        readonly ReceiveEndpointSettings _settings;
 
         public ServiceBusReceiveEndpointConfigurator(IServiceBusHost host, string queueName, IConsumePipe consumePipe = null)
-            : this(host, new QueueDescription(queueName), consumePipe)
+            : this(host, new ReceiveEndpointSettings(queueName), consumePipe)
         {
-            _queueDescription.EnableBatchedOperations = true;
-            _queueDescription.MaxDeliveryCount = 5;
-
-            DefaultMessageTimeToLive = TimeSpan.FromDays(365);
-            LockDuration = TimeSpan.FromMinutes(5);
-            EnableDeadLetteringOnMessageExpiration = true;
         }
 
-        public ServiceBusReceiveEndpointConfigurator(IServiceBusHost host, QueueDescription queueDescription, IConsumePipe consumePipe = null)
+        public ServiceBusReceiveEndpointConfigurator(IServiceBusHost host, ReceiveEndpointSettings settings, IConsumePipe consumePipe = null)
             : base(consumePipe)
         {
             _host = host;
-            _queueDescription = queueDescription;
-            _maxConcurrentCalls = Math.Max(Environment.ProcessorCount, 8);
-            _prefetchCount = Math.Max(_maxConcurrentCalls, 32);
-        }
-
-        public Uri InputAddress
-        {
-            get { return _host.Settings.GetInputAddress(_queueDescription); }
-        }
-
-        public bool DuplicateDetection
-        {
-            set { _queueDescription.RequiresDuplicateDetection = value; }
-        }
-
-        public QueueDescription QueueDescription
-        {
-            get { return _queueDescription; }
+            _settings = settings;
         }
 
         public override IEnumerable<ValidationResult> Validate()
@@ -73,20 +48,16 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
             foreach (ValidationResult result in base.Validate())
                 yield return result;
 
-            if (_prefetchCount <= 0)
+            if (_settings.PrefetchCount <= 0)
                 yield return this.Failure("PrefetchCount", "must be > 0");
+            if (_settings.MaxConcurrentCalls <= 0)
+                yield return this.Failure("MaxConcurrentCalls", "must be > 0");
+            if (_settings.QueueDescription.AutoDeleteOnIdle != TimeSpan.Zero && _settings.QueueDescription.AutoDeleteOnIdle < TimeSpan.FromMinutes(5))
+                yield return this.Failure("AutoDeleteOnIdle", "must be zero, or >= 5:00");
         }
 
         public void Apply(IBusBuilder builder)
         {
-            ReceiveSettings settings = new ReceiveEndpointSettings
-            {
-                AutoRenewTimeout = TimeSpan.FromMinutes(5),
-                MaxConcurrentCalls = _maxConcurrentCalls,
-                PrefetchCount = _prefetchCount,
-                QueueDescription = _queueDescription,
-            };
-
             ServiceBusReceiveEndpointBuilder endpointBuilder = null;
             IPipe<ReceiveContext> receivePipe = CreateReceivePipe(builder, consumePipe =>
             {
@@ -97,65 +68,62 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
             if (endpointBuilder == null)
                 throw new InvalidOperationException("The endpoint builder was not initialized");
 
-            var transport = new ServiceBusReceiveTransport(_host, settings, endpointBuilder.GetTopicSubscriptions().ToArray());
+            var transport = new ServiceBusReceiveTransport(_host, _settings, endpointBuilder.GetTopicSubscriptions().ToArray());
 
             builder.AddReceiveEndpoint(new ReceiveEndpoint(transport, receivePipe));
         }
 
         public bool EnableExpress
         {
-            set { _queueDescription.EnableExpress = value; }
+            set { _settings.QueueDescription.EnableExpress = value; }
         }
 
         public TimeSpan LockDuration
         {
-            set { _queueDescription.LockDuration = value; }
+            set { _settings.QueueDescription.LockDuration = value; }
         }
 
         public bool EnableDeadLetteringOnMessageExpiration
         {
-            set { _queueDescription.EnableDeadLetteringOnMessageExpiration = value; }
+            set { _settings.QueueDescription.EnableDeadLetteringOnMessageExpiration = value; }
         }
 
         public TimeSpan DefaultMessageTimeToLive
         {
-            set { _queueDescription.DefaultMessageTimeToLive = value; }
+            set { _settings.QueueDescription.DefaultMessageTimeToLive = value; }
         }
 
         public int PrefetchCount
         {
-            set { _prefetchCount = value; }
+            set { _settings.PrefetchCount = value; }
         }
 
         public int MaxConcurrentCalls
         {
             set
             {
-                _maxConcurrentCalls = value;
-                if (_maxConcurrentCalls > _prefetchCount)
-                    _prefetchCount = _maxConcurrentCalls;
+                _settings.MaxConcurrentCalls = value;
+                if (_settings.MaxConcurrentCalls > _settings.PrefetchCount)
+                    _settings.PrefetchCount = _settings.MaxConcurrentCalls;
             }
         }
 
-        public Uri QueuePath
-        {
-            get { return _host.Settings.GetInputAddress(_queueDescription); }
-        }
+        public Uri InputAddress => _host.Settings.GetInputAddress(_settings.QueueDescription);
 
         public void EnableDuplicateDetection(TimeSpan historyTimeWindow)
         {
-            _queueDescription.RequiresDuplicateDetection = true;
-            _queueDescription.DuplicateDetectionHistoryTimeWindow = historyTimeWindow;
+            _settings.QueueDescription.RequiresDuplicateDetection = true;
+            _settings.QueueDescription.DuplicateDetectionHistoryTimeWindow = historyTimeWindow;
         }
 
         public TimeSpan AutoDeleteOnIdle
         {
-            set { _queueDescription.AutoDeleteOnIdle = value; }
+            set { _settings.QueueDescription.AutoDeleteOnIdle = value; }
         }
 
         protected override Uri GetErrorAddress()
         {
-            string errorQueueName = _queueDescription.Path + "_error";
+            string errorQueueName = _settings.QueueDescription.Path + "_error";
             var errorQueueDescription = new QueueDescription(errorQueueName);
 
             return _host.Settings.GetInputAddress(errorQueueDescription);
@@ -163,20 +131,10 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
 
         protected override Uri GetDeadLetterAddress()
         {
-            string errorQueueName = _queueDescription.Path + "_skipped";
+            string errorQueueName = _settings.QueueDescription.Path + "_skipped";
             var errorQueueDescription = new QueueDescription(errorQueueName);
 
             return _host.Settings.GetInputAddress(errorQueueDescription);
-        }
-
-
-        class ReceiveEndpointSettings :
-            ReceiveSettings
-        {
-            public int PrefetchCount { get; set; }
-            public int MaxConcurrentCalls { get; set; }
-            public QueueDescription QueueDescription { get; set; }
-            public TimeSpan AutoRenewTimeout { get; set; }
         }
     }
 }

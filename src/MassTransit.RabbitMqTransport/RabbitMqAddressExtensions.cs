@@ -21,6 +21,7 @@ namespace MassTransit.RabbitMqTransport
     using System.Text;
     using System.Text.RegularExpressions;
     using Configuration.Configurators;
+    using NewIdFormatters;
     using RabbitMQ.Client;
     using Topology;
     using Transports;
@@ -29,6 +30,7 @@ namespace MassTransit.RabbitMqTransport
 
     public static class RabbitMqAddressExtensions
     {
+        static readonly INewIdFormatter _formatter = new ZBase32Formatter();
         static readonly Regex _regex = new Regex(@"^[A-Za-z0-9\-_\.:]+$");
 
         public static string GetTemporaryQueueName(this HostInfo host)
@@ -51,7 +53,7 @@ namespace MassTransit.RabbitMqTransport
                     sb.Append(c);
             }
             sb.Append('-');
-            sb.Append(NewId.Next().ToString("NS"));
+            sb.Append(NewId.Next().ToString(_formatter));
 
             return sb.ToString();
         }

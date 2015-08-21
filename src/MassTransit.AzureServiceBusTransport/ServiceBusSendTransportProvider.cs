@@ -36,7 +36,22 @@ namespace MassTransit.AzureServiceBusTransport
             if (host == null)
                 throw new EndpointNotFoundException("The endpoint address specified an unknown host: " + address);
 
-            QueueDescription queueDescription = await (await host.NamespaceManager).CreateQueueSafeAsync(address.GetQueueDescription());
+            var queueDescription = address.GetQueueDescription();
+
+            var namespaceManager = await host.NamespaceManager;
+
+            var namespacePath = namespaceManager.Address.AbsolutePath.Trim('/');
+            if (IsInNamespace(queueDescription, namespacePath))
+            {
+                queueDescription.Path = queueDescription.Path.Replace(namespacePath, "").Trim('/');
+                queueDescription = await namespaceManager.CreateQueueSafeAsync(queueDescription);
+            }
+            else
+            {
+                namespaceManager = await host.RootNamespaceManager;
+
+                queueDescription = await namespaceManager.CreateQueueSafeAsync(queueDescription);
+            }
 
             MessagingFactory messagingFactory = await host.MessagingFactory;
 
@@ -46,6 +61,11 @@ namespace MassTransit.AzureServiceBusTransport
 
             var sendTransport = new ServiceBusSendTransport(messageSender);
             return sendTransport;
+        }
+
+        static bool IsInNamespace(QueueDescription queueDescription, string namespacePath)
+        {
+            return queueDescription.Path.StartsWith(namespacePath);
         }
     }
 }

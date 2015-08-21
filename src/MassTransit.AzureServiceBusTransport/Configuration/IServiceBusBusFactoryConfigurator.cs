@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -15,6 +15,22 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
     public interface IServiceBusBusFactoryConfigurator :
         IBusFactoryConfigurator
     {
+        /// <summary>
+        /// Specify the number of messages to prefetch from the queue to the service
+        /// </summary>
+        /// <value>The limit</value>
+        int PrefetchCount { set; }
+
+        /// <summary>
+        /// Specify the number of concurrent consumers (separate from prefetch count)
+        /// </summary>
+        int MaxConcurrentCalls { set; }
+
+        /// <summary>
+        /// Configures a host
+        /// </summary>
+        /// <param name="settings"></param>
+        /// <returns></returns>
         IServiceBusHost Host(ServiceBusHostSettings settings);
     }
 }

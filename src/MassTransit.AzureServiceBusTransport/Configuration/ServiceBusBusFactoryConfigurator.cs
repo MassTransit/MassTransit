@@ -19,21 +19,34 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
     using BusConfigurators;
     using Configurators;
     using PipeConfigurators;
+    using Util;
 
 
-    public class AzureServiceBusBusFactoryConfigurator :
+    public class ServiceBusBusFactoryConfigurator :
         IServiceBusBusFactoryConfigurator,
+        IQueueConfigurator,
         IBusFactory
     {
         readonly ConsumePipeSpecificationList _consumePipeSpecification;
         readonly IList<ServiceBusHost> _hosts;
+        readonly ReceiveEndpointSettings _settings;
         readonly IList<IBusFactorySpecification> _transportSpecifications;
 
-        public AzureServiceBusBusFactoryConfigurator()
+        public ServiceBusBusFactoryConfigurator()
         {
             _hosts = new List<ServiceBusHost>();
             _transportSpecifications = new List<IBusFactorySpecification>();
             _consumePipeSpecification = new ConsumePipeSpecificationList();
+
+            string queueName = HostMetadataCache.Host.GetTemporaryQueueName();
+            _settings = new ReceiveEndpointSettings(queueName)
+            {
+                QueueDescription =
+                {
+                    EnableExpress = true,
+                    AutoDeleteOnIdle = TimeSpan.FromMinutes(5)
+                }
+            };
         }
 
         public IEnumerable<ValidationResult> Validate()
@@ -43,7 +56,7 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
 
         public IBusControl CreateBus()
         {
-            var builder = new ServiceBusBusBuilder(_hosts, _consumePipeSpecification);
+            var builder = new ServiceBusBusBuilder(_hosts, _consumePipeSpecification, _settings);
 
             foreach (IBusFactorySpecification configurator in _transportSpecifications)
                 configurator.Apply(builder);
@@ -51,10 +64,56 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
             return builder.Build();
         }
 
+        public bool EnableExpress
+        {
+            set { _settings.QueueDescription.EnableExpress = value; }
+        }
+
+        public TimeSpan LockDuration
+        {
+            set { _settings.QueueDescription.LockDuration = value; }
+        }
+
+        public bool EnableDeadLetteringOnMessageExpiration
+        {
+            set { _settings.QueueDescription.EnableDeadLetteringOnMessageExpiration = value; }
+        }
+
+        public TimeSpan DefaultMessageTimeToLive
+        {
+            set { _settings.QueueDescription.DefaultMessageTimeToLive = value; }
+        }
+
+        public void EnableDuplicateDetection(TimeSpan historyTimeWindow)
+        {
+            _settings.QueueDescription.RequiresDuplicateDetection = true;
+            _settings.QueueDescription.DuplicateDetectionHistoryTimeWindow = historyTimeWindow;
+        }
+
+        public TimeSpan AutoDeleteOnIdle
+        {
+            set { _settings.QueueDescription.AutoDeleteOnIdle = value; }
+        }
+
+        public int PrefetchCount
+        {
+            set { _settings.PrefetchCount = value; }
+        }
+
+        public int MaxConcurrentCalls
+        {
+            set
+            {
+                _settings.MaxConcurrentCalls = value;
+                if (_settings.MaxConcurrentCalls > _settings.PrefetchCount)
+                    _settings.PrefetchCount = _settings.MaxConcurrentCalls;
+            }
+        }
+
         public IServiceBusHost Host(ServiceBusHostSettings settings)
         {
             if (settings == null)
-                throw new ArgumentNullException("settings");
+                throw new ArgumentNullException(nameof(settings));
 
             var host = new ServiceBusHost(settings);
             _hosts.Add(host);
@@ -65,7 +124,7 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
         void IBusFactoryConfigurator.AddBusFactorySpecification(IBusFactorySpecification configurator)
         {
             if (configurator == null)
-                throw new ArgumentNullException("configurator");
+                throw new ArgumentNullException(nameof(configurator));
 
             _transportSpecifications.Add(configurator);
         }

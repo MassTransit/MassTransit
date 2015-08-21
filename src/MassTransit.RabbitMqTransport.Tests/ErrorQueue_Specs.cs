@@ -113,7 +113,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         {
             configurator.ReceiveEndpoint(host, "input_queue_error", x =>
             {
-                x.PurgeOnStartup();
+                x.PurgeOnStartup = true;
 
                 _errorHandler = Handler<PingMessage>(x, async context =>
                 {

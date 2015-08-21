@@ -145,21 +145,27 @@ namespace MassTransit.Tests
         public async Task Should_receive_the_response()
         {
             ConsumeContext<PongMessage> context = await _responseHandler;
+
+            context.ConversationId.ShouldBe(_conversationId);
         }
 
         Task<ConsumeContext<PingMessage>> _ping;
         Task<ConsumeContext<PongMessage>> _responseHandler;
         Task<Request<PingMessage>> _request;
         Task<PongMessage> _response;
+        Guid? _conversationId;
 
         [TestFixtureSetUp]
         public void Setup()
         {
             _responseHandler = SubscribeHandler<PongMessage>();
+            _conversationId = NewId.NextGuid();
 
             _request = Bus.Request(InputQueueAddress, new PingMessage(), x =>
             {
-                _response = x.Handle<PongMessage>(async _ =>
+                x.ConversationId = _conversationId;
+
+                _response = x.Handle<PongMessage>(async context =>
                 {
                     Console.WriteLine("Response received");
                 });
