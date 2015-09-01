@@ -15,6 +15,7 @@ namespace MassTransit.Context
     using System;
     using System.Threading.Tasks;
     using Pipeline;
+    using Scheduling;
 
 
     public class ConsumeMessageSchedulerContext :
@@ -37,20 +38,39 @@ namespace MassTransit.Context
             _schedulerEndpoint = new Lazy<Task<ISendEndpoint>>(GetSchedulerEndpoint);
         }
 
-        public async Task ScheduleSend<T>(T message, TimeSpan deliveryDelay, IPipe<SendContext> sendPipe)
+        public Task<ScheduledMessage<T>> ScheduleSend<T>(T message, TimeSpan deliveryDelay, IPipe<SendContext> sendPipe)
             where T : class
         {
-            ISendEndpoint endpoint = await _schedulerEndpoint.Value.ConfigureAwait(false);
+            var scheduledTime = DateTime.UtcNow + deliveryDelay;
 
-            await endpoint.ScheduleSend(_consumeContext.ReceiveContext.InputAddress, DateTime.UtcNow + deliveryDelay, message, sendPipe).ConfigureAwait(false);
+            return ScheduleSend(message, scheduledTime, sendPipe);
         }
 
-        public async Task ScheduleSend<T>(T message, DateTime deliveryTime, IPipe<SendContext> sendPipe)
+        public async Task<ScheduledMessage<T>> ScheduleSend<T>(T message, DateTime deliveryTime, IPipe<SendContext> sendPipe)
             where T : class
         {
             ISendEndpoint endpoint = await _schedulerEndpoint.Value.ConfigureAwait(false);
 
-            await endpoint.ScheduleSend(_consumeContext.ReceiveContext.InputAddress, deliveryTime, message, sendPipe).ConfigureAwait(false);
+            ScheduledMessage<T> scheduledMessage = await endpoint.ScheduleSend(_consumeContext.ReceiveContext.InputAddress, deliveryTime, message, sendPipe)
+                .ConfigureAwait(false);
+
+            return scheduledMessage;
+        }
+
+        public Task CancelScheduledSend<T>(ScheduledMessage<T> message)
+            where T : class
+        {
+            if (message == null)
+                throw new ArgumentNullException(nameof(message));
+
+            return CancelScheduledSend(message.TokenId);
+        }
+
+        public async Task CancelScheduledSend(Guid tokenId)
+        {
+            ISendEndpoint endpoint = await _schedulerEndpoint.Value.ConfigureAwait(false);
+
+            await endpoint.CancelScheduledSend(tokenId).ConfigureAwait(false);
         }
 
         Task<ISendEndpoint> GetSchedulerEndpoint()

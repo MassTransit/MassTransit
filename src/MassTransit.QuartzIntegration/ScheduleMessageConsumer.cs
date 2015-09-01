@@ -44,14 +44,16 @@ namespace MassTransit.QuartzIntegration
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("ScheduleMessage: {0} at {1}", context.Message.CorrelationId, context.Message.ScheduledTime);
 
-            var jobKey = new JobKey(context.Message.CorrelationId.ToString("N"));
+            var correlationId = context.Message.CorrelationId.ToString("N");
+
+            var jobKey = new JobKey(correlationId);
             IJobDetail jobDetail = await CreateJobDetail(context, context.Message.Destination, jobKey);
 
             ITrigger trigger = TriggerBuilder.Create()
                 .ForJob(jobDetail)
                 .StartAt(context.Message.ScheduledTime)
                 .WithSchedule(SimpleScheduleBuilder.Create().WithMisfireHandlingInstructionFireNow())
-                .WithIdentity(new TriggerKey(context.Message.CorrelationId.ToString("N")))
+                .WithIdentity(new TriggerKey(correlationId))
                 .Build();
 
             _scheduler.ScheduleJob(jobDetail, trigger);

@@ -15,14 +15,28 @@ namespace MassTransit
     using System;
     using System.Threading.Tasks;
     using Pipeline;
+    using Scheduling;
 
 
     public interface MessageSchedulerContext
     {
-        Task ScheduleSend<T>(T message, TimeSpan deliveryDelay, IPipe<SendContext> sendPipe)
+        Task<ScheduledMessage<T>> ScheduleSend<T>(T message, TimeSpan deliveryDelay, IPipe<SendContext> sendPipe)
             where T : class;
 
-        Task ScheduleSend<T>(T message, DateTime deliveryTime, IPipe<SendContext> sendPipe)
+        Task<ScheduledMessage<T>> ScheduleSend<T>(T message, DateTime deliveryTime, IPipe<SendContext> sendPipe)
             where T : class;
+
+        /// <summary>
+        /// Cancel a scheduled message by the scheduled message (uses the TokenId)
+        /// </summary>
+        /// <param name="message">The schedule message reference</param>
+        Task CancelScheduledSend<T>(ScheduledMessage<T> message)
+            where T : class;
+
+        /// <summary>
+        /// Cancel a scheduled message by TokenId
+        /// </summary>
+        /// <param name="tokenId">The tokenId of the scheduled message</param>
+        Task CancelScheduledSend(Guid tokenId);
     }
 }

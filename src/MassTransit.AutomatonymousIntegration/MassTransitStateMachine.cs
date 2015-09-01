@@ -21,6 +21,7 @@ namespace Automatonymous
     using MassTransit;
     using MassTransit.Internals.Extensions;
     using Requests;
+    using Schedules;
 
 
     /// <summary>
@@ -231,6 +232,56 @@ namespace Automatonymous
             Event(propertyExpression, x => x.TimeoutExpired, x => x.CorrelateBy<Guid>(requestIdExpression, context => context.Message.RequestId));
 
             State(propertyExpression, x => x.Pending);
+        }
+
+        /// <summary>
+        /// Declares a schedule placeholder that is stored with the state machine instance
+        /// </summary>
+        /// <typeparam name="TMessage">The request type</typeparam>
+        /// <param name="propertyExpression">The schedule property on the state machine</param>
+        /// <param name="tokenIdExpression">The property where the tokenId is stored</param>
+        /// <param name="configureSchedule"></param>
+        protected void Schedule<TMessage>(Expression<Func<Schedule<TInstance, TMessage>>> propertyExpression,
+            Expression<Func<TInstance, Guid?>> tokenIdExpression,
+            Action<ScheduleConfigurator<TInstance, TMessage>> configureSchedule)
+            where TMessage : class
+        {
+            var configurator = new StateMachineScheduleConfigurator<TInstance, TMessage>();
+
+            configureSchedule(configurator);
+
+            Schedule(propertyExpression, tokenIdExpression, configurator.Settings);
+        }
+
+        /// <summary>
+        /// Declares a schedule placeholder that is stored with the state machine instance
+        /// </summary>
+        /// <typeparam name="TMessage">The scheduled message type</typeparam>
+        /// <param name="propertyExpression">The schedule property on the state machine</param>
+        /// <param name="tokenIdExpression">The property where the tokenId is stored</param>
+        /// <param name="settings">The request settings (which can be read from configuration, etc.)</param>
+        protected void Schedule<TMessage>(Expression<Func<Schedule<TInstance, TMessage>>> propertyExpression,
+            Expression<Func<TInstance, Guid?>> tokenIdExpression,
+            ScheduleSettings<TInstance,TMessage> settings)
+            where TMessage : class
+        {
+            PropertyInfo property = propertyExpression.GetPropertyInfo();
+
+            string name = property.Name;
+
+            var request = new StateMachineSchedule<TInstance, TMessage>(name, tokenIdExpression, settings);
+
+            property.SetValue(this, request);
+
+            Event(propertyExpression, x => x.Received, x =>
+            {
+                if (settings.Received != null)
+                    settings.Received(x);
+            });
+
+            DuringAny(
+                When(request.Received)
+                    .Then(context => request.SetTokenId(context.Instance, default(Guid?))));
         }
 
         static bool NotCompletedByDefault(TInstance instance)

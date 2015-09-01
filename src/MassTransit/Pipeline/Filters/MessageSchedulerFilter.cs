@@ -33,7 +33,8 @@ namespace MassTransit.Pipeline.Filters
 
         void IProbeSite.Probe(ProbeContext context)
         {
-            context.CreateFilterScope("scheduler");
+            var scope = context.CreateFilterScope("scheduler");
+            scope.Add("address", _schedulerAddress);
         }
 
         [DebuggerNonUserCode]

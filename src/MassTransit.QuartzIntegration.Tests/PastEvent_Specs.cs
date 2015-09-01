@@ -15,6 +15,7 @@ namespace MassTransit.QuartzIntegration.Tests
     using System;
     using System.Threading.Tasks;
     using NUnit.Framework;
+    using Scheduling;
 
 
     [TestFixture]
@@ -39,6 +40,20 @@ namespace MassTransit.QuartzIntegration.Tests
             await QuartzEndpoint.ScheduleSend(Bus.Address, DateTime.UtcNow + TimeSpan.FromSeconds(2), new A { Name = "Joe" });
 
             await handler;
+        }
+
+        [Test, Explicit]
+        public async void Should_be_able_to_cancel_a_future_event()
+        {
+            Task<ConsumeContext<A>> handler = SubscribeHandler<A>();
+
+            var scheduledMessage = await QuartzEndpoint.ScheduleSend(Bus.Address, DateTime.UtcNow + TimeSpan.FromSeconds(120), new A { Name = "Joe" });
+
+            await Task.Delay(2000);
+
+            await QuartzEndpoint.CancelScheduledSend(scheduledMessage);
+
+            await Task.Delay(2000);
         }
 
         [Test]

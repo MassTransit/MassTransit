@@ -112,6 +112,7 @@
     <Compile Include="Request_Specs.cs" />
     <Compile Include="Respond_Specs.cs" />
     <Compile Include="SagaDbContextFactoryProvider.cs" />
+    <Compile Include="ScheduleTimeout_Specs.cs" />
     <Compile Include="Sending_a_request_that_times_out.cs" />
     <Compile Include="SimpleStateMachine_Specs.cs" />
     <Compile Include="SingleConnectionSessionFactory.cs" />

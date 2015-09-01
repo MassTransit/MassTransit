@@ -33,12 +33,15 @@ namespace MassTransit.QuartzIntegration
 
         public Task Consume(ConsumeContext<CancelScheduledMessage> context)
         {
-            bool unscheduledJob = _scheduler.UnscheduleJob(new TriggerKey(context.Message.TokenId.ToString("N")));
+            var correlationId = context.Message.TokenId.ToString("N");
+
+            var jobKey = new JobKey(correlationId);
+            var deletedJob = _scheduler.DeleteJob(jobKey);
 
             if (_log.IsDebugEnabled)
             {
-                if (unscheduledJob)
-                    _log.DebugFormat("CancelScheduledMessage: {0} at {1}", context.Message.TokenId, context.Message.Timestamp);
+                if (deletedJob)
+                    _log.DebugFormat("Cancelled Scheduled Message: {0} at {1}", context.Message.TokenId, context.Message.Timestamp);
                 else
                     _log.DebugFormat("CancelScheduledMessage: no message found {0}", context.Message.TokenId);
             }

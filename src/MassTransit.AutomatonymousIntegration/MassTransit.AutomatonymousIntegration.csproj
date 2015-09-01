@@ -52,10 +52,14 @@
     <Compile Include="..\SolutionVersion.cs">
       <Link>Properties\SolutionVersion.cs</Link>
     </Compile>
+    <Compile Include="Activities\UnscheduleActivity.cs" />
     <Compile Include="Activities\PublishActivity.cs" />
     <Compile Include="Activities\RequestActivityImpl.cs" />
+    <Compile Include="Activities\ScheduleActivity.cs" />
     <Compile Include="Configuration\EventMissingInstanceConfigurator.cs" />
     <Compile Include="Configuration\MissingInstanceConfigurator.cs" />
+    <Compile Include="Configuration\ScheduleConfigurator.cs" />
+    <Compile Include="Configuration\StateMachineScheduleConfigurator.cs" />
     <Compile Include="EventMessageFactory.cs" />
     <Compile Include="Activities\RequestActivity.cs" />
     <Compile Include="Activities\RespondActivity.cs" />
@@ -85,8 +89,12 @@
     <Compile Include="RequestExtensions.cs" />
     <Compile Include="RequestSettings.cs" />
     <Compile Include="Requests\StateMachineRequest.cs" />
+    <Compile Include="Schedules\StateMachineSchedule.cs" />
     <Compile Include="RespondExtensions.cs" />
     <Compile Include="SagaStateMachine.cs" />
+    <Compile Include="Schedule.cs" />
+    <Compile Include="SchedulerExtensions.cs" />
+    <Compile Include="ScheduleSettings.cs" />
     <Compile Include="Testing\StateMachineSagaTestBuilderImpl.cs" />
     <Compile Include="Testing\StateMachineSagaTestInstance.cs" />
     <Compile Include="Testing\StateMachineSagaTestSubjectImpl.cs" />
