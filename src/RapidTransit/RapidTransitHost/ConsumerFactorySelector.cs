@@ -12,15 +12,27 @@
 // specific language governing permissions and limitations under the License.
 namespace RapidTransit
 {
-    using System;
+    using Autofac;
     using MassTransit;
+    using MassTransit.AutofacIntegration;
 
 
-    /// <summary>
-    /// Passed to a service bootstrapper to allow configuration of receive endpoints
-    /// </summary>
-    public interface IServiceConfigurator
+    public class ConsumerFactorySelector<TConsumer> :
+        IConsumerFactorySelector<TConsumer>
+        where TConsumer : class, IConsumer
     {
-        void ReceiveEndpoint(string queueName, int consumerLimit, Action<IReceiveEndpointConfigurator> configureEndpoint);
+        readonly ILifetimeScope _scope;
+        string _name;
+
+        public ConsumerFactorySelector(ILifetimeScope scope)
+        {
+            _scope = scope;
+            _name = "message";
+        }
+
+        public IConsumerFactory<TConsumer> ConsumerFactory()
+        {
+            return new AutofacConsumerFactory<TConsumer>(_scope, _name);
+        }
     }
 }

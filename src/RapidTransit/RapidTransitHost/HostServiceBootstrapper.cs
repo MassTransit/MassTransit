@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,14 +13,9 @@
 namespace RapidTransit
 {
     using System;
-    using System.Collections.Generic;
     using System.IO;
-    using System.Linq;
     using System.Reflection;
     using Autofac;
-    using MassTransit;
-    using MassTransit.Internals.Extensions;
-    using MassTransit.Util;
     using Topshelf.Logging;
     using Topshelf.Runtime;
 
@@ -50,25 +45,29 @@ namespace RapidTransit
 
         protected override void ConfigureContainer(ContainerBuilder builder)
         {
-            string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
 
-            List<string> assemblies = Directory.EnumerateFiles(baseDirectory, "*.dll", SearchOption.AllDirectories)
-                .Where(x => !x.StartsWith("MassTransit.", StringComparison.OrdinalIgnoreCase))
-                .ToList();
 
-            var registrations = assemblies
-                .Select(Assembly.ReflectionOnlyLoadFrom)
-                .SelectMany(x => x.GetTypes().Select(y => new {Assembly = x, Type = y}))
-                .Where(x => x.Type.HasInterface<IConsumer>())
-                .GroupBy(x => x.Assembly)
-                .Select(x => new {Assembly = Assembly.Load(x.Key.GetName()), Types = x})
-                .SelectMany(x => x.Types.Select(y =>
-                {
-                    _log.DebugFormat("Registering consumer type: {0}", TypeMetadataCache.GetShortName(y.Type));
-
-                    return builder.RegisterType(y.Type);
-                }))
-                .ToList();
+//            string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
+//
+//            List<string> assemblies = Directory.EnumerateFiles(baseDirectory, "*.dll", SearchOption.AllDirectories)
+//                .Where(x => !x.StartsWith("MassTransit.", StringComparison.OrdinalIgnoreCase))
+//                .Where(x => !x.StartsWith("RapidTransit.", StringComparison.OrdinalIgnoreCase))
+//                .Where(x => !x.StartsWith("log4net.", StringComparison.OrdinalIgnoreCase))
+//                .ToList();
+//
+//            var registrations = assemblies
+//                .Select(Assembly.ReflectionOnlyLoadFrom)
+//                .SelectMany(x => x.GetTypes().Select(y => new {Assembly = x, Type = y}))
+//                .Where(x => x.Type.HasInterface<IConsumer>())
+//                .GroupBy(x => x.Assembly)
+//                .Select(x => new {Assembly = Assembly.Load(x.Key.GetName()), Types = x})
+//                .SelectMany(x => x.Types.Select(y =>
+//                {
+//                    _log.DebugFormat("Registering consumer type: {0}", TypeMetadataCache.GetShortName(y.Type));
+//
+//                    return builder.RegisterType(y.Type);
+//                }))
+//                .ToList();
         }
     }
 }

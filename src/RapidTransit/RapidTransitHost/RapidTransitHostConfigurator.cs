@@ -45,7 +45,7 @@ namespace RapidTransit
 
             configurator.Service(settings =>
                 {
-                    OnStarting(settings);
+                    OnStarting?.Invoke(settings);
 
                     _bootstrapper = BootstrapperFactory(settings);
 
@@ -61,7 +61,7 @@ namespace RapidTransit
         static void VerifyEventLogSourceExists(string serviceName)
         {
             if (!EventLog.SourceExists(serviceName))
-                EventLog.CreateEventSource(serviceName, "RelayHealth");
+                EventLog.CreateEventSource(serviceName, "RapidTransit");
         }
 
         /// <summary>

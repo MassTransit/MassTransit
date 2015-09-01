@@ -18,8 +18,7 @@ namespace RapidTransit
 
 
     /// <summary>
-    /// Configures the transport for a service bus instance to use RabbitMQ, including
-    /// the ReceiveFrom address
+    /// A hosted service can specify receive endpoints using the service configurator
     /// </summary>
     public class RabbitMqServiceConfigurator :
         IServiceConfigurator
@@ -33,13 +32,13 @@ namespace RapidTransit
             _host = host;
         }
 
-        public void Configure(string queueName, int consumerLimit, Action<IRabbitMqReceiveEndpointConfigurator> callback)
+        public void ReceiveEndpoint(string queueName, int consumerLimit, Action<IReceiveEndpointConfigurator> configureEndpoint)
         {
             _configurator.ReceiveEndpoint(_host, queueName, x =>
             {
                 x.PrefetchCount = (ushort)consumerLimit;
 
-                callback(x);
+                configureEndpoint(x);
             });
         }
     }
