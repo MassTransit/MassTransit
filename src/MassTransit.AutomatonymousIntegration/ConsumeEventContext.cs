@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -20,9 +20,9 @@ namespace Automatonymous
     /// </summary>
     /// <typeparam name="TInstance"></typeparam>
     public interface ConsumeEventContext<out TInstance> :
-        EventContext<TInstance>
+        EventContext<TInstance>,
+        ConsumeContext
     {
-        ConsumeContext ConsumeContext { get; }
     }
 
 
@@ -32,9 +32,9 @@ namespace Automatonymous
     /// <typeparam name="TInstance"></typeparam>
     /// <typeparam name="TData"></typeparam>
     public interface ConsumeEventContext<out TInstance, out TData> :
-        EventContext<TInstance, TData>
+        EventContext<TInstance, TData>,
+        ConsumeContext
         where TData : class
     {
-        ConsumeContext<TData> ConsumeContext { get; } 
     }
 }

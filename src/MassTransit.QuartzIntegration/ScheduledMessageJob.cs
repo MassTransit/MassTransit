@@ -56,7 +56,7 @@ namespace MassTransit.QuartzIntegration
                 var destinationAddress = new Uri(Destination);
                 Uri sourceAddress = _bus.Address;
 
-                IPipe<SendContext> sendPipe = CreateMessageContext(sourceAddress, destinationAddress);
+                IPipe<SendContext> sendPipe = CreateMessageContext(sourceAddress, destinationAddress, context.Trigger.Key.Name);
 
                 ISendEndpoint endpoint = _bus.GetSendEndpoint(destinationAddress)
                     .Result;
@@ -75,7 +75,7 @@ namespace MassTransit.QuartzIntegration
             }
         }
 
-        IPipe<SendContext> CreateMessageContext(Uri sourceAddress, Uri destinationAddress)
+        IPipe<SendContext> CreateMessageContext(Uri sourceAddress, Uri destinationAddress, string triggerKey)
         {
             IPipe<SendContext> sendPipe = Pipe.New<SendContext>(x =>
             {
@@ -93,6 +93,8 @@ namespace MassTransit.QuartzIntegration
                     context.CorrelationId = ConvertIdToGuid(CorrelationId);
                     context.ConversationId = ConvertIdToGuid(ConversationId);
                     context.InitiatorId = ConvertIdToGuid(InitiatorId);
+
+                    context.Headers.Set("MT-Quartz-TriggerKey", triggerKey);
 
                     if (!string.IsNullOrEmpty(ExpirationTime))
                         context.TimeToLive = DateTime.UtcNow - DateTime.Parse(ExpirationTime);

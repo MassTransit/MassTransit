@@ -15,19 +15,35 @@ namespace Automatonymous.Contexts
     using System;
     using System.Threading;
     using MassTransit;
+    using MassTransit.Context;
 
 
     public class AutomatonymousConsumeEventContext<TInstance, TData> :
+        ConsumeContextProxy<TData>,
         ConsumeEventContext<TInstance, TData>
         where TData : class
     {
-        readonly ConsumeContext<TData> _consumeContext;
         readonly BehaviorContext<TInstance, TData> _context;
 
         public AutomatonymousConsumeEventContext(BehaviorContext<TInstance, TData> context, ConsumeContext<TData> consumeContext)
+            : base(consumeContext)
         {
             _context = context;
-            _consumeContext = consumeContext;
+        }
+
+        public override TPayload GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory)
+        {
+            return _context.GetOrAddPayload(() => payloadFactory());
+        }
+
+        public override bool HasPayloadType(Type contextType)
+        {
+            return _context.HasPayloadType(contextType);
+        }
+
+        public override bool TryGetPayload<TPayload>(out TPayload context)
+        {
+            return _context.TryGetPayload(out context);
         }
 
         CancellationToken InstanceContext<TInstance>.CancellationToken => _context.CancellationToken;
@@ -50,21 +66,35 @@ namespace Automatonymous.Contexts
 
         Event<TData> EventContext<TInstance, TData>.Event => _context.Event;
         TData EventContext<TInstance, TData>.Data => _context.Data;
-        ConsumeContext<TData> ConsumeEventContext<TInstance, TData>.ConsumeContext => _consumeContext;
         Event EventContext<TInstance>.Event => _context.Event;
     }
 
 
     public class AutomatonymousConsumeEventContext<TInstance> :
+        ConsumeContextProxy,
         ConsumeEventContext<TInstance>
     {
-        readonly ConsumeContext _consumeContext;
         readonly BehaviorContext<TInstance> _context;
 
         public AutomatonymousConsumeEventContext(BehaviorContext<TInstance> context, ConsumeContext consumeContext)
+            : base(consumeContext)
         {
             _context = context;
-            _consumeContext = consumeContext;
+        }
+
+        public override TPayload GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory)
+        {
+            return _context.GetOrAddPayload(() => payloadFactory());
+        }
+
+        public override bool HasPayloadType(Type contextType)
+        {
+            return _context.HasPayloadType(contextType);
+        }
+
+        public override bool TryGetPayload<TPayload>(out TPayload context)
+        {
+            return _context.TryGetPayload(out context);
         }
 
         CancellationToken InstanceContext<TInstance>.CancellationToken => _context.CancellationToken;
@@ -85,7 +115,6 @@ namespace Automatonymous.Contexts
             return _context.GetOrAddPayload(payloadFactory);
         }
 
-        ConsumeContext ConsumeEventContext<TInstance>.ConsumeContext => _consumeContext;
         Event EventContext<TInstance>.Event => _context.Event;
     }
 }

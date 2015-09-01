@@ -61,6 +61,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
             configurator.ReceiveEndpoint("quartz", x =>
             {
                 x.Consumer(() => new ScheduleMessageConsumer(_scheduler));
+                x.Consumer(() => new CancelScheduledMessageConsumer(_scheduler));
             });
         }
 
@@ -76,10 +77,8 @@ namespace MassTransit.AutomatonymousIntegration.Tests
         [TestFixtureTearDown]
         public void Teardown_quartz_service()
         {
-            if (_scheduler != null)
-                _scheduler.Standby();
-            if (_scheduler != null)
-                _scheduler.Shutdown();
+            _scheduler?.Standby();
+            _scheduler?.Shutdown();
         }
     }
 }
