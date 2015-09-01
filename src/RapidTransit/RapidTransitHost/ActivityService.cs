@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -16,11 +16,10 @@ namespace RapidTransit
     using Configuration;
     using MassTransit.Courier;
     using MassTransit.Logging;
-    using Topshelf;
 
 
     public class ActivityService<TActivity, TArguments, TLog> :
-        ServiceControl
+        BusServiceConfigurator
         where TActivity : Activity<TArguments, TLog>
         where TArguments : class
         where TLog : class
@@ -33,40 +32,32 @@ namespace RapidTransit
         readonly int _executeConsumerLimit;
         readonly string _executeQueueName;
         readonly ILog _log;
-        readonly IServiceConfigurator _serviceConfigurator;
 
-        public ActivityService(IConfigurationProvider configuration, IServiceConfigurator serviceConfigurator,
-            IActivityQueueNameProvider queueNameProvider,
-            ExecuteActivityFactory<TArguments> executeActivityFactory,
-            CompensateActivityFactory<TLog> compensateActivityFactory)
+        public ActivityService(IConfigurationProvider configuration, IActivityQueueNameProvider queueNameProvider,
+            ExecuteActivityFactory<TArguments> executeActivityFactory, CompensateActivityFactory<TLog> compensateActivityFactory)
         {
             _log = Logger.Get(GetType());
 
-            _serviceConfigurator = serviceConfigurator;
-            IActivityQueueNameProvider activityUriProvider1 = queueNameProvider;
             _executeActivityFactory = executeActivityFactory;
             _compensateActivityFactory = compensateActivityFactory;
 
             _activityName = GetActivityName();
 
-            _executeQueueName = activityUriProvider1.GetExecuteActivityQueueName(_activityName);
+            _executeQueueName = queueNameProvider.GetExecuteActivityQueueName(_activityName);
             _executeConsumerLimit = GetExecuteConsumerLimit(configuration);
 
-            _compensateQueueName = activityUriProvider1.GetCompensateActivityQueueName(_activityName);
+            _compensateQueueName = queueNameProvider.GetCompensateActivityQueueName(_activityName);
             _compensateConsumerLimit = GetCompensateConsumerLimit(configuration);
         }
 
-        public virtual bool Start(HostControl hostControl)
+        public virtual void Configure(IServiceConfigurator configurator)
         {
-            return true;
+            var compensateAddress = CreateCompensateReceiveEndpoint(configurator);
+
+            CreateExecuteReceiveEndpoint(configurator, compensateAddress);
         }
 
-        public virtual bool Stop(HostControl hostControl)
-        {
-            return true;
-        }
-
-        string GetActivityName()
+        static string GetActivityName()
         {
             string activityName = typeof(TActivity).Name;
             if (activityName.EndsWith("Service", StringComparison.OrdinalIgnoreCase))
@@ -76,38 +67,43 @@ namespace RapidTransit
 
         int GetExecuteConsumerLimit(IConfigurationProvider configurationProvider)
         {
-            string settingName = string.Format("{0}ConsumerLimit", _activityName);
+            string settingName = $"{_activityName}ConsumerLimit";
 
             return configurationProvider.GetSetting(settingName, Environment.ProcessorCount);
         }
 
         int GetCompensateConsumerLimit(IConfigurationProvider configurationProvider)
         {
-            string settingName = string.Format("{0}ConsumerLimit", _activityName);
+            string settingName = $"{_activityName}ConsumerLimit";
 
             return configurationProvider.GetSetting(settingName, Environment.ProcessorCount / 2);
         }
 
-        protected virtual void CreateExecuteServiceBus()
+        protected virtual void CreateExecuteReceiveEndpoint(IServiceConfigurator configurator, Uri compensateAddress)
         {
-            _log.InfoFormat("Creating Execute {0} Receive Endpoint", _activityName);
+            if (_log.IsInfoEnabled)
+                _log.InfoFormat("Creating Execute {0} Receive Endpoint", _activityName);
 
-            Uri compensateAddress = null; // compensateServiceBus.Endpoint.Address;
-
-            _serviceConfigurator.Configure(_executeQueueName, _executeConsumerLimit, x =>
+            configurator.ReceiveEndpoint(_executeQueueName, _executeConsumerLimit, x =>
             {
                 x.ExecuteActivityHost<TActivity, TArguments>(compensateAddress, _executeActivityFactory);
             });
         }
 
-        protected virtual void CreateCompensateServiceBus()
+        protected virtual Uri CreateCompensateReceiveEndpoint(IServiceConfigurator configurator)
         {
-            _log.InfoFormat("Creating Compensate {0} Receive Endpoint", _activityName);
+            if (_log.IsInfoEnabled)
+                _log.InfoFormat("Creating Compensate {0} Receive Endpoint", _activityName);
 
-            _serviceConfigurator.Configure(_compensateQueueName, _compensateConsumerLimit, x =>
+            Uri inputAddress = null;
+
+            configurator.ReceiveEndpoint(_compensateQueueName, _compensateConsumerLimit, x =>
             {
+                inputAddress = x.InputAddress;
                 x.CompensateActivityHost<TActivity, TLog>(_compensateActivityFactory);
             });
+
+            return inputAddress;
         }
     }
 }

@@ -62,6 +62,7 @@
     <Compile Include="AutofacCompensateActivityFactory.cs" />
     <Compile Include="AutofacExecuteActivityFactory.cs" />
     <Compile Include="ConfigurationProviderModule.cs" />
+    <Compile Include="ConsumerFactorySelector.cs" />
     <Compile Include="ContainerBuilderExtensions.cs" />
     <Compile Include="ExecuteActivityService.cs" />
     <Compile Include="ExecuteActivityServiceBootstrapper.cs" />
@@ -81,8 +82,7 @@
     <Compile Include="ScopedServiceFactory.cs" />
     <Compile Include="ServiceBootstrapper.cs" />
     <Compile Include="ServiceBootstrapperExtensions.cs" />
-    <Compile Include="ServiceBusInstance.cs" />
-    <Compile Include="ServiceBusInstanceService.cs" />
+    <Compile Include="RabbitMqBusInstanceService.cs" />
     <Compile Include="ServiceBusInstanceServiceBootstrapper.cs" />
     <Compile Include="ServiceConfigurationProviderModule.cs" />
     <Compile Include="ServiceExtensions.cs" />

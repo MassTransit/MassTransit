@@ -43,7 +43,7 @@ namespace RapidTransit
             {
                 _services = _serviceBootstrappers.Select(x => x.CreateService()).ToList();
 
-                _log.InfoFormat("Starting {0} services", _services.Count());
+                _log.InfoFormat("Starting {0} services", _services.Count);
 
                 foreach (ServiceControl activityService in _services)
                 {
@@ -71,7 +71,7 @@ namespace RapidTransit
 
         public bool Stop(HostControl hostControl)
         {
-            _log.InfoFormat("Stopping {0} services", _services.Count());
+            _log.InfoFormat("Stopping {0} services", _services.Count);
 
             if (_services != null)
             {
@@ -88,7 +88,7 @@ namespace RapidTransit
         void StartService(HostControl hostControl, ServiceControl service)
         {
             if (hostControl == null)
-                throw new ArgumentNullException("hostControl");
+                throw new ArgumentNullException(nameof(hostControl));
 
             if (service == null)
                 return;
@@ -96,13 +96,13 @@ namespace RapidTransit
             _log.InfoFormat("Starting Service {0}", service);
 
             if (!service.Start(hostControl))
-                throw new TopshelfException(string.Format("Failed to start service: {0}", service));
+                throw new TopshelfException($"Failed to start service: {service}");
         }
 
         void StopService(HostControl hostControl, ServiceControl service)
         {
             if (hostControl == null)
-                throw new ArgumentNullException("hostControl");
+                throw new ArgumentNullException(nameof(hostControl));
 
             if (service == null)
                 return;
@@ -112,7 +112,7 @@ namespace RapidTransit
                 _log.InfoFormat("Stopping Service {0}", service);
 
                 if (!service.Stop(hostControl))
-                    throw new TopshelfException(string.Format("Failed to stop service: {0}", service));
+                    throw new TopshelfException($"Failed to stop service: {service}");
             }
             catch (Exception ex)
             {

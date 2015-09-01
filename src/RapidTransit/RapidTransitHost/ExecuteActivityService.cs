@@ -90,7 +90,7 @@ namespace RapidTransit
         {
             _log.InfoFormat("Creating Execute {0} Receive Endpoint", _activityName);
 
-            _serviceFactory.Configure(_executeQueueName, _executeConsumerLimit, x =>
+            _serviceFactory.ReceiveEndpoint(_executeQueueName, _executeConsumerLimit, x =>
             {
                 x.ExecuteActivityHost<TActivity, TArguments>(_executeActivityFactory);
             });

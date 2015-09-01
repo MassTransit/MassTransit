@@ -12,6 +12,9 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
+    using System;
+
+
     /// <summary>
     /// Configure a receiving endpoint
     /// </summary>
@@ -20,5 +23,10 @@ namespace MassTransit
     {
         [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
         void AddEndpointSpecification(IReceiveEndpointSpecification configurator);
+
+        /// <summary>
+        /// Returns the input address of the receive endpoint
+        /// </summary>
+        Uri InputAddress { get; }
     }
 }

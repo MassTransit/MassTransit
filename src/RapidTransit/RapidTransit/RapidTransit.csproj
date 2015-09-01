@@ -49,6 +49,7 @@
     <Compile Include="Configuration\IConnectionStringProvider.cs" />
     <Compile Include="Configuration\ISettings.cs" />
     <Compile Include="Configuration\ISettingsProvider.cs" />
+    <Compile Include="EndpointSpecification.cs" />
     <Compile Include="HostBus.cs" />
     <Compile Include="HostBusSettings.cs" />
     <Compile Include="IActivityQueueNameProvider.cs" />

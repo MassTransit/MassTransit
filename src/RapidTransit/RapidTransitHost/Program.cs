@@ -25,11 +25,15 @@ namespace RapidTransit
         {
             SetupLogger();
 
-            return (int)HostFactory.Run(x => new RapidTransitHostConfigurator<HostServiceBootstrapper>
+            return (int)HostFactory.Run(x =>
             {
-                Description = "RapidTransit - A MassTransit Bus Host",
-                DisplayName = "RapidTransit MassTransit Host",
-                ServiceName = "rthost",
+                var configurator = new RapidTransitHostConfigurator<HostServiceBootstrapper>
+                {
+                    Description = "RapidTransit - A MassTransit Bus Host",
+                    DisplayName = "RapidTransit MassTransit Host",
+                    ServiceName = "rthost",
+                };
+                configurator.Configure(x);
             });
         }
 

@@ -1,3 +1,15 @@
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+//  
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
+// this file except in compliance with the License. You may obtain a copy of the 
+// License at 
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0 
+// 
+// Unless required by applicable law or agreed to in writing, software distributed
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// specific language governing permissions and limitations under the License.
 namespace RapidTransit
 {
     using Autofac;
@@ -13,14 +25,14 @@ namespace RapidTransit
     {
         readonly ILifetimeScope _lifetimeScope;
         readonly string _serviceName;
-        readonly string _lifetimeScopeTag;
 
         protected ActivityServiceBootstrapper(ILifetimeScope lifetimeScope)
         {
             _lifetimeScope = lifetimeScope;
 
             _serviceName = typeof(TActivity).GetServiceDescription();
-            _lifetimeScopeTag = string.Format("service_{0}", _serviceName);
+
+            LifetimeScopeTag = $"service_{_serviceName}";
         }
 
         public ServiceControl CreateService()
@@ -29,33 +41,25 @@ namespace RapidTransit
 
             var serviceControl = lifetimeScope.Resolve<ServiceControl>();
 
-
             return new LifetimeScopeServiceControl(lifetimeScope, serviceControl, _serviceName);
         }
 
-        public string ServiceName
-        {
-            get { return _serviceName; }
-        }
+        public string ServiceName => _serviceName;
 
-        public string LifetimeScopeTag
-        {
-            get { return _lifetimeScopeTag; }
-        }
-
+        public string LifetimeScopeTag { get; }
 
         protected virtual void ConfigureLifetimeScope(ContainerBuilder builder)
         {
             builder.RegisterType<TActivity>();
 
             builder.RegisterType<AutofacExecuteActivityFactory<TActivity, TArguments>>()
-                   .As<ExecuteActivityFactory<TArguments>>();
+                .As<ExecuteActivityFactory<TArguments>>();
 
             builder.RegisterType<AutofacCompensateActivityFactory<TActivity, TLog>>()
-                   .As<CompensateActivityFactory<TLog>>();
+                .As<CompensateActivityFactory<TLog>>();
 
             builder.RegisterType<ActivityService<TActivity, TArguments, TLog>>()
-                   .As<ServiceControl>();
+                .As<ServiceControl>();
         }
     }
 }

@@ -40,7 +40,7 @@ namespace RapidTransit
 
         protected virtual void ConfigureLifetimeScope(ContainerBuilder builder)
         {
-            builder.RegisterType<ServiceBusInstanceService>()
+            builder.RegisterType<RabbitMqBusInstanceService>()
                    .InstancePerServiceScope(this)
                    .WithParameter(TypedParameter.From(_serviceName))
                    .As<ServiceControl>();
