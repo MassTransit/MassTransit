@@ -20,6 +20,7 @@ namespace Automatonymous
     using CorrelationConfigurators;
     using MassTransit;
     using MassTransit.Internals.Extensions;
+    using MassTransit.Logging;
     using Requests;
     using Schedules;
 
@@ -35,12 +36,15 @@ namespace Automatonymous
         SagaStateMachine<TInstance>
         where TInstance : class, SagaStateMachineInstance
     {
+        readonly ILog _log;
         readonly Dictionary<Event, EventCorrelation> _eventCorrelations;
         readonly Lazy<StateMachineRegistration[]> _registrations;
         Func<TInstance, bool> _isCompleted;
 
         protected MassTransitStateMachine()
         {
+            _log = Logger.Get(GetType());
+
             _registrations = new Lazy<StateMachineRegistration[]>(GetRegistrations);
 
             _eventCorrelations = new Dictionary<Event, EventCorrelation>();
@@ -240,7 +244,7 @@ namespace Automatonymous
         /// <typeparam name="TMessage">The request type</typeparam>
         /// <param name="propertyExpression">The schedule property on the state machine</param>
         /// <param name="tokenIdExpression">The property where the tokenId is stored</param>
-        /// <param name="configureSchedule"></param>
+        /// <param name="configureSchedule">The callback to configure the schedule</param>
         protected void Schedule<TMessage>(Expression<Func<Schedule<TInstance, TMessage>>> propertyExpression,
             Expression<Func<TInstance, Guid?>> tokenIdExpression,
             Action<ScheduleConfigurator<TInstance, TMessage>> configureSchedule)
@@ -262,26 +266,57 @@ namespace Automatonymous
         /// <param name="settings">The request settings (which can be read from configuration, etc.)</param>
         protected void Schedule<TMessage>(Expression<Func<Schedule<TInstance, TMessage>>> propertyExpression,
             Expression<Func<TInstance, Guid?>> tokenIdExpression,
-            ScheduleSettings<TInstance,TMessage> settings)
+            ScheduleSettings<TInstance, TMessage> settings)
             where TMessage : class
         {
             PropertyInfo property = propertyExpression.GetPropertyInfo();
 
             string name = property.Name;
 
-            var request = new StateMachineSchedule<TInstance, TMessage>(name, tokenIdExpression, settings);
+            var schedule = new StateMachineSchedule<TInstance, TMessage>(name, tokenIdExpression, settings);
 
-            property.SetValue(this, request);
+            property.SetValue(this, schedule);
 
-            Event(propertyExpression, x => x.Received, x =>
+            Event(propertyExpression, x => x.Received);
+
+            if (settings.Received == null)
+                Event(propertyExpression, x => x.AnyReceived);
+            else
             {
-                if (settings.Received != null)
+                Event(propertyExpression, x => x.AnyReceived, x =>
+                {
                     settings.Received(x);
-            });
+                });
+            }
 
             DuringAny(
-                When(request.Received)
-                    .Then(context => request.SetTokenId(context.Instance, default(Guid?))));
+                When(schedule.AnyReceived)
+                    .ThenAsync(async context =>
+                    {
+                        var tokenId = schedule.GetTokenId(context.Instance);
+
+                        ConsumeContext consumeContext;
+                        if (context.TryGetPayload(out consumeContext))
+                        {
+                            var messageTokenId = consumeContext.GetSchedulingTokenId();
+                            if (messageTokenId.HasValue)
+                            {
+                                if (!tokenId.HasValue || (messageTokenId.Value != tokenId.Value))
+                                {
+                                    if (_log.IsDebugEnabled)
+                                        _log.DebugFormat("SAGA: {0} Scheduled message not current: {1}", context.Instance.CorrelationId, messageTokenId.Value);
+                                    
+                                    return;
+                                }
+                            }
+                        }
+
+                        BehaviorContext<TInstance, TMessage> eventContext = context.GetProxy(schedule.Received, context.Data);
+
+                        await ((StateMachine<TInstance>)this).RaiseEvent(eventContext);
+
+                        schedule.SetTokenId(context.Instance, default(Guid?));
+                    }));
         }
 
         static bool NotCompletedByDefault(TInstance instance)
