@@ -5,9 +5,10 @@ Msmq Configuration Options
 
   ServiceBusFactory.New(sbc => 
   {
-    sbc.UseMsmq();
-    sbc.VerifyMsmqConfiguration();
-    sbc.VerifyMsDtcConfiguration():
+    sbc.UseMsmq(q =>
+                    {
+                        q.VerifyMsmqConfiguration();
+                    });
   });
 
 
