@@ -13,10 +13,12 @@
 namespace MassTransit.RabbitMqTransport.Configuration
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
     using Builders;
     using EndpointConfigurators;
     using MassTransit.Builders;
+    using MassTransit.Configurators;
     using MassTransit.Pipeline;
     using Topology;
     using Transports;
@@ -48,6 +50,17 @@ namespace MassTransit.RabbitMqTransport.Configuration
             _host = host;
 
             _settings = settings;
+        }
+
+        public override IEnumerable<ValidationResult> Validate()
+        {
+            foreach (ValidationResult result in base.Validate())
+                yield return result.WithParentKey($"{_settings.QueueName}");
+
+            if (!RabbitMqAddressExtensions.IsValidQueueName(_settings.QueueName))
+                yield return this.Failure($"{_settings.QueueName}", "Is not a valid queue name");
+            if (_settings.PurgeOnStartup)
+                yield return this.Warning($"{_settings.QueueName}", "Existing messages in the queue will be purged on service start");
         }
 
         public Uri InputAddress => _host.Settings.GetInputAddress(_settings);
