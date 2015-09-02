@@ -59,8 +59,17 @@ namespace Automatonymous
         where TMessage : class
     {
         /// <summary>
-        /// The event that is raised when the request completes and the response is received
+        /// This event is raised when the scheduled message is received. If a previous message
+        /// was rescheduled, this event is filtered so that only the most recently scheduled
+        /// message is allowed.
         /// </summary>
         Event<TMessage> Received { get; set; }
+
+        /// <summary>
+        /// This event is raised when any message is directed at the state machine, but it is 
+        /// not filtered to the currently scheduled event. So outdated or original events may
+        /// be raised.
+        /// </summary>
+        Event<TMessage> AnyReceived { get; set; }
     }
 }

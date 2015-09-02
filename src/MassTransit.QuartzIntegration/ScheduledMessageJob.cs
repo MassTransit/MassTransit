@@ -47,6 +47,7 @@ namespace MassTransit.QuartzIntegration
         public string CorrelationId { get; set; }
         public string ConversationId { get; set; }
         public string InitiatorId { get; set; }
+        public string TokenId { get; set; }
         public string HeadersAsJson { get; set; }
 
         public void Execute(IJobExecutionContext context)
@@ -93,6 +94,12 @@ namespace MassTransit.QuartzIntegration
                     context.CorrelationId = ConvertIdToGuid(CorrelationId);
                     context.ConversationId = ConvertIdToGuid(ConversationId);
                     context.InitiatorId = ConvertIdToGuid(InitiatorId);
+
+                    Guid? tokenId = ConvertIdToGuid(TokenId);
+                    if (tokenId.HasValue)
+                    {
+                        context.Headers.Set(MessageHeaders.SchedulingTokenId, tokenId.Value.ToString("N"));
+                    }
 
                     context.Headers.Set("MT-Quartz-TriggerKey", triggerKey);
 

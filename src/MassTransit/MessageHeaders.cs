@@ -12,6 +12,9 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
+    using System;
+
+
     public static class MessageHeaders
     {
         /// <summary>
@@ -24,10 +27,21 @@ namespace MassTransit
         /// </summary>
         public const string DeliveredAddress = "MT-Scheduling-DeliveredAddress";
 
+        /// <summary>
+        /// The tokenId for the message that was registered with the scheduler
+        /// </summary>
+        public const string SchedulingTokenId = "MT-Scheduling-TokenId";
+
 
         /// <summary>
         /// The number of times the message has been redelivered (zero if never)
         /// </summary>
         public const string RedeliveryCount = "MT-Redelivery-Count";
+
+
+        public static Guid? GetSchedulingTokenId(this ConsumeContext context)
+        {
+            return context.Headers.Get<Guid>(SchedulingTokenId, default(Guid?));
+        }
     }
 }

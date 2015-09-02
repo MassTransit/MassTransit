@@ -108,7 +108,7 @@ namespace MassTransit.QuartzIntegration
             return triggerBuilder.Build();
         }
 
-        static async Task<IJobDetail> CreateJobDetail(ConsumeContext context, Uri destination, JobKey jobKey)
+        static async Task<IJobDetail> CreateJobDetail(ConsumeContext context, Uri destination, JobKey jobKey, Guid? tokenId = default(Guid?))
         {
             string body;
             using (var ms = new MemoryStream())
@@ -152,6 +152,9 @@ namespace MassTransit.QuartzIntegration
                 builder = builder.UsingJobData("RequestId", context.RequestId.Value.ToString());
             if (context.ExpirationTime.HasValue)
                 builder = builder.UsingJobData("ExpirationTime", context.ExpirationTime.Value.ToString());
+
+            if (tokenId.HasValue)
+                builder = builder.UsingJobData("TokenId", tokenId.Value.ToString("N"));
 
             IJobDetail jobDetail = builder
                 .UsingJobData("HeadersAsJson", JsonConvert.SerializeObject(context.Headers.GetAll()))

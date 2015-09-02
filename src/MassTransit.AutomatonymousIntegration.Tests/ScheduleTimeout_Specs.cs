@@ -213,28 +213,25 @@ namespace MassTransit.AutomatonymousIntegration.Tests
         {
             public TestStateMachine()
             {
-                Event(() => ItemAdded, x =>
-                    x.CorrelateBy(p => p.MemberNumber, p => p.Message.MemberNumber)
-                        .SelectId(context => NewId.NextGuid()));
+                Event(() => ItemAdded, x => x.CorrelateBy(p => p.MemberNumber, p => p.Message.MemberNumber)
+                    .SelectId(context => NewId.NextGuid()));
 
                 Event(() => Submitted, x => x.CorrelateBy(p => p.MemberNumber, p => p.Message.MemberNumber));
 
                 Schedule(() => CartTimeout, x => x.CartTimeoutTokenId, x =>
                 {
-                    x.Delay = TimeSpan.FromSeconds(10);
+                    x.Delay = TimeSpan.FromSeconds(3);
                     x.Received = p => p.CorrelateBy(state => state.MemberNumber, context => context.Message.MemberNumber);
                 });
 
 
                 Initially(
                     When(ItemAdded)
-                        .Then(context =>
+                        .ThenAsync(context =>
                         {
-                            Console.WriteLine("Cart created: {0}", context.Data.MemberNumber);
-
-                            Console.WriteLine("TestState ID: {0}", context.Instance.CorrelationId);
-
                             context.Instance.MemberNumber = context.Data.MemberNumber;
+
+                            return Console.Out.WriteLineAsync($"Cart {context.Instance.CorrelationId} Created: {context.Data.MemberNumber}");
                         })
                         .Schedule(CartTimeout, context => new CartExpiredEvent(context.Instance))
                         .TransitionTo(Active));
