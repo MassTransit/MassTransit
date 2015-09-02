@@ -24,6 +24,12 @@ namespace MassTransit
         // change this to return an IRabbitMqHost 
         IRabbitMqHost Host(RabbitMqHostSettings settings);
 
+
+        /// <summary>
+        /// Specify a queue name to be used for the bus instance (separate from the receive endpoints queues).
+        /// </summary>
+        string BusQueueName { set; }
+
 //        /// <summary>
 //        ///     Intercept the publishing of a message type that is assignable to T
 //        /// </summary>

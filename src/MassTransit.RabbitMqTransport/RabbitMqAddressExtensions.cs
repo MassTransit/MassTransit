@@ -173,15 +173,6 @@ namespace MassTransit.RabbitMqTransport
             else if (!address.IsDefaultPort)
                 connectionFactory.Port = address.Port;
 
-//            if (!string.IsNullOrEmpty(address.UserInfo))
-//            {
-//                string[] parts = address.UserInfo.Split(':');
-//                connectionFactory.UserName = parts[0];
-//
-//                if (parts.Length >= 2)
-//                    connectionFactory.Password = parts[1];
-//            }
-
             string name = address.AbsolutePath.Substring(1);
             string[] pathSegments = name.Split('/');
             if (pathSegments.Length == 2)

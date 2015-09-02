@@ -68,6 +68,8 @@ namespace MassTransit.RabbitMqTransport.Configuration
         {
             if (_hosts.Count == 0)
                 yield return this.Failure("Host", "At least one host must be defined");
+            if (string.IsNullOrWhiteSpace(_settings.QueueName))
+                yield return this.Failure("Bus", "The bus queue name must not be null or empty");
 
             foreach (ValidationResult result in _transportBuilderConfigurators.SelectMany(x => x.Validate()))
                 yield return result;
@@ -133,6 +135,11 @@ namespace MassTransit.RabbitMqTransport.Configuration
             _hosts.Add(host);
 
             return host;
+        }
+
+        public string BusQueueName
+        {
+            set { _settings.QueueName = value; }
         }
 
         public void AddBusFactorySpecification(IBusFactorySpecification configurator)

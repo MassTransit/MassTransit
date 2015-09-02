@@ -238,22 +238,16 @@ namespace MassTransit.AutomatonymousIntegration.Tests
 
                 During(Active,
                     When(CartTimeout.Received)
-                        .ThenAsync(async context =>
-                        {
-                            await Console.Out.WriteLineAsync($"Cart Expired: {context.Data.MemberNumber}");
-                        })
+                        .ThenAsync(context => Console.Out.WriteLineAsync($"Cart Expired: {context.Data.MemberNumber}"))
                         .Publish(context => new CartRemovedEvent(context.Instance))
                         .Finalize(),
                     When(Submitted)
-                        .ThenAsync(async context =>
-                        {
-                            await Console.Out.WriteLineAsync($"Cart Submitted: {context.Data.MemberNumber}");
-                        })
+                        .ThenAsync(context => Console.Out.WriteLineAsync($"Cart Submitted: {context.Data.MemberNumber}"))
                         .Unschedule(CartTimeout)
                         .Publish(context => new CartRemovedEvent(context.Instance))
                         .Finalize(),
                     When(ItemAdded)
-                        .ThenAsync(async context => await Console.Out.WriteLineAsync($"Card item added: {context.Data.MemberNumber}"))
+                        .ThenAsync(context => Console.Out.WriteLineAsync($"Card item added: {context.Data.MemberNumber}"))
                         .Schedule(CartTimeout, context => new CartExpiredEvent(context.Instance)));
 
                 SetCompletedWhenFinalized();
