@@ -80,11 +80,21 @@ namespace MassTransit.Transports.RabbitMq
                         if (result.BasicProperties.IsHeadersPresent())
                         {
                             object value;
+
                             if (result.BasicProperties.Headers.TryGetValue("Content-Type", out value))
                             {
                                 var contentType = value as byte[];
+
                                 if (contentType != null)
                                     context.SetContentType(Encoding.UTF8.GetString(contentType));
+                            }
+
+                            if (result.BasicProperties.Headers.TryGetValue("Content-Encoding", out value))
+                            {
+                                var contentEncoding = value as byte[];
+
+                                if (contentEncoding != null)
+                                    context.SetHeader("Content-Encoding", Encoding.UTF8.GetString(contentEncoding));
                             }
                         }
 

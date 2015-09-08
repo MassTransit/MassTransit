@@ -21,6 +21,7 @@ namespace MassTransit.Serialization
     using Newtonsoft.Json;
     using Newtonsoft.Json.Converters;
     using Newtonsoft.Json.Linq;
+    using System.Text;
 
     public class JsonMessageSerializer :
         IMessageSerializer
@@ -125,9 +126,13 @@ namespace MassTransit.Serialization
         {
             try
             {
+                string contentEncoding = context.Headers["Content-Encoding"];
+
+                Encoding encoding = string.IsNullOrWhiteSpace(contentEncoding) ? Encoding.UTF8 : Encoding.GetEncoding(contentEncoding);
+
                 Envelope result;
                 using (var nonClosingStream = new NonClosingStream(context.BodyStream))
-                using (var reader = new StreamReader(nonClosingStream))
+                using (var reader = new StreamReader(nonClosingStream, encoding))
                 using (var jsonReader = new JsonTextReader(reader))
                 {
                     result = Deserializer.Deserialize<Envelope>(jsonReader);
