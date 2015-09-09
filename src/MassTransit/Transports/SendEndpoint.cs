@@ -205,10 +205,11 @@ namespace MassTransit.Transports
                 if (_sendPipe != null)
                     await _sendPipe.Send(context);
 
+                if (!context.CorrelationId.HasValue)
+                    MessageCorrelationCache<T>.SetCorrelationId(context);
+
                 if (!context.ConversationId.HasValue)
-                {
                     context.ConversationId = NewId.NextGuid();
-                }
             }
         }
     }

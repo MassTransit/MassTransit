@@ -120,8 +120,15 @@
     <Compile Include="Configuration\ScheduledRetryExtensions.cs" />
     <Compile Include="Configuration\TransformConfiguratorExtensions.cs" />
     <Compile Include="Context\ConsumeContextProxyScope.cs" />
+    <Compile Include="Context\CorrelatedBySetCorrelationId.cs" />
     <Compile Include="Context\CorrelationIdConsumeContextProxy.cs" />
+    <Compile Include="Context\IMessageCorrelationCache.cs" />
+    <Compile Include="Context\ISetCorrelationId.cs" />
     <Compile Include="Context\MessageConsumeContext.cs" />
+    <Compile Include="Context\MessageCorrelationCache.cs" />
+    <Compile Include="Context\NoSetCorrelationId.cs" />
+    <Compile Include="Context\NullablePropertySetCorrelationId.cs" />
+    <Compile Include="Context\PropertySetCorrelationId.cs" />
     <Compile Include="Context\ReceiveContextProxy.cs" />
     <Compile Include="Context\RescueExceptionConsumeContext.cs" />
     <Compile Include="Context\ExceptionConsumeContext.cs" />
