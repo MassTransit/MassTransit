@@ -95,6 +95,7 @@
     <Compile Include="ContainedMessage_Specs.cs" />
     <Compile Include="Behaviors\Behavior.cs" />
     <Compile Include="ConversationId_Specs.cs" />
+    <Compile Include="CorrelationId_Specs.cs" />
     <Compile Include="Courier\ArgumentOverload_Specs.cs" />
     <Compile Include="Courier\Builder_Specs.cs" />
     <Compile Include="Courier\Configuration_Specs.cs" />

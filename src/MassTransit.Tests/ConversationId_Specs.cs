@@ -41,6 +41,7 @@ namespace MassTransit.Tests
         }
     }
 
+
     [TestFixture]
     public class Sending_a_message :
         InMemoryTestFixture

@@ -74,20 +74,11 @@ namespace MassTransit.Util
         class CachedType<T> :
             CachedType
         {
-            public bool IsValidMessageType
-            {
-                get { return TypeMetadataCache<T>.IsValidMessageType; }
-            }
+            public bool IsValidMessageType => TypeMetadataCache<T>.IsValidMessageType;
 
-            public string ShortName
-            {
-                get { return TypeMetadataCache<T>.ShortName; }
-            }
+            public string ShortName => TypeMetadataCache<T>.ShortName;
 
-            public Type[] MessageTypes
-            {
-                get { return TypeMetadataCache<T>.MessageTypes; }
-            }
+            public Type[] MessageTypes => TypeMetadataCache<T>.MessageTypes;
         }
     }
 
