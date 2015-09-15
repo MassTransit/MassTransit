@@ -18,6 +18,7 @@ namespace MassTransit.Transports.InMemory
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
+    using Util;
 
 
     /// <summary>
@@ -91,14 +92,11 @@ namespace MassTransit.Transports.InMemory
                 _cache = cache;
             }
 
-            public async Task Stop(CancellationToken cancellationToken = default(CancellationToken))
+            Task HostHandle.Stop(CancellationToken cancellationToken)
             {
                 Parallel.ForEach(_cache._transports.Values, x => x.Dispose());
-            }
 
-            public void Dispose()
-            {
-                Parallel.ForEach(_cache._transports.Values, x => x.Dispose());
+                return TaskUtil.Completed;
             }
         }
     }

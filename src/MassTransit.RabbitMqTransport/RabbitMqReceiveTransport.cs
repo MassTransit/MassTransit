@@ -118,7 +118,7 @@ namespace MassTransit.RabbitMqTransport
             {
                 _stop.Cancel();
 
-                await _receiverTask.WithCancellation(cancellationToken);
+                await _receiverTask.WithCancellation(cancellationToken).ConfigureAwait(false);
             }
         }
     }

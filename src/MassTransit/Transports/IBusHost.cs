@@ -12,40 +12,11 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports
 {
-    using System;
-    using System.Threading;
-    using System.Threading.Tasks;
-    using Monitoring.Introspection;
-
-
     /// <summary>
     /// A Bus Host is a transport-neutral reference to a host
     /// </summary>
     public interface IBusHost :
         IProbeSite
     {
-    }
-
-
-    public interface IBusHostControl :
-        IBusHost
-    {
-        /// <summary>
-        /// Starts the Host, initiating the connection.
-        /// TODO maybe this should be Task&lt;HostHandle&gt; after all 
-        /// </summary>
-        /// <returns></returns>
-        HostHandle Start();
-    }
-
-
-    public interface HostHandle :
-        IDisposable
-    {
-        /// <summary>
-        /// Close the Host, shutting it down for good.
-        /// </summary>
-        /// <returns></returns>
-        Task Stop(CancellationToken cancellationToken = default(CancellationToken));
     }
 }

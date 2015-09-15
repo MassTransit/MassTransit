@@ -131,7 +131,7 @@ namespace MassTransit.AzureServiceBusTransport
             {
                 _stop.Cancel();
 
-                await _receiveTask.WithCancellation(cancellationToken);
+                await _receiveTask.WithCancellation(cancellationToken).ConfigureAwait(false);
             }
         }
     }

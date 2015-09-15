@@ -12,6 +12,10 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Util
 {
+    using System;
+    using System.Collections.Concurrent;
+    using System.Runtime.CompilerServices;
+    using System.Threading;
     using System.Threading.Tasks;
 
 
@@ -19,6 +23,72 @@ namespace MassTransit.Util
     {
         internal static Task Canceled => Cached<bool>.CanceledTask;
         public static Task Completed => Cached.CompletedTask;
+
+        public static void Await(Func<Task> taskFactory, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            if (taskFactory == null)
+                throw new ArgumentNullException(nameof(taskFactory));
+
+            SynchronizationContext previousContext = SynchronizationContext.Current;
+            try
+            {
+                var syncContext = new SingleThreadSynchronizationContext(cancellationToken);
+                SynchronizationContext.SetSynchronizationContext(syncContext);
+
+                Task t = taskFactory();
+                if (t == null)
+                    throw new InvalidOperationException("The taskFactory must return a Task");
+
+                var awaiter = t.GetAwaiter();
+
+                while (!awaiter.IsCompleted)
+                {
+                    if (cancellationToken.IsCancellationRequested)
+                        throw new OperationCanceledException("The task was not completed before being cancelled");
+
+                    syncContext.RunOnCurrentThread(cancellationToken);
+                }
+
+                t.GetAwaiter().GetResult();
+            }
+            finally
+            {
+                SynchronizationContext.SetSynchronizationContext(previousContext);
+            }
+        }
+
+        public static T Await<T>(Func<Task<T>> taskFactory, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            if (taskFactory == null)
+                throw new ArgumentNullException(nameof(taskFactory));
+
+            SynchronizationContext previousContext = SynchronizationContext.Current;
+            try
+            {
+                var syncContext = new SingleThreadSynchronizationContext(cancellationToken);
+                SynchronizationContext.SetSynchronizationContext(syncContext);
+
+                Task<T> t = taskFactory();
+                if (t == null)
+                    throw new InvalidOperationException("The taskFactory must return a Task");
+
+                var awaiter = t.GetAwaiter();
+
+                while(!awaiter.IsCompleted)
+                {
+                    if (cancellationToken.IsCancellationRequested)
+                        throw new OperationCanceledException("The task was not completed before being cancelled");
+
+                    syncContext.RunOnCurrentThread(cancellationToken);
+                }
+
+                return awaiter.GetResult();
+            }
+            finally
+            {
+                SynchronizationContext.SetSynchronizationContext(previousContext);
+            }
+        }
 
 
         static class Cached
@@ -36,6 +106,47 @@ namespace MassTransit.Util
                 var source = new TaskCompletionSource<T>();
                 source.SetCanceled();
                 return source.Task;
+            }
+        }
+
+
+        sealed class SingleThreadSynchronizationContext :
+            SynchronizationContext
+        {
+            readonly CancellationToken _cancellationToken;
+
+            readonly BlockingCollection<Tuple<SendOrPostCallback, object>> _queue;
+
+            public SingleThreadSynchronizationContext(CancellationToken cancellationToken)
+            {
+                _cancellationToken = cancellationToken;
+                _queue = new BlockingCollection<Tuple<SendOrPostCallback, object>>();
+            }
+
+            public override void Post(SendOrPostCallback callback, object state)
+            {
+                if (callback == null)
+                    throw new ArgumentNullException(nameof(callback));
+
+                try
+                {
+                    _queue.Add(Tuple.Create(callback, state), _cancellationToken);
+                }
+                catch (InvalidOperationException)
+                {
+                }
+            }
+
+            public override void Send(SendOrPostCallback d, object state)
+            {
+                throw new NotSupportedException("Synchronously sending is not supported.");
+            }
+
+            public void RunOnCurrentThread(CancellationToken cancellationToken)
+            {
+                Tuple<SendOrPostCallback, object> callback;
+                while (_queue.TryTake(out callback, 50, cancellationToken))
+                    callback.Item1(callback.Item2);
             }
         }
     }

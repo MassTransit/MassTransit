@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,26 +13,33 @@
 namespace MassTransit.Containers.Tests.Scenarios
 {
     using System;
+    using System.Threading.Tasks;
 
 
     public class SimpleConsumerDependency :
-        ISimpleConsumerDependency
+        ISimpleConsumerDependency,
+        IDisposable
     {
-        bool _disposed;
+        readonly TaskCompletionSource<bool> _disposed;
+
+        public SimpleConsumerDependency()
+        {
+            _disposed = new TaskCompletionSource<bool>();
+        }
 
         public void Dispose()
         {
-            _disposed = true;
+            _disposed.TrySetResult(true);
         }
 
-        public bool WasDisposed
+        public Task<bool> WasDisposed
         {
-            get { return _disposed; }
+            get { return _disposed.Task; }
         }
 
         public void DoSomething()
         {
-            if (_disposed)
+            if (_disposed.Task.IsCompleted)
                 throw new ObjectDisposedException("Should not have disposed of me just yet");
 
             SomethingDone = true;

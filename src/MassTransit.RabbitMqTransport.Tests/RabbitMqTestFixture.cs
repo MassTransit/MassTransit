@@ -116,7 +116,8 @@ namespace MassTransit.RabbitMqTransport.Tests
             }
             catch (Exception)
             {
-                Await(() => _busHandle.Stop(new CancellationTokenSource(TestTimeout).Token));
+                _busHandle.Stop(new CancellationTokenSource(TestTimeout).Token);
+                _busHandle = null;
 
                 throw;
             }
@@ -127,16 +128,13 @@ namespace MassTransit.RabbitMqTransport.Tests
         {
             try
             {
-                if (_busHandle != null)
-                    Await(() => _busHandle.Stop(new CancellationTokenSource(TestTimeout).Token));
+                _busHandle?.Stop(new CancellationTokenSource(TestTimeout).Token);
             }
             catch (AggregateException ex)
             {
                 _log.Error("LocalBus Stop Failed: ", ex);
                 throw;
             }
-
-            _bus = null;
         }
 
         protected virtual void ConfigureBus(IRabbitMqBusFactoryConfigurator configurator)

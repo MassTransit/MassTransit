@@ -131,18 +131,14 @@ namespace MassTransit.AzureServiceBusTransport
                 _messagingFactoryTask = messagingFactoryTask;
             }
 
-            public void Dispose()
-            {
-                Stop().Wait();
-            }
-
-            public async Task Stop(CancellationToken cancellationToken = new CancellationToken())
+            async Task HostHandle.Stop(CancellationToken cancellationToken)
             {
                 try
                 {
-                    MessagingFactory factory = await _messagingFactoryTask;
+                    MessagingFactory factory = await _messagingFactoryTask.ConfigureAwait(false);
+
                     if (!factory.IsClosed)
-                        await factory.CloseAsync();
+                        await factory.CloseAsync().ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {

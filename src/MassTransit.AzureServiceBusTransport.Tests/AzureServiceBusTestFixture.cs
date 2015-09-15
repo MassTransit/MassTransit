@@ -106,7 +106,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
             {
                 Console.WriteLine("The bus creation failed: {0}", ex);
 
-                Await(() => _busHandle.Stop());
+                _busHandle.Stop();
 
                 throw;
             }
@@ -115,8 +115,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
         [TestFixtureTearDown]
         public void TearDownInMemoryTestFixture()
         {
-            if (_busHandle != null)
-                Await(() => _busHandle.Stop());
+            _busHandle?.Stop();
 
             _bus = null;
         }

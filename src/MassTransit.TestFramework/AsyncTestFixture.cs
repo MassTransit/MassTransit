@@ -13,12 +13,12 @@
 namespace MassTransit.TestFramework
 {
     using System;
-    using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.Threading;
     using System.Threading.Tasks;
     using Testing.TestDecorators;
+    using Util;
 
 
     public abstract class AsyncTestFixture
@@ -116,7 +116,7 @@ namespace MassTransit.TestFramework
         /// <param name="taskFactory"></param>
         protected void Await(Func<Task> taskFactory)
         {
-            Await(taskFactory, TestCancellationToken);
+            TaskUtil.Await(taskFactory, CancellationToken.None);
         }
 
         /// <summary>
@@ -126,28 +126,7 @@ namespace MassTransit.TestFramework
         /// <param name="cancellationToken"></param>
         protected void Await(Func<Task> taskFactory, CancellationToken cancellationToken)
         {
-            if (taskFactory == null)
-                throw new ArgumentNullException("taskFactory");
-
-            SynchronizationContext previousContext = SynchronizationContext.Current;
-            try
-            {
-                var syncContext = new SingleThreadSynchronizationContext(cancellationToken);
-                SynchronizationContext.SetSynchronizationContext(syncContext);
-
-                Task t = taskFactory();
-                if (t == null)
-                    throw new InvalidOperationException("The taskFactory must return a Task");
-
-                t.ContinueWith(x => syncContext.Complete(), TaskScheduler.Default);
-
-                syncContext.RunOnCurrentThread();
-                t.GetAwaiter().GetResult();
-            }
-            finally
-            {
-                SynchronizationContext.SetSynchronizationContext(previousContext);
-            }
+            TaskUtil.Await(taskFactory, cancellationToken);
         }
 
         /// <summary>
@@ -156,7 +135,7 @@ namespace MassTransit.TestFramework
         /// <param name="taskFactory"></param>
         protected T Await<T>(Func<Task<T>> taskFactory)
         {
-            return Await(taskFactory, TestCancellationToken);
+            return TaskUtil.Await(taskFactory, CancellationToken.None);
         }
 
         /// <summary>
@@ -166,76 +145,7 @@ namespace MassTransit.TestFramework
         /// <param name="cancellationToken"></param>
         protected T Await<T>(Func<Task<T>> taskFactory, CancellationToken cancellationToken)
         {
-            if (taskFactory == null)
-                throw new ArgumentNullException("taskFactory");
-
-            SynchronizationContext previousContext = SynchronizationContext.Current;
-            try
-            {
-                var syncContext = new SingleThreadSynchronizationContext(cancellationToken);
-                SynchronizationContext.SetSynchronizationContext(syncContext);
-
-                Task<T> t = taskFactory();
-                if (t == null)
-                    throw new InvalidOperationException("The taskFactory must return a Task");
-
-                t.ContinueWith(x => syncContext.Complete(), TaskScheduler.Default);
-
-                syncContext.RunOnCurrentThread();
-                return t.GetAwaiter().GetResult();
-            }
-            finally
-            {
-                SynchronizationContext.SetSynchronizationContext(previousContext);
-            }
-        }
-
-
-        sealed class SingleThreadSynchronizationContext :
-            SynchronizationContext
-        {
-            readonly CancellationToken _cancellationToken;
-
-            readonly BlockingCollection<KeyValuePair<SendOrPostCallback, object>> _queue =
-                new BlockingCollection<KeyValuePair<SendOrPostCallback, object>>();
-
-            readonly Thread _thread = Thread.CurrentThread;
-
-            public SingleThreadSynchronizationContext(CancellationToken cancellationToken)
-            {
-                _cancellationToken = cancellationToken;
-            }
-
-            public override void Post(SendOrPostCallback d, object state)
-            {
-                if (d == null)
-                    throw new ArgumentNullException("d");
-
-                try
-                {
-                    _queue.Add(new KeyValuePair<SendOrPostCallback, object>(d, state), _cancellationToken);
-                }
-                catch (InvalidOperationException ex)
-                {
-                    // if we have completed the collection, this will throw
-                }
-            }
-
-            public override void Send(SendOrPostCallback d, object state)
-            {
-                throw new NotSupportedException("Synchronously sending is not supported.");
-            }
-
-            public void RunOnCurrentThread()
-            {
-                foreach (var workItem in _queue.GetConsumingEnumerable(_cancellationToken))
-                    workItem.Key(workItem.Value);
-            }
-
-            public void Complete()
-            {
-                _queue.CompleteAdding();
-            }
+            return TaskUtil.Await(taskFactory, cancellationToken);
         }
     }
 }
