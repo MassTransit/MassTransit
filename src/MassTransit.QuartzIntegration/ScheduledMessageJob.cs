@@ -22,6 +22,7 @@ namespace MassTransit.QuartzIntegration
     using Newtonsoft.Json;
     using Pipeline;
     using Quartz;
+    using Util;
 
 
     public class ScheduledMessageJob :
@@ -59,12 +60,11 @@ namespace MassTransit.QuartzIntegration
 
                 IPipe<SendContext> sendPipe = CreateMessageContext(sourceAddress, destinationAddress, context.Trigger.Key.Name);
 
-                ISendEndpoint endpoint = _bus.GetSendEndpoint(destinationAddress)
-                    .Result;
+                ISendEndpoint endpoint = TaskUtil.Await(() => _bus.GetSendEndpoint(destinationAddress));
 
                 var scheduled = new Scheduled();
-                endpoint.Send(scheduled, sendPipe)
-                    .Wait();
+
+                TaskUtil.Await(() => endpoint.Send(scheduled, sendPipe));
             }
             catch (Exception ex)
             {

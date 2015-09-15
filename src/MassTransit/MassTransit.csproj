@@ -836,7 +836,9 @@
     <Compile Include="Transports\DefaultMessageNameFormatter.cs" />
     <Compile Include="Transports\EndpointLoggerExtensions.cs" />
     <Compile Include="Transports\FanOutSendEndpoint.cs" />
+    <Compile Include="Transports\HostHandle.cs" />
     <Compile Include="Transports\IBusHost.cs" />
+    <Compile Include="Transports\IBusHostControl.cs" />
     <Compile Include="Transports\IMessageNameFormatter.cs" />
     <Compile Include="Transports\DictionaryHeaderProvider.cs" />
     <Compile Include="Transports\InMemory\InMemoryPublishEndpoint.cs" />

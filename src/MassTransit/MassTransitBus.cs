@@ -21,10 +21,12 @@ namespace MassTransit
     using Logging;
     using Pipeline;
     using Transports;
+    using Util;
 
 
     public class MassTransitBus :
-        IBusControl
+        IBusControl,
+        IDisposable
     {
         readonly IConsumePipe _consumePipe;
         readonly IBusHostControl[] _hosts;
@@ -33,6 +35,8 @@ namespace MassTransit
         readonly IReceiveEndpoint[] _receiveEndpoints;
         readonly ReceiveObservable _receiveObservers;
         readonly ISendEndpointProvider _sendEndpointProvider;
+
+        BusHandle _busHandle;
 
         public MassTransitBus(Uri address, IConsumePipe consumePipe, ISendEndpointProvider sendEndpointProvider,
             IPublishEndpointProvider publishEndpointProvider, IEnumerable<IReceiveEndpoint> receiveEndpoints, IEnumerable<IBusHostControl> hosts)
@@ -143,6 +147,12 @@ namespace MassTransit
 
         BusHandle IBusControl.Start()
         {
+            if (_busHandle != null)
+            {
+                _log.Warn($"The bus was already started, additional Start attempts are ignored: {Address}");
+                return _busHandle;
+            }
+
             Exception exception = null;
 
             var endpoints = new List<ReceiveEndpointHandle>();
@@ -196,22 +206,36 @@ namespace MassTransit
             {
                 try
                 {
-                    observers.ForEach(x => x.Disconnect());
-
-                    Task[] endpointTasks = endpoints.Select(x => x.Stop()).ToArray();
-                    Task[] hostTasks = hosts.Select(x => x.Stop()).ToArray();
-
-                    Task.WaitAll(endpointTasks);
-                    Task.WaitAll(hostTasks);
+                    var handle = new Handle(hosts, endpoints, observers);
+                    handle.Stop(TimeSpan.FromSeconds(60));
                 }
                 catch (Exception ex)
                 {
                     _log.Error("Failed to stop partially created bus", ex);
                 }
+
                 throw new MassTransitException("The service bus could not be started.", exception);
             }
 
-            return new Handle(hosts.ToArray(), endpoints.ToArray(), observers.ToArray());
+            _busHandle = new Handle(hosts, endpoints, observers);
+
+            return _busHandle;
+        }
+
+        void IBusControl.Stop(CancellationToken cancellationToken)
+        {
+            if (_busHandle == null)
+            {
+                _log.Warn($"The bus could not be stopped as it was never started: {Address}");
+                return;
+            }
+
+            _busHandle.Stop(cancellationToken);
+        }
+
+        void IDisposable.Dispose()
+        {
+            _busHandle?.Stop(CancellationToken.None);
         }
 
         public ConnectHandle ConnectReceiveObserver(IReceiveObserver observer)
@@ -251,27 +275,16 @@ namespace MassTransit
             readonly ReceiveEndpointHandle[] _endpointHandles;
             readonly HostHandle[] _hostHandles;
             readonly ConnectHandle[] _observerHandles;
-            bool _disposed;
             bool _stopped;
 
-            public Handle(HostHandle[] hostHandles, ReceiveEndpointHandle[] endpointHandles, ConnectHandle[] observerHandles)
+            public Handle(IEnumerable<HostHandle> hostHandles, IEnumerable<ReceiveEndpointHandle> endpointHandles, IEnumerable<ConnectHandle> observerHandles)
             {
-                _endpointHandles = endpointHandles;
-                _hostHandles = hostHandles;
-                _observerHandles = observerHandles;
+                _endpointHandles = endpointHandles.ToArray();
+                _hostHandles = hostHandles.ToArray();
+                _observerHandles = observerHandles.ToArray();
             }
 
-            public void Dispose()
-            {
-                if (_disposed)
-                    return;
-
-                Stop(default(CancellationToken)).Wait();
-
-                _disposed = true;
-            }
-
-            public async Task Stop(CancellationToken cancellationToken)
+            public void Stop(CancellationToken cancellationToken)
             {
                 if (_stopped)
                     return;
@@ -279,10 +292,16 @@ namespace MassTransit
                 foreach (var observerHandle in _observerHandles)
                     observerHandle.Disconnect();
 
-                await Task.WhenAll(_endpointHandles.Select(x => x.Stop(cancellationToken))).ConfigureAwait(false);
-                await Task.WhenAll(_hostHandles.Select(x => x.Stop(cancellationToken))).ConfigureAwait(false);
+                TaskUtil.Await(() => Task.WhenAll(_endpointHandles.Select(x => x.Stop(cancellationToken))), cancellationToken);
+
+                TaskUtil.Await(() => Task.WhenAll(_hostHandles.Select(x => x.Stop(cancellationToken))), cancellationToken);
 
                 _stopped = true;
+            }
+
+            void IDisposable.Dispose()
+            {
+                Stop(CancellationToken.None);
             }
         }
     }

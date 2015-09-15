@@ -27,8 +27,7 @@ namespace MassTransit
         {
             using (var cancellationTokenSource = new CancellationTokenSource(stopTimeout))
             {
-                handle.Stop(cancellationTokenSource.Token)
-                    .Wait(cancellationTokenSource.Token);
+                handle.Stop(cancellationTokenSource.Token);
             }
         }
     }

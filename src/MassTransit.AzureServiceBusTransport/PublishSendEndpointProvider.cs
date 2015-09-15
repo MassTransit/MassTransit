@@ -45,11 +45,11 @@ namespace MassTransit.AzureServiceBusTransport
             if (host == null)
                 throw new EndpointNotFoundException("The endpoint address specified an unknown host: " + address);
 
-            TopicDescription topicDescription = await (await host.RootNamespaceManager).CreateTopicSafeAsync(address.GetTopicDescription());
+            TopicDescription topicDescription = await (await host.RootNamespaceManager.ConfigureAwait(false)).CreateTopicSafeAsync(address.GetTopicDescription()).ConfigureAwait(false);
 
-            MessagingFactory messagingFactory = await host.MessagingFactory;
+            MessagingFactory messagingFactory = await host.MessagingFactory.ConfigureAwait(false);
 
-            MessageSender messageSender = await messagingFactory.CreateMessageSenderAsync(topicDescription.Path);
+            MessageSender messageSender = await messagingFactory.CreateMessageSenderAsync(topicDescription.Path).ConfigureAwait(false);
 
             var sendTransport = new ServiceBusSendTransport(messageSender);
 

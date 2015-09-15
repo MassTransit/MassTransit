@@ -13,23 +13,72 @@
 namespace MassTransit.Containers.Tests
 {
     using System;
+    using System.Threading.Tasks;
+    using Autofac;
     using NUnit.Framework;
     using Scenarios;
     using Shouldly;
-    using StructureMap;
-    using StructureMap.Configuration.DSL;
-    using StructureMap.Pipeline;
     using TestFramework;
 
 
     [TestFixture]
-    public class StructureMap_Idiomatic :
+    public class AutofacContainer_Setup :
         AsyncTestFixture
     {
-        [Test]
-        public async void Should_work_with_the_registry()
+        IContainer _container;
+
+        [TestFixtureSetUp]
+        public void Setup()
         {
-            var bus = _container.GetInstance<IBusControl>();
+            var builder = new ContainerBuilder();
+
+            builder.RegisterModule<BusModule>();
+            builder.RegisterModule<ConsumerModule>();
+
+            _container = builder.Build();
+        }
+
+
+        class ConsumerModule :
+            Module
+        {
+            protected override void Load(ContainerBuilder builder)
+            {
+                builder.RegisterType<SimpleConsumer>();
+                builder.RegisterType<SimpleConsumerDependency>()
+                    .As<ISimpleConsumerDependency>();
+                builder.RegisterType<AnotherMessageConsumerImpl>()
+                    .As<AnotherMessageConsumer>();
+            }
+        }
+
+
+        class BusModule :
+            Module
+        {
+            protected override void Load(ContainerBuilder builder)
+            {
+                builder.Register(context =>
+                {
+                    return Bus.Factory.CreateUsingInMemory(x => x.ReceiveEndpoint("input_queue", e => e.LoadFrom(context)));
+                })
+                    .As<IBus>()
+                    .As<IBusControl>()
+                    .SingleInstance();
+            }
+        }
+
+
+        [TestFixtureTearDown]
+        public void Teardown()
+        {
+            _container.Dispose();
+        }
+
+        [Test]
+        public async Task Should_work_with_lifecycle_managed_bus()
+        {
+            var bus = _container.Resolve<IBusControl>();
 
             bus.Start();
 
@@ -52,51 +101,6 @@ namespace MassTransit.Containers.Tests
 
             lastConsumer.Dependency.SomethingDone
                 .ShouldBe(true); //Dependency was disposed before consumer executed");
-        }
-
-        Container _container;
-
-        [TestFixtureSetUp]
-        public void Setup()
-        {
-            _container = new Container(x =>
-            {
-                x.AddRegistry(new BusRegistry());
-                x.AddRegistry(new ConsumerRegistry());
-            });
-        }
-
-
-        class ConsumerRegistry :
-            Registry
-        {
-            public ConsumerRegistry()
-            {
-                For<SimpleConsumer>()
-                    .Use<SimpleConsumer>();
-                For<ISimpleConsumerDependency>()
-                    .Use<SimpleConsumerDependency>();
-                For<AnotherMessageConsumer>()
-                    .Use<AnotherMessageConsumerImpl>();
-            }
-        }
-
-
-        class BusRegistry :
-            Registry
-        {
-            public BusRegistry()
-            {
-                For<IBusControl>(new SingletonLifecycle())
-                    .Use(context => Bus.Factory.CreateUsingInMemory(x => x.ReceiveEndpoint("input_queue", e => e.LoadFrom(context))));
-            }
-        }
-
-
-        [TestFixtureTearDown]
-        public void Teardown()
-        {
-            _container.Dispose();
         }
     }
 }

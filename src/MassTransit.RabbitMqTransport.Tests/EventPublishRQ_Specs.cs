@@ -69,7 +69,7 @@ namespace MassTransit.RabbitMqTransport.Tests
                 {
                     PingId = context.Message.CorrelationId,
                     Timestamp = DateTime.UtcNow,
-                }).ConfigureAwait(false);
+                });
 
                 Console.WriteLine("Ping: {0}", context.Message.CorrelationId);
 
@@ -77,7 +77,7 @@ namespace MassTransit.RabbitMqTransport.Tests
                 {
                     PingId = context.Message.CorrelationId,
                     Timestamp = DateTime.UtcNow,
-                }).ConfigureAwait(false);
+                });
 
                 Console.WriteLine("Prcessing: {0}", context.Message.CorrelationId);
 
@@ -85,7 +85,7 @@ namespace MassTransit.RabbitMqTransport.Tests
                 {
                     PingId = context.Message.CorrelationId,
                     Timestamp = DateTime.UtcNow,
-                }).ConfigureAwait(false);
+                });
             }
         }
 

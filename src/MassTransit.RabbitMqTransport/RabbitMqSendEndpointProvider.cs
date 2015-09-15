@@ -36,7 +36,7 @@ namespace MassTransit.RabbitMqTransport
 
         public async Task<ISendEndpoint> GetSendEndpoint(Uri address)
         {
-            ISendTransport sendTransport = await _transportProvider.GetSendTransport(address);
+            ISendTransport sendTransport = await _transportProvider.GetSendTransport(address).ConfigureAwait(false);
 
             sendTransport.ConnectSendObserver(_sendObservable);
 

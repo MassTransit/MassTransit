@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Containers.Tests.Scenarios
 {
+    using System.Threading.Tasks;
     using NUnit.Framework;
     using Shouldly;
 
@@ -34,7 +35,8 @@ namespace MassTransit.Containers.Tests.Scenarios
             last.Name
                 .ShouldBe(name);
 
-            lastConsumer.Dependency.WasDisposed
+            var wasDisposed = await lastConsumer.Dependency.WasDisposed;
+            wasDisposed
                 .ShouldBe(true); //Dependency was not disposed");
 
             lastConsumer.Dependency.SomethingDone
@@ -60,7 +62,8 @@ namespace MassTransit.Containers.Tests.Scenarios
             last.Name
                 .ShouldBe(name);
 
-            lastConsumer.Dependency.WasDisposed
+            bool wasDisposed = await lastConsumer.Dependency.WasDisposed;
+            wasDisposed
                 .ShouldBe(true); //Dependency was not disposed");
 
             lastConsumer.Dependency.SomethingDone

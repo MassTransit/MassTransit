@@ -51,6 +51,20 @@ namespace MassTransit
         }
 
         /// <summary>
+        /// Load the consumer configuration from the specified Autofac LifetimeScope
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="context">The component context of the container</param>
+        /// <param name="name">The name to use for the scope created for each message</param>
+        public static void LoadFrom(this IReceiveEndpointConfigurator configurator, IComponentContext context,
+            string name = "message")
+        {
+            var scope = context.Resolve<ILifetimeScope>();
+
+            LoadFrom(configurator, scope, name);
+        }
+
+        /// <summary>
         /// Registers a consumer given the lifetime scope specified
         /// </summary>
         /// <typeparam name="T">The consumer type</typeparam>

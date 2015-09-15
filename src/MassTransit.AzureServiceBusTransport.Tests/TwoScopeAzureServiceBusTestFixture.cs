@@ -60,7 +60,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
             get { return _secondInputQueueAddress; }
             set
             {
-                if (Bus != null)
+                if (SecondBus != null)
                     throw new InvalidOperationException("The LocalBus has already been created, too late to change the URI");
 
                 _secondInputQueueAddress = value;
@@ -88,19 +88,18 @@ namespace MassTransit.AzureServiceBusTransport.Tests
             {
                 Console.WriteLine("The bus creation failed: {0}", ex);
 
-                Await(() => _secondBusHandle.Stop());
+                _secondBusHandle.Stop();
 
                 throw;
             }
         }
 
         [TestFixtureTearDown]
-        public void TearDownInMemoryTestFixture()
+        public void TearDownTwoScopeTestFixture()
         {
-            if (_secondBusHandle != null)
-                Await(() => _secondBusHandle.Stop());
+            _secondBusHandle?.Stop();
 
-            _secondBus = null;
+            _secondBusHandle = null;
         }
 
         protected virtual void ConfigureSecondBus(IServiceBusBusFactoryConfigurator configurator)

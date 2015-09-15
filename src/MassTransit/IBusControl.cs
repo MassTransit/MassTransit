@@ -12,13 +12,21 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
+    using System.Threading;
+
+
     public interface IBusControl :
         IBus
     {
         /// <summary>
-        /// Starts the bus (assuming the battery isn't dead)
+        /// Starts the bus (assuming the battery isn't dead). Once the bus has been started, it cannot be started again, even after is has been stopped.
         /// </summary>
-        /// <returns>A handle to the started bus instance</returns>
+        /// <returns>The BusHandle for the started bus. This is no longer needed, as calling Stop on the IBusControl will stop the bus equally well.</returns>
         BusHandle Start();
+
+        /// <summary>
+        /// Stops the bus if it has been started. If the bus hasn't been started, the method returns without any warning.
+        /// </summary>
+        void Stop(CancellationToken cancellationToken = default(CancellationToken));
     }
 }

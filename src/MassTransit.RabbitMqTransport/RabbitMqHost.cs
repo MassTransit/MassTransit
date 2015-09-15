@@ -128,11 +128,6 @@ namespace MassTransit.RabbitMqTransport
                 _stopSignal = stopSignal;
             }
 
-            void IDisposable.Dispose()
-            {
-                _stopSignal.Stop();
-            }
-
             Task HostHandle.Stop(CancellationToken cancellationToken)
             {
                 _stopSignal.Stop();

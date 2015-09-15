@@ -158,7 +158,7 @@ namespace MassTransit.AzureServiceBusTransport
             {
                 exception = ex;
                 if (_log.IsErrorEnabled)
-                    _log.Error(string.Format("Received faulted: {0}", message.MessageId), ex);
+                    _log.Error($"Received faulted: {message.MessageId}", ex);
             }
 
             try
