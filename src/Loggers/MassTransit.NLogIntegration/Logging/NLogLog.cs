@@ -238,5 +238,10 @@ namespace MassTransit.NLogIntegration.Logging
                     return obj == null ? "" : obj.ToString();
                 };
         }
+
+        public void Shutdown()
+        {
+            _log.Factory.Flush();
+        }
     }
 }

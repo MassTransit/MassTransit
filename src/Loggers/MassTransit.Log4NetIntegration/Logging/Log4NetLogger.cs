@@ -26,6 +26,11 @@ namespace MassTransit.Log4NetIntegration.Logging
             return new Log4NetLog(LogManager.GetLogger(name));
         }
 
+        public void Shutdown()
+        {
+            LogManager.Shutdown();
+        }
+
         public static void Use()
         {
             Logger.UseLogger(new Log4NetLogger());

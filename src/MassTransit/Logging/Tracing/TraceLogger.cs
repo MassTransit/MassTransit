@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Logging.Tracing
 {
+    using System;
     using System.Collections.Concurrent;
     using System.Diagnostics;
 
@@ -19,18 +20,49 @@ namespace MassTransit.Logging.Tracing
     public class TraceLogger :
         ILogger
     {
+        readonly TraceSource _defaultSource;
         readonly ConcurrentDictionary<string, TraceLog> _logs;
         readonly ConcurrentDictionary<string, TraceSource> _sources;
+        TraceListener _listener;
 
         public TraceLogger()
         {
             _logs = new ConcurrentDictionary<string, TraceLog>();
             _sources = new ConcurrentDictionary<string, TraceSource>();
+
+            _defaultSource = new TraceSource("Default", SourceLevels.Information);
+
+            _listener = AddDefaultConsoleTraceListener(_defaultSource);
+
+            Get("MassTransit");
         }
 
         public ILog Get(string name)
         {
             return _logs.GetOrAdd(name, CreateTraceLog);
+        }
+
+        public void Shutdown()
+        {
+            Trace.Flush();
+
+            if (_listener != null)
+            {
+                Trace.Listeners.Remove(_listener);
+
+                _listener.Close();
+                (_listener as IDisposable).Dispose();
+                _listener = null;
+            }
+        }
+
+        static TraceListener AddDefaultConsoleTraceListener(TraceSource source)
+        {
+            var listener = new ConsoleTraceListener {Name = "MassTransit"};
+
+            source.Listeners.Add(listener);
+
+            return listener;
         }
 
         TraceLog CreateTraceLog(string name)
@@ -40,7 +72,7 @@ namespace MassTransit.Logging.Tracing
 
         TraceSource CreateTraceSource(string name)
         {
-            LogLevel logLevel = LogLevel.None;
+            LogLevel logLevel = LogLevel.Info;
             SourceLevels sourceLevel = logLevel.SourceLevel;
             var source = new TraceSource(name, sourceLevel);
             if (IsSourceConfigured(source))
@@ -51,9 +83,9 @@ namespace MassTransit.Logging.Tracing
             return source;
         }
 
-        static void ConfigureTraceSource(TraceSource source, string name, SourceLevels sourceLevel)
+        void ConfigureTraceSource(TraceSource source, string name, SourceLevels sourceLevel)
         {
-            var defaultSource = new TraceSource("Default", sourceLevel);
+            var defaultSource = _defaultSource;
             for (string parentName = ShortenName(name);
                 !string.IsNullOrEmpty(parentName);
                 parentName = ShortenName(parentName))

@@ -10,12 +10,22 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Logging
+namespace MassTransit.Host
 {
-    public interface ILogger
-    {
-        ILog Get(string name);
+    using Autofac;
+    using Topshelf.Runtime;
 
-        void Shutdown();
+
+    class MassTransitHostServiceBootstrapper :
+        TopshelfServiceBootstrapper<MassTransitHostServiceBootstrapper>
+    {
+        public MassTransitHostServiceBootstrapper(HostSettings hostSettings)
+            : base(hostSettings)
+        {
+        }
+
+        protected override void ConfigureContainer(ContainerBuilder builder)
+        {
+        }
     }
 }
