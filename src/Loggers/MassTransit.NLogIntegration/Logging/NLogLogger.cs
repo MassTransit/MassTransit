@@ -13,6 +13,7 @@
 namespace MassTransit.NLogIntegration.Logging
 {
     using System;
+    using System.Collections.Concurrent;
     using MassTransit.Logging;
     using NLog;
 
@@ -21,10 +22,12 @@ namespace MassTransit.NLogIntegration.Logging
         MassTransit.Logging.ILogger
     {
         readonly Func<string, NLog.Logger> _logFactory;
+        readonly ConcurrentDictionary<string, NLogLog> _logs; 
 
         public NLogLogger(LogFactory factory)
         {
             _logFactory = factory.GetLogger;
+            _logs = new ConcurrentDictionary<string, NLogLog>();
         }
 
         public NLogLogger()
@@ -34,7 +37,15 @@ namespace MassTransit.NLogIntegration.Logging
 
         public ILog Get(string name)
         {
-            return new NLogLog(_logFactory(name), name);
+            return _logs.GetOrAdd(name, x => new NLogLog(_logFactory(x), x));
+        }
+
+        public void Shutdown()
+        {
+            foreach (var log in _logs.Values)
+            {
+                log.Shutdown();
+            }
         }
 
         public static void Use()

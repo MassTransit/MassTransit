@@ -43,5 +43,11 @@ namespace MassTransit.Logging
         {
             _logger = logger;
         }
+
+        public static void Shutdown()
+        {
+            if (_logger != null)
+                _logger.Shutdown();
+        }
     }
 }

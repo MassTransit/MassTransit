@@ -84,6 +84,9 @@
     <Compile Include="Exceptions\PublishNackException.cs" />
     <Compile Include="Exceptions\RabbitMqAddressException.cs" />
     <Compile Include="Exceptions\RabbitMqConnectionException.cs" />
+    <Compile Include="Hosting\RabbitMqHostBusFactory.cs" />
+    <Compile Include="Hosting\RabbitMqServiceConfigurator.cs" />
+    <Compile Include="Hosting\RabbitMqSettings.cs" />
     <Compile Include="Integration\IConnectionCache.cs" />
     <Compile Include="Integration\IModelCache.cs" />
     <Compile Include="Integration\PendingPublish.cs" />

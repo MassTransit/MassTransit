@@ -137,6 +137,18 @@
     <Compile Include="ExceptionReceiveContext.cs" />
     <Compile Include="Exceptions\MessageDataException.cs" />
     <Compile Include="Exceptions\MessageDataNotFoundException.cs" />
+    <Compile Include="Hosting\ConfigurationProviderExtensions.cs" />
+    <Compile Include="Hosting\EndpointSettings.cs" />
+    <Compile Include="Hosting\IActivityQueueNameProvider.cs" />
+    <Compile Include="Hosting\IBusServiceConfigurator.cs" />
+    <Compile Include="Hosting\IConfigurationProvider.cs" />
+    <Compile Include="Hosting\IConnectionStringProvider.cs" />
+    <Compile Include="Hosting\IEndpointSpecification.cs" />
+    <Compile Include="Hosting\IHostBusFactory.cs" />
+    <Compile Include="Hosting\IServiceConfigurator.cs" />
+    <Compile Include="Hosting\IServiceSpecification.cs" />
+    <Compile Include="Hosting\ISettings.cs" />
+    <Compile Include="Hosting\ISettingsProvider.cs" />
     <Compile Include="IBusFactorySelector.cs" />
     <Compile Include="IMessageData.cs" />
     <Compile Include="IntrospectionExtensions.cs" />
@@ -145,6 +157,7 @@
     <Compile Include="IRepeatPolicy.cs" />
     <Compile Include="IRetryPolicy.cs" />
     <Compile Include="LogContext.cs" />
+    <Compile Include="Logging\Tracing\ConsoleTraceListener.cs" />
     <Compile Include="MessageDataExtensions.cs" />
     <Compile Include="MessageData\ByteArrayMessageDataConverter.cs" />
     <Compile Include="MessageData\DeserializedMessageData.cs" />

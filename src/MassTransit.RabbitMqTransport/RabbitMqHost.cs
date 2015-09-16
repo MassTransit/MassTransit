@@ -51,7 +51,7 @@ namespace MassTransit.RabbitMqTransport
                 if (_log.IsDebugEnabled)
                     _log.DebugFormat("Connection established to {0}", _hostSettings.ToDebugString());
 
-                using (var stopSource = new CancellationTokenSource())
+                var stopSource = new CancellationTokenSource();
                 using (_stopSignal.CancellationToken.Register(() => stopSource.Cancel()))
                 {
                     EventHandler<ShutdownEventArgs> connectionShutdown = null;

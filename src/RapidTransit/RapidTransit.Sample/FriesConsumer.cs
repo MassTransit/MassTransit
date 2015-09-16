@@ -10,12 +10,24 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Logging
+namespace RapidTransit.Sample
 {
-    public interface ILogger
-    {
-        ILog Get(string name);
+    using System;
+    using System.Threading.Tasks;
+    using Contracts;
+    using MassTransit;
 
-        void Shutdown();
+
+    public class FriesConsumer :
+        IConsumer<MakeFries>
+    {
+        public async Task Consume(ConsumeContext<MakeFries> context)
+        {
+            await Console.Out.WriteAsync($"Making fries for {context.Message.OrderId}");
+
+            await Task.Delay(TimeSpan.FromSeconds(3));
+
+            await Console.Out.WriteAsync($"Fries are fried for {context.Message.OrderId}");
+        }
     }
 }
