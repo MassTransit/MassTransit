@@ -7,6 +7,7 @@ packages
 *.dotCover
 
 *.ncrunch*
+.vs
 
 .fake
 

@@ -119,6 +119,12 @@ Target "Package" (fun _ ->
                   PackageFile = @".\src\MassTransit\packages.config"
                   Files = [ (@"..\src\MassTransit\bin\Release\MassTransit.*", Some @"lib\net45", None);
                             (@"..\src\MassTransit\**\*.cs", Some "src", None) ] }
+                { Project = "MassTransit.Host"
+                  Summary = "MassTransit Host Service"
+                  PackageFile = @".\src\MassTransit.Host\packages.config"
+                  Files = [ (@"..\src\MassTransit.Host\bin\Release\MassTransit.Host.*", Some @"lib\net45", None);
+                            (@"..\host\*.*", Some @"tools", None);
+                            (@"..\src\MassTransit.Host\**\*.cs", Some @"src", None) ] } 
                 { Project = "MassTransit.RabbitMQ"
                   Summary = "MassTransit RabbitMQ Transport"
                   PackageFile = @".\src\MassTransit.RabbitMQTransport\packages.config"
