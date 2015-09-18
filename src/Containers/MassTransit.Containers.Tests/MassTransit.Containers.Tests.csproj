@@ -93,6 +93,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AutofacRegistrationExtension_Specs.cs" />
     <Compile Include="AutofacRegistration_Specs.cs" />
     <Compile Include="CastleWindsor_Specs.cs" />
     <Compile Include="Ninject_Specs.cs" />
