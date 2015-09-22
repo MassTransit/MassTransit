@@ -5,5 +5,5 @@ Advanced notes.
 
 .. toctree::
 
-    interop.rst
+    interop.md
     distributor.rst
