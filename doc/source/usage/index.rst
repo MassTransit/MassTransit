@@ -1,6 +1,9 @@
 Using MassTransit
 =================
 
+In order to use and understand MassTransit, a set of recipe-based usage examples are
+provided below.
+
 .. toctree::
 
     messages.rst
