@@ -1,34 +1,86 @@
 Subscription Configuration
-""""""""""""""""""""""""""""
+""""""""""""""""""""""""""
 
-MassTransit has a lot of ways that you can provide subscription options.
+MassTransit supports a variety of message consumers, each of which is detailed below. There are 
+some common configuration settings which are available across all consumer types, which are documented
+separately.
 
-
-Subscription Options During Configuration
-'''''''''''''''''''''''''''''''''''''''''
-
-Now that we have a transport, an address, and some basic options figured out the meat of the work
-is in front of you. Establishing your subscriptions. As you can see there are a lot of options
+Once the transport, host, and bus-level configuration settings have been specified, the meat of the work
+is in front of you -- adding your subscriptions. As you can see below there are a lot of options
 so I am going to save most of the explanation for the next page.
 
-.. note::
 
-    Permanent Subscriptions will NOT be automatically unsubscribed at bus shutdown. See :doc:`keyideas`
+Receive Endpoint Subscriptions
+''''''''''''''''''''''''''''''
+
+A recieve endpoint specifies a queue on which messages should be received. When a consumer is
+subscribed to a receive endpoint, a subscription is created for every message type handled by
+the consumer. A subscription is persistent and remains in place after the bus is stopped.
+See :doc:`keyideas`
 
 Handler
 ~~~~~~~
 
-This is the simplest of the options. You simple register a lambda method that
-will be called each time a message of type ``YourMessage`` arrives on the endpoint.
+A handler is the simpliest consumer type, and allows a method, delegate method, or lambda method to be
+specified that is called for every message of the specified type that is received on the endpoint.
 
 .. sourcecode:: csharp
 
-    Bus.Factory.CreateUsingInMemory(cfg =>
+    var busControl = Bus.Factory.CreateUsingInMemory(cfg =>
     {
-        cfg.ReceiveEndpoint("queue_name", ep =>
+        cfg.ReceiveEndpoint("input_queue", ep =>
         {
-            ep.Handler<YourMessage>(async cxt => {});
-            ep.Handler<YourMessage>(async cxt => {}, endpointConfig => {});
+            ep.Handler<MessageA>(async context => 
+            {
+                // do something with message
+            });
+
+            ep.Handler<MessageB>(context => 
+            {
+                // do something
+                return Task.Completed;
+            }, handlerCfg => 
+            {
+                // specify a retry interval of 100ms with 5 attempts
+                handlerCfg.UseRetry(Retry.Interval(5, 100));
+            });
+        });
+    });
+
+    busControl.Start();
+
+
+Consumer
+~~~~~~~~
+
+A consumer is registered using the ``Consumer`` syntax, of which there are several overloads.
+All of the overload ultimately boil down to some type of ``IConsumerFactory``, which is used
+to construct and send the message to the consumer.
+
+.. sourcecode:: csharp
+
+    var busControl = Bus.Factory.CreateUsingInMemory(cfg =>
+    {
+        cfg.ReceiveEndpoint("input_queue", ep =>
+        {
+            // default constructor
+            s.Consumer<YourConsumer>();
+
+            // delegate factory method
+            s.Consumer(() => new YourConsumer());
+
+            // pass a custom consumer factory
+            s.Consumer(consumerFactory)
+
+            // an type-based factory that returns an object (container friendly)
+            s.Consumer(consumerType, type => Activator.CreateInstance(type));
+
+            // delegate factory method
+            s.Consumer(() => new YourConsumer(), x =>
+            {
+                // inject middleware, etc.
+                x.UseLog(ConsoleOut, async context => "Consumer created");
+            });
         });
     });
 
@@ -36,35 +88,18 @@ will be called each time a message of type ``YourMessage`` arrives on the endpoi
 Instance
 ~~~~~~~~
 
-Passing MassTransit an object instance, MassTransit will subscribe any public method
-with a single input parameter and a void method.
+An instance accepts an existing object instance of a consumer, otherwise it is identical.
+There are fewer overloads, because, seriously, it takes ``object``. It's not rocket science.
 
 .. sourcecode:: csharp
 
-    Bus.Factory.CreateUsingInMemory(cfg =>
+    var busControl = Bus.Factory.CreateUsingInMemory(cfg =>
     {
-        cfg.ReceiveEndpoint("queue_name", ep =>
+        cfg.ReceiveEndpoint("input_queue", ep =>
         {
             s.Instance(yourObject);
-            s.Instance(yourObject, retryPolicy: Retry.None);
 
-        });
-    });
-
-
-Consumer
-~~~~~~~~
-
-.. sourcecode:: csharp
-
-    Bus.Factory.CreateUsingInMemory(cfg =>
-    {
-        cfg.ReceiveEndpoint("queue_name", ep =>
-        {
-            s.Consumer(()=> new YourConsumer() );
-            s.Consumer(consumerFactory)
-            s.Consumer(consumerType, type => Activator.CreateInstance(type));
-
+            s.Instance(yourObject, x => { Middlewarez! });
         });
     });
 
@@ -72,13 +107,16 @@ Consumer
 Observer
 ~~~~~~~~
 
+An object, which implements at least one ``IObserver<T>``, can be registered in the same way
+that a consumer can be registered.
+
 .. sourcecode:: csharp
 
-    Bus.Factory.CreateUsingInMemory(cfg =>
+    var busControl = Bus.Factory.CreateUsingInMemory(cfg =>
     {
-        cfg.ReceiveEndpoint("queue_name", ep =>
+        cfg.ReceiveEndpoint("input_queue", ep =>
         {
-            s.Observer(() => new YourObserver() );
+            s.Observer(() => new YourObserver());
             s.Observer(() => new YourObserver(), obsConfig => {});
         });
     });
@@ -87,17 +125,37 @@ Observer
 Saga
 ~~~~
 
-.. note::
-
-    Currently only available with Automatonymous
+There are two types of sagas, and each of them are registered a different way. The first, a
+legacy-style saga, is registered using the ``Saga`` method. The message types in the saga
+interfaces are subscribed to the endpoint.
 
 .. sourcecode:: csharp
 
-    Bus.Factory.CreateUsingInMemory(cfg =>
+    var busControl = Bus.Factory.CreateUsingInMemory(cfg =>
     {
-        cfg.ReceiveEndpoint("queue_name", ep =>
+        cfg.ReceiveEndpoint("input_queue", ep =>
         {
+            // the saga repository is an already created ISagaRepository<T>
+            // where T is the saga class type
             s.Saga(sagaRepository)
+        });
+    });
+
+The more powerful version of a saga, powered by Automatonymous, is a state machine saga. A 
+state machine saga consists of a state type and a state machine, combined with a saga repository.
+The event types in the state machine (denoted by the ``Event<T>`` property type) are subscribed
+to the endpoint.
+
+.. sourcecode:: csharp
+
+    var busControl = Bus.Factory.CreateUsingInMemory(cfg =>
+    {
+        cfg.ReceiveEndpoint("input_queue", ep =>
+        {
+            // machine is an instance of the state machine class
+            // the saga repository is an already created ISagaRepository<T>
+            // where T is the saga class type
+            s.StateMachineSaga(machine, sagaRepository)
         });
     });
 
@@ -109,12 +167,14 @@ LoadFrom
 
     Requires an IoC container.
 
-If you are using an IoC container like AutoFac, StructureMap or Castle then MT
-can scan your container for you to find consumers to be subscribed.
+If you are using an IoC container like AutoFac, StructureMap, or Castle Windsor, MassTransit
+can scan your container to find consumers and subscribe those consumers to the endpoint. Some 
+containers even have methods to help build the container, by scanning the assembly for classes
+that implement any IConsumer interface, and register the concrete consumer type.
 
 .. sourcecode:: csharp
 
-    Bus.Factory.CreateUsingInMemory(cfg =>
+    var busControl = Bus.Factory.CreateUsingInMemory(cfg =>
     {
         cfg.ReceiveEndpoint("abc", ep =>
         {
@@ -125,25 +185,41 @@ can scan your container for you to find consumers to be subscribed.
         });
     });
 
+
 .. note::
 
     Need more notes here
 
-Subscription Options During Post Configuration
-''''''''''''''''''''''''''''''''''''''''''''''
+
+Bus Connections
+'''''''''''''''
+
+Once the bus has been created, the receive endpoints are created at that point and cannot be modified.
+However, the bus itself has a temporary queue which can be used for transient message consumer
+connections. In most cases this is usuable for occasional events (such as a cache update or some other
+low frequency event), and also can be used to receive responses (from the request/response client)
+or faults (failures in message processing).
 
 .. note::
 
-    Subscriptions established post-configuration are assumed to be transient. If this
-    is to be a permanent subscription, it needs to be established during configuration.
+    Consumers connected to the bus post-configured are transient. Persistent subscriptions are not
+    supported on the bus queue (because it's temporary, it's gone soon after the process is gone).
 
 .. sourcecode:: csharp
 
     var bus = Bus.Factory.CreateUsingInMemory(cfg => { /* configure */ });
 
-    //options
-    bus.ConnectHandler();
-    bus.ConnectInstance();
-    bus.ConnectConsumer();
-    bus.ConnectSaga();
+    bus.ConnectHandler<MessageA>();
+    bus.ConnectInstance(yourConsumer);
+    bus.ConnectConsumer<YourConsumer>();
+    bus.ConnectSaga(sagaRepository);
+    bus.ConnectStateMachineSaga(machine, sagaRepository);
+
+.. note::
+
+    It should also be noted that published events cannot be received by the bus queue, as no 
+    bindings are created on bus connections. Messages to the bus queue must be sent directly 
+    to the queue (such as a response, or a request fault). So many of the above connection
+    methods are there for completeless only (IE, connecting a state machine saga to a bus queue
+    is downright silly, but hey, completeness wins).
 

@@ -22,18 +22,18 @@ MassTransit.
 
                 sbc.ReceiveEndpoint(host, "test_queue", ep =>
                 {
-                    ep.Handler<YourMessage>(async context =>
+                    ep.Handler<YourMessage>(context =>
                     {
-                        Console.WriteLine("Received: {0}", context.Message.Text);
+                        return Console.Out.WriteLineAsync($"Received: {context.Message.Text}");
                     });
                 });
             });
 
-            var handle = bus.Start();
+            bus.Start();
 
             bus.Publish(new YourMessage{Text = "Hi"});
 
-            handle.Stop();
+            bus.Stop();
         }
     }
 
