@@ -19,7 +19,6 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
     using MassTransit.Pipeline;
     using Microsoft.ServiceBus;
     using Microsoft.ServiceBus.Messaging;
-    using Monitoring.Introspection;
 
 
     /// <summary>
@@ -29,10 +28,10 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
         IFilter<ConnectionContext>
     {
         static readonly ILog _log = Logger.Get<MessageReceiverFilter>();
-        readonly INotifyReceiveObserver _receiveObserver;
+        readonly IReceiveObserver _receiveObserver;
         readonly IPipe<ReceiveContext> _receivePipe;
 
-        public MessageReceiverFilter(IPipe<ReceiveContext> receivePipe, INotifyReceiveObserver receiveObserver)
+        public MessageReceiverFilter(IPipe<ReceiveContext> receivePipe, IReceiveObserver receiveObserver)
         {
             _receivePipe = receivePipe;
             _receiveObserver = receiveObserver;

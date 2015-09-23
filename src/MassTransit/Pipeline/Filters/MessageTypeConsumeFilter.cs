@@ -138,17 +138,17 @@ namespace MassTransit.Pipeline.Filters
 
             public Task PreConsume(ConsumeContext<TMessage> context)
             {
-                return _observer.NotifyPreConsume(context);
+                return _observer.PreConsume(context);
             }
 
             public Task PostConsume(ConsumeContext<TMessage> context)
             {
-                return _observer.NotifyPostConsume(context);
+                return _observer.PostConsume(context);
             }
 
             public Task ConsumeFault(ConsumeContext<TMessage> context, Exception exception)
             {
-                return _observer.NotifyConsumeFault(context, exception);
+                return _observer.ConsumeFault(context, exception);
             }
 
             public IFilter<ConsumeContext> Filter => _filter.Value;

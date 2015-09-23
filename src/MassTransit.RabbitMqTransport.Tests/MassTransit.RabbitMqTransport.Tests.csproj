@@ -89,6 +89,7 @@
     <Compile Include="Publish_Specs.cs" />
     <Compile Include="Request_Specs.cs" />
     <Compile Include="Security_Specs.cs" />
+    <Compile Include="SendObserver_Specs.cs" />
     <Compile Include="TemporaryQueue_Specs.cs" />
     <Compile Include="TestConnectionPipe.cs" />
     <Compile Include="TestConsumePipe.cs" />

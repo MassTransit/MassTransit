@@ -20,7 +20,6 @@ namespace MassTransit.Transports
     using System.Threading;
     using System.Threading.Tasks;
     using Context;
-    using Pipeline;
     using Serialization;
 
 
@@ -33,10 +32,10 @@ namespace MassTransit.Transports
         readonly Lazy<Headers> _headers;
         readonly PayloadCache _payloadCache;
         readonly IList<Task> _pendingTasks;
-        readonly INotifyReceiveObserver _receiveObserver;
+        readonly IReceiveObserver _receiveObserver;
         readonly Stopwatch _receiveTimer;
 
-        protected BaseReceiveContext(Uri inputAddress, bool redelivered, INotifyReceiveObserver receiveObserver)
+        protected BaseReceiveContext(Uri inputAddress, bool redelivered, IReceiveObserver receiveObserver)
         {
             _receiveTimer = Stopwatch.StartNew();
 
@@ -90,14 +89,14 @@ namespace MassTransit.Transports
         {
             IsDelivered = true;
 
-            return _receiveObserver.NotifyPostConsume(context, duration, consumerType);
+            return _receiveObserver.PostConsume(context, duration, consumerType);
         }
 
         public virtual Task NotifyFaulted<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType, Exception exception) where T : class
         {
             IsFaulted = true;
 
-            return _receiveObserver.NotifyConsumeFault(context, duration, consumerType, exception);
+            return _receiveObserver.ConsumeFault(context, duration, consumerType, exception);
         }
 
         public virtual Stream GetBody()

@@ -31,7 +31,7 @@ namespace MassTransit
         /// <param name="receiveObserver"></param>
         /// <param name="exchangeBindings"></param>
         public static void RabbitMqConsumer(this IPipeConfigurator<ConnectionContext> configurator, IPipe<ReceiveContext> pipe,
-            ReceiveSettings settings, INotifyReceiveObserver receiveObserver, IEnumerable<ExchangeBindingSettings> exchangeBindings)
+            ReceiveSettings settings, IReceiveObserver receiveObserver, IEnumerable<ExchangeBindingSettings> exchangeBindings)
         {
             if (configurator == null)
                 throw new ArgumentNullException(nameof(configurator));

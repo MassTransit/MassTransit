@@ -15,7 +15,6 @@ namespace MassTransit.AzureServiceBusTransport
     using System;
     using System.Linq;
     using System.Threading.Tasks;
-    using Logging;
     using MassTransit.Pipeline;
     using Microsoft.ServiceBus.Messaging;
     using Transports;
@@ -25,7 +24,6 @@ namespace MassTransit.AzureServiceBusTransport
         ISendEndpointProvider
     {
         readonly IServiceBusHost[] _hosts;
-        readonly ILog _log = Logger.Get<ServiceBusSendEndpointProvider>();
         readonly SendObservable _sendObservable;
         readonly IMessageSerializer _serializer;
         readonly Uri _sourceAddress;
@@ -45,7 +43,8 @@ namespace MassTransit.AzureServiceBusTransport
             if (host == null)
                 throw new EndpointNotFoundException("The endpoint address specified an unknown host: " + address);
 
-            TopicDescription topicDescription = await (await host.RootNamespaceManager.ConfigureAwait(false)).CreateTopicSafeAsync(address.GetTopicDescription()).ConfigureAwait(false);
+            TopicDescription topicDescription =
+                await (await host.RootNamespaceManager.ConfigureAwait(false)).CreateTopicSafeAsync(address.GetTopicDescription()).ConfigureAwait(false);
 
             MessagingFactory messagingFactory = await host.MessagingFactory.ConfigureAwait(false);
 
@@ -60,7 +59,7 @@ namespace MassTransit.AzureServiceBusTransport
 
         public ConnectHandle ConnectSendObserver(ISendObserver observer)
         {
-            return _sendObservable.ConnectSendObserver(observer);
+            return _sendObservable.Connect(observer);
         }
     }
 }

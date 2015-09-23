@@ -17,7 +17,6 @@ namespace MassTransit.AzureServiceBusTransport.Contexts
     using System.IO;
     using System.Net.Mime;
     using Context;
-    using MassTransit.Pipeline;
     using Microsoft.ServiceBus.Messaging;
     using Transports;
 
@@ -29,7 +28,7 @@ namespace MassTransit.AzureServiceBusTransport.Contexts
         readonly BrokeredMessage _message;
         byte[] _body;
 
-        public ServiceBusReceiveContext(Uri inputAddress, BrokeredMessage message, INotifyReceiveObserver observer)
+        public ServiceBusReceiveContext(Uri inputAddress, BrokeredMessage message, IReceiveObserver observer)
             : base(inputAddress, message.DeliveryCount > 0, observer)
         {
             _message = message;

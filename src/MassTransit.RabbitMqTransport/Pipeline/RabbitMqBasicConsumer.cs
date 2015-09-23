@@ -36,7 +36,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
         readonly ILog _log = Logger.Get<RabbitMqBasicConsumer>();
         readonly ModelContext _model;
         readonly ConcurrentDictionary<ulong, RabbitMqReceiveContext> _pending;
-        readonly INotifyReceiveObserver _receiveObserver;
+        readonly IReceiveObserver _receiveObserver;
         readonly IPipe<ReceiveContext> _receivePipe;
         readonly ReceiveSettings _receiveSettings;
         string _consumerTag;
@@ -45,7 +45,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
         int _maxPendingDeliveryCount;
         CancellationTokenRegistration _registration;
 
-        public RabbitMqBasicConsumer(ModelContext model, Uri inputAddress, IPipe<ReceiveContext> receivePipe, INotifyReceiveObserver receiveObserver,
+        public RabbitMqBasicConsumer(ModelContext model, Uri inputAddress, IPipe<ReceiveContext> receivePipe, IReceiveObserver receiveObserver,
             CancellationToken cancellationToken)
         {
             _model = model;
@@ -127,7 +127,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
                         _log.ErrorFormat("Duplicate BasicDeliver: {0}", deliveryTag);
                 }
 
-                await _receiveObserver.NotifyPreReceive(context);
+                await _receiveObserver.PreReceive(context);
 
                 await _receivePipe.Send(context);
 
@@ -135,7 +135,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
 
                 _model.BasicAck(deliveryTag, false);
 
-                await _receiveObserver.NotifyPostReceive(context);
+                await _receiveObserver.PostReceive(context);
             }
             catch (Exception ex)
             {
@@ -151,7 +151,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
             }
 
             if (exception != null)
-                await _receiveObserver.NotifyReceiveFault(context, exception);
+                await _receiveObserver.ReceiveFault(context, exception);
         }
 
         IModel IBasicConsumer.Model => _model.Model;

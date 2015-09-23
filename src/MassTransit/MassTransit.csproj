@@ -513,7 +513,6 @@
     <Compile Include="Pipeline\IFilter.cs" />
     <Compile Include="Pipeline\IConsumeMessageObserver.cs" />
     <Compile Include="Pipeline\IConsumeMessageObserverConnector.cs" />
-    <Compile Include="Pipeline\INotifyReceiveObserver.cs" />
     <Compile Include="Pipeline\IPipe.cs" />
     <Compile Include="Pipeline\IConsumePipe.cs" />
     <Compile Include="Pipeline\ConsumePipeExtensions.cs" />
@@ -525,7 +524,7 @@
     <Compile Include="Pipeline\ISendObserver.cs" />
     <Compile Include="Pipeline\ISendObserverConnector.cs" />
     <Compile Include="Pipeline\KeyAccessor.cs" />
-    <Compile Include="Pipeline\MessageObserverConnectable.cs" />
+    <Compile Include="Pipeline\ConsumeMessageObservable.cs" />
     <Compile Include="Pipeline\ConsumeObserverConnectable.cs" />
     <Compile Include="Pipeline\Pipes\FilterPipe.cs" />
     <Compile Include="Pipeline\Pipes\ResponsePipe.cs" />
