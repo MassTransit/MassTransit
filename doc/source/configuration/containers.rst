@@ -23,13 +23,12 @@ StructureMap
             //or use StructureMap's excellent scanning capabilities
         });
         
-        var bus = ServiceBusFactory.New(sbc =>
+        var bus = Bus.Factory.CreateUsingInMemory(sbc =>
         {
-            //other configuration options
-            
-            //this will find all of the consumers in the container and 
-            //register them with the bus.
-            sbc.Subscribe(x => x.LoadFrom(container));
+            sbc.ReceiveEndpoint("input_queue", ec =>
+            {
+                ec.LoadFrom(container);
+            })
         });
         
         //now we add the bus
@@ -55,15 +54,14 @@ Windsor
         //or use Windsor's excellent scanning capabilities
         container.Register(AllTypes.FromThisAssembly().BasedOn<IConsumer>());
         
-        var bus = ServiceBusFactory.New(sbc =>
+        var bus = Bus.Factory.CreateUsingInMemory(sbc =>
         {
-            //other configuration options
-            
-            //this will find all of the consumers in the container and 
-            //register them with the bus.
-            sbc.Subscribe(x => x.LoadFrom(container));
+            sbc.ReceiveEndpoint("input_queue", ec =>
+            {
+                ec.LoadFrom(container);
+            })
         });
-        
+                
         //now we add the bus
         container.Register(Component.For<IServiceBus>().Instance(bus));
     }
@@ -121,16 +119,17 @@ AutoFac
             .AsSelf();
 
         //now we add the bus
-        builder.Register(c => ServiceBusFactory.New(sbc =>
-        {
-            //other configuration options
-
-            //this will find all of the consumers in the container and
-            //register them with the bus.
-            sbc.Subscribe(x => x.LoadFrom(c.Resolve<ILifetimeScope>()));
-        })).As<IServiceBus>()
+        builder.Register(context => Bus.Factory.CreateUsingInMemory(sbc =>
+            {
+                sbc.ReceiveEndpoint("input_queue", ec =>
+                {
+                    ec.LoadFrom(context);
+                })
+            })
+            .As<IBusControl>()
+            .As<IBus>()
             .SingleInstance();
-
+        
         var container = builder.Build();
     }
 
@@ -151,20 +150,14 @@ Ninject
         // register each consumer manually
         kernel.Bind<YourConsumer>().ToSelf();
         
-        //Dru is currently unaware of any scanning capability
-        
-        var bus = ServiceBusFactory.New(sbc =>
+        var bus = Bus.Factory.CreateUsingInMemory(sbc =>
         {
-            //other configuration options
-            
-            //we have to explicitly configure the subscriptions because 
-            //the Ninject metadata model is not rich enough.
-            sbc.Subscribe(subs =>
+            sbc.ReceiveEndpoint("input_queue", ec =>
             {
-                subs.Consumer<YourConsumer>(kernel)
-            });
+                ec.Consumer<YourConsumer>(kernel);;
+            })
         });
-        
+                
         //now we add the bus
         kernel.Bind<IServiceBus>().To(bus);
     }
@@ -204,30 +197,12 @@ Unity
 		// ...
 
 		// Register the ServiceBus.
-		container.RegisterInstance<IServiceBus>(ServiceBusFactory.New(sbc =>
-		{
-			sbc.UseRabbitMq(c =>
-			{
-				// Add configation options if required.
-				// Default JSON serialization is set by MassTransit.  
-			});
-			// Configure exchanges.
-			sbc.ReceiveFrom(receiveQueue);
-			sbc.Subscribe(s => s.LoadFrom(container));
-
-			sbc.SetConcurrentConsumerLimit(concurrentConsumers);
-			sbc.SetDefaultRetryLimit(retryLimit);
-
-			// When using MSMQ as Transport you can choose to verify the DTC configuration.
-			// if (verifyDTCConfiguration)
-			// 		sbc.VerifyMsDtcConfiguration();
-
-			// Configure logging.
-			if (enableLogging)
-				sbc.UseLog4Net();
-			
-			// No performance counters.
-			sbc.DisablePerformanceCounters();
+		container.RegisterInstance<IBusControl>(        var bus = Bus.Factory.CreateUsingInMemory(sbc =>
+        {
+            sbc.ReceiveEndpoint("input_queue", ec =>
+            {
+                ec.LoadFrom(container);
+            });
 		}));
 	}
 	

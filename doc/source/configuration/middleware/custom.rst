@@ -1,37 +1,42 @@
 Adding your own Middleware
 """"""""""""""""""""""""""
 
+Middleware components are configured using extension methods, to make them easy to discover.
+By default, a middleware configuration method should start with Use.
+
+An example middleware component that would log exceptions to the console is shown below.
+
 .. sourcecode:: csharp
-    :linenos:
 
     Bus.Factory.CreateUsingInMemory(cfg =>
     {
-        cfg.UseExample();
-
+        cfg.UseExceptionLogger();
     });
 
-
-Exposing your middleware for people to consume.
+The extension method creates the pipe specification for the middleware component, which can
+be added to any pipe. For a component on the message consumption pipeline, use ``ConsumeContext``
+instead of any ``PipeContext``.
 
 .. sourcecode:: csharp
-    :linenos:
 
     public static class ExampleMiddlewareConfiguratorExtensions
     {
-        public static void UseExample<T>(this IPipeConfigurator<T> configurator)
+        public static void UseExceptionLogger<T>(this IPipeConfigurator<T> configurator)
             where T : class, PipeContext
         {
-
-            configurator.AddPipeSpecification(new ExampleMiddleware<T>());
+            configurator.AddPipeSpecification(new ExceptionLoggerSpecification<T>());
         }
     }
 
-The configuration class
+
+The pipe specification is a class that adds the filter to the pipeline. Additional logic
+can be included, such as configuring optional settings, etc. using a closure syntax similar
+to the other configuration classes in MassTransit.
 
 .. sourcecode:: csharp
-    :linenos:
 
-    public class ExampleMiddleware<T> : IPipeSpecification<T>
+    public class ExceptionLoggerSpecification<T> : 
+        IPipeSpecification<T>
         where T : class, PipeContext
     {
         public IEnumerable<ValidationResult> Validate()
@@ -41,38 +46,55 @@ The configuration class
 
         public void Apply(IPipeBuilder<T> builder)
         {
-            builder.AddFilter(new ExampleFilter<T>());
+            builder.AddFilter(new ExceptionLoggerFilter<T>());
         }
     }
 
-The middleware filter
+Finally, the middleware component itself is a filter connected to the pipeline (inline). All filters
+have absolute and complete control of the execution context and flow of the message. Pipelines are
+entirely asynchronous, and expect that asynchronous operations will be performed. 
+
+.. warning::
+
+    Do not use legacy constructs such as .Wait, .Result, or .WaitAll() as these can cause blocking
+    in the message pipeline. While they might work in same cases, you've been warned!
+
 
 .. sourcecode:: csharp
-    :linenos:
 
-    public class ExampleFilter<T> : IFilter<T>
+    public class ExceptionLoggerFilter<T> : 
+        IFilter<T>
         where T : class, PipeContext
     {
+        long _exceptionCount;
+        long _successCount;
+        long _attemptCount;
+
         public void Probe(ProbeContext context)
         {
-            var step = context.CreateFilterScope("example");
-            step.Add("is-example", true);
+            var scope = context.CreateFilterScope("exceptionLogger");
+            scope.Add("attempted", _attemptCount);
+            scope.Add("succeeded", _successCount);
+            scope.Add("faulted", _exceptionCount);
         }
 
         public async Task Send(T context, IPipe<T> next)
         {
             try
             {
-                //before actions
+                Interlocked.Increment(ref _attemptCount);
+
                 await next.Send(context);
-                //post actions
+
+                Interlocked.Increment(ref _successCount)
             }
             catch (Exception ex)
             {
-                //error handling
-                Console.WriteLine("abc");
+                ::Interlocked.Increment(ref _exceptionCount);
 
-                //if you want standard MT error handling
+                await Console.Out.WriteLineAsync($"An exception occurred: {ex.Message}");
+
+                // propagate the exception up the call stack
                 throw;
             }
         }

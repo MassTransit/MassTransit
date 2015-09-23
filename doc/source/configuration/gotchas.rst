@@ -4,35 +4,35 @@ Comman Gotcha's
 Trying to share a queue
 """""""""""""""""""""""
 
-Each application needs it own address! If you have a website and a console application they will
-each need their own address. For instance the website could listen at ``msmq://localhost/web`` and
-the console at ``msmq://localhost/console``.
+.. note::
 
-The reason for this is you are defining the 'receiving' queue. This is where the bus instance
-will receive its messages. It would be like sharing a mailbox with your neighbor, some times
-you get all the mail, sometimes they get all the mail.
+    While a common mistake in MassTransit 2.x, the new receive endpoint syntax of MassTransit 3 should
+    make it easier to recognize that queue names should not be shared.
+
+Each receive endpoint needs to have a unique queue name! If multiple receive endpoints are created,
+each should have a different queue name so that messages are not skipped.
+
+If two receive endpoints share the same queue name, yet have different consumers subscribed, messages
+which are received by one endpoint but meant for the other will be moved to the _skipped queue. It
+would be like sharing a mailbox with your neighbor, sometimes you get all the mail, sometimes they 
+get all the mail.
 
 
-How to do an NServiceBus send only endpoint?
-""""""""""""""""""""""""""""""""""""""""""""
+Send Only Bus
+"""""""""""""
 
-Use the IEndpointResolver to get an Endpoint that you can call ``.Send(msg)`` on.
+If you need to only send or publish messages, don't create any receive endpoints. The bus will 
+automatically create a temporary queue for the bus which can be used to publish events, as well as
+send commands and do request/response conversations.
 
 
-How to setup a competing consumer?
+How do I load balance consumers across machines?
 """"""""""""""""""""""""""""""""""
 
-need to doc this. ;)
+To load balance consumers, the process with the receive endpoint can be hosted on multiple servers.
+As long as each receive endpoint has the same consumers registered, the messages will be received
+by the first available consumer across all of the machines.
 
-RabbitMQ and Msmq
-
-Where did the Batch<T> go?
-""""""""""""""""""""""""""
-
-We removed the concept, as it required you to bind to the MT dll too 
-tightly in your messages. We don't yet have a way to reproduce the 
-behavior but you can do this in your application. If you would like
-to submit an example we would appreciate it. :)
 
 So, what links two bus instances together?
 """"""""""""""""""""""""""""""""""""""""""
@@ -40,6 +40,7 @@ So, what links two bus instances together?
 This is a common question. The binding element, really is the 
 message contract. If you want message A, then you subscribe to 
 message A. The internals of MT wires it all together.
+
 
 Why aren't queue / message priorities supported?
 """"""""""""""""""""""""""""""""""""""""""""""""
@@ -76,53 +77,4 @@ Knowing that you have a subscriber is not the concern of your application.
 It is something the system architect should know, but not the application.
 Most likely, we just need to introduce all of the states in our protocol
 more explicitly, by using a Saga.
-
-A Sample Saga
-''''''''''''''
-
-.. code::
-
-    //Magnum.StateMachine based saga
-    public class MySaga  :
-		SagaStateMachine<MySaga>,
-		ISaga
-    {
-        static MySaga()
-        {
-            Define(() =>
-            {
-                Initially(
-                    When(CommandOccured)
-                        .Then(saga => saga.StartTimer()) //pseudo code
-                        .TransitionTo(InProcess));
-                
-                During(InProcess,
-                    When(Timeout)
-                        .TransitionTo(TimedOut),
-                    When(Succeeded)
-                        .TransitionTo(Success),
-                    When(Error)
-                        .TransitionTo(Failed));
-                
-            });
-        }
-        
-        //States
-        public static State Initial { get; set; }
-        public static State InProcess { get; set; }
-        public static State TimedOut { get; set; }
-        public static State Succeeded { get; set; }
-        public static State Error { get; set; }
-		public static State Completed { get; set; }
-        
-        //Events
-        public static Event<MyCommand> CommandOccured { get; set; }
-		public static Event<TimeoutEvent> Timeout { get; set; }
-		public static Event<MyCommandSuccess> Succeeded { get; set; }
-		public static Event<MyCommandError> Error { get; set; }
-        
-        
-        //instance data
-        public virtual Guid CorrelationId {get;set;}
-    }
 
