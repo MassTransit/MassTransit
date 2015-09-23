@@ -83,18 +83,18 @@ namespace MassTransit.RabbitMqTransport
                         if (context.TimeToLive.HasValue)
                             properties.Expiration = context.TimeToLive.Value.TotalMilliseconds.ToString("F0", CultureInfo.InvariantCulture);
 
-                        await _observers.NotifyPreSend(context);
+                        await _observers.PreSend(context);
 
                         await modelContext.BasicPublishAsync(context.Exchange, context.RoutingKey, context.Mandatory,
                             context.Immediate, context.BasicProperties, context.Body);
 
                         context.DestinationAddress.LogSent(context.MessageId?.ToString("N") ?? "", TypeMetadataCache<T>.ShortName);
 
-                        await _observers.NotifyPostSend(context);
+                        await _observers.PostSend(context);
                     }
                     catch (Exception ex)
                     {
-                        _observers.NotifySendFault(context, ex).Wait(cancelSend);
+                        _observers.SendFault(context, ex).Wait(cancelSend);
 
                         if (_log.IsErrorEnabled)
                             _log.Error("Send Fault: " + context.DestinationAddress, ex);

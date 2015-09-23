@@ -77,7 +77,8 @@ namespace MassTransit.RabbitMqTransport.Contexts
             set
             {
                 _serializer = value;
-                ContentType = _serializer.ContentType;
+                if(_serializer != null)
+                    ContentType = _serializer.ContentType;
             }
         }
 

@@ -30,7 +30,7 @@ namespace MassTransit.AzureServiceBusTransport
         readonly TaskCompletionSource<ReceiverMetrics> _completeTask;
         readonly Uri _inputAddress;
         readonly MessageReceiver _messageReceiver;
-        readonly INotifyReceiveObserver _receiveObserver;
+        readonly IReceiveObserver _receiveObserver;
         readonly IPipe<ReceiveContext> _receivePipe;
         readonly ReceiveSettings _receiveSettings;
         int _currentPendingDeliveryCount;
@@ -40,7 +40,7 @@ namespace MassTransit.AzureServiceBusTransport
         bool _shuttingDown;
 
         public Receiver(MessageReceiver messageReceiver, Uri inputAddress, IPipe<ReceiveContext> receivePipe,
-            ReceiveSettings receiveSettings, INotifyReceiveObserver receiveObserver, CancellationToken cancellationToken)
+            ReceiveSettings receiveSettings, IReceiveObserver receiveObserver, CancellationToken cancellationToken)
         {
             _messageReceiver = messageReceiver;
             _inputAddress = inputAddress;
@@ -141,7 +141,7 @@ namespace MassTransit.AzureServiceBusTransport
                     throw new TransportException(_inputAddress, "Transport shutdown in progress, abandoning message");
                 }
 
-                await _receiveObserver.NotifyPreReceive(context);
+                await _receiveObserver.PreReceive(context);
 
                 await _receivePipe.Send(context);
 
@@ -149,7 +149,7 @@ namespace MassTransit.AzureServiceBusTransport
 
                 await message.CompleteAsync();
 
-                await _receiveObserver.NotifyPostReceive(context);
+                await _receiveObserver.PostReceive(context);
 
                 if (_log.IsDebugEnabled)
                     _log.DebugFormat("Receive completed: {0}", message.MessageId);
@@ -166,7 +166,7 @@ namespace MassTransit.AzureServiceBusTransport
                 if (exception != null)
                 {
                     await message.AbandonAsync();
-                    await _receiveObserver.NotifyReceiveFault(context, exception);
+                    await _receiveObserver.ReceiveFault(context, exception);
                 }
             }
             finally

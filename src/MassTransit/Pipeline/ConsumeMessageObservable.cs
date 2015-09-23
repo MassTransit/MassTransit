@@ -18,20 +18,21 @@ namespace MassTransit.Pipeline
 
 
     public class ConsumeMessageObservable<T> :
-        Connectable<IConsumeMessageObserver<T>>
+        Connectable<IConsumeMessageObserver<T>>,
+        IConsumeMessageObserver<T>
         where T : class
     {
-        public Task NotifyPreConsume(ConsumeContext<T> context)
+        public Task PreConsume(ConsumeContext<T> context)
         {
             return ForEachAsync(x => x.PreConsume(context));
         }
 
-        public Task NotifyPostConsume(ConsumeContext<T> context)
+        public Task PostConsume(ConsumeContext<T> context)
         {
             return ForEachAsync(x => x.PostConsume(context));
         }
 
-        public Task NotifyConsumeFault(ConsumeContext<T> context, Exception exception)
+        public Task ConsumeFault(ConsumeContext<T> context, Exception exception)
         {
             return ForEachAsync(x => x.ConsumeFault(context, exception));
         }

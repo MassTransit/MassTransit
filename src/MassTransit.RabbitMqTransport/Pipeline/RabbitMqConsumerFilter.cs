@@ -25,10 +25,10 @@ namespace MassTransit.RabbitMqTransport.Pipeline
         IFilter<ModelContext>
     {
         static readonly ILog _log = Logger.Get<RabbitMqConsumerFilter>();
-        readonly INotifyReceiveObserver _receiveObserver;
+        readonly IReceiveObserver _receiveObserver;
         readonly IPipe<ReceiveContext> _receivePipe;
 
-        public RabbitMqConsumerFilter(IPipe<ReceiveContext> receivePipe, INotifyReceiveObserver receiveObserver)
+        public RabbitMqConsumerFilter(IPipe<ReceiveContext> receivePipe, IReceiveObserver receiveObserver)
         {
             _receivePipe = receivePipe;
             _receiveObserver = receiveObserver;

@@ -19,59 +19,31 @@ namespace MassTransit.Pipeline
 
     public class ReceiveObservable :
         Connectable<IReceiveObserver>,
-        INotifyReceiveObserver,
         IReceiveObserver
     {
-        public Task NotifyPreReceive(ReceiveContext context)
+        public Task PreReceive(ReceiveContext context)
         {
             return ForEachAsync(x => x.PreReceive(context));
         }
 
-        public Task NotifyPostReceive(ReceiveContext context)
+        public Task PostReceive(ReceiveContext context)
         {
             return ForEachAsync(x => x.PostReceive(context));
         }
 
-        public Task NotifyPostConsume<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType)
-            where T : class
+        public Task PostConsume<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType) where T : class
         {
             return ForEachAsync(x => x.PostConsume(context, duration, consumerType));
         }
 
-        public Task NotifyConsumeFault<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType, Exception exception)
-            where T : class
+        public Task ConsumeFault<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType, Exception exception) where T : class
         {
             return ForEachAsync(x => x.ConsumeFault(context, duration, consumerType, exception));
         }
 
-        public Task NotifyReceiveFault(ReceiveContext context, Exception exception)
+        public Task ReceiveFault(ReceiveContext context, Exception exception)
         {
             return ForEachAsync(x => x.ReceiveFault(context, exception));
-        }
-
-        Task IReceiveObserver.PreReceive(ReceiveContext context)
-        {
-            return NotifyPreReceive(context);
-        }
-
-        Task IReceiveObserver.PostReceive(ReceiveContext context)
-        {
-            return NotifyPostReceive(context);
-        }
-
-        Task IReceiveObserver.PostConsume<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType)
-        {
-            return NotifyPostConsume(context, duration, consumerType);
-        }
-
-        Task IReceiveObserver.ConsumeFault<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType, Exception exception)
-        {
-            return NotifyConsumeFault(context, duration, consumerType, exception);
-        }
-
-        Task IReceiveObserver.ReceiveFault(ReceiveContext context, Exception exception)
-        {
-            return NotifyReceiveFault(context, exception);
         }
     }
 }

@@ -45,7 +45,7 @@ namespace MassTransit.RabbitMqTransport
 
         public ConnectHandle ConnectSendObserver(ISendObserver observer)
         {
-            return _sendObservable.ConnectSendObserver(observer);
+            return _sendObservable.Connect(observer);
         }
     }
 }

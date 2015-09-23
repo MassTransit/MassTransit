@@ -74,13 +74,13 @@ namespace MassTransit.Pipeline.Filters
             if (context.TryGetMessage(out consumeContext))
             {
                 if (_messageObservers.Count > 0)
-                    await _messageObservers.NotifyPreConsume(consumeContext);
+                    await _messageObservers.PreConsume(consumeContext);
                 try
                 {
                     await _outputPipe.Send(consumeContext);
 
                     if (_messageObservers.Count > 0)
-                        await _messageObservers.NotifyPostConsume(consumeContext);
+                        await _messageObservers.PostConsume(consumeContext);
 
                     await next.Send(context);
                 }
@@ -89,7 +89,7 @@ namespace MassTransit.Pipeline.Filters
                     // we can't await in a catch block, so we have to wait explicitly on this one
                     if (_messageObservers.Count > 0)
                     {
-                        await _messageObservers.NotifyConsumeFault(consumeContext, ex);
+                        await _messageObservers.ConsumeFault(consumeContext, ex);
                     }
 
                     throw;

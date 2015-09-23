@@ -32,8 +32,8 @@ namespace MassTransit.Transports.InMemory
     {
         static readonly ILog _log = Logger.Get<InMemoryTransport>();
         readonly Uri _inputAddress;
-        readonly SendObservable _observers;
-        readonly ReceiveObservable _receiveObservers;
+        readonly SendObservable _sendObservable;
+        readonly ReceiveObservable _receiveObservable;
         readonly QueuedTaskScheduler _scheduler;
         IPipe<ReceiveContext> _receivePipe;
         CancellationToken _stopToken;
@@ -42,8 +42,8 @@ namespace MassTransit.Transports.InMemory
         {
             _inputAddress = inputAddress;
 
-            _observers = new SendObservable();
-            _receiveObservers = new ReceiveObservable();
+            _sendObservable = new SendObservable();
+            _receiveObservable = new ReceiveObservable();
 
             _scheduler = new QueuedTaskScheduler(TaskScheduler.Default, concurrencyLimit);
         }
@@ -74,7 +74,7 @@ namespace MassTransit.Transports.InMemory
 
         public ConnectHandle ConnectReceiveObserver(IReceiveObserver observer)
         {
-            return _receiveObservers.Connect(observer);
+            return _receiveObservable.Connect(observer);
         }
 
         async Task ISendTransport.Send<T>(T message, IPipe<SendContext<T>> pipe, CancellationToken cancelSend)
@@ -87,7 +87,7 @@ namespace MassTransit.Transports.InMemory
 
                 Guid messageId = context.MessageId ?? NewId.NextGuid();
 
-                await _observers.NotifyPreSend(context);
+                await _sendObservable.PreSend(context);
 
                 var transportMessage = new InMemoryTransportMessage(messageId, context.Body, context.ContentType.MediaType, TypeMetadataCache<T>.ShortName);
 
@@ -97,13 +97,13 @@ namespace MassTransit.Transports.InMemory
 
                 context.DestinationAddress.LogSent(context.MessageId?.ToString("N") ?? "", TypeMetadataCache<T>.ShortName);
 
-                await _observers.NotifyPostSend(context);
+                await _sendObservable.PostSend(context);
             }
             catch (Exception ex)
             {
                 _log.Error($"SEND FAULT: {_inputAddress} {context.MessageId} {TypeMetadataCache<T>.ShortName}", ex);
 
-                await _observers.NotifySendFault(context, ex);
+                await _sendObservable.SendFault(context, ex);
 
                 throw;
             }
@@ -133,7 +133,7 @@ namespace MassTransit.Transports.InMemory
 
         public ConnectHandle ConnectSendObserver(ISendObserver observer)
         {
-            return _observers.Connect(observer);
+            return _sendObservable.Connect(observer);
         }
 
         async Task DispatchMessage(InMemoryTransportMessage message)
@@ -144,17 +144,17 @@ namespace MassTransit.Transports.InMemory
             if (_receivePipe == null)
                 throw new ArgumentException("ReceivePipe not configured");
 
-            var context = new InMemoryReceiveContext(_inputAddress, message, _receiveObservers);
+            var context = new InMemoryReceiveContext(_inputAddress, message, _receiveObservable);
 
             try
             {
-                await _receiveObservers.NotifyPreReceive(context);
+                await _receiveObservable.PreReceive(context);
 
                 await _receivePipe.Send(context);
 
                 await context.CompleteTask;
 
-                await _receiveObservers.NotifyPostReceive(context);
+                await _receiveObservable.PostReceive(context);
 
                 _inputAddress.LogReceived(message.MessageId.ToString("N"), message.MessageType);
             }
@@ -162,7 +162,7 @@ namespace MassTransit.Transports.InMemory
             {
                 _log.Error($"RCV FAULT: {message.MessageId}", ex);
 
-                await _receiveObservers.NotifyReceiveFault(context, ex);
+                await _receiveObservable.ReceiveFault(context, ex);
 
                 message.DeliveryCount++;
             }

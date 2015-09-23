@@ -27,11 +27,11 @@ namespace MassTransit.RabbitMqTransport.Configuration
     {
         readonly IPipe<ReceiveContext> _receivePipe;
         readonly ReceiveSettings _settings;
-        readonly INotifyReceiveObserver _receiveObserver;
+        readonly IReceiveObserver _receiveObserver;
         readonly ExchangeBindingSettings[] _exchangeBindings;
 
         public RabbitMqConsumerPipeSpecification(IPipe<ReceiveContext> receivePipe, ReceiveSettings settings,
-            INotifyReceiveObserver receiveObserver,
+            IReceiveObserver receiveObserver,
             IEnumerable<ExchangeBindingSettings> exchangeBindings)
         {
             _settings = settings;
