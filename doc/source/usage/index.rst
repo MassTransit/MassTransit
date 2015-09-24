@@ -10,6 +10,6 @@ provided below.
     consumer.rst
     locations.rst
     transactions.rst
+    request_response.rst
     exceptions.rst
     retry.rst
-    request_response.rst
