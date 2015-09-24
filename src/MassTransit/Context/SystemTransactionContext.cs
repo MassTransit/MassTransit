@@ -13,6 +13,7 @@
 namespace MassTransit.Context
 {
     using System;
+    using System.Threading.Tasks;
     using System.Transactions;
 
 
@@ -41,17 +42,17 @@ namespace MassTransit.Context
 
         Transaction TransactionContext.Transaction => _transaction;
 
-        void TransactionContext.Commit()
+        public async Task Commit()
         {
             if (_completed)
                 return;
 
-            _transaction.Commit();
+            await Task.Factory.FromAsync(_transaction.BeginCommit, _transaction.EndCommit, null);
 
             _completed = true;
         }
 
-        void TransactionContext.Rollback()
+        public void Rollback()
         {
             if (_completed)
                 return;
@@ -61,7 +62,7 @@ namespace MassTransit.Context
             _completed = true;
         }
 
-        void TransactionContext.Rollback(Exception exception)
+        public void Rollback(Exception exception)
         {
             if (_completed)
                 return;

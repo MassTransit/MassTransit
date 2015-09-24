@@ -13,6 +13,7 @@
 namespace MassTransit
 {
     using System;
+    using System.Threading.Tasks;
     using System.Transactions;
 
 
@@ -27,7 +28,7 @@ namespace MassTransit
         /// <summary>
         /// Complete the transaction scope
         /// </summary>
-        void Commit();
+        Task Commit();
 
         /// <summary>
         /// Rollback the transaction

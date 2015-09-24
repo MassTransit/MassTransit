@@ -58,6 +58,8 @@ namespace MassTransit.Tests.Pipeline
                 x.UseExecute(payload => Console.WriteLine("Execute: {0}", Thread.CurrentThread.ManagedThreadId));
                 x.UseExecuteAsync(async payload =>
                 {
+                    await Task.Yield();
+
                     using (TransactionScope scope = payload.CreateTransactionScope())
                     {
                         Console.WriteLine("ExecuteAsync: {0}", Thread.CurrentThread.ManagedThreadId);
@@ -114,6 +116,8 @@ namespace MassTransit.Tests.Pipeline
                 x.UseExecute(payload => Console.WriteLine("Execute: {0}", Thread.CurrentThread.ManagedThreadId));
                 x.UseExecuteAsync(async payload =>
                 {
+                    await Task.Yield();
+
                     using (TransactionScope scope = payload.CreateTransactionScope())
                     {
                         Console.WriteLine("ExecuteAsync: {0}", Thread.CurrentThread.ManagedThreadId);

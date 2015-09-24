@@ -52,6 +52,7 @@ namespace MassTransit.Pipeline.Filters
             context.GetOrAddPayload<TransactionContext>(() =>
             {
                 systemTransactionContext = new SystemTransactionContext(_options);
+
                 return systemTransactionContext;
             });
 
@@ -60,12 +61,11 @@ namespace MassTransit.Pipeline.Filters
                 await next.Send(context);
 
                 if (systemTransactionContext != null)
-                    ((TransactionContext)systemTransactionContext).Commit();
+                    await systemTransactionContext.Commit();
             }
             catch (Exception ex)
             {
-                if (systemTransactionContext != null)
-                    ((TransactionContext)systemTransactionContext).Rollback(ex);
+                systemTransactionContext?.Rollback(ex);
 
                 throw;
             }
