@@ -14,15 +14,12 @@ namespace MassTransit.QuartzIntegration.Tests
 {
     using System;
     using NUnit.Framework;
-    using Quartz;
-    using Quartz.Impl;
     using TestFramework;
 
 
     public class QuartzInMemoryTestFixture :
         InMemoryTestFixture
     {
-        IScheduler _scheduler;
         readonly Uri _quartzAddress;
         ISendEndpoint _quartzEndpoint;
 
@@ -45,32 +42,13 @@ namespace MassTransit.QuartzIntegration.Tests
         {
             base.ConfigureBus(configurator);
 
-            ISchedulerFactory schedulerFactory = new StdSchedulerFactory();
-            _scheduler = schedulerFactory.GetScheduler();
-
-            configurator.ReceiveEndpoint("quartz", x =>
-            {
-                x.Consumer(() => new ScheduleMessageConsumer(_scheduler));
-                x.Consumer(() => new CancelScheduledMessageConsumer(_scheduler));
-            });
+            configurator.UseInMemoryScheduler();
         }
 
         [TestFixtureSetUp]
         public void Setup_quartz_service()
         {
-            _scheduler.JobFactory = new MassTransitJobFactory(Bus);
-            _scheduler.Start();
-
             _quartzEndpoint = Await(() => GetSendEndpoint(QuartzAddress));
-        }
-
-        [TestFixtureTearDown]
-        public void Teardown_quartz_service()
-        {
-            if (_scheduler != null)
-                _scheduler.Standby();
-            if (_scheduler != null)
-                _scheduler.Shutdown();
         }
     }
 }

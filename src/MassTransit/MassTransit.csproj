@@ -150,6 +150,7 @@
     <Compile Include="Hosting\ISettings.cs" />
     <Compile Include="Hosting\ISettingsProvider.cs" />
     <Compile Include="IBusFactorySelector.cs" />
+    <Compile Include="IBusObserver.cs" />
     <Compile Include="IMessageData.cs" />
     <Compile Include="IntrospectionExtensions.cs" />
     <Compile Include="IProbeSite.cs" />
@@ -460,6 +461,7 @@
     <Compile Include="Pipe.cs" />
     <Compile Include="PipeContext.cs" />
     <Compile Include="PipeExtensions.cs" />
+    <Compile Include="Pipeline\BusObservable.cs" />
     <Compile Include="Pipeline\ConsumerFactories\DefaultConstructorConsumerFactory.cs" />
     <Compile Include="Pipeline\ConsumerFactories\DelegateConsumerFactory.cs" />
     <Compile Include="Pipeline\ConsumerFactories\InstanceConsumerFactory.cs" />

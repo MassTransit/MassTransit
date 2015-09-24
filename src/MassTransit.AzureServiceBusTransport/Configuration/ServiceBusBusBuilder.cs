@@ -75,7 +75,7 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
         {
             _busEndpointConfigurator.Apply(this);
 
-            return new MassTransitBus(_inputAddress, _busConsumePipe, SendEndpointProvider, PublishEndpoint, ReceiveEndpoints, _hosts);
+            return new MassTransitBus(_inputAddress, _busConsumePipe, SendEndpointProvider, PublishEndpoint, ReceiveEndpoints, _hosts, BusObservable);
         }
     }
 }

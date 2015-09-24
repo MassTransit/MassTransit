@@ -77,7 +77,7 @@ namespace MassTransit.Builders
         {
             IConsumePipe busConsumePipe = CreateBusReceiveEndpoint();
 
-            return new MassTransitBus(_inputAddress, busConsumePipe, SendEndpointProvider, PublishEndpoint, ReceiveEndpoints, _hosts);
+            return new MassTransitBus(_inputAddress, busConsumePipe, SendEndpointProvider, PublishEndpoint, ReceiveEndpoints, _hosts, BusObservable);
         }
 
         IConsumePipe CreateBusReceiveEndpoint()

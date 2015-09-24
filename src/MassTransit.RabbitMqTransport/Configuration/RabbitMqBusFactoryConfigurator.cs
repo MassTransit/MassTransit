@@ -147,6 +147,14 @@ namespace MassTransit.RabbitMqTransport.Configuration
             _transportBuilderConfigurators.Add(configurator);
         }
 
+        public void ReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configureEndpoint)
+        {
+            if (_hosts.Count == 0)
+                throw new ArgumentException("At least one host must be configured before configuring a receive endpoint");
+
+            ReceiveEndpoint(_hosts[0], queueName, configureEndpoint);
+        }
+
         public void ReceiveEndpoint(IRabbitMqHost host, string queueName,
             Action<IRabbitMqReceiveEndpointConfigurator> configure)
         {

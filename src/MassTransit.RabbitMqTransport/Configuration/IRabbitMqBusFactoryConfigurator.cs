@@ -21,26 +21,18 @@ namespace MassTransit
         IBusFactoryConfigurator,
         IQueueConfigurator
     {
-        // change this to return an IRabbitMqHost 
-        IRabbitMqHost Host(RabbitMqHostSettings settings);
-
-
         /// <summary>
         /// Specify a queue name to be used for the bus instance (separate from the receive endpoints queues).
         /// </summary>
         string BusQueueName { set; }
 
-//        /// <summary>
-//        ///     Intercept the publishing of a message type that is assignable to T
-//        /// </summary>
-//        /// <typeparam name="T"></typeparam>
-//        /// <param name="callback"></param>
-//        void OnPublish<T>(Action<RabbitMqPublishContext<T>> callback)
-//            where T : class;
-//
-//        void OnPublish(Action<RabbitMqPublishContext> callback);
-//
-        // TODO change receive endpoint to use an IRabbitMqHost, so that we don't have to match 
+        /// <summary>
+        /// Configure a Host that can be connected. If only one host is specified, it is used as the default
+        /// host for receive endpoints.
+        /// </summary>
+        /// <param name="settings"></param>
+        /// <returns></returns>
+        IRabbitMqHost Host(RabbitMqHostSettings settings);
 
         /// <summary>
         /// Declare a ReceiveEndpoint on the broker and configure the endpoint settings and message consumers.

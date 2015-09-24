@@ -12,6 +12,9 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.AzureServiceBusTransport.Configuration
 {
+    using System;
+
+
     public interface IServiceBusBusFactoryConfigurator :
         IBusFactoryConfigurator
     {
@@ -32,5 +35,13 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
         /// <param name="settings"></param>
         /// <returns></returns>
         IServiceBusHost Host(ServiceBusHostSettings settings);
+
+        /// <summary>
+        /// Declare a ReceiveEndpoint on the broker and configure the endpoint settings and message consumers.
+        /// </summary>
+        /// <param name="host">The host for this endpoint</param>
+        /// <param name="queueName">The input queue name</param>
+        /// <param name="configure">The configuration method</param>
+        void ReceiveEndpoint(IServiceBusHost host, string queueName, Action<IServiceBusReceiveEndpointConfigurator> configure);
     }
 }

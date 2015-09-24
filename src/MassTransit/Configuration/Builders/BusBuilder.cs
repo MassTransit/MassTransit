@@ -23,6 +23,7 @@ namespace MassTransit.Builders
 
     public abstract class BusBuilder
     {
+        readonly BusObservable _busObservable;
         readonly IConsumePipeSpecification _consumePipeSpecification;
         readonly Lazy<IMessageDeserializer> _deserializer;
         readonly IDictionary<string, DeserializerFactory> _deserializerFactories;
@@ -40,7 +41,7 @@ namespace MassTransit.Builders
             _deserializerFactories = new Dictionary<string, DeserializerFactory>(StringComparer.OrdinalIgnoreCase);
             _receiveEndpoints = new List<IReceiveEndpoint>();
             _serializerFactory = () => new JsonMessageSerializer();
-
+            _busObservable = new BusObservable();
             _serializer = new Lazy<IMessageSerializer>(CreateSerializer);
             _deserializer = new Lazy<IMessageDeserializer>(CreateDeserializer);
             _sendTransportProvider = new Lazy<ISendTransportProvider>(CreateSendTransportProvider);
@@ -56,6 +57,8 @@ namespace MassTransit.Builders
             AddMessageDeserializer(XmlMessageSerializer.XmlContentType,
                 (s, p) => new XmlMessageDeserializer(JsonMessageSerializer.Deserializer, s, p));
         }
+
+        protected BusObservable BusObservable => _busObservable;
 
         protected IEnumerable<IReceiveEndpoint> ReceiveEndpoints => _receiveEndpoints;
 
@@ -128,6 +131,11 @@ namespace MassTransit.Builders
         public void AddReceiveEndpoint(IReceiveEndpoint receiveEndpoint)
         {
             _receiveEndpoints.Add(receiveEndpoint);
+        }
+
+        public ConnectHandle ConnectBusObserver(IBusObserver observer)
+        {
+            return _busObservable.Connect(observer);
         }
 
         protected abstract ISendTransportProvider CreateSendTransportProvider();
