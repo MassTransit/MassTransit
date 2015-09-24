@@ -1,46 +1,95 @@
 Handling Exceptions
 ===================
 
-Handling errors in your consumers is quite easy.
+Let's face it, bad things happen. Networks partition, data servers crash, remote endpoints get busy and fail
+to respond. And when bad things happen, exceptions get thrown. And when exceptions get thrown, people die.
+Okay, maybe that's a bit dramatic, but the point is, exceptions are a fact of software development.
 
-Let's suppose that you have a message containing a some data that needs to be
-saved to a database. In the event of a failure to save that data, that code
-throws an exception say, ``SqlErrorException`` or some other monkey business.
-What do you do?
+Fortunately, MassTransit provides a number of features to help your application recover from and deal with
+exceptions. But before getting into that, an understanding of what happens when a message is consumed is needed.
 
-The easiest thing is to just let the exception bubble out of your consumer method
-and MassTransit will automatically catch the exception for you, and then, by
-default, will retry the message 5 times for you. After 5 attempts it will move
-the error to the 'error queue'. From there you will need to inspect the message
-in the error queue and decide what you need to do.
+Take, for example, a consumer that simply throws an exception. 
 
 .. sourcecode:: csharp
 
-    public class AConsumer : IConsumer<object>
+    public class UpdateCustomerAddressConsumer : 
+        IConsumer<UpdateCustomerAddress>
     {
-        public async Task Consume(ConsumeContext<object> context)
+        public Task Consume(ConsumeContext<UpdateCustomerAddress> context)
         {
-            throw new Exception("Something went wrong");
+            throw new Exception("Very bad things happened");
         }
     }
 
-If that isn't fancy enough for you, there is another option as well. You can
-handle the error yourself. On the ``ConsumeContex<T>`` class are a number of
-methods that you can use.
+When a message is delivered to the consumer, the consumer throws an exception. With a default bus configuration,
+the exception is caught by middleware in the transport (the ``MoveExceptionToTransportFilter`` to be exact), and 
+the message is moved to an *_error* queue (prefixed by the receive endpoint queue name). The exception details are 
+stored as headers with the message, for analysis and to assist in troubleshooting the exception.
+
+In addition to moving the message to an error queue, MassTransit also generates a ``Fault<T>`` event. If the received 
+message specified a ``FaultAddress`` header, the fault is sent to that address. If a fault address is not found, and
+a ``ResponseAddress`` is present, the fault is sent to the response address. If neither address is present, the fault
+is published.
+
+
+Retrying Messages
+-----------------
+
+In some cases, the exception may be a transient condition, such as a database deadlock, a busy web service, or some
+similar type of situation which usually clears up on a second attempt. With these exception types, it is often desirable
+to retry the message delivery to the consumer, allowing the consumer to try the operation again.
 
 .. sourcecode:: csharp
 
-    public class AConsumer : IConsumer<object>
+    public class UpdateCustomerAddressConsumer : 
+        IConsumer<UpdateCustomerAddress>
     {
-        public async Task Consume(ConsumeContext<object> context)
+        ISessionFactory _sessionFactory;
+
+        public async Task Consume(ConsumeContext<UpdateCustomerAddress> context)
         {
-            try
+            using(var session = _sessionFactory.OpenSession())
+            using(var transaction = session.BeginTransaction())
             {
-                //do work
-            }
-            catch (Exception ex)
-            {
-                context.NotifyFaulted(context.Message, "consumer type", ex);
+                var customer = session.Get<Customer>(context.Message.CustomerId);
+                // update customer address properties from message
+
+                session.Update(customer);
+
+                transaction.Commit();
             }
         }
     }
+
+With this consumer, an ``ADOException`` can be thrown if the update fails. In this case, the operation should be retried
+before moving the message to the error queue. This can be configured on the receive endpoint. Shown below is a retry
+policy which attempts to deliver the message to a consumer five times before throwing the exception back up the pipeline.
+
+.. sourcecode:: csharp
+
+    ISessionFactory sessionFactory = CreateSessionFactory();
+
+    var busControl = Bus.Factory.CreateUsingRabbitMq(cfg =>
+    {
+        var host = cfg.Host(new Uri("rabbitmq://localhost/"), h =>
+        {
+            h.Username("guest");
+            h.Password("guest");
+        });
+
+        cfg.ReceiveEndpoint(host, "customer_update_queue", e =>
+        {
+            e.UseRetry(Retry.Immediate(5));
+            e.Consumer(() => new UpdateCustomerAddressConsumer(sessionFactory));
+        });
+    });
+
+The ``UseRetry`` method is an extension method that configures a middleware filter, in this case the ``RetryFilter``.
+There are a variety of retry policies available, which are detailed in the reference section.
+
+.. note::
+
+    In this example, the ``UseRetry`` is at the receive endpoint level. Additional retry filters can be
+    added at the bus and consumer level, providing flexibility in how different consumers, messages, etc. are
+    retried.
+    
