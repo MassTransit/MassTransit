@@ -1,5 +1,5 @@
-Request/Response Using MassTransit
-==================================
+Crafting a Request/Response Conversation
+========================================
 
 Request/response is a common pattern in application development, where a component sends a request to a service and 
 continues once the response is received. In a distributed system, this can increase the latency of an application
@@ -13,17 +13,38 @@ procedural code and avoid the complex use of callbacks and handlers. Additionall
 be executed at once, reducing the overall execution time to that of the longest request.
 
 
-The MassTransit Request Client
+Creating the Message Contracts
 ------------------------------
 
-Most interactions of the request/response nature consist of four elements: the request parameters, the response values, 
+To get started, the message contracts need to be created. In this example, an order status check is being created.
+
+.. sourcecode:: csharp
+
+	public interface CheckOrderStatus
+    {
+    	string OrderId { get; }
+    }
+ 
+    public interface OrderStatusResult
+    {
+    	string OrderId { get; }
+        DateTime Timestamp { get; }
+        short StatusCode { get; }
+        string StatusText { get; }
+    }
+
+
+Creating the Message Request Client
+------------------------------
+
+Most interactions of the request/response nature consist of four elements: the request arguments, the response values, 
 exception handling, and the time to wait for a response. The .NET framework gives us one additional element, a 
 ``CancellationToken`` which can prematurely cancel waiting for the response. The request client optimizes these elements
 into an easy-to-use interface:
 
 .. sourcecode:: csharp
 
-	interface IRequestClient<TRequest, TResponse>
+	public interface IRequestClient<TRequest, TResponse>
 	{
 		Task<TResponse> Request(TRequest request, CancellationToken cancellationToken);
 	}
@@ -34,55 +55,37 @@ by using the request client, an application can be completely free of any MassTr
 and endpoints. The configuration of the application can defined the endpoints and connections and register them in 
 a dependency injection container, keeping the configuration complexity at the outer edge of the application.
 
-To start, the message contracts needs to be created:
+To create a request client, the provided ``MessageRequestClient`` can be used.
 
 .. sourcecode:: csharp
 
-	public class SimpleCommand
-    {
-        public Guid CommandId { get; set; }
-        public DateTime Timestamp { get; set; }
-    }
- 
-    public class SimpleResult
-    {
-        public Guid ResultId { get; set; }
-        public DateTime Timestamp { get; set; }
-        public TimeSpan Duration { get; set; }
-        public Guid CommandId { get; set; }
-        public short ResultCode { get; set; }
-        public string ResultText { get; set; }
-    }
+	Uri address = new Uri("loopback://localhost/order_status_check");
+	TimeSpan requestTimeout = TimeSpan.FromSeconds(30);
 
-Once defined, the calling application can create the request client:
+	IRequestClient<CheckOrderStatus, OrderStatusResult> client =
+    	new MessageRequestClient<CheckOrderStatus, OrderStatusResult>(bus, address, requestTimeout);
 
-.. sourcecode:: csharp
-
-	Uri address = new Uri("loopback://localhost/input_queue");
-	TimeSpan timeout = TimeSpan.FromSeconds(30);
-
-	IRequestClient<SimpleCommand, SimpleResult> client =
-    	new MessageRequestClient<SimpleCommand, SimpleResult>(bus,
-            address, timeout);
-
-Now that the requeest client is created, a web controller, for example, can use
-the request client in an action method easily.
+Once created, the request client instance can be registered with the depenendency resolver using the ``IRequestClient``
+interface type. Once registered, a controller can use the client via a constructor dependency. 
 
 .. sourcecode:: csharp
 
 	public class RequestController :
 		Controller
 	{
-		IRequestClient<SimpleCommand, SimpleResult> _client;
+		IRequestClient<CheckOrderStatus, OrderStatusResult> _client;
 
-		public RequestController(IRequestClient<SimpleCommand, SimpleResult> client)
+		public RequestController(IRequestClient<CheckOrderStatus, OrderStatusResult> client)
 		{
 			_client = client;
 		}
 
-		public async Task<ActionResult> Get()
+		public async Task<ActionResult> Get(string id)
 		{
-			var command = new SimpleCommand();
+			var command = new CheckOrderStatus
+			{
+				OrderId = id
+			};
 
 			var result = await _client.Request(command);
 
@@ -94,7 +97,8 @@ The controller method will send the command, and return the view once the result
 The syntax is significantly cleaner than dealing with message object, consumer contexts, responses,
 etc. And since async/await and messaging are both about asynchronous programming, it's a natural fit.
 
-Bonus Coverage
+
+Composing Multiple Requests
 --------------
 
 If there were multiple requests to be performed, it is easy to wait on all results at the same time,
