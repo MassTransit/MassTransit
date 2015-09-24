@@ -25,12 +25,14 @@ namespace MassTransit.RabbitMqTransport.Hosting
         IServiceConfigurator
     {
         readonly IRabbitMqBusFactoryConfigurator _configurator;
+        readonly int _defaultConsumerLimit;
         readonly IRabbitMqHost _host;
 
         public RabbitMqServiceConfigurator(IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host)
         {
             _configurator = configurator;
             _host = host;
+            _defaultConsumerLimit = Environment.ProcessorCount * 4;
         }
 
         public void ReceiveEndpoint(string queueName, int consumerLimit, Action<IReceiveEndpointConfigurator> configureEndpoint)
@@ -56,6 +58,11 @@ namespace MassTransit.RabbitMqTransport.Hosting
         public void AddBusFactorySpecification(IBusFactorySpecification configurator)
         {
             _configurator.AddBusFactorySpecification(configurator);
+        }
+
+        public void ReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configureEndpoint)
+        {
+            ReceiveEndpoint(queueName, _defaultConsumerLimit, configureEndpoint);
         }
     }
 }

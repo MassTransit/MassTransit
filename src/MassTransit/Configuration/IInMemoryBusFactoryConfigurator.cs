@@ -12,7 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
-    using System;
     using System.ComponentModel;
     using Builders;
 
@@ -39,12 +38,5 @@ namespace MassTransit
 
         [EditorBrowsable(EditorBrowsableState.Never)]
         void AddBusFactorySpecification(IInMemoryBusFactorySpecification configurator);
-
-        /// <summary>
-        /// Specify a receive endpoint for the bus, with the specified queue name
-        /// </summary>
-        /// <param name="queueName">The queue name for the receiving endpoint</param>
-        /// <param name="configure">The configuration callback</param>
-        void ReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configure);
     }
 }

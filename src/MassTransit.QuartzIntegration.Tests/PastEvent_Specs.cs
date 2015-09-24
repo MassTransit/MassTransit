@@ -15,19 +15,38 @@ namespace MassTransit.QuartzIntegration.Tests
     using System;
     using System.Threading.Tasks;
     using NUnit.Framework;
-    using Scheduling;
 
 
     [TestFixture]
     public class Specifying_an_event_in_the_past :
         QuartzInMemoryTestFixture
     {
+        class A
+        {
+            public string Name { get; set; }
+        }
+
+
+        [Test, Explicit]
+        public async void Should_be_able_to_cancel_a_future_event()
+        {
+            Task<ConsumeContext<A>> handler = SubscribeHandler<A>();
+
+            var scheduledMessage = await QuartzEndpoint.ScheduleSend(Bus.Address, DateTime.UtcNow + TimeSpan.FromSeconds(120), new A {Name = "Joe"});
+
+            await Task.Delay(2000);
+
+            await QuartzEndpoint.CancelScheduledSend(scheduledMessage);
+
+            await Task.Delay(2000);
+        }
+
         [Test]
         public async void Should_handle_now_properly()
         {
             Task<ConsumeContext<A>> handler = SubscribeHandler<A>();
 
-            await QuartzEndpoint.ScheduleSend(Bus.Address, DateTime.UtcNow, new A { Name = "Joe" });
+            await QuartzEndpoint.ScheduleSend(Bus.Address, DateTime.UtcNow, new A {Name = "Joe"});
 
             await handler;
         }
@@ -37,23 +56,9 @@ namespace MassTransit.QuartzIntegration.Tests
         {
             Task<ConsumeContext<A>> handler = SubscribeHandler<A>();
 
-            await QuartzEndpoint.ScheduleSend(Bus.Address, DateTime.UtcNow + TimeSpan.FromSeconds(2), new A { Name = "Joe" });
+            await QuartzEndpoint.ScheduleSend(Bus.Address, DateTime.UtcNow + TimeSpan.FromSeconds(2), new A {Name = "Joe"});
 
             await handler;
-        }
-
-        [Test, Explicit]
-        public async void Should_be_able_to_cancel_a_future_event()
-        {
-            Task<ConsumeContext<A>> handler = SubscribeHandler<A>();
-
-            var scheduledMessage = await QuartzEndpoint.ScheduleSend(Bus.Address, DateTime.UtcNow + TimeSpan.FromSeconds(120), new A { Name = "Joe" });
-
-            await Task.Delay(2000);
-
-            await QuartzEndpoint.CancelScheduledSend(scheduledMessage);
-
-            await Task.Delay(2000);
         }
 
         [Test]
@@ -65,7 +70,7 @@ namespace MassTransit.QuartzIntegration.Tests
             Guid correlationId = Guid.NewGuid();
             Guid conversationId = Guid.NewGuid();
             Guid initiatorId = Guid.NewGuid();
-            await QuartzEndpoint.ScheduleSend(Bus.Address, DateTime.UtcNow, new A { Name = "Joe" }, Pipe.Execute<SendContext>(x =>
+            await QuartzEndpoint.ScheduleSend(Bus.Address, DateTime.UtcNow, new A {Name = "Joe"}, Pipe.Execute<SendContext>(x =>
             {
                 x.FaultAddress = Bus.Address;
                 x.ResponseAddress = InputQueueAddress;
@@ -100,15 +105,9 @@ namespace MassTransit.QuartzIntegration.Tests
         {
             Task<ConsumeContext<A>> handler = SubscribeHandler<A>();
 
-            await QuartzEndpoint.ScheduleSend(Bus.Address, DateTime.UtcNow + TimeSpan.FromHours(-1), new A { Name = "Joe" });
+            await QuartzEndpoint.ScheduleSend(Bus.Address, DateTime.UtcNow + TimeSpan.FromHours(-1), new A {Name = "Joe"});
 
             await handler;
-        }
-
-
-        class A
-        {
-            public string Name { get; set; }
         }
     }
 }

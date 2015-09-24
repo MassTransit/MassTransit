@@ -64,5 +64,12 @@ namespace MassTransit.Builders
         /// <param name="specifications"></param>
         /// <returns></returns>
         IConsumePipe CreateConsumePipe(params IConsumePipeSpecification[] specifications);
+
+        /// <summary>
+        /// Connects a bus observer to the bus to observe lifecycle events on the bus
+        /// </summary>
+        /// <param name="observer"></param>
+        /// <returns></returns>
+        ConnectHandle ConnectBusObserver(IBusObserver observer);
     }
 }

@@ -44,7 +44,7 @@ namespace MassTransit.RabbitMqTransport.Configuration.Builders
         {
             _busEndpointConfigurator.Apply(this);
 
-            return new MassTransitBus(_busEndpointConfigurator.InputAddress, _busConsumePipe, SendEndpointProvider, PublishEndpoint, ReceiveEndpoints, _hosts);
+            return new MassTransitBus(_busEndpointConfigurator.InputAddress, _busConsumePipe, SendEndpointProvider, PublishEndpoint, ReceiveEndpoints, _hosts, BusObservable);
         }
 
         protected override Uri GetInputAddress()

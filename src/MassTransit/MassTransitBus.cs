@@ -32,23 +32,26 @@ namespace MassTransit
         readonly IBusHostControl[] _hosts;
         readonly ILog _log;
         readonly IPublishEndpointProvider _publishEndpointProvider;
+        readonly IBusObserver _busObservable;
         readonly IReceiveEndpoint[] _receiveEndpoints;
         readonly ReceiveObservable _receiveObservers;
         readonly ISendEndpointProvider _sendEndpointProvider;
 
         BusHandle _busHandle;
 
-        public MassTransitBus(Uri address, IConsumePipe consumePipe, ISendEndpointProvider sendEndpointProvider,
-            IPublishEndpointProvider publishEndpointProvider, IEnumerable<IReceiveEndpoint> receiveEndpoints, IEnumerable<IBusHostControl> hosts)
+        public MassTransitBus(Uri address, IConsumePipe consumePipe, ISendEndpointProvider sendEndpointProvider, IPublishEndpointProvider publishEndpointProvider, IEnumerable<IReceiveEndpoint> receiveEndpoints, IEnumerable<IBusHostControl> hosts, IBusObserver busObservable)
         {
             _log = Logger.Get<MassTransitBus>();
             Address = address;
             _consumePipe = consumePipe;
             _sendEndpointProvider = sendEndpointProvider;
             _publishEndpointProvider = publishEndpointProvider;
+            _busObservable = busObservable;
             _receiveEndpoints = receiveEndpoints.ToArray();
             _hosts = hosts.ToArray();
             _receiveObservers = new ReceiveObservable();
+
+            TaskUtil.Await(() => _busObservable.PostCreate(this));
         }
 
         ConnectHandle IConsumePipeConnector.ConnectConsumePipe<T>(IPipe<ConsumeContext<T>> pipe)
@@ -153,6 +156,8 @@ namespace MassTransit
                 return _busHandle;
             }
 
+            TaskUtil.Await(() => _busObservable.PreStart(this));
+
             Exception exception = null;
 
             var endpoints = new List<ReceiveEndpointHandle>();
@@ -206,7 +211,8 @@ namespace MassTransit
             {
                 try
                 {
-                    var handle = new Handle(hosts, endpoints, observers);
+                    var handle = new Handle(hosts, endpoints, observers, this, _busObservable);
+
                     handle.Stop(TimeSpan.FromSeconds(60));
                 }
                 catch (Exception ex)
@@ -214,10 +220,14 @@ namespace MassTransit
                     _log.Error("Failed to stop partially created bus", ex);
                 }
 
+                TaskUtil.Await(() => _busObservable.StartFaulted(this, exception));
+
                 throw new MassTransitException("The service bus could not be started.", exception);
             }
 
-            _busHandle = new Handle(hosts, endpoints, observers);
+            _busHandle = new Handle(hosts, endpoints, observers, this, _busObservable);
+
+            TaskUtil.Await(() => _busObservable.PostStart(this));
 
             return _busHandle;
         }
@@ -272,13 +282,17 @@ namespace MassTransit
         class Handle :
             BusHandle
         {
+            readonly IBus _bus;
+            readonly IBusObserver _busObserver;
             readonly ReceiveEndpointHandle[] _endpointHandles;
             readonly HostHandle[] _hostHandles;
             readonly ConnectHandle[] _observerHandles;
             bool _stopped;
 
-            public Handle(IEnumerable<HostHandle> hostHandles, IEnumerable<ReceiveEndpointHandle> endpointHandles, IEnumerable<ConnectHandle> observerHandles)
+            public Handle(IEnumerable<HostHandle> hostHandles, IEnumerable<ReceiveEndpointHandle> endpointHandles, IEnumerable<ConnectHandle> observerHandles, IBus bus, IBusObserver busObserver)
             {
+                _bus = bus;
+                _busObserver = busObserver;
                 _endpointHandles = endpointHandles.ToArray();
                 _hostHandles = hostHandles.ToArray();
                 _observerHandles = observerHandles.ToArray();
@@ -289,12 +303,25 @@ namespace MassTransit
                 if (_stopped)
                     return;
 
-                foreach (var observerHandle in _observerHandles)
-                    observerHandle.Disconnect();
+                TaskUtil.Await(() => _busObserver.PreStop(_bus), cancellationToken);
 
-                TaskUtil.Await(() => Task.WhenAll(_endpointHandles.Select(x => x.Stop(cancellationToken))), cancellationToken);
+                try
+                {
+                    foreach (var observerHandle in _observerHandles)
+                        observerHandle.Disconnect();
 
-                TaskUtil.Await(() => Task.WhenAll(_hostHandles.Select(x => x.Stop(cancellationToken))), cancellationToken);
+                    TaskUtil.Await(() => Task.WhenAll(_endpointHandles.Select(x => x.Stop(cancellationToken))), cancellationToken);
+
+                    TaskUtil.Await(() => Task.WhenAll(_hostHandles.Select(x => x.Stop(cancellationToken))), cancellationToken);
+
+                    TaskUtil.Await(() => _busObserver.PostStop(_bus), cancellationToken);
+                }
+                catch (Exception exception)
+                {
+                    TaskUtil.Await(() => _busObserver.StopFaulted(_bus, exception), cancellationToken);
+
+                    throw;
+                }
 
                 _stopped = true;
             }

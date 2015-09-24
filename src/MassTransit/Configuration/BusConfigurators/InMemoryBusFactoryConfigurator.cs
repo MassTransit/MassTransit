@@ -99,11 +99,11 @@ namespace MassTransit.BusConfigurators
             _configurators.Add(configurator);
         }
 
-        public void ReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configure)
+        public void ReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configureEndpoint)
         {
             var endpointConfigurator = new InMemoryReceiveEndpointConfigurator(queueName);
 
-            configure(endpointConfigurator);
+            configureEndpoint(endpointConfigurator);
 
             AddBusFactorySpecification(endpointConfigurator);
         }

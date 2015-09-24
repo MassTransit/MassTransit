@@ -121,12 +121,20 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
             return host;
         }
 
-        void IBusFactoryConfigurator.AddBusFactorySpecification(IBusFactorySpecification configurator)
+        public void AddBusFactorySpecification(IBusFactorySpecification configurator)
         {
             if (configurator == null)
                 throw new ArgumentNullException(nameof(configurator));
 
             _transportSpecifications.Add(configurator);
+        }
+
+        public void ReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configureEndpoint)
+        {
+            if (_hosts.Count == 0)
+                throw new ArgumentException("At least one host must be configured before configuring a receive endpoint");
+
+            ReceiveEndpoint(_hosts[0], queueName, configureEndpoint);
         }
 
         void IPipeConfigurator<ConsumeContext>.AddPipeSpecification(IPipeSpecification<ConsumeContext> specification)
@@ -137,6 +145,15 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
         void IConsumePipeConfigurator.AddPipeSpecification<T>(IPipeSpecification<ConsumeContext<T>> specification)
         {
             _consumePipeSpecification.Add(specification);
+        }
+
+        public void ReceiveEndpoint(IServiceBusHost host, string queueName, Action<IServiceBusReceiveEndpointConfigurator> configure)
+        {
+            var endpointConfigurator = new ServiceBusReceiveEndpointConfigurator(host, queueName);
+
+            configure(endpointConfigurator);
+
+            AddBusFactorySpecification(endpointConfigurator);
         }
     }
 }

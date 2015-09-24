@@ -25,7 +25,7 @@ namespace MassTransit.AzureServiceBusTransport
 
             configure(hostConfigurator);
 
-           return configurator.Host(hostConfigurator.Settings);
+            return configurator.Host(hostConfigurator.Settings);
         }
 
         public static void SharedAccessSignature(this IServiceBusHostConfigurator configurator,
@@ -36,23 +36,6 @@ namespace MassTransit.AzureServiceBusTransport
             configure(tokenProviderConfigurator);
 
             configurator.TokenProvider = tokenProviderConfigurator.GetTokenProvider();
-        }
-
-        /// <summary>
-        /// Declare a ReceiveEndpoint on the broker and configure the endpoint settings and message consumers.
-        /// </summary>
-        /// <param name="configurator"></param>
-        /// <param name="host">The host for this endpoint</param>
-        /// <param name="queueName">The input queue name</param>
-        /// <param name="configure">The configuration method</param>
-        public static void ReceiveEndpoint(this IServiceBusBusFactoryConfigurator configurator, IServiceBusHost host, string queueName,
-            Action<IServiceBusReceiveEndpointConfigurator> configure)
-        {
-            var endpointConfigurator = new ServiceBusReceiveEndpointConfigurator(host, queueName);
-
-            configure(endpointConfigurator);
-
-            configurator.AddBusFactorySpecification(endpointConfigurator);
         }
     }
 }
