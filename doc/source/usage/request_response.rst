@@ -20,14 +20,14 @@ To get started, the message contracts need to be created. In this example, an or
 
 .. sourcecode:: csharp
 
-	public interface CheckOrderStatus
+    public interface CheckOrderStatus
     {
-    	string OrderId { get; }
+        string OrderId { get; }
     }
  
     public interface OrderStatusResult
     {
-    	string OrderId { get; }
+        string OrderId { get; }
         DateTime Timestamp { get; }
         short StatusCode { get; }
         string StatusText { get; }
@@ -44,10 +44,10 @@ into an easy-to-use interface:
 
 .. sourcecode:: csharp
 
-	public interface IRequestClient<TRequest, TResponse>
-	{
-		Task<TResponse> Request(TRequest request, CancellationToken cancellationToken);
-	}
+    public interface IRequestClient<TRequest, TResponse>
+    {
+        Task<TResponse> Request(TRequest request, CancellationToken cancellationToken);
+    }
 
 The interface is simple, a single method that accepts the request and returns a Task that can be awaited. The interface
 declares the request and response types, making it useful for dependency management using dependency injection. In fact, 
@@ -59,39 +59,39 @@ To create a request client, the provided ``MessageRequestClient`` can be used.
 
 .. sourcecode:: csharp
 
-	Uri address = new Uri("loopback://localhost/order_status_check");
-	TimeSpan requestTimeout = TimeSpan.FromSeconds(30);
+    Uri address = new Uri("loopback://localhost/order_status_check");
+    TimeSpan requestTimeout = TimeSpan.FromSeconds(30);
 
-	IRequestClient<CheckOrderStatus, OrderStatusResult> client =
-    	new MessageRequestClient<CheckOrderStatus, OrderStatusResult>(bus, address, requestTimeout);
+    IRequestClient<CheckOrderStatus, OrderStatusResult> client =
+        new MessageRequestClient<CheckOrderStatus, OrderStatusResult>(bus, address, requestTimeout);
 
 Once created, the request client instance can be registered with the depenendency resolver using the ``IRequestClient``
 interface type. Once registered, a controller can use the client via a constructor dependency. 
 
 .. sourcecode:: csharp
 
-	public class RequestController :
-		Controller
-	{
-		IRequestClient<CheckOrderStatus, OrderStatusResult> _client;
+    public class RequestController :
+        Controller
+    {
+        IRequestClient<CheckOrderStatus, OrderStatusResult> _client;
 
-		public RequestController(IRequestClient<CheckOrderStatus, OrderStatusResult> client)
-		{
-			_client = client;
-		}
+        public RequestController(IRequestClient<CheckOrderStatus, OrderStatusResult> client)
+        {
+            _client = client;
+        }
 
-		public async Task<ActionResult> Get(string id)
-		{
-			var command = new CheckOrderStatus
-			{
-				OrderId = id
-			};
+        public async Task<ActionResult> Get(string id)
+        {
+            var command = new CheckOrderStatus
+            {
+                OrderId = id
+            };
 
-			var result = await _client.Request(command);
+            var result = await _client.Request(command);
 
-			return View(result);
-		}
-	}
+            return View(result);
+        }
+    }
 
 The controller method will send the command, and return the view once the result has been received.
 The syntax is significantly cleaner than dealing with message object, consumer contexts, responses,
@@ -106,32 +106,32 @@ benefiting from the concurrent operation.
 
 .. sourcecode:: csharp
 
-	public class RequestController :
-		Controller
-	{
-		IRequestClient<RequestA, ResultA> _clientA;
-		IRequestClient<RequestB, ResultB> _clientB;
+    public class RequestController :
+        Controller
+    {
+        IRequestClient<RequestA, ResultA> _clientA;
+        IRequestClient<RequestB, ResultB> _clientB;
 
-		public RequestController(IRequestClient<RequestA, ResultA> clientA, IRequestClient<RequestB, ResultB> clientB)
-		{
-			_clientA = clientA;
-			_clientB = clientB;
-		}
+        public RequestController(IRequestClient<RequestA, ResultA> clientA, IRequestClient<RequestB, ResultB> clientB)
+        {
+            _clientA = clientA;
+            _clientB = clientB;
+        }
 
-		public async Task<ActionResult> Get()
-		{
-			var requestA = new RequestA();
-			Task<ResultA> resultA = _clientA.Request(requestA);
+        public async Task<ActionResult> Get()
+        {
+            var requestA = new RequestA();
+            Task<ResultA> resultA = _clientA.Request(requestA);
 
-			var requestB = new RequestB();
-			Task<ResultB> resultB = _clientB.Request(requestB);
+            var requestB = new RequestB();
+            Task<ResultB> resultB = _clientB.Request(requestB);
 
-			await Task.WhenAll(resultA, resultB);
+            await Task.WhenAll(resultA, resultB);
 
-			var model = new Model(resultA.Result, resultB.Result);
+            var model = new Model(resultA.Result, resultB.Result);
 
-			return View(model);
-		}
-	}
+            return View(model);
+        }
+    }
 
 The power of concurrency, for the win! 
