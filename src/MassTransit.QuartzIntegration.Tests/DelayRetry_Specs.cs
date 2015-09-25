@@ -121,7 +121,7 @@ namespace MassTransit.QuartzIntegration.Tests
 
                 _timer.Stop();
 
-                Console.WriteLine("{0} okay, now is good (retried {1} times)", DateTime.UtcNow, context.Headers.Get("MT-Redelivery-Count", default(int?)));
+                Console.WriteLine("{0} okay, now is good (retried {1} times)", DateTime.UtcNow, context.Headers.Get(MessageHeaders.RedeliveryCount, default(int?)));
 
                 // okay, ready.
                 _receivedTimeSpan = _timer.Elapsed;

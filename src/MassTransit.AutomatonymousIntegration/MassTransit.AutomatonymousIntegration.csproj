@@ -63,7 +63,6 @@
     <Compile Include="EventMessageFactory.cs" />
     <Compile Include="Activities\RequestActivity.cs" />
     <Compile Include="Activities\RespondActivity.cs" />
-    <Compile Include="Activities\RetryLaterActivity.cs" />
     <Compile Include="Configuration\CorrelationConfigurators\CorrelatedByEventCorrelationBuilder.cs" />
     <Compile Include="Configuration\CorrelationConfigurators\EventCorrelationBuilder.cs" />
     <Compile Include="Configuration\CorrelationConfigurators\EventCorrelationExpressionConverter.cs" />
@@ -99,7 +98,6 @@
     <Compile Include="Testing\StateMachineSagaTestInstance.cs" />
     <Compile Include="Testing\StateMachineSagaTestSubjectImpl.cs" />
     <Compile Include="Testing\StateMachineSagaTestingExtensions.cs" />
-    <Compile Include="Configuration\RetryLaterExtensions.cs" />
     <Compile Include="Configuration\StateMachineSubscriptionExtensions.cs" />
     <Compile Include="Configuration\SubscriptionConfigurators\StateMachineSagaSpecification.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\StateMachineSagaMessageConnector.cs" />
