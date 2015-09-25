@@ -9,7 +9,7 @@ provided below.
     messages.rst
     consumer.rst
     locations.rst
-    transactions.rst
     request_response.rst
     exceptions.rst
     retry.rst
+    transactions.rst
