@@ -20,28 +20,13 @@ namespace MassTransit
     public static class RetryLaterExtensions
     {
         /// <summary>
-        /// A legacy hold over, RetryLater just increments the delivery count and puts the message at the end
-        /// of the input queue. There is no delay, so an empty queue just spins -- quickly. In fact, another consumer
-        /// can start before this one completes the RetryLater operation. Consider using Defer instead.
+        /// Redeliver uses the message scheduler to deliver the message to the queue at a future
+        /// time. The delivery count is incremented. A message scheduler must be configured on the
+        /// bus for redelivery to be enabled.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="context"></param>
-        /// <returns></returns>
-        public static async Task RetryLater<T>(this ConsumeContext<T> context)
-            where T : class
-        {
-            ISendEndpoint endpoint = await context.GetSendEndpoint(context.ReceiveContext.InputAddress);
-
-            await endpoint.Send(context.Message, context.CreateCopyContextPipe(UpdateDeliveryContext));
-        }
-
-        /// <summary>
-        /// This version of RetryLater requires a message scheduler to be configured on the bus, but
-        /// schedules the message for redelivery at the scheduled time.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="context"></param>
-        /// <param name="delay"></param>
+        /// <typeparam name="T">The message type</typeparam>
+        /// <param name="context">The consume context of the message</param>
+        /// <param name="delay">The delay before the message is delivered. It may take longer to receive the message if the queue is not empty.</param>
         /// <returns></returns>
         public static Task Redeliver<T>(this ConsumeContext<T> context, TimeSpan delay)
             where T : class
@@ -53,14 +38,6 @@ namespace MassTransit
             MessageRedeliveryContext redeliverContext = new ScheduleMessageRedeliveryContext<T>(context, schedulerContext);
 
             return redeliverContext.ScheduleRedelivery(delay);
-        }
-
-        static void UpdateDeliveryContext(ConsumeContext context, SendContext sendContext)
-        {
-            int? previousDeliveryCount = context.Headers.Get("MT-Redelivery-Count", default(int?));
-            if (!previousDeliveryCount.HasValue)
-                previousDeliveryCount = 0;
-            sendContext.Headers.Set("MT-Redelivery-Count", previousDeliveryCount.Value + 1);
         }
     }
 }
