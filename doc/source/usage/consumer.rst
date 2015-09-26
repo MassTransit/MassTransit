@@ -76,6 +76,32 @@ class with a default constructor.
     will be delivered to the consumer(s).
 
 
+Connecting to an Existing Bus
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To connect a consumer to an existing bus (using the temporary queue), a series of *Connect* methods can be used.
+When a consumer is connected to the bus, no exchange bindings or topic subsriptions are created. Only messages
+sent directly to the queue will be received. Examples include responses to requests, faults generated from a request,
+or a routing slip subscription.
+
+.. sourcecode:: csharp
+
+    var busControl = Bus.Factory.CreateUsingRabbitMq(cfg =>
+    {
+        var host = cfg.Host(new Uri("rabbitmq://localhost/"), h =>
+        {
+            h.Username("guest");
+            h.Password("guest");
+        });
+    });
+
+    busControl.Start();
+
+    ConnectHandle handle = busControl.ConnectConsumer<FaultConsumer>();
+    ...
+    handle.Disconnect(); // disconnect the consumer from the bus pipeline
+
+
 Handling Undeliverable Messages
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

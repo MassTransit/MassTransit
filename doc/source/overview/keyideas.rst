@@ -26,125 +26,6 @@ default serialization can be changed when a service bus is being configured.
     sbc.UseXmlSerializer();  // uses XML by default
     sbc.UseBsonSerializer(); // uses BSON (binary JSON) by default
 
-Receiving Messages
-------------------
-
-At the application layer, most users of MassTransit are interested in receiving messages.
-There are several different receiver types that are supported, providing flexibility it
-how you interact with the framework.
-
-Handlers
-""""""""
-
-The easiest (and, by definition, least flexible) type of receiver is the **Handler**. A *handler*
-is any method (including anonymous and lambda methods) that has a single argument of a message
-type and a void return type.
-
-.. sourcecode:: csharp
-
-    void MyMessageHandler(MyMessage message)
-    {}
-
-When a message is received, MassTransit will call the method passing the message as the argument.
-With a handler, no special controls are available to manage the lifecycle of the receiver. Therefore,
-it is up to the application to deal with the fact that the handler may be called simultaneously
-from multiple threads if more than one message is being received. If your application is not
-thread-safe, it is recommended that the concurrent consumer limit be set to one in the bus
-configuration to avoid multithreading issues.
-
-Instances
-"""""""""
-
-An **Instance** receiver is a class instance where the class implements one or more ``Consumes``
-interfaces. Each of the ``Consumes`` interfaces accepts a generic argument (which must be a
-reference type) that declares the type of message the instance wants to consume. Once an
-instance is subscribed, as messages of the subscribed types are received, MassTransit will
-call the ``Consume`` method on the class instance passing the message as the argument.
-
-.. sourcecode:: csharp
-
-    public class MyClass :
-        Consumes<MyMessage>.All,
-        Consumes<MyOtherMessage>.All
-    {
-        public void Consume(MyMessage message)
-        {}
-        public void Consume(MyOtherMessage message)
-        {}
-    }
-
-
-Consumers
-"""""""""
-
-A **Consumer** is the most useful type of receiver and support a number of features that allow
-proper lifecycle management of dependencies, as well as multiple message type handling. Consumers
-are declared using the same interfaces as an *instance*, however, instead of subscribing an
-already created instance of the class to the bus, the consumer type is subscribed along with a
-*consumer factory*. As messages are received, MassTransit calls the consumer factory to get an
-instance of the consumer and calls the *Consume* method on the instance passing the message as
-the argument.
-
-By using the consumer factory, MassTransit allows the implementation to handle the lifecycle of
-consumer instances. Actual implementations vary, and can range from a simple constructor call
-to create an instance to the retrieval of a consumer and any of the consumers dependencies (such as a
-database session, cache reference, etc.) from an inversion of control (IoC) container. Since
-the consumer factory returns a handler to MassTransit, the factory can wrap the consumer call
-with any lifecycle management/synchronization code before and after the message is consumed.
-
-Interfaces for Consumers
-''''''''''''''''''''''''
-
-.. sourcecode:: csharp
-
-    public class Consumes<TMessage>
-    {
-        public interface All : IConsumer
-        {
-            void Consume(TMessage message);
-        }
-
-        public interface Selected : All
-        {
-            bool Accept(TMessage message);
-        }
-
-        public interface For<TCorrelationId> :
-            All,
-            CorrelatedBy<TCorrelationId>
-        {
-
-        }
-    }
-
-All
-'''
-
-``Consumes<TMessage>.All``
-
-This interface defines the ``void Consume(TMessage message)`` method
-
-Selected
-''''''''
-
-``Consumes<TMessage>.Selected``
-
-This interface defines an additional method allowing to process only selected
-messages, by implementing the ``bool Accept(TMessage message)`` method.
-
-For<TCorrelationId>
-'''''''''''''''''''
-
-``Consumes<TMessage>.For<TCorrelationId>``
-
-This interface defines how to do a correlated consumer.
-
-
-.. note::
-
-    Consumers are usually sourced from an IoC container. When they are, MassTransit respects
-    your container's lifecycle.
-
 Sagas
 """""
 
@@ -166,13 +47,13 @@ to hundreds of saga instances which may cause database performance issues.
 
     public class MySaga :
         ISaga,
-        InitiatedBy<MyInitialMessage>.All,
-        Orchestrates<MyFollowUpMessage>.All
+        InitiatedBy<MyInitialMessage>,
+        Orchestrates<MyFollowUpMessage>
     {
         public Guid CorrelationId { get; set; }
-        public void Consume(MyInitialMessage message)
+        public Task Consume(ConsumeContext<MyInitialMessage> message)
         {}
-        public void Consume(MyFollowUpMessage message)
+        public Task Consume(ConsumeContext<MyFollowUpMessage> message)
         {}
     }
 
