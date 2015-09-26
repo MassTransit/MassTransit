@@ -1,10 +1,7 @@
-    .. MassTransit documentation master file, created by
-    sphinx-quickstart on Mon Jan 17 15:29:48 2011.
-    You can adapt this file completely to your liking, but it should at least
-    contain the root `toctree` directive.
+    .. MassTransit documentation master file, created by sphinx-quickstart on Mon Jan 17 15:29:48 2011.
 
 MassTransit Documentation
-=======================================
+=========================
 
 .. image:: mt-logo.png
 
