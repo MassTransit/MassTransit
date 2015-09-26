@@ -1,9 +1,8 @@
-Advanced MassTransit Concepts
-"""""""""""""""""""""""""""""
+Extending MassTransit
+=====================
 
 Advanced notes.
 
 .. toctree::
 
     interop.md
-    distributor.rst

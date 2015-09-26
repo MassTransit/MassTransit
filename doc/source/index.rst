@@ -16,10 +16,11 @@ Contents:
     installation/index.rst
     configuration/index.rst
     usage/index.rst
-    troubleshooting/index.rst
-    patterns/index.rst
+    middleware/index.rst
     advanced/index.rst
     samples/index.rst
+    troubleshooting/index.rst
+    patterns/index.rst
     learning/index.rst
     migrating/index.rst
     overview/index.rst

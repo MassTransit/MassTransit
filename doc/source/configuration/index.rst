@@ -13,7 +13,6 @@ which will be followed up with a few configuration examples.
     subscription_configuration.rst
     endpoint_configuration.rst
     transports/index.rst
-    middleware/index.rst
     containers.rst
     gotchas.rst
     diagnostics.rst
