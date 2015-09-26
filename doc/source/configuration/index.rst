@@ -13,7 +13,7 @@ which will be followed up with a few configuration examples.
     subscription_configuration.rst
     endpoint_configuration.rst
     transports/index.rst
-    containers.rst
+    containers/index.rst
     gotchas.rst
     diagnostics.rst
     bus_tuning.rst
