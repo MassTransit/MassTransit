@@ -6,7 +6,6 @@ How MassTransit Works
     keyideas.rst
     publishing.rst
     sending.rst
-    request.rst
     versioning.rst
     inbound.rst
     subscriptions.rst
@@ -18,8 +17,6 @@ How MassTransit Works
     inheritance.rst
     serializers.rst
     perfcounters.rst
-    standardservices.rst
-    runtimeservices.rst
     videos.rst
     backstory.rst
     correlation.rst
