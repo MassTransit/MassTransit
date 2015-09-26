@@ -6,7 +6,7 @@
 MassTransit Documentation
 =======================================
 
-.. image:: http://www.phatboyg.com/mt-logo.png
+.. image:: mt-logo.png
 
 Contents:
 
