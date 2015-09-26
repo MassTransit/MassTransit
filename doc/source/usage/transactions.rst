@@ -1,5 +1,5 @@
-Managing Consumer Transactions
-==============================
+Managing Transactions
+=====================
 
 .. note::
 

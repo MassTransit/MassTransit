@@ -17,6 +17,7 @@ Contents:
     configuration/index.rst
     usage/index.rst
     middleware/index.rst
+    scheduling/index.rst
     advanced/index.rst
     samples/index.rst
     troubleshooting/index.rst
