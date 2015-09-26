@@ -16,8 +16,7 @@ support in MassTransit has stayed up to date, including all of the major contain
     or style of dependency injection. In short, we care.
 
 
-Hey! Where is my container??
-----------------------------
+**Hey! Where is my container??**
 
 Containers come and go, so if you don't see your container here, or feel that the support for you container is weaksauce,
 pull requests are always welcome. Using an existing container it should be straight forward to add support for your favorite
