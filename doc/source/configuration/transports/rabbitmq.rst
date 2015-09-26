@@ -1,6 +1,10 @@
 RabbitMQ Configuration Options
 """"""""""""""""""""""""""""""
 
+.. warning::
+
+    This page has not been updated yet.
+
 This is the recommended approach for configuring MassTransit for use with RabbitMQ.
 
 .. sourcecode:: csharp
@@ -14,20 +18,6 @@ This is the recommended approach for configuring MassTransit for use with Rabbit
         });
     });
 
-
-Have a look at this table for clarification:
-
-``CreateUsingRabbitMq`` tells the MassTransit code to use RabbitMQ as the transport.
-This also sets the default serializer to JSON.
-
-
- ==================================  ===================================      ==================================
-  Description                        Calling ``UseRabbitMqRouting``           Not calling ``UseRabbitMqRouting``
- ==================================  ===================================      ==================================
- IServiceBus.Publish<T>(T, A<C<T>>)  Enables *Polymorphic routing* [#pr]      Will only route non-polymorphicly.
-                                     and *Interface-based routing* [#ir]      Will not route on interfaces.
-                                                                              Will not place message in any exchange.
- ==================================  ===================================      ==================================
 
 
  Routing Topology

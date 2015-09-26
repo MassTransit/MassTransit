@@ -7,7 +7,7 @@ until the rate limiting period has expired.
 
 .. note:: 
 
-    The rate lmiiter will delay message delivery until the rate limit expires, so it is best to avoid large time windows
+    The rate limiter will delay message delivery until the rate limit expires, so it is best to avoid large time windows
     and keep the rate limits sane. Something like 1000 over 10 minutes is a bad idea, versus 100 over a minute. Try to
     adjust the values and see what works for you.
 
