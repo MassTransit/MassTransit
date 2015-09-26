@@ -1,5 +1,5 @@
-Adding your own Middleware
-""""""""""""""""""""""""""
+Creating Your Own Middleware
+============================
 
 Middleware components are configured using extension methods, to make them easy to discover.
 By default, a middleware configuration method should start with Use.

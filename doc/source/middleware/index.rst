@@ -20,8 +20,5 @@ The details of many of the built-in middleware components follow.
     circuit_breaker.rst
     rate_limiter.rst
     latest.rst
-    transactions.rst
-    message_scheduling.rst
-    retry.rst
     custom.rst
 
