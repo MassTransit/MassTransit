@@ -23,6 +23,7 @@ namespace MassTransit.RabbitMqTransport.Integration
     using MassTransit.Pipeline;
     using RabbitMQ.Client;
     using RabbitMQ.Client.Exceptions;
+    using Util;
 
 
     public class RabbitMqConnectionCache :
@@ -33,14 +34,20 @@ namespace MassTransit.RabbitMqTransport.Integration
         readonly ConnectionFactory _connectionFactory;
         readonly object _scopeLock = new object();
         readonly RabbitMqHostSettings _settings;
+        readonly StopSignal _signal;
         ConnectionScope _scope;
 
         public RabbitMqConnectionCache(RabbitMqHostSettings settings)
         {
+            _signal = new StopSignal();
+
             _settings = settings;
 
             _connectionFactory = settings.GetConnectionFactory();
         }
+
+        public Task StopRequested => _signal.StopRequested;
+        public CancellationToken ConnectionCancellationToken => _signal.CancellationToken;
 
         public Task Send(IPipe<ConnectionContext> connectionPipe, CancellationToken cancellationToken)
         {
@@ -78,6 +85,9 @@ namespace MassTransit.RabbitMqTransport.Integration
         {
             try
             {
+                if (_signal.CancellationToken.IsCancellationRequested)
+                    throw new TaskCanceledException($"The connection is being disconnected: {_settings.ToDebugString()}");
+
                 if (_log.IsDebugEnabled)
                     _log.DebugFormat("Connecting: {0}", _connectionFactory.ToDebugString());
 
@@ -101,7 +111,7 @@ namespace MassTransit.RabbitMqTransport.Integration
 
                 connection.ConnectionShutdown += connectionShutdown;
 
-                var connectionContext = new RabbitMqConnectionContext(connection, _settings, cancellationToken);
+                var connectionContext = new RabbitMqConnectionContext(connection, _settings, _signal.CancellationToken);
 
                 connectionContext.GetOrAddPayload(() => _settings);
 
@@ -154,6 +164,16 @@ namespace MassTransit.RabbitMqTransport.Integration
 
                 throw;
             }
+        }
+
+        /// <summary>
+        /// Stop the connections to the host, signals the exit
+        /// </summary>
+        public Task Stop()
+        {
+            _signal.Stop();
+
+            return _signal.StopRequested;
         }
 
 

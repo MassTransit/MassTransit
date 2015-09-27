@@ -16,29 +16,24 @@ namespace MassTransit.RabbitMqTransport
     using System.Threading;
     using System.Threading.Tasks;
     using Integration;
-    using Internals.Extensions;
     using Logging;
     using MassTransit.Pipeline;
     using Policies;
     using RabbitMQ.Client;
     using Transports;
-    using Util;
 
 
     public class RabbitMqHost :
         IRabbitMqHost,
         IBusHostControl
     {
+        static readonly ILog _log = Logger.Get<RabbitMqHost>();
         readonly RabbitMqConnectionCache _connectionCache;
         readonly RabbitMqHostSettings _hostSettings;
-        readonly ILog _log = Logger.Get<RabbitMqHost>();
-        StopSignal _stopSignal;
 
         public RabbitMqHost(RabbitMqHostSettings hostSettings)
         {
             _hostSettings = hostSettings;
-
-            _stopSignal = new StopSignal();
 
             _connectionCache = new RabbitMqConnectionCache(hostSettings);
             MessageNameFormatter = new RabbitMqMessageNameFormatter();
@@ -51,25 +46,20 @@ namespace MassTransit.RabbitMqTransport
                 if (_log.IsDebugEnabled)
                     _log.DebugFormat("Connection established to {0}", _hostSettings.ToDebugString());
 
-                var stopSource = new CancellationTokenSource();
-                using (_stopSignal.CancellationToken.Register(() => stopSource.Cancel()))
+                EventHandler<ShutdownEventArgs> connectionShutdown = null;
+                connectionShutdown = (obj, reason) =>
                 {
-                    EventHandler<ShutdownEventArgs> connectionShutdown = null;
-                    connectionShutdown = (obj, reason) =>
-                    {
-                        context.Connection.ConnectionShutdown -= connectionShutdown;
-                        stopSource.Cancel();
-                    };
+                    context.Connection.ConnectionShutdown -= connectionShutdown;
+                };
 
-                    context.Connection.ConnectionShutdown += connectionShutdown;
+                context.Connection.ConnectionShutdown += connectionShutdown;
 
-                    try
-                    {
-                        await _stopSignal.Stopped.WithCancellation(stopSource.Token);
-                    }
-                    catch (OperationCanceledException)
-                    {
-                    }
+                try
+                {
+                    await _connectionCache.StopRequested;
+                }
+                catch (OperationCanceledException)
+                {
                 }
 
                 if (_log.IsDebugEnabled)
@@ -82,9 +72,10 @@ namespace MassTransit.RabbitMqTransport
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Starting connection to {0}", _hostSettings.ToDebugString());
 
-            Repeat.UntilCancelled(_stopSignal.CancellationToken, () => _connectionCache.Send(connectionPipe, _stopSignal.CancellationToken));
+            var connectionTask = Repeat.UntilCancelled(_connectionCache.ConnectionCancellationToken, () =>
+                _connectionCache.Send(connectionPipe, _connectionCache.ConnectionCancellationToken));
 
-            return new Handle(_stopSignal);
+            return new Handle(_connectionCache, connectionTask);
         }
 
         void IProbeSite.Probe(ProbeContext context)
@@ -121,18 +112,26 @@ namespace MassTransit.RabbitMqTransport
         class Handle :
             HostHandle
         {
-            readonly StopSignal _stopSignal;
+            readonly RabbitMqConnectionCache _cache;
+            readonly Task _connectionTask;
 
-            public Handle(StopSignal stopSignal)
+            public Handle(RabbitMqConnectionCache cache, Task connectionTask)
             {
-                _stopSignal = stopSignal;
+                _cache = cache;
+                _connectionTask = connectionTask;
             }
 
-            Task HostHandle.Stop(CancellationToken cancellationToken)
+            async Task HostHandle.Stop(CancellationToken cancellationToken)
             {
-                _stopSignal.Stop();
+                await _cache.Stop();
 
-                return TaskUtil.Completed;
+                if (_log.IsDebugEnabled)
+                    _log.Debug("Waiting for disconnection...");
+
+                await _connectionTask;
+
+                if (_log.IsDebugEnabled)
+                    _log.Debug("Disconnectionn complete.");
             }
         }
     }

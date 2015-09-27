@@ -18,24 +18,31 @@ namespace MassTransit.Util
 
     public class StopSignal
     {
-        readonly TaskCompletionSource<bool> _stopTask;
+        readonly TaskCompletionSource<bool> _stopRequested;
         readonly CancellationTokenSource _stopToken;
         CancellationTokenRegistration _registration;
 
         public StopSignal()
         {
-            _stopTask = new TaskCompletionSource<bool>();
+            _stopRequested = new TaskCompletionSource<bool>();
 
             _stopToken = new CancellationTokenSource();
             _registration = _stopToken.Token.Register(() =>
             {
-                _stopTask.TrySetResult(true);
+                _stopRequested.TrySetResult(true);
 
                 _registration.Dispose();
             });
         }
 
-        public Task Stopped => _stopTask.Task;
+        /// <summary>
+        /// Completed when the token has been cancelled signaling the intent to stop
+        /// </summary>
+        public Task StopRequested => _stopRequested.Task;
+
+        /// <summary>
+        /// The token that is cancelled once the stop is requested
+        /// </summary>
         public CancellationToken CancellationToken => _stopToken.Token;
 
         public void Stop()
