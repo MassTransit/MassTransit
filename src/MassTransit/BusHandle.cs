@@ -14,6 +14,7 @@ namespace MassTransit
 {
     using System;
     using System.Threading;
+    using System.Threading.Tasks;
 
 
     /// <summary>
@@ -23,6 +24,11 @@ namespace MassTransit
     public interface BusHandle :
         IDisposable
     {
+        /// <summary>
+        /// A task which can be awaited to know when the bus is ready and all of the receive endpoints have reported ready.
+        /// </summary>
+        Task<ReceiveEndpointReady[]> Ready { get; }
+
         /// <summary>
         /// Stop the bus and all receiving endpoints on the bus. Note that cancelling the Stop
         /// operation may leave the bus and/or one or more receive endpoints in an indeterminate

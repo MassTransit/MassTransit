@@ -31,10 +31,14 @@ namespace MassTransit.Transports.InMemory
         IDisposable
     {
         static readonly ILog _log = Logger.Get<InMemoryTransport>();
+        readonly ReceiveEndpointObservable _endpointObservable;
         readonly Uri _inputAddress;
-        readonly SendObservable _sendObservable;
         readonly ReceiveObservable _receiveObservable;
         readonly QueuedTaskScheduler _scheduler;
+        readonly SendObservable _sendObservable;
+        int _currentPendingDeliveryCount;
+        long _deliveryCount;
+        int _maxPendingDeliveryCount;
         IPipe<ReceiveContext> _receivePipe;
         CancellationToken _stopToken;
 
@@ -44,6 +48,7 @@ namespace MassTransit.Transports.InMemory
 
             _sendObservable = new SendObservable();
             _receiveObservable = new ReceiveObservable();
+            _endpointObservable = new ReceiveEndpointObservable();
 
             _scheduler = new QueuedTaskScheduler(TaskScheduler.Default, concurrencyLimit);
         }
@@ -51,6 +56,8 @@ namespace MassTransit.Transports.InMemory
         public void Dispose()
         {
             _scheduler.Dispose();
+
+
         }
 
         public void Probe(ProbeContext context)
@@ -69,12 +76,27 @@ namespace MassTransit.Transports.InMemory
             _receivePipe = receivePipe;
             _stopToken = stopTokenSource.Token;
 
+            TaskUtil.Await(() => _endpointObservable.Ready(new Ready(_inputAddress)));
+
+            CancellationTokenRegistration registration = new CancellationTokenRegistration();
+            registration = _stopToken.Register(() =>
+            {
+                TaskUtil.Await(() => _endpointObservable.Completed(new Completed(_inputAddress, _deliveryCount, _maxPendingDeliveryCount)));
+
+                registration.Dispose();
+            });
+
             return new Handle(stopTokenSource);
         }
 
         public ConnectHandle ConnectReceiveObserver(IReceiveObserver observer)
         {
             return _receiveObservable.Connect(observer);
+        }
+
+        public ConnectHandle ConnectReceiveEndpointObserver(IReceiveEndpointObserver observer)
+        {
+            return _endpointObservable.Connect(observer);
         }
 
         async Task ISendTransport.Send<T>(T message, IPipe<SendContext<T>> pipe, CancellationToken cancelSend)
@@ -146,6 +168,12 @@ namespace MassTransit.Transports.InMemory
 
             var context = new InMemoryReceiveContext(_inputAddress, message, _receiveObservable);
 
+            Interlocked.Increment(ref _deliveryCount);
+
+            int current = Interlocked.Increment(ref _currentPendingDeliveryCount);
+            while (current > _maxPendingDeliveryCount)
+                Interlocked.CompareExchange(ref _maxPendingDeliveryCount, current, _maxPendingDeliveryCount);
+
             try
             {
                 await _receiveObservable.PreReceive(context);
@@ -165,6 +193,10 @@ namespace MassTransit.Transports.InMemory
                 await _receiveObservable.ReceiveFault(context, ex);
 
                 message.DeliveryCount++;
+            }
+            finally
+            {
+                Interlocked.Decrement(ref _currentPendingDeliveryCount);
             }
         }
 
@@ -208,6 +240,34 @@ namespace MassTransit.Transports.InMemory
 
                 return TaskUtil.Completed;
             }
+        }
+
+
+        class Ready :
+            ReceiveEndpointReady
+        {
+            public Ready(Uri inputAddress)
+            {
+                InputAddress = inputAddress;
+            }
+
+            public Uri InputAddress { get; }
+        }
+
+
+        class Completed :
+            ReceiveEndpointCompleted
+        {
+            public Completed(Uri inputAddress, long deliveryCount, long concurrentDeliveryCount)
+            {
+                InputAddress = inputAddress;
+                DeliveryCount = deliveryCount;
+                ConcurrentDeliveryCount = concurrentDeliveryCount;
+            }
+
+            public Uri InputAddress { get; }
+            public long DeliveryCount { get; }
+            public long ConcurrentDeliveryCount { get; }
         }
     }
 }

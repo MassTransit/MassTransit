@@ -12,27 +12,17 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
-    using System;
-    using Pipeline;
-
-
-    /// <summary>
-    /// A bus is a logical element that includes a local endpoint and zero or more receive endpoints
-    /// </summary>
-    public interface IBus :
-        IPublishEndpoint,
-        ISendEndpointProvider,
-        IConsumePipeConnector,
-        IRequestPipeConnector,
-        IConsumeMessageObserverConnector,
-        IConsumeObserverConnector,
-        IReceiveObserverConnector,
-        IReceiveEndpointObserverConnector,
-        IProbeSite
+    public interface ReceiveEndpointCompleted :
+        ReceiveEndpointEvent
     {
         /// <summary>
-        /// The receive address of the bus itself, versus any receive endpoints that were created
+        /// The number of messages delivered to the receive endpoint
         /// </summary>
-        Uri Address { get; }
+        long DeliveryCount { get; }
+
+        /// <summary>
+        /// The maximum concurrent messages delivery to the receive endpoint
+        /// </summary>
+        long ConcurrentDeliveryCount { get; }
     }
 }

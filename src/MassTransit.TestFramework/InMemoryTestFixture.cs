@@ -98,6 +98,8 @@ namespace MassTransit.TestFramework
 
             _busHandle = _bus.Start();
 
+            Await(() => _busHandle.Ready);
+
             _busSendEndpoint = Await(() => GetSendEndpoint(_bus.Address));
 
             _inputQueueSendEndpoint = Await(() => GetSendEndpoint(InputQueueAddress));

@@ -29,12 +29,14 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
     {
         static readonly ILog _log = Logger.Get<MessageReceiverFilter>();
         readonly IReceiveObserver _receiveObserver;
+        readonly IReceiveEndpointObserver _endpointObserver;
         readonly IPipe<ReceiveContext> _receivePipe;
 
-        public MessageReceiverFilter(IPipe<ReceiveContext> receivePipe, IReceiveObserver receiveObserver)
+        public MessageReceiverFilter(IPipe<ReceiveContext> receivePipe, IReceiveObserver receiveObserver, IReceiveEndpointObserver endpointObserver)
         {
             _receivePipe = receivePipe;
             _receiveObserver = receiveObserver;
+            _endpointObserver = endpointObserver;
         }
 
         void IProbeSite.Probe(ProbeContext context)
@@ -62,7 +64,11 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
 
                 using (var receiver = new Receiver(messageReceiver, inputAddress, _receivePipe, receiveSettings, _receiveObserver, context.CancellationToken))
                 {
+                    await _endpointObserver.Ready(new Ready(inputAddress));
+
                     ReceiverMetrics metrics = await receiver.CompleteTask;
+
+                    await _endpointObserver.Completed(new Completed(inputAddress, metrics));
 
                     if (_log.IsDebugEnabled)
                     {
@@ -84,6 +90,35 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
                 await messageReceiver.CloseAsync();
 
             await next.Send(context);
+        }
+
+
+        class Ready : 
+            ReceiveEndpointReady
+        {
+            public Ready(Uri inputAddress)
+            {
+                InputAddress = inputAddress;
+            }
+
+            public Uri InputAddress { get; }
+        }
+
+
+        class Completed : 
+            ReceiveEndpointCompleted
+        {
+            public Completed(Uri inputAddress, ReceiverMetrics metrics)
+            {
+                InputAddress = inputAddress;
+                DeliveryCount = metrics.DeliveryCount;
+                ConcurrentDeliveryCount = metrics.ConcurrentDeliveryCount;
+
+            }
+
+            public Uri InputAddress { get; }
+            public long DeliveryCount { get; }
+            public long ConcurrentDeliveryCount { get; }
         }
     }
 }

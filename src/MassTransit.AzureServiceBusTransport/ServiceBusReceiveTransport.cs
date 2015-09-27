@@ -30,6 +30,7 @@ namespace MassTransit.AzureServiceBusTransport
         IReceiveTransport
     {
         static readonly ILog _log = Logger.Get<ServiceBusReceiveTransport>();
+        readonly ReceiveEndpointObservable _endpointObservers;
         readonly IServiceBusHost _host;
         readonly ReceiveObservable _receiveObservers;
         readonly ReceiveSettings _settings;
@@ -42,6 +43,7 @@ namespace MassTransit.AzureServiceBusTransport
             _settings = settings;
             _subscriptionSettings = subscriptionSettings;
             _receiveObservers = new ReceiveObservable();
+            _endpointObservers = new ReceiveEndpointObservable();
         }
 
         void IProbeSite.Probe(ProbeContext context)
@@ -56,8 +58,8 @@ namespace MassTransit.AzureServiceBusTransport
                 _settings.QueueDescription,
                 Subscriptions = _subscriptionSettings.Select(subscription => new
                 {
-                    subscription.Topic.Path,
-                }).ToArray(),
+                    subscription.Topic.Path
+                }).ToArray()
             });
         }
 
@@ -72,7 +74,7 @@ namespace MassTransit.AzureServiceBusTransport
             {
                 x.UseFilter(new PrepareReceiveQueueFilter(_settings, _subscriptionSettings));
 
-                x.UseFilter(new MessageReceiverFilter(receivePipe, _receiveObservers));
+                x.UseFilter(new MessageReceiverFilter(receivePipe, _receiveObservers, _endpointObservers));
             });
 
             Task receiveTask = Receiver(stopTokenSource.Token, connectionPipe);
@@ -83,6 +85,11 @@ namespace MassTransit.AzureServiceBusTransport
         public ConnectHandle ConnectReceiveObserver(IReceiveObserver observer)
         {
             return _receiveObservers.Connect(observer);
+        }
+
+        public ConnectHandle ConnectReceiveEndpointObserver(IReceiveEndpointObserver observer)
+        {
+            return _endpointObservers.Connect(observer);
         }
 
         async Task Receiver(CancellationToken stopTokenSource, IPipe<ConnectionContext> connectionPipe)

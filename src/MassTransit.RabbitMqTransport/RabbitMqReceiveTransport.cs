@@ -29,6 +29,7 @@ namespace MassTransit.RabbitMqTransport
     {
         static readonly ILog _log = Logger.Get<RabbitMqReceiveTransport>();
         readonly IConnectionCache _connectionCache;
+        readonly ReceiveEndpointObservable _endpointObservers;
         readonly ExchangeBindingSettings[] _exchangeBindings;
         readonly ReceiveObservable _receiveObservers;
         readonly ReceiveSettings _settings;
@@ -40,6 +41,7 @@ namespace MassTransit.RabbitMqTransport
             _settings = settings;
             _exchangeBindings = exchangeBindings;
             _receiveObservers = new ReceiveObservable();
+            _endpointObservers = new ReceiveEndpointObservable();
         }
 
         void IProbeSite.Probe(ProbeContext context)
@@ -60,7 +62,7 @@ namespace MassTransit.RabbitMqTransport
         {
             var stopTokenSource = new CancellationTokenSource();
 
-            IPipe<ConnectionContext> pipe = Pipe.New<ConnectionContext>(x => x.RabbitMqConsumer(receivePipe, _settings, _receiveObservers, _exchangeBindings));
+            IPipe<ConnectionContext> pipe = Pipe.New<ConnectionContext>(x => x.RabbitMqConsumer(receivePipe, _settings, _receiveObservers, _endpointObservers, _exchangeBindings));
 
             Task receiverTask = Receiver(pipe, stopTokenSource.Token);
 
@@ -70,6 +72,11 @@ namespace MassTransit.RabbitMqTransport
         public ConnectHandle ConnectReceiveObserver(IReceiveObserver observer)
         {
             return _receiveObservers.Connect(observer);
+        }
+
+        public ConnectHandle ConnectReceiveEndpointObserver(IReceiveEndpointObserver observer)
+        {
+            return _endpointObservers.Connect(observer);
         }
 
         Task Receiver(IPipe<ConnectionContext> transportPipe, CancellationToken stopToken)

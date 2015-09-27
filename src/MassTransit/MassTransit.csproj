@@ -155,6 +155,8 @@
     <Compile Include="IntrospectionExtensions.cs" />
     <Compile Include="IProbeSite.cs" />
     <Compile Include="IPublishEndpointProvider.cs" />
+    <Compile Include="IReceiveEndpointObserver.cs" />
+    <Compile Include="IReceiveEndpointObserverConnector.cs" />
     <Compile Include="IRepeatPolicy.cs" />
     <Compile Include="IRetryPolicy.cs" />
     <Compile Include="LogContext.cs" />
@@ -535,6 +537,7 @@
     <Compile Include="Pipeline\Pipes\EmptyPipe.cs" />
     <Compile Include="Pipeline\Pipes\LastPipe.cs" />
     <Compile Include="Pipeline\PublishObservable.cs" />
+    <Compile Include="Pipeline\ReceiveEndpointObservable.cs" />
     <Compile Include="Pipeline\ReceiveObservable.cs" />
     <Compile Include="Pipeline\SendObservable.cs" />
     <Compile Include="Policies\CancelRetryContext.cs" />
@@ -562,6 +565,9 @@
     <Compile Include="PublishContext.cs" />
     <Compile Include="IPublishConvention.cs" />
     <Compile Include="ReceiveContext.cs" />
+    <Compile Include="ReceiveEndpointCompleted.cs" />
+    <Compile Include="ReceiveEndpointEvent.cs" />
+    <Compile Include="ReceiveEndpointReady.cs" />
     <Compile Include="Request.cs" />
     <Compile Include="IRequestClient.cs" />
     <Compile Include="RequestClientExtensions.cs" />
