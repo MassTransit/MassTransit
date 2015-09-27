@@ -1,4 +1,4 @@
-Request Response
+Request response
 ================
 
 Clone the sample: `GitHub Repository`_

@@ -1,4 +1,4 @@
-Scheduling Messages
+Scheduling messages
 ===================
 
 Time is important, especially in distributed applications. Quartz.NET is an excellent scheduler, and is used
@@ -26,5 +26,3 @@ a standalone MassTransit service.
     scheduling_api.rst
     in_memory.rst
     redeliver.rst
-    
-

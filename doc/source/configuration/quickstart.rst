@@ -38,12 +38,12 @@ MassTransit.
     }
 
 
-So what is all of this doing?
-"""""""""""""""""""""""""""""""""""
+What is this doing?
+"""""""""""""""""""
 
 If we are going to create a messaging system, we need to create a message. ``YourMessage``
-is a .Net class that will represent our message. Notice that it's just a plain
-C# class (or POCO).
+is a .NET class that will represent our message. Notice that it's just a Plain Old
+CLR Object (or POCO).
 
 Next up, we need a program to run our code. Here we have a standard issue
 command line ``Main`` method. To setup the bus we start with the static

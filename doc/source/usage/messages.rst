@@ -1,4 +1,4 @@
-Creating a Message Contract
+Creating a message contract
 ===========================
 
 In MassTransit, a message contract is defined using the .NET type system. Messages
@@ -9,7 +9,7 @@ use read-only properties and no behavior.
 
 	It is strongly suggested that interfaces be used for message contracts, based
 	on experience over several years with varying levels of developer experience.
-	MassTransit will create dynamic interface implementations for the messages, 
+	MassTransit will create dynamic interface implementations for the messages,
 	ensuring a clean separate of the message contract from the consumer.
 
 An example message to update a customer address is shown below.
@@ -41,7 +41,7 @@ try to dispatch that base class in the consumer -- including the behavior of the
 This always leads to pain and suffering, so just say no to base classes.
 
 
-Specifying Message Names
+Specifying message names
 ------------------------
 
 There are two main message types, *events* and *commands*. When choosing a name for a
@@ -78,7 +78,7 @@ Example Events:
 * OrderSubmitted, OrderAccepted, OrderRejected, OrderShipped
 
 
-Correlating Messages
+Correlating messages
 -------------------
 
 There are several built-in message headers that can be used to correlate messages. However, it is also
@@ -100,18 +100,14 @@ RequestId
 ConversationId
   The conversation is created by the first message that is sent or published, in which no existing
   context is available (such as when a message is sent or published from a message consumer). If an
-  existing context is used to send or publish a message, the ``ConversationId`` is copied to the 
+  existing context is used to send or publish a message, the ``ConversationId`` is copied to the
   new message, ensuring that a set of messages within the same *conversation* have the same identifier.
 
 InitiatorId
   When a message is created within the context of an existing message, such as in a consumer, a saga, etc.,
   the ``CorrelationId`` of the message (if available, otherwise the ``MessageId`` may be used) is copied
-  to the ``InitiatorId`` header. This makes it possible to combine a chain of messages into a graph of 
+  to the ``InitiatorId`` header. This makes it possible to combine a chain of messages into a graph of
   producers and consumers.
 
 MessageId
   When a message is sent or published, this header is automatically generated for the message.
-
-
-
-

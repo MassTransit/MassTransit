@@ -1,4 +1,4 @@
-Send Only Bus
+Send only bus
 =============
 
 .. sourcecode:: csharp

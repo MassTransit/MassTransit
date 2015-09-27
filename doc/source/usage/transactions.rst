@@ -1,4 +1,4 @@
-Managing Transactions
+Managing transactions
 =====================
 
 .. note::
@@ -43,7 +43,7 @@ across multiple operations that are committed as a single unit. If the commit fa
 message is faulted (or, retried based on the retry policy).
 
 
-Sharing a Transaction
+Sharing a transaction
 ---------------------
 
 MassTransit includes transaction middleware to share a single committable transaction across any number consumers
@@ -73,14 +73,14 @@ endpoint.
     });
 
 For each message, a new ``CommittableTransaction`` is created. This transaction can be passed to classes
-that support transactional operations, such as ``DbContext``, ``SqlCommand``, and ``SqlConnection``. It can also 
+that support transactional operations, such as ``DbContext``, ``SqlCommand``, and ``SqlConnection``. It can also
 be used to create any ``TransactionScope`` that may be required to support a synchronous operation.
 
 To use the transaction directly in a consumer, the transaction can be pulled from the ``ConsumeContext``.
 
 .. sourcecode:: csharp
 
-    public class TransactionalConsumer : 
+    public class TransactionalConsumer :
         IConsumer<UpdateCustomerAddress>
     {
         readonly SqlConnection _connection; // ctor injected
@@ -112,4 +112,3 @@ to the container to ensure that the transaction is not enlisted twice (not sure 
 ignored). Also, as long as only a single connection string is enlisted, the DTC should not get involved. Using the same
 transaction across multiple connection strings is a bad thing, as it will make the DTC come into play which slows the
 world down significantly.
-

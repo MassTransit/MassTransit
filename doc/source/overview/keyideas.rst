@@ -1,11 +1,11 @@
-Key Terminology
+Key terminology
 ===============
 
 When getting started using MassTransit, it is a good idea to have a handle on the terminology
 used in messaging. To ensure that you are on the right path when looking at a class or interface,
 here are some of the terms used when working with MassTransit.
 
-Messages and Serialization
+Messages and serialization
 --------------------------
 
 MassTransit is a service bus, and a service bus is designed to move *messages*. At the lowest
@@ -57,7 +57,7 @@ to hundreds of saga instances which may cause database performance issues.
         {}
     }
 
-Transports and Endpoints
+Transports and endpoints
 ------------------------
 
 MassTransit is a framework, and being a framework has certain rules. The first of which is known

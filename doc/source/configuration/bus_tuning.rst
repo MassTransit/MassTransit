@@ -1,27 +1,27 @@
-Tuning the Transport
+Tuning the transport
 ====================
 
 There are a number of settings which can be configured, not including the available
-middleware components. Many of them are specific to the transport, but some are 
+middleware components. Many of them are specific to the transport, but some are
 common.
 
-In Memory Transport
+In-Memory transport
 -------------------
 
 .. sourcecode:: csharp
 
     var busControl = Bus.Factory.CreateUsingInMemory(cfg =>
     {
-    	// sets the number of threads available to the 
+    	// sets the number of threads available to the
     	// in-memory message dispatcher
         cfg.TransportConcurrencyLimit = 2;
     });
 
 
-Sharing Transports
+Sharing transports
 ~~~~~~~~~~~~~~~~~~
 
-While it seems weird, and again, it's probably only useful in test scenarios, the transport cache
+While it seems weird, and it's probably only useful in test scenarios, the transport cache
 can be shared across bus instances. To share a transport cache, use the syntax below.
 
 .. sourcecode:: csharp
@@ -37,7 +37,7 @@ As many bus instances as desired can be share the same cache. Again, useful for 
 want to use this anywhere else.
 
 
-RabbitMQ Transport
+RabbitMQ transport
 ------------------
 
 

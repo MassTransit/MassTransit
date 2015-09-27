@@ -1,4 +1,4 @@
-Transport Configuration
+Transport configuration
 """""""""""""""""""""""
 
 Each transport has different configuration options.

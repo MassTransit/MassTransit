@@ -1,11 +1,11 @@
-Using the Rate Limiter
+Using the rate limiter
 ======================
 
 A rate limiter is used to restrict the number of messages processed within a time period. The reason may be
 that an API or service only accepts a certain number of calls per minute, and will delay any subsequent attempts
 until the rate limiting period has expired.
 
-.. note:: 
+.. note::
 
     The rate limiter will delay message delivery until the rate limit expires, so it is best to avoid large time windows
     and keep the rate limits sane. Something like 1000 over 10 minutes is a bad idea, versus 100 over a minute. Try to

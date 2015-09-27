@@ -1,4 +1,4 @@
-The Abandoned Cart Saga
+The abandoned cart saga
 =======================
 
 Clone the sample: `GitHub Repository`_

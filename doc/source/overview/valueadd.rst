@@ -1,7 +1,7 @@
 What does MassTransit add on top of MSMQ and RabbitMQ?
 ======================================================
 
-MassTransit is a service bus implementing the data bus pattern in a distributed setting. It aims to be a .Net-friendly abstraction over the messaging technologies MSMQ and RabbitMQ. As such it brings a lot of the application-specific logic closer to the programmer in an easy-to-configure manner.
+MassTransit is a service bus implementing the data bus pattern in a distributed setting. It aims to be a .NET-friendly abstraction over the messaging technologies MSMQ and RabbitMQ. As such it brings a lot of the application-specific logic closer to the programmer in an easy-to-configure manner.
 
 Below follows a few of the benefits of having MassTransit as opposed to having raw access to the transport and building everything directly on top of the transport.
 
@@ -9,7 +9,7 @@ Sagas
 -----
 Sagas is a coordination mechanism in distributed systems that helps with checkpointing. Often Sagas listen for events or messages and reacts on them by sending further messages; what the outgoing messages are may depend on contextual information and questions; such as 'How long ago was this orchestration started?'
 
-Threaded Consumers 
+Threaded Consumers
 -------------------
 Multiple concurrent receives possible.
 
@@ -65,7 +65,7 @@ In this case you further have the option of unit testing your sagas using Fluent
 
 Routing & Static Routing
 ------------------------
-The routing engine is state-of-the-art, using the Rete Algorithm:http://en.wikipedia.org/wiki/Rete_algorithm with Stact - the .Net actor framework. 
+The routing engine is state-of-the-art, using the Rete Algorithm:http://en.wikipedia.org/wiki/Rete_algorithm with Stact - the .NET actor framework.
 
 If you want to route differently than the default per-type routing, MassTransit will allow you to do this easily.
 

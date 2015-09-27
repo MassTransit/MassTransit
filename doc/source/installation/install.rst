@@ -13,7 +13,7 @@ NuGet.
 
 However, the NuGet packages don't contain the MassTransit.RuntimeServices executable and database SQL scripts.  The RuntimeServices system routes messages to multiple subscribers via the Subscription Service.  If you plan to use the "UseSubscriptionService" feature, then you'll need to get compile that from source.
 
-Raw Binaries
+Raw binaries
 ''''''''''''
 
 If you are a fan of getting the binaries you can get released builds from
@@ -28,7 +28,7 @@ Then you will need to add references to
  * MassTransit.<ContainerSupport>.dll (Castle, AutoFac, and StructureMap)
 
 
-Compiling From Source
+Compiling from source
 '''''''''''''''''''''
 
 Lastly, if you want to hack on MassTransit or just want to have the actual source
@@ -46,7 +46,7 @@ To clone the repository using git try the following::
     gold code.
 
 
-Build Dependencies
+Build dependencies
 ''''''''''''''''''
 
 To compile MassTransit from source you will need the following developer tools
