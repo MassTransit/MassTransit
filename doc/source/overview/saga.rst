@@ -1,4 +1,4 @@
-Defining Sagas using the Saga State Machine
+Defining sagas using the saga state machine
 ===========================================
 
 Sagas are one of the more powerful features in MassTransit, allowing complex state and behavior to be
@@ -17,7 +17,7 @@ Cornell paper: http://www.cs.cornell.edu/andru/cs711/2002fa/reading/sagas.pdf
 Arnon Rotem-Gal-Oz’s book chapter: http://www.rgoarchitects.com/Files/SOAPatterns/Saga.pdf
 
 
-Defining a Saga
+Defining a saga
 ---------------
 
 There are two ways to define a saga using MassTransit. The first approach is similar to creating a _consumer_
@@ -26,7 +26,7 @@ instance. The second approach creates a state machine from a class definition th
 and actions that make up the state machine.
 
 
-Defining a Saga Using the State Machine Syntax
+Defining a saga using the state machine syntax
 ----------------------------------------------
 
 To define a saga using the state machine, a class that inherits from SagaStateMachine must be created.
@@ -34,8 +34,8 @@ To define a saga using the state machine, a class that inherits from SagaStateMa
 
 .. sourcecode:: csharp
     :linenos:
-    
-    public class AuctionSaga : 
+
+    public class AuctionSaga :
         SagaStateMachine<AuctionSaga>,
         ISaga
     {
@@ -49,9 +49,9 @@ To define a saga using the state machine, a class that inherits from SagaStateMa
         public Guid CorrelationId { get; set; }
         public IServiceBus Bus { get; set; }
     }
-    
+
 Shown above is an empty definition of a saga state machine. This is just the start, however, as there
-is much more to be done. The CorrelationId is the Guid assigned to the saga when it is created. The _IServiceBus_ 
+is much more to be done. The CorrelationId is the Guid assigned to the saga when it is created. The _IServiceBus_
 property is set before any methods on the saga instance are called, allowing it to be used by the event handlers
 defined in the saga.
 
@@ -66,7 +66,7 @@ example states are shown below.
     public static State Completed { get; set; }
     public static State Open { get; set; }
     public static State Closed { get; set; }
-    
+
 As you see, the states are added as public static properties of type _State_. This allows the states to be
 used in code as properties, instead of relying on strings or other symbols.
 
@@ -77,7 +77,7 @@ Now, let's define some events to go along with those states.
 
     public static Event<CreateAuction> Create { get; set; }
     public static Event<PlaceBid> Bid { get; set; }
-    
+
 Just like states, events are defined as public static properties on the saga class. The generic type
 specified for the event is the message type associated with the event. When the saga is subscribed to the bus,
 the message types for the events are subscribed.
@@ -95,8 +95,8 @@ are shown below.
         string OwnerEmail { get; }
         decimal OpeningBid { get; }
     }
-    
-When an auction is created, a CreateAuction command is sent to the endpoint where the saga is subscribed. Since the 
+
+When an auction is created, a CreateAuction command is sent to the endpoint where the saga is subscribed. Since the
 message is correlated by Guid, the CorrelationId of the message will be used as the CorrelationId of the saga by default (this can be overridden as well).
 
 .. sourcecode:: csharp
@@ -111,9 +111,9 @@ message is correlated by Guid, the CorrelationId of the message will be used as 
     }
 
 For the bid message, we want to have a unique identifier for the bid, so we have a BidId on the message. We also
-need the AuctionId so that the message can be delivered to the proper saga instance. 
+need the AuctionId so that the message can be delivered to the proper saga instance.
 
-Now that we have defined the messages that are associated with the events defined in the saga, we need to 
+Now that we have defined the messages that are associated with the events defined in the saga, we need to
 specify the behavior of how and when those events can be handled. To define the behavior, we need to add
 code to the Define call in the static initializer of the saga class as shown.
 
@@ -169,7 +169,7 @@ relationship as shown above is your best bet.
 
 *NOTE: Since the CreateAuction message is correlated by Guid, the default correlation is used.*
 
-Now we need to define some behavior to happen when the events occur. We've already defined the events, we 
+Now we need to define some behavior to happen when the events occur. We've already defined the events, we
 just need to link up some behavior.
 
 .. sourcecode:: csharp
@@ -181,7 +181,7 @@ just need to link up some behavior.
         {
             Initially(
                 When(Create)
-                    .Then((saga,message) => 
+                    .Then((saga,message) =>
                     {
                         saga.OpeningBid = message.OpeningBid;
                         saga.OwnerEmail = message.OwnerEmail;
@@ -189,12 +189,12 @@ just need to link up some behavior.
                     })
                     .TransitionTo(Open));
         });
-    }    
+    }
     //
     public decimal OpeningBid { get; set; }
     public string OwnerEmail { get; set; }
     public string Title { get; set; }
-    
+
 Two simple behavior steps have been defined above. The first, an anonymous method called with the saga instance
 and the message, initializes some properties on the saga. The second transitions the state of the saga to Open.
 Properties were also added to store the auction details that were provided in the CreateAuction message.
@@ -238,13 +238,13 @@ Properties were also added to store the auction details that were provided in th
 Above, the behavior for accepting a bid is defined. If the bid received is higher than the current bid,
 the current bid is updated and the high bidder information is stored with the saga instance. If there was a high
 bidder, a message is published indicating the a previous bidder was outbid, allowing actions to be taken such as
-sending an email to the previous high bidder. If the new bid is too low, and exception is thrown which is caught by the 
+sending an email to the previous high bidder. If the new bid is too low, and exception is thrown which is caught by the
 InCaseOf method. This specifies an exception handler for the Call method. Multiple exception handlers can be specified and they are evaluated in a chain-of-command order where the first one that matches the type (IsAssignableFrom) is invoked.
 
 The use of the Bus property is also demonstrated in the Handle method, as it is used to publish the outbid message.
 
 
-Combining Events (think Fork/Join)
+Combining events (think Fork/Join)
 ----------------------------------
 
 In some cases, you may want to create a saga that orchestrates several child sagas or initiate multiple concurrent commands
@@ -259,17 +259,17 @@ and continue processing once all of the commands have been acknowledged. This ca
         {
             Initially(
                 When(Create)
-                    .Then((saga,message) => 
+                    .Then((saga,message) =>
                     {
                         saga.PostalCode = message.PostalCode;
                     })
                     .Publish((saga,message) => new RequestPostalCodeDetails(saga.PostalCode))
                     .Publish((saga,message) => new RequestGeolocation(saga.PostalCode))
                     .TransitionTo(Waiting));
-                    
+
             During(Waiting,
                 When(PostalCodeDetailsReceived)
-                    .Then((saga,message) => 
+                    .Then((saga,message) =>
                     {
                         saga.City = message.City;
                         saga.State = message.State;
@@ -280,10 +280,10 @@ and continue processing once all of the commands have been acknowledged. This ca
                         saga.Latitude = message.Latitude;
                         saga.Longitude = message.Longitude;
                     }));
-                    
+
             Combine(PostalCodeDetailsReceived, GeolocationReceived)
                 .Into(ReadyToProceed, saga => saga.ReadyFlags);
-                
+
             During(Waiting,
                 When(ReadyToProceed)
                     .Then((saga,message) =>
@@ -308,7 +308,7 @@ This is a pretty simple example of the saga, but with this great power comes gre
 
 (and with that, I'm too tired to continue for now and must rest)
 
-Subscribing to the Saga
+Subscribing to the saga
 -----------------------
 
 Once the saga has been defined, it is subscribed to the bus using the Saga subscription method.

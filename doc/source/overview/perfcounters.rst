@@ -1,9 +1,9 @@
-Performance Counters
+Performance counters
 ======================
 
 Masstransit has support for updating Windows performance counters. Chris has a post introducing them - Performance Counters Added to MassTransit. http://lostechies.com/chrispatterson/2009/10/14/performance-counters-added-to-masstransit/
 
-User Permissions
+User permissions
 """"""""""""""""
 
 The user running your mass transit enabled application will need access to update the performance counters.
@@ -12,7 +12,7 @@ The user running your mass transit enabled application will need access to updat
 
 If Masstransit does not detect the performance counters it wishes to write to it will attempt to create them. If the user credentials do not have administrative access likely they will not have the ability to create the performance counters and errors will be logged.
 
-Windows Installer
+Windows installer
 """""""""""""""""
 
 When deploying your mass transit enabled application it is possible to have Windows Installer create your performance counters for you. Below is Xml used by Wix 3.0 to define the Masstransit performance counters.

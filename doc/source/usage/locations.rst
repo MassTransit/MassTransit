@@ -7,7 +7,7 @@ use of a dependency injection framework is not included. Using a container (such
 Autofac, StructureMap, etc.) with MassTransit is covered separately.
 
 
-Configuring MassTransit in a Console Application
+Configuring MassTransit in a console application
 ------------------------------------------------
 
 A console application has a ``Main`` entry point, which is part of the ``Program.cs`` class
@@ -17,7 +17,7 @@ a value entered.
 .. sourcecode:: csharp
     :linenos:
 
-    namespace EventPublisher 
+    namespace EventPublisher
     {
         public interface ValueEntered
         {
@@ -41,9 +41,9 @@ a value entered.
                         if("quit".Equals(value, StringComparison.OrdinalIgnoreCase))
                             break;
 
-                        busControl.Publish<ValueEntered>(new 
+                        busControl.Publish<ValueEntered>(new
                         {
-                            Value = value 
+                            Value = value
                         });
                     }
                     while (true);
@@ -69,10 +69,10 @@ allows values to be entered and published. When the loop exits, the ``busControl
 variable is disposed, which stops the bus.
 
 
-Configuring MassTransit in a Windows Service
+Configuring MassTransit in a Windows service
 --------------------------------------------
 
-A windows service is recommended for consuming commands and events as it provides an
+A Windows service is recommended for consuming commands and events as it provides an
 autonomous execution environment for message consumers. The service can be started and
 stopped using the service control manager, as well as monitored by operations tools.
 
@@ -88,7 +88,7 @@ is only configured and started when the service is *started*.
 .. sourcecode:: csharp
     :linenos:
 
-    namespace EventService 
+    namespace EventService
     {
         using Topshelf;
 
@@ -141,11 +141,11 @@ is only configured and started when the service is *started*.
     }
 
 
-Configuring MassTransit in a Web Application
+Configuring MassTransit in a web application
 --------------------------------------------
 
 Configuring a bus in a web site is typically done to publish events, send commands,
-as well as engage in request/response conversations. Hosting receive endpoints and 
+as well as engage in request/response conversations. Hosting receive endpoints and
 persistent consumers is not recommended (use a service as shown above).
 
 In a web application, the ``HttpApplication`` class methods of Application_Start and
@@ -158,7 +158,7 @@ Application_End are used to configure/start the bus and stop the bus respectivel
 
 .. sourcecode:: csharp
 
-    public class MvcApplication : 
+    public class MvcApplication :
         HttpApplication
     {
         static IBusControl _busControl;
@@ -197,7 +197,7 @@ Application_End are used to configure/start the bus and stop the bus respectivel
     {
         public async Task<ActionResult> Put(string value)
         {
-            await MvcApplication.Bus.Publish<ValueNotified>(new 
+            await MvcApplication.Bus.Publish<ValueNotified>(new
             {
                 Value = value
             });
@@ -208,7 +208,7 @@ Application_End are used to configure/start the bus and stop the bus respectivel
 
     public class CommandController :
         Controller
-    {        
+    {
         public async Task<ActionResult> Send(string value)
         {
             var endpoint = await MvcApplication.Bus.GetSendEndpoint(_serviceAddress);
@@ -231,4 +231,3 @@ In fact, the inherited ``IPublishEndpoint`` and ``ISendEndpointProvider`` should
 be registered.
 
 The example controllers show how to publish and send messages as well.
-

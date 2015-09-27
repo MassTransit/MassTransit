@@ -1,17 +1,17 @@
-Versioning Messages
+Versioning messages
 ===================
 
 Versioning of messages is going to happen, services evolve and requirements change.
 
 
-Versioning Existing Message Contracts
+Versioning existing message contracts
 -------------------------------------
 
 Consider a command to fetch and cache a local copy of an image from a remote system.
 
 .. sourcecode:: csharp
     :linenos:
-    
+
     public interface FetchRemoteImage
     {
     	Guid CommandId { get; }
@@ -24,7 +24,7 @@ After the initial deployment, a requirement is added to resize the image to a ma
 
 .. sourcecode:: csharp
     :linenos:
-    
+
     public interface FetchRemoteImage
     {
     	Guid CommandId { get; }
@@ -37,7 +37,7 @@ After the initial deployment, a requirement is added to resize the image to a ma
 By making the _int_ value nullable, commands that are submitted using the original contract can still be accepted as the missing value does not break the new contract. If the value was added as a regular _int_, it would be assigned a default value of zero, which may not convey the right information. String values can also be added as they will be _null_ if the value is not present in the serialized message. The consumer just needs to check if the value is present and process it accordingly.
 
 
-Versioning Existing Events
+Versioning existing events
 --------------------------
 
 Consider an event to notify that an image has been cached is now available.
@@ -117,10 +117,3 @@ As mentioned above, depending upon the interface type subscribed, a dynamic back
 The message is a single message on the wire, but the available/known types are captured in the message headers so that types can be deserialized from the message body.
 
 A lot of flexibility and power, it's up to the application developer to ensure that it is used in a way that ensures application evolution over time without requiring forklift/switchover upgrades due to breaking message changes.
-
-
-
-
-
-
-

@@ -13,7 +13,7 @@ to why.
 And before you even do that, do a couple of searches to see if your question is
 already answered, if it has been, you will get your answer much faster that way.
 
-Mailing List
+Mailing list
 """"""""""""
 
 Getting on or off our mailinglist happens through Google Groups.
@@ -43,7 +43,7 @@ This will help jump start a lot of the context for us.
   var output = cc.ToJsonString();
   System.IO.File.WriteAllText("probe.txt", output);
 
-Sample Output
+Sample output
 '''''''''''''
 
 .. sourcecode:: json
@@ -129,7 +129,7 @@ If twitter is all quiet, try the mailing list as well, we do have lives,
 families and jobs to deal with also.
 
 
-Issues / Tickets
+Issues / tickets
 """"""""""""""""
 
 Please do not open an issue on github, unless you have spotted an actual

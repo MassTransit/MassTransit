@@ -1,4 +1,4 @@
-Bus Configuration
+Bus configuration
 """""""""""""""""
 
 Trying to get multiple applications to talk to each other is not a simple problem.
@@ -10,7 +10,7 @@ that the options are clear and make sense why you need to select them. Below are
 some of the options you have:
 
 
-Selecting a Message Transport
+Selecting a message transport
 '''''''''''''''''''''''''''''
 
 The first decision is what transport are you going to use? RabbitMQ or Azure Service Bus?
@@ -29,7 +29,7 @@ which one works better for your environment.
     The InMemory transport is a great tool for testing, as it doesn't require a message broker
     to be installed or running. It's also very fast. But it isn't durable, and messages are gone
     if the bus is stopped or the process terminates. So, it's generally not a smart option for a
-    production system. However, there are places where durability it not important so the cautionary 
+    production system. However, there are places where durability it not important so the cautionary
     tale is to proceed with caution.
 
 
@@ -62,7 +62,7 @@ with additional configuration for the username/password, as well as options on t
     });
 
 
-Specifying a Receive Endpoint
+Specifying a receive endpoint
 '''''''''''''''''''''''''''''
 
 Once the hosts are configured, any number of receive endpoints can be configured. No receive endpoints
@@ -85,7 +85,7 @@ a single receive endpoint is shown below.
     });
 
 
-Selecting an Outbound Message Serializer
+Selecting an outbound message serializer
 ''''''''''''''''''''''''''''''''''''''''
 
 By default, outbound messages are serialized using JSON and inbound messages that are in JSON, BSON,
@@ -102,6 +102,3 @@ the factory methods for the custom serializer.
         cfg.UseJsonSerializer();
         cfg.UseXmlSerializer();
     });
-
-
-

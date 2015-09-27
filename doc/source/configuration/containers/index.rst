@@ -1,4 +1,4 @@
-Configuring a Container
+Configuring a container
 =======================
 
 When MassTransit was originally built, it required a dependency injection container to work. Unfortunately,
@@ -6,7 +6,7 @@ in 2008 there were few .NET developers who knew what Inversion of Control (IOC) 
 and even fewer who used it. Several versions later, the requirement was dropped and container support was put back
 where it belonged - around the edges of the application instead of at the core of the framework.
 
-Fortunately, the world has changed and DI is more mainstream, particularly with newer applications. And container 
+Fortunately, the world has changed and DI is more mainstream, particularly with newer applications. And container
 support in MassTransit has stayed up to date, including all of the major containers.
 
 .. note::
@@ -31,4 +31,3 @@ pull requests are always welcome. Using an existing container it should be strai
     structuremap.rst
     unity.rst
     windsor.rst
-

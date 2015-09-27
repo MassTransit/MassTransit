@@ -1,4 +1,4 @@
-In Memory Transport
+In-Memory transport
 ===================
 
 .. warning::
@@ -6,11 +6,11 @@ In Memory Transport
     The InMemory transport is a great tool for testing, as it doesn't require a message broker
     to be installed or running. It's also very fast. But it isn't durable, and messages are gone
     if the bus is stopped or the process terminates. So, it's generally not a smart option for a
-    production system. However, there are places where durability it not important so the cautionary 
+    production system. However, there are places where durability it not important so the cautionary
     tale is to proceed with caution.
 
 
-The InMemory transport uses the ``loopback`` address (a holdover from previous version of MassTransit).
+The In-Memory transport uses the ``loopback`` address (a holdover from previous version of MassTransit).
 The host doesn't matter, and the queue_name is the name of the queue.
 
     loopback://localhost/queue_name
@@ -26,7 +26,7 @@ The host doesn't matter, and the queue_name is the name of the queue.
     });
 
 
-Sharing Transports
+Sharing transports
 ------------------
 
 While it seems weird, and again, it's probably only useful in test scenarios, the transport cache

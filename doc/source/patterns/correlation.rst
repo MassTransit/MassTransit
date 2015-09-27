@@ -14,10 +14,10 @@ In MassTransit we can mark a message as correlated by implementing the interface
         TKey CorrelationId { get; }
 	}
 
-Ok, that’s great, but what does it mean to be correlated? In short it means that
+Ok, that's great, but what does it mean to be correlated? In short it means that
 this message is a part of a larger story. For instance, you may have a message that says
-‘New Order (Item:Hammers; Qty:22; OrderNumber:45)’ and there may be another message that
-is a response to that message that says ‘Order Allocated(OrderNumber:45)’. In this case
+ï¿½New Order (Item:Hammers; Qty:22; OrderNumber:45)ï¿½ and there may be another message that
+is a response to that message that says ï¿½Order Allocated(OrderNumber:45)ï¿½. In this case
 the order number is acting as your correlation id, it ties the messages together.
 
 NOTE: Since most transactions in a system will ultimately be logged and wide-scale

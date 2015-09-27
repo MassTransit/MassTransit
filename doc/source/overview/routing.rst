@@ -1,16 +1,16 @@
-Routing of Messages in MassTransit
+Routing of messages in MassTransit
 """"""""""""""""""""""""""""""""""
 
 How are messages routed?
 
-RabbitMQ Routing Conventionns
+RabbitMQ routing conventionns
 '''''''''''''''''''''''''''''
 
 As we were building in the RabbitMQ support into MassTransit, we tried to follow the best
 practices for RabbitMQ at the time. Also, since C# is a strongly typed language,
 we have tried to make the most of that as well. MassTransit follows a routing scheme
 that is based on the type of the message. All messages published in MassTransit are
-routed by the Message Type. In our case the Message Type is going to be the .Net type of
+routed by the Message Type. In our case the Message Type is going to be the .NET type of
 the message class.
 
 Another goal was leveraging RabbitMQ for as much of the routing logic possible. With MSMQ
@@ -18,7 +18,7 @@ we had to manage the routing logic ourselves and that added quite a bit of code 
 But with RabbitMQ's advanced routing features we hoped we could excise that piece of the system.
 
 To achieve that we devised a routing system that leaned on RabbitMQ's concepts of bindings
-and exchanges. By doing so the routing logic has been completely moved to RabbitMQ, which 
+and exchanges. By doing so the routing logic has been completely moved to RabbitMQ, which
 has lead to us also working well with RabbitMQ's clustering support giving us more HA scenarios
 as well.
 
@@ -52,8 +52,8 @@ example that would be:
 .. NOTE::
 
   A word about Exchange to Exchange bindings. It is a RabbitMQ only feature.
-  Exchange queue. To limit the amount of RabbitMQ churn we have established a 
-  directly bound exchange to your queue. This lets you come on and off the network with 
+  Exchange queue. To limit the amount of RabbitMQ churn we have established a
+  directly bound exchange to your queue. This lets you come on and off the network with
   little impact to the flow of messages. [#churn]_
 
 If you are leveraging our interface based messaging with a message class like

@@ -1,4 +1,4 @@
-Redelivering Messages
+Redelivering messages
 =====================
 
 There are situations where a message cannot be processed, either due to an unavailable resource or a situation
@@ -9,7 +9,7 @@ easy workaround). In these situations, scheduling a message for redelivery is a 
 
     Sometimes this behavior is referred to as a *Second Level Retry*.
 
-Specifying Redelivery
+Specifying redelivery
 ---------------------
 
 MassTransit makes it easy to schedule messages for redelivery. In the example below, the Quartz service is running
@@ -17,7 +17,7 @@ as a separate service on the */quartz* queue.
 
 .. sourcecode:: csharp
 
-    public class UpdateCustomerAddressConsumer : 
+    public class UpdateCustomerAddressConsumer :
         IConsumer<UpdateCustomerAddress>
     {
         public async Task Consume(ConsumeContext<ScheduleNotification> context)
@@ -56,5 +56,3 @@ MT-Redelivery-Count
 
 MT-Scheduling-DeliveredAddress
   The address where the message was last delivered and subsequently scheduled for redelivery.
-
-

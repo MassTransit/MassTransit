@@ -1,4 +1,4 @@
-Azure Service Bus Configuration Options
+Azure Service Bus configuration options
 """""""""""""""""""""""""""""""""""""""
 
 .. sourcecode:: csharp

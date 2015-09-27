@@ -1,4 +1,4 @@
-Message Scheduling
+Message scheduling
 ==================
 
 Why would I want this?

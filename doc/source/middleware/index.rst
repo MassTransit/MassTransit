@@ -1,4 +1,4 @@
-Using Middleware
+Using middleware
 ================
 
 MassTransit is composed of a network of pipelines, which are used to dispatch messages from the transport,
@@ -9,7 +9,7 @@ Middleware components can be added to every pipeline in MassTransit, allowing fo
 of message processing. And the granular ways that middleware can be applied make it easy to focus a particular
 behavior into a single receive endpoint, a single consumer, a saga, or the entire bus.
 
-Middleware components are configured via extension methods on any pipe configurator (``IPipeConfigurator<T>``), 
+Middleware components are configured via extension methods on any pipe configurator (``IPipeConfigurator<T>``),
 and the extension methods all begin with ``Use`` to separate them from other methods.
 
 The details of many of the built-in middleware components follow.
@@ -21,4 +21,3 @@ The details of many of the built-in middleware components follow.
     rate_limiter.rst
     latest.rst
     custom.rst
-
