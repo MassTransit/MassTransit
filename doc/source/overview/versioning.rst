@@ -34,7 +34,7 @@ After the initial deployment, a requirement is added to resize the image to a ma
     	int? MaximumDimension { get; }
     }
 
-By making the _int_ value nullable, commands that are submitted using the original contract can still be accepted as the missing value does not break the new contract. If the value was added as a regular _int_, it would be assigned a default value of zero, which may not convey the right information. String values can also be added as they will be _null_ if the value is not present in the serialized message. The consumer just needs to check if the value is present and process it accordingly.
+By making the *int* value nullable, commands that are submitted using the original contract can still be accepted as the missing value does not break the new contract. If the value was added as a regular *int*, it would be assigned a default value of zero, which may not convey the right information. String values can also be added as they will be *null* if the value is not present in the serialized message. The consumer just needs to check if the value is present and process it accordingly.
 
 
 Versioning existing events
@@ -76,7 +76,6 @@ The class implements the event interface, and when published, is delivered to co
 As the event evolves, additional event contracts can be defined that include additional information without modifying the original contract. For example.
 
 .. sourcecode:: csharp
-    :linenos:
 
     public interface RemoteImageCachedV2
     {
@@ -92,7 +91,6 @@ As the event evolves, additional event contracts can be defined that include add
 The event class is then modified to include the additional property, while still implementing the previous interface.
 
 .. sourcecode:: csharp
-    :linenos:
 
     class RemoteImageCachedEvent :
         RemoteImageCached,
@@ -108,9 +106,13 @@ The event class is then modified to include the additional property, while still
 
 When the event class is published now, both interfaces are available in the message. When a consumer subscribes to one of the interfaces, that consumer will receive a copy of the message. It is important that both interfaces are not consumed in the same context, as duplicates will be received. If a service is updated, it should use the new contract.
 
+.. note::
+
     Note that ownership of the contract belongs to the event publisher, not the event observer/subscriber. And contracts should not be shared between event producers as this can create some extensive leakage of multiple events making it difficult to consume unique events.
 
-As mentioned above, depending upon the interface type subscribed, a dynamic backing class is created by MT. Therefore, if a consumer subscribes to RemoteImageCached, it is not possible to cast the message to RemoteImageCachedV2, as the dynamic implementation does not support that interface.
+As mentioned above, depending upon the interface type subscribed, a dynamic backing class is created by MassTransit. Therefore, if a consumer subscribes to RemoteImageCached, it is not possible to cast the message to RemoteImageCachedV2, as the dynamic implementation does not support that interface.
+
+.. note::
 
     It should be noted, however, that on the IConsumeContext interface, there is a method to TryGetContext<T> method, which can be used to attempt to deserialize the message as type T. So it is possible to check if the message also implements the new version of the interface and not process as the original version knowing that the new version will be processed on the same message consumption if both types are subscribed.
 
