@@ -10,6 +10,7 @@ Contents:
 .. toctree::
     :maxdepth: 2
 
+    overview/backstory.rst
     installation/index.rst
     configuration/index.rst
     usage/index.rst
@@ -19,7 +20,6 @@ Contents:
     samples/index.rst
     troubleshooting/index.rst
     patterns/index.rst
-    learning/index.rst
     migrating/index.rst
     overview/index.rst
 
