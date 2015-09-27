@@ -5,6 +5,7 @@ When getting started using MassTransit, it is a good idea to have a handle on th
 used in messaging. To ensure that you are on the right path when looking at a class or interface,
 here are some of the terms used when working with MassTransit.
 
+
 Messages and serialization
 --------------------------
 
@@ -26,8 +27,9 @@ default serialization can be changed when a service bus is being configured.
     sbc.UseXmlSerializer();  // uses XML by default
     sbc.UseBsonSerializer(); // uses BSON (binary JSON) by default
 
+
 Sagas
-"""""
+-----
 
 All of the receiver types above are stateless by design, the framework makes no effort to
 correlate multiple messages to a single receiver. Often it is necessary to orchestrate
@@ -65,30 +67,43 @@ as the Hollywood principle -- "Don't call us, we'll call you." Once the bus is c
 running, the receivers are called by the framework as messages are received. There is no need
 for the application to poll a message queue or repeated call a framework method in a loop.
 
+.. note::
+
+    A way to understand this is to think of a message consumer as being similar to a controller
+    in a web application. With a web application, the socket and HTTP protocol are under the
+    hood, and the controller is created and action method called by the web framework. MassTransit
+    is similar, in that the message reception is handled by MT, which then creates the consumer
+    and calls the Consume method.
+
 To initiate the calls into your application code, MassTransit creates an abstraction on top of
 the messaging platform (such as RabbitMQ).
 
 Transports
-""""""""""
+~~~~~~~~~~
+The transport is at the lowest level and is closest to the actual message broker. The transport
+communicates with the broker, responsible for sending and receiving messages. The send and receive
+sections of the transport are completely independent, keeping reads and writes separate in line with
+the Command Query Responsibility Segregation pattern.
 
-At the lowest level, closest to the actual messaging platform used, is the transport. Transports
-communicate with the actual platform API to send and receive messages. The transport implementation
-is split into two parts, inbound and outbound, providing the ability to support asymmetric APIs
-where sending and receiving have different behaviors and/or addresses.
 
-Endpoints
-"""""""""
+Receive endpoints
+~~~~~~~~~~~~~~~~~
+A receive endpoint receives messages from a transport, deserializes the message body, and routes
+the message to the consumers. Applications do not interact with receive endpoints, other than to
+configure and connect consumers. The rest of the work is done entirely by MassTransit.
 
-The endpoint is the abstraction used to send messages directly and to receive messages by the
-service bus. It is very uncommon (and not recommended) for an application to call *Receive*
-on an endpoint. Endpoints are referenced by *address* and no distinction is made between inbound
-and outbound at the endpoint level.
 
-Address
-"""""""
+Send endpoints
+~~~~~~~~~~~~~~
+A send endpoint is used by an application to send a message to a specific adddress. They can be
+obtained from the ``ConsumeContext`` or the ``IBus``, and support a variety of message types.
 
-In MassTransit, a URI is used as an address to an endpoint. The elements of the URI are used to
-determine the proper transport, server, port, and queue name of the actual endpoint. For example,
-a RabbitMQ endpoint on the local machine named "my_queue" would have the address shown below.
+
+Endpoint addressing
+~~~~~~~~~~~~~~~~~~~
+MassTransit uses Universal Resource Identifiers (URIs) to identify endpoints. URIs are flexible
+and easy to include additional information, such as queue or exchange types. An example RabbitMQ
+endpoint address for *my_queue* on the local machine would be:
 
     ``rabbitmq://localhost/my_queue``
+
