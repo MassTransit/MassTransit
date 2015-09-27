@@ -1,4 +1,4 @@
-Creating a Message Consumer
+Creating a message consumer
 ===========================
 
 A message consumer is a class that consumes one or more message types, specified by the
@@ -6,7 +6,7 @@ A message consumer is a class that consumes one or more message types, specified
 
 .. sourcecode:: csharp
 
-    public class UpdateCustomerConsumer : 
+    public class UpdateCustomerConsumer :
         IConsumer<UpdateCustomerAddress>
     {
         public async Task Consume(ConsumeContext<UpdateCustomerAddress> context)
@@ -19,22 +19,22 @@ A message consumer is a class that consumes one or more message types, specified
 
 When a consumer is subscribed to a receive endpoint, and a message consumed by the consumer is
 received by the endpoint, an instance of the consumer is created (using a consumer factory, which
-is covered --> here <--). The message (wrapped in a ``ConsumeContext``) is then delivered to the 
+is covered --> here <--). The message (wrapped in a ``ConsumeContext``) is then delivered to the
 consumer via the ``Consume`` method.
 
 The ``Consume`` method is asynchronous, and returns a Task. The task is awaited by MassTransit,
-during which time the message is unavailable to other receive endpoints. If the consume method 
+during which time the message is unavailable to other receive endpoints. If the consume method
 completes successfuly (a task status of RanToCompletion), the message is acknowledged and removed
-from the queue. 
+from the queue.
 
-.. note:: 
+.. note::
 
     If the consumer faults (such as throwing an exception, resulting in a task status of Faulted),
     or is somehow cancelled (TaskStatus of Canceled), the exception is propagated back up the pipeline
     where it can ultimately be retried or moved to an error queue.
 
 
-Connecting a Message Consumer
+Connecting a message consumer
 -----------------------------
 
 For a consumer to receive messages, the consumer must be connected to a receive endpoint. This is done
@@ -60,13 +60,13 @@ An example of connecting a consumer to a receive endpoint is shown below.
 
 The example creates a bus, which connects to the RabbitMQ running on the local machine, using the default
 username and password (guest/guest). On that bus. a single receive endpoint is created with the name
-*customer_udpate_queue*. The consumer is connected using the simplest method, which accepts a consumer 
+*customer_udpate_queue*. The consumer is connected using the simplest method, which accepts a consumer
 class with a default constructor.
 
 .. note::
 
     When a consumer is connected to a receive endpoint, the combined set of message types consumed by
-    all of the consumers connected to the same receive endpoint are *subscribed* to the queue. The 
+    all of the consumers connected to the same receive endpoint are *subscribed* to the queue. The
     subscription method varies by broker, in the case of RabbitMQ exchange bindings are created for
     the message types to the exchange/queue for the receive endpoint.
 
@@ -76,7 +76,7 @@ class with a default constructor.
     will be delivered to the consumer(s).
 
 
-Connecting to an Existing Bus
+Connecting to an existing bus
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 To connect a consumer to an existing bus (using the temporary queue), a series of *Connect* methods can be used.
@@ -102,7 +102,7 @@ or a routing slip subscription.
     handle.Disconnect(); // disconnect the consumer from the bus pipeline
 
 
-Handling Undeliverable Messages
+Handling undeliverable messages
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 If the configuration of an endpoint changes, or if a message is mistakenly sent to an endpoint, it is
@@ -111,11 +111,11 @@ the message is moved to a *_skipped* queue (prefixed by the original queue name)
 content is retained, and additional headers are added to indicate the host which moved the message.
 
 
-Handling Messages Without a Consumer
+Handling messages without a consumer
 ------------------------------------
 
 While creating a consumer is the preferred way to consume messages, it is also possible to create
-a simple message handler. By specifying a method, anonymous method, or lambda method, a message 
+a simple message handler. By specifying a method, anonymous method, or lambda method, a message
 can be consumed on a receive endpoint.
 
 To configure a simple message handler, refer to the example below.
@@ -141,7 +141,7 @@ In this case, the method is called for each message received. No consumer is cre
 management is performed.
 
 
-Observing Messages via IObserver
+Observing messages via IObserver
 --------------------------------
 
 With the addition of the ``IObserver`` interface, the concept of an observer was added to the .NET framework.
@@ -190,7 +190,3 @@ Once created, the observer is connected to the receive endpoint similar to a con
             e.Observer<CustomerAddressUpdatedObserver>();
         });
     });
-
-
-
-

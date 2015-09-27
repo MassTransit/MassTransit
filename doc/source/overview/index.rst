@@ -1,4 +1,4 @@
-How MassTransit Works
+How MassTransit works
 =====================
 
 .. toctree::

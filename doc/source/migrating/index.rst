@@ -1,8 +1,8 @@
-Migrating from MassTransit v2.x to MassTransit 3
+Migrating from MassTransit v2.x to MassTransit v3
 ======================
 
-To migrate an application built with an earlier version of MassTransit, there are a few changes that need to be 
-considered. 
+To migrate an application built with an earlier version of MassTransit, there are few changes that need to be
+considered.
 
 .. note::
 
@@ -120,7 +120,7 @@ should now use the single ``IConsumer<T>`` interface.
         public async Task Consume(ConsumeContext<A> context)
         {
         }
-    
+
         public async Task Consume(ConsumeContext<B> context)
         {
         }
@@ -132,18 +132,18 @@ are implemented by the context, and should be used to send or publish messages. 
 and ``InitiatorId`` are properly carried through the system.
 
 
-Receive Endpoints
+Receive endpoints
 ~~~~~~~~~~~~~~~~
 
 In MassTransit v2, a separate bus had to be created for every queue. With MassTransit 3, that is no longer the case. Any number
-of receive endpoints can be configured on a single bus, reducing the overhead and memory usage, as well as the number of 
+of receive endpoints can be configured on a single bus, reducing the overhead and memory usage, as well as the number of
 broker connections. This really helps with broker performance, as well as simplifies configuration.
 
-It's also completely legal to create a bus with no receive endpoints. In this case, the bus is meant only for publish/send, as 
+It's also completely legal to create a bus with no receive endpoints. In this case, the bus is meant only for publish/send, as
 well as request/response. A temporary queue is created for the bus, on which responses can be received.
 
 
-State Machine Sagas
+State machine sagas
 ~~~~~~~~~~~~~~~~~~~
 
 Automatonymous is the only support state machine saga format with MassTransit 3. Magnum has been completely eradicated from
@@ -154,46 +154,13 @@ timeouts to be supported.
 Courier
 ~~~~~~~
 
-The routing slip engine is now built into the main assembly, and has been updated to support event subscriptions (instead of 
+The routing slip engine is now built into the main assembly, and has been updated to support event subscriptions (instead of
 just publishing all routing slip events). The routing slips are not backwards compatible, as the syntax has been improved
 to support better troubleshooting and event history. The API is mostly the same, though, so it's easy to migrate.
 
 
-Living Document
+Living document
 ---------------
 
 While the above items are just a few of the changes, this document will continue to be updated in response to questions about
-how to migrate code using previous features arise. 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+how to migrate code using previous features arise.

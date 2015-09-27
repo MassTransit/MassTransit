@@ -1,4 +1,4 @@
-Retry Policies
+Retry policies
 ==============
 
 When you register various consumers of messages, one of the configuration elements
@@ -18,7 +18,7 @@ you have control over is the retry policy.
         });
     });
 
-Retry Options
+Retry options
 """""""""""""
 
 None

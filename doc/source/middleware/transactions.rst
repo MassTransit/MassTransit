@@ -1,5 +1,5 @@
-Transaction Middleware
-""""""""""""""""""""""""
+Transaction middleware
+""""""""""""""""""""""
 
 .. sourcecode:: csharp
     :linenos:

@@ -1,4 +1,4 @@
-Serialization Options
+Serialization options
 """""""""""""""""""""
 
 Using NHibernate terminology

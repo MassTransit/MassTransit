@@ -1,4 +1,4 @@
-Inheritance and Message Class Design
+Inheritance and message class design
 ====================================
 
 That said, I would advise you to think about the following things:

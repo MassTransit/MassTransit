@@ -1,7 +1,7 @@
-Subscription Configuration
+Subscription configuration
 """"""""""""""""""""""""""
 
-MassTransit supports a variety of message consumers, each of which is detailed below. There are 
+MassTransit supports a variety of message consumers, each of which is detailed below. There are
 some common configuration settings which are available across all consumer types, which are documented
 separately.
 
@@ -10,7 +10,7 @@ is in front of you -- adding your subscriptions. As you can see below there are 
 so I am going to save most of the explanation for the next page.
 
 
-Receive Endpoint Subscriptions
+Receive endpoint subscriptions
 ''''''''''''''''''''''''''''''
 
 A recieve endpoint specifies a queue on which messages should be received. When a consumer is
@@ -30,16 +30,16 @@ specified that is called for every message of the specified type that is receive
     {
         cfg.ReceiveEndpoint("input_queue", ep =>
         {
-            ep.Handler<MessageA>(async context => 
+            ep.Handler<MessageA>(async context =>
             {
                 // do something with message
             });
 
-            ep.Handler<MessageB>(context => 
+            ep.Handler<MessageB>(context =>
             {
                 // do something
                 return Task.Completed;
-            }, handlerCfg => 
+            }, handlerCfg =>
             {
                 // specify a retry interval of 100ms with 5 attempts
                 handlerCfg.UseRetry(Retry.Interval(5, 100));
@@ -141,7 +141,7 @@ interfaces are subscribed to the endpoint.
         });
     });
 
-The more powerful version of a saga, powered by Automatonymous, is a state machine saga. A 
+The more powerful version of a saga, powered by Automatonymous, is a state machine saga. A
 state machine saga consists of a state type and a state machine, combined with a saga repository.
 The event types in the state machine (denoted by the ``Event<T>`` property type) are subscribed
 to the endpoint.
@@ -168,7 +168,7 @@ LoadFrom
     Requires an IoC container.
 
 If you are using an IoC container like AutoFac, StructureMap, or Castle Windsor, MassTransit
-can scan your container to find consumers and subscribe those consumers to the endpoint. Some 
+can scan your container to find consumers and subscribe those consumers to the endpoint. Some
 containers even have methods to help build the container, by scanning the assembly for classes
 that implement any IConsumer interface, and register the concrete consumer type.
 
@@ -191,7 +191,7 @@ that implement any IConsumer interface, and register the concrete consumer type.
     Need more notes here
 
 
-Bus Connections
+Bus connections
 '''''''''''''''
 
 Once the bus has been created, the receive endpoints are created at that point and cannot be modified.
@@ -217,9 +217,8 @@ or faults (failures in message processing).
 
 .. note::
 
-    It should also be noted that published events cannot be received by the bus queue, as no 
-    bindings are created on bus connections. Messages to the bus queue must be sent directly 
+    It should also be noted that published events cannot be received by the bus queue, as no
+    bindings are created on bus connections. Messages to the bus queue must be sent directly
     to the queue (such as a response, or a request fault). So many of the above connection
     methods are there for completeless only (IE, connecting a state machine saga to a bus queue
     is downright silly, but hey, completeness wins).
-

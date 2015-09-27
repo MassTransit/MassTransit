@@ -1,4 +1,4 @@
-Displaying Configuration
+Displaying configuration
 ========================
 
 A bus instance is composed of many classes, all of which are wired together to form a connection pipeline of

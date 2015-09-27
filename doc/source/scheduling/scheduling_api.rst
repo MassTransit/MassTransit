@@ -1,11 +1,11 @@
-Using the Scheduling API
+Using the scheduling API
 ========================
 
 The scheduling API consists of several extension methods that send messages to an endpoint where
 the Quartz scheduling consumers are connected.
 
 
-Scheduling a Message
+Scheduling a message
 --------------------
 
 To schedule a message, call the ``ScheduleSend`` method with the message to be delivered.
@@ -26,7 +26,7 @@ To schedule a message, call the ``ScheduleSend`` method with the message to be d
         string Body { get; }
     }
 
-    public class ScheduleNotificationConsumer : 
+    public class ScheduleNotificationConsumer :
         IConsumer<ScheduleNotification>
     {
         Uri _schedulerAddress;
@@ -38,7 +38,7 @@ To schedule a message, call the ``ScheduleSend`` method with the message to be d
 
             await schedulerEndpoint.ScheduleSend(_notificationService,
                 context.Message.DeliveryTime,
-                new SendNotification 
+                new SendNotification
                 {
                     EmailAddress = context.Message.EmailAddress,
                     Body =  context.Message.Body
