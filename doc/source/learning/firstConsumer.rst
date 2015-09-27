@@ -1,4 +1,4 @@
-Creating Your First Consumer
+Creating your first consumer
 ============================
 
 To create your first consumer, create a new project using Visual Studio. The project should be configured to use .NET 4.0, and should be created as a class library. In this exercise, the project name is LearningMT.Consumer.
@@ -23,7 +23,7 @@ Once the package manager is finished downloading the package and adding the refe
 .. image:: images/consumerReferences.png
 
 
-Adding the Message Contract
+Adding the message contract
 ---------------------------
 
 Using MassTransit, there are several ways that message subscriptions can be added to a service bus instance. In this exercise, you will be creating a message *consumer*. Other types of message subscriptions include message *handlers*, consumer *instances*, and *sagas*.
@@ -49,7 +49,7 @@ The interface defines the message contract that the consumer accepts. In this ex
 The properties on the interface are defined with getters only, because message contents are *immutable*. The interface extends the CorrelatedBy interface, specifying that a Guid should be used for message correlation. Correlation allows the message to be tracked from the message produder to the message consumer.
 
 
-Adding the Consumer Class
+Adding the consumer class
 -------------------------
 
 A consumer in MassTransit is a class that implements one or more **Consumes** interfaces. To create the consumer, add a new class to the project called *SubmitOrderConsumer* as shown.
@@ -70,7 +70,7 @@ A consumer in MassTransit is a class that implements one or more **Consumes** in
 The Consume method is defined by the Consumes<SubmitOrder>.Context interface, and is used by MassTransit to identify the message type for the consumer. At this point, the consumer has no behavior, but has enough code to continue the exercise.
 
 
-Creating a Service Bus Instance
+Creating a service bus instance
 -------------------------------
 
 With the consumer class created above, you are now ready to subscribe that consumer to an instance of a MassTransit service bus. However, you must first create a service to host the service bus.
@@ -104,7 +104,7 @@ Create a new class in the same project called *OrderService* as shown below.
 In the class above, two methods have been added, *Start* and *Stop*. In the Start method, the *ServiceBusFactory* is used to configure an instance of the service bus, which includes specifying the input queue for the bus instance. The Stop method disposes of the bus instance, which is necessary to ensure that all pending subscriber threads have completed.
 
 
-Testing the Service Bus Instance
+Testing the service bus instance
 --------------------------------
 
 At this point, there is a lot of code written and no unit tests. To fix that, create another project in the solution called LearningMT.OrderConsumerTests. Once created, use the NuGet Package Manager to add NUnit to the project, and also add a reference to your LearningMT.OrderConsumer project. References to MassTransit and MassTransit.RabbitMQ will also need to be added using the NuGet package manager as you did above for the OrderConsumer project.
@@ -148,7 +148,5 @@ After creating the tests project, create a new unit test to verify the OrderServ
         {
         }
     }
-   
+
 The test fixture setup and teardown code manage the creation, starting, and stopping of the service. The unit test itself is empty since this test is only verifying that the bus can be created.
-
-

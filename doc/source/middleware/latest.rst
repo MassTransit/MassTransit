@@ -1,4 +1,4 @@
-Using the Latest Filter
+Using the latest filter
 =======================
 
 The latest filter is pretty simple, it keeps track of the latest message received by the pipeline and makes that
@@ -7,7 +7,7 @@ value available. It seems pretty simple, and it is, but it is actually useful in
 .. note::
 
     This filter is actually usable to capture any context type on any pipe, so you know.
-    
+
 
 To add a latest to a receive endpoint:
 
@@ -30,4 +30,3 @@ To add a latest to a receive endpoint:
                 x.UseLatest(x => x.Created = filter => tempFilter = filter);
             })
         });
-

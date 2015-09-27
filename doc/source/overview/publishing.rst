@@ -5,7 +5,7 @@ What actually happens when you call ``bus.Publish(yourMessage)``? The process
 itself is pretty simple, but it does depend on your transport. The first thing
 to know is that MassTransit has something called an 'Outbound Pipeline'. Messages
 enter into the outbound pipeline to be sent to the actual transport. Once they
-hit the transport, the messages leave your .Net process and enter the process
+hit the transport, the messages leave your .NET process and enter the process
 of the transport infrastructure.
 
 .. note::

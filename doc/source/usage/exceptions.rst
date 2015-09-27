@@ -1,4 +1,4 @@
-Handling Exceptions
+Handling exceptions
 ===================
 
 Let's face it, bad things happen. Networks partition, data servers crash, remote endpoints get busy and fail
@@ -8,11 +8,11 @@ Okay, maybe that's a bit dramatic, but the point is, exceptions are a fact of so
 Fortunately, MassTransit provides a number of features to help your application recover from and deal with
 exceptions. But before getting into that, an understanding of what happens when a message is consumed is needed.
 
-Take, for example, a consumer that simply throws an exception. 
+Take, for example, a consumer that simply throws an exception.
 
 .. sourcecode:: csharp
 
-    public class UpdateCustomerAddressConsumer : 
+    public class UpdateCustomerAddressConsumer :
         IConsumer<UpdateCustomerAddress>
     {
         public Task Consume(ConsumeContext<UpdateCustomerAddress> context)
@@ -22,17 +22,17 @@ Take, for example, a consumer that simply throws an exception.
     }
 
 When a message is delivered to the consumer, the consumer throws an exception. With a default bus configuration,
-the exception is caught by middleware in the transport (the ``MoveExceptionToTransportFilter`` to be exact), and 
-the message is moved to an *_error* queue (prefixed by the receive endpoint queue name). The exception details are 
+the exception is caught by middleware in the transport (the ``MoveExceptionToTransportFilter`` to be exact), and
+the message is moved to an *_error* queue (prefixed by the receive endpoint queue name). The exception details are
 stored as headers with the message, for analysis and to assist in troubleshooting the exception.
 
-In addition to moving the message to an error queue, MassTransit also generates a ``Fault<T>`` event. If the received 
+In addition to moving the message to an error queue, MassTransit also generates a ``Fault<T>`` event. If the received
 message specified a ``FaultAddress`` header, the fault is sent to that address. If a fault address is not found, and
 a ``ResponseAddress`` is present, the fault is sent to the response address. If neither address is present, the fault
 is published.
 
 
-Retrying Messages
+Retrying messages
 -----------------
 
 In some cases, the exception may be a transient condition, such as a database deadlock, a busy web service, or some
@@ -41,7 +41,7 @@ to retry the message delivery to the consumer, allowing the consumer to try the 
 
 .. sourcecode:: csharp
 
-    public class UpdateCustomerAddressConsumer : 
+    public class UpdateCustomerAddressConsumer :
         IConsumer<UpdateCustomerAddress>
     {
         ISessionFactory _sessionFactory;
@@ -92,4 +92,3 @@ There are a variety of retry policies available, which are detailed in the refer
     In this example, the ``UseRetry`` is at the receive endpoint level. Additional retry filters can be
     added at the bus and consumer level, providing flexibility in how different consumers, messages, etc. are
     retried.
-    

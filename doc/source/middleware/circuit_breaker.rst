@@ -1,10 +1,10 @@
-Using the Circuit Breaker
+Using the circuit breaker
 =========================
 
 A circuit breaker is used to protect resources (remote, local, or otherwise) from being overload when
 in a failure state. For example, a remote web site may be unavailable and calling that web site in a
 message consumer takes 30-60 seconds to time out. By continuing to call the failing service, the service
-may be unable to recover. A circuit breaker detects the repeated failures and trips, preventing further 
+may be unable to recover. A circuit breaker detects the repeated failures and trips, preventing further
 calls to the service giving it time to recover. Once the reset interval expires, calls are slowed allowed
 back to the service. If it is still failing, the breaker remains open, and the timeout interval resets.
 Once the service returns to healthy, calls flow normally as the breaker closes.
@@ -47,7 +47,7 @@ TripThreshold
   exceeds 15%, the circuit breaker opens and remains open until the ``ResetInterval`` expires.
 
 ActiveThreshold
-  This is the number of messages that must reach the circuit breaker in a tracking period before the circuit breaker 
+  This is the number of messages that must reach the circuit breaker in a tracking period before the circuit breaker
   can trip. If set to 10, the trip threshold is not evaluated until at least 10 messages have been received.
 
 ResetInterval

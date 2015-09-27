@@ -1,4 +1,4 @@
-Creating Your Own Middleware
+Creating your own middleware
 ============================
 
 Middleware components are configured using extension methods, to make them easy to discover.
@@ -35,7 +35,7 @@ to the other configuration classes in MassTransit.
 
 .. sourcecode:: csharp
 
-    public class ExceptionLoggerSpecification<T> : 
+    public class ExceptionLoggerSpecification<T> :
         IPipeSpecification<T>
         where T : class, PipeContext
     {
@@ -52,7 +52,7 @@ to the other configuration classes in MassTransit.
 
 Finally, the middleware component itself is a filter connected to the pipeline (inline). All filters
 have absolute and complete control of the execution context and flow of the message. Pipelines are
-entirely asynchronous, and expect that asynchronous operations will be performed. 
+entirely asynchronous, and expect that asynchronous operations will be performed.
 
 .. warning::
 
@@ -62,7 +62,7 @@ entirely asynchronous, and expect that asynchronous operations will be performed
 
 .. sourcecode:: csharp
 
-    public class ExceptionLoggerFilter<T> : 
+    public class ExceptionLoggerFilter<T> :
         IFilter<T>
         where T : class, PipeContext
     {
@@ -99,4 +99,3 @@ entirely asynchronous, and expect that asynchronous operations will be performed
             }
         }
     }
-

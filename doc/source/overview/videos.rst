@@ -8,4 +8,4 @@ Presented at the North Dallas .NET User Group in February, 2010 by Chris Patters
 
 http://www.drowningintechnicaldebt.com/ShawnWeisfeld/archive/2010/02/04/event-driven-architecture-by-chris-patterson-north-dallas-.net.aspx
 
-Others I’m sure, I just need to find them and link them here.
+Others I'm sure, I just need to find them and link them here.

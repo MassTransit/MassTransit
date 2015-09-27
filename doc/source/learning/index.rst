@@ -1,4 +1,4 @@
-MassTransit Learning Series
+MassTransit learning series
 ===========================
 
 For many developers, asynchronous messaging is a new pattern. In this series of learning exercises, developers will learn how to create applications using asynchronous messaging with MassTransit.
