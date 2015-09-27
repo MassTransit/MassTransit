@@ -30,13 +30,13 @@ namespace MassTransit
         /// <param name="settings"></param>
         /// <param name="receiveObserver"></param>
         /// <param name="exchangeBindings"></param>
-        public static void RabbitMqConsumer(this IPipeConfigurator<ConnectionContext> configurator, IPipe<ReceiveContext> pipe,
-            ReceiveSettings settings, IReceiveObserver receiveObserver, IEnumerable<ExchangeBindingSettings> exchangeBindings)
+        /// <param name="endpointObserver"></param>
+        public static void RabbitMqConsumer(this IPipeConfigurator<ConnectionContext> configurator, IPipe<ReceiveContext> pipe, ReceiveSettings settings, IReceiveObserver receiveObserver, IReceiveEndpointObserver endpointObserver, IEnumerable<ExchangeBindingSettings> exchangeBindings)
         {
             if (configurator == null)
                 throw new ArgumentNullException(nameof(configurator));
 
-            var pipeBuilderConfigurator = new RabbitMqConsumerPipeSpecification(pipe, settings, receiveObserver, exchangeBindings);
+            var pipeBuilderConfigurator = new RabbitMqConsumerPipeSpecification(pipe, settings, receiveObserver, endpointObserver, exchangeBindings);
 
             configurator.AddPipeSpecification(pipeBuilderConfigurator);
         }

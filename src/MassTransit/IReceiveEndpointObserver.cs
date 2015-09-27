@@ -12,27 +12,26 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
-    using System;
-    using Pipeline;
+    using System.Threading.Tasks;
 
 
     /// <summary>
-    /// A bus is a logical element that includes a local endpoint and zero or more receive endpoints
+    /// Used to observe the events signaled by a receive endpoint
     /// </summary>
-    public interface IBus :
-        IPublishEndpoint,
-        ISendEndpointProvider,
-        IConsumePipeConnector,
-        IRequestPipeConnector,
-        IConsumeMessageObserverConnector,
-        IConsumeObserverConnector,
-        IReceiveObserverConnector,
-        IReceiveEndpointObserverConnector,
-        IProbeSite
+    public interface IReceiveEndpointObserver
     {
         /// <summary>
-        /// The receive address of the bus itself, versus any receive endpoints that were created
+        /// Called when the receive endpoint is ready to receive messages
         /// </summary>
-        Uri Address { get; }
+        /// <param name="ready"></param>
+        /// <returns></returns>
+        Task Ready(ReceiveEndpointReady ready);
+
+        /// <summary>
+        /// Called when the receive endpoint has completed
+        /// </summary>
+        /// <param name="completed"></param>
+        /// <returns></returns>
+        Task Completed(ReceiveEndpointCompleted completed);
     }
 }

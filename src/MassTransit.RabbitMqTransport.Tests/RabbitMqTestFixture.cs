@@ -108,11 +108,15 @@ namespace MassTransit.RabbitMqTransport.Tests
             _busHandle = _bus.Start();
             try
             {
+                Await(() => _busHandle.Ready);
+
                 _busSendEndpoint = Await(() => _bus.GetSendEndpoint(_bus.Address));
                 _busSendEndpoint.ConnectSendObserver(_sendObserver);
 
                 _inputQueueSendEndpoint = Await(() => _bus.GetSendEndpoint(_inputQueueAddress));
                 _inputQueueSendEndpoint.ConnectSendObserver(_sendObserver);
+
+
             }
             catch (Exception)
             {

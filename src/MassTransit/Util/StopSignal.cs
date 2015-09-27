@@ -50,4 +50,15 @@ namespace MassTransit.Util
             _stopToken.Cancel();
         }
     }
+
+
+    public class StartSignal
+    {
+        readonly TaskCompletionSource<bool> _started;
+
+        public StartSignal()
+        {
+            _started = new TaskCompletionSource<bool>();
+        }
+    }
 }

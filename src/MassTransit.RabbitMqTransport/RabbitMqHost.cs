@@ -125,13 +125,7 @@ namespace MassTransit.RabbitMqTransport
             {
                 await _cache.Stop();
 
-                if (_log.IsDebugEnabled)
-                    _log.Debug("Waiting for disconnection...");
-
-                await _connectionTask;
-
-                if (_log.IsDebugEnabled)
-                    _log.Debug("Disconnectionn complete.");
+                await _connectionTask.ConfigureAwait(false);
             }
         }
     }

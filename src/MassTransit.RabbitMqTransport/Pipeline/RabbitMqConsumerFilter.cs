@@ -25,13 +25,15 @@ namespace MassTransit.RabbitMqTransport.Pipeline
         IFilter<ModelContext>
     {
         static readonly ILog _log = Logger.Get<RabbitMqConsumerFilter>();
+        readonly IReceiveEndpointObserver _endpointObserver;
         readonly IReceiveObserver _receiveObserver;
         readonly IPipe<ReceiveContext> _receivePipe;
 
-        public RabbitMqConsumerFilter(IPipe<ReceiveContext> receivePipe, IReceiveObserver receiveObserver)
+        public RabbitMqConsumerFilter(IPipe<ReceiveContext> receivePipe, IReceiveObserver receiveObserver, IReceiveEndpointObserver endpointObserver)
         {
             _receivePipe = receivePipe;
             _receiveObserver = receiveObserver;
+            _endpointObserver = endpointObserver;
         }
 
         void IProbeSite.Probe(ProbeContext context)
@@ -48,7 +50,11 @@ namespace MassTransit.RabbitMqTransport.Pipeline
             {
                 await context.BasicConsume(receiveSettings.QueueName, false, consumer);
 
+                await _endpointObserver.Ready(new Ready(inputAddress));
+
                 RabbitMqConsumerMetrics metrics = await consumer.CompleteTask;
+
+                await _endpointObserver.Completed(new Completed(inputAddress, metrics));
 
                 if (_log.IsDebugEnabled)
                 {
@@ -56,6 +62,34 @@ namespace MassTransit.RabbitMqTransport.Pipeline
                         metrics.ConcurrentDeliveryCount);
                 }
             }
+        }
+
+
+        class Ready :
+            ReceiveEndpointReady
+        {
+            public Ready(Uri inputAddress)
+            {
+                InputAddress = inputAddress;
+            }
+
+            public Uri InputAddress { get; }
+        }
+
+
+        class Completed :
+            ReceiveEndpointCompleted
+        {
+            public Completed(Uri inputAddress, RabbitMqConsumerMetrics metrics)
+            {
+                InputAddress = inputAddress;
+                DeliveryCount = metrics.DeliveryCount;
+                ConcurrentDeliveryCount = metrics.ConcurrentDeliveryCount;
+            }
+
+            public Uri InputAddress { get; }
+            public long DeliveryCount { get; }
+            public long ConcurrentDeliveryCount { get; }
         }
     }
 }

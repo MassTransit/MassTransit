@@ -56,6 +56,11 @@ namespace MassTransit.Transports
             _receivePipe.Probe(scope);
         }
 
+        ConnectHandle IReceiveEndpointObserverConnector.ConnectReceiveEndpointObserver(IReceiveEndpointObserver observer)
+        {
+            return _receiveTransport.ConnectReceiveEndpointObserver(observer);
+        }
+
 
         class Handle :
             ReceiveEndpointHandle

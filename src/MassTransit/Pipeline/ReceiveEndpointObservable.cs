@@ -10,21 +10,24 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Transports
+namespace MassTransit.Pipeline
 {
-    using Pipeline;
+    using System.Threading.Tasks;
+    using Util;
 
 
-    public interface IReceiveTransport :
-        IReceiveObserverConnector,
-        IReceiveEndpointObserverConnector,
-        IProbeSite
+    public class ReceiveEndpointObservable :
+        Connectable<IReceiveEndpointObserver>,
+        IReceiveEndpointObserver
     {
-        /// <summary>
-        /// Start receiving on a transport, sending messages to the specified pipe.
-        /// </summary>
-        /// <param name="receivePipe">The receiving pipe</param>
-        /// <returns></returns>
-        ReceiveTransportHandle Start(IPipe<ReceiveContext> receivePipe);
+        public Task Ready(ReceiveEndpointReady ready)
+        {
+            return ForEachAsync(x => x.Ready(ready));
+        }
+
+        public Task Completed(ReceiveEndpointCompleted completed)
+        {
+            return ForEachAsync(x => x.Completed(completed));
+        }
     }
 }

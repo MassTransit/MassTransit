@@ -12,21 +12,14 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
-    using Transports;
+    using System;
 
 
-    /// <summary>
-    /// A service endpoint has a inbound transport that pushes messages to consumers
-    /// </summary>
-    public interface IReceiveEndpoint :
-        IReceiveObserverConnector,
-        IReceiveEndpointObserverConnector,
-        IProbeSite
+    public interface ReceiveEndpointEvent
     {
         /// <summary>
-        /// Starts recieving from the inbound transport.
+        /// The input address of the receive endpoint
         /// </summary>
-        /// <returns>A handle to the receiving endpoint, which is used to stop it</returns>
-        ReceiveEndpointHandle Start();
+        Uri InputAddress { get; }
     }
 }

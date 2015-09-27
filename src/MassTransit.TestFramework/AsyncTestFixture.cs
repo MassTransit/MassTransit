@@ -135,7 +135,7 @@ namespace MassTransit.TestFramework
         /// <param name="taskFactory"></param>
         protected T Await<T>(Func<Task<T>> taskFactory)
         {
-            return TaskUtil.Await(taskFactory, CancellationToken.None);
+            return TaskUtil.Await(taskFactory, TestCancellationToken);
         }
 
         /// <summary>
