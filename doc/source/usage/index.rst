@@ -11,5 +11,7 @@ provided below.
     locations.rst
     request_response.rst
     exceptions.rst
+    observers.rst
+    busevents.rst
     retry.rst
     transactions.rst
