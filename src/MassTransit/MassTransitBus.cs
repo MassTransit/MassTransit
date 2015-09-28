@@ -230,7 +230,7 @@ namespace MassTransit
 
             _busHandle = new Handle(hosts, endpoints, observers, this, _busObservable, busReady);
 
-            TaskUtil.Await(() => _busObservable.PostStart(this));
+            TaskUtil.Await(() => _busObservable.PostStart(this, busReady.Ready));
 
             return _busHandle;
         }

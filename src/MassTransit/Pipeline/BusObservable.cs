@@ -26,9 +26,9 @@ namespace MassTransit.Pipeline
             return ForEachAsync(x => x.PostCreate(bus));
         }
 
-        public Task CreateFaulted(IBus bus, Exception exception)
+        public Task CreateFaulted(Exception exception)
         {
-            return ForEachAsync(x => x.CreateFaulted(bus, exception));
+            return ForEachAsync(x => x.CreateFaulted(exception));
         }
 
         public Task PreStart(IBus bus)
@@ -36,9 +36,9 @@ namespace MassTransit.Pipeline
             return ForEachAsync(x => x.PreStart(bus));
         }
 
-        public Task PostStart(IBus bus)
+        public Task PostStart(IBus bus, Task busReady)
         {
-            return ForEachAsync(x => x.PostStart(bus));
+            return ForEachAsync(x => x.PostStart(bus, busReady));
         }
 
         public Task StartFaulted(IBus bus, Exception exception)

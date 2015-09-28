@@ -20,6 +20,7 @@ namespace MassTransit.RabbitMqTransport.Configuration.Builders
     using MassTransit.Pipeline;
     using Topology;
     using Transports;
+    using Util;
 
 
     public class RabbitMqBusBuilder :
@@ -42,9 +43,18 @@ namespace MassTransit.RabbitMqTransport.Configuration.Builders
 
         public IBusControl Build()
         {
-            _busEndpointConfigurator.Apply(this);
+            try
+            {
+                _busEndpointConfigurator.Apply(this);
 
-            return new MassTransitBus(_busEndpointConfigurator.InputAddress, _busConsumePipe, SendEndpointProvider, PublishEndpoint, ReceiveEndpoints, _hosts, BusObservable);
+                return new MassTransitBus(_busEndpointConfigurator.InputAddress, _busConsumePipe, SendEndpointProvider, PublishEndpoint, ReceiveEndpoints, _hosts, BusObservable);
+            }
+            catch (Exception exception)
+            {
+                TaskUtil.Await(() => BusObservable.CreateFaulted(exception));
+
+                throw;
+            }
         }
 
         protected override Uri GetInputAddress()

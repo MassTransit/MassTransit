@@ -72,7 +72,7 @@ namespace MassTransit.RabbitMqTransport
                             .ToDictionary(entry => entry.Key, entry => entry.Value);
                         properties.Headers["Content-Type"] = context.ContentType.MediaType;
 
-                        properties.SetPersistent(context.Durable);
+                        properties.Persistent = context.Durable;
 
                         if (context.MessageId.HasValue)
                             properties.MessageId = context.MessageId.ToString();
