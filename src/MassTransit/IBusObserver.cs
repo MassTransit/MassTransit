@@ -34,7 +34,7 @@ namespace MassTransit
         /// <param name="bus"></param>
         /// <param name="exception"></param>
         /// <returns></returns>
-        Task CreateFaulted(IBus bus, Exception exception);
+        Task CreateFaulted(Exception exception);
 
         /// <summary>
         /// Called when the bus is being started, before the actual Start commences.
@@ -47,8 +47,9 @@ namespace MassTransit
         /// Called once the bus has started and is running
         /// </summary>
         /// <param name="bus"></param>
+        /// <param name="busReady">A task which is completed once the bus is ready and all receive endpoints are ready.</param>
         /// <returns></returns>
-        Task PostStart(IBus bus);
+        Task PostStart(IBus bus, Task busReady);
 
         /// <summary>
         /// Called when the bus fails to start

@@ -38,7 +38,7 @@ namespace MassTransit.QuartzIntegration.Configuration
             return TaskUtil.Completed;
         }
 
-        public Task CreateFaulted(IBus bus, Exception exception)
+        public Task CreateFaulted(Exception exception)
         {
             return TaskUtil.Completed;
         }
@@ -48,18 +48,18 @@ namespace MassTransit.QuartzIntegration.Configuration
             return TaskUtil.Completed;
         }
 
-        public Task PostStart(IBus bus)
+        public async Task PostStart(IBus bus, Task busReady)
         {
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Quartz Scheduler Starting: {0} ({1}/{2})", bus.Address, _scheduler.SchedulerName, _scheduler.SchedulerInstanceId);
+
+            await busReady;
 
             _scheduler.JobFactory = new MassTransitJobFactory(bus);
             _scheduler.Start();
 
             if (_log.IsInfoEnabled)
                 _log.InfoFormat("Quartz Scheduler Started: {0} ({1}/{2})", bus.Address, _scheduler.SchedulerName, _scheduler.SchedulerInstanceId);
-
-            return TaskUtil.Completed;
         }
 
         public Task StartFaulted(IBus bus, Exception exception)
