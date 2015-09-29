@@ -13,5 +13,6 @@ provided below.
     exceptions.rst
     observers.rst
     busevents.rst
+    saga.rst
     retry.rst
     transactions.rst
