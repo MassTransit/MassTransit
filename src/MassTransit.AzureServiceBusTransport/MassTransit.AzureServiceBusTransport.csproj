@@ -68,6 +68,7 @@
     <Compile Include="ServiceBusAddressExtensions.cs" />
     <Compile Include="ServiceBusPublishEndpoint.cs" />
     <Compile Include="ServiceBusSendContext.cs" />
+    <Compile Include="ServiceBusSendContextExtensions.cs" />
     <Compile Include="ServiceBusSendEndpointProvider.cs" />
     <Compile Include="ServiceBusSendTransport.cs" />
     <Compile Include="BrokeredMessageContext.cs" />
@@ -83,7 +84,6 @@
     <Compile Include="Configuration\SharedAccessSignatureTokenProviderConfigurator.cs" />
     <Compile Include="Configuration\TopicSubscriptionSettings.cs" />
     <Compile Include="Contexts\ServiceBusReceiveContext.cs" />
-    <Compile Include="Contexts\ServiceBusSendHeaders.cs" />
     <Compile Include="Contexts\ServiceBusSendContextImpl.cs" />
     <Compile Include="Contexts\ConnectionContext.cs" />
     <Compile Include="Contexts\ServiceBusConnectionContext.cs" />

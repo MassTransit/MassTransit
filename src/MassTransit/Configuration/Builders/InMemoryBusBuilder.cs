@@ -20,6 +20,7 @@ namespace MassTransit.Builders
     using Pipeline;
     using Transports;
     using Transports.InMemory;
+    using Util;
 
 
     public class InMemoryBusBuilder :
@@ -75,9 +76,18 @@ namespace MassTransit.Builders
 
         public IBusControl Build()
         {
-            IConsumePipe busConsumePipe = CreateBusReceiveEndpoint();
+            try
+            {
+                IConsumePipe busConsumePipe = CreateBusReceiveEndpoint();
 
-            return new MassTransitBus(_inputAddress, busConsumePipe, SendEndpointProvider, PublishEndpoint, ReceiveEndpoints, _hosts, BusObservable);
+                return new MassTransitBus(_inputAddress, busConsumePipe, SendEndpointProvider, PublishEndpoint, ReceiveEndpoints, _hosts, BusObservable);
+            }
+            catch (Exception exception)
+            {
+                TaskUtil.Await(() => BusObservable.CreateFaulted(exception));
+
+                throw;
+            }
         }
 
         IConsumePipe CreateBusReceiveEndpoint()

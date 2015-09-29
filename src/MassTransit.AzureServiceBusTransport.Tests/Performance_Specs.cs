@@ -17,6 +17,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
+    using Configuration;
     using NUnit.Framework;
     using TestFramework.Messages;
 
@@ -38,9 +39,18 @@ namespace MassTransit.AzureServiceBusTransport.Tests
             _requestClient = new MessageRequestClient<PingMessage, PongMessage>(Bus, InputQueueAddress, TestTimeout);
         }
 
+        protected override void ConfigureBus(IServiceBusBusFactoryConfigurator configurator)
+        {
+            base.ConfigureBus(configurator);
+
+            configurator.MaxConcurrentCalls = 16;
+            configurator.PrefetchCount = 64;
+        }
+
         protected override void ConfigureInputQueueEndpoint(IServiceBusReceiveEndpointConfigurator configurator)
         {
             configurator.PrefetchCount = 64;
+            configurator.MaxConcurrentCalls = 16;
 
             configurator.Handler<PingMessage>(async context =>
             {
@@ -57,9 +67,9 @@ namespace MassTransit.AzureServiceBusTransport.Tests
         }
 
         [Test]
-        public async void Should_be_wicked_fast()
+        public async Task Should_be_wicked_fast()
         {
-            int limit = 1000;
+            int limit = 2000;
             int count = 0;
 
             await _requestClient.Request(new PingMessage());

@@ -124,15 +124,27 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
         protected override Uri GetErrorAddress()
         {
             string errorQueueName = _settings.QueueDescription.Path + "_error";
-            var errorQueueDescription = new QueueDescription(errorQueueName);
+
+            var errorQueueDescription = GetQueueDescription(errorQueueName);
 
             return _host.Settings.GetInputAddress(errorQueueDescription);
         }
 
+        QueueDescription GetQueueDescription(string errorQueueName)
+        {
+            return new QueueDescription(errorQueueName)
+            {
+                AutoDeleteOnIdle = _settings.QueueDescription.AutoDeleteOnIdle,
+                EnableExpress = _settings.QueueDescription.EnableExpress,
+                DefaultMessageTimeToLive = _settings.QueueDescription.DefaultMessageTimeToLive
+            };
+        }
+
         protected override Uri GetDeadLetterAddress()
         {
-            string errorQueueName = _settings.QueueDescription.Path + "_skipped";
-            var errorQueueDescription = new QueueDescription(errorQueueName);
+            string skippedQueueName = _settings.QueueDescription.Path + "_skipped";
+
+            var errorQueueDescription = GetQueueDescription(skippedQueueName);
 
             return _host.Settings.GetInputAddress(errorQueueDescription);
         }

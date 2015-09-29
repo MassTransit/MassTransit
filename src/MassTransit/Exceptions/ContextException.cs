@@ -10,25 +10,33 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.AzureServiceBusTransport.Contexts
+namespace MassTransit
 {
     using System;
-    using System.Threading;
-    using Context;
+    using System.Runtime.Serialization;
 
 
-    public class ServiceBusSendContextImpl<T> :
-        BaseSendContext<T>,
-        ServiceBusSendContext<T>
-        where T : class
+    [Serializable]
+    public class ContextException :
+        Exception
     {
-        public ServiceBusSendContextImpl(T message, CancellationToken cancellationToken)
-            : base(message, cancellationToken)
+        public ContextException()
         {
         }
 
-        public DateTime? ScheduledEnqueueTimeUtc { get; set; }
+        public ContextException(string message)
+            : base(message)
+        {
+        }
 
-        public string PartitionKey { get; set; }
+        public ContextException(string message, Exception innerException)
+            : base(message, innerException)
+        {
+        }
+
+        protected ContextException(SerializationInfo info, StreamingContext context)
+            : base(info, context)
+        {
+        }
     }
 }

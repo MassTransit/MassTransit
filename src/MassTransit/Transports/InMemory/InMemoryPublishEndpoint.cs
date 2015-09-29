@@ -42,7 +42,7 @@ namespace MassTransit.Transports.InMemory
             ISendEndpoint[] result = await Task.WhenAll(_transportCache.TransportAddresses.Select(x => _sendEndpointProvider.GetSendEndpoint(x)))
                 .ConfigureAwait(false);
 
-            return new FanOutSendEndpoint(result);
+            return new FanoutSendEndpoint(result);
         }
 
         public ConnectHandle ConnectPublishObserver(IPublishObserver observer)

@@ -14,6 +14,7 @@ namespace MassTransit.Tests
 {
     using System.Threading.Tasks;
     using NUnit.Framework;
+    using Shouldly;
     using TestFramework;
     using TestFramework.Messages;
 
@@ -70,10 +71,14 @@ namespace MassTransit.Tests
         {
             Task<ConsumeContext<MessageA>> handler = SubscribeHandler<MessageA>(x => x.RequestId.HasValue);
 
-            var message = new MessageA();
-            await BusSendEndpoint.Send(message, Pipe.New<SendContext>(x => x.UseExecute(c => c.RequestId = NewId.NextGuid())));
+            var requestId = NewId.NextGuid();
 
-            await handler;
+            var message = new MessageA();
+            await BusSendEndpoint.Send(message, c => c.RequestId = requestId);
+
+            var consumeContext = await handler;
+
+            consumeContext.RequestId.ShouldBe(requestId);
         }
 
         [Test]
@@ -81,10 +86,29 @@ namespace MassTransit.Tests
         {
             Task<ConsumeContext<MessageA>> handler = SubscribeHandler<MessageA>();
 
-            object message = new MessageA();
-            await BusSendEndpoint.Send(message, typeof(MessageA));
+            var requestId = NewId.NextGuid();
 
-            await handler;
+            object message = new MessageA();
+            await BusSendEndpoint.Send(message, typeof(MessageA), c => c.RequestId = requestId);
+
+            var consumeContext = await handler;
+
+            consumeContext.RequestId.ShouldBe(requestId);
+        }
+
+        [Test]
+        public async Task Should_receive_the_proper_message_without_type()
+        {
+            Task<ConsumeContext<MessageA>> handler = SubscribeHandler<MessageA>();
+
+            var requestId = NewId.NextGuid();
+
+            object message = new MessageA();
+            await BusSendEndpoint.Send(message, (SendContext context) => context.RequestId = requestId);
+
+            var consumeContext = await handler;
+
+            consumeContext.RequestId.ShouldBe(requestId);
         }
     }
 }

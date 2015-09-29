@@ -21,7 +21,6 @@ namespace MassTransit.AzureServiceBusTransport
     using MassTransit.Pipeline;
     using Microsoft.ServiceBus.Messaging;
     using Transports;
-    using Util;
 
 
     /// <summary>
@@ -67,6 +66,12 @@ namespace MassTransit.AzureServiceBusTransport
 
                         if (context.CorrelationId.HasValue)
                             brokeredMessage.CorrelationId = context.CorrelationId.Value.ToString("N");
+
+                        if (context.ScheduledEnqueueTimeUtc.HasValue)
+                            brokeredMessage.ScheduledEnqueueTimeUtc = context.ScheduledEnqueueTimeUtc.Value;
+
+                        if (context.PartitionKey != null)
+                            brokeredMessage.PartitionKey = context.PartitionKey;
 
                         await _observers.PreSend(context);
 

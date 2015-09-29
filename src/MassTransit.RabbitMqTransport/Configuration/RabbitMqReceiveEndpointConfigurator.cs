@@ -137,8 +137,8 @@ namespace MassTransit.RabbitMqTransport.Configuration
         protected override Uri GetErrorAddress()
         {
             string errorQueueName = _settings.QueueName + "_error";
-            var sendSettings = new RabbitMqSendSettings(errorQueueName, RabbitMQ.Client.ExchangeType.Fanout, true,
-                false);
+            var sendSettings = new RabbitMqSendSettings(errorQueueName, RabbitMQ.Client.ExchangeType.Fanout, _settings.Durable,
+                _settings.AutoDelete);
 
             sendSettings.BindToQueue(errorQueueName);
 
@@ -148,8 +148,8 @@ namespace MassTransit.RabbitMqTransport.Configuration
         protected override Uri GetDeadLetterAddress()
         {
             string errorQueueName = _settings.QueueName + "_skipped";
-            var sendSettings = new RabbitMqSendSettings(errorQueueName, RabbitMQ.Client.ExchangeType.Fanout, true,
-                false);
+            var sendSettings = new RabbitMqSendSettings(errorQueueName, RabbitMQ.Client.ExchangeType.Fanout, _settings.Durable,
+                _settings.AutoDelete);
 
             sendSettings.BindToQueue(errorQueueName);
 

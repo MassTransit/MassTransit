@@ -15,6 +15,7 @@ namespace MassTransit.Pipeline.Filters
     using System;
     using System.Threading.Tasks;
     using Transports;
+    using Util;
 
 
     /// <summary>
@@ -44,12 +45,12 @@ namespace MassTransit.Pipeline.Filters
 
             IPipe<SendContext> pipe = Pipe.Execute<SendContext>(sendContext =>
             {
-                sendContext.Headers.Set("MT-Reason", "fault");
+                sendContext.Headers.Set(MessageHeaders.Reason, "fault");
 
                 Exception exception = context.Exception.GetBaseException();
 
-                sendContext.Headers.Set("MT-Fault-Message", exception.Message);
-                sendContext.Headers.Set("MT-Fault-StackTrace", exception.StackTrace);
+                sendContext.Headers.Set(MessageHeaders.FaultMessage, exception.Message);
+                sendContext.Headers.Set(MessageHeaders.FaultStackTrace, ExceptionUtil.GetStackTrace(exception));
 
                 sendContext.SetHostHeaders();
             });

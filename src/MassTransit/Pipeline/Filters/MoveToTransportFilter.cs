@@ -46,7 +46,7 @@ namespace MassTransit.Pipeline.Filters
 
             IPipe<SendContext> pipe = Pipe.Execute<SendContext>(sendContext =>
             {
-                sendContext.Headers.Set("MT-Reason", _reason);
+                sendContext.Headers.Set(MessageHeaders.Reason, _reason);
 
                 sendContext.SetHostHeaders();
             });

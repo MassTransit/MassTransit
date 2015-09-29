@@ -18,6 +18,21 @@ namespace MassTransit
     public static class MessageHeaders
     {
         /// <summary>
+        /// The reason for a message action being taken 
+        /// </summary>
+        public const string Reason = "MT-Reason";
+
+        /// <summary>
+        /// The exception message from a Fault
+        /// </summary>
+        public const string FaultMessage = "MT-Fault-Message";
+
+        /// <summary>
+        /// The stack trace from a Fault
+        /// </summary>
+        public const string FaultStackTrace = "MT-Fault-StackTrace";
+
+        /// <summary>
         /// The endpoint that forwarded the message to the new destination
         /// </summary>
         public const string ForwarderAddress = "MT-Forwarder-Address";
@@ -32,16 +47,19 @@ namespace MassTransit
         /// </summary>
         public const string SchedulingTokenId = "MT-Scheduling-TokenId";
 
-
         /// <summary>
         /// The number of times the message has been redelivered (zero if never)
         /// </summary>
         public const string RedeliveryCount = "MT-Redelivery-Count";
 
+        /// <summary>
+        /// The trigger key that was used when the scheduled message was trigger
+        /// </summary>
+        public const string QuartzTriggerKey = "MT-Quartz-TriggerKey";
 
         public static Guid? GetSchedulingTokenId(this ConsumeContext context)
         {
-            return context.Headers.Get<Guid>(SchedulingTokenId, default(Guid?));
+            return context.Headers.Get(SchedulingTokenId, default(Guid?));
         }
     }
 }

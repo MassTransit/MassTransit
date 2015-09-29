@@ -14,6 +14,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
 {
     using System;
     using System.Diagnostics;
+    using System.Threading.Tasks;
     using Configuration;
     using Microsoft.ServiceBus;
     using NUnit.Framework;
@@ -93,9 +94,13 @@ namespace MassTransit.AzureServiceBusTransport.Tests
         {
             _bus = CreateBus();
 
+            _bus.ConnectReceiveEndpointObserver(new ReceiveEndpointObserver());
+
             _busHandle = _bus.Start();
             try
             {
+                Await(() => _busHandle.Ready);
+
                 _busSendEndpoint = _bus.GetSendEndpoint(_bus.Address).Result;
                 _busSendEndpoint.ConnectSendObserver(_sendObserver);
 
@@ -160,6 +165,21 @@ namespace MassTransit.AzureServiceBusTransport.Tests
                     ConfigureInputQueueEndpoint(e);
                 });
             });
+        }
+
+
+        class ReceiveEndpointObserver :
+            IReceiveEndpointObserver
+        {
+            public Task Ready(ReceiveEndpointReady ready)
+            {
+                return Console.Out.WriteLineAsync($"Endpoint Ready: {ready.InputAddress}");
+            }
+
+            public Task Completed(ReceiveEndpointCompleted completed)
+            {
+                return Console.Out.WriteLineAsync($"Endpoint Complete: {completed.DeliveryCount}/{completed.ConcurrentDeliveryCount} - {completed.InputAddress}");
+            }
         }
     }
 }

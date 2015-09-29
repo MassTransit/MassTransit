@@ -20,6 +20,7 @@ namespace MassTransit.Tests
     using Shouldly;
     using TestFramework;
     using TestFramework.Messages;
+    using Util;
 
 
     [TestFixture]
@@ -31,11 +32,11 @@ namespace MassTransit.Tests
         {
             Task<ConsumeContext<Fault<PingMessage>>> fault = SubscribeHandler<Fault<PingMessage>>();
 
-            await InputQueueSendEndpoint.Send(new PingMessage(), Pipe.Execute<SendContext<PingMessage>>(x =>
+            await InputQueueSendEndpoint.Send(new PingMessage(), context =>
             {
-                x.ResponseAddress = BusAddress;
-                x.FaultAddress = BusAddress;
-            }));
+                context.ResponseAddress = BusAddress;
+                context.FaultAddress = BusAddress;
+            });
             await fault;
 
             _attempts.ShouldBe(1);
@@ -73,11 +74,13 @@ namespace MassTransit.Tests
         {
             Task<ConsumeContext<Fault<PingMessage>>> fault = SubscribeHandler<Fault<PingMessage>>();
 
-            await InputQueueSendEndpoint.Send(new PingMessage(), Pipe.Execute<SendContext<PingMessage>>(x =>
+            await InputQueueSendEndpoint.Send(new PingMessage(), context =>
             {
-                x.ResponseAddress = BusAddress;
-                x.FaultAddress = BusAddress;
-            }));
+                context.ResponseAddress = BusAddress;
+                context.FaultAddress = BusAddress;
+
+                return TaskUtil.Completed;
+            });
             await fault;
 
             _attempts.ShouldBe(1);
@@ -113,11 +116,11 @@ namespace MassTransit.Tests
         {
             Task<ConsumeContext<Fault<PingMessage>>> fault = SubscribeHandler<Fault<PingMessage>>();
 
-            await InputQueueSendEndpoint.Send(new PingMessage(), Pipe.Execute<SendContext<PingMessage>>(x =>
+            await InputQueueSendEndpoint.Send(new PingMessage(), context =>
             {
-                x.ResponseAddress = BusAddress;
-                x.FaultAddress = BusAddress;
-            }));
+                context.ResponseAddress = BusAddress;
+                context.FaultAddress = BusAddress;
+            });
 
             await fault;
 

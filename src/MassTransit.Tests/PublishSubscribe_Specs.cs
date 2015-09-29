@@ -124,12 +124,11 @@ namespace MassTransit.Tests
         public async Task Should_be_received_properly()
         {
             object message = new PingMessage();
-            await Bus.Publish(message, Pipe.New<PublishContext>(x => x.UseExecute(v => v.RequestId = _requestId)));
+            await Bus.Publish(message, (PublishContext context) => context.RequestId = _requestId);
 
-            ConsumeContext<PingMessage> context = await _received;
+            ConsumeContext<PingMessage> consumeContext = await _received;
 
-            context.RequestId.HasValue.ShouldBe(true);
-            context.RequestId.Value.ShouldBe(_requestId);
+            consumeContext.RequestId.ShouldBe(_requestId);
         }
 
         Task<ConsumeContext<PingMessage>> _received;
@@ -170,12 +169,12 @@ namespace MassTransit.Tests
         [Test]
         public async Task Should_be_received_properly()
         {
-            await Bus.Publish<PingMessage>(new {}, Pipe.New<PublishContext>(x => x.UseExecute(v => v.RequestId = _requestId)));
+            await Bus.Publish<PingMessage>(new {}, v => v.RequestId = _requestId);
 
             ConsumeContext<PingMessage> context = await _received;
 
             context.RequestId.HasValue.ShouldBe(true);
-            context.RequestId.Value.ShouldBe(_requestId);
+            context.RequestId.ShouldBe(_requestId);
         }
 
         Task<ConsumeContext<PingMessage>> _received;

@@ -16,8 +16,7 @@ namespace MassTransit.Transports
         IBusHost
     {
         /// <summary>
-        /// Starts the Host, initiating the connection.
-        /// TODO maybe this should be Task&lt;HostHandle&gt; after all 
+        /// Starts the Host, which begins the connection asynchronously.
         /// </summary>
         /// <returns></returns>
         HostHandle Start();

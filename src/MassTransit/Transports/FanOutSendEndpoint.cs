@@ -25,12 +25,12 @@ namespace MassTransit.Transports
     /// Combines multiple send endpoints into a single send endpoint. Useful when publishing
     /// requires sending to multiple endpoints.
     /// </summary>
-    public class FanOutSendEndpoint :
+    public class FanoutSendEndpoint :
         ISendEndpoint
     {
         readonly ISendEndpoint[] _endpoints;
 
-        public FanOutSendEndpoint(ISendEndpoint[] endpoints)
+        public FanoutSendEndpoint(ISendEndpoint[] endpoints)
         {
             _endpoints = endpoints;
         }

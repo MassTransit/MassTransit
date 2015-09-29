@@ -119,9 +119,12 @@
     <Compile Include="Configuration\PipeConfigurators\ScheduleMessageRedeliveryPipeSpecification.cs" />
     <Compile Include="Configuration\ScheduledRetryExtensions.cs" />
     <Compile Include="Configuration\TransformConfiguratorExtensions.cs" />
+    <Compile Include="Context\BaseReceiveContext.cs" />
+    <Compile Include="Context\BaseSendContext.cs" />
     <Compile Include="Context\ConsumeContextProxyScope.cs" />
     <Compile Include="Context\CorrelatedBySetCorrelationId.cs" />
     <Compile Include="Context\CorrelationIdConsumeContextProxy.cs" />
+    <Compile Include="Context\DictionarySendHeaders.cs" />
     <Compile Include="Context\IMessageCorrelationCache.cs" />
     <Compile Include="Context\ISetCorrelationId.cs" />
     <Compile Include="Context\MessageConsumeContext.cs" />
@@ -131,10 +134,11 @@
     <Compile Include="Context\PropertySetCorrelationId.cs" />
     <Compile Include="Context\ReceiveContextProxy.cs" />
     <Compile Include="Context\RescueExceptionConsumeContext.cs" />
-    <Compile Include="Context\ExceptionConsumeContext.cs" />
+    <Compile Include="Context\RescueExceptionReceiveContext.cs" />
     <Compile Include="Courier\Exceptions\RoutingSlipArgumentException.cs" />
     <Compile Include="ExceptionConsumeContext.cs" />
     <Compile Include="ExceptionReceiveContext.cs" />
+    <Compile Include="Exceptions\ContextException.cs" />
     <Compile Include="Exceptions\MessageDataException.cs" />
     <Compile Include="Exceptions\MessageDataNotFoundException.cs" />
     <Compile Include="Hosting\ConfigurationProviderExtensions.cs" />
@@ -564,6 +568,7 @@
     <Compile Include="ProbeContextExtensions.cs" />
     <Compile Include="PublishContext.cs" />
     <Compile Include="IPublishConvention.cs" />
+    <Compile Include="PublishContextExecuteExtensions.cs" />
     <Compile Include="ReceiveContext.cs" />
     <Compile Include="ReceiveEndpointCompleted.cs" />
     <Compile Include="ReceiveEndpointEvent.cs" />
@@ -637,6 +642,7 @@
     <Compile Include="Scheduling\ScheduleMessage.cs" />
     <Compile Include="Scheduling\ScheduleRecurringMessage.cs" />
     <Compile Include="SendContext.cs" />
+    <Compile Include="SendContextExecuteExtensions.cs" />
     <Compile Include="SendContextExtensions.cs" />
     <Compile Include="SendEndpointExtensions.cs" />
     <Compile Include="SendHeaders.cs" />
@@ -690,7 +696,6 @@
     <Compile Include="Configuration\ConsumeConfigurators\UntypedConsumerConfigurator.cs" />
     <Compile Include="Configuration\ConsumeConnectors\IConsumerConnector.cs" />
     <Compile Include="Configuration\ConsumeConnectors\IInstanceConnector.cs" />
-    <Compile Include="Context\ContextException.cs" />
     <Compile Include="Exceptions\MessageRetryLimitExceededException.cs" />
     <Compile Include="Exceptions\PublishException.cs" />
     <Compile Include="Exceptions\RequestCancelledException.cs" />
@@ -855,7 +860,7 @@
     <Compile Include="Transports\AddressEqualityComparer.cs" />
     <Compile Include="Transports\DefaultMessageNameFormatter.cs" />
     <Compile Include="Transports\EndpointLoggerExtensions.cs" />
-    <Compile Include="Transports\FanOutSendEndpoint.cs" />
+    <Compile Include="Transports\FanoutSendEndpoint.cs" />
     <Compile Include="Transports\HostHandle.cs" />
     <Compile Include="Transports\IBusHost.cs" />
     <Compile Include="Transports\IBusHostControl.cs" />
@@ -864,18 +869,15 @@
     <Compile Include="Transports\InMemory\InMemoryPublishEndpoint.cs" />
     <Compile Include="Transports\InMemory\InMemoryReceiveContext.cs" />
     <Compile Include="Transports\InMemory\InMemorySendContext.cs" />
-    <Compile Include="Transports\InMemory\InMemorySendHeaders.cs" />
     <Compile Include="Transports\InMemory\InMemorySendEndpointProvider.cs" />
     <Compile Include="Transports\InMemory\InMemoryTransport.cs" />
     <Compile Include="Transports\InMemory\InMemoryTransportCache.cs" />
     <Compile Include="Transports\InMemory\InMemoryTransportMessage.cs" />
     <Compile Include="Transports\IReceiveTransport.cs" />
-    <Compile Include="Transports\InvalidConnectionException.cs" />
     <Compile Include="Transports\ISendTransport.cs" />
     <Compile Include="Transports\MessageName.cs" />
     <Compile Include="Transports\PublishEndpoint.cs" />
     <Compile Include="Transports\PublishPipeContextAdapter.cs" />
-    <Compile Include="Transports\BaseReceiveContext.cs" />
     <Compile Include="Transports\ReceiveEndpoint.cs" />
     <Compile Include="Transports\ReceiveEndpointHandle.cs" />
     <Compile Include="Transports\ReceiveTransportHandle.cs" />
@@ -892,6 +894,7 @@
     <Compile Include="Util\AsyncObservable.cs" />
     <Compile Include="Util\BusHostInfo.cs" />
     <Compile Include="Util\Connectable.cs" />
+    <Compile Include="Util\ExceptionUtil.cs" />
     <Compile Include="Util\HostMetadataCache.cs" />
     <Compile Include="Util\IndexedSagaProperty.cs" />
     <Compile Include="Util\ITypeMetadataCache.cs" />
