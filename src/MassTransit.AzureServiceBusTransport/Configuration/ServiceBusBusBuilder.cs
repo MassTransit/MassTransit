@@ -19,6 +19,7 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
     using BusConfigurators;
     using MassTransit.Pipeline;
     using Transports;
+    using Util;
 
 
     public class ServiceBusBusBuilder :
@@ -73,9 +74,18 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
 
         public virtual IBusControl Build()
         {
-            _busEndpointConfigurator.Apply(this);
+            try
+            {
+                _busEndpointConfigurator.Apply(this);
 
-            return new MassTransitBus(_inputAddress, _busConsumePipe, SendEndpointProvider, PublishEndpoint, ReceiveEndpoints, _hosts, BusObservable);
+                return new MassTransitBus(_inputAddress, _busConsumePipe, SendEndpointProvider, PublishEndpoint, ReceiveEndpoints, _hosts, BusObservable);
+            }
+            catch (Exception exception)
+            {
+                TaskUtil.Await(() => BusObservable.CreateFaulted(exception));
+
+                throw;
+            }
         }
     }
 }

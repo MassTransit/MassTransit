@@ -21,12 +21,14 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
     {
         public ReceiveEndpointSettings(string queuePath)
         {
-            QueueDescription = new QueueDescription(queuePath);
-            QueueDescription.EnableBatchedOperations = true;
-            QueueDescription.MaxDeliveryCount = 5;
-            QueueDescription.DefaultMessageTimeToLive = TimeSpan.FromDays(365);
-            QueueDescription.LockDuration = TimeSpan.FromMinutes(5);
-            QueueDescription.EnableDeadLetteringOnMessageExpiration = true;
+            QueueDescription = new QueueDescription(queuePath)
+            {
+                EnableBatchedOperations = true,
+                MaxDeliveryCount = 5,
+                DefaultMessageTimeToLive = TimeSpan.MaxValue,
+                LockDuration = TimeSpan.FromMinutes(5),
+                EnableDeadLetteringOnMessageExpiration = true
+            };
 
             MaxConcurrentCalls = Math.Max(Environment.ProcessorCount, 8);
             PrefetchCount = Math.Max(MaxConcurrentCalls, 32);

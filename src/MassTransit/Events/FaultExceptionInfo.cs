@@ -14,6 +14,7 @@ namespace MassTransit.Events
 {
     using System;
     using Internals.Extensions;
+    using Util;
 
 
     public class FaultExceptionInfo :
@@ -38,7 +39,7 @@ namespace MassTransit.Events
             }
         }
 
-        public string StackTrace => _exception.StackTrace;
+        public string StackTrace => ExceptionUtil.GetStackTrace(_exception);
 
         public string Message => _exception.Message;
 

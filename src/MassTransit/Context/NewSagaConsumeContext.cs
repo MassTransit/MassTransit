@@ -19,7 +19,7 @@ namespace MassTransit.Context
 
 
     /// <summary>
-    /// A consumer instance merged with a message consume context
+    /// A new saga that was created
     /// </summary>
     /// <typeparam name="TSaga"></typeparam>
     /// <typeparam name="TMessage"></typeparam>

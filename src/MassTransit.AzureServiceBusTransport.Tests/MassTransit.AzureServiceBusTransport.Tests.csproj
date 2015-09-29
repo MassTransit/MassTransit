@@ -73,6 +73,7 @@
     <Compile Include="ErrorQueue_Specs.cs" />
     <Compile Include="Performance_Specs.cs" />
     <Compile Include="Publish_Specs.cs" />
+    <Compile Include="SendContext_Specs.cs" />
     <Compile Include="Send_Specs.cs" />
     <Compile Include="TestAzureServiceBusAccountSettings.cs" />
     <Compile Include="TwoScopeAzureServiceBusTestFixture.cs" />

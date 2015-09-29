@@ -101,7 +101,7 @@ namespace MassTransit.QuartzIntegration
                         context.Headers.Set(MessageHeaders.SchedulingTokenId, tokenId.Value.ToString("N"));
                     }
 
-                    context.Headers.Set("MT-Quartz-TriggerKey", triggerKey);
+                    context.Headers.Set(MessageHeaders.QuartzTriggerKey, triggerKey);
 
                     if (!string.IsNullOrEmpty(ExpirationTime))
                         context.TimeToLive = DateTime.UtcNow - DateTime.Parse(ExpirationTime);
