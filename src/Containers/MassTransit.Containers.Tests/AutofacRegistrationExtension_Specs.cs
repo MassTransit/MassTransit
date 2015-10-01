@@ -12,10 +12,12 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Containers.Tests
 {
+    using System.Reflection;
     using System.Threading.Tasks;
     using Autofac;
-    using AutofacIntegration;
     using NUnit.Framework;
+    using Saga;
+    using Scenarios;
 
 
     [TestFixture]
@@ -26,14 +28,40 @@ namespace MassTransit.Containers.Tests
         {
             var builder = new ContainerBuilder();
 
-            builder.RegisterConsumers(System.Reflection.Assembly.GetExecutingAssembly());
+            builder.RegisterConsumers(Assembly.GetExecutingAssembly());
 
             var container = builder.Build();
 
             Assert.That(container.IsRegistered<TestConsumer>(), Is.True);
         }
+
+        [Test]
+        public async Task Throw_them_under_the_bus()
+        {
+            var builder = new ContainerBuilder();
+
+            builder.RegisterConsumers(Assembly.GetExecutingAssembly());
+            builder.RegisterType<InMemorySagaRepository<SimpleSaga>>()
+                .As<ISagaRepository<SimpleSaga>>()
+                .SingleInstance();
+
+            var container = builder.Build();
+
+            var busControl = Bus.Factory.CreateUsingInMemory(x =>
+            {
+                x.ReceiveEndpoint("input_queue", e => e.LoadFrom(container));
+            });
+
+            var busHandle = busControl.Start();
+
+            await busHandle.Ready;
+
+            busHandle.Stop();
+        }
     }
 
+
     public class TestConsumer : IConsumer
-    { }
+    {
+    }
 }
