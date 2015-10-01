@@ -30,9 +30,10 @@ namespace MassTransit.NLogIntegration.Logging
             _logs = new ConcurrentDictionary<string, NLogLog>();
         }
 
-        public NLogLogger()
+        public NLogLogger() 
         {
             _logFactory = LogManager.GetLogger;
+            _logs = new ConcurrentDictionary<string, NLogLog>();
         }
 
         public ILog Get(string name)
