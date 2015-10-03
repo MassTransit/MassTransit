@@ -151,6 +151,7 @@
     <Compile Include="Pipeline\TestPipeContext.cs" />
     <Compile Include="Pipeline\Transaction_Specs.cs" />
     <Compile Include="Pipeline\TwoMessageConsumer.cs" />
+    <Compile Include="PublishHeader_Specs.cs" />
     <Compile Include="PublishObserver_Specs.cs" />
     <Compile Include="ReceiveObserver_Specs.cs" />
     <Compile Include="RequestClient_Specs.cs" />
@@ -182,7 +183,6 @@
     <Compile Include="Transforms\TransformClass_Specs.cs" />
     <Compile Include="Transports\InMemoryTransport_Specs.cs" />
     <Compile Include="Uri_Specs.cs" />
-    <None Include="app.config" />
     <Compile Include="Saga\Messages\CompleteSimpleSaga.cs" />
     <Compile Include="Saga\Messages\InitiateSimpleSaga.cs" />
     <Compile Include="Saga\Locator\SagaExpression_Specs.cs" />

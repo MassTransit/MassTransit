@@ -26,12 +26,12 @@ namespace MassTransit.Saga
         where TSaga : class, ISaga
     {
         static readonly ILog _log = Logger.Get<InMemorySagaRepository<TSaga>>();
-        readonly InMemorySagaRepository<TSaga> _repository;
+        readonly Func<Task> _removeSaga;
 
-        public InMemorySagaConsumeContext(InMemorySagaRepository<TSaga> repository, ConsumeContext<TMessage> context, TSaga instance)
+        public InMemorySagaConsumeContext(InMemorySagaRepository<TSaga> repository, ConsumeContext<TMessage> context, TSaga instance, Func<Task> removeSaga)
             : base(context)
         {
-            _repository = repository;
+            _removeSaga = removeSaga;
 
             Saga = instance;
         }
@@ -50,8 +50,10 @@ namespace MassTransit.Saga
 
         public async Task SetCompleted()
         {
-            await _repository.Remove(Saga, CancellationToken);
+            await _removeSaga();
+
             IsCompleted = true;
+
             if (_log.IsDebugEnabled)
             {
                 _log.DebugFormat("SAGA:{0}:{1} Removed {2}", TypeMetadataCache<TSaga>.ShortName, Saga.CorrelationId,
