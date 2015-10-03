@@ -84,7 +84,7 @@ namespace MassTransit.Saga
                         if (_log.IsDebugEnabled)
                             _log.DebugFormat("SAGA:{0}:{1} Used {2}", TypeMetadataCache<TSaga>.ShortName, sagaId, TypeMetadataCache<T>.ShortName);
 
-                        SagaConsumeContext<TSaga, T> sagaConsumeContext = new InMemorySagaConsumeContext<TSaga, T>(this, context, saga.Instance);
+                        SagaConsumeContext<TSaga, T> sagaConsumeContext = new InMemorySagaConsumeContext<TSaga, T>(this, context, saga.Instance, () => Remove(saga, context.CancellationToken));
 
                         await policy.Existing(sagaConsumeContext, next);
                     }
@@ -124,7 +124,8 @@ namespace MassTransit.Saga
                 if (_log.IsDebugEnabled)
                     _log.DebugFormat("SAGA:{0}:{1} Used {2}", TypeMetadataCache<TSaga>.ShortName, saga.Instance.CorrelationId, TypeMetadataCache<T>.ShortName);
 
-                SagaConsumeContext<TSaga, T> sagaConsumeContext = new InMemorySagaConsumeContext<TSaga, T>(this, context, saga.Instance);
+                SagaConsumeContext<TSaga, T> sagaConsumeContext = new InMemorySagaConsumeContext<TSaga, T>(this, context, saga.Instance,
+                    () => Remove(saga, context.CancellationToken));
 
                 await policy.Existing(sagaConsumeContext, next);
             }
@@ -172,6 +173,19 @@ namespace MassTransit.Saga
             }
         }
 
+        async Task Remove(SagaInstance<TSaga> saga, CancellationToken cancellationToken)
+        {
+            await _sagas.MarkInUse(cancellationToken);
+            try
+            {
+                _sagas.Remove(saga);
+            }
+            finally
+            {
+                _sagas.Release();
+            }
+        }
+
         /// <summary>
         /// Adds the saga within an existing lock
         /// </summary>
@@ -179,6 +193,11 @@ namespace MassTransit.Saga
         void AddWithinLock(TSaga newSaga)
         {
             _sagas.Add(newSaga);
+        }
+
+        void RemoveWithinLock(TSaga saga)
+        {
+            _sagas.Remove(new SagaInstance<TSaga>(saga));
         }
 
 
@@ -208,7 +227,8 @@ namespace MassTransit.Saga
 
             public async Task Send(SagaConsumeContext<TSaga, TMessage> context)
             {
-                var proxy = new InMemorySagaConsumeContext<TSaga, TMessage>(_repository, context, context.Saga);
+                var proxy = new InMemorySagaConsumeContext<TSaga, TMessage>(_repository, context, context.Saga,
+                    () => RemoveNewSaga(context.Saga, context.CancellationToken));
 
                 if (_withinLock)
                     _repository.AddWithinLock(context.Saga);
@@ -221,10 +241,35 @@ namespace MassTransit.Saga
                         TypeMetadataCache<TMessage>.ShortName);
                 }
 
-                await _next.Send(proxy);
+                try
+                {
+                    await _next.Send(proxy);
 
-                if (proxy.IsCompleted)
-                    await _repository.Remove(proxy.Saga, context.CancellationToken);
+                    if (proxy.IsCompleted)
+                    {
+                        await RemoveNewSaga(proxy.Saga, context.CancellationToken);
+                    }
+                }
+                catch (Exception)
+                {
+                    if (_log.IsDebugEnabled)
+                    {
+                        _log.DebugFormat("SAGA:{0}:{1} Removed(Fault) {2}", TypeMetadataCache<TSaga>.ShortName, context.Saga.CorrelationId,
+                            TypeMetadataCache<TMessage>.ShortName);
+                    }
+
+                    await RemoveNewSaga(proxy.Saga, context.CancellationToken);
+
+                    throw;
+                }
+            }
+
+            async Task RemoveNewSaga(TSaga saga, CancellationToken cancellationToken)
+            {
+                if (_withinLock)
+                    _repository.RemoveWithinLock(saga);
+                else
+                    await _repository.Remove(saga, cancellationToken);
             }
         }
     }

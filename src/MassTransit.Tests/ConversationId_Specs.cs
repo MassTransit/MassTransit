@@ -90,7 +90,7 @@ namespace MassTransit.Tests
 
             responseContext.ConversationId.HasValue.ShouldBe(true);
 
-            responseContext.ConversationId.Value.ShouldBe(context.ConversationId.Value);
+            responseContext.ConversationId.ShouldBe(context.ConversationId);
         }
     }
 }
