@@ -26,7 +26,7 @@ In Memory
 
 The `in memory`_ transport is included with MassTransit. No additional software is required.
 
-.. _in memory: ../configuration/transports/in_memory.rst
+.. _in memory: ../configuration/transports/in_memory.html
 
 
 RabbitMQ
@@ -44,7 +44,7 @@ enable some additional plug-ins for management and message tracking.
 
 Then, install the ```MassTransit.RabbitMQ``` package in your project and follow the RabbitMQ_ configuration guid.
 
-.. _RabbitMQ: ../configuration/transports/rabbitmq.rst
+.. _RabbitMQ: ../configuration/transports/rabbitmq.html
 
 
 Azure Service Bus
@@ -58,5 +58,5 @@ Azure Service Bus
 To use Azure Service Bus with MassTransit, install the ```MassTransit.AzureServiceBus``` package in your project and follow the
 `Service Bus`_ configuration guid.
 
-.. _Service Bus: ../configuration/transports/azure.rst
+.. _Service Bus: ../configuration/transports/azure.html
 

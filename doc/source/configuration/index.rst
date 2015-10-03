@@ -1,6 +1,11 @@
 Configuring MassTransit
 """"""""""""""""""""""""
 
+.. note:: 
+
+    This is earlier documentation that is being migrated into the Using section, so start there before coming here.
+    
+
 Now that you have MassTransit installed into your project, we need to get it
 configured so that you can start bringing the awesome! First we have a quickstart
 which will be followed up with a few configuration examples.
@@ -10,10 +15,5 @@ which will be followed up with a few configuration examples.
 
     quickstart.rst
     bus_configuration.rst
-    subscription_configuration.rst
-    endpoint_configuration.rst
     transports/index.rst
-    containers/index.rst
     gotchas.rst
-    diagnostics.rst
-    bus_tuning.rst

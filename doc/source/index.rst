@@ -10,19 +10,21 @@ framework. MassTransit provides an `extensive set of features`_ on top existing 
 a developer friendly way to asynchronously connect services using message-based conversation patterns.
 Message-based communication is a reliable and scalable way to implement a service oriented architecture.
 
-.. _extensive set of features: ../overview/valueadd.rst
+.. _extensive set of features: overview/valueadd.html
+
+.. image:: https://ci.appveyor.com/api/projects/status/hox8dhh5eyy7jsf4/branch/master?svg=true
 
 .. toctree::
     :maxdepth: 2
 
     overview/backstory.rst
     installation/index.rst
-    configuration/index.rst
     usage/index.rst
     middleware/index.rst
     scheduling/index.rst
     advanced/index.rst
     samples/index.rst
+    configuration/index.rst
     troubleshooting/index.rst
     patterns/index.rst
     migrating/index.rst

@@ -75,24 +75,57 @@ class with a default constructor.
     saved even is the process is terminated. When the process is started, messages waiting in the queue
     will be delivered to the consumer(s).
 
-
-Connecting to an existing bus
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-To connect a consumer to an existing bus (using the temporary queue), a series of *Connect* methods can be used.
-When a consumer is connected to the bus, no exchange bindings or topic subsriptions are created. Only messages
-sent directly to the queue will be received. Examples include responses to requests, faults generated from a request,
-or a routing slip subscription.
+The above example connects the consumer using a default constructor consumer factory. There are several other
+consumer factories supported, as shown below.
 
 .. sourcecode:: csharp
 
     var busControl = Bus.Factory.CreateUsingRabbitMq(cfg =>
     {
-        var host = cfg.Host(new Uri("rabbitmq://localhost/"), h =>
+        var host = ...;
+
+        cfg.ReceiveEndpoint(host, "customer_update_queue", e =>
         {
-            h.Username("guest");
-            h.Password("guest");
+            // an anonymous factory method
+            e.Consumer(() => new YourConsumer());
+
+            // an existing consumer factory for the consumer type
+            e.Consumer(consumerFactory)
+
+            // a type-based factory that returns an object (container friendly)
+            e.Consumer(consumerType, type => container.Resolve(type));
+
+            // an anonymous factory method, with some middleware goodness
+            e.Consumer(() => new YourConsumer(), x =>
+            {
+                // add middleware to the consumer pipeline
+                x.UseLog(ConsoleOut, async context => "Consumer created");
+            });
         });
+    });
+
+
+Connecting to an existing bus
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Once a bus has been created, the receive endpoints have been created and cannot be modified. The bus itself,
+however, provides a temporary (auto-delete) queue which can be used to receive messages. To connect a consumer
+to the bus temporary queue, a series of *Connect* methods can be used.
+
+.. warning::
+
+    Published messages will not be received by the temporary queue. Because the queue is temporary,
+    when consumers are connected no bindings or subscriptions are created. This makes it very fast
+    for transient consumers, and avoid thrashing the message broker with temporary bindings.
+
+The temporary queue is useful to receive request responses and faults (via the response/fault address header)
+and routing slip events (via an event subscription in the routing slip).
+
+.. sourcecode:: csharp
+
+    var busControl = Bus.Factory.CreateUsingRabbitMq(cfg =>
+    {
+        var host = ...;
     });
 
     busControl.Start();
@@ -100,6 +133,29 @@ or a routing slip subscription.
     ConnectHandle handle = busControl.ConnectConsumer<FaultConsumer>();
     ...
     handle.Disconnect(); // disconnect the consumer from the bus pipeline
+
+In addition to the ```ConnectConsumer``` method, methods for each consumer type are also included
+(```ConnectHandler```, ```ConnectInstance```, ```ConnectSaga```, and ```ConnectStateMachineSaga```).
+
+
+Connecting an existing consumer instance
+----------------------------------------
+
+While using a consumer instance per message is highly suggested, it is possible to connect an existing
+consumer instance which will be called for every message. The consumer *must* be thread-safe, as the ```Consume```
+method will be called from multiple threads simultaneously. To connect an existing instance, see the example below.
+
+.. sourcecode:: csharp
+
+    var busControl = Bus.Factory.CreateUsingRabbitMq(cfg =>
+    {
+        var host = ...;
+
+        cfg.ReceiveEndpoint(host, "customer_update_queue", e =>
+        {
+            e.Instance(existingConsumer);
+        });
+    });
 
 
 Handling undeliverable messages
@@ -124,11 +180,7 @@ To configure a simple message handler, refer to the example below.
 
     var busControl = Bus.Factory.CreateUsingRabbitMq(cfg =>
     {
-        var host = cfg.Host(new Uri("rabbitmq://localhost/"), h =>
-        {
-            h.Username("guest");
-            h.Password("guest");
-        });
+        var host = ...;
 
         cfg.ReceiveEndpoint(host, "customer_update_queue", e =>
         {
@@ -179,11 +231,7 @@ Once created, the observer is connected to the receive endpoint similar to a con
 
     var busControl = Bus.Factory.CreateUsingRabbitMq(cfg =>
     {
-        var host = cfg.Host(new Uri("rabbitmq://localhost/"), h =>
-        {
-            h.Username("guest");
-            h.Password("guest");
-        });
+        var host = ...;
 
         cfg.ReceiveEndpoint(host, "customer_update_queue", e =>
         {

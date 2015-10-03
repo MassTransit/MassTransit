@@ -7,6 +7,9 @@ MassTransit is a _free, open-source_ distributed application framework for .NET.
 
 MassTransit is Apache 2.0 licensed.
 
+![master](https://ci.appveyor.com/api/projects/status/hox8dhh5eyy7jsf4/branch/master?svg=true)
+![develop](https://ci.appveyor.com/api/projects/status/hox8dhh5eyy7jsf4/branch/develop?svg=true)
+
 ## Getting started with MassTransit
 
 In order to get started with MassTransit, you can have a look at the documentation, which is located at [http://docs.masstransit-project.com/](http://docs.masstransit-project.com/).
