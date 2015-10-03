@@ -3,11 +3,11 @@ MassTransit
 
 MassTransit is a _free, open-source_ distributed application framework for .NET. MassTransit makes it easy to create applications and services that leverage message-based, loosely-coupled asynchronous communication for higher availability, reliabililty, and scalability.
 
-![Mass Transit](http://www.phatboyg.com/mt-logo.png "Mass Transit")
+![Mass Transit](https://raw.githubusercontent.com/MassTransit/MassTransit/develop/doc/source/mt-logo.png "Mass Transit")
 
 MassTransit is Apache 2.0 licensed.
 
-## Getting Started with MassTransit
+## Getting started with MassTransit
 
 In order to get started with MassTransit, you can have a look at the documentation, which is located at [http://docs.masstransit-project.com/](http://docs.masstransit-project.com/).
 
@@ -60,11 +60,11 @@ Download from NuGet 'MassTransit' [Search NuGet for MassTransit](http://nuget.or
 
 Download the continuously integrated Binaries from [TeamCity](http://teamcity.codebetter.com/viewType.html?buildTypeId=bt8&tab=buildTypeStatusDiv).
 
-### Supported Transports
+### Supported transports
 
 We support RabbitMQ and Azure Service Bus message brokers.
 
-## Mailing List
+## Mailing list
 
 [MassTransit Discuss](http://groups.google.com/group/masstransit-discuss)
 
@@ -79,6 +79,10 @@ We support RabbitMQ and Azure Service Bus message brokers.
  1. `git config --global core.autocrlf false`
  1. Hack!
  1. Make a pull request.
+
+## Builds
+
+MassTransit is built on [AppVeyor](https://ci.appveyor.com/project/phatboyg/masstransit)
  
 # REQUIREMENTS
 * .Net 4.5
