@@ -9,6 +9,7 @@ provided below.
     messages.rst
     consumer.rst
     locations.rst
+    containers/index.rst
     request_response.rst
     exceptions.rst
     observers.rst
@@ -16,3 +17,4 @@ provided below.
     saga.rst
     retry.rst
     transactions.rst
+    diagnostics.rst

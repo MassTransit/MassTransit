@@ -1,10 +1,12 @@
-# Interoperability
+Interoperability
+================
 
 In MassTransit, developers specify types for messages. MassTransit's serializers then perform the hard work of converting the types to the serializer format (such as JSON, XML, BSON, etc.) and then back again.
 
 To interoperate with other languages and platforms, the message structure is important.
 
-## Content type
+Content type
+------------
 
 To support custom message types, MassTransit uses a transport-level header to specify the message format. MassTransit simultaneously supports the following message formats on a single transport.
 
@@ -22,9 +24,12 @@ If you configure the binary serializer:
 
 Register custom types would during endpoint/bus configuration.
 
-## JSON/BSON/XML
+JSON/BSON/XML
+------------
 
 MassTransit uses a message envelope to encapsulate the built-in message headers, as well as the message payload. The envelope properties on the wire include:
+
+.. sourcecode:: csharp
 
     string MessageId
     string CorrelationId
@@ -41,15 +46,19 @@ MassTransit uses a message envelope to encapsulate the built-in message headers,
     string[] MessageType
     HostInfo Host
 
-The _Id_ values should be convertible to a GUID/UUID or they will fail. All are optional, but MessageId should be present at a minimum.
+The *Id* values should be convertible to a GUID/UUID or they will fail. All are optional, but MessageId should be present at a minimum.
 
-The _Address_ values should be convertible to a URI that is a valid MassTransit endpoint address.
+The *Address* values should be convertible to a URI that is a valid MassTransit endpoint address.
 
-The _MessageType_ entries should be URNs, which are convertible to .NET types. MassTransit defines the format of the URN in the following structure:
+The *MessageType* entries should be URNs, which are convertible to .NET types. MassTransit defines the format of the URN in the following structure:
+
+.. sourcecode::
 
     urn:message:Namespace:TypeName
 
-The _Host_ is an internal data type, but is a set of strings that define the host that produced the message.
+The *Host* is an internal data type, but is a set of strings that define the host that produced the message.
+
+.. sourcecode:: csharp
 
     string MachineName
     string ProcessName
@@ -69,9 +78,12 @@ Examples include:
 
 The last one is a nested class, as indicated by the '+' symbol.
 
-### Example message
+Example message
+~~~~~~~~~~~~~~~
 
 This is a minimal message:
+
+.. sourcecode:: json
 
     {
         "destinationAddress": "rabbitmq://localhost/input_queue",
@@ -86,6 +98,7 @@ This is a minimal message:
     }
 
 
-## Encrypted Messages
+Encrypted Messages
+------------------
 
 If you use the encrypted message serializer, it uses BSON under the hood. The encryption format is AES-256. Assuming the same Key/IV pair, an encrypted message should be compatible across the wire.

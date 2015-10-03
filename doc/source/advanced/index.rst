@@ -5,4 +5,5 @@ Advanced notes.
 
 .. toctree::
 
-    interop.md
+    transort_tuning.rst
+    interop.rst

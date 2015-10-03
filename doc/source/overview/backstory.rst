@@ -6,7 +6,7 @@ framework. MassTransit provides an `extensive set of features`_ on top existing 
 a developer friendly way to asynchronously connect services using message-based conversation patterns.
 Message-based communication is a reliable and scalable way to implement a service oriented architecture.
 
-.. _extensive set of features: ../overview/valueadd.rst
+.. _extensive set of features: ../overview/valueadd.html
 
 
 A bit of the back story?
