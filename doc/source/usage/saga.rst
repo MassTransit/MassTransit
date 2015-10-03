@@ -67,7 +67,7 @@ The order submitted event, and the correlation for that order.
 
 In order to schedule the timeout, a schedule is defined, including the time delay for the scheduled event, and the correlation of the event back to the state machine.
 
-Now, it is time for the actual behavior of the events and how they interact with the state of the _ShoppingCart_.
+Now, it is time for the actual behavior of the events and how they interact with the state of the *ShoppingCart*.
 
 .. sourcecode:: csharp
 
@@ -84,7 +84,7 @@ Now, it is time for the actual behavior of the events and how they interact with
                 .TransitionTo(Active)
             );
 
-Initially defined events that can create a state machine instance. In the above, the properties of the instance are initialized, and then the _CartExpired_ event is scheduled, after which the state is set to _Active_.
+Initially defined events that can create a state machine instance. In the above, the properties of the instance are initialized, and then the *CartExpired* event is scheduled, after which the state is set to *Active*.
 
 .. sourcecode:: csharp
 
@@ -100,7 +100,7 @@ Initially defined events that can create a state machine instance. In the above,
                 .Unschedule(CartExpired)
                 .TransitionTo(Ordered),
 
-While the shopping cart is active, if the order is submitted, the expiration is canceled (via _Unschedule_) and the state is set to Ordered.
+While the shopping cart is active, if the order is submitted, the expiration is canceled (via *Unschedule*) and the state is set to Ordered.
 
 .. sourcecode:: csharp
 
@@ -113,7 +113,7 @@ While the shopping cart is active, if the order is submitted, the expiration is 
                 .ThenAsync(context => Console.Out.WriteLineAsync($"Item Added: {context.Data.UserName} to {context.Instance.CorrelationId}"))
                 .Schedule(CartExpired, context => new CartExpiredEvent(context.Instance)),
 
-If another item is added to the cart, the _CartExpired_ event is scheduled, and the existence of a previously scheduled event (via the _ExpirationId_ property) is used to cancel the previously scheduled event.
+If another item is added to the cart, the *CartExpired* event is scheduled, and the existence of a previously scheduled event (via the *ExpirationId* property) is used to cancel the previously scheduled event.
 
 .. sourcecode:: csharp
 
@@ -123,7 +123,7 @@ If another item is added to the cart, the _CartExpired_ event is scheduled, and 
                 .Finalize()
             );
 
-If the _CartExpired_ event is received, the cart removed event is published and the shopping cart is finalized.
+If the *CartExpired* event is received, the cart removed event is published and the shopping cart is finalized.
 
 .. sourcecode:: csharp
 
@@ -137,7 +137,7 @@ Signals that the state machine instance should be deleted if it is finalized. Th
         public State Active { get; private set; }
         public State Ordered { get; private set; }
 
-The states of the shopping cart (_Initial_ and _Final_ are built-in states).
+The states of the shopping cart (*Initial* and *Final* are built-in states).
 
 .. sourcecode:: csharp
 
