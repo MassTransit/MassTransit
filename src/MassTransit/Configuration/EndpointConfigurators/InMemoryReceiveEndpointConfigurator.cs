@@ -35,7 +35,7 @@ namespace MassTransit.EndpointConfigurators
         {
             IReceiveTransport transport = builder.ReceiveTransportProvider.GetReceiveTransport(_queueName);
 
-            IPipe<ReceiveContext> receivePipe = CreateReceivePipe(builder, consumePipe => new InMemoryReceiveEndpointBuilder(consumePipe));
+            var receivePipe = CreateReceivePipe(builder, consumePipe => new InMemoryReceiveEndpointBuilder(consumePipe));
 
             builder.AddReceiveEndpoint(new ReceiveEndpoint(transport, receivePipe));
         }

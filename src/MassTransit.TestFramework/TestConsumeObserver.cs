@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -15,52 +15,48 @@ namespace MassTransit.TestFramework
     using System;
     using System.Threading.Tasks;
     using Pipeline;
+    using Util;
 
 
     public class TestConsumeObserver<T> :
         IConsumeMessageObserver<T>
         where T : class
     {
-        readonly TaskCompletionSource<T> _dispatchFaulted;
-        readonly TaskCompletionSource<T> _postDispatched;
-        readonly TaskCompletionSource<T> _preDispatched;
+        readonly TaskCompletionSource<T> _consumeFaulted;
+        readonly TaskCompletionSource<T> _postConsumed;
+        readonly TaskCompletionSource<T> _preConsumed;
 
-        public TestConsumeObserver(TaskCompletionSource<T> preDispatched, TaskCompletionSource<T> postDispatched,
-            TaskCompletionSource<T> dispatchFaulted)
+        public TestConsumeObserver(TaskCompletionSource<T> preConsumed, TaskCompletionSource<T> postConsumed,
+            TaskCompletionSource<T> consumeFaulted)
         {
-            _preDispatched = preDispatched;
-            _postDispatched = postDispatched;
-            _dispatchFaulted = dispatchFaulted;
+            _preConsumed = preConsumed;
+            _postConsumed = postConsumed;
+            _consumeFaulted = consumeFaulted;
         }
 
-        public Task PreDispatched
+        public Task<T> PreConsumed => _preConsumed.Task;
+        public Task<T> PostConsumed => _postConsumed.Task;
+        public Task<T> ConsumeFaulted => _consumeFaulted.Task;
+
+        Task IConsumeMessageObserver<T>.PreConsume(ConsumeContext<T> context)
         {
-            get { return _preDispatched.Task; }
+            _preConsumed.TrySetResult(context.Message);
+
+            return TaskUtil.Completed;
         }
 
-        public Task PostDispatched
+        Task IConsumeMessageObserver<T>.PostConsume(ConsumeContext<T> context)
         {
-            get { return _postDispatched.Task; }
+            _postConsumed.TrySetResult(context.Message);
+
+            return TaskUtil.Completed;
         }
 
-        public Task DispatchedFaulted
+        Task IConsumeMessageObserver<T>.ConsumeFault(ConsumeContext<T> context, Exception exception)
         {
-            get { return _dispatchFaulted.Task; }
-        }
+            _consumeFaulted.TrySetException(exception);
 
-        async Task IConsumeMessageObserver<T>.PreConsume(ConsumeContext<T> context)
-        {
-            _preDispatched.TrySetResult(context.Message);
-        }
-
-        async Task IConsumeMessageObserver<T>.PostConsume(ConsumeContext<T> context)
-        {
-            _postDispatched.TrySetResult(context.Message);
-        }
-
-        async Task IConsumeMessageObserver<T>.ConsumeFault(ConsumeContext<T> context, Exception exception)
-        {
-            _dispatchFaulted.TrySetException(exception);
+            return TaskUtil.Completed;
         }
     }
 }

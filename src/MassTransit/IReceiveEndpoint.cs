@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
+    using Pipeline;
     using Transports;
 
 
@@ -21,6 +22,8 @@ namespace MassTransit
     public interface IReceiveEndpoint :
         IReceiveObserverConnector,
         IReceiveEndpointObserverConnector,
+        IConsumeObserverConnector,
+        IConsumeMessageObserverConnector,
         IProbeSite
     {
         /// <summary>

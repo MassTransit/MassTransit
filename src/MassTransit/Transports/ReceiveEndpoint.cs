@@ -26,10 +26,10 @@ namespace MassTransit.Transports
     public class ReceiveEndpoint :
         IReceiveEndpoint
     {
-        readonly IPipe<ReceiveContext> _receivePipe;
+        readonly IReceivePipe _receivePipe;
         readonly IReceiveTransport _receiveTransport;
 
-        public ReceiveEndpoint(IReceiveTransport receiveTransport, IPipe<ReceiveContext> receivePipe)
+        public ReceiveEndpoint(IReceiveTransport receiveTransport, IReceivePipe receivePipe)
         {
             _receiveTransport = receiveTransport;
             _receivePipe = receivePipe;
@@ -59,6 +59,16 @@ namespace MassTransit.Transports
         ConnectHandle IReceiveEndpointObserverConnector.ConnectReceiveEndpointObserver(IReceiveEndpointObserver observer)
         {
             return _receiveTransport.ConnectReceiveEndpointObserver(observer);
+        }
+
+        public ConnectHandle ConnectConsumeObserver(IConsumeObserver observer)
+        {
+            return _receivePipe.ConnectConsumeObserver(observer);
+        }
+
+        public ConnectHandle ConnectConsumeMessageObserver<T>(IConsumeMessageObserver<T> observer) where T : class
+        {
+            return _receivePipe.ConnectConsumeMessageObserver(observer);
         }
 
 

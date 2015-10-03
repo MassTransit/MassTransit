@@ -22,6 +22,7 @@ namespace MassTransit.EndpointConfigurators
     using PipeConfigurators;
     using Pipeline;
     using Pipeline.Filters;
+    using Pipeline.Pipes;
     using Transports;
 
 
@@ -63,7 +64,7 @@ namespace MassTransit.EndpointConfigurators
             _specifications.Add(configurator);
         }
 
-        protected IPipe<ReceiveContext> CreateReceivePipe(IBusBuilder builder, Func<IConsumePipe, IReceiveEndpointBuilder> endpointBuilderFactory)
+        protected IReceivePipe CreateReceivePipe(IBusBuilder builder, Func<IConsumePipe, IReceiveEndpointBuilder> endpointBuilderFactory)
         {
             IConsumePipe consumePipe = _consumePipe ?? builder.CreateConsumePipe(_consumePipeSpecification);
 
@@ -78,7 +79,9 @@ namespace MassTransit.EndpointConfigurators
 
             _receiveConfigurator.UseFilter(new DeserializeFilter(builder.MessageDeserializer, consumePipe));
 
-            return _receiveConfigurator.Build();
+            var receivePipe = _receiveConfigurator.Build();
+
+            return new ReceivePipe(receivePipe, consumePipe);
         }
 
         void ConfigureAddDeadLetterFilter(ISendTransportProvider transportProvider)

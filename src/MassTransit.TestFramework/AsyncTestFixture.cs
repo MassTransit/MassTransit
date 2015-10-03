@@ -99,6 +99,11 @@ namespace MassTransit.TestFramework
             return new TestConsumeObserver<T>(GetTask<T>(), GetTask<T>(), GetTask<T>());
         }
 
+        protected TestConsumeObserver GetConsumeObserver()
+        {
+            return new TestConsumeObserver(TestTimeout);
+        }
+
         protected TestObserver<T> GetObserver<T>() 
             where T : class
         {

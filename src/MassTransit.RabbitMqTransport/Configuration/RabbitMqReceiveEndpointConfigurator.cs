@@ -68,7 +68,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
         public void Apply(IBusBuilder builder)
         {
             RabbitMqReceiveEndpointBuilder endpointBuilder = null;
-            IPipe<ReceiveContext> receivePipe = CreateReceivePipe(builder, consumePipe =>
+            var receivePipe = CreateReceivePipe(builder, consumePipe =>
             {
                 endpointBuilder = new RabbitMqReceiveEndpointBuilder(consumePipe, _host.MessageNameFormatter);
                 return endpointBuilder;

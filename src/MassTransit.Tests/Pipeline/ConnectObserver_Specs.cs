@@ -40,7 +40,7 @@ namespace MassTransit.Tests.Pipeline
 
             Assert.Throws<IntentionalTestException>(async () => await filter.Send(consumeContext));
 
-            Assert.Throws<IntentionalTestException>(async () => await interceptor.DispatchedFaulted);
+            Assert.Throws<IntentionalTestException>(async () => await interceptor.ConsumeFaulted);
         }
 
         [Test]
@@ -61,7 +61,7 @@ namespace MassTransit.Tests.Pipeline
 
             await received.Task;
 
-            await interceptor.PostDispatched;
+            await interceptor.PostConsumed;
         }
 
         [Test]
@@ -82,7 +82,7 @@ namespace MassTransit.Tests.Pipeline
 
             await received.Task;
 
-            await interceptor.PostDispatched;
+            await interceptor.PostConsumed;
         }
 
         [Test]
@@ -103,7 +103,7 @@ namespace MassTransit.Tests.Pipeline
 
             await received.Task;
 
-            await interceptor.PreDispatched;
+            await interceptor.PreConsumed;
         }
     }
 }

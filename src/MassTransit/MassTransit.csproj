@@ -527,6 +527,7 @@
     <Compile Include="Pipeline\IPublishInterceptor.cs" />
     <Compile Include="Pipeline\IPublishObserver.cs" />
     <Compile Include="Pipeline\IPublishObserverConnector.cs" />
+    <Compile Include="Pipeline\IReceivePipe.cs" />
     <Compile Include="Pipeline\IRequestPipeConnector.cs" />
     <Compile Include="Pipeline\ISendInterceptor.cs" />
     <Compile Include="Pipeline\ISendObserver.cs" />
@@ -535,6 +536,7 @@
     <Compile Include="Pipeline\ConsumeMessageObservable.cs" />
     <Compile Include="Pipeline\ConsumeObserverConnectable.cs" />
     <Compile Include="Pipeline\Pipes\FilterPipe.cs" />
+    <Compile Include="Pipeline\Pipes\ReceivePipe.cs" />
     <Compile Include="Pipeline\Pipes\ResponsePipe.cs" />
     <Compile Include="Pipeline\Pipes\ConsumePipe.cs" />
     <Compile Include="Pipeline\Pipes\ConsumerMergePipe.cs" />

@@ -91,6 +91,7 @@
     <Compile Include="..\SolutionVersion.cs">
       <Link>Properties\SolutionVersion.cs</Link>
     </Compile>
+    <Compile Include="ConsumeObserver_Specs.cs" />
     <Compile Include="Consumer_Specs.cs" />
     <Compile Include="ContainedMessage_Specs.cs" />
     <Compile Include="Behaviors\Behavior.cs" />

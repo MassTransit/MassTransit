@@ -15,6 +15,7 @@ namespace MassTransit.Testing.TestDecorators
     using System;
     using System.Threading.Tasks;
     using Pipeline;
+    using Util;
 
 
     public class TestConsumeObserver :
@@ -29,18 +30,23 @@ namespace MassTransit.Testing.TestDecorators
 
         public IReceivedMessageList Messages => _messages;
 
-        async Task IConsumeObserver.PreConsume<T>(ConsumeContext<T> context)
+        Task IConsumeObserver.PreConsume<T>(ConsumeContext<T> context)
         {
+            return TaskUtil.Completed;
         }
 
-        async Task IConsumeObserver.PostConsume<T>(ConsumeContext<T> context)
+        Task IConsumeObserver.PostConsume<T>(ConsumeContext<T> context)
         {
             _messages.Add(context);
+
+            return TaskUtil.Completed;
         }
 
-        async Task IConsumeObserver.ConsumeFault<T>(ConsumeContext<T> context, Exception exception)
+        Task IConsumeObserver.ConsumeFault<T>(ConsumeContext<T> context, Exception exception)
         {
             _messages.Add(context, exception);
+
+            return TaskUtil.Completed;
         }
     }
 }
