@@ -902,6 +902,7 @@
     <Compile Include="Util\ITypeMetadataCache.cs" />
     <Compile Include="Util\LambdaEqualityComparer.cs" />
     <Compile Include="Util\MultipleConnectHandle.cs" />
+    <Compile Include="Util\ObjectTypeDeserializer.cs" />
     <Compile Include="Util\QueuedTaskScheduler.cs" />
     <Compile Include="Util\StopSignal.cs" />
     <Compile Include="Util\TaskUtil.cs" />

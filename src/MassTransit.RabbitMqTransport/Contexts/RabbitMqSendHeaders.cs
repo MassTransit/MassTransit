@@ -13,11 +13,11 @@
 namespace MassTransit.RabbitMqTransport.Contexts
 {
     using System;
-    using System.Collections;
     using System.Collections.Generic;
     using System.Linq;
     using System.Text;
     using RabbitMQ.Client;
+    using Util;
 
 
     public class RabbitMqSendHeaders :
@@ -75,17 +75,30 @@ namespace MassTransit.RabbitMqTransport.Contexts
             return found;
         }
 
-        public IEnumerator<KeyValuePair<string, object>> GetEnumerator()
+        public IEnumerable<KeyValuePair<string, object>> GetAll()
         {
             if (_basicProperties.IsHeadersPresent())
-                return _basicProperties.Headers.GetEnumerator();
+                return _basicProperties.Headers;
 
-            return Enumerable.Empty<KeyValuePair<string, object>>().GetEnumerator();
+            return Enumerable.Empty<KeyValuePair<string, object>>();
         }
 
-        IEnumerator IEnumerable.GetEnumerator()
+        T Headers.Get<T>(string key, T defaultValue)
         {
-            return GetEnumerator();
+            object value;
+            if (TryGetHeader(key, out value))
+                return ObjectTypeDeserializer.Deserialize(value, defaultValue);
+
+            return defaultValue;
+        }
+
+        T? Headers.Get<T>(string key, T? defaultValue)
+        {
+            object value;
+            if (TryGetHeader(key, out value))
+                return ObjectTypeDeserializer.Deserialize(value, defaultValue);
+
+            return defaultValue;
         }
     }
 }

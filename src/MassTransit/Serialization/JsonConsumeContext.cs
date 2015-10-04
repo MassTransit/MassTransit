@@ -30,39 +30,42 @@ namespace MassTransit.Serialization
         ConsumeContext
     {
         readonly JsonSerializer _deserializer;
+        readonly IObjectTypeDeserializer _objectTypeDeserializer;
         readonly MessageEnvelope _envelope;
         readonly JToken _messageToken;
         readonly IDictionary<Type, object> _messageTypes;
+        readonly Lazy<IPublishEndpoint> _publishEndpoint;
+        readonly IPublishEndpointProvider _publishEndpointProvider;
         readonly ReceiveContext _receiveContext;
         readonly ISendEndpointProvider _sendEndpointProvider;
-        readonly IPublishEndpointProvider _publishEndpointProvider;
         readonly string[] _supportedTypes;
-        readonly Lazy<IPublishEndpoint> _publishEndpoint;
         Guid? _conversationId;
         Guid? _correlationId;
         Uri _destinationAddress;
         Uri _faultAddress;
         Headers _headers;
+        HostInfo _host;
         Guid? _initiatorId;
         Guid? _messageId;
         Guid? _requestId;
         Uri _responseAddress;
         Uri _sourceAddress;
-        HostInfo _host;
 
-        public JsonConsumeContext(JsonSerializer deserializer, ISendEndpointProvider sendEndpointProvider, IPublishEndpointProvider publishEndpointProvider,
-            ReceiveContext receiveContext, MessageEnvelope envelope)
+        public JsonConsumeContext(JsonSerializer deserializer, IObjectTypeDeserializer objectTypeDeserializer, ISendEndpointProvider sendEndpointProvider,
+            IPublishEndpointProvider publishEndpointProvider, ReceiveContext receiveContext, MessageEnvelope envelope)
         {
             _receiveContext = receiveContext;
             _envelope = envelope;
             _sendEndpointProvider = sendEndpointProvider;
             _publishEndpointProvider = publishEndpointProvider;
             _deserializer = deserializer;
+            _objectTypeDeserializer = objectTypeDeserializer;
             _messageToken = GetMessageToken(envelope.Message);
             _supportedTypes = envelope.MessageType.ToArray();
             _messageTypes = new Dictionary<Type, object>();
 
-            _publishEndpoint = new Lazy<IPublishEndpoint>(() => _publishEndpointProvider.CreatePublishEndpoint(_receiveContext.InputAddress, CorrelationId, ConversationId));
+            _publishEndpoint =
+                new Lazy<IPublishEndpoint>(() => _publishEndpointProvider.CreatePublishEndpoint(_receiveContext.InputAddress, CorrelationId, ConversationId));
         }
 
         public bool HasPayloadType(Type contextType)
@@ -92,7 +95,7 @@ namespace MassTransit.Serialization
         public Uri DestinationAddress => _destinationAddress ?? (_destinationAddress = ConvertToUri(_envelope.DestinationAddress));
         public Uri ResponseAddress => _responseAddress ?? (_responseAddress = ConvertToUri(_envelope.ResponseAddress));
         public Uri FaultAddress => _faultAddress ?? (_faultAddress = ConvertToUri(_envelope.FaultAddress));
-        public Headers Headers => _headers ?? (_headers = new JsonMessageHeaders(_deserializer, _envelope.Headers));
+        public Headers Headers => _headers ?? (_headers = new JsonMessageHeaders(_objectTypeDeserializer, _envelope.Headers));
         public HostInfo Host => _envelope.Host;
         public CancellationToken CancellationToken => _receiveContext.CancellationToken;
         public ReceiveContext ReceiveContext => _receiveContext;

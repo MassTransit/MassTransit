@@ -18,6 +18,7 @@ namespace MassTransit.Serialization
     using System.Runtime.Serialization;
     using System.Text;
     using Newtonsoft.Json;
+    using Util;
 
 
     public class JsonMessageDeserializer :
@@ -26,11 +27,13 @@ namespace MassTransit.Serialization
         readonly JsonSerializer _deserializer;
         readonly IPublishEndpointProvider _publishEndpoint;
         readonly ISendEndpointProvider _sendEndpointProvider;
+        IObjectTypeDeserializer _objectTypeDeserializer;
 
         public JsonMessageDeserializer(JsonSerializer deserializer, ISendEndpointProvider sendEndpointProvider,
             IPublishEndpointProvider publishEndpoint)
         {
             _deserializer = deserializer;
+            _objectTypeDeserializer = new ObjectTypeDeserializer(_deserializer);
             _sendEndpointProvider = sendEndpointProvider;
             _publishEndpoint = publishEndpoint;
         }
@@ -55,7 +58,7 @@ namespace MassTransit.Serialization
                     envelope = _deserializer.Deserialize<MessageEnvelope>(jsonReader);
                 }
 
-                return new JsonConsumeContext(_deserializer, _sendEndpointProvider, _publishEndpoint, receiveContext, envelope);
+                return new JsonConsumeContext(_deserializer, _objectTypeDeserializer, _sendEndpointProvider, _publishEndpoint, receiveContext, envelope);
             }
             catch (JsonSerializationException ex)
             {

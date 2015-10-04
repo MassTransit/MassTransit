@@ -58,11 +58,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
             ISchedulerFactory schedulerFactory = new StdSchedulerFactory();
             _scheduler = schedulerFactory.GetScheduler();
 
-            configurator.ReceiveEndpoint("quartz", x =>
-            {
-                x.Consumer(() => new ScheduleMessageConsumer(_scheduler));
-                x.Consumer(() => new CancelScheduledMessageConsumer(_scheduler));
-            });
+            configurator.UseInMemoryScheduler();
         }
 
         [TestFixtureSetUp]

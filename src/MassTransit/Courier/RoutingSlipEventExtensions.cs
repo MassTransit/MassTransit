@@ -13,9 +13,8 @@
 namespace MassTransit.Courier
 {
     using System;
-    using System.Collections.Generic;
     using Contracts;
-    using Newtonsoft.Json.Linq;
+    using Util;
 
 
     public static class RoutingSlipEventExtensions
@@ -27,7 +26,7 @@ namespace MassTransit.Courier
             if (string.IsNullOrEmpty(key))
                 throw new ArgumentException("The key must not be empty", nameof(key));
 
-            return DeserializeVariable<T>(key, source.Data);
+            return ObjectTypeDeserializer.Deserialize<T>(source.Data, key);
         }
 
         public static T GetVariable<T>(this RoutingSlipActivityCompensated source, string key)
@@ -37,7 +36,7 @@ namespace MassTransit.Courier
             if (string.IsNullOrEmpty(key))
                 throw new ArgumentException("The key must not be empty", nameof(key));
 
-            return DeserializeVariable<T>(key, source.Variables);
+            return ObjectTypeDeserializer.Deserialize<T>(source.Variables, key);
         }
 
         public static T GetResult<T>(this RoutingSlipActivityCompensationFailed source, string key)
@@ -47,7 +46,7 @@ namespace MassTransit.Courier
             if (string.IsNullOrEmpty(key))
                 throw new ArgumentException("The key must not be empty", nameof(key));
 
-            return DeserializeVariable<T>(key, source.Data);
+            return ObjectTypeDeserializer.Deserialize<T>(source.Data, key);
         }
 
         public static T GetVariable<T>(this RoutingSlipActivityCompensationFailed source, string key)
@@ -57,7 +56,7 @@ namespace MassTransit.Courier
             if (string.IsNullOrEmpty(key))
                 throw new ArgumentException("The key must not be empty", nameof(key));
 
-            return DeserializeVariable<T>(key, source.Variables);
+            return ObjectTypeDeserializer.Deserialize<T>(source.Variables, key);
         }
 
         public static T GetArgument<T>(this RoutingSlipActivityCompleted source, string key)
@@ -67,7 +66,7 @@ namespace MassTransit.Courier
             if (string.IsNullOrEmpty(key))
                 throw new ArgumentException("The key must not be empty", nameof(key));
 
-            return DeserializeVariable<T>(key, source.Arguments);
+            return ObjectTypeDeserializer.Deserialize<T>(source.Arguments, key);
         }
 
         public static T GetResult<T>(this RoutingSlipActivityCompleted source, string key)
@@ -77,7 +76,7 @@ namespace MassTransit.Courier
             if (string.IsNullOrEmpty(key))
                 throw new ArgumentException("The key must not be empty", nameof(key));
 
-            return DeserializeVariable<T>(key, source.Data);
+            return ObjectTypeDeserializer.Deserialize<T>(source.Data, key);
         }
 
         public static T GetVariable<T>(this RoutingSlipActivityCompleted source, string key)
@@ -87,7 +86,7 @@ namespace MassTransit.Courier
             if (string.IsNullOrEmpty(key))
                 throw new ArgumentException("The key must not be empty", nameof(key));
 
-            return DeserializeVariable<T>(key, source.Variables);
+            return ObjectTypeDeserializer.Deserialize<T>(source.Variables, key);
         }
 
         public static T GetArgument<T>(this RoutingSlipActivityFaulted source, string key)
@@ -97,7 +96,7 @@ namespace MassTransit.Courier
             if (string.IsNullOrEmpty(key))
                 throw new ArgumentException("The key must not be empty", nameof(key));
 
-            return DeserializeVariable<T>(key, source.Arguments);
+            return ObjectTypeDeserializer.Deserialize<T>(source.Arguments, key);
         }
 
         public static T GetVariable<T>(this RoutingSlipActivityFaulted source, string key)
@@ -107,7 +106,7 @@ namespace MassTransit.Courier
             if (string.IsNullOrEmpty(key))
                 throw new ArgumentException("The key must not be empty", nameof(key));
 
-            return DeserializeVariable<T>(key, source.Variables);
+            return ObjectTypeDeserializer.Deserialize<T>(source.Variables, key);
         }
 
         public static T GetVariable<T>(this RoutingSlipCompensationFailed source, string key)
@@ -117,7 +116,7 @@ namespace MassTransit.Courier
             if (string.IsNullOrEmpty(key))
                 throw new ArgumentException("The key must not be empty", nameof(key));
 
-            return DeserializeVariable<T>(key, source.Variables);
+            return ObjectTypeDeserializer.Deserialize<T>(source.Variables, key);
         }
 
         public static T GetVariable<T>(this RoutingSlipCompleted source, string key)
@@ -127,7 +126,7 @@ namespace MassTransit.Courier
             if (string.IsNullOrEmpty(key))
                 throw new ArgumentException("The key must not be empty", nameof(key));
 
-            return DeserializeVariable<T>(key, source.Variables);
+            return ObjectTypeDeserializer.Deserialize<T>(source.Variables, key);
         }
 
         public static T GetVariable<T>(this RoutingSlipFaulted source, string key)
@@ -137,44 +136,7 @@ namespace MassTransit.Courier
             if (string.IsNullOrEmpty(key))
                 throw new ArgumentException("The key must not be empty", nameof(key));
 
-            return DeserializeVariable<T>(key, source.Variables);
-        }
-
-        static T DeserializeVariable<T>(string key, IDictionary<string, object> dictionary)
-        {
-            object obj;
-            if (!dictionary.TryGetValue(key, out obj) && !TryGetValueCamelCase(key, dictionary, out obj))
-                throw new KeyNotFoundException("The variable was not present: " + key);
-
-            var token = obj as JToken;
-            if (token == null)
-            {
-                if (typeof(T).IsValueType || typeof(T) == typeof(string))
-                    return (T)obj;
-
-                token = new JObject();
-            }
-
-            if (token.Type == JTokenType.Null)
-                token = new JObject();
-
-            using (var jsonReader = new JTokenReader(token))
-                return (T)SerializerCache.Deserializer.Deserialize(jsonReader, typeof(T));
-        }
-
-        static bool TryGetValueCamelCase(string key, IDictionary<string, object> dictionary, out object result)
-        {
-            if (char.IsUpper(key[0]))
-            {
-                char[] chars = key.ToCharArray();
-                chars[0] = char.ToLower(chars[0]);
-
-                key = new string(chars);
-                return dictionary.TryGetValue(key, out result);
-            }
-
-            result = null;
-            return false;
+            return ObjectTypeDeserializer.Deserialize<T>(source.Variables, key);
         }
     }
 }

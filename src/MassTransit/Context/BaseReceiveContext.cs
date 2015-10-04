@@ -20,6 +20,7 @@ namespace MassTransit.Context
     using System.Threading;
     using System.Threading.Tasks;
     using Serialization;
+    using Util;
 
 
     public abstract class BaseReceiveContext :
@@ -46,7 +47,7 @@ namespace MassTransit.Context
 
             _cancellationTokenSource = new CancellationTokenSource();
 
-            _headers = new Lazy<Headers>(() => new JsonHeaders(HeaderProvider));
+            _headers = new Lazy<Headers>(() => new JsonHeaders(ObjectTypeDeserializer.Instance, HeaderProvider));
 
             _contentType = new Lazy<ContentType>(GetContentType);
 
