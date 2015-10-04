@@ -14,9 +14,7 @@ namespace MassTransit.Context
 {
     using System;
     using System.Collections.Generic;
-    using Newtonsoft.Json;
-    using Newtonsoft.Json.Linq;
-    using Serialization;
+    using Util;
 
 
     /// <summary>
@@ -27,67 +25,23 @@ namespace MassTransit.Context
     public class JsonHeaders :
         Headers
     {
-        readonly JsonSerializer _deserializer;
+        readonly IObjectTypeDeserializer _deserializer;
         readonly IHeaderProvider _provider;
 
-        public JsonHeaders(IHeaderProvider provider)
+        public JsonHeaders(IObjectTypeDeserializer deserializer, IHeaderProvider provider)
         {
+            if (deserializer == null)
+                throw new ArgumentNullException(nameof(deserializer));
             if (provider == null)
                 throw new ArgumentNullException(nameof(provider));
 
+            _deserializer = deserializer;
             _provider = provider;
-
-            _deserializer = JsonMessageSerializer.Deserializer;
         }
 
         public IEnumerable<KeyValuePair<string, object>> GetAll()
         {
             return _provider.GetAll();
-        }
-
-        T Headers.Get<T>(string key, T defaultValue)
-        {
-            if (key == null)
-                throw new ArgumentNullException(nameof(key));
-
-            object obj;
-            if (!_provider.TryGetHeader(key, out obj))
-                return defaultValue;
-
-            if (obj == null)
-                return defaultValue;
-
-            JToken token = obj as JToken ?? new JValue(obj);
-
-            if (token.Type == JTokenType.Null)
-                return defaultValue;
-
-            using (JsonReader jsonReader = token.CreateReader())
-                return (T)_deserializer.Deserialize(jsonReader, typeof(T)) ?? defaultValue;
-        }
-
-        T? Headers.Get<T>(string key, T? defaultValue)
-        {
-            if (key == null)
-                throw new ArgumentNullException(nameof(key));
-
-            object obj;
-            if (!_provider.TryGetHeader(key, out obj))
-                return defaultValue;
-
-            if (obj == null)
-                return defaultValue;
-
-            JToken token = obj as JToken ?? new JValue(obj);
-
-            if (token.Type == JTokenType.Null)
-                token = new JObject();
-
-            if (token.Type == JTokenType.Null)
-                return defaultValue;
-
-            using (JsonReader jsonReader = token.CreateReader())
-                return (T)_deserializer.Deserialize(jsonReader, typeof(T));
         }
 
         bool Headers.TryGetHeader(string key, out object value)
@@ -96,6 +50,16 @@ namespace MassTransit.Context
                 throw new ArgumentNullException(nameof(key));
 
             return _provider.TryGetHeader(key, out value);
+        }
+
+        T Headers.Get<T>(string key, T defaultValue)
+        {
+            return _deserializer.Deserialize(_provider, key, defaultValue);
+        }
+
+        T? Headers.Get<T>(string key, T? defaultValue)
+        {
+            return _deserializer.Deserialize(_provider, key, defaultValue);
         }
     }
 }

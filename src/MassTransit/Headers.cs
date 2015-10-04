@@ -27,6 +27,14 @@ namespace MassTransit
         IEnumerable<KeyValuePair<string, object>> GetAll();
 
         /// <summary>
+        /// If the specified header name is found, returns the value of the header as an object
+        /// </summary>
+        /// <param name="key">The header name</param>
+        /// <param name="value">The output header value</param>
+        /// <returns>True if the header was found, otherwise false</returns>
+        bool TryGetHeader(string key, out object value);
+
+        /// <summary>
         /// Returns the specified header as the type, returning a default value is the header is not found
         /// </summary>
         /// <typeparam name="T">The result type</typeparam>
@@ -45,13 +53,5 @@ namespace MassTransit
         /// <returns>The header value</returns>
         T? Get<T>(string key, T? defaultValue = default(T?))
             where T : struct;
-
-        /// <summary>
-        /// If the specified header name is found, returns the value of the header as an object
-        /// </summary>
-        /// <param name="key">The header name</param>
-        /// <param name="value">The output header value</param>
-        /// <returns>True if the header was found, otherwise false</returns>
-        bool TryGetHeader(string key, out object value);
     }
 }

@@ -13,8 +13,8 @@
 namespace MassTransit.Context
 {
     using System;
-    using System.Collections;
     using System.Collections.Generic;
+    using Util;
 
 
     public class DictionarySendHeaders :
@@ -27,7 +27,7 @@ namespace MassTransit.Context
             _headers = new Dictionary<string, object>();
         }
 
-        public void Set(string key, string value)
+        void SendHeaders.Set(string key, string value)
         {
             if (key == null)
                 throw new ArgumentNullException(nameof(key));
@@ -38,7 +38,7 @@ namespace MassTransit.Context
                 _headers[key] = value;
         }
 
-        public void Set(string key, object value)
+        void SendHeaders.Set(string key, object value)
         {
             if (key == null)
                 throw new ArgumentNullException(nameof(key));
@@ -49,19 +49,24 @@ namespace MassTransit.Context
                 _headers[key] = value;
         }
 
-        public bool TryGetHeader(string key, out object value)
+        bool Headers.TryGetHeader(string key, out object value)
         {
             return _headers.TryGetValue(key, out value);
         }
 
-        public IEnumerator<KeyValuePair<string, object>> GetEnumerator()
+        IEnumerable<KeyValuePair<string, object>> Headers.GetAll()
         {
-            return _headers.GetEnumerator();
+            return _headers;
         }
 
-        IEnumerator IEnumerable.GetEnumerator()
+        T Headers.Get<T>(string key, T defaultValue)
         {
-            return GetEnumerator();
+            return ObjectTypeDeserializer.Deserialize(_headers, key, defaultValue);
+        }
+
+        T? Headers.Get<T>(string key, T? defaultValue)
+        {
+            return ObjectTypeDeserializer.Deserialize(_headers, key, defaultValue);
         }
     }
 }

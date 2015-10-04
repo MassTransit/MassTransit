@@ -67,8 +67,10 @@ namespace MassTransit.RabbitMqTransport
 
                         properties.ContentType = context.ContentType.MediaType;
 
-                        properties.Headers = context.Headers
+                        properties.Headers = (properties.Headers ?? Enumerable.Empty<KeyValuePair<string, object>>())
+                            .Concat(context.Headers.GetAll())
                             .Where(x => x.Value != null && (x.Value is string || x.Value.GetType().IsValueType))
+                            .Distinct()
                             .ToDictionary(entry => entry.Key, entry => entry.Value);
                         properties.Headers["Content-Type"] = context.ContentType.MediaType;
 

@@ -101,7 +101,7 @@ namespace MassTransit.Serialization
         public Uri DestinationAddress => _destinationAddress ?? (_destinationAddress = GetHeaderUri(BinaryMessageSerializer.DestinationAddressKey));
         public Uri ResponseAddress => _responseAddress ?? (_responseAddress = GetHeaderUri(BinaryMessageSerializer.ResponseAddressKey));
         public Uri FaultAddress => _faultAddress ?? (_faultAddress = GetHeaderUri(BinaryMessageSerializer.FaultAddressKey));
-        public Headers Headers => _headers ?? (_headers = new StaticHeaders(_deserializer, _binaryHeaders));
+        public Headers Headers => _headers ?? (_headers = new StaticHeaders(_binaryHeaders));
         public HostInfo Host => _host ?? (_host = GetHeaderObject<HostInfo>(BinaryMessageSerializer.HostInfoKey));
         public CancellationToken CancellationToken => _receiveContext.CancellationToken;
         public ReceiveContext ReceiveContext => _receiveContext;

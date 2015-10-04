@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -16,19 +16,15 @@ namespace MassTransit.Serialization
     using System.Collections.Generic;
     using System.Linq;
     using System.Runtime.Remoting.Messaging;
-    using Newtonsoft.Json;
-    using Newtonsoft.Json.Linq;
 
 
     public class StaticHeaders :
         Headers
     {
-        readonly JsonSerializer _deserializer;
         readonly Header[] _headers;
 
-        public StaticHeaders(JsonSerializer deserializer, Header[] headers)
+        public StaticHeaders(Header[] headers)
         {
-            _deserializer = deserializer;
             _headers = headers;
         }
 
@@ -46,16 +42,9 @@ namespace MassTransit.Serialization
             if (!TryGetHeader(key, out obj))
                 return defaultValue;
 
-            if (obj == null)
-                return defaultValue;
+            var result = obj as T;
 
-            JToken token = obj as JToken ?? new JValue(obj);
-
-            if (token.Type == JTokenType.Null)
-                return defaultValue;
-
-            using (JsonReader jsonReader = token.CreateReader())
-                return (T)_deserializer.Deserialize(jsonReader, typeof(T)) ?? defaultValue;
+            return result ?? defaultValue;
         }
 
         T? Headers.Get<T>(string key, T? defaultValue)
@@ -70,16 +59,10 @@ namespace MassTransit.Serialization
             if (obj == null)
                 return defaultValue;
 
-            JToken token = obj as JToken ?? new JValue(obj);
+            if (obj is T)
+                return (T)obj;
 
-            if (token.Type == JTokenType.Null)
-                token = new JObject();
-
-            if (token.Type == JTokenType.Null)
-                return defaultValue;
-
-            using (JsonReader jsonReader = token.CreateReader())
-                return (T)_deserializer.Deserialize(jsonReader, typeof(T));
+            return defaultValue;
         }
 
         public bool TryGetHeader(string key, out object value)

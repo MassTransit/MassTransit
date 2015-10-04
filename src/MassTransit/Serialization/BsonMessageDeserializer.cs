@@ -18,6 +18,7 @@ namespace MassTransit.Serialization
     using System.Runtime.Serialization;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Bson;
+    using Util;
 
 
     public class BsonMessageDeserializer :
@@ -26,6 +27,8 @@ namespace MassTransit.Serialization
         readonly JsonSerializer _deserializer;
         readonly IPublishEndpointProvider _publishEndpoint;
         readonly ISendEndpointProvider _sendEndpointProvider;
+        readonly IObjectTypeDeserializer _objectTypeDeserializer;
+
 
         public BsonMessageDeserializer(JsonSerializer deserializer, ISendEndpointProvider sendEndpointProvider,
             IPublishEndpointProvider publishEndpoint)
@@ -33,6 +36,8 @@ namespace MassTransit.Serialization
             _deserializer = deserializer;
             _sendEndpointProvider = sendEndpointProvider;
             _publishEndpoint = publishEndpoint;
+
+            _objectTypeDeserializer = new ObjectTypeDeserializer(_deserializer);
         }
 
         void IProbeSite.Probe(ProbeContext context)
@@ -54,7 +59,7 @@ namespace MassTransit.Serialization
                     envelope = _deserializer.Deserialize<MessageEnvelope>(jsonReader);
                 }
 
-                return new JsonConsumeContext(_deserializer, _sendEndpointProvider, _publishEndpoint, receiveContext, envelope);
+                return new JsonConsumeContext(_deserializer, _objectTypeDeserializer, _sendEndpointProvider, _publishEndpoint, receiveContext, envelope);
             }
             catch (JsonSerializationException ex)
             {

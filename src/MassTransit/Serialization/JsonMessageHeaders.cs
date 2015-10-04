@@ -14,17 +14,16 @@ namespace MassTransit.Serialization
 {
     using System;
     using System.Collections.Generic;
-    using Newtonsoft.Json;
-    using Newtonsoft.Json.Linq;
+    using Util;
 
 
     public class JsonMessageHeaders :
         Headers
     {
-        readonly JsonSerializer _deserializer;
+        readonly IObjectTypeDeserializer _deserializer;
         readonly IDictionary<string, object> _headers;
 
-        public JsonMessageHeaders(JsonSerializer deserializer, IDictionary<string, object> headers)
+        public JsonMessageHeaders(IObjectTypeDeserializer deserializer, IDictionary<string, object> headers)
         {
             _deserializer = deserializer;
             _headers = headers ?? new Dictionary<string, object>();
@@ -35,59 +34,22 @@ namespace MassTransit.Serialization
             return _headers;
         }
 
-        public T Get<T>(string key, T defaultValue = default(T))
-            where T : class
-        {
-            if (key == null)
-                throw new ArgumentNullException(nameof(key));
-
-            object obj;
-            if (!_headers.TryGetValue(key, out obj))
-                return defaultValue;
-
-            if (obj == null)
-                return defaultValue;
-
-            JToken token = obj as JToken ?? new JValue(obj);
-
-            if (token.Type == JTokenType.Null)
-                return defaultValue;
-
-            using (JsonReader jsonReader = token.CreateReader())
-                return (T)_deserializer.Deserialize(jsonReader, typeof(T)) ?? defaultValue;
-        }
-
-        public T? Get<T>(string key, T? defaultValue)
-            where T : struct
-        {
-            if (key == null)
-                throw new ArgumentNullException(nameof(key));
-
-            object obj;
-            if (!_headers.TryGetValue(key, out obj))
-                return defaultValue;
-
-            if (obj == null)
-                return defaultValue;
-
-            JToken token = obj as JToken ?? new JValue(obj);
-
-            if (token.Type == JTokenType.Null)
-                token = new JObject();
-
-            if (token.Type == JTokenType.Null)
-                return defaultValue;
-
-            using (JsonReader jsonReader = token.CreateReader())
-                return (T)_deserializer.Deserialize(jsonReader, typeof(T));
-        }
-
         public bool TryGetHeader(string key, out object value)
         {
             if (key == null)
                 throw new ArgumentNullException(nameof(key));
 
             return _headers.TryGetValue(key, out value);
+        }
+
+        T Headers.Get<T>(string key, T defaultValue)
+        {
+            return _deserializer.Deserialize(_headers, key, defaultValue);
+        }
+
+        public T? Get<T>(string key, T? defaultValue = null) where T : struct
+        {
+            return _deserializer.Deserialize(_headers, key, defaultValue);
         }
     }
 }

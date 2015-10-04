@@ -70,7 +70,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         {
             ConsumeContext<PingMessage> context = await _errorHandler;
 
-            context.ReceiveContext.TransportHeaders.Get<string>("MT-Host-MachineName").ShouldBe(HostMetadataCache.Host.MachineName);
+            context.ReceiveContext.TransportHeaders.Get("MT-Host-MachineName", (string)null).ShouldBe(HostMetadataCache.Host.MachineName);
         }
 
         [Test]
@@ -78,7 +78,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         {
             ConsumeContext<PingMessage> context = await _errorHandler;
 
-            context.ReceiveContext.TransportHeaders.Get<string>("MT-Reason").ShouldBe("fault");
+            context.ReceiveContext.TransportHeaders.Get("MT-Reason", (string)null).ShouldBe("fault");
         }
 
         [Test]
@@ -86,7 +86,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         {
             ConsumeContext<PingMessage> context = await _errorHandler;
 
-            context.ReceiveContext.TransportHeaders.Get<string>("MT-Fault-Message").ShouldBe("This is fine, forcing death");
+            context.ReceiveContext.TransportHeaders.Get("MT-Fault-Message", (string)null).ShouldBe("This is fine, forcing death");
         }
 
         [Test]
