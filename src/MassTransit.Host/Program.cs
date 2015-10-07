@@ -15,6 +15,7 @@ namespace MassTransit.Host
     using System;
     using System.IO;
     using log4net.Config;
+    using Log4NetIntegration.Logging;
     using Topshelf;
     using Topshelf.Logging;
 
@@ -44,6 +45,7 @@ namespace MassTransit.Host
                 XmlConfigurator.ConfigureAndWatch(configFile);
 
             Log4NetLogWriterFactory.Use();
+            Log4NetLogger.Use();
         }
     }
 }
