@@ -56,18 +56,20 @@ namespace MassTransit.Host
                     .Where(x => !x.File.StartsWith("NewId.", StringComparison.OrdinalIgnoreCase))
                     .Where(x => !x.File.StartsWith("Newtonsoft.", StringComparison.OrdinalIgnoreCase))
                     .Where(x => !x.File.StartsWith("log4net.", StringComparison.OrdinalIgnoreCase))
+                    .Where(x => !x.File.StartsWith("NLog.", StringComparison.OrdinalIgnoreCase))
                     .Where(x => !x.File.StartsWith("Autofac.", StringComparison.OrdinalIgnoreCase))
                     .Where(x => !x.File.StartsWith("RabbitMQ.", StringComparison.OrdinalIgnoreCase))
+                    .Where(x => !x.File.StartsWith("Microsoft.", StringComparison.OrdinalIgnoreCase))
                     .Select(x => x.Path)
                     .ToList();
 
                 var registrations = assemblies
                     .Select(Assembly.ReflectionOnlyLoadFrom)
-                    .SelectMany(x => x.GetTypes().Select(y => new {Assembly = x, Type = y}))
-                    .Where(x => IsSupportedType(x.Type))
-                    .GroupBy(x => x.Assembly)
-                    .Select(x => new {Assembly = Assembly.Load(x.Key.GetName()), FoundTypes = x})
-                    .Select(x => new AssemblyRegistration(x.Assembly, x.FoundTypes.Select(y => x.Assembly.GetType(y.Type.FullName)).ToArray()))
+                    .SelectMany(TrySelectAllTypes)
+                    .Where(x => IsSupportedType(x.Item2))
+                    .GroupBy(x => x.Item1)
+                    .Select(x => new { Assembly = Assembly.Load(x.Key.GetName()), FoundTypes = x })
+                    .Select(x => new AssemblyRegistration(x.Assembly, x.FoundTypes.Select(y => x.Assembly.GetType(y.Item2.FullName)).ToArray()))
                     .ToList();
 
                 return registrations;
@@ -94,10 +96,10 @@ namespace MassTransit.Host
 
                 var busFactoryType = assemblies
                     .Select(Assembly.ReflectionOnlyLoadFrom)
-                    .SelectMany(x => x.GetTypes().Select(y => new {Assembly = x, Type = y}))
-                    .Where(x => IsHostBusFactoryType(x.Type))
-                    .Select(x => new {Assembly = Assembly.Load(x.Assembly.GetName()), x.Type})
-                    .Select(x => x.Assembly.GetType(x.Type.FullName))
+                    .SelectMany(TrySelectAllTypes)
+                    .Where(x => IsHostBusFactoryType(x.Item2))
+                    .Select(x => new { Assembly = Assembly.Load(x.Item1.GetName()), x.Item2 })
+                    .Select(x => x.Assembly.GetType(x.Item2.FullName))
                     .FirstOrDefault();
 
                 return busFactoryType;
@@ -140,6 +142,19 @@ namespace MassTransit.Host
         Assembly CurrentDomain_ReflectionOnlyAssemblyResolve(object sender, ResolveEventArgs args)
         {
             return Assembly.ReflectionOnlyLoad(args.Name);
+        }
+
+        private IEnumerable<Tuple<Assembly, Type>> TrySelectAllTypes(Assembly x)
+        {
+            try
+            {
+                return x.GetTypes().Select(y => Tuple.Create(x, y));
+            }
+            catch (ReflectionTypeLoadException e)
+            {
+                _log.Warn($"Exception loading types from assembly: {x}", e);
+                return Enumerable.Empty<Tuple<Assembly, Type>>();
+            }
         }
     }
 }
