@@ -63,6 +63,9 @@
     <Compile Include="AzureBusFactory.cs" />
     <Compile Include="Configuration\ReceiveEndpointSettings.cs" />
     <Compile Include="Configuration\ServiceBusReceiveEndpointConfigurator.cs" />
+    <Compile Include="Hosting\ServiceBusHostBusFactory.cs" />
+    <Compile Include="Hosting\ServiceBusServiceConfigurator.cs" />
+    <Compile Include="Hosting\ServiceBusSettings.cs" />
     <Compile Include="IQueueConfigurator.cs" />
     <Compile Include="NamespaceManagerExtensions.cs" />
     <Compile Include="ServiceBusAddressExtensions.cs" />
