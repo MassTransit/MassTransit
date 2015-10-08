@@ -29,7 +29,7 @@ namespace MassTransit.AzureServiceBusTransport.Hosting
         {
             ServiceBusSettings settings;
             if (!settingsProvider.TryGetSettings("ServiceBus", out settings))
-                throw new ConfigurationException("The SersviceBus settings were not available");
+                throw new ConfigurationException("The ServiceBus settings were not available");
 
             _hostSettings = new SettingsAdapter(settings);
 
