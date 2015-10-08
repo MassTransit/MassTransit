@@ -32,7 +32,10 @@ namespace MassTransit.AzureServiceBusTransport.Hosting
                 throw new ConfigurationException("The ServiceBus settings were not available");
 
             _hostSettings = new SettingsAdapter(settings);
+        }
 
+        public IBusControl CreateBus(IBusServiceConfigurator busServiceConfigurator, string serviceName)
+        {
             if (string.IsNullOrEmpty(_hostSettings.Namespace))
                 throw new ConfigurationException("The ServiceBus Namespace setting has not been configured");
 
@@ -41,10 +44,7 @@ namespace MassTransit.AzureServiceBusTransport.Hosting
 
             if (string.IsNullOrEmpty(_hostSettings.SharedAccessKey))
                 throw new ConfigurationException("The ServiceBus SharedAccessKey setting has not been configured");
-        }
 
-        public IBusControl CreateBus(IBusServiceConfigurator busServiceConfigurator, string serviceName)
-        {
             return AzureBusFactory.CreateUsingServiceBus(configurator =>
             {
                 serviceName = serviceName.ToLowerInvariant().Trim().Replace(" ", "_");
