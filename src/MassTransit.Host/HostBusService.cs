@@ -46,7 +46,7 @@ namespace MassTransit.Host
 
             try
             {
-                _busControl = _hostBusFactory.CreateBus(_serviceConfigurator);
+                _busControl = _hostBusFactory.CreateBus(_serviceConfigurator, _serviceName);
 
                 _busHandle = _busControl.Start();
 

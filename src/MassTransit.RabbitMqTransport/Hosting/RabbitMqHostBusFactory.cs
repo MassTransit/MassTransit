@@ -33,7 +33,7 @@ namespace MassTransit.RabbitMqTransport.Hosting
             _hostSettings = new SettingsAdapter(settings);
         }
 
-        public IBusControl CreateBus(IBusServiceConfigurator busServiceConfigurator)
+        public IBusControl CreateBus(IBusServiceConfigurator busServiceConfigurator, string serviceName)
         {
             return RabbitMqBusFactory.Create(configurator =>
             {

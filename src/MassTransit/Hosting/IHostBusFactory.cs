@@ -14,6 +14,6 @@ namespace MassTransit.Hosting
 {
     public interface IHostBusFactory
     {
-        IBusControl CreateBus(IBusServiceConfigurator busServiceConfigurator);
+        IBusControl CreateBus(IBusServiceConfigurator busServiceConfigurator, string serviceName);
     }
 }
