@@ -18,10 +18,50 @@ namespace MassTransit.AzureServiceBusTransport
     public interface IQueueConfigurator
     {
         /// <summary>
-        /// Specify the queue should be durable (survives broker restart) or in-memory
+        /// True if the queue should be deleted if idle
+        /// </summary>
+        TimeSpan AutoDeleteOnIdle { set; }
+
+        /// <summary>
+        /// Set the default message time to live in the queue
+        /// </summary>
+        TimeSpan DefaultMessageTimeToLive { set; }
+
+        /// <summary>
+        /// Sets the TimeSpan structure that defines the duration of the duplicate detection history. The default value is 10 minutes
+        /// </summary>
+        TimeSpan DuplicateDetectionHistoryTimeWindow { set; }
+
+        /// <summary>
+        /// Sets a value that indicates whether server-side batched operations are enabled
+        /// </summary>
+        bool EnableBatchedOperations { set; }
+
+        /// <summary>
+        /// Move messages to the dead letter queue on expiration (time to live exceeded)
+        /// </summary>
+        bool EnableDeadLetteringOnMessageExpiration { set; }
+
+        /// <summary>
+        /// If express is enabled, messages are not persisted to durable storage
         /// </summary>
         /// <value>True for a durable queue, False for an in-memory queue</value>
         bool EnableExpress { set; }
+
+        /// <summary>
+        /// Sets a value that indicates whether the queue to be partitioned across multiple message brokers is enabled
+        /// </summary>
+        bool EnablePartitioning { set; }
+
+        /// <summary>
+        /// Sets the path to the recipient to which the dead lettered message is forwarded.
+        /// </summary>
+        string ForwardDeadLetteredMessagesTo { set; }
+
+        /// <summary>
+        /// Sets a value that indicates whether the message is anonymous accessible.
+        /// </summary>
+        bool IsAnonymousAccessible { set; }
 
         /// <summary>
         /// Specify the lock duration for messages read from the queue
@@ -30,25 +70,34 @@ namespace MassTransit.AzureServiceBusTransport
         TimeSpan LockDuration { set; }
 
         /// <summary>
-        /// Move messages to the dead letter queue on expiration (time to live exceeded)
+        /// Sets the maximum delivery count. A message is automatically deadlettered after this number of deliveries.
         /// </summary>
-        bool EnableDeadLetteringOnMessageExpiration { set; }
+        int MaxDeliveryCount { set; }
 
         /// <summary>
-        /// Set the default message time to live in the queue
+        /// Sets the maximum size of the queue in megabytes, which is the size of memory allocated for the queue
         /// </summary>
-        TimeSpan DefaultMessageTimeToLive { set; }
+        int MaxSizeInMegabytes { set; }
+
+        /// <summary>
+        /// Sets the value indicating if this queue requires duplicate detection.
+        /// </summary>
+        bool RequiresDuplicateDetection { set; }
+
+        /// <summary>
+        /// Sets a value that indicates whether the queue supports ordering.
+        /// </summary>
+        bool SupportOrdering { set; }
+
+        /// <summary>
+        /// Sets the user metadata.
+        /// </summary>
+        string UserMetadata { set; }
 
         /// <summary>
         /// Enable duplicate detection on the queue, specifying the time window
         /// </summary>
         /// <param name="historyTimeWindow">The time window for duplicate history</param>
         void EnableDuplicateDetection(TimeSpan historyTimeWindow);
-
-        /// <summary>
-        /// True if the queue should be deleted if idle
-        /// </summary>
-        TimeSpan AutoDeleteOnIdle { set; }
-
     }
 }

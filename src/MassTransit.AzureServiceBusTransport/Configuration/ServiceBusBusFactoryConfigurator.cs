@@ -64,63 +64,6 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
             return builder.Build();
         }
 
-        public bool EnableExpress
-        {
-            set { _settings.QueueDescription.EnableExpress = value; }
-        }
-
-        public TimeSpan LockDuration
-        {
-            set { _settings.QueueDescription.LockDuration = value; }
-        }
-
-        public bool EnableDeadLetteringOnMessageExpiration
-        {
-            set { _settings.QueueDescription.EnableDeadLetteringOnMessageExpiration = value; }
-        }
-
-        public TimeSpan DefaultMessageTimeToLive
-        {
-            set { _settings.QueueDescription.DefaultMessageTimeToLive = value; }
-        }
-
-        public void EnableDuplicateDetection(TimeSpan historyTimeWindow)
-        {
-            _settings.QueueDescription.RequiresDuplicateDetection = true;
-            _settings.QueueDescription.DuplicateDetectionHistoryTimeWindow = historyTimeWindow;
-        }
-
-        public TimeSpan AutoDeleteOnIdle
-        {
-            set { _settings.QueueDescription.AutoDeleteOnIdle = value; }
-        }
-
-        public int PrefetchCount
-        {
-            set { _settings.PrefetchCount = value; }
-        }
-
-        public int MaxConcurrentCalls
-        {
-            set
-            {
-                _settings.MaxConcurrentCalls = value;
-                if (_settings.MaxConcurrentCalls > _settings.PrefetchCount)
-                    _settings.PrefetchCount = _settings.MaxConcurrentCalls;
-            }
-        }
-
-        public IServiceBusHost Host(ServiceBusHostSettings settings)
-        {
-            if (settings == null)
-                throw new ArgumentNullException(nameof(settings));
-
-            var host = new ServiceBusHost(settings);
-            _hosts.Add(host);
-
-            return host;
-        }
-
         public void AddBusFactorySpecification(IBusFactorySpecification configurator)
         {
             if (configurator == null)
@@ -137,14 +80,121 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
             ReceiveEndpoint(_hosts[0], queueName, configureEndpoint);
         }
 
+        void IConsumePipeConfigurator.AddPipeSpecification<T>(IPipeSpecification<ConsumeContext<T>> specification)
+        {
+            _consumePipeSpecification.Add(specification);
+        }
+
         void IPipeConfigurator<ConsumeContext>.AddPipeSpecification(IPipeSpecification<ConsumeContext> specification)
         {
             _consumePipeSpecification.Add(specification);
         }
 
-        void IConsumePipeConfigurator.AddPipeSpecification<T>(IPipeSpecification<ConsumeContext<T>> specification)
+        public TimeSpan AutoDeleteOnIdle
         {
-            _consumePipeSpecification.Add(specification);
+            set { _settings.QueueDescription.AutoDeleteOnIdle = value; }
+        }
+
+        public TimeSpan DefaultMessageTimeToLive
+        {
+            set { _settings.QueueDescription.DefaultMessageTimeToLive = value; }
+        }
+
+        public TimeSpan DuplicateDetectionHistoryTimeWindow
+        {
+            set { _settings.QueueDescription.DuplicateDetectionHistoryTimeWindow = value; }
+        }
+
+        public bool EnableBatchedOperations
+        {
+            set { _settings.QueueDescription.EnableBatchedOperations = value; }
+        }
+
+        public bool EnableDeadLetteringOnMessageExpiration
+        {
+            set { _settings.QueueDescription.EnableDeadLetteringOnMessageExpiration = value; }
+        }
+
+        public void EnableDuplicateDetection(TimeSpan historyTimeWindow)
+        {
+            _settings.QueueDescription.RequiresDuplicateDetection = true;
+            _settings.QueueDescription.DuplicateDetectionHistoryTimeWindow = historyTimeWindow;
+        }
+
+        public bool EnableExpress
+        {
+            set { _settings.QueueDescription.EnableExpress = value; }
+        }
+
+        public bool EnablePartitioning
+        {
+            set { _settings.QueueDescription.EnablePartitioning = value; }
+        }
+
+        public string ForwardDeadLetteredMessagesTo
+        {
+            set { _settings.QueueDescription.ForwardDeadLetteredMessagesTo = value; }
+        }
+
+        public bool IsAnonymousAccessible
+        {
+            set { _settings.QueueDescription.IsAnonymousAccessible = value; }
+        }
+
+        public TimeSpan LockDuration
+        {
+            set { _settings.QueueDescription.LockDuration = value; }
+        }
+
+        public int MaxDeliveryCount
+        {
+            set { _settings.QueueDescription.MaxDeliveryCount = value; }
+        }
+
+        public int MaxSizeInMegabytes
+        {
+            set { _settings.QueueDescription.MaxSizeInMegabytes = value; }
+        }
+
+        public bool RequiresDuplicateDetection
+        {
+            set { _settings.QueueDescription.RequiresDuplicateDetection = value; }
+        }
+
+        public bool SupportOrdering
+        {
+            set { _settings.QueueDescription.SupportOrdering = value; }
+        }
+
+        public string UserMetadata
+        {
+            set { _settings.QueueDescription.UserMetadata = value; }
+        }
+
+        public IServiceBusHost Host(ServiceBusHostSettings settings)
+        {
+            if (settings == null)
+                throw new ArgumentNullException(nameof(settings));
+
+            var host = new ServiceBusHost(settings);
+            _hosts.Add(host);
+
+            return host;
+        }
+
+        public int MaxConcurrentCalls
+        {
+            set
+            {
+                _settings.MaxConcurrentCalls = value;
+                if (_settings.MaxConcurrentCalls > _settings.PrefetchCount)
+                    _settings.PrefetchCount = _settings.MaxConcurrentCalls;
+            }
+        }
+
+        public int PrefetchCount
+        {
+            set { _settings.PrefetchCount = value; }
         }
 
         public void ReceiveEndpoint(IServiceBusHost host, string queueName, Action<IServiceBusReceiveEndpointConfigurator> configure)
