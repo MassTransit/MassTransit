@@ -37,6 +37,15 @@ namespace MassTransit.RabbitMqTransport.Contexts
         {
             var receiveSettings = _context.ReceiveContext.GetPayload<ReceiveSettings>();
 
+            var delayExchangeAddress = GetDelayExchangeAddress(receiveSettings);
+
+            ISendEndpoint delayEndpoint = await _context.GetSendEndpoint(delayExchangeAddress);
+
+            await delayEndpoint.Send(_context.Message, _context.CreateCopyContextPipe((x, y) => UpdateDeliveryContext(x, y, delay)));
+        }
+
+        Uri GetDelayExchangeAddress(ReceiveSettings receiveSettings)
+        {
             string delayExchangeName = receiveSettings.QueueName + "_delay";
             var sendSettings = new RabbitMqSendSettings(delayExchangeName, "x-delayed-message", receiveSettings.Durable, receiveSettings.AutoDelete);
 
@@ -46,19 +55,15 @@ namespace MassTransit.RabbitMqTransport.Contexts
 
             var modelContext = _context.ReceiveContext.GetPayload<ModelContext>();
 
-            Uri delayExchangeAddress = modelContext.ConnectionContext.HostSettings.GetSendAddress(sendSettings);
-
-            ISendEndpoint delayEndpoint = await _context.GetSendEndpoint(delayExchangeAddress);
-
-            await delayEndpoint.Send(_context.Message, _context.CreateCopyContextPipe((x, y) => UpdateDeliveryContext(x, y, delay)));
+            return modelContext.ConnectionContext.HostSettings.GetSendAddress(sendSettings);
         }
 
         static void UpdateDeliveryContext(ConsumeContext context, SendContext sendContext, TimeSpan delay)
         {
-            int? previousDeliveryCount = context.Headers.Get("MT-Redelivery-Count", default(int?));
+            int? previousDeliveryCount = context.Headers.Get(MessageHeaders.RedeliveryCount, default(int?));
             if (!previousDeliveryCount.HasValue)
                 previousDeliveryCount = 0;
-            sendContext.Headers.Set("MT-Redelivery-Count", previousDeliveryCount.Value + 1);
+            sendContext.Headers.Set(MessageHeaders.RedeliveryCount, previousDeliveryCount.Value + 1);
 
             var rabbitSendContext = sendContext.GetPayload<RabbitMqSendContext>();
 
