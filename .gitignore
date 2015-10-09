@@ -41,3 +41,5 @@ doc/build/*
 
 # osx noise
 .DS_Store
+*.DotSettings
+/src/MassTransit.SimpleInjectorIntegration/MassTransit.SimpleInjectorIntegration.csproj.nuspec
