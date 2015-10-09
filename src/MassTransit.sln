@@ -80,6 +80,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.EntityFramework
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.EntityFrameworkIntegration.Tests", "Persistence\MassTransit.EntityFrameworkIntegration.Tests\MassTransit.EntityFrameworkIntegration.Tests.csproj", "{B6EA7211-7706-4EB1-B91C-B4C959F0CB29}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.SimpleInjectorIntegration", "Containers\MassTransit.SimpleInjectorIntegration\MassTransit.SimpleInjectorIntegration.csproj", "{259E9F30-40EC-47B0-83AE-A2271EF3421D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -347,6 +349,18 @@ Global
 		{B6EA7211-7706-4EB1-B91C-B4C959F0CB29}.ReleaseUnsigned|Any CPU.Build.0 = Release|Any CPU
 		{B6EA7211-7706-4EB1-B91C-B4C959F0CB29}.ReleaseUnsigned|x86.ActiveCfg = Release|Any CPU
 		{B6EA7211-7706-4EB1-B91C-B4C959F0CB29}.ReleaseUnsigned|x86.Build.0 = Release|Any CPU
+		{259E9F30-40EC-47B0-83AE-A2271EF3421D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{259E9F30-40EC-47B0-83AE-A2271EF3421D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{259E9F30-40EC-47B0-83AE-A2271EF3421D}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{259E9F30-40EC-47B0-83AE-A2271EF3421D}.Debug|x86.Build.0 = Debug|Any CPU
+		{259E9F30-40EC-47B0-83AE-A2271EF3421D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{259E9F30-40EC-47B0-83AE-A2271EF3421D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{259E9F30-40EC-47B0-83AE-A2271EF3421D}.Release|x86.ActiveCfg = Release|Any CPU
+		{259E9F30-40EC-47B0-83AE-A2271EF3421D}.Release|x86.Build.0 = Release|Any CPU
+		{259E9F30-40EC-47B0-83AE-A2271EF3421D}.ReleaseUnsigned|Any CPU.ActiveCfg = Release|Any CPU
+		{259E9F30-40EC-47B0-83AE-A2271EF3421D}.ReleaseUnsigned|Any CPU.Build.0 = Release|Any CPU
+		{259E9F30-40EC-47B0-83AE-A2271EF3421D}.ReleaseUnsigned|x86.ActiveCfg = Release|Any CPU
+		{259E9F30-40EC-47B0-83AE-A2271EF3421D}.ReleaseUnsigned|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -373,6 +387,7 @@ Global
 		{989BA511-C126-4C88-A74B-BAD83DF2291B} = {FDC1A760-D4E5-44F4-B0D9-C19F2E14253A}
 		{442E2B78-0237-458D-B32B-CEC94413F44D} = {56F516D7-BC3C-49E1-A639-83C5F14953F8}
 		{B6EA7211-7706-4EB1-B91C-B4C959F0CB29} = {56F516D7-BC3C-49E1-A639-83C5F14953F8}
+		{259E9F30-40EC-47B0-83AE-A2271EF3421D} = {6C61507E-FF16-45C8-8FE4-350069D9B4C1}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		EnterpriseLibraryConfigurationToolBinariesPath = packages\Unity.2.1.505.2\lib\NET35
