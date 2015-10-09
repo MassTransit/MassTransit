@@ -25,7 +25,7 @@ namespace MassTransit.Context
         where TRequest : class
     {
         readonly IBus _bus;
-        readonly List<HandlerHandle> _connections;
+        readonly Dictionary<Type, RequestHandlerHandle> _connections;
         readonly SendContext<TRequest> _context;
         readonly Guid _requestId;
         readonly TaskCompletionSource<TRequest> _requestTask;
@@ -42,7 +42,7 @@ namespace MassTransit.Context
             if (!context.RequestId.HasValue)
                 throw new ArgumentException("The requestId must be initialized");
 
-            _connections = new List<HandlerHandle>();
+            _connections = new Dictionary<Type, RequestHandlerHandle>();
 
             _requestId = context.RequestId.Value;
             _bus = bus;
@@ -62,7 +62,9 @@ namespace MassTransit.Context
             }
         }
 
-        Task RequestContext.Task => _requestTask.Task;
+        public IDictionary<Type, RequestHandlerHandle> Connections => _connections;
+
+        public Task Task => _requestTask.Task;
 
         Uri SendContext.SourceAddress
         {
@@ -169,6 +171,8 @@ namespace MassTransit.Context
             set { _timeout = value; }
         }
 
+        Task<TRequest> RequestContext<TRequest>.Task => _requestTask.Task;
+
         void RequestContext.UseCurrentSynchronizationContext()
         {
             _taskScheduler = TaskScheduler.FromCurrentSynchronizationContext();
@@ -181,13 +185,19 @@ namespace MassTransit.Context
 
         void RequestContext.Watch<T>(MessageHandler<T> handler)
         {
+            if (_connections.ContainsKey(typeof(T)))
+                throw new RequestException($"Only one handler of type {TypeMetadataCache<T>.ShortName} can be registered");
+
             ConnectHandle connectHandle = _bus.ConnectRequestHandler(_requestId, handler);
 
-            _connections.Add(new HandlerHandle<T>(connectHandle));
+            _connections.Add(typeof(T), new RequestHandlerHandle<T>(connectHandle));
         }
 
         Task<T> RequestContext.Handle<T>(MessageHandler<T> handler)
         {
+            if (_connections.ContainsKey(typeof(T)))
+                throw new RequestException($"Only one handler of type {TypeMetadataCache<T>.ShortName} can be registered");
+
             var source = new TaskCompletionSource<T>();
 
             MessageHandler<T> messageHandler = async context =>
@@ -210,13 +220,16 @@ namespace MassTransit.Context
 
             ConnectHandle connectHandle = _bus.ConnectRequestHandler(_requestId, messageHandler);
 
-            _connections.Add(new HandlerHandle<T>(connectHandle, source));
+            _connections.Add(typeof(T), new RequestHandlerHandle<T>(connectHandle, source));
 
             return source.Task;
         }
 
         Task<T> RequestContext.Handle<T>()
         {
+            if (_connections.ContainsKey(typeof(T)))
+                throw new RequestException($"Only one handler of type {TypeMetadataCache<T>.ShortName} can be registered");
+
             var source = new TaskCompletionSource<T>();
 
             MessageHandler<T> messageHandler = context =>
@@ -239,7 +252,7 @@ namespace MassTransit.Context
 
             ConnectHandle connectHandle = _bus.ConnectRequestHandler(_requestId, messageHandler);
 
-            _connections.Add(new HandlerHandle<T>(connectHandle, source));
+            _connections.Add(typeof(T), new RequestHandlerHandle<T>(connectHandle, source));
 
             return source.Task;
         }
@@ -268,7 +281,7 @@ namespace MassTransit.Context
 
             ConnectHandle connectHandle = _bus.ConnectRequestHandler(_requestId, messageHandler);
 
-            _connections.Add(new HandlerHandle<Fault<TRequest>>(connectHandle, source));
+            _connections.Add(typeof(Fault<TRequest>), new RequestHandlerHandle<Fault<TRequest>>(connectHandle, source));
         }
 
         void TimeoutExpired()
@@ -281,11 +294,11 @@ namespace MassTransit.Context
 
             var timeoutException = new RequestTimeoutException(_requestId.ToString());
 
-            _connections.ForEach(x =>
+            foreach (var handle in _connections.Values)
             {
-                x.TrySetException(timeoutException);
-                x.Disconnect();
-            });
+                handle.TrySetException(timeoutException);
+                handle.Disconnect();
+            }
 
             _requestTask.TrySetException(timeoutException);
         }
@@ -298,11 +311,11 @@ namespace MassTransit.Context
                 _timeoutToken = null;
             }
 
-            _connections.ForEach(x =>
+            foreach (var handle in _connections.Values)
             {
-                x.TrySetCanceled();
-                x.Disconnect();
-            });
+                handle.TrySetCanceled();
+                handle.Disconnect();
+            }
 
             _requestTask.TrySetResult(_context.Message);
         }
@@ -314,40 +327,32 @@ namespace MassTransit.Context
 
         void Fail(Exception ex)
         {
-            _connections.ForEach(x =>
+            foreach (var handle in _connections.Values)
             {
-                x.TrySetException(ex);
-                x.Disconnect();
-            });
+                handle.TrySetException(ex);
+                handle.Disconnect();
+            }
 
             _requestTask.TrySetException(ex);
         }
 
 
-        interface HandlerHandle :
-            ConnectHandle
-        {
-            void TrySetException(Exception exception);
-            void TrySetCanceled();
-        }
-
-
-        class HandlerHandle<T> :
-            HandlerHandle
+        class RequestHandlerHandle<TResponse> :
+            RequestHandlerHandle
         {
             readonly ConnectHandle _handle;
-            readonly TaskCompletionSource<T> _source;
+            readonly TaskCompletionSource<TResponse> _source;
 
-            public HandlerHandle(ConnectHandle handle, TaskCompletionSource<T> source)
+            public RequestHandlerHandle(ConnectHandle handle, TaskCompletionSource<TResponse> source)
             {
                 _handle = handle;
                 _source = source;
             }
 
-            public HandlerHandle(ConnectHandle handle)
+            public RequestHandlerHandle(ConnectHandle handle)
             {
                 _handle = handle;
-                _source = new TaskCompletionSource<T>(TaskCreationOptions.None);
+                _source = new TaskCompletionSource<TResponse>(TaskCreationOptions.None);
             }
 
             public void Dispose()
@@ -368,6 +373,11 @@ namespace MassTransit.Context
             public void TrySetCanceled()
             {
                 _source.TrySetCanceled();
+            }
+
+            public Task<T> GetTask<T>()
+            {
+                return _source.Task as Task<T>;
             }
         }
     }

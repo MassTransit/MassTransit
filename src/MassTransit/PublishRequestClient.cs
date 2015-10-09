@@ -19,31 +19,27 @@ namespace MassTransit
 
 
     /// <summary>
-    /// Implements a request client that uses specified endpoint to send the request and return the
-    /// response task.
+    /// Implements a request client that allows a message to be published, versus sending to a specific endpoint
     /// </summary>
     /// <typeparam name="TRequest">The request message type</typeparam>
     /// <typeparam name="TResponse">The response message type</typeparam>
-    public class MessageRequestClient<TRequest, TResponse> :
+    public class PublishRequestClient<TRequest, TResponse> :
         IRequestClient<TRequest, TResponse>
         where TRequest : class
         where TResponse : class
     {
         readonly IBus _bus;
-        readonly Lazy<Task<ISendEndpoint>> _requestEndpoint;
         readonly TimeSpan _timeout;
 
         /// <summary>
         /// Creates a message request client for the bus and endpoint specified
         /// </summary>
         /// <param name="bus">The bus instance</param>
-        /// <param name="address">The service endpoint address</param>
         /// <param name="timeout">The request timeout</param>
-        public MessageRequestClient(IBus bus, Uri address, TimeSpan timeout)
+        public PublishRequestClient(IBus bus, TimeSpan timeout)
         {
             _bus = bus;
             _timeout = timeout;
-            _requestEndpoint = new Lazy<Task<ISendEndpoint>>(async () => await _bus.GetSendEndpoint(address));
         }
 
         async Task<TResponse> IRequestClient<TRequest, TResponse>.Request(TRequest request, CancellationToken cancellationToken)
@@ -60,9 +56,7 @@ namespace MassTransit
                 responseTask = x.Handle<TResponse>();
             });
 
-            ISendEndpoint endpoint = await _requestEndpoint.Value.ConfigureAwait(false);
-
-            await endpoint.Send(request, pipe, cancellationToken).ConfigureAwait(false);
+            await _bus.Publish(request, pipe, cancellationToken).ConfigureAwait(false);
 
             return await responseTask.ConfigureAwait(false);
         }

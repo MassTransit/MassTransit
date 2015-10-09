@@ -20,11 +20,15 @@ namespace MassTransit
     /// Sending of a request, allowing specification of response handlers, etc.
     /// </summary>
     /// <typeparam name="TRequest"></typeparam>
-    public interface RequestContext<out TRequest> :
+    public interface RequestContext<TRequest> :
         SendContext<TRequest>,
         RequestContext
         where TRequest : class
     {
+        /// <summary>
+        /// The request Task
+        /// </summary>
+        new Task<TRequest> Task { get; }
     }
 
 
