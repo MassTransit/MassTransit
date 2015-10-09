@@ -118,7 +118,6 @@ namespace MassTransit.RabbitMqTransport.Pipeline
             context.GetOrAddPayload(() => _receiveSettings);
             context.GetOrAddPayload(() => _model);
 
-            Exception exception = null;
             try
             {
                 if (!_pending.TryAdd(deliveryTag, context))
@@ -139,7 +138,8 @@ namespace MassTransit.RabbitMqTransport.Pipeline
             }
             catch (Exception ex)
             {
-                exception = ex;
+                await _receiveObserver.ReceiveFault(context, ex);
+
                 _model.BasicNack(deliveryTag, false, true);
             }
             finally
@@ -149,9 +149,6 @@ namespace MassTransit.RabbitMqTransport.Pipeline
                 RabbitMqReceiveContext ignored;
                 _pending.TryRemove(deliveryTag, out ignored);
             }
-
-            if (exception != null)
-                await _receiveObserver.ReceiveFault(context, exception);
         }
 
         IModel IBasicConsumer.Model => _model.Model;

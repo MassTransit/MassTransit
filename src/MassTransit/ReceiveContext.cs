@@ -25,12 +25,6 @@ namespace MassTransit
     public interface ReceiveContext :
         PipeContext
     {
-        /// <summary>
-        /// Returns the message body as a stream that can be deserialized. The stream
-        /// must be disposed by the caller, a reference is not retained
-        /// </summary>
-        Stream GetBody();
-
         // the amount of time elapsed since the message was read from the queue
         TimeSpan ElapsedTime { get; }
 
@@ -68,6 +62,12 @@ namespace MassTransit
         bool IsFaulted { get; }
 
         /// <summary>
+        /// Returns the message body as a stream that can be deserialized. The stream
+        /// must be disposed by the caller, a reference is not retained
+        /// </summary>
+        Stream GetBody();
+
+        /// <summary>
         /// Notify that a message has been consumed from the received context
         /// </summary>
         /// <param name="context">The consume context of the message</param>
@@ -85,6 +85,12 @@ namespace MassTransit
         /// <param name="exception">The exception that occurred</param>
         Task NotifyFaulted<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType, Exception exception)
             where T : class;
+
+        /// <summary>
+        /// Notify that a message receive faulted outside of the message consumer
+        /// </summary>
+        /// <param name="exception">The exception that occurred</param>
+        Task NotifyFaulted(Exception exception);
 
         // TODO to tie sends back to the receiver?
         //void NotifySend(string messageType, Uri destinationAddress);

@@ -19,6 +19,8 @@ namespace MassTransit.Context
     using System.Net.Mime;
     using System.Threading;
     using System.Threading.Tasks;
+    using Events;
+    using Pipeline;
     using Serialization;
     using Util;
 
@@ -97,6 +99,13 @@ namespace MassTransit.Context
             IsFaulted = true;
 
             return _receiveObserver.ConsumeFault(context, duration, consumerType, exception);
+        }
+
+        public virtual Task NotifyFaulted(Exception exception)
+        {
+            IsFaulted = true;
+
+            return _receiveObserver.ReceiveFault(this, exception);
         }
 
         public virtual Stream GetBody()

@@ -12,6 +12,8 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests
 {
+    using System;
+    using System.Net.Mime;
     using System.Runtime.Serialization;
     using System.Threading.Tasks;
     using NUnit.Framework;
@@ -50,6 +52,32 @@ namespace MassTransit.Tests
             {
                 throw new SerializationException("This is fine, forcing death");
             });
+        }
+    }
+
+    /// <summary>
+    /// this requires debugger tricks to make it work
+    /// </summary>
+    [TestFixture, Explicit]
+    public class When_a_message_has_an_unrecognized_body_format :
+        InMemoryTestFixture
+    {
+        Task<ConsumeContext<PingMessage>> _handled;
+        Task<ConsumeContext<ReceiveFault>> _faulted;
+
+        [Test]
+        public async Task It_should_publish_a_fault()
+        {
+            await InputQueueSendEndpoint.Send(new PingMessage(), context => context.ContentType = new ContentType("text/json"));
+
+            var faultContext = await _faulted;
+        }
+
+        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+        {
+            _handled = Handled<PingMessage>(configurator);
+
+            _faulted = Handled<ReceiveFault>(configurator);
         }
     }
 }

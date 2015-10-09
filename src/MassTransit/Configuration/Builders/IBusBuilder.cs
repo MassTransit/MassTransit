@@ -38,6 +38,8 @@ namespace MassTransit.Builders
         /// </summary>
         ISendTransportProvider SendTransportProvider { get; }
 
+        IPublishEndpointProvider PublishEndpoint { get; }
+
         /// <summary>
         /// Adds a receive endpoint to the bus
         /// </summary>

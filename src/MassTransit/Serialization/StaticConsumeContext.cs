@@ -278,7 +278,7 @@ namespace MassTransit.Serialization
         async Task GenerateFault<T>(T message, Exception exception)
             where T : class
         {
-            Fault<T> fault = new FaultEvent<T>(message, HostMetadataCache.Host, exception);
+            Fault<T> fault = new FaultEvent<T>(message, MessageId, HostMetadataCache.Host, exception);
 
             IPipe<SendContext<Fault<T>>> faultPipe = Pipe.New<SendContext<Fault<T>>>(x => x.UseExecute(v =>
             {

@@ -75,7 +75,7 @@ namespace MassTransit.EndpointConfigurators
 
             ConfigureAddDeadLetterFilter(builder.SendTransportProvider);
 
-            ConfigureRescueFilter(builder.SendTransportProvider);
+            ConfigureRescueFilter(builder.PublishEndpoint, builder.SendTransportProvider);
 
             _receiveConfigurator.UseFilter(new DeserializeFilter(builder.MessageDeserializer, consumePipe));
 
@@ -98,7 +98,7 @@ namespace MassTransit.EndpointConfigurators
             _receiveConfigurator.UseDeadLetterQueue(moveToDeadLetterPipe);
         }
 
-        void ConfigureRescueFilter(ISendTransportProvider transportProvider)
+        void ConfigureRescueFilter(IPublishEndpointProvider publishEndpoint, ISendTransportProvider transportProvider)
         {
             IPipe<ExceptionReceiveContext> moveToErrorPipe = Pipe.New<ExceptionReceiveContext>(x =>
             {
@@ -106,7 +106,7 @@ namespace MassTransit.EndpointConfigurators
 
                 Func<Task<ISendTransport>> getErrorTransport = () => transportProvider.GetSendTransport(errorAddress);
 
-                x.UseFilter(new MoveExceptionToTransportFilter(errorAddress, getErrorTransport));
+                x.UseFilter(new MoveExceptionToTransportFilter(publishEndpoint, errorAddress, getErrorTransport));
             });
 
             _receiveConfigurator.UseRescue(moveToErrorPipe);

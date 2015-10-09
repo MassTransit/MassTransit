@@ -70,6 +70,11 @@ namespace MassTransit.Context
             return _context.NotifyFaulted(context, duration, consumerType, exception);
         }
 
+        public Task NotifyFaulted(Exception exception)
+        {
+            return _context.NotifyFaulted(exception);
+        }
+
         public virtual void AddPendingTask(Task task)
         {
             _context.AddPendingTask(task);

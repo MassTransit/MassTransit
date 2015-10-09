@@ -18,8 +18,8 @@ namespace MassTransit.Pipeline.Filters
 
 
     /// <summary>
-    /// Catches a pipeline exception and determines if the rescue pipe should be passed
-    /// control of the context.
+    /// If a message was neither delivered to a consumer nor caused a fault (which was notified already)
+    /// then this filter will send the message to the dead letter pipe.
     /// </summary>
     public class DeadLetterFilter :
         IFilter<ReceiveContext>
