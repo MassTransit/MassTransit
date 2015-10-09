@@ -16,16 +16,16 @@ namespace MassTransit.Events
     using System.Linq;
 
 
-    public class FaultEvent<T> :
-        Fault<T>
+    public class ReceiveFaultEvent :
+        ReceiveFault
     {
-        public FaultEvent(T message, Guid? faultedMessageId, HostInfo host, Exception exception)
+        public ReceiveFaultEvent(HostInfo host, Exception exception, string contentType, Guid? faultedMessageId)
         {
             Timestamp = DateTime.UtcNow;
             FaultId = NewId.NextGuid();
 
-            Message = message;
             Host = host;
+            ContentType = contentType;
             FaultedMessageId = faultedMessageId;
 
             var aggregateException = exception as AggregateException;
@@ -34,10 +34,10 @@ namespace MassTransit.Events
         }
 
         public Guid FaultId { get; }
-        public Guid? FaultedMessageId { get; }
         public DateTime Timestamp { get; }
+        public Guid? FaultedMessageId { get; }
         public ExceptionInfo[] Exceptions { get; }
         public HostInfo Host { get; }
-        public T Message { get; }
+        public string ContentType { get; }
     }
 }

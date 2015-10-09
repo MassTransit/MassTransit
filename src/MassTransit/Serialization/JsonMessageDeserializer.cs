@@ -27,7 +27,7 @@ namespace MassTransit.Serialization
         readonly JsonSerializer _deserializer;
         readonly IPublishEndpointProvider _publishEndpoint;
         readonly ISendEndpointProvider _sendEndpointProvider;
-        IObjectTypeDeserializer _objectTypeDeserializer;
+        readonly IObjectTypeDeserializer _objectTypeDeserializer;
 
         public JsonMessageDeserializer(JsonSerializer deserializer, ISendEndpointProvider sendEndpointProvider,
             IPublishEndpointProvider publishEndpoint)

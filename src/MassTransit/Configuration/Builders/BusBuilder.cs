@@ -70,7 +70,7 @@ namespace MassTransit.Builders
 
         public ISendTransportProvider SendTransportProvider => _sendTransportProvider.Value;
 
-        protected IPublishEndpointProvider PublishEndpoint => _publishSendEndpointProvider.Value;
+        public IPublishEndpointProvider PublishEndpoint => _publishSendEndpointProvider.Value;
 
         protected Uri InputAddress => _inputAddress.Value;
 

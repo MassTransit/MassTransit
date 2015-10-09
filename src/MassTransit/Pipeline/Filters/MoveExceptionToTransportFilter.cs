@@ -14,22 +14,27 @@ namespace MassTransit.Pipeline.Filters
 {
     using System;
     using System.Threading.Tasks;
+    using Events;
     using Transports;
     using Util;
 
 
     /// <summary>
-    /// Moves a message received to an error transport without any deserialization
+    /// In the case of an exception, the message is moved to the destination transport. If the receive had not yet been
+    /// faulted, a fault is generated.
     /// </summary>
     public class MoveExceptionToTransportFilter :
         IFilter<ExceptionReceiveContext>
     {
         readonly Uri _destinationAddress;
         readonly Func<Task<ISendTransport>> _getDestinationTransport;
+        readonly IPublishEndpointProvider _publishEndpoint;
 
-        public MoveExceptionToTransportFilter(Uri destinationAddress, Func<Task<ISendTransport>> getDestinationTransport)
+        public MoveExceptionToTransportFilter(IPublishEndpointProvider publishEndpoint, Uri destinationAddress,
+            Func<Task<ISendTransport>> getDestinationTransport)
         {
             _getDestinationTransport = getDestinationTransport;
+            _publishEndpoint = publishEndpoint;
             _destinationAddress = destinationAddress;
         }
 
@@ -55,9 +60,27 @@ namespace MassTransit.Pipeline.Filters
                 sendContext.SetHostHeaders();
             });
 
+            if (!context.IsFaulted)
+                GenerateFault(context);
+
             await transport.Move(context, pipe);
 
             await next.Send(context);
+        }
+
+        void GenerateFault(ExceptionReceiveContext context)
+        {
+            Guid? faultedMessageId = context.TransportHeaders.Get("MessageId", default(Guid?));
+
+            ReceiveFault fault = new ReceiveFaultEvent(HostMetadataCache.Host, context.Exception, context.ContentType.MediaType, faultedMessageId);
+
+            var publishEndpoint = _publishEndpoint.CreatePublishEndpoint(context.InputAddress);
+
+            var publishTask = publishEndpoint.Publish(fault, context.CancellationToken);
+
+            context.AddPendingTask(publishTask);
+
+            context.AddPendingTask(context.NotifyFaulted(context.Exception));
         }
     }
 }

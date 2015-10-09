@@ -138,6 +138,7 @@
     <Compile Include="Context\RescueExceptionConsumeContext.cs" />
     <Compile Include="Context\RescueExceptionReceiveContext.cs" />
     <Compile Include="Courier\Exceptions\RoutingSlipArgumentException.cs" />
+    <Compile Include="Events\ReceiveFaultEvent.cs" />
     <Compile Include="ExceptionConsumeContext.cs" />
     <Compile Include="ExceptionReceiveContext.cs" />
     <Compile Include="Exceptions\ContextException.cs" />
@@ -651,7 +652,7 @@
     <Compile Include="SendContextExtensions.cs" />
     <Compile Include="SendEndpointExtensions.cs" />
     <Compile Include="SendHeaders.cs" />
-    <Compile Include="SerializationFault.cs" />
+    <Compile Include="ReceiveFault.cs" />
     <Compile Include="Serialization\AesCryptoStreamProvider.cs" />
     <Compile Include="Serialization\BinaryMessageDeserializer.cs" />
     <Compile Include="Serialization\BsonMessageDeserializer.cs" />
