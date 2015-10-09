@@ -30,6 +30,11 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
         int MaxConcurrentCalls { set; }
 
         /// <summary>
+        /// Specify a queue name to be used for the bus instance (separate from the receive endpoints queues).
+        /// </summary>
+        string BusQueueName { set; }
+
+        /// <summary>
         /// Configures a host
         /// </summary>
         /// <param name="settings"></param>

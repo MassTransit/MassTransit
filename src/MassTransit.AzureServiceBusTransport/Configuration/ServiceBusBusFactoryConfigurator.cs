@@ -64,32 +64,6 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
             return builder.Build();
         }
 
-        public void AddBusFactorySpecification(IBusFactorySpecification configurator)
-        {
-            if (configurator == null)
-                throw new ArgumentNullException(nameof(configurator));
-
-            _transportSpecifications.Add(configurator);
-        }
-
-        public void ReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configureEndpoint)
-        {
-            if (_hosts.Count == 0)
-                throw new ArgumentException("At least one host must be configured before configuring a receive endpoint");
-
-            ReceiveEndpoint(_hosts[0], queueName, configureEndpoint);
-        }
-
-        void IConsumePipeConfigurator.AddPipeSpecification<T>(IPipeSpecification<ConsumeContext<T>> specification)
-        {
-            _consumePipeSpecification.Add(specification);
-        }
-
-        void IPipeConfigurator<ConsumeContext>.AddPipeSpecification(IPipeSpecification<ConsumeContext> specification)
-        {
-            _consumePipeSpecification.Add(specification);
-        }
-
         public TimeSpan AutoDeleteOnIdle
         {
             set { _settings.QueueDescription.AutoDeleteOnIdle = value; }
@@ -169,6 +143,37 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
         public string UserMetadata
         {
             set { _settings.QueueDescription.UserMetadata = value; }
+        }
+
+        public void AddBusFactorySpecification(IBusFactorySpecification configurator)
+        {
+            if (configurator == null)
+                throw new ArgumentNullException(nameof(configurator));
+
+            _transportSpecifications.Add(configurator);
+        }
+
+        public void ReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configureEndpoint)
+        {
+            if (_hosts.Count == 0)
+                throw new ArgumentException("At least one host must be configured before configuring a receive endpoint");
+
+            ReceiveEndpoint(_hosts[0], queueName, configureEndpoint);
+        }
+
+        void IConsumePipeConfigurator.AddPipeSpecification<T>(IPipeSpecification<ConsumeContext<T>> specification)
+        {
+            _consumePipeSpecification.Add(specification);
+        }
+
+        void IPipeConfigurator<ConsumeContext>.AddPipeSpecification(IPipeSpecification<ConsumeContext> specification)
+        {
+            _consumePipeSpecification.Add(specification);
+        }
+
+        public string BusQueueName
+        {
+            set { _settings.QueueDescription.Path = value; }
         }
 
         public IServiceBusHost Host(ServiceBusHostSettings settings)
