@@ -32,5 +32,20 @@ namespace MassTransit
         {
             return new MessageRequestClient<TRequest, TResponse>(bus, address, timeout);
         }
+
+        /// <summary>
+        /// Creates a request client that uses the bus to publish a request.
+        /// </summary>
+        /// <typeparam name="TRequest">The request type</typeparam>
+        /// <typeparam name="TResponse">The response type</typeparam>
+        /// <param name="bus">The bus on which the client is created</param>
+        /// <param name="timeout">The timeout before the request is cancelled</param>
+        /// <returns></returns>
+        public static IRequestClient<TRequest, TResponse> CreatePublistRequestClient<TRequest, TResponse>(this IBus bus, TimeSpan timeout)
+            where TRequest : class
+            where TResponse : class
+        {
+            return new PublishRequestClient<TRequest, TResponse>(bus, timeout);
+        }
     }
 }

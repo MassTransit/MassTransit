@@ -63,5 +63,30 @@ namespace MassTransit
 
             return pipe;
         }
+
+        /// <summary>
+        /// Publish a request from the bus, establishing response handlers. Using Request with an address is highly
+        /// recommended, but this was requested by several users.
+        /// </summary>
+        /// <typeparam name="TRequest">The request message type</typeparam>
+        /// <param name="bus">The bus instance</param>
+        /// <param name="message">The request message</param>
+        /// <param name="callback">A callback to configure the request and response handlers</param>
+        /// <param name="cancellationToken">Can be used to cancel the request</param>
+        /// <returns>An awaitable task that completes once the request is sent</returns>
+        public static async Task<Request<TRequest>> PublishRequest<TRequest>(this IBus bus, TRequest message,
+            Action<RequestContext<TRequest>> callback, CancellationToken cancellationToken = default(CancellationToken))
+            where TRequest : class
+        {
+            TaskScheduler taskScheduler = SynchronizationContext.Current == null
+                ? TaskScheduler.Default
+                : TaskScheduler.FromCurrentSynchronizationContext();
+
+            var pipe = new SendRequest<TRequest>(bus, taskScheduler, callback);
+
+            await bus.Publish(message, pipe, cancellationToken).ConfigureAwait(false);
+
+            return pipe;
+        }
     }
 }

@@ -31,12 +31,14 @@ namespace MassTransit.Context
         readonly Action<RequestContext<TRequest>> _callback;
         readonly TaskScheduler _taskScheduler;
         SendRequestContext<TRequest> _requestContext;
+        readonly Guid _requestId;
 
         public SendRequest(IBus bus, TaskScheduler taskScheduler, Action<RequestContext<TRequest>> callback)
         {
             _taskScheduler = taskScheduler;
             _callback = callback;
             _bus = bus;
+            _requestId = NewId.NextGuid();
         }
 
         void IProbeSite.Probe(ProbeContext context)
@@ -45,10 +47,15 @@ namespace MassTransit.Context
 
         Task IPipe<SendContext<TRequest>>.Send(SendContext<TRequest> context)
         {
-            context.RequestId = NewId.NextGuid();
+            context.RequestId = _requestId;
             context.ResponseAddress = _bus.Address;
 
-            _requestContext = new SendRequestContext<TRequest>(_bus, context, _taskScheduler, _callback);
+            if(_requestContext == null)
+                _requestContext = new SendRequestContext<TRequest>(_bus, context, _taskScheduler, _callback);
+            else
+            {
+                var publishContext = new PublishRequestContext<TRequest>(_bus, context, _callback, _requestContext.Connections, ((RequestContext<TRequest>)_requestContext).Task);
+            }
 
             return TaskUtil.Completed;
         }

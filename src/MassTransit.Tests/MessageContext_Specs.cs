@@ -234,6 +234,44 @@ namespace MassTransit.Tests
         }
     }
 
+    [TestFixture]
+    public class Publishing_a_request:
+        InMemoryTestFixture
+    {
+        [Test]
+        public async Task Should_have_received_the_response_on_the_handler()
+        {
+            PongMessage message = await _response;
+
+            message.CorrelationId.ShouldBe(_ping.Result.Message.CorrelationId);
+        }
+
+        Task<ConsumeContext<PingMessage>> _ping;
+        Task<ConsumeContext<PongMessage>> _responseHandler;
+        Task<Request<PingMessage>> _request;
+        Task<PongMessage> _response;
+        Task<PingNotSupported> _notSupported;
+
+        [TestFixtureSetUp]
+        public void Setup()
+        {
+            _responseHandler = SubscribeHandler<PongMessage>();
+
+            _request = Bus.PublishRequest(new PingMessage(), x =>
+            {
+                _response = x.Handle<PongMessage>(async _ =>
+                {
+                });
+
+            });
+        }
+
+        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+        {
+            _ping = Handler<PingMessage>(configurator, async x => await x.RespondAsync(new PongMessage(x.Message.CorrelationId)));
+        }
+    }
+
 
     [TestFixture]
     public class Sending_a_request_with_no_handler :

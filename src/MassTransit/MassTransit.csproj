@@ -132,7 +132,9 @@
     <Compile Include="Context\NoSetCorrelationId.cs" />
     <Compile Include="Context\NullablePropertySetCorrelationId.cs" />
     <Compile Include="Context\PropertySetCorrelationId.cs" />
+    <Compile Include="Context\PublishRequestContext.cs" />
     <Compile Include="Context\ReceiveContextProxy.cs" />
+    <Compile Include="Context\RequestHandlerHandle.cs" />
     <Compile Include="Context\RescueExceptionConsumeContext.cs" />
     <Compile Include="Context\RescueExceptionReceiveContext.cs" />
     <Compile Include="Courier\Exceptions\RoutingSlipArgumentException.cs" />
@@ -571,6 +573,7 @@
     <Compile Include="PublishContext.cs" />
     <Compile Include="IPublishConvention.cs" />
     <Compile Include="PublishContextExecuteExtensions.cs" />
+    <Compile Include="PublishRequestClient.cs" />
     <Compile Include="ReceiveContext.cs" />
     <Compile Include="ReceiveEndpointCompleted.cs" />
     <Compile Include="ReceiveEndpointEvent.cs" />

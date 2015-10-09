@@ -203,7 +203,6 @@ namespace MassTransit.RabbitMqTransport
             else
                 VerifyQueueOrExchangeNameIsLegal(name);
 
-
             ushort prefetch = address.Query.GetValueFromQueryString("prefetch", (ushort)Math.Max(Environment.ProcessorCount, 16));
             int timeToLive = address.Query.GetValueFromQueryString("ttl", 0);
 
