@@ -86,6 +86,14 @@
       <HintPath>..\..\packages\Shouldly.2.6.0\lib\net40\Shouldly.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="SimpleInjector, Version=3.1.0.0, Culture=neutral, PublicKeyToken=984cb50dea722e99, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\SimpleInjector.3.1.0\lib\net45\SimpleInjector.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="SimpleInjector.Extensions.ExecutionContextScoping, Version=3.1.0.0, Culture=neutral, PublicKeyToken=984cb50dea722e99, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\SimpleInjector.Extensions.ExecutionContextScoping.3.1.0\lib\net45\SimpleInjector.Extensions.ExecutionContextScoping.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="StructureMap, Version=3.1.6.191, Culture=neutral, PublicKeyToken=e60ad81abae3c223, processorArchitecture=MSIL">
       <HintPath>..\..\packages\structuremap-signed.3.1.6.191\lib\net40\StructureMap.dll</HintPath>
       <Private>True</Private>
@@ -121,6 +129,7 @@
     <Compile Include="Scenarios\SimpleConsumer.cs" />
     <Compile Include="Scenarios\SimpleMessageClass.cs" />
     <Compile Include="Scenarios\SimpleMessageInterface.cs" />
+    <Compile Include="SimpleInjector_Specs.cs" />
     <Compile Include="StructureMap_Idiomatic.cs" />
     <Compile Include="StructureMap_Specs.cs" />
     <Compile Include="Unity_Specs.cs" />
@@ -141,6 +150,10 @@
     <ProjectReference Include="..\MassTransit.NinjectIntegration\MassTransit.NinjectIntegration.csproj">
       <Project>{25A2A3C3-27D0-4C55-A9E9-0B82D6B6913F}</Project>
       <Name>MassTransit.NinjectIntegration</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\MassTransit.SimpleInjectorIntegration\MassTransit.SimpleInjectorIntegration.csproj">
+      <Project>{259e9f30-40ec-47b0-83ae-a2271ef3421d}</Project>
+      <Name>MassTransit.SimpleInjectorIntegration</Name>
     </ProjectReference>
     <ProjectReference Include="..\MassTransit.StructureMapIntegration\MassTransit.StructureMapIntegration.csproj">
       <Project>{F5E67502-2B30-484C-88C3-97710291F5AA}</Project>
