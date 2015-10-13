@@ -54,8 +54,9 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Creating message receiver for {0}", inputAddress);
 
-            MessagingFactory messagingFactory = await context.MessagingFactory;
-            MessageReceiver messageReceiver = await messagingFactory.CreateMessageReceiverAsync(queuePath, ReceiveMode.PeekLock);
+            MessagingFactory messagingFactory = await context.MessagingFactory.ConfigureAwait(false);
+            MessageReceiver messageReceiver = await messagingFactory.CreateMessageReceiverAsync(queuePath, ReceiveMode.PeekLock)
+                .ConfigureAwait(false);
 
             try
             {
@@ -64,11 +65,12 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
 
                 using (var receiver = new Receiver(messageReceiver, inputAddress, _receivePipe, receiveSettings, _receiveObserver, context.CancellationToken))
                 {
-                    await _endpointObserver.Ready(new Ready(inputAddress));
+                    await _endpointObserver.Ready(new Ready(inputAddress))
+                        .ConfigureAwait(false);
 
-                    ReceiverMetrics metrics = await receiver.CompleteTask;
+                    ReceiverMetrics metrics = await receiver.CompleteTask.ConfigureAwait(false);
 
-                    await _endpointObserver.Completed(new Completed(inputAddress, metrics));
+                    await _endpointObserver.Completed(new Completed(inputAddress, metrics)).ConfigureAwait(false);
 
                     if (_log.IsDebugEnabled)
                     {
@@ -81,15 +83,15 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
             catch
             {
                 if (!messageReceiver.IsClosed)
-                    messageReceiver.Close();
+                    await messageReceiver.CloseAsync().ConfigureAwait(false);
 
                 throw;
             }
 
             if (!messageReceiver.IsClosed)
-                await messageReceiver.CloseAsync();
+                await messageReceiver.CloseAsync().ConfigureAwait(false);
 
-            await next.Send(context);
+            await next.Send(context).ConfigureAwait(false);
         }
 
 

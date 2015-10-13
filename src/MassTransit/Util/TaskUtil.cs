@@ -14,7 +14,6 @@ namespace MassTransit.Util
 {
     using System;
     using System.Collections.Concurrent;
-    using System.Runtime.CompilerServices;
     using System.Threading;
     using System.Threading.Tasks;
 
@@ -49,7 +48,7 @@ namespace MassTransit.Util
                     syncContext.RunOnCurrentThread(cancellationToken);
                 }
 
-                t.GetAwaiter().GetResult();
+                awaiter.GetResult();
             }
             finally
             {
@@ -74,7 +73,7 @@ namespace MassTransit.Util
 
                 var awaiter = t.GetAwaiter();
 
-                while(!awaiter.IsCompleted)
+                while (!awaiter.IsCompleted)
                 {
                     if (cancellationToken.IsCancellationRequested)
                         throw new OperationCanceledException("The task was not completed before being cancelled");

@@ -20,7 +20,6 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
     using System.Threading.Tasks;
     using Configuration;
     using Contexts;
-    using Logging;
     using MassTransit.Pipeline;
     using Microsoft.ServiceBus;
     using NewIdFormatters;
@@ -33,7 +32,6 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
         IFilter<ConnectionContext>
     {
         static readonly INewIdFormatter _formatter = new ZBase32Formatter();
-        readonly ILog _log = Logger.Get<PrepareReceiveQueueFilter>();
         readonly ReceiveSettings _settings;
         readonly TopicSubscriptionSettings[] _subscriptionSettings;
 
@@ -49,15 +47,16 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
 
         public async Task Send(ConnectionContext context, IPipe<ConnectionContext> next)
         {
-            NamespaceManager namespaceManager = await context.NamespaceManager;
+            NamespaceManager namespaceManager = await context.NamespaceManager.ConfigureAwait(false);
 
-            var queueDescription = await namespaceManager.CreateQueueSafeAsync(_settings.QueueDescription);
+            var queueDescription = await namespaceManager.CreateQueueSafeAsync(_settings.QueueDescription).ConfigureAwait(false);
 
             if (_subscriptionSettings.Length > 0)
             {
-                NamespaceManager rootNamespaceManager = await context.RootNamespaceManager;
+                NamespaceManager rootNamespaceManager = await context.RootNamespaceManager.ConfigureAwait(false);
 
-                await Task.WhenAll(_subscriptionSettings.Select(subscription => CreateSubscription(rootNamespaceManager, namespaceManager, subscription)));
+                await Task.WhenAll(_subscriptionSettings.Select(subscription => CreateSubscription(rootNamespaceManager, namespaceManager, subscription)))
+                    .ConfigureAwait(false);
             }
 
             context.GetOrAddPayload(() => _settings);
@@ -67,14 +66,15 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
 
         async Task CreateSubscription(NamespaceManager rootNamespaceManager, NamespaceManager namespaceManager, TopicSubscriptionSettings settings)
         {
-            var topicDescription = await rootNamespaceManager.CreateTopicSafeAsync(settings.Topic);
+            var topicDescription = await rootNamespaceManager.CreateTopicSafeAsync(settings.Topic).ConfigureAwait(false);
 
             string queuePath = Path.Combine(namespaceManager.Address.AbsoluteUri.TrimStart('/'), _settings.QueueDescription.Path)
                 .Replace('\\', '/');
 
             var subscriptionName = GetSubscriptionName(namespaceManager, _settings.QueueDescription.Path);
 
-            await rootNamespaceManager.CreateTopicSubscriptionSafeAsync(subscriptionName, topicDescription.Path, queuePath);
+            await rootNamespaceManager.CreateTopicSubscriptionSafeAsync(subscriptionName, topicDescription.Path, queuePath, _settings.QueueDescription)
+                .ConfigureAwait(false);
         }
 
         static string GetSubscriptionName(NamespaceManager namespaceManager, string queuePath)

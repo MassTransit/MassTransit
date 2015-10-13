@@ -180,6 +180,11 @@ namespace MassTransit.AzureServiceBusTransport.Tests
             {
                 return Console.Out.WriteLineAsync($"Endpoint Complete: {completed.DeliveryCount}/{completed.ConcurrentDeliveryCount} - {completed.InputAddress}");
             }
+
+            public Task Faulted(ReceiveEndpointFaulted faulted)
+            {
+                return Console.Out.WriteLineAsync($"Endpoint Faulted: {faulted.Exception} - {faulted.InputAddress}");
+            }
         }
     }
 }

@@ -24,7 +24,12 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
         {
             bool temporary = IsTemporaryMessageType(messageType);
 
-            var topicDescription = new TopicDescription(messageNameFormatter.GetMessageName(messageType).ToString());
+            var topicDescription = new TopicDescription(messageNameFormatter.GetMessageName(messageType).ToString())
+            {
+                EnableBatchedOperations = true,
+                EnableExpress = temporary,
+                DefaultMessageTimeToLive = TimeSpan.FromDays(365)
+            };
 
             var binding = new TopicSubscription(topicDescription);
 
@@ -43,7 +48,7 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
             return builder.Uri;
         }
 
-        public static bool IsTemporaryMessageType(this Type messageType)
+        static bool IsTemporaryMessageType(this Type messageType)
         {
             return (!messageType.IsPublic && messageType.IsClass)
                 || (messageType.IsGenericType && messageType.GetGenericArguments().Any(IsTemporaryMessageType));

@@ -28,22 +28,24 @@ namespace MassTransit.AzureServiceBusTransport.Tests
             _handler = Handled<PingMessage>(configurator);
         }
 
-        [Test]
-        public async void Should_succeed()
+        [TestFixtureSetUp]
+        public void Setup()
         {
-            await InputQueueSendEndpoint.Send(new PingMessage());
-
-            await _handler;
+            Await(() => InputQueueSendEndpoint.Send(new PingMessage()));
         }
 
         [Test]
         public async void Should_have_a_redelivery_flag_of_false()
         {
-            await InputQueueSendEndpoint.Send(new PingMessage());
-
             var context = await _handler;
 
             Assert.IsFalse(context.ReceiveContext.Redelivered);
+        }
+
+        [Test]
+        public async void Should_succeed()
+        {
+            await _handler;
         }
     }
 

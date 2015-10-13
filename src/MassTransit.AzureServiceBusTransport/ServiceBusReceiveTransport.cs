@@ -99,11 +99,11 @@ namespace MassTransit.AzureServiceBusTransport
                 if (_log.IsDebugEnabled)
                     _log.DebugFormat("Connecting receive transport: {0}", _host.Settings.GetInputAddress(_settings.QueueDescription));
 
+                var context = new ServiceBusConnectionContext(_host, stopTokenSource);
+
                 try
                 {
-                    var context = new ServiceBusConnectionContext(_host, stopTokenSource);
-
-                    await connectionPipe.Send(context);
+                    await connectionPipe.Send(context).ConfigureAwait(false);
                 }
                 catch (TaskCanceledException)
                 {
@@ -112,8 +112,26 @@ namespace MassTransit.AzureServiceBusTransport
                 {
                     if (_log.IsErrorEnabled)
                         _log.ErrorFormat("Azure Service Bus connection failed: {0}", ex.Message);
+
+                    Uri inputAddress = context.GetQueueAddress(_settings.QueueDescription);
+
+                    await _endpointObservers.Faulted(new Faulted(inputAddress, ex));
                 }
-            });
+            }).ConfigureAwait(false);
+        }
+
+
+        class Faulted :
+            ReceiveEndpointFaulted
+        {
+            public Faulted(Uri inputAddress, Exception exception)
+            {
+                InputAddress = inputAddress;
+                Exception = exception;
+            }
+
+            public Uri InputAddress { get; }
+            public Exception Exception { get; }
         }
 
 
