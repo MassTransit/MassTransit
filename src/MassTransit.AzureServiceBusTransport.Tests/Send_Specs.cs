@@ -35,6 +35,16 @@ namespace MassTransit.AzureServiceBusTransport.Tests
 
             await _handler;
         }
+
+        [Test]
+        public async void Should_have_a_redelivery_flag_of_false()
+        {
+            await InputQueueSendEndpoint.Send(new PingMessage());
+
+            var context = await _handler;
+
+            Assert.IsFalse(context.ReceiveContext.Redelivered);
+        }
     }
 
 
