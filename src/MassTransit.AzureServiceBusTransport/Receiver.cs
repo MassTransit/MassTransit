@@ -129,45 +129,37 @@ namespace MassTransit.AzureServiceBusTransport
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Receiving {0}:{1} - {2}", deliveryCount, message.MessageId, _receiveSettings.QueueDescription.Path);
 
-            Exception exception = null;
             var context = new ServiceBusReceiveContext(_inputAddress, message, _receiveObserver);
 
             try
             {
                 if (_shuttingDown)
                 {
-                    await _completeTask.Task;
+                    await _completeTask.Task.ConfigureAwait(false);
 
                     throw new TransportException(_inputAddress, "Transport shutdown in progress, abandoning message");
                 }
 
-                await _receiveObserver.PreReceive(context);
+                await _receiveObserver.PreReceive(context).ConfigureAwait(false);
 
-                await _receivePipe.Send(context);
+                await _receivePipe.Send(context).ConfigureAwait(false);
 
-                await context.CompleteTask;
+                await context.CompleteTask.ConfigureAwait(false);
 
-                await message.CompleteAsync();
+                await message.CompleteAsync().ConfigureAwait(false);
 
-                await _receiveObserver.PostReceive(context);
+                await _receiveObserver.PostReceive(context).ConfigureAwait(false);
 
                 if (_log.IsDebugEnabled)
                     _log.DebugFormat("Receive completed: {0}", message.MessageId);
             }
             catch (Exception ex)
             {
-                exception = ex;
                 if (_log.IsErrorEnabled)
                     _log.Error($"Received faulted: {message.MessageId}", ex);
-            }
 
-            try
-            {
-                if (exception != null)
-                {
-                    await message.AbandonAsync();
-                    await _receiveObserver.ReceiveFault(context, exception);
-                }
+                await message.AbandonAsync().ConfigureAwait(false);
+                await _receiveObserver.ReceiveFault(context, ex).ConfigureAwait(false);
             }
             finally
             {

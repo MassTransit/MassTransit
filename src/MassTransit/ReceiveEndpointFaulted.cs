@@ -10,29 +10,14 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Pipeline
+namespace MassTransit
 {
-    using System.Threading.Tasks;
-    using Util;
+    using System;
 
 
-    public class ReceiveEndpointObservable :
-        Connectable<IReceiveEndpointObserver>,
-        IReceiveEndpointObserver
+    public interface ReceiveEndpointFaulted :
+        ReceiveEndpointEvent
     {
-        public Task Ready(ReceiveEndpointReady ready)
-        {
-            return ForEachAsync(x => x.Ready(ready));
-        }
-
-        public Task Completed(ReceiveEndpointCompleted completed)
-        {
-            return ForEachAsync(x => x.Completed(completed));
-        }
-
-        public Task Faulted(ReceiveEndpointFaulted faulted)
-        {
-            return ForEachAsync(x => x.Faulted(faulted));
-        }
+        Exception Exception { get; }
     }
 }

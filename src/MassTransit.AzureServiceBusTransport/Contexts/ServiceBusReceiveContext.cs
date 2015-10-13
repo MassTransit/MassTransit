@@ -29,7 +29,7 @@ namespace MassTransit.AzureServiceBusTransport.Contexts
         byte[] _body;
 
         public ServiceBusReceiveContext(Uri inputAddress, BrokeredMessage message, IReceiveObserver observer)
-            : base(inputAddress, message.DeliveryCount > 0, observer)
+            : base(inputAddress, message.DeliveryCount > 1, observer)
         {
             _message = message;
 

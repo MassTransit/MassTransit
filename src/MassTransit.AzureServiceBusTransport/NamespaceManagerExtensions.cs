@@ -28,7 +28,7 @@ namespace MassTransit.AzureServiceBusTransport
             bool create = true;
             try
             {
-                queueDescription = await namespaceManager.GetQueueAsync(queueDescription.Path);
+                queueDescription = await namespaceManager.GetQueueAsync(queueDescription.Path).ConfigureAwait(false);
 
                 create = false;
             }
@@ -44,7 +44,7 @@ namespace MassTransit.AzureServiceBusTransport
                     if (_log.IsDebugEnabled)
                         _log.DebugFormat("Creating queue {0}", queueDescription.Path);
 
-                    queueDescription = await namespaceManager.CreateQueueAsync(queueDescription);
+                    queueDescription = await namespaceManager.CreateQueueAsync(queueDescription).ConfigureAwait(false);
 
                     created = true;
                 }
@@ -61,7 +61,7 @@ namespace MassTransit.AzureServiceBusTransport
                 }
 
                 if (!created)
-                    queueDescription = await namespaceManager.GetQueueAsync(queueDescription.Path);
+                    queueDescription = await namespaceManager.GetQueueAsync(queueDescription.Path).ConfigureAwait(false);
             }
 
             if (_log.IsDebugEnabled)
@@ -83,7 +83,7 @@ namespace MassTransit.AzureServiceBusTransport
             bool create = true;
             try
             {
-                topicDescription = await namespaceManager.GetTopicAsync(topicDescription.Path);
+                topicDescription = await namespaceManager.GetTopicAsync(topicDescription.Path).ConfigureAwait(false);
 
                 create = false;
             }
@@ -99,7 +99,7 @@ namespace MassTransit.AzureServiceBusTransport
                     if (_log.IsDebugEnabled)
                         _log.DebugFormat("Creating topic {0}", topicDescription.Path);
 
-                    topicDescription = await namespaceManager.CreateTopicAsync(topicDescription);
+                    topicDescription = await namespaceManager.CreateTopicAsync(topicDescription).ConfigureAwait(false);
 
                     created = true;
                 }
@@ -116,7 +116,7 @@ namespace MassTransit.AzureServiceBusTransport
                 }
 
                 if (!created)
-                    topicDescription = await namespaceManager.GetTopicAsync(topicDescription.Path);
+                    topicDescription = await namespaceManager.GetTopicAsync(topicDescription.Path).ConfigureAwait(false);
             }
 
             if (_log.IsDebugEnabled)
@@ -125,20 +125,21 @@ namespace MassTransit.AzureServiceBusTransport
                     string.Join(", ", new[]
                     {
                         topicDescription.EnableExpress ? "express" : "",
-                        topicDescription.RequiresDuplicateDetection ? "dupe detect" : "",
+                        topicDescription.RequiresDuplicateDetection ? "dupe detect" : ""
                     }.Where(x => !string.IsNullOrWhiteSpace(x))));
             }
 
             return topicDescription;
         }
 
-        public static async Task<SubscriptionDescription> CreateTopicSubscriptionSafeAsync(this NamespaceManager namespaceManager, string subscriptionName, string topicPath, string queuePath)
+        public static async Task<SubscriptionDescription> CreateTopicSubscriptionSafeAsync(this NamespaceManager namespaceManager, string subscriptionName,
+            string topicPath, string queuePath, QueueDescription queueDescription)
         {
             bool create = true;
             SubscriptionDescription subscriptionDescription = null;
             try
             {
-                subscriptionDescription = await namespaceManager.GetSubscriptionAsync(topicPath, subscriptionName);
+                subscriptionDescription = await namespaceManager.GetSubscriptionAsync(topicPath, subscriptionName).ConfigureAwait(false);
                 if (!queuePath.Equals(subscriptionDescription.ForwardTo))
                 {
                     if (_log.IsWarnEnabled)
@@ -147,7 +148,7 @@ namespace MassTransit.AzureServiceBusTransport
                             subscriptionDescription.ForwardTo);
                     }
 
-                    await namespaceManager.DeleteSubscriptionAsync(topicPath, subscriptionName);
+                    await namespaceManager.DeleteSubscriptionAsync(topicPath, subscriptionName).ConfigureAwait(false);
                 }
                 else
                     create = false;
@@ -167,9 +168,17 @@ namespace MassTransit.AzureServiceBusTransport
                     var description = new SubscriptionDescription(topicPath, subscriptionName)
                     {
                         ForwardTo = queuePath,
+                        AutoDeleteOnIdle = queueDescription.AutoDeleteOnIdle,
+                        DefaultMessageTimeToLive = queueDescription.DefaultMessageTimeToLive,
+                        EnableBatchedOperations = queueDescription.EnableBatchedOperations,
+                        EnableDeadLetteringOnMessageExpiration = queueDescription.EnableDeadLetteringOnMessageExpiration,
+                        MaxDeliveryCount = queueDescription.MaxDeliveryCount,
+                        UserMetadata = queueDescription.UserMetadata,
+                        RequiresSession = queueDescription.RequiresSession,
+                        LockDuration = queueDescription.LockDuration
                     };
 
-                    subscriptionDescription = await namespaceManager.CreateSubscriptionAsync(description);
+                    subscriptionDescription = await namespaceManager.CreateSubscriptionAsync(description).ConfigureAwait(false);
 
                     created = true;
                 }
@@ -186,7 +195,7 @@ namespace MassTransit.AzureServiceBusTransport
                 }
 
                 if (!created)
-                    subscriptionDescription = await namespaceManager.GetSubscriptionAsync(topicPath, subscriptionName);
+                    subscriptionDescription = await namespaceManager.GetSubscriptionAsync(topicPath, subscriptionName).ConfigureAwait(false);
             }
 
             if (_log.IsDebugEnabled)

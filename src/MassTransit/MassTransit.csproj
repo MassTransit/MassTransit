@@ -578,6 +578,7 @@
     <Compile Include="ReceiveContext.cs" />
     <Compile Include="ReceiveEndpointCompleted.cs" />
     <Compile Include="ReceiveEndpointEvent.cs" />
+    <Compile Include="ReceiveEndpointFaulted.cs" />
     <Compile Include="ReceiveEndpointReady.cs" />
     <Compile Include="Request.cs" />
     <Compile Include="IRequestClient.cs" />

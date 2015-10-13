@@ -33,5 +33,12 @@ namespace MassTransit
         /// <param name="completed"></param>
         /// <returns></returns>
         Task Completed(ReceiveEndpointCompleted completed);
+
+        /// <summary>
+        /// Called when the receive endpoint faults
+        /// </summary>
+        /// <param name="faulted"></param>
+        /// <returns></returns>
+        Task Faulted(ReceiveEndpointFaulted faulted);
     }
 }

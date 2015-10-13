@@ -29,13 +29,13 @@ namespace MassTransit
         IDisposable
     {
         readonly IBusObserver _busObservable;
+        readonly ConsumeObservable _consumeObservers;
         readonly IConsumePipe _consumePipe;
         readonly IBusHostControl[] _hosts;
         readonly ILog _log;
         readonly IPublishEndpointProvider _publishEndpointProvider;
         readonly IReceiveEndpoint[] _receiveEndpoints;
         readonly ReceiveObservable _receiveObservers;
-        readonly ConsumeObservable _consumeObservers;
         readonly ISendEndpointProvider _sendEndpointProvider;
 
         BusHandle _busHandle;
@@ -310,8 +310,8 @@ namespace MassTransit
             class ReadyObserver :
                 IReceiveEndpointObserver
             {
-                readonly TaskCompletionSource<ReceiveEndpointReady> _ready;
                 readonly ConnectHandle _handle;
+                readonly TaskCompletionSource<ReceiveEndpointReady> _ready;
 
                 public ReadyObserver(IReceiveEndpoint endpoint)
                 {
@@ -334,8 +334,16 @@ namespace MassTransit
                 {
                     return TaskUtil.Completed;
                 }
+
+                public Task Faulted(ReceiveEndpointFaulted faulted)
+                {
+                    _ready.TrySetException(faulted.Exception);
+
+                    return TaskUtil.Completed;
+                }
             }
         }
+
 
         class Handle :
             BusHandle
@@ -347,7 +355,8 @@ namespace MassTransit
             readonly ConnectHandle[] _observerHandles;
             bool _stopped;
 
-            public Handle(IEnumerable<HostHandle> hostHandles, IEnumerable<ReceiveEndpointHandle> endpointHandles, IEnumerable<ConnectHandle> observerHandles, IBus bus, IBusObserver busObserver, BusReady ready)
+            public Handle(IEnumerable<HostHandle> hostHandles, IEnumerable<ReceiveEndpointHandle> endpointHandles, IEnumerable<ConnectHandle> observerHandles,
+                IBus bus, IBusObserver busObserver, BusReady ready)
             {
                 _bus = bus;
                 _busObserver = busObserver;
