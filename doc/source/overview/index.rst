@@ -2,7 +2,7 @@ Understanding MassTransit
 =========================
 
 MassTransit is a large framework, and there is a lot going on under the hood. To understand what is happening,
-there are a number of subject covered below that explain in detail how everything works.
+there are a number of subjects covered below that explain in detail how everything works.
 
 .. note::
 
@@ -14,9 +14,10 @@ there are a number of subject covered below that explain in detail how everythin
 
     keyideas.rst
     valueadd.rst
+    publishing.rst
+    sending.rst
     versioning.rst
     saga.rst
-    routing.rst
     inheritance.rst
     perfcounters.rst
     videos.rst
