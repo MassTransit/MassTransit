@@ -42,7 +42,7 @@ enable some additional plug-ins for management and message tracking.
 
     rabbitmq-plugins.bat enable rabbitmq_management 
 
-Then, install the ```MassTransit.RabbitMQ``` package in your project and follow the RabbitMQ_ configuration guid.
+Then, install the ```MassTransit.RabbitMQ``` package in your project and follow the RabbitMQ_ configuration guide.
 
 .. _RabbitMQ: ../configuration/transports/rabbitmq.html
 
@@ -56,7 +56,7 @@ Azure Service Bus
 
 
 To use Azure Service Bus with MassTransit, install the ```MassTransit.AzureServiceBus``` package in your project and follow the
-`Service Bus`_ configuration guid.
+`Service Bus`_ configuration guide.
 
 .. _Service Bus: ../configuration/transports/azure.html
 
