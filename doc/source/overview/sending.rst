@@ -1,4 +1,7 @@
-When messages are sent, how do they get there?
-==============================================
+Sending messages
+================
 
-TBD
+.. note::
+
+    Coming soon.
+    

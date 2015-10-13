@@ -1,5 +1,7 @@
-Routing of messages in MassTransit
-""""""""""""""""""""""""""""""""""
+Routing messages in
+===============================
+
+
 
 How are messages routed?
 
