@@ -1,7 +1,7 @@
 Publishing messages
 ===================
 
-When a message is published (by way of a call to ```bus.Publish```), it's important to understand what MassTransit actually
+When a message is published (by way of a call to ``bus.Publish``), it's important to understand what MassTransit actually
 does under the hood. While the explicit implementation details depend upon the message transport being used, the general
 pattern is the same.
 
@@ -58,7 +58,7 @@ To see how this plays out, consider the following message types:
 
 Once the messages have been published, exchanges are created in RabbitMQ for each of the message types:
 
-.. sourcecode::
+.. sourcecode:: text
 
     Exchanges
 
@@ -86,9 +86,9 @@ are bound to the consumer message type exchanges, closing the loop.
         });
     });
 
-This results in the creation of a queue, as well as a binding to the queue from the ```UpdateCustomerAddress``` exchange.
+This results in the creation of a queue, as well as a binding to the queue from the ``UpdateCustomerAddress`` exchange.
 
-.. sourcecode::
+.. sourcecode:: text
 
     Exchanges
 

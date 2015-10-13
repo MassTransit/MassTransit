@@ -10,7 +10,7 @@ there are a number of subjects covered below that explain in detail how everythi
 
 
 .. toctree::
-    :maxdepth: 1
+    :maxdepth: 0
 
     keyideas.rst
     valueadd.rst
