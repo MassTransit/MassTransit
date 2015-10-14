@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -40,7 +40,7 @@ namespace Automatonymous
         }
 
         public static EventActivityBinder<TInstance, TData> Respond<TInstance, TData, TMessage>(
-            this EventActivityBinder<TInstance, TData> source, Func<ConsumeEventContext<TInstance, TData>, TMessage> messageFactory)
+            this EventActivityBinder<TInstance, TData> source, EventMessageFactory<TInstance, TData, TMessage> messageFactory)
             where TInstance : class, SagaStateMachineInstance
             where TData : class
             where TMessage : class
@@ -49,13 +49,57 @@ namespace Automatonymous
         }
 
         public static EventActivityBinder<TInstance, TData> Respond<TInstance, TData, TMessage>(
-            this EventActivityBinder<TInstance, TData> source, Func<ConsumeEventContext<TInstance, TData>, TMessage> messageFactory,
+            this EventActivityBinder<TInstance, TData> source, EventMessageFactory<TInstance, TData, TMessage> messageFactory,
             Action<SendContext<TMessage>> contextCallback)
             where TInstance : class, SagaStateMachineInstance
             where TData : class
             where TMessage : class
         {
             return source.Add(new RespondActivity<TInstance, TData, TMessage>(messageFactory, contextCallback));
+        }
+
+        public static ExceptionActivityBinder<TInstance, TData, TException> Respond<TInstance, TData, TException, TMessage>(
+            this ExceptionActivityBinder<TInstance, TData, TException> source, TMessage message)
+            where TInstance : class, SagaStateMachineInstance
+            where TData : class
+            where TMessage : class
+            where TException : Exception
+        {
+            return source.Add(new FaultedRespondActivity<TInstance, TData, TException, TMessage>(x => message));
+        }
+
+        public static ExceptionActivityBinder<TInstance, TData, TException> Respond<TInstance, TData, TException, TMessage>(
+            this ExceptionActivityBinder<TInstance, TData, TException> source, TMessage message,
+            Action<SendContext<TMessage>> contextCallback)
+            where TInstance : class, SagaStateMachineInstance
+            where TData : class
+            where TMessage : class
+            where TException : Exception
+        {
+            return source.Add(new FaultedRespondActivity<TInstance, TData, TException, TMessage>(x => message, contextCallback));
+        }
+
+        public static ExceptionActivityBinder<TInstance, TData, TException> Respond<TInstance, TData, TException, TMessage>(
+            this ExceptionActivityBinder<TInstance, TData, TException> source,
+            EventExceptionMessageFactory<TInstance, TData, TException, TMessage> messageFactory)
+            where TInstance : class, SagaStateMachineInstance
+            where TData : class
+            where TMessage : class
+            where TException : Exception
+        {
+            return source.Add(new FaultedRespondActivity<TInstance, TData, TException, TMessage>(messageFactory));
+        }
+
+        public static ExceptionActivityBinder<TInstance, TData, TException> Respond<TInstance, TData, TException, TMessage>(
+            this ExceptionActivityBinder<TInstance, TData, TException> source,
+            EventExceptionMessageFactory<TInstance, TData, TException, TMessage> messageFactory,
+            Action<SendContext<TMessage>> contextCallback)
+            where TInstance : class, SagaStateMachineInstance
+            where TData : class
+            where TMessage : class
+            where TException : Exception
+        {
+            return source.Add(new FaultedRespondActivity<TInstance, TData, TException, TMessage>(messageFactory, contextCallback));
         }
     }
 }

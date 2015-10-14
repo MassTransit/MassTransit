@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace Automatonymous
 {
+    using System;
     using Activities;
     using Binders;
 
@@ -38,6 +39,32 @@ namespace Automatonymous
             where TResponse : class
         {
             var activity = new RequestActivity<TInstance, TData, TRequest, TResponse>(request, messageFactory);
+
+            return binder.Add(activity);
+        }
+
+        /// <summary>
+        /// Send a request to the configured service endpoint, and setup the state machine to accept the response.
+        /// </summary>
+        /// <typeparam name="TInstance">The state instance type</typeparam>
+        /// <typeparam name="TData">The event data type</typeparam>
+        /// <typeparam name="TRequest">The request message type</typeparam>
+        /// <typeparam name="TResponse">The response message type</typeparam>
+        /// <typeparam name="TException"></typeparam>
+        /// <param name="binder">The event binder</param>
+        /// <param name="request">The configured request to use</param>
+        /// <param name="messageFactory">The request message factory</param>
+        /// <returns></returns>
+        public static ExceptionActivityBinder<TInstance, TData, TException> Request<TInstance, TData, TException, TRequest, TResponse>(
+            this ExceptionActivityBinder<TInstance, TData, TException> binder, Request<TInstance, TRequest, TResponse> request,
+            EventExceptionMessageFactory<TInstance, TData, TException, TRequest> messageFactory)
+            where TInstance : class, SagaStateMachineInstance
+            where TData : class
+            where TRequest : class
+            where TResponse : class 
+            where TException : Exception
+        {
+            var activity = new FaultedRequestActivity<TInstance, TData, TException, TRequest, TResponse>(request, messageFactory);
 
             return binder.Add(activity);
         }

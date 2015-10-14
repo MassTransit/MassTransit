@@ -18,16 +18,17 @@ namespace Automatonymous.Activities
     using MassTransit.Pipeline;
 
 
-    public class RespondActivity<TInstance, TData, TMessage> :
+    public class FaultedRespondActivity<TInstance, TData, TException, TMessage> :
         Activity<TInstance, TData>
         where TInstance : SagaStateMachineInstance
         where TData : class
         where TMessage : class
+        where TException : Exception
     {
-        readonly EventMessageFactory<TInstance, TData, TMessage> _messageFactory;
+        readonly EventExceptionMessageFactory<TInstance, TData, TException, TMessage> _messageFactory;
         readonly IPipe<SendContext<TMessage>> _responsePipe;
 
-        public RespondActivity(EventMessageFactory<TInstance, TData, TMessage> messageFactory,
+        public FaultedRespondActivity(EventExceptionMessageFactory<TInstance, TData, TException, TMessage> messageFactory,
             Action<SendContext<TMessage>> contextCallback)
         {
             _messageFactory = messageFactory;
@@ -35,7 +36,7 @@ namespace Automatonymous.Activities
             _responsePipe = Pipe.Execute(contextCallback);
         }
 
-        public RespondActivity(EventMessageFactory<TInstance, TData, TMessage> messageFactory)
+        public FaultedRespondActivity(EventExceptionMessageFactory<TInstance, TData, TException, TMessage> messageFactory)
         {
             _messageFactory = messageFactory;
 
@@ -47,20 +48,22 @@ namespace Automatonymous.Activities
             inspector.Visit(this);
         }
 
-        async Task Activity<TInstance, TData>.Execute(BehaviorContext<TInstance, TData> context, Behavior<TInstance, TData> next)
+        Task Activity<TInstance, TData>.Execute(BehaviorContext<TInstance, TData> context, Behavior<TInstance, TData> next)
         {
-            var consumeContext = context.CreateConsumeContext();
-
-            TMessage message = _messageFactory(consumeContext);
-
-            await consumeContext.RespondAsync(message, _responsePipe);
-
-            await next.Execute(context);
+            return next.Execute(context);
         }
 
-        async Task Activity<TInstance, TData>.Faulted<TException>(BehaviorExceptionContext<TInstance, TData, TException> context,
+        async Task Activity<TInstance, TData>.Faulted<T>(BehaviorExceptionContext<TInstance, TData, T> context,
             Behavior<TInstance, TData> next)
         {
+            ConsumeExceptionEventContext<TInstance, TData, TException> exceptionContext;
+            if (context.TryGetExceptionContext(out exceptionContext))
+            {
+                TMessage message = _messageFactory(exceptionContext);
+
+                await exceptionContext.RespondAsync(message, _responsePipe);
+            }
+
             await next.Faulted(context);
         }
     }

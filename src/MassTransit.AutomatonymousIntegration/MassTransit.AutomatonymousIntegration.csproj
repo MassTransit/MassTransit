@@ -52,6 +52,11 @@
     <Compile Include="..\SolutionVersion.cs">
       <Link>Properties\SolutionVersion.cs</Link>
     </Compile>
+    <Compile Include="Activities\FaultedPublishActivity.cs" />
+    <Compile Include="Activities\FaultedRequestActivity.cs" />
+    <Compile Include="Activities\FaultedRespondActivity.cs" />
+    <Compile Include="Activities\FaultedScheduleActivity.cs" />
+    <Compile Include="Activities\FaultedUnscheduleActivity.cs" />
     <Compile Include="Activities\UnscheduleActivity.cs" />
     <Compile Include="Activities\PublishActivity.cs" />
     <Compile Include="Activities\RequestActivityImpl.cs" />
@@ -60,6 +65,10 @@
     <Compile Include="Configuration\MissingInstanceConfigurator.cs" />
     <Compile Include="Configuration\ScheduleConfigurator.cs" />
     <Compile Include="Configuration\StateMachineScheduleConfigurator.cs" />
+    <Compile Include="ConsumeExceptionEventContext.cs" />
+    <Compile Include="ContextExtensions.cs" />
+    <Compile Include="Contexts\AutomatonymousConsumeExceptionEventContext.cs" />
+    <Compile Include="EventExceptionMessageFactory.cs" />
     <Compile Include="EventMessageFactory.cs" />
     <Compile Include="Activities\RequestActivity.cs" />
     <Compile Include="Activities\RespondActivity.cs" />

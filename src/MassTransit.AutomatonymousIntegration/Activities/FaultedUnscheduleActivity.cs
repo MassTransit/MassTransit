@@ -17,13 +17,13 @@ namespace Automatonymous.Activities
     using MassTransit;
 
 
-    public class UnscheduleActivity<TInstance> :
+    public class FaultedUnscheduleActivity<TInstance> :
         Activity<TInstance>
         where TInstance : class, SagaStateMachineInstance
     {
         readonly Schedule<TInstance> _schedule;
 
-        public UnscheduleActivity(Schedule<TInstance> schedule)
+        public FaultedUnscheduleActivity(Schedule<TInstance> schedule)
         {
             _schedule = schedule;
         }
@@ -33,31 +33,31 @@ namespace Automatonymous.Activities
             inspector.Visit(this);
         }
 
-        async Task Activity<TInstance>.Execute(BehaviorContext<TInstance> context, Behavior<TInstance> next)
+        Task Activity<TInstance>.Execute(BehaviorContext<TInstance> context, Behavior<TInstance> next)
         {
-            await Execute(context);
-
-            await next.Execute(context);
+            return next.Execute(context);
         }
 
-        async Task Activity<TInstance>.Execute<T>(BehaviorContext<TInstance, T> context, Behavior<TInstance, T> next)
+        Task Activity<TInstance>.Execute<T>(BehaviorContext<TInstance, T> context, Behavior<TInstance, T> next)
         {
-            await Execute(context);
-
-            await next.Execute(context);
+            return next.Execute(context);
         }
 
         async Task Activity<TInstance>.Faulted<TException>(BehaviorExceptionContext<TInstance, TException> context, Behavior<TInstance> next)
         {
+            await Faulted(context);
+
             await next.Faulted(context);
         }
 
         async Task Activity<TInstance>.Faulted<T, TException>(BehaviorExceptionContext<TInstance, T, TException> context, Behavior<TInstance, T> next)
         {
+            await Faulted(context);
+
             await next.Faulted(context);
         }
 
-        async Task Execute(BehaviorContext<TInstance> context)
+        async Task Faulted(BehaviorContext<TInstance> context)
         {
             ConsumeContext consumeContext;
             if (!context.TryGetPayload(out consumeContext))
