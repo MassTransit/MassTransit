@@ -38,9 +38,8 @@ namespace MassTransit.AzureServiceBusTransport
 
         public async Task<ISendEndpoint> GetSendEndpoint(Uri address)
         {
-            IServiceBusHost host =
-                _hosts.FirstOrDefault(x => x.Settings.ServiceUri.Host.Equals(address.Host, StringComparison.OrdinalIgnoreCase));
-            if (host == null)
+            IServiceBusHost host;
+            if(!TryGetMatchingHost(address, out host))
                 throw new EndpointNotFoundException("The endpoint address specified an unknown host: " + address);
 
             TopicDescription topicDescription =
@@ -61,5 +60,16 @@ namespace MassTransit.AzureServiceBusTransport
         {
             return _sendObservable.Connect(observer);
         }
+
+        bool TryGetMatchingHost(Uri address, out IServiceBusHost host)
+        {
+            host = _hosts
+                .Where(x => x.Settings.ServiceUri.GetLeftPart(UriPartial.Authority).Equals(address.GetLeftPart(UriPartial.Authority), StringComparison.OrdinalIgnoreCase))
+                .OrderByDescending(x => address.AbsolutePath.StartsWith(x.Settings.ServiceUri.AbsolutePath, StringComparison.OrdinalIgnoreCase) ? 1 : 0)
+                .FirstOrDefault();
+
+            return host != null;
+        }
+
     }
 }
