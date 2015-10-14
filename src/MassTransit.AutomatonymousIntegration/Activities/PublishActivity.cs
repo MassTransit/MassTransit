@@ -14,9 +14,7 @@ namespace Automatonymous.Activities
 {
     using System;
     using System.Threading.Tasks;
-    using Contexts;
     using MassTransit;
-    using MassTransit.Context;
     using MassTransit.Pipeline;
 
 
@@ -74,13 +72,9 @@ namespace Automatonymous.Activities
 
         async Task Execute(BehaviorContext<TInstance> context)
         {
-            ConsumeContext consumeContext;
-            if (!context.TryGetPayload(out consumeContext))
-                throw new ContextException("The consume context could not be retrieved.");
+            var consumeContext = context.CreateConsumeContext();
 
-            var consumeEventContext = new AutomatonymousConsumeEventContext<TInstance>(context, consumeContext);
-
-            TMessage message = _messageFactory(consumeEventContext);
+            TMessage message = _messageFactory(consumeContext);
 
             await consumeContext.Publish(message, _publishPipe);
         }
@@ -118,13 +112,9 @@ namespace Automatonymous.Activities
 
         async Task Activity<TInstance, TData>.Execute(BehaviorContext<TInstance, TData> context, Behavior<TInstance, TData> next)
         {
-            ConsumeContext<TData> consumeContext;
-            if (!context.TryGetPayload(out consumeContext))
-                throw new ContextException("The consume context could not be retrieved.");
+            var consumeContext = context.CreateConsumeContext();
 
-            var consumeEventContext = new AutomatonymousConsumeEventContext<TInstance, TData>(context, consumeContext);
-
-            TMessage message = _messageFactory(consumeEventContext);
+            TMessage message = _messageFactory(consumeContext);
 
             await consumeContext.Publish(message, _publishPipe);
 

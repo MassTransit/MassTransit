@@ -14,11 +14,8 @@ namespace Automatonymous.Activities
 {
     using System;
     using System.Threading.Tasks;
-    using Contexts;
     using MassTransit;
-    using MassTransit.Context;
     using MassTransit.Pipeline;
-    using MassTransit.Scheduling;
 
 
     public class ScheduleActivity<TInstance, TMessage> :
@@ -78,17 +75,13 @@ namespace Automatonymous.Activities
 
         async Task Execute(BehaviorContext<TInstance> context)
         {
-            ConsumeContext consumeContext;
-            if (!context.TryGetPayload(out consumeContext))
-                throw new ContextException("The consume context could not be retrieved.");
-
-            var consumeEventContext = new AutomatonymousConsumeEventContext<TInstance>(context, consumeContext);
-
-            TMessage message = _messageFactory(consumeEventContext);
+            var consumeContext = context.CreateConsumeContext();
 
             MessageSchedulerContext schedulerContext;
-            if (!consumeContext.TryGetPayload(out schedulerContext))
+            if (!((ConsumeContext)consumeContext).TryGetPayload(out schedulerContext))
                 throw new ContextException("The scheduler context could not be retrieved.");
+
+            TMessage message = _messageFactory(consumeContext);
 
             var scheduledMessage = await schedulerContext.ScheduleSend(message, _schedule.Delay, _sendPipe);
 
@@ -137,17 +130,13 @@ namespace Automatonymous.Activities
 
         async Task Activity<TInstance, TData>.Execute(BehaviorContext<TInstance, TData> context, Behavior<TInstance, TData> next)
         {
-            ConsumeContext<TData> consumeContext;
-            if (!context.TryGetPayload(out consumeContext))
-                throw new ContextException("The consume context could not be retrieved.");
-
-            var consumeEventContext = new AutomatonymousConsumeEventContext<TInstance, TData>(context, consumeContext);
-
-            TMessage message = _messageFactory(consumeEventContext);
+            var consumeContext = context.CreateConsumeContext();
 
             MessageSchedulerContext schedulerContext;
-            if (!consumeContext.TryGetPayload(out schedulerContext))
+            if (!((ConsumeContext)consumeContext).TryGetPayload(out schedulerContext))
                 throw new ContextException("The scheduler context could not be retrieved.");
+
+            TMessage message = _messageFactory(consumeContext);
 
             var scheduledMessage = await schedulerContext.ScheduleSend(message, _schedule.Delay, _sendPipe);
 

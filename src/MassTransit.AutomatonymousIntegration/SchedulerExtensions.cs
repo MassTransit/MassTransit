@@ -92,6 +92,58 @@ namespace Automatonymous
             return source.Add(new ScheduleActivity<TInstance, TData, TMessage>(messageFactory, schedule, contextCallback));
         }
 
+        public static ExceptionActivityBinder<TInstance, TData, TException> Schedule<TInstance, TData, TException, TMessage>(
+            this ExceptionActivityBinder<TInstance, TData, TException> source, Schedule<TInstance, TMessage> schedule, TMessage message)
+            where TInstance : class, SagaStateMachineInstance
+            where TData : class
+            where TException : Exception
+            where TMessage : class
+        {
+            return source.Add(new FaultedScheduleActivity<TInstance, TData, TException, TMessage>(x => message, schedule));
+        }
+
+        public static ExceptionActivityBinder<TInstance, TData, TException> Schedule<TInstance, TData, TException, TMessage>(
+            this ExceptionActivityBinder<TInstance, TData, TException> source, Schedule<TInstance, TMessage> schedule, TMessage message,
+            Action<SendContext> contextCallback)
+            where TInstance : class, SagaStateMachineInstance
+            where TData : class
+            where TException : Exception
+            where TMessage : class
+        {
+            return source.Add(new FaultedScheduleActivity<TInstance, TData, TException, TMessage>(x => message, schedule, contextCallback));
+        }
+
+        public static ExceptionActivityBinder<TInstance, TData, TException> Schedule<TInstance, TData, TException, TMessage>(
+            this ExceptionActivityBinder<TInstance, TData, TException> source, Schedule<TInstance, TMessage> schedule,
+            EventExceptionMessageFactory<TInstance, TData, TException, TMessage> messageFactory)
+            where TInstance : class, SagaStateMachineInstance
+            where TData : class
+            where TException : Exception
+            where TMessage : class
+        {
+            return source.Add(new FaultedScheduleActivity<TInstance, TData, TException, TMessage>(messageFactory, schedule));
+        }
+
+        public static ExceptionActivityBinder<TInstance, TData, TException> Schedule<TInstance, TData, TException, TMessage>(
+            this ExceptionActivityBinder<TInstance, TData, TException> source, Schedule<TInstance, TMessage> schedule,
+            EventExceptionMessageFactory<TInstance, TData, TException, TMessage> messageFactory,
+            Action<SendContext> contextCallback)
+            where TInstance : class, SagaStateMachineInstance
+            where TData : class
+            where TException : Exception
+            where TMessage : class
+        {
+            return source.Add(new FaultedScheduleActivity<TInstance, TData, TException, TMessage>(messageFactory, schedule, contextCallback));
+        }
+
+        /// <summary>
+        /// Unschedule a message, if the message was scheduled.
+        /// </summary>
+        /// <typeparam name="TInstance"></typeparam>
+        /// <typeparam name="TData"></typeparam>
+        /// <param name="source"></param>
+        /// <param name="schedule"></param>
+        /// <returns></returns>
         public static EventActivityBinder<TInstance, TData> Unschedule<TInstance, TData>(
             this EventActivityBinder<TInstance, TData> source, Schedule<TInstance> schedule)
             where TInstance : class, SagaStateMachineInstance
@@ -100,6 +152,30 @@ namespace Automatonymous
             return source.Add(new UnscheduleActivity<TInstance>(schedule));
         }
 
+        /// <summary>
+        /// Unschedule a message, if the message was scheduled.
+        /// </summary>
+        /// <typeparam name="TInstance"></typeparam>
+        /// <typeparam name="TData"></typeparam>
+        /// <param name="source"></param>
+        /// <param name="schedule"></param>
+        /// <returns></returns>
+        public static ExceptionActivityBinder<TInstance, TData, TException> Unschedule<TInstance, TData, TException>(
+            this ExceptionActivityBinder<TInstance, TData, TException> source, Schedule<TInstance> schedule)
+            where TInstance : class, SagaStateMachineInstance
+            where TData : class
+            where TException : Exception
+        {
+            return source.Add(new FaultedUnscheduleActivity<TInstance>(schedule));
+        }
+
+        /// <summary>
+        /// Unschedule a message, if the message was scheduled.
+        /// </summary>
+        /// <typeparam name="TInstance"></typeparam>
+        /// <param name="source"></param>
+        /// <param name="schedule"></param>
+        /// <returns></returns>
         public static EventActivityBinder<TInstance> Unschedule<TInstance>(
             this EventActivityBinder<TInstance> source, Schedule<TInstance> schedule)
             where TInstance : class, SagaStateMachineInstance

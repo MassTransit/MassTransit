@@ -14,8 +14,6 @@ namespace Automatonymous.Activities
 {
     using System;
     using System.Threading.Tasks;
-    using Contexts;
-    using MassTransit;
 
 
     public class RequestActivity<TInstance, TRequest, TResponse> :
@@ -64,13 +62,9 @@ namespace Automatonymous.Activities
 
         async Task Execute(BehaviorContext<TInstance> context)
         {
-            ConsumeContext consumeContext;
-            if (!context.TryGetPayload(out consumeContext))
-                throw new ArgumentException("The ConsumeContext was not available");
+            var consumeContext = context.CreateConsumeContext();
 
-            var consumeEventContext = new AutomatonymousConsumeEventContext<TInstance>(context, consumeContext);
-
-            TRequest requestMessage = _messageFactory(consumeEventContext);
+            TRequest requestMessage = _messageFactory(consumeContext);
 
             await SendRequest(context, consumeContext, requestMessage);
         }
@@ -100,13 +94,9 @@ namespace Automatonymous.Activities
 
         public async Task Execute(BehaviorContext<TInstance, TData> context, Behavior<TInstance, TData> next)
         {
-            ConsumeContext<TData> consumeContext;
-            if (!context.TryGetPayload(out consumeContext))
-                throw new ArgumentException("The ConsumeContext was not available");
+            var consumeContext = context.CreateConsumeContext();
 
-            var consumeEventContext = new AutomatonymousConsumeEventContext<TInstance, TData>(context, consumeContext);
-
-            TRequest requestMessage = _messageFactory(consumeEventContext);
+            TRequest requestMessage = _messageFactory(consumeContext);
 
             await SendRequest(context, consumeContext, requestMessage);
 

@@ -101,6 +101,7 @@
     <Compile Include="..\SolutionVersion.cs">
       <Link>Properties\SolutionVersion.cs</Link>
     </Compile>
+    <Compile Include="CatchFault_Specs.cs" />
     <Compile Include="CompositeEvent_Specs.cs" />
     <Compile Include="ContextSetup.cs" />
     <Compile Include="CorrelationExpression_Specs.cs" />

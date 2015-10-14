@@ -18,28 +18,29 @@ namespace Automatonymous.Activities
     using MassTransit.Pipeline;
 
 
-    public class RespondActivity<TInstance, TData, TMessage> :
+    public class FaultedPublishActivity<TInstance, TData, TException, TMessage> :
         Activity<TInstance, TData>
         where TInstance : SagaStateMachineInstance
         where TData : class
         where TMessage : class
+        where TException : Exception
     {
-        readonly EventMessageFactory<TInstance, TData, TMessage> _messageFactory;
-        readonly IPipe<SendContext<TMessage>> _responsePipe;
+        readonly EventExceptionMessageFactory<TInstance, TData, TException, TMessage> _messageFactory;
+        readonly IPipe<PublishContext<TMessage>> _publishPipe;
 
-        public RespondActivity(EventMessageFactory<TInstance, TData, TMessage> messageFactory,
-            Action<SendContext<TMessage>> contextCallback)
+        public FaultedPublishActivity(EventExceptionMessageFactory<TInstance, TData, TException, TMessage> messageFactory,
+            Action<PublishContext<TMessage>> contextCallback)
         {
             _messageFactory = messageFactory;
 
-            _responsePipe = Pipe.Execute(contextCallback);
+            _publishPipe = Pipe.Execute(contextCallback);
         }
 
-        public RespondActivity(EventMessageFactory<TInstance, TData, TMessage> messageFactory)
+        public FaultedPublishActivity(EventExceptionMessageFactory<TInstance, TData, TException, TMessage> messageFactory)
         {
             _messageFactory = messageFactory;
 
-            _responsePipe = Pipe.Empty<SendContext<TMessage>>();
+            _publishPipe = Pipe.Empty<PublishContext<TMessage>>();
         }
 
         void Visitable.Accept(StateMachineVisitor inspector)
@@ -47,20 +48,22 @@ namespace Automatonymous.Activities
             inspector.Visit(this);
         }
 
-        async Task Activity<TInstance, TData>.Execute(BehaviorContext<TInstance, TData> context, Behavior<TInstance, TData> next)
+        Task Activity<TInstance, TData>.Execute(BehaviorContext<TInstance, TData> context, Behavior<TInstance, TData> next)
         {
-            var consumeContext = context.CreateConsumeContext();
-
-            TMessage message = _messageFactory(consumeContext);
-
-            await consumeContext.RespondAsync(message, _responsePipe);
-
-            await next.Execute(context);
+            return next.Execute(context);
         }
 
-        async Task Activity<TInstance, TData>.Faulted<TException>(BehaviorExceptionContext<TInstance, TData, TException> context,
+        async Task Activity<TInstance, TData>.Faulted<T>(BehaviorExceptionContext<TInstance, TData, T> context,
             Behavior<TInstance, TData> next)
         {
+            ConsumeExceptionEventContext<TInstance, TData, TException> exceptionContext;
+            if (context.TryGetExceptionContext(out exceptionContext))
+            {
+                TMessage message = _messageFactory(exceptionContext);
+
+                await exceptionContext.Publish(message, _publishPipe);
+            }
+
             await next.Faulted(context);
         }
     }
