@@ -31,36 +31,47 @@ namespace MassTransit.AzureServiceBusTransport
 
         public async Task<ISendTransport> GetSendTransport(Uri address)
         {
-            IServiceBusHost host = _hosts.FirstOrDefault(
-                x => address.ToString().StartsWith(x.Settings.ServiceUri.ToString(), StringComparison.OrdinalIgnoreCase));
-            if (host == null)
+            IServiceBusHost host;
+            if(!TryGetMatchingHost(address, out host))
                 throw new EndpointNotFoundException("The endpoint address specified an unknown host: " + address);
 
             var queueDescription = address.GetQueueDescription();
 
-            var namespaceManager = await host.NamespaceManager;
+            var namespaceManager = await host.NamespaceManager.ConfigureAwait(false);
 
+            string queuePath;
             var namespacePath = namespaceManager.Address.AbsolutePath.Trim('/');
             if (IsInNamespace(queueDescription, namespacePath))
             {
                 queueDescription.Path = queueDescription.Path.Replace(namespacePath, "").Trim('/');
-                queueDescription = await namespaceManager.CreateQueueSafeAsync(queueDescription);
+                queueDescription = await namespaceManager.CreateQueueSafeAsync(queueDescription).ConfigureAwait(false);
+
+                queuePath = host.GetQueuePath(queueDescription);
             }
             else
             {
-                namespaceManager = await host.RootNamespaceManager;
+                namespaceManager = await host.RootNamespaceManager.ConfigureAwait(false);
 
-                queueDescription = await namespaceManager.CreateQueueSafeAsync(queueDescription);
+                queueDescription = await namespaceManager.CreateQueueSafeAsync(queueDescription).ConfigureAwait(false);
+
+                queuePath = queueDescription.Path;
             }
 
-            MessagingFactory messagingFactory = await host.MessagingFactory;
+            MessagingFactory messagingFactory = await host.MessagingFactory.ConfigureAwait(false);
 
-            string queuePath = host.GetQueuePath(queueDescription);
+            MessageSender messageSender = await messagingFactory.CreateMessageSenderAsync(queuePath).ConfigureAwait(false);
 
-            MessageSender messageSender = await messagingFactory.CreateMessageSenderAsync(queuePath);
+            return new ServiceBusSendTransport(messageSender);
+        }
 
-            var sendTransport = new ServiceBusSendTransport(messageSender);
-            return sendTransport;
+        bool TryGetMatchingHost(Uri address, out IServiceBusHost host)
+        {
+            host = _hosts
+                .Where(x => x.Settings.ServiceUri.GetLeftPart(UriPartial.Authority).Equals(address.GetLeftPart(UriPartial.Authority), StringComparison.OrdinalIgnoreCase))
+                .OrderByDescending(x => address.AbsolutePath.StartsWith(x.Settings.ServiceUri.AbsolutePath, StringComparison.OrdinalIgnoreCase) ? 1 : 0)
+                .FirstOrDefault();
+
+            return host != null;
         }
 
         static bool IsInNamespace(QueueDescription queueDescription, string namespacePath)

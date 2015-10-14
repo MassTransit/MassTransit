@@ -80,6 +80,8 @@ namespace MassTransit.AzureServiceBusTransport.Tests
             _secondBusHandle = _secondBus.Start();
             try
             {
+                Await(() => _secondBusHandle.Ready);
+
                 _secondBusSendEndpoint = Await(() => _secondBus.GetSendEndpoint(_secondBus.Address));
 
                 _secondInputQueueSendEndpoint = Await(() => _secondBus.GetSendEndpoint(_secondInputQueueAddress));
