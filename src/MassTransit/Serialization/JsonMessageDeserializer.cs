@@ -25,9 +25,9 @@ namespace MassTransit.Serialization
         IMessageDeserializer
     {
         readonly JsonSerializer _deserializer;
+        readonly IObjectTypeDeserializer _objectTypeDeserializer;
         readonly IPublishEndpointProvider _publishEndpoint;
         readonly ISendEndpointProvider _sendEndpointProvider;
-        readonly IObjectTypeDeserializer _objectTypeDeserializer;
 
         public JsonMessageDeserializer(JsonSerializer deserializer, ISendEndpointProvider sendEndpointProvider,
             IPublishEndpointProvider publishEndpoint)
@@ -40,7 +40,7 @@ namespace MassTransit.Serialization
 
         void IProbeSite.Probe(ProbeContext context)
         {
-            ProbeContext scope = context.CreateScope("json");
+            var scope = context.CreateScope("json");
             scope.Add("contentType", JsonMessageSerializer.JsonContentType.MediaType);
         }
 
@@ -50,9 +50,11 @@ namespace MassTransit.Serialization
         {
             try
             {
+                var messageEncoding = GetMessageEncoding(receiveContext);
+
                 MessageEnvelope envelope;
-                using (Stream body = receiveContext.GetBody())
-                using (var reader = new StreamReader(body, Encoding.UTF8, false, 1024, true))
+                using (var body = receiveContext.GetBody())
+                using (var reader = new StreamReader(body, messageEncoding, false, 1024, true))
                 using (var jsonReader = new JsonTextReader(reader))
                 {
                     envelope = _deserializer.Deserialize<MessageEnvelope>(jsonReader);
@@ -72,6 +74,13 @@ namespace MassTransit.Serialization
             {
                 throw new SerializationException("An exception occurred while deserializing the message envelope", ex);
             }
+        }
+
+        static Encoding GetMessageEncoding(ReceiveContext receiveContext)
+        {
+            var contentEncoding = receiveContext.TransportHeaders.Get("Content-Encoding", default(string));
+
+            return string.IsNullOrWhiteSpace(contentEncoding) ? Encoding.UTF8 : Encoding.GetEncoding(contentEncoding);
         }
     }
 }
