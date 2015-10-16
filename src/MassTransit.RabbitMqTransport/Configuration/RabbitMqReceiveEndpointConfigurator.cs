@@ -79,7 +79,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
 
             var transport = new RabbitMqReceiveTransport(_host.ConnectionCache, _settings, endpointBuilder.GetExchangeBindings().ToArray());
 
-            builder.AddReceiveEndpoint(new ReceiveEndpoint(transport, receivePipe));
+            builder.AddReceiveEndpoint(_settings.QueueName ?? NewId.Next().ToString(), new ReceiveEndpoint(transport, receivePipe));
         }
 
         public bool Durable

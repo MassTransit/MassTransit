@@ -140,6 +140,50 @@ namespace MassTransit.RabbitMqTransport.Tests
             }
         }
 
+        [TestFixture]
+        public class WhenAMessageIsPublishedToATemporaryEndpoint :
+            RabbitMqTestFixture
+        {
+            [Test]
+            public async Task Should_be_received()
+            {
+                var message = new A { Id = Guid.NewGuid() };
+
+                await Bus.Publish(message);
+
+                await _receivedA;
+                await _temporaryA;
+                await _temporaryB;
+            }
+
+            Task<ConsumeContext<A>> _receivedA;
+            Task<ConsumeContext<A>> _temporaryA;
+            Task<ConsumeContext<A>> _temporaryB;
+
+            protected override void ConfigureBusHost(IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host)
+            {
+                base.ConfigureBusHost(configurator, host);
+
+                configurator.ReceiveEndpoint(host, x =>
+                {
+                    _temporaryA = Handled<A>(x);
+                });
+
+                configurator.ReceiveEndpoint(host, x =>
+                {
+                    _temporaryB = Handled<A>(x);
+                });
+
+            }
+
+            protected override void ConfigureInputQueueEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
+            {
+                base.ConfigureInputQueueEndpoint(configurator);
+
+                _receivedA = Handled<A>(configurator);
+            }
+        }
+
 
         [TestFixture]
         public class When_a_message_is_published_from_the_queue :
