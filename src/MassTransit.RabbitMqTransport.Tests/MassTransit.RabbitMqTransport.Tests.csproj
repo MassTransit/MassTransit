@@ -81,6 +81,7 @@
     <Compile Include="DelayRetry_Specs.cs" />
     <Compile Include="ErrorQueue_Specs.cs" />
     <Compile Include="EventPublishRQ_Specs.cs" />
+    <Compile Include="FailedConnection_Specs.cs" />
     <Compile Include="HammerTime_Specs.cs" />
     <Compile Include="Performance_Specs.cs" />
     <Compile Include="RabbitMqActivityTestFixture.cs" />
