@@ -1,12 +1,12 @@
-// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
 // License at 
 // 
 //     http://www.apache.org/licenses/LICENSE-2.0 
 // 
-// Unless required by applicable law or agreed to in writing, software distributed 
+// Unless required by applicable law or agreed to in writing, software distributed
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
@@ -15,7 +15,7 @@ namespace MassTransit.NLogIntegration.Logging
     using System;
     using MassTransit.Logging;
     using NLog;
-    using Util;
+
 
     /// <summary>
     /// A logger that wraps to NLog. See http://stackoverflow.com/questions/7412156/how-to-retain-callsite-information-when-wrapping-nlog
@@ -28,38 +28,24 @@ namespace MassTransit.NLogIntegration.Logging
         /// <summary>
         /// Create a new NLog logger instance.
         /// </summary>
+        /// <param name="log"></param>
         /// <param name="name">Name of type to log as.</param>
-        public NLogLog( NLog.Logger log,  string name)
+        public NLogLog(NLog.Logger log, string name)
         {
             if (name == null)
-                throw new ArgumentNullException("name");
+                throw new ArgumentNullException(nameof(name));
             _log = log;
         }
 
-        public bool IsDebugEnabled
-        {
-            get { return _log.IsDebugEnabled; }
-        }
+        public bool IsDebugEnabled => _log.IsDebugEnabled;
 
-        public bool IsInfoEnabled
-        {
-            get { return _log.IsInfoEnabled; }
-        }
+        public bool IsInfoEnabled => _log.IsInfoEnabled;
 
-        public bool IsWarnEnabled
-        {
-            get { return _log.IsWarnEnabled; }
-        }
+        public bool IsWarnEnabled => _log.IsWarnEnabled;
 
-        public bool IsErrorEnabled
-        {
-            get { return _log.IsErrorEnabled; }
-        }
+        public bool IsErrorEnabled => _log.IsErrorEnabled;
 
-        public bool IsFatalEnabled
-        {
-            get { return _log.IsFatalEnabled; }
-        }
+        public bool IsFatalEnabled => _log.IsFatalEnabled;
 
         public void Log(MassTransit.Logging.LogLevel level, object obj)
         {
@@ -68,7 +54,7 @@ namespace MassTransit.NLogIntegration.Logging
 
         public void Log(MassTransit.Logging.LogLevel level, object obj, Exception exception)
         {
-            _log.LogException(GetNLogLevel(level), obj == null ? "" : obj.ToString(), exception);
+            _log.Log(GetNLogLevel(level), exception, obj?.ToString() ?? "");
         }
 
         public void Log(MassTransit.Logging.LogLevel level, LogOutputProvider messageProvider)
@@ -77,7 +63,7 @@ namespace MassTransit.NLogIntegration.Logging
         }
 
         public void LogFormat(MassTransit.Logging.LogLevel level, IFormatProvider formatProvider, string format,
-                              params object[] args)
+            params object[] args)
         {
             _log.Log(GetNLogLevel(level), formatProvider, format, args);
         }
@@ -94,7 +80,7 @@ namespace MassTransit.NLogIntegration.Logging
 
         public void Debug(object obj, Exception exception)
         {
-            _log.LogException(NLog.LogLevel.Debug, obj == null ? "" : obj.ToString(), exception);
+            _log.Log(NLog.LogLevel.Debug, exception, obj?.ToString() ?? "");
         }
 
         public void Debug(LogOutputProvider messageProvider)
@@ -109,7 +95,7 @@ namespace MassTransit.NLogIntegration.Logging
 
         public void Info(object obj, Exception exception)
         {
-            _log.LogException(NLog.LogLevel.Info, obj == null ? "" : obj.ToString(), exception);
+            _log.Log(NLog.LogLevel.Info, exception, obj?.ToString() ?? "");
         }
 
         public void Info(LogOutputProvider messageProvider)
@@ -124,7 +110,7 @@ namespace MassTransit.NLogIntegration.Logging
 
         public void Warn(object obj, Exception exception)
         {
-            _log.LogException(NLog.LogLevel.Warn, obj == null ? "" : obj.ToString(), exception);
+            _log.Log(NLog.LogLevel.Warn, exception, obj?.ToString() ?? "");
         }
 
         public void Warn(LogOutputProvider messageProvider)
@@ -139,7 +125,7 @@ namespace MassTransit.NLogIntegration.Logging
 
         public void Error(object obj, Exception exception)
         {
-            _log.LogException(NLog.LogLevel.Error, obj == null ? "" : obj.ToString(), exception);
+            _log.Log(NLog.LogLevel.Error, exception, obj?.ToString() ?? "");
         }
 
         public void Error(LogOutputProvider messageProvider)
@@ -154,7 +140,7 @@ namespace MassTransit.NLogIntegration.Logging
 
         public void Fatal(object obj, Exception exception)
         {
-            _log.LogException(NLog.LogLevel.Fatal, obj == null ? "" : obj.ToString(), exception);
+            _log.Log(NLog.LogLevel.Fatal, exception, obj?.ToString() ?? "");
         }
 
         public void Fatal(LogOutputProvider messageProvider)
@@ -233,10 +219,10 @@ namespace MassTransit.NLogIntegration.Logging
         LogMessageGenerator ToGenerator(LogOutputProvider provider)
         {
             return () =>
-                {
-                    object obj = provider();
-                    return obj == null ? "" : obj.ToString();
-                };
+            {
+                var obj = provider();
+                return obj?.ToString() ?? "";
+            };
         }
 
         public void Shutdown()
