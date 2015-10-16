@@ -31,6 +31,8 @@ namespace MassTransit.Policies
 
         public static async Task UntilCancelled(CancellationToken cancellationToken, Func<Task> callback)
         {
+            await Task.Yield();
+
             IRepeatPolicy repeatPolicy = UntilCancelled(cancellationToken);
             using (IRepeatContext repeatContext = repeatPolicy.GetRepeatContext())
             {

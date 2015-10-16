@@ -15,7 +15,6 @@ namespace MassTransit.RabbitMqTransport
     using System;
     using System.Threading;
     using System.Threading.Tasks;
-    using Integration;
     using Internals.Extensions;
     using Logging;
     using MassTransit.Pipeline;
@@ -28,16 +27,16 @@ namespace MassTransit.RabbitMqTransport
         IReceiveTransport
     {
         static readonly ILog _log = Logger.Get<RabbitMqReceiveTransport>();
-        readonly IConnectionCache _connectionCache;
         readonly ReceiveEndpointObservable _endpointObservers;
         readonly ExchangeBindingSettings[] _exchangeBindings;
+        readonly IRabbitMqHost _host;
         readonly ReceiveObservable _receiveObservers;
         readonly ReceiveSettings _settings;
 
-        public RabbitMqReceiveTransport(IConnectionCache connectionCache, ReceiveSettings settings,
+        public RabbitMqReceiveTransport(IRabbitMqHost host, ReceiveSettings settings,
             params ExchangeBindingSettings[] exchangeBindings)
         {
-            _connectionCache = connectionCache;
+            _host = host;
             _settings = settings;
             _exchangeBindings = exchangeBindings;
             _receiveObservers = new ReceiveObservable();
@@ -46,7 +45,7 @@ namespace MassTransit.RabbitMqTransport
 
         void IProbeSite.Probe(ProbeContext context)
         {
-            ProbeContext scope = context.CreateScope("transport");
+            var scope = context.CreateScope("transport");
             scope.Add("type", "RabbitMQ");
             scope.Set(_settings);
             scope.Add("bindings", _exchangeBindings);
@@ -62,9 +61,9 @@ namespace MassTransit.RabbitMqTransport
         {
             var stopTokenSource = new CancellationTokenSource();
 
-            IPipe<ConnectionContext> pipe = Pipe.New<ConnectionContext>(x => x.RabbitMqConsumer(receivePipe, _settings, _receiveObservers, _endpointObservers, _exchangeBindings));
+            var pipe = Pipe.New<ConnectionContext>(x => x.RabbitMqConsumer(receivePipe, _settings, _receiveObservers, _endpointObservers, _exchangeBindings));
 
-            Task receiverTask = Receiver(pipe, stopTokenSource.Token);
+            var receiverTask = Receiver(pipe, stopTokenSource.Token);
 
             return new Handle(stopTokenSource, receiverTask);
         }
@@ -85,12 +84,16 @@ namespace MassTransit.RabbitMqTransport
             {
                 try
                 {
-                    await _connectionCache.Send(transportPipe, stopToken);
+                    await _host.ConnectionCache.Send(transportPipe, stopToken);
                 }
                 catch (RabbitMqConnectionException ex)
                 {
                     if (_log.IsErrorEnabled)
                         _log.ErrorFormat("RabbitMQ connection failed: {0}", ex.Message);
+
+                    var inputAddress = _host.Settings.GetInputAddress(_settings);
+
+                    await _endpointObservers.Faulted(new Faulted(inputAddress, ex));
                 }
                 catch (TaskCanceledException)
                 {
@@ -99,8 +102,26 @@ namespace MassTransit.RabbitMqTransport
                 {
                     if (_log.IsErrorEnabled)
                         _log.ErrorFormat("RabbitMQ receive transport failed: {0}", ex.Message);
+
+                    var inputAddress = _host.Settings.GetInputAddress(_settings);
+
+                    await _endpointObservers.Faulted(new Faulted(inputAddress, ex));
                 }
             });
+        }
+
+
+        class Faulted :
+            ReceiveEndpointFaulted
+        {
+            public Faulted(Uri inputAddress, Exception exception)
+            {
+                InputAddress = inputAddress;
+                Exception = exception;
+            }
+
+            public Uri InputAddress { get; }
+            public Exception Exception { get; }
         }
 
 

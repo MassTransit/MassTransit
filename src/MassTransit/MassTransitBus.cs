@@ -29,7 +29,6 @@ namespace MassTransit
         IDisposable
     {
         readonly IBusObserver _busObservable;
-        readonly ConsumeObservable _consumeObservers;
         readonly IConsumePipe _consumePipe;
         readonly IBusHostControl[] _hosts;
         readonly ILog _log;
@@ -54,7 +53,6 @@ namespace MassTransit
 
             _log = Logger.Get<MassTransitBus>();
             _receiveObservers = new ReceiveObservable();
-            _consumeObservers = new ConsumeObservable();
 
             TaskUtil.Await(() => _busObservable.PostCreate(this));
         }
