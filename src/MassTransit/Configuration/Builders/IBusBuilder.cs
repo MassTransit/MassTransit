@@ -43,8 +43,9 @@ namespace MassTransit.Builders
         /// <summary>
         /// Adds a receive endpoint to the bus
         /// </summary>
+        /// <param name="queueName">The name of the queue for the receive endpoint</param>
         /// <param name="receiveEndpoint"></param>
-        void AddReceiveEndpoint(IReceiveEndpoint receiveEndpoint);
+        void AddReceiveEndpoint(string queueName, IReceiveEndpoint receiveEndpoint);
 
         /// <summary>
         /// Sets the outbound message serializer

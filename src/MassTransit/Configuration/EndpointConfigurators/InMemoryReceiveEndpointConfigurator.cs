@@ -37,7 +37,7 @@ namespace MassTransit.EndpointConfigurators
 
             var receivePipe = CreateReceivePipe(builder, consumePipe => new InMemoryReceiveEndpointBuilder(consumePipe));
 
-            builder.AddReceiveEndpoint(new ReceiveEndpoint(transport, receivePipe));
+            builder.AddReceiveEndpoint(_queueName, new ReceiveEndpoint(transport, receivePipe));
         }
 
         protected override Uri GetErrorAddress()

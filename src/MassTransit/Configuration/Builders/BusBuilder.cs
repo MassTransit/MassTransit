@@ -29,7 +29,7 @@ namespace MassTransit.Builders
         readonly IDictionary<string, DeserializerFactory> _deserializerFactories;
         readonly Lazy<Uri> _inputAddress;
         readonly Lazy<IPublishEndpointProvider> _publishSendEndpointProvider;
-        readonly IList<IReceiveEndpoint> _receiveEndpoints;
+        readonly IDictionary<string, IReceiveEndpoint> _receiveEndpoints;
         readonly Lazy<ISendEndpointProvider> _sendEndpointProvider;
         readonly Lazy<ISendTransportProvider> _sendTransportProvider;
         readonly Lazy<IMessageSerializer> _serializer;
@@ -39,7 +39,7 @@ namespace MassTransit.Builders
         {
             _consumePipeSpecification = consumePipeSpecification;
             _deserializerFactories = new Dictionary<string, DeserializerFactory>(StringComparer.OrdinalIgnoreCase);
-            _receiveEndpoints = new List<IReceiveEndpoint>();
+            _receiveEndpoints = new Dictionary<string, IReceiveEndpoint>();
             _serializerFactory = () => new JsonMessageSerializer();
             _busObservable = new BusObservable();
             _serializer = new Lazy<IMessageSerializer>(CreateSerializer);
@@ -60,7 +60,7 @@ namespace MassTransit.Builders
 
         protected BusObservable BusObservable => _busObservable;
 
-        protected IEnumerable<IReceiveEndpoint> ReceiveEndpoints => _receiveEndpoints;
+        protected IEnumerable<IReceiveEndpoint> ReceiveEndpoints => _receiveEndpoints.Values;
 
         public IMessageSerializer MessageSerializer => _serializer.Value;
 
@@ -128,9 +128,15 @@ namespace MassTransit.Builders
             return new SupportedMessageDeserializers(deserializers);
         }
 
-        public void AddReceiveEndpoint(IReceiveEndpoint receiveEndpoint)
+        public void AddReceiveEndpoint(string endpointKey, IReceiveEndpoint receiveEndpoint)
         {
-            _receiveEndpoints.Add(receiveEndpoint);
+            if (endpointKey == null)
+                throw new ArgumentNullException(nameof(endpointKey));
+
+            if (_receiveEndpoints.ContainsKey(endpointKey))
+                throw new ConfigurationException("A receive endpoint with the same key was already added: " + endpointKey);
+
+            _receiveEndpoints.Add(endpointKey, receiveEndpoint);
         }
 
         public ConnectHandle ConnectBusObserver(IBusObserver observer)

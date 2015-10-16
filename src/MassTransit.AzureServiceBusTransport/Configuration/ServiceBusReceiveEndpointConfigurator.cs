@@ -70,7 +70,7 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
 
             var transport = new ServiceBusReceiveTransport(_host, _settings, endpointBuilder.GetTopicSubscriptions().ToArray());
 
-            builder.AddReceiveEndpoint(new ReceiveEndpoint(transport, receivePipe));
+            builder.AddReceiveEndpoint(_settings.QueueDescription.Path, new ReceiveEndpoint(transport, receivePipe));
         }
 
         public TimeSpan AutoDeleteOnIdle

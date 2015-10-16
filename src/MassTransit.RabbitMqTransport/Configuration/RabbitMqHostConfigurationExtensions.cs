@@ -16,6 +16,8 @@ namespace MassTransit
     using RabbitMqTransport;
     using RabbitMqTransport.Configuration;
     using RabbitMqTransport.Configuration.Configurators;
+    using RabbitMqTransport.Topology;
+    using Util;
 
 
     public static class RabbitMqHostConfigurationExtensions
@@ -47,7 +49,9 @@ namespace MassTransit
         public static void ReceiveEndpoint(this IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host,
             Action<IRabbitMqReceiveEndpointConfigurator> configure)
         {
-            configurator.ReceiveEndpoint(host, null, x =>
+            string queueName = HostMetadataCache.Host.GetTemporaryQueueName("receiveEndpoint-");
+
+            configurator.ReceiveEndpoint(host, queueName, x =>
             {
                 x.AutoDelete = true;
                 x.Durable = false;

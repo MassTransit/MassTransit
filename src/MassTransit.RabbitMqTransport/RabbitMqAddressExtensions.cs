@@ -33,9 +33,9 @@ namespace MassTransit.RabbitMqTransport
         static readonly INewIdFormatter _formatter = new ZBase32Formatter();
         static readonly Regex _regex = new Regex(@"^[A-Za-z0-9\-_\.:]+$");
 
-        public static string GetTemporaryQueueName(this HostInfo host)
+        public static string GetTemporaryQueueName(this HostInfo host, string prefix)
         {
-            var sb = new StringBuilder("bus-");
+            var sb = new StringBuilder(prefix);
 
             foreach (char c in host.MachineName)
             {
@@ -375,11 +375,14 @@ namespace MassTransit.RabbitMqTransport
 
         static void VerifyQueueOrExchangeNameIsLegal(string queueName)
         {
+            if (string.IsNullOrWhiteSpace(queueName))
+                throw new RabbitMqAddressException("The queue name must not be null or empty");
+
             bool success = IsValidQueueName(queueName);
             if (!success)
             {
                 throw new RabbitMqAddressException(
-                    "The queueName can be empty, or a sequence of these characters: letters, digits, hyphen, underscore, period, or colon.");
+                    "The queueName must be a sequence of these characters: letters, digits, hyphen, underscore, period, or colon.");
             }
         }
 
