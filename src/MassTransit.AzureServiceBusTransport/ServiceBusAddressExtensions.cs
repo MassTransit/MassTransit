@@ -13,7 +13,6 @@
 namespace MassTransit.AzureServiceBusTransport
 {
     using System;
-    using System.Linq;
     using System.Text;
     using Internals.Extensions;
     using Microsoft.ServiceBus.Messaging;
@@ -24,11 +23,11 @@ namespace MassTransit.AzureServiceBusTransport
     {
         static readonly INewIdFormatter _formatter = new ZBase32Formatter();
 
-        public static string GetTemporaryQueueName(this HostInfo host)
+        public static string GetTemporaryQueueName(this HostInfo host, string prefix)
         {
             var sb = new StringBuilder();
 
-            foreach (char c in host.MachineName)
+            foreach (var c in host.MachineName)
             {
                 if (char.IsLetterOrDigit(c))
                     sb.Append(c);
@@ -36,14 +35,14 @@ namespace MassTransit.AzureServiceBusTransport
                     sb.Append(c);
             }
             sb.Append('_');
-            foreach (char c in host.ProcessName)
+            foreach (var c in host.ProcessName)
             {
                 if (char.IsLetterOrDigit(c))
                     sb.Append(c);
                 else if (c == '_')
                     sb.Append(c);
             }
-            sb.Append("_bus_");
+            sb.AppendFormat("_{0}_", prefix);
             sb.Append(NewId.Next().ToString(_formatter));
 
             return sb.ToString();
@@ -54,7 +53,7 @@ namespace MassTransit.AzureServiceBusTransport
             if (string.Compare("sb", address.Scheme, StringComparison.OrdinalIgnoreCase) != 0)
                 throw new ArgumentException("The invalid scheme was specified: " + address.Scheme);
 
-            string queueName = address.AbsolutePath.Trim('/');
+            var queueName = address.AbsolutePath.Trim('/');
 
             var queueDescription = new QueueDescription(queueName)
             {
@@ -62,7 +61,7 @@ namespace MassTransit.AzureServiceBusTransport
                 MaxDeliveryCount = 5,
                 DefaultMessageTimeToLive = TimeSpan.FromDays(365),
                 LockDuration = TimeSpan.FromMinutes(5),
-                EnableDeadLetteringOnMessageExpiration = true,
+                EnableDeadLetteringOnMessageExpiration = true
             };
 
             queueDescription.DefaultMessageTimeToLive = address.GetValueFromQueryString("ttl", queueDescription.DefaultMessageTimeToLive);
@@ -76,12 +75,12 @@ namespace MassTransit.AzureServiceBusTransport
             if (string.Compare("sb", address.Scheme, StringComparison.OrdinalIgnoreCase) != 0)
                 throw new ArgumentException("The invalid scheme was specified: " + address.Scheme);
 
-            string topicPath = address.AbsolutePath.Trim(new[] {'/'});
+            var topicPath = address.AbsolutePath.Trim('/');
 
             var topicDescription = new TopicDescription(topicPath)
             {
                 EnableBatchedOperations = true,
-                DefaultMessageTimeToLive = TimeSpan.FromDays(365),
+                DefaultMessageTimeToLive = TimeSpan.FromDays(365)
             };
 
             topicDescription.DefaultMessageTimeToLive = address.GetValueFromQueryString("ttl", topicDescription.DefaultMessageTimeToLive);

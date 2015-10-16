@@ -14,6 +14,7 @@ namespace MassTransit.AzureServiceBusTransport
 {
     using System;
     using Configuration;
+    using Util;
 
 
     public static class TransportConfiguratorExtensions
@@ -37,5 +38,29 @@ namespace MassTransit.AzureServiceBusTransport
 
             configurator.TokenProvider = tokenProviderConfigurator.GetTokenProvider();
         }
+
+
+        /// <summary>
+        /// Declare a ReceiveEndpoint using a unique generated queue name. This queue defaults to auto-delete
+        /// and non-durable. By default all services bus instances include a default receiveEndpoint that is
+        /// of this type (created automatically upon the first receiver binding).
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="host"></param>
+        /// <param name="configure"></param>
+        public static void ReceiveEndpoint(this IServiceBusBusFactoryConfigurator configurator, IServiceBusHost host,
+            Action<IServiceBusReceiveEndpointConfigurator> configure)
+        {
+            var queueName = HostMetadataCache.Host.GetTemporaryQueueName("endpoint");
+
+            configurator.ReceiveEndpoint(host, queueName, x =>
+            {
+                x.AutoDeleteOnIdle = TimeSpan.FromMinutes(5);
+                x.EnableExpress = true;
+
+                configure(x);
+            });
+        }
+
     }
 }

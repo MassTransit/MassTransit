@@ -38,7 +38,7 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
             _transportSpecifications = new List<IBusFactorySpecification>();
             _consumePipeSpecification = new ConsumePipeSpecificationList();
 
-            string queueName = HostMetadataCache.Host.GetTemporaryQueueName();
+            string queueName = HostMetadataCache.Host.GetTemporaryQueueName("bus");
             _settings = new ReceiveEndpointSettings(queueName)
             {
                 QueueDescription =
