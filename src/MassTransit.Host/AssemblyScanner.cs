@@ -144,15 +144,15 @@ namespace MassTransit.Host
             return Assembly.ReflectionOnlyLoad(args.Name);
         }
 
-        private IEnumerable<Tuple<Assembly, Type>> TrySelectAllTypes(Assembly x)
+        private IEnumerable<Tuple<Assembly, Type>> TrySelectAllTypes(Assembly assembly)
         {
             try
             {
-                return x.GetTypes().Select(y => Tuple.Create(x, y));
+                return assembly.GetTypes().Select(y => Tuple.Create(assembly, y));
             }
             catch (ReflectionTypeLoadException e)
             {
-                _log.Warn($"Exception loading types from assembly: {x}", e);
+                _log.Warn($"Exception loading types from assembly: {assembly.FullName}\n{string.Join(Environment.NewLine, e.LoaderExceptions.Select(x => x.Message))}", e);
                 return Enumerable.Empty<Tuple<Assembly, Type>>();
             }
         }

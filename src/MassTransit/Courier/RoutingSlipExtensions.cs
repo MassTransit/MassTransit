@@ -43,22 +43,23 @@ namespace MassTransit.Courier
             return routingSlip.CompensateLogs.Select(x => x.Address).Last();
         }
 
-        public static async Task Execute(this IBus bus, RoutingSlip routingSlip)
+        public static async Task Execute<T>(this T source, RoutingSlip routingSlip)
+                 where T : IPublishEndpoint, ISendEndpointProvider
         {
             if (routingSlip.RanToCompletion())
             {
                 DateTime timestamp = DateTime.UtcNow;
                 TimeSpan duration = timestamp - routingSlip.CreateTimestamp;
 
-                IRoutingSlipEventPublisher publisher = new RoutingSlipEventPublisher(bus, routingSlip);
+                IRoutingSlipEventPublisher publisher = new RoutingSlipEventPublisher(source, source, routingSlip);
 
                 await publisher.PublishRoutingSlipCompleted(timestamp, duration, routingSlip.Variables);
             }
             else
             {
-                ISendEndpoint endpoint = await bus.GetSendEndpoint(routingSlip.GetNextExecuteAddress());
+                ISendEndpoint endpoint = await source.GetSendEndpoint(routingSlip.GetNextExecuteAddress());
 
-                await endpoint.Send(routingSlip, Pipe.New<SendContext>(x => x.UseExecute(context => context.SourceAddress = bus.Address)));
+                await endpoint.Send(routingSlip);
             }
         }
 
