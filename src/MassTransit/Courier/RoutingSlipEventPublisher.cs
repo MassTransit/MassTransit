@@ -31,6 +31,7 @@ namespace MassTransit.Courier
         readonly ISendEndpointProvider _sendEndpointProvider;
 
         public RoutingSlipEventPublisher(CompensateContext compensateContext, RoutingSlip routingSlip)
+            : this(compensateContext, compensateContext, routingSlip)
         {
             _sendEndpointProvider = compensateContext;
             _publishEndpoint = compensateContext;
@@ -39,6 +40,7 @@ namespace MassTransit.Courier
         }
 
         public RoutingSlipEventPublisher(ExecuteContext executeContext, RoutingSlip routingSlip)
+            : this(executeContext, executeContext, routingSlip)
         {
             _sendEndpointProvider = executeContext;
             _publishEndpoint = executeContext;
@@ -46,10 +48,10 @@ namespace MassTransit.Courier
             _host = executeContext.Host;
         }
 
-        public RoutingSlipEventPublisher(IBus bus, RoutingSlip routingSlip)
+        public RoutingSlipEventPublisher(ISendEndpointProvider sendEndpointProvider, IPublishEndpoint publishEndpoint, RoutingSlip routingSlip)
         {
-            _sendEndpointProvider = bus;
-            _publishEndpoint = bus;
+            _sendEndpointProvider = sendEndpointProvider;
+            _publishEndpoint = publishEndpoint;
             _routingSlip = routingSlip;
             _host = HostMetadataCache.Host;
         }
