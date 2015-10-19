@@ -137,9 +137,9 @@ namespace MassTransit.RabbitMqTransport.Configuration
             return host;
         }
 
-        public string BusQueueName
+        public void OverrideDefaultBusEndpointQueueName(string value)
         {
-            set { _settings.QueueName = value; }
+            _settings.QueueName = value;
         }
 
         public void AddBusFactorySpecification(IBusFactorySpecification configurator)

@@ -85,7 +85,7 @@ namespace MassTransit.RabbitMqTransport.Tests
                     {
                     });
 
-                    x.BusQueueName = "";
+                    x.OverrideDefaultBusEndpointQueueName("");
                 });
             });
 
