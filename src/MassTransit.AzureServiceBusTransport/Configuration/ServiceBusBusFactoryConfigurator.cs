@@ -171,9 +171,9 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
             _consumePipeSpecification.Add(specification);
         }
 
-        public string BusQueueName
+        public void OverrideDefaultBusEndpointQueueName(string value)
         {
-            set { _settings.QueueDescription.Path = value; }
+            _settings.QueueDescription.Path = value;
         }
 
         public IServiceBusHost Host(ServiceBusHostSettings settings)
