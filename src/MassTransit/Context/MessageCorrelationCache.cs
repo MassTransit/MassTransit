@@ -32,6 +32,11 @@ namespace MassTransit.Context
             _setCorrelationIdPipe = new Lazy<ISetCorrelationId<T>>(CreateCorrelationPipe);
         }
 
+        MessageCorrelationCache(ISetCorrelationId<T> setCorrelationId)
+        {
+            _setCorrelationIdPipe = new Lazy<ISetCorrelationId<T>>(() => setCorrelationId);
+        }
+
         void IMessageCorrelationCache<T>.SetCorrelationId(SendContext<T> context)
         {
             _setCorrelationIdPipe.Value.SetCorrelationId(context);
@@ -40,6 +45,15 @@ namespace MassTransit.Context
         public static void SetCorrelationId(SendContext<T> context)
         {
             Cached.Metadata.Value.SetCorrelationId(context);
+        }
+
+        internal static void UseCorrelationId(Func<T, Guid> getCorrelationId)
+        {
+            if (Cached.Metadata.IsValueCreated)
+                throw new InvalidOperationException("The correlationId pipe has already been created");
+
+            Cached.Metadata = new Lazy<IMessageCorrelationCache<T>>(
+                () => new MessageCorrelationCache<T>(new DelegateSetCorrelationId<T>(context => getCorrelationId(context))));
         }
 
         ISetCorrelationId<T> CreateCorrelationPipe()
@@ -84,7 +98,7 @@ namespace MassTransit.Context
 
         static class Cached
         {
-            internal static readonly Lazy<IMessageCorrelationCache<T>> Metadata = new Lazy<IMessageCorrelationCache<T>>(
+            internal static Lazy<IMessageCorrelationCache<T>> Metadata = new Lazy<IMessageCorrelationCache<T>>(
                 () => new MessageCorrelationCache<T>(), LazyThreadSafetyMode.PublicationOnly);
         }
     }

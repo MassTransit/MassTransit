@@ -23,6 +23,11 @@ namespace MassTransit.Courier
 
     public static class RoutingSlipExtensions
     {
+        static RoutingSlipExtensions()
+        {
+            MessageCorrelation.UseCorrelationId<RoutingSlip>(x => x.TrackingNumber);
+        }
+
         /// <summary>
         /// Returns true if there are no remaining activities to be executed
         /// </summary>
@@ -44,12 +49,12 @@ namespace MassTransit.Courier
         }
 
         public static async Task Execute<T>(this T source, RoutingSlip routingSlip)
-                 where T : IPublishEndpoint, ISendEndpointProvider
+            where T : IPublishEndpoint, ISendEndpointProvider
         {
             if (routingSlip.RanToCompletion())
             {
-                DateTime timestamp = DateTime.UtcNow;
-                TimeSpan duration = timestamp - routingSlip.CreateTimestamp;
+                var timestamp = DateTime.UtcNow;
+                var duration = timestamp - routingSlip.CreateTimestamp;
 
                 IRoutingSlipEventPublisher publisher = new RoutingSlipEventPublisher(source, source, routingSlip);
 
@@ -57,7 +62,7 @@ namespace MassTransit.Courier
             }
             else
             {
-                ISendEndpoint endpoint = await source.GetSendEndpoint(routingSlip.GetNextExecuteAddress());
+                var endpoint = await source.GetSendEndpoint(routingSlip.GetNextExecuteAddress());
 
                 await endpoint.Send(routingSlip);
             }

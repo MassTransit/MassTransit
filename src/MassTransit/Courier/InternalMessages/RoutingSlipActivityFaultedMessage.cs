@@ -20,7 +20,7 @@ namespace MassTransit.Courier.InternalMessages
     class RoutingSlipActivityFaultedMessage :
         RoutingSlipActivityFaulted
     {
-        public RoutingSlipActivityFaultedMessage(HostInfo host, Guid trackingNumber, string activityName, Guid activityTrackingNumber,
+        public RoutingSlipActivityFaultedMessage(HostInfo host, Guid trackingNumber, string activityName, Guid executionId,
             DateTime timestamp, TimeSpan duration, ExceptionInfo exceptionInfo, IDictionary<string, object> variables,
             IDictionary<string, object> arguments)
         {
@@ -28,7 +28,7 @@ namespace MassTransit.Courier.InternalMessages
             TrackingNumber = trackingNumber;
             Timestamp = timestamp;
             Duration = duration;
-            ActivityTrackingNumber = activityTrackingNumber;
+            ExecutionId = executionId;
             ActivityName = activityName;
             Variables = variables;
             Arguments = arguments;
@@ -40,7 +40,7 @@ namespace MassTransit.Courier.InternalMessages
         public TimeSpan Duration { get; private set; }
         public string ActivityName { get; private set; }
         public HostInfo Host { get; private set; }
-        public Guid ActivityTrackingNumber { get; private set; }
+        public Guid ExecutionId { get; private set; }
         public ExceptionInfo ExceptionInfo { get; private set; }
         public IDictionary<string, object> Arguments { get; private set; }
         public IDictionary<string, object> Variables { get; private set; }

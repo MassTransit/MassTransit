@@ -20,7 +20,7 @@ namespace MassTransit.Courier.InternalMessages
     class RoutingSlipActivityCompensatedMessage :
         RoutingSlipActivityCompensated
     {
-        public RoutingSlipActivityCompensatedMessage(HostInfo host, Guid trackingNumber, string activityName, Guid activityTrackingNumber,
+        public RoutingSlipActivityCompensatedMessage(HostInfo host, Guid trackingNumber, string activityName, Guid executionId,
             DateTime timestamp, TimeSpan duration, IDictionary<string, object> variables, IDictionary<string, object> data)
         {
             Host = host;
@@ -28,13 +28,13 @@ namespace MassTransit.Courier.InternalMessages
             Timestamp = timestamp;
 
             TrackingNumber = trackingNumber;
-            ActivityTrackingNumber = activityTrackingNumber;
+            ExecutionId = executionId;
             ActivityName = activityName;
             Data = data;
             Variables = variables;
         }
 
-        public Guid ActivityTrackingNumber { get; private set; }
+        public Guid ExecutionId { get; private set; }
         public HostInfo Host { get; private set; }
         public IDictionary<string, object> Data { get; private set; }
         public IDictionary<string, object> Variables { get; private set; }

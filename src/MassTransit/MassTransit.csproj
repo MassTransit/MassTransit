@@ -124,10 +124,12 @@
     <Compile Include="Context\ConsumeContextProxyScope.cs" />
     <Compile Include="Context\CorrelatedBySetCorrelationId.cs" />
     <Compile Include="Context\CorrelationIdConsumeContextProxy.cs" />
+    <Compile Include="Context\DelegateSetCorrelationId.cs" />
     <Compile Include="Context\DictionarySendHeaders.cs" />
     <Compile Include="Context\IMessageCorrelationCache.cs" />
     <Compile Include="Context\ISetCorrelationId.cs" />
     <Compile Include="Context\MessageConsumeContext.cs" />
+    <Compile Include="Context\MessageCorrelation.cs" />
     <Compile Include="Context\MessageCorrelationCache.cs" />
     <Compile Include="Context\NoSetCorrelationId.cs" />
     <Compile Include="Context\NullablePropertySetCorrelationId.cs" />

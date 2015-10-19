@@ -26,7 +26,7 @@ namespace MassTransit.Courier.Contracts
         /// <summary>
         /// The tracking number of this activity execution
         /// </summary>
-        Guid ActivityTrackingNumber { get; }
+        Guid ExecutionId { get; }
 
         /// <summary>
         /// The date/time when the routing slip compensation was finished
