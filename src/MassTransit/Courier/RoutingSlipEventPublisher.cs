@@ -30,6 +30,19 @@ namespace MassTransit.Courier
         readonly RoutingSlip _routingSlip;
         readonly ISendEndpointProvider _sendEndpointProvider;
 
+        static RoutingSlipEventPublisher()
+        {
+            MessageCorrelation.UseCorrelationId<RoutingSlipCompleted>(x => x.TrackingNumber);
+            MessageCorrelation.UseCorrelationId<RoutingSlipFaulted>(x => x.TrackingNumber);
+            MessageCorrelation.UseCorrelationId<RoutingSlipActivityCompleted>(x => x.ExecutionId);
+            MessageCorrelation.UseCorrelationId<RoutingSlipActivityFaulted>(x => x.ExecutionId);
+            MessageCorrelation.UseCorrelationId<RoutingSlipActivityCompensated>(x => x.ExecutionId);
+            MessageCorrelation.UseCorrelationId<RoutingSlipActivityCompensationFailed>(x => x.ExecutionId);
+            MessageCorrelation.UseCorrelationId<RoutingSlipCompensationFailed>(x => x.TrackingNumber);
+            MessageCorrelation.UseCorrelationId<RoutingSlipTerminated>(x => x.TrackingNumber);
+            MessageCorrelation.UseCorrelationId<RoutingSlipRevised>(x => x.TrackingNumber);
+        }
+
         public RoutingSlipEventPublisher(CompensateContext compensateContext, RoutingSlip routingSlip)
             : this(compensateContext, compensateContext, routingSlip)
         {
@@ -208,13 +221,13 @@ namespace MassTransit.Courier
         {
             if (_routingSlip.Subscriptions.Any())
             {
-                foreach (Subscription subscription in _routingSlip.Subscriptions)
+                foreach (var subscription in _routingSlip.Subscriptions)
                 {
                     if (subscription.Events == RoutingSlipEvents.All || subscription.Events.HasFlag(eventFlag))
                     {
-                        ISendEndpoint endpoint = await _sendEndpointProvider.GetSendEndpoint(subscription.Address);
+                        var endpoint = await _sendEndpointProvider.GetSendEndpoint(subscription.Address);
 
-                        T subscriptionMessage = messageFactory(subscription.Include);
+                        var subscriptionMessage = messageFactory(subscription.Include);
 
                         await endpoint.Send(subscriptionMessage);
                     }
