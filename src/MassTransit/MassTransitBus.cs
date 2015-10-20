@@ -371,25 +371,30 @@ namespace MassTransit
                 if (_stopped)
                     return;
 
-                TaskUtil.Await(() => _busObserver.PreStop(_bus), cancellationToken);
-
-                try
+                TaskUtil.Await(async () =>
                 {
-                    foreach (var observerHandle in _observerHandles)
-                        observerHandle.Disconnect();
+                    await _busObserver.PreStop(_bus);
 
-                    TaskUtil.Await(() => Task.WhenAll(_endpointHandles.Select(x => x.Stop(cancellationToken))), cancellationToken);
+                    try
+                    {
+                        foreach (var observerHandle in _observerHandles)
+                            observerHandle.Disconnect();
 
-                    TaskUtil.Await(() => Task.WhenAll(_hostHandles.Select(x => x.Stop(cancellationToken))), cancellationToken);
+                        await Task.WhenAll(_endpointHandles.Select(x => x.Stop(cancellationToken)));
 
-                    TaskUtil.Await(() => _busObserver.PostStop(_bus), cancellationToken);
-                }
-                catch (Exception exception)
-                {
-                    TaskUtil.Await(() => _busObserver.StopFaulted(_bus, exception), cancellationToken);
+                        await Task.WhenAll(_hostHandles.Select(x => x.Stop(cancellationToken)));
 
-                    throw;
-                }
+                        await _busObserver.PostStop(_bus);
+                    }
+                    catch (Exception exception)
+                    {
+                        await _busObserver.StopFaulted(_bus, exception);
+
+                        throw;
+                    }
+
+                    _stopped = true;
+                }, cancellationToken);
 
                 _stopped = true;
             }

@@ -37,14 +37,14 @@ namespace MassTransit.RabbitMqTransport.Pipeline
 
         async Task IFilter<ConnectionContext>.Send(ConnectionContext context, IPipe<ConnectionContext> next)
         {
-            IModel model = await context.CreateModel();
+            IModel model = await context.CreateModel().ConfigureAwait(false);
 
             using (var modelContext = new RabbitMqModelContext(context, model, context.CancellationToken))
             {
-                await _pipe.Send(modelContext);
+                await _pipe.Send(modelContext).ConfigureAwait(false);
             }
 
-            await next.Send(context);
+            await next.Send(context).ConfigureAwait(false);
         }
     }
 }

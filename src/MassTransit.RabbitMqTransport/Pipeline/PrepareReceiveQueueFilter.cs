@@ -44,10 +44,10 @@ namespace MassTransit.RabbitMqTransport.Pipeline
 
         async Task IFilter<ModelContext>.Send(ModelContext context, IPipe<ModelContext> next)
         {
-            await context.BasicQos(0, _settings.PrefetchCount, false);
+            await context.BasicQos(0, _settings.PrefetchCount, false).ConfigureAwait(false);
 
             QueueDeclareOk queueOk = await context.QueueDeclare(_settings.QueueName, _settings.Durable, _settings.Exclusive,
-                _settings.AutoDelete, _settings.QueueArguments);
+                _settings.AutoDelete, _settings.QueueArguments).ConfigureAwait(false);
 
             string queueName = queueOk.QueueName;
 
@@ -63,19 +63,19 @@ namespace MassTransit.RabbitMqTransport.Pipeline
             }
 
             if (_settings.PurgeOnStartup)
-                await PurgeIfRequested(context, queueOk, queueName);
+                await PurgeIfRequested(context, queueOk, queueName).ConfigureAwait(false);
 
             string exchangeName = _settings.ExchangeName ?? queueName;
 
             if (!string.IsNullOrWhiteSpace(_settings.ExchangeName) || string.IsNullOrWhiteSpace(_settings.QueueName))
             {
                 await context.ExchangeDeclare(exchangeName, _settings.ExchangeType, _settings.Durable, _settings.AutoDelete,
-                    _settings.ExchangeArguments);
+                    _settings.ExchangeArguments).ConfigureAwait(false);
 
-                await context.QueueBind(queueName, exchangeName, "", new Dictionary<string, object>());
+                await context.QueueBind(queueName, exchangeName, "", new Dictionary<string, object>()).ConfigureAwait(false);
             }
 
-            await ApplyExchangeBindings(context, exchangeName);
+            await ApplyExchangeBindings(context, exchangeName).ConfigureAwait(false);
 
             ReceiveSettings settings = new RabbitMqReceiveSettings(_settings)
             {
@@ -85,7 +85,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
 
             context.GetOrAddPayload(() => settings);
 
-            await next.Send(context);
+            await next.Send(context).ConfigureAwait(false);
         }
 
         Task ApplyExchangeBindings(ModelContext context, string exchangeName)
@@ -95,9 +95,9 @@ namespace MassTransit.RabbitMqTransport.Pipeline
                 ExchangeSettings exchange = binding.Exchange;
 
                 await context.ExchangeDeclare(exchange.ExchangeName, exchange.ExchangeType, exchange.Durable, exchange.AutoDelete,
-                    exchange.Arguments);
+                    exchange.Arguments).ConfigureAwait(false);
 
-                await context.ExchangeBind(exchangeName, exchange.ExchangeName, binding.RoutingKey, binding.Arguments);
+                await context.ExchangeBind(exchangeName, exchange.ExchangeName, binding.RoutingKey, binding.Arguments).ConfigureAwait(false);
             }));
         }
 
@@ -108,7 +108,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
                 if (_log.IsDebugEnabled)
                     _log.DebugFormat("Purging {0} messages from queue {1}", queueOk.MessageCount, queueName);
 
-                var purgedMessageCount = await context.QueuePurge(queueName);
+                var purgedMessageCount = await context.QueuePurge(queueName).ConfigureAwait(false);
 
                 if (_log.IsDebugEnabled)
                     _log.DebugFormat("Purged {0} messages from queue {1}", purgedMessageCount, queueName);

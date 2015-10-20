@@ -56,7 +56,7 @@ namespace MassTransit.RabbitMqTransport
 
                 try
                 {
-                    await _connectionCache.StopRequested;
+                    await _connectionCache.StopRequested.ConfigureAwait(false);
                 }
                 catch (OperationCanceledException)
                 {
@@ -123,7 +123,7 @@ namespace MassTransit.RabbitMqTransport
 
             async Task HostHandle.Stop(CancellationToken cancellationToken)
             {
-                await _cache.Stop();
+                await _cache.Stop().ConfigureAwait(false);
 
                 await _connectionTask.ConfigureAwait(false);
             }

@@ -126,19 +126,19 @@ namespace MassTransit.RabbitMqTransport.Pipeline
                         _log.ErrorFormat("Duplicate BasicDeliver: {0}", deliveryTag);
                 }
 
-                await _receiveObserver.PreReceive(context);
+                await _receiveObserver.PreReceive(context).ConfigureAwait(false);
 
-                await _receivePipe.Send(context);
+                await _receivePipe.Send(context).ConfigureAwait(false);
 
-                await context.CompleteTask;
+                await context.CompleteTask.ConfigureAwait(false);
 
                 _model.BasicAck(deliveryTag, false);
 
-                await _receiveObserver.PostReceive(context);
+                await _receiveObserver.PostReceive(context).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
-                await _receiveObserver.ReceiveFault(context, ex);
+                await _receiveObserver.ReceiveFault(context, ex).ConfigureAwait(false);
 
                 _model.BasicNack(deliveryTag, false, true);
             }
