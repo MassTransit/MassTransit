@@ -207,6 +207,7 @@ Target "Package" (fun _ ->
 
       let getDeps daNug : NugetDependencies =
         if daNug.Project = "MassTransit" then (getDependencies daNug.PackageFile)
+        else if daNug.Project = "MassTransit.Host" then (("MassTransit", NuGetVersion) :: ("MassTransit.Autofac", NuGetVersion) :: ("MassTransit.Log4Net", NuGetVersion) :: (getDependencies daNug.PackageFile))
         else ("MassTransit", NuGetVersion) :: (getDependencies daNug.PackageFile)
 
       let setParams defaults = {
