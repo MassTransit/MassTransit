@@ -68,7 +68,7 @@ namespace MassTransit.ConsumeConfigurators
         {
             return type.GetConstructors(BindingFlags.Public | BindingFlags.Instance)
                 .All(constructorInfo => !constructorInfo.GetParameters().Any())
-                && type.GetConstructors().Count() == 1;
+                && type.GetConstructors().Length == 1;
         }
     }
 }
