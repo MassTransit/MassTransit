@@ -201,9 +201,9 @@ namespace MassTransit.Transports
                     context.SourceAddress = _endpoint.SourceAddress;
 
                 if (_pipe != null)
-                    await _pipe.Send(context);
+                    await _pipe.Send(context).ConfigureAwait(false);
                 if (_sendPipe != null)
-                    await _sendPipe.Send(context);
+                    await _sendPipe.Send(context).ConfigureAwait(false);
 
                 if (!context.CorrelationId.HasValue)
                     MessageCorrelationCache<T>.SetCorrelationId(context);

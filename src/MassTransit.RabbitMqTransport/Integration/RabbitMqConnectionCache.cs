@@ -128,13 +128,20 @@ namespace MassTransit.RabbitMqTransport.Integration
 
             try
             {
-                using (SharedConnectionContext context = await scope.Attach(cancellationToken))
+                using (SharedConnectionContext context = await scope.Attach(cancellationToken).ConfigureAwait(false))
                 {
                     if (_log.IsDebugEnabled)
                         _log.DebugFormat("Using new connection: {0}", ((ConnectionContext)context).HostSettings.ToDebugString());
 
-                    await connectionPipe.Send(context);
+                    await connectionPipe.Send(context).ConfigureAwait(false);
                 }
+            }
+            catch (BrokerUnreachableException ex)
+            {
+                if (_log.IsDebugEnabled)
+                    _log.Debug("The connection usage threw an exception", ex);
+
+                throw new RabbitMqConnectionException("Connect failed: " + _connectionFactory.ToDebugString(), ex);
             }
             catch (Exception ex)
             {
@@ -145,17 +152,24 @@ namespace MassTransit.RabbitMqTransport.Integration
             }
         }
 
-        static async Task SendUsingExistingConnection(IPipe<ConnectionContext> connectionPipe, CancellationToken cancellationToken, ConnectionScope scope)
+        async Task SendUsingExistingConnection(IPipe<ConnectionContext> connectionPipe, CancellationToken cancellationToken, ConnectionScope scope)
         {
             try
             {
-                using (SharedConnectionContext context = await scope.Attach(cancellationToken))
+                using (SharedConnectionContext context = await scope.Attach(cancellationToken).ConfigureAwait(false))
                 {
                     if (_log.IsDebugEnabled)
                         _log.DebugFormat("Using existing connection: {0}", ((ConnectionContext)context).HostSettings.ToDebugString());
 
-                    await connectionPipe.Send(context);
+                    await connectionPipe.Send(context).ConfigureAwait(false);
                 }
+            }
+            catch (BrokerUnreachableException ex)
+            {
+                if (_log.IsDebugEnabled)
+                    _log.Debug("The connection usage threw an exception", ex);
+
+                throw new RabbitMqConnectionException("Connect failed: " + _connectionFactory.ToDebugString(), ex);
             }
             catch (Exception ex)
             {
@@ -196,7 +210,7 @@ namespace MassTransit.RabbitMqTransport.Integration
 
             public async Task<SharedConnectionContext> Attach(CancellationToken cancellationToken)
             {
-                var context = new SharedConnectionContext(await _connectionContext.Task, cancellationToken);
+                var context = new SharedConnectionContext(await _connectionContext.Task.ConfigureAwait(false), cancellationToken);
 
                 _attached.Add(context);
                 return context;
@@ -204,7 +218,7 @@ namespace MassTransit.RabbitMqTransport.Integration
 
             public async void Close()
             {
-                var connectionContext = await _connectionContext.Task;
+                var connectionContext = await _connectionContext.Task.ConfigureAwait(false);
 
                 try
                 {
@@ -214,7 +228,7 @@ namespace MassTransit.RabbitMqTransport.Integration
                         {
                             try
                             {
-                                await context.Completed.WithCancellation(source.Token);
+                                await context.Completed.WithCancellation(source.Token).ConfigureAwait(false);
                             }
                             catch (OperationCanceledException)
                             {
@@ -222,7 +236,7 @@ namespace MassTransit.RabbitMqTransport.Integration
                         }
                     }
 
-                    await Task.WhenAll(_attached.Select(x => x.Completed));
+                    await Task.WhenAll(_attached.Select(x => x.Completed)).ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {
@@ -231,7 +245,7 @@ namespace MassTransit.RabbitMqTransport.Integration
 
                 connectionContext.Dispose();
 
-                await connectionContext.Completed;
+                await connectionContext.Completed.ConfigureAwait(false);
             }
 
             public void ConnectFaulted(Exception exception)

@@ -84,7 +84,7 @@ namespace MassTransit.RabbitMqTransport
             {
                 try
                 {
-                    await _host.ConnectionCache.Send(transportPipe, stopToken);
+                    await _host.ConnectionCache.Send(transportPipe, stopToken).ConfigureAwait(false);
                 }
                 catch (RabbitMqConnectionException ex)
                 {
@@ -93,7 +93,7 @@ namespace MassTransit.RabbitMqTransport
 
                     var inputAddress = _host.Settings.GetInputAddress(_settings);
 
-                    await _endpointObservers.Faulted(new Faulted(inputAddress, ex));
+                    await _endpointObservers.Faulted(new Faulted(inputAddress, ex)).ConfigureAwait(false);
                 }
                 catch (TaskCanceledException)
                 {
@@ -105,7 +105,7 @@ namespace MassTransit.RabbitMqTransport
 
                     var inputAddress = _host.Settings.GetInputAddress(_settings);
 
-                    await _endpointObservers.Faulted(new Faulted(inputAddress, ex));
+                    await _endpointObservers.Faulted(new Faulted(inputAddress, ex)).ConfigureAwait(false);
                 }
             });
         }

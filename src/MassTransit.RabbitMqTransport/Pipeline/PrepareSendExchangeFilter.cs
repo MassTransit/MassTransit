@@ -45,10 +45,10 @@ namespace MassTransit.RabbitMqTransport.Pipeline
         {
             if (IsFirstTime(context))
             {
-                await DeclareExchange(context);
+                await DeclareExchange(context).ConfigureAwait(false);
 
                 if (_settings.BindToQueue)
-                    await DeclareAndBindQueue(context);
+                    await DeclareAndBindQueue(context).ConfigureAwait(false);
 
                 for (int i = 0; i < _exchangeBindings.Length; i++)
                 {
@@ -67,16 +67,16 @@ namespace MassTransit.RabbitMqTransport.Pipeline
                     }
 
                     await context.ExchangeDeclare(exchange.ExchangeName, exchange.ExchangeType, exchange.Durable, exchange.AutoDelete,
-                        exchange.Arguments);
+                        exchange.Arguments).ConfigureAwait(false);
 
-                    await context.ExchangeBind(exchange.ExchangeName, _settings.ExchangeName, binding.RoutingKey, new Dictionary<string, object>());
+                    await context.ExchangeBind(exchange.ExchangeName, _settings.ExchangeName, binding.RoutingKey, new Dictionary<string, object>()).ConfigureAwait(false);
 
                     if (_log.IsDebugEnabled)
                         _log.DebugFormat("Exchange:Exchange Binding: {0} ({1})", exchange.ExchangeName, _settings.ExchangeName);
                 }
             }
 
-            await next.Send(context);
+            await next.Send(context).ConfigureAwait(false);
         }
 
         bool IsFirstTime(ModelContext context)
@@ -105,7 +105,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
             if (!string.IsNullOrWhiteSpace(_settings.ExchangeName))
             {
                 await context.ExchangeDeclare(_settings.ExchangeName, _settings.ExchangeType, _settings.Durable, _settings.AutoDelete,
-                    _settings.ExchangeArguments);
+                    _settings.ExchangeArguments).ConfigureAwait(false);
             }
 
             context.GetOrAddPayload(() => _settings);
@@ -114,7 +114,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
         async Task DeclareAndBindQueue(ModelContext context)
         {
             QueueDeclareOk queueOk = await context.QueueDeclare(_settings.QueueName, _settings.Durable, false,
-                _settings.AutoDelete, _settings.QueueArguments);
+                _settings.AutoDelete, _settings.QueueArguments).ConfigureAwait(false);
 
             string queueName = queueOk.QueueName;
 
@@ -128,7 +128,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
                     }.Where(x => !string.IsNullOrWhiteSpace(x))));
             }
 
-            await context.QueueBind(queueName, _settings.ExchangeName, "", new Dictionary<string, object>());
+            await context.QueueBind(queueName, _settings.ExchangeName, "", new Dictionary<string, object>()).ConfigureAwait(false);
 
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Exchange:Queue Binding: {0} ({1})", _settings.ExchangeName, queueName);

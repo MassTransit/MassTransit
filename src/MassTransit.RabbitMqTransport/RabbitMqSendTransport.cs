@@ -63,7 +63,7 @@ namespace MassTransit.RabbitMqTransport
 
                     try
                     {
-                        await pipe.Send(context);
+                        await pipe.Send(context).ConfigureAwait(false);
 
                         properties.ContentType = context.ContentType.MediaType;
 
@@ -85,18 +85,18 @@ namespace MassTransit.RabbitMqTransport
                         if (context.TimeToLive.HasValue)
                             properties.Expiration = context.TimeToLive.Value.TotalMilliseconds.ToString("F0", CultureInfo.InvariantCulture);
 
-                        await _observers.PreSend(context);
+                        await _observers.PreSend(context).ConfigureAwait(false);
 
                         await modelContext.BasicPublishAsync(context.Exchange, context.RoutingKey, context.Mandatory,
-                            context.Immediate, context.BasicProperties, context.Body);
+                            context.Immediate, context.BasicProperties, context.Body).ConfigureAwait(false);
 
                         context.DestinationAddress.LogSent(context.MessageId?.ToString("N") ?? "", TypeMetadataCache<T>.ShortName);
 
-                        await _observers.PostSend(context);
+                        await _observers.PostSend(context).ConfigureAwait(false);
                     }
                     catch (Exception ex)
                     {
-                        _observers.SendFault(context, ex).Wait(cancelSend);
+                        await _observers.SendFault(context, ex).ConfigureAwait(false);
 
                         if (_log.IsErrorEnabled)
                             _log.Error("Send Fault: " + context.DestinationAddress, ex);
@@ -106,7 +106,7 @@ namespace MassTransit.RabbitMqTransport
                 });
             });
 
-            await _modelCache.Send(modelPipe, cancelSend);
+            await _modelCache.Send(modelPipe, cancelSend).ConfigureAwait(false);
         }
 
         async Task ISendTransport.Move(ReceiveContext context, IPipe<SendContext> pipe)
@@ -134,7 +134,7 @@ namespace MassTransit.RabbitMqTransport
 
                         var moveContext = new RabbitMqMoveContext(context, properties);
 
-                        await pipe.Send(moveContext);
+                        await pipe.Send(moveContext).ConfigureAwait(false);
 
 //                        properties.Headers["Content-Type"] = context.ContentType.MediaType;
 
@@ -171,7 +171,7 @@ namespace MassTransit.RabbitMqTransport
                 });
             });
 
-            await _modelCache.Send(modelPipe, context.CancellationToken);
+            await _modelCache.Send(modelPipe, context.CancellationToken).ConfigureAwait(false);
         }
 
         public ConnectHandle ConnectSendObserver(ISendObserver observer)

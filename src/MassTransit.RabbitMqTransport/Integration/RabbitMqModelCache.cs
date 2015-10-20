@@ -65,7 +65,7 @@ namespace MassTransit.RabbitMqTransport.Integration
         {
             IPipe<ConnectionContext> connectionPipe = Pipe.ExecuteAsync<ConnectionContext>(async connectionContext =>
             {
-                IModel model = await connectionContext.CreateModel();
+                IModel model = await connectionContext.CreateModel().ConfigureAwait(false);
 
                 EventHandler<ShutdownEventArgs> modelShutdown = null;
                 modelShutdown = (obj, reason) =>
@@ -85,9 +85,9 @@ namespace MassTransit.RabbitMqTransport.Integration
 
                 try
                 {
-                    using (SharedModelContext context = await scope.Attach(cancellationToken))
+                    using (SharedModelContext context = await scope.Attach(cancellationToken).ConfigureAwait(false))
                     {
-                        await modelPipe.Send(context);
+                        await modelPipe.Send(context).ConfigureAwait(false);
                     }
                 }
                 catch (Exception ex)
@@ -99,16 +99,16 @@ namespace MassTransit.RabbitMqTransport.Integration
                 }
             });
 
-            await _connectionCache.Send(connectionPipe, new CancellationToken());
+            await _connectionCache.Send(connectionPipe, new CancellationToken()).ConfigureAwait(false);
         }
 
         static async Task SendUsingExistingModel(IPipe<ModelContext> modelPipe, ModelScope existingScope, CancellationToken cancellationToken)
         {
             try
             {
-                using (SharedModelContext context = await existingScope.Attach(cancellationToken))
+                using (SharedModelContext context = await existingScope.Attach(cancellationToken).ConfigureAwait(false))
                 {
-                    await modelPipe.Send(context);
+                    await modelPipe.Send(context).ConfigureAwait(false);
                 }
             }
             catch (Exception ex)
@@ -142,7 +142,7 @@ namespace MassTransit.RabbitMqTransport.Integration
             {
                 long id = Interlocked.Increment(ref _nextId);
 
-                var context = new SharedModelContext(await _modelContext.Task, id, Disconnect, cancellationToken);
+                var context = new SharedModelContext(await _modelContext.Task.ConfigureAwait(false), id, Disconnect, cancellationToken);
 
                 bool added = _models.TryAdd(id, context);
                 if (!added)
@@ -166,14 +166,14 @@ namespace MassTransit.RabbitMqTransport.Integration
             {
                 try
                 {
-                    await Task.WhenAll(_models.Values.Select(x => x.Completed));
+                    await Task.WhenAll(_models.Values.Select(x => x.Completed)).ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {
                     _log.Error("Close faulted waiting for attached models", ex);
                 }
 
-                (await _modelContext.Task).Dispose();
+                (await _modelContext.Task.ConfigureAwait(false)).Dispose();
             }
         }
     }

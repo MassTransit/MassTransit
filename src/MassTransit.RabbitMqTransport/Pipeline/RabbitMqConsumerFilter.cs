@@ -48,13 +48,13 @@ namespace MassTransit.RabbitMqTransport.Pipeline
 
             using (var consumer = new RabbitMqBasicConsumer(context, inputAddress, _receivePipe, _receiveObserver, context.CancellationToken))
             {
-                await context.BasicConsume(receiveSettings.QueueName, false, consumer);
+                await context.BasicConsume(receiveSettings.QueueName, false, consumer).ConfigureAwait(false);
 
-                await _endpointObserver.Ready(new Ready(inputAddress));
+                await _endpointObserver.Ready(new Ready(inputAddress)).ConfigureAwait(false);
 
-                RabbitMqConsumerMetrics metrics = await consumer.CompleteTask;
+                RabbitMqConsumerMetrics metrics = await consumer.CompleteTask.ConfigureAwait(false);
 
-                await _endpointObserver.Completed(new Completed(inputAddress, metrics));
+                await _endpointObserver.Completed(new Completed(inputAddress, metrics)).ConfigureAwait(false);
 
                 if (_log.IsDebugEnabled)
                 {
