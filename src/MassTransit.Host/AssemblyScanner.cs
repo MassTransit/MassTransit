@@ -51,7 +51,6 @@ namespace MassTransit.Host
                 List<string> assemblies = Directory.EnumerateFiles(baseDirectory, "*.dll", SearchOption.AllDirectories)
                     .Select(x => new {Path = x, File = Path.GetFileName(x)})
                     .Where(x => !x.File.StartsWith("MassTransit.", StringComparison.OrdinalIgnoreCase))
-                    .Where(x => !x.File.StartsWith("RapidTransit.", StringComparison.OrdinalIgnoreCase))
                     .Where(x => !x.File.StartsWith("Topshelf.", StringComparison.OrdinalIgnoreCase))
                     .Where(x => !x.File.StartsWith("NewId.", StringComparison.OrdinalIgnoreCase))
                     .Where(x => !x.File.StartsWith("Newtonsoft.", StringComparison.OrdinalIgnoreCase))
