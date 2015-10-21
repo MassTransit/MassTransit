@@ -31,7 +31,12 @@ namespace MassTransit.RabbitMqTransport.Tests
                 {
                     IdentityType = "AAD:Claims",
                     IdentityId = 27,
-                    Claims = new[] {"One", "two", "Three"}
+                    Claims = new[]
+                    {
+                        new ClaimProxy {Issuer = "Azure", Type="User", Value="37" },
+                        new ClaimProxy {Issuer = "Azure", Type="User", Value="457" },
+                        new ClaimProxy {Issuer = "Azure", Type="User", Value="451" },
+                    }
                 });
             });
 
@@ -41,6 +46,8 @@ namespace MassTransit.RabbitMqTransport.Tests
 
             Assert.AreEqual(27, identity.IdentityId);
             Assert.AreEqual("AAD:Claims", identity.IdentityType);
+            Assert.AreEqual(3, identity.Claims.Length);
+            Assert.AreEqual("Azure", identity.Claims[0].Issuer);
         }
 
         Task<ConsumeContext<PingMessage>> _handled;
@@ -63,7 +70,26 @@ namespace MassTransit.RabbitMqTransport.Tests
         {
             string IdentityType { get; }
             int IdentityId { get; }
-            string[] Claims { get; }
+            Claim[] Claims { get; }
+        }
+
+
+        public interface Claim
+        {
+            string Type { get;  }
+             string Value { get;  }
+             string ValueType { get;  }
+             string Issuer { get;  }
+        }
+
+
+        public class ClaimProxy :
+            Claim
+        {
+            public string Type { get; set; }
+            public string Value { get; set; }
+            public string ValueType { get; set; }
+            public string Issuer { get; set; }
         }
 
 
@@ -72,7 +98,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         {
             public string IdentityType { get; set; }
             public int IdentityId { get; set; }
-            public string[] Claims { get; set; }
+            public Claim[] Claims { get; set; }
         }
     }
 }
