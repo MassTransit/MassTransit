@@ -112,6 +112,7 @@
     <Compile Include="Courier\TwoActivityEvent_Specs.cs" />
     <Compile Include="Courier\UriArgument_Specs.cs" />
     <Compile Include="EventPublish_Specs.cs" />
+    <Compile Include="HeaderObject_Specs.cs" />
     <Compile Include="HostInfo_Specs.cs" />
     <Compile Include="Introspection_Specs.cs" />
     <Compile Include="MessageData\DataBus_Specs.cs" />
