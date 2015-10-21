@@ -285,7 +285,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
         }
 
 
-        [TestFixture]
+        [TestFixture, Category("Flakey")]
         public class When_pre_inserting_in_an_invalid_state_with_ef :
             InMemoryTestFixture
         {
