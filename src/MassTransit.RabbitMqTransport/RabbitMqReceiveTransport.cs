@@ -21,6 +21,7 @@ namespace MassTransit.RabbitMqTransport
     using Policies;
     using Topology;
     using Transports;
+    using Util;
 
 
     public class RabbitMqReceiveTransport :
@@ -59,13 +60,13 @@ namespace MassTransit.RabbitMqTransport
         /// <returns>A task that is completed once the transport is shut down</returns>
         public ReceiveTransportHandle Start(IPipe<ReceiveContext> receivePipe)
         {
-            var stopTokenSource = new CancellationTokenSource();
+            var supervisor = new TaskSupervisor();
 
-            var pipe = Pipe.New<ConnectionContext>(x => x.RabbitMqConsumer(receivePipe, _settings, _receiveObservers, _endpointObservers, _exchangeBindings));
+            var pipe = Pipe.New<ConnectionContext>(x => x.RabbitMqConsumer(receivePipe, _settings, _receiveObservers, _endpointObservers, _exchangeBindings, supervisor));
 
-            var receiverTask = Receiver(pipe, stopTokenSource.Token);
+            Receiver(pipe, supervisor);
 
-            return new Handle(stopTokenSource, receiverTask);
+            return new Handle(supervisor);
         }
 
         public ConnectHandle ConnectReceiveObserver(IReceiveObserver observer)
@@ -78,13 +79,13 @@ namespace MassTransit.RabbitMqTransport
             return _endpointObservers.Connect(observer);
         }
 
-        Task Receiver(IPipe<ConnectionContext> transportPipe, CancellationToken stopToken)
+        async void Receiver(IPipe<ConnectionContext> transportPipe, TaskSupervisor supervisor)
         {
-            return Repeat.UntilCancelled(stopToken, async () =>
+            await Repeat.UntilCancelled(supervisor.StopToken, async () =>
             {
                 try
                 {
-                    await _host.ConnectionCache.Send(transportPipe, stopToken).ConfigureAwait(false);
+                    await _host.ConnectionCache.Send(transportPipe, supervisor.StopToken).ConfigureAwait(false);
                 }
                 catch (RabbitMqConnectionException ex)
                 {
@@ -128,25 +129,18 @@ namespace MassTransit.RabbitMqTransport
         class Handle :
             ReceiveTransportHandle
         {
-            readonly Task _receiverTask;
-            readonly CancellationTokenSource _stop;
+            readonly TaskSupervisor _supervisor;
 
-            public Handle(CancellationTokenSource cancellationTokenSource, Task receiverTask)
+            public Handle(TaskSupervisor supervisor)
             {
-                _stop = cancellationTokenSource;
-                _receiverTask = receiverTask;
-            }
-
-            void IDisposable.Dispose()
-            {
-                _stop.Cancel();
+                _supervisor = supervisor;
             }
 
             async Task ReceiveTransportHandle.Stop(CancellationToken cancellationToken)
             {
-                _stop.Cancel();
+                await _supervisor.Stop("Receive Transport Stopping").ConfigureAwait(false);
 
-                await _receiverTask.WithCancellation(cancellationToken).ConfigureAwait(false);
+                await _supervisor.Completed.ConfigureAwait(false);
             }
         }
     }

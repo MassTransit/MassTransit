@@ -18,6 +18,7 @@ namespace MassTransit
     using RabbitMqTransport;
     using RabbitMqTransport.Configuration;
     using RabbitMqTransport.Topology;
+    using Util;
 
 
     public static class ConsumerPipeConfiguratorExtensions
@@ -29,14 +30,15 @@ namespace MassTransit
         /// <param name="pipe"></param>
         /// <param name="settings"></param>
         /// <param name="receiveObserver"></param>
-        /// <param name="exchangeBindings"></param>
         /// <param name="endpointObserver"></param>
-        public static void RabbitMqConsumer(this IPipeConfigurator<ConnectionContext> configurator, IPipe<ReceiveContext> pipe, ReceiveSettings settings, IReceiveObserver receiveObserver, IReceiveEndpointObserver endpointObserver, IEnumerable<ExchangeBindingSettings> exchangeBindings)
+        /// <param name="exchangeBindings"></param>
+        /// <param name="taskSupervisor"></param>
+        public static void RabbitMqConsumer(this IPipeConfigurator<ConnectionContext> configurator, IPipe<ReceiveContext> pipe, ReceiveSettings settings, IReceiveObserver receiveObserver, IReceiveEndpointObserver endpointObserver, IEnumerable<ExchangeBindingSettings> exchangeBindings, ITaskSupervisor taskSupervisor)
         {
             if (configurator == null)
                 throw new ArgumentNullException(nameof(configurator));
 
-            var pipeBuilderConfigurator = new RabbitMqConsumerPipeSpecification(pipe, settings, receiveObserver, endpointObserver, exchangeBindings);
+            var pipeBuilderConfigurator = new RabbitMqConsumerPipeSpecification(pipe, settings, receiveObserver, endpointObserver, exchangeBindings, taskSupervisor);
 
             configurator.AddPipeSpecification(pipeBuilderConfigurator);
         }

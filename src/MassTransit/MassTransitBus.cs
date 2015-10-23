@@ -373,22 +373,22 @@ namespace MassTransit
 
                 TaskUtil.Await(async () =>
                 {
-                    await _busObserver.PreStop(_bus);
+                    await _busObserver.PreStop(_bus).ConfigureAwait(false);
 
                     try
                     {
                         foreach (var observerHandle in _observerHandles)
                             observerHandle.Disconnect();
 
-                        await Task.WhenAll(_endpointHandles.Select(x => x.Stop(cancellationToken)));
+                        await Task.WhenAll(_endpointHandles.Select(x => x.Stop(cancellationToken))).ConfigureAwait(false);
 
-                        await Task.WhenAll(_hostHandles.Select(x => x.Stop(cancellationToken)));
+                        await Task.WhenAll(_hostHandles.Select(x => x.Stop(cancellationToken))).ConfigureAwait(false);
 
-                        await _busObserver.PostStop(_bus);
+                        await _busObserver.PostStop(_bus).ConfigureAwait(false);
                     }
                     catch (Exception exception)
                     {
-                        await _busObserver.StopFaulted(_bus, exception);
+                        await _busObserver.StopFaulted(_bus, exception).ConfigureAwait(false);
 
                         throw;
                     }

@@ -147,11 +147,6 @@ namespace MassTransit.AzureServiceBusTransport
                 _receiveTask = receiveTask;
             }
 
-            void IDisposable.Dispose()
-            {
-                _stop.Cancel();
-            }
-
             async Task ReceiveTransportHandle.Stop(CancellationToken cancellationToken)
             {
                 _stop.Cancel();

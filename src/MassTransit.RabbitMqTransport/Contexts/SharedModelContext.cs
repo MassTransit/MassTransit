@@ -114,6 +114,11 @@ namespace MassTransit.RabbitMqTransport.Contexts
             return _context.BasicConsume(queue, noAck, consumer);
         }
 
+        public Task BasicCancel(string consumerTag)
+        {
+            return _context.BasicCancel(consumerTag);
+        }
+
         IModel ModelContext.Model => _context.Model;
 
         CancellationToken PipeContext.CancellationToken => _cancellationToken;
