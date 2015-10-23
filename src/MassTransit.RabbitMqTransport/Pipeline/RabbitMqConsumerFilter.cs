@@ -16,6 +16,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
     using System.Threading.Tasks;
     using Logging;
     using MassTransit.Pipeline;
+    using Util;
 
 
     /// <summary>
@@ -28,12 +29,15 @@ namespace MassTransit.RabbitMqTransport.Pipeline
         readonly IReceiveEndpointObserver _endpointObserver;
         readonly IReceiveObserver _receiveObserver;
         readonly IPipe<ReceiveContext> _receivePipe;
+        readonly ITaskSupervisor _taskSupervisor;
 
-        public RabbitMqConsumerFilter(IPipe<ReceiveContext> receivePipe, IReceiveObserver receiveObserver, IReceiveEndpointObserver endpointObserver)
+        public RabbitMqConsumerFilter(IPipe<ReceiveContext> receivePipe, IReceiveObserver receiveObserver, IReceiveEndpointObserver endpointObserver,
+            ITaskSupervisor taskSupervisor)
         {
             _receivePipe = receivePipe;
             _receiveObserver = receiveObserver;
             _endpointObserver = endpointObserver;
+            _taskSupervisor = taskSupervisor;
         }
 
         void IProbeSite.Probe(ProbeContext context)
@@ -44,21 +48,28 @@ namespace MassTransit.RabbitMqTransport.Pipeline
         {
             var receiveSettings = context.GetPayload<ReceiveSettings>();
 
-            Uri inputAddress = context.ConnectionContext.HostSettings.GetInputAddress(receiveSettings);
+            var inputAddress = context.ConnectionContext.HostSettings.GetInputAddress(receiveSettings);
 
-            using (var consumer = new RabbitMqBasicConsumer(context, inputAddress, _receivePipe, _receiveObserver, context.CancellationToken))
+            using (var scope = _taskSupervisor.CreateScope())
             {
+                var consumer = new RabbitMqBasicConsumer(context, inputAddress, _receivePipe, _receiveObserver, scope);
+
                 await context.BasicConsume(receiveSettings.QueueName, false, consumer).ConfigureAwait(false);
+
+                await scope.Ready.ConfigureAwait(false);
 
                 await _endpointObserver.Ready(new Ready(inputAddress)).ConfigureAwait(false);
 
-                RabbitMqConsumerMetrics metrics = await consumer.CompleteTask.ConfigureAwait(false);
+                scope.SetReady();
 
+                await scope.Completed.ConfigureAwait(false);
+
+                RabbitMqConsumerMetrics metrics = consumer;
                 await _endpointObserver.Completed(new Completed(inputAddress, metrics)).ConfigureAwait(false);
 
                 if (_log.IsDebugEnabled)
                 {
-                    _log.InfoFormat("Consumer {0}: {1} received, {2} concurrent", metrics.ConsumerTag, metrics.DeliveryCount,
+                    _log.DebugFormat("Consumer {0}: {1} received, {2} concurrent", metrics.ConsumerTag, metrics.DeliveryCount,
                         metrics.ConcurrentDeliveryCount);
                 }
             }

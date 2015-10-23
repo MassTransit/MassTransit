@@ -12,7 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports
 {
-    using System;
     using System.Threading;
     using System.Threading.Tasks;
     using Pipeline;
@@ -37,7 +36,7 @@ namespace MassTransit.Transports
 
         ReceiveEndpointHandle IReceiveEndpoint.Start()
         {
-            ReceiveTransportHandle transportHandle = _receiveTransport.Start(_receivePipe);
+            var transportHandle = _receiveTransport.Start(_receivePipe);
 
             return new Handle(transportHandle);
         }
@@ -49,7 +48,7 @@ namespace MassTransit.Transports
 
         void IProbeSite.Probe(ProbeContext context)
         {
-            ProbeContext scope = context.CreateScope("receiveEndpoint");
+            var scope = context.CreateScope("receiveEndpoint");
 
             _receiveTransport.Probe(scope);
 
@@ -80,11 +79,6 @@ namespace MassTransit.Transports
             public Handle(ReceiveTransportHandle transportHandle)
             {
                 _transportHandle = transportHandle;
-            }
-
-            void IDisposable.Dispose()
-            {
-                _transportHandle.Dispose();
             }
 
             Task ReceiveEndpointHandle.Stop(CancellationToken cancellationToken)

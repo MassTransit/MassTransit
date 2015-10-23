@@ -12,7 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports
 {
-    using System;
     using System.Threading;
     using System.Threading.Tasks;
 
@@ -20,8 +19,7 @@ namespace MassTransit.Transports
     /// <summary>
     /// A handle to an active transport
     /// </summary>
-    public interface ReceiveTransportHandle :
-        IDisposable
+    public interface ReceiveTransportHandle
     {
         /// <summary>
         /// Stop the transport, releasing any resources associated with the endpoint

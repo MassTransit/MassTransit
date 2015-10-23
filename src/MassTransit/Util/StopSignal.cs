@@ -12,6 +12,8 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Util
 {
+    using System;
+    using System.Diagnostics.Eventing.Reader;
     using System.Threading;
     using System.Threading.Tasks;
 
@@ -49,6 +51,33 @@ namespace MassTransit.Util
         {
             _stopToken.Cancel();
         }
+    }
+
+
+    public interface IStopEvent
+    {
+        string Reason { get; }
+    }
+
+    public class StopEventArgs :
+        EventArgs,
+        IStopEvent
+    {
+        public StopEventArgs(string reason)
+        {
+            Reason = reason;
+        }
+
+        public string Reason { get; }
+    }
+
+
+    public interface IAsyncControlParticipant
+    {
+        /// <summary>
+        /// Completed when the participant has acknowledged the signal
+        /// </summary>
+        Task Completed { get; }
     }
 
 

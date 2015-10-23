@@ -10,22 +10,17 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Transports
+namespace MassTransit.Util
 {
-    using System.Threading;
-    using System.Threading.Tasks;
-
+    using System;
 
     /// <summary>
-    /// A handle to an active endpoint
+    /// A task participant that hosts additional participants
     /// </summary>
-    public interface ReceiveEndpointHandle
+    public interface ITaskSupervisorScope :
+        ITaskParticipant,
+        ITaskSupervisor,
+        IDisposable
     {
-        /// <summary>
-        /// Stop the endpoint, releasing any resources associated with the endpoint
-        /// </summary>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
-        Task Stop(CancellationToken cancellationToken = default(CancellationToken));
     }
 }

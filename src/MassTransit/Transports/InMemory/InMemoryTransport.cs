@@ -229,11 +229,6 @@ namespace MassTransit.Transports.InMemory
                 _stop = cancellationTokenSource;
             }
 
-            void IDisposable.Dispose()
-            {
-                _stop.Cancel();
-            }
-
             Task ReceiveTransportHandle.Stop(CancellationToken cancellationToken)
             {
                 _stop.Cancel();

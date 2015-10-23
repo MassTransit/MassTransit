@@ -21,6 +21,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
     using MassTransit.Pipeline;
     using RabbitMQ.Client;
     using RabbitMQ.Client.Events;
+    using Util;
 
 
     /// <summary>
@@ -28,10 +29,8 @@ namespace MassTransit.RabbitMqTransport.Pipeline
     /// </summary>
     public class RabbitMqBasicConsumer :
         IBasicConsumer,
-        RabbitMqConsumerMetrics,
-        IDisposable
+        RabbitMqConsumerMetrics
     {
-        readonly TaskCompletionSource<RabbitMqConsumerMetrics> _consumerComplete;
         readonly Uri _inputAddress;
         readonly ILog _log = Logger.Get<RabbitMqBasicConsumer>();
         readonly ModelContext _model;
@@ -43,10 +42,18 @@ namespace MassTransit.RabbitMqTransport.Pipeline
         int _currentPendingDeliveryCount;
         long _deliveryCount;
         int _maxPendingDeliveryCount;
-        CancellationTokenRegistration _registration;
+        readonly ITaskParticipant _participant;
 
+        /// <summary>
+        /// The basic consumer receives messages pushed from the broker.
+        /// </summary>
+        /// <param name="model">The model context for the consumer</param>
+        /// <param name="inputAddress">The input address for messages received by the consumer</param>
+        /// <param name="receivePipe">The receive pipe to dispatch messages</param>
+        /// <param name="receiveObserver">The observer for receive events</param>
+        /// <param name="taskSupervisor">The token used to cancel/stop the consumer at shutdown</param>
         public RabbitMqBasicConsumer(ModelContext model, Uri inputAddress, IPipe<ReceiveContext> receivePipe, IReceiveObserver receiveObserver,
-            CancellationToken cancellationToken)
+            ITaskSupervisor taskSupervisor)
         {
             _model = model;
             _inputAddress = inputAddress;
@@ -57,36 +64,63 @@ namespace MassTransit.RabbitMqTransport.Pipeline
 
             _pending = new ConcurrentDictionary<ulong, RabbitMqReceiveContext>();
 
-            _consumerComplete = new TaskCompletionSource<RabbitMqConsumerMetrics>();
-
-            _registration = cancellationToken.Register(Complete);
+            _participant = taskSupervisor.CreateParticipant();
         }
 
-        public Task<RabbitMqConsumerMetrics> CompleteTask => _consumerComplete.Task;
-
+        /// <summary>
+        /// Called when the consumer is ready to be delivered messages by the broker
+        /// </summary>
+        /// <param name="consumerTag"></param>
         void IBasicConsumer.HandleBasicConsumeOk(string consumerTag)
         {
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("ConsumerOk: {0} - {1}", _inputAddress, consumerTag);
 
             _consumerTag = consumerTag;
+
+            _participant.SetReady();
+
+            SetupStopTask();
         }
 
+        async void SetupStopTask()
+        {
+            await Task.Yield();
+
+            await _participant.StopRequested;
+
+            await _model.BasicCancel(_consumerTag);
+        }
+
+        /// <summary>
+        /// Called when the broker has received and acknowledged the BasicCancel, indicating
+        /// that the consumer is requesting to be shut down gracefully.
+        /// </summary>
+        /// <param name="consumerTag">The consumerTag that was shut down.</param>
         void IBasicConsumer.HandleBasicCancelOk(string consumerTag)
         {
+            if (_log.IsDebugEnabled)
+                _log.DebugFormat("Consumer Cancel Ok: {0} - {1}", _inputAddress, consumerTag);
+
+            _participant.SetComplete();
         }
 
+        /// <summary>
+        /// Called when the broker cancels the consumer due to an unexpected event, such as a
+        /// queue removal, or other change, that would disconnect the consumer.
+        /// </summary>
+        /// <param name="consumerTag">The consumerTag that is being cancelled.</param>
         void IBasicConsumer.HandleBasicCancel(string consumerTag)
         {
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Consumer Cancelled: {0}", consumerTag);
 
-            foreach (RabbitMqReceiveContext context in _pending.Values)
+            foreach (var context in _pending.Values)
                 context.Cancel();
 
             ConsumerCancelled?.Invoke(this, new ConsumerEventArgs(consumerTag));
 
-            Complete();
+            _participant.SetComplete();
         }
 
         void IBasicConsumer.HandleModelShutdown(object model, ShutdownEventArgs reason)
@@ -97,7 +131,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
                     reason.ReplyText);
             }
 
-            Complete();
+            _participant.SetComplete();
         }
 
         async void IBasicConsumer.HandleBasicDeliver(string consumerTag, ulong deliveryTag, bool redelivered, string exchange,
@@ -106,7 +140,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
         {
             Interlocked.Increment(ref _deliveryCount);
 
-            int current = Interlocked.Increment(ref _currentPendingDeliveryCount);
+            var current = Interlocked.Increment(ref _currentPendingDeliveryCount);
             while (current > _maxPendingDeliveryCount)
                 Interlocked.CompareExchange(ref _maxPendingDeliveryCount, current, _maxPendingDeliveryCount);
 
@@ -155,22 +189,10 @@ namespace MassTransit.RabbitMqTransport.Pipeline
 
         public event EventHandler<ConsumerEventArgs> ConsumerCancelled;
 
-        void IDisposable.Dispose()
-        {
-            _registration.Dispose();
-
-            Complete();
-        }
-
         string RabbitMqConsumerMetrics.ConsumerTag => _consumerTag;
 
         long RabbitMqConsumerMetrics.DeliveryCount => _deliveryCount;
 
         int RabbitMqConsumerMetrics.ConcurrentDeliveryCount => _maxPendingDeliveryCount;
-
-        void Complete()
-        {
-            _consumerComplete.TrySetResult(this);
-        }
     }
 }

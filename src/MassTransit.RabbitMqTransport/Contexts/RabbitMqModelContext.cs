@@ -39,8 +39,8 @@ namespace MassTransit.RabbitMqTransport.Contexts
         readonly ConcurrentDictionary<ulong, PendingPublish> _published;
         readonly QueuedTaskScheduler _taskScheduler;
         readonly CancellationTokenSource _tokenSource;
-        CancellationTokenRegistration _registration;
         ulong _publishTagMax;
+        CancellationTokenRegistration _registration;
 
         public RabbitMqModelContext(ConnectionContext connectionContext, IModel model, CancellationToken cancellationToken)
         {
@@ -102,7 +102,7 @@ namespace MassTransit.RabbitMqTransport.Contexts
         async Task ModelContext.BasicPublishAsync(string exchange, string routingKey, bool mandatory, bool immediate, IBasicProperties basicProperties,
             byte[] body)
         {
-            PendingPublish pendingPublish = await Task.Factory.StartNew(() => PublishAsync(exchange, routingKey, mandatory, immediate, basicProperties, body),
+            var pendingPublish = await Task.Factory.StartNew(() => PublishAsync(exchange, routingKey, mandatory, immediate, basicProperties, body),
                 _tokenSource.Token, TaskCreationOptions.HideScheduler, _taskScheduler);
 
             await pendingPublish.Task;
@@ -160,6 +160,12 @@ namespace MassTransit.RabbitMqTransport.Contexts
                 _tokenSource.Token, TaskCreationOptions.HideScheduler, _taskScheduler);
         }
 
+        public async Task BasicCancel(string consumerTag)
+        {
+            await Task.Factory.StartNew(() => _model.BasicCancel(consumerTag),
+                _tokenSource.Token, TaskCreationOptions.HideScheduler, _taskScheduler);
+        }
+
         void Close(string reason)
         {
             try
@@ -186,7 +192,7 @@ namespace MassTransit.RabbitMqTransport.Contexts
 
         PendingPublish PublishAsync(string exchange, string routingKey, bool mandatory, bool immediate, IBasicProperties basicProperties, byte[] body)
         {
-            ulong publishTag = _model.NextPublishSeqNo;
+            var publishTag = _model.NextPublishSeqNo;
             _publishTagMax = Math.Max(_publishTagMax, publishTag);
             var pendingPublish = new PendingPublish(_connectionContext, exchange, publishTag);
             try
@@ -232,7 +238,7 @@ namespace MassTransit.RabbitMqTransport.Contexts
         {
             try
             {
-                foreach (ulong key in _published.Keys)
+                foreach (var key in _published.Keys)
                 {
                     PendingPublish pending;
                     if (_published.TryRemove(key, out pending))
@@ -248,8 +254,8 @@ namespace MassTransit.RabbitMqTransport.Contexts
         {
             if (args.Multiple)
             {
-                ulong[] ids = _published.Keys.Where(x => x <= args.DeliveryTag).ToArray();
-                foreach (ulong id in ids)
+                var ids = _published.Keys.Where(x => x <= args.DeliveryTag).ToArray();
+                foreach (var id in ids)
                 {
                     PendingPublish value;
                     if (_published.TryRemove(id, out value))
@@ -268,8 +274,8 @@ namespace MassTransit.RabbitMqTransport.Contexts
         {
             if (args.Multiple)
             {
-                ulong[] ids = _published.Keys.Where(x => x <= args.DeliveryTag).ToArray();
-                foreach (ulong id in ids)
+                var ids = _published.Keys.Where(x => x <= args.DeliveryTag).ToArray();
+                foreach (var id in ids)
                 {
                     PendingPublish value;
                     if (_published.TryRemove(id, out value))

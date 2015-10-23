@@ -56,5 +56,6 @@ namespace MassTransit.RabbitMqTransport
         void BasicAck(ulong deliveryTag, bool multiple);
         void BasicNack(ulong deliveryTag, bool multiple, bool requeue);
         Task<string> BasicConsume(string queue, bool noAck, IBasicConsumer consumer);
+        Task BasicCancel(string consumerTag);
     }
 }

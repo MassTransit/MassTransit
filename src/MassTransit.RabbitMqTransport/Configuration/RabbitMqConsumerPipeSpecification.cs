@@ -20,6 +20,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
     using PipeConfigurators;
     using Pipeline;
     using Topology;
+    using Util;
 
 
     public class RabbitMqConsumerPipeSpecification :
@@ -29,16 +30,15 @@ namespace MassTransit.RabbitMqTransport.Configuration
         readonly ReceiveSettings _settings;
         readonly IReceiveObserver _receiveObserver;
         readonly IReceiveEndpointObserver _endpointObserver;
+        readonly ITaskSupervisor _taskSupervisor;
         readonly ExchangeBindingSettings[] _exchangeBindings;
 
-        public RabbitMqConsumerPipeSpecification(IPipe<ReceiveContext> receivePipe, ReceiveSettings settings,
-            IReceiveObserver receiveObserver,
-            IReceiveEndpointObserver endpointObserver,
-            IEnumerable<ExchangeBindingSettings> exchangeBindings)
+        public RabbitMqConsumerPipeSpecification(IPipe<ReceiveContext> receivePipe, ReceiveSettings settings, IReceiveObserver receiveObserver, IReceiveEndpointObserver endpointObserver, IEnumerable<ExchangeBindingSettings> exchangeBindings, ITaskSupervisor taskSupervisor)
         {
             _settings = settings;
             _receiveObserver = receiveObserver;
             _endpointObserver = endpointObserver;
+            _taskSupervisor = taskSupervisor;
             _exchangeBindings = exchangeBindings.ToArray();
             _receivePipe = receivePipe;
         }
@@ -49,7 +49,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
             {
                 x.UseFilter(new PrepareReceiveQueueFilter(_settings, _exchangeBindings));
 
-                x.UseFilter(new RabbitMqConsumerFilter(_receivePipe, _receiveObserver, _endpointObserver));
+                x.UseFilter(new RabbitMqConsumerFilter(_receivePipe, _receiveObserver, _endpointObserver, _taskSupervisor));
             });
 
             IFilter<ConnectionContext> modelFilter = new ReceiveModelFilter(pipe);
