@@ -40,7 +40,7 @@ namespace MassTransit.Transports.InMemory
         long _deliveryCount;
         int _maxPendingDeliveryCount;
         IPipe<ReceiveContext> _receivePipe;
-        CancellationToken _stopToken;
+        TaskSupervisor _supervisor;
 
         public InMemoryTransport(Uri inputAddress, int concurrencyLimit)
         {
@@ -49,20 +49,23 @@ namespace MassTransit.Transports.InMemory
             _sendObservable = new SendObservable();
             _receiveObservable = new ReceiveObservable();
             _endpointObservable = new ReceiveEndpointObservable();
+            _supervisor = new TaskSupervisor();
 
             _scheduler = new QueuedTaskScheduler(TaskScheduler.Default, concurrencyLimit);
         }
 
         public void Dispose()
         {
+            TaskUtil.Await(() => _supervisor.Stop("Disposed"));
+
+            TaskUtil.Await(() => _supervisor.Completed);
+
             _scheduler.Dispose();
-
-
         }
 
         public void Probe(ProbeContext context)
         {
-            ProbeContext scope = context.CreateScope("transport");
+            var scope = context.CreateScope("transport");
             scope.Set(new
             {
                 Address = _inputAddress
@@ -71,22 +74,11 @@ namespace MassTransit.Transports.InMemory
 
         ReceiveTransportHandle IReceiveTransport.Start(IPipe<ReceiveContext> receivePipe)
         {
-            var stopTokenSource = new CancellationTokenSource();
-
             _receivePipe = receivePipe;
-            _stopToken = stopTokenSource.Token;
 
             TaskUtil.Await(() => _endpointObservable.Ready(new Ready(_inputAddress)));
 
-            CancellationTokenRegistration registration = new CancellationTokenRegistration();
-            registration = _stopToken.Register(() =>
-            {
-                TaskUtil.Await(() => _endpointObservable.Completed(new Completed(_inputAddress, _deliveryCount, _maxPendingDeliveryCount)));
-
-                registration.Dispose();
-            });
-
-            return new Handle(stopTokenSource);
+            return new Handle(_supervisor, this);
         }
 
         public ConnectHandle ConnectReceiveObserver(IReceiveObserver observer)
@@ -107,25 +99,25 @@ namespace MassTransit.Transports.InMemory
             {
                 await pipe.Send(context).ConfigureAwait(false);
 
-                Guid messageId = context.MessageId ?? NewId.NextGuid();
+                var messageId = context.MessageId ?? NewId.NextGuid();
 
-                await _sendObservable.PreSend(context);
+                await _sendObservable.PreSend(context).ConfigureAwait(false);
 
                 var transportMessage = new InMemoryTransportMessage(messageId, context.Body, context.ContentType.MediaType, TypeMetadataCache<T>.ShortName);
 
 #pragma warning disable 4014
-                Task.Factory.StartNew(() => DispatchMessage(transportMessage), _stopToken, TaskCreationOptions.HideScheduler, _scheduler);
+                Task.Factory.StartNew(() => DispatchMessage(transportMessage), _supervisor.StopToken, TaskCreationOptions.HideScheduler, _scheduler);
 #pragma warning restore 4014
 
                 context.DestinationAddress.LogSent(context.MessageId?.ToString("N") ?? "", TypeMetadataCache<T>.ShortName);
 
-                await _sendObservable.PostSend(context);
+                await _sendObservable.PostSend(context).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
                 _log.Error($"SEND FAULT: {_inputAddress} {context.MessageId} {TypeMetadataCache<T>.ShortName}", ex);
 
-                await _sendObservable.SendFault(context, ex);
+                await _sendObservable.SendFault(context, ex).ConfigureAwait(false);
 
                 throw;
             }
@@ -133,15 +125,15 @@ namespace MassTransit.Transports.InMemory
 
         async Task ISendTransport.Move(ReceiveContext context, IPipe<SendContext> pipe)
         {
-            Guid messageId = GetMessageId(context);
+            var messageId = GetMessageId(context);
 
             byte[] body;
-            using (Stream bodyStream = context.GetBody())
+            using (var bodyStream = context.GetBody())
             {
                 body = await GetMessageBody(bodyStream);
             }
 
-            string messageType = "Unknown";
+            var messageType = "Unknown";
             InMemoryTransportMessage receivedMessage;
             if (context.TryGetPayload(out receivedMessage))
                 messageType = receivedMessage.MessageType;
@@ -149,7 +141,7 @@ namespace MassTransit.Transports.InMemory
             var transportMessage = new InMemoryTransportMessage(messageId, body, context.ContentType.MediaType, messageType);
 
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
-            Task.Factory.StartNew(() => DispatchMessage(transportMessage), _stopToken, TaskCreationOptions.HideScheduler, _scheduler);
+            Task.Factory.StartNew(() => DispatchMessage(transportMessage), _supervisor.StopToken, TaskCreationOptions.HideScheduler, _scheduler);
 #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
         }
 
@@ -160,7 +152,7 @@ namespace MassTransit.Transports.InMemory
 
         async Task DispatchMessage(InMemoryTransportMessage message)
         {
-            if (_stopToken.IsCancellationRequested)
+            if (_supervisor.StopToken.IsCancellationRequested)
                 return;
 
             if (_receivePipe == null)
@@ -170,19 +162,19 @@ namespace MassTransit.Transports.InMemory
 
             Interlocked.Increment(ref _deliveryCount);
 
-            int current = Interlocked.Increment(ref _currentPendingDeliveryCount);
+            var current = Interlocked.Increment(ref _currentPendingDeliveryCount);
             while (current > _maxPendingDeliveryCount)
                 Interlocked.CompareExchange(ref _maxPendingDeliveryCount, current, _maxPendingDeliveryCount);
 
             try
             {
-                await _receiveObservable.PreReceive(context);
+                await _receiveObservable.PreReceive(context).ConfigureAwait(false);
 
-                await _receivePipe.Send(context);
+                await _receivePipe.Send(context).ConfigureAwait(false);
 
-                await context.CompleteTask;
+                await context.CompleteTask.ConfigureAwait(false);
 
-                await _receiveObservable.PostReceive(context);
+                await _receiveObservable.PostReceive(context).ConfigureAwait(false);
 
                 _inputAddress.LogReceived(message.MessageId.ToString("N"), message.MessageType);
             }
@@ -190,7 +182,7 @@ namespace MassTransit.Transports.InMemory
             {
                 _log.Error($"RCV FAULT: {message.MessageId}", ex);
 
-                await _receiveObservable.ReceiveFault(context, ex);
+                await _receiveObservable.ReceiveFault(context, ex).ConfigureAwait(false);
 
                 message.DeliveryCount++;
             }
@@ -222,18 +214,23 @@ namespace MassTransit.Transports.InMemory
         class Handle :
             ReceiveTransportHandle
         {
-            readonly CancellationTokenSource _stop;
+            readonly TaskSupervisor _supervisor;
+            readonly InMemoryTransport _transport;
 
-            public Handle(CancellationTokenSource cancellationTokenSource)
+            public Handle(TaskSupervisor supervisor, InMemoryTransport transport)
             {
-                _stop = cancellationTokenSource;
+                _supervisor = supervisor;
+                _transport = transport;
             }
 
-            Task ReceiveTransportHandle.Stop(CancellationToken cancellationToken)
+            async Task ReceiveTransportHandle.Stop(CancellationToken cancellationToken)
             {
-                _stop.Cancel();
+                await _supervisor.Stop("Stopped").ConfigureAwait(false);
 
-                return TaskUtil.Completed;
+                await _supervisor.Completed.ConfigureAwait(false);
+
+                await _transport._endpointObservable.Completed(new Completed(_transport._inputAddress, _transport._deliveryCount,
+                    _transport._maxPendingDeliveryCount)).ConfigureAwait(false);
             }
         }
 
