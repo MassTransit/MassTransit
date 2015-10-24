@@ -62,15 +62,20 @@ namespace MassTransit.RabbitMqTransport.Pipeline
 
                 scope.SetReady();
 
-                await scope.Completed.ConfigureAwait(false);
-
-                RabbitMqConsumerMetrics metrics = consumer;
-                await _endpointObserver.Completed(new Completed(inputAddress, metrics)).ConfigureAwait(false);
-
-                if (_log.IsDebugEnabled)
+                try
                 {
-                    _log.DebugFormat("Consumer {0}: {1} received, {2} concurrent", metrics.ConsumerTag, metrics.DeliveryCount,
-                        metrics.ConcurrentDeliveryCount);
+                    await scope.Completed.ConfigureAwait(false);
+                }
+                finally
+                {
+                    RabbitMqConsumerMetrics metrics = consumer;
+                    await _endpointObserver.Completed(new Completed(inputAddress, metrics)).ConfigureAwait(false);
+
+                    if (_log.IsDebugEnabled)
+                    {
+                        _log.DebugFormat("Consumer {0}: {1} received, {2} concurrent", metrics.ConsumerTag, metrics.DeliveryCount,
+                            metrics.ConcurrentDeliveryCount);
+                    }
                 }
             }
         }

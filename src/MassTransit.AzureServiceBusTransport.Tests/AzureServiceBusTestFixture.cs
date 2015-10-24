@@ -49,28 +49,16 @@ namespace MassTransit.AzureServiceBusTransport.Tests
         /// <summary>
         /// The sending endpoint for the InputQueue
         /// </summary>
-        protected ISendEndpoint InputQueueSendEndpoint
-        {
-            get { return _inputQueueSendEndpoint; }
-        }
+        protected ISendEndpoint InputQueueSendEndpoint => _inputQueueSendEndpoint;
 
         /// <summary>
         /// The sending endpoint for the Bus 
         /// </summary>
-        protected ISendEndpoint BusSendEndpoint
-        {
-            get { return _busSendEndpoint; }
-        }
+        protected ISendEndpoint BusSendEndpoint => _busSendEndpoint;
 
-        protected ISentMessageList Sent
-        {
-            get { return _sendObserver.Messages; }
-        }
+        protected ISentMessageList Sent => _sendObserver.Messages;
 
-        protected Uri BusAddress
-        {
-            get { return _bus.Address; }
-        }
+        protected Uri BusAddress => _bus.Address;
 
         protected Uri InputQueueAddress
         {
@@ -84,10 +72,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
             }
         }
 
-        protected override IBus Bus
-        {
-            get { return _bus; }
-        }
+        protected override IBus Bus => _bus;
 
         [TestFixtureSetUp]
         public void SetupAzureServiceBusTestFixture()

@@ -16,76 +16,74 @@ namespace MassTransit.AzureServiceBusTransport
     using System.Threading;
     using System.Threading.Tasks;
     using Contexts;
+    using Internals.Extensions;
     using Logging;
     using MassTransit.Pipeline;
     using Microsoft.ServiceBus.Messaging;
+    using Util;
 
 
     public class Receiver :
-        ReceiverMetrics,
-        IDisposable
+        ReceiverMetrics
     {
         static readonly ILog _log = Logger.Get<Receiver>();
 
-        readonly TaskCompletionSource<ReceiverMetrics> _completeTask;
         readonly Uri _inputAddress;
         readonly MessageReceiver _messageReceiver;
+        readonly ITaskParticipant _participant;
         readonly IReceiveObserver _receiveObserver;
+        readonly ITaskSupervisor _supervisor;
         readonly IPipe<ReceiveContext> _receivePipe;
         readonly ReceiveSettings _receiveSettings;
         int _currentPendingDeliveryCount;
         long _deliveryCount;
         int _maxPendingDeliveryCount;
-        CancellationTokenRegistration _registration;
         bool _shuttingDown;
 
-        public Receiver(MessageReceiver messageReceiver, Uri inputAddress, IPipe<ReceiveContext> receivePipe,
-            ReceiveSettings receiveSettings, IReceiveObserver receiveObserver, CancellationToken cancellationToken)
+        public Receiver(MessageReceiver messageReceiver, Uri inputAddress, IPipe<ReceiveContext> receivePipe, ReceiveSettings receiveSettings,
+            IReceiveObserver receiveObserver, ITaskSupervisor supervisor)
         {
             _messageReceiver = messageReceiver;
             _inputAddress = inputAddress;
             _receivePipe = receivePipe;
             _receiveSettings = receiveSettings;
             _receiveObserver = receiveObserver;
+            _supervisor = supervisor;
 
-            _completeTask = new TaskCompletionSource<ReceiverMetrics>();
-
-            _registration = cancellationToken.Register(Shutdown);
+            _participant = supervisor.CreateParticipant();
 
             var options = new OnMessageOptions
             {
                 AutoComplete = false,
                 AutoRenewTimeout = receiveSettings.AutoRenewTimeout,
-                MaxConcurrentCalls = receiveSettings.MaxConcurrentCalls,
+                MaxConcurrentCalls = receiveSettings.MaxConcurrentCalls
             };
 
-            options.ExceptionReceived += (sender, x) => _completeTask.TrySetException(x.Exception);
+            options.ExceptionReceived += (sender, x) =>
+            {
+                if (_log.IsErrorEnabled)
+                    _log.Error($"Exception received on receiver: {_inputAddress} during {x.Action}", x.Exception);
+
+                _participant.SetComplete();
+            };
 
             messageReceiver.OnMessageAsync(OnMessage, options);
+
+            _participant.SetReady();
+
+            SetupStopTask();
         }
 
-        public Task<ReceiverMetrics> CompleteTask
-        {
-            get { return _completeTask.Task; }
-        }
+        public long DeliveryCount => _deliveryCount;
 
-        public void Dispose()
-        {
-            _registration.Dispose();
-        }
+        public int ConcurrentDeliveryCount => _maxPendingDeliveryCount;
 
-        public long DeliveryCount
+        async void SetupStopTask()
         {
-            get { return _deliveryCount; }
-        }
+            await Task.Yield();
 
-        public int ConcurrentDeliveryCount
-        {
-            get { return _maxPendingDeliveryCount; }
-        }
+            await _participant.StopRequested;
 
-        void Shutdown()
-        {
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Shutting down receiver: {0}", _inputAddress);
 
@@ -93,38 +91,54 @@ namespace MassTransit.AzureServiceBusTransport
 
             if (_currentPendingDeliveryCount > 0)
             {
-                if (!_completeTask.Task.Wait(TimeSpan.FromSeconds(60)))
+                try
+                {
+                    using (var cancellation = new CancellationTokenSource(_receiveSettings.QueueDescription.LockDuration))
+                    {
+                        await _supervisor.Completed
+                            .WithCancellation(cancellation.Token).ConfigureAwait(false);
+                    }
+                }
+                catch (TaskCanceledException)
                 {
                     if (_log.IsWarnEnabled)
                         _log.WarnFormat("Timeout waiting for receiver to exit: {0}", _inputAddress);
                 }
             }
 
-            if (_log.IsDebugEnabled)
-                _log.DebugFormat("Receiver shutdown completed: {0}", _inputAddress);
-
             try
             {
-                _messageReceiver.Close();
+                await _messageReceiver.CloseAsync();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                _completeTask.TrySetException(ex);
+                _participant.SetComplete();
             }
             finally
             {
                 if (_currentPendingDeliveryCount == 0)
-                    _completeTask.TrySetResult(this);
+                {
+                    if (_log.IsDebugEnabled)
+                        _log.DebugFormat("Receiver shutdown completed: {0}", _inputAddress);
+
+                    _participant.SetComplete();
+                }
             }
         }
 
         async Task OnMessage(BrokeredMessage message)
         {
-            int current = Interlocked.Increment(ref _currentPendingDeliveryCount);
+            if (_shuttingDown)
+            {
+                await WaitAndAbandonMessage(message);
+                return;
+            }
+
+            var current = Interlocked.Increment(ref _currentPendingDeliveryCount);
             while (current > _maxPendingDeliveryCount)
                 Interlocked.CompareExchange(ref _maxPendingDeliveryCount, current, _maxPendingDeliveryCount);
 
-            long deliveryCount = Interlocked.Increment(ref _deliveryCount);
+            var deliveryCount = Interlocked.Increment(ref _deliveryCount);
 
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Receiving {0}:{1} - {2}", deliveryCount, message.MessageId, _receiveSettings.QueueDescription.Path);
@@ -133,13 +147,6 @@ namespace MassTransit.AzureServiceBusTransport
 
             try
             {
-                if (_shuttingDown)
-                {
-                    await _completeTask.Task.ConfigureAwait(false);
-
-                    throw new TransportException(_inputAddress, "Transport shutdown in progress, abandoning message");
-                }
-
                 await _receiveObserver.PreReceive(context).ConfigureAwait(false);
 
                 await _receivePipe.Send(context).ConfigureAwait(false);
@@ -163,9 +170,29 @@ namespace MassTransit.AzureServiceBusTransport
             }
             finally
             {
-                int pendingCount = Interlocked.Decrement(ref _currentPendingDeliveryCount);
+                var pendingCount = Interlocked.Decrement(ref _currentPendingDeliveryCount);
                 if (pendingCount == 0 && _shuttingDown)
-                    _completeTask.TrySetResult(this);
+                {
+                    if (_log.IsDebugEnabled)
+                        _log.DebugFormat("Receiver shutdown completed: {0}", _inputAddress);
+
+                    _participant.SetComplete();
+                }
+            }
+        }
+
+        async Task WaitAndAbandonMessage(BrokeredMessage message)
+        {
+            try
+            {
+                await _supervisor.Completed.ConfigureAwait(false);
+
+                await message.AbandonAsync().ConfigureAwait(false);
+            }
+            catch (Exception exception)
+            {
+                if (_log.IsErrorEnabled)
+                    _log.Debug("Shutting down, abandoned message faulted: {_inputAddress}", exception);
             }
         }
     }
