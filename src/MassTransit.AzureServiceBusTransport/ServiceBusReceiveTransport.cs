@@ -18,12 +18,12 @@ namespace MassTransit.AzureServiceBusTransport
     using System.Threading.Tasks;
     using Configuration;
     using Contexts;
-    using Internals.Extensions;
     using Logging;
     using MassTransit.Pipeline;
     using Pipeline;
     using Policies;
     using Transports;
+    using Util;
 
 
     public class ServiceBusReceiveTransport :
@@ -48,7 +48,7 @@ namespace MassTransit.AzureServiceBusTransport
 
         void IProbeSite.Probe(ProbeContext context)
         {
-            ProbeContext scope = context.CreateScope("transport");
+            var scope = context.CreateScope("transport");
             scope.Set(new
             {
                 Type = "Azure Service Bus",
@@ -68,18 +68,18 @@ namespace MassTransit.AzureServiceBusTransport
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Starting receive transport: {0}", new Uri(_host.Settings.ServiceUri, _settings.QueueDescription.Path));
 
-            var stopTokenSource = new CancellationTokenSource();
+            var supervisor = new TaskSupervisor();
 
-            IPipe<ConnectionContext> connectionPipe = Pipe.New<ConnectionContext>(x =>
+            var connectionPipe = Pipe.New<ConnectionContext>(x =>
             {
                 x.UseFilter(new PrepareReceiveQueueFilter(_settings, _subscriptionSettings));
 
-                x.UseFilter(new MessageReceiverFilter(receivePipe, _receiveObservers, _endpointObservers));
+                x.UseFilter(new MessageReceiverFilter(receivePipe, _receiveObservers, _endpointObservers, supervisor));
             });
 
-            Task receiveTask = Receiver(stopTokenSource.Token, connectionPipe);
+            Receiver(supervisor, connectionPipe);
 
-            return new Handle(stopTokenSource, receiveTask);
+            return new Handle(supervisor);
         }
 
         public ConnectHandle ConnectReceiveObserver(IReceiveObserver observer)
@@ -92,14 +92,14 @@ namespace MassTransit.AzureServiceBusTransport
             return _endpointObservers.Connect(observer);
         }
 
-        async Task Receiver(CancellationToken stopTokenSource, IPipe<ConnectionContext> connectionPipe)
+        async void Receiver(TaskSupervisor supervisor, IPipe<ConnectionContext> connectionPipe)
         {
-            await Repeat.UntilCancelled(stopTokenSource, async () =>
+            await Repeat.UntilCancelled(supervisor.StopToken, async () =>
             {
                 if (_log.IsDebugEnabled)
                     _log.DebugFormat("Connecting receive transport: {0}", _host.Settings.GetInputAddress(_settings.QueueDescription));
 
-                var context = new ServiceBusConnectionContext(_host, stopTokenSource);
+                var context = new ServiceBusConnectionContext(_host, supervisor.StopToken);
 
                 try
                 {
@@ -113,7 +113,7 @@ namespace MassTransit.AzureServiceBusTransport
                     if (_log.IsErrorEnabled)
                         _log.ErrorFormat("Azure Service Bus connection failed: {0}", ex.Message);
 
-                    Uri inputAddress = context.GetQueueAddress(_settings.QueueDescription);
+                    var inputAddress = context.GetQueueAddress(_settings.QueueDescription);
 
                     await _endpointObservers.Faulted(new Faulted(inputAddress, ex));
                 }
@@ -138,20 +138,18 @@ namespace MassTransit.AzureServiceBusTransport
         class Handle :
             ReceiveTransportHandle
         {
-            readonly Task _receiveTask;
-            readonly CancellationTokenSource _stop;
+            readonly TaskSupervisor _supervisor;
 
-            public Handle(CancellationTokenSource cancellationTokenSource, Task receiveTask)
+            public Handle(TaskSupervisor supervisor)
             {
-                _stop = cancellationTokenSource;
-                _receiveTask = receiveTask;
+                _supervisor = supervisor;
             }
 
             async Task ReceiveTransportHandle.Stop(CancellationToken cancellationToken)
             {
-                _stop.Cancel();
+                await _supervisor.Stop("Receive Transport Stopping").ConfigureAwait(false);
 
-                await _receiveTask.WithCancellation(cancellationToken).ConfigureAwait(false);
+                await _supervisor.Completed.ConfigureAwait(false);
             }
         }
     }

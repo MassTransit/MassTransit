@@ -19,6 +19,7 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
     using MassTransit.Pipeline;
     using Microsoft.ServiceBus;
     using Microsoft.ServiceBus.Messaging;
+    using Util;
 
 
     /// <summary>
@@ -30,13 +31,15 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
         static readonly ILog _log = Logger.Get<MessageReceiverFilter>();
         readonly IReceiveObserver _receiveObserver;
         readonly IReceiveEndpointObserver _endpointObserver;
+        readonly ITaskSupervisor _supervisor;
         readonly IPipe<ReceiveContext> _receivePipe;
 
-        public MessageReceiverFilter(IPipe<ReceiveContext> receivePipe, IReceiveObserver receiveObserver, IReceiveEndpointObserver endpointObserver)
+        public MessageReceiverFilter(IPipe<ReceiveContext> receivePipe, IReceiveObserver receiveObserver, IReceiveEndpointObserver endpointObserver, ITaskSupervisor supervisor)
         {
             _receivePipe = receivePipe;
             _receiveObserver = receiveObserver;
             _endpointObserver = endpointObserver;
+            _supervisor = supervisor;
         }
 
         void IProbeSite.Probe(ProbeContext context)
@@ -54,43 +57,52 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Creating message receiver for {0}", inputAddress);
 
-            MessagingFactory messagingFactory = await context.MessagingFactory.ConfigureAwait(false);
-            MessageReceiver messageReceiver = await messagingFactory.CreateMessageReceiverAsync(queuePath, ReceiveMode.PeekLock)
-                .ConfigureAwait(false);
+            MessageReceiver messageReceiver = null;
 
             try
             {
+                MessagingFactory messagingFactory = await context.MessagingFactory.ConfigureAwait(false);
+
+                messageReceiver = await messagingFactory.CreateMessageReceiverAsync(queuePath, ReceiveMode.PeekLock).ConfigureAwait(false);
+
                 messageReceiver.PrefetchCount = receiveSettings.PrefetchCount;
                 messageReceiver.RetryPolicy = RetryPolicy.Default;
 
-                using (var receiver = new Receiver(messageReceiver, inputAddress, _receivePipe, receiveSettings, _receiveObserver, context.CancellationToken))
+                using (var scope = _supervisor.CreateScope())
                 {
-                    await _endpointObserver.Ready(new Ready(inputAddress))
-                        .ConfigureAwait(false);
+                    var receiver = new Receiver(messageReceiver, inputAddress, _receivePipe, receiveSettings, _receiveObserver, scope);
 
-                    ReceiverMetrics metrics = await receiver.CompleteTask.ConfigureAwait(false);
+                    await scope.Ready.ConfigureAwait(false);
 
-                    await _endpointObserver.Completed(new Completed(inputAddress, metrics)).ConfigureAwait(false);
+                    await _endpointObserver.Ready(new Ready(inputAddress)).ConfigureAwait(false);
 
-                    if (_log.IsDebugEnabled)
+                    scope.SetReady();
+
+                    try
                     {
-                        _log.DebugFormat("Consumer {0}: {1} received, {2} concurrent", queuePath,
-                            metrics.DeliveryCount,
-                            metrics.ConcurrentDeliveryCount);
+                        await scope.Completed.ConfigureAwait(false);
+                    }
+                    finally
+                    {
+                        ReceiverMetrics metrics = receiver;
+
+                        await _endpointObserver.Completed(new Completed(inputAddress, metrics)).ConfigureAwait(false);
+
+                        if (_log.IsDebugEnabled)
+                        {
+                            _log.DebugFormat("Consumer {0}: {1} received, {2} concurrent", queuePath,
+                                metrics.DeliveryCount,
+                                metrics.ConcurrentDeliveryCount);
+                        }
                     }
                 }
             }
-            catch
+            finally
             {
-                if (!messageReceiver.IsClosed)
+                if (messageReceiver != null && !messageReceiver.IsClosed)
                     await messageReceiver.CloseAsync().ConfigureAwait(false);
-
-                throw;
             }
-
-            if (!messageReceiver.IsClosed)
-                await messageReceiver.CloseAsync().ConfigureAwait(false);
-
+            
             await next.Send(context).ConfigureAwait(false);
         }
 
