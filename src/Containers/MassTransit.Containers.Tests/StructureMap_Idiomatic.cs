@@ -31,7 +31,9 @@ namespace MassTransit.Containers.Tests
         {
             var bus = _container.GetInstance<IBusControl>();
 
-            bus.Start();
+            var busHandle = bus.Start();
+
+            await busHandle.Ready;
 
             ISendEndpoint endpoint = await bus.GetSendEndpoint(new Uri("loopback://localhost/input_queue"));
 
@@ -72,8 +74,7 @@ namespace MassTransit.Containers.Tests
         {
             public ConsumerRegistry()
             {
-                For<SimpleConsumer>()
-                    .Use<SimpleConsumer>();
+                ForConcreteType<SimpleConsumer>();
                 For<ISimpleConsumerDependency>()
                     .Use<SimpleConsumerDependency>();
                 For<AnotherMessageConsumer>()
