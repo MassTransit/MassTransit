@@ -172,7 +172,7 @@ namespace MassTransit.Transports
             }
             catch (Exception ex)
             {
-                await adapter.PublishFaulted(ex);
+                await adapter.PublishFaulted(ex).ConfigureAwait(false);
                 throw;
             }
         }
