@@ -23,19 +23,19 @@ namespace MassTransit.Serialization
         public JsonMessageEnvelope(SendContext context, object message, string[] messageTypeNames)
         {
             if (context.MessageId.HasValue)
-                MessageId = context.MessageId.Value.ToString("N");
+                MessageId = context.MessageId.Value.ToString();
 
             if (context.RequestId.HasValue)
-                RequestId = context.RequestId.Value.ToString("N");
+                RequestId = context.RequestId.Value.ToString();
 
             if (context.CorrelationId.HasValue)
-                CorrelationId = context.CorrelationId.Value.ToString("N");
+                CorrelationId = context.CorrelationId.Value.ToString();
 
             if (context.ConversationId.HasValue)
-                ConversationId = context.ConversationId.Value.ToString("N");
+                ConversationId = context.ConversationId.Value.ToString();
 
             if (context.InitiatorId.HasValue)
-                InitiatorId = context.InitiatorId.Value.ToString("N");
+                InitiatorId = context.InitiatorId.Value.ToString();
 
             if (context.SourceAddress != null)
                 SourceAddress = context.SourceAddress.ToString();

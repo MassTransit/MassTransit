@@ -72,13 +72,13 @@ namespace MassTransit.Serialization
             headers.Add(MessageTypeKey, messageType);
 
             if (context.CorrelationId.HasValue)
-                headers.Add(RequestIdKey, context.CorrelationId.Value.ToString("N"));
+                headers.Add(RequestIdKey, context.CorrelationId.Value.ToString());
             if (context.RequestId.HasValue)
-                headers.Add(RequestIdKey, context.RequestId.Value.ToString("N"));
+                headers.Add(RequestIdKey, context.RequestId.Value.ToString());
             if (context.ConversationId.HasValue)
-                headers.Add(ConversationIdKey, context.ConversationId.Value.ToString("N"));
+                headers.Add(ConversationIdKey, context.ConversationId.Value.ToString());
             if (context.InitiatorId.HasValue)
-                headers.Add(InitiatorIdKey, context.InitiatorId.Value.ToString("N"));
+                headers.Add(InitiatorIdKey, context.InitiatorId.Value.ToString());
 
             headers.Add(SourceAddressKey, context.SourceAddress);
             headers.Add(DestinationAddressKey, context.DestinationAddress);
