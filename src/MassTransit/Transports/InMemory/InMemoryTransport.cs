@@ -105,8 +105,9 @@ namespace MassTransit.Transports.InMemory
 
                 var transportMessage = new InMemoryTransportMessage(messageId, context.Body, context.ContentType.MediaType, TypeMetadataCache<T>.ShortName);
 
+                if(_receivePipe != null)
 #pragma warning disable 4014
-                Task.Factory.StartNew(() => DispatchMessage(transportMessage), _supervisor.StopToken, TaskCreationOptions.HideScheduler, _scheduler);
+                    Task.Factory.StartNew(() => DispatchMessage(transportMessage), _supervisor.StopToken, TaskCreationOptions.HideScheduler, _scheduler);
 #pragma warning restore 4014
 
                 context.DestinationAddress.LogSent(context.MessageId?.ToString("N") ?? "", TypeMetadataCache<T>.ShortName);

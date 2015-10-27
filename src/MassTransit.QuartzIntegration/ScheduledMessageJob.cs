@@ -106,9 +106,7 @@ namespace MassTransit.QuartzIntegration
                     if (!string.IsNullOrEmpty(ExpirationTime))
                         context.TimeToLive = DateTime.UtcNow - DateTime.Parse(ExpirationTime);
 
-                    context.ContentType = new ContentType(ContentType);
-
-                    context.Serializer = new ScheduledBodySerializer(context.ContentType, Encoding.UTF8.GetBytes(Body));
+                    context.Serializer = new ScheduledBodySerializer(new ContentType(ContentType), Encoding.UTF8.GetBytes(Body));
                 });
             });
 
