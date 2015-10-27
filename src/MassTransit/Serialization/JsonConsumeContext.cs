@@ -44,7 +44,6 @@ namespace MassTransit.Serialization
         Uri _destinationAddress;
         Uri _faultAddress;
         Headers _headers;
-        HostInfo _host;
         Guid? _initiatorId;
         Guid? _messageId;
         Guid? _requestId;
