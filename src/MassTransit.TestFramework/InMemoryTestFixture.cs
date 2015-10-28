@@ -34,10 +34,7 @@ namespace MassTransit.TestFramework
         readonly Uri _baseAddress;
         InMemoryTransportCache _inMemoryTransportCache;
 
-        public Uri BaseAddress
-        {
-            get { return _baseAddress; }
-        }
+        public Uri BaseAddress => _baseAddress;
 
         public InMemoryTestFixture()
         {
@@ -49,23 +46,14 @@ namespace MassTransit.TestFramework
         /// <summary>
         /// The sending endpoint for the InputQueue
         /// </summary>
-        protected ISendEndpoint InputQueueSendEndpoint
-        {
-            get { return _inputQueueSendEndpoint; }
-        }
+        protected ISendEndpoint InputQueueSendEndpoint => _inputQueueSendEndpoint;
 
         /// <summary>
         /// The sending endpoint for the Bus 
         /// </summary>
-        protected ISendEndpoint BusSendEndpoint
-        {
-            get { return _busSendEndpoint; }
-        }
+        protected ISendEndpoint BusSendEndpoint => _busSendEndpoint;
 
-        protected Uri BusAddress
-        {
-            get { return _bus.Address; }
-        }
+        protected Uri BusAddress => _bus.Address;
 
         protected Uri InputQueueAddress
         {
@@ -79,10 +67,7 @@ namespace MassTransit.TestFramework
             }
         }
 
-        protected override IBus Bus
-        {
-            get { return _bus; }
-        }
+        protected override IBus Bus => _bus;
 
         protected IRequestClient<TRequest, TResponse> CreateRequestClient<TRequest, TResponse>()
             where TRequest : class
@@ -98,8 +83,6 @@ namespace MassTransit.TestFramework
 
             _busHandle = _bus.Start();
 
-            Await(() => _busHandle.Ready);
-
             _busSendEndpoint = Await(() => GetSendEndpoint(_bus.Address));
 
             _inputQueueSendEndpoint = Await(() => GetSendEndpoint(InputQueueAddress));
@@ -107,15 +90,12 @@ namespace MassTransit.TestFramework
 
         protected async Task<ISendEndpoint> GetSendEndpoint(Uri address)
         {
-            ISendEndpoint sendEndpoint = await _bus.GetSendEndpoint(address);
+            ISendEndpoint sendEndpoint = await _bus.GetSendEndpoint(address).ConfigureAwait(false);
 
             return sendEndpoint;
         }
 
-        protected IPublishEndpointProvider PublishEndpointProvider
-        {
-            get { return new InMemoryPublishEndpointProvider(Bus, _inMemoryTransportCache); }
-        }
+        protected IPublishEndpointProvider PublishEndpointProvider => new InMemoryPublishEndpointProvider(Bus, _inMemoryTransportCache);
 
         [TestFixtureTearDown]
         public void TearDownInMemoryTestFixture()
@@ -124,13 +104,16 @@ namespace MassTransit.TestFramework
             {
                 _busHandle?.Stop(new CancellationTokenSource(TestTimeout).Token);
             }
-            catch (AggregateException ex)
+            catch (Exception ex)
             {
-                _log.Error("LocalBus Stop Failed: ", ex);
+                _log.Error("Bus Stop Failed: ", ex);
                 throw;
             }
-
-            _bus = null;
+            finally
+            {
+                _busHandle = null;
+                _bus = null;
+            }
         }
 
         protected virtual void ConfigureBus(IInMemoryBusFactoryConfigurator configurator)
