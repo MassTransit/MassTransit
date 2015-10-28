@@ -42,15 +42,15 @@ namespace MassTransit.Pipeline.Filters
             DateTime startTime = DateTime.UtcNow;
             Stopwatch timer = Stopwatch.StartNew();
 
-            await next.Send(context);
+            await next.Send(context).ConfigureAwait(false);
 
             timer.Stop();
 
             var logContext = new LogContext(startTime, timer.Elapsed);
 
-            string text = await _formatter(context, logContext);
+            string text = await _formatter(context, logContext).ConfigureAwait(false);
 
-            await _writer.WriteLineAsync(text);
+            await _writer.WriteLineAsync(text).ConfigureAwait(false);
         }
     }
 }

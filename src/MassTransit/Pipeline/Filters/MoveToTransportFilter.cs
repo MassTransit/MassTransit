@@ -42,7 +42,7 @@ namespace MassTransit.Pipeline.Filters
 
         async Task IFilter<ReceiveContext>.Send(ReceiveContext context, IPipe<ReceiveContext> next)
         {
-            ISendTransport transport = await _getDestinationTransport();
+            ISendTransport transport = await _getDestinationTransport().ConfigureAwait(false);
 
             IPipe<SendContext> pipe = Pipe.Execute<SendContext>(sendContext =>
             {
@@ -51,9 +51,9 @@ namespace MassTransit.Pipeline.Filters
                 sendContext.SetHostHeaders();
             });
 
-            await transport.Move(context, pipe);
+            await transport.Move(context, pipe).ConfigureAwait(false);
 
-            await next.Send(context);
+            await next.Send(context).ConfigureAwait(false);
         }
     }
 }

@@ -65,7 +65,7 @@ namespace MassTransit.Pipeline.Filters
             {
                 _behavior.PreSend();
 
-                await next.Send(context);
+                await next.Send(context).ConfigureAwait(false);
 
                 _behavior.PostSend();
             }

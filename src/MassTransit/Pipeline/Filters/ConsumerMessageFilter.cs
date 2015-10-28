@@ -55,15 +55,15 @@ namespace MassTransit.Pipeline.Filters
             Stopwatch timer = Stopwatch.StartNew();
             try
             {
-                await _consumerFactory.Send(context, _consumerPipe);
+                await _consumerFactory.Send(context, _consumerPipe).ConfigureAwait(false);
 
-                await context.NotifyConsumed(timer.Elapsed, TypeMetadataCache<TConsumer>.ShortName);
+                await context.NotifyConsumed(timer.Elapsed, TypeMetadataCache<TConsumer>.ShortName).ConfigureAwait(false);
 
-                await next.Send(context);
+                await next.Send(context).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
-                await context.NotifyFaulted(timer.Elapsed, TypeMetadataCache<TConsumer>.ShortName, ex);
+                await context.NotifyFaulted(timer.Elapsed, TypeMetadataCache<TConsumer>.ShortName, ex).ConfigureAwait(false);
                 throw;
             }
         }

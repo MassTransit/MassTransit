@@ -45,11 +45,11 @@ namespace MassTransit.Pipeline.Filters
         {
             ConsumeContext consumeContext = _deserializer.Deserialize(context);
 
-            await _output.Send(consumeContext);
+            await _output.Send(consumeContext).ConfigureAwait(false);
 
-            await next.Send(context);
+            await next.Send(context).ConfigureAwait(false);
 
-            await consumeContext.CompleteTask;
+            await consumeContext.CompleteTask.ConfigureAwait(false);
         }
     }
 }

@@ -14,6 +14,7 @@ namespace MassTransit.Pipeline.Pipes
 {
     using System.Diagnostics;
     using System.Threading.Tasks;
+    using Util;
 
 
     public class EmptyPipe<T> :
@@ -21,8 +22,9 @@ namespace MassTransit.Pipeline.Pipes
         where T : class, PipeContext
     {
         [DebuggerNonUserCode]
-        public async Task Send(T context)
+        public Task Send(T context)
         {
+            return TaskUtil.Completed;
         }
 
         public void Probe(ProbeContext context)

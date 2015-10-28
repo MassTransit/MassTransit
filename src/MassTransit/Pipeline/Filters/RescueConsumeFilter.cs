@@ -52,7 +52,7 @@ namespace MassTransit.Pipeline.Filters
         {
             try
             {
-                await next.Send(context);
+                await next.Send(context).ConfigureAwait(false);
             }
             catch (AggregateException ex)
             {
@@ -62,7 +62,7 @@ namespace MassTransit.Pipeline.Filters
                 if (_log.IsErrorEnabled)
                     _log.Error($"Rescue<{TypeMetadataCache<T>.ShortName}>", ex);
 
-                await _rescuePipe.Send(context);
+                await _rescuePipe.Send(context).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -72,7 +72,7 @@ namespace MassTransit.Pipeline.Filters
                 if (_log.IsErrorEnabled)
                     _log.Error($"Rescue<{TypeMetadataCache<T>.ShortName}>", ex);
 
-                await _rescuePipe.Send(context);
+                await _rescuePipe.Send(context).ConfigureAwait(false);
             }
         }
     }

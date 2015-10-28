@@ -52,7 +52,7 @@ namespace MassTransit.Pipeline.Filters
         {
             try
             {
-                await next.Send(context);
+                await next.Send(context).ConfigureAwait(false);
             }
             catch (AggregateException ex)
             {
@@ -64,7 +64,7 @@ namespace MassTransit.Pipeline.Filters
 
                 var exceptionContext = new RescueExceptionReceiveContext(context, ex);
 
-                await _rescuePipe.Send(exceptionContext);
+                await _rescuePipe.Send(exceptionContext).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -76,7 +76,7 @@ namespace MassTransit.Pipeline.Filters
 
                 var exceptionContext = new RescueExceptionReceiveContext(context, ex);
 
-                await _rescuePipe.Send(exceptionContext);
+                await _rescuePipe.Send(exceptionContext).ConfigureAwait(false);
             }
         }
     }

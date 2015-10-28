@@ -58,10 +58,10 @@ namespace MassTransit.Pipeline.Filters
 
             try
             {
-                await next.Send(context);
+                await next.Send(context).ConfigureAwait(false);
 
                 if (systemTransactionContext != null)
-                    await systemTransactionContext.Commit();
+                    await systemTransactionContext.Commit().ConfigureAwait(false);
             }
             catch (Exception ex)
             {

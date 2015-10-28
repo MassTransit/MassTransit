@@ -39,9 +39,9 @@ namespace MassTransit.RabbitMqTransport.Contexts
 
             var delayExchangeAddress = GetDelayExchangeAddress(receiveSettings);
 
-            ISendEndpoint delayEndpoint = await _context.GetSendEndpoint(delayExchangeAddress);
+            ISendEndpoint delayEndpoint = await _context.GetSendEndpoint(delayExchangeAddress).ConfigureAwait(false);
 
-            await delayEndpoint.Send(_context.Message, _context.CreateCopyContextPipe((x, y) => UpdateDeliveryContext(x, y, delay)));
+            await delayEndpoint.Send(_context.Message, _context.CreateCopyContextPipe((x, y) => UpdateDeliveryContext(x, y, delay))).ConfigureAwait(false);
         }
 
         Uri GetDelayExchangeAddress(ReceiveSettings receiveSettings)

@@ -15,7 +15,6 @@ namespace MassTransit.Pipeline.Filters
     using System;
     using System.Diagnostics;
     using System.Threading.Tasks;
-    using Util;
 
 
     public class AsyncDelegateFilter<T> :
@@ -37,9 +36,9 @@ namespace MassTransit.Pipeline.Filters
         [DebuggerNonUserCode]
         public async Task Send(T context, IPipe<T> next)
         {
-            await _callback(context);
+            await _callback(context).ConfigureAwait(false);
 
-            await next.Send(context);
+            await next.Send(context).ConfigureAwait(false);
         }
     }
 }

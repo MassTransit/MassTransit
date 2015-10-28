@@ -67,7 +67,7 @@ namespace MassTransit.Pipeline.Filters
 
             RequestPipeFilter<T, TKey> filter;
             if (_pipes.TryGetValue(key, out filter))
-                await filter.Send(context, next);
+                await filter.Send(context, next).ConfigureAwait(false);
         }
 
         void RemovePipe(TKey key)

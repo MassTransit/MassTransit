@@ -48,6 +48,8 @@ namespace MassTransit.Util
                     syncContext.RunOnCurrentThread(cancellationToken);
                 }
 
+                syncContext.SetComplete();
+
                 awaiter.GetResult();
             }
             finally
@@ -80,6 +82,8 @@ namespace MassTransit.Util
 
                     syncContext.RunOnCurrentThread(cancellationToken);
                 }
+
+                syncContext.SetComplete();
 
                 return awaiter.GetResult();
             }
@@ -115,6 +119,7 @@ namespace MassTransit.Util
             readonly CancellationToken _cancellationToken;
 
             readonly BlockingCollection<Tuple<SendOrPostCallback, object>> _queue;
+            bool _completed;
 
             public SingleThreadSynchronizationContext(CancellationToken cancellationToken)
             {
@@ -126,6 +131,9 @@ namespace MassTransit.Util
             {
                 if (callback == null)
                     throw new ArgumentNullException(nameof(callback));
+
+                if (_completed)
+                    throw new TaskSchedulerException("The synchronization context was already completed");
 
                 try
                 {
@@ -146,6 +154,11 @@ namespace MassTransit.Util
                 Tuple<SendOrPostCallback, object> callback;
                 while (_queue.TryTake(out callback, 50, cancellationToken))
                     callback.Item1(callback.Item2);
+            }
+
+            public void SetComplete()
+            {
+                _completed = true;
             }
         }
     }
