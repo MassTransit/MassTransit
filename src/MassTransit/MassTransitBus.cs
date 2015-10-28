@@ -151,20 +151,24 @@ namespace MassTransit
 
         BusHandle IBusControl.Start()
         {
+            return TaskUtil.Await(() => StartAsync(CancellationToken.None));
+        }
+
+        public async Task<BusHandle> StartAsync(CancellationToken cancellationToken)
+        {
             if (_busHandle != null)
             {
                 _log.Warn($"The bus was already started, additional Start attempts are ignored: {Address}");
                 return _busHandle;
             }
 
-            TaskUtil.Await(() => _busObservable.PreStart(this));
-
-            Exception exception = null;
+            await _busObservable.PreStart(this).ConfigureAwait(false);
 
             var endpoints = new List<ReceiveEndpointHandle>();
             var hosts = new List<HostHandle>();
             var observers = new List<ConnectHandle>();
             var busReady = new BusReady(_receiveEndpoints);
+            Handle busHandle = null;
             try
             {
                 if (_log.IsDebugEnabled)
@@ -172,16 +176,9 @@ namespace MassTransit
 
                 foreach (IBusHostControl host in _hosts)
                 {
-                    try
-                    {
-                        HostHandle hostHandle = host.Start();
+                    HostHandle hostHandle = host.Start();
 
-                        hosts.Add(hostHandle);
-                    }
-                    catch (Exception ex)
-                    {
-                        exception = ex;
-                    }
+                    hosts.Add(hostHandle);
                 }
 
                 if (_log.IsDebugEnabled)
@@ -189,49 +186,46 @@ namespace MassTransit
 
                 foreach (IReceiveEndpoint endpoint in _receiveEndpoints)
                 {
-                    try
-                    {
-                        ConnectHandle observerHandle = endpoint.ConnectReceiveObserver(_receiveObservers);
-                        observers.Add(observerHandle);
+                    ConnectHandle observerHandle = endpoint.ConnectReceiveObserver(_receiveObservers);
+                    observers.Add(observerHandle);
 
-                        ReceiveEndpointHandle handle = endpoint.Start();
+                    ReceiveEndpointHandle handle = endpoint.Start();
 
-                        endpoints.Add(handle);
-                    }
-                    catch (Exception ex)
-                    {
-                        exception = ex;
-                    }
+                    endpoints.Add(handle);
                 }
+
+                busHandle = new Handle(hosts, endpoints, observers, this, _busObservable, busReady);
+
+                await busHandle.Ready.ConfigureAwait(false);
+
+                await _busObservable.PostStart(this, busReady.Ready).ConfigureAwait(false);
+
+                _busHandle = busHandle;
+
+                return _busHandle;
             }
             catch (Exception ex)
             {
-                exception = ex;
-            }
-
-            if (exception != null)
-            {
                 try
                 {
-                    var handle = new Handle(hosts, endpoints, observers, this, _busObservable, busReady);
+                    if (busHandle != null)
+                        busHandle.Stop(TimeSpan.FromSeconds(60));
+                    else
+                    {
+                        var handle = new Handle(hosts, endpoints, observers, this, _busObservable, busReady);
 
-                    handle.Stop(TimeSpan.FromSeconds(60));
+                        handle.Stop(TimeSpan.FromSeconds(60));
+                    }
                 }
-                catch (Exception ex)
+                catch (Exception stopException)
                 {
-                    _log.Error("Failed to stop partially created bus", ex);
+                    _log.Error("Failed to stop partially created bus", stopException);
                 }
 
-                TaskUtil.Await(() => _busObservable.StartFaulted(this, exception));
+                await _busObservable.StartFaulted(this, ex).ConfigureAwait(false);
 
-                throw new MassTransitException("The service bus could not be started.", exception);
+                throw;
             }
-
-            _busHandle = new Handle(hosts, endpoints, observers, this, _busObservable, busReady);
-
-            TaskUtil.Await(() => _busObservable.PostStart(this, busReady.Ready));
-
-            return _busHandle;
         }
 
         void IBusControl.Stop(CancellationToken cancellationToken)

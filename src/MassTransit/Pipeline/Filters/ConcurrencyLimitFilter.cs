@@ -52,11 +52,11 @@ namespace MassTransit.Pipeline.Filters
         [DebuggerNonUserCode]
         public async Task Send(T context, IPipe<T> next)
         {
-            await _limit.WaitAsync(context.CancellationToken);
+            await _limit.WaitAsync(context.CancellationToken).ConfigureAwait(false);
 
             try
             {
-                await next.Send(context);
+                await next.Send(context).ConfigureAwait(false);
             }
             finally
             {

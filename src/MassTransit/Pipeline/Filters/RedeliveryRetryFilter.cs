@@ -42,7 +42,7 @@ namespace MassTransit.Pipeline.Filters
         {
             try
             {
-                await next.Send(context);
+                await next.Send(context).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -61,7 +61,7 @@ namespace MassTransit.Pipeline.Filters
                         retryContext.CanRetry(ex, out delay);
                     }
 
-                    await redeliveryContext.ScheduleRedelivery(delay);
+                    await redeliveryContext.ScheduleRedelivery(delay).ConfigureAwait(false);
                 }
                 catch (Exception redeliveryException)
                 {

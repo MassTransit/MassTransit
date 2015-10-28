@@ -64,8 +64,8 @@ namespace MassTransit.Pipeline.Filters
             {
                 Interlocked.Increment(ref _activeCount);
 
-                await _limit.WaitAsync(context.CancellationToken);
-                await next.Send(context);
+                await _limit.WaitAsync(context.CancellationToken).ConfigureAwait(false);
+                await next.Send(context).ConfigureAwait(false);
 
                 Interlocked.Increment(ref _successCount);
             }

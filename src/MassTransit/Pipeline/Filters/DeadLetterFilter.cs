@@ -41,14 +41,14 @@ namespace MassTransit.Pipeline.Filters
         [DebuggerNonUserCode]
         async Task IFilter<ReceiveContext>.Send(ReceiveContext context, IPipe<ReceiveContext> next)
         {
-            await next.Send(context);
+            await next.Send(context).ConfigureAwait(false);
 
             if (context.IsDelivered || context.IsFaulted)
                 return;
 
             context.InputAddress.LogSkipped(context.TransportHeaders.Get("MessageId", "N/A"));
 
-            await _deadLetterPipe.Send(context);
+            await _deadLetterPipe.Send(context).ConfigureAwait(false);
         }
     }
 }

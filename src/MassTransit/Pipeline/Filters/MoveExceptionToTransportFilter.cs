@@ -63,9 +63,9 @@ namespace MassTransit.Pipeline.Filters
             if (!context.IsFaulted)
                 GenerateFault(context);
 
-            await transport.Move(context, pipe);
+            await transport.Move(context, pipe).ConfigureAwait(false);
 
-            await next.Send(context);
+            await next.Send(context).ConfigureAwait(false);
         }
 
         void GenerateFault(ExceptionReceiveContext context)

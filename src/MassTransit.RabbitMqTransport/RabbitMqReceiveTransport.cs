@@ -15,7 +15,6 @@ namespace MassTransit.RabbitMqTransport
     using System;
     using System.Threading;
     using System.Threading.Tasks;
-    using Internals.Extensions;
     using Logging;
     using MassTransit.Pipeline;
     using Policies;
@@ -62,7 +61,8 @@ namespace MassTransit.RabbitMqTransport
         {
             var supervisor = new TaskSupervisor();
 
-            var pipe = Pipe.New<ConnectionContext>(x => x.RabbitMqConsumer(receivePipe, _settings, _receiveObservers, _endpointObservers, _exchangeBindings, supervisor));
+            var pipe = Pipe.New<ConnectionContext>(
+                    x => x.RabbitMqConsumer(receivePipe, _settings, _receiveObservers, _endpointObservers, _exchangeBindings, supervisor));
 
             Receiver(pipe, supervisor);
 
@@ -108,7 +108,7 @@ namespace MassTransit.RabbitMqTransport
 
                     await _endpointObservers.Faulted(new Faulted(inputAddress, ex)).ConfigureAwait(false);
                 }
-            });
+            }).ConfigureAwait(false);
         }
 
 

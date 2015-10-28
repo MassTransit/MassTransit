@@ -55,7 +55,7 @@ namespace MassTransit.RabbitMqTransport.Contexts
         public async Task<IModel> CreateModel()
         {
             return await Task.Factory.StartNew(() => _connection.CreateModel(),
-                _tokenSource.Token, TaskCreationOptions.HideScheduler, _taskScheduler);
+                _tokenSource.Token, TaskCreationOptions.HideScheduler, _taskScheduler).ConfigureAwait(false);
         }
 
         public bool HasPayloadType(Type contextType)

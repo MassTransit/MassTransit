@@ -87,9 +87,9 @@ namespace MassTransit.RabbitMqTransport.Pipeline
         {
             await Task.Yield();
 
-            await _participant.StopRequested;
+            await _participant.StopRequested.ConfigureAwait(false);
 
-            await _model.BasicCancel(_consumerTag);
+            await _model.BasicCancel(_consumerTag).ConfigureAwait(false);
         }
 
         /// <summary>

@@ -53,17 +53,17 @@ namespace MassTransit.Pipeline.Filters
             Stopwatch timer = Stopwatch.StartNew();
             try
             {
-                await _handler(context);
+                await _handler(context).ConfigureAwait(false);
 
-                await context.NotifyConsumed(timer.Elapsed, TypeMetadataCache<MessageHandler<TMessage>>.ShortName);
+                await context.NotifyConsumed(timer.Elapsed, TypeMetadataCache<MessageHandler<TMessage>>.ShortName).ConfigureAwait(false);
 
                 Interlocked.Increment(ref _completed);
 
-                await next.Send(context);
+                await next.Send(context).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
-                await context.NotifyFaulted(timer.Elapsed, TypeMetadataCache<MessageHandler<TMessage>>.ShortName, ex);
+                await context.NotifyFaulted(timer.Elapsed, TypeMetadataCache<MessageHandler<TMessage>>.ShortName, ex).ConfigureAwait(false);
 
                 Interlocked.Increment(ref _faulted);
                 throw;

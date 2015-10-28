@@ -103,45 +103,45 @@ namespace MassTransit.RabbitMqTransport.Contexts
             byte[] body)
         {
             var pendingPublish = await Task.Factory.StartNew(() => PublishAsync(exchange, routingKey, mandatory, immediate, basicProperties, body),
-                _tokenSource.Token, TaskCreationOptions.HideScheduler, _taskScheduler);
+                _tokenSource.Token, TaskCreationOptions.HideScheduler, _taskScheduler).ConfigureAwait(false);
 
-            await pendingPublish.Task;
+            await pendingPublish.Task.ConfigureAwait(false);
         }
 
         async Task ModelContext.ExchangeBind(string destination, string source, string routingKey, IDictionary<string, object> arguments)
         {
             await Task.Factory.StartNew(() => _model.ExchangeBind(destination, source, routingKey, arguments),
-                _tokenSource.Token, TaskCreationOptions.HideScheduler, _taskScheduler);
+                _tokenSource.Token, TaskCreationOptions.HideScheduler, _taskScheduler).ConfigureAwait(false);
         }
 
         async Task ModelContext.ExchangeDeclare(string exchange, string type, bool durable, bool autoDelete, IDictionary<string, object> arguments)
         {
             await Task.Factory.StartNew(() => _model.ExchangeDeclare(exchange, type, durable, autoDelete, arguments),
-                _tokenSource.Token, TaskCreationOptions.HideScheduler, _taskScheduler);
+                _tokenSource.Token, TaskCreationOptions.HideScheduler, _taskScheduler).ConfigureAwait(false);
         }
 
         async Task ModelContext.QueueBind(string queue, string exchange, string routingKey, IDictionary<string, object> arguments)
         {
             await Task.Factory.StartNew(() => _model.QueueBind(queue, exchange, routingKey, arguments),
-                _tokenSource.Token, TaskCreationOptions.HideScheduler, _taskScheduler);
+                _tokenSource.Token, TaskCreationOptions.HideScheduler, _taskScheduler).ConfigureAwait(false);
         }
 
         async Task<QueueDeclareOk> ModelContext.QueueDeclare(string queue, bool durable, bool exclusive, bool autoDelete, IDictionary<string, object> arguments)
         {
             return await Task.Factory.StartNew(() => _model.QueueDeclare(queue, durable, exclusive, autoDelete, arguments),
-                _tokenSource.Token, TaskCreationOptions.HideScheduler, _taskScheduler);
+                _tokenSource.Token, TaskCreationOptions.HideScheduler, _taskScheduler).ConfigureAwait(false);
         }
 
         async Task<uint> ModelContext.QueuePurge(string queue)
         {
             return await Task.Factory.StartNew(() => _model.QueuePurge(queue),
-                _tokenSource.Token, TaskCreationOptions.HideScheduler, _taskScheduler);
+                _tokenSource.Token, TaskCreationOptions.HideScheduler, _taskScheduler).ConfigureAwait(false);
         }
 
         async Task ModelContext.BasicQos(uint prefetchSize, ushort prefetchCount, bool global)
         {
             await Task.Factory.StartNew(() => _model.BasicQos(prefetchSize, prefetchCount, global),
-                _tokenSource.Token, TaskCreationOptions.HideScheduler, _taskScheduler);
+                _tokenSource.Token, TaskCreationOptions.HideScheduler, _taskScheduler).ConfigureAwait(false);
         }
 
         void ModelContext.BasicAck(ulong deliveryTag, bool multiple)
@@ -157,13 +157,13 @@ namespace MassTransit.RabbitMqTransport.Contexts
         async Task<string> ModelContext.BasicConsume(string queue, bool noAck, IBasicConsumer consumer)
         {
             return await Task.Factory.StartNew(() => _model.BasicConsume(queue, noAck, consumer),
-                _tokenSource.Token, TaskCreationOptions.HideScheduler, _taskScheduler);
+                _tokenSource.Token, TaskCreationOptions.HideScheduler, _taskScheduler).ConfigureAwait(false);
         }
 
         public async Task BasicCancel(string consumerTag)
         {
             await Task.Factory.StartNew(() => _model.BasicCancel(consumerTag),
-                _tokenSource.Token, TaskCreationOptions.HideScheduler, _taskScheduler);
+                _tokenSource.Token, TaskCreationOptions.HideScheduler, _taskScheduler).ConfigureAwait(false);
         }
 
         void Close(string reason)
