@@ -19,6 +19,8 @@ namespace MassTransit.Builders
     using BusConfigurators;
     using Pipeline;
     using Serialization;
+    using Transports;
+    using Util;
 
 
     public abstract class BusBuilder
@@ -34,8 +36,10 @@ namespace MassTransit.Builders
         readonly Lazy<ISendTransportProvider> _sendTransportProvider;
         readonly Lazy<IMessageSerializer> _serializer;
         Func<IMessageSerializer> _serializerFactory;
+        readonly Lazy<IConsumePipe> _consumePipe;
+        IBusHostControl[] _hosts;
 
-        protected BusBuilder(IConsumePipeSpecification consumePipeSpecification)
+        protected BusBuilder(IConsumePipeSpecification consumePipeSpecification, IEnumerable<IBusHostControl> hosts)
         {
             _consumePipeSpecification = consumePipeSpecification;
             _deserializerFactories = new Dictionary<string, DeserializerFactory>(StringComparer.OrdinalIgnoreCase);
@@ -49,6 +53,8 @@ namespace MassTransit.Builders
             _publishSendEndpointProvider = new Lazy<IPublishEndpointProvider>(CreatePublishSendEndpointProvider);
 
             _inputAddress = new Lazy<Uri>(GetInputAddress);
+            _consumePipe = new Lazy<IConsumePipe>(GetConsumePipe);
+            _hosts = hosts.ToArray();
 
             AddMessageDeserializer(JsonMessageSerializer.JsonContentType,
                 (s, p) => new JsonMessageDeserializer(JsonMessageSerializer.Deserializer, s, p));
@@ -75,6 +81,9 @@ namespace MassTransit.Builders
         protected Uri InputAddress => _inputAddress.Value;
 
         protected abstract Uri GetInputAddress();
+        protected abstract IConsumePipe GetConsumePipe();
+
+        protected IConsumePipe ConsumePipe => _consumePipe.Value;
 
         public void AddMessageDeserializer(ContentType contentType, DeserializerFactory deserializerFactory)
         {
@@ -142,6 +151,32 @@ namespace MassTransit.Builders
         public ConnectHandle ConnectBusObserver(IBusObserver observer)
         {
             return _busObservable.Connect(observer);
+        }
+
+        public IBusControl Build()
+        {
+            try
+            {
+                PreBuild();
+
+                var bus =  new MassTransitBus(InputAddress, ConsumePipe, SendEndpointProvider, PublishEndpoint, ReceiveEndpoints, _hosts, BusObservable);
+
+                TaskUtil.Await(() => _busObservable.PostCreate(bus));
+
+                return bus;
+
+            }
+            catch (Exception exception)
+            {
+                TaskUtil.Await(() => BusObservable.CreateFaulted(exception));
+
+                throw;
+            }
+        }
+
+        protected virtual void PreBuild()
+        {
+            
         }
 
         protected abstract ISendTransportProvider CreateSendTransportProvider();

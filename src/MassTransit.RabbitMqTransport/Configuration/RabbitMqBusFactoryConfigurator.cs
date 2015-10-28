@@ -54,7 +54,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
 
         public IBusControl CreateBus()
         {
-            var builder = new RabbitMqBusBuilder(_hosts, _consumePipeSpecification, _settings);
+            var builder = new RabbitMqBusBuilder(_hosts.ToArray(), _consumePipeSpecification, _settings);
 
             foreach (IBusFactorySpecification configurator in _transportBuilderConfigurators)
                 configurator.Apply(builder);
