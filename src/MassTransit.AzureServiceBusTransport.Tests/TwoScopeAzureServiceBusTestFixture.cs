@@ -13,7 +13,9 @@
 namespace MassTransit.AzureServiceBusTransport.Tests
 {
     using System;
+    using System.Threading;
     using Configuration;
+    using Logging;
     using Microsoft.ServiceBus;
     using NUnit.Framework;
 
@@ -22,6 +24,8 @@ namespace MassTransit.AzureServiceBusTransport.Tests
     public class TwoScopeAzureServiceBusTestFixture :
         AzureServiceBusTestFixture
     {
+        static readonly ILog _log = Logger.Get<TwoScopeAzureServiceBusTestFixture>();
+
         public TwoScopeAzureServiceBusTestFixture()
         {
             _secondServiceUri = ServiceBusEnvironment.CreateServiceUri("sb", "masstransit-build", "MassTransit.Tests.SecondService");
@@ -37,23 +41,14 @@ namespace MassTransit.AzureServiceBusTransport.Tests
         /// <summary>
         /// The sending endpoint for the InputQueue
         /// </summary>
-        protected ISendEndpoint SecondInputQueueSendEndpoint
-        {
-            get { return _secondInputQueueSendEndpoint; }
-        }
+        protected ISendEndpoint SecondInputQueueSendEndpoint => _secondInputQueueSendEndpoint;
 
         /// <summary>
         /// The sending endpoint for the Bus 
         /// </summary>
-        protected ISendEndpoint SecondBusSendEndpoint
-        {
-            get { return _secondBusSendEndpoint; }
-        }
+        protected ISendEndpoint SecondBusSendEndpoint => _secondBusSendEndpoint;
 
-        protected Uri SecondBusAddress
-        {
-            get { return _secondBus.Address; }
-        }
+        protected Uri SecondBusAddress => _secondBus.Address;
 
         protected Uri SecondInputQueueAddress
         {
@@ -67,10 +62,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
             }
         }
 
-        protected virtual IBus SecondBus
-        {
-            get { return _secondBus; }
-        }
+        protected virtual IBus SecondBus => _secondBus;
 
         [TestFixtureSetUp]
         public void SetupSecondAzureServiceBusTestFixture()
@@ -80,17 +72,24 @@ namespace MassTransit.AzureServiceBusTransport.Tests
             _secondBusHandle = _secondBus.Start();
             try
             {
-                Await(() => _secondBusHandle.Ready);
-
                 _secondBusSendEndpoint = Await(() => _secondBus.GetSendEndpoint(_secondBus.Address));
 
                 _secondInputQueueSendEndpoint = Await(() => _secondBus.GetSendEndpoint(_secondInputQueueAddress));
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                Console.WriteLine("The bus creation failed: {0}", ex);
-
-                _secondBusHandle.Stop();
+                try
+                {
+                    using (var tokenSource = new CancellationTokenSource(TestTimeout))
+                    {
+                        _secondBusHandle.Stop(tokenSource.Token);
+                    }
+                }
+                finally
+                {
+                    _secondBusHandle = null;
+                    _secondBus = null;
+                }
 
                 throw;
             }
@@ -99,9 +98,22 @@ namespace MassTransit.AzureServiceBusTransport.Tests
         [TestFixtureTearDown]
         public void TearDownTwoScopeTestFixture()
         {
-            _secondBusHandle?.Stop();
-
-            _secondBusHandle = null;
+            try
+            {
+                using (var tokenSource = new CancellationTokenSource(TestTimeout))
+                {
+                    _secondBusHandle?.Stop(tokenSource.Token);
+                }
+            }
+            catch (Exception ex)
+            {
+                _log.Error("SecondBus Stop Failed", ex);
+            }
+            finally
+            {
+                _secondBusHandle = null;
+                _secondBus = null;
+            }
         }
 
         protected virtual void ConfigureSecondBus(IServiceBusBusFactoryConfigurator configurator)

@@ -35,6 +35,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         readonly TestSendObserver _sendObserver;
         Uri _hostAddress;
         IMessageNameFormatter _nameFormatter;
+        BusHandle _busHandle;
 
         public RabbitMqTestFixture()
         {
@@ -44,18 +45,12 @@ namespace MassTransit.RabbitMqTransport.Tests
             _sendObserver = new TestSendObserver(TestTimeout);
         }
 
-        protected override IBus Bus
-        {
-            get { return _bus; }
-        }
+        protected override IBus Bus => _bus;
 
         /// <summary>
         /// The sending endpoint for the InputQueue
         /// </summary>
-        protected ISendEndpoint InputQueueSendEndpoint
-        {
-            get { return _inputQueueSendEndpoint; }
-        }
+        protected ISendEndpoint InputQueueSendEndpoint => _inputQueueSendEndpoint;
 
         protected Uri InputQueueAddress
         {
@@ -84,27 +79,18 @@ namespace MassTransit.RabbitMqTransport.Tests
         /// <summary>
         /// The sending endpoint for the Bus 
         /// </summary>
-        protected ISendEndpoint BusSendEndpoint
-        {
-            get { return _busSendEndpoint; }
-        }
+        protected ISendEndpoint BusSendEndpoint => _busSendEndpoint;
 
-        protected ISentMessageList Sent
-        {
-            get { return _sendObserver.Messages; }
-        }
+        protected ISentMessageList Sent => _sendObserver.Messages;
 
-        protected Uri BusAddress
-        {
-            get { return _bus.Address; }
-        }
+        protected Uri BusAddress => _bus.Address;
 
         [TestFixtureSetUp]
         public void SetupInMemoryTestFixture()
         {
             _bus = CreateBus();
 
-            _bus.Start();
+            _busHandle = _bus.Start();
             try
             {
                 _busSendEndpoint = Await(() => _bus.GetSendEndpoint(_bus.Address));
@@ -115,9 +101,17 @@ namespace MassTransit.RabbitMqTransport.Tests
             }
             catch (Exception)
             {
-                using (var tokenSource = new CancellationTokenSource(TestTimeout))
+                try
                 {
-                    _bus.Stop(tokenSource.Token);
+                    using (var tokenSource = new CancellationTokenSource(TestTimeout))
+                    {
+                        _busHandle?.Stop(tokenSource.Token);
+                    }
+                }
+                finally
+                {
+                    _busHandle = null;
+                    _bus = null;
                 }
 
                 throw;
@@ -129,12 +123,19 @@ namespace MassTransit.RabbitMqTransport.Tests
         {
             try
             {
-                _bus?.Stop(new CancellationTokenSource(TestTimeout).Token);
+                using (var tokenSource = new CancellationTokenSource(TestTimeout))
+                {
+                    _bus.Stop(tokenSource.Token);
+                }
             }
-            catch (AggregateException ex)
+            catch (Exception ex)
             {
-                _log.Error("LocalBus Stop Failed: ", ex);
-                throw;
+                _log.Error("Bus Stop Failed", ex);
+            }
+            finally
+            {
+                _busHandle = null;
+                _bus = null;
             }
         }
 
@@ -180,10 +181,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             });
         }
 
-        protected IMessageNameFormatter NameFormatter
-        {
-            get { return _nameFormatter; }
-        }
+        protected IMessageNameFormatter NameFormatter => _nameFormatter;
 
         void CleanUpVirtualHost(IRabbitMqHost host)
         {

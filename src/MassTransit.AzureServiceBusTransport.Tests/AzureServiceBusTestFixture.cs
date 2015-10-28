@@ -14,8 +14,10 @@ namespace MassTransit.AzureServiceBusTransport.Tests
 {
     using System;
     using System.Diagnostics;
+    using System.Threading;
     using System.Threading.Tasks;
     using Configuration;
+    using Logging;
     using Microsoft.ServiceBus;
     using NUnit.Framework;
     using TestFramework;
@@ -27,6 +29,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
     public class AzureServiceBusTestFixture :
         BusTestFixture
     {
+        static readonly ILog _log = Logger.Get<AzureServiceBusTestFixture>();
         IBusControl _bus;
         Uri _inputQueueAddress;
         ISendEndpoint _inputQueueSendEndpoint;
@@ -84,19 +87,26 @@ namespace MassTransit.AzureServiceBusTransport.Tests
             _busHandle = _bus.Start();
             try
             {
-                Await(() => _busHandle.Ready);
-
                 _busSendEndpoint = _bus.GetSendEndpoint(_bus.Address).Result;
                 _busSendEndpoint.ConnectSendObserver(_sendObserver);
 
                 _inputQueueSendEndpoint = _bus.GetSendEndpoint(_inputQueueAddress).Result;
                 _inputQueueSendEndpoint.ConnectSendObserver(_sendObserver);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                Console.WriteLine("The bus creation failed: {0}", ex);
-
-                _busHandle.Stop();
+                try
+                {
+                    using (var tokenSource = new CancellationTokenSource(TestTimeout))
+                    {
+                        _bus.Stop(tokenSource.Token);
+                    }
+                }
+                finally
+                {
+                    _busHandle = null;
+                    _bus = null;
+                }
 
                 throw;
             }
@@ -105,9 +115,22 @@ namespace MassTransit.AzureServiceBusTransport.Tests
         [TestFixtureTearDown]
         public void TearDownInMemoryTestFixture()
         {
-            _busHandle?.Stop();
-
-            _bus = null;
+            try
+            {
+                using (var tokenSource = new CancellationTokenSource(TestTimeout))
+                {
+                    _busHandle?.Stop(tokenSource.Token);
+                }
+            }
+            catch (Exception ex)
+            {
+                _log.Error("Bus Stop Failed", ex);
+            }
+            finally
+            {
+                _busHandle = null;
+                _bus = null;
+            }
         }
 
         protected virtual void ConfigureBus(IServiceBusBusFactoryConfigurator configurator)

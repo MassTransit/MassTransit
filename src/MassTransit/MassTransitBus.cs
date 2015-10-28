@@ -18,6 +18,7 @@ namespace MassTransit
     using System.Threading;
     using System.Threading.Tasks;
     using Context;
+    using Internals.Extensions;
     using Logging;
     using Pipeline;
     using Transports;
@@ -164,11 +165,12 @@ namespace MassTransit
 
             await _busObservable.PreStart(this).ConfigureAwait(false);
 
+            Handle busHandle = null;
+
             var endpoints = new List<ReceiveEndpointHandle>();
             var hosts = new List<HostHandle>();
             var observers = new List<ConnectHandle>();
             var busReady = new BusReady(_receiveEndpoints);
-            Handle busHandle = null;
             try
             {
                 if (_log.IsDebugEnabled)
@@ -196,7 +198,7 @@ namespace MassTransit
 
                 busHandle = new Handle(hosts, endpoints, observers, this, _busObservable, busReady);
 
-                await busHandle.Ready.ConfigureAwait(false);
+                await busHandle.Ready.WithCancellation(cancellationToken).ConfigureAwait(false);
 
                 await _busObservable.PostStart(this, busReady.Ready).ConfigureAwait(false);
 
@@ -237,6 +239,17 @@ namespace MassTransit
             }
 
             _busHandle.Stop(cancellationToken);
+        }
+
+        public Task StopAsync(CancellationToken cancellationToken = new CancellationToken())
+        {
+            if (_busHandle == null)
+            {
+                _log.Warn($"The bus could not be stopped as it was never started: {Address}");
+                return TaskUtil.Completed;
+            }
+
+            return _busHandle.StopAsync(cancellationToken);
         }
 
         public ConnectHandle ConnectReceiveObserver(IReceiveObserver observer)
@@ -363,30 +376,35 @@ namespace MassTransit
                 if (_stopped)
                     return;
 
-                TaskUtil.Await(async () =>
+                TaskUtil.Await(() => StopAsync(cancellationToken), cancellationToken);
+
+                _stopped = true;
+            }
+
+            public async Task StopAsync(CancellationToken cancellationToken = new CancellationToken())
+            {
+                if (_stopped)
+                    return;
+
+                await _busObserver.PreStop(_bus).ConfigureAwait(false);
+
+                try
                 {
-                    await _busObserver.PreStop(_bus).ConfigureAwait(false);
+                    foreach (var observerHandle in _observerHandles)
+                        observerHandle.Disconnect();
 
-                    try
-                    {
-                        foreach (var observerHandle in _observerHandles)
-                            observerHandle.Disconnect();
+                    await Task.WhenAll(_endpointHandles.Select(x => x.Stop(cancellationToken))).ConfigureAwait(false);
 
-                        await Task.WhenAll(_endpointHandles.Select(x => x.Stop(cancellationToken))).ConfigureAwait(false);
+                    await Task.WhenAll(_hostHandles.Select(x => x.Stop(cancellationToken))).ConfigureAwait(false);
 
-                        await Task.WhenAll(_hostHandles.Select(x => x.Stop(cancellationToken))).ConfigureAwait(false);
+                    await _busObserver.PostStop(_bus).ConfigureAwait(false);
+                }
+                catch (Exception exception)
+                {
+                    await _busObserver.StopFaulted(_bus, exception).ConfigureAwait(false);
 
-                        await _busObserver.PostStop(_bus).ConfigureAwait(false);
-                    }
-                    catch (Exception exception)
-                    {
-                        await _busObserver.StopFaulted(_bus, exception).ConfigureAwait(false);
-
-                        throw;
-                    }
-
-                    _stopped = true;
-                }, cancellationToken);
+                    throw;
+                }
 
                 _stopped = true;
             }

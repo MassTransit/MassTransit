@@ -35,5 +35,10 @@ namespace MassTransit
         /// Stops the bus if it has been started. If the bus hasn't been started, the method returns without any warning.
         /// </summary>
         void Stop(CancellationToken cancellationToken = default(CancellationToken));
+
+        /// <summary>
+        /// Stops the bus if it has been started. If the bus hasn't been started, the method returns without any warning.
+        /// </summary>
+        Task StopAsync(CancellationToken cancellationToken = default(CancellationToken));
     }
 }

@@ -37,5 +37,14 @@ namespace MassTransit
         /// <param name="cancellationToken">Cancel the stop operation in progress</param>
         /// <returns>An awaitable task that is completed once everything is stopped</returns>
         void Stop(CancellationToken cancellationToken = default(CancellationToken));
+
+        /// <summary>
+        /// Stop the bus and all receiving endpoints on the bus. Note that cancelling the Stop
+        /// operation may leave the bus and/or one or more receive endpoints in an indeterminate
+        /// state.
+        /// </summary>
+        /// <param name="cancellationToken">Cancel the stop operation in progress</param>
+        /// <returns>An awaitable task that is completed once everything is stopped</returns>
+        Task StopAsync(CancellationToken cancellationToken = default(CancellationToken));
     }
 }
