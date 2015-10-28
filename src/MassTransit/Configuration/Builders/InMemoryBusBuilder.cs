@@ -13,14 +13,11 @@
 namespace MassTransit.Builders
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
     using BusConfigurators;
     using EndpointConfigurators;
     using Pipeline;
     using Transports;
     using Transports.InMemory;
-    using Util;
 
 
     public class InMemoryBusBuilder :
@@ -28,14 +25,13 @@ namespace MassTransit.Builders
         IInMemoryBusBuilder
     {
         readonly string _busQueueName;
-        readonly IBusHostControl[] _hosts;
         readonly Uri _inputAddress;
         readonly ISendTransportProvider _sendTransportProvider;
 
         public InMemoryBusBuilder(IReceiveTransportProvider receiveTransportProvider,
-            ISendTransportProvider sendTransportProvider, IEnumerable<IBusHostControl> hosts,
+            ISendTransportProvider sendTransportProvider, IBusHostControl[] hosts,
             IConsumePipeSpecification consumePipeSpecification)
-            : base(consumePipeSpecification)
+            : base(consumePipeSpecification, hosts)
         {
             if (receiveTransportProvider == null)
                 throw new ArgumentNullException(nameof(receiveTransportProvider));
@@ -47,7 +43,6 @@ namespace MassTransit.Builders
 
             ReceiveTransportProvider = receiveTransportProvider;
             _sendTransportProvider = sendTransportProvider;
-            _hosts = hosts.ToArray();
         }
 
         public IReceiveTransportProvider ReceiveTransportProvider { get; }
@@ -55,6 +50,11 @@ namespace MassTransit.Builders
         protected override Uri GetInputAddress()
         {
             return _inputAddress;
+        }
+
+        protected override IConsumePipe GetConsumePipe()
+        {
+            return CreateBusReceiveEndpoint();
         }
 
         protected override ISendTransportProvider CreateSendTransportProvider()
@@ -72,22 +72,6 @@ namespace MassTransit.Builders
         protected override IPublishEndpointProvider CreatePublishSendEndpointProvider()
         {
             return new InMemoryPublishEndpointProvider(SendEndpointProvider, _sendTransportProvider);
-        }
-
-        public IBusControl Build()
-        {
-            try
-            {
-                IConsumePipe busConsumePipe = CreateBusReceiveEndpoint();
-
-                return new MassTransitBus(_inputAddress, busConsumePipe, SendEndpointProvider, PublishEndpoint, ReceiveEndpoints, _hosts, BusObservable);
-            }
-            catch (Exception exception)
-            {
-                TaskUtil.Await(() => BusObservable.CreateFaulted(exception));
-
-                throw;
-            }
         }
 
         IConsumePipe CreateBusReceiveEndpoint()

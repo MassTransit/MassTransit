@@ -53,8 +53,6 @@ namespace MassTransit
 
             _log = Logger.Get<MassTransitBus>();
             _receiveObservers = new ReceiveObservable();
-
-            TaskUtil.Await(() => _busObservable.PostCreate(this));
         }
 
         ConnectHandle IConsumePipeConnector.ConnectConsumePipe<T>(IPipe<ConsumeContext<T>> pipe)

@@ -13,13 +13,10 @@
 namespace MassTransit.AzureServiceBusTransport.Configuration
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
     using Builders;
     using BusConfigurators;
     using MassTransit.Pipeline;
     using Transports;
-    using Util;
 
 
     public class ServiceBusBusBuilder :
@@ -29,26 +26,26 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
         readonly IConsumePipe _busConsumePipe;
         readonly ServiceBusReceiveEndpointConfigurator _busEndpointConfigurator;
         readonly ServiceBusHost[] _hosts;
-        readonly Uri _inputAddress;
 
-        public ServiceBusBusBuilder(IEnumerable<ServiceBusHost> hosts, IConsumePipeSpecification consumePipeSpecification, ReceiveEndpointSettings settings)
-            : base(consumePipeSpecification)
+        public ServiceBusBusBuilder(ServiceBusHost[] hosts, IConsumePipeSpecification consumePipeSpecification, ReceiveEndpointSettings settings)
+            : base(consumePipeSpecification, hosts)
         {
             if (hosts == null)
                 throw new ArgumentNullException(nameof(hosts));
 
-            _hosts = hosts.ToArray();
+            _hosts = hosts;
 
-            _busConsumePipe = CreateConsumePipe();
-
-            _busEndpointConfigurator = new ServiceBusReceiveEndpointConfigurator(_hosts[0], settings, _busConsumePipe);
-
-            _inputAddress = _busEndpointConfigurator.InputAddress;
+            _busEndpointConfigurator = new ServiceBusReceiveEndpointConfigurator(_hosts[0], settings, ConsumePipe);
         }
 
         protected override Uri GetInputAddress()
         {
-            return _inputAddress;
+            return _busEndpointConfigurator.InputAddress;
+        }
+
+        protected override IConsumePipe GetConsumePipe()
+        {
+            return CreateConsumePipe();
         }
 
         protected override ISendTransportProvider CreateSendTransportProvider()
@@ -58,34 +55,25 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
 
         protected override ISendEndpointProvider CreateSendEndpointProvider()
         {
-            var provider = new ServiceBusSendEndpointProvider(MessageSerializer, _inputAddress, SendTransportProvider);
+            var provider = new ServiceBusSendEndpointProvider(MessageSerializer, InputAddress, SendTransportProvider);
 
             return new SendEndpointCache(provider);
         }
 
         protected override IPublishEndpointProvider CreatePublishSendEndpointProvider()
         {
-            var sendEndpointProvider = new PublishSendEndpointProvider(MessageSerializer, _inputAddress, _hosts);
+            var sendEndpointProvider = new PublishSendEndpointProvider(MessageSerializer, InputAddress, _hosts);
 
             var endpointCache = new SendEndpointCache(sendEndpointProvider);
 
             return new ServiceBusPublishEndpointProvider(_hosts[0], endpointCache);
         }
 
-        public virtual IBusControl Build()
+        protected override void PreBuild()
         {
-            try
-            {
-                _busEndpointConfigurator.Apply(this);
+            base.PreBuild();
 
-                return new MassTransitBus(_inputAddress, _busConsumePipe, SendEndpointProvider, PublishEndpoint, ReceiveEndpoints, _hosts, BusObservable);
-            }
-            catch (Exception exception)
-            {
-                TaskUtil.Await(() => BusObservable.CreateFaulted(exception));
-
-                throw;
-            }
+            _busEndpointConfigurator.Apply(this);
         }
     }
 }

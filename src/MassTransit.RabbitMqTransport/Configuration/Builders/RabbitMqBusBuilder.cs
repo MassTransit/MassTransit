@@ -13,53 +13,41 @@
 namespace MassTransit.RabbitMqTransport.Configuration.Builders
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
     using BusConfigurators;
     using MassTransit.Builders;
     using MassTransit.Pipeline;
     using Topology;
     using Transports;
-    using Util;
 
 
     public class RabbitMqBusBuilder :
         BusBuilder,
         IBusBuilder
     {
-        readonly IConsumePipe _busConsumePipe;
         readonly RabbitMqReceiveEndpointConfigurator _busEndpointConfigurator;
         readonly RabbitMqHost[] _hosts;
 
-        public RabbitMqBusBuilder(IEnumerable<RabbitMqHost> hosts, IConsumePipeSpecification consumePipeSpecification, RabbitMqReceiveSettings busSettings)
-            : base(consumePipeSpecification)
+        public RabbitMqBusBuilder(RabbitMqHost[] hosts, IConsumePipeSpecification consumePipeSpecification, RabbitMqReceiveSettings busSettings)
+            : base(consumePipeSpecification, hosts)
         {
-            _hosts = hosts.ToArray();
+            _hosts = hosts;
 
-            _busConsumePipe = CreateConsumePipe();
-
-            _busEndpointConfigurator = new RabbitMqReceiveEndpointConfigurator(_hosts[0], busSettings, _busConsumePipe);
+            _busEndpointConfigurator = new RabbitMqReceiveEndpointConfigurator(_hosts[0], busSettings, ConsumePipe);
         }
 
-        public IBusControl Build()
+        protected override void PreBuild()
         {
-            try
-            {
-                _busEndpointConfigurator.Apply(this);
-
-                return new MassTransitBus(_busEndpointConfigurator.InputAddress, _busConsumePipe, SendEndpointProvider, PublishEndpoint, ReceiveEndpoints, _hosts, BusObservable);
-            }
-            catch (Exception exception)
-            {
-                TaskUtil.Await(() => BusObservable.CreateFaulted(exception));
-
-                throw;
-            }
+            _busEndpointConfigurator.Apply(this);
         }
 
         protected override Uri GetInputAddress()
         {
             return _busEndpointConfigurator.InputAddress;
+        }
+
+        protected override IConsumePipe GetConsumePipe()
+        {
+            return CreateConsumePipe();
         }
 
         protected override ISendTransportProvider CreateSendTransportProvider()
