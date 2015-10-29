@@ -17,40 +17,42 @@ namespace MassTransit.QuartzIntegration.Tests
     using NUnit.Framework;
 
 
-    public class QuartzPublish_Specs :
+    [TestFixture]
+    public class ScheduleMessage_Specs :
         QuartzInMemoryTestFixture
     {
-        class SomeMessageConsumer :
-            IConsumer<SomeMessage>
+        Task<ConsumeContext<SecondMessage>> _second;
+        Task<ConsumeContext<FirstMessage>> _first;
+
+        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
         {
-            public Task Consume(ConsumeContext<SomeMessage> context)
+            _first = Handler<FirstMessage>(configurator, async context =>
             {
-                return Console.Out.WriteLineAsync(context.Message.GetType().Name + " - " + context.Message.SendDate + " - " + context.Message.Source);
-            }
-        }
-
-
-        class SomeMessage
-        {
-            public DateTime SendDate { get; set; }
-            public string Source { get; set; }
-        }
-
-
-        [Test]
-        public async Task Should_receive_the_message()
-        {
-            var handled = SubscribeHandler<SomeMessage>();
-
-            Bus.ConnectConsumer(() => new SomeMessageConsumer());
-
-            await Bus.ScheduleMessage(DateTime.Now, new SomeMessage
-            {
-                SendDate = DateTime.Now,
-                Source = "Schedule"
+                await context.ScheduleMessage(DateTime.Now, new SecondMessage());
             });
 
-            await handled;
+            _second = Handled<SecondMessage>(configurator);
+        }
+
+        [Test]
+        public async Task Should_get_both_messages()
+        {
+            await Bus.ScheduleMessage(InputQueueAddress, DateTime.Now, new FirstMessage());
+
+            await _first;
+
+            await _second;
+        }
+
+        public class FirstMessage
+        {
+            
+        }
+
+
+        public class SecondMessage
+        {
+            
         }
     }
 }
