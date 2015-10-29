@@ -142,9 +142,15 @@ namespace MassTransit
         ///  /// <param name="contextCallback">Optional: A callback that gives the caller access to the publish context.</param>
         /// <returns>A handled to the scheduled message</returns>
         public static Task<ScheduledMessage<T>> ScheduleMessage<T>(this ConsumeContext context, DateTime scheduledTime, T message,
-            IPipe<PublishContext<ScheduleMessage<T>>> contextCallback = null)
+            IPipe<SendContext> contextCallback = null)
             where T : class
         {
+            MessageSchedulerContext schedulerContext;
+            if (context.TryGetPayload(out schedulerContext))
+            {
+                return schedulerContext.ScheduleSend(message, scheduledTime, contextCallback ?? Pipe.Empty<SendContext>());
+            }
+
             return ScheduleMessage(context, context.ReceiveContext.InputAddress, scheduledTime, message, contextCallback);
         }
 
