@@ -119,7 +119,7 @@ namespace MassTransit
         /// the quartz service is on a single shared queue or behind a distributor
         /// </summary>
         /// <typeparam name="T">The scheduled message type</typeparam>
-        /// <param name="bus">The bus from which the scheduled message command should be published</param>
+        /// <param name="bus">The bus from which the scheduled message command should be published and delivered</param>
         /// <param name="scheduledTime">The time when the message should be sent to the endpoint</param>
         /// <param name="message">The message to send</param>
         ///  /// <param name="contextCallback">Optional: A callback that gives the caller access to the publish context.</param>
@@ -129,6 +129,23 @@ namespace MassTransit
             where T : class
         {
             return ScheduleMessage(bus, bus.Address, scheduledTime, message, contextCallback);
+        }
+
+        /// <summary>
+        /// Schedules a message to be sent to the bus using a Publish, which should only be used when
+        /// the quartz service is on a single shared queue or behind a distributor
+        /// </summary>
+        /// <typeparam name="T">The scheduled message type</typeparam>
+        /// <param name="context">The bus from which the scheduled message command should be published and delivered</param>
+        /// <param name="scheduledTime">The time when the message should be sent to the endpoint</param>
+        /// <param name="message">The message to send</param>
+        ///  /// <param name="contextCallback">Optional: A callback that gives the caller access to the publish context.</param>
+        /// <returns>A handled to the scheduled message</returns>
+        public static Task<ScheduledMessage<T>> ScheduleMessage<T>(this ConsumeContext context, DateTime scheduledTime, T message,
+            IPipe<PublishContext<ScheduleMessage<T>>> contextCallback = null)
+            where T : class
+        {
+            return ScheduleMessage(context, context.ReceiveContext.InputAddress, scheduledTime, message, contextCallback);
         }
 
         /// <summary>
