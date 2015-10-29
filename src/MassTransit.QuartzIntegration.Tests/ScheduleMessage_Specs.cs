@@ -34,6 +34,17 @@ namespace MassTransit.QuartzIntegration.Tests
             _second = Handled<SecondMessage>(configurator);
         }
 
+
+        public class FirstMessage
+        {
+        }
+
+
+        public class SecondMessage
+        {
+        }
+
+
         [Test]
         public async Task Should_get_both_messages()
         {
@@ -42,17 +53,6 @@ namespace MassTransit.QuartzIntegration.Tests
             await _first;
 
             await _second;
-        }
-
-        public class FirstMessage
-        {
-            
-        }
-
-
-        public class SecondMessage
-        {
-            
         }
     }
 }
