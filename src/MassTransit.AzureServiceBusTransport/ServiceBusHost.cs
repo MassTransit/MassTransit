@@ -84,12 +84,19 @@ namespace MassTransit.AzureServiceBusTransport
             {
                 TokenProvider = _settings.TokenProvider,
                 OperationTimeout = _settings.OperationTimeout,
-                TransportType = TransportType.Amqp,
-                AmqpTransportSettings = new AmqpTransportSettings
-                {
-                    BatchFlushInterval = TimeSpan.FromMilliseconds(50)
-                }
             };
+
+            switch (_settings.TransportType)
+            {
+                case TransportType.NetMessaging:
+                    mfs.NetMessagingTransportSettings = _settings.NetMessagingTransportSettings;
+                    break;
+                case TransportType.Amqp:
+                    mfs.AmqpTransportSettings = _settings.AmqpTransportSettings;
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
 
             return CreateFactory(mfs);
         }

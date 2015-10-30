@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,6 +14,8 @@ namespace MassTransit.AzureServiceBusTransport
 {
     using System;
     using Microsoft.ServiceBus;
+    using Microsoft.ServiceBus.Messaging;
+    using Microsoft.ServiceBus.Messaging.Amqp;
 
 
     /// <summary>
@@ -50,5 +52,20 @@ namespace MassTransit.AzureServiceBusTransport
         /// The retry limit for service bus operations
         /// </summary>
         int RetryLimit { get; }
+
+        /// <summary>
+        /// The type of transport to use AMQP or NetMessaging
+        /// </summary>
+        TransportType TransportType { get; }
+
+        /// <summary>
+        /// The AMQP settings
+        /// </summary>
+        AmqpTransportSettings AmqpTransportSettings { get; }
+
+        /// <summary>
+        /// The net messaging settings
+        /// </summary>
+        NetMessagingTransportSettings NetMessagingTransportSettings { get; }
     }
 }

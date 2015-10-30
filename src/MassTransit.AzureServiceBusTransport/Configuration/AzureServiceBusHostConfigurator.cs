@@ -14,6 +14,8 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
 {
     using System;
     using Microsoft.ServiceBus;
+    using Microsoft.ServiceBus.Messaging;
+    using Microsoft.ServiceBus.Messaging.Amqp;
 
 
     public class AzureServiceBusHostConfigurator :
@@ -38,6 +40,11 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
             set { _settings.OperationTimeout = value; }
         }
 
+        public TransportType TransportType
+        {
+            set { _settings.TransportType = value; }
+        }
+
         public TimeSpan RetryMinBackoff
         {
             set { _settings.RetryMinBackoff = value; }
@@ -53,6 +60,15 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
             set { _settings.RetryLimit = value; }
         }
 
+        public TimeSpan BatchFlushInterval
+        {
+            set
+            {
+                _settings.AmqpTransportSettings.BatchFlushInterval = value;
+                _settings.NetMessagingTransportSettings.BatchFlushInterval = value;
+            }
+        }
+
 
         class HostSettings :
             ServiceBusHostSettings
@@ -65,6 +81,9 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
                 RetryMinBackoff = TimeSpan.Zero;
                 RetryMaxBackoff = TimeSpan.FromSeconds(10);
                 RetryLimit = 10;
+                TransportType = TransportType.Amqp;
+                AmqpTransportSettings = new AmqpTransportSettings() { BatchFlushInterval = TimeSpan.FromMilliseconds(50), };
+                NetMessagingTransportSettings = new NetMessagingTransportSettings() { BatchFlushInterval = TimeSpan.FromMilliseconds(50), };
             }
 
             public Uri ServiceUri { get; private set; }
@@ -73,6 +92,9 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
             public TimeSpan RetryMinBackoff { get; set; }
             public TimeSpan RetryMaxBackoff { get; set; }
             public int RetryLimit { get; set; }
+            public TransportType TransportType { get; set; }
+            public AmqpTransportSettings AmqpTransportSettings { get; set; }
+            public NetMessagingTransportSettings NetMessagingTransportSettings { get; set; }
         }
     }
 }
