@@ -16,6 +16,8 @@ namespace MassTransit.AzureServiceBusTransport.Hosting
     using Logging;
     using MassTransit.Hosting;
     using Microsoft.ServiceBus;
+    using Microsoft.ServiceBus.Messaging;
+    using Microsoft.ServiceBus.Messaging.Amqp;
 
 
     public class ServiceBusHostBusFactory :
@@ -106,6 +108,12 @@ namespace MassTransit.AzureServiceBusTransport.Hosting
             public TimeSpan RetryMaxBackoff => _settings.RetryMaxBackoff ?? TimeSpan.FromSeconds(2);
 
             public int RetryLimit => _settings.RetryLimit ?? 10;
+
+            public TransportType TransportType => _settings.TransportType;
+
+            public AmqpTransportSettings AmqpTransportSettings => _settings.AmqpTransportSettings;
+
+            public NetMessagingTransportSettings NetMessagingTransportSettings => _settings.NetMessagingTransportSettings;
 
             public Uri ServiceUri { get; private set; }
 

@@ -15,6 +15,8 @@ namespace MassTransit.AzureServiceBusTransport.Hosting
     using System;
     using MassTransit.Hosting;
     using Microsoft.ServiceBus;
+    using Microsoft.ServiceBus.Messaging;
+    using Microsoft.ServiceBus.Messaging.Amqp;
 
 
     public interface ServiceBusSettings :
@@ -32,5 +34,8 @@ namespace MassTransit.AzureServiceBusTransport.Hosting
         TimeSpan? RetryMinBackoff { get; }
         TimeSpan? RetryMaxBackoff { get; }
         int? RetryLimit { get; }
+        TransportType TransportType { get; }
+        NetMessagingTransportSettings NetMessagingTransportSettings { get; }
+        AmqpTransportSettings AmqpTransportSettings { get; }
     }
 }

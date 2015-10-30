@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,6 +14,7 @@ namespace MassTransit.AzureServiceBusTransport
 {
     using System;
     using Microsoft.ServiceBus;
+    using Microsoft.ServiceBus.Messaging;
 
 
     public interface IServiceBusHostConfigurator
@@ -42,5 +43,15 @@ namespace MassTransit.AzureServiceBusTransport
         /// The retry limit for service bus operations
         /// </summary>
         int RetryLimit { set; }
+
+        /// <summary>
+        /// Sets the messaging protocol to use with the messaging factory, defaults to AMQP.
+        /// </summary>
+        TransportType TransportType { set; }
+        
+        /// <summary>
+        /// Sets the batch flush interval to use with the messaging factory.
+        /// </summary>
+        TimeSpan BatchFlushInterval { set; }
     }
 }
