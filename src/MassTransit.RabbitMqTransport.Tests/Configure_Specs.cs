@@ -50,6 +50,31 @@ namespace MassTransit.RabbitMqTransport.Tests
 
 
             Console.WriteLine(string.Join(Environment.NewLine, exception.Result.Results));
+
+        }
+        [Test]
+        public void Should_fail_when_late_configuration_happens()
+        {
+            var exception = Assert.Throws<ConfigurationException>(() =>
+            {
+                Bus.Factory.CreateUsingRabbitMq(x =>
+                {
+                    var host = x.Host(new Uri("rabbitmq://[::1]/test/"), h =>
+                    {
+                    });
+
+                    x.ReceiveEndpoint(host, "input_queue", e =>
+                    {
+                        var inputAddress = e.InputAddress;
+
+                        e.Durable = false;
+                        e.AutoDelete = true;
+                    });
+                });
+            });
+
+
+            Console.WriteLine(string.Join(Environment.NewLine, exception.Result.Results));
         }
 
         [Test]

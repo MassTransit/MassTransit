@@ -106,7 +106,12 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
 
         public bool EnableExpress
         {
-            set { _settings.QueueDescription.EnableExpress = value; }
+            set
+            {
+                _settings.QueueDescription.EnableExpress = value;
+
+                Changed("EnableExpress");
+            }
         }
 
         public bool EnablePartitioning
@@ -154,8 +159,6 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
             set { _settings.QueueDescription.UserMetadata = value; }
         }
 
-        public Uri InputAddress => _host.Settings.GetInputAddress(_settings.QueueDescription);
-
         public int MaxConcurrentCalls
         {
             set
@@ -169,6 +172,11 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
         public int PrefetchCount
         {
             set { _settings.PrefetchCount = value; }
+        }
+
+        protected override Uri GetInputAddress()
+        {
+            return _host.Settings.GetInputAddress(_settings.QueueDescription);
         }
 
         protected override Uri GetErrorAddress()

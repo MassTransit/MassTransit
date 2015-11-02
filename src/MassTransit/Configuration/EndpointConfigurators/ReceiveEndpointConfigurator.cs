@@ -31,8 +31,12 @@ namespace MassTransit.EndpointConfigurators
     {
         readonly IConsumePipe _consumePipe;
         readonly ConsumePipeSpecificationList _consumePipeSpecification;
+        readonly Lazy<Uri> _deadLetterAddress;
+        readonly Lazy<Uri> _errorAddress;
+        readonly Lazy<Uri> _inputAddress;
         readonly IBuildPipeConfigurator<ReceiveContext> _receiveConfigurator;
         readonly IList<IReceiveEndpointSpecification> _specifications;
+        readonly IList<string> _lateConfigurationKeys; 
 
         protected ReceiveEndpointConfigurator(IConsumePipe consumePipe)
         {
@@ -41,7 +45,14 @@ namespace MassTransit.EndpointConfigurators
             _specifications = new List<IReceiveEndpointSpecification>();
             _consumePipeSpecification = new ConsumePipeSpecificationList();
             _receiveConfigurator = new PipeConfigurator<ReceiveContext>();
+            _lateConfigurationKeys = new List<string>();
+
+            _inputAddress = new Lazy<Uri>(GetInputAddress);
+            _errorAddress = new Lazy<Uri>(GetErrorAddress);
+            _deadLetterAddress = new Lazy<Uri>(GetDeadLetterAddress);
         }
+
+        public Uri InputAddress => _inputAddress.Value;
 
         void IPipeConfigurator<ConsumeContext>.AddPipeSpecification(IPipeSpecification<ConsumeContext> specification)
         {
@@ -56,7 +67,8 @@ namespace MassTransit.EndpointConfigurators
         public virtual IEnumerable<ValidationResult> Validate()
         {
             return _specifications.SelectMany(x => x.Validate())
-                .Concat(_consumePipeSpecification.Validate());
+                .Concat(_consumePipeSpecification.Validate())
+                .Concat(_lateConfigurationKeys.Select(x => new ValidationResultImpl(ValidationResultDisposition.Failure, x, "was configured after being used")));
         }
 
         public void AddEndpointSpecification(IReceiveEndpointSpecification configurator)
@@ -88,11 +100,9 @@ namespace MassTransit.EndpointConfigurators
         {
             IPipe<ReceiveContext> moveToDeadLetterPipe = Pipe.New<ReceiveContext>(x =>
             {
-                Uri deadLetterAddress = GetDeadLetterAddress();
+                Func<Task<ISendTransport>> getDeadLetterTransport = () => transportProvider.GetSendTransport(_deadLetterAddress.Value);
 
-                Func<Task<ISendTransport>> getDeadLetterTransport = () => transportProvider.GetSendTransport(deadLetterAddress);
-
-                x.UseFilter(new MoveToTransportFilter(deadLetterAddress, getDeadLetterTransport, "dead-letter"));
+                x.UseFilter(new MoveToTransportFilter(_deadLetterAddress.Value, getDeadLetterTransport, "dead-letter"));
             });
 
             _receiveConfigurator.UseDeadLetterQueue(moveToDeadLetterPipe);
@@ -102,17 +112,33 @@ namespace MassTransit.EndpointConfigurators
         {
             IPipe<ExceptionReceiveContext> moveToErrorPipe = Pipe.New<ExceptionReceiveContext>(x =>
             {
-                Uri errorAddress = GetErrorAddress();
+                Func<Task<ISendTransport>> getErrorTransport = () => transportProvider.GetSendTransport(_errorAddress.Value);
 
-                Func<Task<ISendTransport>> getErrorTransport = () => transportProvider.GetSendTransport(errorAddress);
-
-                x.UseFilter(new MoveExceptionToTransportFilter(publishEndpoint, errorAddress, getErrorTransport));
+                x.UseFilter(new MoveExceptionToTransportFilter(publishEndpoint, _errorAddress.Value, getErrorTransport));
             });
 
             _receiveConfigurator.UseRescue(moveToErrorPipe);
         }
 
+        protected virtual void Changed(string key)
+        {
+            if (IsAlreadyConfigured())
+            {
+                _lateConfigurationKeys.Add(key);
+            }
+        }
+
+        protected virtual bool IsAlreadyConfigured()
+        {
+            return _inputAddress.IsValueCreated
+                || _errorAddress.IsValueCreated
+                || _deadLetterAddress.IsValueCreated;
+        }
+
+        protected abstract Uri GetInputAddress();
+
         protected abstract Uri GetErrorAddress();
+
         protected abstract Uri GetDeadLetterAddress();
     }
 }

@@ -63,8 +63,6 @@ namespace MassTransit.RabbitMqTransport.Configuration
                 yield return this.Warning($"{_settings.QueueName}", "Existing messages in the queue will be purged on service start");
         }
 
-        public Uri InputAddress => _host.Settings.GetInputAddress(_settings);
-
         public void Apply(IBusBuilder builder)
         {
             RabbitMqReceiveEndpointBuilder endpointBuilder = null;
@@ -84,17 +82,32 @@ namespace MassTransit.RabbitMqTransport.Configuration
 
         public bool Durable
         {
-            set { _settings.Durable = value; }
+            set
+            {
+                _settings.Durable = value;
+
+                Changed("Durable");
+            }
         }
 
         public bool Exclusive
         {
-            set { _settings.Exclusive = value; }
+            set
+            {
+                _settings.Exclusive = value;
+
+                Changed("Exclusive");
+            }
         }
 
         public bool AutoDelete
         {
-            set { _settings.AutoDelete = value; }
+            set
+            {
+                _settings.AutoDelete = value;
+
+                Changed("AutoDelete");
+            }
         }
 
         public string ExchangeType
@@ -109,7 +122,12 @@ namespace MassTransit.RabbitMqTransport.Configuration
 
         public ushort PrefetchCount
         {
-            set { _settings.PrefetchCount = value; }
+            set
+            {
+                _settings.PrefetchCount = value;
+
+                Changed("PrefetchCount");
+            }
         }
 
         public void SetQueueArgument(string key, object value)
@@ -132,6 +150,11 @@ namespace MassTransit.RabbitMqTransport.Configuration
                 _settings.ExchangeArguments.Remove(key);
             else
                 _settings.ExchangeArguments[key] = value;
+        }
+
+        protected override Uri GetInputAddress()
+        {
+            return _host.Settings.GetInputAddress(_settings);
         }
 
         protected override Uri GetErrorAddress()
