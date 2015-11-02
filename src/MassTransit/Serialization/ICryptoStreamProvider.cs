@@ -13,6 +13,8 @@
 namespace MassTransit.Serialization
 {
     using System.IO;
+    using System.Security.Cryptography;
+
 
     /// <summary>
     /// Provides a crypto stream for the purpose of encrypting or decrypting 
@@ -25,17 +27,18 @@ namespace MassTransit.Serialization
         /// </summary>
         /// <typeparam name="T">The message type</typeparam>
         /// <param name="stream">The original stream to which the encrypted message content is written</param>
-        /// <param name="context">The message send context</param>
+        /// <param name="keyId">The encryption key identifier</param>
+        /// <param name="streamMode"></param>
         /// <returns>A stream for serializing the message which will be encrypted</returns>
-        Stream GetEncryptStream<T>(Stream stream, SendContext<T> context)
-            where T : class;
+        Stream GetEncryptStream(Stream stream, string keyId, CryptoStreamMode streamMode);
 
         /// <summary>
         /// Returns a stream for decrypting the message
         /// </summary>
         /// <param name="stream">The input stream of the encrypted message</param>
-        /// <param name="context">The receive context from the transport</param>
+        /// <param name="keyId">The encryption key identifier</param>
+        /// <param name="streamMode"></param>
         /// <returns>A stream for deserializing the encrypted message</returns>
-        Stream GetDecryptStream(Stream stream, ReceiveContext context);
+        Stream GetDecryptStream(Stream stream, string keyId, CryptoStreamMode streamMode);
     }
 }
