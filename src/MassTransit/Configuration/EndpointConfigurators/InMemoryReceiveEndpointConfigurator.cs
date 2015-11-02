@@ -50,6 +50,9 @@ namespace MassTransit.EndpointConfigurators
             return new Uri($"loopback://localhost/{_queueName}_skipped");
         }
 
-        public Uri InputAddress => new Uri($"loopback://localhost/{_queueName}");
+        protected override Uri GetInputAddress()
+        {
+            return new Uri($"loopback://localhost/{_queueName}");
+        }
     }
 }
