@@ -32,18 +32,12 @@ namespace MassTransit.Serialization
             _defaultKeyId = defaultKeyId;
         }
 
-        Stream ICryptoStreamProvider.GetEncryptStream<T>(Stream stream, SendContext<T> context)
+        Stream ICryptoStreamProvider.GetEncryptStream(Stream stream, string keyId, CryptoStreamMode streamMode)
         {
             if (stream == null)
                 throw new ArgumentNullException(nameof(stream));
 
-            if (context == null)
-                throw new ArgumentNullException(nameof(context));
-
-            object keyIdObj;
-            string keyId = context.Headers.TryGetHeader(EncryptedMessageSerializer.EncryptionKeyHeader, out keyIdObj)
-                ? keyIdObj.ToString()
-                : _defaultKeyId;
+            keyId = keyId ?? _defaultKeyId;
 
             SymmetricKey key;
             if (!_keyProvider.TryGetKey(keyId, out key))
@@ -51,21 +45,15 @@ namespace MassTransit.Serialization
 
             ICryptoTransform encryptor = CreateEncryptor(key.Key, key.IV);
 
-            return new DisposingCryptoStream(stream, encryptor, CryptoStreamMode.Write);
+            return new DisposingCryptoStream(stream, encryptor, streamMode);
         }
 
-        Stream ICryptoStreamProvider.GetDecryptStream(Stream stream, ReceiveContext context)
+        Stream ICryptoStreamProvider.GetDecryptStream(Stream stream, string keyId, CryptoStreamMode streamMode)
         {
             if (stream == null)
                 throw new ArgumentNullException(nameof(stream));
 
-            if (context == null)
-                throw new ArgumentNullException(nameof(context));
-
-            object keyIdObj;
-            string keyId = context.TransportHeaders.TryGetHeader(EncryptedMessageSerializer.EncryptionKeyHeader, out keyIdObj)
-                ? keyIdObj.ToString()
-                : _defaultKeyId;
+            keyId = keyId ?? _defaultKeyId;
 
             SymmetricKey key;
             if (!_keyProvider.TryGetKey(keyId, out key))
@@ -73,7 +61,7 @@ namespace MassTransit.Serialization
 
             ICryptoTransform encryptor = CreateDecryptor(key.Key, key.IV);
 
-            return new DisposingCryptoStream(stream, encryptor, CryptoStreamMode.Read);
+            return new DisposingCryptoStream(stream, encryptor, streamMode);
         }
 
         public void Probe(ProbeContext context)

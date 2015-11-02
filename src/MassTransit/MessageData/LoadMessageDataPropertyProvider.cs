@@ -20,8 +20,8 @@ namespace MassTransit.MessageData
     public class LoadMessageDataPropertyProvider<TInput, TValue> :
         IPropertyProvider<MessageData<TValue>, TInput>
     {
-        readonly IMessageDataRepository _repository;
         readonly ReadOnlyProperty<TInput, MessageData<TValue>> _property;
+        readonly IMessageDataRepository _repository;
 
         public LoadMessageDataPropertyProvider(IMessageDataRepository repository, PropertyInfo property)
         {
@@ -35,7 +35,7 @@ namespace MassTransit.MessageData
             {
                 MessageData<TValue> value = _property.Get(context.Input);
                 if (value?.Address != null)
-                    return MessageDataFactory.Load<TValue>(_repository, value.Address, context.CancellationToken);
+                    return MessageDataFactory.Load<TValue>(_repository, value.Address, context);
             }
 
             return new EmptyMessageData<TValue>();

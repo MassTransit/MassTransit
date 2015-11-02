@@ -16,9 +16,11 @@ namespace MassTransit.Tests.MessageData
     {
         using System;
         using System.IO;
+        using System.Security.Cryptography;
         using System.Text;
         using System.Threading.Tasks;
         using MassTransit.MessageData;
+        using MassTransit.Serialization;
         using NUnit.Framework;
         using Shouldly;
         using TestFramework;
@@ -77,6 +79,74 @@ namespace MassTransit.Tests.MessageData
                 var dataDirectory = new DirectoryInfo(messageDataPath);
 
                 _repository = new FileSystemMessageDataRepository(dataDirectory);
+
+                configurator.UseMessageData<MessageWithBigData>(_repository);
+
+                _received = Handled<MessageWithBigData>(configurator);
+
+                configurator.UseMessageData<MessageWithByteArray>(_repository);
+
+                _receivedBytes = Handled<MessageWithByteArray>(configurator);
+            }
+        }
+
+        [TestFixture]
+        public class Sending_a_large_message_through_the_file_system_encrypted :
+            InMemoryTestFixture
+        {
+            [Test]
+            public async Task Should_load_the_data_from_the_repository()
+            {
+                string data = NewId.NextGuid().ToString();
+
+                var message = new SendMessageWithBigData
+                {
+                    Body = await _repository.PutString(data)
+                };
+
+                await InputQueueSendEndpoint.Send(message);
+
+                ConsumeContext<MessageWithBigData> received = await _received;
+
+                string value = await received.Message.Body.Value;
+                value.ShouldBe(data);
+            }
+
+            [Test]
+            public async Task Should_be_able_to_write_bytes_too ()
+            {
+                byte[] data = NewId.NextGuid().ToByteArray();
+
+                var message = new MessageWithByteArrayImpl
+                {
+                    Bytes = await _repository.PutBytes(data)
+                };
+
+                await InputQueueSendEndpoint.Send(message);
+
+                ConsumeContext<MessageWithByteArray> received = await _receivedBytes;
+
+                byte[] value = await received.Message.Bytes.Value;
+                value.ShouldBe(data);
+            }
+
+            IMessageDataRepository _repository;
+            Task<ConsumeContext<MessageWithBigData>> _received;
+            Task<ConsumeContext<MessageWithByteArray>> _receivedBytes;
+
+            protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+            {
+                string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
+
+                string messageDataPath = Path.Combine(baseDirectory, "MessageData");
+
+                var dataDirectory = new DirectoryInfo(messageDataPath);
+
+                var fileRepository = new FileSystemMessageDataRepository(dataDirectory);
+
+                ISymmetricKeyProvider keyProvider = new TestSymmetricKeyProvider();
+                var cryptoStreamProvider = new AesCryptoStreamProvider(keyProvider, "default");
+                _repository = new EncryptedMessageDataRepository(fileRepository, cryptoStreamProvider);
 
                 configurator.UseMessageData<MessageWithBigData>(_repository);
 

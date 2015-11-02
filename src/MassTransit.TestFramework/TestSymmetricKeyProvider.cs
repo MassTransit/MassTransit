@@ -12,6 +12,8 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.TestFramework
 {
+    using System.Collections.Generic;
+    using System.Linq;
     using System.Security.Cryptography;
     using Serialization;
 
@@ -22,31 +24,44 @@ namespace MassTransit.TestFramework
     public class TestSymmetricKeyProvider :
         ISymmetricKeyProvider
     {
-        readonly TestSymmetricKey _key;
+        readonly Dictionary<string, TestSymmetricKey> _keys;
 
-        public TestSymmetricKeyProvider()
+        public TestSymmetricKeyProvider(params string[] ids)
         {
-            byte[] key;
-            byte[] iv;
+            _keys = new Dictionary<string, TestSymmetricKey>();
 
-            using (var provider = new AesCryptoServiceProvider())
+            foreach (var id in ids.Concat(new[] {"default"}).Distinct())
             {
-                provider.GenerateIV();
-                provider.GenerateKey();
+                byte[] key;
+                byte[] iv;
 
-                key = provider.Key;
-                iv = provider.IV;
+                using (var provider = new AesCryptoServiceProvider())
+                {
+                    provider.GenerateIV();
+                    provider.GenerateKey();
 
-                provider.Clear();
+                    key = provider.Key;
+                    iv = provider.IV;
+
+                    provider.Clear();
+                }
+
+                _keys.Add(id, new TestSymmetricKey(key, iv));
             }
-
-            _key = new TestSymmetricKey(key, iv);
         }
 
         public bool TryGetKey(string id, out SymmetricKey key)
         {
-            key = _key;
-            return true;
+            TestSymmetricKey symmetricKey;
+            bool found = _keys.TryGetValue(id, out symmetricKey);
+            if (found)
+            {
+                key = symmetricKey;
+                return true;
+            }
+
+            key = null;
+            return false;
         }
 
 
@@ -62,15 +77,8 @@ namespace MassTransit.TestFramework
                 _iv = iv;
             }
 
-            byte[] SymmetricKey.Key
-            {
-                get { return _key; }
-            }
-
-            byte[] SymmetricKey.IV
-            {
-                get { return _iv; }
-            }
+            byte[] SymmetricKey.Key => _key;
+            byte[] SymmetricKey.IV => _iv;
         }
     }
 }

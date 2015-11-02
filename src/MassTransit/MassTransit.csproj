@@ -140,6 +140,7 @@
     <Compile Include="Context\RescueExceptionConsumeContext.cs" />
     <Compile Include="Context\RescueExceptionReceiveContext.cs" />
     <Compile Include="Courier\Exceptions\RoutingSlipArgumentException.cs" />
+    <Compile Include="CryptoStreamProviderExtensions.cs" />
     <Compile Include="Events\ReceiveFaultEvent.cs" />
     <Compile Include="ExceptionConsumeContext.cs" />
     <Compile Include="ExceptionReceiveContext.cs" />
@@ -174,6 +175,7 @@
     <Compile Include="MessageData\ByteArrayMessageDataConverter.cs" />
     <Compile Include="MessageData\DeserializedMessageData.cs" />
     <Compile Include="MessageData\EmptyMessageData.cs" />
+    <Compile Include="MessageData\EncryptedMessageDataRepository.cs" />
     <Compile Include="MessageData\FileSystemMessageDataRepository.cs" />
     <Compile Include="MessageData\IMessageDataConverter.cs" />
     <Compile Include="MessageData\InMemoryMessageDataId.cs" />
@@ -182,7 +184,7 @@
     <Compile Include="MessageData\LoadMessageDataPropertyProvider.cs" />
     <Compile Include="MessageData\MessageDataConverter.cs" />
     <Compile Include="MessageData\MessageDataFactory.cs" />
-    <Compile Include="MessageData\ReadStringBigProperty.cs" />
+    <Compile Include="MessageData\LoadMessageData.cs" />
     <Compile Include="Bus.cs" />
     <Compile Include="BusHandle.cs" />
     <Compile Include="BusHandleExtensions.cs" />

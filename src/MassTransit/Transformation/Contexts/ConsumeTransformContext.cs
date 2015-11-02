@@ -36,6 +36,15 @@ namespace MassTransit.Transformation.Contexts
         }
 
         CancellationToken TransformContext.CancellationToken => _context.CancellationToken;
+        Guid? TransformContext.MessageId => _context.MessageId;
+        Guid? TransformContext.RequestId => _context.RequestId;
+        Guid? TransformContext.CorrelationId => _context.CorrelationId;
+        Guid? TransformContext.ConversationId => _context.ConversationId;
+        Guid? TransformContext.InitiatorId => _context.InitiatorId;
+        Uri TransformContext.SourceAddress => _context.SourceAddress;
+        Uri TransformContext.DestinationAddress => _context.DestinationAddress;
+        Headers TransformContext.Headers => _context.Headers;
+        HostInfo TransformContext.Host => _context.Host;
 
         bool TransformContext.HasPayloadType(Type contextType)
         {

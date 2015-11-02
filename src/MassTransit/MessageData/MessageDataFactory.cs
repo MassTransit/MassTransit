@@ -14,18 +14,19 @@ namespace MassTransit.MessageData
 {
     using System;
     using System.Threading;
+    using Transformation;
     using Util;
 
 
     public static class MessageDataFactory
     {
-        public static MessageData<T> Load<T>(IMessageDataRepository repository, Uri address, CancellationToken cancellationToken)
+        public static MessageData<T> Load<T>(IMessageDataRepository repository, Uri address, TransformContext context)
         {
             if (typeof(T) == typeof(string))
-                return (MessageData<T>)new LoadMessageData<string>(address, repository, MessageDataConverter.String, cancellationToken);
+                return (MessageData<T>)new LoadMessageData<string>(address, repository, MessageDataConverter.String, context);
 
             if (typeof(T) == typeof(byte[]))
-                return (MessageData<T>)new LoadMessageData<byte[]>(address, repository, MessageDataConverter.ByteArray, cancellationToken);
+                return (MessageData<T>)new LoadMessageData<byte[]>(address, repository, MessageDataConverter.ByteArray, context);
 
             throw new MessageDataException("Unknown message data type: " + TypeMetadataCache<T>.ShortName);
         }
