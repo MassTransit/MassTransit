@@ -60,7 +60,7 @@ An example of connecting a consumer to a receive endpoint is shown below.
 
 The example creates a bus, which connects to the RabbitMQ running on the local machine, using the default
 username and password (guest/guest). On that bus. a single receive endpoint is created with the name
-*customer_udpate_queue*. The consumer is connected using the simplest method, which accepts a consumer
+*customer_update_queue*. The consumer is connected using the simplest method, which accepts a consumer
 class with a default constructor.
 
 .. note::
