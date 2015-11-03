@@ -26,9 +26,11 @@ namespace MassTransit.Builders
     public abstract class BusBuilder
     {
         readonly BusObservable _busObservable;
+        readonly Lazy<IConsumePipe> _consumePipe;
         readonly IConsumePipeSpecification _consumePipeSpecification;
         readonly Lazy<IMessageDeserializer> _deserializer;
         readonly IDictionary<string, DeserializerFactory> _deserializerFactories;
+        readonly IBusHostControl[] _hosts;
         readonly Lazy<Uri> _inputAddress;
         readonly Lazy<IPublishEndpointProvider> _publishSendEndpointProvider;
         readonly IDictionary<string, IReceiveEndpoint> _receiveEndpoints;
@@ -36,8 +38,6 @@ namespace MassTransit.Builders
         readonly Lazy<ISendTransportProvider> _sendTransportProvider;
         readonly Lazy<IMessageSerializer> _serializer;
         Func<IMessageSerializer> _serializerFactory;
-        readonly Lazy<IConsumePipe> _consumePipe;
-        IBusHostControl[] _hosts;
 
         protected BusBuilder(IConsumePipeSpecification consumePipeSpecification, IEnumerable<IBusHostControl> hosts)
         {
@@ -80,10 +80,10 @@ namespace MassTransit.Builders
 
         protected Uri InputAddress => _inputAddress.Value;
 
+        protected IConsumePipe ConsumePipe => _consumePipe.Value;
+
         protected abstract Uri GetInputAddress();
         protected abstract IConsumePipe GetConsumePipe();
-
-        protected IConsumePipe ConsumePipe => _consumePipe.Value;
 
         public void AddMessageDeserializer(ContentType contentType, DeserializerFactory deserializerFactory)
         {
@@ -159,12 +159,11 @@ namespace MassTransit.Builders
             {
                 PreBuild();
 
-                var bus =  new MassTransitBus(InputAddress, ConsumePipe, SendEndpointProvider, PublishEndpoint, ReceiveEndpoints, _hosts, BusObservable);
+                var bus = new MassTransitBus(InputAddress, ConsumePipe, SendEndpointProvider, PublishEndpoint, ReceiveEndpoints, _hosts, BusObservable);
 
                 TaskUtil.Await(() => _busObservable.PostCreate(bus));
 
                 return bus;
-
             }
             catch (Exception exception)
             {
@@ -176,7 +175,6 @@ namespace MassTransit.Builders
 
         protected virtual void PreBuild()
         {
-            
         }
 
         protected abstract ISendTransportProvider CreateSendTransportProvider();

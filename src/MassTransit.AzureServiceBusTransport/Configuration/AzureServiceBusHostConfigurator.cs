@@ -19,20 +19,14 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
     public class AzureServiceBusHostConfigurator :
         IServiceBusHostConfigurator
     {
-        readonly Uri _hostAddress;
         readonly HostSettings _settings;
 
-        public AzureServiceBusHostConfigurator(Uri hostAddress)
+        public AzureServiceBusHostConfigurator(Uri serviceAddress)
         {
-            _hostAddress = hostAddress;
-
-            _settings = new HostSettings(hostAddress);
+            _settings = new HostSettings(serviceAddress);
         }
 
-        public ServiceBusHostSettings Settings
-        {
-            get { return _settings; }
-        }
+        public ServiceBusHostSettings Settings => _settings;
 
         public TokenProvider TokenProvider
         {

@@ -33,6 +33,9 @@ namespace MassTransit.AzureServiceBusTransport
         {
             if (settings.EnableExpress)
                 yield return "express=true";
+
+            if (settings.AutoDeleteOnIdle > TimeSpan.Zero)
+                yield return $"autodelete={settings.AutoDeleteOnIdle.TotalSeconds}";
         }
     }
 }
