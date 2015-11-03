@@ -64,7 +64,10 @@ namespace MassTransit.AzureServiceBusTransport
                 EnableDeadLetteringOnMessageExpiration = true
             };
 
-            queueDescription.DefaultMessageTimeToLive = address.GetValueFromQueryString("ttl", queueDescription.DefaultMessageTimeToLive);
+            int autoDeleteOnIdleSeconds = address.GetValueFromQueryString("autodelete", 0);
+            if (autoDeleteOnIdleSeconds > 0)
+                queueDescription.AutoDeleteOnIdle = TimeSpan.FromSeconds(autoDeleteOnIdleSeconds);
+
             queueDescription.EnableExpress = address.GetValueFromQueryString("express", queueDescription.EnableExpress);
 
             return queueDescription;
