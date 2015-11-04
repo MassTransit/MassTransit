@@ -90,7 +90,7 @@ consumer factories supported, as shown below.
             e.Consumer(() => new YourConsumer());
 
             // an existing consumer factory for the consumer type
-            e.Consumer(consumerFactory)
+            e.Consumer(consumerFactory);
 
             // a type-based factory that returns an object (container friendly)
             e.Consumer(consumerType, type => container.Resolve(type));
