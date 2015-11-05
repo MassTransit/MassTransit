@@ -166,6 +166,16 @@ namespace MassTransit.Serialization
                 await _publishEndpoint.Publish(message, new ResponsePipe<T>(this), CancellationToken).ConfigureAwait(false);
         }
 
+        Task ConsumeContext.RespondAsync<T>(object values)
+        {
+            if (values == null)
+                throw new ArgumentNullException(nameof(values));
+
+            T message = TypeMetadataCache<T>.InitializeFromObject(values);
+
+            return RespondAsync(message);
+        }
+
         async Task ConsumeContext.RespondAsync<T>(T message, IPipe<SendContext<T>> sendPipe)
         {
             if (ResponseAddress != null)

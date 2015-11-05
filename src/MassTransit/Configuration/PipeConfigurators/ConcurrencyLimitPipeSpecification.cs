@@ -15,24 +15,39 @@ namespace MassTransit.PipeConfigurators
     using System.Collections.Generic;
     using Configurators;
     using PipeBuilders;
-    using Pipeline.Filters;
+    using Pipeline.Filters.ConcurrencyLimit;
+    using Util;
 
 
-
+    /// <summary>
+    /// Configures a concurrency limit on the pipe. If the management endpoint is specified,
+    /// the consumer and appropriate mediator is created to handle the adjustment of the limit.
+    /// </summary>
+    /// <typeparam name="T">The message type being limited</typeparam>
     public class ConcurrencyLimitPipeSpecification<T> :
         IPipeSpecification<T>
         where T : class, PipeContext
     {
         readonly int _concurrencyLimit;
+        readonly Mediator<IConcurrencyLimitFilter> _mediator;
 
         public ConcurrencyLimitPipeSpecification(int concurrencyLimit)
         {
             _concurrencyLimit = concurrencyLimit;
+            _mediator = new Mediator<IConcurrencyLimitFilter>();
+        }
+
+        public ConcurrencyLimitPipeSpecification(int concurrencyLimit, IManagementEndpointConfigurator configurator, string id = null)
+            : this(concurrencyLimit)
+        {
+            var consumer = new ConcurrencyLimitFilterManagementConsumer(_mediator, id);
+            configurator.Instance(consumer);
         }
 
         public void Apply(IPipeBuilder<T> builder)
         {
-            builder.AddFilter(new ConcurrencyLimitFilter<T>(_concurrencyLimit));
+            var filter = new ConcurrencyLimitFilter<T>(_concurrencyLimit, _mediator);
+            builder.AddFilter(filter);
         }
 
         public IEnumerable<ValidationResult> Validate()

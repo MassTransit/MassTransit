@@ -25,13 +25,18 @@ namespace MassTransit
         /// <typeparam name="T"></typeparam>
         /// <param name="configurator"></param>
         /// <param name="concurrencyLimit">The concurrency limit for the subsequent filters in the pipeline</param>
-        public static void UseConcurrencyLimit<T>(this IPipeConfigurator<T> configurator, int concurrencyLimit)
+        /// <param name="managementEndpointConfigurator">A management endpoint configurator to support runtime adjustment</param>
+        /// <param name="id">An identifier for the concurrency limit to allow selective adjustment</param>
+        public static void UseConcurrencyLimit<T>(this IPipeConfigurator<T> configurator, int concurrencyLimit,
+            IManagementEndpointConfigurator managementEndpointConfigurator = null, string id = null)
             where T : class, PipeContext
         {
             if (configurator == null)
                 throw new ArgumentNullException(nameof(configurator));
 
-            var specification = new ConcurrencyLimitPipeSpecification<T>(concurrencyLimit);
+            var specification = managementEndpointConfigurator != null
+                ? new ConcurrencyLimitPipeSpecification<T>(concurrencyLimit, managementEndpointConfigurator, id)
+                : new ConcurrencyLimitPipeSpecification<T>(concurrencyLimit);
 
             configurator.AddPipeSpecification(specification);
         }

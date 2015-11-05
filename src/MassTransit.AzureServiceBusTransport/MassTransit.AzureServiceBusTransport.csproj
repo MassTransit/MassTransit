@@ -107,7 +107,7 @@
     <Compile Include="ReceiveSettings.cs" />
     <Compile Include="ServiceBusHostSettingsExtensions.cs" />
     <Compile Include="ServiceBusMessageNameFormatter.cs" />
-    <Compile Include="TransportConfiguratorExtensions.cs" />
+    <Compile Include="BusFactoryConfiguratorExtensions.cs" />
     <Compile Include="ServiceBusConfigurationExtensions.cs" />
   </ItemGroup>
   <ItemGroup>

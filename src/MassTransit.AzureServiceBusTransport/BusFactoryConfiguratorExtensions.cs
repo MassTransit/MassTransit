@@ -17,7 +17,7 @@ namespace MassTransit.AzureServiceBusTransport
     using Util;
 
 
-    public static class TransportConfiguratorExtensions
+    public static class BusFactoryConfiguratorExtensions
     {
         public static IServiceBusHost Host(this IServiceBusBusFactoryConfigurator configurator, Uri hostAddress,
             Action<IServiceBusHostConfigurator> configure)
