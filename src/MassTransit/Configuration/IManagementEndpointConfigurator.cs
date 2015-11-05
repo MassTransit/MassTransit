@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,11 +13,14 @@
 namespace MassTransit
 {
     using System;
-    using Transports;
 
 
-    public interface IReceiveTransportProvider
+    /// <summary>
+    /// Used to configure the management endpoint, and to denote the configurator as for that 
+    /// purpose to be usable by middleware components wanting to connect to it.
+    /// </summary>
+    public interface IManagementEndpointConfigurator :
+        IReceiveEndpointConfigurator
     {
-        IReceiveTransport GetReceiveTransport(string queueName, int concurrencyLimit);
     }
 }

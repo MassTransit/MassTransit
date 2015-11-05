@@ -67,11 +67,6 @@ namespace MassTransit.Transports.InMemory
             return new Handle(this);
         }
 
-        public IReceiveTransport GetReceiveTransport(string queueName)
-        {
-            return _transports.GetOrAdd(queueName, name => new InMemoryTransport(new Uri(_baseUri, name), _concurrencyLimit));
-        }
-
         public async Task<ISendTransport> GetSendTransport(Uri address)
         {
             string queueName = address.AbsolutePath;
@@ -79,6 +74,14 @@ namespace MassTransit.Transports.InMemory
                 queueName = queueName.Substring(1);
 
             return _transports.GetOrAdd(queueName, name => new InMemoryTransport(new Uri(_baseUri, name), _concurrencyLimit));
+        }
+
+        public IReceiveTransport GetReceiveTransport(string queueName, int concurrencyLimit)
+        {
+            if (concurrencyLimit <= 0)
+                concurrencyLimit = _concurrencyLimit;
+
+            return _transports.GetOrAdd(queueName, name => new InMemoryTransport(new Uri(_baseUri, name), concurrencyLimit));
         }
 
 

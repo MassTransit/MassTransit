@@ -10,12 +10,13 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Pipeline.Filters
+namespace MassTransit.Pipeline.Filters.ConcurrencyLimit
 {
     using System;
     using System.Diagnostics;
     using System.Threading;
     using System.Threading.Tasks;
+    using Util;
 
 
     /// <summary>
@@ -25,21 +26,42 @@ namespace MassTransit.Pipeline.Filters
     /// <typeparam name="T"></typeparam>
     public class ConcurrencyLimitFilter<T> :
         IFilter<T>,
+        IConcurrencyLimitFilter,
         IDisposable
         where T : class, PipeContext
     {
         readonly int _concurrencyLimit;
+        readonly ConnectHandle _handle;
         readonly SemaphoreSlim _limit;
 
-        public ConcurrencyLimitFilter(int concurrencyLimit)
+        public ConcurrencyLimitFilter(int concurrencyLimit, Mediator<IConcurrencyLimitFilter> mediator)
         {
             _concurrencyLimit = concurrencyLimit;
+
             _limit = new SemaphoreSlim(concurrencyLimit);
+
+            _handle = mediator.Connect(this);
+        }
+
+        public async Task SetConcurrencyLimit(int concurrencyLimit)
+        {
+            if (concurrencyLimit < 1)
+                throw new ArgumentOutOfRangeException(nameof(concurrencyLimit), "The concurrency limit must be >= 1");
+
+            int previousLimit = _concurrencyLimit;
+            if (concurrencyLimit > previousLimit)
+                _limit.Release(concurrencyLimit - previousLimit);
+            else
+            {
+                for (; previousLimit > concurrencyLimit; previousLimit--)
+                    await _limit.WaitAsync().ConfigureAwait(false);
+            }
         }
 
         public void Dispose()
         {
             _limit?.Dispose();
+            _handle?.Dispose();
         }
 
         void IProbeSite.Probe(ProbeContext context)
@@ -61,21 +83,6 @@ namespace MassTransit.Pipeline.Filters
             finally
             {
                 _limit.Release();
-            }
-        }
-
-        public async Task SetConcurrencyLimit(int concurrencyLimit)
-        {
-            if (concurrencyLimit < 1)
-                throw new ArgumentOutOfRangeException(nameof(concurrencyLimit), "The concurrency limit must be >= 1");
-
-            int previousLimit = _concurrencyLimit;
-            if (concurrencyLimit > previousLimit)
-                _limit.Release(concurrencyLimit - previousLimit);
-            else
-            {
-                for (; previousLimit > concurrencyLimit; previousLimit--)
-                    await _limit.WaitAsync().ConfigureAwait(false);
             }
         }
 

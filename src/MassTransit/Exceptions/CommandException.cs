@@ -13,11 +13,30 @@
 namespace MassTransit
 {
     using System;
-    using Transports;
+    using System.Runtime.Serialization;
 
 
-    public interface IReceiveTransportProvider
+    [Serializable]
+    public class CommandException :
+        MassTransitException
     {
-        IReceiveTransport GetReceiveTransport(string queueName, int concurrencyLimit);
+        public CommandException()
+        {
+        }
+
+        public CommandException(string message)
+            : base(message)
+        {
+        }
+
+        public CommandException(string message, Exception innerException)
+            : base(message, innerException)
+        {
+        }
+
+        protected CommandException(SerializationInfo info, StreamingContext context)
+            : base(info, context)
+        {
+        }
     }
 }

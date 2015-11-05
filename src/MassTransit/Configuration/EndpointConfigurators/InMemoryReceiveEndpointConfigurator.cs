@@ -20,24 +20,31 @@ namespace MassTransit.EndpointConfigurators
 
     public class InMemoryReceiveEndpointConfigurator :
         ReceiveEndpointConfigurator,
-        IReceiveEndpointConfigurator,
+        IInMemoryReceiveEndpointConfigurator,
         IInMemoryBusFactorySpecification
     {
         readonly string _queueName;
+        int _transportConcurrencyLimit;
 
         public InMemoryReceiveEndpointConfigurator(string queueName, IConsumePipe consumePipe = null)
             : base(consumePipe)
         {
             _queueName = queueName;
+            _transportConcurrencyLimit = 0;
         }
 
         public void Apply(IInMemoryBusBuilder builder)
         {
-            IReceiveTransport transport = builder.ReceiveTransportProvider.GetReceiveTransport(_queueName);
+            IReceiveTransport transport = builder.ReceiveTransportProvider.GetReceiveTransport(_queueName, _transportConcurrencyLimit);
 
             var receivePipe = CreateReceivePipe(builder, consumePipe => new InMemoryReceiveEndpointBuilder(consumePipe));
 
             builder.AddReceiveEndpoint(_queueName, new ReceiveEndpoint(transport, receivePipe));
+        }
+
+        public int TransportConcurrencyLimit
+        {
+            set { _transportConcurrencyLimit = value; }
         }
 
         protected override Uri GetErrorAddress()

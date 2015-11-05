@@ -33,6 +33,11 @@ namespace MassTransit.Context
             _context = context;
         }
 
+        public virtual Task RespondAsync<T>(object values) where T : class
+        {
+            return _context.RespondAsync<T>(values);
+        }
+
         public virtual Task RespondAsync<T>(T message, IPipe<SendContext<T>> sendPipe)
             where T : class
         {
@@ -134,7 +139,7 @@ namespace MassTransit.Context
             return _context.HasMessageType(messageType);
         }
 
-        public virtual bool TryGetMessage<T>(out ConsumeContext<T> consumeContext) 
+        public virtual bool TryGetMessage<T>(out ConsumeContext<T> consumeContext)
             where T : class
         {
             ConsumeContext<T> messageContext;

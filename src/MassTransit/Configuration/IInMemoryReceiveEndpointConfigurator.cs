@@ -13,11 +13,11 @@
 namespace MassTransit
 {
     using System;
-    using Transports;
 
 
-    public interface IReceiveTransportProvider
+    public interface IInMemoryReceiveEndpointConfigurator :
+        IReceiveEndpointConfigurator
     {
-        IReceiveTransport GetReceiveTransport(string queueName, int concurrencyLimit);
+        int TransportConcurrencyLimit { set; }
     }
 }
