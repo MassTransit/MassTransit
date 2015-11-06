@@ -71,6 +71,12 @@ We support RabbitMQ and Azure Service Bus message brokers.
 
 [MassTransit Discuss](http://groups.google.com/group/masstransit-discuss)
 
+## Gitter Chat 
+
+While attendence is pretty light, there is a Gitter chat room available:
+
+[![Join the chat at https://gitter.im/MassTransit/MassTransit](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/MassTransit/MassTransit?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 ## Building from Source
 
  1. Clone the source down to your machine. 
