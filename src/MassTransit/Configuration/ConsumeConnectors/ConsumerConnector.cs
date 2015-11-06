@@ -32,7 +32,6 @@ namespace MassTransit.ConsumeConnectors
                 throw new ConfigurationException("A saga cannot be registered as a consumer");
 
             _connectors = Consumes()
-                .Concat(ConsumesAll())
                 .Distinct((x, y) => x.MessageType == y.MessageType)
                 .ToList();
         }
@@ -65,11 +64,6 @@ namespace MassTransit.ConsumeConnectors
         static IEnumerable<IConsumerMessageConnector> Consumes()
         {
             return ConsumerMetadataCache<T>.ConsumerTypes.Select(x => x.GetConsumerConnector());
-        }
-
-        static IEnumerable<IConsumerMessageConnector> ConsumesAll()
-        {
-            return ConsumerMetadataCache<T>.MessageConsumerTypes.Select(x => x.GetConsumerMessageConnector());
         }
     }
 }

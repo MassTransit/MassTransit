@@ -24,6 +24,8 @@ namespace MassTransit.ConsumeConfigurators
 
     public static class ConsumerFactoryConfiguratorExtensions
     {
+        public static IEqualityComparer<IMessageInterfaceType> MessageTypeComparer { get; } = new MessageTypeEqualityComparer();
+
         public static IEnumerable<ValidationResult> ValidateConsumer<TConsumer>(this Configurator configurator)
             where TConsumer : class
         {
@@ -34,8 +36,7 @@ namespace MassTransit.ConsumeConfigurators
             }
 
             IEnumerable<ValidationResult> warningForMessages = ConsumerMetadataCache<TConsumer>
-                .ConsumerTypes.Concat(ConsumerMetadataCache<TConsumer>.MessageConsumerTypes)
-                .Distinct(MessageInterfaceType.MessageTypeComparer)
+                .ConsumerTypes.Distinct(MessageTypeComparer)
                 .Where(x => !(HasProtectedDefaultConstructor(x.MessageType) || HasSinglePublicConstructor(x.MessageType)))
                 .Select(x =>
                     $"The {TypeMetadataCache.GetShortName(x.MessageType)} message should have a public or protected default constructor."
@@ -69,6 +70,29 @@ namespace MassTransit.ConsumeConfigurators
             return type.GetConstructors(BindingFlags.Public | BindingFlags.Instance)
                 .All(constructorInfo => !constructorInfo.GetParameters().Any())
                 && type.GetConstructors().Length == 1;
+        }
+
+
+        sealed class MessageTypeEqualityComparer :
+            IEqualityComparer<IMessageInterfaceType>
+        {
+            public bool Equals(IMessageInterfaceType x, IMessageInterfaceType y)
+            {
+                if (ReferenceEquals(x, y))
+                    return true;
+                if (ReferenceEquals(x, null))
+                    return false;
+                if (ReferenceEquals(y, null))
+                    return false;
+                if (x.GetType() != y.GetType())
+                    return false;
+                return x.MessageType.Equals(y.MessageType);
+            }
+
+            public int GetHashCode(IMessageInterfaceType obj)
+            {
+                return obj.MessageType.GetHashCode();
+            }
         }
     }
 }

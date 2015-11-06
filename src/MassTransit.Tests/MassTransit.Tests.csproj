@@ -96,6 +96,7 @@
     <Compile Include="Consumer_Specs.cs" />
     <Compile Include="ContainedMessage_Specs.cs" />
     <Compile Include="Behaviors\Behavior.cs" />
+    <Compile Include="ConventionConsumer_Specs.cs" />
     <Compile Include="ConversationId_Specs.cs" />
     <Compile Include="CorrelationId_Specs.cs" />
     <Compile Include="Courier\ArgumentOverload_Specs.cs" />
@@ -136,6 +137,7 @@
     <Compile Include="InterfaceSubscription_Specs.cs" />
     <Compile Include="MessageContext_Specs.cs" />
     <Compile Include="Messages\PartialSerializationTestMessage.cs" />
+    <Compile Include="MixedConsumer_Specs.cs" />
     <Compile Include="MultiTestConsumer_Specs.cs" />
     <Compile Include="ObjectToDictionary_Specs.cs" />
     <Compile Include="Observer_Specs.cs" />
