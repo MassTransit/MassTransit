@@ -96,7 +96,13 @@
     <Compile Include="Consumer_Specs.cs" />
     <Compile Include="ContainedMessage_Specs.cs" />
     <Compile Include="Behaviors\Behavior.cs" />
-    <Compile Include="ConventionConsumer_Specs.cs" />
+    <Compile Include="Conventional\ConventionConsumer_Specs.cs" />
+    <Compile Include="Conventional\CustomConsumeConnectorFactory.cs" />
+    <Compile Include="Conventional\CustomConsumerConvention.cs" />
+    <Compile Include="Conventional\CustomConsumerInterfaceType.cs" />
+    <Compile Include="Conventional\CustomConsumerMessageConvention.cs" />
+    <Compile Include="Conventional\CustomMethodConsumerMessageFilter.cs" />
+    <Compile Include="Conventional\IHandler.cs" />
     <Compile Include="ConversationId_Specs.cs" />
     <Compile Include="CorrelationId_Specs.cs" />
     <Compile Include="Courier\ArgumentOverload_Specs.cs" />
