@@ -13,7 +13,6 @@
 namespace MassTransit.ConsumeConnectors
 {
     using System;
-    using System.Collections.Generic;
     using System.Linq;
     using System.Threading;
 
@@ -26,51 +25,14 @@ namespace MassTransit.ConsumeConnectors
 
         ConsumerMetadataCache()
         {
-            _consumerTypes = GetConsumerMessageTypes()
-                .Concat(GetLegacyMessageConsumerMessageTypes()).ToArray();
+            _consumerTypes = ConsumerConventionCache.GetConventions<T>()
+                .SelectMany(x => x.GetMessageTypes())
+                .ToArray();
         }
 
         public static IMessageInterfaceType[] ConsumerTypes => Cached.Metadata.Value.ConsumerTypes;
 
         IMessageInterfaceType[] IConsumerMetadataCache<T>.ConsumerTypes => _consumerTypes;
-
-        static IEnumerable<IMessageInterfaceType> GetConsumerMessageTypes()
-        {
-            if (typeof(T).IsGenericType && typeof(T).GetGenericTypeDefinition() == typeof(IConsumer<>))
-            {
-                var interfaceType = new ConsumerInterfaceType(typeof(T).GetGenericArguments()[0], typeof(T));
-                if (interfaceType.MessageType.IsValueType == false && interfaceType.MessageType != typeof(string))
-                    yield return interfaceType;
-            }
-
-            IEnumerable<IMessageInterfaceType> types = typeof(T).GetInterfaces()
-                .Where(x => x.IsGenericType)
-                .Where(x => x.GetGenericTypeDefinition() == typeof(IConsumer<>))
-                .Select(x => new ConsumerInterfaceType(x.GetGenericArguments()[0], typeof(T)))
-                .Where(x => x.MessageType.IsValueType == false && x.MessageType != typeof(string));
-
-            foreach (IMessageInterfaceType type in types)
-                yield return type;
-        }
-
-        static IEnumerable<LegacyConsumerInterfaceType> GetLegacyMessageConsumerMessageTypes()
-        {
-            if (typeof(T).IsGenericType && typeof(T).GetGenericTypeDefinition() == typeof(IMessageConsumer<>))
-            {
-                var interfaceType = new LegacyConsumerInterfaceType(typeof(T).GetGenericArguments()[0], typeof(T));
-                if (interfaceType.MessageType.IsValueType == false && interfaceType.MessageType != typeof(string))
-                    yield return interfaceType;
-            }
-
-            IEnumerable<LegacyConsumerInterfaceType> types = typeof(T).GetInterfaces()
-                .Where(x => x.IsGenericType)
-                .Where(x => x.GetGenericTypeDefinition() == typeof(IMessageConsumer<>))
-                .Select(x => new LegacyConsumerInterfaceType(x.GetGenericArguments()[0], typeof(T)))
-                .Where(x => x.MessageType.IsValueType == false && x.MessageType != typeof(string));
-
-            foreach (LegacyConsumerInterfaceType type in types)
-                yield return type;
-        }
 
 
         static class Cached
