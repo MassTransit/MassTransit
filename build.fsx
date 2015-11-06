@@ -160,6 +160,11 @@ Target "Package" (fun _ ->
                   PackageFile = @".\src\Containers\MassTransit.WindsorIntegration\packages.config"
                   Files = [ (@"..\src\Containers\MassTransit.WindsorIntegration\bin\Release\MassTransit.WindsorIntegration.*", Some @"lib\net45", None);
                             (@"..\src\Containers\MassTransit.WindsorIntegration\**\*.cs", Some @"src", None) ] } 
+                { Project = "MassTransit.SimpleInjector"
+                  Summary = "MassTransit SimpleInjector Container Support"
+                  PackageFile = @".\src\Containers\MassTransit.SimpleInjectorIntegration\packages.config"
+                  Files = [ (@"..\src\Containers\MassTransit.SimpleInjectorIntegration\bin\Release\MassTransit.SimpleInjectorIntegration.*", Some @"lib\net45", None);
+                            (@"..\src\Containers\MassTransit.SimpleInjectorIntegration\**\*.cs", Some @"src", None) ] } 
                 { Project = "MassTransit.StructureMap"
                   Summary = "MassTransit StructureMap Container Support"
                   PackageFile = @".\src\Containers\MassTransit.StructureMapIntegration\packages.config"
