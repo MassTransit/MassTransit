@@ -90,7 +90,9 @@
     <Compile Include="Configuration\BusConfigurators\IConsumePipeSpecification.cs" />
     <Compile Include="Configuration\CircuitBreakerExtensions.cs" />
     <Compile Include="Configuration\ConsumeConnectors\ConsumerConnector.cs" />
+    <Compile Include="Configuration\ConsumeConnectors\ConsumerInterfaceType.cs" />
     <Compile Include="Configuration\ConsumeConnectors\ConsumerMessageConnector.cs" />
+    <Compile Include="Configuration\ConsumeConnectors\IMessageInterfaceType.cs" />
     <Compile Include="Configuration\ConsumeConnectors\InstanceConnector.cs" />
     <Compile Include="Configuration\ConsumeConnectors\IObserverConnectorCache.cs" />
     <Compile Include="Configuration\ConsumeConnectors\MessageObserverConnector.cs" />
@@ -694,7 +696,7 @@
     <Compile Include="Serialization\StaticHeaders.cs" />
     <Compile Include="Serialization\SupportedMessageDeserializers.cs" />
     <Compile Include="Configuration\ConsumeConfigurators\ConsumerFactoryConfiguratorExtensions.cs" />
-    <Compile Include="Configuration\ConsumeConnectors\MessageInterfaceType.cs" />
+    <Compile Include="Configuration\ConsumeConnectors\LegacyConsumerInterfaceType.cs" />
     <Compile Include="Configuration\ConsumeConnectors\IConsumerMetadataCache.cs" />
     <Compile Include="Configuration\Configurators\ConfigurationResult.cs" />
     <Compile Include="Configuration\Configurators\BusConfigurationResult.cs" />

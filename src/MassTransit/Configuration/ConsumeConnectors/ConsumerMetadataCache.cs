@@ -22,58 +22,53 @@ namespace MassTransit.ConsumeConnectors
         IConsumerMetadataCache<T>
         where T : class
     {
-        readonly MessageInterfaceType[] _consumerTypes;
-        readonly MessageInterfaceType[] _messageConsumerTypes;
+        readonly IMessageInterfaceType[] _consumerTypes;
 
         ConsumerMetadataCache()
         {
-            _consumerTypes = GetConsumerMessageTypes().ToArray();
-            _messageConsumerTypes = GetMessageConsumerTypes().ToArray();
+            _consumerTypes = GetConsumerMessageTypes()
+                .Concat(GetLegacyMessageConsumerMessageTypes()).ToArray();
         }
 
-        public static MessageInterfaceType[] ConsumerTypes => Cached.Metadata.Value.ConsumerTypes;
+        public static IMessageInterfaceType[] ConsumerTypes => Cached.Metadata.Value.ConsumerTypes;
 
-        public static MessageInterfaceType[] MessageConsumerTypes => Cached.Metadata.Value.MessageConsumerTypes;
+        IMessageInterfaceType[] IConsumerMetadataCache<T>.ConsumerTypes => _consumerTypes;
 
-        MessageInterfaceType[] IConsumerMetadataCache<T>.ConsumerTypes => _consumerTypes;
-
-        MessageInterfaceType[] IConsumerMetadataCache<T>.MessageConsumerTypes => _messageConsumerTypes;
-
-        static IEnumerable<MessageInterfaceType> GetConsumerMessageTypes()
+        static IEnumerable<IMessageInterfaceType> GetConsumerMessageTypes()
         {
             if (typeof(T).IsGenericType && typeof(T).GetGenericTypeDefinition() == typeof(IConsumer<>))
             {
-                var interfaceType = new MessageInterfaceType(typeof(T).GetGenericArguments()[0], typeof(T));
+                var interfaceType = new ConsumerInterfaceType(typeof(T).GetGenericArguments()[0], typeof(T));
                 if (interfaceType.MessageType.IsValueType == false && interfaceType.MessageType != typeof(string))
                     yield return interfaceType;
             }
 
-            IEnumerable<MessageInterfaceType> types = typeof(T).GetInterfaces()
+            IEnumerable<IMessageInterfaceType> types = typeof(T).GetInterfaces()
                 .Where(x => x.IsGenericType)
                 .Where(x => x.GetGenericTypeDefinition() == typeof(IConsumer<>))
-                .Select(x => new MessageInterfaceType(x.GetGenericArguments()[0], typeof(T)))
+                .Select(x => new ConsumerInterfaceType(x.GetGenericArguments()[0], typeof(T)))
                 .Where(x => x.MessageType.IsValueType == false && x.MessageType != typeof(string));
 
-            foreach (MessageInterfaceType type in types)
+            foreach (IMessageInterfaceType type in types)
                 yield return type;
         }
 
-        static IEnumerable<MessageInterfaceType> GetMessageConsumerTypes()
+        static IEnumerable<LegacyConsumerInterfaceType> GetLegacyMessageConsumerMessageTypes()
         {
             if (typeof(T).IsGenericType && typeof(T).GetGenericTypeDefinition() == typeof(IMessageConsumer<>))
             {
-                var interfaceType = new MessageInterfaceType(typeof(T).GetGenericArguments()[0], typeof(T));
+                var interfaceType = new LegacyConsumerInterfaceType(typeof(T).GetGenericArguments()[0], typeof(T));
                 if (interfaceType.MessageType.IsValueType == false && interfaceType.MessageType != typeof(string))
                     yield return interfaceType;
             }
 
-            IEnumerable<MessageInterfaceType> types = typeof(T).GetInterfaces()
+            IEnumerable<LegacyConsumerInterfaceType> types = typeof(T).GetInterfaces()
                 .Where(x => x.IsGenericType)
                 .Where(x => x.GetGenericTypeDefinition() == typeof(IMessageConsumer<>))
-                .Select(x => new MessageInterfaceType(x.GetGenericArguments()[0], typeof(T)))
+                .Select(x => new LegacyConsumerInterfaceType(x.GetGenericArguments()[0], typeof(T)))
                 .Where(x => x.MessageType.IsValueType == false && x.MessageType != typeof(string));
 
-            foreach (MessageInterfaceType type in types)
+            foreach (LegacyConsumerInterfaceType type in types)
                 yield return type;
         }
 
