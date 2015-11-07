@@ -12,7 +12,7 @@ support in MassTransit has stayed up to date, including all of the major contain
 .. note::
 
     Dependency Injection styles are a personal choice that each developer or organization must make on their
-    own. We recognize this choice, and respect it, and will not judget those who don't use a particular container
+    own. We recognize this choice, and respect it, and will not judge those who don't use a particular container
     or style of dependency injection. In short, we care.
 
 
