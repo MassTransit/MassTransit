@@ -23,15 +23,15 @@ var bus = Bus.Factory.CreateUsingRabbitMq(sbc =>
 {
     var host = sbc.Host(new Uri("rabbitmq://localhost/"), h =>
     {
-        h.Username = "guest";
-        h.Password = "guest";
+        h.Username("guest");
+        h.Password("guest");
     });
 
     sbc.ReceiveEndpoint(host, "my_queue", endpoint =>
     {
         endpoint.Handler<MyMessage>(async context =>
         {
-            await Console.Out.WriteLine($"Received: {context.Message.Value}");
+            await Console.Out.WriteLineAsync($"Received: {context.Message.Value}");
         });
     });
 });
