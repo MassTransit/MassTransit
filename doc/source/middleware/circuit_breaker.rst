@@ -1,11 +1,11 @@
 Using the circuit breaker
 =========================
 
-A circuit breaker is used to protect resources (remote, local, or otherwise) from being overload when
+A circuit breaker is used to protect resources (remote, local, or otherwise) from being overloaded when
 in a failure state. For example, a remote web site may be unavailable and calling that web site in a
 message consumer takes 30-60 seconds to time out. By continuing to call the failing service, the service
 may be unable to recover. A circuit breaker detects the repeated failures and trips, preventing further
-calls to the service giving it time to recover. Once the reset interval expires, calls are slowed allowed
+calls to the service and giving it time to recover. Once the reset interval expires, calls are slowly allowed
 back to the service. If it is still failing, the breaker remains open, and the timeout interval resets.
 Once the service returns to healthy, calls flow normally as the breaker closes.
 

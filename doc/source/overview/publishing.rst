@@ -32,7 +32,7 @@ This approach was `based on an article`_ on how to maximize routing performance 
 
 .. _based on an article: http://spring.io/blog/2011/04/01/routing-topologies-for-performance-and-scalability-with-rabbitmq/
 
-This dynamic, type-based routing model has provided very powerful in many large applications. The ability to add
+This dynamic, type-based routing model has proved very powerful in many large applications. The ability to add
 new consumers to an existing message publisher is a great way to manage dependencies and keep projects from becoming tightly
 coupled.
 
