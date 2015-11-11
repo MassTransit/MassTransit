@@ -37,6 +37,16 @@ namespace Automatonymous
         EventCorrelationConfigurator<TInstance, TData> CorrelateById(Func<ConsumeContext<TData>, Guid> selector);
 
         /// <summary>
+        /// Correlate to the saga instance by a single value property, matched to the property value of the message
+        /// </summary>
+        /// <param name="propertyExpression">The instance property</param>
+        /// <param name="selector">The identifier selector for the message</param>
+        /// <returns></returns>
+        EventCorrelationConfigurator<TInstance, TData> CorrelateById<T>(Expression<Func<TInstance, T>> propertyExpression,
+            Func<ConsumeContext<TData>, T> selector)
+            where T : struct;
+
+        /// <summary>
         /// Correlate to the saga instance by a single property, matched to the property value of the message
         /// </summary>
         /// <param name="propertyExpression">The instance property</param>
