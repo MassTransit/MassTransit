@@ -10,18 +10,29 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit
+namespace MassTransit.RabbitMqTransport.Contracts
 {
-    using RabbitMqTransport.Configuration;
+    using System;
 
 
     /// <summary>
-    /// Configure a receiving RabbitMQ endpoint
+    /// Set the prefetch count of a receive endpoint
     /// </summary>
-    public interface IRabbitMqReceiveEndpointConfigurator :
-        IReceiveEndpointConfigurator,
-        IQueueConfigurator
+    public interface SetPrefetchCount
     {
-        void ConnectManagementEndpoint(IManagementEndpointConfigurator management);
+        /// <summary>
+        /// The time at which the change was requested
+        /// </summary>
+        DateTime Timestamp { get; }
+
+        /// <summary>
+        /// An optional queue name that if specified limits the setting to the queue name specified
+        /// </summary>
+        string QueueName { get; }
+
+        /// <summary>
+        /// The new prefetch count for the receive endpoint
+        /// </summary>
+        ushort PrefetchCount { get; }
     }
 }

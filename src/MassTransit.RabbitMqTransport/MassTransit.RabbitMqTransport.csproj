@@ -78,6 +78,8 @@
     <Compile Include="Contexts\RabbitMqSendContextImpl.cs" />
     <Compile Include="Contexts\SharedConnectionContext.cs" />
     <Compile Include="Contexts\SharedModelContext.cs" />
+    <Compile Include="Contracts\PrefetchCountUpdated.cs" />
+    <Compile Include="Contracts\SetPrefetchCount.cs" />
     <Compile Include="DeferExtensions.cs" />
     <Compile Include="DelayedExchangeRetryExtensions.cs" />
     <Compile Include="Exceptions\MessageNotConfirmedException.cs" />
@@ -99,6 +101,7 @@
     <Compile Include="Pipeline\RabbitMqBasicConsumer.cs" />
     <Compile Include="Pipeline\ReceiveModelFilter.cs" />
     <Compile Include="Pipeline\PrepareReceiveQueueFilter.cs" />
+    <Compile Include="Pipeline\SetPrefetchCountManagementConsumer.cs" />
     <Compile Include="PublishSettings.cs" />
     <Compile Include="RabbitMqBusFactory.cs" />
     <Compile Include="RabbitMqAddressExtensions.cs" />

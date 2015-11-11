@@ -58,5 +58,34 @@ namespace MassTransit
                 configure(x);
             });
         }
+
+        /// <summary>
+        /// Registers a management endpoint on the bus, which can be used to control
+        /// filters and other management control points on the bus.
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="host">The host where the endpoint is to be created</param>
+        /// <param name="configure">Configure additional values of the underlying receive endpoint</param>
+        /// <returns></returns>
+        public static IManagementEndpointConfigurator ManagementEndpoint(this IRabbitMqBusFactoryConfigurator configurator,
+            IRabbitMqHost host, Action<IRabbitMqReceiveEndpointConfigurator> configure = null)
+        {
+            if (configurator == null)
+                throw new ArgumentNullException(nameof(configurator));
+            if (host == null)
+                throw new ArgumentNullException(nameof(host));
+
+            var queueName = HostMetadataCache.Host.GetTemporaryQueueName("manage-");
+
+            var endpointConfigurator = new RabbitMqReceiveEndpointConfigurator(host, queueName);
+
+            configure?.Invoke(endpointConfigurator);
+
+            configurator.AddBusFactorySpecification(endpointConfigurator);
+
+            var managementEndpointConfigurator = new ManagementEndpointConfigurator(endpointConfigurator);
+
+            return managementEndpointConfigurator;
+        }
     }
 }

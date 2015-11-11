@@ -17,6 +17,7 @@ namespace MassTransit.RabbitMqTransport
     using System.Threading.Tasks;
     using Logging;
     using MassTransit.Pipeline;
+    using Pipeline;
     using Policies;
     using Topology;
     using Transports;
@@ -32,8 +33,9 @@ namespace MassTransit.RabbitMqTransport
         readonly IRabbitMqHost _host;
         readonly ReceiveObservable _receiveObservers;
         readonly ReceiveSettings _settings;
+        readonly Mediator<ISetPrefetchCount> _mediator;
 
-        public RabbitMqReceiveTransport(IRabbitMqHost host, ReceiveSettings settings,
+        public RabbitMqReceiveTransport(IRabbitMqHost host, ReceiveSettings settings, Mediator<ISetPrefetchCount> mediator,
             params ExchangeBindingSettings[] exchangeBindings)
         {
             _host = host;
@@ -41,6 +43,7 @@ namespace MassTransit.RabbitMqTransport
             _exchangeBindings = exchangeBindings;
             _receiveObservers = new ReceiveObservable();
             _endpointObservers = new ReceiveEndpointObservable();
+            _mediator = mediator;
         }
 
         void IProbeSite.Probe(ProbeContext context)
@@ -62,7 +65,7 @@ namespace MassTransit.RabbitMqTransport
             var supervisor = new TaskSupervisor();
 
             var pipe = Pipe.New<ConnectionContext>(
-                    x => x.RabbitMqConsumer(receivePipe, _settings, _receiveObservers, _endpointObservers, _exchangeBindings, supervisor));
+                    x => x.RabbitMqConsumer(receivePipe, _settings, _receiveObservers, _endpointObservers, _exchangeBindings, supervisor, _mediator));
 
             Receiver(pipe, supervisor);
 
