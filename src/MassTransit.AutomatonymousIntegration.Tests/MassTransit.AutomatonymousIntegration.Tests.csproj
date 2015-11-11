@@ -104,6 +104,7 @@
     <Compile Include="CatchFault_Specs.cs" />
     <Compile Include="CompositeEvent_Specs.cs" />
     <Compile Include="ContextSetup.cs" />
+    <Compile Include="CorrelateGuid_Specs.cs" />
     <Compile Include="CorrelationExpression_Specs.cs" />
     <Compile Include="Fault_Specs.cs" />
     <Compile Include="Initiator_Specs.cs" />
