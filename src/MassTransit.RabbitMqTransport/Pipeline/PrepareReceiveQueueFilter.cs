@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RabbitMqTransport.Pipeline
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
@@ -19,6 +20,13 @@ namespace MassTransit.RabbitMqTransport.Pipeline
     using MassTransit.Pipeline;
     using RabbitMQ.Client;
     using Topology;
+    using Util;
+
+
+    public interface ISetPrefetchCount
+    {
+        Task SetPrefetchCount(ushort prefetchCount);
+    }
 
 
     /// <summary>
@@ -29,12 +37,15 @@ namespace MassTransit.RabbitMqTransport.Pipeline
     {
         static readonly ILog _log = Logger.Get<PrepareReceiveQueueFilter>();
         readonly ExchangeBindingSettings[] _exchangeBindings;
+        readonly Mediator<ISetPrefetchCount> _prefetchCountMediator;
         readonly ReceiveSettings _settings;
         bool _queueAlreadyPurged;
 
-        public PrepareReceiveQueueFilter(ReceiveSettings settings, params ExchangeBindingSettings[] exchangeBindings)
+        public PrepareReceiveQueueFilter(ReceiveSettings settings, Mediator<ISetPrefetchCount> prefetchCountMediator,
+            params ExchangeBindingSettings[] exchangeBindings)
         {
             _settings = settings;
+            _prefetchCountMediator = prefetchCountMediator;
             _exchangeBindings = exchangeBindings;
         }
 
@@ -85,7 +96,10 @@ namespace MassTransit.RabbitMqTransport.Pipeline
 
             context.GetOrAddPayload(() => settings);
 
-            await next.Send(context).ConfigureAwait(false);
+            using (new SetPrefetchCount(_prefetchCountMediator, context))
+            {
+                await next.Send(context).ConfigureAwait(false);
+            }
         }
 
         Task ApplyExchangeBindings(ModelContext context, string exchangeName)
@@ -119,6 +133,32 @@ namespace MassTransit.RabbitMqTransport.Pipeline
             {
                 if (_log.IsDebugEnabled)
                     _log.DebugFormat("Queue {0} already purged at startup, skipping", queueName);
+            }
+        }
+
+
+        class SetPrefetchCount :
+            ISetPrefetchCount,
+            IDisposable
+        {
+            readonly ConnectHandle _handle;
+            readonly ModelContext _modelContext;
+
+            public SetPrefetchCount(Mediator<ISetPrefetchCount> mediator, ModelContext modelContext)
+            {
+                _modelContext = modelContext;
+
+                _handle = mediator.Connect(this);
+            }
+
+            public void Dispose()
+            {
+                _handle.Dispose();
+            }
+
+            async Task ISetPrefetchCount.SetPrefetchCount(ushort prefetchCount)
+            {
+                await _modelContext.BasicQos(0, prefetchCount, false).ConfigureAwait(false);
             }
         }
     }

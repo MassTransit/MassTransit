@@ -53,7 +53,7 @@ namespace MassTransit
         public static IManagementEndpointConfigurator ManagementEndpoint(this IInMemoryBusFactoryConfigurator configurator,
             Action<IReceiveEndpointConfigurator> configure = null)
         {
-            var queueName = HostMetadataCache.Host.GetTemporaryQueueName("manage");
+            var queueName = HostMetadataCache.Host.GetTemporaryQueueName("manage-");
 
             var endpointConfigurator = new InMemoryReceiveEndpointConfigurator(queueName)
             {

@@ -18,19 +18,22 @@ namespace MassTransit.Pipeline.Filters.ConcurrencyLimit
     using Logging;
     using Util;
 
-
+    /// <summary>
+    /// Consumer which when connected to a management bus can control the concurrency
+    /// limit.
+    /// </summary>
     public class ConcurrencyLimitFilterManagementConsumer :
         IConsumer<SetConcurrencyLimit>
     {
         static readonly ILog _log = Logger.Get<ConcurrencyLimitFilterManagementConsumer>();
 
         readonly string _id;
-        readonly IMediator<IConcurrencyLimitFilter> _mediator;
+        readonly IMediator<IConcurrencyLimitFilter> _filterMediator;
         DateTime _lastUpdated;
 
-        public ConcurrencyLimitFilterManagementConsumer(IMediator<IConcurrencyLimitFilter> mediator, string id = null)
+        public ConcurrencyLimitFilterManagementConsumer(IMediator<IConcurrencyLimitFilter> filterMediator, string id = null)
         {
-            _mediator = mediator;
+            _filterMediator = filterMediator;
             _id = id;
 
             _lastUpdated = DateTime.UtcNow;
@@ -44,7 +47,7 @@ namespace MassTransit.Pipeline.Filters.ConcurrencyLimit
                 {
                     try
                     {
-                        await _mediator.ForEachAsync(x => x.SetConcurrencyLimit(context.Message.ConcurrencyLimit));
+                        await _filterMediator.ForEachAsync(x => x.SetConcurrencyLimit(context.Message.ConcurrencyLimit));
 
                         _lastUpdated = context.Message.Timestamp;
 
@@ -56,12 +59,12 @@ namespace MassTransit.Pipeline.Filters.ConcurrencyLimit
                         });
 
                         if (_log.IsDebugEnabled)
-                            _log.DebugFormat("Set Consumer Limit: {0} ({1})", context.Message.ConcurrencyLimit, context.Message.Id ?? "");
+                            _log.Debug($"Set Consumer Limit: {context.Message.ConcurrencyLimit} ({context.Message.Id ?? ""})");
                     }
                     catch (Exception exception)
                     {
                         if (_log.IsErrorEnabled)
-                            _log.Error($"Set Consumer Limit Failed: {context.Message.ConcurrencyLimit} ({context.Message.Id}", exception);
+                            _log.Error($"Set Consumer Limit Failed: {context.Message.ConcurrencyLimit} ({context.Message.Id})", exception);
 
                         throw;
                     }

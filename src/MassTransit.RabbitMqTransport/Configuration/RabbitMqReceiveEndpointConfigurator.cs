@@ -20,8 +20,10 @@ namespace MassTransit.RabbitMqTransport.Configuration
     using MassTransit.Builders;
     using MassTransit.Configurators;
     using MassTransit.Pipeline;
+    using Pipeline;
     using Topology;
     using Transports;
+    using Util;
 
 
     public class RabbitMqReceiveEndpointConfigurator :
@@ -30,6 +32,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
         IBusFactorySpecification
     {
         readonly IRabbitMqHost _host;
+        readonly Mediator<ISetPrefetchCount> _mediator;
         readonly RabbitMqReceiveSettings _settings;
 
         public RabbitMqReceiveEndpointConfigurator(IRabbitMqHost host, string queueName = null, IConsumePipe consumePipe = null)
@@ -42,6 +45,8 @@ namespace MassTransit.RabbitMqTransport.Configuration
                 QueueName = queueName,
                 ExchangeName = queueName
             };
+
+            _mediator = new Mediator<ISetPrefetchCount>();
         }
 
         public RabbitMqReceiveEndpointConfigurator(IRabbitMqHost host, RabbitMqReceiveSettings settings, IConsumePipe consumePipe)
@@ -50,6 +55,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
             _host = host;
 
             _settings = settings;
+            _mediator = new Mediator<ISetPrefetchCount>();
         }
 
         public override IEnumerable<ValidationResult> Validate()
@@ -75,7 +81,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
             if (endpointBuilder == null)
                 throw new InvalidOperationException("The endpoint builder was not initialized");
 
-            var transport = new RabbitMqReceiveTransport(_host, _settings, endpointBuilder.GetExchangeBindings().ToArray());
+            var transport = new RabbitMqReceiveTransport(_host, _settings, _mediator, endpointBuilder.GetExchangeBindings().ToArray());
 
             builder.AddReceiveEndpoint(_settings.QueueName ?? NewId.Next().ToString(), new ReceiveEndpoint(transport, receivePipe));
         }
@@ -150,6 +156,12 @@ namespace MassTransit.RabbitMqTransport.Configuration
                 _settings.ExchangeArguments.Remove(key);
             else
                 _settings.ExchangeArguments[key] = value;
+        }
+
+        public void ConnectManagementEndpoint(IManagementEndpointConfigurator management)
+        {
+            var consumer = new SetPrefetchCountManagementConsumer(_mediator, _settings.QueueName);
+            management.Instance(consumer);
         }
 
         protected override Uri GetInputAddress()
