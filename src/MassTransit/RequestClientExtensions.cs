@@ -41,7 +41,7 @@ namespace MassTransit
         /// <param name="bus">The bus on which the client is created</param>
         /// <param name="timeout">The timeout before the request is cancelled</param>
         /// <returns></returns>
-        public static IRequestClient<TRequest, TResponse> CreatePublistRequestClient<TRequest, TResponse>(this IBus bus, TimeSpan timeout)
+        public static IRequestClient<TRequest, TResponse> CreatePublishRequestClient<TRequest, TResponse>(this IBus bus, TimeSpan timeout)
             where TRequest : class
             where TResponse : class
         {

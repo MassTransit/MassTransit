@@ -10,28 +10,13 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Contracts
+namespace MassTransit.RabbitMqTransport.Management
 {
-    using System;
+    using System.Threading.Tasks;
 
-    /// <summary>
-    /// Published when the concurrency limit of a filter is updated.
-    /// </summary>
-    public interface ConcurrencyLimitUpdated
+
+    public interface ISetPrefetchCount
     {
-        /// <summary>
-        /// The actual time at which the adjustment was applied
-        /// </summary>
-        DateTime Timestamp { get; }
-
-        /// <summary>
-        /// The identifier that was adjusted
-        /// </summary>
-        string Id { get; }
-
-        /// <summary>
-        /// The current concurrency limit value
-        /// </summary>
-        int ConcurrencyLimit { get; }
+        Task SetPrefetchCount(ushort prefetchCount);
     }
 }

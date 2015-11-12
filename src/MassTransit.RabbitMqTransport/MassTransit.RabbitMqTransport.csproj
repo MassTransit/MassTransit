@@ -96,12 +96,13 @@
     <Compile Include="Integration\RabbitMqModelCache.cs" />
     <Compile Include="IRabbitMqHost.cs" />
     <Compile Include="Pipeline\DelayedExchangeMessageRedeliveryFilter.cs" />
+    <Compile Include="Management\ISetPrefetchCount.cs" />
     <Compile Include="Pipeline\RabbitMqConsumerFilter.cs" />
     <Compile Include="Pipeline\PrepareSendExchangeFilter.cs" />
     <Compile Include="Pipeline\RabbitMqBasicConsumer.cs" />
     <Compile Include="Pipeline\ReceiveModelFilter.cs" />
     <Compile Include="Pipeline\PrepareReceiveQueueFilter.cs" />
-    <Compile Include="Pipeline\SetPrefetchCountManagementConsumer.cs" />
+    <Compile Include="Management\SetPrefetchCountManagementConsumer.cs" />
     <Compile Include="PublishSettings.cs" />
     <Compile Include="RabbitMqBusFactory.cs" />
     <Compile Include="RabbitMqAddressExtensions.cs" />
