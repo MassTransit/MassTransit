@@ -79,6 +79,13 @@ namespace MassTransit.RabbitMqTransport.Tests
             IRequestClient<SetPrefetchCount, PrefetchCountUpdated> client = new PublishRequestClient<SetPrefetchCount, PrefetchCountUpdated>(Bus,
                 TestTimeout);
 
+            for (int i = 0; i < 500; i++)
+            {
+                await Bus.Publish(new A());
+
+                await Task.Delay(50);
+            }
+
             SetPrefetchCount request = TypeMetadataCache<SetPrefetchCount>.InitializeFromObject(new
             {
                 PrefetchCount = (ushort)32,
@@ -88,7 +95,12 @@ namespace MassTransit.RabbitMqTransport.Tests
 
             await client.Request(request, TestCancellationToken);
 
-            await Bus.Publish(new A());
+            for (int i = 0; i < 500; i++)
+            {
+                await Bus.Publish(new A());
+
+                await Task.Delay(50);
+            }
 
             Assert.IsTrue(_consumer.Received.Select<A>().Any());
         }

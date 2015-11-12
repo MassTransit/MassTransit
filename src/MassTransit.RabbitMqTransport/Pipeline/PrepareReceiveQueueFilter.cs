@@ -17,34 +17,32 @@ namespace MassTransit.RabbitMqTransport.Pipeline
     using System.Linq;
     using System.Threading.Tasks;
     using Logging;
+    using Management;
     using MassTransit.Pipeline;
     using RabbitMQ.Client;
     using Topology;
     using Util;
 
 
-    public interface ISetPrefetchCount
-    {
-        Task SetPrefetchCount(ushort prefetchCount);
-    }
-
-
     /// <summary>
     /// Prepares a queue for receiving messages using the ReceiveSettings specified.
     /// </summary>
     public class PrepareReceiveQueueFilter :
-        IFilter<ModelContext>
+        IFilter<ModelContext>,
+        ISetPrefetchCount
     {
         static readonly ILog _log = Logger.Get<PrepareReceiveQueueFilter>();
         readonly ExchangeBindingSettings[] _exchangeBindings;
         readonly Mediator<ISetPrefetchCount> _prefetchCountMediator;
         readonly ReceiveSettings _settings;
+        ushort _prefetchCount;
         bool _queueAlreadyPurged;
 
         public PrepareReceiveQueueFilter(ReceiveSettings settings, Mediator<ISetPrefetchCount> prefetchCountMediator,
             params ExchangeBindingSettings[] exchangeBindings)
         {
             _settings = settings;
+            _prefetchCount = settings.PrefetchCount;
             _prefetchCountMediator = prefetchCountMediator;
             _exchangeBindings = exchangeBindings;
         }
@@ -55,12 +53,12 @@ namespace MassTransit.RabbitMqTransport.Pipeline
 
         async Task IFilter<ModelContext>.Send(ModelContext context, IPipe<ModelContext> next)
         {
-            await context.BasicQos(0, _settings.PrefetchCount, false).ConfigureAwait(false);
+            await context.BasicQos(0, _prefetchCount, true).ConfigureAwait(false);
 
-            QueueDeclareOk queueOk = await context.QueueDeclare(_settings.QueueName, _settings.Durable, _settings.Exclusive,
+            var queueOk = await context.QueueDeclare(_settings.QueueName, _settings.Durable, _settings.Exclusive,
                 _settings.AutoDelete, _settings.QueueArguments).ConfigureAwait(false);
 
-            string queueName = queueOk.QueueName;
+            var queueName = queueOk.QueueName;
 
             if (_log.IsDebugEnabled)
             {
@@ -76,7 +74,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
             if (_settings.PurgeOnStartup)
                 await PurgeIfRequested(context, queueOk, queueName).ConfigureAwait(false);
 
-            string exchangeName = _settings.ExchangeName ?? queueName;
+            var exchangeName = _settings.ExchangeName ?? queueName;
 
             if (!string.IsNullOrWhiteSpace(_settings.ExchangeName) || string.IsNullOrWhiteSpace(_settings.QueueName))
             {
@@ -96,17 +94,24 @@ namespace MassTransit.RabbitMqTransport.Pipeline
 
             context.GetOrAddPayload(() => settings);
 
-            using (new SetPrefetchCount(_prefetchCountMediator, context))
+            using (new SetModelPrefetchCountProxy(_prefetchCountMediator, context, this))
             {
                 await next.Send(context).ConfigureAwait(false);
             }
+        }
+
+        Task ISetPrefetchCount.SetPrefetchCount(ushort prefetchCount)
+        {
+            _prefetchCount = prefetchCount;
+
+            return TaskUtil.Completed;
         }
 
         Task ApplyExchangeBindings(ModelContext context, string exchangeName)
         {
             return Task.WhenAll(_exchangeBindings.Select(async binding =>
             {
-                ExchangeSettings exchange = binding.Exchange;
+                var exchange = binding.Exchange;
 
                 await context.ExchangeDeclare(exchange.ExchangeName, exchange.ExchangeType, exchange.Durable, exchange.AutoDelete,
                     exchange.Arguments).ConfigureAwait(false);
@@ -137,16 +142,18 @@ namespace MassTransit.RabbitMqTransport.Pipeline
         }
 
 
-        class SetPrefetchCount :
+        class SetModelPrefetchCountProxy :
             ISetPrefetchCount,
             IDisposable
         {
+            readonly ISetPrefetchCount _filter;
             readonly ConnectHandle _handle;
             readonly ModelContext _modelContext;
 
-            public SetPrefetchCount(Mediator<ISetPrefetchCount> mediator, ModelContext modelContext)
+            public SetModelPrefetchCountProxy(Mediator<ISetPrefetchCount> mediator, ModelContext modelContext, ISetPrefetchCount filter)
             {
                 _modelContext = modelContext;
+                _filter = filter;
 
                 _handle = mediator.Connect(this);
             }
@@ -158,7 +165,9 @@ namespace MassTransit.RabbitMqTransport.Pipeline
 
             async Task ISetPrefetchCount.SetPrefetchCount(ushort prefetchCount)
             {
-                await _modelContext.BasicQos(0, prefetchCount, false).ConfigureAwait(false);
+                await _modelContext.BasicQos(0, prefetchCount, true).ConfigureAwait(false);
+
+                await _filter.SetPrefetchCount(prefetchCount).ConfigureAwait(false);
             }
         }
     }

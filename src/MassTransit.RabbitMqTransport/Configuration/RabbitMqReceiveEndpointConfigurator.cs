@@ -17,6 +17,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
     using System.Linq;
     using Builders;
     using EndpointConfigurators;
+    using Management;
     using MassTransit.Builders;
     using MassTransit.Configurators;
     using MassTransit.Pipeline;
