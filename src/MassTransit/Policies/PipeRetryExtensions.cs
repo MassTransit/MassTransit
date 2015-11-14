@@ -51,5 +51,35 @@ namespace MassTransit.Policies
 
             await Attempt(retryContext, retryMethod, cancellationToken).ConfigureAwait(false);
         }
+
+        public static async Task<T> Retry<T>(this IRetryPolicy retryPolicy, Func<Task<T>> retryMethod, 
+            CancellationToken cancellationToken = default(CancellationToken))
+        {
+            using (IRetryContext retryContext = retryPolicy.GetRetryContext())
+            {
+                return await Attempt(retryContext, retryMethod, cancellationToken).ConfigureAwait(false);
+            }
+        }
+
+        static async Task<T> Attempt<T>(IRetryContext retryContext, Func<Task<T>> retryMethod, CancellationToken cancellationToken)
+        {
+            if (cancellationToken.IsCancellationRequested)
+                throw new TaskCanceledException();
+
+            TimeSpan delay;
+            try
+            {
+                return await retryMethod().ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                if (!retryContext.CanRetry(ex, out delay))
+                    throw;
+            }
+
+            await Task.Delay(delay, cancellationToken).ConfigureAwait(false);
+
+            return await Attempt(retryContext, retryMethod, cancellationToken).ConfigureAwait(false);
+        }
     }
 }
