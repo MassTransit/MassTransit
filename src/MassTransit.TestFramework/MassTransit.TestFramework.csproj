@@ -84,6 +84,7 @@
     <Compile Include="Courier\AddressLog.cs" />
     <Compile Include="ExtensionMethodsForBuses.cs" />
     <Compile Include="Indicators\BusActivityConsumeIndicator.cs" />
+    <Compile Include="Indicators\BaseBusActivityIndicatorConnectable.cs" />
     <Compile Include="Indicators\BusActivityMonitor.cs" />
     <Compile Include="Indicators\BusActivityPublishIndicator.cs" />
     <Compile Include="Indicators\BusActivityReceiveIndicator.cs" />

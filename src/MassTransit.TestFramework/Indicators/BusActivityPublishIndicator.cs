@@ -3,6 +3,7 @@ namespace MassTransit.TestFramework.Indicators
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Threading;
     using System.Threading.Tasks;
     using Pipeline;
     using Util;
@@ -11,11 +12,11 @@ namespace MassTransit.TestFramework.Indicators
     /// <summary>
     /// An activity indicator for publish endpoints. Utilizes a timer that restarts on publish activity.
     /// </summary>
-    public class BusActivityPublishIndicator : ISignalResource, IObservableCondition, IPublishObserver
+    public class BusActivityPublishIndicator : BaseBusActivityIndicatorConnectable, ISignalResource, IPublishObserver
     {
         readonly ISignalResource _signalResource;
         readonly RollingTimer _receiveIdleTimer;
-        readonly List<IConditionObserver> _observers = new List<IConditionObserver>(); 
+        int _activityStarted = 0;
 
         public BusActivityPublishIndicator(ISignalResource signalResource, TimeSpan receiveIdleTimeout)
         {
@@ -40,6 +41,7 @@ namespace MassTransit.TestFramework.Indicators
 
         Task IPublishObserver.PrePublish<T>(PublishContext<T> context)
         {
+            Interlocked.CompareExchange(ref _activityStarted, 1, 0);
             _receiveIdleTimer.Restart();
             ConditionUpdated();
             return TaskUtil.Completed;
@@ -73,18 +75,9 @@ namespace MassTransit.TestFramework.Indicators
         }
 
 
-        public bool State => _receiveIdleTimer.Triggered;
+        public override bool State => _receiveIdleTimer.Triggered ||
+            Interlocked.CompareExchange(ref _activityStarted, int.MinValue, int.MinValue) == 0;
         
-        public void RegisterObserver(IConditionObserver observer)
-        {
-            _observers.Add(observer);
-        }
-
-        void ConditionUpdated()
-        {
-            if (_observers.Any())
-                _observers.ForEach(x => x.ConditionUpdated());
-        }
 
     }
 }

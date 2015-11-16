@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
+    using System;
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
@@ -54,7 +55,7 @@ namespace MassTransit
             }
         }
 
-        public static IEnumerable<string> GetReceiveEndpointAddresses(this IBus bus)
+        public static IEnumerable<Uri> GetReceiveEndpointAddresses(this IBus bus)
         {
             ProbeResult probeResult = bus.GetProbeResult();
 
@@ -64,7 +65,7 @@ namespace MassTransit
             var probeResults = receiveEndpoints.Select(result => 
             JsonConvert.DeserializeObject<ReceiveTransportProbeResult>(result["transport"].ToString()));
 
-            return probeResults.Select(result => result.Address);
+            return probeResults.Select(result => new Uri(result.Address));
         }
 
         class ReceiveTransportProbeResult
