@@ -42,7 +42,7 @@ namespace MassTransit.Tests
         }
 
         [Test]
-        public async Task Should_extract_receive_endpoint_addresses()
+        public void Should_extract_receive_endpoint_addresses()
         {
             List<Uri> receiveAddresses = Bus.GetReceiveEndpointAddresses().ToList();
             Assert.Contains(InputQueueAddress, receiveAddresses);
