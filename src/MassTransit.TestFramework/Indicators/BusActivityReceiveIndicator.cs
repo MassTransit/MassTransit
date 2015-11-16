@@ -42,14 +42,12 @@ namespace MassTransit.TestFramework.Indicators
         {
             Interlocked.CompareExchange(ref _activityStarted, 1, 0);
             _receiveIdleTimer.Restart();
-            ConditionUpdated();
             return TaskUtil.Completed;
         }
 
         Task IReceiveObserver.PostReceive(ReceiveContext context)
         {
             _receiveIdleTimer.Restart();
-            ConditionUpdated();
             return TaskUtil.Completed;
         }
 
@@ -66,7 +64,6 @@ namespace MassTransit.TestFramework.Indicators
         Task IReceiveObserver.ReceiveFault(ReceiveContext context, Exception exception)
         {
             _receiveIdleTimer.Restart();
-            ConditionUpdated();
             return TaskUtil.Completed;
         }
 
@@ -74,6 +71,7 @@ namespace MassTransit.TestFramework.Indicators
         {
             _signalResource?.Signal();
             ConditionUpdated();
+            Interlocked.CompareExchange(ref _activityStarted, 0, 1);
             _receiveIdleTimer.Stop();
         }
 
