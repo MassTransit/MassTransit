@@ -57,20 +57,22 @@ namespace MassTransit
 
         public static IEnumerable<Uri> GetReceiveEndpointAddresses(this IBus bus)
         {
-            ProbeResult probeResult = bus.GetProbeResult();
+            var probeResult = bus.GetProbeResult();
 
-            JObject probeJObject = JObject.Parse(probeResult.ToJsonString());
+            var probeJObject = JObject.Parse(probeResult.ToJsonString());
             var receiveEndpoints = probeJObject["results"]["bus"]["receiveEndpoint"].Children();
 
-            var probeResults = receiveEndpoints.Select(result => 
-            JsonConvert.DeserializeObject<ReceiveTransportProbeResult>(result["transport"].ToString()));
+            var probeResults = receiveEndpoints.Select(result =>
+                JsonConvert.DeserializeObject<ReceiveTransportProbeResult>(result["transport"].ToString()))
+                .Where(x => x.Address != null);
 
-            return probeResults.Select(result => new Uri(result.Address));
+            return probeResults.Select(result => result.Address);
         }
+
 
         class ReceiveTransportProbeResult
         {
-            public string Address { get; set; }
+            public Uri Address { get; set; }
         }
     }
 }
