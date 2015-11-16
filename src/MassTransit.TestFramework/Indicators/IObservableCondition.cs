@@ -5,6 +5,6 @@ namespace MassTransit.TestFramework.Indicators
     /// </summary>
     public interface IObservableCondition : ICondition
     {
-        void RegisterObserver(IConditionObserver observer);
+        ConnectHandle ConnectConditionObserver(IConditionObserver observer);
     }
 }

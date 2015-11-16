@@ -3,6 +3,7 @@ namespace MassTransit.TestFramework.Indicators
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Threading;
     using System.Threading.Tasks;
     using Util;
 
@@ -10,11 +11,11 @@ namespace MassTransit.TestFramework.Indicators
     /// <summary>
     /// An activity indicator for receive endpoint queues. Utilizes a timer that restarts on receive activity.
     /// </summary>
-    public class BusActivityReceiveIndicator : ISignalResource, IObservableCondition, IReceiveObserver
+    public class BusActivityReceiveIndicator : BaseBusActivityIndicatorConnectable, ISignalResource, IReceiveObserver
     {
         readonly ISignalResource _signalResource;
         readonly RollingTimer _receiveIdleTimer;
-        readonly List<IConditionObserver> _observers = new List<IConditionObserver>(); 
+        int _activityStarted = 0;
 
         public BusActivityReceiveIndicator(ISignalResource signalResource, TimeSpan receiveIdleTimeout)
         {
@@ -39,6 +40,7 @@ namespace MassTransit.TestFramework.Indicators
         
         Task IReceiveObserver.PreReceive(ReceiveContext context)
         {
+            Interlocked.CompareExchange(ref _activityStarted, 1, 0);
             _receiveIdleTimer.Restart();
             ConditionUpdated();
             return TaskUtil.Completed;
@@ -81,18 +83,7 @@ namespace MassTransit.TestFramework.Indicators
         }
 
 
-        public bool State => _receiveIdleTimer.Triggered;
-        
-        public void RegisterObserver(IConditionObserver observer)
-        {
-            _observers.Add(observer);
-        }
-
-        void ConditionUpdated()
-        {
-            if (_observers.Any())
-                _observers.ForEach(x => x.ConditionUpdated());
-        }
-        
+        public override bool State => _receiveIdleTimer.Triggered ||
+            Interlocked.CompareExchange(ref _activityStarted, int.MinValue, int.MinValue) == 0;
     }
 }

@@ -9,10 +9,9 @@ namespace MassTransit.TestFramework.Indicators
     using Util;
 
 
-    public class BusActivityConsumeIndicator : ISignalResource, IObservableCondition, IConsumeObserver
+    public class BusActivityConsumeIndicator : BaseBusActivityIndicatorConnectable, ISignalResource, IConsumeObserver
     {
         readonly ISignalResource _signalResource;
-        readonly List<IConditionObserver> _observers = new List<IConditionObserver>();
         int _messagesInFlight = 0;
         
         public BusActivityConsumeIndicator(ISignalResource signalResource)
@@ -53,18 +52,8 @@ namespace MassTransit.TestFramework.Indicators
             ConditionUpdated();
         }
 
-        public bool State => Interlocked.CompareExchange(ref _messagesInFlight, int.MinValue, int.MinValue) == 0;
+        public override bool State => Interlocked.CompareExchange(ref _messagesInFlight, int.MinValue, int.MinValue) == 0;
         
-
-        public void RegisterObserver(IConditionObserver observer)
-        {
-            _observers.Add(observer);
-        }
-
-        void ConditionUpdated()
-        {
-            if (_observers.Any())
-                _observers.ForEach(x => x.ConditionUpdated());
-        }
+        
     }
 }

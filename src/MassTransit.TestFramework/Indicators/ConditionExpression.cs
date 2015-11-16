@@ -2,6 +2,8 @@ namespace MassTransit.TestFramework.Indicators
 {
     using System;
     using System.Collections.Generic;
+    using System.Threading.Tasks;
+    using Util;
 
 
     /// <summary>
@@ -28,7 +30,7 @@ namespace MassTransit.TestFramework.Indicators
 
             foreach (var condition in conditions)
             {
-                condition.RegisterObserver(this);
+                condition.ConnectConditionObserver(this);
             }
             _conditionBlocks.Add(conditions);
         }
@@ -62,10 +64,11 @@ namespace MassTransit.TestFramework.Indicators
             return false;
         }
 
-        public void ConditionUpdated()
+        public Task ConditionUpdated()
         {
             if (CheckCondition())
                 _resource.Signal();
+            return TaskUtil.Completed;
         }
     }
 }
