@@ -27,8 +27,7 @@ namespace MassTransit.TestFramework.Indicators
 
         Task IConsumeObserver.PreConsume<T>(ConsumeContext<T> context)
         {
-            if (Interlocked.Increment(ref _messagesInFlight) == 1)
-                ConditionUpdated();
+            Interlocked.Increment(ref _messagesInFlight);
             return TaskUtil.Completed;
         }
 
