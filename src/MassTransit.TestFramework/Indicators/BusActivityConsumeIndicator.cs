@@ -1,0 +1,70 @@
+namespace MassTransit.TestFramework.Indicators
+{
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Threading;
+    using System.Threading.Tasks;
+    using Pipeline;
+    using Util;
+
+
+    public class BusActivityConsumeIndicator : ISignalResource, IObservableCondition, IConsumeObserver
+    {
+        readonly ISignalResource _signalResource;
+        readonly List<IConditionObserver> _observers = new List<IConditionObserver>();
+        int _messagesInFlight = 0;
+        
+        public BusActivityConsumeIndicator(ISignalResource signalResource)
+        {
+            _signalResource = signalResource;
+        }
+
+        public BusActivityConsumeIndicator() :
+            this(null)
+        {
+        }
+        
+
+        Task IConsumeObserver.PreConsume<T>(ConsumeContext<T> context)
+        {
+            if (Interlocked.Increment(ref _messagesInFlight) == 1)
+                ConditionUpdated();
+            return TaskUtil.Completed;
+        }
+
+        Task IConsumeObserver.PostConsume<T>(ConsumeContext<T> context)
+        {
+            if (Interlocked.Decrement(ref _messagesInFlight) == 0)
+                Signal();
+            return TaskUtil.Completed;
+        }
+
+        Task IConsumeObserver.ConsumeFault<T>(ConsumeContext<T> context, Exception exception)
+        {
+            if (Interlocked.Decrement(ref _messagesInFlight) == 0)
+                Signal();
+            return TaskUtil.Completed;
+        }
+
+        public void Signal()
+        {
+            _signalResource?.Signal();
+            ConditionUpdated();
+        }
+
+        public bool State => Interlocked.CompareExchange(ref _messagesInFlight, int.MinValue, int.MinValue) == 0;
+        
+
+        public void RegisterObserver(IConditionObserver observer)
+        {
+            _observers.Add(observer);
+        }
+
+        void ConditionUpdated()
+        {
+            if (_observers.Any())
+                _observers.ForEach(x => x.ConditionUpdated());
+        }
+    }
+}

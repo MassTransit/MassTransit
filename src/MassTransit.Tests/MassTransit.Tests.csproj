@@ -91,6 +91,7 @@
     <Compile Include="..\SolutionVersion.cs">
       <Link>Properties\SolutionVersion.cs</Link>
     </Compile>
+    <Compile Include="BusActivityIndicator_Specs.cs" />
     <Compile Include="ConcurrencyLimitKnob_Specs.cs" />
     <Compile Include="ConsumeObserver_Specs.cs" />
     <Compile Include="Consumer_Specs.cs" />

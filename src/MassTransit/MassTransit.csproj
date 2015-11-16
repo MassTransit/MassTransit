@@ -924,6 +924,7 @@
     <Compile Include="Util\IMediator.cs" />
     <Compile Include="Util\ITaskSupervisorScope.cs" />
     <Compile Include="Util\Mediator.cs" />
+    <Compile Include="Util\RollingTimer.cs" />
     <Compile Include="Util\TaskSupervisor.cs" />
     <Compile Include="Util\AsyncObservable.cs" />
     <Compile Include="Util\BusHostInfo.cs" />

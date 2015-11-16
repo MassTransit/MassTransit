@@ -82,6 +82,18 @@
     <Compile Include="Courier\AddressActivity.cs" />
     <Compile Include="Courier\AddressArguments.cs" />
     <Compile Include="Courier\AddressLog.cs" />
+    <Compile Include="ExtensionMethodsForBuses.cs" />
+    <Compile Include="Indicators\BusActivityConsumeIndicator.cs" />
+    <Compile Include="Indicators\BusActivityMonitor.cs" />
+    <Compile Include="Indicators\BusActivityPublishIndicator.cs" />
+    <Compile Include="Indicators\BusActivityReceiveIndicator.cs" />
+    <Compile Include="Indicators\BusActivitySendIndicator.cs" />
+    <Compile Include="Indicators\ConditionExpression.cs" />
+    <Compile Include="Indicators\IBusActivityMonitor.cs" />
+    <Compile Include="Indicators\ICondition.cs" />
+    <Compile Include="Indicators\IConditionObserver.cs" />
+    <Compile Include="Indicators\IObservableCondition.cs" />
+    <Compile Include="Indicators\ISignalResource.cs" />
     <Compile Include="InMemoryActivityTestFixture.cs" />
     <Compile Include="AsyncTestFixture.cs" />
     <Compile Include="Courier\FaultyActivity.cs" />
@@ -118,6 +130,7 @@
     <Compile Include="TestConsumeObserver.cs" />
     <Compile Include="TestObserver.cs" />
     <Compile Include="TestSymmetricKeyProvider.cs" />
+    <Compile Include="ThreadSafeRandom.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="MassTransit.TestFramework.log4net.xml">

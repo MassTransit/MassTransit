@@ -81,6 +81,8 @@ namespace MassTransit.TestFramework
         {
             _bus = CreateBus();
 
+            ConnectObservers(_bus);
+
             _busHandle = _bus.Start();
 
             _busSendEndpoint = Await(() => GetSendEndpoint(_bus.Address));
@@ -118,6 +120,11 @@ namespace MassTransit.TestFramework
 
         protected virtual void ConfigureBus(IInMemoryBusFactoryConfigurator configurator)
         {
+        }
+
+        protected virtual void ConnectObservers(IBus bus)
+        {
+            
         }
 
         protected virtual void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
