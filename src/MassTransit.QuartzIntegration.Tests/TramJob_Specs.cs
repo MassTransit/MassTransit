@@ -47,7 +47,7 @@ namespace MassTransit.QuartzIntegration.Tests
 
             IJobFactory<ProcessFile> jobFactory = new DelegateJobFactory<ProcessFile>(async context => await Task.Delay(context.Message.Size));
 
-            _consumerTurnout = new ConsumerTurnout();
+            _consumerTurnout = new ConsumerTurnout(new JobRoster(), configurator.InputAddress);
 
             configurator.Consumer(() => new CreateJobConsumer<ProcessFile>(_consumerTurnout, jobFactory));
         }
@@ -91,7 +91,7 @@ namespace MassTransit.QuartzIntegration.Tests
                 throw new IntentionalTestException();
             });
 
-            _consumerTurnout = new ConsumerTurnout();
+            _consumerTurnout = new ConsumerTurnout(new JobRoster(), configurator.InputAddress);
 
             configurator.Consumer(() => new CreateJobConsumer<ProcessFile>(_consumerTurnout, jobFactory));
         }

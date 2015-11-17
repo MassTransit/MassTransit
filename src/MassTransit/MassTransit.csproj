@@ -855,7 +855,7 @@
     <Compile Include="Testing\TestInstanceConfigurators\IHandlerTestConfigurator.cs" />
     <Compile Include="Testing\TestInstanceConfigurators\HandlerTestInstanceConfiguratorImpl.cs" />
     <Compile Include="Testing\ITestSubject.cs" />
-    <Compile Include="Turnout\CheckJobConsumer.cs" />
+    <Compile Include="Turnout\TurnoutJobConsumer.cs" />
     <Compile Include="Turnout\Contracts\CheckJobProgress.cs" />
     <Compile Include="Turnout\Contracts\JobCompleted.cs" />
     <Compile Include="Turnout\Contracts\JobFaulted.cs" />
@@ -863,14 +863,14 @@
     <Compile Include="Turnout\Contracts\JobStatus.cs" />
     <Compile Include="Turnout\CreateJobConsumer.cs" />
     <Compile Include="Turnout\DelegateJobFactory.cs" />
-    <Compile Include="Turnout\IJobReference.cs" />
+    <Compile Include="Turnout\JobHandle.cs" />
     <Compile Include="Turnout\IJobRoster.cs" />
     <Compile Include="Turnout\IJobFactory.cs" />
     <Compile Include="Turnout\IConsumerTurnout.cs" />
     <Compile Include="Turnout\JobAlreadyExistsException.cs" />
     <Compile Include="Turnout\ConsumerJobContext.cs" />
     <Compile Include="Turnout\JobContext.cs" />
-    <Compile Include="Turnout\JobReference.cs" />
+    <Compile Include="Turnout\ConsumerJobHandle.cs" />
     <Compile Include="Turnout\JobRoster.cs" />
     <Compile Include="Turnout\ConsumerTurnout.cs" />
     <Compile Include="TransactionContext.cs" />

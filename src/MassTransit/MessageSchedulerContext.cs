@@ -26,6 +26,12 @@ namespace MassTransit
         Task<ScheduledMessage<T>> ScheduleSend<T>(T message, DateTime deliveryTime, IPipe<SendContext> sendPipe)
             where T : class;
 
+        Task<ScheduledMessage<T>> ScheduleSend<T>(T message, Uri destinationAddress, TimeSpan deliveryDelay, IPipe<SendContext> sendPipe)
+            where T : class;
+
+        Task<ScheduledMessage<T>> ScheduleSend<T>(T message, Uri destinationAddress, DateTime deliveryTime, IPipe<SendContext> sendPipe)
+            where T : class;
+
         /// <summary>
         /// Cancel a scheduled message by the scheduled message (uses the TokenId)
         /// </summary>

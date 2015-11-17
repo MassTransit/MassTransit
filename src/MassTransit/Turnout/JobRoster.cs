@@ -15,26 +15,34 @@ namespace MassTransit.Turnout
     using System;
     using System.Collections.Concurrent;
 
-
+    /// <summary>
+    /// Maintains the jobs for a turnout
+    /// </summary>
     public class JobRoster :
         IJobRoster
     {
-        readonly ConcurrentDictionary<Guid, IJobReference> _jobs;
+        readonly ConcurrentDictionary<Guid, JobHandle> _jobs;
 
         public JobRoster()
         {
-            _jobs = new ConcurrentDictionary<Guid, IJobReference>();
+            _jobs = new ConcurrentDictionary<Guid, JobHandle>();
         }
 
-        public bool TryGetJob(Guid jobId, out IJobReference jobReference)
+        public bool TryGetJob(Guid jobId, out JobHandle jobReference)
         {
             return _jobs.TryGetValue(jobId, out jobReference);
         }
 
-        public void Add(Guid jobId, IJobReference jobReference)
+        public void Add(Guid jobId, JobHandle jobReference)
         {
             if (!_jobs.TryAdd(jobId, jobReference))
                 throw new JobAlreadyExistsException(jobId);
+        }
+
+        public void RemoveJob(Guid jobId)
+        {
+            JobHandle ignored;
+            _jobs.TryRemove(jobId, out ignored);
         }
     }
 }
