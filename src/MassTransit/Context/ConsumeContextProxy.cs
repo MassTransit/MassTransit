@@ -44,7 +44,7 @@ namespace MassTransit.Context
             return _context.RespondAsync(message, sendPipe);
         }
 
-        public CancellationToken CancellationToken => _context.CancellationToken;
+        public virtual CancellationToken CancellationToken => _context.CancellationToken;
 
         public virtual bool HasPayloadType(Type contextType)
         {
