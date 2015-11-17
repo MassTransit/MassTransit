@@ -21,24 +21,40 @@ namespace MassTransit.Turnout
     public class ConsumerTurnout :
         IConsumerTurnout
     {
+        readonly TimeSpan _checkInterval;
         readonly IJobRoster _roster;
+        readonly Uri _controlAddress;
 
-        public ConsumerTurnout()
+        public ConsumerTurnout(IJobRoster jobRoster, Uri controlAddress)
+            : this(jobRoster, controlAddress, TimeSpan.FromMinutes(1))
         {
-            _roster = new JobRoster();
         }
 
-        Task<TramJob<T>> IConsumerTurnout.CreateJob<T>(ConsumeContext<T> context, IJobFactory<T> jobFactory)
+        public ConsumerTurnout(IJobRoster jobRoster, Uri controlAddress, TimeSpan checkInterval)
+        {
+            _checkInterval = checkInterval;
+            _roster = jobRoster;
+            _controlAddress = controlAddress;
+        }
+
+        async Task<TramJob<T>> IConsumerTurnout.CreateJob<T>(ConsumeContext<T> context, IJobFactory<T> jobFactory)
         {
             var jobContext = new ConsumerJobContext<T>(context);
 
             var babyTask = Run(jobContext, jobFactory);
 
-            var jobReference = new JobReference(jobContext, babyTask);
+            var jobReference = new ConsumerJobHandle(jobContext, babyTask);
 
             _roster.Add(jobContext.JobId, jobReference);
 
-            return Task.FromResult<TramJob<T>>(new Job<T>(context, jobReference));
+            DateTime utcNow = DateTime.UtcNow;
+            var scheduledTime = utcNow + _checkInterval;
+
+            var check = new Check(jobContext.JobId, utcNow, jobReference.Status);
+
+            await context.ScheduleMessage(_controlAddress, scheduledTime, check);
+
+            return new Job<T>(context, jobReference);
         }
 
         async Task Run<T>(ConsumerJobContext<T> jobContext, IJobFactory<T> jobFactory)
@@ -72,6 +88,24 @@ namespace MassTransit.Turnout
                 jobContext.Dispose();
             }
         }
+
+
+        class Check :
+            CheckJobProgress
+        {
+            public Check(Guid jobId, DateTime lastStatusCheck, JobStatus lastStatus)
+            {
+                JobId = jobId;
+                LastStatusCheck = lastStatusCheck;
+                LastStatus = lastStatus;
+            }
+
+            public Guid JobId { get; private set; }
+
+            public DateTime LastStatusCheck { get; private set; }
+
+            public JobStatus LastStatus { get; private set; }
+        }
     }
 
 
@@ -80,15 +114,13 @@ namespace MassTransit.Turnout
         where T : class
     {
         readonly ConsumeContext<T> _context;
-        readonly IJobReference _jobReference;
+        readonly JobHandle _jobReference;
 
-        public Job(ConsumeContext<T> context, IJobReference jobReference)
+        public Job(ConsumeContext<T> context, JobHandle jobReference)
         {
             _context = context;
             _jobReference = jobReference;
         }
-
-        public Task Task => _jobReference.Task;
 
         public T Command => _context.Message;
 

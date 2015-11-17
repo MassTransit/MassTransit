@@ -19,13 +19,19 @@ namespace MassTransit.Turnout
     /// </summary>
     public interface IJobRoster
     {
-        bool TryGetJob(Guid jobId, out IJobReference jobReference);
+        bool TryGetJob(Guid jobId, out JobHandle jobReference);
 
         /// <summary>
         /// Add a job to the registry
         /// </summary>
         /// <param name="jobId"></param>
         /// <param name="jobReference"></param>
-        void Add(Guid jobId, IJobReference jobReference);
+        void Add(Guid jobId, JobHandle jobReference);
+
+        /// <summary>
+        /// Remove the job from the roster
+        /// </summary>
+        /// <param name="jobId"></param>
+        void RemoveJob(Guid jobId);
     }
 }

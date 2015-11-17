@@ -13,11 +13,9 @@
 namespace MassTransit.Turnout
 {
     using System;
+    using System.Diagnostics;
     using System.Threading;
-    using System.Threading.Tasks;
     using Context;
-    using Contracts;
-    using Events;
 
 
     /// <summary>
@@ -33,6 +31,7 @@ namespace MassTransit.Turnout
         readonly CancellationTokenSource _cancellationTokenSource;
         readonly ConsumeContext<TInput> _context;
         readonly PayloadCache _payloadCache;
+        readonly Stopwatch _stopwatch;
 
         public ConsumerJobContext(ConsumeContext<TInput> context)
             : base(context)
@@ -43,6 +42,7 @@ namespace MassTransit.Turnout
             _payloadCache = new PayloadCache();
 
             JobId = NewId.NextGuid();
+            _stopwatch = Stopwatch.StartNew();
         }
 
         public void Dispose()
@@ -51,6 +51,8 @@ namespace MassTransit.Turnout
         }
 
         public Guid JobId { get; }
+
+        public TimeSpan ElapsedTime => _stopwatch.Elapsed;
 
         public override CancellationToken CancellationToken => _cancellationTokenSource.Token;
 
@@ -77,29 +79,6 @@ namespace MassTransit.Turnout
                 return payload;
 
             return _payloadCache.GetOrAddPayload(payloadFactory);
-        }
-
-        public async Task OnComplete(ConsumeContext context, Task task, Guid jobId)
-        {
-            try
-            {
-                await task.ConfigureAwait(false);
-
-                await context.Publish<JobCompleted>(new
-                {
-                    JobId = jobId,
-                    Timestamp = DateTime.UtcNow
-                }).ConfigureAwait(false);
-            }
-            catch (Exception exception)
-            {
-                await context.Publish<JobFaulted>(new
-                {
-                    JobId = jobId,
-                    Timestamp = DateTime.UtcNow,
-                    Exceptions = (ExceptionInfo)(new FaultExceptionInfo(exception))
-                }).ConfigureAwait(false);
-            }
         }
     }
 }

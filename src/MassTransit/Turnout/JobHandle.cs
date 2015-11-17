@@ -16,13 +16,24 @@ namespace MassTransit.Turnout
     using System.Threading.Tasks;
     using Contracts;
 
-
-    public interface IJobReference
+    /// <summary>
+    /// A JobHandle contains the JobContext, Task, and provides access to the job control
+    /// </summary>
+    public interface JobHandle
     {
+        /// <summary>
+        /// The unique job identifier
+        /// </summary>
         Guid JobId { get; }
 
-        Task Task { get; }
+        /// <summary>
+        /// The time the job has been active
+        /// </summary>
+        TimeSpan ElapsedTime { get; }
 
+        /// <summary>
+        /// The job's status, derived from the underlying Task status
+        /// </summary>
         JobStatus Status { get; }
 
         /// <summary>

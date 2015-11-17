@@ -155,6 +155,30 @@ namespace MassTransit
         }
 
         /// <summary>
+        /// Schedules a message to be sent to the bus using a Publish, which should only be used when
+        /// the quartz service is on a single shared queue or behind a distributor
+        /// </summary>
+        /// <typeparam name="T">The scheduled message type</typeparam>
+        /// <param name="context">The bus from which the scheduled message command should be published and delivered</param>
+        /// <param name="destinationAddress"></param>
+        /// <param name="scheduledTime">The time when the message should be sent to the endpoint</param>
+        /// <param name="message">The message to send</param>
+        ///  /// <param name="contextCallback">Optional: A callback that gives the caller access to the publish context.</param>
+        /// <returns>A handled to the scheduled message</returns>
+        public static Task<ScheduledMessage<T>> ScheduleMessage<T>(this ConsumeContext context, Uri destinationAddress, DateTime scheduledTime, T message,
+            IPipe<SendContext> contextCallback = null)
+            where T : class
+        {
+            MessageSchedulerContext schedulerContext;
+            if (context.TryGetPayload(out schedulerContext))
+            {
+                return schedulerContext.ScheduleSend(message, destinationAddress, scheduledTime, contextCallback ?? Pipe.Empty<SendContext>());
+            }
+
+            return ScheduleMessage((IPublishEndpoint)context, destinationAddress, scheduledTime, message, contextCallback);
+        }
+
+        /// <summary>
         /// Cancel a scheduled message using the scheduled message instance
         /// </summary>
         /// <param name="bus"></param>

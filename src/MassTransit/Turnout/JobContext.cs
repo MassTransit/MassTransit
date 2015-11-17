@@ -24,6 +24,11 @@ namespace MassTransit.Turnout
         /// Identifies the job execution
         /// </summary>
         Guid JobId { get; }
+
+        /// <summary>
+        /// The elapsed time of the job
+        /// </summary>
+        TimeSpan ElapsedTime { get; }
     }
 
 

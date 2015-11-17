@@ -41,17 +41,29 @@ namespace MassTransit.Context
         public Task<ScheduledMessage<T>> ScheduleSend<T>(T message, TimeSpan deliveryDelay, IPipe<SendContext> sendPipe)
             where T : class
         {
-            var scheduledTime = DateTime.UtcNow + deliveryDelay;
-
-            return ScheduleSend(message, scheduledTime, sendPipe);
+            return ScheduleSend(message, _consumeContext.ReceiveContext.InputAddress, deliveryDelay, sendPipe);
         }
 
-        public async Task<ScheduledMessage<T>> ScheduleSend<T>(T message, DateTime deliveryTime, IPipe<SendContext> sendPipe)
+        public Task<ScheduledMessage<T>> ScheduleSend<T>(T message, DateTime deliveryTime, IPipe<SendContext> sendPipe)
+            where T : class
+        {
+            return ScheduleSend(message, _consumeContext.ReceiveContext.InputAddress, deliveryTime, sendPipe);
+        }
+
+        public Task<ScheduledMessage<T>> ScheduleSend<T>(T message, Uri destinationAddress, TimeSpan deliveryDelay, IPipe<SendContext> sendPipe)
+            where T : class
+        {
+            var scheduledTime = DateTime.UtcNow + deliveryDelay;
+
+            return ScheduleSend(message, destinationAddress, scheduledTime, sendPipe);
+        }
+
+        public async Task<ScheduledMessage<T>> ScheduleSend<T>(T message, Uri destinationAddress, DateTime deliveryTime, IPipe<SendContext> sendPipe)
             where T : class
         {
             ISendEndpoint endpoint = await _schedulerEndpoint.Value.ConfigureAwait(false);
 
-            ScheduledMessage<T> scheduledMessage = await endpoint.ScheduleSend(_consumeContext.ReceiveContext.InputAddress, deliveryTime, message, sendPipe)
+            ScheduledMessage<T> scheduledMessage = await endpoint.ScheduleSend(destinationAddress, deliveryTime, message, sendPipe)
                 .ConfigureAwait(false);
 
             return scheduledMessage;
