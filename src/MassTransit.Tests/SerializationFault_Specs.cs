@@ -46,7 +46,7 @@ namespace MassTransit.Tests
         {
         }
 
-        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             Handler<PingMessage>(configurator, async context =>
             {
@@ -73,7 +73,7 @@ namespace MassTransit.Tests
             var faultContext = await _faulted;
         }
 
-        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             _handled = Handled<PingMessage>(configurator);
 

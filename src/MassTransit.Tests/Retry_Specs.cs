@@ -52,7 +52,7 @@ namespace MassTransit.Tests
 
         int _attempts;
 
-        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             configurator.UseRetry(Retry.None);
 
@@ -96,7 +96,7 @@ namespace MassTransit.Tests
 
         int _attempts;
 
-        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             Handler<PingMessage>(configurator, async context =>
             {
@@ -144,7 +144,7 @@ namespace MassTransit.Tests
             base.ConfigureBus(configurator);
         }
 
-        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             Handler<PingMessage>(configurator, async context =>
             {
@@ -191,7 +191,7 @@ namespace MassTransit.Tests
             base.ConfigureBus(configurator);
         }
 
-        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             configurator.UseRetry(Retry.Immediate(3));
             Handler<PingMessage>(configurator, async context =>

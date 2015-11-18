@@ -14,26 +14,31 @@ namespace MassTransit.Turnout
 {
     using System;
     using System.Threading.Tasks;
+    using Commands;
     using Contracts;
     using Logging;
+    using Util;
 
 
-    public class TurnoutJobConsumer :
-        IConsumer<CheckJobProgress>
+    /// <summary>
+    /// Consumer that handles the SuperviseJob message to check the status of the job
+    /// </summary>
+    public class SuperviseJobConsumer :
+        IConsumer<SuperviseJob>
     {
-        static readonly ILog _log = Logger.Get<TurnoutJobConsumer>();
+        static readonly ILog _log = Logger.Get<SuperviseJobConsumer>();
         readonly TimeSpan _checkInterval;
 
         readonly IJobRoster _roster;
 
-        public TurnoutJobConsumer(IJobRoster roster, TimeSpan checkInterval)
+        public SuperviseJobConsumer(IJobRoster roster, TimeSpan checkInterval)
         {
             _roster = roster;
 
             _checkInterval = checkInterval;
         }
 
-        public async Task Consume(ConsumeContext<CheckJobProgress> context)
+        public Task Consume(ConsumeContext<SuperviseJob> context)
         {
             JobHandle jobHandle;
             if (_roster.TryGetJob(context.Message.JobId, out jobHandle))
@@ -42,49 +47,38 @@ namespace MassTransit.Turnout
                 {
                     case JobStatus.Created:
                     case JobStatus.Running:
-                        DateTime scheduledTime = DateTime.UtcNow + _checkInterval;
+                        var timestamp = DateTime.UtcNow;
 
-                        var recheck = new Recheck(context.Message.JobId, JobStatus.Running);
+                        DateTime scheduledTime = timestamp + _checkInterval;
 
-                        await context.ScheduleMessage(scheduledTime, recheck);
+                        var supervise = new Supervise(context.Message.JobId, timestamp, JobStatus.Running);
+
+                        context.ScheduleMessage(scheduledTime, supervise);
 
                         if (_log.IsDebugEnabled)
-                            _log.DebugFormat("Scheduled next job check for {0} at {1}", context.Message.JobId, scheduledTime);
+                            _log.DebugFormat("Scheduled next supervise message: {0}", context.Message.JobId);
                         break;
+
                     case JobStatus.RanToCompletion:
                         _roster.RemoveJob(context.Message.JobId);
-
-                        if (_log.IsDebugEnabled)
-                            _log.DebugFormat("Removing completed job: {0}", context.Message.JobId);
                         break;
-                    default:
-                        if (_log.IsDebugEnabled)
-                            _log.DebugFormat("Unknown Job Status: {0} ({1})", context.Message.JobId, jobHandle.Status);
+
+                    case JobStatus.Faulted:
+                        _roster.RemoveJob(context.Message.JobId);
+                        break;
+
+                    case JobStatus.Canceled:
+                        _roster.RemoveJob(context.Message.JobId);
                         break;
                 }
             }
             else
             {
-                if (_log.IsDebugEnabled)
-                    _log.DebugFormat("JobId not found: {0}", context.Message.JobId);
-            }
-        }
-
-
-        class Recheck :
-            CheckJobProgress
-        {
-            public Recheck(Guid jobId, JobStatus status)
-            {
-                JobId = jobId;
-
-                LastStatusCheck = DateTime.UtcNow;
-                LastStatus = status;
+                if (_log.IsWarnEnabled)
+                    _log.WarnFormat("JobId not found: {0}", context.Message.JobId);
             }
 
-            public Guid JobId { get; }
-            public DateTime LastStatusCheck { get; }
-            public JobStatus LastStatus { get; }
+            return TaskUtil.Completed;
         }
     }
 }

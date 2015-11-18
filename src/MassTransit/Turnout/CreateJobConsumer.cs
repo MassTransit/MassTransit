@@ -12,45 +12,29 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Turnout
 {
-    using System;
     using System.Threading.Tasks;
 
-
-    public interface TramJob<out T>
-        where T : class
-    {
-        /// <summary>
-        /// The message that initiated the job
-        /// </summary>
-        T Command { get; }
-
-        /// <summary>
-        /// The identifier assigned to the job
-        /// </summary>
-        Guid JobId { get; }
-
-
-        
-    }
-
-
+    /// <summary>
+    /// The consumer that creates the job using the turnout host
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public class CreateJobConsumer<T> :
         IConsumer<T>
         where T : class
 
     {
-        readonly IConsumerTurnout _consumerTurnout;
+        readonly ITurnoutController _turnoutHost;
         readonly IJobFactory<T> _jobFactory;
 
-        public CreateJobConsumer(IConsumerTurnout consumerTurnout, IJobFactory<T> jobFactory)
+        public CreateJobConsumer(ITurnoutController turnoutHost, IJobFactory<T> jobFactory)
         {
-            _consumerTurnout = consumerTurnout;
+            _turnoutHost = turnoutHost;
             _jobFactory = jobFactory;
         }
 
         public async Task Consume(ConsumeContext<T> context)
         {
-            var job = await _consumerTurnout.CreateJob(context, _jobFactory);
+            var job = await _turnoutHost.CreateJob(context, _jobFactory);
         }
     }
 }

@@ -16,14 +16,23 @@ namespace MassTransit.Turnout.Contracts
 
 
     /// <summary>
-    /// Published when a Tram job faults
+    /// Published when a job faults
     /// </summary>
     public interface JobFaulted
     {
+        /// <summary>
+        /// The job identifier
+        /// </summary>
         Guid JobId { get; }
 
+        /// <summary>
+        /// The time the job faulted
+        /// </summary>
         DateTime Timestamp { get; }
 
+        /// <summary>
+        /// The exceptions that were thrown by the job
+        /// </summary>
         ExceptionInfo Exceptions { get; }
     }
 }

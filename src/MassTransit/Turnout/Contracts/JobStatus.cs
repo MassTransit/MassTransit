@@ -12,6 +12,9 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Turnout.Contracts
 {
+    /// <summary>
+    /// The status of a job
+    /// </summary>
     public enum JobStatus
     {
         Created,

@@ -80,5 +80,10 @@ namespace MassTransit.Turnout
 
             return _payloadCache.GetOrAddPayload(payloadFactory);
         }
+
+        public void Cancel()
+        {
+            _cancellationTokenSource.Cancel();
+        }
     }
 }

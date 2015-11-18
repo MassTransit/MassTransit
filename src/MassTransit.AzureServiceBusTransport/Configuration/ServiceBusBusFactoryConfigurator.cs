@@ -19,7 +19,6 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
     using BusConfigurators;
     using Configurators;
     using PipeConfigurators;
-    using Util;
 
 
     public class ServiceBusBusFactoryConfigurator :
@@ -38,7 +37,7 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
             _transportSpecifications = new List<IBusFactorySpecification>();
             _consumePipeSpecification = new ConsumePipeSpecificationList();
 
-            string queueName = HostMetadataCache.Host.GetTemporaryQueueName("bus");
+            var queueName = this.GetTemporaryQueueName("bus");
             _settings = new ReceiveEndpointSettings(queueName)
             {
                 QueueDescription =
@@ -58,7 +57,7 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
         {
             var builder = new ServiceBusBusBuilder(_hosts.ToArray(), _consumePipeSpecification, _settings);
 
-            foreach (IBusFactorySpecification configurator in _transportSpecifications)
+            foreach (var configurator in _transportSpecifications)
                 configurator.Apply(builder);
 
             return builder.Build();

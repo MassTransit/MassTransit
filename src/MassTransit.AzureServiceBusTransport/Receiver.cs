@@ -32,9 +32,9 @@ namespace MassTransit.AzureServiceBusTransport
         readonly MessageReceiver _messageReceiver;
         readonly ITaskParticipant _participant;
         readonly IReceiveObserver _receiveObserver;
-        readonly ITaskSupervisor _supervisor;
         readonly IPipe<ReceiveContext> _receivePipe;
         readonly ReceiveSettings _receiveSettings;
+        readonly ITaskSupervisor _supervisor;
         int _currentPendingDeliveryCount;
         long _deliveryCount;
         int _maxPendingDeliveryCount;
@@ -59,12 +59,25 @@ namespace MassTransit.AzureServiceBusTransport
                 MaxConcurrentCalls = receiveSettings.MaxConcurrentCalls
             };
 
-            options.ExceptionReceived += (sender, x) =>
+            options.ExceptionReceived += async (sender, x) =>
             {
                 if (_log.IsErrorEnabled)
                     _log.Error($"Exception received on receiver: {_inputAddress} during {x.Action}", x.Exception);
 
-                _participant.SetComplete();
+                try
+                {
+                    await _messageReceiver.CloseAsync();
+                }
+                finally
+                {
+                    if (_currentPendingDeliveryCount == 0)
+                    {
+                        if (_log.IsDebugEnabled)
+                            _log.DebugFormat("Receiver shutdown completed: {0}", _inputAddress);
+
+                        _participant.SetComplete();
+                    }
+                }
             };
 
             messageReceiver.OnMessageAsync(OnMessage, options);
@@ -109,10 +122,6 @@ namespace MassTransit.AzureServiceBusTransport
             try
             {
                 await _messageReceiver.CloseAsync();
-            }
-            catch (Exception)
-            {
-                _participant.SetComplete();
             }
             finally
             {

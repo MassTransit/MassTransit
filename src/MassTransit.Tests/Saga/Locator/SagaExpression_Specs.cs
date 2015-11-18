@@ -60,7 +60,7 @@ namespace MassTransit.Tests.Saga.Locator
             _repository = new InMemorySagaRepository<SimpleSaga>();
         }
 
-        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             configurator.Saga(_repository);
         }

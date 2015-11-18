@@ -53,7 +53,7 @@ namespace MassTransit.Tests.Saga
             _repository = SetupSagaRepository<InjectingSampleSaga>();
         }
 
-        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             configurator.Saga(_repository, x => x.UseExecute(context => context.Saga.Dependency = _dependency));
         }

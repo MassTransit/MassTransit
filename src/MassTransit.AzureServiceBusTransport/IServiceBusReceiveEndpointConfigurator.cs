@@ -34,8 +34,8 @@ namespace MassTransit.AzureServiceBusTransport
         int MaxConcurrentCalls { set; }
 
         /// <summary>
-        /// The address on Azure of the endpoint that's being configured
+        /// The host on which the endpoint is being configured
         /// </summary>
-        Uri InputAddress { get; }
+        IServiceBusHost Host { get; }
     }
 }

@@ -47,7 +47,7 @@ namespace MassTransit.QuartzIntegration.Tests
             configurator.UseMessageScheduler(QuartzAddress);
         }
 
-        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             _count = 0;
 
@@ -101,7 +101,7 @@ namespace MassTransit.QuartzIntegration.Tests
             configurator.UseMessageScheduler(QuartzAddress);
         }
 
-        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             _count = 0;
 

@@ -67,7 +67,7 @@ namespace MassTransit.Tests
             _activityMonitor = bus.CreateBusActivityMonitor(TimeSpan.FromMilliseconds(500));
         }
 
-        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             _retryEnumerator.MoveNext();
             var retryPolicy = _retryEnumerator.Current;

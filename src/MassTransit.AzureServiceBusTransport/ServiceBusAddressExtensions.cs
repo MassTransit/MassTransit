@@ -14,18 +14,22 @@ namespace MassTransit.AzureServiceBusTransport
 {
     using System;
     using System.Text;
+    using Configuration;
     using Internals.Extensions;
     using Microsoft.ServiceBus.Messaging;
     using NewIdFormatters;
+    using Util;
 
 
     public static class ServiceBusAddressExtensions
     {
         static readonly INewIdFormatter _formatter = new ZBase32Formatter();
 
-        public static string GetTemporaryQueueName(this HostInfo host, string prefix)
+        public static string GetTemporaryQueueName(this IServiceBusBusFactoryConfigurator configurator, string prefix)
         {
             var sb = new StringBuilder();
+
+            var host = HostMetadataCache.Host;
 
             foreach (var c in host.MachineName)
             {

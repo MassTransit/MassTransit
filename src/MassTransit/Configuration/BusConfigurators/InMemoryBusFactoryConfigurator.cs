@@ -30,9 +30,9 @@ namespace MassTransit.BusConfigurators
         readonly IList<IInMemoryBusFactorySpecification> _configurators;
         readonly ConsumePipeSpecificationList _consumePipeSpecification;
         readonly IList<IBusHostControl> _hosts;
+        int _concurrencyLimit;
         IReceiveTransportProvider _receiveTransportProvider;
         ISendTransportProvider _sendTransportProvider;
-        int _concurrencyLimit;
 
         public InMemoryBusFactoryConfigurator()
         {
@@ -56,7 +56,7 @@ namespace MassTransit.BusConfigurators
 
             var builder = new InMemoryBusBuilder(_receiveTransportProvider, _sendTransportProvider, _hosts.ToArray(), _consumePipeSpecification);
 
-            foreach (IInMemoryBusFactorySpecification configurator in _configurators)
+            foreach (var configurator in _configurators)
                 configurator.Apply(builder);
 
             return builder.Build();
@@ -99,13 +99,18 @@ namespace MassTransit.BusConfigurators
             _configurators.Add(configurator);
         }
 
-        public void ReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configureEndpoint)
+        public void ReceiveEndpoint(string queueName, Action<IInMemoryReceiveEndpointConfigurator> configureEndpoint)
         {
             var endpointConfigurator = new InMemoryReceiveEndpointConfigurator(queueName);
 
             configureEndpoint(endpointConfigurator);
 
             AddBusFactorySpecification(endpointConfigurator);
+        }
+
+        void IBusFactoryConfigurator.ReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configureEndpoint)
+        {
+            ReceiveEndpoint(queueName, configureEndpoint);
         }
 
 

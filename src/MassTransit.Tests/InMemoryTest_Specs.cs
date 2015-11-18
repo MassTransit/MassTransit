@@ -44,7 +44,7 @@ namespace MassTransit.Tests
         }
 
 
-        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             _receivedA = Handler<A>(configurator, async context => Console.WriteLine("Hi"));
         }
@@ -73,7 +73,7 @@ namespace MassTransit.Tests
         }
 
 
-        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             _receivedA = Handled<A>(configurator);
         }

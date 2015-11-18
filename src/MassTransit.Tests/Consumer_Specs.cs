@@ -37,7 +37,7 @@ namespace MassTransit.Tests
             _requestClient = CreateRequestClient<PingMessage, PongMessage>();
         }
 
-        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             configurator.Consumer<Consumer>(
                 x => x.UseConsoleLog(async (context, logContext) => string.Format("{1:u} {2:F0} Consumer: {0}", TypeMetadataCache<Consumer>.ShortName,

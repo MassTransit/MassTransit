@@ -51,7 +51,7 @@ namespace MassTransit.AzureServiceBusTransport
         public static void ReceiveEndpoint(this IServiceBusBusFactoryConfigurator configurator, IServiceBusHost host,
             Action<IServiceBusReceiveEndpointConfigurator> configure)
         {
-            var queueName = HostMetadataCache.Host.GetTemporaryQueueName("endpoint");
+            var queueName = configurator.GetTemporaryQueueName("endpoint");
 
             configurator.ReceiveEndpoint(host, queueName, x =>
             {

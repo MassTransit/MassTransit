@@ -38,7 +38,7 @@ namespace MassTransit.QuartzIntegration.Tests
         Task<ConsumeContext<Done>> _done;
         int _count;
 
-        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             _count = 0;
             configurator.Handler<Interval>(async context =>

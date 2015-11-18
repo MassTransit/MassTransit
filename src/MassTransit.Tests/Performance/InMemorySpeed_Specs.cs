@@ -64,7 +64,7 @@ namespace MassTransit.Tests.Performance
             base.ConfigureBus(configurator);
         }
 
-        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             configurator.Handler<PingMessage>(async context =>
             {
@@ -109,7 +109,7 @@ namespace MassTransit.Tests.Performance
             _requestClient = CreateRequestClient<PerformanceRequest, PerformanceResult>();
         }
 
-        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             configurator.Handler<PerformanceRequest>(async context =>
             {

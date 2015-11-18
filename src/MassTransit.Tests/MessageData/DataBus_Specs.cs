@@ -70,7 +70,7 @@ namespace MassTransit.Tests.MessageData
             Task<ConsumeContext<MessageWithBigData>> _received;
             Task<ConsumeContext<MessageWithByteArray>> _receivedBytes;
 
-            protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+            protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
             {
                 string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
 
@@ -134,7 +134,7 @@ namespace MassTransit.Tests.MessageData
             Task<ConsumeContext<MessageWithBigData>> _received;
             Task<ConsumeContext<MessageWithByteArray>> _receivedBytes;
 
-            protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+            protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
             {
                 string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
 
@@ -189,7 +189,7 @@ namespace MassTransit.Tests.MessageData
 
             Task<ConsumeContext<MessageWithBigData>> _received;
 
-            protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+            protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
             {
                 _messageDataRepository = new InMemoryMessageDataRepository();
 
@@ -232,7 +232,7 @@ namespace MassTransit.Tests.MessageData
 
             Task<ConsumeContext<MessageWithByteArray>> _received;
 
-            protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+            protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
             {
                 _messageDataRepository = new InMemoryMessageDataRepository();
 
