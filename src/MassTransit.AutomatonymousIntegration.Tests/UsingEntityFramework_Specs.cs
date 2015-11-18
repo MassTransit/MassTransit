@@ -31,7 +31,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
         readonly SagaDbContextFactory _sagaDbContextFactory;
         readonly Lazy<ISagaRepository<ShoppingChore>> _repository;
 
-        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             _machine = new SuperShopper();
 

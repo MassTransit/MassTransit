@@ -15,7 +15,6 @@ namespace MassTransit.QuartzIntegration.Tests
     using System;
     using System.Threading.Tasks;
     using NUnit.Framework;
-    using Turnout;
     using Turnout.Contracts;
 
 
@@ -23,56 +22,6 @@ namespace MassTransit.QuartzIntegration.Tests
     public class A_turnout_check_consumer :
         QuartzInMemoryTestFixture
     {
-        public A_turnout_check_consumer()
-        {
-            _checkInterval = TimeSpan.FromSeconds(1);
-
-            _roster = new JobRoster();
-        }
-
-        ConsumerTurnout _consumerTurnout;
-        readonly TimeSpan _checkInterval;
-        Uri _controlAddress;
-        readonly JobRoster _roster;
-
-        protected override void ConfigureBus(IInMemoryBusFactoryConfigurator configurator)
-        {
-            base.ConfigureBus(configurator);
-
-            configurator.ReceiveEndpoint("turnout_control", e =>
-            {
-                _controlAddress = e.InputAddress;
-
-                e.Consumer(() => new TurnoutJobConsumer(_roster, _checkInterval));
-            });
-        }
-
-        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
-        {
-            base.ConfigureInputQueueEndpoint(configurator);
-
-            IJobFactory<ProcessFile> jobFactory = new DelegateJobFactory<ProcessFile>(async context =>
-            {
-                await Console.Out.WriteLineAsync("Started");
-
-                await Task.Delay(context.Message.Size);
-
-                await Console.Out.WriteLineAsync("Stopped");
-            });
-
-            _consumerTurnout = new ConsumerTurnout(_roster, _controlAddress, _checkInterval);
-
-            configurator.Consumer(() => new CreateJobConsumer<ProcessFile>(_consumerTurnout, jobFactory));
-        }
-
-
-        public class ProcessFile
-        {
-            public string Filename { get; set; }
-            public int Size { get; set; }
-        }
-
-
         [Test]
         public async Task Should_find_existing_jobs_and_continue_to_check_them()
         {
@@ -85,6 +34,40 @@ namespace MassTransit.QuartzIntegration.Tests
             });
 
             var context = await completed;
+        }
+
+        IInMemoryBusFactoryConfigurator _busFactoryConfigurator;
+
+        protected override void ConfigureBus(IInMemoryBusFactoryConfigurator configurator)
+        {
+            base.ConfigureBus(configurator);
+
+            _busFactoryConfigurator = configurator;
+        }
+
+        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        {
+            base.ConfigureInputQueueEndpoint(configurator);
+
+            configurator.Turnout<ProcessFile>(_busFactoryConfigurator, x =>
+            {
+                x.SuperviseInterval = TimeSpan.FromSeconds(1);
+                x.SetJobFactory(async context =>
+                {
+                    await Console.Out.WriteLineAsync($"Started: {context.Message.Filename}");
+
+                    await Task.Delay(context.Message.Size);
+
+                    await Console.Out.WriteLineAsync($"Stopped: {context.Message.Filename}");
+                });
+            });
+        }
+
+
+        public class ProcessFile
+        {
+            public string Filename { get; set; }
+            public int Size { get; set; }
         }
     }
 }

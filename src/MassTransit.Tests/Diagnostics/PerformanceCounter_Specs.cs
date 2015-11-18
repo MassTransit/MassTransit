@@ -44,7 +44,7 @@ namespace MassTransit.Tests.Diagnostics
 
         TaskCompletionSource<bool> _completed;
 
-        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             long value = 0;
             configurator.Handler<PingMessage>(async context =>

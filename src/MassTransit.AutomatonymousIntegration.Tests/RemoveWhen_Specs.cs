@@ -72,7 +72,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
             Assert.IsFalse(saga.HasValue);
         }
 
-        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             configurator.StateMachineSaga(_machine, _repository);
         }
@@ -165,7 +165,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
             Assert.AreEqual(sagaId, response.CorrelationId);
         }
 
-        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             configurator.StateMachineSaga(_machine, _repository);
         }

@@ -10,28 +10,22 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Turnout
+namespace MassTransit
 {
     using System;
-    using System.Runtime.Serialization;
+    using AzureServiceBusTransport.Configuration;
 
 
-    [Serializable]
-    public class JobAlreadyExistsException :
-        MassTransitException
+    public static class ScheduleMessageExtensions
     {
-        public JobAlreadyExistsException(Guid jobId)
-            : base($"The job already exists in the registry: {jobId}")
+        public static void UseServiceBusMessageScheduler(this IPipeConfigurator<ConsumeContext> configurator)
         {
-        }
+            if (configurator == null)
+                throw new ArgumentNullException(nameof(configurator));
 
-        public JobAlreadyExistsException()
-        {
-        }
+            var pipeBuilderConfigurator = new ServiceBusMessageSchedulerSpecification();
 
-        protected JobAlreadyExistsException(SerializationInfo info, StreamingContext context)
-            : base(info, context)
-        {
+            configurator.AddPipeSpecification(pipeBuilderConfigurator);
         }
     }
 }

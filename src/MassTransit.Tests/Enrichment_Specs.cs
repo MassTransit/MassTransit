@@ -55,7 +55,7 @@ namespace MassTransit.Tests
             }).Wait(TestCancellationToken);
         }
 
-        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             _commandHandler = Handler<SecureCommand>(configurator, async context =>
             {

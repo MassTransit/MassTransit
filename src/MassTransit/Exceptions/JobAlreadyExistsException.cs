@@ -10,17 +10,28 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Turnout.Contracts
+namespace MassTransit
 {
     using System;
+    using System.Runtime.Serialization;
 
 
-    public interface CheckJobProgress
+    [Serializable]
+    public class JobAlreadyExistsException :
+        MassTransitException
     {
-        Guid JobId { get; }
+        public JobAlreadyExistsException()
+        {
+        }
 
-        DateTime LastStatusCheck { get; }
+        public JobAlreadyExistsException(Guid jobId)
+            : base($"The job already exists in the roster: {jobId}")
+        {
+        }
 
-        JobStatus LastStatus { get; }
+        protected JobAlreadyExistsException(SerializationInfo info, StreamingContext context)
+            : base(info, context)
+        {
+        }
     }
 }

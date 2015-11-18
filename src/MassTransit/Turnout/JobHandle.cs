@@ -16,6 +16,18 @@ namespace MassTransit.Turnout
     using System.Threading.Tasks;
     using Contracts;
 
+
+    public interface JobHandle<out T> :
+        JobHandle
+        where T : class
+    {
+        /// <summary>
+        /// The message that initiated the job
+        /// </summary>
+        T Message { get; }
+    }
+
+
     /// <summary>
     /// A JobHandle contains the JobContext, Task, and provides access to the job control
     /// </summary>

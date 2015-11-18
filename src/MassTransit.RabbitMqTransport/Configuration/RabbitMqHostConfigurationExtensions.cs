@@ -48,7 +48,7 @@ namespace MassTransit
         public static void ReceiveEndpoint(this IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host,
             Action<IRabbitMqReceiveEndpointConfigurator> configure)
         {
-            var queueName = HostMetadataCache.Host.GetTemporaryQueueName("receiveEndpoint-");
+            var queueName = configurator.GetTemporaryQueueName("receiveEndpoint-");
 
             configurator.ReceiveEndpoint(host, queueName, x =>
             {
@@ -75,7 +75,7 @@ namespace MassTransit
             if (host == null)
                 throw new ArgumentNullException(nameof(host));
 
-            var queueName = HostMetadataCache.Host.GetTemporaryQueueName("manage-");
+            var queueName = configurator.GetTemporaryQueueName("manage-");
 
             var endpointConfigurator = new RabbitMqReceiveEndpointConfigurator(host, queueName);
 

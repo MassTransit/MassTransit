@@ -15,16 +15,17 @@ namespace MassTransit.Turnout
     using System;
     using System.Threading.Tasks;
     using Contracts;
+    using Util;
 
 
-    public class ConsumerJobHandle :
-        JobHandle
+    public class ConsumerJobHandle<T> :
+        JobHandle<T>
+        where T : class
     {
-        readonly JobContext _jobContext;
+        readonly ConsumerJobContext<T> _jobContext;
         readonly Task _task;
-        TimeSpan _elapsedTime;
 
-        public ConsumerJobHandle(JobContext jobContext, Task task)
+        public ConsumerJobHandle(ConsumerJobContext<T> jobContext, Task task)
         {
             _jobContext = jobContext;
             _task = task;
@@ -32,10 +33,7 @@ namespace MassTransit.Turnout
 
         public Guid JobId => _jobContext.JobId;
 
-        public TimeSpan ElapsedTime
-        {
-            get { return _elapsedTime; }
-        }
+        public TimeSpan ElapsedTime => _jobContext.ElapsedTime;
 
         public JobStatus Status
         {
@@ -44,6 +42,7 @@ namespace MassTransit.Turnout
                 switch (_task.Status)
                 {
                     case TaskStatus.Running:
+                    case TaskStatus.WaitingForChildrenToComplete:
                         return JobStatus.Running;
 
                     case TaskStatus.Faulted:
@@ -55,15 +54,24 @@ namespace MassTransit.Turnout
                     case TaskStatus.Canceled:
                         return JobStatus.Canceled;
 
+                    case TaskStatus.Created:
+                    case TaskStatus.WaitingForActivation:
+                    case TaskStatus.WaitingToRun:
+                        return JobStatus.Created;
+
                     default:
                         return JobStatus.Created;
                 }
             }
         }
 
-        public Task Cancel()
+        Task JobHandle.Cancel()
         {
-            throw new NotImplementedException();
+            _jobContext.Cancel();
+
+            return TaskUtil.Completed;
         }
+
+        public T Message => _jobContext.Message;
     }
 }

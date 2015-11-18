@@ -48,7 +48,7 @@ namespace MassTransit.Tests
             Assert.Contains(InputQueueAddress, receiveAddresses);
         }
 
-        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             configurator.Handler<PingMessage>(async context =>
             {

@@ -16,12 +16,18 @@ namespace MassTransit.Turnout.Contracts
 
 
     /// <summary>
-    /// Published when a Tram job is started by a node
+    /// Published when a job is started
     /// </summary>
     public interface JobStarted
     {
+        /// <summary>
+        /// The job identifier
+        /// </summary>
         Guid JobId { get; }
 
+        /// <summary>
+        /// The time the job was started
+        /// </summary>
         DateTime Timestamp { get; }
     }
 }

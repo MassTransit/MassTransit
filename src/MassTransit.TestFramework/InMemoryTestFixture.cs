@@ -155,7 +155,7 @@ namespace MassTransit.TestFramework
             
         }
 
-        protected virtual void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+        protected virtual void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
         }
 
@@ -168,7 +168,7 @@ namespace MassTransit.TestFramework
                 x.SetTransportProvider(_inMemoryTransportCache);
                 ConfigureBus(x);
 
-                x.ReceiveEndpoint("input_queue", ConfigureInputQueueEndpoint);
+                x.ReceiveEndpoint("input_queue", configurator => ConfigureInputQueueEndpoint(configurator));
             });
         }
 

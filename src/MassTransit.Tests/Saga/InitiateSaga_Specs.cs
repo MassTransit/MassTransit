@@ -64,7 +64,7 @@ namespace MassTransit.Tests.Saga
             configurator.UseRetry(Retry.None);
         }
 
-        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             configurator.UseRetry(Retry.Immediate(2));
             configurator.Saga(_repository);
@@ -108,7 +108,7 @@ namespace MassTransit.Tests.Saga
             _sagaId = Guid.NewGuid();
         }
 
-        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             configurator.Saga(_repository);
         }
@@ -147,7 +147,7 @@ namespace MassTransit.Tests.Saga
             _sagaId = Guid.NewGuid();
         }
 
-        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             configurator.Saga(_repository);
         }
@@ -186,7 +186,7 @@ namespace MassTransit.Tests.Saga
             _sagaId = Guid.NewGuid();
         }
 
-        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             configurator.Saga(_repository);
         }

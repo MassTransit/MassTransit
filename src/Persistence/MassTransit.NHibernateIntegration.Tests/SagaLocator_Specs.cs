@@ -84,7 +84,7 @@ namespace MassTransit.NHibernateIntegration.Tests
                 _provider.Dispose();
         }
 
-        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             configurator.Saga(_sagaRepository.Value);
         }

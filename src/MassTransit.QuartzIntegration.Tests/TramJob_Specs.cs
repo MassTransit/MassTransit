@@ -16,7 +16,6 @@ namespace MassTransit.QuartzIntegration.Tests
     using System.Threading.Tasks;
     using NUnit.Framework;
     using TestFramework;
-    using Turnout;
     using Turnout.Contracts;
 
 
@@ -29,27 +28,33 @@ namespace MassTransit.QuartzIntegration.Tests
         {
             var completed = SubscribeHandler<JobCompleted>();
 
-            await Bus.Publish(new ProcessFile()
+            await Bus.Publish(new ProcessFile
             {
                 Filename = "log.txt",
-                Size = 10,
+                Size = 10
             });
 
             var context = await completed;
-
         }
 
-        IConsumerTurnout _consumerTurnout;
+        IInMemoryBusFactoryConfigurator _busFactoryConfigurator;
 
-        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+        protected override void ConfigureBus(IInMemoryBusFactoryConfigurator configurator)
+        {
+            base.ConfigureBus(configurator);
+
+            _busFactoryConfigurator = configurator;
+        }
+
+        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             base.ConfigureInputQueueEndpoint(configurator);
 
-            IJobFactory<ProcessFile> jobFactory = new DelegateJobFactory<ProcessFile>(async context => await Task.Delay(context.Message.Size));
-
-            _consumerTurnout = new ConsumerTurnout(new JobRoster(), configurator.InputAddress);
-
-            configurator.Consumer(() => new CreateJobConsumer<ProcessFile>(_consumerTurnout, jobFactory));
+            configurator.Turnout<ProcessFile>(_busFactoryConfigurator, x =>
+            {
+                x.SuperviseInterval = TimeSpan.FromSeconds(1);
+                x.SetJobFactory(async context => await Task.Delay(context.Message.Size));
+            });
         }
 
 
@@ -60,40 +65,48 @@ namespace MassTransit.QuartzIntegration.Tests
         }
     }
 
+
     [TestFixture]
-    public class BadTramJob_Specs :
+    public class When_a_job_faults :
         QuartzInMemoryTestFixture
     {
         [Test]
-        public async Task Should_allow_scheduling_a_job()
+        public async Task Should_receive_the_job_faulted_event()
         {
-            var completed = SubscribeHandler<JobFaulted>();
+            var faulted = SubscribeHandler<JobFaulted>();
 
-            await Bus.Publish(new ProcessFile()
+            await Bus.Publish(new ProcessFile
             {
                 Filename = "log.txt",
-                Size = 10,
+                Size = 10
             });
 
-            var context = await completed;
+            var context = await faulted;
         }
 
-        IConsumerTurnout _consumerTurnout;
+        IInMemoryBusFactoryConfigurator _busFactoryConfigurator;
 
-        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+        protected override void ConfigureBus(IInMemoryBusFactoryConfigurator configurator)
+        {
+            base.ConfigureBus(configurator);
+
+            _busFactoryConfigurator = configurator;
+        }
+
+        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             base.ConfigureInputQueueEndpoint(configurator);
 
-            IJobFactory<ProcessFile> jobFactory = new DelegateJobFactory<ProcessFile>(async context =>
+            configurator.Turnout<ProcessFile>(_busFactoryConfigurator, x =>
             {
-                await Task.Delay(context.Message.Size);
+                x.SuperviseInterval = TimeSpan.FromSeconds(1);
+                x.SetJobFactory(async context =>
+                {
+                    await Task.Delay(context.Message.Size);
 
-                throw new IntentionalTestException();
+                    throw new IntentionalTestException();
+                });
             });
-
-            _consumerTurnout = new ConsumerTurnout(new JobRoster(), configurator.InputAddress);
-
-            configurator.Consumer(() => new CreateJobConsumer<ProcessFile>(_consumerTurnout, jobFactory));
         }
 
 

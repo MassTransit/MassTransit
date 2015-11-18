@@ -63,11 +63,15 @@
     <Compile Include="AzureBusFactory.cs" />
     <Compile Include="Configuration\ReceiveEndpointSettings.cs" />
     <Compile Include="Configuration\ServiceBusReceiveEndpointConfigurator.cs" />
+    <Compile Include="Configuration\ServiceBusMessageSchedulerSpecification.cs" />
+    <Compile Include="Contexts\ServiceBusMessageSchedulerContext.cs" />
     <Compile Include="Hosting\ServiceBusHostBusFactory.cs" />
     <Compile Include="Hosting\ServiceBusServiceConfigurator.cs" />
     <Compile Include="Hosting\ServiceBusSettings.cs" />
     <Compile Include="IQueueConfigurator.cs" />
     <Compile Include="NamespaceManagerExtensions.cs" />
+    <Compile Include="Pipeline\ServiceBusMessageSchedulerFilter.cs" />
+    <Compile Include="ScheduleMessageExtensions.cs" />
     <Compile Include="ServiceBusAddressExtensions.cs" />
     <Compile Include="ServiceBusPublishEndpoint.cs" />
     <Compile Include="ServiceBusSendContext.cs" />
@@ -109,6 +113,7 @@
     <Compile Include="ServiceBusMessageNameFormatter.cs" />
     <Compile Include="BusFactoryConfiguratorExtensions.cs" />
     <Compile Include="ServiceBusConfigurationExtensions.cs" />
+    <Compile Include="TurnoutExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

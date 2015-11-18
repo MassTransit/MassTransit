@@ -50,7 +50,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
 
         InMemorySagaRepository<Instance> _repository;
 
-        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             _machine = new TestStateMachine();
             _repository = new InMemorySagaRepository<Instance>();

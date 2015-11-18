@@ -74,9 +74,11 @@
     <Compile Include="Performance_Specs.cs" />
     <Compile Include="Publish_Specs.cs" />
     <Compile Include="RequestClient_Specs.cs" />
+    <Compile Include="ScheduleMessage_Specs.cs" />
     <Compile Include="SendContext_Specs.cs" />
     <Compile Include="Send_Specs.cs" />
     <Compile Include="TestAzureServiceBusAccountSettings.cs" />
+    <Compile Include="Turnout_Sepcs.cs" />
     <Compile Include="TwoScopeAzureServiceBusTestFixture.cs" />
     <Compile Include="Verify_account_settings.cs" />
   </ItemGroup>

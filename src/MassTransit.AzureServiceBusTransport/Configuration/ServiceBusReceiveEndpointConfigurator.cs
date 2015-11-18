@@ -45,7 +45,7 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
 
         public override IEnumerable<ValidationResult> Validate()
         {
-            foreach (ValidationResult result in base.Validate())
+            foreach (var result in base.Validate())
                 yield return result;
 
             if (_settings.PrefetchCount <= 0)
@@ -72,6 +72,8 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
 
             builder.AddReceiveEndpoint(_settings.QueueDescription.Path, new ReceiveEndpoint(transport, receivePipe));
         }
+
+        public IServiceBusHost Host => _host;
 
         public TimeSpan AutoDeleteOnIdle
         {
@@ -181,7 +183,7 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
 
         protected override Uri GetErrorAddress()
         {
-            string errorQueueName = _settings.QueueDescription.Path + "_error";
+            var errorQueueName = _settings.QueueDescription.Path + "_error";
 
             var errorQueueDescription = GetQueueDescription(errorQueueName);
 
@@ -200,7 +202,7 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
 
         protected override Uri GetDeadLetterAddress()
         {
-            string skippedQueueName = _settings.QueueDescription.Path + "_skipped";
+            var skippedQueueName = _settings.QueueDescription.Path + "_skipped";
 
             var errorQueueDescription = GetQueueDescription(skippedQueueName);
 

@@ -39,7 +39,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
             _transportBuilderConfigurators = new List<IBusFactorySpecification>();
             _consumePipeSpecification = new ConsumePipeSpecificationList();
 
-            string queueName = HostMetadataCache.Host.GetTemporaryQueueName("bus-");
+            string queueName = this.GetTemporaryQueueName("bus-");
             _settings = new RabbitMqReceiveSettings
             {
                 QueueName = queueName,

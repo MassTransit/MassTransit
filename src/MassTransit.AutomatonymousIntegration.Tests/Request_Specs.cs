@@ -83,7 +83,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
                 configurator.ReceiveEndpoint("service_queue", ConfigureServiceQueueEndpoint);
             }
 
-            protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+            protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
             {
                 base.ConfigureInputQueueEndpoint(configurator);
 

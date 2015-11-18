@@ -20,7 +20,7 @@ namespace MassTransit.Turnout
     /// turnout service allows message consumers to run asynchronous tasks and continue once the background job
     /// is completed.
     /// </summary>
-    public interface IConsumerTurnout
+    public interface ITurnoutController
     {
         /// <summary>
         /// Creates a job and schedules it for execution.
@@ -28,8 +28,8 @@ namespace MassTransit.Turnout
         /// <typeparam name="T">The message type that is used to initiate the job</typeparam>
         /// <param name="context">The context of the message being consumed</param>
         /// <param name="jobFactory">The factory to create the job Task</param>
-        /// <returns>A tram job</returns>
-        Task<TramJob<T>> CreateJob<T>(ConsumeContext<T> context, IJobFactory<T> jobFactory)
+        /// <returns>The newly created job's handle</returns>
+        Task<JobHandle<T>> CreateJob<T>(ConsumeContext<T> context, IJobFactory<T> jobFactory)
             where T : class;
     }
 }

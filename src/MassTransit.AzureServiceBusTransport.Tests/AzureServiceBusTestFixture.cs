@@ -164,6 +164,8 @@ namespace MassTransit.AzureServiceBusTransport.Tests
                     });
                 });
 
+                x.UseServiceBusMessageScheduler();
+
                 ConfigureBusHost(x, host);
 
                 x.ReceiveEndpoint(host, "input_queue", e =>

@@ -41,7 +41,7 @@ namespace MassTransit.Containers.Tests
             _container.Dispose();
         }
 
-        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             configurator.LoadFrom(_container);
         }
@@ -71,7 +71,7 @@ namespace MassTransit.Containers.Tests
             _container.Dispose();
         }
 
-        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             configurator.LoadFrom(_container);
         }
@@ -100,7 +100,7 @@ namespace MassTransit.Containers.Tests
 
         readonly IContainer _container;
 
-        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             configurator.LoadFrom(_container);
         }
