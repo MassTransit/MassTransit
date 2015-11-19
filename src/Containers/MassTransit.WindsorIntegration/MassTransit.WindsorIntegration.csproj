@@ -80,8 +80,9 @@
     </Compile>
     <Compile Include="ConsumerConfiguratorCache.cs" />
     <Compile Include="MessageLifetimeScope.cs" />
+    <Compile Include="MessageScope.cs" />
     <Compile Include="SagaConfiguratorCache.cs" />
-    <Compile Include="WindsorInboundInterceptor.cs" />
+    <Compile Include="WindsorMessageScopeFilter.cs" />
     <Compile Include="WindsorMessageScopePipeSpecification.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="WindsorContainerExtensions.cs" />

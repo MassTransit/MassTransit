@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,7 +13,6 @@
 namespace MassTransit.WindsorIntegration
 {
     using System.Threading.Tasks;
-    using Monitoring.Introspection;
     using Pipeline;
 
 
@@ -27,19 +26,14 @@ namespace MassTransit.WindsorIntegration
     {
         void IProbeSite.Probe(ProbeContext context)
         {
+            context.CreateFilterScope("windsorMessageScope");
         }
 
         async Task IFilter<T>.Send(T context, IPipe<T> next)
         {
-            try
+            using (var lifetimeScope = new MessageLifetimeScope())
             {
-                MessageScope.BeginScope();
-
                 await next.Send(context);
-            }
-            finally
-            {
-                MessageScope.EndScope();
             }
         }
     }

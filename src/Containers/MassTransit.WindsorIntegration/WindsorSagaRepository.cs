@@ -15,7 +15,6 @@ namespace MassTransit.WindsorIntegration
     using System.Threading.Tasks;
     using Castle.MicroKernel;
     using Castle.MicroKernel.Lifestyle;
-    using Monitoring.Introspection;
     using Pipeline;
     using Saga;
 
@@ -40,18 +39,17 @@ namespace MassTransit.WindsorIntegration
             _repository.Probe(scope);
         }
 
-        public async Task Send<T>(ConsumeContext<T> context, ISagaPolicy<TSaga, T> policy, IPipe<SagaConsumeContext<TSaga, T>> next) where T : class
+        async Task ISagaRepository<TSaga>.Send<T>(ConsumeContext<T> context, ISagaPolicy<TSaga, T> policy, IPipe<SagaConsumeContext<TSaga, T>> next)
         {
-            using (_container.BeginScope())
+            using (_container.RequireScope())
             {
                 await _repository.Send(context, policy, next);
             }
         }
 
-        public async Task SendQuery<T>(SagaQueryConsumeContext<TSaga, T> context, ISagaPolicy<TSaga, T> policy, IPipe<SagaConsumeContext<TSaga, T>> next)
-            where T : class
+        async Task ISagaRepository<TSaga>.SendQuery<T>(SagaQueryConsumeContext<TSaga, T> context, ISagaPolicy<TSaga, T> policy, IPipe<SagaConsumeContext<TSaga, T>> next)
         {
-            using (_container.BeginScope())
+            using (_container.RequireScope())
             {
                 await _repository.SendQuery(context, policy, next);
             }

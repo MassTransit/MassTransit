@@ -103,9 +103,9 @@ namespace MassTransit
             where T : class, ISaga
         {
             if (configurator == null)
-                throw new ArgumentNullException("configurator");
+                throw new ArgumentNullException(nameof(configurator));
             if (container == null)
-                throw new ArgumentNullException("container");
+                throw new ArgumentNullException(nameof(container));
 
             var sagaRepository = container.Resolve<ISagaRepository<T>>();
 
@@ -119,11 +119,23 @@ namespace MassTransit
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="configurator"></param>
+        [Obsolete("Change to UseMessageScope - method was renamed to match middleware conventions")]
         public static void EnableMessageScope<T>(this IPipeConfigurator<T> configurator)
             where T : class, PipeContext
         {
+            UseMessageScope(configurator);
+        }
+
+        /// <summary>
+        /// Enables message scope lifetime for windsor containers
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="configurator"></param>
+        public static void UseMessageScope<T>(this IPipeConfigurator<T> configurator)
+            where T : class, PipeContext
+        {
             if (configurator == null)
-                throw new ArgumentNullException("configurator");
+                throw new ArgumentNullException(nameof(configurator));
 
             var pipeBuilderConfigurator = new WindsorMessageScopePipeSpecification<T>();
 
