@@ -141,12 +141,16 @@ namespace MassTransit.RabbitMqTransport.Integration
                 if (_log.IsDebugEnabled)
                     _log.Debug("The connection usage threw an exception", ex);
 
+                Interlocked.CompareExchange(ref _scope, null, scope);
+
                 throw new RabbitMqConnectionException("Connect failed: " + _connectionFactory.ToDebugString(), ex);
             }
             catch (Exception ex)
             {
                 if (_log.IsDebugEnabled)
                     _log.Debug("The connection usage threw an exception", ex);
+
+                Interlocked.CompareExchange(ref _scope, null, scope);
 
                 throw;
             }
@@ -167,7 +171,9 @@ namespace MassTransit.RabbitMqTransport.Integration
             catch (BrokerUnreachableException ex)
             {
                 if (_log.IsDebugEnabled)
-                    _log.Debug("The connection usage threw an exception", ex);
+                    _log.Debug("The existing connection usage threw an exception", ex);
+
+                Interlocked.CompareExchange(ref _scope, null, scope);
 
                 throw new RabbitMqConnectionException("Connect failed: " + _connectionFactory.ToDebugString(), ex);
             }
@@ -175,6 +181,8 @@ namespace MassTransit.RabbitMqTransport.Integration
             {
                 if (_log.IsDebugEnabled)
                     _log.Debug("The existing connection usage threw an exception", ex);
+
+                Interlocked.CompareExchange(ref _scope, null, scope);
 
                 throw;
             }

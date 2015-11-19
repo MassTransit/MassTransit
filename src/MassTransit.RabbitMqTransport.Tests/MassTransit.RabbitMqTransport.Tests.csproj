@@ -90,6 +90,7 @@
     <Compile Include="RabbitMqTestFixture.cs" />
     <Compile Include="PublisherConfirm_Specs.cs" />
     <Compile Include="Publish_Specs.cs" />
+    <Compile Include="Reconnecting_Specs.cs" />
     <Compile Include="Request_Specs.cs" />
     <Compile Include="Security_Specs.cs" />
     <Compile Include="SendObserver_Specs.cs" />
