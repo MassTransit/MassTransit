@@ -175,7 +175,7 @@ namespace MassTransit.Containers.Tests
 
         protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
-            configurator.EnableMessageScope();
+            configurator.UseMessageScope();
 
             configurator.LoadFrom(_container);
         }
