@@ -119,10 +119,12 @@ namespace MassTransit.Testing
 
             public ReceivedMessageList<T> Received => _received;
 
-            public async Task Consume(ConsumeContext<T> context)
+            public Task Consume(ConsumeContext<T> context)
             {
                 _received.Add(context);
                 _multiConsumer._received.Add(context);
+
+                return TaskUtil.Completed;
             }
         }
     }

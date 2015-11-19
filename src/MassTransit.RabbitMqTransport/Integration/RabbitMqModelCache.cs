@@ -95,14 +95,30 @@ namespace MassTransit.RabbitMqTransport.Integration
                     if (_log.IsDebugEnabled)
                         _log.Debug("The existing model usage threw an exception", ex);
 
+                    Interlocked.CompareExchange(ref _scope, null, scope);
+
+                    scope.Close();
+
                     throw;
                 }
             });
 
-            await _connectionCache.Send(connectionPipe, new CancellationToken()).ConfigureAwait(false);
+            try
+            {
+                await _connectionCache.Send(connectionPipe, new CancellationToken()).ConfigureAwait(false);
+            }
+            catch (Exception exception)
+            {
+                if (_log.IsDebugEnabled)
+                    _log.Debug("The connection threw an exception", exception);
+
+                Interlocked.CompareExchange(ref _scope, null, scope);
+
+                throw;
+            }
         }
 
-        static async Task SendUsingExistingModel(IPipe<ModelContext> modelPipe, ModelScope existingScope, CancellationToken cancellationToken)
+        async Task SendUsingExistingModel(IPipe<ModelContext> modelPipe, ModelScope existingScope, CancellationToken cancellationToken)
         {
             try
             {
@@ -115,6 +131,10 @@ namespace MassTransit.RabbitMqTransport.Integration
             {
                 if (_log.IsDebugEnabled)
                     _log.Debug("The existing model usage threw an exception", ex);
+
+                Interlocked.CompareExchange(ref _scope, null, existingScope);
+
+                existingScope.Close();
 
                 throw;
             }

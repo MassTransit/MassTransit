@@ -185,16 +185,26 @@ namespace MassTransit.RabbitMqTransport.Tests
 
         void CleanUpVirtualHost(IRabbitMqHost host)
         {
-            _nameFormatter = new RabbitMqMessageNameFormatter();
-
-            ConnectionFactory connectionFactory = host.Settings.GetConnectionFactory();
-            using (IConnection connection = connectionFactory.CreateConnection())
-            using (IModel model = connection.CreateModel())
+            try
             {
-                model.ExchangeDelete("input_queue");
-                model.QueueDelete("input_queue");
+                _nameFormatter = new RabbitMqMessageNameFormatter();
 
-                OnCleanupVirtualHost(model);
+                ConnectionFactory connectionFactory = host.Settings.GetConnectionFactory();
+                using (IConnection connection = connectionFactory.CreateConnection())
+                using (IModel model = connection.CreateModel())
+                {
+                    model.ExchangeDelete("input_queue");
+                    model.QueueDelete("input_queue");
+
+                    OnCleanupVirtualHost(model);
+
+                    model.Abort(200, "Cleanup complete");
+                    connection.Abort(200, "Cleanup complete");
+                }
+            }
+            catch (Exception exception)
+            {
+                Console.WriteLine(exception);
             }
         }
     }
