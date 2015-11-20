@@ -23,14 +23,15 @@ namespace MassTransit.AzureServiceBusTransport.Contexts
     public class ServiceBusConnectionContext :
         ConnectionContext
     {
-        readonly CancellationToken _cancellationToken;
         readonly IServiceBusHost _host;
+
         readonly PayloadCache _payloadCache;
 
         public ServiceBusConnectionContext(IServiceBusHost host, CancellationToken cancellationToken)
         {
             _host = host;
-            _cancellationToken = cancellationToken;
+            CancellationToken = cancellationToken;
+
             _payloadCache = new PayloadCache();
         }
 
@@ -51,20 +52,13 @@ namespace MassTransit.AzureServiceBusTransport.Contexts
             return _payloadCache.GetOrAddPayload(payloadFactory);
         }
 
-        public Task<MessagingFactory> MessagingFactory
-        {
-            get { return _host.MessagingFactory; }
-        }
+        public Task<MessagingFactory> MessagingFactory => _host.MessagingFactory;
 
-        public Task<NamespaceManager> NamespaceManager
-        {
-            get { return _host.NamespaceManager; }
-        }
+        public Task<MessagingFactory> SessionMessagingFactory => _host.SessionMessagingFactory;
 
-        public Task<NamespaceManager> RootNamespaceManager
-        {
-            get { return _host.RootNamespaceManager; }
-        }
+        public Task<NamespaceManager> NamespaceManager => _host.NamespaceManager;
+
+        public Task<NamespaceManager> RootNamespaceManager => _host.RootNamespaceManager;
 
         public Uri GetQueueAddress(QueueDescription queueDescription)
         {
@@ -76,9 +70,6 @@ namespace MassTransit.AzureServiceBusTransport.Contexts
             return _host.GetQueuePath(queueDescription);
         }
 
-        public CancellationToken CancellationToken
-        {
-            get { return _cancellationToken; }
-        }
+        public CancellationToken CancellationToken { get; }
     }
 }

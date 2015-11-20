@@ -27,6 +27,11 @@ namespace MassTransit.AzureServiceBusTransport.Contexts
         Task<MessagingFactory> MessagingFactory { get; }
 
         /// <summary>
+        /// The messaging factory initialized for the service bus
+        /// </summary>
+        Task<MessagingFactory> SessionMessagingFactory { get; }
+
+        /// <summary>
         /// The namespace manager for the service bus
         /// </summary>
         Task<NamespaceManager> NamespaceManager { get; }

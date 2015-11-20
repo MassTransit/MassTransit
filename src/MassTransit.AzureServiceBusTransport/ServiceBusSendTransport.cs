@@ -73,6 +73,15 @@ namespace MassTransit.AzureServiceBusTransport
                         if (context.PartitionKey != null)
                             brokeredMessage.PartitionKey = context.PartitionKey;
 
+                        if (context.SessionId != null)
+                        {
+                            brokeredMessage.SessionId = context.SessionId;
+
+                            if(context.ReplyToSessionId == null)
+                                brokeredMessage.ReplyToSessionId = context.SessionId;
+                        }
+
+
                         await _observers.PreSend(context);
 
                         await _sender.SendAsync(brokeredMessage);

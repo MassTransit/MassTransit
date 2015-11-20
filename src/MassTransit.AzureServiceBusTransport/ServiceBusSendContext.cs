@@ -27,6 +27,16 @@ namespace MassTransit.AzureServiceBusTransport
         /// Set the partition key for the message, which is used to split load across nodes in Azure
         /// </summary>
         string PartitionKey { set; }
+
+        /// <summary>
+        /// Set the sessionId of the message
+        /// </summary>
+        string SessionId { set; }
+
+        /// <summary>
+        /// Set the replyToSessionId of the message
+        /// </summary>
+        string ReplyToSessionId { set; }
     }
 
 

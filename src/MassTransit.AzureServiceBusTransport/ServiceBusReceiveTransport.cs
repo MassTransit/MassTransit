@@ -74,7 +74,14 @@ namespace MassTransit.AzureServiceBusTransport
             {
                 x.UseFilter(new PrepareReceiveQueueFilter(_settings, _subscriptionSettings));
 
-                x.UseFilter(new MessageReceiverFilter(receivePipe, _receiveObservers, _endpointObservers, supervisor));
+                if (_settings.QueueDescription.RequiresSession)
+                {
+                    x.UseFilter(new MessageSessionReceiverFilter(receivePipe, _receiveObservers, _endpointObservers, supervisor));
+                }
+                else
+                {
+                    x.UseFilter(new MessageReceiverFilter(receivePipe, _receiveObservers, _endpointObservers, supervisor));
+                }
             });
 
             Receiver(supervisor, connectionPipe);

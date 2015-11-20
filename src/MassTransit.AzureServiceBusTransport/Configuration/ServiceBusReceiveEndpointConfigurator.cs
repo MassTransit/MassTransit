@@ -151,6 +151,11 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
             set { _settings.QueueDescription.RequiresDuplicateDetection = value; }
         }
 
+        public bool RequiresSession
+        {
+            set { _settings.QueueDescription.RequiresSession = value; }
+        }
+
         public bool SupportOrdering
         {
             set { _settings.QueueDescription.SupportOrdering = value; }

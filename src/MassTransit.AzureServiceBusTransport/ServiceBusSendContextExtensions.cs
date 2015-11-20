@@ -47,5 +47,31 @@ namespace MassTransit.AzureServiceBusTransport
                 sendContext.ScheduledEnqueueTimeUtc = DateTime.UtcNow + delay;
             }
         }
+
+        public static void SetSessionId(this SendContext context, string sessionId)
+        {
+            ServiceBusSendContext sendContext;
+            if (context.TryGetPayload(out sendContext))
+            {
+                sendContext.SessionId = sessionId;
+            }
+        }
+
+        public static void SetReplyToSessionId(this SendContext context, string sessionId)
+        {
+            ServiceBusSendContext sendContext;
+            if (context.TryGetPayload(out sendContext))
+            {
+                sendContext.ReplyToSessionId = sessionId;
+            }
+        }
+        public static void SetPartitionKey(this SendContext context, string partitionKey)
+        {
+            ServiceBusSendContext sendContext;
+            if (context.TryGetPayload(out sendContext))
+            {
+                sendContext.PartitionKey = partitionKey;
+            }
+        }
     }
 }

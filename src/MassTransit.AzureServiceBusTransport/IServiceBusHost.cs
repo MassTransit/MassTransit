@@ -28,11 +28,17 @@ namespace MassTransit.AzureServiceBusTransport
 
         Task<MessagingFactory> MessagingFactory { get; }
 
+        /// <summary>
+        /// Session-based messages with state require the use of a net-tcp style client
+        /// </summary>
+        Task<MessagingFactory> SessionMessagingFactory { get; }
+
         Task<NamespaceManager> NamespaceManager { get; }
 
         Task<NamespaceManager> RootNamespaceManager { get; }
 
         IMessageNameFormatter MessageNameFormatter { get; }
+
 
         string GetQueuePath(QueueDescription queueDescription);
     }
