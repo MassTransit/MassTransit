@@ -22,9 +22,9 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
 
 
     /// <summary>
-    /// Creates a message receiver and receives messages from the input queue of the endpoint
+    /// Creates a message session receiver
     /// </summary>
-    public class MessageReceiverFilter :
+    public class MessageSessionReceiverFilter :
         IFilter<ConnectionContext>
     {
         static readonly ILog _log = Logger.Get<MessageReceiverFilter>();
@@ -33,7 +33,7 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
         readonly IPipe<ReceiveContext> _receivePipe;
         readonly ITaskSupervisor _supervisor;
 
-        public MessageReceiverFilter(IPipe<ReceiveContext> receivePipe, IReceiveObserver receiveObserver, IReceiveEndpointObserver endpointObserver,
+        public MessageSessionReceiverFilter(IPipe<ReceiveContext> receivePipe, IReceiveObserver receiveObserver, IReceiveEndpointObserver endpointObserver,
             ITaskSupervisor supervisor)
         {
             _receivePipe = receivePipe;
@@ -57,19 +57,19 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Creating message receiver for {0}", inputAddress);
 
-            MessageReceiver messageReceiver = null;
+
+            QueueClient queueClient = null;
 
             try
             {
-                var messagingFactory = await context.MessagingFactory.ConfigureAwait(false);
+                var messagingFactory = await context.SessionMessagingFactory.ConfigureAwait(false);
 
-                messageReceiver = await messagingFactory.CreateMessageReceiverAsync(queuePath, ReceiveMode.PeekLock).ConfigureAwait(false);
+                queueClient = messagingFactory.CreateQueueClient(queuePath);
 
-                messageReceiver.PrefetchCount = receiveSettings.PrefetchCount;
-
+                queueClient.PrefetchCount = receiveSettings.PrefetchCount;
                 using (var scope = _supervisor.CreateScope())
                 {
-                    var receiver = new Receiver(messageReceiver, inputAddress, _receivePipe, receiveSettings, _receiveObserver, scope);
+                    var receiver = new SessionReceiver(queueClient, inputAddress, _receivePipe, receiveSettings, _receiveObserver, scope);
 
                     await scope.Ready.ConfigureAwait(false);
 
@@ -98,8 +98,8 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
             }
             finally
             {
-                if (messageReceiver != null && !messageReceiver.IsClosed)
-                    await messageReceiver.CloseAsync().ConfigureAwait(false);
+                if (queueClient != null && !queueClient.IsClosed)
+                    await queueClient.CloseAsync().ConfigureAwait(false);
             }
 
             await next.Send(context).ConfigureAwait(false);

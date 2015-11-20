@@ -85,6 +85,11 @@ namespace MassTransit.AzureServiceBusTransport
         bool RequiresDuplicateDetection { set; }
 
         /// <summary>
+        /// Sets the queue in session mode, requiring a session for inbound messages
+        /// </summary>
+        bool RequiresSession { set; }
+
+        /// <summary>
         /// Sets a value that indicates whether the queue supports ordering.
         /// </summary>
         bool SupportOrdering { set; }

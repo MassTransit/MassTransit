@@ -27,8 +27,12 @@ namespace MassTransit.AzureServiceBusTransport.Contexts
         {
         }
 
+        public string ReplyToSessionId { get; set; }
+
         public DateTime? ScheduledEnqueueTimeUtc { get; set; }
 
         public string PartitionKey { get; set; }
+
+        public string SessionId { get; set; }
     }
 }

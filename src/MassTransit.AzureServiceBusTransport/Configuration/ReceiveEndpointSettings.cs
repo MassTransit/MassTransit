@@ -25,18 +25,22 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
             {
                 EnableBatchedOperations = true,
                 MaxDeliveryCount = 5,
-                DefaultMessageTimeToLive = TimeSpan.MaxValue,
+                DefaultMessageTimeToLive = TimeSpan.FromDays(365 + 1),
                 LockDuration = TimeSpan.FromMinutes(5),
                 EnableDeadLetteringOnMessageExpiration = true
             };
 
             MaxConcurrentCalls = Math.Max(Environment.ProcessorCount, 8);
             PrefetchCount = Math.Max(MaxConcurrentCalls, 32);
+
+            AutoRenewTimeout = TimeSpan.FromSeconds(60);
+            MessageWaitTimeout = TimeSpan.FromDays(1);
         }
 
         public int PrefetchCount { get; set; }
         public int MaxConcurrentCalls { get; set; }
         public QueueDescription QueueDescription { get; }
         public TimeSpan AutoRenewTimeout { get; set; }
+        public TimeSpan MessageWaitTimeout { get; set; }
     }
 }

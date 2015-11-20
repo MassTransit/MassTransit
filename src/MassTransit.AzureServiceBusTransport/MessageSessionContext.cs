@@ -13,31 +13,42 @@
 namespace MassTransit.AzureServiceBusTransport
 {
     using System;
-    using Microsoft.ServiceBus.Messaging;
+    using System.IO;
+    using System.Threading.Tasks;
 
 
-    public interface ReceiveSettings
+    /// <summary>
+    /// A context for a message consumed within a message session
+    /// </summary>
+    public interface MessageSessionContext
     {
         /// <summary>
-        /// The number of messages to push from the server to the client
+        /// The SessionId of the session
         /// </summary>
-        int PrefetchCount { get; }
+        string SessionId { get; }
 
         /// <summary>
-        /// The number of concurrent messages to process
+        /// The session is locked until...
         /// </summary>
-        int MaxConcurrentCalls { get; }
-
-        QueueDescription QueueDescription { get; }
+        DateTime LockedUntilUtc { get; }
 
         /// <summary>
-        /// The timeout before the session state is renewed
+        /// Returns the state as a stream
         /// </summary>
-        TimeSpan AutoRenewTimeout { get; }
+        /// <returns></returns>
+        Task<Stream> GetStateAsync();
 
         /// <summary>
-        /// The timeout before a message session is abandoned
+        /// Writes the message state from the specified stream
         /// </summary>
-        TimeSpan MessageWaitTimeout { get; }
+        /// <param name="sessionState"></param>
+        /// <returns></returns>
+        Task SetStateAsync(Stream sessionState);
+
+        /// <summary>
+        /// Renews the session lock
+        /// </summary>
+        /// <returns></returns>
+        Task RenewLockAsync();
     }
 }
