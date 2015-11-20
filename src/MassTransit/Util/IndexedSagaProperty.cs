@@ -15,8 +15,8 @@ namespace MassTransit.Util
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Linq.Expressions;
     using System.Reflection;
+    using Internals.Reflection;
     using Saga;
 
 
@@ -83,7 +83,7 @@ namespace MassTransit.Util
         where TSaga : class, ISaga
     {
         readonly Func<TSaga, TProperty> _getProperty;
-        readonly IDictionary<TProperty, HashSet<SagaInstance<TSaga> >> _values;
+        readonly IDictionary<TProperty, HashSet<SagaInstance<TSaga>>> _values;
 
         /// <summary>
         /// Creates an index for the specified property of a saga
@@ -105,7 +105,7 @@ namespace MassTransit.Util
 
                 HashSet<SagaInstance<TSaga>> result;
                 if (_values.TryGetValue(keyValue, out result))
-                    return result.Single();
+                    return result.SingleOrDefault();
 
                 return null;
             }
@@ -113,7 +113,7 @@ namespace MassTransit.Util
 
         public void Add(TSaga newItem)
         {
-            TProperty key = _getProperty(newItem);
+            var key = _getProperty(newItem);
 
             HashSet<SagaInstance<TSaga>> hashSet;
             if (!_values.TryGetValue(key, out hashSet))
@@ -127,13 +127,14 @@ namespace MassTransit.Util
 
         public void Remove(SagaInstance<TSaga> instance)
         {
-            TProperty key = _getProperty(instance.Instance);
+            var key = _getProperty(instance.Instance);
 
             HashSet<SagaInstance<TSaga>> hashSet;
             if (!_values.TryGetValue(key, out hashSet))
                 return;
 
-            hashSet.Remove(instance);
+            if (hashSet.Remove(instance) && hashSet.Count == 0)
+                _values.Remove(key);
         }
 
         public IEnumerable<SagaInstance<TSaga>> Where(Func<TSaga, bool> filter)
@@ -159,9 +160,7 @@ namespace MassTransit.Util
 
         static Func<TSaga, TProperty> GetGetMethod(PropertyInfo property)
         {
-            ParameterExpression parameterExpression = Expression.Parameter(typeof(TSaga), "instance");
-            return Expression.Lambda<Func<TSaga, TProperty>>(
-                Expression.Call(parameterExpression, property.GetGetMethod()), new[] {parameterExpression}).Compile();
+            return new ReadOnlyProperty<TSaga, TProperty>(property).GetProperty;
         }
     }
 }
