@@ -15,16 +15,22 @@ namespace MassTransit.AzureServiceBusTransport.Hosting
     using System;
     using MassTransit.Hosting;
     using Microsoft.ServiceBus;
-    
+
+
     public interface ServiceBusSettings :
         ISettings
     {
+        string ConnectionString { get; }
         string Namespace { get; }
+        string ServicePath { get; }
 
         string KeyName { get; }
         string SharedAccessKey { get; }
         TimeSpan? OperationTimeout { get; }
         TimeSpan? TokenTimeToLive { get; }
         TokenScope TokenScope { get; }
+        TimeSpan? RetryMinBackoff { get; }
+        TimeSpan? RetryMaxBackoff { get; }
+        int? RetryLimit { get; }
     }
 }
