@@ -22,8 +22,7 @@ namespace MassTransit.AzureServiceBusTransport.Hosting
         IHostBusFactory
     {
         readonly ILog _log = Logger.Get<ServiceBusHostBusFactory>();
-
-        readonly SettingsAdapter _hostSettings;
+        ServiceBusSettings _settings;
 
         public ServiceBusHostBusFactory(ISettingsProvider settingsProvider)
         {
@@ -31,39 +30,33 @@ namespace MassTransit.AzureServiceBusTransport.Hosting
             if (!settingsProvider.TryGetSettings("ServiceBus", out settings))
                 throw new ConfigurationException("The ServiceBus settings were not available");
 
-            _hostSettings = new SettingsAdapter(settings);
+            _settings = settings;
         }
 
         public IBusControl CreateBus(IBusServiceConfigurator busServiceConfigurator, string serviceName)
         {
-            if (string.IsNullOrEmpty(_hostSettings.Namespace))
-                throw new ConfigurationException("The ServiceBus Namespace setting has not been configured");
+            serviceName = serviceName.ToLowerInvariant().Trim().Replace(" ", "_");
 
-            if (string.IsNullOrEmpty(_hostSettings.KeyName))
-                throw new ConfigurationException("The ServiceBus KeyName setting has not been configured");
+            var hostSettings = new SettingsAdapter(_settings, serviceName);
 
-            if (string.IsNullOrEmpty(_hostSettings.SharedAccessKey))
-                throw new ConfigurationException("The ServiceBus SharedAccessKey setting has not been configured");
+            if (hostSettings.ServiceUri == null)
+                throw new ConfigurationException("The ServiceBus ServiceUri setting has not been configured");
 
             return AzureBusFactory.CreateUsingServiceBus(configurator =>
             {
-                serviceName = serviceName.ToLowerInvariant().Trim().Replace(" ", "_");
-                _hostSettings.ServiceUri = ServiceBusEnvironment.CreateServiceUri("sb",
-                    _hostSettings.Namespace, serviceName);
-                
-                var host = configurator.Host(_hostSettings.ServiceUri, h =>
+                var host = configurator.Host(hostSettings.ServiceUri, h =>
                 {
                     h.SharedAccessSignature(s =>
                     {
-                        s.KeyName = _hostSettings.KeyName;
-                        s.SharedAccessKey = _hostSettings.SharedAccessKey;
-                        s.TokenTimeToLive = _hostSettings.TokenTimeToLive;
-                        s.TokenScope = _hostSettings.TokenScope;
+                        s.KeyName = hostSettings.KeyName;
+                        s.SharedAccessKey = hostSettings.SharedAccessKey;
+                        s.TokenTimeToLive = hostSettings.TokenTimeToLive;
+                        s.TokenScope = hostSettings.TokenScope;
                     });
                 });
 
                 if (_log.IsInfoEnabled)
-                    _log.Info($"Configuring Host: { _hostSettings.ServiceUri}");
+                    _log.Info($"Configuring Host: {hostSettings.ServiceUri}");
 
                 var serviceConfigurator = new ServiceBusServiceConfigurator(configurator, host);
 
@@ -77,19 +70,46 @@ namespace MassTransit.AzureServiceBusTransport.Hosting
         {
             readonly ServiceBusSettings _settings;
 
-            public SettingsAdapter(ServiceBusSettings settings)
+            public SettingsAdapter(ServiceBusSettings settings, string serviceName)
             {
                 _settings = settings;
+
+                if (string.IsNullOrWhiteSpace(settings.ConnectionString))
+                {
+                    if (string.IsNullOrWhiteSpace(_settings.Namespace))
+                        throw new ConfigurationException("The ServiceBus Namespace setting has not been configured");
+                    if (string.IsNullOrEmpty(settings.KeyName))
+                        throw new ConfigurationException("The ServiceBus KeyName setting has not been configured");
+                    if (string.IsNullOrEmpty(settings.SharedAccessKey))
+                        throw new ConfigurationException("The ServiceBus SharedAccessKey setting has not been configured");
+
+                    ServiceUri = ServiceBusEnvironment.CreateServiceUri("sb", settings.Namespace, settings.ServicePath ?? serviceName);
+                    TokenProvider = TokenProvider.CreateSharedAccessSignatureTokenProvider(settings.KeyName, settings.SharedAccessKey);
+                }
+                else
+                {
+                    var namespaceManager = NamespaceManager.CreateFromConnectionString(settings.ConnectionString);
+
+                    ServiceUri = namespaceManager.Address;
+                    TokenProvider = namespaceManager.Settings.TokenProvider;
+                }
             }
 
-            public string Namespace => _settings.Namespace;
             public string KeyName => _settings.KeyName;
             public string SharedAccessKey => _settings.SharedAccessKey;
             public TimeSpan TokenTimeToLive => _settings.TokenTimeToLive ?? TimeSpan.FromDays(1);
             public TokenScope TokenScope => _settings.TokenScope;
             public TimeSpan OperationTimeout => _settings.OperationTimeout ?? TimeSpan.FromSeconds(30);
-            public Uri ServiceUri { get; set; }
-            public TokenProvider TokenProvider { get; set; }
+
+            public TimeSpan RetryMinBackoff => _settings.RetryMinBackoff ?? TimeSpan.Zero;
+
+            public TimeSpan RetryMaxBackoff => _settings.RetryMaxBackoff ?? TimeSpan.FromSeconds(2);
+
+            public int RetryLimit => _settings.RetryLimit ?? 10;
+
+            public Uri ServiceUri { get; private set; }
+
+            public TokenProvider TokenProvider { get; private set; }
         }
     }
 }

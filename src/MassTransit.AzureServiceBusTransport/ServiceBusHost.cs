@@ -74,7 +74,7 @@ namespace MassTransit.AzureServiceBusTransport
             return string.Join("/", _settings.ServiceUri.AbsolutePath.Trim('/'), queueDescription.Path);
         }
 
-        Task<MessagingFactory> CreateMessagingFactory()
+        async Task<MessagingFactory> CreateMessagingFactory()
         {
             var mfs = new MessagingFactorySettings
             {
@@ -89,7 +89,11 @@ namespace MassTransit.AzureServiceBusTransport
 
             var builder = new UriBuilder(_settings.ServiceUri) {Path = ""};
 
-            return MessagingFactory.CreateAsync(builder.Uri, mfs);
+            var messagingFactory = await MessagingFactory.CreateAsync(builder.Uri, mfs);
+
+            messagingFactory.RetryPolicy = new RetryExponential(_settings.RetryMinBackoff, _settings.RetryMaxBackoff, _settings.RetryLimit);
+
+            return messagingFactory;
         }
 
         Task<NamespaceManager> CreateNamespaceManager()
@@ -98,8 +102,8 @@ namespace MassTransit.AzureServiceBusTransport
             {
                 TokenProvider = _settings.TokenProvider,
                 OperationTimeout = TimeSpan.FromSeconds(10),
-                RetryPolicy = RetryPolicy.NoRetry
-            };
+                RetryPolicy = new RetryExponential(_settings.RetryMinBackoff, _settings.RetryMaxBackoff, _settings.RetryLimit)
+        };
 
             return Task.FromResult(new NamespaceManager(_settings.ServiceUri, nms));
         }
@@ -110,7 +114,7 @@ namespace MassTransit.AzureServiceBusTransport
             {
                 TokenProvider = _settings.TokenProvider,
                 OperationTimeout = TimeSpan.FromSeconds(10),
-                RetryPolicy = RetryPolicy.NoRetry
+                RetryPolicy = new RetryExponential(_settings.RetryMinBackoff, _settings.RetryMaxBackoff, _settings.RetryLimit)
             };
             var builder = new UriBuilder(_settings.ServiceUri)
             {

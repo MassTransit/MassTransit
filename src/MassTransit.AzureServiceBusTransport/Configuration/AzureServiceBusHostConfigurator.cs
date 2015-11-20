@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -38,6 +38,21 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
             set { _settings.OperationTimeout = value; }
         }
 
+        public TimeSpan RetryMinBackoff
+        {
+            set { _settings.RetryMinBackoff = value; }
+        }
+
+        public TimeSpan RetryMaxBackoff
+        {
+            set { _settings.RetryMaxBackoff = value; }
+        }
+
+        public int RetryLimit
+        {
+            set { _settings.RetryLimit = value; }
+        }
+
 
         class HostSettings :
             ServiceBusHostSettings
@@ -46,11 +61,18 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
             {
                 ServiceUri = serviceUri;
                 OperationTimeout = TimeSpan.FromSeconds(30);
+
+                RetryMinBackoff = TimeSpan.Zero;
+                RetryMaxBackoff = TimeSpan.FromSeconds(10);
+                RetryLimit = 10;
             }
 
             public Uri ServiceUri { get; private set; }
             public TokenProvider TokenProvider { get; set; }
             public TimeSpan OperationTimeout { get; set; }
+            public TimeSpan RetryMinBackoff { get; set; }
+            public TimeSpan RetryMaxBackoff { get; set; }
+            public int RetryLimit { get; set; }
         }
     }
 }

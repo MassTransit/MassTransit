@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -16,10 +16,39 @@ namespace MassTransit.AzureServiceBusTransport
     using Microsoft.ServiceBus;
 
 
+    /// <summary>
+    /// The host settings used to configure the service bus connection
+    /// </summary>
     public interface ServiceBusHostSettings
     {
+        /// <summary>
+        /// The address of the service bus namespace (and accompanying service scope)
+        /// </summary>
         Uri ServiceUri { get; }
+
+        /// <summary>
+        /// The token provider to access the namespace
+        /// </summary>
         TokenProvider TokenProvider { get; }
+
+        /// <summary>
+        /// The operation timeout for timing out operations
+        /// </summary>
         TimeSpan OperationTimeout { get; }
+
+        /// <summary>
+        /// The minimum back off interval for the exponential retry policy
+        /// </summary>
+        TimeSpan RetryMinBackoff { get; }
+
+        /// <summary>
+        /// The maximum back off interval for the exponential retry policy
+        /// </summary>
+        TimeSpan RetryMaxBackoff { get; }
+
+        /// <summary>
+        /// The retry limit for service bus operations
+        /// </summary>
+        int RetryLimit { get; }
     }
 }

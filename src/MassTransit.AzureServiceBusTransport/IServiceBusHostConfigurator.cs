@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -27,5 +27,20 @@ namespace MassTransit.AzureServiceBusTransport
         /// Sets the operation timeout for the messaging factory
         /// </summary>
         TimeSpan OperationTimeout { set; }
+
+        /// <summary>
+        /// The minimum back off interval for the exponential retry policy
+        /// </summary>
+        TimeSpan RetryMinBackoff { set; }
+
+        /// <summary>
+        /// The maximum back off interval for the exponential retry policy
+        /// </summary>
+        TimeSpan RetryMaxBackoff { set; }
+
+        /// <summary>
+        /// The retry limit for service bus operations
+        /// </summary>
+        int RetryLimit { set; }
     }
 }

@@ -66,7 +66,6 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
                 messageReceiver = await messagingFactory.CreateMessageReceiverAsync(queuePath, ReceiveMode.PeekLock).ConfigureAwait(false);
 
                 messageReceiver.PrefetchCount = receiveSettings.PrefetchCount;
-                messageReceiver.RetryPolicy = RetryPolicy.Default;
 
                 using (var scope = _supervisor.CreateScope())
                 {
