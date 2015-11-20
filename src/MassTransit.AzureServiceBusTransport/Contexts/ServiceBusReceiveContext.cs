@@ -16,12 +16,13 @@ namespace MassTransit.AzureServiceBusTransport.Contexts
     using System.Collections.Generic;
     using System.IO;
     using System.Net.Mime;
+    using System.Threading.Tasks;
     using Context;
     using Microsoft.ServiceBus.Messaging;
     using Transports;
 
 
-    public class ServiceBusReceiveContext :
+    public sealed class ServiceBusReceiveContext :
         BaseReceiveContext,
         BrokeredMessageContext
     {
@@ -33,117 +34,56 @@ namespace MassTransit.AzureServiceBusTransport.Contexts
         {
             _message = message;
 
-            ((ReceiveContext)this).GetOrAddPayload<BrokeredMessageContext>(() => this);
+            GetOrAddPayload<BrokeredMessageContext>(() => this);
         }
 
-        protected override IHeaderProvider HeaderProvider
-        {
-            get { return new DictionaryHeaderProvider(_message.Properties); }
-        }
+        protected override IHeaderProvider HeaderProvider => new DictionaryHeaderProvider(_message.Properties);
 
-        public string MessageId
-        {
-            get { return _message.MessageId; }
-        }
+        public string MessageId => _message.MessageId;
 
-        public string CorrelationId
-        {
-            get { return _message.CorrelationId; }
-        }
+        public string CorrelationId => _message.CorrelationId;
 
-        public TimeSpan TimeToLive
-        {
-            get { return _message.TimeToLive; }
-        }
+        public TimeSpan TimeToLive => _message.TimeToLive;
 
-        public IDictionary<string, object> Properties
-        {
-            get { return _message.Properties; }
-        }
+        public IDictionary<string, object> Properties => _message.Properties;
 
-        public int DeliveryCount
-        {
-            get { return _message.DeliveryCount; }
-        }
+        public int DeliveryCount => _message.DeliveryCount;
 
-        public string Label
-        {
-            get { return _message.Label; }
-        }
+        public string Label => _message.Label;
 
-        public long SequenceNumber
-        {
-            get { return _message.SequenceNumber; }
-        }
+        public long SequenceNumber => _message.SequenceNumber;
 
-        public long EnqueuedSequenceNumber
-        {
-            get { return _message.EnqueuedSequenceNumber; }
-        }
+        public long EnqueuedSequenceNumber => _message.EnqueuedSequenceNumber;
 
-        public Guid LockToken
-        {
-            get { return _message.LockToken; }
-        }
+        public Guid LockToken => _message.LockToken;
 
-        public DateTime LockedUntil
-        {
-            get { return _message.LockedUntilUtc; }
-        }
+        public DateTime LockedUntil => _message.LockedUntilUtc;
 
-        public string SessionId
-        {
-            get { return _message.SessionId; }
-        }
+        public string SessionId => _message.SessionId;
 
-        public long Size
-        {
-            get { return _message.Size; }
-        }
+        public long Size => _message.Size;
 
-        public MessageState State
-        {
-            get { return _message.State; }
-        }
+        public MessageState State => _message.State;
 
-        public bool ForcePersistence
-        {
-            get { return _message.ForcePersistence; }
-        }
+        public bool ForcePersistence => _message.ForcePersistence;
 
-        public string To
-        {
-            get { return _message.To; }
-        }
+        public string To => _message.To;
 
-        public string ReplyToSessionId
-        {
-            get { return _message.ReplyToSessionId; }
-        }
+        public string ReplyToSessionId => _message.ReplyToSessionId;
 
-        public string PartitionKey
-        {
-            get { return _message.PartitionKey; }
-        }
+        public string PartitionKey => _message.PartitionKey;
 
-        public string ViaPartitionKey
-        {
-            get { return _message.ViaPartitionKey; }
-        }
+        public string ViaPartitionKey => _message.ViaPartitionKey;
 
-        public string ReplyTo
-        {
-            get { return _message.ReplyTo; }
-        }
+        public string ReplyTo => _message.ReplyTo;
 
-        public DateTime EnqueuedTime
-        {
-            get { return _message.EnqueuedTimeUtc; }
-        }
+        public DateTime EnqueuedTime => _message.EnqueuedTimeUtc;
 
-        public DateTime ScheduledEnqueueTime
+        public DateTime ScheduledEnqueueTime => _message.ScheduledEnqueueTimeUtc;
+
+        public Task RenewLockAsync()
         {
-            get { return _message.ScheduledEnqueueTimeUtc; }
+            return _message.RenewLockAsync();
         }
 
         protected override Stream GetBodyStream()
