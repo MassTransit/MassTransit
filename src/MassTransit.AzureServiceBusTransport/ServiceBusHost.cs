@@ -38,7 +38,7 @@ namespace MassTransit.AzureServiceBusTransport
         {
             _settings = settings;
             _messagingFactory = new Lazy<Task<MessagingFactory>>(CreateMessagingFactory);
-            _sessionMessagingFactory = new Lazy<Task<MessagingFactory>>(CreateSessionMessagingFactory);
+            _sessionMessagingFactory = new Lazy<Task<MessagingFactory>>(CreateNetMessagingFactory);
             _namespaceManager = new Lazy<Task<NamespaceManager>>(CreateNamespaceManager);
             _rootNamespaceManager = new Lazy<Task<NamespaceManager>>(CreateRootNamespaceManager);
 
@@ -47,7 +47,7 @@ namespace MassTransit.AzureServiceBusTransport
 
         public HostHandle Start()
         {
-            return new Handle(_messagingFactory.Value, _sessionMessagingFactory);
+            return new Handle(_messagingFactory.Value, _sessionMessagingFactory, _settings);
         }
 
         Task<MessagingFactory> IServiceBusHost.SessionMessagingFactory => _sessionMessagingFactory.Value;
@@ -113,8 +113,11 @@ namespace MassTransit.AzureServiceBusTransport
             return messagingFactory;
         }
 
-        Task<MessagingFactory> CreateSessionMessagingFactory()
+        Task<MessagingFactory> CreateNetMessagingFactory()
         {
+            if (_settings.TransportType == TransportType.NetMessaging)
+                return _messagingFactory.Value;
+
             var mfs = new MessagingFactorySettings
             {
                 TokenProvider = _settings.TokenProvider,
@@ -163,11 +166,13 @@ namespace MassTransit.AzureServiceBusTransport
         {
             readonly Task<MessagingFactory> _messagingFactoryTask;
             readonly Lazy<Task<MessagingFactory>> _sessionFactory;
+            readonly ServiceBusHostSettings _settings;
 
-            public Handle(Task<MessagingFactory> messagingFactoryTask, Lazy<Task<MessagingFactory>> sessionFactory)
+            public Handle(Task<MessagingFactory> messagingFactoryTask, Lazy<Task<MessagingFactory>> sessionFactory, ServiceBusHostSettings settings)
             {
                 _messagingFactoryTask = messagingFactoryTask;
                 _sessionFactory = sessionFactory;
+                _settings = settings;
             }
 
             async Task HostHandle.Stop(CancellationToken cancellationToken)
@@ -185,7 +190,7 @@ namespace MassTransit.AzureServiceBusTransport
                         _log.Warn("Exception closing messaging factory", ex);
                 }
 
-                if(_sessionFactory.IsValueCreated)
+                if(_sessionFactory.IsValueCreated && _settings.TransportType == TransportType.Amqp)
                 {
                     try
                     {
