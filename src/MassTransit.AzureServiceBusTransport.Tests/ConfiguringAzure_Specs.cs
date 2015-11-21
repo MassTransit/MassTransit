@@ -105,6 +105,8 @@ namespace MassTransit.AzureServiceBusTransport.Tests
                         });
 
                         h.TransportType = TransportType.NetMessaging;
+                        h.OperationTimeout = TimeSpan.FromSeconds(30);
+                        h.BatchFlushInterval = TimeSpan.FromMilliseconds(50);
                     });
 
                     x.ReceiveEndpoint(host, "input_queue", e =>
