@@ -76,10 +76,10 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
             public HostSettings(Uri serviceUri)
             {
                 ServiceUri = serviceUri;
-                OperationTimeout = TimeSpan.FromSeconds(30);
+                OperationTimeout = TimeSpan.FromSeconds(60);
 
-                RetryMinBackoff = TimeSpan.Zero;
-                RetryMaxBackoff = TimeSpan.FromSeconds(10);
+                RetryMinBackoff = TimeSpan.FromMilliseconds(100);
+                RetryMaxBackoff = TimeSpan.FromSeconds(20);
                 RetryLimit = 10;
                 TransportType = TransportType.Amqp;
                 AmqpTransportSettings = new AmqpTransportSettings() { BatchFlushInterval = TimeSpan.FromMilliseconds(50), };

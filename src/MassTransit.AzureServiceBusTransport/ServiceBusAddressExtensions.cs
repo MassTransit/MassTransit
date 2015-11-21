@@ -87,7 +87,8 @@ namespace MassTransit.AzureServiceBusTransport
             var topicDescription = new TopicDescription(topicPath)
             {
                 EnableBatchedOperations = true,
-                DefaultMessageTimeToLive = TimeSpan.FromDays(365)
+                DefaultMessageTimeToLive = TimeSpan.FromDays(365 + 1),
+                AutoDeleteOnIdle = TimeSpan.FromDays(427),
             };
 
             topicDescription.DefaultMessageTimeToLive = address.GetValueFromQueryString("ttl", topicDescription.DefaultMessageTimeToLive);
