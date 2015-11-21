@@ -26,6 +26,7 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
                 EnableBatchedOperations = true,
                 MaxDeliveryCount = 5,
                 DefaultMessageTimeToLive = TimeSpan.FromDays(365 + 1),
+                AutoDeleteOnIdle = TimeSpan.FromDays(427),
                 LockDuration = TimeSpan.FromMinutes(5),
                 EnableDeadLetteringOnMessageExpiration = true
             };
