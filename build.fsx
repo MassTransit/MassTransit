@@ -12,7 +12,7 @@ let packagesPath = FullName "./src/packages"
 let keyFile = FullName "./MassTransit.snk"
 
 let assemblyVersion = "3.0.0.0"
-let baseVersion = "3.0.15"
+let baseVersion = "3.0.16"
 
 let semVersion : SemVerInfo = parse baseVersion
 
@@ -82,14 +82,29 @@ Target "Build" (fun _ ->
                 "DebugSymbols", "True"
                 "RestorePackages", "True"
                 "Configuration", buildMode
-                "SignAssembly", "True"
-                "AssemblyOriginatorKeyFile", keyFile
                 "TargetFrameworkVersion", "v4.5"
                 "Platform", "Any CPU"
             ]
   }
 
   build setParams @".\src\MassTransit.sln"
+      |> DoNothing
+
+  let unsignedSetParams defaults = { 
+    defaults with
+        Verbosity = Some(Quiet)
+        Targets = ["Build"]
+        Properties =
+            [
+                "Optimize", "True"
+                "DebugSymbols", "True"
+                "Configuration", "ReleaseUnsigned"
+                "TargetFrameworkVersion", "v4.5"
+                "Platform", "Any CPU"
+            ]
+  }
+
+  build unsignedSetParams @".\src\MassTransit.sln"
       |> DoNothing
 )
 
@@ -167,7 +182,12 @@ Target "Package" (fun _ ->
                             (@"..\src\Containers\MassTransit.SimpleInjectorIntegration\**\*.cs", Some @"src", None) ] } 
                 { Project = "MassTransit.StructureMap"
                   Summary = "MassTransit StructureMap Container Support"
-                  PackageFile = @".\src\Containers\MassTransit.StructureMapIntegration\packages.config"
+                  PackageFile = @".\src\Containers\MassTransit.StructureMapIntegration\packages-unsigned.config"
+                  Files = [ (@"..\src\Containers\MassTransit.StructureMapIntegration\bin\ReleaseUnsigned\MassTransit.StructureMapIntegration.*", Some @"lib\net45", None);
+                            (@"..\src\Containers\MassTransit.StructureMapIntegration\**\*.cs", Some @"src", None) ] } 
+                { Project = "MassTransit.StructureMapSigned"
+                  Summary = "MassTransit StructureMap (Signed) Container Support"
+                  PackageFile = @".\src\Containers\MassTransit.StructureMapIntegration\packages-signed.config"
                   Files = [ (@"..\src\Containers\MassTransit.StructureMapIntegration\bin\Release\MassTransit.StructureMapIntegration.*", Some @"lib\net45", None);
                             (@"..\src\Containers\MassTransit.StructureMapIntegration\**\*.cs", Some @"src", None) ] } 
                 { Project = "MassTransit.Unity"
