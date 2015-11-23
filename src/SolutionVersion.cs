@@ -5,8 +5,8 @@ using System.Reflection;
 [assembly: AssemblyDescriptionAttribute("MassTransit is a distributed application framework for .NET http://masstransit-project.com")]
 [assembly: AssemblyProductAttribute("MassTransit")]
 [assembly: AssemblyVersionAttribute("3.0.0.0")]
-[assembly: AssemblyFileVersionAttribute("3.0.15.0")]
-[assembly: AssemblyInformationalVersionAttribute("3.0.15.0 (inj/9cf75cef)")]
+[assembly: AssemblyFileVersionAttribute("3.0.16.0")]
+[assembly: AssemblyInformationalVersionAttribute("3.0.16.0 (develop/f694e20b)")]
 namespace System {
     internal static class AssemblyVersionInformation {
         internal const string Version = "3.0.0.0";

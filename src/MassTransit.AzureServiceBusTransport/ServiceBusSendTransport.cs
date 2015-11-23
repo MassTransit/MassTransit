@@ -81,6 +81,8 @@ namespace MassTransit.AzureServiceBusTransport
                                 brokeredMessage.ReplyToSessionId = context.SessionId;
                         }
 
+                        if (context.ReplyToSessionId != null)
+                            brokeredMessage.ReplyToSessionId = context.ReplyToSessionId;
 
                         await _observers.PreSend(context);
 

@@ -32,6 +32,7 @@
     <OutputPath>..\..\..\tests\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
+    <NoWarn>1587,1591,1998,3008,3001</NoWarn>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
