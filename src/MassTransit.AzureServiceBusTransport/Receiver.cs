@@ -59,24 +59,20 @@ namespace MassTransit.AzureServiceBusTransport
                 MaxConcurrentCalls = receiveSettings.MaxConcurrentCalls
             };
 
-            options.ExceptionReceived += async (sender, x) =>
+            options.ExceptionReceived += (sender, x) =>
             {
-                if (_log.IsErrorEnabled)
-                    _log.Error($"Exception received on receiver: {_inputAddress} during {x.Action}", x.Exception);
-
-                try
+                if (!(x.Exception is OperationCanceledException))
                 {
-                    await _messageReceiver.CloseAsync();
+                    if (_log.IsErrorEnabled)
+                        _log.Error($"Exception received on receiver: {_inputAddress} during {x.Action}", x.Exception);
                 }
-                finally
-                {
-                    if (_currentPendingDeliveryCount == 0)
-                    {
-                        if (_log.IsDebugEnabled)
-                            _log.DebugFormat("Receiver shutdown completed: {0}", _inputAddress);
 
-                        _participant.SetComplete();
-                    }
+                if (_currentPendingDeliveryCount == 0)
+                {
+                    if (_log.IsDebugEnabled)
+                        _log.DebugFormat("Receiver shutdown completed: {0}", _inputAddress);
+
+                    _participant.SetComplete();
                 }
             };
 

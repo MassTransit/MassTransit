@@ -15,7 +15,6 @@ namespace MassTransit.AzureServiceBusTransport
     using System;
     using System.Threading;
     using System.Threading.Tasks;
-    using Contexts;
     using Internals.Extensions;
     using Logging;
     using MassTransit.Pipeline;
@@ -70,27 +69,23 @@ namespace MassTransit.AzureServiceBusTransport
                 AutoComplete = false,
                 AutoRenewTimeout = receiveSettings.AutoRenewTimeout,
                 MaxConcurrentSessions = receiveSettings.MaxConcurrentCalls,
-                MessageWaitTimeout = receiveSettings.MessageWaitTimeout,
+                MessageWaitTimeout = receiveSettings.MessageWaitTimeout
             };
 
-            options.ExceptionReceived += async (sender, x) =>
+            options.ExceptionReceived += (sender, x) =>
             {
-                if (_log.IsErrorEnabled)
-                    _log.Error($"Exception received on session receiver: {_inputAddress} during {x.Action}", x.Exception);
-
-                try
+                if (!(x.Exception is OperationCanceledException))
                 {
-                    await _queueClient.CloseAsync();
+                    if (_log.IsErrorEnabled)
+                        _log.Error($"Exception received on session receiver: {_inputAddress} during {x.Action}", x.Exception);
                 }
-                finally
-                {
-                    if (_currentPendingDeliveryCount == 0)
-                    {
-                        if (_log.IsDebugEnabled)
-                            _log.DebugFormat("Session receiver shutdown completed: {0}", _inputAddress);
 
-                        _participant.SetComplete();
-                    }
+                if (_currentPendingDeliveryCount == 0)
+                {
+                    if (_log.IsDebugEnabled)
+                        _log.DebugFormat("Session receiver shutdown completed: {0}", _inputAddress);
+
+                    _participant.SetComplete();
                 }
             };
 
@@ -102,27 +97,11 @@ namespace MassTransit.AzureServiceBusTransport
             SetupStopTask();
         }
 
-        public bool IsShuttingDown => _shuttingDown;
-
-        public string QueuePath
-        {
-            get { return _receiveSettings.QueueDescription.Path; }
-        }
-
-        public Uri InputAddress
-        {
-            get { return _inputAddress; }
-        }
-
-        public IReceiveObserver ReceiveObserver
-        {
-            get { return _receiveObserver; }
-        }
-
-        public IPipe<ReceiveContext> ReceivePipe
-        {
-            get { return _receivePipe; }
-        }
+        bool ISessionReceiver.IsShuttingDown => _shuttingDown;
+        string ISessionReceiver.QueuePath => _receiveSettings.QueueDescription.Path;
+        Uri ISessionReceiver.InputAddress => _inputAddress;
+        IReceiveObserver ISessionReceiver.ReceiveObserver => _receiveObserver;
+        IPipe<ReceiveContext> ISessionReceiver.ReceivePipe => _receivePipe;
 
         public long IncrementDeliveryCount()
         {
@@ -190,76 +169,6 @@ namespace MassTransit.AzureServiceBusTransport
 
                     _participant.SetComplete();
                 }
-            }
-        }
-
-        async Task OnMessage(BrokeredMessage message)
-        {
-            if (_shuttingDown)
-            {
-                await WaitAndAbandonMessage(message);
-                return;
-            }
-
-            var current = Interlocked.Increment(ref _currentPendingDeliveryCount);
-            while (current > _maxPendingDeliveryCount)
-                Interlocked.CompareExchange(ref _maxPendingDeliveryCount, current, _maxPendingDeliveryCount);
-
-            var deliveryCount = Interlocked.Increment(ref _deliveryCount);
-
-            if (_log.IsDebugEnabled)
-                _log.DebugFormat("Receiving {0}:{1} - {2}", deliveryCount, message.MessageId, _receiveSettings.QueueDescription.Path);
-
-            var context = new ServiceBusReceiveContext(_inputAddress, message, _receiveObserver);
-
-            try
-            {
-                await _receiveObserver.PreReceive(context).ConfigureAwait(false);
-
-                await _receivePipe.Send(context).ConfigureAwait(false);
-
-                await context.CompleteTask.ConfigureAwait(false);
-
-                await message.CompleteAsync().ConfigureAwait(false);
-
-                await _receiveObserver.PostReceive(context).ConfigureAwait(false);
-
-                if (_log.IsDebugEnabled)
-                    _log.DebugFormat("Receive completed: {0}", message.MessageId);
-            }
-            catch (Exception ex)
-            {
-                if (_log.IsErrorEnabled)
-                    _log.Error($"Received faulted: {message.MessageId}", ex);
-
-                await message.AbandonAsync().ConfigureAwait(false);
-                await _receiveObserver.ReceiveFault(context, ex).ConfigureAwait(false);
-            }
-            finally
-            {
-                var pendingCount = Interlocked.Decrement(ref _currentPendingDeliveryCount);
-                if (pendingCount == 0 && _shuttingDown)
-                {
-                    if (_log.IsDebugEnabled)
-                        _log.DebugFormat("Receiver shutdown completed: {0}", _inputAddress);
-
-                    _participant.SetComplete();
-                }
-            }
-        }
-
-        async Task WaitAndAbandonMessage(BrokeredMessage message)
-        {
-            try
-            {
-                await _supervisor.Completed.ConfigureAwait(false);
-
-                await message.AbandonAsync().ConfigureAwait(false);
-            }
-            catch (Exception exception)
-            {
-                if (_log.IsErrorEnabled)
-                    _log.Debug("Shutting down, abandoned message faulted: {_inputAddress}", exception);
             }
         }
     }

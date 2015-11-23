@@ -15,6 +15,7 @@ namespace MassTransit.AzureServiceBusTransport
     using System;
     using System.IO;
     using System.Threading.Tasks;
+    using Context;
     using Logging;
     using MassTransit.Pipeline;
     using Newtonsoft.Json.Bson;
@@ -23,6 +24,11 @@ namespace MassTransit.AzureServiceBusTransport
     using Util;
 
 
+    /// <summary>
+    /// A saga repository that uses the message session in Azure Service Bus to store the state 
+    /// of the saga.
+    /// </summary>
+    /// <typeparam name="TSaga">The saga state type</typeparam>
     public class MessageSessionSagaRepository<TSaga> :
         ISagaRepository<TSaga>
         where TSaga : class, ISaga
@@ -38,14 +44,25 @@ namespace MassTransit.AzureServiceBusTransport
             });
         }
 
-        public async Task Send<T>(ConsumeContext<T> context, ISagaPolicy<TSaga, T> policy, IPipe<SagaConsumeContext<TSaga, T>> next) where T : class
+        async Task ISagaRepository<TSaga>.Send<T>(ConsumeContext<T> context, ISagaPolicy<TSaga, T> policy, IPipe<SagaConsumeContext<TSaga, T>> next)
         {
-            var sessionContext = context.GetPayload<MessageSessionContext>();
+            MessageSessionContext sessionContext;
+            if (!context.TryGetPayload(out sessionContext))
+            {
+                throw new SagaException($"The session-based saga repository requires an active message session: {TypeMetadataCache<TSaga>.ShortName}",
+                    typeof(TSaga), typeof(T));
+            }
 
-            var saga = await GetSaga(sessionContext);
+            Guid sessionId;
+            if (Guid.TryParse(sessionContext.SessionId, out sessionId))
+            {
+                context = new CorrelationIdConsumeContextProxy<T>(context, sessionId);
+            }
+
+            var saga = await ReadSagaState(sessionContext);
             if (saga == null)
             {
-                var missingSagaPipe = new MissingPipe<T>(next);
+                var missingSagaPipe = new MissingPipe<T>(next, WriteSagaState);
 
                 await policy.Missing(context, missingSagaPipe);
             }
@@ -53,48 +70,74 @@ namespace MassTransit.AzureServiceBusTransport
             {
                 SagaConsumeContext<TSaga, T> sagaConsumeContext = new MessageSessionSagaConsumeContext<TSaga, T>(context, sessionContext, saga);
 
+                if (_log.IsDebugEnabled)
+                {
+                    _log.DebugFormat("SAGA:{0}:{1} Existing {2}", TypeMetadataCache<TSaga>.ShortName, sessionContext.SessionId, TypeMetadataCache<T>.ShortName);
+                }
+
                 await policy.Existing(sagaConsumeContext, next);
 
                 if (!sagaConsumeContext.IsCompleted)
                 {
-                    using (var memoryStream = new MemoryStream())
-                    using (var writer = new BsonWriter(memoryStream))
-                    {
-                        BsonMessageSerializer.Serializer.Serialize(writer, saga);
+                    await WriteSagaState(sessionContext, saga);
 
-                        writer.Flush();
-                        memoryStream.Flush();
-
-                        using (var writeStream = new MemoryStream(memoryStream.ToArray(), false))
-                        {
-                            await sessionContext.SetStateAsync(writeStream);
-                        }
-                    }
                     if (_log.IsDebugEnabled)
                     {
-                        _log.DebugFormat("SAGA:{0}:{1} Updated {2}", TypeMetadataCache<TSaga>.ShortName, saga.CorrelationId, TypeMetadataCache<T>.ShortName);
+                        _log.DebugFormat("SAGA:{0}:{1} Updated {2}", TypeMetadataCache<TSaga>.ShortName, sessionContext.SessionId,
+                            TypeMetadataCache<T>.ShortName);
                     }
                 }
             }
         }
 
-        public Task SendQuery<T>(SagaQueryConsumeContext<TSaga, T> context, ISagaPolicy<TSaga, T> policy, IPipe<SagaConsumeContext<TSaga, T>> next)
-            where T : class
+        Task ISagaRepository<TSaga>.SendQuery<T>(SagaQueryConsumeContext<TSaga, T> context, ISagaPolicy<TSaga, T> policy,
+            IPipe<SagaConsumeContext<TSaga, T>> next)
         {
-            return Send(context, policy, next);
+            throw new NotImplementedException(
+                $"Query-based saga correlation is not available when using the MessageSession-based saga repository: {TypeMetadataCache<TSaga>.ShortName}");
         }
 
-        async Task<TSaga> GetSaga(MessageSessionContext context)
+        /// <summary>
+        /// Writes the saga state to the message session
+        /// </summary>
+        /// <param name="context">The message session context</param>
+        /// <param name="saga">The saga state</param>
+        /// <returns>An awaitable task, of course</returns>
+        async Task WriteSagaState(MessageSessionContext context, TSaga saga)
         {
-            using (var readStream = await context.GetStateAsync())
+            using (var serializeStream = new MemoryStream())
+            using (var bsonWriter = new BsonWriter(serializeStream))
             {
-                if (readStream == null || readStream.Length == 0)
-                    return default(TSaga);
+                BsonMessageSerializer.Serializer.Serialize(bsonWriter, saga);
 
-                using (var jsonReader = new BsonReader(readStream))
+                bsonWriter.Flush();
+                serializeStream.Flush();
+
+                using (var stateStream = new MemoryStream(serializeStream.ToArray(), false))
                 {
-                    return BsonMessageSerializer.Deserializer.Deserialize<TSaga>(jsonReader);
+                    await context.SetStateAsync(stateStream);
                 }
+            }
+        }
+
+        async Task<TSaga> ReadSagaState(MessageSessionContext context)
+        {
+            try
+            {
+                using (var stateStream = await context.GetStateAsync())
+                {
+                    if (stateStream == null || stateStream.Length == 0)
+                        return default(TSaga);
+
+                    using (var bsonReader = new BsonReader(stateStream))
+                    {
+                        return BsonMessageSerializer.Deserializer.Deserialize<TSaga>(bsonReader);
+                    }
+                }
+            }
+            catch (NotImplementedException exception)
+            {
+                throw new ConfigurationException("NetMessaging must be used for session-based sagas", exception);
             }
         }
 
@@ -108,10 +151,12 @@ namespace MassTransit.AzureServiceBusTransport
             where TMessage : class
         {
             readonly IPipe<SagaConsumeContext<TSaga, TMessage>> _next;
+            readonly Func<MessageSessionContext, TSaga, Task> _writeSagaState;
 
-            public MissingPipe(IPipe<SagaConsumeContext<TSaga, TMessage>> next)
+            public MissingPipe(IPipe<SagaConsumeContext<TSaga, TMessage>> next, Func<MessageSessionContext, TSaga, Task> writeSagaState)
             {
                 _next = next;
+                _writeSagaState = writeSagaState;
             }
 
             void IProbeSite.Probe(ProbeContext context)
@@ -121,13 +166,13 @@ namespace MassTransit.AzureServiceBusTransport
 
             public async Task Send(SagaConsumeContext<TSaga, TMessage> context)
             {
-                var messageSessionContext = context.GetPayload<MessageSessionContext>();
+                var sessionContext = context.GetPayload<MessageSessionContext>();
 
-                var proxy = new MessageSessionSagaConsumeContext<TSaga, TMessage>(context, messageSessionContext, context.Saga);
+                var proxy = new MessageSessionSagaConsumeContext<TSaga, TMessage>(context, sessionContext, context.Saga);
 
                 if (_log.IsDebugEnabled)
                 {
-                    _log.DebugFormat("SAGA:{0}:{1} Created {2}", TypeMetadataCache<TSaga>.ShortName, context.Saga.CorrelationId,
+                    _log.DebugFormat("SAGA:{0}:{1} Created {2}", TypeMetadataCache<TSaga>.ShortName, sessionContext.SessionId,
                         TypeMetadataCache<TMessage>.ShortName);
                 }
 
@@ -137,22 +182,10 @@ namespace MassTransit.AzureServiceBusTransport
 
                     if (!proxy.IsCompleted)
                     {
-                        using (var memoryStream = new MemoryStream())
-                        using (var writer = new BsonWriter(memoryStream))
-                        {
-                            BsonMessageSerializer.Serializer.Serialize(writer, context.Saga);
-
-                            writer.Flush();
-                            memoryStream.Flush();
-
-                            using (var writeStream = new MemoryStream(memoryStream.ToArray(), false))
-                            {
-                                await messageSessionContext.SetStateAsync(writeStream);
-                            }
-                        }
+                        await _writeSagaState(sessionContext, proxy.Saga);
                         if (_log.IsDebugEnabled)
                         {
-                            _log.DebugFormat("SAGA:{0}:{1} Saved {2}", TypeMetadataCache<TSaga>.ShortName, context.Saga.CorrelationId,
+                            _log.DebugFormat("SAGA:{0}:{1} Saved {2}", TypeMetadataCache<TSaga>.ShortName, sessionContext.SessionId,
                                 TypeMetadataCache<TMessage>.ShortName);
                         }
                     }
@@ -161,7 +194,7 @@ namespace MassTransit.AzureServiceBusTransport
                 {
                     if (_log.IsDebugEnabled)
                     {
-                        _log.DebugFormat("SAGA:{0}:{1} Removed(Fault) {2}", TypeMetadataCache<TSaga>.ShortName, context.Saga.CorrelationId,
+                        _log.DebugFormat("SAGA:{0}:{1} Unsaved(Fault) {2}", TypeMetadataCache<TSaga>.ShortName, sessionContext.SessionId,
                             TypeMetadataCache<TMessage>.ShortName);
                     }
 
