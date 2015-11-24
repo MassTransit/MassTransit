@@ -13,27 +13,36 @@
 namespace MassTransit.AzureServiceBusTransport.Configuration
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
     using Microsoft.ServiceBus.Messaging;
+    using Newtonsoft.Json.Linq;
     using Transports;
 
 
     public static class ServiceBusTopicSubscriptionExtensions
     {
-        public static TopicSubscriptionSettings GetTopicSubscription(this IMessageNameFormatter messageNameFormatter, Type messageType)
+        public static IEnumerable<TopicSubscriptionSettings> GetTopicSubscription(this IMessageNameFormatter messageNameFormatter, Type messageType)
         {
+            if (!IsSubscriptionMessageType(messageType))
+                yield break;
+
             bool temporary = IsTemporaryMessageType(messageType);
 
-            var topicDescription = new TopicDescription(messageNameFormatter.GetMessageName(messageType).ToString())
-            {
-                EnableBatchedOperations = true,
-                EnableExpress = temporary,
-                DefaultMessageTimeToLive = TimeSpan.FromDays(365)
-            };
+            var topicDescription = Defaults.CreateTopicDescription(messageNameFormatter.GetMessageName(messageType).ToString());
+            topicDescription.EnableExpress = temporary;
 
             var binding = new TopicSubscription(topicDescription);
 
-            return binding;
+            yield return binding;
+        }
+
+        static bool IsSubscriptionMessageType(Type messageType)
+        {
+            if (typeof(JToken) == messageType)
+                return false;
+
+            return true;
         }
 
         public static Uri GetTopicAddress(this IMessageNameFormatter messageNameFormatter, IServiceBusHost host, Type messageType)
@@ -58,17 +67,12 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
         class TopicSubscription :
             TopicSubscriptionSettings
         {
-            readonly TopicDescription _topic;
-
             public TopicSubscription(TopicDescription topic)
             {
-                _topic = topic;
+                Topic = topic;
             }
 
-            public TopicDescription Topic
-            {
-                get { return _topic; }
-            }
+            public TopicDescription Topic { get; }
         }
     }
 }

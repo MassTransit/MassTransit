@@ -41,7 +41,14 @@ namespace MassTransit.AzureServiceBusTransport
 
             string queuePath;
             var namespacePath = namespaceManager.Address.AbsolutePath.Trim('/');
-            if (IsInNamespace(queueDescription, namespacePath))
+
+            if (string.IsNullOrEmpty(namespacePath))
+            {
+                queueDescription = await namespaceManager.CreateQueueSafeAsync(queueDescription).ConfigureAwait(false);
+
+                queuePath = host.GetQueuePath(queueDescription);
+            }
+            else if (IsInNamespace(queueDescription, namespacePath))
             {
                 queueDescription.Path = queueDescription.Path.Replace(namespacePath, "").Trim('/');
                 queueDescription = await namespaceManager.CreateQueueSafeAsync(queueDescription).ConfigureAwait(false);

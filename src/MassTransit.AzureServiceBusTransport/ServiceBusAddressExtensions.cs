@@ -59,14 +59,7 @@ namespace MassTransit.AzureServiceBusTransport
 
             var queueName = address.AbsolutePath.Trim('/');
 
-            var queueDescription = new QueueDescription(queueName)
-            {
-                EnableBatchedOperations = true,
-                MaxDeliveryCount = 5,
-                DefaultMessageTimeToLive = TimeSpan.FromDays(365),
-                LockDuration = TimeSpan.FromMinutes(5),
-                EnableDeadLetteringOnMessageExpiration = true
-            };
+            var queueDescription = Defaults.CreateQueueDescription(queueName);
 
             int autoDeleteOnIdleSeconds = address.GetValueFromQueryString("autodelete", 0);
             if (autoDeleteOnIdleSeconds > 0)
@@ -84,12 +77,7 @@ namespace MassTransit.AzureServiceBusTransport
 
             var topicPath = address.AbsolutePath.Trim('/');
 
-            var topicDescription = new TopicDescription(topicPath)
-            {
-                EnableBatchedOperations = true,
-                DefaultMessageTimeToLive = TimeSpan.FromDays(365 + 1),
-                AutoDeleteOnIdle = TimeSpan.FromDays(427),
-            };
+            var topicDescription = Defaults.CreateTopicDescription(topicPath);
 
             topicDescription.DefaultMessageTimeToLive = address.GetValueFromQueryString("ttl", topicDescription.DefaultMessageTimeToLive);
             topicDescription.EnableExpress = address.GetValueFromQueryString("express", topicDescription.EnableExpress);
