@@ -79,8 +79,11 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
 
         static string GetSubscriptionName(NamespaceManager namespaceManager, string queuePath)
         {
-            string subscriptionPath =
-                $"{queuePath}-{namespaceManager.Address.AbsolutePath.Split(new[] {'/'}, StringSplitOptions.RemoveEmptyEntries).Last()}";
+            string subscriptionPath = queuePath;
+
+            string suffix = namespaceManager.Address.AbsolutePath.Split(new[] {'/'}, StringSplitOptions.RemoveEmptyEntries).LastOrDefault();
+            if (!string.IsNullOrEmpty(suffix))
+                subscriptionPath = $"{queuePath}-{suffix}";
 
             string name;
             if (subscriptionPath.Length > 50)

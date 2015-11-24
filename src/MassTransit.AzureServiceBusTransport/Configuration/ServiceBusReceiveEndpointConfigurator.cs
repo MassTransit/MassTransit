@@ -201,7 +201,10 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
             {
                 AutoDeleteOnIdle = _settings.QueueDescription.AutoDeleteOnIdle,
                 EnableExpress = _settings.QueueDescription.EnableExpress,
-                DefaultMessageTimeToLive = _settings.QueueDescription.DefaultMessageTimeToLive
+                DefaultMessageTimeToLive = _settings.QueueDescription.DefaultMessageTimeToLive,
+                MaxDeliveryCount = _settings.QueueDescription.MaxDeliveryCount,
+                RequiresSession = _settings.QueueDescription.RequiresSession,
+                EnablePartitioning = _settings.QueueDescription.EnablePartitioning
             };
         }
 

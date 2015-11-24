@@ -13,12 +13,12 @@
 namespace MassTransit.AzureServiceBusTransport
 {
     using System;
+    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using Logging;
     using Microsoft.ServiceBus;
     using Microsoft.ServiceBus.Messaging;
-    using Microsoft.ServiceBus.Messaging.Amqp;
     using Transports;
 
 
@@ -75,7 +75,10 @@ namespace MassTransit.AzureServiceBusTransport
 
         public string GetQueuePath(QueueDescription queueDescription)
         {
-            return string.Join("/", _settings.ServiceUri.AbsolutePath.Trim('/'), queueDescription.Path);
+            var segments = new[] {_settings.ServiceUri.AbsolutePath.Trim('/'), queueDescription.Path.Trim('/')}
+                .Where(x => x.Length > 0);
+
+            return string.Join("/", segments);
         }
 
         Task<MessagingFactory> CreateMessagingFactory()
@@ -84,7 +87,7 @@ namespace MassTransit.AzureServiceBusTransport
             {
                 TokenProvider = _settings.TokenProvider,
                 OperationTimeout = _settings.OperationTimeout,
-                TransportType = _settings.TransportType,
+                TransportType = _settings.TransportType
             };
 
             switch (_settings.TransportType)
@@ -190,7 +193,7 @@ namespace MassTransit.AzureServiceBusTransport
                         _log.Warn("Exception closing messaging factory", ex);
                 }
 
-                if(_sessionFactory.IsValueCreated && _settings.TransportType == TransportType.Amqp)
+                if (_sessionFactory.IsValueCreated && _settings.TransportType == TransportType.Amqp)
                 {
                     try
                     {
@@ -204,7 +207,6 @@ namespace MassTransit.AzureServiceBusTransport
                         if (_log.IsWarnEnabled)
                             _log.Warn("Exception closing messaging factory", ex);
                     }
-                    
                 }
             }
         }

@@ -33,7 +33,7 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
 
         ConnectHandle IConsumePipeConnector.ConnectConsumePipe<T>(IPipe<ConsumeContext<T>> pipe)
         {
-            _topicSubscriptions.Add(_messageNameFormatter.GetTopicSubscription(typeof(T)));
+            _topicSubscriptions.AddRange(_messageNameFormatter.GetTopicSubscription(typeof(T)));
 
             return _consumePipe.ConnectConsumePipe(pipe);
         }
