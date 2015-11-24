@@ -34,7 +34,7 @@ namespace MassTransit.RabbitMqTransport.Configuration.Builders
 
         ConnectHandle IConsumePipeConnector.ConnectConsumePipe<T>(IPipe<ConsumeContext<T>> pipe)
         {
-            _exchangeBindings.Add(typeof(T).GetExchangeBinding(_messageNameFormatter));
+            _exchangeBindings.AddRange(typeof(T).GetExchangeBindings(_messageNameFormatter));
 
             return _consumePipe.ConnectConsumePipe(pipe);
         }

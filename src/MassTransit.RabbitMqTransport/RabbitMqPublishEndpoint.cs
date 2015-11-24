@@ -63,7 +63,7 @@ namespace MassTransit.RabbitMqTransport
             SendSettings sendSettings = _host.GetSendSettings(messageType, _messageNameFormatter);
 
             ExchangeBindingSettings[] bindings = TypeMetadataCache.GetMessageTypes(messageType)
-                .Select(type => type.GetExchangeBinding(_messageNameFormatter))
+                .SelectMany(type => type.GetExchangeBindings(_messageNameFormatter))
                 .Where(binding => !sendSettings.ExchangeName.Equals(binding.Exchange.ExchangeName))
                 .ToArray();
 
