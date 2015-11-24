@@ -15,20 +15,32 @@ namespace MassTransit.RabbitMqTransport.Topology
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using Newtonsoft.Json.Linq;
     using Transports;
 
 
     public static class RabbitMqExchangeBindingExtensions
     {
-        public static ExchangeBindingSettings GetExchangeBinding(this Type messageType, IMessageNameFormatter messageNameFormatter)
+        public static IEnumerable<ExchangeBindingSettings> GetExchangeBindings(this Type messageType, IMessageNameFormatter messageNameFormatter)
         {
+            if (!IsBindableMessageType(messageType))
+                yield break;
+
             bool temporary = IsTemporaryMessageType(messageType);
 
             var exchange = new Exchange(messageNameFormatter.GetMessageName(messageType).ToString(), !temporary, temporary);
 
             var binding = new ExchangeBinding(exchange);
 
-            return binding;
+            yield return binding;
+        }
+
+        static bool IsBindableMessageType(Type messageType)
+        {
+            if (typeof(JToken) == messageType)
+                return false;
+
+            return true;
         }
 
         public static ExchangeBindingSettings GetErrorExchangeBinding(this SendSettings settings)

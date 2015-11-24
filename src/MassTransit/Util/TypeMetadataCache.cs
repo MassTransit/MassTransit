@@ -160,8 +160,21 @@ namespace MassTransit.Util
             if (ns != null && ns.StartsWith("System."))
                 return false;
 
-            if (typeof(T).IsGenericType && typeof(T).GetGenericTypeDefinition() == typeof(CorrelatedBy<>))
-                return false;
+            if (typeof(T).IsGenericType)
+            {
+                Type typeDefinition = typeof(T).GetGenericTypeDefinition();
+                if (typeDefinition == typeof(CorrelatedBy<>))
+                    return false;
+                if (typeDefinition == typeof(Orchestrates<>))
+                    return false;
+                if (typeDefinition == typeof(InitiatedBy<>))
+                    return false;
+                if (typeDefinition == typeof(Observes<,>))
+                    return false;
+
+                if (typeof(T).IsOpenGeneric())
+                    return false;
+            }
 
             return true;
         }
