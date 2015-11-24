@@ -105,7 +105,7 @@ namespace MassTransit.Transports.InMemory
 
                 var transportMessage = new InMemoryTransportMessage(messageId, context.Body, context.ContentType.MediaType, TypeMetadataCache<T>.ShortName);
 
-                if(_receivePipe != null)
+                if (_receivePipe != null)
 #pragma warning disable 4014
                     Task.Factory.StartNew(() => DispatchMessage(transportMessage), _supervisor.StopToken, TaskCreationOptions.HideScheduler, _scheduler);
 #pragma warning restore 4014
@@ -142,6 +142,8 @@ namespace MassTransit.Transports.InMemory
             var transportMessage = new InMemoryTransportMessage(messageId, body, context.ContentType.MediaType, messageType);
 
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+            // L.P.
+            // Task.Factory.StartNew(() => DispatchMessage(transportMessage, true), _supervisor.StopToken, TaskCreationOptions.HideScheduler, _scheduler);
             Task.Factory.StartNew(() => DispatchMessage(transportMessage), _supervisor.StopToken, TaskCreationOptions.HideScheduler, _scheduler);
 #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
         }
@@ -151,13 +153,22 @@ namespace MassTransit.Transports.InMemory
             return _sendObservable.Connect(observer);
         }
 
+        // L.P.
+        // async Task DispatchMessage(InMemoryTransportMessage message, bool isSend = false)
         async Task DispatchMessage(InMemoryTransportMessage message)
         {
             if (_supervisor.StopToken.IsCancellationRequested)
                 return;
 
+
             if (_receivePipe == null)
                 throw new ArgumentException("ReceivePipe not configured");
+
+            // L.P. Commenting the two lines above and uncommenting this will fix 
+            //      the issue but it seems weird to me
+
+            //if (!isSend && _receivePipe == null)
+            //    throw new ArgumentException("ReceivePipe not configured");
 
             var context = new InMemoryReceiveContext(_inputAddress, message, _receiveObservable);
 
@@ -171,6 +182,8 @@ namespace MassTransit.Transports.InMemory
             {
                 await _receiveObservable.PreReceive(context).ConfigureAwait(false);
 
+                // L.P.
+                // if (_receivePipe != null) 
                 await _receivePipe.Send(context).ConfigureAwait(false);
 
                 await context.CompleteTask.ConfigureAwait(false);
