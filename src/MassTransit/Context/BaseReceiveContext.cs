@@ -13,7 +13,7 @@
 namespace MassTransit.Context
 {
     using System;
-    using System.Collections.Generic;
+    using System.Collections.Concurrent;
     using System.Diagnostics;
     using System.IO;
     using System.Net.Mime;
@@ -31,7 +31,7 @@ namespace MassTransit.Context
         readonly Lazy<ContentType> _contentType;
         readonly Lazy<Headers> _headers;
         readonly PayloadCache _payloadCache;
-        readonly IList<Task> _pendingTasks;
+        readonly ConcurrentBag<Task> _pendingTasks;
         readonly IReceiveObserver _receiveObserver;
         readonly Stopwatch _receiveTimer;
 
@@ -51,13 +51,13 @@ namespace MassTransit.Context
 
             _contentType = new Lazy<ContentType>(GetContentType);
 
-            _pendingTasks = new List<Task>();
+            _pendingTasks = new ConcurrentBag<Task>();
         }
 
         protected abstract IHeaderProvider HeaderProvider { get; }
         public bool IsDelivered { get; private set; }
         public bool IsFaulted { get; private set; }
-        public Task CompleteTask => Task.WhenAll(_pendingTasks);
+        public Task CompleteTask => Task.WhenAll(_pendingTasks.ToArray());
 
         public void AddPendingTask(Task task)
         {
