@@ -16,7 +16,7 @@ namespace MassTransit.Events
     using Internals.Extensions;
     using Util;
 
-
+    [Serializable]
     public class FaultExceptionInfo :
         ExceptionInfo
     {
