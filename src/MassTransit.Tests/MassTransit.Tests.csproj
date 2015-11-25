@@ -145,6 +145,7 @@
     <Compile Include="InterfaceSubscription_Specs.cs" />
     <Compile Include="MessageContext_Specs.cs" />
     <Compile Include="Messages\PartialSerializationTestMessage.cs" />
+    <Compile Include="BinarySerializer_Specs.cs" />
     <Compile Include="MixedConsumer_Specs.cs" />
     <Compile Include="MultiTestConsumer_Specs.cs" />
     <Compile Include="ObjectToDictionary_Specs.cs" />

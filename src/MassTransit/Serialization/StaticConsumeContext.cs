@@ -213,7 +213,7 @@ namespace MassTransit.Serialization
         public Task NotifyFaulted<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType, Exception exception)
             where T : class
         {
-            Task faultTask = GenerateFault(context, exception);
+            Task faultTask = GenerateFault(context.Message, exception);
 
             _pendingTasks.Add(faultTask);
 

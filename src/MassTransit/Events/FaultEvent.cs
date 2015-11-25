@@ -15,7 +15,7 @@ namespace MassTransit.Events
     using System;
     using System.Linq;
 
-
+    [Serializable]
     public class FaultEvent<T> :
         Fault<T>
     {
