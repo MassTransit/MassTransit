@@ -40,7 +40,8 @@ namespace MassTransit.Transports.InMemory
         long _deliveryCount;
         int _maxPendingDeliveryCount;
         IPipe<ReceiveContext> _receivePipe;
-        TaskSupervisor _supervisor;
+        readonly TaskSupervisor _supervisor;
+        ITaskParticipant _participant;
 
         public InMemoryTransport(Uri inputAddress, int concurrencyLimit)
         {
@@ -49,7 +50,9 @@ namespace MassTransit.Transports.InMemory
             _sendObservable = new SendObservable();
             _receiveObservable = new ReceiveObservable();
             _endpointObservable = new ReceiveEndpointObservable();
+
             _supervisor = new TaskSupervisor();
+            _participant = _supervisor.CreateParticipant();
 
             _scheduler = new QueuedTaskScheduler(TaskScheduler.Default, concurrencyLimit);
         }
@@ -74,11 +77,21 @@ namespace MassTransit.Transports.InMemory
 
         ReceiveTransportHandle IReceiveTransport.Start(IPipe<ReceiveContext> receivePipe)
         {
-            _receivePipe = receivePipe;
+            try
+            {
+                _receivePipe = receivePipe;
 
-            TaskUtil.Await(() => _endpointObservable.Ready(new Ready(_inputAddress)));
+                TaskUtil.Await(() => _endpointObservable.Ready(new Ready(_inputAddress)));
 
-            return new Handle(_supervisor, this);
+                _participant.SetReady();
+
+                return new Handle(_supervisor, _participant, this);
+            }
+            catch (Exception exception)
+            {
+                _participant.SetNotReady(exception);
+                throw;
+            }
         }
 
         public ConnectHandle ConnectReceiveObserver(IReceiveObserver observer)
@@ -153,6 +166,8 @@ namespace MassTransit.Transports.InMemory
 
         async Task DispatchMessage(InMemoryTransportMessage message)
         {
+            await _supervisor.Ready;
+
             if (_supervisor.StopToken.IsCancellationRequested)
                 return;
 
@@ -216,16 +231,20 @@ namespace MassTransit.Transports.InMemory
             ReceiveTransportHandle
         {
             readonly TaskSupervisor _supervisor;
+            readonly ITaskParticipant _participant;
             readonly InMemoryTransport _transport;
 
-            public Handle(TaskSupervisor supervisor, InMemoryTransport transport)
+            public Handle(TaskSupervisor supervisor, ITaskParticipant participant, InMemoryTransport transport)
             {
                 _supervisor = supervisor;
+                _participant = participant;
                 _transport = transport;
             }
 
             async Task ReceiveTransportHandle.Stop(CancellationToken cancellationToken)
             {
+                _participant.SetComplete();
+
                 await _supervisor.Stop("Stopped").ConfigureAwait(false);
 
                 await _supervisor.Completed.ConfigureAwait(false);
