@@ -78,4 +78,47 @@ namespace MassTransit.Tests
             _receivedA = Handled<A>(configurator);
         }
     }
+
+    [TestFixture]
+    public class Publishing_a_message_on_the_bus_using_the_InMemoryTransport
+        : AsyncTestFixture
+    {
+        class TestMessage
+        { }
+
+        [Test, Explicit]
+        public async Task Throw_an_an_uncatchable_ArgumentException()
+        {
+            var busControl = MassTransit.Bus.Factory.CreateUsingInMemory(x => { });
+
+            await busControl.StartAsync();
+
+            await busControl.Publish(new TestMessage());
+
+            await Task.Delay(5000);
+
+            await busControl.StopAsync();
+
+        }
+
+        [Test, Explicit]
+        public async Task Should_not_move_the_message_to_the_dead_letter_queue()
+        {
+
+            var busControl = MassTransit.Bus.Factory.CreateUsingInMemory(x =>
+            {
+                x.ReceiveEndpoint("recv_queue", q => q.Handler<TestMessage>(async m => { }));
+            });
+
+            await busControl.StartAsync();
+
+            await busControl.Publish(new TestMessage());
+
+            await Task.Delay(5000);
+
+            await busControl.StopAsync();
+
+        }
+    }
+
 }
