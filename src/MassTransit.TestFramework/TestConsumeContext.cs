@@ -214,12 +214,47 @@ namespace MassTransit.TestFramework
             throw new NotImplementedException();
         }
 
+        public Task RespondAsync(object message, Type messageType, IPipe<SendContext> sendPipe)
+        {
+            throw new NotImplementedException();
+        }
+
         public Task RespondAsync<T>(object values) where T : class
         {
             throw new NotImplementedException();
         }
 
+        public Task RespondAsync<T>(object values, IPipe<SendContext<T>> sendPipe) where T : class
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task RespondAsync<T>(object values, IPipe<SendContext> sendPipe) where T : class
+        {
+            throw new NotImplementedException();
+        }
+
         public Task RespondAsync<T>(T message, IPipe<SendContext<T>> sendPipe) where T : class
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task RespondAsync<T>(T message, IPipe<SendContext> sendPipe) where T : class
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task RespondAsync(object message)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task RespondAsync(object message, Type messageType)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task RespondAsync(object message, IPipe<SendContext> sendPipe)
         {
             throw new NotImplementedException();
         }

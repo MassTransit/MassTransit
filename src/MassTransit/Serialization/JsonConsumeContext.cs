@@ -15,29 +15,20 @@ namespace MassTransit.Serialization
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Threading;
-    using System.Threading.Tasks;
     using Context;
-    using Events;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
-    using Pipeline;
-    using Pipeline.Pipes;
     using Util;
 
 
     public class JsonConsumeContext :
-        ConsumeContext
+        BaseConsumeContext
     {
         readonly JsonSerializer _deserializer;
-        readonly IObjectTypeDeserializer _objectTypeDeserializer;
         readonly MessageEnvelope _envelope;
         readonly JToken _messageToken;
         readonly IDictionary<Type, object> _messageTypes;
-        readonly Lazy<IPublishEndpoint> _publishEndpoint;
-        readonly IPublishEndpointProvider _publishEndpointProvider;
-        readonly ReceiveContext _receiveContext;
-        readonly ISendEndpointProvider _sendEndpointProvider;
+        readonly IObjectTypeDeserializer _objectTypeDeserializer;
         readonly string[] _supportedTypes;
         Guid? _conversationId;
         Guid? _correlationId;
@@ -52,56 +43,31 @@ namespace MassTransit.Serialization
 
         public JsonConsumeContext(JsonSerializer deserializer, IObjectTypeDeserializer objectTypeDeserializer, ISendEndpointProvider sendEndpointProvider,
             IPublishEndpointProvider publishEndpointProvider, ReceiveContext receiveContext, MessageEnvelope envelope)
+            : base(receiveContext, sendEndpointProvider, publishEndpointProvider)
         {
-            _receiveContext = receiveContext;
             _envelope = envelope;
-            _sendEndpointProvider = sendEndpointProvider;
-            _publishEndpointProvider = publishEndpointProvider;
             _deserializer = deserializer;
             _objectTypeDeserializer = objectTypeDeserializer;
             _messageToken = GetMessageToken(envelope.Message);
             _supportedTypes = envelope.MessageType.ToArray();
             _messageTypes = new Dictionary<Type, object>();
-
-            _publishEndpoint =
-                new Lazy<IPublishEndpoint>(() => _publishEndpointProvider.CreatePublishEndpoint(_receiveContext.InputAddress, CorrelationId, ConversationId));
         }
 
-        public bool HasPayloadType(Type contextType)
-        {
-            return _receiveContext.HasPayloadType(contextType);
-        }
+        public override Guid? MessageId => _messageId.HasValue ? _messageId : (_messageId = ConvertIdToGuid(_envelope.MessageId));
+        public override Guid? RequestId => _requestId.HasValue ? _requestId : (_requestId = ConvertIdToGuid(_envelope.RequestId));
+        public override Guid? CorrelationId => _correlationId.HasValue ? _correlationId : (_correlationId = ConvertIdToGuid(_envelope.CorrelationId));
+        public override Guid? ConversationId => _conversationId.HasValue ? _conversationId : (_conversationId = ConvertIdToGuid(_envelope.ConversationId));
+        public override Guid? InitiatorId => _initiatorId.HasValue ? _initiatorId : (_initiatorId = ConvertIdToGuid(_envelope.InitiatorId));
+        public override DateTime? ExpirationTime => _envelope.ExpirationTime;
+        public override Uri SourceAddress => _sourceAddress ?? (_sourceAddress = ConvertToUri(_envelope.SourceAddress));
+        public override Uri DestinationAddress => _destinationAddress ?? (_destinationAddress = ConvertToUri(_envelope.DestinationAddress));
+        public override Uri ResponseAddress => _responseAddress ?? (_responseAddress = ConvertToUri(_envelope.ResponseAddress));
+        public override Uri FaultAddress => _faultAddress ?? (_faultAddress = ConvertToUri(_envelope.FaultAddress));
+        public override Headers Headers => _headers ?? (_headers = new JsonMessageHeaders(_objectTypeDeserializer, _envelope.Headers));
+        public override HostInfo Host => _envelope.Host;
+        public override IEnumerable<string> SupportedMessageTypes => _supportedTypes;
 
-        public bool TryGetPayload<TPayload>(out TPayload payload)
-            where TPayload : class
-        {
-            return _receiveContext.TryGetPayload(out payload);
-        }
-
-        public TPayload GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory)
-            where TPayload : class
-        {
-            return _receiveContext.GetOrAddPayload(payloadFactory);
-        }
-
-        public Guid? MessageId => _messageId.HasValue ? _messageId : (_messageId = ConvertIdToGuid(_envelope.MessageId));
-        public Guid? RequestId => _requestId.HasValue ? _requestId : (_requestId = ConvertIdToGuid(_envelope.RequestId));
-        public Guid? CorrelationId => _correlationId.HasValue ? _correlationId : (_correlationId = ConvertIdToGuid(_envelope.CorrelationId));
-        public Guid? ConversationId => _conversationId.HasValue ? _conversationId : (_conversationId = ConvertIdToGuid(_envelope.ConversationId));
-        public Guid? InitiatorId => _initiatorId.HasValue ? _initiatorId : (_initiatorId = ConvertIdToGuid(_envelope.InitiatorId));
-        public DateTime? ExpirationTime => _envelope.ExpirationTime;
-        public Uri SourceAddress => _sourceAddress ?? (_sourceAddress = ConvertToUri(_envelope.SourceAddress));
-        public Uri DestinationAddress => _destinationAddress ?? (_destinationAddress = ConvertToUri(_envelope.DestinationAddress));
-        public Uri ResponseAddress => _responseAddress ?? (_responseAddress = ConvertToUri(_envelope.ResponseAddress));
-        public Uri FaultAddress => _faultAddress ?? (_faultAddress = ConvertToUri(_envelope.FaultAddress));
-        public Headers Headers => _headers ?? (_headers = new JsonMessageHeaders(_objectTypeDeserializer, _envelope.Headers));
-        public HostInfo Host => _envelope.Host;
-        public CancellationToken CancellationToken => _receiveContext.CancellationToken;
-        public ReceiveContext ReceiveContext => _receiveContext;
-        public Task CompleteTask => _receiveContext.CompleteTask;
-        public IEnumerable<string> SupportedMessageTypes => _supportedTypes;
-
-        public bool HasMessageType(Type messageType)
+        public override bool HasMessageType(Type messageType)
         {
             lock (_messageTypes)
             {
@@ -115,8 +81,7 @@ namespace MassTransit.Serialization
             return _supportedTypes.Any(x => typeUrn.Equals(x, StringComparison.OrdinalIgnoreCase));
         }
 
-        public bool TryGetMessage<T>(out ConsumeContext<T> message)
-            where T : class
+        public override bool TryGetMessage<T>(out ConsumeContext<T> message)
         {
             lock (_messageTypes)
             {
@@ -154,190 +119,6 @@ namespace MassTransit.Serialization
                 _messageTypes[typeof(T)] = message = null;
                 return false;
             }
-        }
-
-        public async Task RespondAsync<T>(T message)
-            where T : class
-        {
-            if (ResponseAddress != null)
-            {
-                ISendEndpoint endpoint = await GetSendEndpoint(ResponseAddress).ConfigureAwait(false);
-
-                await endpoint.Send(message, new ResponsePipe<T>(this), CancellationToken).ConfigureAwait(false);
-            }
-            else
-                await _publishEndpoint.Value.Publish(message, new ResponsePipe<T>(this), CancellationToken).ConfigureAwait(false);
-        }
-
-        Task ConsumeContext.RespondAsync<T>(object values)
-        {
-            if (values == null)
-                throw new ArgumentNullException(nameof(values));
-
-            T message = TypeMetadataCache<T>.InitializeFromObject(values);
-
-            return RespondAsync(message);
-        }
-
-        async Task ConsumeContext.RespondAsync<T>(T message, IPipe<SendContext<T>> sendPipe)
-        {
-            if (ResponseAddress != null)
-            {
-                ISendEndpoint endpoint = await GetSendEndpoint(ResponseAddress).ConfigureAwait(false);
-
-                await endpoint.Send(message, new ResponsePipe<T>(this, sendPipe), CancellationToken).ConfigureAwait(false);
-            }
-            else
-                await _publishEndpoint.Value.Publish(message, new ResponsePipe<T>(this, sendPipe), CancellationToken).ConfigureAwait(false);
-        }
-
-        public void Respond<T>(T message)
-            where T : class
-        {
-            Task task = RespondAsync(message);
-
-            _receiveContext.AddPendingTask(task);
-        }
-
-        public async Task<ISendEndpoint> GetSendEndpoint(Uri address)
-        {
-            ISendEndpoint sendEndpoint = await _sendEndpointProvider.GetSendEndpoint(address).ConfigureAwait(false);
-
-            return new ConsumeSendEndpoint(sendEndpoint, this);
-        }
-
-        Task ConsumeContext.NotifyConsumed<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType)
-        {
-            Task receiveTask = _receiveContext.NotifyConsumed(context, duration, consumerType);
-
-            _receiveContext.AddPendingTask(receiveTask);
-
-            return TaskUtil.Completed;
-        }
-
-        public Task NotifyFaulted<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType, Exception exception)
-            where T : class
-        {
-            Task faultTask = GenerateFault(context, exception);
-
-            _receiveContext.AddPendingTask(faultTask);
-
-            Task receiveTask = _receiveContext.NotifyFaulted(context, duration, consumerType, exception);
-
-            _receiveContext.AddPendingTask(receiveTask);
-
-            return TaskUtil.Completed;
-        }
-
-        Task IPublishEndpoint.Publish<T>(T message, CancellationToken cancellationToken)
-        {
-            Task task = _publishEndpoint.Value.Publish(message, cancellationToken);
-            _receiveContext.AddPendingTask(task);
-            return task;
-        }
-
-        Task IPublishEndpoint.Publish<T>(T message, IPipe<PublishContext<T>> publishPipe, CancellationToken cancellationToken)
-        {
-            Task task = _publishEndpoint.Value.Publish(message, publishPipe, cancellationToken);
-            _receiveContext.AddPendingTask(task);
-            return task;
-        }
-
-        Task IPublishEndpoint.Publish<T>(T message, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
-        {
-            Task task = _publishEndpoint.Value.Publish(message, publishPipe, cancellationToken);
-            _receiveContext.AddPendingTask(task);
-            return task;
-        }
-
-        Task IPublishEndpoint.Publish(object message, CancellationToken cancellationToken)
-        {
-            Task task = _publishEndpoint.Value.Publish(message, cancellationToken);
-            _receiveContext.AddPendingTask(task);
-            return task;
-        }
-
-        Task IPublishEndpoint.Publish(object message, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
-        {
-            Task task = _publishEndpoint.Value.Publish(message, publishPipe, cancellationToken);
-            _receiveContext.AddPendingTask(task);
-            return task;
-        }
-
-        Task IPublishEndpoint.Publish(object message, Type messageType, CancellationToken cancellationToken)
-        {
-            Task task = _publishEndpoint.Value.Publish(message, messageType, cancellationToken);
-            _receiveContext.AddPendingTask(task);
-            return task;
-        }
-
-        Task IPublishEndpoint.Publish(object message, Type messageType, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
-        {
-            Task task = _publishEndpoint.Value.Publish(message, messageType, publishPipe, cancellationToken);
-            _receiveContext.AddPendingTask(task);
-            return task;
-        }
-
-        Task IPublishEndpoint.Publish<T>(object values, CancellationToken cancellationToken)
-        {
-            Task task = _publishEndpoint.Value.Publish<T>(values, cancellationToken);
-            _receiveContext.AddPendingTask(task);
-            return task;
-        }
-
-        Task IPublishEndpoint.Publish<T>(object values, IPipe<PublishContext<T>> publishPipe, CancellationToken cancellationToken)
-        {
-            Task task = _publishEndpoint.Value.Publish(values, publishPipe, cancellationToken);
-            _receiveContext.AddPendingTask(task);
-            return task;
-        }
-
-        Task IPublishEndpoint.Publish<T>(object values, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
-        {
-            Task task = _publishEndpoint.Value.Publish<T>(values, publishPipe, cancellationToken);
-            _receiveContext.AddPendingTask(task);
-            return task;
-        }
-
-        public ConnectHandle ConnectPublishObserver(IPublishObserver observer)
-        {
-            return _publishEndpoint.Value.ConnectPublishObserver(observer);
-        }
-
-        public ConnectHandle ConnectSendObserver(ISendObserver observer)
-        {
-            return _sendEndpointProvider.ConnectSendObserver(observer);
-        }
-
-        async Task GenerateFault<T>(ConsumeContext<T> context, Exception exception)
-            where T : class
-        {
-            Fault<T> fault = new FaultEvent<T>(context.Message, context.MessageId, HostMetadataCache.Host, exception);
-
-            IPipe<SendContext<Fault<T>>> faultPipe = Pipe.Execute<SendContext<Fault<T>>>(x =>
-            {
-                x.SourceAddress = ReceiveContext.InputAddress;
-                x.CorrelationId = CorrelationId;
-                x.RequestId = RequestId;
-
-                foreach (var header in Headers.GetAll())
-                    x.Headers.Set(header.Key, header.Value);
-            });
-
-            if (FaultAddress != null)
-            {
-                ISendEndpoint endpoint = await GetSendEndpoint(FaultAddress);
-
-                await endpoint.Send(fault, faultPipe, CancellationToken);
-            }
-            else if (ResponseAddress != null)
-            {
-                ISendEndpoint endpoint = await GetSendEndpoint(ResponseAddress);
-
-                await endpoint.Send(fault, faultPipe, CancellationToken);
-            }
-            else
-                await _publishEndpoint.Value.Publish(fault, faultPipe, CancellationToken);
         }
 
         static JToken GetMessageToken(object message)

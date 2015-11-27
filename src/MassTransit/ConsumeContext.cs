@@ -70,8 +70,9 @@ namespace MassTransit
         /// allow the framework to wait for it (which will happen automatically before the message is acked)
         /// </summary>
         /// <typeparam name="T">The type of the message to respond with.</typeparam>
-        /// <param name="values">The values for the message properties</param>
-        Task RespondAsync<T>(object values)
+        /// <param name="message">The message to send in response</param>
+        /// <param name="sendPipe">The pipe used to customize the response send context</param>
+        Task RespondAsync<T>(T message, IPipe<SendContext<T>> sendPipe)
             where T : class;
 
         /// <summary>
@@ -82,7 +83,75 @@ namespace MassTransit
         /// <typeparam name="T">The type of the message to respond with.</typeparam>
         /// <param name="message">The message to send in response</param>
         /// <param name="sendPipe">The pipe used to customize the response send context</param>
-        Task RespondAsync<T>(T message, IPipe<SendContext<T>> sendPipe)
+        Task RespondAsync<T>(T message, IPipe<SendContext> sendPipe)
+            where T : class;
+
+        /// <summary>
+        /// Responds to the current message immediately, returning the Task for the
+        /// sending message. The caller may choose to await the response to ensure it was sent, or 
+        /// allow the framework to wait for it (which will happen automatically before the message is acked)
+        /// </summary>
+        /// <param name="message">The message to send</param>
+        Task RespondAsync(object message);
+
+        /// <summary>
+        /// Responds to the current message immediately, returning the Task for the
+        /// sending message. The caller may choose to await the response to ensure it was sent, or 
+        /// allow the framework to wait for it (which will happen automatically before the message is acked)
+        /// </summary>
+        /// <param name="message">The message to send</param>
+        /// <param name="messageType">The message type to send</param>
+        Task RespondAsync(object message, Type messageType);
+
+        /// <summary>
+        /// Responds to the current message immediately, returning the Task for the
+        /// sending message. The caller may choose to await the response to ensure it was sent, or 
+        /// allow the framework to wait for it (which will happen automatically before the message is acked)
+        /// </summary>
+        /// <param name="message">The message to send</param>
+        /// <param name="sendPipe"></param>
+        Task RespondAsync(object message, IPipe<SendContext> sendPipe);
+
+        /// <summary>
+        /// Responds to the current message immediately, returning the Task for the
+        /// sending message. The caller may choose to await the response to ensure it was sent, or 
+        /// allow the framework to wait for it (which will happen automatically before the message is acked)
+        /// </summary>
+        /// <param name="message">The message to send</param>
+        /// <param name="messageType">The message type to send</param>
+        /// <param name="sendPipe"></param>
+        Task RespondAsync(object message, Type messageType, IPipe<SendContext> sendPipe);
+
+        /// <summary>
+        /// Responds to the current message immediately, returning the Task for the
+        /// sending message. The caller may choose to await the response to ensure it was sent, or 
+        /// allow the framework to wait for it (which will happen automatically before the message is acked)
+        /// </summary>
+        /// <typeparam name="T">The type of the message to respond with.</typeparam>
+        /// <param name="values">The values for the message properties</param>
+        Task RespondAsync<T>(object values)
+            where T : class;
+
+        /// <summary>
+        /// Responds to the current message immediately, returning the Task for the
+        /// sending message. The caller may choose to await the response to ensure it was sent, or 
+        /// allow the framework to wait for it (which will happen automatically before the message is acked)
+        /// </summary>
+        /// <typeparam name="T">The type of the message to respond with.</typeparam>
+        /// <param name="values">The values for the message properties</param>
+        /// <param name="sendPipe"></param>
+        Task RespondAsync<T>(object values, IPipe<SendContext<T>> sendPipe)
+            where T : class;
+
+        /// <summary>
+        /// Responds to the current message immediately, returning the Task for the
+        /// sending message. The caller may choose to await the response to ensure it was sent, or 
+        /// allow the framework to wait for it (which will happen automatically before the message is acked)
+        /// </summary>
+        /// <typeparam name="T">The type of the message to respond with.</typeparam>
+        /// <param name="values">The values for the message properties</param>
+        /// <param name="sendPipe"></param>
+        Task RespondAsync<T>(object values, IPipe<SendContext> sendPipe)
             where T : class;
 
         /// <summary>
