@@ -21,15 +21,19 @@ namespace MassTransit.Context
         ExceptionReceiveContext
     {
         readonly Exception _exception;
+        readonly DateTime _exceptionTimestamp;
         ExceptionInfo _exceptionInfo;
 
         public RescueExceptionReceiveContext(ReceiveContext context, Exception exception)
             : base(context)
         {
             _exception = exception;
+
+            _exceptionTimestamp = DateTime.UtcNow;
         }
 
         Exception ExceptionReceiveContext.Exception => _exception;
+        DateTime ExceptionReceiveContext.ExceptionTimestamp => _exceptionTimestamp;
 
         ExceptionInfo ExceptionReceiveContext.ExceptionInfo
         {

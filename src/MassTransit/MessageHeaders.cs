@@ -28,6 +28,11 @@ namespace MassTransit
         public const string FaultMessage = "MT-Fault-Message";
 
         /// <summary>
+        /// The timestamp when the fault occurred
+        /// </summary>
+        public const string FaultTimestamp = "MT-Fault-Timestamp";
+
+        /// <summary>
         /// The stack trace from a Fault
         /// </summary>
         public const string FaultStackTrace = "MT-Fault-StackTrace";

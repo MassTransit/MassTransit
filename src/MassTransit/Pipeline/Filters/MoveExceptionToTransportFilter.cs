@@ -55,6 +55,7 @@ namespace MassTransit.Pipeline.Filters
                 Exception exception = context.Exception.GetBaseException();
 
                 sendContext.Headers.Set(MessageHeaders.FaultMessage, exception.Message);
+                sendContext.Headers.Set(MessageHeaders.FaultTimestamp, context.ExceptionTimestamp);
                 sendContext.Headers.Set(MessageHeaders.FaultStackTrace, ExceptionUtil.GetStackTrace(exception));
 
                 sendContext.SetHostHeaders();

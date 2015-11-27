@@ -46,7 +46,7 @@ namespace MassTransit.Serialization
                 obj = _formatter.Deserialize(body, x => headers = x);
             }
 
-            return new StaticConsumeContext(_deserializer, _sendEndpointProvider, _publishEndpoint, receiveContext, obj, headers);
+            return new StaticConsumeContext(_sendEndpointProvider, _publishEndpoint, receiveContext, obj, headers);
         }
 
         void IProbeSite.Probe(ProbeContext context)

@@ -33,13 +33,48 @@ namespace MassTransit.Context
             _context = context;
         }
 
+        public virtual Task RespondAsync(object message, Type messageType, IPipe<SendContext> sendPipe)
+        {
+            return _context.RespondAsync(message, messageType, sendPipe);
+        }
+
         public virtual Task RespondAsync<T>(object values) where T : class
         {
             return _context.RespondAsync<T>(values);
         }
 
+        public virtual Task RespondAsync<T>(object values, IPipe<SendContext<T>> sendPipe) where T : class
+        {
+            return _context.RespondAsync(values, sendPipe);
+        }
+
+        public virtual Task RespondAsync<T>(object values, IPipe<SendContext> sendPipe) where T : class
+        {
+            return _context.RespondAsync<T>(values, sendPipe);
+        }
+
         public virtual Task RespondAsync<T>(T message, IPipe<SendContext<T>> sendPipe)
             where T : class
+        {
+            return _context.RespondAsync(message, sendPipe);
+        }
+
+        public virtual Task RespondAsync<T>(T message, IPipe<SendContext> sendPipe) where T : class
+        {
+            return _context.RespondAsync(message, sendPipe);
+        }
+
+        public virtual Task RespondAsync(object message)
+        {
+            return _context.RespondAsync(message);
+        }
+
+        public virtual Task RespondAsync(object message, Type messageType)
+        {
+            return _context.RespondAsync(message, messageType);
+        }
+
+        public virtual Task RespondAsync(object message, IPipe<SendContext> sendPipe)
         {
             return _context.RespondAsync(message, sendPipe);
         }
