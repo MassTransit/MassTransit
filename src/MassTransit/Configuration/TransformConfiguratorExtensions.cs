@@ -35,6 +35,22 @@ namespace MassTransit
         }
 
         /// <summary>
+        /// Apply a transform on send to the message
+        /// </summary>
+        /// <typeparam name="T">The message type</typeparam>
+        /// <param name="configurator">The consume pipe configurator</param>
+        /// <param name="configure">The configuration callback</param>
+        public static void UseSendTransform<T>(this ISendPipeConfigurator configurator, Action<ITransformConfigurator<T>> configure)
+            where T : class
+        {
+            var specification = new SendTransformSpecification<T>();
+
+            configure(specification);
+
+            configurator.AddPipeSpecification(specification);
+        }
+
+        /// <summary>
         /// Encapsulate the pipe behavior in a transaction
         /// </summary>
         /// <typeparam name="T"></typeparam>

@@ -28,6 +28,8 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
     {
         readonly ConsumePipeSpecificationList _consumePipeSpecification;
         readonly IList<ServiceBusHost> _hosts;
+
+        readonly SendPipeSpecificationList _sendPipeSpecification;
         readonly ReceiveEndpointSettings _settings;
         readonly IList<IBusFactorySpecification> _transportSpecifications;
 
@@ -36,6 +38,7 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
             _hosts = new List<ServiceBusHost>();
             _transportSpecifications = new List<IBusFactorySpecification>();
             _consumePipeSpecification = new ConsumePipeSpecificationList();
+            _sendPipeSpecification = new SendPipeSpecificationList();
 
             var queueName = this.GetTemporaryQueueName("bus");
             _settings = new ReceiveEndpointSettings(queueName)
@@ -55,7 +58,7 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
 
         public IBusControl CreateBus()
         {
-            var builder = new ServiceBusBusBuilder(_hosts.ToArray(), _consumePipeSpecification, _settings);
+            var builder = new ServiceBusBusBuilder(_hosts.ToArray(), _consumePipeSpecification, _sendPipeSpecification, _settings);
 
             foreach (var configurator in _transportSpecifications)
                 configurator.Apply(builder);
@@ -213,6 +216,16 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
             configure(endpointConfigurator);
 
             AddBusFactorySpecification(endpointConfigurator);
+        }
+
+        void IPipeConfigurator<SendContext>.AddPipeSpecification(IPipeSpecification<SendContext> specification)
+        {
+            _sendPipeSpecification.Add(specification);
+        }
+
+        void ISendPipeConfigurator.AddPipeSpecification<T>(IPipeSpecification<SendContext<T>> specification)
+        {
+            _sendPipeSpecification.Add(specification);
         }
     }
 }

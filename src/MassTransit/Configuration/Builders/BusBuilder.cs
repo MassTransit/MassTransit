@@ -28,6 +28,7 @@ namespace MassTransit.Builders
         readonly BusObservable _busObservable;
         readonly Lazy<IConsumePipe> _consumePipe;
         readonly IConsumePipeSpecification _consumePipeSpecification;
+        readonly ISendPipeSpecification _sendPipeSpecification;
         readonly Lazy<IMessageDeserializer> _deserializer;
         readonly IDictionary<string, DeserializerFactory> _deserializerFactories;
         readonly IBusHostControl[] _hosts;
@@ -39,9 +40,12 @@ namespace MassTransit.Builders
         readonly Lazy<IMessageSerializer> _serializer;
         Func<IMessageSerializer> _serializerFactory;
 
-        protected BusBuilder(IConsumePipeSpecification consumePipeSpecification, IEnumerable<IBusHostControl> hosts)
+        protected BusBuilder(IConsumePipeSpecification consumePipeSpecification, ISendPipeSpecification sendPipeSpecification,
+            IEnumerable<IBusHostControl> hosts)
         {
             _consumePipeSpecification = consumePipeSpecification;
+            _sendPipeSpecification = sendPipeSpecification;
+
             _deserializerFactories = new Dictionary<string, DeserializerFactory>(StringComparer.OrdinalIgnoreCase);
             _receiveEndpoints = new Dictionary<string, IReceiveEndpoint>();
             _serializerFactory = () => new JsonMessageSerializer();
@@ -110,6 +114,18 @@ namespace MassTransit.Builders
                 throw new ConfigurationException("The serializer has already been created, the serializer cannot be changed at this time.");
 
             _serializerFactory = serializerFactory;
+        }
+
+        public ISendPipe CreateSendPipe(params ISendPipeSpecification[] specifications)
+        {
+            var builder = new SendPipeBuilder();
+
+            _sendPipeSpecification.Apply(builder);
+
+            for (int i = 0; i < specifications.Length; i++)
+                specifications[i].Apply(builder);
+
+            return builder.Build();
         }
 
         public IConsumePipe CreateConsumePipe(params IConsumePipeSpecification[] specifications)

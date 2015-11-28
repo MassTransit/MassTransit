@@ -20,6 +20,7 @@ namespace MassTransit.RabbitMqTransport
     using System.Net.Mime;
     using System.Threading;
     using System.Threading.Tasks;
+    using Context;
     using Contexts;
     using Integration;
     using Logging;
@@ -232,6 +233,11 @@ namespace MassTransit.RabbitMqTransport
                     _serializer = value;
                     ContentType = _serializer.ContentType;
                 }
+            }
+
+            SendContext<T> SendContext.CreateProxy<T>(T message)
+            {
+                return new SendContextProxy<T>(this, message);
             }
 
             public bool Durable { get; set; }

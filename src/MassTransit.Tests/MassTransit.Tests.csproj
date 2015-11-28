@@ -162,7 +162,6 @@
     <Compile Include="Pipeline\MessageTestFixture.cs" />
     <Compile Include="Pipeline\OneMessageConsumer.cs" />
     <Compile Include="Pipeline\Retry_Specs.cs" />
-    <Compile Include="Pipeline\TestPipeContext.cs" />
     <Compile Include="Pipeline\Transaction_Specs.cs" />
     <Compile Include="Pipeline\TwoMessageConsumer.cs" />
     <Compile Include="PublishHeader_Specs.cs" />
@@ -193,6 +192,7 @@
     <Compile Include="Testing\HandlerTest_Specs.cs" />
     <Compile Include="Testing\SagaTest_Specs.cs" />
     <Compile Include="Threading_Specs.cs" />
+    <Compile Include="Transforms\SendTransform_Specs.cs" />
     <Compile Include="Transforms\SetProperty_Specs.cs" />
     <Compile Include="Transforms\TransformClass_Specs.cs" />
     <Compile Include="Transports\InMemoryTransport_Specs.cs" />

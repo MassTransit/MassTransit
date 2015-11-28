@@ -17,12 +17,12 @@ namespace MassTransit.Transformation.TransformConfigurators
     using Pipeline.Filters;
 
 
-    public class ConsumeTransformSpecification<TMessage> :
+    public class SendTransformSpecification<TMessage> :
         TransformSpecification<TMessage>,
-        IConsumeTransformSpecification<TMessage>
+        ISendTransformSpecification<TMessage>
         where TMessage : class
     {
-        void IPipeSpecification<ConsumeContext<TMessage>>.Apply(IPipeBuilder<ConsumeContext<TMessage>> builder)
+        void IPipeSpecification<SendContext<TMessage>>.Apply(IPipeBuilder<SendContext<TMessage>> builder)
         {
             ITransform<TMessage, TMessage> transform = Build();
 

@@ -10,23 +10,31 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Transformation.TransformConfigurators
+namespace MassTransit.Pipeline
 {
-    using PipeBuilders;
-    using PipeConfigurators;
-    using Pipeline.Filters;
+    using System;
+    using System.Threading.Tasks;
+    using Util;
 
 
-    public class ConsumeTransformSpecification<TMessage> :
-        TransformSpecification<TMessage>,
-        IConsumeTransformSpecification<TMessage>
+    public class SendMessageObservable<TMessage> :
+        Connectable<ISendMessageObserver<TMessage>>,
+        ISendMessageObserver<TMessage>
         where TMessage : class
     {
-        void IPipeSpecification<ConsumeContext<TMessage>>.Apply(IPipeBuilder<ConsumeContext<TMessage>> builder)
+        public Task PreSend(SendContext<TMessage> context)
         {
-            ITransform<TMessage, TMessage> transform = Build();
+            return ForEachAsync(x => x.PreSend(context));
+        }
 
-            builder.AddFilter(new TransformFilter<TMessage>(transform));
+        public Task PostSend(SendContext<TMessage> context)
+        {
+            return ForEachAsync(x => x.PostSend(context));
+        }
+
+        public Task SendFault(SendContext<TMessage> context, Exception exception)
+        {
+            return ForEachAsync(x => x.SendFault(context, exception));
         }
     }
 }

@@ -21,7 +21,6 @@ namespace MassTransit.RabbitMqTransport.Configuration
     using MassTransit.Configurators;
     using PipeConfigurators;
     using Topology;
-    using Util;
 
 
     public class RabbitMqBusFactoryConfigurator :
@@ -32,12 +31,14 @@ namespace MassTransit.RabbitMqTransport.Configuration
         readonly IList<RabbitMqHost> _hosts;
         readonly RabbitMqReceiveSettings _settings;
         readonly IList<IBusFactorySpecification> _transportBuilderConfigurators;
+        readonly SendPipeSpecificationList _sendPipeSpecification;
 
         public RabbitMqBusFactoryConfigurator()
         {
             _hosts = new List<RabbitMqHost>();
             _transportBuilderConfigurators = new List<IBusFactorySpecification>();
             _consumePipeSpecification = new ConsumePipeSpecificationList();
+            _sendPipeSpecification = new SendPipeSpecificationList();
 
             string queueName = this.GetTemporaryQueueName("bus-");
             _settings = new RabbitMqReceiveSettings
@@ -54,7 +55,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
 
         public IBusControl CreateBus()
         {
-            var builder = new RabbitMqBusBuilder(_hosts.ToArray(), _consumePipeSpecification, _settings);
+            var builder = new RabbitMqBusBuilder(_hosts.ToArray(), _consumePipeSpecification, _sendPipeSpecification, _settings);
 
             foreach (IBusFactorySpecification configurator in _transportBuilderConfigurators)
                 configurator.Apply(builder);
@@ -176,6 +177,16 @@ namespace MassTransit.RabbitMqTransport.Configuration
         void IConsumePipeConfigurator.AddPipeSpecification<T>(IPipeSpecification<ConsumeContext<T>> specification)
         {
             _consumePipeSpecification.Add(specification);
+        }
+
+        public void AddPipeSpecification(IPipeSpecification<SendContext> specification)
+        {
+            _sendPipeSpecification.Add(specification);
+        }
+
+        public void AddPipeSpecification<T>(IPipeSpecification<SendContext<T>> specification) where T : class
+        {
+            _sendPipeSpecification.Add(specification);
         }
     }
 }

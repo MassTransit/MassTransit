@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -17,73 +17,77 @@ namespace MassTransit.Context
     using System.Threading;
 
 
-    public class PublishContextProxy<TMessage> :
-        PublishContext<TMessage>
+    public class SendContextProxy<TMessage> :
+        SendContext<TMessage>
         where TMessage : class
     {
-        readonly SendContext<TMessage> _context;
+        readonly SendContext _context;
 
-        public PublishContextProxy(SendContext<TMessage> context)
+        public SendContextProxy(SendContext context, TMessage message)
         {
             _context = context;
+            Message = message;
         }
 
-        bool PublishContext.Mandatory { get; set; }
+        public TMessage Message { get; }
 
-        CancellationToken PipeContext.CancellationToken => _context.CancellationToken;
+        public CancellationToken CancellationToken
+        {
+            get { return _context.CancellationToken; }
+        }
 
-        bool PipeContext.HasPayloadType(Type contextType)
+        public bool HasPayloadType(Type contextType)
         {
             return _context.HasPayloadType(contextType);
         }
 
-        bool PipeContext.TryGetPayload<TPayload>(out TPayload payload)
+        public bool TryGetPayload<TPayload>(out TPayload payload) where TPayload : class
         {
             return _context.TryGetPayload(out payload);
         }
 
-        TPayload PipeContext.GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory)
+        public TPayload GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory) where TPayload : class
         {
             return _context.GetOrAddPayload(payloadFactory);
         }
 
-        Uri SendContext.SourceAddress
+        public Uri SourceAddress
         {
             get { return _context.SourceAddress; }
             set { _context.SourceAddress = value; }
         }
 
-        Uri SendContext.DestinationAddress
+        public Uri DestinationAddress
         {
             get { return _context.DestinationAddress; }
             set { _context.DestinationAddress = value; }
         }
 
-        Uri SendContext.ResponseAddress
+        public Uri ResponseAddress
         {
             get { return _context.ResponseAddress; }
             set { _context.ResponseAddress = value; }
         }
 
-        Uri SendContext.FaultAddress
+        public Uri FaultAddress
         {
             get { return _context.FaultAddress; }
             set { _context.FaultAddress = value; }
         }
 
-        Guid? SendContext.RequestId
+        public Guid? RequestId
         {
             get { return _context.RequestId; }
             set { _context.RequestId = value; }
         }
 
-        Guid? SendContext.MessageId
+        public Guid? MessageId
         {
             get { return _context.MessageId; }
             set { _context.MessageId = value; }
         }
 
-        Guid? SendContext.CorrelationId
+        public Guid? CorrelationId
         {
             get { return _context.CorrelationId; }
             set { _context.CorrelationId = value; }
@@ -101,37 +105,38 @@ namespace MassTransit.Context
             set { _context.InitiatorId = value; }
         }
 
-        SendHeaders SendContext.Headers => _context.Headers;
+        public SendHeaders Headers
+        {
+            get { return _context.Headers; }
+        }
 
-        TimeSpan? SendContext.TimeToLive
+        public TimeSpan? TimeToLive
         {
             get { return _context.TimeToLive; }
             set { _context.TimeToLive = value; }
         }
 
-        ContentType SendContext.ContentType
+        public ContentType ContentType
         {
             get { return _context.ContentType; }
             set { _context.ContentType = value; }
         }
 
-        bool SendContext.Durable
+        public bool Durable
         {
             get { return _context.Durable; }
             set { _context.Durable = value; }
         }
 
-        IMessageSerializer SendContext.Serializer
+        public IMessageSerializer Serializer
         {
             get { return _context.Serializer; }
             set { _context.Serializer = value; }
         }
 
-        SendContext<T> SendContext.CreateProxy<T>(T message)
+        public SendContext<T> CreateProxy<T>(T message) where T : class
         {
             return _context.CreateProxy(message);
         }
-
-        TMessage SendContext<TMessage>.Message => _context.Message;
     }
 }

@@ -28,11 +28,31 @@ namespace MassTransit.Tests
         {
             IBusControl busControl = Bus.Factory.CreateUsingInMemory(x =>
             {
+                x.UseTransform<PingMessage>(v =>
+                {
+                });
+
+                x.UseConcurrencyLimit(3);
+                x.UseRateLimit(1000);
+                x.UseTransaction();
+
                 x.ReceiveEndpoint("input_queue", e =>
                 {
-                    e.Saga(new InMemorySagaRepository<SimpleSaga>(), s => s.UseConcurrencyLimit(1));
-                    e.Consumer<MyConsumer>();
-                    
+                    e.Saga(new InMemorySagaRepository<SimpleSaga>(), s =>
+                    {
+                        s.UseConcurrencyLimit(1);
+                        s.UseRateLimit(1000);
+                    });
+
+                    e.Consumer<MyConsumer>(c =>
+                    {
+                        c.UseConcurrencyLimit(1);
+                        c.UseRateLimit(100);
+                    });
+
+                    e.UseTransaction();
+                    e.UseConcurrencyLimit(7);
+                    e.UseRateLimit(100);
                 });
             });
         }

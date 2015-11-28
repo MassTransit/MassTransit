@@ -27,10 +27,12 @@ namespace MassTransit.AzureServiceBusTransport
         readonly SendObservable _sendObservable;
         readonly IMessageSerializer _serializer;
         readonly Uri _sourceAddress;
+        readonly ISendPipe _sendPipe;
 
-        public PublishSendEndpointProvider(IMessageSerializer serializer, Uri sourceAddress, IServiceBusHost[] hosts)
+        public PublishSendEndpointProvider(IMessageSerializer serializer, Uri sourceAddress, IServiceBusHost[] hosts, ISendPipe sendPipe)
         {
             _hosts = hosts;
+            _sendPipe = sendPipe;
             _sourceAddress = sourceAddress;
             _serializer = serializer;
             _sendObservable = new SendObservable();
@@ -53,7 +55,7 @@ namespace MassTransit.AzureServiceBusTransport
 
             sendTransport.ConnectSendObserver(_sendObservable);
 
-            return new SendEndpoint(sendTransport, _serializer, address, _sourceAddress);
+            return new SendEndpoint(sendTransport, _serializer, address, _sourceAddress, _sendPipe);
         }
 
         public ConnectHandle ConnectSendObserver(ISendObserver observer)

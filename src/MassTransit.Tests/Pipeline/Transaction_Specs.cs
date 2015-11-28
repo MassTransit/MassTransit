@@ -18,6 +18,8 @@ namespace MassTransit.Tests.Pipeline
     using System.Transactions;
     using MassTransit.Pipeline;
     using NUnit.Framework;
+    using TestFramework;
+    using TestFramework.Messages;
 
 
     [TestFixture]
@@ -26,7 +28,7 @@ namespace MassTransit.Tests.Pipeline
         [Test]
         public void Should_properly_fail()
         {
-            IPipe<TestPipeContext> pipe = Pipe.New<TestPipeContext>(x =>
+            IPipe<ConsumeContext> pipe = Pipe.New<ConsumeContext>(x =>
             {
                 x.UseTransaction();
                 x.UseExecute(payload => Console.WriteLine("Execute: {0}", Thread.CurrentThread.ManagedThreadId));
@@ -42,7 +44,7 @@ namespace MassTransit.Tests.Pipeline
                 }));
             });
 
-            var context = new TestPipeContext();
+            var context = new TestConsumeContext<PingMessage>(new PingMessage());
 
             var exception = Assert.Throws<TransactionAbortedException>(async () => await pipe.Send(context));
 
@@ -52,7 +54,7 @@ namespace MassTransit.Tests.Pipeline
         [Test]
         public void Should_properly_handle_exception()
         {
-            IPipe<TestPipeContext> pipe = Pipe.New<TestPipeContext>(x =>
+            IPipe<ConsumeContext> pipe = Pipe.New<ConsumeContext>(x =>
             {
                 x.UseTransaction();
                 x.UseExecute(payload => Console.WriteLine("Execute: {0}", Thread.CurrentThread.ManagedThreadId));
@@ -75,7 +77,7 @@ namespace MassTransit.Tests.Pipeline
                 x.UseExecute(payload => Console.WriteLine("After Transaction: {0}", Thread.CurrentThread.ManagedThreadId));
             });
 
-            var context = new TestPipeContext();
+            var context = new TestConsumeContext<PingMessage>(new PingMessage());
 
             var exception = Assert.Throws<InvalidOperationException>(async () => await pipe.Send(context));
 
@@ -85,7 +87,7 @@ namespace MassTransit.Tests.Pipeline
         [Test]
         public async Task Should_properly_succeed()
         {
-            IPipe<TestPipeContext> pipe = Pipe.New<TestPipeContext>(x =>
+            IPipe<ConsumeContext> pipe = Pipe.New<ConsumeContext>(x =>
             {
                 x.UseTransaction();
                 x.UseExecute(payload => Console.WriteLine("Execute: {0}", Thread.CurrentThread.ManagedThreadId));
@@ -102,7 +104,7 @@ namespace MassTransit.Tests.Pipeline
                 }));
             });
 
-            var context = new TestPipeContext();
+            var context = new TestConsumeContext<PingMessage>(new PingMessage());
 
             await pipe.Send(context);
         }
@@ -110,7 +112,7 @@ namespace MassTransit.Tests.Pipeline
         [Test]
         public void Should_timeout()
         {
-            IPipe<TestPipeContext> pipe = Pipe.New<TestPipeContext>(x =>
+            IPipe<ConsumeContext> pipe = Pipe.New<ConsumeContext>(x =>
             {
                 x.UseTransaction(t => t.Timeout = TimeSpan.FromSeconds(1));
                 x.UseExecute(payload => Console.WriteLine("Execute: {0}", Thread.CurrentThread.ManagedThreadId));
@@ -135,7 +137,7 @@ namespace MassTransit.Tests.Pipeline
                 x.UseExecute(payload => Console.WriteLine("After Transaction: {0}", Thread.CurrentThread.ManagedThreadId));
             });
 
-            var context = new TestPipeContext();
+            var context = new TestConsumeContext<PingMessage>(new PingMessage());
 
             var exception = Assert.Throws<TransactionAbortedException>(async () => await pipe.Send(context));
 

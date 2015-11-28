@@ -64,5 +64,15 @@ namespace MassTransit.RabbitMqTransport.Hosting
         {
             ReceiveEndpoint(queueName, _defaultConsumerLimit, configureEndpoint);
         }
+
+        public void AddPipeSpecification(IPipeSpecification<SendContext> specification)
+        {
+            _configurator.AddPipeSpecification(specification);
+        }
+
+        public void AddPipeSpecification<T>(IPipeSpecification<SendContext<T>> specification) where T : class
+        {
+            _configurator.AddPipeSpecification(specification);
+        }
     }
 }
