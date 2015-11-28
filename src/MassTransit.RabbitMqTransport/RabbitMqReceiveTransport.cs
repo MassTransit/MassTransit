@@ -18,7 +18,6 @@ namespace MassTransit.RabbitMqTransport
     using Logging;
     using Management;
     using MassTransit.Pipeline;
-    using Pipeline;
     using Policies;
     using Topology;
     using Transports;
@@ -29,22 +28,23 @@ namespace MassTransit.RabbitMqTransport
         IReceiveTransport
     {
         static readonly ILog _log = Logger.Get<RabbitMqReceiveTransport>();
-        readonly ReceiveEndpointObservable _endpointObservers;
-        readonly ExchangeBindingSettings[] _exchangeBindings;
+        readonly ExchangeBindingSettings[] _bindings;
         readonly IRabbitMqHost _host;
-        readonly ReceiveObservable _receiveObservers;
-        readonly ReceiveSettings _settings;
         readonly Mediator<ISetPrefetchCount> _mediator;
+        readonly ReceiveEndpointObservable _receiveEndpointObservable;
+        readonly ReceiveObservable _receiveObservable;
+        readonly ReceiveSettings _settings;
 
         public RabbitMqReceiveTransport(IRabbitMqHost host, ReceiveSettings settings, Mediator<ISetPrefetchCount> mediator,
-            params ExchangeBindingSettings[] exchangeBindings)
+            params ExchangeBindingSettings[] bindings)
         {
             _host = host;
             _settings = settings;
-            _exchangeBindings = exchangeBindings;
-            _receiveObservers = new ReceiveObservable();
-            _endpointObservers = new ReceiveEndpointObservable();
+            _bindings = bindings;
             _mediator = mediator;
+
+            _receiveObservable = new ReceiveObservable();
+            _receiveEndpointObservable = new ReceiveEndpointObservable();
         }
 
         void IProbeSite.Probe(ProbeContext context)
@@ -52,7 +52,7 @@ namespace MassTransit.RabbitMqTransport
             var scope = context.CreateScope("transport");
             scope.Add("type", "RabbitMQ");
             scope.Set(_settings);
-            scope.Add("bindings", _exchangeBindings);
+            scope.Add("bindings", _bindings);
         }
 
         /// <summary>
@@ -65,8 +65,10 @@ namespace MassTransit.RabbitMqTransport
         {
             var supervisor = new TaskSupervisor();
 
-            var pipe = Pipe.New<ConnectionContext>(
-                    x => x.RabbitMqConsumer(receivePipe, _settings, _receiveObservers, _endpointObservers, _exchangeBindings, supervisor, _mediator));
+            var pipe = Pipe.New<ConnectionContext>(x =>
+            {
+                x.RabbitMqConsumer(receivePipe, _settings, _receiveObservable, _receiveEndpointObservable, _bindings, supervisor, _mediator);
+            });
 
             Receiver(pipe, supervisor);
 
@@ -75,12 +77,12 @@ namespace MassTransit.RabbitMqTransport
 
         public ConnectHandle ConnectReceiveObserver(IReceiveObserver observer)
         {
-            return _receiveObservers.Connect(observer);
+            return _receiveObservable.Connect(observer);
         }
 
         public ConnectHandle ConnectReceiveEndpointObserver(IReceiveEndpointObserver observer)
         {
-            return _endpointObservers.Connect(observer);
+            return _receiveEndpointObservable.Connect(observer);
         }
 
         async void Receiver(IPipe<ConnectionContext> transportPipe, TaskSupervisor supervisor)
@@ -98,7 +100,7 @@ namespace MassTransit.RabbitMqTransport
 
                     var inputAddress = _host.Settings.GetInputAddress(_settings);
 
-                    await _endpointObservers.Faulted(new Faulted(inputAddress, ex)).ConfigureAwait(false);
+                    await _receiveEndpointObservable.Faulted(new Faulted(inputAddress, ex)).ConfigureAwait(false);
                 }
                 catch (TaskCanceledException)
                 {
@@ -110,7 +112,7 @@ namespace MassTransit.RabbitMqTransport
 
                     var inputAddress = _host.Settings.GetInputAddress(_settings);
 
-                    await _endpointObservers.Faulted(new Faulted(inputAddress, ex)).ConfigureAwait(false);
+                    await _receiveEndpointObservable.Faulted(new Faulted(inputAddress, ex)).ConfigureAwait(false);
                 }
             }).ConfigureAwait(false);
         }

@@ -28,7 +28,6 @@ namespace MassTransit.RabbitMqTransport
     {
         readonly ConcurrentDictionary<Type, Lazy<ISendEndpoint>> _cachedEndpoints;
         readonly IRabbitMqHost _host;
-        readonly IMessageNameFormatter _messageNameFormatter;
         readonly PublishObservable _publishObservable;
         readonly IMessageSerializer _serializer;
         readonly Uri _sourceAddress;
@@ -40,7 +39,6 @@ namespace MassTransit.RabbitMqTransport
             _serializer = serializer;
             _sourceAddress = sourceAddress;
             _sendPipe = sendPipe;
-            _messageNameFormatter = host.MessageNameFormatter;
             _cachedEndpoints = new ConcurrentDictionary<Type, Lazy<ISendEndpoint>>();
             _publishObservable = new PublishObservable();
         }
@@ -62,10 +60,10 @@ namespace MassTransit.RabbitMqTransport
 
         ISendEndpoint CreateSendEndpoint(Type messageType)
         {
-            SendSettings sendSettings = _host.GetSendSettings(messageType, _messageNameFormatter);
+            SendSettings sendSettings = _host.GetSendSettings(messageType);
 
             ExchangeBindingSettings[] bindings = TypeMetadataCache.GetMessageTypes(messageType)
-                .SelectMany(type => type.GetExchangeBindings(_messageNameFormatter))
+                .SelectMany(type => type.GetExchangeBindings(_host.MessageNameFormatter))
                 .Where(binding => !sendSettings.ExchangeName.Equals(binding.Exchange.ExchangeName))
                 .ToArray();
 

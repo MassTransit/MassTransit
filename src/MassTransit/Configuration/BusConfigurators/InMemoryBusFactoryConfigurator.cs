@@ -30,7 +30,7 @@ namespace MassTransit.BusConfigurators
         readonly IList<IInMemoryBusFactorySpecification> _configurators;
         readonly ConsumePipeSpecificationList _consumePipeSpecification;
         readonly IList<IBusHostControl> _hosts;
-        readonly SendPipeSpecificationList _sendPipeSpecification;
+        readonly SendPipeConfigurator _sendPipeConfigurator;
         int _concurrencyLimit;
         IReceiveTransportProvider _receiveTransportProvider;
         ISendTransportProvider _sendTransportProvider;
@@ -39,7 +39,7 @@ namespace MassTransit.BusConfigurators
         {
             _configurators = new List<IInMemoryBusFactorySpecification>();
             _consumePipeSpecification = new ConsumePipeSpecificationList();
-            _sendPipeSpecification = new SendPipeSpecificationList();
+            _sendPipeConfigurator = new SendPipeConfigurator();
 
             _concurrencyLimit = Environment.ProcessorCount;
 
@@ -58,7 +58,7 @@ namespace MassTransit.BusConfigurators
             }
 
             var builder = new InMemoryBusBuilder(_receiveTransportProvider, _sendTransportProvider, _hosts.ToArray(), _consumePipeSpecification,
-                _sendPipeSpecification);
+                _sendPipeConfigurator);
 
             foreach (var configurator in _configurators)
                 configurator.Apply(builder);
@@ -69,7 +69,7 @@ namespace MassTransit.BusConfigurators
         public IEnumerable<ValidationResult> Validate()
         {
             return _consumePipeSpecification.Validate()
-                .Concat(_sendPipeSpecification.Validate())
+                .Concat(_sendPipeConfigurator.Validate())
                 .Concat(_configurators.SelectMany(x => x.Validate()));
         }
 
@@ -118,14 +118,12 @@ namespace MassTransit.BusConfigurators
             ReceiveEndpoint(queueName, configureEndpoint);
         }
 
-        void IPipeConfigurator<SendContext>.AddPipeSpecification(IPipeSpecification<SendContext> specification)
+        public void ConfigureSend(Action<ISendPipeConfigurator> callback)
         {
-            _sendPipeSpecification.Add(specification);
-        }
+            if (callback == null)
+                throw new ArgumentNullException(nameof(callback));
 
-        void ISendPipeConfigurator.AddPipeSpecification<T>(IPipeSpecification<SendContext<T>> specification)
-        {
-            _sendPipeSpecification.Add(specification);
+            callback(_sendPipeConfigurator);
         }
 
 

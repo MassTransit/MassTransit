@@ -19,7 +19,7 @@ namespace MassTransit
 
     public interface IBusFactoryConfigurator :
         IConsumePipeConfigurator,
-        ISendPipeConfigurator
+        ISendPipelineConfigurator
     {
         [EditorBrowsable(EditorBrowsableState.Never)]
         void AddBusFactorySpecification(IBusFactorySpecification configurator);

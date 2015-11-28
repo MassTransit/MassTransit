@@ -26,7 +26,12 @@ namespace MassTransit.Builders
         /// <summary>
         /// The default message deserializer
         /// </summary>
-        IMessageDeserializer MessageDeserializer { get; }
+        IMessageDeserializer GetMessageDeserializer(ISendEndpointProvider sendEndpointProvider, IPublishEndpointProvider publishEndpointProvider);
+
+
+        ISendEndpointProvider CreateSendEndpointProvider(params ISendPipeSpecification[] specifications);
+
+        IPublishEndpointProvider CreatePublishEndpointProvider();
 
         /// <summary>
         /// The default message serializer
@@ -37,8 +42,6 @@ namespace MassTransit.Builders
         /// The Send Transport Provider
         /// </summary>
         ISendTransportProvider SendTransportProvider { get; }
-
-        IPublishEndpointProvider PublishEndpoint { get; }
 
         /// <summary>
         /// Adds a receive endpoint to the bus
@@ -67,6 +70,14 @@ namespace MassTransit.Builders
         /// <param name="specifications"></param>
         /// <returns></returns>
         IConsumePipe CreateConsumePipe(params IConsumePipeSpecification[] specifications);
+
+        /// <summary>
+        /// Create a send pipe for the endpoint, using the bus builder. The bus builder may add additional filters
+        /// from the bus configuration to the endpoint.
+        /// </summary>
+        /// <param name="specifications"></param>
+        /// <returns></returns>
+        ISendPipe CreateSendPipe(params ISendPipeSpecification[] specifications);
 
         /// <summary>
         /// Connects a bus observer to the bus to observe lifecycle events on the bus

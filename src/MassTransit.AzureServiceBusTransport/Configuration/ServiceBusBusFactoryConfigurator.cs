@@ -29,7 +29,7 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
         readonly ConsumePipeSpecificationList _consumePipeSpecification;
         readonly IList<ServiceBusHost> _hosts;
 
-        readonly SendPipeSpecificationList _sendPipeSpecification;
+        readonly SendPipeConfigurator _sendPipeConfigurator;
         readonly ReceiveEndpointSettings _settings;
         readonly IList<IBusFactorySpecification> _transportSpecifications;
 
@@ -38,7 +38,7 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
             _hosts = new List<ServiceBusHost>();
             _transportSpecifications = new List<IBusFactorySpecification>();
             _consumePipeSpecification = new ConsumePipeSpecificationList();
-            _sendPipeSpecification = new SendPipeSpecificationList();
+            _sendPipeConfigurator = new SendPipeConfigurator();
 
             var queueName = this.GetTemporaryQueueName("bus");
             _settings = new ReceiveEndpointSettings(queueName)
@@ -58,7 +58,7 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
 
         public IBusControl CreateBus()
         {
-            var builder = new ServiceBusBusBuilder(_hosts.ToArray(), _consumePipeSpecification, _sendPipeSpecification, _settings);
+            var builder = new ServiceBusBusBuilder(_hosts.ToArray(), _consumePipeSpecification, _sendPipeConfigurator, _settings);
 
             foreach (var configurator in _transportSpecifications)
                 configurator.Apply(builder);
@@ -217,15 +217,13 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
 
             AddBusFactorySpecification(endpointConfigurator);
         }
-
-        void IPipeConfigurator<SendContext>.AddPipeSpecification(IPipeSpecification<SendContext> specification)
+        
+        public void ConfigureSend(Action<ISendPipeConfigurator> callback)
         {
-            _sendPipeSpecification.Add(specification);
-        }
+            if (callback == null)
+                throw new ArgumentNullException(nameof(callback));
 
-        void ISendPipeConfigurator.AddPipeSpecification<T>(IPipeSpecification<SendContext<T>> specification)
-        {
-            _sendPipeSpecification.Add(specification);
+            callback(_sendPipeConfigurator);
         }
     }
 }

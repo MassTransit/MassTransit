@@ -24,7 +24,6 @@ namespace MassTransit.RabbitMqTransport
     using NewIdFormatters;
     using RabbitMQ.Client;
     using Topology;
-    using Transports;
     using Util;
 
 
@@ -273,14 +272,14 @@ namespace MassTransit.RabbitMqTransport
             return settings;
         }
 
-        public static SendSettings GetSendSettings(this IRabbitMqHost host, Type messageType, IMessageNameFormatter messageNameFormatter)
+        public static SendSettings GetSendSettings(this IRabbitMqHost host, Type messageType)
         {
             bool isTemporary = messageType.IsTemporaryMessageType();
 
             bool durable = !isTemporary;
             bool autoDelete = isTemporary;
 
-            string name = messageNameFormatter.GetMessageName(messageType).ToString();
+            string name = host.MessageNameFormatter.GetMessageName(messageType).ToString();
 
             SendSettings settings = new RabbitMqSendSettings(name, ExchangeType.Fanout, durable, autoDelete);
 
