@@ -65,5 +65,14 @@ namespace MassTransit
         /// The serializer to use when serializing the message to the transport
         /// </summary>
         IMessageSerializer Serializer { get; set; }
+
+        /// <summary>
+        /// Create a send context proxy with the new message type
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="message"></param>
+        /// <returns></returns>
+        SendContext<T> CreateProxy<T>(T message)
+            where T : class;
     }
 }

@@ -24,10 +24,12 @@ namespace MassTransit.Transports
         ISendEndpoint
     {
         readonly ISendTransport _transport;
+        readonly ISendPipe _sendPipe;
 
-        public SendEndpoint(ISendTransport transport, IMessageSerializer serializer, Uri destinationAddress, Uri sourceAddress)
+        public SendEndpoint(ISendTransport transport, IMessageSerializer serializer, Uri destinationAddress, Uri sourceAddress, ISendPipe sendPipe)
         {
             _transport = transport;
+            _sendPipe = sendPipe;
             Serializer = serializer;
             DestinationAddress = destinationAddress;
             SourceAddress = sourceAddress;
@@ -200,6 +202,8 @@ namespace MassTransit.Transports
                 if (context.SourceAddress == null)
                     context.SourceAddress = _endpoint.SourceAddress;
 
+                if (_endpoint._sendPipe != null)
+                    await _endpoint._sendPipe.Send(context);
                 if (_pipe != null)
                     await _pipe.Send(context).ConfigureAwait(false);
                 if (_sendPipe != null)

@@ -28,10 +28,8 @@ namespace MassTransit.Builders
         readonly Uri _inputAddress;
         readonly ISendTransportProvider _sendTransportProvider;
 
-        public InMemoryBusBuilder(IReceiveTransportProvider receiveTransportProvider,
-            ISendTransportProvider sendTransportProvider, IBusHostControl[] hosts,
-            IConsumePipeSpecification consumePipeSpecification)
-            : base(consumePipeSpecification, hosts)
+        public InMemoryBusBuilder(IReceiveTransportProvider receiveTransportProvider, ISendTransportProvider sendTransportProvider, IBusHostControl[] hosts, IConsumePipeSpecification consumePipeSpecification, ISendPipeSpecification sendPipeSpecification)
+            : base(consumePipeSpecification, sendPipeSpecification, hosts)
         {
             if (receiveTransportProvider == null)
                 throw new ArgumentNullException(nameof(receiveTransportProvider));
@@ -64,7 +62,9 @@ namespace MassTransit.Builders
 
         protected override ISendEndpointProvider CreateSendEndpointProvider()
         {
-            var provider = new InMemorySendEndpointProvider(_inputAddress, _sendTransportProvider, MessageSerializer);
+            var sendPipe = CreateSendPipe();
+
+            var provider = new InMemorySendEndpointProvider(_inputAddress, _sendTransportProvider, MessageSerializer, sendPipe);
 
             return new SendEndpointCache(provider);
         }

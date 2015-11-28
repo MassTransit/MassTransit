@@ -32,12 +32,14 @@ namespace MassTransit.RabbitMqTransport
         readonly PublishObservable _publishObservable;
         readonly IMessageSerializer _serializer;
         readonly Uri _sourceAddress;
+        readonly ISendPipe _sendPipe;
 
-        public RabbitMqPublishEndpointProvider(IRabbitMqHost host, IMessageSerializer serializer, Uri sourceAddress)
+        public RabbitMqPublishEndpointProvider(IRabbitMqHost host, IMessageSerializer serializer, Uri sourceAddress, ISendPipe sendPipe)
         {
             _host = host;
             _serializer = serializer;
             _sourceAddress = sourceAddress;
+            _sendPipe = sendPipe;
             _messageNameFormatter = host.MessageNameFormatter;
             _cachedEndpoints = new ConcurrentDictionary<Type, Lazy<ISendEndpoint>>();
             _publishObservable = new PublishObservable();
@@ -73,7 +75,7 @@ namespace MassTransit.RabbitMqTransport
 
             var sendTransport = new RabbitMqSendTransport(modelCache, sendSettings, bindings);
 
-            return new SendEndpoint(sendTransport, _serializer, destinationAddress, _sourceAddress);
+            return new SendEndpoint(sendTransport, _serializer, destinationAddress, _sourceAddress, _sendPipe);
         }
     }
 }

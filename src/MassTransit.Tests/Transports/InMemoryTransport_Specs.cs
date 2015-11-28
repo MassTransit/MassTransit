@@ -19,6 +19,7 @@ namespace MassTransit.Tests.Transports
         using System.Threading.Tasks;
         using MassTransit.Pipeline;
         using MassTransit.Pipeline.Filters;
+        using MassTransit.Pipeline.Pipes;
         using MassTransit.Serialization;
         using MassTransit.Transports;
         using MassTransit.Transports.InMemory;
@@ -54,7 +55,7 @@ namespace MassTransit.Tests.Transports
                 ReceiveTransportHandle receiveHandle = ((IReceiveTransport)transport).Start(receivePipe);
 
                 var sendEndpoint = new SendEndpoint(transport, new JsonMessageSerializer(), inputAddress,
-                    inputAddress);
+                    inputAddress, new SendPipe(new MessageTypeSendFilter(), Pipe.Empty<SendContext>()));
 
                 await sendEndpoint.Send(new A(), TestCancellationToken);
 

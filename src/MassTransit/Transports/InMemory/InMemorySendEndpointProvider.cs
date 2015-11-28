@@ -21,15 +21,16 @@ namespace MassTransit.Transports.InMemory
         ISendEndpointProvider
     {
         readonly IMessageSerializer _defaultSerializer;
+        readonly ISendPipe _sendPipe;
         readonly SendObservable _sendObservable;
         readonly Uri _sourceAddress;
         readonly ISendTransportProvider _transportProvider;
 
-        public InMemorySendEndpointProvider(Uri sourceAddress, ISendTransportProvider transportProvider,
-            IMessageSerializer defaultSerializer)
+        public InMemorySendEndpointProvider(Uri sourceAddress, ISendTransportProvider transportProvider, IMessageSerializer defaultSerializer, ISendPipe sendPipe)
         {
             _transportProvider = transportProvider;
             _defaultSerializer = defaultSerializer;
+            _sendPipe = sendPipe;
             _sourceAddress = sourceAddress;
             _sendObservable = new SendObservable();
         }
@@ -40,7 +41,7 @@ namespace MassTransit.Transports.InMemory
 
             sendTransport.ConnectSendObserver(_sendObservable);
 
-            return new SendEndpoint(sendTransport, _defaultSerializer, address, _sourceAddress);
+            return new SendEndpoint(sendTransport, _defaultSerializer, address, _sourceAddress, _sendPipe);
         }
 
         public ConnectHandle ConnectSendObserver(ISendObserver observer)

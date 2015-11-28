@@ -33,15 +33,15 @@ namespace MassTransit.Transports.InMemory
         static readonly ILog _log = Logger.Get<InMemoryTransport>();
         readonly ReceiveEndpointObservable _endpointObservable;
         readonly Uri _inputAddress;
+        readonly ITaskParticipant _participant;
         readonly ReceiveObservable _receiveObservable;
         readonly QueuedTaskScheduler _scheduler;
         readonly SendObservable _sendObservable;
+        readonly TaskSupervisor _supervisor;
         int _currentPendingDeliveryCount;
         long _deliveryCount;
         int _maxPendingDeliveryCount;
         IPipe<ReceiveContext> _receivePipe;
-        readonly TaskSupervisor _supervisor;
-        ITaskParticipant _participant;
 
         public InMemoryTransport(Uri inputAddress, int concurrencyLimit)
         {
@@ -118,7 +118,6 @@ namespace MassTransit.Transports.InMemory
 
                 var transportMessage = new InMemoryTransportMessage(messageId, context.Body, context.ContentType.MediaType, TypeMetadataCache<T>.ShortName);
 
-                if(_receivePipe != null)
 #pragma warning disable 4014
                     Task.Factory.StartNew(() => DispatchMessage(transportMessage), _supervisor.StopToken, TaskCreationOptions.HideScheduler, _scheduler);
 #pragma warning restore 4014
@@ -230,8 +229,8 @@ namespace MassTransit.Transports.InMemory
         class Handle :
             ReceiveTransportHandle
         {
-            readonly TaskSupervisor _supervisor;
             readonly ITaskParticipant _participant;
+            readonly TaskSupervisor _supervisor;
             readonly InMemoryTransport _transport;
 
             public Handle(TaskSupervisor supervisor, ITaskParticipant participant, InMemoryTransport transport)

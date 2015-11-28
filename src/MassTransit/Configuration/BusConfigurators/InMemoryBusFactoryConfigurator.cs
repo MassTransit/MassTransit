@@ -30,6 +30,7 @@ namespace MassTransit.BusConfigurators
         readonly IList<IInMemoryBusFactorySpecification> _configurators;
         readonly ConsumePipeSpecificationList _consumePipeSpecification;
         readonly IList<IBusHostControl> _hosts;
+        readonly SendPipeSpecificationList _sendPipeSpecification;
         int _concurrencyLimit;
         IReceiveTransportProvider _receiveTransportProvider;
         ISendTransportProvider _sendTransportProvider;
@@ -38,6 +39,8 @@ namespace MassTransit.BusConfigurators
         {
             _configurators = new List<IInMemoryBusFactorySpecification>();
             _consumePipeSpecification = new ConsumePipeSpecificationList();
+            _sendPipeSpecification = new SendPipeSpecificationList();
+
             _concurrencyLimit = Environment.ProcessorCount;
 
             _hosts = new List<IBusHostControl>();
@@ -54,7 +57,8 @@ namespace MassTransit.BusConfigurators
                 _sendTransportProvider = _sendTransportProvider ?? transportProvider;
             }
 
-            var builder = new InMemoryBusBuilder(_receiveTransportProvider, _sendTransportProvider, _hosts.ToArray(), _consumePipeSpecification);
+            var builder = new InMemoryBusBuilder(_receiveTransportProvider, _sendTransportProvider, _hosts.ToArray(), _consumePipeSpecification,
+                _sendPipeSpecification);
 
             foreach (var configurator in _configurators)
                 configurator.Apply(builder);
@@ -65,6 +69,7 @@ namespace MassTransit.BusConfigurators
         public IEnumerable<ValidationResult> Validate()
         {
             return _consumePipeSpecification.Validate()
+                .Concat(_sendPipeSpecification.Validate())
                 .Concat(_configurators.SelectMany(x => x.Validate()));
         }
 
@@ -111,6 +116,16 @@ namespace MassTransit.BusConfigurators
         void IBusFactoryConfigurator.ReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configureEndpoint)
         {
             ReceiveEndpoint(queueName, configureEndpoint);
+        }
+
+        void IPipeConfigurator<SendContext>.AddPipeSpecification(IPipeSpecification<SendContext> specification)
+        {
+            _sendPipeSpecification.Add(specification);
+        }
+
+        void ISendPipeConfigurator.AddPipeSpecification<T>(IPipeSpecification<SendContext<T>> specification)
+        {
+            _sendPipeSpecification.Add(specification);
         }
 
 

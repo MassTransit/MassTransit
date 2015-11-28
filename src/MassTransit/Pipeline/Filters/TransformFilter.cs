@@ -23,7 +23,8 @@ namespace MassTransit.Pipeline.Filters
     /// </summary>
     /// <typeparam name="T">The message type</typeparam>
     public class TransformFilter<T> :
-        IFilter<ConsumeContext<T>>
+        IFilter<ConsumeContext<T>>,
+        IFilter<SendContext<T>>
         where T : class
     {
         readonly ITransform<T, T> _transform;
@@ -46,6 +47,22 @@ namespace MassTransit.Pipeline.Filters
             if (result.IsNewValue)
             {
                 var transformedContext = new MessageConsumeContext<T>(context, result.Value);
+
+                return next.Send(transformedContext);
+            }
+
+            return next.Send(context);
+        }
+
+        Task IFilter<SendContext<T>>.Send(SendContext<T> context, IPipe<SendContext<T>> next)
+        {
+            var transformContext = new SendTransformContext<T>(context);
+
+            TransformResult<T> result = _transform.ApplyTo(transformContext);
+            if (result.IsNewValue)
+            {
+                
+                var transformedContext = context.CreateProxy(result.Value);
 
                 return next.Send(transformedContext);
             }
