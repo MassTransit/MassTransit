@@ -10,51 +10,27 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Tests.Transforms
+namespace MassTransit.Tests
 {
-    using System.Threading.Tasks;
+    using System;
     using NUnit.Framework;
-    using Shouldly;
     using TestFramework;
 
 
     [TestFixture]
-    public class Transforming_a_message_when_sent :
+    public class Using_the_circuit_breaker :
         InMemoryTestFixture
     {
         [Test]
-        public async Task Should_change_the_property()
-        {
-            await InputQueueSendEndpoint.Send(new A {First = "Hello"});
-
-            ConsumeContext<A> result = await _received;
-
-            result.Message.First.ShouldBe("Hello");
-            result.Message.Second.ShouldBe("World");
-        }
-
-        Task<ConsumeContext<A>> _received;
-
-        protected override void ConfigureBus(IInMemoryBusFactoryConfigurator configurator)
-        {
-            configurator.ConfigureSend(s => s.UseTransform<A>(t =>
-            {
-                t.Replace(x => x.Second, context => "World");
-            }));
+        public void Should_work()
+        {            
         }
 
         protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             base.ConfigureInputQueueEndpoint(configurator);
 
-            _received = Handled<A>(configurator);
-        }
-
-
-        class A
-        {
-            public string First { get; set; }
-            public string Second { get; set; }
+            configurator.UseCircuitBreaker(x => x.ResetInterval(TimeSpan.FromSeconds(30)));
         }
     }
 }

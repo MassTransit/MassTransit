@@ -95,8 +95,10 @@
     <Compile Include="Configuration\BusConfigurators\IConsumePipeBuilder.cs" />
     <Compile Include="Configuration\BusConfigurators\IConsumePipeSpecification.cs" />
     <Compile Include="Configuration\BusConfigurators\ISendPipeBuilder.cs" />
+    <Compile Include="Configuration\BusConfigurators\ISendPipeFactory.cs" />
     <Compile Include="Configuration\BusConfigurators\ISendPipeSpecification.cs" />
     <Compile Include="Configuration\BusConfigurators\SendPipeBuilder.cs" />
+    <Compile Include="Configuration\BusConfigurators\SendPipeConfigurator.cs" />
     <Compile Include="Configuration\BusConfigurators\SendPipeSpecificationList.cs" />
     <Compile Include="Configuration\CircuitBreakerExtensions.cs" />
     <Compile Include="Configuration\ConsumeConnectors\AsyncConsumerConvention.cs" />
@@ -127,6 +129,7 @@
     <Compile Include="Configuration\IMessageInterfaceType.cs" />
     <Compile Include="Configuration\InMemoryBusFactoryConfiguratorExtensions.cs" />
     <Compile Include="Configuration\IPublishPipeConfigurator.cs" />
+    <Compile Include="Configuration\ISendPipelineConfigurator.cs" />
     <Compile Include="Configuration\ISendPipeConfigurator.cs" />
     <Compile Include="Configuration\ISendTransformSpecification.cs" />
     <Compile Include="Configuration\ITransformConfigurator.cs" />

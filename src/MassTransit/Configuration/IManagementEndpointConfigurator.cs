@@ -12,9 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
-    using System;
-
-
     /// <summary>
     /// Used to configure the management endpoint, and to denote the configurator as for that 
     /// purpose to be usable by middleware components wanting to connect to it.

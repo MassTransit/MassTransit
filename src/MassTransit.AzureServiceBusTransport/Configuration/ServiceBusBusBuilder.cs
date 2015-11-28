@@ -20,16 +20,14 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
 
 
     public class ServiceBusBusBuilder :
-        BusBuilder,
-        IBusBuilder
+        BusBuilder
     {
-        readonly IConsumePipe _busConsumePipe;
         readonly ServiceBusReceiveEndpointConfigurator _busEndpointConfigurator;
         readonly ServiceBusHost[] _hosts;
 
-        public ServiceBusBusBuilder(ServiceBusHost[] hosts, IConsumePipeSpecification consumePipeSpecification, ISendPipeSpecification sendPipeSpecification,
+        public ServiceBusBusBuilder(ServiceBusHost[] hosts, IConsumePipeSpecification consumePipeSpecification, ISendPipeFactory sendPipeFactory,
             ReceiveEndpointSettings settings)
-            : base(consumePipeSpecification, sendPipeSpecification, hosts)
+            : base(consumePipeSpecification, sendPipeFactory, hosts)
         {
             if (hosts == null)
                 throw new ArgumentNullException(nameof(hosts));
@@ -54,16 +52,16 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
             return new ServiceBusSendTransportProvider(_hosts);
         }
 
-        protected override ISendEndpointProvider CreateSendEndpointProvider()
+        public override ISendEndpointProvider CreateSendEndpointProvider(params ISendPipeSpecification[] specifications)
         {
-            var sendPipe = CreateSendPipe();
+            var sendPipe = CreateSendPipe(specifications);
 
             var provider = new ServiceBusSendEndpointProvider(MessageSerializer, InputAddress, SendTransportProvider, sendPipe);
 
             return new SendEndpointCache(provider);
         }
 
-        protected override IPublishEndpointProvider CreatePublishSendEndpointProvider()
+        public override IPublishEndpointProvider CreatePublishEndpointProvider()
         {
             var sendPipe = CreateSendPipe();
 

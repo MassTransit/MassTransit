@@ -21,14 +21,13 @@ namespace MassTransit.RabbitMqTransport.Configuration.Builders
 
 
     public class RabbitMqBusBuilder :
-        BusBuilder,
-        IBusBuilder
+        BusBuilder
     {
         readonly RabbitMqReceiveEndpointConfigurator _busEndpointConfigurator;
         readonly RabbitMqHost[] _hosts;
 
-        public RabbitMqBusBuilder(RabbitMqHost[] hosts, IConsumePipeSpecification consumePipeSpecification, ISendPipeSpecification sendPipeSpecification, RabbitMqReceiveSettings busSettings)
-            : base(consumePipeSpecification, sendPipeSpecification, hosts)
+        public RabbitMqBusBuilder(RabbitMqHost[] hosts, IConsumePipeSpecification consumePipeSpecification, ISendPipeFactory sendPipeFactory, RabbitMqReceiveSettings busSettings)
+            : base(consumePipeSpecification, sendPipeFactory, hosts)
         {
             _hosts = hosts;
 
@@ -55,16 +54,16 @@ namespace MassTransit.RabbitMqTransport.Configuration.Builders
             return new RabbitMqSendTransportProvider(_hosts);
         }
 
-        protected override ISendEndpointProvider CreateSendEndpointProvider()
+        public override ISendEndpointProvider CreateSendEndpointProvider(params ISendPipeSpecification[] specifications)
         {
-            var sendPipe = CreateSendPipe();
+            var sendPipe = CreateSendPipe(specifications);
 
             var sendEndpointProvider = new RabbitMqSendEndpointProvider(MessageSerializer, InputAddress, SendTransportProvider, sendPipe);
 
             return new SendEndpointCache(sendEndpointProvider);
         }
 
-        protected override IPublishEndpointProvider CreatePublishSendEndpointProvider()
+        public override IPublishEndpointProvider CreatePublishEndpointProvider()
         {
             var sendPipe = CreateSendPipe();
 

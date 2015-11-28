@@ -66,14 +66,9 @@ namespace MassTransit.AzureServiceBusTransport.Hosting
             ReceiveEndpoint(queueName, _defaultConsumerLimit, configureEndpoint);
         }
 
-        void IPipeConfigurator<SendContext>.AddPipeSpecification(IPipeSpecification<SendContext> specification)
+        public void ConfigureSend(Action<ISendPipeConfigurator> callback)
         {
-            _configurator.AddPipeSpecification(specification);
-        }
-
-        void ISendPipeConfigurator.AddPipeSpecification<T>(IPipeSpecification<SendContext<T>> specification)
-        {
-            _configurator.AddPipeSpecification(specification);
+            _configurator.ConfigureSend(callback);
         }
     }
 }

@@ -31,14 +31,14 @@ namespace MassTransit.RabbitMqTransport.Configuration
         readonly IList<RabbitMqHost> _hosts;
         readonly RabbitMqReceiveSettings _settings;
         readonly IList<IBusFactorySpecification> _transportBuilderConfigurators;
-        readonly SendPipeSpecificationList _sendPipeSpecification;
+        readonly SendPipeConfigurator _sendPipeConfigurator;
 
         public RabbitMqBusFactoryConfigurator()
         {
             _hosts = new List<RabbitMqHost>();
             _transportBuilderConfigurators = new List<IBusFactorySpecification>();
             _consumePipeSpecification = new ConsumePipeSpecificationList();
-            _sendPipeSpecification = new SendPipeSpecificationList();
+            _sendPipeConfigurator = new SendPipeConfigurator();
 
             string queueName = this.GetTemporaryQueueName("bus-");
             _settings = new RabbitMqReceiveSettings
@@ -55,7 +55,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
 
         public IBusControl CreateBus()
         {
-            var builder = new RabbitMqBusBuilder(_hosts.ToArray(), _consumePipeSpecification, _sendPipeSpecification, _settings);
+            var builder = new RabbitMqBusBuilder(_hosts.ToArray(), _consumePipeSpecification, _sendPipeConfigurator, _settings);
 
             foreach (IBusFactorySpecification configurator in _transportBuilderConfigurators)
                 configurator.Apply(builder);
@@ -179,14 +179,12 @@ namespace MassTransit.RabbitMqTransport.Configuration
             _consumePipeSpecification.Add(specification);
         }
 
-        public void AddPipeSpecification(IPipeSpecification<SendContext> specification)
+        public void ConfigureSend(Action<ISendPipeConfigurator> callback)
         {
-            _sendPipeSpecification.Add(specification);
-        }
+            if (callback == null)
+                throw new ArgumentNullException(nameof(callback));
 
-        public void AddPipeSpecification<T>(IPipeSpecification<SendContext<T>> specification) where T : class
-        {
-            _sendPipeSpecification.Add(specification);
+            callback(_sendPipeConfigurator);
         }
     }
 }

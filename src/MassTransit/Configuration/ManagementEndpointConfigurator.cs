@@ -47,5 +47,10 @@ namespace MassTransit
         }
 
         Uri IReceiveEndpointConfigurator.InputAddress => _configurator.InputAddress;
+
+        void ISendPipelineConfigurator.ConfigureSend(Action<ISendPipeConfigurator> callback)
+        {
+            _configurator.ConfigureSend(callback);
+        }
     }
 }

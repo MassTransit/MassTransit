@@ -115,16 +115,13 @@ namespace MassTransit.RabbitMqTransport.Tests
             {
                 x.PurgeOnStartup = true;
 
-                _errorHandler = Handler<PingMessage>(x, async context =>
-                {
-                    //
-                });
+                _errorHandler = Handled<PingMessage>(x);
             });
         }
 
         protected override void ConfigureInputQueueEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
-            Handler<PingMessage>(configurator, async context =>
+            Handler<PingMessage>(configurator, context =>
             {
                 throw new SerializationException("This is fine, forcing death");
             });

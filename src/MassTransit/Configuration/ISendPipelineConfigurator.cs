@@ -15,19 +15,12 @@ namespace MassTransit
     using System;
 
 
-    /// <summary>
-    /// Configure a receiving endpoint
-    /// </summary>
-    public interface IReceiveEndpointConfigurator :
-        IConsumePipeConfigurator,
-        ISendPipelineConfigurator
+    public interface ISendPipelineConfigurator
     {
-        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
-        void AddEndpointSpecification(IReceiveEndpointSpecification configurator);
-
         /// <summary>
-        /// Returns the input address of the receive endpoint
+        /// Configure the Send pipeline
         /// </summary>
-        Uri InputAddress { get; }
+        /// <param name="callback"></param>
+        void ConfigureSend(Action<ISendPipeConfigurator> callback);
     }
 }

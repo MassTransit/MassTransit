@@ -10,24 +10,25 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit
+namespace MassTransit.BusConfigurators
 {
-    using System;
+    using Configurators;
+    using Pipeline;
 
 
-    /// <summary>
-    /// Configure a receiving endpoint
-    /// </summary>
-    public interface IReceiveEndpointConfigurator :
-        IConsumePipeConfigurator,
-        ISendPipelineConfigurator
+    public interface ISendPipeFactory :
+        Configurator
     {
-        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
-        void AddEndpointSpecification(IReceiveEndpointSpecification configurator);
+        /// <summary>
+        /// Returns the specification for the factory
+        /// </summary>
+        ISendPipeSpecification Specification { get; }
 
         /// <summary>
-        /// Returns the input address of the receive endpoint
+        /// Creates a send pipe using the specifications and any additional specifications specified
         /// </summary>
-        Uri InputAddress { get; }
+        /// <param name="specifications"></param>
+        /// <returns></returns>
+        ISendPipe CreateSendPipe(params ISendPipeSpecification[] specifications);
     }
 }

@@ -75,11 +75,6 @@ namespace MassTransit.Turnout.Configuration
             set { _jobFactory = value; }
         }
 
-        ITurnoutController CreateController()
-        {
-            return new TurnoutController(_jobRoster, _controlAddress, _superviseInterval);
-        }
-
         void IPipeConfigurator<ConsumeContext>.AddPipeSpecification(IPipeSpecification<ConsumeContext> specification)
         {
             _configurator.AddPipeSpecification(specification);
@@ -96,5 +91,15 @@ namespace MassTransit.Turnout.Configuration
         }
 
         Uri IReceiveEndpointConfigurator.InputAddress => _configurator.InputAddress;
+
+        void ISendPipelineConfigurator.ConfigureSend(Action<ISendPipeConfigurator> callback)
+        {
+            _configurator.ConfigureSend(callback);
+        }
+
+        ITurnoutController CreateController()
+        {
+            return new TurnoutController(_jobRoster, _controlAddress, _superviseInterval);
+        }
     }
 }
