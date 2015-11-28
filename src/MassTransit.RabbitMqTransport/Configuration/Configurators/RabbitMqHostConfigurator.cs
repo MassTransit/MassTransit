@@ -31,6 +31,16 @@ namespace MassTransit.RabbitMqTransport.Configuration.Configurators
             };
         }
 
+        public RabbitMqHostConfigurator(string host, string virtualHost, ushort port = 5672)
+        {
+            _settings = new ConfigurationHostSettings
+            {
+                Host = host,
+                Port = port,
+                VirtualHost = virtualHost
+            };
+        }
+
         public RabbitMqHostSettings Settings => _settings;
 
         public void UseSsl(Action<IRabbitMqSslConfigurator> configureSsl)
