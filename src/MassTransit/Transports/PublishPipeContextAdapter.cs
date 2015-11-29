@@ -26,32 +26,36 @@ namespace MassTransit.Transports
     {
         readonly Guid? _conversationId;
         readonly Guid? _correlationId;
+        readonly IPublishPipe _publishPipe;
         readonly IPublishObserver _observer;
         readonly IPipe<PublishContext<T>> _pipe;
         readonly Uri _sourceAddress;
         PublishContext<T> _context;
 
-        public PublishPipeContextAdapter(IPipe<PublishContext<T>> pipe, IPublishObserver observer, Uri sourceAddress, Guid? correlationId, Guid? conversationId)
+        public PublishPipeContextAdapter(IPipe<PublishContext<T>> pipe, IPublishPipe publishPipe, IPublishObserver observer, Uri sourceAddress, Guid? correlationId, Guid? conversationId)
         {
             _pipe = pipe;
+            _publishPipe = publishPipe;
             _observer = observer;
             _sourceAddress = sourceAddress;
             _correlationId = correlationId;
             _conversationId = conversationId;
         }
 
-        public PublishPipeContextAdapter(IPipe<PublishContext> pipe, IPublishObserver observer, Uri sourceAddress, Guid? correlationId, Guid? conversationId)
+        public PublishPipeContextAdapter(IPipe<PublishContext> pipe, IPublishPipe publishPipe, IPublishObserver observer, Uri sourceAddress, Guid? correlationId, Guid? conversationId)
         {
             _pipe = pipe;
+            _publishPipe = publishPipe;
             _observer = observer;
             _sourceAddress = sourceAddress;
             _correlationId = correlationId;
             _conversationId = conversationId;
         }
 
-        public PublishPipeContextAdapter(IPublishObserver observer, Uri sourceAddress, Guid? correlationId, Guid? conversationId)
+        public PublishPipeContextAdapter(IPublishPipe publishPipe, IPublishObserver observer, Uri sourceAddress, Guid? correlationId, Guid? conversationId)
         {
             _pipe = Pipe.Empty<PublishContext<T>>();
+            _publishPipe = publishPipe;
             _observer = observer;
             _sourceAddress = sourceAddress;
             _correlationId = correlationId;
@@ -73,8 +77,10 @@ namespace MassTransit.Transports
             if (_correlationId.HasValue)
                 context.InitiatorId = _correlationId;
 
-            var publishContext = new PublishContextProxy<T>(context);
+            var publishContext = new PublishContextProxy<T>(context, context.Message);
             bool firstTime = Interlocked.CompareExchange(ref _context, publishContext, null) == null;
+
+            await _publishPipe.Send(publishContext);
 
             await _pipe.Send(publishContext);
 

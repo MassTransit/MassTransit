@@ -18,6 +18,7 @@ namespace MassTransit.RabbitMqTransport
     using System.Threading.Tasks;
     using Integration;
     using MassTransit.Pipeline;
+    using MassTransit.Pipeline.Pipes;
     using Topology;
     using Transports;
     using Util;
@@ -29,23 +30,23 @@ namespace MassTransit.RabbitMqTransport
         readonly ConcurrentDictionary<Type, Lazy<ISendEndpoint>> _cachedEndpoints;
         readonly IRabbitMqHost _host;
         readonly PublishObservable _publishObservable;
+        readonly IPublishPipe _publishPipe;
         readonly IMessageSerializer _serializer;
         readonly Uri _sourceAddress;
-        readonly ISendPipe _sendPipe;
 
-        public RabbitMqPublishEndpointProvider(IRabbitMqHost host, IMessageSerializer serializer, Uri sourceAddress, ISendPipe sendPipe)
+        public RabbitMqPublishEndpointProvider(IRabbitMqHost host, IMessageSerializer serializer, Uri sourceAddress, IPublishPipe publishPipe)
         {
             _host = host;
             _serializer = serializer;
             _sourceAddress = sourceAddress;
-            _sendPipe = sendPipe;
+            _publishPipe = publishPipe;
             _cachedEndpoints = new ConcurrentDictionary<Type, Lazy<ISendEndpoint>>();
             _publishObservable = new PublishObservable();
         }
 
         public IPublishEndpoint CreatePublishEndpoint(Uri sourceAddress, Guid? correlationId, Guid? conversationId)
         {
-            return new PublishEndpoint(sourceAddress, this, _publishObservable, correlationId, conversationId);
+            return new PublishEndpoint(sourceAddress, this, _publishObservable, _publishPipe, correlationId, conversationId);
         }
 
         public Task<ISendEndpoint> GetPublishSendEndpoint(Type messageType)
@@ -73,7 +74,7 @@ namespace MassTransit.RabbitMqTransport
 
             var sendTransport = new RabbitMqSendTransport(modelCache, sendSettings, bindings);
 
-            return new SendEndpoint(sendTransport, _serializer, destinationAddress, _sourceAddress, _sendPipe);
+            return new SendEndpoint(sendTransport, _serializer, destinationAddress, _sourceAddress, SendPipe.Empty);
         }
     }
 }

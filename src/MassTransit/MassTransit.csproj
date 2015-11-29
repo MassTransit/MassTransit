@@ -92,12 +92,16 @@
     </Compile>
     <Compile Include="Configuration\Builders\ConsumePipeBuilder.cs" />
     <Compile Include="Configuration\Builders\IConsumePipeBuilder.cs" />
+    <Compile Include="Configuration\Builders\IPublishPipeBuilder.cs" />
     <Compile Include="Configuration\Builders\ISendPipeBuilder.cs" />
+    <Compile Include="Configuration\Builders\PublishPipeBuilder.cs" />
     <Compile Include="Configuration\Builders\SendPipeBuilder.cs" />
     <Compile Include="Configuration\BusConfigurators\BusFactoryConfigurator.cs" />
     <Compile Include="Configuration\BusConfigurators\ConsumePipeConfigurator.cs" />
     <Compile Include="Configuration\BusConfigurators\IConsumePipeFactory.cs" />
+    <Compile Include="Configuration\BusConfigurators\IPublishPipeFactory.cs" />
     <Compile Include="Configuration\BusConfigurators\ISendPipeFactory.cs" />
+    <Compile Include="Configuration\BusConfigurators\PublishPipeConfigurator.cs" />
     <Compile Include="Configuration\BusConfigurators\SendPipeConfigurator.cs" />
     <Compile Include="Configuration\CircuitBreakerExtensions.cs" />
     <Compile Include="Configuration\ConsumeConnectors\AsyncConsumerConvention.cs" />
@@ -129,6 +133,9 @@
     <Compile Include="Configuration\IMessageInterfaceType.cs" />
     <Compile Include="Configuration\InMemoryBusFactoryConfiguratorExtensions.cs" />
     <Compile Include="Configuration\IPublishPipeConfigurator.cs" />
+    <Compile Include="Configuration\IPublishPipelineConfigurator.cs" />
+    <Compile Include="Configuration\IPublishPipeSpecification.cs" />
+    <Compile Include="Configuration\IPublishTransformSpecification.cs" />
     <Compile Include="Configuration\ISendPipelineConfigurator.cs" />
     <Compile Include="Configuration\ISendPipeConfigurator.cs" />
     <Compile Include="Configuration\ISendPipeSpecification.cs" />
@@ -531,7 +538,9 @@
     <Compile Include="Pipeline\Filters\DeadLetterFilter.cs" />
     <Compile Include="Pipeline\Filters\LatestFilter.cs" />
     <Compile Include="Pipeline\Filters\Latest\ILatestFilter.cs" />
+    <Compile Include="Pipeline\Filters\MessagePublishFilter.cs" />
     <Compile Include="Pipeline\Filters\MessageSendFilter.cs" />
+    <Compile Include="Pipeline\Filters\MessageTypePublishFilter.cs" />
     <Compile Include="Pipeline\Filters\MessageTypeSendFilter.cs" />
     <Compile Include="Pipeline\Filters\MoveToTransportFilter.cs" />
     <Compile Include="Pipeline\Filters\RedeliveryRetryFilter.cs" />
@@ -572,8 +581,11 @@
     <Compile Include="Pipeline\IConsumePipe.cs" />
     <Compile Include="Pipeline\ConsumePipeExtensions.cs" />
     <Compile Include="Pipeline\IPublishInterceptor.cs" />
+    <Compile Include="Pipeline\IPublishMessageObserver.cs" />
+    <Compile Include="Pipeline\IPublishMessageObserverConnector.cs" />
     <Compile Include="Pipeline\IPublishObserver.cs" />
     <Compile Include="Pipeline\IPublishObserverConnector.cs" />
+    <Compile Include="Pipeline\IPublishPipe.cs" />
     <Compile Include="Pipeline\IReceivePipe.cs" />
     <Compile Include="Pipeline\IRequestPipeConnector.cs" />
     <Compile Include="Pipeline\ISendInterceptor.cs" />
@@ -587,6 +599,7 @@
     <Compile Include="Pipeline\ConsumeMessageObservable.cs" />
     <Compile Include="Pipeline\ConsumeObservable.cs" />
     <Compile Include="Pipeline\Pipes\FilterPipe.cs" />
+    <Compile Include="Pipeline\Pipes\PublishPipe.cs" />
     <Compile Include="Pipeline\Pipes\ReceivePipe.cs" />
     <Compile Include="Pipeline\Pipes\ResponsePipe.cs" />
     <Compile Include="Pipeline\Pipes\ConsumePipe.cs" />
@@ -594,7 +607,9 @@
     <Compile Include="Pipeline\Pipes\EmptyPipe.cs" />
     <Compile Include="Pipeline\Pipes\LastPipe.cs" />
     <Compile Include="Pipeline\Pipes\SendPipe.cs" />
+    <Compile Include="Pipeline\PublishMessageObservable.cs" />
     <Compile Include="Pipeline\PublishObservable.cs" />
+    <Compile Include="Pipeline\PublishPipeProxy.cs" />
     <Compile Include="Pipeline\ReceiveEndpointObservable.cs" />
     <Compile Include="Pipeline\ReceiveObservable.cs" />
     <Compile Include="Pipeline\SendMessageObservable.cs" />

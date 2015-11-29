@@ -13,23 +13,14 @@
 namespace MassTransit
 {
     using System;
-    using System.ComponentModel;
-    using Builders;
 
 
-    public interface IBusFactoryConfigurator :
-        IConsumePipeConfigurator,
-        ISendPipelineConfigurator,
-        IPublishPipelineConfigurator
+    public interface IPublishPipelineConfigurator
     {
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        void AddBusFactorySpecification(IBusFactorySpecification configurator);
-
         /// <summary>
-        /// Specify a receive endpoint for the bus, with the specified queue name
+        /// Configure the Send pipeline
         /// </summary>
-        /// <param name="queueName">The queue name for the receiving endpoint</param>
-        /// <param name="configureEndpoint">The configuration callback</param>
-        void ReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configureEndpoint);
+        /// <param name="callback"></param>
+        void ConfigurePublish(Action<IPublishPipeConfigurator> callback);
     }
 }

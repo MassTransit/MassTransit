@@ -26,8 +26,8 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
         readonly ServiceBusHost[] _hosts;
 
         public ServiceBusBusBuilder(ServiceBusHost[] hosts, IConsumePipeFactory consumePipeFactory, ISendPipeFactory sendPipeFactory,
-            ReceiveEndpointSettings settings)
-            : base(consumePipeFactory, sendPipeFactory, hosts)
+            IPublishPipeFactory publishPipeFactory, ReceiveEndpointSettings settings)
+            : base(consumePipeFactory, sendPipeFactory, publishPipeFactory, hosts)
         {
             if (hosts == null)
                 throw new ArgumentNullException(nameof(hosts));
@@ -61,15 +61,15 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
             return new SendEndpointCache(provider);
         }
 
-        public override IPublishEndpointProvider CreatePublishEndpointProvider()
+        public override IPublishEndpointProvider CreatePublishEndpointProvider(params IPublishPipeSpecification[] specifications)
         {
-            var sendPipe = CreateSendPipe();
-
-            var sendEndpointProvider = new PublishSendEndpointProvider(MessageSerializer, InputAddress, _hosts, sendPipe);
+            var sendEndpointProvider = new PublishSendEndpointProvider(MessageSerializer, InputAddress, _hosts);
 
             var endpointCache = new SendEndpointCache(sendEndpointProvider);
 
-            return new ServiceBusPublishEndpointProvider(_hosts[0], endpointCache);
+            var publishPipe = CreatePublishPipe(specifications);
+
+            return new ServiceBusPublishEndpointProvider(_hosts[0], endpointCache, publishPipe);
         }
 
         protected override void PreBuild()

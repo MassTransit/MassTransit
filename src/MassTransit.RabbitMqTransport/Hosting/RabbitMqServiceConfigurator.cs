@@ -69,5 +69,10 @@ namespace MassTransit.RabbitMqTransport.Hosting
         {
             _configurator.ConfigureSend(callback);
         }
+
+        public void ConfigurePublish(Action<IPublishPipeConfigurator> callback)
+        {
+            _configurator.ConfigurePublish(callback);
+        }
     }
 }

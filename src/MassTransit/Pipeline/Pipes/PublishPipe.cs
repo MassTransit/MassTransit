@@ -17,26 +17,25 @@ namespace MassTransit.Pipeline.Pipes
     using Filters;
 
 
-    public class SendPipe :
-        ISendPipe
+    public class PublishPipe :
+        IPublishPipe
     {
-        static readonly ISendPipe _empty = new SendPipe(new MessageTypeSendFilter(), Pipe.Empty<SendContext>());
+        static readonly IPublishPipe _empty = new PublishPipe(new MessageTypePublishFilter(), Pipe.Empty<PublishContext>());
+        readonly MessageTypePublishFilter _filter;
+        readonly IPipe<PublishContext> _pipe;
 
-        readonly MessageTypeSendFilter _filter;
-        readonly IPipe<SendContext> _pipe;
-
-        public SendPipe(MessageTypeSendFilter messageTypeSendFilter, IPipe<SendContext> pipe)
+        public PublishPipe(MessageTypePublishFilter messageTypePublishFilter, IPipe<PublishContext> pipe)
         {
-            if (messageTypeSendFilter == null)
-                throw new ArgumentNullException(nameof(messageTypeSendFilter));
+            if (messageTypePublishFilter == null)
+                throw new ArgumentNullException(nameof(messageTypePublishFilter));
             if (pipe == null)
                 throw new ArgumentNullException(nameof(pipe));
 
-            _filter = messageTypeSendFilter;
+            _filter = messageTypePublishFilter;
             _pipe = pipe;
         }
 
-        public static ISendPipe Empty => _empty;
+        public static IPublishPipe Empty => _empty;
 
         void IProbeSite.Probe(ProbeContext context)
         {
@@ -45,19 +44,19 @@ namespace MassTransit.Pipeline.Pipes
             _pipe.Probe(scope);
         }
 
-        Task IPipe<SendContext>.Send(SendContext context)
+        Task IPipe<PublishContext>.Send(PublishContext context)
         {
             return _pipe.Send(context);
         }
 
-        ConnectHandle ISendMessageObserverConnector.ConnectSendMessageObserver<TMessage>(ISendMessageObserver<TMessage> observer)
+        ConnectHandle IPublishMessageObserverConnector.ConnectPublishMessageObserver<TMessage>(IPublishMessageObserver<TMessage> observer)
         {
-            return _filter.ConnectSendMessageObserver(observer);
+            return _filter.ConnectPublishMessageObserver(observer);
         }
 
-        ConnectHandle ISendObserverConnector.ConnectSendObserver(ISendObserver observer)
+        ConnectHandle IPublishObserverConnector.ConnectPublishObserver(IPublishObserver observer)
         {
-            return _filter.ConnectSendObserver(observer);
+            return _filter.ConnectPublishObserver(observer);
         }
     }
 }

@@ -16,6 +16,7 @@ namespace MassTransit.AzureServiceBusTransport
     using System.Linq;
     using System.Threading.Tasks;
     using MassTransit.Pipeline;
+    using MassTransit.Pipeline.Pipes;
     using Microsoft.ServiceBus.Messaging;
     using Transports;
 
@@ -27,12 +28,10 @@ namespace MassTransit.AzureServiceBusTransport
         readonly SendObservable _sendObservable;
         readonly IMessageSerializer _serializer;
         readonly Uri _sourceAddress;
-        readonly ISendPipe _sendPipe;
 
-        public PublishSendEndpointProvider(IMessageSerializer serializer, Uri sourceAddress, IServiceBusHost[] hosts, ISendPipe sendPipe)
+        public PublishSendEndpointProvider(IMessageSerializer serializer, Uri sourceAddress, IServiceBusHost[] hosts)
         {
             _hosts = hosts;
-            _sendPipe = sendPipe;
             _sourceAddress = sourceAddress;
             _serializer = serializer;
             _sendObservable = new SendObservable();
@@ -55,7 +54,7 @@ namespace MassTransit.AzureServiceBusTransport
 
             sendTransport.ConnectSendObserver(_sendObservable);
 
-            return new SendEndpoint(sendTransport, _serializer, address, _sourceAddress, _sendPipe);
+            return new SendEndpoint(sendTransport, _serializer, address, _sourceAddress, SendPipe.Empty);
         }
 
         public ConnectHandle ConnectSendObserver(ISendObserver observer)
