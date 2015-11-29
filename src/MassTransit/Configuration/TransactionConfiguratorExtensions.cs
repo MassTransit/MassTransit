@@ -14,7 +14,6 @@ namespace MassTransit
 {
     using System;
     using PipeConfigurators;
-    using Saga;
 
 
     public static class TransactionConfiguratorExtensions
@@ -25,46 +24,7 @@ namespace MassTransit
         /// <typeparam name="T">The pipe context type</typeparam>
         /// <param name="configurator">The pipe configurator</param>
         /// <param name="configure">Configure the transaction pipe</param>
-        public static void UseTransaction(this IPipeConfigurator<ConsumeContext> configurator, Action<ITransactionConfigurator> configure = null)
-        {
-            ConfigureTransaction(configurator, configure);
-        }
-
-        /// <summary>
-        /// Encapsulate the pipe behavior in a transaction
-        /// </summary>
-        /// <typeparam name="T">The pipe context type</typeparam>
-        /// <param name="configurator">The pipe configurator</param>
-        /// <param name="configure">Configure the transaction pipe</param>
-        public static void UseTransaction<T>(this IPipeConfigurator<ConsumeContext<T>> configurator, Action<ITransactionConfigurator> configure = null)
-            where T : class
-        {
-            ConfigureTransaction(configurator, configure);
-        }
-        /// <summary>
-        /// Encapsulate the pipe behavior in a transaction
-        /// </summary>
-        /// <typeparam name="T">The pipe context type</typeparam>
-        /// <param name="configurator">The pipe configurator</param>
-        /// <param name="configure">Configure the transaction pipe</param>
-        public static void UseTransaction<T>(this IPipeConfigurator<SagaConsumeContext<T>> configurator, Action<ITransactionConfigurator> configure = null)
-            where T : class, ISaga
-        {
-            ConfigureTransaction(configurator, configure);
-        }
-        /// <summary>
-        /// Encapsulate the pipe behavior in a transaction
-        /// </summary>
-        /// <typeparam name="T">The pipe context type</typeparam>
-        /// <param name="configurator">The pipe configurator</param>
-        /// <param name="configure">Configure the transaction pipe</param>
-        public static void UseTransaction<T>(this IPipeConfigurator<ConsumerConsumeContext<T>> configurator, Action<ITransactionConfigurator> configure = null)
-            where T : class
-        {
-            ConfigureTransaction(configurator, configure);
-        }
-
-        static void ConfigureTransaction<T>(IPipeConfigurator<T> configurator, Action<ITransactionConfigurator> configure) 
+        public static void UseTransaction<T>(this IPipeConfigurator<T> configurator, Action<ITransactionConfigurator> configure = null)
             where T : class, PipeContext
         {
             var transactionConfigurator = new TransactionPipeSpecification<T>();

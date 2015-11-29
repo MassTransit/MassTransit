@@ -14,7 +14,6 @@ namespace MassTransit
 {
     using System;
     using PipeConfigurators;
-    using Saga;
 
 
     public static class ConcurrencyLimitExtensions
@@ -23,67 +22,14 @@ namespace MassTransit
         /// Specify a concurrency limit for tasks executing through the filter. No more than the specified
         /// number of tasks will be allowed to execute concurrently.
         /// </summary>
-        /// <param name="configurator"></param>
-        /// <param name="concurrencyLimit">The concurrency limit for the subsequent filters in the pipeline</param>
-        /// <param name="managementEndpointConfigurator">A management endpoint configurator to support runtime adjustment</param>
-        /// <param name="id">An identifier for the concurrency limit to allow selective adjustment</param>
-        public static void UseConcurrencyLimit(this IPipeConfigurator<ConsumeContext> configurator, int concurrencyLimit,
-            IManagementEndpointConfigurator managementEndpointConfigurator = null, string id = null)
-        {
-            ConfigureConcurrencyLimit(configurator, concurrencyLimit, managementEndpointConfigurator, id);
-        }
-
-        /// <summary>
-        /// Specify a concurrency limit for tasks executing through the filter. No more than the specified
-        /// number of tasks will be allowed to execute concurrently.
-        /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="configurator"></param>
         /// <param name="concurrencyLimit">The concurrency limit for the subsequent filters in the pipeline</param>
         /// <param name="managementEndpointConfigurator">A management endpoint configurator to support runtime adjustment</param>
         /// <param name="id">An identifier for the concurrency limit to allow selective adjustment</param>
-        public static void UseConcurrencyLimit<T>(this IPipeConfigurator<ConsumeContext<T>> configurator, int concurrencyLimit,
+        public static void UseConcurrencyLimit<T>(this IPipeConfigurator<T> configurator, int concurrencyLimit,
             IManagementEndpointConfigurator managementEndpointConfigurator = null, string id = null)
-            where T : class
-        {
-            ConfigureConcurrencyLimit(configurator, concurrencyLimit, managementEndpointConfigurator, id);
-        }
-
-        /// <summary>
-        /// Specify a concurrency limit for tasks executing through the filter. No more than the specified
-        /// number of tasks will be allowed to execute concurrently.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="configurator"></param>
-        /// <param name="concurrencyLimit">The concurrency limit for the subsequent filters in the pipeline</param>
-        /// <param name="managementEndpointConfigurator">A management endpoint configurator to support runtime adjustment</param>
-        /// <param name="id">An identifier for the concurrency limit to allow selective adjustment</param>
-        public static void UseConcurrencyLimit<T>(this IPipeConfigurator<SagaConsumeContext<T>> configurator, int concurrencyLimit,
-            IManagementEndpointConfigurator managementEndpointConfigurator = null, string id = null)
-            where T : class, ISaga
-        {
-            ConfigureConcurrencyLimit(configurator, concurrencyLimit, managementEndpointConfigurator, id);
-        }
-
-        /// <summary>
-        /// Specify a concurrency limit for tasks executing through the filter. No more than the specified
-        /// number of tasks will be allowed to execute concurrently.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="configurator"></param>
-        /// <param name="concurrencyLimit">The concurrency limit for the subsequent filters in the pipeline</param>
-        /// <param name="managementEndpointConfigurator">A management endpoint configurator to support runtime adjustment</param>
-        /// <param name="id">An identifier for the concurrency limit to allow selective adjustment</param>
-        public static void UseConcurrencyLimit<T>(this IPipeConfigurator<ConsumerConsumeContext<T>> configurator, int concurrencyLimit,
-            IManagementEndpointConfigurator managementEndpointConfigurator = null, string id = null)
-            where T : class
-        {
-            ConfigureConcurrencyLimit(configurator, concurrencyLimit, managementEndpointConfigurator, id);
-        }
-
-        static void ConfigureConcurrencyLimit<T>(IPipeConfigurator<T> configurator, int concurrencyLimit,
-            IManagementEndpointConfigurator managementEndpointConfigurator,
-            string id) where T : class, PipeContext
+            where T : class, PipeContext
         {
             if (configurator == null)
                 throw new ArgumentNullException(nameof(configurator));
