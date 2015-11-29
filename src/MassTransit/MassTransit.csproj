@@ -90,16 +90,15 @@
     <Compile Include="..\SolutionVersion.cs">
       <Link>Properties\SolutionVersion.cs</Link>
     </Compile>
-    <Compile Include="Configuration\BusConfigurators\ConsumePipeBuilder.cs" />
-    <Compile Include="Configuration\BusConfigurators\ConsumePipeSpecificationList.cs" />
-    <Compile Include="Configuration\BusConfigurators\IConsumePipeBuilder.cs" />
-    <Compile Include="Configuration\BusConfigurators\IConsumePipeSpecification.cs" />
-    <Compile Include="Configuration\BusConfigurators\ISendPipeBuilder.cs" />
+    <Compile Include="Configuration\Builders\ConsumePipeBuilder.cs" />
+    <Compile Include="Configuration\Builders\IConsumePipeBuilder.cs" />
+    <Compile Include="Configuration\Builders\ISendPipeBuilder.cs" />
+    <Compile Include="Configuration\Builders\SendPipeBuilder.cs" />
+    <Compile Include="Configuration\BusConfigurators\BusFactoryConfigurator.cs" />
+    <Compile Include="Configuration\BusConfigurators\ConsumePipeConfigurator.cs" />
+    <Compile Include="Configuration\BusConfigurators\IConsumePipeFactory.cs" />
     <Compile Include="Configuration\BusConfigurators\ISendPipeFactory.cs" />
-    <Compile Include="Configuration\BusConfigurators\ISendPipeSpecification.cs" />
-    <Compile Include="Configuration\BusConfigurators\SendPipeBuilder.cs" />
     <Compile Include="Configuration\BusConfigurators\SendPipeConfigurator.cs" />
-    <Compile Include="Configuration\BusConfigurators\SendPipeSpecificationList.cs" />
     <Compile Include="Configuration\CircuitBreakerExtensions.cs" />
     <Compile Include="Configuration\ConsumeConnectors\AsyncConsumerConvention.cs" />
     <Compile Include="Configuration\ConsumeConnectors\ConsumerConnector.cs" />
@@ -120,6 +119,7 @@
     <Compile Include="Configuration\EndpointConfigurators\ReceiveEndpointConfigurator.cs" />
     <Compile Include="Configuration\ICircuitBreakerConfigurator.cs" />
     <Compile Include="Configuration\IConsumePipeConfigurator.cs" />
+    <Compile Include="Configuration\IConsumePipeSpecification.cs" />
     <Compile Include="Configuration\IConsumerConvention.cs" />
     <Compile Include="Configuration\IConsumerMessageConvention.cs" />
     <Compile Include="Configuration\IConsumeTransformSpecification.cs" />
@@ -131,6 +131,7 @@
     <Compile Include="Configuration\IPublishPipeConfigurator.cs" />
     <Compile Include="Configuration\ISendPipelineConfigurator.cs" />
     <Compile Include="Configuration\ISendPipeConfigurator.cs" />
+    <Compile Include="Configuration\ISendPipeSpecification.cs" />
     <Compile Include="Configuration\ISendTransformSpecification.cs" />
     <Compile Include="Configuration\ITransformConfigurator.cs" />
     <Compile Include="Configuration\LatestExtensions.cs" />

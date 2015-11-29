@@ -26,8 +26,9 @@ namespace MassTransit.RabbitMqTransport.Configuration.Builders
         readonly RabbitMqReceiveEndpointConfigurator _busEndpointConfigurator;
         readonly RabbitMqHost[] _hosts;
 
-        public RabbitMqBusBuilder(RabbitMqHost[] hosts, IConsumePipeSpecification consumePipeSpecification, ISendPipeFactory sendPipeFactory, RabbitMqReceiveSettings busSettings)
-            : base(consumePipeSpecification, sendPipeFactory, hosts)
+        public RabbitMqBusBuilder(RabbitMqHost[] hosts, IConsumePipeFactory consumePipeFactory, ISendPipeFactory sendPipeFactory,
+            RabbitMqReceiveSettings busSettings)
+            : base(consumePipeFactory, sendPipeFactory, hosts)
         {
             _hosts = hosts;
 

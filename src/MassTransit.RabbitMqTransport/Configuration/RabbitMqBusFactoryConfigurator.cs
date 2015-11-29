@@ -19,26 +19,22 @@ namespace MassTransit.RabbitMqTransport.Configuration
     using BusConfigurators;
     using MassTransit.Builders;
     using MassTransit.Configurators;
-    using PipeConfigurators;
     using Topology;
 
 
     public class RabbitMqBusFactoryConfigurator :
+        BusFactoryConfigurator,
         IRabbitMqBusFactoryConfigurator,
         IBusFactory
     {
-        readonly ConsumePipeSpecificationList _consumePipeSpecification;
         readonly IList<RabbitMqHost> _hosts;
         readonly RabbitMqReceiveSettings _settings;
         readonly IList<IBusFactorySpecification> _transportBuilderConfigurators;
-        readonly SendPipeConfigurator _sendPipeConfigurator;
 
         public RabbitMqBusFactoryConfigurator()
         {
             _hosts = new List<RabbitMqHost>();
             _transportBuilderConfigurators = new List<IBusFactorySpecification>();
-            _consumePipeSpecification = new ConsumePipeSpecificationList();
-            _sendPipeConfigurator = new SendPipeConfigurator();
 
             string queueName = this.GetTemporaryQueueName("bus-");
             _settings = new RabbitMqReceiveSettings
@@ -55,7 +51,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
 
         public IBusControl CreateBus()
         {
-            var builder = new RabbitMqBusBuilder(_hosts.ToArray(), _consumePipeSpecification, _sendPipeConfigurator, _settings);
+            var builder = new RabbitMqBusBuilder(_hosts.ToArray(), ConsumePipeFactory, SendPipeFactory, _settings);
 
             foreach (IBusFactorySpecification configurator in _transportBuilderConfigurators)
                 configurator.Apply(builder);
@@ -65,16 +61,17 @@ namespace MassTransit.RabbitMqTransport.Configuration
             return bus;
         }
 
-        public IEnumerable<ValidationResult> Validate()
+        public override IEnumerable<ValidationResult> Validate()
         {
+            foreach (ValidationResult result in base.Validate())
+                yield return result;
+
             if (_hosts.Count == 0)
                 yield return this.Failure("Host", "At least one host must be defined");
             if (string.IsNullOrWhiteSpace(_settings.QueueName))
                 yield return this.Failure("Bus", "The bus queue name must not be null or empty");
 
             foreach (ValidationResult result in _transportBuilderConfigurators.SelectMany(x => x.Validate()))
-                yield return result;
-            foreach (ValidationResult result in _consumePipeSpecification.Validate())
                 yield return result;
         }
 
@@ -156,8 +153,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
             ReceiveEndpoint(_hosts[0], queueName, configureEndpoint);
         }
 
-        public void ReceiveEndpoint(IRabbitMqHost host, string queueName,
-            Action<IRabbitMqReceiveEndpointConfigurator> configure)
+        public void ReceiveEndpoint(IRabbitMqHost host, string queueName, Action<IRabbitMqReceiveEndpointConfigurator> configure)
         {
             if (host == null)
                 throw new EndpointNotFoundException("The host address specified was not configured.");
@@ -167,24 +163,6 @@ namespace MassTransit.RabbitMqTransport.Configuration
             configure(endpointConfigurator);
 
             AddBusFactorySpecification(endpointConfigurator);
-        }
-
-        void IPipeConfigurator<ConsumeContext>.AddPipeSpecification(IPipeSpecification<ConsumeContext> specification)
-        {
-            _consumePipeSpecification.Add(specification);
-        }
-
-        void IConsumePipeConfigurator.AddPipeSpecification<T>(IPipeSpecification<ConsumeContext<T>> specification)
-        {
-            _consumePipeSpecification.Add(specification);
-        }
-
-        public void ConfigureSend(Action<ISendPipeConfigurator> callback)
-        {
-            if (callback == null)
-                throw new ArgumentNullException(nameof(callback));
-
-            callback(_sendPipeConfigurator);
         }
     }
 }

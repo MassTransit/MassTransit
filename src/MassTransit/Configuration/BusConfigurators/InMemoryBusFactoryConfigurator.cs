@@ -18,19 +18,17 @@ namespace MassTransit.BusConfigurators
     using Builders;
     using Configurators;
     using EndpointConfigurators;
-    using PipeConfigurators;
     using Transports;
     using Transports.InMemory;
 
 
     public class InMemoryBusFactoryConfigurator :
+        BusFactoryConfigurator,
         IInMemoryBusFactoryConfigurator,
         IBusFactory
     {
         readonly IList<IInMemoryBusFactorySpecification> _configurators;
-        readonly ConsumePipeSpecificationList _consumePipeSpecification;
         readonly IList<IBusHostControl> _hosts;
-        readonly SendPipeConfigurator _sendPipeConfigurator;
         int _concurrencyLimit;
         IReceiveTransportProvider _receiveTransportProvider;
         ISendTransportProvider _sendTransportProvider;
@@ -38,8 +36,6 @@ namespace MassTransit.BusConfigurators
         public InMemoryBusFactoryConfigurator()
         {
             _configurators = new List<IInMemoryBusFactorySpecification>();
-            _consumePipeSpecification = new ConsumePipeSpecificationList();
-            _sendPipeConfigurator = new SendPipeConfigurator();
 
             _concurrencyLimit = Environment.ProcessorCount;
 
@@ -57,8 +53,7 @@ namespace MassTransit.BusConfigurators
                 _sendTransportProvider = _sendTransportProvider ?? transportProvider;
             }
 
-            var builder = new InMemoryBusBuilder(_receiveTransportProvider, _sendTransportProvider, _hosts.ToArray(), _consumePipeSpecification,
-                _sendPipeConfigurator);
+            var builder = new InMemoryBusBuilder(_receiveTransportProvider, _sendTransportProvider, _hosts.ToArray(), ConsumePipeFactory, SendPipeFactory);
 
             foreach (var configurator in _configurators)
                 configurator.Apply(builder);
@@ -66,21 +61,10 @@ namespace MassTransit.BusConfigurators
             return builder.Build();
         }
 
-        public IEnumerable<ValidationResult> Validate()
+        public override IEnumerable<ValidationResult> Validate()
         {
-            return _consumePipeSpecification.Validate()
-                .Concat(_sendPipeConfigurator.Validate())
+            return base.Validate()
                 .Concat(_configurators.SelectMany(x => x.Validate()));
-        }
-
-        void IPipeConfigurator<ConsumeContext>.AddPipeSpecification(IPipeSpecification<ConsumeContext> specification)
-        {
-            _consumePipeSpecification.Add(specification);
-        }
-
-        void IConsumePipeConfigurator.AddPipeSpecification<T>(IPipeSpecification<ConsumeContext<T>> specification)
-        {
-            _consumePipeSpecification.Add(specification);
         }
 
         void IBusFactoryConfigurator.AddBusFactorySpecification(IBusFactorySpecification configurator)
@@ -116,14 +100,6 @@ namespace MassTransit.BusConfigurators
         void IBusFactoryConfigurator.ReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configureEndpoint)
         {
             ReceiveEndpoint(queueName, configureEndpoint);
-        }
-
-        public void ConfigureSend(Action<ISendPipeConfigurator> callback)
-        {
-            if (callback == null)
-                throw new ArgumentNullException(nameof(callback));
-
-            callback(_sendPipeConfigurator);
         }
 
 

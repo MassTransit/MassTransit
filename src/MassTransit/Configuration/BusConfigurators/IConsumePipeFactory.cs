@@ -13,11 +13,12 @@
 namespace MassTransit.BusConfigurators
 {
     using Configurators;
+    using Pipeline;
 
 
-    public interface IConsumePipeSpecification :
+    public interface IConsumePipeFactory :
         Configurator
     {
-        void Apply(IConsumePipeBuilder builder);
+        IConsumePipe CreateConsumePipe(params IConsumePipeSpecification[] specifications);
     }
 }

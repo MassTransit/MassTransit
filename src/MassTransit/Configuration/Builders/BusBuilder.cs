@@ -28,7 +28,7 @@ namespace MassTransit.Builders
     {
         readonly BusObservable _busObservable;
         readonly Lazy<IConsumePipe> _consumePipe;
-        readonly IConsumePipeSpecification _consumePipeSpecification;
+        readonly IConsumePipeFactory _consumePipeFactory;
         readonly ISendPipeFactory _sendPipeFactory;
         readonly IDictionary<string, DeserializerFactory> _deserializerFactories;
         readonly IBusHostControl[] _hosts;
@@ -38,11 +38,12 @@ namespace MassTransit.Builders
         readonly Lazy<IMessageSerializer> _serializer;
         Func<IMessageSerializer> _serializerFactory;
 
-        protected BusBuilder(IConsumePipeSpecification consumePipeSpecification, ISendPipeFactory sendPipeFactory,
+        protected BusBuilder(IConsumePipeFactory consumePipeFactory, ISendPipeFactory sendPipeFactory,
             IEnumerable<IBusHostControl> hosts)
         {
-            _consumePipeSpecification = consumePipeSpecification;
+            _consumePipeFactory = consumePipeFactory;
             _sendPipeFactory = sendPipeFactory;
+            _hosts = hosts.ToArray();
 
             _deserializerFactories = new Dictionary<string, DeserializerFactory>(StringComparer.OrdinalIgnoreCase);
             _receiveEndpoints = new Dictionary<string, IReceiveEndpoint>();
@@ -53,7 +54,6 @@ namespace MassTransit.Builders
 
             _inputAddress = new Lazy<Uri>(GetInputAddress);
             _consumePipe = new Lazy<IConsumePipe>(GetConsumePipe);
-            _hosts = hosts.ToArray();
 
             AddMessageDeserializer(JsonMessageSerializer.JsonContentType,
                 (s, p) => new JsonMessageDeserializer(JsonMessageSerializer.Deserializer, s, p));
@@ -109,14 +109,7 @@ namespace MassTransit.Builders
 
         public IConsumePipe CreateConsumePipe(params IConsumePipeSpecification[] specifications)
         {
-            var builder = new ConsumePipeBuilder();
-
-            _consumePipeSpecification.Apply(builder);
-
-            for (int i = 0; i < specifications.Length; i++)
-                specifications[i].Apply(builder);
-
-            return builder.Build();
+            return _consumePipeFactory.CreateConsumePipe(specifications);
         }
 
         IMessageSerializer CreateSerializer()

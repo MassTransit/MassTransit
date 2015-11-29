@@ -15,34 +15,26 @@ namespace MassTransit.BusConfigurators
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using Builders;
     using Configurators;
     using PipeBuilders;
     using PipeConfigurators;
     using Pipeline;
 
 
-    public class ConsumePipeSpecificationList :
+    public class ConsumePipeConfigurator :
+        IConsumePipeConfigurator,
+        IConsumePipeFactory,
         IConsumePipeSpecification
     {
         readonly IList<IConsumePipeSpecification> _specifications;
 
-        public ConsumePipeSpecificationList()
+        public ConsumePipeConfigurator()
         {
             _specifications = new List<IConsumePipeSpecification>();
         }
 
-        public void Apply(IConsumePipeBuilder builder)
-        {
-            foreach (IConsumePipeSpecification specification in _specifications)
-                specification.Apply(builder);
-        }
-
-        public IEnumerable<ValidationResult> Validate()
-        {
-            return _specifications.SelectMany(x => x.Validate());
-        }
-
-        public void Add(IPipeSpecification<ConsumeContext> specification)
+        public void AddPipeSpecification(IPipeSpecification<ConsumeContext> specification)
         {
             if (specification == null)
                 throw new ArgumentNullException(nameof(specification));
@@ -50,13 +42,35 @@ namespace MassTransit.BusConfigurators
             _specifications.Add(new Proxy(specification));
         }
 
-        public void Add<T>(IPipeSpecification<ConsumeContext<T>> specification)
-            where T : class
+        public void AddPipeSpecification<T>(IPipeSpecification<ConsumeContext<T>> specification) where T : class
         {
             if (specification == null)
                 throw new ArgumentNullException(nameof(specification));
 
             _specifications.Add(new Proxy<T>(specification));
+        }
+
+        public IConsumePipe CreateConsumePipe(params IConsumePipeSpecification[] specifications)
+        {
+            var builder = new ConsumePipeBuilder();
+
+            Apply(builder);
+
+            for (int i = 0; i < specifications.Length; i++)
+                specifications[i].Apply(builder);
+
+            return builder.Build();
+        }
+
+        public IEnumerable<ValidationResult> Validate()
+        {
+            return _specifications.SelectMany(x => x.Validate());
+        }
+
+        public void Apply(IConsumePipeBuilder builder)
+        {
+            foreach (IConsumePipeSpecification specification in _specifications)
+                specification.Apply(builder);
         }
 
 
