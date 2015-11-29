@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -10,23 +10,20 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit
+namespace MassTransit.Builders
 {
-    using System.ComponentModel;
-    using PipeConfigurators;
+    using PipeBuilders;
+    using Pipeline;
 
 
-    public interface IPublishPipeConfigurator :
-        IPipeConfigurator<PublishContext>,
-        ISendPipeConfigurator
+    public interface IPublishPipeBuilder :
+        IPipeBuilder<PublishContext>
     {
         /// <summary>
-        /// Adds a type-specific pipe specification to the consume pipe
+        /// Add a filter to the pipe after any existing filters
         /// </summary>
-        /// <typeparam name="T">The message type</typeparam>
-        /// <param name="specification"></param>
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        void AddPipeSpecification<T>(IPipeSpecification<PublishContext<T>> specification)
+        /// <param name="filter">The filter to add</param>
+        void AddFilter<T>(IFilter<PublishContext<T>> filter)
             where T : class;
     }
 }

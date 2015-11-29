@@ -30,6 +30,7 @@ namespace MassTransit.Builders
         readonly Lazy<IConsumePipe> _consumePipe;
         readonly IConsumePipeFactory _consumePipeFactory;
         readonly ISendPipeFactory _sendPipeFactory;
+        readonly IPublishPipeFactory _publishPipeFactory;
         readonly IDictionary<string, DeserializerFactory> _deserializerFactories;
         readonly IBusHostControl[] _hosts;
         readonly Lazy<Uri> _inputAddress;
@@ -39,10 +40,11 @@ namespace MassTransit.Builders
         Func<IMessageSerializer> _serializerFactory;
 
         protected BusBuilder(IConsumePipeFactory consumePipeFactory, ISendPipeFactory sendPipeFactory,
-            IEnumerable<IBusHostControl> hosts)
+            IPublishPipeFactory publishPipeFactory, IEnumerable<IBusHostControl> hosts)
         {
             _consumePipeFactory = consumePipeFactory;
             _sendPipeFactory = sendPipeFactory;
+            _publishPipeFactory = publishPipeFactory;
             _hosts = hosts.ToArray();
 
             _deserializerFactories = new Dictionary<string, DeserializerFactory>(StringComparer.OrdinalIgnoreCase);
@@ -105,6 +107,11 @@ namespace MassTransit.Builders
         public ISendPipe CreateSendPipe(params ISendPipeSpecification[] specifications)
         {
             return _sendPipeFactory.CreateSendPipe(specifications);
+        }
+
+        public IPublishPipe CreatePublishPipe(params IPublishPipeSpecification[] specifications)
+        {
+            return _publishPipeFactory.CreatePublishPipe(specifications);
         }
 
         public IConsumePipe CreateConsumePipe(params IConsumePipeSpecification[] specifications)
@@ -172,6 +179,6 @@ namespace MassTransit.Builders
 
         public abstract ISendEndpointProvider CreateSendEndpointProvider(params ISendPipeSpecification[] specifications);
 
-        public abstract IPublishEndpointProvider CreatePublishEndpointProvider();
+        public abstract IPublishEndpointProvider CreatePublishEndpointProvider(params IPublishPipeSpecification[] specifications);
     }
 }

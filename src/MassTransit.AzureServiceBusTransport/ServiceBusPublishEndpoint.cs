@@ -26,18 +26,20 @@ namespace MassTransit.AzureServiceBusTransport
         readonly IMessageNameFormatter _nameFormatter;
         readonly PublishObservable _publishObservable;
         readonly ISendEndpointProvider _sendEndpointProvider;
+        readonly IPublishPipe _publishPipe;
 
-        public ServiceBusPublishEndpointProvider(IServiceBusHost host, ISendEndpointProvider sendEndpointProvider)
+        public ServiceBusPublishEndpointProvider(IServiceBusHost host, ISendEndpointProvider sendEndpointProvider, IPublishPipe publishPipe)
         {
             _host = host;
             _sendEndpointProvider = sendEndpointProvider;
+            _publishPipe = publishPipe;
             _nameFormatter = host.MessageNameFormatter;
             _publishObservable = new PublishObservable();
         }
 
         public IPublishEndpoint CreatePublishEndpoint(Uri sourceAddress, Guid? correlationId, Guid? conversationId)
         {
-            return new PublishEndpoint(sourceAddress, this, _publishObservable, correlationId, conversationId);
+            return new PublishEndpoint(sourceAddress, this, _publishObservable, _publishPipe, correlationId, conversationId);
         }
 
         public Task<ISendEndpoint> GetPublishSendEndpoint(Type messageType)

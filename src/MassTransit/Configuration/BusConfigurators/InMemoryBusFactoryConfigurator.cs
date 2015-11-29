@@ -53,7 +53,7 @@ namespace MassTransit.BusConfigurators
                 _sendTransportProvider = _sendTransportProvider ?? transportProvider;
             }
 
-            var builder = new InMemoryBusBuilder(_receiveTransportProvider, _sendTransportProvider, _hosts.ToArray(), ConsumePipeFactory, SendPipeFactory);
+            var builder = new InMemoryBusBuilder(_receiveTransportProvider, _sendTransportProvider, _hosts.ToArray(), ConsumePipeFactory, SendPipeFactory, PublishPipeFactory);
 
             foreach (var configurator in _configurators)
                 configurator.Apply(builder);

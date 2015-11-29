@@ -23,16 +23,19 @@ namespace MassTransit.BusConfigurators
     {
         readonly ConsumePipeConfigurator _consumePipeConfigurator;
         readonly SendPipeConfigurator _sendPipeConfigurator;
+        readonly PublishPipeConfigurator _publishPipeConfigurator;
 
         protected BusFactoryConfigurator()
         {
             _consumePipeConfigurator = new ConsumePipeConfigurator();
             _sendPipeConfigurator = new SendPipeConfigurator();
+            _publishPipeConfigurator = new PublishPipeConfigurator();
         }
 
         protected IConsumePipeFactory ConsumePipeFactory => _consumePipeConfigurator;
 
         protected ISendPipeFactory SendPipeFactory => _sendPipeConfigurator;
+        protected IPublishPipeFactory PublishPipeFactory => _publishPipeConfigurator;
 
         public void AddPipeSpecification(IPipeSpecification<ConsumeContext> specification)
         {
@@ -51,6 +54,14 @@ namespace MassTransit.BusConfigurators
                 throw new ArgumentNullException(nameof(callback));
 
             callback(_sendPipeConfigurator);
+        }
+
+        public void ConfigurePublish(Action<IPublishPipeConfigurator> callback)
+        {
+            if (callback == null)
+                throw new ArgumentNullException(nameof(callback));
+
+            callback(_publishPipeConfigurator);
         }
 
         public virtual IEnumerable<ValidationResult> Validate()

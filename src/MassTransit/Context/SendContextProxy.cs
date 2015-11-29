@@ -18,23 +18,31 @@ namespace MassTransit.Context
 
 
     public class SendContextProxy<TMessage> :
+        SendContextProxy,
         SendContext<TMessage>
         where TMessage : class
     {
-        readonly SendContext _context;
-
         public SendContextProxy(SendContext context, TMessage message)
+            : base(context)
         {
-            _context = context;
             Message = message;
         }
 
         public TMessage Message { get; }
+    }
 
-        public CancellationToken CancellationToken
+
+    public class SendContextProxy :
+        SendContext
+    {
+        readonly SendContext _context;
+
+        public SendContextProxy(SendContext context)
         {
-            get { return _context.CancellationToken; }
+            _context = context;
         }
+
+        public CancellationToken CancellationToken => _context.CancellationToken;
 
         public bool HasPayloadType(Type contextType)
         {

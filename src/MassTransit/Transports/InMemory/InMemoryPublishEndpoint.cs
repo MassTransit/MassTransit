@@ -22,19 +22,21 @@ namespace MassTransit.Transports.InMemory
         IPublishEndpointProvider
     {
         readonly PublishObservable _publishObservable;
+        readonly IPublishPipe _publishPipe;
         readonly ISendEndpointProvider _sendEndpointProvider;
         readonly InMemoryTransportCache _transportCache;
 
-        public InMemoryPublishEndpointProvider(ISendEndpointProvider sendEndpointProvider, ISendTransportProvider transportProvider)
+        public InMemoryPublishEndpointProvider(ISendEndpointProvider sendEndpointProvider, ISendTransportProvider transportProvider, IPublishPipe publishPipe)
         {
             _sendEndpointProvider = sendEndpointProvider;
+            _publishPipe = publishPipe;
             _transportCache = transportProvider as InMemoryTransportCache;
             _publishObservable = new PublishObservable();
         }
 
         public IPublishEndpoint CreatePublishEndpoint(Uri sourceAddress, Guid? correlationId, Guid? conversationId)
         {
-            return new PublishEndpoint(sourceAddress, this, _publishObservable, correlationId, conversationId);
+            return new PublishEndpoint(sourceAddress, this, _publishObservable, _publishPipe, correlationId, conversationId);
         }
 
         public async Task<ISendEndpoint> GetPublishSendEndpoint(Type messageType)

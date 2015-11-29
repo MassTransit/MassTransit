@@ -17,6 +17,7 @@ namespace MassTransit.TestFramework
     using System.Threading.Tasks;
     using Logging;
     using NUnit.Framework;
+    using Pipeline.Pipes;
     using Transports.InMemory;
 
 
@@ -114,7 +115,7 @@ namespace MassTransit.TestFramework
             return sendEndpoint;
         }
 
-        protected IPublishEndpointProvider PublishEndpointProvider => new InMemoryPublishEndpointProvider(Bus, _inMemoryTransportCache);
+        protected IPublishEndpointProvider PublishEndpointProvider => new InMemoryPublishEndpointProvider(Bus, _inMemoryTransportCache, PublishPipe.Empty);
 
         [TestFixtureTearDown]
         public void TearDownInMemoryTestFixture()

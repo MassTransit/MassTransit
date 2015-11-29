@@ -10,23 +10,12 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit
+namespace MassTransit.Pipeline
 {
-    using System.ComponentModel;
-    using PipeConfigurators;
-
-
-    public interface IPublishPipeConfigurator :
-        IPipeConfigurator<PublishContext>,
-        ISendPipeConfigurator
+    public interface IPublishPipe :
+        IPipe<PublishContext>,
+        IPublishObserverConnector,
+        IPublishMessageObserverConnector
     {
-        /// <summary>
-        /// Adds a type-specific pipe specification to the consume pipe
-        /// </summary>
-        /// <typeparam name="T">The message type</typeparam>
-        /// <param name="specification"></param>
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        void AddPipeSpecification<T>(IPipeSpecification<PublishContext<T>> specification)
-            where T : class;
     }
 }

@@ -28,7 +28,8 @@ namespace MassTransit.EndpointConfigurators
 
     public abstract class ReceiveEndpointConfigurator :
         IConsumePipeConfigurator,
-        ISendPipelineConfigurator
+        ISendPipelineConfigurator,
+        IPublishPipelineConfigurator
     {
         readonly IConsumePipe _consumePipe;
         readonly ConsumePipeConfigurator _consumePipeConfigurator;
@@ -36,6 +37,7 @@ namespace MassTransit.EndpointConfigurators
         readonly Lazy<Uri> _errorAddress;
         readonly Lazy<Uri> _inputAddress;
         readonly IList<string> _lateConfigurationKeys;
+        readonly PublishPipeConfigurator _publishPipeConfigurator;
         readonly IBuildPipeConfigurator<ReceiveContext> _receiveConfigurator;
         readonly SendPipeConfigurator _sendPipeConfigurator;
         readonly IList<IReceiveEndpointSpecification> _specifications;
@@ -47,6 +49,7 @@ namespace MassTransit.EndpointConfigurators
             _specifications = new List<IReceiveEndpointSpecification>();
             _consumePipeConfigurator = new ConsumePipeConfigurator();
             _sendPipeConfigurator = new SendPipeConfigurator();
+            _publishPipeConfigurator = new PublishPipeConfigurator();
             _receiveConfigurator = new PipeConfigurator<ReceiveContext>();
             _lateConfigurationKeys = new List<string>();
 
@@ -65,6 +68,14 @@ namespace MassTransit.EndpointConfigurators
         void IConsumePipeConfigurator.AddPipeSpecification<T>(IPipeSpecification<ConsumeContext<T>> specification)
         {
             _consumePipeConfigurator.AddPipeSpecification(specification);
+        }
+
+        public void ConfigurePublish(Action<IPublishPipeConfigurator> callback)
+        {
+            if (callback == null)
+                throw new ArgumentNullException(nameof(callback));
+
+            callback(_publishPipeConfigurator);
         }
 
         public void ConfigureSend(Action<ISendPipeConfigurator> callback)
@@ -99,7 +110,7 @@ namespace MassTransit.EndpointConfigurators
 
             ConfigureAddDeadLetterFilter(builder.SendTransportProvider);
 
-            var publishEndpointProvider = builder.CreatePublishEndpointProvider();
+            var publishEndpointProvider = builder.CreatePublishEndpointProvider(_publishPipeConfigurator);
 
             ConfigureRescueFilter(publishEndpointProvider, builder.SendTransportProvider);
 

@@ -70,5 +70,10 @@ namespace MassTransit.AzureServiceBusTransport.Hosting
         {
             _configurator.ConfigureSend(callback);
         }
+
+        public void ConfigurePublish(Action<IPublishPipeConfigurator> callback)
+        {
+            _configurator.ConfigurePublish(callback);
+        }
     }
 }
