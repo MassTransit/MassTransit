@@ -28,8 +28,8 @@ namespace MassTransit.Builders
         readonly Uri _inputAddress;
         readonly ISendTransportProvider _sendTransportProvider;
 
-        public InMemoryBusBuilder(IReceiveTransportProvider receiveTransportProvider, ISendTransportProvider sendTransportProvider, IBusHostControl[] hosts, IConsumePipeSpecification consumePipeSpecification, ISendPipeFactory sendPipeFactory)
-            : base(consumePipeSpecification, sendPipeFactory, hosts)
+        public InMemoryBusBuilder(IReceiveTransportProvider receiveTransportProvider, ISendTransportProvider sendTransportProvider, IBusHostControl[] hosts, IConsumePipeFactory consumePipeFactory, ISendPipeFactory sendPipeFactory)
+            : base(consumePipeFactory, sendPipeFactory, hosts)
         {
             if (receiveTransportProvider == null)
                 throw new ArgumentNullException(nameof(receiveTransportProvider));

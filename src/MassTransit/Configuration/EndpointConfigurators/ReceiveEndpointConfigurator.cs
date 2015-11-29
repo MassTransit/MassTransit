@@ -31,7 +31,7 @@ namespace MassTransit.EndpointConfigurators
         ISendPipelineConfigurator
     {
         readonly IConsumePipe _consumePipe;
-        readonly ConsumePipeSpecificationList _consumePipeSpecification;
+        readonly ConsumePipeConfigurator _consumePipeConfigurator;
         readonly Lazy<Uri> _deadLetterAddress;
         readonly Lazy<Uri> _errorAddress;
         readonly Lazy<Uri> _inputAddress;
@@ -45,7 +45,7 @@ namespace MassTransit.EndpointConfigurators
             _consumePipe = consumePipe;
 
             _specifications = new List<IReceiveEndpointSpecification>();
-            _consumePipeSpecification = new ConsumePipeSpecificationList();
+            _consumePipeConfigurator = new ConsumePipeConfigurator();
             _sendPipeConfigurator = new SendPipeConfigurator();
             _receiveConfigurator = new PipeConfigurator<ReceiveContext>();
             _lateConfigurationKeys = new List<string>();
@@ -59,12 +59,12 @@ namespace MassTransit.EndpointConfigurators
 
         void IPipeConfigurator<ConsumeContext>.AddPipeSpecification(IPipeSpecification<ConsumeContext> specification)
         {
-            _consumePipeSpecification.Add(specification);
+            _consumePipeConfigurator.AddPipeSpecification(specification);
         }
 
         void IConsumePipeConfigurator.AddPipeSpecification<T>(IPipeSpecification<ConsumeContext<T>> specification)
         {
-            _consumePipeSpecification.Add(specification);
+            _consumePipeConfigurator.AddPipeSpecification(specification);
         }
 
         public void ConfigureSend(Action<ISendPipeConfigurator> callback)
@@ -78,7 +78,7 @@ namespace MassTransit.EndpointConfigurators
         public virtual IEnumerable<ValidationResult> Validate()
         {
             return _specifications.SelectMany(x => x.Validate())
-                .Concat(_consumePipeSpecification.Validate())
+                .Concat(_consumePipeConfigurator.Validate())
                 .Concat(_sendPipeConfigurator.Validate())
                 .Concat(_lateConfigurationKeys.Select(x => new ValidationResultImpl(ValidationResultDisposition.Failure, x, "was configured after being used")));
         }
@@ -90,7 +90,7 @@ namespace MassTransit.EndpointConfigurators
 
         protected IReceivePipe CreateReceivePipe(IBusBuilder builder, Func<IConsumePipe, IReceiveEndpointBuilder> endpointBuilderFactory)
         {
-            IConsumePipe consumePipe = _consumePipe ?? builder.CreateConsumePipe(_consumePipeSpecification);
+            IConsumePipe consumePipe = _consumePipe ?? builder.CreateConsumePipe(_consumePipeConfigurator);
 
             IReceiveEndpointBuilder endpointBuilder = endpointBuilderFactory(consumePipe);
 
@@ -103,7 +103,7 @@ namespace MassTransit.EndpointConfigurators
 
             ConfigureRescueFilter(publishEndpointProvider, builder.SendTransportProvider);
 
-            ISendEndpointProvider sendEndpointProvider = builder.CreateSendEndpointProvider(_sendPipeConfigurator.Specification);
+            ISendEndpointProvider sendEndpointProvider = builder.CreateSendEndpointProvider(_sendPipeConfigurator);
 
             IMessageDeserializer messageDeserializer = builder.GetMessageDeserializer(sendEndpointProvider, publishEndpointProvider);
 

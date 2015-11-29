@@ -25,9 +25,9 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
         readonly ServiceBusReceiveEndpointConfigurator _busEndpointConfigurator;
         readonly ServiceBusHost[] _hosts;
 
-        public ServiceBusBusBuilder(ServiceBusHost[] hosts, IConsumePipeSpecification consumePipeSpecification, ISendPipeFactory sendPipeFactory,
+        public ServiceBusBusBuilder(ServiceBusHost[] hosts, IConsumePipeFactory consumePipeFactory, ISendPipeFactory sendPipeFactory,
             ReceiveEndpointSettings settings)
-            : base(consumePipeSpecification, sendPipeFactory, hosts)
+            : base(consumePipeFactory, sendPipeFactory, hosts)
         {
             if (hosts == null)
                 throw new ArgumentNullException(nameof(hosts));

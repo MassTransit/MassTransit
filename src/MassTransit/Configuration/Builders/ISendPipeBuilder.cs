@@ -10,14 +10,20 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.BusConfigurators
+namespace MassTransit.Builders
 {
-    using Configurators;
+    using PipeBuilders;
+    using Pipeline;
 
 
-    public interface ISendPipeSpecification :
-        Configurator
+    public interface ISendPipeBuilder :
+        IPipeBuilder<SendContext>
     {
-        void Apply(ISendPipeBuilder builder);
+        /// <summary>
+        /// Add a filter to the pipe after any existing filters
+        /// </summary>
+        /// <param name="filter">The filter to add</param>
+        void AddFilter<T>(IFilter<SendContext<T>> filter)
+            where T : class;
     }
 }

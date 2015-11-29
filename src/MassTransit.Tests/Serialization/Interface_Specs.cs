@@ -15,6 +15,7 @@ namespace MassTransit.Tests.Serialization
 	using System;
 	using System.Linq;
 	using System.Threading.Tasks;
+	using Builders;
 	using BusConfigurators;
 	using MassTransit.Pipeline;
 	using MassTransit.Serialization;

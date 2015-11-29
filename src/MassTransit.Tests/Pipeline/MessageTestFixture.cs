@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.Pipeline
 {
+    using Builders;
     using BusConfigurators;
     using MassTransit.Pipeline;
     using MassTransit.Pipeline.ConsumerFactories;

@@ -12,40 +12,49 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.BusConfigurators
 {
+    using System;
     using System.Collections.Generic;
+    using System.Linq;
+    using Builders;
     using Configurators;
+    using PipeBuilders;
     using PipeConfigurators;
     using Pipeline;
 
 
     public class SendPipeConfigurator :
         ISendPipeConfigurator,
-        ISendPipeFactory
+        ISendPipeFactory,
+        ISendPipeSpecification
     {
-        readonly SendPipeSpecificationList _sendPipeSpecification;
+        readonly IList<ISendPipeSpecification> _specifications;
 
         public SendPipeConfigurator()
         {
-            _sendPipeSpecification = new SendPipeSpecificationList();
+            _specifications = new List<ISendPipeSpecification>();
         }
 
-        void IPipeConfigurator<SendContext>.AddPipeSpecification(IPipeSpecification<SendContext> specification)
+        public void AddPipeSpecification(IPipeSpecification<SendContext> specification)
         {
-            _sendPipeSpecification.Add(specification);
+            if (specification == null)
+                throw new ArgumentNullException(nameof(specification));
+
+            _specifications.Add(new Proxy(specification));
         }
 
-        void ISendPipeConfigurator.AddPipeSpecification<T>(IPipeSpecification<SendContext<T>> specification)
+        public void AddPipeSpecification<T>(IPipeSpecification<SendContext<T>> specification) where T : class
         {
-            _sendPipeSpecification.Add(specification);
-        }
+            if (specification == null)
+                throw new ArgumentNullException(nameof(specification));
 
-        public ISendPipeSpecification Specification => _sendPipeSpecification;
+            _specifications.Add(new Proxy<T>(specification));
+        }
 
         public ISendPipe CreateSendPipe(params ISendPipeSpecification[] specifications)
         {
             var builder = new SendPipeBuilder();
 
-            _sendPipeSpecification.Apply(builder);
+            Apply(builder);
 
             for (int i = 0; i < specifications.Length; i++)
                 specifications[i].Apply(builder);
@@ -55,7 +64,75 @@ namespace MassTransit.BusConfigurators
 
         public IEnumerable<ValidationResult> Validate()
         {
-            return _sendPipeSpecification.Validate();
+            return _specifications.SelectMany(x => x.Validate());
+        }
+
+        public void Apply(ISendPipeBuilder builder)
+        {
+            foreach (ISendPipeSpecification specification in _specifications)
+                specification.Apply(builder);
+        }
+
+
+        class Proxy :
+            ISendPipeSpecification
+        {
+            readonly IPipeSpecification<SendContext> _specification;
+
+            public Proxy(IPipeSpecification<SendContext> specification)
+            {
+                _specification = specification;
+            }
+
+            public void Apply(ISendPipeBuilder builder)
+            {
+                _specification.Apply(builder);
+            }
+
+            public IEnumerable<ValidationResult> Validate()
+            {
+                return _specification.Validate();
+            }
+        }
+
+
+        class Proxy<T> :
+            ISendPipeSpecification
+            where T : class
+        {
+            readonly IPipeSpecification<SendContext<T>> _specification;
+
+            public Proxy(IPipeSpecification<SendContext<T>> specification)
+            {
+                _specification = specification;
+            }
+
+            public void Apply(ISendPipeBuilder builder)
+            {
+                _specification.Apply(new BuilderProxy(builder));
+            }
+
+            public IEnumerable<ValidationResult> Validate()
+            {
+                return _specification.Validate();
+            }
+
+
+            class BuilderProxy :
+                IPipeBuilder<SendContext<T>>
+            {
+                readonly ISendPipeBuilder _builder;
+
+                public BuilderProxy(ISendPipeBuilder builder)
+                {
+                    _builder = builder;
+                }
+
+                public void AddFilter(IFilter<SendContext<T>> filter)
+                {
+                    _builder.AddFilter(filter);
+                }
+            }
         }
     }
 }
