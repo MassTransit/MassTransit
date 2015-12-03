@@ -81,6 +81,7 @@ namespace MassTransit.BusConfigurators
         {
             _receiveTransportProvider = transportProvider;
             _sendTransportProvider = transportProvider;
+            _hosts.Add(transportProvider);
         }
 
         public void AddBusFactorySpecification(IInMemoryBusFactorySpecification configurator)
