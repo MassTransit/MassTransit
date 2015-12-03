@@ -59,6 +59,8 @@ namespace MassTransit.Transports.InMemory
 
         public void Dispose()
         {
+            _participant.SetComplete();
+
             TaskUtil.Await(() => _supervisor.Stop("Disposed"));
 
             TaskUtil.Await(() => _supervisor.Completed);

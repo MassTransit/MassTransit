@@ -50,6 +50,39 @@ namespace MassTransit.Tests
         }
     }
 
+    [TestFixture]
+    public class Sending_a_skipped_message :
+        InMemoryTestFixture
+    {
+        [Test]
+        public async Task Should_not_hang_the_shutdown()
+        {
+            await InputQueueSendEndpoint.Send(new B());
+
+            await InputQueueSendEndpoint.Send(new A());
+
+            await _receivedA;
+        }
+
+        Task<ConsumeContext<A>> _receivedA;
+
+
+        class A
+        {
+        }
+
+
+        class B
+        {
+        }
+
+
+        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        {
+            _receivedA = Handler<A>(configurator, context => Console.Out.WriteLineAsync("Hi"));
+        }
+    }
+
 
     [TestFixture]
     public class Sending_an_object_to_the_endpoint :

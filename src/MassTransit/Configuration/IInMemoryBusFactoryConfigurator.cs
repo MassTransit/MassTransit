@@ -15,6 +15,7 @@ namespace MassTransit
     using System;
     using System.ComponentModel;
     using Builders;
+    using Transports;
 
 
     public interface IInMemoryBusFactoryConfigurator :
@@ -35,7 +36,7 @@ namespace MassTransit
         /// <param name="transportProvider"></param>
         [EditorBrowsable(EditorBrowsableState.Advanced)]
         void SetTransportProvider<T>(T transportProvider)
-            where T : ISendTransportProvider, IReceiveTransportProvider;
+            where T : ISendTransportProvider, IReceiveTransportProvider, IBusHostControl;
 
         [EditorBrowsable(EditorBrowsableState.Never)]
         void AddBusFactorySpecification(IInMemoryBusFactorySpecification configurator);
