@@ -97,6 +97,11 @@ namespace MassTransit.Turnout.Configuration
             _configurator.ConfigureSend(callback);
         }
 
+        void IPublishPipelineConfigurator.ConfigurePublish(Action<IPublishPipeConfigurator> callback)
+        {
+            _configurator.ConfigurePublish(callback);
+        }
+
         ITurnoutController CreateController()
         {
             return new TurnoutController(_jobRoster, _controlAddress, _superviseInterval);

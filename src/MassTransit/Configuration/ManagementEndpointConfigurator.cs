@@ -52,5 +52,10 @@ namespace MassTransit
         {
             _configurator.ConfigureSend(callback);
         }
+
+        void IPublishPipelineConfigurator.ConfigurePublish(Action<IPublishPipeConfigurator> callback)
+        {
+            _configurator.ConfigurePublish(callback);
+        }
     }
 }
