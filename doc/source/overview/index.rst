@@ -13,6 +13,7 @@ there are a number of subjects covered below that explain in detail how everythi
     :maxdepth: 0
 
     keyideas.rst
+    underthehood.rst
     valueadd.rst
     publishing.rst
     sending.rst
