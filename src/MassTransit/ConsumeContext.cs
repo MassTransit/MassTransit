@@ -164,7 +164,7 @@ namespace MassTransit
             where T : class;
 
         /// <summary>
-        /// Notify that the message has been consumed
+        /// Notify that the message has been consumed -- note that this is internal, and should not be called by a consumer.
         /// </summary>
         /// <param name="context"></param>
         /// <param name="duration"></param>
@@ -173,7 +173,7 @@ namespace MassTransit
             where T : class;
 
         /// <summary>
-        /// Notify that a message consumer has faulted
+        /// Notify that a message consumer has faulted -- note that this is internal, and should not be called by a consumer
         /// </summary>
         /// <param name="context"></param>
         /// <param name="duration"></param>
@@ -191,14 +191,14 @@ namespace MassTransit
         T Message { get; }
 
         /// <summary>
-        /// Notify that the message has been consumed
+        /// Notify that the message has been consumed -- note that this is internal, and should not be called by a consumer
         /// </summary>
         /// <param name="duration"></param>
         /// <param name="consumerType">The consumer type</param>
         Task NotifyConsumed(TimeSpan duration, string consumerType);
 
         /// <summary>
-        /// Notify that a fault occurred during message consumption
+        /// Notify that a fault occurred during message consumption -- note that this is internal, and should not be called by a consumer
         /// </summary>
         /// <param name="duration"></param>
         /// <param name="consumerType"></param>
