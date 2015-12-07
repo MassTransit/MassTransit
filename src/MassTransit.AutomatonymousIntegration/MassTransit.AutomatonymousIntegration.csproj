@@ -68,6 +68,7 @@
     <Compile Include="Activities\PublishActivity.cs" />
     <Compile Include="Activities\RequestActivityImpl.cs" />
     <Compile Include="Activities\ScheduleActivity.cs" />
+    <Compile Include="BehaviorContextExtensions.cs" />
     <Compile Include="Configuration\EventMissingInstanceConfigurator.cs" />
     <Compile Include="Configuration\MissingInstanceConfigurator.cs" />
     <Compile Include="Configuration\ScheduleConfigurator.cs" />
