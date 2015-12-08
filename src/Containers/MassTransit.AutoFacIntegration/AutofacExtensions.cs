@@ -15,7 +15,9 @@ namespace MassTransit
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Linq.Expressions;
     using Autofac;
+    using Autofac.Builder;
     using Autofac.Core;
     using AutofacIntegration;
     using ConsumeConfigurators;
@@ -38,14 +40,14 @@ namespace MassTransit
             IList<Type> concreteTypes = FindTypes<IConsumer>(scope, r => !r.HasInterface<ISaga>());
             if (concreteTypes.Count > 0)
             {
-                foreach (Type concreteType in concreteTypes)
+                foreach (var concreteType in concreteTypes)
                     ConsumerConfiguratorCache.Configure(concreteType, configurator, scope, name);
             }
 
             IList<Type> sagaTypes = FindTypes<ISaga>(scope, x => true);
             if (sagaTypes.Count > 0)
             {
-                foreach (Type sagaType in sagaTypes)
+                foreach (var sagaType in sagaTypes)
                     SagaConfiguratorCache.Configure(sagaType, configurator, scope, name);
             }
         }
@@ -85,6 +87,41 @@ namespace MassTransit
         /// Registers a consumer given the lifetime scope specified
         /// </summary>
         /// <typeparam name="T">The consumer type</typeparam>
+        /// <typeparam name="TId"></typeparam>
+        /// <param name="configurator">The service bus configurator</param>
+        /// <param name="context">The component context containing the registry</param>
+        /// <param name="name">The name of the scope created per-message</param>
+        /// <returns></returns>
+        public static void ConsumerInScope<T, TId>(this IReceiveEndpointConfigurator configurator,
+            IComponentContext context, string name = "message")
+            where T : class, IConsumer
+        {
+            var consumerFactory = new AutofacScopeConsumerFactory<T, TId>(context.Resolve<ILifetimeScopeRegistry<TId>>(), name);
+
+            configurator.Consumer(consumerFactory);
+        }
+
+        /// <summary>
+        /// Registers a consumer given the lifetime scope specified
+        /// </summary>
+        /// <typeparam name="T">The consumer type</typeparam>
+        /// <param name="configurator">The service bus configurator</param>
+        /// <param name="context">The LifetimeScope of the container</param>
+        /// <param name="name">The name of the scope created per-message</param>
+        /// <returns></returns>
+        public static void Consumer<T>(this IReceiveEndpointConfigurator configurator,
+            IComponentContext context, string name = "message")
+            where T : class, IConsumer
+        {
+            var consumerFactory = new AutofacConsumerFactory<T>(context.Resolve<ILifetimeScope>(), name);
+
+            configurator.Consumer(consumerFactory);
+        }
+
+        /// <summary>
+        /// Registers a consumer given the lifetime scope specified
+        /// </summary>
+        /// <typeparam name="T">The consumer type</typeparam>
         /// <param name="configurator">The service bus configurator</param>
         /// <param name="scope">The LifetimeScope of the container</param>
         /// <param name="configure"></param>
@@ -95,6 +132,24 @@ namespace MassTransit
             where T : class, IConsumer
         {
             var consumerFactory = new AutofacConsumerFactory<T>(scope, name);
+
+            configurator.Consumer(consumerFactory, configure);
+        }
+
+        /// <summary>
+        /// Registers a consumer given the lifetime scope specified
+        /// </summary>
+        /// <typeparam name="T">The consumer type</typeparam>
+        /// <param name="configurator">The service bus configurator</param>
+        /// <param name="context">The LifetimeScope of the container</param>
+        /// <param name="configure"></param>
+        /// <param name="name">The name of the scope created per-message</param>
+        /// <returns></returns>
+        public static void Consumer<T>(this IReceiveEndpointConfigurator configurator,
+            IComponentContext context, Action<IConsumerConfigurator<T>> configure, string name = "message")
+            where T : class, IConsumer
+        {
+            var consumerFactory = new AutofacConsumerFactory<T>(context.Resolve<ILifetimeScope>(), name);
 
             configurator.Consumer(consumerFactory, configure);
         }
@@ -123,6 +178,25 @@ namespace MassTransit
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="configurator"></param>
+        /// <param name="context"></param>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public static void Saga<T>(this IReceiveEndpointConfigurator configurator, IComponentContext context,
+            string name = "message")
+            where T : class, ISaga
+        {
+            var sagaRepository = context.Resolve<ISagaRepository<T>>();
+
+            var autofacSagaRepository = new AutofacSagaRepository<T>(sagaRepository, context.Resolve<ILifetimeScope>(), name);
+
+            configurator.Saga(autofacSagaRepository);
+        }
+
+        /// <summary>
+        /// Registers a saga using the container that has the repository resolved from the container
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="configurator"></param>
         /// <param name="scope"></param>
         /// <param name="configure"></param>
         /// <param name="name"></param>
@@ -138,7 +212,64 @@ namespace MassTransit
             configurator.Saga(autofacSagaRepository, configure);
         }
 
-        static IList<Type> FindTypes<T>(ILifetimeScope scope, Func<Type, bool> filter)
+        /// <summary>
+        /// Registers a saga using the container that has the repository resolved from the container
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="configurator"></param>
+        /// <param name="context"></param>
+        /// <param name="configure"></param>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public static void Saga<T>(this IReceiveEndpointConfigurator configurator, IComponentContext context,
+            Action<ISagaConfigurator<T>> configure, string name = "message")
+            where T : class, ISaga
+        {
+            var sagaRepository = context.Resolve<ISagaRepository<T>>();
+
+            var autofacSagaRepository = new AutofacSagaRepository<T>(sagaRepository, context.Resolve<ILifetimeScope>(), name);
+
+
+            configurator.Saga(autofacSagaRepository, configure);
+        }
+
+        /// <summary>
+        /// Register an accessor for an input type in the container
+        /// </summary>
+        /// <typeparam name="TInput"></typeparam>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="builder"></param>
+        /// <param name="propertyExpression"></param>
+        public static IRegistrationBuilder<ILifetimeScopeIdAccessor<TInput, T>, ConcreteReflectionActivatorData, SingleRegistrationStyle>
+            RegisterLifetimeScopeIdAccessor<TInput, T>(this ContainerBuilder builder, Expression<Func<TInput, T>> propertyExpression)
+        {
+            if (propertyExpression == null)
+                throw new ArgumentNullException(nameof(propertyExpression));
+
+            var propertyInfo = propertyExpression.GetPropertyInfo();
+
+            return builder.RegisterType<MessageLifetimeScopeIdAccessor<TInput, T>>()
+                .As<ILifetimeScopeIdAccessor<TInput, T>>()
+                .WithParameter(TypedParameter.From(propertyInfo));
+        }
+
+        /// <summary>
+        /// Register a lifetime scope registry for the given identifier type
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="builder"></param>
+        /// <param name="scopeTag"></param>
+        /// <returns></returns>
+        public static IRegistrationBuilder<ILifetimeScopeRegistry<string>, ConcreteReflectionActivatorData, SingleRegistrationStyle>
+            RegisterLifetimeScopeRegistry<T>(this ContainerBuilder builder, object scopeTag)
+        {
+            return builder.RegisterType<LifetimeScopeRegistry<string>>()
+                .As<ILifetimeScopeRegistry<string>>()
+                .WithParameter("tag", scopeTag)
+                .SingleInstance();
+        }
+
+        static IList<Type> FindTypes<T>(IComponentContext scope, Func<Type, bool> filter)
         {
             return scope.ComponentRegistry.Registrations
                 .SelectMany(r => r.Services.OfType<IServiceWithType>(), (r, s) => new {r, s})

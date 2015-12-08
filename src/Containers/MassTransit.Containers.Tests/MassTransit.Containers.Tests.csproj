@@ -111,6 +111,7 @@
   <ItemGroup>
     <Compile Include="AutofacRegistrationExtension_Specs.cs" />
     <Compile Include="AutofacRegistration_Specs.cs" />
+    <Compile Include="Autofac_TenantContainerSpecs.cs" />
     <Compile Include="CastleWindsor_Specs.cs" />
     <Compile Include="Ninject_Specs.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
