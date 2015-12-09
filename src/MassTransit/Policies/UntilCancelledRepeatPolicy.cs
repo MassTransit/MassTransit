@@ -13,7 +13,6 @@
 namespace MassTransit.Policies
 {
     using System.Threading;
-    using System.Threading.Tasks;
 
 
     public class UntilCancelledRepeatPolicy :

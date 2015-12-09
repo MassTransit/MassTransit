@@ -29,6 +29,7 @@ namespace MassTransit.RabbitMqTransport
     {
         static readonly ILog _log = Logger.Get<RabbitMqReceiveTransport>();
         readonly ExchangeBindingSettings[] _bindings;
+        readonly IRetryPolicy _connectionRetryPolicy;
         readonly IRabbitMqHost _host;
         readonly Mediator<ISetPrefetchCount> _mediator;
         readonly ReceiveEndpointObservable _receiveEndpointObservable;
@@ -45,6 +46,10 @@ namespace MassTransit.RabbitMqTransport
 
             _receiveObservable = new ReceiveObservable();
             _receiveEndpointObservable = new ReceiveEndpointObservable();
+
+            var exceptionFilter = Retry.Selected<RabbitMqConnectionException>();
+
+            _connectionRetryPolicy = exceptionFilter.Exponential(1000, TimeSpan.FromMilliseconds(100), TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(1));
         }
 
         void IProbeSite.Probe(ProbeContext context)
@@ -65,7 +70,7 @@ namespace MassTransit.RabbitMqTransport
         {
             var supervisor = new TaskSupervisor();
 
-            var pipe = Pipe.New<ConnectionContext>(x =>
+            IPipe<ConnectionContext> pipe = Pipe.New<ConnectionContext>(x =>
             {
                 x.RabbitMqConsumer(receivePipe, _settings, _receiveObservable, _receiveEndpointObservable, _bindings, supervisor, _mediator);
             });
@@ -87,34 +92,41 @@ namespace MassTransit.RabbitMqTransport
 
         async void Receiver(IPipe<ConnectionContext> transportPipe, TaskSupervisor supervisor)
         {
-            await Repeat.UntilCancelled(supervisor.StopToken, async () =>
+            try
             {
-                try
+                await Repeat.UntilCancelled(supervisor.StopToken, () => _connectionRetryPolicy.Retry(async () =>
                 {
-                    await _host.ConnectionCache.Send(transportPipe, supervisor.StopToken).ConfigureAwait(false);
-                }
-                catch (RabbitMqConnectionException ex)
-                {
-                    if (_log.IsErrorEnabled)
-                        _log.ErrorFormat("RabbitMQ connection failed: {0}", ex.Message);
+                    try
+                    {
+                        await _host.ConnectionCache.Send(transportPipe, supervisor.StopToken)
+                            .ConfigureAwait(false);
+                    }
+                    catch (RabbitMqConnectionException ex)
+                    {
+                        if (_log.IsErrorEnabled)
+                            _log.ErrorFormat("RabbitMQ connection failed: {0}", ex.Message);
 
-                    var inputAddress = _host.Settings.GetInputAddress(_settings);
+                        var inputAddress = _host.Settings.GetInputAddress(_settings);
 
-                    await _receiveEndpointObservable.Faulted(new Faulted(inputAddress, ex)).ConfigureAwait(false);
-                }
-                catch (TaskCanceledException)
-                {
-                }
-                catch (Exception ex)
-                {
-                    if (_log.IsErrorEnabled)
-                        _log.ErrorFormat("RabbitMQ receive transport failed: {0}", ex.Message);
+                        await _receiveEndpointObservable.Faulted(new Faulted(inputAddress, ex)).ConfigureAwait(false);
+                    }
+                    catch (TaskCanceledException)
+                    {
+                    }
+                    catch (Exception ex)
+                    {
+                        if (_log.IsErrorEnabled)
+                            _log.ErrorFormat("RabbitMQ receive transport failed: {0}", ex.Message);
 
-                    var inputAddress = _host.Settings.GetInputAddress(_settings);
+                        var inputAddress = _host.Settings.GetInputAddress(_settings);
 
-                    await _receiveEndpointObservable.Faulted(new Faulted(inputAddress, ex)).ConfigureAwait(false);
-                }
-            }).ConfigureAwait(false);
+                        await _receiveEndpointObservable.Faulted(new Faulted(inputAddress, ex)).ConfigureAwait(false);
+                    }
+                }));
+            }
+            catch (TaskCanceledException)
+            {
+            }
         }
 
 
