@@ -43,7 +43,6 @@ namespace MassTransit.RabbitMqTransport.Configuration
             _settings = new RabbitMqReceiveSettings
             {
                 QueueName = queueName,
-                ExchangeName = queueName
             };
 
             _mediator = new Mediator<ISetPrefetchCount>();

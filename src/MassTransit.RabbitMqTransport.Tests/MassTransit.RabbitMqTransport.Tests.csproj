@@ -86,6 +86,7 @@
     <Compile Include="FailedConnection_Specs.cs" />
     <Compile Include="HammerTime_Specs.cs" />
     <Compile Include="HeaderObject_Specs.cs" />
+    <Compile Include="LocalBusName_Specs.cs" />
     <Compile Include="Performance_Specs.cs" />
     <Compile Include="RabbitMqActivityTestFixture.cs" />
     <Compile Include="RabbitMqTestFixture.cs" />

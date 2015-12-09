@@ -40,7 +40,6 @@ namespace MassTransit.RabbitMqTransport.Configuration
             _settings = new RabbitMqReceiveSettings
             {
                 QueueName = queueName,
-                ExchangeName = queueName,
                 AutoDelete = true,
                 Durable = false
             };
