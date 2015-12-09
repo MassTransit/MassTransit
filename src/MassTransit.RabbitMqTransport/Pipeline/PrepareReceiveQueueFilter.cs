@@ -76,7 +76,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
 
             var exchangeName = _settings.ExchangeName ?? queueName;
 
-            if (!string.IsNullOrWhiteSpace(_settings.ExchangeName) || string.IsNullOrWhiteSpace(_settings.QueueName))
+            if (!string.IsNullOrWhiteSpace(exchangeName))
             {
                 await context.ExchangeDeclare(exchangeName, _settings.ExchangeType, _settings.Durable, _settings.AutoDelete,
                     _settings.ExchangeArguments).ConfigureAwait(false);

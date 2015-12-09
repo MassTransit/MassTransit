@@ -46,7 +46,7 @@ namespace MassTransit
             _requestEndpoint = new Lazy<Task<ISendEndpoint>>(async () => await _bus.GetSendEndpoint(address));
         }
 
-        async Task<TResponse> IRequestClient<TRequest, TResponse>.Request(TRequest request, CancellationToken cancellationToken)
+        public async Task<TResponse> Request(TRequest request, CancellationToken cancellationToken)
         {
             var taskScheduler = SynchronizationContext.Current == null
                 ? TaskScheduler.Default
