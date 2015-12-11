@@ -64,5 +64,11 @@ namespace MassTransit.RabbitMqTransport.Configuration
         /// <param name="key">The argument key</param>
         /// <param name="value">The argument value</param>
         void SetExchangeArgument(string key, object value);
+
+        /// <summary>
+        /// Enable the message priority for the queue, specifying the maximum priority available
+        /// </summary>
+        /// <param name="maxPriority"></param>
+        void EnablePriority(byte maxPriority);
     }
 }

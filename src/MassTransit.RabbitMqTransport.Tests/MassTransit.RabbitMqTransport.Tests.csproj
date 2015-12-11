@@ -88,6 +88,7 @@
     <Compile Include="HeaderObject_Specs.cs" />
     <Compile Include="LocalBusName_Specs.cs" />
     <Compile Include="Performance_Specs.cs" />
+    <Compile Include="PriorityQueue_Specs.cs" />
     <Compile Include="RabbitMqActivityTestFixture.cs" />
     <Compile Include="RabbitMqTestFixture.cs" />
     <Compile Include="PublisherConfirm_Specs.cs" />

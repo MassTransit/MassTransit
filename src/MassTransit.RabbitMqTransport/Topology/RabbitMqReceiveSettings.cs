@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,10 +14,12 @@ namespace MassTransit.RabbitMqTransport.Topology
 {
     using System;
     using System.Collections.Generic;
+    using Configuration;
 
 
     public class RabbitMqReceiveSettings :
-        ReceiveSettings
+        ReceiveSettings,
+        IQueueConfigurator
     {
         public RabbitMqReceiveSettings()
         {
@@ -43,6 +45,33 @@ namespace MassTransit.RabbitMqTransport.Topology
             ExchangeType = settings.ExchangeType;
             QueueArguments = new Dictionary<string, object>(settings.QueueArguments);
             ExchangeArguments = new Dictionary<string, object>(settings.ExchangeArguments);
+        }
+
+        public void SetQueueArgument(string key, object value)
+        {
+            if (key == null)
+                throw new ArgumentNullException(nameof(key));
+
+            if (value == null)
+                QueueArguments.Remove(key);
+            else
+                QueueArguments[key] = value;
+        }
+
+        public void SetExchangeArgument(string key, object value)
+        {
+            if (key == null)
+                throw new ArgumentNullException(nameof(key));
+
+            if (value == null)
+                ExchangeArguments.Remove(key);
+            else
+                ExchangeArguments[key] = value;
+        }
+
+        public void EnablePriority(byte maxPriority)
+        {
+            QueueArguments["x-max-priority"] = (int)maxPriority;
         }
 
         public string QueueName { get; set; }
