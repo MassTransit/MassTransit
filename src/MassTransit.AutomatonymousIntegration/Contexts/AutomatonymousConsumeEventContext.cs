@@ -14,6 +14,7 @@ namespace Automatonymous.Contexts
 {
     using System;
     using System.Threading;
+    using System.Threading.Tasks;
     using MassTransit;
     using MassTransit.Context;
 
@@ -74,6 +75,16 @@ namespace Automatonymous.Contexts
             return _context.GetOrAddPayload(payloadFactory);
         }
 
+        public Task Raise(Event @event, CancellationToken cancellationToken = new CancellationToken())
+        {
+            return _context.Raise(@event, cancellationToken);
+        }
+
+        public Task Raise<TData1>(Event<TData1> @event, TData1 data, CancellationToken cancellationToken = new CancellationToken())
+        {
+            return _context.Raise(@event, data, cancellationToken);
+        }
+
         Event<TData> EventContext<TInstance, TData>.Event => _context.Event;
         TData EventContext<TInstance, TData>.Data => _context.Data;
         Event EventContext<TInstance>.Event => _context.Event;
@@ -123,6 +134,16 @@ namespace Automatonymous.Contexts
         TPayload InstanceContext<TInstance>.GetOrAddPayload<TPayload>(Automatonymous.PayloadFactory<TPayload> payloadFactory)
         {
             return _context.GetOrAddPayload(payloadFactory);
+        }
+
+        public Task Raise(Event @event, CancellationToken cancellationToken = new CancellationToken())
+        {
+            return _context.Raise(@event, cancellationToken);
+        }
+
+        public Task Raise<TData>(Event<TData> @event, TData data, CancellationToken cancellationToken = new CancellationToken())
+        {
+            return _context.Raise(@event, data, cancellationToken);
         }
 
         Event EventContext<TInstance>.Event => _context.Event;

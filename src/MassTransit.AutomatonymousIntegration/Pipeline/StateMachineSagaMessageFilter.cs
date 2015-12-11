@@ -37,11 +37,11 @@ namespace Automatonymous.Pipeline
     {
         static readonly ILog _log = Logger.Get<StateMachineSagaMessageFilter<TInstance, TData>>();
         readonly Event<TData> _event;
-        readonly SagaStateMachine<TInstance> _stateMachine;
+        readonly SagaStateMachine<TInstance> _machine;
 
-        public StateMachineSagaMessageFilter(SagaStateMachine<TInstance> stateMachine, Event<TData> @event)
+        public StateMachineSagaMessageFilter(SagaStateMachine<TInstance> machine, Event<TData> @event)
         {
-            _stateMachine = stateMachine;
+            _machine = machine;
             _event = @event;
         }
 
@@ -58,20 +58,20 @@ namespace Automatonymous.Pipeline
 
         public async Task Send(SagaConsumeContext<TInstance, TData> context, IPipe<SagaConsumeContext<TInstance, TData>> next)
         {
-            var eventContext = new StateMachineEventContext<TInstance, TData>(context.Saga, _event, context.Message, context.CancellationToken);
+            var eventContext = new StateMachineEventContext<TInstance, TData>(_machine, context.Saga, _event, context.Message, context.CancellationToken);
 
             eventContext.GetOrAddPayload(() => context);
             eventContext.GetOrAddPayload(() => (ConsumeContext<TData>)context);
             eventContext.GetOrAddPayload(() => (ConsumeContext)context);
 
-            State<TInstance> currentState = await _stateMachine.Accessor.Get(eventContext);
+            State<TInstance> currentState = await _machine.Accessor.Get(eventContext);
 
-            IEnumerable<Event> nextEvents = _stateMachine.NextEvents(currentState);
+            IEnumerable<Event> nextEvents = _machine.NextEvents(currentState);
             if (nextEvents.Contains(_event))
             {
-                await _stateMachine.RaiseEvent(eventContext);
+                await _machine.RaiseEvent(eventContext);
 
-                if (_stateMachine.IsCompleted(context.Saga))
+                if (_machine.IsCompleted(context.Saga))
                     await context.SetCompleted();
             }
             else
