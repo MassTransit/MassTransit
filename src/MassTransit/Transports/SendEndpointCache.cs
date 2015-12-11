@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,10 +13,10 @@
 namespace MassTransit.Transports
 {
     using System;
-    using System.Collections.Concurrent;
     using System.Threading.Tasks;
     using Logging;
     using Pipeline;
+    using Util;
 
 
     /// <summary>
@@ -27,18 +27,23 @@ namespace MassTransit.Transports
     {
         static readonly ILog _log = Logger.Get<SendEndpointCache>();
 
-        readonly ConcurrentDictionary<Uri, Lazy<Task<ISendEndpoint>>> _cache;
+        readonly LazyConcurrentDictionary<Uri, ISendEndpoint> _cache;
         readonly ISendEndpointProvider _sendEndpointProvider;
 
         public SendEndpointCache(ISendEndpointProvider sendEndpointProvider)
         {
             _sendEndpointProvider = sendEndpointProvider;
-            _cache = new ConcurrentDictionary<Uri, Lazy<Task<ISendEndpoint>>>(AddressEqualityComparer.Comparer);
+            _cache = new LazyConcurrentDictionary<Uri, ISendEndpoint>(GetSendEndpointFromProvider, AddressEqualityComparer.Comparer);
         }
 
         public Task<ISendEndpoint> GetSendEndpoint(Uri address)
         {
-            return _cache.GetOrAdd(address, x => new Lazy<Task<ISendEndpoint>>(() => GetSendEndpointFromProvider(address))).Value;
+            return _cache.Get(address);
+        }
+
+        public ConnectHandle ConnectSendObserver(ISendObserver observer)
+        {
+            return _sendEndpointProvider.ConnectSendObserver(observer);
         }
 
         Task<ISendEndpoint> GetSendEndpointFromProvider(Uri address)
@@ -47,11 +52,6 @@ namespace MassTransit.Transports
                 _log.DebugFormat("GetSendEndpoint: {0}", address);
 
             return _sendEndpointProvider.GetSendEndpoint(address);
-        }
-
-        public ConnectHandle ConnectSendObserver(ISendObserver observer)
-        {
-            return _sendEndpointProvider.ConnectSendObserver(observer);
         }
     }
 }

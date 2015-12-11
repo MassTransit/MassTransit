@@ -995,6 +995,7 @@
     <Compile Include="Util\AsyncTimer.cs" />
     <Compile Include="Util\IMediator.cs" />
     <Compile Include="Util\ITaskSupervisorScope.cs" />
+    <Compile Include="Util\LazyConcurrentDictionary.cs" />
     <Compile Include="Util\Mediator.cs" />
     <Compile Include="Util\RollingTimer.cs" />
     <Compile Include="Util\TaskSupervisor.cs" />

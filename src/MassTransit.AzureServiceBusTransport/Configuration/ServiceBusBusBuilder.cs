@@ -54,22 +54,22 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
 
         public override ISendEndpointProvider CreateSendEndpointProvider(params ISendPipeSpecification[] specifications)
         {
-            var sendPipe = CreateSendPipe(specifications);
+            var pipe = CreateSendPipe(specifications);
 
-            var provider = new ServiceBusSendEndpointProvider(MessageSerializer, InputAddress, SendTransportProvider, sendPipe);
+            var provider = new ServiceBusSendEndpointProvider(MessageSerializer, InputAddress, SendTransportProvider, pipe);
 
             return new SendEndpointCache(provider);
         }
 
         public override IPublishEndpointProvider CreatePublishEndpointProvider(params IPublishPipeSpecification[] specifications)
         {
-            var sendEndpointProvider = new PublishSendEndpointProvider(MessageSerializer, InputAddress, _hosts);
+            var provider = new PublishSendEndpointProvider(MessageSerializer, InputAddress, _hosts);
 
-            var endpointCache = new SendEndpointCache(sendEndpointProvider);
+            var cache = new SendEndpointCache(provider);
 
-            var publishPipe = CreatePublishPipe(specifications);
+            var pipe = CreatePublishPipe(specifications);
 
-            return new ServiceBusPublishEndpointProvider(_hosts[0], endpointCache, publishPipe);
+            return new ServiceBusPublishEndpointProvider(_hosts[0], cache, pipe);
         }
 
         protected override void PreBuild()

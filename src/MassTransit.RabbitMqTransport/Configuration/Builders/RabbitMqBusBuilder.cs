@@ -57,18 +57,18 @@ namespace MassTransit.RabbitMqTransport.Configuration.Builders
 
         public override ISendEndpointProvider CreateSendEndpointProvider(params ISendPipeSpecification[] specifications)
         {
-            var sendPipe = CreateSendPipe(specifications);
+            var pipe = CreateSendPipe(specifications);
 
-            var sendEndpointProvider = new RabbitMqSendEndpointProvider(MessageSerializer, InputAddress, SendTransportProvider, sendPipe);
+            var provider = new RabbitMqSendEndpointProvider(MessageSerializer, InputAddress, SendTransportProvider, pipe);
 
-            return new SendEndpointCache(sendEndpointProvider);
+            return new SendEndpointCache(provider);
         }
 
         public override IPublishEndpointProvider CreatePublishEndpointProvider(params IPublishPipeSpecification[] specifications)
         {
-            var publishPipe = CreatePublishPipe(specifications);
+            var pipe = CreatePublishPipe(specifications);
 
-            return new RabbitMqPublishEndpointProvider(_hosts[0], MessageSerializer, InputAddress, publishPipe);
+            return new RabbitMqPublishEndpointProvider(_hosts[0], MessageSerializer, InputAddress, pipe);
         }
     }
 }

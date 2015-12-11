@@ -17,6 +17,7 @@ namespace MassTransit.Internals.Reflection
     using System.Collections.Generic;
     using System.Reflection;
     using System.Reflection.Emit;
+    using System.Threading;
     using Extensions;
     using Util;
 
@@ -44,7 +45,7 @@ namespace MassTransit.Internals.Reflection
 
         public Type GetImplementationType(Type interfaceType)
         {
-            return _proxyTypes.GetOrAdd(interfaceType, x => new Lazy<Type>(() => CreateImplementation(x))).Value;
+            return _proxyTypes.GetOrAdd(interfaceType, x => new Lazy<Type>(() => CreateImplementation(x), LazyThreadSafetyMode.PublicationOnly)).Value;
         }
 
         Type CreateImplementation(Type interfaceType)

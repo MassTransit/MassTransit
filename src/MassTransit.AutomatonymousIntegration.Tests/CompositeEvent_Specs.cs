@@ -87,7 +87,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
         }
 
 
-        class TestStateMachine :
+        sealed class TestStateMachine :
             MassTransitStateMachine<Instance>
         {
             public TestStateMachine()
