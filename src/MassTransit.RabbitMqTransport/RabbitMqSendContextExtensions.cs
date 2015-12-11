@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RabbitMqTransport
 {
+    using System;
     using System.Collections.Generic;
 
 
@@ -23,6 +24,20 @@ namespace MassTransit.RabbitMqTransport
                 context.BasicProperties.Headers = new Dictionary<string, object>();
 
             context.BasicProperties.Headers[key] = value;
+        }
+
+        /// <summary>
+        /// Sets the priority of a message sent to the broker
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="priority"></param>
+        public static void SetPriority(this SendContext context, byte priority)
+        {
+            RabbitMqSendContext sendContext;
+            if (!context.TryGetPayload(out sendContext))
+                throw new ArgumentException("The RabbitMqSendContext was not available");
+
+            sendContext.BasicProperties.Priority = priority;
         }
     }
 }

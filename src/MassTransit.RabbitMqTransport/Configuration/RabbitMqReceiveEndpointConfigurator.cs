@@ -137,24 +137,17 @@ namespace MassTransit.RabbitMqTransport.Configuration
 
         public void SetQueueArgument(string key, object value)
         {
-            if (key == null)
-                throw new ArgumentNullException(nameof(key));
-
-            if (value == null)
-                _settings.QueueArguments.Remove(key);
-            else
-                _settings.QueueArguments[key] = value;
+            _settings.SetQueueArgument(key, value);
         }
 
         public void SetExchangeArgument(string key, object value)
         {
-            if (key == null)
-                throw new ArgumentNullException(nameof(key));
+            _settings.SetExchangeArgument(key, value);
+        }
 
-            if (value == null)
-                _settings.ExchangeArguments.Remove(key);
-            else
-                _settings.ExchangeArguments[key] = value;
+        public void EnablePriority(byte maxPriority)
+        {
+            _settings.EnablePriority(maxPriority);
         }
 
         public void ConnectManagementEndpoint(IManagementEndpointConfigurator management)
