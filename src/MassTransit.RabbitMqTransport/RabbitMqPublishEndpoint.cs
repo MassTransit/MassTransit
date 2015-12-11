@@ -13,7 +13,6 @@
 namespace MassTransit.RabbitMqTransport
 {
     using System;
-    using System.Collections.Concurrent;
     using System.Linq;
     using System.Threading.Tasks;
     using Integration;
@@ -27,7 +26,7 @@ namespace MassTransit.RabbitMqTransport
     public class RabbitMqPublishEndpointProvider :
         IPublishEndpointProvider
     {
-        readonly ConcurrentDictionary<Type, Lazy<ISendEndpoint>> _cachedEndpoints;
+        readonly LazyConcurrentDictionary<Type, ISendEndpoint> _cachedEndpoints;
         readonly IRabbitMqHost _host;
         readonly PublishObservable _publishObservable;
         readonly IPublishPipe _publishPipe;
@@ -40,7 +39,7 @@ namespace MassTransit.RabbitMqTransport
             _serializer = serializer;
             _sourceAddress = sourceAddress;
             _publishPipe = publishPipe;
-            _cachedEndpoints = new ConcurrentDictionary<Type, Lazy<ISendEndpoint>>();
+            _cachedEndpoints = new LazyConcurrentDictionary<Type, ISendEndpoint>(CreateSendEndpoint);
             _publishObservable = new PublishObservable();
         }
 
@@ -51,7 +50,7 @@ namespace MassTransit.RabbitMqTransport
 
         public Task<ISendEndpoint> GetPublishSendEndpoint(Type messageType)
         {
-            return Task.FromResult(_cachedEndpoints.GetOrAdd(messageType, x => new Lazy<ISendEndpoint>(() => CreateSendEndpoint(x))).Value);
+            return _cachedEndpoints.Get(messageType);
         }
 
         public ConnectHandle ConnectPublishObserver(IPublishObserver observer)
@@ -59,7 +58,7 @@ namespace MassTransit.RabbitMqTransport
             return _publishObservable.Connect(observer);
         }
 
-        ISendEndpoint CreateSendEndpoint(Type messageType)
+        Task<ISendEndpoint> CreateSendEndpoint(Type messageType)
         {
             SendSettings sendSettings = _host.GetSendSettings(messageType);
 
@@ -74,7 +73,7 @@ namespace MassTransit.RabbitMqTransport
 
             var sendTransport = new RabbitMqSendTransport(modelCache, sendSettings, bindings);
 
-            return new SendEndpoint(sendTransport, _serializer, destinationAddress, _sourceAddress, SendPipe.Empty);
+            return Task.FromResult<ISendEndpoint>(new SendEndpoint(sendTransport, _serializer, destinationAddress, _sourceAddress, SendPipe.Empty));
         }
     }
 }
