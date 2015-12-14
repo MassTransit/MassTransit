@@ -31,6 +31,9 @@ namespace MassTransit.Policies
 
         public static async Task UntilCancelled(CancellationToken cancellationToken, Func<Task> callback)
         {
+            if (cancellationToken.IsCancellationRequested)
+                return;
+
             await Task.Yield();
 
             IRepeatPolicy repeatPolicy = UntilCancelled(cancellationToken);
@@ -39,8 +42,14 @@ namespace MassTransit.Policies
                 TimeSpan delay = TimeSpan.Zero;
                 do
                 {
+                    if (cancellationToken.IsCancellationRequested)
+                        break;
+
                     if (delay > TimeSpan.Zero)
                         await Task.Delay(delay, repeatContext.CancellationToken).ConfigureAwait(false);
+
+                    if (cancellationToken.IsCancellationRequested)
+                        break;
 
                     await callback().ConfigureAwait(false);
                 }

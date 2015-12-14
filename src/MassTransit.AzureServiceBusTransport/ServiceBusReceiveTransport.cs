@@ -35,6 +35,7 @@ namespace MassTransit.AzureServiceBusTransport
         readonly ReceiveObservable _receiveObservers;
         readonly ReceiveSettings _settings;
         readonly TopicSubscriptionSettings[] _subscriptionSettings;
+        IRetryPolicy _connectionRetryPolicy;
 
         public ServiceBusReceiveTransport(IServiceBusHost host, ReceiveSettings settings,
             params TopicSubscriptionSettings[] subscriptionSettings)
@@ -44,6 +45,8 @@ namespace MassTransit.AzureServiceBusTransport
             _subscriptionSettings = subscriptionSettings;
             _receiveObservers = new ReceiveObservable();
             _endpointObservers = new ReceiveEndpointObservable();
+
+            _connectionRetryPolicy = Retry.Exponential(1000, TimeSpan.FromMilliseconds(100), TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(1));
         }
 
         void IProbeSite.Probe(ProbeContext context)
@@ -101,7 +104,7 @@ namespace MassTransit.AzureServiceBusTransport
 
         async void Receiver(TaskSupervisor supervisor, IPipe<ConnectionContext> connectionPipe)
         {
-            await Repeat.UntilCancelled(supervisor.StopToken, async () =>
+            await _connectionRetryPolicy.RetryUntilCancelled(async () =>
             {
                 if (_log.IsDebugEnabled)
                     _log.DebugFormat("Connecting receive transport: {0}", _host.Settings.GetInputAddress(_settings.QueueDescription));
@@ -124,7 +127,7 @@ namespace MassTransit.AzureServiceBusTransport
 
                     await _endpointObservers.Faulted(new Faulted(inputAddress, ex));
                 }
-            }).ConfigureAwait(false);
+            }, supervisor.StopToken).ConfigureAwait(false);
         }
 
 
