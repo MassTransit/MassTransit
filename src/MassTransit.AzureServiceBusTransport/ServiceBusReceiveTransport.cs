@@ -35,7 +35,7 @@ namespace MassTransit.AzureServiceBusTransport
         readonly ReceiveObservable _receiveObservers;
         readonly ReceiveSettings _settings;
         readonly TopicSubscriptionSettings[] _subscriptionSettings;
-        IRetryPolicy _connectionRetryPolicy;
+        readonly IRetryPolicy _connectionRetryPolicy;
 
         public ServiceBusReceiveTransport(IServiceBusHost host, ReceiveSettings settings,
             params TopicSubscriptionSettings[] subscriptionSettings)
@@ -125,7 +125,7 @@ namespace MassTransit.AzureServiceBusTransport
 
                     var inputAddress = context.GetQueueAddress(_settings.QueueDescription);
 
-                    await _endpointObservers.Faulted(new Faulted(inputAddress, ex));
+                    await _endpointObservers.Faulted(new Faulted(inputAddress, ex)).ConfigureAwait(false);
                 }
             }, supervisor.StopToken).ConfigureAwait(false);
         }
