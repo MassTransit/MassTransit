@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -19,17 +19,29 @@ namespace MassTransit.Policies
 
     public static class PipeRetryExtensions
     {
-        public static async Task Retry(this IRetryPolicy retryPolicy, Func<Task> retryMethod,
-            CancellationToken cancellationToken = default(CancellationToken))
+        public static async Task Retry(this IRetryPolicy retryPolicy, Func<Task> retryMethod, CancellationToken cancellationToken = default(CancellationToken))
         {
-            using (IRetryContext retryContext = retryPolicy.GetRetryContext())
+            using (var retryContext = retryPolicy.GetRetryContext())
             {
                 await Attempt(retryContext, retryMethod, cancellationToken).ConfigureAwait(false);
             }
         }
 
-        static async Task Attempt(IRetryContext retryContext, Func<Task> retryMethod,
-            CancellationToken cancellationToken)
+        public static async Task RetryUntilCancelled(this IRetryPolicy retryPolicy, Func<Task> retryMethod,
+            CancellationToken cancellationToken = default(CancellationToken))
+        {
+            await Task.Yield();
+
+            while (!cancellationToken.IsCancellationRequested)
+            {
+                using (var retryContext = retryPolicy.GetRetryContext())
+                {
+                    await Attempt(retryContext, retryMethod, cancellationToken).ConfigureAwait(false);
+                }
+            }
+        }
+
+        static async Task Attempt(IRetryContext retryContext, Func<Task> retryMethod, CancellationToken cancellationToken)
         {
             if (cancellationToken.IsCancellationRequested)
                 throw new TaskCanceledException();
@@ -52,10 +64,10 @@ namespace MassTransit.Policies
             await Attempt(retryContext, retryMethod, cancellationToken).ConfigureAwait(false);
         }
 
-        public static async Task<T> Retry<T>(this IRetryPolicy retryPolicy, Func<Task<T>> retryMethod, 
+        public static async Task<T> Retry<T>(this IRetryPolicy retryPolicy, Func<Task<T>> retryMethod,
             CancellationToken cancellationToken = default(CancellationToken))
         {
-            using (IRetryContext retryContext = retryPolicy.GetRetryContext())
+            using (var retryContext = retryPolicy.GetRetryContext())
             {
                 return await Attempt(retryContext, retryMethod, cancellationToken).ConfigureAwait(false);
             }

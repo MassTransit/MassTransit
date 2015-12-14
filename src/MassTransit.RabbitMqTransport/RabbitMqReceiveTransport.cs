@@ -94,7 +94,7 @@ namespace MassTransit.RabbitMqTransport
         {
             try
             {
-                await Repeat.UntilCancelled(supervisor.StopToken, () => _connectionRetryPolicy.Retry(async () =>
+                await _connectionRetryPolicy.RetryUntilCancelled(async () =>
                 {
                     try
                     {
@@ -122,7 +122,7 @@ namespace MassTransit.RabbitMqTransport
 
                         await _receiveEndpointObservable.Faulted(new Faulted(inputAddress, ex)).ConfigureAwait(false);
                     }
-                }));
+                }, supervisor.StopToken).ConfigureAwait(false);
             }
             catch (TaskCanceledException)
             {
