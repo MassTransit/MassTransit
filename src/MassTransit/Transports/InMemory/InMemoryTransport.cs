@@ -145,7 +145,7 @@ namespace MassTransit.Transports.InMemory
             byte[] body;
             using (var bodyStream = context.GetBody())
             {
-                body = await GetMessageBody(bodyStream);
+                body = await GetMessageBody(bodyStream).ConfigureAwait(false);
             }
 
             var messageType = "Unknown";
@@ -167,7 +167,7 @@ namespace MassTransit.Transports.InMemory
 
         async Task DispatchMessage(InMemoryTransportMessage message)
         {
-            await _supervisor.Ready;
+            await _supervisor.Ready.ConfigureAwait(false);
 
             if (_supervisor.StopToken.IsCancellationRequested)
                 return;

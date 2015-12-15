@@ -61,7 +61,7 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
 
             context.GetOrAddPayload(() => _settings);
 
-            await next.Send(context);
+            await next.Send(context).ConfigureAwait(false);
         }
 
         async Task CreateSubscription(NamespaceManager rootNamespaceManager, NamespaceManager namespaceManager, TopicSubscriptionSettings settings)

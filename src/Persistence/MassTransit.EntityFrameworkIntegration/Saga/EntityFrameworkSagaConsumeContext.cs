@@ -59,7 +59,7 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
                     Saga.CorrelationId);
             }
 
-            await _dbContext.SaveChangesAsync(CancellationToken);
+            await _dbContext.SaveChangesAsync(CancellationToken).ConfigureAwait(false);
         }
 
         public bool IsCompleted { get; private set; }

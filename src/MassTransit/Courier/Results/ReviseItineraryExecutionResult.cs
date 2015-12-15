@@ -55,10 +55,10 @@ namespace MassTransit.Courier.Results
 
         protected override async Task PublishActivityEvents(RoutingSlip routingSlip, RoutingSlipBuilder builder)
         {
-            await base.PublishActivityEvents(routingSlip, builder);
+            await base.PublishActivityEvents(routingSlip, builder).ConfigureAwait(false);
 
             await Publisher.PublishRoutingSlipRevised(Context.ExecutionId, Context.Timestamp, Context.Elapsed, routingSlip.Variables,
-                routingSlip.Itinerary, builder.SourceItinerary);
+                routingSlip.Itinerary, builder.SourceItinerary).ConfigureAwait(false);
         }
     }
 

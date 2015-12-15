@@ -43,9 +43,9 @@ namespace MassTransit.Saga.Pipeline.Filters
                 throw new ConsumerMessageException(message);
             }
 
-            await saga.Consume(context);
+            await saga.Consume(context).ConfigureAwait(false);
 
-            await next.Send(context);
+            await next.Send(context).ConfigureAwait(false);
         }
     }
 }

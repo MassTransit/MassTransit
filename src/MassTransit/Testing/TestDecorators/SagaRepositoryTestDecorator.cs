@@ -86,7 +86,7 @@ namespace MassTransit.Testing.TestDecorators
 
                 try
                 {
-                    await _pipe.Send(context);
+                    await _pipe.Send(context).ConfigureAwait(false);
 
                     _received.Add(context);
                 }
@@ -126,7 +126,7 @@ namespace MassTransit.Testing.TestDecorators
             {
                 var interceptPipe = new InterceptPolicyPipe(_created, next);
 
-                await _policy.Missing(context, interceptPipe);
+                await _policy.Missing(context, interceptPipe).ConfigureAwait(false);
             }
 
 
@@ -151,7 +151,7 @@ namespace MassTransit.Testing.TestDecorators
                 {
                     _created.Add(context);
 
-                    await _pipe.Send(context);
+                    await _pipe.Send(context).ConfigureAwait(false);
                 }
             }
         }

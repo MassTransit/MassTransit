@@ -33,7 +33,7 @@ namespace MassTransit.WindsorIntegration
         {
             using (var lifetimeScope = new MessageLifetimeScope())
             {
-                await next.Send(context);
+                await next.Send(context).ConfigureAwait(false);
             }
         }
     }

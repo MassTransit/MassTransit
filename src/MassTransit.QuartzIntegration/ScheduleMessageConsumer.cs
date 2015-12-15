@@ -47,7 +47,7 @@ namespace MassTransit.QuartzIntegration
             var correlationId = context.Message.CorrelationId.ToString("N");
 
             var jobKey = new JobKey(correlationId);
-            IJobDetail jobDetail = await CreateJobDetail(context, context.Message.Destination, jobKey);
+            IJobDetail jobDetail = await CreateJobDetail(context, context.Message.Destination, jobKey).ConfigureAwait(false);
 
             ITrigger trigger = TriggerBuilder.Create()
                 .ForJob(jobDetail)
@@ -66,7 +66,7 @@ namespace MassTransit.QuartzIntegration
 
             var jobKey = new JobKey(context.Message.Schedule.ScheduleId, context.Message.Schedule.ScheduleGroup);
 
-            IJobDetail jobDetail = await CreateJobDetail(context, context.Message.Destination, jobKey);
+            IJobDetail jobDetail = await CreateJobDetail(context, context.Message.Destination, jobKey).ConfigureAwait(false);
 
             var triggerKey = new TriggerKey("Recurring.Trigger." + context.Message.Schedule.ScheduleId, context.Message.Schedule.ScheduleGroup);
 
@@ -115,7 +115,7 @@ namespace MassTransit.QuartzIntegration
             {
                 using (Stream bodyStream = context.ReceiveContext.GetBody())
                 {
-                    await bodyStream.CopyToAsync(ms);
+                    await bodyStream.CopyToAsync(ms).ConfigureAwait(false);
                 }
 
                 body = Encoding.UTF8.GetString(ms.ToArray());

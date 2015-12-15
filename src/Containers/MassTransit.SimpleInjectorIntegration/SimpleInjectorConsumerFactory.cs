@@ -41,7 +41,7 @@ namespace MassTransit.SimpleInjectorIntegration
                         string.Format("Unable to resolve consumer type '{0}'.", TypeMetadataCache<TConsumer>.ShortName));
                 }
 
-                await next.Send(context.PushConsumer(consumer));
+                await next.Send(context.PushConsumer(consumer)).ConfigureAwait(false);
             }
         }
 

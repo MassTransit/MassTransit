@@ -151,7 +151,7 @@ namespace MassTransit.AzureServiceBusTransport
                             subscriptionDescription.ForwardTo);
                     }
 
-                    await namespaceManager.UpdateSubscriptionAsync(description);
+                    await namespaceManager.UpdateSubscriptionAsync(description).ConfigureAwait(false);
 
                     create = false;
                 }

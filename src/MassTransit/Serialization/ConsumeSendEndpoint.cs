@@ -202,9 +202,9 @@ namespace MassTransit.Serialization
                     sendContext.InitiatorId = _context.CorrelationId;
 
                 if (_pipe != null)
-                    await _pipe.Send(sendContext);
+                    await _pipe.Send(sendContext).ConfigureAwait(false);
                 if (_sendPipe != null)
-                    await _sendPipe.Send(sendContext);
+                    await _sendPipe.Send(sendContext).ConfigureAwait(false);
             }
         }
     }

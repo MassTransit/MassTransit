@@ -67,7 +67,7 @@ namespace MassTransit.Testing.TestDecorators
             {
                 try
                 {
-                    await _next.Send(context);
+                    await _next.Send(context).ConfigureAwait(false);
 
                     _received.Add(context);
                 }

@@ -102,16 +102,16 @@ namespace MassTransit.Util
         {
             await Task.Yield();
 
-            await stopRequested;
+            await stopRequested.ConfigureAwait(false);
 
-            await Stop("Parent Stop Requested");
+            await Stop("Parent Stop Requested").ConfigureAwait(false);
         }
 
         async void RaiseStopEventOnCancel()
         {
             await Task.Yield();
 
-            await Stop("Parent Cancellation Requested");
+            await Stop("Parent Cancellation Requested").ConfigureAwait(false);
         }
 
         public async Task Stop(string reason)

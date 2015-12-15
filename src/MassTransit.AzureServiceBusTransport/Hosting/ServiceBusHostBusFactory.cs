@@ -24,7 +24,7 @@ namespace MassTransit.AzureServiceBusTransport.Hosting
         IHostBusFactory
     {
         readonly ILog _log = Logger.Get<ServiceBusHostBusFactory>();
-        ServiceBusSettings _settings;
+        readonly ServiceBusSettings _settings;
 
         public ServiceBusHostBusFactory(ISettingsProvider settingsProvider)
         {

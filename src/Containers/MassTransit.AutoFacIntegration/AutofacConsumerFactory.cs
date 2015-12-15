@@ -42,7 +42,7 @@ namespace MassTransit.AutofacIntegration
                     throw new ConsumerException($"Unable to resolve consumer type '{TypeMetadataCache<TConsumer>.ShortName}'.");
                 }
 
-                await next.Send(context.PushConsumer(consumer));
+                await next.Send(context.PushConsumer(consumer)).ConfigureAwait(false);
             }
         }
 

@@ -18,7 +18,7 @@ namespace MassTransit.Util
 
     public static class ExceptionUtil
     {
-        static Regex _cleanup;
+        static readonly Regex _cleanup;
 
         static ExceptionUtil()
         {

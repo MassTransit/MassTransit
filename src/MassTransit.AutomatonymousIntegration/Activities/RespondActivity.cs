@@ -53,15 +53,15 @@ namespace Automatonymous.Activities
 
             TMessage message = _messageFactory(consumeContext);
 
-            await consumeContext.RespondAsync(message, _responsePipe);
+            await consumeContext.RespondAsync(message, _responsePipe).ConfigureAwait(false);
 
-            await next.Execute(context);
+            await next.Execute(context).ConfigureAwait(false);
         }
 
         async Task Activity<TInstance, TData>.Faulted<TException>(BehaviorExceptionContext<TInstance, TData, TException> context,
             Behavior<TInstance, TData> next)
         {
-            await next.Faulted(context);
+            await next.Faulted(context).ConfigureAwait(false);
         }
     }
 }

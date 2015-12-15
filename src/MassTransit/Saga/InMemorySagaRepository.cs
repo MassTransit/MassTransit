@@ -60,7 +60,7 @@ namespace MassTransit.Saga
             Guid sagaId = context.CorrelationId.Value;
 
             bool needToLeaveSagas = true;
-            await _sagas.MarkInUse(context.CancellationToken);
+            await _sagas.MarkInUse(context.CancellationToken).ConfigureAwait(false);
             try
             {
                 SagaInstance<TSaga> saga = _sagas[sagaId];
@@ -68,14 +68,14 @@ namespace MassTransit.Saga
                 {
                     var missingSagaPipe = new MissingPipe<T>(this, next, true);
 
-                    await policy.Missing(context, missingSagaPipe);
+                    await policy.Missing(context, missingSagaPipe).ConfigureAwait(false);
 
                     _sagas.Release();
                     needToLeaveSagas = false;
                 }
                 else
                 {
-                    await saga.MarkInUse(context.CancellationToken);
+                    await saga.MarkInUse(context.CancellationToken).ConfigureAwait(false);
                     try
                     {
                         _sagas.Release();
@@ -84,9 +84,9 @@ namespace MassTransit.Saga
                         if (_log.IsDebugEnabled)
                             _log.DebugFormat("SAGA:{0}:{1} Used {2}", TypeMetadataCache<TSaga>.ShortName, sagaId, TypeMetadataCache<T>.ShortName);
 
-                        SagaConsumeContext<TSaga, T> sagaConsumeContext = new InMemorySagaConsumeContext<TSaga, T>(this, context, saga.Instance, () => Remove(saga, context.CancellationToken));
+                        SagaConsumeContext<TSaga, T> sagaConsumeContext = new InMemorySagaConsumeContext<TSaga, T>(context, saga.Instance, () => Remove(saga, context.CancellationToken));
 
-                        await policy.Existing(sagaConsumeContext, next);
+                        await policy.Existing(sagaConsumeContext, next).ConfigureAwait(false);
                     }
                     finally
                     {
@@ -108,26 +108,26 @@ namespace MassTransit.Saga
             if (existingSagas.Length == 0)
             {
                 var missingSagaPipe = new MissingPipe<T>(this, next);
-                await policy.Missing(context, missingSagaPipe);
+                await policy.Missing(context, missingSagaPipe).ConfigureAwait(false);
             }
             else
-                await Task.WhenAll(existingSagas.Select(instance => SendToInstance(context, policy, instance, next)));
+                await Task.WhenAll(existingSagas.Select(instance => SendToInstance(context, policy, instance, next))).ConfigureAwait(false);
         }
 
         async Task SendToInstance<T>(SagaQueryConsumeContext<TSaga, T> context, ISagaPolicy<TSaga, T> policy, SagaInstance<TSaga> saga,
             IPipe<SagaConsumeContext<TSaga, T>> next)
             where T : class
         {
-            await saga.MarkInUse(context.CancellationToken);
+            await saga.MarkInUse(context.CancellationToken).ConfigureAwait(false);
             try
             {
                 if (_log.IsDebugEnabled)
                     _log.DebugFormat("SAGA:{0}:{1} Used {2}", TypeMetadataCache<TSaga>.ShortName, saga.Instance.CorrelationId, TypeMetadataCache<T>.ShortName);
 
-                SagaConsumeContext<TSaga, T> sagaConsumeContext = new InMemorySagaConsumeContext<TSaga, T>(this, context, saga.Instance,
+                SagaConsumeContext<TSaga, T> sagaConsumeContext = new InMemorySagaConsumeContext<TSaga, T>(context, saga.Instance,
                     () => Remove(saga, context.CancellationToken));
 
-                await policy.Existing(sagaConsumeContext, next);
+                await policy.Existing(sagaConsumeContext, next).ConfigureAwait(false);
             }
             finally
             {
@@ -143,7 +143,7 @@ namespace MassTransit.Saga
         /// <returns></returns>
         public async Task Add(TSaga newSaga, CancellationToken cancellationToken)
         {
-            await _sagas.MarkInUse(cancellationToken);
+            await _sagas.MarkInUse(cancellationToken).ConfigureAwait(false);
             try
             {
                 _sagas.Add(newSaga);
@@ -162,7 +162,7 @@ namespace MassTransit.Saga
         /// <returns></returns>
         public async Task Remove(TSaga saga, CancellationToken cancellationToken)
         {
-            await _sagas.MarkInUse(cancellationToken);
+            await _sagas.MarkInUse(cancellationToken).ConfigureAwait(false);
             try
             {
                 _sagas.Remove(new SagaInstance<TSaga>(saga));
@@ -175,7 +175,7 @@ namespace MassTransit.Saga
 
         async Task Remove(SagaInstance<TSaga> saga, CancellationToken cancellationToken)
         {
-            await _sagas.MarkInUse(cancellationToken);
+            await _sagas.MarkInUse(cancellationToken).ConfigureAwait(false);
             try
             {
                 _sagas.Remove(saga);
@@ -227,13 +227,13 @@ namespace MassTransit.Saga
 
             public async Task Send(SagaConsumeContext<TSaga, TMessage> context)
             {
-                var proxy = new InMemorySagaConsumeContext<TSaga, TMessage>(_repository, context, context.Saga,
+                var proxy = new InMemorySagaConsumeContext<TSaga, TMessage>(context, context.Saga,
                     () => RemoveNewSaga(context.Saga, context.CancellationToken));
 
                 if (_withinLock)
                     _repository.AddWithinLock(context.Saga);
                 else
-                    await _repository.Add(context.Saga, context.CancellationToken);
+                    await _repository.Add(context.Saga, context.CancellationToken).ConfigureAwait(false);
 
                 if (_log.IsDebugEnabled)
                 {
@@ -243,11 +243,11 @@ namespace MassTransit.Saga
 
                 try
                 {
-                    await _next.Send(proxy);
+                    await _next.Send(proxy).ConfigureAwait(false);
 
                     if (proxy.IsCompleted)
                     {
-                        await RemoveNewSaga(proxy.Saga, context.CancellationToken);
+                        await RemoveNewSaga(proxy.Saga, context.CancellationToken).ConfigureAwait(false);
                     }
                 }
                 catch (Exception)
@@ -258,7 +258,7 @@ namespace MassTransit.Saga
                             TypeMetadataCache<TMessage>.ShortName);
                     }
 
-                    await RemoveNewSaga(proxy.Saga, context.CancellationToken);
+                    await RemoveNewSaga(proxy.Saga, context.CancellationToken).ConfigureAwait(false);
 
                     throw;
                 }
@@ -269,7 +269,7 @@ namespace MassTransit.Saga
                 if (_withinLock)
                     _repository.RemoveWithinLock(saga);
                 else
-                    await _repository.Remove(saga, cancellationToken);
+                    await _repository.Remove(saga, cancellationToken).ConfigureAwait(false);
             }
         }
     }

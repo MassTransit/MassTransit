@@ -82,15 +82,15 @@ namespace MassTransit.Courier.Hosts
                         executeContext.TrackingNumber);
                 }
 
-                await _activityFactory.Execute(executeContext, _executePipe);
+                await _activityFactory.Execute(executeContext, _executePipe).ConfigureAwait(false);
 
-                await context.NotifyConsumed(timer.Elapsed, TypeMetadataCache<TActivity>.ShortName);
+                await context.NotifyConsumed(timer.Elapsed, TypeMetadataCache<TActivity>.ShortName).ConfigureAwait(false);
 
-                await next.Send(context);
+                await next.Send(context).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
-                await context.NotifyFaulted(timer.Elapsed, TypeMetadataCache<TActivity>.ShortName, ex);
+                await context.NotifyFaulted(timer.Elapsed, TypeMetadataCache<TActivity>.ShortName, ex).ConfigureAwait(false);
                 throw;
             }
         }

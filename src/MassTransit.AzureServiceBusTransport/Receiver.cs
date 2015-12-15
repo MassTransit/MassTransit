@@ -91,7 +91,7 @@ namespace MassTransit.AzureServiceBusTransport
         {
             await Task.Yield();
 
-            await _participant.StopRequested;
+            await _participant.StopRequested.ConfigureAwait(false);
 
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Shutting down receiver: {0}", _inputAddress);
@@ -117,7 +117,7 @@ namespace MassTransit.AzureServiceBusTransport
 
             try
             {
-                await _messageReceiver.CloseAsync();
+                await _messageReceiver.CloseAsync().ConfigureAwait(false);
             }
             finally
             {
@@ -135,7 +135,7 @@ namespace MassTransit.AzureServiceBusTransport
         {
             if (_shuttingDown)
             {
-                await WaitAndAbandonMessage(message);
+                await WaitAndAbandonMessage(message).ConfigureAwait(false);
                 return;
             }
 

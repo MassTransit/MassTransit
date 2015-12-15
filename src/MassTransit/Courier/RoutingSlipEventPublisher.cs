@@ -225,16 +225,16 @@ namespace MassTransit.Courier
                 {
                     if (subscription.Events == RoutingSlipEvents.All || subscription.Events.HasFlag(eventFlag))
                     {
-                        var endpoint = await _sendEndpointProvider.GetSendEndpoint(subscription.Address);
+                        var endpoint = await _sendEndpointProvider.GetSendEndpoint(subscription.Address).ConfigureAwait(false);
 
                         var subscriptionMessage = messageFactory(subscription.Include);
 
-                        await endpoint.Send(subscriptionMessage);
+                        await endpoint.Send(subscriptionMessage).ConfigureAwait(false);
                     }
                 }
             }
             else
-                await _publishEndpoint.Publish(messageFactory(RoutingSlipEventContents.All));
+                await _publishEndpoint.Publish(messageFactory(RoutingSlipEventContents.All)).ConfigureAwait(false);
         }
     }
 }

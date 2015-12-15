@@ -43,17 +43,17 @@ namespace MassTransit.Courier.Pipeline
             {
                 try
                 {
-                    ExecutionResult result = await context.Activity.Execute(context);
+                    ExecutionResult result = await context.Activity.Execute(context).ConfigureAwait(false);
 
-                    await result.Evaluate();
+                    await result.Evaluate().ConfigureAwait(false);
 
-                    await next.Send(context);
+                    await next.Send(context).ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {
                     ExecutionResult result = context.Faulted(ex);
 
-                    await result.Evaluate();
+                    await result.Evaluate().ConfigureAwait(false);
                 }
 
             }

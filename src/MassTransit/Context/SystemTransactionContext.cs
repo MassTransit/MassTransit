@@ -47,7 +47,7 @@ namespace MassTransit.Context
             if (_completed)
                 return;
 
-            await Task.Factory.FromAsync(_transaction.BeginCommit, _transaction.EndCommit, null);
+            await Task.Factory.FromAsync(_transaction.BeginCommit, _transaction.EndCommit, null).ConfigureAwait(false);
 
             _completed = true;
         }

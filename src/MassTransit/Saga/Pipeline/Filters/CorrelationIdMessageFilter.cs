@@ -49,7 +49,7 @@ namespace MassTransit.Saga.Pipeline.Filters
 
             var proxy = new CorrelationIdConsumeContextProxy<TMessage>(context, correlationId);
 
-            await next.Send(proxy);
+            await next.Send(proxy).ConfigureAwait(false);
         }
     }
 }

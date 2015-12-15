@@ -45,7 +45,7 @@ namespace MassTransit.Host.Activities
 
                 var activityContext = new HostExecuteActivityContext<TActivity, TArguments>(activity, context);
 
-                await next.Send(activityContext);
+                await next.Send(activityContext).ConfigureAwait(false);
             }
         }
 

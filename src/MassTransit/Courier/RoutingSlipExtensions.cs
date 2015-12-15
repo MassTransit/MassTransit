@@ -58,13 +58,13 @@ namespace MassTransit.Courier
 
                 IRoutingSlipEventPublisher publisher = new RoutingSlipEventPublisher(source, source, routingSlip);
 
-                await publisher.PublishRoutingSlipCompleted(timestamp, duration, routingSlip.Variables);
+                await publisher.PublishRoutingSlipCompleted(timestamp, duration, routingSlip.Variables).ConfigureAwait(false);
             }
             else
             {
-                var endpoint = await source.GetSendEndpoint(routingSlip.GetNextExecuteAddress());
+                var endpoint = await source.GetSendEndpoint(routingSlip.GetNextExecuteAddress()).ConfigureAwait(false);
 
-                await endpoint.Send(routingSlip);
+                await endpoint.Send(routingSlip).ConfigureAwait(false);
             }
         }
 

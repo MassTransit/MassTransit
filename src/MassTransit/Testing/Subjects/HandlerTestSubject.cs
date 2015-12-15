@@ -60,7 +60,7 @@ namespace MassTransit.Testing.Subjects
         {
             try
             {
-                await _handler(context);
+                await _handler(context).ConfigureAwait(false);
 
                 _received.Add(context);
             }

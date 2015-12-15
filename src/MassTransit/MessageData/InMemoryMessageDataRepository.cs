@@ -47,7 +47,7 @@ namespace MassTransit.MessageData
 
             using (var ms = new MemoryStream())
             {
-                await stream.CopyToAsync(ms);
+                await stream.CopyToAsync(ms).ConfigureAwait(false);
 
                 _values.TryAdd(address, ms.ToArray());
             }

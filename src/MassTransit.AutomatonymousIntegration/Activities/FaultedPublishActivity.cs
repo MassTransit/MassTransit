@@ -61,10 +61,10 @@ namespace Automatonymous.Activities
             {
                 TMessage message = _messageFactory(exceptionContext);
 
-                await exceptionContext.Publish(message, _publishPipe);
+                await exceptionContext.Publish(message, _publishPipe).ConfigureAwait(false);
             }
 
-            await next.Faulted(context);
+            await next.Faulted(context).ConfigureAwait(false);
         }
     }
 }

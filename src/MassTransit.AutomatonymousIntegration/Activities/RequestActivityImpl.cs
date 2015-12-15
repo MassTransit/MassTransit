@@ -36,9 +36,9 @@ namespace Automatonymous.Activities
         {
             var pipe = new SendRequestPipe(consumeContext.ReceiveContext.InputAddress);
 
-            ISendEndpoint endpoint = await consumeContext.GetSendEndpoint(_request.Settings.ServiceAddress);
+            ISendEndpoint endpoint = await consumeContext.GetSendEndpoint(_request.Settings.ServiceAddress).ConfigureAwait(false);
 
-            await endpoint.Send(requestMessage, pipe);
+            await endpoint.Send(requestMessage, pipe).ConfigureAwait(false);
 
             _request.SetRequestId(context.Instance, pipe.RequestId);
 
@@ -52,12 +52,12 @@ namespace Automatonymous.Activities
                 MessageSchedulerContext schedulerContext;
                 if (_request.Settings.SchedulingServiceAddress != null)
                 {
-                    ISendEndpoint scheduleEndpoint = await consumeContext.GetSendEndpoint(_request.Settings.SchedulingServiceAddress);
+                    ISendEndpoint scheduleEndpoint = await consumeContext.GetSendEndpoint(_request.Settings.SchedulingServiceAddress).ConfigureAwait(false);
 
-                    await scheduleEndpoint.ScheduleSend(consumeContext.ReceiveContext.InputAddress, expirationTime, message);
+                    await scheduleEndpoint.ScheduleSend(consumeContext.ReceiveContext.InputAddress, expirationTime, message).ConfigureAwait(false);
                 }
                 else if (consumeContext.TryGetPayload(out schedulerContext))
-                    await schedulerContext.ScheduleSend(message, expirationTime, Pipe.Empty<SendContext>());
+                    await schedulerContext.ScheduleSend(message, expirationTime, Pipe.Empty<SendContext>()).ConfigureAwait(false);
                 else
                     throw new ConfigurationException("A request timeout was specified but no message scheduler was specified or available");
             }

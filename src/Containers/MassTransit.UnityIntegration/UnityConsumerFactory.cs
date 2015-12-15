@@ -41,7 +41,7 @@ namespace MassTransit.UnityIntegration
                         TypeMetadataCache<TConsumer>.ShortName));
                 }
 
-                await next.Send(context.PushConsumer(consumer));
+                await next.Send(context.PushConsumer(consumer)).ConfigureAwait(false);
             }
         }
 

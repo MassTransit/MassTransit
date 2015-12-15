@@ -49,7 +49,7 @@ namespace MassTransit.AutofacIntegration
 
             using (outerScope.BeginLifetimeScope(_name))
             {
-                await _repository.Send(context, policy, next);
+                await _repository.Send(context, policy, next).ConfigureAwait(false);
             }
         }
 
@@ -60,7 +60,7 @@ namespace MassTransit.AutofacIntegration
 
             using (outerScope.BeginLifetimeScope(_name))
             {
-                await _repository.SendQuery(context, policy, next);
+                await _repository.SendQuery(context, policy, next).ConfigureAwait(false);
             }
         }
 

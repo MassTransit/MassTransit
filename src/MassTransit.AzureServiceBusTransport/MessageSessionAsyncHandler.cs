@@ -41,7 +41,7 @@ namespace MassTransit.AzureServiceBusTransport
         {
             if (_receiver.IsShuttingDown)
             {
-                await WaitAndAbandonMessage(message);
+                await WaitAndAbandonMessage(message).ConfigureAwait(false);
                 return;
             }
 

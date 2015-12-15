@@ -46,7 +46,7 @@ namespace MassTransit.Pipeline.Filters
 
         async Task IFilter<ExceptionReceiveContext>.Send(ExceptionReceiveContext context, IPipe<ExceptionReceiveContext> next)
         {
-            ISendTransport transport = await _getDestinationTransport();
+            ISendTransport transport = await _getDestinationTransport().ConfigureAwait(false);
 
             IPipe<SendContext> pipe = Pipe.Execute<SendContext>(sendContext =>
             {
