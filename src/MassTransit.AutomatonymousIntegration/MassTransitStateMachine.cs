@@ -313,7 +313,7 @@ namespace Automatonymous
 
                         BehaviorContext<TInstance, TMessage> eventContext = context.GetProxy(schedule.Received, context.Data);
 
-                        await ((StateMachine<TInstance>)this).RaiseEvent(eventContext);
+                        await ((StateMachine<TInstance>)this).RaiseEvent(eventContext).ConfigureAwait(false);
 
                         schedule.SetTokenId(context.Instance, default(Guid?));
                     }));

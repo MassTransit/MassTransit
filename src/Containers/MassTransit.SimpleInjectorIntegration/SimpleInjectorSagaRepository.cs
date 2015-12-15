@@ -43,7 +43,7 @@ namespace MassTransit.SimpleInjectorIntegration
         {
             using (_container.BeginExecutionContextScope())
             {
-                await _repository.Send(context, policy, next);
+                await _repository.Send(context, policy, next).ConfigureAwait(false);
             }
         }
 
@@ -52,7 +52,7 @@ namespace MassTransit.SimpleInjectorIntegration
         {
             using (_container.BeginExecutionContextScope())
             {
-                await _repository.SendQuery(context, policy, next);
+                await _repository.SendQuery(context, policy, next).ConfigureAwait(false);
             }
         }
     }

@@ -51,7 +51,7 @@ namespace MassTransit.Saga
 
             var proxy = new NewSagaConsumeContext<TSaga, TMessage>(context, instance);
 
-            await next.Send(proxy);
+            await next.Send(proxy).ConfigureAwait(false);
         }
     }
 }

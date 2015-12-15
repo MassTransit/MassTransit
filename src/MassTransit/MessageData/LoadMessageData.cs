@@ -49,9 +49,9 @@ namespace MassTransit.MessageData
 
         async Task<T> GetValue()
         {
-            using (Stream valueStream = await _repository.Get(_address, _transformContext.CancellationToken))
+            using (Stream valueStream = await _repository.Get(_address, _transformContext.CancellationToken).ConfigureAwait(false))
             {
-                return await _converter.Convert(valueStream, _transformContext.CancellationToken);
+                return await _converter.Convert(valueStream, _transformContext.CancellationToken).ConfigureAwait(false);
             }
         }
     }

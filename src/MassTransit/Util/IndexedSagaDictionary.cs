@@ -64,7 +64,7 @@ namespace MassTransit.Util
 
         public async Task MarkInUse(CancellationToken cancellationToken)
         {
-            await _inUse.WaitAsync(cancellationToken);
+            await _inUse.WaitAsync(cancellationToken).ConfigureAwait(false);
         }
 
         public void Release()
@@ -111,7 +111,7 @@ namespace MassTransit.Util
 
         public async Task MarkInUse(CancellationToken cancellationToken)
         {
-            await _inUse.WaitAsync(cancellationToken);
+            await _inUse.WaitAsync(cancellationToken).ConfigureAwait(false);
         }
 
         public void Release()

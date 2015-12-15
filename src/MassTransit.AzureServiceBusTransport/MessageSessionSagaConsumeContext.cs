@@ -52,7 +52,7 @@ namespace MassTransit.AzureServiceBusTransport
 
         public async Task SetCompleted()
         {
-            await RemoveState();
+            await RemoveState().ConfigureAwait(false);
 
             IsCompleted = true;
 
@@ -70,7 +70,7 @@ namespace MassTransit.AzureServiceBusTransport
         {
             using (var emptyStream = new MemoryStream())
             {
-                await _sessionContext.SetStateAsync(emptyStream);
+                await _sessionContext.SetStateAsync(emptyStream).ConfigureAwait(false);
             }
         }
     }

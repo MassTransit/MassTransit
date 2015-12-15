@@ -30,9 +30,9 @@ namespace MassTransit.Turnout
 
         public async Task Execute(JobContext<TInput> context, IPipe<JobContext<TInput>> next)
         {
-            await _factory(context);
+            await _factory(context).ConfigureAwait(false);
 
-            await next.Send(context);
+            await next.Send(context).ConfigureAwait(false);
         }
     }
 
@@ -51,9 +51,9 @@ namespace MassTransit.Turnout
 
         async Task IJobFactory<TInput, TResult>.Execute(JobContext<TInput, TResult> context, IPipe<JobResultContext<TInput, TResult>> next)
         {
-            var result = await _factory(context);
+            var result = await _factory(context).ConfigureAwait(false);
 
-            await next.Send(context.FromResult(result));
+            await next.Send(context.FromResult(result)).ConfigureAwait(false);
         }
     }
 }

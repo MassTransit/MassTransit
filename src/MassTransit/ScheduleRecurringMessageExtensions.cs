@@ -49,7 +49,7 @@ namespace MassTransit
         {
             var command = new ScheduleRecurringMessageCommand<T>(schedule, destinationAddress, message);
 
-            await publishEndpoint.Publish(command, contextCallback ?? Pipe.Empty<PublishContext<ScheduleRecurringMessage<T>>>());
+            await publishEndpoint.Publish(command, contextCallback ?? Pipe.Empty<PublishContext<ScheduleRecurringMessage<T>>>()).ConfigureAwait(false);
 
             return new ScheduledRecurringMessageHandle<T>(command.Schedule, command.Destination, command.Payload);
         }
@@ -95,7 +95,7 @@ namespace MassTransit
         {
             var command = new CancelScheduledRecurringMessageCommand(scheduleId, scheduleGroup);
 
-            await bus.Publish<CancelScheduledRecurringMessage>(command);
+            await bus.Publish<CancelScheduledRecurringMessage>(command).ConfigureAwait(false);
         }
 
 

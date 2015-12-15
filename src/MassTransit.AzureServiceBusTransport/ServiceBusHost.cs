@@ -109,7 +109,7 @@ namespace MassTransit.AzureServiceBusTransport
         {
             var builder = new UriBuilder(_settings.ServiceUri) {Path = ""};
 
-            var messagingFactory = await MessagingFactory.CreateAsync(builder.Uri, mfs);
+            var messagingFactory = await MessagingFactory.CreateAsync(builder.Uri, mfs).ConfigureAwait(false);
 
             messagingFactory.RetryPolicy = new RetryExponential(_settings.RetryMinBackoff, _settings.RetryMaxBackoff, _settings.RetryLimit);
 

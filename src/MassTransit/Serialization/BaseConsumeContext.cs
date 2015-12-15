@@ -353,18 +353,18 @@ namespace MassTransit.Serialization
 
             if (FaultAddress != null)
             {
-                ISendEndpoint endpoint = await GetSendEndpoint(FaultAddress);
+                ISendEndpoint endpoint = await GetSendEndpoint(FaultAddress).ConfigureAwait(false);
 
-                await endpoint.Send(fault, faultPipe, CancellationToken);
+                await endpoint.Send(fault, faultPipe, CancellationToken).ConfigureAwait(false);
             }
             else if (ResponseAddress != null)
             {
-                ISendEndpoint endpoint = await GetSendEndpoint(ResponseAddress);
+                ISendEndpoint endpoint = await GetSendEndpoint(ResponseAddress).ConfigureAwait(false);
 
-                await endpoint.Send(fault, faultPipe, CancellationToken);
+                await endpoint.Send(fault, faultPipe, CancellationToken).ConfigureAwait(false);
             }
             else
-                await _publishEndpoint.Value.Publish(fault, faultPipe, CancellationToken);
+                await _publishEndpoint.Value.Publish(fault, faultPipe, CancellationToken).ConfigureAwait(false);
         }
     }
 }

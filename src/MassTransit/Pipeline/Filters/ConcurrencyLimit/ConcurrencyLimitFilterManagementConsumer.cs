@@ -47,7 +47,7 @@ namespace MassTransit.Pipeline.Filters.ConcurrencyLimit
                 {
                     try
                     {
-                        await _filterMediator.ForEachAsync(x => x.SetConcurrencyLimit(context.Message.ConcurrencyLimit));
+                        await _filterMediator.ForEachAsync(x => x.SetConcurrencyLimit(context.Message.ConcurrencyLimit)).ConfigureAwait(false);
 
                         _lastUpdated = context.Message.Timestamp;
 
@@ -56,7 +56,7 @@ namespace MassTransit.Pipeline.Filters.ConcurrencyLimit
                             Timestamp = DateTime.UtcNow,
                             context.Message.Id,
                             context.Message.ConcurrencyLimit
-                        });
+                        }).ConfigureAwait(false);
 
                         if (_log.IsDebugEnabled)
                             _log.Debug($"Set Consumer Limit: {context.Message.ConcurrencyLimit} ({context.Message.Id ?? ""})");

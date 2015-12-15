@@ -41,12 +41,12 @@ namespace MassTransit.Saga.Policies
 
         async Task ISagaPolicy<TSaga, TMessage>.Existing(SagaConsumeContext<TSaga, TMessage> context, IPipe<SagaConsumeContext<TSaga, TMessage>> next)
         {
-            await next.Send(context);
+            await next.Send(context).ConfigureAwait(false);
         }
 
         async Task ISagaPolicy<TSaga, TMessage>.Missing(ConsumeContext<TMessage> context, IPipe<SagaConsumeContext<TSaga, TMessage>> next)
         {
-            await _missingPipe.Send(context);
+            await _missingPipe.Send(context).ConfigureAwait(false);
         }
     }
 }

@@ -43,7 +43,7 @@ namespace MassTransit.MessageData
             using (var stream = new FileStream(fullPath, FileMode.Open, FileAccess.Read, FileShare.Read, DefaultBufferSize, FileOptions.Asynchronous))
             {
                 var memoryStream = new MemoryStream();
-                await stream.CopyToAsync(memoryStream, DefaultBufferSize, cancellationToken);
+                await stream.CopyToAsync(memoryStream, DefaultBufferSize, cancellationToken).ConfigureAwait(false);
                 
                 memoryStream.Position = 0;
                 return memoryStream;
@@ -60,7 +60,7 @@ namespace MassTransit.MessageData
 
             using (var fileStream = new FileStream(fullPath, FileMode.CreateNew, FileAccess.Write, FileShare.Read, DefaultBufferSize, FileOptions.Asynchronous))
             {
-                await stream.CopyToAsync(fileStream, DefaultBufferSize, cancellationToken);
+                await stream.CopyToAsync(fileStream, DefaultBufferSize, cancellationToken).ConfigureAwait(false);
             }
 
             return new Uri($"urn:file:{filePath.Replace(Path.DirectorySeparatorChar, ':')}");

@@ -66,15 +66,15 @@ namespace MassTransit.Saga.Pipeline.Filters
 
                 SagaQueryConsumeContext<TSaga, TMessage> queryContext = new SagaQueryConsumeContextProxy<TSaga, TMessage>(context, query);
 
-                await _sagaRepository.SendQuery(queryContext, _policy, _messagePipe);
+                await _sagaRepository.SendQuery(queryContext, _policy, _messagePipe).ConfigureAwait(false);
 
-                await next.Send(context);
+                await next.Send(context).ConfigureAwait(false);
 
-                await context.NotifyConsumed(timer.Elapsed, TypeMetadataCache<TSaga>.ShortName);
+                await context.NotifyConsumed(timer.Elapsed, TypeMetadataCache<TSaga>.ShortName).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
-                await context.NotifyFaulted(timer.Elapsed, TypeMetadataCache<TSaga>.ShortName, ex);
+                await context.NotifyFaulted(timer.Elapsed, TypeMetadataCache<TSaga>.ShortName, ex).ConfigureAwait(false);
                 throw;
             }
         }

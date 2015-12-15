@@ -48,13 +48,13 @@ namespace MassTransit.Courier.Results
             RoutingSlip routingSlip = builder.Build();
 
              await _publisher.PublishRoutingSlipActivityCompensated(_compensateContext.ActivityName, _compensateContext.ExecutionId,
-                _compensateContext.StartTimestamp, _duration, _routingSlip.Variables, _compensateLog.Data);
+                 _compensateContext.StartTimestamp, _duration, _routingSlip.Variables, _compensateLog.Data).ConfigureAwait(false);
 
             if (HasMoreCompensations(routingSlip))
             {
-                ISendEndpoint endpoint = await _compensateContext.GetSendEndpoint(routingSlip.GetNextCompensateAddress());
+                ISendEndpoint endpoint = await _compensateContext.GetSendEndpoint(routingSlip.GetNextCompensateAddress()).ConfigureAwait(false);
 
-                 await _compensateContext.ConsumeContext.Forward(endpoint, routingSlip);
+                 await _compensateContext.ConsumeContext.Forward(endpoint, routingSlip).ConfigureAwait(false);
             }
             else
             {
@@ -62,7 +62,7 @@ namespace MassTransit.Courier.Results
                 TimeSpan faultedDuration = faultedTimestamp - _routingSlip.CreateTimestamp;
 
                 await _publisher.PublishRoutingSlipFaulted(faultedTimestamp, faultedDuration, _routingSlip.Variables,
-                    _routingSlip.ActivityExceptions.ToArray());
+                    _routingSlip.ActivityExceptions.ToArray()).ConfigureAwait(false);
             }
         }
 

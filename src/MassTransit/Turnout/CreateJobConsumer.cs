@@ -34,7 +34,7 @@ namespace MassTransit.Turnout
 
         public async Task Consume(ConsumeContext<T> context)
         {
-            var job = await _turnoutHost.CreateJob(context, _jobFactory);
+            var job = await _turnoutHost.CreateJob(context, _jobFactory).ConfigureAwait(false);
         }
     }
 }

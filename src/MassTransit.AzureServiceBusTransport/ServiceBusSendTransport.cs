@@ -49,7 +49,7 @@ namespace MassTransit.AzureServiceBusTransport
 
             try
             {
-                await pipe.Send(context);
+                await pipe.Send(context).ConfigureAwait(false);
 
                 using (Stream messageBodyStream = context.GetBodyStream())
                 {
@@ -84,13 +84,13 @@ namespace MassTransit.AzureServiceBusTransport
                         if (context.ReplyToSessionId != null)
                             brokeredMessage.ReplyToSessionId = context.ReplyToSessionId;
 
-                        await _observers.PreSend(context);
+                        await _observers.PreSend(context).ConfigureAwait(false);
 
-                        await _sender.SendAsync(brokeredMessage);
+                        await _sender.SendAsync(brokeredMessage).ConfigureAwait(false);
 
                         _log.DebugFormat("SEND {0} ({1})", brokeredMessage.MessageId, _sender.Path);
 
-                        await _observers.PostSend(context);
+                        await _observers.PostSend(context).ConfigureAwait(false);
                     }
                 }
             }
@@ -122,7 +122,7 @@ namespace MassTransit.AzureServiceBusTransport
                         brokeredMessage.ReplyToSessionId = messageContext.ReplyToSessionId;
                         brokeredMessage.SessionId = messageContext.SessionId;
 
-                        await _sender.SendAsync(brokeredMessage);
+                        await _sender.SendAsync(brokeredMessage).ConfigureAwait(false);
 
                         _log.DebugFormat("MOVE {0} ({1} to {2})", brokeredMessage.MessageId, context.InputAddress, _sender.Path);
                     }

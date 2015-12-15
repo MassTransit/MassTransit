@@ -80,12 +80,12 @@ namespace MassTransit.Transports
             var publishContext = new PublishContextProxy<T>(context, context.Message);
             bool firstTime = Interlocked.CompareExchange(ref _context, publishContext, null) == null;
 
-            await _publishPipe.Send(publishContext);
+            await _publishPipe.Send(publishContext).ConfigureAwait(false);
 
-            await _pipe.Send(publishContext);
+            await _pipe.Send(publishContext).ConfigureAwait(false);
 
             if (firstTime)
-                await _observer.PrePublish(publishContext);
+                await _observer.PrePublish(publishContext).ConfigureAwait(false);
         }
 
         public Task PostPublish()

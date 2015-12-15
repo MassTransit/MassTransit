@@ -59,12 +59,12 @@ namespace MassTransit.AzureServiceBusTransport
                 context = new CorrelationIdConsumeContextProxy<T>(context, sessionId);
             }
 
-            var saga = await ReadSagaState(sessionContext);
+            var saga = await ReadSagaState(sessionContext).ConfigureAwait(false);
             if (saga == null)
             {
                 var missingSagaPipe = new MissingPipe<T>(next, WriteSagaState);
 
-                await policy.Missing(context, missingSagaPipe);
+                await policy.Missing(context, missingSagaPipe).ConfigureAwait(false);
             }
             else
             {
@@ -75,11 +75,11 @@ namespace MassTransit.AzureServiceBusTransport
                     _log.DebugFormat("SAGA:{0}:{1} Existing {2}", TypeMetadataCache<TSaga>.ShortName, sessionContext.SessionId, TypeMetadataCache<T>.ShortName);
                 }
 
-                await policy.Existing(sagaConsumeContext, next);
+                await policy.Existing(sagaConsumeContext, next).ConfigureAwait(false);
 
                 if (!sagaConsumeContext.IsCompleted)
                 {
-                    await WriteSagaState(sessionContext, saga);
+                    await WriteSagaState(sessionContext, saga).ConfigureAwait(false);
 
                     if (_log.IsDebugEnabled)
                     {
@@ -115,7 +115,7 @@ namespace MassTransit.AzureServiceBusTransport
 
                 using (var stateStream = new MemoryStream(serializeStream.ToArray(), false))
                 {
-                    await context.SetStateAsync(stateStream);
+                    await context.SetStateAsync(stateStream).ConfigureAwait(false);
                 }
             }
         }
@@ -124,7 +124,7 @@ namespace MassTransit.AzureServiceBusTransport
         {
             try
             {
-                using (var stateStream = await context.GetStateAsync())
+                using (var stateStream = await context.GetStateAsync().ConfigureAwait(false))
                 {
                     if (stateStream == null || stateStream.Length == 0)
                         return default(TSaga);
@@ -178,11 +178,11 @@ namespace MassTransit.AzureServiceBusTransport
 
                 try
                 {
-                    await _next.Send(proxy);
+                    await _next.Send(proxy).ConfigureAwait(false);
 
                     if (!proxy.IsCompleted)
                     {
-                        await _writeSagaState(sessionContext, proxy.Saga);
+                        await _writeSagaState(sessionContext, proxy.Saga).ConfigureAwait(false);
                         if (_log.IsDebugEnabled)
                         {
                             _log.DebugFormat("SAGA:{0}:{1} Saved {2}", TypeMetadataCache<TSaga>.ShortName, sessionContext.SessionId,

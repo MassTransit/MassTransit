@@ -43,17 +43,17 @@ namespace MassTransit.Courier.Pipeline
             {
                 try
                 {
-                    CompensationResult result = await context.Activity.Compensate(context);
+                    CompensationResult result = await context.Activity.Compensate(context).ConfigureAwait(false);
 
-                    await result.Evaluate();
+                    await result.Evaluate().ConfigureAwait(false);
 
-                    await next.Send(context);
+                    await next.Send(context).ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {
                     CompensationResult result = context.Failed(ex);
 
-                    await result.Evaluate();
+                    await result.Evaluate().ConfigureAwait(false);
                 }
 
             }

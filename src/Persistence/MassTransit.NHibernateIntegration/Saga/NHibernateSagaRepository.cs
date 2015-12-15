@@ -98,7 +98,7 @@ namespace MassTransit.NHibernateIntegration.Saga
                     {
                         var missingSagaPipe = new MissingPipe<T>(session, next);
 
-                        await policy.Missing(context, missingSagaPipe);
+                        await policy.Missing(context, missingSagaPipe).ConfigureAwait(false);
                     }
                     else
                     {
@@ -107,7 +107,7 @@ namespace MassTransit.NHibernateIntegration.Saga
 
                         var sagaConsumeContext = new NHibernateSagaConsumeContext<TSaga, T>(session, context, instance);
 
-                        await policy.Existing(sagaConsumeContext, next);
+                        await policy.Existing(sagaConsumeContext, next).ConfigureAwait(false);
 
                         if (inserted && !sagaConsumeContext.IsCompleted)
                             session.Update(instance);
@@ -141,10 +141,10 @@ namespace MassTransit.NHibernateIntegration.Saga
                     if (instances.Count == 0)
                     {
                         var missingSagaPipe = new MissingPipe<T>(session, next);
-                        await policy.Missing(context, missingSagaPipe);
+                        await policy.Missing(context, missingSagaPipe).ConfigureAwait(false);
                     }
                     else
-                        await Task.WhenAll(instances.Select(instance => SendToInstance(context, policy, instance, next, session)));
+                        await Task.WhenAll(instances.Select(instance => SendToInstance(context, policy, instance, next, session))).ConfigureAwait(false);
 
                     // TODO partial failure should not affect them all
 
@@ -203,7 +203,7 @@ namespace MassTransit.NHibernateIntegration.Saga
 
                 var sagaConsumeContext = new NHibernateSagaConsumeContext<TSaga, T>(session, context, instance);
 
-                await policy.Existing(sagaConsumeContext, next);
+                await policy.Existing(sagaConsumeContext, next).ConfigureAwait(false);
             }
             catch (SagaException)
             {
@@ -248,7 +248,7 @@ namespace MassTransit.NHibernateIntegration.Saga
 
                 SagaConsumeContext<TSaga, TMessage> proxy = new NHibernateSagaConsumeContext<TSaga, TMessage>(_session, context, context.Saga);
 
-                await _next.Send(proxy);
+                await _next.Send(proxy).ConfigureAwait(false);
 
                 if (!proxy.IsCompleted)
                     _session.Save(context.Saga);

@@ -44,7 +44,7 @@ namespace MassTransit.RabbitMqTransport.Management
                 {
                     try
                     {
-                        await _filterMediator.ForEachAsync(x => x.SetPrefetchCount(context.Message.PrefetchCount));
+                        await _filterMediator.ForEachAsync(x => x.SetPrefetchCount(context.Message.PrefetchCount)).ConfigureAwait(false);
 
                         _lastUpdated = context.Message.Timestamp;
 
@@ -53,7 +53,7 @@ namespace MassTransit.RabbitMqTransport.Management
                             Timestamp = DateTime.UtcNow,
                             QueueName = _queueName,
                             context.Message.PrefetchCount
-                        });
+                        }).ConfigureAwait(false);
 
                         if (_log.IsDebugEnabled)
                             _log.Debug($"Set Prefetch Count: {context.Message.PrefetchCount} ({_queueName})");

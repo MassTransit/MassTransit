@@ -54,7 +54,7 @@ namespace MassTransit.Transports
             if (_context.CorrelationId.HasValue)
                 context.InitiatorId = _context.CorrelationId;
 
-            await _pipe.Send(context);
+            await _pipe.Send(context).ConfigureAwait(false);
         }
     }
 }

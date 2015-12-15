@@ -57,7 +57,7 @@ namespace MassTransit.Saga.Policies
 
         async Task ISagaPolicy<TSaga, TMessage>.Missing(ConsumeContext<TMessage> context, IPipe<SagaConsumeContext<TSaga, TMessage>> next)
         {
-            await _sagaFactory.Send(context, next);
+            await _sagaFactory.Send(context, next).ConfigureAwait(false);
         }
     }
 }

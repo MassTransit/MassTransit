@@ -70,7 +70,7 @@ namespace MassTransit.Testing.Instances
                 if (_scenario.CancellationToken.IsCancellationRequested)
                     throw new TaskCanceledException("The test was cancelled");
 
-                await action.Act(_scenario, _scenario.CancellationToken);
+                await action.Act(_scenario, _scenario.CancellationToken).ConfigureAwait(false);
             }
         }
     }

@@ -43,7 +43,7 @@ namespace MassTransit.Util
         {
             Lazy<Task<TValue>> result = _values.GetOrAdd(key, x => new Lazy<Task<TValue>>(() => _valueFactory(x), LazyThreadSafetyMode.PublicationOnly));
 
-            return await result.Value;
+            return await result.Value.ConfigureAwait(false);
         }
     }
 }

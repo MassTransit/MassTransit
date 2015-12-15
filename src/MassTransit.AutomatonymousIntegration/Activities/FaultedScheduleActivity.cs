@@ -70,18 +70,18 @@ namespace Automatonymous.Activities
 
                 TMessage message = _messageFactory(exceptionContext);
 
-                var scheduledMessage = await schedulerContext.ScheduleSend(message, _schedule.Delay, _sendPipe);
+                var scheduledMessage = await schedulerContext.ScheduleSend(message, _schedule.Delay, _sendPipe).ConfigureAwait(false);
 
                 var previousTokenId = _schedule.GetTokenId(context.Instance);
                 if (previousTokenId.HasValue)
                 {
-                    await schedulerContext.CancelScheduledSend(previousTokenId.Value);
+                    await schedulerContext.CancelScheduledSend(previousTokenId.Value).ConfigureAwait(false);
                 }
 
                 _schedule?.SetTokenId(context.Instance, scheduledMessage.TokenId);
             }
 
-            await next.Faulted(context);
+            await next.Faulted(context).ConfigureAwait(false);
         }
     }
 }

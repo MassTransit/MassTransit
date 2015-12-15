@@ -48,7 +48,7 @@ namespace MassTransit.Courier.Results
 
              await _publisher.PublishRoutingSlipActivityCompensationFailed(_compensateContext.ActivityName, _compensateContext.ExecutionId,
                  _compensateContext.StartTimestamp, _duration, faultedTimestamp, faultedDuration, new FaultExceptionInfo(_exception), _routingSlip.Variables,
-                 _compensateLog.Data);
+                 _compensateLog.Data).ConfigureAwait(false);
         }
     }
 }

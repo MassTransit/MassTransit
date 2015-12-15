@@ -64,15 +64,15 @@ namespace Automatonymous.Pipeline
             eventContext.GetOrAddPayload(() => (ConsumeContext<TData>)context);
             eventContext.GetOrAddPayload(() => (ConsumeContext)context);
 
-            State<TInstance> currentState = await _machine.Accessor.Get(eventContext);
+            State<TInstance> currentState = await _machine.Accessor.Get(eventContext).ConfigureAwait(false);
 
             IEnumerable<Event> nextEvents = _machine.NextEvents(currentState);
             if (nextEvents.Contains(_event))
             {
-                await _machine.RaiseEvent(eventContext);
+                await _machine.RaiseEvent(eventContext).ConfigureAwait(false);
 
                 if (_machine.IsCompleted(context.Saga))
-                    await context.SetCompleted();
+                    await context.SetCompleted().ConfigureAwait(false);
             }
             else
                 throw new NotAcceptedStateMachineException(typeof(TInstance), typeof(TData), context.CorrelationId ?? Guid.Empty, currentState.Name);
