@@ -32,6 +32,7 @@ namespace MassTransit
         readonly IBus _bus;
         readonly Lazy<Task<ISendEndpoint>> _requestEndpoint;
         readonly TimeSpan _timeout;
+        private readonly TimeSpan? _ttl;
 
         /// <summary>
         /// Creates a message request client for the bus and endpoint specified
@@ -40,11 +41,25 @@ namespace MassTransit
         /// <param name="address">The service endpoint address</param>
         /// <param name="timeout">The request timeout</param>
         public MessageRequestClient(IBus bus, Uri address, TimeSpan timeout)
+            : this(bus, address, timeout, null)
+        {
+        }
+
+        /// <summary>
+        /// Creates a message request client for the bus and endpoint specified
+        /// </summary>
+        /// <param name="bus">The bus instance</param>
+        /// <param name="address">The service endpoint address</param>
+        /// <param name="timeout">The request timeout</param>
+        /// <param name="ttl">The time that the request will live for</param>
+        public MessageRequestClient(IBus bus, Uri address, TimeSpan timeout, TimeSpan? ttl = null)
         {
             _bus = bus;
             _timeout = timeout;
+            _ttl = ttl;
             _requestEndpoint = new Lazy<Task<ISendEndpoint>>(async () => await _bus.GetSendEndpoint(address));
         }
+
 
         public async Task<TResponse> Request(TRequest request, CancellationToken cancellationToken)
         {
@@ -55,8 +70,8 @@ namespace MassTransit
             Task<TResponse> responseTask = null;
             var pipe = new SendRequest<TRequest>(_bus, taskScheduler, x =>
             {
+                x.TimeToLive = _ttl;
                 x.Timeout = _timeout;
-
                 responseTask = x.Handle<TResponse>();
             });
 
