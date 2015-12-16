@@ -147,12 +147,14 @@
     <Compile Include="Configuration\ManagementEndpointConfigurator.cs" />
     <Compile Include="Configuration\MessageDataConfiguratorExtensions.cs" />
     <Compile Include="Configuration\MessageSchedulerExtensions.cs" />
+    <Compile Include="Configuration\InMemoryOutboxConfiguratorExtensions.cs" />
     <Compile Include="Configuration\PipeConfigurators\CircuitBreakerPipeSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\CompensateActivityHostSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\DeadLetterPipeSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\ExecuteActivityHostSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\LatestPipeSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\MessageSchedulerPipeSpecification.cs" />
+    <Compile Include="Configuration\PipeConfigurators\InMemoryOutboxSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\RedeliveryRetryPipeSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\ScheduleMessageRedeliveryPipeSpecification.cs" />
     <Compile Include="Configuration\ScheduledRetryExtensions.cs" />
@@ -171,6 +173,8 @@
     <Compile Include="Context\MessageCorrelationCache.cs" />
     <Compile Include="Context\NoSetCorrelationId.cs" />
     <Compile Include="Context\NullablePropertySetCorrelationId.cs" />
+    <Compile Include="Context\InMemoryOutboxConsumeContext.cs" />
+    <Compile Include="Context\OutboxContext.cs" />
     <Compile Include="Context\PropertySetCorrelationId.cs" />
     <Compile Include="Context\PublishRequestContext.cs" />
     <Compile Include="Context\ReceiveContextProxy.cs" />
@@ -543,6 +547,8 @@
     <Compile Include="Pipeline\Filters\MessageTypePublishFilter.cs" />
     <Compile Include="Pipeline\Filters\MessageTypeSendFilter.cs" />
     <Compile Include="Pipeline\Filters\MoveToTransportFilter.cs" />
+    <Compile Include="Pipeline\Filters\InMemoryOutboxFilter.cs" />
+    <Compile Include="Pipeline\Filters\Outbox\OutboxSendEndpoint.cs" />
     <Compile Include="Pipeline\Filters\RedeliveryRetryFilter.cs" />
     <Compile Include="Pipeline\Filters\DelegateFilter.cs" />
     <Compile Include="Pipeline\Filters\DeserializeFilter.cs" />

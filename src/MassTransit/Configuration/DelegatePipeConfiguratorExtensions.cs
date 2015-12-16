@@ -15,7 +15,6 @@ namespace MassTransit
     using System;
     using System.Threading.Tasks;
     using PipeConfigurators;
-    using Pipeline;
 
 
     public static class DelegatePipeConfiguratorExtensions
