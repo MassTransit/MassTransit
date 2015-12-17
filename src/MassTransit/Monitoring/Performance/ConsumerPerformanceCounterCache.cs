@@ -14,7 +14,6 @@ namespace MassTransit.Monitoring.Performance
 {
     using System;
     using System.Collections.Concurrent;
-    using System.Threading;
 
 
     public class ConsumerPerformanceCounterCache
@@ -29,7 +28,7 @@ namespace MassTransit.Monitoring.Performance
         public static IConsumerPerformanceCounter GetCounter(string consumerType)
         {
             return Cached.Counter.Value._types
-                .GetOrAdd(consumerType, x => new Lazy<ConsumerPerformanceCounter>(() => new ConsumerPerformanceCounter(x), LazyThreadSafetyMode.PublicationOnly))
+                .GetOrAdd(consumerType, x => new Lazy<ConsumerPerformanceCounter>(() => new ConsumerPerformanceCounter(x)))
                 .Value;
         }
 
