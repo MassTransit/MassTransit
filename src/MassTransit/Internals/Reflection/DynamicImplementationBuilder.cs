@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -17,7 +17,6 @@ namespace MassTransit.Internals.Reflection
     using System.Collections.Generic;
     using System.Reflection;
     using System.Reflection.Emit;
-    using System.Threading;
     using Extensions;
     using Util;
 
@@ -45,14 +44,14 @@ namespace MassTransit.Internals.Reflection
 
         public Type GetImplementationType(Type interfaceType)
         {
-            return _proxyTypes.GetOrAdd(interfaceType, x => new Lazy<Type>(() => CreateImplementation(x), LazyThreadSafetyMode.PublicationOnly)).Value;
+            return _proxyTypes.GetOrAdd(interfaceType, x => new Lazy<Type>(() => CreateImplementation(x))).Value;
         }
 
         Type CreateImplementation(Type interfaceType)
         {
             if (!interfaceType.IsInterface)
             {
-                throw new ArgumentException("Proxies can only be created for interfaces: " + interfaceType.Name,nameof(interfaceType));
+                throw new ArgumentException("Proxies can only be created for interfaces: " + interfaceType.Name, nameof(interfaceType));
             }
 
             return GetModuleBuilderForType(interfaceType, moduleBuilder => CreateTypeFromInterface(moduleBuilder, interfaceType));
@@ -60,13 +59,13 @@ namespace MassTransit.Internals.Reflection
 
         Type CreateTypeFromInterface(ModuleBuilder builder, Type interfaceType)
         {
-            string typeName = _proxyNamespaceSuffix + "." +
+            var typeName = _proxyNamespaceSuffix + "." +
                 (interfaceType.IsNested && interfaceType.DeclaringType != null
                     ? (interfaceType.DeclaringType.Name + '+' + TypeMetadataCache.GetShortName(interfaceType))
                     : TypeMetadataCache.GetShortName(interfaceType));
             try
             {
-                TypeBuilder typeBuilder = builder.DefineType(typeName,
+                var typeBuilder = builder.DefineType(typeName,
                     TypeAttributes.Serializable | TypeAttributes.Class |
                         TypeAttributes.Public | TypeAttributes.Sealed,
                     typeof(object), new[] {interfaceType});
@@ -74,16 +73,16 @@ namespace MassTransit.Internals.Reflection
                 typeBuilder.DefineDefaultConstructor(MethodAttributes.Public);
 
                 IEnumerable<PropertyInfo> properties = interfaceType.GetAllProperties();
-                foreach (PropertyInfo property in properties)
+                foreach (var property in properties)
                 {
-                    FieldBuilder fieldBuilder = typeBuilder.DefineField("field_" + property.Name, property.PropertyType,
+                    var fieldBuilder = typeBuilder.DefineField("field_" + property.Name, property.PropertyType,
                         FieldAttributes.Private);
 
-                    PropertyBuilder propertyBuilder = typeBuilder.DefineProperty(property.Name,
+                    var propertyBuilder = typeBuilder.DefineProperty(property.Name,
                         property.Attributes | PropertyAttributes.HasDefault, property.PropertyType, null);
 
-                    MethodBuilder getMethod = GetGetMethodBuilder(property, typeBuilder, fieldBuilder);
-                    MethodBuilder setMethod = GetSetMethodBuilder(property, typeBuilder, fieldBuilder);
+                    var getMethod = GetGetMethodBuilder(property, typeBuilder, fieldBuilder);
+                    var setMethod = GetSetMethodBuilder(property, typeBuilder, fieldBuilder);
 
                     propertyBuilder.SetGetMethod(getMethod);
                     propertyBuilder.SetSetMethod(setMethod);
@@ -102,12 +101,12 @@ namespace MassTransit.Internals.Reflection
         MethodBuilder GetGetMethodBuilder(PropertyInfo propertyInfo, TypeBuilder typeBuilder,
             FieldBuilder fieldBuilder)
         {
-            MethodBuilder getMethodBuilder = typeBuilder.DefineMethod("get_" + propertyInfo.Name,
+            var getMethodBuilder = typeBuilder.DefineMethod("get_" + propertyInfo.Name,
                 PropertyAccessMethodAttributes,
                 propertyInfo.PropertyType,
                 Type.EmptyTypes);
 
-            ILGenerator il = getMethodBuilder.GetILGenerator();
+            var il = getMethodBuilder.GetILGenerator();
             il.Emit(OpCodes.Ldarg_0);
             il.Emit(OpCodes.Ldfld, fieldBuilder);
             il.Emit(OpCodes.Ret);
@@ -118,12 +117,12 @@ namespace MassTransit.Internals.Reflection
         MethodBuilder GetSetMethodBuilder(PropertyInfo propertyInfo, TypeBuilder typeBuilder,
             FieldBuilder fieldBuilder)
         {
-            MethodBuilder setMethodBuilder = typeBuilder.DefineMethod("set_" + propertyInfo.Name,
+            var setMethodBuilder = typeBuilder.DefineMethod("set_" + propertyInfo.Name,
                 PropertyAccessMethodAttributes,
                 null,
                 new[] {propertyInfo.PropertyType});
 
-            ILGenerator il = setMethodBuilder.GetILGenerator();
+            var il = setMethodBuilder.GetILGenerator();
             il.Emit(OpCodes.Ldarg_0);
             il.Emit(OpCodes.Ldarg_1);
             il.Emit(OpCodes.Stfld, fieldBuilder);
@@ -134,14 +133,14 @@ namespace MassTransit.Internals.Reflection
 
         TResult GetModuleBuilderForType<TResult>(Type interfaceType, Func<ModuleBuilder, TResult> callback)
         {
-            string assemblyName = interfaceType.Namespace + _proxyNamespaceSuffix;
+            var assemblyName = interfaceType.Namespace + _proxyNamespaceSuffix;
 
-            ModuleBuilder builder = _moduleBuilders.GetOrAdd(assemblyName, name =>
+            var builder = _moduleBuilders.GetOrAdd(assemblyName, name =>
             {
                 const AssemblyBuilderAccess access = AssemblyBuilderAccess.RunAndCollect;
-                AssemblyBuilder assemblyBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(new AssemblyName(name), access);
+                var assemblyBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(new AssemblyName(name), access);
 
-                ModuleBuilder moduleBuilder = assemblyBuilder.DefineDynamicModule(assemblyName);
+                var moduleBuilder = assemblyBuilder.DefineDynamicModule(assemblyName);
 
                 return moduleBuilder;
             });
