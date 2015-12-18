@@ -127,7 +127,7 @@ namespace MassTransit.AzureServiceBusTransport
 
                     await _endpointObservers.Faulted(new Faulted(inputAddress, ex)).ConfigureAwait(false);
                 }
-            }, supervisor.StopToken).ConfigureAwait(false);
+            }, supervisor.StoppingToken).ConfigureAwait(false);
         }
 
 

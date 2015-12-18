@@ -30,6 +30,7 @@ namespace MassTransit.Util
         readonly TaskCompletionSource<IStopEvent> _stopping;
         readonly CancellationTokenSource _stopToken;
         CancellationTokenRegistration _registration;
+        readonly CancellationTokenSource _stoppingToken;
 
         public TaskSupervisor(CancellationToken cancellationToken)
             : this()
@@ -46,12 +47,13 @@ namespace MassTransit.Util
         public TaskSupervisor()
         {
             _stopping = new TaskCompletionSource<IStopEvent>();
+            _stoppingToken = new CancellationTokenSource();
             _participants = new List<Participant>();
             _stopToken = new CancellationTokenSource();
         }
 
         public CancellationToken StopToken => _stopToken.Token;
-
+        public CancellationToken StoppingToken => _stoppingToken.Token;
         public void Dispose()
         {
             _registration.Dispose();
@@ -78,6 +80,9 @@ namespace MassTransit.Util
 
         public ITaskParticipant CreateParticipant()
         {
+            if (_stoppingToken.IsCancellationRequested)
+                throw new OperationCanceledException("The supervisor is stopping, no additional participants can be created");
+
             var participant = new Participant();
             lock (_participants)
             {
@@ -89,6 +94,9 @@ namespace MassTransit.Util
 
         public ITaskSupervisorScope CreateScope()
         {
+            if (_stoppingToken.IsCancellationRequested)
+                throw new OperationCanceledException("The supervisor is stopping, no additional scopes can be created");
+
             var scope = new Scope();
             lock (_participants)
             {
@@ -117,6 +125,8 @@ namespace MassTransit.Util
         public async Task Stop(string reason)
         {
             var eventArgs = new StopEventArgs(reason);
+            _stoppingToken.Cancel();
+            _stopping.TrySetResult(eventArgs);
 
             lock (_participants)
             {
@@ -128,7 +138,6 @@ namespace MassTransit.Util
 
             await Completed.ConfigureAwait(false);
 
-            _stopping.TrySetResult(eventArgs);
             _stopToken.Cancel();
         }
 
