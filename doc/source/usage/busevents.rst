@@ -2,7 +2,7 @@ Observing lifecycle events
 ==========================
 
 When integrating a framework into your application, it can be useful to understand when the framework is "doing stuff."
-Whether it is starting up, shutting down, or anything in between, being notified and thereby able to take action is a 
+Whether it is starting up, shutting down, or anything in between, being notified and thereby able to take action is a
 huge benefit.
 
 MassTransit supports a number of lifecycle events that can be observed, making it easy to build components that are
@@ -63,7 +63,39 @@ To observe bus events, create a class which implements ``IBusObserver``, as show
         }
     }
 
-Then connect the observer to the bus before starting it, as shown.
+Bus observers can only be configured during bus configuration.
+This means we'll also need to create a bus factory specification that
+actually wires up our ``BusObserver``.
+
+.. sourcecode:: csharp
+
+    public class BusObserverSpecification : IBusFactorySpecification
+    {
+        public void Apply(IBusBuilder builder)
+        {
+            builder.ConnectBusObserver(new BusObserver());
+        }
+
+        public IEnumerable<ValidationResult> Validate()
+        {
+            yield break;
+        }
+    }
+
+Add an extension method that adds the ``BusObserverSpecification`` to the bus configuration.
+
+.. sourcecode:: csharp
+
+    public static class BusObserverExtensions
+    {
+        public static void UseBusObserver(this IBusFactoryConfigurator configurator)
+        {
+            var specification = new BusObserverSpecification();
+            configurator.AddBusFactorySpecification(specification);
+        }
+    }
+
+Then connect the observer to the bus during configuration, as shown.
 
 .. sourcecode:: csharp
 
@@ -79,8 +111,6 @@ Then connect the observer to the bus before starting it, as shown.
         {
             e.Consumer<UpdateCustomerConsumer>();
         });
+
+        cfg.UseBusObserver();
     });
-
-    var observer = new BusObserver();
-    var handle = busControl.ConnectBusObserver(observer);
-
