@@ -31,7 +31,6 @@ namespace MassTransit
         /// <summary>
         /// Called when the bus fails to be created
         /// </summary>
-        /// <param name="bus"></param>
         /// <param name="exception"></param>
         /// <returns></returns>
         Task CreateFaulted(Exception exception);
