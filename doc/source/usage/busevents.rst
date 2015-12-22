@@ -2,7 +2,7 @@ Observing lifecycle events
 ==========================
 
 When integrating a framework into your application, it can be useful to understand when the framework is "doing stuff."
-Whether it is starting up, shutting down, or anything in between, being notified and thereby able to take action is a 
+Whether it is starting up, shutting down, or anything in between, being notified and thereby able to take action is a
 huge benefit.
 
 MassTransit supports a number of lifecycle events that can be observed, making it easy to build components that are
@@ -63,9 +63,12 @@ To observe bus events, create a class which implements ``IBusObserver``, as show
         }
     }
 
-Then connect the observer to the bus before starting it, as shown.
+Bus observers can only be configured during bus configuration. To connect a bus observer during
+bus configuration, refer to the example shown below.
 
 .. sourcecode:: csharp
+
+    var busObserver = new BusObserver();
 
     var busControl = Bus.Factory.CreateUsingRabbitMq(cfg =>
     {
@@ -79,8 +82,6 @@ Then connect the observer to the bus before starting it, as shown.
         {
             e.Consumer<UpdateCustomerConsumer>();
         });
+
+        cfg.BusObserver(busObserver);
     });
-
-    var observer = new BusObserver();
-    var handle = busControl.ConnectBusObserver(observer);
-
