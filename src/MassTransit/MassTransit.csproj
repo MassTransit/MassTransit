@@ -97,12 +97,14 @@
     <Compile Include="Configuration\Builders\PublishPipeBuilder.cs" />
     <Compile Include="Configuration\Builders\SendPipeBuilder.cs" />
     <Compile Include="Configuration\BusConfigurators\BusFactoryConfigurator.cs" />
+    <Compile Include="Configuration\BusConfigurators\BusObserverSpecification.cs" />
     <Compile Include="Configuration\BusConfigurators\ConsumePipeConfigurator.cs" />
     <Compile Include="Configuration\BusConfigurators\IConsumePipeFactory.cs" />
     <Compile Include="Configuration\BusConfigurators\IPublishPipeFactory.cs" />
     <Compile Include="Configuration\BusConfigurators\ISendPipeFactory.cs" />
     <Compile Include="Configuration\BusConfigurators\PublishPipeConfigurator.cs" />
     <Compile Include="Configuration\BusConfigurators\SendPipeConfigurator.cs" />
+    <Compile Include="Configuration\BusObserverExtensions.cs" />
     <Compile Include="Configuration\CircuitBreakerExtensions.cs" />
     <Compile Include="Configuration\ConsumeConnectors\AsyncConsumerConvention.cs" />
     <Compile Include="Configuration\ConsumeConnectors\ConsumerConnector.cs" />
