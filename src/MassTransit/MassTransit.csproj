@@ -588,7 +588,6 @@
     <Compile Include="Pipeline\IPipe.cs" />
     <Compile Include="Pipeline\IConsumePipe.cs" />
     <Compile Include="Pipeline\ConsumePipeExtensions.cs" />
-    <Compile Include="Pipeline\IPublishInterceptor.cs" />
     <Compile Include="Pipeline\IPublishMessageObserver.cs" />
     <Compile Include="Pipeline\IPublishMessageObserverConnector.cs" />
     <Compile Include="Pipeline\IPublishObserver.cs" />
