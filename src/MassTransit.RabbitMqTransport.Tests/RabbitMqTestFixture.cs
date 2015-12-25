@@ -196,6 +196,15 @@ namespace MassTransit.RabbitMqTransport.Tests
                     model.ExchangeDelete("input_queue");
                     model.QueueDelete("input_queue");
 
+                    model.ExchangeDelete("input_queue_skipped");
+                    model.QueueDelete("input_queue_skipped");
+
+                    model.ExchangeDelete("input_queue_error");
+                    model.QueueDelete("input_queue_error");
+
+                    model.ExchangeDelete("input_queue_delay");
+                    model.QueueDelete("input_queue_delay");
+
                     OnCleanupVirtualHost(model);
 
                     model.Abort(200, "Cleanup complete");

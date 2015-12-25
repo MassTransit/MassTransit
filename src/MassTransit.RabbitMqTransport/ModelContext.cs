@@ -49,6 +49,7 @@ namespace MassTransit.RabbitMqTransport
 
         Task ExchangeBind(string destination, string source, string routingKey, IDictionary<string, object> arguments);
         Task ExchangeDeclare(string exchange, string type, bool durable, bool autoDelete, IDictionary<string, object> arguments);
+        Task ExchangeDeclarePassive(string exchange);
         Task QueueBind(string queue, string exchange, string routingKey, IDictionary<string, object> arguments);
         Task<QueueDeclareOk> QueueDeclare(string queue, bool durable, bool exclusive, bool autoDelete, IDictionary<string, object> arguments);
         Task<uint> QueuePurge(string queue);

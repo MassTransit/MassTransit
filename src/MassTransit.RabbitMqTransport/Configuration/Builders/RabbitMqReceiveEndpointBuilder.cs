@@ -19,7 +19,7 @@ namespace MassTransit.RabbitMqTransport.Configuration.Builders
 
 
     public class RabbitMqReceiveEndpointBuilder :
-        IReceiveEndpointBuilder
+        IRabbitMqReceiveEndpointBuilder
     {
         readonly IConsumePipe _consumePipe;
         readonly List<ExchangeBindingSettings> _exchangeBindings;
@@ -29,6 +29,7 @@ namespace MassTransit.RabbitMqTransport.Configuration.Builders
         {
             _consumePipe = consumePipe;
             _messageNameFormatter = messageNameFormatter;
+
             _exchangeBindings = new List<ExchangeBindingSettings>();
         }
 
@@ -42,6 +43,11 @@ namespace MassTransit.RabbitMqTransport.Configuration.Builders
         ConnectHandle IConsumeMessageObserverConnector.ConnectConsumeMessageObserver<T>(IConsumeMessageObserver<T> observer)
         {
             return _consumePipe.ConnectConsumeMessageObserver(observer);
+        }
+
+        public void AddExchangeBindings(params ExchangeBindingSettings[] bindings)
+        {
+            _exchangeBindings.AddRange(bindings);
         }
 
         public IEnumerable<ExchangeBindingSettings> GetExchangeBindings()

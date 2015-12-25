@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
+    using System;
     using RabbitMqTransport.Configuration;
 
 
@@ -23,5 +24,18 @@ namespace MassTransit
         IQueueConfigurator
     {
         void ConnectManagementEndpoint(IManagementEndpointConfigurator management);
+
+        /// <summary>
+        /// Bind an existing exchange to the receive endpoint queue by name
+        /// </summary>
+        /// <param name="exchangeName">The exchange name</param>
+        void Bind(string exchangeName);
+
+        /// <summary>
+        /// Bind an exchange to the receive endpoint exchange
+        /// </summary>
+        /// <param name="exchangeName">The exchange name</param>
+        /// <param name="callback">Configure the exchange and binding</param>
+        void Bind(string exchangeName, Action<IExchangeBindingConfigurator> callback);
     }
 }
