@@ -52,6 +52,15 @@ namespace MassTransit.RabbitMqTransport.Topology
             return binding;
         }
 
+        public static IEnumerable<ExchangeBindingSettings> GetExchangeBindings(this ReceiveSettings settings, string exchangeName)
+        {
+            var exchange = new Exchange(exchangeName, settings.Durable, settings.AutoDelete, settings.ExchangeType);
+
+            var binding = new ExchangeBinding(exchange);
+
+            yield return binding;
+        }
+
         public static bool IsTemporaryMessageType(this Type messageType)
         {
             return (!messageType.IsPublic && messageType.IsClass)
@@ -62,12 +71,12 @@ namespace MassTransit.RabbitMqTransport.Topology
         class Exchange :
             ExchangeSettings
         {
-            public Exchange(string exchangeName, bool durable, bool autoDelete)
+            public Exchange(string exchangeName, bool durable, bool autoDelete, string exchangeType = null)
             {
                 ExchangeName = exchangeName;
                 Durable = durable;
                 AutoDelete = autoDelete;
-                ExchangeType = RabbitMQ.Client.ExchangeType.Fanout;
+                ExchangeType = exchangeType ?? RabbitMQ.Client.ExchangeType.Fanout;
                 Arguments = new Dictionary<string, object>();
             }
 

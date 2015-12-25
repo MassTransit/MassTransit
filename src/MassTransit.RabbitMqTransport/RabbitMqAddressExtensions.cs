@@ -20,6 +20,7 @@ namespace MassTransit.RabbitMqTransport
     using System.Security.Authentication;
     using System.Text;
     using System.Text.RegularExpressions;
+    using Configuration;
     using Configuration.Configurators;
     using NewIdFormatters;
     using RabbitMQ.Client;
@@ -99,15 +100,46 @@ namespace MassTransit.RabbitMqTransport
 
         public static Uri GetQueueAddress(this RabbitMqHostSettings hostSettings, string queueName)
         {
-            var builder = new UriBuilder
+            UriBuilder builder = GetHostUriBuilder(hostSettings, queueName);
+
+            return builder.Uri;
+        }
+
+        /// <summary>
+        /// Returns a UriBuilder for the host and entity specified
+        /// </summary>
+        /// <param name="hostSettings">The host settings</param>
+        /// <param name="entityName">The entity name (queue/exchange)</param>
+        /// <returns>A UriBuilder</returns>
+        static UriBuilder GetHostUriBuilder(RabbitMqHostSettings hostSettings, string entityName)
+        {
+            return new UriBuilder
             {
                 Scheme = "rabbitmq",
                 Host = hostSettings.Host,
                 Port = hostSettings.Port,
                 Path = (string.IsNullOrWhiteSpace(hostSettings.VirtualHost) || hostSettings.VirtualHost == "/")
-                    ? queueName
-                    : string.Join("/", hostSettings.VirtualHost, queueName)
+                    ? entityName
+                    : string.Join("/", hostSettings.VirtualHost, entityName)
             };
+        }
+
+        /// <summary>
+        /// Return a send address for the exchange
+        /// </summary>
+        /// <param name="host">The RabbitMQ host</param>
+        /// <param name="exchangeName">The exchange name</param>
+        /// <param name="configure">An optional configuration for the exchange to set type, durable, etc.</param>
+        /// <returns></returns>
+        public static Uri GetSendAddress(this IRabbitMqHost host, string exchangeName, Action<IExchangeConfigurator> configure = null)
+        {
+            var builder = GetHostUriBuilder(host.Settings, exchangeName);
+
+            var sendSettings = new RabbitMqSendSettings(exchangeName, ExchangeType.Fanout, true, false);
+
+            configure?.Invoke(sendSettings);
+
+            builder.Query += string.Join("&", GetQueryStringOptions(sendSettings));
 
             return builder.Uri;
         }

@@ -13,10 +13,12 @@
 namespace MassTransit.RabbitMqTransport.Topology
 {
     using System.Collections.Generic;
+    using Configuration;
 
 
     public class RabbitMqSendSettings :
-        SendSettings
+        SendSettings,
+        IExchangeConfigurator
     {
         bool _bindToQueue;
         IDictionary<string, object> _exchangeArguments;
@@ -31,15 +33,23 @@ namespace MassTransit.RabbitMqTransport.Topology
             AutoDelete = autoDelete;
         }
 
+        public void SetExchangeArgument(string key, object value)
+        {
+            if (_exchangeArguments == null)
+                _exchangeArguments = new Dictionary<string, object>();
+
+            _exchangeArguments[key] = value;
+        }
+
         public string ExchangeName { get; }
 
-        public bool Durable { get; }
+        public bool Durable { get; set; }
 
-        public bool AutoDelete { get; }
+        public bool AutoDelete { get; set; }
 
         public IDictionary<string, object> ExchangeArguments => _exchangeArguments;
 
-        public string ExchangeType { get; }
+        public string ExchangeType { get; set; }
 
         bool SendSettings.BindToQueue => _bindToQueue;
 
@@ -61,12 +71,32 @@ namespace MassTransit.RabbitMqTransport.Topology
             _queueArguments[key] = value;
         }
 
-        public void SetExchangeArgument(string key, object value)
+        IEnumerable<string> GetSettingStrings()
         {
-            if (_exchangeArguments == null)
-                _exchangeArguments = new Dictionary<string, object>();
+            if (Durable)
+                yield return "durable";
+            if (AutoDelete)
+                yield return "auto-delete";
+            if (ExchangeType != RabbitMQ.Client.ExchangeType.Fanout)
+                yield return ExchangeType;
+            if (_bindToQueue)
+                yield return $"bind->{_queueName}";
 
-            _exchangeArguments[key] = value;
+            if (_exchangeArguments != null)
+                foreach (var argument in _exchangeArguments)
+                {
+                    yield return $"e:{argument.Key}={argument.Value}";
+                }
+            if (_queueArguments != null)
+                foreach (var argument in _queueArguments)
+                {
+                    yield return $"q:{argument.Key}={argument.Value}";
+                }
+        }
+
+        public override string ToString()
+        {
+            return string.Join(", ", GetSettingStrings());
         }
     }
 }

@@ -94,12 +94,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
         {
             if (_log.IsDebugEnabled)
             {
-                _log.DebugFormat("Exchange: {0} ({1})", _settings.ExchangeName,
-                    string.Join(", ", new[]
-                    {
-                        _settings.Durable ? "durable" : "",
-                        _settings.AutoDelete ? "auto-delete" : ""
-                    }.Where(x => !string.IsNullOrWhiteSpace(x))));
+                _log.DebugFormat("Exchange: {0} ({1})", _settings.ExchangeName, _settings);
             }
 
             if (!string.IsNullOrWhiteSpace(_settings.ExchangeName))
@@ -117,16 +112,6 @@ namespace MassTransit.RabbitMqTransport.Pipeline
                 _settings.AutoDelete, _settings.QueueArguments).ConfigureAwait(false);
 
             string queueName = queueOk.QueueName;
-
-            if (_log.IsDebugEnabled)
-            {
-                _log.DebugFormat("Queue: {0} ({1})", queueName,
-                    string.Join(", ", new[]
-                    {
-                        _settings.Durable ? "durable" : "",
-                        _settings.AutoDelete ? "auto-delete" : ""
-                    }.Where(x => !string.IsNullOrWhiteSpace(x))));
-            }
 
             await context.QueueBind(queueName, _settings.ExchangeName, "", new Dictionary<string, object>()).ConfigureAwait(false);
 

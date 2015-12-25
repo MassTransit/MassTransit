@@ -34,6 +34,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
         readonly IRabbitMqHost _host;
         readonly Mediator<ISetPrefetchCount> _mediator;
         readonly RabbitMqReceiveSettings _settings;
+        readonly List<ExchangeBindingSettings> _exchangeBindings;
 
         public RabbitMqReceiveEndpointConfigurator(IRabbitMqHost host, string queueName = null, IConsumePipe consumePipe = null)
             : base(consumePipe)
@@ -46,6 +47,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
             };
 
             _mediator = new Mediator<ISetPrefetchCount>();
+            _exchangeBindings = new List<ExchangeBindingSettings>();
         }
 
         public RabbitMqReceiveEndpointConfigurator(IRabbitMqHost host, RabbitMqReceiveSettings settings, IConsumePipe consumePipe)
@@ -54,7 +56,9 @@ namespace MassTransit.RabbitMqTransport.Configuration
             _host = host;
 
             _settings = settings;
+
             _mediator = new Mediator<ISetPrefetchCount>();
+            _exchangeBindings = new List<ExchangeBindingSettings>();
         }
 
         public override IEnumerable<ValidationResult> Validate()
@@ -74,6 +78,9 @@ namespace MassTransit.RabbitMqTransport.Configuration
             var receivePipe = CreateReceivePipe(builder, consumePipe =>
             {
                 endpointBuilder = new RabbitMqReceiveEndpointBuilder(consumePipe, _host.MessageNameFormatter);
+
+                endpointBuilder.AddExchangeBindings(_exchangeBindings.ToArray());
+
                 return endpointBuilder;
             });
 
@@ -154,6 +161,28 @@ namespace MassTransit.RabbitMqTransport.Configuration
         {
             var consumer = new SetPrefetchCountManagementConsumer(_mediator, _settings.QueueName);
             management.Instance(consumer);
+        }
+
+        public void Bind(string exchangeName)
+        {
+            if (exchangeName == null)
+                throw new ArgumentNullException(nameof(exchangeName));
+
+            _exchangeBindings.AddRange(_settings.GetExchangeBindings(exchangeName));
+        }
+
+        public void Bind(string exchangeName, Action<IExchangeBindingConfigurator> callback)
+        {
+            if (exchangeName == null)
+                throw new ArgumentNullException(nameof(exchangeName));
+            if (callback == null)
+                throw new ArgumentNullException(nameof(callback));
+
+            var exchangeSettings = new RabbitMqReceiveSettings(_settings);
+
+            callback(exchangeSettings);
+
+            _exchangeBindings.AddRange(exchangeSettings.GetExchangeBindings(exchangeName));
         }
 
         protected override Uri GetInputAddress()

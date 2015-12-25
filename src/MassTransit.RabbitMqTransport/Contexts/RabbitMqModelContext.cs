@@ -120,6 +120,12 @@ namespace MassTransit.RabbitMqTransport.Contexts
                 _tokenSource.Token, TaskCreationOptions.HideScheduler, _taskScheduler).ConfigureAwait(false);
         }
 
+        public async Task ExchangeDeclarePassive(string exchange)
+        {
+            await Task.Factory.StartNew(() => _model.ExchangeDeclarePassive(exchange),
+                _tokenSource.Token, TaskCreationOptions.HideScheduler, _taskScheduler).ConfigureAwait(false);
+        }
+
         async Task ModelContext.QueueBind(string queue, string exchange, string routingKey, IDictionary<string, object> arguments)
         {
             await Task.Factory.StartNew(() => _model.QueueBind(queue, exchange, routingKey, arguments),

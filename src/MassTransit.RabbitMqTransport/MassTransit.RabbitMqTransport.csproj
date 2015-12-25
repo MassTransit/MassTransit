@@ -67,11 +67,14 @@
     <Compile Include="..\SolutionVersion.cs">
       <Link>Properties\SolutionVersion.cs</Link>
     </Compile>
+    <Compile Include="Configuration\Builders\IRabbitMqReceiveEndpointBuilder.cs" />
     <Compile Include="Configuration\Builders\RabbitMqBusBuilder.cs" />
     <Compile Include="Configuration\Builders\RabbitMqReceiveEndpointBuilder.cs" />
     <Compile Include="Configuration\Configurators\ConfigurationHostSettings.cs" />
     <Compile Include="Configuration\Configurators\RabbitMqHostConfigurator.cs" />
     <Compile Include="Configuration\DelayedExchangeRedeliveryPipeSpecification.cs" />
+    <Compile Include="Configuration\IExchangeBindingConfigurator.cs" />
+    <Compile Include="Configuration\IExchangeConfigurator.cs" />
     <Compile Include="Configuration\IQueueConfigurator.cs" />
     <Compile Include="Configuration\RabbitMqConsumerPipeSpecification.cs" />
     <Compile Include="Configuration\ConsumerPipeConfiguratorExtensions.cs" />

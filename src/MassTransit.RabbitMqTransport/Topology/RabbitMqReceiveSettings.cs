@@ -19,7 +19,8 @@ namespace MassTransit.RabbitMqTransport.Topology
 
     public class RabbitMqReceiveSettings :
         ReceiveSettings,
-        IQueueConfigurator
+        IQueueConfigurator,
+        IExchangeBindingConfigurator
     {
         public RabbitMqReceiveSettings()
         {
@@ -84,5 +85,6 @@ namespace MassTransit.RabbitMqTransport.Topology
         public IDictionary<string, object> ExchangeArguments { get; }
         public bool PurgeOnStartup { get; set; }
         public string ExchangeType { get; set; }
+        public string RoutingKey { get; set; }
     }
 }
