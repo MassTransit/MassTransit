@@ -141,6 +141,7 @@
     <Compile Include="RabbitMqReceiveTransport.cs" />
     <Compile Include="RabbitMqSendContext.cs" />
     <Compile Include="RabbitMqSendTransport.cs" />
+    <Compile Include="SchedulePublishExtensions.cs" />
     <Compile Include="SendSettings.cs" />
     <Compile Include="Testing\BusTestScenarioExtensions.cs" />
     <Compile Include="Testing\RabbitMqBusTestScenarioBuilder.cs" />
