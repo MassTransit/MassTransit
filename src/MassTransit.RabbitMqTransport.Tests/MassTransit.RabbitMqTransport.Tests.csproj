@@ -98,6 +98,7 @@
     <Compile Include="Request_Specs.cs" />
     <Compile Include="Security_Specs.cs" />
     <Compile Include="SendObserver_Specs.cs" />
+    <Compile Include="SendToPublishExchange_Specs.cs" />
     <Compile Include="SetPrefetchCount_Specs.cs" />
     <Compile Include="TemporaryQueue_Specs.cs" />
     <Compile Include="TestConnectionPipe.cs" />
