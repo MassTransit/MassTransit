@@ -64,9 +64,9 @@ namespace MassTransit.RabbitMqTransport.Contexts
 
         ConnectionContext ModelContext.ConnectionContext => _context.ConnectionContext;
 
-        Task ModelContext.BasicPublishAsync(string exchange, string routingKey, bool mandatory, bool immediate, IBasicProperties basicProperties, byte[] body)
+        Task ModelContext.BasicPublishAsync(string exchange, string routingKey, bool mandatory, IBasicProperties basicProperties, byte[] body)
         {
-            return _context.BasicPublishAsync(exchange, routingKey, mandatory, immediate, basicProperties, body);
+            return _context.BasicPublishAsync(exchange, routingKey, mandatory, basicProperties, body);
         }
 
         Task ModelContext.ExchangeBind(string destination, string source, string routingKey, IDictionary<string, object> arguments)

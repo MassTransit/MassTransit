@@ -48,6 +48,8 @@ namespace MassTransit.RabbitMqTransport.Topology
             ExchangeArguments = new Dictionary<string, object>(settings.ExchangeArguments);
         }
 
+        public string RoutingKey { get; set; }
+
         public void SetQueueArgument(string key, object value)
         {
             if (key == null)
@@ -57,6 +59,11 @@ namespace MassTransit.RabbitMqTransport.Topology
                 QueueArguments.Remove(key);
             else
                 QueueArguments[key] = value;
+        }
+
+        public bool Lazy
+        {
+            set { SetQueueArgument("x-queue-mode", value ? "lazy" : "default"); }
         }
 
         public void SetExchangeArgument(string key, object value)
@@ -85,6 +92,5 @@ namespace MassTransit.RabbitMqTransport.Topology
         public IDictionary<string, object> ExchangeArguments { get; }
         public bool PurgeOnStartup { get; set; }
         public string ExchangeType { get; set; }
-        public string RoutingKey { get; set; }
     }
 }

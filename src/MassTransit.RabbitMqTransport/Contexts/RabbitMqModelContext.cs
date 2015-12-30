@@ -99,10 +99,10 @@ namespace MassTransit.RabbitMqTransport.Contexts
 
         CancellationToken PipeContext.CancellationToken => _tokenSource.Token;
 
-        async Task ModelContext.BasicPublishAsync(string exchange, string routingKey, bool mandatory, bool immediate, IBasicProperties basicProperties,
+        async Task ModelContext.BasicPublishAsync(string exchange, string routingKey, bool mandatory, IBasicProperties basicProperties,
             byte[] body)
         {
-            var pendingPublish = await Task.Factory.StartNew(() => PublishAsync(exchange, routingKey, mandatory, immediate, basicProperties, body),
+            var pendingPublish = await Task.Factory.StartNew(() => PublishAsync(exchange, routingKey, mandatory, basicProperties, body),
                 _tokenSource.Token, TaskCreationOptions.HideScheduler, _taskScheduler).ConfigureAwait(false);
 
             await pendingPublish.Task.ConfigureAwait(false);
@@ -196,7 +196,13 @@ namespace MassTransit.RabbitMqTransport.Contexts
             _model.Cleanup(200, reason);
         }
 
-        PendingPublish PublishAsync(string exchange, string routingKey, bool mandatory, bool immediate, IBasicProperties basicProperties, byte[] body)
+        void OnBasicReturn(object model, BasicReturnEventArgs args)
+        {
+            if (_log.IsDebugEnabled)
+                _log.DebugFormat("BasicReturn: {0}-{1} {2}", args.ReplyCode, args.ReplyText, args.BasicProperties.MessageId);
+        }
+
+        PendingPublish PublishAsync(string exchange, string routingKey, bool mandatory, IBasicProperties basicProperties, byte[] body)
         {
             var publishTag = _model.NextPublishSeqNo;
             _publishTagMax = Math.Max(_publishTagMax, publishTag);
@@ -209,7 +215,7 @@ namespace MassTransit.RabbitMqTransport.Contexts
                     return pendingPublish;
                 });
 
-                _model.BasicPublish(exchange, routingKey, mandatory, immediate, basicProperties, body);
+                _model.BasicPublish(exchange, routingKey, mandatory, basicProperties, body);
             }
             catch
             {
@@ -220,12 +226,6 @@ namespace MassTransit.RabbitMqTransport.Contexts
             }
 
             return pendingPublish;
-        }
-
-        void OnBasicReturn(object model, BasicReturnEventArgs args)
-        {
-            if (_log.IsDebugEnabled)
-                _log.DebugFormat("BasicReturn: {0}-{1} {2}", args.ReplyCode, args.ReplyText, args.BasicProperties.MessageId);
         }
 
         void OnModelShutdown(object model, ShutdownEventArgs reason)

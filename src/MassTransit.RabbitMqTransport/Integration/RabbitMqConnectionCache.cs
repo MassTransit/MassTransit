@@ -96,7 +96,7 @@ namespace MassTransit.RabbitMqTransport.Integration
                 if (_log.IsDebugEnabled)
                 {
                     _log.DebugFormat("Connected: {0} (address: {1}, local: {2}", _connectionFactory.ToDebugString(),
-                        connection.RemoteEndPoint, connection.LocalEndPoint);
+                        connection.Endpoint, connection.LocalPort);
                 }
 
                 EventHandler<ShutdownEventArgs> connectionShutdown = null;
