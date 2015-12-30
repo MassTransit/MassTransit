@@ -31,7 +31,6 @@ namespace MassTransit.RabbitMqTransport.Contexts
             RoutingKey = routingKey;
         }
 
-        public bool Immediate { get; set; }
         public bool Mandatory { get; set; }
 
         public string Exchange { get; }

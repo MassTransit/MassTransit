@@ -37,6 +37,11 @@ namespace MassTransit.RabbitMqTransport.Configuration
         bool PurgeOnStartup { set; }
 
         /// <summary>
+        /// Sets the queue to be lazy (using less memory)
+        /// </summary>
+        bool Lazy { set; }
+
+        /// <summary>
         /// Set a queue argument passed to the broker on queue declaration
         /// </summary>
         /// <param name="key">The argument key</param>

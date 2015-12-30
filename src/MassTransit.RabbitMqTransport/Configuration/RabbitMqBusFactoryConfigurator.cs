@@ -104,6 +104,11 @@ namespace MassTransit.RabbitMqTransport.Configuration
             set { _settings.PurgeOnStartup = value; }
         }
 
+        public bool Lazy
+        {
+            set { SetQueueArgument("x-queue-mode", value ? "lazy" : "default"); }
+        }
+
         public void SetQueueArgument(string key, object value)
         {
             _settings.SetQueueArgument(key, value);

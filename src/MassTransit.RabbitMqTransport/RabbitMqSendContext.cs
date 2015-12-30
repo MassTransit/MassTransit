@@ -19,11 +19,6 @@ namespace MassTransit.RabbitMqTransport
         SendContext
     {
         /// <summary>
-        /// True if the message should be sent immediately
-        /// </summary>
-        bool Immediate { get; set; }
-
-        /// <summary>
         ///     Specify that the published message must be delivered to a queue or it will be returned
         /// </summary>
         bool Mandatory { get; set; }

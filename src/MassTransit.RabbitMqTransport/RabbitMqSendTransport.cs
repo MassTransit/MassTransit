@@ -89,7 +89,7 @@ namespace MassTransit.RabbitMqTransport
                         await _observers.PreSend(context).ConfigureAwait(false);
 
                         await modelContext.BasicPublishAsync(context.Exchange, context.RoutingKey, context.Mandatory,
-                            context.Immediate, context.BasicProperties, context.Body).ConfigureAwait(false);
+                            context.BasicProperties, context.Body).ConfigureAwait(false);
 
                         context.DestinationAddress.LogSent(context.MessageId?.ToString("N") ?? "", TypeMetadataCache<T>.ShortName);
 
@@ -153,7 +153,7 @@ namespace MassTransit.RabbitMqTransport
                             body = memoryStream.ToArray();
                         }
 
-                        Task task = modelContext.BasicPublishAsync(_sendSettings.ExchangeName, "", true, false, properties, body);
+                        Task task = modelContext.BasicPublishAsync(_sendSettings.ExchangeName, "", true, properties, body);
                         context.AddPendingTask(task);
 
                         if (_log.IsDebugEnabled)
@@ -241,7 +241,6 @@ namespace MassTransit.RabbitMqTransport
             }
 
             public bool Durable { get; set; }
-            public bool Immediate { get; set; }
             public bool Mandatory { get; set; }
             public string Exchange { get; private set; }
             public string RoutingKey { get; set; }
