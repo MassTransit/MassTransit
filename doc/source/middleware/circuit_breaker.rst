@@ -9,7 +9,7 @@ calls to the service giving it time to recover. Once the reset interval expires,
 back to the service. If it is still failing, the breaker remains open, and the timeout interval resets.
 Once the service returns to healthy, calls flow normally as the breaker closes.
 
-Read Martin Fowler's description of the pattern here.
+Read Martin Fowler's description of the pattern `here <http://martinfowler.com/bliki/CircuitBreaker.html>`_.
 
 To add the circuit breaker to a receive endpoint:
 
