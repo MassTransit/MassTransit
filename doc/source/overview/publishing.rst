@@ -18,7 +18,7 @@ RabbitMQ provides powerful routing capabilities out of the box, in the form of e
 to queues, as well as other exchanges, making it easy to create a message routing fabric. MassTransit leverages exchanges
 and queues combined with the .NET type system to connect subscribers to publishers.
 
-MassTransit uses the message type to declare exchanges and exchange bindings that match the heirarchy of types implemented
+MassTransit uses the message type to declare exchanges and exchange bindings that match the hierarchy of types implemented
 by the message type. Interfaces are declared as separate exchanges (using a fully-qualified type name that is compatible with
 the naming structure of exchanges) and bound to the published message type exchange. When a message is first published, the
 exchanges are declared once, and then used for the life of the channel.
