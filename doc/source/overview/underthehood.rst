@@ -53,7 +53,7 @@ Queues
 - If you run multiple copies  of your consumer service, they would listen to the same queue (as they are copies).
 	This would mean you have multiple applications listening to ``my_endpoint`` queue
 	This would result in a 'competing consumer' scenario.  (Which is what you want if you run same service multiple times)
-- If there is an exceptioh from your consumer, the message will be sent to ``my_endpoint_error`` queue.
+- If there is an exception from your consumer, the message will be sent to ``my_endpoint_error`` queue.
 - If a message is received in a queue that the consumer does not know how to handle, the message will be sent to ``my_endpoint_skipped`` queue.
 
 
