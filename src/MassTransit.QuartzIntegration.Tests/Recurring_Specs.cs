@@ -26,8 +26,8 @@ namespace MassTransit.QuartzIntegration.Tests
         [Test, Explicit]
         public async void Should_handle_now_properly()
         {
-            await QuartzEndpoint.ScheduleSend(InputQueueAddress, DateTime.UtcNow + TimeSpan.FromSeconds(20), new Done {Name = "Joe"});
-            await QuartzEndpoint.ScheduleRecurringSend(InputQueueAddress, new MySchedule(), new Interval {Name = "Joe"});
+            await QuartzEndpoint.ScheduleSend(InputQueueAddress, DateTime.UtcNow + TimeSpan.FromSeconds(20), new Done { Name = "Joe" });
+            await QuartzEndpoint.ScheduleRecurringSend(InputQueueAddress, new MySchedule(), new Interval { Name = "Joe" });
 
 
             await _done;
@@ -35,7 +35,30 @@ namespace MassTransit.QuartzIntegration.Tests
             Assert.AreEqual(8, _count, "Expected to see 8 interval messages");
         }
 
+        [Test, Explicit]
+        public async void Should_cancel_recurring_schedule()
+        {
+            var scheduleId = Guid.NewGuid().ToString();
+
+            await QuartzEndpoint.ScheduleSend(InputQueueAddress, DateTime.UtcNow + TimeSpan.FromSeconds(10), new Done { Name = "Joe" });
+            var scheduledRecurringMessage = await QuartzEndpoint.ScheduleRecurringSend(InputQueueAddress, new MyCancelableSchedule(scheduleId), new Interval { Name = "Joe" });
+
+            await _done;
+
+            var countBeforeCancel = _count;
+            Assert.AreEqual(8, _count, "Expected to see 8 interval messages");
+
+            await Bus.CancelScheduledRecurringMessage(scheduledRecurringMessage);
+
+            await QuartzEndpoint.ScheduleSend(InputQueueAddress, DateTime.UtcNow + TimeSpan.FromSeconds(10), new DoneAgain { Name = "Joe" });
+
+            await _doneAgain;
+
+            Assert.AreEqual(countBeforeCancel, _count, "Expected to see the count matches.");
+        }
+
         Task<ConsumeContext<Done>> _done;
+        Task<ConsumeContext<DoneAgain>> _doneAgain;
         int _count;
 
         protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
@@ -47,8 +70,9 @@ namespace MassTransit.QuartzIntegration.Tests
             });
 
             _done = Handled<Done>(configurator);
-        }
+            _doneAgain = Handled<DoneAgain>(configurator);
 
+        }
 
         class MySchedule :
             DefaultRecurringSchedule
@@ -62,6 +86,27 @@ namespace MassTransit.QuartzIntegration.Tests
             }
         }
 
+        class MyCancelableSchedule :
+          RecurringSchedule
+        {
+            public MyCancelableSchedule(string scheduleId)
+            {
+                this.ScheduleId = scheduleId;
+                CronExpression = "0/1 * * * * ?";
+
+                StartTime = DateTime.Now + TimeSpan.FromSeconds(3);
+                EndTime = StartTime + TimeSpan.FromSeconds(20);
+            }
+
+
+            public MissedEventPolicy MisfirePolicy { get; protected set; }
+            public string TimeZoneId { get; protected set; }
+            public DateTimeOffset StartTime { get; protected set; }
+            public DateTimeOffset? EndTime { get; protected set; }
+            public string ScheduleId { get; private set; }
+            public string ScheduleGroup { get; private set; }
+            public string CronExpression { get; protected set; }
+        }
 
         public class Interval
         {
@@ -70,6 +115,11 @@ namespace MassTransit.QuartzIntegration.Tests
 
 
         public class Done
+        {
+            public string Name { get; set; }
+        }
+
+        public class DoneAgain
         {
             public string Name { get; set; }
         }
