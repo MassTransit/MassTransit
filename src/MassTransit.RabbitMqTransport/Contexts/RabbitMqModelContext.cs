@@ -108,46 +108,46 @@ namespace MassTransit.RabbitMqTransport.Contexts
             await pendingPublish.Task.ConfigureAwait(false);
         }
 
-        async Task ModelContext.ExchangeBind(string destination, string source, string routingKey, IDictionary<string, object> arguments)
+        Task ModelContext.ExchangeBind(string destination, string source, string routingKey, IDictionary<string, object> arguments)
         {
-            await Task.Factory.StartNew(() => _model.ExchangeBind(destination, source, routingKey, arguments),
-                _tokenSource.Token, TaskCreationOptions.HideScheduler, _taskScheduler).ConfigureAwait(false);
+            return Task.Factory.StartNew(() => _model.ExchangeBind(destination, source, routingKey, arguments),
+                _tokenSource.Token, TaskCreationOptions.HideScheduler, _taskScheduler);
         }
 
-        async Task ModelContext.ExchangeDeclare(string exchange, string type, bool durable, bool autoDelete, IDictionary<string, object> arguments)
+        Task ModelContext.ExchangeDeclare(string exchange, string type, bool durable, bool autoDelete, IDictionary<string, object> arguments)
         {
-            await Task.Factory.StartNew(() => _model.ExchangeDeclare(exchange, type, durable, autoDelete, arguments),
-                _tokenSource.Token, TaskCreationOptions.HideScheduler, _taskScheduler).ConfigureAwait(false);
+            return Task.Factory.StartNew(() => _model.ExchangeDeclare(exchange, type, durable, autoDelete, arguments),
+                _tokenSource.Token, TaskCreationOptions.HideScheduler, _taskScheduler);
         }
 
-        public async Task ExchangeDeclarePassive(string exchange)
+        public Task ExchangeDeclarePassive(string exchange)
         {
-            await Task.Factory.StartNew(() => _model.ExchangeDeclarePassive(exchange),
-                _tokenSource.Token, TaskCreationOptions.HideScheduler, _taskScheduler).ConfigureAwait(false);
+            return Task.Factory.StartNew(() => _model.ExchangeDeclarePassive(exchange),
+                _tokenSource.Token, TaskCreationOptions.HideScheduler, _taskScheduler);
         }
 
-        async Task ModelContext.QueueBind(string queue, string exchange, string routingKey, IDictionary<string, object> arguments)
+        Task ModelContext.QueueBind(string queue, string exchange, string routingKey, IDictionary<string, object> arguments)
         {
-            await Task.Factory.StartNew(() => _model.QueueBind(queue, exchange, routingKey, arguments),
-                _tokenSource.Token, TaskCreationOptions.HideScheduler, _taskScheduler).ConfigureAwait(false);
+            return Task.Factory.StartNew(() => _model.QueueBind(queue, exchange, routingKey, arguments),
+                _tokenSource.Token, TaskCreationOptions.HideScheduler, _taskScheduler);
         }
 
-        async Task<QueueDeclareOk> ModelContext.QueueDeclare(string queue, bool durable, bool exclusive, bool autoDelete, IDictionary<string, object> arguments)
+        Task<QueueDeclareOk> ModelContext.QueueDeclare(string queue, bool durable, bool exclusive, bool autoDelete, IDictionary<string, object> arguments)
         {
-            return await Task.Factory.StartNew(() => _model.QueueDeclare(queue, durable, exclusive, autoDelete, arguments),
-                _tokenSource.Token, TaskCreationOptions.HideScheduler, _taskScheduler).ConfigureAwait(false);
+            return Task.Factory.StartNew(() => _model.QueueDeclare(queue, durable, exclusive, autoDelete, arguments),
+                _tokenSource.Token, TaskCreationOptions.HideScheduler, _taskScheduler);
         }
 
-        async Task<uint> ModelContext.QueuePurge(string queue)
+        Task<uint> ModelContext.QueuePurge(string queue)
         {
-            return await Task.Factory.StartNew(() => _model.QueuePurge(queue),
-                _tokenSource.Token, TaskCreationOptions.HideScheduler, _taskScheduler).ConfigureAwait(false);
+            return Task.Factory.StartNew(() => _model.QueuePurge(queue),
+                _tokenSource.Token, TaskCreationOptions.HideScheduler, _taskScheduler);
         }
 
-        async Task ModelContext.BasicQos(uint prefetchSize, ushort prefetchCount, bool global)
+        Task ModelContext.BasicQos(uint prefetchSize, ushort prefetchCount, bool global)
         {
-            await Task.Factory.StartNew(() => _model.BasicQos(prefetchSize, prefetchCount, global),
-                _tokenSource.Token, TaskCreationOptions.HideScheduler, _taskScheduler).ConfigureAwait(false);
+            return Task.Factory.StartNew(() => _model.BasicQos(prefetchSize, prefetchCount, global),
+                _tokenSource.Token, TaskCreationOptions.HideScheduler, _taskScheduler);
         }
 
         void ModelContext.BasicAck(ulong deliveryTag, bool multiple)
@@ -160,16 +160,16 @@ namespace MassTransit.RabbitMqTransport.Contexts
             _model.BasicNack(deliveryTag, multiple, requeue);
         }
 
-        async Task<string> ModelContext.BasicConsume(string queue, bool noAck, IBasicConsumer consumer)
+        Task<string> ModelContext.BasicConsume(string queue, bool noAck, IBasicConsumer consumer)
         {
-            return await Task.Factory.StartNew(() => _model.BasicConsume(queue, noAck, consumer),
-                _tokenSource.Token, TaskCreationOptions.HideScheduler, _taskScheduler).ConfigureAwait(false);
+            return Task.Factory.StartNew(() => _model.BasicConsume(queue, noAck, consumer),
+                _tokenSource.Token, TaskCreationOptions.HideScheduler, _taskScheduler);
         }
 
-        public async Task BasicCancel(string consumerTag)
+        public Task BasicCancel(string consumerTag)
         {
-            await Task.Factory.StartNew(() => _model.BasicCancel(consumerTag),
-                _tokenSource.Token, TaskCreationOptions.HideScheduler, _taskScheduler).ConfigureAwait(false);
+            return Task.Factory.StartNew(() => _model.BasicCancel(consumerTag),
+                _tokenSource.Token, TaskCreationOptions.HideScheduler, _taskScheduler);
         }
 
         void Close(string reason)
