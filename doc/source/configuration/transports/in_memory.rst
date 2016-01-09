@@ -3,6 +3,15 @@ In-Memory transport
 
 .. warning::
 
+    The in-memory transport is designed for use within a single process only.
+    It is not possible to use the in-memory transport to communicate between multiple processes
+    (even if they are on the same machine). By the way, it is possible to share the same
+    in-memory transport with multiple bus instances *within the same process* by configuring
+    the transport provider using InMemoryTransportCache (see below).
+
+
+.. warning::
+
     The InMemory transport is a great tool for testing, as it doesn't require a message broker
     to be installed or running. It's also very fast. But it isn't durable, and messages are gone
     if the bus is stopped or the process terminates. So, it's generally not a smart option for a
