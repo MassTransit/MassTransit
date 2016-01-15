@@ -13,6 +13,7 @@
 namespace MassTransit.RabbitMqTransport.Configuration.Configurators
 {
     using System.Net.Security;
+    using System.Security.Authentication;
 
 
     public class RabbitMqSslConfigurator :
@@ -25,10 +26,12 @@ namespace MassTransit.RabbitMqTransport.Configuration.Configurators
             CertificatePath = settings.ClientCertificatePath;
             CertificatePassphrase = settings.ClientCertificatePassphrase;
             ServerName = settings.SslServerName;
+            Protocol = settings.SslProtocol;
             _acceptablePolicyErrors = settings.AcceptablePolicyErrors | SslPolicyErrors.RemoteCertificateChainErrors;
         }
 
         public SslPolicyErrors AcceptablePolicyErrors => _acceptablePolicyErrors;
+
 
         public string CertificatePath { get; set; }
 
@@ -40,6 +43,8 @@ namespace MassTransit.RabbitMqTransport.Configuration.Configurators
         public string CertificatePassphrase { get; set; }
 
         public string ServerName { get; set; }
+
+        public SslProtocols Protocol { get; set; }
 
         /// <summary>
         /// Configures the rabbit mq client connection for Sll properties.
