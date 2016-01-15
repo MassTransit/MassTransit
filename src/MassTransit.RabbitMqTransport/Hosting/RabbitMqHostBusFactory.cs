@@ -13,6 +13,7 @@
 namespace MassTransit.RabbitMqTransport.Hosting
 {
     using System.Net.Security;
+    using System.Security.Authentication;
     using Logging;
     using MassTransit.Hosting;
 
@@ -66,6 +67,7 @@ namespace MassTransit.RabbitMqTransport.Hosting
             public string Password => _settings.Password ?? "guest";
             public ushort Heartbeat => _settings.Heartbeat ?? 0;
             public bool Ssl => false;
+            public SslProtocols SslProtocol => SslProtocols.None;
             public string SslServerName => null;
             public SslPolicyErrors AcceptablePolicyErrors => SslPolicyErrors.None;
             public string ClientCertificatePath => null;

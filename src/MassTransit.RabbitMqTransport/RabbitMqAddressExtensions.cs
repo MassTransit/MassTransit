@@ -332,7 +332,7 @@ namespace MassTransit.RabbitMqTransport
             };
 
             factory.Ssl.Enabled = settings.Ssl;
-            factory.Ssl.Version = SslProtocols.Tls;
+            factory.Ssl.Version = settings.SslProtocol;
             factory.Ssl.AcceptablePolicyErrors = settings.AcceptablePolicyErrors;
             factory.Ssl.ServerName = settings.SslServerName;
             if (string.IsNullOrWhiteSpace(factory.Ssl.ServerName))
