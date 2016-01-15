@@ -13,6 +13,7 @@
 namespace MassTransit.Internals.Mapping
 {
     using System;
+    using System.ComponentModel;
     using Reflection;
 
 
@@ -32,9 +33,14 @@ namespace MassTransit.Internals.Mapping
             object value;
             if (valueProvider.TryGetValue(_property.Property.Name, out value))
             {
-                TValue? nullableValue = value as TValue?;
-                if (!nullableValue.HasValue)
-                    nullableValue = (TValue)Convert.ChangeType(value, typeof(TValue));
+                TValue? nullableValue = null;
+                if (value != null)
+                {
+                    var converter = TypeDescriptor.GetConverter(typeof(TValue));
+                    nullableValue = converter.CanConvertFrom(value.GetType())
+                        ? (TValue)converter.ConvertFrom(value)
+                        : default(TValue?);
+                }
 
                 _property.Set(obj, nullableValue);
             }
