@@ -74,7 +74,9 @@
     <Compile Include="Configuration\ServiceBusMessageSchedulerSpecification.cs" />
     <Compile Include="Contexts\ServiceBusMessageSchedulerContext.cs" />
     <Compile Include="Defaults.cs" />
+    <Compile Include="Hosting\ServiceBusAmqpTransportSettings.cs" />
     <Compile Include="Hosting\ServiceBusHostBusFactory.cs" />
+    <Compile Include="Hosting\ServiceBusNetMessagingTransportSettings.cs" />
     <Compile Include="Hosting\ServiceBusServiceConfigurator.cs" />
     <Compile Include="Hosting\ServiceBusSettings.cs" />
     <Compile Include="IQueueConfigurator.cs" />
