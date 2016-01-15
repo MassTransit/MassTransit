@@ -13,6 +13,7 @@
 namespace MassTransit.RabbitMqTransport
 {
     using System.Net.Security;
+    using System.Security.Authentication;
 
 
     /// <summary>
@@ -55,6 +56,11 @@ namespace MassTransit.RabbitMqTransport
         /// True if SSL is required
         /// </summary>
         bool Ssl { get; }
+
+        /// <summary>
+        /// SSL protocol, Tls11 or Tls12 are recommended
+        /// </summary>
+        SslProtocols SslProtocol { get; }
 
         /// <summary>
         /// The server name specified on the certificate for the RabbitMQ server

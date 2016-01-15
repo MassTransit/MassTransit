@@ -13,6 +13,7 @@
 namespace MassTransit.RabbitMqTransport.Configuration.Configurators
 {
     using System.Net.Security;
+    using System.Security.Authentication;
 
 
     class ConfigurationHostSettings :
@@ -25,6 +26,7 @@ namespace MassTransit.RabbitMqTransport.Configuration.Configurators
         public string Password { get; set; }
         public ushort Heartbeat { get; set; }
         public bool Ssl { get; set; }
+        public SslProtocols SslProtocol { get; set; } = SslProtocols.Tls;
         public string SslServerName { get; set; }
         public SslPolicyErrors AcceptablePolicyErrors { get; set; }
         public string ClientCertificatePath { get; set; }

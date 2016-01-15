@@ -13,6 +13,7 @@
 namespace MassTransit.RabbitMqTransport.Configuration.Configurators
 {
     using System.Net.Security;
+    using System.Security.Authentication;
 
 
     /// <summary>
@@ -21,6 +22,7 @@ namespace MassTransit.RabbitMqTransport.Configuration.Configurators
     /// </summary>
     public interface IRabbitMqSslConfigurator
     {
+        SslProtocols Protocol { get; set; }
         string ServerName { get; set; }
         string CertificatePath { get; set; }
         string CertificatePassphrase { get; set; }
