@@ -1,14 +1,14 @@
 // Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
+//
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
+// this file except in compliance with the License. You may obtain a copy of the
+// License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
 // Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.AzureServiceBusTransport.Hosting
 {
@@ -26,6 +26,10 @@ namespace MassTransit.AzureServiceBusTransport.Hosting
         readonly ILog _log = Logger.Get<ServiceBusHostBusFactory>();
         readonly ServiceBusSettings _settings;
 
+        readonly ServiceBusAmqpTransportSettings _ampAmqpTransportSettings;
+
+        readonly ServiceBusNetMessagingTransportSettings _netMessagingTransportSettings;
+
         public ServiceBusHostBusFactory(ISettingsProvider settingsProvider)
         {
             ServiceBusSettings settings;
@@ -33,13 +37,23 @@ namespace MassTransit.AzureServiceBusTransport.Hosting
                 throw new ConfigurationException("The ServiceBus settings were not available");
 
             _settings = settings;
+
+            ServiceBusAmqpTransportSettings amqpTransportSettings;
+            if (!settingsProvider.TryGetSettings("ServiceBusAmqpTransport", out amqpTransportSettings))
+                throw new ConfigurationException("The ServiceBusAmqpTransport settings were not available");
+            _ampAmqpTransportSettings = amqpTransportSettings;
+
+            ServiceBusNetMessagingTransportSettings netMessagingTransportSettings;
+            if (!settingsProvider.TryGetSettings("ServiceBusNetMessagingTransport", out netMessagingTransportSettings))
+                throw new ConfigurationException("The ServiceBusNetMessagingTransport settings were not available");
+            _netMessagingTransportSettings = netMessagingTransportSettings;
         }
 
         public IBusControl CreateBus(IBusServiceConfigurator busServiceConfigurator, string serviceName)
         {
             serviceName = serviceName.ToLowerInvariant().Trim().Replace(" ", "_");
 
-            var hostSettings = new SettingsAdapter(_settings, serviceName);
+            var hostSettings = new SettingsAdapter(_settings,_ampAmqpTransportSettings, _netMessagingTransportSettings, serviceName);
 
             if (hostSettings.ServiceUri == null)
                 throw new ConfigurationException("The ServiceBus ServiceUri setting has not been configured");
@@ -70,11 +84,17 @@ namespace MassTransit.AzureServiceBusTransport.Hosting
         class SettingsAdapter :
             ServiceBusHostSettings
         {
-            readonly ServiceBusSettings _settings;
+            private readonly ServiceBusSettings _settings;
 
-            public SettingsAdapter(ServiceBusSettings settings, string serviceName)
+            private readonly ServiceBusAmqpTransportSettings _ampAmqpTransportSettings;
+
+            private readonly ServiceBusNetMessagingTransportSettings _netMessagingTransportSettings;
+
+            public SettingsAdapter(ServiceBusSettings settings, ServiceBusAmqpTransportSettings ampAmqpTransportSettings, ServiceBusNetMessagingTransportSettings netMessagingTransportSettings, string serviceName)
             {
                 _settings = settings;
+                _ampAmqpTransportSettings = ampAmqpTransportSettings;
+                _netMessagingTransportSettings = netMessagingTransportSettings;
 
                 if (string.IsNullOrWhiteSpace(settings.ConnectionString))
                 {
@@ -111,9 +131,47 @@ namespace MassTransit.AzureServiceBusTransport.Hosting
 
             public TransportType TransportType => _settings.TransportType;
 
-            public AmqpTransportSettings AmqpTransportSettings => _settings.AmqpTransportSettings;
+            public AmqpTransportSettings AmqpTransportSettings
+            {
+                get
+                {
+                    // Leave AmqpTransportSettings default values intact unless configuration value provided.
+                    var settings = new AmqpTransportSettings();
 
-            public NetMessagingTransportSettings NetMessagingTransportSettings => _settings.NetMessagingTransportSettings;
+                    if (_ampAmqpTransportSettings.BatchFlushInterval.HasValue)
+                        settings.BatchFlushInterval = _ampAmqpTransportSettings.BatchFlushInterval.Value;
+
+                    if (_ampAmqpTransportSettings.EnableLinkRedirect.HasValue)
+                        settings.EnableLinkRedirect = _ampAmqpTransportSettings.EnableLinkRedirect.Value;
+
+                    if (_ampAmqpTransportSettings.MaxFrameSize.HasValue)
+                        settings.MaxFrameSize = _ampAmqpTransportSettings.MaxFrameSize.Value;
+
+                    if (_ampAmqpTransportSettings.UseSslStreamSecurity.HasValue)
+                        settings.UseSslStreamSecurity = _ampAmqpTransportSettings.UseSslStreamSecurity.Value;
+
+                    return settings;
+                }
+            }
+
+            public NetMessagingTransportSettings NetMessagingTransportSettings
+            {
+                get
+                {
+                    // Leave NetMessagingTransportSettings default values intact unless configuration value provided.
+                    var settings = new NetMessagingTransportSettings();
+                    if (_netMessagingTransportSettings.BatchFlushInterval.HasValue)
+                        settings.BatchFlushInterval = _netMessagingTransportSettings.BatchFlushInterval.Value;
+
+                    if (_netMessagingTransportSettings.EnableRedirect.HasValue)
+                        settings.EnableRedirect = _netMessagingTransportSettings.EnableRedirect.Value;
+
+                    if (_netMessagingTransportSettings.LeaseTimeout.HasValue)
+                        settings.LeaseTimeout = _netMessagingTransportSettings.LeaseTimeout.Value;
+
+                    return settings;
+                }
+            }
 
             public Uri ServiceUri { get; private set; }
 
