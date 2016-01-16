@@ -52,7 +52,7 @@ stable having been used in production since 2008. The format is `well documented
 of messages. Furthermore, the envelope includes headers for tracking messages, including conversations, correlations,
 and requests. The address and host information in the envelope make it easy to build any messaging pattern.
 
-.. _well documented: ../advanced/interop.rst
+.. _well documented: ../advanced/interop.html
 
 
 Consumer lifecycle management
