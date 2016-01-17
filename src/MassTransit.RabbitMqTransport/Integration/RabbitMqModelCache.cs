@@ -65,6 +65,9 @@ namespace MassTransit.RabbitMqTransport.Integration
         {
             IPipe<ConnectionContext> connectionPipe = Pipe.ExecuteAsync<ConnectionContext>(async connectionContext =>
             {
+                if (_log.IsDebugEnabled)
+                    _log.DebugFormat("Creating model: {0}", connectionContext.HostSettings.ToDebugString());
+
                 IModel model = await connectionContext.CreateModel().ConfigureAwait(false);
 
                 EventHandler<ShutdownEventArgs> modelShutdown = null;
@@ -124,6 +127,9 @@ namespace MassTransit.RabbitMqTransport.Integration
             {
                 using (SharedModelContext context = await existingScope.Attach(cancellationToken).ConfigureAwait(false))
                 {
+                    if (_log.IsDebugEnabled)
+                        _log.DebugFormat("Existing model: {0}", ((ModelContext)context).ConnectionContext.HostSettings.ToDebugString());
+
                     await modelPipe.Send(context).ConfigureAwait(false);
                 }
             }
