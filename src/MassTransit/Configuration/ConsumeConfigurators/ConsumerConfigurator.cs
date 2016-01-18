@@ -44,7 +44,6 @@ namespace MassTransit.ConsumeConfigurators
         public void ConfigureMessage<T>(Action<IConsumerMessageConfigurator<T>> configure)
             where T : class
         {
-            
             var messageConfigurator = new ConsumerMessageConfigurator<TConsumer, T>(this);
 
             configure(messageConfigurator);
