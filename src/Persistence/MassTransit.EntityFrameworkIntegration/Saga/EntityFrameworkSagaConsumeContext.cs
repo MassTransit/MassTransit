@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -29,12 +29,14 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
     {
         static readonly ILog _log = Logger.Get<EntityFrameworkSagaRepository<TSaga>>();
         readonly DbContext _dbContext;
+        readonly bool _existing;
 
-        public EntityFrameworkSagaConsumeContext(DbContext dbContext, ConsumeContext<TMessage> context, TSaga instance)
+        public EntityFrameworkSagaConsumeContext(DbContext dbContext, ConsumeContext<TMessage> context, TSaga instance, bool existing = true)
             : base(context)
         {
             Saga = instance;
             _dbContext = dbContext;
+            _existing = existing;
         }
 
         Guid? MessageContext.CorrelationId => Saga.CorrelationId;
@@ -50,16 +52,19 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
 
         public async Task SetCompleted()
         {
-            _dbContext.Set<TSaga>().Remove(Saga);
-
             IsCompleted = true;
-            if (_log.IsDebugEnabled)
+            if (_existing)
             {
-                _log.DebugFormat("SAGA:{0}:{1} Removed {2}", TypeMetadataCache<TSaga>.ShortName, TypeMetadataCache<TMessage>.ShortName,
-                    Saga.CorrelationId);
-            }
+                _dbContext.Set<TSaga>().Remove(Saga);
 
-            await _dbContext.SaveChangesAsync(CancellationToken).ConfigureAwait(false);
+                if (_log.IsDebugEnabled)
+                {
+                    _log.DebugFormat("SAGA:{0}:{1} Removed {2}", TypeMetadataCache<TSaga>.ShortName, TypeMetadataCache<TMessage>.ShortName,
+                        Saga.CorrelationId);
+                }
+
+                await _dbContext.SaveChangesAsync(CancellationToken).ConfigureAwait(false);
+            }
         }
 
         public bool IsCompleted { get; private set; }
