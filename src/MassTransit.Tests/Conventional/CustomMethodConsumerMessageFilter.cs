@@ -30,6 +30,8 @@ namespace MassTransit.Tests.Conventional
     {
         void IProbeSite.Probe(ProbeContext context)
         {
+            var scope = context.CreateScope("consume");
+            scope.Add("method", $"Handle({TypeMetadataCache<TMessage>.ShortName} message)");
         }
 
         [DebuggerNonUserCode]

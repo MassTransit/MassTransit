@@ -24,14 +24,14 @@ namespace MassTransit.Pipeline.Filters
     /// </summary>
     /// <typeparam name="TConsumer"></typeparam>
     /// <typeparam name="TMessage"></typeparam>
-    public class ConsumerSplitFilter<TConsumer, TMessage> :
+    public class MessageSplitFilter<TConsumer, TMessage> :
         IFilter<ConsumerConsumeContext<TConsumer, TMessage>>
         where TMessage : class
         where TConsumer : class
     {
-        readonly IFilter<ConsumerConsumeContext<TConsumer>> _next;
+        readonly IFilter<ConsumeContext<TMessage>> _next;
 
-        public ConsumerSplitFilter(IFilter<ConsumerConsumeContext<TConsumer>> next)
+        public MessageSplitFilter(IFilter<ConsumeContext<TMessage>> next)
         {
             _next = next;
         }
@@ -41,7 +41,7 @@ namespace MassTransit.Pipeline.Filters
             ProbeContext scope = context.CreateFilterScope("split");
             scope.Set(new
             {
-                ConsumerType = TypeMetadataCache<TConsumer>.ShortName
+                MessageType = TypeMetadataCache<TMessage>.ShortName
             });
 
             _next.Probe(scope);
@@ -50,7 +50,7 @@ namespace MassTransit.Pipeline.Filters
         [DebuggerNonUserCode]
         public Task Send(ConsumerConsumeContext<TConsumer, TMessage> context, IPipe<ConsumerConsumeContext<TConsumer, TMessage>> next)
         {
-            var mergePipe = new ConsumerMergePipe<TConsumer, TMessage>(next);
+            var mergePipe = new MessageMergePipe<TConsumer, TMessage>(next);
 
             return _next.Send(context, mergePipe);
         }

@@ -24,16 +24,21 @@ namespace MassTransit.PipeConfigurators
         where TConsumer : class
         where TMessage : class
     {
-        readonly IFilter<ConsumerConsumeContext<TConsumer>> _filter;
+        readonly IFilter<ConsumerConsumeContext<TConsumer, TMessage>> _filter;
 
         public ConsumerPipeSpecification(IFilter<ConsumerConsumeContext<TConsumer>> filter)
+        {
+            _filter = new ConsumerSplitFilter<TConsumer, TMessage>(filter);
+        }
+
+        public ConsumerPipeSpecification(IFilter<ConsumerConsumeContext<TConsumer, TMessage>> filter)
         {
             _filter = filter;
         }
 
         public void Apply(IPipeBuilder<ConsumerConsumeContext<TConsumer, TMessage>> builder)
         {
-            builder.AddFilter(new ConsumerSplitFilter<TConsumer, TMessage>(_filter));
+            builder.AddFilter(_filter);
         }
 
         public IEnumerable<ValidationResult> Validate()

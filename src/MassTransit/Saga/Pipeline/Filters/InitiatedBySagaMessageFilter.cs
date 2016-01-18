@@ -30,7 +30,8 @@ namespace MassTransit.Saga.Pipeline.Filters
     {
         void IProbeSite.Probe(ProbeContext context)
         {
-            context.CreateFilterScope("initiatedBy");
+            var scope = context.CreateFilterScope("initiatedBy");
+            scope.Add("method", $"Consume({TypeMetadataCache<TMessage>.ShortName} message)");
         }
 
         public async Task Send(SagaConsumeContext<TSaga, TMessage> context, IPipe<SagaConsumeContext<TSaga, TMessage>> next)
