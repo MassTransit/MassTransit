@@ -12,8 +12,10 @@
 // specific language governing permissions and limitations under the License.
 namespace Automatonymous
 {
+    using System;
     using MassTransit;
     using MassTransit.Saga;
+    using MassTransit.Saga.SubscriptionConfigurators;
     using SubscriptionConfigurators;
     using SubscriptionConnectors;
 
@@ -27,13 +29,16 @@ namespace Automatonymous
         /// <param name="configurator"></param>
         /// <param name="stateMachine">The state machine</param>
         /// <param name="repository">The saga repository for the instances</param>
+        /// <param name="configure">Optionally configure the saga</param>
         /// <returns></returns>
         public static void StateMachineSaga<TInstance>(
             this IReceiveEndpointConfigurator configurator, SagaStateMachine<TInstance> stateMachine,
-            ISagaRepository<TInstance> repository)
+            ISagaRepository<TInstance> repository, Action<ISagaConfigurator<TInstance>> configure = null)
             where TInstance : class, SagaStateMachineInstance
         {
             var stateMachineConfigurator = new StateMachineSagaSpecification<TInstance>(stateMachine, repository);
+
+            configure?.Invoke(stateMachineConfigurator);
 
             configurator.AddEndpointSpecification(stateMachineConfigurator);
         }

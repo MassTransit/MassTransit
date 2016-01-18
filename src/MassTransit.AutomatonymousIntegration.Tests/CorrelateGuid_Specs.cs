@@ -34,7 +34,10 @@ namespace MassTransit.AutomatonymousIntegration.Tests
             _repository = new InMemorySagaRepository<TransactionState>();
             _machine = new TransactionStateMachine();
 
-            configurator.StateMachineSaga(_machine, _repository);
+            configurator.StateMachineSaga(_machine, _repository, x =>
+            {
+                x.ConfigureMessage<BeginTransaction>(m => m.UsePartitioner(4, p => p.Message.TransactionId));
+            });
         }
 
 
@@ -121,6 +124,8 @@ namespace MassTransit.AutomatonymousIntegration.Tests
 
             saga = await _repository.ShouldContainSaga(state => state.TransactionId == id && state.CurrentState == _machine.Final, TestTimeout);
             Assert.IsTrue(saga.HasValue);
+
+            Console.WriteLine(Bus.GetProbeResult().ToJsonString());
         }
     }
 }

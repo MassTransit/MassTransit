@@ -36,7 +36,7 @@ namespace MassTransit.Tests.Pipeline
 
             Console.WriteLine("Processed: {0}", count);
 
-          //  Console.WriteLine(Bus.GetProbeResult().ToJsonString());
+            //Console.WriteLine(Bus.GetProbeResult().ToJsonString());
         }
 
         TaskCompletionSource<int> _completed;

@@ -552,7 +552,6 @@
     <Compile Include="Pipeline\Filters\Latest\ILatestFilter.cs" />
     <Compile Include="Pipeline\Filters\MessagePublishFilter.cs" />
     <Compile Include="Pipeline\Filters\MessageSendFilter.cs" />
-    <Compile Include="Pipeline\Filters\MessageSplitFilter.cs" />
     <Compile Include="Pipeline\Filters\MessageTypePublishFilter.cs" />
     <Compile Include="Pipeline\Filters\MessageTypeSendFilter.cs" />
     <Compile Include="Pipeline\Filters\MoveToTransportFilter.cs" />
@@ -617,7 +616,6 @@
     <Compile Include="Pipeline\ConsumeMessageObservable.cs" />
     <Compile Include="Pipeline\ConsumeObservable.cs" />
     <Compile Include="Pipeline\Pipes\FilterPipe.cs" />
-    <Compile Include="Pipeline\Pipes\MessageMergePipe.cs" />
     <Compile Include="Pipeline\Pipes\PublishPipe.cs" />
     <Compile Include="Pipeline\Pipes\ReceivePipe.cs" />
     <Compile Include="Pipeline\Pipes\ResponsePipe.cs" />
@@ -721,6 +719,8 @@
     <Compile Include="Saga\SagaQuery.cs" />
     <Compile Include="Saga\SagaQueryConsumeContext.cs" />
     <Compile Include="Saga\SagaQueryConsumeContextProxy.cs" />
+    <Compile Include="Saga\SubscriptionConfigurators\ISagaMessageConfigurator.cs" />
+    <Compile Include="Saga\SubscriptionConfigurators\SagaMessageConfigurator.cs" />
     <Compile Include="ScheduleMessageExtensions.cs" />
     <Compile Include="ScheduleRecurringMessageExtensions.cs" />
     <Compile Include="Scheduling\CancelScheduledMessage.cs" />
