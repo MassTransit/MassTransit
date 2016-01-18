@@ -249,7 +249,7 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
                         TypeMetadataCache<TMessage>.ShortName);
                 }
 
-                var proxy = new EntityFrameworkSagaConsumeContext<TSaga, TMessage>(_dbContext, context, context.Saga);
+                var proxy = new EntityFrameworkSagaConsumeContext<TSaga, TMessage>(_dbContext, context, context.Saga, false);
 
                 await _next.Send(proxy).ConfigureAwait(false);
 
