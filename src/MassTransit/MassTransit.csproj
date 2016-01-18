@@ -49,6 +49,7 @@
     <DocumentationFile>
     </DocumentationFile>
     <Prefer32Bit>false</Prefer32Bit>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -67,6 +68,7 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <AssemblyOriginatorKeyFile>..\..\MassTransit.snk</AssemblyOriginatorKeyFile>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="NewId, Version=2.1.3.0, Culture=neutral, PublicKeyToken=b8e0e9f2f1e657fa, processorArchitecture=MSIL">
@@ -106,6 +108,8 @@
     <Compile Include="Configuration\BusConfigurators\SendPipeConfigurator.cs" />
     <Compile Include="Configuration\BusObserverExtensions.cs" />
     <Compile Include="Configuration\CircuitBreakerExtensions.cs" />
+    <Compile Include="Configuration\ConsumeConfigurators\ConsumerMessageConfigurator.cs" />
+    <Compile Include="Configuration\ConsumeConfigurators\IConsumerMessageConfigurator.cs" />
     <Compile Include="Configuration\ConsumeConnectors\AsyncConsumerConvention.cs" />
     <Compile Include="Configuration\ConsumeConnectors\ConsumerConnector.cs" />
     <Compile Include="Configuration\ConsumeConnectors\ConsumerConventionCache.cs" />
@@ -150,6 +154,7 @@
     <Compile Include="Configuration\MessageDataConfiguratorExtensions.cs" />
     <Compile Include="Configuration\MessageSchedulerExtensions.cs" />
     <Compile Include="Configuration\InMemoryOutboxConfiguratorExtensions.cs" />
+    <Compile Include="Configuration\PartitionerExtensions.cs" />
     <Compile Include="Configuration\PipeConfigurators\CircuitBreakerPipeSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\CompensateActivityHostSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\DeadLetterPipeSpecification.cs" />
@@ -157,6 +162,7 @@
     <Compile Include="Configuration\PipeConfigurators\LatestPipeSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\MessageSchedulerPipeSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\InMemoryOutboxSpecification.cs" />
+    <Compile Include="Configuration\PipeConfigurators\PartitionerPipeSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\RedeliveryRetryPipeSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\ScheduleMessageRedeliveryPipeSpecification.cs" />
     <Compile Include="Configuration\ScheduledRetryExtensions.cs" />
@@ -546,11 +552,16 @@
     <Compile Include="Pipeline\Filters\Latest\ILatestFilter.cs" />
     <Compile Include="Pipeline\Filters\MessagePublishFilter.cs" />
     <Compile Include="Pipeline\Filters\MessageSendFilter.cs" />
+    <Compile Include="Pipeline\Filters\MessageSplitFilter.cs" />
     <Compile Include="Pipeline\Filters\MessageTypePublishFilter.cs" />
     <Compile Include="Pipeline\Filters\MessageTypeSendFilter.cs" />
     <Compile Include="Pipeline\Filters\MoveToTransportFilter.cs" />
     <Compile Include="Pipeline\Filters\InMemoryOutboxFilter.cs" />
     <Compile Include="Pipeline\Filters\Outbox\OutboxSendEndpoint.cs" />
+    <Compile Include="Pipeline\Filters\Partitioner\IHashGenerator.cs" />
+    <Compile Include="Pipeline\Filters\Partitioner\Murmur3UnsafeHashGenerator.cs" />
+    <Compile Include="Pipeline\Filters\Partitioner\PartitionFilter.cs" />
+    <Compile Include="Pipeline\Filters\Partitioner\PartitionKeyProvider.cs" />
     <Compile Include="Pipeline\Filters\RedeliveryRetryFilter.cs" />
     <Compile Include="Pipeline\Filters\DelegateFilter.cs" />
     <Compile Include="Pipeline\Filters\DeserializeFilter.cs" />
@@ -606,6 +617,7 @@
     <Compile Include="Pipeline\ConsumeMessageObservable.cs" />
     <Compile Include="Pipeline\ConsumeObservable.cs" />
     <Compile Include="Pipeline\Pipes\FilterPipe.cs" />
+    <Compile Include="Pipeline\Pipes\MessageMergePipe.cs" />
     <Compile Include="Pipeline\Pipes\PublishPipe.cs" />
     <Compile Include="Pipeline\Pipes\ReceivePipe.cs" />
     <Compile Include="Pipeline\Pipes\ResponsePipe.cs" />

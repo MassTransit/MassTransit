@@ -164,6 +164,7 @@
     <Compile Include="Pipeline\LatestFilter_Specs.cs" />
     <Compile Include="Pipeline\MessageTestFixture.cs" />
     <Compile Include="Pipeline\OneMessageConsumer.cs" />
+    <Compile Include="Pipeline\PartitionByKey_Specs.cs" />
     <Compile Include="Pipeline\Retry_Specs.cs" />
     <Compile Include="Pipeline\Transaction_Specs.cs" />
     <Compile Include="Pipeline\TwoMessageConsumer.cs" />

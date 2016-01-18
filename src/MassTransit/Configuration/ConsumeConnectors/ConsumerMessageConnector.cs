@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -65,21 +65,27 @@ namespace MassTransit.ConsumeConnectors
 
 
         class ConsumerPipeBuilder<T> :
-            IPipeBuilder<ConsumerConsumeContext<T>>
+            IPipeBuilder<ConsumerConsumeContext<T>>,
+            IPipeBuilder<ConsumeContext<TMessage>>
             where T : class
         {
-            readonly IList<IFilter<ConsumerConsumeContext<T>>> _filters;
+            readonly IList<IFilter<ConsumerConsumeContext<T, TMessage>>> _filters;
 
             public ConsumerPipeBuilder()
             {
-                _filters = new List<IFilter<ConsumerConsumeContext<T>>>();
+                _filters = new List<IFilter<ConsumerConsumeContext<T, TMessage>>>();
             }
 
-            public IEnumerable<IFilter<ConsumerConsumeContext<T>>> Filters => _filters;
+            public IEnumerable<IFilter<ConsumerConsumeContext<T, TMessage>>> Filters => _filters;
+
+            public void AddFilter(IFilter<ConsumeContext<TMessage>> filter)
+            {
+                _filters.Add(new MessageSplitFilter<T, TMessage>(filter));
+            }
 
             public void AddFilter(IFilter<ConsumerConsumeContext<T>> filter)
             {
-                _filters.Add(filter);
+                _filters.Add(new ConsumerSplitFilter<T, TMessage>(filter));
             }
         }
     }
