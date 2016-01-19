@@ -28,11 +28,11 @@ container. The two bus interfaces, ``IBus`` and ``IBusControl``, are included.
 
             sbc.ReceiveEndpoint("customer_update_queue", ec =>
             {
-                ec.LoadFrom(container);
+                ec.LoadFrom(kernel);
             })
         });
         
-        container.Configure(cfg =>
+        kernel.Configure(cfg =>
         {
             For<IBusControl>()
                 .Use(busControl);
@@ -45,7 +45,7 @@ container. The two bus interfaces, ``IBus`` and ``IBusControl``, are included.
 .. note::
 
     The behavior with Ninject is slightly different, in that the current AppDomain types are checked against the
-    container and any consumer types are registered, they are resolved from the container. The unit tests pass, and
+    container and if any consumer types are registered, they are resolved from the container. The unit tests pass, and
     it works, but just be aware that container metadata is not being used to support this feature. There is some history
     on this, found at the `Ninject issue`_.
 
