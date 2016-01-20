@@ -34,8 +34,9 @@ container. The two bus interfaces, ``IBus`` and ``IBusControl``, are included.
         
         kernel.Bind<IBus>()
             .ToProvider(new CallbackProvider<IBus>(x => x.Kernel.Get<IBusControl>()));
-                busControl.Start();
-        }
+        
+        busControl.Start();
+    }
 
 .. note::
 
