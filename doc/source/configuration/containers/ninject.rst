@@ -16,7 +16,17 @@ container. The two bus interfaces, ``IBus`` and ``IBusControl``, are included.
     {
         var kernel = new StandardKernel();
 
+        // register a specific consumer
         kernel.Bind<UpdateCustomerAddressConsumer>().ToSelf();
+        
+        // just register all the consumers using Ninject.Extensions.Conventions
+        kernel.Bind(x =>
+            {
+                x.FromThisAssembly()
+                .SelectAllClasses()
+                .InheritedFrom<IConsumer>()
+                .BindToSelf();
+            });
             
         var busControl = Bus.Factory.CreateUsingRabbitMq(cfg =>
         {
