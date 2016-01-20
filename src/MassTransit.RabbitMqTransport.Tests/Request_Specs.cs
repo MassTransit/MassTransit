@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -26,7 +26,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         [Test]
         public async Task Should_receive_the_response()
         {
-            PongMessage message = await _response;
+            var message = await _response;
 
             message.CorrelationId.ShouldBe(_ping.Result.Message.CorrelationId);
         }

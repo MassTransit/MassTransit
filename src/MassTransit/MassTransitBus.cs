@@ -275,6 +275,9 @@ namespace MassTransit
         void IDisposable.Dispose()
         {
             _busHandle?.Stop(CancellationToken.None);
+
+            (_sendEndpointProvider as IDisposable)?.Dispose();
+            (_publishEndpointProvider as IDisposable)?.Dispose();
         }
 
 

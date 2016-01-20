@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -58,18 +58,32 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
 
             var provider = new ServiceBusSendEndpointProvider(MessageSerializer, InputAddress, SendTransportProvider, pipe);
 
-            return new SendEndpointCache(provider);
+            return new SendEndpointCache(provider, QueueCacheDurationProvider);
+        }
+
+        TimeSpan QueueCacheDurationProvider(Uri address)
+        {
+            var timeSpan = address.GetQueueDescription().AutoDeleteOnIdle;
+
+            return timeSpan > TimeSpan.FromDays(1) ? TimeSpan.FromDays(1) : timeSpan;
         }
 
         public override IPublishEndpointProvider CreatePublishEndpointProvider(params IPublishPipeSpecification[] specifications)
         {
             var provider = new PublishSendEndpointProvider(MessageSerializer, InputAddress, _hosts);
 
-            var cache = new SendEndpointCache(provider);
+            var cache = new SendEndpointCache(provider, TopicCacheDurationProvider);
 
             var pipe = CreatePublishPipe(specifications);
 
             return new ServiceBusPublishEndpointProvider(_hosts[0], cache, pipe);
+        }
+
+        TimeSpan TopicCacheDurationProvider(Uri address)
+        {
+            var timeSpan = address.GetTopicDescription().AutoDeleteOnIdle;
+
+            return timeSpan > TimeSpan.FromDays(1) ? TimeSpan.FromDays(1) : timeSpan;
         }
 
         protected override void PreBuild()

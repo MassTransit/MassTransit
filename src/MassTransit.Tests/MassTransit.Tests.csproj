@@ -128,6 +128,7 @@
     <Compile Include="HeaderObject_Specs.cs" />
     <Compile Include="HostInfo_Specs.cs" />
     <Compile Include="Introspection_Specs.cs" />
+    <Compile Include="LazyMemoryCache_Specs.cs" />
     <Compile Include="MessageData\DataBus_Specs.cs" />
     <Compile Include="Diagnostics\PerformanceCounter_Specs.cs" />
     <Compile Include="DictionaryToObject_Specs.cs" />

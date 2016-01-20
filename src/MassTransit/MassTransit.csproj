@@ -84,6 +84,7 @@
     </Reference>
     <Reference Include="System.Data" />
     <Reference Include="System.Management" />
+    <Reference Include="System.Runtime.Caching" />
     <Reference Include="System.Transactions" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Xml.Linq" />
@@ -1012,6 +1013,9 @@
     <Compile Include="Exceptions\EndpointException.cs" />
     <Compile Include="Turnout\JobResultContext.cs" />
     <Compile Include="Util\AsyncTimer.cs" />
+    <Compile Include="Util\Caching\Cached.cs" />
+    <Compile Include="Util\Caching\LazyMemoryCache.cs" />
+    <Compile Include="Util\IAsyncDisposable.cs" />
     <Compile Include="Util\IMediator.cs" />
     <Compile Include="Util\ITaskSupervisorScope.cs" />
     <Compile Include="Util\LazyConcurrentDictionary.cs" />
