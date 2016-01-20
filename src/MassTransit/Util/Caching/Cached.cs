@@ -10,24 +10,26 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.RabbitMqTransport.Integration
+namespace MassTransit.Util.Caching
 {
-    using System.Threading;
     using System.Threading.Tasks;
-    using MassTransit.Pipeline;
 
 
     /// <summary>
-    /// Attaches a model context to the value
+    /// A cached value
     /// </summary>
-    public interface IModelCache
+    /// <typeparam name="TValue"></typeparam>
+    public interface Cached<TValue>
+        where TValue : class
     {
-        Task Send(IPipe<ModelContext> modelPipe, CancellationToken cancellationToken);
+        /// <summary>
+        /// The cached value
+        /// </summary>
+        Task<TValue> Value { get; }
 
         /// <summary>
-        /// Close the model cache, disposing of any resources
+        /// Update the last used time for the cached value
         /// </summary>
-        /// <returns></returns>
-        Task Close();
+        void Touch();
     }
 }

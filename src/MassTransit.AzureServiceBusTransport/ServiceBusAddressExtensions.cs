@@ -81,6 +81,9 @@ namespace MassTransit.AzureServiceBusTransport
 
             topicDescription.DefaultMessageTimeToLive = address.GetValueFromQueryString("ttl", topicDescription.DefaultMessageTimeToLive);
             topicDescription.EnableExpress = address.GetValueFromQueryString("express", topicDescription.EnableExpress);
+            int autoDeleteOnIdleSeconds = address.GetValueFromQueryString("autodelete", 0);
+            if (autoDeleteOnIdleSeconds > 0)
+                topicDescription.AutoDeleteOnIdle = TimeSpan.FromSeconds(autoDeleteOnIdleSeconds);
 
             return topicDescription;
         }

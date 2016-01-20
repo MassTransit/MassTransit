@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -18,13 +18,15 @@ namespace MassTransit.Transports
     using Context;
     using Pipeline;
     using Util;
+    using Util.Caching;
 
 
     public class SendEndpoint :
-        ISendEndpoint
+        ISendEndpoint,
+        IAsyncDisposable
     {
-        readonly ISendTransport _transport;
         readonly ISendPipe _sendPipe;
+        readonly ISendTransport _transport;
 
         public SendEndpoint(ISendTransport transport, IMessageSerializer serializer, Uri destinationAddress, Uri sourceAddress, ISendPipe sendPipe)
         {
@@ -40,6 +42,11 @@ namespace MassTransit.Transports
         Uri DestinationAddress { get; }
 
         Uri SourceAddress { get; }
+
+        public Task DisposeAsync()
+        {
+            return _transport.Close();
+        }
 
         public ConnectHandle ConnectSendObserver(ISendObserver observer)
         {
@@ -75,7 +82,7 @@ namespace MassTransit.Transports
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
 
-            Type messageType = message.GetType();
+            var messageType = message.GetType();
 
             return SendEndpointConverterCache.Send(this, message, messageType, cancellationToken);
         }
@@ -96,7 +103,7 @@ namespace MassTransit.Transports
             if (values == null)
                 throw new ArgumentNullException(nameof(values));
 
-            T message = TypeMetadataCache<T>.InitializeFromObject(values);
+            var message = TypeMetadataCache<T>.InitializeFromObject(values);
 
             return Send(message, cancellationToken);
         }
@@ -121,7 +128,7 @@ namespace MassTransit.Transports
             if (pipe == null)
                 throw new ArgumentNullException(nameof(pipe));
 
-            Type messageType = message.GetType();
+            var messageType = message.GetType();
 
             return SendEndpointConverterCache.Send(this, message, messageType, pipe, cancellationToken);
         }
@@ -144,7 +151,7 @@ namespace MassTransit.Transports
             if (values == null)
                 throw new ArgumentNullException(nameof(values));
 
-            T message = TypeMetadataCache<T>.InitializeFromObject(values);
+            var message = TypeMetadataCache<T>.InitializeFromObject(values);
 
             return Send(message, pipe, cancellationToken);
         }
@@ -157,7 +164,7 @@ namespace MassTransit.Transports
             if (pipe == null)
                 throw new ArgumentNullException(nameof(pipe));
 
-            T message = TypeMetadataCache<T>.InitializeFromObject(values);
+            var message = TypeMetadataCache<T>.InitializeFromObject(values);
 
             return Send(message, pipe, cancellationToken);
         }

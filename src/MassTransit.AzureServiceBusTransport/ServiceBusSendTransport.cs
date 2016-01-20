@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,7 +13,6 @@
 namespace MassTransit.AzureServiceBusTransport
 {
     using System;
-    using System.IO;
     using System.Threading;
     using System.Threading.Tasks;
     using Contexts;
@@ -51,7 +50,7 @@ namespace MassTransit.AzureServiceBusTransport
             {
                 await pipe.Send(context).ConfigureAwait(false);
 
-                using (Stream messageBodyStream = context.GetBodyStream())
+                using (var messageBodyStream = context.GetBodyStream())
                 {
                     using (var brokeredMessage = new BrokeredMessage(messageBodyStream))
                     {
@@ -77,7 +76,7 @@ namespace MassTransit.AzureServiceBusTransport
                         {
                             brokeredMessage.SessionId = context.SessionId;
 
-                            if(context.ReplyToSessionId == null)
+                            if (context.ReplyToSessionId == null)
                                 brokeredMessage.ReplyToSessionId = context.SessionId;
                         }
 
@@ -107,7 +106,7 @@ namespace MassTransit.AzureServiceBusTransport
             BrokeredMessageContext messageContext;
             if (context.TryGetPayload(out messageContext))
             {
-                using (Stream messageBodyStream = context.GetBody())
+                using (var messageBodyStream = context.GetBody())
                 {
                     using (var brokeredMessage = new BrokeredMessage(messageBodyStream))
                     {
@@ -133,6 +132,19 @@ namespace MassTransit.AzureServiceBusTransport
         public ConnectHandle ConnectSendObserver(ISendObserver observer)
         {
             return _observers.Connect(observer);
+        }
+
+        public async Task Close()
+        {
+            try
+            {
+                await _sender.CloseAsync().ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                if (_log.IsErrorEnabled)
+                    _log.Error($"The message sender could not be closed: {_sender.Path}", ex);
+            }
         }
     }
 }

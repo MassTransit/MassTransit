@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,6 +14,7 @@ namespace MassTransit.RabbitMqTransport
 {
     using System;
     using System.Linq;
+    using System.Threading;
     using System.Threading.Tasks;
     using Integration;
     using MassTransit.Pipeline;
@@ -21,12 +22,14 @@ namespace MassTransit.RabbitMqTransport
     using Topology;
     using Transports;
     using Util;
+    using Util.Caching;
 
 
     public class RabbitMqPublishEndpointProvider :
-        IPublishEndpointProvider
+        IPublishEndpointProvider,
+        IDisposable
     {
-        readonly LazyConcurrentDictionary<Type, ISendEndpoint> _cachedEndpoints;
+        readonly LazyMemoryCache<Type, ISendEndpoint> _cache;
         readonly IRabbitMqHost _host;
         readonly PublishObservable _publishObservable;
         readonly IPublishPipe _publishPipe;
@@ -39,8 +42,17 @@ namespace MassTransit.RabbitMqTransport
             _serializer = serializer;
             _sourceAddress = sourceAddress;
             _publishPipe = publishPipe;
-            _cachedEndpoints = new LazyConcurrentDictionary<Type, ISendEndpoint>(CreateSendEndpoint);
+
             _publishObservable = new PublishObservable();
+
+            var cacheId = NewId.NextGuid().ToString();
+            _cache = new LazyMemoryCache<Type, ISendEndpoint>(cacheId, CreateSendEndpoint, GetEndpointCachePolicy, FormatAddressKey,
+                OnCachedEndpointRemoved);
+        }
+
+        public void Dispose()
+        {
+            _cache.Dispose();
         }
 
         public IPublishEndpoint CreatePublishEndpoint(Uri sourceAddress, Guid? correlationId, Guid? conversationId)
@@ -48,9 +60,13 @@ namespace MassTransit.RabbitMqTransport
             return new PublishEndpoint(sourceAddress, this, _publishObservable, _publishPipe, correlationId, conversationId);
         }
 
-        public Task<ISendEndpoint> GetPublishSendEndpoint(Type messageType)
+        public async Task<ISendEndpoint> GetPublishSendEndpoint(Type messageType)
         {
-            return _cachedEndpoints.Get(messageType);
+            Cached<ISendEndpoint> cached = _cache.Get(messageType);
+
+            var endpoint = await cached.Value.ConfigureAwait(false);
+
+            return new CachedSendEndpoint(endpoint, cached.Touch);
         }
 
         public ConnectHandle ConnectPublishObserver(IPublishObserver observer)
@@ -58,22 +74,116 @@ namespace MassTransit.RabbitMqTransport
             return _publishObservable.Connect(observer);
         }
 
+        Task OnCachedEndpointRemoved(string key, ISendEndpoint value, string reason)
+        {
+            return TaskUtil.Completed;
+        }
+
+        string FormatAddressKey(Type key)
+        {
+            return TypeMetadataCache.GetShortName(key);
+        }
+
+        LazyMemoryCache<Type, ISendEndpoint>.ICacheExpiration GetEndpointCachePolicy(LazyMemoryCache<Type, ISendEndpoint>.ICacheExpirationSelector selector)
+        {
+            return selector.SlidingWindow(TimeSpan.FromDays(1));
+        }
+
         Task<ISendEndpoint> CreateSendEndpoint(Type messageType)
         {
-            SendSettings sendSettings = _host.GetSendSettings(messageType);
+            var sendSettings = _host.GetSendSettings(messageType);
 
             ExchangeBindingSettings[] bindings = TypeMetadataCache.GetMessageTypes(messageType)
                 .SelectMany(type => type.GetExchangeBindings(_host.MessageNameFormatter))
                 .Where(binding => !sendSettings.ExchangeName.Equals(binding.Exchange.ExchangeName))
                 .ToArray();
 
-            Uri destinationAddress = _host.Settings.GetSendAddress(sendSettings);
+            var destinationAddress = _host.Settings.GetSendAddress(sendSettings);
 
             var modelCache = new RabbitMqModelCache(_host.ConnectionCache);
 
             var sendTransport = new RabbitMqSendTransport(modelCache, sendSettings, bindings);
 
             return Task.FromResult<ISendEndpoint>(new SendEndpoint(sendTransport, _serializer, destinationAddress, _sourceAddress, SendPipe.Empty));
+        }
+
+
+        class CachedSendEndpoint :
+            ISendEndpoint
+        {
+            readonly ISendEndpoint _endpoint;
+            readonly Action _touch;
+
+            public CachedSendEndpoint(ISendEndpoint endpoint, Action touch)
+            {
+                _endpoint = endpoint;
+                _touch = touch;
+            }
+
+            public ConnectHandle ConnectSendObserver(ISendObserver observer)
+            {
+                return _endpoint.ConnectSendObserver(observer);
+            }
+
+            public Task Send<T>(T message, CancellationToken cancellationToken = new CancellationToken()) where T : class
+            {
+                _touch();
+                return _endpoint.Send(message, cancellationToken);
+            }
+
+            public Task Send<T>(T message, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken = new CancellationToken()) where T : class
+            {
+                _touch();
+                return _endpoint.Send(message, pipe, cancellationToken);
+            }
+
+            public Task Send<T>(T message, IPipe<SendContext> pipe, CancellationToken cancellationToken = new CancellationToken()) where T : class
+            {
+                _touch();
+                return _endpoint.Send(message, pipe, cancellationToken);
+            }
+
+            public Task Send(object message, CancellationToken cancellationToken = new CancellationToken())
+            {
+                _touch();
+                return _endpoint.Send(message, cancellationToken);
+            }
+
+            public Task Send(object message, Type messageType, CancellationToken cancellationToken = new CancellationToken())
+            {
+                _touch();
+                return _endpoint.Send(message, messageType, cancellationToken);
+            }
+
+            public Task Send(object message, IPipe<SendContext> pipe, CancellationToken cancellationToken = new CancellationToken())
+            {
+                _touch();
+                return _endpoint.Send(message, pipe, cancellationToken);
+            }
+
+            public Task Send(object message, Type messageType, IPipe<SendContext> pipe, CancellationToken cancellationToken = new CancellationToken())
+            {
+                _touch();
+                return _endpoint.Send(message, messageType, pipe, cancellationToken);
+            }
+
+            public Task Send<T>(object values, CancellationToken cancellationToken = new CancellationToken()) where T : class
+            {
+                _touch();
+                return _endpoint.Send<T>(values, cancellationToken);
+            }
+
+            public Task Send<T>(object values, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken = new CancellationToken()) where T : class
+            {
+                _touch();
+                return _endpoint.Send(values, pipe, cancellationToken);
+            }
+
+            public Task Send<T>(object values, IPipe<SendContext> pipe, CancellationToken cancellationToken = new CancellationToken()) where T : class
+            {
+                _touch();
+                return _endpoint.Send<T>(values, pipe, cancellationToken);
+            }
         }
     }
 }

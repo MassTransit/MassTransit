@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -58,7 +58,7 @@ namespace MassTransit.RabbitMqTransport
 
                 p.UseExecuteAsync(async modelContext =>
                 {
-                    IBasicProperties properties = modelContext.Model.CreateBasicProperties();
+                    var properties = modelContext.Model.CreateBasicProperties();
 
                     var context = new RabbitMqSendContextImpl<T>(properties, message, _sendSettings, cancelSend);
 
@@ -145,7 +145,7 @@ namespace MassTransit.RabbitMqTransport
                         byte[] body;
                         using (var memoryStream = new MemoryStream())
                         {
-                            using (Stream bodyStream = context.GetBody())
+                            using (var bodyStream = context.GetBody())
                             {
                                 bodyStream.CopyTo(memoryStream);
                             }
@@ -153,7 +153,7 @@ namespace MassTransit.RabbitMqTransport
                             body = memoryStream.ToArray();
                         }
 
-                        Task task = modelContext.BasicPublishAsync(_sendSettings.ExchangeName, "", true, properties, body);
+                        var task = modelContext.BasicPublishAsync(_sendSettings.ExchangeName, "", true, properties, body);
                         context.AddPendingTask(task);
 
                         if (_log.IsDebugEnabled)
@@ -178,6 +178,11 @@ namespace MassTransit.RabbitMqTransport
         public ConnectHandle ConnectSendObserver(ISendObserver observer)
         {
             return _observers.Connect(observer);
+        }
+
+        public Task Close()
+        {
+            return _modelCache.Close();
         }
 
 
@@ -261,7 +266,7 @@ namespace MassTransit.RabbitMqTransport
 
                 void IMessageSerializer.Serialize<T>(Stream stream, SendContext<T> context)
                 {
-                    using (Stream bodyStream = _context.GetBody())
+                    using (var bodyStream = _context.GetBody())
                     {
                         bodyStream.CopyTo(stream);
                     }
