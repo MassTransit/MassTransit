@@ -32,15 +32,10 @@ container. The two bus interfaces, ``IBus`` and ``IBusControl``, are included.
             })
         });
         
-        kernel.Configure(cfg =>
-        {
-            For<IBusControl>()
-                .Use(busControl);
-            Forward<IBus, IBusControl>();
-        });
-
-        busControl.Start();
-    }
+        kernel.Bind<IBus>()
+            .ToProvider(new CallbackProvider<IBus>(x => x.Kernel.Get<IBusControl>()));
+                busControl.Start();
+        }
 
 .. note::
 
