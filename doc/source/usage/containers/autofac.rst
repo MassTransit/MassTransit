@@ -33,7 +33,7 @@ various ways that MassTransit can be configured, including the appropriate inter
                     h.Password("guest");
                 });
 
-                sbc.ReceiveEndpoint("customer_update_queue", ec =>
+                cfg.ReceiveEndpoint("customer_update_queue", ec =>
                 {
                     ec.LoadFrom(context);
                 })
