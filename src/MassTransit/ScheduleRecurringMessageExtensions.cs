@@ -86,12 +86,25 @@ namespace MassTransit
         }
 
         /// <summary>
+        ///     Cancel a scheduled recurring message using the id and group of the schedule class.
+        /// </summary>
+        /// <param name="bus"></param>
+        /// <param name="scheduleId"></param>
+        /// <param name="scheduleGroup"></param>
+        public static Task CancelScheduledRecurringMessage(this IPublishEndpoint bus, RecurringSchedule schedule)
+        {
+            if (schedule == null)
+                throw new ArgumentNullException(nameof(schedule));
+            return CancelScheduledRecurringMessageCommand(bus, schedule.ScheduleId, schedule.ScheduleGroup);
+        }
+
+        /// <summary>
         ///     Cancel a scheduled recurring message using the id and group of the schedule.
         /// </summary>
         /// <param name="bus"></param>
         /// <param name="scheduleId"></param>
         /// <param name="scheduleGroup"></param>
-        static async Task CancelScheduledRecurringMessage(this IPublishEndpoint bus, string scheduleId, string scheduleGroup)
+        public static async Task CancelScheduledRecurringMessage(this IPublishEndpoint bus, string scheduleId, string scheduleGroup)
         {
             var command = new CancelScheduledRecurringMessageCommand(scheduleId, scheduleGroup);
 
