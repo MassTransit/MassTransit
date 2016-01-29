@@ -14,6 +14,7 @@ namespace MassTransit.RabbitMqTransport
 {
     using System.Net.Security;
     using System.Security.Authentication;
+    using System.Security.Cryptography.X509Certificates;
 
 
     /// <summary>
@@ -78,8 +79,13 @@ namespace MassTransit.RabbitMqTransport
         string ClientCertificatePath { get; }
 
         /// <summary>
-        /// The passphrase for the client certificate 
+        /// The passphrase for the client certificate found using the <see cref="ClientCertificatePath"/>, not required if <see cref="ClientCertificate"/> is populated
         /// </summary>
         string ClientCertificatePassphrase { get; }
+
+        /// <summary>
+        /// A certificate to use for client certificate authentication, if not set then the <see cref="ClientCertificatePath"/> and <see cref="ClientCertificatePassphrase"/> will be used
+        /// </summary>
+        X509Certificate ClientCertificate { get; }
     }
 }

@@ -14,6 +14,7 @@ namespace MassTransit.RabbitMqTransport.Configuration.Configurators
 {
     using System.Net.Security;
     using System.Security.Authentication;
+    using System.Security.Cryptography.X509Certificates;
 
 
     public class RabbitMqSslConfigurator :
@@ -25,6 +26,7 @@ namespace MassTransit.RabbitMqTransport.Configuration.Configurators
         {
             CertificatePath = settings.ClientCertificatePath;
             CertificatePassphrase = settings.ClientCertificatePassphrase;
+            Certificate = settings.ClientCertificate;
             ServerName = settings.SslServerName;
             Protocol = settings.SslProtocol;
             _acceptablePolicyErrors = settings.AcceptablePolicyErrors | SslPolicyErrors.RemoteCertificateChainErrors;
@@ -41,6 +43,8 @@ namespace MassTransit.RabbitMqTransport.Configuration.Configurators
         }
 
         public string CertificatePassphrase { get; set; }
+
+        public X509Certificate Certificate { get; set; }
 
         public string ServerName { get; set; }
 

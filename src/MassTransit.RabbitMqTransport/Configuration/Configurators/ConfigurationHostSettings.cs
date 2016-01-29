@@ -14,6 +14,7 @@ namespace MassTransit.RabbitMqTransport.Configuration.Configurators
 {
     using System.Net.Security;
     using System.Security.Authentication;
+    using System.Security.Cryptography.X509Certificates;
 
 
     class ConfigurationHostSettings :
@@ -31,5 +32,6 @@ namespace MassTransit.RabbitMqTransport.Configuration.Configurators
         public SslPolicyErrors AcceptablePolicyErrors { get; set; }
         public string ClientCertificatePath { get; set; }
         public string ClientCertificatePassphrase { get; set; }
+        public X509Certificate ClientCertificate { get; set; }
     }
 }

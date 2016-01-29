@@ -14,6 +14,7 @@ namespace MassTransit.RabbitMqTransport.Hosting
 {
     using System.Net.Security;
     using System.Security.Authentication;
+    using System.Security.Cryptography.X509Certificates;
     using Logging;
     using MassTransit.Hosting;
 
@@ -72,6 +73,7 @@ namespace MassTransit.RabbitMqTransport.Hosting
             public SslPolicyErrors AcceptablePolicyErrors => SslPolicyErrors.None;
             public string ClientCertificatePath => null;
             public string ClientCertificatePassphrase => null;
+            public X509Certificate ClientCertificate => null;
         }
     }
 }
