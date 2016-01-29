@@ -18,6 +18,7 @@ namespace MassTransit.RabbitMqTransport
     using System.Net;
     using System.Net.Security;
     using System.Security.Authentication;
+    using System.Security.Cryptography.X509Certificates;
     using System.Text;
     using System.Text.RegularExpressions;
     using Configuration;
@@ -335,6 +336,8 @@ namespace MassTransit.RabbitMqTransport
             factory.Ssl.Version = settings.SslProtocol;
             factory.Ssl.AcceptablePolicyErrors = settings.AcceptablePolicyErrors;
             factory.Ssl.ServerName = settings.SslServerName;
+            factory.Ssl.Certs = settings.ClientCertificate == null ? null : new X509Certificate2Collection {settings.ClientCertificate};
+            
             if (string.IsNullOrWhiteSpace(factory.Ssl.ServerName))
                 factory.Ssl.AcceptablePolicyErrors |= SslPolicyErrors.RemoteCertificateNameMismatch;
 
@@ -347,7 +350,6 @@ namespace MassTransit.RabbitMqTransport
 
                 factory.Ssl.CertPath = "";
                 factory.Ssl.CertPassphrase = "";
-                factory.Ssl.Certs = null;
             }
             else
             {
