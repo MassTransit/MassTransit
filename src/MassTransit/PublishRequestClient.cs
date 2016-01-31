@@ -31,17 +31,7 @@ namespace MassTransit
         readonly IBus _bus;
         readonly TimeSpan _timeout;
         private readonly TimeSpan? _timeToLive;
-
-        /// <summary>
-        /// Creates a message request client for the bus and endpoint specified
-        /// </summary>
-        /// <param name="bus">The bus instance</param>
-        /// <param name="timeout">The request timeout</param>
-        public PublishRequestClient(IBus bus, TimeSpan timeout)
-            : this(bus, timeout, default(TimeSpan?))
-        {
-            
-        }
+        readonly Action<SendContext<TRequest>> _callback;
 
         /// <summary>
         /// Creates a message request client for the bus and endpoint specified
@@ -49,11 +39,13 @@ namespace MassTransit
         /// <param name="bus">The bus instance</param>
         /// <param name="timeout">The request timeout</param>
         /// <param name="timeToLive">The time that the request will live for</param>
-        public PublishRequestClient(IBus bus, TimeSpan timeout, TimeSpan? timeToLive)
+        /// <param name="callback"></param>
+        public PublishRequestClient(IBus bus, TimeSpan timeout, TimeSpan? timeToLive = default(TimeSpan?), Action<SendContext<TRequest>> callback = null)
         {
             _bus = bus;
             _timeout = timeout;
             _timeToLive = timeToLive;
+            _callback = callback;
         }
 
         async Task<TResponse> IRequestClient<TRequest, TResponse>.Request(TRequest request, CancellationToken cancellationToken)
@@ -68,6 +60,8 @@ namespace MassTransit
                 x.TimeToLive = _timeToLive;
                 x.Timeout = _timeout;
                 responseTask = x.Handle<TResponse>();
+
+                _callback?.Invoke(x);
             });
 
             await _bus.Publish(request, pipe, cancellationToken).ConfigureAwait(false);

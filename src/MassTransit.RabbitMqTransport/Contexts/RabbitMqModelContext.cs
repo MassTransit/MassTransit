@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -99,13 +99,14 @@ namespace MassTransit.RabbitMqTransport.Contexts
 
         CancellationToken PipeContext.CancellationToken => _tokenSource.Token;
 
-        async Task ModelContext.BasicPublishAsync(string exchange, string routingKey, bool mandatory, IBasicProperties basicProperties,
-            byte[] body)
+        async Task ModelContext.BasicPublishAsync(string exchange, string routingKey, bool mandatory, IBasicProperties basicProperties, byte[] body,
+            bool awaitAck)
         {
             var pendingPublish = await Task.Factory.StartNew(() => PublishAsync(exchange, routingKey, mandatory, basicProperties, body),
                 _tokenSource.Token, TaskCreationOptions.HideScheduler, _taskScheduler).ConfigureAwait(false);
 
-            await pendingPublish.Task.ConfigureAwait(false);
+            if (awaitAck)
+                await pendingPublish.Task.ConfigureAwait(false);
         }
 
         Task ModelContext.ExchangeBind(string destination, string source, string routingKey, IDictionary<string, object> arguments)

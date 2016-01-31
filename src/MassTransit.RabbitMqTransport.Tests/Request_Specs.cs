@@ -38,7 +38,8 @@ namespace MassTransit.RabbitMqTransport.Tests
         [TestFixtureSetUp]
         public void Setup()
         {
-            _requestClient = new MessageRequestClient<PingMessage, PongMessage>(Bus, InputQueueAddress, TimeSpan.FromSeconds(8));
+            _requestClient = new MessageRequestClient<PingMessage, PongMessage>(Bus, InputQueueAddress, TimeSpan.FromSeconds(8),
+                TimeSpan.FromSeconds(8), context => context.SetAwaitAck(false));
 
             _response = _requestClient.Request(new PingMessage());
         }
