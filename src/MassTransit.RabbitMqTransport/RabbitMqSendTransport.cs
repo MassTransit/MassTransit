@@ -89,7 +89,7 @@ namespace MassTransit.RabbitMqTransport
                         await _observers.PreSend(context).ConfigureAwait(false);
 
                         await modelContext.BasicPublishAsync(context.Exchange, context.RoutingKey, context.Mandatory,
-                            context.BasicProperties, context.Body).ConfigureAwait(false);
+                            context.BasicProperties, context.Body, context.AwaitAck).ConfigureAwait(false);
 
                         context.DestinationAddress.LogSent(context.MessageId?.ToString("N") ?? "", TypeMetadataCache<T>.ShortName);
 
@@ -153,7 +153,7 @@ namespace MassTransit.RabbitMqTransport
                             body = memoryStream.ToArray();
                         }
 
-                        var task = modelContext.BasicPublishAsync(_sendSettings.ExchangeName, "", true, properties, body);
+                        var task = modelContext.BasicPublishAsync(_sendSettings.ExchangeName, "", true, properties, body, true);
                         context.AddPendingTask(task);
 
                         if (_log.IsDebugEnabled)
@@ -196,6 +196,7 @@ namespace MassTransit.RabbitMqTransport
             {
                 _context = context;
                 BasicProperties = properties;
+                AwaitAck = true;
                 Headers = new RabbitMqSendHeaders(properties);
                 _serializer = new CopyBodySerializer(context);
             }
@@ -249,6 +250,8 @@ namespace MassTransit.RabbitMqTransport
             public bool Mandatory { get; set; }
             public string Exchange { get; private set; }
             public string RoutingKey { get; set; }
+            public bool AwaitAck { get; set; }
+
             public IBasicProperties BasicProperties { get; }
 
 

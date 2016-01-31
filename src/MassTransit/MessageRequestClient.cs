@@ -32,18 +32,8 @@ namespace MassTransit
         readonly IBus _bus;
         readonly Lazy<Task<ISendEndpoint>> _requestEndpoint;
         readonly TimeSpan _timeout;
-        private readonly TimeSpan? _timeToLive;
-
-        /// <summary>
-        /// Creates a message request client for the bus and endpoint specified
-        /// </summary>
-        /// <param name="bus">The bus instance</param>
-        /// <param name="address">The service endpoint address</param>
-        /// <param name="timeout">The request timeout</param>
-        public MessageRequestClient(IBus bus, Uri address, TimeSpan timeout)
-            : this(bus, address, timeout, default(TimeSpan?))
-        {
-        }
+        readonly TimeSpan? _timeToLive;
+        readonly Action<SendContext<TRequest>> _callback;
 
         /// <summary>
         /// Creates a message request client for the bus and endpoint specified
@@ -52,11 +42,14 @@ namespace MassTransit
         /// <param name="address">The service endpoint address</param>
         /// <param name="timeout">The request timeout</param>
         /// <param name="timeToLive">The time that the request will live for</param>
-        public MessageRequestClient(IBus bus, Uri address, TimeSpan timeout, TimeSpan? timeToLive)
+        /// <param name="callback"></param>
+        public MessageRequestClient(IBus bus, Uri address, TimeSpan timeout, TimeSpan? timeToLive = default(TimeSpan?), Action<SendContext<TRequest>> callback = null)
         {
             _bus = bus;
             _timeout = timeout;
             _timeToLive = timeToLive;
+            _callback = callback;
+
             _requestEndpoint = new Lazy<Task<ISendEndpoint>>(async () => await _bus.GetSendEndpoint(address).ConfigureAwait(false));
         }
 
@@ -73,6 +66,8 @@ namespace MassTransit
                 x.TimeToLive = _timeToLive;
                 x.Timeout = _timeout;
                 responseTask = x.Handle<TResponse>();
+
+                _callback?.Invoke(x);
             });
 
             ISendEndpoint endpoint = await _requestEndpoint.Value.ConfigureAwait(false);
