@@ -53,6 +53,7 @@ namespace MassTransit.RabbitMqTransport.Configuration.Configurators
             _settings.ClientCertificatePassphrase = configurator.CertificatePassphrase;
             _settings.ClientCertificatePath = configurator.CertificatePath;
             _settings.ClientCertificate = configurator.Certificate;
+            _settings.UseClientCertificateAsAuthenticationIdentity = configurator.UseCertificateAsAuthenticationIdentity;
             _settings.AcceptablePolicyErrors = configurator.AcceptablePolicyErrors;
             _settings.SslServerName = configurator.ServerName ?? _settings.Host;
             _settings.SslProtocol = configurator.Protocol;

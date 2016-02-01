@@ -74,6 +74,7 @@ namespace MassTransit.RabbitMqTransport.Hosting
             public string ClientCertificatePath => null;
             public string ClientCertificatePassphrase => null;
             public X509Certificate ClientCertificate => null;
+            public bool UseClientCertificateAsAuthenticationIdentity => false;
         }
     }
 }

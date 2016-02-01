@@ -44,5 +44,28 @@ namespace MassTransit.RabbitMqTransport.Tests
 
             configurator.Settings.SslProtocol.ShouldBe(SslProtocols.Tls);
         }
+
+        [Test, Description("Default SSL settings should not use client certificate as authentication identity")]
+        public void Should_set_client_certificate_as_authentication_identity_as_false_by_default()
+        {
+            var configurator = new RabbitMqHostConfigurator(new Uri("rabbitmq://localhost"));
+
+            configurator.UseSsl(sslConfigurator => { });
+
+            configurator.Settings.UseClientCertificateAsAuthenticationIdentity.ShouldBeFalse();
+        }
+
+        [TestCase(true), TestCase(false), Description("SSL settings should set use client certificate as authentication identity as specified by configuration")]
+        public void Should_set_client_certificate_as_authentication_identity_when_configured(bool valueToSet)
+        {
+            var configurator = new RabbitMqHostConfigurator(new Uri("rabbitmq://localhost"));
+
+            configurator.UseSsl(sslConfigurator =>
+            {
+                sslConfigurator.UseCertificateAsAuthenticationIdentity = valueToSet;
+            });
+
+            configurator.Settings.UseClientCertificateAsAuthenticationIdentity.ShouldBe(valueToSet);
+        }
     }
 }

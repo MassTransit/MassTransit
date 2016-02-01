@@ -17,7 +17,6 @@ namespace MassTransit.RabbitMqTransport
     using System.Globalization;
     using System.Net;
     using System.Net.Security;
-    using System.Security.Authentication;
     using System.Security.Cryptography.X509Certificates;
     using System.Text;
     using System.Text.RegularExpressions;
@@ -332,6 +331,21 @@ namespace MassTransit.RabbitMqTransport
                 RequestedHeartbeat = settings.Heartbeat
             };
 
+            if (settings.UseClientCertificateAsAuthenticationIdentity)
+            {
+                factory.AuthMechanisms.Clear();
+                factory.AuthMechanisms.Add(new ExternalMechanismFactory());
+                factory.UserName = "";
+                factory.Password = "";
+            }
+            else
+            {
+                if (!string.IsNullOrWhiteSpace(settings.Username))
+                    factory.UserName = settings.Username;
+                if (!string.IsNullOrWhiteSpace(settings.Password))
+                    factory.Password = settings.Password;
+            }
+
             factory.Ssl.Enabled = settings.Ssl;
             factory.Ssl.Version = settings.SslProtocol;
             factory.Ssl.AcceptablePolicyErrors = settings.AcceptablePolicyErrors;
@@ -343,11 +357,6 @@ namespace MassTransit.RabbitMqTransport
 
             if (string.IsNullOrEmpty(settings.ClientCertificatePath))
             {
-                if (!string.IsNullOrWhiteSpace(settings.Username))
-                    factory.UserName = settings.Username;
-                if (!string.IsNullOrWhiteSpace(settings.Password))
-                    factory.Password = settings.Password;
-
                 factory.Ssl.CertPath = "";
                 factory.Ssl.CertPassphrase = "";
             }
@@ -356,7 +365,7 @@ namespace MassTransit.RabbitMqTransport
                 factory.Ssl.CertPath = settings.ClientCertificatePath;
                 factory.Ssl.CertPassphrase = settings.ClientCertificatePassphrase;
             }
-
+            
             factory.ClientProperties = factory.ClientProperties ?? new Dictionary<string, object>();
 
             HostInfo hostInfo = HostMetadataCache.Host;

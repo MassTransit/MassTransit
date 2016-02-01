@@ -33,5 +33,6 @@ namespace MassTransit.RabbitMqTransport.Configuration.Configurators
         public string ClientCertificatePath { get; set; }
         public string ClientCertificatePassphrase { get; set; }
         public X509Certificate ClientCertificate { get; set; }
+        public bool UseClientCertificateAsAuthenticationIdentity { get; set; }
     }
 }
