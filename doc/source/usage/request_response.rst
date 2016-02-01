@@ -65,7 +65,7 @@ To create a request client, the provided ``MessageRequestClient`` can be used.
     IRequestClient<CheckOrderStatus, OrderStatusResult> client =
         new MessageRequestClient<CheckOrderStatus, OrderStatusResult>(bus, address, requestTimeout);
 
-Once created, the request client instance can be registered with the depenendency resolver using the ``IRequestClient``
+Once created, the request client instance can be registered with the dependency resolver using the ``IRequestClient``
 interface type. Once registered, a controller can use the client via a constructor dependency.
 
 .. sourcecode:: csharp
