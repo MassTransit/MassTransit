@@ -14,7 +14,7 @@ Stack Overflow
 
 There is a MassTransit tag on `Stack Overflow`_ which has many questions that have already been asked.
 Several developers regularly monitor this tag for new questions, so that's a great place to start. Be sure
-to search and see if your question has already been asked, that is the fasted way to an answer if someone
+to search and see if your question has already been asked, that is the fastest way to an answer if someone
 else has already experienced the same issue.
 
 .. _Stack Overflow: http://stackoverflow.com/questions/tagged/masstransit
