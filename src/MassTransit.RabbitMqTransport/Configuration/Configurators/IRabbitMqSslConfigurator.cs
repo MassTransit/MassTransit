@@ -38,5 +38,6 @@ namespace MassTransit.RabbitMqTransport.Configuration.Configurators
         /// </summary>
         X509Certificate Certificate { get; set; }
         void AllowPolicyErrors(SslPolicyErrors policyErrors);
+        bool UseCertificateAsAuthenticationIdentity { get; set; }
     }
 }

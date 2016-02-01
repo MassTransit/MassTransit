@@ -87,5 +87,13 @@ namespace MassTransit.RabbitMqTransport
         /// A certificate to use for client certificate authentication, if not set then the <see cref="ClientCertificatePath"/> and <see cref="ClientCertificatePassphrase"/> will be used
         /// </summary>
         X509Certificate ClientCertificate { get; }
+
+        /// <summary>
+        /// Whether the client certificate should be used for logging in to RabbitMQ, ignoring any username and password set
+        /// </summary>
+        /// <remarks>
+        /// RabbitMQ must be configured correctly for this to work, including enabling the rabbitmq_auth_mechanism_ssl plugin
+        /// </remarks>
+        bool UseClientCertificateAsAuthenticationIdentity { get; }
     }
 }
