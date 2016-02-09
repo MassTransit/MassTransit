@@ -82,8 +82,8 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
                 RetryMaxBackoff = TimeSpan.FromSeconds(20);
                 RetryLimit = 10;
                 TransportType = TransportType.Amqp;
-                AmqpTransportSettings = new AmqpTransportSettings() { BatchFlushInterval = TimeSpan.FromMilliseconds(50), };
-                NetMessagingTransportSettings = new NetMessagingTransportSettings() { BatchFlushInterval = TimeSpan.FromMilliseconds(50), };
+                AmqpTransportSettings = new AmqpTransportSettings();
+                NetMessagingTransportSettings = new NetMessagingTransportSettings();
             }
 
             public Uri ServiceUri { get; private set; }
