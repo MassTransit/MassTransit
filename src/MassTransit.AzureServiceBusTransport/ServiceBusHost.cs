@@ -126,10 +126,7 @@ namespace MassTransit.AzureServiceBusTransport
                 TokenProvider = _settings.TokenProvider,
                 OperationTimeout = _settings.OperationTimeout,
                 TransportType = TransportType.NetMessaging,
-                NetMessagingTransportSettings = new NetMessagingTransportSettings
-                {
-                    BatchFlushInterval = TimeSpan.FromMilliseconds(50)
-                }
+                NetMessagingTransportSettings = _settings.NetMessagingTransportSettings
             };
 
             return CreateFactory(mfs);
