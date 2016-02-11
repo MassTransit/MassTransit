@@ -139,6 +139,7 @@
     <Compile Include="InterfaceProxy_Specs.cs" />
     <Compile Include="JsonToken_Specs.cs" />
     <Compile Include="MessageData\FileSystem_Specs.cs" />
+    <Compile Include="Messages\ReadOnlyMessage.cs" />
     <Compile Include="MessageUrnSpecs.cs" />
     <Compile Include="Configuration\ConsumesAll_Specs.cs" />
     <Compile Include="Configuration\InstanceSubscription_Specs.cs" />
@@ -183,6 +184,7 @@
     <Compile Include="Serialization\Array_Specs.cs" />
     <Compile Include="Serialization\DateTimeFormat_Specs.cs" />
     <Compile Include="Serialization\IEnumerable_Specs.cs" />
+    <Compile Include="Serialization\JsonDeserialization_Specs.cs" />
     <Compile Include="Serialization\MessageDataSerialization_Specs.cs" />
     <Compile Include="Serialization\PolymorphicProperty_Specs.cs" />
     <Compile Include="Serialization\SerializationException_Specs.cs" />
