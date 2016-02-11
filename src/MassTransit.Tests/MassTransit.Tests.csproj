@@ -139,7 +139,6 @@
     <Compile Include="InterfaceProxy_Specs.cs" />
     <Compile Include="JsonToken_Specs.cs" />
     <Compile Include="MessageData\FileSystem_Specs.cs" />
-    <Compile Include="Messages\ReadOnlyMessage.cs" />
     <Compile Include="MessageUrnSpecs.cs" />
     <Compile Include="Configuration\ConsumesAll_Specs.cs" />
     <Compile Include="Configuration\InstanceSubscription_Specs.cs" />
