@@ -30,6 +30,7 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
     {
         readonly IServiceBusHost _host;
         readonly ReceiveEndpointSettings _settings;
+        bool _subscribeMessageTopics;
 
         public ServiceBusReceiveEndpointConfigurator(IServiceBusHost host, string queueName, IConsumePipe consumePipe = null)
             : this(host, new ReceiveEndpointSettings(queueName), consumePipe)
@@ -61,7 +62,7 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
             ServiceBusReceiveEndpointBuilder endpointBuilder = null;
             var receivePipe = CreateReceivePipe(builder, consumePipe =>
             {
-                endpointBuilder = new ServiceBusReceiveEndpointBuilder(consumePipe, _host.MessageNameFormatter);
+                endpointBuilder = new ServiceBusReceiveEndpointBuilder(consumePipe, _host.MessageNameFormatter, _subscribeMessageTopics);
                 return endpointBuilder;
             });
 
@@ -74,6 +75,11 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
         }
 
         public IServiceBusHost Host => _host;
+
+        public bool SubscribeMessageTopics
+        {
+            set { _subscribeMessageTopics = value; }
+        }
 
         public TimeSpan AutoDeleteOnIdle
         {

@@ -35,11 +35,14 @@ namespace MassTransit.RabbitMqTransport.Configuration
         readonly Mediator<ISetPrefetchCount> _mediator;
         readonly RabbitMqReceiveSettings _settings;
         readonly List<ExchangeBindingSettings> _exchangeBindings;
+        bool _bindMessageExchanges;
 
         public RabbitMqReceiveEndpointConfigurator(IRabbitMqHost host, string queueName = null, IConsumePipe consumePipe = null)
             : base(consumePipe)
         {
             _host = host;
+
+            _bindMessageExchanges = true;
 
             _settings = new RabbitMqReceiveSettings
             {
@@ -77,7 +80,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
             RabbitMqReceiveEndpointBuilder endpointBuilder = null;
             var receivePipe = CreateReceivePipe(builder, consumePipe =>
             {
-                endpointBuilder = new RabbitMqReceiveEndpointBuilder(consumePipe, _host.MessageNameFormatter);
+                endpointBuilder = new RabbitMqReceiveEndpointBuilder(consumePipe, _host.MessageNameFormatter, _bindMessageExchanges);
 
                 endpointBuilder.AddExchangeBindings(_exchangeBindings.ToArray());
 
@@ -145,6 +148,11 @@ namespace MassTransit.RabbitMqTransport.Configuration
         public bool Lazy
         {
             set { SetQueueArgument("x-queue-mode", value ? "lazy" : "default"); }
+        }
+
+        public bool BindMessageExchanges
+        {
+            set { _bindMessageExchanges = value; }
         }
 
         public void SetQueueArgument(string key, object value)

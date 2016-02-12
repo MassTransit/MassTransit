@@ -137,6 +137,41 @@ namespace MassTransit.RabbitMqTransport.Tests
             }
         }
 
+        [TestFixture]
+        public class Configuring_a_consumer_without_binding :
+            ConsumerBindingTestFixture
+        {
+            [Test]
+            public async Task Should_receive_the_message_a()
+            {
+                await _a;
+            }
+
+            [Test]
+            public async Task Should_receive_the_message_b()
+            {
+                await _b;
+            }
+
+            Task<ConsumeContext<A>> _a;
+            Task<ConsumeContext<B>> _b;
+
+            [TestFixtureSetUp]
+            public void Setup()
+            {
+                Await(() => InputQueueSendEndpoint.Send(new A()));
+                Await(() => InputQueueSendEndpoint.Send(new B()));
+            }
+
+            protected override void ConfigureInputQueueEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
+            {
+                configurator.BindMessageExchanges = false;
+
+                _a = Handled<A>(configurator);
+                _b = Handled<B>(configurator);
+            }
+        }
+
 
         [TestFixture]
         public class Binding_a_old_school_saga :

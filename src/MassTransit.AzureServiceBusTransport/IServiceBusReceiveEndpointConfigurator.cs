@@ -34,5 +34,10 @@ namespace MassTransit.AzureServiceBusTransport
         /// The host on which the endpoint is being configured
         /// </summary>
         IServiceBusHost Host { get; }
+
+        /// <summary>
+        /// If true, subscribes the message type exchanges to the queue
+        /// </summary>
+        bool SubscribeMessageTopics { set; }
     }
 }

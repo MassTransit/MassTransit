@@ -37,5 +37,10 @@ namespace MassTransit
         /// <param name="exchangeName">The exchange name</param>
         /// <param name="callback">Configure the exchange and binding</param>
         void Bind(string exchangeName, Action<IExchangeBindingConfigurator> callback);
+
+        /// <summary>
+        /// If true, binds the message type exchanges to the queue exchange
+        /// </summary>
+        bool BindMessageExchanges {  set; }
     }
 }
