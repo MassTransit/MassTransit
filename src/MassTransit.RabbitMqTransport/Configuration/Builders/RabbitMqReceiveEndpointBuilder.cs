@@ -24,18 +24,21 @@ namespace MassTransit.RabbitMqTransport.Configuration.Builders
         readonly IConsumePipe _consumePipe;
         readonly List<ExchangeBindingSettings> _exchangeBindings;
         readonly IMessageNameFormatter _messageNameFormatter;
+        readonly bool _bindMessageExchanges;
 
-        public RabbitMqReceiveEndpointBuilder(IConsumePipe consumePipe, IMessageNameFormatter messageNameFormatter)
+        public RabbitMqReceiveEndpointBuilder(IConsumePipe consumePipe, IMessageNameFormatter messageNameFormatter, bool bindMessageExchanges)
         {
             _consumePipe = consumePipe;
             _messageNameFormatter = messageNameFormatter;
+            _bindMessageExchanges = bindMessageExchanges;
 
             _exchangeBindings = new List<ExchangeBindingSettings>();
         }
 
         ConnectHandle IConsumePipeConnector.ConnectConsumePipe<T>(IPipe<ConsumeContext<T>> pipe)
         {
-            _exchangeBindings.AddRange(typeof(T).GetExchangeBindings(_messageNameFormatter));
+            if(_bindMessageExchanges)
+                _exchangeBindings.AddRange(typeof(T).GetExchangeBindings(_messageNameFormatter));
 
             return _consumePipe.ConnectConsumePipe(pipe);
         }
