@@ -71,7 +71,7 @@ namespace MassTransit.AzureServiceBusTransport
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Starting receive transport: {0}", new Uri(_host.Settings.ServiceUri, _settings.QueueDescription.Path));
 
-            var supervisor = new TaskSupervisor();
+            var supervisor = new TaskSupervisor($"{TypeMetadataCache<ServiceBusReceiveTransport>.ShortName} - {_host.Settings.GetInputAddress(_settings.QueueDescription)}");
 
             var connectionPipe = Pipe.New<ConnectionContext>(x =>
             {
@@ -109,7 +109,7 @@ namespace MassTransit.AzureServiceBusTransport
                 if (_log.IsDebugEnabled)
                     _log.DebugFormat("Connecting receive transport: {0}", _host.Settings.GetInputAddress(_settings.QueueDescription));
 
-                var context = new ServiceBusConnectionContext(_host, supervisor.StopToken);
+                var context = new ServiceBusConnectionContext(_host, supervisor.StoppedToken);
 
                 try
                 {
@@ -157,9 +157,7 @@ namespace MassTransit.AzureServiceBusTransport
 
             async Task ReceiveTransportHandle.Stop(CancellationToken cancellationToken)
             {
-                await _supervisor.Stop("Receive Transport Stopping").ConfigureAwait(false);
-
-                await _supervisor.Completed.ConfigureAwait(false);
+                await _supervisor.Stop("Receive Transport Stopping", cancellationToken).ConfigureAwait(false);
             }
         }
     }

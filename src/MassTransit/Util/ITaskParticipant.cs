@@ -20,14 +20,29 @@ namespace MassTransit.Util
     public interface ITaskParticipant
     {
         /// <summary>
-        /// An awaitable task that is completed when stop is requested
+        /// Completed when the participant is ready
         /// </summary>
-        Task StopRequested { get; }
+        Task ParticipantReady { get; }
 
         /// <summary>
-        /// A cancellation Token for top requests
+        /// An awaitable task that is completed when stop is requested
         /// </summary>
-        CancellationToken StopToken { get; }
+        Task<IStopEvent> StopRequested { get; }
+
+        /// <summary>
+        /// Cancelled when the participant is stopping
+        /// </summary>
+        CancellationToken StoppingToken { get; }
+
+        /// <summary>
+        /// Cancelled when the participant has stopped
+        /// </summary>
+        CancellationToken StoppedToken { get; }
+
+        /// <summary>
+        /// Completed when the participant is completed
+        /// </summary>
+        Task ParticipantCompleted { get; }
 
         /// <summary>
         /// Signal that the participant has completed use of the resource
@@ -44,5 +59,11 @@ namespace MassTransit.Util
         /// </summary>
         /// <param name="exception"></param>
         void SetNotReady(Exception exception);
+
+        /// <summary>
+        /// Stop the participant
+        /// </summary>
+        /// <param name="stopEvent"></param>
+        void Stop(IStopEvent stopEvent);
     }
 }

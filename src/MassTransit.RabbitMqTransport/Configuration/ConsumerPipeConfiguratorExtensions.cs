@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -18,7 +18,6 @@ namespace MassTransit
     using RabbitMqTransport;
     using RabbitMqTransport.Configuration;
     using RabbitMqTransport.Management;
-    using RabbitMqTransport.Pipeline;
     using RabbitMqTransport.Topology;
     using Util;
 
@@ -34,14 +33,17 @@ namespace MassTransit
         /// <param name="receiveObserver"></param>
         /// <param name="endpointObserver"></param>
         /// <param name="exchangeBindings"></param>
-        /// <param name="taskSupervisor"></param>
+        /// <param name="supervisor"></param>
         /// <param name="mediator"></param>
-        public static void RabbitMqConsumer(this IPipeConfigurator<ConnectionContext> configurator, IPipe<ReceiveContext> pipe, ReceiveSettings settings, IReceiveObserver receiveObserver, IReceiveEndpointObserver endpointObserver, IEnumerable<ExchangeBindingSettings> exchangeBindings, ITaskSupervisor taskSupervisor, Mediator<ISetPrefetchCount> mediator)
+        public static void RabbitMqConsumer(this IPipeConfigurator<ConnectionContext> configurator, IPipe<ReceiveContext> pipe, ReceiveSettings settings,
+            IReceiveObserver receiveObserver, IReceiveEndpointObserver endpointObserver, IEnumerable<ExchangeBindingSettings> exchangeBindings,
+            ITaskSupervisor supervisor, Mediator<ISetPrefetchCount> mediator)
         {
             if (configurator == null)
                 throw new ArgumentNullException(nameof(configurator));
 
-            var pipeBuilderConfigurator = new RabbitMqConsumerPipeSpecification(pipe, settings, receiveObserver, endpointObserver, exchangeBindings, taskSupervisor, mediator);
+            var pipeBuilderConfigurator = new RabbitMqConsumerPipeSpecification(pipe, settings, receiveObserver, endpointObserver, exchangeBindings,
+                supervisor, mediator);
 
             configurator.AddPipeSpecification(pipeBuilderConfigurator);
         }

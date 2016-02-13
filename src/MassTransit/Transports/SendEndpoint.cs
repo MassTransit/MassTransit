@@ -18,7 +18,6 @@ namespace MassTransit.Transports
     using Context;
     using Pipeline;
     using Util;
-    using Util.Caching;
 
 
     public class SendEndpoint :

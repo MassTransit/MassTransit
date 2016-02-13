@@ -29,7 +29,6 @@ namespace MassTransit.RabbitMqTransport
     {
         static readonly ILog _log = Logger.Get<RabbitMqReceiveTransport>();
         readonly ExchangeBindingSettings[] _bindings;
-        readonly IRetryPolicy _connectionRetryPolicy;
         readonly IRabbitMqHost _host;
         readonly Mediator<ISetPrefetchCount> _mediator;
         readonly ReceiveEndpointObservable _receiveEndpointObservable;
@@ -46,10 +45,6 @@ namespace MassTransit.RabbitMqTransport
 
             _receiveObservable = new ReceiveObservable();
             _receiveEndpointObservable = new ReceiveEndpointObservable();
-
-            var exceptionFilter = Retry.Selected<RabbitMqConnectionException>();
-
-            _connectionRetryPolicy = exceptionFilter.Exponential(1000, TimeSpan.FromMilliseconds(100), TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(1));
         }
 
         void IProbeSite.Probe(ProbeContext context)
@@ -68,7 +63,7 @@ namespace MassTransit.RabbitMqTransport
         /// <returns>A task that is completed once the transport is shut down</returns>
         public ReceiveTransportHandle Start(IPipe<ReceiveContext> receivePipe)
         {
-            var supervisor = new TaskSupervisor();
+            var supervisor = new TaskSupervisor($"{TypeMetadataCache<RabbitMqReceiveTransport>.ShortName} - {_host.Settings.GetInputAddress(_settings)}");
 
             IPipe<ConnectionContext> pipe = Pipe.New<ConnectionContext>(x =>
             {
@@ -94,11 +89,11 @@ namespace MassTransit.RabbitMqTransport
         {
             try
             {
-                await _connectionRetryPolicy.RetryUntilCancelled(async () =>
+                await _host.ConnectionRetryPolicy.RetryUntilCancelled(async () =>
                 {
                     try
                     {
-                        await _host.ConnectionCache.Send(transportPipe, supervisor.StopToken)
+                        await _host.ConnectionCache.Send(transportPipe, supervisor.StoppingToken)
                             .ConfigureAwait(false);
                     }
                     catch (RabbitMqConnectionException ex)
@@ -156,9 +151,7 @@ namespace MassTransit.RabbitMqTransport
 
             async Task ReceiveTransportHandle.Stop(CancellationToken cancellationToken)
             {
-                await _supervisor.Stop("Receive Transport Stopping").ConfigureAwait(false);
-
-                await _supervisor.Completed.ConfigureAwait(false);
+                await _supervisor.Stop("Receive Transport Stopping", cancellationToken).ConfigureAwait(false);
             }
         }
     }

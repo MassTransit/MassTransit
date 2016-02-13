@@ -28,7 +28,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         [Test]
         public async Task Should_be_wicked_fast()
         {
-            int limit = 10000;
+            int limit = 20000;
             int count = 0;
 
             await _requestClient.Request(new PingMessage());
@@ -77,6 +77,71 @@ namespace MassTransit.RabbitMqTransport.Tests
                 {
                     Console.WriteLine(ex);
                 }
+            });
+        }
+    }
+
+    [TestFixture, Explicit]
+    public class Performance_of_the_RabbitMQ_transport_non_durable :
+        RabbitMqTestFixture
+    {
+        [Test]
+        public async Task Should_be_wicked_fast()
+        {
+            int limit = 20000;
+            int count = 0;
+
+            await _requestClient.Request(new PingMessage());
+
+            Stopwatch timer = Stopwatch.StartNew();
+
+            await Task.WhenAll(Enumerable.Range(0, limit).Select(async x =>
+            {
+                await _requestClient.Request(new PingMessage());
+
+                Interlocked.Increment(ref count);
+            }));
+
+            timer.Stop();
+
+            Console.WriteLine("Time to process {0} messages = {1}", count * 2, timer.ElapsedMilliseconds + "ms");
+            Console.WriteLine("Messages per second: {0}", count * 2 * 1000 / timer.ElapsedMilliseconds);
+        }
+
+        IRequestClient<PingMessage, PongMessage> _requestClient;
+        Uri _serviceAddress;
+
+        [TestFixtureSetUp]
+        public void Setup()
+        {
+            _requestClient = new MessageRequestClient<PingMessage, PongMessage>(Bus, _serviceAddress, TestTimeout);
+        }
+
+        protected override void ConfigureBusHost(IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host)
+        {
+            base.ConfigureBusHost(configurator, host);
+
+            configurator.PrefetchCount = 100;
+
+            configurator.ReceiveEndpoint(host, "input_queue_express", x =>
+            {
+                x.AutoDelete = true;
+                x.Durable = false;
+                x.PrefetchCount = 100;
+
+                _serviceAddress = x.InputAddress;
+
+                x.Handler<PingMessage>(async context =>
+                {
+                    try
+                    {
+                        await context.RespondAsync(new PongMessage(context.Message.CorrelationId));
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex);
+                    }
+                });
             });
         }
     }
