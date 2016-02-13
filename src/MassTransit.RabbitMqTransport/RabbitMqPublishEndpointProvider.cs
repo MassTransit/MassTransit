@@ -100,7 +100,7 @@ namespace MassTransit.RabbitMqTransport
 
             var destinationAddress = _host.Settings.GetSendAddress(sendSettings);
 
-            var modelCache = new RabbitMqModelCache(_host.ConnectionCache);
+            var modelCache = new RabbitMqModelCache(_host.ConnectionCache, _host.Supervisor);
 
             var sendTransport = new RabbitMqSendTransport(modelCache, sendSettings, bindings);
 

@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -19,8 +19,8 @@ namespace MassTransit.RabbitMqTransport
     using Logging;
     using MassTransit.Pipeline;
     using Policies;
-    using RabbitMQ.Client;
     using Transports;
+    using Util;
 
 
     public class RabbitMqHost :
@@ -29,14 +29,23 @@ namespace MassTransit.RabbitMqTransport
     {
         static readonly ILog _log = Logger.Get<RabbitMqHost>();
         readonly RabbitMqConnectionCache _connectionCache;
+        readonly IRetryPolicy _connectionRetryPolicy;
         readonly RabbitMqHostSettings _hostSettings;
+        readonly TaskSupervisor _supervisor;
 
         public RabbitMqHost(RabbitMqHostSettings hostSettings)
         {
             _hostSettings = hostSettings;
 
-            _connectionCache = new RabbitMqConnectionCache(hostSettings);
             MessageNameFormatter = new RabbitMqMessageNameFormatter();
+
+            var exceptionFilter = Retry.Selected<RabbitMqConnectionException>();
+
+            _connectionRetryPolicy = exceptionFilter.Exponential(1000, TimeSpan.FromMilliseconds(100), TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(1));
+
+            _supervisor = new TaskSupervisor($"{TypeMetadataCache<RabbitMqHost>.ShortName} - {_hostSettings.ToDebugString()}");
+
+            _connectionCache = new RabbitMqConnectionCache(hostSettings, _supervisor);
         }
 
         public HostHandle Start()
@@ -46,41 +55,27 @@ namespace MassTransit.RabbitMqTransport
                 if (_log.IsDebugEnabled)
                     _log.DebugFormat("Connection established to {0}", _hostSettings.ToDebugString());
 
-                EventHandler<ShutdownEventArgs> connectionShutdown = null;
-                connectionShutdown = (obj, reason) =>
-                {
-                    context.Connection.ConnectionShutdown -= connectionShutdown;
-                };
-
-                context.Connection.ConnectionShutdown += connectionShutdown;
-
                 try
                 {
-                    await _connectionCache.StopRequested.ConfigureAwait(false);
+                    await _supervisor.StopRequested.ConfigureAwait(false);
                 }
                 catch (OperationCanceledException)
                 {
                 }
-
-                if (_log.IsDebugEnabled)
-                    _log.DebugFormat("Closing connection to host {0}", _hostSettings.ToDebugString());
-
-                // this is a bad thing, we need to cascade everything to a stopped state before closing.
-                context.Connection.Cleanup(200, "Host stopped");
             });
 
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Starting connection to {0}", _hostSettings.ToDebugString());
 
-            var connectionTask = Repeat.UntilCancelled(_connectionCache.ConnectionCancellationToken, () =>
-                _connectionCache.Send(connectionPipe, _connectionCache.ConnectionCancellationToken));
+            var connectionTask = _connectionRetryPolicy.RetryUntilCancelled(
+                () => _connectionCache.Send(connectionPipe, _supervisor.StoppingToken), _supervisor.StoppingToken);
 
-            return new Handle(_connectionCache, connectionTask);
+            return new Handle(connectionTask, _supervisor);
         }
 
         void IProbeSite.Probe(ProbeContext context)
         {
-            ProbeContext scope = context.CreateScope("host");
+            var scope = context.CreateScope("host");
             scope.Set(new
             {
                 Type = "RabbitMQ",
@@ -107,23 +102,25 @@ namespace MassTransit.RabbitMqTransport
         public IMessageNameFormatter MessageNameFormatter { get; }
         public IConnectionCache ConnectionCache => _connectionCache;
         public RabbitMqHostSettings Settings => _hostSettings;
+        public IRetryPolicy ConnectionRetryPolicy => _connectionRetryPolicy;
+        public ITaskSupervisor Supervisor => _supervisor;
 
 
         class Handle :
             HostHandle
         {
-            readonly RabbitMqConnectionCache _cache;
             readonly Task _connectionTask;
+            readonly TaskSupervisor _supervisor;
 
-            public Handle(RabbitMqConnectionCache cache, Task connectionTask)
+            public Handle(Task connectionTask, TaskSupervisor supervisor)
             {
-                _cache = cache;
                 _connectionTask = connectionTask;
+                _supervisor = supervisor;
             }
 
             async Task HostHandle.Stop(CancellationToken cancellationToken)
             {
-                await _cache.Stop().ConfigureAwait(false);
+                await _supervisor.Stop("Host stopped", cancellationToken).ConfigureAwait(false);
 
                 await _connectionTask.ConfigureAwait(false);
             }

@@ -128,7 +128,7 @@
     <Compile Include="RabbitMqConsumerMetrics.cs" />
     <Compile Include="RabbitMqHost.cs" />
     <Compile Include="RabbitMqHostSettings.cs" />
-    <Compile Include="RabbitMqPublishEndpoint.cs" />
+    <Compile Include="RabbitMqPublishEndpointProvider.cs" />
     <Compile Include="ConnectionContext.cs" />
     <Compile Include="RabbitMqExtensions.cs" />
     <Compile Include="RabbitMqHeaders.cs" />

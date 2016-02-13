@@ -67,7 +67,8 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
                 queueClient = messagingFactory.CreateQueueClient(queuePath);
 
                 queueClient.PrefetchCount = receiveSettings.PrefetchCount;
-                using (var scope = _supervisor.CreateScope())
+
+                using (var scope = _supervisor.CreateScope($"{TypeMetadataCache<MessageReceiverFilter>.ShortName} - {inputAddress}"))
                 {
                     var receiver = new SessionReceiver(queueClient, inputAddress, _receivePipe, receiveSettings, _receiveObserver, scope);
 

@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -30,13 +30,14 @@ namespace MassTransit.Util
         /// <summary>
         /// Connects a participant to the signal for observation by the signaler
         /// </summary>
+        /// <param name="tag"></param>
         /// <returns></returns>
-        ITaskParticipant CreateParticipant();
+        ITaskParticipant CreateParticipant(string tag);
 
         /// <summary>
         /// Creates a scope that has it's own participants that can be coordinated
         /// </summary>
         /// <returns></returns>
-        ITaskSupervisorScope CreateScope();
+        ITaskScope CreateScope(string tag);
     }
 }

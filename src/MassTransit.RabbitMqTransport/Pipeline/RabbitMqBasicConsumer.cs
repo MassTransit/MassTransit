@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -34,6 +34,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
         readonly Uri _inputAddress;
         readonly ILog _log = Logger.Get<RabbitMqBasicConsumer>();
         readonly ModelContext _model;
+        readonly ITaskParticipant _participant;
         readonly ConcurrentDictionary<ulong, RabbitMqReceiveContext> _pending;
         readonly IReceiveObserver _receiveObserver;
         readonly IPipe<ReceiveContext> _receivePipe;
@@ -42,7 +43,6 @@ namespace MassTransit.RabbitMqTransport.Pipeline
         int _currentPendingDeliveryCount;
         long _deliveryCount;
         int _maxPendingDeliveryCount;
-        readonly ITaskParticipant _participant;
 
         /// <summary>
         /// The basic consumer receives messages pushed from the broker.
@@ -64,7 +64,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
 
             _pending = new ConcurrentDictionary<ulong, RabbitMqReceiveContext>();
 
-            _participant = taskSupervisor.CreateParticipant();
+            _participant = taskSupervisor.CreateParticipant($"{TypeMetadataCache<RabbitMqBasicConsumer>.ShortName} - {inputAddress}", Stop);
         }
 
         /// <summary>
@@ -79,17 +79,6 @@ namespace MassTransit.RabbitMqTransport.Pipeline
             _consumerTag = consumerTag;
 
             _participant.SetReady();
-
-            SetupStopTask();
-        }
-
-        async void SetupStopTask()
-        {
-            await Task.Yield();
-
-            await _participant.StopRequested.ConfigureAwait(false);
-
-            await _model.BasicCancel(_consumerTag).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -194,5 +183,10 @@ namespace MassTransit.RabbitMqTransport.Pipeline
         long RabbitMqConsumerMetrics.DeliveryCount => _deliveryCount;
 
         int RabbitMqConsumerMetrics.ConcurrentDeliveryCount => _maxPendingDeliveryCount;
+
+        async Task Stop()
+        {
+            await _model.BasicCancel(_consumerTag).ConfigureAwait(false);
+        }
     }
 }

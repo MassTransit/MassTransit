@@ -31,16 +31,16 @@ namespace MassTransit.RabbitMqTransport.Configuration
         readonly ReceiveSettings _settings;
         readonly IReceiveObserver _receiveObserver;
         readonly IReceiveEndpointObserver _endpointObserver;
-        readonly ITaskSupervisor _taskSupervisor;
+        readonly ITaskSupervisor _supervisor;
         readonly ExchangeBindingSettings[] _exchangeBindings;
         readonly Mediator<ISetPrefetchCount> _mediator;
 
-        public RabbitMqConsumerPipeSpecification(IPipe<ReceiveContext> receivePipe, ReceiveSettings settings, IReceiveObserver receiveObserver, IReceiveEndpointObserver endpointObserver, IEnumerable<ExchangeBindingSettings> exchangeBindings, ITaskSupervisor taskSupervisor, Mediator<ISetPrefetchCount> mediator)
+        public RabbitMqConsumerPipeSpecification(IPipe<ReceiveContext> receivePipe, ReceiveSettings settings, IReceiveObserver receiveObserver, IReceiveEndpointObserver endpointObserver, IEnumerable<ExchangeBindingSettings> exchangeBindings, ITaskSupervisor supervisor, Mediator<ISetPrefetchCount> mediator)
         {
             _settings = settings;
             _receiveObserver = receiveObserver;
             _endpointObserver = endpointObserver;
-            _taskSupervisor = taskSupervisor;
+            _supervisor = supervisor;
             _exchangeBindings = exchangeBindings.ToArray();
             _receivePipe = receivePipe;
             _mediator = mediator;
@@ -52,10 +52,10 @@ namespace MassTransit.RabbitMqTransport.Configuration
             {
                 x.UseFilter(new PrepareReceiveQueueFilter(_settings, _mediator, _exchangeBindings));
 
-                x.UseFilter(new RabbitMqConsumerFilter(_receivePipe, _receiveObserver, _endpointObserver, _taskSupervisor));
+                x.UseFilter(new RabbitMqConsumerFilter(_receivePipe, _receiveObserver, _endpointObserver, _supervisor));
             });
 
-            IFilter<ConnectionContext> modelFilter = new ReceiveModelFilter(pipe);
+            IFilter<ConnectionContext> modelFilter = new ReceiveModelFilter(pipe, _supervisor);
 
             builder.AddFilter(modelFilter);
         }

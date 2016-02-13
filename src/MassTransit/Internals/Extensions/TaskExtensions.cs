@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -37,6 +37,19 @@ namespace MassTransit.Internals.Extensions
                     throw new OperationCanceledException(cancellationToken);
 
             await task.ConfigureAwait(false);
+        }
+
+        public static async Task WithTimeout(this Task task, int milliseconds)
+        {
+            using (var tokenSource = new CancellationTokenSource(milliseconds))
+            {
+                var tcs = new TaskCompletionSource<bool>();
+                using (tokenSource.Token.Register(s => ((TaskCompletionSource<bool>)s).TrySetResult(true), tcs))
+                    if (task != await Task.WhenAny(task, tcs.Task).ConfigureAwait(false))
+                        throw new OperationCanceledException(tokenSource.Token);
+
+                await task.ConfigureAwait(false);
+            }
         }
     }
 }

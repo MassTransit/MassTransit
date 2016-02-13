@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -16,6 +16,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
     using Contexts;
     using MassTransit.Pipeline;
     using RabbitMQ.Client;
+    using Util;
 
 
     /// <summary>
@@ -25,10 +26,12 @@ namespace MassTransit.RabbitMqTransport.Pipeline
         IFilter<ConnectionContext>
     {
         readonly IPipe<ModelContext> _pipe;
+        readonly ITaskSupervisor _supervisor;
 
-        public ReceiveModelFilter(IPipe<ModelContext> pipe)
+        public ReceiveModelFilter(IPipe<ModelContext> pipe, ITaskSupervisor supervisor)
         {
             _pipe = pipe;
+            _supervisor = supervisor;
         }
 
         void IProbeSite.Probe(ProbeContext context)
@@ -37,14 +40,19 @@ namespace MassTransit.RabbitMqTransport.Pipeline
 
         async Task IFilter<ConnectionContext>.Send(ConnectionContext context, IPipe<ConnectionContext> next)
         {
-            IModel model = await context.CreateModel().ConfigureAwait(false);
-
-            using (var modelContext = new RabbitMqModelContext(context, model, context.CancellationToken))
+            using (var scope = _supervisor.CreateScope($"{TypeMetadataCache<ReceiveModelFilter>.ShortName}"))
             {
-                await _pipe.Send(modelContext).ConfigureAwait(false);
-            }
+                IModel model = await context.CreateModel().ConfigureAwait(false);
 
-            await next.Send(context).ConfigureAwait(false);
+                using (var modelContext = new RabbitMqModelContext(context, model, scope))
+                {
+                    await _pipe.Send(modelContext).ConfigureAwait(false);
+                }
+
+                await scope.Completed.ConfigureAwait(false);
+
+                await next.Send(context).ConfigureAwait(false);
+            }
         }
     }
 }

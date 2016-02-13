@@ -50,7 +50,7 @@ namespace MassTransit.AzureServiceBusTransport
             _receiveObserver = receiveObserver;
             _supervisor = supervisor;
 
-            _participant = supervisor.CreateParticipant();
+            _participant = supervisor.CreateParticipant($"{TypeMetadataCache<Receiver>.ShortName} - {inputAddress}");
 
             var options = new OnMessageOptions
             {
@@ -87,48 +87,49 @@ namespace MassTransit.AzureServiceBusTransport
 
         public int ConcurrentDeliveryCount => _maxPendingDeliveryCount;
 
-        async void SetupStopTask()
+        void SetupStopTask()
         {
-            await Task.Yield();
-
-            await _participant.StopRequested.ConfigureAwait(false);
-
-            if (_log.IsDebugEnabled)
-                _log.DebugFormat("Shutting down receiver: {0}", _inputAddress);
-
-            _shuttingDown = true;
-
-            if (_currentPendingDeliveryCount > 0)
+            _participant.StopRequested.ContinueWith(async stopTask =>
             {
-                try
+                await stopTask.ConfigureAwait(false);
+
+                if (_log.IsDebugEnabled)
+                    _log.DebugFormat("Shutting down receiver: {0}", _inputAddress);
+
+                _shuttingDown = true;
+
+                if (_currentPendingDeliveryCount > 0)
                 {
-                    using (var cancellation = new CancellationTokenSource(_receiveSettings.QueueDescription.LockDuration))
+                    try
                     {
-                        await _supervisor.Completed
-                            .WithCancellation(cancellation.Token).ConfigureAwait(false);
+                        using (var cancellation = new CancellationTokenSource(_receiveSettings.QueueDescription.LockDuration))
+                        {
+                            await _supervisor.Completed
+                                .WithCancellation(cancellation.Token).ConfigureAwait(false);
+                        }
+                    }
+                    catch (TaskCanceledException)
+                    {
+                        if (_log.IsWarnEnabled)
+                            _log.WarnFormat("Timeout waiting for receiver to exit: {0}", _inputAddress);
                     }
                 }
-                catch (TaskCanceledException)
-                {
-                    if (_log.IsWarnEnabled)
-                        _log.WarnFormat("Timeout waiting for receiver to exit: {0}", _inputAddress);
-                }
-            }
 
-            try
-            {
-                await _messageReceiver.CloseAsync().ConfigureAwait(false);
-            }
-            finally
-            {
-                if (_currentPendingDeliveryCount == 0)
+                try
                 {
-                    if (_log.IsDebugEnabled)
-                        _log.DebugFormat("Receiver shutdown completed: {0}", _inputAddress);
-
-                    _participant.SetComplete();
+                    await _messageReceiver.CloseAsync().ConfigureAwait(false);
                 }
-            }
+                finally
+                {
+                    if (_currentPendingDeliveryCount == 0)
+                    {
+                        if (_log.IsDebugEnabled)
+                            _log.DebugFormat("Receiver shutdown completed: {0}", _inputAddress);
+
+                        _participant.SetComplete();
+                    }
+                }
+            });
         }
 
         async Task OnMessage(BrokeredMessage message)

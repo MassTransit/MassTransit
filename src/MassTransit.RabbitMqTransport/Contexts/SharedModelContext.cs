@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -17,6 +17,7 @@ namespace MassTransit.RabbitMqTransport.Contexts
     using System.Threading;
     using System.Threading.Tasks;
     using RabbitMQ.Client;
+    using Util;
 
 
     public class SharedModelContext :
@@ -24,27 +25,21 @@ namespace MassTransit.RabbitMqTransport.Contexts
         IDisposable
     {
         readonly CancellationToken _cancellationToken;
-        readonly TaskCompletionSource<bool> _completed;
         readonly ModelContext _context;
-        readonly Action<long> _disconnect;
-        readonly long _id;
+        readonly ITaskParticipant _participant;
 
-        public SharedModelContext(ModelContext context, long id, Action<long> disconnect, CancellationToken cancellationToken)
+        public SharedModelContext(ModelContext context, CancellationToken cancellationToken, ITaskParticipant participant)
         {
             _context = context;
-            _id = id;
-            _disconnect = disconnect;
             _cancellationToken = cancellationToken;
-            _completed = new TaskCompletionSource<bool>();
-        }
 
-        public Task Completed => _completed.Task;
+            _participant = participant;
+            _participant.SetReady();
+        }
 
         void IDisposable.Dispose()
         {
-            _completed.TrySetResult(true);
-
-            _disconnect(_id);
+            _participant.SetComplete();
         }
 
         bool PipeContext.HasPayloadType(Type contextType)

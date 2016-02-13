@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,12 +13,9 @@
 namespace MassTransit.RabbitMqTransport.Integration
 {
     using System;
-    using System.Collections.Concurrent;
-    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using Contexts;
-    using Internals.Extensions;
     using Logging;
     using MassTransit.Pipeline;
     using RabbitMQ.Client;
@@ -34,20 +31,18 @@ namespace MassTransit.RabbitMqTransport.Integration
         readonly ConnectionFactory _connectionFactory;
         readonly object _scopeLock = new object();
         readonly RabbitMqHostSettings _settings;
-        readonly StopSignal _signal;
+        readonly TaskSupervisor _supervisor;
+        readonly ITaskScope _taskScope;
         ConnectionScope _scope;
 
-        public RabbitMqConnectionCache(RabbitMqHostSettings settings)
+        public RabbitMqConnectionCache(RabbitMqHostSettings settings, TaskSupervisor supervisor)
         {
-            _signal = new StopSignal();
-
+            _supervisor = supervisor;
             _settings = settings;
-
             _connectionFactory = settings.GetConnectionFactory();
-        }
 
-        public Task StopRequested => _signal.StopRequested;
-        public CancellationToken ConnectionCancellationToken => _signal.CancellationToken;
+            _taskScope = supervisor.CreateScope($"{TypeMetadataCache<RabbitMqConnectionCache>.ShortName} - {settings.ToDebugString()}", CloseScope);
+        }
 
         public Task Send(IPipe<ConnectionContext> connectionPipe, CancellationToken cancellationToken)
         {
@@ -59,7 +54,7 @@ namespace MassTransit.RabbitMqTransport.Integration
                 existingScope = _scope;
                 if (existingScope == null)
                 {
-                    newScope = new ConnectionScope();
+                    newScope = new ConnectionScope(_taskScope);
                     _scope = newScope;
                 }
             }
@@ -71,7 +66,7 @@ namespace MassTransit.RabbitMqTransport.Integration
 
         public void Probe(ProbeContext context)
         {
-            ConnectionScope connectionScope = _scope;
+            var connectionScope = _scope;
             if (connectionScope != null)
             {
                 context.Set(new
@@ -81,17 +76,29 @@ namespace MassTransit.RabbitMqTransport.Integration
             }
         }
 
+        async Task CloseScope()
+        {
+            ConnectionScope existingScope;
+            lock (_scopeLock)
+            {
+                existingScope = _scope;
+            }
+
+            if (existingScope != null)
+                await existingScope.Close().ConfigureAwait(false);
+        }
+
         async Task SendUsingNewConnection(IPipe<ConnectionContext> connectionPipe, ConnectionScope scope, CancellationToken cancellationToken)
         {
             try
             {
-                if (_signal.CancellationToken.IsCancellationRequested)
+                if (_supervisor.StoppingToken.IsCancellationRequested)
                     throw new TaskCanceledException($"The connection is being disconnected: {_settings.ToDebugString()}");
 
                 if (_log.IsDebugEnabled)
                     _log.DebugFormat("Connecting: {0}", _connectionFactory.ToDebugString());
 
-                IConnection connection = _connectionFactory.CreateConnection();
+                var connection = _connectionFactory.CreateConnection();
 
                 if (_log.IsDebugEnabled)
                 {
@@ -111,7 +118,7 @@ namespace MassTransit.RabbitMqTransport.Integration
 
                 connection.ConnectionShutdown += connectionShutdown;
 
-                var connectionContext = new RabbitMqConnectionContext(connection, _settings, _signal.CancellationToken);
+                var connectionContext = new RabbitMqConnectionContext(connection, _settings, _taskScope);
 
                 connectionContext.GetOrAddPayload(() => _settings);
 
@@ -128,7 +135,7 @@ namespace MassTransit.RabbitMqTransport.Integration
 
             try
             {
-                using (SharedConnectionContext context = await scope.Attach(cancellationToken).ConfigureAwait(false))
+                using (var context = await scope.Attach(cancellationToken).ConfigureAwait(false))
                 {
                     if (_log.IsDebugEnabled)
                         _log.DebugFormat("Using new connection: {0}", ((ConnectionContext)context).HostSettings.ToDebugString());
@@ -160,7 +167,7 @@ namespace MassTransit.RabbitMqTransport.Integration
         {
             try
             {
-                using (SharedConnectionContext context = await scope.Attach(cancellationToken).ConfigureAwait(false))
+                using (var context = await scope.Attach(cancellationToken).ConfigureAwait(false))
                 {
                     if (_log.IsDebugEnabled)
                         _log.DebugFormat("Using existing connection: {0}", ((ConnectionContext)context).HostSettings.ToDebugString());
@@ -188,77 +195,78 @@ namespace MassTransit.RabbitMqTransport.Integration
             }
         }
 
-        /// <summary>
-        /// Stop the connections to the host, signals the exit
-        /// </summary>
-        public Task Stop()
-        {
-            _signal.Stop();
-
-            return _signal.StopRequested;
-        }
-
 
         class ConnectionScope
         {
             static readonly ILog _log = Logger.Get<ConnectionScope>();
-            readonly ConcurrentBag<SharedConnectionContext> _attached;
             readonly TaskCompletionSource<RabbitMqConnectionContext> _connectionContext;
+            readonly ITaskScope _taskScope;
+            bool _closed;
 
-            public ConnectionScope()
+            public ConnectionScope(ITaskSupervisor supervisor)
             {
-                _attached = new ConcurrentBag<SharedConnectionContext>();
                 _connectionContext = new TaskCompletionSource<RabbitMqConnectionContext>();
+
+                _taskScope = supervisor.CreateScope("ConnectionScope", Close);
             }
 
             public void Connected(RabbitMqConnectionContext connectionContext)
             {
                 _connectionContext.TrySetResult(connectionContext);
+
+                _taskScope.SetReady();
             }
 
             public async Task<SharedConnectionContext> Attach(CancellationToken cancellationToken)
             {
-                var context = new SharedConnectionContext(await _connectionContext.Task.ConfigureAwait(false), cancellationToken);
+                var connectionContext = await _connectionContext.Task.ConfigureAwait(false);
 
-                _attached.Add(context);
-                return context;
+                var participant =
+                    _taskScope.CreateParticipant($"{TypeMetadataCache<ConnectionScope>.ShortName} - {connectionContext.HostSettings.ToDebugString()}");
+
+                return new SharedConnectionContext(connectionContext, cancellationToken, participant);
             }
 
-            public async void Close()
+            public async Task Close()
             {
+                if (_closed)
+                    return;
+
                 var connectionContext = await _connectionContext.Task.ConfigureAwait(false);
 
                 try
                 {
-                    foreach (var context in _attached)
+                    using (var tokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(60)))
                     {
-                        using (var source = new CancellationTokenSource(TimeSpan.FromSeconds(5)))
-                        {
-                            try
-                            {
-                                await context.Completed.WithCancellation(source.Token).ConfigureAwait(false);
-                            }
-                            catch (OperationCanceledException)
-                            {
-                            }
-                        }
+                        await _taskScope.Stop("Closing connection", tokenSource.Token);
                     }
-
-                    await Task.WhenAll(_attached.Select(x => x.Completed)).ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {
-                    _log.Error($"Close Faulted waiting for shared contexts", ex);
+                    _log.Error("Close Faulted waiting for shared contexts", ex);
                 }
 
-                connectionContext.Dispose();
+                _closed = true;
 
-                await connectionContext.Completed.ConfigureAwait(false);
+                try
+                {
+                    connectionContext.Dispose();
+                }
+                catch (Exception exception)
+                {
+                    _log.Error("Close Faulted waiting for connection contexts", exception);
+                }
+
+                _taskScope.SetComplete();
             }
 
             public void ConnectFaulted(Exception exception)
             {
                 _connectionContext.TrySetException(exception);
+
+                _taskScope.SetNotReady(exception);
+
+                _taskScope.SetComplete();
             }
         }
     }

@@ -103,6 +103,7 @@
     <Compile Include="SendObserver_Specs.cs" />
     <Compile Include="SendToPublishExchange_Specs.cs" />
     <Compile Include="SetPrefetchCount_Specs.cs" />
+    <Compile Include="SimpleConnect_Specs.cs" />
     <Compile Include="TemporaryQueue_Specs.cs" />
     <Compile Include="TestConnectionPipe.cs" />
     <Compile Include="TestConsumePipe.cs" />

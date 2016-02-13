@@ -10,27 +10,18 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.RabbitMqTransport
+namespace MassTransit.RabbitMqTransport.Tests
 {
-    using System.Threading.Tasks;
-    using Integration;
-    using Transports;
-    using Util;
+    using NUnit.Framework;
 
 
-    public interface IRabbitMqHost :
-        IBusHost
+    [TestFixture]
+    public class Using_a_simple_connection_to_rabbit :
+        RabbitMqTestFixture
     {
-        IMessageNameFormatter MessageNameFormatter { get; }
-        IConnectionCache ConnectionCache { get; }
-        RabbitMqHostSettings Settings { get; }
-
-        /// <summary>
-        /// The connection retry policy used for connecting to the host
-        /// </summary>
-        IRetryPolicy ConnectionRetryPolicy { get; }
-
-
-        ITaskSupervisor Supervisor { get; }
+        [Test]
+        public void Should_be_good()
+        {
+        }
     }
 }

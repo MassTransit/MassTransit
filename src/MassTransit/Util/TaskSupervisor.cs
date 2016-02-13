@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -17,6 +17,7 @@ namespace MassTransit.Util
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
+    using Internals.Extensions;
 
 
     /// <summary>
@@ -26,38 +27,36 @@ namespace MassTransit.Util
         IDisposable,
         ITaskSupervisor
     {
-        readonly List<Participant> _participants;
-        readonly TaskCompletionSource<IStopEvent> _stopping;
-        readonly CancellationTokenSource _stopToken;
-        CancellationTokenRegistration _registration;
+        readonly List<ITaskParticipant> _participants;
+        readonly CancellationTokenSource _stoppedToken;
         readonly CancellationTokenSource _stoppingToken;
+        readonly TaskCompletionSource<IStopEvent> _stopRequested;
+        readonly string _tag;
 
-        public TaskSupervisor(CancellationToken cancellationToken)
-            : this()
-        {
-            _registration = cancellationToken.Register(RaiseStopEventOnCancel);
-        }
-
-        TaskSupervisor(ITaskParticipant participant)
-            : this()
+        public TaskSupervisor(string tag, ITaskParticipant participant)
+            : this(tag)
         {
             OnStopRequested(participant.StopRequested);
         }
 
-        public TaskSupervisor()
+        public TaskSupervisor(string tag)
         {
-            _stopping = new TaskCompletionSource<IStopEvent>();
+            _tag = tag;
+            _participants = new List<ITaskParticipant>();
+
+            _stopRequested = new TaskCompletionSource<IStopEvent>();
+
             _stoppingToken = new CancellationTokenSource();
-            _participants = new List<Participant>();
-            _stopToken = new CancellationTokenSource();
+            _stoppedToken = new CancellationTokenSource();
         }
 
-        public CancellationToken StopToken => _stopToken.Token;
+        public CancellationToken StoppedToken => _stoppedToken.Token;
         public CancellationToken StoppingToken => _stoppingToken.Token;
+
+        public Task<IStopEvent> StopRequested => _stopRequested.Task;
+
         public void Dispose()
         {
-            _registration.Dispose();
-            // _stopToken.Dispose(); this might make for some nasty disposed exceptions
         }
 
         public Task Ready
@@ -78,12 +77,12 @@ namespace MassTransit.Util
             }
         }
 
-        public ITaskParticipant CreateParticipant()
+        public ITaskParticipant CreateParticipant(string tag)
         {
             if (_stoppingToken.IsCancellationRequested)
                 throw new OperationCanceledException("The supervisor is stopping, no additional participants can be created");
 
-            var participant = new Participant();
+            var participant = new TaskParticipant(tag);
             lock (_participants)
             {
                 _participants.Add(participant);
@@ -92,12 +91,12 @@ namespace MassTransit.Util
             return participant;
         }
 
-        public ITaskSupervisorScope CreateScope()
+        public ITaskScope CreateScope(string tag)
         {
             if (_stoppingToken.IsCancellationRequested)
                 throw new OperationCanceledException("The supervisor is stopping, no additional scopes can be created");
 
-            var scope = new Scope();
+            var scope = new TaskScope(tag);
             lock (_participants)
             {
                 _participants.Add(scope);
@@ -106,27 +105,57 @@ namespace MassTransit.Util
             return scope;
         }
 
-        async void OnStopRequested(Task stopRequested)
+        public string Tag => _tag;
+
+        async Task WhenAll(IEnumerable<ITaskParticipant> participants, Func<ITaskParticipant, Task> selector)
         {
-            await Task.Yield();
+            ITaskParticipant[] taskArray = participants.ToArray();
 
-            await stopRequested.ConfigureAwait(false);
+            do
+            {
+                var delayTask = Task.Delay(1000);
 
-            await Stop("Parent Stop Requested").ConfigureAwait(false);
+                var readyTask = await Task.WhenAny(taskArray.Select(selector).Concat(Enumerable.Repeat(delayTask, 1)));
+                if (delayTask == readyTask)
+                {
+                    Console.WriteLine();
+                    Console.WriteLine("Waiting: {0}", ToString());
+                    foreach (var task in taskArray)
+                    {
+                        Console.WriteLine("{0} - {1}", task, selector(task).Status);
+                    }
+
+                }
+                else
+                {
+                    var ready = taskArray.Where(x => selector(x).Status == TaskStatus.RanToCompletion || selector(x).Status == TaskStatus.Canceled);
+                    foreach (var participant in ready)
+                    {
+                        Console.WriteLine("Completed: {0} - {1}", participant, ToString());
+                    }
+
+                    taskArray = taskArray.Where(x => selector(x).Status != TaskStatus.RanToCompletion && selector(x).Status != TaskStatus.Canceled)
+                        .ToArray();
+                }
+            }
+            while (taskArray.Length > 0);
         }
 
-        async void RaiseStopEventOnCancel()
+        void OnStopRequested(Task stopRequested)
         {
-            await Task.Yield();
+            stopRequested.ContinueWith(async stopTask =>
+            {
+                await stopTask.ConfigureAwait(false);
 
-            await Stop("Parent Cancellation Requested").ConfigureAwait(false);
+                await Stop("Parent Stop Requested").ConfigureAwait(false);
+            });
         }
 
-        public async Task Stop(string reason)
+        public async Task Stop(string reason, CancellationToken cancellationToken = default(CancellationToken))
         {
             var eventArgs = new StopEventArgs(reason);
             _stoppingToken.Cancel();
-            _stopping.TrySetResult(eventArgs);
+            _stopRequested.TrySetResult(eventArgs);
 
             lock (_participants)
             {
@@ -136,87 +165,14 @@ namespace MassTransit.Util
                 }
             }
 
-            await Completed.ConfigureAwait(false);
+            await Completed.WithCancellation(cancellationToken).ConfigureAwait(false);
 
-            _stopToken.Cancel();
+            _stoppedToken.Cancel();
         }
 
-
-        class Scope :
-            Participant,
-            ITaskSupervisorScope
+        public override string ToString()
         {
-            readonly TaskSupervisor _supervisor;
-
-            public Scope()
-            {
-                _supervisor = new TaskSupervisor(this);
-            }
-
-            Task ITaskSupervisor.Ready => _supervisor.Ready;
-
-            Task ITaskSupervisor.Completed => _supervisor.Completed;
-
-            ITaskParticipant ITaskSupervisor.CreateParticipant()
-            {
-                return _supervisor.CreateParticipant();
-            }
-
-            ITaskSupervisorScope ITaskSupervisor.CreateScope()
-            {
-                return _supervisor.CreateScope();
-            }
-        }
-
-
-        class Participant :
-            ITaskParticipant
-        {
-            readonly TaskCompletionSource<bool> _complete;
-            readonly TaskCompletionSource<bool> _ready;
-            readonly TaskCompletionSource<IStopEvent> _stopping;
-            readonly CancellationTokenSource _stopToken;
-
-            public Participant()
-            {
-                _ready = new TaskCompletionSource<bool>();
-                _complete = new TaskCompletionSource<bool>();
-                _stopToken = new CancellationTokenSource();
-                _stopping = new TaskCompletionSource<IStopEvent>();
-            }
-
-            public Task ParticipantReady => _ready.Task;
-            public Task ParticipantCompleted => _complete.Task;
-
-            Task ITaskParticipant.StopRequested => _stopping.Task;
-            public CancellationToken StopToken => _stopToken.Token;
-
-            public void SetComplete()
-            {
-                _complete.TrySetResult(true);
-            }
-
-            public void SetReady()
-            {
-                _ready.TrySetResult(true);
-            }
-
-            public void SetNotReady(Exception exception)
-            {
-                _ready.TrySetException(exception);
-            }
-
-            public void Dispose()
-            {
-                SetReady();
-                SetComplete();
-            }
-
-            public void Stop(IStopEvent stopEvent)
-            {
-                _stopping.TrySetResult(stopEvent);
-                _stopToken.Cancel();
-            }
+            return $"Supervisor: {_tag}";
         }
     }
 }

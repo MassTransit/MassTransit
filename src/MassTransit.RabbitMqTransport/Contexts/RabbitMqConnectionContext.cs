@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -26,36 +26,31 @@ namespace MassTransit.RabbitMqTransport.Contexts
         IDisposable
     {
         static readonly ILog _log = Logger.Get<RabbitMqConnectionContext>();
-        readonly TaskCompletionSource<bool> _completed;
         readonly IConnection _connection;
         readonly RabbitMqHostSettings _hostSettings;
+        readonly ITaskParticipant _participant;
         readonly PayloadCache _payloadCache;
         readonly QueuedTaskScheduler _taskScheduler;
-        readonly CancellationTokenSource _tokenSource;
-        CancellationTokenRegistration _registration;
 
-        public RabbitMqConnectionContext(IConnection connection, RabbitMqHostSettings hostSettings, CancellationToken cancellationToken)
+        public RabbitMqConnectionContext(IConnection connection, RabbitMqHostSettings hostSettings, ITaskSupervisor supervisor)
         {
             _connection = connection;
             _hostSettings = hostSettings;
             _payloadCache = new PayloadCache();
 
-            _completed = new TaskCompletionSource<bool>();
-            _tokenSource = new CancellationTokenSource();
-            _registration = cancellationToken.Register(OnCancellationRequested);
+            _participant = supervisor.CreateParticipant($"{TypeMetadataCache<RabbitMqConnectionContext>.ShortName} - {_hostSettings.ToDebugString()}");
+
             _taskScheduler = new QueuedTaskScheduler(TaskScheduler.Default, 1);
 
             connection.ConnectionShutdown += OnConnectionShutdown;
         }
-
-        public Task Completed => _completed.Task;
 
         public RabbitMqHostSettings HostSettings => _hostSettings;
 
         public async Task<IModel> CreateModel()
         {
             return await Task.Factory.StartNew(() => _connection.CreateModel(),
-                _tokenSource.Token, TaskCreationOptions.HideScheduler, _taskScheduler).ConfigureAwait(false);
+                _participant.StoppedToken, TaskCreationOptions.HideScheduler, _taskScheduler).ConfigureAwait(false);
         }
 
         public bool HasPayloadType(Type contextType)
@@ -77,14 +72,11 @@ namespace MassTransit.RabbitMqTransport.Contexts
 
         public IConnection Connection => _connection;
 
-        public CancellationToken CancellationToken => _tokenSource.Token;
+        public CancellationToken CancellationToken => _participant.StoppedToken;
 
         public void Dispose()
         {
             _connection.ConnectionShutdown -= OnConnectionShutdown;
-
-            _registration.Dispose();
-            _tokenSource.Dispose();
 
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Disconnecting: {0}", _hostSettings.ToDebugString());
@@ -94,19 +86,14 @@ namespace MassTransit.RabbitMqTransport.Contexts
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Disconnected: {0}", _hostSettings.ToDebugString());
 
-            _completed.TrySetResult(true);
+            _participant.SetComplete();
         }
 
         void OnConnectionShutdown(object connection, ShutdownEventArgs reason)
         {
-            _tokenSource.Cancel();
-
             Close(reason.ReplyCode, reason.ReplyText);
-        }
 
-        void OnCancellationRequested()
-        {
-            _tokenSource.Cancel();
+            _participant.SetComplete();
         }
 
         void Close(ushort replyCode, string message)

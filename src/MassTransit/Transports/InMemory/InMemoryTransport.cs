@@ -51,8 +51,8 @@ namespace MassTransit.Transports.InMemory
             _receiveObservable = new ReceiveObservable();
             _endpointObservable = new ReceiveEndpointObservable();
 
-            _supervisor = new TaskSupervisor();
-            _participant = _supervisor.CreateParticipant();
+            _supervisor = new TaskSupervisor($"{TypeMetadataCache<InMemoryTransport>.ShortName} - {_inputAddress}");
+            _participant = _supervisor.CreateParticipant($"{TypeMetadataCache<InMemoryTransport>.ShortName} - {_inputAddress}");
 
             _scheduler = new QueuedTaskScheduler(TaskScheduler.Default, concurrencyLimit);
         }
@@ -121,7 +121,7 @@ namespace MassTransit.Transports.InMemory
                 var transportMessage = new InMemoryTransportMessage(messageId, context.Body, context.ContentType.MediaType, TypeMetadataCache<T>.ShortName);
 
 #pragma warning disable 4014
-                    Task.Factory.StartNew(() => DispatchMessage(transportMessage), _supervisor.StopToken, TaskCreationOptions.HideScheduler, _scheduler);
+                    Task.Factory.StartNew(() => DispatchMessage(transportMessage), _supervisor.StoppedToken, TaskCreationOptions.HideScheduler, _scheduler);
 #pragma warning restore 4014
 
                 context.DestinationAddress.LogSent(context.MessageId?.ToString("N") ?? "", TypeMetadataCache<T>.ShortName);
@@ -156,7 +156,7 @@ namespace MassTransit.Transports.InMemory
             var transportMessage = new InMemoryTransportMessage(messageId, body, context.ContentType.MediaType, messageType);
 
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
-            Task.Factory.StartNew(() => DispatchMessage(transportMessage), _supervisor.StopToken, TaskCreationOptions.HideScheduler, _scheduler);
+            Task.Factory.StartNew(() => DispatchMessage(transportMessage), _supervisor.StoppedToken, TaskCreationOptions.HideScheduler, _scheduler);
 #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
         }
 
@@ -175,7 +175,7 @@ namespace MassTransit.Transports.InMemory
         {
             await _supervisor.Ready.ConfigureAwait(false);
 
-            if (_supervisor.StopToken.IsCancellationRequested)
+            if (_supervisor.StoppedToken.IsCancellationRequested)
                 return;
 
             if (_receivePipe == null)

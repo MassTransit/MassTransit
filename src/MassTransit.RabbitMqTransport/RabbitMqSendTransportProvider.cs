@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -18,6 +18,7 @@ namespace MassTransit.RabbitMqTransport
     using Integration;
     using Topology;
     using Transports;
+    using Util;
 
 
     public class RabbitMqSendTransportProvider :
@@ -32,15 +33,15 @@ namespace MassTransit.RabbitMqTransport
 
         public Task<ISendTransport> GetSendTransport(Uri address)
         {
-            SendSettings sendSettings = address.GetSendSettings();
+            var sendSettings = address.GetSendSettings();
 
-            RabbitMqHostSettings hostSettings = address.GetHostSettings();
+            var hostSettings = address.GetHostSettings();
 
-            IRabbitMqHost host = _hosts.FirstOrDefault(x => RabbitMqHostEqualityComparer.Default.Equals(hostSettings, x.Settings));
+            var host = _hosts.FirstOrDefault(x => RabbitMqHostEqualityComparer.Default.Equals(hostSettings, x.Settings));
             if (host == null)
                 throw new EndpointNotFoundException("The endpoint address specified an unknown host: " + address);
 
-            var modelCache = new RabbitMqModelCache(host.ConnectionCache);
+            var modelCache = new RabbitMqModelCache(host.ConnectionCache, host.Supervisor);
 
             return Task.FromResult<ISendTransport>(new RabbitMqSendTransport(modelCache, sendSettings));
         }

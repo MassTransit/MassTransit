@@ -1017,10 +1017,12 @@
     <Compile Include="Util\Caching\LazyMemoryCache.cs" />
     <Compile Include="Util\IAsyncDisposable.cs" />
     <Compile Include="Util\IMediator.cs" />
-    <Compile Include="Util\ITaskSupervisorScope.cs" />
+    <Compile Include="Util\ITaskScope.cs" />
     <Compile Include="Util\LazyConcurrentDictionary.cs" />
     <Compile Include="Util\Mediator.cs" />
     <Compile Include="Util\RollingTimer.cs" />
+    <Compile Include="Util\StopEventArgs.cs" />
+    <Compile Include="Util\TaskParticipant.cs" />
     <Compile Include="Util\TaskSupervisor.cs" />
     <Compile Include="Util\AsyncObservable.cs" />
     <Compile Include="Util\BusHostInfo.cs" />
@@ -1035,7 +1037,9 @@
     <Compile Include="Util\ObjectTypeDeserializer.cs" />
     <Compile Include="Util\ITaskParticipant.cs" />
     <Compile Include="Util\QueuedTaskScheduler.cs" />
-    <Compile Include="Util\StopSignal.cs" />
+    <Compile Include="Util\IStopEvent.cs" />
+    <Compile Include="Util\TaskScope.cs" />
+    <Compile Include="Util\TaskSupervisorExtensions.cs" />
     <Compile Include="Util\TaskUtil.cs" />
     <Compile Include="Util\TypeMetadataCache.cs" />
     <Compile Include="Util\UriExtensions.cs" />
