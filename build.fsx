@@ -12,7 +12,7 @@ let packagesPath = FullName "./src/packages"
 let keyFile = FullName "./MassTransit.snk"
 
 let assemblyVersion = "3.2.0.0"
-let baseVersion = "3.2.0"
+let baseVersion = "3.2.1"
 
 let semVersion : SemVerInfo = parse baseVersion
 
@@ -165,6 +165,11 @@ Target "Package" (fun _ ->
                   PackageFile = @".\src\Loggers\MassTransit.NLogIntegration\packages.config"
                   Files = [ (@"..\src\Loggers\MassTransit.NLogIntegration\bin\Release\MassTransit.NLogIntegration.*", Some @"lib\net45", None);
                             (@"..\src\Loggers\MassTransit.NLogIntegration\**\*.cs", Some @"src", None) ] } 
+                { Project = "MassTransit.SerilogIntegration"
+                  Summary = "MassTransit Serilog Logging Support"
+                  PackageFile = @".\src\Loggers\MassTransit.SerilogIntegration\packages.config"
+                  Files = [ (@"..\src\Loggers\MassTransit.SerilogIntegration\bin\Release\MassTransit.SerilogIntegration.*", Some @"lib\net45", None);
+                            (@"..\src\Loggers\MassTransit.SerilogIntegration\**\*.cs", Some @"src", None) ] } 
                 { Project = "MassTransit.Autofac"
                   Summary = "MassTransit Autofac Container Support"
                   PackageFile = @".\src\Containers\MassTransit.AutofacIntegration\packages.config"
