@@ -76,12 +76,17 @@
     <Reference Include="Ninject.Extensions.NamedScope">
       <HintPath>..\..\packages\Ninject.Extensions.NamedScope.3.2.0.0\lib\net45-full\Ninject.Extensions.NamedScope.dll</HintPath>
     </Reference>
-    <Reference Include="log4net">
-      <HintPath>..\..\packages\log4net.2.0.3\lib\net40-full\log4net.dll</HintPath>
-    </Reference>
     <Reference Include="nunit.framework, Version=2.6.4.14350, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\packages\NUnit.2.6.4\lib\nunit.framework.dll</HintPath>
+    </Reference>
+    <Reference Include="Serilog, Version=1.5.0.0, Culture=neutral, PublicKeyToken=24c2f752a8e58a10, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Serilog.1.5.14\lib\net45\Serilog.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Serilog.FullNetFx, Version=1.5.0.0, Culture=neutral, PublicKeyToken=24c2f752a8e58a10, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Serilog.1.5.14\lib\net45\Serilog.FullNetFx.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="Shouldly, Version=2.6.0.0, Culture=neutral, PublicKeyToken=6042cbcb05cbc941, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Shouldly.2.6.0\lib\net40\Shouldly.dll</HintPath>
@@ -113,6 +118,7 @@
     <Compile Include="AutofacRegistration_Specs.cs" />
     <Compile Include="Autofac_TenantContainerSpecs.cs" />
     <Compile Include="CastleWindsor_Specs.cs" />
+    <Compile Include="ContextSetup.cs" />
     <Compile Include="Ninject_Specs.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Autofac_Specs.cs" />
@@ -137,6 +143,10 @@
     <Compile Include="Unity_Specs.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Loggers\MassTransit.SerilogIntegration\MassTransit.SerilogIntegration.csproj">
+      <Project>{0e90afe6-99e8-43cf-995e-e99466dd6807}</Project>
+      <Name>MassTransit.SerilogIntegration</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\MassTransit.TestFramework\MassTransit.TestFramework.csproj">
       <Project>{3c4b5f1a-69ad-415e-9f40-a7fdbd7a3012}</Project>
       <Name>MassTransit.TestFramework</Name>

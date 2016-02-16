@@ -20,7 +20,7 @@ namespace MassTransit.SeriLogIntegration
 
     public class SerilogLog : ILog
     {
-        public const string ObjectLogTemplate = "{@obj}";
+        public const string ObjectLogTemplate = "{@Obj}";
 
         static readonly Dictionary<LogLevel, LogEventLevel> LogLevelTypeMap = new Dictionary<LogLevel, LogEventLevel>
         {
