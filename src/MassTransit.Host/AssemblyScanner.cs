@@ -59,6 +59,7 @@ namespace MassTransit.Host
                     .Where(x => !x.File.StartsWith("Autofac.", StringComparison.OrdinalIgnoreCase))
                     .Where(x => !x.File.StartsWith("RabbitMQ.", StringComparison.OrdinalIgnoreCase))
                     .Where(x => !x.File.StartsWith("Microsoft.", StringComparison.OrdinalIgnoreCase))
+                    .Where(x => !x.File.StartsWith("System.", StringComparison.OrdinalIgnoreCase))
                     .Select(x => x.Path)
                     .ToList();
 
@@ -151,7 +152,7 @@ namespace MassTransit.Host
             }
             catch (ReflectionTypeLoadException e)
             {
-                _log.Warn($"Exception loading types from assembly: {assembly.FullName}\n{string.Join(Environment.NewLine, e.LoaderExceptions.Select(x => x.Message))}", e);
+                _log.Debug($"Exception loading types from assembly: {assembly.FullName}\n{string.Join(Environment.NewLine, e.LoaderExceptions.Select(x => x.Message))}", e);
                 return Enumerable.Empty<Tuple<Assembly, Type>>();
             }
         }

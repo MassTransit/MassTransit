@@ -38,7 +38,7 @@ namespace MassTransit.Host
 
         public bool Start(HostControl hostControl)
         {
-            _log.InfoFormat("Starting RapidTransit Host");
+            _log.InfoFormat($"Starting {GetType().GetDisplayName()}");
 
             var started = new List<ServiceControl>();
 
