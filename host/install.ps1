@@ -62,6 +62,7 @@ function Find-Specification($project, $typeName) {
 function Add-ServiceSpecification {
     $found = Find-Specification -project $project -typeName "MassTransit.Hosting.IServiceSpecification"
     if($found -eq $false) {
+    	Write-Host "Adding ServiceSpecification.cs"
 
         $ns = $project.Properties.Item("DefaultNamespace").Value
         $projectPath = [System.IO.Path]::GetDirectoryName($project.FullName)
@@ -76,6 +77,7 @@ function Add-ServiceSpecification {
 function Add-EndpointSpecification {
     $found = Find-Specification -project $project -typeName "MassTransit.Hosting.IEndpointSpecification"
     if($found -eq $false) {
+    	Write-Host "Adding EndpointSpecification.cs"
 
         $ns = $project.Properties.Item("DefaultNamespace").Value
         $projectPath = [System.IO.Path]::GetDirectoryName($project.FullName)
@@ -87,6 +89,64 @@ function Add-EndpointSpecification {
     }
 }
 
+function Has-ProjectItem($project, $name) {
+    Write-Host "Searching for $($name) in project"
+    foreach ($item in $project.ProjectItems) {
+        if($item.Name -eq $name) {
+            return $true
+        }
+    }
+
+    $false	
+}
+
+function Add-LoggingConfig {
+    $found = Has-ProjectItem -project $project -name "MassTransit.Host.log4net.config"
+    if($found -eq $false) {
+    	Write-Host "Adding MassTransit.Host.log4net.config to project and setting copy to output"
+        $projectPath = [System.IO.Path]::GetDirectoryName($project.FullName)
+        $targetPath = [System.IO.Path]::Combine($projectPath, "MassTransit.Host.log4net.config")
+		$sourcePath = "$installPath\Tools\MassTransit.Host.log4net.config"
+		
+		Copy-Item -Path $sourcePath -Destination $targetPath
+        $projectItem = $project.ProjectItems.AddFromFile($targetPath);
+		$projectItem.Properties.Item("CopyToOutputDirectory").Value = [int]2
+	}
+}
+
+function Add-StartProgram {
+	[xml] $prjXml = Get-Content $project.FullName
+	foreach($PropertyGroup in $prjXml.project.ChildNodes) {
+		if($PropertyGroup.StartAction -ne $null) {
+			return
+		}
+	}
+
+    $exeName = "MassTransit.Host.exe"
+
+	$propertyGroupElement = $prjXml.CreateElement("PropertyGroup", $prjXml.Project.GetAttribute("xmlns"));
+	$startActionElement = $prjXml.CreateElement("StartAction", $prjXml.Project.GetAttribute("xmlns"));
+	$propertyGroupElement.AppendChild($startActionElement) | Out-Null
+	$propertyGroupElement.StartAction = "Program"
+	$startProgramElement = $prjXml.CreateElement("StartProgram", $prjXml.Project.GetAttribute("xmlns"));
+	$propertyGroupElement.AppendChild($startProgramElement) | Out-Null
+	$propertyGroupElement.StartProgram = "`$(ProjectDir)`$(OutputPath)$exeName"
+	$prjXml.project.AppendChild($propertyGroupElement) | Out-Null
+	$writerSettings = new-object System.Xml.XmlWriterSettings
+	$writerSettings.OmitXmlDeclaration = $false
+	$writerSettings.NewLineOnAttributes = $false
+	$writerSettings.Indent = $true
+	$projectFilePath = Resolve-Path -Path $project.FullName
+	$writer = [System.Xml.XmlWriter]::Create($projectFilePath, $writerSettings)
+	$prjXml.WriteTo($writer)
+	$writer.Flush()
+	$writer.Close()
+}
 
 Add-ServiceSpecification
 Add-EndpointSpecification
+Add-LoggingConfig
+
+$project.Save()
+
+Add-StartProgram
