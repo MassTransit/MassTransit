@@ -1019,6 +1019,7 @@
     <Compile Include="Util\IMediator.cs" />
     <Compile Include="Util\ITaskScope.cs" />
     <Compile Include="Util\LazyConcurrentDictionary.cs" />
+    <Compile Include="Util\LimitedConcurrencyLevelTaskScheduler.cs" />
     <Compile Include="Util\Mediator.cs" />
     <Compile Include="Util\RollingTimer.cs" />
     <Compile Include="Util\StopEventArgs.cs" />

@@ -21,7 +21,7 @@ namespace MassTransit.Util
     {
         static readonly ILog _log = Logger.Get<TaskSupervisor>();
 
-        public static ITaskScope CreateScope(this ITaskSupervisor supervisor, string tag, Func<Task> onStopMethod)
+        public static ITaskScope CreateScope(this ITaskSupervisor supervisor, string tag, Func<Task> afterStopped)
         {
             var scope = supervisor.CreateScope(tag);
 
@@ -29,23 +29,8 @@ namespace MassTransit.Util
             {
                 var stopEvent = await stopTask.ConfigureAwait(false);
 
-                await scope.Stop(stopEvent.Reason).ConfigureAwait(false);
-
-                try
-                {
-                    await onStopMethod().ConfigureAwait(false);
-
-                    await scope.Completed.ConfigureAwait(false);
-                }
-                catch (Exception ex)
-                {
-                    _log.Error($"Failed to close scope {tag}", ex);
-                }
-                finally
-                {
-                    scope.SetComplete();
-                }
-            });
+                await scope.Stop(stopEvent.Reason, afterStopped).ConfigureAwait(false);
+            }, TaskScheduler.Default);
 
             return scope;
         }
@@ -68,7 +53,7 @@ namespace MassTransit.Util
                 {
                     participant.SetComplete();
                 }
-            });
+            }, TaskScheduler.Default);
 
             return participant;
         }

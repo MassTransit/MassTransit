@@ -37,21 +37,19 @@ namespace MassTransit.RabbitMqTransport.Contexts
         readonly ITaskParticipant _participant;
         readonly PayloadCache _payloadCache;
         readonly ConcurrentDictionary<ulong, PendingPublish> _published;
-        readonly ITaskScope _taskScope;
-        readonly QueuedTaskScheduler _taskScheduler;
+        readonly LimitedConcurrencyLevelTaskScheduler _taskScheduler;
         ulong _publishTagMax;
 
         public RabbitMqModelContext(ConnectionContext connectionContext, IModel model, ITaskScope taskScope)
         {
             _connectionContext = connectionContext;
             _model = model;
-            _taskScope = taskScope;
 
             _participant = taskScope.CreateParticipant($"{TypeMetadataCache<RabbitMqModelContext>.ShortName} - {_connectionContext.HostSettings.ToDebugString()}");
 
             _payloadCache = new PayloadCache();
             _published = new ConcurrentDictionary<ulong, PendingPublish>();
-            _taskScheduler = new QueuedTaskScheduler(TaskScheduler.Default, 1);
+            _taskScheduler = new LimitedConcurrencyLevelTaskScheduler(1);
 
             _model.ModelShutdown += OnModelShutdown;
             _model.BasicAcks += OnBasicAcks;
@@ -174,6 +172,9 @@ namespace MassTransit.RabbitMqTransport.Contexts
 
         void Close(string reason)
         {
+            if (_log.IsDebugEnabled)
+                _log.DebugFormat("Closing model: {0} / {1}", _model.ChannelNumber, _connectionContext.HostSettings.ToDebugString());
+
             try
             {
                 if (_model.IsOpen && _published.Count > 0)

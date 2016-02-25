@@ -27,12 +27,13 @@ namespace MassTransit.RabbitMqTransport.Contexts
         readonly ConnectionContext _context;
         readonly ITaskParticipant _participant;
 
-        public SharedConnectionContext(ConnectionContext context, CancellationToken cancellationToken, ITaskParticipant participant)
+        public SharedConnectionContext(ConnectionContext context, CancellationToken cancellationToken, ITaskScope scope)
         {
             _context = context;
             _cancellationToken = cancellationToken;
 
-            _participant = participant;
+            _participant = scope.CreateParticipant($"{TypeMetadataCache<SharedConnectionContext>.ShortName} - {context.HostSettings.ToDebugString()}");
+
             _participant.SetReady();
         }
 

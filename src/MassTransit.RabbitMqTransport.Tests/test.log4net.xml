@@ -18,6 +18,10 @@
 			<level value="DEBUG" />
 		</logger>
 
+		<logger name="MassTransit.Util.TaskSupervisor">
+			<level value="DEBUG" />
+		</logger>
+
 		<logger name="NHibernate">
 			<level value="INFO"/>
 		</logger>

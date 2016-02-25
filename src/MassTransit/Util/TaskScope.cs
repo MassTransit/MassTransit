@@ -15,6 +15,7 @@ namespace MassTransit.Util
     using System;
     using System.Threading;
     using System.Threading.Tasks;
+    using Logging;
 
 
     class TaskScope :
@@ -72,13 +73,22 @@ namespace MassTransit.Util
             return _supervisor.CreateScope(tag);
         }
 
-        public string Tag => _supervisor.Tag;
+        static readonly ILog _log = Logger.Get<TaskScope>();
 
-        async Task ITaskScope.Stop(string reason, CancellationToken cancellationToken)
+        async Task ITaskScope.Stop(string reason, Func<Task> afterStopped, CancellationToken cancellationToken)
         {
             _participant.Stop(new StopEventArgs(reason));
 
             await _supervisor.Stop(reason, cancellationToken).ConfigureAwait(false);
+
+            try
+            {
+                await afterStopped().ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                _log.Error($"Exception after stopping scope {_supervisor.Tag}", ex);
+            }
 
             _participant.SetComplete();
         }

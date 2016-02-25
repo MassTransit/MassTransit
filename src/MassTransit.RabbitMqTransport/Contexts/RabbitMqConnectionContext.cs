@@ -22,15 +22,15 @@ namespace MassTransit.RabbitMqTransport.Contexts
 
 
     public class RabbitMqConnectionContext :
-        ConnectionContext,
-        IDisposable
+        ConnectionContext
     {
         static readonly ILog _log = Logger.Get<RabbitMqConnectionContext>();
+
         readonly IConnection _connection;
         readonly RabbitMqHostSettings _hostSettings;
         readonly ITaskParticipant _participant;
         readonly PayloadCache _payloadCache;
-        readonly QueuedTaskScheduler _taskScheduler;
+        readonly LimitedConcurrencyLevelTaskScheduler _taskScheduler;
 
         public RabbitMqConnectionContext(IConnection connection, RabbitMqHostSettings hostSettings, ITaskSupervisor supervisor)
         {
@@ -40,7 +40,7 @@ namespace MassTransit.RabbitMqTransport.Contexts
 
             _participant = supervisor.CreateParticipant($"{TypeMetadataCache<RabbitMqConnectionContext>.ShortName} - {_hostSettings.ToDebugString()}");
 
-            _taskScheduler = new QueuedTaskScheduler(TaskScheduler.Default, 1);
+            _taskScheduler = new LimitedConcurrencyLevelTaskScheduler(1);
 
             connection.ConnectionShutdown += OnConnectionShutdown;
         }
