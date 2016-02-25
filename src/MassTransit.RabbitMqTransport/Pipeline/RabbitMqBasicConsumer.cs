@@ -52,8 +52,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
         /// <param name="receivePipe">The receive pipe to dispatch messages</param>
         /// <param name="receiveObserver">The observer for receive events</param>
         /// <param name="taskSupervisor">The token used to cancel/stop the consumer at shutdown</param>
-        public RabbitMqBasicConsumer(ModelContext model, Uri inputAddress, IPipe<ReceiveContext> receivePipe, IReceiveObserver receiveObserver,
-            ITaskSupervisor taskSupervisor)
+        public RabbitMqBasicConsumer(ModelContext model, Uri inputAddress, IPipe<ReceiveContext> receivePipe, IReceiveObserver receiveObserver, ITaskScope taskSupervisor)
         {
             _model = model;
             _inputAddress = inputAddress;
@@ -184,9 +183,9 @@ namespace MassTransit.RabbitMqTransport.Pipeline
 
         int RabbitMqConsumerMetrics.ConcurrentDeliveryCount => _maxPendingDeliveryCount;
 
-        async Task Stop()
+        Task Stop()
         {
-            await _model.BasicCancel(_consumerTag).ConfigureAwait(false);
+            return _model.BasicCancel(_consumerTag);
         }
     }
 }

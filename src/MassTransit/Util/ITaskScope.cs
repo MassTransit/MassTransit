@@ -25,6 +25,6 @@ namespace MassTransit.Util
         ITaskSupervisor,
         IDisposable
     {
-        Task Stop(string reason, CancellationToken cancellationToken = default(CancellationToken));
+        Task Stop(string reason, Func<Task> afterStopped, CancellationToken cancellationToken = default(CancellationToken));
     }
 }

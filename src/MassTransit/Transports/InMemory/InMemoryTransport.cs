@@ -35,7 +35,7 @@ namespace MassTransit.Transports.InMemory
         readonly Uri _inputAddress;
         readonly ITaskParticipant _participant;
         readonly ReceiveObservable _receiveObservable;
-        readonly QueuedTaskScheduler _scheduler;
+        readonly LimitedConcurrencyLevelTaskScheduler _scheduler;
         readonly SendObservable _sendObservable;
         readonly TaskSupervisor _supervisor;
         int _currentPendingDeliveryCount;
@@ -54,7 +54,7 @@ namespace MassTransit.Transports.InMemory
             _supervisor = new TaskSupervisor($"{TypeMetadataCache<InMemoryTransport>.ShortName} - {_inputAddress}");
             _participant = _supervisor.CreateParticipant($"{TypeMetadataCache<InMemoryTransport>.ShortName} - {_inputAddress}");
 
-            _scheduler = new QueuedTaskScheduler(TaskScheduler.Default, concurrencyLimit);
+            _scheduler = new LimitedConcurrencyLevelTaskScheduler(concurrencyLimit);
         }
 
         public void Dispose()
@@ -64,8 +64,6 @@ namespace MassTransit.Transports.InMemory
             TaskUtil.Await(() => _supervisor.Stop("Disposed"));
 
             TaskUtil.Await(() => _supervisor.Completed);
-
-            _scheduler.Dispose();
         }
 
         public void Probe(ProbeContext context)

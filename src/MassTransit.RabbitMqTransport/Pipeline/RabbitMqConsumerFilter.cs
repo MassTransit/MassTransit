@@ -50,7 +50,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
 
             var inputAddress = context.ConnectionContext.HostSettings.GetInputAddress(receiveSettings);
 
-            using (ITaskScope scope = _supervisor.CreateScope($"{TypeMetadataCache<RabbitMqConsumerFilter>.ShortName} - {inputAddress}"))
+            using (ITaskScope scope = _supervisor.CreateScope($"{TypeMetadataCache<RabbitMqConsumerFilter>.ShortName} - {inputAddress}", () => TaskUtil.Completed))
             {
                 var consumer = new RabbitMqBasicConsumer(context, inputAddress, _receivePipe, _receiveObserver, scope);
 

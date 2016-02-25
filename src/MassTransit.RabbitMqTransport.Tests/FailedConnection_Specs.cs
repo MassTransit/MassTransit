@@ -75,9 +75,9 @@ namespace MassTransit.RabbitMqTransport.Tests
                 });
             });
 
-            using (var handle = busControl.Start())
+            using (var handle = await busControl.StartAsync())
             {
-                for (int i = 0; i < 100; i++)
+                for (int i = 0; i < 10; i++)
                 {
                     try
                     {
@@ -92,6 +92,67 @@ namespace MassTransit.RabbitMqTransport.Tests
                         Console.WriteLine("Publish {0} faulted: {1}", i, ex.Message);
                     }
                 }
+            }
+        }
+
+        [Test, Explicit]
+        public async Task Should_startup_and_shut_down_cleanly()
+        {
+            var busControl = Bus.Factory.CreateUsingRabbitMq(x =>
+            {
+                x.Host(new Uri("rabbitmq://localhost/"), h =>
+                {
+                });
+            });
+
+            using (var handle = await busControl.StartAsync())
+            {
+                await Task.Delay(5000);
+            }
+        }
+
+        [Test, Explicit]
+        public async Task Should_startup_and_shut_down_cleanly_with_publish()
+        {
+            var busControl = Bus.Factory.CreateUsingRabbitMq(x =>
+            {
+                x.Host(new Uri("rabbitmq://localhost/"), h =>
+                {
+                });
+            });
+
+            await busControl.StartAsync();
+            try
+            {
+                await busControl.Publish(new TestMessage());
+
+            }
+            finally
+            {
+                await busControl.StopAsync();
+            }
+        }
+
+        [Test, Explicit]
+        public async Task Should_startup_and_shut_down_cleanly_with_an_endpoint()
+        {
+            var busControl = Bus.Factory.CreateUsingRabbitMq(x =>
+            {
+                var host = x.Host(new Uri("rabbitmq://localhost/"), h =>
+                {
+                });
+
+                x.ReceiveEndpoint(host, "input_queue", e =>
+                {
+                    e.Handler<Test>(async context =>
+                    {
+                    });
+                });
+            });
+
+            using (var handle = await busControl.StartAsync())
+            {
+                await Task.Delay(5000);
             }
         }
 
