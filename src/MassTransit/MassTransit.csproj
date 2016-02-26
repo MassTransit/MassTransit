@@ -175,6 +175,7 @@
     <Compile Include="Context\CorrelationIdConsumeContextProxy.cs" />
     <Compile Include="Context\DelegateSetCorrelationId.cs" />
     <Compile Include="Context\DictionarySendHeaders.cs" />
+    <Compile Include="Context\FaultedPublishContext.cs" />
     <Compile Include="Context\IMessageCorrelationCache.cs" />
     <Compile Include="Context\ISetCorrelationId.cs" />
     <Compile Include="Context\MessageConsumeContext.cs" />
