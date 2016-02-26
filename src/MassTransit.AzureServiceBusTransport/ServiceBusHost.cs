@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,6 +13,7 @@
 namespace MassTransit.AzureServiceBusTransport
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
@@ -20,6 +21,7 @@ namespace MassTransit.AzureServiceBusTransport
     using Microsoft.ServiceBus;
     using Microsoft.ServiceBus.Messaging;
     using Transports;
+    using Util;
 
 
     public class ServiceBusHost :
@@ -33,6 +35,7 @@ namespace MassTransit.AzureServiceBusTransport
         readonly Lazy<Task<NamespaceManager>> _rootNamespaceManager;
         readonly Lazy<Task<MessagingFactory>> _sessionMessagingFactory;
         readonly ServiceBusHostSettings _settings;
+        readonly TaskSupervisor _supervisor;
 
         public ServiceBusHost(ServiceBusHostSettings settings)
         {
@@ -43,11 +46,13 @@ namespace MassTransit.AzureServiceBusTransport
             _rootNamespaceManager = new Lazy<Task<NamespaceManager>>(CreateRootNamespaceManager);
 
             _messageNameFormatter = new ServiceBusMessageNameFormatter();
+
+            _supervisor = new TaskSupervisor($"{TypeMetadataCache<ServiceBusHost>.ShortName} - {_settings.ServiceUri}");
         }
 
         public HostHandle Start()
         {
-            return new Handle(_messagingFactory.Value, _sessionMessagingFactory, _settings);
+            return new Handle(_messagingFactory.Value, _sessionMessagingFactory, _settings, _supervisor);
         }
 
         Task<MessagingFactory> IServiceBusHost.SessionMessagingFactory => _sessionMessagingFactory.Value;
@@ -73,9 +78,11 @@ namespace MassTransit.AzureServiceBusTransport
 
         IMessageNameFormatter IServiceBusHost.MessageNameFormatter => _messageNameFormatter;
 
+        public ITaskSupervisor Supervisor => _supervisor;
+
         public string GetQueuePath(QueueDescription queueDescription)
         {
-            var segments = new[] {_settings.ServiceUri.AbsolutePath.Trim('/'), queueDescription.Path.Trim('/')}
+            IEnumerable<string> segments = new[] {_settings.ServiceUri.AbsolutePath.Trim('/'), queueDescription.Path.Trim('/')}
                 .Where(x => x.Length > 0);
 
             return string.Join("/", segments);
@@ -167,18 +174,22 @@ namespace MassTransit.AzureServiceBusTransport
             readonly Task<MessagingFactory> _messagingFactoryTask;
             readonly Lazy<Task<MessagingFactory>> _sessionFactory;
             readonly ServiceBusHostSettings _settings;
+            readonly TaskSupervisor _supervisor;
 
-            public Handle(Task<MessagingFactory> messagingFactoryTask, Lazy<Task<MessagingFactory>> sessionFactory, ServiceBusHostSettings settings)
+            public Handle(Task<MessagingFactory> messagingFactoryTask, Lazy<Task<MessagingFactory>> sessionFactory, ServiceBusHostSettings settings, TaskSupervisor supervisor)
             {
                 _messagingFactoryTask = messagingFactoryTask;
                 _sessionFactory = sessionFactory;
                 _settings = settings;
+                _supervisor = supervisor;
             }
 
             async Task HostHandle.Stop(CancellationToken cancellationToken)
             {
                 try
                 {
+                    await _supervisor.Stop("Host stopped", cancellationToken).ConfigureAwait(false);
+
                     var factory = await _messagingFactoryTask.ConfigureAwait(false);
 
                     if (!factory.IsClosed)

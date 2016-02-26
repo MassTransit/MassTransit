@@ -50,7 +50,7 @@ namespace MassTransit.AzureServiceBusTransport
 
             MessageSender messageSender = await messagingFactory.CreateMessageSenderAsync(topicDescription.Path).ConfigureAwait(false);
 
-            var sendTransport = new ServiceBusSendTransport(messageSender);
+            var sendTransport = new ServiceBusSendTransport(messageSender, host.Supervisor);
 
             sendTransport.ConnectSendObserver(_sendObservable);
 
