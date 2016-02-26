@@ -67,7 +67,7 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
 
                 messageReceiver.PrefetchCount = receiveSettings.PrefetchCount;
 
-                using (var scope = _supervisor.CreateScope($"{TypeMetadataCache<MessageReceiverFilter>.ShortName} - {inputAddress}"))
+                using (var scope = _supervisor.CreateScope($"{TypeMetadataCache<MessageReceiverFilter>.ShortName} - {inputAddress}", () => TaskUtil.Completed))
                 {
                     var receiver = new Receiver(messageReceiver, inputAddress, _receivePipe, receiveSettings, _receiveObserver, scope);
 
@@ -79,7 +79,7 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
 
                     try
                     {
-                        await ((ITaskSupervisor)scope).Completed.ConfigureAwait(false);
+                        await scope.Completed.ConfigureAwait(false);
                     }
                     finally
                     {

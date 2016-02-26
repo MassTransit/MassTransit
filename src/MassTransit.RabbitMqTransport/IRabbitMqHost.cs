@@ -12,7 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RabbitMqTransport
 {
-    using System.Threading.Tasks;
     using Integration;
     using Transports;
     using Util;
@@ -30,7 +29,9 @@ namespace MassTransit.RabbitMqTransport
         /// </summary>
         IRetryPolicy ConnectionRetryPolicy { get; }
 
-
+        /// <summary>
+        /// The supervisor for the host, which indicates when it's being stopped
+        /// </summary>
         ITaskSupervisor Supervisor { get; }
     }
 }

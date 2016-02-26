@@ -68,7 +68,7 @@ namespace MassTransit.AzureServiceBusTransport
 
             MessageSender messageSender = await messagingFactory.CreateMessageSenderAsync(queuePath).ConfigureAwait(false);
 
-            return new ServiceBusSendTransport(messageSender);
+            return new ServiceBusSendTransport(messageSender, host.Supervisor);
         }
 
         bool TryGetMatchingHost(Uri address, out IServiceBusHost host)

@@ -16,7 +16,6 @@ namespace MassTransit.RabbitMqTransport.Integration
     using System.Threading;
     using System.Threading.Tasks;
     using Contexts;
-    using Internals.Extensions;
     using Logging;
     using MassTransit.Pipeline;
     using RabbitMQ.Client;
@@ -210,7 +209,6 @@ namespace MassTransit.RabbitMqTransport.Integration
                     modelContext.Dispose();
                 }
             }
-
         }
     }
 }

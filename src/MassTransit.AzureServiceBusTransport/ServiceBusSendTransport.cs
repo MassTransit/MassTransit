@@ -20,6 +20,7 @@ namespace MassTransit.AzureServiceBusTransport
     using MassTransit.Pipeline;
     using Microsoft.ServiceBus.Messaging;
     using Transports;
+    using Util;
 
 
     /// <summary>
@@ -35,11 +36,27 @@ namespace MassTransit.AzureServiceBusTransport
 
         readonly SendObservable _observers;
         readonly MessageSender _sender;
+        ITaskParticipant _participant;
 
-        public ServiceBusSendTransport(MessageSender sender)
+        public ServiceBusSendTransport(MessageSender sender, ITaskSupervisor supervisor)
         {
             _observers = new SendObservable();
             _sender = sender;
+
+            _participant = supervisor.CreateParticipant($"{TypeMetadataCache<ServiceBusSendTransport>.ShortName} - {sender.Path}", StopSender);
+        }
+
+        async Task StopSender()
+        {
+            try
+            {
+                await _sender.CloseAsync().ConfigureAwait(false);
+            }
+            catch (Exception exception)
+            {
+                _log.Error($"Failed to close message sender: {_sender.Path}", exception);
+                throw;
+            }
         }
 
         async Task ISendTransport.Send<T>(T message, IPipe<SendContext<T>> pipe, CancellationToken cancelSend)

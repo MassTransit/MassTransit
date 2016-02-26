@@ -18,7 +18,6 @@ namespace MassTransit.RabbitMqTransport
     using Integration;
     using Topology;
     using Transports;
-    using Util;
 
 
     public class RabbitMqSendTransportProvider :

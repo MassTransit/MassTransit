@@ -46,7 +46,6 @@ namespace MassTransit.AzureServiceBusTransport
         readonly IReceiveObserver _receiveObserver;
         readonly IPipe<ReceiveContext> _receivePipe;
         readonly ReceiveSettings _receiveSettings;
-        readonly ITaskSupervisor _supervisor;
         int _currentPendingDeliveryCount;
         long _deliveryCount;
         int _maxPendingDeliveryCount;
@@ -60,9 +59,8 @@ namespace MassTransit.AzureServiceBusTransport
             _receivePipe = receivePipe;
             _receiveSettings = receiveSettings;
             _receiveObserver = receiveObserver;
-            _supervisor = supervisor;
 
-            _participant = supervisor.CreateParticipant($"{TypeMetadataCache<SessionReceiver>.ShortName} - {inputAddress}");
+            _participant = supervisor.CreateParticipant($"{TypeMetadataCache<Receiver>.ShortName} - {inputAddress}", Stop);
 
             var options = new SessionHandlerOptions
             {
@@ -93,8 +91,6 @@ namespace MassTransit.AzureServiceBusTransport
             queueClient.RegisterSessionHandlerFactoryAsync(handlerFactory, options);
 
             _participant.SetReady();
-
-            SetupStopTask();
         }
 
         bool ISessionReceiver.IsShuttingDown => _shuttingDown;
@@ -128,49 +124,43 @@ namespace MassTransit.AzureServiceBusTransport
 
         public int ConcurrentDeliveryCount => _maxPendingDeliveryCount;
 
-        void SetupStopTask()
+        async Task Stop()
         {
-            _participant.StopRequested.ContinueWith(async stopTask =>
+            if (_log.IsDebugEnabled)
+                _log.DebugFormat("Shutting down receiver: {0}", _inputAddress);
+
+            _shuttingDown = true;
+
+            if (_currentPendingDeliveryCount > 0)
             {
-                await stopTask.ConfigureAwait(false);
-
-                if (_log.IsDebugEnabled)
-                    _log.DebugFormat("Shutting down receiver: {0}", _inputAddress);
-
-                _shuttingDown = true;
-
-                if (_currentPendingDeliveryCount > 0)
-                {
-                    try
-                    {
-                        using (var cancellation = new CancellationTokenSource(_receiveSettings.QueueDescription.LockDuration))
-                        {
-                            await _supervisor.Completed
-                                .WithCancellation(cancellation.Token).ConfigureAwait(false);
-                        }
-                    }
-                    catch (TaskCanceledException)
-                    {
-                        if (_log.IsWarnEnabled)
-                            _log.WarnFormat("Timeout waiting for receiver to exit: {0}", _inputAddress);
-                    }
-                }
-
                 try
                 {
-                    await _queueClient.CloseAsync().ConfigureAwait(false);
-                }
-                finally
-                {
-                    if (_currentPendingDeliveryCount == 0)
+                    using (var cancellation = new CancellationTokenSource(_receiveSettings.QueueDescription.LockDuration))
                     {
-                        if (_log.IsDebugEnabled)
-                            _log.DebugFormat("Receiver shutdown completed: {0}", _inputAddress);
-
-                        _participant.SetComplete();
+                        await _participant.ParticipantCompleted.WithCancellation(cancellation.Token).ConfigureAwait(false);
                     }
                 }
-            });
+                catch (TaskCanceledException)
+                {
+                    if (_log.IsWarnEnabled)
+                        _log.WarnFormat("Timeout waiting for receiver to exit: {0}", _inputAddress);
+                }
+            }
+
+            try
+            {
+                await _queueClient.CloseAsync().ConfigureAwait(false);
+            }
+            finally
+            {
+                if (_currentPendingDeliveryCount == 0)
+                {
+                    if (_log.IsDebugEnabled)
+                        _log.DebugFormat("Receiver shutdown completed: {0}", _inputAddress);
+
+                    _participant.SetComplete();
+                }
+            }
         }
     }
 }

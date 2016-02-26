@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -34,7 +34,6 @@ namespace MassTransit.AzureServiceBusTransport
         readonly IReceiveObserver _receiveObserver;
         readonly IPipe<ReceiveContext> _receivePipe;
         readonly ReceiveSettings _receiveSettings;
-        readonly ITaskSupervisor _supervisor;
         int _currentPendingDeliveryCount;
         long _deliveryCount;
         int _maxPendingDeliveryCount;
@@ -48,9 +47,8 @@ namespace MassTransit.AzureServiceBusTransport
             _receivePipe = receivePipe;
             _receiveSettings = receiveSettings;
             _receiveObserver = receiveObserver;
-            _supervisor = supervisor;
 
-            _participant = supervisor.CreateParticipant($"{TypeMetadataCache<Receiver>.ShortName} - {inputAddress}");
+            _participant = supervisor.CreateParticipant($"{TypeMetadataCache<Receiver>.ShortName} - {inputAddress}", Stop);
 
             var options = new OnMessageOptions
             {
@@ -79,57 +77,49 @@ namespace MassTransit.AzureServiceBusTransport
             messageReceiver.OnMessageAsync(OnMessage, options);
 
             _participant.SetReady();
-
-            SetupStopTask();
         }
 
         public long DeliveryCount => _deliveryCount;
 
         public int ConcurrentDeliveryCount => _maxPendingDeliveryCount;
 
-        void SetupStopTask()
+        async Task Stop()
         {
-            _participant.StopRequested.ContinueWith(async stopTask =>
+            if (_log.IsDebugEnabled)
+                _log.DebugFormat("Shutting down receiver: {0}", _inputAddress);
+
+            _shuttingDown = true;
+
+            if (_currentPendingDeliveryCount > 0)
             {
-                await stopTask.ConfigureAwait(false);
-
-                if (_log.IsDebugEnabled)
-                    _log.DebugFormat("Shutting down receiver: {0}", _inputAddress);
-
-                _shuttingDown = true;
-
-                if (_currentPendingDeliveryCount > 0)
-                {
-                    try
-                    {
-                        using (var cancellation = new CancellationTokenSource(_receiveSettings.QueueDescription.LockDuration))
-                        {
-                            await _supervisor.Completed
-                                .WithCancellation(cancellation.Token).ConfigureAwait(false);
-                        }
-                    }
-                    catch (TaskCanceledException)
-                    {
-                        if (_log.IsWarnEnabled)
-                            _log.WarnFormat("Timeout waiting for receiver to exit: {0}", _inputAddress);
-                    }
-                }
-
                 try
                 {
-                    await _messageReceiver.CloseAsync().ConfigureAwait(false);
-                }
-                finally
-                {
-                    if (_currentPendingDeliveryCount == 0)
+                    using (var cancellation = new CancellationTokenSource(_receiveSettings.QueueDescription.LockDuration))
                     {
-                        if (_log.IsDebugEnabled)
-                            _log.DebugFormat("Receiver shutdown completed: {0}", _inputAddress);
-
-                        _participant.SetComplete();
+                        await _participant.ParticipantCompleted.WithCancellation(cancellation.Token).ConfigureAwait(false);
                     }
                 }
-            });
+                catch (TaskCanceledException)
+                {
+                    if (_log.IsWarnEnabled)
+                        _log.WarnFormat("Timeout waiting for receiver to exit: {0}", _inputAddress);
+                }
+            }
+
+            try
+            {
+                await _messageReceiver.CloseAsync().ConfigureAwait(false);
+            }
+            finally
+            {
+                if (_currentPendingDeliveryCount == 0)
+                {
+                    if (_log.IsDebugEnabled)
+                        _log.DebugFormat("Receiver shutdown completed: {0}", _inputAddress);
+
+                    _participant.SetComplete();
+                }
+            }
         }
 
         async Task OnMessage(BrokeredMessage message)
@@ -191,7 +181,7 @@ namespace MassTransit.AzureServiceBusTransport
         {
             try
             {
-                await _supervisor.Completed.ConfigureAwait(false);
+                await _participant.ParticipantCompleted.ConfigureAwait(false);
 
                 await message.AbandonAsync().ConfigureAwait(false);
             }
