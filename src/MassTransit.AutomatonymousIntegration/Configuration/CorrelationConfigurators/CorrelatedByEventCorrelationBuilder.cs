@@ -36,25 +36,4 @@ namespace Automatonymous.CorrelationConfigurators
             return _configurator.Build();
         }
     }
-
-
-    public class UncorrelatedByEventCorrelationBuilder<TInstance, TData> :
-        EventCorrelationBuilder<TInstance>
-        where TInstance : class, SagaStateMachineInstance
-        where TData : class
-    {
-        readonly MassTransitEventCorrelationConfigurator<TInstance, TData> _configurator;
-
-        public UncorrelatedByEventCorrelationBuilder(SagaStateMachine<TInstance> machine, Event<TData> @event)
-        {
-            var configurator = new MassTransitEventCorrelationConfigurator<TInstance, TData>(machine, @event, null);
-
-            _configurator = configurator;
-        }
-
-        public EventCorrelation Build()
-        {
-            return _configurator.Build();
-        }
-    }
 }
