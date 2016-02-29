@@ -16,6 +16,7 @@ namespace Automatonymous.SubscriptionConnectors
     using System.Collections.Generic;
     using System.Linq;
     using MassTransit;
+    using MassTransit.Configurators;
     using MassTransit.PipeConfigurators;
     using MassTransit.Pipeline;
     using MassTransit.Saga;
@@ -70,7 +71,11 @@ namespace Automatonymous.SubscriptionConnectors
 
         IEnumerable<ISagaMessageConnector> StateMachineEvents()
         {
-            foreach (var correlation in _stateMachine.Correlations)
+            var correlations = _stateMachine.Correlations.ToArray();
+
+            StateMachineConfigurationResult.CompileResults(correlations.SelectMany(x => x.Validate()).ToArray());
+
+            foreach (var correlation in correlations)
             {
                 if (correlation.DataType.IsValueType)
                     continue;

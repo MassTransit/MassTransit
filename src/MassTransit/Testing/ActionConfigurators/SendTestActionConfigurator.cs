@@ -14,6 +14,7 @@ namespace MassTransit.Testing.ActionConfigurators
 {
     using System;
     using System.Collections.Generic;
+    using System.Threading.Tasks;
     using Builders;
     using Configurators;
     using TestActions;
@@ -25,16 +26,16 @@ namespace MassTransit.Testing.ActionConfigurators
         where TScenario : ITestScenario
     {
         readonly Action<TScenario, SendContext<TMessage>> _callback;
-        readonly Func<TScenario, ISendEndpoint> _endpointAccessor;
+        readonly Func<TScenario, Task<ISendEndpoint>> _endpointAccessor;
         readonly TMessage _message;
 
-        public SendTestActionConfigurator(Func<TScenario, ISendEndpoint> endpointAccessor, TMessage message)
+        public SendTestActionConfigurator(Func<TScenario, Task<ISendEndpoint>> endpointAccessor, TMessage message)
         {
             _message = message;
             _endpointAccessor = endpointAccessor;
         }
 
-        public SendTestActionConfigurator(Func<TScenario, ISendEndpoint> endpointAccessor, TMessage message,
+        public SendTestActionConfigurator(Func<TScenario, Task<ISendEndpoint>> endpointAccessor, TMessage message,
             Action<TScenario, SendContext<TMessage>> callback)
         {
             _message = message;

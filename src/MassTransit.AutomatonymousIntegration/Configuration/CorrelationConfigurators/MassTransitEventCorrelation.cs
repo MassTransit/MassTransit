@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,8 +13,10 @@
 namespace Automatonymous.CorrelationConfigurators
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
     using MassTransit;
+    using MassTransit.Configurators;
     using MassTransit.Pipeline;
     using MassTransit.Saga;
     using MassTransit.Saga.Policies;
@@ -26,14 +28,16 @@ namespace Automatonymous.CorrelationConfigurators
         where TData : class
     {
         readonly Event<TData> _event;
+        readonly bool _insertOnInitial;
         readonly SagaStateMachine<TInstance> _machine;
         readonly IFilter<ConsumeContext<TData>> _messageFilter;
         readonly IPipe<ConsumeContext<TData>> _missingPipe;
-        readonly ISagaFactory<TInstance, TData> _sagaFactory;
-        readonly bool _insertOnInitial;
         readonly Lazy<ISagaPolicy<TInstance, TData>> _policy;
+        readonly ISagaFactory<TInstance, TData> _sagaFactory;
 
-        public MassTransitEventCorrelation(SagaStateMachine<TInstance> machine, Event<TData> @event, SagaFilterFactory<TInstance, TData> sagaFilterFactory, IFilter<ConsumeContext<TData>> messageFilter, IPipe<ConsumeContext<TData>> missingPipe, ISagaFactory<TInstance, TData> sagaFactory, bool insertOnInitial)
+        public MassTransitEventCorrelation(SagaStateMachine<TInstance> machine, Event<TData> @event, SagaFilterFactory<TInstance, TData> sagaFilterFactory,
+            IFilter<ConsumeContext<TData>> messageFilter, IPipe<ConsumeContext<TData>> missingPipe, ISagaFactory<TInstance, TData> sagaFactory,
+            bool insertOnInitial)
         {
             _event = @event;
             FilterFactory = sagaFilterFactory;
@@ -56,13 +60,18 @@ namespace Automatonymous.CorrelationConfigurators
 
         ISagaPolicy<TInstance, TData> EventCorrelation<TInstance, TData>.Policy => _policy.Value;
 
+        public IEnumerable<ValidationResult> Validate()
+        {
+            yield break;
+        }
+
         ISagaPolicy<TInstance, TData> GetSagaPolicy()
         {
             State[] states = _machine.States
                 .Where(state => _machine.NextEvents(state).Contains(_event))
                 .ToArray();
 
-            bool includesInitial = states.Any(x => x.Name.Equals(_machine.Initial.Name));
+            var includesInitial = states.Any(x => x.Name.Equals(_machine.Initial.Name));
 
             if (includesInitial)
                 return new NewOrExistingSagaPolicy<TInstance, TData>(_sagaFactory, _insertOnInitial);

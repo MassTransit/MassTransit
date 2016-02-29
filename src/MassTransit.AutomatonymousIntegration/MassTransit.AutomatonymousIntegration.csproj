@@ -69,8 +69,10 @@
     <Compile Include="Activities\RequestActivityImpl.cs" />
     <Compile Include="Activities\ScheduleActivity.cs" />
     <Compile Include="BehaviorContextExtensions.cs" />
+    <Compile Include="Configuration\CorrelationConfigurators\UncorrelatedEventCorrelation.cs" />
     <Compile Include="Configuration\EventMissingInstanceConfigurator.cs" />
     <Compile Include="Configuration\MissingInstanceConfigurator.cs" />
+    <Compile Include="Configuration\StateMachineConfigurationResult.cs" />
     <Compile Include="Configuration\ScheduleConfigurator.cs" />
     <Compile Include="Configuration\StateMachineScheduleConfigurator.cs" />
     <Compile Include="ConsumeExceptionEventContext.cs" />
@@ -99,6 +101,7 @@
     <Compile Include="Contexts\AutomatonymousConsumeEventContext.cs" />
     <Compile Include="Events\RequestTimeoutExpired.cs" />
     <Compile Include="Exceptions\NotAcceptedStateMachineException.cs" />
+    <Compile Include="Exceptions\UncorrelationEventStateMachineException.cs" />
     <Compile Include="MassTransitStateMachine.cs" />
     <Compile Include="PublishExtensions.cs" />
     <Compile Include="Request.cs" />

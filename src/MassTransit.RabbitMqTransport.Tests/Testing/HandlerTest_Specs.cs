@@ -34,7 +34,7 @@ namespace MassTransit.RabbitMqTransport.Tests.Testing
 						x.Send(new A());
 						x.Send(new B());
 					});
-			_test.Execute();
+			_test.ExecuteAsync();
 		}
 
 		[TearDown]

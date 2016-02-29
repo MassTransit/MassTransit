@@ -51,5 +51,18 @@ namespace MassTransit.Internals.Extensions
                 await task.ConfigureAwait(false);
             }
         }
+
+        public static async Task WithTimeout(this Task task, TimeSpan timeout)
+        {
+            using (var tokenSource = new CancellationTokenSource(timeout))
+            {
+                var tcs = new TaskCompletionSource<bool>();
+                using (tokenSource.Token.Register(s => ((TaskCompletionSource<bool>)s).TrySetResult(true), tcs))
+                    if (task != await Task.WhenAny(task, tcs.Task).ConfigureAwait(false))
+                        throw new OperationCanceledException(tokenSource.Token);
+
+                await task.ConfigureAwait(false);
+            }
+        }
     }
 }

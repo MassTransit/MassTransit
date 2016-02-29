@@ -133,7 +133,6 @@
     <Compile Include="Messages\PingNotSupported.cs" />
     <Compile Include="Messages\PongMessage.cs" />
     <Compile Include="ExtensionMethodsForSagas.cs" />
-    <Compile Include="RandomMagnumAssertion.cs" />
     <Compile Include="TestConsumeContext.cs" />
     <Compile Include="TestConsumeObserver.cs" />
     <Compile Include="TestObserver.cs" />

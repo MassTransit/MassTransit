@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -15,7 +15,6 @@ namespace MassTransit.Testing.TestActions
     using System;
     using System.Threading;
     using System.Threading.Tasks;
-    using Scenarios;
 
 
     public class PublishTestAction<TScenario, TMessage> :
@@ -37,10 +36,9 @@ namespace MassTransit.Testing.TestActions
 
         public Task Act(TScenario scenario, CancellationToken cancellationToken)
         {
-            IPublishEndpoint publishEndpoint = _busAccessor(scenario);
+            var publishEndpoint = _busAccessor(scenario);
 
-            return publishEndpoint.Publish(_message,
-                Pipe.New<PublishContext<TMessage>>(x => x.UseExecute(context => _callback(scenario, context))), cancellationToken);
+            return publishEndpoint.Publish(_message, context => _callback(scenario, context), cancellationToken);
         }
 
         static void DefaultCallback(TScenario scenario, PublishContext<TMessage> context)
