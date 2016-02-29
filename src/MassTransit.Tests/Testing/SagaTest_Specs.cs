@@ -44,7 +44,7 @@ namespace MassTransit.Tests.Testing
 							});
 					});
 
-			_test.Execute();
+			_test.ExecuteAsync();
 		}
 
 		[TearDown]

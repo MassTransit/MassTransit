@@ -67,8 +67,7 @@ namespace MassTransit.RabbitMqTransport
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Starting connection to {0}", _hostSettings.ToDebugString());
 
-            var connectionTask = _connectionRetryPolicy.RetryUntilCancelled(
-                () => _connectionCache.Send(connectionPipe, _supervisor.StoppingToken), _supervisor.StoppingToken);
+            var connectionTask = _connectionRetryPolicy.RetryUntilCancelled(() => _connectionCache.Send(connectionPipe, _supervisor.StoppingToken), _supervisor.StoppingToken);
 
             return new Handle(connectionTask, _supervisor);
         }
@@ -122,7 +121,13 @@ namespace MassTransit.RabbitMqTransport
             {
                 await _supervisor.Stop("Host stopped", cancellationToken).ConfigureAwait(false);
 
-                await _connectionTask.ConfigureAwait(false);
+                try
+                {
+                    await _connectionTask.ConfigureAwait(false);
+                }
+                catch (TaskCanceledException)
+                {
+                }
             }
         }
     }

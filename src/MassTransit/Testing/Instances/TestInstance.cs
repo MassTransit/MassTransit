@@ -15,6 +15,7 @@ namespace MassTransit.Testing.Instances
     using System.Collections.Generic;
     using System.Threading.Tasks;
     using TestActions;
+    using Util;
 
 
     public abstract class TestInstance<TScenario>
@@ -42,8 +43,12 @@ namespace MassTransit.Testing.Instances
 
         public void Execute()
         {
-            ExecuteTestActions()
-                .Wait(Scenario.CancellationToken);
+            TaskUtil.Await(ExecuteAsync);
+        }
+
+        public async Task ExecuteAsync()
+        {
+            await ExecuteTestActions().ConfigureAwait(false);
         }
 
         public void Dispose()

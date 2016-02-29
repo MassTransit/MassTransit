@@ -196,12 +196,13 @@ namespace MassTransit
                 try
                 {
                     if (busHandle != null)
-                        busHandle.Stop(TimeSpan.FromSeconds(60));
+
+                        await busHandle.StopAsync(cancellationToken).ConfigureAwait(false);
                     else
                     {
                         var handle = new Handle(hosts, endpoints, observers, this, _busObservable, busReady);
 
-                        handle.Stop(TimeSpan.FromSeconds(60));
+                        await handle.StopAsync(cancellationToken).ConfigureAwait(false);
                     }
                 }
                 catch (Exception stopException)

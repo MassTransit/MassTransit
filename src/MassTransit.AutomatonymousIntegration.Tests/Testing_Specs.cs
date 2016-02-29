@@ -37,7 +37,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
                         });
                 });
 
-            test.Execute();
+            test.ExecuteAsync();
 
             Assert.IsTrue(test.Received.Select<Start>().Any(), "Message not received");
 
@@ -66,7 +66,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
                         });
                 });
 
-            test.Execute();
+            test.ExecuteAsync();
 
             Assert.IsTrue(test.Received.Select<Start>().Any(), "Start not received");
             Assert.IsTrue(test.Received.Select<Stop>().Any(), "Stop not received");

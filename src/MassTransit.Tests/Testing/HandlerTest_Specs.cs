@@ -32,7 +32,7 @@ namespace MassTransit.Tests.Testing
 						x.Send(new B());
 					});
 
-			_test.Execute();
+			_test.ExecuteAsync();
 		}
 
 		[TearDown]
@@ -103,7 +103,7 @@ namespace MassTransit.Tests.Testing
 						x.Send(new B());
 					});
 
-			_test.Execute();
+			_test.ExecuteAsync();
 		}
 
 		[TearDown]
@@ -173,7 +173,7 @@ namespace MassTransit.Tests.Testing
 						x.Publish(new B());
 					});
 
-			_test.Execute();
+			_test.ExecuteAsync();
 		}
 
 		[TearDown]

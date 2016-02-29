@@ -109,6 +109,7 @@
     <Compile Include="ContextSetup.cs" />
     <Compile Include="CorrelateGuid_Specs.cs" />
     <Compile Include="CorrelationExpression_Specs.cs" />
+    <Compile Include="CorrelationUnknown_Specs.cs" />
     <Compile Include="DiscardEvent_Specs.cs" />
     <Compile Include="EnterEvent_Specs.cs" />
     <Compile Include="Fault_Specs.cs" />

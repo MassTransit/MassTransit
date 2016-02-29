@@ -103,7 +103,7 @@ namespace MassTransit.Tests.Testing
 						x.Send(new A(), (scenario, context) => context.ResponseAddress = scenario.Bus.Address);
 					});
 
-			_test.Execute();
+			_test.ExecuteAsync();
 		}
 
 		[TearDown]

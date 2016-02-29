@@ -33,7 +33,7 @@ namespace MassTransit.Tests.Testing
 						//x.Send(new A(), (scenario, context) => context.SendResponseTo(scenario.Bus));
 					});
 
-			_test.Execute();
+			_test.ExecuteAsync();
 		}
 
 		[TearDown]
@@ -80,7 +80,7 @@ namespace MassTransit.Tests.Testing
 						//x.Send(new A(), (scenario, context) => context.SendResponseTo(scenario.Bus));
 					});
 
-			_test.Execute();
+			_test.ExecuteAsync();
 		}
 
 		[TearDown]
