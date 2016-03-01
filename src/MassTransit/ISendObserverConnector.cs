@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,15 +12,11 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
-    using Monitoring.Performance;
-
-
-    public static class BusPerformanceCounters
+    /// <summary>
+    /// Connect an observer that is notified when a message is sent to an endpoint
+    /// </summary>
+    public interface ISendObserverConnector
     {
-        public static void Install()
-        {
-            ConsumerPerformanceCounters.Install();
-            MessagePerformanceCounters.Install();
-        }
+        ConnectHandle ConnectSendObserver(ISendObserver observer);
     }
 }
