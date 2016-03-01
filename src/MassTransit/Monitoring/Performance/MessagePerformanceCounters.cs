@@ -21,7 +21,7 @@ namespace MassTransit.Monitoring.Performance
         PerformanceCounters
     {
         public const string CategoryName = "MassTransit Messages";
-        public const string CategoryHelp = "Message types consumed by a MassTransit consumer";
+        public const string CategoryHelp = "Messages handled by MassTransit";
 
         MessagePerformanceCounters()
             : base(CategoryName, CategoryHelp)
@@ -32,9 +32,19 @@ namespace MassTransit.Monitoring.Performance
         public static CounterCreationData TotalReceived => Cached.Instance.Value.Data[1];
         public static CounterCreationData ConsumeDuration => Cached.Instance.Value.Data[2];
         public static CounterCreationData ConsumeDurationBase => Cached.Instance.Value.Data[3];
-        public static CounterCreationData Faulted => Cached.Instance.Value.Data[4];
-        public static CounterCreationData FaultPercentage => Cached.Instance.Value.Data[5];
-        public static CounterCreationData FaultPercentageBase => Cached.Instance.Value.Data[6];
+        public static CounterCreationData ConsumeFaulted => Cached.Instance.Value.Data[4];
+        public static CounterCreationData ConsumeFaultPercentage => Cached.Instance.Value.Data[5];
+        public static CounterCreationData ConsumeFaultPercentageBase => Cached.Instance.Value.Data[6];
+        public static CounterCreationData SentPerSecond => Cached.Instance.Value.Data[7];
+        public static CounterCreationData TotalSent => Cached.Instance.Value.Data[8];
+        public static CounterCreationData SendFaulted => Cached.Instance.Value.Data[9];
+        public static CounterCreationData SendFaultPercentage => Cached.Instance.Value.Data[10];
+        public static CounterCreationData SendFaultPercentageBase => Cached.Instance.Value.Data[11];
+        public static CounterCreationData PublishedPerSecond => Cached.Instance.Value.Data[12];
+        public static CounterCreationData TotalPublished => Cached.Instance.Value.Data[13];
+        public static CounterCreationData PublishFaulted => Cached.Instance.Value.Data[14];
+        public static CounterCreationData PublishFaultPercentage => Cached.Instance.Value.Data[15];
+        public static CounterCreationData PublishFaultPercentageBase => Cached.Instance.Value.Data[16];
 
         public static IPerformanceCounter CreateCounter(string counterName, string instanceName)
         {
@@ -44,19 +54,39 @@ namespace MassTransit.Monitoring.Performance
         protected override IEnumerable<CounterCreationData> GetCounterData()
         {
             yield return
-                new CounterCreationData("Messages/s", "Number of messages consumed per second", PerformanceCounterType.RateOfCountsPerSecond32);
+                new CounterCreationData("Consumed/s", "Number of messages consumed per second", PerformanceCounterType.RateOfCountsPerSecond32);
             yield return
-                new CounterCreationData("Total Message", "Total number of messages consumed", PerformanceCounterType.NumberOfItems64);
+                new CounterCreationData("Consumed", "Total number of messages consumed", PerformanceCounterType.NumberOfItems64);
             yield return
-                new CounterCreationData("Average Duration", "The average time spent consuming a message", PerformanceCounterType.AverageCount64);
+                new CounterCreationData("Average Consume Duration", "The average time spent consuming a message", PerformanceCounterType.AverageCount64);
             yield return
-                new CounterCreationData("Average Duration Base", "The average time spent consuming a message", PerformanceCounterType.AverageBase);
+                new CounterCreationData("Average Consume Duration Base", "The average time spent consuming a message", PerformanceCounterType.AverageBase);
             yield return
-                new CounterCreationData("Total Faults", "Total number of consumer faults generated", PerformanceCounterType.NumberOfItems64);
+                new CounterCreationData("Consume Faults", "Total number of consume faults", PerformanceCounterType.NumberOfItems64);
             yield return
-                new CounterCreationData("Fault %", "The percentage of messages generating faults", PerformanceCounterType.AverageCount64);
+                new CounterCreationData("Consume Fault %", "The percentage of consumes faulted", PerformanceCounterType.AverageCount64);
             yield return
-                new CounterCreationData("Fault % Base", "The percentage of messages generating faults", PerformanceCounterType.AverageBase);
+                new CounterCreationData("Consume Fault % Base", "The percentage of consumes faulted", PerformanceCounterType.AverageBase);
+            yield return
+                new CounterCreationData("Sent/s", "Number of messages sent per second", PerformanceCounterType.RateOfCountsPerSecond32);
+            yield return
+                new CounterCreationData("Sent", "Total number of messages sent", PerformanceCounterType.NumberOfItems64);
+            yield return
+                new CounterCreationData("Send Faults", "Total number of send faults", PerformanceCounterType.NumberOfItems64);
+            yield return
+                new CounterCreationData("Send Fault %", "The percentage of sends faulted", PerformanceCounterType.AverageCount64);
+            yield return
+                new CounterCreationData("Send Fault % Base", "The percentage of sends faulted", PerformanceCounterType.AverageBase);
+            yield return
+                new CounterCreationData("Published/s", "Number of messages Published per second", PerformanceCounterType.RateOfCountsPerSecond32);
+            yield return
+                new CounterCreationData("Published", "Total number of messages Published", PerformanceCounterType.NumberOfItems64);
+            yield return
+                new CounterCreationData("Publish Faults", "Total number of Publish faults", PerformanceCounterType.NumberOfItems64);
+            yield return
+                new CounterCreationData("Publish Fault %", "The percentage of Publishes faulted", PerformanceCounterType.AverageCount64);
+            yield return
+                new CounterCreationData("Publish Fault % Base", "The percentage of Publishes faulted", PerformanceCounterType.AverageBase);
         }
 
         public static void Install()

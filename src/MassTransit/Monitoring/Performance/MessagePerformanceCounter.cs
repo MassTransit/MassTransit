@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -20,13 +20,23 @@ namespace MassTransit.Monitoring.Performance
         IDisposable,
         IMessagePerformanceCounter
     {
+        readonly IPerformanceCounter _consumedPerSecond;
         readonly IPerformanceCounter _consumeDuration;
         readonly IPerformanceCounter _consumeDurationBase;
-        readonly IPerformanceCounter _consumedPerSecond;
+        readonly IPerformanceCounter _faulted;
         readonly IPerformanceCounter _faultPercentage;
         readonly IPerformanceCounter _faultPercentageBase;
-        readonly IPerformanceCounter _faulted;
         readonly IPerformanceCounter _totalConsumed;
+        IPerformanceCounter _publishedPerSecond;
+        IPerformanceCounter _publishFaulted;
+        IPerformanceCounter _publishFaultPercentage;
+        IPerformanceCounter _publishFaultPercentageBase;
+        IPerformanceCounter _sendFaulted;
+        IPerformanceCounter _sendFaultPercentage;
+        IPerformanceCounter _sendFaultPercentageBase;
+        IPerformanceCounter _sentPerSecond;
+        IPerformanceCounter _totalPublished;
+        IPerformanceCounter _totalSent;
 
         public MessagePerformanceCounter()
         {
@@ -43,11 +53,31 @@ namespace MassTransit.Monitoring.Performance
             _consumeDurationBase = MessagePerformanceCounters.CreateCounter(
                 MessagePerformanceCounters.ConsumeDurationBase.CounterName, messageType);
             _faulted = MessagePerformanceCounters.CreateCounter(
-                MessagePerformanceCounters.Faulted.CounterName, messageType);
+                MessagePerformanceCounters.ConsumeFaulted.CounterName, messageType);
             _faultPercentage = MessagePerformanceCounters.CreateCounter(
-                MessagePerformanceCounters.FaultPercentage.CounterName, messageType);
+                MessagePerformanceCounters.ConsumeFaultPercentage.CounterName, messageType);
             _faultPercentageBase = MessagePerformanceCounters.CreateCounter(
-                MessagePerformanceCounters.FaultPercentageBase.CounterName, messageType);
+                MessagePerformanceCounters.ConsumeFaultPercentageBase.CounterName, messageType);
+            _totalSent = MessagePerformanceCounters.CreateCounter(
+                MessagePerformanceCounters.TotalSent.CounterName, messageType);
+            _sentPerSecond = MessagePerformanceCounters.CreateCounter(
+                MessagePerformanceCounters.SentPerSecond.CounterName, messageType);
+            _sendFaulted = MessagePerformanceCounters.CreateCounter(
+                MessagePerformanceCounters.SendFaulted.CounterName, messageType);
+            _sendFaultPercentage = MessagePerformanceCounters.CreateCounter(
+                MessagePerformanceCounters.SendFaultPercentage.CounterName, messageType);
+            _sendFaultPercentageBase = MessagePerformanceCounters.CreateCounter(
+                MessagePerformanceCounters.SendFaultPercentageBase.CounterName, messageType);
+            _totalPublished = MessagePerformanceCounters.CreateCounter(
+                MessagePerformanceCounters.TotalPublished.CounterName, messageType);
+            _publishedPerSecond = MessagePerformanceCounters.CreateCounter(
+                MessagePerformanceCounters.PublishedPerSecond.CounterName, messageType);
+            _publishFaulted = MessagePerformanceCounters.CreateCounter(
+                MessagePerformanceCounters.PublishFaulted.CounterName, messageType);
+            _publishFaultPercentage = MessagePerformanceCounters.CreateCounter(
+                MessagePerformanceCounters.PublishFaultPercentage.CounterName, messageType);
+            _publishFaultPercentageBase = MessagePerformanceCounters.CreateCounter(
+                MessagePerformanceCounters.PublishFaultPercentageBase.CounterName, messageType);
         }
 
         public void Dispose()
@@ -59,6 +89,16 @@ namespace MassTransit.Monitoring.Performance
             _faultPercentageBase.Dispose();
             _faulted.Dispose();
             _totalConsumed.Dispose();
+            _totalSent.Dispose();
+            _sentPerSecond.Dispose();
+            _sendFaulted.Dispose();
+            _sendFaultPercentage.Dispose();
+            _sendFaultPercentageBase.Dispose();
+            _totalPublished.Dispose();
+            _publishedPerSecond.Dispose();
+            _publishFaulted.Dispose();
+            _publishFaultPercentage.Dispose();
+            _publishFaultPercentageBase.Dispose();
         }
 
         public void Consumed(TimeSpan duration)
@@ -72,7 +112,7 @@ namespace MassTransit.Monitoring.Performance
             _faultPercentageBase.Increment();
         }
 
-        public void Faulted()
+        public void ConsumeFaulted(TimeSpan duration)
         {
             _totalConsumed.Increment();
             _consumedPerSecond.Increment();
@@ -81,6 +121,44 @@ namespace MassTransit.Monitoring.Performance
 
             _faultPercentage.Increment();
             _faultPercentageBase.Increment();
+        }
+
+        public void Sent()
+        {
+            _totalSent.Increment();
+            _sentPerSecond.Increment();
+
+            _sendFaultPercentageBase.Increment();
+        }
+
+        public void Published()
+        {
+            _totalPublished.Increment();
+            _publishedPerSecond.Increment();
+
+            _publishFaultPercentageBase.Increment();
+        }
+
+        public void PublishFaulted()
+        {
+            _totalPublished.Increment();
+            _publishedPerSecond.Increment();
+
+            _publishFaulted.Increment();
+
+            _publishFaultPercentage.Increment();
+            _publishFaultPercentageBase.Increment();
+        }
+
+        public void SendFaulted()
+        {
+            _totalSent.Increment();
+            _sentPerSecond.Increment();
+
+            _sendFaulted.Increment();
+
+            _sendFaultPercentage.Increment();
+            _sendFaultPercentageBase.Increment();
         }
     }
 }

@@ -105,6 +105,7 @@
     <Compile Include="Configuration\BusConfigurators\IConsumePipeFactory.cs" />
     <Compile Include="Configuration\BusConfigurators\IPublishPipeFactory.cs" />
     <Compile Include="Configuration\BusConfigurators\ISendPipeFactory.cs" />
+    <Compile Include="Configuration\BusConfigurators\PerformanceCounterBusFactorySpecification.cs" />
     <Compile Include="Configuration\BusConfigurators\PublishPipeConfigurator.cs" />
     <Compile Include="Configuration\BusConfigurators\SendPipeConfigurator.cs" />
     <Compile Include="Configuration\BusObserverExtensions.cs" />
@@ -222,10 +223,13 @@
     <Compile Include="IntrospectionExtensions.cs" />
     <Compile Include="IProbeSite.cs" />
     <Compile Include="IPublishEndpointProvider.cs" />
+    <Compile Include="IPublishObserver.cs" />
     <Compile Include="IReceiveEndpointObserver.cs" />
     <Compile Include="IReceiveEndpointObserverConnector.cs" />
     <Compile Include="IRepeatPolicy.cs" />
     <Compile Include="IRetryPolicy.cs" />
+    <Compile Include="ISendObserver.cs" />
+    <Compile Include="ISendObserverConnector.cs" />
     <Compile Include="LogContext.cs" />
     <Compile Include="Logging\Tracing\ConsoleTraceListener.cs" />
     <Compile Include="MessageDataExtensions.cs" />
@@ -521,13 +525,18 @@
     <Compile Include="Monitoring\Performance\IMessagePerformanceCounter.cs" />
     <Compile Include="Monitoring\Performance\InstancePerformanceCounter.cs" />
     <Compile Include="Monitoring\Performance\IPerformanceCounter.cs" />
+    <Compile Include="Monitoring\Performance\ISendPerformanceCounter.cs" />
     <Compile Include="Monitoring\Performance\MessagePerformanceCounter.cs" />
     <Compile Include="Monitoring\Performance\MessagePerformanceCounterCache.cs" />
     <Compile Include="Monitoring\Performance\MessagePerformanceCounters.cs" />
     <Compile Include="Monitoring\Performance\NullPerformanceCounter.cs" />
+    <Compile Include="Monitoring\Performance\PerformanceCounterBusObserver.cs" />
+    <Compile Include="Monitoring\Performance\PerformanceCounterPublishObserver.cs" />
     <Compile Include="Monitoring\Performance\PerformanceCounterReceiveObserver.cs" />
     <Compile Include="Monitoring\Performance\PerformanceCounters.cs" />
+    <Compile Include="Monitoring\Performance\PerformanceCounterSendObserver.cs" />
     <Compile Include="PayloadFactory.cs" />
+    <Compile Include="PerformanceCounterExtensions.cs" />
     <Compile Include="Pipe.cs" />
     <Compile Include="PipeContext.cs" />
     <Compile Include="PipeExtensions.cs" />
@@ -602,7 +611,6 @@
     <Compile Include="Pipeline\ConsumePipeExtensions.cs" />
     <Compile Include="Pipeline\IPublishMessageObserver.cs" />
     <Compile Include="Pipeline\IPublishMessageObserverConnector.cs" />
-    <Compile Include="Pipeline\IPublishObserver.cs" />
     <Compile Include="Pipeline\IPublishObserverConnector.cs" />
     <Compile Include="Pipeline\IPublishPipe.cs" />
     <Compile Include="Pipeline\IReceivePipe.cs" />
@@ -610,8 +618,6 @@
     <Compile Include="Pipeline\ISendInterceptor.cs" />
     <Compile Include="Pipeline\ISendMessageObserver.cs" />
     <Compile Include="Pipeline\ISendMessageObserverConnector.cs" />
-    <Compile Include="Pipeline\ISendObserver.cs" />
-    <Compile Include="Pipeline\ISendObserverConnector.cs" />
     <Compile Include="Pipeline\ISendPipe.cs" />
     <Compile Include="Pipeline\ISendPipeConnector.cs" />
     <Compile Include="Pipeline\KeyAccessor.cs" />

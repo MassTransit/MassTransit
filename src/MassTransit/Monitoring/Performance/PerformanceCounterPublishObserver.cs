@@ -21,35 +21,25 @@ namespace MassTransit.Monitoring.Performance
     /// An observer that updates the performance counters using the bus events
     /// generated.
     /// </summary>
-    public class PerformanceCounterReceiveObserver :
-        IReceiveObserver
+    public class PerformanceCounterPublishObserver :
+        IPublishObserver
     {
-        Task IReceiveObserver.PreReceive(ReceiveContext context)
+        Task IPublishObserver.PrePublish<T>(PublishContext<T> context)
         {
             return TaskUtil.Completed;
         }
 
-        Task IReceiveObserver.PostReceive(ReceiveContext context)
+        Task IPublishObserver.PostPublish<T>(PublishContext<T> context)
         {
+            MessagePerformanceCounterCache<T>.Counter.Published();
+
             return TaskUtil.Completed;
         }
 
-        Task IReceiveObserver.PostConsume<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType)
+        Task IPublishObserver.PublishFault<T>(PublishContext<T> context, Exception exception)
         {
-            ConsumerPerformanceCounterCache.GetCounter(consumerType).Consumed(duration);
-            MessagePerformanceCounterCache<T>.Counter.Consumed(duration);
-            return TaskUtil.Completed;
-        }
+            MessagePerformanceCounterCache<T>.Counter.PublishFaulted();
 
-        Task IReceiveObserver.ConsumeFault<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType, Exception exception)
-        {
-            ConsumerPerformanceCounterCache.GetCounter(consumerType).Faulted();
-            MessagePerformanceCounterCache<T>.Counter.ConsumeFaulted(duration);
-            return TaskUtil.Completed;
-        }
-
-        Task IReceiveObserver.ReceiveFault(ReceiveContext context, Exception exception)
-        {
             return TaskUtil.Completed;
         }
     }
