@@ -29,6 +29,10 @@ namespace MassTransit.Util
 
         public static string GetStackTrace(Exception exception)
         {
+            if (exception == null ||  exception.StackTrace == null) {
+                return string.Empty;
+            }
+			
             return _cleanup.Replace(exception.StackTrace, "");
         }
     }
