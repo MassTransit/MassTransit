@@ -24,10 +24,12 @@ namespace MassTransit.RabbitMqTransport
         ISendTransportProvider
     {
         readonly IRabbitMqHost[] _hosts;
+        readonly ModelSettings _settings;
 
-        public RabbitMqSendTransportProvider(IRabbitMqHost[] hosts)
+        public RabbitMqSendTransportProvider(IRabbitMqHost[] hosts, ModelSettings settings)
         {
             _hosts = hosts;
+            _settings = settings;
         }
 
         public Task<ISendTransport> GetSendTransport(Uri address)
@@ -40,7 +42,7 @@ namespace MassTransit.RabbitMqTransport
             if (host == null)
                 throw new EndpointNotFoundException("The endpoint address specified an unknown host: " + address);
 
-            var modelCache = new RabbitMqModelCache(host.ConnectionCache, host.Supervisor);
+            var modelCache = new RabbitMqModelCache(host.ConnectionCache, host.Supervisor, _settings);
 
             return Task.FromResult<ISendTransport>(new RabbitMqSendTransport(modelCache, sendSettings));
         }

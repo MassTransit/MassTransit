@@ -50,6 +50,44 @@ namespace MassTransit.RabbitMqTransport.Tests
         }
     }
 
+    [TestFixture]
+    public class Sending_a_request_using_the_request_client_with_no_confirmations :
+        RabbitMqTestFixture
+    {
+        [Test]
+        public async Task Should_receive_the_response()
+        {
+            var message = await _response;
+
+            message.CorrelationId.ShouldBe(_ping.Result.Message.CorrelationId);
+        }
+
+        Task<ConsumeContext<PingMessage>> _ping;
+        Task<PongMessage> _response;
+        IRequestClient<PingMessage, PongMessage> _requestClient;
+
+        [TestFixtureSetUp]
+        public void Setup()
+        {
+            _requestClient = new MessageRequestClient<PingMessage, PongMessage>(Bus, InputQueueAddress, TimeSpan.FromSeconds(8),
+                TimeSpan.FromSeconds(8));
+
+            _response = _requestClient.Request(new PingMessage());
+        }
+
+        protected override void ConfigureBus(IRabbitMqBusFactoryConfigurator configurator)
+        {
+            base.ConfigureBus(configurator);
+
+            configurator.PublisherConfirmation = false;
+        }
+
+        protected override void ConfigureInputQueueEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
+        {
+            _ping = Handler<PingMessage>(configurator, async x => await x.RespondAsync(new PongMessage(x.Message.CorrelationId)));
+        }
+    }
+
 
     [TestFixture]
     public class Sending_a_request_to_a_missing_service :

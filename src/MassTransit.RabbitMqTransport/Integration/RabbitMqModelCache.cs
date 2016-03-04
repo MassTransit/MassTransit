@@ -33,12 +33,14 @@ namespace MassTransit.RabbitMqTransport.Integration
         readonly ITaskScope _cacheTaskScope;
 
         readonly IConnectionCache _connectionCache;
+        readonly ModelSettings _modelSettings;
         readonly object _scopeLock = new object();
         ModelScope _scope;
 
-        public RabbitMqModelCache(IConnectionCache connectionCache, ITaskSupervisor supervisor)
+        public RabbitMqModelCache(IConnectionCache connectionCache, ITaskSupervisor supervisor, ModelSettings modelSettings)
         {
             _connectionCache = connectionCache;
+            _modelSettings = modelSettings;
 
             _cacheTaskScope = supervisor.CreateScope($"{TypeMetadataCache<RabbitMqModelCache>.ShortName}", CloseScope);
         }
@@ -98,7 +100,7 @@ namespace MassTransit.RabbitMqTransport.Integration
 
                     model.ModelShutdown += modelShutdown;
 
-                    var modelContext = new RabbitMqModelContext(connectionContext, model, _cacheTaskScope);
+                    var modelContext = new RabbitMqModelContext(connectionContext, model, _cacheTaskScope, _modelSettings);
 
                     scope.Created(modelContext);
                 }

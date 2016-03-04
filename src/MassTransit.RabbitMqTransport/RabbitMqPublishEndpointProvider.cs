@@ -31,17 +31,20 @@ namespace MassTransit.RabbitMqTransport
     {
         readonly LazyMemoryCache<Type, ISendEndpoint> _cache;
         readonly IRabbitMqHost _host;
+        readonly ModelSettings _modelSettings;
         readonly PublishObservable _publishObservable;
         readonly IPublishPipe _publishPipe;
         readonly IMessageSerializer _serializer;
         readonly Uri _sourceAddress;
 
-        public RabbitMqPublishEndpointProvider(IRabbitMqHost host, IMessageSerializer serializer, Uri sourceAddress, IPublishPipe publishPipe)
+        public RabbitMqPublishEndpointProvider(IRabbitMqHost host, IMessageSerializer serializer, Uri sourceAddress, IPublishPipe publishPipe,
+            ModelSettings modelSettings)
         {
             _host = host;
             _serializer = serializer;
             _sourceAddress = sourceAddress;
             _publishPipe = publishPipe;
+            _modelSettings = modelSettings;
 
             _publishObservable = new PublishObservable();
 
@@ -100,7 +103,7 @@ namespace MassTransit.RabbitMqTransport
 
             var destinationAddress = _host.Settings.GetSendAddress(sendSettings);
 
-            var modelCache = new RabbitMqModelCache(_host.ConnectionCache, _host.Supervisor);
+            var modelCache = new RabbitMqModelCache(_host.ConnectionCache, _host.Supervisor, _modelSettings);
 
             var sendTransport = new RabbitMqSendTransport(modelCache, sendSettings, bindings);
 
