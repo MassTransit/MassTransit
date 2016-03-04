@@ -34,16 +34,18 @@ namespace MassTransit.RabbitMqTransport.Contexts
 
         readonly ConnectionContext _connectionContext;
         readonly IModel _model;
+        readonly ModelSettings _settings;
         readonly ITaskParticipant _participant;
         readonly PayloadCache _payloadCache;
         readonly ConcurrentDictionary<ulong, PendingPublish> _published;
         readonly LimitedConcurrencyLevelTaskScheduler _taskScheduler;
         ulong _publishTagMax;
 
-        public RabbitMqModelContext(ConnectionContext connectionContext, IModel model, ITaskScope taskScope)
+        public RabbitMqModelContext(ConnectionContext connectionContext, IModel model, ITaskScope taskScope, ModelSettings settings)
         {
             _connectionContext = connectionContext;
             _model = model;
+            _settings = settings;
 
             _participant = taskScope.CreateParticipant($"{TypeMetadataCache<RabbitMqModelContext>.ShortName} - {_connectionContext.HostSettings.ToDebugString()}");
 
@@ -55,7 +57,11 @@ namespace MassTransit.RabbitMqTransport.Contexts
             _model.BasicAcks += OnBasicAcks;
             _model.BasicNacks += OnBasicNacks;
             _model.BasicReturn += OnBasicReturn;
-            _model.ConfirmSelect();
+
+            if (settings.PublisherConfirmation)
+            {
+                _model.ConfirmSelect();
+            }
 
             _participant.SetReady();
         }
@@ -99,11 +105,19 @@ namespace MassTransit.RabbitMqTransport.Contexts
         async Task ModelContext.BasicPublishAsync(string exchange, string routingKey, bool mandatory, IBasicProperties basicProperties, byte[] body,
             bool awaitAck)
         {
-            var pendingPublish = await Task.Factory.StartNew(() => PublishAsync(exchange, routingKey, mandatory, basicProperties, body),
-                _participant.StoppedToken, TaskCreationOptions.HideScheduler, _taskScheduler).ConfigureAwait(false);
+            if (_settings.PublisherConfirmation)
+            {
+                var pendingPublish = await Task.Factory.StartNew(() => PublishAsync(exchange, routingKey, mandatory, basicProperties, body),
+                    _participant.StoppedToken, TaskCreationOptions.HideScheduler, _taskScheduler).ConfigureAwait(false);
 
-            if (awaitAck)
-                await pendingPublish.Task.ConfigureAwait(false);
+                if (awaitAck)
+                    await pendingPublish.Task.ConfigureAwait(false);
+            }
+            else
+            {
+                await Task.Factory.StartNew(() => Publish(exchange, routingKey, mandatory, basicProperties, body),
+                    _participant.StoppedToken, TaskCreationOptions.HideScheduler, _taskScheduler).ConfigureAwait(false);
+            }
         }
 
         Task ModelContext.ExchangeBind(string destination, string source, string routingKey, IDictionary<string, object> arguments)
@@ -177,7 +191,7 @@ namespace MassTransit.RabbitMqTransport.Contexts
 
             try
             {
-                if (_model.IsOpen && _published.Count > 0)
+                if (_settings.PublisherConfirmation && _model.IsOpen && _published.Count > 0)
                 {
                     bool timedOut;
                     _model.WaitForConfirms(TimeSpan.FromSeconds(30), out timedOut);
@@ -229,6 +243,14 @@ namespace MassTransit.RabbitMqTransport.Contexts
             }
 
             return pendingPublish;
+        }
+
+        void Publish(string exchange, string routingKey, bool mandatory, IBasicProperties basicProperties, byte[] body)
+        {
+            var publishTag = _model.NextPublishSeqNo;
+            _publishTagMax = Math.Max(_publishTagMax, publishTag);
+
+            _model.BasicPublish(exchange, routingKey, mandatory, basicProperties, body);
         }
 
         void OnModelShutdown(object model, ShutdownEventArgs reason)

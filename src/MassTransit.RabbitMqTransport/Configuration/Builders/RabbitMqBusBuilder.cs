@@ -26,13 +26,15 @@ namespace MassTransit.RabbitMqTransport.Configuration.Builders
         readonly TimeSpan _autoDeleteCacheTimeout;
         readonly RabbitMqReceiveEndpointConfigurator _busEndpointConfigurator;
         readonly RabbitMqHost[] _hosts;
+        readonly ModelSettings _modelSettings;
         readonly TimeSpan _sendEndpointCacheTimeout;
 
         public RabbitMqBusBuilder(RabbitMqHost[] hosts, IConsumePipeFactory consumePipeFactory, ISendPipeFactory sendPipeFactory,
-            IPublishPipeFactory publishPipeFactory, RabbitMqReceiveSettings busSettings)
+            IPublishPipeFactory publishPipeFactory, RabbitMqReceiveSettings busSettings, ModelSettings modelSettings)
             : base(consumePipeFactory, sendPipeFactory, publishPipeFactory, hosts)
         {
             _hosts = hosts;
+            _modelSettings = modelSettings;
 
             _autoDeleteCacheTimeout = TimeSpan.FromMinutes(1);
             _sendEndpointCacheTimeout = TimeSpan.FromDays(1);
@@ -57,7 +59,7 @@ namespace MassTransit.RabbitMqTransport.Configuration.Builders
 
         protected override ISendTransportProvider CreateSendTransportProvider()
         {
-            return new RabbitMqSendTransportProvider(_hosts);
+            return new RabbitMqSendTransportProvider(_hosts, _modelSettings);
         }
 
         public override ISendEndpointProvider CreateSendEndpointProvider(params ISendPipeSpecification[] specifications)
@@ -81,7 +83,7 @@ namespace MassTransit.RabbitMqTransport.Configuration.Builders
         {
             var pipe = CreatePublishPipe(specifications);
 
-            return new RabbitMqPublishEndpointProvider(_hosts[0], MessageSerializer, InputAddress, pipe);
+            return new RabbitMqPublishEndpointProvider(_hosts[0], MessageSerializer, InputAddress, pipe, _modelSettings);
         }
     }
 }

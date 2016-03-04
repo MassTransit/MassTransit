@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -27,15 +27,18 @@ namespace MassTransit.RabbitMqTransport.Configuration
     public class RabbitMqConsumerPipeSpecification :
         IPipeSpecification<ConnectionContext>
     {
-        readonly IPipe<ReceiveContext> _receivePipe;
-        readonly ReceiveSettings _settings;
-        readonly IReceiveObserver _receiveObserver;
         readonly IReceiveEndpointObserver _endpointObserver;
-        readonly ITaskSupervisor _supervisor;
         readonly ExchangeBindingSettings[] _exchangeBindings;
         readonly Mediator<ISetPrefetchCount> _mediator;
+        readonly ModelSettings _modelSettings;
+        readonly IReceiveObserver _receiveObserver;
+        readonly IPipe<ReceiveContext> _receivePipe;
+        readonly ReceiveSettings _settings;
+        readonly ITaskSupervisor _supervisor;
 
-        public RabbitMqConsumerPipeSpecification(IPipe<ReceiveContext> receivePipe, ReceiveSettings settings, IReceiveObserver receiveObserver, IReceiveEndpointObserver endpointObserver, IEnumerable<ExchangeBindingSettings> exchangeBindings, ITaskSupervisor supervisor, Mediator<ISetPrefetchCount> mediator)
+        public RabbitMqConsumerPipeSpecification(IPipe<ReceiveContext> receivePipe, ReceiveSettings settings, IReceiveObserver receiveObserver,
+            IReceiveEndpointObserver endpointObserver, IEnumerable<ExchangeBindingSettings> exchangeBindings, ITaskSupervisor supervisor,
+            Mediator<ISetPrefetchCount> mediator)
         {
             _settings = settings;
             _receiveObserver = receiveObserver;
@@ -44,6 +47,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
             _exchangeBindings = exchangeBindings.ToArray();
             _receivePipe = receivePipe;
             _mediator = mediator;
+            _modelSettings = new RabbitMqModelSettings();
         }
 
         public void Apply(IPipeBuilder<ConnectionContext> builder)
@@ -55,7 +59,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
                 x.UseFilter(new RabbitMqConsumerFilter(_receivePipe, _receiveObserver, _endpointObserver, _supervisor));
             });
 
-            IFilter<ConnectionContext> modelFilter = new ReceiveModelFilter(pipe, _supervisor);
+            IFilter<ConnectionContext> modelFilter = new ReceiveModelFilter(pipe, _supervisor, _modelSettings);
 
             builder.AddFilter(modelFilter);
         }

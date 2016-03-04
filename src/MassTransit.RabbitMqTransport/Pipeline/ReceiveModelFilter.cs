@@ -27,11 +27,13 @@ namespace MassTransit.RabbitMqTransport.Pipeline
     {
         readonly IPipe<ModelContext> _pipe;
         readonly ITaskSupervisor _supervisor;
+        readonly ModelSettings _settings;
 
-        public ReceiveModelFilter(IPipe<ModelContext> pipe, ITaskSupervisor supervisor)
+        public ReceiveModelFilter(IPipe<ModelContext> pipe, ITaskSupervisor supervisor, ModelSettings settings)
         {
             _pipe = pipe;
             _supervisor = supervisor;
+            _settings = settings;
         }
 
         void IProbeSite.Probe(ProbeContext context)
@@ -44,7 +46,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
             {
                 IModel model = await context.CreateModel().ConfigureAwait(false);
 
-                using (var modelContext = new RabbitMqModelContext(context, model, scope))
+                using (var modelContext = new RabbitMqModelContext(context, model, scope, _settings))
                 {
                     await _pipe.Send(modelContext).ConfigureAwait(false);
                 }

@@ -104,6 +104,7 @@
     <Compile Include="Integration\RabbitMqConnectionCache.cs" />
     <Compile Include="Integration\RabbitMqModelCache.cs" />
     <Compile Include="IRabbitMqHost.cs" />
+    <Compile Include="ModelSettings.cs" />
     <Compile Include="Pipeline\DelayedExchangeMessageRedeliveryFilter.cs" />
     <Compile Include="Management\ISetPrefetchCount.cs" />
     <Compile Include="Pipeline\RabbitMqConsumerFilter.cs" />
@@ -128,6 +129,7 @@
     <Compile Include="RabbitMqConsumerMetrics.cs" />
     <Compile Include="RabbitMqHost.cs" />
     <Compile Include="RabbitMqHostSettings.cs" />
+    <Compile Include="RabbitMqModelSettings.cs" />
     <Compile Include="RabbitMqPublishEndpointProvider.cs" />
     <Compile Include="ConnectionContext.cs" />
     <Compile Include="RabbitMqExtensions.cs" />
