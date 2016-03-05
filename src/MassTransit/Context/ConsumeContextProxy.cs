@@ -24,11 +24,13 @@ namespace MassTransit.Context
     /// of the context is only added at the scope level and below.
     /// </summary>
     public abstract class ConsumeContextProxy :
+        BasePipeContextProxy,
         ConsumeContext
     {
         readonly ConsumeContext _context;
 
         protected ConsumeContextProxy(ConsumeContext context)
+            : base(context)
         {
             _context = context;
         }
@@ -77,25 +79,6 @@ namespace MassTransit.Context
         public virtual Task RespondAsync(object message, IPipe<SendContext> sendPipe)
         {
             return _context.RespondAsync(message, sendPipe);
-        }
-
-        public virtual CancellationToken CancellationToken => _context.CancellationToken;
-
-        public virtual bool HasPayloadType(Type contextType)
-        {
-            return _context.HasPayloadType(contextType);
-        }
-
-        public virtual bool TryGetPayload<TPayload>(out TPayload context)
-            where TPayload : class
-        {
-            return _context.TryGetPayload(out context);
-        }
-
-        public virtual TPayload GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory)
-            where TPayload : class
-        {
-            return _context.GetOrAddPayload(payloadFactory);
         }
 
         public virtual Guid? MessageId => _context.MessageId;

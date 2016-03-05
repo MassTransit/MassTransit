@@ -12,8 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RabbitMqTransport.Contexts
 {
-    using System;
-    using System.Threading;
     using System.Threading.Tasks;
     using Context;
     using Logging;
@@ -22,6 +20,7 @@ namespace MassTransit.RabbitMqTransport.Contexts
 
 
     public class RabbitMqConnectionContext :
+        BasePipeContext,
         ConnectionContext
     {
         static readonly ILog _log = Logger.Get<RabbitMqConnectionContext>();
@@ -29,16 +28,21 @@ namespace MassTransit.RabbitMqTransport.Contexts
         readonly IConnection _connection;
         readonly RabbitMqHostSettings _hostSettings;
         readonly ITaskParticipant _participant;
-        readonly PayloadCache _payloadCache;
         readonly LimitedConcurrencyLevelTaskScheduler _taskScheduler;
 
         public RabbitMqConnectionContext(IConnection connection, RabbitMqHostSettings hostSettings, ITaskSupervisor supervisor)
+            : this(connection, hostSettings,
+                supervisor.CreateParticipant($"{TypeMetadataCache<RabbitMqConnectionContext>.ShortName} - {hostSettings.ToDebugString()}"))
+        {
+        }
+
+        RabbitMqConnectionContext(IConnection connection, RabbitMqHostSettings hostSettings, ITaskParticipant participant)
+            : base(participant.StoppedToken)
         {
             _connection = connection;
             _hostSettings = hostSettings;
-            _payloadCache = new PayloadCache();
 
-            _participant = supervisor.CreateParticipant($"{TypeMetadataCache<RabbitMqConnectionContext>.ShortName} - {_hostSettings.ToDebugString()}");
+            _participant = participant;
 
             _taskScheduler = new LimitedConcurrencyLevelTaskScheduler(1);
 
@@ -53,26 +57,7 @@ namespace MassTransit.RabbitMqTransport.Contexts
                 _participant.StoppedToken, TaskCreationOptions.HideScheduler, _taskScheduler).ConfigureAwait(false);
         }
 
-        public bool HasPayloadType(Type contextType)
-        {
-            return _payloadCache.HasPayloadType(contextType);
-        }
-
-        public bool TryGetPayload<TPayload>(out TPayload context)
-            where TPayload : class
-        {
-            return _payloadCache.TryGetPayload(out context);
-        }
-
-        public TPayload GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory)
-            where TPayload : class
-        {
-            return _payloadCache.GetOrAddPayload(payloadFactory);
-        }
-
         public IConnection Connection => _connection;
-
-        public CancellationToken CancellationToken => _participant.StoppedToken;
 
         public void Dispose()
         {

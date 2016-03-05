@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -20,20 +20,19 @@ namespace MassTransit.Context
 
 
     public abstract class BaseSendContext<TMessage> :
+        BasePipeContext,
         SendContext<TMessage>
         where TMessage : class
     {
         readonly DictionarySendHeaders _headers;
-        readonly PayloadCache _payloadCache;
         byte[] _body;
         IMessageSerializer _serializer;
 
         protected BaseSendContext(TMessage message, CancellationToken cancellationToken)
+            : base(cancellationToken)
         {
-            CancellationToken = cancellationToken;
             Message = message;
 
-            _payloadCache = new PayloadCache();
             _headers = new DictionarySendHeaders();
 
             MessageId = NewId.NextGuid();
@@ -61,8 +60,6 @@ namespace MassTransit.Context
                 }
             }
         }
-
-        public CancellationToken CancellationToken { get; }
 
         public Guid? MessageId { get; set; }
         public Guid? RequestId { get; set; }
@@ -101,34 +98,6 @@ namespace MassTransit.Context
         public bool Durable { get; set; }
 
         public TMessage Message { get; }
-
-        public virtual bool HasPayloadType(Type contextType)
-        {
-            if (contextType.IsInstanceOfType(this))
-                return true;
-
-            return _payloadCache.HasPayloadType(contextType);
-        }
-
-        public virtual bool TryGetPayload<TPayload>(out TPayload context)
-            where TPayload : class
-        {
-            context = this as TPayload;
-            if (context != null)
-                return true;
-
-            return _payloadCache.TryGetPayload(out context);
-        }
-
-        public virtual TPayload GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory)
-            where TPayload : class
-        {
-            var context = this as TPayload;
-            if (context != null)
-                return context;
-
-            return _payloadCache.GetOrAddPayload(payloadFactory);
-        }
 
         public Stream GetBodyStream()
         {

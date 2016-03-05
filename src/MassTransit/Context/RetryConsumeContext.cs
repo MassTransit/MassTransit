@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -19,19 +19,22 @@ namespace MassTransit.Context
 
 
     public class RetryConsumeContext :
-        ConsumeContextProxy
+        ConsumeContextProxy,
+        RetryContext
     {
         readonly ConsumeContext _context;
         readonly IList<PendingFault> _pendingFaults;
 
-        public RetryConsumeContext(ConsumeContext context) 
+        public RetryConsumeContext(ConsumeContext context)
             : base(context)
         {
             _context = context;
             _pendingFaults = new List<PendingFault>();
         }
 
-        public override Task NotifyFaulted<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType, Exception exception) 
+        public int RetryAttempt { get; set; }
+
+        public override Task NotifyFaulted<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType, Exception exception)
         {
             _pendingFaults.Add(new PendingFault<T>(context, duration, consumerType, exception));
 
@@ -45,7 +48,7 @@ namespace MassTransit.Context
 
         public void NotifyPendingFaults()
         {
-            foreach (PendingFault pendingFault in _pendingFaults)
+            foreach (var pendingFault in _pendingFaults)
                 pendingFault.Notify(_context);
         }
 

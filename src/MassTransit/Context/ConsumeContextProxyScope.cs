@@ -23,38 +23,30 @@ namespace MassTransit.Context
         ConsumeContextProxy<TMessage>
         where TMessage : class
     {
-        readonly PayloadCache _payloadCache = new PayloadCache();
+        readonly BasePipeContextProxyScope _scope;
         readonly Lazy<IPublishEndpoint> _publishEndpoint;
 
         protected ConsumeContextProxyScope(ConsumeContext<TMessage> context)
             : base(context)
         {
             _publishEndpoint = new Lazy<IPublishEndpoint>(() => new ScopePublishEndpoint(this, context));
+
+            _scope = new BasePipeContextProxyScope(this, context);
         }
 
         public override bool HasPayloadType(Type contextType)
         {
-            return _payloadCache.HasPayloadType(contextType) || base.HasPayloadType(contextType);
+            return _scope.HasPayloadType(contextType);
         }
 
         public override bool TryGetPayload<TPayload>(out TPayload context)
         {
-            if (_payloadCache.TryGetPayload(out context))
-                return true;
-
-            return base.TryGetPayload(out context);
+            return _scope.TryGetPayload(out context);
         }
 
         public override TPayload GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory)
         {
-            TPayload payload;
-            if (_payloadCache.TryGetPayload(out payload))
-                return payload;
-
-            if (base.TryGetPayload(out payload))
-                return payload;
-
-            return _payloadCache.GetOrAddPayload(payloadFactory);
+            return _scope.GetOrAddPayload(payloadFactory);
         }
 
         public override Task Publish<T>(T message, CancellationToken cancellationToken)
@@ -125,6 +117,11 @@ namespace MassTransit.Context
             Task task = _publishEndpoint.Value.Publish<T>(values, publishPipe, cancellationToken);
             ReceiveContext.AddPendingTask(task);
             return task;
+        }
+
+        public void Cancel()
+        {
+            // TODO need to cancel the job
         }
     }
 }

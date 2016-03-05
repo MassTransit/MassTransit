@@ -172,6 +172,8 @@ namespace MassTransit.Tests
             await fault;
 
             _attempts.ShouldBe(4);
+
+            _lastAttempt.ShouldBe(3);
         }
 
         [Test]
@@ -183,6 +185,7 @@ namespace MassTransit.Tests
         }
 
         int _attempts;
+        int _lastAttempt;
 
         protected override void ConfigureBus(IInMemoryBusFactoryConfigurator configurator)
         {
@@ -197,6 +200,9 @@ namespace MassTransit.Tests
             Handler<PingMessage>(configurator, async context =>
             {
                 Interlocked.Increment(ref _attempts);
+
+                _lastAttempt = context.GetRetryAttempt();
+
                 throw new IntentionalTestException();
             });
         }

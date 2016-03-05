@@ -24,6 +24,7 @@ namespace MassTransit.Serialization
 
 
     public abstract class BaseConsumeContext :
+        BasePipeContextProxy,
         ConsumeContext
     {
         readonly Lazy<IPublishEndpoint> _publishEndpoint;
@@ -32,6 +33,7 @@ namespace MassTransit.Serialization
         readonly ISendEndpointProvider _sendEndpointProvider;
 
         protected BaseConsumeContext(ReceiveContext receiveContext, ISendEndpointProvider sendEndpointProvider, IPublishEndpointProvider publishEndpointProvider)
+            : base(receiveContext)
         {
             _receiveContext = receiveContext;
             _sendEndpointProvider = sendEndpointProvider;
@@ -41,24 +43,6 @@ namespace MassTransit.Serialization
                 new Lazy<IPublishEndpoint>(() => _publishEndpointProvider.CreatePublishEndpoint(_receiveContext.InputAddress, CorrelationId, ConversationId));
         }
 
-        public bool HasPayloadType(Type contextType)
-        {
-            return _receiveContext.HasPayloadType(contextType);
-        }
-
-        public bool TryGetPayload<TPayload>(out TPayload payload)
-            where TPayload : class
-        {
-            return _receiveContext.TryGetPayload(out payload);
-        }
-
-        public TPayload GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory)
-            where TPayload : class
-        {
-            return _receiveContext.GetOrAddPayload(payloadFactory);
-        }
-
-        public CancellationToken CancellationToken => _receiveContext.CancellationToken;
         public ReceiveContext ReceiveContext => _receiveContext;
         public Task CompleteTask => _receiveContext.CompleteTask;
 
