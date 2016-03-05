@@ -16,50 +16,40 @@ namespace MassTransit.Context
     using System.Threading;
 
 
-    public abstract class BasePipeContextProxy
+    public class PayloadCacheProxy :
+        IPayloadCache,
+        PipeContext
     {
         readonly PipeContext _context;
 
-        protected BasePipeContextProxy(PipeContext context)
+        public PayloadCacheProxy(PipeContext context)
         {
             _context = context;
             CancellationToken = context.CancellationToken;
         }
 
-        protected BasePipeContextProxy(PipeContext context, CancellationToken cancellationToken)
-        {
-            _context = context;
-            CancellationToken = cancellationToken;
-        }
-
-        public CancellationToken CancellationToken { get; }
-
         public virtual bool HasPayloadType(Type contextType)
         {
-            if (contextType.IsInstanceOfType(this))
-                return true;
-
             return _context.HasPayloadType(contextType);
         }
 
         public virtual bool TryGetPayload<TPayload>(out TPayload context)
             where TPayload : class
         {
-            context = this as TPayload;
-            if (context != null)
-                return true;
-
             return _context.TryGetPayload(out context);
         }
 
         public virtual TPayload GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory)
             where TPayload : class
         {
-            var payload = this as TPayload;
-            if (payload != null)
-                return payload;
-
             return _context.GetOrAddPayload(payloadFactory);
         }
+
+        public IPayloadCache CreateScope()
+        {
+            return new PayloadCacheScope(_context);
+        }
+
+        public CancellationToken CancellationToken { get; }
     }
 }

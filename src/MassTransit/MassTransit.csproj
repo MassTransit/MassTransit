@@ -169,9 +169,9 @@
     <Compile Include="Configuration\PipeConfigurators\ScheduleMessageRedeliveryPipeSpecification.cs" />
     <Compile Include="Configuration\ScheduledRetryExtensions.cs" />
     <Compile Include="Configuration\TransformConfiguratorExtensions.cs" />
+    <Compile Include="Context\ArrayPayloadCollection.cs" />
     <Compile Include="Context\BasePipeContext.cs" />
-    <Compile Include="Context\BasePipeContextProxy.cs" />
-    <Compile Include="Context\BasePipeContextProxyScope.cs" />
+    <Compile Include="Context\BasePayloadCollection.cs" />
     <Compile Include="Context\BaseReceiveContext.cs" />
     <Compile Include="Context\BaseSendContext.cs" />
     <Compile Include="Context\ConsumeContextProxyScope.cs" />
@@ -179,8 +179,13 @@
     <Compile Include="Context\CorrelationIdConsumeContextProxy.cs" />
     <Compile Include="Context\DelegateSetCorrelationId.cs" />
     <Compile Include="Context\DictionarySendHeaders.cs" />
+    <Compile Include="Context\EmptyPayloadCollection.cs" />
     <Compile Include="Context\FaultedPublishContext.cs" />
     <Compile Include="Context\IMessageCorrelationCache.cs" />
+    <Compile Include="Context\IPayloadCache.cs" />
+    <Compile Include="Context\IPayloadCollection.cs" />
+    <Compile Include="Context\IPayloadValue.cs" />
+    <Compile Include="Context\IReadOnlyPayloadCollection.cs" />
     <Compile Include="Context\ISetCorrelationId.cs" />
     <Compile Include="Context\MessageConsumeContext.cs" />
     <Compile Include="Context\MessageCorrelation.cs" />
@@ -189,7 +194,11 @@
     <Compile Include="Context\NullablePropertySetCorrelationId.cs" />
     <Compile Include="Context\InMemoryOutboxConsumeContext.cs" />
     <Compile Include="Context\OutboxContext.cs" />
+    <Compile Include="Context\PayloadCache.cs" />
+    <Compile Include="Context\PayloadCacheProxy.cs" />
+    <Compile Include="Context\PayloadCacheScope.cs" />
     <Compile Include="Context\PropertySetCorrelationId.cs" />
+    <Compile Include="Context\PayloadValue.cs" />
     <Compile Include="Context\PublishRequestContext.cs" />
     <Compile Include="Context\ReceiveContextProxy.cs" />
     <Compile Include="Context\RequestHandlerHandle.cs" />
@@ -197,6 +206,7 @@
     <Compile Include="Context\RescueExceptionReceiveContext.cs" />
     <Compile Include="Context\RetryContext.cs" />
     <Compile Include="Context\SendContextProxy.cs" />
+    <Compile Include="Context\SinglePayloadCollection.cs" />
     <Compile Include="Contracts\ConcurrencyLimitUpdated.cs" />
     <Compile Include="Contracts\SetConcurrencyLimit.cs" />
     <Compile Include="Courier\Exceptions\RoutingSlipArgumentException.cs" />
@@ -338,7 +348,6 @@
     <Compile Include="Context\IHeaderProvider.cs" />
     <Compile Include="Context\IPublishEndpointConverter.cs" />
     <Compile Include="Context\JsonHeaders.cs" />
-    <Compile Include="Context\PayloadCache.cs" />
     <Compile Include="Context\PublishContextProxy.cs" />
     <Compile Include="Context\PublishEndpointConverter.cs" />
     <Compile Include="Context\PublishEndpointConverterCache.cs" />

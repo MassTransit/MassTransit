@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -24,13 +24,19 @@ namespace MassTransit.Context
     /// of the context is only added at the scope level and below.
     /// </summary>
     public abstract class ConsumeContextProxy :
-        BasePipeContextProxy,
+        BasePipeContext,
         ConsumeContext
     {
         readonly ConsumeContext _context;
 
         protected ConsumeContextProxy(ConsumeContext context)
-            : base(context)
+            : base(new PayloadCacheProxy(context))
+        {
+            _context = context;
+        }
+
+        protected ConsumeContextProxy(ConsumeContext context, IPayloadCache payloadCache)
+            : base(payloadCache)
         {
             _context = context;
         }
@@ -222,6 +228,12 @@ namespace MassTransit.Context
 
         protected ConsumeContextProxy(ConsumeContext<TMessage> context)
             : base(context)
+        {
+            _context = context;
+        }
+
+        protected ConsumeContextProxy(ConsumeContext<TMessage> context, IPayloadCache payloadCache)
+            : base(context, payloadCache)
         {
             _context = context;
         }

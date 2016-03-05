@@ -16,6 +16,7 @@ namespace MassTransit.Courier
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
+    using Context;
     using Contracts;
     using InternalMessages;
     using Newtonsoft.Json;

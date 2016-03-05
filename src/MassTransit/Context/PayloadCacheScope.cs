@@ -16,56 +16,35 @@ namespace MassTransit.Context
     using System.Threading;
 
 
-    public class BasePipeContextProxyScope
+    public class PayloadCacheScope :
+        IPayloadCache,
+        PipeContext
     {
         readonly PipeContext _context;
-        readonly PayloadCache _payloadCache;
-        readonly object _self;
+        readonly IPayloadCache _payloadCache;
 
-        public BasePipeContextProxyScope(object self, PipeContext context)
+        public PayloadCacheScope(PipeContext context)
         {
-            _self = self;
             _context = context;
             CancellationToken = context.CancellationToken;
 
             _payloadCache = new PayloadCache();
         }
 
-        public BasePipeContextProxyScope(PipeContext context, CancellationToken cancellationToken)
-        {
-            _context = context;
-            CancellationToken = cancellationToken;
-
-            _payloadCache = new PayloadCache();
-        }
-
-        public CancellationToken CancellationToken { get; }
-
         public virtual bool HasPayloadType(Type contextType)
         {
-            if (contextType.IsInstanceOfType(_self))
-                return true;
-
             return _payloadCache.HasPayloadType(contextType) || _context.HasPayloadType(contextType);
         }
 
         public virtual bool TryGetPayload<TPayload>(out TPayload context)
             where TPayload : class
         {
-            context = _self as TPayload;
-            if (context != null)
-                return true;
-
             return _payloadCache.TryGetPayload(out context) || _context.TryGetPayload(out context);
         }
 
         public virtual TPayload GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory)
             where TPayload : class
         {
-            var context = _self as TPayload;
-            if (context != null)
-                return context;
-
             TPayload payload;
             if (_payloadCache.TryGetPayload(out payload))
                 return payload;
@@ -75,5 +54,12 @@ namespace MassTransit.Context
 
             return _payloadCache.GetOrAddPayload(payloadFactory);
         }
+
+        public IPayloadCache CreateScope()
+        {
+            return new PayloadCacheScope(this);
+        }
+
+        public CancellationToken CancellationToken { get; }
     }
 }

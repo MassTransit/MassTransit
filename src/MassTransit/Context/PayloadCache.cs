@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,96 +13,67 @@
 namespace MassTransit.Context
 {
     using System;
-    using System.Collections.Concurrent;
+    using System.Threading;
     using Util;
 
 
-    public class PayloadCache
+    public class PayloadCache :
+        IPayloadCache
     {
-        readonly ConcurrentDictionary<Type, CachedPayload> _cache;
+        IPayloadCollection _collection;
 
-        public PayloadCache(int capacity = 2)
+        public PayloadCache()
         {
-            _cache = new ConcurrentDictionary<Type, CachedPayload>(2, capacity);
+            _collection = new EmptyPayloadCollection();
         }
 
-        public bool HasPayloadType(Type contextType)
+        PayloadCache(IReadOnlyPayloadCollection collection)
         {
-            return _cache.ContainsKey(contextType);
+            _collection = new EmptyPayloadCollection(collection);
         }
 
-        public bool TryGetPayload<TPayload>(out TPayload context)
-            where TPayload : class
+        bool IReadOnlyPayloadCollection.HasPayloadType(Type propertyType)
         {
-            CachedPayload payloadCache;
-            if (_cache.TryGetValue(typeof(TPayload), out payloadCache))
-            {
-                context = payloadCache.GetPayload<TPayload>();
-                return true;
-            }
-
-            context = default(TPayload);
-            return false;
+            return _collection.HasPayloadType(propertyType);
         }
 
-        public TPayload GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory)
-            where TPayload : class
+        bool IReadOnlyPayloadCollection.TryGetPayload<T>(out T value)
         {
-            CachedPayload cachedPayload;
-            if (_cache.TryGetValue(typeof(TPayload), out cachedPayload))
-                return cachedPayload.GetPayload<TPayload>();
+            return _collection.TryGetPayload(out value);
+        }
 
+        T IPayloadCache.GetOrAddPayload<T>(PayloadFactory<T> payloadFactory)
+        {
             try
             {
-                cachedPayload = _cache.GetOrAdd(typeof(TPayload), x =>
+                IPayloadValue<T> payload = null;
+
+                IPayloadCollection currentCollection;
+                do
                 {
-                    TPayload payload = payloadFactory();
-                    if (payload != default(TPayload))
-                        return new CachedPayload<TPayload>(payload);
+                    T existingValue;
+                    if (_collection.TryGetPayload(out existingValue))
+                        return existingValue;
 
-                    throw new PayloadNotFoundException("The payload was not found: " + TypeMetadataCache<TPayload>.ShortName);
-                });
+                    IPayloadValue<T> contextProperty = payload ?? (payload = new PayloadValue<T>(payloadFactory()));
 
-                return cachedPayload.GetPayload<TPayload>();
+                    currentCollection = Volatile.Read(ref _collection);
+
+                    Interlocked.CompareExchange(ref _collection, currentCollection.Add(contextProperty), currentCollection);
+                }
+                while (currentCollection == Volatile.Read(ref _collection));
+
+                return payload.Value;
             }
-            catch (PayloadNotFoundException)
+            catch (Exception exception)
             {
-                throw;
-            }
-            catch (Exception ex)
-            {
-                throw new PayloadFactoryException("The payload factory faulted: " + TypeMetadataCache<TPayload>.ShortName, ex);
+                throw new PayloadFactoryException("The payload factory faulted: " + TypeMetadataCache<T>.ShortName, exception);
             }
         }
 
-
-        interface CachedPayload
+        IPayloadCache IPayloadCache.CreateScope()
         {
-            T GetPayload<T>()
-                where T : class;
-        }
-
-
-        class CachedPayload<TPayload> :
-            CachedPayload
-            where TPayload : class
-        {
-            readonly TPayload _payload;
-
-            public CachedPayload(TPayload payload)
-            {
-                _payload = payload;
-            }
-
-            public T GetPayload<T>()
-                where T : class
-            {
-                var payload = this as CachedPayload<T>;
-                if (payload != null)
-                    return payload._payload;
-
-                throw new PayloadException("Payload type mismatch: " + TypeMetadataCache<T>.ShortName);
-            }
+            return new PayloadCache(_collection);
         }
     }
 }

@@ -27,7 +27,7 @@ namespace MassTransit.AzureServiceBusTransport.Contexts
         readonly IServiceBusHost _host;
 
         public ServiceBusConnectionContext(IServiceBusHost host, CancellationToken cancellationToken)
-            : base(cancellationToken)
+            : base(new PayloadCache(), cancellationToken)
         {
             _host = host;
         }

@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,15 +12,17 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Context
 {
-    using System;
-
-
-    public static class MessageCorrelation
+    public class EmptyPayloadCollection :
+        BasePayloadCollection
     {
-        public static void UseCorrelationId<T>(Func<T, Guid> getCorrelationId)
-            where T : class
+        public EmptyPayloadCollection(IReadOnlyPayloadCollection parent = null)
+            : base(parent)
         {
-            MessageCorrelationCache<T>.UseCorrelationId(getCorrelationId);
+        }
+
+        public override IPayloadCollection Add(IPayloadValue payload)
+        {
+            return new SinglePayloadCollection(payload, Parent);
         }
     }
 }
