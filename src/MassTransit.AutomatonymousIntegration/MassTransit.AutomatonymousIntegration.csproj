@@ -45,7 +45,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Automatonymous, Version=3.0.0.0, Culture=neutral, PublicKeyToken=b800c4cfcdeea87b, processorArchitecture=MSIL">
-      <HintPath>..\packages\Automatonymous.3.1.0\lib\net45\Automatonymous.dll</HintPath>
+      <HintPath>..\packages\Automatonymous.3.2.0\lib\net45\Automatonymous.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="NewId, Version=2.1.3.0, Culture=neutral, PublicKeyToken=b8e0e9f2f1e657fa, processorArchitecture=MSIL">
