@@ -27,7 +27,7 @@ namespace MassTransit.RabbitMqTransport.Contexts
 
 
     public class RabbitMqModelContext :
-        BasePipeContextProxy,
+        BasePipeContext,
         ModelContext,
         IDisposable
     {
@@ -48,7 +48,7 @@ namespace MassTransit.RabbitMqTransport.Contexts
         }
 
         RabbitMqModelContext(ConnectionContext connectionContext, IModel model, ModelSettings settings, ITaskParticipant participant)
-            : base(connectionContext, participant.StoppedToken)
+            : base(new PayloadCacheScope(connectionContext))
         {
             _connectionContext = connectionContext;
             _model = model;

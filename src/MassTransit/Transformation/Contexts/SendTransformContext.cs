@@ -23,14 +23,14 @@ namespace MassTransit.Transformation.Contexts
     /// </summary>
     /// <typeparam name="TMessage"></typeparam>
     public class SendTransformContext<TMessage> :
-        BasePipeContextProxy,
+        BasePipeContext,
         TransformContext<TMessage>
         where TMessage : class
     {
         readonly SendContext<TMessage> _context;
 
         public SendTransformContext(SendContext<TMessage> context)
-            : base(context)
+            : base(new PayloadCacheScope(context))
         {
             _context = context;
         }

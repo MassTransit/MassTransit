@@ -19,21 +19,21 @@ namespace MassTransit.Context
     public abstract class BasePipeContext
     {
         readonly CancellationTokenSource _cancellationTokenSource;
-        readonly PayloadCache _payloadCache;
+        readonly IPayloadCache _payloadCache;
 
-        protected BasePipeContext(CancellationToken cancellationToken)
+        protected BasePipeContext(IPayloadCache payloadCache, CancellationToken cancellationToken)
         {
             CancellationToken = cancellationToken;
 
-            _payloadCache = new PayloadCache();
+            _payloadCache = payloadCache;
         }
 
-        protected BasePipeContext()
+        protected BasePipeContext(IPayloadCache payloadCache)
         {
             _cancellationTokenSource = new CancellationTokenSource();
             CancellationToken = _cancellationTokenSource.Token;
 
-            _payloadCache = new PayloadCache();
+            _payloadCache = payloadCache;
         }
 
         public CancellationToken CancellationToken { get; }

@@ -37,7 +37,7 @@ namespace MassTransit.RabbitMqTransport.Contexts
         }
 
         RabbitMqConnectionContext(IConnection connection, RabbitMqHostSettings hostSettings, ITaskParticipant participant)
-            : base(participant.StoppedToken)
+            : base(new PayloadCache(), participant.StoppedToken)
         {
             _connection = connection;
             _hostSettings = hostSettings;

@@ -24,7 +24,7 @@ namespace MassTransit.Serialization
 
 
     public abstract class BaseConsumeContext :
-        BasePipeContextProxy,
+        BasePipeContext,
         ConsumeContext
     {
         readonly Lazy<IPublishEndpoint> _publishEndpoint;
@@ -33,7 +33,7 @@ namespace MassTransit.Serialization
         readonly ISendEndpointProvider _sendEndpointProvider;
 
         protected BaseConsumeContext(ReceiveContext receiveContext, ISendEndpointProvider sendEndpointProvider, IPublishEndpointProvider publishEndpointProvider)
-            : base(receiveContext)
+            : base(new PayloadCacheProxy(receiveContext))
         {
             _receiveContext = receiveContext;
             _sendEndpointProvider = sendEndpointProvider;

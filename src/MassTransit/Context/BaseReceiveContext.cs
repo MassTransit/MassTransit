@@ -34,6 +34,7 @@ namespace MassTransit.Context
         readonly Stopwatch _receiveTimer;
 
         protected BaseReceiveContext(Uri inputAddress, bool redelivered, IReceiveObserver receiveObserver)
+            : base(new PayloadCache())
         {
             _receiveTimer = Stopwatch.StartNew();
 

@@ -43,6 +43,7 @@ namespace MassTransit.TestFramework
         Uri _sourceAddress;
 
         public TestConsumeContext(TMessage message)
+            : base(new PayloadCache())
         {
             _message = message;
 

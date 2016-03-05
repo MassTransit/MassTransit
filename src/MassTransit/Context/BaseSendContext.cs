@@ -29,7 +29,7 @@ namespace MassTransit.Context
         IMessageSerializer _serializer;
 
         protected BaseSendContext(TMessage message, CancellationToken cancellationToken)
-            : base(cancellationToken)
+            : base(new PayloadCache(), cancellationToken)
         {
             Message = message;
 
