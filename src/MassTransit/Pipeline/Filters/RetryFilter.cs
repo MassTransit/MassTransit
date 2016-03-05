@@ -78,6 +78,8 @@ namespace MassTransit.Pipeline.Filters
 
             await Task.Delay(delay).ConfigureAwait(false);
 
+            context.RetryAttempt++;
+
             await Attempt(context, next).ConfigureAwait(false);
         }
     }
@@ -141,6 +143,8 @@ namespace MassTransit.Pipeline.Filters
             }
 
             await Task.Delay(delay).ConfigureAwait(false);
+
+            context.RetryAttempt++;
 
             await Attempt(context, next).ConfigureAwait(false);
         }

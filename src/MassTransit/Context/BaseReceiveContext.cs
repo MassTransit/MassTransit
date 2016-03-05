@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -17,20 +17,18 @@ namespace MassTransit.Context
     using System.Diagnostics;
     using System.IO;
     using System.Net.Mime;
-    using System.Threading;
     using System.Threading.Tasks;
     using Serialization;
     using Util;
 
 
     public abstract class BaseReceiveContext :
+        BasePipeContext,
         ReceiveContext
     {
         static readonly ContentType DefaultContentType = JsonMessageSerializer.JsonContentType;
-        readonly CancellationTokenSource _cancellationTokenSource;
         readonly Lazy<ContentType> _contentType;
         readonly Lazy<Headers> _headers;
-        readonly PayloadCache _payloadCache;
         readonly ConcurrentBag<Task> _pendingTasks;
         readonly IReceiveObserver _receiveObserver;
         readonly Stopwatch _receiveTimer;
@@ -39,13 +37,9 @@ namespace MassTransit.Context
         {
             _receiveTimer = Stopwatch.StartNew();
 
-            _payloadCache = new PayloadCache();
-
             InputAddress = inputAddress;
             Redelivered = redelivered;
             _receiveObserver = receiveObserver;
-
-            _cancellationTokenSource = new CancellationTokenSource();
 
             _headers = new Lazy<Headers>(() => new JsonHeaders(ObjectTypeDeserializer.Instance, HeaderProvider));
 
@@ -64,24 +58,6 @@ namespace MassTransit.Context
             _pendingTasks.Add(task);
         }
 
-        public virtual bool HasPayloadType(Type contextType)
-        {
-            return _payloadCache.HasPayloadType(contextType);
-        }
-
-        public virtual bool TryGetPayload<TPayload>(out TPayload context)
-            where TPayload : class
-        {
-            return _payloadCache.TryGetPayload(out context);
-        }
-
-        public virtual TPayload GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory)
-            where TPayload : class
-        {
-            return _payloadCache.GetOrAddPayload(payloadFactory);
-        }
-
-        public CancellationToken CancellationToken => _cancellationTokenSource.Token;
         public bool Redelivered { get; }
         public Headers TransportHeaders => _headers.Value;
 
@@ -115,11 +91,6 @@ namespace MassTransit.Context
         public Uri InputAddress { get; }
         public ContentType ContentType => _contentType.Value;
         protected abstract Stream GetBodyStream();
-
-        public void Cancel()
-        {
-            _cancellationTokenSource.Cancel();
-        }
 
         protected virtual ContentType GetContentType()
         {

@@ -23,11 +23,10 @@ namespace MassTransit.TestFramework
 
 
     public class TestConsumeContext<TMessage> :
+        BasePipeContext,
         ConsumeContext<TMessage>
         where TMessage : class
     {
-        PayloadCache _cache = new PayloadCache();
-        CancellationToken _cancellationToken;
         Task _completeTask;
         Guid? _conversationId;
         Guid? _correlationId;
@@ -47,31 +46,9 @@ namespace MassTransit.TestFramework
         {
             _message = message;
 
-            _cancellationToken = new CancellationToken();
-
             _messageId = NewId.NextGuid();
             _sourceAddress = new Uri("loopback://localhost/input_queue");
             _destinationAddress = new Uri("loopback://localhost/input_queue");
-        }
-
-        public bool HasPayloadType(Type contextType)
-        {
-            return _cache.HasPayloadType(contextType);
-        }
-
-        public bool TryGetPayload<TPayload>(out TPayload context) where TPayload : class
-        {
-            return _cache.TryGetPayload(out context);
-        }
-
-        public TPayload GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory) where TPayload : class
-        {
-            return _cache.GetOrAddPayload(payloadFactory);
-        }
-
-        public CancellationToken CancellationToken
-        {
-            get { return _cancellationToken; }
         }
 
         public Guid? MessageId

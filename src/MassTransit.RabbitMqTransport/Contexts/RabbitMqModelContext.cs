@@ -27,6 +27,7 @@ namespace MassTransit.RabbitMqTransport.Contexts
 
 
     public class RabbitMqModelContext :
+        BasePipeContextProxy,
         ModelContext,
         IDisposable
     {
@@ -34,22 +35,27 @@ namespace MassTransit.RabbitMqTransport.Contexts
 
         readonly ConnectionContext _connectionContext;
         readonly IModel _model;
-        readonly ModelSettings _settings;
         readonly ITaskParticipant _participant;
-        readonly PayloadCache _payloadCache;
         readonly ConcurrentDictionary<ulong, PendingPublish> _published;
+        readonly ModelSettings _settings;
         readonly LimitedConcurrencyLevelTaskScheduler _taskScheduler;
         ulong _publishTagMax;
 
         public RabbitMqModelContext(ConnectionContext connectionContext, IModel model, ITaskScope taskScope, ModelSettings settings)
+            : this(connectionContext, model, settings,
+                taskScope.CreateParticipant($"{TypeMetadataCache<RabbitMqModelContext>.ShortName} - {connectionContext.HostSettings.ToDebugString()}"))
+        {
+        }
+
+        RabbitMqModelContext(ConnectionContext connectionContext, IModel model, ModelSettings settings, ITaskParticipant participant)
+            : base(connectionContext, participant.StoppedToken)
         {
             _connectionContext = connectionContext;
             _model = model;
             _settings = settings;
 
-            _participant = taskScope.CreateParticipant($"{TypeMetadataCache<RabbitMqModelContext>.ShortName} - {_connectionContext.HostSettings.ToDebugString()}");
+            _participant = participant;
 
-            _payloadCache = new PayloadCache();
             _published = new ConcurrentDictionary<ulong, PendingPublish>();
             _taskScheduler = new LimitedConcurrencyLevelTaskScheduler(1);
 
@@ -69,31 +75,6 @@ namespace MassTransit.RabbitMqTransport.Contexts
         public void Dispose()
         {
             Close("ModelContext Disposed");
-        }
-
-        bool PipeContext.HasPayloadType(Type contextType)
-        {
-            return _payloadCache.HasPayloadType(contextType) || _connectionContext.HasPayloadType(contextType);
-        }
-
-        bool PipeContext.TryGetPayload<TPayload>(out TPayload context)
-        {
-            if (_payloadCache.TryGetPayload(out context))
-                return true;
-
-            return _connectionContext.TryGetPayload(out context);
-        }
-
-        TPayload PipeContext.GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory)
-        {
-            TPayload payload;
-            if (_payloadCache.TryGetPayload(out payload))
-                return payload;
-
-            if (_connectionContext.TryGetPayload(out payload))
-                return payload;
-
-            return _payloadCache.GetOrAddPayload(payloadFactory);
         }
 
         IModel ModelContext.Model => _model;
@@ -285,7 +266,7 @@ namespace MassTransit.RabbitMqTransport.Contexts
         {
             if (args.Multiple)
             {
-                var ids = _published.Keys.Where(x => x <= args.DeliveryTag).ToArray();
+                ulong[] ids = _published.Keys.Where(x => x <= args.DeliveryTag).ToArray();
                 foreach (var id in ids)
                 {
                     PendingPublish value;
@@ -305,7 +286,7 @@ namespace MassTransit.RabbitMqTransport.Contexts
         {
             if (args.Multiple)
             {
-                var ids = _published.Keys.Where(x => x <= args.DeliveryTag).ToArray();
+                ulong[] ids = _published.Keys.Where(x => x <= args.DeliveryTag).ToArray();
                 foreach (var id in ids)
                 {
                     PendingPublish value;

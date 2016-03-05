@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,7 +13,6 @@
 namespace MassTransit.Transformation.Contexts
 {
     using System;
-    using System.Threading;
     using Context;
     using Util;
 
@@ -24,19 +23,18 @@ namespace MassTransit.Transformation.Contexts
     /// </summary>
     /// <typeparam name="TMessage"></typeparam>
     public class SendTransformContext<TMessage> :
+        BasePipeContextProxy,
         TransformContext<TMessage>
         where TMessage : class
     {
         readonly SendContext<TMessage> _context;
-        readonly PayloadCache _payloadCache;
 
         public SendTransformContext(SendContext<TMessage> context)
+            : base(context)
         {
             _context = context;
-            _payloadCache = new PayloadCache();
         }
 
-        CancellationToken TransformContext.CancellationToken => _context.CancellationToken;
         Guid? TransformContext.MessageId => _context.MessageId;
         Guid? TransformContext.RequestId => _context.RequestId;
         Guid? TransformContext.CorrelationId => _context.CorrelationId;
@@ -46,31 +44,6 @@ namespace MassTransit.Transformation.Contexts
         Uri TransformContext.DestinationAddress => _context.DestinationAddress;
         Headers TransformContext.Headers => _context.Headers;
         HostInfo TransformContext.Host => HostMetadataCache.Host;
-
-        bool TransformContext.HasPayloadType(Type contextType)
-        {
-            return _payloadCache.HasPayloadType(contextType) || _context.HasPayloadType(contextType);
-        }
-
-        bool TransformContext.TryGetPayload<TPayload>(out TPayload context)
-        {
-            if (_payloadCache.TryGetPayload(out context))
-                return true;
-
-            return _context.TryGetPayload(out context);
-        }
-
-        TPayload TransformContext.GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory)
-        {
-            TPayload payload;
-            if (_payloadCache.TryGetPayload(out payload))
-                return payload;
-
-            if (_context.TryGetPayload(out payload))
-                return payload;
-
-            return _payloadCache.GetOrAddPayload(payloadFactory);
-        }
 
         TMessage TransformContext<TMessage>.Input => _context.Message;
 

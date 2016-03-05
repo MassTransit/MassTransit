@@ -169,6 +169,9 @@
     <Compile Include="Configuration\PipeConfigurators\ScheduleMessageRedeliveryPipeSpecification.cs" />
     <Compile Include="Configuration\ScheduledRetryExtensions.cs" />
     <Compile Include="Configuration\TransformConfiguratorExtensions.cs" />
+    <Compile Include="Context\BasePipeContext.cs" />
+    <Compile Include="Context\BasePipeContextProxy.cs" />
+    <Compile Include="Context\BasePipeContextProxyScope.cs" />
     <Compile Include="Context\BaseReceiveContext.cs" />
     <Compile Include="Context\BaseSendContext.cs" />
     <Compile Include="Context\ConsumeContextProxyScope.cs" />
@@ -192,6 +195,7 @@
     <Compile Include="Context\RequestHandlerHandle.cs" />
     <Compile Include="Context\RescueExceptionConsumeContext.cs" />
     <Compile Include="Context\RescueExceptionReceiveContext.cs" />
+    <Compile Include="Context\RetryContext.cs" />
     <Compile Include="Context\SendContextProxy.cs" />
     <Compile Include="Contracts\ConcurrencyLimitUpdated.cs" />
     <Compile Include="Contracts\SetConcurrencyLimit.cs" />
@@ -676,6 +680,7 @@
     <Compile Include="RequestContext.cs" />
     <Compile Include="RequestExtensions.cs" />
     <Compile Include="Retry.cs" />
+    <Compile Include="RetryContextExtensions.cs" />
     <Compile Include="RetryLaterExtensions.cs" />
     <Compile Include="SagaConsumeContext.cs" />
     <Compile Include="SagaExtensions.cs" />

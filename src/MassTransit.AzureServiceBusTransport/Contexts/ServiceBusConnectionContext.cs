@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -21,35 +21,15 @@ namespace MassTransit.AzureServiceBusTransport.Contexts
 
 
     public class ServiceBusConnectionContext :
+        BasePipeContext,
         ConnectionContext
     {
         readonly IServiceBusHost _host;
 
-        readonly PayloadCache _payloadCache;
-
         public ServiceBusConnectionContext(IServiceBusHost host, CancellationToken cancellationToken)
+            : base(cancellationToken)
         {
             _host = host;
-            CancellationToken = cancellationToken;
-
-            _payloadCache = new PayloadCache();
-        }
-
-        public bool HasPayloadType(Type contextType)
-        {
-            return _payloadCache.HasPayloadType(contextType);
-        }
-
-        public bool TryGetPayload<TPayload>(out TPayload context)
-            where TPayload : class
-        {
-            return _payloadCache.TryGetPayload(out context);
-        }
-
-        public TPayload GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory)
-            where TPayload : class
-        {
-            return _payloadCache.GetOrAddPayload(payloadFactory);
         }
 
         public Task<MessagingFactory> MessagingFactory => _host.MessagingFactory;
@@ -69,7 +49,5 @@ namespace MassTransit.AzureServiceBusTransport.Contexts
         {
             return _host.GetQueuePath(queueDescription);
         }
-
-        public CancellationToken CancellationToken { get; }
     }
 }
