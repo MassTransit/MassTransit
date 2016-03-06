@@ -132,8 +132,6 @@ namespace MassTransit.RabbitMqTransport.Pipeline
             while (current > _maxPendingDeliveryCount)
                 Interlocked.CompareExchange(ref _maxPendingDeliveryCount, current, _maxPendingDeliveryCount);
 
-            await Task.Yield();
-
             var context = new RabbitMqReceiveContext(_inputAddress, exchange, routingKey, _consumerTag, deliveryTag, body, redelivered, properties,
                 _receiveObserver);
 

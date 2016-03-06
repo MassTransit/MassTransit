@@ -139,8 +139,8 @@ namespace MassTransit.RabbitMqTransport.Integration
             {
                 using (var context = await scope.Attach(cancellationToken).ConfigureAwait(false))
                 {
-                    if (_log.IsDebugEnabled)
-                        _log.DebugFormat("Using model: {0}", ((ModelContext)context).ConnectionContext.HostSettings.ToDebugString());
+//                    if (_log.IsDebugEnabled)
+//                        _log.DebugFormat("Using model: {0}", ((ModelContext)context).ConnectionContext.HostSettings.ToDebugString());
 
                     await modelPipe.Send(context).ConfigureAwait(false);
                 }
