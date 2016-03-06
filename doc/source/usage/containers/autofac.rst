@@ -2,8 +2,11 @@ Configuring Autofac
 ===================
 
 Autofac is a powerful and fast container, and is well supported by MassTransit. Nested lifetime scopes are used
-extensively to encapsulate dependencies and ensure clean object lifetime management. The following examples show the 
+extensively to encapsulate dependencies and ensure clean object lifetime management. The following examples show the
 various ways that MassTransit can be configured, including the appropriate interfaces necessary.
+
+.. note::
+    Requires NuGets ``MassTransit``, ``MassTransit.AutoFac``, and ``MassTransit.RabbitMQ``
 
 .. note::
 
@@ -13,40 +16,63 @@ various ways that MassTransit can be configured, including the appropriate inter
 
 .. sourcecode:: csharp
 
-    public static void main(string[] args) 
+    using System;
+    using System.Reflection;
+    using System.Threading.Tasks;
+    using Autofac;
+    using MassTransit;
+
+    namespace Example
     {
-        var builder = new ContainerBuilder();
-
-        // register a specific consumer
-        builder.RegisterType<<UpdateCustomerAddressConsumer>();
-
-        // just register all the consumers
-        builder.RegisterConsumers(Assembly.GetExecutingAssembly());
-
-        builder.Register(context => 
+        public class UpdateCustomerAddressConsumer : MassTransit.IConsumer<object>
         {
-            var busControl = Bus.Factory.CreateUsingRabbitMq(cfg =>
+            public async Task Consume(ConsumeContext<object> context)
             {
-                var host = cfg.Host(new Uri("rabbitmq://localhost/"), h =>
-                {
-                    h.Username("guest");
-                    h.Password("guest");
-                });
+                //do stuff
+            }
+        }
 
-                sbc.ReceiveEndpoint("customer_update_queue", ec =>
+        class Program
+        {
+
+            public static void Main(string[] args)
+            {
+                var builder = new ContainerBuilder();
+
+                // register a specific consumer
+                builder.RegisterType<<UpdateCustomerAddressConsumer>();
+
+                // just register all the consumers
+                builder.RegisterConsumers(Assembly.GetExecutingAssembly());
+
+                builder.Register(context =>
                 {
-                    ec.LoadFrom(context);
+                    var busControl = Bus.Factory.CreateUsingRabbitMq(cfg =>
+                    {
+                        var host = cfg.Host(new Uri("rabbitmq://localhost/"), h =>
+                        {
+                            h.Username("guest");
+                            h.Password("guest");
+                        });
+
+                        cfg.ReceiveEndpoint("customer_update_queue", ec =>
+                        {
+                            ec.LoadFrom(context);
+                        });
+                    });
+
+                    return busControl;
                 })
-            });
-        })
-            .SingleInstance()
-            .As<IBusControl>()
-            .As<IBus>();
+                    .SingleInstance()
+                    .As<IBusControl>()
+                    .As<IBus>();
 
-        var container = builder.Build();
+                var container = builder.Build();
 
-        var busControl = container.Resolve<IBusControl>();        
-        busControl.Start();
+                var bc = container.Resolve<IBusControl>();
+                bc.Start();
+            }
+        }
     }
 
 
@@ -107,7 +133,7 @@ using modules with Autofac is shown below.
         builder.RegisterModule<ConsumerModule>();
 
         return builder.Build();
-    }   
+    }
 
     public void CreateContainer()
     {
