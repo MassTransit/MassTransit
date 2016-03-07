@@ -46,6 +46,10 @@
       <HintPath>..\..\packages\MongoDB.Driver.GridFS.2.2.3\lib\net45\MongoDB.Driver.GridFS.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Moq, Version=4.2.1510.2205, Culture=neutral, PublicKeyToken=69f491c39445e920, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Moq.4.2.1510.2205\lib\net40\Moq.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="nunit.framework, Version=2.6.4.14350, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
       <HintPath>..\..\packages\NUnit.2.6.4\lib\nunit.framework.dll</HintPath>
       <Private>True</Private>
@@ -87,6 +91,25 @@
     <Compile Include="MongoUriResolverTestsForResolvingMalformedUris.cs" />
     <Compile Include="MongoUriResolverTestsForResolvingObjectId.cs" />
     <Compile Include="MongoUriResolverTestsForResolvingUri.cs" />
+    <Compile Include="Saga\Messages\CompleteSimpleSaga.cs" />
+    <Compile Include="Saga\Messages\InitiateSimpleSaga.cs" />
+    <Compile Include="Saga\MissingPipeTestsForProbing.cs" />
+    <Compile Include="Saga\MissingPipeTestsForSendingWhenProxyCompleted.cs" />
+    <Compile Include="Saga\MissingPipeTestsForSendingWhenProxyIncomplete.cs" />
+    <Compile Include="Saga\MongoDbQuerySagaRepositoryTests.cs" />
+    <Compile Include="Saga\Messages\ObservableSagaMessage.cs" />
+    <Compile Include="Saga\Data\SagaRepository.cs" />
+    <Compile Include="Saga\Data\SimpleSaga.cs" />
+    <Compile Include="Saga\Messages\SimpleSagaMessageBase.cs" />
+    <Compile Include="Saga\MongoDbSagaConsumeContextTestsForPopContext.cs" />
+    <Compile Include="Saga\MongoDbSagaConsumeContextTestsForSetCompleted.cs" />
+    <Compile Include="Saga\MongoDbSagaRepositoryTestsForProbing.cs" />
+    <Compile Include="Saga\MongoDbSagaRepositoryTestsForSendingWhenCorrelationIdNull.cs" />
+    <Compile Include="Saga\MongoDbSagaRepositoryTestsForSendingWhenInstanceNotFound.cs" />
+    <Compile Include="Saga\MongoDbSagaRepositoryTestsForSendingWhenInstanceNotReturnedFromPolicy.cs" />
+    <Compile Include="Saga\MongoDbSagaRepositoryTestsForSendingWhenPolicyReturnsInstance.cs" />
+    <Compile Include="Saga\MongoDbSagaRepositoryTestsForSendQuery.cs" />
+    <Compile Include="Saga\MongoDbSagaRepositoryTestsForSendQueryWhenSagaNotFound.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="test.log4net.xml">

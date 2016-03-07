@@ -58,11 +58,21 @@
     <Compile Include="..\..\SolutionVersion.cs">
       <Link>Properties\SolutionVersion.cs</Link>
     </Compile>
+    <Compile Include="Mappings\MappingConfigurator.cs" />
+    <Compile Include="Mappings\SagaConvention.cs" />
     <Compile Include="MessageData\IFileNameGenerator.cs" />
     <Compile Include="MessageData\IMessageDataResolver.cs" />
     <Compile Include="MessageData\MongoDbMessageDataRepository.cs" />
     <Compile Include="MessageData\MessageDataResolver.cs" />
     <Compile Include="MessageData\NewIdFileNameGenerator.cs" />
+    <Compile Include="Exceptions\MongoDbConcurrencyException.cs" />
+    <Compile Include="Saga\Context\IMongoDbSagaConsumeContextFactory.cs" />
+    <Compile Include="Saga\IVersionedSaga.cs" />
+    <Compile Include="Saga\Pipeline\MissingPipe.cs" />
+    <Compile Include="Saga\MongoDbQuerySagaRepository.cs" />
+    <Compile Include="Saga\Context\MongoDbSagaConsumeContext.cs" />
+    <Compile Include="Saga\Context\MongoDbSagaConsumeContextFactory.cs" />
+    <Compile Include="Saga\MongoDbSagaRepository.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
