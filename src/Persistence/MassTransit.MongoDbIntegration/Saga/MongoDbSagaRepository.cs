@@ -56,8 +56,8 @@ namespace MassTransit.MongoDbIntegration.Saga
             scope.Set(new
             {
                 Persistence = "mongodb",
-                //Mongo is schemaless so assume that the class contains all entities 
-                Entities = typeof(TSaga).GetProperties().Select(x => x.Name)
+                SagaType = TypeMetadataCache<TSaga>.ShortName,
+                Properties = TypeMetadataCache<TSaga>.ReadWritePropertyCache.Select(x => x.Property.Name).ToArray()
             });
         }
 

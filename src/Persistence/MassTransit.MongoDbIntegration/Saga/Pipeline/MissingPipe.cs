@@ -46,7 +46,8 @@ namespace MassTransit.MongoDbIntegration.Saga.Pipeline
         public async Task Send(SagaConsumeContext<TSaga, TMessage> context)
         {
             if (_log.IsDebugEnabled)
-                _log.DebugFormat("SAGA:{0}:{1} Added {2}", TypeMetadataCache<TSaga>.ShortName, TypeMetadataCache<TMessage>.ShortName);
+                _log.DebugFormat("SAGA:{0}:{1} Added {2}", TypeMetadataCache<TSaga>.ShortName, context.Saga.CorrelationId,
+                    TypeMetadataCache<TMessage>.ShortName);
 
             SagaConsumeContext<TSaga, TMessage> proxy = _mongoDbSagaConsumeContextFactory.Create(_collection, context, context.Saga, false);
 
