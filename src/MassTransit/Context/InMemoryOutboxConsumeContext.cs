@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,7 +13,7 @@
 namespace MassTransit.Context
 {
     using System;
-    using System.Collections.Concurrent;
+    using System.Collections.Generic;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
@@ -27,12 +27,12 @@ namespace MassTransit.Context
         OutboxContext
     {
         readonly TaskCompletionSource<InMemoryOutboxConsumeContext> _clearToSend;
-        readonly ConcurrentBag<Func<Task>> _pendingActions;
+        readonly List<Func<Task>> _pendingActions;
 
         public InMemoryOutboxConsumeContext(ConsumeContext context)
             : base(context)
         {
-            _pendingActions = new ConcurrentBag<Func<Task>>();
+            _pendingActions = new List<Func<Task>>();
             _clearToSend = new TaskCompletionSource<InMemoryOutboxConsumeContext>();
         }
 
@@ -40,7 +40,8 @@ namespace MassTransit.Context
 
         public void Add(Func<Task> method)
         {
-            _pendingActions.Add(method);
+            lock (_pendingActions)
+                _pendingActions.Add(method);
         }
 
         public override async Task<ISendEndpoint> GetSendEndpoint(Uri address)
@@ -204,7 +205,11 @@ namespace MassTransit.Context
         {
             _clearToSend.TrySetResult(this);
 
-            await Task.WhenAll(_pendingActions.Select(x => x())).ConfigureAwait(false);
+            IEnumerable<Task> tasks;
+            lock (_pendingActions)
+                tasks = _pendingActions.Select(x => x()).Where(x => x != null).ToArray();
+
+            await Task.WhenAll(tasks).ConfigureAwait(false);
         }
 
         public Task DiscardPendingActions()
