@@ -206,15 +206,20 @@ Target "Package" (fun _ ->
                   Files = [ (@"..\src\Containers\MassTransit.NinjectIntegration\bin\Release\MassTransit.NinjectIntegration.*", Some @"lib\net45", None);
                             (@"..\src\Containers\MassTransit.NinjectIntegration\**\*.cs", Some @"src", None) ] } 
                 { Project = "MassTransit.NHibernate"
-                  Summary = "MassTransit NHibernate Saga Transport"
+                  Summary = "MassTransit NHibernate Saga Storage"
                   PackageFile = @".\src\Persistence\MassTransit.NHibernateIntegration\packages.config"
                   Files = [ (@"..\src\Persistence\MassTransit.NHibernateIntegration\bin\Release\MassTransit.NHibernateIntegration.*", Some @"lib\net45", None);
                             (@"..\src\Persistence\MassTransit.NHibernateIntegration\**\*.cs", Some @"src", None) ] } 
                 { Project = "MassTransit.EntityFramework"
-                  Summary = "MassTransit Entity Framework Saga Transport"
+                  Summary = "MassTransit Entity Framework Saga Storage"
                   PackageFile = @".\src\Persistence\MassTransit.EntityFrameworkIntegration\packages.config"
                   Files = [ (@"..\src\Persistence\MassTransit.EntityFrameworkIntegration\bin\Release\MassTransit.EntityFrameworkIntegration.*", Some @"lib\net45", None);
                             (@"..\src\Persistence\MassTransit.EntityFrameworkIntegration\**\*.cs", Some @"src", None) ] } 
+                { Project = "MassTransit.MongoDbIntegration"
+                  Summary = "MassTransit MongoDb Saga and Message Data Storage"
+                  PackageFile = @".\src\Persistence\MassTransit.MongoDbIntegration\packages.config"
+                  Files = [ (@"..\src\Persistence\MassTransit.MongoDbIntegration\bin\Release\MassTransit.MongoDbIntegration.*", Some @"lib\net45", None);
+                            (@"..\src\Persistence\MassTransit.MongoDbIntegration\**\*.cs", Some @"src", None) ] } 
                 { Project = "MassTransit.TestFramework"
                   Summary = "MassTransit NUnit Test Framework"
                   PackageFile = @".\src\MassTransit.TestFramework\packages.config"
