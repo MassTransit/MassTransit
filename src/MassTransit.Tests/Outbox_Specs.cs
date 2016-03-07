@@ -50,6 +50,8 @@ namespace MassTransit.Tests
 
             await _pingReceived.Task;
 
+            Console.WriteLine("Ping was received");
+
             Assert.Throws<OperationCanceledException>(async () => await responseHandler.WithCancellation(new CancellationTokenSource(300).Token));
         }
 

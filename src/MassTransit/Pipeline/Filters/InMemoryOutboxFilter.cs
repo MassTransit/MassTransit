@@ -40,6 +40,7 @@ namespace MassTransit.Pipeline.Filters
         public void Probe(ProbeContext context)
         {
             var scope = context.CreateFilterScope("outbox");
+            scope.Add("type", "in-memory");
         }
     }
 }
