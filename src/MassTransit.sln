@@ -84,6 +84,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.SimpleInjectorI
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.SerilogIntegration", "Loggers\MassTransit.SerilogIntegration\MassTransit.SerilogIntegration.csproj", "{0E90AFE6-99E8-43CF-995E-E99466DD6807}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.MongoDbIntegration", "Persistence\MassTransit.MongoDbIntegration\MassTransit.MongoDbIntegration.csproj", "{2406B6D6-09DF-4BC3-AEFC-068AACA77567}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.MongoDbIntegration.Tests", "Persistence\MassTransit.MongoDbIntegration.Tests\MassTransit.MongoDbIntegration.Tests.csproj", "{BACA6A81-D395-48C5-B2BD-0995B241E1CC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -360,6 +364,30 @@ Global
 		{0E90AFE6-99E8-43CF-995E-E99466DD6807}.ReleaseUnsigned|Any CPU.Build.0 = Release|Any CPU
 		{0E90AFE6-99E8-43CF-995E-E99466DD6807}.ReleaseUnsigned|x86.ActiveCfg = Release|Any CPU
 		{0E90AFE6-99E8-43CF-995E-E99466DD6807}.ReleaseUnsigned|x86.Build.0 = Release|Any CPU
+		{2406B6D6-09DF-4BC3-AEFC-068AACA77567}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2406B6D6-09DF-4BC3-AEFC-068AACA77567}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2406B6D6-09DF-4BC3-AEFC-068AACA77567}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{2406B6D6-09DF-4BC3-AEFC-068AACA77567}.Debug|x86.Build.0 = Debug|Any CPU
+		{2406B6D6-09DF-4BC3-AEFC-068AACA77567}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2406B6D6-09DF-4BC3-AEFC-068AACA77567}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2406B6D6-09DF-4BC3-AEFC-068AACA77567}.Release|x86.ActiveCfg = Release|Any CPU
+		{2406B6D6-09DF-4BC3-AEFC-068AACA77567}.Release|x86.Build.0 = Release|Any CPU
+		{2406B6D6-09DF-4BC3-AEFC-068AACA77567}.ReleaseUnsigned|Any CPU.ActiveCfg = Release|Any CPU
+		{2406B6D6-09DF-4BC3-AEFC-068AACA77567}.ReleaseUnsigned|Any CPU.Build.0 = Release|Any CPU
+		{2406B6D6-09DF-4BC3-AEFC-068AACA77567}.ReleaseUnsigned|x86.ActiveCfg = Release|Any CPU
+		{2406B6D6-09DF-4BC3-AEFC-068AACA77567}.ReleaseUnsigned|x86.Build.0 = Release|Any CPU
+		{BACA6A81-D395-48C5-B2BD-0995B241E1CC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BACA6A81-D395-48C5-B2BD-0995B241E1CC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BACA6A81-D395-48C5-B2BD-0995B241E1CC}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{BACA6A81-D395-48C5-B2BD-0995B241E1CC}.Debug|x86.Build.0 = Debug|Any CPU
+		{BACA6A81-D395-48C5-B2BD-0995B241E1CC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BACA6A81-D395-48C5-B2BD-0995B241E1CC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BACA6A81-D395-48C5-B2BD-0995B241E1CC}.Release|x86.ActiveCfg = Release|Any CPU
+		{BACA6A81-D395-48C5-B2BD-0995B241E1CC}.Release|x86.Build.0 = Release|Any CPU
+		{BACA6A81-D395-48C5-B2BD-0995B241E1CC}.ReleaseUnsigned|Any CPU.ActiveCfg = Release|Any CPU
+		{BACA6A81-D395-48C5-B2BD-0995B241E1CC}.ReleaseUnsigned|Any CPU.Build.0 = Release|Any CPU
+		{BACA6A81-D395-48C5-B2BD-0995B241E1CC}.ReleaseUnsigned|x86.ActiveCfg = Release|Any CPU
+		{BACA6A81-D395-48C5-B2BD-0995B241E1CC}.ReleaseUnsigned|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -388,6 +416,8 @@ Global
 		{B6EA7211-7706-4EB1-B91C-B4C959F0CB29} = {56F516D7-BC3C-49E1-A639-83C5F14953F8}
 		{259E9F30-40EC-47B0-83AE-A2271EF3421D} = {6C61507E-FF16-45C8-8FE4-350069D9B4C1}
 		{0E90AFE6-99E8-43CF-995E-E99466DD6807} = {6A938565-BEE9-434C-9A1A-CD2905907554}
+		{2406B6D6-09DF-4BC3-AEFC-068AACA77567} = {56F516D7-BC3C-49E1-A639-83C5F14953F8}
+		{BACA6A81-D395-48C5-B2BD-0995B241E1CC} = {56F516D7-BC3C-49E1-A639-83C5F14953F8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		EnterpriseLibraryConfigurationToolBinariesPath = packages\Unity.2.1.505.2\lib\NET35
