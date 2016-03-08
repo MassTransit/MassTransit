@@ -21,6 +21,19 @@ namespace MassTransit
     public static class PartitionerExtensions
     {
         /// <summary>
+        /// Create a partitioner which can be used across multiple partitioner filters
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="configurator"></param>
+        /// <param name="partitionCount"></param>
+        /// <returns></returns>
+        public static IPartitioner CreatePartitioner<T>(this IPipeConfigurator<T> configurator, int partitionCount)
+            where T : class, PipeContext
+        {
+            return new Partitioner(partitionCount, new Murmur3UnsafeHashGenerator());
+        }
+
+        /// <summary>
         /// Specify a concurrency limit for tasks executing through the filter. No more than the specified
         /// number of tasks will be allowed to execute concurrently.
         /// </summary>
@@ -40,6 +53,32 @@ namespace MassTransit
             PartitionKeyProvider<ConsumeContext<T>> provider = context => keyProvider(context).ToByteArray();
 
             var specification = new PartitionerPipeSpecification<T>(provider, partitionCount);
+
+            configurator.AddPipeSpecification(specification);
+        }
+
+        /// <summary>
+        /// Specify a concurrency limit for tasks executing through the filter. No more than the specified
+        /// number of tasks will be allowed to execute concurrently.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="configurator"></param>
+        /// <param name="partitioner">An existing partitioner to share</param>
+        /// <param name="keyProvider">Provides the key from the message</param>
+        public static void UsePartitioner<T>(this IPipeConfigurator<ConsumeContext<T>> configurator, IPartitioner partitioner,
+            Func<ConsumeContext<T>, Guid> keyProvider)
+            where T : class
+        {
+            if (configurator == null)
+                throw new ArgumentNullException(nameof(configurator));
+            if (partitioner == null)
+                throw new ArgumentNullException(nameof(partitioner));
+            if (keyProvider == null)
+                throw new ArgumentNullException(nameof(keyProvider));
+
+            PartitionKeyProvider<ConsumeContext<T>> provider = context => keyProvider(context).ToByteArray();
+
+            var specification = new PartitionerPipeSpecification<T>(provider, partitioner);
 
             configurator.AddPipeSpecification(specification);
         }
@@ -71,6 +110,39 @@ namespace MassTransit
             };
 
             var specification = new PartitionerPipeSpecification<T>(provider, partitionCount);
+
+            configurator.AddPipeSpecification(specification);
+        }
+
+        /// <summary>
+        /// Specify a concurrency limit for tasks executing through the filter. No more than the specified
+        /// number of tasks will be allowed to execute concurrently.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="configurator"></param>
+        /// <param name="partitioner">An existing partitioner to share</param>
+        /// <param name="keyProvider">Provides the key from the message</param>
+        /// <param name="encoding">The text encoding to use to convert the string to byte[] (defaults to UTF8)</param>
+        public static void UsePartitioner<T>(this IPipeConfigurator<ConsumeContext<T>> configurator, IPartitioner partitioner,
+            Func<ConsumeContext<T>, string> keyProvider, Encoding encoding = null)
+            where T : class
+        {
+            if (configurator == null)
+                throw new ArgumentNullException(nameof(configurator));
+            if (partitioner == null)
+                throw new ArgumentNullException(nameof(partitioner));
+            if (keyProvider == null)
+                throw new ArgumentNullException(nameof(keyProvider));
+
+            var textEncoding = encoding ?? Encoding.UTF8;
+
+            PartitionKeyProvider<ConsumeContext<T>> provider = context =>
+            {
+                var key = keyProvider(context) ?? "";
+                return textEncoding.GetBytes(key);
+            };
+
+            var specification = new PartitionerPipeSpecification<T>(provider, partitioner);
 
             configurator.AddPipeSpecification(specification);
         }

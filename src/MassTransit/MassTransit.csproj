@@ -584,7 +584,11 @@
     <Compile Include="Pipeline\Filters\InMemoryOutboxFilter.cs" />
     <Compile Include="Pipeline\Filters\Outbox\OutboxSendEndpoint.cs" />
     <Compile Include="Pipeline\Filters\Partitioner\IHashGenerator.cs" />
+    <Compile Include="Pipeline\Filters\Partitioner\IPartition.cs" />
+    <Compile Include="Pipeline\Filters\Partitioner\IPartitioner.cs" />
     <Compile Include="Pipeline\Filters\Partitioner\Murmur3UnsafeHashGenerator.cs" />
+    <Compile Include="Pipeline\Filters\Partitioner\Partition.cs" />
+    <Compile Include="Pipeline\Filters\Partitioner\Partitioner.cs" />
     <Compile Include="Pipeline\Filters\Partitioner\PartitionFilter.cs" />
     <Compile Include="Pipeline\Filters\Partitioner\PartitionKeyProvider.cs" />
     <Compile Include="Pipeline\Filters\RedeliveryRetryFilter.cs" />

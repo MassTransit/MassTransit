@@ -24,25 +24,34 @@ namespace MassTransit.PipeConfigurators
     {
         readonly PartitionKeyProvider<ConsumeContext<TMessage>> _keyProvider;
         readonly int _partitionCount;
+        readonly IPartitioner _partitioner;
 
         public PartitionerPipeSpecification(PartitionKeyProvider<ConsumeContext<TMessage>> keyProvider, int partitionCount)
         {
             _keyProvider = keyProvider;
+
             _partitionCount = partitionCount;
+        }
+
+        public PartitionerPipeSpecification(PartitionKeyProvider<ConsumeContext<TMessage>> keyProvider, IPartitioner partitioner)
+        {
+            _keyProvider = keyProvider;
+
+            _partitioner = partitioner;
         }
 
         public void Apply(IPipeBuilder<ConsumeContext<TMessage>> builder)
         {
-            IHashGenerator hashGenerator = new Murmur3UnsafeHashGenerator();
+            var partitioner = _partitioner ?? new Partitioner(_partitionCount, new Murmur3UnsafeHashGenerator());
 
-            builder.AddFilter(new PartitionFilter<TMessage>(_partitionCount, _keyProvider, hashGenerator));
+            builder.AddFilter(new PartitionFilter<TMessage>(_keyProvider, partitioner));
         }
 
         public IEnumerable<ValidationResult> Validate()
         {
             if (_keyProvider == null)
                 yield return this.Failure("KeyProvider", "must not be null");
-            if (_partitionCount < 1)
+            if (_partitioner == null && _partitionCount < 1)
                 yield return this.Failure("PartitionCount", "must be >= 1");
         }
     }
