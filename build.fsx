@@ -215,7 +215,7 @@ Target "Package" (fun _ ->
                   PackageFile = @".\src\Persistence\MassTransit.EntityFrameworkIntegration\packages.config"
                   Files = [ (@"..\src\Persistence\MassTransit.EntityFrameworkIntegration\bin\Release\MassTransit.EntityFrameworkIntegration.*", Some @"lib\net45", None);
                             (@"..\src\Persistence\MassTransit.EntityFrameworkIntegration\**\*.cs", Some @"src", None) ] } 
-                { Project = "MassTransit.MongoDbIntegration"
+                { Project = "MassTransit.MongoDb"
                   Summary = "MassTransit MongoDb Saga and Message Data Storage"
                   PackageFile = @".\src\Persistence\MassTransit.MongoDbIntegration\packages.config"
                   Files = [ (@"..\src\Persistence\MassTransit.MongoDbIntegration\bin\Release\MassTransit.MongoDbIntegration.*", Some @"lib\net45", None);
