@@ -27,16 +27,16 @@ namespace MassTransit.Monitoring.Performance
         readonly IPerformanceCounter _faultPercentage;
         readonly IPerformanceCounter _faultPercentageBase;
         readonly IPerformanceCounter _totalConsumed;
-        IPerformanceCounter _publishedPerSecond;
-        IPerformanceCounter _publishFaulted;
-        IPerformanceCounter _publishFaultPercentage;
-        IPerformanceCounter _publishFaultPercentageBase;
-        IPerformanceCounter _sendFaulted;
-        IPerformanceCounter _sendFaultPercentage;
-        IPerformanceCounter _sendFaultPercentageBase;
-        IPerformanceCounter _sentPerSecond;
-        IPerformanceCounter _totalPublished;
-        IPerformanceCounter _totalSent;
+        readonly IPerformanceCounter _publishedPerSecond;
+        readonly IPerformanceCounter _publishFaulted;
+        readonly IPerformanceCounter _publishFaultPercentage;
+        readonly IPerformanceCounter _publishFaultPercentageBase;
+        readonly IPerformanceCounter _sendFaulted;
+        readonly IPerformanceCounter _sendFaultPercentage;
+        readonly IPerformanceCounter _sendFaultPercentageBase;
+        readonly IPerformanceCounter _sentPerSecond;
+        readonly IPerformanceCounter _totalPublished;
+        readonly IPerformanceCounter _totalSent;
 
         public MessagePerformanceCounter()
         {

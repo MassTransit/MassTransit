@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -47,17 +47,17 @@ namespace MassTransit.Monitoring.Performance
             }
         }
 
-        public virtual void Increment()
+        public void Increment()
         {
             _counter.Increment();
         }
 
-        public virtual void IncrementBy(long val)
+        public void IncrementBy(long val)
         {
             _counter.IncrementBy(val);
         }
 
-        public virtual void Set(long val)
+        public void Set(long val)
         {
             _counter.RawValue = val;
         }
