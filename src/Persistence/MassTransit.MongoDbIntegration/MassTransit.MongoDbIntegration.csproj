@@ -58,14 +58,42 @@
     <Compile Include="..\..\SolutionVersion.cs">
       <Link>Properties\SolutionVersion.cs</Link>
     </Compile>
-    <Compile Include="Mappings\MappingConfigurator.cs" />
-    <Compile Include="Mappings\SagaConvention.cs" />
+    <Compile Include="Courier\Consumers\RoutingSlipActivityCompensatedConsumer.cs" />
+    <Compile Include="Courier\Consumers\RoutingSlipActivityCompensationFailedConsumer.cs" />
+    <Compile Include="Courier\Consumers\RoutingSlipActivityCompletedConsumer.cs" />
+    <Compile Include="Courier\Consumers\RoutingSlipActivityFaultedConsumer.cs" />
+    <Compile Include="Courier\Consumers\RoutingSlipCompensationFailedConsumer.cs" />
+    <Compile Include="Courier\Consumers\RoutingSlipCompletedConsumer.cs" />
+    <Compile Include="Courier\Consumers\RoutingSlipFaultedConsumer.cs" />
+    <Compile Include="Courier\Consumers\RoutingSlipRevisedConsumer.cs" />
+    <Compile Include="Courier\Consumers\RoutingSlipTerminatedConsumer.cs" />
+    <Compile Include="Courier\ConventionFilter.cs" />
+    <Compile Include="Courier\Documents\ActivityExceptionDocument.cs" />
+    <Compile Include="Courier\Documents\ExceptionInfoDocument.cs" />
+    <Compile Include="Courier\Documents\HostDocument.cs" />
+    <Compile Include="Courier\Documents\RoutingSlipDocument.cs" />
+    <Compile Include="Courier\Events\RoutingSlipActivityCompensatedDocument.cs" />
+    <Compile Include="Courier\Events\RoutingSlipActivityCompensationFailedDocument.cs" />
+    <Compile Include="Courier\Events\RoutingSlipActivityCompletedDocument.cs" />
+    <Compile Include="Courier\Events\RoutingSlipActivityFaultedDocument.cs" />
+    <Compile Include="Courier\Events\RoutingSlipCompensationFailedDocument.cs" />
+    <Compile Include="Courier\Events\RoutingSlipCompletedDocument.cs" />
+    <Compile Include="Courier\Events\RoutingSlipEventDocument.cs" />
+    <Compile Include="Courier\Events\RoutingSlipFaultedDocument.cs" />
+    <Compile Include="Courier\Events\RoutingSlipRevisedDocument.cs" />
+    <Compile Include="Courier\Events\RoutingSlipTerminatedDocument.cs" />
+    <Compile Include="Courier\IRoutingSlipEventPersister.cs" />
+    <Compile Include="Courier\RoutingSlipEventConsumerConfigurationExtensions.cs" />
+    <Compile Include="Courier\RoutingSlipEventPersister.cs" />
+    <Compile Include="Exceptions\SaveEventException.cs" />
+    <Compile Include="MassTransitMongoDbConventions.cs" />
     <Compile Include="MessageData\IFileNameGenerator.cs" />
     <Compile Include="MessageData\IMessageDataResolver.cs" />
     <Compile Include="MessageData\MongoDbMessageDataRepository.cs" />
     <Compile Include="MessageData\MessageDataResolver.cs" />
     <Compile Include="MessageData\NewIdFileNameGenerator.cs" />
     <Compile Include="Exceptions\MongoDbConcurrencyException.cs" />
+    <Compile Include="SagaConvention.cs" />
     <Compile Include="Saga\Context\IMongoDbSagaConsumeContextFactory.cs" />
     <Compile Include="Saga\IVersionedSaga.cs" />
     <Compile Include="Saga\Pipeline\MissingPipe.cs" />
@@ -82,6 +110,9 @@
       <Project>{6efd69fc-cbcc-4f85-aee0-efba73f4d273}</Project>
       <Name>MassTransit</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Mappings\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

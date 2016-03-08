@@ -12,24 +12,14 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
-    using System;
-    using Configurators;
+    using Courier;
 
 
-    public static class BusFactoryExtensions
+    public static class RoutingSlipEventCorrelationExtensions
     {
-        public static IBusControl Build(this IBusFactory factory)
+        public static void ConfigureRoutingSlipEventCorrelation(this IBusFactoryConfigurator configurator)
         {
-            var result = BusConfigurationResult.CompileResults(factory.Validate());
-
-            try
-            {
-                return factory.CreateBus();
-            }
-            catch (Exception ex)
-            {
-                throw new ConfigurationException(result, "An exception occurred during bus creation", ex);
-            }
+            RoutingSlipEventCorrelation.ConfigureMessageCorrelation();
         }
     }
 }
