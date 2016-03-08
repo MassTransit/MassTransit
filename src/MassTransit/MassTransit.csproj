@@ -167,6 +167,7 @@
     <Compile Include="Configuration\PipeConfigurators\PartitionerPipeSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\RedeliveryRetryPipeSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\ScheduleMessageRedeliveryPipeSpecification.cs" />
+    <Compile Include="Configuration\RoutingSlipEventCorrelationExtensions.cs" />
     <Compile Include="Configuration\ScheduledRetryExtensions.cs" />
     <Compile Include="Configuration\TransformConfiguratorExtensions.cs" />
     <Compile Include="Context\ArrayPayloadCollection.cs" />
@@ -210,6 +211,7 @@
     <Compile Include="Contracts\ConcurrencyLimitUpdated.cs" />
     <Compile Include="Contracts\SetConcurrencyLimit.cs" />
     <Compile Include="Courier\Exceptions\RoutingSlipArgumentException.cs" />
+    <Compile Include="Courier\RoutingSlipEvents.cs" />
     <Compile Include="CryptoStreamProviderExtensions.cs" />
     <Compile Include="Events\ReceiveFaultEvent.cs" />
     <Compile Include="ExceptionConsumeContext.cs" />

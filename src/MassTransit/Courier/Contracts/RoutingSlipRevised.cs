@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -27,6 +27,11 @@ namespace MassTransit.Courier.Contracts
         Guid TrackingNumber { get; }
 
         /// <summary>
+        /// The execution that modified the routing slip
+        /// </summary>
+        Guid ExecutionId { get; }
+
+        /// <summary>
         /// The date/time when the routing slip completed
         /// </summary>
         DateTime Timestamp { get; }
@@ -37,9 +42,14 @@ namespace MassTransit.Courier.Contracts
         TimeSpan Duration { get; }
 
         /// <summary>
-        /// The execution that modified the routing slip
+        /// The name of the activity that terminated the routing slip
         /// </summary>
-        Guid ExecutionId { get; }
+        string ActivityName { get; }
+
+        /// <summary>
+        /// The host that executed the activity
+        /// </summary>
+        HostInfo Host { get; }
 
         /// <summary>
         /// The variables that were present once the routing slip completed, can be used

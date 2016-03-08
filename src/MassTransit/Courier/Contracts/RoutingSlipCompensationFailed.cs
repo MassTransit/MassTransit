@@ -34,6 +34,11 @@ namespace MassTransit.Courier.Contracts
         TimeSpan Duration { get; }
 
         /// <summary>
+        /// The host that executed the activity
+        /// </summary>
+        HostInfo Host { get; }
+
+        /// <summary>
         /// The exception information from the faulting activity
         /// </summary>
         ExceptionInfo ExceptionInfo { get; }

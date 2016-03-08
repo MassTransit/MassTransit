@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -10,25 +10,22 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit
+namespace MassTransit.MongoDbIntegration
 {
-    using System;
-    using Configurators;
+    using MassTransit.Saga;
+    using MongoDB.Bson.Serialization;
+    using MongoDB.Bson.Serialization.Conventions;
 
 
-    public static class BusFactoryExtensions
+    public class SagaConvention :
+        ConventionBase,
+        IClassMapConvention
     {
-        public static IBusControl Build(this IBusFactory factory)
+        public void Apply(BsonClassMap classMap)
         {
-            var result = BusConfigurationResult.CompileResults(factory.Validate());
-
-            try
+            if (classMap.ClassType.IsClass && typeof(ISaga).IsAssignableFrom(classMap.ClassType))
             {
-                return factory.CreateBus();
-            }
-            catch (Exception ex)
-            {
-                throw new ConfigurationException(result, "An exception occurred during bus creation", ex);
+                classMap.MapIdProperty(nameof(ISaga.CorrelationId));
             }
         }
     }

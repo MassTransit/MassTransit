@@ -10,26 +10,28 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit
+namespace MassTransit.MongoDbIntegration.Courier.Consumers
 {
-    using System;
-    using Configurators;
+    using System.Threading.Tasks;
+    using Events;
+    using MassTransit.Courier.Contracts;
 
 
-    public static class BusFactoryExtensions
+    public class RoutingSlipRevisedConsumer :
+        IConsumer<RoutingSlipRevised>
     {
-        public static IBusControl Build(this IBusFactory factory)
-        {
-            var result = BusConfigurationResult.CompileResults(factory.Validate());
+        readonly IRoutingSlipEventPersister _persister;
 
-            try
-            {
-                return factory.CreateBus();
-            }
-            catch (Exception ex)
-            {
-                throw new ConfigurationException(result, "An exception occurred during bus creation", ex);
-            }
+        public RoutingSlipRevisedConsumer(IRoutingSlipEventPersister persister)
+        {
+            _persister = persister;
+        }
+
+        public Task Consume(ConsumeContext<RoutingSlipRevised> context)
+        {
+            var @event = new RoutingSlipRevisedDocument(context.Message);
+
+            return _persister.Persist(context.Message.TrackingNumber, @event);
         }
     }
 }

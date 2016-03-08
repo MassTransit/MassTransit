@@ -10,26 +10,20 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit
+namespace MassTransit.MongoDbIntegration.Courier.Documents
 {
     using System;
-    using Configurators;
+    using Events;
 
 
-    public static class BusFactoryExtensions
+    public class RoutingSlipDocument
     {
-        public static IBusControl Build(this IBusFactory factory)
+        public RoutingSlipDocument(Guid trackingNumber)
         {
-            var result = BusConfigurationResult.CompileResults(factory.Validate());
-
-            try
-            {
-                return factory.CreateBus();
-            }
-            catch (Exception ex)
-            {
-                throw new ConfigurationException(result, "An exception occurred during bus creation", ex);
-            }
+            TrackingNumber = trackingNumber;
         }
+
+        public Guid TrackingNumber { get; private set; }
+        public RoutingSlipEventDocument[] Events { get; private set; }
     }
 }

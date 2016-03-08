@@ -10,27 +10,28 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.MongoDbIntegration.Mappings
+namespace MassTransit.MongoDbIntegration.Courier.Consumers
 {
-    using MongoDB.Bson.Serialization.Conventions;
-    using Saga;
+    using System.Threading.Tasks;
+    using Events;
+    using MassTransit.Courier.Contracts;
 
 
-    public class MappingConfigurator
+    public class RoutingSlipFaultedConsumer :
+        IConsumer<RoutingSlipFaulted>
     {
-        public void Configure()
-        {
-            var conventionPack = new ConventionPack
-            {
-                new CamelCaseElementNameConvention(),
-                new IgnoreIfNullConvention(true),
-                new IgnoreExtraElementsConvention(true),
-                new SagaConvention()
-            };
+        readonly IRoutingSlipEventPersister _persister;
 
-            ConventionRegistry.Register("MassTransit Saga Conventions",
-                conventionPack,
-                t => t.IsClass && typeof(IVersionedSaga).IsAssignableFrom(t));
+        public RoutingSlipFaultedConsumer(IRoutingSlipEventPersister persister)
+        {
+            _persister = persister;
+        }
+
+        public Task Consume(ConsumeContext<RoutingSlipFaulted> context)
+        {
+            var @event = new RoutingSlipFaultedDocument(context.Message);
+
+            return _persister.Persist(context.Message.TrackingNumber, @event);
         }
     }
 }
