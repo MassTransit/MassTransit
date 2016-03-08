@@ -92,3 +92,26 @@ There are a variety of retry policies available, which are detailed in the refer
     In this example, the ``UseRetry`` is at the receive endpoint level. Additional retry filters can be
     added at the bus and consumer level, providing flexibility in how different consumers, messages, etc. are
     retried.
+
+
+Consuming Faults
+-----------------
+
+After all of the various retry policies have executed, the bus will generate a
+fault which you can consume. Below is a simple example of consuming a fault
+thrown by the consumer above.
+
+.. sourcecode:: csharp
+
+    public class UpdateCustomerAddressFaultConsumer :
+        IConsumer<Fault<UpdateCustomerAddress>>
+    {
+
+        public async Task Consume(ConsumeContext<Fault<UpdateCustomerAddress>> context)
+        {
+            var originalMessage = context.Message.Message;
+            var exceptions = context.Message.Exceptions;
+
+            //Do something interesting.
+        }
+    }
