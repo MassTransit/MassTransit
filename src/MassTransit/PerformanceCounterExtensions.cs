@@ -18,7 +18,18 @@ namespace MassTransit
 
     public static class PerformanceCounterExtensions
     {
+        [Obsolete("This method was improperly named, use EnablePerformanceCounters instead")]
         public static void EnabledPerformanceCounters(this IBusFactoryConfigurator configurator)
+        {
+            configurator.EnablePerformanceCounters();
+        }
+
+        /// <summary>
+        /// Enable performance counters on the bus to emit performance data for use by performance
+        /// monitor.
+        /// </summary>
+        /// <param name="configurator"></param>
+        public static void EnablePerformanceCounters(this IBusFactoryConfigurator configurator)
         {
             if (configurator == null)
                 throw new ArgumentNullException(nameof(configurator));
