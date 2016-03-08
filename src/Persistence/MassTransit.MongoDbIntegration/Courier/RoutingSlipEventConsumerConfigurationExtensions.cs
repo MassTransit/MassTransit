@@ -12,8 +12,10 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
+    using Courier.Contracts;
     using MongoDbIntegration.Courier;
     using MongoDbIntegration.Courier.Consumers;
+    using Pipeline.Filters.Partitioner;
 
 
     public static class RoutingSlipEventConsumerConfigurationExtensions
@@ -25,12 +27,31 @@ namespace MassTransit
         /// <param name="persister">The event persister used to save the events</param>
         public static void RoutingSlipEventConsumers(this IReceiveEndpointConfigurator configurator, IRoutingSlipEventPersister persister)
         {
-
             configurator.Consumer(() => new RoutingSlipCompletedConsumer(persister));
             configurator.Consumer(() => new RoutingSlipFaultedConsumer(persister));
-            configurator.Consumer(() => new RoutingSlipActivityCompensationFailedConsumer(persister));
+            configurator.Consumer(() => new RoutingSlipCompensationFailedConsumer(persister));
             configurator.Consumer(() => new RoutingSlipRevisedConsumer(persister));
             configurator.Consumer(() => new RoutingSlipTerminatedConsumer(persister));
+        }
+
+        /// <summary>
+        /// Configure the routing slip event consumers on a receive endpoint
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="persister">The event persister used to save the events</param>
+        /// <param name="partitioner">Use a partitioner to reduce duplicate key errors</param>
+        public static void RoutingSlipEventConsumers(this IReceiveEndpointConfigurator configurator, IRoutingSlipEventPersister persister, IPartitioner partitioner)
+        {
+            configurator.Consumer(() => new RoutingSlipCompletedConsumer(persister),
+                x => x.ConfigureMessage<RoutingSlipCompleted>(y => y.UsePartitioner(partitioner, p => p.Message.TrackingNumber)));
+            configurator.Consumer(() => new RoutingSlipFaultedConsumer(persister),
+                x => x.ConfigureMessage<RoutingSlipFaulted>(y => y.UsePartitioner(partitioner, p => p.Message.TrackingNumber)));
+            configurator.Consumer(() => new RoutingSlipCompensationFailedConsumer(persister),
+                x => x.ConfigureMessage<RoutingSlipCompensationFailed>(y => y.UsePartitioner(partitioner, p => p.Message.TrackingNumber)));
+            configurator.Consumer(() => new RoutingSlipRevisedConsumer(persister),
+                x => x.ConfigureMessage<RoutingSlipRevised>(y => y.UsePartitioner(partitioner, p => p.Message.TrackingNumber)));
+            configurator.Consumer(() => new RoutingSlipTerminatedConsumer(persister),
+                x => x.ConfigureMessage<RoutingSlipTerminated>(y => y.UsePartitioner(partitioner, p => p.Message.TrackingNumber)));
         }
 
         /// <summary>
@@ -44,6 +65,24 @@ namespace MassTransit
             configurator.Consumer(() => new RoutingSlipActivityCompletedConsumer(persister));
             configurator.Consumer(() => new RoutingSlipActivityFaultedConsumer(persister));
             configurator.Consumer(() => new RoutingSlipActivityCompensationFailedConsumer(persister));
+        }
+
+        /// <summary>
+        /// Configure the routing slip activity event consumers on a receive endpoint
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="persister"></param>
+        /// <param name="partitioner">Use a partitioner to reduce duplicate key errors</param>
+        public static void RoutingSlipActivityEventConsumers(this IReceiveEndpointConfigurator configurator, IRoutingSlipEventPersister persister, IPartitioner partitioner)
+        {
+            configurator.Consumer(() => new RoutingSlipActivityCompensatedConsumer(persister),
+                x => x.ConfigureMessage<RoutingSlipActivityCompensated>(y => y.UsePartitioner(partitioner, p => p.Message.TrackingNumber)));
+            configurator.Consumer(() => new RoutingSlipActivityCompletedConsumer(persister),
+                x => x.ConfigureMessage<RoutingSlipActivityCompleted>(y => y.UsePartitioner(partitioner, p => p.Message.TrackingNumber)));
+            configurator.Consumer(() => new RoutingSlipActivityFaultedConsumer(persister),
+                x => x.ConfigureMessage<RoutingSlipActivityFaulted>(y => y.UsePartitioner(partitioner, p => p.Message.TrackingNumber)));
+            configurator.Consumer(() => new RoutingSlipActivityCompensationFailedConsumer(persister),
+                x => x.ConfigureMessage<RoutingSlipActivityCompensationFailed>(y => y.UsePartitioner(partitioner, p => p.Message.TrackingNumber)));
         }
     }
 }

@@ -77,6 +77,10 @@ namespace MassTransit.MongoDbIntegration.Tests.Courier
             Assert.IsNotNull(routingSlip);
             Assert.IsNotNull(routingSlip.Events);
             Assert.AreEqual(3, routingSlip.Events.Length);
+
+            var jsonResult = Bus.GetProbeResult().ToJsonString();
+
+            Console.WriteLine(jsonResult);
         }
 
         [TestFixtureSetUp]
@@ -113,8 +117,10 @@ namespace MassTransit.MongoDbIntegration.Tests.Courier
 
             configurator.UseRetry(Retry.Selected<MongoWriteException>().Interval(10, TimeSpan.FromMilliseconds(20)));
 
-            configurator.RoutingSlipEventConsumers(persister);
-            configurator.RoutingSlipActivityEventConsumers(persister);
+            var partitioner = configurator.CreatePartitioner(16);
+
+            configurator.RoutingSlipEventConsumers(persister, partitioner);
+            configurator.RoutingSlipActivityEventConsumers(persister, partitioner);
 
             _completed = Handled<RoutingSlipCompleted>(configurator);
             _prepareCompleted = Handled<RoutingSlipActivityCompleted>(configurator, x => x.Message.ActivityName == "Prepare");
