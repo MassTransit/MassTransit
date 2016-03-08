@@ -4,7 +4,7 @@ This package supports MongoDb, including the storage of sagas, message data, and
 
 ## Attribution
 
-Many parts of this package, including the message data and saga repositories, were originally created by Liberis Labs, including [Lee Blundell](https://github.com/Blundell89), [Kevin Smith](https://github.com/kevbite), and others. The original packages were [here](https://github.com/LiberisLabs/MassTransit.MessageData.MongoDb) and [here](https://github.com/LiberisLabs/MassTransit.Persistence.MongoDb). They were copied with permission from the authors into this official assembly.
+Many parts of this package, including the message data and saga repositories, were originally created by [Liberis Labs](http://goo.gl/VaFgpk), including [Lee Blundell](https://github.com/Blundell89), [Kevin Smith](https://github.com/kevbite), and others. The original packages were [here](https://github.com/LiberisLabs/MassTransit.MessageData.MongoDb) and [here](https://github.com/LiberisLabs/MassTransit.Persistence.MongoDb). They were copied with permission from the authors into this official assembly.
 
 ## Getting Started
 
@@ -13,9 +13,6 @@ MassTransit.MongoDbIntegration can be installed via the package manager console 
 ```powershell
 PM> Install-Package MassTransit.MongoDbIntegration
 ```
-
-[![install from nuget](http://img.shields.io/nuget/v/MassTransit.MongoDbIntegration.svg?style=flat-square)](https://www.nuget.org/packages/MassTransit.MongoDbIntegration)
-[![downloads](http://img.shields.io/nuget/dt/MassTransit.MongoDbIntegration.svg?style=flat-square)](https://www.nuget.org/packages/MassTransit.MongoDbIntegration)
 
 ## Saga Storage
 
