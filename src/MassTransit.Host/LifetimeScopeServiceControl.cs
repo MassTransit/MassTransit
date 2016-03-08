@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Host
 {
+    using System.Diagnostics;
     using Autofac;
     using Topshelf;
 
@@ -20,6 +21,7 @@ namespace MassTransit.Host
     /// Decorates ServiceControl and manages the LifetimeScope for the service as part of the Start/Stop handshake.
     /// If the service is stopped, the LifetimeScope is disposed. The service cannot be restarted.
     /// </summary>
+    [DebuggerDisplay("{DebuggerDisplay()}")]
     public class LifetimeScopeServiceControl :
         ServiceControl
     {
@@ -48,6 +50,11 @@ namespace MassTransit.Host
         }
 
         public override string ToString()
+        {
+            return _serviceName;
+        }
+
+        string DebuggerDisplay()
         {
             return _serviceName;
         }

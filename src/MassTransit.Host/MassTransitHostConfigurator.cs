@@ -14,7 +14,6 @@ namespace MassTransit.Host
 {
     using System;
     using System.Diagnostics;
-    using Monitoring.Performance;
     using Topshelf;
     using Topshelf.HostConfigurators;
     using Topshelf.Runtime;
