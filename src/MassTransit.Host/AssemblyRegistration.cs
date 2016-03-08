@@ -14,12 +14,13 @@ namespace MassTransit.Host
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Linq;
     using System.Reflection;
     using Hosting;
     using Internals.Extensions;
 
-
+    [DebuggerDisplay("{DebuggerDisplay()}")]
     public struct AssemblyRegistration
     {
         public readonly Assembly Assembly;
@@ -47,6 +48,11 @@ namespace MassTransit.Host
         static IEnumerable<Type> GetEndpointSpecifications(Type[] types)
         {
             return types.Where(x => x.HasInterface<IEndpointSpecification>());
+        }
+
+        string DebuggerDisplay()
+        {
+            return $"{Assembly.GetName().Name} ( {Types.Length} Types)";
         }
     }
 }

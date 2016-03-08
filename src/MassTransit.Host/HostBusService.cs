@@ -13,6 +13,7 @@
 namespace MassTransit.Host
 {
     using System;
+    using System.Diagnostics;
     using Hosting;
     using Logging;
     using Topshelf;
@@ -21,6 +22,7 @@ namespace MassTransit.Host
     /// <summary>
     /// A service that hosts a bus instance, and supports the configuration of that bus instance at startup
     /// </summary>
+    [DebuggerDisplay("{DebuggerDisplay()}")]
     public class HostBusService :
         ServiceControl
     {
@@ -75,6 +77,11 @@ namespace MassTransit.Host
                 _log.InfoFormat("Stopping bus for hosted service: {0}", _serviceName);
 
             return true;
+        }
+
+        string DebuggerDisplay()
+        {
+            return _serviceName;
         }
     }
 }

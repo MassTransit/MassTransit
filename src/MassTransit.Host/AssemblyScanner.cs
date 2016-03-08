@@ -144,11 +144,11 @@ namespace MassTransit.Host
             return Assembly.ReflectionOnlyLoad(args.Name);
         }
 
-        private IEnumerable<Tuple<Assembly, Type>> TrySelectAllTypes(Assembly assembly)
+        IEnumerable<Tuple<Assembly, Type>> TrySelectAllTypes(Assembly assembly)
         {
             try
             {
-                return assembly.GetTypes().Select(y => Tuple.Create(assembly, y));
+                return assembly.GetTypes().Select(type => Tuple.Create(assembly, type));
             }
             catch (ReflectionTypeLoadException e)
             {
