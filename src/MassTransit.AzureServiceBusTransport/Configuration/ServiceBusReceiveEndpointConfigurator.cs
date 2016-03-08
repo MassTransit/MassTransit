@@ -42,6 +42,7 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
         {
             _host = host;
             _settings = settings;
+            _subscribeMessageTopics = true;
         }
 
         public override IEnumerable<ValidationResult> Validate()
