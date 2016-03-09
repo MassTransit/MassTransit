@@ -27,10 +27,13 @@ namespace Automatonymous.Activities
         readonly Schedule<TInstance> _schedule;
         readonly IPipe<SendContext> _sendPipe;
 
+        Func<TInstance, TimeSpan> _delayFn;  
+
         public ScheduleActivity(EventMessageFactory<TInstance, TMessage> messageFactory, Schedule<TInstance> schedule)
         {
             _messageFactory = messageFactory;
             _schedule = schedule;
+            _delayFn = instance => schedule.Delay;
 
             _sendPipe = Pipe.Empty<SendContext>();
         }
@@ -40,9 +43,16 @@ namespace Automatonymous.Activities
         {
             _messageFactory = messageFactory;
             _schedule = schedule;
+            _delayFn = instance => schedule.Delay;
 
             _sendPipe = Pipe.Execute(contextCallback);
         }
+
+        public ScheduleActivity<TInstance, TMessage> WithDelay(Func<TInstance, TimeSpan> delayFn)
+        {
+            _delayFn = delayFn;
+            return this;
+        }   
 
         public void Accept(StateMachineVisitor inspector)
         {
@@ -82,8 +92,9 @@ namespace Automatonymous.Activities
                 throw new ContextException("The scheduler context could not be retrieved.");
 
             TMessage message = _messageFactory(consumeContext);
+            TimeSpan delay = _delayFn(consumeContext.Instance);
 
-            var scheduledMessage = await schedulerContext.ScheduleSend(message, _schedule.Delay, _sendPipe).ConfigureAwait(false);
+            var scheduledMessage = await schedulerContext.ScheduleSend(message, delay, _sendPipe).ConfigureAwait(false);
 
             var previousTokenId = _schedule.GetTokenId(context.Instance);
             if (previousTokenId.HasValue)
@@ -106,12 +117,12 @@ namespace Automatonymous.Activities
         readonly Schedule<TInstance, TMessage> _schedule;
         readonly IPipe<SendContext> _sendPipe;
 
+        Func<TInstance, TData, TimeSpan> _delayFn;
+
         public ScheduleActivity(EventMessageFactory<TInstance, TData, TMessage> messageFactory, Schedule<TInstance, TMessage> schedule,
             Action<SendContext> contextCallback)
+            : this(messageFactory, schedule)
         {
-            _messageFactory = messageFactory;
-            _schedule = schedule;
-
             _sendPipe = Pipe.Execute(contextCallback);
         }
 
@@ -119,9 +130,16 @@ namespace Automatonymous.Activities
         {
             _messageFactory = messageFactory;
             _schedule = schedule;
+            _delayFn = (i, e) => schedule.Delay;
 
             _sendPipe = Pipe.Empty<SendContext>();
         }
+
+        public ScheduleActivity<TInstance, TData, TMessage> WithDelay(Func<TInstance, TData, TimeSpan> delayFn)
+        {
+            _delayFn = delayFn;
+            return this;
+        } 
 
         void Visitable.Accept(StateMachineVisitor inspector)
         {
@@ -137,8 +155,9 @@ namespace Automatonymous.Activities
                 throw new ContextException("The scheduler context could not be retrieved.");
 
             TMessage message = _messageFactory(consumeContext);
+            TimeSpan delay = _delayFn(consumeContext.Instance, consumeContext.Data);
 
-            var scheduledMessage = await schedulerContext.ScheduleSend(message, _schedule.Delay, _sendPipe).ConfigureAwait(false);
+            var scheduledMessage = await schedulerContext.ScheduleSend(message, delay, _sendPipe).ConfigureAwait(false);
 
             var previousTokenId = _schedule.GetTokenId(context.Instance);
             if (previousTokenId.HasValue)
