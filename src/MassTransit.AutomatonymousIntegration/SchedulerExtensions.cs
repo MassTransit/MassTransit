@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -25,7 +25,15 @@ namespace Automatonymous
             where TInstance : class, SagaStateMachineInstance
             where TMessage : class
         {
-            return source.Add(new ScheduleActivity<TInstance, TMessage>(x => message, schedule));
+            return source.Add(new ScheduleActivity<TInstance, TMessage>(x => message, schedule, x => schedule.Delay));
+        }
+
+        public static EventActivityBinder<TInstance> Schedule<TInstance, TMessage>(this EventActivityBinder<TInstance> source,
+            Schedule<TInstance, TMessage> schedule, TMessage message, ScheduleDelayProvider<TInstance> delayProvider)
+            where TInstance : class, SagaStateMachineInstance
+            where TMessage : class
+        {
+            return source.Add(new ScheduleActivity<TInstance, TMessage>(x => message, schedule, delayProvider));
         }
 
         public static EventActivityBinder<TInstance> Schedule<TInstance, TMessage>(this EventActivityBinder<TInstance> source,
@@ -33,7 +41,15 @@ namespace Automatonymous
             where TInstance : class, SagaStateMachineInstance
             where TMessage : class
         {
-            return source.Add(new ScheduleActivity<TInstance, TMessage>(x => message, schedule, contextCallback));
+            return source.Add(new ScheduleActivity<TInstance, TMessage>(x => message, schedule, contextCallback, x => schedule.Delay));
+        }
+
+        public static EventActivityBinder<TInstance> Schedule<TInstance, TMessage>(this EventActivityBinder<TInstance> source,
+            Schedule<TInstance, TMessage> schedule, TMessage message, Action<SendContext> contextCallback, ScheduleDelayProvider<TInstance> delayProvider)
+            where TInstance : class, SagaStateMachineInstance
+            where TMessage : class
+        {
+            return source.Add(new ScheduleActivity<TInstance, TMessage>(x => message, schedule, contextCallback, delayProvider));
         }
 
         public static EventActivityBinder<TInstance> Schedule<TInstance, TMessage>(this EventActivityBinder<TInstance> source,
@@ -41,23 +57,32 @@ namespace Automatonymous
             where TInstance : class, SagaStateMachineInstance
             where TMessage : class
         {
-            return source.Add(new ScheduleActivity<TInstance, TMessage>(messageFactory, schedule));
+            return source.Add(new ScheduleActivity<TInstance, TMessage>(messageFactory, schedule, x => schedule.Delay));
         }
 
         public static EventActivityBinder<TInstance> Schedule<TInstance, TMessage>(this EventActivityBinder<TInstance> source,
-            Schedule<TInstance, TMessage> schedule, EventMessageFactory<TInstance, TMessage> messageFactory, Func<TInstance, TimeSpan> delay)
+            Schedule<TInstance, TMessage> schedule, EventMessageFactory<TInstance, TMessage> messageFactory, ScheduleDelayProvider<TInstance> delayProvider)
             where TInstance : class, SagaStateMachineInstance
             where TMessage : class
         {
-            return source.Add(new ScheduleActivity<TInstance, TMessage>(messageFactory, schedule).WithDelay(delay));
-        } 
+            return source.Add(new ScheduleActivity<TInstance, TMessage>(messageFactory, schedule, delayProvider));
+        }
 
         public static EventActivityBinder<TInstance> Schedule<TInstance, TMessage>(this EventActivityBinder<TInstance> source,
             Schedule<TInstance, TMessage> schedule, EventMessageFactory<TInstance, TMessage> messageFactory, Action<SendContext> contextCallback)
             where TInstance : class, SagaStateMachineInstance
             where TMessage : class
         {
-            return source.Add(new ScheduleActivity<TInstance, TMessage>(messageFactory, schedule, contextCallback));
+            return source.Add(new ScheduleActivity<TInstance, TMessage>(messageFactory, schedule, contextCallback, x => schedule.Delay));
+        }
+
+        public static EventActivityBinder<TInstance> Schedule<TInstance, TMessage>(this EventActivityBinder<TInstance> source,
+            Schedule<TInstance, TMessage> schedule, EventMessageFactory<TInstance, TMessage> messageFactory, Action<SendContext> contextCallback,
+            ScheduleDelayProvider<TInstance> delayProvider)
+            where TInstance : class, SagaStateMachineInstance
+            where TMessage : class
+        {
+            return source.Add(new ScheduleActivity<TInstance, TMessage>(messageFactory, schedule, contextCallback, delayProvider));
         }
 
         public static EventActivityBinder<TInstance, TData> Schedule<TInstance, TData, TMessage>(
@@ -66,7 +91,17 @@ namespace Automatonymous
             where TData : class
             where TMessage : class
         {
-            return source.Add(new ScheduleActivity<TInstance, TData, TMessage>(x => message, schedule));
+            return source.Add(new ScheduleActivity<TInstance, TData, TMessage>(x => message, schedule, x => schedule.Delay));
+        }
+
+        public static EventActivityBinder<TInstance, TData> Schedule<TInstance, TData, TMessage>(
+            this EventActivityBinder<TInstance, TData> source, Schedule<TInstance, TMessage> schedule, TMessage message,
+            ScheduleDelayProvider<TInstance, TData> delayProvider)
+            where TInstance : class, SagaStateMachineInstance
+            where TData : class
+            where TMessage : class
+        {
+            return source.Add(new ScheduleActivity<TInstance, TData, TMessage>(x => message, schedule, delayProvider));
         }
 
         public static EventActivityBinder<TInstance, TData> Schedule<TInstance, TData, TMessage>(
@@ -76,7 +111,17 @@ namespace Automatonymous
             where TData : class
             where TMessage : class
         {
-            return source.Add(new ScheduleActivity<TInstance, TData, TMessage>(x => message, schedule, contextCallback));
+            return source.Add(new ScheduleActivity<TInstance, TData, TMessage>(x => message, schedule, x => schedule.Delay));
+        }
+
+        public static EventActivityBinder<TInstance, TData> Schedule<TInstance, TData, TMessage>(
+            this EventActivityBinder<TInstance, TData> source, Schedule<TInstance, TMessage> schedule, TMessage message,
+            Action<SendContext> contextCallback, ScheduleDelayProvider<TInstance, TData> delayProvider)
+            where TInstance : class, SagaStateMachineInstance
+            where TData : class
+            where TMessage : class
+        {
+            return source.Add(new ScheduleActivity<TInstance, TData, TMessage>(x => message, schedule, contextCallback, delayProvider));
         }
 
         public static EventActivityBinder<TInstance, TData> Schedule<TInstance, TData, TMessage>(
@@ -86,17 +131,17 @@ namespace Automatonymous
             where TData : class
             where TMessage : class
         {
-            return source.Add(new ScheduleActivity<TInstance, TData, TMessage>(messageFactory, schedule));
+            return source.Add(new ScheduleActivity<TInstance, TData, TMessage>(messageFactory, schedule, x => schedule.Delay));
         }
 
         public static EventActivityBinder<TInstance, TData> Schedule<TInstance, TData, TMessage>(
             this EventActivityBinder<TInstance, TData> source, Schedule<TInstance, TMessage> schedule,
-            EventMessageFactory<TInstance, TData, TMessage> messageFactory, Func<TInstance, TData, TimeSpan> delay)
+            EventMessageFactory<TInstance, TData, TMessage> messageFactory, ScheduleDelayProvider<TInstance, TData> delayProvider)
             where TInstance : class, SagaStateMachineInstance
             where TData : class
             where TMessage : class
         {
-            return source.Add(new ScheduleActivity<TInstance, TData, TMessage>(messageFactory, schedule).WithDelay(delay));
+            return source.Add(new ScheduleActivity<TInstance, TData, TMessage>(messageFactory, schedule, delayProvider));
         }
 
         public static EventActivityBinder<TInstance, TData> Schedule<TInstance, TData, TMessage>(
@@ -107,7 +152,18 @@ namespace Automatonymous
             where TData : class
             where TMessage : class
         {
-            return source.Add(new ScheduleActivity<TInstance, TData, TMessage>(messageFactory, schedule, contextCallback));
+            return source.Add(new ScheduleActivity<TInstance, TData, TMessage>(messageFactory, schedule, contextCallback, x => schedule.Delay));
+        }
+
+        public static EventActivityBinder<TInstance, TData> Schedule<TInstance, TData, TMessage>(
+            this EventActivityBinder<TInstance, TData> source, Schedule<TInstance, TMessage> schedule,
+            EventMessageFactory<TInstance, TData, TMessage> messageFactory,
+            Action<SendContext> contextCallback, ScheduleDelayProvider<TInstance, TData> delayProvider)
+            where TInstance : class, SagaStateMachineInstance
+            where TData : class
+            where TMessage : class
+        {
+            return source.Add(new ScheduleActivity<TInstance, TData, TMessage>(messageFactory, schedule, contextCallback, delayProvider));
         }
 
         public static ExceptionActivityBinder<TInstance, TData, TException> Schedule<TInstance, TData, TException, TMessage>(
@@ -117,7 +173,18 @@ namespace Automatonymous
             where TException : Exception
             where TMessage : class
         {
-            return source.Add(new FaultedScheduleActivity<TInstance, TData, TException, TMessage>(x => message, schedule));
+            return source.Add(new FaultedScheduleActivity<TInstance, TData, TException, TMessage>(x => message, schedule, x => schedule.Delay));
+        }
+
+        public static ExceptionActivityBinder<TInstance, TData, TException> Schedule<TInstance, TData, TException, TMessage>(
+            this ExceptionActivityBinder<TInstance, TData, TException> source, Schedule<TInstance, TMessage> schedule, TMessage message,
+            ScheduleDelayProvider<TInstance, TData, TException> delayProvider)
+            where TInstance : class, SagaStateMachineInstance
+            where TData : class
+            where TException : Exception
+            where TMessage : class
+        {
+            return source.Add(new FaultedScheduleActivity<TInstance, TData, TException, TMessage>(x => message, schedule, delayProvider));
         }
 
         public static ExceptionActivityBinder<TInstance, TData, TException> Schedule<TInstance, TData, TException, TMessage>(
@@ -128,7 +195,18 @@ namespace Automatonymous
             where TException : Exception
             where TMessage : class
         {
-            return source.Add(new FaultedScheduleActivity<TInstance, TData, TException, TMessage>(x => message, schedule, contextCallback));
+            return source.Add(new FaultedScheduleActivity<TInstance, TData, TException, TMessage>(x => message, schedule, contextCallback, x => schedule.Delay));
+        }
+
+        public static ExceptionActivityBinder<TInstance, TData, TException> Schedule<TInstance, TData, TException, TMessage>(
+            this ExceptionActivityBinder<TInstance, TData, TException> source, Schedule<TInstance, TMessage> schedule, TMessage message,
+            Action<SendContext> contextCallback, ScheduleDelayProvider<TInstance, TData, TException> delayProvider)
+            where TInstance : class, SagaStateMachineInstance
+            where TData : class
+            where TException : Exception
+            where TMessage : class
+        {
+            return source.Add(new FaultedScheduleActivity<TInstance, TData, TException, TMessage>(x => message, schedule, contextCallback, delayProvider));
         }
 
         public static ExceptionActivityBinder<TInstance, TData, TException> Schedule<TInstance, TData, TException, TMessage>(
@@ -139,19 +217,19 @@ namespace Automatonymous
             where TException : Exception
             where TMessage : class
         {
-            return source.Add(new FaultedScheduleActivity<TInstance, TData, TException, TMessage>(messageFactory, schedule));
+            return source.Add(new FaultedScheduleActivity<TInstance, TData, TException, TMessage>(messageFactory, schedule, x => schedule.Delay));
         }
 
         public static ExceptionActivityBinder<TInstance, TData, TException> Schedule<TInstance, TData, TException, TMessage>(
             this ExceptionActivityBinder<TInstance, TData, TException> source, Schedule<TInstance, TMessage> schedule,
             EventExceptionMessageFactory<TInstance, TData, TException, TMessage> messageFactory,
-            Action<SendContext> contextCallback)
+            Action<SendContext> contextCallback, ScheduleDelayProvider<TInstance, TData, TException> delayProvider)
             where TInstance : class, SagaStateMachineInstance
             where TData : class
             where TException : Exception
             where TMessage : class
         {
-            return source.Add(new FaultedScheduleActivity<TInstance, TData, TException, TMessage>(messageFactory, schedule, contextCallback));
+            return source.Add(new FaultedScheduleActivity<TInstance, TData, TException, TMessage>(messageFactory, schedule, contextCallback, delayProvider));
         }
 
         /// <summary>
