@@ -235,7 +235,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
                             context.Instance.ExpiresAfterSeconds = 3;
                             return Console.Out.WriteLineAsync($"Cart {context.Instance.CorrelationId} Created: {context.Data.MemberNumber}");
                         })
-                        .Schedule(CartTimeout, context => new CartExpiredEvent(context.Instance), (state, added) => TimeSpan.FromSeconds(state.ExpiresAfterSeconds))
+                        .Schedule(CartTimeout, context => new CartExpiredEvent(context.Instance), context => TimeSpan.FromSeconds(context.Instance.ExpiresAfterSeconds))
                         .TransitionTo(Active));
 
                 During(Active,
@@ -250,7 +250,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
                         .Finalize(),
                     When(ItemAdded)
                         .ThenAsync(context => Console.Out.WriteLineAsync($"Card item added: {context.Data.MemberNumber}"))
-                        .Schedule(CartTimeout, context => new CartExpiredEvent(context.Instance), (state, added) => TimeSpan.FromSeconds(state.ExpiresAfterSeconds)));
+                        .Schedule(CartTimeout, context => new CartExpiredEvent(context.Instance), context => TimeSpan.FromSeconds(context.Instance.ExpiresAfterSeconds)));
 
                 SetCompletedWhenFinalized();
             }
