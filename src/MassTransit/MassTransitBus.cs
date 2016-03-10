@@ -14,6 +14,7 @@ namespace MassTransit
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
@@ -25,6 +26,7 @@ namespace MassTransit
     using Util;
 
 
+    [DebuggerDisplay("{DebuggerDisplay()}")]
     public class MassTransitBus :
         IBusControl,
         IDisposable
@@ -281,6 +283,10 @@ namespace MassTransit
             (_publishEndpointProvider as IDisposable)?.Dispose();
         }
 
+        string DebuggerDisplay()
+        {
+            return Address.ToString();
+        }
 
         class BusReady
         {
@@ -332,6 +338,7 @@ namespace MassTransit
         }
 
 
+        [DebuggerDisplay("{DebuggerDisplay()}")]
         class Handle :
             BusHandle
         {
@@ -396,6 +403,11 @@ namespace MassTransit
             void IDisposable.Dispose()
             {
                 Stop(CancellationToken.None);
+            }
+
+            string DebuggerDisplay()
+            {
+                return $"Stopped: {_stopped}";
             }
         }
     }
