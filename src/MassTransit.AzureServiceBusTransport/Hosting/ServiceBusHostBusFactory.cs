@@ -62,14 +62,20 @@ namespace MassTransit.AzureServiceBusTransport.Hosting
             {
                 var host = configurator.Host(hostSettings.ServiceUri, h =>
                 {
-                    h.SharedAccessSignature(s =>
+                    if (!string.IsNullOrWhiteSpace(hostSettings.ConnectionString))
                     {
-                        s.TokenProvider = hostSettings.TokenProvider;
-                        s.KeyName = hostSettings.KeyName;
-                        s.SharedAccessKey = hostSettings.SharedAccessKey;
-                        s.TokenTimeToLive = hostSettings.TokenTimeToLive;
-                        s.TokenScope = hostSettings.TokenScope;
-                    });
+                        h.TokenProvider = hostSettings.TokenProvider;
+                    }
+                    else
+                    {
+                        h.SharedAccessSignature(s =>
+                        {
+                            s.KeyName = hostSettings.KeyName;
+                            s.SharedAccessKey = hostSettings.SharedAccessKey;
+                            s.TokenTimeToLive = hostSettings.TokenTimeToLive;
+                            s.TokenScope = hostSettings.TokenScope;
+                        });
+                    }
                 });
 
                 if (_log.IsInfoEnabled)
@@ -117,6 +123,8 @@ namespace MassTransit.AzureServiceBusTransport.Hosting
                     TokenProvider = namespaceManager.Settings.TokenProvider;
                 }
             }
+
+            public string ConnectionString => _settings.ConnectionString;
 
             public string KeyName => _settings.KeyName;
             public string SharedAccessKey => _settings.SharedAccessKey;
