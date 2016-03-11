@@ -64,6 +64,7 @@ namespace MassTransit.AzureServiceBusTransport.Hosting
                 {
                     h.SharedAccessSignature(s =>
                     {
+                        s.TokenProvider = hostSettings.TokenProvider;
                         s.KeyName = hostSettings.KeyName;
                         s.SharedAccessKey = hostSettings.SharedAccessKey;
                         s.TokenTimeToLive = hostSettings.TokenTimeToLive;
