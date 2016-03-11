@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -16,6 +16,7 @@ namespace Automatonymous.Activities
     using System.Threading.Tasks;
     using MassTransit;
     using MassTransit.Pipeline;
+    using MassTransit.Scheduling;
 
 
     public class FaultedScheduleActivity<TInstance, TData, TException, TMessage> :
@@ -25,25 +26,28 @@ namespace Automatonymous.Activities
         where TException : Exception
         where TMessage : class
     {
+        readonly ScheduleDelayProvider<TInstance, TData, TException> _delayProvider;
         readonly EventExceptionMessageFactory<TInstance, TData, TException, TMessage> _messageFactory;
         readonly Schedule<TInstance, TMessage> _schedule;
         readonly IPipe<SendContext> _sendPipe;
 
         public FaultedScheduleActivity(EventExceptionMessageFactory<TInstance, TData, TException, TMessage> messageFactory,
             Schedule<TInstance, TMessage> schedule,
-            Action<SendContext> contextCallback)
+            Action<SendContext> contextCallback, ScheduleDelayProvider<TInstance, TData, TException> delayProvider)
         {
             _messageFactory = messageFactory;
             _schedule = schedule;
+            _delayProvider = delayProvider;
 
             _sendPipe = Pipe.Execute(contextCallback);
         }
 
         public FaultedScheduleActivity(EventExceptionMessageFactory<TInstance, TData, TException, TMessage> messageFactory,
-            Schedule<TInstance, TMessage> schedule)
+            Schedule<TInstance, TMessage> schedule, ScheduleDelayProvider<TInstance, TData, TException> delayProvider)
         {
             _messageFactory = messageFactory;
             _schedule = schedule;
+            _delayProvider = delayProvider;
 
             _sendPipe = Pipe.Empty<SendContext>();
         }
@@ -68,11 +72,13 @@ namespace Automatonymous.Activities
                 if (!((ConsumeContext)exceptionContext).TryGetPayload(out schedulerContext))
                     throw new ContextException("The scheduler context could not be retrieved.");
 
-                TMessage message = _messageFactory(exceptionContext);
+                var message = _messageFactory(exceptionContext);
 
-                var scheduledMessage = await schedulerContext.ScheduleSend(message, _schedule.Delay, _sendPipe).ConfigureAwait(false);
+                var delay = _delayProvider(exceptionContext);
 
-                var previousTokenId = _schedule.GetTokenId(context.Instance);
+                ScheduledMessage<TMessage> scheduledMessage = await schedulerContext.ScheduleSend(message, delay, _sendPipe).ConfigureAwait(false);
+
+                Guid? previousTokenId = _schedule.GetTokenId(context.Instance);
                 if (previousTokenId.HasValue)
                 {
                     await schedulerContext.CancelScheduledSend(previousTokenId.Value).ConfigureAwait(false);

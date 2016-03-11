@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -16,6 +16,7 @@ namespace Automatonymous.Activities
     using System.Threading.Tasks;
     using MassTransit;
     using MassTransit.Pipeline;
+    using MassTransit.Scheduling;
 
 
     public class ScheduleActivity<TInstance, TMessage> :
@@ -23,23 +24,27 @@ namespace Automatonymous.Activities
         where TInstance : class, SagaStateMachineInstance
         where TMessage : class
     {
+        readonly ScheduleDelayProvider<TInstance> _delayProvider;
         readonly EventMessageFactory<TInstance, TMessage> _messageFactory;
         readonly Schedule<TInstance> _schedule;
         readonly IPipe<SendContext> _sendPipe;
 
-        public ScheduleActivity(EventMessageFactory<TInstance, TMessage> messageFactory, Schedule<TInstance> schedule)
+        public ScheduleActivity(EventMessageFactory<TInstance, TMessage> messageFactory, Schedule<TInstance> schedule,
+            ScheduleDelayProvider<TInstance> delayProvider)
         {
             _messageFactory = messageFactory;
             _schedule = schedule;
+            _delayProvider = delayProvider;
 
             _sendPipe = Pipe.Empty<SendContext>();
         }
 
-        public ScheduleActivity(EventMessageFactory<TInstance, TMessage> messageFactory, Schedule<TInstance> schedule,
-            Action<SendContext> contextCallback)
+        public ScheduleActivity(EventMessageFactory<TInstance, TMessage> messageFactory, Schedule<TInstance> schedule, Action<SendContext> contextCallback,
+            ScheduleDelayProvider<TInstance> delayProvider)
         {
             _messageFactory = messageFactory;
             _schedule = schedule;
+            _delayProvider = delayProvider;
 
             _sendPipe = Pipe.Execute(contextCallback);
         }
@@ -75,17 +80,19 @@ namespace Automatonymous.Activities
 
         async Task Execute(BehaviorContext<TInstance> context)
         {
-            var consumeContext = context.CreateConsumeContext();
+            ConsumeEventContext<TInstance> consumeContext = context.CreateConsumeContext();
 
             MessageSchedulerContext schedulerContext;
             if (!((ConsumeContext)consumeContext).TryGetPayload(out schedulerContext))
                 throw new ContextException("The scheduler context could not be retrieved.");
 
-            TMessage message = _messageFactory(consumeContext);
+            var message = _messageFactory(consumeContext);
 
-            var scheduledMessage = await schedulerContext.ScheduleSend(message, _schedule.Delay, _sendPipe).ConfigureAwait(false);
+            var delay = _delayProvider(consumeContext);
 
-            var previousTokenId = _schedule.GetTokenId(context.Instance);
+            ScheduledMessage<TMessage> scheduledMessage = await schedulerContext.ScheduleSend(message, delay, _sendPipe).ConfigureAwait(false);
+
+            Guid? previousTokenId = _schedule.GetTokenId(context.Instance);
             if (previousTokenId.HasValue)
             {
                 await schedulerContext.CancelScheduledSend(previousTokenId.Value).ConfigureAwait(false);
@@ -102,23 +109,24 @@ namespace Automatonymous.Activities
         where TData : class
         where TMessage : class
     {
+        readonly ScheduleDelayProvider<TInstance, TData> _delayProvider;
         readonly EventMessageFactory<TInstance, TData, TMessage> _messageFactory;
         readonly Schedule<TInstance, TMessage> _schedule;
         readonly IPipe<SendContext> _sendPipe;
 
         public ScheduleActivity(EventMessageFactory<TInstance, TData, TMessage> messageFactory, Schedule<TInstance, TMessage> schedule,
-            Action<SendContext> contextCallback)
+            Action<SendContext> contextCallback, ScheduleDelayProvider<TInstance, TData> delayProvider)
+            : this(messageFactory, schedule, delayProvider)
         {
-            _messageFactory = messageFactory;
-            _schedule = schedule;
-
             _sendPipe = Pipe.Execute(contextCallback);
         }
 
-        public ScheduleActivity(EventMessageFactory<TInstance, TData, TMessage> messageFactory, Schedule<TInstance, TMessage> schedule)
+        public ScheduleActivity(EventMessageFactory<TInstance, TData, TMessage> messageFactory, Schedule<TInstance, TMessage> schedule,
+            ScheduleDelayProvider<TInstance, TData> delayProvider)
         {
             _messageFactory = messageFactory;
             _schedule = schedule;
+            _delayProvider = delayProvider;
 
             _sendPipe = Pipe.Empty<SendContext>();
         }
@@ -130,17 +138,19 @@ namespace Automatonymous.Activities
 
         async Task Activity<TInstance, TData>.Execute(BehaviorContext<TInstance, TData> context, Behavior<TInstance, TData> next)
         {
-            var consumeContext = context.CreateConsumeContext();
+            ConsumeEventContext<TInstance, TData> consumeContext = context.CreateConsumeContext();
 
             MessageSchedulerContext schedulerContext;
             if (!((ConsumeContext)consumeContext).TryGetPayload(out schedulerContext))
                 throw new ContextException("The scheduler context could not be retrieved.");
 
-            TMessage message = _messageFactory(consumeContext);
+            var message = _messageFactory(consumeContext);
 
-            var scheduledMessage = await schedulerContext.ScheduleSend(message, _schedule.Delay, _sendPipe).ConfigureAwait(false);
+            var delay = _delayProvider(consumeContext);
 
-            var previousTokenId = _schedule.GetTokenId(context.Instance);
+            ScheduledMessage<TMessage> scheduledMessage = await schedulerContext.ScheduleSend(message, delay, _sendPipe).ConfigureAwait(false);
+
+            Guid? previousTokenId = _schedule.GetTokenId(context.Instance);
             if (previousTokenId.HasValue)
             {
                 await schedulerContext.CancelScheduledSend(previousTokenId.Value).ConfigureAwait(false);

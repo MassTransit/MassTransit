@@ -102,6 +102,7 @@
     <Compile Include="Events\RequestTimeoutExpired.cs" />
     <Compile Include="Exceptions\NotAcceptedStateMachineException.cs" />
     <Compile Include="MassTransitStateMachine.cs" />
+    <Compile Include="ScheduleDelayProvider.cs" />
     <Compile Include="PublishExtensions.cs" />
     <Compile Include="Request.cs" />
     <Compile Include="RequestExtensions.cs" />
