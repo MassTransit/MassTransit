@@ -23,5 +23,6 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
         string SharedAccessKey { set; }
         TimeSpan TokenTimeToLive { set; }
         TokenScope TokenScope { set; }
+        TokenProvider TokenProvider { get; set; }
     }
 }
