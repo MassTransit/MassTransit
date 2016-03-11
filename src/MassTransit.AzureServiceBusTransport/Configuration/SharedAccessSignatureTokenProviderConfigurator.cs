@@ -23,12 +23,11 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
         public string SharedAccessKey { get; set; }
         public TimeSpan TokenTimeToLive { get; set; }
         public TokenScope TokenScope { get; set; }
-        public TokenProvider TokenProvider { get; set; }
 
         public TokenProvider GetTokenProvider()
         {
-            return TokenProvider ?? (TokenProvider = TokenProvider.CreateSharedAccessSignatureTokenProvider(KeyName, SharedAccessKey,
-                TokenTimeToLive, TokenScope));
+            return TokenProvider.CreateSharedAccessSignatureTokenProvider(KeyName, SharedAccessKey,
+                TokenTimeToLive, TokenScope);
         }
     }
 }
