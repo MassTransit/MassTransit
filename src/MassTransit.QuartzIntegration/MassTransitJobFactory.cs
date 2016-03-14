@@ -86,6 +86,7 @@ namespace MassTransit.QuartzIntegration
                 jobData.PutAll(scheduler.Context);
                 jobData.PutAll(bundle.JobDetail.JobDataMap);
                 jobData.PutAll(bundle.Trigger.JobDataMap);
+                jobData.Put("HeadersAsJson", CreateFireTimeHeaders(bundle));
 
                 SetObjectProperties(job, jobData);
 
@@ -148,6 +149,23 @@ namespace MassTransit.QuartzIntegration
             NewExpression @new = Expression.New(constructorInfo, bus);
 
             return Expression.Lambda<Func<IBus, T>>(@new, bus).Compile();
+        }
+
+        /// <summary>
+        /// Some additional properties from the TriggerFiredBundle
+        /// </summary>
+        /// <param name="bundle"></param>
+        public string CreateFireTimeHeaders(TriggerFiredBundle bundle)
+        {
+            var timeHeaders = new Dictionary<string, DateTimeOffset?>();
+            timeHeaders.Add("ScheduledFireTimeUtc", bundle.ScheduledFireTimeUtc);
+            timeHeaders.Add("FireTimeUtc", bundle.FireTimeUtc);
+            timeHeaders.Add("NextFireTimeUtc", bundle.NextFireTimeUtc);
+            timeHeaders.Add("PrevFireTimeUtc", bundle.PrevFireTimeUtc);
+
+            return JsonConvert.SerializeObject(timeHeaders);
+
+
         }
     }
 }
