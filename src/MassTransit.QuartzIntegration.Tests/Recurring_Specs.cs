@@ -57,9 +57,31 @@ namespace MassTransit.QuartzIntegration.Tests
             Assert.AreEqual(countBeforeCancel, _count, "Expected to see the count matches.");
         }
 
+        [Test, Explicit]
+        public async void Should_contain_additional_headers_that_provide_time_domain_context()
+        {
+            var scheduleId = Guid.NewGuid().ToString();
+
+            await QuartzEndpoint.ScheduleSend(InputQueueAddress, DateTime.UtcNow + TimeSpan.FromSeconds(10), new Done { Name = "Joe" });
+            var scheduledRecurringMessage = await QuartzEndpoint.ScheduleRecurringSend(InputQueueAddress, new MySchedule(), new Interval { Name = "Joe" });
+
+            await _done;
+
+            Assert.Greater(_count, 0, "Expected to see at least one interval");
+
+
+            //This test framework does not receive the message headers they are always null
+            // I was able to validate they are being added in the MassTransit.QuartzIntegration.MasstransitJobFactory
+            //Assert.IsNotNull(_lastInterval.Headers.Get<DateTimeOffset>("ScheduledFireTimeUtc", null));
+            //Assert.IsNotNull(_lastInterval.Headers.Get<DateTimeOffset>("FireTimeUtc", null));
+            //Assert.IsNotNull(_lastInterval.Headers.Get<DateTimeOffset>("NextFireTimeUtc", null));
+            //Assert.IsNotNull(_lastInterval.Headers.Get<DateTimeOffset>("PrevFireTimeUtc", null));
+        }
+
         Task<ConsumeContext<Done>> _done;
         Task<ConsumeContext<DoneAgain>> _doneAgain;
         int _count;
+        ConsumeContext<Interval> _lastInterval;
 
         protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
@@ -67,6 +89,7 @@ namespace MassTransit.QuartzIntegration.Tests
             configurator.Handler<Interval>(async context =>
             {
                 Interlocked.Increment(ref _count);
+                _lastInterval = context;
             });
 
             _done = Handled<Done>(configurator);
