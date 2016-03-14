@@ -66,16 +66,17 @@ namespace Automatonymous.Pipeline
 
             State<TInstance> currentState = await _machine.Accessor.Get(eventContext).ConfigureAwait(false);
 
-            IEnumerable<Event> nextEvents = _machine.NextEvents(currentState);
-            if (nextEvents.Contains(_event))
+            try
             {
                 await _machine.RaiseEvent(eventContext).ConfigureAwait(false);
 
                 if (_machine.IsCompleted(context.Saga))
                     await context.SetCompleted().ConfigureAwait(false);
             }
-            else
-                throw new NotAcceptedStateMachineException(typeof(TInstance), typeof(TData), context.CorrelationId ?? Guid.Empty, currentState.Name);
+            catch (UnhandledEventException ex)
+            {
+                throw new NotAcceptedStateMachineException(typeof(TInstance), typeof(TData), context.CorrelationId ?? Guid.Empty, currentState.Name, ex);
+            }
         }
     }
 }
