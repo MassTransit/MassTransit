@@ -14,13 +14,16 @@ namespace MassTransit.QuartzIntegration
 {
     using System;
     using System.Collections.Concurrent;
+    using System.Collections.Generic;
     using System.Globalization;
     using System.Linq.Expressions;
     using System.Reflection;
     using Internals.Extensions;
     using Internals.Reflection;
+    using Newtonsoft.Json;
     using Quartz;
     using Quartz.Spi;
+    using Scheduling;
 
 
     public class MassTransitJobFactory :
@@ -86,6 +89,7 @@ namespace MassTransit.QuartzIntegration
                 jobData.PutAll(scheduler.Context);
                 jobData.PutAll(bundle.JobDetail.JobDataMap);
                 jobData.PutAll(bundle.Trigger.JobDataMap);
+                jobData.Put("PayloadMessageHeadersAsJson", CreateFireTimeContext(bundle));
 
                 SetObjectProperties(job, jobData);
 
@@ -148,6 +152,24 @@ namespace MassTransit.QuartzIntegration
             NewExpression @new = Expression.New(constructorInfo, bus);
 
             return Expression.Lambda<Func<IBus, T>>(@new, bus).Compile();
+        }
+
+        /// <summary>
+        /// Some additional properties from the TriggerFiredBundle
+        /// There is a bug in RabbitMq.Client that prevents using the DateTimeOffset type in the headers
+        /// These values are being serialized as ISO-8601 round trip string
+        /// </summary>
+        /// <param name="bundle"></param>
+        public string CreateFireTimeContext(TriggerFiredBundle bundle)
+        {
+            var timeHeaders = new Dictionary<string, DateTimeOffset?>();
+            timeHeaders.Add("ScheduledFireTimeUtc", bundle.ScheduledFireTimeUtc);
+            timeHeaders.Add("FireTimeUtc", bundle.FireTimeUtc);
+            timeHeaders.Add("NextFireTimeUtc", bundle.NextFireTimeUtc);
+            timeHeaders.Add("PrevFireTimeUtc", bundle.PrevFireTimeUtc);
+
+            return JsonConvert.SerializeObject(timeHeaders);
+
         }
     }
 }

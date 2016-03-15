@@ -20,6 +20,7 @@ namespace MassTransit.QuartzIntegration
     using System.Text;
     using Logging;
     using Newtonsoft.Json;
+    using Newtonsoft.Json.Linq;
     using Pipeline;
     using Quartz;
     using Util;
@@ -50,6 +51,7 @@ namespace MassTransit.QuartzIntegration
         public string InitiatorId { get; set; }
         public string TokenId { get; set; }
         public string HeadersAsJson { get; set; }
+        public string PayloadMessageHeadersAsJson { get; set; }
 
         public void Execute(IJobExecutionContext context)
         {
@@ -106,6 +108,8 @@ namespace MassTransit.QuartzIntegration
                     if (!string.IsNullOrEmpty(ExpirationTime))
                         context.TimeToLive = DateTime.UtcNow - DateTime.Parse(ExpirationTime);
 
+                    Body = AppendPayloadMessageHeaders(Body);
+
                     context.Serializer = new ScheduledBodySerializer(new ContentType(ContentType), Encoding.UTF8.GetBytes(Body));
                 });
             });
@@ -133,6 +137,24 @@ namespace MassTransit.QuartzIntegration
             var headers = JsonConvert.DeserializeObject<IDictionary<string, object>>(HeadersAsJson);
             foreach (var header in headers)
                 context.Headers.Set(header.Key, header.Value);
+        }
+
+
+        string AppendPayloadMessageHeaders(string body)
+        {
+            JObject envelope = JObject.Parse(body);
+
+            var payloadHeaders = JObject.Parse(PayloadMessageHeadersAsJson).ToObject<Dictionary<string, object>>();
+
+            Dictionary<string, object> headers = envelope["headers"].ToObject<Dictionary<string, object>>();
+
+            foreach (KeyValuePair<string, object> payloadHeader in payloadHeaders)
+            {
+                headers.Add(payloadHeader.Key, payloadHeader.Value);
+            }
+            envelope["headers"] = JToken.FromObject(headers);
+
+            return JsonConvert.SerializeObject(envelope, Formatting.Indented);
         }
 
         static Uri ToUri(string s)
