@@ -58,7 +58,7 @@ namespace MassTransit.WindowsServiceBusTransport.Hosting
             if (hostSettings.ServiceUri == null)
                 throw new ConfigurationException("The ServiceBus ServiceUri setting has not been configured");
 
-            return AzureBusFactory.CreateUsingServiceBus(configurator =>
+            return WindowsBusFactory.CreateUsingServiceBus(configurator =>
             {
                 var host = configurator.Host(hostSettings.ServiceUri, h =>
                 {

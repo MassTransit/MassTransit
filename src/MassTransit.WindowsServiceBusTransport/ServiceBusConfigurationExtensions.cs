@@ -24,9 +24,9 @@ namespace MassTransit.WindowsServiceBusTransport
         /// <param name="selector">Hang off the selector interface for visibility</param>
         /// <param name="configure">The configuration callback to configure the bus</param>
         /// <returns></returns>
-        public static IBusControl CreateUsingAzureServiceBus(this IBusFactorySelector selector, Action<IServiceBusBusFactoryConfigurator> configure)
+        public static IBusControl CreateUsingWindowsServiceBus(this IBusFactorySelector selector, Action<IServiceBusBusFactoryConfigurator> configure)
         {
-            return AzureBusFactory.CreateUsingServiceBus(configure);
+            return WindowsBusFactory.CreateUsingServiceBus(configure);
         }
     }
 }

@@ -53,35 +53,6 @@ namespace MassTransit.WindowsServiceBusTransport.Tests
 
 
     [TestFixture]
-    public class Publishing_a_message_to_an_endpoint_from_another_scope :
-        TwoScopeAzureServiceBusTestFixture
-    {
-        Task<ConsumeContext<PingMessage>> _handler;
-        Task<ConsumeContext<PingMessage>> _secondHandler;
-
-        protected override void ConfigureInputQueueEndpoint(IServiceBusReceiveEndpointConfigurator configurator)
-        {
-            _handler = Handled<PingMessage>(configurator);
-        }
-
-        protected override void ConfigureSecondInputQueueEndpoint(IServiceBusReceiveEndpointConfigurator configurator)
-        {
-            _secondHandler = Handled<PingMessage>(configurator);
-        }
-
-        [Test]
-        public async void Should_succeed()
-        {
-            await SecondBus.Publish(new PingMessage());
-
-            await _handler;
-
-            await _secondHandler;
-        }
-    }
-
-
-    [TestFixture]
     public class Publishing_an_encrypted_message_to_an_endpoint :
         ServiceBusTestFixture
     {

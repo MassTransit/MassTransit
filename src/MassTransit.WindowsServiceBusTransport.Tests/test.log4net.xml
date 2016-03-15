@@ -13,7 +13,7 @@
 			<level value="WARN" />
 		</logger>
 
-		<logger name="MassTransit.AzureServiceBusTransport">
+		<logger name="MassTransit.WindowsServiceBusTransport">
 			<level value="DEBUG" />
 		</logger>
 

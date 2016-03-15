@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -16,7 +16,6 @@ namespace MassTransit.WindowsServiceBusTransport.Tests
     {
         using System;
         using System.Threading.Tasks;
-        using Microsoft.ServiceBus;
         using Microsoft.ServiceBus.Messaging;
         using NUnit.Framework;
         using TestFramework;
@@ -33,9 +32,9 @@ namespace MassTransit.WindowsServiceBusTransport.Tests
 
                 var completed = new TaskCompletionSource<A>();
 
-                IBusControl bus = Bus.Factory.CreateUsingAzureServiceBus(x =>
+                var bus = Bus.Factory.CreateUsingWindowsServiceBus(x =>
                 {
-                    IServiceBusHost host = x.Host(settings.ConnectionString, h =>
+                    var host = x.Host(settings.ConnectionString, h =>
                     {
                         h.TransportType = TransportType.NetMessaging;
                         h.OperationTimeout = TimeSpan.FromSeconds(30);
@@ -80,9 +79,9 @@ namespace MassTransit.WindowsServiceBusTransport.Tests
 
                 var completed = new TaskCompletionSource<A>();
 
-                IBusControl bus = Bus.Factory.CreateUsingAzureServiceBus(x =>
+                var bus = Bus.Factory.CreateUsingWindowsServiceBus(x =>
                 {
-                    IServiceBusHost host = x.Host(settings.ConnectionString, h =>
+                    var host = x.Host(settings.ConnectionString, h =>
                     {
                     });
 

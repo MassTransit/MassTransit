@@ -16,7 +16,7 @@ namespace MassTransit.WindowsServiceBusTransport
     using Configuration;
 
 
-    public static class AzureBusFactory
+    public static class WindowsBusFactory
     {
         /// <summary>
         /// Configure and create a bus for Azure Service Bus (later, we'll use Event Hubs instead)

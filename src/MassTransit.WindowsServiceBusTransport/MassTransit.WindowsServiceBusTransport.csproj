@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{C0985654-7C9F-4E8B-805A-5951849DBD40}</ProjectGuid>
+    <ProjectGuid>{6152E294-15FE-4E37-A943-E31252824C06}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>MassTransit.WindowsServiceBusTransport</RootNamespace>
@@ -63,7 +63,7 @@
     <Compile Include="..\SolutionVersion.cs">
       <Link>Properties\SolutionVersion.cs</Link>
     </Compile>
-    <Compile Include="AzureBusFactory.cs" />
+    <Compile Include="WindowsBusFactory.cs" />
     <Compile Include="BrokeredMessageSessionContext.cs" />
     <Compile Include="Configuration\ReceiveEndpointSettings.cs" />
     <Compile Include="Configuration\ServiceBusReceiveEndpointConfigurator.cs" />

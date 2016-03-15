@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{8AEB225D-17EF-478D-B99E-4779C2F568BC}</ProjectGuid>
+    <ProjectGuid>{FCF31896-50D2-42F3-9785-050662BA3C80}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>MassTransit.WindowsServiceBusTransport.Tests</RootNamespace>
@@ -70,7 +70,6 @@
     <Compile Include="ErrorQueue_Specs.cs" />
     <Compile Include="Performance_Specs.cs" />
     <Compile Include="Publish_Specs.cs" />
-    <Compile Include="RequestClient_Specs.cs" />
     <Compile Include="SagaRepository_Specs.cs" />
     <Compile Include="ScheduleMessage_Specs.cs" />
     <Compile Include="SendContext_Specs.cs" />
@@ -78,7 +77,6 @@
     <Compile Include="Session_Specs.cs" />
     <Compile Include="TestServiceBusAccountSettings.cs" />
     <Compile Include="Turnout_Sepcs.cs" />
-    <Compile Include="TwoScopeAzureServiceBusTestFixture.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -89,7 +87,7 @@
       <Name>MassTransit.Log4NetIntegration</Name>
     </ProjectReference>
     <ProjectReference Include="..\MassTransit.WindowsServiceBusTransport\MassTransit.WindowsServiceBusTransport.csproj">
-      <Project>{a84b8d78-6592-4340-9e78-4ac608f53efd}</Project>
+      <Project>{6152E294-15FE-4E37-A943-E31252824C06}</Project>
       <Name>MassTransit.WindowsServiceBusTransport</Name>
     </ProjectReference>
     <ProjectReference Include="..\MassTransit.TestFramework\MassTransit.TestFramework.csproj">
