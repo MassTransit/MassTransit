@@ -70,12 +70,10 @@ namespace MassTransit.QuartzIntegration.Tests
             Assert.Greater(_count, 0, "Expected to see at least one interval");
 
 
-            //This test framework does not receive the message headers they are always null
-            // I was able to validate they are being added in the MassTransit.QuartzIntegration.MasstransitJobFactory
-            //Assert.IsNotNull(_lastInterval.Headers.Get<DateTimeOffset>("ScheduledFireTimeUtc", null));
-            //Assert.IsNotNull(_lastInterval.Headers.Get<DateTimeOffset>("FireTimeUtc", null));
-            //Assert.IsNotNull(_lastInterval.Headers.Get<DateTimeOffset>("NextFireTimeUtc", null));
-            //Assert.IsNotNull(_lastInterval.Headers.Get<DateTimeOffset>("PrevFireTimeUtc", null));
+            Assert.IsNotNull(_lastInterval.Headers.Get<DateTimeOffset>("ScheduledFireTimeUtc", null));
+            Assert.IsNotNull(_lastInterval.Headers.Get<DateTimeOffset>("FireTimeUtc", null));
+            Assert.IsNotNull(_lastInterval.Headers.Get<DateTimeOffset>("NextFireTimeUtc", null));
+            Assert.IsNotNull(_lastInterval.Headers.Get<DateTimeOffset>("PrevFireTimeUtc", null));
         }
 
         Task<ConsumeContext<Done>> _done;
