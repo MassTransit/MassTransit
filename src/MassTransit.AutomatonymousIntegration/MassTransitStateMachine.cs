@@ -21,6 +21,7 @@ namespace Automatonymous
     using MassTransit;
     using MassTransit.Internals.Extensions;
     using MassTransit.Logging;
+    using MassTransit.Scheduling;
     using Requests;
     using Schedules;
 

@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -23,7 +23,6 @@ namespace MassTransit.QuartzIntegration
     using Newtonsoft.Json;
     using Quartz;
     using Quartz.Spi;
-    using Scheduling;
 
 
     public class MassTransitJobFactory :
@@ -40,11 +39,11 @@ namespace MassTransit.QuartzIntegration
 
         public IJob NewJob(TriggerFiredBundle bundle, IScheduler scheduler)
         {
-            IJobDetail jobDetail = bundle.JobDetail;
+            var jobDetail = bundle.JobDetail;
             if (jobDetail == null)
                 throw new SchedulerException("JobDetail was null");
 
-            Type type = jobDetail.JobType;
+            var type = jobDetail.JobType;
 
             return _typeFactories.GetOrAdd(type, CreateJobFactory)
                 .NewJob(bundle, scheduler);
@@ -56,7 +55,7 @@ namespace MassTransit.QuartzIntegration
 
         IJobFactory CreateJobFactory(Type type)
         {
-            Type genericType = typeof(MassTransitJobFactory<>).MakeGenericType(type);
+            var genericType = typeof(MassTransitJobFactory<>).MakeGenericType(type);
 
             return (IJobFactory)Activator.CreateInstance(genericType, _bus);
         }
@@ -83,13 +82,13 @@ namespace MassTransit.QuartzIntegration
         {
             try
             {
-                T job = _factory(_bus);
+                var job = _factory(_bus);
 
                 var jobData = new JobDataMap();
                 jobData.PutAll(scheduler.Context);
                 jobData.PutAll(bundle.JobDetail.JobDataMap);
                 jobData.PutAll(bundle.Trigger.JobDataMap);
-                jobData.Put("PayloadMessageHeadersAsJson", CreateFireTimeContext(bundle));
+                jobData.Put("PayloadMessageHeadersAsJson", CreatePayloadHeaderString(bundle));
 
                 SetObjectProperties(job, jobData);
 
@@ -109,12 +108,12 @@ namespace MassTransit.QuartzIntegration
 
         void SetObjectProperties(T job, JobDataMap jobData)
         {
-            foreach (string key in jobData.Keys)
+            foreach (var key in jobData.Keys)
             {
                 ReadWriteProperty<T> property;
                 if (_propertyCache.TryGetProperty(key, out property))
                 {
-                    object value = jobData[key];
+                    var value = jobData[key];
 
                     if (property.Property.PropertyType == typeof(Uri))
                         value = new Uri(value.ToString());
@@ -126,7 +125,7 @@ namespace MassTransit.QuartzIntegration
 
         Func<IBus, T> CreateConstructor()
         {
-            ConstructorInfo ctor = typeof(T).GetConstructor(new[] { typeof(IBus) });
+            var ctor = typeof(T).GetConstructor(new[] {typeof(IBus)});
             if (ctor != null)
                 return CreateServiceBusConstructor(ctor);
 
@@ -140,16 +139,16 @@ namespace MassTransit.QuartzIntegration
 
         Func<IBus, T> CreateDefaultConstructor(ConstructorInfo constructorInfo)
         {
-            ParameterExpression bus = Expression.Parameter(typeof(IBus), "bus");
-            NewExpression @new = Expression.New(constructorInfo);
+            var bus = Expression.Parameter(typeof(IBus), "bus");
+            var @new = Expression.New(constructorInfo);
 
             return Expression.Lambda<Func<IBus, T>>(@new, bus).Compile();
         }
 
         Func<IBus, T> CreateServiceBusConstructor(ConstructorInfo constructorInfo)
         {
-            ParameterExpression bus = Expression.Parameter(typeof(IBus), "bus");
-            NewExpression @new = Expression.New(constructorInfo, bus);
+            var bus = Expression.Parameter(typeof(IBus), "bus");
+            var @new = Expression.New(constructorInfo, bus);
 
             return Expression.Lambda<Func<IBus, T>>(@new, bus).Compile();
         }
@@ -160,16 +159,19 @@ namespace MassTransit.QuartzIntegration
         /// These values are being serialized as ISO-8601 round trip string
         /// </summary>
         /// <param name="bundle"></param>
-        public string CreateFireTimeContext(TriggerFiredBundle bundle)
+        string CreatePayloadHeaderString(TriggerFiredBundle bundle)
         {
             var timeHeaders = new Dictionary<string, DateTimeOffset?>();
-            timeHeaders.Add("ScheduledFireTimeUtc", bundle.ScheduledFireTimeUtc);
-            timeHeaders.Add("FireTimeUtc", bundle.FireTimeUtc);
-            timeHeaders.Add("NextFireTimeUtc", bundle.NextFireTimeUtc);
-            timeHeaders.Add("PrevFireTimeUtc", bundle.PrevFireTimeUtc);
+            if (bundle.ScheduledFireTimeUtc.HasValue)
+                timeHeaders.Add(MessageHeaders.Quartz.Scheduled, bundle.ScheduledFireTimeUtc);
+            if (bundle.FireTimeUtc.HasValue)
+                timeHeaders.Add(MessageHeaders.Quartz.Sent, bundle.FireTimeUtc);
+            if (bundle.NextFireTimeUtc.HasValue)
+                timeHeaders.Add(MessageHeaders.Quartz.NextScheduled, bundle.NextFireTimeUtc);
+            if (bundle.PrevFireTimeUtc.HasValue)
+                timeHeaders.Add(MessageHeaders.Quartz.PreviousSent, bundle.PrevFireTimeUtc);
 
             return JsonConvert.SerializeObject(timeHeaders);
-
         }
     }
 }

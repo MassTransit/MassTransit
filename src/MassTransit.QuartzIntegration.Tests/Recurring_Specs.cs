@@ -70,10 +70,10 @@ namespace MassTransit.QuartzIntegration.Tests
             Assert.Greater(_count, 0, "Expected to see at least one interval");
 
 
-            Assert.IsNotNull(_lastInterval.Headers.Get<DateTimeOffset>("ScheduledFireTimeUtc", null));
-            Assert.IsNotNull(_lastInterval.Headers.Get<DateTimeOffset>("FireTimeUtc", null));
-            Assert.IsNotNull(_lastInterval.Headers.Get<DateTimeOffset>("NextFireTimeUtc", null));
-            Assert.IsNotNull(_lastInterval.Headers.Get<DateTimeOffset>("PrevFireTimeUtc", null));
+            Assert.IsNotNull(_lastInterval.Headers.Get<DateTimeOffset>(MessageHeaders.Quartz.Scheduled, null));
+            Assert.IsNotNull(_lastInterval.Headers.Get<DateTimeOffset>(MessageHeaders.Quartz.Sent, null));
+            //Assert.IsNotNull(_lastInterval.Headers.Get<DateTimeOffset>("NextFireTimeUtc", null));
+            Assert.IsNotNull(_lastInterval.Headers.Get<DateTimeOffset>(MessageHeaders.Quartz.PreviousSent, null));
         }
 
         Task<ConsumeContext<Done>> _done;
