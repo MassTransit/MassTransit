@@ -49,13 +49,13 @@ To schedule a message, call the ``ScheduleMessage`` method with the message to b
     public class ScheduleNotificationConsumer :
         IConsumer<ScheduleNotification>
     {
-        Uri _notificationService;
+        Uri _notificationService = new Uri("rabbitmq://localhost/quartz");
 
         public async Task Consume(ConsumeContext<ScheduleNotification> context)
         {
-            context.ScheduleMessage(_notificationService,
+            await context.ScheduleMessage(_notificationService,
                 context.Message.DeliveryTime,
-                new SendNotification
+                new SendNotificationCommand
                 {
                     EmailAddress = context.Message.EmailAddress,
                     Body =  context.Message.Body
