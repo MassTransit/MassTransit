@@ -64,7 +64,10 @@ namespace MassTransit.QuartzIntegration.Tests
             await Bus.ScheduleMessage(DateTime.UtcNow + TimeSpan.FromSeconds(1), new A {Name = "Joe"});
 
             await handlerA;
-            await handlerIA;
+
+            ConsumeContext<IA> context = await handlerIA;
+
+            Assert.IsTrue(context.GetQuartzSent().HasValue);
         }
 
 

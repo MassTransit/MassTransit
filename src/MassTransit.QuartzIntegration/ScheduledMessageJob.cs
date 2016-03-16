@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -16,13 +16,16 @@ namespace MassTransit.QuartzIntegration
     using System.Collections.Generic;
     using System.Globalization;
     using System.IO;
+    using System.Linq;
     using System.Net.Mime;
     using System.Text;
+    using System.Xml.Linq;
     using Logging;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
     using Pipeline;
     using Quartz;
+    using Serialization;
     using Util;
 
 
@@ -58,11 +61,11 @@ namespace MassTransit.QuartzIntegration
             try
             {
                 var destinationAddress = new Uri(Destination);
-                Uri sourceAddress = _bus.Address;
+                var sourceAddress = _bus.Address;
 
                 IPipe<SendContext> sendPipe = CreateMessageContext(sourceAddress, destinationAddress, context.Trigger.Key.Name);
 
-                ISendEndpoint endpoint = TaskUtil.Await(() => _bus.GetSendEndpoint(destinationAddress));
+                var endpoint = TaskUtil.Await(() => _bus.GetSendEndpoint(destinationAddress));
 
                 var scheduled = new Scheduled();
 
@@ -70,7 +73,7 @@ namespace MassTransit.QuartzIntegration
             }
             catch (Exception ex)
             {
-                string message = string.Format(CultureInfo.InvariantCulture,
+                var message = string.Format(CultureInfo.InvariantCulture,
                     "An exception occurred sending message {0} to {1}", MessageType, Destination);
                 _log.Error(message, ex);
 
@@ -108,7 +111,10 @@ namespace MassTransit.QuartzIntegration
                     if (!string.IsNullOrEmpty(ExpirationTime))
                         context.TimeToLive = DateTime.UtcNow - DateTime.Parse(ExpirationTime);
 
-                    Body = AppendPayloadMessageHeaders(Body);
+                    if (string.Compare(ContentType, JsonMessageSerializer.JsonContentType.MediaType, StringComparison.OrdinalIgnoreCase) == 0)
+                        Body = UpdateJsonHeaders(Body);
+                    else if (string.Compare(ContentType, XmlMessageSerializer.XmlContentType.MediaType, StringComparison.OrdinalIgnoreCase) == 0)
+                        Body = UpdateXmlHeaders(Body);
 
                     context.Serializer = new ScheduledBodySerializer(new ContentType(ContentType), Encoding.UTF8.GetBytes(Body));
                 });
@@ -135,26 +141,51 @@ namespace MassTransit.QuartzIntegration
                 return;
 
             var headers = JsonConvert.DeserializeObject<IDictionary<string, object>>(HeadersAsJson);
-            foreach (var header in headers)
+            foreach (KeyValuePair<string, object> header in headers)
                 context.Headers.Set(header.Key, header.Value);
         }
 
-
-        string AppendPayloadMessageHeaders(string body)
+        string UpdateJsonHeaders(string body)
         {
-            JObject envelope = JObject.Parse(body);
+            var envelope = JObject.Parse(body);
 
             var payloadHeaders = JObject.Parse(PayloadMessageHeadersAsJson).ToObject<Dictionary<string, object>>();
 
-            Dictionary<string, object> headers = envelope["headers"].ToObject<Dictionary<string, object>>();
+            var headers = envelope["headers"].ToObject<Dictionary<string, object>>();
 
             foreach (KeyValuePair<string, object> payloadHeader in payloadHeaders)
             {
-                headers.Add(payloadHeader.Key, payloadHeader.Value);
+                headers[payloadHeader.Key] = payloadHeader.Value;
             }
             envelope["headers"] = JToken.FromObject(headers);
 
             return JsonConvert.SerializeObject(envelope, Formatting.Indented);
+        }
+
+        string UpdateXmlHeaders(string body)
+        {
+            using (var reader = new StringReader(body))
+            {
+                var document = XDocument.Load(reader);
+
+                var envelope = (from e in document.Descendants("envelope") select e).Single();
+
+                var headers = (from h in envelope.Descendants("headers") select h).SingleOrDefault();
+                if (headers == null)
+                {
+                    headers = new XElement("headers");
+                    envelope.Add(headers);
+                }
+
+                var payloadHeaders = JObject.Parse(PayloadMessageHeadersAsJson).ToObject<Dictionary<string, object>>();
+
+                foreach (KeyValuePair<string, object> payloadHeader in payloadHeaders)
+                {
+                    headers.Add(new XElement(payloadHeader.Key, payloadHeader.Value));
+                }
+
+                return document.ToString();
+            }
         }
 
         static Uri ToUri(string s)

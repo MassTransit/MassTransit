@@ -760,6 +760,7 @@
     <Compile Include="Scheduling\ScheduledRecurringMessage.cs" />
     <Compile Include="Scheduling\ScheduleMessage.cs" />
     <Compile Include="Scheduling\ScheduleRecurringMessage.cs" />
+    <Compile Include="Scheduling\SchedulingExtensions.cs" />
     <Compile Include="SendContext.cs" />
     <Compile Include="SendContextExecuteExtensions.cs" />
     <Compile Include="SendContextExtensions.cs" />
