@@ -13,9 +13,10 @@
 namespace MassTransit.Context
 {
     using System;
-    using System.Collections.Concurrent;
+    using System.Collections.Generic;
     using System.Diagnostics;
     using System.IO;
+    using System.Linq;
     using System.Net.Mime;
     using System.Threading.Tasks;
     using Serialization;
@@ -29,7 +30,7 @@ namespace MassTransit.Context
         static readonly ContentType DefaultContentType = JsonMessageSerializer.JsonContentType;
         readonly Lazy<ContentType> _contentType;
         readonly Lazy<Headers> _headers;
-        readonly ConcurrentBag<Task> _pendingTasks;
+        readonly List<Task> _pendingTasks;
         readonly IReceiveObserver _receiveObserver;
         readonly Stopwatch _receiveTimer;
 
@@ -46,17 +47,55 @@ namespace MassTransit.Context
 
             _contentType = new Lazy<ContentType>(GetContentType);
 
-            _pendingTasks = new ConcurrentBag<Task>();
+            _pendingTasks = new List<Task>(4);
         }
 
         protected abstract IHeaderProvider HeaderProvider { get; }
         public bool IsDelivered { get; private set; }
         public bool IsFaulted { get; private set; }
-        public Task CompleteTask => Task.WhenAll(_pendingTasks.ToArray());
+
+        public Task CompleteTask
+        {
+            get
+            {
+                Task[] tasks;
+                lock (_pendingTasks)
+                {
+                    tasks = _pendingTasks
+                        .Where(x => x.Status != TaskStatus.RanToCompletion)
+                        .ToArray();
+                }
+
+
+                var completeTask = Task.WhenAll(tasks);
+                completeTask.ContinueWith(result =>
+                {
+                    lock (_pendingTasks)
+                    {
+                        for (int i = 0; i < _pendingTasks.Count;)
+                        {
+                            if (_pendingTasks[i].Status == TaskStatus.RanToCompletion)
+                            {
+                                _pendingTasks.RemoveAt(i);
+                            }
+                            else
+                            {
+                                i++;
+                            }
+                        }
+                    }
+
+                }, TaskContinuationOptions.OnlyOnRanToCompletion);
+
+
+                return completeTask;
+            }
+        }
 
         public void AddPendingTask(Task task)
         {
-            _pendingTasks.Add(task);
+            lock (_pendingTasks)
+                _pendingTasks.Add(task);
         }
 
         public bool Redelivered { get; }
