@@ -24,9 +24,9 @@ namespace MassTransit.Util
         readonly ITaskParticipant _participant;
         readonly TaskSupervisor _supervisor;
 
-        public TaskScope(string tag)
+        public TaskScope(string tag, Action remove)
         {
-            _participant = new TaskParticipant(tag);
+            _participant = new TaskParticipant(tag, remove);
 
             _supervisor = new TaskSupervisor(tag, this);
         }
