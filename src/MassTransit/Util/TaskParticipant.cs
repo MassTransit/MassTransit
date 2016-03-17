@@ -26,10 +26,12 @@ namespace MassTransit.Util
         readonly CancellationTokenSource _stoppingToken;
         readonly TaskCompletionSource<IStopEvent> _stopRequested;
         readonly string _tag;
+        readonly Action _remove;
 
-        public TaskParticipant(string tag)
+        public TaskParticipant(string tag, Action remove)
         {
             _tag = tag;
+            _remove = remove;
             _stoppingToken = new CancellationTokenSource();
             _stoppedToken = new CancellationTokenSource();
 
@@ -51,6 +53,8 @@ namespace MassTransit.Util
         {
             _stoppedToken.Cancel();
             _completed.TrySetResult(true);
+
+            _remove();
         }
 
         public void SetReady()

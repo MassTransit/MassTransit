@@ -24,14 +24,14 @@ namespace MassTransit.Util
     /// An asynchronous signaling component
     /// </summary>
     public class TaskSupervisor :
-        IDisposable,
         ITaskSupervisor
     {
-        readonly List<ITaskParticipant> _participants;
+        readonly Dictionary<long, ITaskParticipant> _participants; 
         readonly CancellationTokenSource _stoppedToken;
         readonly CancellationTokenSource _stoppingToken;
         readonly TaskCompletionSource<IStopEvent> _stopRequested;
         readonly string _tag;
+        long _nextId;
 
         public TaskSupervisor(string tag, ITaskParticipant participant)
             : this(tag)
@@ -42,7 +42,7 @@ namespace MassTransit.Util
         public TaskSupervisor(string tag)
         {
             _tag = tag;
-            _participants = new List<ITaskParticipant>();
+            _participants = new Dictionary<long, ITaskParticipant>();
 
             _stopRequested = new TaskCompletionSource<IStopEvent>();
 
@@ -55,16 +55,12 @@ namespace MassTransit.Util
 
         public Task<IStopEvent> StopRequested => _stopRequested.Task;
 
-        public void Dispose()
-        {
-        }
-
         public Task Ready
         {
             get
             {
                 lock (_participants)
-                    return Task.WhenAll(_participants.Select(x => x.ParticipantReady));
+                    return Task.WhenAll(_participants.Select(x => x.Value.ParticipantReady).ToArray());
             }
         }
 
@@ -73,7 +69,7 @@ namespace MassTransit.Util
             get
             {
                 lock (_participants)
-                    return Task.WhenAll(_participants.Select(x => x.ParticipantCompleted));
+                    return Task.WhenAll(_participants.Select(x => x.Value.ParticipantCompleted).ToArray());
             }
         }
 
@@ -82,13 +78,21 @@ namespace MassTransit.Util
             if (_stoppingToken.IsCancellationRequested)
                 throw new OperationCanceledException("The supervisor is stopping, no additional participants can be created");
 
-            var participant = new TaskParticipant(tag);
+            long id = Interlocked.Increment(ref _nextId);
+
+            var participant = new TaskParticipant(tag, () => RemoveParticipant(id));
             lock (_participants)
             {
-                _participants.Add(participant);
+                _participants.Add(id, participant);
             }
 
             return participant;
+        }
+
+        void RemoveParticipant(long id)
+        {
+            lock (_participants)
+                _participants.Remove(id);
         }
 
         public ITaskScope CreateScope(string tag)
@@ -96,10 +100,12 @@ namespace MassTransit.Util
             if (_stoppingToken.IsCancellationRequested)
                 throw new OperationCanceledException("The supervisor is stopping, no additional scopes can be created");
 
-            var scope = new TaskScope(tag);
+            long id = Interlocked.Increment(ref _nextId);
+
+            var scope = new TaskScope(tag, () => RemoveParticipant(id));
             lock (_participants)
             {
-                _participants.Add(scope);
+                _participants.Add(id, scope);
             }
 
             return scope;
@@ -115,7 +121,7 @@ namespace MassTransit.Util
             {
                 var delayTask = Task.Delay(1000);
 
-                var readyTask = await Task.WhenAny(taskArray.Select(selector).Concat(Enumerable.Repeat(delayTask, 1)));
+                var readyTask = await Task.WhenAny(taskArray.Select(selector).Concat(Enumerable.Repeat(delayTask, 1))).ConfigureAwait(false);
                 if (delayTask == readyTask)
                 {
                     Console.WriteLine();
@@ -161,7 +167,7 @@ namespace MassTransit.Util
             {
                 foreach (var participant in _participants)
                 {
-                    participant.Stop(eventArgs);
+                    participant.Value.Stop(eventArgs);
                 }
             }
 
