@@ -66,14 +66,17 @@ namespace MassTransit.Host
 
                 List<ServiceControl> services = bootstrappers.Select(x => x.CreateService()).ToList();
 
-                foreach (ServiceControl serviceControl in services)
+                Parallel.ForEach(services, serviceControl =>
                 {
                     hostControl.RequestAdditionalTime(TimeSpan.FromMinutes(1));
 
                     StartService(hostControl, serviceControl);
 
-                    started.Add(serviceControl);
-                }
+                    lock (started)
+                    {
+                        started.Add(serviceControl);
+                    }
+                });
 
                 _services = started;
 
