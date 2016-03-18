@@ -52,6 +52,15 @@ namespace MassTransit.RabbitMqTransport.Topology
             return binding;
         }
 
+        public static ExchangeBindingSettings GetExchangeBinding(this SendSettings settings, string exchangeName)
+        {
+            var exchange = new Exchange(exchangeName, settings.Durable, settings.AutoDelete);
+
+            var binding = new ExchangeBinding(exchange);
+
+            return binding;
+        }
+
         public static IEnumerable<ExchangeBindingSettings> GetExchangeBindings(this ReceiveSettings settings, string exchangeName)
         {
             var exchange = new Exchange(exchangeName, settings.Durable, settings.AutoDelete, settings.ExchangeType);

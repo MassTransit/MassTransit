@@ -34,7 +34,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
         public PrepareSendExchangeFilter(SendSettings settings, params ExchangeBindingSettings[] exchangeBindings)
         {
             _settings = settings;
-            _exchangeBindings = exchangeBindings;
+            _exchangeBindings = exchangeBindings.Concat(settings.ExchangeBindings).ToArray();
         }
 
         void IProbeSite.Probe(ProbeContext context)
