@@ -187,6 +187,11 @@ namespace MassTransit.RabbitMqTransport
                 yield return "type=" + settings.ExchangeType;
             if (settings.ExchangeArguments != null && settings.ExchangeArguments.ContainsKey("x-delayed-type"))
                 yield return "delayedType=" + settings.ExchangeArguments["x-delayed-type"];
+
+            foreach (var binding in settings.ExchangeBindings)
+            {
+                yield return $"bindexchange={binding.Exchange.ExchangeName}";
+            }
         }
 
         public static ReceiveSettings GetReceiveSettings(this Uri address)
@@ -300,6 +305,10 @@ namespace MassTransit.RabbitMqTransport
             string delayedType = address.Query.GetValueFromQueryString("delayedType");
             if (!string.IsNullOrWhiteSpace(delayedType))
                 settings.SetExchangeArgument("x-delayed-type", delayedType);
+
+            string bindExchange = address.Query.GetValueFromQueryString("bindexchange");
+            if (!string.IsNullOrWhiteSpace(bindExchange))
+                settings.BindToExchange(bindExchange);
 
             return settings;
         }

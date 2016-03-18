@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -20,31 +20,32 @@ namespace MassTransit.RabbitMqTransport.Contexts
 
 
     /// <summary>
-    /// Uses the RabbitMQ delayed exchange feature to schedule message delivery
+    /// Using the delayed exchange plug-in allows messages to be scheduled. This is used to
+    /// send scheduled messages to that exchange
     /// </summary>
     public class DelayedExchangeMessageSchedulerContext :
         MessageSchedulerContext
     {
-        readonly ConsumeContext _context;
+        readonly ConsumeContext _consumeContext;
 
-        public DelayedExchangeMessageSchedulerContext(ConsumeContext context)
+        public DelayedExchangeMessageSchedulerContext(ConsumeContext consumeContext)
         {
-            if (context == null)
-                throw new ArgumentNullException(nameof(context));
+            if (consumeContext == null)
+                throw new ArgumentNullException(nameof(consumeContext));
 
-            _context = context;
+            _consumeContext = consumeContext;
         }
 
         public Task<ScheduledMessage<T>> ScheduleSend<T>(T message, TimeSpan deliveryDelay, IPipe<SendContext> sendPipe)
             where T : class
         {
-            return ScheduleSend(message, _context.ReceiveContext.InputAddress, deliveryDelay, sendPipe);
+            return ScheduleSend(message, _consumeContext.ReceiveContext.InputAddress, deliveryDelay, sendPipe);
         }
 
         public Task<ScheduledMessage<T>> ScheduleSend<T>(T message, DateTime deliveryTime, IPipe<SendContext> sendPipe)
             where T : class
         {
-            return ScheduleSend(message, _context.ReceiveContext.InputAddress, deliveryTime, sendPipe);
+            return ScheduleSend(message, _consumeContext.ReceiveContext.InputAddress, deliveryTime, sendPipe);
         }
 
         public Task<ScheduledMessage<T>> ScheduleSend<T>(T message, Uri destinationAddress, TimeSpan deliveryDelay, IPipe<SendContext> sendPipe)
@@ -58,49 +59,42 @@ namespace MassTransit.RabbitMqTransport.Contexts
         public async Task<ScheduledMessage<T>> ScheduleSend<T>(T message, Uri destinationAddress, DateTime deliveryTime, IPipe<SendContext> sendPipe)
             where T : class
         {
-            var endpoint = await _context.GetSendEndpoint(destinationAddress).ConfigureAwait(false);
+            var destinationSettings = destinationAddress.GetSendSettings();
+
+            var sendSettings = new RabbitMqSendSettings(destinationSettings.ExchangeName + "_delay", "x-delayed-message", destinationSettings.Durable,
+                destinationSettings.AutoDelete);
+
+            sendSettings.SetExchangeArgument("x-delayed-type", destinationSettings.ExchangeType);
+
+            sendSettings.BindToExchange(destinationSettings.ExchangeName);
+
+            var modelContext = _consumeContext.ReceiveContext.GetPayload<ModelContext>();
+
+            var delayExchangeAddress = modelContext.ConnectionContext.HostSettings.GetSendAddress(sendSettings);
+
+            var delayEndpoint = await _consumeContext.GetSendEndpoint(delayExchangeAddress).ConfigureAwait(false);
 
             var messageId = NewId.NextGuid();
-            await endpoint.Send(message, context =>
+
+            IPipe<SendContext> delayPipe = Pipe.New<SendContext>(x =>
             {
-                context.MessageId = messageId;
-                context.SetScheduledEnqueueTime(deliveryTime);
-            }).ConfigureAwait(false);
+                x.UseExecuteAsync(async context =>
+                {
+                    context.MessageId = messageId;
+                    var rabbitSendContext = context.GetPayload<RabbitMqSendContext>();
+
+                    var delay = Math.Max(0, (deliveryTime.Kind == DateTimeKind.Local ? (deliveryTime - DateTime.Now) : (deliveryTime - DateTime.UtcNow)).TotalMilliseconds);
+
+                    if(delay>0)
+                        rabbitSendContext.SetTransportHeader("x-delay", (long)delay);
+
+                    await sendPipe.Send(context).ConfigureAwait(false);
+                });
+            });
+
+            await delayEndpoint.Send(message, delayPipe).ConfigureAwait(false);
 
             return new ScheduledMessageHandle<T>(messageId, deliveryTime, destinationAddress, message);
-        }
-
-
-        async Task ScheduleRedelivery(TimeSpan delay)
-        {
-            var receiveSettings = _context.ReceiveContext.GetPayload<ReceiveSettings>();
-
-            var delayExchangeAddress = GetDelayExchangeAddress(receiveSettings);
-
-            ISendEndpoint delayEndpoint = await _context.GetSendEndpoint(delayExchangeAddress).ConfigureAwait(false);
-
-            await delayEndpoint.Send(_context.Message, _context.CreateCopyContextPipe((x, y) => UpdateDeliveryContext(x, y, delay))).ConfigureAwait(false);
-        }
-
-        Uri GetDelayExchangeAddress(Uri destinationAddress)
-        {
-            var destinationSendSettings = destinationAddress.GetSendSettings();
-
-
-
-            modelContext.ConnectionContext.HostSettings.
-            var receiveSettings = _context.ReceiveContext.GetPayload<ReceiveSettings>();
-
-            string delayExchangeName = destinationSendSettings.ExchangeName + "_delay";
-            var sendSettings = new RabbitMqSendSettings(delayExchangeName, "x-delayed-message", destinationSendSettings.Durable, destinationSendSettings.AutoDelete);
-
-            sendSettings.SetExchangeArgument("x-delayed-type", destinationSendSettings.ExchangeType);
-
-            sendSettings.BindToQueue(receiveSettings.QueueName);
-
-            var modelContext = _context.ReceiveContext.GetPayload<ModelContext>();
-
-            return modelContext.ConnectionContext.HostSettings.GetSendAddress(sendSettings);
         }
 
         public Task CancelScheduledSend<T>(ScheduledMessage<T> message)
@@ -114,7 +108,7 @@ namespace MassTransit.RabbitMqTransport.Contexts
 
         public Task CancelScheduledSend(Guid tokenId)
         {
-            throw new NotImplementedByDesignException("ServiceBus does not support cancelling scheduled messages.");
+            throw new NotImplementedByDesignException("RabbitMQ delayed exchanges do not support cancelling scheduled messages.");
         }
 
 

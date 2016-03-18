@@ -72,6 +72,7 @@
     <Compile Include="Configuration\Builders\RabbitMqReceiveEndpointBuilder.cs" />
     <Compile Include="Configuration\Configurators\ConfigurationHostSettings.cs" />
     <Compile Include="Configuration\Configurators\RabbitMqHostConfigurator.cs" />
+    <Compile Include="Configuration\DelayedExchangeMessageSchedulerSpecification.cs" />
     <Compile Include="Configuration\DelayedExchangeRedeliveryPipeSpecification.cs" />
     <Compile Include="Configuration\IExchangeBindingConfigurator.cs" />
     <Compile Include="Configuration\IExchangeConfigurator.cs" />
@@ -79,6 +80,7 @@
     <Compile Include="Configuration\RabbitMqConsumerPipeSpecification.cs" />
     <Compile Include="Configuration\ConsumerPipeConfiguratorExtensions.cs" />
     <Compile Include="Contexts\DelayedExchangeMessageRedeliveryContext.cs" />
+    <Compile Include="Contexts\DelayedExchangeMessageSchedulerContext.cs" />
     <Compile Include="Contexts\RabbitMqSendHeaders.cs" />
     <Compile Include="Contexts\RabbitMqConnectionContext.cs" />
     <Compile Include="Contexts\RabbitMqHeaderProvider.cs" />
@@ -91,6 +93,7 @@
     <Compile Include="Contracts\SetPrefetchCount.cs" />
     <Compile Include="DeferExtensions.cs" />
     <Compile Include="DelayedExchangeRetryExtensions.cs" />
+    <Compile Include="DelayedExchangeSchedulerExtensions.cs" />
     <Compile Include="Exceptions\MessageNotConfirmedException.cs" />
     <Compile Include="Exceptions\PublishNackException.cs" />
     <Compile Include="Exceptions\RabbitMqAddressException.cs" />
@@ -107,6 +110,7 @@
     <Compile Include="ModelSettings.cs" />
     <Compile Include="Pipeline\DelayedExchangeMessageRedeliveryFilter.cs" />
     <Compile Include="Management\ISetPrefetchCount.cs" />
+    <Compile Include="Pipeline\DelayedExchangeMessageSchedulerFilter.cs" />
     <Compile Include="Pipeline\RabbitMqConsumerFilter.cs" />
     <Compile Include="Pipeline\PrepareSendExchangeFilter.cs" />
     <Compile Include="Pipeline\RabbitMqBasicConsumer.cs" />

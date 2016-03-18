@@ -13,6 +13,7 @@
 namespace MassTransit.RabbitMqTransport
 {
     using System.Collections.Generic;
+    using Topology;
 
 
     public interface SendSettings
@@ -56,5 +57,10 @@ namespace MassTransit.RabbitMqTransport
         /// Arguments passed to QueueDeclare
         /// </summary>
         IDictionary<string, object> QueueArguments { get; }
+
+        /// <summary>
+        /// The exchange bindings for the send
+        /// </summary>
+        IEnumerable<ExchangeBindingSettings> ExchangeBindings { get; } 
     }
 }

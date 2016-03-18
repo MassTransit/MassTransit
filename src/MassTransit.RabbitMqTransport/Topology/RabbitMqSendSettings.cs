@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -20,6 +20,7 @@ namespace MassTransit.RabbitMqTransport.Topology
         SendSettings,
         IExchangeConfigurator
     {
+        readonly IList<ExchangeBindingSettings> _exchangeBindings;
         bool _bindToQueue;
         IDictionary<string, object> _exchangeArguments;
         IDictionary<string, object> _queueArguments;
@@ -31,6 +32,8 @@ namespace MassTransit.RabbitMqTransport.Topology
             ExchangeType = exchangeType;
             Durable = durable;
             AutoDelete = autoDelete;
+
+            _exchangeBindings = new List<ExchangeBindingSettings>();
         }
 
         public void SetExchangeArgument(string key, object value)
@@ -57,10 +60,19 @@ namespace MassTransit.RabbitMqTransport.Topology
 
         public IDictionary<string, object> QueueArguments => _queueArguments;
 
+        public IEnumerable<ExchangeBindingSettings> ExchangeBindings => _exchangeBindings;
+
         public void BindToQueue(string queueName)
         {
             _bindToQueue = true;
             _queueName = queueName;
+        }
+
+        public void BindToExchange(string exchangeName)
+        {
+            var settings = this.GetExchangeBinding(exchangeName);
+
+            _exchangeBindings.Add(settings);
         }
 
         public void SetQueueArgument(string key, object value)
@@ -83,12 +95,12 @@ namespace MassTransit.RabbitMqTransport.Topology
                 yield return $"bind->{_queueName}";
 
             if (_exchangeArguments != null)
-                foreach (var argument in _exchangeArguments)
+                foreach (KeyValuePair<string, object> argument in _exchangeArguments)
                 {
                     yield return $"e:{argument.Key}={argument.Value}";
                 }
             if (_queueArguments != null)
-                foreach (var argument in _queueArguments)
+                foreach (KeyValuePair<string, object> argument in _queueArguments)
                 {
                     yield return $"q:{argument.Key}={argument.Value}";
                 }

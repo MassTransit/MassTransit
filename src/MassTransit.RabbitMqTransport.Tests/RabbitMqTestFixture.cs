@@ -206,9 +206,6 @@ namespace MassTransit.RabbitMqTransport.Tests
                     model.QueueDelete("input_queue_delay");
 
                     OnCleanupVirtualHost(model);
-
-                    model.Abort(200, "Cleanup complete");
-                    connection.Abort(200, "Cleanup complete");
                 }
             }
             catch (Exception exception)
