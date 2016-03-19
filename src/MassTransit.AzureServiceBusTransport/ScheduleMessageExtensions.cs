@@ -18,6 +18,11 @@ namespace MassTransit
 
     public static class ScheduleMessageExtensions
     {
+        /// <summary>
+        /// Uses the Enqueue time of Service Bus messages to schedule future delivery of messages instead
+        /// of using Quartz. A natively supported feature that is highly reliable.
+        /// </summary>
+        /// <param name="configurator"></param>
         public static void UseServiceBusMessageScheduler(this IPipeConfigurator<ConsumeContext> configurator)
         {
             if (configurator == null)

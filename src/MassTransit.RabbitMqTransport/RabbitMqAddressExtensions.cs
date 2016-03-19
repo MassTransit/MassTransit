@@ -313,18 +313,22 @@ namespace MassTransit.RabbitMqTransport
             return settings;
         }
 
+        [Obsolete]
         public static SendSettings GetSendSettings(this IRabbitMqHost host, Type messageType)
+        {
+            return GetSendSettings(host.Settings, messageType);
+        }
+
+        public static SendSettings GetSendSettings(this RabbitMqHostSettings hostSettings, Type messageType)
         {
             bool isTemporary = messageType.IsTemporaryMessageType();
 
             bool durable = !isTemporary;
             bool autoDelete = isTemporary;
 
-            string name = host.MessageNameFormatter.GetMessageName(messageType).ToString();
+            string name = hostSettings.MessageNameFormatter.GetMessageName(messageType).ToString();
 
-            SendSettings settings = new RabbitMqSendSettings(name, ExchangeType.Fanout, durable, autoDelete);
-
-            return settings;
+            return new RabbitMqSendSettings(name, ExchangeType.Fanout, durable, autoDelete);
         }
 
         public static ConnectionFactory GetConnectionFactory(this RabbitMqHostSettings settings)

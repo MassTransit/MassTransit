@@ -15,6 +15,7 @@ namespace MassTransit.RabbitMqTransport
     using System.Net.Security;
     using System.Security.Authentication;
     using System.Security.Cryptography.X509Certificates;
+    using Transports;
 
 
     /// <summary>
@@ -95,5 +96,10 @@ namespace MassTransit.RabbitMqTransport
         /// RabbitMQ must be configured correctly for this to work, including enabling the rabbitmq_auth_mechanism_ssl plugin
         /// </remarks>
         bool UseClientCertificateAsAuthenticationIdentity { get; }
+
+        /// <summary>
+        /// The message name formatter for the publisher
+        /// </summary>
+        IMessageNameFormatter MessageNameFormatter { get; }
     }
 }

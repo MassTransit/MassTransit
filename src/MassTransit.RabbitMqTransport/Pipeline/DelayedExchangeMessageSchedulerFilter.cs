@@ -14,8 +14,9 @@ namespace MassTransit.RabbitMqTransport.Pipeline
 {
     using System.Diagnostics;
     using System.Threading.Tasks;
-    using Contexts;
+    using Context;
     using MassTransit.Pipeline;
+    using Scheduling;
 
 
     public class DelayedExchangeMessageSchedulerFilter :
@@ -30,7 +31,11 @@ namespace MassTransit.RabbitMqTransport.Pipeline
         [DebuggerNonUserCode]
         Task IFilter<ConsumeContext>.Send(ConsumeContext context, IPipe<ConsumeContext> next)
         {
-            MessageSchedulerContext schedulerContext = new DelayedExchangeMessageSchedulerContext(context);
+            var modelContext = context.ReceiveContext.GetPayload<ModelContext>();
+
+            var scheduler = new DelayedExchangeMessageScheduler(context, modelContext.ConnectionContext.HostSettings);
+
+            MessageSchedulerContext schedulerContext = new ConsumeMessageSchedulerContext(context, scheduler);
 
             context.GetOrAddPayload(() => schedulerContext);
 

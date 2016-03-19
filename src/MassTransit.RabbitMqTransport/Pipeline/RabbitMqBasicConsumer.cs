@@ -151,6 +151,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
 
             context.GetOrAddPayload(() => _receiveSettings);
             context.GetOrAddPayload(() => _model);
+            context.GetOrAddPayload(() => _model.ConnectionContext);
 
             try
             {

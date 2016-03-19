@@ -13,6 +13,7 @@
 namespace MassTransit.AzureServiceBusTransport
 {
     using System;
+    using Contexts;
     using Microsoft.ServiceBus.Messaging;
     using Util;
 
@@ -21,17 +22,19 @@ namespace MassTransit.AzureServiceBusTransport
         IMessageSessionAsyncHandlerFactory
     {
         readonly ISessionReceiver _receiver;
+        readonly ConnectionContext _context;
         readonly ITaskSupervisor _supervisor;
 
-        public MessageSessionAsyncHandlerFactory(ITaskSupervisor supervisor, ISessionReceiver receiver)
+        public MessageSessionAsyncHandlerFactory(ConnectionContext context, ITaskSupervisor supervisor, ISessionReceiver receiver)
         {
+            _context = context;
             _supervisor = supervisor;
             _receiver = receiver;
         }
 
         public IMessageSessionAsyncHandler CreateInstance(MessageSession session, BrokeredMessage message)
         {
-            return new MessageSessionAsyncHandler(_supervisor, _receiver, session, message);
+            return new MessageSessionAsyncHandler(_context, _supervisor, _receiver, session, message);
         }
 
         public void DisposeInstance(IMessageSessionAsyncHandler handler)

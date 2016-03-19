@@ -15,6 +15,7 @@ namespace MassTransit.AzureServiceBusTransport
     using System;
     using System.Threading;
     using System.Threading.Tasks;
+    using Contexts;
     using Internals.Extensions;
     using Logging;
     using MassTransit.Pipeline;
@@ -51,8 +52,7 @@ namespace MassTransit.AzureServiceBusTransport
         int _maxPendingDeliveryCount;
         bool _shuttingDown;
 
-        public SessionReceiver(QueueClient queueClient, Uri inputAddress, IPipe<ReceiveContext> receivePipe, ReceiveSettings receiveSettings,
-            IReceiveObserver receiveObserver, ITaskSupervisor supervisor)
+        public SessionReceiver(ConnectionContext context, QueueClient queueClient, Uri inputAddress, IPipe<ReceiveContext> receivePipe, ReceiveSettings receiveSettings, IReceiveObserver receiveObserver, ITaskSupervisor supervisor)
         {
             _queueClient = queueClient;
             _inputAddress = inputAddress;
@@ -87,7 +87,7 @@ namespace MassTransit.AzureServiceBusTransport
                 }
             };
 
-            IMessageSessionAsyncHandlerFactory handlerFactory = new MessageSessionAsyncHandlerFactory(supervisor, this);
+            IMessageSessionAsyncHandlerFactory handlerFactory = new MessageSessionAsyncHandlerFactory(context, supervisor, this);
             queueClient.RegisterSessionHandlerFactoryAsync(handlerFactory, options);
 
             _participant.SetReady();

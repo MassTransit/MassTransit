@@ -16,6 +16,7 @@ namespace MassTransit.Pipeline.Filters
     using System.Diagnostics;
     using System.Threading.Tasks;
     using Context;
+    using Scheduling;
 
 
     /// <summary>
@@ -40,7 +41,9 @@ namespace MassTransit.Pipeline.Filters
         [DebuggerNonUserCode]
         Task IFilter<ConsumeContext>.Send(ConsumeContext context, IPipe<ConsumeContext> next)
         {
-            MessageSchedulerContext schedulerContext = new ConsumeMessageSchedulerContext(context, _schedulerAddress);
+            var scheduler = new EndpointMessageScheduler(context, _schedulerAddress);
+
+            MessageSchedulerContext schedulerContext = new ConsumeMessageSchedulerContext(context, scheduler);
 
             context.GetOrAddPayload(() => schedulerContext);
 

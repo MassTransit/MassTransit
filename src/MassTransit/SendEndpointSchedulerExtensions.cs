@@ -16,28 +16,26 @@ namespace MassTransit
     using System.Threading;
     using System.Threading.Tasks;
     using Pipeline;
-    using RabbitMqTransport;
     using Scheduling;
 
 
-    public static class SchedulePublishExtensions
+    public static class SendEndpointSchedulerExtensions
     {
         /// <summary>
         /// Send a message
         /// </summary>
         /// <typeparam name="T">The message type</typeparam>
-        /// <param name="context">The consume context</param>
-        /// <param name="scheduledTime">The time at which the message should be delivered to the queue</param>
+        /// <param name="endpoint">The message scheduler endpoint</param>
         /// <param name="message">The message</param>
+        /// <param name="destinationAddress">The destination address where the schedule message should be sent</param>
+        /// <param name="scheduledTime">The time at which the message should be delivered to the queue</param>
         /// <param name="cancellationToken"></param>
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
-        public static Task<ScheduledMessage<T>> SchedulePublish<T>(this ConsumeContext context, DateTime scheduledTime, T message,
+        public static Task<ScheduledMessage<T>> ScheduleSend<T>(this ISendEndpoint endpoint, Uri destinationAddress, DateTime scheduledTime, T message,
             CancellationToken cancellationToken = default(CancellationToken))
             where T : class
         {
-            var destinationAddress = GetDestinationAddress(context, typeof(T));
-
-            var scheduler = context.GetPayload<MessageSchedulerContext>();
+            IMessageScheduler scheduler = new EndpointMessageScheduler(endpoint);
 
             return scheduler.ScheduleSend(destinationAddress, scheduledTime, message, cancellationToken);
         }
@@ -46,19 +44,18 @@ namespace MassTransit
         /// Send a message
         /// </summary>
         /// <typeparam name="T">The message type</typeparam>
-        /// <param name="context">The consume context</param>
-        /// <param name="scheduledTime">The time at which the message should be delivered to the queue</param>
+        /// <param name="endpoint">The message scheduler endpoint</param>
         /// <param name="message">The message</param>
+        /// <param name="destinationAddress">The destination address where the schedule message should be sent</param>
+        /// <param name="scheduledTime">The time at which the message should be delivered to the queue</param>
         /// <param name="pipe"></param>
         /// <param name="cancellationToken"></param>
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
-        public static Task<ScheduledMessage<T>> SchedulePublish<T>(this ConsumeContext context, DateTime scheduledTime, T message, IPipe<SendContext<T>> pipe,
-            CancellationToken cancellationToken = default(CancellationToken))
+        public static Task<ScheduledMessage<T>> ScheduleSend<T>(this ISendEndpoint endpoint, Uri destinationAddress, DateTime scheduledTime, T message,
+            IPipe<SendContext<T>> pipe, CancellationToken cancellationToken = default(CancellationToken))
             where T : class
         {
-            var destinationAddress = GetDestinationAddress(context, typeof(T));
-
-            var scheduler = context.GetPayload<MessageSchedulerContext>();
+            IMessageScheduler scheduler = new EndpointMessageScheduler(endpoint);
 
             return scheduler.ScheduleSend(destinationAddress, scheduledTime, message, pipe, cancellationToken);
         }
@@ -67,19 +64,18 @@ namespace MassTransit
         /// Send a message
         /// </summary>
         /// <typeparam name="T">The message type</typeparam>
-        /// <param name="context">The consume context</param>
-        /// <param name="scheduledTime">The time at which the message should be delivered to the queue</param>
+        /// <param name="endpoint">The message scheduler endpoint</param>
         /// <param name="message">The message</param>
+        /// <param name="destinationAddress">The destination address where the schedule message should be sent</param>
+        /// <param name="scheduledTime">The time at which the message should be delivered to the queue</param>
         /// <param name="pipe"></param>
         /// <param name="cancellationToken"></param>
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
-        public static Task<ScheduledMessage<T>> SchedulePublish<T>(this ConsumeContext context, DateTime scheduledTime, T message, IPipe<SendContext> pipe,
-            CancellationToken cancellationToken = default(CancellationToken))
+        public static Task<ScheduledMessage<T>> ScheduleSend<T>(this ISendEndpoint endpoint, Uri destinationAddress, DateTime scheduledTime, T message,
+            IPipe<SendContext> pipe, CancellationToken cancellationToken = default(CancellationToken))
             where T : class
         {
-            var destinationAddress = GetDestinationAddress(context, typeof(T));
-
-            var scheduler = context.GetPayload<MessageSchedulerContext>();
+            IMessageScheduler scheduler = new EndpointMessageScheduler(endpoint);
 
             return scheduler.ScheduleSend(destinationAddress, scheduledTime, message, pipe, cancellationToken);
         }
@@ -87,45 +83,35 @@ namespace MassTransit
         /// <summary>
         ///     Sends an object as a message, using the type of the message instance.
         /// </summary>
-        /// <param name="context">The consume context</param>
-        /// <param name="scheduledTime">The time at which the message should be delivered to the queue</param>
+        /// <param name="endpoint">The message scheduler endpoint</param>
         /// <param name="message">The message object</param>
+        /// <param name="destinationAddress">The destination address where the schedule message should be sent</param>
+        /// <param name="scheduledTime">The time at which the message should be delivered to the queue</param>
         /// <param name="cancellationToken"></param>
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
-        public static Task<ScheduledMessage> SchedulePublish(this ConsumeContext context, DateTime scheduledTime, object message,
+        public static Task<ScheduledMessage> ScheduleSend(this ISendEndpoint endpoint, Uri destinationAddress, DateTime scheduledTime, object message,
             CancellationToken cancellationToken = default(CancellationToken))
         {
-            if (message == null)
-                throw new ArgumentNullException(nameof(message));
+            IMessageScheduler scheduler = new EndpointMessageScheduler(endpoint);
 
-            var messageType = message.GetType();
-
-            var destinationAddress = GetDestinationAddress(context, messageType);
-
-            var scheduler = context.GetPayload<MessageSchedulerContext>();
-
-            return scheduler.ScheduleSend(destinationAddress, scheduledTime, message, messageType, cancellationToken);
+            return scheduler.ScheduleSend(destinationAddress, scheduledTime, message, cancellationToken);
         }
 
         /// <summary>
         ///     Sends an object as a message, using the message type specified. If the object cannot be cast
         ///     to the specified message type, an exception will be thrown.
         /// </summary>
-        /// <param name="context">The consume context</param>
-        /// <param name="scheduledTime">The time at which the message should be delivered to the queue</param>
+        /// <param name="endpoint">The message scheduler endpoint</param>
         /// <param name="message">The message object</param>
+        /// <param name="destinationAddress">The destination address where the schedule message should be sent</param>
+        /// <param name="scheduledTime">The time at which the message should be delivered to the queue</param>
         /// <param name="messageType">The type of the message (use message.GetType() if desired)</param>
         /// <param name="cancellationToken"></param>
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
-        public static Task<ScheduledMessage> SchedulePublish(this ConsumeContext context, DateTime scheduledTime, object message, Type messageType,
-            CancellationToken cancellationToken = default(CancellationToken))
+        public static Task<ScheduledMessage> ScheduleSend(this ISendEndpoint endpoint, Uri destinationAddress, DateTime scheduledTime, object message,
+            Type messageType, CancellationToken cancellationToken = default(CancellationToken))
         {
-            if (messageType == null)
-                throw new ArgumentNullException(nameof(messageType));
-
-            var destinationAddress = GetDestinationAddress(context, messageType);
-
-            var scheduler = context.GetPayload<MessageSchedulerContext>();
+            IMessageScheduler scheduler = new EndpointMessageScheduler(endpoint);
 
             return scheduler.ScheduleSend(destinationAddress, scheduledTime, message, messageType, cancellationToken);
         }
@@ -134,23 +120,17 @@ namespace MassTransit
         ///     Sends an object as a message, using the message type specified. If the object cannot be cast
         ///     to the specified message type, an exception will be thrown.
         /// </summary>
-        /// <param name="context">The consume context</param>
-        /// <param name="scheduledTime">The time at which the message should be delivered to the queue</param>
+        /// <param name="endpoint">The message scheduler endpoint</param>
         /// <param name="message">The message object</param>
+        /// <param name="destinationAddress">The destination address where the schedule message should be sent</param>
+        /// <param name="scheduledTime">The time at which the message should be delivered to the queue</param>
         /// <param name="pipe"></param>
         /// <param name="cancellationToken"></param>
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
-        public static Task<ScheduledMessage> SchedulePublish(this ConsumeContext context, DateTime scheduledTime, object message, IPipe<SendContext> pipe,
-            CancellationToken cancellationToken = default(CancellationToken))
+        public static Task<ScheduledMessage> ScheduleSend(this ISendEndpoint endpoint, Uri destinationAddress, DateTime scheduledTime, object message,
+            IPipe<SendContext> pipe, CancellationToken cancellationToken = default(CancellationToken))
         {
-            if (message == null)
-                throw new ArgumentNullException(nameof(message));
-
-            var messageType = message.GetType();
-
-            var destinationAddress = GetDestinationAddress(context, messageType);
-
-            var scheduler = context.GetPayload<MessageSchedulerContext>();
+            IMessageScheduler scheduler = new EndpointMessageScheduler(endpoint);
 
             return scheduler.ScheduleSend(destinationAddress, scheduledTime, message, pipe, cancellationToken);
         }
@@ -159,19 +139,18 @@ namespace MassTransit
         ///     Sends an object as a message, using the message type specified. If the object cannot be cast
         ///     to the specified message type, an exception will be thrown.
         /// </summary>
-        /// <param name="context">The consume context</param>
-        /// <param name="scheduledTime">The time at which the message should be delivered to the queue</param>
+        /// <param name="endpoint">The message scheduler endpoint</param>
         /// <param name="message">The message object</param>
+        /// <param name="destinationAddress">The destination address where the schedule message should be sent</param>
+        /// <param name="scheduledTime">The time at which the message should be delivered to the queue</param>
         /// <param name="messageType">The type of the message (use message.GetType() if desired)</param>
         /// <param name="pipe"></param>
         /// <param name="cancellationToken"></param>
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
-        public static Task<ScheduledMessage> SchedulePublish(this ConsumeContext context, DateTime scheduledTime, object message, Type messageType,
-            IPipe<SendContext> pipe, CancellationToken cancellationToken = default(CancellationToken))
+        public static Task<ScheduledMessage> ScheduleSend(this ISendEndpoint endpoint, Uri destinationAddress, DateTime scheduledTime, object message,
+            Type messageType, IPipe<SendContext> pipe, CancellationToken cancellationToken = default(CancellationToken))
         {
-            var destinationAddress = GetDestinationAddress(context, messageType);
-
-            var scheduler = context.GetPayload<MessageSchedulerContext>();
+            IMessageScheduler scheduler = new EndpointMessageScheduler(endpoint);
 
             return scheduler.ScheduleSend(destinationAddress, scheduledTime, message, messageType, pipe, cancellationToken);
         }
@@ -181,18 +160,17 @@ namespace MassTransit
         ///     object specified
         /// </summary>
         /// <typeparam name="T">The interface type to send</typeparam>
-        /// <param name="context">The consume context</param>
-        /// <param name="scheduledTime">The time at which the message should be delivered to the queue</param>
+        /// <param name="endpoint">The message scheduler endpoint</param>
         /// <param name="values">The property values to initialize on the interface</param>
+        /// <param name="destinationAddress">The destination address where the schedule message should be sent</param>
+        /// <param name="scheduledTime">The time at which the message should be delivered to the queue</param>
         /// <param name="cancellationToken"></param>
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
-        public static Task<ScheduledMessage<T>> SchedulePublish<T>(this ConsumeContext context, DateTime scheduledTime, object values,
+        public static Task<ScheduledMessage<T>> ScheduleSend<T>(this ISendEndpoint endpoint, Uri destinationAddress, DateTime scheduledTime, object values,
             CancellationToken cancellationToken = default(CancellationToken))
             where T : class
         {
-            var destinationAddress = GetDestinationAddress(context, typeof(T));
-
-            var scheduler = context.GetPayload<MessageSchedulerContext>();
+            IMessageScheduler scheduler = new EndpointMessageScheduler(endpoint);
 
             return scheduler.ScheduleSend<T>(destinationAddress, scheduledTime, values, cancellationToken);
         }
@@ -202,19 +180,18 @@ namespace MassTransit
         ///     object specified
         /// </summary>
         /// <typeparam name="T">The interface type to send</typeparam>
-        /// <param name="context">The consume context</param>
-        /// <param name="scheduledTime">The time at which the message should be delivered to the queue</param>
+        /// <param name="endpoint">The message scheduler endpoint</param>
         /// <param name="values">The property values to initialize on the interface</param>
+        /// <param name="destinationAddress">The destination address where the schedule message should be sent</param>
+        /// <param name="scheduledTime">The time at which the message should be delivered to the queue</param>
         /// <param name="pipe"></param>
         /// <param name="cancellationToken"></param>
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
-        public static Task<ScheduledMessage<T>> SchedulePublish<T>(this ConsumeContext context, DateTime scheduledTime, object values,
+        public static Task<ScheduledMessage<T>> ScheduleSend<T>(this ISendEndpoint endpoint, Uri destinationAddress, DateTime scheduledTime, object values,
             IPipe<SendContext<T>> pipe, CancellationToken cancellationToken = default(CancellationToken))
             where T : class
         {
-            var destinationAddress = GetDestinationAddress(context, typeof(T));
-
-            var scheduler = context.GetPayload<MessageSchedulerContext>();
+            IMessageScheduler scheduler = new EndpointMessageScheduler(endpoint);
 
             return scheduler.ScheduleSend(destinationAddress, scheduledTime, values, pipe, cancellationToken);
         }
@@ -224,19 +201,18 @@ namespace MassTransit
         ///     object specified
         /// </summary>
         /// <typeparam name="T">The interface type to send</typeparam>
-        /// <param name="context">The consume context</param>
-        /// <param name="scheduledTime">The time at which the message should be delivered to the queue</param>
+        /// <param name="endpoint">The message scheduler endpoint</param>
         /// <param name="values">The property values to initialize on the interface</param>
+        /// <param name="destinationAddress">The destination address where the schedule message should be sent</param>
+        /// <param name="scheduledTime">The time at which the message should be delivered to the queue</param>
         /// <param name="pipe"></param>
         /// <param name="cancellationToken"></param>
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
-        public static Task<ScheduledMessage<T>> SchedulePublish<T>(this ConsumeContext context, DateTime scheduledTime, object values, IPipe<SendContext> pipe,
-            CancellationToken cancellationToken = default(CancellationToken))
+        public static Task<ScheduledMessage<T>> ScheduleSend<T>(this ISendEndpoint endpoint, Uri destinationAddress, DateTime scheduledTime, object values,
+            IPipe<SendContext> pipe, CancellationToken cancellationToken = default(CancellationToken))
             where T : class
         {
-            var destinationAddress = GetDestinationAddress(context, typeof(T));
-
-            var scheduler = context.GetPayload<MessageSchedulerContext>();
+            IMessageScheduler scheduler = new EndpointMessageScheduler(endpoint);
 
             return scheduler.ScheduleSend<T>(destinationAddress, scheduledTime, values, pipe, cancellationToken);
         }
@@ -245,127 +221,134 @@ namespace MassTransit
         /// Send a message
         /// </summary>
         /// <typeparam name="T">The message type</typeparam>
-        /// <param name="context">The consume context</param>
-        /// <param name="delay">The time at which the message should be delivered to the queue</param>
+        /// <param name="endpoint">The message scheduler endpoint</param>
         /// <param name="message">The message</param>
+        /// <param name="destinationAddress">The destination address where the schedule message should be sent</param>
+        /// <param name="delay">The time at which the message should be delivered to the queue</param>
         /// <param name="cancellationToken"></param>
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
-        public static Task<ScheduledMessage<T>> SchedulePublish<T>(this ConsumeContext context, TimeSpan delay, T message,
+        public static Task<ScheduledMessage<T>> ScheduleSend<T>(this ISendEndpoint endpoint, Uri destinationAddress, TimeSpan delay, T message,
             CancellationToken cancellationToken = default(CancellationToken))
             where T : class
         {
             var scheduledTime = DateTime.UtcNow + delay;
 
-            return SchedulePublish(context, scheduledTime, message, cancellationToken);
+            return ScheduleSend(endpoint, destinationAddress, scheduledTime, message, cancellationToken);
         }
 
         /// <summary>
         /// Send a message
         /// </summary>
         /// <typeparam name="T">The message type</typeparam>
-        /// <param name="context">The consume context</param>
+        /// <param name="endpoint">The message scheduler endpoint</param>
         /// <param name="message">The message</param>
+        /// <param name="destinationAddress">The destination address where the schedule message should be sent</param>
         /// <param name="delay">The time at which the message should be delivered to the queue</param>
         /// <param name="pipe"></param>
         /// <param name="cancellationToken"></param>
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
-        public static Task<ScheduledMessage<T>> SchedulePublish<T>(this ConsumeContext context, TimeSpan delay, T message,
+        public static Task<ScheduledMessage<T>> ScheduleSend<T>(this ISendEndpoint endpoint, Uri destinationAddress, TimeSpan delay, T message,
             IPipe<SendContext<T>> pipe, CancellationToken cancellationToken = default(CancellationToken))
             where T : class
         {
             var scheduledTime = DateTime.UtcNow + delay;
 
-            return SchedulePublish(context, scheduledTime, message, pipe, cancellationToken);
+            return ScheduleSend(endpoint, destinationAddress, scheduledTime, message, pipe, cancellationToken);
         }
 
         /// <summary>
         /// Send a message
         /// </summary>
         /// <typeparam name="T">The message type</typeparam>
-        /// <param name="context">The consume context</param>
+        /// <param name="endpoint">The message scheduler endpoint</param>
         /// <param name="message">The message</param>
+        /// <param name="destinationAddress">The destination address where the schedule message should be sent</param>
         /// <param name="delay">The time at which the message should be delivered to the queue</param>
         /// <param name="pipe"></param>
         /// <param name="cancellationToken"></param>
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
-        public static Task<ScheduledMessage<T>> SchedulePublish<T>(this ConsumeContext context, TimeSpan delay, T message,
+        public static Task<ScheduledMessage<T>> ScheduleSend<T>(this ISendEndpoint endpoint, Uri destinationAddress, TimeSpan delay, T message,
             IPipe<SendContext> pipe, CancellationToken cancellationToken = default(CancellationToken))
             where T : class
         {
             var scheduledTime = DateTime.UtcNow + delay;
 
-            return SchedulePublish(context, scheduledTime, message, pipe, cancellationToken);
+            return ScheduleSend(endpoint, destinationAddress, scheduledTime, message, pipe, cancellationToken);
         }
 
         /// <summary>
         ///     Sends an object as a message, using the type of the message instance.
         /// </summary>
-        /// <param name="context">The consume context</param>
+        /// <param name="endpoint">The message scheduler endpoint</param>
         /// <param name="message">The message object</param>
+        /// <param name="destinationAddress">The destination address where the schedule message should be sent</param>
         /// <param name="delay">The time at which the message should be delivered to the queue</param>
         /// <param name="cancellationToken"></param>
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
-        public static Task<ScheduledMessage> SchedulePublish(this ConsumeContext context, TimeSpan delay, object message,
+        public static Task<ScheduledMessage> ScheduleSend(this ISendEndpoint endpoint, Uri destinationAddress, TimeSpan delay, object message,
             CancellationToken cancellationToken = default(CancellationToken))
         {
             var scheduledTime = DateTime.UtcNow + delay;
 
-            return SchedulePublish(context, scheduledTime, message, cancellationToken);
+            return ScheduleSend(endpoint, destinationAddress, scheduledTime, message, cancellationToken);
         }
 
         /// <summary>
         ///     Sends an object as a message, using the message type specified. If the object cannot be cast
         ///     to the specified message type, an exception will be thrown.
         /// </summary>
-        /// <param name="context">The consume context</param>
+        /// <param name="endpoint">The message scheduler endpoint</param>
         /// <param name="message">The message object</param>
-        /// <param name="messageType">The type of the message (use message.GetType() if desired)</param>
+        /// <param name="destinationAddress">The destination address where the schedule message should be sent</param>
         /// <param name="delay">The time at which the message should be delivered to the queue</param>
+        /// <param name="messageType">The type of the message (use message.GetType() if desired)</param>
         /// <param name="cancellationToken"></param>
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
-        public static Task<ScheduledMessage> SchedulePublish(this ConsumeContext context, TimeSpan delay, object message, Type messageType,
-            CancellationToken cancellationToken = default(CancellationToken))
+        public static Task<ScheduledMessage> ScheduleSend(this ISendEndpoint endpoint, Uri destinationAddress, TimeSpan delay, object message,
+            Type messageType, CancellationToken cancellationToken = default(CancellationToken))
         {
             var scheduledTime = DateTime.UtcNow + delay;
 
-            return SchedulePublish(context, scheduledTime, message, messageType, cancellationToken);
+            return ScheduleSend(endpoint, destinationAddress, scheduledTime, message, messageType, cancellationToken);
         }
 
         /// <summary>
         ///     Sends an object as a message, using the message type specified. If the object cannot be cast
         ///     to the specified message type, an exception will be thrown.
         /// </summary>
-        /// <param name="context">The consume context</param>
+        /// <param name="endpoint">The message scheduler endpoint</param>
         /// <param name="message">The message object</param>
+        /// <param name="destinationAddress">The destination address where the schedule message should be sent</param>
         /// <param name="delay">The time at which the message should be delivered to the queue</param>
         /// <param name="pipe"></param>
         /// <param name="cancellationToken"></param>
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
-        public static Task<ScheduledMessage> SchedulePublish(this ConsumeContext context, TimeSpan delay, object message,
+        public static Task<ScheduledMessage> ScheduleSend(this ISendEndpoint endpoint, Uri destinationAddress, TimeSpan delay, object message,
             IPipe<SendContext> pipe, CancellationToken cancellationToken = default(CancellationToken))
         {
             var scheduledTime = DateTime.UtcNow + delay;
 
-            return SchedulePublish(context, scheduledTime, message, pipe, cancellationToken);
+            return ScheduleSend(endpoint, destinationAddress, scheduledTime, message, pipe, cancellationToken);
         }
 
         /// <summary>
         ///     Sends an object as a message, using the message type specified. If the object cannot be cast
         ///     to the specified message type, an exception will be thrown.
         /// </summary>
-        /// <param name="context">The consume context</param>
+        /// <param name="endpoint">The message scheduler endpoint</param>
         /// <param name="message">The message object</param>
-        /// <param name="messageType">The type of the message (use message.GetType() if desired)</param>
+        /// <param name="destinationAddress">The destination address where the schedule message should be sent</param>
         /// <param name="delay">The time at which the message should be delivered to the queue</param>
+        /// <param name="messageType">The type of the message (use message.GetType() if desired)</param>
         /// <param name="pipe"></param>
         /// <param name="cancellationToken"></param>
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
-        public static Task<ScheduledMessage> SchedulePublish(this ConsumeContext context, TimeSpan delay, object message, Type messageType,
-            IPipe<SendContext> pipe, CancellationToken cancellationToken = default(CancellationToken))
+        public static Task<ScheduledMessage> ScheduleSend(this ISendEndpoint endpoint, Uri destinationAddress, TimeSpan delay, object message,
+            Type messageType, IPipe<SendContext> pipe, CancellationToken cancellationToken = default(CancellationToken))
         {
             var scheduledTime = DateTime.UtcNow + delay;
 
-            return SchedulePublish(context, scheduledTime, message, messageType, pipe, cancellationToken);
+            return ScheduleSend(endpoint, destinationAddress, scheduledTime, message, messageType, pipe, cancellationToken);
         }
 
         /// <summary>
@@ -373,18 +356,19 @@ namespace MassTransit
         ///     object specified
         /// </summary>
         /// <typeparam name="T">The interface type to send</typeparam>
-        /// <param name="context">The consume context</param>
+        /// <param name="endpoint">The message scheduler endpoint</param>
         /// <param name="values">The property values to initialize on the interface</param>
+        /// <param name="destinationAddress">The destination address where the schedule message should be sent</param>
         /// <param name="delay">The time at which the message should be delivered to the queue</param>
         /// <param name="cancellationToken"></param>
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
-        public static Task<ScheduledMessage<T>> SchedulePublish<T>(this ConsumeContext context, TimeSpan delay, object values,
+        public static Task<ScheduledMessage<T>> ScheduleSend<T>(this ISendEndpoint endpoint, Uri destinationAddress, TimeSpan delay, object values,
             CancellationToken cancellationToken = default(CancellationToken))
             where T : class
         {
             var scheduledTime = DateTime.UtcNow + delay;
 
-            return SchedulePublish<T>(context, scheduledTime, values, cancellationToken);
+            return ScheduleSend<T>(endpoint, destinationAddress, scheduledTime, values, cancellationToken);
         }
 
         /// <summary>
@@ -392,19 +376,20 @@ namespace MassTransit
         ///     object specified
         /// </summary>
         /// <typeparam name="T">The interface type to send</typeparam>
-        /// <param name="context">The consume context</param>
+        /// <param name="endpoint">The message scheduler endpoint</param>
         /// <param name="values">The property values to initialize on the interface</param>
+        /// <param name="destinationAddress">The destination address where the schedule message should be sent</param>
         /// <param name="delay">The time at which the message should be delivered to the queue</param>
         /// <param name="pipe"></param>
         /// <param name="cancellationToken"></param>
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
-        public static Task<ScheduledMessage<T>> SchedulePublish<T>(this ConsumeContext context, TimeSpan delay, object values,
+        public static Task<ScheduledMessage<T>> ScheduleSend<T>(this ISendEndpoint endpoint, Uri destinationAddress, TimeSpan delay, object values,
             IPipe<SendContext<T>> pipe, CancellationToken cancellationToken = default(CancellationToken))
             where T : class
         {
             var scheduledTime = DateTime.UtcNow + delay;
 
-            return SchedulePublish(context, scheduledTime, values, pipe, cancellationToken);
+            return ScheduleSend(endpoint, destinationAddress, scheduledTime, values, pipe, cancellationToken);
         }
 
         /// <summary>
@@ -412,30 +397,46 @@ namespace MassTransit
         ///     object specified
         /// </summary>
         /// <typeparam name="T">The interface type to send</typeparam>
-        /// <param name="context">The consume context</param>
+        /// <param name="endpoint">The message scheduler endpoint</param>
         /// <param name="values">The property values to initialize on the interface</param>
+        /// <param name="destinationAddress">The destination address where the schedule message should be sent</param>
         /// <param name="delay">The time at which the message should be delivered to the queue</param>
         /// <param name="pipe"></param>
         /// <param name="cancellationToken"></param>
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
-        public static Task<ScheduledMessage<T>> SchedulePublish<T>(this ConsumeContext context, TimeSpan delay, object values,
+        public static Task<ScheduledMessage<T>> ScheduleSend<T>(this ISendEndpoint endpoint, Uri destinationAddress, TimeSpan delay, object values,
             IPipe<SendContext> pipe, CancellationToken cancellationToken = default(CancellationToken))
             where T : class
         {
             var scheduledTime = DateTime.UtcNow + delay;
 
-            return SchedulePublish<T>(context, scheduledTime, values, pipe, cancellationToken);
+            return ScheduleSend<T>(endpoint, destinationAddress, scheduledTime, values, pipe, cancellationToken);
         }
 
-        static Uri GetDestinationAddress(ConsumeContext context, Type messageType)
+        /// <summary>
+        /// Cancel a scheduled message using the scheduled message instance
+        /// </summary>
+        /// <param name="endpoint">The endpoint of the scheduling service</param>
+        /// <param name="message">The schedule message reference</param>
+        public static Task CancelScheduledSend<T>(this ISendEndpoint endpoint, ScheduledMessage<T> message)
+            where T : class
         {
-            var modelContext = context.ReceiveContext.GetPayload<ModelContext>();
+            if (message == null)
+                throw new ArgumentNullException(nameof(message));
 
-            var hostSettings = modelContext.ConnectionContext.HostSettings;
+            return CancelScheduledSend(endpoint, message.TokenId);
+        }
 
-            var sendSettings = hostSettings.GetSendSettings(messageType);
+        /// <summary>
+        /// Cancel a scheduled message using the tokenId that was returned when the message was scheduled.
+        /// </summary>
+        /// <param name="endpoint">The endpoint of the scheduling service</param>
+        /// <param name="tokenId">The tokenId of the scheduled message</param>
+        public static Task CancelScheduledSend(this ISendEndpoint endpoint, Guid tokenId)
+        {
+            IMessageScheduler scheduler = new EndpointMessageScheduler(endpoint);
 
-            return hostSettings.GetSendAddress(sendSettings);
+            return scheduler.CancelScheduledSend(tokenId);
         }
     }
 }

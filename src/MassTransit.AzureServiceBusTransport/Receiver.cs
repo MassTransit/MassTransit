@@ -38,10 +38,12 @@ namespace MassTransit.AzureServiceBusTransport
         long _deliveryCount;
         int _maxPendingDeliveryCount;
         bool _shuttingDown;
+        readonly ConnectionContext _context;
 
-        public Receiver(MessageReceiver messageReceiver, Uri inputAddress, IPipe<ReceiveContext> receivePipe, ReceiveSettings receiveSettings,
+        public Receiver(ConnectionContext context, MessageReceiver messageReceiver, Uri inputAddress, IPipe<ReceiveContext> receivePipe, ReceiveSettings receiveSettings,
             IReceiveObserver receiveObserver, ITaskSupervisor supervisor)
         {
+            _context = context;
             _messageReceiver = messageReceiver;
             _inputAddress = inputAddress;
             _receivePipe = receivePipe;
@@ -140,6 +142,7 @@ namespace MassTransit.AzureServiceBusTransport
                 _log.DebugFormat("Receiving {0}:{1} - {2}", deliveryCount, message.MessageId, _receiveSettings.QueueDescription.Path);
 
             var context = new ServiceBusReceiveContext(_inputAddress, message, _receiveObserver);
+            context.GetOrAddPayload(() => _context);
 
             try
             {

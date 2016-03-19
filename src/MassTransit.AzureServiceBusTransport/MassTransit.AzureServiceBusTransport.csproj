@@ -72,7 +72,6 @@
     <Compile Include="Configuration\ReceiveEndpointSettings.cs" />
     <Compile Include="Configuration\ServiceBusReceiveEndpointConfigurator.cs" />
     <Compile Include="Configuration\ServiceBusMessageSchedulerSpecification.cs" />
-    <Compile Include="Contexts\ServiceBusMessageSchedulerContext.cs" />
     <Compile Include="Defaults.cs" />
     <Compile Include="Hosting\ServiceBusAmqpTransportSettings.cs" />
     <Compile Include="Hosting\ServiceBusHostBusFactory.cs" />
@@ -89,8 +88,11 @@
     <Compile Include="Pipeline\MessageSessionReceiverFilter.cs" />
     <Compile Include="Pipeline\ServiceBusMessageSchedulerFilter.cs" />
     <Compile Include="ScheduleMessageExtensions.cs" />
+    <Compile Include="SchedulePublishExtensions.cs" />
+    <Compile Include="Scheduling\ServiceBusScheduleMessagePipe.cs" />
+    <Compile Include="Scheduling\ServiceBusMessageScheduler.cs" />
     <Compile Include="ServiceBusAddressExtensions.cs" />
-    <Compile Include="ServiceBusPublishEndpoint.cs" />
+    <Compile Include="ServiceBusPublishEndpointProvider.cs" />
     <Compile Include="ServiceBusSendContext.cs" />
     <Compile Include="ServiceBusSendContextExtensions.cs" />
     <Compile Include="ServiceBusSendEndpointProvider.cs" />

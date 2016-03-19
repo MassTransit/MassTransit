@@ -27,10 +27,12 @@ namespace MassTransit.AzureServiceBusTransport
         readonly BrokeredMessage _message;
         readonly ISessionReceiver _receiver;
         readonly MessageSession _session;
+        readonly ConnectionContext _context;
         readonly ITaskSupervisor _supervisor;
 
-        public MessageSessionAsyncHandler(ITaskSupervisor supervisor, ISessionReceiver receiver, MessageSession session, BrokeredMessage message)
+        public MessageSessionAsyncHandler(ConnectionContext context, ITaskSupervisor supervisor, ISessionReceiver receiver, MessageSession session, BrokeredMessage message)
         {
+            _context = context;
             _supervisor = supervisor;
             _receiver = receiver;
             _session = session;
@@ -51,7 +53,9 @@ namespace MassTransit.AzureServiceBusTransport
                 _log.DebugFormat("Receiving {0}:{1}({3}) - {2}", deliveryCount, message.MessageId, _receiver.QueuePath, session.SessionId);
 
             var context = new ServiceBusReceiveContext(_receiver.InputAddress, message, _receiver.ReceiveObserver);
+
             context.GetOrAddPayload<MessageSessionContext>(() => new BrokeredMessageSessionContext(session));
+            context.GetOrAddPayload(() => _context);
 
             try
             {

@@ -80,7 +80,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
             RabbitMqReceiveEndpointBuilder endpointBuilder = null;
             var receivePipe = CreateReceivePipe(builder, consumePipe =>
             {
-                endpointBuilder = new RabbitMqReceiveEndpointBuilder(consumePipe, _host.MessageNameFormatter, _bindMessageExchanges);
+                endpointBuilder = new RabbitMqReceiveEndpointBuilder(consumePipe, _host.Settings.MessageNameFormatter, _bindMessageExchanges);
 
                 endpointBuilder.AddExchangeBindings(_exchangeBindings.ToArray());
 

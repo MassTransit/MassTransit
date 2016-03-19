@@ -37,8 +37,6 @@ namespace MassTransit.RabbitMqTransport
         {
             _hostSettings = hostSettings;
 
-            MessageNameFormatter = new RabbitMqMessageNameFormatter();
-
             var exceptionFilter = Retry.Selected<RabbitMqConnectionException>();
 
             _connectionRetryPolicy = exceptionFilter.Exponential(1000, TimeSpan.FromMilliseconds(100), TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(1));
@@ -98,7 +96,6 @@ namespace MassTransit.RabbitMqTransport
             _connectionCache.Probe(scope);
         }
 
-        public IMessageNameFormatter MessageNameFormatter { get; }
         public IConnectionCache ConnectionCache => _connectionCache;
         public RabbitMqHostSettings Settings => _hostSettings;
         public IRetryPolicy ConnectionRetryPolicy => _connectionRetryPolicy;
