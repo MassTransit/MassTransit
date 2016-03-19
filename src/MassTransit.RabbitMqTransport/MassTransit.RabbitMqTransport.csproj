@@ -80,7 +80,6 @@
     <Compile Include="Configuration\RabbitMqConsumerPipeSpecification.cs" />
     <Compile Include="Configuration\ConsumerPipeConfiguratorExtensions.cs" />
     <Compile Include="Contexts\DelayedExchangeMessageRedeliveryContext.cs" />
-    <Compile Include="Contexts\DelayedExchangeMessageSchedulerContext.cs" />
     <Compile Include="Contexts\RabbitMqSendHeaders.cs" />
     <Compile Include="Contexts\RabbitMqConnectionContext.cs" />
     <Compile Include="Contexts\RabbitMqHeaderProvider.cs" />
@@ -148,6 +147,7 @@
     <Compile Include="RabbitMqSendContext.cs" />
     <Compile Include="RabbitMqSendTransport.cs" />
     <Compile Include="SchedulePublishExtensions.cs" />
+    <Compile Include="Scheduling\DelayedExchangeMessageScheduler.cs" />
     <Compile Include="SendSettings.cs" />
     <Compile Include="Testing\BusTestScenarioExtensions.cs" />
     <Compile Include="Testing\RabbitMqBusTestScenarioBuilder.cs" />

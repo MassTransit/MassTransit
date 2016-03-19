@@ -15,9 +15,11 @@ namespace MassTransit
     using System;
     using System.Threading;
     using System.Threading.Tasks;
+    using AzureServiceBusTransport.Contexts;
+    using AzureServiceBusTransport.Scheduling;
     using Pipeline;
-    using RabbitMqTransport;
     using Scheduling;
+    using Util;
 
 
     public static class SchedulePublishExtensions
@@ -35,11 +37,9 @@ namespace MassTransit
             CancellationToken cancellationToken = default(CancellationToken))
             where T : class
         {
-            var destinationAddress = GetDestinationAddress(context, typeof(T));
+            var pipeProxy = new ServiceBusScheduleMessagePipe<T>(scheduledTime);
 
-            var scheduler = context.GetPayload<MessageSchedulerContext>();
-
-            return scheduler.ScheduleSend(destinationAddress, scheduledTime, message, cancellationToken);
+            return Schedule(context, scheduledTime, message, pipeProxy, cancellationToken);
         }
 
         /// <summary>
@@ -56,11 +56,9 @@ namespace MassTransit
             CancellationToken cancellationToken = default(CancellationToken))
             where T : class
         {
-            var destinationAddress = GetDestinationAddress(context, typeof(T));
+            var pipeProxy = new ServiceBusScheduleMessagePipe<T>(scheduledTime, pipe);
 
-            var scheduler = context.GetPayload<MessageSchedulerContext>();
-
-            return scheduler.ScheduleSend(destinationAddress, scheduledTime, message, pipe, cancellationToken);
+            return Schedule(context, scheduledTime, message, pipeProxy, cancellationToken);
         }
 
         /// <summary>
@@ -77,11 +75,9 @@ namespace MassTransit
             CancellationToken cancellationToken = default(CancellationToken))
             where T : class
         {
-            var destinationAddress = GetDestinationAddress(context, typeof(T));
+            var pipeProxy = new ServiceBusScheduleMessagePipe<T>(scheduledTime, pipe);
 
-            var scheduler = context.GetPayload<MessageSchedulerContext>();
-
-            return scheduler.ScheduleSend(destinationAddress, scheduledTime, message, pipe, cancellationToken);
+            return Schedule(context, scheduledTime, message, pipeProxy, cancellationToken);
         }
 
         /// <summary>
@@ -100,11 +96,9 @@ namespace MassTransit
 
             var messageType = message.GetType();
 
-            var destinationAddress = GetDestinationAddress(context, messageType);
+            var pipeProxy = new ServiceBusScheduleMessagePipe(scheduledTime);
 
-            var scheduler = context.GetPayload<MessageSchedulerContext>();
-
-            return scheduler.ScheduleSend(destinationAddress, scheduledTime, message, messageType, cancellationToken);
+            return Schedule(context, scheduledTime, message, messageType, pipeProxy, cancellationToken);
         }
 
         /// <summary>
@@ -120,14 +114,14 @@ namespace MassTransit
         public static Task<ScheduledMessage> SchedulePublish(this ConsumeContext context, DateTime scheduledTime, object message, Type messageType,
             CancellationToken cancellationToken = default(CancellationToken))
         {
+            if (message == null)
+                throw new ArgumentNullException(nameof(message));
             if (messageType == null)
                 throw new ArgumentNullException(nameof(messageType));
 
-            var destinationAddress = GetDestinationAddress(context, messageType);
+            var pipeProxy = new ServiceBusScheduleMessagePipe(scheduledTime);
 
-            var scheduler = context.GetPayload<MessageSchedulerContext>();
-
-            return scheduler.ScheduleSend(destinationAddress, scheduledTime, message, messageType, cancellationToken);
+            return Schedule(context, scheduledTime, message, messageType, pipeProxy, cancellationToken);
         }
 
         /// <summary>
@@ -148,11 +142,9 @@ namespace MassTransit
 
             var messageType = message.GetType();
 
-            var destinationAddress = GetDestinationAddress(context, messageType);
+            var pipeProxy = new ServiceBusScheduleMessagePipe(scheduledTime, pipe);
 
-            var scheduler = context.GetPayload<MessageSchedulerContext>();
-
-            return scheduler.ScheduleSend(destinationAddress, scheduledTime, message, pipe, cancellationToken);
+            return Schedule(context, scheduledTime, message, messageType, pipeProxy, cancellationToken);
         }
 
         /// <summary>
@@ -169,11 +161,14 @@ namespace MassTransit
         public static Task<ScheduledMessage> SchedulePublish(this ConsumeContext context, DateTime scheduledTime, object message, Type messageType,
             IPipe<SendContext> pipe, CancellationToken cancellationToken = default(CancellationToken))
         {
-            var destinationAddress = GetDestinationAddress(context, messageType);
+            if (message == null)
+                throw new ArgumentNullException(nameof(message));
+            if (messageType == null)
+                throw new ArgumentNullException(nameof(messageType));
 
-            var scheduler = context.GetPayload<MessageSchedulerContext>();
+            var pipeProxy = new ServiceBusScheduleMessagePipe(scheduledTime, pipe);
 
-            return scheduler.ScheduleSend(destinationAddress, scheduledTime, message, messageType, pipe, cancellationToken);
+            return Schedule(context, scheduledTime, message, messageType, pipeProxy, cancellationToken);
         }
 
         /// <summary>
@@ -190,11 +185,14 @@ namespace MassTransit
             CancellationToken cancellationToken = default(CancellationToken))
             where T : class
         {
-            var destinationAddress = GetDestinationAddress(context, typeof(T));
+            if (values == null)
+                throw new ArgumentNullException(nameof(values));
 
-            var scheduler = context.GetPayload<MessageSchedulerContext>();
+            var pipeProxy = new ServiceBusScheduleMessagePipe<T>(scheduledTime);
 
-            return scheduler.ScheduleSend<T>(destinationAddress, scheduledTime, values, cancellationToken);
+            var message = TypeMetadataCache<T>.InitializeFromObject(values);
+
+            return Schedule(context, scheduledTime, message, pipeProxy, cancellationToken);
         }
 
         /// <summary>
@@ -212,11 +210,14 @@ namespace MassTransit
             IPipe<SendContext<T>> pipe, CancellationToken cancellationToken = default(CancellationToken))
             where T : class
         {
-            var destinationAddress = GetDestinationAddress(context, typeof(T));
+            if (values == null)
+                throw new ArgumentNullException(nameof(values));
 
-            var scheduler = context.GetPayload<MessageSchedulerContext>();
+            var pipeProxy = new ServiceBusScheduleMessagePipe<T>(scheduledTime, pipe);
 
-            return scheduler.ScheduleSend(destinationAddress, scheduledTime, values, pipe, cancellationToken);
+            var message = TypeMetadataCache<T>.InitializeFromObject(values);
+
+            return Schedule(context, scheduledTime, message, pipeProxy, cancellationToken);
         }
 
         /// <summary>
@@ -234,11 +235,14 @@ namespace MassTransit
             CancellationToken cancellationToken = default(CancellationToken))
             where T : class
         {
-            var destinationAddress = GetDestinationAddress(context, typeof(T));
+            if (values == null)
+                throw new ArgumentNullException(nameof(values));
 
-            var scheduler = context.GetPayload<MessageSchedulerContext>();
+            var pipeProxy = new ServiceBusScheduleMessagePipe<T>(scheduledTime, pipe);
 
-            return scheduler.ScheduleSend<T>(destinationAddress, scheduledTime, values, pipe, cancellationToken);
+            var message = TypeMetadataCache<T>.InitializeFromObject(values);
+
+            return Schedule(context, scheduledTime, message, pipeProxy, cancellationToken);
         }
 
         /// <summary>
@@ -264,13 +268,13 @@ namespace MassTransit
         /// </summary>
         /// <typeparam name="T">The message type</typeparam>
         /// <param name="context">The consume context</param>
-        /// <param name="message">The message</param>
         /// <param name="delay">The time at which the message should be delivered to the queue</param>
+        /// <param name="message">The message</param>
         /// <param name="pipe"></param>
         /// <param name="cancellationToken"></param>
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
-        public static Task<ScheduledMessage<T>> SchedulePublish<T>(this ConsumeContext context, TimeSpan delay, T message,
-            IPipe<SendContext<T>> pipe, CancellationToken cancellationToken = default(CancellationToken))
+        public static Task<ScheduledMessage<T>> SchedulePublish<T>(this ConsumeContext context, TimeSpan delay, T message, IPipe<SendContext<T>> pipe,
+            CancellationToken cancellationToken = default(CancellationToken))
             where T : class
         {
             var scheduledTime = DateTime.UtcNow + delay;
@@ -429,13 +433,48 @@ namespace MassTransit
 
         static Uri GetDestinationAddress(ConsumeContext context, Type messageType)
         {
-            var modelContext = context.ReceiveContext.GetPayload<ModelContext>();
+            var connectionContext = context.ReceiveContext.GetPayload<ConnectionContext>();
 
-            var hostSettings = modelContext.ConnectionContext.HostSettings;
+            var address = connectionContext.GetTopicAddress(messageType);
 
-            var sendSettings = hostSettings.GetSendSettings(messageType);
+            return address;
+        }
 
-            return hostSettings.GetSendAddress(sendSettings);
+        static async Task<ScheduledMessage<T>> Schedule<T>(ConsumeContext context, DateTime scheduledTime, T message, ServiceBusScheduleMessagePipe<T> pipe,
+            CancellationToken cancellationToken)
+            where T : class
+        {
+            await context.Publish(message, pipe, cancellationToken).ConfigureAwait(false);
+
+            var destinationAddress = GetDestinationAddress(context, typeof(T));
+
+            return new ScheduledMessageHandle<T>(pipe.MessageId, scheduledTime, destinationAddress, message);
+        }
+
+        static async Task<ScheduledMessage> Schedule(ConsumeContext context, DateTime scheduledTime, object message, Type messageType,
+            ServiceBusScheduleMessagePipe pipe, CancellationToken cancellationToken)
+        {
+            await context.Publish(message, pipe, cancellationToken).ConfigureAwait(false);
+
+            var destinationAddress = GetDestinationAddress(context, messageType);
+
+            return new ScheduledMessageHandle(pipe.MessageId, scheduledTime, destinationAddress);
+        }
+
+
+        class ScheduledMessageHandle :
+            ScheduledMessage
+        {
+            public ScheduledMessageHandle(Guid tokenId, DateTime scheduledTime, Uri destination)
+            {
+                TokenId = tokenId;
+                ScheduledTime = scheduledTime;
+                Destination = destination;
+            }
+
+            public Guid TokenId { get; }
+            public DateTime ScheduledTime { get; }
+            public Uri Destination { get; }
         }
     }
 }

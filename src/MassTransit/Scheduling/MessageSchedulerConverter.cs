@@ -10,7 +10,7 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Context
+namespace MassTransit.Scheduling
 {
     using System;
     using System.Threading;
@@ -24,14 +24,14 @@ namespace MassTransit.Context
     /// generic overload.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class SendEndpointConverter<T> :
-        ISendEndpointConverter
+    public class MessageSchedulerConverter<T> :
+        IMessageSchedulerConverter
         where T : class
     {
-        Task ISendEndpointConverter.Send(ISendEndpoint endpoint, object message, CancellationToken cancellationToken)
+        public async Task<ScheduledMessage> ScheduleSend(IMessageScheduler scheduler, Uri destinationAddress, DateTime scheduledTime, object message, CancellationToken cancellationToken = default(CancellationToken))
         {
-            if (endpoint == null)
-                throw new ArgumentNullException(nameof(endpoint));
+            if (scheduler == null)
+                throw new ArgumentNullException(nameof(scheduler));
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
 
@@ -39,14 +39,15 @@ namespace MassTransit.Context
             if (msg == null)
                 throw new ArgumentException("Unexpected message type: " + message.GetType().GetTypeName());
 
-            return endpoint.Send(msg, cancellationToken);
+            ScheduledMessage scheduleSend = await scheduler.ScheduleSend(destinationAddress, scheduledTime, msg, cancellationToken).ConfigureAwait(false);
+
+            return scheduleSend;
         }
 
-        Task ISendEndpointConverter.Send(ISendEndpoint endpoint, object message, IPipe<SendContext> pipe,
-            CancellationToken cancellationToken)
+        public async Task<ScheduledMessage> ScheduleSend(IMessageScheduler scheduler, Uri destinationAddress, DateTime scheduledTime, object message, IPipe<SendContext> pipe, CancellationToken cancellationToken = default(CancellationToken))
         {
-            if (endpoint == null)
-                throw new ArgumentNullException(nameof(endpoint));
+            if (scheduler == null)
+                throw new ArgumentNullException(nameof(scheduler));
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
             if (pipe == null)
@@ -56,7 +57,10 @@ namespace MassTransit.Context
             if (msg == null)
                 throw new ArgumentException("Unexpected message type: " + message.GetType().GetTypeName());
 
-            return endpoint.Send(msg, pipe, cancellationToken);
+            ScheduledMessage<T> scheduleSend =
+                await scheduler.ScheduleSend(destinationAddress, scheduledTime, msg, pipe, cancellationToken).ConfigureAwait(false);
+
+            return scheduleSend;
         }
     }
 }

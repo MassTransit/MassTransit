@@ -69,7 +69,7 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
 
                 using (var scope = _supervisor.CreateScope($"{TypeMetadataCache<MessageReceiverFilter>.ShortName} - {inputAddress}", () => TaskUtil.Completed))
                 {
-                    var receiver = new Receiver(messageReceiver, inputAddress, _receivePipe, receiveSettings, _receiveObserver, scope);
+                    var receiver = new Receiver(context, messageReceiver, inputAddress, _receivePipe, receiveSettings, _receiveObserver, scope);
 
                     await scope.Ready.ConfigureAwait(false);
 

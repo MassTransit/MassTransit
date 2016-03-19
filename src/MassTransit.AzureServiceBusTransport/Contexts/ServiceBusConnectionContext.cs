@@ -15,6 +15,7 @@ namespace MassTransit.AzureServiceBusTransport.Contexts
     using System;
     using System.Threading;
     using System.Threading.Tasks;
+    using Configuration;
     using Context;
     using Microsoft.ServiceBus;
     using Microsoft.ServiceBus.Messaging;
@@ -43,6 +44,11 @@ namespace MassTransit.AzureServiceBusTransport.Contexts
         public Uri GetQueueAddress(QueueDescription queueDescription)
         {
             return _host.Settings.GetInputAddress(queueDescription);
+        }
+
+        public Uri GetTopicAddress(Type messageType)
+        {
+            return _host.MessageNameFormatter.GetTopicAddress(_host, messageType);
         }
 
         public string GetQueuePath(QueueDescription queueDescription)

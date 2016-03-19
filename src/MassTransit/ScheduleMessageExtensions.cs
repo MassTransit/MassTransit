@@ -25,73 +25,6 @@ namespace MassTransit
     public static class ScheduleMessageExtensions
     {
         /// <summary>
-        /// Sends a ScheduleMessage command to the endpoint, using the specified arguments
-        /// </summary>
-        /// <typeparam name="T">The scheduled message type</typeparam>
-        /// <param name="endpoint">The endpoint of the message scheduling service</param>
-        /// <param name="destinationAddress">The destination address where the schedule message should be sent</param>
-        /// <param name="scheduledTime">The time when the message should be sent to the endpoint</param>
-        /// <param name="message">The message to send</param>
-        /// <returns>A handled to the scheduled message</returns>
-        public static async Task<ScheduledMessage<T>> ScheduleSend<T>(this ISendEndpoint endpoint, Uri destinationAddress,
-            DateTime scheduledTime, T message)
-            where T : class
-        {
-            var command = new ScheduleMessageCommand<T>(scheduledTime, destinationAddress, message);
-
-            await endpoint.Send<ScheduleMessage<T>>(command).ConfigureAwait(false);
-
-            return new ScheduledMessageHandle<T>(command.CorrelationId, command.ScheduledTime, command.Destination, command.Payload);
-        }
-
-        /// <summary>
-        /// Sends a ScheduleMessage command to the endpoint, using the specified arguments
-        /// </summary>
-        /// <typeparam name="T">The scheduled message type</typeparam>
-        /// <param name="endpoint">The endpoint of the message scheduling service</param>
-        /// <param name="destinationAddress">The destination address where the schedule message should be sent</param>
-        /// <param name="scheduledTime">The time when the message should be sent to the endpoint</param>
-        /// <param name="message">The message to send</param>
-        /// <param name="sendPipe"></param>
-        /// <returns>A handled to the scheduled message</returns>
-        public static async Task<ScheduledMessage<T>> ScheduleSend<T>(this ISendEndpoint endpoint, Uri destinationAddress,
-            DateTime scheduledTime, T message, IPipe<SendContext<ScheduleMessage<T>>> sendPipe)
-            where T : class
-        {
-            var command = new ScheduleMessageCommand<T>(scheduledTime, destinationAddress, message);
-
-            await endpoint.Send(command, sendPipe).ConfigureAwait(false);
-
-            return new ScheduledMessageHandle<T>(command.CorrelationId, command.ScheduledTime, command.Destination, command.Payload);
-        }
-
-        /// <summary>
-        /// Cancel a scheduled message using the scheduled message instance
-        /// </summary>
-        /// <param name="endpoint">The endpoint of the scheduling service</param>
-        /// <param name="message">The schedule message reference</param>
-        public static Task CancelScheduledSend<T>(this ISendEndpoint endpoint, ScheduledMessage<T> message)
-            where T : class
-        {
-            if (message == null)
-                throw new ArgumentNullException(nameof(message));
-
-            return CancelScheduledSend(endpoint, message.TokenId);
-        }
-
-        /// <summary>
-        /// Cancel a scheduled message using the tokenId that was returned when the message was scheduled.
-        /// </summary>
-        /// <param name="endpoint">The endpoint of the scheduling service</param>
-        /// <param name="tokenId">The tokenId of the scheduled message</param>
-        public static async Task CancelScheduledSend(this ISendEndpoint endpoint, Guid tokenId)
-        {
-            var command = new CancelScheduledMessageCommand(tokenId);
-
-            await endpoint.Send<CancelScheduledMessage>(command).ConfigureAwait(false);
-        }
-
-        /// <summary>
         /// Schedules a message to be sent to the bus using a Publish, which should only be used when
         /// the quartz service is on a single shared queue or behind a distributor
         /// </summary>
@@ -128,7 +61,7 @@ namespace MassTransit
             IPipe<PublishContext<ScheduleMessage<T>>> contextCallback = null)
             where T : class
         {
-            return ScheduleMessage(bus, bus.Address, scheduledTime, message, contextCallback);
+            return ScheduleMessage(bus, bus.Address, scheduledTime, message, contextCallback ?? Pipe.Empty<PublishContext<ScheduleMessage<T>>>());
         }
 
         /// <summary>
@@ -139,19 +72,19 @@ namespace MassTransit
         /// <param name="context">The bus from which the scheduled message command should be published and delivered</param>
         /// <param name="scheduledTime">The time when the message should be sent to the endpoint</param>
         /// <param name="message">The message to send</param>
-        ///  /// <param name="contextCallback">Optional: A callback that gives the caller access to the publish context.</param>
+        ///  /// <param name="sendPipe">Optional: A callback that gives the caller access to the publish context.</param>
         /// <returns>A handled to the scheduled message</returns>
         public static Task<ScheduledMessage<T>> ScheduleMessage<T>(this ConsumeContext context, DateTime scheduledTime, T message,
-            IPipe<SendContext> contextCallback = null)
+            IPipe<SendContext> sendPipe = null)
             where T : class
         {
             MessageSchedulerContext schedulerContext;
             if (context.TryGetPayload(out schedulerContext))
             {
-                return schedulerContext.ScheduleSend(message, scheduledTime, contextCallback ?? Pipe.Empty<SendContext>());
+                return schedulerContext.ScheduleSend(scheduledTime, message, sendPipe ?? Pipe.Empty<SendContext>());
             }
 
-            return ScheduleMessage(context, context.ReceiveContext.InputAddress, scheduledTime, message, contextCallback);
+            return ScheduleMessage(context, context.ReceiveContext.InputAddress, scheduledTime, message, sendPipe);
         }
 
         /// <summary>
@@ -172,7 +105,7 @@ namespace MassTransit
             MessageSchedulerContext schedulerContext;
             if (context.TryGetPayload(out schedulerContext))
             {
-                return schedulerContext.ScheduleSend(message, destinationAddress, scheduledTime, contextCallback ?? Pipe.Empty<SendContext>());
+                return schedulerContext.ScheduleSend(destinationAddress, scheduledTime, message, contextCallback ?? Pipe.Empty<SendContext>());
             }
 
             return ScheduleMessage((IPublishEndpoint)context, destinationAddress, scheduledTime, message, contextCallback);
@@ -181,28 +114,50 @@ namespace MassTransit
         /// <summary>
         /// Cancel a scheduled message using the scheduled message instance
         /// </summary>
-        /// <param name="bus"></param>
+        /// <param name="publishEndpoint"></param>
         /// <param name="message"> </param>
-        public static Task CancelScheduledMessage<T>(this IPublishEndpoint bus, ScheduledMessage<T> message)
+        public static Task CancelScheduledMessage<T>(this IPublishEndpoint publishEndpoint, ScheduledMessage<T> message)
             where T : class
         {
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
 
-            return CancelScheduledMessage(bus, message.TokenId);
+            return CancelScheduledMessage(publishEndpoint, message.TokenId);
         }
 
         /// <summary>
         /// Cancel a scheduled message using the tokenId that was returned when the message was scheduled.
         /// </summary>
-        /// <param name="bus"></param>
+        /// <param name="publishEndpoint"></param>
         /// <param name="tokenId">The tokenId of the scheduled message</param>
-        public static async Task CancelScheduledMessage(this IPublishEndpoint bus, Guid tokenId)
+        public static async Task CancelScheduledMessage(this IPublishEndpoint publishEndpoint, Guid tokenId)
         {
+            if (publishEndpoint == null)
+                throw new ArgumentNullException(nameof(publishEndpoint));
             var command = new CancelScheduledMessageCommand(tokenId);
 
-            await bus.Publish<CancelScheduledMessage>(command).ConfigureAwait(false);
+            await publishEndpoint.Publish<CancelScheduledMessage>(command).ConfigureAwait(false);
         }
+
+
+        /// <summary>
+        /// Cancel a scheduled message 
+        /// </summary>
+        /// <typeparam name="T">The message type</typeparam>
+        /// <param name="scheduler">The message scheduler</param>
+        /// <param name="message">The </param>
+        /// <returns></returns>
+        public static Task CancelScheduledSend<T>(this IMessageScheduler scheduler, ScheduledMessage<T> message)
+             where T : class
+        {
+            if (scheduler == null)
+                throw new ArgumentNullException(nameof(scheduler));
+            if (message == null)
+                throw new ArgumentNullException(nameof(message));
+
+            return scheduler.CancelScheduledSend(message.TokenId);
+        }
+
 
 
         class CancelScheduledMessageCommand :

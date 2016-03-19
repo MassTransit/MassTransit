@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -15,18 +15,21 @@ namespace MassTransit.Scheduling
     using System;
 
 
-    public interface ScheduledMessage
-    {
-        Guid TokenId { get; }
-        DateTime ScheduledTime { get; }
-        Uri Destination { get; }
-    }
-
-
-    public interface ScheduledMessage<out T> :
-        ScheduledMessage
+    public class ScheduledMessageHandle<T> :
+        ScheduledMessage<T>
         where T : class
     {
-        T Payload { get; }
+        public ScheduledMessageHandle(Guid tokenId, DateTime scheduledTime, Uri destination, T payload)
+        {
+            TokenId = tokenId;
+            ScheduledTime = scheduledTime;
+            Destination = destination;
+            Payload = payload;
+        }
+
+        public Guid TokenId { get; }
+        public DateTime ScheduledTime { get; }
+        public Uri Destination { get; }
+        public T Payload { get; }
     }
 }

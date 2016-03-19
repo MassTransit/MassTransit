@@ -20,7 +20,6 @@ namespace MassTransit.RabbitMqTransport
     public interface IRabbitMqHost :
         IBusHost
     {
-        IMessageNameFormatter MessageNameFormatter { get; }
         IConnectionCache ConnectionCache { get; }
         RabbitMqHostSettings Settings { get; }
 

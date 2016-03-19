@@ -13,20 +13,20 @@
 namespace MassTransit.Scheduling
 {
     using System;
+    using System.Threading;
+    using System.Threading.Tasks;
+    using Pipeline;
 
 
-    public interface ScheduledMessage
+    /// <summary>
+    /// Calls the generic version of the ISendEndpoint.Send method with the object's type
+    /// </summary>
+    public interface IMessageSchedulerConverter
     {
-        Guid TokenId { get; }
-        DateTime ScheduledTime { get; }
-        Uri Destination { get; }
-    }
+        Task<ScheduledMessage> ScheduleSend(IMessageScheduler scheduler, Uri destinationAddress, DateTime scheduledTime, object message,
+            CancellationToken cancellationToken);
 
-
-    public interface ScheduledMessage<out T> :
-        ScheduledMessage
-        where T : class
-    {
-        T Payload { get; }
+        Task<ScheduledMessage> ScheduleSend(IMessageScheduler scheduler, Uri destinationAddress, DateTime scheduledTime, object message, IPipe<SendContext> pipe,
+            CancellationToken cancellationToken);
     }
 }

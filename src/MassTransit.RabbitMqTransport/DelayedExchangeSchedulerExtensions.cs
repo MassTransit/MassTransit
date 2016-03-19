@@ -29,6 +29,7 @@ namespace MassTransit
                 throw new ArgumentNullException(nameof(configurator));
 
             var specification = new DelayedExchangeMessageSchedulerSpecification();
+
             configurator.AddPipeSpecification(specification);
         }
     }

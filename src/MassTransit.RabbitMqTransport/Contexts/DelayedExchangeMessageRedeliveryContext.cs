@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,7 +14,6 @@ namespace MassTransit.RabbitMqTransport.Contexts
 {
     using System;
     using System.Threading.Tasks;
-    using Topology;
 
 
     /// <summary>
@@ -27,47 +26,26 @@ namespace MassTransit.RabbitMqTransport.Contexts
         where TMessage : class
     {
         readonly ConsumeContext<TMessage> _context;
+        readonly IMessageScheduler _scheduler;
 
-        public DelayedExchangeMessageRedeliveryContext(ConsumeContext<TMessage> context)
+        public DelayedExchangeMessageRedeliveryContext(ConsumeContext<TMessage> context, IMessageScheduler scheduler)
         {
             _context = context;
+            _scheduler = scheduler;
         }
 
-        async Task MessageRedeliveryContext.ScheduleRedelivery(TimeSpan delay)
+        Task MessageRedeliveryContext.ScheduleRedelivery(TimeSpan delay)
         {
-            var receiveSettings = _context.ReceiveContext.GetPayload<ReceiveSettings>();
-
-            var delayExchangeAddress = GetDelayExchangeAddress(receiveSettings);
-
-            ISendEndpoint delayEndpoint = await _context.GetSendEndpoint(delayExchangeAddress).ConfigureAwait(false);
-
-            await delayEndpoint.Send(_context.Message, _context.CreateCopyContextPipe((x, y) => UpdateDeliveryContext(x, y, delay))).ConfigureAwait(false);
+            return _scheduler.ScheduleSend(_context.ReceiveContext.InputAddress, delay, _context.Message,
+                _context.CreateCopyContextPipe(UpdateDeliveryContext));
         }
 
-        Uri GetDelayExchangeAddress(ReceiveSettings receiveSettings)
-        {
-            string delayExchangeName = receiveSettings.QueueName + "_delay";
-            var sendSettings = new RabbitMqSendSettings(delayExchangeName, "x-delayed-message", receiveSettings.Durable, receiveSettings.AutoDelete);
-
-            sendSettings.SetExchangeArgument("x-delayed-type", receiveSettings.ExchangeType);
-
-            sendSettings.BindToQueue(receiveSettings.QueueName);
-
-            var modelContext = _context.ReceiveContext.GetPayload<ModelContext>();
-
-            return modelContext.ConnectionContext.HostSettings.GetSendAddress(sendSettings);
-        }
-
-        static void UpdateDeliveryContext(ConsumeContext context, SendContext sendContext, TimeSpan delay)
+        static void UpdateDeliveryContext(ConsumeContext context, SendContext sendContext)
         {
             int? previousDeliveryCount = context.Headers.Get(MessageHeaders.RedeliveryCount, default(int?));
             if (!previousDeliveryCount.HasValue)
                 previousDeliveryCount = 0;
             sendContext.Headers.Set(MessageHeaders.RedeliveryCount, previousDeliveryCount.Value + 1);
-
-            var rabbitSendContext = sendContext.GetPayload<RabbitMqSendContext>();
-
-            rabbitSendContext.SetTransportHeader("x-delay", (long)delay.TotalMilliseconds);
         }
     }
 }

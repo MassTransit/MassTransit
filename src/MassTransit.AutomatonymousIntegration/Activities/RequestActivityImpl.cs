@@ -57,7 +57,7 @@ namespace Automatonymous.Activities
                     await scheduleEndpoint.ScheduleSend(consumeContext.ReceiveContext.InputAddress, expirationTime, message).ConfigureAwait(false);
                 }
                 else if (consumeContext.TryGetPayload(out schedulerContext))
-                    await schedulerContext.ScheduleSend(message, expirationTime, Pipe.Empty<SendContext>()).ConfigureAwait(false);
+                    await schedulerContext.ScheduleSend(expirationTime, message).ConfigureAwait(false);
                 else
                     throw new ConfigurationException("A request timeout was specified but no message scheduler was specified or available");
             }

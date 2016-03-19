@@ -36,7 +36,7 @@ namespace MassTransit.Context
 
         Task MessageRedeliveryContext.ScheduleRedelivery(TimeSpan delay)
         {
-            return _scheduler.ScheduleSend(_context.Message, delay, _context.CreateCopyContextPipe(GetScheduledMessageHeaders));
+            return _scheduler.ScheduleSend(delay, _context.Message, _context.CreateCopyContextPipe(GetScheduledMessageHeaders));
         }
 
         static IEnumerable<KeyValuePair<string, object>> GetScheduledMessageHeaders(ConsumeContext context)

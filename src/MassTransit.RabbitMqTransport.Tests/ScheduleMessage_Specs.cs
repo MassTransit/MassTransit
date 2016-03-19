@@ -108,4 +108,49 @@ namespace MassTransit.RabbitMqTransport.Tests
         {
         }
     }
+
+    public class Scheduling_a_published_message :
+        RabbitMqTestFixture
+    {
+        [Test]
+        public async Task Should_get_both_messages()
+        {
+            await InputQueueSendEndpoint.Send(new FirstMessage());
+
+            await _first;
+
+            await _second;
+        }
+
+        protected override void ConfigureBusHost(IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host)
+        {
+            base.ConfigureBusHost(configurator, host);
+
+            configurator.UseDelayedExchangeMessageScheduler();
+        }
+
+        Task<ConsumeContext<SecondMessage>> _second;
+        Task<ConsumeContext<FirstMessage>> _first;
+
+        protected override void ConfigureInputQueueEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
+        {
+            _first = Handler<FirstMessage>(configurator, async context =>
+            {
+                await context.SchedulePublish(TimeSpan.FromSeconds(1), new SecondMessage());
+            });
+
+            _second = Handled<SecondMessage>(configurator);
+        }
+
+
+        public class FirstMessage
+        {
+        }
+
+
+        public class SecondMessage
+        {
+        }
+    }
+
 }

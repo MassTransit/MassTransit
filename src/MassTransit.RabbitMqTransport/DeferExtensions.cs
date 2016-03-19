@@ -14,7 +14,9 @@ namespace MassTransit
 {
     using System;
     using System.Threading.Tasks;
+    using RabbitMqTransport;
     using RabbitMqTransport.Contexts;
+    using RabbitMqTransport.Scheduling;
 
 
     public static class DeferExtensions
@@ -29,7 +31,11 @@ namespace MassTransit
         public static Task Defer<T>(this ConsumeContext<T> context, TimeSpan delay)
             where T : class
         {
-            MessageRedeliveryContext redeliveryContext = new DelayedExchangeMessageRedeliveryContext<T>(context);
+            var modelContext = context.ReceiveContext.GetPayload<ModelContext>();
+
+            var scheduler = new DelayedExchangeMessageScheduler(context, modelContext.ConnectionContext.HostSettings);
+
+            MessageRedeliveryContext redeliveryContext = new DelayedExchangeMessageRedeliveryContext<T>(context, scheduler);
 
             return redeliveryContext.ScheduleRedelivery(delay);
         }

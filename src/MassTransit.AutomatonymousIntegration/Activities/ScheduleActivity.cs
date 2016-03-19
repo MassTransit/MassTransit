@@ -90,7 +90,7 @@ namespace Automatonymous.Activities
 
             var delay = _delayProvider(consumeContext);
 
-            ScheduledMessage<TMessage> scheduledMessage = await schedulerContext.ScheduleSend(message, delay, _sendPipe).ConfigureAwait(false);
+            ScheduledMessage<TMessage> scheduledMessage = await schedulerContext.ScheduleSend(delay, message, _sendPipe).ConfigureAwait(false);
 
             Guid? previousTokenId = _schedule.GetTokenId(context.Instance);
             if (previousTokenId.HasValue)
@@ -148,7 +148,7 @@ namespace Automatonymous.Activities
 
             var delay = _delayProvider(consumeContext);
 
-            ScheduledMessage<TMessage> scheduledMessage = await schedulerContext.ScheduleSend(message, delay, _sendPipe).ConfigureAwait(false);
+            ScheduledMessage<TMessage> scheduledMessage = await schedulerContext.ScheduleSend(delay, message, _sendPipe).ConfigureAwait(false);
 
             Guid? previousTokenId = _schedule.GetTokenId(context.Instance);
             if (previousTokenId.HasValue)

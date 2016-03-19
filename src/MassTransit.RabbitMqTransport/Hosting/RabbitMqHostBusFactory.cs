@@ -17,6 +17,7 @@ namespace MassTransit.RabbitMqTransport.Hosting
     using System.Security.Cryptography.X509Certificates;
     using Logging;
     using MassTransit.Hosting;
+    using Transports;
 
 
     public class RabbitMqHostBusFactory :
@@ -75,6 +76,7 @@ namespace MassTransit.RabbitMqTransport.Hosting
             public string ClientCertificatePassphrase => null;
             public X509Certificate ClientCertificate => null;
             public bool UseClientCertificateAsAuthenticationIdentity => false;
+            public IMessageNameFormatter MessageNameFormatter => new RabbitMqMessageNameFormatter();
         }
     }
 }
