@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,14 +13,13 @@
 namespace MassTransit.Containers.Tests
 {
     using System;
-    using System.Threading;
     using System.Threading.Tasks;
     using Castle.MicroKernel.Registration;
     using Castle.Windsor;
+    using Internals.Extensions;
     using NUnit.Framework;
     using Saga;
     using Scenarios;
-    using Shouldly;
     using TestFramework;
     using WindsorIntegration;
 
@@ -93,17 +92,6 @@ namespace MassTransit.Containers.Tests
     public class Test_Bus_Subscriptions_For_Consumers_In_Dummy_Saga_Using_Castle_As_IoC :
         Given_a_service_bus_instance
     {
-        [TearDown]
-        public void Close_container()
-        {
-            _container.Dispose();
-        }
-
-        [SetUp]
-        public void Registering_a_dummy_saga()
-        {
-        }
-
         [Test]
         public void Should_have_a_subscription_for_the_first_saga_message()
         {
@@ -116,6 +104,17 @@ namespace MassTransit.Containers.Tests
         {
 //            LocalBus.HasSubscription<SecondSagaMessage>().Count()
 //                    .ShouldBe(1, "No subscription for the SecondSagaMessage was found.");
+        }
+
+        [TearDown]
+        public void Close_container()
+        {
+            _container.Dispose();
+        }
+
+        [SetUp]
+        public void Registering_a_dummy_saga()
+        {
         }
 
         readonly IWindsorContainer _container;
@@ -137,15 +136,9 @@ namespace MassTransit.Containers.Tests
     }
 
 
-    public class MessageScope_usage :
+    public class Using_message_scope_with_two_consumers :
         InMemoryTestFixture
     {
-        [TearDown]
-        public void Close_container()
-        {
-            _container.Dispose();
-        }
-
         [Test]
         public async void Should_receive_a_message_in_scope()
         {
@@ -153,18 +146,26 @@ namespace MassTransit.Containers.Tests
 
             await InputQueueSendEndpoint.Send(new SimpleMessageClass(name));
 
-            CheckScopeConsumer.Last.Name.ShouldBe(name);
+            var result = await Depedency.Completed.WithCancellation(TestCancellationToken);
+
+            Console.WriteLine(result);
+        }
+
+        [TearDown]
+        public void Close_container()
+        {
+            _container.Dispose();
         }
 
         readonly IWindsorContainer _container;
 
-        public MessageScope_usage()
+        public Using_message_scope_with_two_consumers()
         {
             _container = new WindsorContainer();
             _container.Register(
-                Component.For<CheckScopeConsumer>()
-                    .LifestyleScoped<MessageScope>(),
-                Component.For<IDepedency>()
+                Component.For<FirstConsumer>(),
+                Component.For<SecondConsumer>(),
+                Component.For<IScopedDependency>()
                     .ImplementedBy<Depedency>()
                     .LifestyleScoped<MessageScope>());
         }
@@ -177,51 +178,87 @@ namespace MassTransit.Containers.Tests
         {
             configurator.UseMessageScope();
 
-            configurator.LoadFrom(_container);
+            configurator.Consumer(new WindsorConsumerFactory<FirstConsumer>(_container.Kernel));
+            configurator.Consumer(new WindsorConsumerFactory<SecondConsumer>(_container.Kernel));
         }
 
 
-        public class CheckScopeConsumer :
+        public class FirstConsumer :
             IConsumer<SimpleMessageInterface>
         {
-            static SimpleMessageInterface _last;
-            static ManualResetEvent _received = new ManualResetEvent(false);
-            readonly IDepedency _depedency;
+            readonly IScopedDependency _depedency;
 
-            public CheckScopeConsumer(IDepedency depedency)
+            public FirstConsumer(IScopedDependency depedency)
             {
                 _depedency = depedency;
-
-                depedency.ShouldNotBe(null);
-            }
-
-            public static SimpleMessageInterface Last
-            {
-                get
-                {
-                    if (_received.WaitOne(TimeSpan.FromSeconds(8)))
-                        return _last;
-
-                    throw new TimeoutException("Timeout waiting for message to be consumed");
-                }
             }
 
             public async Task Consume(ConsumeContext<SimpleMessageInterface> context)
             {
-                _last = context.Message;
-                _received.Set();
+                _depedency.CompleteFirst();
+            }
+        }
+
+
+        public class SecondConsumer :
+            IConsumer<SimpleMessageInterface>
+        {
+            readonly IScopedDependency _depedency;
+
+            public SecondConsumer(IScopedDependency depedency)
+            {
+                _depedency = depedency;
+            }
+
+            public async Task Consume(ConsumeContext<SimpleMessageInterface> context)
+            {
+                _depedency.CompleteSecond();
             }
         }
 
 
         public class Depedency :
-            IDepedency
+            IScopedDependency
         {
+            static TaskCompletionSource<string> _completed;
+            TaskCompletionSource<string> _first;
+            TaskCompletionSource<string> _second;
+
+            static Depedency()
+            {
+                _completed = new TaskCompletionSource<string>();
+            }
+
+            public Depedency()
+            {
+                _first = new TaskCompletionSource<string>();
+                _second = new TaskCompletionSource<string>();
+            }
+
+            public static Task<string> Completed => _completed.Task;
+
+            public void CompleteFirst()
+            {
+                _first.TrySetResult("First");
+
+                if (_second.Task.Status == TaskStatus.RanToCompletion)
+                    _completed.TrySetResult(_second.Task.Result);
+            }
+
+            public void CompleteSecond()
+            {
+                _second.TrySetResult("Second");
+
+                if (_first.Task.Status == TaskStatus.RanToCompletion)
+                    _completed.TrySetResult(_first.Task.Result);
+            }
         }
 
 
-        public interface IDepedency
+        public interface IScopedDependency
         {
+            void CompleteFirst();
+            void CompleteSecond();
         }
     }
 }
