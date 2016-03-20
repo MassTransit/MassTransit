@@ -25,16 +25,16 @@ namespace MassTransit.HttpTransport.Tests
 //                });
 
                 //http://localhost:8080/listen_here
-                cfg.ReceiveEndpoint("listen_here", ep =>
-                {
-                    ep.Consumer<HttpEater>();
-                });
+//                cfg.ReceiveEndpoint("listen_here", ep =>
+//                {
+//                    ep.Consumer<HttpEater>();
+//                });
             });
             
             var uu = bus.Start();
 
 //            Thread.Sleep(10000);
-            uu.Stop(CancellationToken.None);
+            uu.Stop();
 
         }
 

@@ -18,7 +18,6 @@ namespace MassTransit.HttpTransport.Hosting
     using Configuration.Builders;
     using Logging;
     using MassTransit.Pipeline;
-    using Pipeline;
     using Transports;
     using Util;
 
@@ -28,16 +27,15 @@ namespace MassTransit.HttpTransport.Hosting
         IBusHostControl
     {
         static readonly ILog _log = Logger.Get<HttpHost>();
-        readonly OwinHostCache _owinHostCache;
 
         readonly TaskSupervisor _supervisor;
+        readonly OwinHostCache _owinHostCache;
 
         public HttpHost(HttpHostSettings hostSettings)
         {
             Settings = hostSettings;
             _supervisor = new TaskSupervisor($"{TypeMetadataCache<HttpHost>.ShortName} - {Settings.Host}");
             _owinHostCache = new OwinHostCache(Settings, _supervisor);
-            OwinHostCache = new OwinHostCache(Settings, _supervisor);
         }
 
         public HostHandle Start()
@@ -46,7 +44,7 @@ namespace MassTransit.HttpTransport.Hosting
             {
                 if (_log.IsDebugEnabled)
                     _log.DebugFormat("Connection established to {0}", Settings.Host);
-
+                
                 try
                 {
                     await _supervisor.StopRequested.ConfigureAwait(false);
@@ -59,7 +57,7 @@ namespace MassTransit.HttpTransport.Hosting
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Starting connection to {0}", Settings.Host);
 
-            var connectionTask = _owinHostCache.Send(connectionPipe, _supervisor.StoppingToken);
+            var connectionTask = OwinHostCache.Send(connectionPipe, _supervisor.StoppingToken);
 
             return new Handle(connectionTask, _supervisor);
         }
@@ -78,7 +76,7 @@ namespace MassTransit.HttpTransport.Hosting
             _owinHostCache.Probe(scope);
         }
 
-        public IOwinHostCache OwinHostCache { get; private set; }
+        public IOwinHostCache OwinHostCache => _owinHostCache;
 
         public HttpHostSettings Settings { get; }
 

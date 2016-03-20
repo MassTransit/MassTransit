@@ -81,8 +81,10 @@
     <Compile Include="Hosting\HttpHeaderProvider.cs" />
     <Compile Include="Hosting\HttpOwinHostInstanceFactory.cs" />
     <Compile Include="Hosting\HttpReceiveContext.cs" />
+    <Compile Include="Hosting\OwinHostInstance.cs" />
     <Compile Include="Hosting\OwinHostInstanceFactory.cs" />
     <Compile Include="Hosting\OwinHostFactoryExtensions.cs" />
+    <Compile Include="Hosting\RuntimeInstance.cs" />
     <Compile Include="HttpAddressExtensions.cs" />
     <Compile Include="Configuration\HttpBusFactory.cs" />
     <Compile Include="Clients\HttpClientSettingsImpl.cs" />

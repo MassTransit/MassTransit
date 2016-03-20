@@ -16,7 +16,7 @@ namespace MassTransit.HttpTransport.Hosting
     {
         public static string ToDebugString(this HttpHostSettings settings)
         {
-            return $"{settings.Host}";
+            return $"{settings.Host}:{settings.Port}";
         }
 
         public static OwinHostInstanceFactory GetHostFactory(this HttpHostSettings settings)
