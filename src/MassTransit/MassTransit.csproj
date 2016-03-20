@@ -655,7 +655,6 @@
     <Compile Include="Pipeline\Pipes\SendPipe.cs" />
     <Compile Include="Pipeline\PublishMessageObservable.cs" />
     <Compile Include="Pipeline\PublishObservable.cs" />
-    <Compile Include="Pipeline\PublishPipeProxy.cs" />
     <Compile Include="Pipeline\ReceiveEndpointObservable.cs" />
     <Compile Include="Pipeline\ReceiveObservable.cs" />
     <Compile Include="Pipeline\SendMessageObservable.cs" />
