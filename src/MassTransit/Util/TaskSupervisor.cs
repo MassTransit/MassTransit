@@ -14,6 +14,7 @@ namespace MassTransit.Util
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
@@ -23,6 +24,7 @@ namespace MassTransit.Util
     /// <summary>
     /// An asynchronous signaling component
     /// </summary>
+    [DebuggerDisplay("{DebuggerDisplay()}")]
     public class TaskSupervisor :
         ITaskSupervisor
     {
@@ -179,6 +181,11 @@ namespace MassTransit.Util
         public override string ToString()
         {
             return $"Supervisor: {_tag}";
+        }
+
+        string DebuggerDisplay()
+        {
+            return $"Supervisor: {_tag} - Participants: {_participants.Count}";
         }
     }
 }
