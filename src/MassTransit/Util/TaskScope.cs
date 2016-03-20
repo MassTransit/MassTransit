@@ -13,11 +13,13 @@
 namespace MassTransit.Util
 {
     using System;
+    using System.Diagnostics;
     using System.Threading;
     using System.Threading.Tasks;
     using Logging;
 
 
+    [DebuggerDisplay("{DebuggerDisplay()}")]
     class TaskScope :
         ITaskScope
     {
@@ -105,6 +107,11 @@ namespace MassTransit.Util
         }
 
         public override string ToString()
+        {
+            return $"Scope: {_supervisor.Tag}";
+        }
+
+        string DebuggerDisplay()
         {
             return $"Scope: {_supervisor.Tag}";
         }

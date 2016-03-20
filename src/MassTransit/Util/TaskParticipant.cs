@@ -13,10 +13,12 @@
 namespace MassTransit.Util
 {
     using System;
+    using System.Diagnostics;
     using System.Threading;
     using System.Threading.Tasks;
 
 
+    [DebuggerDisplay("{DebuggerDisplay()}")]
     class TaskParticipant :
         ITaskParticipant
     {
@@ -75,7 +77,12 @@ namespace MassTransit.Util
 
         public override string ToString()
         {
-            return $"Scope: {_tag}";
+            return $"Participant: {_tag}";
+        }
+
+        string DebuggerDisplay()
+        {
+            return $"Participant: {_tag}";
         }
     }
 }
