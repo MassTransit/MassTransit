@@ -2,6 +2,7 @@ namespace MassTransit.HttpTransport.Configuration.Builders
 {
     using System;
     using System.Net.Http;
+    using System.Runtime.CompilerServices;
     using System.Threading;
     using System.Threading.Tasks;
     using Hosting;
@@ -53,15 +54,29 @@ namespace MassTransit.HttpTransport.Configuration.Builders
         {
             var supervisor = new TaskSupervisor($"{TypeMetadataCache<HttpReceiveTransport>.ShortName} - {_host.Settings.GetInputAddress(_settings)}");
 
-            IPipe<OwinHostContext> hostPipe = Pipe.Execute<OwinHostContext>(cxt =>
+            IPipe<OwinHostContext> hostPipe = Pipe.ExecuteAsync<OwinHostContext>(async cxt =>
             {
                 cxt.Instance.Start(receivePipe);
+
+                await _receiveEndpointObservable.Ready(new Ready(_host.Settings.GetInputAddress(_settings))).ConfigureAwait(false);
             });
 
-            _host.OwinHostCache.Send(hostPipe, supervisor.StoppingToken).ConfigureAwait(false);
+            var connectionTask = _host.OwinHostCache.Send(hostPipe, supervisor.StoppingToken);
 
-            return new Handle(supervisor);
+            return new Handle(supervisor, connectionTask);
         }
+        class Ready :
+    ReceiveEndpointReady
+        {
+            public Ready(Uri inputAddress)
+            {
+                InputAddress = inputAddress;
+            }
+
+            public Uri InputAddress { get; }
+        }
+
+
 
         class Faulted :
             ReceiveEndpointFaulted
@@ -80,15 +95,19 @@ namespace MassTransit.HttpTransport.Configuration.Builders
             ReceiveTransportHandle
         {
             readonly TaskSupervisor _supervisor;
+            readonly Task _connectionTask;
 
-            public Handle(TaskSupervisor supervisor)
+            public Handle(TaskSupervisor supervisor, Task connectionTask)
             {
                 _supervisor = supervisor;
+                _connectionTask = connectionTask;
             }
 
-            Task ReceiveTransportHandle.Stop(CancellationToken cancellationToken)
+            async Task ReceiveTransportHandle.Stop(CancellationToken cancellationToken)
             {
-                return _supervisor.Stop("Stop Receive Transport", cancellationToken);
+                await _supervisor.Stop("Stop Receive Transport", cancellationToken).ConfigureAwait(false);
+
+                await _connectionTask.ConfigureAwait(false);
             }
         }
     }

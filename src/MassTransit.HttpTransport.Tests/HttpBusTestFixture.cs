@@ -44,7 +44,7 @@ namespace MassTransit.HttpTransport.Tests
         [TestFixtureSetUp]
         public void SetupInMemoryTestFixture()
         {
-            _bus = CreateBus();
+             _bus = CreateBus();
             _busHandle = _bus.Start();
 
             try
