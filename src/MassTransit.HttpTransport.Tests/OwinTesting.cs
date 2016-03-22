@@ -2,10 +2,8 @@ namespace MassTransit.HttpTransport.Tests
 {
     using System;
     using System.Net.Http;
-    using System.Text;
     using System.Threading;
     using Hosting;
-    using HottpTransport.Tests;
     using NUnit.Framework;
 
 

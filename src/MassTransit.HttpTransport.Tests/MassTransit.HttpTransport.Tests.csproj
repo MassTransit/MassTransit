@@ -48,7 +48,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CanItStartAndStop.cs" />
     <Compile Include="Class1.cs" />
+    <Compile Include="HttpBusTestFixture.cs" />
+    <Compile Include="HttpHostTests.cs" />
     <Compile Include="OwinTesting.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -60,6 +63,10 @@
     <ProjectReference Include="..\MassTransit.HttpTransport\MassTransit.HttpTransport.csproj">
       <Project>{bc27d21a-7586-4263-942e-157b2cd682b3}</Project>
       <Name>MassTransit.HttpTransport</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\MassTransit.TestFramework\MassTransit.TestFramework.csproj">
+      <Project>{3c4b5f1a-69ad-415e-9f40-a7fdbd7a3012}</Project>
+      <Name>MassTransit.TestFramework</Name>
     </ProjectReference>
     <ProjectReference Include="..\MassTransit\MassTransit.csproj">
       <Project>{6efd69fc-cbcc-4f85-aee0-efba73f4d273}</Project>

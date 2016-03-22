@@ -47,6 +47,7 @@ namespace MassTransit.HttpTransport.Hosting
                 
                 try
                 {
+                    //Wait until someone shuts down the bus - Parked thread.
                     await _supervisor.StopRequested.ConfigureAwait(false);
                 }
                 catch (OperationCanceledException)

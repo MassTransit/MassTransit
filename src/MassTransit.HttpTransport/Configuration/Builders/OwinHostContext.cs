@@ -18,7 +18,7 @@ namespace MassTransit.HttpTransport.Configuration.Builders
     public interface OwinHostContext :
         PipeContext
     {
-        HttpHostSettings HostSettings { get; set; }
+        HttpHostSettings HostSettings { get; }
         OwinHostInstance Instance { get; }
     }
 }

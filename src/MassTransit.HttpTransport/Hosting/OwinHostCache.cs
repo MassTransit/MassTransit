@@ -100,11 +100,11 @@ namespace MassTransit.HttpTransport.Hosting
 
                 owinHost.HostShutdown += hostShutdown;
 
-                var connectionContext = new HttpOwinHostContext(owinHost, _settings, _cacheTaskScope);
+                var hostContext = new HttpOwinHostContext(owinHost, _settings, _cacheTaskScope);
 
-                connectionContext.GetOrAddPayload(() => _settings);
+                hostContext.GetOrAddPayload(() => _settings);
 
-                scope.Connected(connectionContext);
+                scope.Connected(hostContext);
             }
             catch (Exception ex)
             {
@@ -122,20 +122,18 @@ namespace MassTransit.HttpTransport.Hosting
         {
             try
             {
-                //TODO: Should this be a using?
-                //using (var context = await scope.Attach(cancellationToken).ConfigureAwait(false))
-                //{
-                var context = await scope.Attach(cancellationToken).ConfigureAwait(false);
-                if (_log.IsDebugEnabled)
-                    _log.DebugFormat("Using connection: {0}", context.HostSettings.ToDebugString());
+                using (var context = await scope.Attach(cancellationToken).ConfigureAwait(false))
+                {
+                    if (_log.IsDebugEnabled)
+                        _log.DebugFormat("Using host: {0}", context.HostSettings.ToDebugString());
 
-                await connectionPipe.Send(context).ConfigureAwait(false);
-                //}
+                    await connectionPipe.Send(context).ConfigureAwait(false);
+                }
             }
             catch (Exception ex)
             {
                 if (_log.IsDebugEnabled)
-                    _log.Debug("The connection usage threw an exception", ex);
+                    _log.Debug("The host usage threw an exception", ex);
 
                 Interlocked.CompareExchange(ref _scope, null, scope);
 
@@ -160,7 +158,7 @@ namespace MassTransit.HttpTransport.Hosting
             {
                 _owinHostContext = new TaskCompletionSource<HttpOwinHostContext>();
 
-                _taskScope = scope.CreateScope($"ConnectionScope: {settings.ToDebugString()}", CloseContext);
+                _taskScope = scope.CreateScope($"{TypeMetadataCache<OwinHostScope>.ShortName} - {settings.ToDebugString()}", CloseContext);
             }
 
             public void Connected(HttpOwinHostContext connectionContext)
@@ -179,11 +177,11 @@ namespace MassTransit.HttpTransport.Hosting
                 _taskScope.Stop(new StopEventArgs($"Connection faulted: {exception.Message}"));
             }
 
-            public async Task<OwinHostContext> Attach(CancellationToken cancellationToken)
+            public async Task<SharedHttpOwinHostContext> Attach(CancellationToken cancellationToken)
             {
                 var owinHostContext = await _owinHostContext.Task.ConfigureAwait(false);
 
-                return owinHostContext;
+                return new SharedHttpOwinHostContext(owinHostContext, cancellationToken, _taskScope);
             }
 
             public void Shutdown(string reason)

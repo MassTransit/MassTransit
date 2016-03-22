@@ -72,6 +72,7 @@
     <Compile Include="Configuration\Builders\IHttpReceiveEndpointBuilder.cs" />
     <Compile Include="Configuration\Builders\IHttpReceiveEndpointConfigurator.cs" />
     <Compile Include="Configuration\Builders\OwinHostContext.cs" />
+    <Compile Include="Configuration\Builders\SharedHttpOwinHostContext.cs" />
     <Compile Include="Configuration\HttpBusFactoryConfigurator.cs" />
     <Compile Include="Configuration\HttpBusFactoryConfiguratorExtensions.cs" />
     <Compile Include="Configuration\HttpBusFactorySelectorExtensions.cs" />
