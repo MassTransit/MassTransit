@@ -19,7 +19,6 @@ namespace MassTransit.HttpTransport.Configuration
     using BusConfigurators;
     using Configurators;
     using Hosting;
-    using HttpTransport;
     using MassTransit.Builders;
 
 
@@ -29,8 +28,8 @@ namespace MassTransit.HttpTransport.Configuration
         IBusFactory
     {
         readonly IList<HttpHost> _hosts;
-        readonly IList<IBusFactorySpecification> _transportBuilderConfigurators;
         readonly HttpReceiveSettings _receiveSettings;
+        readonly IList<IBusFactorySpecification> _transportBuilderConfigurators;
 
         public HttpBusFactoryConfigurator()
         {
@@ -50,6 +49,20 @@ namespace MassTransit.HttpTransport.Configuration
             var bus = builder.Build();
 
             return bus;
+        }
+
+        public override IEnumerable<ValidationResult> Validate()
+        {
+            foreach (var result in base.Validate())
+                yield return result;
+
+            if (_hosts.Count == 0)
+                yield return this.Failure("Host", "At least one host must be defined");
+            if (string.IsNullOrWhiteSpace(_receiveSettings.Path))
+                yield return this.Failure("Bus", "The bus path must not be null or empty");
+
+            foreach (var result in _transportBuilderConfigurators.SelectMany(x => x.Validate()))
+                yield return result;
         }
 
         public IHttpHost Host(HttpHostSettings settings)
@@ -73,12 +86,11 @@ namespace MassTransit.HttpTransport.Configuration
 
             var ep = new HttpReceiveEndpointConfigurator(host, new HttpReceiveSettings(host.Settings.Host, host.Settings.Port, path));
 
-            if(configure != null)
+            if (configure != null)
                 configure(ep);
 
             AddBusFactorySpecification(ep);
         }
-
 
         public void AddBusFactorySpecification(IBusFactorySpecification configurator)
         {
@@ -88,20 +100,6 @@ namespace MassTransit.HttpTransport.Configuration
         public void OverrideDefaultBusEndpointPath(string value)
         {
             _receiveSettings.Path = value;
-        }
-
-        public override IEnumerable<ValidationResult> Validate()
-        {
-            foreach (var result in base.Validate())
-                yield return result;
-
-            if (_hosts.Count == 0)
-                yield return this.Failure("Host", "At least one host must be defined");
-            if (string.IsNullOrWhiteSpace(_receiveSettings.Path))
-                yield return this.Failure("Bus", "The bus path must not be null or empty");
-
-            foreach (var result in _transportBuilderConfigurators.SelectMany(x => x.Validate()))
-                yield return result;
         }
     }
 }

@@ -15,7 +15,6 @@ namespace MassTransit.HttpTransport.Clients
     using System;
     using System.Threading.Tasks;
     using MassTransit.Pipeline;
-    using Pipeline;
     using Transports;
 
 

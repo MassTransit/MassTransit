@@ -14,13 +14,12 @@ namespace MassTransit.HttpTransport.Hosting
 {
     using MassTransit.Pipeline;
     using Owin;
-    using Transports;
 
 
     public class HttpMassTransitStartUp
     {
-        readonly IPipe<ReceiveContext> _receivePipe;
         readonly IReceiveObserver _observer;
+        readonly IPipe<ReceiveContext> _receivePipe;
 
         public HttpMassTransitStartUp(IPipe<ReceiveContext> receivePipe)
         {
@@ -36,8 +35,8 @@ namespace MassTransit.HttpTransport.Hosting
                 var inputAddress = cxt.Request.Uri;
                 var body = cxt.Request.Body;
                 var headers = new HttpHeaderProvider(cxt.Request.Headers);
-                if(_receivePipe != null)
-                    await _receivePipe.Send(new HttpReceiveContext(inputAddress,body, headers, false, _observer )).ConfigureAwait(false);
+                if (_receivePipe != null)
+                    await _receivePipe.Send(new HttpReceiveContext(inputAddress, body, headers, false, _observer)).ConfigureAwait(false);
                 cxt.Response.Write("DELIVERED");
                 await next();
             });

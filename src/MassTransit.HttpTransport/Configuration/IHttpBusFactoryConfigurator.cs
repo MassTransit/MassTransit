@@ -10,7 +10,6 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-// ReSharper disable once CheckNamespace
 namespace MassTransit
 {
     using System;
@@ -22,7 +21,7 @@ namespace MassTransit
     public interface IHttpBusFactoryConfigurator
     {
         IHttpHost Host(HttpHostSettings settings);
-        
+
         void ReceiveEndpoint(string path, Action<IHttpReceiveEndpointConfigurator> configure = null);
         void ReceiveEndpoint(IHttpHost host, string path, Action<IHttpReceiveEndpointConfigurator> configure = null);
     }

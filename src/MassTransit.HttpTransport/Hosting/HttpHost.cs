@@ -27,9 +27,9 @@ namespace MassTransit.HttpTransport.Hosting
         IBusHostControl
     {
         static readonly ILog _log = Logger.Get<HttpHost>();
+        readonly OwinHostCache _owinHostCache;
 
         readonly TaskSupervisor _supervisor;
-        readonly OwinHostCache _owinHostCache;
 
         public HttpHost(HttpHostSettings hostSettings)
         {
@@ -44,7 +44,7 @@ namespace MassTransit.HttpTransport.Hosting
             {
                 if (_log.IsDebugEnabled)
                     _log.DebugFormat("Connection established to {0}", Settings.Host);
-                
+
                 try
                 {
                     //Wait until someone shuts down the bus - Parked thread.

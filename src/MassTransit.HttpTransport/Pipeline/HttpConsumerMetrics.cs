@@ -14,7 +14,6 @@ namespace MassTransit.HttpTransport.Pipeline
 {
     public interface HttpConsumerMetrics
     {
-
         /// <summary>
         /// The number of messages consumed by the consumer
         /// </summary>
