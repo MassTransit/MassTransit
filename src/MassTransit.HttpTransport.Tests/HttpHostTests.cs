@@ -27,7 +27,7 @@ namespace MassTransit.HttpTransport.Tests
         public async void X()
         {
             var sup = new TaskSupervisor("test");
-            var cache = new OwinHostCache(new HttpHostSettingsImpl("http","localhost",8080,HttpMethod.Post), sup);
+            var cache = new OwinHostCache(new HttpHostSettingsImpl("http", "localhost", 8080, HttpMethod.Post), sup);
             await cache.Send(Pipe.Empty<OwinHostContext>(), default(CancellationToken));
             await sup.Stop("test");
         }

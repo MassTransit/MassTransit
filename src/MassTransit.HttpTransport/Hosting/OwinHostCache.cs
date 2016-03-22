@@ -161,9 +161,9 @@ namespace MassTransit.HttpTransport.Hosting
                 _taskScope = scope.CreateScope($"{TypeMetadataCache<OwinHostScope>.ShortName} - {settings.ToDebugString()}", CloseContext);
             }
 
-            public void Connected(HttpOwinHostContext connectionContext)
+            public void Connected(HttpOwinHostContext hostContext)
             {
-                _owinHostContext.TrySetResult(connectionContext);
+                _owinHostContext.TrySetResult(hostContext);
 
                 _taskScope.SetReady();
             }

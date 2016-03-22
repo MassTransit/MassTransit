@@ -12,9 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.HttpTransport.Hosting
 {
-    using Microsoft.Owin.Hosting;
-
-
     public class HttpOwinHostInstanceFactory : OwinHostInstanceFactory
     {
         readonly HttpHostSettings _settings;

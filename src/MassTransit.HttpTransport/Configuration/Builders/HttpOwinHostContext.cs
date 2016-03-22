@@ -23,6 +23,8 @@ namespace MassTransit.HttpTransport.Configuration.Builders
         OwinHostContext,
         IDisposable
     {
+        ITaskParticipant _participant;
+
         public HttpOwinHostContext(OwinHostInstance host, HttpHostSettings settings, ITaskSupervisor supervisor)
             : this(host, settings, supervisor.CreateParticipant($"{TypeMetadataCache<HttpOwinHostContext>.ShortName} - {settings.ToDebugString()}"))
         {
@@ -33,11 +35,14 @@ namespace MassTransit.HttpTransport.Configuration.Builders
         {
             HostSettings = settings;
             Instance = host;
+            _participant = participant;
+            _participant.SetReady();
         }
 
         public void Dispose()
         {
             Instance.Dispose();
+            _participant.SetComplete();
         }
 
         public HttpHostSettings HostSettings { get; set; }
