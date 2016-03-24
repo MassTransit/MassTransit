@@ -14,14 +14,14 @@ namespace MassTransit.HttpTransport
         IPipeSpecification<OwinHostContext>
     {
         readonly IReceiveEndpointObserver _endpointObserver;
-        readonly IPipe<ReceiveContext> _pipe;
+        readonly IPipe<ReceiveContext> _receivePipe;
         readonly IReceiveObserver _receiveObserver;
         readonly ReceiveSettings _settings;
         readonly ITaskSupervisor _supervisor;
 
-        public HttpConsumerPipeSpecification(IPipe<ReceiveContext> pipe, ReceiveSettings settings, IReceiveObserver receiveObserver, IReceiveEndpointObserver endpointObserver, ITaskSupervisor supervisor)
+        public HttpConsumerPipeSpecification(IPipe<ReceiveContext> receivePipe, ReceiveSettings settings, IReceiveObserver receiveObserver, IReceiveEndpointObserver endpointObserver, ITaskSupervisor supervisor)
         {
-            _pipe = pipe;
+            _receivePipe = receivePipe;
             _settings = settings;
             _receiveObserver = receiveObserver;
             _endpointObserver = endpointObserver;
@@ -30,19 +30,11 @@ namespace MassTransit.HttpTransport
 
         public void Apply(IPipeBuilder<OwinHostContext> builder)
         {
-            IPipe<OwinHostContext> startListeningPipe = Pipe.New<OwinHostContext>(x =>
-            {
-                x.UseFilter(new HttpConsumerFilter(_pipe, _receiveObserver, _endpointObserver, _supervisor));
-            });
-
-            IFilter<OwinHostContext> hostFilter = new HttpReceiveHostFilter(startListeningPipe, _supervisor, _settings);
-
-            builder.AddFilter(hostFilter);
+            builder.AddFilter(new HttpConsumerFilter(_receivePipe, _receiveObserver, _endpointObserver, _supervisor));
         }
 
         public IEnumerable<ValidationResult> Validate()
         {
-
             if (_settings == null)
                 yield return this.Failure("Settings", "must not be null");
         }

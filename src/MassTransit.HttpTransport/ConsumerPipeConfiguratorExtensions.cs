@@ -25,18 +25,18 @@ namespace MassTransit.HttpTransport
         /// Adds a RabbitMQ Basic Consumer to the pipeline
         /// </summary>
         /// <param name="configurator"></param>
-        /// <param name="pipe"></param>
+        /// <param name="receivePipe"></param>
         /// <param name="settings"></param>
         /// <param name="receiveObserver"></param>
         /// <param name="endpointObserver"></param>
         /// <param name="supervisor"></param>
-        public static void HttpConsumer(this IPipeConfigurator<OwinHostContext> configurator, IPipe<ReceiveContext> pipe, ReceiveSettings settings,
+        public static void HttpConsumer(this IPipeConfigurator<OwinHostContext> configurator, IPipe<ReceiveContext> receivePipe, ReceiveSettings settings,
             IReceiveObserver receiveObserver, IReceiveEndpointObserver endpointObserver, ITaskSupervisor supervisor)
         {
             if (configurator == null)
                 throw new ArgumentNullException(nameof(configurator));
 
-            var pipeBuilderConfigurator = new HttpConsumerPipeSpecification(pipe, settings, receiveObserver, endpointObserver,
+            var pipeBuilderConfigurator = new HttpConsumerPipeSpecification(receivePipe, settings, receiveObserver, endpointObserver,
                 supervisor);
 
             configurator.AddPipeSpecification(pipeBuilderConfigurator);

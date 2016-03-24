@@ -66,9 +66,9 @@ namespace MassTransit.HttpTransport.Configuration.Builders
             get { return _context.HostSettings; }
         }
 
-        public OwinHostInstance Instance
+        public void StartHttpListener(HttpConsumerAction controller)
         {
-            get { return _context.Instance; }
+            _context.StartHttpListener(controller);
         }
     }
 }

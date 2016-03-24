@@ -13,16 +13,16 @@ namespace MassTransit.HttpTransport
     public class HttpConsumerFilter : IFilter<OwinHostContext>
     {
         static readonly ILog _log = Logger.Get<HttpConsumerFilter>();
-        readonly IPipe<ReceiveContext> _pipe;
+        readonly IPipe<ReceiveContext> _receivePipe;
         readonly IReceiveObserver _receiveObserver;
         readonly IReceiveEndpointObserver _endpointObserver;
         readonly ITaskSupervisor _supervisor;
 
 
-        public HttpConsumerFilter(IPipe<ReceiveContext> pipe, IReceiveObserver receiveObserver, IReceiveEndpointObserver endpointObserver,
+        public HttpConsumerFilter(IPipe<ReceiveContext> receivePipe, IReceiveObserver receiveObserver, IReceiveEndpointObserver endpointObserver,
             ITaskSupervisor supervisor)
         {
-            _pipe = pipe;
+            _receivePipe = receivePipe;
             _receiveObserver = receiveObserver;
             _endpointObserver = endpointObserver;
             _supervisor = supervisor;
@@ -35,18 +35,16 @@ namespace MassTransit.HttpTransport
 
         public async Task Send(OwinHostContext context, IPipe<OwinHostContext> next)
         {
-            var receiveSettings = context.GetPayload<ReceiveSettings>();
-            var inputAddress = context.HostSettings.GetInputAddress(receiveSettings);
-
+            //var receiveSettings = context.GetPayload<ReceiveSettings>();
+            //var inputAddress = context.HostSettings.GetInputAddress(receiveSettings);
+            var inputAddress = new Uri("http://localhost:8080");
 
             using (ITaskScope scope = _supervisor.CreateScope($"{TypeMetadataCache<HttpConsumerFilter>.ShortName} - {inputAddress}", () => TaskUtil.Completed))
             {
-                var controller = new HttpConsumerAction(null, null, null);
-
-                //TODO register with host
+                var controller = new HttpConsumerAction(_receiveObserver, _receivePipe, scope);
+                context.StartHttpListener(controller);
 
                 await scope.Ready.ConfigureAwait(false);
-
 
                 await _endpointObserver.Ready(new Ready(inputAddress)).ConfigureAwait(false);
 

@@ -82,8 +82,6 @@
     <Compile Include="ConsumerPipeConfiguratorExtensions.cs" />
     <Compile Include="Hosting\HttpHeaderProvider.cs" />
     <Compile Include="Hosting\HttpReceiveContext.cs" />
-    <Compile Include="Hosting\OwinHostInstance.cs" />
-    <Compile Include="Hosting\RuntimeInstance.cs" />
     <Compile Include="HttpAddressExtensions.cs" />
     <Compile Include="Configuration\HttpBusFactory.cs" />
     <Compile Include="Clients\HttpClientSettingsImpl.cs" />
@@ -111,7 +109,6 @@
     <Compile Include="HttpConsumerAction.cs" />
     <Compile Include="HttpConsumerFilter.cs" />
     <Compile Include="HttpConsumerPipeSpecification.cs" />
-    <Compile Include="HttpReceiveHostFilter.cs" />
     <Compile Include="IHttpHost.cs" />
     <Compile Include="Pipeline\HttpConsumerMetrics.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

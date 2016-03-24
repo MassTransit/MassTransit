@@ -15,6 +15,9 @@ namespace MassTransit.HttpTransport.Configuration.Builders
     using System;
     using Context;
     using Hosting;
+    using MassTransit.Pipeline;
+    using Microsoft.Owin.Hosting;
+    using Owin;
     using Util;
 
 
@@ -24,28 +27,45 @@ namespace MassTransit.HttpTransport.Configuration.Builders
         IDisposable
     {
         readonly ITaskParticipant _participant;
+        IDisposable _owinHost;
+        bool _started;
 
-        public HttpOwinHostContext(OwinHostInstance host, HttpHostSettings settings, ITaskSupervisor supervisor)
-            : this(host, settings, supervisor.CreateParticipant($"{TypeMetadataCache<HttpOwinHostContext>.ShortName} - {settings.ToDebugString()}"))
+        public HttpOwinHostContext( HttpHostSettings settings, ITaskSupervisor supervisor)
+            : this(settings, supervisor.CreateParticipant($"{TypeMetadataCache<HttpOwinHostContext>.ShortName} - {settings.ToDebugString()}"))
         {
         }
 
-        HttpOwinHostContext(OwinHostInstance host, HttpHostSettings settings, ITaskParticipant participant)
+        HttpOwinHostContext( HttpHostSettings settings, ITaskParticipant participant)
             : base(new PayloadCache(), participant.StoppedToken)
         {
             HostSettings = settings;
-            Instance = host;
             _participant = participant;
             _participant.SetReady();
         }
 
         public void Dispose()
         {
-            Instance.Dispose();
+            _owinHost?.Dispose();
+
             _participant.SetComplete();
         }
 
         public HttpHostSettings HostSettings { get; set; }
-        public OwinHostInstance Instance { get; }
+
+        public void StartHttpListener(HttpConsumerAction controller)
+        {
+            if (_started)
+                return;
+
+            _started = true;
+            var options = new StartOptions();
+            options.Urls.Add(HostSettings.Host);
+            options.Port = HostSettings.Port;
+
+            _owinHost = WebApp.Start(options, app =>
+            {
+                app.Use(controller.Handle);
+            });
+        }
     }
 }

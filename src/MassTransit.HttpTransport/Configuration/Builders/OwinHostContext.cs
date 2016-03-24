@@ -19,6 +19,6 @@ namespace MassTransit.HttpTransport.Configuration.Builders
         PipeContext
     {
         HttpHostSettings HostSettings { get; }
-        OwinHostInstance Instance { get; }
+        void StartHttpListener(HttpConsumerAction controller);
     }
 }

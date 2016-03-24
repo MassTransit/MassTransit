@@ -13,12 +13,13 @@
 namespace MassTransit.HttpTransport.Hosting
 {
     using System;
-    using System.Runtime.InteropServices;
     using System.Threading;
     using System.Threading.Tasks;
     using Configuration.Builders;
     using Logging;
     using MassTransit.Pipeline;
+    using Microsoft.Owin.Hosting;
+    using Owin;
     using Util;
 
 
@@ -80,26 +81,16 @@ namespace MassTransit.HttpTransport.Hosting
 
                 if (_log.IsDebugEnabled)
                     _log.DebugFormat("Connecting: {0}", _settings.ToDebugString());
-
-                var owinHost = new RuntimeInstance(_settings);
+                
+                
 
                 if (_log.IsDebugEnabled)
                 {
                     _log.DebugFormat("Connected: {0} (address: {1}, local: {2}", _settings.ToDebugString(),
-                        owinHost.Host, owinHost.Port);
+                        _settings.Host, _settings.Port);
                 }
 
-                EventHandler<ShutdownEventArgs> hostShutdown = null;
-                hostShutdown = (obj, reason) =>
-                {
-                    Interlocked.CompareExchange(ref _scope, null, scope);
-
-                    scope.Shutdown(reason.ReplyText);
-                };
-
-                owinHost.HostShutdown += hostShutdown;
-
-                var hostContext = new HttpOwinHostContext(owinHost, _settings, _cacheTaskScope);
+                var hostContext = new HttpOwinHostContext(_settings, _cacheTaskScope);
 
                 hostContext.GetOrAddPayload(() => _settings);
 

@@ -3,6 +3,7 @@ namespace MassTransit.HttpTransport.Tests
     using System;
     using System.Net.Http;
     using System.Threading;
+    using Configuration.Builders;
     using Hosting;
     using HottpTransport.Tests;
     using NUnit.Framework;
@@ -32,7 +33,7 @@ namespace MassTransit.HttpTransport.Tests
             
             var uu = bus.Start();
 
-//            Thread.Sleep(10000);
+            Thread.Sleep(10000);
             uu.Stop();
 
         }
@@ -40,18 +41,7 @@ namespace MassTransit.HttpTransport.Tests
         [Test]
         public void OwinHost()
         {
-            var hostSettings = new HttpHostSettingsImpl("http", "localhost", 8080, HttpMethod.Get);
-            //Here to make sure the assembly is loaded
-            Microsoft.Owin.Host.HttpListener.OwinHttpListener x = null;
-            using (var h = new RuntimeInstance(hostSettings))
-            {
-                h.Start(Pipe.Execute<ReceiveContext>(cxt =>
-                {
-                    Console.WriteLine("HTTPParty");
-                }));
-                
-                Thread.Sleep(10000);
-            }
+            
         }
     }
 }

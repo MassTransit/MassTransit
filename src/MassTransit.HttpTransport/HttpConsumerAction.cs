@@ -79,7 +79,7 @@ namespace MassTransit.HttpTransport
             context.GetOrAddPayload(() => owinContext.Response);
 
             //TODO: this is wrong
-            var settings = context.GetPayload<ReceiveSettings>();
+            //var settings = context.GetPayload<ReceiveSettings>();
 
             try
             {
