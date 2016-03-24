@@ -4,6 +4,7 @@ namespace MassTransit.HttpTransport.Tests
     using System.Net.Http;
     using System.Threading;
     using Hosting;
+    using HottpTransport.Tests;
     using NUnit.Framework;
 
 
@@ -23,10 +24,10 @@ namespace MassTransit.HttpTransport.Tests
 //                });
 
                 //http://localhost:8080/listen_here
-//                cfg.ReceiveEndpoint("listen_here", ep =>
-//                {
-//                    ep.Consumer<HttpEater>();
-//                });
+                cfg.ReceiveEndpoint("listen_here", ep =>
+                {
+                    ep.Consumer<HttpEater>();
+                });
             });
             
             var uu = bus.Start();

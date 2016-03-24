@@ -21,5 +21,6 @@ namespace MassTransit.HttpTransport.Pipeline
 
         string Route { get; set; }
         long ConcurrentDeliveryCount { get; set; }
+        string ConsumerTag { get; }
     }
 }

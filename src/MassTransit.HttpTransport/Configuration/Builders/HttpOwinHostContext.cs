@@ -23,7 +23,7 @@ namespace MassTransit.HttpTransport.Configuration.Builders
         OwinHostContext,
         IDisposable
     {
-        ITaskParticipant _participant;
+        readonly ITaskParticipant _participant;
 
         public HttpOwinHostContext(OwinHostInstance host, HttpHostSettings settings, ITaskSupervisor supervisor)
             : this(host, settings, supervisor.CreateParticipant($"{TypeMetadataCache<HttpOwinHostContext>.ShortName} - {settings.ToDebugString()}"))

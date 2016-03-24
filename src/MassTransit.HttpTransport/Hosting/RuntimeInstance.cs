@@ -15,6 +15,7 @@ namespace MassTransit.HttpTransport.Hosting
     using System;
     using MassTransit.Pipeline;
     using Microsoft.Owin.Hosting;
+    using Owin;
 
 
     public class RuntimeInstance : OwinHostInstance
@@ -39,7 +40,7 @@ namespace MassTransit.HttpTransport.Hosting
 
             _appInstance = WebApp.Start(options, app =>
             {
-                new HttpMassTransitStartUp(receivePipe).Configuration(app);
+                app.Use(new HttpConsumerAction(new ReceiveObservable(), receivePipe, null).Handle);
             });
         }
 

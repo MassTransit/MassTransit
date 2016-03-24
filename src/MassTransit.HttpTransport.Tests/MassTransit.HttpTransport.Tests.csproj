@@ -54,6 +54,7 @@
     <Compile Include="HttpHostTests.cs" />
     <Compile Include="OwinTesting.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Send_specs.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Loggers\MassTransit.Log4NetIntegration\MassTransit.Log4NetIntegration.csproj">

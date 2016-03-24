@@ -79,6 +79,7 @@
     <Compile Include="Configuration\HttpHostConfigurator.cs" />
     <Compile Include="Configuration\IHttpBusFactoryConfigurator.cs" />
     <Compile Include="Configuration\IHttpHostConfigurator.cs" />
+    <Compile Include="ConsumerPipeConfiguratorExtensions.cs" />
     <Compile Include="Hosting\HttpHeaderProvider.cs" />
     <Compile Include="Hosting\HttpOwinHostInstanceFactory.cs" />
     <Compile Include="Hosting\HttpReceiveContext.cs" />
@@ -95,7 +96,6 @@
     <Compile Include="Hosting\HttpHostSettings.cs" />
     <Compile Include="Hosting\HttpHostSettingsExtensions.cs" />
     <Compile Include="Hosting\HttpHostSettingsImpl.cs" />
-    <Compile Include="Hosting\HttpMassTransitStartUp.cs" />
     <Compile Include="Hosting\IOwinHostCache.cs" />
     <Compile Include="Hosting\OwinHostCache.cs" />
     <Compile Include="Hosting\ReceiveSettings.cs" />
@@ -111,8 +111,13 @@
     <Compile Include="Clients\HttpSendTransport.cs" />
     <Compile Include="Clients\HttpClientSettings.cs" />
     <Compile Include="Clients\HttpSendTransportProvider.cs" />
+    <Compile Include="HttpConsumerAction.cs" />
+    <Compile Include="HttpConsumerFilter.cs" />
+    <Compile Include="HttpConsumerPipeSpecification.cs" />
+    <Compile Include="HttpReceiveHostFilter.cs" />
     <Compile Include="IHttpHost.cs" />
     <Compile Include="Pipeline\HttpConsumerMetrics.cs" />
+    <Compile Include="PrepareRouteFilter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Hosting\ShutdownEventArgs.cs" />
   </ItemGroup>

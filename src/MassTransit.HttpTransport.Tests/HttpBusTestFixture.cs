@@ -14,6 +14,7 @@ namespace MassTransit.HttpTransport.Tests
 {
     using System;
     using System.Threading;
+    using Configuration.Builders;
     using Logging;
     using NUnit.Framework;
     using TestFramework;
@@ -39,7 +40,24 @@ namespace MassTransit.HttpTransport.Tests
             _inputQueueAddress = new Uri(_hostAddress, "input_queue");
         }
 
+
+        /// <summary>
+        /// The sending endpoint for the InputQueue
+        /// </summary>
+        protected ISendEndpoint InputQueueSendEndpoint => _inputQueueSendEndpoint;
         protected override IBus Bus => _bus;
+
+        protected Uri InputQueueAddress
+        {
+            get { return _inputQueueAddress; }
+            set
+            {
+                if (Bus != null)
+                    throw new InvalidOperationException("The LocalBus has already been created, too late to change the URI");
+
+                _inputQueueAddress = value;
+            }
+        }
 
         [TestFixtureSetUp]
         public void SetupInMemoryTestFixture()
@@ -99,6 +117,10 @@ namespace MassTransit.HttpTransport.Tests
         {
         }
 
+        protected virtual void ConfigureInputQueueEndpoint(IHttpReceiveEndpointConfigurator configurator)
+        {
+        }
+
 
         IBusControl CreateBus()
         {
@@ -110,6 +132,9 @@ namespace MassTransit.HttpTransport.Tests
 
                 x.ReceiveEndpoint(host, "input_queue", e =>
                 {
+                    _inputQueueAddress = e.InputAddress;
+
+                    ConfigureInputQueueEndpoint(e);
                 });
             });
         }

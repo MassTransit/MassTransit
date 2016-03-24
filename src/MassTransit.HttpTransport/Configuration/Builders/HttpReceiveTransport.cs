@@ -61,16 +61,16 @@ namespace MassTransit.HttpTransport.Configuration.Builders
         {
             var supervisor = new TaskSupervisor($"{TypeMetadataCache<HttpReceiveTransport>.ShortName} - {_host.Settings.GetInputAddress(_settings)}");
 
-            IPipe<OwinHostContext> hostPipe = Pipe.ExecuteAsync<OwinHostContext>(async cxt =>
+            IPipe<OwinHostContext> hostPipe = Pipe.New<OwinHostContext>(async cxt =>
             {
-                cxt.Instance.Start(receivePipe);
+                cxt.HttpConsumer(receivePipe, _settings, _receiveObservable, _receiveEndpointObservable, supervisor);
 
                 await _receiveEndpointObservable.Ready(new Ready(_host.Settings.GetInputAddress(_settings))).ConfigureAwait(false);
             });
 
-            var connectionTask = _host.OwinHostCache.Send(hostPipe, supervisor.StoppingToken);
+            var hostTask = _host.OwinHostCache.Send(hostPipe, supervisor.StoppingToken);
 
-            return new Handle(supervisor, connectionTask);
+            return new Handle(supervisor, hostTask);
         }
 
 
