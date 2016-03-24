@@ -18,10 +18,5 @@ namespace MassTransit.HttpTransport.Hosting
         {
             return $"{settings.Host}:{settings.Port}";
         }
-
-        public static OwinHostInstanceFactory GetHostFactory(this HttpHostSettings settings)
-        {
-            return new HttpOwinHostInstanceFactory(settings);
-        }
     }
 }

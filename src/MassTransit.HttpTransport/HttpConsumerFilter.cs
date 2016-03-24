@@ -12,7 +12,7 @@ namespace MassTransit.HttpTransport
 
     public class HttpConsumerFilter : IFilter<OwinHostContext>
     {
-        static readonly ILog _log = Logger.Get<RabbitMqConsumerFilter>();
+        static readonly ILog _log = Logger.Get<HttpConsumerFilter>();
         readonly IPipe<ReceiveContext> _pipe;
         readonly IReceiveObserver _receiveObserver;
         readonly IReceiveEndpointObserver _endpointObserver;

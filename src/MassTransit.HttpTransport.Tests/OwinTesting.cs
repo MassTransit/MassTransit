@@ -41,10 +41,9 @@ namespace MassTransit.HttpTransport.Tests
         public void OwinHost()
         {
             var hostSettings = new HttpHostSettingsImpl("http", "localhost", 8080, HttpMethod.Get);
-            var hf = hostSettings.GetHostFactory();
             //Here to make sure the assembly is loaded
             Microsoft.Owin.Host.HttpListener.OwinHttpListener x = null;
-            using (var h = hf.CreateHost())
+            using (var h = new RuntimeInstance(hostSettings))
             {
                 h.Start(Pipe.Execute<ReceiveContext>(cxt =>
                 {

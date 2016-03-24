@@ -30,14 +30,12 @@ namespace MassTransit.HttpTransport
 
         public void Apply(IPipeBuilder<OwinHostContext> builder)
         {
-            IPipe<OwinHostContext> pipe = Pipe.New<OwinHostContext>(x =>
+            IPipe<OwinHostContext> startListeningPipe = Pipe.New<OwinHostContext>(x =>
             {
-                x.UseFilter(new PrepareRouteFilter(_settings));
-
                 x.UseFilter(new HttpConsumerFilter(_pipe, _receiveObserver, _endpointObserver, _supervisor));
             });
 
-            IFilter<OwinHostContext> hostFilter = new HttpReceiveHostFilter(pipe, _supervisor, _settings);
+            IFilter<OwinHostContext> hostFilter = new HttpReceiveHostFilter(startListeningPipe, _supervisor, _settings);
 
             builder.AddFilter(hostFilter);
         }

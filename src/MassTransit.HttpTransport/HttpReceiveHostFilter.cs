@@ -10,8 +10,8 @@ namespace MassTransit.HttpTransport
     public class HttpReceiveHostFilter : IFilter<OwinHostContext>
     {
         readonly IPipe<OwinHostContext> _pipe;
-        ReceiveSettings _settings;
-        ITaskSupervisor _supervisor;
+        readonly ReceiveSettings _settings;
+        readonly ITaskSupervisor _supervisor;
 
         public HttpReceiveHostFilter(IPipe<OwinHostContext> pipe, ITaskSupervisor supervisor, ReceiveSettings settings)
         {
@@ -25,10 +25,11 @@ namespace MassTransit.HttpTransport
             //no-op
         }
 
-        public Task Send(OwinHostContext context, IPipe<OwinHostContext> next)
+        public async Task Send(OwinHostContext context, IPipe<OwinHostContext> next)
         {
             using (var scope = _supervisor.CreateScope($"{TypeMetadataCache<HttpReceiveHostFilter>.ShortName}"))
             {
+                //TODO: I can't really get a model
 //                IModel model = context.Instance.Start(null);
 //
 //                using (var modelContext = new RabbitMqModelContext(context, model, scope, _settings))
@@ -36,9 +37,9 @@ namespace MassTransit.HttpTransport
 //                    await _pipe.Send(modelContext).ConfigureAwait(false);
 //                }
 //
-//                await scope.Completed.ConfigureAwait(false);
-//
-//                await next.Send(context).ConfigureAwait(false);
+                await scope.Completed.ConfigureAwait(false);
+
+                await next.Send(context).ConfigureAwait(false);
             }
         }
     }

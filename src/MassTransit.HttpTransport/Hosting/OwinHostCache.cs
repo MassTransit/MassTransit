@@ -13,6 +13,7 @@
 namespace MassTransit.HttpTransport.Hosting
 {
     using System;
+    using System.Runtime.InteropServices;
     using System.Threading;
     using System.Threading.Tasks;
     using Configuration.Builders;
@@ -27,7 +28,6 @@ namespace MassTransit.HttpTransport.Hosting
     {
         static readonly ILog _log = Logger.Get<OwinHostCache>();
         readonly ITaskScope _cacheTaskScope;
-        readonly OwinHostInstanceFactory _owinHostInstanceFactory;
         readonly object _scopeLock = new object();
         readonly HttpHostSettings _settings;
         OwinHostScope _scope;
@@ -35,7 +35,6 @@ namespace MassTransit.HttpTransport.Hosting
         public OwinHostCache(HttpHostSettings settings, ITaskSupervisor supervisor)
         {
             _settings = settings;
-            _owinHostInstanceFactory = settings.GetHostFactory();
 
             _cacheTaskScope = supervisor.CreateScope($"{TypeMetadataCache<OwinHostCache>.ShortName} - {settings.ToDebugString()}", CloseScope);
         }
@@ -80,13 +79,13 @@ namespace MassTransit.HttpTransport.Hosting
                     throw new TaskCanceledException($"The connection is being disconnected: {_settings.ToDebugString()}");
 
                 if (_log.IsDebugEnabled)
-                    _log.DebugFormat("Connecting: {0}", _owinHostInstanceFactory.ToDebugString());
+                    _log.DebugFormat("Connecting: {0}", _settings.ToDebugString());
 
-                var owinHost = _owinHostInstanceFactory.CreateHost();
+                var owinHost = new RuntimeInstance(_settings);
 
                 if (_log.IsDebugEnabled)
                 {
-                    _log.DebugFormat("Connected: {0} (address: {1}, local: {2}", _owinHostInstanceFactory.ToDebugString(),
+                    _log.DebugFormat("Connected: {0} (address: {1}, local: {2}", _settings.ToDebugString(),
                         owinHost.Host, owinHost.Port);
                 }
 
@@ -112,7 +111,7 @@ namespace MassTransit.HttpTransport.Hosting
 
                 scope.ConnectFaulted(ex);
 
-                throw new HttpConnectionException("Connect failed: " + _owinHostInstanceFactory.ToDebugString(), ex);
+                throw new HttpConnectionException("Connect failed: " + _settings.ToDebugString(), ex);
             }
 
             return SendUsingExistingConnection(connectionPipe, scope, stoppingToken);
