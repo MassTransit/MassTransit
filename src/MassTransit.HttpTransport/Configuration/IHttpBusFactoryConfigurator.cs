@@ -22,7 +22,7 @@ namespace MassTransit
     {
         IHttpHost Host(HttpHostSettings settings);
 
-        void ReceiveEndpoint(string path, Action<IHttpReceiveEndpointConfigurator> configure = null);
-        void ReceiveEndpoint(IHttpHost host, string path, Action<IHttpReceiveEndpointConfigurator> configure = null);
+        void ReceiveEndpoint(Action<IHttpReceiveEndpointConfigurator> configure = null);
+        void ReceiveEndpoint(IHttpHost host, Action<IHttpReceiveEndpointConfigurator> configure = null);
     }
 }

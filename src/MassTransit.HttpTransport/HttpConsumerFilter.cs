@@ -13,19 +13,21 @@ namespace MassTransit.HttpTransport
     public class HttpConsumerFilter : IFilter<OwinHostContext>
     {
         static readonly ILog _log = Logger.Get<HttpConsumerFilter>();
+
         readonly IPipe<ReceiveContext> _receivePipe;
         readonly IReceiveObserver _receiveObserver;
         readonly IReceiveEndpointObserver _endpointObserver;
         readonly ITaskSupervisor _supervisor;
-
+        readonly HttpHostSettings _settings;
 
         public HttpConsumerFilter(IPipe<ReceiveContext> receivePipe, IReceiveObserver receiveObserver, IReceiveEndpointObserver endpointObserver,
-            ITaskSupervisor supervisor)
+            ITaskSupervisor supervisor, HttpHostSettings settings)
         {
             _receivePipe = receivePipe;
             _receiveObserver = receiveObserver;
             _endpointObserver = endpointObserver;
             _supervisor = supervisor;
+            _settings = settings;
         }
 
         public void Probe(ProbeContext context)
@@ -41,7 +43,7 @@ namespace MassTransit.HttpTransport
 
             using (ITaskScope scope = _supervisor.CreateScope($"{TypeMetadataCache<HttpConsumerFilter>.ShortName} - {inputAddress}", () => TaskUtil.Completed))
             {
-                var controller = new HttpConsumerAction(_receiveObserver, _receivePipe, scope);
+                var controller = new HttpConsumerAction(_receiveObserver, _settings, _receivePipe, scope);
                 context.StartHttpListener(controller);
 
                 await scope.Ready.ConfigureAwait(false);

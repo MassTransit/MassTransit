@@ -24,8 +24,8 @@ namespace MassTransit.HttpTransport.Tests
 //                    //TODO: Serializer
 //                });
 
-                //http://localhost:8080/listen_here
-                cfg.ReceiveEndpoint("listen_here", ep =>
+                //http://localhost:8080/
+                cfg.ReceiveEndpoint(ep =>
                 {
                     ep.Consumer<HttpEater>();
                 });
@@ -33,7 +33,7 @@ namespace MassTransit.HttpTransport.Tests
             
             var uu = bus.Start();
 
-            Thread.Sleep(10000);
+            Thread.Sleep(100000);
             uu.Stop();
 
         }

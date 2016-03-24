@@ -12,11 +12,16 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.HttpTransport.Clients
 {
+    using System;
     using System.Net.Http;
+    using System.Threading;
+    using System.Threading.Tasks;
 
 
     public interface ClientContext : PipeContext
     {
-        HttpClient Client { get; }
+        //HttpClient Client { get; }
+        Uri BaseAddress { get; }
+        Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken);
     }
 }

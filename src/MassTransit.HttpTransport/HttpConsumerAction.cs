@@ -20,6 +20,7 @@ namespace MassTransit.HttpTransport
 
         readonly Uri _inputAddress;
         readonly IReceiveObserver _receiveObserver;
+        readonly HttpHostSettings _settings;
         readonly IPipe<ReceiveContext> _receivePipe;
         int _currentPendingDeliveryCount;
         int _deliveryCount;
@@ -29,15 +30,15 @@ namespace MassTransit.HttpTransport
         int _maxPendingDeliveryCount;
         readonly ConcurrentDictionary<Guid, HttpReceiveContext> _pending;
 
-        public HttpConsumerAction(IReceiveObserver receiveObserver, IPipe<ReceiveContext> receivePipe,
+        public HttpConsumerAction(IReceiveObserver receiveObserver, HttpHostSettings settings,IPipe<ReceiveContext> receivePipe,
             ITaskScope taskSupervisor)
         {
             _receiveObserver = receiveObserver;
+            _settings = settings;
             _receivePipe = receivePipe;
 
-            //receive settings in consumer
             _pending = new ConcurrentDictionary<Guid, HttpReceiveContext>();
-
+            _inputAddress = settings.GetInputAddress();
             _participant = taskSupervisor.CreateParticipant($"{TypeMetadataCache<HttpConsumerAction>.ShortName} - {_inputAddress}", Stop);
             _deliveryComplete = new TaskCompletionSource<bool>();
 
@@ -59,7 +60,8 @@ namespace MassTransit.HttpTransport
 
             if (_shuttingDown)
             {
-                //TODO: handle shutting down
+                owinContext.Response.StatusCode = (int)HttpStatusCode.ServiceUnavailable;
+                owinContext.Response.Write("SHUTTING DOWN");
                 await next();
             }
 
@@ -77,9 +79,6 @@ namespace MassTransit.HttpTransport
 
             context.GetOrAddPayload(() => owinContext.Request);
             context.GetOrAddPayload(() => owinContext.Response);
-
-            //TODO: this is wrong
-            //var settings = context.GetPayload<ReceiveSettings>();
 
             try
             {
@@ -150,10 +149,6 @@ namespace MassTransit.HttpTransport
                         _log.WarnFormat("Timeout waiting for consumer to exit: {0}", _inputAddress);
                 }
             }
-
-
-            //TODO: Is there anyway to do this?
-            //await _model.BasicCancel(_consumerTag).ConfigureAwait(false);
 
             await _participant.ParticipantCompleted.ConfigureAwait(false);
         }

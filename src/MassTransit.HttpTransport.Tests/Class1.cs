@@ -34,19 +34,21 @@ namespace MassTransit.HottpTransport.Tests
                     //TODO: Serializer
                 });
 
-                //http://localhost:8080/listen_here
-                cfg.ReceiveEndpoint("listen_here", ep =>
+                //http://localhost:8080/
+                cfg.ReceiveEndpoint(ep =>
                 {
                     ep.Consumer<HttpEater>();
                 });
             });
 
-            var epa = bus.GetSendEndpoint(new Uri("http://requestb.in/1jgiiy51")).Result;
-            var r = epa.Send(new Ping {Hello = "Hal"}, CancellationToken.None).Wait(TimeSpan.FromMinutes(5));
-            Console.WriteLine(r.ToString());
+//            var epa = bus.GetSendEndpoint(new Uri("http://requestb.in/15alnbk1")).Result;
+//            var r = epa.Send(new Ping {Hello = "Hal"}, CancellationToken.None).Wait(TimeSpan.FromMinutes(5));
+//            Console.WriteLine(r.ToString());
+            var mc = new MessageRequestClient<Ping, Pong>(bus, new Uri("http://requestb.in/15alnbk1"), TimeSpan.FromSeconds(5) );
+            mc.Request(new Ping(), default(CancellationToken)).Wait(TimeSpan.FromSeconds(10));
 
-            var p = bus.GetProbeResult();
-            Console.WriteLine(p.ToJsonString());
+//            var p = bus.GetProbeResult();
+//            Console.WriteLine(p.ToJsonString());
         }
     }
 
@@ -55,10 +57,16 @@ namespace MassTransit.HottpTransport.Tests
     {
         public async Task Consume(ConsumeContext<Ping> context)
         {
+            await Console.Out.WriteLineAsync(string.Format("Request-Id: {0}", context.RequestId));
+            await Console.Out.WriteLineAsync(string.Format("Conversation-Id: {0}", context.ConversationId));
+            await Console.Out.WriteLineAsync(string.Format("Initiator-Id: {0}", context.InitiatorId));
+            await Console.Out.WriteLineAsync(string.Format("Message-Id: {0}", context.MessageId));
             await Console.Out.WriteAsync(context.Message.Hello);
         }
     }
 
+    public class Pong
+    { }
 
     public class Ping
     {

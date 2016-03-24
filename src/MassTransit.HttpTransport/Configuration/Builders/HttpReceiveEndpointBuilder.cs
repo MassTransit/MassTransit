@@ -36,10 +36,5 @@ namespace MassTransit.HttpTransport.Configuration.Builders
         {
             return _consumePipe.ConnectConsumeMessageObserver(observer);
         }
-
-        public IEnumerable<object> GetHttpRouteBindings()
-        {
-            return Enumerable.Empty<object>();
-        }
     }
 }

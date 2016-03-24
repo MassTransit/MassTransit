@@ -15,7 +15,6 @@ namespace MassTransit.HttpTransport.Configuration.Builders
     using System;
     using System.Threading;
     using System.Threading.Tasks;
-    using Hosting;
     using Logging;
     using MassTransit.Pipeline;
     using Transports;
@@ -26,15 +25,14 @@ namespace MassTransit.HttpTransport.Configuration.Builders
         IReceiveTransport
     {
         static readonly ILog _log = Logger.Get<HttpReceiveTransport>();
+
         readonly IHttpHost _host;
         readonly ReceiveEndpointObservable _receiveEndpointObservable;
         readonly ReceiveObservable _receiveObservable;
-        readonly ReceiveSettings _settings;
 
-        public HttpReceiveTransport(IHttpHost host, ReceiveSettings settings, object[] routeBindings)
+        public HttpReceiveTransport(IHttpHost host)
         {
             _host = host;
-            _settings = settings;
 
             _receiveObservable = new ReceiveObservable();
             _receiveEndpointObservable = new ReceiveEndpointObservable();
@@ -54,18 +52,18 @@ namespace MassTransit.HttpTransport.Configuration.Builders
         {
             var scope = context.CreateScope("transport");
             scope.Add("type", "HTTP");
-            scope.Set(_settings);
+            scope.Set(_host.Settings);
         }
 
         public ReceiveTransportHandle Start(IPipe<ReceiveContext> receivePipe)
         {
-            var supervisor = new TaskSupervisor($"{TypeMetadataCache<HttpReceiveTransport>.ShortName} - {_host.Settings.GetInputAddress(_settings)}");
+            var supervisor = new TaskSupervisor($"{TypeMetadataCache<HttpReceiveTransport>.ShortName} - {_host.Settings.GetInputAddress()}");
 
             IPipe<OwinHostContext> hostPipe = Pipe.New<OwinHostContext>(async cxt =>
             {
-                cxt.HttpConsumer(receivePipe, _settings, _receiveObservable, _receiveEndpointObservable, supervisor);
+                cxt.HttpConsumer(receivePipe, _host.Settings, _receiveObservable, _receiveEndpointObservable, supervisor);
 
-                await _receiveEndpointObservable.Ready(new Ready(_host.Settings.GetInputAddress(_settings))).ConfigureAwait(false);
+                await _receiveEndpointObservable.Ready(new Ready(_host.Settings.GetInputAddress())).ConfigureAwait(false);
             });
 
             var hostTask = _host.OwinHostCache.Send(hostPipe, supervisor.StoppingToken);

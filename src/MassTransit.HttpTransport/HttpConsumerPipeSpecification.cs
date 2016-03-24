@@ -14,15 +14,15 @@ namespace MassTransit.HttpTransport
         IPipeSpecification<OwinHostContext>
     {
         readonly IReceiveEndpointObserver _endpointObserver;
+        readonly HttpHostSettings _settings;
         readonly IPipe<ReceiveContext> _receivePipe;
         readonly IReceiveObserver _receiveObserver;
-        readonly ReceiveSettings _settings;
         readonly ITaskSupervisor _supervisor;
 
-        public HttpConsumerPipeSpecification(IPipe<ReceiveContext> receivePipe, ReceiveSettings settings, IReceiveObserver receiveObserver, IReceiveEndpointObserver endpointObserver, ITaskSupervisor supervisor)
+        public HttpConsumerPipeSpecification(HttpHostSettings settings, IPipe<ReceiveContext> receivePipe, IReceiveObserver receiveObserver, IReceiveEndpointObserver endpointObserver, ITaskSupervisor supervisor)
         {
-            _receivePipe = receivePipe;
             _settings = settings;
+            _receivePipe = receivePipe;
             _receiveObserver = receiveObserver;
             _endpointObserver = endpointObserver;
             _supervisor = supervisor;
@@ -30,7 +30,7 @@ namespace MassTransit.HttpTransport
 
         public void Apply(IPipeBuilder<OwinHostContext> builder)
         {
-            builder.AddFilter(new HttpConsumerFilter(_receivePipe, _receiveObserver, _endpointObserver, _supervisor));
+            builder.AddFilter(new HttpConsumerFilter(_receivePipe, _receiveObserver, _endpointObserver, _supervisor, _settings));
         }
 
         public IEnumerable<ValidationResult> Validate()

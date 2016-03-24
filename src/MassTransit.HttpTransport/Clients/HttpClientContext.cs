@@ -15,6 +15,7 @@ namespace MassTransit.HttpTransport.Clients
     using System;
     using System.Net.Http;
     using System.Threading;
+    using System.Threading.Tasks;
     using Context;
     using Logging;
     using Util;
@@ -27,6 +28,7 @@ namespace MassTransit.HttpTransport.Clients
     {
         static readonly ILog _log = Logger.Get<HttpClientContext>();
         readonly ITaskParticipant _participant;
+        readonly HttpClient _client;
 
         public HttpClientContext(HttpClient client, ITaskScope taskScope)
             :
@@ -37,13 +39,29 @@ namespace MassTransit.HttpTransport.Clients
         public HttpClientContext(HttpClient client, ITaskParticipant participant)
             : base(new PayloadCache())
         {
-            Client = client;
+            _client = client;
             _participant = participant;
         }
 
         CancellationToken PipeContext.CancellationToken => _participant.StoppedToken;
+        
 
-        public HttpClient Client { get; }
+        public Uri BaseAddress => _client.BaseAddress;
+
+        public async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            return await _client.SendAsync(request, cancellationToken);
+        }
+
+        public async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, HttpCompletionOption completionOption)
+        {
+            return await _client.SendAsync(request, completionOption);
+        }
+
+        public async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationToken cancellationToken)
+        {
+            return await _client.SendAsync(request, completionOption, cancellationToken);
+        }
 
         public void Dispose()
         {
@@ -53,11 +71,11 @@ namespace MassTransit.HttpTransport.Clients
         void Close(string reason)
         {
             if (_log.IsDebugEnabled)
-                _log.Debug($"Closing client: {Client.BaseAddress}");
+                _log.Debug($"Closing client: {_client.BaseAddress}");
 
             try
             {
-                Client.Dispose();
+                _client.Dispose();
             }
             catch (Exception ex)
             {
@@ -66,6 +84,11 @@ namespace MassTransit.HttpTransport.Clients
             }
 
             _participant.SetComplete();
+        }
+
+        public void CancelPendingRequests()
+        {
+            _client.CancelPendingRequests();
         }
     }
 }

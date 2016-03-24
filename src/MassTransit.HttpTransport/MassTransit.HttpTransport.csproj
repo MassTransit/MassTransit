@@ -90,11 +90,9 @@
     <Compile Include="Hosting\HttpHostEqualityComparer.cs" />
     <Compile Include="Hosting\HttpHostSettings.cs" />
     <Compile Include="Hosting\HttpHostSettingsExtensions.cs" />
-    <Compile Include="Hosting\HttpHostSettingsImpl.cs" />
+    <Compile Include="Hosting\ConfigurationHostSettings.cs" />
     <Compile Include="Hosting\IOwinHostCache.cs" />
     <Compile Include="Hosting\OwinHostCache.cs" />
-    <Compile Include="Hosting\ReceiveSettings.cs" />
-    <Compile Include="Hosting\HttpReceiveSettings.cs" />
     <Compile Include="Clients\HttpSendContextImpl.cs" />
     <Compile Include="Clients\ClientContext.cs" />
     <Compile Include="Clients\HttpClientCache.cs" />
@@ -112,7 +110,6 @@
     <Compile Include="IHttpHost.cs" />
     <Compile Include="Pipeline\HttpConsumerMetrics.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Hosting\ShutdownEventArgs.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MassTransit\MassTransit.csproj">

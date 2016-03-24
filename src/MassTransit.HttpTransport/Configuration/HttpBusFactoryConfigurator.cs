@@ -28,20 +28,17 @@ namespace MassTransit.HttpTransport.Configuration
         IBusFactory
     {
         readonly IList<HttpHost> _hosts;
-        readonly HttpReceiveSettings _receiveSettings;
         readonly IList<IBusFactorySpecification> _transportBuilderConfigurators;
 
         public HttpBusFactoryConfigurator()
         {
             _hosts = new List<HttpHost>();
             _transportBuilderConfigurators = new List<IBusFactorySpecification>();
-
-            _receiveSettings = new HttpReceiveSettings("localhost", 8080, "bus-" + Guid.NewGuid());
         }
 
         public IBusControl CreateBus()
         {
-            var builder = new HttpBusBuilder(_hosts.ToArray(), ConsumePipeFactory, SendPipeFactory, PublishPipeFactory, _receiveSettings);
+            var builder = new HttpBusBuilder(_hosts.ToArray(), ConsumePipeFactory, SendPipeFactory, PublishPipeFactory);
 
             foreach (var configurator in _transportBuilderConfigurators)
                 configurator.Apply(builder);
@@ -58,8 +55,6 @@ namespace MassTransit.HttpTransport.Configuration
 
             if (_hosts.Count == 0)
                 yield return this.Failure("Host", "At least one host must be defined");
-            if (string.IsNullOrWhiteSpace(_receiveSettings.Path))
-                yield return this.Failure("Bus", "The bus path must not be null or empty");
 
             foreach (var result in _transportBuilderConfigurators.SelectMany(x => x.Validate()))
                 yield return result;
@@ -74,17 +69,17 @@ namespace MassTransit.HttpTransport.Configuration
             return httpHost;
         }
 
-        public void ReceiveEndpoint(string path, Action<IHttpReceiveEndpointConfigurator> configure = null)
+        public void ReceiveEndpoint(Action<IHttpReceiveEndpointConfigurator> configure = null)
         {
-            ReceiveEndpoint(_hosts[0], path, configure);
+            ReceiveEndpoint(_hosts[0], configure);
         }
 
-        public void ReceiveEndpoint(IHttpHost host, string path, Action<IHttpReceiveEndpointConfigurator> configure = null)
+        public void ReceiveEndpoint(IHttpHost host, Action<IHttpReceiveEndpointConfigurator> configure = null)
         {
             if (host == null)
                 throw new EndpointNotFoundException("The host address specified was not configured.");
 
-            var ep = new HttpReceiveEndpointConfigurator(host, new HttpReceiveSettings(host.Settings.Host, host.Settings.Port, path));
+            var ep = new HttpReceiveEndpointConfigurator(host);
 
             if (configure != null)
                 configure(ep);
@@ -95,11 +90,6 @@ namespace MassTransit.HttpTransport.Configuration
         public void AddBusFactorySpecification(IBusFactorySpecification configurator)
         {
             _transportBuilderConfigurators.Add(configurator);
-        }
-
-        public void OverrideDefaultBusEndpointPath(string value)
-        {
-            _receiveSettings.Path = value;
         }
     }
 }

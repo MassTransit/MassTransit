@@ -167,9 +167,9 @@ namespace MassTransit.HttpTransport.Clients
                     var clientContext = await _clientContext.Task.ConfigureAwait(false);
 
                     if (_log.IsDebugEnabled)
-                        _log.DebugFormat("Disposing client: {0}", ((ClientContext)clientContext).Client.BaseAddress);
+                        _log.DebugFormat("Disposing client: {0}", ((ClientContext)clientContext).BaseAddress);
 
-                    clientContext.Client.CancelPendingRequests();
+                    clientContext.CancelPendingRequests();
                     clientContext.Dispose();
                 }
             }

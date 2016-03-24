@@ -29,33 +29,21 @@ namespace MassTransit.HttpTransport
 
         public static HttpHostSettings GetHostSettings(this Uri uri)
         {
-            return new HttpHostSettingsImpl(uri.Scheme, uri.Host, uri.Port, HttpMethod.Get);
+            return new ConfigurationHostSettings(uri.Scheme, uri.Host, uri.Port, HttpMethod.Get);
         }
 
-        public static ReceiveSettings GetReceiveSettings(this Uri uri)
-        {
-            return new HttpReceiveSettings(uri.Host, uri.Port, uri.LocalPath);
-        }
-
-        public static Uri GetInputAddress(this HttpHostSettings hostSettings, ReceiveSettings receiveSettings)
+        public static Uri GetInputAddress(this HttpHostSettings hostSettings)
         {
             var builder = new UriBuilder
             {
-                Scheme = "http",
+                Scheme = hostSettings.Scheme,
                 Host = hostSettings.Host,
                 Port = hostSettings.Port,
-                Path = receiveSettings.Path
             };
-
-            builder.Query += string.Join("&", GetQueryStringOptions(receiveSettings));
 
             return builder.Uri;
         }
-
-        static IEnumerable<string> GetQueryStringOptions(ReceiveSettings settings)
-        {
-            return Enumerable.Empty<string>();
-        }
+        
 
         static IEnumerable<string> GetQueryStringOptions(HttpSendSettings settings)
         {

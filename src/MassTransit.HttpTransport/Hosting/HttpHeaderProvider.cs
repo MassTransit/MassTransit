@@ -36,7 +36,7 @@ namespace MassTransit.HttpTransport.Hosting
         {
             string[] values;
             var result = _headers.TryGetValue(key, out values);
-            value = values;
+            value = values?.FirstOrDefault();
             return result;
         }
     }

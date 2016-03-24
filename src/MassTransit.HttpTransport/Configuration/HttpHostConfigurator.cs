@@ -18,11 +18,11 @@ namespace MassTransit.HttpTransport.Configuration
 
     public class HttpHostConfigurator : IHttpHostConfigurator
     {
-        readonly HttpHostSettingsImpl _settings;
+        readonly ConfigurationHostSettings _settings;
 
         public HttpHostConfigurator(string scheme, string host, int port)
         {
-            _settings = new HttpHostSettingsImpl(scheme, host, port, HttpMethod.Post);
+            _settings = new ConfigurationHostSettings(scheme, host, port, HttpMethod.Post);
         }
 
         public HttpHostSettings Settings

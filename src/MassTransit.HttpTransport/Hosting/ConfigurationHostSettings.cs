@@ -12,14 +12,23 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.HttpTransport.Hosting
 {
-    public interface ReceiveSettings
-    {
-        /// <summary>
-        /// The path to attach to in the HTTP context
-        /// </summary>
-        string Path { get; }
+    using System.Net.Http;
 
-        string Host { get; }
-        int Port { get; }
+
+    public class ConfigurationHostSettings : HttpHostSettings
+    {
+        public ConfigurationHostSettings(string scheme, string host, int port, HttpMethod method)
+        {
+            Scheme = scheme;
+            Host = host;
+            Port = port;
+            Method = method;
+        }
+
+        public HttpMethod Method { get; set; }
+
+        public string Scheme { get; set; }
+        public string Host { get; }
+        public int Port { get; }
     }
 }

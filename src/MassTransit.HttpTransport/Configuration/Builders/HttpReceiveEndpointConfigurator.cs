@@ -31,28 +31,19 @@ namespace MassTransit.HttpTransport.Configuration.Builders
         IBusFactorySpecification
     {
         readonly IHttpHost _host;
-        readonly ReceiveSettings _settings;
 
-        public HttpReceiveEndpointConfigurator(IHttpHost host, string path, IConsumePipe consumePipe = null)
+        
+        public HttpReceiveEndpointConfigurator(IHttpHost host, IConsumePipe consumePipe = null)
             :
                 base(consumePipe)
         {
             _host = host;
-            _settings = new HttpReceiveSettings(host.Settings.Host, host.Settings.Port, path);
-        }
-
-        public HttpReceiveEndpointConfigurator(IHttpHost host, ReceiveSettings settings, IConsumePipe consumePipe = null)
-            :
-                base(consumePipe)
-        {
-            _host = host;
-            _settings = settings;
         }
 
         public override IEnumerable<ValidationResult> Validate()
         {
             foreach (var result in base.Validate())
-                yield return result.WithParentKey($"{_settings.Path}");
+                yield return result.WithParentKey($"{_host.Settings.ToDebugString()}");
         }
 
         public void Apply(IBusBuilder builder)
@@ -68,19 +59,19 @@ namespace MassTransit.HttpTransport.Configuration.Builders
             if (endpointBuilder == null)
                 throw new InvalidOperationException("The endpoint builder was not initialized");
 
-            var transport = new HttpReceiveTransport(_host, _settings, endpointBuilder.GetHttpRouteBindings().ToArray());
+            var transport = new HttpReceiveTransport(_host);
 
-            builder.AddReceiveEndpoint(_settings.Path ?? NewId.Next().ToString(), new ReceiveEndpoint(transport, receivePipe));
+            builder.AddReceiveEndpoint(NewId.Next().ToString(), new ReceiveEndpoint(transport, receivePipe));
         }
 
         protected override Uri GetInputAddress()
         {
-            return _host.Settings.GetInputAddress(_settings);
+            return _host.Settings.GetInputAddress();
         }
 
         protected override Uri GetErrorAddress()
         {
-            var errorQueueName = _settings.Path + "_error";
+            var errorQueueName = "bus_error";
             var sendSettings = new HttpSendSettingsImpl(HttpMethod.Get, errorQueueName);
 
             //sendSettings.BindToQueue(errorQueueName);
@@ -90,7 +81,7 @@ namespace MassTransit.HttpTransport.Configuration.Builders
 
         protected override Uri GetDeadLetterAddress()
         {
-            var deadLetterQueueName = _settings.Path + "_skipped";
+            var deadLetterQueueName = "bus_skipped";
             var sendSettings = new HttpSendSettingsImpl(HttpMethod.Delete, deadLetterQueueName);
 
             //sendSettings.BindToQueue(errorQueueName);

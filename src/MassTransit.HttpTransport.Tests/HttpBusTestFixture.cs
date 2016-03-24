@@ -130,7 +130,7 @@ namespace MassTransit.HttpTransport.Tests
 
                 var host = x.Host(_hostAddress);
 
-                x.ReceiveEndpoint(host, "input_queue", e =>
+                x.ReceiveEndpoint(host, e =>
                 {
                     _inputQueueAddress = e.InputAddress;
 

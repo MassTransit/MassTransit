@@ -81,10 +81,19 @@ namespace MassTransit.HttpTransport.Clients
                             }
 
                             if (context.MessageId.HasValue)
-                                msg.Headers.Add("Message-Id", context.MessageId.Value.ToString());
+                                msg.Headers.Add(HttpHeaders.MessageId, context.MessageId.Value.ToString());
 
                             if (context.CorrelationId.HasValue)
-                                msg.Headers.Add("Correlation-Id", context.CorrelationId.Value.ToString());
+                                msg.Headers.Add(HttpHeaders.CorrelationId, context.CorrelationId.Value.ToString());
+
+                            if(context.InitiatorId.HasValue)
+                                msg.Headers.Add(HttpHeaders.InitiatorId, context.InitiatorId.Value.ToString());
+
+                            if (context.ConversationId.HasValue)
+                                msg.Headers.Add(HttpHeaders.ConversationId, context.ConversationId.Value.ToString());
+
+                            if(context.RequestId.HasValue)
+                                msg.Headers.Add(HttpHeaders.RequestId, context.RequestId.Value.ToString());
 
                             //TODO: TTL?
 
@@ -92,7 +101,7 @@ namespace MassTransit.HttpTransport.Clients
 
                             await _observers.PreSend(context).ConfigureAwait(false);
 
-                            var r = await clientContext.Client.SendAsync(msg, cancelSend).ConfigureAwait(false);
+                            var r = await clientContext.SendAsync(msg, cancelSend).ConfigureAwait(false);
 
                             await _observers.PostSend(context).ConfigureAwait(false);
                         }
@@ -112,9 +121,9 @@ namespace MassTransit.HttpTransport.Clients
             await _clientCache.DoWith(clientPipe, cancelSend).ConfigureAwait(false);
         }
 
-        public async Task Move(ReceiveContext context, IPipe<SendContext> pipe)
+        public Task Move(ReceiveContext context, IPipe<SendContext> pipe)
         {
-            throw new NotImplementedException();
+            return Task.FromResult(true);
         }
 
         public Task Close()
@@ -122,4 +131,15 @@ namespace MassTransit.HttpTransport.Clients
             return Task.FromResult(0);
         }
     }
+
+
+    public class HttpHeaders
+    {
+        public const string InitiatorId = "MassTransit-Initiator-Id";
+        public const string RequestId = "MassTransit-Request-Id";
+        public const string ConversationId = "MassTransit-Conversation-Id";
+        public const string MessageId = "MassTransit-Message-Id";
+        public const string CorrelationId = "MassTransit-Message-Id";
+    }
+
 }
