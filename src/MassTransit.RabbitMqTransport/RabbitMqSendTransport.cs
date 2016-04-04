@@ -68,11 +68,21 @@ namespace MassTransit.RabbitMqTransport
 
                         properties.ContentType = context.ContentType.MediaType;
 
-                        properties.Headers = (properties.Headers ?? Enumerable.Empty<KeyValuePair<string, object>>())
-                            .Concat(context.Headers.GetAll())
+                        KeyValuePair<string, object>[] headers = context.Headers.GetAll()
                             .Where(x => x.Value != null && (x.Value is string || x.Value.GetType().IsValueType))
-                            .Distinct()
-                            .ToDictionary(entry => entry.Key, entry => entry.Value);
+                            .ToArray();
+
+                        if (properties.Headers == null)
+                            properties.Headers = new Dictionary<string, object>(headers.Length);
+
+                        foreach (KeyValuePair<string, object> header in headers)
+                        {
+                            if (properties.Headers.ContainsKey(header.Key))
+                                continue;
+
+                            properties.SetHeader(header.Key, header.Value);
+                        }
+
                         properties.Headers["Content-Type"] = context.ContentType.MediaType;
 
                         properties.Persistent = context.Durable;
