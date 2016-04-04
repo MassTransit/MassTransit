@@ -73,7 +73,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             await client.Request(request, TestCancellationToken);
         }
 
-        [Test]
+        [Test, Explicit]
         public async Task Should_allow_reconfiguration_of_prefetch_count()
         {
             IRequestClient<SetPrefetchCount, PrefetchCountUpdated> client = new PublishRequestClient<SetPrefetchCount, PrefetchCountUpdated>(Bus,

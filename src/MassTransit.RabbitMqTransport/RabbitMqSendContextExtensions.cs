@@ -15,6 +15,7 @@ namespace MassTransit
     using System;
     using System.Collections.Generic;
     using RabbitMqTransport;
+    using RabbitMQ.Client;
 
 
     public static class RabbitMqSendContextExtensions
@@ -24,7 +25,24 @@ namespace MassTransit
             if (context.BasicProperties.Headers == null)
                 context.BasicProperties.Headers = new Dictionary<string, object>();
 
-            context.BasicProperties.Headers[key] = value;
+            SetHeader(context.BasicProperties, key, value);
+        }
+
+        public static void SetHeader(this IBasicProperties basicProperties, string key, object value)
+        {
+            if (basicProperties.Headers == null)
+                basicProperties.Headers = new Dictionary<string, object>();
+
+            if (value is DateTime)
+            {
+                value = ((DateTime)value).ToString("O");
+            }
+            else if (value is DateTimeOffset)
+            {
+                value = ((DateTimeOffset)value).ToString("O");
+            }
+
+            basicProperties.Headers[key] = value;
         }
 
         /// <summary>

@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RabbitMqTransport.Tests
 {
+    using System;
     using System.Threading.Tasks;
     using NUnit.Framework;
     using TestFramework.Messages;
@@ -99,6 +100,47 @@ namespace MassTransit.RabbitMqTransport.Tests
             public string IdentityType { get; set; }
             public int IdentityId { get; set; }
             public Claim[] Claims { get; set; }
+        }
+    }
+
+
+    [TestFixture]
+    public class Header_properties_of_unsupported_values :
+        RabbitMqTestFixture
+    {
+        Task<ConsumeContext<PingMessage>> _handled;
+        DateTime _now;
+        DateTimeOffset _later;
+
+        [Test]
+        public async Task Should_support_date_time()
+        {
+            var context = await _handled;
+
+            Assert.AreEqual(_now, context.Headers.Get("Now", default(DateTime?)));
+
+            Assert.AreEqual(_later, context.Headers.Get("Later", default(DateTimeOffset?)));
+
+        }
+
+        [TestFixtureSetUp]
+        public void Setup()
+        {
+            InputQueueSendEndpoint.Send(new PingMessage(), context =>
+            {
+                _now = DateTime.UtcNow;
+                context.Headers.Set("Now", _now);
+
+                _later = DateTimeOffset.Now;
+                context.Headers.Set("Later", _later);
+            });
+        }
+
+        protected override void ConfigureInputQueueEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
+        {
+            base.ConfigureInputQueueEndpoint(configurator);
+
+            _handled = Handled<PingMessage>(configurator);
         }
     }
 }

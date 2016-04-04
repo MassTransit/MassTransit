@@ -14,11 +14,10 @@ namespace MassTransit.RabbitMqTransport.Tests
 {
     using System;
     using System.Threading.Tasks;
-    using MassTransit.Pipeline;
     using NUnit.Framework;
 
 
-    [TestFixture]
+    [TestFixture, Explicit]
     public class PublishFaultObserver_Specs :
         RabbitMqTestFixture
     {
