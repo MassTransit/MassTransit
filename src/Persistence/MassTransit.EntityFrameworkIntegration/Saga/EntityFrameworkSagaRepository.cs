@@ -16,8 +16,10 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
     using System.Collections.Generic;
     using System.Data;
     using System.Data.Entity;
+    using System.Data.Entity.Core;
     using System.Data.Entity.Core.Metadata.Edm;
     using System.Data.Entity.Infrastructure;
+    using System.Data.SqlClient;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
@@ -109,18 +111,45 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
                         var sagaConsumeContext = new EntityFrameworkSagaConsumeContext<TSaga, T>(dbContext, context, instance);
 
                         await policy.Existing(sagaConsumeContext, next).ConfigureAwait(false);
-
-//                        if (inserted && !sagaConsumeContext.IsCompleted)
-//                            dbContext.Set<TSaga>().Update(instance);
                     }
 
                     await dbContext.SaveChangesAsync().ConfigureAwait(false);
 
                     transaction.Commit();
                 }
+                catch (DbUpdateException ex)
+                {
+                    var baseException = ex.GetBaseException() as SqlException;
+                    if(baseException != null && baseException.Number == 1205)
+                    {
+                        // deadlock, no need to rollback
+                    }
+                    else
+                    {
+                        try
+                        {
+                            transaction.Rollback();
+                        }
+                        catch (Exception innerException)
+                        {
+                            if (_log.IsWarnEnabled)
+                                _log.Warn("The transaction rollback failed", innerException);
+                        }
+                    }
+
+                    throw;
+                }
                 catch (Exception)
                 {
-                    transaction.Rollback();
+                    try
+                    {
+                        transaction.Rollback();
+                    }
+                    catch (Exception innerException)
+                    {
+                        if (_log.IsWarnEnabled)
+                            _log.Warn("The transaction rollback failed", innerException);
+                    }
                     throw;
                 }
             }
