@@ -32,7 +32,6 @@ namespace MassTransit.MongoDbIntegration
             {
                 new CamelCaseElementNameConvention(),
                 new IgnoreExtraElementsConvention(true),
-                new IgnoreIfDefaultConvention(true),
                 new SagaConvention(),
                 new MemberDefaultValueConvention(typeof(Guid), Guid.Empty)
             };
