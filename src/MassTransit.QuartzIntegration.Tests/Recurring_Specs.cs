@@ -104,6 +104,8 @@ namespace MassTransit.QuartzIntegration.Tests
 
                 StartTime = DateTime.Now + TimeSpan.FromSeconds(3);
                 EndTime = StartTime + TimeSpan.FromSeconds(7);
+
+                Description = "my description";
             }
         }
 
@@ -127,6 +129,7 @@ namespace MassTransit.QuartzIntegration.Tests
             public string ScheduleId { get; private set; }
             public string ScheduleGroup { get; private set; }
             public string CronExpression { get; protected set; }
+            public string Description { get; protected set; }
         }
 
         public class Interval
