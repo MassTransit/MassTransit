@@ -154,7 +154,8 @@ namespace MassTransit.MongoDbIntegration.Saga
 
                 await policy.Existing(sagaConsumeContext, next).ConfigureAwait(false);
 
-                await UpdateMongoDbSaga(context, instance).ConfigureAwait(false);
+                if (!sagaConsumeContext.IsCompleted)
+                    await UpdateMongoDbSaga(context, instance).ConfigureAwait(false);
             }
             catch (SagaException)
             {

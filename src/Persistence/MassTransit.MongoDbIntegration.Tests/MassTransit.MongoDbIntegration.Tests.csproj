@@ -116,6 +116,7 @@
     <Compile Include="Saga\MongoDbSagaRepositoryTestsForSendingWhenCorrelationIdNull.cs" />
     <Compile Include="Saga\MongoDbSagaRepositoryTestsForSendingWhenInstanceNotFound.cs" />
     <Compile Include="Saga\MongoDbSagaRepositoryTestsForSendingWhenInstanceNotReturnedFromPolicy.cs" />
+    <Compile Include="Saga\MongoDbSagaRepositoryTestsForSendingWhenPolicyReturnsCompletedInstance.cs" />
     <Compile Include="Saga\MongoDbSagaRepositoryTestsForSendingWhenPolicyReturnsInstance.cs" />
     <Compile Include="Saga\MongoDbSagaRepositoryTestsForSendQuery.cs" />
     <Compile Include="Saga\MongoDbSagaRepositoryTestsForSendQueryWhenSagaNotFound.cs" />
