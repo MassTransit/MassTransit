@@ -109,7 +109,8 @@ Target "Build" (fun _ ->
 )
 
 let testDlls = [ "./src/MassTransit.Tests/bin/Release/MassTransit.Tests.dll"
-                 "./src/MassTransit.AutomatonymousIntegration.Tests/bin/Release/MassTransit.AutomatonymousIntegration.Tests.dll" ]
+                 "./src/MassTransit.AutomatonymousIntegration.Tests/bin/Release/MassTransit.AutomatonymousIntegration.Tests.dll"
+                 "./src/Persistence/MassTransit.MongoDbIntegration.Tests/bin/Release/MassTransit.MongoDbIntegration.Tests.dll" ]
 
 Target "UnitTests" (fun _ ->
     testDlls
@@ -270,6 +271,7 @@ Target "Default" (fun _ ->
 "Clean"
   ==> "RestorePackages"
   ==> "Build"
+  ==> "UnitTests"
   ==> "Package"
   ==> "Default"
 
