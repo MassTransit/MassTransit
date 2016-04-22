@@ -101,6 +101,7 @@
     <Compile Include="Contexts\AutomatonymousConsumeEventContext.cs" />
     <Compile Include="Events\RequestTimeoutExpired.cs" />
     <Compile Include="Exceptions\NotAcceptedStateMachineException.cs" />
+    <Compile Include="IStateMachineActivityFactory.cs" />
     <Compile Include="MassTransitStateMachine.cs" />
     <Compile Include="ScheduleDelayProvider.cs" />
     <Compile Include="PublishExtensions.cs" />
@@ -133,8 +134,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Configuration\BuilderConfigurators\" />
-    <Folder Include="Configuration\RepositoryBuilders\" />
-    <Folder Include="Configuration\RepositoryConfigurators\" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

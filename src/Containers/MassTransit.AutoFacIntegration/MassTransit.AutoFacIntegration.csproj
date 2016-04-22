@@ -54,7 +54,9 @@
     <Compile Include="..\..\SolutionVersion.cs">
       <Link>SolutionVersion.cs</Link>
     </Compile>
+    <Compile Include="AutofacCompensateActivityFactory.cs" />
     <Compile Include="AutofacConsumerFactory.cs" />
+    <Compile Include="AutofacExecuteActivityFactory.cs" />
     <Compile Include="AutofacExtensions.cs" />
     <Compile Include="AutofacSagaRepository.cs" />
     <Compile Include="AutofacScopeConsumerFactory.cs" />

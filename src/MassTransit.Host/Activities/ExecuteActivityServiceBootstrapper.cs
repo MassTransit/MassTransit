@@ -13,6 +13,7 @@
 namespace MassTransit.Host.Activities
 {
     using Autofac;
+    using AutofacIntegration;
     using Courier;
     using Topshelf;
 
