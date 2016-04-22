@@ -64,8 +64,6 @@
   <ItemGroup>
     <Compile Include="Activities\ActivityService.cs" />
     <Compile Include="Activities\ActivityServiceBootstrapper.cs" />
-    <Compile Include="Activities\AutofacCompensateActivityFactory.cs" />
-    <Compile Include="Activities\AutofacExecuteActivityFactory.cs" />
     <Compile Include="AssemblyBusServiceConfigurator.cs" />
     <Compile Include="AssemblyRegistration.cs" />
     <Compile Include="AssemblyScanner.cs" />

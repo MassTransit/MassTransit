@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -21,7 +21,9 @@ namespace MassTransit
     using Autofac.Core;
     using AutofacIntegration;
     using ConsumeConfigurators;
+    using Courier;
     using Internals.Extensions;
+    using PipeConfigurators;
     using Saga;
     using Saga.SubscriptionConfigurators;
 
@@ -231,6 +233,39 @@ namespace MassTransit
 
 
             configurator.Saga(autofacSagaRepository, configure);
+        }
+
+        public static void ExecuteActivityHost<TActivity, TArguments>(
+            this IReceiveEndpointConfigurator configurator,
+            Uri compensateAddress, ILifetimeScope lifetimeScope)
+            where TActivity : class, ExecuteActivity<TArguments>
+            where TArguments : class
+        {
+            var factory = new AutofacExecuteActivityFactory<TActivity, TArguments>(lifetimeScope);
+            var specification = new ExecuteActivityHostSpecification<TActivity, TArguments>(factory, compensateAddress);
+
+            configurator.AddEndpointSpecification(specification);
+        }
+
+        public static void ExecuteActivityHost<TActivity, TArguments>(
+            this IReceiveEndpointConfigurator configurator, ILifetimeScope lifetimeScope)
+            where TActivity : class, ExecuteActivity<TArguments>
+            where TArguments : class
+        {
+            var factory = new AutofacExecuteActivityFactory<TActivity, TArguments>(lifetimeScope);
+            var specification = new ExecuteActivityHostSpecification<TActivity, TArguments>(factory);
+
+            configurator.AddEndpointSpecification(specification);
+        }
+
+        public static void CompensateActivityHost<TActivity, TLog>(this IReceiveEndpointConfigurator configurator, ILifetimeScope lifetimeScope)
+            where TActivity : class, CompensateActivity<TLog>
+            where TLog : class
+        {
+            var factory = new AutofacCompensateActivityFactory<TActivity, TLog>(lifetimeScope);
+            var specification = new CompensateActivityHostSpecification<TActivity, TLog>(factory);
+
+            configurator.AddEndpointSpecification(specification);
         }
 
         /// <summary>
