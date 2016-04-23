@@ -104,7 +104,12 @@ namespace MassTransit.Util.Caching
 
             var result = _cache.Get(textKey) as Cached<TValue>;
             if (result != null)
-                return result;
+            {
+                if (!result.Value.IsFaulted && !result.Value.IsCanceled)
+                    return result;
+
+                _cache.Remove(textKey);
+            }
 
             var cacheItemValue = new CachedValue(_valueFactory, key, () => Touch(textKey));
             var cacheItem = new CacheItem(textKey, cacheItemValue);
