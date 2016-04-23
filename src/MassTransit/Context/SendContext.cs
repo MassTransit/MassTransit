@@ -52,6 +52,7 @@ namespace MassTransit.Context
             this.SetMessageType(typeof (T));
 
             DeliveryMode = context.DeliveryMode;
+            _waitForAck = context.WaitForAck;
         }
 
         public Guid Id
