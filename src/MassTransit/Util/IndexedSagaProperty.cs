@@ -17,6 +17,7 @@ namespace MassTransit.Util
     using System.Linq;
     using System.Linq.Expressions;
     using System.Reflection;
+    using Magnum.Reflection;
     using Saga;
 
     /// <summary>
@@ -99,7 +100,7 @@ namespace MassTransit.Util
 
                 HashSet<TSaga> result;
                 if (_values.TryGetValue(keyValue, out result))
-                    return result.Single();
+                    return result.SingleOrDefault();
 
                 return null;
             }
@@ -127,7 +128,8 @@ namespace MassTransit.Util
             if (!_values.TryGetValue(key, out hashSet))
                 return;
 
-            hashSet.Remove(item);
+            if (hashSet.Remove(item) && hashSet.Count == 0)
+                _values.Remove(key);
         }
 
         public IEnumerable<TSaga> Where(Func<TSaga, bool> filter)
