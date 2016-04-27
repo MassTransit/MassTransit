@@ -20,9 +20,9 @@ namespace MassTransit.Scheduling
         ScheduleMessage<T>
         where T : class
     {
-        public ScheduleMessageCommand(DateTime scheduledTime, Uri destination, T payload)
+        public ScheduleMessageCommand(DateTime scheduledTime, Uri destination, T payload, Guid tokenId)
         {
-            CorrelationId = NewId.NextGuid();
+            CorrelationId = tokenId;
 
             ScheduledTime = scheduledTime.Kind == DateTimeKind.Local
                 ? scheduledTime.ToUniversalTime()

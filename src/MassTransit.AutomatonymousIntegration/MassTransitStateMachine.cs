@@ -237,6 +237,12 @@ namespace Automatonymous
             Event(propertyExpression, x => x.TimeoutExpired, x => x.CorrelateBy<Guid>(requestIdExpression, context => context.Message.RequestId));
 
             State(propertyExpression, x => x.Pending);
+
+            DuringAny(
+                When(request.Completed)
+                    .CancelRequestTimeout(request),
+                When(request.Faulted)
+                    .CancelRequestTimeout(request));
         }
 
         /// <summary>

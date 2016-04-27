@@ -41,9 +41,9 @@ namespace MassTransit.QuartzIntegration
             if (_log.IsDebugEnabled)
             {
                 if (deletedJob)
-                    _log.DebugFormat("Cancelled Scheduled Message: {0} at {1}", context.Message.TokenId, context.Message.Timestamp);
+                    _log.DebugFormat("Cancelled Scheduled Message: {0} at {1}", jobKey, context.Message.Timestamp);
                 else
-                    _log.DebugFormat("CancelScheduledMessage: no message found {0}", context.Message.TokenId);
+                    _log.DebugFormat("CancelScheduledMessage: no message found {0}", jobKey);
             }
 
             return TaskUtil.Completed;

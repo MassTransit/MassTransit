@@ -15,6 +15,7 @@ namespace MassTransit.Scheduling
     using System;
     using System.Threading;
     using System.Threading.Tasks;
+    using Context;
     using Pipeline;
     using Util;
 
@@ -173,7 +174,9 @@ namespace MassTransit.Scheduling
         async Task<ScheduledMessage<T>> ScheduleSend<T>(Uri destinationAddress, DateTime scheduledTime, T message, CancellationToken cancellationToken)
             where T : class
         {
-            ScheduleMessage<T> command = new ScheduleMessageCommand<T>(scheduledTime, destinationAddress, message);
+            Guid tokenId = ScheduleTokenIdCache<T>.GetTokenId(message);
+
+            ScheduleMessage<T> command = new ScheduleMessageCommand<T>(scheduledTime, destinationAddress, message, tokenId);
 
             await _publishEndpoint.Publish(command, cancellationToken).ConfigureAwait(false);
 
@@ -184,7 +187,9 @@ namespace MassTransit.Scheduling
             CancellationToken cancellationToken)
             where T : class
         {
-            ScheduleMessage<T> command = new ScheduleMessageCommand<T>(scheduledTime, destinationAddress, message);
+            Guid tokenId = ScheduleTokenIdCache<T>.GetTokenId(message);
+
+            ScheduleMessage<T> command = new ScheduleMessageCommand<T>(scheduledTime, destinationAddress, message, tokenId);
 
             await _publishEndpoint.Publish(command, pipe, cancellationToken).ConfigureAwait(false);
 
