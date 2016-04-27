@@ -190,6 +190,7 @@
     <Compile Include="Context\IPayloadCollection.cs" />
     <Compile Include="Context\IPayloadValue.cs" />
     <Compile Include="Context\IReadOnlyPayloadCollection.cs" />
+    <Compile Include="Context\IScheduleTokenIdCache.cs" />
     <Compile Include="Context\ISetCorrelationId.cs" />
     <Compile Include="Context\MessageConsumeContext.cs" />
     <Compile Include="Context\MessageCorrelation.cs" />
@@ -209,6 +210,8 @@
     <Compile Include="Context\RescueExceptionConsumeContext.cs" />
     <Compile Include="Context\RescueExceptionReceiveContext.cs" />
     <Compile Include="Context\RetryContext.cs" />
+    <Compile Include="Context\ScheduleTokenId.cs" />
+    <Compile Include="Context\ScheduleTokenIdCache.cs" />
     <Compile Include="Context\SendContextProxy.cs" />
     <Compile Include="Context\SinglePayloadCollection.cs" />
     <Compile Include="Contracts\ConcurrencyLimitUpdated.cs" />

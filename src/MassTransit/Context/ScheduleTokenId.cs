@@ -12,13 +12,12 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Context
 {
-    public interface IMessageCorrelationCache<in T>
-        where T : class
+    public static class ScheduleTokenId
     {
-        /// <summary>
-        /// Set the correlationId on the SendContext using the message content
-        /// </summary>
-        /// <param name="context"></param>
-        void SetCorrelationId(SendContext<T> context);
+        public static void UseTokenId<T>(ScheduleTokenIdCache<T>.TokenIdSelector tokenIdSelector)
+            where T : class
+        {
+            ScheduleTokenIdCache<T>.UseTokenId(tokenIdSelector);
+        }
     }
 }

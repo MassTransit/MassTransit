@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -15,10 +15,17 @@ namespace Automatonymous
     using System;
     using Activities;
     using Binders;
+    using Events;
+    using MassTransit.Context;
 
 
     public static class RequestExtensions
     {
+        static RequestExtensions()
+        {
+            ScheduleTokenId.UseTokenId<RequestTimeoutExpired>(x => x.RequestId);
+        }
+
         /// <summary>
         /// Send a request to the configured service endpoint, and setup the state machine to accept the response.
         /// </summary>
@@ -61,7 +68,7 @@ namespace Automatonymous
             where TInstance : class, SagaStateMachineInstance
             where TData : class
             where TRequest : class
-            where TResponse : class 
+            where TResponse : class
             where TException : Exception
         {
             var activity = new FaultedRequestActivity<TInstance, TData, TException, TRequest, TResponse>(request, messageFactory);
@@ -87,6 +94,17 @@ namespace Automatonymous
             where TResponse : class
         {
             var activity = new RequestActivity<TInstance, TRequest, TResponse>(request, messageFactory);
+
+            return binder.Add(activity);
+        }
+
+        public static EventActivityBinder<TInstance, TData> CancelRequestTimeout<TInstance, TData, TRequest, TResponse>(
+            this EventActivityBinder<TInstance, TData> binder, Request<TInstance, TRequest, TResponse> request)
+            where TInstance : class, SagaStateMachineInstance
+            where TRequest : class
+            where TResponse : class
+        {
+            var activity = new CancelRequestTimeoutActivity<TInstance, TData, TRequest, TResponse>(request);
 
             return binder.Add(activity);
         }

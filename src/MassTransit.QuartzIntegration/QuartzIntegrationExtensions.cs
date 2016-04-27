@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -17,6 +17,7 @@ namespace MassTransit
     using Quartz.Impl;
     using QuartzIntegration;
     using QuartzIntegration.Configuration;
+    using Scheduling;
 
 
     public static class QuartzIntegrationExtensions
@@ -36,8 +37,12 @@ namespace MassTransit
             {
                 configurator.UseMessageScheduler(e.InputAddress);
 
-                e.Consumer(() => new ScheduleMessageConsumer(scheduler));
-                e.Consumer(() => new CancelScheduledMessageConsumer(scheduler));
+                var partitioner = configurator.CreatePartitioner(16);
+
+                e.Consumer(() => new ScheduleMessageConsumer(scheduler), x =>
+                    x.ConfigureMessage<ScheduleMessage>(m => m.UsePartitioner(partitioner, p => p.Message.CorrelationId)));
+                e.Consumer(() => new CancelScheduledMessageConsumer(scheduler), x =>
+                    x.ConfigureMessage<CancelScheduledMessage>(m => m.UsePartitioner(partitioner, p => p.Message.TokenId)));
             });
         }
     }
