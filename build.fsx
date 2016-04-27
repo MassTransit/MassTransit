@@ -82,7 +82,7 @@ Target "Build" (fun _ ->
                 "DebugSymbols", "True"
                 "RestorePackages", "True"
                 "Configuration", buildMode
-                "TargetFrameworkVersion", "v4.5"
+                "TargetFrameworkVersion", "v4.5.2"
                 "Platform", "Any CPU"
             ]
   }
@@ -99,7 +99,7 @@ Target "Build" (fun _ ->
                 "Optimize", "True"
                 "DebugSymbols", "True"
                 "Configuration", "ReleaseUnsigned"
-                "TargetFrameworkVersion", "v4.5"
+                "TargetFrameworkVersion", "v4.5.2"
                 "Platform", "Any CPU"
             ]
   }
