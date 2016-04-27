@@ -13,6 +13,7 @@
 namespace MassTransit.Tests
 {
     using System;
+    using System.Linq;
     using System.Net.Mime;
     using System.Runtime.Serialization;
     using System.Threading.Tasks;
@@ -53,6 +54,57 @@ namespace MassTransit.Tests
                 throw new SerializationException("This is fine, forcing death");
             });
         }
+    }
+
+    [TestFixture]
+    public class When_a_message_response_fails_to_serialize_properly_and_is_using_the_binary_serializer :
+        InMemoryTestFixture
+    {
+        [Serializable]
+        public class PingMessage2 { }
+
+
+        public class PongMessage2
+        {
+        }
+
+        Task<ConsumeContext<PingMessage2>> _handled;
+        Task<ConsumeContext<ReceiveFault>> _faulted;
+
+        [Test]
+        public async Task It_should_respond_with_a_fault_indicating_that_the_type_could_not_be_serialized()
+        {
+            var faultContext = await _faulted;
+
+            Assert.That(faultContext.Message.Exceptions.First().Message.Contains("PongMessage2"));
+        }
+
+        IRequestClient<PingMessage2, PongMessage2> _requestClient;
+        Task<PongMessage2> _response;
+
+        [TestFixtureSetUp]
+        public void Setup()
+        {
+            _requestClient = CreateRequestClient<PingMessage2, PongMessage2>();
+
+            _response = _requestClient.Request(new PingMessage2());
+        }
+
+        protected override void ConfigureBus(IInMemoryBusFactoryConfigurator configurator)
+        {
+            configurator.UseBinarySerializer();
+        }
+
+        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        {
+            Handler<PingMessage2>(configurator, async context =>
+            {
+                context.Respond(new PongMessage2());
+            });
+
+            _faulted = Handled<ReceiveFault>(configurator);
+        }
+
     }
 
     /// <summary>
