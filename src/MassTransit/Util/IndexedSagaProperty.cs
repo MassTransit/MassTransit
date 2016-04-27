@@ -40,7 +40,7 @@ namespace MassTransit.Util
         /// Adds a new saga to the index
         /// </summary>
         /// <param name="newItem"></param>
-        void Add(TSaga newItem);
+        void Add(SagaInstance<TSaga> newItem);
 
         /// <summary>
         /// Removes a saga from the index
@@ -111,9 +111,9 @@ namespace MassTransit.Util
             }
         }
 
-        public void Add(TSaga newItem)
+        public void Add(SagaInstance<TSaga> newItem)
         {
-            var key = _getProperty(newItem);
+            var key = _getProperty(newItem.Instance);
 
             HashSet<SagaInstance<TSaga>> hashSet;
             if (!_values.TryGetValue(key, out hashSet))
@@ -122,7 +122,7 @@ namespace MassTransit.Util
                 _values.Add(key, hashSet);
             }
 
-            hashSet.Add(new SagaInstance<TSaga>(newItem));
+            hashSet.Add(newItem);
         }
 
         public void Remove(SagaInstance<TSaga> instance)

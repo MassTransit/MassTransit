@@ -119,11 +119,11 @@ namespace MassTransit.Util
             _inUse.Release();
         }
 
-        public void Add(TSaga newItem)
+        public void Add(SagaInstance<TSaga> instance)
         {
             lock (_lock)
                 foreach (var index in _indices.Values)
-                    index.Add(newItem);
+                    index.Add(instance);
         }
 
         public void Remove(SagaInstance<TSaga> item)
