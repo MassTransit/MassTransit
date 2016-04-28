@@ -18,8 +18,6 @@ In order to get started with MassTransit, you can have a look at the documentati
 
 `install-package MassTransit.RabbitMq` then;
 
-Message Defininition
-
 ```
 // Message Definition
 class MyMessage
