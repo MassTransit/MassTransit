@@ -188,6 +188,7 @@
     <Compile Include="Serialization\IEnumerable_Specs.cs" />
     <Compile Include="Serialization\MessageDataSerialization_Specs.cs" />
     <Compile Include="Serialization\PolymorphicProperty_Specs.cs" />
+    <Compile Include="Serialization\ReceiveFault_Serialization_Specs.cs" />
     <Compile Include="Serialization\SerializationException_Specs.cs" />
     <Compile Include="InMemoryTest_Specs.cs" />
     <Compile Include="Serialization\TypeHandling_Specs.cs" />
