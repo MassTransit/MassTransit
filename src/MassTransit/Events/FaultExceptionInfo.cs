@@ -20,29 +20,25 @@ namespace MassTransit.Events
     public class FaultExceptionInfo :
         ExceptionInfo
     {
-        readonly Exception _exception;
 
-        public FaultExceptionInfo(Exception exception)
-        {
-            _exception = exception;
+        public FaultExceptionInfo(Exception exception) {
+            ExceptionType = exception.GetType().GetTypeName();
+            InnerException = exception.InnerException != null
+                ? new FaultExceptionInfo(exception.InnerException)
+                : null;
+            StackTrace = ExceptionUtil.GetStackTrace(exception);
+            Message = exception.Message;
+            Source = exception.Source;
         }
 
-        public string ExceptionType => _exception.GetType().GetTypeName();
+        public string ExceptionType { get; private set; }
 
-        public ExceptionInfo InnerException
-        {
-            get
-            {
-                if (_exception.InnerException != null)
-                    return new FaultExceptionInfo(_exception.InnerException);
-                return null;
-            }
-        }
+        public ExceptionInfo InnerException { get; private set;}
 
-        public string StackTrace => ExceptionUtil.GetStackTrace(_exception);
 
-        public string Message => _exception.Message;
+        public string StackTrace { get; private set; }
 
-        public string Source => _exception.Source;
+        public string Message { get; private set; }
+        public string Source { get; private set; }
     }
 }

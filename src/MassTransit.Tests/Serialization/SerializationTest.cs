@@ -19,6 +19,7 @@ namespace MassTransit.Tests.Serialization
     using MassTransit.Pipeline;
     using MassTransit.Serialization;
     using MassTransit.Transports.InMemory;
+    using Newtonsoft.Json;
     using NUnit.Framework;
     using Shouldly;
     using TestFramework;
@@ -68,37 +69,23 @@ namespace MassTransit.Tests.Serialization
                 Serializer = new EncryptedMessageSerializer(streamProvider);
                 Deserializer = new EncryptedMessageDeserializer(BsonMessageSerializer.Deserializer, Bus, PublishEndpointProvider, streamProvider);
             }
+            else if (_serializerType == typeof(BinaryMessageSerializer)) {
+                Serializer = new BinaryMessageSerializer();
+                Deserializer = new BinaryMessageDeserializer(JsonMessageSerializer.Serializer, Bus, PublishEndpointProvider);
+            }
             else
                 throw new ArgumentException("The serializer type is unknown");
         }
 
         protected T SerializeAndReturn<T>(T obj)
-            where T : class
-        {
-            byte[] serializedMessageData;
+            where T : class {
 
-            using (var output = new MemoryStream())
-            {
-                var sendContext = new InMemorySendContext<T>(obj);
-
-                sendContext.SourceAddress = _sourceAddress;
-                sendContext.DestinationAddress = _destinationAddress;
-                sendContext.FaultAddress = _faultAddress;
-                sendContext.ResponseAddress = _responseAddress;
-                sendContext.RequestId = _requestId;
-
-
-                Serializer.Serialize(output, sendContext);
-
-                serializedMessageData = output.ToArray();
-
-                Trace.WriteLine(Encoding.UTF8.GetString(serializedMessageData));
-            }
+            var serializedMessageData = Serialize(obj);
 
             return Return<T>(serializedMessageData);
         }
 
-        protected void Serialize<T>(T obj)
+        protected byte[] Serialize<T>(T obj)
             where T : class
         {
             using (var output = new MemoryStream())
@@ -117,6 +104,7 @@ namespace MassTransit.Tests.Serialization
                 byte[] serializedMessageData = output.ToArray();
 
                 Trace.WriteLine(Encoding.UTF8.GetString(serializedMessageData));
+                return serializedMessageData;
             }
         }
 
@@ -143,7 +131,7 @@ namespace MassTransit.Tests.Serialization
             return messageContext.Message;
         }
 
-        protected void TestSerialization<T>(T message)
+        protected virtual void TestSerialization<T>(T message)
             where T : class
         {
             T result = SerializeAndReturn(message);
