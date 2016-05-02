@@ -64,7 +64,7 @@ namespace Automatonymous
         /// </summary>
         /// <param name="instance"></param>
         /// <param name="requestId"></param>
-        void SetRequestId(TInstance instance, Guid requestId);
+        void SetRequestId(TInstance instance, Guid? requestId);
 
         /// <summary>
         /// Gets the requestId on the instance using the configured property

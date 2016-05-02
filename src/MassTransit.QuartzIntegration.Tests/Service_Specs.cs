@@ -14,6 +14,7 @@ namespace MassTransit.QuartzIntegration.Tests
 {
     using System;
     using System.Threading.Tasks;
+    using Internals.Extensions;
     using NUnit.Framework;
     using Quartz;
     using Quartz.Impl;
@@ -94,23 +95,21 @@ namespace MassTransit.QuartzIntegration.Tests
 
     [TestFixture]
     public class Using_the_quartz_service_and_cancelling :
-        InMemoryTestFixture
+        QuartzInMemoryTestFixture
     {
         [Test]
         public async void Should_properly_send_the_message()
         {
             Task<ConsumeContext<A>> handlerA = SubscribeHandler<A>();
-            Task<ConsumeContext<IA>> handlerIA = SubscribeHandler<IA>();
 
             ScheduledMessage<A> scheduledMessage =
-                await Bus.ScheduleMessage(DateTime.UtcNow + TimeSpan.FromSeconds(8), new A {Name = "Joe"});
+                await Bus.ScheduleMessage(DateTime.UtcNow + TimeSpan.FromSeconds(3), new A {Name = "Joe"});
 
+            await Task.Delay(1000);
 
             await Bus.CancelScheduledMessage(scheduledMessage);
 
-
-            await handlerA;
-            await handlerIA;
+            Assert.Throws<OperationCanceledException>(async () => await handlerA.WithTimeout(5000));
         }
 
 
@@ -123,38 +122,6 @@ namespace MassTransit.QuartzIntegration.Tests
         class IA
         {
             string Id { get; set; }
-        }
-
-
-        IScheduler _scheduler;
-
-        protected override void ConfigureBus(IInMemoryBusFactoryConfigurator configurator)
-        {
-            configurator.UseJsonSerializer();
-
-            ISchedulerFactory schedulerFactory = new StdSchedulerFactory();
-            _scheduler = schedulerFactory.GetScheduler();
-
-            configurator.ReceiveEndpoint("quartz", x =>
-            {
-                x.Consumer(() => new ScheduleMessageConsumer(_scheduler));
-            });
-        }
-
-        [TestFixtureSetUp]
-        public void Setup_quartz_service()
-        {
-            _scheduler.JobFactory = new MassTransitJobFactory(Bus);
-            _scheduler.Start();
-        }
-
-        [TestFixtureTearDown]
-        public void Teardown_quartz_service()
-        {
-            if (_scheduler != null)
-                _scheduler.Standby();
-            if (_scheduler != null)
-                _scheduler.Shutdown();
         }
     }
 }

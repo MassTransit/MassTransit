@@ -240,9 +240,14 @@ namespace Automatonymous
 
             DuringAny(
                 When(request.Completed)
-                    .CancelRequestTimeout(request),
+                    .CancelRequestTimeout(request)
+                    .ClearRequest(request),
                 When(request.Faulted)
-                    .CancelRequestTimeout(request));
+                    .CancelRequestTimeout(request)
+                    .ClearRequest(request),
+                When(request.TimeoutExpired)
+                    .ClearRequest(request));
+
         }
 
         /// <summary>

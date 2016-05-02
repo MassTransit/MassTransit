@@ -45,7 +45,7 @@ namespace Automatonymous.Requests
         public Event<RequestTimeoutExpired> TimeoutExpired { get; set; }
         public State Pending { get; set; }
 
-        public void SetRequestId(TInstance instance, Guid requestId)
+        public void SetRequestId(TInstance instance, Guid? requestId)
         {
             if (instance == null)
                 throw new ArgumentNullException(nameof(instance));
