@@ -162,6 +162,7 @@
     <Compile Include="Pipeline\ConnectConsumer_Specs.cs" />
     <Compile Include="Pipeline\ConnectHandler_Specs.cs" />
     <Compile Include="Pipeline\ConnectObserver_Specs.cs" />
+    <Compile Include="Pipeline\ContentFilter_Specs.cs" />
     <Compile Include="Pipeline\LatestFilter_Specs.cs" />
     <Compile Include="Pipeline\MessageTestFixture.cs" />
     <Compile Include="Pipeline\OneMessageConsumer.cs" />
