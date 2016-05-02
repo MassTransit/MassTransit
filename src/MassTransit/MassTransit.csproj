@@ -126,6 +126,7 @@
     <Compile Include="Configuration\ConsumeConnectors\IObserverConnector.cs" />
     <Compile Include="Configuration\ConsumeConnectors\ObserverConnectorCache.cs" />
     <Compile Include="Configuration\ConsumerConvention.cs" />
+    <Compile Include="Configuration\ContentFilterExtensions.cs" />
     <Compile Include="Configuration\DeadLetterExtensions.cs" />
     <Compile Include="Configuration\EndpointConfigurators\InMemoryReceiveEndpointConfigurator.cs" />
     <Compile Include="Configuration\EndpointConfigurators\ReceiveEndpointConfigurator.cs" />
@@ -159,6 +160,7 @@
     <Compile Include="Configuration\PartitionerExtensions.cs" />
     <Compile Include="Configuration\PipeConfigurators\CircuitBreakerPipeSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\CompensateActivityHostSpecification.cs" />
+    <Compile Include="Configuration\PipeConfigurators\ContentFilterPipeSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\DeadLetterPipeSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\ExecuteActivityHostSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\LatestPipeSpecification.cs" />
@@ -575,6 +577,7 @@
     <Compile Include="Pipeline\Filters\ConcurrencyLimit\IConcurrencyLimitFilter.cs" />
     <Compile Include="Pipeline\Filters\ConsumerMessageFilter.cs" />
     <Compile Include="Pipeline\Filters\ConsumerSplitFilter.cs" />
+    <Compile Include="Pipeline\Filters\ContentFilter.cs" />
     <Compile Include="Pipeline\Filters\DeadLetterFilter.cs" />
     <Compile Include="Pipeline\Filters\LatestFilter.cs" />
     <Compile Include="Pipeline\Filters\Latest\ILatestFilter.cs" />
