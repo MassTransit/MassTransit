@@ -60,6 +60,7 @@
       <Link>Properties\SolutionVersion.cs</Link>
     </Compile>
     <Compile Include="Activities\CancelRequestTimeoutActivity.cs" />
+    <Compile Include="Activities\ClearRequestActivity.cs" />
     <Compile Include="Activities\FaultedPublishActivity.cs" />
     <Compile Include="Activities\FaultedRequestActivity.cs" />
     <Compile Include="Activities\FaultedRespondActivity.cs" />

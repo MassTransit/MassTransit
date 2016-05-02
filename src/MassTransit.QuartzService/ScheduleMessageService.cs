@@ -19,6 +19,7 @@ namespace MassTransit.QuartzService
     using Quartz.Impl;
     using QuartzIntegration;
     using RabbitMqTransport;
+    using Scheduling;
     using Topshelf;
 
 
@@ -50,17 +51,21 @@ namespace MassTransit.QuartzService
 
                 if (serviceBusUri.Scheme.Equals("rabbitmq", StringComparison.OrdinalIgnoreCase))
                 {
-                    _bus = Bus.Factory.CreateUsingRabbitMq(x =>
+                    _bus = Bus.Factory.CreateUsingRabbitMq(busConfig =>
                     {
-                        IRabbitMqHost host = x.Host(serviceBusUri, h => _configurationProvider.GetHostSettings(h));
-                        x.UseJsonSerializer();
+                        IRabbitMqHost host = busConfig.Host(serviceBusUri, h => _configurationProvider.GetHostSettings(h));
+                        busConfig.UseJsonSerializer();
 
-                        x.ReceiveEndpoint(host, _queueName, e =>
+                        busConfig.ReceiveEndpoint(host, _queueName, endpoint =>
                         {
-                            e.PrefetchCount = (ushort)_consumerLimit;
+                            endpoint.PrefetchCount = (ushort)_consumerLimit;
 
-                            e.Consumer(() => new ScheduleMessageConsumer(_scheduler));
-                            e.Consumer(() => new CancelScheduledMessageConsumer(_scheduler));
+                            var partitioner = endpoint.CreatePartitioner(_consumerLimit);
+
+                            endpoint.Consumer(() => new ScheduleMessageConsumer(_scheduler), x =>
+                                x.ConfigureMessage<ScheduleMessage>(m => m.UsePartitioner(partitioner, p => p.Message.CorrelationId)));
+                            endpoint.Consumer(() => new CancelScheduledMessageConsumer(_scheduler), x =>
+                                x.ConfigureMessage<CancelScheduledMessage>(m => m.UsePartitioner(partitioner, p => p.Message.TokenId)));
                         });
                     });
                 }
