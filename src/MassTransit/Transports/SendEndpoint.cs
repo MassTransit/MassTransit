@@ -13,6 +13,7 @@
 namespace MassTransit.Transports
 {
     using System;
+    using System.Diagnostics;
     using System.Threading;
     using System.Threading.Tasks;
     using Context;
@@ -20,6 +21,7 @@ namespace MassTransit.Transports
     using Util;
 
 
+    [DebuggerDisplay("{DebuggerDisplay()}")]
     public class SendEndpoint :
         ISendEndpoint,
         IAsyncDisposable
@@ -168,6 +170,10 @@ namespace MassTransit.Transports
             return Send(message, pipe, cancellationToken);
         }
 
+        string DebuggerDisplay()
+        {
+            return DestinationAddress.ToString();
+        }
 
         class EndpointSendContextPipe<T> :
             IPipe<SendContext<T>>

@@ -14,9 +14,11 @@ namespace MassTransit.Serialization
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using Util;
 
 
+    [DebuggerDisplay("{DebuggerDisplay()}")]
     public class JsonMessageHeaders :
         Headers
     {
@@ -50,6 +52,11 @@ namespace MassTransit.Serialization
         public T? Get<T>(string key, T? defaultValue = null) where T : struct
         {
             return _deserializer.Deserialize(_headers, key, defaultValue);
+        }
+
+        string DebuggerDisplay()
+        {
+            return $"Keys: {_headers.Count}";
         }
     }
 }

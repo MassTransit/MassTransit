@@ -13,6 +13,7 @@
 namespace MassTransit.Transports
 {
     using System;
+    using System.Diagnostics;
     using System.Threading;
     using System.Threading.Tasks;
     using Logging;
@@ -96,6 +97,7 @@ namespace MassTransit.Transports
         }
 
 
+        [DebuggerDisplay("{DebuggerDisplay()}")]
         class CachedSendEndpoint :
             ISendEndpoint
         {
@@ -171,6 +173,11 @@ namespace MassTransit.Transports
             {
                 _touch();
                 return _endpoint.Send<T>(values, pipe, cancellationToken);
+            }
+
+            string DebuggerDisplay()
+            {
+                return _endpoint.ToString();
             }
         }
     }
