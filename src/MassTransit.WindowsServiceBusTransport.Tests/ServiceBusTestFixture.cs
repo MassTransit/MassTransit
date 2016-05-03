@@ -1,0 +1,199 @@
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+//  
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
+// this file except in compliance with the License. You may obtain a copy of the 
+// License at 
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0 
+// 
+// Unless required by applicable law or agreed to in writing, software distributed
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// specific language governing permissions and limitations under the License.
+namespace MassTransit.WindowsServiceBusTransport.Tests
+{
+    using System;
+    using System.Diagnostics;
+    using System.Threading;
+    using System.Threading.Tasks;
+    using Configuration;
+    using Logging;
+    using Microsoft.ServiceBus;
+    using NUnit.Framework;
+    using TestFramework;
+    using Testing;
+    using Testing.TestDecorators;
+
+
+    [TestFixture]
+    public class ServiceBusTestFixture :
+        BusTestFixture
+    {
+        static readonly ILog _log = Logger.Get<ServiceBusTestFixture>();
+        IBusControl _bus;
+        Uri _inputQueueAddress;
+        ISendEndpoint _inputQueueSendEndpoint;
+        ISendEndpoint _busSendEndpoint;
+        readonly TestSendObserver _sendObserver;
+        BusHandle _busHandle;
+        readonly string _inputQueueName;
+        readonly string _connectionString;
+
+        public ServiceBusTestFixture()
+            : this("input_queue")
+        {
+        }
+
+        public ServiceBusTestFixture(string inputQueueName)
+        {
+            ServiceBusEnvironment.SystemConnectivity.Mode = ConnectivityMode.Http;
+
+            _inputQueueName = inputQueueName;
+
+            TestTimeout = Debugger.IsAttached ? TimeSpan.FromMinutes(5) : TimeSpan.FromSeconds(60);
+
+            _connectionString = new TestServiceBusAccountSettings().ConnectionString;
+
+            _sendObserver = new TestSendObserver(TestTimeout);
+        }
+
+        /// <summary>
+        /// The sending endpoint for the InputQueue
+        /// </summary>
+        protected ISendEndpoint InputQueueSendEndpoint => _inputQueueSendEndpoint;
+
+        /// <summary>
+        /// The sending endpoint for the Bus 
+        /// </summary>
+        protected ISendEndpoint BusSendEndpoint => _busSendEndpoint;
+
+        protected ISentMessageList Sent => _sendObserver.Messages;
+
+        protected Uri BusAddress => _bus.Address;
+
+        protected Uri InputQueueAddress
+        {
+            get { return _inputQueueAddress; }
+            set
+            {
+                if (Bus != null)
+                    throw new InvalidOperationException("The LocalBus has already been created, too late to change the URI");
+
+                _inputQueueAddress = value;
+            }
+        }
+
+        protected override IBus Bus => _bus;
+
+        [TestFixtureSetUp]
+        public void SetupAzureServiceBusTestFixture()
+        {
+            _bus = CreateBus();
+
+            _bus.ConnectReceiveEndpointObserver(new ReceiveEndpointObserver());
+
+            _busHandle = _bus.Start();
+            try
+            {
+                _busSendEndpoint = _bus.GetSendEndpoint(_bus.Address).Result;
+                _busSendEndpoint.ConnectSendObserver(_sendObserver);
+
+                _inputQueueSendEndpoint = _bus.GetSendEndpoint(_inputQueueAddress).Result;
+                _inputQueueSendEndpoint.ConnectSendObserver(_sendObserver);
+            }
+            catch (Exception)
+            {
+                try
+                {
+                    using (var tokenSource = new CancellationTokenSource(TestTimeout))
+                    {
+                        _bus.Stop(tokenSource.Token);
+                    }
+                }
+                finally
+                {
+                    _busHandle = null;
+                    _bus = null;
+                }
+
+                throw;
+            }
+        }
+
+        [TestFixtureTearDown]
+        public void TearDownInMemoryTestFixture()
+        {
+            try
+            {
+                using (var tokenSource = new CancellationTokenSource(TestTimeout))
+                {
+                    _busHandle?.Stop(tokenSource.Token);
+                }
+            }
+            catch (Exception ex)
+            {
+                _log.Error("Bus Stop Failed", ex);
+            }
+            finally
+            {
+                _busHandle = null;
+                _bus = null;
+            }
+        }
+
+        protected virtual void ConfigureBus(IServiceBusBusFactoryConfigurator configurator)
+        {
+        }
+
+        protected virtual void ConfigureBusHost(IServiceBusBusFactoryConfigurator configurator, IServiceBusHost host)
+        {
+        }
+
+        protected virtual void ConfigureInputQueueEndpoint(IServiceBusReceiveEndpointConfigurator configurator)
+        {
+        }
+
+        IBusControl CreateBus()
+        {
+            return MassTransit.Bus.Factory.CreateUsingWindowsServiceBus(x =>
+            {
+                ConfigureBus(x);
+
+                var host = x.Host(_connectionString, h =>
+                {
+                });
+
+                x.UseServiceBusMessageScheduler();
+
+                ConfigureBusHost(x, host);
+
+                x.ReceiveEndpoint(host, _inputQueueName, e =>
+                {
+                    _inputQueueAddress = e.InputAddress;
+
+                    ConfigureInputQueueEndpoint(e);
+                });
+            });
+        }
+
+
+        class ReceiveEndpointObserver :
+            IReceiveEndpointObserver
+        {
+            public Task Ready(ReceiveEndpointReady ready)
+            {
+                return Console.Out.WriteLineAsync($"Endpoint Ready: {ready.InputAddress}");
+            }
+
+            public Task Completed(ReceiveEndpointCompleted completed)
+            {
+                return Console.Out.WriteLineAsync($"Endpoint Complete: {completed.DeliveryCount}/{completed.ConcurrentDeliveryCount} - {completed.InputAddress}");
+            }
+
+            public Task Faulted(ReceiveEndpointFaulted faulted)
+            {
+                return Console.Out.WriteLineAsync($"Endpoint Faulted: {faulted.Exception} - {faulted.InputAddress}");
+            }
+        }
+    }
+}
