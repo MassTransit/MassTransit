@@ -60,11 +60,43 @@ namespace MassTransit.Saga
             var sagaId = context.CorrelationId.Value;
 
             var needToLeaveSagas = true;
+
             await _sagas.MarkInUse(context.CancellationToken).ConfigureAwait(false);
             try
             {
                 SagaInstance<TSaga> saga = _sagas[sagaId];
-                if (saga == null)
+                if (saga != null)
+                {
+                    await saga.MarkInUse(context.CancellationToken).ConfigureAwait(false);
+                    try
+                    {
+                        _sagas.Release();
+                        needToLeaveSagas = false;
+
+                        if (saga.IsRemoved)
+                        {
+                            saga.Release();
+                            saga = null;
+                        }
+                        else
+                        {
+                            if (_log.IsDebugEnabled)
+                                _log.DebugFormat("SAGA:{0}:{1} Used {2}", TypeMetadataCache<TSaga>.ShortName, sagaId, TypeMetadataCache<T>.ShortName);
+
+                            SagaConsumeContext<TSaga, T> sagaConsumeContext = new InMemorySagaConsumeContext<TSaga, T>(context, saga.Instance,
+                                () => Remove(saga, context.CancellationToken));
+
+                            await policy.Existing(sagaConsumeContext, next).ConfigureAwait(false);
+
+                        }
+                    }
+                    finally
+                    {
+                        saga?.Release();
+                    }
+                }
+
+                if(saga == null)
                 {
                     var missingSagaPipe = new MissingPipe<T>(this, next, true);
 
@@ -73,32 +105,13 @@ namespace MassTransit.Saga
                     _sagas.Release();
                     needToLeaveSagas = false;
                 }
-                else
-                {
-                    await saga.MarkInUse(context.CancellationToken).ConfigureAwait(false);
-                    try
-                    {
-                        _sagas.Release();
-                        needToLeaveSagas = false;
-
-                        if (_log.IsDebugEnabled)
-                            _log.DebugFormat("SAGA:{0}:{1} Used {2}", TypeMetadataCache<TSaga>.ShortName, sagaId, TypeMetadataCache<T>.ShortName);
-
-                        SagaConsumeContext<TSaga, T> sagaConsumeContext = new InMemorySagaConsumeContext<TSaga, T>(context, saga.Instance,
-                            () => Remove(saga, context.CancellationToken));
-
-                        await policy.Existing(sagaConsumeContext, next).ConfigureAwait(false);
-                    }
-                    finally
-                    {
-                        saga.Release();
-                    }
-                }
             }
             finally
             {
                 if (needToLeaveSagas)
+                {
                     _sagas.Release();
+                }
             }
         }
 
@@ -122,6 +135,9 @@ namespace MassTransit.Saga
             await saga.MarkInUse(context.CancellationToken).ConfigureAwait(false);
             try
             {
+                if (saga.IsRemoved)
+                    return;
+
                 if (_log.IsDebugEnabled)
                     _log.DebugFormat("SAGA:{0}:{1} Used {2}", TypeMetadataCache<TSaga>.ShortName, saga.Instance.CorrelationId, TypeMetadataCache<T>.ShortName);
 
@@ -155,19 +171,6 @@ namespace MassTransit.Saga
             }
         }
 
-        async Task Remove(SagaInstance<TSaga> saga, CancellationToken cancellationToken)
-        {
-            await _sagas.MarkInUse(cancellationToken).ConfigureAwait(false);
-            try
-            {
-                _sagas.Remove(saga);
-            }
-            finally
-            {
-                _sagas.Release();
-            }
-        }
-
         /// <summary>
         /// Adds the saga within an existing lock
         /// </summary>
@@ -177,8 +180,25 @@ namespace MassTransit.Saga
             _sagas.Add(instance);
         }
 
+        async Task Remove(SagaInstance<TSaga> instance, CancellationToken cancellationToken)
+        {
+            instance.Remove();
+
+            await _sagas.MarkInUse(cancellationToken).ConfigureAwait(false);
+            try
+            {
+                _sagas.Remove(instance);
+            }
+            finally
+            {
+                _sagas.Release();
+            }
+        }
+
         void RemoveWithinLock(SagaInstance<TSaga> instance)
         {
+            instance.Remove();
+
             _sagas.Remove(instance);
         }
 

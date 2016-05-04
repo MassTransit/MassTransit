@@ -37,6 +37,8 @@ namespace MassTransit.Util
 
         public TSaga Instance => _instance;
 
+        public bool IsRemoved { get; set; }
+
         public bool Equals(SagaInstance<TSaga> other)
         {
             if (ReferenceEquals(null, other))
@@ -69,6 +71,12 @@ namespace MassTransit.Util
 
         public void Release()
         {
+            _inUse.Release();
+        }
+
+        public void Remove()
+        {
+            IsRemoved = true;
             _inUse.Release();
         }
     }
