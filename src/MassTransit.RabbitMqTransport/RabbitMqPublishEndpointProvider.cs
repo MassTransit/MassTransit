@@ -94,7 +94,7 @@ namespace MassTransit.RabbitMqTransport
 
         Task<ISendEndpoint> CreateSendEndpoint(Type messageType)
         {
-            var sendSettings = _host.GetSendSettings(messageType);
+            var sendSettings = _host.Settings.GetSendSettings(messageType);
 
             ExchangeBindingSettings[] bindings = TypeMetadataCache.GetMessageTypes(messageType)
                 .SelectMany(type => type.GetExchangeBindings(_host.Settings.MessageNameFormatter))

@@ -196,8 +196,12 @@ namespace MassTransit
                 try
                 {
                     if (busHandle != null)
+                    {
+                        if (_log.IsDebugEnabled)
+                            _log.DebugFormat("Stopping bus hosts...");
 
                         await busHandle.StopAsync(cancellationToken).ConfigureAwait(false);
+                    }
                     else
                     {
                         var handle = new Handle(hosts, endpoints, observers, this, _busObservable, busReady);
@@ -326,6 +330,8 @@ namespace MassTransit
                 {
                     _ready.TrySetException(faulted.Exception);
 
+                    _handle.Disconnect();
+
                     return TaskUtil.Completed;
                 }
             }
@@ -365,7 +371,7 @@ namespace MassTransit
                 _stopped = true;
             }
 
-            public async Task StopAsync(CancellationToken cancellationToken = new CancellationToken())
+            public async Task StopAsync(CancellationToken cancellationToken)
             {
                 if (_stopped)
                     return;
@@ -377,7 +383,13 @@ namespace MassTransit
                     foreach (var observerHandle in _observerHandles)
                         observerHandle.Disconnect();
 
+                    if (_log.IsDebugEnabled)
+                        _log.DebugFormat("Stopping endpoints...");
+
                     await Task.WhenAll(_endpointHandles.Select(x => x.Stop(cancellationToken))).ConfigureAwait(false);
+
+                    if (_log.IsDebugEnabled)
+                        _log.DebugFormat("Stopping hosts...");
 
                     await Task.WhenAll(_hostHandles.Select(x => x.Stop(cancellationToken))).ConfigureAwait(false);
 

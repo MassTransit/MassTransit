@@ -41,14 +41,14 @@ namespace MassTransit.Courier.Results
             _duration = _compensateContext.ElapsedTime;
         }
 
-        public async Task Evaluate()
+        public Task Evaluate()
         {
             DateTime faultedTimestamp = _compensateContext.StartTimestamp + _duration;
             TimeSpan faultedDuration = faultedTimestamp - _routingSlip.CreateTimestamp;
 
-             await _publisher.PublishRoutingSlipActivityCompensationFailed(_compensateContext.ActivityName, _compensateContext.ExecutionId,
-                 _compensateContext.StartTimestamp, _duration, faultedTimestamp, faultedDuration, new FaultExceptionInfo(_exception), _routingSlip.Variables,
-                 _compensateLog.Data).ConfigureAwait(false);
+            return _publisher.PublishRoutingSlipActivityCompensationFailed(_compensateContext.ActivityName, _compensateContext.ExecutionId,
+                _compensateContext.StartTimestamp, _duration, faultedTimestamp, faultedDuration, new FaultExceptionInfo(_exception), _routingSlip.Variables,
+                _compensateLog.Data);
         }
     }
 }

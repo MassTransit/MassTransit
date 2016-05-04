@@ -100,10 +100,5 @@ namespace MassTransit.Context
             ReceiveContext.AddPendingTask(task);
             return task;
         }
-
-        public void Cancel()
-        {
-            // TODO need to cancel the job
-        }
     }
 }

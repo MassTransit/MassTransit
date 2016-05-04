@@ -57,7 +57,7 @@ namespace MassTransit.RabbitMqTransport
                     if (connection.IsOpen)
                         connection.Close(replyCode, message);
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                 }
             }

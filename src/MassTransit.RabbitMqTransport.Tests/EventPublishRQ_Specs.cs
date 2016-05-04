@@ -65,7 +65,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         {
             public async Task Consume(ConsumeContext<PingMessage> context)
             {
-                context.Publish<PingReceived>(new
+                await context.Publish<PingReceived>(new
                 {
                     PingId = context.Message.CorrelationId,
                     Timestamp = DateTime.UtcNow,
@@ -73,7 +73,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
                 Console.WriteLine("Ping: {0}", context.Message.CorrelationId);
 
-                context.Publish<PingProcessing>(new
+                await context.Publish<PingProcessing>(new
                 {
                     PingId = context.Message.CorrelationId,
                     Timestamp = DateTime.UtcNow,
@@ -81,7 +81,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
                 Console.WriteLine("Prcessing: {0}", context.Message.CorrelationId);
 
-                context.Publish<PingConsumed>(new
+                await context.Publish<PingConsumed>(new
                 {
                     PingId = context.Message.CorrelationId,
                     Timestamp = DateTime.UtcNow,

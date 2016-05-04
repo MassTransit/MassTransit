@@ -80,9 +80,9 @@ namespace MassTransit.Tests.Steward
     class MagicMakingConsumer :
         IConsumer<MakeMagicHappen>
     {
-        public async Task Consume(ConsumeContext<MakeMagicHappen> context)
+        public Task Consume(ConsumeContext<MakeMagicHappen> context)
         {
-            context.Publish(new MagicMade());
+            return context.Publish(new MagicMade());
         }
     }
 }

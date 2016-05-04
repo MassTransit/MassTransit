@@ -45,7 +45,7 @@ namespace MassTransit.Saga
             return _factoryMethod(context);
         }
 
-        public async Task Send(ConsumeContext<TMessage> context, IPipe<SagaConsumeContext<TSaga, TMessage>> next)
+        public Task Send(ConsumeContext<TMessage> context, IPipe<SagaConsumeContext<TSaga, TMessage>> next)
         {
             if (!context.CorrelationId.HasValue)
                 throw new SagaException("The correlationId was not present and the saga could not be created", typeof(TSaga), typeof(TMessage));
@@ -57,7 +57,7 @@ namespace MassTransit.Saga
 
             var proxy = new NewSagaConsumeContext<TSaga, TMessage>(context, instance);
 
-            await next.Send(proxy).ConfigureAwait(false);
+            return next.Send(proxy);
         }
     }
 }
