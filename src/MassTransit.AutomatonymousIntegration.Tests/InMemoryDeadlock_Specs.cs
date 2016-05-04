@@ -52,8 +52,13 @@ namespace MassTransit.AutomatonymousIntegration.Tests
                 CorrelationId = id
             });
 
-            saga = await _repository.ShouldContainSaga(state => state.CorrelationId == id && state.CurrentState == _machine.Final, TestTimeout);
-            Assert.IsTrue(saga.HasValue);
+            id = NewId.NextGuid();
+            await InputQueueSendEndpoint.Send<CreateInstance>(new
+            {
+                CorrelationId = id
+            });
+            Guid? saga2 = await _repository.ShouldContainSaga(state => state.CorrelationId == id && state.CurrentState == _machine.Active, TestTimeout);
+            Assert.IsTrue(saga2.HasValue);
         }
 
         InMemorySagaRepository<Instance> _repository;
