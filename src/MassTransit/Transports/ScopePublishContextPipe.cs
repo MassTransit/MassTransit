@@ -46,7 +46,7 @@ namespace MassTransit.Transports
             _pipe.Probe(context);
         }
 
-        public async Task Send(PublishContext<T> context)
+        public Task Send(PublishContext<T> context)
         {
             if (_context.ConversationId.HasValue)
                 context.ConversationId = _context.ConversationId;
@@ -54,7 +54,7 @@ namespace MassTransit.Transports
             if (_context.CorrelationId.HasValue)
                 context.InitiatorId = _context.CorrelationId;
 
-            await _pipe.Send(context).ConfigureAwait(false);
+            return _pipe.Send(context);
         }
     }
 }

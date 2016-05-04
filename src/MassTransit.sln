@@ -1,6 +1,6 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.24720.0
+VisualStudioVersion = 14.0.25123.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Persistence", "Persistence", "{56F516D7-BC3C-49E1-A639-83C5F14953F8}"
 EndProject
@@ -87,6 +87,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.MongoDbIntegration", "Persistence\MassTransit.MongoDbIntegration\MassTransit.MongoDbIntegration.csproj", "{2406B6D6-09DF-4BC3-AEFC-068AACA77567}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.MongoDbIntegration.Tests", "Persistence\MassTransit.MongoDbIntegration.Tests\MassTransit.MongoDbIntegration.Tests.csproj", "{BACA6A81-D395-48C5-B2BD-0995B241E1CC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RapidTransit.Sample", "RapidTransit\RapidTransit.Sample\RapidTransit.Sample.csproj", "{12C840BF-1A87-443A-BA17-052A60ED4F51}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -386,6 +388,18 @@ Global
 		{BACA6A81-D395-48C5-B2BD-0995B241E1CC}.ReleaseUnsigned|Any CPU.ActiveCfg = Release|Any CPU
 		{BACA6A81-D395-48C5-B2BD-0995B241E1CC}.ReleaseUnsigned|x86.ActiveCfg = Release|Any CPU
 		{BACA6A81-D395-48C5-B2BD-0995B241E1CC}.ReleaseUnsigned|x86.Build.0 = Release|Any CPU
+		{12C840BF-1A87-443A-BA17-052A60ED4F51}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{12C840BF-1A87-443A-BA17-052A60ED4F51}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{12C840BF-1A87-443A-BA17-052A60ED4F51}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{12C840BF-1A87-443A-BA17-052A60ED4F51}.Debug|x86.Build.0 = Debug|Any CPU
+		{12C840BF-1A87-443A-BA17-052A60ED4F51}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{12C840BF-1A87-443A-BA17-052A60ED4F51}.Release|Any CPU.Build.0 = Release|Any CPU
+		{12C840BF-1A87-443A-BA17-052A60ED4F51}.Release|x86.ActiveCfg = Release|Any CPU
+		{12C840BF-1A87-443A-BA17-052A60ED4F51}.Release|x86.Build.0 = Release|Any CPU
+		{12C840BF-1A87-443A-BA17-052A60ED4F51}.ReleaseUnsigned|Any CPU.ActiveCfg = Release|Any CPU
+		{12C840BF-1A87-443A-BA17-052A60ED4F51}.ReleaseUnsigned|Any CPU.Build.0 = Release|Any CPU
+		{12C840BF-1A87-443A-BA17-052A60ED4F51}.ReleaseUnsigned|x86.ActiveCfg = Release|Any CPU
+		{12C840BF-1A87-443A-BA17-052A60ED4F51}.ReleaseUnsigned|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

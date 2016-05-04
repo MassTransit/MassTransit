@@ -99,7 +99,6 @@
     <Compile Include="ConsumeObserver_Specs.cs" />
     <Compile Include="Consumer_Specs.cs" />
     <Compile Include="ContainedMessage_Specs.cs" />
-    <Compile Include="Behaviors\Behavior.cs" />
     <Compile Include="Conventional\ConventionConsumer_Specs.cs" />
     <Compile Include="Conventional\CustomConsumeConnectorFactory.cs" />
     <Compile Include="Conventional\CustomConsumerConvention.cs" />

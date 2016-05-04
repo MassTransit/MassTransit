@@ -85,10 +85,10 @@ namespace MassTransit.Courier.Results
             }
         }
 
-        protected virtual async Task PublishActivityEvents(RoutingSlip routingSlip, RoutingSlipBuilder builder)
+        protected virtual Task PublishActivityEvents(RoutingSlip routingSlip, RoutingSlipBuilder builder)
         {
-            await Publisher.PublishRoutingSlipActivityCompleted(Context.ActivityName, Context.ExecutionId, Context.Timestamp, _duration,
-                routingSlip.Variables, _activity.Arguments, _data).ConfigureAwait(false);
+            return Publisher.PublishRoutingSlipActivityCompleted(Context.ActivityName, Context.ExecutionId, Context.Timestamp, _duration,
+                routingSlip.Variables, _activity.Arguments, _data);
         }
 
         static bool HasNextActivity(RoutingSlip routingSlip)

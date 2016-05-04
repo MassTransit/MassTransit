@@ -122,11 +122,11 @@ namespace MassTransit.Testing.TestDecorators
                 return _policy.Existing(context, next);
             }
 
-            public async Task Missing(ConsumeContext<TMessage> context, IPipe<SagaConsumeContext<TSaga, TMessage>> next)
+            public Task Missing(ConsumeContext<TMessage> context, IPipe<SagaConsumeContext<TSaga, TMessage>> next)
             {
                 var interceptPipe = new InterceptPolicyPipe(_created, next);
 
-                await _policy.Missing(context, interceptPipe).ConfigureAwait(false);
+                return _policy.Missing(context, interceptPipe);
             }
 
 
@@ -147,11 +147,11 @@ namespace MassTransit.Testing.TestDecorators
                     _pipe.Probe(context);
                 }
 
-                public async Task Send(SagaConsumeContext<TSaga, TMessage> context)
+                public Task Send(SagaConsumeContext<TSaga, TMessage> context)
                 {
                     _created.Add(context);
 
-                    await _pipe.Send(context).ConfigureAwait(false);
+                    return _pipe.Send(context);
                 }
             }
         }

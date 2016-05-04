@@ -41,102 +41,102 @@ namespace MassTransit.Context
             return _scheduler.CancelScheduledSend(tokenId);
         }
 
-        Task<ScheduledMessage<T>> IMessageScheduler.ScheduleSend<T>(Uri destinationAddress, DateTime scheduledTime, T message, CancellationToken cancellationToken = default(CancellationToken))
+        Task<ScheduledMessage<T>> IMessageScheduler.ScheduleSend<T>(Uri destinationAddress, DateTime scheduledTime, T message, CancellationToken cancellationToken)
         {
             return _scheduler.ScheduleSend(destinationAddress, scheduledTime, message, cancellationToken);
         }
 
-        Task<ScheduledMessage<T>> IMessageScheduler.ScheduleSend<T>(Uri destinationAddress, DateTime scheduledTime, T message, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken = default(CancellationToken))
+        Task<ScheduledMessage<T>> IMessageScheduler.ScheduleSend<T>(Uri destinationAddress, DateTime scheduledTime, T message, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken)
         {
             return _scheduler.ScheduleSend(destinationAddress, scheduledTime, message, pipe, cancellationToken);
         }
 
-        Task<ScheduledMessage<T>> IMessageScheduler.ScheduleSend<T>(Uri destinationAddress, DateTime scheduledTime, T message, IPipe<SendContext> pipe, CancellationToken cancellationToken = default(CancellationToken))
+        Task<ScheduledMessage<T>> IMessageScheduler.ScheduleSend<T>(Uri destinationAddress, DateTime scheduledTime, T message, IPipe<SendContext> pipe, CancellationToken cancellationToken)
         {
             return _scheduler.ScheduleSend(destinationAddress, scheduledTime, message, pipe, cancellationToken);
         }
 
-        Task<ScheduledMessage> IMessageScheduler.ScheduleSend(Uri destinationAddress, DateTime scheduledTime, object message, CancellationToken cancellationToken = default(CancellationToken))
+        Task<ScheduledMessage> IMessageScheduler.ScheduleSend(Uri destinationAddress, DateTime scheduledTime, object message, CancellationToken cancellationToken)
         {
             return _scheduler.ScheduleSend(destinationAddress, scheduledTime, message, cancellationToken);
         }
 
-        Task<ScheduledMessage> IMessageScheduler.ScheduleSend(Uri destinationAddress, DateTime scheduledTime, object message, Type messageType, CancellationToken cancellationToken = default(CancellationToken))
+        Task<ScheduledMessage> IMessageScheduler.ScheduleSend(Uri destinationAddress, DateTime scheduledTime, object message, Type messageType, CancellationToken cancellationToken)
         {
             return _scheduler.ScheduleSend(destinationAddress, scheduledTime, message, messageType, cancellationToken);
         }
 
-        Task<ScheduledMessage> IMessageScheduler.ScheduleSend(Uri destinationAddress, DateTime scheduledTime, object message, IPipe<SendContext> pipe, CancellationToken cancellationToken = default(CancellationToken))
+        Task<ScheduledMessage> IMessageScheduler.ScheduleSend(Uri destinationAddress, DateTime scheduledTime, object message, IPipe<SendContext> pipe, CancellationToken cancellationToken)
         {
             return _scheduler.ScheduleSend(destinationAddress, scheduledTime, message, pipe, cancellationToken);
         }
 
-        Task<ScheduledMessage> IMessageScheduler.ScheduleSend(Uri destinationAddress, DateTime scheduledTime, object message, Type messageType, IPipe<SendContext> pipe, CancellationToken cancellationToken = default(CancellationToken))
+        Task<ScheduledMessage> IMessageScheduler.ScheduleSend(Uri destinationAddress, DateTime scheduledTime, object message, Type messageType, IPipe<SendContext> pipe, CancellationToken cancellationToken)
         {
             return _scheduler.ScheduleSend(destinationAddress, scheduledTime, message, messageType, pipe, cancellationToken);
         }
 
-        Task<ScheduledMessage<T>> IMessageScheduler.ScheduleSend<T>(Uri destinationAddress, DateTime scheduledTime, object values, CancellationToken cancellationToken = default(CancellationToken))
+        Task<ScheduledMessage<T>> IMessageScheduler.ScheduleSend<T>(Uri destinationAddress, DateTime scheduledTime, object values, CancellationToken cancellationToken)
         {
             return _scheduler.ScheduleSend<T>(destinationAddress, scheduledTime, values, cancellationToken);
         }
 
-        Task<ScheduledMessage<T>> IMessageScheduler.ScheduleSend<T>(Uri destinationAddress, DateTime scheduledTime, object values, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken = default(CancellationToken))
+        Task<ScheduledMessage<T>> IMessageScheduler.ScheduleSend<T>(Uri destinationAddress, DateTime scheduledTime, object values, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken)
         {
             return _scheduler.ScheduleSend(destinationAddress, scheduledTime, values, pipe, cancellationToken);
         }
 
-        Task<ScheduledMessage<T>> IMessageScheduler.ScheduleSend<T>(Uri destinationAddress, DateTime scheduledTime, object values, IPipe<SendContext> pipe, CancellationToken cancellationToken = default(CancellationToken))
+        Task<ScheduledMessage<T>> IMessageScheduler.ScheduleSend<T>(Uri destinationAddress, DateTime scheduledTime, object values, IPipe<SendContext> pipe, CancellationToken cancellationToken)
         {
             return _scheduler.ScheduleSend<T>(destinationAddress, scheduledTime, values, pipe, cancellationToken);
         }
 
-        Task<ScheduledMessage<T>> MessageSchedulerContext.ScheduleSend<T>(DateTime scheduledTime, T message, CancellationToken cancellationToken = default(CancellationToken))
+        Task<ScheduledMessage<T>> MessageSchedulerContext.ScheduleSend<T>(DateTime scheduledTime, T message, CancellationToken cancellationToken)
         {
             return _scheduler.ScheduleSend(_consumeContext.ReceiveContext.InputAddress, scheduledTime, message, cancellationToken);
         }
 
-        Task<ScheduledMessage<T>> MessageSchedulerContext.ScheduleSend<T>(DateTime scheduledTime, T message, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken = default(CancellationToken))
+        Task<ScheduledMessage<T>> MessageSchedulerContext.ScheduleSend<T>(DateTime scheduledTime, T message, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken)
         {
             return _scheduler.ScheduleSend(_consumeContext.ReceiveContext.InputAddress, scheduledTime, message, pipe, cancellationToken);
         }
 
-        Task<ScheduledMessage<T>> MessageSchedulerContext.ScheduleSend<T>(DateTime scheduledTime, T message, IPipe<SendContext> pipe, CancellationToken cancellationToken = default(CancellationToken))
+        Task<ScheduledMessage<T>> MessageSchedulerContext.ScheduleSend<T>(DateTime scheduledTime, T message, IPipe<SendContext> pipe, CancellationToken cancellationToken)
         {
             return _scheduler.ScheduleSend(_consumeContext.ReceiveContext.InputAddress, scheduledTime, message, pipe, cancellationToken);
         }
 
-        Task<ScheduledMessage> MessageSchedulerContext.ScheduleSend(DateTime scheduledTime, object message, CancellationToken cancellationToken = default(CancellationToken))
+        Task<ScheduledMessage> MessageSchedulerContext.ScheduleSend(DateTime scheduledTime, object message, CancellationToken cancellationToken)
         {
             return _scheduler.ScheduleSend(_consumeContext.ReceiveContext.InputAddress, scheduledTime, message, cancellationToken);
         }
 
-        Task<ScheduledMessage> MessageSchedulerContext.ScheduleSend(DateTime scheduledTime, object message, Type messageType, CancellationToken cancellationToken = default(CancellationToken))
+        Task<ScheduledMessage> MessageSchedulerContext.ScheduleSend(DateTime scheduledTime, object message, Type messageType, CancellationToken cancellationToken)
         {
             return _scheduler.ScheduleSend(_consumeContext.ReceiveContext.InputAddress, scheduledTime, message, messageType, cancellationToken);
         }
 
-        Task<ScheduledMessage> MessageSchedulerContext.ScheduleSend(DateTime scheduledTime, object message, IPipe<SendContext> pipe, CancellationToken cancellationToken = default(CancellationToken))
+        Task<ScheduledMessage> MessageSchedulerContext.ScheduleSend(DateTime scheduledTime, object message, IPipe<SendContext> pipe, CancellationToken cancellationToken)
         {
             return _scheduler.ScheduleSend(_consumeContext.ReceiveContext.InputAddress, scheduledTime, message, pipe, cancellationToken);
         }
 
-        Task<ScheduledMessage> MessageSchedulerContext.ScheduleSend(DateTime scheduledTime, object message, Type messageType, IPipe<SendContext> pipe, CancellationToken cancellationToken = default(CancellationToken))
+        Task<ScheduledMessage> MessageSchedulerContext.ScheduleSend(DateTime scheduledTime, object message, Type messageType, IPipe<SendContext> pipe, CancellationToken cancellationToken)
         {
             return _scheduler.ScheduleSend(_consumeContext.ReceiveContext.InputAddress, scheduledTime, message, messageType, pipe, cancellationToken);
         }
 
-        Task<ScheduledMessage<T>> MessageSchedulerContext.ScheduleSend<T>(DateTime scheduledTime, object values, CancellationToken cancellationToken = default(CancellationToken))
+        Task<ScheduledMessage<T>> MessageSchedulerContext.ScheduleSend<T>(DateTime scheduledTime, object values, CancellationToken cancellationToken)
         {
             return _scheduler.ScheduleSend<T>(_consumeContext.ReceiveContext.InputAddress, scheduledTime, values, cancellationToken);
         }
 
-        Task<ScheduledMessage<T>> MessageSchedulerContext.ScheduleSend<T>(DateTime scheduledTime, object values, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken = default(CancellationToken))
+        Task<ScheduledMessage<T>> MessageSchedulerContext.ScheduleSend<T>(DateTime scheduledTime, object values, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken)
         {
             return _scheduler.ScheduleSend(_consumeContext.ReceiveContext.InputAddress, scheduledTime, values, pipe, cancellationToken);
         }
 
-        Task<ScheduledMessage<T>> MessageSchedulerContext.ScheduleSend<T>(DateTime scheduledTime, object values, IPipe<SendContext> pipe, CancellationToken cancellationToken = default(CancellationToken))
+        Task<ScheduledMessage<T>> MessageSchedulerContext.ScheduleSend<T>(DateTime scheduledTime, object values, IPipe<SendContext> pipe, CancellationToken cancellationToken)
         {
             return _scheduler.ScheduleSend<T>(_consumeContext.ReceiveContext.InputAddress, scheduledTime, values, pipe, cancellationToken);
         }

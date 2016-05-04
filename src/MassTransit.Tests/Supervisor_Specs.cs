@@ -59,7 +59,7 @@ namespace MassTransit.Tests
             var scope = supervisor.CreateScope("scope");
 
             var participant = supervisor.CreateParticipant("testA");
-            ((ITaskSupervisor)scope).Completed.ContinueWith(x => scope.SetComplete());
+            scope.Completed.ContinueWith(x => scope.SetComplete());
 
             Task.Delay(100)
                 .ContinueWith(x => participant.SetComplete());

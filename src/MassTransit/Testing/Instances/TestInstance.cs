@@ -46,9 +46,9 @@ namespace MassTransit.Testing.Instances
             TaskUtil.Await(ExecuteAsync);
         }
 
-        public async Task ExecuteAsync()
+        public Task ExecuteAsync()
         {
-            await ExecuteTestActions().ConfigureAwait(false);
+            return ExecuteTestActions();
         }
 
         public void Dispose()

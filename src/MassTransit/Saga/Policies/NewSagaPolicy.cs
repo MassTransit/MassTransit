@@ -55,9 +55,9 @@ namespace MassTransit.Saga.Policies
                 context.CorrelationId ?? Guid.Empty);
         }
 
-        async Task ISagaPolicy<TSaga, TMessage>.Missing(ConsumeContext<TMessage> context, IPipe<SagaConsumeContext<TSaga, TMessage>> next)
+        Task ISagaPolicy<TSaga, TMessage>.Missing(ConsumeContext<TMessage> context, IPipe<SagaConsumeContext<TSaga, TMessage>> next)
         {
-            await _sagaFactory.Send(context, next).ConfigureAwait(false);
+            return _sagaFactory.Send(context, next);
         }
     }
 }

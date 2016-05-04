@@ -33,7 +33,7 @@ namespace MassTransit.RabbitMqTransport.Scheduling
             _hostSettings = hostSettings;
         }
 
-        Task<ScheduledMessage<T>> IMessageScheduler.ScheduleSend<T>(Uri destinationAddress, DateTime scheduledTime, T message, CancellationToken cancellationToken = default(CancellationToken))
+        Task<ScheduledMessage<T>> IMessageScheduler.ScheduleSend<T>(Uri destinationAddress, DateTime scheduledTime, T message, CancellationToken cancellationToken)
         {
             if (destinationAddress == null)
                 throw new ArgumentNullException(nameof(destinationAddress));
@@ -43,7 +43,7 @@ namespace MassTransit.RabbitMqTransport.Scheduling
             return ScheduleSend(destinationAddress, scheduledTime, message, Pipe.Empty<SendContext<T>>(), cancellationToken);
         }
 
-        Task<ScheduledMessage<T>> IMessageScheduler.ScheduleSend<T>(Uri destinationAddress, DateTime scheduledTime, T message, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken = default(CancellationToken))
+        Task<ScheduledMessage<T>> IMessageScheduler.ScheduleSend<T>(Uri destinationAddress, DateTime scheduledTime, T message, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken)
         {
             if (destinationAddress == null)
                 throw new ArgumentNullException(nameof(destinationAddress));
@@ -55,7 +55,7 @@ namespace MassTransit.RabbitMqTransport.Scheduling
             return ScheduleSend(destinationAddress, scheduledTime, message, pipe, cancellationToken);
         }
 
-        Task<ScheduledMessage<T>> IMessageScheduler.ScheduleSend<T>(Uri destinationAddress, DateTime scheduledTime, T message, IPipe<SendContext> pipe, CancellationToken cancellationToken = default(CancellationToken))
+        Task<ScheduledMessage<T>> IMessageScheduler.ScheduleSend<T>(Uri destinationAddress, DateTime scheduledTime, T message, IPipe<SendContext> pipe, CancellationToken cancellationToken)
         {
             if (destinationAddress == null)
                 throw new ArgumentNullException(nameof(destinationAddress));
@@ -67,7 +67,7 @@ namespace MassTransit.RabbitMqTransport.Scheduling
             return ScheduleSend(destinationAddress, scheduledTime, message, pipe, cancellationToken);
         }
 
-        Task<ScheduledMessage> IMessageScheduler.ScheduleSend(Uri destinationAddress, DateTime scheduledTime, object message, CancellationToken cancellationToken = default(CancellationToken))
+        Task<ScheduledMessage> IMessageScheduler.ScheduleSend(Uri destinationAddress, DateTime scheduledTime, object message, CancellationToken cancellationToken)
         {
             if (destinationAddress == null)
                 throw new ArgumentNullException(nameof(destinationAddress));
@@ -79,7 +79,7 @@ namespace MassTransit.RabbitMqTransport.Scheduling
             return MessageSchedulerConverterCache.ScheduleSend(this, destinationAddress, scheduledTime, message, messageType, cancellationToken);
         }
 
-        Task<ScheduledMessage> IMessageScheduler.ScheduleSend(Uri destinationAddress, DateTime scheduledTime, object message, Type messageType, CancellationToken cancellationToken = default(CancellationToken))
+        Task<ScheduledMessage> IMessageScheduler.ScheduleSend(Uri destinationAddress, DateTime scheduledTime, object message, Type messageType, CancellationToken cancellationToken)
         {
             if (destinationAddress == null)
                 throw new ArgumentNullException(nameof(destinationAddress));
@@ -91,7 +91,7 @@ namespace MassTransit.RabbitMqTransport.Scheduling
             return MessageSchedulerConverterCache.ScheduleSend(this, destinationAddress, scheduledTime, message, messageType, cancellationToken);
         }
 
-        Task<ScheduledMessage> IMessageScheduler.ScheduleSend(Uri destinationAddress, DateTime scheduledTime, object message, IPipe<SendContext> pipe, CancellationToken cancellationToken = default(CancellationToken))
+        Task<ScheduledMessage> IMessageScheduler.ScheduleSend(Uri destinationAddress, DateTime scheduledTime, object message, IPipe<SendContext> pipe, CancellationToken cancellationToken)
         {
             if (destinationAddress == null)
                 throw new ArgumentNullException(nameof(destinationAddress));
@@ -105,7 +105,7 @@ namespace MassTransit.RabbitMqTransport.Scheduling
             return MessageSchedulerConverterCache.ScheduleSend(this, destinationAddress, scheduledTime, message, messageType, pipe, cancellationToken);
         }
 
-        Task<ScheduledMessage> IMessageScheduler.ScheduleSend(Uri destinationAddress, DateTime scheduledTime, object message, Type messageType, IPipe<SendContext> pipe, CancellationToken cancellationToken = default(CancellationToken))
+        Task<ScheduledMessage> IMessageScheduler.ScheduleSend(Uri destinationAddress, DateTime scheduledTime, object message, Type messageType, IPipe<SendContext> pipe, CancellationToken cancellationToken)
         {
             if (destinationAddress == null)
                 throw new ArgumentNullException(nameof(destinationAddress));
@@ -119,7 +119,7 @@ namespace MassTransit.RabbitMqTransport.Scheduling
             return MessageSchedulerConverterCache.ScheduleSend(this, destinationAddress, scheduledTime, message, messageType, pipe, cancellationToken);
         }
 
-        Task<ScheduledMessage<T>> IMessageScheduler.ScheduleSend<T>(Uri destinationAddress, DateTime scheduledTime, object values, CancellationToken cancellationToken = default(CancellationToken))
+        Task<ScheduledMessage<T>> IMessageScheduler.ScheduleSend<T>(Uri destinationAddress, DateTime scheduledTime, object values, CancellationToken cancellationToken)
         {
             if (destinationAddress == null)
                 throw new ArgumentNullException(nameof(destinationAddress));
@@ -131,7 +131,7 @@ namespace MassTransit.RabbitMqTransport.Scheduling
             return ScheduleSend(destinationAddress, scheduledTime, message, Pipe.Empty<SendContext<T>>(), cancellationToken);
         }
 
-        Task<ScheduledMessage<T>> IMessageScheduler.ScheduleSend<T>(Uri destinationAddress, DateTime scheduledTime, object values, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken = default(CancellationToken))
+        Task<ScheduledMessage<T>> IMessageScheduler.ScheduleSend<T>(Uri destinationAddress, DateTime scheduledTime, object values, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken)
         {
             if (destinationAddress == null)
                 throw new ArgumentNullException(nameof(destinationAddress));
@@ -145,7 +145,7 @@ namespace MassTransit.RabbitMqTransport.Scheduling
             return ScheduleSend(destinationAddress, scheduledTime, message, pipe, cancellationToken);
         }
 
-        Task<ScheduledMessage<T>> IMessageScheduler.ScheduleSend<T>(Uri destinationAddress, DateTime scheduledTime, object values, IPipe<SendContext> pipe, CancellationToken cancellationToken = default(CancellationToken))
+        Task<ScheduledMessage<T>> IMessageScheduler.ScheduleSend<T>(Uri destinationAddress, DateTime scheduledTime, object values, IPipe<SendContext> pipe, CancellationToken cancellationToken)
         {
             if (destinationAddress == null)
                 throw new ArgumentNullException(nameof(destinationAddress));

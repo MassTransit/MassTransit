@@ -62,9 +62,9 @@ namespace MassTransit.Util
             return EqualityComparer<TSaga>.Default.GetHashCode(_instance);
         }
 
-        public async Task MarkInUse(CancellationToken cancellationToken)
+        public Task MarkInUse(CancellationToken cancellationToken)
         {
-            await _inUse.WaitAsync(cancellationToken).ConfigureAwait(false);
+            return _inUse.WaitAsync(cancellationToken);
         }
 
         public void Release()
@@ -109,9 +109,9 @@ namespace MassTransit.Util
             }
         }
 
-        public async Task MarkInUse(CancellationToken cancellationToken)
+        public Task MarkInUse(CancellationToken cancellationToken)
         {
-            await _inUse.WaitAsync(cancellationToken).ConfigureAwait(false);
+            return _inUse.WaitAsync(cancellationToken);
         }
 
         public void Release()

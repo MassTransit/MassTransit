@@ -104,11 +104,11 @@ namespace MassTransit
         /// <param name="bus"></param>
         /// <param name="scheduleId"></param>
         /// <param name="scheduleGroup"></param>
-        public static async Task CancelScheduledRecurringMessage(this IPublishEndpoint bus, string scheduleId, string scheduleGroup)
+        public static Task CancelScheduledRecurringMessage(this IPublishEndpoint bus, string scheduleId, string scheduleGroup)
         {
             var command = new CancelScheduledRecurringMessageCommand(scheduleId, scheduleGroup);
 
-            await bus.Publish<CancelScheduledRecurringMessage>(command).ConfigureAwait(false);
+            return bus.Publish<CancelScheduledRecurringMessage>(command);
         }
 
 

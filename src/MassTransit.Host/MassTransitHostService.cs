@@ -29,11 +29,12 @@ namespace MassTransit.Host
         readonly ILifetimeScope _hostScope;
         readonly ILog _log = Logger.Get<MassTransitHostService>();
         ILifetimeScope _bootstrapperScope;
-        List<ServiceControl> _services;
+        readonly List<ServiceControl> _services;
 
         public MassTransitHostService(ILifetimeScope hostScope)
         {
             _hostScope = hostScope;
+            _services = new List<ServiceControl>();
         }
 
         public bool Start(HostControl hostControl)
@@ -78,7 +79,7 @@ namespace MassTransit.Host
                     }
                 });
 
-                _services = started;
+                _services.AddRange(started);
 
                 return true;
             }

@@ -201,7 +201,7 @@ namespace MassTransit.Context
             });
         }
 
-        public async Task ExecutePendingActions()
+        public Task ExecutePendingActions()
         {
             _clearToSend.TrySetResult(this);
 
@@ -209,7 +209,7 @@ namespace MassTransit.Context
             lock (_pendingActions)
                 tasks = _pendingActions.Select(x => x()).Where(x => x != null).ToArray();
 
-            await Task.WhenAll(tasks).ConfigureAwait(false);
+            return Task.WhenAll(tasks);
         }
 
         public Task DiscardPendingActions()
