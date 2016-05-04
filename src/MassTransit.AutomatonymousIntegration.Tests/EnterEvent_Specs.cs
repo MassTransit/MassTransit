@@ -34,7 +34,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
                 CorrelationId = sagaId
             });
 
-            Guid? saga = await _repository.ShouldContainSaga(x => x.CorrelationId == sagaId && Equals(x.CurrentState, _machine.Running), TestTimeout);
+            Guid? saga = await _repository.ShouldContainSaga(x => x.CorrelationId == sagaId && Equals(x.CurrentState, _machine.RunningFaster), TestTimeout);
             Assert.IsTrue(saga.HasValue);
 
             Assert.AreEqual(1, _repository[saga.Value].Instance.OnEnter);
@@ -101,10 +101,11 @@ namespace MassTransit.AutomatonymousIntegration.Tests
                 {
                     Console.WriteLine("Running.Enter:Then");
                     context.Instance.OnEnter = context.Instance.Counter;
-                }));
+                }).TransitionTo(RunningFaster));
             }
 
             public State Running { get; private set; }
+            public State RunningFaster { get; private set; }
             public Event<Start> Started { get; private set; }
             public Event<Stop> Stopped { get; private set; }
         }
