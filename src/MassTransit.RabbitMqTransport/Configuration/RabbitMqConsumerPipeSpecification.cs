@@ -14,9 +14,9 @@ namespace MassTransit.RabbitMqTransport.Configuration
 {
     using System.Collections.Generic;
     using System.Linq;
-    using Management;
     using MassTransit.Configurators;
     using MassTransit.Pipeline;
+    using MassTransit.Pipeline.Pipes;
     using PipeBuilders;
     using PipeConfigurators;
     using Pipeline;
@@ -29,7 +29,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
     {
         readonly IReceiveEndpointObserver _endpointObserver;
         readonly ExchangeBindingSettings[] _exchangeBindings;
-        readonly Mediator<ISetPrefetchCount> _mediator;
+        readonly IManagementPipe _managementPipe;
         readonly ModelSettings _modelSettings;
         readonly IReceiveObserver _receiveObserver;
         readonly IPipe<ReceiveContext> _receivePipe;
@@ -38,7 +38,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
 
         public RabbitMqConsumerPipeSpecification(IPipe<ReceiveContext> receivePipe, ReceiveSettings settings, IReceiveObserver receiveObserver,
             IReceiveEndpointObserver endpointObserver, IEnumerable<ExchangeBindingSettings> exchangeBindings, ITaskSupervisor supervisor,
-            Mediator<ISetPrefetchCount> mediator)
+            IManagementPipe managementPipe)
         {
             _settings = settings;
             _receiveObserver = receiveObserver;
@@ -46,7 +46,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
             _supervisor = supervisor;
             _exchangeBindings = exchangeBindings.ToArray();
             _receivePipe = receivePipe;
-            _mediator = mediator;
+            _managementPipe = managementPipe;
             _modelSettings = new RabbitMqModelSettings();
         }
 
@@ -54,7 +54,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
         {
             IPipe<ModelContext> pipe = Pipe.New<ModelContext>(x =>
             {
-                x.UseFilter(new PrepareReceiveQueueFilter(_settings, _mediator, _exchangeBindings));
+                x.UseFilter(new PrepareReceiveQueueFilter(_settings, _managementPipe, _exchangeBindings));
 
                 x.UseFilter(new RabbitMqConsumerFilter(_receivePipe, _receiveObserver, _endpointObserver, _supervisor));
             });

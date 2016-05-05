@@ -577,7 +577,6 @@
     <Compile Include="Pipeline\Filters\CircuitBreaker\HalfOpenBehavior.cs" />
     <Compile Include="Pipeline\Filters\ConcurrencyLimit\ConcurrencyLimitFilter.cs" />
     <Compile Include="Pipeline\Filters\ConcurrencyLimit\ConcurrencyLimitFilterManagementConsumer.cs" />
-    <Compile Include="Pipeline\Filters\ConcurrencyLimit\IConcurrencyLimitFilter.cs" />
     <Compile Include="Pipeline\Filters\ConsumerMessageFilter.cs" />
     <Compile Include="Pipeline\Filters\ConsumerSplitFilter.cs" />
     <Compile Include="Pipeline\Filters\ContentFilter.cs" />
@@ -651,6 +650,8 @@
     <Compile Include="Pipeline\ConsumeMessageObservable.cs" />
     <Compile Include="Pipeline\ConsumeObservable.cs" />
     <Compile Include="Pipeline\Pipes\FilterPipe.cs" />
+    <Compile Include="Pipeline\Pipes\IManagementPipe.cs" />
+    <Compile Include="Pipeline\Pipes\ManagementPipe.cs" />
     <Compile Include="Pipeline\Pipes\PublishPipe.cs" />
     <Compile Include="Pipeline\Pipes\ReceivePipe.cs" />
     <Compile Include="Pipeline\Pipes\ResponsePipe.cs" />
@@ -1063,10 +1064,8 @@
     <Compile Include="Util\Caching\Cached.cs" />
     <Compile Include="Util\Caching\LazyMemoryCache.cs" />
     <Compile Include="Util\IAsyncDisposable.cs" />
-    <Compile Include="Util\IMediator.cs" />
     <Compile Include="Util\ITaskScope.cs" />
     <Compile Include="Util\LimitedConcurrencyLevelTaskScheduler.cs" />
-    <Compile Include="Util\Mediator.cs" />
     <Compile Include="Util\RollingTimer.cs" />
     <Compile Include="Util\StopEventArgs.cs" />
     <Compile Include="Util\TaskParticipant.cs" />
