@@ -70,7 +70,9 @@ namespace MassTransit.RabbitMqTransport.Tests
                 Timestamp = DateTime.UtcNow
             });
 
-            await client.Request(request, TestCancellationToken);
+            var concurrencyLimitUpdated = await client.Request(request, TestCancellationToken);
+
+            Assert.AreEqual(request.ConcurrencyLimit, concurrencyLimitUpdated.ConcurrencyLimit);
         }
 
         [Test, Explicit]

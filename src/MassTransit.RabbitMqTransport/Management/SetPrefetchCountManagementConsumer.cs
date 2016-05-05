@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -16,22 +16,21 @@ namespace MassTransit.RabbitMqTransport.Management
     using System.Threading.Tasks;
     using Contracts;
     using Logging;
-    using Pipeline;
-    using Util;
+    using MassTransit.Pipeline.Pipes;
 
 
     public class SetPrefetchCountManagementConsumer :
         IConsumer<SetPrefetchCount>
     {
         static readonly ILog _log = Logger.Get<SetPrefetchCountManagementConsumer>();
-        readonly IMediator<ISetPrefetchCount> _filterMediator;
 
+        readonly IManagementPipe _managementPipe;
         readonly string _queueName;
         DateTime _lastUpdated;
 
-        public SetPrefetchCountManagementConsumer(IMediator<ISetPrefetchCount> filterMediator, string queueName)
+        public SetPrefetchCountManagementConsumer(IManagementPipe managementPipe, string queueName)
         {
-            _filterMediator = filterMediator;
+            _managementPipe = managementPipe;
             _queueName = queueName;
             _lastUpdated = DateTime.UtcNow;
         }
@@ -44,7 +43,7 @@ namespace MassTransit.RabbitMqTransport.Management
                 {
                     try
                     {
-                        await _filterMediator.ForEachAsync(x => x.SetPrefetchCount(context.Message.PrefetchCount)).ConfigureAwait(false);
+                        await _managementPipe.Send(context).ConfigureAwait(false);
 
                         _lastUpdated = context.Message.Timestamp;
 

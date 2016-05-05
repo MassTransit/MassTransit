@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -16,7 +16,7 @@ namespace MassTransit.Pipeline.Filters.ConcurrencyLimit
     using System.Threading.Tasks;
     using Contracts;
     using Logging;
-    using Util;
+
 
     /// <summary>
     /// Consumer which when connected to a management bus can control the concurrency
@@ -26,12 +26,12 @@ namespace MassTransit.Pipeline.Filters.ConcurrencyLimit
         IConsumer<SetConcurrencyLimit>
     {
         static readonly ILog _log = Logger.Get<ConcurrencyLimitFilterManagementConsumer>();
+        readonly IPipe<ConsumeContext> _filterMediator;
 
         readonly string _id;
-        readonly IMediator<IConcurrencyLimitFilter> _filterMediator;
         DateTime _lastUpdated;
 
-        public ConcurrencyLimitFilterManagementConsumer(IMediator<IConcurrencyLimitFilter> filterMediator, string id = null)
+        public ConcurrencyLimitFilterManagementConsumer(IPipe<ConsumeContext> filterMediator, string id = null)
         {
             _filterMediator = filterMediator;
             _id = id;
@@ -47,7 +47,7 @@ namespace MassTransit.Pipeline.Filters.ConcurrencyLimit
                 {
                     try
                     {
-                        await _filterMediator.ForEachAsync(x => x.SetConcurrencyLimit(context.Message.ConcurrencyLimit)).ConfigureAwait(false);
+                        await _filterMediator.Send(context).ConfigureAwait(false);
 
                         _lastUpdated = context.Message.Timestamp;
 
