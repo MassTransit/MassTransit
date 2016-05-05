@@ -157,7 +157,7 @@ namespace MassTransit.RabbitMqTransport
                         {
                             using (var bodyStream = context.GetBody())
                             {
-                                bodyStream.CopyTo(memoryStream);
+                                await bodyStream.CopyToAsync(memoryStream).ConfigureAwait(false);
                             }
 
                             body = memoryStream.ToArray();

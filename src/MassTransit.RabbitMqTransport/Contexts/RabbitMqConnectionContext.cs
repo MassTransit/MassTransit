@@ -51,10 +51,10 @@ namespace MassTransit.RabbitMqTransport.Contexts
 
         public RabbitMqHostSettings HostSettings => _hostSettings;
 
-        public async Task<IModel> CreateModel()
+        public Task<IModel> CreateModel()
         {
-            return await Task.Factory.StartNew(() => _connection.CreateModel(),
-                _participant.StoppedToken, TaskCreationOptions.HideScheduler, _taskScheduler).ConfigureAwait(false);
+            return Task.Factory.StartNew(() => _connection.CreateModel(),
+                _participant.StoppedToken, TaskCreationOptions.HideScheduler, _taskScheduler);
         }
 
         public IConnection Connection => _connection;

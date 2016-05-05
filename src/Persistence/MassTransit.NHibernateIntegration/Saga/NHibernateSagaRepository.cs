@@ -48,7 +48,7 @@ namespace MassTransit.NHibernateIntegration.Saga
             _insertIsolationLevel = isolationLevel;
         }
 
-        public async Task<IEnumerable<Guid>> Find(ISagaQuery<TSaga> query)
+        public Task<IEnumerable<Guid>> Find(ISagaQuery<TSaga> query)
         {
             using (var scope = new TransactionScope(TransactionScopeOption.RequiresNew))
             using (ISession session = _sessionFactory.OpenSession())
@@ -60,7 +60,7 @@ namespace MassTransit.NHibernateIntegration.Saga
 
                 scope.Complete();
 
-                return result;
+                return Task.FromResult<IEnumerable<Guid>>(result);
             }
         }
 

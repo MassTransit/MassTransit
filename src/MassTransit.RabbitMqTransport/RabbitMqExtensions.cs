@@ -34,7 +34,7 @@ namespace MassTransit.RabbitMqTransport
                     if (model.IsOpen)
                         model.Close(replyCode, message);
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                 }
 

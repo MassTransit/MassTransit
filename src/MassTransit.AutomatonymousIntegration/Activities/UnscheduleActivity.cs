@@ -47,14 +47,14 @@ namespace Automatonymous.Activities
             await next.Execute(context).ConfigureAwait(false);
         }
 
-        async Task Activity<TInstance>.Faulted<TException>(BehaviorExceptionContext<TInstance, TException> context, Behavior<TInstance> next)
+        Task Activity<TInstance>.Faulted<TException>(BehaviorExceptionContext<TInstance, TException> context, Behavior<TInstance> next)
         {
-            await next.Faulted(context).ConfigureAwait(false);
+            return next.Faulted(context);
         }
 
-        async Task Activity<TInstance>.Faulted<T, TException>(BehaviorExceptionContext<TInstance, T, TException> context, Behavior<TInstance, T> next)
+        Task Activity<TInstance>.Faulted<T, TException>(BehaviorExceptionContext<TInstance, T, TException> context, Behavior<TInstance, T> next)
         {
-            await next.Faulted(context).ConfigureAwait(false);
+            return next.Faulted(context);
         }
 
         async Task Execute(BehaviorContext<TInstance> context)

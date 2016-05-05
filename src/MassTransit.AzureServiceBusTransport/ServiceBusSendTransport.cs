@@ -112,7 +112,7 @@ namespace MassTransit.AzureServiceBusTransport
             }
             catch (Exception ex)
             {
-                _observers.SendFault(context, ex).Wait(cancelSend);
+                await _observers.SendFault(context, ex).ConfigureAwait(false);
 
                 throw;
             }

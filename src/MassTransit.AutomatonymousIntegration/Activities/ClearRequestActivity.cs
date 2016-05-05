@@ -34,11 +34,11 @@ namespace Automatonymous.Activities
             visitor.Visit(this);
         }
 
-        async Task Activity<TInstance, TData>.Execute(BehaviorContext<TInstance, TData> context, Behavior<TInstance, TData> next)
+        Task Activity<TInstance, TData>.Execute(BehaviorContext<TInstance, TData> context, Behavior<TInstance, TData> next)
         {
             _request.SetRequestId(context.Instance, default(Guid?));
 
-            await next.Execute(context).ConfigureAwait(false);
+            return next.Execute(context);
         }
 
         public Task Faulted<TException>(BehaviorExceptionContext<TInstance, TData, TException> context, Behavior<TInstance, TData> next)
