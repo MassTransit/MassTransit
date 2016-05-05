@@ -23,6 +23,7 @@ namespace MassTransit.RabbitMqTransport.Tests
     using NUnit.Framework;
     using TestFramework;
     using TestFramework.Courier;
+    using Util;
 
 
     [TestFixture]
@@ -261,7 +262,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
                 RoutingSlip routingSlip = builder.Build();
 
-                Bus.Execute(routingSlip);
+                TaskUtil.Await(() => Bus.Execute(routingSlip));
 
                 _sentRoutingSlips.Add(routingSlip.TrackingNumber);
             }

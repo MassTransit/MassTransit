@@ -42,7 +42,7 @@ namespace MassTransit.Tests.Diagnostics
         {
             base.ConfigureBus(configurator);
 
-            configurator.EnabledPerformanceCounters();
+            configurator.EnablePerformanceCounters();
         }
 
         protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
