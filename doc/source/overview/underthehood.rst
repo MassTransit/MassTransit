@@ -68,7 +68,7 @@ Design Benefits
 Faq
 ----------------------------------------------
 - How many messages at a time will be simultaniously processed?
-		- Each endpoint you create represents 1 queue.  That queue can receive any number of differnt message types (based on what you subscribe to it)
+		- Each endpoint you create represents 1 queue.  That queue can receive any number of different message types (based on what you subscribe to it)
 		- The configuration of each endpoint you can set the number of consumers with a call to ``PrefetchCount(x)``.  
 		- This is the total number of consumers for all message types sent to this queue.
 		- In MT2, you had to add ?prefetch=X to the Rabbit URL.  This is handled automatically now.
@@ -77,7 +77,7 @@ Faq
 		PrefetchCount should be relatively high, a multiple of your concurrency limit for all message types so that RabbitMQ doesn’t choke delivery messages due to network delays. Always have a queue ready to receive the message.
 - When my consumer is not running, I do not want the messages to wait in the queue.  How can I do this?
 	There are two ways.  Note that each of these imply you would never use a 'competing consumer' pattern, so make sure that is the case.
-		1.  Set ``PurgetOnStartup=true`` in the endpoint configuration.  When the bus starts, it will empty the queue of all messages.
+		1.  Set ``PurgeOnStartup=true`` in the endpoint configuration.  When the bus starts, it will empty the queue of all messages.
 		2.  Set ``AutoDelete=true`` in the endpoint configuration.  This causes the queue to be removed when your application stops.
 - How are Retrys handled?
 	This is handled by `middleware`_  Each endpoint has a `retry policy`_.  
