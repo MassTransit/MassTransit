@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -15,6 +15,7 @@ namespace MassTransit.Events
     using System;
     using System.Linq;
 
+
     [Serializable]
     public class FaultEvent<T> :
         Fault<T>
@@ -29,7 +30,10 @@ namespace MassTransit.Events
             FaultedMessageId = faultedMessageId;
 
             var aggregateException = exception as AggregateException;
-            Exceptions = aggregateException?.InnerExceptions.Select(x => ((ExceptionInfo)new FaultExceptionInfo(x))).ToArray()
+            Exceptions = aggregateException?.InnerExceptions
+                .Where(x => x != null)
+                .Select(x => (ExceptionInfo)new FaultExceptionInfo(x))
+                .ToArray()
                 ?? new ExceptionInfo[] {new FaultExceptionInfo(exception)};
         }
 
