@@ -28,10 +28,10 @@ namespace MassTransit.RabbitMqTransport.Integration
         IProbeSite
     {
         static readonly ILog _log = Logger.Get<RabbitMqConnectionCache>();
+        readonly ITaskScope _cacheTaskScope;
         readonly ConnectionFactory _connectionFactory;
         readonly object _scopeLock = new object();
         readonly RabbitMqHostSettings _settings;
-        readonly ITaskScope _cacheTaskScope;
         ConnectionScope _scope;
 
         public RabbitMqConnectionCache(RabbitMqHostSettings settings, ITaskSupervisor supervisor)
@@ -208,12 +208,20 @@ namespace MassTransit.RabbitMqTransport.Integration
             {
                 if (_connectionContext.Task.Status == TaskStatus.RanToCompletion)
                 {
-                    var connectionContext = await _connectionContext.Task.ConfigureAwait(false);
+                    try
+                    {
+                        var connectionContext = await _connectionContext.Task.ConfigureAwait(false);
 
-                    if (_log.IsDebugEnabled)
-                        _log.DebugFormat("Disposing connection: {0}", connectionContext.HostSettings.ToDebugString());
+                        if (_log.IsDebugEnabled)
+                            _log.DebugFormat("Disposing connection: {0}", connectionContext.HostSettings.ToDebugString());
 
-                    connectionContext.Dispose();
+                        connectionContext.Dispose();
+                    }
+                    catch (Exception exception)
+                    {
+                        if (_log.IsWarnEnabled)
+                            _log.Warn("The model failed to be disposed", exception);
+                    }
                 }
             }
         }
