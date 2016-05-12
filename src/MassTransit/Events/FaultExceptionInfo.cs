@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -16,12 +16,13 @@ namespace MassTransit.Events
     using Internals.Extensions;
     using Util;
 
+
     [Serializable]
     public class FaultExceptionInfo :
         ExceptionInfo
     {
-
-        public FaultExceptionInfo(Exception exception) {
+        public FaultExceptionInfo(Exception exception)
+        {
             ExceptionType = exception.GetType().GetTypeName();
             InnerException = exception.InnerException != null
                 ? new FaultExceptionInfo(exception.InnerException)
@@ -33,8 +34,7 @@ namespace MassTransit.Events
 
         public string ExceptionType { get; private set; }
 
-        public ExceptionInfo InnerException { get; private set;}
-
+        public ExceptionInfo InnerException { get; private set; }
 
         public string StackTrace { get; private set; }
 
