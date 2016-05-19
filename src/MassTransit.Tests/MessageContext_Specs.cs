@@ -171,6 +171,7 @@ namespace MassTransit.Tests
                 });
                 x.Timeout = TestTimeout;
             });
+            Await(() => _request);
         }
 
         protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
@@ -226,6 +227,8 @@ namespace MassTransit.Tests
                 {
                 });
             });
+
+            Await(() => _request);
         }
 
         protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
@@ -264,6 +267,7 @@ namespace MassTransit.Tests
                 });
 
             });
+            Await(() => _request);
         }
 
         protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
@@ -308,6 +312,7 @@ namespace MassTransit.Tests
                 {
                 });
             });
+            Await(() => _request);
         }
     }
 }

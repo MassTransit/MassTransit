@@ -27,17 +27,17 @@ namespace MassTransit.Tests
             using (var cache = new LazyMemoryCache<Uri, Data>("endpoints", key => Task.FromResult(new Data {Value = $"The Key: {key}"}),
                 x => x.SlidingWindow(TimeSpan.FromSeconds(5))))
             {
-                var endpoint = await cache.Get(new Uri("loopback://localhost")).Value;
+                var endpoint = await (await cache.Get(new Uri("loopback://localhost"))).Value;
                 Console.WriteLine("Endpoint: {0}", endpoint.Created);
 
                 await Task.Delay(TimeSpan.FromSeconds(2));
 
-                endpoint = await cache.Get(new Uri("loopback://localhost")).Value;
+                endpoint = await (await cache.Get(new Uri("loopback://localhost"))).Value;
                 Console.WriteLine("Endpoint: {0}", endpoint.Created);
 
                 await Task.Delay(TimeSpan.FromSeconds(10));
 
-                endpoint = await cache.Get(new Uri("loopback://localhost")).Value;
+                endpoint = await (await cache.Get(new Uri("loopback://localhost"))).Value;
                 Console.WriteLine("Endpoint: {0}", endpoint.Created);
             }
         }
