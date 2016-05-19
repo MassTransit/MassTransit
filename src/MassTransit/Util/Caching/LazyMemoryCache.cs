@@ -61,6 +61,7 @@ namespace MassTransit.Util.Caching
         readonly PolicyProvider _policyProvider;
         readonly ValueFactory _valueFactory;
         readonly ValueRemoved _valueRemoved;
+        readonly object _cacheLock = new object();
 
         public LazyMemoryCache(string name, ValueFactory valueFactory, PolicyProvider policyProvider = null, KeyFormatter keyFormatter = null,
             ValueRemoved valueRemoved = null)
@@ -100,35 +101,38 @@ namespace MassTransit.Util.Caching
 
         public Cached<TValue> Get(TKey key)
         {
-            var textKey = _keyFormatter(key);
-
-            var result = _cache.Get(textKey) as Cached<TValue>;
-            if (result != null)
+            lock (_cacheLock)
             {
-                if (!result.Value.IsFaulted && !result.Value.IsCanceled)
-                    return result;
+                var textKey = _keyFormatter(key);
 
-                _cache.Remove(textKey);
-            }
-
-            var cacheItemValue = new CachedValue(_valueFactory, key, () => Touch(textKey));
-            var cacheItem = new CacheItem(textKey, cacheItemValue);
-            var cacheItemPolicy = _policyProvider(new CacheExpirationSelector(key)).Policy;
-            cacheItemPolicy.RemovedCallback = OnCacheItemRemoved;
-
-            var existingItem = _cache.AddOrGetExisting(cacheItem, cacheItemPolicy);
-            if (existingItem != cacheItem)
-            {
-                result = existingItem.Value as CachedValue;
+                var result = _cache.Get(textKey) as Cached<TValue>;
                 if (result != null)
                 {
-                    return result;
+                    if (!result.Value.IsFaulted && !result.Value.IsCanceled)
+                        return result;
+
+                    _cache.Remove(textKey);
                 }
 
-                _cache.Set(cacheItem, cacheItemPolicy);
-            }
+                var cacheItemValue = new CachedValue(_valueFactory, key, () => Touch(textKey));
+                var cacheItem = new CacheItem(textKey, cacheItemValue);
+                var cacheItemPolicy = _policyProvider(new CacheExpirationSelector(key)).Policy;
+                cacheItemPolicy.RemovedCallback = OnCacheItemRemoved;
 
-            return cacheItemValue;
+                var existingItem = _cache.AddOrGetExisting(cacheItem, cacheItemPolicy);
+                if (existingItem != cacheItem)
+                {
+                    result = existingItem.Value as CachedValue;
+                    if (result != null)
+                    {
+                        return result;
+                    }
+
+                    _cache.Set(cacheItem, cacheItemPolicy);
+                }
+
+                return cacheItemValue;
+            }
         }
 
         void OnCacheItemRemoved(CacheEntryRemovedArguments arguments)
