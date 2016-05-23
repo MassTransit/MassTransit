@@ -113,6 +113,7 @@
     <Compile Include="DiscardEvent_Specs.cs" />
     <Compile Include="EnterEvent_Specs.cs" />
     <Compile Include="Fault_Specs.cs" />
+    <Compile Include="FilterFault_Specs.cs" />
     <Compile Include="Ignore_Specs.cs" />
     <Compile Include="Initiator_Specs.cs" />
     <Compile Include="InMemoryDeadlock_Specs.cs" />

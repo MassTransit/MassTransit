@@ -65,7 +65,7 @@ namespace MassTransit.RabbitMqTransport
 
         public async Task<ISendEndpoint> GetPublishSendEndpoint(Type messageType)
         {
-            Cached<ISendEndpoint> cached = _cache.Get(messageType);
+            Cached<ISendEndpoint> cached = await _cache.Get(messageType).ConfigureAwait(false);
 
             var endpoint = await cached.Value.ConfigureAwait(false);
 

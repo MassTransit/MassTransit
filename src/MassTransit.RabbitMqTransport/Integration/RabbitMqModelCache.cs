@@ -19,6 +19,7 @@ namespace MassTransit.RabbitMqTransport.Integration
     using Logging;
     using MassTransit.Pipeline;
     using RabbitMQ.Client;
+    using RabbitMQ.Client.Exceptions;
     using Util;
 
 
@@ -203,12 +204,20 @@ namespace MassTransit.RabbitMqTransport.Integration
             {
                 if (_modelContext.Task.Status == TaskStatus.RanToCompletion)
                 {
-                    var modelContext = await _modelContext.Task.ConfigureAwait(false);
+                    try
+                    {
+                        var modelContext = await _modelContext.Task.ConfigureAwait(false);
 
-                    if (_log.IsDebugEnabled)
-                        _log.DebugFormat("Disposing model: {0}", ((ModelContext)modelContext).ConnectionContext.HostSettings.ToDebugString());
+                        if (_log.IsDebugEnabled)
+                            _log.DebugFormat("Disposing model: {0}", ((ModelContext)modelContext).ConnectionContext.HostSettings.ToDebugString());
 
-                    modelContext.Dispose();
+                        modelContext.Dispose();
+                    }
+                    catch (Exception exception)
+                    {
+                        if (_log.IsWarnEnabled)
+                            _log.Warn("The model failed to be disposed", exception);
+                    }
                 }
             }
         }

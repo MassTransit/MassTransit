@@ -27,7 +27,7 @@ To add a rate limiter to a receive endpoint:
 
         cfg.ReceiveEndpoint(host, "customer_update_queue", e =>
         {
-            e.UseRateLimit(1000, TimeSpan.FromSeconds(5));;
+            e.UseRateLimit(1000, TimeSpan.FromSeconds(5));
 
             e.Consumer(() => new UpdateCustomerAddressConsumer(sessionFactory));
         });

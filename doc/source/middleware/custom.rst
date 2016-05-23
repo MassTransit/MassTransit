@@ -90,7 +90,7 @@ entirely asynchronous, and expect that asynchronous operations will be performed
             }
             catch (Exception ex)
             {
-                ::Interlocked.Increment(ref _exceptionCount);
+                Interlocked.Increment(ref _exceptionCount);
 
                 await Console.Out.WriteLineAsync($"An exception occurred: {ex.Message}");
 

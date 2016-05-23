@@ -41,7 +41,7 @@ namespace MassTransit.SeriLogIntegration
             if (name == null)
                 throw new ArgumentNullException(nameof(name));
 
-            return _logs.Get(name).Value.Result;
+            return _logs.Get(name).Result.Value.Result;
         }
 
         public void Shutdown()

@@ -52,7 +52,7 @@ namespace MassTransit.Transports
 
         public async Task<ISendEndpoint> GetSendEndpoint(Uri address)
         {
-            Cached<ISendEndpoint> cached = _cache.Get(address);
+            Cached<ISendEndpoint> cached = await _cache.Get(address).ConfigureAwait(false);
 
             var endpoint = await cached.Value.ConfigureAwait(false);
 

@@ -7,10 +7,10 @@ use read-only properties and no behavior.
 
 .. note::
 
-	It is strongly suggested that interfaces be used for message contracts, based
+	It is strongly suggested to use interfaces for message contracts, based
 	on experience over several years with varying levels of developer experience.
 	MassTransit will create dynamic interface implementations for the messages,
-	ensuring a clean separate of the message contract from the consumer.
+	ensuring a clean separation of the message contract from the consumer.
 
 An example message to update a customer address is shown below.
 

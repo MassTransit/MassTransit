@@ -47,7 +47,7 @@ require any configuration, because it's, well, in memory.
     });
 
 
-For RabbitMQ, a URI specifying the host (and virtual host, default is /) should be specified, along
+For RabbitMQ, a URI specifying the host (and virtual host, default is /) should be provided, along
 with additional configuration for the username/password, as well as options on the transport.
 
 .. sourcecode:: csharp
@@ -58,6 +58,19 @@ with additional configuration for the username/password, as well as options on t
         {
             h.Username("guest");
             h.Password("guest");
+        });
+    });
+
+For Azure Service Bus, a URI specifying the namespace should be provided, along with the
+``TokenProvider`` for a token with **manage** permissions.
+
+.. sourcecode:: csharp
+
+    var busControl = Bus.Factory.CreateUsingAzureServiceBus(cfg =>
+    {
+        var host = cfg.Host(new Uri("sb://my-namespace.servicebus.windows.net/"), h =>
+        {
+            h.TokenProvider = TokenProvider.CreateSharedAccessSignatureTokenProvider("KeyName", "keyvalue");
         });
     });
 
