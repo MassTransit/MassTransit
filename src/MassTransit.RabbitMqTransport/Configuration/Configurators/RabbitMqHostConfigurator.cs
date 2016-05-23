@@ -18,7 +18,7 @@ namespace MassTransit.RabbitMqTransport.Configuration.Configurators
     public class RabbitMqHostConfigurator :
         IRabbitMqHostConfigurator
     {
-        static readonly char[] _pathSeparator = {'/'};
+        static readonly char[] _pathSeparator = { '/' };
         readonly ConfigurationHostSettings _settings;
 
         public RabbitMqHostConfigurator(Uri hostAddress)
@@ -85,5 +85,13 @@ namespace MassTransit.RabbitMqTransport.Configuration.Configurators
 
             throw new FormatException("The host path must be empty or contain a single virtual host name");
         }
+
+        public void UseCluster(Action<IRabbitMqClusterConfigurator> configureCluster)
+        {
+            var configurator = new RabbitMqClusterConfigurator();
+            configureCluster(configurator);
+            _settings.ClusterMembers = configurator.ClusterMembers;
+        }
+
     }
 }
