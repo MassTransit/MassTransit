@@ -72,6 +72,22 @@ namespace MassTransit.RabbitMqTransport.Tests
                 ConsumeContext<A> received = await receivedA;
 
                 Assert.AreEqual(message.Id, received.Message.Id);
+
+                Assert.AreEqual(LogicalHostAddress.Host, received.DestinationAddress.Host);
+
+            }
+
+            protected readonly Uri LogicalHostAddress = new Uri("rabbitmq://cluster/test");
+
+            protected override IRabbitMqHost ConfigureHost(IRabbitMqBusFactoryConfigurator x)
+            {
+                return x.Host(LogicalHostAddress, h =>
+                {
+                    h.Username("guest");
+                    h.Password("guest");
+
+                    h.UseCluster(v => v.Node(HostAddress.Host));
+                });
             }
         }
 

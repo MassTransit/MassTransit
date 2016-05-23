@@ -161,11 +161,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             {
                 ConfigureBus(x);
 
-                IRabbitMqHost host = x.Host(_hostAddress, h =>
-                {
-                    h.Username("guest");
-                    h.Password("guest");
-                });
+                IRabbitMqHost host = ConfigureHost(x);
 
                 CleanUpVirtualHost(host);
 
@@ -178,6 +174,15 @@ namespace MassTransit.RabbitMqTransport.Tests
 
                     ConfigureInputQueueEndpoint(e);
                 });
+            });
+        }
+
+        protected virtual IRabbitMqHost ConfigureHost(IRabbitMqBusFactoryConfigurator x)
+        {
+            return x.Host(_hostAddress, h =>
+            {
+                h.Username("guest");
+                h.Password("guest");
             });
         }
 

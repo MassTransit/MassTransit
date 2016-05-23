@@ -115,6 +115,7 @@
     <Compile Include="Testing\HandlerTest_Specs.cs" />
     <Compile Include="TestRegularExpression_Specs.cs" />
     <Compile Include="TwoActivityCourier_Specs.cs" />
+    <Compile Include="UsingCluster_Specs.cs" />
     <Compile Include="When_a_message_consumer_throws_an_exception.cs" />
     <Compile Include="When_a_message_is_published.cs" />
     <Compile Include="RabbitMqAddress_Specs.cs" />
