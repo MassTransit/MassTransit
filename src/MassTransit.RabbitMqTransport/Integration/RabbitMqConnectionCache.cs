@@ -13,6 +13,7 @@
 namespace MassTransit.RabbitMqTransport.Integration
 {
     using System;
+    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using Contexts;
@@ -89,7 +90,16 @@ namespace MassTransit.RabbitMqTransport.Integration
                 if (_log.IsDebugEnabled)
                     _log.DebugFormat("Connecting: {0}", _connectionFactory.ToDebugString());
 
-                var connection = _connectionFactory.CreateConnection();
+                IConnection connection = null;
+                if (_connectionFactory.HostnameSelector != null && _settings.ClusterMembers.Any())
+                {
+                    connection = _connectionFactory.CreateConnection(_settings.ClusterMembers);
+                }
+                else
+                {
+                    connection = _connectionFactory.CreateConnection();
+                }
+
 
                 if (_log.IsDebugEnabled)
                 {

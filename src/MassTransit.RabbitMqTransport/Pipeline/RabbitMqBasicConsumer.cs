@@ -175,6 +175,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
             {
                 await _receiveObserver.ReceiveFault(context, ex).ConfigureAwait(false);
 
+                //NOTE: If this exceptions, the application will crash
                 _model.BasicNack(deliveryTag, false, true);
             }
             finally
