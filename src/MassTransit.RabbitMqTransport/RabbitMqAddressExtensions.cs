@@ -349,7 +349,6 @@ namespace MassTransit.RabbitMqTransport
             {
                 factory.HostName = null;
                 factory.HostnameSelector = new RabbitMqSequentialHostnameSelector();
-                factory.AutomaticRecoveryEnabled = true;
             }
             
             if (settings.UseClientCertificateAsAuthenticationIdentity)
