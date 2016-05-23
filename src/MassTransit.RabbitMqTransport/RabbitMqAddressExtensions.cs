@@ -13,6 +13,7 @@
 namespace MassTransit.RabbitMqTransport
 {
     using System;
+    using System.Linq;
     using System.Collections.Generic;
     using System.Globalization;
     using System.Net;
