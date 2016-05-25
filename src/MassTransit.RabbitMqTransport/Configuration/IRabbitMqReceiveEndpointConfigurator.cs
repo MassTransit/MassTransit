@@ -32,6 +32,13 @@ namespace MassTransit
         void Bind(string exchangeName);
 
         /// <summary>
+        /// Bind an existing exchange for the message type to the receive endpoint by name
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        void Bind<T>()
+            where T : class;
+
+        /// <summary>
         /// Bind an exchange to the receive endpoint exchange
         /// </summary>
         /// <param name="exchangeName">The exchange name</param>

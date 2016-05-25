@@ -185,6 +185,12 @@ namespace MassTransit.RabbitMqTransport.Configuration
             _exchangeBindings.AddRange(_settings.GetExchangeBindings(exchangeName));
         }
 
+        public void Bind<T>()
+            where T : class
+        {
+            _exchangeBindings.AddRange(typeof(T).GetExchangeBindings(_host.Settings.MessageNameFormatter));
+        }
+
         public void Bind(string exchangeName, Action<IExchangeBindingConfigurator> callback)
         {
             if (exchangeName == null)
