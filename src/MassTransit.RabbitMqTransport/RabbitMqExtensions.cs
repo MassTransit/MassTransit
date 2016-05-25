@@ -63,23 +63,27 @@ namespace MassTransit.RabbitMqTransport
             }
         }
 
-        public static string ToDebugString(this ConnectionFactory factory)
+        public static string ToDebugString(this RabbitMqHostSettings settings)
         {
             var sb = new StringBuilder();
 
-            if (!string.IsNullOrWhiteSpace(factory.UserName))
-                sb.Append(factory.UserName).Append('@');
+            if (!string.IsNullOrWhiteSpace(settings.Username))
+                sb.Append(settings.Username).Append('@');
 
-            sb.Append(factory.HostName);
-            if (factory.Port != -1)
-                sb.Append(':').Append(factory.Port);
+            sb.Append(settings.Host);
 
-            if (string.IsNullOrWhiteSpace(factory.VirtualHost))
+            var actualHost = settings.HostNameSelector?.LastHost;
+            if (!string.IsNullOrWhiteSpace(actualHost))
+                sb.Append('(').Append(actualHost).Append(')');
+            if (settings.Port != -1)
+                sb.Append(':').Append(settings.Port);
+
+            if (string.IsNullOrWhiteSpace(settings.VirtualHost))
                 sb.Append('/');
-            else if (factory.VirtualHost.StartsWith("/"))
-                sb.Append(factory.VirtualHost);
+            else if (settings.VirtualHost.StartsWith("/"))
+                sb.Append(settings.VirtualHost);
             else
-                sb.Append("/").Append(factory.VirtualHost);
+                sb.Append("/").Append(settings.VirtualHost);
 
             return sb.ToString();
         }

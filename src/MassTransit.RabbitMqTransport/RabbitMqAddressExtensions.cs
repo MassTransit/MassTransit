@@ -61,27 +61,6 @@ namespace MassTransit.RabbitMqTransport
             return sb.ToString();
         }
 
-        public static string ToDebugString(this RabbitMqHostSettings settings)
-        {
-            var sb = new StringBuilder();
-
-            if (!string.IsNullOrWhiteSpace(settings.Username))
-                sb.Append(settings.Username).Append('@');
-
-            sb.Append(settings.Host);
-            if (settings.Port != -1)
-                sb.Append(':').Append(settings.Port);
-
-            if (string.IsNullOrWhiteSpace(settings.VirtualHost))
-                sb.Append('/');
-            else if (settings.VirtualHost.StartsWith("/"))
-                sb.Append(settings.VirtualHost);
-            else
-                sb.Append("/").Append(settings.VirtualHost);
-
-            return sb.ToString();
-        }
-
         public static Uri GetInputAddress(this RabbitMqHostSettings hostSettings, ReceiveSettings receiveSettings)
         {
             var builder = new UriBuilder
@@ -348,7 +327,7 @@ namespace MassTransit.RabbitMqTransport
             if (settings.ClusterMembers != null && settings.ClusterMembers.Any())
             {
                 factory.HostName = null;
-                factory.HostnameSelector = new RabbitMqSequentialHostnameSelector();
+                factory.HostnameSelector = settings.HostNameSelector;
             }
             
             if (settings.UseClientCertificateAsAuthenticationIdentity)

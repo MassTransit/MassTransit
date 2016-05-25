@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -18,7 +18,7 @@ namespace MassTransit.RabbitMqTransport.Configuration.Configurators
     public class RabbitMqHostConfigurator :
         IRabbitMqHostConfigurator
     {
-        static readonly char[] _pathSeparator = { '/' };
+        static readonly char[] _pathSeparator = {'/'};
         readonly ConfigurationHostSettings _settings;
 
         public RabbitMqHostConfigurator(Uri hostAddress)
@@ -74,6 +74,15 @@ namespace MassTransit.RabbitMqTransport.Configuration.Configurators
             _settings.Password = password;
         }
 
+        public void UseCluster(Action<IRabbitMqClusterConfigurator> configureCluster)
+        {
+            var configurator = new RabbitMqClusterConfigurator();
+            configureCluster(configurator);
+
+            _settings.ClusterMembers = configurator.ClusterMembers;
+            _settings.HostNameSelector = configurator.GetHostNameSelector();
+        }
+
         string GetVirtualHost(Uri address)
         {
             string[] segments = address.AbsolutePath.Split(_pathSeparator, StringSplitOptions.RemoveEmptyEntries);
@@ -85,13 +94,5 @@ namespace MassTransit.RabbitMqTransport.Configuration.Configurators
 
             throw new FormatException("The host path must be empty or contain a single virtual host name");
         }
-
-        public void UseCluster(Action<IRabbitMqClusterConfigurator> configureCluster)
-        {
-            var configurator = new RabbitMqClusterConfigurator();
-            configureCluster(configurator);
-            _settings.ClusterMembers = configurator.ClusterMembers;
-        }
-
     }
 }

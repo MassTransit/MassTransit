@@ -17,39 +17,45 @@ namespace MassTransit.RabbitMqTransport
     using System.Linq;
     using System.Threading;
     using Logging;
-    using RabbitMQ.Client;
 
 
     /// <summary>
     /// Creates an IHostnameSelector which sequentially chooses the next host name from the provided list based on index
     /// </summary>
-    public class RabbitMqSequentialHostnameSelector :
-        IHostnameSelector
+    public class SequentialHostnameSelector :
+        IRabbitMqHostNameSelector
     {
-        static readonly ILog _log = Logger.Get<RabbitMqSequentialHostnameSelector>();
-
+        static readonly ILog _log = Logger.Get<SequentialHostnameSelector>();
+        string _lastHost;
         int _nextHostIndex;
 
-        public RabbitMqSequentialHostnameSelector()
+        public SequentialHostnameSelector()
         {
             _nextHostIndex = 0;
+            _lastHost = "";
         }
 
         public string NextFrom(IList<string> options)
         {
             if (options == null)
                 throw new ArgumentNullException(nameof(options));
-            if (!options.Any())
+            if (options.All(string.IsNullOrWhiteSpace))
                 throw new ArgumentException("There must be at least one host to use a hostname selector.", nameof(options));
 
-            string host = options[_nextHostIndex % options.Count];
-            if (_log.IsDebugEnabled)
+            do
             {
-                _log.Debug($"Using new hostname from pool; {host}");
+                _lastHost = options[_nextHostIndex % options.Count];
             }
+            while (string.IsNullOrWhiteSpace(_lastHost));
+            
+            if (_log.IsDebugEnabled)
+                _log.Debug($"Returning next host: {_lastHost}");
+
             Interlocked.Increment(ref _nextHostIndex);
 
-            return host;
+            return _lastHost;
         }
+
+        public string LastHost => _lastHost;
     }
 }

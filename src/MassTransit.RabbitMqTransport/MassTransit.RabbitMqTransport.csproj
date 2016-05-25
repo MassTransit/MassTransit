@@ -108,6 +108,7 @@
     <Compile Include="Integration\RabbitMqConnectionCache.cs" />
     <Compile Include="Integration\RabbitMqModelCache.cs" />
     <Compile Include="IRabbitMqHost.cs" />
+    <Compile Include="IRabbitMqHostNameSelector.cs" />
     <Compile Include="ModelSettings.cs" />
     <Compile Include="Pipeline\DelayedExchangeMessageRedeliveryFilter.cs" />
     <Compile Include="Management\ISetPrefetchCount.cs" />
@@ -144,7 +145,7 @@
     <Compile Include="RabbitMqSendContextExtensions.cs" />
     <Compile Include="RabbitMqSendEndpointProvider.cs" />
     <Compile Include="RabbitMqSendTransportProvider.cs" />
-    <Compile Include="RabbitMqSequentialHostnameSelector.cs" />
+    <Compile Include="SequentialHostnameSelector.cs" />
     <Compile Include="ReceiveSettings.cs" />
     <Compile Include="RabbitMqReceiveTransport.cs" />
     <Compile Include="RabbitMqSendContext.cs" />

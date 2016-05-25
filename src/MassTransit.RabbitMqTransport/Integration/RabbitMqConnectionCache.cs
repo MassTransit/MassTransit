@@ -88,12 +88,12 @@ namespace MassTransit.RabbitMqTransport.Integration
                     throw new TaskCanceledException($"The connection is being disconnected: {_settings.ToDebugString()}");
 
                 if (_log.IsDebugEnabled)
-                    _log.DebugFormat("Connecting: {0}", _connectionFactory.ToDebugString());
+                    _log.DebugFormat("Connecting: {0}", _settings.ToDebugString());
 
-                IConnection connection = null;
-                if (_connectionFactory.HostnameSelector != null && _settings.ClusterMembers.Any())
+                IConnection connection;
+                if (_settings.ClusterMembers?.Any() ?? false)
                 {
-                    connection = _connectionFactory.CreateConnection(_settings.ClusterMembers);
+                    connection = _connectionFactory.CreateConnection(_settings.ClusterMembers, _settings.Host);
                 }
                 else
                 {
@@ -103,7 +103,7 @@ namespace MassTransit.RabbitMqTransport.Integration
 
                 if (_log.IsDebugEnabled)
                 {
-                    _log.DebugFormat("Connected: {0} (address: {1}, local: {2}", _connectionFactory.ToDebugString(),
+                    _log.DebugFormat("Connected: {0} (address: {1}, local: {2}", _settings.ToDebugString(),
                         connection.Endpoint, connection.LocalPort);
                 }
 
@@ -131,7 +131,7 @@ namespace MassTransit.RabbitMqTransport.Integration
 
                 scope.ConnectFaulted(ex);
 
-                throw new RabbitMqConnectionException("Connect failed: " + _connectionFactory.ToDebugString(), ex);
+                throw new RabbitMqConnectionException("Connect failed: " + _settings.ToDebugString(), ex);
             }
 
             return SendUsingExistingConnection(connectionPipe, scope, cancellationToken);
@@ -158,7 +158,7 @@ namespace MassTransit.RabbitMqTransport.Integration
 
                 scope.ConnectFaulted(ex);
 
-                throw new RabbitMqConnectionException("Connect failed: " + _connectionFactory.ToDebugString(), ex);
+                throw new RabbitMqConnectionException("Connect failed: " + _settings.ToDebugString(), ex);
             }
             catch (Exception ex)
             {

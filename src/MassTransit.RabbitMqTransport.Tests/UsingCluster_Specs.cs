@@ -25,7 +25,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         [Test]
         public async Task Should_use_the_logical_host_name()
         {
-            ISendEndpoint endpoint = await Bus.GetSendEndpoint(InputQueueAddress);
+            var endpoint = await Bus.GetSendEndpoint(InputQueueAddress);
 
             var message = new PingMessage();
             await endpoint.Send(message);
@@ -37,20 +37,14 @@ namespace MassTransit.RabbitMqTransport.Tests
             Assert.AreEqual(LogicalHostAddress.Host, received.DestinationAddress.Host);
         }
 
-        Task<ConsumeContext<PingMessage>> _receivedA;
-
-        protected readonly Uri LogicalHostAddress = new Uri("rabbitmq://cluster/test");
-
-        protected override IRabbitMqHost ConfigureHost(IRabbitMqBusFactoryConfigurator x)
+        public When_clustering_nodes_into_a_logical_broker()
+            : base(new Uri("rabbitmq://cluster/test/"))
         {
-            return x.Host(LogicalHostAddress, h =>
-            {
-                h.Username("guest");
-                h.Password("guest");
-
-                h.UseCluster(v => v.Node(HostAddress.Host));
-            });
         }
+
+        protected readonly Uri LogicalHostAddress = new Uri("rabbitmq://cluster/test/");
+
+        Task<ConsumeContext<PingMessage>> _receivedA;
 
         protected override void ConfigureInputQueueEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {

@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -36,7 +36,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             [Test]
             public async Task Should_be_received()
             {
-                ISendEndpoint endpoint = await Bus.GetSendEndpoint(InputQueueAddress);
+                var endpoint = await Bus.GetSendEndpoint(InputQueueAddress);
 
                 var message = new A {Id = Guid.NewGuid()};
                 await endpoint.Send(message);
@@ -73,21 +73,6 @@ namespace MassTransit.RabbitMqTransport.Tests
 
                 Assert.AreEqual(message.Id, received.Message.Id);
 
-                Assert.AreEqual(LogicalHostAddress.Host, received.DestinationAddress.Host);
-
-            }
-
-            protected readonly Uri LogicalHostAddress = new Uri("rabbitmq://cluster/test");
-
-            protected override IRabbitMqHost ConfigureHost(IRabbitMqBusFactoryConfigurator x)
-            {
-                return x.Host(LogicalHostAddress, h =>
-                {
-                    h.Username("guest");
-                    h.Password("guest");
-
-                    h.UseCluster(v => v.Node(HostAddress.Host));
-                });
             }
         }
 
@@ -99,7 +84,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             [Test]
             public async Task Should_be_received()
             {
-                ISendEndpoint endpoint = await Bus.GetSendEndpoint(InputQueueAddress);
+                var endpoint = await Bus.GetSendEndpoint(InputQueueAddress);
 
                 var message = new A {Id = Guid.NewGuid()};
                 await endpoint.Send(message);
@@ -156,6 +141,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             }
         }
 
+
         [TestFixture]
         public class WhenAMessageIsPublishedToATemporaryEndpoint :
             RabbitMqTestFixture
@@ -163,7 +149,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             [Test]
             public async Task Should_be_received()
             {
-                var message = new A { Id = Guid.NewGuid() };
+                var message = new A {Id = Guid.NewGuid()};
 
                 await Bus.Publish(message);
 
@@ -189,7 +175,6 @@ namespace MassTransit.RabbitMqTransport.Tests
                 {
                     _temporaryB = Handled<A>(x);
                 });
-
             }
 
             protected override void ConfigureInputQueueEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
