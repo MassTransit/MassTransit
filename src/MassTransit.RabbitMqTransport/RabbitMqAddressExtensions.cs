@@ -13,6 +13,7 @@
 namespace MassTransit.RabbitMqTransport
 {
     using System;
+    using System.Linq;
     using System.Collections.Generic;
     using System.Globalization;
     using System.Net;
@@ -344,6 +345,13 @@ namespace MassTransit.RabbitMqTransport
                 RequestedHeartbeat = settings.Heartbeat
             };
 
+            if (settings.ClusterMembers != null && settings.ClusterMembers.Any())
+            {
+                factory.HostName = null;
+                factory.HostnameSelector = new RabbitMqSequentialHostnameSelector();
+                factory.AutomaticRecoveryEnabled = true;
+            }
+            
             if (settings.UseClientCertificateAsAuthenticationIdentity)
             {
                 factory.AuthMechanisms.Clear();
