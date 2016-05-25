@@ -13,8 +13,13 @@
 namespace MassTransit.AzureServiceBusTransport
 {
     using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Linq;
+    using System.Net.Mime;
     using System.Threading;
     using System.Threading.Tasks;
+    using Context;
     using Contexts;
     using Logging;
     using MassTransit.Pipeline;
@@ -46,19 +51,6 @@ namespace MassTransit.AzureServiceBusTransport
             _participant = supervisor.CreateParticipant($"{TypeMetadataCache<ServiceBusSendTransport>.ShortName} - {sender.Path}", StopSender);
         }
 
-        async Task StopSender()
-        {
-            try
-            {
-                await _sender.CloseAsync().ConfigureAwait(false);
-            }
-            catch (Exception exception)
-            {
-                _log.Error($"Failed to close message sender: {_sender.Path}", exception);
-                throw;
-            }
-        }
-
         async Task ISendTransport.Send<T>(T message, IPipe<SendContext<T>> pipe, CancellationToken cancelSend)
         {
             var context = new ServiceBusSendContextImpl<T>(message, cancelSend);
@@ -73,6 +65,18 @@ namespace MassTransit.AzureServiceBusTransport
                     {
                         brokeredMessage.ContentType = context.ContentType.MediaType;
                         brokeredMessage.ForcePersistence = context.Durable;
+
+                        KeyValuePair<string, object>[] headers = context.Headers.GetAll()
+                            .Where(x => x.Value != null && (x.Value is string || x.Value.GetType().IsValueType))
+                            .ToArray();
+
+                        foreach (KeyValuePair<string, object> header in headers)
+                        {
+                            if (brokeredMessage.Properties.ContainsKey(header.Key))
+                                continue;
+
+                            brokeredMessage.Properties.Add(header.Key, header.Value);
+                        }
 
                         if (context.TimeToLive.HasValue)
                             brokeredMessage.TimeToLive = context.TimeToLive.Value;
@@ -120,29 +124,23 @@ namespace MassTransit.AzureServiceBusTransport
 
         async Task ISendTransport.Move(ReceiveContext context, IPipe<SendContext> pipe)
         {
-            BrokeredMessageContext messageContext;
-            if (context.TryGetPayload(out messageContext))
+            try
             {
-                using (var messageBodyStream = context.GetBody())
+                using (var moveContext = new ServiceBusMoveContext(context))
                 {
-                    using (var brokeredMessage = new BrokeredMessage(messageBodyStream))
-                    {
-                        brokeredMessage.ContentType = context.ContentType.MediaType;
-                        brokeredMessage.ForcePersistence = messageContext.ForcePersistence;
-                        brokeredMessage.TimeToLive = messageContext.TimeToLive;
-                        brokeredMessage.CorrelationId = messageContext.CorrelationId;
-                        brokeredMessage.MessageId = messageContext.MessageId;
-                        brokeredMessage.Label = messageContext.Label;
-                        brokeredMessage.PartitionKey = messageContext.PartitionKey;
-                        brokeredMessage.ReplyTo = messageContext.ReplyTo;
-                        brokeredMessage.ReplyToSessionId = messageContext.ReplyToSessionId;
-                        brokeredMessage.SessionId = messageContext.SessionId;
+                    await pipe.Send(moveContext).ConfigureAwait(false);
 
-                        await _sender.SendAsync(brokeredMessage).ConfigureAwait(false);
+                    await _sender.SendAsync(moveContext.BrokeredMessage).ConfigureAwait(false);
 
-                        _log.DebugFormat("MOVE {0} ({1} to {2})", brokeredMessage.MessageId, context.InputAddress, _sender.Path);
-                    }
+                    _log.DebugFormat("MOVE {0} ({1} to {2})", moveContext.BrokeredMessage.MessageId, context.InputAddress, _sender.Path);
                 }
+            }
+            catch (Exception ex)
+            {
+                if (_log.IsErrorEnabled)
+                    _log.Error("Move To Error Queue Fault: " + _sender.Path, ex);
+
+                throw;
             }
         }
 
@@ -161,6 +159,150 @@ namespace MassTransit.AzureServiceBusTransport
             {
                 if (_log.IsErrorEnabled)
                     _log.Error($"The message sender could not be closed: {_sender.Path}", ex);
+            }
+        }
+
+        async Task StopSender()
+        {
+            try
+            {
+                await _sender.CloseAsync().ConfigureAwait(false);
+            }
+            catch (Exception exception)
+            {
+                _log.Error($"Failed to close message sender: {_sender.Path}", exception);
+                throw;
+            }
+        }
+
+
+        class ServiceBusMoveContext :
+            ServiceBusSendContext,
+            IDisposable
+        {
+            readonly BrokeredMessage _brokeredMessage;
+            readonly ReceiveContext _context;
+
+            readonly Stream _messageBodyStream;
+            IMessageSerializer _serializer;
+
+            public ServiceBusMoveContext(ReceiveContext context)
+            {
+                _context = context;
+                _serializer = new CopyBodySerializer(context);
+
+                BrokeredMessageContext messageContext;
+                if (!context.TryGetPayload(out messageContext))
+                    throw new ArgumentException("The context must be a service bus receive context", nameof(context));
+
+                _messageBodyStream = context.GetBody();
+                _brokeredMessage = new BrokeredMessage(_messageBodyStream)
+                {
+                    ContentType = context.ContentType.MediaType,
+                    ForcePersistence = messageContext.ForcePersistence,
+                    TimeToLive = messageContext.TimeToLive,
+                    CorrelationId = messageContext.CorrelationId,
+                    MessageId = messageContext.MessageId,
+                    Label = messageContext.Label,
+                    PartitionKey = messageContext.PartitionKey,
+                    ReplyTo = messageContext.ReplyTo,
+                    ReplyToSessionId = messageContext.ReplyToSessionId,
+                    SessionId = messageContext.SessionId
+                };
+
+                Headers = new DictionarySendHeaders(_brokeredMessage.Properties);
+
+                foreach (KeyValuePair<string, object> property in messageContext.Properties)
+                {
+                    _brokeredMessage.Properties[property.Key] = property.Value;
+                }
+            }
+
+            public BrokeredMessage BrokeredMessage
+            {
+                get { return _brokeredMessage; }
+            }
+
+            public void Dispose()
+            {
+                _brokeredMessage.Dispose();
+                _messageBodyStream.Dispose();
+            }
+
+            CancellationToken PipeContext.CancellationToken => _context.CancellationToken;
+
+            bool PipeContext.HasPayloadType(Type contextType)
+            {
+                return _context.HasPayloadType(contextType);
+            }
+
+            bool PipeContext.TryGetPayload<TPayload>(out TPayload payload)
+            {
+                return _context.TryGetPayload(out payload);
+            }
+
+            TPayload PipeContext.GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory)
+            {
+                return _context.GetOrAddPayload(payloadFactory);
+            }
+
+            public Guid? MessageId { get; set; }
+            public Guid? RequestId { get; set; }
+            public Guid? CorrelationId { get; set; }
+            public Guid? ConversationId { get; set; }
+            public Guid? InitiatorId { get; set; }
+            public SendHeaders Headers { get; }
+            public Uri SourceAddress { get; set; }
+            public Uri DestinationAddress { get; set; }
+            public Uri ResponseAddress { get; set; }
+            public Uri FaultAddress { get; set; }
+            public TimeSpan? TimeToLive { get; set; }
+            public ContentType ContentType { get; set; }
+
+            public IMessageSerializer Serializer
+            {
+                get { return _serializer; }
+                set
+                {
+                    _serializer = value;
+                    ContentType = _serializer.ContentType;
+                }
+            }
+
+            SendContext<T> SendContext.CreateProxy<T>(T message)
+            {
+                return new SendContextProxy<T>(this, message);
+            }
+
+            public bool Durable { get; set; }
+
+            public DateTime? ScheduledEnqueueTimeUtc { get; set; }
+            public string PartitionKey { get; set; }
+
+            public string SessionId { get; set; }
+            public string ReplyToSessionId { get; set; }
+
+
+            class CopyBodySerializer :
+                IMessageSerializer
+            {
+                readonly ReceiveContext _context;
+
+                public CopyBodySerializer(ReceiveContext context)
+                {
+                    _context = context;
+                    ContentType = context.ContentType;
+                }
+
+                public ContentType ContentType { get; }
+
+                void IMessageSerializer.Serialize<T>(Stream stream, SendContext<T> context)
+                {
+                    using (var bodyStream = _context.GetBody())
+                    {
+                        bodyStream.CopyTo(stream);
+                    }
+                }
             }
         }
     }
