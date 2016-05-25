@@ -7,6 +7,7 @@
     using NUnit.Framework;
     using Shouldly;
     using TestFramework.Messages;
+    using Util;
 
 
     [TestFixture]
@@ -43,6 +44,31 @@
             ConsumeContext<PingMessage> context = await _errorHandler;
 
             context.ResponseAddress.ShouldBe(BusAddress);
+        }
+
+
+        [Test]
+        public async Task Should_have_the_exception()
+        {
+            ConsumeContext<PingMessage> context = await _errorHandler;
+
+            context.ReceiveContext.TransportHeaders.Get("MT-Fault-Message", (string)null).ShouldBe("This is fine, forcing death");
+        }
+
+        [Test]
+        public async Task Should_have_the_host_machine_name()
+        {
+            ConsumeContext<PingMessage> context = await _errorHandler;
+
+            context.ReceiveContext.TransportHeaders.Get("MT-Host-MachineName", (string)null).ShouldBe(HostMetadataCache.Host.MachineName);
+        }
+
+        [Test]
+        public async Task Should_have_the_reason()
+        {
+            ConsumeContext<PingMessage> context = await _errorHandler;
+
+            context.ReceiveContext.TransportHeaders.Get("MT-Reason", (string)null).ShouldBe("fault");
         }
 
         [Test]

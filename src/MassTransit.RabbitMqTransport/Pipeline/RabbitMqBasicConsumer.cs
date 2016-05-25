@@ -174,8 +174,15 @@ namespace MassTransit.RabbitMqTransport.Pipeline
             catch (Exception ex)
             {
                 await _receiveObserver.ReceiveFault(context, ex).ConfigureAwait(false);
-
-                _model.BasicNack(deliveryTag, false, true);
+                try
+                {
+                    _model.BasicNack(deliveryTag, false, true);
+                }
+                catch (Exception ackEx)
+                {
+                    if (_log.IsErrorEnabled)
+                        _log.ErrorFormat("An error occurred trying to NACK a message with delivery tag {0}: {1}", deliveryTag, ackEx.ToString());
+                }
             }
             finally
             {

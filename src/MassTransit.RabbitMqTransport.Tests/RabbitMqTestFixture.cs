@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,6 +13,7 @@
 namespace MassTransit.RabbitMqTransport.Tests
 {
     using System;
+    using System.Linq;
     using System.Threading;
     using Logging;
     using MassTransit.Testing;
@@ -36,6 +37,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         Uri _hostAddress;
         IMessageNameFormatter _nameFormatter;
         BusHandle _busHandle;
+        string _nodeHostName;
 
         public RabbitMqTestFixture()
         {
@@ -43,6 +45,15 @@ namespace MassTransit.RabbitMqTransport.Tests
             _inputQueueAddress = new Uri(_hostAddress, "input_queue");
 
             _sendObserver = new TestSendObserver(TestTimeout);
+        }
+
+        protected RabbitMqTestFixture(Uri logicalHostAddress)
+            : this()
+        {
+            _nodeHostName = _hostAddress.Host;
+
+            _hostAddress = logicalHostAddress;
+            _inputQueueAddress = new Uri(_hostAddress, "input_queue");
         }
 
         protected override IBus Bus => _bus;
@@ -161,11 +172,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             {
                 ConfigureBus(x);
 
-                IRabbitMqHost host = x.Host(_hostAddress, h =>
-                {
-                    h.Username("guest");
-                    h.Password("guest");
-                });
+                var host = ConfigureHost(x);
 
                 CleanUpVirtualHost(host);
 
@@ -181,6 +188,18 @@ namespace MassTransit.RabbitMqTransport.Tests
             });
         }
 
+        protected virtual IRabbitMqHost ConfigureHost(IRabbitMqBusFactoryConfigurator x)
+        {
+            return x.Host(_hostAddress, h =>
+            {
+                h.Username("guest");
+                h.Password("guest");
+
+                if (!string.IsNullOrWhiteSpace(_nodeHostName))
+                    h.UseCluster(c => c.Node(_nodeHostName));
+            });
+        }
+
         protected IMessageNameFormatter NameFormatter => _nameFormatter;
 
         void CleanUpVirtualHost(IRabbitMqHost host)
@@ -189,9 +208,12 @@ namespace MassTransit.RabbitMqTransport.Tests
             {
                 _nameFormatter = new RabbitMqMessageNameFormatter();
 
-                ConnectionFactory connectionFactory = host.Settings.GetConnectionFactory();
-                using (IConnection connection = connectionFactory.CreateConnection())
-                using (IModel model = connection.CreateModel())
+                var connectionFactory = host.Settings.GetConnectionFactory();
+                using (
+                    var connection = host.Settings.ClusterMembers?.Any() ?? false
+                        ? connectionFactory.CreateConnection(host.Settings.ClusterMembers, host.Settings.Host)
+                        : connectionFactory.CreateConnection())
+                using (var model = connection.CreateModel())
                 {
                     model.ExchangeDelete("input_queue");
                     model.QueueDelete("input_queue");
