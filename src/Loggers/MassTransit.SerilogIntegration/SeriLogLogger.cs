@@ -13,27 +13,26 @@
 namespace MassTransit.SeriLogIntegration
 {
     using System;
-    using System.Threading.Tasks;
+    using System.Collections.Concurrent;
     using Logging;
     using Serilog;
     using Serilog.Core;
-    using Util.Caching;
 
 
-    public class SerilogLogger : 
+    public class SerilogLogger :
         Logging.ILogger
     {
         readonly Serilog.ILogger _baseLogger;
 
         readonly bool _demoteDebug;
 
-        readonly LazyMemoryCache<string, ILog> _logs;
+        readonly ConcurrentDictionary<string, ILog> _logs;
 
         public SerilogLogger(Serilog.ILogger baseLogger = null, bool demoteDebug = false)
         {
             _baseLogger = baseLogger;
             _demoteDebug = demoteDebug;
-            _logs = new LazyMemoryCache<string, ILog>("MassTransit.SerilogIntegration", CreateLog);
+            _logs = new ConcurrentDictionary<string, ILog>();
         }
 
         public ILog Get(string name)
@@ -41,15 +40,14 @@ namespace MassTransit.SeriLogIntegration
             if (name == null)
                 throw new ArgumentNullException(nameof(name));
 
-            return _logs.Get(name).Result.Value.Result;
+            return _logs.GetOrAdd(name, CreateLog);
         }
 
         public void Shutdown()
         {
-            _logs.Dispose();
         }
 
-        Task<ILog> CreateLog(string name)
+        ILog CreateLog(string name)
         {
             var logger = _baseLogger ?? Log.Logger;
             if (logger == null)
@@ -57,7 +55,7 @@ namespace MassTransit.SeriLogIntegration
                 throw new ArgumentException("An valid instance of Serilog was not available.");
             }
 
-            return Task.FromResult<ILog>(new SerilogLog(logger.ForContext(Constants.SourceContextPropertyName, name), _demoteDebug));
+            return new SerilogLog(logger.ForContext(Constants.SourceContextPropertyName, name), _demoteDebug);
         }
 
         /// <summary>
