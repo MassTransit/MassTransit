@@ -91,7 +91,7 @@ namespace MassTransit.RabbitMqTransport.Integration
                     _log.DebugFormat("Connecting: {0}", _connectionFactory.ToDebugString());
 
                 IConnection connection = null;
-                if (_connectionFactory.HostnameSelector != null && _settings.ClusterMembers.Any())
+                if (_connectionFactory.HostnameSelector != null && _settings.ClusterMembers != null && _settings.ClusterMembers.Any())
                 {
                     connection = _connectionFactory.CreateConnection(_settings.ClusterMembers);
                 }
