@@ -1,5 +1,5 @@
 Bus configuration
-"""""""""""""""""
+=================
 
 Trying to get multiple applications to talk to each other is not a simple problem.
 Often times the biggest is just getting everything configured. With over eight
@@ -11,7 +11,7 @@ some of the options you have:
 
 
 Selecting a message transport
-'''''''''''''''''''''''''''''
+"""""""""""""""""""""""""""""
 
 The first decision is what transport are you going to use? RabbitMQ or Azure Service Bus?
 If you don't know which one to choose I suggest reading up on the two and see
@@ -34,7 +34,7 @@ which one works better for your environment.
 
 
 Specifying a Host
-'''''''''''''''''
+"""""""""""""""""
 
 Once the transport has been selected, the message host(s) must be configured. The host settings are
 transport specific, so the available options will vary. For instance, the InMemory transport does not
@@ -46,6 +46,8 @@ require any configuration, because it's, well, in memory.
     {
     });
 
+RabbitMQ Specific
+'''''''''''''''''
 
 For RabbitMQ, a URI specifying the host (and virtual host, default is /) should be provided, along
 with additional configuration for the username/password, as well as options on the transport.
@@ -60,6 +62,32 @@ with additional configuration for the username/password, as well as options on t
             h.Password("guest");
         });
     });
+
+You can also specify the nodes in a cluster to use the RabbitMQ driver's built-in failover capabilities. 
+When a connection is interrupted, a new node will be selected and connected to. 
+
+.. sourcecode:: csharp
+
+    var busControl = Bus.Factory.CreateUsingRabbitMq(cfg =>
+    {
+        var host = cfg.Host(new Uri("rabbitmq://myclustername/a_virtual_host"), h =>
+        {
+            h.Username("guest");
+            h.Password("guest");
+            h.UseCluster(c =>
+            {
+                c.Node("rabbit1");
+                c.Node("rabbit2");
+                c.Node("rabbit3");
+            });
+        });
+    });
+	
+.. note:: The ``myclustername`` value specified in the ``Uri`` is strictly cosmetic when using clustering in this way. The actual Uri 
+          will be rewritten to use a node hostname from the cluster node list.
+
+Azure Specific
+''''''''''''''
 
 For Azure Service Bus, a URI specifying the namespace should be provided, along with the
 ``TokenProvider`` for a token with **manage** permissions.
@@ -76,7 +104,7 @@ For Azure Service Bus, a URI specifying the namespace should be provided, along 
 
 
 Specifying a receive endpoint
-'''''''''''''''''''''''''''''
+"""""""""""""""""""""""""""""
 
 Once the hosts are configured, any number of receive endpoints can be configured. No receive endpoints
 are required, a send/publish only bus is totally legit. An example of configuring a RabbitMQ host with
@@ -99,7 +127,7 @@ a single receive endpoint is shown below.
 
 
 Selecting an outbound message serializer
-''''''''''''''''''''''''''''''''''''''''
+""""""""""""""""""""""""""""""""""""""""
 
 By default, outbound messages are serialized using JSON and inbound messages that are in JSON, BSON,
 or XML can be deserialized. To use a different outbound message format, the default serializer can be
