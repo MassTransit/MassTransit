@@ -107,6 +107,7 @@
     <Compile Include="SetPrefetchCount_Specs.cs" />
     <Compile Include="Shutdown_Specs.cs" />
     <Compile Include="SimpleConnect_Specs.cs" />
+    <Compile Include="Skip_Specs.cs" />
     <Compile Include="TemporaryQueue_Specs.cs" />
     <Compile Include="TestConnectionPipe.cs" />
     <Compile Include="TestConsumePipe.cs" />
