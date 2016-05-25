@@ -65,7 +65,9 @@
     <Compile Include="Activities\FaultedRequestActivity.cs" />
     <Compile Include="Activities\FaultedRespondActivity.cs" />
     <Compile Include="Activities\FaultedScheduleActivity.cs" />
+    <Compile Include="Activities\FaultedSendActivity.cs" />
     <Compile Include="Activities\FaultedUnscheduleActivity.cs" />
+    <Compile Include="Activities\SendActivity.cs" />
     <Compile Include="Activities\UnscheduleActivity.cs" />
     <Compile Include="Activities\PublishActivity.cs" />
     <Compile Include="Activities\RequestActivityImpl.cs" />
@@ -117,6 +119,7 @@
     <Compile Include="Schedule.cs" />
     <Compile Include="SchedulerExtensions.cs" />
     <Compile Include="ScheduleSettings.cs" />
+    <Compile Include="SendExtensions.cs" />
     <Compile Include="Testing\StateMachineSagaTestBuilderImpl.cs" />
     <Compile Include="Testing\StateMachineSagaTestInstance.cs" />
     <Compile Include="Testing\StateMachineSagaTestSubjectImpl.cs" />

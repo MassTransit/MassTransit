@@ -125,6 +125,7 @@
     <Compile Include="SagaDbContextFactoryProvider.cs" />
     <Compile Include="ScheduleTimeout_Specs.cs" />
     <Compile Include="Sending_a_request_that_times_out.cs" />
+    <Compile Include="Send_Specs.cs" />
     <Compile Include="SimpleStateMachine_Specs.cs" />
     <Compile Include="SingleConnectionSessionFactory.cs" />
     <Compile Include="SqlLiteSessionFactoryProvider.cs" />
