@@ -19,9 +19,22 @@ namespace MassTransit.Courier
     /// <typeparam name="TLog">The activity log argument type</typeparam>
     public interface Activity<in TArguments, in TLog> :
         ExecuteActivity<TArguments>,
-        CompensateActivity<TLog>
+        CompensateActivity<TLog>,
+        IActivity
         where TArguments : class
         where TLog : class
+    {
+    }
+
+    /// <summary>
+    ///     Marker interface used to assist identification in IoC containers.
+    ///     Not to be used directly as it does not contain the message type of the
+    ///     consumer
+    /// </summary>
+    /// <remarks>
+    ///     Not to be used directly by application code, for internal reflection only
+    /// </remarks>
+    public interface IActivity
     {
     }
 }
