@@ -218,6 +218,8 @@
     <Compile Include="Contracts\SetConcurrencyLimit.cs" />
     <Compile Include="Courier\Exceptions\RoutingSlipArgumentException.cs" />
     <Compile Include="Courier\IActivity.cs" />
+    <Compile Include="Courier\ICompensateActivity.cs" />
+    <Compile Include="Courier\IExecuteActivity.cs" />
     <Compile Include="Courier\RoutingSlipEvents.cs" />
     <Compile Include="CryptoStreamProviderExtensions.cs" />
     <Compile Include="Events\ReceiveFaultEvent.cs" />
