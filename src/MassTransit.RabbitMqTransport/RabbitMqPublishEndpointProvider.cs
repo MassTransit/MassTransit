@@ -94,6 +94,9 @@ namespace MassTransit.RabbitMqTransport
 
         Task<ISendEndpoint> CreateSendEndpoint(Type messageType)
         {
+            if (!TypeMetadataCache.IsValidMessageType(messageType))
+                throw new MessageException(messageType, "Anonymous types are not valid message types");
+
             var sendSettings = _host.Settings.GetSendSettings(messageType);
 
             ExchangeBindingSettings[] bindings = TypeMetadataCache.GetMessageTypes(messageType)
