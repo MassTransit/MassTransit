@@ -16,6 +16,7 @@ namespace MassTransit.Internals.Extensions
     using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
+    using System.Runtime.CompilerServices;
     using Reflection;
 
 
@@ -201,6 +202,16 @@ namespace MassTransit.Internals.Extensions
             where T : Attribute
         {
             return provider.GetAttribute<T>().Any();
+        }
+
+        /// <summary>
+        /// Returns true if the type is an anonymous type
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        public static bool IsAnonymousType(this Type type)
+        {
+            return type.HasAttribute<CompilerGeneratedAttribute>() && type.FullName.Contains("AnonymousType");
         }
     }
 }

@@ -73,6 +73,7 @@
     <Compile Include="ContextSetup.cs" />
     <Compile Include="ErrorQueue_Specs.cs" />
     <Compile Include="Performance_Specs.cs" />
+    <Compile Include="PublishDynamicType_Specs.cs" />
     <Compile Include="PublishFaultCache_Specs.cs" />
     <Compile Include="Publish_Specs.cs" />
     <Compile Include="RequestClient_Specs.cs" />
