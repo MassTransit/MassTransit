@@ -23,12 +23,9 @@ namespace MassTransit.RabbitMqTransport.Configuration.Configurators
 
         public RabbitMqHostConfigurator(Uri hostAddress)
         {
-            _settings = new ConfigurationHostSettings
-            {
-                Host = hostAddress.Host,
-                Port = hostAddress.IsDefaultPort ? 5672 : hostAddress.Port,
-                VirtualHost = GetVirtualHost(hostAddress)
-            };
+            _settings = hostAddress.GetConfigurationHostSettings();
+
+            GetVirtualHost(hostAddress);
         }
 
         public RabbitMqHostConfigurator(string host, string virtualHost, ushort port = 5672)
