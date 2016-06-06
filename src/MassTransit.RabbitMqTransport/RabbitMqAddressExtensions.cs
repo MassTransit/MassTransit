@@ -386,6 +386,11 @@ namespace MassTransit.RabbitMqTransport
 
         public static RabbitMqHostSettings GetHostSettings(this Uri address)
         {
+            return GetConfigurationHostSettings(address);
+        }
+
+        internal static ConfigurationHostSettings GetConfigurationHostSettings(this Uri address)
+        {
             if (string.Compare("rabbitmq", address.Scheme, StringComparison.OrdinalIgnoreCase) != 0)
                 throw new RabbitMqAddressException("The invalid scheme was specified: " + address.Scheme);
 
