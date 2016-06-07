@@ -25,7 +25,7 @@ namespace MassTransit.RabbitMqTransport.Configuration.Configurators
         {
             _settings = hostAddress.GetConfigurationHostSettings();
 
-            GetVirtualHost(hostAddress);
+            _settings.VirtualHost = GetVirtualHost(hostAddress);
         }
 
         public RabbitMqHostConfigurator(string host, string virtualHost, ushort port = 5672)
