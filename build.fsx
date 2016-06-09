@@ -12,7 +12,7 @@ let packagesPath = FullName "./src/packages"
 let keyFile = FullName "./MassTransit.snk"
 
 let assemblyVersion = "3.3.1.0"
-let baseVersion = "3.3.5"
+let baseVersion = "3.3.6"
 
 let semVersion : SemVerInfo = parse baseVersion
 
