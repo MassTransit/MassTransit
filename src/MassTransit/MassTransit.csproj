@@ -167,12 +167,14 @@
     <Compile Include="Configuration\PipeConfigurators\MessageSchedulerPipeSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\InMemoryOutboxSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\PartitionerPipeSpecification.cs" />
+    <Compile Include="Configuration\PipeConfigurators\PublishMessageSchedulerPipeSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\RedeliveryRetryPipeSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\ScheduleMessageRedeliveryPipeSpecification.cs" />
     <Compile Include="Configuration\RoutingSlipEventCorrelationExtensions.cs" />
     <Compile Include="Configuration\ScheduledRetryExtensions.cs" />
     <Compile Include="Configuration\TransformConfiguratorExtensions.cs" />
     <Compile Include="ConsumeContextSchedulerExtensions.cs" />
+    <Compile Include="ConsumeContextSelfSchedulerExtensions.cs" />
     <Compile Include="Context\ArrayPayloadCollection.cs" />
     <Compile Include="Context\BasePipeContext.cs" />
     <Compile Include="Context\BasePayloadCollection.cs" />
@@ -601,6 +603,7 @@
     <Compile Include="Pipeline\Filters\Partitioner\Partitioner.cs" />
     <Compile Include="Pipeline\Filters\Partitioner\PartitionFilter.cs" />
     <Compile Include="Pipeline\Filters\Partitioner\PartitionKeyProvider.cs" />
+    <Compile Include="Pipeline\Filters\PublishMessageSchedulerFilter.cs" />
     <Compile Include="Pipeline\Filters\RedeliveryRetryFilter.cs" />
     <Compile Include="Pipeline\Filters\DelegateFilter.cs" />
     <Compile Include="Pipeline\Filters\DeserializeFilter.cs" />
