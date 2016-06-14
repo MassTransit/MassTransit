@@ -48,7 +48,7 @@ namespace MassTransit.Turnout
 
             var check = new Supervise(jobContext.JobId, utcNow, jobHandle.Status);
 
-            await context.ScheduleMessage(_controlAddress, scheduledTime, check).ConfigureAwait(false);
+            await context.ScheduleSend(_controlAddress, scheduledTime, check).ConfigureAwait(false);
 
             return jobHandle;
         }

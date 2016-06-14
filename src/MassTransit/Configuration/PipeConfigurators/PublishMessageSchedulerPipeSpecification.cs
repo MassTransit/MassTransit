@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,32 +12,23 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.PipeConfigurators
 {
-    using System;
     using System.Collections.Generic;
     using Configurators;
     using PipeBuilders;
     using Pipeline.Filters;
 
 
-    public class MessageSchedulerPipeSpecification :
+    public class PublishMessageSchedulerPipeSpecification :
         IPipeSpecification<ConsumeContext>
     {
-        readonly Uri _schedulerAddress;
-
-        public MessageSchedulerPipeSpecification(Uri schedulerAddress)
-        {
-            _schedulerAddress = schedulerAddress;
-        }
-
         public void Apply(IPipeBuilder<ConsumeContext> builder)
         {
-            builder.AddFilter(new MessageSchedulerFilter(_schedulerAddress));
+            builder.AddFilter(new PublishMessageSchedulerFilter());
         }
 
         public IEnumerable<ValidationResult> Validate()
         {
-            if (_schedulerAddress == null)
-                yield return this.Failure("SchedulerAddress", "must not be null");
+            yield break;
         }
     }
 }

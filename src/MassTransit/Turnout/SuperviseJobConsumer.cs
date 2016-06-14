@@ -53,7 +53,7 @@ namespace MassTransit.Turnout
 
                         var supervise = new Supervise(context.Message.JobId, timestamp, JobStatus.Running);
 
-                        context.ScheduleMessage(scheduledTime, supervise);
+                        context.ScheduleSend(scheduledTime, supervise);
 
                         if (_log.IsDebugEnabled)
                             _log.DebugFormat("Scheduled next supervise message: {0}", context.Message.JobId);

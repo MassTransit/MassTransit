@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,7 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Pipeline.Filters
 {
-    using System;
     using System.Diagnostics;
     using System.Threading.Tasks;
     using Context;
@@ -22,27 +21,19 @@ namespace MassTransit.Pipeline.Filters
     /// <summary>
     /// Adds the scheduler to the consume context, so that it can be used for message redelivery
     /// </summary>
-    public class MessageSchedulerFilter :
+    public class PublishMessageSchedulerFilter :
         IFilter<ConsumeContext>
     {
-        readonly Uri _schedulerAddress;
-
-        public MessageSchedulerFilter(Uri schedulerAddress)
-        {
-            _schedulerAddress = schedulerAddress;
-        }
-
         void IProbeSite.Probe(ProbeContext context)
         {
             var scope = context.CreateFilterScope("scheduler");
-            scope.Add("type", "send");
-            scope.Add("address", _schedulerAddress);
+            scope.Add("type", "publish");
         }
 
         [DebuggerNonUserCode]
         Task IFilter<ConsumeContext>.Send(ConsumeContext context, IPipe<ConsumeContext> next)
         {
-            var scheduler = new EndpointMessageScheduler(context, _schedulerAddress);
+            var scheduler = new PublishMessageScheduler(context);
 
             MessageSchedulerContext schedulerContext = new ConsumeMessageSchedulerContext(context, scheduler);
 
