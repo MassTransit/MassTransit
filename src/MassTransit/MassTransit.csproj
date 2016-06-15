@@ -230,6 +230,7 @@
     <Compile Include="Exceptions\CommandException.cs" />
     <Compile Include="Exceptions\ContextException.cs" />
     <Compile Include="Exceptions\JobAlreadyExistsException.cs" />
+    <Compile Include="Exceptions\JobNotFoundException.cs" />
     <Compile Include="Exceptions\MessageDataException.cs" />
     <Compile Include="Exceptions\MessageDataNotFoundException.cs" />
     <Compile Include="Hosting\ConfigurationProviderExtensions.cs" />
@@ -975,10 +976,14 @@
     <Compile Include="Transformation\Contexts\SendTransformContext.cs" />
     <Compile Include="Transformation\TransformConfigurators\SendTransformSpecification.cs" />
     <Compile Include="Transformation\TransformConfigurators\TransformSpecification.cs" />
+    <Compile Include="Turnout\CancelJobConsumer.cs" />
     <Compile Include="Turnout\Commands\Supervise.cs" />
     <Compile Include="Turnout\Configuration\ITurnoutHostConfigurator.cs" />
     <Compile Include="Turnout\Configuration\TurnoutHostSpecification.cs" />
+    <Compile Include="Turnout\Contracts\CancelJob.cs" />
+    <Compile Include="Turnout\Contracts\JobCanceled.cs" />
     <Compile Include="Turnout\Contracts\MonitorJob.cs" />
+    <Compile Include="Turnout\Events\Canceled.cs" />
     <Compile Include="Turnout\Events\Completed.cs" />
     <Compile Include="Turnout\Events\Faulted.cs" />
     <Compile Include="Turnout\SuperviseJobConsumer.cs" />
