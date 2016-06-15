@@ -56,6 +56,7 @@ namespace MassTransit
             var superviseInterval = specification.SuperviseInterval;
 
             turnoutEndpointConfigurator.Consumer(() => new SuperviseJobConsumer(jobRoster, superviseInterval));
+            turnoutEndpointConfigurator.Consumer(() => new CancelJobConsumer(jobRoster));
 
             var controller = specification.Controller;
             IJobFactory<T> jobFactory = specification.JobFactory;
