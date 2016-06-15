@@ -223,6 +223,8 @@
     <Compile Include="Courier\ICompensateActivity.cs" />
     <Compile Include="Courier\IExecuteActivity.cs" />
     <Compile Include="Courier\RoutingSlipEvents.cs" />
+    <Compile Include="Courier\RoutingSlipRequestProxy.cs" />
+    <Compile Include="Courier\RoutingSlipResponseProxy.cs" />
     <Compile Include="CryptoStreamProviderExtensions.cs" />
     <Compile Include="Events\ReceiveFaultEvent.cs" />
     <Compile Include="ExceptionConsumeContext.cs" />
