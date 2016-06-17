@@ -39,5 +39,10 @@ namespace Automatonymous
         {
             return Pipe.ExecuteAsync(action);
         }
+
+        public IPipe<ConsumeContext<TData>> Execute(Action<ConsumeContext<TData>> action)
+        {
+            return Pipe.Execute(action);
+        }
     }
 }
