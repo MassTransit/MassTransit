@@ -56,7 +56,6 @@ namespace MassTransit.RabbitMqTransport.Hosting
             RabbitMqHostSettings
         {
             readonly RabbitMqSettings _settings;
-            RabbitMqHostSettings _rabbitMqHostSettingsImplementation;
 
             public SettingsAdapter(RabbitMqSettings settings)
             {
@@ -81,7 +80,7 @@ namespace MassTransit.RabbitMqTransport.Hosting
             public IExchangeTypeDeterminer ExchangeTypeDeterminer => new RabbitMqExchangeTypeDeterminer();
             public IRoutingkeyFormatter RoutingkeyFormatter => new RabbitMqRoutingkeyFormatter();
             public string[] ClusterMembers => null;
-            public IRabbitMqHostNameSelector HostNameSelector => _rabbitMqHostSettingsImplementation.HostNameSelector;
+            public IRabbitMqHostNameSelector HostNameSelector => null;
         }
     }
 }

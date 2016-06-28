@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,11 +12,13 @@
 // specific language governing permissions and limitations under the License.
 namespace Automatonymous
 {
+    using System;
+    using System.Threading.Tasks;
     using MassTransit;
     using MassTransit.Pipeline;
 
 
-    public interface MissingInstanceConfigurator<in TData>
+    public interface MissingInstanceConfigurator<TData>
         where TData : class
     {
         /// <summary>
@@ -28,5 +30,19 @@ namespace Automatonymous
         /// Fault the saga consumer, which moves the message to the error queue
         /// </summary>
         IPipe<ConsumeContext<TData>> Fault();
+
+        /// <summary>
+        /// Execute an asynchronous method when the instance is missed, allowing a custom behavior to be specified.
+        /// </summary>
+        /// <param name="action"></param>
+        /// <returns></returns>
+        IPipe<ConsumeContext<TData>> ExecuteAsync(Func<ConsumeContext<TData>, Task> action);
+
+        /// <summary>
+        /// Execute a method when the instance is missed, allowing a custom behavior to be specified.
+        /// </summary>
+        /// <param name="action"></param>
+        /// <returns></returns>
+        IPipe<ConsumeContext<TData>> Execute(Action<ConsumeContext<TData>> action);
     }
 }

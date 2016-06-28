@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -17,6 +17,7 @@ namespace MassTransit.Turnout
     using Commands;
     using Contracts;
     using Events;
+    using Pipeline;
 
 
     public class TurnoutController :
@@ -58,23 +59,38 @@ namespace MassTransit.Turnout
         {
             try
             {
-                var nextPipe = Pipe.ExecuteAsync<JobContext<T>>(async context =>
+                IPipe<JobContext<T>> nextPipe = Pipe.ExecuteAsync<JobContext<T>>(async context =>
                 {
                     await context.Publish<JobCompleted>(new Completed(context.JobId)).ConfigureAwait(false);
                 });
 
                 await jobFactory.Execute(jobContext, nextPipe).ConfigureAwait(false);
             }
+            catch (TaskCanceledException)
+            {
+                await NotifyCanceled(jobContext).ConfigureAwait(false);
+            }
+            catch (OperationCanceledException)
+            {
+                await NotifyCanceled(jobContext).ConfigureAwait(false);
+            }
             catch (Exception exception)
             {
                 JobContext<T> context = jobContext;
 
-                await context.Publish<JobFaulted>(new Faulted(jobContext.JobId, exception)).ConfigureAwait(false);
+                await context.Publish<JobFaulted<T>>(new Faulted<T>(jobContext.JobId, jobContext.Message, exception)).ConfigureAwait(false);
             }
             finally
             {
                 jobContext.Dispose();
             }
+        }
+
+        static async Task NotifyCanceled<T>(ConsumerJobContext<T> jobContext) where T : class
+        {
+            JobContext<T> context = jobContext;
+
+            await context.Publish<JobCanceled<T>>(new Canceled<T>(jobContext.JobId, jobContext.Message)).ConfigureAwait(false);
         }
     }
 }
