@@ -70,5 +70,15 @@ namespace MassTransit.RabbitMqTransport
         /// The RabbitMQ exchange type
         /// </summary>
         string ExchangeType { get; }
+
+        /// <summary>
+        /// The dynamic exchange type determiner
+        /// </summary>
+        IExchangeTypeDeterminer ExchangeTypeDeterminer { get; }
+
+        /// <summary>
+        /// Sets a dynamic routingkeyDeterminer which creates routingkeys based on messages that are subscribed to
+        /// </summary>
+        IRoutingkeyFormatter RoutingkeyFormatter { get; }
     }
 }

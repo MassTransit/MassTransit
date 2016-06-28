@@ -167,10 +167,10 @@ namespace MassTransit.RabbitMqTransport.Scheduling
         async Task<ScheduledMessage<T>> ScheduleSend<T>(Uri destinationAddress, DateTime scheduledTime, T message, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken)
             where T : class
         {
-            var destinationSettings = destinationAddress.GetSendSettings();
+            var destinationSettings = destinationAddress.GetSendSettings(_hostSettings.ExchangeTypeDeterminer, _hostSettings.RoutingkeyFormatter);
 
-            var sendSettings = new RabbitMqSendSettings(destinationSettings.ExchangeName + "_delay", "x-delayed-message", destinationSettings.Durable,
-                destinationSettings.AutoDelete);
+            var sendSettings = new RabbitMqSendSettings(destinationSettings.ExchangeName + "_delay", destinationSettings.Durable,
+                destinationSettings.AutoDelete, _hostSettings.ExchangeTypeDeterminer, _hostSettings.RoutingkeyFormatter, "x-delayed-message");
 
             sendSettings.SetExchangeArgument("x-delayed-type", destinationSettings.ExchangeType);
 

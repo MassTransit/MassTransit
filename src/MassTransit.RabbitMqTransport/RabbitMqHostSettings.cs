@@ -103,6 +103,16 @@ namespace MassTransit.RabbitMqTransport
         IMessageNameFormatter MessageNameFormatter { get; }
 
         /// <summary>
+        /// The type determiner for the publisher
+        /// </summary>
+        IExchangeTypeDeterminer ExchangeTypeDeterminer { get; }
+
+        /// <summary>
+        /// The Routingkey formatter that can be configured to create routing keys for messages
+        /// </summary>
+        IRoutingkeyFormatter RoutingkeyFormatter { get; }
+
+        /// <summary>
         /// When using a RabbitMQ cluster, this contains the host names which make up the cluster. In the event of a connection failure, the next host in the array will be connected to.
         /// </summary>
         string[] ClusterMembers { get; }

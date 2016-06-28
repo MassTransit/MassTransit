@@ -79,7 +79,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
 
             if (!string.IsNullOrWhiteSpace(exchangeName))
             {
-                await context.ExchangeDeclare(exchangeName, _settings.ExchangeType, _settings.Durable, _settings.AutoDelete,
+                await context.ExchangeDeclare(exchangeName, _settings.ExchangeTypeDeterminer, _settings.Durable, _settings.AutoDelete,
                     _settings.ExchangeArguments).ConfigureAwait(false);
 
                 await context.QueueBind(queueName, exchangeName, "", new Dictionary<string, object>()).ConfigureAwait(false);
@@ -114,7 +114,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
             {
                 var exchange = binding.Exchange;
 
-                await context.ExchangeDeclare(exchange.ExchangeName, exchange.ExchangeType, exchange.Durable, exchange.AutoDelete,
+                await context.ExchangeDeclare(exchange.ExchangeName, exchange.ExchangeTypeDeterminer, exchange.Durable, exchange.AutoDelete,
                     exchange.Arguments).ConfigureAwait(false);
 
                 await context.ExchangeBind(exchangeName, exchange.ExchangeName, binding.RoutingKey, binding.Arguments).ConfigureAwait(false);

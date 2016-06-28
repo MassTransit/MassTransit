@@ -115,7 +115,7 @@ namespace MassTransit.RabbitMqTransport
         {
             var builder = GetHostUriBuilder(host.Settings, exchangeName);
 
-            var sendSettings = new RabbitMqSendSettings(exchangeName, ExchangeType.Fanout, true, false);
+            var sendSettings = new RabbitMqSendSettings(exchangeName, true, false, host.Settings.ExchangeTypeDeterminer, host.Settings.RoutingkeyFormatter);
 
             configure?.Invoke(sendSettings);
 
@@ -250,7 +250,7 @@ namespace MassTransit.RabbitMqTransport
         /// </summary>
         /// <param name="address"></param>
         /// <returns></returns>
-        public static SendSettings GetSendSettings(this Uri address)
+        public static SendSettings GetSendSettings(this Uri address, IExchangeTypeDeterminer exchangeTypeDeterminer, IRoutingkeyFormatter routingkeyFormatter)
         {
             if (string.Compare("rabbitmq", address.Scheme, StringComparison.OrdinalIgnoreCase) != 0)
                 throw new RabbitMqAddressException("The invalid scheme was specified: " + address.Scheme);
@@ -271,9 +271,9 @@ namespace MassTransit.RabbitMqTransport
             bool durable = address.Query.GetValueFromQueryString("durable", !isTemporary);
             bool autoDelete = address.Query.GetValueFromQueryString("autodelete", isTemporary);
 
-            string exchangeType = address.Query.GetValueFromQueryString("type") ?? ExchangeType.Fanout;
+            string exchangeType = address.Query.GetValueFromQueryString("type");
 
-            var settings = new RabbitMqSendSettings(name, exchangeType, durable, autoDelete);
+            var settings = new RabbitMqSendSettings(name, durable, autoDelete, exchangeTypeDeterminer, routingkeyFormatter, exchangeType);
 
             bool bindToQueue = address.Query.GetValueFromQueryString("bind", false);
             if (bindToQueue)
@@ -308,7 +308,7 @@ namespace MassTransit.RabbitMqTransport
 
             string name = hostSettings.MessageNameFormatter.GetMessageName(messageType).ToString();
 
-            return new RabbitMqSendSettings(name, ExchangeType.Fanout, durable, autoDelete);
+            return new RabbitMqSendSettings(name, durable, autoDelete, hostSettings.ExchangeTypeDeterminer, hostSettings.RoutingkeyFormatter);
         }
 
         public static ConnectionFactory GetConnectionFactory(this RabbitMqHostSettings settings)
@@ -437,7 +437,7 @@ namespace MassTransit.RabbitMqTransport
         public static bool IsValidQueueName(string queueName)
         {
             Match match = _regex.Match(queueName);
-            bool success = match.Success;
+            bool success = match.Success;        
             return success;
         }
     }

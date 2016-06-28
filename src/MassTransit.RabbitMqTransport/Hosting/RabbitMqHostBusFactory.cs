@@ -78,6 +78,8 @@ namespace MassTransit.RabbitMqTransport.Hosting
             public X509Certificate ClientCertificate => null;
             public bool UseClientCertificateAsAuthenticationIdentity => false;
             public IMessageNameFormatter MessageNameFormatter => new RabbitMqMessageNameFormatter();
+            public IExchangeTypeDeterminer ExchangeTypeDeterminer => new RabbitMqExchangeTypeDeterminer();
+            public IRoutingkeyFormatter RoutingkeyFormatter => new RabbitMqRoutingkeyFormatter();
             public string[] ClusterMembers => null;
             public IRabbitMqHostNameSelector HostNameSelector => _rabbitMqHostSettingsImplementation.HostNameSelector;
         }

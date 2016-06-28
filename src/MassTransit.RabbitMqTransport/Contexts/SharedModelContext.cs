@@ -69,9 +69,9 @@ namespace MassTransit.RabbitMqTransport.Contexts
             return _context.ExchangeBind(destination, source, routingKey, arguments);
         }
 
-        Task ModelContext.ExchangeDeclare(string exchange, string type, bool durable, bool autoDelete, IDictionary<string, object> arguments)
+        Task ModelContext.ExchangeDeclare(string exchange, IExchangeTypeDeterminer exchangeTypeDeterminer, bool durable, bool autoDelete, IDictionary<string, object> arguments)
         {
-            return _context.ExchangeDeclare(exchange, type, durable, autoDelete, arguments);
+            return _context.ExchangeDeclare(exchange, exchangeTypeDeterminer, durable, autoDelete, arguments);
         }
 
         public Task ExchangeDeclarePassive(string exchange)

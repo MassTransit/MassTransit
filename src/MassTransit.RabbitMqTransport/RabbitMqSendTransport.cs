@@ -98,7 +98,9 @@ namespace MassTransit.RabbitMqTransport
 
                         await _observers.PreSend(context).ConfigureAwait(false);
 
-                        await modelContext.BasicPublishAsync(context.Exchange, context.RoutingKey, context.Mandatory,
+                        var routingKey = _sendSettings.RoutingkeyFormatter.createRoutingkeyForType(message.GetType());
+
+                        await modelContext.BasicPublishAsync(context.Exchange, routingKey, context.Mandatory,
                             context.BasicProperties, context.Body, context.AwaitAck).ConfigureAwait(false);
 
                         context.DestinationAddress.LogSent(context.MessageId?.ToString("N") ?? "", TypeMetadataCache<T>.ShortName);

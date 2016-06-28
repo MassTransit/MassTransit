@@ -31,6 +31,11 @@ namespace MassTransit.RabbitMqTransport.Topology
         string ExchangeType { get; }
 
         /// <summary>
+        /// The dynamic exchange type determiner
+        /// </summary>
+        IExchangeTypeDeterminer ExchangeTypeDeterminer { get; }
+
+        /// <summary>
         /// True if the exchange should be durable, and survive a broker restart
         /// </summary>
         bool Durable { get; }
