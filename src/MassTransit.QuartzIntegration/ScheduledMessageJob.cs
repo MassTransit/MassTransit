@@ -147,11 +147,15 @@ namespace MassTransit.QuartzIntegration
 
         string UpdateJsonHeaders(string body)
         {
+            if (string.IsNullOrEmpty(PayloadMessageHeadersAsJson))
+                return body;
+
             var envelope = JObject.Parse(body);
 
             var payloadHeaders = JObject.Parse(PayloadMessageHeadersAsJson).ToObject<Dictionary<string, object>>();
 
-            var headers = envelope["headers"].ToObject<Dictionary<string, object>>();
+            var headersToken = envelope["headers"] ?? new JObject();
+            var headers = headersToken.ToObject<Dictionary<string, object>>();
 
             foreach (KeyValuePair<string, object> payloadHeader in payloadHeaders)
             {
@@ -164,6 +168,9 @@ namespace MassTransit.QuartzIntegration
 
         string UpdateXmlHeaders(string body)
         {
+            if (string.IsNullOrEmpty(PayloadMessageHeadersAsJson))
+                return body;
+
             using (var reader = new StringReader(body))
             {
                 var document = XDocument.Load(reader);

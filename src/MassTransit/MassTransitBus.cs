@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -161,9 +161,9 @@ namespace MassTransit
                 if (_log.IsDebugEnabled)
                     _log.DebugFormat("Starting bus hosts...");
 
-                foreach (IBusHostControl host in _hosts)
+                foreach (var host in _hosts)
                 {
-                    HostHandle hostHandle = host.Start();
+                    var hostHandle = host.Start();
 
                     hosts.Add(hostHandle);
                 }
@@ -171,12 +171,12 @@ namespace MassTransit
                 if (_log.IsDebugEnabled)
                     _log.DebugFormat("Starting receive endpoints...");
 
-                foreach (IReceiveEndpoint endpoint in _receiveEndpoints)
+                foreach (var endpoint in _receiveEndpoints)
                 {
-                    ConnectHandle observerHandle = endpoint.ConnectReceiveObserver(_receiveObservers);
+                    var observerHandle = endpoint.ConnectReceiveObserver(_receiveObservers);
                     observers.Add(observerHandle);
 
-                    ReceiveEndpointHandle handle = endpoint.Start();
+                    var handle = endpoint.Start();
 
                     endpoints.Add(handle);
                 }
@@ -196,8 +196,12 @@ namespace MassTransit
                 try
                 {
                     if (busHandle != null)
+                    {
+                        if (_log.IsDebugEnabled)
+                            _log.DebugFormat("Stopping bus hosts...");
 
                         await busHandle.StopAsync(cancellationToken).ConfigureAwait(false);
+                    }
                     else
                     {
                         var handle = new Handle(hosts, endpoints, observers, this, _busObservable, busReady);
@@ -250,16 +254,16 @@ namespace MassTransit
 
         void IProbeSite.Probe(ProbeContext context)
         {
-            ProbeContext scope = context.CreateScope("bus");
+            var scope = context.CreateScope("bus");
             scope.Set(new
             {
                 Address
             });
 
-            foreach (IBusHostControl host in _hosts)
+            foreach (var host in _hosts)
                 host.Probe(scope);
 
-            foreach (IReceiveEndpoint receiveEndpoint in _receiveEndpoints)
+            foreach (var receiveEndpoint in _receiveEndpoints)
                 receiveEndpoint.Probe(scope);
         }
 
@@ -284,14 +288,29 @@ namespace MassTransit
 
         class BusReady
         {
+            readonly ReadyObserver[] _observers;
+
             public BusReady(IEnumerable<IReceiveEndpoint> receiveEndpoints)
             {
-                var observers = receiveEndpoints.Select(x => new ReadyObserver(x).Ready).ToArray();
-
-                Ready = Task.WhenAll(observers);
+                _observers = receiveEndpoints.Select(x => new ReadyObserver(x)).ToArray();
             }
 
-            public Task<ReceiveEndpointReady[]> Ready { get; }
+            public Task<ReceiveEndpointReady[]> Ready
+            {
+                get { return ReadyOrNot(_observers.Select(x => x.Ready)); }
+            }
+
+            async Task<ReceiveEndpointReady[]> ReadyOrNot(IEnumerable<Task<ReceiveEndpointReady>> observers)
+            {
+                var tasks = observers as Task<ReceiveEndpointReady>[] ?? observers.ToArray();
+
+                foreach (Task<ReceiveEndpointReady> observer in tasks)
+                {
+                    await observer.ConfigureAwait(false);
+                }
+
+                return await Task.WhenAll(tasks).ConfigureAwait(false);
+            }
 
 
             class ReadyObserver :
@@ -325,6 +344,8 @@ namespace MassTransit
                 public Task Faulted(ReceiveEndpointFaulted faulted)
                 {
                     _ready.TrySetException(faulted.Exception);
+
+                    _handle.Disconnect();
 
                     return TaskUtil.Completed;
                 }
@@ -365,7 +386,7 @@ namespace MassTransit
                 _stopped = true;
             }
 
-            public async Task StopAsync(CancellationToken cancellationToken = new CancellationToken())
+            public async Task StopAsync(CancellationToken cancellationToken)
             {
                 if (_stopped)
                     return;
@@ -377,7 +398,13 @@ namespace MassTransit
                     foreach (var observerHandle in _observerHandles)
                         observerHandle.Disconnect();
 
+                    if (_log.IsDebugEnabled)
+                        _log.DebugFormat("Stopping endpoints...");
+
                     await Task.WhenAll(_endpointHandles.Select(x => x.Stop(cancellationToken))).ConfigureAwait(false);
+
+                    if (_log.IsDebugEnabled)
+                        _log.DebugFormat("Stopping hosts...");
 
                     await Task.WhenAll(_hostHandles.Select(x => x.Stop(cancellationToken))).ConfigureAwait(false);
 

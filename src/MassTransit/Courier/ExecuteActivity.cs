@@ -15,7 +15,8 @@ namespace MassTransit.Courier
     using System.Threading.Tasks;
 
 
-    public interface ExecuteActivity<in TArguments>
+    public interface ExecuteActivity<in TArguments> :
+        IExecuteActivity
         where TArguments : class
     {
         /// <summary>

@@ -147,17 +147,12 @@ namespace MassTransit.RabbitMqTransport
 
                         await pipe.Send(moveContext).ConfigureAwait(false);
 
-//                        properties.Headers["Content-Type"] = context.ContentType.MediaType;
-
-//                        if (messageId.HasValue)
-//                            properties.MessageId = messageId.ToString();
-
                         byte[] body;
                         using (var memoryStream = new MemoryStream())
                         {
                             using (var bodyStream = context.GetBody())
                             {
-                                bodyStream.CopyTo(memoryStream);
+                                await bodyStream.CopyToAsync(memoryStream).ConfigureAwait(false);
                             }
 
                             body = memoryStream.ToArray();

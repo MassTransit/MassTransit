@@ -196,6 +196,8 @@ namespace MassTransit.Serialization
 
             public async Task Send(SendContext<T> sendContext)
             {
+                sendContext.SourceAddress = _context.ReceiveContext.InputAddress;
+
                 if (_context.ConversationId.HasValue)
                     sendContext.ConversationId = _context.ConversationId;
                 if (_context.CorrelationId.HasValue)

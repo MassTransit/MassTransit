@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -17,6 +17,7 @@ namespace MassTransit.AzureServiceBusTransport
     using Configuration;
     using MassTransit.Pipeline;
     using Transports;
+    using Util;
 
 
     public class ServiceBusPublishEndpointProvider :
@@ -25,8 +26,8 @@ namespace MassTransit.AzureServiceBusTransport
         readonly IServiceBusHost _host;
         readonly IMessageNameFormatter _nameFormatter;
         readonly PublishObservable _publishObservable;
-        readonly ISendEndpointProvider _sendEndpointProvider;
         readonly IPublishPipe _publishPipe;
+        readonly ISendEndpointProvider _sendEndpointProvider;
 
         public ServiceBusPublishEndpointProvider(IServiceBusHost host, ISendEndpointProvider sendEndpointProvider, IPublishPipe publishPipe)
         {
@@ -44,7 +45,10 @@ namespace MassTransit.AzureServiceBusTransport
 
         public Task<ISendEndpoint> GetPublishSendEndpoint(Type messageType)
         {
-            Uri address = _nameFormatter.GetTopicAddress(_host, messageType);
+            if (!TypeMetadataCache.IsValidMessageType(messageType))
+                throw new MessageException(messageType, "Anonymous types are not valid message types");
+
+            var address = _nameFormatter.GetTopicAddress(_host, messageType);
 
             return _sendEndpointProvider.GetSendEndpoint(address);
         }

@@ -13,8 +13,6 @@
 namespace MassTransit.Tests
 {
     using System.Threading.Tasks;
-    using EndpointConfigurators;
-    using NUnit.Framework;
     using NUnit.Framework;
     using Shouldly;
     using TestFramework;

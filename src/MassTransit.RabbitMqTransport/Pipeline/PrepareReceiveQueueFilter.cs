@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -16,9 +16,11 @@ namespace MassTransit.RabbitMqTransport.Pipeline
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
+    using Contracts;
     using Logging;
     using Management;
     using MassTransit.Pipeline;
+    using MassTransit.Pipeline.Pipes;
     using RabbitMQ.Client;
     using Topology;
     using Util;
@@ -33,17 +35,16 @@ namespace MassTransit.RabbitMqTransport.Pipeline
     {
         static readonly ILog _log = Logger.Get<PrepareReceiveQueueFilter>();
         readonly ExchangeBindingSettings[] _exchangeBindings;
-        readonly Mediator<ISetPrefetchCount> _prefetchCountMediator;
+        readonly IManagementPipe _managementPipe;
         readonly ReceiveSettings _settings;
         ushort _prefetchCount;
         bool _queueAlreadyPurged;
 
-        public PrepareReceiveQueueFilter(ReceiveSettings settings, Mediator<ISetPrefetchCount> prefetchCountMediator,
-            params ExchangeBindingSettings[] exchangeBindings)
+        public PrepareReceiveQueueFilter(ReceiveSettings settings, IManagementPipe managementPipe, params ExchangeBindingSettings[] exchangeBindings)
         {
             _settings = settings;
             _prefetchCount = settings.PrefetchCount;
-            _prefetchCountMediator = prefetchCountMediator;
+            _managementPipe = managementPipe;
             _exchangeBindings = exchangeBindings;
         }
 
@@ -94,13 +95,13 @@ namespace MassTransit.RabbitMqTransport.Pipeline
 
             context.GetOrAddPayload(() => settings);
 
-            using (new SetModelPrefetchCountProxy(_prefetchCountMediator, context, this))
+            using (new SetModelPrefetchCountConsumer(_managementPipe, context, this))
             {
                 await next.Send(context).ConfigureAwait(false);
             }
         }
 
-        Task ISetPrefetchCount.SetPrefetchCount(ushort prefetchCount)
+        public Task SetPrefetchCount(ushort prefetchCount)
         {
             _prefetchCount = prefetchCount;
 
@@ -142,32 +143,34 @@ namespace MassTransit.RabbitMqTransport.Pipeline
         }
 
 
-        class SetModelPrefetchCountProxy :
-            ISetPrefetchCount,
+        class SetModelPrefetchCountConsumer :
+            IConsumer<SetPrefetchCount>,
             IDisposable
         {
             readonly ISetPrefetchCount _filter;
             readonly ConnectHandle _handle;
             readonly ModelContext _modelContext;
 
-            public SetModelPrefetchCountProxy(Mediator<ISetPrefetchCount> mediator, ModelContext modelContext, ISetPrefetchCount filter)
+            public SetModelPrefetchCountConsumer(IManagementPipe managementPipe, ModelContext modelContext, ISetPrefetchCount filter)
             {
                 _modelContext = modelContext;
                 _filter = filter;
 
-                _handle = mediator.Connect(this);
+                _handle = managementPipe.ConnectInstance(this);
+            }
+
+            async Task IConsumer<SetPrefetchCount>.Consume(ConsumeContext<SetPrefetchCount> context)
+            {
+                var prefetchCount = context.Message.PrefetchCount;
+
+                await _modelContext.BasicQos(0, prefetchCount, true).ConfigureAwait(false);
+
+                await _filter.SetPrefetchCount(prefetchCount).ConfigureAwait(false);
             }
 
             public void Dispose()
             {
                 _handle.Dispose();
-            }
-
-            async Task ISetPrefetchCount.SetPrefetchCount(ushort prefetchCount)
-            {
-                await _modelContext.BasicQos(0, prefetchCount, true).ConfigureAwait(false);
-
-                await _filter.SetPrefetchCount(prefetchCount).ConfigureAwait(false);
             }
         }
     }

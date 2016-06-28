@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -16,7 +16,8 @@ namespace MassTransit.Pipeline.Filters.ConcurrencyLimit
     using System.Diagnostics;
     using System.Threading;
     using System.Threading.Tasks;
-    using Util;
+    using Contracts;
+    using Pipes;
 
 
     /// <summary>
@@ -26,7 +27,7 @@ namespace MassTransit.Pipeline.Filters.ConcurrencyLimit
     /// <typeparam name="T"></typeparam>
     public class ConcurrencyLimitFilter<T> :
         IFilter<T>,
-        IConcurrencyLimitFilter,
+        IConsumer<SetConcurrencyLimit>,
         IDisposable
         where T : class, PipeContext
     {
@@ -34,21 +35,22 @@ namespace MassTransit.Pipeline.Filters.ConcurrencyLimit
         readonly ConnectHandle _handle;
         readonly SemaphoreSlim _limit;
 
-        public ConcurrencyLimitFilter(int concurrencyLimit, Mediator<IConcurrencyLimitFilter> mediator)
+        public ConcurrencyLimitFilter(int concurrencyLimit, IManagementPipe managementPipe)
         {
             _concurrencyLimit = concurrencyLimit;
 
             _limit = new SemaphoreSlim(concurrencyLimit);
 
-            _handle = mediator.Connect(this);
+            _handle = managementPipe.ConnectInstance(this);
         }
 
-        public async Task SetConcurrencyLimit(int concurrencyLimit)
+        public async Task Consume(ConsumeContext<SetConcurrencyLimit> context)
         {
+            var concurrencyLimit = context.Message.ConcurrencyLimit;
             if (concurrencyLimit < 1)
                 throw new ArgumentOutOfRangeException(nameof(concurrencyLimit), "The concurrency limit must be >= 1");
 
-            int previousLimit = _concurrencyLimit;
+            var previousLimit = _concurrencyLimit;
             if (concurrencyLimit > previousLimit)
                 _limit.Release(concurrencyLimit - previousLimit);
             else
@@ -66,7 +68,7 @@ namespace MassTransit.Pipeline.Filters.ConcurrencyLimit
 
         void IProbeSite.Probe(ProbeContext context)
         {
-            ProbeContext scope = context.CreateFilterScope("concurrencyLimit");
+            var scope = context.CreateFilterScope("concurrencyLimit");
             scope.Add("limit", _concurrencyLimit);
             scope.Add("available", _limit.CurrentCount);
         }

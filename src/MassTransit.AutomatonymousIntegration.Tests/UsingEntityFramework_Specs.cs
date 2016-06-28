@@ -85,7 +85,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
             Assert.IsFalse(sagaId.HasValue);
         }
 
-        [Test]
+        [Test, Explicit]
         public async Task Should_handle_the_big_load()
         {
             Guid[] sagaIds = new Guid[200];

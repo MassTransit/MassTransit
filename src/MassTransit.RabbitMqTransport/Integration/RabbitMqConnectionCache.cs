@@ -13,6 +13,7 @@
 namespace MassTransit.RabbitMqTransport.Integration
 {
     using System;
+    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using Contexts;
@@ -28,10 +29,10 @@ namespace MassTransit.RabbitMqTransport.Integration
         IProbeSite
     {
         static readonly ILog _log = Logger.Get<RabbitMqConnectionCache>();
+        readonly ITaskScope _cacheTaskScope;
         readonly ConnectionFactory _connectionFactory;
         readonly object _scopeLock = new object();
         readonly RabbitMqHostSettings _settings;
-        readonly ITaskScope _cacheTaskScope;
         ConnectionScope _scope;
 
         public RabbitMqConnectionCache(RabbitMqHostSettings settings, ITaskSupervisor supervisor)
@@ -87,13 +88,22 @@ namespace MassTransit.RabbitMqTransport.Integration
                     throw new TaskCanceledException($"The connection is being disconnected: {_settings.ToDebugString()}");
 
                 if (_log.IsDebugEnabled)
-                    _log.DebugFormat("Connecting: {0}", _connectionFactory.ToDebugString());
+                    _log.DebugFormat("Connecting: {0}", _settings.ToDebugString());
 
-                var connection = _connectionFactory.CreateConnection();
+                IConnection connection;
+                if (_settings.ClusterMembers?.Any() ?? false)
+                {
+                    connection = _connectionFactory.CreateConnection(_settings.ClusterMembers, _settings.Host);
+                }
+                else
+                {
+                    connection = _connectionFactory.CreateConnection();
+                }
+
 
                 if (_log.IsDebugEnabled)
                 {
-                    _log.DebugFormat("Connected: {0} (address: {1}, local: {2}", _connectionFactory.ToDebugString(),
+                    _log.DebugFormat("Connected: {0} (address: {1}, local: {2}", _settings.ToDebugString(),
                         connection.Endpoint, connection.LocalPort);
                 }
 
@@ -121,7 +131,7 @@ namespace MassTransit.RabbitMqTransport.Integration
 
                 scope.ConnectFaulted(ex);
 
-                throw new RabbitMqConnectionException("Connect failed: " + _connectionFactory.ToDebugString(), ex);
+                throw new RabbitMqConnectionException("Connect failed: " + _settings.ToDebugString(), ex);
             }
 
             return SendUsingExistingConnection(connectionPipe, scope, cancellationToken);
@@ -148,7 +158,7 @@ namespace MassTransit.RabbitMqTransport.Integration
 
                 scope.ConnectFaulted(ex);
 
-                throw new RabbitMqConnectionException("Connect failed: " + _connectionFactory.ToDebugString(), ex);
+                throw new RabbitMqConnectionException("Connect failed: " + _settings.ToDebugString(), ex);
             }
             catch (Exception ex)
             {
@@ -208,12 +218,20 @@ namespace MassTransit.RabbitMqTransport.Integration
             {
                 if (_connectionContext.Task.Status == TaskStatus.RanToCompletion)
                 {
-                    var connectionContext = await _connectionContext.Task.ConfigureAwait(false);
+                    try
+                    {
+                        var connectionContext = await _connectionContext.Task.ConfigureAwait(false);
 
-                    if (_log.IsDebugEnabled)
-                        _log.DebugFormat("Disposing connection: {0}", connectionContext.HostSettings.ToDebugString());
+                        if (_log.IsDebugEnabled)
+                            _log.DebugFormat("Disposing connection: {0}", connectionContext.HostSettings.ToDebugString());
 
-                    connectionContext.Dispose();
+                        connectionContext.Dispose();
+                    }
+                    catch (Exception exception)
+                    {
+                        if (_log.IsWarnEnabled)
+                            _log.Warn("The model failed to be disposed", exception);
+                    }
                 }
             }
         }

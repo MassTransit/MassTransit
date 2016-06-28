@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -101,5 +101,15 @@ namespace MassTransit.RabbitMqTransport
         /// The message name formatter for the publisher
         /// </summary>
         IMessageNameFormatter MessageNameFormatter { get; }
+
+        /// <summary>
+        /// When using a RabbitMQ cluster, this contains the host names which make up the cluster. In the event of a connection failure, the next host in the array will be connected to.
+        /// </summary>
+        string[] ClusterMembers { get; }
+
+        /// <summary>
+        /// The host name selector if used to choose which server to connect
+        /// </summary>
+        IRabbitMqHostNameSelector HostNameSelector { get; }
     }
 }

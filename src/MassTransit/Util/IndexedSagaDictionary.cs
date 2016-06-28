@@ -37,6 +37,8 @@ namespace MassTransit.Util
 
         public TSaga Instance => _instance;
 
+        public bool IsRemoved { get; set; }
+
         public bool Equals(SagaInstance<TSaga> other)
         {
             if (ReferenceEquals(null, other))
@@ -62,13 +64,19 @@ namespace MassTransit.Util
             return EqualityComparer<TSaga>.Default.GetHashCode(_instance);
         }
 
-        public async Task MarkInUse(CancellationToken cancellationToken)
+        public Task MarkInUse(CancellationToken cancellationToken)
         {
-            await _inUse.WaitAsync(cancellationToken).ConfigureAwait(false);
+            return _inUse.WaitAsync(cancellationToken);
         }
 
         public void Release()
         {
+            _inUse.Release();
+        }
+
+        public void Remove()
+        {
+            IsRemoved = true;
             _inUse.Release();
         }
     }
@@ -109,9 +117,9 @@ namespace MassTransit.Util
             }
         }
 
-        public async Task MarkInUse(CancellationToken cancellationToken)
+        public Task MarkInUse(CancellationToken cancellationToken)
         {
-            await _inUse.WaitAsync(cancellationToken).ConfigureAwait(false);
+            return _inUse.WaitAsync(cancellationToken);
         }
 
         public void Release()
@@ -119,11 +127,11 @@ namespace MassTransit.Util
             _inUse.Release();
         }
 
-        public void Add(TSaga newItem)
+        public void Add(SagaInstance<TSaga> instance)
         {
             lock (_lock)
                 foreach (var index in _indices.Values)
-                    index.Add(newItem);
+                    index.Add(instance);
         }
 
         public void Remove(SagaInstance<TSaga> item)

@@ -43,13 +43,13 @@ namespace MassTransit.Saga.Pipeline.Filters
             context.CreateFilterScope("correlationId");
         }
 
-        public async Task Send(ConsumeContext<TMessage> context, IPipe<ConsumeContext<TMessage>> next)
+        public Task Send(ConsumeContext<TMessage> context, IPipe<ConsumeContext<TMessage>> next)
         {
             Guid correlationId = _getCorrelationId(context);
 
             var proxy = new CorrelationIdConsumeContextProxy<TMessage>(context, correlationId);
 
-            await next.Send(proxy).ConfigureAwait(false);
+            return next.Send(proxy);
         }
     }
 }

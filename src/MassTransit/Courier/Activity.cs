@@ -19,7 +19,8 @@ namespace MassTransit.Courier
     /// <typeparam name="TLog">The activity log argument type</typeparam>
     public interface Activity<in TArguments, in TLog> :
         ExecuteActivity<TArguments>,
-        CompensateActivity<TLog>
+        CompensateActivity<TLog>,
+        IActivity
         where TArguments : class
         where TLog : class
     {

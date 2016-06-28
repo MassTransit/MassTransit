@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -45,9 +45,20 @@ namespace Automatonymous.Requests
         public Event<RequestTimeoutExpired> TimeoutExpired { get; set; }
         public State Pending { get; set; }
 
-        public void SetRequestId(TInstance instance, Guid requestId)
+        public void SetRequestId(TInstance instance, Guid? requestId)
         {
+            if (instance == null)
+                throw new ArgumentNullException(nameof(instance));
+
             _requestIdProperty.Set(instance, requestId);
+        }
+
+        public Guid? GetRequestId(TInstance instance)
+        {
+            if (instance == null)
+                throw new ArgumentNullException(nameof(instance));
+
+            return _requestIdProperty.Get(instance);
         }
     }
 }

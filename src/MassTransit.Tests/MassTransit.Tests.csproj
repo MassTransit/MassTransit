@@ -15,7 +15,7 @@
     <OldToolsVersion>3.5</OldToolsVersion>
     <UpgradeBackupLocation>
     </UpgradeBackupLocation>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
@@ -74,8 +74,8 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\NUnit.2.6.4\lib\nunit.framework.dll</HintPath>
     </Reference>
-    <Reference Include="Shouldly, Version=2.6.0.0, Culture=neutral, PublicKeyToken=6042cbcb05cbc941, processorArchitecture=MSIL">
-      <HintPath>..\packages\Shouldly.2.6.0\lib\net40\Shouldly.dll</HintPath>
+    <Reference Include="Shouldly, Version=2.7.0.0, Culture=neutral, PublicKeyToken=6042cbcb05cbc941, processorArchitecture=MSIL">
+      <HintPath>..\packages\Shouldly.2.7.0\lib\net40\Shouldly.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
@@ -99,7 +99,6 @@
     <Compile Include="ConsumeObserver_Specs.cs" />
     <Compile Include="Consumer_Specs.cs" />
     <Compile Include="ContainedMessage_Specs.cs" />
-    <Compile Include="Behaviors\Behavior.cs" />
     <Compile Include="Conventional\ConventionConsumer_Specs.cs" />
     <Compile Include="Conventional\CustomConsumeConnectorFactory.cs" />
     <Compile Include="Conventional\CustomConsumerConvention.cs" />
@@ -162,6 +161,7 @@
     <Compile Include="Pipeline\ConnectConsumer_Specs.cs" />
     <Compile Include="Pipeline\ConnectHandler_Specs.cs" />
     <Compile Include="Pipeline\ConnectObserver_Specs.cs" />
+    <Compile Include="Pipeline\ContentFilter_Specs.cs" />
     <Compile Include="Pipeline\LatestFilter_Specs.cs" />
     <Compile Include="Pipeline\MessageTestFixture.cs" />
     <Compile Include="Pipeline\OneMessageConsumer.cs" />
@@ -188,6 +188,7 @@
     <Compile Include="Serialization\IEnumerable_Specs.cs" />
     <Compile Include="Serialization\MessageDataSerialization_Specs.cs" />
     <Compile Include="Serialization\PolymorphicProperty_Specs.cs" />
+    <Compile Include="Serialization\ReceiveFault_Serialization_Specs.cs" />
     <Compile Include="Serialization\SerializationException_Specs.cs" />
     <Compile Include="InMemoryTest_Specs.cs" />
     <Compile Include="Serialization\TypeHandling_Specs.cs" />

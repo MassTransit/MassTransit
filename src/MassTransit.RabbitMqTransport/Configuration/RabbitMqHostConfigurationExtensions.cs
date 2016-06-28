@@ -59,6 +59,29 @@ namespace MassTransit
         }
 
         /// <summary>
+        /// Configure a RabbitMQ host with a host name and virtual host
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="port">The port to connect to the broker</param>
+        /// <param name="virtualHost">The virtual host to use</param>
+        /// <param name="configure">The configuratino callback</param>
+        /// <param name="host">The host name of the broker</param>
+        public static IRabbitMqHost Host(this IRabbitMqBusFactoryConfigurator configurator, string host, ushort port, string virtualHost,
+            Action<IRabbitMqHostConfigurator> configure)
+        {
+            if (host == null)
+                throw new ArgumentNullException(nameof(host));
+            if (virtualHost == null)
+                throw new ArgumentNullException(nameof(virtualHost));
+
+            var hostConfigurator = new RabbitMqHostConfigurator(host, virtualHost, port);
+
+            configure(hostConfigurator);
+
+            return configurator.Host(hostConfigurator.Settings);
+        }
+
+        /// <summary>
         /// Declare a ReceiveEndpoint using a unique generated queue name. This queue defaults to auto-delete
         /// and non-durable. By default all services bus instances include a default receiveEndpoint that is
         /// of this type (created automatically upon the first receiver binding).

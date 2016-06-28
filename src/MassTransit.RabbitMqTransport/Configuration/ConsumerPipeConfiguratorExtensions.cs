@@ -15,9 +15,9 @@ namespace MassTransit
     using System;
     using System.Collections.Generic;
     using Pipeline;
+    using Pipeline.Pipes;
     using RabbitMqTransport;
     using RabbitMqTransport.Configuration;
-    using RabbitMqTransport.Management;
     using RabbitMqTransport.Topology;
     using Util;
 
@@ -34,16 +34,16 @@ namespace MassTransit
         /// <param name="endpointObserver"></param>
         /// <param name="exchangeBindings"></param>
         /// <param name="supervisor"></param>
-        /// <param name="mediator"></param>
+        /// <param name="managementPipe"></param>
         public static void RabbitMqConsumer(this IPipeConfigurator<ConnectionContext> configurator, IPipe<ReceiveContext> pipe, ReceiveSettings settings,
             IReceiveObserver receiveObserver, IReceiveEndpointObserver endpointObserver, IEnumerable<ExchangeBindingSettings> exchangeBindings,
-            ITaskSupervisor supervisor, Mediator<ISetPrefetchCount> mediator)
+            ITaskSupervisor supervisor, IManagementPipe managementPipe)
         {
             if (configurator == null)
                 throw new ArgumentNullException(nameof(configurator));
 
             var pipeBuilderConfigurator = new RabbitMqConsumerPipeSpecification(pipe, settings, receiveObserver, endpointObserver, exchangeBindings,
-                supervisor, mediator);
+                supervisor, managementPipe);
 
             configurator.AddPipeSpecification(pipeBuilderConfigurator);
         }

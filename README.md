@@ -19,6 +19,13 @@ In order to get started with MassTransit, you can have a look at the documentati
 `install-package MassTransit.RabbitMq` then;
 
 ```
+// Message Definition
+class MyMessage
+{
+    public string Value { get; set; }
+}
+
+// Code Snippet for Console Application 
 var bus = Bus.Factory.CreateUsingRabbitMq(sbc =>
 {
     var host = sbc.Host(new Uri("rabbitmq://localhost/"), h =>

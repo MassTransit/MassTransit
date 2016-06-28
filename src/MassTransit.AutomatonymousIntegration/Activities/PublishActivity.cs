@@ -60,23 +60,23 @@ namespace Automatonymous.Activities
             await next.Execute(context).ConfigureAwait(false);
         }
 
-        async Task Activity<TInstance>.Faulted<TException>(BehaviorExceptionContext<TInstance, TException> context, Behavior<TInstance> next)
+        Task Activity<TInstance>.Faulted<TException>(BehaviorExceptionContext<TInstance, TException> context, Behavior<TInstance> next)
         {
-            await next.Faulted(context).ConfigureAwait(false);
+            return next.Faulted(context);
         }
 
-        async Task Activity<TInstance>.Faulted<T, TException>(BehaviorExceptionContext<TInstance, T, TException> context, Behavior<TInstance, T> next)
+        Task Activity<TInstance>.Faulted<T, TException>(BehaviorExceptionContext<TInstance, T, TException> context, Behavior<TInstance, T> next)
         {
-            await next.Faulted(context).ConfigureAwait(false);
+            return next.Faulted(context);
         }
 
-        async Task Execute(BehaviorContext<TInstance> context)
+        Task Execute(BehaviorContext<TInstance> context)
         {
             var consumeContext = context.CreateConsumeContext();
 
             TMessage message = _messageFactory(consumeContext);
 
-            await consumeContext.Publish(message, _publishPipe).ConfigureAwait(false);
+            return consumeContext.Publish(message, _publishPipe);
         }
     }
 
@@ -121,10 +121,10 @@ namespace Automatonymous.Activities
             await next.Execute(context).ConfigureAwait(false);
         }
 
-        async Task Activity<TInstance, TData>.Faulted<TException>(BehaviorExceptionContext<TInstance, TData, TException> context,
+        Task Activity<TInstance, TData>.Faulted<TException>(BehaviorExceptionContext<TInstance, TData, TException> context,
             Behavior<TInstance, TData> next)
         {
-            await next.Faulted(context).ConfigureAwait(false);
+            return next.Faulted(context);
         }
     }
 }

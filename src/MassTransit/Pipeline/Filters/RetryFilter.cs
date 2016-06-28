@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -16,7 +16,6 @@ namespace MassTransit.Pipeline.Filters
     using System.Diagnostics;
     using System.Threading.Tasks;
     using Context;
-    using Policies;
 
 
     /// <summary>
@@ -39,11 +38,11 @@ namespace MassTransit.Pipeline.Filters
         }
 
         [DebuggerNonUserCode]
-        async Task IFilter<ConsumeContext>.Send(ConsumeContext context, IPipe<ConsumeContext> next)
+        Task IFilter<ConsumeContext>.Send(ConsumeContext context, IPipe<ConsumeContext> next)
         {
             var retryContext = new RetryConsumeContext(context);
 
-            await Attempt(retryContext, next).ConfigureAwait(false);
+            return Attempt(retryContext, next);
         }
 
         [DebuggerNonUserCode]
@@ -68,7 +67,7 @@ namespace MassTransit.Pipeline.Filters
 
                 // by not adding the retry payload until the exception occurs, the deepest retry filter
                 // is the one to set the actual retry context with the deepest configured policy
-                IRetryContext retryContext = context.GetOrAddPayload(() => _retryPolicy.GetRetryContext());
+                var retryContext = context.GetOrAddPayload(() => _retryPolicy.GetRetryContext());
                 if (!retryContext.CanRetry(ex, out delay))
                 {
                     context.NotifyPendingFaults();
@@ -106,11 +105,11 @@ namespace MassTransit.Pipeline.Filters
             _retryPolicy.Probe(context.CreateFilterScope("retry"));
         }
 
-        async Task IFilter<ConsumeContext<T>>.Send(ConsumeContext<T> context, IPipe<ConsumeContext<T>> next)
+        Task IFilter<ConsumeContext<T>>.Send(ConsumeContext<T> context, IPipe<ConsumeContext<T>> next)
         {
             var retryContext = new RetryConsumeContext<T>(context);
 
-            await Attempt(retryContext, next).ConfigureAwait(false);
+            return Attempt(retryContext, next);
         }
 
         async Task Attempt(RetryConsumeContext<T> context, IPipe<ConsumeContext<T>> next)
@@ -134,7 +133,7 @@ namespace MassTransit.Pipeline.Filters
 
                 // by not adding the retry payload until the exception occurs, the deepest retry filter
                 // is the one to set the actual retry context with the deepest configured policy
-                IRetryContext retryContext = context.GetOrAddPayload(() => _retryPolicy.GetRetryContext());
+                var retryContext = context.GetOrAddPayload(() => _retryPolicy.GetRetryContext());
                 if (!retryContext.CanRetry(ex, out delay))
                 {
                     context.NotifyPendingFaults();

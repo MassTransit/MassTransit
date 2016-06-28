@@ -10,7 +10,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Automatonymous</RootNamespace>
     <AssemblyName>MassTransit.AutomatonymousIntegration</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\..\src\</SolutionDir>
     <TargetFrameworkProfile />
@@ -44,8 +44,8 @@
     <AssemblyOriginatorKeyFile>..\..\MassTransit.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Automatonymous, Version=3.0.0.0, Culture=neutral, PublicKeyToken=b800c4cfcdeea87b, processorArchitecture=MSIL">
-      <HintPath>..\packages\Automatonymous.3.2.1\lib\net45\Automatonymous.dll</HintPath>
+    <Reference Include="Automatonymous, Version=3.3.0.0, Culture=neutral, PublicKeyToken=b800c4cfcdeea87b, processorArchitecture=MSIL">
+      <HintPath>..\packages\Automatonymous.3.3.0\lib\net452\Automatonymous.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="NewId, Version=2.1.3.0, Culture=neutral, PublicKeyToken=b8e0e9f2f1e657fa, processorArchitecture=MSIL">
@@ -59,11 +59,15 @@
     <Compile Include="..\SolutionVersion.cs">
       <Link>Properties\SolutionVersion.cs</Link>
     </Compile>
+    <Compile Include="Activities\CancelRequestTimeoutActivity.cs" />
+    <Compile Include="Activities\ClearRequestActivity.cs" />
     <Compile Include="Activities\FaultedPublishActivity.cs" />
     <Compile Include="Activities\FaultedRequestActivity.cs" />
     <Compile Include="Activities\FaultedRespondActivity.cs" />
     <Compile Include="Activities\FaultedScheduleActivity.cs" />
+    <Compile Include="Activities\FaultedSendActivity.cs" />
     <Compile Include="Activities\FaultedUnscheduleActivity.cs" />
+    <Compile Include="Activities\SendActivity.cs" />
     <Compile Include="Activities\UnscheduleActivity.cs" />
     <Compile Include="Activities\PublishActivity.cs" />
     <Compile Include="Activities\RequestActivityImpl.cs" />
@@ -101,6 +105,7 @@
     <Compile Include="Contexts\AutomatonymousConsumeEventContext.cs" />
     <Compile Include="Events\RequestTimeoutExpired.cs" />
     <Compile Include="Exceptions\NotAcceptedStateMachineException.cs" />
+    <Compile Include="IStateMachineActivityFactory.cs" />
     <Compile Include="MassTransitStateMachine.cs" />
     <Compile Include="ScheduleDelayProvider.cs" />
     <Compile Include="PublishExtensions.cs" />
@@ -114,6 +119,7 @@
     <Compile Include="Schedule.cs" />
     <Compile Include="SchedulerExtensions.cs" />
     <Compile Include="ScheduleSettings.cs" />
+    <Compile Include="SendExtensions.cs" />
     <Compile Include="Testing\StateMachineSagaTestBuilderImpl.cs" />
     <Compile Include="Testing\StateMachineSagaTestInstance.cs" />
     <Compile Include="Testing\StateMachineSagaTestSubjectImpl.cs" />
@@ -133,8 +139,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Configuration\BuilderConfigurators\" />
-    <Folder Include="Configuration\RepositoryBuilders\" />
-    <Folder Include="Configuration\RepositoryConfigurators\" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

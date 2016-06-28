@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -18,7 +18,9 @@ namespace MassTransit
     using Castle.MicroKernel;
     using Castle.Windsor;
     using ConsumeConfigurators;
+    using Courier;
     using Internals.Extensions;
+    using PipeConfigurators;
     using Saga;
     using Saga.SubscriptionConfigurators;
     using WindsorIntegration;
@@ -37,7 +39,7 @@ namespace MassTransit
         public static void LoadFrom(this IReceiveEndpointConfigurator configurator, IWindsorContainer container)
         {
             if (container == null)
-                throw new ArgumentNullException("container");
+                throw new ArgumentNullException(nameof(container));
 
             LoadFrom(configurator, container.Kernel);
         }
@@ -50,21 +52,21 @@ namespace MassTransit
         public static void LoadFrom(this IReceiveEndpointConfigurator configurator, IKernel container)
         {
             if (configurator == null)
-                throw new ArgumentNullException("configurator");
+                throw new ArgumentNullException(nameof(configurator));
             if (container == null)
-                throw new ArgumentNullException("container");
+                throw new ArgumentNullException(nameof(container));
 
             IList<Type> consumerTypes = FindTypes<IConsumer>(container, x => !x.HasInterface<ISaga>());
             if (consumerTypes.Count > 0)
             {
-                foreach (Type type in consumerTypes)
+                foreach (var type in consumerTypes)
                     ConsumerConfiguratorCache.Configure(type, configurator, container);
             }
 
             IList<Type> sagaTypes = FindTypes<ISaga>(container, x => true);
             if (sagaTypes.Count > 0)
             {
-                foreach (Type sagaType in sagaTypes)
+                foreach (var sagaType in sagaTypes)
                     SagaConfiguratorCache.Configure(sagaType, configurator, container);
             }
         }
@@ -81,9 +83,9 @@ namespace MassTransit
             where T : class, IConsumer
         {
             if (configurator == null)
-                throw new ArgumentNullException("configurator");
+                throw new ArgumentNullException(nameof(configurator));
             if (container == null)
-                throw new ArgumentNullException("container");
+                throw new ArgumentNullException(nameof(container));
 
             var consumerFactory = new WindsorConsumerFactory<T>(container);
 
@@ -112,6 +114,39 @@ namespace MassTransit
             var windsorSagaRepository = new WindsorSagaRepository<T>(sagaRepository, container);
 
             configurator.Saga(windsorSagaRepository, configure);
+        }
+
+        public static void ExecuteActivityHost<TActivity, TArguments>(
+            this IReceiveEndpointConfigurator configurator,
+            Uri compensateAddress, IKernel kernel)
+            where TActivity : class, ExecuteActivity<TArguments>
+            where TArguments : class
+        {
+            var factory = new WindsorExecuteActivityFactory<TActivity, TArguments>(kernel);
+            var specification = new ExecuteActivityHostSpecification<TActivity, TArguments>(factory, compensateAddress);
+
+            configurator.AddEndpointSpecification(specification);
+        }
+
+        public static void ExecuteActivityHost<TActivity, TArguments>(
+            this IReceiveEndpointConfigurator configurator, IKernel kernel)
+            where TActivity : class, ExecuteActivity<TArguments>
+            where TArguments : class
+        {
+            var factory = new WindsorExecuteActivityFactory<TActivity, TArguments>(kernel);
+            var specification = new ExecuteActivityHostSpecification<TActivity, TArguments>(factory);
+
+            configurator.AddEndpointSpecification(specification);
+        }
+
+        public static void CompensateActivityHost<TActivity, TLog>(this IReceiveEndpointConfigurator configurator, IKernel kernel)
+            where TActivity : class, CompensateActivity<TLog>
+            where TLog : class
+        {
+            var factory = new WindsorCompensateActivityFactory<TActivity, TLog>(kernel);
+            var specification = new CompensateActivityHostSpecification<TActivity, TLog>(factory);
+
+            configurator.AddEndpointSpecification(specification);
         }
 
         /// <summary>

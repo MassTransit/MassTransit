@@ -10,7 +10,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>MassTransit.AutomatonymousIntegration.Tests</RootNamespace>
     <AssemblyName>MassTransit.AutomatonymousIntegration.Tests</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\..\src\</SolutionDir>
     <TargetFrameworkProfile />
@@ -39,12 +39,12 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Automatonymous, Version=3.0.0.0, Culture=neutral, PublicKeyToken=b800c4cfcdeea87b, processorArchitecture=MSIL">
-      <HintPath>..\packages\Automatonymous.3.2.1\lib\net45\Automatonymous.dll</HintPath>
+    <Reference Include="Automatonymous, Version=3.3.0.0, Culture=neutral, PublicKeyToken=b800c4cfcdeea87b, processorArchitecture=MSIL">
+      <HintPath>..\packages\Automatonymous.3.3.0\lib\net452\Automatonymous.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Automatonymous.NHibernateIntegration, Version=3.0.0.0, Culture=neutral, PublicKeyToken=b800c4cfcdeea87b, processorArchitecture=MSIL">
-      <HintPath>..\packages\Automatonymous.NHibernate.3.2.1\lib\net45\Automatonymous.NHibernateIntegration.dll</HintPath>
+    <Reference Include="Automatonymous.NHibernateIntegration, Version=3.3.0.0, Culture=neutral, PublicKeyToken=b800c4cfcdeea87b, processorArchitecture=MSIL">
+      <HintPath>..\packages\Automatonymous.NHibernate.3.3.0\lib\net452\Automatonymous.NHibernateIntegration.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Common.Logging, Version=3.3.1.0, Culture=neutral, PublicKeyToken=af08829b84f0328e, processorArchitecture=MSIL">
@@ -86,8 +86,8 @@
       <HintPath>..\packages\Quartz.2.3.3\lib\net40\Quartz.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Shouldly, Version=2.6.0.0, Culture=neutral, PublicKeyToken=6042cbcb05cbc941, processorArchitecture=MSIL">
-      <HintPath>..\packages\Shouldly.2.6.0\lib\net40\Shouldly.dll</HintPath>
+    <Reference Include="Shouldly, Version=2.7.0.0, Culture=neutral, PublicKeyToken=6042cbcb05cbc941, processorArchitecture=MSIL">
+      <HintPath>..\packages\Shouldly.2.7.0\lib\net40\Shouldly.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
@@ -113,8 +113,10 @@
     <Compile Include="DiscardEvent_Specs.cs" />
     <Compile Include="EnterEvent_Specs.cs" />
     <Compile Include="Fault_Specs.cs" />
+    <Compile Include="FilterFault_Specs.cs" />
     <Compile Include="Ignore_Specs.cs" />
     <Compile Include="Initiator_Specs.cs" />
+    <Compile Include="InMemoryDeadlock_Specs.cs" />
     <Compile Include="NHibernateFactory_Specs.cs" />
     <Compile Include="Publish_Specs.cs" />
     <Compile Include="RemoveWhen_Specs.cs" />
@@ -123,6 +125,7 @@
     <Compile Include="SagaDbContextFactoryProvider.cs" />
     <Compile Include="ScheduleTimeout_Specs.cs" />
     <Compile Include="Sending_a_request_that_times_out.cs" />
+    <Compile Include="Send_Specs.cs" />
     <Compile Include="SimpleStateMachine_Specs.cs" />
     <Compile Include="SingleConnectionSessionFactory.cs" />
     <Compile Include="SqlLiteSessionFactoryProvider.cs" />

@@ -51,10 +51,10 @@ namespace MassTransit.RabbitMqTransport.Contexts
 
         public RabbitMqHostSettings HostSettings => _hostSettings;
 
-        public async Task<IModel> CreateModel()
+        public Task<IModel> CreateModel()
         {
-            return await Task.Factory.StartNew(() => _connection.CreateModel(),
-                _participant.StoppedToken, TaskCreationOptions.HideScheduler, _taskScheduler).ConfigureAwait(false);
+            return Task.Factory.StartNew(() => _connection.CreateModel(),
+                _participant.StoppedToken, TaskCreationOptions.HideScheduler, _taskScheduler);
         }
 
         public IConnection Connection => _connection;
@@ -66,7 +66,7 @@ namespace MassTransit.RabbitMqTransport.Contexts
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Disconnecting: {0}", _hostSettings.ToDebugString());
 
-            Close(200, "Connection Disposed");
+            _connection.Cleanup(200, "Connection Disposed");
 
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Disconnected: {0}", _hostSettings.ToDebugString());
@@ -76,14 +76,9 @@ namespace MassTransit.RabbitMqTransport.Contexts
 
         void OnConnectionShutdown(object connection, ShutdownEventArgs reason)
         {
-            Close(reason.ReplyCode, reason.ReplyText);
+            _connection.Cleanup(reason.ReplyCode, reason.ReplyText);
 
             _participant.SetComplete();
-        }
-
-        void Close(ushort replyCode, string message)
-        {
-            _connection.Cleanup(replyCode, message);
         }
     }
 }

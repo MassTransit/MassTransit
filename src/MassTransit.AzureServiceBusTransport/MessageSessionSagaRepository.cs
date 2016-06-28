@@ -111,7 +111,7 @@ namespace MassTransit.AzureServiceBusTransport
                 BsonMessageSerializer.Serializer.Serialize(bsonWriter, saga);
 
                 bsonWriter.Flush();
-                serializeStream.Flush();
+                await serializeStream.FlushAsync().ConfigureAwait(false);
 
                 using (var stateStream = new MemoryStream(serializeStream.ToArray(), false))
                 {

@@ -59,6 +59,8 @@ namespace MassTransit.Util.Caching
         readonly MemoryCache _cache;
         readonly KeyFormatter _keyFormatter;
         readonly PolicyProvider _policyProvider;
+
+        readonly LimitedConcurrencyLevelTaskScheduler _scheduler;
         readonly ValueFactory _valueFactory;
         readonly ValueRemoved _valueRemoved;
 
@@ -71,11 +73,12 @@ namespace MassTransit.Util.Caching
             _valueRemoved = valueRemoved ?? DefaultValueRemoved;
 
             _cache = new MemoryCache(name);
+            _scheduler = new LimitedConcurrencyLevelTaskScheduler(1);
         }
 
         public void Dispose()
         {
-            _cache.Dispose();
+            Task.Factory.StartNew(() => _cache.Dispose(), CancellationToken.None, TaskCreationOptions.HideScheduler, _scheduler);
         }
 
         Task DefaultValueRemoved(string key, TValue value, string reason)
@@ -95,35 +98,37 @@ namespace MassTransit.Util.Caching
 
         void Touch(string textKey)
         {
-            _cache.Get(textKey);
+            Task.Factory.StartNew(() => _cache.Get(textKey), CancellationToken.None, TaskCreationOptions.HideScheduler, _scheduler);
         }
 
-        public Cached<TValue> Get(TKey key)
+        public Task<Cached<TValue>> Get(TKey key)
         {
-            var textKey = _keyFormatter(key);
-
-            var result = _cache.Get(textKey) as Cached<TValue>;
-            if (result != null)
-                return result;
-
-            var cacheItemValue = new CachedValue(_valueFactory, key, () => Touch(textKey));
-            var cacheItem = new CacheItem(textKey, cacheItemValue);
-            var cacheItemPolicy = _policyProvider(new CacheExpirationSelector(key)).Policy;
-            cacheItemPolicy.RemovedCallback = OnCacheItemRemoved;
-
-            var existingItem = _cache.AddOrGetExisting(cacheItem, cacheItemPolicy);
-            if (existingItem != cacheItem)
+            return Task.Factory.StartNew(() =>
             {
-                result = existingItem.Value as CachedValue;
+                var textKey = _keyFormatter(key);
+
+                var result = _cache.Get(textKey) as Cached<TValue>;
                 if (result != null)
                 {
-                    return result;
+                    if (!result.Value.IsFaulted && !result.Value.IsCanceled)
+                        return result;
+
+                    _cache.Remove(textKey);
                 }
 
-                _cache.Set(cacheItem, cacheItemPolicy);
-            }
+                var cacheItemValue = new CachedValue(_valueFactory, key, () => Touch(textKey));
+                var cacheItem = new CacheItem(textKey, cacheItemValue);
+                var cacheItemPolicy = _policyProvider(new CacheExpirationSelector(key)).Policy;
+                cacheItemPolicy.RemovedCallback = OnCacheItemRemoved;
 
-            return cacheItemValue;
+                var added = _cache.Add(cacheItem, cacheItemPolicy);
+                if (!added)
+                {
+                    throw new InvalidOperationException($"The item was not added to the cache: {key}");
+                }
+
+                return cacheItemValue;
+            }, CancellationToken.None, TaskCreationOptions.HideScheduler, _scheduler);
         }
 
         void OnCacheItemRemoved(CacheEntryRemovedArguments arguments)

@@ -13,6 +13,7 @@
 namespace MassTransit.RabbitMqTransport
 {
     using System;
+    using System.Linq;
     using System.Collections.Generic;
     using System.Globalization;
     using System.Net;
@@ -56,27 +57,6 @@ namespace MassTransit.RabbitMqTransport
             }
             sb.Append('-');
             sb.Append(NewId.Next().ToString(_formatter));
-
-            return sb.ToString();
-        }
-
-        public static string ToDebugString(this RabbitMqHostSettings settings)
-        {
-            var sb = new StringBuilder();
-
-            if (!string.IsNullOrWhiteSpace(settings.Username))
-                sb.Append(settings.Username).Append('@');
-
-            sb.Append(settings.Host);
-            if (settings.Port != -1)
-                sb.Append(':').Append(settings.Port);
-
-            if (string.IsNullOrWhiteSpace(settings.VirtualHost))
-                sb.Append('/');
-            else if (settings.VirtualHost.StartsWith("/"))
-                sb.Append(settings.VirtualHost);
-            else
-                sb.Append("/").Append(settings.VirtualHost);
 
             return sb.ToString();
         }
@@ -344,6 +324,12 @@ namespace MassTransit.RabbitMqTransport
                 RequestedHeartbeat = settings.Heartbeat
             };
 
+            if (settings.ClusterMembers != null && settings.ClusterMembers.Any())
+            {
+                factory.HostName = null;
+                factory.HostnameSelector = settings.HostNameSelector;
+            }
+            
             if (settings.UseClientCertificateAsAuthenticationIdentity)
             {
                 factory.AuthMechanisms.Clear();
@@ -399,6 +385,11 @@ namespace MassTransit.RabbitMqTransport
         }
 
         public static RabbitMqHostSettings GetHostSettings(this Uri address)
+        {
+            return GetConfigurationHostSettings(address);
+        }
+
+        internal static ConfigurationHostSettings GetConfigurationHostSettings(this Uri address)
         {
             if (string.Compare("rabbitmq", address.Scheme, StringComparison.OrdinalIgnoreCase) != 0)
                 throw new RabbitMqAddressException("The invalid scheme was specified: " + address.Scheme);

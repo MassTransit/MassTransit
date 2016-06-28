@@ -209,7 +209,9 @@ namespace MassTransit.Context
             {
                 try
                 {
-                    await Task.Factory.StartNew(() => handler(context), context.CancellationToken, TaskCreationOptions.None, _taskScheduler).ConfigureAwait(false);
+                    await Task.Factory.StartNew(() => handler(context), context.CancellationToken, TaskCreationOptions.None, _taskScheduler)
+                        .Unwrap()
+                        .ConfigureAwait(false);
 
                     source.TrySetResult(context.Message);
 

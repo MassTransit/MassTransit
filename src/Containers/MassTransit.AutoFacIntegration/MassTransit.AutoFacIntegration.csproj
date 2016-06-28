@@ -10,7 +10,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>MassTransit.AutofacIntegration</RootNamespace>
     <AssemblyName>MassTransit.AutofacIntegration</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\</SolutionDir>
     <TargetFrameworkProfile />
@@ -54,7 +54,9 @@
     <Compile Include="..\..\SolutionVersion.cs">
       <Link>SolutionVersion.cs</Link>
     </Compile>
+    <Compile Include="AutofacCompensateActivityFactory.cs" />
     <Compile Include="AutofacConsumerFactory.cs" />
+    <Compile Include="AutofacExecuteActivityFactory.cs" />
     <Compile Include="AutofacExtensions.cs" />
     <Compile Include="AutofacSagaRepository.cs" />
     <Compile Include="AutofacScopeConsumerFactory.cs" />

@@ -176,6 +176,9 @@ namespace MassTransit.Util
                     return false;
             }
 
+            if (typeof(T).IsAnonymousType())
+                return false;
+
             return true;
         }
 

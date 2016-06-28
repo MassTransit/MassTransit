@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -23,12 +23,9 @@ namespace MassTransit.RabbitMqTransport.Configuration.Configurators
 
         public RabbitMqHostConfigurator(Uri hostAddress)
         {
-            _settings = new ConfigurationHostSettings
-            {
-                Host = hostAddress.Host,
-                Port = hostAddress.IsDefaultPort ? 5672 : hostAddress.Port,
-                VirtualHost = GetVirtualHost(hostAddress)
-            };
+            _settings = hostAddress.GetConfigurationHostSettings();
+
+            _settings.VirtualHost = GetVirtualHost(hostAddress);
         }
 
         public RabbitMqHostConfigurator(string host, string virtualHost, ushort port = 5672)
@@ -72,6 +69,15 @@ namespace MassTransit.RabbitMqTransport.Configuration.Configurators
         public void Password(string password)
         {
             _settings.Password = password;
+        }
+
+        public void UseCluster(Action<IRabbitMqClusterConfigurator> configureCluster)
+        {
+            var configurator = new RabbitMqClusterConfigurator();
+            configureCluster(configurator);
+
+            _settings.ClusterMembers = configurator.ClusterMembers;
+            _settings.HostNameSelector = configurator.GetHostNameSelector();
         }
 
         string GetVirtualHost(Uri address)

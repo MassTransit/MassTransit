@@ -16,8 +16,8 @@ namespace MassTransit.RabbitMqTransport
     using System.Threading;
     using System.Threading.Tasks;
     using Logging;
-    using Management;
     using MassTransit.Pipeline;
+    using MassTransit.Pipeline.Pipes;
     using Policies;
     using Topology;
     using Transports;
@@ -30,18 +30,18 @@ namespace MassTransit.RabbitMqTransport
         static readonly ILog _log = Logger.Get<RabbitMqReceiveTransport>();
         readonly ExchangeBindingSettings[] _bindings;
         readonly IRabbitMqHost _host;
-        readonly Mediator<ISetPrefetchCount> _mediator;
+        readonly IManagementPipe _managementPipe;
         readonly ReceiveEndpointObservable _receiveEndpointObservable;
         readonly ReceiveObservable _receiveObservable;
         readonly ReceiveSettings _settings;
 
-        public RabbitMqReceiveTransport(IRabbitMqHost host, ReceiveSettings settings, Mediator<ISetPrefetchCount> mediator,
+        public RabbitMqReceiveTransport(IRabbitMqHost host, ReceiveSettings settings, IManagementPipe managementPipe,
             params ExchangeBindingSettings[] bindings)
         {
             _host = host;
             _settings = settings;
             _bindings = bindings;
-            _mediator = mediator;
+            _managementPipe = managementPipe;
 
             _receiveObservable = new ReceiveObservable();
             _receiveEndpointObservable = new ReceiveEndpointObservable();
@@ -67,7 +67,7 @@ namespace MassTransit.RabbitMqTransport
 
             IPipe<ConnectionContext> pipe = Pipe.New<ConnectionContext>(x =>
             {
-                x.RabbitMqConsumer(receivePipe, _settings, _receiveObservable, _receiveEndpointObservable, _bindings, supervisor, _mediator);
+                x.RabbitMqConsumer(receivePipe, _settings, _receiveObservable, _receiveEndpointObservable, _bindings, supervisor, _managementPipe);
             });
 
             Receiver(pipe, supervisor);

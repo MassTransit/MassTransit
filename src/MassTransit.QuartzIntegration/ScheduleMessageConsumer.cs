@@ -41,12 +41,12 @@ namespace MassTransit.QuartzIntegration
 
         public async Task Consume(ConsumeContext<ScheduleMessage> context)
         {
-            if (_log.IsDebugEnabled)
-                _log.DebugFormat("ScheduleMessage: {0} at {1}", context.Message.CorrelationId, context.Message.ScheduledTime);
-
             var correlationId = context.Message.CorrelationId.ToString("N");
 
             var jobKey = new JobKey(correlationId);
+            if (_log.IsDebugEnabled)
+                _log.DebugFormat("ScheduleMessage: {0} at {1}", jobKey, context.Message.ScheduledTime);
+
             IJobDetail jobDetail = await CreateJobDetail(context, context.Message.Destination, jobKey).ConfigureAwait(false);
 
             ITrigger trigger = TriggerBuilder.Create()
