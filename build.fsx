@@ -1,5 +1,6 @@
 #r @"src/packages/FAKE/tools/FakeLib.dll"
 open System.IO
+open System;
 open Fake
 open Fake.AssemblyInfoFile
 open Fake.Git.Information
@@ -96,7 +97,7 @@ Target "Build" (fun _ ->
         Targets = ["Build"]
         Properties =
             [
-                "Optimize", "True"
+                "Optimize", "False"
                 "DebugSymbols", "True"
                 "Configuration", "ReleaseUnsigned"
                 "TargetFrameworkVersion", "v4.5.2"
@@ -118,6 +119,20 @@ Target "UnitTests" (fun _ ->
                 Framework = "v4.0.30319"
                 DisableShadowCopy = true; 
                 OutputFile = buildArtifactPath + "/nunit-test-results.xml"})
+)
+
+let gitLink = (packagesPath @@ "gitlink" @@ "lib" @@ "net45" @@ "GitLink.exe")
+
+Target "GitLink" (fun _ ->
+
+    if String.IsNullOrWhiteSpace(gitLink) then failwith "Couldn't find GitLink.exe in the packages folder"
+
+    let ok =
+        execProcess (fun info ->
+            info.FileName <- gitLink
+            info.Arguments <- __SOURCE_DIRECTORY__) (TimeSpan.FromSeconds 30.0)
+    if not ok then failwith (sprintf "GitLink.exe %s' task failed" __SOURCE_DIRECTORY__)
+
 )
 
 type packageInfo = {
@@ -263,13 +278,14 @@ Target "Package" (fun _ ->
     )
 )
 
-Target "Default" (fun _ ->
+FinalTarget "Default" (fun _ ->
   trace "Build starting..."
 )
 
 "Clean"
   ==> "RestorePackages"
   ==> "Build"
+  ==> "GitLink"
   ==> "Package"
   ==> "Default"
 
