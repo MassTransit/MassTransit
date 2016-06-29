@@ -97,7 +97,7 @@ Target "Build" (fun _ ->
         Targets = ["Build"]
         Properties =
             [
-                "Optimize", "True"
+                "Optimize", "False"
                 "DebugSymbols", "True"
                 "Configuration", "ReleaseUnsigned"
                 "TargetFrameworkVersion", "v4.5.2"
