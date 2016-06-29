@@ -306,6 +306,10 @@ namespace MassTransit.RabbitMqTransport
             bool durable = !isTemporary;
             bool autoDelete = isTemporary;
 
+            var exchangeBuilder = hostSettings.MessageNameFormatter as IRabbitMqMessageExchangeBuilder;
+            if (exchangeBuilder != null)
+                return exchangeBuilder.CreateSendSettings(messageType, durable, autoDelete);
+
             string name = hostSettings.MessageNameFormatter.GetMessageName(messageType).ToString();
 
             return new RabbitMqSendSettings(name, ExchangeType.Fanout, durable, autoDelete);

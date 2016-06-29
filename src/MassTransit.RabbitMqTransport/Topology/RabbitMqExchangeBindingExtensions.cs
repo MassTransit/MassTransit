@@ -27,11 +27,18 @@ namespace MassTransit.RabbitMqTransport.Topology
                 yield break;
 
             bool temporary = IsTemporaryMessageType(messageType);
+            var exchangeBuilder = messageNameFormatter as IRabbitMqMessageExchangeBuilder;
+            ExchangeBindingSettings binding;
+            if (exchangeBuilder != null)
+            {
+                binding = exchangeBuilder.CreateBindingSettings(messageType, !temporary, temporary);
+            }
+            else
+            {
+                var exchange = new Exchange(messageNameFormatter.GetMessageName(messageType).ToString(), !temporary, temporary);
 
-            var exchange = new Exchange(messageNameFormatter.GetMessageName(messageType).ToString(), !temporary, temporary);
-
-            var binding = new ExchangeBinding(exchange);
-
+                binding = new ExchangeBinding(exchange);
+            }
             yield return binding;
         }
 

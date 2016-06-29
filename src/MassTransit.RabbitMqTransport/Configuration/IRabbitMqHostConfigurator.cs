@@ -14,6 +14,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
 {
     using System;
     using Configurators;
+    using Transports;
 
 
     public interface IRabbitMqHostConfigurator
@@ -43,6 +44,8 @@ namespace MassTransit.RabbitMqTransport.Configuration
         /// </summary>
         /// <param name="password"></param>
         void Password(string password);
+
+        void MessageNameFormatter(IMessageNameFormatter messageNameFormatter);
 
         /// <summary>
         /// Configure a RabbitMQ High-Availability cluster which will cycle hosts when connections are interrupted.

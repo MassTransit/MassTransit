@@ -36,7 +36,7 @@ namespace MassTransit.RabbitMqTransport
         ISendTransport
     {
         static readonly ILog _log = Logger.Get<RabbitMqSendTransport>();
-        readonly PrepareSendExchangeFilter _filter;
+        readonly IFilter<ModelContext> _filter;
         readonly IModelCache _modelCache;
         readonly SendObservable _observers;
         readonly SendSettings _sendSettings;
@@ -60,7 +60,7 @@ namespace MassTransit.RabbitMqTransport
                 {
                     var properties = modelContext.Model.CreateBasicProperties();
 
-                    var context = new RabbitMqSendContextImpl<T>(properties, message, _sendSettings, cancelSend);
+                    var context = new RabbitMqSendContextImpl<T>(properties, message, _sendSettings, cancelSend, routingKey: _sendSettings.RoutingKey);
 
                     try
                     {
