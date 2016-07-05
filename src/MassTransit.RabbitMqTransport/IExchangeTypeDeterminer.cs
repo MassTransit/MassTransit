@@ -4,6 +4,6 @@ namespace MassTransit.RabbitMqTransport
 {
     public interface IExchangeTypeDeterminer
     {
-        string getTypeForExchangeName(String exchangeName);
+        string GetTypeForExchangeName(String exchangeName);
     }
 }

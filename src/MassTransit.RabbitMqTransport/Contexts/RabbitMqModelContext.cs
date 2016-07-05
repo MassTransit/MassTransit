@@ -109,7 +109,7 @@ namespace MassTransit.RabbitMqTransport.Contexts
 
         Task ModelContext.ExchangeDeclare(string exchange, IExchangeTypeDeterminer exchangeTypeDeterminer, bool durable, bool autoDelete, IDictionary<string, object> arguments)
         {
-            return Task.Factory.StartNew(() => _model.ExchangeDeclare(exchange, exchangeTypeDeterminer.getTypeForExchangeName(exchange), durable, autoDelete, arguments),
+            return Task.Factory.StartNew(() => _model.ExchangeDeclare(exchange, exchangeTypeDeterminer.GetTypeForExchangeName(exchange), durable, autoDelete, arguments),
                 _participant.StoppedToken, TaskCreationOptions.HideScheduler, _taskScheduler);
         }
 

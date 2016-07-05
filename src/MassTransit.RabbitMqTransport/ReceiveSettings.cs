@@ -79,6 +79,6 @@ namespace MassTransit.RabbitMqTransport
         /// <summary>
         /// Sets a dynamic routingkeyDeterminer which creates routingkeys based on messages that are subscribed to
         /// </summary>
-        IRoutingkeyFormatter RoutingkeyFormatter { get; }
+        IRoutingKeyFormatter RoutingKeyFormatter { get; }
     }
 }

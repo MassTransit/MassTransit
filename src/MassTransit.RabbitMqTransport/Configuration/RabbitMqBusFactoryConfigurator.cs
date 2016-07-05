@@ -45,7 +45,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
                 AutoDelete = true,
                 Durable = false,
                 ExchangeTypeDeterminer = new RabbitMqExchangeTypeDeterminer(),
-                RoutingkeyFormatter = new RabbitMqRoutingkeyFormatter()
+                RoutingKeyFormatter = new MasstransitRoutingKeyFormatter()
             };
 
             _settings.QueueArguments["x-expires"] = 60000;
@@ -108,9 +108,9 @@ namespace MassTransit.RabbitMqTransport.Configuration
             set { _settings.ExchangeTypeDeterminer = value; }
         }
 
-        public IRoutingkeyFormatter RoutingkeyFormatter
+        public IRoutingKeyFormatter RoutingKeyFormatter
         {
-            set { _settings.RoutingkeyFormatter = value; }
+            set { _settings.RoutingKeyFormatter = value; }
         }
 
         public bool PurgeOnStartup

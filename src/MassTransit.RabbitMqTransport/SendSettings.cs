@@ -51,7 +51,7 @@ namespace MassTransit.RabbitMqTransport
         /// <summary>
         /// The dynamic RabbitMQ exchange type determiner
         /// </summary>
-        IRoutingkeyFormatter RoutingkeyFormatter { get; set; }
+        IRoutingKeyFormatter RoutingKeyFormatter { get; set; }
 
         /// <summary>
         /// True if the exchange should be bound to a queue on send (for error queues, etc.)

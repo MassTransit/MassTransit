@@ -21,18 +21,18 @@ namespace MassTransit.RabbitMqTransport.Topology
 
     public static class RabbitMqExchangeBindingExtensions
     {
-        public static IEnumerable<ExchangeBindingSettings> GetExchangeBindings(this Type messageType, IMessageNameFormatter messageNameFormatter, IExchangeTypeDeterminer exchangeTypeDeterminer, IRoutingkeyFormatter routingkeyFormatter)
+        public static IEnumerable<ExchangeBindingSettings> GetExchangeBindings(this Type messageType, IMessageNameFormatter messageNameFormatter, IExchangeTypeDeterminer exchangeTypeDeterminer, IRoutingKeyFormatter routingKeyFormatter)
         {
             if (!IsBindableMessageType(messageType))
                 yield break;
 
             bool temporary = IsTemporaryMessageType(messageType);
 
-            var name = messageNameFormatter.GetMessageName(messageType).ToString();
+            var exchangeName = messageNameFormatter.GetMessageName(messageType).ToString();
 
-            var exchange = new Exchange(name, !temporary, temporary, exchangeTypeDeterminer);
+            var exchange = new Exchange(exchangeName, !temporary, temporary, exchangeTypeDeterminer);
             
-            var routingkey = routingkeyFormatter.createRoutingkeyForType(messageType);
+            var routingkey = routingKeyFormatter.CreateRoutingKeyForType(messageType);
             
             var binding = new ExchangeBinding(exchange, routingkey);
 
@@ -69,7 +69,7 @@ namespace MassTransit.RabbitMqTransport.Topology
         {
             var exchange = new Exchange(exchangeName, settings.Durable, settings.AutoDelete, settings.ExchangeTypeDeterminer);
             //TODO find a way for this to stay working while you want to implement routingkey structure
-            var binding = new ExchangeBinding(exchange/*, settings.RoutingkeyFormatter.createRoutingkeyForType()*/);
+            var binding = new ExchangeBinding(exchange/*, settings.RoutingKeyFormatter.createRoutingkeyForType()*/);
 
             yield return binding;
         }
@@ -90,7 +90,7 @@ namespace MassTransit.RabbitMqTransport.Topology
                 Durable = durable;
                 AutoDelete = autoDelete;
                 ExchangeTypeDeterminer = exchangeTypeDeterminer ?? new RabbitMqExchangeTypeDeterminer();
-                ExchangeType = ExchangeTypeDeterminer.getTypeForExchangeName(exchangeName);
+                ExchangeType = ExchangeTypeDeterminer.GetTypeForExchangeName(exchangeName);
                 Arguments = new Dictionary<string, object>();
             }
 

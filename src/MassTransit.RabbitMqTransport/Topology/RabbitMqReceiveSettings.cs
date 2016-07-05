@@ -44,14 +44,14 @@ namespace MassTransit.RabbitMqTransport.Topology
             AutoDelete = settings.AutoDelete;
             PurgeOnStartup = settings.PurgeOnStartup;
             ExchangeTypeDeterminer = settings.ExchangeTypeDeterminer ?? new RabbitMqExchangeTypeDeterminer();
-            RoutingkeyFormatter = settings.RoutingkeyFormatter ?? new RabbitMqRoutingkeyFormatter();
-            ExchangeType = settings.ExchangeType ?? ExchangeTypeDeterminer.getTypeForExchangeName(settings.ExchangeName ?? settings.QueueName);
+            RoutingKeyFormatter = settings.RoutingKeyFormatter ?? new MasstransitRoutingKeyFormatter();
+            ExchangeType = settings.ExchangeType ?? ExchangeTypeDeterminer.GetTypeForExchangeName(settings.ExchangeName ?? settings.QueueName);
             QueueArguments = new Dictionary<string, object>(settings.QueueArguments);
             ExchangeArguments = new Dictionary<string, object>(settings.ExchangeArguments);
         }
 
         public string RoutingKey { get; set; }
-        public IRoutingkeyFormatter RoutingkeyFormatter { get; set; }
+        public IRoutingKeyFormatter RoutingKeyFormatter { get; set; }
 
         public void SetQueueArgument(string key, object value)
         {

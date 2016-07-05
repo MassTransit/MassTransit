@@ -2,8 +2,8 @@
 
 namespace MassTransit.RabbitMqTransport
 {
-    public interface IRoutingkeyFormatter
+    public interface IRoutingKeyFormatter
     {
-        string createRoutingkeyForType(Type messageType);
+        string CreateRoutingKeyForType(Type messageType);
     }
 }

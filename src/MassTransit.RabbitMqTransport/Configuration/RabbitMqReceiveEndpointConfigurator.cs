@@ -48,7 +48,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
             {
                 QueueName = queueName,
                 ExchangeTypeDeterminer = _host.Settings.ExchangeTypeDeterminer ?? new RabbitMqExchangeTypeDeterminer(),
-                RoutingkeyFormatter = _host.Settings.RoutingkeyFormatter ?? new RabbitMqRoutingkeyFormatter()
+                RoutingKeyFormatter = _host.Settings.RoutingKeyFormatter ?? new MasstransitRoutingKeyFormatter()
             };
 
             _managementPipe = new ManagementPipe();
@@ -82,7 +82,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
             RabbitMqReceiveEndpointBuilder endpointBuilder = null;
             var receivePipe = CreateReceivePipe(builder, consumePipe =>
             {
-                endpointBuilder = new RabbitMqReceiveEndpointBuilder(consumePipe,  _host.Settings.MessageNameFormatter, _host.Settings.ExchangeTypeDeterminer, _host.Settings.RoutingkeyFormatter, _bindMessageExchanges);
+                endpointBuilder = new RabbitMqReceiveEndpointBuilder(consumePipe, _host.Settings.MessageNameFormatter, _host.Settings.ExchangeTypeDeterminer, _host.Settings.RoutingKeyFormatter, _bindMessageExchanges);
 
                 endpointBuilder.AddExchangeBindings(_exchangeBindings.ToArray());
 
@@ -196,7 +196,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
         public void Bind<T>()
             where T : class
         {
-            _exchangeBindings.AddRange(typeof(T).GetExchangeBindings(_host.Settings.MessageNameFormatter, _host.Settings.ExchangeTypeDeterminer, _host.Settings.RoutingkeyFormatter));
+            _exchangeBindings.AddRange(typeof(T).GetExchangeBindings(_host.Settings.MessageNameFormatter, _host.Settings.ExchangeTypeDeterminer, _host.Settings.RoutingKeyFormatter));
         }
 
         public void Bind(string exchangeName, Action<IExchangeBindingConfigurator> callback)
@@ -222,7 +222,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
         {
             var errorQueueName = _settings.QueueName + "_error";
             var sendSettings = new RabbitMqSendSettings(errorQueueName, _settings.Durable,
-                _settings.AutoDelete, _host.Settings.ExchangeTypeDeterminer, _host.Settings.RoutingkeyFormatter);
+                _settings.AutoDelete, _host.Settings.ExchangeTypeDeterminer, _host.Settings.RoutingKeyFormatter);
 
             sendSettings.BindToQueue(errorQueueName);
 
@@ -233,7 +233,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
         {
             var errorQueueName = _settings.QueueName + "_skipped";
             var sendSettings = new RabbitMqSendSettings(errorQueueName, _settings.Durable,
-                _settings.AutoDelete, _host.Settings.ExchangeTypeDeterminer, _host.Settings.RoutingkeyFormatter);
+                _settings.AutoDelete, _host.Settings.ExchangeTypeDeterminer, _host.Settings.RoutingKeyFormatter);
 
             sendSettings.BindToQueue(errorQueueName);
 
