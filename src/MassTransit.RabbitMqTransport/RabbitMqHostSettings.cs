@@ -105,7 +105,7 @@ namespace MassTransit.RabbitMqTransport
         /// <summary>
         /// The type determiner for the publisher
         /// </summary>
-        IExchangeTypeDeterminer ExchangeTypeDeterminer { get; }
+        IExchangeTypeProvider ExchangeTypeProvider { get; }
 
         /// <summary>
         /// The Routingkey formatter that can be configured to create routing keys for messages

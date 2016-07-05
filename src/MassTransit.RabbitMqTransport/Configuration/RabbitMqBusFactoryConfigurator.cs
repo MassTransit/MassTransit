@@ -44,7 +44,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
                 QueueName = queueName,
                 AutoDelete = true,
                 Durable = false,
-                ExchangeTypeDeterminer = new MasstransitExchangeTypeDeterminer(),
+                ExchangeTypeProvider = new MasstransitExchangeTypeProvider(),
                 RoutingKeyFormatter = new MasstransitRoutingKeyFormatter()
             };
 
@@ -103,9 +103,9 @@ namespace MassTransit.RabbitMqTransport.Configuration
             set { _settings.ExchangeType = value; }
         }
 
-        public IExchangeTypeDeterminer ExchangeTypeDeterminer
+        public IExchangeTypeProvider ExchangeTypeProvider
         {
-            set { _settings.ExchangeTypeDeterminer = value; }
+            set { _settings.ExchangeTypeProvider = value; }
         }
 
         public IRoutingKeyFormatter RoutingKeyFormatter

@@ -46,7 +46,7 @@ namespace MassTransit.RabbitMqTransport
         /// <summary>
         /// The dynamic RabbitMQ exchange type determiner
         /// </summary>
-        IExchangeTypeDeterminer ExchangeTypeDeterminer { get; set; }
+        IExchangeTypeProvider ExchangeTypeProvider { get; set; }
 
         /// <summary>
         /// The dynamic RabbitMQ exchange type determiner

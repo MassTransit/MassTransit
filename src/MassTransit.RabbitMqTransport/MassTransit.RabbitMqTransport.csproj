@@ -102,7 +102,7 @@
     <Compile Include="Hosting\RabbitMqHostBusFactory.cs" />
     <Compile Include="Hosting\RabbitMqServiceConfigurator.cs" />
     <Compile Include="Hosting\RabbitMqSettings.cs" />
-    <Compile Include="IExchangeTypeDeterminer.cs" />
+    <Compile Include="IExchangeTypeProvider.cs" />
     <Compile Include="Integration\IConnectionCache.cs" />
     <Compile Include="Integration\IModelCache.cs" />
     <Compile Include="Integration\PendingPublish.cs" />
@@ -148,7 +148,7 @@
     <Compile Include="RabbitMqSendContextExtensions.cs" />
     <Compile Include="RabbitMqSendEndpointProvider.cs" />
     <Compile Include="RabbitMqSendTransportProvider.cs" />
-    <Compile Include="MasstransitExchangeTypeDeterminer.cs" />
+    <Compile Include="MasstransitExchangeTypeProvider.cs" />
     <Compile Include="SequentialHostnameSelector.cs" />
     <Compile Include="ReceiveSettings.cs" />
     <Compile Include="RabbitMqReceiveTransport.cs" />

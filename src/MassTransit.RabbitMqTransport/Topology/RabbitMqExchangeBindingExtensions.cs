@@ -21,7 +21,7 @@ namespace MassTransit.RabbitMqTransport.Topology
 
     public static class RabbitMqExchangeBindingExtensions
     {
-        public static IEnumerable<ExchangeBindingSettings> GetExchangeBindings(this Type messageType, IMessageNameFormatter messageNameFormatter, IExchangeTypeDeterminer exchangeTypeDeterminer, IRoutingKeyFormatter routingKeyFormatter)
+        public static IEnumerable<ExchangeBindingSettings> GetExchangeBindings(this Type messageType, IMessageNameFormatter messageNameFormatter, IExchangeTypeProvider exchangeTypeProvider, IRoutingKeyFormatter routingKeyFormatter)
         {
             if (!IsBindableMessageType(messageType))
                 yield break;
@@ -30,7 +30,7 @@ namespace MassTransit.RabbitMqTransport.Topology
 
             var exchangeName = messageNameFormatter.GetMessageName(messageType).ToString();
 
-            var exchange = new Exchange(exchangeName, !temporary, temporary, exchangeTypeDeterminer);
+            var exchange = new Exchange(exchangeName, !temporary, temporary, exchangeTypeProvider);
             
             var routingkey = routingKeyFormatter.CreateRoutingKeyForType(messageType);
             
@@ -67,7 +67,7 @@ namespace MassTransit.RabbitMqTransport.Topology
 
         public static IEnumerable<ExchangeBindingSettings> GetExchangeBindings(this ReceiveSettings settings, string exchangeName)
         {
-            var exchange = new Exchange(exchangeName, settings.Durable, settings.AutoDelete, settings.ExchangeTypeDeterminer);
+            var exchange = new Exchange(exchangeName, settings.Durable, settings.AutoDelete, settings.ExchangeTypeProvider);
             //TODO find a way for this to stay working while you want to implement routingkey structure
             var binding = new ExchangeBinding(exchange/*, settings.RoutingKeyFormatter.createRoutingkeyForType()*/);
 
@@ -84,19 +84,19 @@ namespace MassTransit.RabbitMqTransport.Topology
         class Exchange :
             ExchangeSettings
         {
-            public Exchange(string exchangeName, bool durable, bool autoDelete, IExchangeTypeDeterminer exchangeTypeDeterminer = null)
+            public Exchange(string exchangeName, bool durable, bool autoDelete, IExchangeTypeProvider exchangeTypeProvider = null)
             {
                 ExchangeName = exchangeName;
                 Durable = durable;
                 AutoDelete = autoDelete;
-                ExchangeTypeDeterminer = exchangeTypeDeterminer ?? new MasstransitExchangeTypeDeterminer();
-                ExchangeType = ExchangeTypeDeterminer.GetTypeForExchangeName(exchangeName);
+                ExchangeTypeProvider = exchangeTypeProvider ?? new MasstransitExchangeTypeProvider();
+                ExchangeType = ExchangeTypeProvider.GetTypeForExchangeName(exchangeName);
                 Arguments = new Dictionary<string, object>();
             }
 
             public string ExchangeName { get; }
             public string ExchangeType { get; }
-            public IExchangeTypeDeterminer ExchangeTypeDeterminer { get; }
+            public IExchangeTypeProvider ExchangeTypeProvider { get; }
             public bool Durable { get; }
             public bool AutoDelete { get; }
             public IDictionary<string, object> Arguments { get; }

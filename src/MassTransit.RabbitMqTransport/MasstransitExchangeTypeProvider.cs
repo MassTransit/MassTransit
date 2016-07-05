@@ -4,7 +4,7 @@
     /// The default class for determining the type of an exchange
     /// For the Masstransit routing logic only fanout exchanges need to be made
     /// </summary>
-    public class MasstransitExchangeTypeDeterminer: IExchangeTypeDeterminer
+    public class MasstransitExchangeTypeProvider: IExchangeTypeProvider
     {
         public string GetTypeForExchangeName(string exchangeName)
         {

@@ -43,9 +43,9 @@ namespace MassTransit.RabbitMqTransport.Topology
             Exclusive = settings.Exclusive;
             AutoDelete = settings.AutoDelete;
             PurgeOnStartup = settings.PurgeOnStartup;
-            ExchangeTypeDeterminer = settings.ExchangeTypeDeterminer ?? new MasstransitExchangeTypeDeterminer();
+            ExchangeTypeProvider = settings.ExchangeTypeProvider ?? new MasstransitExchangeTypeProvider();
             RoutingKeyFormatter = settings.RoutingKeyFormatter ?? new MasstransitRoutingKeyFormatter();
-            ExchangeType = settings.ExchangeType ?? ExchangeTypeDeterminer.GetTypeForExchangeName(settings.ExchangeName ?? settings.QueueName);
+            ExchangeType = settings.ExchangeType ?? ExchangeTypeProvider.GetTypeForExchangeName(settings.ExchangeName ?? settings.QueueName);
             QueueArguments = new Dictionary<string, object>(settings.QueueArguments);
             ExchangeArguments = new Dictionary<string, object>(settings.ExchangeArguments);
         }
@@ -95,6 +95,6 @@ namespace MassTransit.RabbitMqTransport.Topology
         public IDictionary<string, object> ExchangeArguments { get; }
         public bool PurgeOnStartup { get; set; }
         public string ExchangeType { get; set; }
-        public IExchangeTypeDeterminer ExchangeTypeDeterminer { get; set; }
+        public IExchangeTypeProvider ExchangeTypeProvider { get; set; }
     }
 }
