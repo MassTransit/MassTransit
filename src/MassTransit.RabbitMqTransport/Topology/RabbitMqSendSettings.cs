@@ -56,6 +56,8 @@ namespace MassTransit.RabbitMqTransport.Topology
 
         bool SendSettings.BindToQueue => _bindToQueue;
 
+        public string RoutingKey { get; }
+
         public string QueueName => _queueName;
 
         public IDictionary<string, object> QueueArguments => _queueArguments;

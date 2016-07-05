@@ -61,6 +61,8 @@ namespace MassTransit.RabbitMqTransport
         /// <summary>
         /// The exchange bindings for the send
         /// </summary>
-        IEnumerable<ExchangeBindingSettings> ExchangeBindings { get; } 
+        IEnumerable<ExchangeBindingSettings> ExchangeBindings { get; }
+
+        string RoutingKey { get; }
     }
 }

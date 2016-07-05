@@ -13,6 +13,7 @@
 namespace MassTransit.RabbitMqTransport.Configuration.Configurators
 {
     using System;
+    using Transports;
 
 
     public class RabbitMqHostConfigurator :
@@ -90,6 +91,12 @@ namespace MassTransit.RabbitMqTransport.Configuration.Configurators
                 return segments[0];
 
             throw new FormatException("The host path must be empty or contain a single virtual host name");
+
+        }
+
+        public void MessageNameFormatter(IMessageNameFormatter messageNameFormatter)
+        {
+            _settings.MessageNameFormatter = messageNameFormatter;
         }
     }
 }

@@ -157,6 +157,7 @@
     <Compile Include="Testing\RabbitMqBusTestScenarioBuilder.cs" />
     <Compile Include="Topology\ExchangeBindingSettings.cs" />
     <Compile Include="Topology\ExchangeSettings.cs" />
+    <Compile Include="Topology\IRabbitMqMessageExchangeBuilder.cs" />
     <Compile Include="Topology\RabbitMqExchangeBindingExtensions.cs" />
     <Compile Include="Topology\RabbitMqHostEqualityComparer.cs" />
     <Compile Include="Topology\RabbitMqReceiveSettings.cs" />
