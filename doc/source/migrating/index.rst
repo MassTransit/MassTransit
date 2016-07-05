@@ -75,7 +75,7 @@ is no longer five attempts before moving to the error queue.
 
             busControl.Start();
 
-            PublishMessage(bus)
+            PublishMessage(busControl)
                 .Wait();
 
             busControl.Stop();
