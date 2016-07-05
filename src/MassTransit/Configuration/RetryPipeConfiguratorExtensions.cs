@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -16,6 +16,7 @@ namespace MassTransit
     using System.Threading;
     using PipeConfigurators;
     using Policies;
+    using Saga;
 
 
     public static class RetryPipeConfiguratorExtensions
@@ -37,6 +38,28 @@ namespace MassTransit
                 throw new ArgumentNullException(nameof(configurator));
 
             var pipeBuilderConfigurator = new RetryPipeSpecification<T>(retryPolicy);
+
+            configurator.AddPipeSpecification(pipeBuilderConfigurator);
+        }
+
+        public static void UseRetry<TConsumer>(this IPipeConfigurator<ConsumerConsumeContext<TConsumer>> configurator, IRetryPolicy retryPolicy)
+            where TConsumer : class
+        {
+            if (configurator == null)
+                throw new ArgumentNullException(nameof(configurator));
+
+            var pipeBuilderConfigurator = new RetryConsumerPipeSpecification<TConsumer>(retryPolicy);
+
+            configurator.AddPipeSpecification(pipeBuilderConfigurator);
+        }
+
+        public static void UseRetry<TSaga>(this IPipeConfigurator<SagaConsumeContext<TSaga>> configurator, IRetryPolicy retryPolicy)
+            where TSaga : class, ISaga
+        {
+            if (configurator == null)
+                throw new ArgumentNullException(nameof(configurator));
+
+            var pipeBuilderConfigurator = new RetrySagaPipeSpecification<TSaga>(retryPolicy);
 
             configurator.AddPipeSpecification(pipeBuilderConfigurator);
         }

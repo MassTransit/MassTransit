@@ -106,6 +106,60 @@ namespace MassTransit.Tests
         }
     }
 
+    [TestFixture]
+    public class When_specifying_retry_for_the_consumer :
+        InMemoryTestFixture
+    {
+        [Test]
+        public async Task Should_only_call_the_handler_once()
+        {
+            Task<ConsumeContext<Fault<PingMessage>>> fault = SubscribeHandler<Fault<PingMessage>>();
+
+            await InputQueueSendEndpoint.Send(new PingMessage(), context =>
+            {
+                context.ResponseAddress = BusAddress;
+                context.FaultAddress = BusAddress;
+
+                return TaskUtil.Completed;
+            });
+            await fault;
+
+            Consumer.Attempts.ShouldBe(6);
+        }
+
+        [Test]
+        public void Should_return_a_wonderful_breakdown_of_the_guts_inside_it()
+        {
+            ProbeResult result = Bus.GetProbeResult();
+
+            Console.WriteLine(result.ToJsonString());
+        }
+
+        int _attempts;
+
+        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        {
+            configurator.Consumer(() => new Consumer(), x =>
+            {
+                x.UseRetry(Retry.Immediate(5));
+            });
+        }
+
+
+        class Consumer :
+            IConsumer<PingMessage>
+        {
+            public static int Attempts;
+
+            public Task Consume(ConsumeContext<PingMessage> context)
+            {
+                Interlocked.Increment(ref Attempts);
+
+                throw new IntentionalTestException();
+            }
+        }
+    }
+
 
     [TestFixture]
     public class When_specifying_the_bus_level_retry_policy :
