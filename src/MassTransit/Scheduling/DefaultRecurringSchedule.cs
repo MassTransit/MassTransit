@@ -34,6 +34,6 @@ namespace MassTransit.Scheduling
         public string ScheduleId { get; private set; }
         public string ScheduleGroup { get; private set; }
         public string CronExpression { get; protected set; }
-        public string Description { get;protected set; }
+        public string Description { get; protected set; }
     }
 }
