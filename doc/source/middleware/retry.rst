@@ -25,21 +25,6 @@ To configure the retry policy for a receive endpoint.
         });
     });
 
-To configure the retry policy for a specific consumer on an endpoint.
-
-.. sourcecode:: csharp
-
-    Bus.Factory.CreateUsingInMemory(cfg =>
-    {
-        cfg.ReceiveEndpoint("inbound", ep =>
-        {
-            ep.Consumer<MyConsumer>(consumerCfg =>
-            {
-                consumerCfg.UseRetry(Retry.Interval(10, 200));
-            })
-        });
-    });
-
 Retry Policies
 --------------
 
