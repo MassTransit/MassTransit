@@ -43,7 +43,7 @@ namespace MassTransit.RabbitMqTransport.Topology
             Exclusive = settings.Exclusive;
             AutoDelete = settings.AutoDelete;
             PurgeOnStartup = settings.PurgeOnStartup;
-            ExchangeTypeDeterminer = settings.ExchangeTypeDeterminer ?? new RabbitMqExchangeTypeDeterminer();
+            ExchangeTypeDeterminer = settings.ExchangeTypeDeterminer ?? new MasstransitExchangeTypeDeterminer();
             RoutingKeyFormatter = settings.RoutingKeyFormatter ?? new MasstransitRoutingKeyFormatter();
             ExchangeType = settings.ExchangeType ?? ExchangeTypeDeterminer.GetTypeForExchangeName(settings.ExchangeName ?? settings.QueueName);
             QueueArguments = new Dictionary<string, object>(settings.QueueArguments);

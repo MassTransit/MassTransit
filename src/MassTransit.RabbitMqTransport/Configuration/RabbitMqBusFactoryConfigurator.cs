@@ -44,7 +44,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
                 QueueName = queueName,
                 AutoDelete = true,
                 Durable = false,
-                ExchangeTypeDeterminer = new RabbitMqExchangeTypeDeterminer(),
+                ExchangeTypeDeterminer = new MasstransitExchangeTypeDeterminer(),
                 RoutingKeyFormatter = new MasstransitRoutingKeyFormatter()
             };
 

@@ -25,7 +25,7 @@ namespace MassTransit.RabbitMqTransport.Configuration.Configurators
         public ConfigurationHostSettings()
         {
             MessageNameFormatter = new RabbitMqMessageNameFormatter();
-            ExchangeTypeDeterminer = new RabbitMqExchangeTypeDeterminer();
+            ExchangeTypeDeterminer = new MasstransitExchangeTypeDeterminer();
             RoutingKeyFormatter = new MasstransitRoutingKeyFormatter();
 
             var connectionFactory = new ConnectionFactory();

@@ -148,7 +148,7 @@
     <Compile Include="RabbitMqSendContextExtensions.cs" />
     <Compile Include="RabbitMqSendEndpointProvider.cs" />
     <Compile Include="RabbitMqSendTransportProvider.cs" />
-    <Compile Include="RabbitMqExchangeTypeDeterminer.cs" />
+    <Compile Include="MasstransitExchangeTypeDeterminer.cs" />
     <Compile Include="SequentialHostnameSelector.cs" />
     <Compile Include="ReceiveSettings.cs" />
     <Compile Include="RabbitMqReceiveTransport.cs" />

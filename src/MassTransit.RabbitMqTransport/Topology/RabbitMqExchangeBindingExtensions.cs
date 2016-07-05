@@ -89,7 +89,7 @@ namespace MassTransit.RabbitMqTransport.Topology
                 ExchangeName = exchangeName;
                 Durable = durable;
                 AutoDelete = autoDelete;
-                ExchangeTypeDeterminer = exchangeTypeDeterminer ?? new RabbitMqExchangeTypeDeterminer();
+                ExchangeTypeDeterminer = exchangeTypeDeterminer ?? new MasstransitExchangeTypeDeterminer();
                 ExchangeType = ExchangeTypeDeterminer.GetTypeForExchangeName(exchangeName);
                 Arguments = new Dictionary<string, object>();
             }

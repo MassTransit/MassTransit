@@ -29,7 +29,7 @@ namespace MassTransit.RabbitMqTransport.Topology
         public RabbitMqSendSettings(string exchangeName, bool durable, bool autoDelete, IExchangeTypeDeterminer exchangeTypeDeterminer = null, IRoutingKeyFormatter routingKeyFormatter = null, string exchangeType = null)
         {
             ExchangeName = exchangeName;
-            ExchangeTypeDeterminer = exchangeTypeDeterminer ?? new RabbitMqExchangeTypeDeterminer();
+            ExchangeTypeDeterminer = exchangeTypeDeterminer ?? new MasstransitExchangeTypeDeterminer();
             ExchangeType = exchangeType ?? ExchangeTypeDeterminer.GetTypeForExchangeName(ExchangeName);
             RoutingKeyFormatter = routingKeyFormatter ?? new MasstransitRoutingKeyFormatter();
             Durable = durable;

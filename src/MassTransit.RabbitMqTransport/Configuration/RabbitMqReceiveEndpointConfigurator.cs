@@ -47,7 +47,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
             _settings = new RabbitMqReceiveSettings
             {
                 QueueName = queueName,
-                ExchangeTypeDeterminer = _host.Settings.ExchangeTypeDeterminer ?? new RabbitMqExchangeTypeDeterminer(),
+                ExchangeTypeDeterminer = _host.Settings.ExchangeTypeDeterminer ?? new MasstransitExchangeTypeDeterminer(),
                 RoutingKeyFormatter = _host.Settings.RoutingKeyFormatter ?? new MasstransitRoutingKeyFormatter()
             };
 
