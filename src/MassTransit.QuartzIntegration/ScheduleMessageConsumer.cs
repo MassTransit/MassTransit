@@ -88,7 +88,7 @@ namespace MassTransit.QuartzIntegration
                 .ForJob(jobDetail)
                 .WithIdentity(triggerKey)
                 .StartAt(schedule.StartTime)
-                .WithDescription(schedule?.Description)
+                .WithDescription(schedule.Description)
                 .WithCronSchedule(schedule.CronExpression, x =>
                 {
                     x.InTimeZone(tz);
