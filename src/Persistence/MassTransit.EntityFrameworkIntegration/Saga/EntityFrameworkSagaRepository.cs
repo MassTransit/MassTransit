@@ -82,6 +82,9 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
             using (DbContext dbContext = _sagaDbContextFactory())
             using(var transaction = dbContext.Database.BeginTransaction(_isolationLevel))
             {
+                var tableName = ((IObjectContextAdapter)dbContext).ObjectContext.CreateObjectSet<TSaga>().EntitySet.Name;
+                dbContext.Set<TSaga>().SqlQuery($"select * from {tableName} WITH (UPDLOCK, ROWLOCK) WHERE CorrelationId = @p0", sagaId).ToList();
+
                 bool inserted = false;
 
                 TSaga instance;
