@@ -44,12 +44,12 @@ namespace MassTransit.RabbitMqTransport
         string ExchangeType { get; }
 
         /// <summary>
-        /// The dynamic RabbitMQ exchange type determiner
+        /// The dynamic RabbitMQ exchange type provider
         /// </summary>
         IExchangeTypeProvider ExchangeTypeProvider { get; set; }
 
         /// <summary>
-        /// The dynamic RabbitMQ exchange type determiner
+        /// The dynamic RabbitMQ routingkey provider
         /// </summary>
         IRoutingKeyFormatter RoutingKeyFormatter { get; set; }
 

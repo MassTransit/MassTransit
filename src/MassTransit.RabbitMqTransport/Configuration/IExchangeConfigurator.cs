@@ -34,7 +34,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
         string ExchangeType { set; }
 
         /// <summary>
-        /// Specify a dynamic exchangeType determiner for the endpoint
+        /// Specify a dynamic exchangeTypeProvider for the endpoint
         /// </summary>
         IExchangeTypeProvider ExchangeTypeProvider { set; }
 

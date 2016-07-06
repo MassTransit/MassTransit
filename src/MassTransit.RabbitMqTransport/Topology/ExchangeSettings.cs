@@ -31,7 +31,7 @@ namespace MassTransit.RabbitMqTransport.Topology
         string ExchangeType { get; }
 
         /// <summary>
-        /// The dynamic exchange type determiner
+        /// The dynamic exchange type provider
         /// </summary>
         IExchangeTypeProvider ExchangeTypeProvider { get; }
 

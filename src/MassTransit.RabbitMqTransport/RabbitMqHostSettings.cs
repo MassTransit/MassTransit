@@ -103,7 +103,7 @@ namespace MassTransit.RabbitMqTransport
         IMessageNameFormatter MessageNameFormatter { get; }
 
         /// <summary>
-        /// The type determiner for the publisher
+        /// The type provider for the publisher
         /// </summary>
         IExchangeTypeProvider ExchangeTypeProvider { get; }
 
