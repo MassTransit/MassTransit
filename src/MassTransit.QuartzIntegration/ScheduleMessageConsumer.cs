@@ -78,20 +78,21 @@ namespace MassTransit.QuartzIntegration
                 _scheduler.ScheduleJob(jobDetail, trigger);
         }
 
-        ITrigger CreateTrigger(RecurringSchedule message, IJobDetail jobDetail, TriggerKey triggerKey)
+        ITrigger CreateTrigger(RecurringSchedule schedule, IJobDetail jobDetail, TriggerKey triggerKey)
         {
             TimeZoneInfo tz = TimeZoneInfo.Local;
-            if (!string.IsNullOrWhiteSpace(message.TimeZoneId) && message.TimeZoneId != tz.Id)
-                tz = TimeZoneInfo.FindSystemTimeZoneById(message.TimeZoneId);
+            if (!string.IsNullOrWhiteSpace(schedule.TimeZoneId) && schedule.TimeZoneId != tz.Id)
+                tz = TimeZoneInfo.FindSystemTimeZoneById(schedule.TimeZoneId);
 
             TriggerBuilder triggerBuilder = TriggerBuilder.Create()
                 .ForJob(jobDetail)
                 .WithIdentity(triggerKey)
-                .StartAt(message.StartTime)
-                .WithCronSchedule(message.CronExpression, x =>
+                .StartAt(schedule.StartTime)
+                .WithDescription(schedule.Description)
+                .WithCronSchedule(schedule.CronExpression, x =>
                 {
                     x.InTimeZone(tz);
-                    switch (message.MisfirePolicy)
+                    switch (schedule.MisfirePolicy)
                     {
                         case MissedEventPolicy.Skip:
                             x.WithMisfireHandlingInstructionDoNothing();
@@ -102,8 +103,8 @@ namespace MassTransit.QuartzIntegration
                     }
                 });
 
-            if (message.EndTime.HasValue)
-                triggerBuilder.EndAt(message.EndTime);
+            if (schedule.EndTime.HasValue)
+                triggerBuilder.EndAt(schedule.EndTime);
 
             return triggerBuilder.Build();
         }
