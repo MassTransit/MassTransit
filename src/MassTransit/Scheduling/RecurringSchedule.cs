@@ -48,6 +48,11 @@ namespace MassTransit.Scheduling
         /// </summary>
         string CronExpression { get; }
 
+        /// <summary>
+        /// Schedule description
+        /// </summary>
+        string Description { get; }
+
         MissedEventPolicy MisfirePolicy { get; }
     }
 }
