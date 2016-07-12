@@ -4,6 +4,7 @@ open Fake
 open Fake.AssemblyInfoFile
 open Fake.Git.Information
 open Fake.SemVerHelper
+open System
 
 let buildOutputPath = "./build_output"
 let buildArtifactPath = "./build_artifacts"
@@ -12,7 +13,7 @@ let packagesPath = FullName "./src/packages"
 let keyFile = FullName "./MassTransit.snk"
 
 let assemblyVersion = "3.3.1.0"
-let baseVersion = "3.3.6"
+let baseVersion = "3.3.5"
 
 let semVersion : SemVerInfo = parse baseVersion
 
@@ -107,6 +108,21 @@ Target "Build" (fun _ ->
   build unsignedSetParams @".\src\MassTransit.sln"
       |> DoNothing
 )
+
+let gitLink = (packagesPath @@ "gitlink" @@ "lib" @@ "net45" @@ "GitLink.exe")
+
+Target "GitLink" (fun _ ->
+
+    if String.IsNullOrWhiteSpace(gitLink) then failwith "Couldn't find GitLink.exe in the packages folder"
+
+    let ok =
+        execProcess (fun info ->
+            info.FileName <- gitLink
+            info.Arguments <- __SOURCE_DIRECTORY__) (TimeSpan.FromSeconds 30.0)
+    if not ok then failwith (sprintf "GitLink.exe %s' task failed" __SOURCE_DIRECTORY__)
+
+)
+
 
 let testDlls = [ "./src/MassTransit.Tests/bin/Release/MassTransit.Tests.dll"
                  "./src/MassTransit.AutomatonymousIntegration.Tests/bin/Release/MassTransit.AutomatonymousIntegration.Tests.dll" ]
@@ -270,6 +286,7 @@ Target "Default" (fun _ ->
 "Clean"
   ==> "RestorePackages"
   ==> "Build"
+  ==> "GitLink"
   ==> "Package"
   ==> "Default"
 
