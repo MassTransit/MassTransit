@@ -68,8 +68,8 @@ namespace MassTransit.RabbitMqTransport.Topology
         public static IEnumerable<ExchangeBindingSettings> GetExchangeBindings(this ReceiveSettings settings, string exchangeName)
         {
             var exchange = new Exchange(exchangeName, settings.Durable, settings.AutoDelete, settings.ExchangeTypeProvider);
-            //TODO find a way for this to stay working while you want to implement routingkey structure
-            var binding = new ExchangeBinding(exchange/*, settings.RoutingKeyFormatter.createRoutingkeyForType()*/);
+
+            var binding = new ExchangeBinding(exchange);
 
             yield return binding;
         }
