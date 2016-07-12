@@ -14,6 +14,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
 {
     using System;
     using System.Linq;
+    using System.Threading.Tasks;
     using Automatonymous;
     using NUnit.Framework;
     using Testing;
@@ -23,7 +24,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
     public class Using_the_testing_framework_built_into_masstransit
     {
         [Test]
-        public void Should_handle_the_initial_state()
+        public async Task Should_handle_the_initial_state()
         {
             Guid sagaId = Guid.NewGuid();
 
@@ -37,7 +38,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
                         });
                 });
 
-            test.ExecuteAsync();
+            await test.ExecuteAsync();
 
             Assert.IsTrue(test.Received.Select<Start>().Any(), "Message not received");
 
@@ -48,7 +49,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
         }
 
         [Test]
-        public void Should_handle_the_stop_state()
+        public async Task Should_handle_the_stop_state()
         {
             Guid sagaId = Guid.NewGuid();
 
@@ -66,7 +67,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
                         });
                 });
 
-            test.ExecuteAsync();
+            await test.ExecuteAsync();
 
             Assert.IsTrue(test.Received.Select<Start>().Any(), "Start not received");
             Assert.IsTrue(test.Received.Select<Stop>().Any(), "Stop not received");

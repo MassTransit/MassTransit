@@ -78,13 +78,13 @@ namespace MassTransit.Tests
                 });
         }
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void BusActivityMonitor_SpecsSetup()
         {
             _retryEnumerator = GetNextRetryPolicy().GetEnumerator();
         }
 
-        [TestFixtureTearDown]
+        [OneTimeTearDown]
         public void BusActivityMonitor_SpecsTeardown()
         {
             _retryEnumerator?.Dispose();

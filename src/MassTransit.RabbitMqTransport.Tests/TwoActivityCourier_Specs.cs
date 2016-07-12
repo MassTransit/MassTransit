@@ -118,7 +118,7 @@ namespace MassTransit.RabbitMqTransport.Tests
                 Handled<RoutingSlipActivityCompleted>(configurator, context => context.Message.ActivityName.Equals(secondActivity.Name));
         }
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void Setup()
         {
             var builder = new RoutingSlipBuilder(Guid.NewGuid());
@@ -174,7 +174,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             _completed = Handled<RoutingSlipCompleted>(configurator);
         }
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void Setup()
         {
             var builder = new RoutingSlipBuilder(Guid.NewGuid());
@@ -245,7 +245,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             });
         }
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void Setup()
         {
             _limit = 100;
@@ -313,7 +313,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             });
         }
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void Setup()
         {
             _limit = 1;

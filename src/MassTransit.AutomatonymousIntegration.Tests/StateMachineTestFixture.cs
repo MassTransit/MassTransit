@@ -61,7 +61,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
             configurator.UseInMemoryScheduler();
         }
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void Setup_quartz_service()
         {
             _scheduler.JobFactory = new MassTransitJobFactory(Bus);
@@ -70,7 +70,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
             _quartzQueueSendEndpoint = GetSendEndpoint(_quartzQueueAddress).Result;
         }
 
-        [TestFixtureTearDown]
+        [OneTimeTearDown]
         public void Teardown_quartz_service()
         {
             _scheduler?.Standby();

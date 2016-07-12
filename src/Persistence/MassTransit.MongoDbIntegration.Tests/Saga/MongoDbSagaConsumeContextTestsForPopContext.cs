@@ -30,7 +30,7 @@ namespace MassTransit.MongoDbIntegration.Tests.Saga
 
         SagaConsumeContext<SimpleSaga, InitiateSimpleSaga> _context;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void GivenAMongoDbSagaConsumeContext_WhenPoppingContext()
         {
             var mongoDbSagaConsumeContext = new MongoDbSagaConsumeContext<SimpleSaga, InitiateSimpleSaga>(Mock.Of<IMongoCollection<SimpleSaga>>(),

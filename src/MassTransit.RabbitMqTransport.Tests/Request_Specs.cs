@@ -35,7 +35,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         Task<PongMessage> _response;
         IRequestClient<PingMessage, PongMessage> _requestClient;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void Setup()
         {
             _requestClient = new MessageRequestClient<PingMessage, PongMessage>(Bus, InputQueueAddress, TimeSpan.FromSeconds(8),
@@ -66,7 +66,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         Task<PongMessage> _response;
         IRequestClient<PingMessage, PongMessage> _requestClient;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void Setup()
         {
             _requestClient = new MessageRequestClient<PingMessage, PongMessage>(Bus, InputQueueAddress, TimeSpan.FromSeconds(8),
@@ -96,14 +96,14 @@ namespace MassTransit.RabbitMqTransport.Tests
         [Test]
         public void Should_timeout()
         {
-            Assert.Throws<RequestTimeoutException>(async () => await _response);
+            Assert.That(async () => await _response, Throws.TypeOf<RequestTimeoutException>());
         }
 
         Task<ConsumeContext<PingMessage>> _ping;
         Task<PongMessage> _response;
         IRequestClient<PingMessage, PongMessage> _requestClient;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void Setup()
         {
             _requestClient = new MessageRequestClient<PingMessage, PongMessage>(Bus, InputQueueAddress, TimeSpan.FromSeconds(1));
@@ -120,14 +120,14 @@ namespace MassTransit.RabbitMqTransport.Tests
         [Test]
         public void Should_receive_the_exception()
         {
-            Assert.Throws<RequestFaultException>(async () => await _response);
+            Assert.That(async () => await _response, Throws.TypeOf<RequestFaultException>());
         }
 
         Task<ConsumeContext<PingMessage>> _ping;
         Task<PongMessage> _response;
         IRequestClient<PingMessage, PongMessage> _requestClient;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void Setup()
         {
             _requestClient = new MessageRequestClient<PingMessage, PongMessage>(Bus, InputQueueAddress, TimeSpan.FromSeconds(8));

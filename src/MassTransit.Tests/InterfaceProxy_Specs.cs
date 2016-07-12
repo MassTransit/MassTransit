@@ -67,7 +67,7 @@ namespace MassTransit.Tests
         Task<ConsumeContext<IProxyMe>> _handler;
         const string UriString = "http://localhost/";
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void Setup()
         {
             InputQueueSendEndpoint.Send<IProxyMe>(new

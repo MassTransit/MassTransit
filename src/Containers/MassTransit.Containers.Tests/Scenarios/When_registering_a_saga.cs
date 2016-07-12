@@ -13,6 +13,7 @@
 namespace MassTransit.Containers.Tests.Scenarios
 {
     using System;
+    using System.Threading.Tasks;
     using NUnit.Framework;
     using Saga;
     using Shouldly;
@@ -23,7 +24,7 @@ namespace MassTransit.Containers.Tests.Scenarios
         Given_a_service_bus_instance
     {
         [Test]
-        public async void Should_have_a_subscription_for_the_first_saga_message()
+        public async Task Should_have_a_subscription_for_the_first_saga_message()
         {
             Guid sagaId = NewId.NextGuid();
 
@@ -37,7 +38,7 @@ namespace MassTransit.Containers.Tests.Scenarios
         }
 
         [Test]
-        public async void Should_have_a_subscription_for_the_second_saga_message()
+        public async Task Should_have_a_subscription_for_the_second_saga_message()
         {
             Guid sagaId = NewId.NextGuid();
 
@@ -59,7 +60,7 @@ namespace MassTransit.Containers.Tests.Scenarios
         }
 
         [Test]
-        public async void Should_have_a_subscription_for_the_third_saga_message()
+        public async Task Should_have_a_subscription_for_the_third_saga_message()
         {
             Guid sagaId = NewId.NextGuid();
 

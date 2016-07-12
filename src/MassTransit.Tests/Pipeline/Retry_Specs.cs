@@ -44,7 +44,7 @@ namespace MassTransit.Tests.Pipeline
 
             var context = new TestConsumeContext<A>(new A());
 
-            var exception = Assert.Throws<IntentionalTestException>(async () => await pipe.Send(context));
+            Assert.That(async () => await pipe.Send(context), Throws.TypeOf<IntentionalTestException>());
 
             count.ShouldBe(5);
         }
@@ -66,7 +66,7 @@ namespace MassTransit.Tests.Pipeline
 
             var context = new TestConsumeContext<A>(new A());
 
-            var exception = Assert.Throws<IntentionalTestException>(async () => await pipe.Send(context));
+            Assert.That(async () => await pipe.Send(context), Throws.TypeOf<IntentionalTestException>());
 
             count.ShouldBe(1);
         }
@@ -88,7 +88,7 @@ namespace MassTransit.Tests.Pipeline
 
             var context = new TestConsumeContext<A>(new A());
 
-            var exception = Assert.Throws<IntentionalTestException>(async () => await pipe.Send(context));
+            Assert.That(async () => await pipe.Send(context), Throws.TypeOf<IntentionalTestException>());
 
             count.ShouldBe(5);
         }

@@ -51,7 +51,7 @@ namespace MassTransit.Tests.Saga
             _repository = new InMemorySagaRepository<SimpleSaga>();
         }
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void Setup()
         {
             _sagaId = Guid.NewGuid();
@@ -102,7 +102,7 @@ namespace MassTransit.Tests.Saga
             _repository = new InMemorySagaRepository<SimpleSaga>();
         }
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void Setup()
         {
             _sagaId = Guid.NewGuid();
@@ -141,7 +141,7 @@ namespace MassTransit.Tests.Saga
             _repository = new InMemorySagaRepository<SimpleSaga>();
         }
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void Setup()
         {
             _sagaId = Guid.NewGuid();
@@ -180,7 +180,7 @@ namespace MassTransit.Tests.Saga
             _repository = new InMemorySagaRepository<SimpleSaga>();
         }
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void Setup()
         {
             _sagaId = Guid.NewGuid();
@@ -218,7 +218,7 @@ namespace MassTransit.Tests.Saga
             }
         }
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void SetUp()
         {
             _sagaId = Guid.NewGuid();

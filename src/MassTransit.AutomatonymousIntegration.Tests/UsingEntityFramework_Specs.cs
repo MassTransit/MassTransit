@@ -49,7 +49,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
             _repository = new Lazy<ISagaRepository<ShoppingChore>>(() => new EntityFrameworkSagaRepository<ShoppingChore>(_sagaDbContextFactory));
         }
 
-        [TestFixtureTearDown]
+        [OneTimeTearDown]
         public void Teardown()
         {
         }
