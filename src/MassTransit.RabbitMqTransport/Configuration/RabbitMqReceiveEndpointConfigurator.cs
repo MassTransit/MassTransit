@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -24,7 +24,6 @@ namespace MassTransit.RabbitMqTransport.Configuration
     using MassTransit.Pipeline.Pipes;
     using Topology;
     using Transports;
-    using Util;
 
 
     public class RabbitMqReceiveEndpointConfigurator :
@@ -32,10 +31,10 @@ namespace MassTransit.RabbitMqTransport.Configuration
         IRabbitMqReceiveEndpointConfigurator,
         IBusFactorySpecification
     {
+        readonly List<ExchangeBindingSettings> _exchangeBindings;
         readonly IRabbitMqHost _host;
         readonly IManagementPipe _managementPipe;
         readonly RabbitMqReceiveSettings _settings;
-        readonly List<ExchangeBindingSettings> _exchangeBindings;
         bool _bindMessageExchanges;
 
         public RabbitMqReceiveEndpointConfigurator(IRabbitMqHost host, string queueName = null, IConsumePipe consumePipe = null)
@@ -47,7 +46,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
 
             _settings = new RabbitMqReceiveSettings
             {
-                QueueName = queueName,
+                QueueName = queueName
             };
 
             _managementPipe = new ManagementPipe();
@@ -67,7 +66,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
 
         public override IEnumerable<ValidationResult> Validate()
         {
-            foreach (ValidationResult result in base.Validate())
+            foreach (var result in base.Validate())
                 yield return result.WithParentKey($"{_settings.QueueName}");
 
             if (!RabbitMqAddressExtensions.IsValidQueueName(_settings.QueueName))
@@ -95,6 +94,8 @@ namespace MassTransit.RabbitMqTransport.Configuration
 
             builder.AddReceiveEndpoint(_settings.QueueName ?? NewId.Next().ToString(), new ReceiveEndpoint(transport, receivePipe));
         }
+
+        IRabbitMqHost IRabbitMqReceiveEndpointConfigurator.Host => _host;
 
         public bool Durable
         {
@@ -212,7 +213,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
 
         protected override Uri GetErrorAddress()
         {
-            string errorQueueName = _settings.QueueName + "_error";
+            var errorQueueName = _settings.QueueName + "_error";
             var sendSettings = new RabbitMqSendSettings(errorQueueName, RabbitMQ.Client.ExchangeType.Fanout, _settings.Durable,
                 _settings.AutoDelete);
 
@@ -223,7 +224,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
 
         protected override Uri GetDeadLetterAddress()
         {
-            string errorQueueName = _settings.QueueName + "_skipped";
+            var errorQueueName = _settings.QueueName + "_skipped";
             var sendSettings = new RabbitMqSendSettings(errorQueueName, RabbitMQ.Client.ExchangeType.Fanout, _settings.Durable,
                 _settings.AutoDelete);
 

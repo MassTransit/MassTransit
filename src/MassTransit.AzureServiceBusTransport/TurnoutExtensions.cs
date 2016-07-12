@@ -32,14 +32,14 @@ namespace MassTransit
             Action<ITurnoutHostConfigurator<T>> configure)
             where T : class
         {
-            var temporaryQueueName = busFactoryConfigurator.GetTemporaryQueueName($"turnout-");
+            var temporaryQueueName = busFactoryConfigurator.GetTemporaryQueueName("turnout-");
 
             busFactoryConfigurator.ReceiveEndpoint(configurator.Host, temporaryQueueName, turnoutEndpointConfigurator =>
             {
                 turnoutEndpointConfigurator.AutoDeleteOnIdle = TimeSpan.FromMinutes(5);
                 turnoutEndpointConfigurator.EnableExpress = true;
 
-                TurnoutConfigurationExtensions.ConfigureTurnoutEndpoints(configurator, busFactoryConfigurator, configure, turnoutEndpointConfigurator);
+                configurator.ConfigureTurnoutEndpoints(busFactoryConfigurator, turnoutEndpointConfigurator, configure);
             });
         }
     }

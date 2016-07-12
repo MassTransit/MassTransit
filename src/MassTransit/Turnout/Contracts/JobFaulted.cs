@@ -35,4 +35,17 @@ namespace MassTransit.Turnout.Contracts
         /// </summary>
         ExceptionInfo Exceptions { get; }
     }
+
+    /// <summary>
+    /// Published when a job faults
+    /// </summary>
+    /// <typeparam name="TInput"></typeparam>
+    public interface JobFaulted<out TInput> :
+        JobFaulted
+    {
+        /// <summary>
+        /// The job input
+        /// </summary>
+        TInput Input { get; }
+    }
 }

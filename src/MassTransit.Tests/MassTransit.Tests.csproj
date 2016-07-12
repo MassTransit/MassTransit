@@ -74,8 +74,8 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\NUnit.2.6.4\lib\nunit.framework.dll</HintPath>
     </Reference>
-    <Reference Include="Shouldly, Version=2.7.0.0, Culture=neutral, PublicKeyToken=6042cbcb05cbc941, processorArchitecture=MSIL">
-      <HintPath>..\packages\Shouldly.2.7.0\lib\net40\Shouldly.dll</HintPath>
+    <Reference Include="Shouldly, Version=2.8.0.0, Culture=neutral, PublicKeyToken=6042cbcb05cbc941, processorArchitecture=MSIL">
+      <HintPath>..\packages\Shouldly.2.8.0\lib\net40\Shouldly.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
@@ -116,6 +116,7 @@
     <Compile Include="Courier\Fault_Specs.cs" />
     <Compile Include="Courier\ObjectGraph_Specs.cs" />
     <Compile Include="Courier\RanToCompletion_Specs.cs" />
+    <Compile Include="Courier\RequestRoutingSlip_Specs.cs" />
     <Compile Include="Courier\ReviseItinerary_Specs.cs" />
     <Compile Include="Courier\RoutingSlip_Specs.cs" />
     <Compile Include="Courier\SingleActivityEvent_Specs.cs" />

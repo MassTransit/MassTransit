@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,6 +14,7 @@ namespace MassTransit.Turnout
 {
     using System.Threading.Tasks;
 
+
     /// <summary>
     /// The consumer that creates the job using the turnout host
     /// </summary>
@@ -23,8 +24,8 @@ namespace MassTransit.Turnout
         where T : class
 
     {
-        readonly ITurnoutController _turnoutHost;
         readonly IJobFactory<T> _jobFactory;
+        readonly ITurnoutController _turnoutHost;
 
         public CreateJobConsumer(ITurnoutController turnoutHost, IJobFactory<T> jobFactory)
         {
@@ -34,7 +35,7 @@ namespace MassTransit.Turnout
 
         public async Task Consume(ConsumeContext<T> context)
         {
-            var job = await _turnoutHost.CreateJob(context, _jobFactory).ConfigureAwait(false);
+            JobHandle<T> job = await _turnoutHost.CreateJob(context, _jobFactory).ConfigureAwait(false);
         }
     }
 }
