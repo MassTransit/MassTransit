@@ -29,7 +29,7 @@ namespace MassTransit.Tests.Courier
         Task<ConsumeContext<RoutingSlipActivityCompleted>> _activityCompleted;
         Guid _trackingNumber;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void Should_publish_the_completed_event()
         {
             _completed = SubscribeHandler<RoutingSlipCompleted>();

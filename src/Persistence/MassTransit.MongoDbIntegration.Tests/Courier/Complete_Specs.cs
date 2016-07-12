@@ -83,7 +83,7 @@ namespace MassTransit.MongoDbIntegration.Tests.Courier
             Console.WriteLine(jsonResult);
         }
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void Setup()
         {
             _trackingNumber = NewId.NextGuid();

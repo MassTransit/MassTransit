@@ -44,7 +44,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         Task<ConsumeContext<PingConsumed>> _consumed;
         Task<ConsumeContext<PingProcessing>> _processing;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void Setup()
         {
             Await(() => InputQueueSendEndpoint.Send(new PingMessage()));

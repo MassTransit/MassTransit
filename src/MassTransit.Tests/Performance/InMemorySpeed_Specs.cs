@@ -51,7 +51,7 @@ namespace MassTransit.Tests.Performance
 
         IRequestClient<PingMessage, PongMessage> _requestClient;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void Setup()
         {
             _requestClient = new MessageRequestClient<PingMessage, PongMessage>(Bus, InputQueueAddress, TestTimeout);
@@ -103,7 +103,7 @@ namespace MassTransit.Tests.Performance
 
         IRequestClient<PerformanceRequest, PerformanceResult> _requestClient;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void Setup()
         {
             _requestClient = CreateRequestClient<PerformanceRequest, PerformanceResult>();

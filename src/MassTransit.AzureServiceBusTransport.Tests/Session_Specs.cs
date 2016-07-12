@@ -22,7 +22,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
         AzureServiceBusTestFixture
     {
         [Test]
-        public async void Should_have_a_redelivery_flag_of_false()
+        public async Task Should_have_a_redelivery_flag_of_false()
         {
             var context = await _handler;
 
@@ -30,7 +30,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
         }
 
         [Test]
-        public async void Should_succeed()
+        public async Task Should_succeed()
         {
             await _handler;
         }
@@ -49,7 +49,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
             _handler = Handled<PingMessage>(configurator);
         }
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void Setup()
         {
             Await(() =>

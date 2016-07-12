@@ -36,7 +36,7 @@ namespace MassTransit.Tests
         Task<PongMessage> _response;
         IRequestClient<PingMessage, PongMessage> _requestClient;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void Setup()
         {
             _requestClient = CreateRequestClient<PingMessage, PongMessage>();
@@ -58,14 +58,14 @@ namespace MassTransit.Tests
         [Test]
         public void Should_timeout()
         {
-            Assert.Throws<RequestTimeoutException>(async () => await _response);
+            Assert.That(async () => await _response, Throws.TypeOf<RequestTimeoutException>());
         }
 
         Task<ConsumeContext<PingMessage>> _ping;
         Task<PongMessage> _response;
         IRequestClient<PingMessage, PongMessage> _requestClient;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void Setup()
         {
             _requestClient = new MessageRequestClient<PingMessage, PongMessage>(Bus, InputQueueAddress, TimeSpan.FromSeconds(1));
@@ -82,14 +82,14 @@ namespace MassTransit.Tests
         [Test]
         public void Should_receive_the_exception()
         {
-            Assert.Throws<RequestFaultException>(async () => await _response);
+            Assert.That(async () => await _response, Throws.TypeOf<RequestFaultException>());
         }
 
         Task<ConsumeContext<PingMessage>> _ping;
         Task<PongMessage> _response;
         IRequestClient<PingMessage, PongMessage> _requestClient;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void Setup()
         {
             _requestClient = CreateRequestClient<PingMessage, PongMessage>();

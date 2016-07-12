@@ -13,6 +13,7 @@
 namespace MassTransit.AutomatonymousIntegration.Tests
 {
     using System;
+    using System.Data.Entity.Core.Metadata.Edm;
     using System.Threading.Tasks;
     using Automatonymous;
     using NUnit.Framework;
@@ -25,10 +26,11 @@ namespace MassTransit.AutomatonymousIntegration.Tests
         InMemoryTestFixture
     {
         [Test]
-        [ExpectedException(typeof(ConfigurationException))]
-        public async Task Should_retry_the_status_message()
+        public void Should_retry_the_status_message()
         {
-            Bus.ConnectStateMachineSaga(_machine, _repository);
+            TestDelegate invocation = () => Bus.ConnectStateMachineSaga(_machine, _repository);
+
+            Assert.Throws<ConfigurationException>(invocation);
         }
 
         protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)

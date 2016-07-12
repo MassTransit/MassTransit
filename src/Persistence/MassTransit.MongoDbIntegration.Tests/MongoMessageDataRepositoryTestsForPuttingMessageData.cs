@@ -47,7 +47,7 @@ namespace MassTransit.MongoDbIntegration.Tests
             Assert.That(result, Is.EqualTo(_expectedData));
         }
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void GivenAMongoMessageDataRepository_WhenPuttingMessageData()
         {
             var db = new MongoClient().GetDatabase("messagedatastoretests");
@@ -68,7 +68,7 @@ namespace MassTransit.MongoDbIntegration.Tests
             }
         }
 
-        [TestFixtureTearDown]
+        [OneTimeTearDown]
         public void Kill()
         {
             _bucket.DropAsync().GetAwaiter().GetResult();

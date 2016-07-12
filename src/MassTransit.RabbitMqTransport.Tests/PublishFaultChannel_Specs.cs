@@ -49,7 +49,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         private PingMessage _pingMessage2;
         private Task<ConsumeContext<PingMessage>> _errorHandler2;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void Setup()
         {
             Await(() =>

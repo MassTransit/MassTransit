@@ -20,13 +20,13 @@ namespace MassTransit.QuartzIntegration.Tests
     [SetUpFixture]
     public class ContextSetup
     {
-        [SetUp]
+        [OneTimeSetUp]
         public void Before_any_tests()
         {
             Log4NetLogger.Use("log4net.config");
         }
 
-        [TearDown]
+        [OneTimeTearDown]
         public void After_all_tests()
         {
             LogManager.Shutdown();

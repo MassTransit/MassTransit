@@ -32,7 +32,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
         }
 
         [Test, Explicit]
-        public async void Should_succeed()
+        public async Task Should_succeed()
         {
             await InputQueueSendEndpoint.Send(new PingMessage(), context => context.SetScheduledEnqueueTime(TimeSpan.FromSeconds(10)));
 

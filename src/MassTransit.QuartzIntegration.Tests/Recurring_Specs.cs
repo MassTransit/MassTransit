@@ -24,7 +24,7 @@ namespace MassTransit.QuartzIntegration.Tests
         QuartzInMemoryTestFixture
     {
         [Test, Explicit]
-        public async void Should_handle_now_properly()
+        public async Task Should_handle_now_properly()
         {
             await QuartzEndpoint.ScheduleSend(InputQueueAddress, DateTime.UtcNow + TimeSpan.FromSeconds(20), new Done { Name = "Joe" });
             await QuartzEndpoint.ScheduleRecurringSend(InputQueueAddress, new MySchedule(), new Interval { Name = "Joe" });
@@ -36,7 +36,7 @@ namespace MassTransit.QuartzIntegration.Tests
         }
 
         [Test, Explicit]
-        public async void Should_cancel_recurring_schedule()
+        public async Task Should_cancel_recurring_schedule()
         {
             var scheduleId = Guid.NewGuid().ToString();
 
@@ -58,7 +58,7 @@ namespace MassTransit.QuartzIntegration.Tests
         }
 
         [Test, Explicit]
-        public async void Should_contain_additional_headers_that_provide_time_domain_context()
+        public async Task Should_contain_additional_headers_that_provide_time_domain_context()
         {
             var scheduleId = Guid.NewGuid().ToString();
 

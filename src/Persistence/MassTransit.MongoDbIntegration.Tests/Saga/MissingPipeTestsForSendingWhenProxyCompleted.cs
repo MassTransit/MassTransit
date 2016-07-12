@@ -45,7 +45,7 @@ namespace MassTransit.MongoDbIntegration.Tests.Saga
         Mock<IMongoDbSagaConsumeContextFactory> _consumeContextFactory;
         Mock<SagaConsumeContext<SimpleSaga, InitiateSimpleSaga>> _proxy;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void GivenAMissingPipe_WhenSendingAndProxyCompleted()
         {
             _collection = new Mock<IMongoCollection<SimpleSaga>>();

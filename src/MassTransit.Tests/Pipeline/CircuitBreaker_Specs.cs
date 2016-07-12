@@ -43,7 +43,7 @@ namespace MassTransit.Tests.Pipeline
             var context = new TestConsumeContext<A>(new A());
 
             for (int i = 0; i < 100; i++)
-                Assert.Throws<IntentionalTestException>(async () => await pipe.Send(context));
+                Assert.That(async () => await pipe.Send(context), Throws.TypeOf<IntentionalTestException>());
 
             count.ShouldBe(6);
         }

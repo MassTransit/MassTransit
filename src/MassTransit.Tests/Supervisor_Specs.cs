@@ -72,14 +72,14 @@ namespace MassTransit.Tests
         }
 
         [Test]
-        public async Task Should_fault_if_not_completed()
+        public void Should_fault_if_not_completed()
         {
             var supervisor = new TaskSupervisor("test");
 
             var stopwatch = Stopwatch.StartNew();
             var participant = supervisor.CreateParticipant("testA");
 
-            Assert.Throws<OperationCanceledException>(async () => await supervisor.Completed.WithTimeout(1000));
+            Assert.That(async () => await supervisor.Completed.WithTimeout(1000), Throws.TypeOf<OperationCanceledException>());
 
             stopwatch.Stop();
 

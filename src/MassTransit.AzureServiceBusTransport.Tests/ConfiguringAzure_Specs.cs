@@ -27,7 +27,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
             AsyncTestFixture
         {
             [Test]
-            public async void Should_Support_NetMessaging_Protocol()
+            public async Task Should_Support_NetMessaging_Protocol()
             {
                 ServiceBusTokenProviderSettings settings = new TestAzureServiceBusAccountSettings();
 
@@ -85,7 +85,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
             }
 
             [Test]
-            public async void Should_support_the_new_syntax()
+            public async Task Should_support_the_new_syntax()
             {
                 ServiceBusTokenProviderSettings settings = new TestAzureServiceBusAccountSettings();
 

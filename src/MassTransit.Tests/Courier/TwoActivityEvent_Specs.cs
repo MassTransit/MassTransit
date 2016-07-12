@@ -103,7 +103,7 @@ namespace MassTransit.Tests.Courier
             AddActivityContext<SecondTestActivity, TestArguments, TestLog>(() => new SecondTestActivity());
         }
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void Setup()
         {
             ActivityTestContext testActivity = GetActivityContext<TestActivity>();

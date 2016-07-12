@@ -29,13 +29,13 @@ namespace MassTransit.Tests
         [Test]
         public void It_should_respond_with_a_serialization_fault()
         {
-            Assert.Throws<RequestFaultException>(async () => await _response);
+            Assert.That(async () => await _response, Throws.TypeOf<RequestFaultException>());
         }
 
         IRequestClient<PingMessage, PongMessage> _requestClient;
         Task<PongMessage> _response;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void Setup()
         {
             _requestClient = CreateRequestClient<PingMessage, PongMessage>();
@@ -82,7 +82,7 @@ namespace MassTransit.Tests
         IRequestClient<PingMessage2, PongMessage2> _requestClient;
         Task<PongMessage2> _response;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void Setup()
         {
             _requestClient = CreateRequestClient<PingMessage2, PongMessage2>();

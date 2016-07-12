@@ -27,7 +27,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
         InMemoryTestFixture
     {
         [Test]
-        public async void Should_not_throw_an_exception_when_receiving_ignored_event()
+        public async Task Should_not_throw_an_exception_when_receiving_ignored_event()
         {
             var sagaId = Guid.NewGuid();
 

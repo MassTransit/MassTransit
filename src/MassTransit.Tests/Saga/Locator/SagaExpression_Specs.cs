@@ -65,7 +65,7 @@ namespace MassTransit.Tests.Saga.Locator
             configurator.Saga(_repository);
         }
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void Setup()
         {
             _sagaId = NewId.NextGuid();

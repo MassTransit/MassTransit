@@ -15,144 +15,144 @@ namespace MassTransit.Tests.Testing
     using System.Linq;
     using System.Threading.Tasks;
     using NUnit.Framework;
-	using MassTransit.Testing;
+    using MassTransit.Testing;
     using Shouldly;
 
     [Explicit]
     public class When_a_consumer_is_being_tested
-	{
-		IConsumerTest<IBusTestScenario, Testsumer> _test;
+    {
+        IConsumerTest<IBusTestScenario, Testsumer> _test;
 
-		[SetUp]
-		public void A_consumer_is_being_tested()
-		{
-			_test = TestFactory.ForConsumer<Testsumer>()
-				.New(x =>
-					{
-						x.UseConsumerFactory(() => new Testsumer());
+        [SetUp]
+        public void A_consumer_is_being_tested()
+        {
+            _test = TestFactory.ForConsumer<Testsumer>()
+                .New(x =>
+                    {
+                        x.UseConsumerFactory(() => new Testsumer());
 
-						x.Send(new A());
-					});
+                        x.Send(new A());
+                    });
 
-			_test.Execute();
-		}
+            _test.Execute();
+        }
 
-		[TearDown]
-		public void Teardown()
-		{
-			_test.Dispose();
-			_test = null;
-		}
-
-
-		[Test]
-		public void Should_send_the_initial_message_to_the_consumer()
-		{
-			_test.Sent.Select<A>().Any().ShouldBe(true);
-		}
-
-		[Test]
-		public void Should_have_sent_the_response_from_the_consumer()
-		{
-            _test.Sent.Select<B>().Any().ShouldBe(true);
-		}
-
-		[Test]
-		public void Should_receive_the_message_type_a()
-		{
-            _test.Received.Select<A>().Any().ShouldBe(true);
-		}
-
-		[Test]
-		public void Should_have_called_the_consumer_method()
-		{
-            _test.Consumer.Received.Select<A>().Any().ShouldBe(true);
-		}
-
-		class Testsumer :
-			IConsumer<A>
-		{
-		    public async Task Consume(ConsumeContext<A> context)
-		    {
-		        await context.RespondAsync(new B());
-		    }
-		}
-
-		class A
-		{
-		}
-
-		class B
-		{
-		}
-	}
-
-	[Explicit]
-	public class When_a_context_consumer_is_being_tested
-	{
-		IConsumerTest<IBusTestScenario, Testsumer> _test;
-
-		[SetUp]
-		public void A_consumer_is_being_tested()
-		{
-			_test = TestFactory.ForConsumer<Testsumer>()
-				.New(x =>
-					{
-						x.UseConsumerFactory(() => new Testsumer());
-
-						x.Send(new A(), (scenario, context) => context.ResponseAddress = scenario.Bus.Address);
-					});
-
-			_test.ExecuteAsync();
-		}
-
-		[TearDown]
-		public void Teardown()
-		{
-			_test.Dispose();
-			_test = null;
-		}
+        [TearDown]
+        public void Teardown()
+        {
+            _test.Dispose();
+            _test = null;
+        }
 
 
-		[Test]
-		public void Should_send_the_initial_message_to_the_consumer()
-		{
+        [Test]
+        public void Should_send_the_initial_message_to_the_consumer()
+        {
             _test.Sent.Select<A>().Any().ShouldBe(true);
-		}
+        }
 
-		[Test]
-		public void Should_have_sent_the_response_from_the_consumer()
-		{
+        [Test]
+        public void Should_have_sent_the_response_from_the_consumer()
+        {
             _test.Sent.Select<B>().Any().ShouldBe(true);
-		}
+        }
 
-		[Test]
-		public void Should_receive_the_message_type_a()
-		{
+        [Test]
+        public void Should_receive_the_message_type_a()
+        {
             _test.Received.Select<A>().Any().ShouldBe(true);
-		}
+        }
 
-		[Test]
-		public void Should_have_called_the_consumer_method()
-		{
+        [Test]
+        public void Should_have_called_the_consumer_method()
+        {
             _test.Consumer.Received.Select<A>().Any().ShouldBe(true);
-		}
+        }
 
-		class Testsumer :
-			IConsumer<A>
-		{
-			public Task Consume(ConsumeContext<A> context)
-			{
-				return context.RespondAsync(new B());
-			}
-		}
+        class Testsumer :
+            IConsumer<A>
+        {
+            public async Task Consume(ConsumeContext<A> context)
+            {
+                await context.RespondAsync(new B());
+            }
+        }
 
-		class A
-		{
-		}
+        class A
+        {
+        }
 
-		class B
-		{
-		}
-	}
+        class B
+        {
+        }
+    }
+
+    [Explicit]
+    public class When_a_context_consumer_is_being_tested
+    {
+        IConsumerTest<IBusTestScenario, Testsumer> _test;
+
+        [SetUp]
+        public void A_consumer_is_being_tested()
+        {
+            _test = TestFactory.ForConsumer<Testsumer>()
+                .New(x =>
+                    {
+                        x.UseConsumerFactory(() => new Testsumer());
+
+                        x.Send(new A(), (scenario, context) => context.ResponseAddress = scenario.Bus.Address);
+                    });
+
+            _test.ExecuteAsync();
+        }
+
+        [TearDown]
+        public void Teardown()
+        {
+            _test.Dispose();
+            _test = null;
+        }
+
+
+        [Test]
+        public void Should_send_the_initial_message_to_the_consumer()
+        {
+            _test.Sent.Select<A>().Any().ShouldBe(true);
+        }
+
+        [Test]
+        public void Should_have_sent_the_response_from_the_consumer()
+        {
+            _test.Sent.Select<B>().Any().ShouldBe(true);
+        }
+
+        [Test]
+        public void Should_receive_the_message_type_a()
+        {
+            _test.Received.Select<A>().Any().ShouldBe(true);
+        }
+
+        [Test]
+        public void Should_have_called_the_consumer_method()
+        {
+            _test.Consumer.Received.Select<A>().Any().ShouldBe(true);
+        }
+
+        class Testsumer :
+            IConsumer<A>
+        {
+            public Task Consume(ConsumeContext<A> context)
+            {
+                return context.RespondAsync(new B());
+            }
+        }
+
+        class A
+        {
+        }
+
+        class B
+        {
+        }
+    }
 }

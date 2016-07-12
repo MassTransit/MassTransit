@@ -24,12 +24,12 @@ namespace MassTransit.Reactive.Tests
         InMemoryTestFixture
     {
         [Test]
-        public async void The_message_should_be_observed()
+        public async Task The_message_should_be_observed()
         {
             await _thatJustHappened.Task;
         }
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void A_reactive_query_is_observing_a_bus_message()
         {
             _observable = Bus.AsObservable<PingMessage>();
@@ -44,7 +44,7 @@ namespace MassTransit.Reactive.Tests
         TaskCompletionSource<PingMessage> _thatJustHappened;
         IDisposable _subscription;
 
-        [TestFixtureTearDown]
+        [OneTimeTearDown]
         public void Finally()
         {
             _subscription.Dispose();

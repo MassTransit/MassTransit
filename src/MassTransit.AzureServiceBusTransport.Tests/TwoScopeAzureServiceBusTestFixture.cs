@@ -64,7 +64,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
 
         protected virtual IBus SecondBus => _secondBus;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void SetupSecondAzureServiceBusTestFixture()
         {
             _secondBus = CreateSecondBus();
@@ -95,7 +95,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
             }
         }
 
-        [TestFixtureTearDown]
+        [OneTimeTearDown]
         public void TearDownTwoScopeTestFixture()
         {
             try

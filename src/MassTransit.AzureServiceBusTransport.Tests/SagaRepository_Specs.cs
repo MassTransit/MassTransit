@@ -132,7 +132,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
                 _repository = new MessageSessionSagaRepository<JobState>();
             }
 
-            [TestFixtureSetUp]
+            [OneTimeSetUp]
             public void Setup()
             {
                 _jobId = NewId.NextGuid();

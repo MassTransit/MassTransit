@@ -43,7 +43,7 @@ namespace MassTransit.Tests.Serialization
             _serializerType = serializerType;
         }
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void SetupSerializationTest()
         {
             if (_serializerType == typeof(JsonMessageSerializer))

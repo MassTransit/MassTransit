@@ -55,7 +55,7 @@ namespace MassTransit.MongoDbIntegration.Tests.Saga
         Mock<SagaConsumeContext<SimpleSaga, InitiateSimpleSaga>> _sagaConsumeContext;
         Mock<IMongoDbSagaConsumeContextFactory> _sagaConsumeContextFactory;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void GivenAMongoDbSagaRepository_WhenSendingQuery()
         {
             _correlationId = Guid.NewGuid();
@@ -82,7 +82,7 @@ namespace MassTransit.MongoDbIntegration.Tests.Saga
             TaskUtil.Await(() => repository.SendQuery(_sagaQueryConsumeContext.Object, _sagaPolicy.Object, _nextPipe.Object));
         }
 
-        [TestFixtureTearDown]
+        [OneTimeTearDown]
         public void Kill()
         {
             TaskUtil.Await(() => SagaRepository.DeleteSaga(_correlationId));
