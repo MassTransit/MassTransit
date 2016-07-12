@@ -45,7 +45,7 @@ namespace MassTransit.QuartzIntegration.Tests
             configurator.UseInMemoryScheduler();
         }
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void Setup_quartz_service()
         {
             _quartzEndpoint = Await(() => GetSendEndpoint(QuartzAddress));

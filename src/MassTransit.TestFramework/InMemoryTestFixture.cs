@@ -83,7 +83,7 @@ namespace MassTransit.TestFramework
             return Bus.CreateRequestClient<TRequest, TResponse>(InputQueueAddress, TestTimeout);
         }
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void SetupInMemoryTestFixture()
         {
             _busCreationScope.TestFixtureSetup();
@@ -117,7 +117,7 @@ namespace MassTransit.TestFramework
 
         protected IPublishEndpointProvider PublishEndpointProvider => new InMemoryPublishEndpointProvider(Bus, _inMemoryTransportCache, PublishPipe.Empty);
 
-        [TestFixtureTearDown]
+        [OneTimeTearDown]
         public void TearDownInMemoryTestFixture()
         {
             _busCreationScope.TestFixtureTeardown();

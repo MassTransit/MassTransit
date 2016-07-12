@@ -24,7 +24,7 @@ namespace MassTransit.Tests.Steward
         InMemoryDispatchTestFixture
     {
         [Test]
-        public async void Should_execute()
+        public async Task Should_execute()
         {
             Task<ConsumeContext<MagicMade>> received = SubscribeHandler<MagicMade>();
 

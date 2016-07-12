@@ -46,9 +46,9 @@ namespace MassTransit.Tests.Pipeline
 
             var context = new TestConsumeContext<PingMessage>(new PingMessage());
 
-            var exception = Assert.Throws<TransactionAbortedException>(async () => await pipe.Send(context));
+            Assert.That(async () => await pipe.Send(context), Throws.TypeOf<TransactionAbortedException>());
 
-            Console.WriteLine(exception.Message);
+            //Console.WriteLine(exception.Message);
         }
 
         [Test]
@@ -79,9 +79,9 @@ namespace MassTransit.Tests.Pipeline
 
             var context = new TestConsumeContext<PingMessage>(new PingMessage());
 
-            var exception = Assert.Throws<InvalidOperationException>(async () => await pipe.Send(context));
+            Assert.That(async () => await pipe.Send(context), Throws.InvalidOperationException);
 
-            Console.WriteLine(exception.Message);
+            //Console.WriteLine(exception.Message);
         }
 
         [Test]
@@ -139,9 +139,9 @@ namespace MassTransit.Tests.Pipeline
 
             var context = new TestConsumeContext<PingMessage>(new PingMessage());
 
-            var exception = Assert.Throws<TransactionAbortedException>(async () => await pipe.Send(context));
+            Assert.That(async () => await pipe.Send(context), Throws.TypeOf<TransactionAbortedException>());
 
-            Console.WriteLine(exception.Message);
+            //Console.WriteLine(exception.Message);
         }
     }
 }

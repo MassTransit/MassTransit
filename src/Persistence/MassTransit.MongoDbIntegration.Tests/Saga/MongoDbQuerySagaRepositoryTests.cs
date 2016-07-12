@@ -32,7 +32,7 @@ namespace MassTransit.MongoDbIntegration.Tests.Saga
         Guid _correlationId;
         IEnumerable<Guid> _result;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void GivenAMongoDbQuerySagaRepository_WhenFindingSaga()
         {
             _correlationId = Guid.NewGuid();
@@ -46,7 +46,7 @@ namespace MassTransit.MongoDbIntegration.Tests.Saga
             _result = repository.Find(query).GetAwaiter().GetResult();
         }
 
-        [TestFixtureTearDown]
+        [OneTimeTearDown]
         public void Kill()
         {
             SagaRepository.DeleteSaga(_correlationId).GetAwaiter().GetResult();

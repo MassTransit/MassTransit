@@ -20,7 +20,9 @@
             var observer = new Observer();
             using (Bus.ConnectPublishObserver(observer))
             {
-                Assert.Throws<SerializationException>(async () => await Bus.Publish(new PingMessage(), Pipe.Execute<SendContext>(x => x.Serializer = null)));
+                Assert.That(
+                    async () => await Bus.Publish(new PingMessage(), Pipe.Execute<SendContext>(x => x.Serializer = null)),
+                    Throws.TypeOf<SerializationException>());
 
                 await observer.SendFaulted;
             }
@@ -56,7 +58,9 @@
             var observer = new Observer();
             using (Bus.ConnectPublishObserver(observer))
             {
-                Assert.Throws<SerializationException>(async () => await Bus.Publish(new PingMessage(), Pipe.Execute<SendContext>(x => x.Serializer = null)));
+                Assert.That(
+                    async () => await Bus.Publish(new PingMessage(), Pipe.Execute<SendContext>(x => x.Serializer = null)),
+                    Throws.TypeOf<SerializationException>());
 
                 await observer.SendFaulted;
 

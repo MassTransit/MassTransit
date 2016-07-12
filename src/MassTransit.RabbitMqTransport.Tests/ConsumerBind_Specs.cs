@@ -51,7 +51,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
             TestConsumer _testConsumer;
 
-            [TestFixtureSetUp]
+            [OneTimeSetUp]
             public void Setup()
             {
                 Await(() => InputQueueSendEndpoint.Send(new A()));
@@ -88,7 +88,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
             TestConsumer _testConsumer;
 
-            [TestFixtureSetUp]
+            [OneTimeSetUp]
             public void Setup()
             {
                 Await(() => InputQueueSendEndpoint.Send(new A()));
@@ -123,7 +123,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             Task<ConsumeContext<A>> _a;
             Task<ConsumeContext<B>> _b;
 
-            [TestFixtureSetUp]
+            [OneTimeSetUp]
             public void Setup()
             {
                 Await(() => InputQueueSendEndpoint.Send(new A()));
@@ -156,7 +156,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             Task<ConsumeContext<A>> _a;
             Task<ConsumeContext<B>> _b;
 
-            [TestFixtureSetUp]
+            [OneTimeSetUp]
             public void Setup()
             {
                 Await(() => InputQueueSendEndpoint.Send(new A()));
@@ -205,7 +205,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             InMemorySagaRepository<TestSaga> _repository;
             Guid _sagaId;
 
-            [TestFixtureSetUp]
+            [OneTimeSetUp]
             public void Setup()
             {
                 _sagaId = NewId.NextGuid();

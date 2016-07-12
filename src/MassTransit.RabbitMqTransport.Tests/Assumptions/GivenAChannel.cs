@@ -12,13 +12,13 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RabbitMqTransport.Tests.Assumptions
 {
-    using System;
-    using System.Diagnostics;
-    using NUnit.Framework;
-    using RabbitMQ.Client;
+	using System;
+	using System.Diagnostics;
+	using NUnit.Framework;
+	using RabbitMQ.Client;
 
 
-    public class GivenAChannel
+	public class GivenAChannel
 	{
 		protected readonly byte[] TheMessage = new byte[] {1, 2, 3};
 		IConnection _connection;

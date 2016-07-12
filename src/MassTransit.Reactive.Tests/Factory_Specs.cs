@@ -14,6 +14,7 @@ namespace MassTransit.Reactive.Tests
 {
     using System;
     using System.Reactive;
+    using System.Threading.Tasks;
     using NUnit.Framework;
     using TestFramework;
 
@@ -23,7 +24,7 @@ namespace MassTransit.Reactive.Tests
         InMemoryTestFixture
     {
         [Test]
-        public async void Should_allow_rx_subscribers()
+        public async Task Should_allow_rx_subscribers()
         {
             await InputQueueSendEndpoint.Send(new A {Name = "Joe"});
 

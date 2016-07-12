@@ -76,7 +76,7 @@ namespace MassTransit.Tests.Courier
         Task<ConsumeContext<RoutingSlipActivityCompleted>> _activityCompleted;
         Guid _trackingNumber;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void Should_publish_the_completed_event()
         {
             _completed = SubscribeHandler<RoutingSlipCompleted>();
@@ -121,7 +121,7 @@ namespace MassTransit.Tests.Courier
 //
 //        IConsumerTest<IBusTestScenario, ExecuteActivityHost<TestActivity, TestArguments>> _test;
 //
-//        [TestFixtureSetUp]
+//        [OneTimeSetUp]
 //        public void Setup()
 //        {
 //            _test = TestFactory.ForConsumer<ExecuteActivityHost<TestActivity, TestArguments>>()
@@ -155,7 +155,7 @@ namespace MassTransit.Tests.Courier
 //            _test.Execute();
 //        }
 //
-//        [TestFixtureTearDown]
+//        [OneTimeTearDown]
 //        public void Teardown()
 //        {
 //            _test.Dispose();

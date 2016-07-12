@@ -32,7 +32,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
         public class The_account_credentials_for_unit_tests
         {
             [Test]
-            public async void Should_be_configured_and_working()
+            public async Task Should_be_configured_and_working()
             {
                 var settings = new TestAzureServiceBusAccountSettings();
                 var provider = new SharedAccessKeyTokenProvider(settings);

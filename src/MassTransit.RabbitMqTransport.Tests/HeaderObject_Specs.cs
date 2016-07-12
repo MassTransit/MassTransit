@@ -123,7 +123,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
         }
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void Setup()
         {
             InputQueueSendEndpoint.Send(new PingMessage(), context =>

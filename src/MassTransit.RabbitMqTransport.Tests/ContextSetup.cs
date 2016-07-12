@@ -19,7 +19,7 @@ namespace MassTransit.RabbitMqTransport.Tests
     [SetUpFixture]
     public class ContextSetup
     {
-        [SetUp]
+        [OneTimeSetUp]
         public void Before_any()
         {
             string file = "test.log4net.xml";

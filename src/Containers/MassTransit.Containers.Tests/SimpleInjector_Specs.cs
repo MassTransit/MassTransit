@@ -52,7 +52,7 @@ namespace MassTransit.Containers.Tests
     public class SimpleInjector_Saga :
         When_registering_a_saga
     {
-        [TestFixtureTearDown]
+        [OneTimeTearDown]
         public void Close_container()
         {
             _container.Dispose();

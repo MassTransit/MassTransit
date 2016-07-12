@@ -38,7 +38,7 @@ namespace MassTransit.MongoDbIntegration.Tests.Saga
         SimpleSaga _nullSimpleSaga;
         Mock<IPipe<SagaConsumeContext<SimpleSaga, InitiateSimpleSaga>>> _nextPipe;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void GivenAMongoDbSagaRepository_WhenSendingAndInstanceNotFound()
         {
             _context = new Mock<ConsumeContext<InitiateSimpleSaga>>();

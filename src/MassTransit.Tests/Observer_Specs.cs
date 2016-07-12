@@ -34,7 +34,7 @@ namespace MassTransit.Tests
         IRequestClient<PingMessage, PongMessage> _requestClient;
         PingObserver _observer;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void Setup()
         {
             _requestClient = CreateRequestClient<PingMessage, PongMessage>();
