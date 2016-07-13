@@ -55,7 +55,7 @@ namespace MassTransit.Tests
 
             Assert.That(
                 async () => await responseHandler.WithCancellation(new CancellationTokenSource(300).Token), 
-                Throws.TypeOf<OperationCanceledException>());
+                Throws.TypeOf<TaskCanceledException>());
         }
 
         TaskCompletionSource<ConsumeContext<PingMessage>> _pingReceived;

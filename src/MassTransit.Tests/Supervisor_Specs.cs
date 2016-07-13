@@ -79,7 +79,7 @@ namespace MassTransit.Tests
             var stopwatch = Stopwatch.StartNew();
             var participant = supervisor.CreateParticipant("testA");
 
-            Assert.That(async () => await supervisor.Completed.WithTimeout(1000), Throws.TypeOf<OperationCanceledException>());
+            Assert.That(async () => await supervisor.Completed.WithTimeout(1000), Throws.TypeOf<TaskCanceledException>());
 
             stopwatch.Stop();
 
