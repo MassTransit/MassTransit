@@ -61,7 +61,7 @@ namespace MassTransit.MongoDbIntegration.Tests.Courier
             //Assert.AreEqual(received.Timestamp.ToMongoDbDateTime(), read.Timestamp);
         }
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void Setup()
         {
             _trackingNumber = NewId.NextGuid();

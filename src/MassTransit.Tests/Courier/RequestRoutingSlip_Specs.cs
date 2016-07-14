@@ -93,7 +93,7 @@ namespace MassTransit.Tests.Courier
         }
 
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void Setup()
         {
             _requestClient = new MessageRequestClient<Request, Response>(Bus, _requestAddress, TimeSpan.FromSeconds(30));
@@ -118,7 +118,7 @@ namespace MassTransit.Tests.Courier
         [Test]
         public async Task Should_fault_the_request()
         {
-            Assert.Throws<RequestFaultException>(async () => await _requestClient.Request(new Request()));
+            Assert.That(async () => await _requestClient.Request(new Request()), Throws.TypeOf<RequestFaultException>());
         }
 
         RoutingSlip _routingSlip;
@@ -183,7 +183,7 @@ namespace MassTransit.Tests.Courier
         }
 
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void Setup()
         {
             _requestClient = new MessageRequestClient<Request, Response>(Bus, _requestAddress, TimeSpan.FromSeconds(30));

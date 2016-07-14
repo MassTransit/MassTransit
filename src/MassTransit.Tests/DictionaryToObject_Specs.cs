@@ -25,7 +25,6 @@ namespace MassTransit.Tests
         [Test]
         public void Should_include_a_string()
         {
-            Assert.IsNotNullOrEmpty(_values.StringValue);
             Assert.AreEqual("Hello", _values.StringValue);
         }
 
@@ -124,7 +123,7 @@ namespace MassTransit.Tests
         IDictionary<string, object> _dictionary;
         Values _values;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void Setup()
         {
             _dictionary = new Dictionary<string, object>

@@ -28,7 +28,7 @@ namespace MassTransit.QuartzIntegration.Tests
 
 
         [Test, Explicit]
-        public async void Should_be_able_to_cancel_a_future_event()
+        public async Task Should_be_able_to_cancel_a_future_event()
         {
             Task<ConsumeContext<A>> handler = SubscribeHandler<A>();
 
@@ -42,7 +42,7 @@ namespace MassTransit.QuartzIntegration.Tests
         }
 
         [Test]
-        public async void Should_handle_now_properly()
+        public async Task Should_handle_now_properly()
         {
             Task<ConsumeContext<A>> handler = SubscribeHandler<A>();
 
@@ -52,7 +52,7 @@ namespace MassTransit.QuartzIntegration.Tests
         }
 
         [Test]
-        public async void Should_handle_slightly_in_the_future_properly()
+        public async Task Should_handle_slightly_in_the_future_properly()
         {
             Task<ConsumeContext<A>> handler = SubscribeHandler<A>();
 
@@ -62,7 +62,7 @@ namespace MassTransit.QuartzIntegration.Tests
         }
 
         [Test]
-        public async void Should_include_message_headers()
+        public async Task Should_include_message_headers()
         {
             Task<ConsumeContext<A>> handler = SubscribeHandler<A>();
 
@@ -101,7 +101,7 @@ namespace MassTransit.QuartzIntegration.Tests
         }
 
         [Test]
-        public async void Should_properly_send_the_message()
+        public async Task Should_properly_send_the_message()
         {
             Task<ConsumeContext<A>> handler = SubscribeHandler<A>();
 

@@ -34,7 +34,7 @@ namespace MassTransit.MongoDbIntegration.Tests.Saga
 
         SagaException _exception;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public  void GivenAMongoDbSagaRepository_WhenSendingWithNullCorrelationId()
         {
             var context = new Mock<ConsumeContext<InitiateSimpleSaga>>();

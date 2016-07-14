@@ -25,7 +25,7 @@ namespace MassTransit.Tests.Steward
         InMemoryDispatchTestFixture
     {
         [Test]
-        public async void Should_succeed_nicely()
+        public async Task Should_succeed_nicely()
         {
             Task<ConsumeContext<HttpRequestSucceeded>> succeeded = SubscribeHandler<HttpRequestSucceeded>();
             Task<ConsumeContext<HttpRequestFaulted>> faulted = SubscribeHandler<HttpRequestFaulted>();

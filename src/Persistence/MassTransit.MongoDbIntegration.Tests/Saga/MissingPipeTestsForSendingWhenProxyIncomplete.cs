@@ -48,7 +48,7 @@ namespace MassTransit.MongoDbIntegration.Tests.Saga
         Mock<SagaConsumeContext<SimpleSaga, InitiateSimpleSaga>> _proxy;
         SimpleSaga _saga;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void GivenAMissingPipe_WhenSendingAndProxyIncomplete()
         {
             IMongoCollection<SimpleSaga> collection = SagaRepository.Instance.GetCollection<SimpleSaga>("sagas");
@@ -66,7 +66,7 @@ namespace MassTransit.MongoDbIntegration.Tests.Saga
             TaskUtil.Await(() => _pipe.Send(_context.Object));
         }
 
-        [TestFixtureTearDown]
+        [OneTimeTearDown]
         public void Kill()
         {
             TaskUtil.Await(() => SagaRepository.DeleteSaga(_saga.CorrelationId));

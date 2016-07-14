@@ -70,13 +70,13 @@
     <Compile Include="SeriLogLogger.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\..\MassTransit\MassTransit.csproj">
       <Project>{6efd69fc-cbcc-4f85-aee0-efba73f4d273}</Project>
       <Name>MassTransit</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

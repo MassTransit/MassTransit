@@ -27,7 +27,7 @@ namespace MassTransit.QuartzIntegration.Tests
         QuartzInMemoryTestFixture
     {
         [Test]
-        public async void Should_properly_send_the_message()
+        public async Task Should_properly_send_the_message()
         {
             Task<ConsumeContext<A>> handlerA = SubscribeHandler<A>();
             Task<ConsumeContext<IA>> handlerIA = SubscribeHandler<IA>();
@@ -57,7 +57,7 @@ namespace MassTransit.QuartzIntegration.Tests
         QuartzInMemoryTestFixture
     {
         [Test]
-        public async void Should_properly_send_the_message()
+        public async Task Should_properly_send_the_message()
         {
             Task<ConsumeContext<A>> handlerA = SubscribeHandler<A>();
             Task<ConsumeContext<IA>> handlerIA = SubscribeHandler<IA>();
@@ -98,7 +98,7 @@ namespace MassTransit.QuartzIntegration.Tests
         QuartzInMemoryTestFixture
     {
         [Test]
-        public async void Should_properly_send_the_message()
+        public async Task Should_properly_send_the_message()
         {
             Task<ConsumeContext<A>> handlerA = SubscribeHandler<A>();
 
@@ -109,7 +109,7 @@ namespace MassTransit.QuartzIntegration.Tests
 
             await Bus.CancelScheduledMessage(scheduledMessage);
 
-            Assert.Throws<OperationCanceledException>(async () => await handlerA.WithTimeout(5000));
+            Assert.That(async () => await handlerA.WithTimeout(5000), Throws.TypeOf<OperationCanceledException>());
         }
 
 

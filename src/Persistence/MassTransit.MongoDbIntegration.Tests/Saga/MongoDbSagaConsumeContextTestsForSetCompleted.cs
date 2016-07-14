@@ -41,7 +41,7 @@ namespace MassTransit.MongoDbIntegration.Tests.Saga
         SimpleSaga _saga;
         MongoDbSagaConsumeContext<SimpleSaga, InitiateSimpleSaga> _mongoDbSagaConsumeContext;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void GivenAMongoDbSagaConsumeContext_WhenSettingComplete()
         {
             _saga = new SimpleSaga {CorrelationId = Guid.NewGuid()};
@@ -55,7 +55,7 @@ namespace MassTransit.MongoDbIntegration.Tests.Saga
             TaskUtil.Await(() => _mongoDbSagaConsumeContext.SetCompleted());
         }
 
-        [TestFixtureTearDown]
+        [OneTimeTearDown]
         public void Kill()
         {
             TaskUtil.Await(() => SagaRepository.DeleteSaga(_saga.CorrelationId));

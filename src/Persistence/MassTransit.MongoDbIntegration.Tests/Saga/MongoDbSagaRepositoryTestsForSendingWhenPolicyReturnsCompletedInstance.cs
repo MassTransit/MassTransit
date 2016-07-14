@@ -26,7 +26,7 @@ namespace MassTransit.MongoDbIntegration.Tests.Saga
         CancellationToken _cancellationToken;
         Guid _correlationId;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void GivenAMongoDbSagaRespository_WhenSendingCompletedInstance()
         {
             _correlationId = Guid.NewGuid();
@@ -53,7 +53,7 @@ namespace MassTransit.MongoDbIntegration.Tests.Saga
             TaskUtil.Await(() => repository.Send(context.Object, Mock.Of<ISagaPolicy<SimpleSaga, CompleteSimpleSaga>>(), null));
         }
 
-        [TestFixtureTearDown]
+        [OneTimeTearDown]
         public void Kill()
         {
             TaskUtil.Await(() => SagaRepository.DeleteSaga(_correlationId));

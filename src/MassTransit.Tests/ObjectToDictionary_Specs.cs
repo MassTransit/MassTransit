@@ -133,7 +133,7 @@ namespace MassTransit.Tests
         IDictionary<string, object> _dictionary;
         ValuesImpl _expected;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void Setup()
         {
             var factory = new DictionaryConverterCache();

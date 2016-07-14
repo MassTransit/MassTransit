@@ -49,7 +49,7 @@ namespace MassTransit.Containers.Tests
     public class Unity_Saga :
         When_registering_a_saga
     {
-        [TestFixtureTearDown]
+        [OneTimeTearDown]
         public void Close_container()
         {
             _container.Dispose();

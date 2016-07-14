@@ -101,7 +101,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         Task<ConsumeContext<PingMessage>> _errorHandler;
         readonly Guid? _correlationId = NewId.NextGuid();
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void Setup()
         {
             Await(() => InputQueueSendEndpoint.Send(new PingMessage(), Pipe.Execute<SendContext<PingMessage>>(context =>
@@ -161,7 +161,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         string _body;
         BasicGetResult _basicGetResult;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void Setup()
         {
             TaskUtil.Await(async () =>

@@ -148,7 +148,7 @@ namespace MassTransit.Containers.Tests
             _updated = Handled<OrderUpdated>(configurator, context => context.Message.OrderId == "123" && context.Message.OrderStatus == "Processed");
         }
 
-        [TestFixtureTearDown]
+        [OneTimeTearDown]
         public void Teardown()
         {
             _container.Dispose();

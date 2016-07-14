@@ -42,7 +42,7 @@ namespace MassTransit.MongoDbIntegration.Tests.Saga
         Mock<SagaQueryConsumeContext<SimpleSaga, InitiateSimpleSaga>> _sagaQueryConsumeContext;
         Mock<IPipe<SagaConsumeContext<SimpleSaga, InitiateSimpleSaga>>> _nextPipe;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void GivenAMongoDbSagaRepository_WhenSendingQueryAndSagaNotFound()
         {
             _sagaQueryConsumeContext = new Mock<SagaQueryConsumeContext<SimpleSaga, InitiateSimpleSaga>>();

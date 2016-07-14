@@ -85,7 +85,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
 
         protected override IBus Bus => _bus;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void SetupAzureServiceBusTestFixture()
         {
             _bus = CreateBus();
@@ -120,7 +120,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
             }
         }
 
-        [TestFixtureTearDown]
+        [OneTimeTearDown]
         public void TearDownInMemoryTestFixture()
         {
             try

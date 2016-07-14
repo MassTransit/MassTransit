@@ -24,7 +24,7 @@ namespace MassTransit.Tests
     [SetUpFixture]
     public class ContextSetup
     {
-        [SetUp]
+        [OneTimeSetUp]
         public void Before_any()
         {
             string path = AppDomain.CurrentDomain.BaseDirectory;
@@ -38,7 +38,7 @@ namespace MassTransit.Tests
             Logger.UseLogger(new Log4NetLogger());
         }
 
-        [TearDown]
+        [OneTimeTearDown]
         public void After_all()
         {
             LogManager.Shutdown();

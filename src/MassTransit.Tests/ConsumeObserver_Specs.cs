@@ -31,7 +31,7 @@ namespace MassTransit.Tests
             TestConsumeObserver<PingMessage> _pingObserver;
             TestConsumeObserver _observer;
 
-            [TestFixtureSetUp]
+            [OneTimeSetUp]
             public void SetupObservers()
             {
                 _pingObserver = GetConsumeObserver<PingMessage>();

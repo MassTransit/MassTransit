@@ -33,14 +33,14 @@ namespace MassTransit.AzureServiceBusTransport.Tests
         {
         }
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void Setup()
         {
             _requestClient = new MessageRequestClient<PingMessage, PongMessage>(SecondBus, InputQueueAddress, TestTimeout);
         }
 
         [Test]
-        public async void Should_succeed()
+        public async Task Should_succeed()
         {
             var response = await _requestClient.Request(new PingMessage());
 

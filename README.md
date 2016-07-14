@@ -101,7 +101,7 @@ While attendence is pretty light, there is a Gitter chat room available:
 MassTransit is built on [AppVeyor](https://ci.appveyor.com/project/phatboyg/masstransit)
  
 # REQUIREMENTS
-* .Net 4.5
+* .Net 4.5.2
 
 # CREDITS
 Logo Design by [The Agile Badger](http://www.theagilebadger.com)

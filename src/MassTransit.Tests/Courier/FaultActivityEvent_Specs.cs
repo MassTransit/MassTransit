@@ -32,7 +32,7 @@ namespace MassTransit.Tests.Courier
         Task<ConsumeContext<RoutingSlipActivityCompleted>> _secondActivityCompleted;
         Task<ConsumeContext<RoutingSlipActivityCompensated>> _activityCompensated;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void Setup()
         {
             _faulted = SubscribeHandler<RoutingSlipFaulted>();

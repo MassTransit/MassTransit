@@ -96,7 +96,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
         protected Uri BusAddress => _bus.Address;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void SetupInMemoryTestFixture()
         {
             _bus = CreateBus();
@@ -129,7 +129,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             }
         }
 
-        [TestFixtureTearDown]
+        [OneTimeTearDown]
         public void TearDownInMemoryTestFixture()
         {
             try

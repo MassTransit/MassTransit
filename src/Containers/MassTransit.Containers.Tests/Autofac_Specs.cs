@@ -35,7 +35,7 @@ namespace MassTransit.Containers.Tests
             _container = builder.Build();
         }
 
-        [TestFixtureTearDown]
+        [OneTimeTearDown]
         public void Close_container()
         {
             _container.Dispose();
@@ -65,7 +65,7 @@ namespace MassTransit.Containers.Tests
             _container = builder.Build();
         }
 
-        [TestFixtureTearDown]
+        [OneTimeTearDown]
         public void Close_container()
         {
             _container.Dispose();
@@ -92,7 +92,7 @@ namespace MassTransit.Containers.Tests
             _container = builder.Build();
         }
 
-        [TestFixtureTearDown]
+        [OneTimeTearDown]
         public void Close_container()
         {
             _container.Dispose();

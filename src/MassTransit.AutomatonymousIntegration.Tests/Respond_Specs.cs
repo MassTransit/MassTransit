@@ -44,12 +44,14 @@ namespace MassTransit.AutomatonymousIntegration.Tests
         }
 
         [Test]
-        public async Task Should_fault_on_a_missing_instance()
+        public void Should_fault_on_a_missing_instance()
         {
-            Assert.Throws<RequestFaultException>(async () => await _statusClient.Request(new StatusRequested(NewId.NextGuid()), TestCancellationToken));
+            Assert.That(
+                async () => await _statusClient.Request(new StatusRequested(NewId.NextGuid()), TestCancellationToken), 
+                Throws.TypeOf<RequestFaultException>());
         }
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void Setup()
         {
             _client = new MessageRequestClient<Start, StartupComplete>(Bus, InputQueueAddress, TestTimeout);
