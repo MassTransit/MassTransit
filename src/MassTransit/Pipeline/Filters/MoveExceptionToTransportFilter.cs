@@ -54,7 +54,19 @@ namespace MassTransit.Pipeline.Filters
 
                 Exception exception = context.Exception.GetBaseException();
 
-                sendContext.Headers.Set(MessageHeaders.FaultMessage, exception.Message);
+                string message;
+
+                if (exception == null)
+                {
+                    sendContext.Headers.Set(MessageHeaders.FaultMessage, exception.Message);
+                    message = $"An exception was thrown but the call to {context.Exception.GetType()}.GetBaseException() was null.";
+                }
+                else
+                {
+                    message = exception.Message;
+                }
+
+                sendContext.Headers.Set(MessageHeaders.FaultMessage, message);
                 sendContext.Headers.Set(MessageHeaders.FaultTimestamp, context.ExceptionTimestamp.ToString("O"));
                 sendContext.Headers.Set(MessageHeaders.FaultStackTrace, ExceptionUtil.GetStackTrace(exception));
 
