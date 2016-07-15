@@ -12,224 +12,215 @@
 // specific language governing permissions and limitations under the License.
 namespace Automatonymous
 {
-	using System;
-	using Activities;
-	using Binders;
-	using MassTransit;
+    using System;
+    using Activities;
+    using Binders;
+    using MassTransit;
 
 
-	public static class SendExtensions
-	{
-		public static EventActivityBinder<TInstance> Send<TInstance, TMessage>(
-			this EventActivityBinder<TInstance> source, Func<TInstance, Uri> destinationAddressFactory,
-			TMessage message)
-			where TInstance : class, SagaStateMachineInstance
-			where TMessage : class
-		{
-			return source.Add(new SendActivity<TInstance, TMessage>(destinationAddressFactory, x => message));
-		}
+    public static class SendExtensions
+    {
+        public static EventActivityBinder<TInstance> Send<TInstance, TMessage>(this EventActivityBinder<TInstance> source,
+            DestinationAddressProvider<TInstance> destinationAddressProvider, TMessage message)
+            where TInstance : class, SagaStateMachineInstance
+            where TMessage : class
+        {
+            return source.Add(new SendActivity<TInstance, TMessage>(destinationAddressProvider, x => message));
+        }
 
-		public static EventActivityBinder<TInstance> Send<TInstance, TMessage>(
-			this EventActivityBinder<TInstance> source, Func<TInstance, Uri> destinationAddressFactory,
-			TMessage message, Action<SendContext<TMessage>> contextCallback)
-			where TInstance : class, SagaStateMachineInstance
-			where TMessage : class
-		{
-			return source.Add(new SendActivity<TInstance, TMessage>(destinationAddressFactory, x => message, contextCallback));
-		}
+        public static EventActivityBinder<TInstance> Send<TInstance, TMessage>(this EventActivityBinder<TInstance> source,
+            DestinationAddressProvider<TInstance> destinationAddressProvider, TMessage message, Action<SendContext<TMessage>> contextCallback)
+            where TInstance : class, SagaStateMachineInstance
+            where TMessage : class
+        {
+            return source.Add(new SendActivity<TInstance, TMessage>(destinationAddressProvider, x => message, contextCallback));
+        }
 
-		public static EventActivityBinder<TInstance> Send<TInstance, TMessage>(
-			this EventActivityBinder<TInstance> source, Func<TInstance, Uri> destinationAddressFactory,
-			EventMessageFactory<TInstance, TMessage> messageFactory)
-			where TInstance : class, SagaStateMachineInstance
-			where TMessage : class
-		{
-			return source.Add(new SendActivity<TInstance, TMessage>(destinationAddressFactory, messageFactory));
-		}
+        public static EventActivityBinder<TInstance> Send<TInstance, TMessage>(this EventActivityBinder<TInstance> source,
+            DestinationAddressProvider<TInstance> destinationAddressProvider, EventMessageFactory<TInstance, TMessage> messageFactory)
+            where TInstance : class, SagaStateMachineInstance
+            where TMessage : class
+        {
+            return source.Add(new SendActivity<TInstance, TMessage>(destinationAddressProvider, messageFactory));
+        }
 
-		public static EventActivityBinder<TInstance> Send<TInstance, TMessage>(
-			this EventActivityBinder<TInstance> source, Func<TInstance, Uri> destinationAddressFactory,
-			EventMessageFactory<TInstance, TMessage> messageFactory, Action<SendContext<TMessage>> contextCallback)
-			where TInstance : class, SagaStateMachineInstance
-			where TMessage : class
-		{
-			return source.Add(new SendActivity<TInstance, TMessage>(destinationAddressFactory, messageFactory, contextCallback));
-		}
+        public static EventActivityBinder<TInstance> Send<TInstance, TMessage>(this EventActivityBinder<TInstance> source,
+            DestinationAddressProvider<TInstance> destinationAddressProvider, EventMessageFactory<TInstance, TMessage> messageFactory,
+            Action<SendContext<TMessage>> contextCallback)
+            where TInstance : class, SagaStateMachineInstance
+            where TMessage : class
+        {
+            return source.Add(new SendActivity<TInstance, TMessage>(destinationAddressProvider, messageFactory, contextCallback));
+        }
 
-		public static EventActivityBinder<TInstance, TData> Send<TInstance, TData, TMessage>(
-			this EventActivityBinder<TInstance, TData> source, Func<TInstance, Uri> destinationAddressFactory, TMessage message)
-			where TInstance : class, SagaStateMachineInstance
-			where TData : class
-			where TMessage : class
-				{
-					return source.Add(new SendActivity<TInstance, TData, TMessage>(destinationAddressFactory, x => message));
-				}
+        public static EventActivityBinder<TInstance, TData> Send<TInstance, TData, TMessage>(this EventActivityBinder<TInstance, TData> source,
+            DestinationAddressProvider<TInstance, TData> destinationAddressProvider, TMessage message)
+            where TInstance : class, SagaStateMachineInstance
+            where TData : class
+            where TMessage : class
+        {
+            return source.Add(new SendActivity<TInstance, TData, TMessage>(destinationAddressProvider, x => message));
+        }
 
-		public static EventActivityBinder<TInstance, TData> Send<TInstance, TData, TMessage>(
-			this EventActivityBinder<TInstance, TData> source, Func<TInstance, Uri> destinationAddressFactory, TMessage message,
-			Action<SendContext<TMessage>> contextCallback)
-			where TInstance : class, SagaStateMachineInstance
-			where TData : class
-			where TMessage : class
-		{
-			return source.Add(new SendActivity<TInstance, TData, TMessage>(destinationAddressFactory, x => message, contextCallback));
-		}
+        public static EventActivityBinder<TInstance, TData> Send<TInstance, TData, TMessage>(this EventActivityBinder<TInstance, TData> source,
+            DestinationAddressProvider<TInstance, TData> destinationAddressProvider, TMessage message, Action<SendContext<TMessage>> contextCallback)
+            where TInstance : class, SagaStateMachineInstance
+            where TData : class
+            where TMessage : class
+        {
+            return source.Add(new SendActivity<TInstance, TData, TMessage>(destinationAddressProvider, x => message, contextCallback));
+        }
 
-		public static EventActivityBinder<TInstance, TData> Send<TInstance, TData, TMessage>(
-			this EventActivityBinder<TInstance, TData> source, Func<TInstance, Uri> destinationAddressFactory, EventMessageFactory<TInstance, TData, TMessage> messageFactory)
-			where TInstance : class, SagaStateMachineInstance
-			where TData : class
-			where TMessage : class
-		{
-			return source.Add(new SendActivity<TInstance, TData, TMessage>(destinationAddressFactory, messageFactory));
-		}
+        public static EventActivityBinder<TInstance, TData> Send<TInstance, TData, TMessage>(this EventActivityBinder<TInstance, TData> source,
+            DestinationAddressProvider<TInstance, TData> destinationAddressProvider, EventMessageFactory<TInstance, TData, TMessage> messageFactory)
+            where TInstance : class, SagaStateMachineInstance
+            where TData : class
+            where TMessage : class
+        {
+            return source.Add(new SendActivity<TInstance, TData, TMessage>(destinationAddressProvider, messageFactory));
+        }
 
-		public static EventActivityBinder<TInstance, TData> Send<TInstance, TData, TMessage>(
-			this EventActivityBinder<TInstance, TData> source, Func<TInstance, Uri> destinationAddressFactory, EventMessageFactory<TInstance, TData, TMessage> messageFactory,
-			Action<SendContext<TMessage>> contextCallback)
-			where TInstance : class, SagaStateMachineInstance
-			where TData : class
-			where TMessage : class
-		{
-			return source.Add(new SendActivity<TInstance, TData, TMessage>(destinationAddressFactory, messageFactory, contextCallback));
-		}
+        public static EventActivityBinder<TInstance, TData> Send<TInstance, TData, TMessage>(this EventActivityBinder<TInstance, TData> source,
+            DestinationAddressProvider<TInstance, TData> destinationAddressProvider, EventMessageFactory<TInstance, TData, TMessage> messageFactory,
+            Action<SendContext<TMessage>> contextCallback)
+            where TInstance : class, SagaStateMachineInstance
+            where TData : class
+            where TMessage : class
+        {
+            return source.Add(new SendActivity<TInstance, TData, TMessage>(destinationAddressProvider, messageFactory, contextCallback));
+        }
 
-		public static ExceptionActivityBinder<TInstance, TData, TException> Send<TInstance, TData, TException, TMessage>(
-			this ExceptionActivityBinder<TInstance, TData, TException> source, Func<TInstance, Uri> destinationAddressFactory, TMessage message)
-			where TInstance : class, SagaStateMachineInstance
-			where TData : class
-			where TMessage : class
-			where TException : Exception
-		{
-			return source.Add(new SendActivity<TInstance, TData, TMessage>(destinationAddressFactory, x => message));
-		}
+        public static ExceptionActivityBinder<TInstance, TData, TException> Send<TInstance, TData, TException, TMessage>(
+            this ExceptionActivityBinder<TInstance, TData, TException> source, DestinationAddressProvider<TInstance, TData> destinationAddressProvider,
+            TMessage message)
+            where TInstance : class, SagaStateMachineInstance
+            where TData : class
+            where TMessage : class
+            where TException : Exception
+        {
+            return source.Add(new SendActivity<TInstance, TData, TMessage>(destinationAddressProvider, x => message));
+        }
 
-		public static ExceptionActivityBinder<TInstance, TData, TException> Send<TInstance, TData, TException, TMessage>(
-			this ExceptionActivityBinder<TInstance, TData, TException> source, Func<TInstance, Uri> destinationAddressFactory, TMessage message,
-			Action<SendContext<TMessage>> contextCallback)
-			where TInstance : class, SagaStateMachineInstance
-			where TData : class
-			where TMessage : class
-			where TException : Exception
-		{
-			return source.Add(new SendActivity<TInstance, TData, TMessage>(destinationAddressFactory, x => message, contextCallback));
-		}
+        public static ExceptionActivityBinder<TInstance, TData, TException> Send<TInstance, TData, TException, TMessage>(
+            this ExceptionActivityBinder<TInstance, TData, TException> source, DestinationAddressProvider<TInstance, TData> destinationAddressProvider,
+            TMessage message, Action<SendContext<TMessage>> contextCallback)
+            where TInstance : class, SagaStateMachineInstance
+            where TData : class
+            where TMessage : class
+            where TException : Exception
+        {
+            return source.Add(new SendActivity<TInstance, TData, TMessage>(destinationAddressProvider, x => message, contextCallback));
+        }
 
-		public static EventActivityBinder<TInstance> Send<TInstance, TMessage>(
-			this EventActivityBinder<TInstance> source, Uri destinationAddress,
-			TMessage message)
-			where TInstance : class, SagaStateMachineInstance
-			where TMessage : class
-		{
-			return source.Add(new SendActivity<TInstance, TMessage>(destinationAddress, x => message));
-		}
+        public static EventActivityBinder<TInstance> Send<TInstance, TMessage>(this EventActivityBinder<TInstance> source, Uri destinationAddress,
+            TMessage message)
+            where TInstance : class, SagaStateMachineInstance
+            where TMessage : class
+        {
+            return source.Add(new SendActivity<TInstance, TMessage>(destinationAddress, x => message));
+        }
 
-		public static EventActivityBinder<TInstance> Send<TInstance, TMessage>(this EventActivityBinder<TInstance> source, Uri destinationAddress,
-			TMessage message, Action<SendContext<TMessage>> contextCallback)
-			where TInstance : class, SagaStateMachineInstance
-			where TMessage : class
-		{
-			return source.Add(new SendActivity<TInstance, TMessage>(destinationAddress, x => message, contextCallback));
-		}
+        public static EventActivityBinder<TInstance> Send<TInstance, TMessage>(this EventActivityBinder<TInstance> source, Uri destinationAddress,
+            TMessage message, Action<SendContext<TMessage>> contextCallback)
+            where TInstance : class, SagaStateMachineInstance
+            where TMessage : class
+        {
+            return source.Add(new SendActivity<TInstance, TMessage>(destinationAddress, x => message, contextCallback));
+        }
 
-		public static EventActivityBinder<TInstance> Send<TInstance, TMessage>(
-			this EventActivityBinder<TInstance> source, Uri destinationAddress,
-			EventMessageFactory<TInstance, TMessage> messageFactory)
-			where TInstance : class, SagaStateMachineInstance
-			where TMessage : class
-		{
-			return source.Add(new SendActivity<TInstance, TMessage>(destinationAddress, messageFactory));
-		}
+        public static EventActivityBinder<TInstance> Send<TInstance, TMessage>(this EventActivityBinder<TInstance> source, Uri destinationAddress,
+            EventMessageFactory<TInstance, TMessage> messageFactory)
+            where TInstance : class, SagaStateMachineInstance
+            where TMessage : class
+        {
+            return source.Add(new SendActivity<TInstance, TMessage>(destinationAddress, messageFactory));
+        }
 
-		public static EventActivityBinder<TInstance> Send<TInstance, TMessage>(
-			this EventActivityBinder<TInstance> source, Uri destinationAddress,
-			EventMessageFactory<TInstance, TMessage> messageFactory, Action<SendContext<TMessage>> contextCallback)
-			where TInstance : class, SagaStateMachineInstance
-			where TMessage : class
-		{
-			return source.Add(new SendActivity<TInstance, TMessage>(destinationAddress, messageFactory, contextCallback));
-		}
+        public static EventActivityBinder<TInstance> Send<TInstance, TMessage>(this EventActivityBinder<TInstance> source, Uri destinationAddress,
+            EventMessageFactory<TInstance, TMessage> messageFactory, Action<SendContext<TMessage>> contextCallback)
+            where TInstance : class, SagaStateMachineInstance
+            where TMessage : class
+        {
+            return source.Add(new SendActivity<TInstance, TMessage>(destinationAddress, messageFactory, contextCallback));
+        }
 
-		public static EventActivityBinder<TInstance, TData> Send<TInstance, TData, TMessage>(
-			this EventActivityBinder<TInstance, TData> source, Uri destinationAddress, TMessage message)
-			where TInstance : class, SagaStateMachineInstance
-			where TData : class
-			where TMessage : class
-		{
-			return source.Add(new SendActivity<TInstance, TData, TMessage>(destinationAddress, x => message));
-		}
+        public static EventActivityBinder<TInstance, TData> Send<TInstance, TData, TMessage>(this EventActivityBinder<TInstance, TData> source,
+            Uri destinationAddress, TMessage message)
+            where TInstance : class, SagaStateMachineInstance
+            where TData : class
+            where TMessage : class
+        {
+            return source.Add(new SendActivity<TInstance, TData, TMessage>(destinationAddress, x => message));
+        }
 
-		public static EventActivityBinder<TInstance, TData> Send<TInstance, TData, TMessage>(
-			this EventActivityBinder<TInstance, TData> source, Uri destinationAddress, TMessage message,
-			Action<SendContext<TMessage>> contextCallback)
-			where TInstance : class, SagaStateMachineInstance
-			where TData : class
-			where TMessage : class
-		{
-			return source.Add(new SendActivity<TInstance, TData, TMessage>(destinationAddress, x => message, contextCallback));
-		}
+        public static EventActivityBinder<TInstance, TData> Send<TInstance, TData, TMessage>(this EventActivityBinder<TInstance, TData> source,
+            Uri destinationAddress, TMessage message, Action<SendContext<TMessage>> contextCallback)
+            where TInstance : class, SagaStateMachineInstance
+            where TData : class
+            where TMessage : class
+        {
+            return source.Add(new SendActivity<TInstance, TData, TMessage>(destinationAddress, x => message, contextCallback));
+        }
 
-		public static EventActivityBinder<TInstance, TData> Send<TInstance, TData, TMessage>(
-			this EventActivityBinder<TInstance, TData> source, Uri destinationAddress, EventMessageFactory<TInstance, TData, TMessage> messageFactory)
-			where TInstance : class, SagaStateMachineInstance
-			where TData : class
-			where TMessage : class
-		{
-			return source.Add(new SendActivity<TInstance, TData, TMessage>(destinationAddress, messageFactory));
-		}
+        public static EventActivityBinder<TInstance, TData> Send<TInstance, TData, TMessage>(this EventActivityBinder<TInstance, TData> source,
+            Uri destinationAddress, EventMessageFactory<TInstance, TData, TMessage> messageFactory)
+            where TInstance : class, SagaStateMachineInstance
+            where TData : class
+            where TMessage : class
+        {
+            return source.Add(new SendActivity<TInstance, TData, TMessage>(destinationAddress, messageFactory));
+        }
 
-		public static EventActivityBinder<TInstance, TData> Send<TInstance, TData, TMessage>(
-			this EventActivityBinder<TInstance, TData> source, Uri destinationAddress, EventMessageFactory<TInstance, TData, TMessage> messageFactory,
-			Action<SendContext<TMessage>> contextCallback)
-			where TInstance : class, SagaStateMachineInstance
-			where TData : class
-			where TMessage : class
-		{
-			return source.Add(new SendActivity<TInstance, TData, TMessage>(destinationAddress, messageFactory, contextCallback));
-		}
+        public static EventActivityBinder<TInstance, TData> Send<TInstance, TData, TMessage>(this EventActivityBinder<TInstance, TData> source,
+            Uri destinationAddress, EventMessageFactory<TInstance, TData, TMessage> messageFactory, Action<SendContext<TMessage>> contextCallback)
+            where TInstance : class, SagaStateMachineInstance
+            where TData : class
+            where TMessage : class
+        {
+            return source.Add(new SendActivity<TInstance, TData, TMessage>(destinationAddress, messageFactory, contextCallback));
+        }
 
-		public static ExceptionActivityBinder<TInstance, TData, TException> Send<TInstance, TData, TException, TMessage>(
-			this ExceptionActivityBinder<TInstance, TData, TException> source, Uri destinationAddress, TMessage message)
-			where TInstance : class, SagaStateMachineInstance
-			where TData : class
-			where TMessage : class
-			where TException : Exception
-		{
-			return source.Add(new SendActivity<TInstance, TData, TMessage>(destinationAddress, x => message));
-		}
+        public static ExceptionActivityBinder<TInstance, TData, TException> Send<TInstance, TData, TException, TMessage>(
+            this ExceptionActivityBinder<TInstance, TData, TException> source, Uri destinationAddress, TMessage message)
+            where TInstance : class, SagaStateMachineInstance
+            where TData : class
+            where TMessage : class
+            where TException : Exception
+        {
+            return source.Add(new SendActivity<TInstance, TData, TMessage>(destinationAddress, x => message));
+        }
 
-		public static ExceptionActivityBinder<TInstance, TData, TException> Send<TInstance, TData, TException, TMessage>(
-			this ExceptionActivityBinder<TInstance, TData, TException> source, Uri destinationAddress, TMessage message,
-			Action<SendContext<TMessage>> contextCallback)
-			where TInstance : class, SagaStateMachineInstance
-			where TData : class
-			where TMessage : class
-			where TException : Exception
-		{
-			return source.Add(new SendActivity<TInstance, TData, TMessage>(destinationAddress, x => message, contextCallback));
-		}
+        public static ExceptionActivityBinder<TInstance, TData, TException> Send<TInstance, TData, TException, TMessage>(
+            this ExceptionActivityBinder<TInstance, TData, TException> source, Uri destinationAddress, TMessage message,
+            Action<SendContext<TMessage>> contextCallback)
+            where TInstance : class, SagaStateMachineInstance
+            where TData : class
+            where TMessage : class
+            where TException : Exception
+        {
+            return source.Add(new SendActivity<TInstance, TData, TMessage>(destinationAddress, x => message, contextCallback));
+        }
 
-		public static ExceptionActivityBinder<TInstance, TData, TException> Send<TInstance, TData, TException, TMessage>(
-			this ExceptionActivityBinder<TInstance, TData, TException> source, Uri destinationAddress,
-			EventExceptionMessageFactory<TInstance, TData, TException, TMessage> messageFactory)
-			where TInstance : class, SagaStateMachineInstance
-			where TData : class
-			where TMessage : class
-			where TException : Exception
-		{
-			return source.Add(new FaultedSendActivity<TInstance, TData, TException, TMessage>(destinationAddress, messageFactory));
-		}
+        public static ExceptionActivityBinder<TInstance, TData, TException> Send<TInstance, TData, TException, TMessage>(
+            this ExceptionActivityBinder<TInstance, TData, TException> source, Uri destinationAddress,
+            EventExceptionMessageFactory<TInstance, TData, TException, TMessage> messageFactory)
+            where TInstance : class, SagaStateMachineInstance
+            where TData : class
+            where TMessage : class
+            where TException : Exception
+        {
+            return source.Add(new FaultedSendActivity<TInstance, TData, TException, TMessage>(destinationAddress, messageFactory));
+        }
 
-		public static ExceptionActivityBinder<TInstance, TData, TException> Send<TInstance, TData, TException, TMessage>(
-			this ExceptionActivityBinder<TInstance, TData, TException> source, Uri destinationAddress,
-			EventExceptionMessageFactory<TInstance, TData, TException, TMessage> messageFactory,
-			Action<SendContext<TMessage>> contextCallback)
-			where TInstance : class, SagaStateMachineInstance
-			where TData : class
-			where TMessage : class
-			where TException : Exception
-		{
-			return source.Add(new FaultedSendActivity<TInstance, TData, TException, TMessage>(destinationAddress, messageFactory, contextCallback));
-		}
-	}
+        public static ExceptionActivityBinder<TInstance, TData, TException> Send<TInstance, TData, TException, TMessage>(
+            this ExceptionActivityBinder<TInstance, TData, TException> source, Uri destinationAddress,
+            EventExceptionMessageFactory<TInstance, TData, TException, TMessage> messageFactory, Action<SendContext<TMessage>> contextCallback)
+            where TInstance : class, SagaStateMachineInstance
+            where TData : class
+            where TMessage : class
+            where TException : Exception
+        {
+            return source.Add(new FaultedSendActivity<TInstance, TData, TException, TMessage>(destinationAddress, messageFactory, contextCallback));
+        }
+    }
 }
