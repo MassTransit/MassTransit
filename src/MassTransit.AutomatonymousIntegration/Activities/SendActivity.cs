@@ -23,13 +23,13 @@ namespace Automatonymous.Activities
         where TInstance : SagaStateMachineInstance
         where TMessage : class
     {
-        readonly Uri _destinationAddress;
+        readonly Func<TInstance, Uri> _destinationAddressFactory;
         readonly EventMessageFactory<TInstance, TMessage> _messageFactory;
         readonly IPipe<SendContext<TMessage>> _sendPipe;
 
         public SendActivity(Uri destinationAddress, EventMessageFactory<TInstance, TMessage> messageFactory)
         {
-            _destinationAddress = destinationAddress;
+            _destinationAddressFactory = _ =>destinationAddress;
             _messageFactory = messageFactory;
 
             _sendPipe = Pipe.Empty<SendContext<TMessage>>();
@@ -37,7 +37,23 @@ namespace Automatonymous.Activities
 
         public SendActivity(Uri destinationAddress, EventMessageFactory<TInstance, TMessage> messageFactory, Action<SendContext<TMessage>> contextCallback)
         {
-            _destinationAddress = destinationAddress;
+            _destinationAddressFactory = _ => destinationAddress;
+            _messageFactory = messageFactory;
+
+            _sendPipe = Pipe.Execute(contextCallback);
+        }
+
+        public SendActivity(Func<TInstance,Uri> destinationAddressFactory, EventMessageFactory<TInstance, TMessage> messageFactory)
+        {
+            _destinationAddressFactory = destinationAddressFactory;
+            _messageFactory = messageFactory;
+
+            _sendPipe = Pipe.Empty<SendContext<TMessage>>();
+        }
+
+        public SendActivity(Func<TInstance, Uri> destinationAddressFactory, EventMessageFactory<TInstance, TMessage> messageFactory, Action<SendContext<TMessage>> contextCallback)
+        {
+            _destinationAddressFactory = destinationAddressFactory;
             _messageFactory = messageFactory;
 
             _sendPipe = Pipe.Execute(contextCallback);
@@ -78,7 +94,9 @@ namespace Automatonymous.Activities
 
             var message = _messageFactory(consumeContext);
 
-            var endpoint = await consumeContext.GetSendEndpoint(_destinationAddress).ConfigureAwait(false);
+            var destinationAddress = _destinationAddressFactory(consumeContext.Instance);
+
+            var endpoint = await consumeContext.GetSendEndpoint(destinationAddress).ConfigureAwait(false);
 
             await endpoint.Send(message, _sendPipe).ConfigureAwait(false);
         }
@@ -91,14 +109,14 @@ namespace Automatonymous.Activities
         where TData : class
         where TMessage : class
     {
-        readonly Uri _destinationAddress;
+        readonly Func<TInstance, Uri> _destinationAddressFactory;
         readonly EventMessageFactory<TInstance, TData, TMessage> _messageFactory;
         readonly IPipe<SendContext<TMessage>> _sendPipe;
 
         public SendActivity(Uri destinationAddress, EventMessageFactory<TInstance, TData, TMessage> messageFactory,
             Action<SendContext<TMessage>> contextCallback)
         {
-            _destinationAddress = destinationAddress;
+            _destinationAddressFactory = _ => destinationAddress;
             _messageFactory = messageFactory;
 
             _sendPipe = Pipe.Execute(contextCallback);
@@ -106,7 +124,24 @@ namespace Automatonymous.Activities
 
         public SendActivity(Uri destinationAddress, EventMessageFactory<TInstance, TData, TMessage> messageFactory)
         {
-            _destinationAddress = destinationAddress;
+            _destinationAddressFactory = _ => destinationAddress;
+            _messageFactory = messageFactory;
+
+            _sendPipe = Pipe.Empty<SendContext<TMessage>>();
+        }
+
+        public SendActivity(Func<TInstance, Uri> destinationAddressFactory, EventMessageFactory<TInstance, TData, TMessage> messageFactory,
+            Action<SendContext<TMessage>> contextCallback)
+        {
+            _destinationAddressFactory = destinationAddressFactory;
+            _messageFactory = messageFactory;
+
+            _sendPipe = Pipe.Execute(contextCallback);
+        }
+
+        public SendActivity(Func<TInstance, Uri> destinationAddressFactory, EventMessageFactory<TInstance, TData, TMessage> messageFactory)
+        {
+            _destinationAddressFactory = destinationAddressFactory;
             _messageFactory = messageFactory;
 
             _sendPipe = Pipe.Empty<SendContext<TMessage>>();
@@ -123,7 +158,9 @@ namespace Automatonymous.Activities
 
             var message = _messageFactory(consumeContext);
 
-            var endpoint = await consumeContext.GetSendEndpoint(_destinationAddress).ConfigureAwait(false);
+            var destinationAddress = _destinationAddressFactory(consumeContext.Instance);
+
+            var endpoint = await consumeContext.GetSendEndpoint(destinationAddress).ConfigureAwait(false);
 
             await endpoint.Send(message, _sendPipe).ConfigureAwait(false);
 
