@@ -16,6 +16,7 @@ namespace MassTransit.Builders
     using BusConfigurators;
     using EndpointConfigurators;
     using Pipeline;
+    using Pipeline.Pipes;
     using Transports;
     using Transports.InMemory;
 
@@ -28,10 +29,9 @@ namespace MassTransit.Builders
         readonly Uri _inputAddress;
         readonly ISendTransportProvider _sendTransportProvider;
 
-        public InMemoryBusBuilder(IReceiveTransportProvider receiveTransportProvider,
-            ISendTransportProvider sendTransportProvider, IBusHostControl[] hosts,
-            IConsumePipeSpecification consumePipeSpecification)
-            : base(consumePipeSpecification, hosts)
+        public InMemoryBusBuilder(IReceiveTransportProvider receiveTransportProvider, ISendTransportProvider sendTransportProvider, IBusHostControl[] hosts,
+            IConsumePipeFactory consumePipeFactory, ISendPipeFactory sendPipeFactory, IPublishPipeFactory publishPipeFactory)
+            : base(consumePipeFactory, sendPipeFactory, publishPipeFactory, hosts)
         {
             if (receiveTransportProvider == null)
                 throw new ArgumentNullException(nameof(receiveTransportProvider));
@@ -46,6 +46,27 @@ namespace MassTransit.Builders
         }
 
         public IReceiveTransportProvider ReceiveTransportProvider { get; }
+
+        public override ISendEndpointProvider CreateSendEndpointProvider(params ISendPipeSpecification[] specifications)
+        {
+            var sendPipe = CreateSendPipe(specifications);
+
+            var provider = new InMemorySendEndpointProvider(_inputAddress, _sendTransportProvider, MessageSerializer, sendPipe);
+
+            return new SendEndpointCache(provider);
+        }
+
+        public override IPublishEndpointProvider CreatePublishEndpointProvider(params IPublishPipeSpecification[] specifications)
+        {
+
+            var sendEndpointProvider = new InMemorySendEndpointProvider(_inputAddress, _sendTransportProvider, MessageSerializer, SendPipe.Empty);
+
+            var sendEndpointCache = new SendEndpointCache(sendEndpointProvider);
+
+            var publishPipe = CreatePublishPipe(specifications);
+
+            return new InMemoryPublishEndpointProvider(sendEndpointCache, _sendTransportProvider, publishPipe);
+        }
 
         protected override Uri GetInputAddress()
         {
@@ -62,24 +83,13 @@ namespace MassTransit.Builders
             return _sendTransportProvider;
         }
 
-        protected override ISendEndpointProvider CreateSendEndpointProvider()
-        {
-            var provider = new InMemorySendEndpointProvider(_inputAddress, _sendTransportProvider, MessageSerializer);
-
-            return new SendEndpointCache(provider);
-        }
-
-        protected override IPublishEndpointProvider CreatePublishSendEndpointProvider()
-        {
-            return new InMemoryPublishEndpointProvider(SendEndpointProvider, _sendTransportProvider);
-        }
-
         IConsumePipe CreateBusReceiveEndpoint()
         {
             IConsumePipe busConsumePipe = CreateConsumePipe();
 
             var busEndpointConfigurator = new InMemoryReceiveEndpointConfigurator(_busQueueName, busConsumePipe);
             busEndpointConfigurator.Apply(this);
+
             return busConsumePipe;
         }
 

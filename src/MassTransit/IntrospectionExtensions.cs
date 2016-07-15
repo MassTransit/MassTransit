@@ -12,12 +12,16 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
+    using System;
+    using System.Collections.Generic;
     using System.IO;
+    using System.Linq;
     using System.Text;
     using System.Threading;
     using Monitoring.Introspection;
     using Monitoring.Introspection.Contracts;
     using Newtonsoft.Json;
+    using Newtonsoft.Json.Linq;
     using Serialization;
 
 
@@ -49,6 +53,26 @@ namespace MassTransit
 
                 return encoding.GetString(stream.ToArray());
             }
+        }
+
+        public static IEnumerable<Uri> GetReceiveEndpointAddresses(this IBus bus)
+        {
+            var probeResult = bus.GetProbeResult();
+
+            var probeJObject = JObject.Parse(probeResult.ToJsonString());
+            var receiveEndpoints = probeJObject["results"]["bus"]["receiveEndpoint"].Children();
+
+            var probeResults = receiveEndpoints.Select(result =>
+                JsonConvert.DeserializeObject<ReceiveTransportProbeResult>(result["transport"].ToString()))
+                .Where(x => x.Address != null);
+
+            return probeResults.Select(result => result.Address);
+        }
+
+
+        class ReceiveTransportProbeResult
+        {
+            public Uri Address { get; set; }
         }
     }
 }

@@ -25,10 +25,12 @@ namespace MassTransit.AzureServiceBusTransport
         readonly IMessageSerializer _serializer;
         readonly Uri _sourceAddress;
         readonly ISendTransportProvider _transportProvider;
+        readonly ISendPipe _sendPipe;
 
-        public ServiceBusSendEndpointProvider(IMessageSerializer serializer, Uri sourceAddress, ISendTransportProvider transportProvider)
+        public ServiceBusSendEndpointProvider(IMessageSerializer serializer, Uri sourceAddress, ISendTransportProvider transportProvider, ISendPipe sendPipe)
         {
             _transportProvider = transportProvider;
+            _sendPipe = sendPipe;
             _sourceAddress = sourceAddress;
             _serializer = serializer;
             _sendObservable = new SendObservable();
@@ -36,9 +38,9 @@ namespace MassTransit.AzureServiceBusTransport
 
         public async Task<ISendEndpoint> GetSendEndpoint(Uri address)
         {
-            ISendTransport sendTransport = await _transportProvider.GetSendTransport(address).ConfigureAwait(false);
+            ISendTransport transport = await _transportProvider.GetSendTransport(address).ConfigureAwait(false);
 
-            return new SendEndpoint(sendTransport, _serializer, address, _sourceAddress);
+            return new SendEndpoint(transport, _serializer, address, _sourceAddress, _sendPipe);
         }
 
         public ConnectHandle ConnectSendObserver(ISendObserver observer)

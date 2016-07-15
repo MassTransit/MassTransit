@@ -24,7 +24,7 @@ namespace MassTransit.MessageData
         {
             using (var ms = new MemoryStream())
             {
-                await stream.CopyToAsync(ms, 4096, cancellationToken);
+                await stream.CopyToAsync(ms, 4096, cancellationToken).ConfigureAwait(false);
 
                 return ms.ToArray();
             }

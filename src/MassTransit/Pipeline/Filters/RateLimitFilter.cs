@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -32,8 +32,7 @@ namespace MassTransit.Pipeline.Filters
         readonly SemaphoreSlim _limit;
         readonly int _rateLimit;
         readonly Timer _timer;
-        int _activeCount;
-        int _successCount;
+        int _count;
 
         public RateLimitFilter(int rateLimit, TimeSpan interval)
         {
@@ -60,24 +59,16 @@ namespace MassTransit.Pipeline.Filters
         [DebuggerNonUserCode]
         public async Task Send(T context, IPipe<T> next)
         {
-            try
-            {
-                Interlocked.Increment(ref _activeCount);
+            await _limit.WaitAsync(context.CancellationToken).ConfigureAwait(false);
 
-                await _limit.WaitAsync(context.CancellationToken).ConfigureAwait(false);
-                await next.Send(context).ConfigureAwait(false);
+            Interlocked.Increment(ref _count);
 
-                Interlocked.Increment(ref _successCount);
-            }
-            finally
-            {
-                Interlocked.Decrement(ref _activeCount);
-            }
+            await next.Send(context).ConfigureAwait(false);
         }
 
         void Reset(object state)
         {
-            int processed = Interlocked.Exchange(ref _successCount, 0);
+            int processed = Interlocked.Exchange(ref _count, 0);
             if (processed > 0)
                 _limit.Release(processed);
         }

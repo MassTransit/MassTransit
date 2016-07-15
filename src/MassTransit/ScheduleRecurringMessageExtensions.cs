@@ -49,7 +49,7 @@ namespace MassTransit
         {
             var command = new ScheduleRecurringMessageCommand<T>(schedule, destinationAddress, message);
 
-            await publishEndpoint.Publish(command, contextCallback ?? Pipe.Empty<PublishContext<ScheduleRecurringMessage<T>>>());
+            await publishEndpoint.Publish(command, contextCallback ?? Pipe.Empty<PublishContext<ScheduleRecurringMessage<T>>>()).ConfigureAwait(false);
 
             return new ScheduledRecurringMessageHandle<T>(command.Schedule, command.Destination, command.Payload);
         }
@@ -86,16 +86,29 @@ namespace MassTransit
         }
 
         /// <summary>
+        ///     Cancel a scheduled recurring message using the id and group of the schedule class.
+        /// </summary>
+        /// <param name="bus"></param>
+        /// <param name="scheduleId"></param>
+        /// <param name="scheduleGroup"></param>
+        public static Task CancelScheduledRecurringMessage(this IPublishEndpoint bus, RecurringSchedule schedule)
+        {
+            if (schedule == null)
+                throw new ArgumentNullException(nameof(schedule));
+            return CancelScheduledRecurringMessage(bus, schedule.ScheduleId, schedule.ScheduleGroup);
+        }
+
+        /// <summary>
         ///     Cancel a scheduled recurring message using the id and group of the schedule.
         /// </summary>
         /// <param name="bus"></param>
         /// <param name="scheduleId"></param>
         /// <param name="scheduleGroup"></param>
-        static async Task CancelScheduledRecurringMessage(this IPublishEndpoint bus, string scheduleId, string scheduleGroup)
+        public static Task CancelScheduledRecurringMessage(this IPublishEndpoint bus, string scheduleId, string scheduleGroup)
         {
             var command = new CancelScheduledRecurringMessageCommand(scheduleId, scheduleGroup);
 
-            await bus.Publish<CancelScheduledRecurringMessage>(command);
+            return bus.Publish<CancelScheduledRecurringMessage>(command);
         }
 
 

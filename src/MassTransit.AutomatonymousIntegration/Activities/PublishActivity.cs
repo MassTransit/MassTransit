@@ -48,35 +48,35 @@ namespace Automatonymous.Activities
 
         async Task Activity<TInstance>.Execute(BehaviorContext<TInstance> context, Behavior<TInstance> next)
         {
-            await Execute(context);
+            await Execute(context).ConfigureAwait(false);
 
-            await next.Execute(context);
+            await next.Execute(context).ConfigureAwait(false);
         }
 
         async Task Activity<TInstance>.Execute<T>(BehaviorContext<TInstance, T> context, Behavior<TInstance, T> next)
         {
-            await Execute(context);
+            await Execute(context).ConfigureAwait(false);
 
-            await next.Execute(context);
+            await next.Execute(context).ConfigureAwait(false);
         }
 
-        async Task Activity<TInstance>.Faulted<TException>(BehaviorExceptionContext<TInstance, TException> context, Behavior<TInstance> next)
+        Task Activity<TInstance>.Faulted<TException>(BehaviorExceptionContext<TInstance, TException> context, Behavior<TInstance> next)
         {
-            await next.Faulted(context);
+            return next.Faulted(context);
         }
 
-        async Task Activity<TInstance>.Faulted<T, TException>(BehaviorExceptionContext<TInstance, T, TException> context, Behavior<TInstance, T> next)
+        Task Activity<TInstance>.Faulted<T, TException>(BehaviorExceptionContext<TInstance, T, TException> context, Behavior<TInstance, T> next)
         {
-            await next.Faulted(context);
+            return next.Faulted(context);
         }
 
-        async Task Execute(BehaviorContext<TInstance> context)
+        Task Execute(BehaviorContext<TInstance> context)
         {
             var consumeContext = context.CreateConsumeContext();
 
             TMessage message = _messageFactory(consumeContext);
 
-            await consumeContext.Publish(message, _publishPipe);
+            return consumeContext.Publish(message, _publishPipe);
         }
     }
 
@@ -116,15 +116,15 @@ namespace Automatonymous.Activities
 
             TMessage message = _messageFactory(consumeContext);
 
-            await consumeContext.Publish(message, _publishPipe);
+            await consumeContext.Publish(message, _publishPipe).ConfigureAwait(false);
 
-            await next.Execute(context);
+            await next.Execute(context).ConfigureAwait(false);
         }
 
-        async Task Activity<TInstance, TData>.Faulted<TException>(BehaviorExceptionContext<TInstance, TData, TException> context,
+        Task Activity<TInstance, TData>.Faulted<TException>(BehaviorExceptionContext<TInstance, TData, TException> context,
             Behavior<TInstance, TData> next)
         {
-            await next.Faulted(context);
+            return next.Faulted(context);
         }
     }
 }

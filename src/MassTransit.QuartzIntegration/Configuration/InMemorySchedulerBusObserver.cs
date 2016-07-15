@@ -53,7 +53,7 @@ namespace MassTransit.QuartzIntegration.Configuration
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Quartz Scheduler Starting: {0} ({1}/{2})", bus.Address, _scheduler.SchedulerName, _scheduler.SchedulerInstanceId);
 
-            await busReady;
+            await busReady.ConfigureAwait(false);
 
             _scheduler.JobFactory = new MassTransitJobFactory(bus);
             _scheduler.Start();

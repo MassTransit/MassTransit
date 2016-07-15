@@ -83,7 +83,7 @@ namespace MassTransit.RabbitMqTransport.Contexts
             return Enumerable.Empty<KeyValuePair<string, object>>();
         }
 
-        T Headers.Get<T>(string key, T defaultValue)
+        T MassTransit.Headers.Get<T>(string key, T defaultValue)
         {
             object value;
             if (TryGetHeader(key, out value))
@@ -92,7 +92,7 @@ namespace MassTransit.RabbitMqTransport.Contexts
             return defaultValue;
         }
 
-        T? Headers.Get<T>(string key, T? defaultValue)
+        T? MassTransit.Headers.Get<T>(string key, T? defaultValue)
         {
             object value;
             if (TryGetHeader(key, out value))

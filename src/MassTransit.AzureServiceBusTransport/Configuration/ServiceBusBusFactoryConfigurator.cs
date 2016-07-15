@@ -18,16 +18,14 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
     using Builders;
     using BusConfigurators;
     using Configurators;
-    using PipeConfigurators;
-    using Util;
 
 
     public class ServiceBusBusFactoryConfigurator :
+        BusFactoryConfigurator,
         IServiceBusBusFactoryConfigurator,
         IQueueConfigurator,
         IBusFactory
     {
-        readonly ConsumePipeSpecificationList _consumePipeSpecification;
         readonly IList<ServiceBusHost> _hosts;
         readonly ReceiveEndpointSettings _settings;
         readonly IList<IBusFactorySpecification> _transportSpecifications;
@@ -36,9 +34,8 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
         {
             _hosts = new List<ServiceBusHost>();
             _transportSpecifications = new List<IBusFactorySpecification>();
-            _consumePipeSpecification = new ConsumePipeSpecificationList();
 
-            string queueName = HostMetadataCache.Host.GetTemporaryQueueName("bus");
+            var queueName = this.GetTemporaryQueueName("bus");
             _settings = new ReceiveEndpointSettings(queueName)
             {
                 QueueDescription =
@@ -49,16 +46,17 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
             };
         }
 
-        public IEnumerable<ValidationResult> Validate()
+        public override IEnumerable<ValidationResult> Validate()
         {
-            return _transportSpecifications.SelectMany(x => x.Validate());
+            return base.Validate()
+                .Concat(_transportSpecifications.SelectMany(x => x.Validate()));
         }
 
         public IBusControl CreateBus()
         {
-            var builder = new ServiceBusBusBuilder(_hosts.ToArray(), _consumePipeSpecification, _settings);
+            var builder = new ServiceBusBusBuilder(_hosts.ToArray(), ConsumePipeFactory, SendPipeFactory, PublishPipeFactory, _settings);
 
-            foreach (IBusFactorySpecification configurator in _transportSpecifications)
+            foreach (var configurator in _transportSpecifications)
                 configurator.Apply(builder);
 
             return builder.Build();
@@ -135,6 +133,11 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
             set { _settings.QueueDescription.RequiresDuplicateDetection = value; }
         }
 
+        public bool RequiresSession
+        {
+            set { _settings.QueueDescription.RequiresSession = value; }
+        }
+
         public bool SupportOrdering
         {
             set { _settings.QueueDescription.SupportOrdering = value; }
@@ -159,16 +162,6 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
                 throw new ArgumentException("At least one host must be configured before configuring a receive endpoint");
 
             ReceiveEndpoint(_hosts[0], queueName, configureEndpoint);
-        }
-
-        void IConsumePipeConfigurator.AddPipeSpecification<T>(IPipeSpecification<ConsumeContext<T>> specification)
-        {
-            _consumePipeSpecification.Add(specification);
-        }
-
-        void IPipeConfigurator<ConsumeContext>.AddPipeSpecification(IPipeSpecification<ConsumeContext> specification)
-        {
-            _consumePipeSpecification.Add(specification);
         }
 
         public void OverrideDefaultBusEndpointQueueName(string value)

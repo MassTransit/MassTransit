@@ -13,6 +13,7 @@
 namespace MassTransit.Testing
 {
     using System;
+    using System.Threading.Tasks;
 
 
     public interface ITest :
@@ -40,6 +41,11 @@ namespace MassTransit.Testing
 
         /// <summary>
         /// Execute the test actions
+        /// </summary>
+        Task ExecuteAsync();
+
+        /// <summary>
+        /// Execute the test actions, waiting for them to complete
         /// </summary>
         void Execute();
     }

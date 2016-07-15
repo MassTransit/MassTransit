@@ -24,7 +24,7 @@ namespace MassTransit.Tests
     {
         MixedConsumer _consumer;
 
-        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             base.ConfigureInputQueueEndpoint(configurator);
 

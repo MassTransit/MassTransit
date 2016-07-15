@@ -13,11 +13,24 @@
 namespace MassTransit.RabbitMqTransport.Configuration.Configurators
 {
     using System.Net.Security;
+    using System.Security.Authentication;
+    using System.Security.Cryptography.X509Certificates;
+    using RabbitMQ.Client;
+    using Transports;
 
 
     class ConfigurationHostSettings :
         RabbitMqHostSettings
     {
+        public ConfigurationHostSettings()
+        {
+            MessageNameFormatter = new RabbitMqMessageNameFormatter();
+
+            var connectionFactory = new ConnectionFactory();
+            SslProtocol = connectionFactory.Ssl.Version;
+            AcceptablePolicyErrors = connectionFactory.Ssl.AcceptablePolicyErrors;
+        }
+
         public string Host { get; set; }
         public int Port { get; set; }
         public string VirtualHost { get; set; }
@@ -25,9 +38,15 @@ namespace MassTransit.RabbitMqTransport.Configuration.Configurators
         public string Password { get; set; }
         public ushort Heartbeat { get; set; }
         public bool Ssl { get; set; }
+        public SslProtocols SslProtocol { get; set; }
         public string SslServerName { get; set; }
         public SslPolicyErrors AcceptablePolicyErrors { get; set; }
         public string ClientCertificatePath { get; set; }
         public string ClientCertificatePassphrase { get; set; }
+        public X509Certificate ClientCertificate { get; set; }
+        public bool UseClientCertificateAsAuthenticationIdentity { get; set; }
+        public IMessageNameFormatter MessageNameFormatter { get; set; }
+        public string[] ClusterMembers { get; set; }
+        public IRabbitMqHostNameSelector HostNameSelector { get; set; }
     }
 }

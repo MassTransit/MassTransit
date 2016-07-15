@@ -16,7 +16,17 @@ container. The two bus interfaces, ``IBus`` and ``IBusControl``, are included.
     {
         var kernel = new StandardKernel();
 
+        // register a specific consumer
         kernel.Bind<UpdateCustomerAddressConsumer>().ToSelf();
+        
+        // just register all the consumers using Ninject.Extensions.Conventions
+        kernel.Bind(x =>
+        {
+            x.FromThisAssembly()
+                .SelectAllClasses()
+                .InheritedFrom<IConsumer>()
+                .BindToSelf();
+        });
             
         var busControl = Bus.Factory.CreateUsingRabbitMq(cfg =>
         {
@@ -28,24 +38,20 @@ container. The two bus interfaces, ``IBus`` and ``IBusControl``, are included.
 
             sbc.ReceiveEndpoint("customer_update_queue", ec =>
             {
-                ec.LoadFrom(container);
+                ec.LoadFrom(kernel);
             })
         });
         
-        container.Configure(cfg =>
-        {
-            For<IBusControl>()
-                .Use(busControl);
-            Forward<IBus, IBusControl>();
-        });
-
+        kernel.Bind<IBus>()
+            .ToProvider(new CallbackProvider<IBus>(x => x.Kernel.Get<IBusControl>()));
+        
         busControl.Start();
     }
 
 .. note::
 
     The behavior with Ninject is slightly different, in that the current AppDomain types are checked against the
-    container and any consumer types are registered, they are resolved from the container. The unit tests pass, and
+    container and if any consumer types are registered, they are resolved from the container. The unit tests pass, and
     it works, but just be aware that container metadata is not being used to support this feature. There is some history
     on this, found at the `Ninject issue`_.
 

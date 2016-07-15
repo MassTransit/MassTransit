@@ -29,16 +29,17 @@ namespace MassTransit.Host
         readonly ILifetimeScope _hostScope;
         readonly ILog _log = Logger.Get<MassTransitHostService>();
         ILifetimeScope _bootstrapperScope;
-        List<ServiceControl> _services;
+        readonly List<ServiceControl> _services;
 
         public MassTransitHostService(ILifetimeScope hostScope)
         {
             _hostScope = hostScope;
+            _services = new List<ServiceControl>();
         }
 
         public bool Start(HostControl hostControl)
         {
-            _log.InfoFormat("Starting RapidTransit Host");
+            _log.InfoFormat($"Starting {GetType().GetDisplayName()}");
 
             var started = new List<ServiceControl>();
 
@@ -66,16 +67,19 @@ namespace MassTransit.Host
 
                 List<ServiceControl> services = bootstrappers.Select(x => x.CreateService()).ToList();
 
-                foreach (ServiceControl serviceControl in services)
+                Parallel.ForEach(services, serviceControl =>
                 {
                     hostControl.RequestAdditionalTime(TimeSpan.FromMinutes(1));
 
                     StartService(hostControl, serviceControl);
 
-                    started.Add(serviceControl);
-                }
+                    lock (started)
+                    {
+                        started.Add(serviceControl);
+                    }
+                });
 
-                _services = started;
+                _services.AddRange(started);
 
                 return true;
             }

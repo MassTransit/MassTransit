@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -18,7 +18,7 @@ namespace MassTransit.Util
 
     public static class ExceptionUtil
     {
-        static Regex _cleanup;
+        static readonly Regex _cleanup;
 
         static ExceptionUtil()
         {
@@ -29,6 +29,11 @@ namespace MassTransit.Util
 
         public static string GetStackTrace(Exception exception)
         {
+            if (string.IsNullOrWhiteSpace(exception?.StackTrace))
+            {
+                return "";
+            }
+
             return _cleanup.Replace(exception.StackTrace, "");
         }
     }

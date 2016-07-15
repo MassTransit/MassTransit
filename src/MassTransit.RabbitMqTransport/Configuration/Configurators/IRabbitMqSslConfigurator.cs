@@ -13,6 +13,8 @@
 namespace MassTransit.RabbitMqTransport.Configuration.Configurators
 {
     using System.Net.Security;
+    using System.Security.Authentication;
+    using System.Security.Cryptography.X509Certificates;
 
 
     /// <summary>
@@ -21,9 +23,21 @@ namespace MassTransit.RabbitMqTransport.Configuration.Configurators
     /// </summary>
     public interface IRabbitMqSslConfigurator
     {
+        SslProtocols Protocol { get; set; }
         string ServerName { get; set; }
+        /// <summary>
+        /// The path to a file containing a certificate to use for client authentication, not required if <see cref="Certificate"/> is populated
+        /// </summary>
         string CertificatePath { get; set; }
+        /// <summary>
+        /// The password for the certificate file at <see cref="CertificatePath"/>
+        /// </summary>
         string CertificatePassphrase { get; set; }
+        /// <summary>
+        /// A certficate instance to use for client authentication, if provided then <see cref="CertificatePath"/> and <see cref="CertificatePassphrase"/> are not required
+        /// </summary>
+        X509Certificate Certificate { get; set; }
         void AllowPolicyErrors(SslPolicyErrors policyErrors);
+        bool UseCertificateAsAuthenticationIdentity { get; set; }
     }
 }

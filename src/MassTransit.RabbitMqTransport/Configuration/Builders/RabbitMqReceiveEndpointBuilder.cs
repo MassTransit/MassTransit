@@ -19,22 +19,26 @@ namespace MassTransit.RabbitMqTransport.Configuration.Builders
 
 
     public class RabbitMqReceiveEndpointBuilder :
-        IReceiveEndpointBuilder
+        IRabbitMqReceiveEndpointBuilder
     {
         readonly IConsumePipe _consumePipe;
         readonly List<ExchangeBindingSettings> _exchangeBindings;
         readonly IMessageNameFormatter _messageNameFormatter;
+        readonly bool _bindMessageExchanges;
 
-        public RabbitMqReceiveEndpointBuilder(IConsumePipe consumePipe, IMessageNameFormatter messageNameFormatter)
+        public RabbitMqReceiveEndpointBuilder(IConsumePipe consumePipe, IMessageNameFormatter messageNameFormatter, bool bindMessageExchanges)
         {
             _consumePipe = consumePipe;
             _messageNameFormatter = messageNameFormatter;
+            _bindMessageExchanges = bindMessageExchanges;
+
             _exchangeBindings = new List<ExchangeBindingSettings>();
         }
 
         ConnectHandle IConsumePipeConnector.ConnectConsumePipe<T>(IPipe<ConsumeContext<T>> pipe)
         {
-            _exchangeBindings.Add(typeof(T).GetExchangeBinding(_messageNameFormatter));
+            if(_bindMessageExchanges)
+                _exchangeBindings.AddRange(typeof(T).GetExchangeBindings(_messageNameFormatter));
 
             return _consumePipe.ConnectConsumePipe(pipe);
         }
@@ -42,6 +46,11 @@ namespace MassTransit.RabbitMqTransport.Configuration.Builders
         ConnectHandle IConsumeMessageObserverConnector.ConnectConsumeMessageObserver<T>(IConsumeMessageObserver<T> observer)
         {
             return _consumePipe.ConnectConsumeMessageObserver(observer);
+        }
+
+        public void AddExchangeBindings(params ExchangeBindingSettings[] bindings)
+        {
+            _exchangeBindings.AddRange(bindings);
         }
 
         public IEnumerable<ExchangeBindingSettings> GetExchangeBindings()

@@ -23,38 +23,12 @@ namespace MassTransit.Context
         ConsumeContextProxy<TMessage>
         where TMessage : class
     {
-        readonly PayloadCache _payloadCache = new PayloadCache();
         readonly Lazy<IPublishEndpoint> _publishEndpoint;
 
         protected ConsumeContextProxyScope(ConsumeContext<TMessage> context)
-            : base(context)
+            : base(context, new PayloadCacheScope(context))
         {
             _publishEndpoint = new Lazy<IPublishEndpoint>(() => new ScopePublishEndpoint(this, context));
-        }
-
-        public override bool HasPayloadType(Type contextType)
-        {
-            return _payloadCache.HasPayloadType(contextType) || base.HasPayloadType(contextType);
-        }
-
-        public override bool TryGetPayload<TPayload>(out TPayload context)
-        {
-            if (_payloadCache.TryGetPayload(out context))
-                return true;
-
-            return base.TryGetPayload(out context);
-        }
-
-        public override TPayload GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory)
-        {
-            TPayload payload;
-            if (_payloadCache.TryGetPayload(out payload))
-                return payload;
-
-            if (base.TryGetPayload(out payload))
-                return payload;
-
-            return _payloadCache.GetOrAddPayload(payloadFactory);
         }
 
         public override Task Publish<T>(T message, CancellationToken cancellationToken)

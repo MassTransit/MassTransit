@@ -83,7 +83,6 @@ namespace MassTransit.RabbitMqTransport.Tests.Assumptions
         {
             WithChannel(chan =>
             {
-                int shutup = 0;
                 WithStopWatch("BasicConsumer", () =>
                 {
                     chan.BasicQos(0, 1000, false);

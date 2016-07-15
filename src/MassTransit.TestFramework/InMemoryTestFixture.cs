@@ -17,6 +17,7 @@ namespace MassTransit.TestFramework
     using System.Threading.Tasks;
     using Logging;
     using NUnit.Framework;
+    using Pipeline.Pipes;
     using Transports.InMemory;
 
 
@@ -33,14 +34,20 @@ namespace MassTransit.TestFramework
         BusHandle _busHandle;
         readonly Uri _baseAddress;
         InMemoryTransportCache _inMemoryTransportCache;
+        readonly IBusCreationScope _busCreationScope;
 
         public Uri BaseAddress => _baseAddress;
 
-        public InMemoryTestFixture()
+        public InMemoryTestFixture(bool busPerTest = false)
         {
             _baseAddress = new Uri("loopback://localhost/");
 
             _inputQueueAddress = new Uri("loopback://localhost/input_queue");
+
+            if (busPerTest)
+                _busCreationScope = new PerTestBusCreationScope(SetupBus, TeardownBus);
+            else
+                _busCreationScope = new PerTestFixtureBusCreationScope(SetupBus, TeardownBus);
         }
 
         /// <summary>
@@ -76,10 +83,23 @@ namespace MassTransit.TestFramework
             return Bus.CreateRequestClient<TRequest, TResponse>(InputQueueAddress, TestTimeout);
         }
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void SetupInMemoryTestFixture()
         {
+            _busCreationScope.TestFixtureSetup();
+        }
+
+        [SetUp]
+        public void SetupInMemoryTest()
+        {
+            _busCreationScope.TestSetup();
+        }
+
+        void SetupBus()
+        {
             _bus = CreateBus();
+
+            ConnectObservers(_bus);
 
             _busHandle = _bus.Start();
 
@@ -95,10 +115,21 @@ namespace MassTransit.TestFramework
             return sendEndpoint;
         }
 
-        protected IPublishEndpointProvider PublishEndpointProvider => new InMemoryPublishEndpointProvider(Bus, _inMemoryTransportCache);
+        protected IPublishEndpointProvider PublishEndpointProvider => new InMemoryPublishEndpointProvider(Bus, _inMemoryTransportCache, PublishPipe.Empty);
 
-        [TestFixtureTearDown]
+        [OneTimeTearDown]
         public void TearDownInMemoryTestFixture()
+        {
+            _busCreationScope.TestFixtureTeardown();
+        }
+
+        [TearDown]
+        public void TearDownInMemoryTest()
+        {
+            _busCreationScope.TestTeardown();
+        }
+
+        void TeardownBus()
         {
             try
             {
@@ -120,7 +151,12 @@ namespace MassTransit.TestFramework
         {
         }
 
-        protected virtual void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+        protected virtual void ConnectObservers(IBus bus)
+        {
+            
+        }
+
+        protected virtual void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
         }
 
@@ -133,8 +169,80 @@ namespace MassTransit.TestFramework
                 x.SetTransportProvider(_inMemoryTransportCache);
                 ConfigureBus(x);
 
-                x.ReceiveEndpoint("input_queue", ConfigureInputQueueEndpoint);
+                x.ReceiveEndpoint("input_queue", configurator => ConfigureInputQueueEndpoint(configurator));
             });
+        }
+
+        
+
+        interface IBusCreationScope
+        {
+            void TestFixtureSetup();
+            void TestSetup();
+            void TestTeardown();
+            void TestFixtureTeardown();
+            
+        }
+
+        
+
+        class PerTestFixtureBusCreationScope : IBusCreationScope
+        {
+            readonly Action _setupBus;
+            readonly Action _teardownBus;
+
+            public PerTestFixtureBusCreationScope(Action setupBus, Action teardownBus)
+            {
+                _setupBus = setupBus;
+                _teardownBus = teardownBus;
+            }
+
+            public void TestFixtureSetup()
+            {
+                _setupBus();
+            }
+
+            public void TestSetup()
+            {
+            }
+
+            public void TestTeardown()
+            {
+            }
+
+            public void TestFixtureTeardown()
+            {
+                _teardownBus();
+            }
+        }
+        class PerTestBusCreationScope : IBusCreationScope
+        {
+            readonly Action _setupBus;
+            readonly Action _teardownBus;
+
+            public PerTestBusCreationScope(Action setupBus, Action teardownBus)
+            {
+                _setupBus = setupBus;
+                _teardownBus = teardownBus;
+            }
+
+            public void TestFixtureSetup()
+            {
+            }
+
+            public void TestSetup()
+            {
+                _setupBus();
+            }
+
+            public void TestTeardown()
+            {
+                _teardownBus();
+            }
+
+            public void TestFixtureTeardown()
+            {
+            }
         }
     }
 }

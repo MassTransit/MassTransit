@@ -52,10 +52,10 @@ namespace Automatonymous.Activities
             {
                 TRequest message = _messageFactory(exceptionContext);
 
-                await SendRequest(context, exceptionContext, message);
+                await SendRequest(context, exceptionContext, message).ConfigureAwait(false);
             }
 
-            await next.Faulted(context);
+            await next.Faulted(context).ConfigureAwait(false);
         }
     }
 }

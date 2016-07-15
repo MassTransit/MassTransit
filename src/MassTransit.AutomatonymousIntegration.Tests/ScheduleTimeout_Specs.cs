@@ -41,7 +41,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
                 configurator.UseMessageScheduler(QuartzQueueAddress);
             }
 
-            protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+            protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
             {
                 base.ConfigureInputQueueEndpoint(configurator);
 
@@ -123,6 +123,8 @@ namespace MassTransit.AutomatonymousIntegration.Tests
             public Guid? CartTimeoutTokenId { get; set; }
 
             public Guid CorrelationId { get; set; }
+
+            public int ExpiresAfterSeconds { get; set; }
         }
 
 
@@ -220,7 +222,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
 
                 Schedule(() => CartTimeout, x => x.CartTimeoutTokenId, x =>
                 {
-                    x.Delay = TimeSpan.FromSeconds(3);
+                    x.Delay = TimeSpan.FromSeconds(30);
                     x.Received = p => p.CorrelateBy(state => state.MemberNumber, context => context.Message.MemberNumber);
                 });
 
@@ -230,10 +232,10 @@ namespace MassTransit.AutomatonymousIntegration.Tests
                         .ThenAsync(context =>
                         {
                             context.Instance.MemberNumber = context.Data.MemberNumber;
-
+                            context.Instance.ExpiresAfterSeconds = 3;
                             return Console.Out.WriteLineAsync($"Cart {context.Instance.CorrelationId} Created: {context.Data.MemberNumber}");
                         })
-                        .Schedule(CartTimeout, context => new CartExpiredEvent(context.Instance))
+                        .Schedule(CartTimeout, context => new CartExpiredEvent(context.Instance), context => TimeSpan.FromSeconds(context.Instance.ExpiresAfterSeconds))
                         .TransitionTo(Active));
 
                 During(Active,
@@ -248,7 +250,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
                         .Finalize(),
                     When(ItemAdded)
                         .ThenAsync(context => Console.Out.WriteLineAsync($"Card item added: {context.Data.MemberNumber}"))
-                        .Schedule(CartTimeout, context => new CartExpiredEvent(context.Instance)));
+                        .Schedule(CartTimeout, context => new CartExpiredEvent(context.Instance), context => TimeSpan.FromSeconds(context.Instance.ExpiresAfterSeconds)));
 
                 SetCompletedWhenFinalized();
             }

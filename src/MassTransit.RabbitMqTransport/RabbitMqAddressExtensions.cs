@@ -13,18 +13,19 @@
 namespace MassTransit.RabbitMqTransport
 {
     using System;
+    using System.Linq;
     using System.Collections.Generic;
     using System.Globalization;
     using System.Net;
     using System.Net.Security;
-    using System.Security.Authentication;
+    using System.Security.Cryptography.X509Certificates;
     using System.Text;
     using System.Text.RegularExpressions;
+    using Configuration;
     using Configuration.Configurators;
     using NewIdFormatters;
     using RabbitMQ.Client;
     using Topology;
-    using Transports;
     using Util;
 
 
@@ -33,9 +34,11 @@ namespace MassTransit.RabbitMqTransport
         static readonly INewIdFormatter _formatter = new ZBase32Formatter();
         static readonly Regex _regex = new Regex(@"^[A-Za-z0-9\-_\.:]+$");
 
-        public static string GetTemporaryQueueName(this HostInfo host, string prefix)
+        public static string GetTemporaryQueueName(this IRabbitMqBusFactoryConfigurator configurator, string prefix)
         {
             var sb = new StringBuilder(prefix);
+
+            var host = HostMetadataCache.Host;
 
             foreach (char c in host.MachineName)
             {
@@ -54,27 +57,6 @@ namespace MassTransit.RabbitMqTransport
             }
             sb.Append('-');
             sb.Append(NewId.Next().ToString(_formatter));
-
-            return sb.ToString();
-        }
-
-        public static string ToDebugString(this RabbitMqHostSettings settings)
-        {
-            var sb = new StringBuilder();
-
-            if (!string.IsNullOrWhiteSpace(settings.Username))
-                sb.Append(settings.Username).Append('@');
-
-            sb.Append(settings.Host);
-            if (settings.Port != -1)
-                sb.Append(':').Append(settings.Port);
-
-            if (string.IsNullOrWhiteSpace(settings.VirtualHost))
-                sb.Append('/');
-            else if (settings.VirtualHost.StartsWith("/"))
-                sb.Append(settings.VirtualHost);
-            else
-                sb.Append("/").Append(settings.VirtualHost);
 
             return sb.ToString();
         }
@@ -98,15 +80,46 @@ namespace MassTransit.RabbitMqTransport
 
         public static Uri GetQueueAddress(this RabbitMqHostSettings hostSettings, string queueName)
         {
-            var builder = new UriBuilder
+            UriBuilder builder = GetHostUriBuilder(hostSettings, queueName);
+
+            return builder.Uri;
+        }
+
+        /// <summary>
+        /// Returns a UriBuilder for the host and entity specified
+        /// </summary>
+        /// <param name="hostSettings">The host settings</param>
+        /// <param name="entityName">The entity name (queue/exchange)</param>
+        /// <returns>A UriBuilder</returns>
+        static UriBuilder GetHostUriBuilder(RabbitMqHostSettings hostSettings, string entityName)
+        {
+            return new UriBuilder
             {
                 Scheme = "rabbitmq",
                 Host = hostSettings.Host,
                 Port = hostSettings.Port,
                 Path = (string.IsNullOrWhiteSpace(hostSettings.VirtualHost) || hostSettings.VirtualHost == "/")
-                    ? queueName
-                    : string.Join("/", hostSettings.VirtualHost, queueName)
+                    ? entityName
+                    : string.Join("/", hostSettings.VirtualHost, entityName)
             };
+        }
+
+        /// <summary>
+        /// Return a send address for the exchange
+        /// </summary>
+        /// <param name="host">The RabbitMQ host</param>
+        /// <param name="exchangeName">The exchange name</param>
+        /// <param name="configure">An optional configuration for the exchange to set type, durable, etc.</param>
+        /// <returns></returns>
+        public static Uri GetSendAddress(this IRabbitMqHost host, string exchangeName, Action<IExchangeConfigurator> configure = null)
+        {
+            var builder = GetHostUriBuilder(host.Settings, exchangeName);
+
+            var sendSettings = new RabbitMqSendSettings(exchangeName, ExchangeType.Fanout, true, false);
+
+            configure?.Invoke(sendSettings);
+
+            builder.Query += string.Join("&", GetQueryStringOptions(sendSettings));
 
             return builder.Uri;
         }
@@ -154,6 +167,11 @@ namespace MassTransit.RabbitMqTransport
                 yield return "type=" + settings.ExchangeType;
             if (settings.ExchangeArguments != null && settings.ExchangeArguments.ContainsKey("x-delayed-type"))
                 yield return "delayedType=" + settings.ExchangeArguments["x-delayed-type"];
+
+            foreach (var binding in settings.ExchangeBindings)
+            {
+                yield return $"bindexchange={binding.Exchange.ExchangeName}";
+            }
         }
 
         public static ReceiveSettings GetReceiveSettings(this Uri address)
@@ -268,21 +286,29 @@ namespace MassTransit.RabbitMqTransport
             if (!string.IsNullOrWhiteSpace(delayedType))
                 settings.SetExchangeArgument("x-delayed-type", delayedType);
 
+            string bindExchange = address.Query.GetValueFromQueryString("bindexchange");
+            if (!string.IsNullOrWhiteSpace(bindExchange))
+                settings.BindToExchange(bindExchange);
+
             return settings;
         }
 
-        public static SendSettings GetSendSettings(this IRabbitMqHost host, Type messageType, IMessageNameFormatter messageNameFormatter)
+        [Obsolete]
+        public static SendSettings GetSendSettings(this IRabbitMqHost host, Type messageType)
+        {
+            return GetSendSettings(host.Settings, messageType);
+        }
+
+        public static SendSettings GetSendSettings(this RabbitMqHostSettings hostSettings, Type messageType)
         {
             bool isTemporary = messageType.IsTemporaryMessageType();
 
             bool durable = !isTemporary;
             bool autoDelete = isTemporary;
 
-            string name = messageNameFormatter.GetMessageName(messageType).ToString();
+            string name = hostSettings.MessageNameFormatter.GetMessageName(messageType).ToString();
 
-            SendSettings settings = new RabbitMqSendSettings(name, ExchangeType.Fanout, durable, autoDelete);
-
-            return settings;
+            return new RabbitMqSendSettings(name, ExchangeType.Fanout, durable, autoDelete);
         }
 
         public static ConnectionFactory GetConnectionFactory(this RabbitMqHostSettings settings)
@@ -298,30 +324,47 @@ namespace MassTransit.RabbitMqTransport
                 RequestedHeartbeat = settings.Heartbeat
             };
 
-            factory.Ssl.Enabled = settings.Ssl;
-            factory.Ssl.Version = SslProtocols.Tls;
-            factory.Ssl.AcceptablePolicyErrors = settings.AcceptablePolicyErrors;
-            factory.Ssl.ServerName = settings.SslServerName;
-            if (string.IsNullOrWhiteSpace(factory.Ssl.ServerName))
-                factory.Ssl.AcceptablePolicyErrors |= SslPolicyErrors.RemoteCertificateNameMismatch;
-
-            if (string.IsNullOrEmpty(settings.ClientCertificatePath))
+            if (settings.ClusterMembers != null && settings.ClusterMembers.Any())
+            {
+                factory.HostName = null;
+                factory.HostnameSelector = settings.HostNameSelector;
+            }
+            
+            if (settings.UseClientCertificateAsAuthenticationIdentity)
+            {
+                factory.AuthMechanisms.Clear();
+                factory.AuthMechanisms.Add(new ExternalMechanismFactory());
+                factory.UserName = "";
+                factory.Password = "";
+            }
+            else
             {
                 if (!string.IsNullOrWhiteSpace(settings.Username))
                     factory.UserName = settings.Username;
                 if (!string.IsNullOrWhiteSpace(settings.Password))
                     factory.Password = settings.Password;
+            }
 
+            factory.Ssl.Enabled = settings.Ssl;
+            factory.Ssl.Version = settings.SslProtocol;
+            factory.Ssl.AcceptablePolicyErrors = settings.AcceptablePolicyErrors;
+            factory.Ssl.ServerName = settings.SslServerName;
+            factory.Ssl.Certs = settings.ClientCertificate == null ? null : new X509Certificate2Collection {settings.ClientCertificate};
+            
+            if (string.IsNullOrWhiteSpace(factory.Ssl.ServerName))
+                factory.Ssl.AcceptablePolicyErrors |= SslPolicyErrors.RemoteCertificateNameMismatch;
+
+            if (string.IsNullOrEmpty(settings.ClientCertificatePath))
+            {
                 factory.Ssl.CertPath = "";
                 factory.Ssl.CertPassphrase = "";
-                factory.Ssl.Certs = null;
             }
             else
             {
                 factory.Ssl.CertPath = settings.ClientCertificatePath;
                 factory.Ssl.CertPassphrase = settings.ClientCertificatePassphrase;
             }
-
+            
             factory.ClientProperties = factory.ClientProperties ?? new Dictionary<string, object>();
 
             HostInfo hostInfo = HostMetadataCache.Host;
@@ -342,6 +385,11 @@ namespace MassTransit.RabbitMqTransport
         }
 
         public static RabbitMqHostSettings GetHostSettings(this Uri address)
+        {
+            return GetConfigurationHostSettings(address);
+        }
+
+        internal static ConfigurationHostSettings GetConfigurationHostSettings(this Uri address)
         {
             if (string.Compare("rabbitmq", address.Scheme, StringComparison.OrdinalIgnoreCase) != 0)
                 throw new RabbitMqAddressException("The invalid scheme was specified: " + address.Scheme);

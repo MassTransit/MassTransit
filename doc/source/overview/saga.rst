@@ -281,15 +281,12 @@ and continue processing once all of the commands have been acknowledged. This ca
                         saga.Longitude = message.Longitude;
                     }));
 
-            Combine(PostalCodeDetailsReceived, GeolocationReceived)
-                .Into(ReadyToProceed, saga => saga.ReadyFlags);
+            CompositeEvent(() => ReadyToProceed, saga => saga.ReadyFlags,
+                PostalCodeDetailsReceived, GeolocationReceived);
 
             During(Waiting,
                 When(ReadyToProceed)
-                    .Then((saga,message) =>
-                    {
-                        saga.Bus.Publish(new PostalCodeDetails(...));
-                    })
+                    .Publish((saga,message) => new PostalCodeDetails(...))
                     .Complete());
         });
     }

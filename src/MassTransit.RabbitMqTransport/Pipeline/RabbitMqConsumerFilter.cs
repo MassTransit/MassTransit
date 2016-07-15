@@ -29,15 +29,15 @@ namespace MassTransit.RabbitMqTransport.Pipeline
         readonly IReceiveEndpointObserver _endpointObserver;
         readonly IReceiveObserver _receiveObserver;
         readonly IPipe<ReceiveContext> _receivePipe;
-        readonly ITaskSupervisor _taskSupervisor;
+        readonly ITaskSupervisor _supervisor;
 
         public RabbitMqConsumerFilter(IPipe<ReceiveContext> receivePipe, IReceiveObserver receiveObserver, IReceiveEndpointObserver endpointObserver,
-            ITaskSupervisor taskSupervisor)
+            ITaskSupervisor supervisor)
         {
             _receivePipe = receivePipe;
             _receiveObserver = receiveObserver;
             _endpointObserver = endpointObserver;
-            _taskSupervisor = taskSupervisor;
+            _supervisor = supervisor;
         }
 
         void IProbeSite.Probe(ProbeContext context)
@@ -50,7 +50,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
 
             var inputAddress = context.ConnectionContext.HostSettings.GetInputAddress(receiveSettings);
 
-            using (var scope = _taskSupervisor.CreateScope())
+            using (ITaskScope scope = _supervisor.CreateScope($"{TypeMetadataCache<RabbitMqConsumerFilter>.ShortName} - {inputAddress}", () => TaskUtil.Completed))
             {
                 var consumer = new RabbitMqBasicConsumer(context, inputAddress, _receivePipe, _receiveObserver, scope);
 

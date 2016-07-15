@@ -12,6 +12,9 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Testing
 {
+    using System.Threading.Tasks;
+
+
     /// <summary>
     /// A bus test scenario with a single bus with no receiving endpoints
     /// </summary>
@@ -26,6 +29,6 @@ namespace MassTransit.Testing
         /// <summary>
         /// Gets the endpoint that is the receiving endpoint with the test subject
         /// </summary>
-        ISendEndpoint SubjectSendEndpoint { get; }
+        Task<ISendEndpoint> SubjectSendEndpoint { get; }
     }
 }

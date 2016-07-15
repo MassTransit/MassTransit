@@ -11,8 +11,8 @@ let nugetWorkingPath = FullName "./build_temp"
 let packagesPath = FullName "./src/packages"
 let keyFile = FullName "./MassTransit.snk"
 
-let assemblyVersion = "3.0.0.0"
-let baseVersion = "3.0.15"
+let assemblyVersion = "3.3.1.0"
+let baseVersion = "3.3.6"
 
 let semVersion : SemVerInfo = parse baseVersion
 
@@ -82,14 +82,29 @@ Target "Build" (fun _ ->
                 "DebugSymbols", "True"
                 "RestorePackages", "True"
                 "Configuration", buildMode
-                "SignAssembly", "True"
-                "AssemblyOriginatorKeyFile", keyFile
-                "TargetFrameworkVersion", "v4.5"
+                "TargetFrameworkVersion", "v4.5.2"
                 "Platform", "Any CPU"
             ]
   }
 
   build setParams @".\src\MassTransit.sln"
+      |> DoNothing
+
+  let unsignedSetParams defaults = { 
+    defaults with
+        Verbosity = Some(Quiet)
+        Targets = ["Build"]
+        Properties =
+            [
+                "Optimize", "True"
+                "DebugSymbols", "True"
+                "Configuration", "ReleaseUnsigned"
+                "TargetFrameworkVersion", "v4.5.2"
+                "Platform", "Any CPU"
+            ]
+  }
+
+  build unsignedSetParams @".\src\MassTransit.sln"
       |> DoNothing
 )
 
@@ -117,93 +132,108 @@ Target "Package" (fun _ ->
   let nugs = [| { Project = "MassTransit"
                   Summary = "MassTransit, a mesage-based distributed application framework"
                   PackageFile = @".\src\MassTransit\packages.config"
-                  Files = [ (@"..\src\MassTransit\bin\Release\MassTransit.*", Some @"lib\net45", None);
+                  Files = [ (@"..\src\MassTransit\bin\Release\MassTransit.*", Some @"lib\net452", None);
                             (@"..\src\MassTransit\**\*.cs", Some "src", None) ] }
                 { Project = "MassTransit.Host"
                   Summary = "MassTransit Host Service"
                   PackageFile = @".\src\MassTransit.Host\packages.config"
-                  Files = [ (@"..\src\MassTransit.Host\bin\Release\MassTransit.Host.*", Some @"lib\net45", None);
+                  Files = [ (@"..\src\MassTransit.Host\bin\Release\MassTransit.Host.*", Some @"lib\net452", None);
                             (@"..\host\*.*", Some @"tools", None);
                             (@"..\src\MassTransit.Host\**\*.cs", Some @"src", None) ] } 
                 { Project = "MassTransit.RabbitMQ"
                   Summary = "MassTransit RabbitMQ Transport"
                   PackageFile = @".\src\MassTransit.RabbitMQTransport\packages.config"
-                  Files = [ (@"..\src\MassTransit.RabbitMQTransport\bin\Release\MassTransit.RabbitMQTransport.*", Some @"lib\net45", None);
+                  Files = [ (@"..\src\MassTransit.RabbitMQTransport\bin\Release\MassTransit.RabbitMQTransport.*", Some @"lib\net452", None);
                             (@"..\src\MassTransit.RabbitMQTransport\**\*.cs", Some @"src", None) ] } 
                 { Project = "MassTransit.AzureServiceBus"
                   Summary = "MassTransit Azure Service Bus Transport"
                   PackageFile = @".\src\MassTransit.AzureServiceBusTransport\packages.config"
-                  Files = [ (@"..\src\MassTransit.AzureServiceBusTransport\bin\Release\MassTransit.AzureServiceBusTransport.*", Some @"lib\net45", None);
+                  Files = [ (@"..\src\MassTransit.AzureServiceBusTransport\bin\Release\MassTransit.AzureServiceBusTransport.*", Some @"lib\net452", None);
                             (@"..\src\MassTransit.AzureServiceBusTransport\**\*.cs", Some @"src", None) ] } 
                 { Project = "MassTransit.Automatonymous"
                   Summary = "MassTransit Automatonymous State Machine Support"
                   PackageFile = @".\src\MassTransit.AutomatonymousIntegration\packages.config"
-                  Files = [ (@"..\src\MassTransit.AutomatonymousIntegration\bin\Release\MassTransit.AutomatonymousIntegration.*", Some @"lib\net45", None);
+                  Files = [ (@"..\src\MassTransit.AutomatonymousIntegration\bin\Release\MassTransit.AutomatonymousIntegration.*", Some @"lib\net452", None);
                             (@"..\src\MassTransit.AutomatonymousIntegration\**\*.cs", Some @"src", None) ] } 
                 { Project = "MassTransit.Log4Net"
                   Summary = "MassTransit Log4Net Logging Support"
                   PackageFile = @".\src\Loggers\MassTransit.Log4NetIntegration\packages.config"
-                  Files = [ (@"..\src\Loggers\MassTransit.Log4NetIntegration\bin\Release\MassTransit.Log4NetIntegration.*", Some @"lib\net45", None);
+                  Files = [ (@"..\src\Loggers\MassTransit.Log4NetIntegration\bin\Release\MassTransit.Log4NetIntegration.*", Some @"lib\net452", None);
                             (@"..\src\Loggers\MassTransit.Log4NetIntegration\**\*.cs", Some @"src", None) ] } 
                 { Project = "MassTransit.NLog"
                   Summary = "MassTransit NLog Logging Support"
                   PackageFile = @".\src\Loggers\MassTransit.NLogIntegration\packages.config"
-                  Files = [ (@"..\src\Loggers\MassTransit.NLogIntegration\bin\Release\MassTransit.NLogIntegration.*", Some @"lib\net45", None);
+                  Files = [ (@"..\src\Loggers\MassTransit.NLogIntegration\bin\Release\MassTransit.NLogIntegration.*", Some @"lib\net452", None);
                             (@"..\src\Loggers\MassTransit.NLogIntegration\**\*.cs", Some @"src", None) ] } 
+                { Project = "MassTransit.SerilogIntegration"
+                  Summary = "MassTransit Serilog Logging Support"
+                  PackageFile = @".\src\Loggers\MassTransit.SerilogIntegration\packages.config"
+                  Files = [ (@"..\src\Loggers\MassTransit.SerilogIntegration\bin\Release\MassTransit.SerilogIntegration.*", Some @"lib\net452", None);
+                            (@"..\src\Loggers\MassTransit.SerilogIntegration\**\*.cs", Some @"src", None) ] } 
                 { Project = "MassTransit.Autofac"
                   Summary = "MassTransit Autofac Container Support"
                   PackageFile = @".\src\Containers\MassTransit.AutofacIntegration\packages.config"
-                  Files = [ (@"..\src\Containers\MassTransit.AutofacIntegration\bin\Release\MassTransit.AutofacIntegration.*", Some @"lib\net45", None);
+                  Files = [ (@"..\src\Containers\MassTransit.AutofacIntegration\bin\Release\MassTransit.AutofacIntegration.*", Some @"lib\net452", None);
                             (@"..\src\Containers\MassTransit.AutofacIntegration\**\*.cs", Some @"src", None) ] } 
                 { Project = "MassTransit.CastleWindsor"
                   Summary = "MassTransit Castle Windsor Container Support"
                   PackageFile = @".\src\Containers\MassTransit.WindsorIntegration\packages.config"
-                  Files = [ (@"..\src\Containers\MassTransit.WindsorIntegration\bin\Release\MassTransit.WindsorIntegration.*", Some @"lib\net45", None);
+                  Files = [ (@"..\src\Containers\MassTransit.WindsorIntegration\bin\Release\MassTransit.WindsorIntegration.*", Some @"lib\net452", None);
                             (@"..\src\Containers\MassTransit.WindsorIntegration\**\*.cs", Some @"src", None) ] } 
                 { Project = "MassTransit.SimpleInjector"
                   Summary = "MassTransit SimpleInjector Container Support"
                   PackageFile = @".\src\Containers\MassTransit.SimpleInjectorIntegration\packages.config"
-                  Files = [ (@"..\src\Containers\MassTransit.SimpleInjectorIntegration\bin\Release\MassTransit.SimpleInjectorIntegration.*", Some @"lib\net45", None);
+                  Files = [ (@"..\src\Containers\MassTransit.SimpleInjectorIntegration\bin\Release\MassTransit.SimpleInjectorIntegration.*", Some @"lib\net452", None);
                             (@"..\src\Containers\MassTransit.SimpleInjectorIntegration\**\*.cs", Some @"src", None) ] } 
                 { Project = "MassTransit.StructureMap"
                   Summary = "MassTransit StructureMap Container Support"
-                  PackageFile = @".\src\Containers\MassTransit.StructureMapIntegration\packages.config"
-                  Files = [ (@"..\src\Containers\MassTransit.StructureMapIntegration\bin\Release\MassTransit.StructureMapIntegration.*", Some @"lib\net45", None);
+                  PackageFile = @".\src\Containers\MassTransit.StructureMapIntegration\packages-unsigned.config"
+                  Files = [ (@"..\src\Containers\MassTransit.StructureMapIntegration\bin\ReleaseUnsigned\MassTransit.StructureMapIntegration.*", Some @"lib\net452", None);
+                            (@"..\src\Containers\MassTransit.StructureMapIntegration\**\*.cs", Some @"src", None) ] } 
+                { Project = "MassTransit.StructureMapSigned"
+                  Summary = "MassTransit StructureMap (Signed) Container Support"
+                  PackageFile = @".\src\Containers\MassTransit.StructureMapIntegration\packages-signed.config"
+                  Files = [ (@"..\src\Containers\MassTransit.StructureMapIntegration\bin\Release\MassTransit.StructureMapIntegration.*", Some @"lib\net452", None);
                             (@"..\src\Containers\MassTransit.StructureMapIntegration\**\*.cs", Some @"src", None) ] } 
                 { Project = "MassTransit.Unity"
                   Summary = "MassTransit Unity Container Support"
                   PackageFile = @".\src\Containers\MassTransit.UnityIntegration\packages.config"
-                  Files = [ (@"..\src\Containers\MassTransit.UnityIntegration\bin\Release\MassTransit.UnityIntegration.*", Some @"lib\net45", None);
+                  Files = [ (@"..\src\Containers\MassTransit.UnityIntegration\bin\Release\MassTransit.UnityIntegration.*", Some @"lib\net452", None);
                             (@"..\src\Containers\MassTransit.UnityIntegration\**\*.cs", Some @"src", None) ] } 
                 { Project = "MassTransit.Ninject"
                   Summary = "MassTransit Ninject Container Support"
                   PackageFile = @".\src\Containers\MassTransit.NinjectIntegration\packages.config"
-                  Files = [ (@"..\src\Containers\MassTransit.NinjectIntegration\bin\Release\MassTransit.NinjectIntegration.*", Some @"lib\net45", None);
+                  Files = [ (@"..\src\Containers\MassTransit.NinjectIntegration\bin\Release\MassTransit.NinjectIntegration.*", Some @"lib\net452", None);
                             (@"..\src\Containers\MassTransit.NinjectIntegration\**\*.cs", Some @"src", None) ] } 
                 { Project = "MassTransit.NHibernate"
-                  Summary = "MassTransit NHibernate Saga Transport"
+                  Summary = "MassTransit NHibernate Saga Storage"
                   PackageFile = @".\src\Persistence\MassTransit.NHibernateIntegration\packages.config"
-                  Files = [ (@"..\src\Persistence\MassTransit.NHibernateIntegration\bin\Release\MassTransit.NHibernateIntegration.*", Some @"lib\net45", None);
+                  Files = [ (@"..\src\Persistence\MassTransit.NHibernateIntegration\bin\Release\MassTransit.NHibernateIntegration.*", Some @"lib\net452", None);
                             (@"..\src\Persistence\MassTransit.NHibernateIntegration\**\*.cs", Some @"src", None) ] } 
                 { Project = "MassTransit.EntityFramework"
-                  Summary = "MassTransit Entity Framework Saga Transport"
+                  Summary = "MassTransit Entity Framework Saga Storage"
                   PackageFile = @".\src\Persistence\MassTransit.EntityFrameworkIntegration\packages.config"
-                  Files = [ (@"..\src\Persistence\MassTransit.EntityFrameworkIntegration\bin\Release\MassTransit.EntityFrameworkIntegration.*", Some @"lib\net45", None);
+                  Files = [ (@"..\src\Persistence\MassTransit.EntityFrameworkIntegration\bin\Release\MassTransit.EntityFrameworkIntegration.*", Some @"lib\net452", None);
                             (@"..\src\Persistence\MassTransit.EntityFrameworkIntegration\**\*.cs", Some @"src", None) ] } 
+                { Project = "MassTransit.MongoDb"
+                  Summary = "MassTransit MongoDb Saga and Message Data Storage"
+                  PackageFile = @".\src\Persistence\MassTransit.MongoDbIntegration\packages.config"
+                  Files = [ (@"..\src\Persistence\MassTransit.MongoDbIntegration\bin\Release\MassTransit.MongoDbIntegration.*", Some @"lib\net452", None);
+                            (@"..\src\Persistence\MassTransit.MongoDbIntegration\**\*.cs", Some @"src", None) ] } 
                 { Project = "MassTransit.TestFramework"
                   Summary = "MassTransit NUnit Test Framework"
                   PackageFile = @".\src\MassTransit.TestFramework\packages.config"
-                  Files = [ (@"..\src\MassTransit.TestFramework\bin\Release\MassTransit.TestFramework.*", Some @"lib\net45", None);
+                  Files = [ (@"..\src\MassTransit.TestFramework\bin\Release\MassTransit.TestFramework.*", Some @"lib\net452", None);
                             (@"..\src\MassTransit.TestFramework\**\*.cs", Some @"src", None) ] } 
                 { Project = "MassTransit.Reactive"
                   Summary = "MassTransit Reactive Extensions Support"
                   PackageFile = @".\src\MassTransit.Reactive\packages.config"
-                  Files = [ (@"..\src\MassTransit.Reactive\bin\Release\MassTransit.Reactive.*", Some @"lib\net45", None);
+                  Files = [ (@"..\src\MassTransit.Reactive\bin\Release\MassTransit.Reactive.*", Some @"lib\net452", None);
                             (@"..\src\MassTransit.Reactive\**\*.cs", Some @"src", None) ] } 
                 { Project = "MassTransit.Quartz"
                   Summary = "MassTransit Quartz Scheduler Support"
                   PackageFile = @".\src\MassTransit.QuartzIntegration\packages.config"
-                  Files = [ (@"..\src\MassTransit.QuartzIntegration\bin\Release\MassTransit.QuartzIntegration.*", Some @"lib\net45", None);
+                  Files = [ (@"..\src\MassTransit.QuartzIntegration\bin\Release\MassTransit.QuartzIntegration.*", Some @"lib\net452", None);
                             (@"..\src\MassTransit.QuartzIntegration\**\*.cs", Some @"src", None) ] } 
              |]
 

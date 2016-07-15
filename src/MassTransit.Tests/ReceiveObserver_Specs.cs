@@ -71,7 +71,7 @@ namespace MassTransit.Tests
                     GetTask<Tuple<ConsumeContext, string>>(), GetTask<ConsumeContext>());
             }
 
-            protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+            protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
             {
                 Handled<PingMessage>(configurator);
             }
@@ -102,7 +102,7 @@ namespace MassTransit.Tests
                     GetTask<Tuple<ConsumeContext, string>>(), GetTask<ConsumeContext>());
             }
 
-            protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+            protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
             {
                 configurator.Consumer<PingConsumerDude>();
             }
@@ -152,7 +152,7 @@ namespace MassTransit.Tests
                     GetTask<Tuple<ConsumeContext, string>>(), GetTask<ConsumeContext>());
             }
 
-            protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+            protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
             {
                 Handler<PingMessage>(configurator, x =>
                 {

@@ -41,7 +41,7 @@ namespace MassTransit.Tests
             configurator.UseXmlSerializer();
         }
 
-        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             // TODO would be nice to support serialization per receiving endpoint
 

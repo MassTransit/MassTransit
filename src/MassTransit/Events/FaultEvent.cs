@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,13 +13,20 @@
 namespace MassTransit.Events
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
 
 
+    [Serializable]
     public class FaultEvent<T> :
         Fault<T>
     {
         public FaultEvent(T message, Guid? faultedMessageId, HostInfo host, Exception exception)
+            : this(message, faultedMessageId, host, GetExceptions(exception))
+        {
+        }
+
+        public FaultEvent(T message, Guid? faultedMessageId, HostInfo host, IEnumerable<ExceptionInfo> exceptions)
         {
             Timestamp = DateTime.UtcNow;
             FaultId = NewId.NextGuid();
@@ -28,9 +35,7 @@ namespace MassTransit.Events
             Host = host;
             FaultedMessageId = faultedMessageId;
 
-            var aggregateException = exception as AggregateException;
-            Exceptions = aggregateException?.InnerExceptions.Select(x => ((ExceptionInfo)new FaultExceptionInfo(x))).ToArray()
-                ?? new ExceptionInfo[] {new FaultExceptionInfo(exception)};
+            Exceptions = exceptions.ToArray();
         }
 
         public Guid FaultId { get; }
@@ -39,5 +44,16 @@ namespace MassTransit.Events
         public ExceptionInfo[] Exceptions { get; }
         public HostInfo Host { get; }
         public T Message { get; }
+
+        static ExceptionInfo[] GetExceptions(Exception exception)
+        {
+            var aggregateException = exception as AggregateException;
+
+            return aggregateException?.InnerExceptions
+                .Where(x => x != null)
+                .Select(x => (ExceptionInfo)new FaultExceptionInfo(x))
+                .ToArray()
+                ?? new ExceptionInfo[] {new FaultExceptionInfo(exception)};
+        }
     }
 }

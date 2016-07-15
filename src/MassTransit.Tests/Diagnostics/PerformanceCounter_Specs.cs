@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,7 +14,6 @@ namespace MassTransit.Tests.Diagnostics
 {
     using System.Threading;
     using System.Threading.Tasks;
-    using Monitoring.Performance;
     using NUnit.Framework;
     using TestFramework;
     using TestFramework.Messages;
@@ -28,9 +27,6 @@ namespace MassTransit.Tests.Diagnostics
         public async Task Should_update_performance_counters()
         {
             _completed = GetTask<bool>();
-            var receiveObserver = new PerformanceCounterReceiveObserver();
-
-            var observerHandle = Bus.ConnectReceiveObserver(receiveObserver);
 
             for (int i = 0; i < 1000; i++)
             {
@@ -38,20 +34,24 @@ namespace MassTransit.Tests.Diagnostics
             }
 
             await _completed.Task;
-
-            observerHandle.Disconnect();
         }
 
         TaskCompletionSource<bool> _completed;
 
-        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+        protected override void ConfigureBus(IInMemoryBusFactoryConfigurator configurator)
+        {
+            base.ConfigureBus(configurator);
+
+            configurator.EnablePerformanceCounters();
+        }
+
+        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             long value = 0;
             configurator.Handler<PingMessage>(async context =>
             {
                 if (Interlocked.Increment(ref value) == 1000)
                     _completed.TrySetResult(true);
-
             });
         }
     }

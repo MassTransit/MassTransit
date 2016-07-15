@@ -15,6 +15,7 @@ namespace MassTransit.Testing.Instances
     using System.Collections.Generic;
     using System.Threading.Tasks;
     using TestActions;
+    using Util;
 
 
     public abstract class TestInstance<TScenario>
@@ -42,8 +43,12 @@ namespace MassTransit.Testing.Instances
 
         public void Execute()
         {
-            ExecuteTestActions()
-                .Wait(Scenario.CancellationToken);
+            TaskUtil.Await(ExecuteAsync);
+        }
+
+        public Task ExecuteAsync()
+        {
+            return ExecuteTestActions();
         }
 
         public void Dispose()
@@ -70,7 +75,7 @@ namespace MassTransit.Testing.Instances
                 if (_scenario.CancellationToken.IsCancellationRequested)
                     throw new TaskCanceledException("The test was cancelled");
 
-                await action.Act(_scenario, _scenario.CancellationToken);
+                await action.Act(_scenario, _scenario.CancellationToken).ConfigureAwait(false);
             }
         }
     }

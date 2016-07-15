@@ -1,17 +1,18 @@
 ﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
+//
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
+// this file except in compliance with the License. You may obtain a copy of the
+// License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
 // Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests
 {
+    using System;
     using System.Collections.Generic;
     using Internals.Mapping;
     using Internals.Reflection;
@@ -24,7 +25,6 @@ namespace MassTransit.Tests
         [Test]
         public void Should_include_a_string()
         {
-            Assert.IsNotNullOrEmpty(_values.StringValue);
             Assert.AreEqual("Hello", _values.StringValue);
         }
 
@@ -33,6 +33,20 @@ namespace MassTransit.Tests
         {
             Assert.IsTrue(_values.LongValue.HasValue);
             Assert.AreEqual(123, _values.LongValue.Value);
+        }
+
+        [Test]
+        public void Should_include_nullable_timespan()
+        {
+            Assert.IsTrue(_values.TimeSpanValue.HasValue);
+            Assert.AreEqual(TimeSpan.FromSeconds(5), _values.TimeSpanValue.Value);
+        }
+
+        [Test]
+        public void Should_include_nullable_timespan_as_string()
+        {
+            Assert.IsTrue(_values.TimeSpanValueAsString.HasValue);
+            Assert.AreEqual(TimeSpan.FromMilliseconds(20), _values.TimeSpanValueAsString.Value);
         }
 
         [Test]
@@ -109,7 +123,7 @@ namespace MassTransit.Tests
         IDictionary<string, object> _dictionary;
         Values _values;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void Setup()
         {
             _dictionary = new Dictionary<string, object>
@@ -117,6 +131,8 @@ namespace MassTransit.Tests
                 {"IntValue", 27},
                 {"StringValue", "Hello"},
                 {"LongValue", (long?)123},
+                {"TimeSpanValue", TimeSpan.FromSeconds(5)},
+                {"TimeSpanValueAsString", "00:00:00.0200000"},
                 {"ValueType", ValueType.Integer},
                 {"ValueTypeAsInt", 2},
                 {"ValueTypeAsString", "String"},
@@ -179,6 +195,8 @@ namespace MassTransit.Tests
             int IntValue { get; }
             string StringValue { get; }
             long? LongValue { get; }
+            TimeSpan? TimeSpanValue { get; }
+            TimeSpan? TimeSpanValueAsString { get; }
             ValueType ValueType { get; }
             ValueType ValueTypeAsInt { get; }
             ValueType ValueTypeAsString { get; }

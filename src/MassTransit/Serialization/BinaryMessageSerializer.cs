@@ -37,6 +37,7 @@ namespace MassTransit.Serialization
         public const string FaultAddressKey = "FaultAddress";
         public const string MessageIdKey = "MessageId";
         public const string MessageTypeKey = "MessageType";
+        public const string PolymorphicMessageTypesKey = "PolymorphicMessageTypes";
         public const string RequestIdKey = "RequestId";
         public const string ResponseAddressKey = "ResponseAddress";
         public const string SourceAddressKey = "SourceAddress";
@@ -58,18 +59,19 @@ namespace MassTransit.Serialization
                     $"Whoa, slow down buddy. The message '{TypeMetadataCache<T>.ShortName}' must be marked with the 'Serializable' attribute!");
             }
 
-            _formatter.Serialize(stream, context.Message, GetHeaders(context, new MessageUrn(typeof(T))));
+            _formatter.Serialize(stream, context.Message, GetHeaders<T>(context));
 
             context.ContentType = BinaryContentType;
         }
 
         ContentType IMessageSerializer.ContentType => BinaryContentType;
 
-        static Header[] GetHeaders(SendContext context, MessageUrn messageType)
+        static Header[] GetHeaders<T>(SendContext context)
         {
             var headers = new List<Header>();
 
-            headers.Add(MessageTypeKey, messageType);
+            headers.Add(MessageTypeKey, new MessageUrn(typeof(T)));
+            headers.Add(new Header(PolymorphicMessageTypesKey, string.Join(";", TypeMetadataCache<T>.MessageTypeNames)));
 
             if (context.CorrelationId.HasValue)
                 headers.Add(RequestIdKey, context.CorrelationId.Value.ToString());

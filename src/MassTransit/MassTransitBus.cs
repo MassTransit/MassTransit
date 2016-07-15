@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -29,10 +29,11 @@ namespace MassTransit
         IBusControl,
         IDisposable
     {
+        static readonly ILog _log = Logger.Get<MassTransitBus>();
         readonly IBusObserver _busObservable;
         readonly IConsumePipe _consumePipe;
         readonly IBusHostControl[] _hosts;
-        readonly ILog _log;
+        readonly Lazy<IPublishEndpoint> _publishEndpoint;
         readonly IPublishEndpointProvider _publishEndpointProvider;
         readonly IReceiveEndpoint[] _receiveEndpoints;
         readonly ReceiveObservable _receiveObservers;
@@ -52,8 +53,8 @@ namespace MassTransit
             _receiveEndpoints = receiveEndpoints.ToArray();
             _hosts = hosts.ToArray();
 
-            _log = Logger.Get<MassTransitBus>();
             _receiveObservers = new ReceiveObservable();
+            _publishEndpoint = new Lazy<IPublishEndpoint>(() => publishEndpointProvider.CreatePublishEndpoint(address));
         }
 
         ConnectHandle IConsumePipeConnector.ConnectConsumePipe<T>(IPipe<ConsumeContext<T>> pipe)
@@ -78,37 +79,27 @@ namespace MassTransit
 
         Task IPublishEndpoint.Publish<T>(T message, CancellationToken cancellationToken)
         {
-            IPublishEndpoint publishEndpoint = _publishEndpointProvider.CreatePublishEndpoint(Address);
-
-            return publishEndpoint.Publish(message, cancellationToken);
+            return _publishEndpoint.Value.Publish(message, cancellationToken);
         }
 
         Task IPublishEndpoint.Publish<T>(T message, IPipe<PublishContext<T>> publishPipe, CancellationToken cancellationToken)
         {
-            IPublishEndpoint publishEndpoint = _publishEndpointProvider.CreatePublishEndpoint(Address);
-
-            return publishEndpoint.Publish(message, publishPipe, cancellationToken);
+            return _publishEndpoint.Value.Publish(message, publishPipe, cancellationToken);
         }
 
         Task IPublishEndpoint.Publish<T>(T message, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
         {
-            IPublishEndpoint publishEndpoint = _publishEndpointProvider.CreatePublishEndpoint(Address);
-
-            return publishEndpoint.Publish(message, publishPipe, cancellationToken);
+            return _publishEndpoint.Value.Publish(message, publishPipe, cancellationToken);
         }
 
         Task IPublishEndpoint.Publish(object message, CancellationToken cancellationToken)
         {
-            IPublishEndpoint publishEndpoint = _publishEndpointProvider.CreatePublishEndpoint(Address);
-
-            return publishEndpoint.Publish(message, cancellationToken);
+            return _publishEndpoint.Value.Publish(message, cancellationToken);
         }
 
         Task IPublishEndpoint.Publish(object message, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
         {
-            IPublishEndpoint publishEndpoint = _publishEndpointProvider.CreatePublishEndpoint(Address);
-
-            return publishEndpoint.Publish(message, publishPipe, cancellationToken);
+            return _publishEndpoint.Value.Publish(message, publishPipe, cancellationToken);
         }
 
         Task IPublishEndpoint.Publish(object message, Type messageType, CancellationToken cancellationToken)
@@ -124,23 +115,17 @@ namespace MassTransit
 
         Task IPublishEndpoint.Publish<T>(object values, CancellationToken cancellationToken)
         {
-            IPublishEndpoint publishEndpoint = _publishEndpointProvider.CreatePublishEndpoint(Address);
-
-            return publishEndpoint.Publish<T>(values, cancellationToken);
+            return _publishEndpoint.Value.Publish<T>(values, cancellationToken);
         }
 
         Task IPublishEndpoint.Publish<T>(object values, IPipe<PublishContext<T>> publishPipe, CancellationToken cancellationToken)
         {
-            IPublishEndpoint publishEndpoint = _publishEndpointProvider.CreatePublishEndpoint(Address);
-
-            return publishEndpoint.Publish(values, publishPipe, cancellationToken);
+            return _publishEndpoint.Value.Publish(values, publishPipe, cancellationToken);
         }
 
         Task IPublishEndpoint.Publish<T>(object values, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
         {
-            IPublishEndpoint publishEndpoint = _publishEndpointProvider.CreatePublishEndpoint(Address);
-
-            return publishEndpoint.Publish<T>(values, publishPipe, cancellationToken);
+            return _publishEndpoint.Value.Publish<T>(values, publishPipe, cancellationToken);
         }
 
         public Uri Address { get; }
@@ -176,9 +161,9 @@ namespace MassTransit
                 if (_log.IsDebugEnabled)
                     _log.DebugFormat("Starting bus hosts...");
 
-                foreach (IBusHostControl host in _hosts)
+                foreach (var host in _hosts)
                 {
-                    HostHandle hostHandle = host.Start();
+                    var hostHandle = host.Start();
 
                     hosts.Add(hostHandle);
                 }
@@ -186,12 +171,12 @@ namespace MassTransit
                 if (_log.IsDebugEnabled)
                     _log.DebugFormat("Starting receive endpoints...");
 
-                foreach (IReceiveEndpoint endpoint in _receiveEndpoints)
+                foreach (var endpoint in _receiveEndpoints)
                 {
-                    ConnectHandle observerHandle = endpoint.ConnectReceiveObserver(_receiveObservers);
+                    var observerHandle = endpoint.ConnectReceiveObserver(_receiveObservers);
                     observers.Add(observerHandle);
 
-                    ReceiveEndpointHandle handle = endpoint.Start();
+                    var handle = endpoint.Start();
 
                     endpoints.Add(handle);
                 }
@@ -211,12 +196,17 @@ namespace MassTransit
                 try
                 {
                     if (busHandle != null)
-                        busHandle.Stop(TimeSpan.FromSeconds(60));
+                    {
+                        if (_log.IsDebugEnabled)
+                            _log.DebugFormat("Stopping bus hosts...");
+
+                        await busHandle.StopAsync(cancellationToken).ConfigureAwait(false);
+                    }
                     else
                     {
                         var handle = new Handle(hosts, endpoints, observers, this, _busObservable, busReady);
 
-                        handle.Stop(TimeSpan.FromSeconds(60));
+                        await handle.StopAsync(cancellationToken).ConfigureAwait(false);
                     }
                 }
                 catch (Exception stopException)
@@ -264,16 +254,16 @@ namespace MassTransit
 
         void IProbeSite.Probe(ProbeContext context)
         {
-            ProbeContext scope = context.CreateScope("bus");
+            var scope = context.CreateScope("bus");
             scope.Set(new
             {
                 Address
             });
 
-            foreach (IBusHostControl host in _hosts)
+            foreach (var host in _hosts)
                 host.Probe(scope);
 
-            foreach (IReceiveEndpoint receiveEndpoint in _receiveEndpoints)
+            foreach (var receiveEndpoint in _receiveEndpoints)
                 receiveEndpoint.Probe(scope);
         }
 
@@ -290,24 +280,37 @@ namespace MassTransit
         void IDisposable.Dispose()
         {
             _busHandle?.Stop(CancellationToken.None);
+
+            (_sendEndpointProvider as IDisposable)?.Dispose();
+            (_publishEndpointProvider as IDisposable)?.Dispose();
         }
 
 
         class BusReady
         {
-            public BusReady()
-            {
-                Ready = Task.FromResult(new ReceiveEndpointReady[0]);
-            }
+            readonly ReadyObserver[] _observers;
 
             public BusReady(IEnumerable<IReceiveEndpoint> receiveEndpoints)
             {
-                var observers = receiveEndpoints.Select(x => new ReadyObserver(x).Ready).ToArray();
-
-                Ready = Task.WhenAll(observers);
+                _observers = receiveEndpoints.Select(x => new ReadyObserver(x)).ToArray();
             }
 
-            public Task<ReceiveEndpointReady[]> Ready { get; }
+            public Task<ReceiveEndpointReady[]> Ready
+            {
+                get { return ReadyOrNot(_observers.Select(x => x.Ready)); }
+            }
+
+            async Task<ReceiveEndpointReady[]> ReadyOrNot(IEnumerable<Task<ReceiveEndpointReady>> observers)
+            {
+                var tasks = observers as Task<ReceiveEndpointReady>[] ?? observers.ToArray();
+
+                foreach (Task<ReceiveEndpointReady> observer in tasks)
+                {
+                    await observer.ConfigureAwait(false);
+                }
+
+                return await Task.WhenAll(tasks).ConfigureAwait(false);
+            }
 
 
             class ReadyObserver :
@@ -341,6 +344,8 @@ namespace MassTransit
                 public Task Faulted(ReceiveEndpointFaulted faulted)
                 {
                     _ready.TrySetException(faulted.Exception);
+
+                    _handle.Disconnect();
 
                     return TaskUtil.Completed;
                 }
@@ -381,7 +386,7 @@ namespace MassTransit
                 _stopped = true;
             }
 
-            public async Task StopAsync(CancellationToken cancellationToken = new CancellationToken())
+            public async Task StopAsync(CancellationToken cancellationToken)
             {
                 if (_stopped)
                     return;
@@ -393,7 +398,13 @@ namespace MassTransit
                     foreach (var observerHandle in _observerHandles)
                         observerHandle.Disconnect();
 
+                    if (_log.IsDebugEnabled)
+                        _log.DebugFormat("Stopping endpoints...");
+
                     await Task.WhenAll(_endpointHandles.Select(x => x.Stop(cancellationToken))).ConfigureAwait(false);
+
+                    if (_log.IsDebugEnabled)
+                        _log.DebugFormat("Stopping hosts...");
 
                     await Task.WhenAll(_hostHandles.Select(x => x.Stop(cancellationToken))).ConfigureAwait(false);
 

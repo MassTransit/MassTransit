@@ -18,7 +18,7 @@ namespace MassTransit.NHibernateIntegration.Tests
     [SetUpFixture]
     public class ContextSetup
     {
-        [SetUp]
+        [OneTimeSetUp]
         public void Before_any()
         {
             Log4NetLogger.Use("test.log4net.xml");

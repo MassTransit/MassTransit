@@ -13,7 +13,6 @@
 namespace MassTransit.MessageData
 {
     using System;
-    using System.Threading;
     using Transformation;
     using Util;
 

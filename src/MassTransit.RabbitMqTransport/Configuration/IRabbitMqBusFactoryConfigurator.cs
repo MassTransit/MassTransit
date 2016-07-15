@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -21,6 +21,12 @@ namespace MassTransit
         IBusFactoryConfigurator,
         IQueueConfigurator
     {
+        /// <summary>
+        /// Enables RabbitMQ publish acknowledgement, so that the Task returned from Send/Publish 
+        /// is not completed until the message has been confirmed by the broker.
+        /// </summary>
+        bool PublisherConfirmation { set; }
+
         /// <summary>
         /// In most cases, this is not needed and should not be used. However, if for any reason the default bus
         /// endpoint queue name needs to be changed, this will do it. Do NOT set it to the same name as a receive

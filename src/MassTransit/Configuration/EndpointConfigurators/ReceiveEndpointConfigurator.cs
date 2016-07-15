@@ -27,23 +27,29 @@ namespace MassTransit.EndpointConfigurators
 
 
     public abstract class ReceiveEndpointConfigurator :
-        IConsumePipeConfigurator
+        IConsumePipeConfigurator,
+        ISendPipelineConfigurator,
+        IPublishPipelineConfigurator
     {
         readonly IConsumePipe _consumePipe;
-        readonly ConsumePipeSpecificationList _consumePipeSpecification;
+        readonly ConsumePipeConfigurator _consumePipeConfigurator;
         readonly Lazy<Uri> _deadLetterAddress;
         readonly Lazy<Uri> _errorAddress;
         readonly Lazy<Uri> _inputAddress;
+        readonly IList<string> _lateConfigurationKeys;
+        readonly PublishPipeConfigurator _publishPipeConfigurator;
         readonly IBuildPipeConfigurator<ReceiveContext> _receiveConfigurator;
+        readonly SendPipeConfigurator _sendPipeConfigurator;
         readonly IList<IReceiveEndpointSpecification> _specifications;
-        readonly IList<string> _lateConfigurationKeys; 
 
         protected ReceiveEndpointConfigurator(IConsumePipe consumePipe)
         {
             _consumePipe = consumePipe;
 
             _specifications = new List<IReceiveEndpointSpecification>();
-            _consumePipeSpecification = new ConsumePipeSpecificationList();
+            _consumePipeConfigurator = new ConsumePipeConfigurator();
+            _sendPipeConfigurator = new SendPipeConfigurator();
+            _publishPipeConfigurator = new PublishPipeConfigurator();
             _receiveConfigurator = new PipeConfigurator<ReceiveContext>();
             _lateConfigurationKeys = new List<string>();
 
@@ -56,18 +62,35 @@ namespace MassTransit.EndpointConfigurators
 
         void IPipeConfigurator<ConsumeContext>.AddPipeSpecification(IPipeSpecification<ConsumeContext> specification)
         {
-            _consumePipeSpecification.Add(specification);
+            _consumePipeConfigurator.AddPipeSpecification(specification);
         }
 
         void IConsumePipeConfigurator.AddPipeSpecification<T>(IPipeSpecification<ConsumeContext<T>> specification)
         {
-            _consumePipeSpecification.Add(specification);
+            _consumePipeConfigurator.AddPipeSpecification(specification);
+        }
+
+        public void ConfigurePublish(Action<IPublishPipeConfigurator> callback)
+        {
+            if (callback == null)
+                throw new ArgumentNullException(nameof(callback));
+
+            callback(_publishPipeConfigurator);
+        }
+
+        public void ConfigureSend(Action<ISendPipeConfigurator> callback)
+        {
+            if (callback == null)
+                throw new ArgumentNullException(nameof(callback));
+
+            callback(_sendPipeConfigurator);
         }
 
         public virtual IEnumerable<ValidationResult> Validate()
         {
             return _specifications.SelectMany(x => x.Validate())
-                .Concat(_consumePipeSpecification.Validate())
+                .Concat(_consumePipeConfigurator.Validate())
+                .Concat(_sendPipeConfigurator.Validate())
                 .Concat(_lateConfigurationKeys.Select(x => new ValidationResultImpl(ValidationResultDisposition.Failure, x, "was configured after being used")));
         }
 
@@ -78,7 +101,7 @@ namespace MassTransit.EndpointConfigurators
 
         protected IReceivePipe CreateReceivePipe(IBusBuilder builder, Func<IConsumePipe, IReceiveEndpointBuilder> endpointBuilderFactory)
         {
-            IConsumePipe consumePipe = _consumePipe ?? builder.CreateConsumePipe(_consumePipeSpecification);
+            IConsumePipe consumePipe = _consumePipe ?? builder.CreateConsumePipe(_consumePipeConfigurator);
 
             IReceiveEndpointBuilder endpointBuilder = endpointBuilderFactory(consumePipe);
 
@@ -87,9 +110,15 @@ namespace MassTransit.EndpointConfigurators
 
             ConfigureAddDeadLetterFilter(builder.SendTransportProvider);
 
-            ConfigureRescueFilter(builder.PublishEndpoint, builder.SendTransportProvider);
+            var publishEndpointProvider = builder.CreatePublishEndpointProvider(_publishPipeConfigurator);
 
-            _receiveConfigurator.UseFilter(new DeserializeFilter(builder.MessageDeserializer, consumePipe));
+            ConfigureRescueFilter(publishEndpointProvider, builder.SendTransportProvider);
+
+            ISendEndpointProvider sendEndpointProvider = builder.CreateSendEndpointProvider(_sendPipeConfigurator);
+
+            IMessageDeserializer messageDeserializer = builder.GetMessageDeserializer(sendEndpointProvider, publishEndpointProvider);
+
+            _receiveConfigurator.UseFilter(new DeserializeFilter(messageDeserializer, consumePipe));
 
             var receivePipe = _receiveConfigurator.Build();
 

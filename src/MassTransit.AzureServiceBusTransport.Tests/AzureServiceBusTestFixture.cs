@@ -37,10 +37,18 @@ namespace MassTransit.AzureServiceBusTransport.Tests
         readonly TestSendObserver _sendObserver;
         readonly Uri _serviceUri;
         BusHandle _busHandle;
+        readonly string _inputQueueName;
 
         public AzureServiceBusTestFixture()
+            : this("input_queue")
         {
-            ServiceBusEnvironment.SystemConnectivity.Mode = ConnectivityMode.Http;
+        }
+
+        public AzureServiceBusTestFixture(string inputQueueName)
+        {
+            ServiceBusEnvironment.SystemConnectivity.Mode = ConnectivityMode.Https;
+
+            _inputQueueName = inputQueueName;
 
             TestTimeout = Debugger.IsAttached ? TimeSpan.FromMinutes(5) : TimeSpan.FromSeconds(60);
 
@@ -77,7 +85,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
 
         protected override IBus Bus => _bus;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void SetupAzureServiceBusTestFixture()
         {
             _bus = CreateBus();
@@ -112,7 +120,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
             }
         }
 
-        [TestFixtureTearDown]
+        [OneTimeTearDown]
         public void TearDownInMemoryTestFixture()
         {
             try
@@ -153,7 +161,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
 
                 ServiceBusTokenProviderSettings settings = new TestAzureServiceBusAccountSettings();
 
-                IServiceBusHost host = x.Host(_serviceUri, h =>
+                var host = x.Host(_serviceUri, h =>
                 {
                     h.SharedAccessSignature(s =>
                     {
@@ -164,9 +172,11 @@ namespace MassTransit.AzureServiceBusTransport.Tests
                     });
                 });
 
+                x.UseServiceBusMessageScheduler();
+
                 ConfigureBusHost(x, host);
 
-                x.ReceiveEndpoint(host, "input_queue", e =>
+                x.ReceiveEndpoint(host, _inputQueueName, e =>
                 {
                     _inputQueueAddress = e.InputAddress;
 

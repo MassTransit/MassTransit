@@ -13,6 +13,7 @@
 namespace MassTransit.NHibernateIntegration.Tests
 {
     using System;
+    using System.Threading.Tasks;
     using MassTransit.Saga;
     using MassTransit.Tests.Saga;
     using MassTransit.Tests.Saga.Messages;
@@ -28,7 +29,7 @@ namespace MassTransit.NHibernateIntegration.Tests
         InMemoryTestFixture
     {
         [Test]
-        public async void A_correlated_message_should_find_the_correct_saga()
+        public async Task A_correlated_message_should_find_the_correct_saga()
         {
             Guid sagaId = NewId.NextGuid();
             var message = new InitiateSimpleSaga(sagaId);
@@ -49,7 +50,7 @@ namespace MassTransit.NHibernateIntegration.Tests
         }
 
         [Test]
-        public async void An_initiating_message_should_start_the_saga()
+        public async Task An_initiating_message_should_start_the_saga()
         {
             Guid sagaId = NewId.NextGuid();
             var message = new InitiateSimpleSaga(sagaId);
@@ -70,12 +71,12 @@ namespace MassTransit.NHibernateIntegration.Tests
             _sagaRepository = new Lazy<ISagaRepository<SimpleSaga>>(() => new NHibernateSagaRepository<SimpleSaga>(_sessionFactory));
         }
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void Setup()
         {
         }
 
-        [TestFixtureTearDown]
+        [OneTimeTearDown]
         public void Teardown()
         {
             if (_sessionFactory != null)
@@ -84,7 +85,7 @@ namespace MassTransit.NHibernateIntegration.Tests
                 _provider.Dispose();
         }
 
-        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             configurator.Saga(_sagaRepository.Value);
         }

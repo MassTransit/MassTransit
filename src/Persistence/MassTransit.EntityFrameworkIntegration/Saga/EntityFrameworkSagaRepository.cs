@@ -16,8 +16,10 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
     using System.Collections.Generic;
     using System.Data;
     using System.Data.Entity;
+    using System.Data.Entity.Core;
     using System.Data.Entity.Core.Metadata.Edm;
     using System.Data.Entity.Infrastructure;
+    using System.Data.SqlClient;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
@@ -49,7 +51,7 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
                 return await dbContext.Set<TSaga>()
                     .Where(query.FilterExpression)
                     .Select(x => x.CorrelationId)
-                    .ToListAsync();
+                    .ToListAsync().ConfigureAwait(false);
             }
         }
 
@@ -85,7 +87,7 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
                 TSaga instance;
                 if (policy.PreInsertInstance(context, out instance))
                 {
-                    inserted = await PreInsertSagaInstance<T>(dbContext, instance, context.CancellationToken);
+                    inserted = await PreInsertSagaInstance<T>(dbContext, instance, context.CancellationToken).ConfigureAwait(false);
                 }
 
                 try
@@ -96,7 +98,7 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
                     {
                         var missingSagaPipe = new MissingPipe<T>(dbContext, next);
 
-                        await policy.Missing(context, missingSagaPipe);
+                        await policy.Missing(context, missingSagaPipe).ConfigureAwait(false);
                     }
                     else
                     {
@@ -108,19 +110,46 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
 
                         var sagaConsumeContext = new EntityFrameworkSagaConsumeContext<TSaga, T>(dbContext, context, instance);
 
-                        await policy.Existing(sagaConsumeContext, next);
-
-//                        if (inserted && !sagaConsumeContext.IsCompleted)
-//                            dbContext.Set<TSaga>().Update(instance);
+                        await policy.Existing(sagaConsumeContext, next).ConfigureAwait(false);
                     }
 
-                    await dbContext.SaveChangesAsync();
+                    await dbContext.SaveChangesAsync().ConfigureAwait(false);
 
                     transaction.Commit();
                 }
+                catch (DbUpdateException ex)
+                {
+                    var baseException = ex.GetBaseException() as SqlException;
+                    if(baseException != null && baseException.Number == 1205)
+                    {
+                        // deadlock, no need to rollback
+                    }
+                    else
+                    {
+                        try
+                        {
+                            transaction.Rollback();
+                        }
+                        catch (Exception innerException)
+                        {
+                            if (_log.IsWarnEnabled)
+                                _log.Warn("The transaction rollback failed", innerException);
+                        }
+                    }
+
+                    throw;
+                }
                 catch (Exception)
                 {
-                    transaction.Rollback();
+                    try
+                    {
+                        transaction.Rollback();
+                    }
+                    catch (Exception innerException)
+                    {
+                        if (_log.IsWarnEnabled)
+                            _log.Warn("The transaction rollback failed", innerException);
+                    }
                     throw;
                 }
             }
@@ -131,7 +160,7 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
             try
             {
                 dbContext.Set<TSaga>().Add(instance);
-                await dbContext.SaveChangesAsync(cancellationToken);
+                await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
                 _log.DebugFormat("SAGA:{0}:{1} Insert {2}", TypeMetadataCache<TSaga>.ShortName, instance.CorrelationId,
                     TypeMetadataCache<T>.ShortName);
@@ -158,22 +187,22 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
             {
                 try
                 {
-                    var sagaInstances = await dbContext.Set<TSaga>().Where(context.Query.FilterExpression).ToListAsync();
+                    var sagaInstances = await dbContext.Set<TSaga>().Where(context.Query.FilterExpression).ToListAsync().ConfigureAwait(false);
                     if (sagaInstances.Count == 0)
                     {
                         var missingSagaPipe = new MissingPipe<T>(dbContext, next);
 
-                        await policy.Missing(context, missingSagaPipe);
+                        await policy.Missing(context, missingSagaPipe).ConfigureAwait(false);
                     }
                     else
                     {
                         foreach (var instance in sagaInstances)
                         {
-                            await SendToInstance(context, dbContext, policy, instance, next);
+                            await SendToInstance(context, dbContext, policy, instance, next).ConfigureAwait(false);
                         }
                     }
 
-                    await dbContext.SaveChangesAsync();
+                    await dbContext.SaveChangesAsync().ConfigureAwait(false);
 
                     transaction.Commit();
                 }
@@ -205,7 +234,7 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
 
                 var sagaConsumeContext = new EntityFrameworkSagaConsumeContext<TSaga, T>(dbContext, context, instance);
 
-                await policy.Existing(sagaConsumeContext, next);
+                await policy.Existing(sagaConsumeContext, next).ConfigureAwait(false);
             }
             catch (SagaException)
             {
@@ -249,14 +278,14 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
                         TypeMetadataCache<TMessage>.ShortName);
                 }
 
-                var proxy = new EntityFrameworkSagaConsumeContext<TSaga, TMessage>(_dbContext, context, context.Saga);
+                var proxy = new EntityFrameworkSagaConsumeContext<TSaga, TMessage>(_dbContext, context, context.Saga, false);
 
-                await _next.Send(proxy);
+                await _next.Send(proxy).ConfigureAwait(false);
 
                 if (!proxy.IsCompleted)
                     _dbContext.Set<TSaga>().Add(context.Saga);
 
-                await _dbContext.SaveChangesAsync();
+                await _dbContext.SaveChangesAsync().ConfigureAwait(false);
             }
         }
     }

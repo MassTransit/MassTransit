@@ -26,3 +26,5 @@ a standalone MassTransit service.
     scheduling_api.rst
     in_memory.rst
     redeliver.rst
+    servicebusscheduler.rst
+

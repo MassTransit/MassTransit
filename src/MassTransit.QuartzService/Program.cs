@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,7 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.QuartzService
 {
-    using System;
     using System.Diagnostics;
     using Configuration;
     using Log4NetIntegration.Logging;
@@ -31,19 +30,19 @@ namespace MassTransit.QuartzService
 
 
             return (int)HostFactory.Run(x =>
+            {
+                x.AfterInstall(() =>
                 {
-                    x.AfterInstall(() =>
-                        {
-                            VerifyEventLogSourceExists();
+                    VerifyEventLogSourceExists();
 
-                            // this will force the performance counters to register during service installation
-                            // making them created - of course using the InstallUtil stuff completely skips
-                            // this part of the install :(
-                            BusPerformanceCounters.Install();
-                        });
-
-                    x.Service(CreateService);
+                    // this will force the performance counters to register during service installation
+                    // making them created - of course using the InstallUtil stuff completely skips
+                    // this part of the install :(
+                    BusPerformanceCounters.Install();
                 });
+
+                x.Service(CreateService);
+            });
         }
 
         static void VerifyEventLogSourceExists()

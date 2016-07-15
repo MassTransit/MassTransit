@@ -30,6 +30,14 @@ namespace MassTransit.AzureServiceBusTransport
 
         QueueDescription QueueDescription { get; }
 
+        /// <summary>
+        /// The timeout before the session state is renewed
+        /// </summary>
         TimeSpan AutoRenewTimeout { get; }
+
+        /// <summary>
+        /// The timeout before a message session is abandoned
+        /// </summary>
+        TimeSpan MessageWaitTimeout { get; }
     }
 }

@@ -14,7 +14,6 @@ namespace MassTransit.AutofacIntegration
 {
     using System.Threading.Tasks;
     using Autofac;
-    using Monitoring.Introspection;
     using Pipeline;
     using Saga;
 
@@ -46,7 +45,7 @@ namespace MassTransit.AutofacIntegration
         {
             using (_scope.BeginLifetimeScope(_name))
             {
-                await _repository.Send(context, policy, next);
+                await _repository.Send(context, policy, next).ConfigureAwait(false);
             }
         }
 
@@ -55,7 +54,7 @@ namespace MassTransit.AutofacIntegration
         {
             using (_scope.BeginLifetimeScope(_name))
             {
-                await _repository.SendQuery(context, policy, next);
+                await _repository.SendQuery(context, policy, next).ConfigureAwait(false);
             }
         }
     }

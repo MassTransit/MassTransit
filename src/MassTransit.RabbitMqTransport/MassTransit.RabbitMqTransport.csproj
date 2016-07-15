@@ -10,7 +10,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>MassTransit.RabbitMqTransport</RootNamespace>
     <AssemblyName>MassTransit.RabbitMqTransport</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
@@ -25,7 +25,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
-    <NoWarn>1591</NoWarn>
+    <NoWarn>1587,1591,1998,3008,3001</NoWarn>
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
@@ -37,20 +37,26 @@
     <WarningLevel>4</WarningLevel>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
     <DocumentationFile>bin\Release\MassTransit.RabbitMqTransport.xml</DocumentationFile>
-    <NoWarn>1591</NoWarn>
+    <NoWarn>1587,1591,1998,3008,3001</NoWarn>
     <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <AssemblyOriginatorKeyFile>..\..\MassTransit.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="NewId, Version=2.1.3.0, Culture=neutral, PublicKeyToken=b8e0e9f2f1e657fa, processorArchitecture=MSIL">
       <HintPath>..\packages\NewId.2.1.3\lib\net45\NewId.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Newtonsoft.Json.6.0.8\lib\net45\Newtonsoft.Json.dll</HintPath>
+    <Reference Include="Newtonsoft.Json, Version=7.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.7.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
     </Reference>
-    <Reference Include="RabbitMQ.Client, Version=3.5.6.0, Culture=neutral, PublicKeyToken=89e7d7c5feba84ce, processorArchitecture=MSIL">
-      <HintPath>..\packages\RabbitMQ.Client.3.5.6\lib\net40\RabbitMQ.Client.dll</HintPath>
+    <Reference Include="RabbitMQ.Client, Version=3.6.3.0, Culture=neutral, PublicKeyToken=89e7d7c5feba84ce, processorArchitecture=MSIL">
+      <HintPath>..\packages\RabbitMQ.Client.3.6.3\lib\net45\RabbitMQ.Client.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
@@ -61,12 +67,18 @@
     <Compile Include="..\SolutionVersion.cs">
       <Link>Properties\SolutionVersion.cs</Link>
     </Compile>
+    <Compile Include="Configuration\Builders\IRabbitMqReceiveEndpointBuilder.cs" />
     <Compile Include="Configuration\Builders\RabbitMqBusBuilder.cs" />
     <Compile Include="Configuration\Builders\RabbitMqReceiveEndpointBuilder.cs" />
     <Compile Include="Configuration\Configurators\ConfigurationHostSettings.cs" />
+    <Compile Include="Configuration\Configurators\RabbitMqClusterConfigurator.cs" />
     <Compile Include="Configuration\Configurators\RabbitMqHostConfigurator.cs" />
+    <Compile Include="Configuration\DelayedExchangeMessageSchedulerSpecification.cs" />
     <Compile Include="Configuration\DelayedExchangeRedeliveryPipeSpecification.cs" />
+    <Compile Include="Configuration\IExchangeBindingConfigurator.cs" />
+    <Compile Include="Configuration\IExchangeConfigurator.cs" />
     <Compile Include="Configuration\IQueueConfigurator.cs" />
+    <Compile Include="Configuration\IRabbitMqClusterConfigurator.cs" />
     <Compile Include="Configuration\RabbitMqConsumerPipeSpecification.cs" />
     <Compile Include="Configuration\ConsumerPipeConfiguratorExtensions.cs" />
     <Compile Include="Contexts\DelayedExchangeMessageRedeliveryContext.cs" />
@@ -78,8 +90,11 @@
     <Compile Include="Contexts\RabbitMqSendContextImpl.cs" />
     <Compile Include="Contexts\SharedConnectionContext.cs" />
     <Compile Include="Contexts\SharedModelContext.cs" />
+    <Compile Include="Contracts\PrefetchCountUpdated.cs" />
+    <Compile Include="Contracts\SetPrefetchCount.cs" />
     <Compile Include="DeferExtensions.cs" />
     <Compile Include="DelayedExchangeRetryExtensions.cs" />
+    <Compile Include="DelayedExchangeSchedulerExtensions.cs" />
     <Compile Include="Exceptions\MessageNotConfirmedException.cs" />
     <Compile Include="Exceptions\PublishNackException.cs" />
     <Compile Include="Exceptions\RabbitMqAddressException.cs" />
@@ -93,12 +108,17 @@
     <Compile Include="Integration\RabbitMqConnectionCache.cs" />
     <Compile Include="Integration\RabbitMqModelCache.cs" />
     <Compile Include="IRabbitMqHost.cs" />
+    <Compile Include="IRabbitMqHostNameSelector.cs" />
+    <Compile Include="ModelSettings.cs" />
     <Compile Include="Pipeline\DelayedExchangeMessageRedeliveryFilter.cs" />
+    <Compile Include="Management\ISetPrefetchCount.cs" />
+    <Compile Include="Pipeline\DelayedExchangeMessageSchedulerFilter.cs" />
     <Compile Include="Pipeline\RabbitMqConsumerFilter.cs" />
     <Compile Include="Pipeline\PrepareSendExchangeFilter.cs" />
     <Compile Include="Pipeline\RabbitMqBasicConsumer.cs" />
     <Compile Include="Pipeline\ReceiveModelFilter.cs" />
     <Compile Include="Pipeline\PrepareReceiveQueueFilter.cs" />
+    <Compile Include="Management\SetPrefetchCountManagementConsumer.cs" />
     <Compile Include="PublishSettings.cs" />
     <Compile Include="RabbitMqBusFactory.cs" />
     <Compile Include="RabbitMqAddressExtensions.cs" />
@@ -115,7 +135,8 @@
     <Compile Include="RabbitMqConsumerMetrics.cs" />
     <Compile Include="RabbitMqHost.cs" />
     <Compile Include="RabbitMqHostSettings.cs" />
-    <Compile Include="RabbitMqPublishEndpoint.cs" />
+    <Compile Include="RabbitMqModelSettings.cs" />
+    <Compile Include="RabbitMqPublishEndpointProvider.cs" />
     <Compile Include="ConnectionContext.cs" />
     <Compile Include="RabbitMqExtensions.cs" />
     <Compile Include="RabbitMqHeaders.cs" />
@@ -124,10 +145,13 @@
     <Compile Include="RabbitMqSendContextExtensions.cs" />
     <Compile Include="RabbitMqSendEndpointProvider.cs" />
     <Compile Include="RabbitMqSendTransportProvider.cs" />
+    <Compile Include="SequentialHostnameSelector.cs" />
     <Compile Include="ReceiveSettings.cs" />
     <Compile Include="RabbitMqReceiveTransport.cs" />
     <Compile Include="RabbitMqSendContext.cs" />
     <Compile Include="RabbitMqSendTransport.cs" />
+    <Compile Include="SchedulePublishExtensions.cs" />
+    <Compile Include="Scheduling\DelayedExchangeMessageScheduler.cs" />
     <Compile Include="SendSettings.cs" />
     <Compile Include="Testing\BusTestScenarioExtensions.cs" />
     <Compile Include="Testing\RabbitMqBusTestScenarioBuilder.cs" />
@@ -137,6 +161,7 @@
     <Compile Include="Topology\RabbitMqHostEqualityComparer.cs" />
     <Compile Include="Topology\RabbitMqReceiveSettings.cs" />
     <Compile Include="Topology\RabbitMqSendSettings.cs" />
+    <Compile Include="TurnoutExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MassTransit\MassTransit.csproj">

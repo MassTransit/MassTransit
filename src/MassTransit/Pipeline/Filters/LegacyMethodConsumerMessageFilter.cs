@@ -29,6 +29,8 @@ namespace MassTransit.Pipeline.Filters
     {
         void IProbeSite.Probe(ProbeContext context)
         {
+            var scope = context.CreateScope("consume");
+            scope.Add("method", $"Consume({TypeMetadataCache<TMessage>.ShortName} message)");
         }
 
         [DebuggerNonUserCode]

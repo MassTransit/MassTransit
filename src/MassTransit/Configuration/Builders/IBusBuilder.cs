@@ -14,7 +14,6 @@ namespace MassTransit.Builders
 {
     using System;
     using System.Net.Mime;
-    using BusConfigurators;
     using Pipeline;
 
 
@@ -24,21 +23,28 @@ namespace MassTransit.Builders
     public interface IBusBuilder
     {
         /// <summary>
-        /// The default message deserializer
-        /// </summary>
-        IMessageDeserializer MessageDeserializer { get; }
-
-        /// <summary>
-        /// The default message serializer
-        /// </summary>
-        IMessageSerializer MessageSerializer { get; }
-
-        /// <summary>
         /// The Send Transport Provider
         /// </summary>
         ISendTransportProvider SendTransportProvider { get; }
 
-        IPublishEndpointProvider PublishEndpoint { get; }
+        /// <summary>
+        /// The default message deserializer
+        /// </summary>
+        IMessageDeserializer GetMessageDeserializer(ISendEndpointProvider sendEndpointProvider, IPublishEndpointProvider publishEndpointProvider);
+
+        /// <summary>
+        /// Creates a send endpoint provider using the bus and supplied specifications
+        /// </summary>
+        /// <param name="specifications"></param>
+        /// <returns></returns>
+        ISendEndpointProvider CreateSendEndpointProvider(params ISendPipeSpecification[] specifications);
+
+        /// <summary>
+        /// Creates a publish endpoint provider using the bus and supplied specifications
+        /// </summary>
+        /// <param name="specifications"></param>
+        /// <returns></returns>
+        IPublishEndpointProvider CreatePublishEndpointProvider(params IPublishPipeSpecification[] specifications);
 
         /// <summary>
         /// Adds a receive endpoint to the bus
@@ -67,6 +73,14 @@ namespace MassTransit.Builders
         /// <param name="specifications"></param>
         /// <returns></returns>
         IConsumePipe CreateConsumePipe(params IConsumePipeSpecification[] specifications);
+
+        /// <summary>
+        /// Create a send pipe for the endpoint, using the bus builder. The bus builder may add additional filters
+        /// from the bus configuration to the endpoint.
+        /// </summary>
+        /// <param name="specifications"></param>
+        /// <returns></returns>
+        ISendPipe CreateSendPipe(params ISendPipeSpecification[] specifications);
 
         /// <summary>
         /// Connects a bus observer to the bus to observe lifecycle events on the bus

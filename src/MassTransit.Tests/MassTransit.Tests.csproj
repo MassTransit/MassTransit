@@ -15,7 +15,7 @@
     <OldToolsVersion>3.5</OldToolsVersion>
     <UpgradeBackupLocation>
     </UpgradeBackupLocation>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
@@ -53,28 +53,29 @@
     <DefineConstants>TRACE;$(DefineConstants)</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <NoWarn>1587,1591</NoWarn>
+    <NoWarn>1587,1591,1998,3008,3001</NoWarn>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="log4net">
-      <HintPath>..\packages\log4net.2.0.3\lib\net40-full\log4net.dll</HintPath>
+    <Reference Include="log4net, Version=1.2.15.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
+      <HintPath>..\packages\log4net.2.0.5\lib\net45-full\log4net.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="NewId, Version=2.1.3.0, Culture=neutral, PublicKeyToken=b8e0e9f2f1e657fa, processorArchitecture=MSIL">
       <HintPath>..\packages\NewId.2.1.3\lib\net45\NewId.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Newtonsoft.Json.6.0.8\lib\net45\Newtonsoft.Json.dll</HintPath>
+    <Reference Include="Newtonsoft.Json, Version=7.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.7.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
     </Reference>
-    <Reference Include="nunit.framework, Version=2.6.4.14350, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\NUnit.2.6.4\lib\nunit.framework.dll</HintPath>
+    <Reference Include="nunit.framework, Version=3.4.1.0, Culture=neutral, PublicKeyToken=2638cd05610744eb, processorArchitecture=MSIL">
+      <HintPath>..\packages\NUnit.3.4.1\lib\net45\nunit.framework.dll</HintPath>
+      <Private>True</Private>
     </Reference>
-    <Reference Include="Shouldly, Version=2.6.0.0, Culture=neutral, PublicKeyToken=6042cbcb05cbc941, processorArchitecture=MSIL">
-      <HintPath>..\packages\Shouldly.2.6.0\lib\net40\Shouldly.dll</HintPath>
+    <Reference Include="Shouldly, Version=2.8.0.0, Culture=neutral, PublicKeyToken=6042cbcb05cbc941, processorArchitecture=MSIL">
+      <HintPath>..\packages\Shouldly.2.8.0\lib\net40\Shouldly.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
@@ -91,11 +92,13 @@
     <Compile Include="..\SolutionVersion.cs">
       <Link>Properties\SolutionVersion.cs</Link>
     </Compile>
+    <Compile Include="BusActivityMonitor_Specs.cs" />
+    <Compile Include="CircuitBreaker_Specs.cs" />
     <Compile Include="ConcurrencyLimitKnob_Specs.cs" />
+    <Compile Include="ConsumeJToken_Specs.cs" />
     <Compile Include="ConsumeObserver_Specs.cs" />
     <Compile Include="Consumer_Specs.cs" />
     <Compile Include="ContainedMessage_Specs.cs" />
-    <Compile Include="Behaviors\Behavior.cs" />
     <Compile Include="Conventional\ConventionConsumer_Specs.cs" />
     <Compile Include="Conventional\CustomConsumeConnectorFactory.cs" />
     <Compile Include="Conventional\CustomConsumerConvention.cs" />
@@ -113,6 +116,7 @@
     <Compile Include="Courier\Fault_Specs.cs" />
     <Compile Include="Courier\ObjectGraph_Specs.cs" />
     <Compile Include="Courier\RanToCompletion_Specs.cs" />
+    <Compile Include="Courier\RequestRoutingSlip_Specs.cs" />
     <Compile Include="Courier\ReviseItinerary_Specs.cs" />
     <Compile Include="Courier\RoutingSlip_Specs.cs" />
     <Compile Include="Courier\SingleActivityEvent_Specs.cs" />
@@ -120,9 +124,11 @@
     <Compile Include="Courier\TwoActivityEvent_Specs.cs" />
     <Compile Include="Courier\UriArgument_Specs.cs" />
     <Compile Include="EventPublish_Specs.cs" />
+    <Compile Include="ExcessiveAsyncFault_Specs.cs" />
     <Compile Include="HeaderObject_Specs.cs" />
     <Compile Include="HostInfo_Specs.cs" />
     <Compile Include="Introspection_Specs.cs" />
+    <Compile Include="LazyMemoryCache_Specs.cs" />
     <Compile Include="MessageData\DataBus_Specs.cs" />
     <Compile Include="Diagnostics\PerformanceCounter_Specs.cs" />
     <Compile Include="DictionaryToObject_Specs.cs" />
@@ -143,22 +149,25 @@
     <Compile Include="InterfaceSubscription_Specs.cs" />
     <Compile Include="MessageContext_Specs.cs" />
     <Compile Include="Messages\PartialSerializationTestMessage.cs" />
+    <Compile Include="BinarySerializer_Specs.cs" />
     <Compile Include="MixedConsumer_Specs.cs" />
     <Compile Include="MultiTestConsumer_Specs.cs" />
     <Compile Include="ObjectToDictionary_Specs.cs" />
     <Compile Include="Observer_Specs.cs" />
     <Compile Include="OrderedNotification_Specs.cs" />
+    <Compile Include="Outbox_Specs.cs" />
     <Compile Include="Performance\InMemorySpeed_Specs.cs" />
     <Compile Include="Pipeline\CircuitBreaker_Specs.cs" />
     <Compile Include="Pipeline\Concurrency_Specs.cs" />
     <Compile Include="Pipeline\ConnectConsumer_Specs.cs" />
     <Compile Include="Pipeline\ConnectHandler_Specs.cs" />
     <Compile Include="Pipeline\ConnectObserver_Specs.cs" />
+    <Compile Include="Pipeline\ContentFilter_Specs.cs" />
     <Compile Include="Pipeline\LatestFilter_Specs.cs" />
     <Compile Include="Pipeline\MessageTestFixture.cs" />
     <Compile Include="Pipeline\OneMessageConsumer.cs" />
+    <Compile Include="Pipeline\PartitionByKey_Specs.cs" />
     <Compile Include="Pipeline\Retry_Specs.cs" />
-    <Compile Include="Pipeline\TestPipeContext.cs" />
     <Compile Include="Pipeline\Transaction_Specs.cs" />
     <Compile Include="Pipeline\TwoMessageConsumer.cs" />
     <Compile Include="PublishHeader_Specs.cs" />
@@ -168,6 +177,7 @@
     <Compile Include="Retry_Specs.cs" />
     <Compile Include="Saga\InjectingSampleSaga.cs" />
     <Compile Include="Saga\Injecting_Specs.cs" />
+    <Compile Include="Saga\PartitionSaga_Specs.cs" />
     <Compile Include="Saga\Using_correlated_messages_to_start_sagas.cs" />
     <Compile Include="SendObserver_Specs.cs" />
     <Compile Include="SendProxy_Specs.cs" />
@@ -178,17 +188,21 @@
     <Compile Include="Serialization\DateTimeFormat_Specs.cs" />
     <Compile Include="Serialization\IEnumerable_Specs.cs" />
     <Compile Include="Serialization\MessageDataSerialization_Specs.cs" />
+    <Compile Include="Serialization\PolymorphicProperty_Specs.cs" />
+    <Compile Include="Serialization\ReceiveFault_Serialization_Specs.cs" />
     <Compile Include="Serialization\SerializationException_Specs.cs" />
     <Compile Include="InMemoryTest_Specs.cs" />
     <Compile Include="Serialization\TypeHandling_Specs.cs" />
     <Compile Include="SimpleConfiguration_Specs.cs" />
     <Compile Include="StaticProperty_Specs.cs" />
+    <Compile Include="Supervisor_Specs.cs" />
     <Compile Include="Testing\ConsumerMultiple_Specs.cs" />
     <Compile Include="Testing\ConsumerTest_Specs.cs" />
     <Compile Include="Testing\HandlerRespond_Specs.cs" />
     <Compile Include="Testing\HandlerTest_Specs.cs" />
     <Compile Include="Testing\SagaTest_Specs.cs" />
     <Compile Include="Threading_Specs.cs" />
+    <Compile Include="Transforms\SendTransform_Specs.cs" />
     <Compile Include="Transforms\SetProperty_Specs.cs" />
     <Compile Include="Transforms\TransformClass_Specs.cs" />
     <Compile Include="Transports\InMemoryTransport_Specs.cs" />
@@ -257,7 +271,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
+  </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
       <Visible>False</Visible>

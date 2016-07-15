@@ -32,6 +32,8 @@ namespace MassTransit
         readonly IBus _bus;
         readonly Lazy<Task<ISendEndpoint>> _requestEndpoint;
         readonly TimeSpan _timeout;
+        readonly TimeSpan? _timeToLive;
+        readonly Action<SendContext<TRequest>> _callback;
 
         /// <summary>
         /// Creates a message request client for the bus and endpoint specified
@@ -39,14 +41,20 @@ namespace MassTransit
         /// <param name="bus">The bus instance</param>
         /// <param name="address">The service endpoint address</param>
         /// <param name="timeout">The request timeout</param>
-        public MessageRequestClient(IBus bus, Uri address, TimeSpan timeout)
+        /// <param name="timeToLive">The time that the request will live for</param>
+        /// <param name="callback"></param>
+        public MessageRequestClient(IBus bus, Uri address, TimeSpan timeout, TimeSpan? timeToLive = default(TimeSpan?), Action<SendContext<TRequest>> callback = null)
         {
             _bus = bus;
             _timeout = timeout;
-            _requestEndpoint = new Lazy<Task<ISendEndpoint>>(async () => await _bus.GetSendEndpoint(address));
+            _timeToLive = timeToLive;
+            _callback = callback;
+
+            _requestEndpoint = new Lazy<Task<ISendEndpoint>>(async () => await _bus.GetSendEndpoint(address).ConfigureAwait(false));
         }
 
-        async Task<TResponse> IRequestClient<TRequest, TResponse>.Request(TRequest request, CancellationToken cancellationToken)
+
+        public async Task<TResponse> Request(TRequest request, CancellationToken cancellationToken)
         {
             var taskScheduler = SynchronizationContext.Current == null
                 ? TaskScheduler.Default
@@ -55,9 +63,11 @@ namespace MassTransit
             Task<TResponse> responseTask = null;
             var pipe = new SendRequest<TRequest>(_bus, taskScheduler, x =>
             {
+                x.TimeToLive = _timeToLive;
                 x.Timeout = _timeout;
-
                 responseTask = x.Handle<TResponse>();
+
+                _callback?.Invoke(x);
             });
 
             ISendEndpoint endpoint = await _requestEndpoint.Value.ConfigureAwait(false);

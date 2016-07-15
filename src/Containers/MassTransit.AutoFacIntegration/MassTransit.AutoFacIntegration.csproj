@@ -10,7 +10,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>MassTransit.AutofacIntegration</RootNamespace>
     <AssemblyName>MassTransit.AutofacIntegration</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\</SolutionDir>
     <TargetFrameworkProfile />
@@ -33,8 +33,15 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <NoWarn>1587,1591,1998,3008,3001</NoWarn>
     <DocumentationFile>bin\Release\MassTransit.AutofacIntegration.XML</DocumentationFile>
     <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <AssemblyOriginatorKeyFile>..\..\..\MassTransit.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Autofac">
@@ -47,13 +54,25 @@
     <Compile Include="..\..\SolutionVersion.cs">
       <Link>SolutionVersion.cs</Link>
     </Compile>
+    <Compile Include="AutofacCompensateActivityFactory.cs" />
     <Compile Include="AutofacConsumerFactory.cs" />
+    <Compile Include="AutofacExecuteActivityFactory.cs" />
     <Compile Include="AutofacExtensions.cs" />
     <Compile Include="AutofacSagaRepository.cs" />
+    <Compile Include="AutofacScopeConsumerFactory.cs" />
+    <Compile Include="AutofacScopeSagaRepository.cs" />
     <Compile Include="ConsumerConfiguratorCache.cs" />
+    <Compile Include="ILifetimeScopeIdProvider.cs" />
+    <Compile Include="ILifetimeScopeRegistry.cs" />
+    <Compile Include="ILifetimeScopeIdAccessor.cs" />
+    <Compile Include="LifetimeScopeConfigurator.cs" />
+    <Compile Include="LifetimeScopeRegistry.cs" />
+    <Compile Include="MessageLifetimeScopeIdProvider.cs" />
+    <Compile Include="MessageLifetimeScopeIdAccessor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RegistrationExtensions.cs" />
     <Compile Include="SagaConfiguratorCache.cs" />
+    <Compile Include="StringHeaderLifetimeScopeIdProvider.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\MassTransit\MassTransit.csproj">

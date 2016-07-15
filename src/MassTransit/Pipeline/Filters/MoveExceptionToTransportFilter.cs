@@ -27,13 +27,13 @@ namespace MassTransit.Pipeline.Filters
         IFilter<ExceptionReceiveContext>
     {
         readonly Uri _destinationAddress;
-        readonly Func<Task<ISendTransport>> _getDestinationTransport;
+        readonly Lazy<Task<ISendTransport>> _getDestinationTransport;
         readonly IPublishEndpointProvider _publishEndpoint;
 
         public MoveExceptionToTransportFilter(IPublishEndpointProvider publishEndpoint, Uri destinationAddress,
             Func<Task<ISendTransport>> getDestinationTransport)
         {
-            _getDestinationTransport = getDestinationTransport;
+            _getDestinationTransport = new Lazy<Task<ISendTransport>>(getDestinationTransport);
             _publishEndpoint = publishEndpoint;
             _destinationAddress = destinationAddress;
         }
@@ -46,7 +46,7 @@ namespace MassTransit.Pipeline.Filters
 
         async Task IFilter<ExceptionReceiveContext>.Send(ExceptionReceiveContext context, IPipe<ExceptionReceiveContext> next)
         {
-            ISendTransport transport = await _getDestinationTransport();
+            ISendTransport transport = await _getDestinationTransport.Value.ConfigureAwait(false);
 
             IPipe<SendContext> pipe = Pipe.Execute<SendContext>(sendContext =>
             {
@@ -55,6 +55,7 @@ namespace MassTransit.Pipeline.Filters
                 Exception exception = context.Exception.GetBaseException();
 
                 sendContext.Headers.Set(MessageHeaders.FaultMessage, exception.Message);
+                sendContext.Headers.Set(MessageHeaders.FaultTimestamp, context.ExceptionTimestamp.ToString("O"));
                 sendContext.Headers.Set(MessageHeaders.FaultStackTrace, ExceptionUtil.GetStackTrace(exception));
 
                 sendContext.SetHostHeaders();

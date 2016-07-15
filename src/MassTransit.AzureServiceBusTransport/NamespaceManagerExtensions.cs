@@ -71,7 +71,8 @@ namespace MassTransit.AzureServiceBusTransport
                     {
                         queueDescription.EnableExpress ? "express" : "",
                         queueDescription.RequiresDuplicateDetection ? "dupe detect" : "",
-                        queueDescription.EnableDeadLetteringOnMessageExpiration ? "dead letter" : ""
+                        queueDescription.EnableDeadLetteringOnMessageExpiration ? "dead letter" : "",
+                        queueDescription.RequiresSession ? "session" : ""
                     }.Where(x => !string.IsNullOrWhiteSpace(x))));
             }
 
@@ -135,12 +136,26 @@ namespace MassTransit.AzureServiceBusTransport
         public static async Task<SubscriptionDescription> CreateTopicSubscriptionSafeAsync(this NamespaceManager namespaceManager, string subscriptionName,
             string topicPath, string queuePath, QueueDescription queueDescription)
         {
+            var description = Defaults.CreateSubscriptionDescription(topicPath, subscriptionName, queueDescription, queuePath);
+
             bool create = true;
             SubscriptionDescription subscriptionDescription = null;
             try
             {
                 subscriptionDescription = await namespaceManager.GetSubscriptionAsync(topicPath, subscriptionName).ConfigureAwait(false);
-                if (!queuePath.Equals(subscriptionDescription.ForwardTo))
+                if (queuePath.Equals(subscriptionDescription.ForwardTo))
+                {
+                    if (_log.IsDebugEnabled)
+                    {
+                        _log.DebugFormat("Updating subscription: {0} ({1} -> {2})", subscriptionDescription.Name, subscriptionDescription.TopicPath,
+                            subscriptionDescription.ForwardTo);
+                    }
+
+                    await namespaceManager.UpdateSubscriptionAsync(description).ConfigureAwait(false);
+
+                    create = false;
+                }
+                else
                 {
                     if (_log.IsWarnEnabled)
                     {
@@ -150,8 +165,6 @@ namespace MassTransit.AzureServiceBusTransport
 
                     await namespaceManager.DeleteSubscriptionAsync(topicPath, subscriptionName).ConfigureAwait(false);
                 }
-                else
-                    create = false;
             }
             catch (MessagingEntityNotFoundException)
             {
@@ -165,18 +178,6 @@ namespace MassTransit.AzureServiceBusTransport
                     if (_log.IsDebugEnabled)
                         _log.DebugFormat("Creating subscription {0} -> {1}", topicPath, queuePath);
 
-                    var description = new SubscriptionDescription(topicPath, subscriptionName)
-                    {
-                        ForwardTo = queuePath,
-                        AutoDeleteOnIdle = queueDescription.AutoDeleteOnIdle,
-                        DefaultMessageTimeToLive = queueDescription.DefaultMessageTimeToLive,
-                        EnableBatchedOperations = queueDescription.EnableBatchedOperations,
-                        EnableDeadLetteringOnMessageExpiration = queueDescription.EnableDeadLetteringOnMessageExpiration,
-                        MaxDeliveryCount = queueDescription.MaxDeliveryCount,
-                        UserMetadata = queueDescription.UserMetadata,
-                        RequiresSession = queueDescription.RequiresSession,
-                        LockDuration = queueDescription.LockDuration
-                    };
 
                     subscriptionDescription = await namespaceManager.CreateSubscriptionAsync(description).ConfigureAwait(false);
 

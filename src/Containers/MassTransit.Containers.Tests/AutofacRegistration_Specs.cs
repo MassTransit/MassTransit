@@ -27,7 +27,7 @@ namespace MassTransit.Containers.Tests
     {
         IContainer _container;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void Setup()
         {
             var builder = new ContainerBuilder();
@@ -69,7 +69,7 @@ namespace MassTransit.Containers.Tests
         }
 
 
-        [TestFixtureTearDown]
+        [OneTimeTearDown]
         public void Teardown()
         {
             _container.Dispose();

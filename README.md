@@ -19,6 +19,13 @@ In order to get started with MassTransit, you can have a look at the documentati
 `install-package MassTransit.RabbitMq` then;
 
 ```
+// Message Definition
+class MyMessage
+{
+    public string Value { get; set; }
+}
+
+// Code Snippet for Console Application 
 var bus = Bus.Factory.CreateUsingRabbitMq(sbc =>
 {
     var host = sbc.Host(new Uri("rabbitmq://localhost/"), h =>
@@ -61,7 +68,7 @@ Next, run the following command to enable the rabbitmq management plugin:
 
 Download from NuGet 'MassTransit' [Search NuGet for MassTransit](http://nuget.org/packages?q=masstransit)
 
-Download the continuously integrated Binaries from [TeamCity](http://teamcity.codebetter.com/viewType.html?buildTypeId=bt8&tab=buildTypeStatusDiv).
+Download the continuously integrated Nuget packages from [AppVeyor](https://ci.appveyor.com/project/phatboyg/masstransit/build/artifacts).
 
 ### Supported transports
 
@@ -94,7 +101,7 @@ While attendence is pretty light, there is a Gitter chat room available:
 MassTransit is built on [AppVeyor](https://ci.appveyor.com/project/phatboyg/masstransit)
  
 # REQUIREMENTS
-* .Net 4.5
+* .Net 4.5.2
 
 # CREDITS
 Logo Design by [The Agile Badger](http://www.theagilebadger.com)

@@ -22,7 +22,7 @@ namespace MassTransit.Containers.Tests
     public class Ninject_Consumer :
         When_registering_a_consumer
     {
-        [TestFixtureTearDown]
+        [OneTimeTearDown]
         public void Close_container()
         {
             _container.Dispose();
@@ -41,7 +41,7 @@ namespace MassTransit.Containers.Tests
                 .To<AnotherMessageConsumerImpl>().InNamedScope("message");
         }
 
-        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             configurator.LoadFrom(_container);
         }
@@ -54,7 +54,7 @@ namespace MassTransit.Containers.Tests
     public class Ninject_Saga :
         When_registering_a_saga
     {
-        [TestFixtureTearDown]
+        [OneTimeTearDown]
         public void Close_container()
         {
             _container.Dispose();
@@ -70,7 +70,7 @@ namespace MassTransit.Containers.Tests
                 .InSingletonScope();
         }
 
-        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             // we have to do this explicitly, since the metadata is not exposed by Ninject
             configurator.Saga<SimpleSaga>(_container);

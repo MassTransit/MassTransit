@@ -36,7 +36,7 @@ namespace MassTransit
         {
             ISendEndpoint endpoint = await bus.GetSendEndpoint(address).ConfigureAwait(false);
 
-            return await Request(bus, endpoint, message, callback, cancellationToken);
+            return await Request(bus, endpoint, message, callback, cancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>

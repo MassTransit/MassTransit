@@ -28,29 +28,29 @@ a value entered.
         {
             public void static Main()
             {
-                using(var busControl = ConfigureBus())
+                var busControl = ConfigureBus();
+                busControl.Start();
+
+                do
                 {
-                    busControl.Start();
+                    Console.WriteLine("Enter message (or quit to exit)");
+                    Console.Write("> ");
+                    string value = Console.ReadLine();
 
-                    do
+                    if("quit".Equals(value, StringComparison.OrdinalIgnoreCase))
+                        break;
+
+                    busControl.Publish<ValueEntered>(new
                     {
-                        Console.WriteLine("Enter message (or quit to exit)");
-                        Console.Write("> ");
-                        string value = Console.ReadLine();
-
-                        if("quit".Equals(value, StringComparison.OrdinalIgnoreCase))
-                            break;
-
-                        busControl.Publish<ValueEntered>(new
-                        {
-                            Value = value
-                        });
-                    }
-                    while (true);
+                        Value = value
+                    });
                 }
+                while (true);
+                
+                busControl.Stop();
             }
 
-            IBusControl ConfigureBus()
+            static IBusControl ConfigureBus()
             {
                 return Bus.Factory.CreateUsingRabbitMq(cfg =>
                 {

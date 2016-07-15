@@ -42,7 +42,7 @@ namespace MassTransit.Containers.Tests
                 Lifestyle.Scoped);
         }
 
-        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             configurator.LoadFrom(_container);
         }
@@ -52,7 +52,7 @@ namespace MassTransit.Containers.Tests
     public class SimpleInjector_Saga :
         When_registering_a_saga
     {
-        [TestFixtureTearDown]
+        [OneTimeTearDown]
         public void Close_container()
         {
             _container.Dispose();
@@ -68,7 +68,7 @@ namespace MassTransit.Containers.Tests
                 Lifestyle.Singleton);
         }
 
-        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             configurator.Saga<SimpleSaga>(_container);
         }

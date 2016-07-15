@@ -15,7 +15,7 @@
     <OldToolsVersion>3.5</OldToolsVersion>
     <UpgradeBackupLocation>
     </UpgradeBackupLocation>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
@@ -44,11 +44,12 @@
     <DefineConstants>DEBUG;TRACE;$(DefineConstants)</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <NoWarn>3009,3001,3008</NoWarn>
+    <NoWarn>1587,1591,1998,3008,3001</NoWarn>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <DocumentationFile>
     </DocumentationFile>
     <Prefer32Bit>false</Prefer32Bit>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -58,24 +59,32 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <DocumentationFile>bin\Release\MassTransit.XML</DocumentationFile>
-    <NoWarn>1587,1591,3008,3001</NoWarn>
+    <NoWarn>1587,1591,1998,3008,3001</NoWarn>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
     <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <AssemblyOriginatorKeyFile>..\..\MassTransit.snk</AssemblyOriginatorKeyFile>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="NewId, Version=2.1.3.0, Culture=neutral, PublicKeyToken=b8e0e9f2f1e657fa, processorArchitecture=MSIL">
       <HintPath>..\packages\NewId.2.1.3\lib\net45\NewId.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Newtonsoft.Json.6.0.8\lib\net45\Newtonsoft.Json.dll</HintPath>
+    <Reference Include="Newtonsoft.Json, Version=7.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.7.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
     </Reference>
     <Reference Include="System.Data" />
     <Reference Include="System.Management" />
+    <Reference Include="System.Runtime.Caching" />
     <Reference Include="System.Transactions" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Xml.Linq" />
@@ -84,11 +93,25 @@
     <Compile Include="..\SolutionVersion.cs">
       <Link>Properties\SolutionVersion.cs</Link>
     </Compile>
-    <Compile Include="Configuration\BusConfigurators\ConsumePipeBuilder.cs" />
-    <Compile Include="Configuration\BusConfigurators\ConsumePipeSpecificationList.cs" />
-    <Compile Include="Configuration\BusConfigurators\IConsumePipeBuilder.cs" />
-    <Compile Include="Configuration\BusConfigurators\IConsumePipeSpecification.cs" />
+    <Compile Include="Configuration\Builders\ConsumePipeBuilder.cs" />
+    <Compile Include="Configuration\Builders\IConsumePipeBuilder.cs" />
+    <Compile Include="Configuration\Builders\IPublishPipeBuilder.cs" />
+    <Compile Include="Configuration\Builders\ISendPipeBuilder.cs" />
+    <Compile Include="Configuration\Builders\PublishPipeBuilder.cs" />
+    <Compile Include="Configuration\Builders\SendPipeBuilder.cs" />
+    <Compile Include="Configuration\BusConfigurators\BusFactoryConfigurator.cs" />
+    <Compile Include="Configuration\BusConfigurators\BusObserverSpecification.cs" />
+    <Compile Include="Configuration\BusConfigurators\ConsumePipeConfigurator.cs" />
+    <Compile Include="Configuration\BusConfigurators\IConsumePipeFactory.cs" />
+    <Compile Include="Configuration\BusConfigurators\IPublishPipeFactory.cs" />
+    <Compile Include="Configuration\BusConfigurators\ISendPipeFactory.cs" />
+    <Compile Include="Configuration\BusConfigurators\PerformanceCounterBusFactorySpecification.cs" />
+    <Compile Include="Configuration\BusConfigurators\PublishPipeConfigurator.cs" />
+    <Compile Include="Configuration\BusConfigurators\SendPipeConfigurator.cs" />
+    <Compile Include="Configuration\BusObserverExtensions.cs" />
     <Compile Include="Configuration\CircuitBreakerExtensions.cs" />
+    <Compile Include="Configuration\ConsumeConfigurators\ConsumerMessageConfigurator.cs" />
+    <Compile Include="Configuration\ConsumeConfigurators\IConsumerMessageConfigurator.cs" />
     <Compile Include="Configuration\ConsumeConnectors\AsyncConsumerConvention.cs" />
     <Compile Include="Configuration\ConsumeConnectors\ConsumerConnector.cs" />
     <Compile Include="Configuration\ConsumeConnectors\ConsumerConventionCache.cs" />
@@ -103,11 +126,13 @@
     <Compile Include="Configuration\ConsumeConnectors\IObserverConnector.cs" />
     <Compile Include="Configuration\ConsumeConnectors\ObserverConnectorCache.cs" />
     <Compile Include="Configuration\ConsumerConvention.cs" />
+    <Compile Include="Configuration\ContentFilterExtensions.cs" />
     <Compile Include="Configuration\DeadLetterExtensions.cs" />
     <Compile Include="Configuration\EndpointConfigurators\InMemoryReceiveEndpointConfigurator.cs" />
     <Compile Include="Configuration\EndpointConfigurators\ReceiveEndpointConfigurator.cs" />
     <Compile Include="Configuration\ICircuitBreakerConfigurator.cs" />
     <Compile Include="Configuration\IConsumePipeConfigurator.cs" />
+    <Compile Include="Configuration\IConsumePipeSpecification.cs" />
     <Compile Include="Configuration\IConsumerConvention.cs" />
     <Compile Include="Configuration\IConsumerMessageConvention.cs" />
     <Compile Include="Configuration\IConsumeTransformSpecification.cs" />
@@ -116,6 +141,14 @@
     <Compile Include="Configuration\IManagementEndpointConfigurator.cs" />
     <Compile Include="Configuration\IMessageInterfaceType.cs" />
     <Compile Include="Configuration\InMemoryBusFactoryConfiguratorExtensions.cs" />
+    <Compile Include="Configuration\IPublishPipeConfigurator.cs" />
+    <Compile Include="Configuration\IPublishPipelineConfigurator.cs" />
+    <Compile Include="Configuration\IPublishPipeSpecification.cs" />
+    <Compile Include="Configuration\IPublishTransformSpecification.cs" />
+    <Compile Include="Configuration\ISendPipelineConfigurator.cs" />
+    <Compile Include="Configuration\ISendPipeConfigurator.cs" />
+    <Compile Include="Configuration\ISendPipeSpecification.cs" />
+    <Compile Include="Configuration\ISendTransformSpecification.cs" />
     <Compile Include="Configuration\ITransformConfigurator.cs" />
     <Compile Include="Configuration\LatestExtensions.cs" />
     <Compile Include="Configuration\LatestFilterCreated.cs" />
@@ -123,16 +156,30 @@
     <Compile Include="Configuration\ManagementEndpointConfigurator.cs" />
     <Compile Include="Configuration\MessageDataConfiguratorExtensions.cs" />
     <Compile Include="Configuration\MessageSchedulerExtensions.cs" />
+    <Compile Include="Configuration\InMemoryOutboxConfiguratorExtensions.cs" />
+    <Compile Include="Configuration\PartitionerExtensions.cs" />
     <Compile Include="Configuration\PipeConfigurators\CircuitBreakerPipeSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\CompensateActivityHostSpecification.cs" />
+    <Compile Include="Configuration\PipeConfigurators\RetryConsumerPipeSpecification.cs" />
+    <Compile Include="Configuration\PipeConfigurators\ContentFilterPipeSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\DeadLetterPipeSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\ExecuteActivityHostSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\LatestPipeSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\MessageSchedulerPipeSpecification.cs" />
+    <Compile Include="Configuration\PipeConfigurators\InMemoryOutboxSpecification.cs" />
+    <Compile Include="Configuration\PipeConfigurators\PartitionerPipeSpecification.cs" />
+    <Compile Include="Configuration\PipeConfigurators\PublishMessageSchedulerPipeSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\RedeliveryRetryPipeSpecification.cs" />
+    <Compile Include="Configuration\PipeConfigurators\RetrySagaPipeSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\ScheduleMessageRedeliveryPipeSpecification.cs" />
+    <Compile Include="Configuration\RoutingSlipEventCorrelationExtensions.cs" />
     <Compile Include="Configuration\ScheduledRetryExtensions.cs" />
     <Compile Include="Configuration\TransformConfiguratorExtensions.cs" />
+    <Compile Include="ConsumeContextSchedulerExtensions.cs" />
+    <Compile Include="ConsumeContextSelfSchedulerExtensions.cs" />
+    <Compile Include="Context\ArrayPayloadCollection.cs" />
+    <Compile Include="Context\BasePipeContext.cs" />
+    <Compile Include="Context\BasePayloadCollection.cs" />
     <Compile Include="Context\BaseReceiveContext.cs" />
     <Compile Include="Context\BaseSendContext.cs" />
     <Compile Include="Context\ConsumeContextProxyScope.cs" />
@@ -140,28 +187,60 @@
     <Compile Include="Context\CorrelationIdConsumeContextProxy.cs" />
     <Compile Include="Context\DelegateSetCorrelationId.cs" />
     <Compile Include="Context\DictionarySendHeaders.cs" />
+    <Compile Include="Context\EmptyPayloadCollection.cs" />
+    <Compile Include="Context\FaultedPublishContext.cs" />
     <Compile Include="Context\IMessageCorrelationCache.cs" />
+    <Compile Include="Context\IPayloadCache.cs" />
+    <Compile Include="Context\IPayloadCollection.cs" />
+    <Compile Include="Context\IPayloadValue.cs" />
+    <Compile Include="Context\IReadOnlyPayloadCollection.cs" />
+    <Compile Include="Context\IScheduleTokenIdCache.cs" />
     <Compile Include="Context\ISetCorrelationId.cs" />
     <Compile Include="Context\MessageConsumeContext.cs" />
     <Compile Include="Context\MessageCorrelation.cs" />
     <Compile Include="Context\MessageCorrelationCache.cs" />
     <Compile Include="Context\NoSetCorrelationId.cs" />
     <Compile Include="Context\NullablePropertySetCorrelationId.cs" />
+    <Compile Include="Context\InMemoryOutboxConsumeContext.cs" />
+    <Compile Include="Context\OutboxContext.cs" />
+    <Compile Include="Context\PayloadCache.cs" />
+    <Compile Include="Context\PayloadCacheProxy.cs" />
+    <Compile Include="Context\PayloadCacheScope.cs" />
     <Compile Include="Context\PropertySetCorrelationId.cs" />
+    <Compile Include="Context\PayloadValue.cs" />
     <Compile Include="Context\PublishRequestContext.cs" />
     <Compile Include="Context\ReceiveContextProxy.cs" />
     <Compile Include="Context\RequestHandlerHandle.cs" />
     <Compile Include="Context\RescueExceptionConsumeContext.cs" />
     <Compile Include="Context\RescueExceptionReceiveContext.cs" />
+    <Compile Include="Context\RetryConsumerConsumeContext.cs" />
+    <Compile Include="Context\RetryContext.cs" />
+    <Compile Include="Context\RetrySagaConsumeContext.cs" />
+    <Compile Include="Context\ScheduleTokenId.cs" />
+    <Compile Include="Context\ScheduleTokenIdCache.cs" />
+    <Compile Include="Context\SendContextProxy.cs" />
+    <Compile Include="Context\SinglePayloadCollection.cs" />
     <Compile Include="Contracts\ConcurrencyLimitUpdated.cs" />
     <Compile Include="Contracts\SetConcurrencyLimit.cs" />
     <Compile Include="Courier\Exceptions\RoutingSlipArgumentException.cs" />
+    <Compile Include="Courier\IActivity.cs" />
+    <Compile Include="Courier\ICompensateActivity.cs" />
+    <Compile Include="Courier\IExecuteActivity.cs" />
+    <Compile Include="Courier\RoutingSlipEvents.cs" />
+    <Compile Include="Courier\RoutingSlipRequestProxy.cs" />
+    <Compile Include="Courier\RoutingSlipResponseProxy.cs" />
     <Compile Include="CryptoStreamProviderExtensions.cs" />
+    <Compile Include="EndpointAddressProvider.cs" />
+    <Compile Include="EndpointConvention.cs" />
+    <Compile Include="EndpointConventionCache.cs" />
+    <Compile Include="EndpointConventionExtensions.cs" />
     <Compile Include="Events\ReceiveFaultEvent.cs" />
     <Compile Include="ExceptionConsumeContext.cs" />
     <Compile Include="ExceptionReceiveContext.cs" />
     <Compile Include="Exceptions\CommandException.cs" />
     <Compile Include="Exceptions\ContextException.cs" />
+    <Compile Include="Exceptions\JobAlreadyExistsException.cs" />
+    <Compile Include="Exceptions\JobNotFoundException.cs" />
     <Compile Include="Exceptions\MessageDataException.cs" />
     <Compile Include="Exceptions\MessageDataNotFoundException.cs" />
     <Compile Include="Hosting\ConfigurationProviderExtensions.cs" />
@@ -178,14 +257,19 @@
     <Compile Include="Hosting\ISettingsProvider.cs" />
     <Compile Include="IBusFactorySelector.cs" />
     <Compile Include="IBusObserver.cs" />
+    <Compile Include="IEndpointConventionCache.cs" />
     <Compile Include="IMessageData.cs" />
+    <Compile Include="IMessageScheduler.cs" />
     <Compile Include="IntrospectionExtensions.cs" />
     <Compile Include="IProbeSite.cs" />
     <Compile Include="IPublishEndpointProvider.cs" />
+    <Compile Include="IPublishObserver.cs" />
     <Compile Include="IReceiveEndpointObserver.cs" />
     <Compile Include="IReceiveEndpointObserverConnector.cs" />
     <Compile Include="IRepeatPolicy.cs" />
     <Compile Include="IRetryPolicy.cs" />
+    <Compile Include="ISendObserver.cs" />
+    <Compile Include="ISendObserverConnector.cs" />
     <Compile Include="LogContext.cs" />
     <Compile Include="Logging\Tracing\ConsoleTraceListener.cs" />
     <Compile Include="MessageDataExtensions.cs" />
@@ -290,7 +374,6 @@
     <Compile Include="Context\IHeaderProvider.cs" />
     <Compile Include="Context\IPublishEndpointConverter.cs" />
     <Compile Include="Context\JsonHeaders.cs" />
-    <Compile Include="Context\PayloadCache.cs" />
     <Compile Include="Context\PublishContextProxy.cs" />
     <Compile Include="Context\PublishEndpointConverter.cs" />
     <Compile Include="Context\PublishEndpointConverterCache.cs" />
@@ -481,13 +564,18 @@
     <Compile Include="Monitoring\Performance\IMessagePerformanceCounter.cs" />
     <Compile Include="Monitoring\Performance\InstancePerformanceCounter.cs" />
     <Compile Include="Monitoring\Performance\IPerformanceCounter.cs" />
+    <Compile Include="Monitoring\Performance\ISendPerformanceCounter.cs" />
     <Compile Include="Monitoring\Performance\MessagePerformanceCounter.cs" />
     <Compile Include="Monitoring\Performance\MessagePerformanceCounterCache.cs" />
     <Compile Include="Monitoring\Performance\MessagePerformanceCounters.cs" />
     <Compile Include="Monitoring\Performance\NullPerformanceCounter.cs" />
+    <Compile Include="Monitoring\Performance\PerformanceCounterBusObserver.cs" />
+    <Compile Include="Monitoring\Performance\PerformanceCounterPublishObserver.cs" />
     <Compile Include="Monitoring\Performance\PerformanceCounterReceiveObserver.cs" />
     <Compile Include="Monitoring\Performance\PerformanceCounters.cs" />
+    <Compile Include="Monitoring\Performance\PerformanceCounterSendObserver.cs" />
     <Compile Include="PayloadFactory.cs" />
+    <Compile Include="PerformanceCounterExtensions.cs" />
     <Compile Include="Pipe.cs" />
     <Compile Include="PipeContext.cs" />
     <Compile Include="PipeExtensions.cs" />
@@ -506,13 +594,29 @@
     <Compile Include="Pipeline\Filters\CircuitBreaker\HalfOpenBehavior.cs" />
     <Compile Include="Pipeline\Filters\ConcurrencyLimit\ConcurrencyLimitFilter.cs" />
     <Compile Include="Pipeline\Filters\ConcurrencyLimit\ConcurrencyLimitFilterManagementConsumer.cs" />
-    <Compile Include="Pipeline\Filters\ConcurrencyLimit\IConcurrencyLimitFilter.cs" />
     <Compile Include="Pipeline\Filters\ConsumerMessageFilter.cs" />
+    <Compile Include="Pipeline\Filters\RetryConsumerFilter.cs" />
     <Compile Include="Pipeline\Filters\ConsumerSplitFilter.cs" />
+    <Compile Include="Pipeline\Filters\ContentFilter.cs" />
     <Compile Include="Pipeline\Filters\DeadLetterFilter.cs" />
     <Compile Include="Pipeline\Filters\LatestFilter.cs" />
     <Compile Include="Pipeline\Filters\Latest\ILatestFilter.cs" />
+    <Compile Include="Pipeline\Filters\MessagePublishFilter.cs" />
+    <Compile Include="Pipeline\Filters\MessageSendFilter.cs" />
+    <Compile Include="Pipeline\Filters\MessageTypePublishFilter.cs" />
+    <Compile Include="Pipeline\Filters\MessageTypeSendFilter.cs" />
     <Compile Include="Pipeline\Filters\MoveToTransportFilter.cs" />
+    <Compile Include="Pipeline\Filters\InMemoryOutboxFilter.cs" />
+    <Compile Include="Pipeline\Filters\Outbox\OutboxSendEndpoint.cs" />
+    <Compile Include="Pipeline\Filters\Partitioner\IHashGenerator.cs" />
+    <Compile Include="Pipeline\Filters\Partitioner\IPartition.cs" />
+    <Compile Include="Pipeline\Filters\Partitioner\IPartitioner.cs" />
+    <Compile Include="Pipeline\Filters\Partitioner\Murmur3UnsafeHashGenerator.cs" />
+    <Compile Include="Pipeline\Filters\Partitioner\Partition.cs" />
+    <Compile Include="Pipeline\Filters\Partitioner\Partitioner.cs" />
+    <Compile Include="Pipeline\Filters\Partitioner\PartitionFilter.cs" />
+    <Compile Include="Pipeline\Filters\Partitioner\PartitionKeyProvider.cs" />
+    <Compile Include="Pipeline\Filters\PublishMessageSchedulerFilter.cs" />
     <Compile Include="Pipeline\Filters\RedeliveryRetryFilter.cs" />
     <Compile Include="Pipeline\Filters\DelegateFilter.cs" />
     <Compile Include="Pipeline\Filters\DeserializeFilter.cs" />
@@ -534,6 +638,7 @@
     <Compile Include="Pipeline\Filters\RescueExceptionFilter.cs" />
     <Compile Include="Pipeline\Filters\RescueReceiveContextFilter.cs" />
     <Compile Include="Pipeline\Filters\RetryFilter.cs" />
+    <Compile Include="Pipeline\Filters\RetrySagaFilter.cs" />
     <Compile Include="Pipeline\Filters\ScheduleMessageRedeliveryFilter.cs" />
     <Compile Include="Pipeline\Filters\TeeConsumeFilter.cs" />
     <Compile Include="Pipeline\Filters\TransactionFilter.cs" />
@@ -550,27 +655,36 @@
     <Compile Include="Pipeline\IPipe.cs" />
     <Compile Include="Pipeline\IConsumePipe.cs" />
     <Compile Include="Pipeline\ConsumePipeExtensions.cs" />
-    <Compile Include="Pipeline\IPublishInterceptor.cs" />
-    <Compile Include="Pipeline\IPublishObserver.cs" />
+    <Compile Include="Pipeline\IPublishMessageObserver.cs" />
+    <Compile Include="Pipeline\IPublishMessageObserverConnector.cs" />
     <Compile Include="Pipeline\IPublishObserverConnector.cs" />
+    <Compile Include="Pipeline\IPublishPipe.cs" />
     <Compile Include="Pipeline\IReceivePipe.cs" />
     <Compile Include="Pipeline\IRequestPipeConnector.cs" />
     <Compile Include="Pipeline\ISendInterceptor.cs" />
-    <Compile Include="Pipeline\ISendObserver.cs" />
-    <Compile Include="Pipeline\ISendObserverConnector.cs" />
+    <Compile Include="Pipeline\ISendMessageObserver.cs" />
+    <Compile Include="Pipeline\ISendMessageObserverConnector.cs" />
+    <Compile Include="Pipeline\ISendPipe.cs" />
+    <Compile Include="Pipeline\ISendPipeConnector.cs" />
     <Compile Include="Pipeline\KeyAccessor.cs" />
     <Compile Include="Pipeline\ConsumeMessageObservable.cs" />
-    <Compile Include="Pipeline\ConsumeObserverConnectable.cs" />
+    <Compile Include="Pipeline\ConsumeObservable.cs" />
     <Compile Include="Pipeline\Pipes\FilterPipe.cs" />
+    <Compile Include="Pipeline\Pipes\IManagementPipe.cs" />
+    <Compile Include="Pipeline\Pipes\ManagementPipe.cs" />
+    <Compile Include="Pipeline\Pipes\PublishPipe.cs" />
     <Compile Include="Pipeline\Pipes\ReceivePipe.cs" />
     <Compile Include="Pipeline\Pipes\ResponsePipe.cs" />
     <Compile Include="Pipeline\Pipes\ConsumePipe.cs" />
     <Compile Include="Pipeline\Pipes\ConsumerMergePipe.cs" />
     <Compile Include="Pipeline\Pipes\EmptyPipe.cs" />
     <Compile Include="Pipeline\Pipes\LastPipe.cs" />
+    <Compile Include="Pipeline\Pipes\SendPipe.cs" />
+    <Compile Include="Pipeline\PublishMessageObservable.cs" />
     <Compile Include="Pipeline\PublishObservable.cs" />
     <Compile Include="Pipeline\ReceiveEndpointObservable.cs" />
     <Compile Include="Pipeline\ReceiveObservable.cs" />
+    <Compile Include="Pipeline\SendMessageObservable.cs" />
     <Compile Include="Pipeline\SendObservable.cs" />
     <Compile Include="Policies\CancelRetryContext.cs" />
     <Compile Include="Policies\CancelRetryPolicy.cs" />
@@ -609,6 +723,7 @@
     <Compile Include="RequestContext.cs" />
     <Compile Include="RequestExtensions.cs" />
     <Compile Include="Retry.cs" />
+    <Compile Include="RetryContextExtensions.cs" />
     <Compile Include="RetryLaterExtensions.cs" />
     <Compile Include="SagaConsumeContext.cs" />
     <Compile Include="SagaExtensions.cs" />
@@ -660,24 +775,38 @@
     <Compile Include="Saga\SagaQuery.cs" />
     <Compile Include="Saga\SagaQueryConsumeContext.cs" />
     <Compile Include="Saga\SagaQueryConsumeContextProxy.cs" />
+    <Compile Include="Saga\SubscriptionConfigurators\ISagaMessageConfigurator.cs" />
+    <Compile Include="Saga\SubscriptionConfigurators\SagaMessageConfigurator.cs" />
     <Compile Include="ScheduleMessageExtensions.cs" />
     <Compile Include="ScheduleRecurringMessageExtensions.cs" />
     <Compile Include="Scheduling\CancelScheduledMessage.cs" />
+    <Compile Include="Scheduling\CancelScheduledMessageCommand.cs" />
     <Compile Include="Scheduling\CancelScheduledRecurringMessage.cs" />
     <Compile Include="Scheduling\DefaultRecurringSchedule.cs" />
+    <Compile Include="Scheduling\IMessageSchedulerConverter.cs" />
+    <Compile Include="Scheduling\EndpointMessageScheduler.cs" />
+    <Compile Include="Scheduling\MessageSchedulerConverter.cs" />
+    <Compile Include="Scheduling\MessageSchedulerConverterCache.cs" />
     <Compile Include="Scheduling\MissedEventPolicy.cs" />
+    <Compile Include="Scheduling\PublishMessageScheduler.cs" />
     <Compile Include="Scheduling\RecurringSchedule.cs" />
     <Compile Include="Scheduling\ScheduledMessage.cs" />
+    <Compile Include="Scheduling\ScheduledMessageHandle.cs" />
     <Compile Include="Scheduling\ScheduledRecurringMessage.cs" />
     <Compile Include="Scheduling\ScheduleMessage.cs" />
+    <Compile Include="Scheduling\ScheduleMessageCommand.cs" />
+    <Compile Include="Scheduling\ScheduleMessageContextPipe.cs" />
     <Compile Include="Scheduling\ScheduleRecurringMessage.cs" />
+    <Compile Include="Scheduling\SchedulingExtensions.cs" />
     <Compile Include="SendContext.cs" />
     <Compile Include="SendContextExecuteExtensions.cs" />
     <Compile Include="SendContextExtensions.cs" />
     <Compile Include="SendEndpointExtensions.cs" />
+    <Compile Include="SendEndpointSchedulerExtensions.cs" />
     <Compile Include="SendHeaders.cs" />
     <Compile Include="ReceiveFault.cs" />
     <Compile Include="Serialization\AesCryptoStreamProvider.cs" />
+    <Compile Include="Serialization\BaseConsumeContext.cs" />
     <Compile Include="Serialization\BinaryMessageDeserializer.cs" />
     <Compile Include="Serialization\BsonMessageDeserializer.cs" />
     <Compile Include="Serialization\ConsumeSendEndpoint.cs" />
@@ -855,6 +984,39 @@
     <Compile Include="Testing\TestInstanceConfigurators\IHandlerTestConfigurator.cs" />
     <Compile Include="Testing\TestInstanceConfigurators\HandlerTestInstanceConfiguratorImpl.cs" />
     <Compile Include="Testing\ITestSubject.cs" />
+    <Compile Include="TimeSpanContextScheduleExtensions.cs" />
+    <Compile Include="TimeSpanScheduleExtensions.cs" />
+    <Compile Include="Transformation\Contexts\SendTransformContext.cs" />
+    <Compile Include="Transformation\TransformConfigurators\SendTransformSpecification.cs" />
+    <Compile Include="Transformation\TransformConfigurators\TransformSpecification.cs" />
+    <Compile Include="Turnout\CancelJobConsumer.cs" />
+    <Compile Include="Turnout\Commands\Supervise.cs" />
+    <Compile Include="Turnout\Configuration\ITurnoutHostConfigurator.cs" />
+    <Compile Include="Turnout\Configuration\TurnoutHostSpecification.cs" />
+    <Compile Include="Turnout\Contracts\CancelJob.cs" />
+    <Compile Include="Turnout\Contracts\JobCanceled.cs" />
+    <Compile Include="Turnout\Contracts\MonitorJob.cs" />
+    <Compile Include="Turnout\Events\Canceled.cs" />
+    <Compile Include="Turnout\Events\Completed.cs" />
+    <Compile Include="Turnout\Events\Faulted.cs" />
+    <Compile Include="Turnout\SuperviseJobConsumer.cs" />
+    <Compile Include="Turnout\Contracts\SuperviseJob.cs" />
+    <Compile Include="Turnout\Contracts\JobCompleted.cs" />
+    <Compile Include="Turnout\Contracts\JobFaulted.cs" />
+    <Compile Include="Turnout\Contracts\JobStarted.cs" />
+    <Compile Include="Turnout\Contracts\JobStatus.cs" />
+    <Compile Include="Turnout\CreateJobConsumer.cs" />
+    <Compile Include="Turnout\DelegateJobFactory.cs" />
+    <Compile Include="Turnout\JobHandle.cs" />
+    <Compile Include="Turnout\IJobRoster.cs" />
+    <Compile Include="Turnout\IJobFactory.cs" />
+    <Compile Include="Turnout\ITurnoutController.cs" />
+    <Compile Include="Turnout\ConsumerJobContext.cs" />
+    <Compile Include="Turnout\JobContext.cs" />
+    <Compile Include="Turnout\ConsumerJobHandle.cs" />
+    <Compile Include="Turnout\JobRoster.cs" />
+    <Compile Include="Turnout\TurnoutConfigurationExtensions.cs" />
+    <Compile Include="Turnout\TurnoutController.cs" />
     <Compile Include="TransactionContext.cs" />
     <Compile Include="TransactionContextExtensions.cs" />
     <Compile Include="Transformation\Contexts\ConsumeTransformContext.cs" />
@@ -921,9 +1083,16 @@
     <Compile Include="Exceptions\MessageException.cs" />
     <Compile Include="Exceptions\ShutDownException.cs" />
     <Compile Include="Exceptions\EndpointException.cs" />
-    <Compile Include="Util\IMediator.cs" />
-    <Compile Include="Util\ITaskSupervisorScope.cs" />
-    <Compile Include="Util\Mediator.cs" />
+    <Compile Include="Turnout\JobResultContext.cs" />
+    <Compile Include="Util\AsyncTimer.cs" />
+    <Compile Include="Util\Caching\Cached.cs" />
+    <Compile Include="Util\Caching\LazyMemoryCache.cs" />
+    <Compile Include="Util\IAsyncDisposable.cs" />
+    <Compile Include="Util\ITaskScope.cs" />
+    <Compile Include="Util\LimitedConcurrencyLevelTaskScheduler.cs" />
+    <Compile Include="Util\RollingTimer.cs" />
+    <Compile Include="Util\StopEventArgs.cs" />
+    <Compile Include="Util\TaskParticipant.cs" />
     <Compile Include="Util\TaskSupervisor.cs" />
     <Compile Include="Util\AsyncObservable.cs" />
     <Compile Include="Util\BusHostInfo.cs" />
@@ -938,7 +1107,9 @@
     <Compile Include="Util\ObjectTypeDeserializer.cs" />
     <Compile Include="Util\ITaskParticipant.cs" />
     <Compile Include="Util\QueuedTaskScheduler.cs" />
-    <Compile Include="Util\StopSignal.cs" />
+    <Compile Include="Util\IStopEvent.cs" />
+    <Compile Include="Util\TaskScope.cs" />
+    <Compile Include="Util\TaskSupervisorExtensions.cs" />
     <Compile Include="Util\TaskUtil.cs" />
     <Compile Include="Util\TypeMetadataCache.cs" />
     <Compile Include="Util\UriExtensions.cs" />
@@ -959,6 +1130,7 @@
     <Compile Include="Serialization\BinaryMessageSerializer.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="MassTransit.snk" />
     <None Include="packages.config">
       <SubType>Designer</SubType>
     </None>

@@ -27,6 +27,11 @@ namespace MassTransit.AzureServiceBusTransport.Contexts
         Task<MessagingFactory> MessagingFactory { get; }
 
         /// <summary>
+        /// The messaging factory initialized for the service bus
+        /// </summary>
+        Task<MessagingFactory> SessionMessagingFactory { get; }
+
+        /// <summary>
         /// The namespace manager for the service bus
         /// </summary>
         Task<NamespaceManager> NamespaceManager { get; }
@@ -49,5 +54,12 @@ namespace MassTransit.AzureServiceBusTransport.Contexts
         /// <param name="queueDescription"></param>
         /// <returns></returns>
         string GetQueuePath(QueueDescription queueDescription);
+
+        /// <summary>
+        /// Returns the Topic address for the message type being published
+        /// </summary>
+        /// <param name="messageType"></param>
+        /// <returns></returns>
+        Uri GetTopicAddress(Type messageType);
     }
 }

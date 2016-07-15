@@ -13,8 +13,6 @@
 namespace MassTransit.Tests
 {
     using System.Threading.Tasks;
-    using EndpointConfigurators;
-    using NUnit.Framework;
     using NUnit.Framework;
     using Shouldly;
     using TestFramework;
@@ -43,7 +41,7 @@ namespace MassTransit.Tests
         Task<ConsumeContext<SecureCommand<ExecuteSql>>> _secureCommandHandler;
         Task<ConsumeContext<ExecuteSql>> _commandHandler;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void Setup()
         {
             InputQueueSendEndpoint.Send(new ExecuteSqlCommand
@@ -52,7 +50,7 @@ namespace MassTransit.Tests
             }).Wait(TestCancellationToken);
         }
 
-        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             _secureCommandHandler = Handled<SecureCommand<ExecuteSql>>(configurator);
 

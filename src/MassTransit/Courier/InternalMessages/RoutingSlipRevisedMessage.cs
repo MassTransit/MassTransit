@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -21,9 +21,12 @@ namespace MassTransit.Courier.InternalMessages
     class RoutingSlipRevisedMessage :
         RoutingSlipRevised
     {
-        public RoutingSlipRevisedMessage(Guid trackingNumber, Guid executionId, DateTime timestamp, TimeSpan duration, IDictionary<string, object> variables,
+        public RoutingSlipRevisedMessage(HostInfo host, Guid trackingNumber, string activityName, Guid executionId, DateTime timestamp, TimeSpan duration,
+            IDictionary<string, object> variables,
             IEnumerable<Activity> itinerary, IEnumerable<Activity> discardedItinerary)
         {
+            Host = host;
+            ActivityName = activityName;
             TrackingNumber = trackingNumber;
             Timestamp = timestamp;
             Duration = duration;
@@ -33,18 +36,18 @@ namespace MassTransit.Courier.InternalMessages
             DiscardedItinerary = discardedItinerary.ToArray();
         }
 
-        public Guid TrackingNumber { get; set; }
+        public Guid TrackingNumber { get; private set; }
+        public DateTime Timestamp { get; private set; }
+        public TimeSpan Duration { get; private set; }
 
-        public DateTime Timestamp { get; set; }
+        public string ActivityName { get; private set; }
+        public Guid ExecutionId { get; private set; }
+        public HostInfo Host { get; private set; }
 
-        public TimeSpan Duration { get; set; }
+        public IDictionary<string, object> Variables { get; private set; }
 
-        public Guid ExecutionId { get; set; }
+        public Activity[] Itinerary { get; private set; }
 
-        public IDictionary<string, object> Variables { get; set; }
-
-        public Activity[] Itinerary { get; set; }
-
-        public Activity[] DiscardedItinerary { get; set; }
+        public Activity[] DiscardedItinerary { get; private set; }
     }
 }

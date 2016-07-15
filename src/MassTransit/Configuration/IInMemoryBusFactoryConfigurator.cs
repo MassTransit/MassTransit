@@ -12,8 +12,10 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
+    using System;
     using System.ComponentModel;
     using Builders;
+    using Transports;
 
 
     public interface IInMemoryBusFactoryConfigurator :
@@ -34,9 +36,16 @@ namespace MassTransit
         /// <param name="transportProvider"></param>
         [EditorBrowsable(EditorBrowsableState.Advanced)]
         void SetTransportProvider<T>(T transportProvider)
-            where T : ISendTransportProvider, IReceiveTransportProvider;
+            where T : ISendTransportProvider, IReceiveTransportProvider, IBusHostControl;
 
         [EditorBrowsable(EditorBrowsableState.Never)]
         void AddBusFactorySpecification(IInMemoryBusFactorySpecification configurator);
+
+        /// <summary>
+        /// Specify a receive endpoint for the bus, with the specified queue name
+        /// </summary>
+        /// <param name="queueName">The queue name for the receiving endpoint</param>
+        /// <param name="configureEndpoint">The configuration callback</param>
+        void ReceiveEndpoint(string queueName, Action<IInMemoryReceiveEndpointConfigurator> configureEndpoint);
     }
 }

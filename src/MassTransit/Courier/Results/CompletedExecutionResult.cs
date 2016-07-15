@@ -68,26 +68,26 @@ namespace MassTransit.Courier.Results
 
             RoutingSlip routingSlip = builder.Build();
 
-            await PublishActivityEvents(routingSlip, builder);
+            await PublishActivityEvents(routingSlip, builder).ConfigureAwait(false);
 
             if (HasNextActivity(routingSlip))
             {
-                ISendEndpoint endpoint = await _context.GetSendEndpoint(routingSlip.GetNextExecuteAddress());
+                ISendEndpoint endpoint = await _context.GetSendEndpoint(routingSlip.GetNextExecuteAddress()).ConfigureAwait(false);
 
-                await _context.ConsumeContext.Forward(endpoint, routingSlip);
+                await _context.ConsumeContext.Forward(endpoint, routingSlip).ConfigureAwait(false);
             }
             else
             {
                 DateTime completedTimestamp = _context.Timestamp + _duration;
                 TimeSpan completedDuration = completedTimestamp - _routingSlip.CreateTimestamp;
 
-                await _publisher.PublishRoutingSlipCompleted(completedTimestamp, completedDuration, routingSlip.Variables);
+                await _publisher.PublishRoutingSlipCompleted(completedTimestamp, completedDuration, routingSlip.Variables).ConfigureAwait(false);
             }
         }
 
-        protected virtual async Task PublishActivityEvents(RoutingSlip routingSlip, RoutingSlipBuilder builder)
+        protected virtual Task PublishActivityEvents(RoutingSlip routingSlip, RoutingSlipBuilder builder)
         {
-            await Publisher.PublishRoutingSlipActivityCompleted(Context.ActivityName, Context.ExecutionId, Context.Timestamp, _duration,
+            return Publisher.PublishRoutingSlipActivityCompleted(Context.ActivityName, Context.ExecutionId, Context.Timestamp, _duration,
                 routingSlip.Variables, _activity.Arguments, _data);
         }
 

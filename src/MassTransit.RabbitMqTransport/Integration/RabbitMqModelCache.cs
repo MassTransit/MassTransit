@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,14 +13,14 @@
 namespace MassTransit.RabbitMqTransport.Integration
 {
     using System;
-    using System.Collections.Concurrent;
-    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using Contexts;
     using Logging;
     using MassTransit.Pipeline;
     using RabbitMQ.Client;
+    using RabbitMQ.Client.Exceptions;
+    using Util;
 
 
     /// <summary>
@@ -31,14 +31,19 @@ namespace MassTransit.RabbitMqTransport.Integration
         IModelCache
     {
         static readonly ILog _log = Logger.Get<RabbitMqModelCache>();
+        readonly ITaskScope _cacheTaskScope;
 
         readonly IConnectionCache _connectionCache;
+        readonly ModelSettings _modelSettings;
         readonly object _scopeLock = new object();
         ModelScope _scope;
 
-        public RabbitMqModelCache(IConnectionCache connectionCache)
+        public RabbitMqModelCache(IConnectionCache connectionCache, ITaskSupervisor supervisor, ModelSettings modelSettings)
         {
             _connectionCache = connectionCache;
+            _modelSettings = modelSettings;
+
+            _cacheTaskScope = supervisor.CreateScope($"{TypeMetadataCache<RabbitMqModelCache>.ShortName}", CloseScope);
         }
 
         public Task Send(IPipe<ModelContext> connectionPipe, CancellationToken cancellationToken)
@@ -51,7 +56,7 @@ namespace MassTransit.RabbitMqTransport.Integration
                 existingScope = _scope;
                 if (existingScope == null)
                 {
-                    newScope = new ModelScope();
+                    newScope = new ModelScope(_cacheTaskScope);
                     _scope = newScope;
                 }
             }
@@ -61,60 +66,94 @@ namespace MassTransit.RabbitMqTransport.Integration
             return SendUsingNewModel(connectionPipe, newScope, cancellationToken);
         }
 
+        public async Task Close()
+        {
+            Interlocked.Exchange(ref _scope, null);
+
+            _cacheTaskScope.Stop(new StopEventArgs("Closed by owner"));
+        }
+
+        Task CloseScope()
+        {
+            return TaskUtil.Completed;
+        }
+
         async Task SendUsingNewModel(IPipe<ModelContext> modelPipe, ModelScope scope, CancellationToken cancellationToken)
         {
             IPipe<ConnectionContext> connectionPipe = Pipe.ExecuteAsync<ConnectionContext>(async connectionContext =>
             {
-                IModel model = await connectionContext.CreateModel().ConfigureAwait(false);
-
-                EventHandler<ShutdownEventArgs> modelShutdown = null;
-                modelShutdown = (obj, reason) =>
-                {
-                    model.ModelShutdown -= modelShutdown;
-
-                    Interlocked.CompareExchange(ref _scope, null, scope);
-
-                    scope.Close();
-                };
-
-                model.ModelShutdown += modelShutdown;
-
-                var modelContext = new RabbitMqModelContext(connectionContext, model, connectionContext.CancellationToken);
-
-                scope.Connected(modelContext);
-
                 try
                 {
-                    using (SharedModelContext context = await scope.Attach(cancellationToken).ConfigureAwait(false))
+                    if (_log.IsDebugEnabled)
+                        _log.DebugFormat("Creating model: {0}", connectionContext.HostSettings.ToDebugString());
+
+                    var model = await connectionContext.CreateModel().ConfigureAwait(false);
+
+                    EventHandler<ShutdownEventArgs> modelShutdown = null;
+                    modelShutdown = (obj, reason) =>
                     {
-                        await modelPipe.Send(context).ConfigureAwait(false);
-                    }
+                        model.ModelShutdown -= modelShutdown;
+
+                        Interlocked.CompareExchange(ref _scope, null, scope);
+
+                        scope.Shutdown(reason.ReplyText);
+                    };
+
+                    model.ModelShutdown += modelShutdown;
+
+                    var modelContext = new RabbitMqModelContext(connectionContext, model, _cacheTaskScope, _modelSettings);
+
+                    scope.Created(modelContext);
                 }
                 catch (Exception ex)
                 {
-                    if (_log.IsDebugEnabled)
-                        _log.Debug("The existing model usage threw an exception", ex);
+                    Interlocked.CompareExchange(ref _scope, null, scope);
+
+                    scope.CreateFaulted(ex);
 
                     throw;
                 }
+
+                await SendUsingExistingModel(modelPipe, scope, cancellationToken).ConfigureAwait(false);
             });
 
-            await _connectionCache.Send(connectionPipe, new CancellationToken()).ConfigureAwait(false);
+            try
+            {
+                await _connectionCache.Send(connectionPipe, _cacheTaskScope.StoppedToken).ConfigureAwait(false);
+            }
+            catch (Exception exception)
+            {
+                if (_log.IsDebugEnabled)
+                    _log.Debug("The connection threw an exception", exception);
+
+                Interlocked.CompareExchange(ref _scope, null, scope);
+
+                scope.CreateFaulted(exception);
+
+                throw;
+            }
         }
 
-        static async Task SendUsingExistingModel(IPipe<ModelContext> modelPipe, ModelScope existingScope, CancellationToken cancellationToken)
+        async Task SendUsingExistingModel(IPipe<ModelContext> modelPipe, ModelScope scope, CancellationToken cancellationToken)
         {
             try
             {
-                using (SharedModelContext context = await existingScope.Attach(cancellationToken).ConfigureAwait(false))
+                using (var context = await scope.Attach(cancellationToken).ConfigureAwait(false))
                 {
+//                    if (_log.IsDebugEnabled)
+//                        _log.DebugFormat("Using model: {0}", ((ModelContext)context).ConnectionContext.HostSettings.ToDebugString());
+
                     await modelPipe.Send(context).ConfigureAwait(false);
                 }
             }
-            catch (Exception ex)
+            catch (Exception exception)
             {
                 if (_log.IsDebugEnabled)
-                    _log.Debug("The existing model usage threw an exception", ex);
+                    _log.Debug("The model usage threw an exception", exception);
+
+                Interlocked.CompareExchange(ref _scope, null, scope);
+
+                scope.CreateFaulted(exception);
 
                 throw;
             }
@@ -124,56 +163,62 @@ namespace MassTransit.RabbitMqTransport.Integration
         class ModelScope
         {
             readonly TaskCompletionSource<RabbitMqModelContext> _modelContext;
-            readonly ConcurrentDictionary<long, SharedModelContext> _models;
-            long _nextId;
+            readonly ITaskScope _taskScope;
 
-            public ModelScope()
+            public ModelScope(ITaskScope supervisor)
             {
-                _models = new ConcurrentDictionary<long, SharedModelContext>();
                 _modelContext = new TaskCompletionSource<RabbitMqModelContext>();
+
+                _taskScope = supervisor.CreateScope("ModelScope", CloseContext);
             }
 
-            /// <summary>
-            /// Connect a connectable type
-            /// </summary>
-            /// <param name="cancellationToken"></param>
-            /// <returns>The connection handle</returns>
-            public async Task<SharedModelContext> Attach(CancellationToken cancellationToken)
-            {
-                long id = Interlocked.Increment(ref _nextId);
-
-                var context = new SharedModelContext(await _modelContext.Task.ConfigureAwait(false), id, Disconnect, cancellationToken);
-
-                bool added = _models.TryAdd(id, context);
-                if (!added)
-                    throw new InvalidOperationException("The connection could not be added");
-
-                return context;
-            }
-
-            void Disconnect(long id)
-            {
-                SharedModelContext ignored;
-                _models.TryRemove(id, out ignored);
-            }
-
-            public void Connected(RabbitMqModelContext connectionContext)
+            public void Created(RabbitMqModelContext connectionContext)
             {
                 _modelContext.TrySetResult(connectionContext);
+
+                _taskScope.SetReady();
             }
 
-            public async void Close()
+            public void CreateFaulted(Exception exception)
             {
-                try
-                {
-                    await Task.WhenAll(_models.Values.Select(x => x.Completed)).ConfigureAwait(false);
-                }
-                catch (Exception ex)
-                {
-                    _log.Error("Close faulted waiting for attached models", ex);
-                }
+                _modelContext.TrySetException(exception);
 
-                (await _modelContext.Task.ConfigureAwait(false)).Dispose();
+                _taskScope.SetNotReady(exception);
+
+                _taskScope.Stop(new StopEventArgs($"Model faulted: {exception.Message}"));
+            }
+
+            public async Task<SharedModelContext> Attach(CancellationToken cancellationToken)
+            {
+                var modelContext = await _modelContext.Task.ConfigureAwait(false);
+
+                return new SharedModelContext(modelContext, cancellationToken, _taskScope);
+            }
+
+            public void Shutdown(string reason)
+            {
+                _taskScope.Stop(new StopEventArgs(reason));
+            }
+
+            async Task CloseContext()
+            {
+                if (_modelContext.Task.Status == TaskStatus.RanToCompletion)
+                {
+                    try
+                    {
+                        var modelContext = await _modelContext.Task.ConfigureAwait(false);
+
+                        if (_log.IsDebugEnabled)
+                            _log.DebugFormat("Disposing model: {0}", ((ModelContext)modelContext).ConnectionContext.HostSettings.ToDebugString());
+
+                        modelContext.Dispose();
+                    }
+                    catch (Exception exception)
+                    {
+                        if (_log.IsWarnEnabled)
+                            _log.Warn("The model failed to be disposed", exception);
+                    }
+                }
             }
         }
     }

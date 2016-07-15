@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -20,6 +20,7 @@ namespace MassTransit.RabbitMqTransport
     using System.Net.Mime;
     using System.Threading;
     using System.Threading.Tasks;
+    using Context;
     using Contexts;
     using Integration;
     using Logging;
@@ -57,7 +58,7 @@ namespace MassTransit.RabbitMqTransport
 
                 p.UseExecuteAsync(async modelContext =>
                 {
-                    IBasicProperties properties = modelContext.Model.CreateBasicProperties();
+                    var properties = modelContext.Model.CreateBasicProperties();
 
                     var context = new RabbitMqSendContextImpl<T>(properties, message, _sendSettings, cancelSend);
 
@@ -67,11 +68,21 @@ namespace MassTransit.RabbitMqTransport
 
                         properties.ContentType = context.ContentType.MediaType;
 
-                        properties.Headers = (properties.Headers ?? Enumerable.Empty<KeyValuePair<string, object>>())
-                            .Concat(context.Headers.GetAll())
+                        KeyValuePair<string, object>[] headers = context.Headers.GetAll()
                             .Where(x => x.Value != null && (x.Value is string || x.Value.GetType().IsValueType))
-                            .Distinct()
-                            .ToDictionary(entry => entry.Key, entry => entry.Value);
+                            .ToArray();
+
+                        if (properties.Headers == null)
+                            properties.Headers = new Dictionary<string, object>(headers.Length);
+
+                        foreach (KeyValuePair<string, object> header in headers)
+                        {
+                            if (properties.Headers.ContainsKey(header.Key))
+                                continue;
+
+                            properties.SetHeader(header.Key, header.Value);
+                        }
+
                         properties.Headers["Content-Type"] = context.ContentType.MediaType;
 
                         properties.Persistent = context.Durable;
@@ -88,7 +99,7 @@ namespace MassTransit.RabbitMqTransport
                         await _observers.PreSend(context).ConfigureAwait(false);
 
                         await modelContext.BasicPublishAsync(context.Exchange, context.RoutingKey, context.Mandatory,
-                            context.Immediate, context.BasicProperties, context.Body).ConfigureAwait(false);
+                            context.BasicProperties, context.Body, context.AwaitAck).ConfigureAwait(false);
 
                         context.DestinationAddress.LogSent(context.MessageId?.ToString("N") ?? "", TypeMetadataCache<T>.ShortName);
 
@@ -136,23 +147,18 @@ namespace MassTransit.RabbitMqTransport
 
                         await pipe.Send(moveContext).ConfigureAwait(false);
 
-//                        properties.Headers["Content-Type"] = context.ContentType.MediaType;
-
-//                        if (messageId.HasValue)
-//                            properties.MessageId = messageId.ToString();
-
                         byte[] body;
                         using (var memoryStream = new MemoryStream())
                         {
-                            using (Stream bodyStream = context.GetBody())
+                            using (var bodyStream = context.GetBody())
                             {
-                                bodyStream.CopyTo(memoryStream);
+                                await bodyStream.CopyToAsync(memoryStream).ConfigureAwait(false);
                             }
 
                             body = memoryStream.ToArray();
                         }
 
-                        Task task = modelContext.BasicPublishAsync(_sendSettings.ExchangeName, "", true, false, properties, body);
+                        var task = modelContext.BasicPublishAsync(_sendSettings.ExchangeName, "", true, properties, body, true);
                         context.AddPendingTask(task);
 
                         if (_log.IsDebugEnabled)
@@ -179,6 +185,11 @@ namespace MassTransit.RabbitMqTransport
             return _observers.Connect(observer);
         }
 
+        public Task Close()
+        {
+            return _modelCache.Close();
+        }
+
 
         class RabbitMqMoveContext :
             RabbitMqSendContext
@@ -190,6 +201,7 @@ namespace MassTransit.RabbitMqTransport
             {
                 _context = context;
                 BasicProperties = properties;
+                AwaitAck = true;
                 Headers = new RabbitMqSendHeaders(properties);
                 _serializer = new CopyBodySerializer(context);
             }
@@ -234,11 +246,17 @@ namespace MassTransit.RabbitMqTransport
                 }
             }
 
+            SendContext<T> SendContext.CreateProxy<T>(T message)
+            {
+                return new SendContextProxy<T>(this, message);
+            }
+
             public bool Durable { get; set; }
-            public bool Immediate { get; set; }
             public bool Mandatory { get; set; }
             public string Exchange { get; private set; }
             public string RoutingKey { get; set; }
+            public bool AwaitAck { get; set; }
+
             public IBasicProperties BasicProperties { get; }
 
 
@@ -256,7 +274,7 @@ namespace MassTransit.RabbitMqTransport
 
                 void IMessageSerializer.Serialize<T>(Stream stream, SendContext<T> context)
                 {
-                    using (Stream bodyStream = _context.GetBody())
+                    using (var bodyStream = _context.GetBody())
                     {
                         bodyStream.CopyTo(stream);
                     }

@@ -4,11 +4,11 @@ using System.Reflection;
 [assembly: AssemblyTitleAttribute("MassTransit")]
 [assembly: AssemblyDescriptionAttribute("MassTransit is a distributed application framework for .NET http://masstransit-project.com")]
 [assembly: AssemblyProductAttribute("MassTransit")]
-[assembly: AssemblyVersionAttribute("3.0.0.0")]
-[assembly: AssemblyFileVersionAttribute("3.0.15.0")]
-[assembly: AssemblyInformationalVersionAttribute("3.0.15.0 (inj/9cf75cef)")]
+[assembly: AssemblyVersionAttribute("3.3.1.0")]
+[assembly: AssemblyFileVersionAttribute("3.3.4.0")]
+[assembly: AssemblyInformationalVersionAttribute("3.3.4.0 (develop/db849c5b)")]
 namespace System {
     internal static class AssemblyVersionInformation {
-        internal const string Version = "3.0.0.0";
+        internal const string Version = "3.3.1.0";
     }
 }

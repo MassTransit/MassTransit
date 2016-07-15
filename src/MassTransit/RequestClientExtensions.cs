@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -25,12 +25,15 @@ namespace MassTransit
         /// <param name="bus">The bus on which the client is created</param>
         /// <param name="address">The service address that handles the request</param>
         /// <param name="timeout">The timeout before the request is cancelled</param>
+        /// <param name="ttl">THe time to live for the request message</param>
+        /// <param name="callback">Callback when the request is sent</param>
         /// <returns></returns>
-        public static IRequestClient<TRequest, TResponse> CreateRequestClient<TRequest, TResponse>(this IBus bus, Uri address, TimeSpan timeout)
+        public static IRequestClient<TRequest, TResponse> CreateRequestClient<TRequest, TResponse>(this IBus bus, Uri address, TimeSpan timeout,
+            TimeSpan? ttl = default(TimeSpan?), Action<SendContext<TRequest>> callback = null)
             where TRequest : class
             where TResponse : class
         {
-            return new MessageRequestClient<TRequest, TResponse>(bus, address, timeout);
+            return new MessageRequestClient<TRequest, TResponse>(bus, address, timeout, ttl, callback);
         }
 
         /// <summary>
@@ -40,12 +43,15 @@ namespace MassTransit
         /// <typeparam name="TResponse">The response type</typeparam>
         /// <param name="bus">The bus on which the client is created</param>
         /// <param name="timeout">The timeout before the request is cancelled</param>
+        /// <param name="callback">Callback when the request is sent</param>
+        /// <param name="ttl">The time that the request will live for</param>
         /// <returns></returns>
-        public static IRequestClient<TRequest, TResponse> CreatePublistRequestClient<TRequest, TResponse>(this IBus bus, TimeSpan timeout)
+        public static IRequestClient<TRequest, TResponse> CreatePublishRequestClient<TRequest, TResponse>(this IBus bus, TimeSpan timeout,
+            TimeSpan? ttl = default(TimeSpan?), Action<SendContext<TRequest>> callback = null)
             where TRequest : class
             where TResponse : class
         {
-            return new PublishRequestClient<TRequest, TResponse>(bus, timeout);
+            return new PublishRequestClient<TRequest, TResponse>(bus, timeout, ttl, callback);
         }
     }
 }

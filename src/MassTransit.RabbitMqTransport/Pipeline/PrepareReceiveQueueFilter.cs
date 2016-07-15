@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,29 +12,39 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RabbitMqTransport.Pipeline
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
+    using Contracts;
     using Logging;
+    using Management;
     using MassTransit.Pipeline;
+    using MassTransit.Pipeline.Pipes;
     using RabbitMQ.Client;
     using Topology;
+    using Util;
 
 
     /// <summary>
     /// Prepares a queue for receiving messages using the ReceiveSettings specified.
     /// </summary>
     public class PrepareReceiveQueueFilter :
-        IFilter<ModelContext>
+        IFilter<ModelContext>,
+        ISetPrefetchCount
     {
         static readonly ILog _log = Logger.Get<PrepareReceiveQueueFilter>();
         readonly ExchangeBindingSettings[] _exchangeBindings;
+        readonly IManagementPipe _managementPipe;
         readonly ReceiveSettings _settings;
+        ushort _prefetchCount;
         bool _queueAlreadyPurged;
 
-        public PrepareReceiveQueueFilter(ReceiveSettings settings, params ExchangeBindingSettings[] exchangeBindings)
+        public PrepareReceiveQueueFilter(ReceiveSettings settings, IManagementPipe managementPipe, params ExchangeBindingSettings[] exchangeBindings)
         {
             _settings = settings;
+            _prefetchCount = settings.PrefetchCount;
+            _managementPipe = managementPipe;
             _exchangeBindings = exchangeBindings;
         }
 
@@ -44,12 +54,12 @@ namespace MassTransit.RabbitMqTransport.Pipeline
 
         async Task IFilter<ModelContext>.Send(ModelContext context, IPipe<ModelContext> next)
         {
-            await context.BasicQos(0, _settings.PrefetchCount, false).ConfigureAwait(false);
+            await context.BasicQos(0, _prefetchCount, true).ConfigureAwait(false);
 
-            QueueDeclareOk queueOk = await context.QueueDeclare(_settings.QueueName, _settings.Durable, _settings.Exclusive,
+            var queueOk = await context.QueueDeclare(_settings.QueueName, _settings.Durable, _settings.Exclusive,
                 _settings.AutoDelete, _settings.QueueArguments).ConfigureAwait(false);
 
-            string queueName = queueOk.QueueName;
+            var queueName = queueOk.QueueName;
 
             if (_log.IsDebugEnabled)
             {
@@ -65,9 +75,9 @@ namespace MassTransit.RabbitMqTransport.Pipeline
             if (_settings.PurgeOnStartup)
                 await PurgeIfRequested(context, queueOk, queueName).ConfigureAwait(false);
 
-            string exchangeName = _settings.ExchangeName ?? queueName;
+            var exchangeName = _settings.ExchangeName ?? queueName;
 
-            if (!string.IsNullOrWhiteSpace(_settings.ExchangeName) || string.IsNullOrWhiteSpace(_settings.QueueName))
+            if (!string.IsNullOrWhiteSpace(exchangeName))
             {
                 await context.ExchangeDeclare(exchangeName, _settings.ExchangeType, _settings.Durable, _settings.AutoDelete,
                     _settings.ExchangeArguments).ConfigureAwait(false);
@@ -85,14 +95,24 @@ namespace MassTransit.RabbitMqTransport.Pipeline
 
             context.GetOrAddPayload(() => settings);
 
-            await next.Send(context).ConfigureAwait(false);
+            using (new SetModelPrefetchCountConsumer(_managementPipe, context, this))
+            {
+                await next.Send(context).ConfigureAwait(false);
+            }
+        }
+
+        public Task SetPrefetchCount(ushort prefetchCount)
+        {
+            _prefetchCount = prefetchCount;
+
+            return TaskUtil.Completed;
         }
 
         Task ApplyExchangeBindings(ModelContext context, string exchangeName)
         {
             return Task.WhenAll(_exchangeBindings.Select(async binding =>
             {
-                ExchangeSettings exchange = binding.Exchange;
+                var exchange = binding.Exchange;
 
                 await context.ExchangeDeclare(exchange.ExchangeName, exchange.ExchangeType, exchange.Durable, exchange.AutoDelete,
                     exchange.Arguments).ConfigureAwait(false);
@@ -119,6 +139,38 @@ namespace MassTransit.RabbitMqTransport.Pipeline
             {
                 if (_log.IsDebugEnabled)
                     _log.DebugFormat("Queue {0} already purged at startup, skipping", queueName);
+            }
+        }
+
+
+        class SetModelPrefetchCountConsumer :
+            IConsumer<SetPrefetchCount>,
+            IDisposable
+        {
+            readonly ISetPrefetchCount _filter;
+            readonly ConnectHandle _handle;
+            readonly ModelContext _modelContext;
+
+            public SetModelPrefetchCountConsumer(IManagementPipe managementPipe, ModelContext modelContext, ISetPrefetchCount filter)
+            {
+                _modelContext = modelContext;
+                _filter = filter;
+
+                _handle = managementPipe.ConnectInstance(this);
+            }
+
+            async Task IConsumer<SetPrefetchCount>.Consume(ConsumeContext<SetPrefetchCount> context)
+            {
+                var prefetchCount = context.Message.PrefetchCount;
+
+                await _modelContext.BasicQos(0, prefetchCount, true).ConfigureAwait(false);
+
+                await _filter.SetPrefetchCount(prefetchCount).ConfigureAwait(false);
+            }
+
+            public void Dispose()
+            {
+                _handle.Dispose();
             }
         }
     }

@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,6 +14,8 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
 {
     using System;
     using Microsoft.ServiceBus;
+    using Microsoft.ServiceBus.Messaging;
+    using Microsoft.ServiceBus.Messaging.Amqp;
 
 
     public class AzureServiceBusHostConfigurator :
@@ -38,6 +40,35 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
             set { _settings.OperationTimeout = value; }
         }
 
+        public TransportType TransportType
+        {
+            set { _settings.TransportType = value; }
+        }
+
+        public TimeSpan RetryMinBackoff
+        {
+            set { _settings.RetryMinBackoff = value; }
+        }
+
+        public TimeSpan RetryMaxBackoff
+        {
+            set { _settings.RetryMaxBackoff = value; }
+        }
+
+        public int RetryLimit
+        {
+            set { _settings.RetryLimit = value; }
+        }
+
+        public TimeSpan BatchFlushInterval
+        {
+            set
+            {
+                _settings.AmqpTransportSettings.BatchFlushInterval = value;
+                _settings.NetMessagingTransportSettings.BatchFlushInterval = value;
+            }
+        }
+
 
         class HostSettings :
             ServiceBusHostSettings
@@ -45,12 +76,25 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
             public HostSettings(Uri serviceUri)
             {
                 ServiceUri = serviceUri;
-                OperationTimeout = TimeSpan.FromSeconds(30);
+                OperationTimeout = TimeSpan.FromSeconds(60);
+
+                RetryMinBackoff = TimeSpan.FromMilliseconds(100);
+                RetryMaxBackoff = TimeSpan.FromSeconds(20);
+                RetryLimit = 10;
+                TransportType = TransportType.Amqp;
+                AmqpTransportSettings = new AmqpTransportSettings();
+                NetMessagingTransportSettings = new NetMessagingTransportSettings();
             }
 
             public Uri ServiceUri { get; private set; }
             public TokenProvider TokenProvider { get; set; }
             public TimeSpan OperationTimeout { get; set; }
+            public TimeSpan RetryMinBackoff { get; set; }
+            public TimeSpan RetryMaxBackoff { get; set; }
+            public int RetryLimit { get; set; }
+            public TransportType TransportType { get; set; }
+            public AmqpTransportSettings AmqpTransportSettings { get; set; }
+            public NetMessagingTransportSettings NetMessagingTransportSettings { get; set; }
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -32,25 +32,25 @@ namespace MassTransit.AzureServiceBusTransport
         readonly MessageReceiver _messageReceiver;
         readonly ITaskParticipant _participant;
         readonly IReceiveObserver _receiveObserver;
-        readonly ITaskSupervisor _supervisor;
         readonly IPipe<ReceiveContext> _receivePipe;
         readonly ReceiveSettings _receiveSettings;
         int _currentPendingDeliveryCount;
         long _deliveryCount;
         int _maxPendingDeliveryCount;
         bool _shuttingDown;
+        readonly ConnectionContext _context;
 
-        public Receiver(MessageReceiver messageReceiver, Uri inputAddress, IPipe<ReceiveContext> receivePipe, ReceiveSettings receiveSettings,
+        public Receiver(ConnectionContext context, MessageReceiver messageReceiver, Uri inputAddress, IPipe<ReceiveContext> receivePipe, ReceiveSettings receiveSettings,
             IReceiveObserver receiveObserver, ITaskSupervisor supervisor)
         {
+            _context = context;
             _messageReceiver = messageReceiver;
             _inputAddress = inputAddress;
             _receivePipe = receivePipe;
             _receiveSettings = receiveSettings;
             _receiveObserver = receiveObserver;
-            _supervisor = supervisor;
 
-            _participant = supervisor.CreateParticipant();
+            _participant = supervisor.CreateParticipant($"{TypeMetadataCache<Receiver>.ShortName} - {inputAddress}", Stop);
 
             var options = new OnMessageOptions
             {
@@ -61,29 +61,32 @@ namespace MassTransit.AzureServiceBusTransport
 
             options.ExceptionReceived += (sender, x) =>
             {
-                if (_log.IsErrorEnabled)
-                    _log.Error($"Exception received on receiver: {_inputAddress} during {x.Action}", x.Exception);
+                if (!(x.Exception is OperationCanceledException))
+                {
+                    if (_log.IsErrorEnabled)
+                        _log.Error($"Exception received on receiver: {_inputAddress} during {x.Action}", x.Exception);
+                }
 
-                _participant.SetComplete();
+                if (_currentPendingDeliveryCount == 0)
+                {
+                    if (_log.IsDebugEnabled)
+                        _log.DebugFormat("Receiver shutdown completed: {0}", _inputAddress);
+
+                    _participant.SetComplete();
+                }
             };
 
             messageReceiver.OnMessageAsync(OnMessage, options);
 
             _participant.SetReady();
-
-            SetupStopTask();
         }
 
         public long DeliveryCount => _deliveryCount;
 
         public int ConcurrentDeliveryCount => _maxPendingDeliveryCount;
 
-        async void SetupStopTask()
+        async Task Stop()
         {
-            await Task.Yield();
-
-            await _participant.StopRequested;
-
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Shutting down receiver: {0}", _inputAddress);
 
@@ -95,8 +98,7 @@ namespace MassTransit.AzureServiceBusTransport
                 {
                     using (var cancellation = new CancellationTokenSource(_receiveSettings.QueueDescription.LockDuration))
                     {
-                        await _supervisor.Completed
-                            .WithCancellation(cancellation.Token).ConfigureAwait(false);
+                        await _participant.ParticipantCompleted.WithCancellation(cancellation.Token).ConfigureAwait(false);
                     }
                 }
                 catch (TaskCanceledException)
@@ -108,11 +110,7 @@ namespace MassTransit.AzureServiceBusTransport
 
             try
             {
-                await _messageReceiver.CloseAsync();
-            }
-            catch (Exception)
-            {
-                _participant.SetComplete();
+                await _messageReceiver.CloseAsync().ConfigureAwait(false);
             }
             finally
             {
@@ -130,7 +128,7 @@ namespace MassTransit.AzureServiceBusTransport
         {
             if (_shuttingDown)
             {
-                await WaitAndAbandonMessage(message);
+                await WaitAndAbandonMessage(message).ConfigureAwait(false);
                 return;
             }
 
@@ -144,6 +142,7 @@ namespace MassTransit.AzureServiceBusTransport
                 _log.DebugFormat("Receiving {0}:{1} - {2}", deliveryCount, message.MessageId, _receiveSettings.QueueDescription.Path);
 
             var context = new ServiceBusReceiveContext(_inputAddress, message, _receiveObserver);
+            context.GetOrAddPayload(() => _context);
 
             try
             {
@@ -185,7 +184,7 @@ namespace MassTransit.AzureServiceBusTransport
         {
             try
             {
-                await _supervisor.Completed.ConfigureAwait(false);
+                await _participant.ParticipantCompleted.ConfigureAwait(false);
 
                 await message.AbandonAsync().ConfigureAwait(false);
             }

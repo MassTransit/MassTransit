@@ -24,7 +24,7 @@ namespace MassTransit.Tests.Steward
         InMemoryDispatchTestFixture
     {
         [Test]
-        public async void Should_execute()
+        public async Task Should_execute()
         {
             Task<ConsumeContext<MagicMade>> received = SubscribeHandler<MagicMade>();
 
@@ -41,7 +41,7 @@ namespace MassTransit.Tests.Steward
 
         Task<ConsumeContext<DispatchAccepted>> _accepted;
 
-        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             _accepted = Handled<DispatchAccepted>(configurator);
         }
@@ -80,9 +80,9 @@ namespace MassTransit.Tests.Steward
     class MagicMakingConsumer :
         IConsumer<MakeMagicHappen>
     {
-        public async Task Consume(ConsumeContext<MakeMagicHappen> context)
+        public Task Consume(ConsumeContext<MakeMagicHappen> context)
         {
-            context.Publish(new MagicMade());
+            return context.Publish(new MagicMade());
         }
     }
 }

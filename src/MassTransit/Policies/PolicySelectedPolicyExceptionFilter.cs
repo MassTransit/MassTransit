@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -29,18 +29,23 @@ namespace MassTransit.Policies
 
         void IProbeSite.Probe(ProbeContext context)
         {
-            ProbeContext scope = context.CreateScope("selected");
+            var scope = context.CreateScope("selected");
             scope.Set(new
             {
-                ExceptionTypes = _exceptionTypes.Select(TypeMetadataCache.GetShortName).ToArray(),
+                ExceptionTypes = _exceptionTypes.Select(TypeMetadataCache.GetShortName).ToArray()
             });
         }
 
         public bool Match(Exception exception)
         {
-            for (int i = 0; i < _exceptionTypes.Length; i++)
+            var baseException = exception.GetBaseException();
+
+            for (var i = 0; i < _exceptionTypes.Length; i++)
             {
                 if (_exceptionTypes[i].IsInstanceOfType(exception))
+                    return true;
+
+                if (_exceptionTypes[i].IsInstanceOfType(baseException))
                     return true;
             }
 

@@ -46,7 +46,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
                 Assert.IsTrue(saga.HasValue);
 
                 TestState sagaInstance = _repository[saga.Value].Instance;
-                Assert.IsTrue(sagaInstance.ValidateAddressRequestId.HasValue);
+                Assert.IsFalse(sagaInstance.ValidateAddressRequestId.HasValue);
             }
 
             InMemorySagaRepository<TestState> _repository;
@@ -83,7 +83,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
                 configurator.ReceiveEndpoint("service_queue", ConfigureServiceQueueEndpoint);
             }
 
-            protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+            protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
             {
                 base.ConfigureInputQueueEndpoint(configurator);
 

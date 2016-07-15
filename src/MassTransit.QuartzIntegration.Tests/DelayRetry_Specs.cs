@@ -26,7 +26,7 @@ namespace MassTransit.QuartzIntegration.Tests
         QuartzInMemoryTestFixture
     {
         [Test]
-        public async void Should_properly_defer_the_message_delivery()
+        public async Task Should_properly_defer_the_message_delivery()
         {
             await InputQueueSendEndpoint.Send(new PingMessage());
 
@@ -47,7 +47,7 @@ namespace MassTransit.QuartzIntegration.Tests
             configurator.UseMessageScheduler(QuartzAddress);
         }
 
-        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             _count = 0;
 
@@ -80,7 +80,7 @@ namespace MassTransit.QuartzIntegration.Tests
         QuartzInMemoryTestFixture
     {
         [Test]
-        public async void Should_properly_defer_the_message_delivery()
+        public async Task Should_properly_defer_the_message_delivery()
         {
             await InputQueueSendEndpoint.Send(new PingMessage());
 
@@ -101,7 +101,7 @@ namespace MassTransit.QuartzIntegration.Tests
             configurator.UseMessageScheduler(QuartzAddress);
         }
 
-        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             _count = 0;
 

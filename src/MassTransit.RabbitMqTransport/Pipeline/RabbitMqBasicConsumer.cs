@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -17,6 +17,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
     using System.Threading;
     using System.Threading.Tasks;
     using Contexts;
+    using Internals.Extensions;
     using Logging;
     using MassTransit.Pipeline;
     using RabbitMQ.Client;
@@ -34,6 +35,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
         readonly Uri _inputAddress;
         readonly ILog _log = Logger.Get<RabbitMqBasicConsumer>();
         readonly ModelContext _model;
+        readonly ITaskParticipant _participant;
         readonly ConcurrentDictionary<ulong, RabbitMqReceiveContext> _pending;
         readonly IReceiveObserver _receiveObserver;
         readonly IPipe<ReceiveContext> _receivePipe;
@@ -42,7 +44,8 @@ namespace MassTransit.RabbitMqTransport.Pipeline
         int _currentPendingDeliveryCount;
         long _deliveryCount;
         int _maxPendingDeliveryCount;
-        readonly ITaskParticipant _participant;
+        bool _shuttingDown;
+        readonly TaskCompletionSource<bool> _deliveryComplete;
 
         /// <summary>
         /// The basic consumer receives messages pushed from the broker.
@@ -53,7 +56,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
         /// <param name="receiveObserver">The observer for receive events</param>
         /// <param name="taskSupervisor">The token used to cancel/stop the consumer at shutdown</param>
         public RabbitMqBasicConsumer(ModelContext model, Uri inputAddress, IPipe<ReceiveContext> receivePipe, IReceiveObserver receiveObserver,
-            ITaskSupervisor taskSupervisor)
+            ITaskScope taskSupervisor)
         {
             _model = model;
             _inputAddress = inputAddress;
@@ -64,7 +67,8 @@ namespace MassTransit.RabbitMqTransport.Pipeline
 
             _pending = new ConcurrentDictionary<ulong, RabbitMqReceiveContext>();
 
-            _participant = taskSupervisor.CreateParticipant();
+            _participant = taskSupervisor.CreateParticipant($"{TypeMetadataCache<RabbitMqBasicConsumer>.ShortName} - {inputAddress}", Stop);
+            _deliveryComplete = new TaskCompletionSource<bool>();
         }
 
         /// <summary>
@@ -79,17 +83,6 @@ namespace MassTransit.RabbitMqTransport.Pipeline
             _consumerTag = consumerTag;
 
             _participant.SetReady();
-
-            SetupStopTask();
-        }
-
-        async void SetupStopTask()
-        {
-            await Task.Yield();
-
-            await _participant.StopRequested.ConfigureAwait(false);
-
-            await _model.BasicCancel(_consumerTag).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -102,6 +95,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Consumer Cancel Ok: {0} - {1}", _inputAddress, consumerTag);
 
+            _deliveryComplete.TrySetResult(true);
             _participant.SetComplete();
         }
 
@@ -115,11 +109,12 @@ namespace MassTransit.RabbitMqTransport.Pipeline
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Consumer Cancelled: {0}", consumerTag);
 
-            foreach (var context in _pending.Values)
+            foreach (RabbitMqReceiveContext context in _pending.Values)
                 context.Cancel();
 
             ConsumerCancelled?.Invoke(this, new ConsumerEventArgs(consumerTag));
 
+            _deliveryComplete.TrySetResult(true);
             _participant.SetComplete();
         }
 
@@ -131,6 +126,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
                     reason.ReplyText);
             }
 
+            _deliveryComplete.TrySetResult(false);
             _participant.SetComplete();
         }
 
@@ -138,19 +134,24 @@ namespace MassTransit.RabbitMqTransport.Pipeline
             string routingKey,
             IBasicProperties properties, byte[] body)
         {
+            if (_shuttingDown)
+            {
+                await WaitAndAbandonMessage(deliveryTag).ConfigureAwait(false);
+                return;
+            }
+
             Interlocked.Increment(ref _deliveryCount);
 
-            var current = Interlocked.Increment(ref _currentPendingDeliveryCount);
+            int current = Interlocked.Increment(ref _currentPendingDeliveryCount);
             while (current > _maxPendingDeliveryCount)
                 Interlocked.CompareExchange(ref _maxPendingDeliveryCount, current, _maxPendingDeliveryCount);
-
-            await Task.Yield();
 
             var context = new RabbitMqReceiveContext(_inputAddress, exchange, routingKey, _consumerTag, deliveryTag, body, redelivered, properties,
                 _receiveObserver);
 
             context.GetOrAddPayload(() => _receiveSettings);
             context.GetOrAddPayload(() => _model);
+            context.GetOrAddPayload(() => _model.ConnectionContext);
 
             try
             {
@@ -173,15 +174,29 @@ namespace MassTransit.RabbitMqTransport.Pipeline
             catch (Exception ex)
             {
                 await _receiveObserver.ReceiveFault(context, ex).ConfigureAwait(false);
-
-                _model.BasicNack(deliveryTag, false, true);
+                try
+                {
+                    _model.BasicNack(deliveryTag, false, true);
+                }
+                catch (Exception ackEx)
+                {
+                    if (_log.IsErrorEnabled)
+                        _log.ErrorFormat("An error occurred trying to NACK a message with delivery tag {0}: {1}", deliveryTag, ackEx.ToString());
+                }
             }
             finally
             {
-                Interlocked.Decrement(ref _currentPendingDeliveryCount);
-
                 RabbitMqReceiveContext ignored;
                 _pending.TryRemove(deliveryTag, out ignored);
+
+                int pendingCount = Interlocked.Decrement(ref _currentPendingDeliveryCount);
+                if (pendingCount == 0 && _shuttingDown)
+                {
+                    if (_log.IsDebugEnabled)
+                        _log.DebugFormat("Consumer shutdown completed: {0}", _inputAddress);
+
+                    _deliveryComplete.TrySetResult(true);
+                }
             }
         }
 
@@ -194,5 +209,48 @@ namespace MassTransit.RabbitMqTransport.Pipeline
         long RabbitMqConsumerMetrics.DeliveryCount => _deliveryCount;
 
         int RabbitMqConsumerMetrics.ConcurrentDeliveryCount => _maxPendingDeliveryCount;
+
+        async Task WaitAndAbandonMessage(ulong deliveryTag)
+        {
+            try
+            {
+                await _deliveryComplete.Task.ConfigureAwait(false);
+
+                _model.BasicNack(deliveryTag, false, true);
+            }
+            catch (Exception exception)
+            {
+                if (_log.IsErrorEnabled)
+                    _log.Debug("Shutting down, nack message faulted: {_inputAddress}", exception);
+            }
+        }
+
+        async Task Stop()
+        {
+            if (_log.IsDebugEnabled)
+                _log.DebugFormat("Shutting down consumer: {0}", _inputAddress);
+
+            _shuttingDown = true;
+
+            if (_currentPendingDeliveryCount > 0)
+            {
+                try
+                {
+                    using (var cancellation = new CancellationTokenSource(TimeSpan.FromSeconds(60)))
+                    {
+                        await _deliveryComplete.Task.WithCancellation(cancellation.Token).ConfigureAwait(false);
+                    }
+                }
+                catch (TaskCanceledException)
+                {
+                    if (_log.IsWarnEnabled)
+                        _log.WarnFormat("Timeout waiting for consumer to exit: {0}", _inputAddress);
+                }
+            }
+
+            await _model.BasicCancel(_consumerTag).ConfigureAwait(false);
+
+            await _participant.ParticipantCompleted.ConfigureAwait(false);
+        }
     }
 }

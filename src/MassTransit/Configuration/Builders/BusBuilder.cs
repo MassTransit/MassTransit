@@ -23,38 +23,39 @@ namespace MassTransit.Builders
     using Util;
 
 
-    public abstract class BusBuilder
+    public abstract class BusBuilder :
+        IBusBuilder
     {
         readonly BusObservable _busObservable;
         readonly Lazy<IConsumePipe> _consumePipe;
-        readonly IConsumePipeSpecification _consumePipeSpecification;
-        readonly Lazy<IMessageDeserializer> _deserializer;
+        readonly IConsumePipeFactory _consumePipeFactory;
+        readonly ISendPipeFactory _sendPipeFactory;
+        readonly IPublishPipeFactory _publishPipeFactory;
         readonly IDictionary<string, DeserializerFactory> _deserializerFactories;
         readonly IBusHostControl[] _hosts;
         readonly Lazy<Uri> _inputAddress;
-        readonly Lazy<IPublishEndpointProvider> _publishSendEndpointProvider;
         readonly IDictionary<string, IReceiveEndpoint> _receiveEndpoints;
-        readonly Lazy<ISendEndpointProvider> _sendEndpointProvider;
         readonly Lazy<ISendTransportProvider> _sendTransportProvider;
         readonly Lazy<IMessageSerializer> _serializer;
         Func<IMessageSerializer> _serializerFactory;
 
-        protected BusBuilder(IConsumePipeSpecification consumePipeSpecification, IEnumerable<IBusHostControl> hosts)
+        protected BusBuilder(IConsumePipeFactory consumePipeFactory, ISendPipeFactory sendPipeFactory,
+            IPublishPipeFactory publishPipeFactory, IEnumerable<IBusHostControl> hosts)
         {
-            _consumePipeSpecification = consumePipeSpecification;
+            _consumePipeFactory = consumePipeFactory;
+            _sendPipeFactory = sendPipeFactory;
+            _publishPipeFactory = publishPipeFactory;
+            _hosts = hosts.ToArray();
+
             _deserializerFactories = new Dictionary<string, DeserializerFactory>(StringComparer.OrdinalIgnoreCase);
             _receiveEndpoints = new Dictionary<string, IReceiveEndpoint>();
             _serializerFactory = () => new JsonMessageSerializer();
             _busObservable = new BusObservable();
             _serializer = new Lazy<IMessageSerializer>(CreateSerializer);
-            _deserializer = new Lazy<IMessageDeserializer>(CreateDeserializer);
             _sendTransportProvider = new Lazy<ISendTransportProvider>(CreateSendTransportProvider);
-            _sendEndpointProvider = new Lazy<ISendEndpointProvider>(CreateSendEndpointProvider);
-            _publishSendEndpointProvider = new Lazy<IPublishEndpointProvider>(CreatePublishSendEndpointProvider);
 
             _inputAddress = new Lazy<Uri>(GetInputAddress);
             _consumePipe = new Lazy<IConsumePipe>(GetConsumePipe);
-            _hosts = hosts.ToArray();
 
             AddMessageDeserializer(JsonMessageSerializer.JsonContentType,
                 (s, p) => new JsonMessageDeserializer(JsonMessageSerializer.Deserializer, s, p));
@@ -70,13 +71,7 @@ namespace MassTransit.Builders
 
         public IMessageSerializer MessageSerializer => _serializer.Value;
 
-        public IMessageDeserializer MessageDeserializer => _deserializer.Value;
-
-        protected ISendEndpointProvider SendEndpointProvider => _sendEndpointProvider.Value;
-
         public ISendTransportProvider SendTransportProvider => _sendTransportProvider.Value;
-
-        public IPublishEndpointProvider PublishEndpoint => _publishSendEndpointProvider.Value;
 
         protected Uri InputAddress => _inputAddress.Value;
 
@@ -91,9 +86,6 @@ namespace MassTransit.Builders
                 throw new ArgumentNullException(nameof(contentType));
             if (deserializerFactory == null)
                 throw new ArgumentNullException(nameof(deserializerFactory));
-
-            if (_deserializer.IsValueCreated)
-                throw new ConfigurationException("The deserializer has already been created, no additional deserializers can be added.");
 
             if (_deserializerFactories.ContainsKey(contentType.MediaType))
                 return;
@@ -112,16 +104,19 @@ namespace MassTransit.Builders
             _serializerFactory = serializerFactory;
         }
 
+        public ISendPipe CreateSendPipe(params ISendPipeSpecification[] specifications)
+        {
+            return _sendPipeFactory.CreateSendPipe(specifications);
+        }
+
+        public IPublishPipe CreatePublishPipe(params IPublishPipeSpecification[] specifications)
+        {
+            return _publishPipeFactory.CreatePublishPipe(specifications);
+        }
+
         public IConsumePipe CreateConsumePipe(params IConsumePipeSpecification[] specifications)
         {
-            var builder = new ConsumePipeBuilder();
-
-            _consumePipeSpecification.Apply(builder);
-
-            for (int i = 0; i < specifications.Length; i++)
-                specifications[i].Apply(builder);
-
-            return builder.Build();
+            return _consumePipeFactory.CreateConsumePipe(specifications);
         }
 
         IMessageSerializer CreateSerializer()
@@ -129,10 +124,10 @@ namespace MassTransit.Builders
             return _serializerFactory();
         }
 
-        IMessageDeserializer CreateDeserializer()
+        public IMessageDeserializer GetMessageDeserializer(ISendEndpointProvider sendEndpointProvider, IPublishEndpointProvider publishEndpointProvider)
         {
             IMessageDeserializer[] deserializers =
-                _deserializerFactories.Values.Select(x => x(SendEndpointProvider, PublishEndpoint)).ToArray();
+                _deserializerFactories.Values.Select(x => x(sendEndpointProvider, publishEndpointProvider)).ToArray();
 
             return new SupportedMessageDeserializers(deserializers);
         }
@@ -143,7 +138,7 @@ namespace MassTransit.Builders
                 throw new ArgumentNullException(nameof(endpointKey));
 
             if (_receiveEndpoints.ContainsKey(endpointKey))
-                throw new ConfigurationException("A receive endpoint with the same key was already added: " + endpointKey);
+                throw new ConfigurationException($"A receive endpoint with the same key was already added: {endpointKey}");
 
             _receiveEndpoints.Add(endpointKey, receiveEndpoint);
         }
@@ -159,7 +154,10 @@ namespace MassTransit.Builders
             {
                 PreBuild();
 
-                var bus = new MassTransitBus(InputAddress, ConsumePipe, SendEndpointProvider, PublishEndpoint, ReceiveEndpoints, _hosts, BusObservable);
+                var sendEndpointProvider = CreateSendEndpointProvider();
+                var publishEndpointProvider = CreatePublishEndpointProvider();
+
+                var bus = new MassTransitBus(InputAddress, ConsumePipe, sendEndpointProvider, publishEndpointProvider, ReceiveEndpoints, _hosts, BusObservable);
 
                 TaskUtil.Await(() => _busObservable.PostCreate(bus));
 
@@ -179,8 +177,8 @@ namespace MassTransit.Builders
 
         protected abstract ISendTransportProvider CreateSendTransportProvider();
 
-        protected abstract ISendEndpointProvider CreateSendEndpointProvider();
+        public abstract ISendEndpointProvider CreateSendEndpointProvider(params ISendPipeSpecification[] specifications);
 
-        protected abstract IPublishEndpointProvider CreatePublishSendEndpointProvider();
+        public abstract IPublishEndpointProvider CreatePublishEndpointProvider(params IPublishPipeSpecification[] specifications);
     }
 }

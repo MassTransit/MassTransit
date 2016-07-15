@@ -12,6 +12,9 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.ConsumeConfigurators
 {
+    using System;
+
+
     public interface IConsumerConfigurator :
         IConsumeConfigurator
     {
@@ -23,5 +26,13 @@ namespace MassTransit.ConsumeConfigurators
         IConsumeConfigurator
         where TConsumer : class, IConsumer
     {
+        /// <summary>
+        /// Configure a message type for the consumer, such as adding middleware to the pipeline for
+        /// the message type.
+        /// </summary>
+        /// <typeparam name="T">The message type</typeparam>
+        /// <param name="configure">The callback to configure the message pipeline</param>
+        void ConfigureMessage<T>(Action<IConsumerMessageConfigurator<T>> configure)
+            where T : class;
     }
 }

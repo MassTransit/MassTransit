@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -15,6 +15,7 @@ namespace MassTransit
     using System;
     using System.Collections.Generic;
     using Pipeline;
+    using Pipeline.Pipes;
     using RabbitMqTransport;
     using RabbitMqTransport.Configuration;
     using RabbitMqTransport.Topology;
@@ -32,13 +33,17 @@ namespace MassTransit
         /// <param name="receiveObserver"></param>
         /// <param name="endpointObserver"></param>
         /// <param name="exchangeBindings"></param>
-        /// <param name="taskSupervisor"></param>
-        public static void RabbitMqConsumer(this IPipeConfigurator<ConnectionContext> configurator, IPipe<ReceiveContext> pipe, ReceiveSettings settings, IReceiveObserver receiveObserver, IReceiveEndpointObserver endpointObserver, IEnumerable<ExchangeBindingSettings> exchangeBindings, ITaskSupervisor taskSupervisor)
+        /// <param name="supervisor"></param>
+        /// <param name="managementPipe"></param>
+        public static void RabbitMqConsumer(this IPipeConfigurator<ConnectionContext> configurator, IPipe<ReceiveContext> pipe, ReceiveSettings settings,
+            IReceiveObserver receiveObserver, IReceiveEndpointObserver endpointObserver, IEnumerable<ExchangeBindingSettings> exchangeBindings,
+            ITaskSupervisor supervisor, IManagementPipe managementPipe)
         {
             if (configurator == null)
                 throw new ArgumentNullException(nameof(configurator));
 
-            var pipeBuilderConfigurator = new RabbitMqConsumerPipeSpecification(pipe, settings, receiveObserver, endpointObserver, exchangeBindings, taskSupervisor);
+            var pipeBuilderConfigurator = new RabbitMqConsumerPipeSpecification(pipe, settings, receiveObserver, endpointObserver, exchangeBindings,
+                supervisor, managementPipe);
 
             configurator.AddPipeSpecification(pipeBuilderConfigurator);
         }

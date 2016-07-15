@@ -24,7 +24,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
     public class Catching_a_fault :
         InMemoryTestFixture
     {
-        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             _machine = new TestStateMachine();
             _repository = new InMemorySagaRepository<Instance>();

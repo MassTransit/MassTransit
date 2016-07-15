@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -16,72 +16,88 @@ namespace MassTransit.Context
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.IO;
+    using System.Linq;
     using System.Net.Mime;
-    using System.Threading;
     using System.Threading.Tasks;
     using Serialization;
     using Util;
 
 
     public abstract class BaseReceiveContext :
+        BasePipeContext,
         ReceiveContext
     {
         static readonly ContentType DefaultContentType = JsonMessageSerializer.JsonContentType;
-        readonly CancellationTokenSource _cancellationTokenSource;
         readonly Lazy<ContentType> _contentType;
         readonly Lazy<Headers> _headers;
-        readonly PayloadCache _payloadCache;
-        readonly IList<Task> _pendingTasks;
+        readonly List<Task> _pendingTasks;
         readonly IReceiveObserver _receiveObserver;
         readonly Stopwatch _receiveTimer;
 
         protected BaseReceiveContext(Uri inputAddress, bool redelivered, IReceiveObserver receiveObserver)
+            : base(new PayloadCache())
         {
             _receiveTimer = Stopwatch.StartNew();
-
-            _payloadCache = new PayloadCache();
 
             InputAddress = inputAddress;
             Redelivered = redelivered;
             _receiveObserver = receiveObserver;
 
-            _cancellationTokenSource = new CancellationTokenSource();
-
             _headers = new Lazy<Headers>(() => new JsonHeaders(ObjectTypeDeserializer.Instance, HeaderProvider));
 
             _contentType = new Lazy<ContentType>(GetContentType);
 
-            _pendingTasks = new List<Task>();
+            _pendingTasks = new List<Task>(4);
         }
 
         protected abstract IHeaderProvider HeaderProvider { get; }
         public bool IsDelivered { get; private set; }
         public bool IsFaulted { get; private set; }
-        public Task CompleteTask => Task.WhenAll(_pendingTasks);
+
+        public Task CompleteTask
+        {
+            get
+            {
+                Task[] tasks;
+                lock (_pendingTasks)
+                {
+                    tasks = _pendingTasks
+                        .Where(x => x.Status != TaskStatus.RanToCompletion)
+                        .ToArray();
+                }
+
+
+                var completeTask = Task.WhenAll(tasks);
+                completeTask.ContinueWith(result =>
+                {
+                    lock (_pendingTasks)
+                    {
+                        for (int i = 0; i < _pendingTasks.Count;)
+                        {
+                            if (_pendingTasks[i].Status == TaskStatus.RanToCompletion)
+                            {
+                                _pendingTasks.RemoveAt(i);
+                            }
+                            else
+                            {
+                                i++;
+                            }
+                        }
+                    }
+
+                }, TaskContinuationOptions.OnlyOnRanToCompletion);
+
+
+                return completeTask;
+            }
+        }
 
         public void AddPendingTask(Task task)
         {
-            _pendingTasks.Add(task);
+            lock (_pendingTasks)
+                _pendingTasks.Add(task);
         }
 
-        public virtual bool HasPayloadType(Type contextType)
-        {
-            return _payloadCache.HasPayloadType(contextType);
-        }
-
-        public virtual bool TryGetPayload<TPayload>(out TPayload context)
-            where TPayload : class
-        {
-            return _payloadCache.TryGetPayload(out context);
-        }
-
-        public virtual TPayload GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory)
-            where TPayload : class
-        {
-            return _payloadCache.GetOrAddPayload(payloadFactory);
-        }
-
-        public CancellationToken CancellationToken => _cancellationTokenSource.Token;
         public bool Redelivered { get; }
         public Headers TransportHeaders => _headers.Value;
 
@@ -115,11 +131,6 @@ namespace MassTransit.Context
         public Uri InputAddress { get; }
         public ContentType ContentType => _contentType.Value;
         protected abstract Stream GetBodyStream();
-
-        public void Cancel()
-        {
-            _cancellationTokenSource.Cancel();
-        }
 
         protected virtual ContentType GetContentType()
         {

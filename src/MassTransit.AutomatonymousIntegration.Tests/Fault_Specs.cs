@@ -59,6 +59,21 @@ namespace MassTransit.AutomatonymousIntegration.Tests
         }
 
         [Test]
+        public async Task Should_receive_a_fault_when_an_instance_does_not_exist()
+        {
+            var message = new Stop();
+
+            Task<ConsumeContext<Fault<Stop>>> faultReceived =
+                SubscribeHandler<Fault<Stop>>(x => (message.CorrelationId == x.Message.Message.CorrelationId));
+
+            await InputQueueSendEndpoint.Send(message);
+
+            ConsumeContext<Fault<Stop>> fault = await faultReceived;
+
+            Assert.AreEqual(message.CorrelationId, fault.Message.Message.CorrelationId);
+        }
+
+        [Test]
         public async Task Should_observe_the_fault_message()
         {
             var message = new Initialize();
@@ -92,7 +107,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
             Console.WriteLine(result.ToJsonString());
         }
 
-        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             _machine = new TestStateMachine();
             _repository = new InMemorySagaRepository<Instance>();
@@ -134,6 +149,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
                 InstanceState(x => x.CurrentState);
 
                 Event(() => StartFaulted, x => x.CorrelateById(context => context.Message.Message.CorrelationId));
+                Event(() => Stopped, x => x.OnMissingInstance(m => m.Fault()));
 
                 Initially(
                     When(Started)
@@ -160,16 +176,22 @@ namespace MassTransit.AutomatonymousIntegration.Tests
                         .TransitionTo(Running),
                     When(StartFaulted)
                         .TransitionTo(FailedToStart));
+
+                During(Running,
+                    When(Stopped)
+                        .TransitionTo(Complete));
             }
 
             public State WaitingToStart { get; private set; }
             public State FailedToStart { get; private set; }
             public State Running { get; private set; }
+            public State Complete { get; private set; }
 
             public Event<Start> Started { get; private set; }
             public Event<Initialize> Initialized { get; private set; }
             public Event<Create> Created { get; private set; }
             public Event<Fault<Start>> StartFaulted { get; private set; }
+            public Event<Stop> Stopped { get; private set; }
         }
 
 
@@ -182,6 +204,21 @@ namespace MassTransit.AutomatonymousIntegration.Tests
             }
 
             public Start(Guid correlationId)
+            {
+                CorrelationId = correlationId;
+            }
+
+            public Guid CorrelationId { get; set; }
+        }
+        public class Stop :
+            CorrelatedBy<Guid>
+        {
+            public Stop()
+            {
+                CorrelationId = NewId.NextGuid();
+            }
+
+            public Stop(Guid correlationId)
             {
                 CorrelationId = correlationId;
             }

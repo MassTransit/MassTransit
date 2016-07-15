@@ -24,12 +24,12 @@ namespace MassTransit.Pipeline.Filters
         IFilter<ReceiveContext>
     {
         readonly Uri _destinationAddress;
-        readonly Func<Task<ISendTransport>> _getDestinationTransport;
+        readonly Lazy<Task<ISendTransport>> _getDestinationTransport;
         readonly string _reason;
 
         public MoveToTransportFilter(Uri destinationAddress, Func<Task<ISendTransport>> getDestinationTransport, string reason)
         {
-            _getDestinationTransport = getDestinationTransport;
+            _getDestinationTransport = new Lazy<Task<ISendTransport>>(getDestinationTransport);
             _destinationAddress = destinationAddress;
             _reason = reason ?? "Unspecified";
         }
@@ -42,7 +42,7 @@ namespace MassTransit.Pipeline.Filters
 
         async Task IFilter<ReceiveContext>.Send(ReceiveContext context, IPipe<ReceiveContext> next)
         {
-            ISendTransport transport = await _getDestinationTransport().ConfigureAwait(false);
+            ISendTransport transport = await _getDestinationTransport.Value.ConfigureAwait(false);
 
             IPipe<SendContext> pipe = Pipe.Execute<SendContext>(sendContext =>
             {

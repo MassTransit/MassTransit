@@ -33,14 +33,15 @@ namespace MassTransit.Transports.InMemory
         static readonly ILog _log = Logger.Get<InMemoryTransport>();
         readonly ReceiveEndpointObservable _endpointObservable;
         readonly Uri _inputAddress;
+        readonly ITaskParticipant _participant;
         readonly ReceiveObservable _receiveObservable;
-        readonly QueuedTaskScheduler _scheduler;
+        readonly LimitedConcurrencyLevelTaskScheduler _scheduler;
         readonly SendObservable _sendObservable;
+        readonly TaskSupervisor _supervisor;
         int _currentPendingDeliveryCount;
         long _deliveryCount;
         int _maxPendingDeliveryCount;
         IPipe<ReceiveContext> _receivePipe;
-        TaskSupervisor _supervisor;
 
         public InMemoryTransport(Uri inputAddress, int concurrencyLimit)
         {
@@ -49,18 +50,20 @@ namespace MassTransit.Transports.InMemory
             _sendObservable = new SendObservable();
             _receiveObservable = new ReceiveObservable();
             _endpointObservable = new ReceiveEndpointObservable();
-            _supervisor = new TaskSupervisor();
 
-            _scheduler = new QueuedTaskScheduler(TaskScheduler.Default, concurrencyLimit);
+            _supervisor = new TaskSupervisor($"{TypeMetadataCache<InMemoryTransport>.ShortName} - {_inputAddress}");
+            _participant = _supervisor.CreateParticipant($"{TypeMetadataCache<InMemoryTransport>.ShortName} - {_inputAddress}");
+
+            _scheduler = new LimitedConcurrencyLevelTaskScheduler(concurrencyLimit);
         }
 
         public void Dispose()
         {
+            _participant.SetComplete();
+
             TaskUtil.Await(() => _supervisor.Stop("Disposed"));
 
             TaskUtil.Await(() => _supervisor.Completed);
-
-            _scheduler.Dispose();
         }
 
         public void Probe(ProbeContext context)
@@ -74,11 +77,21 @@ namespace MassTransit.Transports.InMemory
 
         ReceiveTransportHandle IReceiveTransport.Start(IPipe<ReceiveContext> receivePipe)
         {
-            _receivePipe = receivePipe;
+            try
+            {
+                _receivePipe = receivePipe;
 
-            TaskUtil.Await(() => _endpointObservable.Ready(new Ready(_inputAddress)));
+                TaskUtil.Await(() => _endpointObservable.Ready(new Ready(_inputAddress)));
 
-            return new Handle(_supervisor, this);
+                _participant.SetReady();
+
+                return new Handle(_supervisor, _participant, this);
+            }
+            catch (Exception exception)
+            {
+                _participant.SetNotReady(exception);
+                throw;
+            }
         }
 
         public ConnectHandle ConnectReceiveObserver(IReceiveObserver observer)
@@ -105,9 +118,8 @@ namespace MassTransit.Transports.InMemory
 
                 var transportMessage = new InMemoryTransportMessage(messageId, context.Body, context.ContentType.MediaType, TypeMetadataCache<T>.ShortName);
 
-                if(_receivePipe != null)
 #pragma warning disable 4014
-                    Task.Factory.StartNew(() => DispatchMessage(transportMessage), _supervisor.StopToken, TaskCreationOptions.HideScheduler, _scheduler);
+                    Task.Factory.StartNew(() => DispatchMessage(transportMessage), _supervisor.StoppedToken, TaskCreationOptions.HideScheduler, _scheduler);
 #pragma warning restore 4014
 
                 context.DestinationAddress.LogSent(context.MessageId?.ToString("N") ?? "", TypeMetadataCache<T>.ShortName);
@@ -131,7 +143,7 @@ namespace MassTransit.Transports.InMemory
             byte[] body;
             using (var bodyStream = context.GetBody())
             {
-                body = await GetMessageBody(bodyStream);
+                body = await GetMessageBody(bodyStream).ConfigureAwait(false);
             }
 
             var messageType = "Unknown";
@@ -142,8 +154,14 @@ namespace MassTransit.Transports.InMemory
             var transportMessage = new InMemoryTransportMessage(messageId, body, context.ContentType.MediaType, messageType);
 
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
-            Task.Factory.StartNew(() => DispatchMessage(transportMessage), _supervisor.StopToken, TaskCreationOptions.HideScheduler, _scheduler);
+            Task.Factory.StartNew(() => DispatchMessage(transportMessage), _supervisor.StoppedToken, TaskCreationOptions.HideScheduler, _scheduler);
 #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+        }
+
+        Task ISendTransport.Close()
+        {
+            // an in-memory send transport does not get disposed
+            return TaskUtil.Completed;
         }
 
         public ConnectHandle ConnectSendObserver(ISendObserver observer)
@@ -153,7 +171,9 @@ namespace MassTransit.Transports.InMemory
 
         async Task DispatchMessage(InMemoryTransportMessage message)
         {
-            if (_supervisor.StopToken.IsCancellationRequested)
+            await _supervisor.Ready.ConfigureAwait(false);
+
+            if (_supervisor.StoppedToken.IsCancellationRequested)
                 return;
 
             if (_receivePipe == null)
@@ -215,17 +235,21 @@ namespace MassTransit.Transports.InMemory
         class Handle :
             ReceiveTransportHandle
         {
+            readonly ITaskParticipant _participant;
             readonly TaskSupervisor _supervisor;
             readonly InMemoryTransport _transport;
 
-            public Handle(TaskSupervisor supervisor, InMemoryTransport transport)
+            public Handle(TaskSupervisor supervisor, ITaskParticipant participant, InMemoryTransport transport)
             {
                 _supervisor = supervisor;
+                _participant = participant;
                 _transport = transport;
             }
 
             async Task ReceiveTransportHandle.Stop(CancellationToken cancellationToken)
             {
+                _participant.SetComplete();
+
                 await _supervisor.Stop("Stopped").ConfigureAwait(false);
 
                 await _supervisor.Completed.ConfigureAwait(false);

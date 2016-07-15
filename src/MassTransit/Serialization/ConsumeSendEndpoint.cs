@@ -196,15 +196,17 @@ namespace MassTransit.Serialization
 
             public async Task Send(SendContext<T> sendContext)
             {
+                sendContext.SourceAddress = _context.ReceiveContext.InputAddress;
+
                 if (_context.ConversationId.HasValue)
                     sendContext.ConversationId = _context.ConversationId;
                 if (_context.CorrelationId.HasValue)
                     sendContext.InitiatorId = _context.CorrelationId;
 
                 if (_pipe != null)
-                    await _pipe.Send(sendContext);
+                    await _pipe.Send(sendContext).ConfigureAwait(false);
                 if (_sendPipe != null)
-                    await _sendPipe.Send(sendContext);
+                    await _sendPipe.Send(sendContext).ConfigureAwait(false);
             }
         }
     }

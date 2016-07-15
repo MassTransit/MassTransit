@@ -41,9 +41,9 @@ namespace MassTransit.QuartzIntegration
             if (_log.IsDebugEnabled)
             {
                 if (deletedJob)
-                    _log.DebugFormat("Cancelled Scheduled Message: {0} at {1}", context.Message.TokenId, context.Message.Timestamp);
+                    _log.DebugFormat("Cancelled Scheduled Message: {0} at {1}", jobKey, context.Message.Timestamp);
                 else
-                    _log.DebugFormat("CancelScheduledMessage: no message found {0}", context.Message.TokenId);
+                    _log.DebugFormat("CancelScheduledMessage: no message found {0}", jobKey);
             }
 
             return TaskUtil.Completed;
@@ -51,7 +51,16 @@ namespace MassTransit.QuartzIntegration
 
         public Task Consume(ConsumeContext<CancelScheduledRecurringMessage> context)
         {
-            bool unscheduledJob = _scheduler.UnscheduleJob(new TriggerKey(context.Message.ScheduleId, context.Message.ScheduleGroup));
+            const string prependedValue = "Recurring.Trigger.";
+
+            string scheduleId = context.Message.ScheduleId;
+
+            if (!scheduleId.StartsWith(prependedValue))
+            {
+                scheduleId = string.Concat(prependedValue, scheduleId);
+            }
+
+            bool unscheduledJob = _scheduler.UnscheduleJob(new TriggerKey(scheduleId, context.Message.ScheduleGroup));
 
             if (_log.IsDebugEnabled)
             {

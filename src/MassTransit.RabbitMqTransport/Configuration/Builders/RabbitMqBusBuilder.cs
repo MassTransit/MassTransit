@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -21,16 +21,23 @@ namespace MassTransit.RabbitMqTransport.Configuration.Builders
 
 
     public class RabbitMqBusBuilder :
-        BusBuilder,
-        IBusBuilder
+        BusBuilder
     {
+        readonly TimeSpan _autoDeleteCacheTimeout;
         readonly RabbitMqReceiveEndpointConfigurator _busEndpointConfigurator;
         readonly RabbitMqHost[] _hosts;
+        readonly ModelSettings _modelSettings;
+        readonly TimeSpan _sendEndpointCacheTimeout;
 
-        public RabbitMqBusBuilder(RabbitMqHost[] hosts, IConsumePipeSpecification consumePipeSpecification, RabbitMqReceiveSettings busSettings)
-            : base(consumePipeSpecification, hosts)
+        public RabbitMqBusBuilder(RabbitMqHost[] hosts, IConsumePipeFactory consumePipeFactory, ISendPipeFactory sendPipeFactory,
+            IPublishPipeFactory publishPipeFactory, RabbitMqReceiveSettings busSettings, ModelSettings modelSettings)
+            : base(consumePipeFactory, sendPipeFactory, publishPipeFactory, hosts)
         {
             _hosts = hosts;
+            _modelSettings = modelSettings;
+
+            _autoDeleteCacheTimeout = TimeSpan.FromMinutes(1);
+            _sendEndpointCacheTimeout = TimeSpan.FromDays(1);
 
             _busEndpointConfigurator = new RabbitMqReceiveEndpointConfigurator(_hosts[0], busSettings, ConsumePipe);
         }
@@ -52,19 +59,31 @@ namespace MassTransit.RabbitMqTransport.Configuration.Builders
 
         protected override ISendTransportProvider CreateSendTransportProvider()
         {
-            return new RabbitMqSendTransportProvider(_hosts);
+            return new RabbitMqSendTransportProvider(_hosts, _modelSettings);
         }
 
-        protected override ISendEndpointProvider CreateSendEndpointProvider()
+        public override ISendEndpointProvider CreateSendEndpointProvider(params ISendPipeSpecification[] specifications)
         {
-            var sendEndpointProvider = new RabbitMqSendEndpointProvider(MessageSerializer, InputAddress, SendTransportProvider);
+            var pipe = CreateSendPipe(specifications);
 
-            return new SendEndpointCache(sendEndpointProvider);
+            var provider = new RabbitMqSendEndpointProvider(MessageSerializer, InputAddress, SendTransportProvider, pipe);
+
+            return new SendEndpointCache(provider, CacheDurationProvider);
         }
 
-        protected override IPublishEndpointProvider CreatePublishSendEndpointProvider()
+        TimeSpan CacheDurationProvider(Uri address)
         {
-            return new RabbitMqPublishEndpointProvider(_hosts[0], MessageSerializer, InputAddress);
+            if (address.GetReceiveSettings().AutoDelete)
+                return _autoDeleteCacheTimeout;
+
+            return _sendEndpointCacheTimeout;
+        }
+
+        public override IPublishEndpointProvider CreatePublishEndpointProvider(params IPublishPipeSpecification[] specifications)
+        {
+            var pipe = CreatePublishPipe(specifications);
+
+            return new RabbitMqPublishEndpointProvider(_hosts[0], MessageSerializer, InputAddress, pipe, _modelSettings);
         }
     }
 }

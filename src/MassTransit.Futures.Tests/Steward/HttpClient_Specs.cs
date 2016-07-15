@@ -25,7 +25,7 @@ namespace MassTransit.Tests.Steward
         InMemoryDispatchTestFixture
     {
         [Test]
-        public async void Should_succeed_nicely()
+        public async Task Should_succeed_nicely()
         {
             Task<ConsumeContext<HttpRequestSucceeded>> succeeded = SubscribeHandler<HttpRequestSucceeded>();
             Task<ConsumeContext<HttpRequestFaulted>> faulted = SubscribeHandler<HttpRequestFaulted>();
@@ -52,7 +52,7 @@ namespace MassTransit.Tests.Steward
 
         Task<ConsumeContext<DispatchAccepted>> _accepted;
 
-        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             _accepted = Handled<DispatchAccepted>(configurator);
 

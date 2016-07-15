@@ -146,6 +146,11 @@ namespace MassTransit.Context
             set { _context.Serializer = value; }
         }
 
+        SendContext<T> SendContext.CreateProxy<T>(T message)
+        {
+            return _context.CreateProxy(message);
+        }
+
         TRequest SendContext<TRequest>.Message => _context.Message;
 
         CancellationToken PipeContext.CancellationToken => _context.CancellationToken;
@@ -204,7 +209,9 @@ namespace MassTransit.Context
             {
                 try
                 {
-                    await Task.Factory.StartNew(() => handler(context), context.CancellationToken, TaskCreationOptions.None, _taskScheduler);
+                    await Task.Factory.StartNew(() => handler(context), context.CancellationToken, TaskCreationOptions.None, _taskScheduler)
+                        .Unwrap()
+                        .ConfigureAwait(false);
 
                     source.TrySetResult(context.Message);
 

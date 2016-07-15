@@ -13,6 +13,8 @@
 namespace MassTransit.Tests
 {
     using System;
+    using System.Collections.Generic;
+    using System.Linq;
     using System.Threading.Tasks;
     using MassTransit.Testing;
     using Monitoring.Introspection.Contracts;
@@ -39,7 +41,14 @@ namespace MassTransit.Tests
             Console.WriteLine(result.ToJsonString());
         }
 
-        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+        [Test]
+        public void Should_extract_receive_endpoint_addresses()
+        {
+            List<Uri> receiveAddresses = Bus.GetReceiveEndpointAddresses().ToList();
+            Assert.Contains(InputQueueAddress, receiveAddresses);
+        }
+
+        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             configurator.Handler<PingMessage>(async context =>
             {

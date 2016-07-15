@@ -34,7 +34,7 @@
             Console.WriteLine(await loaded.Value);
         }
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void Setup()
         {
             var baseDirectory = AppDomain.CurrentDomain.BaseDirectory;

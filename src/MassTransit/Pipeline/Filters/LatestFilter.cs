@@ -49,7 +49,7 @@ namespace MassTransit.Pipeline.Filters
 
         async Task<T> GetLatest()
         {
-            await _hasValue.Task;
+            await _hasValue.Task.ConfigureAwait(false);
 
             return _latest;
         }

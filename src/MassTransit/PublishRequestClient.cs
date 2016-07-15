@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -29,17 +29,23 @@ namespace MassTransit
         where TResponse : class
     {
         readonly IBus _bus;
+        readonly Action<SendContext<TRequest>> _callback;
         readonly TimeSpan _timeout;
+        readonly TimeSpan? _timeToLive;
 
         /// <summary>
         /// Creates a message request client for the bus and endpoint specified
         /// </summary>
         /// <param name="bus">The bus instance</param>
         /// <param name="timeout">The request timeout</param>
-        public PublishRequestClient(IBus bus, TimeSpan timeout)
+        /// <param name="timeToLive">The time that the request will live for</param>
+        /// <param name="callback"></param>
+        public PublishRequestClient(IBus bus, TimeSpan timeout, TimeSpan? timeToLive = default(TimeSpan?), Action<SendContext<TRequest>> callback = null)
         {
             _bus = bus;
             _timeout = timeout;
+            _timeToLive = timeToLive;
+            _callback = callback;
         }
 
         async Task<TResponse> IRequestClient<TRequest, TResponse>.Request(TRequest request, CancellationToken cancellationToken)
@@ -51,9 +57,11 @@ namespace MassTransit
             Task<TResponse> responseTask = null;
             var pipe = new SendRequest<TRequest>(_bus, taskScheduler, x =>
             {
+                x.TimeToLive = _timeToLive;
                 x.Timeout = _timeout;
-
                 responseTask = x.Handle<TResponse>();
+
+                _callback?.Invoke(x);
             });
 
             await _bus.Publish(request, pipe, cancellationToken).ConfigureAwait(false);

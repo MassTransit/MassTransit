@@ -51,7 +51,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
             TestConsumer _testConsumer;
 
-            [TestFixtureSetUp]
+            [OneTimeSetUp]
             public void Setup()
             {
                 Await(() => InputQueueSendEndpoint.Send(new A()));
@@ -88,7 +88,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
             TestConsumer _testConsumer;
 
-            [TestFixtureSetUp]
+            [OneTimeSetUp]
             public void Setup()
             {
                 Await(() => InputQueueSendEndpoint.Send(new A()));
@@ -123,7 +123,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             Task<ConsumeContext<A>> _a;
             Task<ConsumeContext<B>> _b;
 
-            [TestFixtureSetUp]
+            [OneTimeSetUp]
             public void Setup()
             {
                 Await(() => InputQueueSendEndpoint.Send(new A()));
@@ -132,6 +132,41 @@ namespace MassTransit.RabbitMqTransport.Tests
 
             protected override void ConfigureInputQueueEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
             {
+                _a = Handled<A>(configurator);
+                _b = Handled<B>(configurator);
+            }
+        }
+
+        [TestFixture]
+        public class Configuring_a_consumer_without_binding :
+            ConsumerBindingTestFixture
+        {
+            [Test]
+            public async Task Should_receive_the_message_a()
+            {
+                await _a;
+            }
+
+            [Test]
+            public async Task Should_receive_the_message_b()
+            {
+                await _b;
+            }
+
+            Task<ConsumeContext<A>> _a;
+            Task<ConsumeContext<B>> _b;
+
+            [OneTimeSetUp]
+            public void Setup()
+            {
+                Await(() => InputQueueSendEndpoint.Send(new A()));
+                Await(() => InputQueueSendEndpoint.Send(new B()));
+            }
+
+            protected override void ConfigureInputQueueEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
+            {
+                configurator.BindMessageExchanges = false;
+
                 _a = Handled<A>(configurator);
                 _b = Handled<B>(configurator);
             }
@@ -170,7 +205,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             InMemorySagaRepository<TestSaga> _repository;
             Guid _sagaId;
 
-            [TestFixtureSetUp]
+            [OneTimeSetUp]
             public void Setup()
             {
                 _sagaId = NewId.NextGuid();

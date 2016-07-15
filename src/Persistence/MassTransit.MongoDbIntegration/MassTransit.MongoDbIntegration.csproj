@@ -1,0 +1,125 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{2406B6D6-09DF-4BC3-AEFC-068AACA77567}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>MassTransit.MongoDbIntegration</RootNamespace>
+    <AssemblyName>MassTransit.MongoDbIntegration</AssemblyName>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="MongoDB.Bson, Version=2.2.4.26, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\MongoDB.Bson.2.2.4\lib\net45\MongoDB.Bson.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="MongoDB.Driver, Version=2.2.4.26, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\MongoDB.Driver.2.2.4\lib\net45\MongoDB.Driver.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="MongoDB.Driver.Core, Version=2.2.4.26, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\MongoDB.Driver.Core.2.2.4\lib\net45\MongoDB.Driver.Core.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="MongoDB.Driver.GridFS, Version=2.2.4.26, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\MongoDB.Driver.GridFS.2.2.4\lib\net45\MongoDB.Driver.GridFS.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="NewId, Version=2.1.3.0, Culture=neutral, PublicKeyToken=b8e0e9f2f1e657fa, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\NewId.2.1.3\lib\net45\NewId.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\..\SolutionVersion.cs">
+      <Link>Properties\SolutionVersion.cs</Link>
+    </Compile>
+    <Compile Include="Courier\Consumers\RoutingSlipActivityCompensatedConsumer.cs" />
+    <Compile Include="Courier\Consumers\RoutingSlipActivityCompensationFailedConsumer.cs" />
+    <Compile Include="Courier\Consumers\RoutingSlipActivityCompletedConsumer.cs" />
+    <Compile Include="Courier\Consumers\RoutingSlipActivityFaultedConsumer.cs" />
+    <Compile Include="Courier\Consumers\RoutingSlipCompensationFailedConsumer.cs" />
+    <Compile Include="Courier\Consumers\RoutingSlipCompletedConsumer.cs" />
+    <Compile Include="Courier\Consumers\RoutingSlipFaultedConsumer.cs" />
+    <Compile Include="Courier\Consumers\RoutingSlipRevisedConsumer.cs" />
+    <Compile Include="Courier\Consumers\RoutingSlipTerminatedConsumer.cs" />
+    <Compile Include="Courier\ConventionFilter.cs" />
+    <Compile Include="Courier\Documents\ActivityExceptionDocument.cs" />
+    <Compile Include="Courier\Documents\ExceptionInfoDocument.cs" />
+    <Compile Include="Courier\Documents\HostDocument.cs" />
+    <Compile Include="Courier\Documents\RoutingSlipDocument.cs" />
+    <Compile Include="Courier\Events\RoutingSlipActivityCompensatedDocument.cs" />
+    <Compile Include="Courier\Events\RoutingSlipActivityCompensationFailedDocument.cs" />
+    <Compile Include="Courier\Events\RoutingSlipActivityCompletedDocument.cs" />
+    <Compile Include="Courier\Events\RoutingSlipActivityFaultedDocument.cs" />
+    <Compile Include="Courier\Events\RoutingSlipCompensationFailedDocument.cs" />
+    <Compile Include="Courier\Events\RoutingSlipCompletedDocument.cs" />
+    <Compile Include="Courier\Events\RoutingSlipEventDocument.cs" />
+    <Compile Include="Courier\Events\RoutingSlipFaultedDocument.cs" />
+    <Compile Include="Courier\Events\RoutingSlipRevisedDocument.cs" />
+    <Compile Include="Courier\Events\RoutingSlipTerminatedDocument.cs" />
+    <Compile Include="Courier\IRoutingSlipEventPersister.cs" />
+    <Compile Include="Courier\RoutingSlipEventConsumerConfigurationExtensions.cs" />
+    <Compile Include="Courier\RoutingSlipEventPersister.cs" />
+    <Compile Include="Exceptions\SaveEventException.cs" />
+    <Compile Include="MassTransitMongoDbConventions.cs" />
+    <Compile Include="MessageData\IFileNameGenerator.cs" />
+    <Compile Include="MessageData\IMessageDataResolver.cs" />
+    <Compile Include="MessageData\MongoDbMessageDataRepository.cs" />
+    <Compile Include="MessageData\MessageDataResolver.cs" />
+    <Compile Include="MessageData\NewIdFileNameGenerator.cs" />
+    <Compile Include="Exceptions\MongoDbConcurrencyException.cs" />
+    <Compile Include="SagaConvention.cs" />
+    <Compile Include="Saga\Context\IMongoDbSagaConsumeContextFactory.cs" />
+    <Compile Include="Saga\IVersionedSaga.cs" />
+    <Compile Include="Saga\Pipeline\MissingPipe.cs" />
+    <Compile Include="Saga\MongoDbQuerySagaRepository.cs" />
+    <Compile Include="Saga\Context\MongoDbSagaConsumeContext.cs" />
+    <Compile Include="Saga\Context\MongoDbSagaConsumeContextFactory.cs" />
+    <Compile Include="Saga\MongoDbSagaRepository.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\MassTransit\MassTransit.csproj">
+      <Project>{6efd69fc-cbcc-4f85-aee0-efba73f4d273}</Project>
+      <Name>MassTransit</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Mappings\" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

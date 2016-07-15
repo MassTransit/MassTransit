@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,12 +13,10 @@
 namespace MassTransit.RabbitMqTransport.Integration
 {
     using System;
-    using System.Collections.Concurrent;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using Contexts;
-    using Internals.Extensions;
     using Logging;
     using MassTransit.Pipeline;
     using RabbitMQ.Client;
@@ -31,23 +29,19 @@ namespace MassTransit.RabbitMqTransport.Integration
         IProbeSite
     {
         static readonly ILog _log = Logger.Get<RabbitMqConnectionCache>();
+        readonly ITaskScope _cacheTaskScope;
         readonly ConnectionFactory _connectionFactory;
         readonly object _scopeLock = new object();
         readonly RabbitMqHostSettings _settings;
-        readonly StopSignal _signal;
         ConnectionScope _scope;
 
-        public RabbitMqConnectionCache(RabbitMqHostSettings settings)
+        public RabbitMqConnectionCache(RabbitMqHostSettings settings, ITaskSupervisor supervisor)
         {
-            _signal = new StopSignal();
-
             _settings = settings;
-
             _connectionFactory = settings.GetConnectionFactory();
-        }
 
-        public Task StopRequested => _signal.StopRequested;
-        public CancellationToken ConnectionCancellationToken => _signal.CancellationToken;
+            _cacheTaskScope = supervisor.CreateScope($"{TypeMetadataCache<RabbitMqConnectionCache>.ShortName} - {settings.ToDebugString()}", CloseScope);
+        }
 
         public Task Send(IPipe<ConnectionContext> connectionPipe, CancellationToken cancellationToken)
         {
@@ -59,19 +53,19 @@ namespace MassTransit.RabbitMqTransport.Integration
                 existingScope = _scope;
                 if (existingScope == null)
                 {
-                    newScope = new ConnectionScope();
+                    newScope = new ConnectionScope(_cacheTaskScope, _settings);
                     _scope = newScope;
                 }
             }
             if (existingScope != null)
-                return SendUsingExistingConnection(connectionPipe, cancellationToken, existingScope);
+                return SendUsingExistingConnection(connectionPipe, existingScope, cancellationToken);
 
             return SendUsingNewConnection(connectionPipe, newScope, cancellationToken);
         }
 
         public void Probe(ProbeContext context)
         {
-            ConnectionScope connectionScope = _scope;
+            var connectionScope = _scope;
             if (connectionScope != null)
             {
                 context.Set(new
@@ -81,37 +75,51 @@ namespace MassTransit.RabbitMqTransport.Integration
             }
         }
 
-        async Task SendUsingNewConnection(IPipe<ConnectionContext> connectionPipe, ConnectionScope scope, CancellationToken cancellationToken)
+        Task CloseScope()
+        {
+            return TaskUtil.Completed;
+        }
+
+        Task SendUsingNewConnection(IPipe<ConnectionContext> connectionPipe, ConnectionScope scope, CancellationToken cancellationToken)
         {
             try
             {
-                if (_signal.CancellationToken.IsCancellationRequested)
+                if (_cacheTaskScope.StoppingToken.IsCancellationRequested)
                     throw new TaskCanceledException($"The connection is being disconnected: {_settings.ToDebugString()}");
 
                 if (_log.IsDebugEnabled)
-                    _log.DebugFormat("Connecting: {0}", _connectionFactory.ToDebugString());
+                    _log.DebugFormat("Connecting: {0}", _settings.ToDebugString());
 
-                IConnection connection = _connectionFactory.CreateConnection();
+                IConnection connection;
+                if (_settings.ClusterMembers?.Any() ?? false)
+                {
+                    connection = _connectionFactory.CreateConnection(_settings.ClusterMembers, _settings.Host);
+                }
+                else
+                {
+                    connection = _connectionFactory.CreateConnection();
+                }
+
 
                 if (_log.IsDebugEnabled)
                 {
-                    _log.DebugFormat("Connected: {0} (address: {1}, local: {2}", _connectionFactory.ToDebugString(),
-                        connection.RemoteEndPoint, connection.LocalEndPoint);
+                    _log.DebugFormat("Connected: {0} (address: {1}, local: {2}", _settings.ToDebugString(),
+                        connection.Endpoint, connection.LocalPort);
                 }
 
                 EventHandler<ShutdownEventArgs> connectionShutdown = null;
                 connectionShutdown = (obj, reason) =>
                 {
-                    connection.ConnectionShutdown -= connectionShutdown;
-
                     Interlocked.CompareExchange(ref _scope, null, scope);
 
-                    scope.Close();
+                    scope.Shutdown(reason.ReplyText);
+
+                    connection.ConnectionShutdown -= connectionShutdown;
                 };
 
                 connection.ConnectionShutdown += connectionShutdown;
 
-                var connectionContext = new RabbitMqConnectionContext(connection, _settings, _signal.CancellationToken);
+                var connectionContext = new RabbitMqConnectionContext(connection, _settings, _cacheTaskScope);
 
                 connectionContext.GetOrAddPayload(() => _settings);
 
@@ -123,15 +131,20 @@ namespace MassTransit.RabbitMqTransport.Integration
 
                 scope.ConnectFaulted(ex);
 
-                throw new RabbitMqConnectionException("Connect failed: " + _connectionFactory.ToDebugString(), ex);
+                throw new RabbitMqConnectionException("Connect failed: " + _settings.ToDebugString(), ex);
             }
 
+            return SendUsingExistingConnection(connectionPipe, scope, cancellationToken);
+        }
+
+        async Task SendUsingExistingConnection(IPipe<ConnectionContext> connectionPipe, ConnectionScope scope, CancellationToken cancellationToken)
+        {
             try
             {
-                using (SharedConnectionContext context = await scope.Attach(cancellationToken).ConfigureAwait(false))
+                using (var context = await scope.Attach(cancellationToken).ConfigureAwait(false))
                 {
                     if (_log.IsDebugEnabled)
-                        _log.DebugFormat("Using new connection: {0}", ((ConnectionContext)context).HostSettings.ToDebugString());
+                        _log.DebugFormat("Using connection: {0}", ((ConnectionContext)context).HostSettings.ToDebugString());
 
                     await connectionPipe.Send(context).ConfigureAwait(false);
                 }
@@ -139,118 +152,87 @@ namespace MassTransit.RabbitMqTransport.Integration
             catch (BrokerUnreachableException ex)
             {
                 if (_log.IsDebugEnabled)
-                    _log.Debug("The connection usage threw an exception", ex);
+                    _log.Debug("The broker was unreachable", ex);
 
-                throw new RabbitMqConnectionException("Connect failed: " + _connectionFactory.ToDebugString(), ex);
+                Interlocked.CompareExchange(ref _scope, null, scope);
+
+                scope.ConnectFaulted(ex);
+
+                throw new RabbitMqConnectionException("Connect failed: " + _settings.ToDebugString(), ex);
             }
             catch (Exception ex)
             {
                 if (_log.IsDebugEnabled)
                     _log.Debug("The connection usage threw an exception", ex);
 
-                throw;
-            }
-        }
+                Interlocked.CompareExchange(ref _scope, null, scope);
 
-        async Task SendUsingExistingConnection(IPipe<ConnectionContext> connectionPipe, CancellationToken cancellationToken, ConnectionScope scope)
-        {
-            try
-            {
-                using (SharedConnectionContext context = await scope.Attach(cancellationToken).ConfigureAwait(false))
-                {
-                    if (_log.IsDebugEnabled)
-                        _log.DebugFormat("Using existing connection: {0}", ((ConnectionContext)context).HostSettings.ToDebugString());
-
-                    await connectionPipe.Send(context).ConfigureAwait(false);
-                }
-            }
-            catch (BrokerUnreachableException ex)
-            {
-                if (_log.IsDebugEnabled)
-                    _log.Debug("The connection usage threw an exception", ex);
-
-                throw new RabbitMqConnectionException("Connect failed: " + _connectionFactory.ToDebugString(), ex);
-            }
-            catch (Exception ex)
-            {
-                if (_log.IsDebugEnabled)
-                    _log.Debug("The existing connection usage threw an exception", ex);
+                scope.ConnectFaulted(ex);
 
                 throw;
             }
-        }
-
-        /// <summary>
-        /// Stop the connections to the host, signals the exit
-        /// </summary>
-        public Task Stop()
-        {
-            _signal.Stop();
-
-            return _signal.StopRequested;
         }
 
 
         class ConnectionScope
         {
-            static readonly ILog _log = Logger.Get<ConnectionScope>();
-            readonly ConcurrentBag<SharedConnectionContext> _attached;
             readonly TaskCompletionSource<RabbitMqConnectionContext> _connectionContext;
+            readonly ITaskScope _taskScope;
 
-            public ConnectionScope()
+            public ConnectionScope(ITaskScope scope, RabbitMqHostSettings settings)
             {
-                _attached = new ConcurrentBag<SharedConnectionContext>();
                 _connectionContext = new TaskCompletionSource<RabbitMqConnectionContext>();
+
+                _taskScope = scope.CreateScope($"ConnectionScope: {settings.ToDebugString()}", CloseContext);
             }
 
             public void Connected(RabbitMqConnectionContext connectionContext)
             {
                 _connectionContext.TrySetResult(connectionContext);
-            }
 
-            public async Task<SharedConnectionContext> Attach(CancellationToken cancellationToken)
-            {
-                var context = new SharedConnectionContext(await _connectionContext.Task.ConfigureAwait(false), cancellationToken);
-
-                _attached.Add(context);
-                return context;
-            }
-
-            public async void Close()
-            {
-                var connectionContext = await _connectionContext.Task.ConfigureAwait(false);
-
-                try
-                {
-                    foreach (var context in _attached)
-                    {
-                        using (var source = new CancellationTokenSource(TimeSpan.FromSeconds(5)))
-                        {
-                            try
-                            {
-                                await context.Completed.WithCancellation(source.Token).ConfigureAwait(false);
-                            }
-                            catch (OperationCanceledException)
-                            {
-                            }
-                        }
-                    }
-
-                    await Task.WhenAll(_attached.Select(x => x.Completed)).ConfigureAwait(false);
-                }
-                catch (Exception ex)
-                {
-                    _log.Error($"Close Faulted waiting for shared contexts", ex);
-                }
-
-                connectionContext.Dispose();
-
-                await connectionContext.Completed.ConfigureAwait(false);
+                _taskScope.SetReady();
             }
 
             public void ConnectFaulted(Exception exception)
             {
                 _connectionContext.TrySetException(exception);
+
+                _taskScope.SetNotReady(exception);
+
+                _taskScope.Stop(new StopEventArgs($"Connection faulted: {exception.Message}"));
+            }
+
+            public async Task<SharedConnectionContext> Attach(CancellationToken cancellationToken)
+            {
+                var connectionContext = await _connectionContext.Task.ConfigureAwait(false);
+
+                return new SharedConnectionContext(connectionContext, cancellationToken, _taskScope);
+            }
+
+            public void Shutdown(string reason)
+            {
+                _taskScope.Stop(new StopEventArgs(reason));
+            }
+
+            async Task CloseContext()
+            {
+                if (_connectionContext.Task.Status == TaskStatus.RanToCompletion)
+                {
+                    try
+                    {
+                        var connectionContext = await _connectionContext.Task.ConfigureAwait(false);
+
+                        if (_log.IsDebugEnabled)
+                            _log.DebugFormat("Disposing connection: {0}", connectionContext.HostSettings.ToDebugString());
+
+                        connectionContext.Dispose();
+                    }
+                    catch (Exception exception)
+                    {
+                        if (_log.IsWarnEnabled)
+                            _log.Warn("The model failed to be disposed", exception);
+                    }
+                }
             }
         }
     }

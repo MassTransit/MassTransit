@@ -33,7 +33,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
             TestTimeout = TimeSpan.FromMinutes(5);
         }
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void Setup()
         {
             _requestClient = new MessageRequestClient<PingMessage, PongMessage>(Bus, InputQueueAddress, TestTimeout);

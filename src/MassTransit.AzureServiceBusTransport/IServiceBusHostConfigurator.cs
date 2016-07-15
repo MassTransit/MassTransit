@@ -14,6 +14,7 @@ namespace MassTransit.AzureServiceBusTransport
 {
     using System;
     using Microsoft.ServiceBus;
+    using Microsoft.ServiceBus.Messaging;
 
 
     public interface IServiceBusHostConfigurator
@@ -27,5 +28,35 @@ namespace MassTransit.AzureServiceBusTransport
         /// Sets the operation timeout for the messaging factory
         /// </summary>
         TimeSpan OperationTimeout { set; }
+
+        /// <summary>
+        /// The minimum back off interval for the exponential retry policy
+        /// </summary>
+        TimeSpan RetryMinBackoff { set; }
+
+        /// <summary>
+        /// The maximum back off interval for the exponential retry policy
+        /// </summary>
+        TimeSpan RetryMaxBackoff { set; }
+
+        /// <summary>
+        /// The retry limit for service bus operations
+        /// </summary>
+        int RetryLimit { set; }
+
+        /// <summary>
+        /// Sets the messaging protocol to use with the messaging factory, defaults to AMQP.
+        /// </summary>
+        TransportType TransportType { set; }
+
+        /// <summary>
+        /// Sets the batch flush interval to use with the messaging factory, default is 20ms. 
+        /// </summary>
+        /// <remarks>
+        /// Currently the Microsoft ServiceBus client defaults to 20ms. For more inforamtion
+        /// regarding batching and performance see: 
+        /// https://azure.microsoft.com/en-us/blog/new-article-best-practices-for-performance-improvements-using-service-bus-brokered-messaging/
+        /// </remarks>
+        TimeSpan BatchFlushInterval { set; }
     }
 }

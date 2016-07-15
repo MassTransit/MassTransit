@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -15,70 +15,45 @@ namespace MassTransit.AzureServiceBusTransport.Contexts
     using System;
     using System.Threading;
     using System.Threading.Tasks;
+    using Configuration;
     using Context;
     using Microsoft.ServiceBus;
     using Microsoft.ServiceBus.Messaging;
 
 
     public class ServiceBusConnectionContext :
+        BasePipeContext,
         ConnectionContext
     {
-        readonly CancellationToken _cancellationToken;
         readonly IServiceBusHost _host;
-        readonly PayloadCache _payloadCache;
 
         public ServiceBusConnectionContext(IServiceBusHost host, CancellationToken cancellationToken)
+            : base(new PayloadCache(), cancellationToken)
         {
             _host = host;
-            _cancellationToken = cancellationToken;
-            _payloadCache = new PayloadCache();
         }
 
-        public bool HasPayloadType(Type contextType)
-        {
-            return _payloadCache.HasPayloadType(contextType);
-        }
+        public Task<MessagingFactory> MessagingFactory => _host.MessagingFactory;
 
-        public bool TryGetPayload<TPayload>(out TPayload context)
-            where TPayload : class
-        {
-            return _payloadCache.TryGetPayload(out context);
-        }
+        public Task<MessagingFactory> SessionMessagingFactory => _host.SessionMessagingFactory;
 
-        public TPayload GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory)
-            where TPayload : class
-        {
-            return _payloadCache.GetOrAddPayload(payloadFactory);
-        }
+        public Task<NamespaceManager> NamespaceManager => _host.NamespaceManager;
 
-        public Task<MessagingFactory> MessagingFactory
-        {
-            get { return _host.MessagingFactory; }
-        }
-
-        public Task<NamespaceManager> NamespaceManager
-        {
-            get { return _host.NamespaceManager; }
-        }
-
-        public Task<NamespaceManager> RootNamespaceManager
-        {
-            get { return _host.RootNamespaceManager; }
-        }
+        public Task<NamespaceManager> RootNamespaceManager => _host.RootNamespaceManager;
 
         public Uri GetQueueAddress(QueueDescription queueDescription)
         {
             return _host.Settings.GetInputAddress(queueDescription);
         }
 
+        public Uri GetTopicAddress(Type messageType)
+        {
+            return _host.MessageNameFormatter.GetTopicAddress(_host, messageType);
+        }
+
         public string GetQueuePath(QueueDescription queueDescription)
         {
             return _host.GetQueuePath(queueDescription);
-        }
-
-        public CancellationToken CancellationToken
-        {
-            get { return _cancellationToken; }
         }
     }
 }

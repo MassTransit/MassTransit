@@ -65,5 +65,15 @@ namespace MassTransit.AzureServiceBusTransport.Hosting
         {
             ReceiveEndpoint(queueName, _defaultConsumerLimit, configureEndpoint);
         }
+
+        public void ConfigureSend(Action<ISendPipeConfigurator> callback)
+        {
+            _configurator.ConfigureSend(callback);
+        }
+
+        public void ConfigurePublish(Action<IPublishPipeConfigurator> callback)
+        {
+            _configurator.ConfigurePublish(callback);
+        }
     }
 }

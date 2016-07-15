@@ -16,7 +16,6 @@ namespace MassTransit
     using RabbitMqTransport;
     using RabbitMqTransport.Configuration;
     using RabbitMqTransport.Configuration.Configurators;
-    using Util;
 
 
     public static class RabbitMqHostConfigurationExtensions
@@ -38,6 +37,51 @@ namespace MassTransit
         }
 
         /// <summary>
+        /// Configure a RabbitMQ host with a host name and virtual host
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="virtualHost">The virtual host to use</param>
+        /// <param name="configure">The configuratino callback</param>
+        /// <param name="host">The host name of the broker</param>
+        public static IRabbitMqHost Host(this IRabbitMqBusFactoryConfigurator configurator, string host, string virtualHost,
+            Action<IRabbitMqHostConfigurator> configure)
+        {
+            if (host == null)
+                throw new ArgumentNullException(nameof(host));
+            if (virtualHost == null)
+                throw new ArgumentNullException(nameof(virtualHost));
+
+            var hostConfigurator = new RabbitMqHostConfigurator(host, virtualHost);
+
+            configure(hostConfigurator);
+
+            return configurator.Host(hostConfigurator.Settings);
+        }
+
+        /// <summary>
+        /// Configure a RabbitMQ host with a host name and virtual host
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="port">The port to connect to the broker</param>
+        /// <param name="virtualHost">The virtual host to use</param>
+        /// <param name="configure">The configuratino callback</param>
+        /// <param name="host">The host name of the broker</param>
+        public static IRabbitMqHost Host(this IRabbitMqBusFactoryConfigurator configurator, string host, ushort port, string virtualHost,
+            Action<IRabbitMqHostConfigurator> configure)
+        {
+            if (host == null)
+                throw new ArgumentNullException(nameof(host));
+            if (virtualHost == null)
+                throw new ArgumentNullException(nameof(virtualHost));
+
+            var hostConfigurator = new RabbitMqHostConfigurator(host, virtualHost, port);
+
+            configure(hostConfigurator);
+
+            return configurator.Host(hostConfigurator.Settings);
+        }
+
+        /// <summary>
         /// Declare a ReceiveEndpoint using a unique generated queue name. This queue defaults to auto-delete
         /// and non-durable. By default all services bus instances include a default receiveEndpoint that is
         /// of this type (created automatically upon the first receiver binding).
@@ -48,7 +92,7 @@ namespace MassTransit
         public static void ReceiveEndpoint(this IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host,
             Action<IRabbitMqReceiveEndpointConfigurator> configure)
         {
-            var queueName = HostMetadataCache.Host.GetTemporaryQueueName("receiveEndpoint-");
+            var queueName = configurator.GetTemporaryQueueName("receiveEndpoint-");
 
             configurator.ReceiveEndpoint(host, queueName, x =>
             {
@@ -57,6 +101,35 @@ namespace MassTransit
 
                 configure(x);
             });
+        }
+
+        /// <summary>
+        /// Registers a management endpoint on the bus, which can be used to control
+        /// filters and other management control points on the bus.
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="host">The host where the endpoint is to be created</param>
+        /// <param name="configure">Configure additional values of the underlying receive endpoint</param>
+        /// <returns></returns>
+        public static IManagementEndpointConfigurator ManagementEndpoint(this IRabbitMqBusFactoryConfigurator configurator,
+            IRabbitMqHost host, Action<IRabbitMqReceiveEndpointConfigurator> configure = null)
+        {
+            if (configurator == null)
+                throw new ArgumentNullException(nameof(configurator));
+            if (host == null)
+                throw new ArgumentNullException(nameof(host));
+
+            var queueName = configurator.GetTemporaryQueueName("manage-");
+
+            var endpointConfigurator = new RabbitMqReceiveEndpointConfigurator(host, queueName);
+
+            configure?.Invoke(endpointConfigurator);
+
+            configurator.AddBusFactorySpecification(endpointConfigurator);
+
+            var managementEndpointConfigurator = new ManagementEndpointConfigurator(endpointConfigurator);
+
+            return managementEndpointConfigurator;
         }
     }
 }

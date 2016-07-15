@@ -175,7 +175,7 @@ them up as it's unique for each message.
 
 .. sourcecode:: csharp
 
-    public class SendObserver :
+    public class PublishObserver :
         IPublishObserver
     {
         public Task PrePublish<T>(PublishContext<T> context)

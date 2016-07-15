@@ -13,8 +13,11 @@
 namespace MassTransit.RabbitMqTransport.Hosting
 {
     using System.Net.Security;
+    using System.Security.Authentication;
+    using System.Security.Cryptography.X509Certificates;
     using Logging;
     using MassTransit.Hosting;
+    using Transports;
 
 
     public class RabbitMqHostBusFactory :
@@ -66,10 +69,16 @@ namespace MassTransit.RabbitMqTransport.Hosting
             public string Password => _settings.Password ?? "guest";
             public ushort Heartbeat => _settings.Heartbeat ?? 0;
             public bool Ssl => false;
+            public SslProtocols SslProtocol => SslProtocols.None;
             public string SslServerName => null;
             public SslPolicyErrors AcceptablePolicyErrors => SslPolicyErrors.None;
             public string ClientCertificatePath => null;
             public string ClientCertificatePassphrase => null;
+            public X509Certificate ClientCertificate => null;
+            public bool UseClientCertificateAsAuthenticationIdentity => false;
+            public IMessageNameFormatter MessageNameFormatter => new RabbitMqMessageNameFormatter();
+            public string[] ClusterMembers => null;
+            public IRabbitMqHostNameSelector HostNameSelector => null;
         }
     }
 }

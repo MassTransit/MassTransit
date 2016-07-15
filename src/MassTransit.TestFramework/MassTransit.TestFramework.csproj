@@ -10,7 +10,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>MassTransit.TestFramework</RootNamespace>
     <AssemblyName>MassTransit.TestFramework</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
@@ -43,6 +43,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <NoWarn>1587,1591,1998,3008,3001</NoWarn>
     <DocumentationFile>
     </DocumentationFile>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
@@ -57,17 +58,23 @@
     <WarningLevel>4</WarningLevel>
     <DocumentationFile>bin\Release\MassTransit.TestFramework.XML</DocumentationFile>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
-    <NoWarn>1591</NoWarn>
+    <NoWarn>1587,1591,1998,3008,3001</NoWarn>
     <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <AssemblyOriginatorKeyFile>..\..\MassTransit.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="NewId, Version=2.1.3.0, Culture=neutral, PublicKeyToken=b8e0e9f2f1e657fa, processorArchitecture=MSIL">
       <HintPath>..\packages\NewId.2.1.3\lib\net45\NewId.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="nunit.framework, Version=2.6.4.14350, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\NUnit.2.6.4\lib\nunit.framework.dll</HintPath>
+    <Reference Include="nunit.framework, Version=3.4.1.0, Culture=neutral, PublicKeyToken=2638cd05610744eb, processorArchitecture=MSIL">
+      <HintPath>..\packages\NUnit.3.4.1\lib\net45\nunit.framework.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
@@ -82,6 +89,19 @@
     <Compile Include="Courier\AddressActivity.cs" />
     <Compile Include="Courier\AddressArguments.cs" />
     <Compile Include="Courier\AddressLog.cs" />
+    <Compile Include="ExtensionMethodsForBuses.cs" />
+    <Compile Include="Indicators\BusActivityConsumeIndicator.cs" />
+    <Compile Include="Indicators\BaseBusActivityIndicatorConnectable.cs" />
+    <Compile Include="Indicators\BusActivityMonitor.cs" />
+    <Compile Include="Indicators\BusActivityPublishIndicator.cs" />
+    <Compile Include="Indicators\BusActivityReceiveIndicator.cs" />
+    <Compile Include="Indicators\BusActivitySendIndicator.cs" />
+    <Compile Include="Indicators\ConditionExpression.cs" />
+    <Compile Include="Indicators\IBusActivityMonitor.cs" />
+    <Compile Include="Indicators\ICondition.cs" />
+    <Compile Include="Indicators\IConditionObserver.cs" />
+    <Compile Include="Indicators\IObservableCondition.cs" />
+    <Compile Include="Indicators\ISignalResource.cs" />
     <Compile Include="InMemoryActivityTestFixture.cs" />
     <Compile Include="AsyncTestFixture.cs" />
     <Compile Include="Courier\FaultyActivity.cs" />
@@ -113,11 +133,11 @@
     <Compile Include="Messages\PingNotSupported.cs" />
     <Compile Include="Messages\PongMessage.cs" />
     <Compile Include="ExtensionMethodsForSagas.cs" />
-    <Compile Include="RandomMagnumAssertion.cs" />
     <Compile Include="TestConsumeContext.cs" />
     <Compile Include="TestConsumeObserver.cs" />
     <Compile Include="TestObserver.cs" />
     <Compile Include="TestSymmetricKeyProvider.cs" />
+    <Compile Include="ThreadSafeRandom.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="MassTransit.TestFramework.log4net.xml">

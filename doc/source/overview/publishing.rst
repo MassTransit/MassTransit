@@ -18,7 +18,7 @@ RabbitMQ provides powerful routing capabilities out of the box, in the form of e
 to queues, as well as other exchanges, making it easy to create a message routing fabric. MassTransit leverages exchanges
 and queues combined with the .NET type system to connect subscribers to publishers.
 
-MassTransit uses the message type to declare exchanges and exchange bindings that match the heirarchy of types implemented
+MassTransit uses the message type to declare exchanges and exchange bindings that match the hierarchy of types implemented
 by the message type. Interfaces are declared as separate exchanges (using a fully-qualified type name that is compatible with
 the naming structure of exchanges) and bound to the published message type exchange. When a message is first published, the
 exchanges are declared once, and then used for the life of the channel.
@@ -32,7 +32,7 @@ This approach was `based on an article`_ on how to maximize routing performance 
 
 .. _based on an article: http://spring.io/blog/2011/04/01/routing-topologies-for-performance-and-scalability-with-rabbitmq/
 
-This dynamic, type-based routing model has provided very powerful in many large applications. The ability to add
+This dynamic, type-based routing model has proved very powerful in many large applications. The ability to add
 new consumers to an existing message publisher is a great way to manage dependencies and keep projects from becoming tightly
 coupled.
 
@@ -116,7 +116,7 @@ Balancing the load
 Because RabbitMQ is a message broker, it supports multiple readers from the same queue. This makes it super easy to setup a
 load balancing scenario where the same service is running on multiple servers, each of which is connected to the same queue. As 
 messages arrive on the queue, they are delivered to the first available consumer that can receive the message. To get good 
-load balancing, it's important to set the ```PrefetchCount``` to a sensible value so that messages are well distributed.
+load balancing, it's important to set the ```PrefetchCount``` to a sensible value on the consumer so that messages are well distributed.
 
 
 Routing on Azure Service Bus

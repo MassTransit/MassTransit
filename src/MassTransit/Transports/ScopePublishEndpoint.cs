@@ -31,25 +31,25 @@ namespace MassTransit.Transports
             _context = context;
         }
 
-        async Task IPublishEndpoint.Publish<T>(T message, CancellationToken cancellationToken)
+        Task IPublishEndpoint.Publish<T>(T message, CancellationToken cancellationToken)
         {
             var contextPipe = new ScopePublishContextPipe<T>(_context);
 
-            await _publishEndpoint.Publish(message, contextPipe, cancellationToken).ConfigureAwait(false);
+            return _publishEndpoint.Publish(message, contextPipe, cancellationToken);
         }
 
-        async Task IPublishEndpoint.Publish<T>(T message, IPipe<PublishContext<T>> publishPipe, CancellationToken cancellationToken)
+        Task IPublishEndpoint.Publish<T>(T message, IPipe<PublishContext<T>> publishPipe, CancellationToken cancellationToken)
         {
             var contextPipe = new ScopePublishContextPipe<T>(publishPipe, _context);
 
-            await _publishEndpoint.Publish(message, contextPipe, cancellationToken).ConfigureAwait(false);
+            return _publishEndpoint.Publish(message, contextPipe, cancellationToken);
         }
 
-        async Task IPublishEndpoint.Publish<T>(T message, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
+        Task IPublishEndpoint.Publish<T>(T message, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
         {
             var contextPipe = new ScopePublishContextPipe<T>(publishPipe, _context);
 
-            await _publishEndpoint.Publish(message, contextPipe, cancellationToken).ConfigureAwait(false);
+            return _publishEndpoint.Publish(message, contextPipe, cancellationToken);
         }
 
         Task IPublishEndpoint.Publish(object message, CancellationToken cancellationToken)
@@ -82,27 +82,27 @@ namespace MassTransit.Transports
             return PublishEndpointConverterCache.Publish(this, message, messageType, publishPipe, cancellationToken);
         }
 
-        async Task IPublishEndpoint.Publish<T>(object values, CancellationToken cancellationToken)
+        Task IPublishEndpoint.Publish<T>(object values, CancellationToken cancellationToken)
         {
             var contextPipe = new ScopePublishContextPipe<T>(_context);
 
-            await _publishEndpoint.Publish(values, contextPipe, cancellationToken).ConfigureAwait(false);
+            return _publishEndpoint.Publish(values, contextPipe, cancellationToken);
         }
 
-        async Task IPublishEndpoint.Publish<T>(object values, IPipe<PublishContext<T>> publishPipe,
+        Task IPublishEndpoint.Publish<T>(object values, IPipe<PublishContext<T>> publishPipe,
             CancellationToken cancellationToken)
         {
             var contextPipe = new ScopePublishContextPipe<T>(publishPipe, _context);
 
-            await _publishEndpoint.Publish(values, contextPipe, cancellationToken).ConfigureAwait(false);
+            return _publishEndpoint.Publish(values, contextPipe, cancellationToken);
         }
 
-        async Task IPublishEndpoint.Publish<T>(object values, IPipe<PublishContext> publishPipe,
+        Task IPublishEndpoint.Publish<T>(object values, IPipe<PublishContext> publishPipe,
             CancellationToken cancellationToken)
         {
             var contextPipe = new ScopePublishContextPipe<T>(publishPipe, _context);
 
-            await _publishEndpoint.Publish(values, contextPipe, cancellationToken).ConfigureAwait(false);
+            return _publishEndpoint.Publish(values, contextPipe, cancellationToken);
         }
 
         public ConnectHandle ConnectPublishObserver(IPublishObserver observer)

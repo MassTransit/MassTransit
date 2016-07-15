@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,6 +14,7 @@ namespace MassTransit.Testing.Scenarios
 {
     using System;
     using System.Threading;
+    using System.Threading.Tasks;
     using TestDecorators;
 
 
@@ -26,10 +27,10 @@ namespace MassTransit.Testing.Scenarios
         readonly IBusControl _busControl;
         readonly PublishedMessageList _published;
         readonly ReceivedMessageList _skipped;
+        readonly Task<ISendEndpoint> _subjectSendEndpoint;
         readonly TimeSpan _timeout;
         readonly CancellationTokenSource _tokenSource;
         BusHandle _busHandle;
-        ISendEndpoint _subjectSendEndpoint;
 
         public BusTestScenario(TimeSpan timeout, IBusControl busControl)
         {
@@ -43,11 +44,11 @@ namespace MassTransit.Testing.Scenarios
             _tokenSource = new CancellationTokenSource(timeout);
             CancellationToken = _tokenSource.Token;
 
-            _subjectSendEndpoint = _busControl.GetSendEndpoint(new Uri("loopback://localhost/input_queue")).Result;
 
             var testSendObserver = new TestSendObserver(timeout);
             Sent = testSendObserver.Messages;
-            _subjectSendEndpoint.ConnectSendObserver(testSendObserver);
+
+            _subjectSendEndpoint = GetSendEndpoint(testSendObserver);
 
             var consumeObserver = new TestConsumeObserver(timeout);
             Received = consumeObserver.Messages;
@@ -56,7 +57,7 @@ namespace MassTransit.Testing.Scenarios
             _busHandle = _busControl.Start();
         }
 
-        public virtual ISendEndpoint SubjectSendEndpoint => _subjectSendEndpoint;
+        public virtual Task<ISendEndpoint> SubjectSendEndpoint => _subjectSendEndpoint;
 
         public ISentMessageList Sent { get; }
 
@@ -85,5 +86,14 @@ namespace MassTransit.Testing.Scenarios
         }
 
         public virtual IBus Bus => _busControl;
+
+        async Task<ISendEndpoint> GetSendEndpoint(TestSendObserver testSendObserver)
+        {
+            var endpoint = await _busControl.GetSendEndpoint(new Uri("loopback://localhost/input_queue")).ConfigureAwait(false);
+
+            endpoint.ConnectSendObserver(testSendObserver);
+
+            return endpoint;
+        }
     }
 }

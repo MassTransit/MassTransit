@@ -30,6 +30,7 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
     {
         readonly IServiceBusHost _host;
         readonly ReceiveEndpointSettings _settings;
+        bool _subscribeMessageTopics;
 
         public ServiceBusReceiveEndpointConfigurator(IServiceBusHost host, string queueName, IConsumePipe consumePipe = null)
             : this(host, new ReceiveEndpointSettings(queueName), consumePipe)
@@ -41,11 +42,12 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
         {
             _host = host;
             _settings = settings;
+            _subscribeMessageTopics = true;
         }
 
         public override IEnumerable<ValidationResult> Validate()
         {
-            foreach (ValidationResult result in base.Validate())
+            foreach (var result in base.Validate())
                 yield return result;
 
             if (_settings.PrefetchCount <= 0)
@@ -61,7 +63,7 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
             ServiceBusReceiveEndpointBuilder endpointBuilder = null;
             var receivePipe = CreateReceivePipe(builder, consumePipe =>
             {
-                endpointBuilder = new ServiceBusReceiveEndpointBuilder(consumePipe, _host.MessageNameFormatter);
+                endpointBuilder = new ServiceBusReceiveEndpointBuilder(consumePipe, _host.MessageNameFormatter, _subscribeMessageTopics);
                 return endpointBuilder;
             });
 
@@ -71,6 +73,13 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
             var transport = new ServiceBusReceiveTransport(_host, _settings, endpointBuilder.GetTopicSubscriptions().ToArray());
 
             builder.AddReceiveEndpoint(_settings.QueueDescription.Path, new ReceiveEndpoint(transport, receivePipe));
+        }
+
+        public IServiceBusHost Host => _host;
+
+        public bool SubscribeMessageTopics
+        {
+            set { _subscribeMessageTopics = value; }
         }
 
         public TimeSpan AutoDeleteOnIdle
@@ -149,6 +158,11 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
             set { _settings.QueueDescription.RequiresDuplicateDetection = value; }
         }
 
+        public bool RequiresSession
+        {
+            set { _settings.QueueDescription.RequiresSession = value; }
+        }
+
         public bool SupportOrdering
         {
             set { _settings.QueueDescription.SupportOrdering = value; }
@@ -181,7 +195,7 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
 
         protected override Uri GetErrorAddress()
         {
-            string errorQueueName = _settings.QueueDescription.Path + "_error";
+            var errorQueueName = _settings.QueueDescription.Path + "_error";
 
             var errorQueueDescription = GetQueueDescription(errorQueueName);
 
@@ -194,13 +208,16 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
             {
                 AutoDeleteOnIdle = _settings.QueueDescription.AutoDeleteOnIdle,
                 EnableExpress = _settings.QueueDescription.EnableExpress,
-                DefaultMessageTimeToLive = _settings.QueueDescription.DefaultMessageTimeToLive
+                DefaultMessageTimeToLive = _settings.QueueDescription.DefaultMessageTimeToLive,
+                MaxDeliveryCount = _settings.QueueDescription.MaxDeliveryCount,
+                RequiresSession = _settings.QueueDescription.RequiresSession,
+                EnablePartitioning = _settings.QueueDescription.EnablePartitioning
             };
         }
 
         protected override Uri GetDeadLetterAddress()
         {
-            string skippedQueueName = _settings.QueueDescription.Path + "_skipped";
+            var skippedQueueName = _settings.QueueDescription.Path + "_skipped";
 
             var errorQueueDescription = GetQueueDescription(skippedQueueName);
 

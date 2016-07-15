@@ -51,7 +51,7 @@ namespace MassTransit.Tests.Performance
 
         IRequestClient<PingMessage, PongMessage> _requestClient;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void Setup()
         {
             _requestClient = new MessageRequestClient<PingMessage, PongMessage>(Bus, InputQueueAddress, TestTimeout);
@@ -64,7 +64,7 @@ namespace MassTransit.Tests.Performance
             base.ConfigureBus(configurator);
         }
 
-        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             configurator.Handler<PingMessage>(async context =>
             {
@@ -103,13 +103,13 @@ namespace MassTransit.Tests.Performance
 
         IRequestClient<PerformanceRequest, PerformanceResult> _requestClient;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void Setup()
         {
             _requestClient = CreateRequestClient<PerformanceRequest, PerformanceResult>();
         }
 
-        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             configurator.Handler<PerformanceRequest>(async context =>
             {

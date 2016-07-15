@@ -13,6 +13,7 @@
 namespace MassTransit.TestFramework
 {
     using System;
+    using System.Threading;
     using System.Threading.Tasks;
 
 
@@ -119,6 +120,30 @@ namespace MassTransit.TestFramework
             configurator.Handler<T>(async context =>
             {
                 if (filter(context))
+                    source.TrySetResult(context);
+            });
+
+            return source.Task;
+        }
+
+        /// <summary>
+        /// Registers a handler on the receive endpoint that is cancelled when the test is canceled
+        /// and completed when the message is received.
+        /// </summary>
+        /// <typeparam name="T">The message type</typeparam>
+        /// <param name="configurator">The endpoint configurator</param>
+        /// <param name="expectedCount">The expected number of messages</param>
+        /// <returns></returns>
+        protected Task<ConsumeContext<T>> Handled<T>(IReceiveEndpointConfigurator configurator, int expectedCount)
+            where T : class
+        {
+            var source = GetTask<ConsumeContext<T>>();
+
+            int count = 0;
+            configurator.Handler<T>(async context =>
+            {
+                var value = Interlocked.Increment(ref count);
+                if(value == expectedCount)
                     source.TrySetResult(context);
             });
 

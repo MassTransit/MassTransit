@@ -54,7 +54,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         RabbitMqHostSettings _hostSettings;
         ReceiveSettings _receiveSettings;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void WhenParsed()
         {
             _hostSettings = _uri.GetHostSettings();
@@ -75,7 +75,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         readonly Uri _uri = new Uri("rabbitmq://some_server/thehost/the_queue");
         ReceiveSettings _receiveSettings;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void WhenParsed()
         {
             _receiveSettings = _uri.GetReceiveSettings();
@@ -95,7 +95,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         readonly Uri _uri = new Uri("rabbitmq://some_server/thehost/the.queue");
         ReceiveSettings _receiveSettings;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void WhenParsed()
         {
             _receiveSettings = _uri.GetReceiveSettings();
@@ -115,7 +115,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         readonly Uri _uri = new Uri("rabbitmq://some_server/thehost/the:queue");
         ReceiveSettings _receiveSettings;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void WhenParsed()
         {
             _receiveSettings = _uri.GetReceiveSettings();
@@ -126,10 +126,12 @@ namespace MassTransit.RabbitMqTransport.Tests
     [TestFixture]
     public class GivenAnAddressWithSlash
     {
-        [Test, ExpectedException(typeof(RabbitMqAddressException))]
+        [Test]
         public void Should_have_the_queue_name()
         {
-            _receiveSettings = _uri.GetReceiveSettings();
+            TestDelegate invocation = () => _receiveSettings = _uri.GetReceiveSettings();
+
+            Assert.Throws<RabbitMqAddressException>(invocation);
         }
 
         readonly Uri _uri = new Uri("rabbitmq://some_server/thehost/the/queue");
@@ -156,7 +158,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         RabbitMqHostSettings _hostSettings;
         ReceiveSettings _receiveSettings;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void WhenParsed()
         {
             _hostSettings = _uri.GetHostSettings();
@@ -183,7 +185,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         readonly Uri _uri = new Uri("rabbitmq://some_server:12/the_queue");
         RabbitMqHostSettings _hostSettings;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void WhenParsed()
         {
             _hostSettings = _uri.GetHostSettings();
@@ -210,7 +212,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         RabbitMqHostSettings _hostSettings;
         ReceiveSettings _receiveSettings;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void WhenParsed()
         {
             _hostSettings = _uri.GetHostSettings();
@@ -249,7 +251,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         readonly Uri _uri = new Uri("rabbitmq://localhost/mttest/somequeue?ttl=30000");
         ReceiveSettings _receiveSettings;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void WhenParsed()
         {
             _receiveSettings = _uri.GetReceiveSettings();
@@ -281,7 +283,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         readonly Uri _uri = new Uri("rabbitmq://localhost/mttest/somequeue?prefetch=32");
         ReceiveSettings _receiveSettings;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void WhenParsed()
         {
             _receiveSettings = _uri.GetReceiveSettings();
@@ -326,7 +328,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         readonly Uri _uri = new Uri("rabbitmq://localhost/mttest/*?temporary=true");
         ReceiveSettings _receiveSettings;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void WhenParsed()
         {
             _receiveSettings = _uri.GetReceiveSettings();

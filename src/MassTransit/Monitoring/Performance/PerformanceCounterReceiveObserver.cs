@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -41,10 +41,10 @@ namespace MassTransit.Monitoring.Performance
             return TaskUtil.Completed;
         }
 
-        Task IReceiveObserver.ConsumeFault<T>(ConsumeContext<T> context, TimeSpan elapsed, string consumerType, Exception exception)
+        Task IReceiveObserver.ConsumeFault<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType, Exception exception)
         {
             ConsumerPerformanceCounterCache.GetCounter(consumerType).Faulted();
-            MessagePerformanceCounterCache<T>.Counter.Faulted();
+            MessagePerformanceCounterCache<T>.Counter.ConsumeFaulted(duration);
             return TaskUtil.Completed;
         }
 
@@ -52,10 +52,5 @@ namespace MassTransit.Monitoring.Performance
         {
             return TaskUtil.Completed;
         }
-    }
-
-
-    public class ReceiveEndpointPerformanceCounters
-    {
     }
 }

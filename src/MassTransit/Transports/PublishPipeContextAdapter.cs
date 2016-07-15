@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -17,7 +17,6 @@ namespace MassTransit.Transports
     using System.Threading.Tasks;
     using Context;
     using Pipeline;
-    using Util;
 
 
     public class PublishPipeContextAdapter<T> :
@@ -26,36 +25,47 @@ namespace MassTransit.Transports
     {
         readonly Guid? _conversationId;
         readonly Guid? _correlationId;
+        readonly T _message;
         readonly IPublishObserver _observer;
         readonly IPipe<PublishContext<T>> _pipe;
+        readonly IPublishPipe _publishPipe;
         readonly Uri _sourceAddress;
         PublishContext<T> _context;
 
-        public PublishPipeContextAdapter(IPipe<PublishContext<T>> pipe, IPublishObserver observer, Uri sourceAddress, Guid? correlationId, Guid? conversationId)
+        public PublishPipeContextAdapter(IPipe<PublishContext<T>> pipe, IPublishPipe publishPipe, IPublishObserver observer, Uri sourceAddress,
+            Guid? correlationId, Guid? conversationId, T message)
         {
             _pipe = pipe;
+            _publishPipe = publishPipe;
             _observer = observer;
             _sourceAddress = sourceAddress;
             _correlationId = correlationId;
             _conversationId = conversationId;
+            _message = message;
         }
 
-        public PublishPipeContextAdapter(IPipe<PublishContext> pipe, IPublishObserver observer, Uri sourceAddress, Guid? correlationId, Guid? conversationId)
+        public PublishPipeContextAdapter(IPipe<PublishContext> pipe, IPublishPipe publishPipe, IPublishObserver observer, Uri sourceAddress, Guid? correlationId,
+            Guid? conversationId, T message)
         {
             _pipe = pipe;
+            _publishPipe = publishPipe;
             _observer = observer;
             _sourceAddress = sourceAddress;
             _correlationId = correlationId;
             _conversationId = conversationId;
+            _message = message;
         }
 
-        public PublishPipeContextAdapter(IPublishObserver observer, Uri sourceAddress, Guid? correlationId, Guid? conversationId)
+        public PublishPipeContextAdapter(IPublishPipe publishPipe, IPublishObserver observer, Uri sourceAddress, Guid? correlationId, Guid? conversationId,
+            T message)
         {
             _pipe = Pipe.Empty<PublishContext<T>>();
+            _publishPipe = publishPipe;
             _observer = observer;
             _sourceAddress = sourceAddress;
             _correlationId = correlationId;
             _conversationId = conversationId;
+            _message = message;
         }
 
         void IProbeSite.Probe(ProbeContext context)
@@ -73,29 +83,35 @@ namespace MassTransit.Transports
             if (_correlationId.HasValue)
                 context.InitiatorId = _correlationId;
 
-            var publishContext = new PublishContextProxy<T>(context);
-            bool firstTime = Interlocked.CompareExchange(ref _context, publishContext, null) == null;
+            var publishContext = new PublishContextProxy<T>(context, context.Message);
+            var firstTime = Interlocked.CompareExchange(ref _context, publishContext, null) == null;
 
-            await _pipe.Send(publishContext);
+            await _publishPipe.Send(publishContext).ConfigureAwait(false);
+
+            await _pipe.Send(publishContext).ConfigureAwait(false);
 
             if (firstTime)
-                await _observer.PrePublish(publishContext);
+                await _observer.PrePublish(publishContext).ConfigureAwait(false);
         }
 
         public Task PostPublish()
         {
-            if (_context != null)
-                return _observer.PostPublish(_context);
-
-            return TaskUtil.Completed;
+            return _observer.PostPublish(_context ?? new FaultedPublishContext<T>(_message, CancellationToken.None)
+            {
+                SourceAddress = _sourceAddress,
+                CorrelationId = _correlationId,
+                ConversationId = _conversationId,
+            });
         }
 
         public Task PublishFaulted(Exception exception)
         {
-            if (_context != null)
-                return _observer.PublishFault(_context, exception);
-
-            return TaskUtil.Completed;
+            return _observer.PublishFault(_context ?? new FaultedPublishContext<T>(_message, CancellationToken.None)
+            {
+                SourceAddress = _sourceAddress,
+                CorrelationId = _correlationId,
+                ConversationId = _conversationId,
+            }, exception);
         }
     }
 }

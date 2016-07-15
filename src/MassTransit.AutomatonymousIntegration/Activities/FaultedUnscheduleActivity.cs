@@ -45,16 +45,16 @@ namespace Automatonymous.Activities
 
         async Task Activity<TInstance>.Faulted<TException>(BehaviorExceptionContext<TInstance, TException> context, Behavior<TInstance> next)
         {
-            await Faulted(context);
+            await Faulted(context).ConfigureAwait(false);
 
-            await next.Faulted(context);
+            await next.Faulted(context).ConfigureAwait(false);
         }
 
         async Task Activity<TInstance>.Faulted<T, TException>(BehaviorExceptionContext<TInstance, T, TException> context, Behavior<TInstance, T> next)
         {
-            await Faulted(context);
+            await Faulted(context).ConfigureAwait(false);
 
-            await next.Faulted(context);
+            await next.Faulted(context).ConfigureAwait(false);
         }
 
         async Task Faulted(BehaviorContext<TInstance> context)
@@ -70,7 +70,7 @@ namespace Automatonymous.Activities
             var previousTokenId = _schedule.GetTokenId(context.Instance);
             if (previousTokenId.HasValue)
             {
-                await schedulerContext.CancelScheduledSend(previousTokenId.Value);
+                await schedulerContext.CancelScheduledSend(previousTokenId.Value).ConfigureAwait(false);
 
                 _schedule.SetTokenId(context.Instance, default(Guid?));
             }

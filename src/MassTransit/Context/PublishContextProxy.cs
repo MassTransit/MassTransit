@@ -12,121 +12,37 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Context
 {
-    using System;
-    using System.Net.Mime;
-    using System.Threading;
-
-
-    public class PublishContextProxy<T> :
-        PublishContext<T>
-        where T : class
+    public class PublishContextProxy<TMessage> :
+        SendContextProxy<TMessage>,
+        PublishContext<TMessage>
+        where TMessage : class
     {
-        readonly SendContext<T> _context;
+        readonly SendContext _context;
 
-        public PublishContextProxy(SendContext<T> context)
+        public PublishContextProxy(SendContext context, TMessage message)
+            : base(context, message)
         {
             _context = context;
         }
 
         bool PublishContext.Mandatory { get; set; }
 
-        CancellationToken PipeContext.CancellationToken => _context.CancellationToken;
-
-        bool PipeContext.HasPayloadType(Type contextType)
+        SendContext<T> SendContext.CreateProxy<T>(T message)
         {
-            return _context.HasPayloadType(contextType);
+            return new PublishContextProxy<T>(_context, message);
+        }
+    }
+
+
+    public class PublishContextProxy :
+        SendContextProxy,
+        PublishContext
+    {
+        public PublishContextProxy(SendContext context)
+            : base(context)
+        {
         }
 
-        bool PipeContext.TryGetPayload<TPayload>(out TPayload payload)
-        {
-            return _context.TryGetPayload(out payload);
-        }
-
-        TPayload PipeContext.GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory)
-        {
-            return _context.GetOrAddPayload(payloadFactory);
-        }
-
-        Uri SendContext.SourceAddress
-        {
-            get { return _context.SourceAddress; }
-            set { _context.SourceAddress = value; }
-        }
-
-        Uri SendContext.DestinationAddress
-        {
-            get { return _context.DestinationAddress; }
-            set { _context.DestinationAddress = value; }
-        }
-
-        Uri SendContext.ResponseAddress
-        {
-            get { return _context.ResponseAddress; }
-            set { _context.ResponseAddress = value; }
-        }
-
-        Uri SendContext.FaultAddress
-        {
-            get { return _context.FaultAddress; }
-            set { _context.FaultAddress = value; }
-        }
-
-        Guid? SendContext.RequestId
-        {
-            get { return _context.RequestId; }
-            set { _context.RequestId = value; }
-        }
-
-        Guid? SendContext.MessageId
-        {
-            get { return _context.MessageId; }
-            set { _context.MessageId = value; }
-        }
-
-        Guid? SendContext.CorrelationId
-        {
-            get { return _context.CorrelationId; }
-            set { _context.CorrelationId = value; }
-        }
-
-        public Guid? ConversationId
-        {
-            get { return _context.ConversationId; }
-            set { _context.ConversationId = value; }
-        }
-
-        public Guid? InitiatorId
-        {
-            get { return _context.InitiatorId; }
-            set { _context.InitiatorId = value; }
-        }
-
-        SendHeaders SendContext.Headers => _context.Headers;
-
-        TimeSpan? SendContext.TimeToLive
-        {
-            get { return _context.TimeToLive; }
-            set { _context.TimeToLive = value; }
-        }
-
-        ContentType SendContext.ContentType
-        {
-            get { return _context.ContentType; }
-            set { _context.ContentType = value; }
-        }
-
-        bool SendContext.Durable
-        {
-            get { return _context.Durable; }
-            set { _context.Durable = value; }
-        }
-
-        IMessageSerializer SendContext.Serializer
-        {
-            get { return _context.Serializer; }
-            set { _context.Serializer = value; }
-        }
-
-        T SendContext<T>.Message => _context.Message;
+        bool PublishContext.Mandatory { get; set; }
     }
 }

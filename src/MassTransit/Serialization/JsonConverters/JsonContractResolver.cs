@@ -25,8 +25,7 @@ namespace MassTransit.Serialization.JsonConverters
         {
             JsonDictionaryContract contract = base.CreateDictionaryContract(objectType);
 
-            // don't camel-case the key names of a dictionary
-            contract.PropertyNameResolver = x => x;
+            contract.DictionaryKeyResolver = x => x;
 
             return contract;
         }

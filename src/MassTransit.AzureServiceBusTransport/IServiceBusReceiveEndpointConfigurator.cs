@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,9 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.AzureServiceBusTransport
 {
-    using System;
-
-
     /// <summary>
     /// Configure an Azure Service Bus receive endpoint
     /// </summary>
@@ -34,8 +31,13 @@ namespace MassTransit.AzureServiceBusTransport
         int MaxConcurrentCalls { set; }
 
         /// <summary>
-        /// The address on Azure of the endpoint that's being configured
+        /// The host on which the endpoint is being configured
         /// </summary>
-        Uri InputAddress { get; }
+        IServiceBusHost Host { get; }
+
+        /// <summary>
+        /// If true, subscribes the message type exchanges to the queue
+        /// </summary>
+        bool SubscribeMessageTopics { set; }
     }
 }

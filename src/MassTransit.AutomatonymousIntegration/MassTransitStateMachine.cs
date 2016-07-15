@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -21,6 +21,7 @@ namespace Automatonymous
     using MassTransit;
     using MassTransit.Internals.Extensions;
     using MassTransit.Logging;
+    using MassTransit.Scheduling;
     using Requests;
     using Schedules;
 
@@ -36,8 +37,8 @@ namespace Automatonymous
         SagaStateMachine<TInstance>
         where TInstance : class, SagaStateMachineInstance
     {
-        readonly ILog _log;
         readonly Dictionary<Event, EventCorrelation> _eventCorrelations;
+        readonly ILog _log;
         readonly Lazy<StateMachineRegistration[]> _registrations;
         Func<TInstance, bool> _isCompleted;
 
@@ -57,7 +58,7 @@ namespace Automatonymous
         {
             get
             {
-                foreach (Event @event in Events)
+                foreach (var @event in Events)
                 {
                     EventCorrelation correlation;
                     if (_eventCorrelations.TryGetValue(@event, out correlation))
@@ -108,7 +109,7 @@ namespace Automatonymous
         {
             base.Event(propertyExpression);
 
-            PropertyInfo propertyInfo = propertyExpression.GetPropertyInfo();
+            var propertyInfo = propertyExpression.GetPropertyInfo();
 
             var @event = (Event<T>)propertyInfo.GetValue(this);
 
@@ -138,10 +139,10 @@ namespace Automatonymous
         {
             base.Event(propertyExpression, eventPropertyExpression);
 
-            PropertyInfo propertyInfo = propertyExpression.GetPropertyInfo();
+            var propertyInfo = propertyExpression.GetPropertyInfo();
             var property = (TProperty)propertyInfo.GetValue(this);
 
-            PropertyInfo eventPropertyInfo = eventPropertyExpression.GetPropertyInfo();
+            var eventPropertyInfo = eventPropertyExpression.GetPropertyInfo();
             var @event = (Event<T>)eventPropertyInfo.GetValue(property);
 
             EventCorrelation existingCorrelation;
@@ -167,11 +168,11 @@ namespace Automatonymous
 
             if (typeof(T).HasInterface<CorrelatedBy<Guid>>())
             {
-                PropertyInfo propertyInfo = propertyExpression.GetPropertyInfo();
+                var propertyInfo = propertyExpression.GetPropertyInfo();
 
                 var @event = (Event<T>)propertyInfo.GetValue(this);
 
-                Type builderType = typeof(CorrelatedByEventCorrelationBuilder<,>).MakeGenericType(typeof(TInstance), typeof(T));
+                var builderType = typeof(CorrelatedByEventCorrelationBuilder<,>).MakeGenericType(typeof(TInstance), typeof(T));
                 var builder = (EventCorrelationBuilder<TInstance>)Activator.CreateInstance(builderType, this, @event);
 
                 _eventCorrelations[@event] = builder.Build();
@@ -223,9 +224,9 @@ namespace Automatonymous
             where TRequest : class
             where TResponse : class
         {
-            PropertyInfo property = propertyExpression.GetPropertyInfo();
+            var property = propertyExpression.GetPropertyInfo();
 
-            string requestName = property.Name;
+            var requestName = property.Name;
 
             var request = new StateMachineRequest<TInstance, TRequest, TResponse>(requestName, requestIdExpression, settings);
 
@@ -236,6 +237,17 @@ namespace Automatonymous
             Event(propertyExpression, x => x.TimeoutExpired, x => x.CorrelateBy<Guid>(requestIdExpression, context => context.Message.RequestId));
 
             State(propertyExpression, x => x.Pending);
+
+            DuringAny(
+                When(request.Completed)
+                    .CancelRequestTimeout(request)
+                    .ClearRequest(request),
+                When(request.Faulted)
+                    .CancelRequestTimeout(request)
+                    .ClearRequest(request),
+                When(request.TimeoutExpired)
+                    .ClearRequest(request));
+
         }
 
         /// <summary>
@@ -269,9 +281,9 @@ namespace Automatonymous
             ScheduleSettings<TInstance, TMessage> settings)
             where TMessage : class
         {
-            PropertyInfo property = propertyExpression.GetPropertyInfo();
+            var property = propertyExpression.GetPropertyInfo();
 
-            string name = property.Name;
+            var name = property.Name;
 
             var schedule = new StateMachineSchedule<TInstance, TMessage>(name, tokenIdExpression, settings);
 
@@ -293,19 +305,19 @@ namespace Automatonymous
                 When(schedule.AnyReceived)
                     .ThenAsync(async context =>
                     {
-                        var tokenId = schedule.GetTokenId(context.Instance);
+                        Guid? tokenId = schedule.GetTokenId(context.Instance);
 
                         ConsumeContext consumeContext;
                         if (context.TryGetPayload(out consumeContext))
                         {
-                            var messageTokenId = consumeContext.GetSchedulingTokenId();
+                            Guid? messageTokenId = consumeContext.GetSchedulingTokenId();
                             if (messageTokenId.HasValue)
                             {
                                 if (!tokenId.HasValue || (messageTokenId.Value != tokenId.Value))
                                 {
                                     if (_log.IsDebugEnabled)
                                         _log.DebugFormat("SAGA: {0} Scheduled message not current: {1}", context.Instance.CorrelationId, messageTokenId.Value);
-                                    
+
                                     return;
                                 }
                             }
@@ -313,7 +325,7 @@ namespace Automatonymous
 
                         BehaviorContext<TInstance, TMessage> eventContext = context.GetProxy(schedule.Received, context.Data);
 
-                        await ((StateMachine<TInstance>)this).RaiseEvent(eventContext);
+                        await ((StateMachine<TInstance>)this).RaiseEvent(eventContext).ConfigureAwait(false);
 
                         schedule.SetTokenId(context.Instance, default(Guid?));
                     }));
@@ -329,7 +341,7 @@ namespace Automatonymous
         /// </summary>
         void RegisterImplicit()
         {
-            foreach (StateMachineRegistration declaration in _registrations.Value)
+            foreach (var declaration in _registrations.Value)
                 declaration.Declare(this);
         }
 
@@ -340,7 +352,7 @@ namespace Automatonymous
 
             if (typeInfo.BaseType != null)
             {
-                foreach (PropertyInfo propertyInfo in GetStateMachineProperties(typeInfo.BaseType.GetTypeInfo()))
+                foreach (var propertyInfo in GetStateMachineProperties(typeInfo.BaseType.GetTypeInfo()))
                     yield return propertyInfo;
             }
 
@@ -349,7 +361,7 @@ namespace Automatonymous
                 .Select(x => typeInfo.GetDeclaredProperty(x.Name.Substring("get_".Length)))
                 .Where(x => x.CanRead && x.CanWrite);
 
-            foreach (PropertyInfo propertyInfo in properties)
+            foreach (var propertyInfo in properties)
                 yield return propertyInfo;
         }
 
@@ -357,22 +369,29 @@ namespace Automatonymous
         {
             var events = new List<StateMachineRegistration>();
 
-            Type machineType = GetType();
+            var machineType = GetType();
 
             IEnumerable<PropertyInfo> properties = GetStateMachineProperties(machineType.GetTypeInfo());
 
-            foreach (PropertyInfo propertyInfo in properties)
+            foreach (var propertyInfo in properties)
             {
                 if (propertyInfo.PropertyType.IsGenericType)
                 {
                     if (propertyInfo.PropertyType.GetGenericTypeDefinition() == typeof(Event<>))
                     {
-                        Type messageType = propertyInfo.PropertyType.GetGenericArguments().First();
+                        var messageType = propertyInfo.PropertyType.GetGenericArguments().First();
                         if (messageType.HasInterface<CorrelatedBy<Guid>>())
                         {
-                            Type declarationType = typeof(CorrelatedEventRegistration<,>).MakeGenericType(typeof(TInstance), machineType,
+                            var declarationType = typeof(CorrelatedEventRegistration<,>).MakeGenericType(typeof(TInstance), machineType,
                                 messageType);
-                            object declaration = Activator.CreateInstance(declarationType, propertyInfo);
+                            var declaration = Activator.CreateInstance(declarationType, propertyInfo);
+                            events.Add((StateMachineRegistration)declaration);
+                        }
+                        else
+                        {
+                            var declarationType = typeof(UncorrelatedEventRegistration<,>).MakeGenericType(typeof(TInstance), machineType,
+                                messageType);
+                            var declaration = Activator.CreateInstance(declarationType, propertyInfo);
                             events.Add((StateMachineRegistration)declaration);
                         }
                     }
@@ -386,7 +405,7 @@ namespace Automatonymous
         class CorrelatedEventRegistration<TStateMachine, TData> :
             StateMachineRegistration
             where TStateMachine : MassTransitStateMachine<TInstance>
-            where TData : CorrelatedBy<Guid>
+            where TData : class, CorrelatedBy<Guid>
         {
             readonly PropertyInfo _propertyInfo;
 
@@ -401,10 +420,37 @@ namespace Automatonymous
                 var @event = (Event<TData>)_propertyInfo.GetValue(machine);
                 if (@event != null)
                 {
-                    Type builderType = typeof(CorrelatedByEventCorrelationBuilder<,>).MakeGenericType(typeof(TInstance), typeof(TData));
+                    var builderType = typeof(CorrelatedByEventCorrelationBuilder<,>).MakeGenericType(typeof(TInstance), typeof(TData));
                     var builder = (EventCorrelationBuilder<TInstance>)Activator.CreateInstance(builderType, machine, @event);
 
                     machine._eventCorrelations[@event] = builder.Build();
+                }
+            }
+        }
+
+
+        class UncorrelatedEventRegistration<TStateMachine, TData> :
+            StateMachineRegistration
+            where TStateMachine : MassTransitStateMachine<TInstance>
+            where TData : class
+        {
+            readonly PropertyInfo _propertyInfo;
+
+            public UncorrelatedEventRegistration(PropertyInfo propertyInfo)
+            {
+                _propertyInfo = propertyInfo;
+            }
+
+            public void Declare(object stateMachine)
+            {
+                var machine = ((TStateMachine)stateMachine);
+                var @event = (Event<TData>)_propertyInfo.GetValue(machine);
+                if (@event != null)
+                {
+                    var correlationType = typeof(UncorrelatedEventCorrelation<,>).MakeGenericType(typeof(TInstance), typeof(TData));
+                    var correlation = (EventCorrelation<TInstance, TData>)Activator.CreateInstance(correlationType, @event);
+
+                    machine._eventCorrelations[@event] = correlation;
                 }
             }
         }

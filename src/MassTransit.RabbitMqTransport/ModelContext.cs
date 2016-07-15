@@ -40,15 +40,15 @@ namespace MassTransit.RabbitMqTransport
         /// <param name="exchange">The destination exchange</param>
         /// <param name="routingKey">The exchange routing key</param>
         /// <param name="mandatory">true if the message must be delivered</param>
-        /// <param name="immediate">true if the message should fail if no consumer is available</param>
         /// <param name="basicProperties">The message properties</param>
         /// <param name="body">The message body</param>
+        /// <param name="awaitAck"></param>
         /// <returns>An awaitable Task that is completed when the message is acknowledged by the broker</returns>
-        Task BasicPublishAsync(string exchange, string routingKey, bool mandatory, bool immediate, IBasicProperties basicProperties,
-            byte[] body);
+        Task BasicPublishAsync(string exchange, string routingKey, bool mandatory, IBasicProperties basicProperties, byte[] body, bool awaitAck);
 
         Task ExchangeBind(string destination, string source, string routingKey, IDictionary<string, object> arguments);
         Task ExchangeDeclare(string exchange, string type, bool durable, bool autoDelete, IDictionary<string, object> arguments);
+        Task ExchangeDeclarePassive(string exchange);
         Task QueueBind(string queue, string exchange, string routingKey, IDictionary<string, object> arguments);
         Task<QueueDeclareOk> QueueDeclare(string queue, bool durable, bool exclusive, bool autoDelete, IDictionary<string, object> arguments);
         Task<uint> QueuePurge(string queue);

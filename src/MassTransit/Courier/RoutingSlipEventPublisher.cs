@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -32,15 +32,7 @@ namespace MassTransit.Courier
 
         static RoutingSlipEventPublisher()
         {
-            MessageCorrelation.UseCorrelationId<RoutingSlipCompleted>(x => x.TrackingNumber);
-            MessageCorrelation.UseCorrelationId<RoutingSlipFaulted>(x => x.TrackingNumber);
-            MessageCorrelation.UseCorrelationId<RoutingSlipActivityCompleted>(x => x.ExecutionId);
-            MessageCorrelation.UseCorrelationId<RoutingSlipActivityFaulted>(x => x.ExecutionId);
-            MessageCorrelation.UseCorrelationId<RoutingSlipActivityCompensated>(x => x.ExecutionId);
-            MessageCorrelation.UseCorrelationId<RoutingSlipActivityCompensationFailed>(x => x.ExecutionId);
-            MessageCorrelation.UseCorrelationId<RoutingSlipCompensationFailed>(x => x.TrackingNumber);
-            MessageCorrelation.UseCorrelationId<RoutingSlipTerminated>(x => x.TrackingNumber);
-            MessageCorrelation.UseCorrelationId<RoutingSlipRevised>(x => x.TrackingNumber);
+            RoutingSlipEventCorrelation.ConfigureMessageCorrelation();
         }
 
         public RoutingSlipEventPublisher(CompensateContext compensateContext, RoutingSlip routingSlip)
@@ -154,11 +146,14 @@ namespace MassTransit.Courier
                     : GetEmptyObject()));
         }
 
-        public Task PublishRoutingSlipRevised(Guid executionId, DateTime timestamp, TimeSpan duration, IDictionary<string, object> variables,
+        public Task PublishRoutingSlipRevised(string activityName, Guid executionId, DateTime timestamp, TimeSpan duration,
+            IDictionary<string, object> variables,
             IList<Activity> itinerary, IList<Activity> previousItinerary)
         {
             return PublishEvent<RoutingSlipRevised>(RoutingSlipEvents.Revised, contents => new RoutingSlipRevisedMessage(
+                _host,
                 _routingSlip.TrackingNumber,
+                activityName,
                 executionId,
                 timestamp,
                 duration,
@@ -173,11 +168,14 @@ namespace MassTransit.Courier
                     : Enumerable.Empty<Activity>()));
         }
 
-        public Task PublishRoutingSlipTerminated(Guid executionId, DateTime timestamp, TimeSpan duration, IDictionary<string, object> variables,
+        public Task PublishRoutingSlipTerminated(string activityName, Guid executionId, DateTime timestamp, TimeSpan duration,
+            IDictionary<string, object> variables,
             IList<Activity> previousItinerary)
         {
             return PublishEvent<RoutingSlipTerminated>(RoutingSlipEvents.Terminated, contents => new RoutingSlipTerminatedMessage(
+                _host,
                 _routingSlip.TrackingNumber,
+                activityName,
                 executionId,
                 timestamp,
                 duration,
@@ -225,16 +223,16 @@ namespace MassTransit.Courier
                 {
                     if (subscription.Events == RoutingSlipEvents.All || subscription.Events.HasFlag(eventFlag))
                     {
-                        var endpoint = await _sendEndpointProvider.GetSendEndpoint(subscription.Address);
+                        var endpoint = await _sendEndpointProvider.GetSendEndpoint(subscription.Address).ConfigureAwait(false);
 
                         var subscriptionMessage = messageFactory(subscription.Include);
 
-                        await endpoint.Send(subscriptionMessage);
+                        await endpoint.Send(subscriptionMessage).ConfigureAwait(false);
                     }
                 }
             }
             else
-                await _publishEndpoint.Publish(messageFactory(RoutingSlipEventContents.All));
+                await _publishEndpoint.Publish(messageFactory(RoutingSlipEventContents.All)).ConfigureAwait(false);
         }
     }
 }

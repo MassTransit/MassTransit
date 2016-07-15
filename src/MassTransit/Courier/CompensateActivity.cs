@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2013 Chris Patterson
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -15,7 +15,8 @@ namespace MassTransit.Courier
     using System.Threading.Tasks;
 
 
-    public interface CompensateActivity<in TLog>
+    public interface CompensateActivity<in TLog> :
+        ICompensateActivity
         where TLog : class
     {
         /// <summary>

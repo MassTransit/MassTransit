@@ -29,7 +29,8 @@ namespace MassTransit.Saga.Pipeline.Filters
     {
         void IProbeSite.Probe(ProbeContext context)
         {
-            context.CreateFilterScope("observes");
+            var scope = context.CreateFilterScope("observes");
+            scope.Add("method", $"Consume({TypeMetadataCache<TMessage>.ShortName} message)");
         }
 
         public async Task Send(SagaConsumeContext<TSaga, TMessage> context, IPipe<SagaConsumeContext<TSaga, TMessage>> next)
@@ -42,9 +43,9 @@ namespace MassTransit.Saga.Pipeline.Filters
                 throw new ConsumerMessageException(message);
             }
 
-            await consumer.Consume(context);
+            await consumer.Consume(context).ConfigureAwait(false);
 
-            await next.Send(context);
+            await next.Send(context).ConfigureAwait(false);
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -20,15 +20,14 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
 
 
     public class ServiceBusBusBuilder :
-        BusBuilder,
-        IBusBuilder
+        BusBuilder
     {
-        readonly IConsumePipe _busConsumePipe;
         readonly ServiceBusReceiveEndpointConfigurator _busEndpointConfigurator;
         readonly ServiceBusHost[] _hosts;
 
-        public ServiceBusBusBuilder(ServiceBusHost[] hosts, IConsumePipeSpecification consumePipeSpecification, ReceiveEndpointSettings settings)
-            : base(consumePipeSpecification, hosts)
+        public ServiceBusBusBuilder(ServiceBusHost[] hosts, IConsumePipeFactory consumePipeFactory, ISendPipeFactory sendPipeFactory,
+            IPublishPipeFactory publishPipeFactory, ReceiveEndpointSettings settings)
+            : base(consumePipeFactory, sendPipeFactory, publishPipeFactory, hosts)
         {
             if (hosts == null)
                 throw new ArgumentNullException(nameof(hosts));
@@ -53,20 +52,38 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
             return new ServiceBusSendTransportProvider(_hosts);
         }
 
-        protected override ISendEndpointProvider CreateSendEndpointProvider()
+        public override ISendEndpointProvider CreateSendEndpointProvider(params ISendPipeSpecification[] specifications)
         {
-            var provider = new ServiceBusSendEndpointProvider(MessageSerializer, InputAddress, SendTransportProvider);
+            var pipe = CreateSendPipe(specifications);
 
-            return new SendEndpointCache(provider);
+            var provider = new ServiceBusSendEndpointProvider(MessageSerializer, InputAddress, SendTransportProvider, pipe);
+
+            return new SendEndpointCache(provider, QueueCacheDurationProvider);
         }
 
-        protected override IPublishEndpointProvider CreatePublishSendEndpointProvider()
+        TimeSpan QueueCacheDurationProvider(Uri address)
         {
-            var sendEndpointProvider = new PublishSendEndpointProvider(MessageSerializer, InputAddress, _hosts);
+            var timeSpan = address.GetQueueDescription().AutoDeleteOnIdle;
 
-            var endpointCache = new SendEndpointCache(sendEndpointProvider);
+            return timeSpan > TimeSpan.FromDays(1) ? TimeSpan.FromDays(1) : timeSpan;
+        }
 
-            return new ServiceBusPublishEndpointProvider(_hosts[0], endpointCache);
+        public override IPublishEndpointProvider CreatePublishEndpointProvider(params IPublishPipeSpecification[] specifications)
+        {
+            var provider = new PublishSendEndpointProvider(MessageSerializer, InputAddress, _hosts);
+
+            var cache = new SendEndpointCache(provider, TopicCacheDurationProvider);
+
+            var pipe = CreatePublishPipe(specifications);
+
+            return new ServiceBusPublishEndpointProvider(_hosts[0], cache, pipe);
+        }
+
+        TimeSpan TopicCacheDurationProvider(Uri address)
+        {
+            var timeSpan = address.GetTopicDescription().AutoDeleteOnIdle;
+
+            return timeSpan > TimeSpan.FromDays(1) ? TimeSpan.FromDays(1) : timeSpan;
         }
 
         protected override void PreBuild()

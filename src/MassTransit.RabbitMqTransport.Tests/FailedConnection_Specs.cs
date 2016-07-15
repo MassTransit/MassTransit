@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -24,8 +24,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         AsyncTestFixture
     {
         [Test]
-        [ExpectedException(typeof(RabbitMqConnectionException))]
-        public async Task Should_fault_nicely()
+        public void Should_fault_nicely()
         {
             var busControl = Bus.Factory.CreateUsingRabbitMq(x =>
             {
@@ -36,17 +35,21 @@ namespace MassTransit.RabbitMqTransport.Tests
                 });
             });
 
-            using (var handle = busControl.Start())
+            TestDelegate invocation = () =>
             {
-                Console.WriteLine("Waiting for connection...");
+                using (var handle = busControl.Start())
+                {
+                    Console.WriteLine("Waiting for connection...");
 
-                TaskUtil.Await(() => handle.Ready);
-            }
+                    TaskUtil.Await(() => handle.Ready);
+                }
+            };
+
+            Assert.Throws<RabbitMqConnectionException>(invocation);
         }
 
         [Test]
-        [ExpectedException(typeof(RabbitMqConnectionException))]
-        public async Task Should_fault_when_credentials_are_bad()
+        public void Should_fault_when_credentials_are_bad()
         {
             var busControl = Bus.Factory.CreateUsingRabbitMq(x =>
             {
@@ -57,12 +60,118 @@ namespace MassTransit.RabbitMqTransport.Tests
                 });
             });
 
-            using (var handle = busControl.Start())
+            TestDelegate invocation = () =>
             {
-                Console.WriteLine("Waiting for connection...");
+                using (var handle = busControl.Start())
+                {
+                    Console.WriteLine("Waiting for connection...");
 
-                TaskUtil.Await(() => handle.Ready);
+                    TaskUtil.Await(() => handle.Ready);
+                }
+            };
+
+            Assert.Throws<RabbitMqConnectionException>(invocation);
+        }
+
+        [Test, Explicit]
+        public async Task Should_recover_from_a_crashed_server()
+        {
+            var busControl = Bus.Factory.CreateUsingRabbitMq(x =>
+            {
+                x.Host(new Uri("rabbitmq://localhost/"), h =>
+                {
+                });
+            });
+
+            using (var handle = await busControl.StartAsync())
+            {
+                for (int i = 0; i < 10; i++)
+                {
+                    try
+                    {
+                        await Task.Delay(1000);
+
+                        await busControl.Publish(new TestMessage());
+
+                        Console.WriteLine("Published: {0}", i);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine("Publish {0} faulted: {1}", i, ex.Message);
+                    }
+                }
             }
+        }
+
+        [Test, Explicit]
+        public async Task Should_startup_and_shut_down_cleanly()
+        {
+            var busControl = Bus.Factory.CreateUsingRabbitMq(x =>
+            {
+                x.Host(new Uri("rabbitmq://localhost/"), h =>
+                {
+                });
+            });
+
+            using (var handle = await busControl.StartAsync())
+            {
+                await Task.Delay(5000);
+            }
+        }
+
+        [Test, Explicit]
+        public async Task Should_startup_and_shut_down_cleanly_with_publish()
+        {
+            var busControl = Bus.Factory.CreateUsingRabbitMq(x =>
+            {
+                x.Host(new Uri("rabbitmq://localhost/"), h =>
+                {
+                });
+            });
+
+            await busControl.StartAsync();
+            try
+            {
+                await busControl.Publish(new TestMessage());
+
+            }
+            finally
+            {
+                await busControl.StopAsync();
+            }
+        }
+
+        [Test, Explicit]
+        public async Task Should_startup_and_shut_down_cleanly_with_an_endpoint()
+        {
+            var busControl = Bus.Factory.CreateUsingRabbitMq(x =>
+            {
+                var host = x.Host(new Uri("rabbitmq://localhost/"), h =>
+                {
+                });
+
+                x.ReceiveEndpoint(host, "input_queue", e =>
+                {
+                    e.Handler<Test>(async context =>
+                    {
+                    });
+                });
+            });
+
+            using (var handle = await busControl.StartAsync())
+            {
+                await Task.Delay(5000);
+            }
+        }
+
+
+        public interface Test
+        {
+        }
+
+
+        public class TestMessage : Test
+        {
         }
     }
 }

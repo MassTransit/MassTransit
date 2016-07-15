@@ -13,6 +13,7 @@
 namespace MassTransit.AutomatonymousIntegration.Tests
 {
     using System;
+    using System.Data.Entity.Infrastructure;
     using System.Linq;
     using System.Threading.Tasks;
     using Automatonymous;
@@ -31,11 +32,14 @@ namespace MassTransit.AutomatonymousIntegration.Tests
         readonly SagaDbContextFactory _sagaDbContextFactory;
         readonly Lazy<ISagaRepository<ShoppingChore>> _repository;
 
-        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             _machine = new SuperShopper();
 
+            configurator.UseRetry(Retry.Selected<DbUpdateException>().Immediate(5));
             configurator.StateMachineSaga(_machine, _repository.Value);
+
+            configurator.TransportConcurrencyLimit = 16;
         }
 
         public When_using_EntityFramework()
@@ -45,7 +49,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
             _repository = new Lazy<ISagaRepository<ShoppingChore>>(() => new EntityFrameworkSagaRepository<ShoppingChore>(_sagaDbContextFactory));
         }
 
-        [TestFixtureTearDown]
+        [OneTimeTearDown]
         public void Teardown()
         {
         }
@@ -81,6 +85,29 @@ namespace MassTransit.AutomatonymousIntegration.Tests
             Assert.IsFalse(sagaId.HasValue);
         }
 
+        [Test, Explicit]
+        public async Task Should_handle_the_big_load()
+        {
+            Guid[] sagaIds = new Guid[200];
+            for (int i = 0; i < 200; i++)
+            {
+                Guid correlationId = Guid.NewGuid();
+
+                InputQueueSendEndpoint.Send(new GirlfriendYelling
+                {
+                    CorrelationId = correlationId
+                });
+
+                sagaIds[i] = correlationId;
+            }
+
+            for (int i = 0; i < 200; i++)
+            {
+                Guid? sagaId = await _repository.Value.ShouldContainSaga(sagaIds[i], TestTimeout);
+                Assert.IsTrue(sagaId.HasValue);
+            }
+        }
+
         [Test]
         public async Task Should_have_the_state_machine()
         {
@@ -108,6 +135,13 @@ namespace MassTransit.AutomatonymousIntegration.Tests
             ShoppingChore instance = await GetSaga(correlationId);
 
             Assert.IsTrue(instance.Screwed);
+        }
+
+        protected override void ConfigureBus(IInMemoryBusFactoryConfigurator configurator)
+        {
+            base.ConfigureBus(configurator);
+
+            configurator.TransportConcurrencyLimit = 16;
         }
     }
 

@@ -83,5 +83,21 @@ namespace MassTransit
 
             configurator.AddPipeSpecification(specification);
         }
+
+        /// <summary>
+        /// Apply a transform on send to the message
+        /// </summary>
+        /// <typeparam name="T">The message type</typeparam>
+        /// <param name="configurator">The consume pipe configurator</param>
+        /// <param name="configure">The configuration callback</param>
+        public static void UseTransform<T>(this ISendPipeConfigurator configurator, Action<ITransformConfigurator<T>> configure)
+            where T : class
+        {
+            var specification = new SendTransformSpecification<T>();
+
+            configure(specification);
+
+            configurator.AddPipeSpecification(specification);
+        }
     }
 }

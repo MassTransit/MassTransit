@@ -14,15 +14,56 @@ namespace MassTransit.AzureServiceBusTransport
 {
     using System;
     using Configuration;
-    using Util;
+    using Microsoft.ServiceBus;
 
 
     public static class BusFactoryConfiguratorExtensions
     {
+        /// <summary>
+        /// Adds a service bus host using the MassTransit style URI host name
+        /// </summary>
+        /// <param name="configurator">The bus factory configurator</param>
+        /// <param name="hostAddress">The host address, in MassTransit format (sb://namespace.servicebus.windows.net/scope)</param>
+        /// <param name="configure">A callback to further configure the service bus</param>
+        /// <returns>The service bus host</returns>
         public static IServiceBusHost Host(this IServiceBusBusFactoryConfigurator configurator, Uri hostAddress,
             Action<IServiceBusHostConfigurator> configure)
         {
             var hostConfigurator = new AzureServiceBusHostConfigurator(hostAddress);
+
+            configure(hostConfigurator);
+
+            return configurator.Host(hostConfigurator.Settings);
+        }
+
+        /// <summary>
+        /// Adds a Service Bus host using a connection string (Endpoint=...., etc.).
+        /// </summary>
+        /// <param name="configurator">The bus factory configurator</param>
+        /// <param name="connectionString">The connection string in the proper format</param>
+        /// <param name="configure">A callback to further configure the service bus</param>
+        /// <returns>The service bus host</returns>
+        public static IServiceBusHost Host(this IServiceBusBusFactoryConfigurator configurator, string connectionString,
+            Action<IServiceBusHostConfigurator> configure)
+        {
+            // in case they pass a URI by mistake (it happens)
+            try
+            {
+                var hostAddress = new Uri(connectionString);
+
+                return Host(configurator, hostAddress, configure);
+            }
+            catch (UriFormatException)
+            {
+            }
+
+            var namespaceManager = NamespaceManager.CreateFromConnectionString(connectionString);
+
+            var hostConfigurator = new AzureServiceBusHostConfigurator(namespaceManager.Address)
+            {
+                TokenProvider = namespaceManager.Settings.TokenProvider,
+                OperationTimeout = namespaceManager.Settings.OperationTimeout
+            };
 
             configure(hostConfigurator);
 
@@ -39,7 +80,6 @@ namespace MassTransit.AzureServiceBusTransport
             configurator.TokenProvider = tokenProviderConfigurator.GetTokenProvider();
         }
 
-
         /// <summary>
         /// Declare a ReceiveEndpoint using a unique generated queue name. This queue defaults to auto-delete
         /// and non-durable. By default all services bus instances include a default receiveEndpoint that is
@@ -51,7 +91,7 @@ namespace MassTransit.AzureServiceBusTransport
         public static void ReceiveEndpoint(this IServiceBusBusFactoryConfigurator configurator, IServiceBusHost host,
             Action<IServiceBusReceiveEndpointConfigurator> configure)
         {
-            var queueName = HostMetadataCache.Host.GetTemporaryQueueName("endpoint");
+            var queueName = configurator.GetTemporaryQueueName("endpoint");
 
             configurator.ReceiveEndpoint(host, queueName, x =>
             {
@@ -61,6 +101,5 @@ namespace MassTransit.AzureServiceBusTransport
                 configure(x);
             });
         }
-
     }
 }

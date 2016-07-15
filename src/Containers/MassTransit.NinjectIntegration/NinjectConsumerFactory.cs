@@ -41,7 +41,7 @@ namespace MassTransit.NinjectIntegration
 
             try
             {
-                await next.Send(context.PushConsumer(consumer));
+                await next.Send(context.PushConsumer(consumer)).ConfigureAwait(false);
             }
             finally
             {

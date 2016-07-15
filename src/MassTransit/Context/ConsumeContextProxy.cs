@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -24,18 +24,41 @@ namespace MassTransit.Context
     /// of the context is only added at the scope level and below.
     /// </summary>
     public abstract class ConsumeContextProxy :
+        BasePipeContext,
         ConsumeContext
     {
         readonly ConsumeContext _context;
 
         protected ConsumeContextProxy(ConsumeContext context)
+            : base(new PayloadCacheProxy(context))
         {
             _context = context;
+        }
+
+        protected ConsumeContextProxy(ConsumeContext context, IPayloadCache payloadCache)
+            : base(payloadCache)
+        {
+            _context = context;
+        }
+
+        public virtual Task RespondAsync(object message, Type messageType, IPipe<SendContext> sendPipe)
+        {
+            return _context.RespondAsync(message, messageType, sendPipe);
         }
 
         public virtual Task RespondAsync<T>(object values) where T : class
         {
             return _context.RespondAsync<T>(values);
+        }
+
+        public virtual Task RespondAsync<T>(object values, IPipe<SendContext<T>> sendPipe) where T : class
+        {
+            return _context.RespondAsync(values, sendPipe);
+        }
+
+        public virtual Task RespondAsync<T>(object values, IPipe<SendContext> sendPipe) where T : class
+        {
+            return _context.RespondAsync<T>(values, sendPipe);
         }
 
         public virtual Task RespondAsync<T>(T message, IPipe<SendContext<T>> sendPipe)
@@ -44,23 +67,24 @@ namespace MassTransit.Context
             return _context.RespondAsync(message, sendPipe);
         }
 
-        public CancellationToken CancellationToken => _context.CancellationToken;
-
-        public virtual bool HasPayloadType(Type contextType)
+        public virtual Task RespondAsync<T>(T message, IPipe<SendContext> sendPipe) where T : class
         {
-            return _context.HasPayloadType(contextType);
+            return _context.RespondAsync(message, sendPipe);
         }
 
-        public virtual bool TryGetPayload<TPayload>(out TPayload context)
-            where TPayload : class
+        public virtual Task RespondAsync(object message)
         {
-            return _context.TryGetPayload(out context);
+            return _context.RespondAsync(message);
         }
 
-        public virtual TPayload GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory)
-            where TPayload : class
+        public virtual Task RespondAsync(object message, Type messageType)
         {
-            return _context.GetOrAddPayload(payloadFactory);
+            return _context.RespondAsync(message, messageType);
+        }
+
+        public virtual Task RespondAsync(object message, IPipe<SendContext> sendPipe)
+        {
+            return _context.RespondAsync(message, sendPipe);
         }
 
         public virtual Guid? MessageId => _context.MessageId;
@@ -204,6 +228,12 @@ namespace MassTransit.Context
 
         protected ConsumeContextProxy(ConsumeContext<TMessage> context)
             : base(context)
+        {
+            _context = context;
+        }
+
+        protected ConsumeContextProxy(ConsumeContext<TMessage> context, IPayloadCache payloadCache)
+            : base(context, payloadCache)
         {
             _context = context;
         }

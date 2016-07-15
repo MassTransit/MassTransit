@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,6 +13,9 @@
 namespace MassTransit.RabbitMqTransport
 {
     using System.Net.Security;
+    using System.Security.Authentication;
+    using System.Security.Cryptography.X509Certificates;
+    using Transports;
 
 
     /// <summary>
@@ -57,6 +60,11 @@ namespace MassTransit.RabbitMqTransport
         bool Ssl { get; }
 
         /// <summary>
+        /// SSL protocol, Tls11 or Tls12 are recommended
+        /// </summary>
+        SslProtocols SslProtocol { get; }
+
+        /// <summary>
         /// The server name specified on the certificate for the RabbitMQ server
         /// </summary>
         string SslServerName { get; }
@@ -72,8 +80,36 @@ namespace MassTransit.RabbitMqTransport
         string ClientCertificatePath { get; }
 
         /// <summary>
-        /// The passphrase for the client certificate 
+        /// The passphrase for the client certificate found using the <see cref="ClientCertificatePath"/>, not required if <see cref="ClientCertificate"/> is populated
         /// </summary>
         string ClientCertificatePassphrase { get; }
+
+        /// <summary>
+        /// A certificate to use for client certificate authentication, if not set then the <see cref="ClientCertificatePath"/> and <see cref="ClientCertificatePassphrase"/> will be used
+        /// </summary>
+        X509Certificate ClientCertificate { get; }
+
+        /// <summary>
+        /// Whether the client certificate should be used for logging in to RabbitMQ, ignoring any username and password set
+        /// </summary>
+        /// <remarks>
+        /// RabbitMQ must be configured correctly for this to work, including enabling the rabbitmq_auth_mechanism_ssl plugin
+        /// </remarks>
+        bool UseClientCertificateAsAuthenticationIdentity { get; }
+
+        /// <summary>
+        /// The message name formatter for the publisher
+        /// </summary>
+        IMessageNameFormatter MessageNameFormatter { get; }
+
+        /// <summary>
+        /// When using a RabbitMQ cluster, this contains the host names which make up the cluster. In the event of a connection failure, the next host in the array will be connected to.
+        /// </summary>
+        string[] ClusterMembers { get; }
+
+        /// <summary>
+        /// The host name selector if used to choose which server to connect
+        /// </summary>
+        IRabbitMqHostNameSelector HostNameSelector { get; }
     }
 }

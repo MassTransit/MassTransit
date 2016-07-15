@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,6 +13,7 @@
 namespace Automatonymous
 {
     using System;
+    using System.Threading.Tasks;
     using MassTransit;
     using MassTransit.Pipeline;
 
@@ -32,6 +33,16 @@ namespace Automatonymous
             {
                 throw new SagaException("An existing saga instance was not found", typeof(TInstance), typeof(TData), context.CorrelationId ?? Guid.Empty);
             });
+        }
+
+        public IPipe<ConsumeContext<TData>> ExecuteAsync(Func<ConsumeContext<TData>, Task> action)
+        {
+            return Pipe.ExecuteAsync(action);
+        }
+
+        public IPipe<ConsumeContext<TData>> Execute(Action<ConsumeContext<TData>> action)
+        {
+            return Pipe.Execute(action);
         }
     }
 }

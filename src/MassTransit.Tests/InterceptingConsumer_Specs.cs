@@ -22,7 +22,7 @@ namespace MassTransit.Tests
     public class Intercepting_a_consumer_factory :
         InMemoryTestFixture
     {
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void Setup()
         {
             Await(() => InputQueueSendEndpoint.Send(new A()));
@@ -31,7 +31,7 @@ namespace MassTransit.Tests
         MyConsumer _myConsumer;
         TransactionFilter _transactionFilter;
 
-        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             _myConsumer = new MyConsumer(GetTask<A>());
             _transactionFilter = new TransactionFilter(GetTask<bool>(), GetTask<bool>());

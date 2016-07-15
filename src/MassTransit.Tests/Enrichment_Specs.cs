@@ -44,7 +44,7 @@ namespace MassTransit.Tests
         readonly TaskCompletionSource<UserCredentials> _credentials = new TaskCompletionSource<UserCredentials>();
         Task<ConsumeContext<UserCredentials>> _credentialsHandler;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void Setup()
         {
             InputQueueSendEndpoint.Send(new CommandAndCredentials
@@ -55,7 +55,7 @@ namespace MassTransit.Tests
             }).Wait(TestCancellationToken);
         }
 
-        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             _commandHandler = Handler<SecureCommand>(configurator, async context =>
             {

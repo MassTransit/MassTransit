@@ -41,7 +41,7 @@ namespace MassTransit.MessageData
 
         public async Task<Stream> Get(Uri address, CancellationToken cancellationToken = new CancellationToken())
         {
-            var stream = await _repository.Get(address, cancellationToken);
+            var stream = await _repository.Get(address, cancellationToken).ConfigureAwait(false);
 
             string keyId;
             address.TryGetValueFromQueryString("keyId", out keyId);
@@ -54,7 +54,7 @@ namespace MassTransit.MessageData
             string keyId = null;
             using (Stream cryptoStream = _streamProvider.GetEncryptStream(stream, keyId, CryptoStreamMode.Read))
             {
-                var address = await _repository.Put(cryptoStream, timeToLive, cancellationToken);
+                var address = await _repository.Put(cryptoStream, timeToLive, cancellationToken).ConfigureAwait(false);
 
                 var addressBuilder = new UriBuilder(address);
 

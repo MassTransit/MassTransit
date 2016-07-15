@@ -35,26 +35,26 @@ namespace Automatonymous.Activities
 
         async Task Activity<TInstance>.Execute(BehaviorContext<TInstance> context, Behavior<TInstance> next)
         {
-            await Execute(context);
+            await Execute(context).ConfigureAwait(false);
 
-            await next.Execute(context);
+            await next.Execute(context).ConfigureAwait(false);
         }
 
         async Task Activity<TInstance>.Execute<T>(BehaviorContext<TInstance, T> context, Behavior<TInstance, T> next)
         {
-            await Execute(context);
+            await Execute(context).ConfigureAwait(false);
 
-            await next.Execute(context);
+            await next.Execute(context).ConfigureAwait(false);
         }
 
-        async Task Activity<TInstance>.Faulted<TException>(BehaviorExceptionContext<TInstance, TException> context, Behavior<TInstance> next)
+        Task Activity<TInstance>.Faulted<TException>(BehaviorExceptionContext<TInstance, TException> context, Behavior<TInstance> next)
         {
-            await next.Faulted(context);
+            return next.Faulted(context);
         }
 
-        async Task Activity<TInstance>.Faulted<T, TException>(BehaviorExceptionContext<TInstance, T, TException> context, Behavior<TInstance, T> next)
+        Task Activity<TInstance>.Faulted<T, TException>(BehaviorExceptionContext<TInstance, T, TException> context, Behavior<TInstance, T> next)
         {
-            await next.Faulted(context);
+            return next.Faulted(context);
         }
 
         async Task Execute(BehaviorContext<TInstance> context)
@@ -70,7 +70,7 @@ namespace Automatonymous.Activities
             var previousTokenId = _schedule.GetTokenId(context.Instance);
             if (previousTokenId.HasValue)
             {
-                await schedulerContext.CancelScheduledSend(previousTokenId.Value);
+                await schedulerContext.CancelScheduledSend(previousTokenId.Value).ConfigureAwait(false);
 
                 _schedule.SetTokenId(context.Instance, default(Guid?));
             }

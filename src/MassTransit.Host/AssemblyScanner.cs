@@ -1,14 +1,14 @@
 ﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
+//
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
+// this file except in compliance with the License. You may obtain a copy of the
+// License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
 // Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Host
 {
@@ -59,11 +59,13 @@ namespace MassTransit.Host
                     .Where(x => !x.File.StartsWith("Autofac.", StringComparison.OrdinalIgnoreCase))
                     .Where(x => !x.File.StartsWith("RabbitMQ.", StringComparison.OrdinalIgnoreCase))
                     .Where(x => !x.File.StartsWith("Microsoft.", StringComparison.OrdinalIgnoreCase))
+                    .Where(x => !x.File.StartsWith("System.", StringComparison.OrdinalIgnoreCase))
                     .Select(x => x.Path)
                     .ToList();
 
                 var registrations = assemblies
-                    .Select(Assembly.ReflectionOnlyLoadFrom)
+                    .Select(ReflectionOnlyLoadAssembly)
+                    .Where(x => x != null)
                     .SelectMany(TrySelectAllTypes)
                     .Where(x => IsSupportedType(x.Item2))
                     .GroupBy(x => x.Item1)
@@ -109,6 +111,19 @@ namespace MassTransit.Host
             }
         }
 
+        Assembly ReflectionOnlyLoadAssembly(string assemblyFile)
+        {
+            try
+            {
+                return Assembly.ReflectionOnlyLoadFrom(assemblyFile);
+            }
+            catch (BadImageFormatException e)
+            {
+                _log.Debug("Could not scan contents of assembly " + assemblyFile, e);
+                return null;
+            }
+        }
+
         bool IsSupportedType(Type type)
         {
             foreach (var interfaceType in type.GetInterfaces())
@@ -143,15 +158,15 @@ namespace MassTransit.Host
             return Assembly.ReflectionOnlyLoad(args.Name);
         }
 
-        private IEnumerable<Tuple<Assembly, Type>> TrySelectAllTypes(Assembly assembly)
+        IEnumerable<Tuple<Assembly, Type>> TrySelectAllTypes(Assembly assembly)
         {
             try
             {
-                return assembly.GetTypes().Select(y => Tuple.Create(assembly, y));
+                return assembly.GetTypes().Select(type => Tuple.Create(assembly, type));
             }
             catch (ReflectionTypeLoadException e)
             {
-                _log.Warn($"Exception loading types from assembly: {assembly.FullName}\n{string.Join(Environment.NewLine, e.LoaderExceptions.Select(x => x.Message))}", e);
+                _log.Debug($"Exception loading types from assembly: {assembly.FullName}\n{string.Join(Environment.NewLine, e.LoaderExceptions.Select(x => x.Message))}", e);
                 return Enumerable.Empty<Tuple<Assembly, Type>>();
             }
         }

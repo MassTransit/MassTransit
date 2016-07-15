@@ -16,6 +16,7 @@ namespace MassTransit.AzureServiceBusTransport
     using System.Linq;
     using System.Threading.Tasks;
     using MassTransit.Pipeline;
+    using MassTransit.Pipeline.Pipes;
     using Microsoft.ServiceBus.Messaging;
     using Transports;
 
@@ -49,11 +50,11 @@ namespace MassTransit.AzureServiceBusTransport
 
             MessageSender messageSender = await messagingFactory.CreateMessageSenderAsync(topicDescription.Path).ConfigureAwait(false);
 
-            var sendTransport = new ServiceBusSendTransport(messageSender);
+            var sendTransport = new ServiceBusSendTransport(messageSender, host.Supervisor);
 
             sendTransport.ConnectSendObserver(_sendObservable);
 
-            return new SendEndpoint(sendTransport, _serializer, address, _sourceAddress);
+            return new SendEndpoint(sendTransport, _serializer, address, _sourceAddress, SendPipe.Empty);
         }
 
         public ConnectHandle ConnectSendObserver(ISendObserver observer)

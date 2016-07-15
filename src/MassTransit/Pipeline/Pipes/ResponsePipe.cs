@@ -16,6 +16,47 @@ namespace MassTransit.Pipeline.Pipes
     using System.Threading.Tasks;
 
 
+    public class ResponsePipe :
+        IPipe<SendContext>,
+        IPipe<PublishContext>
+    {
+        readonly ConsumeContext _context;
+        readonly IPipe<SendContext> _sendPipe;
+
+        public ResponsePipe(ConsumeContext context)
+        {
+            _context = context;
+        }
+
+        public ResponsePipe(ConsumeContext context, IPipe<SendContext> pipe)
+        {
+            _context = context;
+            _sendPipe = pipe;
+        }
+
+        [DebuggerNonUserCode]
+        public Task Send(PublishContext context)
+        {
+            SendContext sendContext = context;
+
+            return Send(sendContext);
+        }
+
+        void IProbeSite.Probe(ProbeContext context)
+        {
+            _sendPipe?.Probe(context);
+        }
+
+        public async Task Send(SendContext context)
+        {
+            context.RequestId = _context.RequestId;
+            context.SourceAddress = _context.ReceiveContext.InputAddress;
+
+            if (_sendPipe != null)
+                await _sendPipe.Send(context).ConfigureAwait(false);
+        }
+    }
+
     public class ResponsePipe<T> :
         IPipe<SendContext<T>>,
         IPipe<PublishContext<T>>

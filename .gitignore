@@ -31,6 +31,7 @@ _ReSharper*
 NuGet.exe
 packages
 
+# Tests
 TestResult.xml
 submit.xml
 tests/*
@@ -38,6 +39,7 @@ SolutionVersion.cs
 src/SolutionVersion.cs
 tests
 doc/build/*
+*.[lm]df
 
 # osx noise
 .DS_Store

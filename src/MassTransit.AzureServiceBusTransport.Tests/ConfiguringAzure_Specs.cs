@@ -17,8 +17,8 @@ namespace MassTransit.AzureServiceBusTransport.Tests
         using System;
         using System.Threading.Tasks;
         using Microsoft.ServiceBus;
+        using Microsoft.ServiceBus.Messaging;
         using NUnit.Framework;
-        using Policies;
         using TestFramework;
 
 
@@ -27,7 +27,65 @@ namespace MassTransit.AzureServiceBusTransport.Tests
             AsyncTestFixture
         {
             [Test]
-            public async void Should_support_the_new_syntax()
+            public async Task Should_Support_NetMessaging_Protocol()
+            {
+                ServiceBusTokenProviderSettings settings = new TestAzureServiceBusAccountSettings();
+
+                Uri serviceUri = ServiceBusEnvironment.CreateServiceUri("sb", "masstransit-build",
+                    "MassTransit.AzureServiceBusTransport.Tests");
+
+                var completed = new TaskCompletionSource<A>();
+
+                IBusControl bus = Bus.Factory.CreateUsingAzureServiceBus(x =>
+                {
+                    IServiceBusHost host = x.Host(serviceUri, h =>
+                    {
+                        h.SharedAccessSignature(s =>
+                        {
+                            s.KeyName = settings.KeyName;
+                            s.SharedAccessKey = settings.SharedAccessKey;
+                            s.TokenTimeToLive = settings.TokenTimeToLive;
+                            s.TokenScope = settings.TokenScope;
+                        });
+
+                        h.TransportType = TransportType.NetMessaging;
+                        h.OperationTimeout = TimeSpan.FromSeconds(30);
+                        h.BatchFlushInterval = TimeSpan.FromMilliseconds(50);
+                    });
+
+                    x.ReceiveEndpoint(host, "input_queue", e =>
+                    {
+                        e.PrefetchCount = 16;
+
+                        e.UseLog(Console.Out, async (c, l) => string.Format("Logging: {0}", c.MessageId.Value));
+
+                        e.Handler<A>(async context => completed.TrySetResult(context.Message));
+
+                        // Add a message handler and configure the pipeline to retry the handler
+                        // if an exception is thrown
+                        e.Handler<A>(Handle, h =>
+                        {
+                            h.UseRetry(Retry.Interval(5, 100));
+                        });
+                    });
+                });
+
+                // TODO: Assert something here, need to get a hook to the underlying MessageReceiver
+                using (bus.Start())
+                {
+                }
+
+                //                }))
+                //                {
+                //                    var queueAddress = new Uri(hostAddress, "input_queue");
+                //                    ISendEndpoint endpoint = bus.GetSendEndpoint(queueAddress);
+                //
+                //                    await endpoint.Send(new A());
+                //                }
+            }
+
+            [Test]
+            public async Task Should_support_the_new_syntax()
             {
                 ServiceBusTokenProviderSettings settings = new TestAzureServiceBusAccountSettings();
 
@@ -53,7 +111,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
                     {
                         e.PrefetchCount = 16;
 
-                        e.UseLog(Console.Out, async (c,l) => string.Format("Logging: {0}", c.MessageId.Value));
+                        e.UseLog(Console.Out, async (c, l) => string.Format("Logging: {0}", c.MessageId.Value));
 
                         e.Handler<A>(async context => completed.TrySetResult(context.Message));
 
@@ -69,7 +127,6 @@ namespace MassTransit.AzureServiceBusTransport.Tests
                 using (bus.Start())
                 {
                 }
-
 
 //                }))
 //                {

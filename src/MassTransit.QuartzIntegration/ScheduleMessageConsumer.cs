@@ -41,13 +41,13 @@ namespace MassTransit.QuartzIntegration
 
         public async Task Consume(ConsumeContext<ScheduleMessage> context)
         {
-            if (_log.IsDebugEnabled)
-                _log.DebugFormat("ScheduleMessage: {0} at {1}", context.Message.CorrelationId, context.Message.ScheduledTime);
-
             var correlationId = context.Message.CorrelationId.ToString("N");
 
             var jobKey = new JobKey(correlationId);
-            IJobDetail jobDetail = await CreateJobDetail(context, context.Message.Destination, jobKey);
+            if (_log.IsDebugEnabled)
+                _log.DebugFormat("ScheduleMessage: {0} at {1}", jobKey, context.Message.ScheduledTime);
+
+            IJobDetail jobDetail = await CreateJobDetail(context, context.Message.Destination, jobKey).ConfigureAwait(false);
 
             ITrigger trigger = TriggerBuilder.Create()
                 .ForJob(jobDetail)
@@ -66,7 +66,7 @@ namespace MassTransit.QuartzIntegration
 
             var jobKey = new JobKey(context.Message.Schedule.ScheduleId, context.Message.Schedule.ScheduleGroup);
 
-            IJobDetail jobDetail = await CreateJobDetail(context, context.Message.Destination, jobKey);
+            IJobDetail jobDetail = await CreateJobDetail(context, context.Message.Destination, jobKey).ConfigureAwait(false);
 
             var triggerKey = new TriggerKey("Recurring.Trigger." + context.Message.Schedule.ScheduleId, context.Message.Schedule.ScheduleGroup);
 
@@ -78,20 +78,21 @@ namespace MassTransit.QuartzIntegration
                 _scheduler.ScheduleJob(jobDetail, trigger);
         }
 
-        ITrigger CreateTrigger(RecurringSchedule message, IJobDetail jobDetail, TriggerKey triggerKey)
+        ITrigger CreateTrigger(RecurringSchedule schedule, IJobDetail jobDetail, TriggerKey triggerKey)
         {
             TimeZoneInfo tz = TimeZoneInfo.Local;
-            if (!string.IsNullOrWhiteSpace(message.TimeZoneId) && message.TimeZoneId != tz.Id)
-                tz = TimeZoneInfo.FindSystemTimeZoneById(message.TimeZoneId);
+            if (!string.IsNullOrWhiteSpace(schedule.TimeZoneId) && schedule.TimeZoneId != tz.Id)
+                tz = TimeZoneInfo.FindSystemTimeZoneById(schedule.TimeZoneId);
 
             TriggerBuilder triggerBuilder = TriggerBuilder.Create()
                 .ForJob(jobDetail)
                 .WithIdentity(triggerKey)
-                .StartAt(message.StartTime)
-                .WithCronSchedule(message.CronExpression, x =>
+                .StartAt(schedule.StartTime)
+                .WithDescription(schedule.Description)
+                .WithCronSchedule(schedule.CronExpression, x =>
                 {
                     x.InTimeZone(tz);
-                    switch (message.MisfirePolicy)
+                    switch (schedule.MisfirePolicy)
                     {
                         case MissedEventPolicy.Skip:
                             x.WithMisfireHandlingInstructionDoNothing();
@@ -102,8 +103,8 @@ namespace MassTransit.QuartzIntegration
                     }
                 });
 
-            if (message.EndTime.HasValue)
-                triggerBuilder.EndAt(message.EndTime);
+            if (schedule.EndTime.HasValue)
+                triggerBuilder.EndAt(schedule.EndTime);
 
             return triggerBuilder.Build();
         }
@@ -115,7 +116,7 @@ namespace MassTransit.QuartzIntegration
             {
                 using (Stream bodyStream = context.ReceiveContext.GetBody())
                 {
-                    await bodyStream.CopyToAsync(ms);
+                    await bodyStream.CopyToAsync(ms).ConfigureAwait(false);
                 }
 
                 body = Encoding.UTF8.GetString(ms.ToArray());

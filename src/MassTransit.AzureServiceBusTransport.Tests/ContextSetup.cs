@@ -20,10 +20,10 @@ namespace MassTransit.AzureServiceBusTransport.Tests
     [SetUpFixture]
     public class ContextSetup
     {
-        [SetUp]
+        [OneTimeSetUp]
         public void Before_any()
         {
-            ServiceBusEnvironment.SystemConnectivity.Mode = ConnectivityMode.Http;
+            ServiceBusEnvironment.SystemConnectivity.Mode = ConnectivityMode.Https;
 
             string file = "test.log4net.xml";
 

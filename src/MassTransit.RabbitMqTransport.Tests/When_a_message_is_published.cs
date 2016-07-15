@@ -31,7 +31,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             _receivedB = Handled<B>(configurator);
         }
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void A_message_is_published()
         {
             Bus.Publish(new A

@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,9 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
-    using System;
-
-
     public static class MessageHeaders
     {
         /// <summary>
@@ -26,6 +23,11 @@ namespace MassTransit
         /// The exception message from a Fault
         /// </summary>
         public const string FaultMessage = "MT-Fault-Message";
+
+        /// <summary>
+        /// The timestamp when the fault occurred
+        /// </summary>
+        public const string FaultTimestamp = "MT-Fault-Timestamp";
 
         /// <summary>
         /// The stack trace from a Fault
@@ -57,9 +59,28 @@ namespace MassTransit
         /// </summary>
         public const string QuartzTriggerKey = "MT-Quartz-TriggerKey";
 
-        public static Guid? GetSchedulingTokenId(this ConsumeContext context)
+
+        public static class Quartz
         {
-            return context.Headers.Get(SchedulingTokenId, default(Guid?));
+            /// <summary>
+            /// The time when the message was scheduled
+            /// </summary>
+            public const string Scheduled = "MT-Quartz-Scheduled";
+
+            /// <summary>
+            /// When the event for this message was fired by Quartz
+            /// </summary>
+            public const string Sent = "MT-Quartz-Sent";
+
+            /// <summary>
+            /// When the next message is scheduled to be sent
+            /// </summary>
+            public const string NextScheduled = "MT-Quartz-NextScheduled";
+
+            /// <summary>
+            /// When the previous message was sent
+            /// </summary>
+            public const string PreviousSent = "MT-Quartz-PreviousSent";
         }
     }
 }

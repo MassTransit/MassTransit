@@ -122,5 +122,44 @@ namespace MassTransit.Tests.Pipeline
 
             timer.ElapsedMilliseconds.ShouldBeGreaterThan(9500);
         }
+
+        [Test, Explicit]
+        public async Task Should_count_success_and_failure_as_same()
+        {
+            int count = 0;
+            IPipe<ConsumeContext<A>> pipe = Pipe.New<ConsumeContext<A>>(x =>
+            {
+                x.UseRateLimit(10, TimeSpan.FromSeconds(1));
+                x.UseExecute(payload =>
+                {
+                    var index = Interlocked.Increment(ref count);
+                    if (index % 2 == 0)
+                        throw new IntentionalTestException();
+                });
+            });
+
+            var context = new TestConsumeContext<A>(new A());
+
+            var timer = Stopwatch.StartNew();
+
+            Task[] tasks = Enumerable.Range(0, 101)
+                .Select(index => Task.Run(async () =>
+                {
+                    try
+                    {
+                        await pipe.Send(context);
+                    }
+                    catch (Exception)
+                    {
+                    }
+                }))
+                .ToArray();
+
+            await Task.WhenAll(tasks);
+
+            timer.Stop();
+
+            timer.ElapsedMilliseconds.ShouldBeGreaterThan(9500);
+        }
     }
 }

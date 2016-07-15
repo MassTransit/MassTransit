@@ -28,11 +28,11 @@ namespace Automatonymous.CorrelationConfigurators
     {
         readonly Event<TData> _event;
         readonly SagaStateMachine<TInstance> _machine;
+        bool _insertOnInitial;
         IFilter<ConsumeContext<TData>> _messageFilter;
         IPipe<ConsumeContext<TData>> _missingPipe;
         ISagaFactory<TInstance, TData> _sagaFactory;
         SagaFilterFactory<TInstance, TData> _sagaFilterFactory;
-        bool _insertOnInitial;
 
         public MassTransitEventCorrelationConfigurator(SagaStateMachine<TInstance> machine, Event<TData> @event, EventCorrelation existingCorrelation)
         {
@@ -52,7 +52,8 @@ namespace Automatonymous.CorrelationConfigurators
 
         public EventCorrelation Build()
         {
-            return new MassTransitEventCorrelation<TInstance, TData>(_machine, _event, _sagaFilterFactory, _messageFilter, _missingPipe, _sagaFactory, _insertOnInitial);
+            return new MassTransitEventCorrelation<TInstance, TData>(_machine, _event, _sagaFilterFactory, _messageFilter, _missingPipe, _sagaFactory,
+                _insertOnInitial);
         }
 
         public bool InsertOnInitial
@@ -65,6 +66,24 @@ namespace Automatonymous.CorrelationConfigurators
             _messageFilter = new CorrelationIdMessageFilter<TData>(selector);
 
             _sagaFilterFactory = (repository, policy, sagaPipe) => new CorrelatedSagaFilter<TInstance, TData>(repository, policy, sagaPipe);
+
+            return this;
+        }
+
+        public EventCorrelationConfigurator<TInstance, TData> CorrelateById<T>(Expression<Func<TInstance, T>> propertyExpression,
+            Func<ConsumeContext<TData>, T> selector) where T : struct
+        {
+            if (propertyExpression == null)
+                throw new ArgumentNullException(nameof(propertyExpression));
+            if (selector == null)
+                throw new ArgumentNullException(nameof(selector));
+
+            _sagaFilterFactory = (repository, policy, sagaPipe) =>
+            {
+                var queryFactory = new PropertyExpressionSagaQueryFactory<TInstance, TData, T>(propertyExpression, selector);
+
+                return new QuerySagaFilter<TInstance, TData>(repository, policy, queryFactory, sagaPipe);
+            };
 
             return this;
         }

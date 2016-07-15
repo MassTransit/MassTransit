@@ -17,7 +17,6 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
     using Contexts;
     using Logging;
     using MassTransit.Pipeline;
-    using Microsoft.ServiceBus;
     using Microsoft.ServiceBus.Messaging;
     using Util;
 
@@ -29,12 +28,13 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
         IFilter<ConnectionContext>
     {
         static readonly ILog _log = Logger.Get<MessageReceiverFilter>();
-        readonly IReceiveObserver _receiveObserver;
         readonly IReceiveEndpointObserver _endpointObserver;
-        readonly ITaskSupervisor _supervisor;
+        readonly IReceiveObserver _receiveObserver;
         readonly IPipe<ReceiveContext> _receivePipe;
+        readonly ITaskSupervisor _supervisor;
 
-        public MessageReceiverFilter(IPipe<ReceiveContext> receivePipe, IReceiveObserver receiveObserver, IReceiveEndpointObserver endpointObserver, ITaskSupervisor supervisor)
+        public MessageReceiverFilter(IPipe<ReceiveContext> receivePipe, IReceiveObserver receiveObserver, IReceiveEndpointObserver endpointObserver,
+            ITaskSupervisor supervisor)
         {
             _receivePipe = receivePipe;
             _receiveObserver = receiveObserver;
@@ -50,9 +50,9 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
         {
             var receiveSettings = context.GetPayload<ReceiveSettings>();
 
-            string queuePath = context.GetQueuePath(receiveSettings.QueueDescription);
+            var queuePath = context.GetQueuePath(receiveSettings.QueueDescription);
 
-            Uri inputAddress = context.GetQueueAddress(receiveSettings.QueueDescription);
+            var inputAddress = context.GetQueueAddress(receiveSettings.QueueDescription);
 
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Creating message receiver for {0}", inputAddress);
@@ -61,16 +61,15 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
 
             try
             {
-                MessagingFactory messagingFactory = await context.MessagingFactory.ConfigureAwait(false);
+                var messagingFactory = await context.MessagingFactory.ConfigureAwait(false);
 
                 messageReceiver = await messagingFactory.CreateMessageReceiverAsync(queuePath, ReceiveMode.PeekLock).ConfigureAwait(false);
 
                 messageReceiver.PrefetchCount = receiveSettings.PrefetchCount;
-                messageReceiver.RetryPolicy = RetryPolicy.Default;
 
-                using (var scope = _supervisor.CreateScope())
+                using (var scope = _supervisor.CreateScope($"{TypeMetadataCache<MessageReceiverFilter>.ShortName} - {inputAddress}", () => TaskUtil.Completed))
                 {
-                    var receiver = new Receiver(messageReceiver, inputAddress, _receivePipe, receiveSettings, _receiveObserver, scope);
+                    var receiver = new Receiver(context, messageReceiver, inputAddress, _receivePipe, receiveSettings, _receiveObserver, scope);
 
                     await scope.Ready.ConfigureAwait(false);
 
@@ -102,12 +101,12 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
                 if (messageReceiver != null && !messageReceiver.IsClosed)
                     await messageReceiver.CloseAsync().ConfigureAwait(false);
             }
-            
+
             await next.Send(context).ConfigureAwait(false);
         }
 
 
-        class Ready : 
+        class Ready :
             ReceiveEndpointReady
         {
             public Ready(Uri inputAddress)
@@ -119,7 +118,7 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
         }
 
 
-        class Completed : 
+        class Completed :
             ReceiveEndpointCompleted
         {
             public Completed(Uri inputAddress, ReceiverMetrics metrics)
@@ -127,7 +126,6 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
                 InputAddress = inputAddress;
                 DeliveryCount = metrics.DeliveryCount;
                 ConcurrentDeliveryCount = metrics.ConcurrentDeliveryCount;
-
             }
 
             public Uri InputAddress { get; }

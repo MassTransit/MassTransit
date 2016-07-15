@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -36,28 +36,28 @@ namespace Automatonymous.Activities
         {
             var pipe = new SendRequestPipe(consumeContext.ReceiveContext.InputAddress);
 
-            ISendEndpoint endpoint = await consumeContext.GetSendEndpoint(_request.Settings.ServiceAddress);
+            var endpoint = await consumeContext.GetSendEndpoint(_request.Settings.ServiceAddress).ConfigureAwait(false);
 
-            await endpoint.Send(requestMessage, pipe);
+            await endpoint.Send(requestMessage, pipe).ConfigureAwait(false);
 
             _request.SetRequestId(context.Instance, pipe.RequestId);
 
             if (_request.Settings.Timeout > TimeSpan.Zero)
             {
-                DateTime now = DateTime.UtcNow;
-                DateTime expirationTime = now + _request.Settings.Timeout;
+                var now = DateTime.UtcNow;
+                var expirationTime = now + _request.Settings.Timeout;
 
                 RequestTimeoutExpired message = new TimeoutExpired(now, expirationTime, context.Instance.CorrelationId, pipe.RequestId);
 
                 MessageSchedulerContext schedulerContext;
                 if (_request.Settings.SchedulingServiceAddress != null)
                 {
-                    ISendEndpoint scheduleEndpoint = await consumeContext.GetSendEndpoint(_request.Settings.SchedulingServiceAddress);
+                    var scheduleEndpoint = await consumeContext.GetSendEndpoint(_request.Settings.SchedulingServiceAddress).ConfigureAwait(false);
 
-                    await scheduleEndpoint.ScheduleSend(consumeContext.ReceiveContext.InputAddress, expirationTime, message);
+                    await scheduleEndpoint.ScheduleSend(consumeContext.ReceiveContext.InputAddress, expirationTime, message).ConfigureAwait(false);
                 }
                 else if (consumeContext.TryGetPayload(out schedulerContext))
-                    await schedulerContext.ScheduleSend(message, expirationTime, Pipe.Empty<SendContext>());
+                    await schedulerContext.ScheduleSend(expirationTime, message).ConfigureAwait(false);
                 else
                     throw new ConfigurationException("A request timeout was specified but no message scheduler was specified or available");
             }

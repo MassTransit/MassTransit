@@ -14,7 +14,9 @@ namespace MassTransit.Contracts
 {
     using System;
 
-
+    /// <summary>
+    /// Published when the concurrency limit of a filter is updated.
+    /// </summary>
     public interface ConcurrencyLimitUpdated
     {
         /// <summary>

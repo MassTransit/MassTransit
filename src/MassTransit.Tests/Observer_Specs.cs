@@ -34,13 +34,13 @@ namespace MassTransit.Tests
         IRequestClient<PingMessage, PongMessage> _requestClient;
         PingObserver _observer;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void Setup()
         {
             _requestClient = CreateRequestClient<PingMessage, PongMessage>();
         }
 
-        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             _observer = new PingObserver();
             configurator.Observer(_observer)

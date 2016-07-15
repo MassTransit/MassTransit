@@ -77,7 +77,7 @@ namespace MassTransit.Tests
         Task<ConsumeContext<PingMessage>> _ping;
         Guid _correlationId;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void Setup()
         {
             _correlationId = Guid.NewGuid();
@@ -90,7 +90,7 @@ namespace MassTransit.Tests
                 .Wait(TestCancellationToken);
         }
 
-        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             _ping = Handled<PingMessage>(configurator);
         }
@@ -155,7 +155,7 @@ namespace MassTransit.Tests
         Task<PongMessage> _response;
         Guid? _conversationId;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void Setup()
         {
             _responseHandler = SubscribeHandler<PongMessage>();
@@ -171,9 +171,10 @@ namespace MassTransit.Tests
                 });
                 x.Timeout = TestTimeout;
             });
+            Await(() => _request);
         }
 
-        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             _ping = Handler<PingMessage>(configurator, async x => await x.RespondAsync(new PongMessage(x.Message.CorrelationId)));
         }
@@ -199,10 +200,8 @@ namespace MassTransit.Tests
 
             await BusSendEndpoint.Send(new PongMessage((await _ping).Message.CorrelationId));
 
-            Assert.Throws<TaskCanceledException>(async () =>
-            {
-                await _response;
-            });
+            Assert.That(async () => await _response, Throws.TypeOf<TaskCanceledException>());
+
         }
 
         Task<ConsumeContext<PingMessage>> _ping;
@@ -211,7 +210,7 @@ namespace MassTransit.Tests
         Task<PongMessage> _response;
         Task<PingNotSupported> _notSupported;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void Setup()
         {
             _responseHandler = SubscribeHandler<PongMessage>();
@@ -226,9 +225,11 @@ namespace MassTransit.Tests
                 {
                 });
             });
+
+            Await(() => _request);
         }
 
-        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             _ping = Handler<PingMessage>(configurator, async x => await x.RespondAsync(new PingNotSupported(x.Message.CorrelationId)));
         }
@@ -252,7 +253,7 @@ namespace MassTransit.Tests
         Task<PongMessage> _response;
         Task<PingNotSupported> _notSupported;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void Setup()
         {
             _responseHandler = SubscribeHandler<PongMessage>();
@@ -264,9 +265,10 @@ namespace MassTransit.Tests
                 });
 
             });
+            Await(() => _request);
         }
 
-        protected override void ConfigureInputQueueEndpoint(IReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             _ping = Handler<PingMessage>(configurator, async x => await x.RespondAsync(new PongMessage(x.Message.CorrelationId)));
         }
@@ -280,24 +282,25 @@ namespace MassTransit.Tests
         [Test]
         public async Task Should_receive_a_request_timeout_exception_on_the_handler()
         {
-            Assert.Throws<RequestTimeoutException>(async () => await _response);
+            Assert.That(async () => await _response, Throws.TypeOf<RequestTimeoutException>());
         }
 
         [Test]
         public async Task Should_receive_a_request_timeout_exception_on_the_request()
         {
-            Assert.Throws<RequestTimeoutException>(async () =>
+            Assert.That(async () =>
             {
                 Request<PingMessage> request = await _request;
 
                 await request.Task;
-            });
+            }, 
+            Throws.TypeOf<RequestTimeoutException>());
         }
 
         Task<Request<PingMessage>> _request;
         Task<PongMessage> _response;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void Setup()
         {
             _request = Bus.Request(InputQueueAddress, new PingMessage(), x =>
@@ -308,6 +311,7 @@ namespace MassTransit.Tests
                 {
                 });
             });
+            Await(() => _request);
         }
     }
 }

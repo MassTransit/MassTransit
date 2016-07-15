@@ -25,11 +25,13 @@ namespace MassTransit
         static readonly INewIdFormatter _formatter = new ZBase32Formatter();
         static readonly Regex _regex = new Regex(@"^[A-Za-z0-9\-_\.:]+$");
 
-        static string GetTemporaryQueueName(this HostInfo host, string prefix)
+        public static string GetTemporaryQueueName(this IInMemoryBusFactoryConfigurator configurator, string prefix)
         {
             var sb = new StringBuilder(prefix);
 
-            foreach (char c in host.MachineName)
+            var host = HostMetadataCache.Host;
+
+            foreach (var c in host.MachineName)
             {
                 if (char.IsLetterOrDigit(c))
                     sb.Append(c);
@@ -37,7 +39,7 @@ namespace MassTransit
                     sb.Append(c);
             }
             sb.Append('-');
-            foreach (char c in host.ProcessName)
+            foreach (var c in host.ProcessName)
             {
                 if (char.IsLetterOrDigit(c))
                     sb.Append(c);
@@ -53,7 +55,7 @@ namespace MassTransit
         public static IManagementEndpointConfigurator ManagementEndpoint(this IInMemoryBusFactoryConfigurator configurator,
             Action<IReceiveEndpointConfigurator> configure = null)
         {
-            var queueName = HostMetadataCache.Host.GetTemporaryQueueName("manage");
+            var queueName = configurator.GetTemporaryQueueName("manage-");
 
             var endpointConfigurator = new InMemoryReceiveEndpointConfigurator(queueName)
             {
