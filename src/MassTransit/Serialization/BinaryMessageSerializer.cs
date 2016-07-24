@@ -66,7 +66,7 @@ namespace MassTransit.Serialization
             catch
             {
                 throw new ConventionException(
-                    $"The message '{TypeMetadataCache<T>.ShortName}' fail to be serialized. Check if all inner objects are serializable.");
+                    $"The message '{TypeMetadataCache<T>.ShortName}' failed to be serialized. Check if all inner objects are serializable.");
             }
 
             context.ContentType = BinaryContentType;
