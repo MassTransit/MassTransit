@@ -48,5 +48,6 @@ namespace MassTransit.RabbitMqTransport.Configuration.Configurators
         public IMessageNameFormatter MessageNameFormatter { get; set; }
         public string[] ClusterMembers { get; set; }
         public IRabbitMqHostNameSelector HostNameSelector { get; set; }
+        public string ClientProvidedName { get; set; }
     }
 }
