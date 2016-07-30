@@ -21,20 +21,22 @@ namespace MassTransit.RabbitMqTransport.Configuration.Configurators
         static readonly char[] _pathSeparator = {'/'};
         readonly ConfigurationHostSettings _settings;
 
-        public RabbitMqHostConfigurator(Uri hostAddress)
+        public RabbitMqHostConfigurator(Uri hostAddress, string connectionName = null)
         {
             _settings = hostAddress.GetConfigurationHostSettings();
 
+            _settings.ClientProvidedName = connectionName;
             _settings.VirtualHost = GetVirtualHost(hostAddress);
         }
 
-        public RabbitMqHostConfigurator(string host, string virtualHost, ushort port = 5672)
+        public RabbitMqHostConfigurator(string host, string virtualHost, ushort port = 5672, string connectionName = null)
         {
             _settings = new ConfigurationHostSettings
             {
                 Host = host,
                 Port = port,
-                VirtualHost = virtualHost
+                VirtualHost = virtualHost,
+                ClientProvidedName = connectionName
             };
         }
 
