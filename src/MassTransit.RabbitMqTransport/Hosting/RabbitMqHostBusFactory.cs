@@ -79,6 +79,7 @@ namespace MassTransit.RabbitMqTransport.Hosting
             public IMessageNameFormatter MessageNameFormatter => new RabbitMqMessageNameFormatter();
             public string[] ClusterMembers => null;
             public IRabbitMqHostNameSelector HostNameSelector => null;
+            public string ClientProvidedName => null;
         }
     }
 }
