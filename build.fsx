@@ -118,7 +118,7 @@ Target "GitLink" (fun _ ->
     let ok =
         execProcess (fun info ->
             info.FileName <- gitLink
-            info.Arguments <- __SOURCE_DIRECTORY__) (TimeSpan.FromSeconds 30.0)
+            info.Arguments <- (sprintf "%s -u https://github.com/MassTransit/MassTransit" __SOURCE_DIRECTORY__)) (TimeSpan.FromSeconds 30.0)
     if not ok then failwith (sprintf "GitLink.exe %s' task failed" __SOURCE_DIRECTORY__)
 
 )
