@@ -59,7 +59,15 @@ namespace MassTransit.Serialization
                     $"Whoa, slow down buddy. The message '{TypeMetadataCache<T>.ShortName}' must be marked with the 'Serializable' attribute!");
             }
 
-            _formatter.Serialize(stream, context.Message, GetHeaders<T>(context));
+            try
+            {
+                _formatter.Serialize(stream, context.Message, GetHeaders<T>(context));
+            }
+            catch
+            {
+                throw new ConventionException(
+                    $"The message '{TypeMetadataCache<T>.ShortName}' failed to be serialized. Check if all inner objects are serializable.");
+            }
 
             context.ContentType = BinaryContentType;
         }

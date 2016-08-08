@@ -81,6 +81,7 @@ namespace MassTransit.RabbitMqTransport.Hosting
             public IRoutingKeyFormatter RoutingKeyFormatter => new MasstransitRoutingKeyFormatter();
             public string[] ClusterMembers => null;
             public IRabbitMqHostNameSelector HostNameSelector => null;
+            public string ClientProvidedName => null;
         }
     }
 }
