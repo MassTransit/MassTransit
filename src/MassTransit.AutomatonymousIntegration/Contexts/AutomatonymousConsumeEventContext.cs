@@ -105,17 +105,27 @@ namespace Automatonymous.Contexts
 
         public override TPayload GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory)
         {
+            TPayload payload;
+            if (_context.TryGetPayload(out payload))
+                return payload;
+
+            if (base.TryGetPayload(out payload))
+                return payload;
+
             return _context.GetOrAddPayload(() => payloadFactory());
         }
 
         public override bool HasPayloadType(Type contextType)
         {
-            return _context.HasPayloadType(contextType);
+            return _context.HasPayloadType(contextType) || base.HasPayloadType(contextType);
         }
 
         public override bool TryGetPayload<TPayload>(out TPayload context)
         {
-            return _context.TryGetPayload(out context);
+            if (_context.TryGetPayload(out context))
+                return true;
+
+            return base.TryGetPayload(out context);
         }
 
         CancellationToken InstanceContext<TInstance>.CancellationToken => _context.CancellationToken;
