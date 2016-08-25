@@ -11,7 +11,7 @@
 		</root>
 
 		<logger name="MassTransit">
-			<level value="ERROR" />
+			<level value="DEBUG" />
 		</logger>
 
 		<logger name="MassTransit.RabbitMqTransport">

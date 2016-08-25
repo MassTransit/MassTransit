@@ -321,13 +321,14 @@ namespace MassTransit.RabbitMqTransport
                 HostName = settings.Host,
                 Port = settings.Port,
                 VirtualHost = settings.VirtualHost ?? "/",
-                RequestedHeartbeat = settings.Heartbeat
+                RequestedHeartbeat = settings.Heartbeat,
+                RequestedConnectionTimeout = 10000
             };
 
             if (settings.ClusterMembers != null && settings.ClusterMembers.Any())
             {
                 factory.HostName = null;
-                factory.HostnameSelector = settings.HostNameSelector;
+                factory.EndpointResolverFactory = x => new SequentialEndpointResolver(settings.ClusterMembers);
             }
             
             if (settings.UseClientCertificateAsAuthenticationIdentity)

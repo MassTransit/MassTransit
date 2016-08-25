@@ -42,12 +42,12 @@ namespace MassTransit.RabbitMqTransport.Configuration.Configurators
             _clusterMembers.Add(clusterNodeHostname);
         }
 
-        public IRabbitMqHostNameSelector GetHostNameSelector()
+        public IRabbitMqEndpointResolver GetHostNameSelector()
         {
             if (_clusterMembers.Count <= 0)
                 return null;
 
-            return new SequentialHostnameSelector();
+            return new SequentialEndpointResolver(_clusterMembers.ToArray());
         }
     }
 }
