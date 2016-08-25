@@ -15,8 +15,8 @@ namespace MassTransit.RabbitMqTransport
     using RabbitMQ.Client;
 
 
-    public interface IRabbitMqHostNameSelector :
-        IHostnameSelector
+    public interface IRabbitMqEndpointResolver :
+        IEndpointResolver
     {
         /// <summary>
         /// Returns the last host selected by the selector

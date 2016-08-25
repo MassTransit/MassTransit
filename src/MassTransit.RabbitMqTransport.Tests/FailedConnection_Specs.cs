@@ -19,7 +19,7 @@ namespace MassTransit.RabbitMqTransport.Tests
     using Util;
 
 
-    [TestFixture]
+    [TestFixture, Explicit]
     public class Failing_to_connect_to_rabbitmq :
         AsyncTestFixture
     {
@@ -32,6 +32,7 @@ namespace MassTransit.RabbitMqTransport.Tests
                 {
                     h.Username("whocares");
                     h.Password("Ohcrud");
+
                 });
             });
 
