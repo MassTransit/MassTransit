@@ -13,6 +13,7 @@
 namespace MassTransit.AutomatonymousIntegration.Tests
 {
     using System;
+    using System.Threading.Tasks;
     using NUnit.Framework;
     using Quartz;
     using Quartz.Impl;
@@ -62,12 +63,12 @@ namespace MassTransit.AutomatonymousIntegration.Tests
         }
 
         [OneTimeSetUp]
-        public void Setup_quartz_service()
+        public async Task Setup_quartz_service()
         {
             _scheduler.JobFactory = new MassTransitJobFactory(Bus);
             _scheduler.Start();
 
-            _quartzQueueSendEndpoint = GetSendEndpoint(_quartzQueueAddress).Result;
+            _quartzQueueSendEndpoint = await GetSendEndpoint(_quartzQueueAddress);
         }
 
         [OneTimeTearDown]
