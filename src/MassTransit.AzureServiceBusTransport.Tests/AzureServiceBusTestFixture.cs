@@ -86,19 +86,19 @@ namespace MassTransit.AzureServiceBusTransport.Tests
         protected override IBus Bus => _bus;
 
         [OneTimeSetUp]
-        public void SetupAzureServiceBusTestFixture()
+        public async Task SetupAzureServiceBusTestFixture()
         {
             _bus = CreateBus();
 
             _bus.ConnectReceiveEndpointObserver(new ReceiveEndpointObserver());
 
-            _busHandle = _bus.Start();
+            _busHandle = await _bus.StartAsync();
             try
             {
-                _busSendEndpoint = _bus.GetSendEndpoint(_bus.Address).Result;
+                _busSendEndpoint = await _bus.GetSendEndpoint(_bus.Address);
                 _busSendEndpoint.ConnectSendObserver(_sendObserver);
 
-                _inputQueueSendEndpoint = _bus.GetSendEndpoint(_inputQueueAddress).Result;
+                _inputQueueSendEndpoint = await _bus.GetSendEndpoint(_inputQueueAddress);
                 _inputQueueSendEndpoint.ConnectSendObserver(_sendObserver);
             }
             catch (Exception)
@@ -107,7 +107,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
                 {
                     using (var tokenSource = new CancellationTokenSource(TestTimeout))
                     {
-                        _bus.Stop(tokenSource.Token);
+                        await _bus.StopAsync(tokenSource.Token);
                     }
                 }
                 finally
@@ -121,13 +121,13 @@ namespace MassTransit.AzureServiceBusTransport.Tests
         }
 
         [OneTimeTearDown]
-        public void TearDownInMemoryTestFixture()
+        public async Task TearDownInMemoryTestFixture()
         {
             try
             {
                 using (var tokenSource = new CancellationTokenSource(TestTimeout))
                 {
-                    _busHandle?.Stop(tokenSource.Token);
+                    await _busHandle?.StopAsync(tokenSource.Token);
                 }
             }
             catch (Exception ex)

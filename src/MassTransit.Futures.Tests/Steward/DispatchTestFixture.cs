@@ -14,6 +14,7 @@ namespace MassTransit.Tests.Steward
 {
     using System;
     using System.Collections.Generic;
+    using System.Threading.Tasks;
     using ConsumeConfigurators;
     using MassTransit.Steward.Contracts;
     using MassTransit.Steward.Core.Agents;
@@ -34,9 +35,9 @@ namespace MassTransit.Tests.Steward
 
         protected IDictionary<Type, DispatchTestContext> CommandTestContexts { get; private set; }
 
-        protected ISendEndpoint DispatchEndpoint
+        protected Task<ISendEndpoint> DispatchEndpoint
         {
-            get { return Await(() => Bus.GetSendEndpoint(GetCommandContext<DispatchMessage>().ExecuteUri)); }
+            get { return Bus.GetSendEndpoint(GetCommandContext<DispatchMessage>().ExecuteUri); }
         }
 
         protected void AddCommandContext<TConsumer, T>(Action<IConsumerConfigurator<TConsumer>> configure = null)

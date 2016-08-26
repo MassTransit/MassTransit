@@ -52,10 +52,10 @@ namespace MassTransit.RabbitMqTransport.Tests
             TestConsumer _testConsumer;
 
             [OneTimeSetUp]
-            public void Setup()
+            public async Task Setup()
             {
-                Await(() => InputQueueSendEndpoint.Send(new A()));
-                Await(() => InputQueueSendEndpoint.Send(new B()));
+                await InputQueueSendEndpoint.Send(new A());
+                await InputQueueSendEndpoint.Send(new B());
             }
 
             protected override void ConfigureInputQueueEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
@@ -89,10 +89,10 @@ namespace MassTransit.RabbitMqTransport.Tests
             TestConsumer _testConsumer;
 
             [OneTimeSetUp]
-            public void Setup()
+            public async Task Setup()
             {
-                Await(() => InputQueueSendEndpoint.Send(new A()));
-                Await(() => InputQueueSendEndpoint.Send(new B()));
+                await InputQueueSendEndpoint.Send(new A());
+                await InputQueueSendEndpoint.Send(new B());
             }
 
             protected override void ConfigureInputQueueEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
@@ -124,10 +124,10 @@ namespace MassTransit.RabbitMqTransport.Tests
             Task<ConsumeContext<B>> _b;
 
             [OneTimeSetUp]
-            public void Setup()
+            public async Task Setup()
             {
-                Await(() => InputQueueSendEndpoint.Send(new A()));
-                Await(() => InputQueueSendEndpoint.Send(new B()));
+                await InputQueueSendEndpoint.Send(new A());
+                await InputQueueSendEndpoint.Send(new B());
             }
 
             protected override void ConfigureInputQueueEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
@@ -157,10 +157,10 @@ namespace MassTransit.RabbitMqTransport.Tests
             Task<ConsumeContext<B>> _b;
 
             [OneTimeSetUp]
-            public void Setup()
+            public async Task Setup()
             {
-                Await(() => InputQueueSendEndpoint.Send(new A()));
-                Await(() => InputQueueSendEndpoint.Send(new B()));
+                await InputQueueSendEndpoint.Send(new A());
+                await InputQueueSendEndpoint.Send(new B());
             }
 
             protected override void ConfigureInputQueueEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
@@ -206,11 +206,11 @@ namespace MassTransit.RabbitMqTransport.Tests
             Guid _sagaId;
 
             [OneTimeSetUp]
-            public void Setup()
+            public async Task Setup()
             {
                 _sagaId = NewId.NextGuid();
 
-                Await(() => InputQueueSendEndpoint.Send(new A {CorrelationId = _sagaId}));
+                await InputQueueSendEndpoint.Send(new A {CorrelationId = _sagaId});
             }
 
             protected override void ConfigureInputQueueEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)

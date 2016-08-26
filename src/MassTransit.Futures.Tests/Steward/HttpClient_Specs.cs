@@ -39,7 +39,7 @@ namespace MassTransit.Tests.Steward
             var command = new ExecuteHttpRequestCommand(webUrl);
 
 
-            DispatchMessageHandle<ExecuteHttpRequest> handle = await DispatchEndpoint.DispatchMessage(command, commandUri, webUrl);
+            DispatchMessageHandle<ExecuteHttpRequest> handle = await (await DispatchEndpoint).DispatchMessage(command, commandUri, webUrl);
 
             ConsumeContext<DispatchAccepted> accepted = await _accepted;
 

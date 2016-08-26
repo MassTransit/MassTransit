@@ -84,20 +84,20 @@ namespace MassTransit.MongoDbIntegration.Tests.Courier
         }
 
         [OneTimeSetUp]
-        public void Setup()
+        public async Task Setup()
         {
             _trackingNumber = NewId.NextGuid();
 
             Console.WriteLine("Tracking Number: {0}", _trackingNumber);
 
-            TaskUtil.Await(() => Bus.Publish<RoutingSlipCompleted>(new RoutingSlipCompletedEvent(_trackingNumber, DateTime.UtcNow, TimeSpan.FromSeconds(1))));
+            await Bus.Publish<RoutingSlipCompleted>(new RoutingSlipCompletedEvent(_trackingNumber, DateTime.UtcNow, TimeSpan.FromSeconds(1)));
 
-            TaskUtil.Await(() => Bus.Publish<RoutingSlipActivityCompleted>(new RoutingSlipActivityCompletedEvent(_trackingNumber,
+            await Bus.Publish<RoutingSlipActivityCompleted>(new RoutingSlipActivityCompletedEvent(_trackingNumber,
                 "Prepare",
-                NewId.NextGuid(), DateTime.UtcNow)));
+                NewId.NextGuid(), DateTime.UtcNow));
 
-            TaskUtil.Await(() => Bus.Publish<RoutingSlipActivityCompleted>(new RoutingSlipActivityCompletedEvent(_trackingNumber, "Send",
-                NewId.NextGuid(), DateTime.UtcNow)));
+            await Bus.Publish<RoutingSlipActivityCompleted>(new RoutingSlipActivityCompletedEvent(_trackingNumber, "Send",
+                NewId.NextGuid(), DateTime.UtcNow));
         }
 
         protected override void ConfigureBus(IInMemoryBusFactoryConfigurator configurator)
