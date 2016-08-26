@@ -40,27 +40,23 @@ namespace MassTransit.RabbitMqTransport.Tests
             await InputQueueSendEndpoint.Send(new PingMessage());
 
             await _errorHandler2;
-
         }
 
-        private Task<ConsumeContext<PingMessage>> _errorHandler;
-        private readonly Guid? _correlationId = NewId.NextGuid();
-        private PingMessage _pingMessage;
-        private PingMessage _pingMessage2;
-        private Task<ConsumeContext<PingMessage>> _errorHandler2;
+        Task<ConsumeContext<PingMessage>> _errorHandler;
+        readonly Guid? _correlationId = NewId.NextGuid();
+        PingMessage _pingMessage;
+        PingMessage _pingMessage2;
+        Task<ConsumeContext<PingMessage>> _errorHandler2;
 
         [OneTimeSetUp]
-        public void Setup()
+        public async Task Setup()
         {
-            Await(() =>
+            _pingMessage = new PingMessage();
+            _pingMessage2 = new PingMessage();
+            await InputQueueSendEndpoint.Send(_pingMessage, Pipe.Execute<SendContext<PingMessage>>(context =>
             {
-                _pingMessage = new PingMessage();
-                _pingMessage2 = new PingMessage();
-                return InputQueueSendEndpoint.Send(_pingMessage, Pipe.Execute<SendContext<PingMessage>>(context =>
-                {
-                    context.CorrelationId = _correlationId;
-                }));
-            });
+                context.CorrelationId = _correlationId;
+            }));
         }
 
         protected override void ConfigureBusHost(IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host)

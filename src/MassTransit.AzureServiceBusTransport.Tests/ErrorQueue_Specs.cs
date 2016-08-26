@@ -89,14 +89,14 @@
         readonly Guid? _correlationId = NewId.NextGuid();
 
         [OneTimeSetUp]
-        public void Setup()
+        public async Task Setup()
         {
-            Await(() => InputQueueSendEndpoint.Send(new PingMessage(), Pipe.Execute<SendContext<PingMessage>>(context =>
+            await InputQueueSendEndpoint.Send(new PingMessage(), Pipe.Execute<SendContext<PingMessage>>(context =>
             {
                 context.CorrelationId = _correlationId;
                 context.ResponseAddress = context.SourceAddress;
                 context.FaultAddress = context.SourceAddress;
-            })));
+            }));
         }
 
         protected override void ConfigureBusHost(IServiceBusBusFactoryConfigurator configurator, IServiceBusHost host)

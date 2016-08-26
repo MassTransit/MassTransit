@@ -250,7 +250,7 @@ namespace MassTransit.Transports.InMemory
             {
                 _participant.SetComplete();
 
-                await _supervisor.Stop("Stopped").ConfigureAwait(false);
+                await _supervisor.Stop("Stopped", cancellationToken).ConfigureAwait(false);
 
                 await _supervisor.Completed.ConfigureAwait(false);
 

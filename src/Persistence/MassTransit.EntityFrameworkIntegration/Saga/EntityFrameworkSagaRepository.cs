@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -16,7 +16,6 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
     using System.Collections.Generic;
     using System.Data;
     using System.Data.Entity;
-    using System.Data.Entity.Core;
     using System.Data.Entity.Core.Metadata.Edm;
     using System.Data.Entity.Infrastructure;
     using System.Data.SqlClient;
@@ -30,13 +29,13 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
 
 
     public class EntityFrameworkSagaRepository<TSaga> :
-        ISagaRepository<TSaga>,
-        IQuerySagaRepository<TSaga>
+            ISagaRepository<TSaga>,
+            IQuerySagaRepository<TSaga>
         where TSaga : class, ISaga
     {
         static readonly ILog _log = Logger.Get<EntityFrameworkSagaRepository<TSaga>>();
-        readonly SagaDbContextFactory _sagaDbContextFactory;
         readonly IsolationLevel _isolationLevel;
+        readonly SagaDbContextFactory _sagaDbContextFactory;
 
         public EntityFrameworkSagaRepository(SagaDbContextFactory sagaDbContextFactory, IsolationLevel isolationLevel = IsolationLevel.Serializable)
         {
@@ -57,7 +56,7 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
 
         void IProbeSite.Probe(ProbeContext context)
         {
-            ProbeContext scope = context.CreateScope("sagaRepository");
+            var scope = context.CreateScope("sagaRepository");
             using (var dbContext = _sagaDbContextFactory())
             {
                 var objectContext = ((IObjectContextAdapter)dbContext).ObjectContext;
@@ -77,12 +76,12 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
             if (!context.CorrelationId.HasValue)
                 throw new SagaException("The CorrelationId was not specified", typeof(TSaga), typeof(T));
 
-            Guid sagaId = context.CorrelationId.Value;
+            var sagaId = context.CorrelationId.Value;
 
-            using (DbContext dbContext = _sagaDbContextFactory())
-            using(var transaction = dbContext.Database.BeginTransaction(_isolationLevel))
+            using (var dbContext = _sagaDbContextFactory())
+            using (var transaction = dbContext.Database.BeginTransaction(_isolationLevel))
             {
-                bool inserted = false;
+                var inserted = false;
 
                 TSaga instance;
                 if (policy.PreInsertInstance(context, out instance))
@@ -120,7 +119,7 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
                 catch (DbUpdateException ex)
                 {
                     var baseException = ex.GetBaseException() as SqlException;
-                    if(baseException != null && baseException.Number == 1205)
+                    if (baseException != null && baseException.Number == 1205)
                     {
                         // deadlock, no need to rollback
                     }
@@ -155,30 +154,6 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
             }
         }
 
-        static async Task<bool> PreInsertSagaInstance<T>(DbContext dbContext, TSaga instance, CancellationToken cancellationToken)
-        {
-            try
-            {
-                dbContext.Set<TSaga>().Add(instance);
-                await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
-                _log.DebugFormat("SAGA:{0}:{1} Insert {2}", TypeMetadataCache<TSaga>.ShortName, instance.CorrelationId,
-                    TypeMetadataCache<T>.ShortName);
-
-                return true;
-            }
-            catch (Exception ex)
-            {
-                if (_log.IsDebugEnabled)
-                {
-                    _log.DebugFormat("SAGA:{0}:{1} Dupe {2} - {3}", TypeMetadataCache<TSaga>.ShortName, instance.CorrelationId,
-                        TypeMetadataCache<T>.ShortName, ex.Message);
-                }
-            }
-
-            return false;
-        }
-
         public async Task SendQuery<T>(SagaQueryConsumeContext<TSaga, T> context, ISagaPolicy<TSaga, T> policy,
             IPipe<SagaConsumeContext<TSaga, T>> next) where T : class
         {
@@ -187,7 +162,7 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
             {
                 try
                 {
-                    var sagaInstances = await dbContext.Set<TSaga>().Where(context.Query.FilterExpression).ToListAsync().ConfigureAwait(false);
+                    List<TSaga> sagaInstances = await dbContext.Set<TSaga>().Where(context.Query.FilterExpression).ToListAsync().ConfigureAwait(false);
                     if (sagaInstances.Count == 0)
                     {
                         var missingSagaPipe = new MissingPipe<T>(dbContext, next);
@@ -223,6 +198,30 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
             }
         }
 
+        static async Task<bool> PreInsertSagaInstance<T>(DbContext dbContext, TSaga instance, CancellationToken cancellationToken)
+        {
+            try
+            {
+                dbContext.Set<TSaga>().Add(instance);
+                await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+                _log.DebugFormat("SAGA:{0}:{1} Insert {2}", TypeMetadataCache<TSaga>.ShortName, instance.CorrelationId,
+                    TypeMetadataCache<T>.ShortName);
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                if (_log.IsDebugEnabled)
+                {
+                    _log.DebugFormat("SAGA:{0}:{1} Dupe {2} - {3}", TypeMetadataCache<TSaga>.ShortName, instance.CorrelationId,
+                        TypeMetadataCache<T>.ShortName, ex.Message);
+                }
+            }
+
+            return false;
+        }
+
         async Task SendToInstance<T>(SagaQueryConsumeContext<TSaga, T> context, DbContext dbContext, ISagaPolicy<TSaga, T> policy, TSaga instance,
             IPipe<SagaConsumeContext<TSaga, T>> next)
             where T : class
@@ -252,7 +251,7 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
         /// </summary>
         /// <typeparam name="TMessage"></typeparam>
         class MissingPipe<TMessage> :
-            IPipe<SagaConsumeContext<TSaga, TMessage>>
+                IPipe<SagaConsumeContext<TSaga, TMessage>>
             where TMessage : class
         {
             readonly DbContext _dbContext;

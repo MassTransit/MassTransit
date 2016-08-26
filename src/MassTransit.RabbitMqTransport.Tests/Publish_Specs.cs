@@ -403,9 +403,9 @@ namespace MassTransit.RabbitMqTransport.Tests
         Task<ConsumeContext<IProxyMe>> _handler;
 
         [OneTimeSetUp]
-        public void Setup()
+        public async Task Setup()
         {
-            Await(() => InputQueueSendEndpoint.Send<IProxyMe>(new {IntValue, StringValue, CorrelationId = _correlationId}));
+            await InputQueueSendEndpoint.Send<IProxyMe>(new {IntValue, StringValue, CorrelationId = _correlationId});
         }
 
         protected override void ConfigureInputQueueEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)

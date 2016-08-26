@@ -29,9 +29,9 @@ namespace MassTransit.AzureServiceBusTransport.Tests
         }
 
         [OneTimeSetUp]
-        public void Setup()
+        public async Task Setup()
         {
-            Await(() => InputQueueSendEndpoint.Send(new PingMessage()));
+            await InputQueueSendEndpoint.Send(new PingMessage());
         }
 
         [Test]
