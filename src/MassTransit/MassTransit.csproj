@@ -1084,7 +1084,6 @@
     <Compile Include="Exceptions\ShutDownException.cs" />
     <Compile Include="Exceptions\EndpointException.cs" />
     <Compile Include="Turnout\JobResultContext.cs" />
-    <Compile Include="Util\AsyncTimer.cs" />
     <Compile Include="Util\Caching\Cached.cs" />
     <Compile Include="Util\Caching\LazyMemoryCache.cs" />
     <Compile Include="Util\IAsyncDisposable.cs" />
