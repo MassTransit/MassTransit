@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -51,7 +51,7 @@ namespace MassTransit.Util
             if (connection == null)
                 throw new ArgumentNullException(nameof(connection));
 
-            long id = Interlocked.Increment(ref _nextId);
+            var id = Interlocked.Increment(ref _nextId);
 
             lock (_connections)
             {
@@ -82,7 +82,7 @@ namespace MassTransit.Util
                 return TaskUtil.Completed;
 
             if (connected.Length == 1)
-                return callback(_connections.First().Value);
+                return callback(connected[0]);
 
             return Task.WhenAll(connected.Select(callback));
         }
@@ -94,6 +94,13 @@ namespace MassTransit.Util
             {
                 connected = _connected;
             }
+
+            if (connected.Length == 0)
+                return true;
+
+            if (connected.Length == 1)
+                return callback(connected[0]);
+
             return connected.All(callback);
         }
 
