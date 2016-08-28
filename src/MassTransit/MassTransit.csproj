@@ -1094,7 +1094,6 @@
     <Compile Include="Util\StopEventArgs.cs" />
     <Compile Include="Util\TaskParticipant.cs" />
     <Compile Include="Util\TaskSupervisor.cs" />
-    <Compile Include="Util\AsyncObservable.cs" />
     <Compile Include="Util\BusHostInfo.cs" />
     <Compile Include="Util\Connectable.cs" />
     <Compile Include="Util\ExceptionUtil.cs" />

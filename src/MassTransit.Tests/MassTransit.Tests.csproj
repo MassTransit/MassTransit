@@ -154,7 +154,6 @@
     <Compile Include="MultiTestConsumer_Specs.cs" />
     <Compile Include="ObjectToDictionary_Specs.cs" />
     <Compile Include="Observer_Specs.cs" />
-    <Compile Include="OrderedNotification_Specs.cs" />
     <Compile Include="Outbox_Specs.cs" />
     <Compile Include="Performance\InMemorySpeed_Specs.cs" />
     <Compile Include="Pipeline\CircuitBreaker_Specs.cs" />
