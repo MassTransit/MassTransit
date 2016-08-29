@@ -97,6 +97,7 @@
     <Compile Include="ConcurrencyLimitKnob_Specs.cs" />
     <Compile Include="ConsumeJToken_Specs.cs" />
     <Compile Include="ConsumeObserver_Specs.cs" />
+    <Compile Include="ConsumerFactoryMiddleware_Specs.cs" />
     <Compile Include="Consumer_Specs.cs" />
     <Compile Include="ContainedMessage_Specs.cs" />
     <Compile Include="Conventional\ConventionConsumer_Specs.cs" />
