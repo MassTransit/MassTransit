@@ -59,6 +59,25 @@ RabbitMQ with SSL
 You will need to configure RabbitMQ to support SSL also http://www.rabbitmq.com/ssl.html.
 
 
+RabbitMQ with CloudAMQP
+-----------------------
+
+It is not necessary to set SSL specific configuration parameters in order to connect using SSL. What is required is specifying the appropriate SSL specific port (usually 5671 as opposed to the non-ssl port for RabbitMQ which is typically 5672).
+
+.. sourcecode:: csharp
+
+    ServiceBusFactory.New(c =>
+    {
+        c.UseRabbitMq(r =>
+        {
+            r.ConfigureHost(host, port, virtualHost, h =>
+            {
+                h.UseSsl(s =>{ });
+            });
+        });
+    });
+
+	
 .. [#pr] *Polymorphic Routing* is routing where ``bus.Subscribe<B>( ... )`` would receive both ``class A {}`` and ``class B : A {}`` message.
 
 .. [#ir] *Interface Routing* is routing where ``bus.Subscribe<C>( ... )``  would receive
