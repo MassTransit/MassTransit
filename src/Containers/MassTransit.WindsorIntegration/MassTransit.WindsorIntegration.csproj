@@ -84,8 +84,8 @@
     <Compile Include="..\..\SolutionVersion.cs">
       <Link>SolutionVersion.cs</Link>
     </Compile>
-    <Compile Include="AutofacCompensateActivityFactory.cs" />
-    <Compile Include="AutofacExecuteActivityFactory.cs" />
+    <Compile Include="WindsorCompensateActivityFactory.cs" />
+    <Compile Include="WindsorExecuteActivityFactory.cs" />
     <Compile Include="ConsumerConfiguratorCache.cs" />
     <Compile Include="MessageLifetimeScope.cs" />
     <Compile Include="MessageScope.cs" />

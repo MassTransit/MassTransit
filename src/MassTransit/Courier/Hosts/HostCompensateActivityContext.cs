@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -108,8 +108,10 @@ namespace MassTransit.Courier.Hosts
 
         Guid CompensateContext.TrackingNumber => _context.TrackingNumber;
         HostInfo CompensateContext.Host => _context.Host;
-        DateTime CompensateContext.StartTimestamp => _context.StartTimestamp;
-        TimeSpan CompensateContext.ElapsedTime => _context.ElapsedTime;
+        DateTime CompensateContext.StartTimestamp => _context.Timestamp;
+        TimeSpan CompensateContext.ElapsedTime => _context.Elapsed;
+        DateTime CompensateContext.Timestamp => _context.Timestamp;
+        TimeSpan CompensateContext.Elapsed => _context.Elapsed;
         ConsumeContext CompensateContext.ConsumeContext => _context.ConsumeContext;
         string CompensateContext.ActivityName => _context.ActivityName;
         Guid CompensateContext.ExecutionId => _context.ExecutionId;

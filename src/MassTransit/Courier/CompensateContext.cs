@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -27,6 +27,11 @@ namespace MassTransit.Courier
         Guid TrackingNumber { get; }
 
         /// <summary>
+        /// The tracking number for this activity within the routing slip
+        /// </summary>
+        Guid ExecutionId { get; }
+
+        /// <summary>
         /// The host performing the compensation
         /// </summary>
         HostInfo Host { get; }
@@ -34,12 +39,24 @@ namespace MassTransit.Courier
         /// <summary>
         /// The start time for the activity compensation
         /// </summary>
+        [Obsolete("Use Timestamp instead, will be removed in a future version of MassTransit")]
         DateTime StartTimestamp { get; }
 
         /// <summary>
         /// The time elapsed for the compensation operation
         /// </summary>
+        [Obsolete("Use Elapsed instead, will be removed in a future version of MassTransit")]
         TimeSpan ElapsedTime { get; }
+
+        /// <summary>
+        /// The start time for the activity compensation
+        /// </summary>
+        DateTime Timestamp { get; }
+
+        /// <summary>
+        /// The time elapsed for the compensation operation
+        /// </summary>
+        TimeSpan Elapsed { get; }
 
         /// <summary>
         /// The consume context of the compensation routing slip
@@ -50,11 +67,6 @@ namespace MassTransit.Courier
         /// The name of the activity being compensated
         /// </summary>
         string ActivityName { get; }
-
-        /// <summary>
-        /// The tracking number for this activity within the routing slip
-        /// </summary>
-        Guid ExecutionId { get; }
 
         /// <summary>
         /// The compensation was successful
@@ -95,6 +107,9 @@ namespace MassTransit.Courier
         CompensateContext
         where TLog : class
     {
+        /// <summary>
+        /// The execution log from the activity execution
+        /// </summary>
         TLog Log { get; }
     }
 }

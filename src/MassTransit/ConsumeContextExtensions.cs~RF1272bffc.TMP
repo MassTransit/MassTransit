@@ -28,13 +28,13 @@ namespace MassTransit
             return new ConsumerConsumeContextProxy<TConsumer, T>(context, consumer);
         }
 
-        public static ConsumerConsumeContext<TConsumer, TMessage> PushConsumerScope<TConsumer, TMessage, T>(this ConsumeContext<TMessage> context, TConsumer consumer,
-            T scope)
-            where TMessage : class
-            where TConsumer : class
+        public static ConsumerConsumeContext<TConsumer, T> PushConsumerScope<TConsumer, T, TScope>(this ConsumeContext<T> context, TConsumer consumer,
+            TScope scope)
             where T : class
+            where TConsumer : class
+            where TScope : class
         {
-            var proxy = new ConsumerConsumeContextProxy<TConsumer, TMessage>(context, new PayloadCacheScope(context), consumer);
+            var proxy = new ConsumerConsumeContextProxy<TConsumer, T>(context, new PayloadCacheScope(context), consumer);
 
             proxy.GetOrAddPayload(() => scope);
 
