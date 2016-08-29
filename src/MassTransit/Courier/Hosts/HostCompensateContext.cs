@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -18,6 +18,7 @@ namespace MassTransit.Courier.Hosts
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
+    using Context;
     using Contracts;
     using Exceptions;
     using MassTransit.Pipeline;
@@ -25,6 +26,7 @@ namespace MassTransit.Courier.Hosts
 
 
     public class HostCompensateContext<TLog> :
+        BasePipeContext,
         CompensateContext<TLog>
         where TLog : class
     {
@@ -39,6 +41,7 @@ namespace MassTransit.Courier.Hosts
         readonly Stopwatch _timer;
 
         public HostCompensateContext(HostInfo host, ConsumeContext<RoutingSlip> context)
+            : base(new PayloadCacheScope(context), context.CancellationToken)
         {
             _host = host;
             _context = context;
@@ -125,6 +128,8 @@ namespace MassTransit.Courier.Hosts
         HostInfo CompensateContext.Host => _host;
         DateTime CompensateContext.StartTimestamp => _startTimestamp;
         TimeSpan CompensateContext.ElapsedTime => _timer.Elapsed;
+        DateTime CompensateContext.Timestamp => _startTimestamp;
+        TimeSpan CompensateContext.Elapsed => _timer.Elapsed;
         ConsumeContext CompensateContext.ConsumeContext => _context;
         string CompensateContext.ActivityName => _activityLog.Name;
         Guid CompensateContext.ExecutionId => _activityLog.ExecutionId;
@@ -167,23 +172,6 @@ namespace MassTransit.Courier.Hosts
         {
             // TODO intercept to ensure SourceAddress is right, but it should be based on the InputAddress
             return _context.GetSendEndpoint(address);
-        }
-
-        CancellationToken PipeContext.CancellationToken => _context.CancellationToken;
-
-        bool PipeContext.HasPayloadType(Type contextType)
-        {
-            return _context.HasPayloadType(contextType);
-        }
-
-        bool PipeContext.TryGetPayload<TPayload>(out TPayload payload)
-        {
-            return _context.TryGetPayload(out payload);
-        }
-
-        TPayload PipeContext.GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory)
-        {
-            return _context.GetOrAddPayload(payloadFactory);
         }
 
         public ConnectHandle ConnectPublishObserver(IPublishObserver observer)

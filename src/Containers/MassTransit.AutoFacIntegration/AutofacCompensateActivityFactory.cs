@@ -41,14 +41,17 @@ namespace MassTransit.AutofacIntegration
 
         public async Task Compensate(CompensateContext<TLog> context, IPipe<CompensateActivityContext<TLog>> next)
         {
-            using (var scope = _lifetimeScope.BeginLifetimeScope(x => ConfigureScope(x, context)))
+            using (var innerScope = _lifetimeScope.BeginLifetimeScope(x => ConfigureScope(x, context)))
             {
                 if (_log.IsDebugEnabled)
                     _log.DebugFormat("CompensateActivityFactory: Compensating: {0}", TypeMetadataCache<TActivity>.ShortName);
 
-                var activity = scope.Resolve<TActivity>(TypedParameter.From(context.Log));
+                var activity = innerScope.Resolve<TActivity>(TypedParameter.From(context.Log));
 
-                var activityContext = new HostCompensateActivityContext<TActivity, TLog>(activity, context);
+                CompensateActivityContext<TLog> activityContext = new HostCompensateActivityContext<TActivity, TLog>(activity, context);
+
+                var consumerLifetimeScope = innerScope;
+                activityContext.GetOrAddPayload(() => consumerLifetimeScope);
 
                 await next.Send(activityContext).ConfigureAwait(false);
             }

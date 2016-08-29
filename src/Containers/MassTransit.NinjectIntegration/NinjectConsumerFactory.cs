@@ -35,8 +35,7 @@ namespace MassTransit.NinjectIntegration
             var consumer = _kernel.Get<TConsumer>();
             if (consumer == null)
             {
-                throw new ConsumerException(string.Format("Unable to resolve consumer type '{0}'.",
-                    TypeMetadataCache<TConsumer>.ShortName));
+                throw new ConsumerException($"Unable to resolve consumer type '{TypeMetadataCache<TConsumer>.ShortName}'.");
             }
 
             try
