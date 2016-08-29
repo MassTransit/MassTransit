@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -23,8 +23,8 @@ namespace MassTransit.Courier.Results
     {
         readonly IDictionary<string, object> _variables;
 
-        public NextActivityWithVariablesExecutionResult(ExecuteContext<TArguments> context, IRoutingSlipEventPublisher publisher, Activity activity, RoutingSlip routingSlip,
-            IDictionary<string, object> variables)
+        public NextActivityWithVariablesExecutionResult(ExecuteContext<TArguments> context, IRoutingSlipEventPublisher publisher, Activity activity,
+            RoutingSlip routingSlip, IDictionary<string, object> variables)
             : base(context, publisher, activity, routingSlip)
         {
             _variables = variables;
@@ -47,8 +47,8 @@ namespace MassTransit.Courier.Results
         readonly Uri _compensationAddress;
         readonly IDictionary<string, object> _variables;
 
-        public NextActivityWithVariablesExecutionResult(ExecuteContext<TArguments> context, IRoutingSlipEventPublisher publisher, Activity activity, RoutingSlip routingSlip,
-            Uri compensationAddress, TLog log, IDictionary<string, object> variables)
+        public NextActivityWithVariablesExecutionResult(ExecuteContext<TArguments> context, IRoutingSlipEventPublisher publisher, Activity activity,
+            RoutingSlip routingSlip, Uri compensationAddress, TLog log, IDictionary<string, object> variables)
             : base(context, publisher, activity, routingSlip, RoutingSlipBuilder.GetObjectAsDictionary(log))
         {
             _compensationAddress = compensationAddress;
