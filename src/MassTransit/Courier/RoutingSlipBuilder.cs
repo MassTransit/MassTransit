@@ -27,7 +27,7 @@ namespace MassTransit.Courier
     public class RoutingSlipBuilder :
         ItineraryBuilder
     {
-        public static readonly IDictionary<string, object> NoArguments = new Dictionary<string, object>();
+        public static readonly IDictionary<string, object> NoArguments = new Dictionary<string, object>(StringComparer.InvariantCultureIgnoreCase);
 
         readonly IList<ActivityException> _activityExceptions;
         readonly IList<ActivityLog> _activityLogs;
@@ -49,7 +49,7 @@ namespace MassTransit.Courier
             _activityLogs = new List<ActivityLog>();
             _activityExceptions = new List<ActivityException>();
             _compensateLogs = new List<CompensateLog>();
-            _variables = new Dictionary<string, object>();
+            _variables = new Dictionary<string, object>(StringComparer.InvariantCultureIgnoreCase);
             _subscriptions = new List<Subscription>();
         }
 
@@ -61,7 +61,7 @@ namespace MassTransit.Courier
             _activityLogs = new List<ActivityLog>(routingSlip.ActivityLogs);
             _compensateLogs = new List<CompensateLog>(routingSlip.CompensateLogs);
             _activityExceptions = new List<ActivityException>(routingSlip.ActivityExceptions);
-            _variables = new Dictionary<string, object>(routingSlip.Variables);
+            _variables = new Dictionary<string, object>(routingSlip.Variables, StringComparer.InvariantCultureIgnoreCase);
             _subscriptions = new List<Subscription>(routingSlip.Subscriptions);
 
             _sourceItinerary = new List<Activity>();
@@ -75,7 +75,7 @@ namespace MassTransit.Courier
             _activityLogs = new List<ActivityLog>(routingSlip.ActivityLogs);
             _compensateLogs = new List<CompensateLog>(routingSlip.CompensateLogs);
             _activityExceptions = new List<ActivityException>(routingSlip.ActivityExceptions);
-            _variables = new Dictionary<string, object>(routingSlip.Variables);
+            _variables = new Dictionary<string, object>(routingSlip.Variables, StringComparer.InvariantCultureIgnoreCase);
             _subscriptions = new List<Subscription>(routingSlip.Subscriptions);
 
             _sourceItinerary = new List<Activity>(sourceItinerary);
@@ -89,7 +89,7 @@ namespace MassTransit.Courier
             _activityLogs = new List<ActivityLog>(routingSlip.ActivityLogs);
             _compensateLogs = new List<CompensateLog>(compensateLogs);
             _activityExceptions = new List<ActivityException>(routingSlip.ActivityExceptions);
-            _variables = new Dictionary<string, object>(routingSlip.Variables);
+            _variables = new Dictionary<string, object>(routingSlip.Variables, StringComparer.InvariantCultureIgnoreCase);
             _subscriptions = new List<Subscription>(routingSlip.Subscriptions);
 
             _sourceItinerary = new List<Activity>();
