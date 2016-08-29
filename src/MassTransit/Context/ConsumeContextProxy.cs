@@ -219,20 +219,20 @@ namespace MassTransit.Context
     /// of the context is only added at the scope level and below.
     /// </summary>
     /// <typeparam name="TMessage"></typeparam>
-    public abstract class ConsumeContextProxy<TMessage> :
+    public class ConsumeContextProxy<TMessage> :
         ConsumeContextProxy,
         ConsumeContext<TMessage>
         where TMessage : class
     {
         readonly ConsumeContext<TMessage> _context;
 
-        protected ConsumeContextProxy(ConsumeContext<TMessage> context)
+        public ConsumeContextProxy(ConsumeContext<TMessage> context)
             : base(context)
         {
             _context = context;
         }
 
-        protected ConsumeContextProxy(ConsumeContext<TMessage> context, IPayloadCache payloadCache)
+        public ConsumeContextProxy(ConsumeContext<TMessage> context, IPayloadCache payloadCache)
             : base(context, payloadCache)
         {
             _context = context;

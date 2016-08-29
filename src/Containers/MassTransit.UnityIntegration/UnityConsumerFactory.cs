@@ -37,11 +37,12 @@ namespace MassTransit.UnityIntegration
                 var consumer = childContainer.Resolve<TConsumer>();
                 if (consumer == null)
                 {
-                    throw new ConsumerException(string.Format("Unable to resolve consumer type '{0}'.",
-                        TypeMetadataCache<TConsumer>.ShortName));
+                    throw new ConsumerException($"Unable to resolve consumer type '{TypeMetadataCache<TConsumer>.ShortName}'.");
                 }
 
-                await next.Send(context.PushConsumer(consumer)).ConfigureAwait(false);
+                ConsumerConsumeContext<TConsumer, T> consumerConsumeContext = context.PushConsumerScope(consumer, childContainer);
+
+                await next.Send(consumerConsumeContext).ConfigureAwait(false);
             }
         }
 
