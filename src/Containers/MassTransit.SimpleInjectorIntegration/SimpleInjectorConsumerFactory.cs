@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -37,11 +37,12 @@ namespace MassTransit.SimpleInjectorIntegration
                 var consumer = _container.GetInstance<TConsumer>();
                 if (consumer == null)
                 {
-                    throw new ConsumerException(
-                        string.Format("Unable to resolve consumer type '{0}'.", TypeMetadataCache<TConsumer>.ShortName));
+                    throw new ConsumerException($"Unable to resolve consumer type '{TypeMetadataCache<TConsumer>.ShortName}'.");
                 }
 
-                await next.Send(context.PushConsumer(consumer)).ConfigureAwait(false);
+                ConsumerConsumeContext<TConsumer, T> consumerConsumeContext = context.PushConsumerScope(consumer, scope);
+
+                await next.Send(consumerConsumeContext).ConfigureAwait(false);
             }
         }
 

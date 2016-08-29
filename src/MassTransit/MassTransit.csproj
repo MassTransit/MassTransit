@@ -749,6 +749,7 @@
     <Compile Include="Saga\ISagaQuery.cs" />
     <Compile Include="Saga\ISagaQueryFactory.cs" />
     <Compile Include="Saga\CorrelationExpressionToSagaIdVisitor.cs" />
+    <Compile Include="Saga\SagaContextExtensions.cs" />
     <Compile Include="Saga\SagaFactoryMethod.cs" />
     <Compile Include="Saga\Pipeline\Filters\CorrelationIdMessageFilter.cs" />
     <Compile Include="Saga\Pipeline\Filters\QuerySagaFilter.cs" />
