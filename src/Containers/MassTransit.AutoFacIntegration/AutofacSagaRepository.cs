@@ -54,9 +54,11 @@ namespace MassTransit.AutofacIntegration
         async Task ISagaRepository<TSaga>.SendQuery<T>(SagaQueryConsumeContext<TSaga, T> context, ISagaPolicy<TSaga, T> policy,
             IPipe<SagaConsumeContext<TSaga, T>> next)
         {
-            using (_scope.BeginLifetimeScope(_name))
+            using (var lifetimeScope = _scope.BeginLifetimeScope(_name))
             {
-                await _repository.SendQuery(context, policy, next).ConfigureAwait(false);
+                SagaQueryConsumeContext<TSaga, T> proxy = context.CreateQueryScope(lifetimeScope);
+
+                await _repository.SendQuery(proxy, policy, next).ConfigureAwait(false);
             }
         }
 
