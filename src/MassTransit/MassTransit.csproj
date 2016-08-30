@@ -260,7 +260,6 @@
     <Compile Include="IEndpointConventionCache.cs" />
     <Compile Include="IMessageData.cs" />
     <Compile Include="IMessageScheduler.cs" />
-    <Compile Include="Internals\Extensions\AttributeExtensions.cs" />
     <Compile Include="IntrospectionExtensions.cs" />
     <Compile Include="IProbeSite.cs" />
     <Compile Include="IPublishEndpointProvider.cs" />
