@@ -14,6 +14,7 @@ namespace MassTransit.Util
 {
     using System;
     using System.Diagnostics;
+    using System.Reflection;
 
 
     [Serializable]
@@ -28,7 +29,7 @@ namespace MassTransit.Util
         {
             MachineName = Environment.MachineName;
 
-            MassTransitVersion = FileVersionInfo.GetVersionInfo(typeof(IBus).Assembly.Location).FileVersion;
+            MassTransitVersion = GetAssemblyFileVersion(typeof(IBus).Assembly);
             FrameworkVersion = Environment.Version.ToString();
             OperatingSystemVersion = Environment.OSVersion.ToString();
             var currentProcess = Process.GetCurrentProcess();
@@ -38,7 +39,7 @@ namespace MassTransit.Util
             var entryAssembly = System.Reflection.Assembly.GetEntryAssembly() ?? System.Reflection.Assembly.GetCallingAssembly();
             var assemblyName = entryAssembly.GetName();
             Assembly = assemblyName.Name;
-            AssemblyVersion = FileVersionInfo.GetVersionInfo(entryAssembly.Location).FileVersion;
+            AssemblyVersion = GetAssemblyFileVersion(entryAssembly);
         }
 
         public string MachineName { get; private set; }
@@ -49,5 +50,20 @@ namespace MassTransit.Util
         public string FrameworkVersion { get; private set; }
         public string MassTransitVersion { get; private set; }
         public string OperatingSystemVersion { get; private set; }
+
+        static string GetAssemblyFileVersion(Assembly assembly)
+        {
+            var attribute = assembly.GetCustomAttribute<AssemblyFileVersionAttribute>();
+            if (attribute != null)
+            {
+                return attribute.Version;
+            }
+
+            var assemblyLocation = assembly.Location;
+            if (assemblyLocation != null)
+                return FileVersionInfo.GetVersionInfo(assemblyLocation).FileVersion;
+
+            return "Unknown";
+        }
     }
 }
