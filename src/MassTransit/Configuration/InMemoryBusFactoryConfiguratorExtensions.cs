@@ -52,6 +52,13 @@ namespace MassTransit
             return sb.ToString();
         }
 
+
+        /// <summary>
+        /// Creates a management endpoint which can be used by controllable filters on a bus intance
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="configure"></param>
+        /// <returns></returns>
         public static IManagementEndpointConfigurator ManagementEndpoint(this IInMemoryBusFactoryConfigurator configurator,
             Action<IReceiveEndpointConfigurator> configure = null)
         {
