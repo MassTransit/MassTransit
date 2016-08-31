@@ -23,7 +23,7 @@ namespace MassTransit.Host
     using Topshelf;
 
 
-    public class MassTransitHostService :
+    public class  MassTransitHostService :
         ServiceControl
     {
         readonly ILifetimeScope _hostScope;

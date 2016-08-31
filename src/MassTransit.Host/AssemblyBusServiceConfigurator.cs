@@ -15,6 +15,7 @@ namespace MassTransit.Host
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using Autofac;
     using Hosting;
     using Internals.Extensions;
     using Logging;
@@ -30,12 +31,14 @@ namespace MassTransit.Host
         readonly ILog _log = Logger.Get<AssemblyBusServiceConfigurator>();
         readonly IServiceSpecification _serviceSpecification;
         readonly ISettingsProvider _settingsProvider;
+        readonly ILifetimeScope _lifetimeScope;
 
         public AssemblyBusServiceConfigurator(IEnumerable<IEndpointSpecification> endpointSpecifications, IServiceSpecification serviceSpecification,
-            ISettingsProvider settingsProvider)
+            ISettingsProvider settingsProvider, ILifetimeScope lifetimeScope)
         {
             _serviceSpecification = serviceSpecification;
             _settingsProvider = settingsProvider;
+            _lifetimeScope = lifetimeScope;
             _endpointSpecifications = endpointSpecifications.ToArray();
         }
 
@@ -56,7 +59,25 @@ namespace MassTransit.Host
                 configurator.ReceiveEndpoint(queueName, consumerLimit, x =>
                 {
                     specification.Configure(x);
+
+                    _log.Info($"Configured Endpoint: {specification.GetType().GetTypeName()} (address: {x.InputAddress})");
                 });
+            }
+
+            ConfigureBusObservers(configurator);
+        }
+
+        void ConfigureBusObservers(IServiceConfigurator configurator)
+        {
+            var observers = _lifetimeScope.ResolveOptional<IEnumerable<IBusObserver>>();
+            if (observers != null)
+            {
+                foreach (var observer in observers)
+                {
+                    _log.Info($"Configuring Bus Observer: {observer.GetType().GetTypeName()}");
+
+                    configurator.BusObserver(observer);
+                }
             }
         }
 

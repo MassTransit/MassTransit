@@ -75,8 +75,8 @@
       <Link>Properties\SolutionVersion.cs</Link>
     </Compile>
     <Compile Include="CancelScheduledMessageConsumer.cs" />
-    <Compile Include="Configuration\InMemorySchedulerBusFactorySpecification.cs" />
-    <Compile Include="Configuration\InMemorySchedulerBusObserver.cs" />
+    <Compile Include="Configuration\SchedulerBusFactorySpecification.cs" />
+    <Compile Include="Configuration\SchedulerBusObserver.cs" />
     <Compile Include="MassTransitJobFactory.cs" />
     <Compile Include="QuartzIntegrationExtensions.cs" />
     <Compile Include="ScheduledMessageJob.cs" />
