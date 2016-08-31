@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -15,9 +15,6 @@ namespace MassTransit.AutomatonymousIntegration.Tests
     using System;
     using System.Threading.Tasks;
     using NUnit.Framework;
-    using Quartz;
-    using Quartz.Impl;
-    using QuartzIntegration;
     using TestFramework;
 
 
@@ -52,30 +49,15 @@ namespace MassTransit.AutomatonymousIntegration.Tests
             }
         }
 
-        IScheduler _scheduler;
-
         protected override void ConfigureBus(IInMemoryBusFactoryConfigurator configurator)
         {
-            ISchedulerFactory schedulerFactory = new StdSchedulerFactory();
-            _scheduler = schedulerFactory.GetScheduler();
-
             configurator.UseInMemoryScheduler();
         }
 
         [OneTimeSetUp]
         public async Task Setup_quartz_service()
         {
-            _scheduler.JobFactory = new MassTransitJobFactory(Bus);
-            _scheduler.Start();
-
             _quartzQueueSendEndpoint = await GetSendEndpoint(_quartzQueueAddress);
-        }
-
-        [OneTimeTearDown]
-        public void Teardown_quartz_service()
-        {
-            _scheduler?.Standby();
-            _scheduler?.Shutdown();
         }
     }
 }
