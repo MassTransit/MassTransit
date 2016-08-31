@@ -19,21 +19,20 @@ namespace MassTransit.Pipeline.Filters.ConcurrencyLimit
 
 
     /// <summary>
-    /// Consumer which when connected to a management bus can control the concurrency
+    /// Consumer which when connected to a management endpoint can control the concurrency
     /// limit.
     /// </summary>
     public class ConcurrencyLimitFilterManagementConsumer :
         IConsumer<SetConcurrencyLimit>
     {
         static readonly ILog _log = Logger.Get<ConcurrencyLimitFilterManagementConsumer>();
-        readonly IPipe<ConsumeContext> _filterMediator;
-
+        readonly IPipe<ConsumeContext> _managementPipe;
         readonly string _id;
         DateTime _lastUpdated;
 
-        public ConcurrencyLimitFilterManagementConsumer(IPipe<ConsumeContext> filterMediator, string id = null)
+        public ConcurrencyLimitFilterManagementConsumer(IPipe<ConsumeContext> managementPipe, string id = null)
         {
-            _filterMediator = filterMediator;
+            _managementPipe = managementPipe;
             _id = id;
 
             _lastUpdated = DateTime.UtcNow;
@@ -47,7 +46,7 @@ namespace MassTransit.Pipeline.Filters.ConcurrencyLimit
                 {
                     try
                     {
-                        await _filterMediator.Send(context).ConfigureAwait(false);
+                        await _managementPipe.Send(context).ConfigureAwait(false);
 
                         _lastUpdated = context.Message.Timestamp;
 

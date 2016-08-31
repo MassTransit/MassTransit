@@ -119,6 +119,7 @@
     <Compile Include="Configuration\ConsumeConnectors\ConsumerMessageConnector.cs" />
     <Compile Include="Configuration\ConsumeConnectors\AsyncConsumerMessageConvention.cs" />
     <Compile Include="Configuration\ConsumeConnectors\InstanceConnector.cs" />
+    <Compile Include="Configuration\ConsumeConnectors\InstanceMessageConnector.cs" />
     <Compile Include="Configuration\ConsumeConnectors\IObserverConnectorCache.cs" />
     <Compile Include="Configuration\ConsumeConnectors\LegacyConsumerConvention.cs" />
     <Compile Include="Configuration\ConsumeConnectors\LegacyConsumerMessageConvention.cs" />

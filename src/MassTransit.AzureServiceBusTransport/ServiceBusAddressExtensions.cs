@@ -87,5 +87,33 @@ namespace MassTransit.AzureServiceBusTransport
 
             return topicDescription;
         }
+
+        /// <summary>
+        /// Creates a management endpoint which can be used by controllable filters on a bus intance
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="host">The service bus host</param>
+        /// <param name="configure"></param>
+        /// <returns></returns>
+        public static IManagementEndpointConfigurator ManagementEndpoint(this IServiceBusBusFactoryConfigurator configurator,
+            IServiceBusHost host, Action<IReceiveEndpointConfigurator> configure = null)
+        {
+            var queueName = configurator.GetTemporaryQueueName("manage-");
+
+            var endpointConfigurator = new ServiceBusReceiveEndpointConfigurator(host, queueName)
+            {
+                AutoDeleteOnIdle = TimeSpan.FromMinutes(5),
+                EnableExpress = true,
+            };
+
+            configure?.Invoke(endpointConfigurator);
+
+            configurator.AddBusFactorySpecification(endpointConfigurator);
+
+            var managementEndpointConfigurator = new ManagementEndpointConfigurator(endpointConfigurator);
+
+            return managementEndpointConfigurator;
+        }
+
     }
 }
