@@ -30,19 +30,19 @@ namespace MassTransit
             ISchedulerFactory schedulerFactory = new StdSchedulerFactory();
             var scheduler = schedulerFactory.GetScheduler();
 
-            var specification = new InMemorySchedulerBusFactorySpecification(scheduler);
-            configurator.AddBusFactorySpecification(specification);
-
             configurator.ReceiveEndpoint("quartz", e =>
             {
-                configurator.UseMessageScheduler(e.InputAddress);
-
                 var partitioner = configurator.CreatePartitioner(16);
 
                 e.Consumer(() => new ScheduleMessageConsumer(scheduler), x =>
                     x.ConfigureMessage<ScheduleMessage>(m => m.UsePartitioner(partitioner, p => p.Message.CorrelationId)));
                 e.Consumer(() => new CancelScheduledMessageConsumer(scheduler), x =>
                     x.ConfigureMessage<CancelScheduledMessage>(m => m.UsePartitioner(partitioner, p => p.Message.TokenId)));
+
+                configurator.UseMessageScheduler(e.InputAddress);
+
+                var specification = new SchedulerBusFactorySpecification(scheduler, e.InputAddress);
+                configurator.AddBusFactorySpecification(specification);
             });
         }
     }

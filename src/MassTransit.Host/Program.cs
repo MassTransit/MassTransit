@@ -32,7 +32,7 @@ namespace MassTransit.Host
 
                 var configurator = new MassTransitHostConfigurator<MassTransitHostServiceBootstrapper>
                 {
-                    Description = "MassTransit Host - A service host for MassTransit endpoints",
+                    Description = "MassTransit Host - A service host fo r MassTransit endpoints",
                     DisplayName = "MassTransit Host",
                     ServiceName = "MassTransitHost"
                 };
