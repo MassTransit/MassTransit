@@ -35,7 +35,7 @@ namespace MassTransit.Tests.Conventional
         }
 
         [DebuggerNonUserCode]
-        async Task IFilter<ConsumerConsumeContext<TConsumer, TMessage>>.Send(ConsumerConsumeContext<TConsumer, TMessage> context,
+        Task IFilter<ConsumerConsumeContext<TConsumer, TMessage>>.Send(ConsumerConsumeContext<TConsumer, TMessage> context,
             IPipe<ConsumerConsumeContext<TConsumer, TMessage>> next)
         {
             var messageConsumer = context.Consumer as IHandler<TMessage>;
@@ -47,9 +47,9 @@ namespace MassTransit.Tests.Conventional
                 throw new ConsumerMessageException(message);
             }
 
-            await Task.Yield();
-
             messageConsumer.Handle(context.Message);
+
+            return TaskUtil.Completed;
         }
     }
 }

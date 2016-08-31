@@ -34,7 +34,7 @@ namespace MassTransit.Pipeline.Filters
         }
 
         [DebuggerNonUserCode]
-        async Task IFilter<ConsumerConsumeContext<TConsumer, TMessage>>.Send(ConsumerConsumeContext<TConsumer, TMessage> context,
+        Task IFilter<ConsumerConsumeContext<TConsumer, TMessage>>.Send(ConsumerConsumeContext<TConsumer, TMessage> context,
             IPipe<ConsumerConsumeContext<TConsumer, TMessage>> next)
         {
             var messageConsumer = context.Consumer as IMessageConsumer<TMessage>;
@@ -46,9 +46,9 @@ namespace MassTransit.Pipeline.Filters
                 throw new ConsumerMessageException(message);
             }
 
-            await Task.Yield();
-
             messageConsumer.Consume(context.Message);
+
+            return TaskUtil.Completed;
         }
     }
 }

@@ -66,6 +66,8 @@ namespace MassTransit.Saga.Pipeline.Filters
 
                 SagaQueryConsumeContext<TSaga, TMessage> queryContext = new SagaQueryConsumeContextProxy<TSaga, TMessage>(context, query);
 
+                await Task.Yield();
+
                 await _sagaRepository.SendQuery(queryContext, _policy, _messagePipe).ConfigureAwait(false);
 
                 await next.Send(context).ConfigureAwait(false);
