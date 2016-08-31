@@ -15,7 +15,7 @@
     </logger>
 
     <logger name="NHibernate">
-      <level value="WARN"/>
+      <level value="INFO"/>
     </logger>
 
     <logger name="MassTransit.Messages" additivity="false">
