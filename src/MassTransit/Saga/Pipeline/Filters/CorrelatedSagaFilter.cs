@@ -59,6 +59,8 @@ namespace MassTransit.Saga.Pipeline.Filters
             Stopwatch timer = Stopwatch.StartNew();
             try
             {
+                await Task.Yield();
+
                 await _sagaRepository.Send(context, _policy, _messagePipe).ConfigureAwait(false);
 
                 await next.Send(context).ConfigureAwait(false);

@@ -47,6 +47,8 @@ namespace MassTransit.Pipeline.Filters
             Stopwatch timer = Stopwatch.StartNew();
             try
             {
+                await Task.Yield();
+
                 _observer.OnNext(context);
 
                 await context.NotifyConsumed(timer.Elapsed, TypeMetadataCache.GetShortName(_observer.GetType())).ConfigureAwait(false);
