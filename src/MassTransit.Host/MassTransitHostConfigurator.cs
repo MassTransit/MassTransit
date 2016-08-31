@@ -71,7 +71,7 @@ namespace MassTransit.Host
         static void VerifyEventLogSourceExists(string serviceName)
         {
             if (!EventLog.SourceExists(serviceName))
-                EventLog.CreateEventSource(serviceName, "RapidTransit");
+                EventLog.CreateEventSource(serviceName, "MassTransitHost");
         }
     }
 }

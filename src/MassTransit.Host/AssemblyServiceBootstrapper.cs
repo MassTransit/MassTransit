@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Host
 {
+    using System;
     using Autofac;
     using Configuration;
     using Hosting;
@@ -38,23 +39,8 @@ namespace MassTransit.Host
         {
             base.ConfigureLifetimeScope(builder);
 
-            foreach (var endpointSpecificationType in _registration.EndpointSpecificationTypes)
-            {
-                builder.RegisterType(endpointSpecificationType)
-                    .As<IEndpointSpecification>();
-            }
-
-            builder.RegisterAssemblyTypes(_registration.Assembly)
-                .Where(x => x.HasInterface<IConsumer>())
-                .AsSelf();
-
-            builder.RegisterType(_registration.ServiceSpecificationType)
-                .As<IServiceSpecification>();
-
             builder.RegisterType<AssemblyBusServiceConfigurator>()
                 .As<IBusServiceConfigurator>();
-
-            builder.RegisterAssemblyModules(_registration.Assembly);
 
             builder.RegisterType<FileConfigurationProvider>()
                 .WithParameter(TypedParameter.From(_registration.Assembly))
@@ -62,6 +48,21 @@ namespace MassTransit.Host
                 .SingleInstance();
 
             builder.RegisterModule<ConfigurationProviderModule>();
+
+            builder.RegisterAssemblyModules(_registration.Assembly);
+
+            builder.RegisterAssemblyTypes(_registration.Assembly)
+                .Where(x => x.HasInterface<IConsumer>())
+                .AsSelf();
+
+            builder.RegisterType(_registration.ServiceSpecificationType)
+                .AsImplementedInterfaces();
+
+            foreach (var endpointSpecificationType in _registration.EndpointSpecificationTypes)
+            {
+                builder.RegisterType(endpointSpecificationType)
+                    .AsImplementedInterfaces();
+            }
         }
     }
 }
