@@ -51,6 +51,8 @@ namespace MassTransit.Courier.Hosts
                         compensateContext.TrackingNumber);
                 }
 
+                await Task.Yield();
+
                 await _activityFactory.Compensate(compensateContext, _compensatePipe).ConfigureAwait(false);
 
                 await context.NotifyConsumed(timer.Elapsed, TypeMetadataCache<TActivity>.ShortName).ConfigureAwait(false);
