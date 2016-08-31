@@ -77,7 +77,7 @@ namespace MassTransit.QuartzIntegration
                     "An exception occurred sending message {0} to {1}", MessageType, Destination);
                 _log.Error(message, ex);
 
-                throw new JobExecutionException(message, ex);
+                throw new JobExecutionException(ex, context.RefireCount < 5);
             }
         }
 
