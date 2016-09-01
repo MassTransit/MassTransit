@@ -32,10 +32,17 @@ namespace MassTransit.Tests.Courier
         string _stringValue;
         decimal _decimalValue;
 
+        readonly IDictionary<string, string> _argumentsDictionary = new Dictionary<string, string>
+        {
+            {"good_jpath_key", "val1"},
+            {"bad jpath key", "val1"}
+        };
+
+
         protected override void SetupActivities()
         {
             AddActivityContext<ObjectGraphTestActivity, ObjectGraphActivityArguments, TestLog>(
-                () => new ObjectGraphTestActivity(_intValue, _stringValue, _decimalValue, new[] {"Albert", "Chris"}));
+                () => new ObjectGraphTestActivity(_intValue, _stringValue, _decimalValue, new[] { "Albert", "Chris" }, _argumentsDictionary));
             AddActivityContext<TestActivity, TestArguments, TestLog>(
                 () => new TestActivity());
         }
@@ -59,13 +66,14 @@ namespace MassTransit.Tests.Courier
             {
                 {"Outer", new OuterObjectImpl(_intValue, _stringValue, _decimalValue)},
                 {"Names", new[] {"Albert", "Chris"}},
+                {"ArgumentsDictionary", _argumentsDictionary}
             };
             builder.AddActivity(testActivity.Name, testActivity.ExecuteUri, dictionary);
             builder.AddActivity(testActivity2.Name, testActivity2.ExecuteUri, new
             {
                 Value = "Howdy!"
             });
-
+            builder.AddVariable("ArgumentsDictionary", _argumentsDictionary);
             await Bus.Execute(builder.Build());
 
             await Task.WhenAny(completed, faulted);
