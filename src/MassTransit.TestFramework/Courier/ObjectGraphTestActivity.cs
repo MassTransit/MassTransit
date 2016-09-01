@@ -13,6 +13,7 @@
 namespace MassTransit.TestFramework.Courier
 {
     using System;
+    using System.Collections.Generic;
     using System.Threading.Tasks;
     using MassTransit.Courier;
 
@@ -24,24 +25,26 @@ namespace MassTransit.TestFramework.Courier
         readonly int _intValue;
         readonly string[] _names;
         readonly string _stringValue;
+        readonly IDictionary<string, string> _argumentsDictionary;
 
-        public ObjectGraphTestActivity(int intValue, string stringValue, decimal decimalValue, string[] names)
+        public ObjectGraphTestActivity(int intValue, string stringValue, decimal decimalValue, string[] names, IDictionary<string, string> argumentsDictionary)
         {
             _intValue = intValue;
             _stringValue = stringValue;
             _decimalValue = decimalValue;
             _names = names;
+            _argumentsDictionary = argumentsDictionary;
         }
-
         public async Task<ExecutionResult> Execute(ExecuteContext<ObjectGraphActivityArguments> context)
         {
             int intValue = context.Arguments.Outer.IntValue;
             string stringValue = context.Arguments.Outer.StringValue;
             decimal decimalValue = context.Arguments.Outer.DecimalValue;
             string[] names = context.Arguments.Names;
+            IDictionary<string, string> argumentsDictionary = context.Arguments.ArgumentsDictionary;
 
-            Console.WriteLine("TestActivity: Execute: {0}, {1}, {2}, [{3}]", intValue, stringValue, decimalValue,
-                string.Join(",", names));
+            Console.WriteLine("TestActivity: Execute: {0}, {1}, {2}, [{3}],[{4}]", intValue, stringValue, decimalValue,
+                          string.Join(",", names), string.Join(",", argumentsDictionary.Keys));
 
             if (_intValue != intValue)
                 throw new ArgumentException("intValue");
