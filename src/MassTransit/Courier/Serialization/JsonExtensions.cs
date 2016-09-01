@@ -22,7 +22,10 @@ namespace MassTransit.Courier.Serialization
             foreach (JProperty rightChild in right.Children<JProperty>())
             {
                 JProperty rightChildProperty = rightChild;
-                JToken leftProperty = left.SelectToken(rightChildProperty.Name);
+                var path = (string.Empty.Equals(rightChildProperty.Name) || rightChildProperty.Name.Contains(" ") ? $"['{rightChildProperty.Name}']" :
+               rightChildProperty.Name);
+                JToken leftProperty = left.SelectToken(path);
+                //JToken leftProperty = left.SelectToken(rightChildProperty.Name);
 
                 if (leftProperty == null)
                 {
