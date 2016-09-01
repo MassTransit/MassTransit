@@ -31,13 +31,13 @@ namespace MassTransit.HttpTransport.Tests
         ISendEndpoint _busSendEndpoint;
         readonly TestSendObserver _sendObserver;
         Uri _inputQueueAddress;
-        Uri _hostAddress;
+        readonly Uri _hostAddress;
 
         public HttpBusTestFixture()
         {
             _sendObserver = new TestSendObserver(TestTimeout);
-            _hostAddress = new Uri("http://localhost:8080/test/");
-            _inputQueueAddress = new Uri(_hostAddress, "input_queue");
+            _hostAddress = new Uri("http://localhost:8080/host");
+            _inputQueueAddress = new Uri("http://localhost:8080/input");
         }
 
 
@@ -126,6 +126,8 @@ namespace MassTransit.HttpTransport.Tests
         {
             return MassTransit.Bus.Factory.CreateUsingHttp(x =>
             {
+                x.OverrideDefaultBusEndpoint(9090);
+
                 ConfigureBus(x);
 
                 var host = x.Host(_hostAddress);

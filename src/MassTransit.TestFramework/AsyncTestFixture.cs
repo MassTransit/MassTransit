@@ -29,7 +29,7 @@ namespace MassTransit.TestFramework
 
         protected AsyncTestFixture()
         {
-            TestTimeout = Debugger.IsAttached ? TimeSpan.FromMinutes(5) : TimeSpan.FromSeconds(30);
+            TestTimeout = Debugger.IsAttached ? TimeSpan.FromMinutes(50) : TimeSpan.FromSeconds(30);
         }
 
         /// <summary>

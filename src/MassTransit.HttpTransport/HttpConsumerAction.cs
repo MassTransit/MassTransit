@@ -76,7 +76,7 @@ namespace MassTransit.HttpTransport
             var headers = new HttpHeaderProvider(owinContext.Request.Headers);
 
             var context = new HttpReceiveContext(inputAddress, body, headers, false, _receiveObserver);
-
+            
             context.GetOrAddPayload(() => owinContext.Request);
             context.GetOrAddPayload(() => owinContext.Response);
 

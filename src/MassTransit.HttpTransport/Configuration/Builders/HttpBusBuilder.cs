@@ -30,11 +30,12 @@ namespace MassTransit.HttpTransport.Configuration.Builders
         public HttpBusBuilder(HttpHost[] hosts,
             IConsumePipeFactory consumePipeFactory,
             ISendPipeFactory sendPipeFactory,
-            IPublishPipeFactory publishPipeFactory)
+            IPublishPipeFactory publishPipeFactory,
+            HttpReceiveSettings settings)
             : base(consumePipeFactory, sendPipeFactory, publishPipeFactory, hosts)
         {
             _hosts = hosts;
-            _busEndpointConfigurator = new HttpReceiveEndpointConfigurator(_hosts[0], ConsumePipe);
+            _busEndpointConfigurator = new HttpReceiveEndpointConfigurator(_hosts[0], settings, ConsumePipe);
         }
 
         protected override Uri GetInputAddress()

@@ -29,16 +29,21 @@ namespace MassTransit.HttpTransport.Configuration
     {
         readonly IList<HttpHost> _hosts;
         readonly IList<IBusFactorySpecification> _transportBuilderConfigurators;
+        readonly HttpReceiveSettings _settings;
 
         public HttpBusFactoryConfigurator()
         {
             _hosts = new List<HttpHost>();
             _transportBuilderConfigurators = new List<IBusFactorySpecification>();
+            _settings = new HttpReceiveSettings
+            {
+                Port = 9090
+            };
         }
 
         public IBusControl CreateBus()
         {
-            var builder = new HttpBusBuilder(_hosts.ToArray(), ConsumePipeFactory, SendPipeFactory, PublishPipeFactory);
+            var builder = new HttpBusBuilder(_hosts.ToArray(), ConsumePipeFactory, SendPipeFactory, PublishPipeFactory, _settings);
 
             foreach (var configurator in _transportBuilderConfigurators)
                 configurator.Apply(builder);
@@ -91,5 +96,20 @@ namespace MassTransit.HttpTransport.Configuration
         {
             _transportBuilderConfigurators.Add(configurator);
         }
+
+        public void OverrideDefaultBusEndpoint(int port)
+        {
+            _settings.Port = port;
+        }
+    }
+
+
+    public class HttpReceiveSettings : ReceiveSettings
+    {
+        public int Port { get; set; }
+    }
+    public interface ReceiveSettings
+    {
+        int Port { get; }
     }
 }

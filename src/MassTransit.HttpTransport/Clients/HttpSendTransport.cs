@@ -73,9 +73,7 @@ namespace MassTransit.HttpTransport.Clients
 
                             payload.Headers.ContentType = new MediaTypeHeaderValue(context.ContentType.MediaType);
 
-                            foreach (
-                                KeyValuePair<string, object> header in
-                                    context.Headers.GetAll().Where(h => h.Value != null && (h.Value is string || h.Value.GetType().IsValueType)))
+                            foreach (var header in context.Headers.GetAll().Where(h => h.Value != null && (h.Value is string || h.Value.GetType().IsValueType)))
                             {
                                 msg.Headers.Add(header.Key, header.Value.ToString());
                             }

@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.HttpTransport.Tests
 {
+    using System;
     using System.Threading.Tasks;
     using NUnit.Framework;
     using TestFramework.Messages;
@@ -52,7 +53,7 @@ namespace MassTransit.HttpTransport.Tests
     [TestFixture]
     public class Sending_a_request_using_the_request_client :
         HttpBusTestFixture
-    {
+    {       
         Task<ConsumeContext<PingMessage>> _ping;
         Task<PongMessage> _response;
         IRequestClient<PingMessage, PongMessage> _requestClient;
@@ -67,12 +68,14 @@ namespace MassTransit.HttpTransport.Tests
 
         protected override void ConfigureInputQueueEndpoint(IHttpReceiveEndpointConfigurator configurator)
         {
-            _ping = Handler<PingMessage>(configurator, async x => await x.RespondAsync(new PongMessage(x.Message.CorrelationId)));
-        }
+            _ping = Handler<PingMessage>(configurator, async cxt => await cxt.RespondAsync(new PongMessage(cxt.Message.CorrelationId)));
+        }   
 
         [Test]
         public async void Should_receive_the_response()
         {
+            var re = base.Bus.GetProbeResult();
+            Console.WriteLine(re.ToJsonString());
             PongMessage message = await _response;
 
             Assert.AreEqual(message.CorrelationId, _ping.Result.Message.CorrelationId);

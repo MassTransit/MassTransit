@@ -31,13 +31,14 @@ namespace MassTransit.HttpTransport.Configuration.Builders
         IBusFactorySpecification
     {
         readonly IHttpHost _host;
-
+        readonly HttpReceiveSettings _settings;
         
-        public HttpReceiveEndpointConfigurator(IHttpHost host, IConsumePipe consumePipe = null)
+        public HttpReceiveEndpointConfigurator(IHttpHost host, HttpReceiveSettings settings, IConsumePipe consumePipe = null)
             :
                 base(consumePipe)
         {
             _host = host;
+            _settings = settings;
         }
 
         public override IEnumerable<ValidationResult> Validate()
