@@ -35,7 +35,7 @@ namespace MassTransit.Tests.Courier
         readonly IDictionary<string, string> _argumentsDictionary = new Dictionary<string, string>
         {
             {"good_jpath_key", "val1"},
-            {"bad jpath key", "val1"}
+            {"bad jpath key", "val2"}
         };
 
 
@@ -73,7 +73,13 @@ namespace MassTransit.Tests.Courier
             {
                 Value = "Howdy!"
             });
-            builder.AddVariable("ArgumentsDictionary", _argumentsDictionary);
+
+            builder.AddVariable("ArgumentsDictionary", new Dictionary<string, string>
+            {
+                {"good_jpath_key", "val3"},
+                {"bad jpath key", "val4"}
+            });
+
             await Bus.Execute(builder.Build());
 
             await Task.WhenAny(completed, faulted);

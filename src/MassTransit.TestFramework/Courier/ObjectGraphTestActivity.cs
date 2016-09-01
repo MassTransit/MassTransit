@@ -14,6 +14,7 @@ namespace MassTransit.TestFramework.Courier
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Threading.Tasks;
     using MassTransit.Courier;
 
@@ -44,7 +45,7 @@ namespace MassTransit.TestFramework.Courier
             IDictionary<string, string> argumentsDictionary = context.Arguments.ArgumentsDictionary;
 
             Console.WriteLine("TestActivity: Execute: {0}, {1}, {2}, [{3}],[{4}]", intValue, stringValue, decimalValue,
-                          string.Join(",", names), string.Join(",", argumentsDictionary.Keys));
+                          string.Join(",", names), string.Join(",", argumentsDictionary.Select(x => $"{x.Key} => {x.Value}")));
 
             if (_intValue != intValue)
                 throw new ArgumentException("intValue");
