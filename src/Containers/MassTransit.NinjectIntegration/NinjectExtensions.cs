@@ -15,12 +15,14 @@ namespace MassTransit
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Reflection;
     using ConsumeConfigurators;
     using Internals.Extensions;
     using Ninject;
     using NinjectIntegration;
     using Saga;
     using Saga.SubscriptionConfigurators;
+    using Util.Scanning;
 
 
     /// <summary>
@@ -71,9 +73,11 @@ namespace MassTransit
 
         static IList<Type> FindTypes<T>(IKernel kernel, Func<Type, bool> filter)
         {
-            return AppDomain.CurrentDomain.GetAssemblies()
-                .SelectMany(s => s.GetTypes())
-                .Where(typeof(T).IsAssignableFrom)
+            Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
+
+            TypeSet types = AssemblyTypeCache.FindTypes(assemblies, typeof(T).IsAssignableFrom).Result;
+
+            return types.AllTypes()
                 .SelectMany(kernel.GetBindings)
                 .Select(x => x.Service)
                 .Distinct()
