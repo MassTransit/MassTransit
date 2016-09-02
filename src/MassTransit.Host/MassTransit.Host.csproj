@@ -66,7 +66,7 @@
     <Compile Include="Activities\ActivityServiceBootstrapper.cs" />
     <Compile Include="AssemblyBusServiceConfigurator.cs" />
     <Compile Include="AssemblyRegistration.cs" />
-    <Compile Include="AssemblyScanner.cs" />
+    <Compile Include="ServiceAssemblyScanner.cs" />
     <Compile Include="AssemblyServiceBootstrapper.cs" />
     <Compile Include="Configuration\ConfigurationObjectValueProvider.cs" />
     <Compile Include="Configuration\ConfigurationProviderBase.cs" />

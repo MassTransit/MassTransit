@@ -1086,8 +1086,16 @@
     <Compile Include="Exceptions\ShutDownException.cs" />
     <Compile Include="Exceptions\EndpointException.cs" />
     <Compile Include="Turnout\JobResultContext.cs" />
+    <Compile Include="Util\Scanning\AssemblyFinder.cs" />
+    <Compile Include="Util\Scanning\AssemblyScanner.cs" />
+    <Compile Include="Util\Scanning\AssemblyScanRecord.cs" />
+    <Compile Include="Util\Scanning\AssemblyTypeList.cs" />
+    <Compile Include="Util\Scanning\AssemblyScanTypeInfo.cs" />
     <Compile Include="Util\Caching\Cached.cs" />
     <Compile Include="Util\Caching\LazyMemoryCache.cs" />
+    <Compile Include="Util\Scanning\CompositeFilter.cs" />
+    <Compile Include="Util\Scanning\CompositePredicate.cs" />
+    <Compile Include="Util\Scanning\IAssemblyScanner.cs" />
     <Compile Include="Util\IAsyncDisposable.cs" />
     <Compile Include="Util\ITaskScope.cs" />
     <Compile Include="Util\LimitedConcurrencyLevelTaskScheduler.cs" />
@@ -1111,7 +1119,11 @@
     <Compile Include="Util\TaskScope.cs" />
     <Compile Include="Util\TaskSupervisorExtensions.cs" />
     <Compile Include="Util\TaskUtil.cs" />
+    <Compile Include="Util\Scanning\TypeClassification.cs" />
     <Compile Include="Util\TypeMetadataCache.cs" />
+    <Compile Include="Util\Scanning\TypeQuery.cs" />
+    <Compile Include="Util\Scanning\AssemblyTypeCache.cs" />
+    <Compile Include="Util\Scanning\TypeSet.cs" />
     <Compile Include="Util\UriExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
