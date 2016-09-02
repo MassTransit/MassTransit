@@ -213,5 +213,17 @@ namespace MassTransit.Internals.Extensions
         {
             return type.HasAttribute<CompilerGeneratedAttribute>() && type.FullName.Contains("AnonymousType");
         }
+
+        /// <summary>
+        /// Returns true if the type is contained within the namespace
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="nameSpace"></param>
+        /// <returns></returns>
+        public static bool IsInNamespace(this Type type, string nameSpace)
+        {
+            var subNameSpace = nameSpace + ".";
+            return type.Namespace != null && (type.Namespace.Equals(nameSpace) || type.Namespace.StartsWith(subNameSpace));
+        }
     }
 }

@@ -45,7 +45,7 @@ namespace MassTransit.Host
 
             try
             {
-                var scanner = new AssemblyScanner();
+                var scanner = new ServiceAssemblyScanner();
 
                 List<AssemblyRegistration> registrations = scanner.GetAssemblyRegistrations().ToList();
 
