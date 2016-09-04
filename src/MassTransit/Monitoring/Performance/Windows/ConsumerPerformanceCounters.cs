@@ -20,11 +20,8 @@ namespace MassTransit.Monitoring.Performance
     public class ConsumerPerformanceCounters :
         PerformanceCounters
     {
-        public const string CategoryName = "MassTransit Consumers";
-        public const string CategoryHelp = "Consumers built using MassTransit";
-
         ConsumerPerformanceCounters()
-            : base(CategoryName, CategoryHelp)
+            : base(BuiltInCounters.Consumers.CategoryName, BuiltInCounters.Consumers.CategoryHelp)
         {
         }
 
@@ -48,22 +45,14 @@ namespace MassTransit.Monitoring.Performance
 
         protected override IEnumerable<CounterCreationData> GetCounterData()
         {
-            yield return
-                new CounterCreationData("Messages/s", "Number of messages consumed per second", PerformanceCounterType.RateOfCountsPerSecond32);
-            yield return
-                new CounterCreationData("Total Messages", "Total number of messages consumed", PerformanceCounterType.NumberOfItems64);
-            yield return
-                new CounterCreationData("Average Duration", "The average time spent consuming a message", PerformanceCounterType.AverageCount64);
-            yield return
-                new CounterCreationData("Average Duration Base", "The average time spent consuming a message", PerformanceCounterType.AverageBase);
-            yield return
-                new CounterCreationData("Total Faults", "Total number of consumer faults generated", PerformanceCounterType.NumberOfItems64);
-            yield return
-                new CounterCreationData("Fault %", "The percentage of consumers generating faults", PerformanceCounterType.AverageCount64);
-            yield return
-                new CounterCreationData("Fault % Base", "The percentage of consumers generating faults", PerformanceCounterType.AverageBase);
+            yield return Convert(BuiltInCounters.Consumers.Counters.MessagesPerSecond, PerformanceCounterType.RateOfCountsPerSecond32);
+            yield return Convert(BuiltInCounters.Consumers.Counters.TotalMessages, PerformanceCounterType.NumberOfItems64);
+            yield return Convert(BuiltInCounters.Consumers.Counters.AverageDuration, PerformanceCounterType.AverageCount64);
+            yield return Convert(BuiltInCounters.Consumers.Counters.AverageDurationBase, PerformanceCounterType.AverageBase);
+            yield return Convert(BuiltInCounters.Consumers.Counters.TotalFaults, PerformanceCounterType.NumberOfItems64);
+            yield return Convert(BuiltInCounters.Consumers.Counters.FaultPercent, PerformanceCounterType.AverageCount64);
+            yield return Convert(BuiltInCounters.Consumers.Counters.FaultPercentBase, PerformanceCounterType.AverageBase);
         }
-
 
         static class Cached
         {

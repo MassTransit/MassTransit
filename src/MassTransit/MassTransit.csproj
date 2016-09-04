@@ -109,7 +109,7 @@
     <Compile Include="Configuration\BusConfigurators\IConsumePipeFactory.cs" />
     <Compile Include="Configuration\BusConfigurators\IPublishPipeFactory.cs" />
     <Compile Include="Configuration\BusConfigurators\ISendPipeFactory.cs" />
-    <Compile Include="Configuration\BusConfigurators\PerformanceCounterBusFactorySpecification.cs" />
+    <Compile Include="Monitoring\Performance\Configuration\PerformanceCounterBusFactorySpecification.cs" />
     <Compile Include="Configuration\BusConfigurators\PublishPipeConfigurator.cs" />
     <Compile Include="Configuration\BusConfigurators\SendPipeConfigurator.cs" />
     <Compile Include="Configuration\BusObserverExtensions.cs" />
@@ -515,25 +515,27 @@
     <Compile Include="MessageRedeliveryContext.cs" />
     <Compile Include="MessageRequestClient.cs" />
     <Compile Include="MessageSchedulerContext.cs" />
-    <Compile Include="Monitoring\Performance\BusPerformanceCounters.cs" />
-    <Compile Include="Monitoring\Performance\ConsumerPerformanceCounter.cs" />
+
+    <Compile Include="Monitoring\Performance\BuiltInCounters.cs" />
+    <Compile Include="Monitoring\Performance\Windows\WindowsPerformanceCounters.cs" />
+    <Compile Include="Monitoring\Performance\Windows\ConsumerPerformanceCounter.cs" />
     <Compile Include="Monitoring\Performance\ConsumerPerformanceCounterCache.cs" />
-    <Compile Include="Monitoring\Performance\ConsumerPerformanceCounters.cs" />
+    <Compile Include="Monitoring\Performance\Windows\ConsumerPerformanceCounters.cs" />
     <Compile Include="Monitoring\Performance\IConsumerPerformanceCounter.cs" />
     <Compile Include="Monitoring\Performance\IMessagePerformanceCounter.cs" />
-    <Compile Include="Monitoring\Performance\InstancePerformanceCounter.cs" />
+    <Compile Include="Monitoring\Performance\Windows\WindowsPerformanceCounter.cs" />
     <Compile Include="Monitoring\Performance\IPerformanceCounter.cs" />
     <Compile Include="Monitoring\Performance\ISendPerformanceCounter.cs" />
-    <Compile Include="Monitoring\Performance\MessagePerformanceCounter.cs" />
+    <Compile Include="Monitoring\Performance\Windows\MessagePerformanceCounter.cs" />
     <Compile Include="Monitoring\Performance\MessagePerformanceCounterCache.cs" />
-    <Compile Include="Monitoring\Performance\MessagePerformanceCounters.cs" />
-    <Compile Include="Monitoring\Performance\NullPerformanceCounter.cs" />
+    <Compile Include="Monitoring\Performance\Windows\MessagePerformanceCounters.cs" />
+    <Compile Include="Monitoring\Performance\Null\NullPerformanceCounter.cs" />
     <Compile Include="Monitoring\Performance\PerformanceCounterBusObserver.cs" />
     <Compile Include="Monitoring\Performance\PerformanceCounterPublishObserver.cs" />
     <Compile Include="Monitoring\Performance\PerformanceCounterReceiveObserver.cs" />
-    <Compile Include="Monitoring\Performance\PerformanceCounters.cs" />
+    <Compile Include="Monitoring\Performance\Windows\PerformanceCounters.cs" />
     <Compile Include="Monitoring\Performance\PerformanceCounterSendObserver.cs" />
-    <Compile Include="PerformanceCounterExtensions.cs" />
+    <Compile Include="Monitoring\Performance\Configuration\PerformanceCounterExtensions.cs" />
     <Compile Include="Pipeline\BusObservable.cs" />
     <Compile Include="Pipeline\ConsumerFactories\DefaultConstructorConsumerFactory.cs" />
     <Compile Include="Pipeline\ConsumerFactories\DelegateConsumerFactory.cs" />
@@ -1065,7 +1067,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Configuration\Configuration\" />
-    <Folder Include="Monitoring\Introspection\Contracts\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />

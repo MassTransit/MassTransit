@@ -15,7 +15,7 @@ namespace MassTransit
     using Monitoring.Performance;
 
 
-    public static class BusPerformanceCounters
+    public static class WindowsPerformanceCounters
     {
         public static void Install()
         {

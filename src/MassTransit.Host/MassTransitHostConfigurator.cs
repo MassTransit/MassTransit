@@ -52,7 +52,7 @@ namespace MassTransit.Host
                 // this will force the performance counters to register during service installation
                 // making them created - of course using the InstallUtil stuff completely skips
                 // this part of the install :(
-                BusPerformanceCounters.Install();
+                WindowsPerformanceCounters.Install();
             });
 
             configurator.Service(settings =>

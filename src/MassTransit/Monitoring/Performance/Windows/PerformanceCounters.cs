@@ -17,7 +17,9 @@ namespace MassTransit.Monitoring.Performance
     using System.Diagnostics;
     using System.Linq;
     using System.Security;
+    using Windows;
     using Logging;
+    using Null;
 
 
     public abstract class PerformanceCounters
@@ -47,7 +49,7 @@ namespace MassTransit.Monitoring.Performance
         IPerformanceCounter PerformanceCounterFactory(string counterName, string instanceName)
         {
             var counter = new PerformanceCounter(_categoryName, counterName, instanceName, false);
-            return new InstancePerformanceCounter(counter);
+            return new WindowsPerformanceCounter(counter);
         }
 
         IPerformanceCounter NullCounterFactory(string counterName, string consumerType)
@@ -103,5 +105,10 @@ namespace MassTransit.Monitoring.Performance
 
 
         delegate IPerformanceCounter CreateCounterDelegate(string counterName, string consumerType);
+
+        protected CounterCreationData Convert(Counter counter, PerformanceCounterType type)
+        {
+            return new CounterCreationData(counter.Name, counter.Help, type);
+        }
     }
 }

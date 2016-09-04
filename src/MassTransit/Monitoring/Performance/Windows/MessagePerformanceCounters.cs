@@ -20,11 +20,8 @@ namespace MassTransit.Monitoring.Performance
     public class MessagePerformanceCounters :
         PerformanceCounters
     {
-        public const string CategoryName = "MassTransit Messages";
-        public const string CategoryHelp = "Messages handled by MassTransit";
-
         MessagePerformanceCounters()
-            : base(CategoryName, CategoryHelp)
+            : base(BuiltInCounters.Messages.CategoryName, BuiltInCounters.Messages.CategoryHelp)
         {
         }
 
@@ -53,40 +50,25 @@ namespace MassTransit.Monitoring.Performance
 
         protected override IEnumerable<CounterCreationData> GetCounterData()
         {
-            yield return
-                new CounterCreationData("Consumed/s", "Number of messages consumed per second", PerformanceCounterType.RateOfCountsPerSecond32);
-            yield return
-                new CounterCreationData("Consumed", "Total number of messages consumed", PerformanceCounterType.NumberOfItems64);
-            yield return
-                new CounterCreationData("Average Consume Duration", "The average time spent consuming a message", PerformanceCounterType.AverageCount64);
-            yield return
-                new CounterCreationData("Average Consume Duration Base", "The average time spent consuming a message", PerformanceCounterType.AverageBase);
-            yield return
-                new CounterCreationData("Consume Faults", "Total number of consume faults", PerformanceCounterType.NumberOfItems64);
-            yield return
-                new CounterCreationData("Consume Fault %", "The percentage of consumes faulted", PerformanceCounterType.AverageCount64);
-            yield return
-                new CounterCreationData("Consume Fault % Base", "The percentage of consumes faulted", PerformanceCounterType.AverageBase);
-            yield return
-                new CounterCreationData("Sent/s", "Number of messages sent per second", PerformanceCounterType.RateOfCountsPerSecond32);
-            yield return
-                new CounterCreationData("Sent", "Total number of messages sent", PerformanceCounterType.NumberOfItems64);
-            yield return
-                new CounterCreationData("Send Faults", "Total number of send faults", PerformanceCounterType.NumberOfItems64);
-            yield return
-                new CounterCreationData("Send Fault %", "The percentage of sends faulted", PerformanceCounterType.AverageCount64);
-            yield return
-                new CounterCreationData("Send Fault % Base", "The percentage of sends faulted", PerformanceCounterType.AverageBase);
-            yield return
-                new CounterCreationData("Published/s", "Number of messages Published per second", PerformanceCounterType.RateOfCountsPerSecond32);
-            yield return
-                new CounterCreationData("Published", "Total number of messages Published", PerformanceCounterType.NumberOfItems64);
-            yield return
-                new CounterCreationData("Publish Faults", "Total number of Publish faults", PerformanceCounterType.NumberOfItems64);
-            yield return
-                new CounterCreationData("Publish Fault %", "The percentage of Publishes faulted", PerformanceCounterType.AverageCount64);
-            yield return
-                new CounterCreationData("Publish Fault % Base", "The percentage of Publishes faulted", PerformanceCounterType.AverageBase);
+            yield return Convert(BuiltInCounters.Messages.Counters.ConsumedPerSecond, PerformanceCounterType.RateOfCountsPerSecond32);
+            yield return Convert(BuiltInCounters.Messages.Counters.TotalConsumed, PerformanceCounterType.NumberOfItems64);
+            yield return Convert(BuiltInCounters.Messages.Counters.AverageConsumeDuration, PerformanceCounterType.AverageCount64);
+            yield return Convert(BuiltInCounters.Messages.Counters.AverageConusmeDurationBase, PerformanceCounterType.AverageBase);
+            yield return Convert(BuiltInCounters.Messages.Counters.TotalConsumeFaults, PerformanceCounterType.NumberOfItems64);
+            yield return Convert(BuiltInCounters.Messages.Counters.ConsumeFaultPercent, PerformanceCounterType.AverageCount64);
+            yield return Convert(BuiltInCounters.Messages.Counters.ConsumeFaultPercentBase, PerformanceCounterType.AverageBase);
+
+            yield return Convert(BuiltInCounters.Messages.Counters.SentPerSecond, PerformanceCounterType.RateOfCountsPerSecond32);
+            yield return Convert(BuiltInCounters.Messages.Counters.TotalSent, PerformanceCounterType.NumberOfItems64);
+            yield return Convert(BuiltInCounters.Messages.Counters.TotalSendFaults, PerformanceCounterType.NumberOfItems64);
+            yield return Convert(BuiltInCounters.Messages.Counters.SendFaultPercent, PerformanceCounterType.AverageCount64);
+            yield return Convert(BuiltInCounters.Messages.Counters.SendFaultPercentBase, PerformanceCounterType.AverageBase);
+
+            yield return Convert(BuiltInCounters.Messages.Counters.PublishesPerSecond, PerformanceCounterType.RateOfCountsPerSecond32);
+            yield return Convert(BuiltInCounters.Messages.Counters.TotalPublished, PerformanceCounterType.NumberOfItems64);
+            yield return Convert(BuiltInCounters.Messages.Counters.TotalPublishFaults, PerformanceCounterType.NumberOfItems64);
+            yield return Convert(BuiltInCounters.Messages.Counters.PublishFaultPercent, PerformanceCounterType.AverageCount64);
+            yield return Convert(BuiltInCounters.Messages.Counters.PublishFaultPercentBase, PerformanceCounterType.AverageBase);
         }
 
         public static void Install()

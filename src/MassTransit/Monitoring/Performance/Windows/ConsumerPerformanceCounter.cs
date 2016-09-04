@@ -36,20 +36,13 @@ namespace MassTransit.Monitoring.Performance
             if (consumerType.Length > 127)
                 consumerType = consumerType.Substring(consumerType.Length - 127);
 
-            _totalMessages = ConsumerPerformanceCounters.CreateCounter(
-                ConsumerPerformanceCounters.TotalMessages.CounterName, consumerType);
-            _consumeRate = ConsumerPerformanceCounters.CreateCounter(
-                ConsumerPerformanceCounters.ConsumeRate.CounterName, consumerType);
-            _duration = ConsumerPerformanceCounters.CreateCounter(
-                ConsumerPerformanceCounters.Duration.CounterName, consumerType);
-            _durationBase = ConsumerPerformanceCounters.CreateCounter(
-                ConsumerPerformanceCounters.DurationBase.CounterName, consumerType);
-            _totalFaults = ConsumerPerformanceCounters.CreateCounter(
-                ConsumerPerformanceCounters.TotalFaults.CounterName, consumerType);
-            _faultPercentage = ConsumerPerformanceCounters.CreateCounter(
-                ConsumerPerformanceCounters.FaultPercentage.CounterName, consumerType);
-            _faultPercentageBase = ConsumerPerformanceCounters.CreateCounter(
-                ConsumerPerformanceCounters.FaultPercentageBase.CounterName, consumerType);
+            _totalMessages = ConsumerPerformanceCounters.CreateCounter(ConsumerPerformanceCounters.TotalMessages.CounterName, consumerType);
+            _consumeRate = ConsumerPerformanceCounters.CreateCounter(ConsumerPerformanceCounters.ConsumeRate.CounterName, consumerType);
+            _duration = ConsumerPerformanceCounters.CreateCounter(ConsumerPerformanceCounters.Duration.CounterName, consumerType);
+            _durationBase = ConsumerPerformanceCounters.CreateCounter(ConsumerPerformanceCounters.DurationBase.CounterName, consumerType);
+            _totalFaults = ConsumerPerformanceCounters.CreateCounter(ConsumerPerformanceCounters.TotalFaults.CounterName, consumerType);
+            _faultPercentage = ConsumerPerformanceCounters.CreateCounter(ConsumerPerformanceCounters.FaultPercentage.CounterName, consumerType);
+            _faultPercentageBase = ConsumerPerformanceCounters.CreateCounter(ConsumerPerformanceCounters.FaultPercentageBase.CounterName, consumerType);
         }
 
         public void Consumed(TimeSpan duration)

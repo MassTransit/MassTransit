@@ -10,18 +10,18 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Monitoring.Performance
+namespace MassTransit.Monitoring.Performance.Windows
 {
     using System;
     using System.Diagnostics;
 
 
-    public class InstancePerformanceCounter :
+    public class WindowsPerformanceCounter :
         IPerformanceCounter
     {
         PerformanceCounter _counter;
 
-        public InstancePerformanceCounter(PerformanceCounter counter)
+        public WindowsPerformanceCounter(PerformanceCounter counter)
         {
             _counter = counter;
         }
