@@ -519,6 +519,9 @@
     <Compile Include="Monitoring\Performance\BuiltInCounters.cs" />
     <Compile Include="Monitoring\Performance\CreateCounterDelegate.cs" />
     <Compile Include="Monitoring\Performance\ICounterFactory.cs" />
+    <Compile Include="Monitoring\Performance\StatsD\StatsDConfiguration.cs" />
+    <Compile Include="Monitoring\Performance\StatsD\StatsDCounterFactory.cs" />
+    <Compile Include="Monitoring\Performance\StatsD\StatsDPerformanceCounter.cs" />
     <Compile Include="Monitoring\Performance\IPerformanceCounterInstaller.cs" />
     <Compile Include="Monitoring\Performance\Null\NullCounterFactory.cs" />
     <Compile Include="Monitoring\Performance\Windows\WindowsCounterFactory.cs" />
