@@ -15,6 +15,8 @@ namespace MassTransit.QuartzService
     using System.Diagnostics;
     using Configuration;
     using Log4NetIntegration.Logging;
+    using Monitoring.Performance;
+    using Monitoring.Performance.Windows;
     using Topshelf;
     using Topshelf.Logging;
     using Topshelf.Runtime;
@@ -37,7 +39,7 @@ namespace MassTransit.QuartzService
                     // this will force the performance counters to register during service installation
                     // making them created - of course using the InstallUtil stuff completely skips
                     // this part of the install :(
-                    WindowsPerformanceCounters.Install();
+                    new WindowsPerformanceCounterInstaller().Install();
                 });
 
                 x.Service(CreateService);

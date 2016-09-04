@@ -14,16 +14,19 @@ namespace MassTransit.Monitoring.Performance
 {
     using System;
 
-
-    public static class MessagePerformanceCounterCache<T>
+    
+    public static class MessagePerformanceCounterCache<TFactory, T>
+        where TFactory : ICounterFactory, new()
     {
         public static IMessagePerformanceCounter Counter => Cached.Counter.Value;
 
 
         static class Cached
         {
+            static readonly Lazy<ICounterFactory> Factory = new Lazy<ICounterFactory>(() => new TFactory());
+
             public static readonly Lazy<MessagePerformanceCounter<T>> Counter =
-                new Lazy<MessagePerformanceCounter<T>>(() => new MessagePerformanceCounter<T>());
+                new Lazy<MessagePerformanceCounter<T>>(() => new MessagePerformanceCounter<T>(Factory.Value));
         }
     }
 }

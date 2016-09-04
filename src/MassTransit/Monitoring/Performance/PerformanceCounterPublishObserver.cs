@@ -21,8 +21,9 @@ namespace MassTransit.Monitoring.Performance
     /// An observer that updates the performance counters using the bus events
     /// generated.
     /// </summary>
-    public class PerformanceCounterPublishObserver :
+    public class PerformanceCounterPublishObserver<TFactory> :
         IPublishObserver
+        where TFactory : ICounterFactory, new()
     {
         Task IPublishObserver.PrePublish<T>(PublishContext<T> context)
         {
@@ -31,14 +32,14 @@ namespace MassTransit.Monitoring.Performance
 
         Task IPublishObserver.PostPublish<T>(PublishContext<T> context)
         {
-            MessagePerformanceCounterCache<T>.Counter.Published();
+            MessagePerformanceCounterCache<TFactory, T>.Counter.Published();
 
             return TaskUtil.Completed;
         }
 
         Task IPublishObserver.PublishFault<T>(PublishContext<T> context, Exception exception)
         {
-            MessagePerformanceCounterCache<T>.Counter.PublishFaulted();
+            MessagePerformanceCounterCache<TFactory, T>.Counter.PublishFaulted();
 
             return TaskUtil.Completed;
         }

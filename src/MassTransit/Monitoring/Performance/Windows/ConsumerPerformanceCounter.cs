@@ -31,18 +31,18 @@ namespace MassTransit.Monitoring.Performance
         readonly IPerformanceCounter _totalFaults;
         readonly IPerformanceCounter _totalMessages;
 
-        public ConsumerPerformanceCounter(string consumerType)
+        public ConsumerPerformanceCounter(ICounterFactory factory, string consumerType)
         {
             if (consumerType.Length > 127)
                 consumerType = consumerType.Substring(consumerType.Length - 127);
 
-            _totalMessages = ConsumerPerformanceCounters.CreateCounter(ConsumerPerformanceCounters.TotalMessages.CounterName, consumerType);
-            _consumeRate = ConsumerPerformanceCounters.CreateCounter(ConsumerPerformanceCounters.ConsumeRate.CounterName, consumerType);
-            _duration = ConsumerPerformanceCounters.CreateCounter(ConsumerPerformanceCounters.Duration.CounterName, consumerType);
-            _durationBase = ConsumerPerformanceCounters.CreateCounter(ConsumerPerformanceCounters.DurationBase.CounterName, consumerType);
-            _totalFaults = ConsumerPerformanceCounters.CreateCounter(ConsumerPerformanceCounters.TotalFaults.CounterName, consumerType);
-            _faultPercentage = ConsumerPerformanceCounters.CreateCounter(ConsumerPerformanceCounters.FaultPercentage.CounterName, consumerType);
-            _faultPercentageBase = ConsumerPerformanceCounters.CreateCounter(ConsumerPerformanceCounters.FaultPercentageBase.CounterName, consumerType);
+            _totalMessages = factory.Create(BuiltInCounters.Consumers.Category, ConsumerPerformanceCounters.TotalMessages.CounterName, consumerType);
+            _consumeRate = factory.Create(BuiltInCounters.Consumers.Category, ConsumerPerformanceCounters.ConsumeRate.CounterName, consumerType);
+            _duration = factory.Create(BuiltInCounters.Consumers.Category, ConsumerPerformanceCounters.Duration.CounterName, consumerType);
+            _durationBase = factory.Create(BuiltInCounters.Consumers.Category, ConsumerPerformanceCounters.DurationBase.CounterName, consumerType);
+            _totalFaults = factory.Create(BuiltInCounters.Consumers.Category, ConsumerPerformanceCounters.TotalFaults.CounterName, consumerType);
+            _faultPercentage = factory.Create(BuiltInCounters.Consumers.Category, ConsumerPerformanceCounters.FaultPercentage.CounterName, consumerType);
+            _faultPercentageBase = factory.Create(BuiltInCounters.Consumers.Category, ConsumerPerformanceCounters.FaultPercentageBase.CounterName, consumerType);
         }
 
         public void Consumed(TimeSpan duration)

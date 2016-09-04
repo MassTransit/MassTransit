@@ -16,8 +16,7 @@ namespace MassTransit.Monitoring.Performance
     {
         public static class Consumers
         {
-            public const string CategoryName = "MassTransit Consumers";
-            public const string CategoryHelp = "Consumers built using MassTransit";
+            public static CounterCategory Category = new CounterCategory("MassTransit Consumers", "Consumers built using MassTransit");
 
             public static class Counters
             {
@@ -34,8 +33,7 @@ namespace MassTransit.Monitoring.Performance
 
         public static class Messages
         {
-            public const string CategoryName = "MassTransit Messages";
-            public const string CategoryHelp = "Messages handled by MassTransit";
+            public static CounterCategory Category = new CounterCategory("MassTransit Messages", "Messages handled by MassTransit");
 
             public static class Counters
             {
@@ -61,6 +59,17 @@ namespace MassTransit.Monitoring.Performance
     }
 
 
+    public class CounterCategory
+    {
+        public CounterCategory(string name, string help)
+        {
+            Name = name;
+            Help = help;
+        }
+
+        public string Name { get; }
+        public string Help { get; }
+    }
     public class Counter
     {
         public Counter(string name, string help)

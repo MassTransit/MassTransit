@@ -10,29 +10,10 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.BusConfigurators
+namespace MassTransit.Monitoring.Performance
 {
-    using System.Collections.Generic;
-    using Builders;
-    using Configurators;
-    using GreenPipes;
-    using Monitoring.Performance;
-
-
-    public class PerformanceCounterBusFactorySpecification<TFactory> :
-        IBusFactorySpecification
-        where TFactory : ICounterFactory, new()
+    public interface IPerformanceCounterInstaller
     {
-        public IEnumerable<ValidationResult> Validate()
-        {
-            yield break;
-        }
-
-        public void Apply(IBusBuilder builder)
-        {
-            var observer = new PerformanceCounterBusObserver<TFactory>();
-
-            builder.ConnectBusObserver(observer);
-        }
+        void Install();
     }
 }

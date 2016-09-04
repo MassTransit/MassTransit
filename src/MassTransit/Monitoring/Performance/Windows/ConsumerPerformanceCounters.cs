@@ -18,10 +18,10 @@ namespace MassTransit.Monitoring.Performance
 
 
     public class ConsumerPerformanceCounters :
-        PerformanceCounters
+        BaseWindowsPerformanceCounters
     {
         ConsumerPerformanceCounters()
-            : base(BuiltInCounters.Consumers.CategoryName, BuiltInCounters.Consumers.CategoryHelp)
+            : base(BuiltInCounters.Consumers.Category.Name, BuiltInCounters.Consumers.Category.Help)
         {
         }
 
@@ -32,11 +32,6 @@ namespace MassTransit.Monitoring.Performance
         public static CounterCreationData TotalFaults => Cached.Instance.Value.Data[4];
         public static CounterCreationData FaultPercentage => Cached.Instance.Value.Data[5];
         public static CounterCreationData FaultPercentageBase => Cached.Instance.Value.Data[6];
-
-        public static IPerformanceCounter CreateCounter(string counterName, string instanceName)
-        {
-            return Cached.Instance.Value.CreatePerformanceCounter(counterName, instanceName);
-        }
 
         public static void Install()
         {

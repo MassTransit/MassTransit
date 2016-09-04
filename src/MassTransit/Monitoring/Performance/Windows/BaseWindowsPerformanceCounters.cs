@@ -17,47 +17,27 @@ namespace MassTransit.Monitoring.Performance
     using System.Diagnostics;
     using System.Linq;
     using System.Security;
-    using Windows;
     using Logging;
-    using Null;
 
-
-    public abstract class PerformanceCounters
+    public abstract class BaseWindowsPerformanceCounters
     {
         readonly string _categoryHelp;
         readonly string _categoryName;
         readonly Lazy<CounterCreationData[]> _counterCreationData;
-        readonly CreateCounterDelegate _createCounter;
-        readonly ILog _log = Logger.Get<PerformanceCounters>();
+        readonly ILog _log = Logger.Get<BaseWindowsPerformanceCounters>();
 
-        protected PerformanceCounters(string categoryName, string categoryHelp)
+        protected BaseWindowsPerformanceCounters(string categoryName, string categoryHelp)
         {
             _categoryName = categoryName;
             _categoryHelp = categoryHelp;
             _counterCreationData = new Lazy<CounterCreationData[]>(() => GetCounterData().ToArray());
 
-            _createCounter = Initialize();
+            Initialize();
         }
 
         protected CounterCreationData[] Data => _counterCreationData.Value;
 
-        protected IPerformanceCounter CreatePerformanceCounter(string counterName, string instanceName)
-        {
-            return _createCounter(counterName, instanceName);
-        }
-
-        IPerformanceCounter PerformanceCounterFactory(string counterName, string instanceName)
-        {
-            var counter = new PerformanceCounter(_categoryName, counterName, instanceName, false);
-            return new WindowsPerformanceCounter(counter);
-        }
-
-        IPerformanceCounter NullCounterFactory(string counterName, string consumerType)
-        {
-            return new NullPerformanceCounter();
-        }
-
-        CreateCounterDelegate Initialize()
+        void Initialize()
         {
             try
             {
@@ -67,7 +47,7 @@ namespace MassTransit.Monitoring.Performance
                 {
                     CreateCategory(counters);
 
-                    return PerformanceCounterFactory;
+                    return;
                 }
 
                 IEnumerable<CounterCreationData> missing =
@@ -78,17 +58,13 @@ namespace MassTransit.Monitoring.Performance
 
                     CreateCategory(counters);
                 }
-
-                return PerformanceCounterFactory;
             }
             catch (SecurityException)
             {
                 _log.WarnFormat(
                     "Unable to create performance counter category (Category: {0})" +
-                        "\nTry running the program in the Administrator role to set these up." +
-                        "\n**Hey, this just means you aren't admin or don't have/want perf counter support**", _categoryName);
-
-                return NullCounterFactory;
+                    "\nTry running the program in the Administrator role to set these up." +
+                    "\n**Hey, this just means you aren't admin or don't have/want perf counter support**", _categoryName);
             }
         }
 
@@ -102,9 +78,6 @@ namespace MassTransit.Monitoring.Performance
                 PerformanceCounterCategoryType.MultiInstance,
                 new CounterCreationDataCollection(counters));
         }
-
-
-        delegate IPerformanceCounter CreateCounterDelegate(string counterName, string consumerType);
 
         protected CounterCreationData Convert(Counter counter, PerformanceCounterType type)
         {

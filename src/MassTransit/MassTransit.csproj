@@ -517,7 +517,12 @@
     <Compile Include="MessageSchedulerContext.cs" />
 
     <Compile Include="Monitoring\Performance\BuiltInCounters.cs" />
-    <Compile Include="Monitoring\Performance\Windows\WindowsPerformanceCounters.cs" />
+    <Compile Include="Monitoring\Performance\CreateCounterDelegate.cs" />
+    <Compile Include="Monitoring\Performance\ICounterFactory.cs" />
+    <Compile Include="Monitoring\Performance\IPerformanceCounterInstaller.cs" />
+    <Compile Include="Monitoring\Performance\Null\NullCounterFactory.cs" />
+    <Compile Include="Monitoring\Performance\Windows\WindowsCounterFactory.cs" />
+    <Compile Include="Monitoring\Performance\Windows\WindowsPerformanceCounterInstaller.cs" />
     <Compile Include="Monitoring\Performance\Windows\ConsumerPerformanceCounter.cs" />
     <Compile Include="Monitoring\Performance\ConsumerPerformanceCounterCache.cs" />
     <Compile Include="Monitoring\Performance\Windows\ConsumerPerformanceCounters.cs" />
@@ -533,7 +538,7 @@
     <Compile Include="Monitoring\Performance\PerformanceCounterBusObserver.cs" />
     <Compile Include="Monitoring\Performance\PerformanceCounterPublishObserver.cs" />
     <Compile Include="Monitoring\Performance\PerformanceCounterReceiveObserver.cs" />
-    <Compile Include="Monitoring\Performance\Windows\PerformanceCounters.cs" />
+    <Compile Include="Monitoring\Performance\Windows\BaseWindowsPerformanceCounters.cs" />
     <Compile Include="Monitoring\Performance\PerformanceCounterSendObserver.cs" />
     <Compile Include="Monitoring\Performance\Configuration\PerformanceCounterExtensions.cs" />
     <Compile Include="Pipeline\BusObservable.cs" />

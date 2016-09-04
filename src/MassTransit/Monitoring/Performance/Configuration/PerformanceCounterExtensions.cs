@@ -14,6 +14,8 @@ namespace MassTransit
 {
     using System;
     using BusConfigurators;
+    using Monitoring.Performance;
+    using Monitoring.Performance.Windows;
 
 
     public static class PerformanceCounterExtensions
@@ -21,7 +23,7 @@ namespace MassTransit
         [Obsolete("This method was improperly named, use EnablePerformanceCounters instead")]
         public static void EnabledPerformanceCounters(this IBusFactoryConfigurator configurator)
         {
-            configurator.EnablePerformanceCounters();
+            configurator.EnablePerformanceCounters<WindowsCounterFactory>();
         }
 
         /// <summary>
@@ -29,12 +31,13 @@ namespace MassTransit
         /// monitor.
         /// </summary>
         /// <param name="configurator"></param>
-        public static void EnablePerformanceCounters(this IBusFactoryConfigurator configurator)
+        public static void EnablePerformanceCounters<TFactory>(this IBusFactoryConfigurator configurator)
+            where TFactory : ICounterFactory, new()
         {
             if (configurator == null)
                 throw new ArgumentNullException(nameof(configurator));
 
-            var specification = new PerformanceCounterBusFactorySpecification();
+            var specification = new PerformanceCounterBusFactorySpecification<TFactory>();
             configurator.AddBusFactorySpecification(specification);
         }
     }

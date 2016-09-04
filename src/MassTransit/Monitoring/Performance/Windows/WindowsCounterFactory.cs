@@ -10,29 +10,16 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.BusConfigurators
+namespace MassTransit.Monitoring.Performance.Windows
 {
-    using System.Collections.Generic;
-    using Builders;
-    using Configurators;
-    using GreenPipes;
-    using Monitoring.Performance;
+    using System.Diagnostics;
 
-
-    public class PerformanceCounterBusFactorySpecification<TFactory> :
-        IBusFactorySpecification
-        where TFactory : ICounterFactory, new()
+    public class WindowsCounterFactory : ICounterFactory
     {
-        public IEnumerable<ValidationResult> Validate()
+        public IPerformanceCounter Create(CounterCategory category, string counterName, string instanceName)
         {
-            yield break;
-        }
-
-        public void Apply(IBusBuilder builder)
-        {
-            var observer = new PerformanceCounterBusObserver<TFactory>();
-
-            builder.ConnectBusObserver(observer);
+            var counter = new PerformanceCounter(category.Name, counterName, instanceName, false);
+            return new WindowsPerformanceCounter(counter);
         }
     }
 }

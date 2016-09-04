@@ -16,7 +16,8 @@ namespace MassTransit.Monitoring.Performance
     using System.Collections.Concurrent;
 
 
-    public class ConsumerPerformanceCounterCache
+    public class ConsumerPerformanceCounterCache<TFactory>
+        where TFactory : ICounterFactory, new()
     {
         readonly ConcurrentDictionary<string, Lazy<ConsumerPerformanceCounter>> _types;
 
@@ -28,15 +29,17 @@ namespace MassTransit.Monitoring.Performance
         public static IConsumerPerformanceCounter GetCounter(string consumerType)
         {
             return Cached.Counter.Value._types
-                .GetOrAdd(consumerType, x => new Lazy<ConsumerPerformanceCounter>(() => new ConsumerPerformanceCounter(x)))
+                .GetOrAdd(consumerType, x => new Lazy<ConsumerPerformanceCounter>(() => new ConsumerPerformanceCounter(Cached.Factory.Value, x)))
                 .Value;
         }
 
 
         static class Cached
         {
-            public static readonly Lazy<ConsumerPerformanceCounterCache> Counter =
-                new Lazy<ConsumerPerformanceCounterCache>(() => new ConsumerPerformanceCounterCache());
+            public static readonly Lazy<ICounterFactory> Factory = new Lazy<ICounterFactory>(() => new TFactory());
+
+            public static readonly Lazy<ConsumerPerformanceCounterCache<TFactory>> Counter =
+                new Lazy<ConsumerPerformanceCounterCache<TFactory>>(() => new ConsumerPerformanceCounterCache<TFactory>());
         }
     }
 }

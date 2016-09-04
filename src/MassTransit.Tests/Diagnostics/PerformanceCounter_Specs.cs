@@ -14,6 +14,7 @@ namespace MassTransit.Tests.Diagnostics
 {
     using System.Threading;
     using System.Threading.Tasks;
+    using Monitoring.Performance.Windows;
     using NUnit.Framework;
     using TestFramework;
     using TestFramework.Messages;
@@ -42,7 +43,7 @@ namespace MassTransit.Tests.Diagnostics
         {
             base.ConfigureBus(configurator);
 
-            configurator.EnablePerformanceCounters();
+            configurator.EnablePerformanceCounters<WindowsCounterFactory>();
         }
 
         protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)

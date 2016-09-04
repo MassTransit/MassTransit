@@ -38,45 +38,45 @@ namespace MassTransit.Monitoring.Performance
         readonly IPerformanceCounter _totalPublished;
         readonly IPerformanceCounter _totalSent;
 
-        public MessagePerformanceCounter()
+        public MessagePerformanceCounter(ICounterFactory factory)
         {
             string messageType = TypeMetadataCache<TMessage>.ShortName;
             if (messageType.Length > 127)
                 messageType = messageType.Substring(messageType.Length - 127);
 
-            _totalConsumed = MessagePerformanceCounters.CreateCounter(
+            _totalConsumed = factory.Create(BuiltInCounters.Messages.Category,
                 MessagePerformanceCounters.TotalReceived.CounterName, messageType);
-            _consumedPerSecond = MessagePerformanceCounters.CreateCounter(
+            _consumedPerSecond = factory.Create(BuiltInCounters.Messages.Category,
                 MessagePerformanceCounters.ConsumedPerSecond.CounterName, messageType);
-            _consumeDuration = MessagePerformanceCounters.CreateCounter(
+            _consumeDuration = factory.Create(BuiltInCounters.Messages.Category,
                 MessagePerformanceCounters.ConsumeDuration.CounterName, messageType);
-            _consumeDurationBase = MessagePerformanceCounters.CreateCounter(
+            _consumeDurationBase = factory.Create(BuiltInCounters.Messages.Category,
                 MessagePerformanceCounters.ConsumeDurationBase.CounterName, messageType);
-            _faulted = MessagePerformanceCounters.CreateCounter(
+            _faulted = factory.Create(BuiltInCounters.Messages.Category,
                 MessagePerformanceCounters.ConsumeFaulted.CounterName, messageType);
-            _faultPercentage = MessagePerformanceCounters.CreateCounter(
+            _faultPercentage = factory.Create(BuiltInCounters.Messages.Category,
                 MessagePerformanceCounters.ConsumeFaultPercentage.CounterName, messageType);
-            _faultPercentageBase = MessagePerformanceCounters.CreateCounter(
+            _faultPercentageBase = factory.Create(BuiltInCounters.Messages.Category,
                 MessagePerformanceCounters.ConsumeFaultPercentageBase.CounterName, messageType);
-            _totalSent = MessagePerformanceCounters.CreateCounter(
+            _totalSent = factory.Create(BuiltInCounters.Messages.Category,
                 MessagePerformanceCounters.TotalSent.CounterName, messageType);
-            _sentPerSecond = MessagePerformanceCounters.CreateCounter(
+            _sentPerSecond = factory.Create(BuiltInCounters.Messages.Category,
                 MessagePerformanceCounters.SentPerSecond.CounterName, messageType);
-            _sendFaulted = MessagePerformanceCounters.CreateCounter(
+            _sendFaulted = factory.Create(BuiltInCounters.Messages.Category,
                 MessagePerformanceCounters.SendFaulted.CounterName, messageType);
-            _sendFaultPercentage = MessagePerformanceCounters.CreateCounter(
+            _sendFaultPercentage = factory.Create(BuiltInCounters.Messages.Category,
                 MessagePerformanceCounters.SendFaultPercentage.CounterName, messageType);
-            _sendFaultPercentageBase = MessagePerformanceCounters.CreateCounter(
+            _sendFaultPercentageBase = factory.Create(BuiltInCounters.Messages.Category,
                 MessagePerformanceCounters.SendFaultPercentageBase.CounterName, messageType);
-            _totalPublished = MessagePerformanceCounters.CreateCounter(
+            _totalPublished = factory.Create(BuiltInCounters.Messages.Category,
                 MessagePerformanceCounters.TotalPublished.CounterName, messageType);
-            _publishedPerSecond = MessagePerformanceCounters.CreateCounter(
+            _publishedPerSecond = factory.Create(BuiltInCounters.Messages.Category,
                 MessagePerformanceCounters.PublishedPerSecond.CounterName, messageType);
-            _publishFaulted = MessagePerformanceCounters.CreateCounter(
+            _publishFaulted = factory.Create(BuiltInCounters.Messages.Category,
                 MessagePerformanceCounters.PublishFaulted.CounterName, messageType);
-            _publishFaultPercentage = MessagePerformanceCounters.CreateCounter(
+            _publishFaultPercentage = factory.Create(BuiltInCounters.Messages.Category,
                 MessagePerformanceCounters.PublishFaultPercentage.CounterName, messageType);
-            _publishFaultPercentageBase = MessagePerformanceCounters.CreateCounter(
+            _publishFaultPercentageBase = factory.Create(BuiltInCounters.Messages.Category,
                 MessagePerformanceCounters.PublishFaultPercentageBase.CounterName, messageType);
         }
 

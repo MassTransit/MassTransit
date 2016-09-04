@@ -18,10 +18,10 @@ namespace MassTransit.Monitoring.Performance
 
 
     public class MessagePerformanceCounters :
-        PerformanceCounters
+        BaseWindowsPerformanceCounters
     {
         MessagePerformanceCounters()
-            : base(BuiltInCounters.Messages.CategoryName, BuiltInCounters.Messages.CategoryHelp)
+            : base(BuiltInCounters.Messages.Category.Name, BuiltInCounters.Messages.Category.Help)
         {
         }
 
@@ -42,11 +42,6 @@ namespace MassTransit.Monitoring.Performance
         public static CounterCreationData PublishFaulted => Cached.Instance.Value.Data[14];
         public static CounterCreationData PublishFaultPercentage => Cached.Instance.Value.Data[15];
         public static CounterCreationData PublishFaultPercentageBase => Cached.Instance.Value.Data[16];
-
-        public static IPerformanceCounter CreateCounter(string counterName, string instanceName)
-        {
-            return Cached.Instance.Value.CreatePerformanceCounter(counterName, instanceName);
-        }
 
         protected override IEnumerable<CounterCreationData> GetCounterData()
         {
