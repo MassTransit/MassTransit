@@ -128,6 +128,7 @@
     <Compile Include="Courier\Subscription_Specs.cs" />
     <Compile Include="Courier\TwoActivityEvent_Specs.cs" />
     <Compile Include="Courier\UriArgument_Specs.cs" />
+    <Compile Include="Diagnostics\StatsD_Specs.cs" />
     <Compile Include="EventPublish_Specs.cs" />
     <Compile Include="ExcessiveAsyncFault_Specs.cs" />
     <Compile Include="HeaderObject_Specs.cs" />
