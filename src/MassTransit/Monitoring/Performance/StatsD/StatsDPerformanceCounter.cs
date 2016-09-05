@@ -13,24 +13,25 @@
 namespace MassTransit.Monitoring.Performance.StatsD
 {
     using System.Net.Sockets;
+    using System.Text;
 
 
     public class StatsDPerformanceCounter : IPerformanceCounter
     {
         readonly string _fullName;
-
+        readonly byte[] _incrementPayload;
         readonly UdpClient _client;
 
         public StatsDPerformanceCounter(StatsDConfiguration cfg, string category, string name, string instance)
         {
             _fullName = $"{category}.{name}.{instance}";
-            _client = new UdpClient(cfg.Port);
+            var increment = $"{_fullName}:1|c";
+            _incrementPayload = Encoding.UTF8.GetBytes(increment);
+            _client = new UdpClient(cfg.Hostname, cfg.Port);
         }
         public void Increment()
         {
-            var payload = $"{_fullName}:1|c";
-            byte[] datagram = System.Text.Encoding.UTF8.GetBytes(payload);
-            var t = _client.SendAsync(datagram, datagram.Length);
+            var t = _client.SendAsync(_incrementPayload, _incrementPayload.Length);
         }
 
         public void IncrementBy(long val)
@@ -49,7 +50,7 @@ namespace MassTransit.Monitoring.Performance.StatsD
 
         public void Dispose()
         {
-            _client.Close();
+            _client?.Close();
         }
     }
 }

@@ -4,14 +4,16 @@ namespace MassTransit.Monitoring.Performance.StatsD
     {
         public static StatsDConfiguration Defaults()
         {
-            return new StatsDConfiguration(8125);
+            return new StatsDConfiguration("localhost", 8125);
         }
 
-        public StatsDConfiguration(int port)
+        public StatsDConfiguration(string hostname, int port)
         {
+            Hostname = hostname;
             Port = port;
         }
 
+        public string Hostname { get; set; }
         public int Port { get; set; }
     }
 }
