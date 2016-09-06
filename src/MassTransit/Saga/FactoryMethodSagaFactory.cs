@@ -14,6 +14,7 @@ namespace MassTransit.Saga
 {
     using System.Threading.Tasks;
     using Context;
+    using GreenPipes;
     using Logging;
     using MassTransit.Pipeline;
     using Util;

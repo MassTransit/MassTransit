@@ -20,6 +20,7 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
     using System.Threading.Tasks;
     using Configuration;
     using Contexts;
+    using GreenPipes;
     using MassTransit.Pipeline;
     using Microsoft.ServiceBus;
     using NewIdFormatters;

@@ -16,6 +16,7 @@ namespace MassTransit.Serialization
     using System.IO;
     using System.Net.Mime;
     using System.Runtime.Serialization;
+    using GreenPipes;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Bson;
     using Util;

@@ -16,6 +16,7 @@ namespace MassTransit.Monitoring.Introspection
     using System.Collections.Generic;
     using System.Threading;
     using Contracts;
+    using GreenPipes.Introspection;
     using Util;
 
 

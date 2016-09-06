@@ -13,7 +13,8 @@
 namespace MassTransit.Builders
 {
     using BusConfigurators;
-    using PipeBuilders;
+    using GreenPipes;
+    using GreenPipes.Builders;
     using Pipeline;
     using Pipeline.Filters;
     using Pipeline.Pipes;

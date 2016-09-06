@@ -15,6 +15,8 @@ namespace MassTransit.Context
     using System;
     using System.Threading;
     using System.Threading.Tasks;
+    using GreenPipes;
+    using GreenPipes.Payloads;
     using Pipeline;
     using Transports;
 

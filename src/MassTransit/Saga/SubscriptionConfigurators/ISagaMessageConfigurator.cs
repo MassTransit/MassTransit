@@ -12,6 +12,9 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Saga.SubscriptionConfigurators
 {
+    using GreenPipes;
+
+
     public interface ISagaMessageConfigurator<TMessage> :
         IPipeConfigurator<ConsumeContext<TMessage>>
         where TMessage : class

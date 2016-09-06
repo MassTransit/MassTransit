@@ -12,6 +12,9 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports
 {
+    using GreenPipes;
+
+
     /// <summary>
     /// A Bus Host is a transport-neutral reference to a host
     /// </summary>

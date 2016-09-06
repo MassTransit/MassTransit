@@ -13,6 +13,7 @@
 namespace MassTransit.Saga
 {
     using Context;
+    using GreenPipes.Payloads;
 
 
     /// <summary>

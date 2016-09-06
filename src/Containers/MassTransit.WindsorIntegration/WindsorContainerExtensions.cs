@@ -19,6 +19,7 @@ namespace MassTransit
     using Castle.Windsor;
     using ConsumeConfigurators;
     using Courier;
+    using GreenPipes;
     using Internals.Extensions;
     using PipeConfigurators;
     using Saga;

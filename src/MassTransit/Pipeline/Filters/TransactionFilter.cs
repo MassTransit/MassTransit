@@ -17,6 +17,7 @@ namespace MassTransit.Pipeline.Filters
     using System.Threading.Tasks;
     using System.Transactions;
     using Context;
+    using GreenPipes;
 
 
     public class TransactionFilter<T> :

@@ -15,6 +15,7 @@ namespace MassTransit.Context
     using System;
     using System.Net.Mime;
     using System.Threading;
+    using GreenPipes;
 
 
     public class SendContextProxy<TMessage> :

@@ -53,6 +53,10 @@
     <Compile Include="SerializationTestMessage.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\..\GreenPipes\src\GreenPipes\GreenPipes.csproj">
+      <Project>{59052db9-b527-4683-a56a-56c4d8fb6584}</Project>
+      <Name>GreenPipes</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\MassTransit.TestFramework\MassTransit.TestFramework.csproj">
       <Project>{3c4b5f1a-69ad-415e-9f40-a7fdbd7a3012}</Project>
       <Name>MassTransit.TestFramework</Name>

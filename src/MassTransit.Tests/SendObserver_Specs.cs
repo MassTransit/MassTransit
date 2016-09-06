@@ -22,6 +22,9 @@ namespace MassTransit.Tests
 
     namespace ObserverTests
     {
+        using GreenPipes;
+
+
         [TestFixture]
         public class Connecting_a_send_observer_to_the_endpoint :
             InMemoryTestFixture

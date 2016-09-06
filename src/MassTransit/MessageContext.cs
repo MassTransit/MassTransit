@@ -13,6 +13,8 @@
 namespace MassTransit
 {
     using System;
+    using GreenPipes;
+
 
     /// <summary>
     /// The message context includes the headers that are transferred with the message

@@ -13,6 +13,7 @@
 namespace MassTransit.NinjectIntegration
 {
     using System.Threading.Tasks;
+    using GreenPipes;
     using Ninject;
     using Pipeline;
     using Saga;

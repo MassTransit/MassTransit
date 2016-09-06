@@ -13,6 +13,7 @@
 namespace MassTransit
 {
     using System;
+    using GreenPipes;
     using PipeConfigurators;
     using RabbitMqTransport.Configuration;
 

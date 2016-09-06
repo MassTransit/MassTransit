@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
+    using GreenPipes;
     using Util;
 
 
@@ -22,15 +23,6 @@ namespace MassTransit
             ProbeContext scope = context.CreateScope("consumerFactory");
             scope.Add("source", source);
             scope.Add("consumerType", TypeMetadataCache<TConsumer>.ShortName);
-
-            return scope;
-        }
-
-        public static ProbeContext CreateFilterScope(this ProbeContext context, string filterType)
-        {
-            ProbeContext scope = context.CreateScope("filters");
-
-            scope.Add("filterType", filterType);
 
             return scope;
         }

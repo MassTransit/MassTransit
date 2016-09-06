@@ -14,6 +14,7 @@ namespace MassTransit.Transformation.Contexts
 {
     using System;
     using System.Threading;
+    using GreenPipes;
 
 
     public class TransformSourceContext<TProperty, TInput> :

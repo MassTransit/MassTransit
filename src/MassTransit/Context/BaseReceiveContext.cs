@@ -19,6 +19,8 @@ namespace MassTransit.Context
     using System.Linq;
     using System.Net.Mime;
     using System.Threading.Tasks;
+    using GreenPipes;
+    using GreenPipes.Payloads;
     using Serialization;
     using Util;
 

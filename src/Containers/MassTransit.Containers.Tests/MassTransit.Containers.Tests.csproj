@@ -139,6 +139,10 @@
     <Compile Include="Unity_Specs.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\..\GreenPipes\src\GreenPipes\GreenPipes.csproj">
+      <Project>{59052DB9-B527-4683-A56A-56C4D8FB6584}</Project>
+      <Name>GreenPipes</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\Loggers\MassTransit.SerilogIntegration\MassTransit.SerilogIntegration.csproj">
       <Project>{0e90afe6-99e8-43cf-995e-e99466dd6807}</Project>
       <Name>MassTransit.SerilogIntegration</Name>

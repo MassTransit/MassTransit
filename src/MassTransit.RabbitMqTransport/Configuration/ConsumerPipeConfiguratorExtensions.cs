@@ -14,6 +14,7 @@ namespace MassTransit
 {
     using System;
     using System.Collections.Generic;
+    using GreenPipes;
     using Pipeline;
     using Pipeline.Pipes;
     using RabbitMqTransport;

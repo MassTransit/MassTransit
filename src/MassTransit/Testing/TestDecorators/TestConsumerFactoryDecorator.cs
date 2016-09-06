@@ -14,6 +14,7 @@ namespace MassTransit.Testing.TestDecorators
 {
     using System;
     using System.Threading.Tasks;
+    using GreenPipes;
     using Pipeline;
 
 

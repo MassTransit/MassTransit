@@ -14,7 +14,7 @@ namespace MassTransit.WindsorIntegration
 {
     using System.Collections.Generic;
     using Configurators;
-    using PipeBuilders;
+    using GreenPipes;
     using PipeConfigurators;
 
 

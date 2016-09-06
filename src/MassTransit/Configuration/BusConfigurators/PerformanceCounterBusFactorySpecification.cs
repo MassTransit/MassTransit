@@ -15,6 +15,7 @@ namespace MassTransit.BusConfigurators
     using System.Collections.Generic;
     using Builders;
     using Configurators;
+    using GreenPipes;
     using Monitoring.Performance;
 
 

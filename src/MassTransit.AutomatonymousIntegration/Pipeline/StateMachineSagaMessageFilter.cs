@@ -15,6 +15,7 @@ namespace Automatonymous.Pipeline
     using System;
     using System.Threading.Tasks;
     using Contexts;
+    using GreenPipes;
     using MassTransit;
     using MassTransit.Logging;
     using MassTransit.Pipeline;

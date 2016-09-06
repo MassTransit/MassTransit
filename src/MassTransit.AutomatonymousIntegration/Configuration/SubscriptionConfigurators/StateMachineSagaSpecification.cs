@@ -15,6 +15,7 @@ namespace Automatonymous.SubscriptionConfigurators
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using GreenPipes;
     using MassTransit;
     using MassTransit.Configurators;
     using MassTransit.PipeConfigurators;

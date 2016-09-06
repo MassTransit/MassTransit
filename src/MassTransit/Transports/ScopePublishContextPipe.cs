@@ -13,6 +13,7 @@
 namespace MassTransit.Transports
 {
     using System.Threading.Tasks;
+    using GreenPipes;
     using Pipeline;
 
 

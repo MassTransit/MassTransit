@@ -13,6 +13,7 @@
 namespace MassTransit.Builders
 {
     using Configurators;
+    using GreenPipes;
 
 
     public interface IBusFactorySpecification :

@@ -14,6 +14,7 @@ namespace MassTransit
 {
     using System;
     using System.Threading;
+    using GreenPipes;
     using PipeConfigurators;
 
 

@@ -18,6 +18,7 @@ namespace MassTransit
     using System.Linq;
     using System.Text;
     using System.Threading;
+    using GreenPipes;
     using Monitoring.Introspection;
     using Monitoring.Introspection.Contracts;
     using Newtonsoft.Json;

@@ -13,6 +13,8 @@
 namespace MassTransit.Pipeline
 {
     using System;
+    using GreenPipes;
+
 
     /// <summary>
     /// Connect a request pipe to the pipeline

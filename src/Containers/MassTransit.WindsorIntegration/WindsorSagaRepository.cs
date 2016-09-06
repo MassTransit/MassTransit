@@ -15,6 +15,7 @@ namespace MassTransit.WindsorIntegration
     using System.Threading.Tasks;
     using Castle.MicroKernel;
     using Castle.MicroKernel.Lifestyle;
+    using GreenPipes;
     using Pipeline;
     using Saga;
 

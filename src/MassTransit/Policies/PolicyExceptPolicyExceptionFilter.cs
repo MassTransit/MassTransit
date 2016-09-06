@@ -14,6 +14,7 @@ namespace MassTransit.Policies
 {
     using System;
     using System.Linq;
+    using GreenPipes;
     using Util;
 
 

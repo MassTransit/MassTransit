@@ -12,6 +12,9 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.ConsumeConfigurators
 {
+    using GreenPipes;
+
+
     /// <summary>
     /// Configure a message handler, including specifying filters that are executed around
     /// the handler itself

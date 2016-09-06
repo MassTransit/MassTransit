@@ -13,6 +13,7 @@
 namespace MassTransit.Tests
 {
     using System.Threading.Tasks;
+    using GreenPipes;
     using MassTransit.Pipeline;
     using Monitoring.Introspection;
     using NUnit.Framework;

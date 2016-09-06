@@ -16,6 +16,7 @@ namespace Automatonymous
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.Linq;
+    using GreenPipes;
     using MassTransit;
     using MassTransit.Configurators;
 

@@ -17,6 +17,8 @@ namespace MassTransit.Context
     using System.Net.Mime;
     using System.Runtime.Serialization;
     using System.Threading;
+    using GreenPipes;
+    using GreenPipes.Payloads;
 
 
     public abstract class BaseSendContext<TMessage> :

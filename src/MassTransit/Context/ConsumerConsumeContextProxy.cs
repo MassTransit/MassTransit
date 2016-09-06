@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Context
 {
+    using GreenPipes.Payloads;
     using Util;
 
 

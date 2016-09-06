@@ -20,6 +20,7 @@ namespace MassTransit.Steward.Core.Agents
     using System.Text;
     using System.Threading.Tasks;
     using Contracts;
+    using GreenPipes;
     using Logging;
     using Pipeline;
 

@@ -13,6 +13,7 @@
 namespace MassTransit.Courier.Factories
 {
     using System.Threading.Tasks;
+    using GreenPipes;
     using MassTransit.Pipeline;
 
 

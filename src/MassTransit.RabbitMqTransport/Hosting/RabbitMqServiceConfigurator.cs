@@ -14,6 +14,7 @@ namespace MassTransit.RabbitMqTransport.Hosting
 {
     using System;
     using Builders;
+    using GreenPipes;
     using MassTransit.Hosting;
     using PipeConfigurators;
 
