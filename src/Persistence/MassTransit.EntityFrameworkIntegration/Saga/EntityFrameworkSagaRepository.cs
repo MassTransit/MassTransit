@@ -82,8 +82,11 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
             using (var dbContext = _sagaDbContextFactory())
             using (var transaction = dbContext.Database.BeginTransaction(_isolationLevel))
             {
+                // Hack for locking row for the duration of the transaction.
                 var tableName = ((IObjectContextAdapter)dbContext).ObjectContext.CreateObjectSet<TSaga>().EntitySet.Name;
-                dbContext.Set<TSaga>().SqlQuery($"select * from {tableName} WITH (UPDLOCK, ROWLOCK) WHERE CorrelationId = @p0", sagaId).ToList();
+                await dbContext.Set<TSaga>().SqlQuery($"select * from {tableName} WITH (UPDLOCK, ROWLOCK) WHERE CorrelationId = @p0", sagaId)
+                    .SingleOrDefaultAsync()
+                    .ConfigureAwait(false);
 
                 var inserted = false;
 
@@ -166,6 +169,10 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
             {
                 try
                 {
+                    // Hack to lock the whole table for the duration of the transaction.
+                    var tableName = ((IObjectContextAdapter)dbContext).ObjectContext.CreateObjectSet<TSaga>().EntitySet.Name;
+                    await dbContext.Set<TSaga>().SqlQuery($"select 1 from {tableName} WITH (TABLOCKX)").ToListAsync().ConfigureAwait(false);
+
                     List<TSaga> sagaInstances = await dbContext.Set<TSaga>().Where(context.Query.FilterExpression).ToListAsync().ConfigureAwait(false);
                     if (sagaInstances.Count == 0)
                     {
@@ -185,15 +192,55 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
 
                     transaction.Commit();
                 }
+                catch (DbUpdateException ex)
+                {
+                    var baseException = ex.GetBaseException() as SqlException;
+                    if (baseException != null && baseException.Number == 1205)
+                    {
+                        // deadlock, no need to rollback
+                    }
+                    else
+                    {
+                        try
+                        {
+                            transaction.Rollback();
+                        }
+                        catch (Exception innerException)
+                        {
+                            if (_log.IsWarnEnabled)
+                                _log.Warn("The transaction rollback failed", innerException);
+                        }
+                    }
+
+                    throw;
+                }
                 catch (SagaException sex)
                 {
-                    transaction.Rollback();
+                    try
+                    {
+                        transaction.Rollback();
+                    }
+                    catch (Exception innerException)
+                    {
+                        if (_log.IsWarnEnabled)
+                            _log.Warn("The transaction rollback failed", innerException);
+                    }
+
                     if (_log.IsErrorEnabled)
                         _log.Error("Saga Exception Occurred", sex);
                 }
                 catch (Exception ex)
                 {
-                    transaction.Rollback();
+                    try
+                    {
+                        transaction.Rollback();
+                    }
+                    catch (Exception innerException)
+                    {
+                        if (_log.IsWarnEnabled)
+                            _log.Warn("The transaction rollback failed", innerException);
+                    }
+
                     if (_log.IsErrorEnabled)
                         _log.Error($"SAGA:{TypeMetadataCache<TSaga>.ShortName} Exception {TypeMetadataCache<T>.ShortName}", ex);
 
