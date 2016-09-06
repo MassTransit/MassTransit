@@ -16,6 +16,7 @@ namespace MassTransit.RabbitMqTransport.Tests
     using System.Runtime.Serialization;
     using System.Text;
     using System.Threading.Tasks;
+    using GreenPipes;
     using NUnit.Framework;
     using RabbitMQ.Client;
     using Shouldly;

@@ -13,6 +13,7 @@
 namespace MassTransit.BusConfigurators
 {
     using Configurators;
+    using GreenPipes;
     using Pipeline;
 
 

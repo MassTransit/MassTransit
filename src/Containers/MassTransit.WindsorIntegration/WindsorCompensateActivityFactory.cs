@@ -17,6 +17,7 @@ namespace MassTransit.WindsorIntegration
     using Castle.MicroKernel.Lifestyle;
     using Courier;
     using Courier.Hosts;
+    using GreenPipes;
     using Logging;
     using Pipeline;
     using Util;

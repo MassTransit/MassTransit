@@ -15,6 +15,7 @@ namespace MassTransit.Transformation.TransformConfigurators
     using System.Collections.Generic;
     using System.Reflection;
     using Configurators;
+    using GreenPipes;
     using PropertyProviders;
     using TransformBuilders;
 

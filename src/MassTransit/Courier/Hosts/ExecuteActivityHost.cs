@@ -16,6 +16,7 @@ namespace MassTransit.Courier.Hosts
     using System.Diagnostics;
     using System.Threading.Tasks;
     using Contracts;
+    using GreenPipes;
     using Logging;
     using MassTransit.Pipeline;
     using Pipeline;

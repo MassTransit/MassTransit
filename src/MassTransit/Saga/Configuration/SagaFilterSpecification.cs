@@ -14,8 +14,8 @@ namespace MassTransit.Saga.Configuration
 {
     using System.Collections.Generic;
     using Configurators;
+    using GreenPipes;
     using MassTransit.Pipeline;
-    using PipeBuilders;
     using PipeConfigurators;
     using Pipeline.Filters;
 

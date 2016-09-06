@@ -13,6 +13,7 @@
 namespace MassTransit
 {
     using System.ComponentModel;
+    using GreenPipes;
     using PipeConfigurators;
 
 

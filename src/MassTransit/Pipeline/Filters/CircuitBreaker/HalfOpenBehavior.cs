@@ -15,6 +15,7 @@ namespace MassTransit.Pipeline.Filters.CircuitBreaker
     using System;
     using System.Collections.Generic;
     using System.Threading;
+    using GreenPipes;
 
 
     /// <summary>

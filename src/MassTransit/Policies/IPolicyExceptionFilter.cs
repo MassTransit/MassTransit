@@ -13,6 +13,7 @@
 namespace MassTransit.Policies
 {
     using System;
+    using GreenPipes;
 
 
     /// <summary>

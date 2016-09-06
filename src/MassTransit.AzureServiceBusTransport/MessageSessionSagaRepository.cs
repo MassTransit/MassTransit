@@ -16,6 +16,7 @@ namespace MassTransit.AzureServiceBusTransport
     using System.IO;
     using System.Threading.Tasks;
     using Context;
+    using GreenPipes;
     using Logging;
     using MassTransit.Pipeline;
     using Newtonsoft.Json.Bson;

@@ -18,6 +18,7 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
     using Builders;
     using BusConfigurators;
     using Configurators;
+    using GreenPipes;
 
 
     public class ServiceBusBusFactoryConfigurator :

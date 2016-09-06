@@ -13,6 +13,7 @@
 namespace MassTransit.SimpleInjectorIntegration
 {
     using System.Threading.Tasks;
+    using GreenPipes;
     using Pipeline;
     using SimpleInjector;
     using SimpleInjector.Extensions.ExecutionContextScoping;

@@ -14,6 +14,8 @@ namespace MassTransit.Transformation.Contexts
 {
     using System;
     using Context;
+    using GreenPipes;
+    using GreenPipes.Payloads;
 
 
     /// <summary>

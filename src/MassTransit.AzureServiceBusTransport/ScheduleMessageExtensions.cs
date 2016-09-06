@@ -14,6 +14,7 @@ namespace MassTransit
 {
     using System;
     using AzureServiceBusTransport.Configuration;
+    using GreenPipes;
 
 
     public static class ScheduleMessageExtensions

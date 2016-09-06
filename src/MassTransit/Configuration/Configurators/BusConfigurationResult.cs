@@ -16,6 +16,7 @@ namespace MassTransit.Configurators
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.Linq;
+    using GreenPipes;
 
 
     [Serializable, DebuggerDisplay("{DebuggerString()}")]

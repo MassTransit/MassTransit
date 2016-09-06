@@ -73,6 +73,10 @@
     <Compile Include="QuartzService.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\GreenPipes\src\GreenPipes\GreenPipes.csproj">
+      <Project>{59052db9-b527-4683-a56a-56c4d8fb6584}</Project>
+      <Name>GreenPipes</Name>
+    </ProjectReference>
     <ProjectReference Include="..\MassTransit.Host\MassTransit.Host.csproj">
       <Project>{d1172bb0-ef5f-4d56-9a3f-13a63dbd4d22}</Project>
       <Name>MassTransit.Host</Name>

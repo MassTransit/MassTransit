@@ -15,6 +15,7 @@ namespace MassTransit.Pipeline.Pipes
     using System;
     using System.Threading.Tasks;
     using Filters;
+    using GreenPipes;
 
 
     public class ConsumePipe :

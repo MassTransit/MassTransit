@@ -13,6 +13,7 @@
 namespace MassTransit.Tests.Pipeline
 {
     using System;
+    using GreenPipes;
     using MassTransit.Pipeline;
     using NUnit.Framework;
     using Policies;

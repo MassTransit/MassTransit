@@ -14,6 +14,7 @@ namespace MassTransit.QuartzService
 {
     using System;
     using Configuration;
+    using GreenPipes;
     using Logging;
     using Quartz;
     using Quartz.Impl;

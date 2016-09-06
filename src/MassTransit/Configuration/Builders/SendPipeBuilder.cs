@@ -12,7 +12,8 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Builders
 {
-    using PipeBuilders;
+    using GreenPipes;
+    using GreenPipes.Builders;
     using Pipeline;
     using Pipeline.Filters;
     using Pipeline.Pipes;

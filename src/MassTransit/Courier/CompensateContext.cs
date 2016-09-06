@@ -14,6 +14,7 @@ namespace MassTransit.Courier
 {
     using System;
     using System.Collections.Generic;
+    using GreenPipes;
 
 
     public interface CompensateContext :

@@ -13,6 +13,7 @@
 namespace MassTransit
 {
     using Configurators;
+    using GreenPipes;
 
 
     public interface IBusFactory :

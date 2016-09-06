@@ -19,6 +19,10 @@ namespace MassTransit.EndpointConfigurators
     using Builders;
     using BusConfigurators;
     using Configurators;
+    using GreenPipes;
+    using GreenPipes.Builders;
+    using GreenPipes.Configurators;
+    using GreenPipes.Validation;
     using PipeConfigurators;
     using Pipeline;
     using Pipeline.Filters;
@@ -91,7 +95,7 @@ namespace MassTransit.EndpointConfigurators
             return _specifications.SelectMany(x => x.Validate())
                 .Concat(_consumePipeConfigurator.Validate())
                 .Concat(_sendPipeConfigurator.Validate())
-                .Concat(_lateConfigurationKeys.Select(x => new ValidationResultImpl(ValidationResultDisposition.Failure, x, "was configured after being used")));
+                .Concat(_lateConfigurationKeys.Select(x => new ConfigurationValidationResult(ValidationResultDisposition.Failure, x, "was configured after being used")));
         }
 
         public void AddEndpointSpecification(IReceiveEndpointSpecification configurator)

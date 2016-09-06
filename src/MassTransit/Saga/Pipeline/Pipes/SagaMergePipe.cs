@@ -13,6 +13,7 @@
 namespace MassTransit.Saga.Pipeline.Pipes
 {
     using System.Threading.Tasks;
+    using GreenPipes;
     using MassTransit.Pipeline;
     using Util;
 

@@ -13,6 +13,7 @@
 namespace Automatonymous.SubscriptionConnectors
 {
     using CorrelationConfigurators;
+    using GreenPipes;
     using MassTransit;
     using MassTransit.Pipeline;
     using MassTransit.Saga;

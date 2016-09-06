@@ -103,6 +103,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\GreenPipes\src\GreenPipes\GreenPipes.csproj">
+      <Project>{59052db9-b527-4683-a56a-56c4d8fb6584}</Project>
+      <Name>GreenPipes</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Containers\MassTransit.AutofacIntegration\MassTransit.AutofacIntegration.csproj">
       <Project>{a31f2c6b-c806-46fd-a4f3-c54209dd495c}</Project>
       <Name>MassTransit.AutofacIntegration</Name>

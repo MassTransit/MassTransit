@@ -18,6 +18,8 @@ namespace MassTransit.Serialization
     using System.Threading.Tasks;
     using Context;
     using Events;
+    using GreenPipes;
+    using GreenPipes.Payloads;
     using Pipeline;
     using Pipeline.Pipes;
     using Util;

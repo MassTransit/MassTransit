@@ -14,6 +14,7 @@ namespace Automatonymous
 {
     using System;
     using CorrelationConfigurators;
+    using GreenPipes;
     using MassTransit;
     using MassTransit.Configurators;
     using MassTransit.Pipeline;

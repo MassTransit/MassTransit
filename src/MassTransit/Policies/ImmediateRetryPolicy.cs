@@ -15,6 +15,7 @@ namespace MassTransit.Policies
     using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
+    using GreenPipes;
 
 
     public class ImmediateRetryPolicy :

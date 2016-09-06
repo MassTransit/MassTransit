@@ -16,6 +16,7 @@ namespace MassTransit.Tests.Pipeline
     using System.Threading;
     using System.Threading.Tasks;
     using System.Transactions;
+    using GreenPipes;
     using MassTransit.Pipeline;
     using NUnit.Framework;
     using TestFramework;

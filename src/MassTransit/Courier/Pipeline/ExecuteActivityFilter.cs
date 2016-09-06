@@ -14,6 +14,7 @@ namespace MassTransit.Courier.Pipeline
 {
     using System;
     using System.Threading.Tasks;
+    using GreenPipes;
     using Logging;
     using MassTransit.Pipeline;
     using Util;

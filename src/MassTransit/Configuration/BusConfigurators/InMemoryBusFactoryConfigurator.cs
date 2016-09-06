@@ -18,6 +18,7 @@ namespace MassTransit.BusConfigurators
     using Builders;
     using Configurators;
     using EndpointConfigurators;
+    using GreenPipes;
     using Transports;
     using Transports.InMemory;
 

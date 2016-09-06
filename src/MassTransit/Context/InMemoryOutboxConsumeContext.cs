@@ -17,6 +17,7 @@ namespace MassTransit.Context
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
+    using GreenPipes;
     using Pipeline;
     using Pipeline.Filters.Outbox;
     using Util;

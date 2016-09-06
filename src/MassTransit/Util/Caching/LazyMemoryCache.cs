@@ -16,6 +16,7 @@ namespace MassTransit.Util.Caching
     using System.Runtime.Caching;
     using System.Threading;
     using System.Threading.Tasks;
+    using GreenPipes;
 
 
     public class LazyMemoryCache<TKey, TValue> :

@@ -14,6 +14,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 {
     using System;
     using System.Threading.Tasks;
+    using GreenPipes;
     using NUnit.Framework;
     using Shouldly;
     using TestFramework;

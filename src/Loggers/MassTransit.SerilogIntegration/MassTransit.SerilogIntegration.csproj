@@ -66,6 +66,10 @@
     <Compile Include="SeriLogLogger.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\..\GreenPipes\src\GreenPipes\GreenPipes.csproj">
+      <Project>{59052db9-b527-4683-a56a-56c4d8fb6584}</Project>
+      <Name>GreenPipes</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\MassTransit\MassTransit.csproj">
       <Project>{6efd69fc-cbcc-4f85-aee0-efba73f4d273}</Project>
       <Name>MassTransit</Name>

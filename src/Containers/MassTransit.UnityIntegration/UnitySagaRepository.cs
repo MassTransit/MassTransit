@@ -13,6 +13,7 @@
 namespace MassTransit.UnityIntegration
 {
     using System.Threading.Tasks;
+    using GreenPipes;
     using Microsoft.Practices.Unity;
     using Pipeline;
     using Saga;

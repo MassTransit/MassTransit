@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.MongoDbIntegration.Tests.Saga
 {
+    using GreenPipes;
     using MongoDbIntegration.Saga;
     using Moq;
     using NUnit.Framework;

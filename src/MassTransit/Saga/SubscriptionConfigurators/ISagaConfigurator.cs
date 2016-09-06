@@ -14,6 +14,7 @@ namespace MassTransit.Saga.SubscriptionConfigurators
 {
     using System;
     using ConsumeConfigurators;
+    using GreenPipes;
 
 
     public interface ISagaConfigurator<TSaga> :

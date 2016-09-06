@@ -14,6 +14,7 @@ namespace MassTransit.MongoDbIntegration.Tests.Saga
 {
     using System;
     using System.Threading.Tasks;
+    using GreenPipes;
     using MassTransit.Saga;
     using MongoDbIntegration.Saga;
     using MongoDB.Driver;

@@ -14,8 +14,8 @@ namespace MassTransit.ConsumeConfigurators
 {
     using System.Collections.Generic;
     using Configurators;
+    using GreenPipes;
     using Internals.Extensions;
-    using PipeBuilders;
     using PipeConfigurators;
     using Util;
 

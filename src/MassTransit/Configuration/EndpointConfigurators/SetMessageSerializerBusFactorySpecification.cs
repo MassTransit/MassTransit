@@ -15,6 +15,7 @@ namespace MassTransit.EndpointConfigurators
     using System.Collections.Generic;
     using Builders;
     using Configurators;
+    using GreenPipes;
 
 
     public class SetMessageSerializerBusFactorySpecification<TSerializer> :

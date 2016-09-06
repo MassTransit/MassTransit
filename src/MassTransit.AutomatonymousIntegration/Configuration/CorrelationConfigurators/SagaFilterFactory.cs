@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace Automatonymous.CorrelationConfigurators
 {
+    using GreenPipes;
     using MassTransit;
     using MassTransit.Pipeline;
     using MassTransit.Saga;

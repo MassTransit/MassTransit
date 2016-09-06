@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Saga.Pipeline.Filters
 {
+    using GreenPipes;
     using MassTransit.Pipeline;
 
 
