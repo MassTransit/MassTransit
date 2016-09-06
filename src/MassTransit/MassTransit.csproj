@@ -109,7 +109,6 @@
     <Compile Include="Configuration\BusConfigurators\PublishPipeConfigurator.cs" />
     <Compile Include="Configuration\BusConfigurators\SendPipeConfigurator.cs" />
     <Compile Include="Configuration\BusObserverExtensions.cs" />
-    <Compile Include="Configuration\CircuitBreakerExtensions.cs" />
     <Compile Include="Configuration\ConsumeConfigurators\ConsumerMessageConfigurator.cs" />
     <Compile Include="Configuration\ConsumeConfigurators\IConsumerMessageConfigurator.cs" />
     <Compile Include="Configuration\ConsumeConnectors\AsyncConsumerConvention.cs" />
@@ -131,7 +130,6 @@
     <Compile Include="Configuration\DeadLetterExtensions.cs" />
     <Compile Include="Configuration\EndpointConfigurators\InMemoryReceiveEndpointConfigurator.cs" />
     <Compile Include="Configuration\EndpointConfigurators\ReceiveEndpointConfigurator.cs" />
-    <Compile Include="Configuration\ICircuitBreakerConfigurator.cs" />
     <Compile Include="Configuration\IConsumePipeConfigurator.cs" />
     <Compile Include="Configuration\IConsumePipeSpecification.cs" />
     <Compile Include="Configuration\IConsumerConvention.cs" />
@@ -153,13 +151,11 @@
     <Compile Include="Configuration\ITransformConfigurator.cs" />
     <Compile Include="Configuration\LatestExtensions.cs" />
     <Compile Include="Configuration\LatestFilterCreated.cs" />
-    <Compile Include="Configuration\LogFormatter.cs" />
     <Compile Include="Configuration\ManagementEndpointConfigurator.cs" />
     <Compile Include="Configuration\MessageDataConfiguratorExtensions.cs" />
     <Compile Include="Configuration\MessageSchedulerExtensions.cs" />
     <Compile Include="Configuration\InMemoryOutboxConfiguratorExtensions.cs" />
     <Compile Include="Configuration\PartitionerExtensions.cs" />
-    <Compile Include="Configuration\PipeConfigurators\CircuitBreakerPipeSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\CompensateActivityHostSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\RetryConsumerPipeSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\ContentFilterPipeSpecification.cs" />
@@ -256,7 +252,6 @@
     <Compile Include="IRetryPolicy.cs" />
     <Compile Include="ISendObserver.cs" />
     <Compile Include="ISendObserverConnector.cs" />
-    <Compile Include="LogContext.cs" />
     <Compile Include="Logging\Tracing\ConsoleTraceListener.cs" />
     <Compile Include="MessageDataExtensions.cs" />
     <Compile Include="MessageData\ByteArrayMessageDataConverter.cs" />
@@ -305,13 +300,11 @@
     <Compile Include="Configuration\IBusFactory.cs" />
     <Compile Include="Configuration\IBusFactoryConfigurator.cs" />
     <Compile Include="Configuration\ITransactionConfigurator.cs" />
-    <Compile Include="Configuration\LogConfiguratorExtensions.cs" />
     <Compile Include="Configuration\ObserverExtensions.cs" />
     <Compile Include="Configuration\PipeConfigurators\ConcurrencyLimitPipeSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\ConsumerPipeSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\FilterPipeSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\HandlerPipeSpecification.cs" />
-    <Compile Include="Configuration\PipeConfigurators\LogPipeSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\ObserverPipeSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\RateLimitPipeSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\RepeatPipeSpecification.cs" />
@@ -552,13 +545,6 @@
     <Compile Include="Pipeline\ConsumerFactories\DelegateConsumerFactory.cs" />
     <Compile Include="Pipeline\ConsumerFactories\InstanceConsumerFactory.cs" />
     <Compile Include="Pipeline\ConsumerFactories\ObjectConsumerFactory.cs" />
-    <Compile Include="Pipeline\Filters\CircuitBreakerFilter.cs" />
-    <Compile Include="Pipeline\Filters\CircuitBreaker\CircuitBreakerSettings.cs" />
-    <Compile Include="Pipeline\Filters\CircuitBreaker\ICircuitBreaker.cs" />
-    <Compile Include="Pipeline\Filters\CircuitBreaker\CircuitBreakerState.cs" />
-    <Compile Include="Pipeline\Filters\CircuitBreaker\ClosedBehavior.cs" />
-    <Compile Include="Pipeline\Filters\CircuitBreaker\OpenBehavior.cs" />
-    <Compile Include="Pipeline\Filters\CircuitBreaker\HalfOpenBehavior.cs" />
     <Compile Include="Pipeline\Filters\ConcurrencyLimit\ConcurrencyLimitFilter.cs" />
     <Compile Include="Pipeline\Filters\ConcurrencyLimit\ConcurrencyLimitFilterManagementConsumer.cs" />
     <Compile Include="Pipeline\Filters\ConsumerMessageFilter.cs" />
@@ -582,7 +568,6 @@
     <Compile Include="Pipeline\Filters\InstanceMessageFilter.cs" />
     <Compile Include="Pipeline\Filters\RequestConsumeFilter.cs" />
     <Compile Include="Pipeline\Filters\LegacyMethodConsumerMessageFilter.cs" />
-    <Compile Include="Pipeline\Filters\LogFilter.cs" />
     <Compile Include="Pipeline\Filters\MessageConsumeFilter.cs" />
     <Compile Include="Pipeline\Filters\MessageSchedulerFilter.cs" />
     <Compile Include="Pipeline\Filters\MessageTypeConsumeFilter.cs" />
@@ -934,6 +919,7 @@
     <Compile Include="Testing\ITestSubject.cs" />
     <Compile Include="TimeSpanContextScheduleExtensions.cs" />
     <Compile Include="TimeSpanScheduleExtensions.cs" />
+    <Compile Include="TransactionContext.cs" />
     <Compile Include="Transformation\Contexts\SendTransformContext.cs" />
     <Compile Include="Transformation\TransformConfigurators\SendTransformSpecification.cs" />
     <Compile Include="Transformation\TransformConfigurators\TransformSpecification.cs" />
@@ -965,7 +951,6 @@
     <Compile Include="Turnout\JobRoster.cs" />
     <Compile Include="Turnout\TurnoutConfigurationExtensions.cs" />
     <Compile Include="Turnout\TurnoutController.cs" />
-    <Compile Include="TransactionContext.cs" />
     <Compile Include="TransactionContextExtensions.cs" />
     <Compile Include="Transformation\Contexts\ConsumeTransformContext.cs" />
     <Compile Include="Transformation\Contexts\TransformSourceContext.cs" />
@@ -1112,7 +1097,7 @@
   <ItemGroup>
     <Folder Include="Configuration\Configuration\" />
     <Folder Include="Configuration\PipeBuilders\" />
-    <Folder Include="Pipeline\Filters\Partitioner\" />
+    <Folder Include="Pipeline\Filters\CircuitBreaker\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\GreenPipes\src\GreenPipes\GreenPipes.csproj">

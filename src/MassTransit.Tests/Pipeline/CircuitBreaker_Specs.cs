@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -16,7 +16,6 @@ namespace MassTransit.Tests.Pipeline
     using System.Threading;
     using System.Threading.Tasks;
     using GreenPipes;
-    using MassTransit.Pipeline;
     using NUnit.Framework;
     using Shouldly;
     using TestFramework;
@@ -29,7 +28,7 @@ namespace MassTransit.Tests.Pipeline
         [Test]
         public async Task Should_allow_the_first_call()
         {
-            int count = 0;
+            var count = 0;
             IPipe<ConsumeContext<A>> pipe = Pipe.New<ConsumeContext<A>>(x =>
             {
                 x.UseCircuitBreaker(v => v.ResetInterval(TimeSpan.FromSeconds(60)));
@@ -43,7 +42,7 @@ namespace MassTransit.Tests.Pipeline
 
             var context = new TestConsumeContext<A>(new A());
 
-            for (int i = 0; i < 100; i++)
+            for (var i = 0; i < 100; i++)
                 Assert.That(async () => await pipe.Send(context), Throws.TypeOf<IntentionalTestException>());
 
             count.ShouldBe(6);

@@ -13,6 +13,7 @@
 namespace MassTransit.Tests
 {
     using System;
+    using GreenPipes;
     using NUnit.Framework;
     using TestFramework;
 
