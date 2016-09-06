@@ -15,13 +15,10 @@ namespace MassTransit.Util.Scanning
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
-    using System.IO;
     using System.Linq;
     using System.Reflection;
     using System.Threading.Tasks;
     using Internals.Extensions;
-
-    // Really only tested in integration with other things
 
     public class AssemblyScanner :
         IAssemblyScanner
@@ -29,7 +26,6 @@ namespace MassTransit.Util.Scanning
         readonly List<Assembly> _assemblies = new List<Assembly>();
         readonly CompositeFilter<string> _assemblyFilter = new CompositeFilter<string>();
         readonly CompositeFilter<Type> _filter = new CompositeFilter<Type>();
-        readonly List<AssemblyScanRecord> _records = new List<AssemblyScanRecord>();
 
         public int Count => _assemblies.Count;
 
@@ -135,8 +131,7 @@ namespace MassTransit.Util.Scanning
             }
         }
 
-        public void AssembliesAndExecutablesFromPath(string path,
-            Func<Assembly, bool> assemblyFilter)
+        public void AssembliesAndExecutablesFromPath(string path, Func<Assembly, bool> assemblyFilter)
         {
             IEnumerable<Assembly> assemblies = AssemblyFinder.FindAssemblies(path, OnAssemblyLoadFailure, true, _assemblyFilter.Matches)
                 .Where(assemblyFilter);
@@ -147,8 +142,7 @@ namespace MassTransit.Util.Scanning
             }
         }
 
-        public void AssembliesFromPath(string path,
-            Func<Assembly, bool> assemblyFilter)
+        public void AssembliesFromPath(string path, Func<Assembly, bool> assemblyFilter)
         {
             IEnumerable<Assembly> assemblies = AssemblyFinder.FindAssemblies(path, OnAssemblyLoadFailure, false, _assemblyFilter.Matches)
                 .Where(assemblyFilter);
@@ -161,7 +155,7 @@ namespace MassTransit.Util.Scanning
 
         public void ExcludeFileNameStartsWith(params string[] startsWith)
         {
-            for (int i = 0; i < startsWith.Length; i++)
+            for (var i = 0; i < startsWith.Length; i++)
             {
                 var value = startsWith[i];
 
@@ -171,7 +165,7 @@ namespace MassTransit.Util.Scanning
 
         public void IncludeFileNameStartsWith(params string[] startsWith)
         {
-            for (int i = 0; i < startsWith.Length; i++)
+            for (var i = 0; i < startsWith.Length; i++)
             {
                 var value = startsWith[i];
 
@@ -197,19 +191,6 @@ namespace MassTransit.Util.Scanning
         public Task<TypeSet> ScanForTypes()
         {
             return AssemblyTypeCache.FindTypes(_assemblies, _filter.Matches);
-        }
-
-        public void Describe(StringWriter writer)
-        {
-            writer.WriteLine(Description);
-            writer.WriteLine("Assemblies");
-            writer.WriteLine("----------");
-
-            foreach (var source in _records.OrderBy(x => x.Name))
-            {
-                writer.WriteLine("* " + source);
-            }
-            writer.WriteLine();
         }
 
         public bool Contains(string assemblyName)
