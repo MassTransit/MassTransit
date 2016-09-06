@@ -1086,6 +1086,7 @@
     <Compile Include="Exceptions\ShutDownException.cs" />
     <Compile Include="Exceptions\EndpointException.cs" />
     <Compile Include="Turnout\JobResultContext.cs" />
+    <Compile Include="Util\AssemblyTypeCache.cs" />
     <Compile Include="Util\Scanning\AssemblyFinder.cs" />
     <Compile Include="Util\Scanning\AssemblyScanner.cs" />
     <Compile Include="Util\Scanning\AssemblyScanRecord.cs" />
@@ -1118,11 +1119,10 @@
     <Compile Include="Util\TaskScope.cs" />
     <Compile Include="Util\TaskSupervisorExtensions.cs" />
     <Compile Include="Util\TaskUtil.cs" />
-    <Compile Include="Util\Scanning\TypeClassification.cs" />
+    <Compile Include="Util\TypeClassification.cs" />
     <Compile Include="Util\TypeMetadataCache.cs" />
     <Compile Include="Util\Scanning\TypeQuery.cs" />
-    <Compile Include="Util\Scanning\AssemblyTypeCache.cs" />
-    <Compile Include="Util\Scanning\TypeSet.cs" />
+    <Compile Include="Util\TypeSet.cs" />
     <Compile Include="Util\UriExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
