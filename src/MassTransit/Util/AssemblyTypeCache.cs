@@ -10,7 +10,7 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Util.Scanning
+namespace MassTransit.Util
 {
     using System;
     using System.Collections.Concurrent;
@@ -18,6 +18,7 @@ namespace MassTransit.Util.Scanning
     using System.Linq;
     using System.Reflection;
     using System.Threading.Tasks;
+    using Scanning;
 
 
     /// <summary>
@@ -68,8 +69,7 @@ namespace MassTransit.Util.Scanning
             });
         }
 
-        public static Task<IEnumerable<Type>> FindTypes(IEnumerable<Assembly> assemblies,
-            TypeClassification classification, Func<Type, bool> filter = null)
+        public static Task<IEnumerable<Type>> FindTypes(IEnumerable<Assembly> assemblies, TypeClassification classification, Func<Type, bool> filter = null)
         {
             var query = new TypeQuery(classification, filter);
 
@@ -77,8 +77,7 @@ namespace MassTransit.Util.Scanning
             return Task.Factory.ContinueWhenAll(tasks, results => results.SelectMany(x => x.Result));
         }
 
-        public static Task<IEnumerable<Type>> FindTypes(Assembly assembly, TypeClassification classification,
-            Func<Type, bool> filter = null)
+        public static Task<IEnumerable<Type>> FindTypes(Assembly assembly, TypeClassification classification, Func<Type, bool> filter = null)
         {
             var query = new TypeQuery(classification, filter);
 
@@ -88,7 +87,8 @@ namespace MassTransit.Util.Scanning
 
         static class Cached
         {
-            internal static readonly ConcurrentDictionary<Assembly, Task<AssemblyScanTypeInfo>> Assemblies = new ConcurrentDictionary<Assembly, Task<AssemblyScanTypeInfo>>();
+            internal static readonly ConcurrentDictionary<Assembly, Task<AssemblyScanTypeInfo>> Assemblies =
+                new ConcurrentDictionary<Assembly, Task<AssemblyScanTypeInfo>>();
         }
     }
 }

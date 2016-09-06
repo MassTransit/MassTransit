@@ -14,6 +14,7 @@ namespace MassTransit.Util.Scanning
 {
     using System;
     using System.Reflection;
+    using System.Threading.Tasks;
 
 
     public interface IAssemblyScanner
@@ -102,5 +103,9 @@ namespace MassTransit.Util.Scanning
         void AssembliesAndExecutablesFromPath(string path, Func<Assembly, bool> assemblyFilter);
 
         void AssembliesFromPath(string path, Func<Assembly, bool> assemblyFilter);
+        void ExcludeFileNameStartsWith(params string[] startsWith);
+        void IncludeFileNameStartsWith(params string[] startsWith);
+        void AssembliesAndExecutablesFromApplicationBaseDirectory();
+        Task<TypeSet> ScanForTypes();
     }
 }
