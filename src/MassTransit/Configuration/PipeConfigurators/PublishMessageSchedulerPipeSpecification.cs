@@ -10,27 +10,25 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Turnout.Events
+namespace MassTransit.PipeConfigurators
 {
-    using System;
-    using Contracts;
-    using MassTransit.Events;
+    using System.Collections.Generic;
+    using Configurators;
+    using PipeBuilders;
+    using Pipeline.Filters;
 
 
-    class Faulted<TInput> :
-        JobFaulted<TInput>
+    public class PublishMessageSchedulerPipeSpecification :
+        IPipeSpecification<ConsumeContext>
     {
-        public Faulted(Guid jobId, TInput input, Exception exception)
+        public void Apply(IPipeBuilder<ConsumeContext> builder)
         {
-            JobId = jobId;
-            Input = input;
-            Timestamp = DateTime.UtcNow;
-            Exceptions = new FaultExceptionInfo(exception);
+            builder.AddFilter(new PublishMessageSchedulerFilter());
         }
 
-        public Guid JobId { get; }
-        public DateTime Timestamp { get; }
-        public ExceptionInfo Exceptions { get; }
-        public TInput Input { get; }
+        public IEnumerable<ValidationResult> Validate()
+        {
+            yield break;
+        }
     }
 }

@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -28,7 +28,7 @@ namespace MassTransit
         /// <param name="configurator">The receive endpoint configurator</param>
         /// <param name="busFactoryConfigurator">The bus factory configuration to use a separate endpoint for the control traffic</param>
         /// <param name="configure"></param>
-        public static void Turnout<T>(this IInMemoryReceiveEndpointConfigurator configurator, IInMemoryBusFactoryConfigurator busFactoryConfigurator,
+        public static void Turnout<T>(this IReceiveEndpointConfigurator configurator, IInMemoryBusFactoryConfigurator busFactoryConfigurator,
             Action<ITurnoutHostConfigurator<T>> configure)
             where T : class
         {
@@ -36,12 +36,12 @@ namespace MassTransit
 
             busFactoryConfigurator.ReceiveEndpoint(temporaryQueueName, turnoutEndpointConfigurator =>
             {
-                ConfigureTurnoutEndpoints(configurator, busFactoryConfigurator, configure, turnoutEndpointConfigurator);
+                configurator.ConfigureTurnoutEndpoints(busFactoryConfigurator, turnoutEndpointConfigurator, configure);
             });
         }
 
-        public static void ConfigureTurnoutEndpoints<T>(IReceiveEndpointConfigurator endpointConfigurator, IBusFactoryConfigurator busFactoryConfigurator,
-            Action<ITurnoutHostConfigurator<T>> configure, IReceiveEndpointConfigurator turnoutEndpointConfigurator)
+        public static void ConfigureTurnoutEndpoints<T>(this IReceiveEndpointConfigurator endpointConfigurator, IBusFactoryConfigurator busFactoryConfigurator,
+            IReceiveEndpointConfigurator turnoutEndpointConfigurator, Action<ITurnoutHostConfigurator<T>> configure)
             where T : class
         {
             var specification = new TurnoutHostSpecification<T>(turnoutEndpointConfigurator);
@@ -56,9 +56,10 @@ namespace MassTransit
             var superviseInterval = specification.SuperviseInterval;
 
             turnoutEndpointConfigurator.Consumer(() => new SuperviseJobConsumer(jobRoster, superviseInterval));
+            turnoutEndpointConfigurator.Consumer(() => new CancelJobConsumer(jobRoster));
 
             var controller = specification.Controller;
-            var jobFactory = specification.JobFactory;
+            IJobFactory<T> jobFactory = specification.JobFactory;
 
             endpointConfigurator.Consumer(() => new CreateJobConsumer<T>(controller, jobFactory));
         }

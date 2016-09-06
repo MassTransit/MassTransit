@@ -116,6 +116,7 @@
     <Compile Include="Courier\Fault_Specs.cs" />
     <Compile Include="Courier\ObjectGraph_Specs.cs" />
     <Compile Include="Courier\RanToCompletion_Specs.cs" />
+    <Compile Include="Courier\RequestRoutingSlip_Specs.cs" />
     <Compile Include="Courier\ReviseItinerary_Specs.cs" />
     <Compile Include="Courier\RoutingSlip_Specs.cs" />
     <Compile Include="Courier\SingleActivityEvent_Specs.cs" />

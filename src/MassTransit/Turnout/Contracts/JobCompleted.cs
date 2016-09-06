@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -35,14 +35,14 @@ namespace MassTransit.Turnout.Contracts
     /// <summary>
     /// Published when a job completes with a result
     /// </summary>
-    /// <typeparam name="T"></typeparam>
-    public interface JobCompleted<out T> :
+    /// <typeparam name="TResult"></typeparam>
+    public interface JobCompleted<out TResult> :
         JobCompleted
-        where T : class
+        where TResult : class
     {
         /// <summary>
         /// The result of the job
         /// </summary>
-        T Result { get; }
+        TResult Result { get; }
     }
 }

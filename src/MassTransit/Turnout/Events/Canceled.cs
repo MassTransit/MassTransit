@@ -14,23 +14,20 @@ namespace MassTransit.Turnout.Events
 {
     using System;
     using Contracts;
-    using MassTransit.Events;
 
 
-    class Faulted<TInput> :
-        JobFaulted<TInput>
+    class Canceled<TInput> :
+        JobCanceled<TInput>
     {
-        public Faulted(Guid jobId, TInput input, Exception exception)
+        public Canceled(Guid jobId, TInput input)
         {
             JobId = jobId;
             Input = input;
             Timestamp = DateTime.UtcNow;
-            Exceptions = new FaultExceptionInfo(exception);
         }
 
         public Guid JobId { get; }
         public DateTime Timestamp { get; }
-        public ExceptionInfo Exceptions { get; }
         public TInput Input { get; }
     }
 }

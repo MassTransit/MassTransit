@@ -13,29 +13,30 @@
 namespace MassTransit.Turnout
 {
     using System.Threading.Tasks;
+    using Contracts;
 
 
     /// <summary>
-    /// The consumer that creates the job using the turnout host
+    /// The consumer that handles the control messages for the job
     /// </summary>
-    /// <typeparam name="T"></typeparam>
-    public class CreateJobConsumer<T> :
-        IConsumer<T>
-        where T : class
+    public class CancelJobConsumer :
+        IConsumer<CancelJob>
 
     {
-        readonly IJobFactory<T> _jobFactory;
-        readonly ITurnoutController _turnoutHost;
+        readonly IJobRoster _roster;
 
-        public CreateJobConsumer(ITurnoutController turnoutHost, IJobFactory<T> jobFactory)
+        public CancelJobConsumer(IJobRoster roster)
         {
-            _turnoutHost = turnoutHost;
-            _jobFactory = jobFactory;
+            _roster = roster;
         }
 
-        public async Task Consume(ConsumeContext<T> context)
+        public async Task Consume(ConsumeContext<CancelJob> context)
         {
-            JobHandle<T> job = await _turnoutHost.CreateJob(context, _jobFactory).ConfigureAwait(false);
+            JobHandle jobHandle;
+            if (!_roster.TryGetJob(context.Message.JobId, out jobHandle))
+                throw new JobNotFoundException($"The JobId {context.Message.JobId} was not found.");
+
+            await jobHandle.Cancel().ConfigureAwait(false);
         }
     }
 }

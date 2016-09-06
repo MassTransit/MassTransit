@@ -23,7 +23,7 @@ namespace MassTransit
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="observer"></param>
-        public static void BusObserver(IBusFactoryConfigurator configurator, IBusObserver observer)
+        public static void BusObserver(this IBusFactoryConfigurator configurator, IBusObserver observer)
         {
             configurator.AddBusFactorySpecification(new BusObserverSpecification(() => observer));
         }
@@ -33,7 +33,7 @@ namespace MassTransit
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="observerFactory">Factory to create the bus observer</param>
-        public static void BusObserver<T>(IBusFactoryConfigurator configurator, Func<T> observerFactory)
+        public static void BusObserver<T>(this IBusFactoryConfigurator configurator, Func<T> observerFactory)
             where T : IBusObserver
         {
             configurator.AddBusFactorySpecification(new BusObserverSpecification(() => observerFactory()));

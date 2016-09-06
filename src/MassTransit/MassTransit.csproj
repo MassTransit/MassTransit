@@ -167,12 +167,14 @@
     <Compile Include="Configuration\PipeConfigurators\MessageSchedulerPipeSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\InMemoryOutboxSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\PartitionerPipeSpecification.cs" />
+    <Compile Include="Configuration\PipeConfigurators\PublishMessageSchedulerPipeSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\RedeliveryRetryPipeSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\ScheduleMessageRedeliveryPipeSpecification.cs" />
     <Compile Include="Configuration\RoutingSlipEventCorrelationExtensions.cs" />
     <Compile Include="Configuration\ScheduledRetryExtensions.cs" />
     <Compile Include="Configuration\TransformConfiguratorExtensions.cs" />
     <Compile Include="ConsumeContextSchedulerExtensions.cs" />
+    <Compile Include="ConsumeContextSelfSchedulerExtensions.cs" />
     <Compile Include="Context\ArrayPayloadCollection.cs" />
     <Compile Include="Context\BasePipeContext.cs" />
     <Compile Include="Context\BasePayloadCollection.cs" />
@@ -221,6 +223,8 @@
     <Compile Include="Courier\ICompensateActivity.cs" />
     <Compile Include="Courier\IExecuteActivity.cs" />
     <Compile Include="Courier\RoutingSlipEvents.cs" />
+    <Compile Include="Courier\RoutingSlipRequestProxy.cs" />
+    <Compile Include="Courier\RoutingSlipResponseProxy.cs" />
     <Compile Include="CryptoStreamProviderExtensions.cs" />
     <Compile Include="Events\ReceiveFaultEvent.cs" />
     <Compile Include="ExceptionConsumeContext.cs" />
@@ -228,6 +232,7 @@
     <Compile Include="Exceptions\CommandException.cs" />
     <Compile Include="Exceptions\ContextException.cs" />
     <Compile Include="Exceptions\JobAlreadyExistsException.cs" />
+    <Compile Include="Exceptions\JobNotFoundException.cs" />
     <Compile Include="Exceptions\MessageDataException.cs" />
     <Compile Include="Exceptions\MessageDataNotFoundException.cs" />
     <Compile Include="Hosting\ConfigurationProviderExtensions.cs" />
@@ -601,6 +606,7 @@
     <Compile Include="Pipeline\Filters\Partitioner\Partitioner.cs" />
     <Compile Include="Pipeline\Filters\Partitioner\PartitionFilter.cs" />
     <Compile Include="Pipeline\Filters\Partitioner\PartitionKeyProvider.cs" />
+    <Compile Include="Pipeline\Filters\PublishMessageSchedulerFilter.cs" />
     <Compile Include="Pipeline\Filters\RedeliveryRetryFilter.cs" />
     <Compile Include="Pipeline\Filters\DelegateFilter.cs" />
     <Compile Include="Pipeline\Filters\DeserializeFilter.cs" />
@@ -972,10 +978,14 @@
     <Compile Include="Transformation\Contexts\SendTransformContext.cs" />
     <Compile Include="Transformation\TransformConfigurators\SendTransformSpecification.cs" />
     <Compile Include="Transformation\TransformConfigurators\TransformSpecification.cs" />
+    <Compile Include="Turnout\CancelJobConsumer.cs" />
     <Compile Include="Turnout\Commands\Supervise.cs" />
     <Compile Include="Turnout\Configuration\ITurnoutHostConfigurator.cs" />
     <Compile Include="Turnout\Configuration\TurnoutHostSpecification.cs" />
+    <Compile Include="Turnout\Contracts\CancelJob.cs" />
+    <Compile Include="Turnout\Contracts\JobCanceled.cs" />
     <Compile Include="Turnout\Contracts\MonitorJob.cs" />
+    <Compile Include="Turnout\Events\Canceled.cs" />
     <Compile Include="Turnout\Events\Completed.cs" />
     <Compile Include="Turnout\Events\Faulted.cs" />
     <Compile Include="Turnout\SuperviseJobConsumer.cs" />
