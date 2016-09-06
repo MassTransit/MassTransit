@@ -13,6 +13,7 @@
 namespace MassTransit.AzureServiceBusTransport.Configuration
 {
     using System.Collections.Generic;
+    using GreenPipes;
     using MassTransit.Pipeline;
     using Transports;
 

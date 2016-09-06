@@ -120,6 +120,10 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\..\GreenPipes\src\GreenPipes\GreenPipes.csproj">
+      <Project>{59052db9-b527-4683-a56a-56c4d8fb6584}</Project>
+      <Name>GreenPipes</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\Loggers\MassTransit.Log4NetIntegration\MassTransit.Log4NetIntegration.csproj">
       <Project>{8D2BE372-A756-4676-B2EA-ED7846809BFE}</Project>
       <Name>MassTransit.Log4NetIntegration</Name>

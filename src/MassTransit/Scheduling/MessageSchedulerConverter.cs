@@ -15,6 +15,7 @@ namespace MassTransit.Scheduling
     using System;
     using System.Threading;
     using System.Threading.Tasks;
+    using GreenPipes;
     using Internals.Extensions;
     using Pipeline;
 

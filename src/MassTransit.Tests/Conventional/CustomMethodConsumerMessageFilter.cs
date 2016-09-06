@@ -14,6 +14,7 @@ namespace MassTransit.Tests.Conventional
 {
     using System.Diagnostics;
     using System.Threading.Tasks;
+    using GreenPipes;
     using MassTransit.Pipeline;
     using Util;
 

@@ -13,6 +13,7 @@
 namespace MassTransit.Policies
 {
     using System.Threading;
+    using GreenPipes;
 
 
     public class UntilCancelledRepeatPolicy :

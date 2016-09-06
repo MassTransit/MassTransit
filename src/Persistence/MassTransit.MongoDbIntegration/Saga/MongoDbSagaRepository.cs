@@ -17,6 +17,7 @@ namespace MassTransit.MongoDbIntegration.Saga
     using System.Linq;
     using System.Threading.Tasks;
     using Context;
+    using GreenPipes;
     using Logging;
     using MassTransit.Pipeline;
     using MassTransit.Saga;

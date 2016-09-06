@@ -20,6 +20,7 @@ namespace MassTransit.Serialization
     using System.Text;
     using System.Xml;
     using System.Xml.Linq;
+    using GreenPipes;
     using Newtonsoft.Json;
     using Util;
 

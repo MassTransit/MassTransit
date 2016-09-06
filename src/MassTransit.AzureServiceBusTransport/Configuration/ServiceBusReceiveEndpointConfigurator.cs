@@ -18,6 +18,7 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
     using Builders;
     using Configurators;
     using EndpointConfigurators;
+    using GreenPipes;
     using MassTransit.Pipeline;
     using Microsoft.ServiceBus.Messaging;
     using Transports;

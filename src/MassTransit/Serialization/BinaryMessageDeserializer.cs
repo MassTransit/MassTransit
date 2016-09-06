@@ -16,6 +16,7 @@ namespace MassTransit.Serialization
     using System.Net.Mime;
     using System.Runtime.Remoting.Messaging;
     using System.Runtime.Serialization.Formatters.Binary;
+    using GreenPipes;
     using Newtonsoft.Json;
 
 

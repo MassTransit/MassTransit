@@ -14,6 +14,7 @@ namespace MassTransit.Transformation
 {
     using System;
     using System.Threading;
+    using GreenPipes;
 
 
     /// <summary>

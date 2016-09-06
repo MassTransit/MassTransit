@@ -16,6 +16,7 @@ namespace MassTransit.Pipeline.Filters
     using System.Diagnostics;
     using System.IO;
     using System.Threading.Tasks;
+    using GreenPipes;
 
 
     public class LogFilter<T> :

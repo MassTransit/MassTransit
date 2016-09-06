@@ -50,6 +50,10 @@
     <Compile Include="ProtocolBuffersMessageSerializer.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\..\GreenPipes\src\GreenPipes\GreenPipes.csproj">
+      <Project>{59052DB9-B527-4683-A56A-56C4D8FB6584}</Project>
+      <Name>GreenPipes</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\MassTransit\MassTransit.csproj">
       <Project>{6efd69fc-cbcc-4f85-aee0-efba73f4d273}</Project>
       <Name>MassTransit</Name>

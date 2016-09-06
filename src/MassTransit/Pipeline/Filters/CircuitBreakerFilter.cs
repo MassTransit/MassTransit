@@ -18,6 +18,7 @@ namespace MassTransit.Pipeline.Filters
     using System.Threading;
     using System.Threading.Tasks;
     using CircuitBreaker;
+    using GreenPipes;
 
 
     public class CircuitBreakerFilter<T> :

@@ -14,6 +14,7 @@ namespace MassTransit
 {
     using System;
     using System.Threading.Tasks;
+    using GreenPipes;
     using RabbitMqTransport;
     using RabbitMqTransport.Contexts;
     using RabbitMqTransport.Scheduling;

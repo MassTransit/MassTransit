@@ -14,10 +14,10 @@ namespace MassTransit.RabbitMqTransport.Configuration
 {
     using System.Collections.Generic;
     using System.Linq;
+    using GreenPipes;
     using MassTransit.Configurators;
     using MassTransit.Pipeline;
     using MassTransit.Pipeline.Pipes;
-    using PipeBuilders;
     using PipeConfigurators;
     using Pipeline;
     using Topology;

@@ -12,6 +12,9 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.ConsumeConfigurators
 {
+    using GreenPipes;
+
+
     public interface IConsumerMessageConfigurator<TMessage> :
         IPipeConfigurator<ConsumeContext<TMessage>>
         where TMessage : class

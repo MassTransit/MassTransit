@@ -2,6 +2,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 {
     using System.Threading;
     using System.Threading.Tasks;
+    using GreenPipes;
     using MassTransit.Pipeline;
     using Monitoring.Introspection;
     using RabbitMqTransport;

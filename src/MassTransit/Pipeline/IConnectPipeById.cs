@@ -12,6 +12,9 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Pipeline
 {
+    using GreenPipes;
+
+
     public interface IConnectPipeById<out T, in TKey>
         where T : class, PipeContext
     {

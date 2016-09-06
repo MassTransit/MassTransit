@@ -13,6 +13,7 @@
 namespace MassTransit.Host.Quartz
 {
     using System;
+    using GreenPipes;
     using Hosting;
     using QuartzIntegration;
     using Scheduling;

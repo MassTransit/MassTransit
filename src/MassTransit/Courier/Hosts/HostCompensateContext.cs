@@ -21,6 +21,8 @@ namespace MassTransit.Courier.Hosts
     using Context;
     using Contracts;
     using Exceptions;
+    using GreenPipes;
+    using GreenPipes.Payloads;
     using MassTransit.Pipeline;
     using Results;
 

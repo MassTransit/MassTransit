@@ -19,6 +19,8 @@ namespace MassTransit.RabbitMqTransport.Contexts
     using System.Threading;
     using System.Threading.Tasks;
     using Context;
+    using GreenPipes;
+    using GreenPipes.Payloads;
     using Integration;
     using Logging;
     using RabbitMQ.Client;

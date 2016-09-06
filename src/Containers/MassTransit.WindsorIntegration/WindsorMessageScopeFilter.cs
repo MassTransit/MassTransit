@@ -13,6 +13,7 @@
 namespace MassTransit.WindsorIntegration
 {
     using System.Threading.Tasks;
+    using GreenPipes;
     using Pipeline;
 
 

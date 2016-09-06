@@ -15,6 +15,7 @@ namespace MassTransit.Pipeline
     using System;
     using ConsumeConnectors;
     using ConsumerFactories;
+    using GreenPipes;
     using PipeConfigurators;
 
 

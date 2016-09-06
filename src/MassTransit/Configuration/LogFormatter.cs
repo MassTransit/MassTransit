@@ -13,6 +13,7 @@
 namespace MassTransit
 {
     using System.Threading.Tasks;
+    using GreenPipes;
 
 
     public delegate Task<string> LogFormatter<in T>(T context, LogContext logContext)

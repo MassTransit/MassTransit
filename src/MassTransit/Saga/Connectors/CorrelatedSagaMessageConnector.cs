@@ -13,6 +13,7 @@
 namespace MassTransit.Saga.Connectors
 {
     using System;
+    using GreenPipes;
     using MassTransit.Pipeline;
     using Pipeline.Filters;
 

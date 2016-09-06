@@ -17,6 +17,7 @@ namespace MassTransit.Pipeline.Filters
     using System.Linq;
     using System.Threading.Tasks;
     using Context;
+    using GreenPipes;
     using Logging;
     using Policies;
 

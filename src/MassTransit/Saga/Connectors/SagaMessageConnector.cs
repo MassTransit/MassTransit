@@ -14,8 +14,8 @@ namespace MassTransit.Saga.Connectors
 {
     using System;
     using System.Collections.Generic;
+    using GreenPipes;
     using MassTransit.Pipeline;
-    using PipeBuilders;
     using PipeConfigurators;
     using Pipeline.Filters;
     using Util;

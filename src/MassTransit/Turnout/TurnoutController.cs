@@ -17,6 +17,7 @@ namespace MassTransit.Turnout
     using Commands;
     using Contracts;
     using Events;
+    using GreenPipes;
     using Pipeline;
 
 

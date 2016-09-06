@@ -17,7 +17,7 @@ namespace MassTransit.BusConfigurators
     using System.Linq;
     using Builders;
     using Configurators;
-    using PipeBuilders;
+    using GreenPipes;
     using PipeConfigurators;
     using Pipeline;
 

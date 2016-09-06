@@ -14,6 +14,7 @@ namespace MassTransit.Pipeline.Pipes
 {
     using System.Diagnostics;
     using System.Threading.Tasks;
+    using GreenPipes;
 
 
     public class ResponsePipe :

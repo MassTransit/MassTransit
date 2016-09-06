@@ -22,6 +22,7 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
+    using GreenPipes;
     using Logging;
     using MassTransit.Saga;
     using Pipeline;

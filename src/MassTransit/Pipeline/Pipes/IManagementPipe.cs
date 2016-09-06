@@ -12,6 +12,9 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Pipeline.Pipes
 {
+    using GreenPipes;
+
+
     /// <summary>
     /// A management pipe is used by filters to communicate with the outside world, for management
     /// purposes such as configuring the acceptance of command and request/response messages.

@@ -15,7 +15,7 @@ namespace MassTransit.PipeConfigurators
     using System;
     using System.Collections.Generic;
     using Configurators;
-    using PipeBuilders;
+    using GreenPipes;
     using Pipeline.Filters;
 
 

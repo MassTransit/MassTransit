@@ -16,6 +16,7 @@ namespace MassTransit.Serialization
     using System.IO;
     using System.Runtime.Serialization;
     using System.Security.Cryptography;
+    using GreenPipes;
 
 
     public class AesCryptoStreamProvider :

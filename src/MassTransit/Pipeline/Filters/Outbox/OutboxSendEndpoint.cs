@@ -16,6 +16,7 @@ namespace MassTransit.Pipeline.Filters.Outbox
     using System.Threading;
     using System.Threading.Tasks;
     using Context;
+    using GreenPipes;
     using Util;
 
 

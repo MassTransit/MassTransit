@@ -13,6 +13,7 @@
 namespace MassTransit.RabbitMqTransport
 {
     using System.Threading.Tasks;
+    using GreenPipes;
     using RabbitMQ.Client;
 
 

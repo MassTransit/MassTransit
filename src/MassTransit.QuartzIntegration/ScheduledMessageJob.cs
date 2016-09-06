@@ -20,6 +20,7 @@ namespace MassTransit.QuartzIntegration
     using System.Net.Mime;
     using System.Text;
     using System.Xml.Linq;
+    using GreenPipes;
     using Logging;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;

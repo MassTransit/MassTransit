@@ -15,6 +15,7 @@ namespace MassTransit.Pipeline.Filters.ConcurrencyLimit
     using System;
     using System.Threading.Tasks;
     using Contracts;
+    using GreenPipes;
     using Logging;
 
 

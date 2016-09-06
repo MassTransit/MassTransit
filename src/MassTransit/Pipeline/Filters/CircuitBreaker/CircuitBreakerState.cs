@@ -13,6 +13,7 @@
 namespace MassTransit.Pipeline.Filters.CircuitBreaker
 {
     using System;
+    using GreenPipes;
 
 
     interface ICircuitBreakerBehavior :

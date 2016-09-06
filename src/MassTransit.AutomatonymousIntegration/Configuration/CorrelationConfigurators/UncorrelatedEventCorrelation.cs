@@ -14,6 +14,7 @@ namespace Automatonymous.CorrelationConfigurators
 {
     using System;
     using System.Collections.Generic;
+    using GreenPipes;
     using MassTransit;
     using MassTransit.Configurators;
     using MassTransit.Pipeline;

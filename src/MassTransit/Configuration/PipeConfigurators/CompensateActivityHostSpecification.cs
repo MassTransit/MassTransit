@@ -19,7 +19,7 @@ namespace MassTransit.PipeConfigurators
     using Courier;
     using Courier.Contracts;
     using Courier.Hosts;
-    using PipeBuilders;
+    using GreenPipes;
     using Pipeline;
 
 

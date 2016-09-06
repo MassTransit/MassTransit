@@ -17,6 +17,8 @@ namespace MassTransit.Pipeline.Filters
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.Threading.Tasks;
+    using GreenPipes;
+
 
     /// <summary>
     /// Handles the registration of requests and connecting them to the consume pipe

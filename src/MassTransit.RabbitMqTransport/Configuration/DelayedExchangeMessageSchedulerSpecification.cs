@@ -13,8 +13,8 @@
 namespace MassTransit.RabbitMqTransport.Configuration
 {
     using System.Collections.Generic;
+    using GreenPipes;
     using MassTransit.Configurators;
-    using PipeBuilders;
     using PipeConfigurators;
     using Pipeline;
 

@@ -16,6 +16,7 @@ namespace MassTransit.Turnout.Configuration
     using System.Collections.Generic;
     using Builders;
     using Configurators;
+    using GreenPipes;
     using PipeConfigurators;
 
 

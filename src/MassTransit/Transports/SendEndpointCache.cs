@@ -15,6 +15,7 @@ namespace MassTransit.Transports
     using System;
     using System.Threading;
     using System.Threading.Tasks;
+    using GreenPipes;
     using Logging;
     using Pipeline;
     using Util;

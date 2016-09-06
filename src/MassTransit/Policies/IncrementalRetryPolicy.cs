@@ -14,6 +14,7 @@ namespace MassTransit.Policies
 {
     using System;
     using System.Collections.Generic;
+    using GreenPipes;
 
 
     public class IncrementalRetryPolicy :
