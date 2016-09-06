@@ -41,7 +41,7 @@ namespace MassTransit.ProtocolBuffers.Tests
             _serializerType = serializerType;
         }
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void SetupSerializationTest()
         {
             if (_serializerType == typeof(ProtocolBuffersMessageSerializer))

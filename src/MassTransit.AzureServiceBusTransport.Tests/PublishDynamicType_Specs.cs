@@ -24,7 +24,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
         [Test]
         public async Task Should_throw_a_proper_exception()
         {
-            Assert.Throws<MessageException>(async () => await Bus.Publish(new {Value = "Name"}));
+            Assert.That(async () => await Bus.Publish(new {Value = "Name"}), Throws.TypeOf<MessageException>());
         }
 
         Task<ConsumeContext<PingMessage>> _handler;

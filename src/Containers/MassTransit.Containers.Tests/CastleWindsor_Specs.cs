@@ -59,7 +59,7 @@ namespace MassTransit.Containers.Tests
     public class Castle_Saga :
         When_registering_a_saga
     {
-        [TestFixtureTearDown]
+        [OneTimeTearDown]
         public void Close_container()
         {
             _container.Dispose();
@@ -140,7 +140,7 @@ namespace MassTransit.Containers.Tests
         InMemoryTestFixture
     {
         [Test]
-        public async void Should_receive_a_message_in_scope()
+        public async Task Should_receive_a_message_in_scope()
         {
             const string name = "Joe";
 

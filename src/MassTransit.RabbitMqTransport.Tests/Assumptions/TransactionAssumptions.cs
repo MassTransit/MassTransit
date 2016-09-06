@@ -1,5 +1,6 @@
 ﻿namespace MassTransit.RabbitMqTransport.Tests.Assumptions
 {
+    using System.Collections.Generic;
     using NUnit.Framework;
     using Shouldly;
 
@@ -17,7 +18,7 @@
                 {
                     model.QueueDeclare(theQueue, true, false, false, null);
                     model.ExchangeDeclare("trx", "fanout", true, true, null);
-                    model.QueueBind(theQueue, "trx", "");
+                    model.QueueBind(theQueue, "trx", "", new Dictionary<string, object>());
                     model.QueuePurge(theQueue);
                 });
 
@@ -26,7 +27,7 @@
                     model.TxSelect();
                     var props = model.CreateBasicProperties();
                     
-                    model.BasicPublish("trx", "", props, theMessage);
+                    model.BasicPublish("trx", "", false, props, theMessage);
 
                     model.TxCommit();
                 });
@@ -57,7 +58,7 @@
                 {
                     model.QueueDeclare(theQueue, true, false, false, null);
                     model.ExchangeDeclare("trx", "fanout", true, true, null);
-                    model.QueueBind(theQueue, "trx", "");
+                    model.QueueBind(theQueue, "trx", "", new Dictionary<string, object>());
                     model.QueuePurge(theQueue);
                 });
 
@@ -66,7 +67,7 @@
                     model.TxSelect();
                     var props = model.CreateBasicProperties();
                     
-                    model.BasicPublish("trx", "", props, TheMessage);
+                    model.BasicPublish("trx", "", false, props, TheMessage);
 
                     model.TxRollback();
                 });
@@ -95,10 +96,10 @@
                 {
                     model.QueueDeclare(theQueue, true, false, false, null);
                     model.ExchangeDeclare("trx", "fanout", true, true, null);
-                    model.QueueBind(theQueue, "trx", "");
+                    model.QueueBind(theQueue, "trx", "", new Dictionary<string, object>());
                     model.QueuePurge(theQueue);
 
-                    model.BasicPublish("trx","",model.CreateBasicProperties(), TheMessage);
+                    model.BasicPublish("trx", "", false, model.CreateBasicProperties(), TheMessage);
                 });
 
             WithChannel(chan=>
@@ -133,10 +134,10 @@
                 {
                     model.QueueDeclare(theQueue, true, false, false, null);
                     model.ExchangeDeclare("trx", "fanout", true, true, null);
-                    model.QueueBind(theQueue, "trx", "");
+                    model.QueueBind(theQueue, "trx", "", new Dictionary<string, object>());
                     model.QueuePurge(theQueue);
 
-                    model.BasicPublish("trx","",model.CreateBasicProperties(), TheMessage);
+                    model.BasicPublish("trx","",false, model.CreateBasicProperties(), TheMessage);
                 });
 
             WithChannel(chan=>

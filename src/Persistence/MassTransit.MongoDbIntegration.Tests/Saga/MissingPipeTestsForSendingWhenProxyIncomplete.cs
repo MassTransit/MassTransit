@@ -48,8 +48,8 @@ namespace MassTransit.MongoDbIntegration.Tests.Saga
         Mock<SagaConsumeContext<SimpleSaga, InitiateSimpleSaga>> _proxy;
         SimpleSaga _saga;
 
-        [TestFixtureSetUp]
-        public void GivenAMissingPipe_WhenSendingAndProxyIncomplete()
+        [OneTimeSetUp]
+        public async Task GivenAMissingPipe_WhenSendingAndProxyIncomplete()
         {
             IMongoCollection<SimpleSaga> collection = SagaRepository.Instance.GetCollection<SimpleSaga>("sagas");
             _nextPipe = new Mock<IPipe<SagaConsumeContext<SimpleSaga, InitiateSimpleSaga>>>();
@@ -63,13 +63,13 @@ namespace MassTransit.MongoDbIntegration.Tests.Saga
 
             _pipe = new MissingPipe<SimpleSaga, InitiateSimpleSaga>(collection, _nextPipe.Object, _consumeContextFactory.Object);
 
-            TaskUtil.Await(() => _pipe.Send(_context.Object));
+            await _pipe.Send(_context.Object);
         }
 
-        [TestFixtureTearDown]
-        public void Kill()
+        [OneTimeTearDown]
+        public async Task Kill()
         {
-            TaskUtil.Await(() => SagaRepository.DeleteSaga(_saga.CorrelationId));
+            await SagaRepository.DeleteSaga(_saga.CorrelationId);
         }
     }
 }

@@ -116,7 +116,7 @@ Balancing the load
 Because RabbitMQ is a message broker, it supports multiple readers from the same queue. This makes it super easy to setup a
 load balancing scenario where the same service is running on multiple servers, each of which is connected to the same queue. As 
 messages arrive on the queue, they are delivered to the first available consumer that can receive the message. To get good 
-load balancing, it's important to set the ```PrefetchCount``` to a sensible value so that messages are well distributed.
+load balancing, it's important to set the ```PrefetchCount``` to a sensible value on the consumer so that messages are well distributed.
 
 
 Routing on Azure Service Bus

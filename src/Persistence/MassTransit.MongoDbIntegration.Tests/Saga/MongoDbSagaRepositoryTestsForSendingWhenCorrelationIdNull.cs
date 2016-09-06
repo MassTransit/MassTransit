@@ -20,7 +20,6 @@ namespace MassTransit.MongoDbIntegration.Tests.Saga
     using Moq;
     using NUnit.Framework;
     using Pipeline;
-    using Util;
 
 
     [TestFixture]
@@ -34,8 +33,8 @@ namespace MassTransit.MongoDbIntegration.Tests.Saga
 
         SagaException _exception;
 
-        [TestFixtureSetUp]
-        public  void GivenAMongoDbSagaRepository_WhenSendingWithNullCorrelationId()
+        [OneTimeSetUp]
+        public async Task GivenAMongoDbSagaRepository_WhenSendingWithNullCorrelationId()
         {
             var context = new Mock<ConsumeContext<InitiateSimpleSaga>>();
             context.Setup(x => x.CorrelationId).Returns(default(Guid?));
@@ -44,9 +43,8 @@ namespace MassTransit.MongoDbIntegration.Tests.Saga
 
             try
             {
-                TaskUtil.Await(() =>
-                    repository.Send(context.Object, Mock.Of<ISagaPolicy<SimpleSaga, InitiateSimpleSaga>>(),
-                        Mock.Of<IPipe<SagaConsumeContext<SimpleSaga, InitiateSimpleSaga>>>()));
+                await repository.Send(context.Object, Mock.Of<ISagaPolicy<SimpleSaga, InitiateSimpleSaga>>(),
+                    Mock.Of<IPipe<SagaConsumeContext<SimpleSaga, InitiateSimpleSaga>>>());
             }
             catch (SagaException exception)
             {

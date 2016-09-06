@@ -22,7 +22,6 @@ namespace MassTransit.MongoDbIntegration.Tests.Saga
     using Moq;
     using NUnit.Framework;
     using Pipeline;
-    using Util;
 
 
     [TestFixture]
@@ -55,13 +54,13 @@ namespace MassTransit.MongoDbIntegration.Tests.Saga
         Mock<SagaConsumeContext<SimpleSaga, InitiateSimpleSaga>> _sagaConsumeContext;
         Mock<IMongoDbSagaConsumeContextFactory> _sagaConsumeContextFactory;
 
-        [TestFixtureSetUp]
-        public void GivenAMongoDbSagaRepository_WhenSendingQuery()
+        [OneTimeSetUp]
+        public async Task GivenAMongoDbSagaRepository_WhenSendingQuery()
         {
             _correlationId = Guid.NewGuid();
             var saga = new SimpleSaga {CorrelationId = _correlationId};
 
-            TaskUtil.Await(() => SagaRepository.InsertSaga(saga));
+            await SagaRepository.InsertSaga(saga);
 
             _sagaQueryConsumeContext = new Mock<SagaQueryConsumeContext<SimpleSaga, InitiateSimpleSaga>>();
             _sagaQueryConsumeContext.Setup(x => x.Query.FilterExpression).Returns(x => x.CorrelationId == _correlationId);
@@ -79,13 +78,13 @@ namespace MassTransit.MongoDbIntegration.Tests.Saga
 
             var repository = new MongoDbSagaRepository<SimpleSaga>(SagaRepository.Instance, _sagaConsumeContextFactory.Object);
 
-            TaskUtil.Await(() => repository.SendQuery(_sagaQueryConsumeContext.Object, _sagaPolicy.Object, _nextPipe.Object));
+            await repository.SendQuery(_sagaQueryConsumeContext.Object, _sagaPolicy.Object, _nextPipe.Object);
         }
 
-        [TestFixtureTearDown]
-        public void Kill()
+        [OneTimeTearDown]
+        public async Task Kill()
         {
-            TaskUtil.Await(() => SagaRepository.DeleteSaga(_correlationId));
+            await SagaRepository.DeleteSaga(_correlationId);
         }
     }
 }

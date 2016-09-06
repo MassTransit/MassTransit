@@ -17,45 +17,51 @@ namespace MassTransit.RabbitMqTransport
     using System.Linq;
     using System.Threading;
     using Logging;
+    using RabbitMQ.Client;
 
 
     /// <summary>
     /// Creates an IHostnameSelector which sequentially chooses the next host name from the provided list based on index
     /// </summary>
-    public class SequentialHostnameSelector :
-        IRabbitMqHostNameSelector
+    public class SequentialEndpointResolver :
+        IRabbitMqEndpointResolver
     {
-        static readonly ILog _log = Logger.Get<SequentialHostnameSelector>();
+        static readonly ILog _log = Logger.Get<SequentialEndpointResolver>();
+
+        readonly string[] _hostNames;
         string _lastHost;
         int _nextHostIndex;
 
-        public SequentialHostnameSelector()
+        public SequentialEndpointResolver(string[] hostNames)
         {
+            if (hostNames == null)
+                throw new ArgumentNullException(nameof(hostNames));
+            if (hostNames.Length == 0)
+                throw new ArgumentException("At least one host name must be specified", nameof(hostNames));
+            if(hostNames.All(string.IsNullOrWhiteSpace))
+                throw new ArgumentException("At least one non-blank host name must be specified", nameof(hostNames));
+
+            _hostNames = hostNames;
             _nextHostIndex = 0;
             _lastHost = "";
         }
 
-        public string NextFrom(IList<string> options)
-        {
-            if (options == null)
-                throw new ArgumentNullException(nameof(options));
-            if (options.All(string.IsNullOrWhiteSpace))
-                throw new ArgumentException("There must be at least one host to use a hostname selector.", nameof(options));
+        public string LastHost => _lastHost;
 
+        public IEnumerable<AmqpTcpEndpoint> All()
+        {
             do
             {
-                _lastHost = options[_nextHostIndex % options.Count];
+                _lastHost = _hostNames[_nextHostIndex % _hostNames.Length];
             }
             while (string.IsNullOrWhiteSpace(_lastHost));
-            
+
             if (_log.IsDebugEnabled)
                 _log.Debug($"Returning next host: {_lastHost}");
 
             Interlocked.Increment(ref _nextHostIndex);
 
-            return _lastHost;
+            yield return new AmqpTcpEndpoint(_lastHost);
         }
-
-        public string LastHost => _lastHost;
     }
 }

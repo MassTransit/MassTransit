@@ -22,15 +22,17 @@ namespace MassTransit.QuartzIntegration.Configuration
     /// <summary>
     /// Used to start and stop an in-memory scheduler using Quartz
     /// </summary>
-    public class InMemorySchedulerBusObserver :
+    public class SchedulerBusObserver :
         IBusObserver
     {
-        readonly ILog _log = Logger.Get<InMemorySchedulerBusObserver>();
+        readonly ILog _log = Logger.Get<SchedulerBusObserver>();
         readonly IScheduler _scheduler;
+        readonly Uri _schedulerEndpointAddress;
 
-        public InMemorySchedulerBusObserver(IScheduler scheduler)
+        public SchedulerBusObserver(IScheduler scheduler, Uri schedulerEndpointAddress)
         {
             _scheduler = scheduler;
+            _schedulerEndpointAddress = schedulerEndpointAddress;
         }
 
         public Task PostCreate(IBus bus)
@@ -51,7 +53,7 @@ namespace MassTransit.QuartzIntegration.Configuration
         public async Task PostStart(IBus bus, Task busReady)
         {
             if (_log.IsDebugEnabled)
-                _log.DebugFormat("Quartz Scheduler Starting: {0} ({1}/{2})", bus.Address, _scheduler.SchedulerName, _scheduler.SchedulerInstanceId);
+                _log.DebugFormat("Quartz Scheduler Starting: {0} ({1}/{2})", _schedulerEndpointAddress, _scheduler.SchedulerName, _scheduler.SchedulerInstanceId);
 
             await busReady.ConfigureAwait(false);
 
@@ -59,7 +61,7 @@ namespace MassTransit.QuartzIntegration.Configuration
             _scheduler.Start();
 
             if (_log.IsInfoEnabled)
-                _log.InfoFormat("Quartz Scheduler Started: {0} ({1}/{2})", bus.Address, _scheduler.SchedulerName, _scheduler.SchedulerInstanceId);
+                _log.InfoFormat("Quartz Scheduler Started: {0} ({1}/{2})", _schedulerEndpointAddress, _scheduler.SchedulerName, _scheduler.SchedulerInstanceId);
         }
 
         public Task StartFaulted(IBus bus, Exception exception)
@@ -72,7 +74,7 @@ namespace MassTransit.QuartzIntegration.Configuration
             _scheduler.Standby();
 
             if (_log.IsInfoEnabled)
-                _log.InfoFormat("Quartz Scheduler Paused: {0} ({1}/{2})", bus.Address, _scheduler.SchedulerName, _scheduler.SchedulerInstanceId);
+                _log.InfoFormat("Quartz Scheduler Paused: {0} ({1}/{2})", _schedulerEndpointAddress, _scheduler.SchedulerName, _scheduler.SchedulerInstanceId);
 
             return TaskUtil.Completed;
         }
@@ -82,7 +84,7 @@ namespace MassTransit.QuartzIntegration.Configuration
             _scheduler.Shutdown();
 
             if (_log.IsInfoEnabled)
-                _log.InfoFormat("Quartz Scheduler Stopped: {0} ({1}/{2})", bus.Address, _scheduler.SchedulerName, _scheduler.SchedulerInstanceId);
+                _log.InfoFormat("Quartz Scheduler Stopped: {0} ({1}/{2})", _schedulerEndpointAddress, _scheduler.SchedulerName, _scheduler.SchedulerInstanceId);
 
             return TaskUtil.Completed;
         }

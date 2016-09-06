@@ -29,24 +29,36 @@ namespace MassTransit.MongoDbIntegration.Saga
         ISagaRepository<TSaga>
         where TSaga : class, IVersionedSaga
     {
+        const string DefaultCollectionName = "sagas";
         static readonly ILog _log = Logger.Get<MongoDbSagaRepository<TSaga>>();
         readonly IMongoCollection<TSaga> _collection;
         readonly IMongoDbSagaConsumeContextFactory _mongoDbSagaConsumeContextFactory;
 
-        public MongoDbSagaRepository(string connectionString, string database)
-            : this(new MongoClient(connectionString).GetDatabase(database), new MongoDbSagaConsumeContextFactory())
+        public MongoDbSagaRepository(string connectionString, string database, string collectionName = DefaultCollectionName)
+            : this(new MongoClient(connectionString).GetDatabase(database), new MongoDbSagaConsumeContextFactory(), collectionName)
         {
         }
 
-        public MongoDbSagaRepository(MongoUrl mongoUrl)
-            : this(mongoUrl.Url, mongoUrl.DatabaseName)
+        public MongoDbSagaRepository(MongoUrl mongoUrl, string collectionName = DefaultCollectionName)
+            : this(mongoUrl.Url, mongoUrl.DatabaseName, collectionName)
         {
         }
 
         public MongoDbSagaRepository(IMongoDatabase mongoDatabase, IMongoDbSagaConsumeContextFactory mongoDbSagaConsumeContextFactory)
+            : this(mongoDatabase, mongoDbSagaConsumeContextFactory, DefaultCollectionName)
         {
+        }
+
+        public MongoDbSagaRepository(IMongoDatabase mongoDatabase, IMongoDbSagaConsumeContextFactory mongoDbSagaConsumeContextFactory, string collectionName)
+        {
+            if (string.IsNullOrWhiteSpace(collectionName))
+                throw new ArgumentNullException(nameof(collectionName));
+            if (collectionName.Length > 120)
+                throw new ArgumentException("Collection names must be no longer than 120 characters", nameof(collectionName));
+
             _mongoDbSagaConsumeContextFactory = mongoDbSagaConsumeContextFactory;
-            _collection = mongoDatabase.GetCollection<TSaga>("sagas");
+
+            _collection = mongoDatabase.GetCollection<TSaga>(collectionName);
         }
 
         public void Probe(ProbeContext context)

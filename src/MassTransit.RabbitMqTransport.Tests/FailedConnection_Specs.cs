@@ -19,13 +19,12 @@ namespace MassTransit.RabbitMqTransport.Tests
     using Util;
 
 
-    [TestFixture]
+    [TestFixture, Explicit]
     public class Failing_to_connect_to_rabbitmq :
         AsyncTestFixture
     {
         [Test]
-        [ExpectedException(typeof(RabbitMqConnectionException))]
-        public async Task Should_fault_nicely()
+        public void Should_fault_nicely()
         {
             var busControl = Bus.Factory.CreateUsingRabbitMq(x =>
             {
@@ -33,20 +32,25 @@ namespace MassTransit.RabbitMqTransport.Tests
                 {
                     h.Username("whocares");
                     h.Password("Ohcrud");
+
                 });
             });
 
-            using (var handle = busControl.Start())
+            TestDelegate invocation = () =>
             {
-                Console.WriteLine("Waiting for connection...");
+                using (var handle = busControl.Start())
+                {
+                    Console.WriteLine("Waiting for connection...");
 
-                TaskUtil.Await(() => handle.Ready);
-            }
+                    TaskUtil.Await(() => handle.Ready);
+                }
+            };
+
+            Assert.Throws<RabbitMqConnectionException>(invocation);
         }
 
         [Test]
-        [ExpectedException(typeof(RabbitMqConnectionException))]
-        public async Task Should_fault_when_credentials_are_bad()
+        public void Should_fault_when_credentials_are_bad()
         {
             var busControl = Bus.Factory.CreateUsingRabbitMq(x =>
             {
@@ -57,12 +61,17 @@ namespace MassTransit.RabbitMqTransport.Tests
                 });
             });
 
-            using (var handle = busControl.Start())
+            TestDelegate invocation = () =>
             {
-                Console.WriteLine("Waiting for connection...");
+                using (var handle = busControl.Start())
+                {
+                    Console.WriteLine("Waiting for connection...");
 
-                TaskUtil.Await(() => handle.Ready);
-            }
+                    TaskUtil.Await(() => handle.Ready);
+                }
+            };
+
+            Assert.Throws<RabbitMqConnectionException>(invocation);
         }
 
         [Test, Explicit]

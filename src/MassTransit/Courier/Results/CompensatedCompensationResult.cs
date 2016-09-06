@@ -36,7 +36,7 @@ namespace MassTransit.Courier.Results
             _publisher = publisher;
             _compensateLog = compensateLog;
             _routingSlip = routingSlip;
-            _duration = _compensateContext.ElapsedTime;
+            _duration = _compensateContext.Elapsed;
         }
 
         public async Task Evaluate()
@@ -48,7 +48,7 @@ namespace MassTransit.Courier.Results
             RoutingSlip routingSlip = builder.Build();
 
              await _publisher.PublishRoutingSlipActivityCompensated(_compensateContext.ActivityName, _compensateContext.ExecutionId,
-                 _compensateContext.StartTimestamp, _duration, _routingSlip.Variables, _compensateLog.Data).ConfigureAwait(false);
+                 _compensateContext.Timestamp, _duration, _routingSlip.Variables, _compensateLog.Data).ConfigureAwait(false);
 
             if (HasMoreCompensations(routingSlip))
             {
@@ -58,7 +58,7 @@ namespace MassTransit.Courier.Results
             }
             else
             {
-                DateTime faultedTimestamp = _compensateContext.StartTimestamp + _duration;
+                DateTime faultedTimestamp = _compensateContext.Timestamp + _duration;
                 TimeSpan faultedDuration = faultedTimestamp - _routingSlip.CreateTimestamp;
 
                 await _publisher.PublishRoutingSlipFaulted(faultedTimestamp, faultedDuration, _routingSlip.Variables,

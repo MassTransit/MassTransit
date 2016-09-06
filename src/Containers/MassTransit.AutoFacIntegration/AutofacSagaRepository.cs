@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -43,19 +43,29 @@ namespace MassTransit.AutofacIntegration
 
         async Task ISagaRepository<TSaga>.Send<T>(ConsumeContext<T> context, ISagaPolicy<TSaga, T> policy, IPipe<SagaConsumeContext<TSaga, T>> next)
         {
-            using (_scope.BeginLifetimeScope(_name))
+            using (var lifetimeScope = _scope.BeginLifetimeScope(_name, x => ConfigureScope(x, context)))
             {
-                await _repository.Send(context, policy, next).ConfigureAwait(false);
+                ConsumeContext<T> proxy = context.CreateScope(lifetimeScope);
+
+                await _repository.Send(proxy, policy, next).ConfigureAwait(false);
             }
         }
 
         async Task ISagaRepository<TSaga>.SendQuery<T>(SagaQueryConsumeContext<TSaga, T> context, ISagaPolicy<TSaga, T> policy,
             IPipe<SagaConsumeContext<TSaga, T>> next)
         {
-            using (_scope.BeginLifetimeScope(_name))
+            using (var lifetimeScope = _scope.BeginLifetimeScope(_name))
             {
-                await _repository.SendQuery(context, policy, next).ConfigureAwait(false);
+                SagaQueryConsumeContext<TSaga, T> proxy = context.CreateQueryScope(lifetimeScope);
+
+                await _repository.SendQuery(proxy, policy, next).ConfigureAwait(false);
             }
+        }
+
+        static void ConfigureScope(ContainerBuilder containerBuilder, ConsumeContext context)
+        {
+            containerBuilder.RegisterInstance(context)
+                .ExternallyOwned();
         }
     }
 }

@@ -15,7 +15,7 @@
         AzureServiceBusTestFixture
     {
         [Test]
-        public async void Should_have_the_correlation_id()
+        public async Task Should_have_the_correlation_id()
         {
             ConsumeContext<PingMessage> context = await _errorHandler;
 
@@ -23,7 +23,7 @@
         }
 
         [Test]
-        public async void Should_have_the_original_destination_address()
+        public async Task Should_have_the_original_destination_address()
         {
             ConsumeContext<PingMessage> context = await _errorHandler;
 
@@ -31,7 +31,7 @@
         }
 
         [Test]
-        public async void Should_have_the_original_fault_address()
+        public async Task Should_have_the_original_fault_address()
         {
             ConsumeContext<PingMessage> context = await _errorHandler;
 
@@ -39,7 +39,7 @@
         }
 
         [Test]
-        public async void Should_have_the_original_response_address()
+        public async Task Should_have_the_original_response_address()
         {
             ConsumeContext<PingMessage> context = await _errorHandler;
 
@@ -72,7 +72,7 @@
         }
 
         [Test]
-        public async void Should_have_the_original_source_address()
+        public async Task Should_have_the_original_source_address()
         {
             ConsumeContext<PingMessage> context = await _errorHandler;
 
@@ -80,7 +80,7 @@
         }
 
         [Test]
-        public async void Should_move_the_message_to_the_error_queue()
+        public async Task Should_move_the_message_to_the_error_queue()
         {
             await _errorHandler;
         }
@@ -88,15 +88,15 @@
         Task<ConsumeContext<PingMessage>> _errorHandler;
         readonly Guid? _correlationId = NewId.NextGuid();
 
-        [TestFixtureSetUp]
-        public void Setup()
+        [OneTimeSetUp]
+        public async Task Setup()
         {
-            Await(() => InputQueueSendEndpoint.Send(new PingMessage(), Pipe.Execute<SendContext<PingMessage>>(context =>
+            await InputQueueSendEndpoint.Send(new PingMessage(), Pipe.Execute<SendContext<PingMessage>>(context =>
             {
                 context.CorrelationId = _correlationId;
                 context.ResponseAddress = context.SourceAddress;
                 context.FaultAddress = context.SourceAddress;
-            })));
+            }));
         }
 
         protected override void ConfigureBusHost(IServiceBusBusFactoryConfigurator configurator, IServiceBusHost host)

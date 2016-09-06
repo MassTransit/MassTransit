@@ -48,7 +48,10 @@ namespace MassTransit.AutofacIntegration
 
                 var activity = scope.Resolve<TActivity>(TypedParameter.From(context.Arguments));
 
-                var activityContext = new HostExecuteActivityContext<TActivity, TArguments>(activity, context);
+                ExecuteActivityContext<TArguments> activityContext = new HostExecuteActivityContext<TActivity, TArguments>(activity, context);
+
+                var consumerLifetimeScope = scope;
+                activityContext.GetOrAddPayload(() => consumerLifetimeScope);
 
                 await next.Send(activityContext).ConfigureAwait(false);
             }

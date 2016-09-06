@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -16,10 +16,7 @@ namespace MassTransit.QuartzIntegration.Tests
     using System.Threading.Tasks;
     using Internals.Extensions;
     using NUnit.Framework;
-    using Quartz;
-    using Quartz.Impl;
     using Scheduling;
-    using TestFramework;
 
 
     [TestFixture]
@@ -27,7 +24,7 @@ namespace MassTransit.QuartzIntegration.Tests
         QuartzInMemoryTestFixture
     {
         [Test]
-        public async void Should_properly_send_the_message()
+        public async Task Should_properly_send_the_message()
         {
             Task<ConsumeContext<A>> handlerA = SubscribeHandler<A>();
             Task<ConsumeContext<IA>> handlerIA = SubscribeHandler<IA>();
@@ -57,7 +54,7 @@ namespace MassTransit.QuartzIntegration.Tests
         QuartzInMemoryTestFixture
     {
         [Test]
-        public async void Should_properly_send_the_message()
+        public async Task Should_properly_send_the_message()
         {
             Task<ConsumeContext<A>> handlerA = SubscribeHandler<A>();
             Task<ConsumeContext<IA>> handlerIA = SubscribeHandler<IA>();
@@ -98,7 +95,7 @@ namespace MassTransit.QuartzIntegration.Tests
         QuartzInMemoryTestFixture
     {
         [Test]
-        public async void Should_properly_send_the_message()
+        public async Task Should_properly_send_the_message()
         {
             Task<ConsumeContext<A>> handlerA = SubscribeHandler<A>();
 
@@ -109,7 +106,7 @@ namespace MassTransit.QuartzIntegration.Tests
 
             await Bus.CancelScheduledMessage(scheduledMessage);
 
-            Assert.Throws<OperationCanceledException>(async () => await handlerA.WithTimeout(5000));
+            Assert.That(async () => await handlerA.WithTimeout(5000), Throws.TypeOf<TaskCanceledException>());
         }
 
 

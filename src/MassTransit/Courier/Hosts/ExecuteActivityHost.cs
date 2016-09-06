@@ -82,6 +82,8 @@ namespace MassTransit.Courier.Hosts
                         executeContext.TrackingNumber);
                 }
 
+                await Task.Yield();
+
                 await _activityFactory.Execute(executeContext, _executePipe).ConfigureAwait(false);
 
                 await context.NotifyConsumed(timer.Elapsed, TypeMetadataCache<TActivity>.ShortName).ConfigureAwait(false);

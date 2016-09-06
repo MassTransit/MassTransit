@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -15,65 +15,197 @@ namespace MassTransit.Tests
     using System;
     using System.Runtime.Serialization;
     using System.Threading.Tasks;
-    using MassTransit.Pipeline;
     using NUnit.Framework;
     using Shouldly;
     using TestFramework;
     using TestFramework.Messages;
 
-
-    [TestFixture]
-    public class Connecting_a_send_observer_to_the_endpoint :
-        InMemoryTestFixture
+    namespace ObserverTests
     {
-        [Test]
-        public async Task Should_invoke_the_exception_after_send_failure()
+        [TestFixture]
+        public class Connecting_a_send_observer_to_the_endpoint :
+            InMemoryTestFixture
         {
-            var observer = new Observer();
-            using (InputQueueSendEndpoint.ConnectSendObserver(observer))
+            [Test]
+            public async Task Should_invoke_the_exception_after_send_failure()
             {
-                Assert.Throws<SerializationException>(async () => await InputQueueSendEndpoint.Send(new PingMessage(), Pipe.Execute<SendContext>(x => x.Serializer = null)));
+                var observer = new Observer();
+                using (InputQueueSendEndpoint.ConnectSendObserver(observer))
+                {
+                    Assert.That(
+                        async () => await InputQueueSendEndpoint.Send(new PingMessage(), Pipe.Execute<SendContext>(x => x.Serializer = null)),
+                        Throws.TypeOf<SerializationException>());
 
-                await observer.SendFaulted;
+                    await observer.SendFaulted;
+                }
+            }
+
+            [Test]
+            public async Task Should_invoke_the_observer_after_send()
+            {
+                var observer = new Observer();
+                using (InputQueueSendEndpoint.ConnectSendObserver(observer))
+                {
+                    await InputQueueSendEndpoint.Send(new PingMessage());
+
+                    await observer.PostSent;
+                }
+            }
+
+            [Test]
+            public async Task Should_invoke_the_observer_prior_to_send()
+            {
+                var observer = new Observer();
+                using (InputQueueSendEndpoint.ConnectSendObserver(observer))
+                {
+                    await InputQueueSendEndpoint.Send(new PingMessage());
+
+                    await observer.PreSent;
+                }
+            }
+
+            [Test]
+            public async Task Should_not_invoke_post_sent_on_exception()
+            {
+                var observer = new Observer();
+                using (InputQueueSendEndpoint.ConnectSendObserver(observer))
+                {
+                    Assert.That(async () => await InputQueueSendEndpoint.Send(new PingMessage(), Pipe.Execute<SendContext>(x => x.Serializer = null)),
+                        Throws.TypeOf<SerializationException>());
+
+                    await observer.SendFaulted;
+
+                    observer.PostSent.Status.ShouldBe(TaskStatus.WaitingForActivation);
+                }
             }
         }
 
-        [Test]
-        public async Task Should_invoke_the_observer_after_send()
+        [TestFixture]
+        public class Connecting_a_send_observer_to_the_bus_A :
+            InMemoryTestFixture
         {
-            var observer = new Observer();
-            using (InputQueueSendEndpoint.ConnectSendObserver(observer))
-            {
-                await InputQueueSendEndpoint.Send(new PingMessage());
+            Observer _observer;
 
-                await observer.PostSent;
+            protected override void ConnectObservers(IBus bus)
+            {
+                base.ConnectObservers(bus);
+
+                _observer = new Observer();
+
+                bus.ConnectSendObserver(_observer);
+            }
+
+            [Test]
+            public async Task Should_not_invoke_post_sent_on_exception()
+            {
+                    Assert.That(async () => await InputQueueSendEndpoint.Send(new PingMessage(), Pipe.Execute<SendContext>(x => x.Serializer = null)),
+                        Throws.TypeOf<SerializationException>());
+
+                    await _observer.SendFaulted;
+
+                _observer.PostSent.Status.ShouldBe(TaskStatus.WaitingForActivation);
             }
         }
-
-        [Test]
-        public async Task Should_invoke_the_observer_prior_to_send()
+        [TestFixture]
+        public class Connecting_a_send_observer_to_the_bus_B :
+            InMemoryTestFixture
         {
-            var observer = new Observer();
-            using (InputQueueSendEndpoint.ConnectSendObserver(observer))
-            {
-                await InputQueueSendEndpoint.Send(new PingMessage());
+            Observer _observer;
 
-                await observer.PreSent;
+            protected override void ConnectObservers(IBus bus)
+            {
+                base.ConnectObservers(bus);
+
+                _observer = new Observer();
+
+                bus.ConnectSendObserver(_observer);
             }
+            [Test]
+            public async Task Should_invoke_the_observer_prior_to_send()
+            {
+                    await InputQueueSendEndpoint.Send(new PingMessage());
+
+                    await _observer.PreSent;
+            }
+
+        }
+        [TestFixture]
+        public class Connecting_a_send_observer_to_the_bus_C :
+            InMemoryTestFixture
+        {
+            Observer _observer;
+
+            protected override void ConnectObservers(IBus bus)
+            {
+                base.ConnectObservers(bus);
+
+                _observer = new Observer();
+
+                bus.ConnectSendObserver(_observer);
+            }
+            
+
+            [Test]
+            public async Task Should_invoke_the_observer_after_send()
+            {
+                    await InputQueueSendEndpoint.Send(new PingMessage());
+
+                    await _observer.PostSent;
+            }
+            
         }
 
-        [Test]
-        public async Task Should_not_invoke_post_sent_on_exception()
+        [TestFixture]
+        public class Connecting_a_send_observer_to_the_bus_CP :
+            InMemoryTestFixture
         {
-            var observer = new Observer();
-            using (InputQueueSendEndpoint.ConnectSendObserver(observer))
+            Observer _observer;
+
+            protected override void ConnectObservers(IBus bus)
             {
-                Assert.Throws<SerializationException>(async () => await InputQueueSendEndpoint.Send(new PingMessage(), Pipe.Execute<SendContext>(x => x.Serializer = null)));
+                base.ConnectObservers(bus);
 
-                await observer.SendFaulted;
+                _observer = new Observer();
 
-                observer.PostSent.Status.ShouldBe(TaskStatus.WaitingForActivation);
+                bus.ConnectSendObserver(_observer);
             }
+            
+
+            [Test]
+            public async Task Should_invoke_the_observer_after_send()
+            {
+                    await Bus.Publish(new PingMessage());
+
+                    await _observer.PostSent;
+            }
+            
+        }
+
+        [TestFixture]
+        public class Connecting_a_send_observer_to_the_bus_D :
+            InMemoryTestFixture
+        {
+            Observer _observer;
+
+            protected override void ConnectObservers(IBus bus)
+            {
+                base.ConnectObservers(bus);
+
+                _observer = new Observer();
+
+                bus.ConnectSendObserver(_observer);
+            }
+
+            [Test]
+            public async Task Should_invoke_the_exception_after_send_failure()
+            {
+                    Assert.That(
+                        async () => await InputQueueSendEndpoint.Send(new PingMessage(), Pipe.Execute<SendContext>(x => x.Serializer = null)),
+                        Throws.TypeOf<SerializationException>());
+
+                    await _observer.SendFaulted;
+            }
+
         }
 
 

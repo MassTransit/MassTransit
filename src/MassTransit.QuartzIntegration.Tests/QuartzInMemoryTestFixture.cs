@@ -13,6 +13,7 @@
 namespace MassTransit.QuartzIntegration.Tests
 {
     using System;
+    using System.Threading.Tasks;
     using NUnit.Framework;
     using TestFramework;
 
@@ -20,23 +21,16 @@ namespace MassTransit.QuartzIntegration.Tests
     public class QuartzInMemoryTestFixture :
         InMemoryTestFixture
     {
-        readonly Uri _quartzAddress;
         ISendEndpoint _quartzEndpoint;
 
         public QuartzInMemoryTestFixture()
         {
-            _quartzAddress = new Uri("loopback://localhost/quartz");
+            QuartzAddress = new Uri("loopback://localhost/quartz");
         }
 
-        protected Uri QuartzAddress
-        {
-            get { return _quartzAddress; }
-        }
+        protected Uri QuartzAddress { get; }
 
-        protected ISendEndpoint QuartzEndpoint
-        {
-            get { return _quartzEndpoint; }
-        }
+        protected ISendEndpoint QuartzEndpoint => _quartzEndpoint;
 
         protected override void ConfigureBus(IInMemoryBusFactoryConfigurator configurator)
         {
@@ -45,10 +39,10 @@ namespace MassTransit.QuartzIntegration.Tests
             configurator.UseInMemoryScheduler();
         }
 
-        [TestFixtureSetUp]
-        public void Setup_quartz_service()
+        [OneTimeSetUp]
+        public async Task Setup_quartz_service()
         {
-            _quartzEndpoint = Await(() => GetSendEndpoint(QuartzAddress));
+            _quartzEndpoint = await GetSendEndpoint(QuartzAddress);
         }
     }
 }

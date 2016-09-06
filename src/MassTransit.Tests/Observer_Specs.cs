@@ -34,7 +34,7 @@ namespace MassTransit.Tests
         IRequestClient<PingMessage, PongMessage> _requestClient;
         PingObserver _observer;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void Setup()
         {
             _requestClient = CreateRequestClient<PingMessage, PongMessage>();
@@ -43,8 +43,8 @@ namespace MassTransit.Tests
         protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             _observer = new PingObserver();
-            configurator.Observer(_observer)
-                .UseLog(Console.Out, async (context, logContext) => string.Format("Observer: {0}", TypeMetadataCache<PingObserver>.ShortName));
+            configurator.Observer(_observer, x => 
+                x.UseLog(Console.Out, async (context, logContext) => string.Format("Observer: {0}", TypeMetadataCache<PingObserver>.ShortName)));
         }
 
 

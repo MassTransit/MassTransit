@@ -40,7 +40,7 @@ namespace MassTransit.MongoDbIntegration.Tests.Saga
         MissingPipe<SimpleSaga, InitiateSimpleSaga> _pipe;
         Mock<ProbeContext> _probeContext;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void GivenAMissingPipe()
         {
             _probeContext = new Mock<ProbeContext>();

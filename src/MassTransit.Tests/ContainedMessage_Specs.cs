@@ -41,7 +41,7 @@ namespace MassTransit.Tests
         Task<ConsumeContext<SecureCommand<ExecuteSql>>> _secureCommandHandler;
         Task<ConsumeContext<ExecuteSql>> _commandHandler;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void Setup()
         {
             InputQueueSendEndpoint.Send(new ExecuteSqlCommand

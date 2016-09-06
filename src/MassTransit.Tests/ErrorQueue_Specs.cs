@@ -28,15 +28,15 @@ namespace MassTransit.Tests
         Task<ConsumeContext<PingMessage>> _errorHandler;
         readonly Guid? _correlationId = NewId.NextGuid();
 
-        [TestFixtureSetUp]
-        public void Setup()
+        [OneTimeSetUp]
+        public async Task Setup()
         {
-            Await(() => InputQueueSendEndpoint.Send(new PingMessage(), Pipe.Execute<SendContext<PingMessage>>(context =>
+            await InputQueueSendEndpoint.Send(new PingMessage(), Pipe.Execute<SendContext<PingMessage>>(context =>
             {
                 context.CorrelationId = _correlationId;
                 context.ResponseAddress = context.SourceAddress;
                 context.FaultAddress = context.SourceAddress;
-            })));
+            }));
         }
 
         protected override void ConfigureBus(IInMemoryBusFactoryConfigurator configurator)

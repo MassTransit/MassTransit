@@ -402,10 +402,10 @@ namespace MassTransit.RabbitMqTransport.Tests
         readonly Guid _correlationId = Guid.NewGuid();
         Task<ConsumeContext<IProxyMe>> _handler;
 
-        [TestFixtureSetUp]
-        public void Setup()
+        [OneTimeSetUp]
+        public async Task Setup()
         {
-            Await(() => InputQueueSendEndpoint.Send<IProxyMe>(new {IntValue, StringValue, CorrelationId = _correlationId}));
+            await InputQueueSendEndpoint.Send<IProxyMe>(new {IntValue, StringValue, CorrelationId = _correlationId});
         }
 
         protected override void ConfigureInputQueueEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)

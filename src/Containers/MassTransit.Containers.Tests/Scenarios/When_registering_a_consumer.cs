@@ -49,7 +49,7 @@ namespace MassTransit.Containers.Tests.Scenarios
         Given_a_service_bus_instance
     {
         [Test]
-        public async void Should_receive_using_the_first_consumer()
+        public async Task Should_receive_using_the_first_consumer()
         {
             const string name = "Joe";
 

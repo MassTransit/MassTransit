@@ -66,7 +66,7 @@ namespace MassTransit.SeriLogIntegration
         /// <param name="demoteDebug"></param>
         public static void Use(Serilog.ILogger baseLogger = null, bool demoteDebug = false)
         {
-            Logger.UseLogger(new SerilogLogger(baseLogger, demoteDebug));
+            Logging.Logger.UseLogger(new SerilogLogger(baseLogger, demoteDebug));
         }
     }
 }

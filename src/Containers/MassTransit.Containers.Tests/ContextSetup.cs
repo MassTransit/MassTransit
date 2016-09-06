@@ -23,7 +23,7 @@ namespace MassTransit.Containers.Tests
     {
         Serilog.ILogger _baseLogger;
 
-        [SetUp]
+        [OneTimeSetUp]
         public void Before_any_tests()
         {
             _baseLogger = new LoggerConfiguration()
@@ -34,7 +34,7 @@ namespace MassTransit.Containers.Tests
             SerilogLogger.Use(_baseLogger);
         }
 
-        [TearDown]
+        [OneTimeTearDown]
         public void After_all_tests()
         {
             Logger.Shutdown();

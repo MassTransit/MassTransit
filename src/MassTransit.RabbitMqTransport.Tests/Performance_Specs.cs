@@ -50,7 +50,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
         IRequestClient<PingMessage, PongMessage> _requestClient;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void Setup()
         {
             _requestClient = new MessageRequestClient<PingMessage, PongMessage>(Bus, InputQueueAddress, TestTimeout);
@@ -111,7 +111,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         IRequestClient<PingMessage, PongMessage> _requestClient;
         Uri _serviceAddress;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void Setup()
         {
             _requestClient = new MessageRequestClient<PingMessage, PongMessage>(Bus, _serviceAddress, TestTimeout);

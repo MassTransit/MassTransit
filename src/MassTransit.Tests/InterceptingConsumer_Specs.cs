@@ -22,10 +22,10 @@ namespace MassTransit.Tests
     public class Intercepting_a_consumer_factory :
         InMemoryTestFixture
     {
-        [TestFixtureSetUp]
-        public void Setup()
+        [OneTimeSetUp]
+        public async Task Setup()
         {
-            Await(() => InputQueueSendEndpoint.Send(new A()));
+            await InputQueueSendEndpoint.Send(new A());
         }
 
         MyConsumer _myConsumer;

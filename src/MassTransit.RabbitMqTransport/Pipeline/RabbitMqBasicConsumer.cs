@@ -32,6 +32,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
         IBasicConsumer,
         RabbitMqConsumerMetrics
     {
+        readonly TaskCompletionSource<bool> _deliveryComplete;
         readonly Uri _inputAddress;
         readonly ILog _log = Logger.Get<RabbitMqBasicConsumer>();
         readonly ModelContext _model;
@@ -45,7 +46,6 @@ namespace MassTransit.RabbitMqTransport.Pipeline
         long _deliveryCount;
         int _maxPendingDeliveryCount;
         bool _shuttingDown;
-        readonly TaskCompletionSource<bool> _deliveryComplete;
 
         /// <summary>
         /// The basic consumer receives messages pushed from the broker.
@@ -109,7 +109,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Consumer Cancelled: {0}", consumerTag);
 
-            foreach (RabbitMqReceiveContext context in _pending.Values)
+            foreach (var context in _pending.Values)
                 context.Cancel();
 
             ConsumerCancelled?.Invoke(this, new ConsumerEventArgs(consumerTag));
@@ -142,7 +142,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
 
             Interlocked.Increment(ref _deliveryCount);
 
-            int current = Interlocked.Increment(ref _currentPendingDeliveryCount);
+            var current = Interlocked.Increment(ref _currentPendingDeliveryCount);
             while (current > _maxPendingDeliveryCount)
                 Interlocked.CompareExchange(ref _maxPendingDeliveryCount, current, _maxPendingDeliveryCount);
 
@@ -189,7 +189,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
                 RabbitMqReceiveContext ignored;
                 _pending.TryRemove(deliveryTag, out ignored);
 
-                int pendingCount = Interlocked.Decrement(ref _currentPendingDeliveryCount);
+                var pendingCount = Interlocked.Decrement(ref _currentPendingDeliveryCount);
                 if (pendingCount == 0 && _shuttingDown)
                 {
                     if (_log.IsDebugEnabled)
@@ -248,9 +248,17 @@ namespace MassTransit.RabbitMqTransport.Pipeline
                 }
             }
 
-            await _model.BasicCancel(_consumerTag).ConfigureAwait(false);
+            try
+            {
+                await _model.BasicCancel(_consumerTag).ConfigureAwait(false);
 
-            await _participant.ParticipantCompleted.ConfigureAwait(false);
+                await _participant.ParticipantCompleted.ConfigureAwait(false);
+            }
+            catch (TaskCanceledException)
+            {
+                if (_log.IsWarnEnabled)
+                    _log.WarnFormat("Timeout waiting for consumer to exit: {0}", _inputAddress);
+            }
         }
     }
 }

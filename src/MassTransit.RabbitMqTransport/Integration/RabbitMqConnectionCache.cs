@@ -93,11 +93,13 @@ namespace MassTransit.RabbitMqTransport.Integration
                 IConnection connection;
                 if (_settings.ClusterMembers?.Any() ?? false)
                 {
-                    connection = _connectionFactory.CreateConnection(_settings.ClusterMembers, _settings.Host);
+                    connection = _connectionFactory.CreateConnection(_settings.ClusterMembers, _settings.ClientProvidedName);
                 }
                 else
                 {
-                    connection = _connectionFactory.CreateConnection();
+                    var hostNames = Enumerable.Repeat(_settings.Host, 1).ToList();
+
+                    connection = _connectionFactory.CreateConnection(hostNames, _settings.ClientProvidedName);
                 }
 
 

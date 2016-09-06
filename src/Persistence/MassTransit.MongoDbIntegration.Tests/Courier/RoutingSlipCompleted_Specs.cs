@@ -61,14 +61,14 @@ namespace MassTransit.MongoDbIntegration.Tests.Courier
             //Assert.AreEqual(received.Timestamp.ToMongoDbDateTime(), read.Timestamp);
         }
 
-        [TestFixtureSetUp]
-        public void Setup()
+        [OneTimeSetUp]
+        public async Task Setup()
         {
             _trackingNumber = NewId.NextGuid();
 
             Console.WriteLine("Tracking Number: {0}", _trackingNumber);
 
-            TaskUtil.Await(() => Bus.Publish<RoutingSlipCompleted>(new RoutingSlipCompletedEvent(_trackingNumber, DateTime.UtcNow, TimeSpan.FromSeconds(1))));
+            await Bus.Publish<RoutingSlipCompleted>(new RoutingSlipCompletedEvent(_trackingNumber, DateTime.UtcNow, TimeSpan.FromSeconds(1)));
         }
 
         protected override void ConfigureBus(IInMemoryBusFactoryConfigurator configurator)

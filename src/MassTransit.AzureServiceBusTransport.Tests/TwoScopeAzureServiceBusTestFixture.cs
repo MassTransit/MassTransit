@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,6 +14,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
 {
     using System;
     using System.Threading;
+    using System.Threading.Tasks;
     using Configuration;
     using Logging;
     using Microsoft.ServiceBus;
@@ -64,17 +65,17 @@ namespace MassTransit.AzureServiceBusTransport.Tests
 
         protected virtual IBus SecondBus => _secondBus;
 
-        [TestFixtureSetUp]
-        public void SetupSecondAzureServiceBusTestFixture()
+        [OneTimeSetUp]
+        public async Task SetupSecondAzureServiceBusTestFixture()
         {
             _secondBus = CreateSecondBus();
 
-            _secondBusHandle = _secondBus.Start();
+            _secondBusHandle = await _secondBus.StartAsync();
             try
             {
-                _secondBusSendEndpoint = Await(() => _secondBus.GetSendEndpoint(_secondBus.Address));
+                _secondBusSendEndpoint = await _secondBus.GetSendEndpoint(_secondBus.Address);
 
-                _secondInputQueueSendEndpoint = Await(() => _secondBus.GetSendEndpoint(_secondInputQueueAddress));
+                _secondInputQueueSendEndpoint = await _secondBus.GetSendEndpoint(_secondInputQueueAddress);
             }
             catch (Exception)
             {
@@ -82,7 +83,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
                 {
                     using (var tokenSource = new CancellationTokenSource(TestTimeout))
                     {
-                        _secondBusHandle.Stop(tokenSource.Token);
+                        await _secondBusHandle.StopAsync(tokenSource.Token);
                     }
                 }
                 finally
@@ -95,14 +96,14 @@ namespace MassTransit.AzureServiceBusTransport.Tests
             }
         }
 
-        [TestFixtureTearDown]
-        public void TearDownTwoScopeTestFixture()
+        [OneTimeTearDown]
+        public async Task TearDownTwoScopeTestFixture()
         {
             try
             {
                 using (var tokenSource = new CancellationTokenSource(TestTimeout))
                 {
-                    _secondBusHandle?.Stop(tokenSource.Token);
+                    await _secondBusHandle?.StopAsync(tokenSource.Token);
                 }
             }
             catch (Exception ex)
@@ -136,7 +137,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
 
                 ServiceBusTokenProviderSettings settings = new TestAzureServiceBusAccountSettings();
 
-                IServiceBusHost host = x.Host(_secondServiceUri, h =>
+                var host = x.Host(_secondServiceUri, h =>
                 {
                     h.SharedAccessSignature(s =>
                     {

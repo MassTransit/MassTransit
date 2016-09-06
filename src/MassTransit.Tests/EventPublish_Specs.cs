@@ -52,10 +52,10 @@ namespace MassTransit.Tests
         Task<ConsumeContext<PingCompleted>> _completed;
         Task<ConsumeContext<PingProcessing>> _processing;
 
-        [TestFixtureSetUp]
-        public void Setup()
+        [OneTimeSetUp]
+        public async Task Setup()
         {
-            Await(() => InputQueueSendEndpoint.Send(new PingMessage()));
+            await InputQueueSendEndpoint.Send(new PingMessage());
         }
 
         protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)

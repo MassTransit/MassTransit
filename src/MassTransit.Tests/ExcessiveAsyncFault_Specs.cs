@@ -24,11 +24,11 @@ namespace MassTransit.Tests
         using Util;
 
 
-        [TestFixture]
+        [TestFixture, Explicit]
         public class An_excessive_fault_storm :
             InMemoryTestFixture
         {
-            [Test, Explicit]
+            [Test]
             public async Task Should_not_explode_the_task_library()
             {
                 var limit = 1000;

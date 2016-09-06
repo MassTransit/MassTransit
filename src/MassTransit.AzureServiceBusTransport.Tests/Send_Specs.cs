@@ -28,14 +28,14 @@ namespace MassTransit.AzureServiceBusTransport.Tests
             _handler = Handled<PingMessage>(configurator);
         }
 
-        [TestFixtureSetUp]
-        public void Setup()
+        [OneTimeSetUp]
+        public async Task Setup()
         {
-            Await(() => InputQueueSendEndpoint.Send(new PingMessage()));
+            await InputQueueSendEndpoint.Send(new PingMessage());
         }
 
         [Test]
-        public async void Should_have_a_redelivery_flag_of_false()
+        public async Task Should_have_a_redelivery_flag_of_false()
         {
             var context = await _handler;
 
@@ -43,7 +43,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
         }
 
         [Test]
-        public async void Should_succeed()
+        public async Task Should_succeed()
         {
             await _handler;
         }
@@ -58,7 +58,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
         Task<PongMessage> _response;
         IRequestClient<PingMessage, PongMessage> _requestClient;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void Setup()
         {
             _requestClient = new MessageRequestClient<PingMessage, PongMessage>(Bus, InputQueueAddress, TestTimeout);
@@ -72,7 +72,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
         }
 
         [Test]
-        public async void Should_receive_the_response()
+        public async Task Should_receive_the_response()
         {
             PongMessage message = await _response;
 

@@ -76,8 +76,8 @@ namespace MassTransit.Tests.Courier
         Task<ConsumeContext<RoutingSlipActivityCompleted>> _activityCompleted;
         Guid _trackingNumber;
 
-        [TestFixtureSetUp]
-        public void Should_publish_the_completed_event()
+        [OneTimeSetUp]
+        public async Task Should_publish_the_completed_event()
         {
             _completed = SubscribeHandler<RoutingSlipCompleted>();
             _activityCompleted = SubscribeHandler<RoutingSlipActivityCompleted>();
@@ -94,7 +94,7 @@ namespace MassTransit.Tests.Courier
 
             builder.AddVariable("Variable", "Knife");
 
-            Await(() =>  Bus.Execute(builder.Build()));
+            await Bus.Execute(builder.Build());
         }
 
         protected override void SetupActivities()
@@ -121,7 +121,7 @@ namespace MassTransit.Tests.Courier
 //
 //        IConsumerTest<IBusTestScenario, ExecuteActivityHost<TestActivity, TestArguments>> _test;
 //
-//        [TestFixtureSetUp]
+//        [OneTimeSetUp]
 //        public void Setup()
 //        {
 //            _test = TestFactory.ForConsumer<ExecuteActivityHost<TestActivity, TestArguments>>()
@@ -155,7 +155,7 @@ namespace MassTransit.Tests.Courier
 //            _test.Execute();
 //        }
 //
-//        [TestFixtureTearDown]
+//        [OneTimeTearDown]
 //        public void Teardown()
 //        {
 //            _test.Dispose();

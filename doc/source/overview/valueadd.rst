@@ -6,7 +6,7 @@ a consistent, .NET friendly abstraction over the message transport (whether it i
 To meet this goal, MassTransit brings a lot of the application-specific logic closer to the developer in an easy to 
 configure and understand manner.
 
-The benefits of using MassTransit over the message transport, as opposed to use the raw transport APIs and building
+The benefits of using MassTransit over the message transport, as opposed to using the raw transport APIs and building
 everything from scratch, are shown below. These are just a few, and some are more significant than others. The fact
 that the hosting of your consumers, handlers, sagas, etc. are all managed consistently with a well documented
 production ready framework is the biggest advantage. You can also find numerous blog posts, podcasts, and articles

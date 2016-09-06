@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -28,6 +28,30 @@ namespace MassTransit
             return new ConsumerConsumeContextProxy<TConsumer, T>(context, consumer);
         }
 
+        public static ConsumerConsumeContext<TConsumer, TMessage> PushConsumerScope<TConsumer, TMessage, T>(this ConsumeContext<TMessage> context, TConsumer consumer,
+            T scope)
+            where TMessage : class
+            where TConsumer : class
+            where T : class
+        {
+            var proxy = new ConsumerConsumeContextProxy<TConsumer, TMessage>(context, new PayloadCacheScope(context), consumer);
+
+            proxy.GetOrAddPayload(() => scope);
+
+            return proxy;
+        }
+
+        public static ConsumeContext<T> CreateScope<T, TScope>(this ConsumeContext<T> context, TScope scope)
+            where T : class
+            where TScope : class
+        {
+            var proxy = new ConsumeContextProxy<T>(context, new PayloadCacheScope(context));
+
+            proxy.GetOrAddPayload(() => scope);
+
+            return proxy;
+        }
+
         public static Task Forward<T>(this ConsumeContext<T> context, ISendEndpoint endpoint)
             where T : class
         {
@@ -47,7 +71,7 @@ namespace MassTransit
             if (address == null)
                 throw new ArgumentNullException(nameof(address));
 
-            ISendEndpoint endpoint = await context.GetSendEndpoint(address).ConfigureAwait(false);
+            var endpoint = await context.GetSendEndpoint(address).ConfigureAwait(false);
 
             await Forward(context, endpoint, context.Message).ConfigureAwait(false);
         }
@@ -55,7 +79,7 @@ namespace MassTransit
         public static async Task Forward<T>(this ConsumeContext context, Uri address, T message)
             where T : class
         {
-            ISendEndpoint endpoint = await context.GetSendEndpoint(address).ConfigureAwait(false);
+            var endpoint = await context.GetSendEndpoint(address).ConfigureAwait(false);
 
             await Forward(context, endpoint, message).ConfigureAwait(false);
         }
@@ -74,7 +98,7 @@ namespace MassTransit
 
         static IEnumerable<KeyValuePair<string, object>> GetForwardHeaders(ConsumeContext context)
         {
-            Uri inputAddress = context.ReceiveContext.InputAddress ?? context.DestinationAddress;
+            var inputAddress = context.ReceiveContext.InputAddress ?? context.DestinationAddress;
             if (inputAddress != null)
                 yield return new KeyValuePair<string, object>(MessageHeaders.ForwarderAddress, inputAddress.ToString());
         }
@@ -90,7 +114,7 @@ namespace MassTransit
         {
             return CreateCopyContextPipe(context, (consumeContext, sendContext) =>
             {
-                foreach (var additionalHeader in additionalHeaders(consumeContext))
+                foreach (KeyValuePair<string, object> additionalHeader in additionalHeaders(consumeContext))
                     sendContext.Headers.Set(additionalHeader.Key, additionalHeader.Value);
             });
         }
@@ -116,7 +140,7 @@ namespace MassTransit
                 if (context.ExpirationTime.HasValue)
                     sendContext.TimeToLive = context.ExpirationTime.Value.ToUniversalTime() - DateTime.UtcNow;
 
-                foreach (var header in context.Headers.GetAll())
+                foreach (KeyValuePair<string, object> header in context.Headers.GetAll())
                     sendContext.Headers.Set(header.Key, header.Value);
 
                 callback(context, sendContext);

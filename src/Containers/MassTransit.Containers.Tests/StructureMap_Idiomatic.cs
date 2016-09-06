@@ -13,6 +13,7 @@
 namespace MassTransit.Containers.Tests
 {
     using System;
+    using System.Threading.Tasks;
     using NUnit.Framework;
     using Scenarios;
     using Shouldly;
@@ -27,7 +28,7 @@ namespace MassTransit.Containers.Tests
         AsyncTestFixture
     {
         [Test]
-        public async void Should_work_with_the_registry()
+        public async Task Should_work_with_the_registry()
         {
             var bus = _container.GetInstance<IBusControl>();
 
@@ -58,7 +59,7 @@ namespace MassTransit.Containers.Tests
 
         Container _container;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void Setup()
         {
             _container = new Container(x =>
@@ -94,7 +95,7 @@ namespace MassTransit.Containers.Tests
         }
 
 
-        [TestFixtureTearDown]
+        [OneTimeTearDown]
         public void Teardown()
         {
             _container.Dispose();

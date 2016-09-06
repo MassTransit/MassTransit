@@ -73,8 +73,9 @@ namespace MassTransit.RabbitMqTransport.Tests
             var observer = new Observer();
             using (InputQueueSendEndpoint.ConnectSendObserver(observer))
             {
-                Assert.Throws<SerializationException>(
-                    async () => await InputQueueSendEndpoint.Send(new PingMessage(), Pipe.Execute<SendContext>(x => x.Serializer = null)));
+                Assert.That(
+                    async () => await InputQueueSendEndpoint.Send(new PingMessage(), Pipe.Execute<SendContext>(x => x.Serializer = null)), 
+                    Throws.TypeOf<SerializationException>());
 
                 await observer.SendFaulted;
             }
@@ -110,8 +111,9 @@ namespace MassTransit.RabbitMqTransport.Tests
             var observer = new Observer();
             using (InputQueueSendEndpoint.ConnectSendObserver(observer))
             {
-                Assert.Throws<SerializationException>(
-                    async () => await InputQueueSendEndpoint.Send(new PingMessage(), Pipe.Execute<SendContext>(x => x.Serializer = null)));
+                Assert.That(
+                    async () => await InputQueueSendEndpoint.Send(new PingMessage(), Pipe.Execute<SendContext>(x => x.Serializer = null)), 
+                    Throws.TypeOf<SerializationException>());
 
                 await observer.SendFaulted;
 

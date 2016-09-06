@@ -44,7 +44,7 @@ namespace MassTransit.Tests
         readonly TaskCompletionSource<UserCredentials> _credentials = new TaskCompletionSource<UserCredentials>();
         Task<ConsumeContext<UserCredentials>> _credentialsHandler;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void Setup()
         {
             InputQueueSendEndpoint.Send(new CommandAndCredentials

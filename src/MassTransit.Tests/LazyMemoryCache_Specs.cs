@@ -42,13 +42,45 @@ namespace MassTransit.Tests
             }
         }
 
+        [Test, Explicit]
+        public async Task Should_handle_faulted_tasks()
+        {
+            var didThrow = false;
+            UnhandledExceptionEventHandler exHandler = (s, e) =>
+            {
+                if (e.ExceptionObject is LazyMemoryCacheSpecException)
+                    didThrow = true;
+            };
+
+            AppDomain.CurrentDomain.UnhandledException += exHandler;
+            using (var cache = new LazyMemoryCache<Uri, Data>("endpoints", async key => { throw new LazyMemoryCacheSpecException(); },
+                x => x.SlidingWindow(TimeSpan.FromSeconds(5))))
+            {
+                try
+                {
+                    await (await cache.Get(new Uri("loopback://localhost"))).Value;
+                }
+                catch (LazyMemoryCacheSpecException e)
+                {
+                }
+
+                await cache.Get(new Uri("loopback://localhost"));
+                await Task.Delay(5000);
+            }
+            AppDomain.CurrentDomain.UnhandledException -= exHandler;
+            Assert.That(!didThrow);
+        }
+
+        class LazyMemoryCacheSpecException : Exception
+        {
+        }
+
 
         interface IData
         {
             string Value { get; }
             DateTime Created { get; }
         }
-
 
         class Data :
             IData

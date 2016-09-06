@@ -118,8 +118,8 @@ namespace MassTransit.RabbitMqTransport.Tests
                 Handled<RoutingSlipActivityCompleted>(configurator, context => context.Message.ActivityName.Equals(secondActivity.Name));
         }
 
-        [TestFixtureSetUp]
-        public void Setup()
+        [OneTimeSetUp]
+        public async Task Setup()
         {
             var builder = new RoutingSlipBuilder(Guid.NewGuid());
 
@@ -138,7 +138,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
             _routingSlip = builder.Build();
 
-            Await(() => Bus.Execute(_routingSlip));
+            await Bus.Execute(_routingSlip);
         }
     }
 
@@ -174,8 +174,8 @@ namespace MassTransit.RabbitMqTransport.Tests
             _completed = Handled<RoutingSlipCompleted>(configurator);
         }
 
-        [TestFixtureSetUp]
-        public void Setup()
+        [OneTimeSetUp]
+        public async Task Setup()
         {
             var builder = new RoutingSlipBuilder(Guid.NewGuid());
 
@@ -194,7 +194,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
             _routingSlip = builder.Build();
 
-            Await(() => Bus.Execute(_routingSlip));
+            await Bus.Execute(_routingSlip);
 
             Console.WriteLine("Routing slip executed");
         }
@@ -245,8 +245,8 @@ namespace MassTransit.RabbitMqTransport.Tests
             });
         }
 
-        [TestFixtureSetUp]
-        public void Setup()
+        [OneTimeSetUp]
+        public async Task Setup()
         {
             _limit = 100;
 
@@ -262,7 +262,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
                 RoutingSlip routingSlip = builder.Build();
 
-                TaskUtil.Await(() => Bus.Execute(routingSlip));
+                await Bus.Execute(routingSlip);
 
                 _sentRoutingSlips.Add(routingSlip.TrackingNumber);
             }
@@ -313,8 +313,8 @@ namespace MassTransit.RabbitMqTransport.Tests
             });
         }
 
-        [TestFixtureSetUp]
-        public void Setup()
+        [OneTimeSetUp]
+        public async Task Setup()
         {
             _limit = 1;
 
@@ -329,7 +329,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
                 RoutingSlip routingSlip = builder.Build();
 
-                Bus.Execute(routingSlip);
+                await Bus.Execute(routingSlip);
 
                 _sentRoutingSlips.Add(routingSlip.TrackingNumber);
             }

@@ -15,6 +15,7 @@ namespace MassTransit.RabbitMqTransport.Tests
     using System;
     using System.Linq;
     using System.Threading;
+    using System.Threading.Tasks;
     using Logging;
     using MassTransit.Testing;
     using MassTransit.Testing.TestDecorators;
@@ -96,18 +97,18 @@ namespace MassTransit.RabbitMqTransport.Tests
 
         protected Uri BusAddress => _bus.Address;
 
-        [TestFixtureSetUp]
-        public void SetupInMemoryTestFixture()
+        [OneTimeSetUp]
+        public async Task SetupInMemoryTestFixture()
         {
             _bus = CreateBus();
 
-            _busHandle = _bus.Start();
+            _busHandle = await _bus.StartAsync();
             try
             {
-                _busSendEndpoint = Await(() => _bus.GetSendEndpoint(_bus.Address));
+                _busSendEndpoint = await _bus.GetSendEndpoint(_bus.Address);
                 _busSendEndpoint.ConnectSendObserver(_sendObserver);
 
-                _inputQueueSendEndpoint = Await(() => _bus.GetSendEndpoint(_inputQueueAddress));
+                _inputQueueSendEndpoint = await _bus.GetSendEndpoint(_inputQueueAddress);
                 _inputQueueSendEndpoint.ConnectSendObserver(_sendObserver);
             }
             catch (Exception)
@@ -116,7 +117,7 @@ namespace MassTransit.RabbitMqTransport.Tests
                 {
                     using (var tokenSource = new CancellationTokenSource(TestTimeout))
                     {
-                        _busHandle?.Stop(tokenSource.Token);
+                        await _busHandle?.StopAsync(tokenSource.Token);
                     }
                 }
                 finally
@@ -129,14 +130,14 @@ namespace MassTransit.RabbitMqTransport.Tests
             }
         }
 
-        [TestFixtureTearDown]
-        public void TearDownInMemoryTestFixture()
+        [OneTimeTearDown]
+        public async Task TearDownInMemoryTestFixture()
         {
             try
             {
                 using (var tokenSource = new CancellationTokenSource(TestTimeout))
                 {
-                    _bus.Stop(tokenSource.Token);
+                    await _bus.StopAsync(tokenSource.Token);
                 }
             }
             catch (Exception ex)

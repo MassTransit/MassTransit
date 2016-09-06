@@ -1,6 +1,7 @@
 ﻿namespace MassTransit.EntityFrameworkIntegration.Tests
 {
     using System;
+    using System.Threading.Tasks;
     using MassTransit.Saga;
     using MassTransit.Tests.Saga;
     using MassTransit.Tests.Saga.Messages;
@@ -14,7 +15,7 @@
         InMemoryTestFixture
     {
         [Test]
-        public async void A_correlated_message_should_find_the_correct_saga()
+        public async Task A_correlated_message_should_find_the_correct_saga()
         {
             Guid sagaId = NewId.NextGuid();
             var message = new InitiateSimpleSaga(sagaId);
@@ -35,7 +36,7 @@
         }
 
         [Test]
-        public async void An_initiating_message_should_start_the_saga()
+        public async Task An_initiating_message_should_start_the_saga()
         {
             Guid sagaId = NewId.NextGuid();
             var message = new InitiateSimpleSaga(sagaId);
@@ -54,16 +55,6 @@
         {
             sagaDbContextFactory = () => new SagaDbContext<SimpleSaga, SimpleSagaMap>(SagaDbContextFactoryProvider.GetLocalDbConnectionString());
             _sagaRepository = new Lazy<ISagaRepository<SimpleSaga>>(() => new EntityFrameworkSagaRepository<SimpleSaga>(sagaDbContextFactory));
-        }
-
-        [TestFixtureSetUp]
-        public void Setup()
-        {
-        }
-
-        [TestFixtureTearDown]
-        public void Teardown()
-        {
         }
 
         protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)

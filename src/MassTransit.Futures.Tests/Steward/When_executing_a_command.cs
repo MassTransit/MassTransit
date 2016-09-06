@@ -24,14 +24,14 @@ namespace MassTransit.Tests.Steward
         InMemoryDispatchTestFixture
     {
         [Test]
-        public async void Should_execute()
+        public async Task Should_execute()
         {
             Task<ConsumeContext<MagicMade>> received = SubscribeHandler<MagicMade>();
 
             Uri commandUri = GetCommandContext<MakeMagicHappen>().ExecuteUri;
             var command = new MakeMagicHappenCommand("Hello, World.");
 
-            DispatchMessageHandle<MakeMagicHappenCommand> handle = await DispatchEndpoint.DispatchMessage(command, commandUri);
+            DispatchMessageHandle<MakeMagicHappenCommand> handle = await (await DispatchEndpoint).DispatchMessage(command, commandUri);
 
             ConsumeContext<DispatchAccepted> accepted = await _accepted;
             Assert.AreEqual(handle.DispatchId, accepted.Message.DispatchId);

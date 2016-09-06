@@ -42,7 +42,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
             configurator.StateMachineSaga(_machine, _repository);
         }
 
-        [TestFixtureTearDown]
+        [OneTimeTearDown]
         public void Teardown()
         {
             _sessionFactory.Dispose();

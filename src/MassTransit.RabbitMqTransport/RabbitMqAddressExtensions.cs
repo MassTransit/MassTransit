@@ -321,13 +321,14 @@ namespace MassTransit.RabbitMqTransport
                 HostName = settings.Host,
                 Port = settings.Port,
                 VirtualHost = settings.VirtualHost ?? "/",
-                RequestedHeartbeat = settings.Heartbeat
+                RequestedHeartbeat = settings.Heartbeat,
+                RequestedConnectionTimeout = 10000
             };
 
             if (settings.ClusterMembers != null && settings.ClusterMembers.Any())
             {
                 factory.HostName = null;
-                factory.HostnameSelector = settings.HostNameSelector;
+                factory.EndpointResolverFactory = x => new SequentialEndpointResolver(settings.ClusterMembers);
             }
             
             if (settings.UseClientCertificateAsAuthenticationIdentity)
@@ -380,6 +381,15 @@ namespace MassTransit.RabbitMqTransport
                 factory.ClientProperties["assembly"] = hostInfo.Assembly;
             if (hostInfo.AssemblyVersion != null)
                 factory.ClientProperties["assembly_version"] = hostInfo.AssemblyVersion;
+
+            if (string.IsNullOrEmpty(settings.ClientProvidedName))
+            {
+                factory.ClientProperties["connection_name"] = $"{hostInfo.MachineName}.{hostInfo.Assembly}_{hostInfo.ProcessName}";
+            }
+            else
+            {
+                factory.ClientProperties["connection_name"] = settings.ClientProvidedName;
+            }
 
             return factory;
         }

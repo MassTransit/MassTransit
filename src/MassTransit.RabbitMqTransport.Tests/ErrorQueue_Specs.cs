@@ -15,7 +15,6 @@ namespace MassTransit.RabbitMqTransport.Tests
     using System;
     using System.Runtime.Serialization;
     using System.Text;
-    using System.Threading;
     using System.Threading.Tasks;
     using NUnit.Framework;
     using RabbitMQ.Client;
@@ -101,15 +100,15 @@ namespace MassTransit.RabbitMqTransport.Tests
         Task<ConsumeContext<PingMessage>> _errorHandler;
         readonly Guid? _correlationId = NewId.NextGuid();
 
-        [TestFixtureSetUp]
-        public void Setup()
+        [OneTimeSetUp]
+        public async Task Setup()
         {
-            Await(() => InputQueueSendEndpoint.Send(new PingMessage(), Pipe.Execute<SendContext<PingMessage>>(context =>
+            await InputQueueSendEndpoint.Send(new PingMessage(), Pipe.Execute<SendContext<PingMessage>>(context =>
             {
                 context.CorrelationId = _correlationId;
                 context.ResponseAddress = Bus.Address;
                 context.FaultAddress = Bus.Address;
-            })));
+            }));
         }
 
         protected override void ConfigureBusHost(IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host)
@@ -137,16 +136,16 @@ namespace MassTransit.RabbitMqTransport.Tests
         RabbitMqTestFixture
     {
         [Test]
-        public void Should_have_the_invalid_body()
-        {
-            _body.ShouldBe("[]");
-        }
-
-        [Test]
         public async Task Should_have_the_host_machine_name()
         {
             var header = Encoding.UTF8.GetString((byte[])_basicGetResult.BasicProperties.Headers["MT-Host-MachineName"]);
             header.ShouldBe(HostMetadataCache.Host.MachineName);
+        }
+
+        [Test]
+        public void Should_have_the_invalid_body()
+        {
+            _body.ShouldBe("[]");
         }
 
         [Test]
@@ -161,29 +160,26 @@ namespace MassTransit.RabbitMqTransport.Tests
         string _body;
         BasicGetResult _basicGetResult;
 
-        [TestFixtureSetUp]
-        public void Setup()
+        [OneTimeSetUp]
+        public async Task Setup()
         {
-            TaskUtil.Await(async () =>
+            var connectionFactory = _host.Settings.GetConnectionFactory();
+            using (var connection = connectionFactory.CreateConnection())
+            using (var model = connection.CreateModel())
             {
-                var connectionFactory = _host.Settings.GetConnectionFactory();
-                using (var connection = connectionFactory.CreateConnection())
-                using (var model = connection.CreateModel())
-                {
-                    byte[] bytes = Encoding.UTF8.GetBytes("[]");
+                byte[] bytes = Encoding.UTF8.GetBytes("[]");
 
-                    model.BasicPublish("input_queue", "", model.CreateBasicProperties(), bytes);
+                model.BasicPublish("input_queue", "", model.CreateBasicProperties(), bytes);
 
-                    await Task.Delay(3000).ConfigureAwait(false);
+                await Task.Delay(3000).ConfigureAwait(false);
 
-                    _basicGetResult = model.BasicGet("input_queue_error", true);
+                _basicGetResult = model.BasicGet("input_queue_error", true);
 
-                    _body = Encoding.UTF8.GetString(_basicGetResult.Body);
+                _body = Encoding.UTF8.GetString(_basicGetResult.Body);
 
-                    model.Close(200, "Cleanup complete");
-                    connection.Close(200, "Cleanup complete");
-                }
-            });
+                model.Close(200, "Cleanup complete");
+                connection.Close(200, "Cleanup complete");
+            }
         }
 
         protected override void ConfigureBusHost(IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host)

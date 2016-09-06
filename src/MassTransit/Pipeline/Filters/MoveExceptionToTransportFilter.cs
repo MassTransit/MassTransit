@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -40,21 +40,23 @@ namespace MassTransit.Pipeline.Filters
 
         void IProbeSite.Probe(ProbeContext context)
         {
-            ProbeContext scope = context.CreateFilterScope("moveFault");
+            var scope = context.CreateFilterScope("moveFault");
             scope.Add("destinationAddress", _destinationAddress);
         }
 
         async Task IFilter<ExceptionReceiveContext>.Send(ExceptionReceiveContext context, IPipe<ExceptionReceiveContext> next)
         {
-            ISendTransport transport = await _getDestinationTransport.Value.ConfigureAwait(false);
+            var transport = await _getDestinationTransport.Value.ConfigureAwait(false);
 
             IPipe<SendContext> pipe = Pipe.Execute<SendContext>(sendContext =>
             {
                 sendContext.Headers.Set(MessageHeaders.Reason, "fault");
 
-                Exception exception = context.Exception.GetBaseException();
+                var exception = context.Exception.GetBaseException() ?? context.Exception;
 
-                sendContext.Headers.Set(MessageHeaders.FaultMessage, exception.Message);
+                var message = exception?.Message ?? $"An exception of type {context.Exception.GetType()} was thrown but the message was null.";
+
+                sendContext.Headers.Set(MessageHeaders.FaultMessage, message);
                 sendContext.Headers.Set(MessageHeaders.FaultTimestamp, context.ExceptionTimestamp.ToString("O"));
                 sendContext.Headers.Set(MessageHeaders.FaultStackTrace, ExceptionUtil.GetStackTrace(exception));
 

@@ -47,6 +47,7 @@ namespace MassTransit.RabbitMqTransport.Configuration.Configurators
         public bool UseClientCertificateAsAuthenticationIdentity { get; set; }
         public IMessageNameFormatter MessageNameFormatter { get; set; }
         public string[] ClusterMembers { get; set; }
-        public IRabbitMqHostNameSelector HostNameSelector { get; set; }
+        public IRabbitMqEndpointResolver HostNameSelector { get; set; }
+        public string ClientProvidedName { get; set; }
     }
 }

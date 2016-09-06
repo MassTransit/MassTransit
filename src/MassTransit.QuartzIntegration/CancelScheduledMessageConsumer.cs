@@ -51,7 +51,7 @@ namespace MassTransit.QuartzIntegration
 
         public Task Consume(ConsumeContext<CancelScheduledRecurringMessage> context)
         {
-            string prependedValue = "Recurring.Trigger.";
+            const string prependedValue = "Recurring.Trigger.";
 
             string scheduleId = context.Message.ScheduleId;
 

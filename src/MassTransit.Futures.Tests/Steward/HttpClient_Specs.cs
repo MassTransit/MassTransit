@@ -25,7 +25,7 @@ namespace MassTransit.Tests.Steward
         InMemoryDispatchTestFixture
     {
         [Test]
-        public async void Should_succeed_nicely()
+        public async Task Should_succeed_nicely()
         {
             Task<ConsumeContext<HttpRequestSucceeded>> succeeded = SubscribeHandler<HttpRequestSucceeded>();
             Task<ConsumeContext<HttpRequestFaulted>> faulted = SubscribeHandler<HttpRequestFaulted>();
@@ -39,7 +39,7 @@ namespace MassTransit.Tests.Steward
             var command = new ExecuteHttpRequestCommand(webUrl);
 
 
-            DispatchMessageHandle<ExecuteHttpRequest> handle = await DispatchEndpoint.DispatchMessage(command, commandUri, webUrl);
+            DispatchMessageHandle<ExecuteHttpRequest> handle = await (await DispatchEndpoint).DispatchMessage(command, commandUri, webUrl);
 
             ConsumeContext<DispatchAccepted> accepted = await _accepted;
 

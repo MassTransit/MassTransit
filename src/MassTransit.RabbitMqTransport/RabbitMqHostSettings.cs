@@ -110,6 +110,11 @@ namespace MassTransit.RabbitMqTransport
         /// <summary>
         /// The host name selector if used to choose which server to connect
         /// </summary>
-        IRabbitMqHostNameSelector HostNameSelector { get; }
+        IRabbitMqEndpointResolver HostNameSelector { get; }
+
+        /// <summary>
+        /// The client-provided name for the connection (displayed in RabbitMQ admin panel)
+        /// </summary>
+        string ClientProvidedName { get; }
     }
 }

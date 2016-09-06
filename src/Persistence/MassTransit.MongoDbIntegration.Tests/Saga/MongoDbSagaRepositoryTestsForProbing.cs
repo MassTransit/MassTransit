@@ -35,7 +35,7 @@ namespace MassTransit.MongoDbIntegration.Tests.Saga
         Mock<ProbeContext> _probeContext;
         Mock<ProbeContext> _scope;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void GivenAMongoDbSagaRepository_WhenProbing()
         {
             _scope = new Mock<ProbeContext>();

@@ -37,6 +37,8 @@ namespace MassTransit.Saga
 
         public SagaInstance<TSaga> this[Guid id] => _sagas[id];
 
+        public int Count => _sagas.Count;
+
         public Task<IEnumerable<Guid>> Find(ISagaQuery<TSaga> query)
         {
             return Task.FromResult(_sagas.Where(query).Select(x => x.Instance.CorrelationId));
@@ -87,7 +89,6 @@ namespace MassTransit.Saga
                                 () => Remove(saga, context.CancellationToken));
 
                             await policy.Existing(sagaConsumeContext, next).ConfigureAwait(false);
-
                         }
                     }
                     finally
@@ -96,7 +97,7 @@ namespace MassTransit.Saga
                     }
                 }
 
-                if(saga == null)
+                if (saga == null)
                 {
                     var missingSagaPipe = new MissingPipe<T>(this, next, true);
 
@@ -253,6 +254,12 @@ namespace MassTransit.Saga
 
                         if (proxy.IsCompleted)
                         {
+                            if (_log.IsDebugEnabled)
+                            {
+                                _log.DebugFormat("SAGA:{0}:{1} Removed {2}", TypeMetadataCache<TSaga>.ShortName, context.Saga.CorrelationId,
+                                    TypeMetadataCache<TMessage>.ShortName);
+                            }
+
                             await RemoveNewSaga(instance, context.CancellationToken).ConfigureAwait(false);
                         }
                     }

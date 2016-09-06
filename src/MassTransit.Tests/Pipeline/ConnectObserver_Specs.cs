@@ -38,9 +38,9 @@ namespace MassTransit.Tests.Pipeline
 
             ConsumeContext consumeContext = GetConsumeContext(new MessageA());
 
-            Assert.Throws<IntentionalTestException>(async () => await filter.Send(consumeContext));
+            Assert.That(async () => await filter.Send(consumeContext), Throws.TypeOf<IntentionalTestException>());
 
-            Assert.Throws<IntentionalTestException>(async () => await interceptor.ConsumeFaulted);
+            Assert.That(async () => await interceptor.ConsumeFaulted, Throws.TypeOf<IntentionalTestException>());
         }
 
         [Test]

@@ -22,7 +22,6 @@ namespace MassTransit.MongoDbIntegration.Tests.Saga
     using Moq;
     using NUnit.Framework;
     using Pipeline;
-    using Util;
 
 
     [TestFixture]
@@ -58,8 +57,8 @@ namespace MassTransit.MongoDbIntegration.Tests.Saga
         Mock<IMongoDbSagaConsumeContextFactory> _sagaConsumeContextFactory;
         Mock<SagaConsumeContext<SimpleSaga, InitiateSimpleSaga>> _sagaConsumeContext;
 
-        [TestFixtureSetUp]
-        public void GivenAMongoDbSagaRepository_WhenSendingAndInstanceNotReturnedFromPolicy()
+        [OneTimeSetUp]
+        public async Task GivenAMongoDbSagaRepository_WhenSendingAndInstanceNotReturnedFromPolicy()
         {
             _correlationId = Guid.NewGuid();
             _cancellationToken = new CancellationToken();
@@ -82,20 +81,20 @@ namespace MassTransit.MongoDbIntegration.Tests.Saga
 
             _sagaConsumeContextFactory = new Mock<IMongoDbSagaConsumeContextFactory>();
             _sagaConsumeContextFactory.Setup(
-                m => m.Create(It.IsAny<IMongoCollection<SimpleSaga>>(), _context.Object, It.Is<SimpleSaga>(x => x.CorrelationId == _correlationId), true))
+                    m => m.Create(It.IsAny<IMongoCollection<SimpleSaga>>(), _context.Object, It.Is<SimpleSaga>(x => x.CorrelationId == _correlationId), true))
                 .Returns(_sagaConsumeContext.Object);
 
-            TaskUtil.Await(() => SagaRepository.InsertSaga(_simpleSaga));
+            await SagaRepository.InsertSaga(_simpleSaga);
 
             var repository = new MongoDbSagaRepository<SimpleSaga>(SagaRepository.Instance, _sagaConsumeContextFactory.Object);
 
-            TaskUtil.Await(() => repository.Send(_context.Object, _policy.Object, _nextPipe.Object));
+            await repository.Send(_context.Object, _policy.Object, _nextPipe.Object);
         }
 
-        [TestFixtureTearDown]
-        public void Kill()
+        [OneTimeTearDown]
+        public async Task Kill()
         {
-            TaskUtil.Await(() => SagaRepository.DeleteSaga(_correlationId));
+            await SagaRepository.DeleteSaga(_correlationId);
         }
     }
 }
