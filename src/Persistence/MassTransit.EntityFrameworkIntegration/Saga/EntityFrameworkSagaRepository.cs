@@ -84,9 +84,8 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
             {
                 // Hack for locking row for the duration of the transaction.
                 var tableName = ((IObjectContextAdapter)dbContext).ObjectContext.CreateObjectSet<TSaga>().EntitySet.Name;
-                await dbContext.Set<TSaga>().SqlQuery($"select * from {tableName} WITH (UPDLOCK, ROWLOCK) WHERE CorrelationId = @p0", sagaId)
-                    .SingleOrDefaultAsync()
-                    .ConfigureAwait(false);
+                await dbContext.Database.ExecuteSqlCommandAsync($"select 1 from {tableName} WITH (UPDLOCK, ROWLOCK) WHERE CorrelationId = @p0", sagaId)
+                        .ConfigureAwait(false);
 
                 var inserted = false;
 
@@ -171,7 +170,7 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
                 {
                     // Hack to lock the whole table for the duration of the transaction.
                     var tableName = ((IObjectContextAdapter)dbContext).ObjectContext.CreateObjectSet<TSaga>().EntitySet.Name;
-                    await dbContext.Set<TSaga>().SqlQuery($"select 1 from {tableName} WITH (TABLOCKX)").ToListAsync().ConfigureAwait(false);
+                    await dbContext.Database.ExecuteSqlCommandAsync($"select 1 from {tableName} WITH (TABLOCKX)").ConfigureAwait(false);
 
                     List<TSaga> sagaInstances = await dbContext.Set<TSaga>().Where(context.Query.FilterExpression).ToListAsync().ConfigureAwait(false);
                     if (sagaInstances.Count == 0)
