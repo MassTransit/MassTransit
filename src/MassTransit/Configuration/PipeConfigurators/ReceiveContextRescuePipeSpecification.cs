@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,20 +13,19 @@
 namespace MassTransit.PipeConfigurators
 {
     using System.Collections.Generic;
-    using Configurators;
+    using Context;
     using GreenPipes;
-    using Pipeline;
-    using Pipeline.Filters;
-    using Policies;
+    using GreenPipes.Filters;
+    using GreenPipes.Policies;
 
 
     public class ReceiveContextRescuePipeSpecification :
         IPipeSpecification<ReceiveContext>
     {
-        readonly IPolicyExceptionFilter _exceptionFilter;
+        readonly IExceptionFilter _exceptionFilter;
         readonly IPipe<ExceptionReceiveContext> _rescuePipe;
 
-        public ReceiveContextRescuePipeSpecification(IPipe<ExceptionReceiveContext> rescuePipe, IPolicyExceptionFilter exceptionFilter)
+        public ReceiveContextRescuePipeSpecification(IPipe<ExceptionReceiveContext> rescuePipe, IExceptionFilter exceptionFilter)
         {
             _rescuePipe = rescuePipe;
             _exceptionFilter = exceptionFilter;
@@ -34,7 +33,10 @@ namespace MassTransit.PipeConfigurators
 
         public void Apply(IPipeBuilder<ReceiveContext> builder)
         {
-            builder.AddFilter(new RescueReceiveContextFilter<ReceiveContext>(_rescuePipe, _exceptionFilter ?? new AllPolicyExceptionFilter()));
+            var filter = _exceptionFilter ?? new AllExceptionFilter();
+
+            builder.AddFilter(new RescueFilter<ReceiveContext, ExceptionReceiveContext>(_rescuePipe, filter,
+                (context, ex) => new RescueExceptionReceiveContext(context, ex)));
         }
 
         public IEnumerable<ValidationResult> Validate()
