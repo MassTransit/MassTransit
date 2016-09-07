@@ -16,7 +16,7 @@ namespace MassTransit.Tests
     using System.Threading;
     using System.Threading.Tasks;
     using GreenPipes;
-    using Monitoring.Introspection.Contracts;
+    using GreenPipes.Introspection;
     using NUnit.Framework;
     using Shouldly;
     using TestFramework;

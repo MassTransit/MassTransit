@@ -35,7 +35,7 @@ namespace MassTransit.Serialization
         readonly ISendEndpointProvider _sendEndpointProvider;
 
         protected BaseConsumeContext(ReceiveContext receiveContext, ISendEndpointProvider sendEndpointProvider, IPublishEndpointProvider publishEndpointProvider)
-            : base(new PayloadCacheProxy(receiveContext))
+            : base(receiveContext)
         {
             _receiveContext = receiveContext;
             _sendEndpointProvider = sendEndpointProvider;

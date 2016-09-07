@@ -17,7 +17,7 @@ namespace MassTransit
 
 
     public interface ISendPipeSpecification :
-        Configurator
+        ISpecification
     {
         void Apply(ISendPipeBuilder builder);
     }

@@ -18,7 +18,7 @@ namespace MassTransit.BusConfigurators
 
 
     public interface ISendPipeFactory :
-        Configurator
+        ISpecification
     {
         /// <summary>
         /// Creates a send pipe using the specifications and any additional specifications specified

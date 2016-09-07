@@ -17,7 +17,7 @@ namespace MassTransit.Builders
 
 
     public interface IInMemoryBusFactorySpecification :
-        Configurator
+        ISpecification
     {
         /// <summary>
         /// Apply the specification to the builder

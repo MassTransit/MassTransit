@@ -18,7 +18,7 @@ namespace MassTransit
 
 
     public interface IConsumePipeSpecification :
-        Configurator
+        ISpecification
     {
         void Apply(IConsumePipeBuilder builder);
     }

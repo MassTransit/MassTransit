@@ -18,7 +18,7 @@ namespace MassTransit
 
 
     public interface IPublishPipeSpecification :
-        Configurator
+        ISpecification
     {
         void Apply(IPublishPipeBuilder builder);
     }

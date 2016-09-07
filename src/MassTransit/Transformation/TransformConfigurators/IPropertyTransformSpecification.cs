@@ -17,7 +17,7 @@ namespace MassTransit.Transformation.TransformConfigurators
 
 
     public interface IPropertyTransformSpecification<in TResult, in TInput> :
-        Configurator
+        ISpecification
     {
         void Configure(ITransformBuilder<TResult, TInput> builder);
     }

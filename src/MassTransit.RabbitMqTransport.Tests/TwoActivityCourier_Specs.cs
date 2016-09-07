@@ -19,7 +19,8 @@ namespace MassTransit.RabbitMqTransport.Tests
     using System.Threading.Tasks;
     using Courier;
     using Courier.Contracts;
-    using Monitoring.Introspection.Contracts;
+    using GreenPipes;
+    using GreenPipes.Introspection;
     using NUnit.Framework;
     using TestFramework;
     using TestFramework.Courier;

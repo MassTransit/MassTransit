@@ -17,7 +17,7 @@ namespace MassTransit
 
 
     public interface IBusFactory :
-        Configurator
+        ISpecification
     {
         /// <summary>
         /// Create the bus, returning the bus control interface
