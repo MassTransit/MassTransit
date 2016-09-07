@@ -571,8 +571,6 @@
     <Compile Include="Pipeline\Filters\RateLimitFilter.cs" />
     <Compile Include="Pipeline\Filters\RepeatFilter.cs" />
     <Compile Include="Pipeline\Filters\RequestPipeFilter.cs" />
-    <Compile Include="Pipeline\Filters\RescueConsumeFilter.cs" />
-    <Compile Include="Pipeline\Filters\RescueReceiveContextFilter.cs" />
     <Compile Include="Pipeline\Filters\RetryFilter.cs" />
     <Compile Include="Pipeline\Filters\RetrySagaFilter.cs" />
     <Compile Include="Pipeline\Filters\ScheduleMessageRedeliveryFilter.cs" />
