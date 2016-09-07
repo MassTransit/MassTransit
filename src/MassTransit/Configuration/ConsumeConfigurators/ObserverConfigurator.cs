@@ -44,7 +44,7 @@ namespace MassTransit.ConsumeConfigurators
 
         public IEnumerable<ValidationResult> Validate()
         {
-            return _handlerConfigurator.Validate().Concat(((Configurator)_pipeConfigurator).Validate());
+            return _handlerConfigurator.Validate().Concat(((ISpecification)_pipeConfigurator).Validate());
         }
 
         public void Configure(IReceiveEndpointBuilder builder)

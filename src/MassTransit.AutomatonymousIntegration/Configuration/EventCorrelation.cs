@@ -22,7 +22,7 @@ namespace Automatonymous
 
 
     public interface EventCorrelation :
-        Configurator
+        ISpecification
     {
         /// <summary>
         /// The data type for the event

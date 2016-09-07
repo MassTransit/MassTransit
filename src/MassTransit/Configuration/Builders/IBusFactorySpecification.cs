@@ -17,7 +17,7 @@ namespace MassTransit.Builders
 
 
     public interface IBusFactorySpecification :
-        Configurator
+        ISpecification
     {
         void Apply(IBusBuilder builder);
     }

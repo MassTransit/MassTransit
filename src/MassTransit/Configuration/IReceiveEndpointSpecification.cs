@@ -20,7 +20,7 @@ namespace MassTransit
     /// Specification for configuring a receive endpoint
     /// </summary>
     public interface IReceiveEndpointSpecification :
-        Configurator
+        ISpecification
     {
         void Configure(IReceiveEndpointBuilder builder);
     }

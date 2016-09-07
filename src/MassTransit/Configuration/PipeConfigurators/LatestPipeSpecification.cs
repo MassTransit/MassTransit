@@ -39,7 +39,7 @@ namespace MassTransit.PipeConfigurators
             _created?.Invoke(filter);
         }
 
-        IEnumerable<ValidationResult> Configurator.Validate()
+        IEnumerable<ValidationResult> ISpecification.Validate()
         {
             yield break;
         }

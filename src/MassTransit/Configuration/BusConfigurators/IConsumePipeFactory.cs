@@ -18,7 +18,7 @@ namespace MassTransit.BusConfigurators
 
 
     public interface IConsumePipeFactory :
-        Configurator
+        ISpecification
     {
         IConsumePipe CreateConsumePipe(params IConsumePipeSpecification[] specifications);
     }

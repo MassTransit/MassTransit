@@ -15,7 +15,7 @@ namespace MassTransit
     using System;
     using System.Threading.Tasks;
     using GreenPipes;
-    using PipeConfigurators;
+    using GreenPipes.Specifications;
 
 
     public static class ContentFilterExtensions
@@ -35,7 +35,7 @@ namespace MassTransit
             if (contentFilter == null)
                 throw new ArgumentNullException(nameof(contentFilter));
 
-            var specification = new ContentFilterPipeSpecification<T>(contentFilter);
+            var specification = new ContextFilterPipeSpecification<ConsumeContext<T>>(contentFilter);
 
             configurator.AddPipeSpecification(specification);
         }
