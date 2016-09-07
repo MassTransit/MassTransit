@@ -32,7 +32,7 @@ namespace MassTransit.Context
         readonly ConsumeContext _context;
 
         protected ConsumeContextProxy(ConsumeContext context)
-            : base(new PayloadCacheProxy(context))
+            : base(context)
         {
             _context = context;
         }

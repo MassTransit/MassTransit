@@ -15,7 +15,8 @@ namespace MassTransit.AutomatonymousIntegration.Tests
     using System;
     using System.Threading.Tasks;
     using Automatonymous;
-    using Monitoring.Introspection.Contracts;
+    using GreenPipes;
+    using GreenPipes.Introspection;
     using NUnit.Framework;
     using Saga;
     using TestFramework;

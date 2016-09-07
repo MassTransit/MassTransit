@@ -27,7 +27,7 @@ namespace MassTransit.ConsumeConfigurators
     {
         public static IEqualityComparer<IMessageInterfaceType> MessageTypeComparer { get; } = new MessageTypeEqualityComparer();
 
-        public static IEnumerable<ValidationResult> ValidateConsumer<TConsumer>(this Configurator configurator)
+        public static IEnumerable<ValidationResult> ValidateConsumer<TConsumer>(this ISpecification configurator)
             where TConsumer : class
         {
             if (!typeof(TConsumer).HasInterface<IConsumer>())

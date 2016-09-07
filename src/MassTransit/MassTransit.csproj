@@ -158,7 +158,6 @@
     <Compile Include="Configuration\PartitionerExtensions.cs" />
     <Compile Include="Configuration\PipeConfigurators\CompensateActivityHostSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\RetryConsumerPipeSpecification.cs" />
-    <Compile Include="Configuration\PipeConfigurators\ContentFilterPipeSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\DeadLetterPipeSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\ExecuteActivityHostSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\LatestPipeSpecification.cs" />
@@ -303,7 +302,6 @@
     <Compile Include="Configuration\ObserverExtensions.cs" />
     <Compile Include="Configuration\PipeConfigurators\ConcurrencyLimitPipeSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\ConsumerPipeSpecification.cs" />
-    <Compile Include="Configuration\PipeConfigurators\FilterPipeSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\HandlerPipeSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\ObserverPipeSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\RateLimitPipeSpecification.cs" />
@@ -518,9 +516,6 @@
     <Compile Include="MessageRedeliveryContext.cs" />
     <Compile Include="MessageRequestClient.cs" />
     <Compile Include="MessageSchedulerContext.cs" />
-    <Compile Include="Monitoring\Introspection\Contracts\ProbeResult.cs" />
-    <Compile Include="Monitoring\Introspection\IProbeResultBuilder.cs" />
-    <Compile Include="Monitoring\Introspection\ProbeResultBuilder.cs" />
     <Compile Include="Monitoring\Performance\BusPerformanceCounters.cs" />
     <Compile Include="Monitoring\Performance\ConsumerPerformanceCounter.cs" />
     <Compile Include="Monitoring\Performance\ConsumerPerformanceCounterCache.cs" />
@@ -550,7 +545,6 @@
     <Compile Include="Pipeline\Filters\ConsumerMessageFilter.cs" />
     <Compile Include="Pipeline\Filters\RetryConsumerFilter.cs" />
     <Compile Include="Pipeline\Filters\ConsumerSplitFilter.cs" />
-    <Compile Include="Pipeline\Filters\ContentFilter.cs" />
     <Compile Include="Pipeline\Filters\DeadLetterFilter.cs" />
     <Compile Include="Pipeline\Filters\LatestFilter.cs" />
     <Compile Include="Pipeline\Filters\Latest\ILatestFilter.cs" />
@@ -578,7 +572,6 @@
     <Compile Include="Pipeline\Filters\RepeatFilter.cs" />
     <Compile Include="Pipeline\Filters\RequestPipeFilter.cs" />
     <Compile Include="Pipeline\Filters\RescueConsumeFilter.cs" />
-    <Compile Include="Pipeline\Filters\RescueExceptionFilter.cs" />
     <Compile Include="Pipeline\Filters\RescueReceiveContextFilter.cs" />
     <Compile Include="Pipeline\Filters\RetryFilter.cs" />
     <Compile Include="Pipeline\Filters\RetrySagaFilter.cs" />
@@ -1096,8 +1089,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Configuration\Configuration\" />
-    <Folder Include="Configuration\PipeBuilders\" />
-    <Folder Include="Pipeline\Filters\CircuitBreaker\" />
+    <Folder Include="Monitoring\Introspection\Contracts\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\GreenPipes\src\GreenPipes\GreenPipes.csproj">
