@@ -537,7 +537,6 @@
     <Compile Include="Pipeline\ConsumerFactories\DelegateConsumerFactory.cs" />
     <Compile Include="Pipeline\ConsumerFactories\InstanceConsumerFactory.cs" />
     <Compile Include="Pipeline\ConsumerFactories\ObjectConsumerFactory.cs" />
-    <Compile Include="Pipeline\Filters\ConcurrencyLimit\ConcurrencyLimitFilter.cs" />
     <Compile Include="Pipeline\Filters\ConcurrencyLimit\ConcurrencyLimitFilterManagementConsumer.cs" />
     <Compile Include="Pipeline\Filters\ConsumeContextRetryContext.cs" />
     <Compile Include="Pipeline\Filters\ConsumeContextRetryPolicy.cs" />

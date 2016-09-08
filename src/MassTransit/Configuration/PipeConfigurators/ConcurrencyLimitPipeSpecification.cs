@@ -13,10 +13,10 @@
 namespace MassTransit.PipeConfigurators
 {
     using System.Collections.Generic;
-    using Configurators;
     using GreenPipes;
+    using GreenPipes.Filters;
+    using GreenPipes.Pipes;
     using Pipeline.Filters.ConcurrencyLimit;
-    using Pipeline.Pipes;
 
 
     /// <summary>
@@ -30,26 +30,29 @@ namespace MassTransit.PipeConfigurators
     {
         readonly int _concurrencyLimit;
 
-        readonly IManagementPipe _managementPipe;
+        readonly IControlPipe _controlPipe;
 
         public ConcurrencyLimitPipeSpecification(int concurrencyLimit)
         {
             _concurrencyLimit = concurrencyLimit;
 
-            _managementPipe = new ManagementPipe();
+            _controlPipe = new ControlPipe();
         }
 
         public ConcurrencyLimitPipeSpecification(int concurrencyLimit, IManagementEndpointConfigurator configurator, string id = null)
             : this(concurrencyLimit)
         {
-            var consumer = new ConcurrencyLimitFilterManagementConsumer(_managementPipe, id);
+            var consumer = new ConcurrencyLimitFilterManagementConsumer(_controlPipe, id);
             configurator.Instance(consumer);
         }
 
         public void Apply(IPipeBuilder<T> builder)
         {
-            var filter = new ConcurrencyLimitFilter<T>(_concurrencyLimit, _managementPipe);
+            var filter = new ConcurrencyLimitFilter<T>(_concurrencyLimit);
+
             builder.AddFilter(filter);
+
+            _controlPipe.ConnectPipe(filter);
         }
 
         public IEnumerable<ValidationResult> Validate()
