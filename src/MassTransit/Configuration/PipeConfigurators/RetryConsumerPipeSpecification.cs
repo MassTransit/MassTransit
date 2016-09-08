@@ -13,8 +13,9 @@
 namespace MassTransit.PipeConfigurators
 {
     using System.Collections.Generic;
-    using Configurators;
+    using Context;
     using GreenPipes;
+    using GreenPipes.Filters;
     using Pipeline.Filters;
 
 
@@ -31,7 +32,10 @@ namespace MassTransit.PipeConfigurators
 
         public void Apply(IPipeBuilder<ConsumerConsumeContext<TConsumer>> builder)
         {
-            builder.AddFilter(new RetryConsumerFilter<TConsumer>(_retryPolicy));
+            var retryPolicy = new ConsumeContextRetryPolicy<ConsumerConsumeContext<TConsumer>, RetryConsumerConsumeContext<TConsumer>>(_retryPolicy,
+                x => new RetryConsumerConsumeContext<TConsumer>(x));
+
+            builder.AddFilter(new RetryFilter<ConsumerConsumeContext<TConsumer>>(retryPolicy));
         }
 
         public IEnumerable<ValidationResult> Validate()

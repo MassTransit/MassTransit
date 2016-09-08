@@ -15,6 +15,7 @@ namespace MassTransit.MongoDbIntegration.Courier
     using System;
     using System.Threading.Tasks;
     using Documents;
+    using GreenPipes;
     using MassTransit.Courier.MongoDbIntegration;
     using MongoDB.Driver;
     using Policies;
