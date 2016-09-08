@@ -17,6 +17,7 @@ namespace MassTransit.Builders
     using System.Linq;
     using System.Net.Mime;
     using BusConfigurators;
+    using GreenPipes;
     using Pipeline;
     using Serialization;
     using Transports;

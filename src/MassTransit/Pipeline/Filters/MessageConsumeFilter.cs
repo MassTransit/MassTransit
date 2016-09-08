@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -19,7 +19,6 @@ namespace MassTransit.Pipeline.Filters
     using System.Threading.Tasks;
     using GreenPipes;
     using GreenPipes.Pipes;
-    using Pipes;
     using Util;
 
 
@@ -64,7 +63,7 @@ namespace MassTransit.Pipeline.Filters
 
         void IProbeSite.Probe(ProbeContext context)
         {
-            ProbeContext scope = context.CreateMessageScope(TypeMetadataCache<TMessage>.ShortName);
+            var scope = context.CreateMessageScope(TypeMetadataCache<TMessage>.ShortName);
 
             _outputPipe.Probe(scope);
         }
@@ -111,7 +110,7 @@ namespace MassTransit.Pipeline.Filters
 
             IPipe<ConsumeContext<TMessage>> current = new LastPipe<ConsumeContext<TMessage>>(filters[filters.Length - 1]);
 
-            for (int i = filters.Length - 2; i >= 0; i--)
+            for (var i = filters.Length - 2; i >= 0; i--)
                 current = new FilterPipe<ConsumeContext<TMessage>>(filters[i], current);
 
             return current;

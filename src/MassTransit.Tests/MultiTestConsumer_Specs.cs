@@ -14,6 +14,7 @@ namespace MassTransit.Tests
 {
     using System;
     using System.Linq;
+    using GreenPipes;
     using MassTransit.Testing;
     using NUnit.Framework;
     using Shouldly;
