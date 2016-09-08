@@ -12,6 +12,9 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.TestFramework.Indicators
 {
+    using GreenPipes;
+
+
     /// <summary>
     /// Represents a boolean condition which may be observed.
     /// </summary>

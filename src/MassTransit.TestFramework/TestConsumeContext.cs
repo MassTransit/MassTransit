@@ -20,6 +20,7 @@ namespace MassTransit.TestFramework
     using Context;
     using GreenPipes;
     using GreenPipes.Payloads;
+    using GreenPipes.Util;
     using Pipeline;
     using Util;
 

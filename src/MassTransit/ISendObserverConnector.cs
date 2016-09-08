@@ -12,6 +12,9 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
+    using GreenPipes;
+
+
     /// <summary>
     /// Connect an observer that is notified when a message is sent to an endpoint
     /// </summary>

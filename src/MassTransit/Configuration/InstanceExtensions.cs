@@ -15,6 +15,7 @@ namespace MassTransit
     using System;
     using ConsumeConfigurators;
     using ConsumeConnectors;
+    using GreenPipes;
 
 
     /// <summary>
