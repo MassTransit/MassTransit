@@ -14,7 +14,9 @@ namespace MassTransit.Context
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Threading.Tasks;
+    using GreenPipes;
     using Util;
 
 
@@ -41,21 +43,22 @@ namespace MassTransit.Context
             return TaskUtil.Completed;
         }
 
-        public void ClearPendingFaults()
+        public Task ClearPendingFaults()
         {
             _pendingFaults.Clear();
+
+            return TaskUtil.Completed;
         }
 
-        public void NotifyPendingFaults()
+        public Task NotifyPendingFaults()
         {
-            foreach (var pendingFault in _pendingFaults)
-                pendingFault.Notify(_context);
+            return Task.WhenAll(_pendingFaults.Select(x => x.Notify(_context)));
         }
 
 
         interface PendingFault
         {
-            void Notify(ConsumeContext context);
+            Task Notify(ConsumeContext context);
         }
 
 
@@ -76,9 +79,9 @@ namespace MassTransit.Context
                 _exception = exception;
             }
 
-            public void Notify(ConsumeContext context)
+            public Task Notify(ConsumeContext context)
             {
-                context.NotifyFaulted(_context, _elapsed, _consumerType, _exception);
+                return context.NotifyFaulted(_context, _elapsed, _consumerType, _exception);
             }
         }
     }

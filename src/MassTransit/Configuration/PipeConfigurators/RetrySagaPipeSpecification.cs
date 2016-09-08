@@ -13,8 +13,9 @@
 namespace MassTransit.PipeConfigurators
 {
     using System.Collections.Generic;
-    using Configurators;
+    using Context;
     using GreenPipes;
+    using GreenPipes.Filters;
     using Pipeline.Filters;
     using Saga;
 
@@ -32,7 +33,10 @@ namespace MassTransit.PipeConfigurators
 
         public void Apply(IPipeBuilder<SagaConsumeContext<TSaga>> builder)
         {
-            builder.AddFilter(new RetrySagaFilter<TSaga>(_retryPolicy));
+            var retryPolicy = new ConsumeContextRetryPolicy<SagaConsumeContext<TSaga>, RetrySagaConsumeContext<TSaga>>(_retryPolicy,
+                x => new RetrySagaConsumeContext<TSaga>(x));
+
+            builder.AddFilter(new RetryFilter<SagaConsumeContext<TSaga>>(retryPolicy));
         }
 
         public IEnumerable<ValidationResult> Validate()

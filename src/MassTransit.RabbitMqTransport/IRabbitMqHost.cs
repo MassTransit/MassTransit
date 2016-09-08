@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RabbitMqTransport
 {
+    using GreenPipes;
     using Integration;
     using Transports;
     using Util;
