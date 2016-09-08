@@ -13,6 +13,8 @@
 namespace MassTransit.TestFramework.Indicators
 {
     using System.Threading.Tasks;
+    using GreenPipes;
+    using GreenPipes.Util;
     using Util;
 
 

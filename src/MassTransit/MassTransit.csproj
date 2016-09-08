@@ -328,7 +328,6 @@
     <Compile Include="Configuration\ConsumeConnectors\IMessageConnectorFactory.cs" />
     <Compile Include="Configuration\ConsumeConnectors\LegacyConsumeConnectorFactory.cs" />
     <Compile Include="Configuration\TransactionConfiguratorExtensions.cs" />
-    <Compile Include="ConnectHandle.cs" />
     <Compile Include="ConsumeContext.cs" />
     <Compile Include="ConsumeContextExtensions.cs" />
     <Compile Include="ConsumerConsumeContext.cs" />
@@ -576,7 +575,6 @@
     <Compile Include="Pipeline\Filters\TransactionFilter.cs" />
     <Compile Include="Pipeline\Filters\TransformFilter.cs" />
     <Compile Include="Pipeline\Filters\WireTapFilter.cs" />
-    <Compile Include="Pipeline\IConnectPipeById.cs" />
     <Compile Include="Pipeline\IConsumePipeConnector.cs" />
     <Compile Include="Pipeline\IConsumeObserver.cs" />
     <Compile Include="Pipeline\IConsumeObserverConnector.cs" />
@@ -596,7 +594,6 @@
     <Compile Include="Pipeline\ISendMessageObserverConnector.cs" />
     <Compile Include="Pipeline\ISendPipe.cs" />
     <Compile Include="Pipeline\ISendPipeConnector.cs" />
-    <Compile Include="Pipeline\KeyAccessor.cs" />
     <Compile Include="Pipeline\ConsumeMessageObservable.cs" />
     <Compile Include="Pipeline\ConsumeObservable.cs" />
     <Compile Include="Pipeline\Pipes\IManagementPipe.cs" />
@@ -1012,7 +1009,6 @@
     <Compile Include="Util\TaskParticipant.cs" />
     <Compile Include="Util\TaskSupervisor.cs" />
     <Compile Include="Util\BusHostInfo.cs" />
-    <Compile Include="Util\Connectable.cs" />
     <Compile Include="Util\ExceptionUtil.cs" />
     <Compile Include="Util\HostMetadataCache.cs" />
     <Compile Include="Util\ITaskSupervisor.cs" />

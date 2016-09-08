@@ -13,6 +13,7 @@
 namespace Automatonymous
 {
     using System;
+    using GreenPipes;
     using MassTransit;
     using MassTransit.Saga;
     using MassTransit.Saga.SubscriptionConfigurators;

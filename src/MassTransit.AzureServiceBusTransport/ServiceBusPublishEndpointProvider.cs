@@ -15,6 +15,7 @@ namespace MassTransit.AzureServiceBusTransport
     using System;
     using System.Threading.Tasks;
     using Configuration;
+    using GreenPipes;
     using MassTransit.Pipeline;
     using Transports;
     using Util;

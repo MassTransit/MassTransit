@@ -15,6 +15,7 @@ namespace MassTransit.Testing
     using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
+    using GreenPipes;
     using Pipeline;
     using Util;
 

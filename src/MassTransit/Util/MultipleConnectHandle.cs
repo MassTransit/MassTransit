@@ -14,6 +14,7 @@ namespace MassTransit.Util
 {
     using System.Collections.Generic;
     using System.Linq;
+    using GreenPipes;
 
 
     public class MultipleConnectHandle :

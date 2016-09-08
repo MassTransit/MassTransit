@@ -12,6 +12,9 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Pipeline
 {
+    using GreenPipes;
+
+
     /// <summary>
     /// Supports connection of a consume observer
     /// </summary>

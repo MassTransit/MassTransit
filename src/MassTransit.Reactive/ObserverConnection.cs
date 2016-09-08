@@ -14,6 +14,7 @@ namespace MassTransit.Reactive
 {
     using System;
     using System.Reactive;
+    using GreenPipes;
 
 
     public class ObserverConnection<T> :

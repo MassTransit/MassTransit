@@ -14,6 +14,7 @@ namespace MassTransit.ConsumeConnectors
 {
     using System.Collections.Generic;
     using System.Linq;
+    using GreenPipes;
     using Pipeline;
     using Util;
 
