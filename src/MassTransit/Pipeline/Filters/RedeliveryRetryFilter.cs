@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -15,7 +15,6 @@ namespace MassTransit.Pipeline.Filters
     using System;
     using System.Threading.Tasks;
     using GreenPipes;
-    using Policies;
 
 
     /// <summary>
@@ -35,19 +34,22 @@ namespace MassTransit.Pipeline.Filters
 
         void IProbeSite.Probe(ProbeContext context)
         {
-            ProbeContext scope = context.CreateFilterScope("retry");
+            var scope = context.CreateFilterScope("retry");
             scope.Add("type", "redelivery");
         }
 
         public async Task Send(ConsumeContext<T> context, IPipe<ConsumeContext<T>> next)
         {
+            var retryContext = _retryPolicy.CreatePolicyContext(context);
+
             try
             {
-                await next.Send(context).ConfigureAwait(false);
+                await next.Send(retryContext.Context).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
-                if (!_retryPolicy.CanRetry(ex))
+                RetryContext<ConsumeContext<T>> nextRetryContext;
+                if (!retryContext.CanRetry(ex, out nextRetryContext))
                     throw;
 
                 try
@@ -56,13 +58,10 @@ namespace MassTransit.Pipeline.Filters
                     if (!context.TryGetPayload(out redeliveryContext))
                         throw new ContextException("The message redelivery context was not available to delay the message", ex);
 
-                    TimeSpan delay;
-                    using (IRetryContext retryContext = _retryPolicy.GetRetryContext())
-                    {
-                        retryContext.CanRetry(ex, out delay);
-                    }
+                    if (!nextRetryContext.Delay.HasValue)
+                        throw new ContextException("The message retry policy did not provide a delay for redelivery", ex);
 
-                    await redeliveryContext.ScheduleRedelivery(delay).ConfigureAwait(false);
+                    await redeliveryContext.ScheduleRedelivery(nextRetryContext.Delay.Value).ConfigureAwait(false);
                 }
                 catch (Exception redeliveryException)
                 {

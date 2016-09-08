@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,8 +13,9 @@
 namespace MassTransit.PipeConfigurators
 {
     using System.Collections.Generic;
-    using Configurators;
+    using Context;
     using GreenPipes;
+    using GreenPipes.Filters;
     using Pipeline.Filters;
 
 
@@ -30,7 +31,9 @@ namespace MassTransit.PipeConfigurators
 
         public void Apply(IPipeBuilder<ConsumeContext> builder)
         {
-            builder.AddFilter(new RetryFilter(_retryPolicy));
+            var retryPolicy = new ConsumeContextRetryPolicy(_retryPolicy);
+
+            builder.AddFilter(new RetryFilter<ConsumeContext>(retryPolicy));
         }
 
         public IEnumerable<ValidationResult> Validate()
@@ -54,7 +57,9 @@ namespace MassTransit.PipeConfigurators
 
         public void Apply(IPipeBuilder<ConsumeContext<T>> builder)
         {
-            builder.AddFilter(new RetryFilter<T>(_retryPolicy));
+            var retryPolicy = new ConsumeContextRetryPolicy<ConsumeContext<T>, RetryConsumeContext<T>>(_retryPolicy, x => new RetryConsumeContext<T>(x));
+
+            builder.AddFilter(new RetryFilter<ConsumeContext<T>>(retryPolicy));
         }
 
         public IEnumerable<ValidationResult> Validate()
