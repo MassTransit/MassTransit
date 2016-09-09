@@ -31,7 +31,11 @@ namespace MassTransit.Tests.Pipeline
             var count = 0;
             IPipe<ConsumeContext<A>> pipe = Pipe.New<ConsumeContext<A>>(x =>
             {
-                x.UseCircuitBreaker(v => v.ResetInterval(TimeSpan.FromSeconds(60)));
+                x.UseCircuitBreaker(v =>
+                {
+                    v.ResetInterval(TimeSpan.FromSeconds(60));
+                    v.Handle<IntentionalTestException>();
+                });
                 x.UseExecute(payload =>
                 {
                     Interlocked.Increment(ref count);

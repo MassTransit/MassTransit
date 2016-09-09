@@ -213,7 +213,7 @@ namespace MassTransit
         /// <returns></returns>
         public static IExceptionFilter Except(params Type[] exceptionTypes)
         {
-            return new ExceptExceptionFilter(exceptionTypes);
+            return new IgnoreExceptionFilter(exceptionTypes);
         }
 
         /// <summary>
@@ -222,7 +222,7 @@ namespace MassTransit
         /// <returns></returns>
         public static IExceptionFilter Except<T1>()
         {
-            return new ExceptExceptionFilter(typeof(T1));
+            return new IgnoreExceptionFilter(typeof(T1));
         }
 
         /// <summary>
@@ -231,7 +231,7 @@ namespace MassTransit
         /// <returns></returns>
         public static IExceptionFilter Except<T1, T2>()
         {
-            return new ExceptExceptionFilter(typeof(T1), typeof(T2));
+            return new IgnoreExceptionFilter(typeof(T1), typeof(T2));
         }
 
         /// <summary>
@@ -240,7 +240,7 @@ namespace MassTransit
         /// <returns></returns>
         public static IExceptionFilter Except<T1, T2, T3>()
         {
-            return new ExceptExceptionFilter(typeof(T1), typeof(T2), typeof(T3));
+            return new IgnoreExceptionFilter(typeof(T1), typeof(T2), typeof(T3));
         }
 
         /// <summary>
@@ -250,7 +250,7 @@ namespace MassTransit
         /// <returns></returns>
         public static IExceptionFilter Selected(params Type[] exceptionTypes)
         {
-            return new SelectedExceptionFilter(exceptionTypes);
+            return new HandleExceptionFilter(exceptionTypes);
         }
 
         /// <summary>
@@ -259,7 +259,7 @@ namespace MassTransit
         /// <returns></returns>
         public static IExceptionFilter Selected<T1>()
         {
-            return new SelectedExceptionFilter(typeof(T1));
+            return new HandleExceptionFilter(typeof(T1));
         }
 
         /// <summary>
@@ -268,7 +268,7 @@ namespace MassTransit
         /// <returns></returns>
         public static IExceptionFilter Selected<T1, T2>()
         {
-            return new SelectedExceptionFilter(typeof(T1), typeof(T2));
+            return new HandleExceptionFilter(typeof(T1), typeof(T2));
         }
 
         /// <summary>
@@ -277,7 +277,7 @@ namespace MassTransit
         /// <returns></returns>
         public static IExceptionFilter Selected<T1, T2, T3>()
         {
-            return new SelectedExceptionFilter(typeof(T1), typeof(T2), typeof(T3));
+            return new HandleExceptionFilter(typeof(T1), typeof(T2), typeof(T3));
         }
 
         /// <summary>
