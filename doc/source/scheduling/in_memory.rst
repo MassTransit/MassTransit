@@ -18,7 +18,7 @@ To use Quartz in-memory for message scheduling:
             h.Password("guest");
         });
 
-        cfg.UseInMemoryMessageScheduler();
+        cfg.UseInMemoryScheduler();
     });
 
 
