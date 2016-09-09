@@ -246,7 +246,6 @@
     <Compile Include="IPublishObserver.cs" />
     <Compile Include="IReceiveEndpointObserver.cs" />
     <Compile Include="IReceiveEndpointObserverConnector.cs" />
-    <Compile Include="IRepeatPolicy.cs" />
     <Compile Include="ISendObserver.cs" />
     <Compile Include="ISendObserverConnector.cs" />
     <Compile Include="Logging\Tracing\ConsoleTraceListener.cs" />
@@ -302,11 +301,9 @@
     <Compile Include="Configuration\PipeConfigurators\ConsumerPipeSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\HandlerPipeSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\ObserverPipeSpecification.cs" />
-    <Compile Include="Configuration\PipeConfigurators\RepeatPipeSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\ReceiveContextRescuePipeSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\RetryPipeSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\TransactionPipeSpecification.cs" />
-    <Compile Include="Configuration\RepeatPipeConfiguratorExtensions.cs" />
     <Compile Include="Configuration\RescueFilterConfiguratorExtensions.cs" />
     <Compile Include="Configuration\RetryPipeConfiguratorExtensions.cs" />
     <Compile Include="Configuration\BusFactoryExtensions.cs" />
@@ -564,13 +561,11 @@
     <Compile Include="Pipeline\Filters\MethodConsumerMessageFilter.cs" />
     <Compile Include="Pipeline\Filters\MoveExceptionToTransportFilter.cs" />
     <Compile Include="Pipeline\Filters\ObserverMessageFilter.cs" />
-    <Compile Include="Pipeline\Filters\RepeatFilter.cs" />
     <Compile Include="Pipeline\Filters\RequestPipeFilter.cs" />
     <Compile Include="Pipeline\Filters\ScheduleMessageRedeliveryFilter.cs" />
     <Compile Include="Pipeline\Filters\TeeConsumeFilter.cs" />
     <Compile Include="Pipeline\Filters\TransactionFilter.cs" />
     <Compile Include="Pipeline\Filters\TransformFilter.cs" />
-    <Compile Include="Pipeline\Filters\WireTapFilter.cs" />
     <Compile Include="Pipeline\IConsumePipeConnector.cs" />
     <Compile Include="Pipeline\IConsumeObserver.cs" />
     <Compile Include="Pipeline\IConsumeObserverConnector.cs" />
@@ -611,9 +606,6 @@
     <Compile Include="Policies\IRetryContext.cs" />
     <Compile Include="Policies\MessageRetryPolicyExtensions.cs" />
     <Compile Include="Policies\PipeRetryExtensions.cs" />
-    <Compile Include="Policies\Repeat.cs" />
-    <Compile Include="Policies\UntilCancelledRepeatContext.cs" />
-    <Compile Include="Policies\UntilCancelledRepeatPolicy.cs" />
     <Compile Include="ProbeContextExtensions.cs" />
     <Compile Include="PublishContext.cs" />
     <Compile Include="IPublishConvention.cs" />
