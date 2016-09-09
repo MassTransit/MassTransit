@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -19,12 +19,25 @@ namespace MassTransit.TestFramework
     using NUnit.Framework;
     using Pipeline.Pipes;
     using Transports.InMemory;
+    using Util;
 
 
     [TestFixture]
     public class InMemoryTestFixture :
         BusTestFixture
     {
+        [SetUp]
+        public Task SetupInMemoryTest()
+        {
+            return _busCreationScope.TestSetup();
+        }
+
+        [TearDown]
+        public Task TearDownInMemoryTest()
+        {
+            return _busCreationScope.TestTeardown();
+        }
+
         static readonly ILog _log = Logger.Get<InMemoryTestFixture>();
 
         IBusControl _bus;
@@ -84,33 +97,27 @@ namespace MassTransit.TestFramework
         }
 
         [OneTimeSetUp]
-        public void SetupInMemoryTestFixture()
+        public Task SetupInMemoryTestFixture()
         {
-            _busCreationScope.TestFixtureSetup();
+            return _busCreationScope.TestFixtureSetup();
         }
 
-        [SetUp]
-        public void SetupInMemoryTest()
-        {
-            _busCreationScope.TestSetup();
-        }
-
-        void SetupBus()
+        async Task SetupBus()
         {
             _bus = CreateBus();
 
             ConnectObservers(_bus);
 
-            _busHandle = _bus.Start();
+            _busHandle = await _bus.StartAsync();
 
-            _busSendEndpoint = Await(() => GetSendEndpoint(_bus.Address));
+            _busSendEndpoint = await GetSendEndpoint(_bus.Address);
 
-            _inputQueueSendEndpoint = Await(() => GetSendEndpoint(InputQueueAddress));
+            _inputQueueSendEndpoint = await GetSendEndpoint(InputQueueAddress);
         }
 
         protected async Task<ISendEndpoint> GetSendEndpoint(Uri address)
         {
-            ISendEndpoint sendEndpoint = await _bus.GetSendEndpoint(address).ConfigureAwait(false);
+            var sendEndpoint = await _bus.GetSendEndpoint(address).ConfigureAwait(false);
 
             return sendEndpoint;
         }
@@ -118,22 +125,16 @@ namespace MassTransit.TestFramework
         protected IPublishEndpointProvider PublishEndpointProvider => new InMemoryPublishEndpointProvider(Bus, _inMemoryTransportCache, PublishPipe.Empty);
 
         [OneTimeTearDown]
-        public void TearDownInMemoryTestFixture()
+        public Task TearDownInMemoryTestFixture()
         {
-            _busCreationScope.TestFixtureTeardown();
+            return _busCreationScope.TestFixtureTeardown();
         }
 
-        [TearDown]
-        public void TearDownInMemoryTest()
-        {
-            _busCreationScope.TestTeardown();
-        }
-
-        void TeardownBus()
+        async Task TeardownBus()
         {
             try
             {
-                _busHandle?.Stop(new CancellationTokenSource(TestTimeout).Token);
+                await _busHandle?.StopAsync(new CancellationTokenSource(TestTimeout).Token);
             }
             catch (Exception ex)
             {
@@ -153,7 +154,6 @@ namespace MassTransit.TestFramework
 
         protected virtual void ConnectObservers(IBus bus)
         {
-            
         }
 
         protected virtual void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
@@ -173,75 +173,80 @@ namespace MassTransit.TestFramework
             });
         }
 
-        
 
         interface IBusCreationScope
         {
-            void TestFixtureSetup();
-            void TestSetup();
-            void TestTeardown();
-            void TestFixtureTeardown();
-            
+            Task TestFixtureSetup();
+            Task TestSetup();
+            Task TestTeardown();
+            Task TestFixtureTeardown();
         }
 
-        
 
-        class PerTestFixtureBusCreationScope : IBusCreationScope
+        class PerTestFixtureBusCreationScope : 
+            IBusCreationScope
         {
-            readonly Action _setupBus;
-            readonly Action _teardownBus;
+            readonly Func<Task> _setupBus;
+            readonly Func<Task> _teardownBus;
 
-            public PerTestFixtureBusCreationScope(Action setupBus, Action teardownBus)
+            public PerTestFixtureBusCreationScope(Func<Task> setupBus, Func<Task> teardownBus)
             {
                 _setupBus = setupBus;
                 _teardownBus = teardownBus;
             }
 
-            public void TestFixtureSetup()
+            public Task TestFixtureSetup()
             {
-                _setupBus();
+                return _setupBus();
             }
 
-            public void TestSetup()
+            public Task TestSetup()
             {
+                return TaskUtil.Completed;
             }
 
-            public void TestTeardown()
+            public Task TestTeardown()
             {
+                return TaskUtil.Completed;
             }
 
-            public void TestFixtureTeardown()
+            public Task TestFixtureTeardown()
             {
-                _teardownBus();
+                return _teardownBus();
             }
         }
-        class PerTestBusCreationScope : IBusCreationScope
-        {
-            readonly Action _setupBus;
-            readonly Action _teardownBus;
 
-            public PerTestBusCreationScope(Action setupBus, Action teardownBus)
+
+        class PerTestBusCreationScope : 
+            IBusCreationScope
+        {
+            readonly Func<Task> _setupBus;
+            readonly Func<Task> _teardownBus;
+
+            public PerTestBusCreationScope(Func<Task> setupBus, Func<Task> teardownBus)
             {
                 _setupBus = setupBus;
                 _teardownBus = teardownBus;
             }
 
-            public void TestFixtureSetup()
+            public Task TestFixtureSetup()
             {
+                return TaskUtil.Completed;
             }
 
-            public void TestSetup()
+            public Task TestSetup()
             {
-                _setupBus();
+                return _setupBus();
             }
 
-            public void TestTeardown()
+            public Task TestTeardown()
             {
-                _teardownBus();
+                return _teardownBus();
             }
 
-            public void TestFixtureTeardown()
+            public Task TestFixtureTeardown()
             {
+                return TaskUtil.Completed;
             }
         }
     }

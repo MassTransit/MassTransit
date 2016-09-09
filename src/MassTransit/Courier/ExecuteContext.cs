@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -31,14 +31,29 @@ namespace MassTransit.Courier
         /// </summary>
         Guid ExecutionId { get; }
 
+        /// <summary>
+        /// The host performing the execution
+        /// </summary>
         HostInfo Host { get; }
 
+        /// <summary>
+        /// The start time for the activity execution
+        /// </summary>
         DateTime Timestamp { get; }
 
+        /// <summary>
+        /// The time elapsed for the execution operation
+        /// </summary>
         TimeSpan Elapsed { get; }
 
+        /// <summary>
+        /// The consume context of the execution routing slip
+        /// </summary>
         ConsumeContext ConsumeContext { get; }
 
+        /// <summary>
+        /// The name of the activity being executed
+        /// </summary>
         string ActivityName { get; }
 
         /// <summary>

@@ -23,7 +23,10 @@ namespace MassTransit.TestFramework.Courier
     {
         public async Task<ExecutionResult> Execute(ExecuteContext<TestArguments> context)
         {
-            return context.Completed();
+            return context.CompletedWithVariables(new
+            {
+                ToBeRemoved = (string)null
+            });
         }
 
         public async Task<CompensationResult> Compensate(CompensateContext<TestLog> context)

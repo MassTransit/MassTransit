@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2013 Chris Patterson
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -19,11 +19,14 @@ namespace MassTransit.Courier.Serialization
     {
         public static void MergeInto(this JContainer left, JToken right)
         {
-            foreach (JProperty rightChild in right.Children<JProperty>())
+            foreach (var rightChild in right.Children<JProperty>())
             {
-                JProperty rightChildProperty = rightChild;
-                JToken leftProperty = left.SelectToken(rightChildProperty.Name);
+                var rightChildProperty = rightChild;
+                var path = string.Empty.Equals(rightChildProperty.Name) || rightChildProperty.Name.Contains(" ")
+                    ? $"['{rightChildProperty.Name}']"
+                    : rightChildProperty.Name;
 
+                var leftProperty = left.SelectToken(path);
                 if (leftProperty == null)
                 {
                     // no matching property, just add 
@@ -39,7 +42,6 @@ namespace MassTransit.Courier.Serialization
                         leftParent.Value = rightChildProperty.Value;
                     }
                     else
-                        // recurse object
                         MergeInto(leftObject, rightChildProperty.Value);
                 }
             }

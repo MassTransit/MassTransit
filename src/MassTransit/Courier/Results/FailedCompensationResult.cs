@@ -38,16 +38,16 @@ namespace MassTransit.Courier.Results
             _compensateLog = compensateLog;
             _routingSlip = routingSlip;
             _exception = exception;
-            _duration = _compensateContext.ElapsedTime;
+            _duration = _compensateContext.Elapsed;
         }
 
         public Task Evaluate()
         {
-            DateTime faultedTimestamp = _compensateContext.StartTimestamp + _duration;
+            DateTime faultedTimestamp = _compensateContext.Timestamp + _duration;
             TimeSpan faultedDuration = faultedTimestamp - _routingSlip.CreateTimestamp;
 
             return _publisher.PublishRoutingSlipActivityCompensationFailed(_compensateContext.ActivityName, _compensateContext.ExecutionId,
-                _compensateContext.StartTimestamp, _duration, faultedTimestamp, faultedDuration, new FaultExceptionInfo(_exception), _routingSlip.Variables,
+                _compensateContext.Timestamp, _duration, faultedTimestamp, faultedDuration, new FaultExceptionInfo(_exception), _routingSlip.Variables,
                 _compensateLog.Data);
         }
     }

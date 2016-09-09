@@ -37,8 +37,8 @@ namespace MassTransit.Courier
 
             var settings = new JsonSerializerSettings
             {
-                NullValueHandling = source.NullValueHandling,
-                DefaultValueHandling = source.DefaultValueHandling,
+                NullValueHandling = NullValueHandling.Include,
+                DefaultValueHandling = DefaultValueHandling.Include,
                 MissingMemberHandling = source.MissingMemberHandling,
                 ObjectCreationHandling = source.ObjectCreationHandling,
                 ConstructorHandling = source.ConstructorHandling,

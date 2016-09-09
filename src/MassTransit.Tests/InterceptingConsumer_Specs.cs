@@ -23,9 +23,9 @@ namespace MassTransit.Tests
         InMemoryTestFixture
     {
         [OneTimeSetUp]
-        public void Setup()
+        public async Task Setup()
         {
-            Await(() => InputQueueSendEndpoint.Send(new A()));
+            await InputQueueSendEndpoint.Send(new A());
         }
 
         MyConsumer _myConsumer;

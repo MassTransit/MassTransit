@@ -156,7 +156,7 @@ namespace MassTransit.Tests
         Guid? _conversationId;
 
         [OneTimeSetUp]
-        public void Setup()
+        public async Task Setup()
         {
             _responseHandler = SubscribeHandler<PongMessage>();
             _conversationId = NewId.NextGuid();
@@ -171,7 +171,8 @@ namespace MassTransit.Tests
                 });
                 x.Timeout = TestTimeout;
             });
-            Await(() => _request);
+
+            await _request;
         }
 
         protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
@@ -201,7 +202,6 @@ namespace MassTransit.Tests
             await BusSendEndpoint.Send(new PongMessage((await _ping).Message.CorrelationId));
 
             Assert.That(async () => await _response, Throws.TypeOf<TaskCanceledException>());
-
         }
 
         Task<ConsumeContext<PingMessage>> _ping;
@@ -211,7 +211,7 @@ namespace MassTransit.Tests
         Task<PingNotSupported> _notSupported;
 
         [OneTimeSetUp]
-        public void Setup()
+        public async Task Setup()
         {
             _responseHandler = SubscribeHandler<PongMessage>();
 
@@ -226,7 +226,7 @@ namespace MassTransit.Tests
                 });
             });
 
-            Await(() => _request);
+            await _request;
         }
 
         protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
@@ -254,7 +254,7 @@ namespace MassTransit.Tests
         Task<PingNotSupported> _notSupported;
 
         [OneTimeSetUp]
-        public void Setup()
+        public async Task Setup()
         {
             _responseHandler = SubscribeHandler<PongMessage>();
 
@@ -265,7 +265,7 @@ namespace MassTransit.Tests
                 });
 
             });
-            Await(() => _request);
+            await _request;
         }
 
         protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
@@ -301,7 +301,7 @@ namespace MassTransit.Tests
         Task<PongMessage> _response;
 
         [OneTimeSetUp]
-        public void Setup()
+        public async Task Setup()
         {
             _request = Bus.Request(InputQueueAddress, new PingMessage(), x =>
             {
@@ -311,7 +311,7 @@ namespace MassTransit.Tests
                 {
                 });
             });
-            Await(() => _request);
+            await _request;
         }
     }
 }

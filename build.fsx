@@ -12,8 +12,8 @@ let nugetWorkingPath = FullName "./build_temp"
 let packagesPath = FullName "./src/packages"
 let keyFile = FullName "./MassTransit.snk"
 
-let assemblyVersion = "3.3.1.0"
-let baseVersion = "3.3.5"
+let assemblyVersion = "3.4.0.0"
+let baseVersion = "3.4.1"
 
 let semVersion : SemVerInfo = parse baseVersion
 
@@ -89,23 +89,6 @@ Target "Build" (fun _ ->
   }
 
   build setParams @".\src\MassTransit.sln"
-      |> DoNothing
-
-  let unsignedSetParams defaults = { 
-    defaults with
-        Verbosity = Some(Quiet)
-        Targets = ["Build"]
-        Properties =
-            [
-                "Optimize", "True"
-                "DebugSymbols", "True"
-                "Configuration", "ReleaseUnsigned"
-                "TargetFrameworkVersion", "v4.5.2"
-                "Platform", "Any CPU"
-            ]
-  }
-
-  build unsignedSetParams @".\src\MassTransit.sln"
       |> DoNothing
 )
 
@@ -203,12 +186,7 @@ Target "Package" (fun _ ->
                             (@"..\src\Containers\MassTransit.SimpleInjectorIntegration\**\*.cs", Some @"src", None) ] } 
                 { Project = "MassTransit.StructureMap"
                   Summary = "MassTransit StructureMap Container Support"
-                  PackageFile = @".\src\Containers\MassTransit.StructureMapIntegration\packages-unsigned.config"
-                  Files = [ (@"..\src\Containers\MassTransit.StructureMapIntegration\bin\ReleaseUnsigned\MassTransit.StructureMapIntegration.*", Some @"lib\net452", None);
-                            (@"..\src\Containers\MassTransit.StructureMapIntegration\**\*.cs", Some @"src", None) ] } 
-                { Project = "MassTransit.StructureMapSigned"
-                  Summary = "MassTransit StructureMap (Signed) Container Support"
-                  PackageFile = @".\src\Containers\MassTransit.StructureMapIntegration\packages-signed.config"
+                  PackageFile = @".\src\Containers\MassTransit.StructureMapIntegration\packages.config"
                   Files = [ (@"..\src\Containers\MassTransit.StructureMapIntegration\bin\Release\MassTransit.StructureMapIntegration.*", Some @"lib\net452", None);
                             (@"..\src\Containers\MassTransit.StructureMapIntegration\**\*.cs", Some @"src", None) ] } 
                 { Project = "MassTransit.Unity"

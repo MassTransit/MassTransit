@@ -13,6 +13,7 @@
 namespace MassTransit.MongoDbIntegration.Tests.Saga
 {
     using System;
+    using System.Threading.Tasks;
     using MassTransit.Saga;
     using MongoDbIntegration.Saga;
     using MongoDbIntegration.Saga.Context;
@@ -20,7 +21,6 @@ namespace MassTransit.MongoDbIntegration.Tests.Saga
     using Moq;
     using NUnit.Framework;
     using Pipeline;
-    using Util;
 
 
     [TestFixture]
@@ -43,7 +43,7 @@ namespace MassTransit.MongoDbIntegration.Tests.Saga
         Mock<IPipe<SagaConsumeContext<SimpleSaga, InitiateSimpleSaga>>> _nextPipe;
 
         [OneTimeSetUp]
-        public void GivenAMongoDbSagaRepository_WhenSendingQueryAndSagaNotFound()
+        public async Task GivenAMongoDbSagaRepository_WhenSendingQueryAndSagaNotFound()
         {
             _sagaQueryConsumeContext = new Mock<SagaQueryConsumeContext<SimpleSaga, InitiateSimpleSaga>>();
             _sagaQueryConsumeContext.Setup(x => x.Query.FilterExpression).Returns(x => x.CorrelationId == Guid.NewGuid());
@@ -52,7 +52,7 @@ namespace MassTransit.MongoDbIntegration.Tests.Saga
 
             var repository = new MongoDbSagaRepository<SimpleSaga>(SagaRepository.Instance, null);
 
-            TaskUtil.Await(() => repository.SendQuery(_sagaQueryConsumeContext.Object, _sagaPolicy.Object, _nextPipe.Object));
+            await repository.SendQuery(_sagaQueryConsumeContext.Object, _sagaPolicy.Object, _nextPipe.Object);
         }
     }
 }

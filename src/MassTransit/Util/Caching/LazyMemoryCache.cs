@@ -142,18 +142,22 @@ namespace MassTransit.Util.Caching
 
         async void CleanupCacheItem(Task<TValue> valueTask, string textKey, CacheEntryRemovedReason reason)
         {
-            var value = await valueTask.ConfigureAwait(false);
+            await valueTask.ContinueWith(async t =>
+            {
+                if (t.IsFaulted)
+                    return;
 
-            await _valueRemoved(textKey, value, reason.ToString()).ConfigureAwait(false);
+                var value = t.Result;
+                await _valueRemoved(textKey, value, reason.ToString()).ConfigureAwait(false);
 
-            var disposable = value as IDisposable;
-            disposable?.Dispose();
+                var disposable = value as IDisposable;
+                disposable?.Dispose();
 
-            var asyncDisposable = value as IAsyncDisposable;
-            if (asyncDisposable != null)
-                await asyncDisposable.DisposeAsync().ConfigureAwait(false);
+                var asyncDisposable = value as IAsyncDisposable;
+                if (asyncDisposable != null)
+                    await asyncDisposable.DisposeAsync().ConfigureAwait(false);
+            }).ConfigureAwait(false);
         }
-
 
         class CachedValue :
             Cached<TValue>

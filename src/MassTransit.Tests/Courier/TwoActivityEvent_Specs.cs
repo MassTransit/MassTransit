@@ -74,6 +74,8 @@ namespace MassTransit.Tests.Courier
             Assert.AreEqual(_routingSlip.TrackingNumber, completed.TrackingNumber);
 
             Console.WriteLine("Duration: {0}", completed.Duration);
+
+            Assert.IsFalse(completed.Variables.ContainsKey("ToBeRemoved"));
         }
 
         [Test]
@@ -104,7 +106,7 @@ namespace MassTransit.Tests.Courier
         }
 
         [OneTimeSetUp]
-        public void Setup()
+        public async Task Setup()
         {
             ActivityTestContext testActivity = GetActivityContext<TestActivity>();
             ActivityTestContext secondActivity = GetActivityContext<SecondTestActivity>();
@@ -127,11 +129,11 @@ namespace MassTransit.Tests.Courier
 
             builder.AddVariable("Variable", "Knife");
             builder.AddVariable("Nothing", null);
+            builder.AddVariable("ToBeRemoved", "Existing");
 
             _routingSlip = builder.Build();
 
-            Bus.Execute(_routingSlip)
-                .Wait(TestCancellationToken);
+            await Bus.Execute(_routingSlip);
         }
     }
 }

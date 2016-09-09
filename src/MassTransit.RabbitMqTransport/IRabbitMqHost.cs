@@ -21,6 +21,7 @@ namespace MassTransit.RabbitMqTransport
         IBusHost
     {
         IConnectionCache ConnectionCache { get; }
+
         RabbitMqHostSettings Settings { get; }
 
         /// <summary>

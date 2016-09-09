@@ -57,16 +57,6 @@
             _sagaRepository = new Lazy<ISagaRepository<SimpleSaga>>(() => new EntityFrameworkSagaRepository<SimpleSaga>(sagaDbContextFactory));
         }
 
-        [OneTimeSetUp]
-        public void Setup()
-        {
-        }
-
-        [OneTimeTearDown]
-        public void Teardown()
-        {
-        }
-
         protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             configurator.Saga(_sagaRepository.Value);

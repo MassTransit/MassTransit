@@ -51,7 +51,7 @@ namespace MassTransit.RabbitMqTransport.Configuration.Configurators
         public IExchangeTypeProvider ExchangeTypeProvider { get; }
         public IRoutingKeyFormatter RoutingKeyFormatter { get; }
         public string[] ClusterMembers { get; set; }
-        public IRabbitMqHostNameSelector HostNameSelector { get; set; }
+        public IRabbitMqEndpointResolver HostNameSelector { get; set; }
         public string ClientProvidedName { get; set; }
     }
 }

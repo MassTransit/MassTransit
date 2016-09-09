@@ -12,9 +12,12 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.TestFramework.Courier
 {
+    using System.Collections.Generic;
+
     public interface ObjectGraphActivityArguments
     {
         OuterObject Outer { get; }
         string[] Names { get; }
+        IDictionary<string, string> ArgumentsDictionary { get; }
     }
 }

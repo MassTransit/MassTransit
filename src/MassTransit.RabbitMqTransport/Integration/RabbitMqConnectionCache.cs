@@ -97,7 +97,9 @@ namespace MassTransit.RabbitMqTransport.Integration
                 }
                 else
                 {
-                    connection = _connectionFactory.CreateConnection(_settings.ClientProvidedName);
+                    var hostNames = Enumerable.Repeat(_settings.Host, 1).ToList();
+
+                    connection = _connectionFactory.CreateConnection(hostNames, _settings.ClientProvidedName);
                 }
 
 

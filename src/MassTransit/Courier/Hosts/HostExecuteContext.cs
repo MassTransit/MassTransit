@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -18,6 +18,7 @@ namespace MassTransit.Courier.Hosts
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
+    using Context;
     using Contracts;
     using Events;
     using Exceptions;
@@ -26,6 +27,7 @@ namespace MassTransit.Courier.Hosts
 
 
     public class HostExecuteContext<TArguments> :
+        BasePipeContext,
         ExecuteContext<TArguments>
         where TArguments : class
     {
@@ -41,13 +43,14 @@ namespace MassTransit.Courier.Hosts
         readonly DateTime _timestamp;
 
         public HostExecuteContext(HostInfo host, Uri compensationAddress, ConsumeContext<RoutingSlip> context)
+            : base(new PayloadCacheScope(context), context.CancellationToken)
         {
             _host = host;
             _compensationAddress = compensationAddress;
             _context = context;
 
             _timer = Stopwatch.StartNew();
-            NewId newId = NewId.Next();
+            var newId = NewId.Next();
 
             _executionId = newId.ToGuid();
             _timestamp = newId.Timestamp;
@@ -60,23 +63,6 @@ namespace MassTransit.Courier.Hosts
             _arguments = _routingSlip.GetActivityArguments<TArguments>();
 
             _publisher = new RoutingSlipEventPublisher(this, _routingSlip);
-        }
-
-        CancellationToken PipeContext.CancellationToken => _context.CancellationToken;
-
-        bool PipeContext.HasPayloadType(Type contextType)
-        {
-            return _context.HasPayloadType(contextType);
-        }
-
-        bool PipeContext.TryGetPayload<TPayload>(out TPayload payload)
-        {
-            return _context.TryGetPayload(out payload);
-        }
-
-        TPayload PipeContext.GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory)
-        {
-            return _context.GetOrAddPayload(payloadFactory);
         }
 
         Task IPublishEndpoint.Publish<T>(T message, CancellationToken cancellationToken)
@@ -305,14 +291,14 @@ namespace MassTransit.Courier.Hosts
             return _context.ConnectPublishObserver(observer);
         }
 
-        ExecutionResult Faulted(Exception exception)
-        {
-            return new FaultedExecutionResult<TArguments>(this, _publisher, _activity, _routingSlip, new FaultExceptionInfo(exception));
-        }
-
         public ConnectHandle ConnectSendObserver(ISendObserver observer)
         {
             return _context.ConnectSendObserver(observer);
+        }
+
+        ExecutionResult Faulted(Exception exception)
+        {
+            return new FaultedExecutionResult<TArguments>(this, _publisher, _activity, _routingSlip, new FaultExceptionInfo(exception));
         }
     }
 }

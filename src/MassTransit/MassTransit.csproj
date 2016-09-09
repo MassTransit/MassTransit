@@ -119,6 +119,7 @@
     <Compile Include="Configuration\ConsumeConnectors\ConsumerMessageConnector.cs" />
     <Compile Include="Configuration\ConsumeConnectors\AsyncConsumerMessageConvention.cs" />
     <Compile Include="Configuration\ConsumeConnectors\InstanceConnector.cs" />
+    <Compile Include="Configuration\ConsumeConnectors\InstanceMessageConnector.cs" />
     <Compile Include="Configuration\ConsumeConnectors\IObserverConnectorCache.cs" />
     <Compile Include="Configuration\ConsumeConnectors\LegacyConsumerConvention.cs" />
     <Compile Include="Configuration\ConsumeConnectors\LegacyConsumerMessageConvention.cs" />
@@ -749,6 +750,7 @@
     <Compile Include="Saga\ISagaQuery.cs" />
     <Compile Include="Saga\ISagaQueryFactory.cs" />
     <Compile Include="Saga\CorrelationExpressionToSagaIdVisitor.cs" />
+    <Compile Include="Saga\SagaContextExtensions.cs" />
     <Compile Include="Saga\SagaFactoryMethod.cs" />
     <Compile Include="Saga\Pipeline\Filters\CorrelationIdMessageFilter.cs" />
     <Compile Include="Saga\Pipeline\Filters\QuerySagaFilter.cs" />
@@ -1084,9 +1086,17 @@
     <Compile Include="Exceptions\ShutDownException.cs" />
     <Compile Include="Exceptions\EndpointException.cs" />
     <Compile Include="Turnout\JobResultContext.cs" />
-    <Compile Include="Util\AsyncTimer.cs" />
+    <Compile Include="Util\AssemblyTypeCache.cs" />
+    <Compile Include="Util\Scanning\AssemblyFinder.cs" />
+    <Compile Include="Util\Scanning\AssemblyScanner.cs" />
+    <Compile Include="Util\Scanning\AssemblyScanRecord.cs" />
+    <Compile Include="Util\Scanning\AssemblyTypeList.cs" />
+    <Compile Include="Util\Scanning\AssemblyScanTypeInfo.cs" />
     <Compile Include="Util\Caching\Cached.cs" />
     <Compile Include="Util\Caching\LazyMemoryCache.cs" />
+    <Compile Include="Util\Scanning\CompositeFilter.cs" />
+    <Compile Include="Util\Scanning\CompositePredicate.cs" />
+    <Compile Include="Util\Scanning\IAssemblyScanner.cs" />
     <Compile Include="Util\IAsyncDisposable.cs" />
     <Compile Include="Util\ITaskScope.cs" />
     <Compile Include="Util\LimitedConcurrencyLevelTaskScheduler.cs" />
@@ -1094,7 +1104,6 @@
     <Compile Include="Util\StopEventArgs.cs" />
     <Compile Include="Util\TaskParticipant.cs" />
     <Compile Include="Util\TaskSupervisor.cs" />
-    <Compile Include="Util\AsyncObservable.cs" />
     <Compile Include="Util\BusHostInfo.cs" />
     <Compile Include="Util\Connectable.cs" />
     <Compile Include="Util\ExceptionUtil.cs" />
@@ -1111,7 +1120,10 @@
     <Compile Include="Util\TaskScope.cs" />
     <Compile Include="Util\TaskSupervisorExtensions.cs" />
     <Compile Include="Util\TaskUtil.cs" />
+    <Compile Include="Util\TypeClassification.cs" />
     <Compile Include="Util\TypeMetadataCache.cs" />
+    <Compile Include="Util\Scanning\TypeQuery.cs" />
+    <Compile Include="Util\TypeSet.cs" />
     <Compile Include="Util\UriExtensions.cs" />
   </ItemGroup>
   <ItemGroup>

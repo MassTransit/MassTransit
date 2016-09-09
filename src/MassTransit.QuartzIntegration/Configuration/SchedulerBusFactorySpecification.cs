@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,20 +12,23 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.QuartzIntegration.Configuration
 {
+    using System;
     using System.Collections.Generic;
     using Builders;
     using Configurators;
     using Quartz;
 
 
-    public class InMemorySchedulerBusFactorySpecification :
+    public class SchedulerBusFactorySpecification :
         IBusFactorySpecification
     {
         readonly IScheduler _scheduler;
+        readonly Uri _schedulerEndpointAddress;
 
-        public InMemorySchedulerBusFactorySpecification(IScheduler scheduler)
+        public SchedulerBusFactorySpecification(IScheduler scheduler, Uri schedulerEndpointAddress)
         {
             _scheduler = scheduler;
+            _schedulerEndpointAddress = schedulerEndpointAddress;
         }
 
         public IEnumerable<ValidationResult> Validate()
@@ -35,7 +38,7 @@ namespace MassTransit.QuartzIntegration.Configuration
 
         public void Apply(IBusBuilder builder)
         {
-            var observer = new InMemorySchedulerBusObserver(_scheduler);
+            var observer = new SchedulerBusObserver(_scheduler, _schedulerEndpointAddress);
 
             builder.ConnectBusObserver(observer);
         }

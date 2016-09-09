@@ -119,7 +119,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         }
 
         [OneTimeSetUp]
-        public void Setup()
+        public async Task Setup()
         {
             var builder = new RoutingSlipBuilder(Guid.NewGuid());
 
@@ -138,7 +138,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
             _routingSlip = builder.Build();
 
-            Await(() => Bus.Execute(_routingSlip));
+            await Bus.Execute(_routingSlip);
         }
     }
 
@@ -175,7 +175,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         }
 
         [OneTimeSetUp]
-        public void Setup()
+        public async Task Setup()
         {
             var builder = new RoutingSlipBuilder(Guid.NewGuid());
 
@@ -194,7 +194,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
             _routingSlip = builder.Build();
 
-            Await(() => Bus.Execute(_routingSlip));
+            await Bus.Execute(_routingSlip);
 
             Console.WriteLine("Routing slip executed");
         }
@@ -246,7 +246,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         }
 
         [OneTimeSetUp]
-        public void Setup()
+        public async Task Setup()
         {
             _limit = 100;
 
@@ -262,7 +262,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
                 RoutingSlip routingSlip = builder.Build();
 
-                TaskUtil.Await(() => Bus.Execute(routingSlip));
+                await Bus.Execute(routingSlip);
 
                 _sentRoutingSlips.Add(routingSlip.TrackingNumber);
             }
@@ -314,7 +314,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         }
 
         [OneTimeSetUp]
-        public void Setup()
+        public async Task Setup()
         {
             _limit = 1;
 
@@ -329,7 +329,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
                 RoutingSlip routingSlip = builder.Build();
 
-                Bus.Execute(routingSlip);
+                await Bus.Execute(routingSlip);
 
                 _sentRoutingSlips.Add(routingSlip.TrackingNumber);
             }
