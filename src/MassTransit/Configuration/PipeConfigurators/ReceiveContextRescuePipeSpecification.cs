@@ -17,6 +17,7 @@ namespace MassTransit.PipeConfigurators
     using GreenPipes;
     using GreenPipes.Filters;
     using GreenPipes.Policies;
+    using GreenPipes.Policies.ExceptionFilters;
 
 
     public class ReceiveContextRescuePipeSpecification :

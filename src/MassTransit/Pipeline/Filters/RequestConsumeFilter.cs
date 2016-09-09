@@ -27,7 +27,7 @@ namespace MassTransit.Pipeline.Filters
     /// <typeparam name="TKey"></typeparam>
     public class RequestConsumeFilter<T, TKey> :
         IFilter<ConsumeContext<T>>,
-        IConnectPipeById<ConsumeContext<T>, TKey>
+        IPipeConnector<ConsumeContext<T>, TKey>
         where T : class
     {
         readonly KeyAccessor<ConsumeContext<T>, TKey> _keyAccessor;
@@ -39,7 +39,7 @@ namespace MassTransit.Pipeline.Filters
             _pipes = new ConcurrentDictionary<TKey, RequestPipeFilter<T, TKey>>();
         }
 
-        public ConnectHandle ConnectById(TKey key, IPipe<ConsumeContext<T>> pipe)
+        public ConnectHandle ConnectPipe(TKey key, IPipe<ConsumeContext<T>> pipe)
         {
             if (pipe == null)
                 throw new ArgumentNullException(nameof(pipe));

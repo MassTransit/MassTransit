@@ -31,12 +31,12 @@ namespace MassTransit.Pipeline.Filters
         where T : class
     {
         readonly Connectable<IPipe<ConsumeContext<T>>> _connections;
-        readonly Lazy<IConnectPipeById<ConsumeContext<T>, Guid>> _requestConnections;
+        readonly Lazy<IPipeConnector<ConsumeContext<T>, Guid>> _requestConnections;
 
         public TeeConsumeFilter()
         {
             _connections = new Connectable<IPipe<ConsumeContext<T>>>();
-            _requestConnections = new Lazy<IConnectPipeById<ConsumeContext<T>, Guid>>(ConnectRequestFilter);
+            _requestConnections = new Lazy<IPipeConnector<ConsumeContext<T>, Guid>>(ConnectRequestFilter);
         }
 
         public int Count => _connections.Count;
@@ -65,10 +65,10 @@ namespace MassTransit.Pipeline.Filters
 
         public ConnectHandle ConnectRequestPipe(Guid requestId, IPipe<ConsumeContext<T>> pipe)
         {
-            return _requestConnections.Value.ConnectById(requestId, pipe);
+            return _requestConnections.Value.ConnectPipe(requestId, pipe);
         }
 
-        IConnectPipeById<ConsumeContext<T>, Guid> ConnectRequestFilter()
+        IPipeConnector<ConsumeContext<T>, Guid> ConnectRequestFilter()
         {
             var filter = new RequestConsumeFilter<T, Guid>(GetRequestId);
 
