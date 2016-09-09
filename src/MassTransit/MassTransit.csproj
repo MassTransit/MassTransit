@@ -302,12 +302,10 @@
     <Compile Include="Configuration\PipeConfigurators\ConsumerPipeSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\HandlerPipeSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\ObserverPipeSpecification.cs" />
-    <Compile Include="Configuration\PipeConfigurators\RateLimitPipeSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\RepeatPipeSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\ReceiveContextRescuePipeSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\RetryPipeSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\TransactionPipeSpecification.cs" />
-    <Compile Include="Configuration\RateLimitExtensions.cs" />
     <Compile Include="Configuration\RepeatPipeConfiguratorExtensions.cs" />
     <Compile Include="Configuration\RescueFilterConfiguratorExtensions.cs" />
     <Compile Include="Configuration\RetryPipeConfiguratorExtensions.cs" />
@@ -566,7 +564,6 @@
     <Compile Include="Pipeline\Filters\MethodConsumerMessageFilter.cs" />
     <Compile Include="Pipeline\Filters\MoveExceptionToTransportFilter.cs" />
     <Compile Include="Pipeline\Filters\ObserverMessageFilter.cs" />
-    <Compile Include="Pipeline\Filters\RateLimitFilter.cs" />
     <Compile Include="Pipeline\Filters\RepeatFilter.cs" />
     <Compile Include="Pipeline\Filters\RequestPipeFilter.cs" />
     <Compile Include="Pipeline\Filters\ScheduleMessageRedeliveryFilter.cs" />
