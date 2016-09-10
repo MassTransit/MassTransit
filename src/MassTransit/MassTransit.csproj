@@ -524,6 +524,7 @@
     <Compile Include="Monitoring\Performance\StatsD\StatsDPerformanceCounter.cs" />
     <Compile Include="Monitoring\Performance\IPerformanceCounterInstaller.cs" />
     <Compile Include="Monitoring\Performance\Null\NullCounterFactory.cs" />
+    <Compile Include="Monitoring\Performance\Windows\BusPerformanceCounters.cs" />
     <Compile Include="Monitoring\Performance\Windows\WindowsCounterFactory.cs" />
     <Compile Include="Monitoring\Performance\Windows\WindowsPerformanceCounterInstaller.cs" />
     <Compile Include="Monitoring\Performance\Windows\ConsumerPerformanceCounter.cs" />
