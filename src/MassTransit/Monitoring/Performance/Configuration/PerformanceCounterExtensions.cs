@@ -15,6 +15,7 @@ namespace MassTransit
     using System;
     using BusConfigurators;
     using Monitoring.Performance;
+    using Monitoring.Performance.StatsD;
     using Monitoring.Performance.Windows;
 
 
@@ -23,7 +24,7 @@ namespace MassTransit
         [Obsolete("This method was improperly named, use EnablePerformanceCounters instead")]
         public static void EnabledPerformanceCounters(this IBusFactoryConfigurator configurator)
         {
-            configurator.EnablePerformanceCounters<WindowsCounterFactory>();
+            configurator.EnableWindowsPerformanceCounters();
         }
 
         /// <summary>
@@ -31,14 +32,32 @@ namespace MassTransit
         /// monitor.
         /// </summary>
         /// <param name="configurator"></param>
-        public static void EnablePerformanceCounters<TFactory>(this IBusFactoryConfigurator configurator)
-            where TFactory : ICounterFactory, new()
+        [Obsolete("This method is replaced by EnableWindowsPerformanceCounters")]
+        public static void EnablePerformanceCounters(this IBusFactoryConfigurator configurator)
+        {
+            configurator.EnableWindowsPerformanceCounters();
+        }
+
+        public static void EnableWindowsPerformanceCounters(this IBusFactoryConfigurator configurator)
         {
             if (configurator == null)
                 throw new ArgumentNullException(nameof(configurator));
 
-            var specification = new PerformanceCounterBusFactorySpecification<TFactory>();
+            var specification = new PerformanceCounterBusFactorySpecification(new WindowsCounterFactory());
             configurator.AddBusFactorySpecification(specification);
         }
+
+        public static void EnableStatsdPerformanceCounters(this IBusFactoryConfigurator configurator, Action<StatsDConfiguration> action)
+        {
+            var statsDConfiguration = StatsDConfiguration.Defaults();
+            action(statsDConfiguration);
+
+            if (configurator == null)
+                throw new ArgumentNullException(nameof(configurator));
+
+            var specification = new PerformanceCounterBusFactorySpecification(new StatsDCounterFactory(statsDConfiguration));
+            configurator.AddBusFactorySpecification(specification);
+        }
+
     }
 }

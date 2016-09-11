@@ -19,18 +19,26 @@ namespace MassTransit.BusConfigurators
     using Monitoring.Performance;
 
 
-    public class PerformanceCounterBusFactorySpecification<TFactory> :
+    public class PerformanceCounterBusFactorySpecification :
         IBusFactorySpecification
-        where TFactory : ICounterFactory, new()
     {
+        readonly ICounterFactory _factory;
+
+        public PerformanceCounterBusFactorySpecification(ICounterFactory factory)
+        {
+            _factory = factory;
+        }
+
         public IEnumerable<ValidationResult> Validate()
         {
-            yield break;
+            if(_factory == null)
+                yield return new ValidationResultImpl(ValidationResultDisposition.Failure, "factory", "ICounterFactory cannot be null");
+
         }
 
         public void Apply(IBusBuilder builder)
         {
-            var observer = new PerformanceCounterBusObserver<TFactory>();
+            var observer = new PerformanceCounterBusObserver(_factory);
 
             builder.ConnectBusObserver(observer);
         }

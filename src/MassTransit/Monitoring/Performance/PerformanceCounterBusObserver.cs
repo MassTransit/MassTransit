@@ -5,17 +5,21 @@ namespace MassTransit.Monitoring.Performance
     using Util;
 
 
-    public class PerformanceCounterBusObserver<TFactory> :
+    public class PerformanceCounterBusObserver :
         IBusObserver
-        where TFactory : ICounterFactory, new()
     {
+        readonly ICounterFactory _factory;
 
+        public PerformanceCounterBusObserver(ICounterFactory factory)
+        {
+            _factory = factory;
+        }
 
         public Task PostCreate(IBus bus)
         {
-            bus.ConnectPublishObserver(new PerformanceCounterPublishObserver<TFactory>());
-            bus.ConnectSendObserver(new PerformanceCounterSendObserver<TFactory>());
-            bus.ConnectReceiveObserver(new PerformanceCounterReceiveObserver<TFactory>());
+            bus.ConnectPublishObserver(new PerformanceCounterPublishObserver(_factory));
+            bus.ConnectSendObserver(new PerformanceCounterSendObserver(_factory));
+            bus.ConnectReceiveObserver(new PerformanceCounterReceiveObserver(_factory));
 
             return TaskUtil.Completed;
         }
