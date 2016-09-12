@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,23 +12,23 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Builders
 {
-    using BusConfigurators;
+    using System;
     using GreenPipes;
     using GreenPipes.Builders;
+    using GreenPipes.Filters;
     using Pipeline;
-    using Pipeline.Filters;
     using Pipeline.Pipes;
 
 
     public class ConsumePipeBuilder :
         IConsumePipeBuilder
     {
-        readonly MessageTypeConsumeFilter _messageTypeConsumeFilter;
         readonly PipeBuilder<ConsumeContext> _pipeBuilder;
+        readonly DynamicFilter<ConsumeContext, Guid> _filter;
 
         public ConsumePipeBuilder()
         {
-            _messageTypeConsumeFilter = new MessageTypeConsumeFilter();
+            _filter = new DynamicFilter<ConsumeContext, Guid>(new ConsumeContextConverterFactory(), GetRequestId);
             _pipeBuilder = new PipeBuilder<ConsumeContext>();
         }
 
@@ -39,14 +39,19 @@ namespace MassTransit.Builders
 
         void IConsumePipeBuilder.AddFilter<T>(IFilter<ConsumeContext<T>> filter)
         {
-            _messageTypeConsumeFilter.AddFilter(filter);
+            _filter.AddFilter(filter);
         }
 
         public IConsumePipe Build()
         {
-            _pipeBuilder.AddFilter(_messageTypeConsumeFilter);
+            _pipeBuilder.AddFilter(_filter);
 
-            return new ConsumePipe(_messageTypeConsumeFilter, _pipeBuilder.Build());
+            return new ConsumePipe(_filter, _pipeBuilder.Build());
+        }
+
+        static Guid GetRequestId(ConsumeContext context)
+        {
+            return context.RequestId ?? Guid.Empty;
         }
     }
 }

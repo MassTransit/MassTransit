@@ -12,19 +12,20 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Context
 {
-    using System.Threading;
+    using System;
     using System.Threading.Tasks;
-    using GreenPipes;
+    using Pipeline;
 
 
     /// <summary>
     /// Calls the generic version of the IPublishEndpoint.Send method with the object's type
     /// </summary>
-    public interface IPublishEndpointConverter
+    public interface IConsumeObserverConverter
     {
-        Task Publish(IPublishEndpoint endpoint, object message, CancellationToken cancellationToken = default(CancellationToken));
+        Task PreConsume(IConsumeObserver observer, object context);
 
-        Task Publish(IPublishEndpoint endpoint, object message, IPipe<PublishContext> pipe,
-            CancellationToken cancellationToken = default(CancellationToken));
+        Task PostConsume(IConsumeObserver observer, object context);
+
+        Task ConsumeFault(IConsumeObserver observer, object context, Exception exception);
     }
 }
