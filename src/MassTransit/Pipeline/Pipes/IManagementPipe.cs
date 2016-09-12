@@ -20,7 +20,7 @@ namespace MassTransit.Pipeline.Pipes
     /// purposes such as configuring the acceptance of command and request/response messages.
     /// </summary>
     public interface IManagementPipe :
-        IPipe<ConsumeContext>,
+        IDynamicRouter<ConsumeContext>,
         IConsumePipeConnector,
         IRequestPipeConnector
     {
