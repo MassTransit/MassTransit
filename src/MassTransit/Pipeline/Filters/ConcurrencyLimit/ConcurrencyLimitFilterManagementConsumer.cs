@@ -27,13 +27,13 @@ namespace MassTransit.Pipeline.Filters.ConcurrencyLimit
         IConsumer<SetConcurrencyLimit>
     {
         static readonly ILog _log = Logger.Get<ConcurrencyLimitFilterManagementConsumer>();
-        readonly IControlPipe _controlPipe;
+        readonly ICommandRouter _router;
         readonly string _id;
         DateTime _lastUpdated;
 
-        public ConcurrencyLimitFilterManagementConsumer(IControlPipe controlPipe, string id = null)
+        public ConcurrencyLimitFilterManagementConsumer(ICommandRouter router, string id = null)
         {
-            _controlPipe = controlPipe;
+            _router = router;
             _id = id;
 
             _lastUpdated = DateTime.UtcNow;
@@ -47,7 +47,7 @@ namespace MassTransit.Pipeline.Filters.ConcurrencyLimit
                 {
                     try
                     {
-                        await _controlPipe.SetConcurrencyLimit(context.Message.ConcurrencyLimit).ConfigureAwait(false);
+                        await _router.SetConcurrencyLimit(context.Message.ConcurrencyLimit).ConfigureAwait(false);
 
                         _lastUpdated = context.Message.Timestamp;
 

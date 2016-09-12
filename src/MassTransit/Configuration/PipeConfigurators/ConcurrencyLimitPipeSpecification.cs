@@ -30,19 +30,19 @@ namespace MassTransit.PipeConfigurators
     {
         readonly int _concurrencyLimit;
 
-        readonly IControlPipe _controlPipe;
+        readonly ICommandRouter _dynamicRouter;
 
         public ConcurrencyLimitPipeSpecification(int concurrencyLimit)
         {
             _concurrencyLimit = concurrencyLimit;
 
-            _controlPipe = new ControlPipe();
+            _dynamicRouter = new CommandRouter();
         }
 
         public ConcurrencyLimitPipeSpecification(int concurrencyLimit, IManagementEndpointConfigurator configurator, string id = null)
             : this(concurrencyLimit)
         {
-            var consumer = new ConcurrencyLimitFilterManagementConsumer(_controlPipe, id);
+            var consumer = new ConcurrencyLimitFilterManagementConsumer(_dynamicRouter, id);
             configurator.Instance(consumer);
         }
 
@@ -52,7 +52,7 @@ namespace MassTransit.PipeConfigurators
 
             builder.AddFilter(filter);
 
-            _controlPipe.ConnectPipe(filter);
+            _dynamicRouter.ConnectPipe(filter);
         }
 
         public IEnumerable<ValidationResult> Validate()
