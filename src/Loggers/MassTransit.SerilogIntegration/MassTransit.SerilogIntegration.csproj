@@ -50,6 +50,14 @@
     </AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="GreenPipes, Version=1.0.0.0, Culture=neutral, PublicKeyToken=b800c4cfcdeea87b, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\GreenPipes.1.0.0\lib\net452\GreenPipes.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Serilog, Version=2.0.0.0, Culture=neutral, PublicKeyToken=24c2f752a8e58a10, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Serilog.2.2.1\lib\net45\Serilog.dll</HintPath>
       <Private>True</Private>
@@ -66,10 +74,6 @@
     <Compile Include="SeriLogLogger.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\GreenPipes\src\GreenPipes\GreenPipes.csproj">
-      <Project>{59052db9-b527-4683-a56a-56c4d8fb6584}</Project>
-      <Name>GreenPipes</Name>
-    </ProjectReference>
     <ProjectReference Include="..\..\MassTransit\MassTransit.csproj">
       <Project>{6efd69fc-cbcc-4f85-aee0-efba73f4d273}</Project>
       <Name>MassTransit</Name>
