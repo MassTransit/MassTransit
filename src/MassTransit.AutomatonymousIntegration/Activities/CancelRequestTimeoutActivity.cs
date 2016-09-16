@@ -14,6 +14,7 @@ namespace Automatonymous.Activities
 {
     using System;
     using System.Threading.Tasks;
+    using GreenPipes;
     using MassTransit;
 
 
@@ -46,6 +47,11 @@ namespace Automatonymous.Activities
             where TException : Exception
         {
             return next.Faulted(context);
+        }
+
+        public void Probe(ProbeContext context)
+        {
+            context.CreateScope("cancelRequest");
         }
 
         async Task Execute(BehaviorContext<TInstance> context)

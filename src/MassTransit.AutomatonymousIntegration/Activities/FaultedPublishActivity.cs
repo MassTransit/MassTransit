@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -16,7 +16,6 @@ namespace Automatonymous.Activities
     using System.Threading.Tasks;
     using GreenPipes;
     using MassTransit;
-    using MassTransit.Pipeline;
 
 
     public class FaultedPublishActivity<TInstance, TData, TException, TMessage> :
@@ -60,12 +59,18 @@ namespace Automatonymous.Activities
             ConsumeExceptionEventContext<TInstance, TData, TException> exceptionContext;
             if (context.TryGetExceptionContext(out exceptionContext))
             {
-                TMessage message = _messageFactory(exceptionContext);
+                var message = _messageFactory(exceptionContext);
 
                 await exceptionContext.Publish(message, _publishPipe).ConfigureAwait(false);
             }
 
             await next.Faulted(context).ConfigureAwait(false);
+        }
+
+        public void Probe(ProbeContext context)
+        {
+            var scope = context.CreateScope("publish-faulted");
+            _publishPipe.Probe(scope);
         }
     }
 }

@@ -16,7 +16,6 @@ namespace Automatonymous.Activities
     using System.Threading.Tasks;
     using GreenPipes;
     using MassTransit;
-    using MassTransit.Pipeline;
 
 
     public class SendActivity<TInstance, TMessage> :
@@ -64,6 +63,12 @@ namespace Automatonymous.Activities
         public void Accept(StateMachineVisitor inspector)
         {
             inspector.Visit(this);
+        }
+
+        public void Probe(ProbeContext context)
+        {
+            var scope = context.CreateScope("send");
+            _sendPipe.Probe(scope);
         }
 
         async Task Activity<TInstance>.Execute(BehaviorContext<TInstance> context, Behavior<TInstance> next)
@@ -154,6 +159,12 @@ namespace Automatonymous.Activities
         void Visitable.Accept(StateMachineVisitor inspector)
         {
             inspector.Visit(this);
+        }
+
+        public void Probe(ProbeContext context)
+        {
+            var scope = context.CreateScope("send");
+            _sendPipe.Probe(scope);
         }
 
         async Task Activity<TInstance, TData>.Execute(BehaviorContext<TInstance, TData> context, Behavior<TInstance, TData> next)

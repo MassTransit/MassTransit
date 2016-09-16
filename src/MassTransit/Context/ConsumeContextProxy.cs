@@ -18,7 +18,6 @@ namespace MassTransit.Context
     using System.Threading.Tasks;
     using GreenPipes;
     using GreenPipes.Payloads;
-    using Pipeline;
 
 
     /// <summary>
