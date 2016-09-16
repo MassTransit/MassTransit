@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -16,7 +16,6 @@ namespace Automatonymous.Activities
     using System.Threading.Tasks;
     using GreenPipes;
     using MassTransit;
-    using MassTransit.Pipeline;
 
 
     public class RespondActivity<TInstance, TData, TMessage> :
@@ -48,11 +47,16 @@ namespace Automatonymous.Activities
             inspector.Visit(this);
         }
 
+        public void Probe(ProbeContext context)
+        {
+            var scope = context.CreateScope("respond");
+        }
+
         async Task Activity<TInstance, TData>.Execute(BehaviorContext<TInstance, TData> context, Behavior<TInstance, TData> next)
         {
-            var consumeContext = context.CreateConsumeContext();
+            ConsumeEventContext<TInstance, TData> consumeContext = context.CreateConsumeContext();
 
-            TMessage message = _messageFactory(consumeContext);
+            var message = _messageFactory(consumeContext);
 
             await consumeContext.RespondAsync(message, _responsePipe).ConfigureAwait(false);
 

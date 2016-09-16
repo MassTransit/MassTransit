@@ -16,7 +16,6 @@ namespace Automatonymous.Activities
     using System.Threading.Tasks;
     using GreenPipes;
     using MassTransit;
-    using MassTransit.Pipeline;
     using MassTransit.Scheduling;
 
 
@@ -55,6 +54,12 @@ namespace Automatonymous.Activities
             inspector.Visit(this);
         }
 
+        public void Probe(ProbeContext context)
+        {
+            var scope = context.CreateScope("schedule");
+            _sendPipe.Probe(scope);
+        }
+
         async Task Activity<TInstance>.Execute(BehaviorContext<TInstance> context, Behavior<TInstance> next)
         {
             await Execute(context).ConfigureAwait(false);
@@ -84,7 +89,7 @@ namespace Automatonymous.Activities
             ConsumeEventContext<TInstance> consumeContext = context.CreateConsumeContext();
 
             MessageSchedulerContext schedulerContext;
-            if (!((ConsumeContext)consumeContext).TryGetPayload(out schedulerContext))
+            if (!consumeContext.TryGetPayload(out schedulerContext))
                 throw new ContextException("The scheduler context could not be retrieved.");
 
             var message = _messageFactory(consumeContext);
@@ -137,12 +142,18 @@ namespace Automatonymous.Activities
             inspector.Visit(this);
         }
 
+        public void Probe(ProbeContext context)
+        {
+            var scope = context.CreateScope("schedule");
+            _sendPipe.Probe(scope);
+        }
+
         async Task Activity<TInstance, TData>.Execute(BehaviorContext<TInstance, TData> context, Behavior<TInstance, TData> next)
         {
             ConsumeEventContext<TInstance, TData> consumeContext = context.CreateConsumeContext();
 
             MessageSchedulerContext schedulerContext;
-            if (!((ConsumeContext)consumeContext).TryGetPayload(out schedulerContext))
+            if (!consumeContext.TryGetPayload(out schedulerContext))
                 throw new ContextException("The scheduler context could not be retrieved.");
 
             var message = _messageFactory(consumeContext);

@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,6 +14,7 @@ namespace Automatonymous.Activities
 {
     using System;
     using System.Threading.Tasks;
+    using GreenPipes;
 
 
     public class RequestActivity<TInstance, TRequest, TResponse> :
@@ -34,6 +35,11 @@ namespace Automatonymous.Activities
         public void Accept(StateMachineVisitor visitor)
         {
             visitor.Visit(this);
+        }
+
+        public void Probe(ProbeContext context)
+        {
+            var scope = context.CreateScope("request");
         }
 
         async Task Activity<TInstance>.Execute(BehaviorContext<TInstance> context, Behavior<TInstance> next)
@@ -62,9 +68,9 @@ namespace Automatonymous.Activities
 
         Task Execute(BehaviorContext<TInstance> context)
         {
-            var consumeContext = context.CreateConsumeContext();
+            ConsumeEventContext<TInstance> consumeContext = context.CreateConsumeContext();
 
-            TRequest requestMessage = _messageFactory(consumeContext);
+            var requestMessage = _messageFactory(consumeContext);
 
             return SendRequest(context, consumeContext, requestMessage);
         }
@@ -92,11 +98,16 @@ namespace Automatonymous.Activities
             visitor.Visit(this);
         }
 
+        public void Probe(ProbeContext context)
+        {
+            var scope = context.CreateScope("request");
+        }
+
         public async Task Execute(BehaviorContext<TInstance, TData> context, Behavior<TInstance, TData> next)
         {
-            var consumeContext = context.CreateConsumeContext();
+            ConsumeEventContext<TInstance, TData> consumeContext = context.CreateConsumeContext();
 
-            TRequest requestMessage = _messageFactory(consumeContext);
+            var requestMessage = _messageFactory(consumeContext);
 
             await SendRequest(context, consumeContext, requestMessage).ConfigureAwait(false);
 
