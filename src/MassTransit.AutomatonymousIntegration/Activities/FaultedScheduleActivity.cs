@@ -16,7 +16,6 @@ namespace Automatonymous.Activities
     using System.Threading.Tasks;
     using GreenPipes;
     using MassTransit;
-    using MassTransit.Pipeline;
     using MassTransit.Scheduling;
 
 
@@ -58,6 +57,12 @@ namespace Automatonymous.Activities
             inspector.Visit(this);
         }
 
+        public void Probe(ProbeContext context)
+        {
+            var scope = context.CreateScope("schedule-faulted");
+            _sendPipe.Probe(scope);
+        }
+
         Task Activity<TInstance, TData>.Execute(BehaviorContext<TInstance, TData> context, Behavior<TInstance, TData> next)
         {
             return next.Execute(context);
@@ -70,7 +75,7 @@ namespace Automatonymous.Activities
             if (context.TryGetExceptionContext(out exceptionContext))
             {
                 MessageSchedulerContext schedulerContext;
-                if (!((ConsumeContext)exceptionContext).TryGetPayload(out schedulerContext))
+                if (!exceptionContext.TryGetPayload(out schedulerContext))
                     throw new ContextException("The scheduler context could not be retrieved.");
 
                 var message = _messageFactory(exceptionContext);

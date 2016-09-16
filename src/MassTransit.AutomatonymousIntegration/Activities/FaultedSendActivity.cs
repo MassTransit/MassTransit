@@ -52,6 +52,12 @@ namespace Automatonymous.Activities
             inspector.Visit(this);
         }
 
+        public void Probe(ProbeContext context)
+        {
+            var scope = context.CreateScope("send-faulted");
+            _sendPipe.Probe(scope);
+        }
+
         Task Activity<TInstance, TData>.Execute(BehaviorContext<TInstance, TData> context, Behavior<TInstance, TData> next)
         {
             return next.Execute(context);
