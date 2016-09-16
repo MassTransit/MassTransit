@@ -12,8 +12,8 @@ let nugetWorkingPath = FullName "./build_temp"
 let packagesPath = FullName "./src/packages"
 let keyFile = FullName "./MassTransit.snk"
 
-let assemblyVersion = "3.4.0.0"
-let baseVersion = "3.4.1"
+let assemblyVersion = "3.5.0.0"
+let baseVersion = "3.5.0"
 
 let semVersion : SemVerInfo = parse baseVersion
 
