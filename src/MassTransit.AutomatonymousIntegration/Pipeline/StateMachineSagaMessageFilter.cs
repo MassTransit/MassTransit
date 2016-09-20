@@ -13,6 +13,7 @@
 namespace Automatonymous.Pipeline
 {
     using System;
+    using System.Linq;
     using System.Threading.Tasks;
     using Contexts;
     using GreenPipes;
@@ -53,6 +54,15 @@ namespace Automatonymous.Pipeline
                 DataType = TypeMetadataCache<TData>.ShortName,
                 InstanceType = TypeMetadataCache<TInstance>.ShortName
             });
+
+            var states = _machine.States.Cast<State<TInstance>>()
+                .Where(x => x.Events.Contains(_event)).ToList();
+            if (states.Any())
+            {
+                scope.Add("states", states.Select(x => x.Name).ToArray());
+            }
+
+            _machine.Probe(context);
         }
 
         public async Task Send(SagaConsumeContext<TInstance, TData> context, IPipe<SagaConsumeContext<TInstance, TData>> next)
