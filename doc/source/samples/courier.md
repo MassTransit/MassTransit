@@ -1,6 +1,6 @@
 # Courier sample
 
-Courier is MassTransit's routing-slip implementation, which makes it possible to orchestrate distributed services into a business transaction. This sample demonstrates how to create and execute a routing slip, record routing slip events, and track transaction state using [https://github.com/MassTransit/Automatonymous](Automatonymous).
+Courier is MassTransit's routing-slip implementation, which makes it possible to orchestrate distributed services into a business transaction. This sample demonstrates how to create and execute a routing slip, record routing slip events, and track transaction state using [Automatonymous](https://github.com/MassTransit/Automatonymous).
 
 > Automatonymous is a free, open-source state machine library with native MassTransit support.
 
