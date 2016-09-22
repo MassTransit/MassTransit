@@ -1106,7 +1106,6 @@
     <Compile Include="Util\MultipleConnectHandle.cs" />
     <Compile Include="Util\ObjectTypeDeserializer.cs" />
     <Compile Include="Util\ITaskParticipant.cs" />
-    <Compile Include="Util\QueuedTaskScheduler.cs" />
     <Compile Include="Util\IStopEvent.cs" />
     <Compile Include="Util\TaskScope.cs" />
     <Compile Include="Util\TaskSupervisorExtensions.cs" />

@@ -179,6 +179,7 @@
     <Compile Include="Saga\Injecting_Specs.cs" />
     <Compile Include="Saga\PartitionSaga_Specs.cs" />
     <Compile Include="Saga\Using_correlated_messages_to_start_sagas.cs" />
+    <Compile Include="SendEndpointCache_Specs.cs" />
     <Compile Include="SendObserver_Specs.cs" />
     <Compile Include="SendProxy_Specs.cs" />
     <Compile Include="SendReceive_Specs.cs" />
