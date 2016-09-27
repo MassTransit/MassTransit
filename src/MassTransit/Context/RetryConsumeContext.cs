@@ -16,13 +16,12 @@ namespace MassTransit.Context
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
-    using GreenPipes;
     using Util;
 
 
     public class RetryConsumeContext :
         ConsumeContextProxy,
-        RetryContext
+        ConsumeRetryContext
     {
         readonly ConsumeContext _context;
         readonly IList<PendingFault> _pendingFaults;

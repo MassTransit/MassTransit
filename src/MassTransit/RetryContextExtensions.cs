@@ -12,7 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
-    using GreenPipes;
+    using Context;
 
 
     public static class RetryContextExtensions
@@ -25,7 +25,7 @@ namespace MassTransit
         /// <returns>The retry attempt number, 0 = first time, >= 1 = retry</returns>
         public static int GetRetryAttempt(this ConsumeContext context)
         {
-            RetryContext retryContext;
+            ConsumeRetryContext retryContext;
             return context.TryGetPayload(out retryContext) ? retryContext.RetryAttempt : 0;
         }
     }
