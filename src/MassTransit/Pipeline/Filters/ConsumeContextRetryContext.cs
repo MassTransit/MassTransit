@@ -41,16 +41,22 @@ namespace MassTransit.Pipeline.Filters
 
         public int RetryAttempt => _retryContext.RetryAttempt;
 
+        public Type ContextType => _retryContext.ContextType;
+
         public TimeSpan? Delay => _retryContext.Delay;
 
-        public Task PreRetry()
+        public async Task PreRetry()
         {
-            return _context.ClearPendingFaults();
+            await _retryContext.PreRetry().ConfigureAwait(false);
+
+            await _context.ClearPendingFaults().ConfigureAwait(false);
         }
 
-        public Task RetryFaulted(Exception exception)
+        public async Task RetryFaulted(Exception exception)
         {
-            return _context.NotifyPendingFaults();
+            await _retryContext.RetryFaulted(exception).ConfigureAwait(false);
+
+            await _context.NotifyPendingFaults().ConfigureAwait(false);
         }
 
         public bool CanRetry(Exception exception, out RetryContext<ConsumeContext> retryContext)
@@ -65,20 +71,20 @@ namespace MassTransit.Pipeline.Filters
 
         bool PipeContext.HasPayloadType(Type payloadType)
         {
-            return ((PipeContext)_context).HasPayloadType(payloadType);
+            return _retryContext.HasPayloadType(payloadType);
         }
 
         bool PipeContext.TryGetPayload<TPayload>(out TPayload payload)
         {
-            return ((PipeContext)_context).TryGetPayload(out payload);
+            return _retryContext.TryGetPayload(out payload);
         }
 
         TPayload PipeContext.GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory)
         {
-            return ((PipeContext)_context).GetOrAddPayload(payloadFactory);
+            return _retryContext.GetOrAddPayload(payloadFactory);
         }
 
-        CancellationToken PipeContext.CancellationToken => ((PipeContext)_context).CancellationToken;
+        CancellationToken PipeContext.CancellationToken => _retryContext.CancellationToken;
     }
 
 
@@ -106,16 +112,22 @@ namespace MassTransit.Pipeline.Filters
 
         public int RetryAttempt => _retryContext.RetryAttempt;
 
+        public Type ContextType => _retryContext.ContextType;
+
         public TimeSpan? Delay => _retryContext.Delay;
 
-        public Task PreRetry()
+        public async Task PreRetry()
         {
-            return _context.ClearPendingFaults();
+            await _retryContext.PreRetry().ConfigureAwait(false);
+
+            await _context.ClearPendingFaults().ConfigureAwait(false);
         }
 
-        public Task RetryFaulted(Exception exception)
+        public async Task RetryFaulted(Exception exception)
         {
-            return _context.NotifyPendingFaults();
+            await _retryContext.RetryFaulted(exception).ConfigureAwait(false);
+
+            await _context.NotifyPendingFaults().ConfigureAwait(false);
         }
 
         public bool CanRetry(Exception exception, out RetryContext<TFilter> retryContext)
@@ -125,29 +137,24 @@ namespace MassTransit.Pipeline.Filters
 
             retryContext = new ConsumeContextRetryContext<TFilter, TContext>(policyRetryContext, _context);
 
-            if (canRetry)
-                _context.ClearPendingFaults();
-            else
-                _context.NotifyPendingFaults();
-
             return canRetry;
         }
 
         bool PipeContext.HasPayloadType(Type payloadType)
         {
-            return ((PipeContext)_context).HasPayloadType(payloadType);
+            return _retryContext.HasPayloadType(payloadType);
         }
 
         bool PipeContext.TryGetPayload<TPayload>(out TPayload payload)
         {
-            return ((PipeContext)_context).TryGetPayload(out payload);
+            return _retryContext.TryGetPayload(out payload);
         }
 
         TPayload PipeContext.GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory)
         {
-            return ((PipeContext)_context).GetOrAddPayload(payloadFactory);
+            return _retryContext.GetOrAddPayload(payloadFactory);
         }
 
-        CancellationToken PipeContext.CancellationToken => ((PipeContext)_context).CancellationToken;
+        CancellationToken PipeContext.CancellationToken => _retryContext.CancellationToken;
     }
 }

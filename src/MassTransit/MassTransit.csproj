@@ -179,6 +179,7 @@
     <Compile Include="Context\ConsumeContextProxyScope.cs" />
     <Compile Include="Context\ConsumeObserverConverter.cs" />
     <Compile Include="Context\ConsumeObserverConverterCache.cs" />
+    <Compile Include="Context\ConsumeRetryContext.cs" />
     <Compile Include="Context\CorrelatedBySetCorrelationId.cs" />
     <Compile Include="Context\CorrelationIdConsumeContextProxy.cs" />
     <Compile Include="Context\DelegateSetCorrelationId.cs" />
@@ -602,9 +603,7 @@
     <Compile Include="Pipeline\ReceiveObservable.cs" />
     <Compile Include="Pipeline\SendMessageObservable.cs" />
     <Compile Include="Pipeline\SendObservable.cs" />
-    <Compile Include="Policies\CancelRetryContext.cs" />
     <Compile Include="Policies\IRepeatContext.cs" />
-    <Compile Include="Policies\IRetryContext.cs" />
     <Compile Include="Policies\MessageRetryPolicyExtensions.cs" />
     <Compile Include="Policies\PipeRetryExtensions.cs" />
     <Compile Include="ProbeContextExtensions.cs" />
