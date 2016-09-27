@@ -20,7 +20,6 @@ namespace MassTransit.RabbitMqTransport.Pipeline
     using GreenPipes;
     using Internals.Extensions;
     using Logging;
-    using MassTransit.Pipeline;
     using RabbitMQ.Client;
     using RabbitMQ.Client.Events;
     using Util;

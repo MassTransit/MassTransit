@@ -67,7 +67,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="GreenPipes, Version=1.0.0.0, Culture=neutral, PublicKeyToken=b800c4cfcdeea87b, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\GreenPipes.1.0.0\lib\net452\GreenPipes.dll</HintPath>
+      <HintPath>..\..\packages\GreenPipes.1.0.1\lib\net452\GreenPipes.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Iesi.Collections, Version=4.0.0.0, Culture=neutral, PublicKeyToken=aa95f207798dfdb4, processorArchitecture=MSIL">

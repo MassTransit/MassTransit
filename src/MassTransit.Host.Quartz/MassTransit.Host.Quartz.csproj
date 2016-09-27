@@ -49,7 +49,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="GreenPipes, Version=1.0.0.0, Culture=neutral, PublicKeyToken=b800c4cfcdeea87b, processorArchitecture=MSIL">
-      <HintPath>..\packages\GreenPipes.1.0.0\lib\net452\GreenPipes.dll</HintPath>
+      <HintPath>..\packages\GreenPipes.1.0.1\lib\net452\GreenPipes.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="log4net, Version=1.2.15.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
