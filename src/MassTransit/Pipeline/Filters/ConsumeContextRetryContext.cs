@@ -13,10 +13,10 @@
 namespace MassTransit.Pipeline.Filters
 {
     using System;
+    using System.Threading;
     using System.Threading.Tasks;
     using Context;
     using GreenPipes;
-    using GreenPipes.Util;
 
 
     public class ConsumeContextRetryContext :
@@ -48,11 +48,6 @@ namespace MassTransit.Pipeline.Filters
             return _context.ClearPendingFaults();
         }
 
-        public Task PostRetry()
-        {
-            return TaskUtil.Completed;
-        }
-
         public Task RetryFaulted(Exception exception)
         {
             return _context.NotifyPendingFaults();
@@ -67,6 +62,23 @@ namespace MassTransit.Pipeline.Filters
 
             return canRetry;
         }
+
+        bool PipeContext.HasPayloadType(Type payloadType)
+        {
+            return ((PipeContext)_context).HasPayloadType(payloadType);
+        }
+
+        bool PipeContext.TryGetPayload<TPayload>(out TPayload payload)
+        {
+            return ((PipeContext)_context).TryGetPayload(out payload);
+        }
+
+        TPayload PipeContext.GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory)
+        {
+            return ((PipeContext)_context).GetOrAddPayload(payloadFactory);
+        }
+
+        CancellationToken PipeContext.CancellationToken => ((PipeContext)_context).CancellationToken;
     }
 
 
@@ -101,11 +113,6 @@ namespace MassTransit.Pipeline.Filters
             return _context.ClearPendingFaults();
         }
 
-        public Task PostRetry()
-        {
-            return TaskUtil.Completed;
-        }
-
         public Task RetryFaulted(Exception exception)
         {
             return _context.NotifyPendingFaults();
@@ -125,5 +132,22 @@ namespace MassTransit.Pipeline.Filters
 
             return canRetry;
         }
+
+        bool PipeContext.HasPayloadType(Type payloadType)
+        {
+            return ((PipeContext)_context).HasPayloadType(payloadType);
+        }
+
+        bool PipeContext.TryGetPayload<TPayload>(out TPayload payload)
+        {
+            return ((PipeContext)_context).TryGetPayload(out payload);
+        }
+
+        TPayload PipeContext.GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory)
+        {
+            return ((PipeContext)_context).GetOrAddPayload(payloadFactory);
+        }
+
+        CancellationToken PipeContext.CancellationToken => ((PipeContext)_context).CancellationToken;
     }
 }

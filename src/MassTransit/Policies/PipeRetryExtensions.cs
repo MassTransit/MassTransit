@@ -22,7 +22,7 @@ namespace MassTransit.Policies
     {
         public static async Task Retry(this IRetryPolicy retryPolicy, Func<Task> retryMethod, CancellationToken cancellationToken = default(CancellationToken))
         {
-            RetryPolicyContext<string> policyContext = retryPolicy.CreatePolicyContext("");
+            RetryPolicyContext<InlinePipeContext> policyContext = retryPolicy.CreatePolicyContext(new InlinePipeContext());
 
             try
             {
@@ -30,7 +30,7 @@ namespace MassTransit.Policies
             }
             catch (Exception exception)
             {
-                RetryContext<string> retryContext;
+                RetryContext<InlinePipeContext> retryContext;
                 if (!policyContext.CanRetry(exception, out retryContext))
                 {
                     throw;
@@ -43,7 +43,7 @@ namespace MassTransit.Policies
         public static async Task<T> Retry<T>(this IRetryPolicy retryPolicy, Func<Task<T>> retryMethod,
             CancellationToken cancellationToken = default(CancellationToken))
         {
-            RetryPolicyContext<string> policyContext = retryPolicy.CreatePolicyContext("");
+            RetryPolicyContext<InlinePipeContext> policyContext = retryPolicy.CreatePolicyContext(new InlinePipeContext());
 
             try
             {
@@ -51,7 +51,7 @@ namespace MassTransit.Policies
             }
             catch (Exception exception)
             {
-                RetryContext<string> retryContext;
+                RetryContext<InlinePipeContext> retryContext;
                 if (!policyContext.CanRetry(exception, out retryContext))
                 {
                     throw;
@@ -118,6 +118,13 @@ namespace MassTransit.Policies
             {
                 await Retry(retryPolicy, retryMethod, cancellationToken).ConfigureAwait(false);
             }
+        }
+
+
+        class InlinePipeContext :
+            BasePipeContext,
+            PipeContext
+        {
         }
     }
 }

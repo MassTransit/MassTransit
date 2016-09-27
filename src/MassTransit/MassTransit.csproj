@@ -72,7 +72,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="GreenPipes, Version=1.0.0.0, Culture=neutral, PublicKeyToken=b800c4cfcdeea87b, processorArchitecture=MSIL">
-      <HintPath>..\packages\GreenPipes.1.0.0\lib\net452\GreenPipes.dll</HintPath>
+      <HintPath>..\packages\GreenPipes.1.0.1\lib\net452\GreenPipes.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="NewId, Version=2.1.3.0, Culture=neutral, PublicKeyToken=b8e0e9f2f1e657fa, processorArchitecture=MSIL">
@@ -161,7 +161,6 @@
     <Compile Include="Configuration\InMemoryOutboxConfiguratorExtensions.cs" />
     <Compile Include="Configuration\PartitionerExtensions.cs" />
     <Compile Include="Configuration\PipeConfigurators\CompensateActivityHostSpecification.cs" />
-    <Compile Include="Configuration\PipeConfigurators\RetryConsumerPipeSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\DeadLetterPipeSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\ExecuteActivityHostSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\LatestPipeSpecification.cs" />
@@ -169,7 +168,6 @@
     <Compile Include="Configuration\PipeConfigurators\InMemoryOutboxSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\PublishMessageSchedulerPipeSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\RedeliveryRetryPipeSpecification.cs" />
-    <Compile Include="Configuration\PipeConfigurators\RetrySagaPipeSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\ScheduleMessageRedeliveryPipeSpecification.cs" />
     <Compile Include="Configuration\RoutingSlipEventCorrelationExtensions.cs" />
     <Compile Include="Configuration\ScheduledRetryExtensions.cs" />
@@ -309,7 +307,6 @@
     <Compile Include="Configuration\PipeConfigurators\HandlerPipeSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\ObserverPipeSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\ReceiveContextRescuePipeSpecification.cs" />
-    <Compile Include="Configuration\PipeConfigurators\RetryPipeSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\TransactionPipeSpecification.cs" />
     <Compile Include="Configuration\RescueFilterConfiguratorExtensions.cs" />
     <Compile Include="Configuration\RetryPipeConfiguratorExtensions.cs" />

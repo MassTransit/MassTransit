@@ -14,6 +14,7 @@ namespace MassTransit.Turnout
 {
     using System;
     using System.Diagnostics;
+    using System.Threading;
     using Context;
 
 
@@ -27,6 +28,7 @@ namespace MassTransit.Turnout
         IDisposable
         where TInput : class
     {
+        readonly CancellationTokenSource _source;
         readonly Stopwatch _stopwatch;
 
         public ConsumerJobContext(ConsumeContext<TInput> context)
@@ -34,14 +36,24 @@ namespace MassTransit.Turnout
         {
             JobId = NewId.NextGuid();
             _stopwatch = Stopwatch.StartNew();
+
+            _source = new CancellationTokenSource();
         }
 
         public void Dispose()
         {
+            _source.Dispose();
         }
+
+        public override CancellationToken CancellationToken => _source.Token;
 
         public Guid JobId { get; }
 
         public TimeSpan ElapsedTime => _stopwatch.Elapsed;
+
+        public void Cancel()
+        {
+            _source.Cancel();
+        }
     }
 }
