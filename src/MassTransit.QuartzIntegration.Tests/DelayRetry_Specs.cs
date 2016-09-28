@@ -15,6 +15,7 @@ namespace MassTransit.QuartzIntegration.Tests
     using System;
     using System.Diagnostics;
     using System.Threading.Tasks;
+    using GreenPipes;
     using NUnit.Framework;
     using TestFramework;
     using TestFramework.Messages;
@@ -71,7 +72,7 @@ namespace MassTransit.QuartzIntegration.Tests
                 // okay, ready.
                 _receivedTimeSpan = _timer.Elapsed;
                 _received.TrySetResult(context);
-            }, x => x.UseScheduledRedelivery(Retry.Intervals(1000, 2000)));
+            }, x => x.UseScheduledRedelivery(r => r.Intervals(1000, 2000)));
         }
     }
 
@@ -105,7 +106,7 @@ namespace MassTransit.QuartzIntegration.Tests
 
             configurator.Consumer(() => _consumer, x =>
             {
-                x.ConfigureMessage<PingMessage>(m => m.UseScheduledRedelivery(Retry.Intervals(1000, 2000)));
+                x.ConfigureMessage<PingMessage>(m => m.UseScheduledRedelivery(r => r.Intervals(1000, 2000)));
             });
         }
 
