@@ -13,6 +13,7 @@
 namespace MassTransit.RabbitMqTransport.Tests
 {
     using System;
+    using GreenPipes;
     using NUnit.Framework;
 
 
@@ -44,7 +45,9 @@ namespace MassTransit.RabbitMqTransport.Tests
                     {
                     });
 
-                    x.UseRetry(null);
+                    x.UseRetry(r =>
+                    {
+                    });
                 });
             });
 
@@ -90,7 +93,9 @@ namespace MassTransit.RabbitMqTransport.Tests
 
                     x.ReceiveEndpoint(host, "input_queue", e =>
                     {
-                        e.UseRetry(null);
+                        e.UseRetry(r =>
+                        {
+                        });
                     });
                 });
             });
