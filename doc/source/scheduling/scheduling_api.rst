@@ -100,7 +100,8 @@ You can also schedule a message to be send to you periodically. This functionali
 
 To request a recurring message, you need to use `ScheduleRecurringSend` extension method, which is available for both `Context` and `SendEndpoint`. This message requires a schedule object as a parameter, which must implement `RecurringSchedule` interface. Since this interface is rather broad, you can use the default abstract implementation `DefaultRecurringSchedule` as the base class for your own schedule.
 
-```c#
+.. sourcecode:: csharp
+
     public class PollExternalSystemSchedule : DefaultRecurringSchedule
     {
         public PollExternalSystemSchedule()
@@ -110,19 +111,21 @@ To request a recurring message, you need to use `ScheduleRecurringSend` extensio
     }
     
     public class PollExternalSystem {}
-```
 
-```c#
+
+.. sourcecode:: csharp
+
     var schedulerEndpoint = await bus.GetSendEndpoint(_schedulerAddress);
     
     var scheduledRecurringMessage = await schedulerEndpoint.ScheduleRecurringSend(InputQueueAddress, new PollExternalSystemSchedule(), new PollExternalSystem());
-```
+
 
 When you stop your service or just have any other need to tell Quartz service to stop sending you these recurring messages, you can use the return value of `ScheduleRecurringSend` to cancel the recurring schedule.
 
-```c#
+.. sourcecode:: csharp
+
     await bus.CancelScheduledRecurringMessage(scheduledRecurringMessage);
-```
+
 
 You can also cancel using schedule id and schedule group values, which are part of the recurring schedule object.
 
