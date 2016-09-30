@@ -58,6 +58,10 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="GreenPipes, Version=1.0.0.0, Culture=neutral, PublicKeyToken=b800c4cfcdeea87b, processorArchitecture=MSIL">
+      <HintPath>..\packages\GreenPipes.1.0.2\lib\net452\GreenPipes.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="log4net, Version=1.2.15.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
       <HintPath>..\packages\log4net.2.0.5\lib\net45-full\log4net.dll</HintPath>
       <Private>True</Private>
@@ -179,6 +183,7 @@
     <Compile Include="Saga\Injecting_Specs.cs" />
     <Compile Include="Saga\PartitionSaga_Specs.cs" />
     <Compile Include="Saga\Using_correlated_messages_to_start_sagas.cs" />
+    <Compile Include="SendEndpointCache_Specs.cs" />
     <Compile Include="SendObserver_Specs.cs" />
     <Compile Include="SendProxy_Specs.cs" />
     <Compile Include="SendReceive_Specs.cs" />

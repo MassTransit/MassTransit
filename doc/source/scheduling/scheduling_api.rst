@@ -28,7 +28,7 @@ Once configured, messages may be scheduled from any message consumer as shown be
 Scheduling a message from a consumer
 ------------------------------------
 
-To schedule a message, call the ``ScheduleMessage`` method with the message to be delivered.
+To schedule a message, call the ``ScheduleSend`` method with the message to be delivered.
 
 .. sourcecode:: csharp
     :linenos:
@@ -53,7 +53,7 @@ To schedule a message, call the ``ScheduleMessage`` method with the message to b
 
         public async Task Consume(ConsumeContext<ScheduleNotification> context)
         {
-            context.ScheduleMessage(_notificationService,
+            await context.ScheduleSend(_notificationService,
                 context.Message.DeliveryTime,
                 new SendNotification
                 {
@@ -92,3 +92,37 @@ If a message needs to be scheduled from the bus itself (not in the context of co
         });
 
 This should only be used outside of a consume context, however, as the lineage of the message will be lost (things like ConversationId, InitiatorId, etc.).
+
+Scheduling a recurring message
+------------------------------
+
+You can also schedule a message to be send to you periodically. This functionality uses the Quartz.Net periodic schedule feature and requires some knowledge of cron expressions.
+
+To request a recurring message, you need to use `ScheduleRecurringSend` extension method, which is available for both `Context` and `SendEndpoint`. This message requires a schedule object as a parameter, which must implement `RecurringSchedule` interface. Since this interface is rather broad, you can use the default abstract implementation `DefaultRecurringSchedule` as the base class for your own schedule.
+
+```c#
+    public class PollExternalSystemSchedule : DefaultRecurringSchedule
+    {
+        public PollExternalSystemSchedule()
+        {
+            CronExpression = "* * * * *"; // this means every minute
+        }
+    }
+    
+    public class PollExternalSystem {}
+```
+
+```c#
+    var schedulerEndpoint = await bus.GetSendEndpoint(_schedulerAddress);
+    
+    var scheduledRecurringMessage = await schedulerEndpoint.ScheduleRecurringSend(InputQueueAddress, new PollExternalSystemSchedule(), new PollExternalSystem());
+```
+
+When you stop your service or just have any other need to tell Quartz service to stop sending you these recurring messages, you can use the return value of `ScheduleRecurringSend` to cancel the recurring schedule.
+
+```c#
+    await bus.CancelScheduledRecurringMessage(scheduledRecurringMessage);
+```
+
+You can also cancel using schedule id and schedule group values, which are part of the recurring schedule object.
+

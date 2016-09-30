@@ -13,10 +13,11 @@
 namespace MassTransit.Builders
 {
     using Configurators;
+    using GreenPipes;
 
 
     public interface IInMemoryBusFactorySpecification :
-        Configurator
+        ISpecification
     {
         /// <summary>
         /// Apply the specification to the builder

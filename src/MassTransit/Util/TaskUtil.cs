@@ -22,6 +22,8 @@ namespace MassTransit.Util
     {
         internal static Task Canceled => Cached<bool>.CanceledTask;
         public static Task Completed => Cached.CompletedTask;
+        public static Task<bool> False => Cached.FalseTask;
+        public static Task<bool> True => Cached.TrueTask;
 
         public static void Await(Func<Task> taskFactory, CancellationToken cancellationToken = default(CancellationToken))
         {
@@ -97,6 +99,8 @@ namespace MassTransit.Util
         static class Cached
         {
             public static readonly Task CompletedTask = Task.FromResult(true);
+            public static readonly Task<bool> TrueTask = Task.FromResult(true);
+            public static readonly Task<bool> FalseTask = Task.FromResult(false);
         }
 
 

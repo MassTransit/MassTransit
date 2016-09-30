@@ -16,6 +16,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
     {
         using System;
         using System.Threading.Tasks;
+        using GreenPipes;
         using Microsoft.ServiceBus;
         using Microsoft.ServiceBus.Messaging;
         using NUnit.Framework;

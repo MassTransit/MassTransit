@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,6 +14,7 @@ namespace Automatonymous.Activities
 {
     using System;
     using System.Threading.Tasks;
+    using GreenPipes;
     using MassTransit;
 
 
@@ -31,6 +32,11 @@ namespace Automatonymous.Activities
         public void Accept(StateMachineVisitor inspector)
         {
             inspector.Visit(this);
+        }
+
+        public void Probe(ProbeContext context)
+        {
+            var scope = context.CreateScope("unschedule-faulted");
         }
 
         Task Activity<TInstance>.Execute(BehaviorContext<TInstance> context, Behavior<TInstance> next)
@@ -67,7 +73,7 @@ namespace Automatonymous.Activities
             if (!consumeContext.TryGetPayload(out schedulerContext))
                 throw new ContextException("The scheduler context could not be retrieved.");
 
-            var previousTokenId = _schedule.GetTokenId(context.Instance);
+            Guid? previousTokenId = _schedule.GetTokenId(context.Instance);
             if (previousTokenId.HasValue)
             {
                 await schedulerContext.CancelScheduledSend(previousTokenId.Value).ConfigureAwait(false);

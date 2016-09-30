@@ -13,6 +13,7 @@
 namespace MassTransit.Tests.Saga
 {
     using System.Diagnostics;
+    using GreenPipes;
     using MassTransit.Saga;
     using Messages;
     using NUnit.Framework;

@@ -12,6 +12,9 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Pipeline
 {
+    using GreenPipes;
+
+
     public interface ISendMessageObserverConnector
     {
         ConnectHandle ConnectSendMessageObserver<T>(ISendMessageObserver<T> observer)

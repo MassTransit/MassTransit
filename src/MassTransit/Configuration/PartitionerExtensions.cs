@@ -14,26 +14,14 @@ namespace MassTransit
 {
     using System;
     using System.Text;
-    using PipeConfigurators;
-    using Pipeline.Filters.Partitioner;
+    using GreenPipes;
+    using GreenPipes.Partitioning;
+    using GreenPipes.Specifications;
 
 
     public static class PartitionerExtensions
     {
         /// <summary>
-        /// Create a partitioner which can be used across multiple partitioner filters
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="configurator"></param>
-        /// <param name="partitionCount"></param>
-        /// <returns></returns>
-        public static IPartitioner CreatePartitioner<T>(this IPipeConfigurator<T> configurator, int partitionCount)
-            where T : class, PipeContext
-        {
-            return new Partitioner(partitionCount, new Murmur3UnsafeHashGenerator());
-        }
-
-        /// <summary>
         /// Specify a concurrency limit for tasks executing through the filter. No more than the specified
         /// number of tasks will be allowed to execute concurrently.
         /// </summary>
@@ -52,7 +40,7 @@ namespace MassTransit
 
             PartitionKeyProvider<ConsumeContext<T>> provider = context => keyProvider(context).ToByteArray();
 
-            var specification = new PartitionerPipeSpecification<T>(provider, partitionCount);
+            var specification = new PartitionerPipeSpecification<ConsumeContext<T>>(provider, partitionCount);
 
             configurator.AddPipeSpecification(specification);
         }
@@ -78,7 +66,7 @@ namespace MassTransit
 
             PartitionKeyProvider<ConsumeContext<T>> provider = context => keyProvider(context).ToByteArray();
 
-            var specification = new PartitionerPipeSpecification<T>(provider, partitioner);
+            var specification = new PartitionerPipeSpecification<ConsumeContext<T>>(provider, partitioner);
 
             configurator.AddPipeSpecification(specification);
         }
@@ -109,7 +97,7 @@ namespace MassTransit
                 return textEncoding.GetBytes(key);
             };
 
-            var specification = new PartitionerPipeSpecification<T>(provider, partitionCount);
+            var specification = new PartitionerPipeSpecification<ConsumeContext<T>>(provider, partitionCount);
 
             configurator.AddPipeSpecification(specification);
         }
@@ -142,7 +130,7 @@ namespace MassTransit
                 return textEncoding.GetBytes(key);
             };
 
-            var specification = new PartitionerPipeSpecification<T>(provider, partitioner);
+            var specification = new PartitionerPipeSpecification<ConsumeContext<T>>(provider, partitioner);
 
             configurator.AddPipeSpecification(specification);
         }

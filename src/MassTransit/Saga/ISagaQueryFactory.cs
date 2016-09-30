@@ -12,6 +12,9 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Saga
 {
+    using GreenPipes;
+
+
     /// <summary>
     /// Used to create a saga query from the message consume context
     /// </summary>

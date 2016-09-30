@@ -13,9 +13,9 @@
 namespace MassTransit
 {
     using System;
-    using System.Threading;
-    using PipeConfigurators;
-    using Policies;
+    using Context;
+    using GreenPipes;
+    using Pipeline.Filters;
     using Saga;
 
 
@@ -26,9 +26,7 @@ namespace MassTransit
             if (configurator == null)
                 throw new ArgumentNullException(nameof(configurator));
 
-            var pipeBuilderConfigurator = new RetryPipeSpecification(retryPolicy);
-
-            configurator.AddPipeSpecification(pipeBuilderConfigurator);
+            configurator.UseRetry(r => r.SetRetryPolicy(exceptionFilter => new ConsumeContextRetryPolicy(retryPolicy)));
         }
 
         public static void UseRetry<T>(this IPipeConfigurator<ConsumeContext<T>> configurator, IRetryPolicy retryPolicy)
@@ -37,9 +35,8 @@ namespace MassTransit
             if (configurator == null)
                 throw new ArgumentNullException(nameof(configurator));
 
-            var pipeBuilderConfigurator = new RetryPipeSpecification<T>(retryPolicy);
-
-            configurator.AddPipeSpecification(pipeBuilderConfigurator);
+            configurator.UseRetry(r => r.SetRetryPolicy(exceptionFilter =>
+                new ConsumeContextRetryPolicy<ConsumeContext<T>, RetryConsumeContext<T>>(retryPolicy, x => new RetryConsumeContext<T>(x))));
         }
 
         public static void UseRetry<TConsumer>(this IPipeConfigurator<ConsumerConsumeContext<TConsumer>> configurator, IRetryPolicy retryPolicy)
@@ -48,9 +45,9 @@ namespace MassTransit
             if (configurator == null)
                 throw new ArgumentNullException(nameof(configurator));
 
-            var pipeBuilderConfigurator = new RetryConsumerPipeSpecification<TConsumer>(retryPolicy);
-
-            configurator.AddPipeSpecification(pipeBuilderConfigurator);
+            configurator.UseRetry(r => r.SetRetryPolicy(exceptionFilter =>
+                new ConsumeContextRetryPolicy<ConsumerConsumeContext<TConsumer>, RetryConsumerConsumeContext<TConsumer>>(retryPolicy,
+                    x => new RetryConsumerConsumeContext<TConsumer>(x))));
         }
 
         public static void UseRetry<TSaga>(this IPipeConfigurator<SagaConsumeContext<TSaga>> configurator, IRetryPolicy retryPolicy)
@@ -59,29 +56,9 @@ namespace MassTransit
             if (configurator == null)
                 throw new ArgumentNullException(nameof(configurator));
 
-            var pipeBuilderConfigurator = new RetrySagaPipeSpecification<TSaga>(retryPolicy);
-
-            configurator.AddPipeSpecification(pipeBuilderConfigurator);
-        }
-
-        /// <summary>
-        /// Retry the subsequent filter pipe using the specified retry policy
-        /// </summary>
-        /// <param name="configurator">The pipe configurator</param>
-        /// <param name="retryPolicy">The retry policy</param>
-        /// <param name="cancellationToken">The cancellation token to end the retry operations</param>
-        public static void UseRetry(this IPipeConfigurator<ConsumeContext> configurator, IRetryPolicy retryPolicy, CancellationToken cancellationToken)
-        {
-            if (configurator == null)
-                throw new ArgumentNullException(nameof(configurator));
-            if (retryPolicy == null)
-                throw new ArgumentNullException(nameof(retryPolicy));
-
-            retryPolicy = new CancelRetryPolicy(retryPolicy, cancellationToken);
-
-            var pipeBuilderConfigurator = new RetryPipeSpecification(retryPolicy);
-
-            configurator.AddPipeSpecification(pipeBuilderConfigurator);
+            configurator.UseRetry(r => r.SetRetryPolicy(exceptionFilter =>
+                new ConsumeContextRetryPolicy<SagaConsumeContext<TSaga>, RetrySagaConsumeContext<TSaga>>(retryPolicy,
+                    x => new RetrySagaConsumeContext<TSaga>(x))));
         }
     }
 }

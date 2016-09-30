@@ -13,10 +13,11 @@
 namespace MassTransit
 {
     using Configurators;
+    using GreenPipes;
 
 
     public interface IBusFactory :
-        Configurator
+        ISpecification
     {
         /// <summary>
         /// Create the bus, returning the bus control interface

@@ -15,7 +15,8 @@ namespace MassTransit.AutomatonymousIntegration.Tests
     using System;
     using System.Threading.Tasks;
     using Automatonymous;
-    using Monitoring.Introspection.Contracts;
+    using GreenPipes;
+    using GreenPipes.Introspection;
     using NUnit.Framework;
     using Saga;
     using TestFramework;
@@ -113,7 +114,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
         public void Should_return_a_wonderful_breakdown_of_the_guts_inside_it()
         {
             ProbeResult result = Bus.GetProbeResult();
-
+            
             Console.WriteLine(result.ToJsonString());
         }
     }

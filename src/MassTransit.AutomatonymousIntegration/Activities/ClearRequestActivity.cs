@@ -14,6 +14,7 @@ namespace Automatonymous.Activities
 {
     using System;
     using System.Threading.Tasks;
+    using GreenPipes;
 
 
     public class ClearRequestActivity<TInstance, TData, TRequest, TResponse> :
@@ -45,6 +46,11 @@ namespace Automatonymous.Activities
             where TException : Exception
         {
             return next.Faulted(context);
+        }
+
+        public void Probe(ProbeContext context)
+        {
+            context.CreateScope("clearRequest");
         }
     }
 }

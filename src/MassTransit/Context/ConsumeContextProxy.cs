@@ -16,7 +16,8 @@ namespace MassTransit.Context
     using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
-    using Pipeline;
+    using GreenPipes;
+    using GreenPipes.Payloads;
 
 
     /// <summary>
@@ -30,7 +31,7 @@ namespace MassTransit.Context
         readonly ConsumeContext _context;
 
         protected ConsumeContextProxy(ConsumeContext context)
-            : base(new PayloadCacheProxy(context))
+            : base(context)
         {
             _context = context;
         }

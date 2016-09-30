@@ -17,6 +17,7 @@ namespace MassTransit.Context
     using System.Net.Mime;
     using System.Threading;
     using System.Threading.Tasks;
+    using GreenPipes;
 
 
     public abstract class ReceiveContextProxy :

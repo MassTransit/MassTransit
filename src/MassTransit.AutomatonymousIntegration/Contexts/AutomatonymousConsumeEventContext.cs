@@ -15,6 +15,7 @@ namespace Automatonymous.Contexts
     using System;
     using System.Threading;
     using System.Threading.Tasks;
+    using GreenPipes;
     using MassTransit;
     using MassTransit.Context;
 
@@ -57,23 +58,7 @@ namespace Automatonymous.Contexts
             return base.TryGetPayload(out context);
         }
 
-        CancellationToken InstanceContext<TInstance>.CancellationToken => _context.CancellationToken;
         TInstance InstanceContext<TInstance>.Instance => _context.Instance;
-
-        bool InstanceContext<TInstance>.HasPayloadType(Type contextType)
-        {
-            return _context.HasPayloadType(contextType);
-        }
-
-        bool InstanceContext<TInstance>.TryGetPayload<TPayload>(out TPayload payload)
-        {
-            return _context.TryGetPayload(out payload);
-        }
-
-        TPayload InstanceContext<TInstance>.GetOrAddPayload<TPayload>(Automatonymous.PayloadFactory<TPayload> payloadFactory)
-        {
-            return _context.GetOrAddPayload(payloadFactory);
-        }
 
         public Task Raise(Event @event, CancellationToken cancellationToken = new CancellationToken())
         {
@@ -128,23 +113,7 @@ namespace Automatonymous.Contexts
             return base.TryGetPayload(out context);
         }
 
-        CancellationToken InstanceContext<TInstance>.CancellationToken => _context.CancellationToken;
         TInstance InstanceContext<TInstance>.Instance => _context.Instance;
-
-        bool InstanceContext<TInstance>.HasPayloadType(Type contextType)
-        {
-            return _context.HasPayloadType(contextType);
-        }
-
-        bool InstanceContext<TInstance>.TryGetPayload<TPayload>(out TPayload payload)
-        {
-            return _context.TryGetPayload(out payload);
-        }
-
-        TPayload InstanceContext<TInstance>.GetOrAddPayload<TPayload>(Automatonymous.PayloadFactory<TPayload> payloadFactory)
-        {
-            return _context.GetOrAddPayload(payloadFactory);
-        }
 
         public Task Raise(Event @event, CancellationToken cancellationToken = new CancellationToken())
         {

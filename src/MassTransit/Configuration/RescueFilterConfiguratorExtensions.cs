@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,9 +13,8 @@
 namespace MassTransit
 {
     using System;
+    using GreenPipes;
     using PipeConfigurators;
-    using Pipeline;
-    using Policies;
 
 
     public static class RescueFilterConfiguratorExtensions
@@ -28,7 +27,7 @@ namespace MassTransit
         /// <param name="rescuePipe"></param>
         /// <param name="exceptionFilter"></param>
         public static void UseRescue(this IPipeConfigurator<ReceiveContext> configurator, IPipe<ExceptionReceiveContext> rescuePipe,
-            IPolicyExceptionFilter exceptionFilter = null)
+            IExceptionFilter exceptionFilter = null)
         {
             if (configurator == null)
                 throw new ArgumentNullException(nameof(configurator));

@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,7 +12,8 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
-    using PipeConfigurators;
+    using System.ComponentModel;
+    using GreenPipes;
 
 
     public interface ISendPipeConfigurator :
@@ -23,7 +24,7 @@ namespace MassTransit
         /// </summary>
         /// <typeparam name="T">The message type</typeparam>
         /// <param name="specification"></param>
-        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         void AddPipeSpecification<T>(IPipeSpecification<SendContext<T>> specification)
             where T : class;
     }

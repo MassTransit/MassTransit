@@ -15,6 +15,7 @@ namespace MassTransit.Pipeline.Filters.ConcurrencyLimit
     using System;
     using System.Threading.Tasks;
     using Contracts;
+    using GreenPipes;
     using Logging;
 
 
@@ -26,13 +27,13 @@ namespace MassTransit.Pipeline.Filters.ConcurrencyLimit
         IConsumer<SetConcurrencyLimit>
     {
         static readonly ILog _log = Logger.Get<ConcurrencyLimitFilterManagementConsumer>();
-        readonly IPipe<ConsumeContext> _managementPipe;
+        readonly ICommandRouter _router;
         readonly string _id;
         DateTime _lastUpdated;
 
-        public ConcurrencyLimitFilterManagementConsumer(IPipe<ConsumeContext> managementPipe, string id = null)
+        public ConcurrencyLimitFilterManagementConsumer(ICommandRouter router, string id = null)
         {
-            _managementPipe = managementPipe;
+            _router = router;
             _id = id;
 
             _lastUpdated = DateTime.UtcNow;
@@ -46,7 +47,7 @@ namespace MassTransit.Pipeline.Filters.ConcurrencyLimit
                 {
                     try
                     {
-                        await _managementPipe.Send(context).ConfigureAwait(false);
+                        await _router.SetConcurrencyLimit(context.Message.ConcurrencyLimit).ConfigureAwait(false);
 
                         _lastUpdated = context.Message.Timestamp;
 

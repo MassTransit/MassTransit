@@ -13,6 +13,7 @@
 namespace MassTransit.ConsumeConfigurators
 {
     using System;
+    using GreenPipes;
 
 
     public interface IConsumerConfigurator :

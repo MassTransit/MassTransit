@@ -14,7 +14,7 @@ namespace MassTransit.Testing.TestDecorators
 {
     using System;
     using System.Threading.Tasks;
-    using Monitoring.Introspection;
+    using GreenPipes;
     using Pipeline;
     using Saga;
 

@@ -21,6 +21,7 @@ namespace MassTransit.AzureServiceBusTransport
     using System.Threading.Tasks;
     using Context;
     using Contexts;
+    using GreenPipes;
     using Logging;
     using MassTransit.Pipeline;
     using Microsoft.ServiceBus.Messaging;

@@ -14,6 +14,7 @@ namespace MassTransit
 {
     using System;
     using System.Net.Mime;
+    using GreenPipes;
 
 
     /// <summary>

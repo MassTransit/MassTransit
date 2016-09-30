@@ -13,6 +13,7 @@
 namespace MassTransit
 {
     using System;
+    using GreenPipes;
 
 
     public interface ILatestConfigurator<T>

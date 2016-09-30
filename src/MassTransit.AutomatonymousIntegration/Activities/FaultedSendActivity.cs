@@ -14,6 +14,7 @@ namespace Automatonymous.Activities
 {
     using System;
     using System.Threading.Tasks;
+    using GreenPipes;
     using MassTransit;
     using MassTransit.Pipeline;
 
@@ -49,6 +50,12 @@ namespace Automatonymous.Activities
         void Visitable.Accept(StateMachineVisitor inspector)
         {
             inspector.Visit(this);
+        }
+
+        public void Probe(ProbeContext context)
+        {
+            var scope = context.CreateScope("send-faulted");
+            _sendPipe.Probe(scope);
         }
 
         Task Activity<TInstance, TData>.Execute(BehaviorContext<TInstance, TData> context, Behavior<TInstance, TData> next)

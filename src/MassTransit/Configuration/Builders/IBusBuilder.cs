@@ -14,6 +14,7 @@ namespace MassTransit.Builders
 {
     using System;
     using System.Net.Mime;
+    using GreenPipes;
     using Pipeline;
 
 

@@ -14,8 +14,8 @@ namespace MassTransit.RabbitMqTransport.Tests
 {
     using System;
     using System.Threading.Tasks;
+    using GreenPipes;
     using MassTransit.Pipeline;
-    using Monitoring.Introspection;
 
 
     class TestConsumePipe :

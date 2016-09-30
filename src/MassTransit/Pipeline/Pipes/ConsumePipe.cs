@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,16 +14,17 @@ namespace MassTransit.Pipeline.Pipes
 {
     using System;
     using System.Threading.Tasks;
-    using Filters;
+    using GreenPipes;
+    using GreenPipes.Filters;
 
 
     public class ConsumePipe :
         IConsumePipe
     {
-        readonly MessageTypeConsumeFilter _filter;
+        readonly IDynamicFilter<ConsumeContext, Guid> _filter;
         readonly IPipe<ConsumeContext> _pipe;
 
-        public ConsumePipe(MessageTypeConsumeFilter messageTypeConsumeFilter, IPipe<ConsumeContext> pipe)
+        public ConsumePipe(IDynamicFilter<ConsumeContext, Guid> messageTypeConsumeFilter, IPipe<ConsumeContext> pipe)
         {
             if (messageTypeConsumeFilter == null)
                 throw new ArgumentNullException(nameof(messageTypeConsumeFilter));
@@ -36,7 +37,7 @@ namespace MassTransit.Pipeline.Pipes
 
         void IProbeSite.Probe(ProbeContext context)
         {
-            ProbeContext scope = context.CreateScope("pipe");
+            var scope = context.CreateScope("pipe");
 
             _pipe.Probe(scope);
         }
@@ -48,22 +49,22 @@ namespace MassTransit.Pipeline.Pipes
 
         ConnectHandle IConsumeMessageObserverConnector.ConnectConsumeMessageObserver<TMessage>(IConsumeMessageObserver<TMessage> observer)
         {
-            return _filter.ConnectConsumeMessageObserver(observer);
+            return _filter.ConnectObserver(new ConsumeObserverAdapter<TMessage>(observer));
         }
 
         ConnectHandle IConsumePipeConnector.ConnectConsumePipe<T>(IPipe<ConsumeContext<T>> pipe)
         {
-            return _filter.ConnectConsumePipe(pipe);
+            return _filter.ConnectPipe(pipe);
         }
 
         ConnectHandle IRequestPipeConnector.ConnectRequestPipe<T>(Guid requestId, IPipe<ConsumeContext<T>> pipe)
         {
-            return _filter.ConnectRequestPipe(requestId, pipe);
+            return _filter.ConnectPipe(requestId, pipe);
         }
 
         ConnectHandle IConsumeObserverConnector.ConnectConsumeObserver(IConsumeObserver observer)
         {
-            return _filter.ConnectConsumeObserver(observer);
+            return _filter.ConnectObserver(new ConsumeObserverAdapter(observer));
         }
     }
 }

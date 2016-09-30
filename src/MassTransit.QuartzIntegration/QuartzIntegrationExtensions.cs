@@ -13,6 +13,7 @@
 namespace MassTransit
 {
     using System;
+    using GreenPipes;
     using Quartz;
     using Quartz.Impl;
     using QuartzIntegration;

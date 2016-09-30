@@ -17,6 +17,7 @@ namespace MassTransit.Saga.SubscriptionConfigurators
     using System.Linq;
     using Configurators;
     using Connectors;
+    using GreenPipes;
     using PipeConfigurators;
 
 

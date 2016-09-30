@@ -14,7 +14,7 @@ namespace MassTransit.PipeConfigurators
 {
     using System.Collections.Generic;
     using Configurators;
-    using PipeBuilders;
+    using GreenPipes;
     using Pipeline.Filters;
 
 
@@ -38,7 +38,7 @@ namespace MassTransit.PipeConfigurators
             builder.AddFilter(new HandlerMessageFilter<T>(_handler));
         }
 
-        IEnumerable<ValidationResult> Configurator.Validate()
+        IEnumerable<ValidationResult> ISpecification.Validate()
         {
             if (_handler == null)
                 yield return this.Failure("Handler", "must not be null");

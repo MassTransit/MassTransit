@@ -13,10 +13,11 @@
 namespace MassTransit.Builders
 {
     using Configurators;
+    using GreenPipes;
 
 
     public interface IBusFactorySpecification :
-        Configurator
+        ISpecification
     {
         void Apply(IBusBuilder builder);
     }

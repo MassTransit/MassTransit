@@ -14,7 +14,7 @@ namespace MassTransit.PipeConfigurators
 {
     using System.Collections.Generic;
     using Configurators;
-    using PipeBuilders;
+    using GreenPipes;
     using Pipeline.Filters;
 
 
@@ -39,7 +39,7 @@ namespace MassTransit.PipeConfigurators
             _created?.Invoke(filter);
         }
 
-        IEnumerable<ValidationResult> Configurator.Validate()
+        IEnumerable<ValidationResult> ISpecification.Validate()
         {
             yield break;
         }

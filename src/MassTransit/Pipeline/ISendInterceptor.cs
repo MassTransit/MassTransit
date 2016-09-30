@@ -14,6 +14,7 @@ namespace MassTransit.Pipeline
 {
     using System;
     using System.Threading.Tasks;
+    using GreenPipes;
 
 
     /// <summary>

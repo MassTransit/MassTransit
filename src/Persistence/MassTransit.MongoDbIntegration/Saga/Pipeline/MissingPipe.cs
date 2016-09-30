@@ -14,6 +14,7 @@ namespace MassTransit.MongoDbIntegration.Saga.Pipeline
 {
     using System.Threading.Tasks;
     using Context;
+    using GreenPipes;
     using Logging;
     using MassTransit.Pipeline;
     using MongoDB.Driver;

@@ -13,13 +13,14 @@
 namespace MassTransit
 {
     using Configurators;
+    using GreenPipes;
 
 
     /// <summary>
     /// Specification for configuring a receive endpoint
     /// </summary>
     public interface IReceiveEndpointSpecification :
-        Configurator
+        ISpecification
     {
         void Configure(IReceiveEndpointBuilder builder);
     }

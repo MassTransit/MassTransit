@@ -14,6 +14,7 @@ namespace MassTransit.QuartzIntegration.Tests
 {
     using System;
     using System.Threading.Tasks;
+    using GreenPipes;
     using NUnit.Framework;
 
 

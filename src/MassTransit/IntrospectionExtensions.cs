@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,55 +14,22 @@ namespace MassTransit
 {
     using System;
     using System.Collections.Generic;
-    using System.IO;
     using System.Linq;
-    using System.Text;
-    using System.Threading;
-    using Monitoring.Introspection;
-    using Monitoring.Introspection.Contracts;
+    using GreenPipes;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
-    using Serialization;
 
 
     public static class IntrospectionExtensions
     {
-        public static ProbeResult GetProbeResult(this IProbeSite probeSite, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            var builder = new ProbeResultBuilder(NewId.NextGuid(), cancellationToken);
-
-            probeSite.Probe(builder);
-
-            return ((IProbeResultBuilder)builder).Build();
-        }
-
-        public static string ToJsonString(this ProbeResult result)
-        {
-            var encoding = new UTF8Encoding(false, true);
-
-            using (var stream = new MemoryStream())
-            using (var writer = new StreamWriter(stream, encoding, 1024, true))
-            using (var jsonWriter = new JsonTextWriter(writer))
-            {
-                jsonWriter.Formatting = Formatting.Indented;
-
-                JsonMessageSerializer.Serializer.Serialize(jsonWriter, result, typeof(ProbeResult));
-
-                jsonWriter.Flush();
-                writer.Flush();
-
-                return encoding.GetString(stream.ToArray());
-            }
-        }
-
         public static IEnumerable<Uri> GetReceiveEndpointAddresses(this IBus bus)
         {
             var probeResult = bus.GetProbeResult();
 
             var probeJObject = JObject.Parse(probeResult.ToJsonString());
-            var receiveEndpoints = probeJObject["results"]["bus"]["receiveEndpoint"].Children();
+            JEnumerable<JToken> receiveEndpoints = probeJObject["results"]["bus"]["receiveEndpoint"].Children();
 
-            var probeResults = receiveEndpoints.Select(result =>
+            IEnumerable<ReceiveTransportProbeResult> probeResults = receiveEndpoints.Select(result =>
                 JsonConvert.DeserializeObject<ReceiveTransportProbeResult>(result["transport"].ToString()))
                 .Where(x => x.Address != null);
 

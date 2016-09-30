@@ -14,10 +14,11 @@ namespace MassTransit
 {
     using Builders;
     using Configurators;
+    using GreenPipes;
 
 
     public interface IConsumePipeSpecification :
-        Configurator
+        ISpecification
     {
         void Apply(IConsumePipeBuilder builder);
     }

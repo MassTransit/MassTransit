@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,6 +13,8 @@
 namespace MassTransit
 {
     using System;
+    using GreenPipes;
+    using GreenPipes.Configurators;
     using PipeConfigurators;
     using RabbitMqTransport.Configuration;
 
@@ -20,7 +22,8 @@ namespace MassTransit
     public static class DelayedExchangeRetryExtensions
     {
         /// <summary>
-        /// Use the message scheduler to schedule redelivery of messages based on the retry policy.
+        /// Use the message scheduler to schedule redelivery of a specific message type based upon the retry policy, via
+        /// the delayed exchange feature of RabbitMQ.
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="retryPolicy"></param>
@@ -34,7 +37,32 @@ namespace MassTransit
 
             configurator.AddPipeSpecification(redeliverySpecification);
 
-            var retrySpecification = new RedeliveryRetryPipeSpecification<T>(retryPolicy);
+            var retrySpecification = new RedeliveryRetryPipeSpecification<T>();
+
+            retrySpecification.SetRetryPolicy(x => retryPolicy);
+
+            configurator.AddPipeSpecification(retrySpecification);
+        }
+
+        /// <summary>
+        /// Use the message scheduler to schedule redelivery of a specific message type based upon the retry policy, via
+        /// the delayed exchange feature of RabbitMQ.
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="configure"></param>
+        public static void UseDelayedRedelivery<T>(this IPipeConfigurator<ConsumeContext<T>> configurator, Action<IRetryConfigurator> configure)
+            where T : class
+        {
+            if (configurator == null)
+                throw new ArgumentNullException(nameof(configurator));
+
+            var redeliverySpecification = new DelayedExchangeRedeliveryPipeSpecification<T>();
+
+            configurator.AddPipeSpecification(redeliverySpecification);
+
+            var retrySpecification = new RedeliveryRetryPipeSpecification<T>();
+
+            configure?.Invoke(retrySpecification);
 
             configurator.AddPipeSpecification(retrySpecification);
         }

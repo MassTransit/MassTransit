@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,6 +14,7 @@ namespace MassTransit.Policies
 {
     using System;
     using System.Threading.Tasks;
+    using GreenPipes;
 
 
     public static class MessageRetryPolicyExtensions
@@ -22,32 +23,52 @@ namespace MassTransit.Policies
             Func<ConsumeContext<T>, Task> retryMethod)
             where T : class
         {
-            using (IRetryContext retryContext = retryPolicy.GetRetryContext())
+            RetryPolicyContext<ConsumeContext<T>> policyContext = retryPolicy.CreatePolicyContext(context);
+
+            try
             {
-                await Attempt(retryContext, context, retryMethod).ConfigureAwait(false);
+                await retryMethod(policyContext.Context).ConfigureAwait(false);
+            }
+            catch (Exception exception)
+            {
+                RetryContext<ConsumeContext<T>> retryContext;
+                if (context.TryGetPayload(out retryContext))
+                    throw;
+
+                if (!policyContext.CanRetry(exception, out retryContext))
+                {
+                    context.GetOrAddPayload(() => retryContext);
+                    throw;
+                }
+
+                await Attempt(retryContext, retryMethod).ConfigureAwait(false);
             }
         }
 
-        static async Task Attempt<T>(IRetryContext retryContext, ConsumeContext<T> context,
-            Func<ConsumeContext<T>, Task> retryMethod)
+        static async Task Attempt<T>(RetryContext<ConsumeContext<T>> retryContext, Func<ConsumeContext<T>, Task> retryMethod)
             where T : class
         {
-            TimeSpan delay;
             try
             {
-                await retryMethod(context).ConfigureAwait(false);
-
-                return;
+                await retryMethod(retryContext.Context).ConfigureAwait(false);
             }
-            catch (Exception ex)
+            catch (Exception exception)
             {
-                if (!retryContext.CanRetry(ex, out delay))
+                RetryContext<ConsumeContext<T>> nextRetryContext;
+                if (retryContext.Context.TryGetPayload(out nextRetryContext))
                     throw;
+
+                if (!retryContext.CanRetry(exception, out nextRetryContext))
+                {
+                    retryContext.Context.GetOrAddPayload(() => nextRetryContext);
+                    throw;
+                }
+
+                if (nextRetryContext.Delay.HasValue)
+                    await Task.Delay(nextRetryContext.Delay.Value).ConfigureAwait(false);
+
+                await Attempt(nextRetryContext, retryMethod).ConfigureAwait(false);
             }
-
-            await Task.Delay(delay).ConfigureAwait(false);
-
-            await Attempt(retryContext, context, retryMethod).ConfigureAwait(false);
         }
     }
 }

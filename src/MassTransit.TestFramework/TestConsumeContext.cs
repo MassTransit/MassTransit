@@ -18,6 +18,9 @@ namespace MassTransit.TestFramework
     using System.Threading;
     using System.Threading.Tasks;
     using Context;
+    using GreenPipes;
+    using GreenPipes.Payloads;
+    using GreenPipes.Util;
     using Pipeline;
     using Util;
 

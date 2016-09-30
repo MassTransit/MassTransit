@@ -16,6 +16,7 @@ namespace MassTransit.Transports.InMemory
     using System.IO;
     using System.Threading;
     using System.Threading.Tasks;
+    using GreenPipes;
     using Logging;
     using Pipeline;
     using Util;

@@ -17,6 +17,7 @@ namespace MassTransit
     using System.Linq;
     using System.Linq.Expressions;
     using System.Reflection;
+    using GreenPipes;
     using Internals.Extensions;
     using MessageData;
     using Transformation.TransformConfigurators;

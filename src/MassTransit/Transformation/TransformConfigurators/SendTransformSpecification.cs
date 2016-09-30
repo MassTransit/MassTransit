@@ -12,7 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transformation.TransformConfigurators
 {
-    using PipeBuilders;
+    using GreenPipes;
     using PipeConfigurators;
     using Pipeline.Filters;
 

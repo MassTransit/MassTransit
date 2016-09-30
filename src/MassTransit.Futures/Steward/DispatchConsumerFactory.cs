@@ -15,6 +15,7 @@ namespace MassTransit.Steward
     using System;
     using System.Diagnostics;
     using System.Threading.Tasks;
+    using GreenPipes;
     using Pipeline;
 
 

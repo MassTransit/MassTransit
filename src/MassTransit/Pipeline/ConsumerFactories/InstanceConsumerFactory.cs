@@ -13,6 +13,7 @@
 namespace MassTransit.Pipeline.ConsumerFactories
 {
     using System.Threading.Tasks;
+    using GreenPipes;
     using Util;
 
 

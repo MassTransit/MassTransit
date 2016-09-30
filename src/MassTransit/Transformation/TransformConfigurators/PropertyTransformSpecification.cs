@@ -16,6 +16,7 @@ namespace MassTransit.Transformation.TransformConfigurators
     using System.Linq;
     using System.Reflection;
     using Configurators;
+    using GreenPipes;
     using PropertyTransforms;
     using TransformBuilders;
 
@@ -37,7 +38,7 @@ namespace MassTransit.Transformation.TransformConfigurators
 
         protected PropertyInfo InputProperty => _inputProperty;
 
-        IEnumerable<ValidationResult> Configurator.Validate()
+        IEnumerable<ValidationResult> ISpecification.Validate()
         {
             return Validate().Concat(ValidateConfiguration());
         }

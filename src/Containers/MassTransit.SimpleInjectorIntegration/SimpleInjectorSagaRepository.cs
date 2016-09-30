@@ -13,6 +13,7 @@
 namespace MassTransit.SimpleInjectorIntegration
 {
     using System.Threading.Tasks;
+    using GreenPipes;
     using Pipeline;
     using Saga;
     using SimpleInjector;

@@ -14,9 +14,10 @@ namespace MassTransit.Tests.Courier
 {
     using System;
     using System.Threading.Tasks;
+    using GreenPipes;
+    using GreenPipes.Introspection;
     using MassTransit.Courier;
     using MassTransit.Courier.Contracts;
-    using Monitoring.Introspection.Contracts;
     using NUnit.Framework;
     using TestFramework;
     using TestFramework.Courier;

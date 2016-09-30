@@ -13,6 +13,7 @@
 namespace MassTransit.Tests.Pipeline
 {
     using System.Threading.Tasks;
+    using GreenPipes;
     using MassTransit.Pipeline;
     using MassTransit.Pipeline.Filters.Latest;
     using NUnit.Framework;

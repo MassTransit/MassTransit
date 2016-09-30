@@ -14,6 +14,7 @@ namespace Automatonymous
 {
     using System;
     using CorrelationConfigurators;
+    using GreenPipes;
     using MassTransit;
     using MassTransit.Configurators;
     using MassTransit.Pipeline;
@@ -21,7 +22,7 @@ namespace Automatonymous
 
 
     public interface EventCorrelation :
-        Configurator
+        ISpecification
     {
         /// <summary>
         /// The data type for the event

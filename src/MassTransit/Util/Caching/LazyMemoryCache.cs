@@ -16,12 +16,16 @@ namespace MassTransit.Util.Caching
     using System.Runtime.Caching;
     using System.Threading;
     using System.Threading.Tasks;
+    using GreenPipes;
+    using Logging;
 
 
     public class LazyMemoryCache<TKey, TValue> :
         IDisposable
         where TValue : class
     {
+        readonly ILog _log = Logger.Get<LazyMemoryCache<TKey, TValue>>();
+
         /// <summary>
         /// Formats a key as a string
         /// </summary>
@@ -78,7 +82,7 @@ namespace MassTransit.Util.Caching
 
         public void Dispose()
         {
-            Task.Factory.StartNew(() => _cache.Dispose(), CancellationToken.None, TaskCreationOptions.HideScheduler, _scheduler);
+            Task.Factory.StartNew(() => _cache.Dispose(), CancellationToken.None, TaskCreationOptions.None, _scheduler);
         }
 
         Task DefaultValueRemoved(string key, TValue value, string reason)
@@ -98,7 +102,7 @@ namespace MassTransit.Util.Caching
 
         void Touch(string textKey)
         {
-            Task.Factory.StartNew(() => _cache.Get(textKey), CancellationToken.None, TaskCreationOptions.HideScheduler, _scheduler);
+            Task.Factory.StartNew(() => _cache.Get(textKey), CancellationToken.None, TaskCreationOptions.None, _scheduler);
         }
 
         public Task<Cached<TValue>> Get(TKey key)
@@ -128,7 +132,7 @@ namespace MassTransit.Util.Caching
                 }
 
                 return cacheItemValue;
-            }, CancellationToken.None, TaskCreationOptions.HideScheduler, _scheduler);
+            }, CancellationToken.None, TaskCreationOptions.None, _scheduler);
         }
 
         void OnCacheItemRemoved(CacheEntryRemovedArguments arguments)
@@ -142,13 +146,18 @@ namespace MassTransit.Util.Caching
 
         async void CleanupCacheItem(Task<TValue> valueTask, string textKey, CacheEntryRemovedReason reason)
         {
-            await valueTask.ContinueWith(async t =>
+            try
             {
-                if (t.IsFaulted)
-                    return;
+                var value = await valueTask.ConfigureAwait(false);
 
-                var value = t.Result;
-                await _valueRemoved(textKey, value, reason.ToString()).ConfigureAwait(false);
+                try
+                {
+                    await _valueRemoved(textKey, value, reason.ToString()).ConfigureAwait(false);
+                }
+                catch(Exception ex)
+                {
+                    _log.Warn($"Value Removed Callback through an exception for {textKey}", ex);
+                }
 
                 var disposable = value as IDisposable;
                 disposable?.Dispose();
@@ -156,7 +165,11 @@ namespace MassTransit.Util.Caching
                 var asyncDisposable = value as IAsyncDisposable;
                 if (asyncDisposable != null)
                     await asyncDisposable.DisposeAsync().ConfigureAwait(false);
-            }).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                _log.Warn($"Value was faulted, discarding {textKey}", ex);
+            }
         }
 
         class CachedValue :

@@ -25,7 +25,7 @@ namespace MassTransit
         /// <returns>The retry attempt number, 0 = first time, >= 1 = retry</returns>
         public static int GetRetryAttempt(this ConsumeContext context)
         {
-            RetryContext retryContext;
+            ConsumeRetryContext retryContext;
             return context.TryGetPayload(out retryContext) ? retryContext.RetryAttempt : 0;
         }
     }

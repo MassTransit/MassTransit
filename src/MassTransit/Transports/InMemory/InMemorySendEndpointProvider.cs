@@ -14,6 +14,7 @@ namespace MassTransit.Transports.InMemory
 {
     using System;
     using System.Threading.Tasks;
+    using GreenPipes;
     using Pipeline;
 
 

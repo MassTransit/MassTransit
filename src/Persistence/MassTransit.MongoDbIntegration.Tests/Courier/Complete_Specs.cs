@@ -14,6 +14,7 @@ namespace MassTransit.MongoDbIntegration.Tests.Courier
 {
     using System;
     using System.Threading.Tasks;
+    using GreenPipes;
     using MassTransit.Courier.Contracts;
     using MongoDbIntegration.Courier;
     using MongoDbIntegration.Courier.Consumers;

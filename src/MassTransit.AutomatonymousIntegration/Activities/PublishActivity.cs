@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,8 +14,8 @@ namespace Automatonymous.Activities
 {
     using System;
     using System.Threading.Tasks;
+    using GreenPipes;
     using MassTransit;
-    using MassTransit.Pipeline;
 
 
     public class PublishActivity<TInstance, TMessage> :
@@ -46,6 +46,12 @@ namespace Automatonymous.Activities
             inspector.Visit(this);
         }
 
+        public void Probe(ProbeContext context)
+        {
+            var scope = context.CreateScope("publish");
+            _publishPipe.Probe(scope);
+        }
+
         async Task Activity<TInstance>.Execute(BehaviorContext<TInstance> context, Behavior<TInstance> next)
         {
             await Execute(context).ConfigureAwait(false);
@@ -72,9 +78,9 @@ namespace Automatonymous.Activities
 
         Task Execute(BehaviorContext<TInstance> context)
         {
-            var consumeContext = context.CreateConsumeContext();
+            ConsumeEventContext<TInstance> consumeContext = context.CreateConsumeContext();
 
-            TMessage message = _messageFactory(consumeContext);
+            var message = _messageFactory(consumeContext);
 
             return consumeContext.Publish(message, _publishPipe);
         }
@@ -110,11 +116,17 @@ namespace Automatonymous.Activities
             inspector.Visit(this);
         }
 
+        public void Probe(ProbeContext context)
+        {
+            var scope = context.CreateScope("publish");
+            _publishPipe.Probe(scope);
+        }
+
         async Task Activity<TInstance, TData>.Execute(BehaviorContext<TInstance, TData> context, Behavior<TInstance, TData> next)
         {
-            var consumeContext = context.CreateConsumeContext();
+            ConsumeEventContext<TInstance, TData> consumeContext = context.CreateConsumeContext();
 
-            TMessage message = _messageFactory(consumeContext);
+            var message = _messageFactory(consumeContext);
 
             await consumeContext.Publish(message, _publishPipe).ConfigureAwait(false);
 

@@ -16,6 +16,7 @@ namespace MassTransit.EndpointConfigurators
     using System.Net.Mime;
     using Builders;
     using Configurators;
+    using GreenPipes;
 
 
     public class SupportMessageDeserializerBusFactorySpecification :

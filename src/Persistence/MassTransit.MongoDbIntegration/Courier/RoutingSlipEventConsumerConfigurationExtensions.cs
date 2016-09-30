@@ -13,9 +13,9 @@
 namespace MassTransit
 {
     using Courier.Contracts;
+    using GreenPipes.Partitioning;
     using MongoDbIntegration.Courier;
     using MongoDbIntegration.Courier.Consumers;
-    using Pipeline.Filters.Partitioner;
 
 
     public static class RoutingSlipEventConsumerConfigurationExtensions

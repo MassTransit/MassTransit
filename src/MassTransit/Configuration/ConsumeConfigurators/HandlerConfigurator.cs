@@ -15,6 +15,9 @@ namespace MassTransit.ConsumeConfigurators
     using System.Collections.Generic;
     using System.Linq;
     using Configurators;
+    using GreenPipes;
+    using GreenPipes.Builders;
+    using GreenPipes.Configurators;
     using PipeConfigurators;
     using Pipeline;
 
@@ -44,7 +47,7 @@ namespace MassTransit.ConsumeConfigurators
 
         public IEnumerable<ValidationResult> Validate()
         {
-            return _handlerConfigurator.Validate().Concat(((Configurator)_pipeConfigurator).Validate());
+            return _handlerConfigurator.Validate().Concat(((ISpecification)_pipeConfigurator).Validate());
         }
 
         public void Configure(IReceiveEndpointBuilder builder)

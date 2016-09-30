@@ -15,8 +15,8 @@ namespace Automatonymous.Activities
     using System;
     using System.Threading.Tasks;
     using Events;
+    using GreenPipes;
     using MassTransit;
-    using MassTransit.Pipeline;
     using MassTransit.Util;
 
 

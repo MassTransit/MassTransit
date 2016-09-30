@@ -13,42 +13,32 @@
 namespace MassTransit.Pipeline.Pipes
 {
     using System;
-    using System.Threading.Tasks;
-    using Filters;
+    using GreenPipes;
+    using GreenPipes.Pipes;
 
 
     public class ManagementPipe :
+        DynamicRouter<ConsumeContext, Guid>,
         IManagementPipe
     {
-        readonly MessageTypeConsumeFilter _filter;
-        readonly IPipe<ConsumeContext> _pipe;
-
         public ManagementPipe()
+            : base(new ConsumeContextConverterFactory(), GetRequestId)
         {
-            _filter = new MessageTypeConsumeFilter();
-            _pipe = Pipe.New<ConsumeContext>(x => x.UseFilter(_filter));
-        }
-
-        void IProbeSite.Probe(ProbeContext context)
-        {
-            var scope = context.CreateScope("managementPipe");
-
-            _pipe.Probe(scope);
-        }
-
-        Task IPipe<ConsumeContext>.Send(ConsumeContext context)
-        {
-            return _pipe.Send(context);
         }
 
         ConnectHandle IConsumePipeConnector.ConnectConsumePipe<T>(IPipe<ConsumeContext<T>> pipe)
         {
-            return _filter.ConnectConsumePipe(pipe);
+            return ConnectPipe(pipe);
         }
 
         ConnectHandle IRequestPipeConnector.ConnectRequestPipe<T>(Guid requestId, IPipe<ConsumeContext<T>> pipe)
         {
-            return _filter.ConnectRequestPipe(requestId, pipe);
+            return ConnectPipe(requestId, pipe);
+        }
+
+        static Guid GetRequestId(ConsumeContext context)
+        {
+            return context.RequestId ?? Guid.Empty;
         }
     }
 }

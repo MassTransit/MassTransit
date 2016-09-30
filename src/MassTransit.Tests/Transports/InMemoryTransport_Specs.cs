@@ -17,6 +17,8 @@ namespace MassTransit.Tests.Transports
         using System;
         using System.Threading;
         using System.Threading.Tasks;
+        using GreenPipes;
+        using GreenPipes.Filters;
         using MassTransit.Pipeline;
         using MassTransit.Pipeline.Filters;
         using MassTransit.Pipeline.Pipes;

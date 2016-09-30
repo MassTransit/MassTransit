@@ -18,7 +18,10 @@ namespace MassTransit.Context
     using System.IO;
     using System.Linq;
     using System.Net.Mime;
+    using System.Threading;
     using System.Threading.Tasks;
+    using GreenPipes;
+    using GreenPipes.Payloads;
     using Serialization;
     using Util;
 
@@ -28,6 +31,7 @@ namespace MassTransit.Context
         ReceiveContext
     {
         static readonly ContentType DefaultContentType = JsonMessageSerializer.JsonContentType;
+        readonly CancellationTokenSource _cancellationTokenSource;
         readonly Lazy<ContentType> _contentType;
         readonly Lazy<Headers> _headers;
         readonly List<Task> _pendingTasks;
@@ -35,10 +39,16 @@ namespace MassTransit.Context
         readonly Stopwatch _receiveTimer;
 
         protected BaseReceiveContext(Uri inputAddress, bool redelivered, IReceiveObserver receiveObserver)
-            : base(new PayloadCache())
+            : this(inputAddress, redelivered, receiveObserver, new CancellationTokenSource())
+        {
+        }
+
+        protected BaseReceiveContext(Uri inputAddress, bool redelivered, IReceiveObserver receiveObserver, CancellationTokenSource source)
+            : base(new PayloadCache(), source.Token)
         {
             _receiveTimer = Stopwatch.StartNew();
 
+            _cancellationTokenSource = source;
             InputAddress = inputAddress;
             Redelivered = redelivered;
             _receiveObserver = receiveObserver;
@@ -72,7 +82,7 @@ namespace MassTransit.Context
                 {
                     lock (_pendingTasks)
                     {
-                        for (int i = 0; i < _pendingTasks.Count;)
+                        for (var i = 0; i < _pendingTasks.Count;)
                         {
                             if (_pendingTasks[i].Status == TaskStatus.RanToCompletion)
                             {
@@ -84,7 +94,6 @@ namespace MassTransit.Context
                             }
                         }
                     }
-
                 }, TaskContinuationOptions.OnlyOnRanToCompletion);
 
 
@@ -147,6 +156,11 @@ namespace MassTransit.Context
             }
 
             return DefaultContentType;
+        }
+
+        public void Cancel()
+        {
+            _cancellationTokenSource.Cancel();
         }
     }
 }
