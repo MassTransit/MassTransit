@@ -56,7 +56,10 @@ namespace MassTransit.QuartzIntegration
                 .WithIdentity(new TriggerKey(correlationId))
                 .Build();
 
-            _scheduler.ScheduleJob(jobDetail, trigger);
+            if (_scheduler.CheckExists(trigger.Key))
+                _scheduler.RescheduleJob(trigger.Key, trigger);
+            else
+                _scheduler.ScheduleJob(jobDetail, trigger);
         }
 
         public async Task Consume(ConsumeContext<ScheduleRecurringMessage> context)
