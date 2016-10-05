@@ -47,7 +47,9 @@ namespace MassTransit.RabbitMqTransport.Configuration
 
             _settings = new RabbitMqReceiveSettings
             {
-                QueueName = queueName
+                QueueName = queueName,
+                ExchangeTypeProvider = _host.Settings.ExchangeTypeProvider ?? new MasstransitExchangeTypeProvider(),
+                RoutingKeyFormatter = _host.Settings.RoutingKeyFormatter ?? new MasstransitRoutingKeyFormatter()
             };
 
             _managementPipe = new ManagementPipe();
@@ -81,7 +83,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
             RabbitMqReceiveEndpointBuilder endpointBuilder = null;
             var receivePipe = CreateReceivePipe(builder, consumePipe =>
             {
-                endpointBuilder = new RabbitMqReceiveEndpointBuilder(consumePipe, _host.Settings.MessageNameFormatter, _bindMessageExchanges);
+                endpointBuilder = new RabbitMqReceiveEndpointBuilder(consumePipe, _host.Settings.MessageNameFormatter, _host.Settings.ExchangeTypeProvider, _host.Settings.RoutingKeyFormatter, _bindMessageExchanges);
 
                 endpointBuilder.AddExchangeBindings(_exchangeBindings.ToArray());
 
@@ -133,6 +135,8 @@ namespace MassTransit.RabbitMqTransport.Configuration
             set { _settings.ExchangeType = value; }
         }
 
+        public IExchangeTypeProvider ExchangeTypeProvider { get; set; }
+
         public bool PurgeOnStartup
         {
             set { _settings.PurgeOnStartup = value; }
@@ -179,6 +183,9 @@ namespace MassTransit.RabbitMqTransport.Configuration
             management.Instance(consumer);
         }
 
+        /// <summary>
+        /// Do not use this method when you want to make use of the configurable routing extension points since this method will add bindings without a routingkey
+        /// </summary>
         public void Bind(string exchangeName)
         {
             if (exchangeName == null)
@@ -190,7 +197,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
         public void Bind<T>()
             where T : class
         {
-            _exchangeBindings.AddRange(typeof(T).GetExchangeBindings(_host.Settings.MessageNameFormatter));
+            _exchangeBindings.AddRange(typeof(T).GetExchangeBindings(_host.Settings.MessageNameFormatter, _host.Settings.ExchangeTypeProvider, _host.Settings.RoutingKeyFormatter));
         }
 
         public void Bind(string exchangeName, Action<IExchangeBindingConfigurator> callback)
@@ -215,8 +222,8 @@ namespace MassTransit.RabbitMqTransport.Configuration
         protected override Uri GetErrorAddress()
         {
             var errorQueueName = _settings.QueueName + "_error";
-            var sendSettings = new RabbitMqSendSettings(errorQueueName, RabbitMQ.Client.ExchangeType.Fanout, _settings.Durable,
-                _settings.AutoDelete);
+            var sendSettings = new RabbitMqSendSettings(errorQueueName, _settings.Durable,
+                _settings.AutoDelete, _host.Settings.ExchangeTypeProvider, _host.Settings.RoutingKeyFormatter);
 
             sendSettings.BindToQueue(errorQueueName);
 
@@ -226,8 +233,8 @@ namespace MassTransit.RabbitMqTransport.Configuration
         protected override Uri GetDeadLetterAddress()
         {
             var errorQueueName = _settings.QueueName + "_skipped";
-            var sendSettings = new RabbitMqSendSettings(errorQueueName, RabbitMQ.Client.ExchangeType.Fanout, _settings.Durable,
-                _settings.AutoDelete);
+            var sendSettings = new RabbitMqSendSettings(errorQueueName, _settings.Durable,
+                _settings.AutoDelete, _host.Settings.ExchangeTypeProvider, _host.Settings.RoutingKeyFormatter);
 
             sendSettings.BindToQueue(errorQueueName);
 

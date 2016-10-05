@@ -48,7 +48,7 @@ namespace MassTransit.RabbitMqTransport
         Task BasicPublishAsync(string exchange, string routingKey, bool mandatory, IBasicProperties basicProperties, byte[] body, bool awaitAck);
 
         Task ExchangeBind(string destination, string source, string routingKey, IDictionary<string, object> arguments);
-        Task ExchangeDeclare(string exchange, string type, bool durable, bool autoDelete, IDictionary<string, object> arguments);
+        Task ExchangeDeclare(string exchange, IExchangeTypeProvider exchangeTypeProvider, bool durable, bool autoDelete, IDictionary<string, object> arguments);
         Task ExchangeDeclarePassive(string exchange);
         Task QueueBind(string queue, string exchange, string routingKey, IDictionary<string, object> arguments);
         Task<QueueDeclareOk> QueueDeclare(string queue, bool durable, bool exclusive, bool autoDelete, IDictionary<string, object> arguments);

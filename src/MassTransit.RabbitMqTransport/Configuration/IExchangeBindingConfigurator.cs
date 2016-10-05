@@ -22,5 +22,10 @@ namespace MassTransit.RabbitMqTransport.Configuration
         /// Sets the routing key for the binding
         /// </summary>
         string RoutingKey { set; }
+
+        /// <summary>
+        /// Sets a dynamic routingkeyFormatter which creates routingkeys based on messages that are subscribed to
+        /// </summary>
+        IRoutingKeyFormatter RoutingKeyFormatter { set; }
     }
 }

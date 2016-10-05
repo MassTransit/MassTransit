@@ -101,7 +101,7 @@ namespace MassTransit.RabbitMqTransport
             var sendSettings = _host.Settings.GetSendSettings(messageType);
 
             ExchangeBindingSettings[] bindings = TypeMetadataCache.GetMessageTypes(messageType)
-                .SelectMany(type => type.GetExchangeBindings(_host.Settings.MessageNameFormatter))
+                .SelectMany(type => type.GetExchangeBindings(_host.Settings.MessageNameFormatter, _host.Settings.ExchangeTypeProvider, _host.Settings.RoutingKeyFormatter))
                 .Where(binding => !sendSettings.ExchangeName.Equals(binding.Exchange.ExchangeName))
                 .ToArray();
 

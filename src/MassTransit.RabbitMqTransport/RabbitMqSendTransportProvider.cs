@@ -34,13 +34,13 @@ namespace MassTransit.RabbitMqTransport
 
         public Task<ISendTransport> GetSendTransport(Uri address)
         {
-            var sendSettings = address.GetSendSettings();
-
             var hostSettings = address.GetHostSettings();
 
             var host = _hosts.FirstOrDefault(x => RabbitMqHostEqualityComparer.Default.Equals(hostSettings, x.Settings));
             if (host == null)
                 throw new EndpointNotFoundException("The endpoint address specified an unknown host: " + address);
+
+            var sendSettings = address.GetSendSettings(host.Settings.ExchangeTypeProvider, host.Settings.RoutingKeyFormatter);
 
             var modelCache = new RabbitMqModelCache(host.ConnectionCache, host.Supervisor, _settings);
 

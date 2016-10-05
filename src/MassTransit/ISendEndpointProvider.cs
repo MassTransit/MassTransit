@@ -15,7 +15,6 @@ namespace MassTransit
     using System;
     using System.Threading.Tasks;
 
-
     /// <summary>
     /// The Send Endpoint Provider is used to retrieve endpoints using addresses. The interface is
     /// available both at the bus and within the context of most message receive handlers, including

@@ -34,6 +34,11 @@ namespace MassTransit.RabbitMqTransport.Configuration
         string ExchangeType { set; }
 
         /// <summary>
+        /// Specify a dynamic exchangeTypeProvider for the endpoint
+        /// </summary>
+        IExchangeTypeProvider ExchangeTypeProvider { set; }
+
+        /// <summary>
         /// Set an exchange argument passed to the broker on queue declaration
         /// </summary>
         /// <param name="key">The argument key</param>

@@ -25,6 +25,8 @@ namespace MassTransit.RabbitMqTransport.Configuration.Configurators
         public ConfigurationHostSettings()
         {
             MessageNameFormatter = new RabbitMqMessageNameFormatter();
+            ExchangeTypeProvider = new MasstransitExchangeTypeProvider();
+            RoutingKeyFormatter = new MasstransitRoutingKeyFormatter();
 
             var connectionFactory = new ConnectionFactory();
             SslProtocol = connectionFactory.Ssl.Version;
@@ -46,6 +48,8 @@ namespace MassTransit.RabbitMqTransport.Configuration.Configurators
         public X509Certificate ClientCertificate { get; set; }
         public bool UseClientCertificateAsAuthenticationIdentity { get; set; }
         public IMessageNameFormatter MessageNameFormatter { get; set; }
+        public IExchangeTypeProvider ExchangeTypeProvider { get; }
+        public IRoutingKeyFormatter RoutingKeyFormatter { get; }
         public string[] ClusterMembers { get; set; }
         public IRabbitMqEndpointResolver HostNameSelector { get; set; }
         public string ClientProvidedName { get; set; }

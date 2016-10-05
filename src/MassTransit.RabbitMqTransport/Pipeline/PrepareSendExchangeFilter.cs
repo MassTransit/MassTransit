@@ -100,7 +100,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
                         }.Where(x => !string.IsNullOrWhiteSpace(x))));
                 }
 
-                await context.ExchangeDeclare(exchange.ExchangeName, exchange.ExchangeType, exchange.Durable, exchange.AutoDelete,
+                await context.ExchangeDeclare(exchange.ExchangeName, exchange.ExchangeTypeProvider, exchange.Durable, exchange.AutoDelete,
                     exchange.Arguments).ConfigureAwait(false);
 
                 await
@@ -121,7 +121,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
 
             if (!string.IsNullOrWhiteSpace(_settings.ExchangeName))
             {
-                await context.ExchangeDeclare(_settings.ExchangeName, _settings.ExchangeType, _settings.Durable, _settings.AutoDelete,
+                await context.ExchangeDeclare(_settings.ExchangeName, _settings.ExchangeTypeProvider, _settings.Durable, _settings.AutoDelete,
                     _settings.ExchangeArguments).ConfigureAwait(false);
             }
 

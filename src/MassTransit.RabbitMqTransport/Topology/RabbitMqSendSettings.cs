@@ -26,15 +26,19 @@ namespace MassTransit.RabbitMqTransport.Topology
         IDictionary<string, object> _queueArguments;
         string _queueName;
 
-        public RabbitMqSendSettings(string exchangeName, string exchangeType, bool durable, bool autoDelete)
+        public RabbitMqSendSettings(string exchangeName, bool durable, bool autoDelete, IExchangeTypeProvider exchangeTypeProvider = null, IRoutingKeyFormatter routingKeyFormatter = null, string exchangeType = null)
         {
             ExchangeName = exchangeName;
-            ExchangeType = exchangeType;
+            ExchangeTypeProvider = exchangeTypeProvider ?? new MasstransitExchangeTypeProvider();
+            ExchangeType = exchangeType ?? ExchangeTypeProvider.GetTypeForExchangeName(ExchangeName);
+            RoutingKeyFormatter = routingKeyFormatter ?? new MasstransitRoutingKeyFormatter();
             Durable = durable;
             AutoDelete = autoDelete;
 
             _exchangeBindings = new List<ExchangeBindingSettings>();
         }
+
+        public IExchangeTypeProvider ExchangeTypeProvider { get; set; }
 
         public void SetExchangeArgument(string key, object value)
         {
@@ -54,6 +58,7 @@ namespace MassTransit.RabbitMqTransport.Topology
 
         public string ExchangeType { get; set; }
 
+        public IRoutingKeyFormatter RoutingKeyFormatter { get; set; }
         bool SendSettings.BindToQueue => _bindToQueue;
 
         public string QueueName => _queueName;

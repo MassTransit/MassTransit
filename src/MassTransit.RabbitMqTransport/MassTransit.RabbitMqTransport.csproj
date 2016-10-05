@@ -106,6 +106,7 @@
     <Compile Include="Hosting\RabbitMqHostBusFactory.cs" />
     <Compile Include="Hosting\RabbitMqServiceConfigurator.cs" />
     <Compile Include="Hosting\RabbitMqSettings.cs" />
+    <Compile Include="IExchangeTypeProvider.cs" />
     <Compile Include="Integration\IConnectionCache.cs" />
     <Compile Include="Integration\IModelCache.cs" />
     <Compile Include="Integration\PendingPublish.cs" />
@@ -113,6 +114,7 @@
     <Compile Include="Integration\RabbitMqModelCache.cs" />
     <Compile Include="IRabbitMqHost.cs" />
     <Compile Include="IRabbitMqEndpointResolver.cs" />
+    <Compile Include="IRoutingkeyFormatter.cs" />
     <Compile Include="ModelSettings.cs" />
     <Compile Include="Pipeline\DelayedExchangeMessageRedeliveryFilter.cs" />
     <Compile Include="Management\ISetPrefetchCount.cs" />
@@ -146,9 +148,11 @@
     <Compile Include="RabbitMqHeaders.cs" />
     <Compile Include="RabbitMqMessageNameFormatter.cs" />
     <Compile Include="ModelContext.cs" />
+    <Compile Include="MasstransitRoutingKeyFormatter.cs" />
     <Compile Include="RabbitMqSendContextExtensions.cs" />
     <Compile Include="RabbitMqSendEndpointProvider.cs" />
     <Compile Include="RabbitMqSendTransportProvider.cs" />
+    <Compile Include="MasstransitExchangeTypeProvider.cs" />
     <Compile Include="SequentialEndpointResolver.cs" />
     <Compile Include="ReceiveSettings.cs" />
     <Compile Include="RabbitMqReceiveTransport.cs" />
