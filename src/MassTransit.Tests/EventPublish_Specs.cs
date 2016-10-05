@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,6 +14,7 @@ namespace MassTransit.Tests
 {
     using System;
     using System.Threading.Tasks;
+    using MassTransit.Transports.InMemory;
     using NUnit.Framework;
     using TestFramework;
     using TestFramework.Messages;
@@ -30,6 +31,14 @@ namespace MassTransit.Tests
         }
 
         [Test]
+        public async Task Should_publish_fourth_event()
+        {
+            ConsumeContext<PingCompleted> consumed = await _completed;
+
+            Assert.That(consumed.Message.QueueDepth, Is.EqualTo(4));
+        }
+
+        [Test]
         public async Task Should_publish_second_event()
         {
             ConsumeContext<PingProcessing> consumed = await _processing;
@@ -39,12 +48,6 @@ namespace MassTransit.Tests
         public async Task Should_publish_third_event()
         {
             ConsumeContext<PingConsumed> consumed = await _consumed;
-        }
-
-        [Test]
-        public async Task Should_publish_fourth_event()
-        {
-            ConsumeContext<PingCompleted> consumed = await _completed;
         }
 
         Task<ConsumeContext<PingReceived>> _received;
@@ -60,7 +63,7 @@ namespace MassTransit.Tests
 
         protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
-            configurator.Consumer<Consumar>();
+            configurator.Consumer(() => new Consumar(GetTransport(InputQueueName)));
 
             _received = Handled<PingReceived>(configurator);
             _processing = Handled<PingProcessing>(configurator);
@@ -72,12 +75,19 @@ namespace MassTransit.Tests
         class Consumar :
             IConsumer<PingMessage>
         {
+            readonly IInMemoryTransport _transport;
+
+            public Consumar(IInMemoryTransport transport)
+            {
+                _transport = transport;
+            }
+
             public async Task Consume(ConsumeContext<PingMessage> context)
             {
                 await context.Publish<PingReceived>(new
                 {
                     PingId = context.Message.CorrelationId,
-                    Timestamp = DateTime.UtcNow,
+                    Timestamp = DateTime.UtcNow
                 });
 
                 Console.WriteLine("Ping: {0}", context.Message.CorrelationId);
@@ -85,21 +95,22 @@ namespace MassTransit.Tests
                 await context.Publish<PingProcessing>(new
                 {
                     PingId = context.Message.CorrelationId,
-                    Timestamp = DateTime.UtcNow,
+                    Timestamp = DateTime.UtcNow
                 });
 
-                Console.WriteLine("Prcessing: {0}", context.Message.CorrelationId);
+                Console.WriteLine("Processing: {0}", context.Message.CorrelationId);
 
                 await context.Publish<PingConsumed>(new
                 {
                     PingId = context.Message.CorrelationId,
-                    Timestamp = DateTime.UtcNow,
+                    Timestamp = DateTime.UtcNow
                 });
 
                 await context.Publish<PingCompleted>(new
                 {
                     PingId = context.Message.CorrelationId,
                     Timestamp = DateTime.UtcNow,
+                    QueueDepth = _transport.QueueDepth
                 });
             }
         }
@@ -128,11 +139,14 @@ namespace MassTransit.Tests
             DateTime Timestamp { get; }
         }
 
+
         public interface PingCompleted
         {
             Guid PingId { get; }
 
             DateTime Timestamp { get; }
+
+            int QueueDepth { get; }
         }
     }
 }

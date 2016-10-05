@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -18,8 +18,6 @@ namespace MassTransit.Tests.Transports
         using System.Threading;
         using System.Threading.Tasks;
         using GreenPipes;
-        using GreenPipes.Filters;
-        using MassTransit.Pipeline;
         using MassTransit.Pipeline.Filters;
         using MassTransit.Pipeline.Pipes;
         using MassTransit.Serialization;
@@ -44,17 +42,14 @@ namespace MassTransit.Tests.Transports
 
                 TaskCompletionSource<int> received = GetTask<int>();
 
-                IPipe<ReceiveContext> receivePipe = Pipe.New<ReceiveContext>(x =>
+                IPipe<ReceiveContext> receivePipe = Pipe.Execute<ReceiveContext>(context =>
                 {
-                    x.UseFilter(new DelegateFilter<ReceiveContext>(context =>
-                    {
-                        Console.WriteLine("Message: {0}", context.TransportHeaders.Get("MessageId", "N/A"));
+                    Console.WriteLine("Message: {0}", context.TransportHeaders.Get("MessageId", "N/A"));
 
-                        received.TrySetResult(1);
-                    }));
+                    received.TrySetResult(1);
                 });
 
-                ReceiveTransportHandle receiveHandle = ((IReceiveTransport)transport).Start(receivePipe);
+                var receiveHandle = ((IReceiveTransport)transport).Start(receivePipe);
 
                 var sendEndpoint = new SendEndpoint(transport, new JsonMessageSerializer(), inputAddress,
                     inputAddress, new SendPipe(new MessageTypeSendFilter(), Pipe.Empty<SendContext>()));

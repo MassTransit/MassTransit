@@ -45,17 +45,18 @@ namespace MassTransit.TestFramework
         ISendEndpoint _inputQueueSendEndpoint;
         ISendEndpoint _busSendEndpoint;
         BusHandle _busHandle;
-        readonly Uri _baseAddress;
         InMemoryTransportCache _inMemoryTransportCache;
         readonly IBusCreationScope _busCreationScope;
+        protected string InputQueueName { get; }
 
-        public Uri BaseAddress => _baseAddress;
+        protected Uri BaseAddress { get; }
 
         public InMemoryTestFixture(bool busPerTest = false)
         {
-            _baseAddress = new Uri("loopback://localhost/");
+            BaseAddress = new Uri("loopback://localhost/");
 
-            _inputQueueAddress = new Uri("loopback://localhost/input_queue");
+            InputQueueName = "input_queue";
+            _inputQueueAddress = new Uri($"loopback://localhost/{InputQueueName}");
 
             if (busPerTest)
                 _busCreationScope = new PerTestBusCreationScope(SetupBus, TeardownBus);
@@ -124,6 +125,11 @@ namespace MassTransit.TestFramework
 
         protected IPublishEndpointProvider PublishEndpointProvider => new InMemoryPublishEndpointProvider(Bus, _inMemoryTransportCache, PublishPipe.Empty);
 
+        protected IInMemoryTransport GetTransport(string queueName)
+        {
+            return _inMemoryTransportCache.GetTransport(queueName);
+        }
+
         [OneTimeTearDown]
         public Task TearDownInMemoryTestFixture()
         {
@@ -134,7 +140,7 @@ namespace MassTransit.TestFramework
         {
             try
             {
-                await _busHandle?.StopAsync(new CancellationTokenSource(TestTimeout).Token);
+                await (_busHandle?.StopAsync(new CancellationTokenSource(TestTimeout).Token) ?? TaskUtil.Completed).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -183,7 +189,7 @@ namespace MassTransit.TestFramework
         }
 
 
-        class PerTestFixtureBusCreationScope : 
+        class PerTestFixtureBusCreationScope :
             IBusCreationScope
         {
             readonly Func<Task> _setupBus;
@@ -217,7 +223,7 @@ namespace MassTransit.TestFramework
         }
 
 
-        class PerTestBusCreationScope : 
+        class PerTestBusCreationScope :
             IBusCreationScope
         {
             readonly Func<Task> _setupBus;
