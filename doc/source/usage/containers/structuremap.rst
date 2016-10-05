@@ -40,7 +40,7 @@ container. The two bus interfaces, ``IBus`` and ``IBusControl``, are included.
         {
             For<IBusControl>()
                 .Use(busControl);
-            Forward<IBus, IBusControl>();
+            Forward<IBusControl, IBus>();
         });
 
         busControl.Start();
@@ -65,7 +65,7 @@ StructureMap, as it ensures consistent usage across services.
                 {
                     x.ReceiveEndpoint("customer_update_queue", e => e.LoadFrom(context));
                 }));
-            Forward<IBus, IBusControl>();
+            Forward<IBusControl, IBus>();
         }
     }
 
