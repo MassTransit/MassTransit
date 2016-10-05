@@ -29,7 +29,8 @@ namespace MassTransit.Transports.InMemory
     public class InMemoryTransport :
         IReceiveTransport,
         ISendTransport,
-        IDisposable
+        IDisposable,
+        IInMemoryTransport
     {
         static readonly ILog _log = Logger.Get<InMemoryTransport>();
         readonly ReceiveEndpointObservable _endpointObservable;
@@ -39,9 +40,10 @@ namespace MassTransit.Transports.InMemory
         readonly LimitedConcurrencyLevelTaskScheduler _scheduler;
         readonly SendObservable _sendObservable;
         readonly TaskSupervisor _supervisor;
-        int _currentPendingDeliveryCount;
+        int _pendingDeliveryCount;
         long _deliveryCount;
         int _maxPendingDeliveryCount;
+        int _queueDepth;
         IPipe<ReceiveContext> _receivePipe;
 
         public InMemoryTransport(Uri inputAddress, int concurrencyLimit)
@@ -57,6 +59,14 @@ namespace MassTransit.Transports.InMemory
 
             _scheduler = new LimitedConcurrencyLevelTaskScheduler(concurrencyLimit);
         }
+
+        public int PendingDeliveryCount => _pendingDeliveryCount;
+
+        public long DeliveryCount => _deliveryCount;
+
+        public int MaxPendingDeliveryCount => _maxPendingDeliveryCount;
+
+        public int QueueDepth => _queueDepth;
 
         public void Dispose()
         {
@@ -118,6 +128,8 @@ namespace MassTransit.Transports.InMemory
                 await _sendObservable.PreSend(context).ConfigureAwait(false);
 
                 var transportMessage = new InMemoryTransportMessage(messageId, context.Body, context.ContentType.MediaType, TypeMetadataCache<T>.ShortName);
+
+                Interlocked.Increment(ref _queueDepth);
 
 #pragma warning disable 4014
                     Task.Factory.StartNew(() => DispatchMessage(transportMessage), _supervisor.StoppedToken, TaskCreationOptions.HideScheduler, _scheduler);
@@ -184,7 +196,7 @@ namespace MassTransit.Transports.InMemory
 
             Interlocked.Increment(ref _deliveryCount);
 
-            var current = Interlocked.Increment(ref _currentPendingDeliveryCount);
+            var current = Interlocked.Increment(ref _pendingDeliveryCount);
             while (current > _maxPendingDeliveryCount)
                 Interlocked.CompareExchange(ref _maxPendingDeliveryCount, current, _maxPendingDeliveryCount);
 
@@ -210,7 +222,8 @@ namespace MassTransit.Transports.InMemory
             }
             finally
             {
-                Interlocked.Decrement(ref _currentPendingDeliveryCount);
+                Interlocked.Decrement(ref _pendingDeliveryCount);
+                Interlocked.Decrement(ref _queueDepth);
             }
         }
 

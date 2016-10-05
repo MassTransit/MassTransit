@@ -45,6 +45,11 @@ namespace MassTransit.Transports.InMemory
             get { return _transports.Keys.Select(x => new Uri(_baseUri, x)); }
         }
 
+        public IInMemoryTransport GetTransport(string queueName)
+        {
+            return _transports.GetOrAdd(queueName, name => new InMemoryTransport(new Uri(_baseUri, name), _concurrencyLimit));
+        }
+
         void IProbeSite.Probe(ProbeContext context)
         {
             ProbeContext scope = context.CreateScope("host");
