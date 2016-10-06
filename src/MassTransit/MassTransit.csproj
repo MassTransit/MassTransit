@@ -981,6 +981,7 @@
     <Compile Include="Exceptions\EndpointException.cs" />
     <Compile Include="Turnout\JobResultContext.cs" />
     <Compile Include="Util\AssemblyTypeCache.cs" />
+    <Compile Include="Util\ObservableObserver.cs" />
     <Compile Include="Util\Scanning\AssemblyFinder.cs" />
     <Compile Include="Util\Scanning\AssemblyScanner.cs" />
     <Compile Include="Util\Scanning\AssemblyScanRecord.cs" />

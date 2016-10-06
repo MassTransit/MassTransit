@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -27,6 +27,7 @@ namespace MassTransit.Pipeline.Filters
         IFilter<ConsumeContext<TMessage>>
         where TMessage : class
     {
+        readonly string _observerType;
         readonly IObserver<ConsumeContext<TMessage>> _observer;
 
         public ObserverMessageFilter(IObserver<ConsumeContext<TMessage>> observer)
@@ -35,30 +36,33 @@ namespace MassTransit.Pipeline.Filters
                 throw new ArgumentNullException(nameof(observer));
 
             _observer = observer;
+            _observerType = TypeMetadataCache.GetShortName(observer.GetType());
         }
 
         void IProbeSite.Probe(ProbeContext context)
         {
-            context.CreateFilterScope("observer");
+            var scope = context.CreateFilterScope("observer");
+            scope.Add("observerType", _observerType);
+
         }
 
         [DebuggerNonUserCode]
         async Task IFilter<ConsumeContext<TMessage>>.Send(ConsumeContext<TMessage> context, IPipe<ConsumeContext<TMessage>> next)
         {
-            Stopwatch timer = Stopwatch.StartNew();
+            var timer = Stopwatch.StartNew();
             try
             {
                 await Task.Yield();
 
                 _observer.OnNext(context);
 
-                await context.NotifyConsumed(timer.Elapsed, TypeMetadataCache.GetShortName(_observer.GetType())).ConfigureAwait(false);
+                await context.NotifyConsumed(timer.Elapsed, _observerType).ConfigureAwait(false);
 
                 await next.Send(context).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
-                await context.NotifyFaulted(timer.Elapsed, TypeMetadataCache.GetShortName(_observer.GetType()), ex).ConfigureAwait(false);
+                await context.NotifyFaulted(timer.Elapsed, _observerType, ex).ConfigureAwait(false);
 
                 _observer.OnError(ex);
 
