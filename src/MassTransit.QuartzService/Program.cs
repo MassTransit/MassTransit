@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -15,7 +15,6 @@ namespace MassTransit.QuartzService
     using System.Diagnostics;
     using Configuration;
     using Log4NetIntegration.Logging;
-    using Monitoring.Performance;
     using Topshelf;
     using Topshelf.Logging;
     using Topshelf.Runtime;
@@ -23,7 +22,7 @@ namespace MassTransit.QuartzService
 
     class Program
     {
-        static int Main()
+        public static int Main()
         {
             Log4NetLogWriterFactory.Use("log4net.config");
             Log4NetLogger.Use();

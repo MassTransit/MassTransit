@@ -62,11 +62,11 @@ namespace MassTransit.RabbitMqTransport.Configuration.Builders
             return new RabbitMqSendTransportProvider(_hosts, _modelSettings);
         }
 
-        public override ISendEndpointProvider CreateSendEndpointProvider(params ISendPipeSpecification[] specifications)
+        public override ISendEndpointProvider CreateSendEndpointProvider(Uri sourceAddress, params ISendPipeSpecification[] specifications)
         {
             var pipe = CreateSendPipe(specifications);
 
-            var provider = new RabbitMqSendEndpointProvider(MessageSerializer, InputAddress, SendTransportProvider, pipe);
+            var provider = new RabbitMqSendEndpointProvider(MessageSerializer, sourceAddress, SendTransportProvider, pipe);
 
             return new SendEndpointCache(provider, CacheDurationProvider);
         }
@@ -79,7 +79,7 @@ namespace MassTransit.RabbitMqTransport.Configuration.Builders
             return _sendEndpointCacheTimeout;
         }
 
-        public override IPublishEndpointProvider CreatePublishEndpointProvider(params IPublishPipeSpecification[] specifications)
+        public override IPublishEndpointProvider CreatePublishEndpointProvider(Uri sourceAddress, params IPublishPipeSpecification[] specifications)
         {
             var pipe = CreatePublishPipe(specifications);
 

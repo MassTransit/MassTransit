@@ -52,11 +52,11 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
             return new ServiceBusSendTransportProvider(_hosts);
         }
 
-        public override ISendEndpointProvider CreateSendEndpointProvider(params ISendPipeSpecification[] specifications)
+        public override ISendEndpointProvider CreateSendEndpointProvider(Uri sourceAddress, params ISendPipeSpecification[] specifications)
         {
             var pipe = CreateSendPipe(specifications);
 
-            var provider = new ServiceBusSendEndpointProvider(MessageSerializer, InputAddress, SendTransportProvider, pipe);
+            var provider = new ServiceBusSendEndpointProvider(MessageSerializer, sourceAddress, SendTransportProvider, pipe);
 
             return new SendEndpointCache(provider, QueueCacheDurationProvider);
         }
@@ -68,9 +68,9 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
             return timeSpan > TimeSpan.FromDays(1) ? TimeSpan.FromDays(1) : timeSpan;
         }
 
-        public override IPublishEndpointProvider CreatePublishEndpointProvider(params IPublishPipeSpecification[] specifications)
+        public override IPublishEndpointProvider CreatePublishEndpointProvider(Uri sourceAddress, params IPublishPipeSpecification[] specifications)
         {
-            var provider = new PublishSendEndpointProvider(MessageSerializer, InputAddress, _hosts);
+            var provider = new PublishSendEndpointProvider(MessageSerializer, sourceAddress, _hosts);
 
             var cache = new SendEndpointCache(provider, TopicCacheDurationProvider);
 

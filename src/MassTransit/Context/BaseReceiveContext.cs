@@ -28,7 +28,8 @@ namespace MassTransit.Context
 
     public abstract class BaseReceiveContext :
         BasePipeContext,
-        ReceiveContext
+        ReceiveContext,
+        IDisposable
     {
         static readonly ContentType DefaultContentType = JsonMessageSerializer.JsonContentType;
         readonly CancellationTokenSource _cancellationTokenSource;
@@ -161,6 +162,11 @@ namespace MassTransit.Context
         public void Cancel()
         {
             _cancellationTokenSource.Cancel();
+        }
+
+        public void Dispose()
+        {
+            _cancellationTokenSource.Dispose();
         }
     }
 }

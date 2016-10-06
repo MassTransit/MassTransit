@@ -83,6 +83,8 @@ namespace MassTransit.AzureServiceBusTransport
             finally
             {
                 _receiver.DeliveryComplete();
+
+                context.Dispose();
             }
         }
 

@@ -38,14 +38,14 @@ namespace MassTransit.Builders
         /// </summary>
         /// <param name="specifications"></param>
         /// <returns></returns>
-        ISendEndpointProvider CreateSendEndpointProvider(params ISendPipeSpecification[] specifications);
+        ISendEndpointProvider CreateSendEndpointProvider(Uri sourceAddress, params ISendPipeSpecification[] specifications);
 
         /// <summary>
         /// Creates a publish endpoint provider using the bus and supplied specifications
         /// </summary>
         /// <param name="specifications"></param>
         /// <returns></returns>
-        IPublishEndpointProvider CreatePublishEndpointProvider(params IPublishPipeSpecification[] specifications);
+        IPublishEndpointProvider CreatePublishEndpointProvider(Uri sourceAddress, params IPublishPipeSpecification[] specifications);
 
         /// <summary>
         /// Adds a receive endpoint to the bus

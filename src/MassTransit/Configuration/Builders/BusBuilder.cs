@@ -155,8 +155,8 @@ namespace MassTransit.Builders
             {
                 PreBuild();
 
-                var sendEndpointProvider = CreateSendEndpointProvider();
-                var publishEndpointProvider = CreatePublishEndpointProvider();
+                var sendEndpointProvider = CreateSendEndpointProvider(InputAddress);
+                var publishEndpointProvider = CreatePublishEndpointProvider(InputAddress);
 
                 var bus = new MassTransitBus(InputAddress, ConsumePipe, sendEndpointProvider, publishEndpointProvider, ReceiveEndpoints, _hosts, BusObservable);
 
@@ -178,8 +178,8 @@ namespace MassTransit.Builders
 
         protected abstract ISendTransportProvider CreateSendTransportProvider();
 
-        public abstract ISendEndpointProvider CreateSendEndpointProvider(params ISendPipeSpecification[] specifications);
+        public abstract ISendEndpointProvider CreateSendEndpointProvider(Uri sourceAddress, params ISendPipeSpecification[] specifications);
 
-        public abstract IPublishEndpointProvider CreatePublishEndpointProvider(params IPublishPipeSpecification[] specifications);
+        public abstract IPublishEndpointProvider CreatePublishEndpointProvider(Uri sourceAddress, params IPublishPipeSpecification[] specifications);
     }
 }

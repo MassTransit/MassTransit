@@ -114,11 +114,11 @@ namespace MassTransit.EndpointConfigurators
 
             ConfigureAddDeadLetterFilter(builder.SendTransportProvider);
 
-            var publishEndpointProvider = builder.CreatePublishEndpointProvider(_publishPipeConfigurator);
+            var publishEndpointProvider = builder.CreatePublishEndpointProvider(InputAddress, _publishPipeConfigurator);
 
             ConfigureRescueFilter(publishEndpointProvider, builder.SendTransportProvider);
 
-            ISendEndpointProvider sendEndpointProvider = builder.CreateSendEndpointProvider(_sendPipeConfigurator);
+            ISendEndpointProvider sendEndpointProvider = builder.CreateSendEndpointProvider(InputAddress, _sendPipeConfigurator);
 
             IMessageDeserializer messageDeserializer = builder.GetMessageDeserializer(sendEndpointProvider, publishEndpointProvider);
 

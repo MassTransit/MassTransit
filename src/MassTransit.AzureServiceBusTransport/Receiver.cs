@@ -178,6 +178,8 @@ namespace MassTransit.AzureServiceBusTransport
 
                     _participant.SetComplete();
                 }
+
+                context.Dispose();
             }
         }
 

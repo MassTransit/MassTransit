@@ -197,6 +197,8 @@ namespace MassTransit.RabbitMqTransport.Pipeline
 
                     _deliveryComplete.TrySetResult(true);
                 }
+
+                context.Dispose();
             }
         }
 

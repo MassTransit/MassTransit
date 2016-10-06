@@ -224,6 +224,8 @@ namespace MassTransit.Transports.InMemory
             {
                 Interlocked.Decrement(ref _pendingDeliveryCount);
                 Interlocked.Decrement(ref _queueDepth);
+
+                context.Dispose();
             }
         }
 
