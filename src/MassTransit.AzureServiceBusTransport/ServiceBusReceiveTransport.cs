@@ -21,6 +21,7 @@ namespace MassTransit.AzureServiceBusTransport
     using GreenPipes;
     using Logging;
     using MassTransit.Pipeline;
+    using Microsoft.ServiceBus.Messaging;
     using Pipeline;
     using Policies;
     using Transports;
@@ -74,8 +75,15 @@ namespace MassTransit.AzureServiceBusTransport
             var supervisor =
                 new TaskSupervisor($"{TypeMetadataCache<ServiceBusReceiveTransport>.ShortName} - {_host.Settings.GetInputAddress(_settings.QueueDescription)}");
 
-            IPipe<ConnectionContext> connectionPipe = Pipe.New<ConnectionContext>(x =>
+            IPipe<NamespaceContext> pipe = Pipe.New<NamespaceContext>(x =>
             {
+                x.UseRetry(r =>
+                {
+                    r.Handle<ServerBusyException>();
+                    r.Handle<TimeoutException>();
+                    r.Intervals(50, 100, 500, 1000, 5000, 10000);
+                });
+
                 x.UseFilter(new PrepareReceiveQueueFilter(_settings, _subscriptionSettings));
 
                 if (_settings.QueueDescription.RequiresSession)
@@ -88,7 +96,7 @@ namespace MassTransit.AzureServiceBusTransport
                 }
             });
 
-            Receiver(connectionPipe, supervisor);
+            Receiver(pipe, supervisor);
 
             return new Handle(supervisor);
         }
@@ -103,7 +111,7 @@ namespace MassTransit.AzureServiceBusTransport
             return _endpointObservers.Connect(observer);
         }
 
-        async void Receiver(IPipe<ConnectionContext> connectionPipe, TaskSupervisor supervisor)
+        async void Receiver(IPipe<NamespaceContext> pipe, TaskSupervisor supervisor)
         {
             try
             {
@@ -112,11 +120,11 @@ namespace MassTransit.AzureServiceBusTransport
                     if (_log.IsDebugEnabled)
                         _log.DebugFormat("Connecting receive transport: {0}", _host.Settings.GetInputAddress(_settings.QueueDescription));
 
-                    var context = new ServiceBusConnectionContext(_host, supervisor.StoppedToken);
+                    var context = new ServiceBusNamespaceContext(_host, supervisor.StoppedToken);
 
                     try
                     {
-                        await connectionPipe.Send(context).ConfigureAwait(false);
+                        await pipe.Send(context).ConfigureAwait(false);
                     }
                     catch (TaskCanceledException)
                     {
@@ -124,7 +132,7 @@ namespace MassTransit.AzureServiceBusTransport
                     catch (Exception ex)
                     {
                         if (_log.IsErrorEnabled)
-                            _log.ErrorFormat("Azure Service Bus connection failed: {0}", ex.Message);
+                            _log.Error($"Azure Service Bus receiver faulted: {_host.Settings.GetInputAddress(_settings.QueueDescription)}", ex);
 
                         var inputAddress = context.GetQueueAddress(_settings.QueueDescription);
 

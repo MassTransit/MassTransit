@@ -30,7 +30,7 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
     /// Prepares a queue for receiving messages using the ReceiveSettings specified.
     /// </summary>
     public class PrepareReceiveQueueFilter :
-        IFilter<ConnectionContext>
+        IFilter<NamespaceContext>
     {
         static readonly INewIdFormatter _formatter = new ZBase32Formatter();
         readonly ReceiveSettings _settings;
@@ -46,7 +46,7 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
         {
         }
 
-        public async Task Send(ConnectionContext context, IPipe<ConnectionContext> next)
+        public async Task Send(NamespaceContext context, IPipe<NamespaceContext> next)
         {
             NamespaceManager namespaceManager = await context.NamespaceManager.ConfigureAwait(false);
 

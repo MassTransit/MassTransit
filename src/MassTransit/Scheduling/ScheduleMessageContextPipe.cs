@@ -12,9 +12,9 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Scheduling
 {
+    using System;
     using System.Threading.Tasks;
     using GreenPipes;
-    using Pipeline;
 
 
     public class ScheduleMessageContextPipe<T> :
@@ -23,6 +23,13 @@ namespace MassTransit.Scheduling
     {
         readonly IPipe<SendContext<T>> _pipe;
         readonly IPipe<SendContext> _sendPipe;
+        SendContext _context;
+
+        Guid? _scheduledMessageId;
+
+        public ScheduleMessageContextPipe()
+        {
+        }
 
         public ScheduleMessageContextPipe(IPipe<SendContext<T>> pipe)
         {
@@ -34,6 +41,12 @@ namespace MassTransit.Scheduling
             _sendPipe = pipe;
         }
 
+        public Guid? ScheduledMessageId
+        {
+            get { return _context?.ScheduledMessageId ?? _scheduledMessageId; }
+            set { _scheduledMessageId = value; }
+        }
+
         void IProbeSite.Probe(ProbeContext context)
         {
             _pipe?.Probe(context);
@@ -42,6 +55,10 @@ namespace MassTransit.Scheduling
 
         public async Task Send(SendContext<ScheduleMessage<T>> context)
         {
+            _context = context;
+
+            _context.ScheduledMessageId = _scheduledMessageId;
+
             if (_pipe != null)
             {
                 SendContext<T> contextProxy = context.CreateProxy(context.Message.Payload);

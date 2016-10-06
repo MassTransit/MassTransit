@@ -51,6 +51,8 @@ namespace MassTransit
         Guid? ConversationId { get; set; }
         Guid? InitiatorId { get; set; }
 
+        Guid? ScheduledMessageId { get; set; }
+
         SendHeaders Headers { get; }
 
         TimeSpan? TimeToLive { get; set; }

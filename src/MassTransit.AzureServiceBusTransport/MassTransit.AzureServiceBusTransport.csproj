@@ -83,6 +83,7 @@
     <Compile Include="Hosting\ServiceBusServiceConfigurator.cs" />
     <Compile Include="Hosting\ServiceBusSettings.cs" />
     <Compile Include="IQueueConfigurator.cs" />
+    <Compile Include="IServiceBusSendClient.cs" />
     <Compile Include="MessageSessionAsyncHandler.cs" />
     <Compile Include="MessageSessionAsyncHandlerFactory.cs" />
     <Compile Include="MessageSessionContext.cs" />
@@ -91,6 +92,7 @@
     <Compile Include="NamespaceManagerExtensions.cs" />
     <Compile Include="Pipeline\MessageSessionReceiverFilter.cs" />
     <Compile Include="Pipeline\ServiceBusMessageSchedulerFilter.cs" />
+    <Compile Include="QueueClientSendClient.cs" />
     <Compile Include="ScheduleMessageExtensions.cs" />
     <Compile Include="SchedulePublishExtensions.cs" />
     <Compile Include="Scheduling\ServiceBusScheduleMessagePipe.cs" />
@@ -115,8 +117,8 @@
     <Compile Include="Configuration\TopicSubscriptionSettings.cs" />
     <Compile Include="Contexts\ServiceBusReceiveContext.cs" />
     <Compile Include="Contexts\ServiceBusSendContextImpl.cs" />
-    <Compile Include="Contexts\ConnectionContext.cs" />
-    <Compile Include="Contexts\ServiceBusConnectionContext.cs" />
+    <Compile Include="Contexts\NamespaceContext.cs" />
+    <Compile Include="Contexts\ServiceBusNamespaceContext.cs" />
     <Compile Include="IServiceBusHost.cs" />
     <Compile Include="IServiceBusHostConfigurator.cs" />
     <Compile Include="IServiceBusReceiveEndpointConfigurator.cs" />
@@ -137,6 +139,7 @@
     <Compile Include="BusFactoryConfiguratorExtensions.cs" />
     <Compile Include="ServiceBusConfigurationExtensions.cs" />
     <Compile Include="SessionReceiver.cs" />
+    <Compile Include="TopicClientSendClient.cs" />
     <Compile Include="TurnoutExtensions.cs" />
   </ItemGroup>
   <ItemGroup>

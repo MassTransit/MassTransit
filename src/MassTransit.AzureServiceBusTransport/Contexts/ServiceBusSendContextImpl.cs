@@ -34,5 +34,18 @@ namespace MassTransit.AzureServiceBusTransport.Contexts
         public string PartitionKey { get; set; }
 
         public string SessionId { get; set; }
+
+        public void SetScheduledMessageId(long sequenceNumber)
+        {
+            var id = NewId.NextGuid();
+
+            var bytes = id.ToByteArray();
+
+            byte[] sequencyNumberBytes = BitConverter.GetBytes(sequenceNumber);
+
+            Buffer.BlockCopy(sequencyNumberBytes, 0, bytes, 0, sequencyNumberBytes.Length);
+
+            ScheduledMessageId = new Guid(bytes);
+        }
     }
 }

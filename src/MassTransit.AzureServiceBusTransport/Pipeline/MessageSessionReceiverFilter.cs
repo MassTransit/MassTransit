@@ -26,7 +26,7 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
     /// Creates a message session receiver
     /// </summary>
     public class MessageSessionReceiverFilter :
-        IFilter<ConnectionContext>
+        IFilter<NamespaceContext>
     {
         static readonly ILog _log = Logger.Get<MessageReceiverFilter>();
         readonly IReceiveEndpointObserver _endpointObserver;
@@ -47,7 +47,7 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
         {
         }
 
-        async Task IFilter<ConnectionContext>.Send(ConnectionContext context, IPipe<ConnectionContext> next)
+        async Task IFilter<NamespaceContext>.Send(NamespaceContext context, IPipe<NamespaceContext> next)
         {
             var receiveSettings = context.GetPayload<ReceiveSettings>();
 

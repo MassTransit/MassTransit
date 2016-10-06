@@ -16,7 +16,6 @@ namespace MassTransit
     using System.Threading;
     using System.Threading.Tasks;
     using GreenPipes;
-    using Pipeline;
     using Scheduling;
 
 
@@ -34,7 +33,8 @@ namespace MassTransit
         /// <param name="message">The message</param>
         /// <param name="cancellationToken"></param>
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
-        Task<ScheduledMessage<T>> ScheduleSend<T>(Uri destinationAddress, DateTime scheduledTime, T message, CancellationToken cancellationToken = default(CancellationToken))
+        Task<ScheduledMessage<T>> ScheduleSend<T>(Uri destinationAddress, DateTime scheduledTime, T message,
+            CancellationToken cancellationToken = default(CancellationToken))
             where T : class;
 
         /// <summary>
@@ -47,7 +47,8 @@ namespace MassTransit
         /// <param name="pipe"></param>
         /// <param name="cancellationToken"></param>
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
-        Task<ScheduledMessage<T>> ScheduleSend<T>(Uri destinationAddress, DateTime scheduledTime, T message, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken = default(CancellationToken))
+        Task<ScheduledMessage<T>> ScheduleSend<T>(Uri destinationAddress, DateTime scheduledTime, T message, IPipe<SendContext<T>> pipe,
+            CancellationToken cancellationToken = default(CancellationToken))
             where T : class;
 
         /// <summary>
@@ -60,7 +61,8 @@ namespace MassTransit
         /// <param name="pipe"></param>
         /// <param name="cancellationToken"></param>
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
-        Task<ScheduledMessage<T>> ScheduleSend<T>(Uri destinationAddress, DateTime scheduledTime, T message, IPipe<SendContext> pipe, CancellationToken cancellationToken = default(CancellationToken))
+        Task<ScheduledMessage<T>> ScheduleSend<T>(Uri destinationAddress, DateTime scheduledTime, T message, IPipe<SendContext> pipe,
+            CancellationToken cancellationToken = default(CancellationToken))
             where T : class;
 
         /// <summary>
@@ -71,7 +73,8 @@ namespace MassTransit
         /// <param name="message">The message object</param>
         /// <param name="cancellationToken"></param>
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
-        Task<ScheduledMessage> ScheduleSend(Uri destinationAddress, DateTime scheduledTime, object message, CancellationToken cancellationToken = default(CancellationToken));
+        Task<ScheduledMessage> ScheduleSend(Uri destinationAddress, DateTime scheduledTime, object message,
+            CancellationToken cancellationToken = default(CancellationToken));
 
         /// <summary>
         ///     Sends an object as a message, using the message type specified. If the object cannot be cast
@@ -83,7 +86,8 @@ namespace MassTransit
         /// <param name="messageType">The type of the message (use message.GetType() if desired)</param>
         /// <param name="cancellationToken"></param>
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
-        Task<ScheduledMessage> ScheduleSend(Uri destinationAddress, DateTime scheduledTime, object message, Type messageType, CancellationToken cancellationToken = default(CancellationToken));
+        Task<ScheduledMessage> ScheduleSend(Uri destinationAddress, DateTime scheduledTime, object message, Type messageType,
+            CancellationToken cancellationToken = default(CancellationToken));
 
         /// <summary>
         ///     Sends an object as a message, using the message type specified. If the object cannot be cast
@@ -95,7 +99,8 @@ namespace MassTransit
         /// <param name="pipe"></param>
         /// <param name="cancellationToken"></param>
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
-        Task<ScheduledMessage> ScheduleSend(Uri destinationAddress, DateTime scheduledTime, object message, IPipe<SendContext> pipe, CancellationToken cancellationToken = default(CancellationToken));
+        Task<ScheduledMessage> ScheduleSend(Uri destinationAddress, DateTime scheduledTime, object message, IPipe<SendContext> pipe,
+            CancellationToken cancellationToken = default(CancellationToken));
 
         /// <summary>
         ///     Sends an object as a message, using the message type specified. If the object cannot be cast
@@ -108,7 +113,8 @@ namespace MassTransit
         /// <param name="pipe"></param>
         /// <param name="cancellationToken"></param>
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
-        Task<ScheduledMessage> ScheduleSend(Uri destinationAddress, DateTime scheduledTime, object message, Type messageType, IPipe<SendContext> pipe, CancellationToken cancellationToken = default(CancellationToken));
+        Task<ScheduledMessage> ScheduleSend(Uri destinationAddress, DateTime scheduledTime, object message, Type messageType, IPipe<SendContext> pipe,
+            CancellationToken cancellationToken = default(CancellationToken));
 
         /// <summary>
         ///     Sends an interface message, initializing the properties of the interface using the anonymous
@@ -120,7 +126,8 @@ namespace MassTransit
         /// <param name="values">The property values to initialize on the interface</param>
         /// <param name="cancellationToken"></param>
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
-        Task<ScheduledMessage<T>> ScheduleSend<T>(Uri destinationAddress, DateTime scheduledTime, object values, CancellationToken cancellationToken = default(CancellationToken))
+        Task<ScheduledMessage<T>> ScheduleSend<T>(Uri destinationAddress, DateTime scheduledTime, object values,
+            CancellationToken cancellationToken = default(CancellationToken))
             where T : class;
 
         /// <summary>
@@ -134,7 +141,8 @@ namespace MassTransit
         /// <param name="pipe"></param>
         /// <param name="cancellationToken"></param>
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
-        Task<ScheduledMessage<T>> ScheduleSend<T>(Uri destinationAddress, DateTime scheduledTime, object values, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken = default(CancellationToken))
+        Task<ScheduledMessage<T>> ScheduleSend<T>(Uri destinationAddress, DateTime scheduledTime, object values, IPipe<SendContext<T>> pipe,
+            CancellationToken cancellationToken = default(CancellationToken))
             where T : class;
 
         /// <summary>
@@ -148,7 +156,8 @@ namespace MassTransit
         /// <param name="pipe"></param>
         /// <param name="cancellationToken"></param>
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
-        Task<ScheduledMessage<T>> ScheduleSend<T>(Uri destinationAddress, DateTime scheduledTime, object values, IPipe<SendContext> pipe, CancellationToken cancellationToken = default(CancellationToken))
+        Task<ScheduledMessage<T>> ScheduleSend<T>(Uri destinationAddress, DateTime scheduledTime, object values, IPipe<SendContext> pipe,
+            CancellationToken cancellationToken = default(CancellationToken))
             where T : class;
 
         /// <summary>

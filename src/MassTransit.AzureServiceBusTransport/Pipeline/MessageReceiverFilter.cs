@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -17,7 +17,6 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
     using Contexts;
     using GreenPipes;
     using Logging;
-    using MassTransit.Pipeline;
     using Microsoft.ServiceBus.Messaging;
     using Util;
 
@@ -26,7 +25,7 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
     /// Creates a message receiver and receives messages from the input queue of the endpoint
     /// </summary>
     public class MessageReceiverFilter :
-        IFilter<ConnectionContext>
+        IFilter<NamespaceContext>
     {
         static readonly ILog _log = Logger.Get<MessageReceiverFilter>();
         readonly IReceiveEndpointObserver _endpointObserver;
@@ -47,7 +46,7 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
         {
         }
 
-        async Task IFilter<ConnectionContext>.Send(ConnectionContext context, IPipe<ConnectionContext> next)
+        async Task IFilter<NamespaceContext>.Send(NamespaceContext context, IPipe<NamespaceContext> next)
         {
             var receiveSettings = context.GetPayload<ReceiveSettings>();
 

@@ -53,7 +53,7 @@ namespace MassTransit.AzureServiceBusTransport
         int _maxPendingDeliveryCount;
         bool _shuttingDown;
 
-        public SessionReceiver(ConnectionContext context, QueueClient queueClient, Uri inputAddress, IPipe<ReceiveContext> receivePipe, ReceiveSettings receiveSettings, IReceiveObserver receiveObserver, ITaskSupervisor supervisor)
+        public SessionReceiver(NamespaceContext context, QueueClient queueClient, Uri inputAddress, IPipe<ReceiveContext> receivePipe, ReceiveSettings receiveSettings, IReceiveObserver receiveObserver, ITaskSupervisor supervisor)
         {
             _queueClient = queueClient;
             _inputAddress = inputAddress;

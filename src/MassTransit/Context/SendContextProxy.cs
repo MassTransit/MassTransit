@@ -114,6 +114,12 @@ namespace MassTransit.Context
             set { _context.InitiatorId = value; }
         }
 
+        public Guid? ScheduledMessageId
+        {
+            get { return _context.ScheduledMessageId; }
+            set { _context.ScheduledMessageId = value; }
+        }
+
         public SendHeaders Headers
         {
             get { return _context.Headers; }

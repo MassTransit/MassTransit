@@ -19,7 +19,6 @@ namespace MassTransit.AzureServiceBusTransport
     using GreenPipes;
     using Internals.Extensions;
     using Logging;
-    using MassTransit.Pipeline;
     using Microsoft.ServiceBus.Messaging;
     using Util;
 
@@ -28,6 +27,7 @@ namespace MassTransit.AzureServiceBusTransport
         ReceiverMetrics
     {
         static readonly ILog _log = Logger.Get<Receiver>();
+        readonly NamespaceContext _context;
 
         readonly Uri _inputAddress;
         readonly MessageReceiver _messageReceiver;
@@ -39,9 +39,9 @@ namespace MassTransit.AzureServiceBusTransport
         long _deliveryCount;
         int _maxPendingDeliveryCount;
         bool _shuttingDown;
-        readonly ConnectionContext _context;
 
-        public Receiver(ConnectionContext context, MessageReceiver messageReceiver, Uri inputAddress, IPipe<ReceiveContext> receivePipe, ReceiveSettings receiveSettings,
+        public Receiver(NamespaceContext context, MessageReceiver messageReceiver, Uri inputAddress, IPipe<ReceiveContext> receivePipe,
+            ReceiveSettings receiveSettings,
             IReceiveObserver receiveObserver, ITaskSupervisor supervisor)
         {
             _context = context;

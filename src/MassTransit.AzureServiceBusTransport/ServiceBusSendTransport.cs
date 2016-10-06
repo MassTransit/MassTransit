@@ -39,17 +39,17 @@ namespace MassTransit.AzureServiceBusTransport
         ISendTransport
     {
         static readonly ILog _log = Logger.Get<ServiceBusSendTransport>();
+        readonly IServiceBusSendClient _client;
 
         readonly SendObservable _observers;
-        readonly MessageSender _sender;
         ITaskParticipant _participant;
 
-        public ServiceBusSendTransport(MessageSender sender, ITaskSupervisor supervisor)
+        public ServiceBusSendTransport(IServiceBusSendClient client, ITaskSupervisor supervisor)
         {
+            _client = client;
             _observers = new SendObservable();
-            _sender = sender;
 
-            _participant = supervisor.CreateParticipant($"{TypeMetadataCache<ServiceBusSendTransport>.ShortName} - {sender.Path}", StopSender);
+            _participant = supervisor.CreateParticipant($"{TypeMetadataCache<ServiceBusSendTransport>.ShortName} - {client.Path}", StopSender);
         }
 
         async Task ISendTransport.Send<T>(T message, IPipe<SendContext<T>> pipe, CancellationToken cancelSend)
@@ -88,9 +88,6 @@ namespace MassTransit.AzureServiceBusTransport
                         if (context.CorrelationId.HasValue)
                             brokeredMessage.CorrelationId = context.CorrelationId.Value.ToString("N");
 
-                        if (context.ScheduledEnqueueTimeUtc.HasValue)
-                            brokeredMessage.ScheduledEnqueueTimeUtc = context.ScheduledEnqueueTimeUtc.Value;
-
                         if (context.PartitionKey != null)
                             brokeredMessage.PartitionKey = context.PartitionKey;
 
@@ -107,9 +104,18 @@ namespace MassTransit.AzureServiceBusTransport
 
                         await _observers.PreSend(context).ConfigureAwait(false);
 
-                        await _sender.SendAsync(brokeredMessage).ConfigureAwait(false);
+                        if (context.ScheduledEnqueueTimeUtc.HasValue)
+                        {
+                            var sequenceNumber = await _client.ScheduleSend(brokeredMessage, context.ScheduledEnqueueTimeUtc.Value).ConfigureAwait(false);
 
-                        _log.DebugFormat("SEND {0} ({1})", brokeredMessage.MessageId, _sender.Path);
+                            context.SetScheduledMessageId(sequenceNumber);
+                        }
+                        else
+                        {
+                            await _client.Send(brokeredMessage).ConfigureAwait(false);
+                        }
+
+                        _log.DebugFormat("SEND {0} ({1})", brokeredMessage.MessageId, _client.Path);
 
                         await _observers.PostSend(context).ConfigureAwait(false);
                     }
@@ -131,15 +137,15 @@ namespace MassTransit.AzureServiceBusTransport
                 {
                     await pipe.Send(moveContext).ConfigureAwait(false);
 
-                    await _sender.SendAsync(moveContext.BrokeredMessage).ConfigureAwait(false);
+                    await _client.Send(moveContext.BrokeredMessage).ConfigureAwait(false);
 
-                    _log.DebugFormat("MOVE {0} ({1} to {2})", moveContext.BrokeredMessage.MessageId, context.InputAddress, _sender.Path);
+                    _log.DebugFormat("MOVE {0} ({1} to {2})", moveContext.BrokeredMessage.MessageId, context.InputAddress, _client.Path);
                 }
             }
             catch (Exception ex)
             {
                 if (_log.IsErrorEnabled)
-                    _log.Error("Move To Error Queue Fault: " + _sender.Path, ex);
+                    _log.Error("Move To Error Queue Fault: " + _client.Path, ex);
 
                 throw;
             }
@@ -154,12 +160,12 @@ namespace MassTransit.AzureServiceBusTransport
         {
             try
             {
-                await _sender.CloseAsync().ConfigureAwait(false);
+                await _client.Close().ConfigureAwait(false);
             }
             catch (Exception ex)
             {
                 if (_log.IsErrorEnabled)
-                    _log.Error($"The message sender could not be closed: {_sender.Path}", ex);
+                    _log.Error($"The message sender could not be closed: {_client.Path}", ex);
             }
         }
 
@@ -167,11 +173,11 @@ namespace MassTransit.AzureServiceBusTransport
         {
             try
             {
-                await _sender.CloseAsync().ConfigureAwait(false);
+                await _client.Close().ConfigureAwait(false);
             }
             catch (Exception exception)
             {
-                _log.Error($"Failed to close message sender: {_sender.Path}", exception);
+                _log.Error($"Failed to close message sender: {_client.Path}", exception);
                 throw;
             }
         }
@@ -186,6 +192,7 @@ namespace MassTransit.AzureServiceBusTransport
 
             readonly Stream _messageBodyStream;
             IMessageSerializer _serializer;
+            Guid? _scheduledMessageId;
 
             public ServiceBusMoveContext(ReceiveContext context)
             {
@@ -252,6 +259,8 @@ namespace MassTransit.AzureServiceBusTransport
             public Guid? CorrelationId { get; set; }
             public Guid? ConversationId { get; set; }
             public Guid? InitiatorId { get; set; }
+            public Guid? ScheduledMessageId { get; set; }
+
             public SendHeaders Headers { get; }
             public Uri SourceAddress { get; set; }
             public Uri DestinationAddress { get; set; }

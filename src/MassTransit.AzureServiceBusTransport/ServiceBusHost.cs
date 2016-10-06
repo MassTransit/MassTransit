@@ -49,12 +49,16 @@ namespace MassTransit.AzureServiceBusTransport
             _messageNameFormatter = new ServiceBusMessageNameFormatter();
 
             _supervisor = new TaskSupervisor($"{TypeMetadataCache<ServiceBusHost>.ShortName} - {_settings.ServiceUri}");
+
+            RetryPolicy = Retry.Selected<ServerBusyException, TimeoutException>().Intervals(100, 500, 1000, 5000, 10000);
         }
 
         public HostHandle Start()
         {
             return new Handle(_messagingFactory.Value, _sessionMessagingFactory, _settings, _supervisor);
         }
+
+        public IRetryPolicy RetryPolicy { get; }
 
         Task<MessagingFactory> IServiceBusHost.SessionMessagingFactory => _sessionMessagingFactory.Value;
 
@@ -177,7 +181,8 @@ namespace MassTransit.AzureServiceBusTransport
             readonly ServiceBusHostSettings _settings;
             readonly TaskSupervisor _supervisor;
 
-            public Handle(Task<MessagingFactory> messagingFactoryTask, Lazy<Task<MessagingFactory>> sessionFactory, ServiceBusHostSettings settings, TaskSupervisor supervisor)
+            public Handle(Task<MessagingFactory> messagingFactoryTask, Lazy<Task<MessagingFactory>> sessionFactory, ServiceBusHostSettings settings,
+                TaskSupervisor supervisor)
             {
                 _messagingFactoryTask = messagingFactoryTask;
                 _sessionFactory = sessionFactory;

@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -18,7 +18,7 @@ namespace MassTransit.AzureServiceBusTransport
     using GreenPipes;
     using MassTransit.Pipeline;
     using MassTransit.Pipeline.Pipes;
-    using Microsoft.ServiceBus.Messaging;
+    using Policies;
     using Transports;
 
 
@@ -35,27 +35,33 @@ namespace MassTransit.AzureServiceBusTransport
             _hosts = hosts;
             _sourceAddress = sourceAddress;
             _serializer = serializer;
+
             _sendObservable = new SendObservable();
         }
 
-        public async Task<ISendEndpoint> GetSendEndpoint(Uri address)
+        public Task<ISendEndpoint> GetSendEndpoint(Uri address)
         {
             IServiceBusHost host;
-            if(!TryGetMatchingHost(address, out host))
+            if (!TryGetMatchingHost(address, out host))
                 throw new EndpointNotFoundException("The endpoint address specified an unknown host: " + address);
 
-            TopicDescription topicDescription =
-                await (await host.RootNamespaceManager.ConfigureAwait(false)).CreateTopicSafeAsync(address.GetTopicDescription()).ConfigureAwait(false);
+            return host.RetryPolicy.Retry<ISendEndpoint>(async () =>
+            {
+                var topicDescription =
+                    await (await host.RootNamespaceManager.ConfigureAwait(false)).CreateTopicSafeAsync(address.GetTopicDescription()).ConfigureAwait(false);
 
-            MessagingFactory messagingFactory = await host.MessagingFactory.ConfigureAwait(false);
+                var messagingFactory = await host.MessagingFactory.ConfigureAwait(false);
 
-            MessageSender messageSender = await messagingFactory.CreateMessageSenderAsync(topicDescription.Path).ConfigureAwait(false);
+                var topicClient = messagingFactory.CreateTopicClient(topicDescription.Path);
 
-            var sendTransport = new ServiceBusSendTransport(messageSender, host.Supervisor);
+                var client = new TopicClientSendClient(topicClient);
 
-            sendTransport.ConnectSendObserver(_sendObservable);
+                var sendTransport = new ServiceBusSendTransport(client, host.Supervisor);
 
-            return new SendEndpoint(sendTransport, _serializer, address, _sourceAddress, SendPipe.Empty);
+                sendTransport.ConnectSendObserver(_sendObservable);
+
+                return new SendEndpoint(sendTransport, _serializer, address, _sourceAddress, SendPipe.Empty);
+            });
         }
 
         public ConnectHandle ConnectSendObserver(ISendObserver observer)
@@ -66,12 +72,14 @@ namespace MassTransit.AzureServiceBusTransport
         bool TryGetMatchingHost(Uri address, out IServiceBusHost host)
         {
             host = _hosts
-                .Where(x => x.Settings.ServiceUri.GetLeftPart(UriPartial.Authority).Equals(address.GetLeftPart(UriPartial.Authority), StringComparison.OrdinalIgnoreCase))
+                .Where(
+                    x =>
+                        x.Settings.ServiceUri.GetLeftPart(UriPartial.Authority).Equals(address.GetLeftPart(UriPartial.Authority),
+                            StringComparison.OrdinalIgnoreCase))
                 .OrderByDescending(x => address.AbsolutePath.StartsWith(x.Settings.ServiceUri.AbsolutePath, StringComparison.OrdinalIgnoreCase) ? 1 : 0)
                 .FirstOrDefault();
 
             return host != null;
         }
-
     }
 }

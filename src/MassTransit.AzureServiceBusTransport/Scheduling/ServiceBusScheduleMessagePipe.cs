@@ -15,7 +15,6 @@ namespace MassTransit.AzureServiceBusTransport.Scheduling
     using System;
     using System.Threading.Tasks;
     using GreenPipes;
-    using MassTransit.Pipeline;
 
 
     /// <summary>
@@ -31,12 +30,11 @@ namespace MassTransit.AzureServiceBusTransport.Scheduling
         readonly IPipe<SendContext<T>> _pipe;
         readonly DateTime _scheduledTime;
         readonly IPipe<SendContext> _sendPipe;
+        SendContext _context;
 
         public ServiceBusScheduleMessagePipe(DateTime scheduledTime)
         {
             _scheduledTime = scheduledTime;
-
-            MessageId = NewId.NextGuid();
         }
 
         public ServiceBusScheduleMessagePipe(DateTime scheduledTime, IPipe<SendContext<T>> pipe)
@@ -51,11 +49,12 @@ namespace MassTransit.AzureServiceBusTransport.Scheduling
             _sendPipe = pipe;
         }
 
-        public Guid MessageId { get; }
+        public Guid? ScheduledMessageId => _context?.ScheduledMessageId;
 
         public async Task Send(PublishContext<T> context)
         {
-            context.MessageId = MessageId;
+            _context = context;
+
             context.SetScheduledEnqueueTime(_scheduledTime);
 
             if (_pipe != null)
@@ -73,7 +72,8 @@ namespace MassTransit.AzureServiceBusTransport.Scheduling
 
         public async Task Send(SendContext<T> context)
         {
-            context.MessageId = MessageId;
+            _context = context;
+
             context.SetScheduledEnqueueTime(_scheduledTime);
 
             if (_pipe != null)
@@ -89,19 +89,17 @@ namespace MassTransit.AzureServiceBusTransport.Scheduling
     /// Sets the message endqueue time when sending the message, and invokes
     /// any developer-specified pipes.
     /// </summary>
-    /// <typeparam name="T"></typeparam>
     public class ServiceBusScheduleMessagePipe :
         IPipe<SendContext>,
         IPipe<PublishContext>
     {
         readonly DateTime _scheduledTime;
         readonly IPipe<SendContext> _sendPipe;
+        SendContext _context;
 
         public ServiceBusScheduleMessagePipe(DateTime scheduledTime)
         {
             _scheduledTime = scheduledTime;
-
-            MessageId = NewId.NextGuid();
         }
 
         public ServiceBusScheduleMessagePipe(DateTime scheduledTime, IPipe<SendContext> pipe)
@@ -110,11 +108,12 @@ namespace MassTransit.AzureServiceBusTransport.Scheduling
             _sendPipe = pipe;
         }
 
-        public Guid MessageId { get; }
+        public Guid? ScheduledMessageId => _context?.ScheduledMessageId;
 
         public async Task Send(PublishContext context)
         {
-            context.MessageId = MessageId;
+            _context = context;
+
             context.SetScheduledEnqueueTime(_scheduledTime);
 
             if (_sendPipe != null)
@@ -128,7 +127,8 @@ namespace MassTransit.AzureServiceBusTransport.Scheduling
 
         public async Task Send(SendContext context)
         {
-            context.MessageId = MessageId;
+            _context = context;
+
             context.SetScheduledEnqueueTime(_scheduledTime);
 
             if (_sendPipe != null)

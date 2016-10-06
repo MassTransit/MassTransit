@@ -13,6 +13,7 @@
 namespace MassTransit.AzureServiceBusTransport
 {
     using System.Threading.Tasks;
+    using GreenPipes;
     using Microsoft.ServiceBus;
     using Microsoft.ServiceBus.Messaging;
     using Transports;
@@ -46,5 +47,7 @@ namespace MassTransit.AzureServiceBusTransport
         ITaskSupervisor Supervisor { get; }
 
         string GetQueuePath(QueueDescription queueDescription);
+
+        IRetryPolicy RetryPolicy { get; }
     }
 }

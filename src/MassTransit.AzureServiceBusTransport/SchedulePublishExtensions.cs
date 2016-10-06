@@ -434,7 +434,7 @@ namespace MassTransit
 
         static Uri GetDestinationAddress(ConsumeContext context, Type messageType)
         {
-            var connectionContext = context.ReceiveContext.GetPayload<ConnectionContext>();
+            var connectionContext = context.ReceiveContext.GetPayload<NamespaceContext>();
 
             var address = connectionContext.GetTopicAddress(messageType);
 
@@ -449,7 +449,7 @@ namespace MassTransit
 
             var destinationAddress = GetDestinationAddress(context, typeof(T));
 
-            return new ScheduledMessageHandle<T>(pipe.MessageId, scheduledTime, destinationAddress, message);
+            return new ScheduledMessageHandle<T>(pipe.ScheduledMessageId ?? NewId.NextGuid(), scheduledTime, destinationAddress, message);
         }
 
         static async Task<ScheduledMessage> Schedule(ConsumeContext context, DateTime scheduledTime, object message, Type messageType,
@@ -459,7 +459,7 @@ namespace MassTransit
 
             var destinationAddress = GetDestinationAddress(context, messageType);
 
-            return new ScheduledMessageHandle(pipe.MessageId, scheduledTime, destinationAddress);
+            return new ScheduledMessageHandle(pipe.ScheduledMessageId ?? NewId.NextGuid(), scheduledTime, destinationAddress);
         }
 
 

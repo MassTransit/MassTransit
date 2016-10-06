@@ -17,7 +17,6 @@ namespace MassTransit.Scheduling
     using System.Threading.Tasks;
     using Context;
     using GreenPipes;
-    using Pipeline;
     using Util;
 
 
@@ -31,7 +30,8 @@ namespace MassTransit.Scheduling
             _publishEndpoint = publishEndpoint;
         }
 
-        Task<ScheduledMessage<T>> IMessageScheduler.ScheduleSend<T>(Uri destinationAddress, DateTime scheduledTime, T message, CancellationToken cancellationToken)
+        Task<ScheduledMessage<T>> IMessageScheduler.ScheduleSend<T>(Uri destinationAddress, DateTime scheduledTime, T message,
+            CancellationToken cancellationToken)
         {
             if (destinationAddress == null)
                 throw new ArgumentNullException(nameof(destinationAddress));
@@ -41,7 +41,8 @@ namespace MassTransit.Scheduling
             return ScheduleSend(destinationAddress, scheduledTime, message, cancellationToken);
         }
 
-        Task<ScheduledMessage<T>> IMessageScheduler.ScheduleSend<T>(Uri destinationAddress, DateTime scheduledTime, T message, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken)
+        Task<ScheduledMessage<T>> IMessageScheduler.ScheduleSend<T>(Uri destinationAddress, DateTime scheduledTime, T message, IPipe<SendContext<T>> pipe,
+            CancellationToken cancellationToken)
         {
             if (destinationAddress == null)
                 throw new ArgumentNullException(nameof(destinationAddress));
@@ -55,7 +56,8 @@ namespace MassTransit.Scheduling
             return ScheduleSend(destinationAddress, scheduledTime, message, pipeProxy, cancellationToken);
         }
 
-        Task<ScheduledMessage<T>> IMessageScheduler.ScheduleSend<T>(Uri destinationAddress, DateTime scheduledTime, T message, IPipe<SendContext> pipe, CancellationToken cancellationToken)
+        Task<ScheduledMessage<T>> IMessageScheduler.ScheduleSend<T>(Uri destinationAddress, DateTime scheduledTime, T message, IPipe<SendContext> pipe,
+            CancellationToken cancellationToken)
         {
             if (destinationAddress == null)
                 throw new ArgumentNullException(nameof(destinationAddress));
@@ -69,7 +71,8 @@ namespace MassTransit.Scheduling
             return ScheduleSend(destinationAddress, scheduledTime, message, pipeProxy, cancellationToken);
         }
 
-        Task<ScheduledMessage> IMessageScheduler.ScheduleSend(Uri destinationAddress, DateTime scheduledTime, object message, CancellationToken cancellationToken)
+        Task<ScheduledMessage> IMessageScheduler.ScheduleSend(Uri destinationAddress, DateTime scheduledTime, object message,
+            CancellationToken cancellationToken)
         {
             if (destinationAddress == null)
                 throw new ArgumentNullException(nameof(destinationAddress));
@@ -81,7 +84,8 @@ namespace MassTransit.Scheduling
             return MessageSchedulerConverterCache.ScheduleSend(this, destinationAddress, scheduledTime, message, messageType, cancellationToken);
         }
 
-        Task<ScheduledMessage> IMessageScheduler.ScheduleSend(Uri destinationAddress, DateTime scheduledTime, object message, Type messageType, CancellationToken cancellationToken)
+        Task<ScheduledMessage> IMessageScheduler.ScheduleSend(Uri destinationAddress, DateTime scheduledTime, object message, Type messageType,
+            CancellationToken cancellationToken)
         {
             if (destinationAddress == null)
                 throw new ArgumentNullException(nameof(destinationAddress));
@@ -93,7 +97,8 @@ namespace MassTransit.Scheduling
             return MessageSchedulerConverterCache.ScheduleSend(this, destinationAddress, scheduledTime, message, messageType, cancellationToken);
         }
 
-        Task<ScheduledMessage> IMessageScheduler.ScheduleSend(Uri destinationAddress, DateTime scheduledTime, object message, IPipe<SendContext> pipe, CancellationToken cancellationToken)
+        Task<ScheduledMessage> IMessageScheduler.ScheduleSend(Uri destinationAddress, DateTime scheduledTime, object message, IPipe<SendContext> pipe,
+            CancellationToken cancellationToken)
         {
             if (destinationAddress == null)
                 throw new ArgumentNullException(nameof(destinationAddress));
@@ -107,7 +112,8 @@ namespace MassTransit.Scheduling
             return MessageSchedulerConverterCache.ScheduleSend(this, destinationAddress, scheduledTime, message, messageType, pipe, cancellationToken);
         }
 
-        Task<ScheduledMessage> IMessageScheduler.ScheduleSend(Uri destinationAddress, DateTime scheduledTime, object message, Type messageType, IPipe<SendContext> pipe, CancellationToken cancellationToken)
+        Task<ScheduledMessage> IMessageScheduler.ScheduleSend(Uri destinationAddress, DateTime scheduledTime, object message, Type messageType,
+            IPipe<SendContext> pipe, CancellationToken cancellationToken)
         {
             if (destinationAddress == null)
                 throw new ArgumentNullException(nameof(destinationAddress));
@@ -121,7 +127,8 @@ namespace MassTransit.Scheduling
             return MessageSchedulerConverterCache.ScheduleSend(this, destinationAddress, scheduledTime, message, messageType, pipe, cancellationToken);
         }
 
-        Task<ScheduledMessage<T>> IMessageScheduler.ScheduleSend<T>(Uri destinationAddress, DateTime scheduledTime, object values, CancellationToken cancellationToken)
+        Task<ScheduledMessage<T>> IMessageScheduler.ScheduleSend<T>(Uri destinationAddress, DateTime scheduledTime, object values,
+            CancellationToken cancellationToken)
         {
             if (destinationAddress == null)
                 throw new ArgumentNullException(nameof(destinationAddress));
@@ -133,7 +140,8 @@ namespace MassTransit.Scheduling
             return ScheduleSend(destinationAddress, scheduledTime, message, cancellationToken);
         }
 
-        Task<ScheduledMessage<T>> IMessageScheduler.ScheduleSend<T>(Uri destinationAddress, DateTime scheduledTime, object values, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken)
+        Task<ScheduledMessage<T>> IMessageScheduler.ScheduleSend<T>(Uri destinationAddress, DateTime scheduledTime, object values, IPipe<SendContext<T>> pipe,
+            CancellationToken cancellationToken)
         {
             if (destinationAddress == null)
                 throw new ArgumentNullException(nameof(destinationAddress));
@@ -149,7 +157,8 @@ namespace MassTransit.Scheduling
             return ScheduleSend(destinationAddress, scheduledTime, message, pipeProxy, cancellationToken);
         }
 
-        Task<ScheduledMessage<T>> IMessageScheduler.ScheduleSend<T>(Uri destinationAddress, DateTime scheduledTime, object values, IPipe<SendContext> pipe, CancellationToken cancellationToken)
+        Task<ScheduledMessage<T>> IMessageScheduler.ScheduleSend<T>(Uri destinationAddress, DateTime scheduledTime, object values, IPipe<SendContext> pipe,
+            CancellationToken cancellationToken)
         {
             if (destinationAddress == null)
                 throw new ArgumentNullException(nameof(destinationAddress));
@@ -172,29 +181,27 @@ namespace MassTransit.Scheduling
             return _publishEndpoint.Publish<CancelScheduledMessage>(command);
         }
 
-        async Task<ScheduledMessage<T>> ScheduleSend<T>(Uri destinationAddress, DateTime scheduledTime, T message, CancellationToken cancellationToken)
+        Task<ScheduledMessage<T>> ScheduleSend<T>(Uri destinationAddress, DateTime scheduledTime, T message, CancellationToken cancellationToken)
             where T : class
         {
-            Guid tokenId = ScheduleTokenIdCache<T>.GetTokenId(message);
+            var pipe = new ScheduleMessageContextPipe<T>();
 
-            ScheduleMessage<T> command = new ScheduleMessageCommand<T>(scheduledTime, destinationAddress, message, tokenId);
-
-            await _publishEndpoint.Publish(command, cancellationToken).ConfigureAwait(false);
-
-            return new ScheduledMessageHandle<T>(command.CorrelationId, command.ScheduledTime, command.Destination, command.Payload);
+            return ScheduleSend(destinationAddress, scheduledTime, message, pipe, cancellationToken);
         }
 
-        async Task<ScheduledMessage<T>> ScheduleSend<T>(Uri destinationAddress, DateTime scheduledTime, T message, IPipe<SendContext<ScheduleMessage<T>>> pipe,
+        async Task<ScheduledMessage<T>> ScheduleSend<T>(Uri destinationAddress, DateTime scheduledTime, T message, ScheduleMessageContextPipe<T> pipe,
             CancellationToken cancellationToken)
             where T : class
         {
-            Guid tokenId = ScheduleTokenIdCache<T>.GetTokenId(message);
+            var tokenId = ScheduleTokenIdCache<T>.GetTokenId(message);
+
+            pipe.ScheduledMessageId = tokenId;
 
             ScheduleMessage<T> command = new ScheduleMessageCommand<T>(scheduledTime, destinationAddress, message, tokenId);
 
             await _publishEndpoint.Publish(command, pipe, cancellationToken).ConfigureAwait(false);
 
-            return new ScheduledMessageHandle<T>(command.CorrelationId, command.ScheduledTime, command.Destination, command.Payload);
+            return new ScheduledMessageHandle<T>(pipe.ScheduledMessageId ?? command.CorrelationId, command.ScheduledTime, command.Destination, command.Payload);
         }
     }
 }

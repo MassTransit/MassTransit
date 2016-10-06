@@ -19,7 +19,10 @@ namespace MassTransit.AzureServiceBusTransport.Contexts
     using Microsoft.ServiceBus.Messaging;
 
 
-    public interface ConnectionContext :
+    /// <summary>
+    /// A service bus namespace which has the appropropriate messaging factories available
+    /// </summary>
+    public interface NamespaceContext :
         PipeContext
     {
         /// <summary>

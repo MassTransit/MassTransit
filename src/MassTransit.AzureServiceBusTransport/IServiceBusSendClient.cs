@@ -10,24 +10,20 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.AzureServiceBusTransport.Configuration
+namespace MassTransit.AzureServiceBusTransport
 {
-    using System.Collections.Generic;
-    using GreenPipes;
-    using Pipeline;
+    using System;
+    using System.Threading.Tasks;
+    using Microsoft.ServiceBus.Messaging;
 
 
-    public class ServiceBusMessageSchedulerSpecification :
-        IPipeSpecification<ConsumeContext>
+    public interface IServiceBusSendClient
     {
-        public void Apply(IPipeBuilder<ConsumeContext> builder)
-        {
-            builder.AddFilter(new ServiceBusMessageSchedulerFilter());
-        }
+        string Path { get; }
 
-        public IEnumerable<ValidationResult> Validate()
-        {
-            yield break;
-        }
+        Task Send(BrokeredMessage message);
+
+        Task Close();
+        Task<long> ScheduleSend(BrokeredMessage message, DateTime scheduleEnqueueTimeUtc);
     }
 }

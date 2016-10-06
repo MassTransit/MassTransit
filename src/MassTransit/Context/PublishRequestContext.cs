@@ -102,6 +102,12 @@ namespace MassTransit.Context
             set { _context.InitiatorId = value; }
         }
 
+        public Guid? ScheduledMessageId
+        {
+            get { return _context.ScheduledMessageId; }
+            set { _context.ScheduledMessageId = value; }
+        }
+
         SendHeaders SendContext.Headers => _context.Headers;
 
         TimeSpan? SendContext.TimeToLive

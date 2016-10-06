@@ -22,10 +22,10 @@ namespace MassTransit.AzureServiceBusTransport
         IMessageSessionAsyncHandlerFactory
     {
         readonly ISessionReceiver _receiver;
-        readonly ConnectionContext _context;
+        readonly NamespaceContext _context;
         readonly ITaskSupervisor _supervisor;
 
-        public MessageSessionAsyncHandlerFactory(ConnectionContext context, ITaskSupervisor supervisor, ISessionReceiver receiver)
+        public MessageSessionAsyncHandlerFactory(NamespaceContext context, ITaskSupervisor supervisor, ISessionReceiver receiver)
         {
             _context = context;
             _supervisor = supervisor;

@@ -27,10 +27,10 @@ namespace MassTransit.AzureServiceBusTransport
         readonly BrokeredMessage _message;
         readonly ISessionReceiver _receiver;
         readonly MessageSession _session;
-        readonly ConnectionContext _context;
+        readonly NamespaceContext _context;
         readonly ITaskSupervisor _supervisor;
 
-        public MessageSessionAsyncHandler(ConnectionContext context, ITaskSupervisor supervisor, ISessionReceiver receiver, MessageSession session, BrokeredMessage message)
+        public MessageSessionAsyncHandler(NamespaceContext context, ITaskSupervisor supervisor, ISessionReceiver receiver, MessageSession session, BrokeredMessage message)
         {
             _context = context;
             _supervisor = supervisor;

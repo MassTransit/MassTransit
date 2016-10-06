@@ -23,13 +23,13 @@ namespace MassTransit.AzureServiceBusTransport.Contexts
     using Microsoft.ServiceBus.Messaging;
 
 
-    public class ServiceBusConnectionContext :
+    public class ServiceBusNamespaceContext :
         BasePipeContext,
-        ConnectionContext
+        NamespaceContext
     {
         readonly IServiceBusHost _host;
 
-        public ServiceBusConnectionContext(IServiceBusHost host, CancellationToken cancellationToken)
+        public ServiceBusNamespaceContext(IServiceBusHost host, CancellationToken cancellationToken)
             : base(new PayloadCache(), cancellationToken)
         {
             _host = host;

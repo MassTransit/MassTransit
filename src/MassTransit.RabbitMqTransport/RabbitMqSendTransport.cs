@@ -229,6 +229,8 @@ namespace MassTransit.RabbitMqTransport
             public Guid? CorrelationId { get; set; }
             public Guid? ConversationId { get; set; }
             public Guid? InitiatorId { get; set; }
+            public Guid? ScheduledMessageId { get; set; }
+
             public SendHeaders Headers { get; }
             public Uri SourceAddress { get; set; }
             public Uri DestinationAddress { get; set; }

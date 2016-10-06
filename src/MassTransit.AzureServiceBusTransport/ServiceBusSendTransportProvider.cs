@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -15,7 +15,9 @@ namespace MassTransit.AzureServiceBusTransport
     using System;
     using System.Linq;
     using System.Threading.Tasks;
+    using GreenPipes;
     using Microsoft.ServiceBus.Messaging;
+    using Policies;
     using Transports;
 
 
@@ -29,52 +31,60 @@ namespace MassTransit.AzureServiceBusTransport
             _hosts = hosts;
         }
 
-        public async Task<ISendTransport> GetSendTransport(Uri address)
+        public Task<ISendTransport> GetSendTransport(Uri address)
         {
             IServiceBusHost host;
-            if(!TryGetMatchingHost(address, out host))
+            if (!TryGetMatchingHost(address, out host))
                 throw new EndpointNotFoundException("The endpoint address specified an unknown host: " + address);
 
-            var queueDescription = address.GetQueueDescription();
-
-            var namespaceManager = await host.NamespaceManager.ConfigureAwait(false);
-
-            string queuePath;
-            var namespacePath = namespaceManager.Address.AbsolutePath.Trim('/');
-
-            if (string.IsNullOrEmpty(namespacePath))
+            return host.RetryPolicy.Retry<ISendTransport>(async () =>
             {
-                queueDescription = await namespaceManager.CreateQueueSafeAsync(queueDescription).ConfigureAwait(false);
+                var queueDescription = address.GetQueueDescription();
 
-                queuePath = host.GetQueuePath(queueDescription);
-            }
-            else if (IsInNamespace(queueDescription, namespacePath))
-            {
-                queueDescription.Path = queueDescription.Path.Replace(namespacePath, "").Trim('/');
-                queueDescription = await namespaceManager.CreateQueueSafeAsync(queueDescription).ConfigureAwait(false);
+                var namespaceManager = await host.NamespaceManager.ConfigureAwait(false);
 
-                queuePath = host.GetQueuePath(queueDescription);
-            }
-            else
-            {
-                namespaceManager = await host.RootNamespaceManager.ConfigureAwait(false);
+                string queuePath;
+                var namespacePath = namespaceManager.Address.AbsolutePath.Trim('/');
 
-                queueDescription = await namespaceManager.CreateQueueSafeAsync(queueDescription).ConfigureAwait(false);
+                if (string.IsNullOrEmpty(namespacePath))
+                {
+                    queueDescription = await namespaceManager.CreateQueueSafeAsync(queueDescription).ConfigureAwait(false);
 
-                queuePath = queueDescription.Path;
-            }
+                    queuePath = host.GetQueuePath(queueDescription);
+                }
+                else if (IsInNamespace(queueDescription, namespacePath))
+                {
+                    queueDescription.Path = queueDescription.Path.Replace(namespacePath, "").Trim('/');
+                    queueDescription = await namespaceManager.CreateQueueSafeAsync(queueDescription).ConfigureAwait(false);
 
-            MessagingFactory messagingFactory = await host.MessagingFactory.ConfigureAwait(false);
+                    queuePath = host.GetQueuePath(queueDescription);
+                }
+                else
+                {
+                    namespaceManager = await host.RootNamespaceManager.ConfigureAwait(false);
 
-            MessageSender messageSender = await messagingFactory.CreateMessageSenderAsync(queuePath).ConfigureAwait(false);
+                    queueDescription = await namespaceManager.CreateQueueSafeAsync(queueDescription).ConfigureAwait(false);
 
-            return new ServiceBusSendTransport(messageSender, host.Supervisor);
+                    queuePath = queueDescription.Path;
+                }
+
+                var messagingFactory = await host.MessagingFactory.ConfigureAwait(false);
+
+                var queueClient = messagingFactory.CreateQueueClient(queuePath);
+
+                var client = new QueueClientSendClient(queueClient);
+
+                return new ServiceBusSendTransport(client, host.Supervisor);
+            });
         }
 
         bool TryGetMatchingHost(Uri address, out IServiceBusHost host)
         {
             host = _hosts
-                .Where(x => x.Settings.ServiceUri.GetLeftPart(UriPartial.Authority).Equals(address.GetLeftPart(UriPartial.Authority), StringComparison.OrdinalIgnoreCase))
+                .Where(
+                    x =>
+                        x.Settings.ServiceUri.GetLeftPart(UriPartial.Authority).Equals(address.GetLeftPart(UriPartial.Authority),
+                            StringComparison.OrdinalIgnoreCase))
                 .OrderByDescending(x => address.AbsolutePath.StartsWith(x.Settings.ServiceUri.AbsolutePath, StringComparison.OrdinalIgnoreCase) ? 1 : 0)
                 .FirstOrDefault();
 
