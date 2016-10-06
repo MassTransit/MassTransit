@@ -165,6 +165,9 @@ namespace MassTransit
 
             var endpointConfigurator = new RabbitMqReceiveEndpointConfigurator(host, queueName);
 
+            endpointConfigurator.AutoDelete = true;
+            endpointConfigurator.Durable = false;
+
             configure?.Invoke(endpointConfigurator);
 
             configurator.AddBusFactorySpecification(endpointConfigurator);

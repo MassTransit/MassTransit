@@ -149,8 +149,6 @@ namespace MassTransit.RabbitMqTransport
                 yield return "autodelete=true";
             if (settings.Exclusive)
                 yield return "exclusive=true";
-            if (settings.PrefetchCount != 0)
-                yield return "prefetch=" + settings.PrefetchCount;
         }
 
         static IEnumerable<string> GetQueryStringOptions(SendSettings settings)
