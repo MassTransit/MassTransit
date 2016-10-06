@@ -35,7 +35,7 @@ namespace MassTransit.Tests
         {
             ConsumeContext<PingCompleted> consumed = await _completed;
 
-            Assert.That(consumed.Message.QueueDepth, Is.EqualTo(4));
+            Assert.That(consumed.Message.QueueDepth, Is.GreaterThanOrEqualTo(1));
         }
 
         [Test]
