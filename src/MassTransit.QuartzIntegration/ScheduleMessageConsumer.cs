@@ -181,10 +181,10 @@ namespace MassTransit.QuartzIntegration
 
             envelope["destinationAddress"] = destination;
 
-            JToken message = envelope["message"];
+            JToken message = envelope["Message"];
 
-            JToken payload = message["payload"];
-            JToken payloadType = message["payloadType"];
+            JToken payload = message["Payload"];
+            JToken payloadType = message["PayloadType"];
 
             envelope["message"] = payload;
             envelope["messageType"] = payloadType;
