@@ -16,12 +16,21 @@ namespace MassTransit.AzureServiceBusTransport
     using Microsoft.ServiceBus.Messaging;
 
 
-    public interface ClientSettings
+    public interface SubscriptionSettings
     {
+        /// <summary>
+        /// The number of messages to push from the server to the client
+        /// </summary>
+        int PrefetchCount { get; }
+
         /// <summary>
         /// The number of concurrent messages to process
         /// </summary>
         int MaxConcurrentCalls { get; }
+
+        TopicDescription TopicDescription { get; }
+
+        SubscriptionDescription SubscriptionDescription { get; }
 
         /// <summary>
         /// The timeout before the session state is renewed
@@ -32,22 +41,5 @@ namespace MassTransit.AzureServiceBusTransport
         /// The timeout before a message session is abandoned
         /// </summary>
         TimeSpan MessageWaitTimeout { get; }
-
-        /// <summary>
-        /// The path of the message entity
-        /// </summary>
-        string Path { get; }
-    }
-
-
-    public interface ReceiveSettings :
-        ClientSettings
-    {
-        /// <summary>
-        /// The number of messages to push from the server to the client
-        /// </summary>
-        int PrefetchCount { get; }
-
-        QueueDescription QueueDescription { get; }
     }
 }

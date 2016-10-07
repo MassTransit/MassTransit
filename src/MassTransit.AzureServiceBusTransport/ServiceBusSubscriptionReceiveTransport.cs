@@ -13,10 +13,8 @@
 namespace MassTransit.AzureServiceBusTransport
 {
     using System;
-    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
-    using Configuration;
     using Contexts;
     using GreenPipes;
     using Logging;
@@ -28,7 +26,7 @@ namespace MassTransit.AzureServiceBusTransport
     using Util;
 
 
-    public class ServiceBusReceiveTransport :
+    public class ServiceBusSubscriptionReceiveTransport :
         IReceiveTransport
     {
         static readonly ILog _log = Logger.Get<ServiceBusReceiveTransport>();
@@ -36,14 +34,12 @@ namespace MassTransit.AzureServiceBusTransport
         readonly ReceiveEndpointObservable _endpointObservers;
         readonly IServiceBusHost _host;
         readonly ReceiveObservable _receiveObservers;
-        readonly ReceiveSettings _settings;
-        readonly TopicSubscriptionSettings[] _subscriptionSettings;
+        readonly SubscriptionSettings _settings;
 
-        public ServiceBusReceiveTransport(IServiceBusHost host, ReceiveSettings settings, params TopicSubscriptionSettings[] subscriptionSettings)
+        public ServiceBusSubscriptionReceiveTransport(IServiceBusHost host, SubscriptionSettings settings)
         {
             _host = host;
             _settings = settings;
-            _subscriptionSettings = subscriptionSettings;
             _receiveObservers = new ReceiveObservable();
             _endpointObservers = new ReceiveEndpointObservable();
 
@@ -56,24 +52,24 @@ namespace MassTransit.AzureServiceBusTransport
             scope.Set(new
             {
                 Type = "Azure Service Bus",
-                _settings.QueueDescription.Path,
+                Topic = _settings.TopicDescription.Path,
                 _settings.PrefetchCount,
                 _settings.MaxConcurrentCalls,
-                _settings.QueueDescription,
-                Subscriptions = _subscriptionSettings.Select(subscription => new
-                {
-                    subscription.Topic.Path
-                }).ToArray()
+                _settings.SubscriptionDescription
             });
         }
 
         public ReceiveTransportHandle Start(IPipe<ReceiveContext> receivePipe)
         {
+            var transportAddress = new Uri(_host.Settings.ServiceUri, _settings.TopicDescription.Path + "/" + _settings.SubscriptionDescription.Name);
+
             if (_log.IsDebugEnabled)
-                _log.DebugFormat("Starting receive transport: {0}", new Uri(_host.Settings.ServiceUri, _settings.QueueDescription.Path));
+            {
+                _log.DebugFormat("Starting receive transport: {0}", transportAddress);
+            }
 
             var supervisor =
-                new TaskSupervisor($"{TypeMetadataCache<ServiceBusReceiveTransport>.ShortName} - {_host.Settings.GetInputAddress(_settings.QueueDescription)}");
+                new TaskSupervisor($"{TypeMetadataCache<ServiceBusReceiveTransport>.ShortName} - {transportAddress}");
 
             IPipe<NamespaceContext> pipe = Pipe.New<NamespaceContext>(x =>
             {
@@ -84,17 +80,11 @@ namespace MassTransit.AzureServiceBusTransport
                     r.Intervals(50, 100, 500, 1000, 5000, 10000);
                 });
 
-                x.UseFilter(new PrepareReceiveQueueFilter(_settings, _subscriptionSettings));
+                x.UseFilter(new PrepareSubscriptionFilter(_settings));
 
-                if (_settings.QueueDescription.RequiresSession)
+                if (_settings.SubscriptionDescription.RequiresSession)
                 {
-                    x.UseFilter(new MessageSessionReceiverFilter(receivePipe, _receiveObservers, _endpointObservers, supervisor, x =>
-                    {
-                        var queueClient = x.CreateQueueClient(queuePath);
-
-                        queueClient.PrefetchCount = _settings.PrefetchCount;
-
-                    }));
+                    x.UseFilter(new MessageSessionReceiverFilter(receivePipe, _receiveObservers, _endpointObservers, supervisor));
                 }
                 else
                 {
@@ -119,12 +109,14 @@ namespace MassTransit.AzureServiceBusTransport
 
         async void Receiver(IPipe<NamespaceContext> pipe, TaskSupervisor supervisor)
         {
+            var transportAddress = new Uri(_host.Settings.ServiceUri, _settings.TopicDescription.Path + "/" + _settings.SubscriptionDescription.Name);
+
             try
             {
                 await _connectionRetryPolicy.RetryUntilCancelled(async () =>
                 {
                     if (_log.IsDebugEnabled)
-                        _log.DebugFormat("Connecting receive transport: {0}", _host.Settings.GetInputAddress(_settings.QueueDescription));
+                        _log.DebugFormat("Connecting receive transport: {0}", transportAddress);
 
                     var context = new ServiceBusNamespaceContext(_host, supervisor.StoppedToken);
 
@@ -138,11 +130,9 @@ namespace MassTransit.AzureServiceBusTransport
                     catch (Exception ex)
                     {
                         if (_log.IsErrorEnabled)
-                            _log.Error($"Azure Service Bus receiver faulted: {_host.Settings.GetInputAddress(_settings.QueueDescription)}", ex);
+                            _log.Error($"Azure Service Bus receiver faulted: {transportAddress}", ex);
 
-                        var inputAddress = context.GetQueueAddress(_settings.QueueDescription);
-
-                        await _endpointObservers.Faulted(new Faulted(inputAddress, ex)).ConfigureAwait(false);
+                        await _endpointObservers.Faulted(new Faulted(transportAddress, ex)).ConfigureAwait(false);
                     }
                 }, supervisor.StoppingToken).ConfigureAwait(false);
             }

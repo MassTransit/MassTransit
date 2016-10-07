@@ -76,6 +76,7 @@
     <Compile Include="Configuration\ReceiveEndpointSettings.cs" />
     <Compile Include="Configuration\ServiceBusReceiveEndpointConfigurator.cs" />
     <Compile Include="Configuration\ServiceBusMessageSchedulerSpecification.cs" />
+    <Compile Include="Configuration\SubscriptionEndpointSettings.cs" />
     <Compile Include="Defaults.cs" />
     <Compile Include="Hosting\ServiceBusAmqpTransportSettings.cs" />
     <Compile Include="Hosting\ServiceBusHostBusFactory.cs" />
@@ -84,6 +85,8 @@
     <Compile Include="Hosting\ServiceBusSettings.cs" />
     <Compile Include="IQueueConfigurator.cs" />
     <Compile Include="IServiceBusSendClient.cs" />
+    <Compile Include="IServiceBusSubscriptionEndpointConfigurator.cs" />
+    <Compile Include="ISessionReceiver.cs" />
     <Compile Include="MessageSessionAsyncHandler.cs" />
     <Compile Include="MessageSessionAsyncHandlerFactory.cs" />
     <Compile Include="MessageSessionContext.cs" />
@@ -91,6 +94,7 @@
     <Compile Include="MessageSessionSagaRepository.cs" />
     <Compile Include="NamespaceManagerExtensions.cs" />
     <Compile Include="Pipeline\MessageSessionReceiverFilter.cs" />
+    <Compile Include="Pipeline\PrepareSubscriptionFilter.cs" />
     <Compile Include="Pipeline\ServiceBusMessageSchedulerFilter.cs" />
     <Compile Include="QueueClientSendClient.cs" />
     <Compile Include="ScheduleMessageExtensions.cs" />
@@ -130,6 +134,7 @@
     <Compile Include="Receiver.cs" />
     <Compile Include="ServiceBusReceiveTransport.cs" />
     <Compile Include="ServiceBusSendTransportProvider.cs" />
+    <Compile Include="ServiceBusSubscriptionReceiveTransport.cs" />
     <Compile Include="ServiceBusTokenProviderSettings.cs" />
     <Compile Include="IAzureServiceBusTokenProvider.cs" />
     <Compile Include="ReceiverMetrics.cs" />
@@ -139,6 +144,7 @@
     <Compile Include="BusFactoryConfiguratorExtensions.cs" />
     <Compile Include="ServiceBusConfigurationExtensions.cs" />
     <Compile Include="SessionReceiver.cs" />
+    <Compile Include="SubscriptionSettings.cs" />
     <Compile Include="TopicClientSendClient.cs" />
     <Compile Include="TurnoutExtensions.cs" />
   </ItemGroup>

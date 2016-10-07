@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -25,7 +25,7 @@ namespace MassTransit.AzureServiceBusTransport
 
         public static async Task<QueueDescription> CreateQueueSafeAsync(this NamespaceManager namespaceManager, QueueDescription queueDescription)
         {
-            bool create = true;
+            var create = true;
             try
             {
                 queueDescription = await namespaceManager.GetQueueAsync(queueDescription.Path).ConfigureAwait(false);
@@ -38,7 +38,7 @@ namespace MassTransit.AzureServiceBusTransport
 
             if (create)
             {
-                bool created = false;
+                var created = false;
                 try
                 {
                     if (_log.IsDebugEnabled)
@@ -81,7 +81,7 @@ namespace MassTransit.AzureServiceBusTransport
 
         public static async Task<TopicDescription> CreateTopicSafeAsync(this NamespaceManager namespaceManager, TopicDescription topicDescription)
         {
-            bool create = true;
+            var create = true;
             try
             {
                 topicDescription = await namespaceManager.GetTopicAsync(topicDescription.Path).ConfigureAwait(false);
@@ -94,7 +94,7 @@ namespace MassTransit.AzureServiceBusTransport
 
             if (create)
             {
-                bool created = false;
+                var created = false;
                 try
                 {
                     if (_log.IsDebugEnabled)
@@ -138,7 +138,7 @@ namespace MassTransit.AzureServiceBusTransport
         {
             var description = Defaults.CreateSubscriptionDescription(topicPath, subscriptionName, queueDescription, queuePath);
 
-            bool create = true;
+            var create = true;
             SubscriptionDescription subscriptionDescription = null;
             try
             {
@@ -172,7 +172,7 @@ namespace MassTransit.AzureServiceBusTransport
 
             if (create)
             {
-                bool created = false;
+                var created = false;
                 try
                 {
                     if (_log.IsDebugEnabled)
@@ -197,6 +197,71 @@ namespace MassTransit.AzureServiceBusTransport
 
                 if (!created)
                     subscriptionDescription = await namespaceManager.GetSubscriptionAsync(topicPath, subscriptionName).ConfigureAwait(false);
+            }
+
+            if (_log.IsDebugEnabled)
+            {
+                _log.DebugFormat("Subscription: {0} ({1} -> {2})", subscriptionDescription.Name, subscriptionDescription.TopicPath,
+                    subscriptionDescription.ForwardTo);
+            }
+
+            return subscriptionDescription;
+        }
+
+        public static async Task<SubscriptionDescription> CreateTopicSubscriptionSafeAsync(this NamespaceManager namespaceManager,
+            SubscriptionDescription description)
+        {
+            var create = true;
+            SubscriptionDescription subscriptionDescription = null;
+            try
+            {
+                subscriptionDescription = await namespaceManager.GetSubscriptionAsync(description.TopicPath, description.Name).ConfigureAwait(false);
+                if (!string.IsNullOrWhiteSpace(subscriptionDescription.ForwardTo))
+                {
+                    if (_log.IsWarnEnabled)
+                    {
+                        _log.WarnFormat("Removing invalid subscription: {0} ({1} -> {2})", subscriptionDescription.Name, subscriptionDescription.TopicPath,
+                            subscriptionDescription.ForwardTo);
+                    }
+
+                    await namespaceManager.DeleteSubscriptionAsync(description.TopicPath, description.Name).ConfigureAwait(false);
+                }
+                else
+                {
+                    create = false;
+                }
+            }
+            catch (MessagingEntityNotFoundException)
+            {
+            }
+
+            if (create)
+            {
+                var created = false;
+                try
+                {
+                    if (_log.IsDebugEnabled)
+                        _log.DebugFormat("Creating subscription {0} -> {1}", description.TopicPath, description.Name);
+
+
+                    subscriptionDescription = await namespaceManager.CreateSubscriptionAsync(description).ConfigureAwait(false);
+
+                    created = true;
+                }
+                catch (MessagingEntityAlreadyExistsException)
+                {
+                }
+                catch (MessagingException mex)
+                {
+                    if (mex.Message.Contains("(409)"))
+                    {
+                    }
+                    else
+                        throw;
+                }
+
+                if (!created)
+                    subscriptionDescription = await namespaceManager.GetSubscriptionAsync(description.TopicPath, description.Name).ConfigureAwait(false);
             }
 
             if (_log.IsDebugEnabled)

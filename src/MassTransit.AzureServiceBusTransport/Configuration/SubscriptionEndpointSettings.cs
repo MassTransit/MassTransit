@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -16,12 +16,13 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
     using Microsoft.ServiceBus.Messaging;
 
 
-    public class ReceiveEndpointSettings :
-        ReceiveSettings
+    public class SubscriptionEndpointSettings :
+        SubscriptionSettings
     {
-        public ReceiveEndpointSettings(string queuePath)
+        public SubscriptionEndpointSettings(string topicName, string subscriptionName)
         {
-            QueueDescription = Defaults.CreateQueueDescription(queuePath);
+            TopicDescription = Defaults.CreateTopicDescription(topicName);
+            SubscriptionDescription = Defaults.CreateSubscriptionDescription(topicName, subscriptionName);
 
             MaxConcurrentCalls = Math.Max(Environment.ProcessorCount, 8);
             PrefetchCount = Math.Max(MaxConcurrentCalls, 32);
@@ -30,12 +31,13 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
             MessageWaitTimeout = TimeSpan.FromDays(1);
         }
 
+        public TopicDescription TopicDescription { get; }
+
+        public SubscriptionDescription SubscriptionDescription { get; }
+
         public int PrefetchCount { get; set; }
         public int MaxConcurrentCalls { get; set; }
-        public QueueDescription QueueDescription { get; }
         public TimeSpan AutoRenewTimeout { get; set; }
         public TimeSpan MessageWaitTimeout { get; set; }
-
-        public string Path => QueueDescription.Path;
     }
 }

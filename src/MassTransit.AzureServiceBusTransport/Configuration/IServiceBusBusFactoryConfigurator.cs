@@ -50,5 +50,25 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
         /// <param name="queueName">The input queue name</param>
         /// <param name="configure">The configuration method</param>
         void ReceiveEndpoint(IServiceBusHost host, string queueName, Action<IServiceBusReceiveEndpointConfigurator> configure);
+
+        /// <summary>
+        /// Declare a subscription endpoint on the broker and configure the endpoint settings and message consumers
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="host"></param>
+        /// <param name="subscriptionName"></param>
+        /// <param name="configure"></param>
+        void SubscriptionEndpoint<T>(IServiceBusHost host, string subscriptionName, Action<IServiceBusReceiveEndpointConfigurator> configure)
+            where T : class;
+
+        /// <summary>
+        /// Declare a subscription endpoint on the broker and configure the endpoint settings and message consumers
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="host">The host for this endpoint</param>
+        /// <param name="subscriptionName">The name of the subscription</param>
+        /// <param name="topicName">The topic name to subscribe</param>
+        /// <param name="configure"></param>
+        void SubscriptionEndpoint(IServiceBusHost host, string subscriptionName, string topicName, Action<IServiceBusReceiveEndpointConfigurator> configure);
     }
 }

@@ -204,5 +204,15 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
 
             AddBusFactorySpecification(endpointConfigurator);
         }
+
+        public void SubscriptionEndpoint<T>(IServiceBusHost host, string subscriptionName, Action<IServiceBusReceiveEndpointConfigurator> configure) where T : class
+        {
+            SubscriptionEndpoint<(>()
+        }
+
+        public void SubscriptionEndpoint(IServiceBusHost host, string subscriptionName, string topicName, Action<IServiceBusReceiveEndpointConfigurator> configure)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

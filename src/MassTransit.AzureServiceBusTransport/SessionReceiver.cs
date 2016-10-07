@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -19,20 +19,36 @@ namespace MassTransit.AzureServiceBusTransport
     using GreenPipes;
     using Internals.Extensions;
     using Logging;
-    using MassTransit.Pipeline;
     using Microsoft.ServiceBus.Messaging;
     using Util;
 
 
-    public interface ISessionReceiver
+    public interface IReceiveClient
     {
-        bool IsShuttingDown { get; }
-        string QueuePath { get; }
-        Uri InputAddress { get; }
-        IReceiveObserver ReceiveObserver { get; }
-        IPipe<ReceiveContext> ReceivePipe { get; }
-        long IncrementDeliveryCount();
-        void DeliveryComplete();
+        Task RegisterSessionHandlerFactoryAsync(IMessageSessionAsyncHandlerFactory factory, SessionHandlerOptions options);
+        Task CloseAsync();
+    }
+
+
+    public class QueueClientReceiveClient :
+        IReceiveClient
+    {
+        readonly QueueClient _client;
+
+        public QueueClientReceiveClient(QueueClient client)
+        {
+            _client = client;
+        }
+
+        public Task RegisterSessionHandlerFactoryAsync(IMessageSessionAsyncHandlerFactory factory, SessionHandlerOptions options)
+        {
+            return _client.RegisterSessionHandlerFactoryAsync(factory, options);
+        }
+
+        public Task CloseAsync()
+        {
+            return _client.CloseAsync();
+        }
     }
 
 
@@ -44,16 +60,17 @@ namespace MassTransit.AzureServiceBusTransport
 
         readonly Uri _inputAddress;
         readonly ITaskParticipant _participant;
-        readonly QueueClient _queueClient;
+        readonly IReceiveClient _queueClient;
         readonly IReceiveObserver _receiveObserver;
         readonly IPipe<ReceiveContext> _receivePipe;
-        readonly ReceiveSettings _receiveSettings;
+        readonly ClientSettings _receiveSettings;
         int _currentPendingDeliveryCount;
         long _deliveryCount;
         int _maxPendingDeliveryCount;
         bool _shuttingDown;
 
-        public SessionReceiver(NamespaceContext context, QueueClient queueClient, Uri inputAddress, IPipe<ReceiveContext> receivePipe, ReceiveSettings receiveSettings, IReceiveObserver receiveObserver, ITaskSupervisor supervisor)
+        public SessionReceiver(NamespaceContext context, IReceiveClient queueClient, Uri inputAddress, IPipe<ReceiveContext> receivePipe,
+            ClientSettings receiveSettings, IReceiveObserver receiveObserver, ITaskSupervisor supervisor)
         {
             _queueClient = queueClient;
             _inputAddress = inputAddress;
@@ -95,7 +112,7 @@ namespace MassTransit.AzureServiceBusTransport
         }
 
         bool ISessionReceiver.IsShuttingDown => _shuttingDown;
-        string ISessionReceiver.QueuePath => _receiveSettings.QueueDescription.Path;
+        string ISessionReceiver.QueuePath => _receiveSettings.Path;
         Uri ISessionReceiver.InputAddress => _inputAddress;
         IReceiveObserver ISessionReceiver.ReceiveObserver => _receiveObserver;
         IPipe<ReceiveContext> ISessionReceiver.ReceivePipe => _receivePipe;
