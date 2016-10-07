@@ -12,42 +12,12 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.AzureServiceBusTransport
 {
-    using System;
     using Microsoft.ServiceBus.Messaging;
-
-
-    public interface ClientSettings
-    {
-        /// <summary>
-        /// The number of concurrent messages to process
-        /// </summary>
-        int MaxConcurrentCalls { get; }
-
-        /// <summary>
-        /// The timeout before the session state is renewed
-        /// </summary>
-        TimeSpan AutoRenewTimeout { get; }
-
-        /// <summary>
-        /// The timeout before a message session is abandoned
-        /// </summary>
-        TimeSpan MessageWaitTimeout { get; }
-
-        /// <summary>
-        /// The path of the message entity
-        /// </summary>
-        string Path { get; }
-    }
 
 
     public interface ReceiveSettings :
         ClientSettings
     {
-        /// <summary>
-        /// The number of messages to push from the server to the client
-        /// </summary>
-        int PrefetchCount { get; }
-
         QueueDescription QueueDescription { get; }
     }
 }

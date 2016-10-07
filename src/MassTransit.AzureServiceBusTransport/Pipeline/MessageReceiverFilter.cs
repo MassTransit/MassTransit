@@ -17,7 +17,6 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
     using Contexts;
     using GreenPipes;
     using Logging;
-    using Microsoft.ServiceBus.Messaging;
     using Util;
 
 
@@ -28,18 +27,11 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
         IFilter<NamespaceContext>
     {
         static readonly ILog _log = Logger.Get<MessageReceiverFilter>();
-        readonly IReceiveEndpointObserver _endpointObserver;
-        readonly IReceiveObserver _receiveObserver;
         readonly IPipe<ReceiveContext> _receivePipe;
-        readonly ITaskSupervisor _supervisor;
 
-        public MessageReceiverFilter(IPipe<ReceiveContext> receivePipe, IReceiveObserver receiveObserver, IReceiveEndpointObserver endpointObserver,
-            ITaskSupervisor supervisor)
+        public MessageReceiverFilter(IPipe<ReceiveContext> receivePipe)
         {
             _receivePipe = receivePipe;
-            _receiveObserver = receiveObserver;
-            _endpointObserver = endpointObserver;
-            _supervisor = supervisor;
         }
 
         void IProbeSite.Probe(ProbeContext context)
@@ -48,58 +40,40 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
 
         async Task IFilter<NamespaceContext>.Send(NamespaceContext context, IPipe<NamespaceContext> next)
         {
-            var receiveSettings = context.GetPayload<ReceiveSettings>();
+            var clientContext = context.GetPayload<ClientContext>();
 
-            var queuePath = context.GetQueuePath(receiveSettings.QueueDescription);
-
-            var inputAddress = context.GetQueueAddress(receiveSettings.QueueDescription);
+            var receiveSettings = context.GetPayload<ClientSettings>();
 
             if (_log.IsDebugEnabled)
-                _log.DebugFormat("Creating message receiver for {0}", inputAddress);
+                _log.DebugFormat("Creating message receiver for {0}", clientContext.InputAddress);
 
-            MessageReceiver messageReceiver = null;
-
-            try
+            using (var scope = context.CreateScope($"{TypeMetadataCache<MessageReceiverFilter>.ShortName} - {clientContext.InputAddress}"))
             {
-                var messagingFactory = await context.MessagingFactory.ConfigureAwait(false);
+                var receiver = new Receiver(context, clientContext, clientContext.InputAddress, _receivePipe, receiveSettings, scope);
 
-                messageReceiver = await messagingFactory.CreateMessageReceiverAsync(queuePath, ReceiveMode.PeekLock).ConfigureAwait(false);
+                await scope.Ready.ConfigureAwait(false);
 
-                messageReceiver.PrefetchCount = receiveSettings.PrefetchCount;
+                await context.Ready(new Ready(clientContext.InputAddress)).ConfigureAwait(false);
 
-                using (var scope = _supervisor.CreateScope($"{TypeMetadataCache<MessageReceiverFilter>.ShortName} - {inputAddress}", () => TaskUtil.Completed))
+                scope.SetReady();
+
+                try
                 {
-                    var receiver = new Receiver(context, messageReceiver, inputAddress, _receivePipe, receiveSettings, _receiveObserver, scope);
+                    await scope.Completed.ConfigureAwait(false);
+                }
+                finally
+                {
+                    ReceiverMetrics metrics = receiver;
 
-                    await scope.Ready.ConfigureAwait(false);
+                    await context.Completed(new Completed(clientContext.InputAddress, metrics)).ConfigureAwait(false);
 
-                    await _endpointObserver.Ready(new Ready(inputAddress)).ConfigureAwait(false);
-
-                    scope.SetReady();
-
-                    try
+                    if (_log.IsDebugEnabled)
                     {
-                        await scope.Completed.ConfigureAwait(false);
-                    }
-                    finally
-                    {
-                        ReceiverMetrics metrics = receiver;
-
-                        await _endpointObserver.Completed(new Completed(inputAddress, metrics)).ConfigureAwait(false);
-
-                        if (_log.IsDebugEnabled)
-                        {
-                            _log.DebugFormat("Consumer {0}: {1} received, {2} concurrent", queuePath,
-                                metrics.DeliveryCount,
-                                metrics.ConcurrentDeliveryCount);
-                        }
+                        _log.DebugFormat("Consumer {0}: {1} received, {2} concurrent", clientContext.InputAddress,
+                            metrics.DeliveryCount,
+                            metrics.ConcurrentDeliveryCount);
                     }
                 }
-            }
-            finally
-            {
-                if (messageReceiver != null && !messageReceiver.IsClosed)
-                    await messageReceiver.CloseAsync().ConfigureAwait(false);
             }
 
             await next.Send(context).ConfigureAwait(false);

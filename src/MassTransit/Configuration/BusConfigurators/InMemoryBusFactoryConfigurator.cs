@@ -68,9 +68,9 @@ namespace MassTransit.BusConfigurators
                 .Concat(_configurators.SelectMany(x => x.Validate()));
         }
 
-        void IBusFactoryConfigurator.AddBusFactorySpecification(IBusFactorySpecification configurator)
+        void IBusFactoryConfigurator.AddBusFactorySpecification(IBusFactorySpecification specification)
         {
-            _configurators.Add(new ConfiguratorProxy(configurator));
+            _configurators.Add(new ConfiguratorProxy(specification));
         }
 
         public int TransportConcurrencyLimit

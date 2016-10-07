@@ -23,69 +23,35 @@ namespace MassTransit.AzureServiceBusTransport
     using Util;
 
 
-    public interface IReceiveClient
-    {
-        Task RegisterSessionHandlerFactoryAsync(IMessageSessionAsyncHandlerFactory factory, SessionHandlerOptions options);
-        Task CloseAsync();
-    }
-
-
-    public class QueueClientReceiveClient :
-        IReceiveClient
-    {
-        readonly QueueClient _client;
-
-        public QueueClientReceiveClient(QueueClient client)
-        {
-            _client = client;
-        }
-
-        public Task RegisterSessionHandlerFactoryAsync(IMessageSessionAsyncHandlerFactory factory, SessionHandlerOptions options)
-        {
-            return _client.RegisterSessionHandlerFactoryAsync(factory, options);
-        }
-
-        public Task CloseAsync()
-        {
-            return _client.CloseAsync();
-        }
-    }
-
-
     public class SessionReceiver :
         ReceiverMetrics,
         ISessionReceiver
     {
         static readonly ILog _log = Logger.Get<SessionReceiver>();
-
-        readonly Uri _inputAddress;
+        readonly ClientContext _clientContext;
+        readonly ClientSettings _clientSettings;
         readonly ITaskParticipant _participant;
-        readonly IReceiveClient _queueClient;
-        readonly IReceiveObserver _receiveObserver;
         readonly IPipe<ReceiveContext> _receivePipe;
-        readonly ClientSettings _receiveSettings;
-        int _currentPendingDeliveryCount;
-        long _deliveryCount;
-        int _maxPendingDeliveryCount;
+        readonly IDeliveryTracker _tracker;
         bool _shuttingDown;
 
-        public SessionReceiver(NamespaceContext context, IReceiveClient queueClient, Uri inputAddress, IPipe<ReceiveContext> receivePipe,
-            ClientSettings receiveSettings, IReceiveObserver receiveObserver, ITaskSupervisor supervisor)
+        public SessionReceiver(NamespaceContext context, ClientContext clientContext, IPipe<ReceiveContext> receivePipe,
+            ClientSettings clientSettings, ITaskSupervisor supervisor)
         {
-            _queueClient = queueClient;
-            _inputAddress = inputAddress;
+            _clientContext = clientContext;
             _receivePipe = receivePipe;
-            _receiveSettings = receiveSettings;
-            _receiveObserver = receiveObserver;
+            _clientSettings = clientSettings;
 
-            _participant = supervisor.CreateParticipant($"{TypeMetadataCache<Receiver>.ShortName} - {inputAddress}", Stop);
+            _tracker = new DeliveryTracker(HandleDeliveryComplete);
+
+            _participant = supervisor.CreateParticipant($"{TypeMetadataCache<Receiver>.ShortName} - {clientContext.InputAddress}", Stop);
 
             var options = new SessionHandlerOptions
             {
                 AutoComplete = false,
-                AutoRenewTimeout = receiveSettings.AutoRenewTimeout,
-                MaxConcurrentSessions = receiveSettings.MaxConcurrentCalls,
-                MessageWaitTimeout = receiveSettings.MessageWaitTimeout
+                AutoRenewTimeout = clientSettings.AutoRenewTimeout,
+                MaxConcurrentSessions = clientSettings.MaxConcurrentCalls,
+                MessageWaitTimeout = clientSettings.MessageWaitTimeout
             };
 
             options.ExceptionReceived += (sender, x) =>
@@ -93,67 +59,57 @@ namespace MassTransit.AzureServiceBusTransport
                 if (!(x.Exception is OperationCanceledException))
                 {
                     if (_log.IsErrorEnabled)
-                        _log.Error($"Exception received on session receiver: {_inputAddress} during {x.Action}", x.Exception);
+                        _log.Error($"Exception received on session receiver: {clientContext.InputAddress} during {x.Action}", x.Exception);
                 }
 
-                if (_currentPendingDeliveryCount == 0)
+                if (_tracker.ActiveDeliveryCount == 0)
                 {
                     if (_log.IsDebugEnabled)
-                        _log.DebugFormat("Session receiver shutdown completed: {0}", _inputAddress);
+                        _log.DebugFormat("Session receiver shutdown completed: {0}", clientContext.InputAddress);
 
                     _participant.SetComplete();
                 }
             };
 
-            IMessageSessionAsyncHandlerFactory handlerFactory = new MessageSessionAsyncHandlerFactory(context, supervisor, this);
-            queueClient.RegisterSessionHandlerFactoryAsync(handlerFactory, options);
+            IMessageSessionAsyncHandlerFactory handlerFactory = new MessageSessionAsyncHandlerFactory(context, supervisor, this, _tracker);
+
+            clientContext.RegisterSessionHandlerFactoryAsync(handlerFactory, options);
 
             _participant.SetReady();
         }
 
         bool ISessionReceiver.IsShuttingDown => _shuttingDown;
-        string ISessionReceiver.QueuePath => _receiveSettings.Path;
-        Uri ISessionReceiver.InputAddress => _inputAddress;
-        IReceiveObserver ISessionReceiver.ReceiveObserver => _receiveObserver;
+        string ISessionReceiver.QueuePath => _clientSettings.Path;
+        Uri ISessionReceiver.InputAddress => _clientContext.InputAddress;
         IPipe<ReceiveContext> ISessionReceiver.ReceivePipe => _receivePipe;
 
-        public long IncrementDeliveryCount()
-        {
-            var current = Interlocked.Increment(ref _currentPendingDeliveryCount);
-            while (current > _maxPendingDeliveryCount)
-                Interlocked.CompareExchange(ref _maxPendingDeliveryCount, current, _maxPendingDeliveryCount);
+        public long DeliveryCount => _tracker.DeliveryCount;
 
-            return Interlocked.Increment(ref _deliveryCount);
-        }
+        public int ConcurrentDeliveryCount => _tracker.MaxConcurrentDeliveryCount;
 
-        public void DeliveryComplete()
+        void HandleDeliveryComplete()
         {
-            var pendingCount = Interlocked.Decrement(ref _currentPendingDeliveryCount);
-            if (pendingCount == 0 && _shuttingDown)
+            if (_shuttingDown)
             {
                 if (_log.IsDebugEnabled)
-                    _log.DebugFormat("Receiver shutdown completed: {0}", _inputAddress);
+                    _log.DebugFormat("Receiver shutdown completed: {0}", _clientContext.InputAddress);
 
                 _participant.SetComplete();
             }
         }
 
-        public long DeliveryCount => _deliveryCount;
-
-        public int ConcurrentDeliveryCount => _maxPendingDeliveryCount;
-
         async Task Stop()
         {
             if (_log.IsDebugEnabled)
-                _log.DebugFormat("Shutting down receiver: {0}", _inputAddress);
+                _log.DebugFormat("Shutting down receiver: {0}", _clientContext.InputAddress);
 
             _shuttingDown = true;
 
-            if (_currentPendingDeliveryCount > 0)
+            if (_tracker.ActiveDeliveryCount > 0)
             {
                 try
                 {
-                    using (var cancellation = new CancellationTokenSource(_receiveSettings.QueueDescription.LockDuration))
+                    using (var cancellation = new CancellationTokenSource(_clientSettings.LockDuration))
                     {
                         await _participant.ParticipantCompleted.WithCancellation(cancellation.Token).ConfigureAwait(false);
                     }
@@ -161,23 +117,16 @@ namespace MassTransit.AzureServiceBusTransport
                 catch (TaskCanceledException)
                 {
                     if (_log.IsWarnEnabled)
-                        _log.WarnFormat("Timeout waiting for receiver to exit: {0}", _inputAddress);
+                        _log.WarnFormat("Timeout waiting for receiver to exit: {0}", _clientContext.InputAddress);
                 }
             }
 
-            try
+            if (_tracker.ActiveDeliveryCount == 0)
             {
-                await _queueClient.CloseAsync().ConfigureAwait(false);
-            }
-            finally
-            {
-                if (_currentPendingDeliveryCount == 0)
-                {
-                    if (_log.IsDebugEnabled)
-                        _log.DebugFormat("Receiver shutdown completed: {0}", _inputAddress);
+                if (_log.IsDebugEnabled)
+                    _log.DebugFormat("Receiver shutdown completed: {0}", _clientContext.InputAddress);
 
-                    _participant.SetComplete();
-                }
+                _participant.SetComplete();
             }
         }
     }

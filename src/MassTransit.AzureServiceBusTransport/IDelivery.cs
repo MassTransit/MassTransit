@@ -13,14 +13,11 @@
 namespace MassTransit.AzureServiceBusTransport
 {
     using System;
-    using GreenPipes;
 
 
-    public interface ISessionReceiver
+    public interface IDelivery :
+        IDisposable
     {
-        bool IsShuttingDown { get; }
-        string QueuePath { get; }
-        Uri InputAddress { get; }
-        IPipe<ReceiveContext> ReceivePipe { get; }
+        long Id { get; }
     }
 }

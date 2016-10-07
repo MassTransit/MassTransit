@@ -73,17 +73,27 @@
     </Compile>
     <Compile Include="AzureBusFactory.cs" />
     <Compile Include="BrokeredMessageSessionContext.cs" />
+    <Compile Include="ClientSettings.cs" />
+    <Compile Include="Configuration\BaseClientSettings.cs" />
     <Compile Include="Configuration\ReceiveEndpointSettings.cs" />
+    <Compile Include="Configuration\ServiceBusEndpointConfigurator.cs" />
     <Compile Include="Configuration\ServiceBusReceiveEndpointConfigurator.cs" />
     <Compile Include="Configuration\ServiceBusMessageSchedulerSpecification.cs" />
+    <Compile Include="Configuration\ServiceBusSubscriptionEndpointConfigurator.cs" />
     <Compile Include="Configuration\SubscriptionEndpointSettings.cs" />
+    <Compile Include="Contexts\ClientContext.cs" />
     <Compile Include="Defaults.cs" />
+    <Compile Include="DeliveryMetrics.cs" />
+    <Compile Include="DeliveryTracker.cs" />
     <Compile Include="Hosting\ServiceBusAmqpTransportSettings.cs" />
     <Compile Include="Hosting\ServiceBusHostBusFactory.cs" />
     <Compile Include="Hosting\ServiceBusNetMessagingTransportSettings.cs" />
     <Compile Include="Hosting\ServiceBusServiceConfigurator.cs" />
     <Compile Include="Hosting\ServiceBusSettings.cs" />
-    <Compile Include="IQueueConfigurator.cs" />
+    <Compile Include="IDelivery.cs" />
+    <Compile Include="IDeliveryTracker.cs" />
+    <Compile Include="IServiceBusEndpointConfigurator.cs" />
+    <Compile Include="IReceiveClient.cs" />
     <Compile Include="IServiceBusSendClient.cs" />
     <Compile Include="IServiceBusSubscriptionEndpointConfigurator.cs" />
     <Compile Include="ISessionReceiver.cs" />
@@ -94,8 +104,11 @@
     <Compile Include="MessageSessionSagaRepository.cs" />
     <Compile Include="NamespaceManagerExtensions.cs" />
     <Compile Include="Pipeline\MessageSessionReceiverFilter.cs" />
+    <Compile Include="Pipeline\PrepareQueueClientFilter.cs" />
+    <Compile Include="Pipeline\PrepareSubscriptionClientFilter.cs" />
     <Compile Include="Pipeline\PrepareSubscriptionFilter.cs" />
     <Compile Include="Pipeline\ServiceBusMessageSchedulerFilter.cs" />
+    <Compile Include="Contexts\QueueClientContext.cs" />
     <Compile Include="QueueClientSendClient.cs" />
     <Compile Include="ScheduleMessageExtensions.cs" />
     <Compile Include="SchedulePublishExtensions.cs" />
@@ -132,9 +145,8 @@
     <Compile Include="ServiceBusHostSettings.cs" />
     <Compile Include="Pipeline\MessageReceiverFilter.cs" />
     <Compile Include="Receiver.cs" />
-    <Compile Include="ServiceBusReceiveTransport.cs" />
+    <Compile Include="ReceiveTransport.cs" />
     <Compile Include="ServiceBusSendTransportProvider.cs" />
-    <Compile Include="ServiceBusSubscriptionReceiveTransport.cs" />
     <Compile Include="ServiceBusTokenProviderSettings.cs" />
     <Compile Include="IAzureServiceBusTokenProvider.cs" />
     <Compile Include="ReceiverMetrics.cs" />
@@ -144,9 +156,11 @@
     <Compile Include="BusFactoryConfiguratorExtensions.cs" />
     <Compile Include="ServiceBusConfigurationExtensions.cs" />
     <Compile Include="SessionReceiver.cs" />
+    <Compile Include="Contexts\SubscriptionClientContext.cs" />
     <Compile Include="SubscriptionSettings.cs" />
     <Compile Include="TopicClientSendClient.cs" />
     <Compile Include="TurnoutExtensions.cs" />
+    <Compile Include="ZeroActiveDeliveryHandler.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

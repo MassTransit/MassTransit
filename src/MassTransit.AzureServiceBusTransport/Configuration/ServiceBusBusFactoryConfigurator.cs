@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -17,24 +17,23 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
     using System.Linq;
     using Builders;
     using BusConfigurators;
-    using Configurators;
     using GreenPipes;
 
 
     public class ServiceBusBusFactoryConfigurator :
         BusFactoryConfigurator,
         IServiceBusBusFactoryConfigurator,
-        IQueueConfigurator,
+        IServiceBusEndpointConfigurator,
         IBusFactory
     {
         readonly IList<ServiceBusHost> _hosts;
         readonly ReceiveEndpointSettings _settings;
-        readonly IList<IBusFactorySpecification> _transportSpecifications;
+        readonly IList<IBusFactorySpecification> _specifications;
 
         public ServiceBusBusFactoryConfigurator()
         {
             _hosts = new List<ServiceBusHost>();
-            _transportSpecifications = new List<IBusFactorySpecification>();
+            _specifications = new List<IBusFactorySpecification>();
 
             var queueName = this.GetTemporaryQueueName("bus");
             _settings = new ReceiveEndpointSettings(queueName)
@@ -50,17 +49,89 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
         public override IEnumerable<ValidationResult> Validate()
         {
             return base.Validate()
-                .Concat(_transportSpecifications.SelectMany(x => x.Validate()));
+                .Concat(_specifications.SelectMany(x => x.Validate()));
         }
 
         public IBusControl CreateBus()
         {
             var builder = new ServiceBusBusBuilder(_hosts.ToArray(), ConsumePipeFactory, SendPipeFactory, PublishPipeFactory, _settings);
 
-            foreach (var configurator in _transportSpecifications)
+            foreach (var configurator in _specifications)
                 configurator.Apply(builder);
 
             return builder.Build();
+        }
+
+        public void AddBusFactorySpecification(IBusFactorySpecification specification)
+        {
+            if (specification == null)
+                throw new ArgumentNullException(nameof(specification));
+
+            _specifications.Add(specification);
+        }
+
+        public void ReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configureEndpoint)
+        {
+            if (_hosts.Count == 0)
+                throw new ArgumentException("At least one host must be configured before configuring a receive endpoint");
+
+            ReceiveEndpoint(_hosts[0], queueName, configureEndpoint);
+        }
+
+        public void OverrideDefaultBusEndpointQueueName(string value)
+        {
+            _settings.QueueDescription.Path = value;
+        }
+
+        public IServiceBusHost Host(ServiceBusHostSettings settings)
+        {
+            if (settings == null)
+                throw new ArgumentNullException(nameof(settings));
+
+            var host = new ServiceBusHost(settings);
+            _hosts.Add(host);
+
+            return host;
+        }
+
+        public int MaxConcurrentCalls
+        {
+            set
+            {
+                _settings.MaxConcurrentCalls = value;
+                if (_settings.MaxConcurrentCalls > _settings.PrefetchCount)
+                    _settings.PrefetchCount = _settings.MaxConcurrentCalls;
+            }
+        }
+
+        public int PrefetchCount
+        {
+            set { _settings.PrefetchCount = value; }
+        }
+
+        public void ReceiveEndpoint(IServiceBusHost host, string queueName, Action<IServiceBusReceiveEndpointConfigurator> configure)
+        {
+            var endpointConfigurator = new ServiceBusReceiveEndpointConfigurator(host, queueName);
+
+            configure(endpointConfigurator);
+
+            AddBusFactorySpecification(endpointConfigurator);
+        }
+
+        public void SubscriptionEndpoint<T>(IServiceBusHost host, string subscriptionName, Action<IServiceBusSubscriptionEndpointConfigurator> configure)
+            where T : class
+        {
+            SubscriptionEndpoint(host, subscriptionName, host.MessageNameFormatter.GetTopicAddress(host, typeof(T)).AbsolutePath, configure);
+        }
+
+        public void SubscriptionEndpoint(IServiceBusHost host, string subscriptionName, string topicName,
+            Action<IServiceBusSubscriptionEndpointConfigurator> configure)
+        {
+            var endpointSpecification = new ServiceBusSubscriptionEndpointConfigurator(host, subscriptionName, topicName);
+
+            configure?.Invoke(endpointSpecification);
+
+            AddBusFactorySpecification(endpointSpecification);
         }
 
         public TimeSpan AutoDeleteOnIdle
@@ -147,72 +218,6 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
         public string UserMetadata
         {
             set { _settings.QueueDescription.UserMetadata = value; }
-        }
-
-        public void AddBusFactorySpecification(IBusFactorySpecification configurator)
-        {
-            if (configurator == null)
-                throw new ArgumentNullException(nameof(configurator));
-
-            _transportSpecifications.Add(configurator);
-        }
-
-        public void ReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configureEndpoint)
-        {
-            if (_hosts.Count == 0)
-                throw new ArgumentException("At least one host must be configured before configuring a receive endpoint");
-
-            ReceiveEndpoint(_hosts[0], queueName, configureEndpoint);
-        }
-
-        public void OverrideDefaultBusEndpointQueueName(string value)
-        {
-            _settings.QueueDescription.Path = value;
-        }
-
-        public IServiceBusHost Host(ServiceBusHostSettings settings)
-        {
-            if (settings == null)
-                throw new ArgumentNullException(nameof(settings));
-
-            var host = new ServiceBusHost(settings);
-            _hosts.Add(host);
-
-            return host;
-        }
-
-        public int MaxConcurrentCalls
-        {
-            set
-            {
-                _settings.MaxConcurrentCalls = value;
-                if (_settings.MaxConcurrentCalls > _settings.PrefetchCount)
-                    _settings.PrefetchCount = _settings.MaxConcurrentCalls;
-            }
-        }
-
-        public int PrefetchCount
-        {
-            set { _settings.PrefetchCount = value; }
-        }
-
-        public void ReceiveEndpoint(IServiceBusHost host, string queueName, Action<IServiceBusReceiveEndpointConfigurator> configure)
-        {
-            var endpointConfigurator = new ServiceBusReceiveEndpointConfigurator(host, queueName);
-
-            configure(endpointConfigurator);
-
-            AddBusFactorySpecification(endpointConfigurator);
-        }
-
-        public void SubscriptionEndpoint<T>(IServiceBusHost host, string subscriptionName, Action<IServiceBusReceiveEndpointConfigurator> configure) where T : class
-        {
-            SubscriptionEndpoint<(>()
-        }
-
-        public void SubscriptionEndpoint(IServiceBusHost host, string subscriptionName, string topicName, Action<IServiceBusReceiveEndpointConfigurator> configure)
-        {
-            throw new NotImplementedException();
         }
     }
 }

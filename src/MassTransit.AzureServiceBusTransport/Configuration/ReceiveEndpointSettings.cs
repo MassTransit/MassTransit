@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,29 +13,106 @@
 namespace MassTransit.AzureServiceBusTransport.Configuration
 {
     using System;
+    using System.Collections.Generic;
     using Microsoft.ServiceBus.Messaging;
 
 
     public class ReceiveEndpointSettings :
+        BaseClientSettings,
         ReceiveSettings
     {
         public ReceiveEndpointSettings(string queuePath)
         {
             QueueDescription = Defaults.CreateQueueDescription(queuePath);
-
-            MaxConcurrentCalls = Math.Max(Environment.ProcessorCount, 8);
-            PrefetchCount = Math.Max(MaxConcurrentCalls, 32);
-
-            AutoRenewTimeout = TimeSpan.FromSeconds(60);
-            MessageWaitTimeout = TimeSpan.FromDays(1);
         }
 
-        public int PrefetchCount { get; set; }
-        public int MaxConcurrentCalls { get; set; }
-        public QueueDescription QueueDescription { get; }
-        public TimeSpan AutoRenewTimeout { get; set; }
-        public TimeSpan MessageWaitTimeout { get; set; }
+        public override TimeSpan AutoDeleteOnIdle
+        {
+            set { QueueDescription.AutoDeleteOnIdle = value; }
+        }
 
-        public string Path => QueueDescription.Path;
+        public override TimeSpan DefaultMessageTimeToLive
+        {
+            set { QueueDescription.DefaultMessageTimeToLive = value; }
+        }
+
+        public TimeSpan DuplicateDetectionHistoryTimeWindow
+        {
+            set { QueueDescription.DuplicateDetectionHistoryTimeWindow = value; }
+        }
+
+        public override bool EnableBatchedOperations
+        {
+            set { QueueDescription.EnableBatchedOperations = value; }
+        }
+
+        public override bool EnableDeadLetteringOnMessageExpiration
+        {
+            set { QueueDescription.EnableDeadLetteringOnMessageExpiration = value; }
+        }
+
+        public bool RequiresDuplicateDetection
+        {
+            set { QueueDescription.RequiresDuplicateDetection = value; }
+        }
+
+        public bool EnablePartitioning
+        {
+            set { QueueDescription.EnablePartitioning = value; }
+        }
+
+        public override string ForwardDeadLetteredMessagesTo
+        {
+            set { QueueDescription.ForwardDeadLetteredMessagesTo = value; }
+        }
+
+        public bool IsAnonymousAccessible
+        {
+            set { QueueDescription.IsAnonymousAccessible = value; }
+        }
+
+        public override int MaxDeliveryCount
+        {
+            set { QueueDescription.MaxDeliveryCount = value; }
+        }
+
+        public long MaxSizeInMegabytes
+        {
+            set { QueueDescription.MaxSizeInMegabytes = value; }
+        }
+
+        public override bool RequiresSession
+        {
+            set { QueueDescription.RequiresSession = value; }
+        }
+
+        public bool SupportOrdering
+        {
+            set { QueueDescription.SupportOrdering = value; }
+        }
+
+        public override string UserMetadata
+        {
+            set { QueueDescription.UserMetadata = value; }
+        }
+
+        public QueueDescription QueueDescription { get; }
+
+        public override TimeSpan LockDuration
+        {
+            get { return QueueDescription.LockDuration; }
+            set { QueueDescription.LockDuration = value; }
+        }
+
+        public override string Path => QueueDescription.Path;
+
+        protected override IEnumerable<string> GetQueryStringOptions()
+        {
+            if (QueueDescription.EnableExpress)
+                yield return "express=true";
+
+            if (QueueDescription.AutoDeleteOnIdle > TimeSpan.Zero)
+                yield return $"autodelete={QueueDescription.AutoDeleteOnIdle.TotalSeconds}";
+        }
     }
 }

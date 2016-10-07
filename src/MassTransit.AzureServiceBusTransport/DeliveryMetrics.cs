@@ -12,15 +12,16 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.AzureServiceBusTransport
 {
-    using System;
-    using GreenPipes;
-
-
-    public interface ISessionReceiver
+    public interface DeliveryMetrics
     {
-        bool IsShuttingDown { get; }
-        string QueuePath { get; }
-        Uri InputAddress { get; }
-        IPipe<ReceiveContext> ReceivePipe { get; }
+        /// <summary>
+        /// The number of messages consumed by the consumer
+        /// </summary>
+        long DeliveryCount { get; }
+
+        /// <summary>
+        /// The highest concurrent message count that was received by the consumer
+        /// </summary>
+        int ConcurrentDeliveryCount { get; }
     }
 }

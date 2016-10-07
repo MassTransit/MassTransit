@@ -17,19 +17,8 @@ namespace MassTransit.AzureServiceBusTransport
     /// </summary>
     public interface IServiceBusSubscriptionEndpointConfigurator :
         IReceiveEndpointConfigurator,
-        IQueueConfigurator
+        IServiceBusEndpointConfigurator
     {
-        /// <summary>
-        /// Specify the number of messages to prefetch from the queue to the service
-        /// </summary>
-        /// <value>The limit</value>
-        int PrefetchCount { set; }
-
-        /// <summary>
-        /// Specify the number of concurrent consumers (separate from prefetch count)
-        /// </summary>
-        int MaxConcurrentCalls { set; }
-
         /// <summary>
         /// The host on which the endpoint is being configured
         /// </summary>

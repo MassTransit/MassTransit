@@ -32,8 +32,8 @@ namespace MassTransit.AzureServiceBusTransport
         static readonly ILog _log = Logger.Get<ServiceBusHost>();
         readonly IMessageNameFormatter _messageNameFormatter;
         readonly Lazy<Task<MessagingFactory>> _messagingFactory;
-        readonly Lazy<Task<NamespaceManager>> _namespaceManager;
-        readonly Lazy<Task<NamespaceManager>> _rootNamespaceManager;
+        readonly Lazy<NamespaceManager> _namespaceManager;
+        readonly Lazy<NamespaceManager> _rootNamespaceManager;
         readonly Lazy<Task<MessagingFactory>> _sessionMessagingFactory;
         readonly ServiceBusHostSettings _settings;
         readonly TaskSupervisor _supervisor;
@@ -43,8 +43,8 @@ namespace MassTransit.AzureServiceBusTransport
             _settings = settings;
             _messagingFactory = new Lazy<Task<MessagingFactory>>(CreateMessagingFactory);
             _sessionMessagingFactory = new Lazy<Task<MessagingFactory>>(CreateNetMessagingFactory);
-            _namespaceManager = new Lazy<Task<NamespaceManager>>(CreateNamespaceManager);
-            _rootNamespaceManager = new Lazy<Task<NamespaceManager>>(CreateRootNamespaceManager);
+            _namespaceManager = new Lazy<NamespaceManager>(CreateNamespaceManager);
+            _rootNamespaceManager = new Lazy<NamespaceManager>(CreateRootNamespaceManager);
 
             _messageNameFormatter = new ServiceBusMessageNameFormatter();
 
@@ -77,9 +77,9 @@ namespace MassTransit.AzureServiceBusTransport
 
         Task<MessagingFactory> IServiceBusHost.MessagingFactory => _messagingFactory.Value;
 
-        Task<NamespaceManager> IServiceBusHost.NamespaceManager => _namespaceManager.Value;
+        public NamespaceManager NamespaceManager => _namespaceManager.Value;
 
-        Task<NamespaceManager> IServiceBusHost.RootNamespaceManager => _rootNamespaceManager.Value;
+        public NamespaceManager RootNamespaceManager => _rootNamespaceManager.Value;
 
         IMessageNameFormatter IServiceBusHost.MessageNameFormatter => _messageNameFormatter;
 
@@ -91,6 +91,255 @@ namespace MassTransit.AzureServiceBusTransport
                 .Where(x => x.Length > 0);
 
             return string.Join("/", segments);
+        }
+
+        public async Task<QueueDescription> CreateQueue(QueueDescription queueDescription)
+        {
+            var create = true;
+            try
+            {
+                queueDescription = await NamespaceManager.GetQueueAsync(queueDescription.Path).ConfigureAwait(false);
+
+                create = false;
+            }
+            catch (MessagingEntityNotFoundException)
+            {
+            }
+
+            if (create)
+            {
+                var created = false;
+                try
+                {
+                    if (_log.IsDebugEnabled)
+                        _log.DebugFormat("Creating queue {0}", queueDescription.Path);
+
+                    queueDescription = await NamespaceManager.CreateQueueAsync(queueDescription).ConfigureAwait(false);
+
+                    created = true;
+                }
+                catch (MessagingEntityAlreadyExistsException)
+                {
+                }
+                catch (MessagingException mex)
+                {
+                    if (mex.Message.Contains("(409)"))
+                    {
+                    }
+                    else
+                        throw;
+                }
+
+                if (!created)
+                    queueDescription = await NamespaceManager.GetQueueAsync(queueDescription.Path).ConfigureAwait(false);
+            }
+
+            if (_log.IsDebugEnabled)
+            {
+                _log.DebugFormat("Queue: {0} ({1})", queueDescription.Path,
+                    string.Join(", ", new[]
+                    {
+                        queueDescription.EnableExpress ? "express" : "",
+                        queueDescription.RequiresDuplicateDetection ? "dupe detect" : "",
+                        queueDescription.EnableDeadLetteringOnMessageExpiration ? "dead letter" : "",
+                        queueDescription.RequiresSession ? "session" : ""
+                    }.Where(x => !string.IsNullOrWhiteSpace(x))));
+            }
+
+            return queueDescription;
+        }
+
+        public async Task<TopicDescription> CreateTopic(TopicDescription topicDescription)
+        {
+            var create = true;
+            try
+            {
+                topicDescription = await RootNamespaceManager.GetTopicAsync(topicDescription.Path).ConfigureAwait(false);
+
+                create = false;
+            }
+            catch (MessagingEntityNotFoundException)
+            {
+            }
+
+            if (create)
+            {
+                var created = false;
+                try
+                {
+                    if (_log.IsDebugEnabled)
+                        _log.DebugFormat("Creating topic {0}", topicDescription.Path);
+
+                    topicDescription = await RootNamespaceManager.CreateTopicAsync(topicDescription).ConfigureAwait(false);
+
+                    created = true;
+                }
+                catch (MessagingEntityAlreadyExistsException)
+                {
+                }
+                catch (MessagingException mex)
+                {
+                    if (mex.Message.Contains("(409)"))
+                    {
+                    }
+                    else
+                        throw;
+                }
+
+                if (!created)
+                    topicDescription = await RootNamespaceManager.GetTopicAsync(topicDescription.Path).ConfigureAwait(false);
+            }
+
+            if (_log.IsDebugEnabled)
+            {
+                _log.DebugFormat("Topic: {0} ({1})", topicDescription.Path,
+                    string.Join(", ", new[]
+                    {
+                        topicDescription.EnableExpress ? "express" : "",
+                        topicDescription.RequiresDuplicateDetection ? "dupe detect" : ""
+                    }.Where(x => !string.IsNullOrWhiteSpace(x))));
+            }
+
+            return topicDescription;
+        }
+
+        public async Task<SubscriptionDescription> CreateTopicSubscription(SubscriptionDescription description)
+        {
+            var create = true;
+            SubscriptionDescription subscriptionDescription = null;
+            try
+            {
+                subscriptionDescription = await RootNamespaceManager.GetSubscriptionAsync(description.TopicPath, description.Name).ConfigureAwait(false);
+                if (!string.IsNullOrWhiteSpace(subscriptionDescription.ForwardTo))
+                {
+                    if (_log.IsWarnEnabled)
+                    {
+                        _log.WarnFormat("Removing invalid subscription: {0} ({1} -> {2})", subscriptionDescription.Name, subscriptionDescription.TopicPath,
+                            subscriptionDescription.ForwardTo);
+                    }
+
+                    await RootNamespaceManager.DeleteSubscriptionAsync(description.TopicPath, description.Name).ConfigureAwait(false);
+                }
+                else
+                {
+                    create = false;
+                }
+            }
+            catch (MessagingEntityNotFoundException)
+            {
+            }
+
+            if (create)
+            {
+                var created = false;
+                try
+                {
+                    if (_log.IsDebugEnabled)
+                        _log.DebugFormat("Creating subscription {0} -> {1}", description.TopicPath, description.Name);
+
+
+                    subscriptionDescription = await RootNamespaceManager.CreateSubscriptionAsync(description).ConfigureAwait(false);
+
+                    created = true;
+                }
+                catch (MessagingEntityAlreadyExistsException)
+                {
+                }
+                catch (MessagingException mex)
+                {
+                    if (mex.Message.Contains("(409)"))
+                    {
+                    }
+                    else
+                        throw;
+                }
+
+                if (!created)
+                    subscriptionDescription = await RootNamespaceManager.GetSubscriptionAsync(description.TopicPath, description.Name).ConfigureAwait(false);
+            }
+
+            if (_log.IsDebugEnabled)
+            {
+                _log.DebugFormat("Subscription: {0} ({1} -> {2})", subscriptionDescription.Name, subscriptionDescription.TopicPath,
+                    subscriptionDescription.ForwardTo);
+            }
+
+            return subscriptionDescription;
+        }
+
+        public async Task<SubscriptionDescription> CreateTopicSubscription(string subscriptionName, string topicPath, string queuePath,
+            QueueDescription queueDescription)
+        {
+            var description = Defaults.CreateSubscriptionDescription(topicPath, subscriptionName, queueDescription, queuePath);
+
+            var create = true;
+            SubscriptionDescription subscriptionDescription = null;
+            try
+            {
+                subscriptionDescription = await RootNamespaceManager.GetSubscriptionAsync(topicPath, subscriptionName).ConfigureAwait(false);
+                if (queuePath.Equals(subscriptionDescription.ForwardTo))
+                {
+                    if (_log.IsDebugEnabled)
+                    {
+                        _log.DebugFormat("Updating subscription: {0} ({1} -> {2})", subscriptionDescription.Name, subscriptionDescription.TopicPath,
+                            subscriptionDescription.ForwardTo);
+                    }
+
+                    await RootNamespaceManager.UpdateSubscriptionAsync(description).ConfigureAwait(false);
+
+                    create = false;
+                }
+                else
+                {
+                    if (_log.IsWarnEnabled)
+                    {
+                        _log.WarnFormat("Removing invalid subscription: {0} ({1} -> {2})", subscriptionDescription.Name, subscriptionDescription.TopicPath,
+                            subscriptionDescription.ForwardTo);
+                    }
+
+                    await RootNamespaceManager.DeleteSubscriptionAsync(topicPath, subscriptionName).ConfigureAwait(false);
+                }
+            }
+            catch (MessagingEntityNotFoundException)
+            {
+            }
+
+            if (create)
+            {
+                var created = false;
+                try
+                {
+                    if (_log.IsDebugEnabled)
+                        _log.DebugFormat("Creating subscription {0} -> {1}", topicPath, queuePath);
+
+
+                    subscriptionDescription = await RootNamespaceManager.CreateSubscriptionAsync(description).ConfigureAwait(false);
+
+                    created = true;
+                }
+                catch (MessagingEntityAlreadyExistsException)
+                {
+                }
+                catch (MessagingException mex)
+                {
+                    if (mex.Message.Contains("(409)"))
+                    {
+                    }
+                    else
+                        throw;
+                }
+
+                if (!created)
+                    subscriptionDescription = await RootNamespaceManager.GetSubscriptionAsync(topicPath, subscriptionName).ConfigureAwait(false);
+            }
+
+            if (_log.IsDebugEnabled)
+            {
+                _log.DebugFormat("Subscription: {0} ({1} -> {2})", subscriptionDescription.Name, subscriptionDescription.TopicPath,
+                    subscriptionDescription.ForwardTo);
+            }
+
+            return subscriptionDescription;
         }
 
         Task<MessagingFactory> CreateMessagingFactory()
@@ -144,7 +393,7 @@ namespace MassTransit.AzureServiceBusTransport
             return CreateFactory(mfs);
         }
 
-        Task<NamespaceManager> CreateNamespaceManager()
+        NamespaceManager CreateNamespaceManager()
         {
             var nms = new NamespaceManagerSettings
             {
@@ -153,10 +402,10 @@ namespace MassTransit.AzureServiceBusTransport
                 RetryPolicy = new RetryExponential(_settings.RetryMinBackoff, _settings.RetryMaxBackoff, _settings.RetryLimit)
             };
 
-            return Task.FromResult(new NamespaceManager(_settings.ServiceUri, nms));
+            return new NamespaceManager(_settings.ServiceUri, nms);
         }
 
-        Task<NamespaceManager> CreateRootNamespaceManager()
+        NamespaceManager CreateRootNamespaceManager()
         {
             var nms = new NamespaceManagerSettings
             {
@@ -169,7 +418,7 @@ namespace MassTransit.AzureServiceBusTransport
                 Path = ""
             };
 
-            return Task.FromResult(new NamespaceManager(builder.Uri, nms));
+            return new NamespaceManager(builder.Uri, nms);
         }
 
 

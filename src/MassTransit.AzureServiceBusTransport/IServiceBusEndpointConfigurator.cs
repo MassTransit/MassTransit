@@ -15,8 +15,19 @@ namespace MassTransit.AzureServiceBusTransport
     using System;
 
 
-    public interface IQueueConfigurator
+    public interface IServiceBusEndpointConfigurator
     {
+        /// <summary>
+        /// Specify the number of messages to prefetch from the queue to the service
+        /// </summary>
+        /// <value>The limit</value>
+        int PrefetchCount { set; }
+
+        /// <summary>
+        /// Specify the number of concurrent consumers (separate from prefetch count)
+        /// </summary>
+        int MaxConcurrentCalls { set; }
+
         /// <summary>
         /// True if the queue should be deleted if idle
         /// </summary>
@@ -26,11 +37,6 @@ namespace MassTransit.AzureServiceBusTransport
         /// Set the default message time to live in the queue
         /// </summary>
         TimeSpan DefaultMessageTimeToLive { set; }
-
-        /// <summary>
-        /// Sets the TimeSpan structure that defines the duration of the duplicate detection history. The default value is 10 minutes
-        /// </summary>
-        TimeSpan DuplicateDetectionHistoryTimeWindow { set; }
 
         /// <summary>
         /// Sets a value that indicates whether server-side batched operations are enabled
@@ -43,25 +49,9 @@ namespace MassTransit.AzureServiceBusTransport
         bool EnableDeadLetteringOnMessageExpiration { set; }
 
         /// <summary>
-        /// If express is enabled, messages are not persisted to durable storage
-        /// </summary>
-        /// <value>True for a durable queue, False for an in-memory queue</value>
-        bool EnableExpress { set; }
-
-        /// <summary>
-        /// Sets a value that indicates whether the queue to be partitioned across multiple message brokers is enabled
-        /// </summary>
-        bool EnablePartitioning { set; }
-
-        /// <summary>
         /// Sets the path to the recipient to which the dead lettered message is forwarded.
         /// </summary>
         string ForwardDeadLetteredMessagesTo { set; }
-
-        /// <summary>
-        /// Sets a value that indicates whether the message is anonymous accessible.
-        /// </summary>
-        bool IsAnonymousAccessible { set; }
 
         /// <summary>
         /// Specify the lock duration for messages read from the queue
@@ -75,34 +65,14 @@ namespace MassTransit.AzureServiceBusTransport
         int MaxDeliveryCount { set; }
 
         /// <summary>
-        /// Sets the maximum size of the queue in megabytes, which is the size of memory allocated for the queue
-        /// </summary>
-        int MaxSizeInMegabytes { set; }
-
-        /// <summary>
-        /// Sets the value indicating if this queue requires duplicate detection.
-        /// </summary>
-        bool RequiresDuplicateDetection { set; }
-
-        /// <summary>
         /// Sets the queue in session mode, requiring a session for inbound messages
         /// </summary>
         bool RequiresSession { set; }
-
-        /// <summary>
-        /// Sets a value that indicates whether the queue supports ordering.
-        /// </summary>
-        bool SupportOrdering { set; }
 
         /// <summary>
         /// Sets the user metadata.
         /// </summary>
         string UserMetadata { set; }
 
-        /// <summary>
-        /// Enable duplicate detection on the queue, specifying the time window
-        /// </summary>
-        /// <param name="historyTimeWindow">The time window for duplicate history</param>
-        void EnableDuplicateDetection(TimeSpan historyTimeWindow);
     }
 }

@@ -57,9 +57,9 @@ namespace MassTransit.AzureServiceBusTransport.Hosting
             _configurator.AddPipeSpecification(specification);
         }
 
-        public void AddBusFactorySpecification(IBusFactorySpecification configurator)
+        public void AddBusFactorySpecification(IBusFactorySpecification specification)
         {
-            _configurator.AddBusFactorySpecification(configurator);
+            _configurator.AddBusFactorySpecification(specification);
         }
 
         public void ReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configureEndpoint)

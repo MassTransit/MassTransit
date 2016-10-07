@@ -35,9 +35,9 @@ namespace MassTransit.AzureServiceBusTransport
         /// </summary>
         Task<MessagingFactory> SessionMessagingFactory { get; }
 
-        Task<NamespaceManager> NamespaceManager { get; }
+        NamespaceManager NamespaceManager { get; }
 
-        Task<NamespaceManager> RootNamespaceManager { get; }
+        NamespaceManager RootNamespaceManager { get; }
 
         IMessageNameFormatter MessageNameFormatter { get; }
 
@@ -48,6 +48,19 @@ namespace MassTransit.AzureServiceBusTransport
 
         string GetQueuePath(QueueDescription queueDescription);
 
+        /// <summary>
+        /// The retry policy shared by transports communicating with the host. Should be
+        /// used for all operations against Azure.
+        /// </summary>
         IRetryPolicy RetryPolicy { get; }
+
+
+        Task<TopicDescription> CreateTopic(TopicDescription topicDescription);
+
+        Task<QueueDescription> CreateQueue(QueueDescription queueDescription);
+
+        Task<SubscriptionDescription> CreateTopicSubscription(string subscriptionName, string topicPath, string queuePath, QueueDescription queueDescription);
+
+        Task<SubscriptionDescription> CreateTopicSubscription(SubscriptionDescription description);
     }
 }

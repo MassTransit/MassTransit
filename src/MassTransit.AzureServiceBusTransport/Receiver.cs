@@ -27,37 +27,33 @@ namespace MassTransit.AzureServiceBusTransport
         ReceiverMetrics
     {
         static readonly ILog _log = Logger.Get<Receiver>();
+        readonly ClientSettings _clientSettings;
         readonly NamespaceContext _context;
-
         readonly Uri _inputAddress;
-        readonly MessageReceiver _messageReceiver;
+        readonly ClientContext _messageReceiver;
         readonly ITaskParticipant _participant;
-        readonly IReceiveObserver _receiveObserver;
         readonly IPipe<ReceiveContext> _receivePipe;
-        readonly ReceiveSettings _receiveSettings;
         int _currentPendingDeliveryCount;
         long _deliveryCount;
         int _maxPendingDeliveryCount;
         bool _shuttingDown;
 
-        public Receiver(NamespaceContext context, MessageReceiver messageReceiver, Uri inputAddress, IPipe<ReceiveContext> receivePipe,
-            ReceiveSettings receiveSettings,
-            IReceiveObserver receiveObserver, ITaskSupervisor supervisor)
+        public Receiver(NamespaceContext context, ClientContext messageReceiver, Uri inputAddress, IPipe<ReceiveContext> receivePipe,
+            ClientSettings clientSettings, ITaskSupervisor supervisor)
         {
             _context = context;
             _messageReceiver = messageReceiver;
             _inputAddress = inputAddress;
             _receivePipe = receivePipe;
-            _receiveSettings = receiveSettings;
-            _receiveObserver = receiveObserver;
+            _clientSettings = clientSettings;
 
             _participant = supervisor.CreateParticipant($"{TypeMetadataCache<Receiver>.ShortName} - {inputAddress}", Stop);
 
             var options = new OnMessageOptions
             {
                 AutoComplete = false,
-                AutoRenewTimeout = receiveSettings.AutoRenewTimeout,
-                MaxConcurrentCalls = receiveSettings.MaxConcurrentCalls
+                AutoRenewTimeout = clientSettings.AutoRenewTimeout,
+                MaxConcurrentCalls = clientSettings.MaxConcurrentCalls
             };
 
             options.ExceptionReceived += (sender, x) =>
@@ -97,7 +93,7 @@ namespace MassTransit.AzureServiceBusTransport
             {
                 try
                 {
-                    using (var cancellation = new CancellationTokenSource(_receiveSettings.QueueDescription.LockDuration))
+                    using (var cancellation = new CancellationTokenSource(_clientSettings.LockDuration))
                     {
                         await _participant.ParticipantCompleted.WithCancellation(cancellation.Token).ConfigureAwait(false);
                     }
@@ -109,19 +105,12 @@ namespace MassTransit.AzureServiceBusTransport
                 }
             }
 
-            try
+            if (_currentPendingDeliveryCount == 0)
             {
-                await _messageReceiver.CloseAsync().ConfigureAwait(false);
-            }
-            finally
-            {
-                if (_currentPendingDeliveryCount == 0)
-                {
-                    if (_log.IsDebugEnabled)
-                        _log.DebugFormat("Receiver shutdown completed: {0}", _inputAddress);
+                if (_log.IsDebugEnabled)
+                    _log.DebugFormat("Receiver shutdown completed: {0}", _inputAddress);
 
-                    _participant.SetComplete();
-                }
+                _participant.SetComplete();
             }
         }
 
@@ -140,14 +129,14 @@ namespace MassTransit.AzureServiceBusTransport
             var deliveryCount = Interlocked.Increment(ref _deliveryCount);
 
             if (_log.IsDebugEnabled)
-                _log.DebugFormat("Receiving {0}:{1} - {2}", deliveryCount, message.MessageId, _receiveSettings.QueueDescription.Path);
+                _log.DebugFormat("Receiving {0}:{1} - {2}", deliveryCount, message.MessageId, _clientSettings.Path);
 
-            var context = new ServiceBusReceiveContext(_inputAddress, message, _receiveObserver);
+            var context = new ServiceBusReceiveContext(_inputAddress, message, _context);
             context.GetOrAddPayload(() => _context);
 
             try
             {
-                await _receiveObserver.PreReceive(context).ConfigureAwait(false);
+                await _context.PreReceive(context).ConfigureAwait(false);
 
                 await _receivePipe.Send(context).ConfigureAwait(false);
 
@@ -155,7 +144,7 @@ namespace MassTransit.AzureServiceBusTransport
 
                 await message.CompleteAsync().ConfigureAwait(false);
 
-                await _receiveObserver.PostReceive(context).ConfigureAwait(false);
+                await _context.PostReceive(context).ConfigureAwait(false);
 
                 if (_log.IsDebugEnabled)
                     _log.DebugFormat("Receive completed: {0}", message.MessageId);
@@ -166,7 +155,7 @@ namespace MassTransit.AzureServiceBusTransport
                     _log.Error($"Received faulted: {message.MessageId}", ex);
 
                 await message.AbandonAsync().ConfigureAwait(false);
-                await _receiveObserver.ReceiveFault(context, ex).ConfigureAwait(false);
+                await _context.ReceiveFault(context, ex).ConfigureAwait(false);
             }
             finally
             {

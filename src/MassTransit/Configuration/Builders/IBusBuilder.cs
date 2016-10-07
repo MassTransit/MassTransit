@@ -36,6 +36,7 @@ namespace MassTransit.Builders
         /// <summary>
         /// Creates a send endpoint provider using the bus and supplied specifications
         /// </summary>
+        /// <param name="sourceAddress"></param>
         /// <param name="specifications"></param>
         /// <returns></returns>
         ISendEndpointProvider CreateSendEndpointProvider(Uri sourceAddress, params ISendPipeSpecification[] specifications);
@@ -43,6 +44,7 @@ namespace MassTransit.Builders
         /// <summary>
         /// Creates a publish endpoint provider using the bus and supplied specifications
         /// </summary>
+        /// <param name="sourceAddress"></param>
         /// <param name="specifications"></param>
         /// <returns></returns>
         IPublishEndpointProvider CreatePublishEndpointProvider(Uri sourceAddress, params IPublishPipeSpecification[] specifications);

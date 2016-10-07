@@ -145,9 +145,9 @@ namespace MassTransit.RabbitMqTransport.Configuration
             _settings.QueueName = value;
         }
 
-        public void AddBusFactorySpecification(IBusFactorySpecification configurator)
+        public void AddBusFactorySpecification(IBusFactorySpecification specification)
         {
-            _transportBuilderConfigurators.Add(configurator);
+            _transportBuilderConfigurators.Add(specification);
         }
 
         public void ReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configureEndpoint)

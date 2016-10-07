@@ -17,7 +17,6 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
     using Contexts;
     using GreenPipes;
     using Logging;
-    using Microsoft.ServiceBus.Messaging;
     using Util;
 
 
@@ -28,18 +27,11 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
         IFilter<NamespaceContext>
     {
         static readonly ILog _log = Logger.Get<MessageReceiverFilter>();
-        readonly IReceiveEndpointObserver _endpointObserver;
-        readonly IReceiveObserver _receiveObserver;
         readonly IPipe<ReceiveContext> _receivePipe;
-        readonly ITaskSupervisor _supervisor;
 
-        public MessageSessionReceiverFilter(IPipe<ReceiveContext> receivePipe, IReceiveObserver receiveObserver, IReceiveEndpointObserver endpointObserver,
-            ITaskSupervisor supervisor)
+        public MessageSessionReceiverFilter(IPipe<ReceiveContext> receivePipe)
         {
             _receivePipe = receivePipe;
-            _receiveObserver = receiveObserver;
-            _endpointObserver = endpointObserver;
-            _supervisor = supervisor;
         }
 
         void IProbeSite.Probe(ProbeContext context)
@@ -48,175 +40,40 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
 
         async Task IFilter<NamespaceContext>.Send(NamespaceContext context, IPipe<NamespaceContext> next)
         {
-            var receiveSettings = context.GetPayload<ReceiveSettings>();
+            var clientContext = context.GetPayload<ClientContext>();
 
-            var queuePath = context.GetQueuePath(receiveSettings.QueueDescription);
-
-            var inputAddress = context.GetQueueAddress(receiveSettings.QueueDescription);
+            var clientSettings = context.GetPayload<ClientSettings>();
 
             if (_log.IsDebugEnabled)
-                _log.DebugFormat("Creating message receiver for {0}", inputAddress);
+                _log.DebugFormat("Creating message receiver for {0}", clientContext.InputAddress);
 
-
-            QueueClient queueClient = null;
-
-            try
+            using (var scope = context.CreateScope($"{TypeMetadataCache<MessageReceiverFilter>.ShortName} - {clientContext.InputAddress}"))
             {
-                var messagingFactory = await context.SessionMessagingFactory.ConfigureAwait(false);
+                var receiver = new SessionReceiver(context, clientContext, _receivePipe, clientSettings, scope);
 
-                queueClient = messagingFactory.CreateQueueClient(queuePath);
+                await scope.Ready.ConfigureAwait(false);
 
-                queueClient.PrefetchCount = receiveSettings.PrefetchCount;
+                await context.Ready(new Ready(clientContext.InputAddress)).ConfigureAwait(false);
 
-                using (var scope = _supervisor.CreateScope($"{TypeMetadataCache<MessageReceiverFilter>.ShortName} - {inputAddress}"))
+                scope.SetReady();
+
+                try
                 {
-                    var client = new QueueClientReceiveClient(queueClient);
+                    await scope.Completed.ConfigureAwait(false);
+                }
+                finally
+                {
+                    ReceiverMetrics metrics = receiver;
 
-                    var receiver = new SessionReceiver(context, client, inputAddress, _receivePipe, receiveSettings, _receiveObserver, scope);
+                    await context.Completed(new Completed(clientContext.InputAddress, metrics)).ConfigureAwait(false);
 
-                    await scope.Ready.ConfigureAwait(false);
-
-                    await _endpointObserver.Ready(new Ready(inputAddress)).ConfigureAwait(false);
-
-                    scope.SetReady();
-
-                    try
+                    if (_log.IsDebugEnabled)
                     {
-                        await scope.Completed.ConfigureAwait(false);
-                    }
-                    finally
-                    {
-                        ReceiverMetrics metrics = receiver;
-
-                        await _endpointObserver.Completed(new Completed(inputAddress, metrics)).ConfigureAwait(false);
-
-                        if (_log.IsDebugEnabled)
-                        {
-                            _log.DebugFormat("Consumer {0}: {1} received, {2} concurrent", queuePath,
-                                metrics.DeliveryCount,
-                                metrics.ConcurrentDeliveryCount);
-                        }
+                        _log.DebugFormat("Consumer {0}: {1} received, {2} concurrent", clientContext.InputAddress,
+                            metrics.DeliveryCount,
+                            metrics.ConcurrentDeliveryCount);
                     }
                 }
-            }
-            finally
-            {
-                if (queueClient != null && !queueClient.IsClosed)
-                    await queueClient.CloseAsync().ConfigureAwait(false);
-            }
-
-            await next.Send(context).ConfigureAwait(false);
-        }
-
-
-        class Ready :
-            ReceiveEndpointReady
-        {
-            public Ready(Uri inputAddress)
-            {
-                InputAddress = inputAddress;
-            }
-
-            public Uri InputAddress { get; }
-        }
-
-
-        class Completed :
-            ReceiveEndpointCompleted
-        {
-            public Completed(Uri inputAddress, ReceiverMetrics metrics)
-            {
-                InputAddress = inputAddress;
-                DeliveryCount = metrics.DeliveryCount;
-                ConcurrentDeliveryCount = metrics.ConcurrentDeliveryCount;
-            }
-
-            public Uri InputAddress { get; }
-            public long DeliveryCount { get; }
-            public long ConcurrentDeliveryCount { get; }
-        }
-    }
-
-    /// <summary>
-    /// Creates a message session receiver
-    /// </summary>
-    public class MessageSessionSubscriptionReceiverFilter :
-        IFilter<NamespaceContext>
-    {
-        static readonly ILog _log = Logger.Get<MessageReceiverFilter>();
-        readonly IReceiveEndpointObserver _endpointObserver;
-        readonly IReceiveObserver _receiveObserver;
-        readonly IPipe<ReceiveContext> _receivePipe;
-        readonly ITaskSupervisor _supervisor;
-
-        public MessageSessionSubscriptionReceiverFilter(IPipe<ReceiveContext> receivePipe, IReceiveObserver receiveObserver, IReceiveEndpointObserver endpointObserver,
-            ITaskSupervisor supervisor)
-        {
-            _receivePipe = receivePipe;
-            _receiveObserver = receiveObserver;
-            _endpointObserver = endpointObserver;
-            _supervisor = supervisor;
-        }
-
-        void IProbeSite.Probe(ProbeContext context)
-        {
-        }
-
-        async Task IFilter<NamespaceContext>.Send(NamespaceContext context, IPipe<NamespaceContext> next)
-        {
-            var receiveSettings = context.GetPayload<SubscriptionSettings>();
-
-            var inputAddress = context.GetSubscriptionAddress(();
-
-            if (_log.IsDebugEnabled)
-                _log.DebugFormat("Creating message receiver for {0}", inputAddress);
-
-
-            QueueClient queueClient = null;
-
-            try
-            {
-                var messagingFactory = await context.SessionMessagingFactory.ConfigureAwait(false);
-
-                queueClient = messagingFactory.CreateQueueClient(queuePath);
-
-                queueClient.PrefetchCount = receiveSettings.PrefetchCount;
-
-                using (var scope = _supervisor.CreateScope($"{TypeMetadataCache<MessageReceiverFilter>.ShortName} - {inputAddress}"))
-                {
-                    var client = new QueueClientReceiveClient(queueClient);
-
-                    var receiver = new SessionReceiver(context, client, inputAddress, _receivePipe, receiveSettings, _receiveObserver, scope);
-
-                    await scope.Ready.ConfigureAwait(false);
-
-                    await _endpointObserver.Ready(new Ready(inputAddress)).ConfigureAwait(false);
-
-                    scope.SetReady();
-
-                    try
-                    {
-                        await scope.Completed.ConfigureAwait(false);
-                    }
-                    finally
-                    {
-                        ReceiverMetrics metrics = receiver;
-
-                        await _endpointObserver.Completed(new Completed(inputAddress, metrics)).ConfigureAwait(false);
-
-                        if (_log.IsDebugEnabled)
-                        {
-                            _log.DebugFormat("Consumer {0}: {1} received, {2} concurrent", queuePath,
-                                metrics.DeliveryCount,
-                                metrics.ConcurrentDeliveryCount);
-                        }
-                    }
-                }
-            }
-            finally
-            {
-                if (queueClient != null && !queueClient.IsClosed)
-                    await queueClient.CloseAsync().ConfigureAwait(false);
             }
 
             await next.Send(context).ConfigureAwait(false);

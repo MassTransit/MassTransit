@@ -22,19 +22,21 @@ namespace MassTransit.AzureServiceBusTransport
         IMessageSessionAsyncHandlerFactory
     {
         readonly ISessionReceiver _receiver;
+        readonly IDeliveryTracker _tracker;
         readonly NamespaceContext _context;
         readonly ITaskSupervisor _supervisor;
 
-        public MessageSessionAsyncHandlerFactory(NamespaceContext context, ITaskSupervisor supervisor, ISessionReceiver receiver)
+        public MessageSessionAsyncHandlerFactory(NamespaceContext context, ITaskSupervisor supervisor, ISessionReceiver receiver, IDeliveryTracker tracker)
         {
             _context = context;
             _supervisor = supervisor;
             _receiver = receiver;
+            _tracker = tracker;
         }
 
         public IMessageSessionAsyncHandler CreateInstance(MessageSession session, BrokeredMessage message)
         {
-            return new MessageSessionAsyncHandler(_context, _supervisor, _receiver, session, message);
+            return new MessageSessionAsyncHandler(_context, _supervisor, _receiver, session, _tracker);
         }
 
         public void DisposeInstance(IMessageSessionAsyncHandler handler)

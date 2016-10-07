@@ -15,7 +15,6 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
     using System.Threading.Tasks;
     using Contexts;
     using GreenPipes;
-    using Microsoft.ServiceBus;
 
 
     /// <summary>
@@ -37,22 +36,18 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
 
         public async Task Send(NamespaceContext context, IPipe<NamespaceContext> next)
         {
-            var namespaceManager = await context.NamespaceManager.ConfigureAwait(false);
-
-            var rootNamespaceManager = await context.RootNamespaceManager.ConfigureAwait(false);
-
-            await CreateSubscription(rootNamespaceManager, namespaceManager).ConfigureAwait(false);
+            await CreateSubscription(context).ConfigureAwait(false);
 
             context.GetOrAddPayload(() => _settings);
 
             await next.Send(context).ConfigureAwait(false);
         }
 
-        async Task CreateSubscription(NamespaceManager rootNamespaceManager, NamespaceManager namespaceManager)
+        async Task CreateSubscription(NamespaceContext context)
         {
-            await rootNamespaceManager.CreateTopicSafeAsync(_settings.TopicDescription).ConfigureAwait(false);
+            await context.CreateTopic(_settings.TopicDescription).ConfigureAwait(false);
 
-            await rootNamespaceManager.CreateTopicSubscriptionSafeAsync(_settings.SubscriptionDescription).ConfigureAwait(false);
+            await context.CreateTopicSubscription(_settings.SubscriptionDescription).ConfigureAwait(false);
         }
     }
 }

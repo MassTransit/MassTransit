@@ -15,7 +15,6 @@ namespace MassTransit.AzureServiceBusTransport
     using System;
     using System.Linq;
     using System.Threading.Tasks;
-    using GreenPipes;
     using Microsoft.ServiceBus.Messaging;
     using Policies;
     using Transports;
@@ -41,29 +40,25 @@ namespace MassTransit.AzureServiceBusTransport
             {
                 var queueDescription = address.GetQueueDescription();
 
-                var namespaceManager = await host.NamespaceManager.ConfigureAwait(false);
-
                 string queuePath;
-                var namespacePath = namespaceManager.Address.AbsolutePath.Trim('/');
+                var namespacePath = host.NamespaceManager.Address.AbsolutePath.Trim('/');
 
                 if (string.IsNullOrEmpty(namespacePath))
                 {
-                    queueDescription = await namespaceManager.CreateQueueSafeAsync(queueDescription).ConfigureAwait(false);
+                    queueDescription = await host.CreateQueue(queueDescription).ConfigureAwait(false);
 
                     queuePath = host.GetQueuePath(queueDescription);
                 }
                 else if (IsInNamespace(queueDescription, namespacePath))
                 {
                     queueDescription.Path = queueDescription.Path.Replace(namespacePath, "").Trim('/');
-                    queueDescription = await namespaceManager.CreateQueueSafeAsync(queueDescription).ConfigureAwait(false);
+                    queueDescription = await host.CreateQueue(queueDescription).ConfigureAwait(false);
 
                     queuePath = host.GetQueuePath(queueDescription);
                 }
                 else
                 {
-                    namespaceManager = await host.RootNamespaceManager.ConfigureAwait(false);
-
-                    queueDescription = await namespaceManager.CreateQueueSafeAsync(queueDescription).ConfigureAwait(false);
+                    queueDescription = await host.RootNamespaceManager.CreateQueueSafeAsync(queueDescription).ConfigureAwait(false);
 
                     queuePath = queueDescription.Path;
                 }

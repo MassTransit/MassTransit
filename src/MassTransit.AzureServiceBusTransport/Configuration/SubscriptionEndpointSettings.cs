@@ -13,16 +13,20 @@
 namespace MassTransit.AzureServiceBusTransport.Configuration
 {
     using System;
+    using System.Collections.Generic;
     using Microsoft.ServiceBus.Messaging;
 
 
     public class SubscriptionEndpointSettings :
+        BaseClientSettings,
         SubscriptionSettings
     {
         public SubscriptionEndpointSettings(string topicName, string subscriptionName)
         {
             TopicDescription = Defaults.CreateTopicDescription(topicName);
             SubscriptionDescription = Defaults.CreateSubscriptionDescription(topicName, subscriptionName);
+
+            Path = string.Join("/", SubscriptionDescription.TopicPath, SubscriptionDescription.Name);
 
             MaxConcurrentCalls = Math.Max(Environment.ProcessorCount, 8);
             PrefetchCount = Math.Max(MaxConcurrentCalls, 32);
@@ -31,13 +35,62 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
             MessageWaitTimeout = TimeSpan.FromDays(1);
         }
 
+        public override TimeSpan AutoDeleteOnIdle
+        {
+            set { SubscriptionDescription.AutoDeleteOnIdle = value; }
+        }
+
+        public override TimeSpan DefaultMessageTimeToLive
+        {
+            set { SubscriptionDescription.DefaultMessageTimeToLive = value; }
+        }
+
+        public override bool EnableBatchedOperations
+        {
+            set { SubscriptionDescription.EnableBatchedOperations = value; }
+        }
+
+        public override bool EnableDeadLetteringOnMessageExpiration
+        {
+            set { SubscriptionDescription.EnableDeadLetteringOnMessageExpiration = value; }
+        }
+
+        public override string ForwardDeadLetteredMessagesTo
+        {
+            set { SubscriptionDescription.ForwardDeadLetteredMessagesTo = value; }
+        }
+
+        public override int MaxDeliveryCount
+        {
+            set { SubscriptionDescription.MaxDeliveryCount = value; }
+        }
+
+        public override bool RequiresSession
+        {
+            set { SubscriptionDescription.RequiresSession = value; }
+        }
+
+        public override string UserMetadata
+        {
+            set { SubscriptionDescription.UserMetadata = value; }
+        }
+
         public TopicDescription TopicDescription { get; }
 
         public SubscriptionDescription SubscriptionDescription { get; }
 
-        public int PrefetchCount { get; set; }
-        public int MaxConcurrentCalls { get; set; }
-        public TimeSpan AutoRenewTimeout { get; set; }
-        public TimeSpan MessageWaitTimeout { get; set; }
+        public override TimeSpan LockDuration
+        {
+            get { return SubscriptionDescription.LockDuration; }
+            set { SubscriptionDescription.LockDuration = value; }
+        }
+
+        public override string Path { get; }
+
+        protected override IEnumerable<string> GetQueryStringOptions()
+        {
+            if (SubscriptionDescription.AutoDeleteOnIdle > TimeSpan.Zero)
+                yield return $"autodelete={SubscriptionDescription.AutoDeleteOnIdle.TotalSeconds}";
+        }
     }
 }

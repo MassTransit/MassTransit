@@ -47,8 +47,7 @@ namespace MassTransit.AzureServiceBusTransport
 
             return host.RetryPolicy.Retry<ISendEndpoint>(async () =>
             {
-                var topicDescription =
-                    await (await host.RootNamespaceManager.ConfigureAwait(false)).CreateTopicSafeAsync(address.GetTopicDescription()).ConfigureAwait(false);
+                var topicDescription = await host.RootNamespaceManager.CreateTopicSafeAsync(address.GetTopicDescription()).ConfigureAwait(false);
 
                 var messagingFactory = await host.MessagingFactory.ConfigureAwait(false);
 

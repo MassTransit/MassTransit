@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -21,7 +21,6 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
     using Configuration;
     using Contexts;
     using GreenPipes;
-    using MassTransit.Pipeline;
     using Microsoft.ServiceBus;
     using NewIdFormatters;
 
@@ -48,15 +47,11 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
 
         public async Task Send(NamespaceContext context, IPipe<NamespaceContext> next)
         {
-            NamespaceManager namespaceManager = await context.NamespaceManager.ConfigureAwait(false);
-
-            var queueDescription = await namespaceManager.CreateQueueSafeAsync(_settings.QueueDescription).ConfigureAwait(false);
+            await context.CreateQueue(_settings.QueueDescription).ConfigureAwait(false);
 
             if (_subscriptionSettings.Length > 0)
             {
-                NamespaceManager rootNamespaceManager = await context.RootNamespaceManager.ConfigureAwait(false);
-
-                await Task.WhenAll(_subscriptionSettings.Select(subscription => CreateSubscription(rootNamespaceManager, namespaceManager, subscription)))
+                await Task.WhenAll(_subscriptionSettings.Select(subscription => CreateSubscription(context, context.NamespaceManager, subscription)))
                     .ConfigureAwait(false);
             }
 
@@ -65,24 +60,23 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
             await next.Send(context).ConfigureAwait(false);
         }
 
-        async Task CreateSubscription(NamespaceManager rootNamespaceManager, NamespaceManager namespaceManager, TopicSubscriptionSettings settings)
+        async Task CreateSubscription(NamespaceContext context, NamespaceManager namespaceManager, TopicSubscriptionSettings settings)
         {
-            var topicDescription = await rootNamespaceManager.CreateTopicSafeAsync(settings.Topic).ConfigureAwait(false);
+            var topicDescription = await context.CreateTopic(settings.Topic).ConfigureAwait(false);
 
-            string queuePath = Path.Combine(namespaceManager.Address.AbsoluteUri.TrimStart('/'), _settings.QueueDescription.Path)
+            var queuePath = Path.Combine(namespaceManager.Address.AbsoluteUri.TrimStart('/'), _settings.QueueDescription.Path)
                 .Replace('\\', '/');
 
             var subscriptionName = GetSubscriptionName(namespaceManager, _settings.QueueDescription.Path);
 
-            await rootNamespaceManager.CreateTopicSubscriptionSafeAsync(subscriptionName, topicDescription.Path, queuePath, _settings.QueueDescription)
-                .ConfigureAwait(false);
+            await context.CreateTopicSubscription(subscriptionName, topicDescription.Path, queuePath, _settings.QueueDescription).ConfigureAwait(false);
         }
 
         static string GetSubscriptionName(NamespaceManager namespaceManager, string queuePath)
         {
-            string subscriptionPath = queuePath;
+            var subscriptionPath = queuePath;
 
-            string suffix = namespaceManager.Address.AbsolutePath.Split(new[] {'/'}, StringSplitOptions.RemoveEmptyEntries).LastOrDefault();
+            var suffix = namespaceManager.Address.AbsolutePath.Split(new[] {'/'}, StringSplitOptions.RemoveEmptyEntries).LastOrDefault();
             if (!string.IsNullOrEmpty(suffix))
                 subscriptionPath = $"{queuePath}-{suffix}";
 

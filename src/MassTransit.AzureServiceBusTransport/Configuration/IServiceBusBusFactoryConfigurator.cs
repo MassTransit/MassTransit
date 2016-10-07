@@ -58,7 +58,7 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
         /// <param name="host"></param>
         /// <param name="subscriptionName"></param>
         /// <param name="configure"></param>
-        void SubscriptionEndpoint<T>(IServiceBusHost host, string subscriptionName, Action<IServiceBusReceiveEndpointConfigurator> configure)
+        void SubscriptionEndpoint<T>(IServiceBusHost host, string subscriptionName, Action<IServiceBusSubscriptionEndpointConfigurator> configure)
             where T : class;
 
         /// <summary>
@@ -69,6 +69,6 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
         /// <param name="subscriptionName">The name of the subscription</param>
         /// <param name="topicName">The topic name to subscribe</param>
         /// <param name="configure"></param>
-        void SubscriptionEndpoint(IServiceBusHost host, string subscriptionName, string topicName, Action<IServiceBusReceiveEndpointConfigurator> configure);
+        void SubscriptionEndpoint(IServiceBusHost host, string subscriptionName, string topicName, Action<IServiceBusSubscriptionEndpointConfigurator> configure);
     }
 }

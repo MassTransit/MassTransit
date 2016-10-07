@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -24,19 +24,19 @@ namespace MassTransit.AzureServiceBusTransport
         IMessageSessionAsyncHandler
     {
         static readonly ILog _log = Logger.Get<MessageSessionAsyncHandler>();
-        readonly BrokeredMessage _message;
+        readonly NamespaceContext _context;
         readonly ISessionReceiver _receiver;
         readonly MessageSession _session;
-        readonly NamespaceContext _context;
         readonly ITaskSupervisor _supervisor;
+        readonly IDeliveryTracker _tracker;
 
-        public MessageSessionAsyncHandler(NamespaceContext context, ITaskSupervisor supervisor, ISessionReceiver receiver, MessageSession session, BrokeredMessage message)
+        public MessageSessionAsyncHandler(NamespaceContext context, ITaskSupervisor supervisor, ISessionReceiver receiver, MessageSession session, IDeliveryTracker tracker)
         {
             _context = context;
             _supervisor = supervisor;
             _receiver = receiver;
             _session = session;
-            _message = message;
+            _tracker = tracker;
         }
 
         async Task IMessageSessionAsyncHandler.OnMessageAsync(MessageSession session, BrokeredMessage message)
@@ -47,44 +47,43 @@ namespace MassTransit.AzureServiceBusTransport
                 return;
             }
 
-            var deliveryCount = _receiver.IncrementDeliveryCount();
-
-            if (_log.IsDebugEnabled)
-                _log.DebugFormat("Receiving {0}:{1}({3}) - {2}", deliveryCount, message.MessageId, _receiver.QueuePath, session.SessionId);
-
-            var context = new ServiceBusReceiveContext(_receiver.InputAddress, message, _receiver.ReceiveObserver);
-
-            context.GetOrAddPayload<MessageSessionContext>(() => new BrokeredMessageSessionContext(session));
-            context.GetOrAddPayload(() => _context);
-
-            try
+            using (var delivery = _tracker.BeginDelivery())
             {
-                await _receiver.ReceiveObserver.PreReceive(context).ConfigureAwait(false);
-
-                await _receiver.ReceivePipe.Send(context).ConfigureAwait(false);
-
-                await context.CompleteTask.ConfigureAwait(false);
-
-                await message.CompleteAsync().ConfigureAwait(false);
-
-                await _receiver.ReceiveObserver.PostReceive(context).ConfigureAwait(false);
-
                 if (_log.IsDebugEnabled)
-                    _log.DebugFormat("Receive completed: {0}", message.MessageId);
-            }
-            catch (Exception ex)
-            {
-                if (_log.IsErrorEnabled)
-                    _log.Error($"Received faulted: {message.MessageId}", ex);
+                    _log.DebugFormat("Receiving {0}:{1}({3}) - {2}", delivery.Id, message.MessageId, _receiver.QueuePath, session.SessionId);
 
-                await message.AbandonAsync().ConfigureAwait(false);
-                await _receiver.ReceiveObserver.ReceiveFault(context, ex).ConfigureAwait(false);
-            }
-            finally
-            {
-                _receiver.DeliveryComplete();
+                var context = new ServiceBusReceiveContext(_receiver.InputAddress, message, _context);
 
-                context.Dispose();
+                context.GetOrAddPayload<MessageSessionContext>(() => new BrokeredMessageSessionContext(session));
+                context.GetOrAddPayload(() => _context);
+
+                try
+                {
+                    await _context.PreReceive(context).ConfigureAwait(false);
+
+                    await _receiver.ReceivePipe.Send(context).ConfigureAwait(false);
+
+                    await context.CompleteTask.ConfigureAwait(false);
+
+                    await message.CompleteAsync().ConfigureAwait(false);
+
+                    await _context.PostReceive(context).ConfigureAwait(false);
+
+                    if (_log.IsDebugEnabled)
+                        _log.DebugFormat("Receive completed: {0}", message.MessageId);
+                }
+                catch (Exception ex)
+                {
+                    if (_log.IsErrorEnabled)
+                        _log.Error($"Received faulted: {message.MessageId}", ex);
+
+                    await message.AbandonAsync().ConfigureAwait(false);
+                    await _context.ReceiveFault(context, ex).ConfigureAwait(false);
+                }
+                finally
+                {
+                    context.Dispose();
+                }
             }
         }
 
