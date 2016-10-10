@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -16,7 +16,6 @@ namespace MassTransit.RabbitMqTransport.Pipeline
     using Events;
     using GreenPipes;
     using Logging;
-    using MassTransit.Pipeline;
     using Util;
 
 
@@ -51,7 +50,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
 
             var inputAddress = context.ConnectionContext.HostSettings.GetInputAddress(receiveSettings);
 
-            using (ITaskScope scope = _supervisor.CreateScope($"{TypeMetadataCache<RabbitMqConsumerFilter>.ShortName} - {inputAddress}", () => TaskUtil.Completed))
+            using (var scope = _supervisor.CreateScope($"{TypeMetadataCache<RabbitMqConsumerFilter>.ShortName} - {inputAddress}", () => TaskUtil.Completed))
             {
                 var consumer = new RabbitMqBasicConsumer(context, inputAddress, _receivePipe, _receiveObserver, scope);
 

@@ -88,6 +88,7 @@
     <Compile Include="Send_Specs.cs" />
     <Compile Include="Session_Specs.cs" />
     <Compile Include="SharedAccessKeyTokenProvider.cs" />
+    <Compile Include="Subscription_Specs.cs" />
     <Compile Include="TestAzureServiceBusAccountSettings.cs" />
     <Compile Include="Turnout_Sepcs.cs" />
     <Compile Include="TwoScopeAzureServiceBusTestFixture.cs" />

@@ -123,7 +123,7 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
         public void SubscriptionEndpoint<T>(IServiceBusHost host, string subscriptionName, Action<IServiceBusSubscriptionEndpointConfigurator> configure)
             where T : class
         {
-            SubscriptionEndpoint(host, subscriptionName, host.MessageNameFormatter.GetTopicAddress(host, typeof(T)).AbsolutePath, configure);
+            SubscriptionEndpoint(host, subscriptionName, host.MessageNameFormatter.GetTopicAddress(host, typeof(T)).AbsolutePath.Trim('/'), configure);
         }
 
         public void SubscriptionEndpoint(IServiceBusHost host, string subscriptionName, string topicName,
