@@ -12,8 +12,8 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RabbitMqTransport.Pipeline
 {
-    using System;
     using System.Threading.Tasks;
+    using Events;
     using GreenPipes;
     using Logging;
     using MassTransit.Pipeline;
@@ -59,7 +59,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
 
                 await scope.Ready.ConfigureAwait(false);
 
-                await _endpointObserver.Ready(new Ready(inputAddress)).ConfigureAwait(false);
+                await _endpointObserver.Ready(new ReceiveEndpointReadyEvent(inputAddress)).ConfigureAwait(false);
 
                 scope.SetReady();
 
@@ -69,8 +69,8 @@ namespace MassTransit.RabbitMqTransport.Pipeline
                 }
                 finally
                 {
-                    RabbitMqConsumerMetrics metrics = consumer;
-                    await _endpointObserver.Completed(new Completed(inputAddress, metrics)).ConfigureAwait(false);
+                    RabbitMqDeliveryMetrics metrics = consumer;
+                    await _endpointObserver.Completed(new ReceiveEndpointCompletedEvent(inputAddress, metrics)).ConfigureAwait(false);
 
                     if (_log.IsDebugEnabled)
                     {
@@ -79,34 +79,6 @@ namespace MassTransit.RabbitMqTransport.Pipeline
                     }
                 }
             }
-        }
-
-
-        class Ready :
-            ReceiveEndpointReady
-        {
-            public Ready(Uri inputAddress)
-            {
-                InputAddress = inputAddress;
-            }
-
-            public Uri InputAddress { get; }
-        }
-
-
-        class Completed :
-            ReceiveEndpointCompleted
-        {
-            public Completed(Uri inputAddress, RabbitMqConsumerMetrics metrics)
-            {
-                InputAddress = inputAddress;
-                DeliveryCount = metrics.DeliveryCount;
-                ConcurrentDeliveryCount = metrics.ConcurrentDeliveryCount;
-            }
-
-            public Uri InputAddress { get; }
-            public long DeliveryCount { get; }
-            public long ConcurrentDeliveryCount { get; }
         }
     }
 }

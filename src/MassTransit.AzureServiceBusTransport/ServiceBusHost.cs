@@ -98,9 +98,12 @@ namespace MassTransit.AzureServiceBusTransport
             var create = true;
             try
             {
-                queueDescription = await NamespaceManager.GetQueueAsync(queueDescription.Path).ConfigureAwait(false);
+                if (await NamespaceManager.QueueExistsAsync(queueDescription.Path).ConfigureAwait(false))
+                {
+                    queueDescription = await NamespaceManager.GetQueueAsync(queueDescription.Path).ConfigureAwait(false);
 
-                create = false;
+                    create = false;
+                }
             }
             catch (MessagingEntityNotFoundException)
             {
@@ -154,9 +157,12 @@ namespace MassTransit.AzureServiceBusTransport
             var create = true;
             try
             {
-                topicDescription = await RootNamespaceManager.GetTopicAsync(topicDescription.Path).ConfigureAwait(false);
+                if (await RootNamespaceManager.TopicExistsAsync(topicDescription.Path).ConfigureAwait(false))
+                {
+                    topicDescription = await RootNamespaceManager.GetTopicAsync(topicDescription.Path).ConfigureAwait(false);
 
-                create = false;
+                    create = false;
+                }
             }
             catch (MessagingEntityNotFoundException)
             {
@@ -209,20 +215,49 @@ namespace MassTransit.AzureServiceBusTransport
             SubscriptionDescription subscriptionDescription = null;
             try
             {
-                subscriptionDescription = await RootNamespaceManager.GetSubscriptionAsync(description.TopicPath, description.Name).ConfigureAwait(false);
-                if (!string.IsNullOrWhiteSpace(subscriptionDescription.ForwardTo))
+                if (await RootNamespaceManager.SubscriptionExistsAsync(description.TopicPath, description.Name).ConfigureAwait(false))
                 {
-                    if (_log.IsWarnEnabled)
+                    subscriptionDescription = await RootNamespaceManager.GetSubscriptionAsync(description.TopicPath, description.Name).ConfigureAwait(false);
+                    if (string.IsNullOrWhiteSpace(description.ForwardTo))
                     {
-                        _log.WarnFormat("Removing invalid subscription: {0} ({1} -> {2})", subscriptionDescription.Name, subscriptionDescription.TopicPath,
-                            subscriptionDescription.ForwardTo);
-                    }
+                        if (!string.IsNullOrWhiteSpace(subscriptionDescription.ForwardTo))
+                        {
+                            if (_log.IsWarnEnabled)
+                            {
+                                _log.WarnFormat("Removing invalid subscription: {0} ({1} -> {2})", subscriptionDescription.Name,
+                                    subscriptionDescription.TopicPath,
+                                    subscriptionDescription.ForwardTo);
+                            }
 
-                    await RootNamespaceManager.DeleteSubscriptionAsync(description.TopicPath, description.Name).ConfigureAwait(false);
-                }
-                else
-                {
-                    create = false;
+                            await RootNamespaceManager.DeleteSubscriptionAsync(description.TopicPath, description.Name).ConfigureAwait(false);
+                        }
+                    }
+                    else
+                    {
+                        if (description.ForwardTo.Equals(subscriptionDescription.ForwardTo))
+                        {
+                            if (_log.IsDebugEnabled)
+                            {
+                                _log.DebugFormat("Updating subscription: {0} ({1} -> {2})", subscriptionDescription.Name, subscriptionDescription.TopicPath,
+                                    subscriptionDescription.ForwardTo);
+                            }
+
+                            await RootNamespaceManager.UpdateSubscriptionAsync(description).ConfigureAwait(false);
+
+                            create = false;
+                        }
+                        else
+                        {
+                            if (_log.IsWarnEnabled)
+                            {
+                                _log.WarnFormat("Removing invalid subscription: {0} ({1} -> {2})", subscriptionDescription.Name,
+                                    subscriptionDescription.TopicPath,
+                                    subscriptionDescription.ForwardTo);
+                            }
+
+                            await RootNamespaceManager.DeleteSubscriptionAsync(description.TopicPath, description.Name).ConfigureAwait(false);
+                        }
+                    }
                 }
             }
             catch (MessagingEntityNotFoundException)
@@ -235,7 +270,7 @@ namespace MassTransit.AzureServiceBusTransport
                 try
                 {
                     if (_log.IsDebugEnabled)
-                        _log.DebugFormat("Creating subscription {0} -> {1}", description.TopicPath, description.Name);
+                        _log.DebugFormat("Creating subscription {0} -> {1}", description.TopicPath, description.ForwardTo);
 
 
                     subscriptionDescription = await RootNamespaceManager.CreateSubscriptionAsync(description).ConfigureAwait(false);
@@ -256,81 +291,6 @@ namespace MassTransit.AzureServiceBusTransport
 
                 if (!created)
                     subscriptionDescription = await RootNamespaceManager.GetSubscriptionAsync(description.TopicPath, description.Name).ConfigureAwait(false);
-            }
-
-            if (_log.IsDebugEnabled)
-            {
-                _log.DebugFormat("Subscription: {0} ({1} -> {2})", subscriptionDescription.Name, subscriptionDescription.TopicPath,
-                    subscriptionDescription.ForwardTo);
-            }
-
-            return subscriptionDescription;
-        }
-
-        public async Task<SubscriptionDescription> CreateTopicSubscription(string subscriptionName, string topicPath, string queuePath,
-            QueueDescription queueDescription)
-        {
-            var description = Defaults.CreateSubscriptionDescription(topicPath, subscriptionName, queueDescription, queuePath);
-
-            var create = true;
-            SubscriptionDescription subscriptionDescription = null;
-            try
-            {
-                subscriptionDescription = await RootNamespaceManager.GetSubscriptionAsync(topicPath, subscriptionName).ConfigureAwait(false);
-                if (queuePath.Equals(subscriptionDescription.ForwardTo))
-                {
-                    if (_log.IsDebugEnabled)
-                    {
-                        _log.DebugFormat("Updating subscription: {0} ({1} -> {2})", subscriptionDescription.Name, subscriptionDescription.TopicPath,
-                            subscriptionDescription.ForwardTo);
-                    }
-
-                    await RootNamespaceManager.UpdateSubscriptionAsync(description).ConfigureAwait(false);
-
-                    create = false;
-                }
-                else
-                {
-                    if (_log.IsWarnEnabled)
-                    {
-                        _log.WarnFormat("Removing invalid subscription: {0} ({1} -> {2})", subscriptionDescription.Name, subscriptionDescription.TopicPath,
-                            subscriptionDescription.ForwardTo);
-                    }
-
-                    await RootNamespaceManager.DeleteSubscriptionAsync(topicPath, subscriptionName).ConfigureAwait(false);
-                }
-            }
-            catch (MessagingEntityNotFoundException)
-            {
-            }
-
-            if (create)
-            {
-                var created = false;
-                try
-                {
-                    if (_log.IsDebugEnabled)
-                        _log.DebugFormat("Creating subscription {0} -> {1}", topicPath, queuePath);
-
-
-                    subscriptionDescription = await RootNamespaceManager.CreateSubscriptionAsync(description).ConfigureAwait(false);
-
-                    created = true;
-                }
-                catch (MessagingEntityAlreadyExistsException)
-                {
-                }
-                catch (MessagingException mex)
-                {
-                    if (mex.Message.Contains("(409)"))
-                    {
-                    }
-                    else
-                        throw;
-                }
-
-                if (!created)
-                    subscriptionDescription = await RootNamespaceManager.GetSubscriptionAsync(topicPath, subscriptionName).ConfigureAwait(false);
             }
 
             if (_log.IsDebugEnabled)

@@ -12,11 +12,11 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.AzureServiceBusTransport.Pipeline
 {
-    using System;
     using System.Threading.Tasks;
-    using Contexts;
+    using Events;
     using GreenPipes;
     using Logging;
+    using Transport;
     using Util;
 
 
@@ -53,7 +53,7 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
 
                 await scope.Ready.ConfigureAwait(false);
 
-                await context.Ready(new Ready(clientContext.InputAddress)).ConfigureAwait(false);
+                await context.Ready(new ReceiveEndpointReadyEvent(clientContext.InputAddress)).ConfigureAwait(false);
 
                 scope.SetReady();
 
@@ -63,9 +63,9 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
                 }
                 finally
                 {
-                    ReceiverMetrics metrics = receiver;
+                    var metrics = receiver.GetDeliveryMetrics();
 
-                    await context.Completed(new Completed(clientContext.InputAddress, metrics)).ConfigureAwait(false);
+                    await context.Completed(new ReceiveEndpointCompletedEvent(clientContext.InputAddress, metrics)).ConfigureAwait(false);
 
                     if (_log.IsDebugEnabled)
                     {
@@ -77,34 +77,6 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
             }
 
             await next.Send(context).ConfigureAwait(false);
-        }
-
-
-        class Ready :
-            ReceiveEndpointReady
-        {
-            public Ready(Uri inputAddress)
-            {
-                InputAddress = inputAddress;
-            }
-
-            public Uri InputAddress { get; }
-        }
-
-
-        class Completed :
-            ReceiveEndpointCompleted
-        {
-            public Completed(Uri inputAddress, ReceiverMetrics metrics)
-            {
-                InputAddress = inputAddress;
-                DeliveryCount = metrics.DeliveryCount;
-                ConcurrentDeliveryCount = metrics.ConcurrentDeliveryCount;
-            }
-
-            public Uri InputAddress { get; }
-            public long DeliveryCount { get; }
-            public long ConcurrentDeliveryCount { get; }
         }
     }
 }

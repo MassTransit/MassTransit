@@ -136,7 +136,7 @@
     <Compile Include="Configuration\IRabbitMqBusFactoryConfigurator.cs" />
     <Compile Include="Configuration\RabbitMqBusFactoryConfigurator.cs" />
     <Compile Include="Configuration\BusFactoryConfiguratorExtensions.cs" />
-    <Compile Include="RabbitMqConsumerMetrics.cs" />
+    <Compile Include="RabbitMqDeliveryMetrics.cs" />
     <Compile Include="RabbitMqHost.cs" />
     <Compile Include="RabbitMqHostSettings.cs" />
     <Compile Include="RabbitMqModelSettings.cs" />

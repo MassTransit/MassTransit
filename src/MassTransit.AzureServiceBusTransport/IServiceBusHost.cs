@@ -59,8 +59,6 @@ namespace MassTransit.AzureServiceBusTransport
 
         Task<QueueDescription> CreateQueue(QueueDescription queueDescription);
 
-        Task<SubscriptionDescription> CreateTopicSubscription(string subscriptionName, string topicPath, string queuePath, QueueDescription queueDescription);
-
         Task<SubscriptionDescription> CreateTopicSubscription(SubscriptionDescription description);
     }
 }

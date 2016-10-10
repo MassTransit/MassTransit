@@ -76,6 +76,7 @@
     <Compile Include="ConfiguringAzure_Specs.cs" />
     <Compile Include="ContextSetup.cs" />
     <Compile Include="ErrorQueue_Specs.cs" />
+    <Compile Include="IAzureServiceBusTokenProvider.cs" />
     <Compile Include="Performance_Specs.cs" />
     <Compile Include="PublishDynamicType_Specs.cs" />
     <Compile Include="PublishFaultCache_Specs.cs" />
@@ -86,6 +87,7 @@
     <Compile Include="SendContext_Specs.cs" />
     <Compile Include="Send_Specs.cs" />
     <Compile Include="Session_Specs.cs" />
+    <Compile Include="SharedAccessKeyTokenProvider.cs" />
     <Compile Include="TestAzureServiceBusAccountSettings.cs" />
     <Compile Include="Turnout_Sepcs.cs" />
     <Compile Include="TwoScopeAzureServiceBusTestFixture.cs" />

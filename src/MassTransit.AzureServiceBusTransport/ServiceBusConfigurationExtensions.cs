@@ -13,7 +13,6 @@
 namespace MassTransit.AzureServiceBusTransport
 {
     using System;
-    using Configuration;
 
 
     public static class ServiceBusConfigurationExtensions

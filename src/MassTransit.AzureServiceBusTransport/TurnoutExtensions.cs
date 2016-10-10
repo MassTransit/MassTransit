@@ -14,7 +14,6 @@ namespace MassTransit
 {
     using System;
     using AzureServiceBusTransport;
-    using AzureServiceBusTransport.Configuration;
     using Turnout.Configuration;
 
 

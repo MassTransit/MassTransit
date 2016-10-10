@@ -221,6 +221,8 @@
     <Compile Include="EndpointConvention.cs" />
     <Compile Include="EndpointConventionCache.cs" />
     <Compile Include="EndpointConventionExtensions.cs" />
+    <Compile Include="Events\ReceiveEndpointCompletedEvent.cs" />
+    <Compile Include="Events\ReceiveEndpointReadyEvent.cs" />
     <Compile Include="Events\ReceiveFaultEvent.cs" />
     <Compile Include="ExceptionConsumeContext.cs" />
     <Compile Include="ExceptionReceiveContext.cs" />
@@ -885,7 +887,12 @@
     <Compile Include="Transformation\Contexts\SendTransformContext.cs" />
     <Compile Include="Transformation\TransformConfigurators\SendTransformSpecification.cs" />
     <Compile Include="Transformation\TransformConfigurators\TransformSpecification.cs" />
+    <Compile Include="Transports\DeliveryMetrics.cs" />
+    <Compile Include="Transports\DeliveryTracker.cs" />
+    <Compile Include="Transports\IDelivery.cs" />
+    <Compile Include="Transports\IDeliveryTracker.cs" />
     <Compile Include="Transports\InMemory\IInMemoryTransport.cs" />
+    <Compile Include="Transports\ZeroActiveDeliveryHandler.cs" />
     <Compile Include="Turnout\CancelJobConsumer.cs" />
     <Compile Include="Turnout\Commands\Supervise.cs" />
     <Compile Include="Turnout\Configuration\ITurnoutHostConfigurator.cs" />

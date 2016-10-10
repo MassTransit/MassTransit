@@ -15,10 +15,9 @@ namespace MassTransit
     using System;
     using System.Threading;
     using System.Threading.Tasks;
-    using AzureServiceBusTransport.Contexts;
+    using AzureServiceBusTransport;
     using AzureServiceBusTransport.Scheduling;
     using GreenPipes;
-    using Pipeline;
     using Scheduling;
     using Util;
 
