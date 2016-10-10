@@ -94,6 +94,7 @@
     <Compile Include="HeaderObject_Specs.cs" />
     <Compile Include="HostConfigurator_Specs.cs" />
     <Compile Include="LocalBusName_Specs.cs" />
+    <Compile Include="Mandatory_Specs.cs" />
     <Compile Include="Observer_Specs.cs" />
     <Compile Include="Performance_Specs.cs" />
     <Compile Include="PriorityQueue_Specs.cs" />

@@ -101,6 +101,7 @@
     <Compile Include="DelayedExchangeSchedulerExtensions.cs" />
     <Compile Include="Exceptions\MessageNotConfirmedException.cs" />
     <Compile Include="Exceptions\PublishNackException.cs" />
+    <Compile Include="Exceptions\PublishReturnedException.cs" />
     <Compile Include="Exceptions\RabbitMqAddressException.cs" />
     <Compile Include="Exceptions\RabbitMqConnectionException.cs" />
     <Compile Include="Hosting\RabbitMqHostBusFactory.cs" />

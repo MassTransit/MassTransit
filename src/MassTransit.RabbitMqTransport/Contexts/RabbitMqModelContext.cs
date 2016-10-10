@@ -16,9 +16,9 @@ namespace MassTransit.RabbitMqTransport.Contexts
     using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
-    using Context;
     using GreenPipes;
     using GreenPipes.Payloads;
     using Integration;
@@ -39,6 +39,7 @@ namespace MassTransit.RabbitMqTransport.Contexts
         readonly IModel _model;
         readonly ITaskParticipant _participant;
         readonly ConcurrentDictionary<ulong, PendingPublish> _published;
+        readonly ConcurrentDictionary<Guid, ulong> _messageIds;
         readonly ModelSettings _settings;
         readonly LimitedConcurrencyLevelTaskScheduler _taskScheduler;
         ulong _publishTagMax;
@@ -200,6 +201,22 @@ namespace MassTransit.RabbitMqTransport.Contexts
         {
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("BasicReturn: {0}-{1} {2}", args.ReplyCode, args.ReplyText, args.BasicProperties.MessageId);
+
+            object value;
+            if (args.BasicProperties.Headers.TryGetValue("publishId", out value))
+            {
+                var bytes = value as byte[];
+                if (bytes == null)
+                    return;
+
+                ulong id;
+                if (!ulong.TryParse(Encoding.UTF8.GetString(bytes), out id))
+                    return;
+
+                PendingPublish published;
+                if (_published.TryRemove(id, out published))
+                    published.PublishReturned(args.ReplyCode, args.ReplyText);
+            }
         }
 
         PendingPublish PublishAsync(string exchange, string routingKey, bool mandatory, IBasicProperties basicProperties, byte[] body)
@@ -214,6 +231,8 @@ namespace MassTransit.RabbitMqTransport.Contexts
                     existing.PublishNotConfirmed();
                     return pendingPublish;
                 });
+
+                basicProperties.Headers["publishId"] = publishTag.ToString("F0");
 
                 _model.BasicPublish(exchange, routingKey, mandatory, basicProperties, body);
             }

@@ -67,6 +67,10 @@ namespace MassTransit.RabbitMqTransport
                     {
                         await pipe.Send(context).ConfigureAwait(false);
 
+                        PublishContext publishContext;
+                        if (context.TryGetPayload(out publishContext))
+                            context.Mandatory = context.Mandatory || publishContext.Mandatory;
+
                         properties.ContentType = context.ContentType.MediaType;
 
                         KeyValuePair<string, object>[] headers = context.Headers.GetAll()

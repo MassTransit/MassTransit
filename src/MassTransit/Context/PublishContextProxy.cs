@@ -23,6 +23,9 @@ namespace MassTransit.Context
             : base(context, message)
         {
             _context = context;
+
+            _context.GetOrAddPayload<PublishContext>(() => this);
+            _context.GetOrAddPayload<PublishContext<TMessage>>(() => this);
         }
 
         bool PublishContext.Mandatory { get; set; }

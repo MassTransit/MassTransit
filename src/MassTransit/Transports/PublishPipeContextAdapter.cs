@@ -102,6 +102,7 @@ namespace MassTransit.Transports
                 SourceAddress = _sourceAddress,
                 CorrelationId = _correlationId,
                 ConversationId = _conversationId,
+                Mandatory = _context?.Mandatory ?? false
             });
         }
 
@@ -112,6 +113,7 @@ namespace MassTransit.Transports
                 SourceAddress = _sourceAddress,
                 CorrelationId = _correlationId,
                 ConversationId = _conversationId,
+                Mandatory = _context?.Mandatory ?? false
             }, exception);
         }
     }

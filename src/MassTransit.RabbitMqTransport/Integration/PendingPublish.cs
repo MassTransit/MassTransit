@@ -53,5 +53,12 @@ namespace MassTransit.RabbitMqTransport.Integration
 
             _source.TrySetException(new MessageNotConfirmedException(address));
         }
+
+        public void PublishReturned(ushort code, string text)
+        {
+            var address = _connectionContext.HostSettings.GetQueueAddress(_exchange);
+
+            _source.TrySetException(new PublishReturnedException(address, $"The message was returned by RabbitMQ: {code}-{text}"));
+        }
     }
 }
