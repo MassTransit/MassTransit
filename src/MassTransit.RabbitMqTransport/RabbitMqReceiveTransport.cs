@@ -105,6 +105,8 @@ namespace MassTransit.RabbitMqTransport
                         var inputAddress = _host.Settings.GetInputAddress(_settings);
 
                         await _receiveEndpointObservable.Faulted(new Faulted(inputAddress, ex)).ConfigureAwait(false);
+
+                        throw;
                     }
                     catch (TaskCanceledException)
                     {
@@ -117,6 +119,8 @@ namespace MassTransit.RabbitMqTransport
                         var inputAddress = _host.Settings.GetInputAddress(_settings);
 
                         await _receiveEndpointObservable.Faulted(new Faulted(inputAddress, ex)).ConfigureAwait(false);
+
+                        throw;
                     }
                 }, supervisor.StoppingToken).ConfigureAwait(false);
             }

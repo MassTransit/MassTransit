@@ -52,10 +52,6 @@ namespace MassTransit.AzureServiceBusTransport.Transport
                 _settings.Path,
                 _settings.PrefetchCount,
                 _settings.MaxConcurrentCalls
-//                Subscriptions = _subscriptionSettings.Select(subscription => new
-//                {
-//                    subscription.Topic.Path
-//                }).ToArray()
             });
         }
 
@@ -76,22 +72,6 @@ namespace MassTransit.AzureServiceBusTransport.Transport
                 {
                     x.AddPipeSpecification(_specifications[i]);
                 }
-//                x.UseFilter(new PrepareReceiveQueueFilter(_settings, _subscriptionSettings));
-//
-//                if (_settings.QueueDescription.RequiresSession)
-//                {
-//                    x.UseFilter(new MessageSessionReceiverFilter(receivePipe, _receiveObservers, _endpointObservers, supervisor, x =>
-//                    {
-//                        var queueClient = x.CreateQueueClient(queuePath);
-//
-//                        queueClient.PrefetchCount = _settings.PrefetchCount;
-//
-//                    }));
-//                }
-//                else
-//                {
-//                    x.UseFilter(new MessageReceiverFilter(receivePipe, _receiveObservers, _endpointObservers, supervisor));
-//                }
             });
 
             Receiver(pipe, supervisor);
@@ -138,6 +118,8 @@ namespace MassTransit.AzureServiceBusTransport.Transport
                             _log.Error($"Azure Service Bus receiver faulted: {inputAddress}", ex);
 
                         await _endpointObservers.Faulted(new Faulted(inputAddress, ex)).ConfigureAwait(false);
+
+                        throw;
                     }
                 }, supervisor.StoppingToken).ConfigureAwait(false);
             }

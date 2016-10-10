@@ -18,7 +18,6 @@ namespace MassTransit.RabbitMqTransport
     using GreenPipes;
     using Integration;
     using Logging;
-    using MassTransit.Pipeline;
     using Policies;
     using Transports;
     using Util;
@@ -66,7 +65,8 @@ namespace MassTransit.RabbitMqTransport
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Starting connection to {0}", _hostSettings.ToDebugString());
 
-            var connectionTask = _connectionRetryPolicy.RetryUntilCancelled(() => _connectionCache.Send(connectionPipe, _supervisor.StoppingToken), _supervisor.StoppingToken);
+            var connectionTask = _connectionRetryPolicy.RetryUntilCancelled(() => _connectionCache.Send(connectionPipe, _supervisor.StoppingToken),
+                _supervisor.StoppingToken);
 
             return new Handle(connectionTask, _supervisor);
         }
