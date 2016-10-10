@@ -61,6 +61,9 @@ namespace MassTransit.Pipeline.Filters
                 sendContext.Headers.Set(MessageHeaders.FaultTimestamp, context.ExceptionTimestamp.ToString("O"));
                 sendContext.Headers.Set(MessageHeaders.FaultStackTrace, ExceptionUtil.GetStackTrace(exception));
 
+                // avoid faulted TTL messages from disappearing from the error queue
+                sendContext.TimeToLive = default(TimeSpan?);
+
                 sendContext.SetHostHeaders();
             });
 
