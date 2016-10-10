@@ -14,11 +14,8 @@ namespace MassTransit.AzureServiceBusTransport.Tests
 {
     namespace SubscriptionTests
     {
-        using System;
         using System.Threading.Tasks;
-        using GreenPipes;
         using NUnit.Framework;
-        using TestFramework.Messages;
 
 
         [TestFixture]
@@ -64,6 +61,71 @@ namespace MassTransit.AzureServiceBusTransport.Tests
         public class MessageB
         {
             public string Value { get; set; }
+        }
+
+
+        public class ResponseA
+        {
+            public string Value { get; set; }
+        }
+
+
+        public class ResponseB
+        {
+            public string Value { get; set; }
+        }
+
+
+        [TestFixture]
+        public class Using_multiple_subscription_endpoints :
+            AzureServiceBusTestFixture
+        {
+            [Test]
+            public async Task Should_handle_a_message_per_endpoint()
+            {
+                _responseA = SubscribeHandler<ResponseA>();
+                _responseB = SubscribeHandler<ResponseB>();
+
+                await Bus.Publish(new MessageA(), context => context.ResponseAddress = Bus.Address);
+                await Bus.Publish(new MessageB(), context => context.ResponseAddress = Bus.Address);
+
+                await _responseA;
+                await _responseB;
+            }
+
+            Task<ConsumeContext<ResponseA>> _responseA;
+            Task<ConsumeContext<ResponseB>> _responseB;
+
+            protected override void ConfigureBusHost(IServiceBusBusFactoryConfigurator configurator, IServiceBusHost host)
+            {
+                base.ConfigureBusHost(configurator, host);
+
+                configurator.SubscriptionEndpoint<MessageA>(host, "phatboyg_you_know_me", x =>
+                {
+                    x.Consumer<Consumer>();
+                });
+
+                configurator.SubscriptionEndpoint<MessageB>(host, "phatboyg_you_know_me", x =>
+                {
+                    x.Consumer<Consumer>();
+                });
+            }
+
+
+            public class Consumer :
+                IConsumer<MessageA>,
+                IConsumer<MessageB>
+            {
+                public Task Consume(ConsumeContext<MessageA> context)
+                {
+                    return context.RespondAsync(new ResponseA {Value = context.Message.Value});
+                }
+
+                public Task Consume(ConsumeContext<MessageB> context)
+                {
+                    return context.RespondAsync(new ResponseB {Value = context.Message.Value});
+                }
+            }
         }
     }
 }
