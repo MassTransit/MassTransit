@@ -16,7 +16,8 @@ namespace MassTransit.HttpTransport.Clients
     using System.Net.Http;
     using System.Threading;
     using System.Threading.Tasks;
-    using Context;
+    using GreenPipes;
+    using GreenPipes.Payloads;
     using Logging;
     using Util;
 

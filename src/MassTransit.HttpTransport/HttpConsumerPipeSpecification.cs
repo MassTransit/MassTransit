@@ -2,11 +2,8 @@ namespace MassTransit.HttpTransport
 {
     using System.Collections.Generic;
     using Configuration.Builders;
-    using Configurators;
+    using GreenPipes;
     using Hosting;
-    using MassTransit.Pipeline;
-    using PipeBuilders;
-    using PipeConfigurators;
     using Util;
 
 

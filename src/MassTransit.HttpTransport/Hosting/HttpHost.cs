@@ -16,8 +16,8 @@ namespace MassTransit.HttpTransport.Hosting
     using System.Threading;
     using System.Threading.Tasks;
     using Configuration.Builders;
+    using GreenPipes;
     using Logging;
-    using MassTransit.Pipeline;
     using Transports;
     using Util;
 

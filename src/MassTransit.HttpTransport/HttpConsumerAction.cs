@@ -5,10 +5,10 @@ namespace MassTransit.HttpTransport
     using System.Net;
     using System.Threading;
     using System.Threading.Tasks;
+    using GreenPipes;
     using Hosting;
     using Internals.Extensions;
     using Logging;
-    using MassTransit.Pipeline;
     using Microsoft.Owin;
     using Pipeline;
     using Util;

@@ -13,9 +13,9 @@
 namespace MassTransit.HttpTransport.Configuration.Builders
 {
     using System;
-    using Context;
+    using GreenPipes;
+    using GreenPipes.Payloads;
     using Hosting;
-    using MassTransit.Pipeline;
     using Microsoft.Owin.Hosting;
     using Owin;
     using Util;

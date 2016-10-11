@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.HttpTransport.Configuration.Builders
 {
+    using GreenPipes;
     using Hosting;
 
 

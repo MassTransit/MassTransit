@@ -3,9 +3,9 @@ namespace MassTransit.HttpTransport
     using System;
     using System.Threading.Tasks;
     using Configuration.Builders;
+    using GreenPipes;
     using Hosting;
     using Logging;
-    using MassTransit.Pipeline;
     using Pipeline;
     using Util;
 

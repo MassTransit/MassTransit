@@ -15,6 +15,7 @@ namespace MassTransit.HttpTransport.Configuration.Builders
     using System;
     using System.Threading;
     using System.Threading.Tasks;
+    using GreenPipes;
     using Logging;
     using MassTransit.Pipeline;
     using Transports;

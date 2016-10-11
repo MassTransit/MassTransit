@@ -15,7 +15,7 @@ namespace MassTransit.HttpTransport.Hosting
     using System.Threading;
     using System.Threading.Tasks;
     using Configuration.Builders;
-    using MassTransit.Pipeline;
+    using GreenPipes;
 
 
     public interface IOwinHostCache

@@ -14,7 +14,7 @@ namespace MassTransit.HttpTransport.Clients
 {
     using System.Threading;
     using System.Threading.Tasks;
-    using MassTransit.Pipeline;
+    using GreenPipes;
 
 
     public interface ClientCache

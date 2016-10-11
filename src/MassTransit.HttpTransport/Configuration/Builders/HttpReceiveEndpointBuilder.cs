@@ -12,8 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.HttpTransport.Configuration.Builders
 {
-    using System.Collections.Generic;
-    using System.Linq;
+    using GreenPipes;
     using MassTransit.Pipeline;
 
 

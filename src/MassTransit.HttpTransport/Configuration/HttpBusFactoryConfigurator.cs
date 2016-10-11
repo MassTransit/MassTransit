@@ -18,6 +18,7 @@ namespace MassTransit.HttpTransport.Configuration
     using Builders;
     using BusConfigurators;
     using Configurators;
+    using GreenPipes;
     using Hosting;
     using MassTransit.Builders;
 
@@ -84,7 +85,7 @@ namespace MassTransit.HttpTransport.Configuration
             if (host == null)
                 throw new EndpointNotFoundException("The host address specified was not configured.");
 
-            var ep = new HttpReceiveEndpointConfigurator(host);
+            var ep = new HttpReceiveEndpointConfigurator(host, null, null);
 
             if (configure != null)
                 configure(ep);

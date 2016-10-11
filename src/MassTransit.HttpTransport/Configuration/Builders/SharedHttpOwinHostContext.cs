@@ -14,6 +14,7 @@ namespace MassTransit.HttpTransport.Configuration.Builders
 {
     using System;
     using System.Threading;
+    using GreenPipes;
     using Hosting;
     using Util;
 
