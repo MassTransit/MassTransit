@@ -16,6 +16,7 @@ namespace MassTransit.HttpTransport.Tests
     using System.Net.Http;
     using System.Threading;
     using Configuration.Builders;
+    using GreenPipes;
     using Hosting;
     using NUnit.Framework;
     using Util;

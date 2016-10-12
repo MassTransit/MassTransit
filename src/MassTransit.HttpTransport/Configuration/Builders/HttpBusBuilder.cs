@@ -53,7 +53,7 @@ namespace MassTransit.HttpTransport.Configuration.Builders
             return new HttpSendTransportProvider(_hosts);
         }
 
-        public override ISendEndpointProvider CreateSendEndpointProvider(params ISendPipeSpecification[] specifications)
+        public override ISendEndpointProvider CreateSendEndpointProvider(Uri sourceAddress, params ISendPipeSpecification[] specifications)
         {
             var pipe = CreateSendPipe(specifications);
 
@@ -67,7 +67,7 @@ namespace MassTransit.HttpTransport.Configuration.Builders
             return TimeSpan.FromHours(1);
         }
 
-        public override IPublishEndpointProvider CreatePublishEndpointProvider(params IPublishPipeSpecification[] specifications)
+        public override IPublishEndpointProvider CreatePublishEndpointProvider(Uri sourceAddress, params IPublishPipeSpecification[] specifications)
         {
             return new HttpPublishEndpointProvider();
         }

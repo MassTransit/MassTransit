@@ -14,6 +14,7 @@ namespace MassTransit.HttpTransport.Tests
 {
     using System;
     using System.Threading.Tasks;
+    using GreenPipes;
     using NUnit.Framework;
     using TestFramework.Messages;
     using MassTransit.HttpTransport.Configuration.Builders;
@@ -74,7 +75,7 @@ namespace MassTransit.HttpTransport.Tests
         [Test]
         public async void Should_receive_the_response()
         {
-            var re = base.Bus.GetProbeResult();
+            var re = Bus.GetProbeResult();
             Console.WriteLine(re.ToJsonString());
             PongMessage message = await _response;
 
