@@ -16,7 +16,11 @@ namespace MassTransit.HttpTransport
         readonly IReceiveObserver _receiveObserver;
         readonly ITaskSupervisor _supervisor;
 
-        public HttpConsumerPipeSpecification(HttpHostSettings settings, IPipe<ReceiveContext> receivePipe, IReceiveObserver receiveObserver, IReceiveEndpointObserver endpointObserver, ITaskSupervisor supervisor)
+        public HttpConsumerPipeSpecification(HttpHostSettings settings, 
+            IPipe<ReceiveContext> receivePipe, 
+            IReceiveObserver receiveObserver,
+            IReceiveEndpointObserver endpointObserver,
+            ITaskSupervisor supervisor)
         {
             _settings = settings;
             _receivePipe = receivePipe;

@@ -16,23 +16,26 @@ namespace MassTransit.HottpTransport.Tests
     using System.Net.Http;
     using System.Threading;
     using System.Threading.Tasks;
+    using GreenPipes;
     using NUnit.Framework;
 
 
     public class Class1
     {
         [Test]
-        public void ConfigurationOptions()
+        public void CheckProbe()
         {
             var bus = Bus.Factory.CreateUsingHttp(cfg =>
             {
-                var h = cfg.Host(new Uri("http://localhost:8080"));
-//                var slack = cfg.Host("http", "slack.com", 80);
-                var request = cfg.Host(new Uri("http://requestb.in"), host =>
+                var mainHost = cfg.Host(new Uri("http://localhost:8080"));
+
+                // TODO: As of now, you have to explicitly add each callers address.
+                // No bueno
+                var allowedOutboundCommunication = cfg.Host(new Uri("http://requestb.in"), host =>
                 {
                     host.UseMethod(HttpMethod.Put);
-                    //TODO: Serializer
                 });
+
 
                 //http://localhost:8080/
                 cfg.ReceiveEndpoint(ep =>
@@ -41,14 +44,69 @@ namespace MassTransit.HottpTransport.Tests
                 });
             });
 
-//            var epa = bus.GetSendEndpoint(new Uri("http://requestb.in/15alnbk1")).Result;
-//            var r = epa.Send(new Ping {Hello = "Hal"}, CancellationToken.None).Wait(TimeSpan.FromMinutes(5));
-//            Console.WriteLine(r.ToString());
-            var mc = new MessageRequestClient<Ping, Pong>(bus, new Uri("http://requestb.in/15alnbk1"), TimeSpan.FromSeconds(5) );
-            mc.Request(new Ping(), default(CancellationToken)).Wait(TimeSpan.FromSeconds(10));
 
-//            var p = bus.GetProbeResult();
-//            Console.WriteLine(p.ToJsonString());
+            var p = bus.GetProbeResult();
+            Console.WriteLine(p.ToJsonString());
+        }
+
+        [Test]
+        [Explicit]
+        public void Request()
+        {
+            var bus = Bus.Factory.CreateUsingHttp(cfg =>
+            {
+                var mainHost = cfg.Host(new Uri("http://localhost:8080"));
+                //TODO: serializer?
+                
+                cfg.ReceiveEndpoint(ep =>
+                {
+                    ep.Consumer<HttpEater>();
+                });
+            });
+
+            var mc = new MessageRequestClient<Ping, Pong>(bus, new Uri("http://requestb.in/15alnbk1"), TimeSpan.FromMinutes(500) );
+            mc.Request(new Ping(), default(CancellationToken)).Wait(TimeSpan.FromMinutes(100));
+        }
+
+        [Test]
+        [Explicit]
+        public void RespondTest()
+        {
+            var bus = Bus.Factory.CreateUsingHttp(cfg =>
+            {
+                var mainHost = cfg.Host(new Uri("http://localhost:8080"));
+                //TODO: serializer?
+
+                cfg.ReceiveEndpoint(ep =>
+                {
+                    ep.Consumer<HttpEater>();
+                });
+            });
+
+            bus.Start();
+
+            Thread.Sleep(TimeSpan.FromMinutes(500));
+        }
+
+        [Test]
+        [Explicit]
+        public void SendACommand()
+        {
+            var bus = Bus.Factory.CreateUsingHttp(cfg =>
+            {
+                var mainHost = cfg.Host(new Uri("http://localhost:8080"));
+                //TODO: serializer?
+
+                var allowedOutboundCommunication = cfg.Host(new Uri("http://requestb.in"), host =>
+                {
+                    host.UseMethod(HttpMethod.Put);
+                    //TODO: Serializer
+                });
+            });
+
+            var epa = bus.GetSendEndpoint(new Uri("http://requestb.in/15alnbk1")).Result;
+            var r = epa.Send(new Ping {Hello = "Hal"}, CancellationToken.None).Wait(TimeSpan.FromMinutes(5));
+            Console.WriteLine(r.ToString());
         }
     }
 
@@ -57,11 +115,13 @@ namespace MassTransit.HottpTransport.Tests
     {
         public async Task Consume(ConsumeContext<Ping> context)
         {
-            await Console.Out.WriteLineAsync(string.Format("Request-Id: {0}", context.RequestId));
-            await Console.Out.WriteLineAsync(string.Format("Conversation-Id: {0}", context.ConversationId));
-            await Console.Out.WriteLineAsync(string.Format("Initiator-Id: {0}", context.InitiatorId));
-            await Console.Out.WriteLineAsync(string.Format("Message-Id: {0}", context.MessageId));
-            await Console.Out.WriteAsync(context.Message.Hello);
+//            await Console.Out.WriteLineAsync(string.Format("Request-Id: {0}", context.RequestId));
+//            await Console.Out.WriteLineAsync(string.Format("Conversation-Id: {0}", context.ConversationId));
+//            await Console.Out.WriteLineAsync(string.Format("Initiator-Id: {0}", context.InitiatorId));
+//            await Console.Out.WriteLineAsync(string.Format("Message-Id: {0}", context.MessageId));
+//            await Console.Out.WriteAsync(context.Message.Hello);
+
+            context.Respond(new Pong());
         }
     }
 

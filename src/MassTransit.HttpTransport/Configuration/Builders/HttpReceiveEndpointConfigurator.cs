@@ -74,8 +74,6 @@ namespace MassTransit.HttpTransport.Configuration.Builders
             var errorQueueName = "bus_error";
             var sendSettings = new HttpSendSettingsImpl(HttpMethod.Get, errorQueueName);
 
-            //sendSettings.BindToQueue(errorQueueName);
-
             return _host.Settings.GetSendAddress(sendSettings);
         }
 
@@ -83,8 +81,6 @@ namespace MassTransit.HttpTransport.Configuration.Builders
         {
             var deadLetterQueueName = "bus_skipped";
             var sendSettings = new HttpSendSettingsImpl(HttpMethod.Delete, deadLetterQueueName);
-
-            //sendSettings.BindToQueue(errorQueueName);
 
             return _host.Settings.GetSendAddress(sendSettings);
         }

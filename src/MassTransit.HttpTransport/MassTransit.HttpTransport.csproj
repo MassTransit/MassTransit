@@ -85,8 +85,10 @@
     <Compile Include="Configuration\HttpBusFactoryConfiguratorExtensions.cs" />
     <Compile Include="Configuration\HttpBusFactorySelectorExtensions.cs" />
     <Compile Include="Configuration\HttpHostConfigurator.cs" />
+    <Compile Include="Configuration\HttpReceiveSettings.cs" />
     <Compile Include="Configuration\IHttpBusFactoryConfigurator.cs" />
     <Compile Include="Configuration\IHttpHostConfigurator.cs" />
+    <Compile Include="Configuration\ReceiveSettings.cs" />
     <Compile Include="ConsumerPipeConfiguratorExtensions.cs" />
     <Compile Include="Hosting\HttpHeaderProvider.cs" />
     <Compile Include="Hosting\HttpReceiveContext.cs" />
@@ -115,6 +117,7 @@
     <Compile Include="HttpConsumerAction.cs" />
     <Compile Include="HttpConsumerFilter.cs" />
     <Compile Include="HttpConsumerPipeSpecification.cs" />
+    <Compile Include="HttpSerializationWrapper.cs" />
     <Compile Include="IHttpHost.cs" />
     <Compile Include="Pipeline\HttpConsumerMetrics.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

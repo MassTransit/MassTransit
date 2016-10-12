@@ -35,6 +35,7 @@ namespace MassTransit.HttpTransport.Clients
             var hostSettings = address.GetHostSettings();
 
             var host = _hosts.FirstOrDefault(x => HttpHostEqualityComparer.Default.Equals(hostSettings, x.Settings));
+
             if (host == null)
                 throw new EndpointNotFoundException("The endpoint address specified an unknown host: " + address);
 

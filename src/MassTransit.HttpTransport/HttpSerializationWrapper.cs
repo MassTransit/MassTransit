@@ -10,28 +10,27 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.HttpTransport.Hosting
+namespace MassTransit.HttpTransport
 {
-    using System.Net.Http;
+    using System.IO;
+    using System.Net.Mime;
+    using Serialization;
 
 
-    public interface HttpHostSettings
+    public class HttpSerializationWrapper : IMessageSerializer
     {
-        string Scheme { get; }
+        readonly JsonMessageSerializer _json;
 
-        /// <summary>
-        ///     The HTTP host to connect to (should be a valid hostname)
-        /// </summary>
-        string Host { get; }
+        public HttpSerializationWrapper()
+        {
+            _json = new JsonMessageSerializer();
+        }
 
-        /// <summary>
-        ///     The HTTP port to connect
-        /// </summary>
-        int Port { get; }
+        public ContentType ContentType => _json.ContentType;
 
-        /// <summary>
-        /// The HTTP Method to use
-        /// </summary>
-        HttpMethod Method { get; }
+        public void Serialize<T>(Stream stream, SendContext<T> context) where T : class
+        {
+            _json.Serialize(stream, context);
+        }
     }
 }

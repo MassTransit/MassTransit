@@ -28,7 +28,10 @@ namespace MassTransit.HttpTransport.Clients
         readonly IMessageSerializer _serializer;
         readonly ISendTransportProvider _transportProvider;
 
-        public HttpSendEndpointProvider(IMessageSerializer serializer, Uri inputAddress, ISendTransportProvider transportProvider, ISendPipe sendPipe)
+        public HttpSendEndpointProvider(IMessageSerializer serializer,
+            Uri inputAddress,
+            ISendTransportProvider transportProvider,
+            ISendPipe sendPipe)
         {
             _inputAddress = inputAddress;
             _transportProvider = transportProvider;

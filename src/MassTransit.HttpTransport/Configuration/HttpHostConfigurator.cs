@@ -25,10 +25,7 @@ namespace MassTransit.HttpTransport.Configuration
             _settings = new ConfigurationHostSettings(scheme, host, port, HttpMethod.Post);
         }
 
-        public HttpHostSettings Settings
-        {
-            get { return _settings; }
-        }
+        public HttpHostSettings Settings => _settings;
 
         public void UseMethod(HttpMethod method)
         {

@@ -70,7 +70,8 @@ namespace MassTransit.HttpTransport.Hosting
             {
                 Type = "HTTP",
                 Settings.Host,
-                Settings.Port
+                Settings.Port,
+                Settings.Method.Method
             });
 
 

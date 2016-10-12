@@ -17,7 +17,6 @@ namespace MassTransit.HttpTransport.Configuration
     using System.Linq;
     using Builders;
     using BusConfigurators;
-    using Configurators;
     using GreenPipes;
     using Hosting;
     using MassTransit.Builders;
@@ -102,15 +101,5 @@ namespace MassTransit.HttpTransport.Configuration
         {
             _settings.Port = port;
         }
-    }
-
-
-    public class HttpReceiveSettings : ReceiveSettings
-    {
-        public int Port { get; set; }
-    }
-    public interface ReceiveSettings
-    {
-        int Port { get; }
     }
 }

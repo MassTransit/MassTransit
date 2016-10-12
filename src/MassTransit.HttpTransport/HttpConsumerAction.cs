@@ -20,7 +20,6 @@ namespace MassTransit.HttpTransport
 
         readonly Uri _inputAddress;
         readonly IReceiveObserver _receiveObserver;
-        readonly HttpHostSettings _settings;
         readonly IPipe<ReceiveContext> _receivePipe;
         int _currentPendingDeliveryCount;
         int _deliveryCount;
@@ -30,11 +29,12 @@ namespace MassTransit.HttpTransport
         int _maxPendingDeliveryCount;
         readonly ConcurrentDictionary<Guid, HttpReceiveContext> _pending;
 
-        public HttpConsumerAction(IReceiveObserver receiveObserver, HttpHostSettings settings,IPipe<ReceiveContext> receivePipe,
+        public HttpConsumerAction(IReceiveObserver receiveObserver, 
+            HttpHostSettings settings,
+            IPipe<ReceiveContext> receivePipe,
             ITaskScope taskSupervisor)
         {
             _receiveObserver = receiveObserver;
-            _settings = settings;
             _receivePipe = receivePipe;
 
             _pending = new ConcurrentDictionary<Guid, HttpReceiveContext>();
