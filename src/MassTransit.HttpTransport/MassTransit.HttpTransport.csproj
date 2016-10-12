@@ -117,7 +117,7 @@
     <Compile Include="HttpConsumerAction.cs" />
     <Compile Include="HttpConsumerFilter.cs" />
     <Compile Include="HttpConsumerPipeSpecification.cs" />
-    <Compile Include="HttpSerializationWrapper.cs" />
+    <Compile Include="HttpMessageDeserializerProxy.cs" />
     <Compile Include="IHttpHost.cs" />
     <Compile Include="Pipeline\HttpConsumerMetrics.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

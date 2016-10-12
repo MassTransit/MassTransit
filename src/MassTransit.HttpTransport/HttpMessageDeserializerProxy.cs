@@ -12,25 +12,31 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.HttpTransport
 {
-    using System.IO;
     using System.Net.Mime;
-    using Serialization;
+    using GreenPipes;
 
 
-    public class HttpSerializationWrapper : IMessageSerializer
+    public class HttpMessageDeserializerProxy : IMessageDeserializer
     {
-        readonly JsonMessageSerializer _json;
+        readonly IMessageDeserializer _wrapped;
 
-        public HttpSerializationWrapper()
+        public HttpMessageDeserializerProxy(IMessageDeserializer wrapped)
         {
-            _json = new JsonMessageSerializer();
+            _wrapped = wrapped;
         }
 
-        public ContentType ContentType => _json.ContentType;
-
-        public void Serialize<T>(Stream stream, SendContext<T> context) where T : class
+        public void Probe(ProbeContext context)
         {
-            _json.Serialize(stream, context);
+            _wrapped.Probe(context);
+        }
+
+        public ContentType ContentType => _wrapped.ContentType;
+
+        public ConsumeContext Deserialize(ReceiveContext receiveContext)
+        {
+            var consumeContext =  _wrapped.Deserialize(receiveContext);
+
+            return consumeContext;
         }
     }
 }

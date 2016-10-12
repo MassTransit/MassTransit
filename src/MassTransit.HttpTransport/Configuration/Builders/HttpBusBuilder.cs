@@ -71,5 +71,12 @@ namespace MassTransit.HttpTransport.Configuration.Builders
         {
             return new HttpPublishEndpointProvider();
         }
+
+        public override IMessageDeserializer GetMessageDeserializer(ISendEndpointProvider sendEndpointProvider, IPublishEndpointProvider publishEndpointProvider)
+        {
+            var m = base.GetMessageDeserializer(sendEndpointProvider, publishEndpointProvider);
+
+            return new HttpMessageDeserializerProxy(m);
+        }
     }
 }
