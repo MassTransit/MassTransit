@@ -13,7 +13,6 @@
 namespace MassTransit.Tests.Diagnostics
 {
     using System;
-    using System.Threading;
     using Monitoring.Performance.StatsD;
     using NUnit.Framework;
 

@@ -14,7 +14,6 @@ namespace MassTransit.BusConfigurators
 {
     using System.Collections.Generic;
     using Builders;
-    using Configurators;
     using GreenPipes;
     using Monitoring.Performance;
 
@@ -31,9 +30,8 @@ namespace MassTransit.BusConfigurators
 
         public IEnumerable<ValidationResult> Validate()
         {
-            if(_factory == null)
-                yield return new ValidationResultImpl(ValidationResultDisposition.Failure, "factory", "ICounterFactory cannot be null");
-
+            if (_factory == null)
+                yield return this.Failure("factory", "ICounterFactory cannot be null");
         }
 
         public void Apply(IBusBuilder builder)
