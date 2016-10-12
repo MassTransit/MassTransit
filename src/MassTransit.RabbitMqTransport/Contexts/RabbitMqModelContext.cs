@@ -39,7 +39,6 @@ namespace MassTransit.RabbitMqTransport.Contexts
         readonly IModel _model;
         readonly ITaskParticipant _participant;
         readonly ConcurrentDictionary<ulong, PendingPublish> _published;
-        readonly ConcurrentDictionary<Guid, ulong> _messageIds;
         readonly ModelSettings _settings;
         readonly LimitedConcurrencyLevelTaskScheduler _taskScheduler;
         ulong _publishTagMax;
