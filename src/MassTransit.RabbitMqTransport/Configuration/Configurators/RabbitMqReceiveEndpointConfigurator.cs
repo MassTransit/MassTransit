@@ -10,7 +10,7 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.RabbitMqTransport.Configuration
+namespace MassTransit.RabbitMqTransport.Configurators
 {
     using System;
     using System.Collections.Generic;
@@ -20,10 +20,10 @@ namespace MassTransit.RabbitMqTransport.Configuration
     using GreenPipes;
     using Management;
     using MassTransit.Builders;
-    using MassTransit.Configurators;
     using MassTransit.Pipeline;
     using MassTransit.Pipeline.Pipes;
     using Topology;
+    using Transport;
     using Transports;
 
 
@@ -209,7 +209,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
 
         protected override Uri GetInputAddress()
         {
-            return _host.Settings.GetInputAddress(_settings);
+            return _settings.GetInputAddress(_host.Settings.HostAddress);
         }
 
         protected override Uri GetErrorAddress()
@@ -220,7 +220,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
 
             sendSettings.BindToQueue(errorQueueName);
 
-            return _host.Settings.GetSendAddress(sendSettings);
+            return sendSettings.GetSendAddress(_host.Settings.HostAddress);
         }
 
         protected override Uri GetDeadLetterAddress()
@@ -231,7 +231,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
 
             sendSettings.BindToQueue(errorQueueName);
 
-            return _host.Settings.GetSendAddress(sendSettings);
+            return sendSettings.GetSendAddress(_host.Settings.HostAddress);
         }
     }
 }

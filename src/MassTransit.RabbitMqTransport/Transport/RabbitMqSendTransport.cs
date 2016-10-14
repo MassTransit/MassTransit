@@ -10,7 +10,7 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.RabbitMqTransport
+namespace MassTransit.RabbitMqTransport.Transport
 {
     using System;
     using System.Collections.Generic;
@@ -168,7 +168,7 @@ namespace MassTransit.RabbitMqTransport
 
                         if (_log.IsDebugEnabled)
                         {
-                            context.InputAddress.LogMoved(modelContext.ConnectionContext.HostSettings.GetSendAddress(_sendSettings),
+                            context.InputAddress.LogMoved(_sendSettings.GetSendAddress(modelContext.ConnectionContext.HostSettings.HostAddress),
                                 messageId?.ToString() ?? "N/A", "Moved");
                         }
                     }

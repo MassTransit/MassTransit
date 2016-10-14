@@ -12,7 +12,10 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RabbitMqTransport.Integration
 {
+    using System;
     using System.Threading.Tasks;
+    using RabbitMQ.Client;
+    using Topology;
 
 
     /// <summary>
@@ -35,6 +38,15 @@ namespace MassTransit.RabbitMqTransport.Integration
 
         public Task Task => _source.Task;
 
+        Uri DestinationAddress
+        {
+            get
+            {
+                var settings = new RabbitMqSendSettings(_exchange, ExchangeType.Fanout, true, false);
+                return settings.GetSendAddress(_connectionContext.HostSettings.HostAddress);
+            }
+        }
+
         public void Ack()
         {
             _source.TrySetResult(_publishTag);
@@ -42,23 +54,17 @@ namespace MassTransit.RabbitMqTransport.Integration
 
         public void Nack()
         {
-            var address = _connectionContext.HostSettings.GetQueueAddress(_exchange);
-
-            _source.TrySetException(new PublishNackException(address, "The message was nacked by RabbitMQ"));
+            _source.TrySetException(new PublishNackException(DestinationAddress, "The message was nacked by RabbitMQ"));
         }
 
         public void PublishNotConfirmed()
         {
-            var address = _connectionContext.HostSettings.GetQueueAddress(_exchange);
-
-            _source.TrySetException(new MessageNotConfirmedException(address));
+            _source.TrySetException(new MessageNotConfirmedException(DestinationAddress));
         }
 
         public void PublishReturned(ushort code, string text)
         {
-            var address = _connectionContext.HostSettings.GetQueueAddress(_exchange);
-
-            _source.TrySetException(new PublishReturnedException(address, $"The message was returned by RabbitMQ: {code}-{text}"));
+            _source.TrySetException(new PublishReturnedException(DestinationAddress, $"The message was returned by RabbitMQ: {code}-{text}"));
         }
     }
 }

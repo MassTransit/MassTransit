@@ -21,6 +21,7 @@ namespace MassTransit.RabbitMqTransport.Integration
     using MassTransit.Pipeline;
     using RabbitMQ.Client;
     using RabbitMQ.Client.Exceptions;
+    using Transport;
     using Util;
 
 

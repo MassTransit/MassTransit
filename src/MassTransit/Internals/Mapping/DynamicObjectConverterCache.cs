@@ -14,7 +14,7 @@ namespace MassTransit.Internals.Mapping
 {
     using System;
     using System.Collections.Concurrent;
-    using Reflection;
+    using GreenPipes.Internals.Reflection;
 
 
     /// <summary>

@@ -494,8 +494,6 @@
     <Compile Include="Internals\Mapping\ValueObjectMapper.cs" />
     <Compile Include="Internals\Mapping\ValueValueDictionaryDictionaryMapper.cs" />
     <Compile Include="Internals\Mapping\ValueValueDictionaryObjectMapper.cs" />
-    <Compile Include="Internals\Reflection\DynamicImplementationBuilder.cs" />
-    <Compile Include="Internals\Reflection\IImplementationBuilder.cs" />
     <Compile Include="Internals\Reflection\InterfaceReflectionCache.cs" />
     <Compile Include="Internals\Reflection\ReadOnlyProperty.cs" />
     <Compile Include="Internals\Reflection\ReadOnlyPropertyCache.cs" />
@@ -515,7 +513,6 @@
     <Compile Include="MessageRedeliveryContext.cs" />
     <Compile Include="MessageRequestClient.cs" />
     <Compile Include="MessageSchedulerContext.cs" />
-
     <Compile Include="Monitoring\Performance\BuiltInCounters.cs" />
     <Compile Include="Monitoring\Performance\CreateCounterDelegate.cs" />
     <Compile Include="Monitoring\Performance\ICounterFactory.cs" />

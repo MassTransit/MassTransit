@@ -16,7 +16,7 @@ namespace MassTransit.QuartzService.Configuration
     using System.Configuration;
     using System.Globalization;
     using System.Linq;
-    using RabbitMqTransport.Configuration;
+    using RabbitMqTransport;
 
 
     public static class ConfigurationProviderExtensions

@@ -10,7 +10,7 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.RabbitMqTransport
+namespace MassTransit.RabbitMqTransport.Transport
 {
     using System;
     using System.Threading;
@@ -19,6 +19,8 @@ namespace MassTransit.RabbitMqTransport
     using Integration;
     using Logging;
     using Policies;
+    using RabbitMQ.Client;
+    using Topology;
     using Transports;
     using Util;
 
@@ -101,6 +103,15 @@ namespace MassTransit.RabbitMqTransport
         public RabbitMqHostSettings Settings => _hostSettings;
         public IRetryPolicy ConnectionRetryPolicy => _connectionRetryPolicy;
         public ITaskSupervisor Supervisor => _supervisor;
+
+        public Uri GetSendAddress(string exchangeName, Action<IExchangeConfigurator> configure = null)
+        {
+            var sendSettings = new RabbitMqSendSettings(exchangeName, ExchangeType.Fanout, true, false);
+
+            configure?.Invoke(sendSettings);
+
+            return sendSettings.GetSendAddress(_hostSettings.HostAddress);
+        }
 
 
         class Handle :

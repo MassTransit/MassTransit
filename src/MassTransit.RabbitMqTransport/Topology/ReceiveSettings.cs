@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -10,15 +10,17 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.RabbitMqTransport
+namespace MassTransit.RabbitMqTransport.Topology
 {
+    using System;
     using System.Collections.Generic;
 
 
     /// <summary>
     /// Specify the receive settings for a receive transport
     /// </summary>
-    public interface ReceiveSettings
+    public interface ReceiveSettings :
+        EntitySettings
     {
         /// <summary>
         /// The queue name to receive from
@@ -26,19 +28,9 @@ namespace MassTransit.RabbitMqTransport
         string QueueName { get; }
 
         /// <summary>
-        /// The exchange name to bind to the queue as the default exchange
-        /// </summary>
-        string ExchangeName { get; }
-
-        /// <summary>
         /// The number of unacknowledged messages to allow to be processed concurrently
         /// </summary>
         ushort PrefetchCount { get; }
-
-        /// <summary>
-        /// True if messages should be persisted to disk for the queue
-        /// </summary>
-        bool Durable { get; }
 
         /// <summary>
         /// True if the queue receive should be exclusive and not shared
@@ -46,19 +38,9 @@ namespace MassTransit.RabbitMqTransport
         bool Exclusive { get; }
 
         /// <summary>
-        /// True if the queue/exchange should automatically be deleted
-        /// </summary>
-        bool AutoDelete { get; }
-
-        /// <summary>
         /// Arguments passed to QueueDeclare
         /// </summary>
         IDictionary<string, object> QueueArguments { get; }
-
-        /// <summary>
-        /// Arguments passed to exchange-declare
-        /// </summary>
-        IDictionary<string, object> ExchangeArguments { get; }
 
         /// <summary>
         /// If True, and a queue name is specified, if the queue exists and has messages, they are purged at startup
@@ -67,8 +49,8 @@ namespace MassTransit.RabbitMqTransport
         bool PurgeOnStartup { get; }
 
         /// <summary>
-        /// The RabbitMQ exchange type
+        /// Get the input address for the transport on the specified host
         /// </summary>
-        string ExchangeType { get; }
+        Uri GetInputAddress(Uri hostAddress);
     }
 }

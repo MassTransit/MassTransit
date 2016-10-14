@@ -10,7 +10,7 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.RabbitMqTransport
+namespace MassTransit.RabbitMqTransport.Transport
 {
     using System;
     using System.Linq;
@@ -105,7 +105,7 @@ namespace MassTransit.RabbitMqTransport
                 .Where(binding => !sendSettings.ExchangeName.Equals(binding.Exchange.ExchangeName))
                 .ToArray();
 
-            var destinationAddress = _host.Settings.GetSendAddress(sendSettings);
+            var destinationAddress = sendSettings.GetSendAddress(_host.Settings.HostAddress);
 
             var modelCache = new RabbitMqModelCache(_host.ConnectionCache, _host.Supervisor, _modelSettings);
 

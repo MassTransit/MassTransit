@@ -13,7 +13,7 @@
 namespace MassTransit.RabbitMqTransport
 {
     using System;
-    using Configuration;
+    using Configurators;
 
 
     public static class RabbitMqBusFactory

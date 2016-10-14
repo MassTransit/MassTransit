@@ -13,8 +13,8 @@
 namespace MassTransit.RabbitMqTransport.Hosting
 {
     using System;
-    using Builders;
     using GreenPipes;
+    using MassTransit.Builders;
     using MassTransit.Hosting;
 
 
@@ -50,7 +50,7 @@ namespace MassTransit.RabbitMqTransport.Hosting
             _configurator.AddPipeSpecification(specification);
         }
 
-        public void AddPipeSpecification<T>(IPipeSpecification<ConsumeContext<T>> specification) 
+        public void AddPipeSpecification<T>(IPipeSpecification<ConsumeContext<T>> specification)
             where T : class
         {
             _configurator.AddPipeSpecification(specification);

@@ -10,13 +10,15 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.RabbitMqTransport.Configuration.Builders
+namespace MassTransit.RabbitMqTransport.Builders
 {
     using System;
     using BusConfigurators;
+    using Configurators;
     using MassTransit.Builders;
     using MassTransit.Pipeline;
     using Topology;
+    using Transport;
     using Transports;
 
 

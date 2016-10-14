@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,10 +14,10 @@ namespace MassTransit.RabbitMqTransport.Topology
 {
     using System;
     using System.Collections.Generic;
-    using Configuration;
 
 
     public class RabbitMqReceiveSettings :
+        RabbitMqEntitySettings,
         ReceiveSettings,
         IQueueConfigurator,
         IExchangeBindingConfigurator
@@ -25,16 +25,16 @@ namespace MassTransit.RabbitMqTransport.Topology
         public RabbitMqReceiveSettings()
         {
             QueueArguments = new Dictionary<string, object>();
-            ExchangeArguments = new Dictionary<string, object>();
-            ExchangeType = RabbitMQ.Client.ExchangeType.Fanout;
 
             PrefetchCount = (ushort)Math.Min(Environment.ProcessorCount * 2, 16);
 
-            Durable = true;
             Exclusive = false;
+
+            QueueArguments = new Dictionary<string, object>();
         }
 
         public RabbitMqReceiveSettings(ReceiveSettings settings)
+            : base(settings)
         {
             QueueName = settings.QueueName;
             ExchangeName = settings.ExchangeName;
@@ -45,7 +45,6 @@ namespace MassTransit.RabbitMqTransport.Topology
             PurgeOnStartup = settings.PurgeOnStartup;
             ExchangeType = settings.ExchangeType;
             QueueArguments = new Dictionary<string, object>(settings.QueueArguments);
-            ExchangeArguments = new Dictionary<string, object>(settings.ExchangeArguments);
         }
 
         public string RoutingKey { get; set; }
@@ -66,16 +65,6 @@ namespace MassTransit.RabbitMqTransport.Topology
             set { SetQueueArgument("x-queue-mode", value ? "lazy" : "default"); }
         }
 
-        public void SetExchangeArgument(string key, object value)
-        {
-            if (key == null)
-                throw new ArgumentNullException(nameof(key));
-
-            if (value == null)
-                ExchangeArguments.Remove(key);
-            else
-                ExchangeArguments[key] = value;
-        }
 
         public void EnablePriority(byte maxPriority)
         {
@@ -83,14 +72,33 @@ namespace MassTransit.RabbitMqTransport.Topology
         }
 
         public string QueueName { get; set; }
-        public string ExchangeName { get; set; }
-        public ushort PrefetchCount { get; set; }
-        public bool Durable { get; set; }
         public bool Exclusive { get; set; }
-        public bool AutoDelete { get; set; }
+        public ushort PrefetchCount { get; set; }
         public IDictionary<string, object> QueueArguments { get; }
-        public IDictionary<string, object> ExchangeArguments { get; }
         public bool PurgeOnStartup { get; set; }
-        public string ExchangeType { get; set; }
+
+        public Uri GetInputAddress(Uri hostAddress)
+        {
+            var builder = new UriBuilder(hostAddress);
+
+            builder.Path = builder.Path == "/"
+                ? $"/{QueueName}"
+                : $"/{string.Join("/", builder.Path.Trim('/'), QueueName)}";
+
+            builder.Query += string.Join("&", GetQueryStringOptions());
+
+            return builder.Uri;
+        }
+
+        protected override IEnumerable<string> GetQueryStringOptions()
+        {
+            foreach (var option in base.GetQueryStringOptions())
+            {
+                yield return option;
+            }
+
+            if (Exclusive)
+                yield return "exclusive=true";
+        }
     }
 }

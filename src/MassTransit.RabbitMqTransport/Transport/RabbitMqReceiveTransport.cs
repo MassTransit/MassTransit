@@ -10,7 +10,7 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.RabbitMqTransport
+namespace MassTransit.RabbitMqTransport.Transport
 {
     using System;
     using System.Threading;
@@ -64,7 +64,7 @@ namespace MassTransit.RabbitMqTransport
         /// <returns>A task that is completed once the transport is shut down</returns>
         public ReceiveTransportHandle Start(IPipe<ReceiveContext> receivePipe)
         {
-            var supervisor = new TaskSupervisor($"{TypeMetadataCache<RabbitMqReceiveTransport>.ShortName} - {_host.Settings.GetInputAddress(_settings)}");
+            var supervisor = new TaskSupervisor($"{TypeMetadataCache<RabbitMqReceiveTransport>.ShortName} - {_settings.GetInputAddress(_host.Settings.HostAddress)}");
 
             IPipe<ConnectionContext> pipe = Pipe.New<ConnectionContext>(x =>
             {
@@ -102,7 +102,7 @@ namespace MassTransit.RabbitMqTransport
                         if (_log.IsErrorEnabled)
                             _log.ErrorFormat("RabbitMQ connection failed: {0}", ex.Message);
 
-                        var inputAddress = _host.Settings.GetInputAddress(_settings);
+                        var inputAddress = _settings.GetInputAddress(_host.Settings.HostAddress);
 
                         await _receiveEndpointObservable.Faulted(new Faulted(inputAddress, ex)).ConfigureAwait(false);
 
@@ -116,7 +116,7 @@ namespace MassTransit.RabbitMqTransport
                         if (_log.IsErrorEnabled)
                             _log.ErrorFormat("RabbitMQ receive transport failed: {0}", ex.Message);
 
-                        var inputAddress = _host.Settings.GetInputAddress(_settings);
+                        var inputAddress = _settings.GetInputAddress(_host.Settings.HostAddress);
 
                         await _receiveEndpointObservable.Faulted(new Faulted(inputAddress, ex)).ConfigureAwait(false);
 

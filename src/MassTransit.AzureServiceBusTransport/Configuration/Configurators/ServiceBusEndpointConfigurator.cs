@@ -15,7 +15,6 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using Contexts;
     using EndpointConfigurators;
     using GreenPipes;
     using GreenPipes.Specifications;

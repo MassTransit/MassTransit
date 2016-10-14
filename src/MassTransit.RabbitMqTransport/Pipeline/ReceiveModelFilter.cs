@@ -15,8 +15,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
     using System.Threading.Tasks;
     using Contexts;
     using GreenPipes;
-    using MassTransit.Pipeline;
-    using RabbitMQ.Client;
+    using Transport;
     using Util;
 
 
@@ -27,8 +26,8 @@ namespace MassTransit.RabbitMqTransport.Pipeline
         IFilter<ConnectionContext>
     {
         readonly IPipe<ModelContext> _pipe;
-        readonly ITaskSupervisor _supervisor;
         readonly ModelSettings _settings;
+        readonly ITaskSupervisor _supervisor;
 
         public ReceiveModelFilter(IPipe<ModelContext> pipe, ITaskSupervisor supervisor, ModelSettings settings)
         {
@@ -45,7 +44,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
         {
             using (var scope = _supervisor.CreateScope($"{TypeMetadataCache<ReceiveModelFilter>.ShortName}"))
             {
-                IModel model = await context.CreateModel().ConfigureAwait(false);
+                var model = await context.CreateModel().ConfigureAwait(false);
 
                 using (var modelContext = new RabbitMqModelContext(context, model, scope, _settings))
                 {

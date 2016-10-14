@@ -22,6 +22,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
     using Logging;
     using RabbitMQ.Client;
     using RabbitMQ.Client.Events;
+    using Topology;
     using Transports;
     using Util;
 

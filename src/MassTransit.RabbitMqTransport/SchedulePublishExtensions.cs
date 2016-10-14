@@ -436,7 +436,7 @@ namespace MassTransit
 
             var sendSettings = hostSettings.GetSendSettings(messageType);
 
-            return hostSettings.GetSendAddress(sendSettings);
+            return sendSettings.GetSendAddress(hostSettings.HostAddress);
         }
     }
 }

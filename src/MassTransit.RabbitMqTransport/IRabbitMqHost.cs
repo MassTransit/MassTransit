@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RabbitMqTransport
 {
+    using System;
     using GreenPipes;
     using Integration;
     using Transports;
@@ -34,5 +35,14 @@ namespace MassTransit.RabbitMqTransport
         /// The supervisor for the host, which indicates when it's being stopped
         /// </summary>
         ITaskSupervisor Supervisor { get; }
+
+        /// <summary>
+        /// Return the send address for the exchange, which can be configured to include
+        /// additional settings.
+        /// </summary>
+        /// <param name="exchangeName">The exchange name</param>
+        /// <param name="configure"></param>
+        /// <returns></returns>
+        Uri GetSendAddress(string exchangeName, Action<IExchangeConfigurator> configure = null);
     }
 }

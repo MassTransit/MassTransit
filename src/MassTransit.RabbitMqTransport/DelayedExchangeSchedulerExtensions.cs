@@ -13,7 +13,7 @@
 namespace MassTransit
 {
     using System;
-    using RabbitMqTransport.Configuration;
+    using RabbitMqTransport.Specifications;
 
 
     public static class DelayedExchangeSchedulerExtensions

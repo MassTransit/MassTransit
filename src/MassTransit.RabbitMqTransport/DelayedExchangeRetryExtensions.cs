@@ -16,7 +16,7 @@ namespace MassTransit
     using GreenPipes;
     using GreenPipes.Configurators;
     using PipeConfigurators;
-    using RabbitMqTransport.Configuration;
+    using RabbitMqTransport.Specifications;
 
 
     public static class DelayedExchangeRetryExtensions

@@ -15,10 +15,9 @@ namespace MassTransit
     using System;
     using System.Collections.Generic;
     using GreenPipes;
-    using Pipeline;
     using Pipeline.Pipes;
     using RabbitMqTransport;
-    using RabbitMqTransport.Configuration;
+    using RabbitMqTransport.Specifications;
     using RabbitMqTransport.Topology;
     using Util;
 

@@ -25,7 +25,6 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
     public class ServiceBusBusFactoryConfigurator :
         BusFactoryConfigurator,
         IServiceBusBusFactoryConfigurator,
-        IServiceBusEndpointConfigurator,
         IBusFactory
     {
         readonly IList<ServiceBusHost> _hosts;

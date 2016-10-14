@@ -18,8 +18,8 @@ namespace MassTransit.Util
     using System.Linq;
     using System.Reflection;
     using System.Threading;
+    using GreenPipes.Internals.Reflection;
     using Internals.Extensions;
-    using Internals.Reflection;
     using Newtonsoft.Json.Linq;
     using Saga;
     using Serialization;
@@ -91,9 +91,9 @@ namespace MassTransit.Util
         readonly Lazy<string[]> _messageTypeNames;
         readonly Lazy<Type[]> _messageTypes;
         readonly Lazy<List<PropertyInfo>> _properties;
-        readonly Lazy<ReadOnlyPropertyCache<T>> _readPropertyCache;
+        readonly Lazy<Internals.Reflection.ReadOnlyPropertyCache<T>> _readPropertyCache;
         readonly string _shortName;
-        readonly Lazy<ReadWritePropertyCache<T>> _writePropertyCache;
+        readonly Lazy<Internals.Reflection.ReadWritePropertyCache<T>> _writePropertyCache;
 
         TypeMetadataCache()
         {
@@ -101,8 +101,8 @@ namespace MassTransit.Util
 
             _hasSagaInterfaces = new Lazy<bool>(ScanForSagaInterfaces, LazyThreadSafetyMode.PublicationOnly);
 
-            _readPropertyCache = new Lazy<ReadOnlyPropertyCache<T>>(() => new ReadOnlyPropertyCache<T>());
-            _writePropertyCache = new Lazy<ReadWritePropertyCache<T>>(() => new ReadWritePropertyCache<T>());
+            _readPropertyCache = new Lazy<Internals.Reflection.ReadOnlyPropertyCache<T>>(() => new Internals.Reflection.ReadOnlyPropertyCache<T>());
+            _writePropertyCache = new Lazy<Internals.Reflection.ReadWritePropertyCache<T>>(() => new Internals.Reflection.ReadWritePropertyCache<T>());
 
             _properties = new Lazy<List<PropertyInfo>>(() => typeof(T).GetAllProperties().ToList());
 
@@ -113,8 +113,8 @@ namespace MassTransit.Util
 
         public static string ShortName => Cached.Metadata.Value.ShortName;
         public static bool HasSagaInterfaces => Cached.Metadata.Value.HasSagaInterfaces;
-        public static ReadOnlyPropertyCache<T> ReadOnlyPropertyCache => Cached.Metadata.Value.ReadOnlyPropertyCache;
-        public static ReadWritePropertyCache<T> ReadWritePropertyCache => Cached.Metadata.Value.ReadWritePropertyCache;
+        public static Internals.Reflection.ReadOnlyPropertyCache<T> ReadOnlyPropertyCache => Cached.Metadata.Value.ReadOnlyPropertyCache;
+        public static Internals.Reflection.ReadWritePropertyCache<T> ReadWritePropertyCache => Cached.Metadata.Value.ReadWritePropertyCache;
         public static IEnumerable<PropertyInfo> Properties => Cached.Metadata.Value.Properties;
         public static bool IsValidMessageType => Cached.Metadata.Value.IsValidMessageType;
         public static Type[] MessageTypes => Cached.Metadata.Value.MessageTypes;
@@ -123,8 +123,8 @@ namespace MassTransit.Util
         IEnumerable<PropertyInfo> ITypeMetadataCache<T>.Properties => _properties.Value;
         bool ITypeMetadataCache<T>.IsValidMessageType => _isValidMessageType.Value;
         Type[] ITypeMetadataCache<T>.MessageTypes => _messageTypes.Value;
-        ReadOnlyPropertyCache<T> ITypeMetadataCache<T>.ReadOnlyPropertyCache => _readPropertyCache.Value;
-        ReadWritePropertyCache<T> ITypeMetadataCache<T>.ReadWritePropertyCache => _writePropertyCache.Value;
+        Internals.Reflection.ReadOnlyPropertyCache<T> ITypeMetadataCache<T>.ReadOnlyPropertyCache => _readPropertyCache.Value;
+        Internals.Reflection.ReadWritePropertyCache<T> ITypeMetadataCache<T>.ReadWritePropertyCache => _writePropertyCache.Value;
 
         T ITypeMetadataCache<T>.InitializeFromObject(object values)
         {

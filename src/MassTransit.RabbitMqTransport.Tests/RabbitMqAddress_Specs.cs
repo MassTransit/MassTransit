@@ -15,6 +15,7 @@ namespace MassTransit.RabbitMqTransport.Tests
     using System;
     using NUnit.Framework;
     using Shouldly;
+    using Topology;
 
 
     [TestFixture]

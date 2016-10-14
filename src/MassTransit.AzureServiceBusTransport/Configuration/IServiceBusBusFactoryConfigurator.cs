@@ -16,19 +16,9 @@ namespace MassTransit.AzureServiceBusTransport
 
 
     public interface IServiceBusBusFactoryConfigurator :
-        IBusFactoryConfigurator
+        IBusFactoryConfigurator,
+        IServiceBusEndpointConfigurator
     {
-        /// <summary>
-        /// Specify the number of messages to prefetch from the queue to the service
-        /// </summary>
-        /// <value>The limit</value>
-        int PrefetchCount { set; }
-
-        /// <summary>
-        /// Specify the number of concurrent consumers (separate from prefetch count)
-        /// </summary>
-        int MaxConcurrentCalls { set; }
-
         /// <summary>
         /// In most cases, this is not needed and should not be used. However, if for any reason the default bus
         /// endpoint queue name needs to be changed, this will do it. Do NOT set it to the same name as a receive

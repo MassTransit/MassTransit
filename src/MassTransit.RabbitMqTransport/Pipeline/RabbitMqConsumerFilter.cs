@@ -16,6 +16,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
     using Events;
     using GreenPipes;
     using Logging;
+    using Topology;
     using Util;
 
 
@@ -48,7 +49,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
         {
             var receiveSettings = context.GetPayload<ReceiveSettings>();
 
-            var inputAddress = context.ConnectionContext.HostSettings.GetInputAddress(receiveSettings);
+            var inputAddress = receiveSettings.GetInputAddress(context.ConnectionContext.HostSettings.HostAddress);
 
             using (var scope = _supervisor.CreateScope($"{TypeMetadataCache<RabbitMqConsumerFilter>.ShortName} - {inputAddress}", () => TaskUtil.Completed))
             {

@@ -177,7 +177,7 @@ namespace MassTransit.RabbitMqTransport.Scheduling
 
             sendSettings.BindToExchange(destinationSettings.ExchangeName);
 
-            var delayExchangeAddress = _hostSettings.GetSendAddress(sendSettings);
+            var delayExchangeAddress = sendSettings.GetSendAddress(_hostSettings.HostAddress);
 
             var delayEndpoint = await _sendEndpointProvider.GetSendEndpoint(delayExchangeAddress).ConfigureAwait(false);
 

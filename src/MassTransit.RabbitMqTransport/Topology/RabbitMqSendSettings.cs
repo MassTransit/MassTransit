@@ -12,18 +12,18 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RabbitMqTransport.Topology
 {
+    using System;
     using System.Collections.Generic;
-    using Configuration;
+    using System.Net;
 
 
     public class RabbitMqSendSettings :
+        RabbitMqEntitySettings,
         SendSettings,
         IExchangeConfigurator
     {
         readonly IList<ExchangeBindingSettings> _exchangeBindings;
         bool _bindToQueue;
-        IDictionary<string, object> _exchangeArguments;
-        IDictionary<string, object> _queueArguments;
         string _queueName;
 
         public RabbitMqSendSettings(string exchangeName, string exchangeType, bool durable, bool autoDelete)
@@ -34,33 +34,30 @@ namespace MassTransit.RabbitMqTransport.Topology
             AutoDelete = autoDelete;
 
             _exchangeBindings = new List<ExchangeBindingSettings>();
+
+            QueueArguments = new Dictionary<string, object>();
         }
-
-        public void SetExchangeArgument(string key, object value)
-        {
-            if (_exchangeArguments == null)
-                _exchangeArguments = new Dictionary<string, object>();
-
-            _exchangeArguments[key] = value;
-        }
-
-        public string ExchangeName { get; }
-
-        public bool Durable { get; set; }
-
-        public bool AutoDelete { get; set; }
-
-        public IDictionary<string, object> ExchangeArguments => _exchangeArguments;
-
-        public string ExchangeType { get; set; }
 
         bool SendSettings.BindToQueue => _bindToQueue;
 
         public string QueueName => _queueName;
 
-        public IDictionary<string, object> QueueArguments => _queueArguments;
+        public IDictionary<string, object> QueueArguments { get; }
 
         public IEnumerable<ExchangeBindingSettings> ExchangeBindings => _exchangeBindings;
+
+        public Uri GetSendAddress(Uri hostAddress)
+        {
+            var builder = new UriBuilder(hostAddress);
+
+            builder.Path = builder.Path == "/"
+                ? $"/{ExchangeName}"
+                : $"/{string.Join("/", builder.Path.Trim('/'), ExchangeName)}";
+
+            builder.Query += string.Join("&", GetQueryStringOptions());
+
+            return builder.Uri;
+        }
 
         public void BindToQueue(string queueName)
         {
@@ -77,10 +74,35 @@ namespace MassTransit.RabbitMqTransport.Topology
 
         public void SetQueueArgument(string key, object value)
         {
-            if (_queueArguments == null)
-                _queueArguments = new Dictionary<string, object>();
+            if (key == null)
+                throw new ArgumentNullException(nameof(key));
 
-            _queueArguments[key] = value;
+            if (value == null)
+            {
+                QueueArguments.Remove(key);
+            }
+            else
+                QueueArguments[key] = value;
+        }
+
+        protected override IEnumerable<string> GetQueryStringOptions()
+        {
+            foreach (var option in base.GetQueryStringOptions())
+            {
+                yield return option;
+            }
+
+            if (_bindToQueue)
+                yield return "bind=true";
+            if (!string.IsNullOrWhiteSpace(QueueName))
+                yield return "queue=" + WebUtility.UrlEncode(QueueName);
+            if (ExchangeArguments != null && ExchangeArguments.ContainsKey("x-delayed-type"))
+                yield return "delayedType=" + ExchangeArguments["x-delayed-type"];
+
+            foreach (var binding in ExchangeBindings)
+            {
+                yield return $"bindexchange={binding.Exchange.ExchangeName}";
+            }
         }
 
         IEnumerable<string> GetSettingStrings()
@@ -94,13 +116,13 @@ namespace MassTransit.RabbitMqTransport.Topology
             if (_bindToQueue)
                 yield return $"bind->{_queueName}";
 
-            if (_exchangeArguments != null)
-                foreach (KeyValuePair<string, object> argument in _exchangeArguments)
+            if (ExchangeArguments != null)
+                foreach (KeyValuePair<string, object> argument in ExchangeArguments)
                 {
                     yield return $"e:{argument.Key}={argument.Value}";
                 }
-            if (_queueArguments != null)
-                foreach (KeyValuePair<string, object> argument in _queueArguments)
+            if (QueueArguments != null)
+                foreach (KeyValuePair<string, object> argument in QueueArguments)
                 {
                     yield return $"q:{argument.Key}={argument.Value}";
                 }

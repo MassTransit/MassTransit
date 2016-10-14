@@ -25,6 +25,7 @@ namespace MassTransit.RabbitMqTransport.Contexts
     using Logging;
     using RabbitMQ.Client;
     using RabbitMQ.Client.Events;
+    using Transport;
     using Util;
 
 
