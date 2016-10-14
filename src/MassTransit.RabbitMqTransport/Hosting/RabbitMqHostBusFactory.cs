@@ -31,9 +31,9 @@ namespace MassTransit.RabbitMqTransport.Hosting
 
             _hostSettings = new ConfigurationHostSettings
             {
-                Host = settings.Host,
+                Host = settings.Host ?? "[::1]",
                 Port = settings.Port ?? 5672,
-                VirtualHost = settings.VirtualHost ?? "/",
+                VirtualHost = string.IsNullOrWhiteSpace(settings.VirtualHost) ? "/" : $"/{settings.VirtualHost.Trim('/')}",
                 Username = settings.Username ?? "guest",
                 Password = settings.Password ?? "guest",
                 Heartbeat = settings.Heartbeat ?? 0

@@ -14,16 +14,20 @@ namespace MassTransit.Host.Configuration
 {
     using System;
     using System.Configuration;
+    using System.Diagnostics;
     using System.IO;
     using System.Reflection;
 
 
+    [DebuggerDisplay("{_configurationFile}")]
     public class FileConfigurationProvider :
         ConfigurationProviderBase
     {
         readonly Func<AppSettingsSection> _appSettings;
         readonly Func<ConnectionStringsSection> _connectionStrings;
         readonly Func<string, ConfigurationSection> _getSection;
+
+        readonly string _configurationFile;
 
         public FileConfigurationProvider()
             : this(Assembly.GetEntryAssembly() ?? Assembly.GetCallingAssembly())
@@ -46,9 +50,9 @@ namespace MassTransit.Host.Configuration
                 ConfigurationUserLevel.None);
 
             _appSettings = GetAppSettings(configuration);
-
             _connectionStrings = GetConnectionStrings(configuration);
             _getSection = configuration.GetSection;
+            _configurationFile = filename;
         }
 
         protected override AppSettingsSection GetAppSettings()
