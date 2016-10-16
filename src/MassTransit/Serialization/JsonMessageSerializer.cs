@@ -19,6 +19,7 @@ namespace MassTransit.Serialization
     using System.Runtime.Serialization;
     using System.Text;
     using System.Threading;
+    using GreenPipes.Internals.Extensions;
     using JsonConverters;
     using Newtonsoft.Json;
     using Util;
@@ -52,7 +53,7 @@ namespace MassTransit.Serialization
             {
                 new ByteArrayConverter(),
                 new ListJsonConverter(),
-                new InterfaceProxyConverter(TypeMetadataCache.ImplementationBuilder),
+                new InterfaceProxyConverter(TypeCache.ImplementationBuilder),
                 new StringDecimalConverter(),
                 new MessageDataJsonConverter(),
             })

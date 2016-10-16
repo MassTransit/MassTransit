@@ -33,7 +33,7 @@ namespace MassTransit.Tests.Pipeline
             {
                 x.UseCircuitBreaker(v =>
                 {
-                    v.ResetInterval(TimeSpan.FromSeconds(60));
+                    v.ResetInterval = TimeSpan.FromSeconds(60);
                     v.Handle<IntentionalTestException>();
                 });
                 x.UseExecute(payload =>

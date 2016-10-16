@@ -14,7 +14,8 @@ namespace MassTransit.Saga
 {
     using System;
     using System.Linq.Expressions;
-    using Internals.Reflection;
+    using GreenPipes.Internals.Extensions;
+    using GreenPipes.Internals.Reflection;
     using Util;
 
 
@@ -33,7 +34,7 @@ namespace MassTransit.Saga
             if (constructorInfo == null)
                 throw new ArgumentException($"The saga {TypeMetadataCache<TSaga>.ShortName} does not have a default public constructor");
 
-            if (!TypeMetadataCache<TSaga>.ReadWritePropertyCache.TryGetValue("CorrelationId", out property))
+            if (!TypeCache<TSaga>.ReadWritePropertyCache.TryGetValue("CorrelationId", out property))
                 throw new ArgumentException($"The saga {TypeMetadataCache<TSaga>.ShortName} does not have a writeable CorrelationId property");
 
             ParameterExpression correlationId = Expression.Parameter(typeof(Guid), "correlationId");

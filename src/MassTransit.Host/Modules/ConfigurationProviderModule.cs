@@ -14,9 +14,9 @@ namespace MassTransit.Host.Modules
 {
     using Autofac;
     using Configuration;
+    using GreenPipes.Internals.Mapping;
     using GreenPipes.Internals.Reflection;
     using Hosting;
-    using Internals.Mapping;
 
 
     public class ConfigurationProviderModule :

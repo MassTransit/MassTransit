@@ -44,6 +44,8 @@ namespace MassTransit.Host
                 .SingleInstance();
 
             _container = builder.Build();
+
+            
         }
 
         public void Dispose()

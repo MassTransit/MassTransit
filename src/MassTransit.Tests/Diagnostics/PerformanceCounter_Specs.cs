@@ -14,13 +14,12 @@ namespace MassTransit.Tests.Diagnostics
 {
     using System.Threading;
     using System.Threading.Tasks;
-    using Monitoring.Performance.Windows;
     using NUnit.Framework;
     using TestFramework;
     using TestFramework.Messages;
 
 
-    [TestFixture]
+    [TestFixture, Explicit]
     public class Registering_a_performance_counter_observer :
         InMemoryTestFixture
     {
@@ -29,7 +28,7 @@ namespace MassTransit.Tests.Diagnostics
         {
             _completed = GetTask<bool>();
 
-            for (int i = 0; i < 1000; i++)
+            for (var i = 0; i < 1000; i++)
             {
                 await InputQueueSendEndpoint.Send(new PingMessage());
             }

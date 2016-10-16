@@ -10,12 +10,15 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit
+namespace MassTransit.TestFramework
 {
     using System;
     using System.Collections.Generic;
+    using System.IO;
     using System.Linq;
+    using System.Text;
     using GreenPipes;
+    using GreenPipes.Introspection;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
 
@@ -33,13 +36,36 @@ namespace MassTransit
                 JsonConvert.DeserializeObject<ReceiveTransportProbeResult>(result["transport"].ToString()))
                 .Where(x => x.Address != null);
 
-            return probeResults.Select(result => result.Address);
+            return probeResults.Select(result => new Uri(result.Address));
+        }
+
+        public static string ToJsonString(this ProbeResult result)
+        {
+            var encoding = new UTF8Encoding(false, true);
+
+            using (var stream = new MemoryStream())
+            {
+                using (var writer = new StreamWriter(stream, encoding, 1024, true))
+                {
+                    using (var jsonWriter = new JsonTextWriter(writer))
+                    {
+                        jsonWriter.Formatting = Formatting.Indented;
+
+                        SerializerCache.Serializer.Serialize(jsonWriter, result, typeof(ProbeResult));
+
+                        jsonWriter.Flush();
+                        writer.Flush();
+
+                        return encoding.GetString(stream.ToArray());
+                    }
+                }
+            }
         }
 
 
         class ReceiveTransportProbeResult
         {
-            public Uri Address { get; set; }
+            public string Address { get; set; }
         }
     }
 }

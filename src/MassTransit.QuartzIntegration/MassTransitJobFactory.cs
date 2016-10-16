@@ -18,8 +18,8 @@ namespace MassTransit.QuartzIntegration
     using System.Globalization;
     using System.Linq.Expressions;
     using System.Reflection;
+    using GreenPipes.Internals.Reflection;
     using Internals.Extensions;
-    using Internals.Reflection;
     using Newtonsoft.Json;
     using Quartz;
     using Quartz.Spi;

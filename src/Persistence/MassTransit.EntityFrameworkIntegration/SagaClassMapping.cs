@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,9 +14,9 @@ namespace MassTransit.EntityFrameworkIntegration
 {
     using System.ComponentModel.DataAnnotations.Schema;
     using System.Data.Entity.ModelConfiguration;
-    using Internals.Reflection;
+    using GreenPipes.Internals.Extensions;
+    using GreenPipes.Internals.Reflection;
     using MassTransit.Saga;
-    using Util;
 
 
     public abstract class SagaClassMapping<T> :
@@ -26,7 +26,7 @@ namespace MassTransit.EntityFrameworkIntegration
         protected SagaClassMapping()
         {
             ReadWriteProperty<T> property;
-            if (!TypeMetadataCache<T>.ReadWritePropertyCache.TryGetProperty("CorrelationId", out property))
+            if (!TypeCache<T>.ReadWritePropertyCache.TryGetProperty("CorrelationId", out property))
                 throw new ConfigurationException("The CorrelationId property must be read/write for use with Entity Framework. Add a setter to the property.");
 
             HasKey(t => t.CorrelationId);

@@ -16,6 +16,7 @@ namespace MassTransit.Serialization
     using System.Collections.Generic;
     using System.Linq;
     using Context;
+    using GreenPipes.Internals.Extensions;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
     using Util;
@@ -105,7 +106,7 @@ namespace MassTransit.Serialization
                     object obj;
                     Type deserializeType = typeof(T);
                     if (deserializeType.IsInterface && TypeMetadataCache.IsValidMessageType(deserializeType))
-                        deserializeType = TypeMetadataCache.GetImplementationType(deserializeType);
+                        deserializeType = TypeCache.GetImplementationType(deserializeType);
 
                     using (JsonReader jsonReader = _messageToken.CreateReader())
                     {

@@ -12,8 +12,8 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Host.Configuration
 {
+    using GreenPipes.Internals.Mapping;
     using Hosting;
-    using Internals.Mapping;
 
 
     public class ConfigurationObjectValueProvider :

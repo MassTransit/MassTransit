@@ -13,7 +13,7 @@
 namespace MassTransit.Transformation.PropertyTransforms
 {
     using System.Reflection;
-    using Internals.Reflection;
+    using GreenPipes.Internals.Reflection;
 
 
     /// <summary>
