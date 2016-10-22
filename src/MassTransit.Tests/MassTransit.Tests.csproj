@@ -177,6 +177,7 @@
     <Compile Include="Pipeline\TwoMessageConsumer.cs" />
     <Compile Include="PublishHeader_Specs.cs" />
     <Compile Include="PublishObserver_Specs.cs" />
+    <Compile Include="ReceiveEndpoint_Specs.cs" />
     <Compile Include="ReceiveObserver_Specs.cs" />
     <Compile Include="RequestClient_Specs.cs" />
     <Compile Include="Retry_Specs.cs" />

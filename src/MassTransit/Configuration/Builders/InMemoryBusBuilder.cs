@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -43,6 +43,8 @@ namespace MassTransit.Builders
 
             ReceiveTransportProvider = receiveTransportProvider;
             _sendTransportProvider = sendTransportProvider;
+
+            ReceiveEndpointFactory = new InMemoryReceiveEndpointFactory(this);
         }
 
         public IReceiveTransportProvider ReceiveTransportProvider { get; }
@@ -58,7 +60,6 @@ namespace MassTransit.Builders
 
         public override IPublishEndpointProvider CreatePublishEndpointProvider(Uri sourceAddress, params IPublishPipeSpecification[] specifications)
         {
-
             var sendEndpointProvider = new InMemorySendEndpointProvider(_inputAddress, _sendTransportProvider, MessageSerializer, SendPipe.Empty);
 
             var sendEndpointCache = new SendEndpointCache(sendEndpointProvider);
@@ -85,7 +86,7 @@ namespace MassTransit.Builders
 
         IConsumePipe CreateBusReceiveEndpoint()
         {
-            IConsumePipe busConsumePipe = CreateConsumePipe();
+            var busConsumePipe = CreateConsumePipe();
 
             var busEndpointConfigurator = new InMemoryReceiveEndpointConfigurator(_busQueueName, busConsumePipe);
             busEndpointConfigurator.Apply(this);

@@ -17,6 +17,8 @@ namespace MassTransit.Builders
     using System.Linq;
     using System.Net.Mime;
     using BusConfigurators;
+    using Configurators;
+    using EndpointConfigurators;
     using GreenPipes;
     using Pipeline;
     using Serialization;
@@ -39,6 +41,8 @@ namespace MassTransit.Builders
         readonly Lazy<ISendTransportProvider> _sendTransportProvider;
         readonly Lazy<IMessageSerializer> _serializer;
         Func<IMessageSerializer> _serializerFactory;
+
+        public IReceiveEndpointFactory ReceiveEndpointFactory { get; protected set; }
 
         protected BusBuilder(IConsumePipeFactory consumePipeFactory, ISendPipeFactory sendPipeFactory,
             IPublishPipeFactory publishPipeFactory, IEnumerable<IBusHostControl> hosts)
@@ -158,7 +162,7 @@ namespace MassTransit.Builders
                 var sendEndpointProvider = CreateSendEndpointProvider(InputAddress);
                 var publishEndpointProvider = CreatePublishEndpointProvider(InputAddress);
 
-                var bus = new MassTransitBus(InputAddress, ConsumePipe, sendEndpointProvider, publishEndpointProvider, ReceiveEndpoints, _hosts, BusObservable);
+                var bus = new MassTransitBus(InputAddress, ConsumePipe, sendEndpointProvider, publishEndpointProvider, ReceiveEndpoints, _hosts, BusObservable, ReceiveEndpointFactory);
 
                 TaskUtil.Await(() => _busObservable.PostCreate(bus));
 

@@ -10,31 +10,20 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit
+namespace MassTransit.Pipeline
 {
     using System;
-    using GreenPipes;
-    using Pipeline;
+    using System.Threading.Tasks;
 
 
-    /// <summary>
-    /// A bus is a logical element that includes a local endpoint and zero or more receive endpoints
-    /// </summary>
-    public interface IBus :
-        IPublishEndpoint,
-        ISendEndpointProvider,
-        IConsumePipeConnector,
-        IRequestPipeConnector,
-        IReceiveEndpointConnector,
-        IConsumeMessageObserverConnector,
-        IConsumeObserverConnector,
-        IReceiveObserverConnector,
-        IReceiveEndpointObserverConnector,
-        IProbeSite
+    public interface IReceiveEndpointConnector
     {
         /// <summary>
-        /// The receive address of the bus itself, versus any receive endpoints that were created
+        /// Connect a receive endpoint, using the specified queue name
         /// </summary>
-        Uri Address { get; }
+        /// <param name="queueName">The queue name for the receive endpoint</param>
+        /// <param name="configure">The callback to configure the receive endpoint</param>
+        /// <returns></returns>
+        Task<BusHandle> ConnectReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configure);
     }
 }

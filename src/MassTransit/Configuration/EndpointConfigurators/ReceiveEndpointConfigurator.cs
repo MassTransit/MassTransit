@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -18,17 +18,21 @@ namespace MassTransit.EndpointConfigurators
     using System.Threading.Tasks;
     using Builders;
     using BusConfigurators;
-    using Configurators;
     using GreenPipes;
     using GreenPipes.Builders;
     using GreenPipes.Configurators;
     using GreenPipes.Validation;
-    using PipeConfigurators;
     using Pipeline;
     using Pipeline.Filters;
     using Pipeline.Pipes;
     using Transports;
 
+
+    public interface IReceiveEndpointFactory
+    {
+        IReceiveEndpoint CreateReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configure);
+
+    }
 
     public abstract class ReceiveEndpointConfigurator :
         IConsumePipeConfigurator,
@@ -95,7 +99,9 @@ namespace MassTransit.EndpointConfigurators
             return _specifications.SelectMany(x => x.Validate())
                 .Concat(_consumePipeConfigurator.Validate())
                 .Concat(_sendPipeConfigurator.Validate())
-                .Concat(_lateConfigurationKeys.Select(x => new ConfigurationValidationResult(ValidationResultDisposition.Failure, x, "was configured after being used")));
+                .Concat(
+                    _lateConfigurationKeys.Select(
+                        x => new ConfigurationValidationResult(ValidationResultDisposition.Failure, x, "was configured after being used")));
         }
 
         public void AddEndpointSpecification(IReceiveEndpointSpecification configurator)
@@ -105,11 +111,11 @@ namespace MassTransit.EndpointConfigurators
 
         protected IReceivePipe CreateReceivePipe(IBusBuilder builder, Func<IConsumePipe, IReceiveEndpointBuilder> endpointBuilderFactory)
         {
-            IConsumePipe consumePipe = _consumePipe ?? builder.CreateConsumePipe(_consumePipeConfigurator);
+            var consumePipe = _consumePipe ?? builder.CreateConsumePipe(_consumePipeConfigurator);
 
-            IReceiveEndpointBuilder endpointBuilder = endpointBuilderFactory(consumePipe);
+            var endpointBuilder = endpointBuilderFactory(consumePipe);
 
-            foreach (IReceiveEndpointSpecification specification in _specifications)
+            foreach (var specification in _specifications)
                 specification.Configure(endpointBuilder);
 
             ConfigureAddDeadLetterFilter(builder.SendTransportProvider);
@@ -118,13 +124,13 @@ namespace MassTransit.EndpointConfigurators
 
             ConfigureRescueFilter(publishEndpointProvider, builder.SendTransportProvider);
 
-            ISendEndpointProvider sendEndpointProvider = builder.CreateSendEndpointProvider(InputAddress, _sendPipeConfigurator);
+            var sendEndpointProvider = builder.CreateSendEndpointProvider(InputAddress, _sendPipeConfigurator);
 
-            IMessageDeserializer messageDeserializer = builder.GetMessageDeserializer(sendEndpointProvider, publishEndpointProvider);
+            var messageDeserializer = builder.GetMessageDeserializer(sendEndpointProvider, publishEndpointProvider);
 
             _receiveConfigurator.UseFilter(new DeserializeFilter(messageDeserializer, consumePipe));
 
-            var receivePipe = _receiveConfigurator.Build();
+            IPipe<ReceiveContext> receivePipe = _receiveConfigurator.Build();
 
             return new ReceivePipe(receivePipe, consumePipe);
         }

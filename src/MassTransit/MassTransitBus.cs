@@ -18,6 +18,7 @@ namespace MassTransit
     using System.Threading;
     using System.Threading.Tasks;
     using Context;
+    using EndpointConfigurators;
     using GreenPipes;
     using Internals.Extensions;
     using Logging;
@@ -39,18 +40,20 @@ namespace MassTransit
         readonly IReceiveEndpoint[] _receiveEndpoints;
         readonly ReceiveObservable _receiveObservers;
         readonly ISendEndpointProvider _sendEndpointProvider;
+        readonly IReceiveEndpointFactory _receiveEndpointFactory;
 
         BusHandle _busHandle;
 
         public MassTransitBus(Uri address, IConsumePipe consumePipe, ISendEndpointProvider sendEndpointProvider,
             IPublishEndpointProvider publishEndpointProvider, IEnumerable<IReceiveEndpoint> receiveEndpoints, IEnumerable<IBusHostControl> hosts,
-            IBusObserver busObservable)
+            IBusObserver busObservable, IReceiveEndpointFactory receiveEndpointFactory)
         {
             Address = address;
             _consumePipe = consumePipe;
             _sendEndpointProvider = sendEndpointProvider;
             _publishEndpointProvider = publishEndpointProvider;
             _busObservable = busObservable;
+            _receiveEndpointFactory = receiveEndpointFactory;
             _receiveEndpoints = receiveEndpoints.ToArray();
             _hosts = hosts.ToArray();
 
@@ -243,6 +246,38 @@ namespace MassTransit
             return _busHandle.StopAsync(cancellationToken);
         }
 
+        public async Task<BusHandle> ConnectReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configure)
+        {
+//            await _busObservable.PreStart(this).ConfigureAwait(false);
+
+            var receiveEndpoint = _receiveEndpointFactory.CreateReceiveEndpoint(queueName, configure);
+
+            var endpointReady = new BusReady(new[] {receiveEndpoint});
+            try
+            {
+                if (_log.IsDebugEnabled)
+                    _log.DebugFormat("Starting receive endpoint...");
+
+                var observerHandle = receiveEndpoint.ConnectReceiveObserver(_receiveObservers);
+
+                var handle = receiveEndpoint.Start();
+
+                var busHandle = new Handle(new HostHandle[0], new[] {handle}, new[] {observerHandle}, this, _busObservable, endpointReady);
+
+                await busHandle.Ready.ConfigureAwait(false);
+
+//                await _busObservable.PostStart(this, busReady.Ready).ConfigureAwait(false);
+
+                return busHandle;
+            }
+            catch (Exception ex)
+            {
+//                await _busObservable.StartFaulted(this, ex).ConfigureAwait(false);
+
+                throw;
+            }
+        }
+
         public ConnectHandle ConnectReceiveObserver(IReceiveObserver observer)
         {
             return _receiveObservers.Connect(observer);
@@ -303,7 +338,7 @@ namespace MassTransit
 
             async Task<ReceiveEndpointReady[]> ReadyOrNot(IEnumerable<Task<ReceiveEndpointReady>> observers)
             {
-                var tasks = observers as Task<ReceiveEndpointReady>[] ?? observers.ToArray();
+                Task<ReceiveEndpointReady>[] tasks = observers as Task<ReceiveEndpointReady>[] ?? observers.ToArray();
 
                 foreach (Task<ReceiveEndpointReady> observer in tasks)
                 {

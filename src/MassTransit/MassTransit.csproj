@@ -99,6 +99,8 @@
     </Compile>
     <Compile Include="Configuration\Builders\ConsumePipeBuilder.cs" />
     <Compile Include="Configuration\Builders\IConsumePipeBuilder.cs" />
+    <Compile Include="Configuration\Builders\InMemoryEndpointBuilder.cs" />
+    <Compile Include="Configuration\Builders\InMemoryReceiveEndpointFactory.cs" />
     <Compile Include="Configuration\Builders\IPublishPipeBuilder.cs" />
     <Compile Include="Configuration\Builders\ISendPipeBuilder.cs" />
     <Compile Include="Configuration\Builders\PublishPipeBuilder.cs" />
@@ -551,6 +553,7 @@
     <Compile Include="Pipeline\IPublishMessageObserverConnector.cs" />
     <Compile Include="Pipeline\IPublishObserverConnector.cs" />
     <Compile Include="Pipeline\IPublishPipe.cs" />
+    <Compile Include="Pipeline\IReceiveEndpointConnector.cs" />
     <Compile Include="Pipeline\IReceivePipe.cs" />
     <Compile Include="Pipeline\IRequestPipeConnector.cs" />
     <Compile Include="Pipeline\ISendInterceptor.cs" />
