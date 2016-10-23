@@ -29,7 +29,7 @@ namespace MassTransit.Builders
         readonly Uri _inputAddress;
         readonly ISendTransportProvider _sendTransportProvider;
 
-        public InMemoryBusBuilder(IReceiveTransportProvider receiveTransportProvider, ISendTransportProvider sendTransportProvider, IBusHostControl[] hosts,
+        public InMemoryBusBuilder(IReceiveTransportProvider receiveTransportProvider, ISendTransportProvider sendTransportProvider, BusHostCollection<IBusHostControl> hosts,
             IConsumePipeFactory consumePipeFactory, ISendPipeFactory sendPipeFactory, IPublishPipeFactory publishPipeFactory)
             : base(consumePipeFactory, sendPipeFactory, publishPipeFactory, hosts)
         {

@@ -23,9 +23,9 @@ namespace MassTransit.AzureServiceBusTransport.Transport
     public class ServiceBusSendTransportProvider :
         ISendTransportProvider
     {
-        readonly IServiceBusHost[] _hosts;
+        readonly BusHostCollection<ServiceBusHost> _hosts;
 
-        public ServiceBusSendTransportProvider(IServiceBusHost[] hosts)
+        public ServiceBusSendTransportProvider(BusHostCollection<ServiceBusHost> hosts)
         {
             _hosts = hosts;
         }
@@ -38,10 +38,10 @@ namespace MassTransit.AzureServiceBusTransport.Transport
 
             return host.RetryPolicy.Retry<ISendTransport>(async () =>
             {
-                var queueDescription = address.GetQueueDescription();
+                QueueDescription queueDescription = address.GetQueueDescription();
 
                 string queuePath;
-                var namespacePath = host.NamespaceManager.Address.AbsolutePath.Trim('/');
+                string namespacePath = host.NamespaceManager.Address.AbsolutePath.Trim('/');
 
                 if (string.IsNullOrEmpty(namespacePath))
                 {
@@ -64,9 +64,9 @@ namespace MassTransit.AzureServiceBusTransport.Transport
                     queuePath = queueDescription.Path;
                 }
 
-                var messagingFactory = await host.MessagingFactory.ConfigureAwait(false);
+                MessagingFactory messagingFactory = await host.MessagingFactory.ConfigureAwait(false);
 
-                var queueClient = messagingFactory.CreateQueueClient(queuePath);
+                QueueClient queueClient = messagingFactory.CreateQueueClient(queuePath);
 
                 var client = new QueueSendClient(queueClient);
 
@@ -76,12 +76,11 @@ namespace MassTransit.AzureServiceBusTransport.Transport
 
         bool TryGetMatchingHost(Uri address, out IServiceBusHost host)
         {
-            host = _hosts
-                .Where(
-                    x =>
-                        x.Settings.ServiceUri.GetLeftPart(UriPartial.Authority).Equals(address.GetLeftPart(UriPartial.Authority),
-                            StringComparison.OrdinalIgnoreCase))
-                .OrderByDescending(x => address.AbsolutePath.StartsWith(x.Settings.ServiceUri.AbsolutePath, StringComparison.OrdinalIgnoreCase) ? 1 : 0)
+            host = _hosts.GetHosts(address)
+                .Cast<IServiceBusHost>()
+                .OrderByDescending(x => address.AbsolutePath.StartsWith(x.Settings.ServiceUri.AbsolutePath, StringComparison.OrdinalIgnoreCase)
+                    ? 1
+                    : 0)
                 .FirstOrDefault();
 
             return host != null;

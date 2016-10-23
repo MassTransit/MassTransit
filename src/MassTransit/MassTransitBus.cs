@@ -34,7 +34,7 @@ namespace MassTransit
         static readonly ILog _log = Logger.Get<MassTransitBus>();
         readonly IBusObserver _busObservable;
         readonly IConsumePipe _consumePipe;
-        readonly IBusHostControl[] _hosts;
+        readonly IBusHostCollection _hosts;
         readonly Lazy<IPublishEndpoint> _publishEndpoint;
         readonly IPublishEndpointProvider _publishEndpointProvider;
         readonly IReceiveEndpoint[] _receiveEndpoints;
@@ -45,7 +45,7 @@ namespace MassTransit
         BusHandle _busHandle;
 
         public MassTransitBus(Uri address, IConsumePipe consumePipe, ISendEndpointProvider sendEndpointProvider,
-            IPublishEndpointProvider publishEndpointProvider, IEnumerable<IReceiveEndpoint> receiveEndpoints, IEnumerable<IBusHostControl> hosts,
+            IPublishEndpointProvider publishEndpointProvider, IEnumerable<IReceiveEndpoint> receiveEndpoints, IBusHostCollection hosts,
             IBusObserver busObservable, IReceiveEndpointFactory receiveEndpointFactory)
         {
             Address = address;
@@ -55,7 +55,7 @@ namespace MassTransit
             _busObservable = busObservable;
             _receiveEndpointFactory = receiveEndpointFactory;
             _receiveEndpoints = receiveEndpoints.ToArray();
-            _hosts = hosts.ToArray();
+            _hosts = hosts;
 
             _receiveObservers = new ReceiveObservable();
             _publishEndpoint = new Lazy<IPublishEndpoint>(() => publishEndpointProvider.CreatePublishEndpoint(address));
@@ -248,6 +248,9 @@ namespace MassTransit
 
         public async Task<BusHandle> ConnectReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configure)
         {
+            if (_receiveEndpointFactory == null)
+                throw new NotSupportedException("Connecting receive endoints is not supported by this transport");
+
 //            await _busObservable.PreStart(this).ConfigureAwait(false);
 
             var receiveEndpoint = _receiveEndpointFactory.CreateReceiveEndpoint(queueName, configure);
@@ -458,7 +461,7 @@ namespace MassTransit
 
             void IDisposable.Dispose()
             {
-                Stop(CancellationToken.None);
+                Task.Run(async () => await StopAsync(CancellationToken.None)).Wait();
             }
         }
     }

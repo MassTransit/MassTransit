@@ -21,6 +21,7 @@ namespace MassTransit.RabbitMqTransport.Configurators
     using MassTransit.Builders;
     using Topology;
     using Transport;
+    using Transports;
 
 
     public class RabbitMqBusFactoryConfigurator :
@@ -28,14 +29,14 @@ namespace MassTransit.RabbitMqTransport.Configurators
         IRabbitMqBusFactoryConfigurator,
         IBusFactory
     {
-        readonly IList<RabbitMqHost> _hosts;
+        readonly BusHostCollection<RabbitMqHost> _hosts;
         readonly RabbitMqModelSettings _modelSettings;
         readonly RabbitMqReceiveSettings _settings;
         readonly IList<IBusFactorySpecification> _transportBuilderConfigurators;
 
         public RabbitMqBusFactoryConfigurator()
         {
-            _hosts = new List<RabbitMqHost>();
+            _hosts = new BusHostCollection<RabbitMqHost>();
             _transportBuilderConfigurators = new List<IBusFactorySpecification>();
             _modelSettings = new RabbitMqModelSettings();
 
@@ -53,7 +54,7 @@ namespace MassTransit.RabbitMqTransport.Configurators
 
         public IBusControl CreateBus()
         {
-            var builder = new RabbitMqBusBuilder(_hosts.ToArray(), ConsumePipeFactory, SendPipeFactory, PublishPipeFactory, _settings, _modelSettings);
+            var builder = new RabbitMqBusBuilder(_hosts, ConsumePipeFactory, SendPipeFactory, PublishPipeFactory, _settings, _modelSettings);
 
             foreach (var configurator in _transportBuilderConfigurators)
                 configurator.Apply(builder);

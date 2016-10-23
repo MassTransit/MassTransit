@@ -98,6 +98,7 @@
       <Link>Properties\SolutionVersion.cs</Link>
     </Compile>
     <Compile Include="Configuration\Builders\ConsumePipeBuilder.cs" />
+    <Compile Include="Configuration\Builders\EndpointBuilder.cs" />
     <Compile Include="Configuration\Builders\IConsumePipeBuilder.cs" />
     <Compile Include="Configuration\Builders\InMemoryEndpointBuilder.cs" />
     <Compile Include="Configuration\Builders\InMemoryReceiveEndpointFactory.cs" />
@@ -861,6 +862,7 @@
     <Compile Include="Transformation\Contexts\SendTransformContext.cs" />
     <Compile Include="Transformation\TransformConfigurators\SendTransformSpecification.cs" />
     <Compile Include="Transformation\TransformConfigurators\TransformSpecification.cs" />
+    <Compile Include="Transports\BusHostCollection.cs" />
     <Compile Include="Transports\DeliveryMetrics.cs" />
     <Compile Include="Transports\DeliveryTracker.cs" />
     <Compile Include="Transports\IDelivery.cs" />

@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -45,11 +45,6 @@ namespace MassTransit.Transports.InMemory
             get { return _transports.Keys.Select(x => new Uri(_baseUri, x)); }
         }
 
-        public IInMemoryTransport GetTransport(string queueName)
-        {
-            return _transports.GetOrAdd(queueName, name => new InMemoryTransport(new Uri(_baseUri, name), _concurrencyLimit));
-        }
-
         void IProbeSite.Probe(ProbeContext context)
         {
             ProbeContext scope = context.CreateScope("host");
@@ -58,9 +53,9 @@ namespace MassTransit.Transports.InMemory
                 Type = "In Memory"
             });
 
-            foreach (var transport in _transports)
+            foreach (KeyValuePair<string, InMemoryTransport> transport in _transports)
             {
-                var transportScope = scope.CreateScope("queue");
+                ProbeContext transportScope = scope.CreateScope("queue");
                 transportScope.Set(new
                 {
                     Name = transport.Key
@@ -73,6 +68,20 @@ namespace MassTransit.Transports.InMemory
             return new Handle(this);
         }
 
+        public bool Matches(Uri address)
+        {
+            return address.Scheme.Equals(_baseUri.Scheme, StringComparison.OrdinalIgnoreCase)
+                && address.Host.Equals(_baseUri.Host, StringComparison.OrdinalIgnoreCase);
+        }
+
+        public IReceiveTransport GetReceiveTransport(string queueName, int concurrencyLimit)
+        {
+            if (concurrencyLimit <= 0)
+                concurrencyLimit = _concurrencyLimit;
+
+            return _transports.GetOrAdd(queueName, name => new InMemoryTransport(new Uri(_baseUri, name), concurrencyLimit));
+        }
+
         public async Task<ISendTransport> GetSendTransport(Uri address)
         {
             string queueName = address.AbsolutePath;
@@ -82,12 +91,9 @@ namespace MassTransit.Transports.InMemory
             return _transports.GetOrAdd(queueName, name => new InMemoryTransport(new Uri(_baseUri, name), _concurrencyLimit));
         }
 
-        public IReceiveTransport GetReceiveTransport(string queueName, int concurrencyLimit)
+        public IInMemoryTransport GetTransport(string queueName)
         {
-            if (concurrencyLimit <= 0)
-                concurrencyLimit = _concurrencyLimit;
-
-            return _transports.GetOrAdd(queueName, name => new InMemoryTransport(new Uri(_baseUri, name), concurrencyLimit));
+            return _transports.GetOrAdd(queueName, name => new InMemoryTransport(new Uri(_baseUri, name), _concurrencyLimit));
         }
 
 

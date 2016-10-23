@@ -73,6 +73,13 @@ namespace MassTransit.RabbitMqTransport.Transport
             return new Handle(connectionTask, _supervisor);
         }
 
+        public bool Matches(Uri address)
+        {
+            var settings = address.GetHostSettings();
+
+            return RabbitMqHostEqualityComparer.Default.Equals(_hostSettings, settings);
+        }
+
         void IProbeSite.Probe(ProbeContext context)
         {
             var scope = context.CreateScope("host");

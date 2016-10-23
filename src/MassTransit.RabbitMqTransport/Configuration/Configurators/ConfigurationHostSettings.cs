@@ -59,7 +59,7 @@ namespace MassTransit.RabbitMqTransport.Configurators
                 {
                     Scheme = "rabbitmq",
                     Host = Host,
-                    Port = Port,
+                    Port = Port == 5672 ? 0 : Port,
                     Path = string.IsNullOrWhiteSpace(VirtualHost) || VirtualHost == "/"
                         ? "/"
                         : $"/{VirtualHost.Trim('/')}"

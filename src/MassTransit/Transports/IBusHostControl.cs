@@ -12,6 +12,9 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports
 {
+    using System;
+
+
     public interface IBusHostControl :
         IBusHost
     {
@@ -20,5 +23,12 @@ namespace MassTransit.Transports
         /// </summary>
         /// <returns></returns>
         HostHandle Start();
+
+        /// <summary>
+        /// Returns true if the address matches the host
+        /// </summary>
+        /// <param name="address"></param>
+        /// <returns></returns>
+        bool Matches(Uri address);
     }
 }

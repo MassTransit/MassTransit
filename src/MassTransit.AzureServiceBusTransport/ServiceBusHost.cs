@@ -58,13 +58,19 @@ namespace MassTransit.AzureServiceBusTransport
             return new Handle(_messagingFactory.Value, _sessionMessagingFactory, _settings, _supervisor);
         }
 
+        public bool Matches(Uri address)
+        {
+            return _settings.ServiceUri.GetLeftPart(UriPartial.Authority).Equals(address.GetLeftPart(UriPartial.Authority),
+                StringComparison.OrdinalIgnoreCase);
+        }
+
         public IRetryPolicy RetryPolicy { get; }
 
         Task<MessagingFactory> IServiceBusHost.SessionMessagingFactory => _sessionMessagingFactory.Value;
 
         void IProbeSite.Probe(ProbeContext context)
         {
-            var scope = context.CreateScope("host");
+            ProbeContext scope = context.CreateScope("host");
             scope.Set(new
             {
                 Type = "Azure Service Bus",
@@ -330,7 +336,7 @@ namespace MassTransit.AzureServiceBusTransport
         {
             var builder = new UriBuilder(_settings.ServiceUri) {Path = ""};
 
-            var messagingFactory = await MessagingFactory.CreateAsync(builder.Uri, mfs).ConfigureAwait(false);
+            MessagingFactory messagingFactory = await MessagingFactory.CreateAsync(builder.Uri, mfs).ConfigureAwait(false);
 
             messagingFactory.RetryPolicy = new RetryExponential(_settings.RetryMinBackoff, _settings.RetryMaxBackoff, _settings.RetryLimit);
 
@@ -405,7 +411,7 @@ namespace MassTransit.AzureServiceBusTransport
                 {
                     await _supervisor.Stop("Host stopped", cancellationToken).ConfigureAwait(false);
 
-                    var factory = await _messagingFactoryTask.ConfigureAwait(false);
+                    MessagingFactory factory = await _messagingFactoryTask.ConfigureAwait(false);
 
                     if (!factory.IsClosed)
                         await factory.CloseAsync().ConfigureAwait(false);
@@ -420,7 +426,7 @@ namespace MassTransit.AzureServiceBusTransport
                 {
                     try
                     {
-                        var factory = await _sessionFactory.Value.ConfigureAwait(false);
+                        MessagingFactory factory = await _sessionFactory.Value.ConfigureAwait(false);
 
                         if (!factory.IsClosed)
                             await factory.CloseAsync().ConfigureAwait(false);

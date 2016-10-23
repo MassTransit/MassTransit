@@ -73,7 +73,9 @@
     </Compile>
     <Compile Include="Configuration\Builders\IRabbitMqReceiveEndpointBuilder.cs" />
     <Compile Include="Configuration\Builders\RabbitMqBusBuilder.cs" />
+    <Compile Include="Configuration\Builders\RabbitMqEndpointBuilder.cs" />
     <Compile Include="Configuration\Builders\RabbitMqReceiveEndpointBuilder.cs" />
+    <Compile Include="Configuration\Builders\RabbitMqReceiveEndpointFactory.cs" />
     <Compile Include="Configuration\Configurators\ConfigurationHostSettings.cs" />
     <Compile Include="Configuration\Configurators\RabbitMqClusterConfigurator.cs" />
     <Compile Include="Configuration\Configurators\RabbitMqHostConfigurator.cs" />

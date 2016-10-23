@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -17,7 +17,6 @@ namespace MassTransit.Builders
     using System.Linq;
     using System.Net.Mime;
     using BusConfigurators;
-    using Configurators;
     using EndpointConfigurators;
     using GreenPipes;
     using Pipeline;
@@ -32,25 +31,23 @@ namespace MassTransit.Builders
         readonly BusObservable _busObservable;
         readonly Lazy<IConsumePipe> _consumePipe;
         readonly IConsumePipeFactory _consumePipeFactory;
-        readonly ISendPipeFactory _sendPipeFactory;
-        readonly IPublishPipeFactory _publishPipeFactory;
         readonly IDictionary<string, DeserializerFactory> _deserializerFactories;
-        readonly IBusHostControl[] _hosts;
+        readonly IBusHostCollection _hosts;
         readonly Lazy<Uri> _inputAddress;
+        readonly IPublishPipeFactory _publishPipeFactory;
         readonly IDictionary<string, IReceiveEndpoint> _receiveEndpoints;
+        readonly ISendPipeFactory _sendPipeFactory;
         readonly Lazy<ISendTransportProvider> _sendTransportProvider;
         readonly Lazy<IMessageSerializer> _serializer;
         Func<IMessageSerializer> _serializerFactory;
 
-        public IReceiveEndpointFactory ReceiveEndpointFactory { get; protected set; }
-
         protected BusBuilder(IConsumePipeFactory consumePipeFactory, ISendPipeFactory sendPipeFactory,
-            IPublishPipeFactory publishPipeFactory, IEnumerable<IBusHostControl> hosts)
+            IPublishPipeFactory publishPipeFactory, IBusHostCollection hosts)
         {
             _consumePipeFactory = consumePipeFactory;
             _sendPipeFactory = sendPipeFactory;
             _publishPipeFactory = publishPipeFactory;
-            _hosts = hosts.ToArray();
+            _hosts = hosts;
 
             _deserializerFactories = new Dictionary<string, DeserializerFactory>(StringComparer.OrdinalIgnoreCase);
             _receiveEndpoints = new Dictionary<string, IReceiveEndpoint>();
@@ -70,20 +67,19 @@ namespace MassTransit.Builders
                 (s, p) => new XmlMessageDeserializer(JsonMessageSerializer.Deserializer, s, p));
         }
 
+        public IReceiveEndpointFactory ReceiveEndpointFactory { get; protected set; }
+
         protected BusObservable BusObservable => _busObservable;
 
         protected IEnumerable<IReceiveEndpoint> ReceiveEndpoints => _receiveEndpoints.Values;
 
         public IMessageSerializer MessageSerializer => _serializer.Value;
 
-        public ISendTransportProvider SendTransportProvider => _sendTransportProvider.Value;
-
         protected Uri InputAddress => _inputAddress.Value;
 
         protected IConsumePipe ConsumePipe => _consumePipe.Value;
 
-        protected abstract Uri GetInputAddress();
-        protected abstract IConsumePipe GetConsumePipe();
+        public ISendTransportProvider SendTransportProvider => _sendTransportProvider.Value;
 
         public void AddMessageDeserializer(ContentType contentType, DeserializerFactory deserializerFactory)
         {
@@ -114,19 +110,9 @@ namespace MassTransit.Builders
             return _sendPipeFactory.CreateSendPipe(specifications);
         }
 
-        public IPublishPipe CreatePublishPipe(params IPublishPipeSpecification[] specifications)
-        {
-            return _publishPipeFactory.CreatePublishPipe(specifications);
-        }
-
         public IConsumePipe CreateConsumePipe(params IConsumePipeSpecification[] specifications)
         {
             return _consumePipeFactory.CreateConsumePipe(specifications);
-        }
-
-        IMessageSerializer CreateSerializer()
-        {
-            return _serializerFactory();
         }
 
         public IMessageDeserializer GetMessageDeserializer(ISendEndpointProvider sendEndpointProvider, IPublishEndpointProvider publishEndpointProvider)
@@ -153,16 +139,34 @@ namespace MassTransit.Builders
             return _busObservable.Connect(observer);
         }
 
+        public abstract ISendEndpointProvider CreateSendEndpointProvider(Uri sourceAddress, params ISendPipeSpecification[] specifications);
+
+        public abstract IPublishEndpointProvider CreatePublishEndpointProvider(Uri sourceAddress, params IPublishPipeSpecification[] specifications);
+
+        protected abstract Uri GetInputAddress();
+        protected abstract IConsumePipe GetConsumePipe();
+
+        public IPublishPipe CreatePublishPipe(params IPublishPipeSpecification[] specifications)
+        {
+            return _publishPipeFactory.CreatePublishPipe(specifications);
+        }
+
+        IMessageSerializer CreateSerializer()
+        {
+            return _serializerFactory();
+        }
+
         public IBusControl Build()
         {
             try
             {
                 PreBuild();
 
-                var sendEndpointProvider = CreateSendEndpointProvider(InputAddress);
-                var publishEndpointProvider = CreatePublishEndpointProvider(InputAddress);
+                ISendEndpointProvider sendEndpointProvider = CreateSendEndpointProvider(InputAddress);
+                IPublishEndpointProvider publishEndpointProvider = CreatePublishEndpointProvider(InputAddress);
 
-                var bus = new MassTransitBus(InputAddress, ConsumePipe, sendEndpointProvider, publishEndpointProvider, ReceiveEndpoints, _hosts, BusObservable, ReceiveEndpointFactory);
+                var bus = new MassTransitBus(InputAddress, ConsumePipe, sendEndpointProvider, publishEndpointProvider, ReceiveEndpoints, _hosts, BusObservable,
+                    ReceiveEndpointFactory);
 
                 TaskUtil.Await(() => _busObservable.PostCreate(bus));
 
@@ -181,9 +185,5 @@ namespace MassTransit.Builders
         }
 
         protected abstract ISendTransportProvider CreateSendTransportProvider();
-
-        public abstract ISendEndpointProvider CreateSendEndpointProvider(Uri sourceAddress, params ISendPipeSpecification[] specifications);
-
-        public abstract IPublishEndpointProvider CreatePublishEndpointProvider(Uri sourceAddress, params IPublishPipeSpecification[] specifications);
     }
 }

@@ -26,9 +26,9 @@ namespace MassTransit.AzureServiceBusTransport.Builders
         BusBuilder
     {
         readonly ServiceBusReceiveEndpointConfigurator _busEndpointConfigurator;
-        readonly ServiceBusHost[] _hosts;
+        readonly BusHostCollection<ServiceBusHost> _hosts;
 
-        public ServiceBusBusBuilder(ServiceBusHost[] hosts, IConsumePipeFactory consumePipeFactory, ISendPipeFactory sendPipeFactory,
+        public ServiceBusBusBuilder(BusHostCollection<ServiceBusHost> hosts, IConsumePipeFactory consumePipeFactory, ISendPipeFactory sendPipeFactory,
             IPublishPipeFactory publishPipeFactory, ReceiveEndpointSettings settings)
             : base(consumePipeFactory, sendPipeFactory, publishPipeFactory, hosts)
         {

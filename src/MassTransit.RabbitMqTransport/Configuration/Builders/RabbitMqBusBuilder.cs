@@ -27,11 +27,11 @@ namespace MassTransit.RabbitMqTransport.Builders
     {
         readonly TimeSpan _autoDeleteCacheTimeout;
         readonly RabbitMqReceiveEndpointConfigurator _busEndpointConfigurator;
-        readonly RabbitMqHost[] _hosts;
+        readonly BusHostCollection<RabbitMqHost> _hosts;
         readonly ModelSettings _modelSettings;
         readonly TimeSpan _sendEndpointCacheTimeout;
 
-        public RabbitMqBusBuilder(RabbitMqHost[] hosts, IConsumePipeFactory consumePipeFactory, ISendPipeFactory sendPipeFactory,
+        public RabbitMqBusBuilder(BusHostCollection<RabbitMqHost> hosts, IConsumePipeFactory consumePipeFactory, ISendPipeFactory sendPipeFactory,
             IPublishPipeFactory publishPipeFactory, RabbitMqReceiveSettings busSettings, ModelSettings modelSettings)
             : base(consumePipeFactory, sendPipeFactory, publishPipeFactory, hosts)
         {
@@ -42,7 +42,11 @@ namespace MassTransit.RabbitMqTransport.Builders
             _sendEndpointCacheTimeout = TimeSpan.FromDays(1);
 
             _busEndpointConfigurator = new RabbitMqReceiveEndpointConfigurator(_hosts[0], busSettings, ConsumePipe);
+
+            ReceiveEndpointFactory = new RabbitMqReceiveEndpointFactory(this);
         }
+
+        public BusHostCollection<RabbitMqHost> Hosts => _hosts;
 
         protected override void PreBuild()
         {
@@ -66,7 +70,7 @@ namespace MassTransit.RabbitMqTransport.Builders
 
         public override ISendEndpointProvider CreateSendEndpointProvider(Uri sourceAddress, params ISendPipeSpecification[] specifications)
         {
-            var pipe = CreateSendPipe(specifications);
+            ISendPipe pipe = CreateSendPipe(specifications);
 
             var provider = new RabbitMqSendEndpointProvider(MessageSerializer, sourceAddress, SendTransportProvider, pipe);
 
@@ -83,7 +87,7 @@ namespace MassTransit.RabbitMqTransport.Builders
 
         public override IPublishEndpointProvider CreatePublishEndpointProvider(Uri sourceAddress, params IPublishPipeSpecification[] specifications)
         {
-            var pipe = CreatePublishPipe(specifications);
+            IPublishPipe pipe = CreatePublishPipe(specifications);
 
             return new RabbitMqPublishEndpointProvider(_hosts[0], MessageSerializer, InputAddress, pipe, _modelSettings);
         }

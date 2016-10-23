@@ -18,6 +18,7 @@ namespace MassTransit.AzureServiceBusTransport.Transport
     using GreenPipes;
     using MassTransit.Pipeline;
     using MassTransit.Pipeline.Pipes;
+    using Microsoft.ServiceBus.Messaging;
     using Policies;
     using Transports;
 
@@ -25,12 +26,12 @@ namespace MassTransit.AzureServiceBusTransport.Transport
     public class PublishSendEndpointProvider :
         ISendEndpointProvider
     {
-        readonly IServiceBusHost[] _hosts;
+        readonly BusHostCollection<ServiceBusHost> _hosts;
         readonly SendObservable _sendObservable;
         readonly IMessageSerializer _serializer;
         readonly Uri _sourceAddress;
 
-        public PublishSendEndpointProvider(IMessageSerializer serializer, Uri sourceAddress, IServiceBusHost[] hosts)
+        public PublishSendEndpointProvider(IMessageSerializer serializer, Uri sourceAddress, BusHostCollection<ServiceBusHost> hosts)
         {
             _hosts = hosts;
             _sourceAddress = sourceAddress;
@@ -47,11 +48,11 @@ namespace MassTransit.AzureServiceBusTransport.Transport
 
             return host.RetryPolicy.Retry<ISendEndpoint>(async () =>
             {
-                var topicDescription = await host.RootNamespaceManager.CreateTopicSafeAsync(address.GetTopicDescription()).ConfigureAwait(false);
+                TopicDescription topicDescription = await host.RootNamespaceManager.CreateTopicSafeAsync(address.GetTopicDescription()).ConfigureAwait(false);
 
-                var messagingFactory = await host.MessagingFactory.ConfigureAwait(false);
+                MessagingFactory messagingFactory = await host.MessagingFactory.ConfigureAwait(false);
 
-                var topicClient = messagingFactory.CreateTopicClient(topicDescription.Path);
+                TopicClient topicClient = messagingFactory.CreateTopicClient(topicDescription.Path);
 
                 var client = new TopicSendClient(topicClient);
 
@@ -70,12 +71,11 @@ namespace MassTransit.AzureServiceBusTransport.Transport
 
         bool TryGetMatchingHost(Uri address, out IServiceBusHost host)
         {
-            host = _hosts
-                .Where(
-                    x =>
-                        x.Settings.ServiceUri.GetLeftPart(UriPartial.Authority).Equals(address.GetLeftPart(UriPartial.Authority),
-                            StringComparison.OrdinalIgnoreCase))
-                .OrderByDescending(x => address.AbsolutePath.StartsWith(x.Settings.ServiceUri.AbsolutePath, StringComparison.OrdinalIgnoreCase) ? 1 : 0)
+            host = _hosts.GetHosts(address)
+                .Cast<IServiceBusHost>()
+                .OrderByDescending(x => address.AbsolutePath.StartsWith(x.Settings.ServiceUri.AbsolutePath, StringComparison.OrdinalIgnoreCase)
+                    ? 1
+                    : 0)
                 .FirstOrDefault();
 
             return host != null;

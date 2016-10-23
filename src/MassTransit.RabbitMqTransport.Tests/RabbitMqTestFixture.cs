@@ -70,7 +70,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             set
             {
                 if (Bus != null)
-                    throw new InvalidOperationException("The LocalBus has already been created, too late to change the URI");
+                    throw new InvalidOperationException("The Bus has already been created, too late to change the URI");
 
                 _inputQueueAddress = value;
             }
@@ -82,7 +82,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             set
             {
                 if (Bus != null)
-                    throw new InvalidOperationException("The LocalBus has already been created, too late to change the URI");
+                    throw new InvalidOperationException("The Bus has already been created, too late to change the URI");
 
                 _hostAddress = value;
             }

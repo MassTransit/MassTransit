@@ -20,6 +20,7 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
     using GreenPipes;
     using MassTransit.Builders;
     using Settings;
+    using Transports;
 
 
     public class ServiceBusBusFactoryConfigurator :
@@ -27,13 +28,13 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
         IServiceBusBusFactoryConfigurator,
         IBusFactory
     {
-        readonly IList<ServiceBusHost> _hosts;
+        readonly BusHostCollection<ServiceBusHost> _hosts;
         readonly ReceiveEndpointSettings _settings;
         readonly IList<IBusFactorySpecification> _specifications;
 
         public ServiceBusBusFactoryConfigurator()
         {
-            _hosts = new List<ServiceBusHost>();
+            _hosts = new BusHostCollection<ServiceBusHost>();
             _specifications = new List<IBusFactorySpecification>();
 
             var queueName = this.GetTemporaryQueueName("bus");
@@ -55,7 +56,7 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
 
         public IBusControl CreateBus()
         {
-            var builder = new ServiceBusBusBuilder(_hosts.ToArray(), ConsumePipeFactory, SendPipeFactory, PublishPipeFactory, _settings);
+            var builder = new ServiceBusBusBuilder(_hosts, ConsumePipeFactory, SendPipeFactory, PublishPipeFactory, _settings);
 
             foreach (var configurator in _specifications)
                 configurator.Apply(builder);
