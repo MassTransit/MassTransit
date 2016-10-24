@@ -17,12 +17,6 @@ namespace MassTransit.Transports
     using System.Collections.Generic;
 
 
-    public interface IBusHostCollection :
-        IEnumerable<IBusHostControl>
-    {
-    }
-
-
     public class BusHostCollection<THost> :
         IBusHostCollection
         where THost : IBusHostControl

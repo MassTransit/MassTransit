@@ -865,6 +865,7 @@
     <Compile Include="Transports\BusHostCollection.cs" />
     <Compile Include="Transports\DeliveryMetrics.cs" />
     <Compile Include="Transports\DeliveryTracker.cs" />
+    <Compile Include="Transports\IBusHostCollection.cs" />
     <Compile Include="Transports\IDelivery.cs" />
     <Compile Include="Transports\IDeliveryTracker.cs" />
     <Compile Include="Transports\InMemory\IInMemoryTransport.cs" />

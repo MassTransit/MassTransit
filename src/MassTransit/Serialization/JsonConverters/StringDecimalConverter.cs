@@ -51,7 +51,7 @@ namespace MassTransit.Serialization.JsonConverters
             }
 
             throw new JsonReaderException(string.Format(CultureInfo.InvariantCulture,
-                "Error reading decimal. Expected a number but got {0}.", new object[] {reader.TokenType}));
+                "Error reading decimal. Expected a number but got {0}.", reader.TokenType));
         }
 
         public override bool CanConvert(Type objectType)

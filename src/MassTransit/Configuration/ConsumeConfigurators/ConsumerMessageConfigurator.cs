@@ -13,10 +13,8 @@
 namespace MassTransit.ConsumeConfigurators
 {
     using System.Collections.Generic;
-    using Configurators;
     using GreenPipes;
     using Internals.Extensions;
-    using PipeConfigurators;
     using Util;
 
 
@@ -61,7 +59,7 @@ namespace MassTransit.ConsumeConfigurators
                 if (!typeof(TConsumer).HasInterface<IConsumer<TMessage>>())
                     yield return this.Failure("MessageType", $"is not consumed by {TypeMetadataCache<TConsumer>.ShortName}");
 
-                foreach (var validationResult in _specification.Validate())
+                foreach (ValidationResult validationResult in _specification.Validate())
                 {
                     yield return validationResult;
                 }
