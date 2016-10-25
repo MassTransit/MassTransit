@@ -72,6 +72,7 @@
       <Link>Properties\SolutionVersion.cs</Link>
     </Compile>
     <Compile Include="AzureBusFactory.cs" />
+    <Compile Include="Configuration\Builders\ServiceBusEndpointBuilder.cs" />
     <Compile Include="Contexts\BrokeredMessageSessionContext.cs" />
     <Compile Include="ClientSettings.cs" />
     <Compile Include="Settings\BaseClientSettings.cs" />
@@ -106,6 +107,7 @@
     <Compile Include="Pipeline\PrepareSubscriptionEndpointFilter.cs" />
     <Compile Include="Pipeline\ServiceBusMessageSchedulerFilter.cs" />
     <Compile Include="Contexts\QueueClientContext.cs" />
+    <Compile Include="Transport\IServiceBusReceiveEndpointFactory.cs" />
     <Compile Include="Transport\QueueSendClient.cs" />
     <Compile Include="ScheduleMessageExtensions.cs" />
     <Compile Include="SchedulePublishExtensions.cs" />
@@ -115,6 +117,7 @@
     <Compile Include="Transport\ServiceBusPublishEndpointProvider.cs" />
     <Compile Include="ServiceBusSendContext.cs" />
     <Compile Include="ServiceBusSendContextExtensions.cs" />
+    <Compile Include="Transport\ServiceBusReceiveEndpointFactory.cs" />
     <Compile Include="Transport\ServiceBusSendEndpointProvider.cs" />
     <Compile Include="Transport\ServiceBusSendTransport.cs" />
     <Compile Include="BrokeredMessageContext.cs" />

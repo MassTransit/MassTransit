@@ -13,11 +13,38 @@
 namespace MassTransit.Transports
 {
     using System.Collections.Generic;
+    using System.Threading.Tasks;
+    using GreenPipes;
+    using Pipeline;
 
 
     public interface IReceiveEndpointCollection :
-        IEnumerable<IReceiveEndpoint>
+        IReceiveObserverConnector,
+        IReceiveEndpointObserverConnector,
+        IConsumeMessageObserverConnector,
+        IConsumeObserverConnector,
+        IEnumerable<IReceiveEndpoint>,
+        IProbeSite
     {
+        /// <summary>
+        /// Add an endpoint to the collection
+        /// </summary>
+        /// <param name="endpointName"></param>
+        /// <param name="endpoint"></param>
         void Add(string endpointName, IReceiveEndpoint endpoint);
+
+        /// <summary>
+        /// Start all endpoints in the collection which have not been started, and return the handles
+        /// for those endpoints.
+        /// </summary>
+        /// <returns></returns>
+        Task<BusReceiveEndpointHandle[]> StartEndpoints();
+
+        /// <summary>
+        /// Start a new receive endpoint
+        /// </summary>
+        /// <param name="endpointName"></param>
+        /// <returns></returns>
+        Task<BusReceiveEndpointHandle> Start(string endpointName);
     }
 }

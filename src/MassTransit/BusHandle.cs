@@ -25,7 +25,7 @@ namespace MassTransit
         /// <summary>
         /// A task which can be awaited to know when the bus is ready and all of the receive endpoints have reported ready.
         /// </summary>
-        Task<ReceiveEndpointReady[]> Ready { get; }
+        Task<BusReady> Ready { get; }
 
         /// <summary>
         /// Stop the bus and all receiving endpoints on the bus. Note that cancelling the Stop

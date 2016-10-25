@@ -13,28 +13,18 @@
 namespace MassTransit
 {
     using System;
-    using GreenPipes;
-    using Pipeline;
-    using Transports;
 
 
-    /// <summary>
-    /// A bus is a logical element that includes a local endpoint and zero or more receive endpoints
-    /// </summary>
-    public interface IBus :
-        IPublishEndpoint,
-        ISendEndpointProvider,
-        IConsumePipeConnector,
-        IRequestPipeConnector,
-        IConsumeMessageObserverConnector,
-        IConsumeObserverConnector,
-        IReceiveObserverConnector,
-        IReceiveEndpointObserverConnector,
-        IProbeSite
+    public interface HostReady
     {
         /// <summary>
-        /// The receive address of the bus itself, versus any receive endpoints that were created
+        /// The Host address
         /// </summary>
-        Uri Address { get; }
+        Uri HostAddress { get; }
+
+        /// <summary>
+        /// The receive endpoints that were started on the host
+        /// </summary>
+        ReceiveEndpointReady[] ReceiveEndpoints { get; }
     }
 }

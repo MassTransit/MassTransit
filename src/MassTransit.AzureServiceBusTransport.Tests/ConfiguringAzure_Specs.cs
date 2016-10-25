@@ -72,17 +72,9 @@ namespace MassTransit.AzureServiceBusTransport.Tests
                 });
 
                 // TODO: Assert something here, need to get a hook to the underlying MessageReceiver
-                using (bus.StartAsync())
-                {
-                }
+                var busHandle = await bus.StartAsync();
 
-                //                }))
-                //                {
-                //                    var queueAddress = new Uri(hostAddress, "input_queue");
-                //                    ISendEndpoint endpoint = bus.GetSendEndpoint(queueAddress);
-                //
-                //                    await endpoint.Send(new A());
-                //                }
+                await busHandle.StopAsync();
             }
 
             [Test]

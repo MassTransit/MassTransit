@@ -39,7 +39,7 @@ namespace MassTransit.Transports
             }
         }
 
-        public IEnumerator GetEnumerator()
+        IEnumerator IEnumerable.GetEnumerator()
         {
             return _hosts.GetEnumerator();
         }
@@ -51,6 +51,8 @@ namespace MassTransit.Transports
 
             _hosts.Add(host);
         }
+
+        public IEnumerable<THost> Hosts => _hosts;
 
         public IEnumerable<THost> GetHosts(Uri address)
         {

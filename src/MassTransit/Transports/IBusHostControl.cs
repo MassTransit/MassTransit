@@ -13,6 +13,7 @@
 namespace MassTransit.Transports
 {
     using System;
+    using System.Threading.Tasks;
 
 
     public interface IBusHostControl :
@@ -22,7 +23,7 @@ namespace MassTransit.Transports
         /// Starts the Host, which begins the connection asynchronously.
         /// </summary>
         /// <returns></returns>
-        HostHandle Start();
+        Task<HostHandle> Start();
 
         /// <summary>
         /// Returns true if the address matches the host

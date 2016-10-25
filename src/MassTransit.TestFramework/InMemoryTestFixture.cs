@@ -45,11 +45,13 @@ namespace MassTransit.TestFramework
         ISendEndpoint _inputQueueSendEndpoint;
         ISendEndpoint _busSendEndpoint;
         BusHandle _busHandle;
-        InMemoryTransportCache _inMemoryTransportCache;
+        InMemoryHost _inMemoryHost;
         readonly IBusCreationScope _busCreationScope;
         protected string InputQueueName { get; }
 
         protected Uri BaseAddress { get; }
+
+        protected IInMemoryHost Host => _inMemoryHost;
 
         public InMemoryTestFixture(bool busPerTest = false)
         {
@@ -123,11 +125,11 @@ namespace MassTransit.TestFramework
             return sendEndpoint;
         }
 
-        protected IPublishEndpointProvider PublishEndpointProvider => new InMemoryPublishEndpointProvider(Bus, _inMemoryTransportCache, PublishPipe.Empty);
+        protected IPublishEndpointProvider PublishEndpointProvider => new InMemoryPublishEndpointProvider(Bus, _inMemoryHost, PublishPipe.Empty);
 
         protected IInMemoryTransport GetTransport(string queueName)
         {
-            return _inMemoryTransportCache.GetTransport(queueName);
+            return _inMemoryHost.GetTransport(queueName);
         }
 
         [OneTimeTearDown]
@@ -170,9 +172,9 @@ namespace MassTransit.TestFramework
         {
             return MassTransit.Bus.Factory.CreateUsingInMemory(x =>
             {
-                _inMemoryTransportCache = new InMemoryTransportCache(Environment.ProcessorCount);
+                _inMemoryHost = new InMemoryHost(Environment.ProcessorCount);
 
-                x.SetTransportProvider(_inMemoryTransportCache);
+                x.SetHost(_inMemoryHost);
                 ConfigureBus(x);
 
                 x.ReceiveEndpoint("input_queue", configurator => ConfigureInputQueueEndpoint(configurator));

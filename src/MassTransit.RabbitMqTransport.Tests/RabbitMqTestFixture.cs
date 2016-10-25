@@ -39,6 +39,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         IMessageNameFormatter _nameFormatter;
         BusHandle _busHandle;
         string _nodeHostName;
+        IRabbitMqHost _host;
 
         public RabbitMqTestFixture()
         {
@@ -173,13 +174,13 @@ namespace MassTransit.RabbitMqTransport.Tests
             {
                 ConfigureBus(x);
 
-                var host = ConfigureHost(x);
+                _host = ConfigureHost(x);
 
-                CleanUpVirtualHost(host);
+                CleanUpVirtualHost(_host);
 
-                ConfigureBusHost(x, host);
+                ConfigureBusHost(x, _host);
 
-                x.ReceiveEndpoint(host, "input_queue", e =>
+                x.ReceiveEndpoint(_host, "input_queue", e =>
                 {
                     e.PrefetchCount = 16;
                     e.PurgeOnStartup = true;
@@ -188,6 +189,8 @@ namespace MassTransit.RabbitMqTransport.Tests
                 });
             });
         }
+
+        protected IRabbitMqHost Host =>_host;
 
         protected virtual IRabbitMqHost ConfigureHost(IRabbitMqBusFactoryConfigurator x)
         {

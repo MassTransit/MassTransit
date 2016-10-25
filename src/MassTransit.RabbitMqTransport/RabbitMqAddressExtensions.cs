@@ -34,7 +34,7 @@ namespace MassTransit.RabbitMqTransport
         static readonly INewIdFormatter _formatter = new ZBase32Formatter();
         static readonly Regex _regex = new Regex(@"^[A-Za-z0-9\-_\.:]+$");
 
-        public static string GetTemporaryQueueName(this IRabbitMqBusFactoryConfigurator configurator, string prefix)
+        public static string GetTemporaryQueueName(this IRabbitMqHost ignored, string prefix)
         {
             var sb = new StringBuilder(prefix);
 

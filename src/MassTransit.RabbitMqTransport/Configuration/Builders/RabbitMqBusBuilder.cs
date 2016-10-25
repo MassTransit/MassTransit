@@ -43,7 +43,12 @@ namespace MassTransit.RabbitMqTransport.Builders
 
             _busEndpointConfigurator = new RabbitMqReceiveEndpointConfigurator(_hosts[0], busSettings, ConsumePipe);
 
-            ReceiveEndpointFactory = new RabbitMqReceiveEndpointFactory(this);
+            foreach (var host in hosts.Hosts)
+            {
+                var factory = new RabbitMqReceiveEndpointFactory(this, host);
+
+                host.ReceiveEndpointFactory = factory;
+            }
         }
 
         public BusHostCollection<RabbitMqHost> Hosts => _hosts;

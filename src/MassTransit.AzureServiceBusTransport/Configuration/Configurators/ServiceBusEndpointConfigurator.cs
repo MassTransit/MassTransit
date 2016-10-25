@@ -32,6 +32,7 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
         IBusFactorySpecification
     {
         readonly BaseClientSettings _settings;
+        ReceiveEndpoint _receiveEndpoint;
 
         protected ServiceBusEndpointConfigurator(IServiceBusHost host, BaseClientSettings settings, IConsumePipe consumePipe = null)
             : base(consumePipe)
@@ -39,6 +40,8 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
             Host = host;
             _settings = settings;
         }
+
+        public IReceiveEndpoint ReceiveEndpoint => _receiveEndpoint;
 
         public IServiceBusHost Host { get; }
 
@@ -110,7 +113,7 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
             set { _settings.UserMetadata = value; }
         }
 
-        protected void ApplyReceiveEndpoint(IBusBuilder builder, IReceivePipe receivePipe, params IFilter<NamespaceContext>[] filters)
+        protected void ApplyReceiveEndpoint(IReceivePipe receivePipe, params IFilter<NamespaceContext>[] filters)
         {
             IPipeSpecification<NamespaceContext>[] specifications = filters
                 .Concat(Enumerable.Repeat(_settings.RequiresSession
@@ -121,7 +124,13 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
 
             var transport = new ReceiveTransport(Host, _settings, specifications);
 
-            builder.AddReceiveEndpoint(_settings.Path, new ReceiveEndpoint(transport, receivePipe));
+            _receiveEndpoint = new ReceiveEndpoint(transport, receivePipe);
+
+            var serviceBusHost = Host as ServiceBusHost;
+            if (serviceBusHost == null)
+                throw new ConfigurationException("Must be a ServiceBusHost");
+
+            serviceBusHost.ReceiveEndpoints.Add(_settings.Path, _receiveEndpoint);
         }
 
         protected override Uri GetInputAddress()

@@ -30,7 +30,7 @@ namespace MassTransit.TestFramework
             var probeResult = bus.GetProbeResult();
 
             var probeJObject = JObject.Parse(probeResult.ToJsonString());
-            JEnumerable<JToken> receiveEndpoints = probeJObject["results"]["bus"]["receiveEndpoint"].Children();
+            JEnumerable<JToken> receiveEndpoints = probeJObject["results"]["bus"]["host"]["receiveEndpoint"].Children();
 
             IEnumerable<ReceiveTransportProbeResult> probeResults = receiveEndpoints.Select(result =>
                 JsonConvert.DeserializeObject<ReceiveTransportProbeResult>(result["transport"].ToString()))

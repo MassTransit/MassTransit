@@ -18,6 +18,7 @@ namespace MassTransit.RabbitMqTransport.Transport
     using GreenPipes;
     using Integration;
     using Logging;
+    using MassTransit.Pipeline;
     using Policies;
     using RabbitMQ.Client;
     using Topology;
@@ -32,28 +33,33 @@ namespace MassTransit.RabbitMqTransport.Transport
         static readonly ILog _log = Logger.Get<RabbitMqHost>();
         readonly RabbitMqConnectionCache _connectionCache;
         readonly IRetryPolicy _connectionRetryPolicy;
-        readonly RabbitMqHostSettings _hostSettings;
+        readonly RabbitMqHostSettings _settings;
         readonly TaskSupervisor _supervisor;
 
-        public RabbitMqHost(RabbitMqHostSettings hostSettings)
+        public RabbitMqHost(RabbitMqHostSettings settings)
         {
-            _hostSettings = hostSettings;
+            _settings = settings;
 
             var exceptionFilter = Retry.Selected<RabbitMqConnectionException>();
+            ReceiveEndpoints = new ReceiveEndpointCollection();
 
             _connectionRetryPolicy = exceptionFilter.Exponential(1000, TimeSpan.FromMilliseconds(100), TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(1));
 
-            _supervisor = new TaskSupervisor($"{TypeMetadataCache<RabbitMqHost>.ShortName} - {_hostSettings.ToDebugString()}");
+            _supervisor = new TaskSupervisor($"{TypeMetadataCache<RabbitMqHost>.ShortName} - {_settings.ToDebugString()}");
 
-            _connectionCache = new RabbitMqConnectionCache(hostSettings, _supervisor);
+            _connectionCache = new RabbitMqConnectionCache(settings, _supervisor);
         }
 
-        public HostHandle Start()
+        public IRabbitMqReceiveEndpointFactory ReceiveEndpointFactory { get; set; }
+
+        public IReceiveEndpointCollection ReceiveEndpoints { get; }
+
+        public async Task<HostHandle> Start()
         {
             IPipe<ConnectionContext> connectionPipe = Pipe.ExecuteAsync<ConnectionContext>(async context =>
             {
                 if (_log.IsDebugEnabled)
-                    _log.DebugFormat("Connection established to {0}", _hostSettings.ToDebugString());
+                    _log.DebugFormat("Connection established to {0}", _settings.ToDebugString());
 
                 try
                 {
@@ -65,19 +71,22 @@ namespace MassTransit.RabbitMqTransport.Transport
             });
 
             if (_log.IsDebugEnabled)
-                _log.DebugFormat("Starting connection to {0}", _hostSettings.ToDebugString());
+                _log.DebugFormat("Starting connection to {0}", _settings.ToDebugString());
 
             var connectionTask = _connectionRetryPolicy.RetryUntilCancelled(() => _connectionCache.Send(connectionPipe, _supervisor.StoppingToken),
                 _supervisor.StoppingToken);
 
-            return new Handle(connectionTask, _supervisor);
+            BusReceiveEndpointHandle[] handles = await ReceiveEndpoints.StartEndpoints().ConfigureAwait(false);
+
+
+            return new Handle(connectionTask, handles, _supervisor, this);
         }
 
         public bool Matches(Uri address)
         {
             var settings = address.GetHostSettings();
 
-            return RabbitMqHostEqualityComparer.Default.Equals(_hostSettings, settings);
+            return RabbitMqHostEqualityComparer.Default.Equals(_settings, settings);
         }
 
         void IProbeSite.Probe(ProbeContext context)
@@ -86,28 +95,30 @@ namespace MassTransit.RabbitMqTransport.Transport
             scope.Set(new
             {
                 Type = "RabbitMQ",
-                _hostSettings.Host,
-                _hostSettings.Port,
-                _hostSettings.VirtualHost,
-                _hostSettings.Username,
-                Password = new string('*', _hostSettings.Password.Length),
-                _hostSettings.Heartbeat,
-                _hostSettings.Ssl
+                _settings.Host,
+                _settings.Port,
+                _settings.VirtualHost,
+                _settings.Username,
+                Password = new string('*', _settings.Password.Length),
+                _settings.Heartbeat,
+                _settings.Ssl
             });
 
-            if (_hostSettings.Ssl)
+            if (_settings.Ssl)
             {
                 scope.Set(new
                 {
-                    _hostSettings.SslServerName
+                    _settings.SslServerName
                 });
             }
 
             _connectionCache.Probe(scope);
+
+            ReceiveEndpoints.Probe(scope);
         }
 
         public IConnectionCache ConnectionCache => _connectionCache;
-        public RabbitMqHostSettings Settings => _hostSettings;
+        public RabbitMqHostSettings Settings => _settings;
         public IRetryPolicy ConnectionRetryPolicy => _connectionRetryPolicy;
         public ITaskSupervisor Supervisor => _supervisor;
 
@@ -117,24 +128,64 @@ namespace MassTransit.RabbitMqTransport.Transport
 
             configure?.Invoke(sendSettings);
 
-            return sendSettings.GetSendAddress(_hostSettings.HostAddress);
+            return sendSettings.GetSendAddress(_settings.HostAddress);
+        }
+
+        public Task<BusReceiveEndpointHandle> ConnectReceiveEndpoint(Action<IRabbitMqReceiveEndpointConfigurator> configure)
+        {
+            return ConnectReceiveEndpoint(this.GetTemporaryQueueName("endpoint"), configure);
+        }
+
+        public Task<BusReceiveEndpointHandle> ConnectReceiveEndpoint(string queueName, Action<IRabbitMqReceiveEndpointConfigurator> configure)
+        {
+            if (ReceiveEndpointFactory == null)
+                throw new ConfigurationException("The receive endpoint factory was not specified");
+
+            ReceiveEndpointFactory.CreateReceiveEndpoint(queueName, configure);
+
+            return ReceiveEndpoints.Start(queueName);
+        }
+
+        public Uri Address => _settings.HostAddress;
+
+        ConnectHandle IConsumeMessageObserverConnector.ConnectConsumeMessageObserver<T>(IConsumeMessageObserver<T> observer)
+        {
+            return ReceiveEndpoints.ConnectConsumeMessageObserver(observer);
+        }
+
+        ConnectHandle IConsumeObserverConnector.ConnectConsumeObserver(IConsumeObserver observer)
+        {
+            return ReceiveEndpoints.ConnectConsumeObserver(observer);
+        }
+
+        ConnectHandle IReceiveObserverConnector.ConnectReceiveObserver(IReceiveObserver observer)
+        {
+            return ReceiveEndpoints.ConnectReceiveObserver(observer);
+        }
+
+        ConnectHandle IReceiveEndpointObserverConnector.ConnectReceiveEndpointObserver(IReceiveEndpointObserver observer)
+        {
+            return ReceiveEndpoints.ConnectReceiveEndpointObserver(observer);
         }
 
 
         class Handle :
-            HostHandle
+            DefaultHostHandle
         {
             readonly Task _connectionTask;
             readonly TaskSupervisor _supervisor;
 
-            public Handle(Task connectionTask, TaskSupervisor supervisor)
+            public Handle(Task connectionTask, BusReceiveEndpointHandle[] handles, TaskSupervisor supervisor, IBusHost host)
+                : base(host, handles)
             {
                 _connectionTask = connectionTask;
                 _supervisor = supervisor;
             }
 
-            async Task HostHandle.Stop(CancellationToken cancellationToken)
+            public override async Task Stop(CancellationToken cancellationToken)
             {
+                await base.Stop(cancellationToken).ConfigureAwait(false);
+
                 await _supervisor.Stop("Host stopped", cancellationToken).ConfigureAwait(false);
 
                 try

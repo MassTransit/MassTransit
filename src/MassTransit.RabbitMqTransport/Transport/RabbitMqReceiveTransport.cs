@@ -16,6 +16,7 @@ namespace MassTransit.RabbitMqTransport.Transport
     using System.Threading;
     using System.Threading.Tasks;
     using GreenPipes;
+    using GreenPipes.Internals.Extensions;
     using Logging;
     using MassTransit.Pipeline;
     using MassTransit.Pipeline.Pipes;
@@ -35,9 +36,9 @@ namespace MassTransit.RabbitMqTransport.Transport
         readonly ReceiveEndpointObservable _receiveEndpointObservable;
         readonly ReceiveObservable _receiveObservable;
         readonly ReceiveSettings _settings;
+        readonly Uri _inputAddress;
 
-        public RabbitMqReceiveTransport(IRabbitMqHost host, ReceiveSettings settings, IManagementPipe managementPipe,
-            params ExchangeBindingSettings[] bindings)
+        public RabbitMqReceiveTransport(IRabbitMqHost host, ReceiveSettings settings, IManagementPipe managementPipe, params ExchangeBindingSettings[] bindings)
         {
             _host = host;
             _settings = settings;
@@ -46,6 +47,8 @@ namespace MassTransit.RabbitMqTransport.Transport
 
             _receiveObservable = new ReceiveObservable();
             _receiveEndpointObservable = new ReceiveEndpointObservable();
+
+            _inputAddress = _settings.GetInputAddress(_host.Settings.HostAddress);
         }
 
         void IProbeSite.Probe(ProbeContext context)
@@ -64,7 +67,7 @@ namespace MassTransit.RabbitMqTransport.Transport
         /// <returns>A task that is completed once the transport is shut down</returns>
         public ReceiveTransportHandle Start(IPipe<ReceiveContext> receivePipe)
         {
-            var supervisor = new TaskSupervisor($"{TypeMetadataCache<RabbitMqReceiveTransport>.ShortName} - {_settings.GetInputAddress(_host.Settings.HostAddress)}");
+            var supervisor = new TaskSupervisor($"{TypeCache<RabbitMqReceiveTransport>.ShortName} - {_inputAddress}");
 
             IPipe<ConnectionContext> pipe = Pipe.New<ConnectionContext>(x =>
             {
@@ -102,9 +105,7 @@ namespace MassTransit.RabbitMqTransport.Transport
                         if (_log.IsErrorEnabled)
                             _log.ErrorFormat("RabbitMQ connection failed: {0}", ex.Message);
 
-                        var inputAddress = _settings.GetInputAddress(_host.Settings.HostAddress);
-
-                        await _receiveEndpointObservable.Faulted(new Faulted(inputAddress, ex)).ConfigureAwait(false);
+                        await _receiveEndpointObservable.Faulted(new Faulted(_inputAddress, ex)).ConfigureAwait(false);
 
                         throw;
                     }
@@ -116,9 +117,7 @@ namespace MassTransit.RabbitMqTransport.Transport
                         if (_log.IsErrorEnabled)
                             _log.ErrorFormat("RabbitMQ receive transport failed: {0}", ex.Message);
 
-                        var inputAddress = _settings.GetInputAddress(_host.Settings.HostAddress);
-
-                        await _receiveEndpointObservable.Faulted(new Faulted(inputAddress, ex)).ConfigureAwait(false);
+                        await _receiveEndpointObservable.Faulted(new Faulted(_inputAddress, ex)).ConfigureAwait(false);
 
                         throw;
                     }

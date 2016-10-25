@@ -28,12 +28,6 @@ namespace MassTransit.EndpointConfigurators
     using Transports;
 
 
-    public interface IReceiveEndpointFactory
-    {
-        IReceiveEndpoint CreateReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configure);
-
-    }
-
     public abstract class ReceiveEndpointConfigurator :
         IConsumePipeConfigurator,
         ISendPipelineConfigurator,

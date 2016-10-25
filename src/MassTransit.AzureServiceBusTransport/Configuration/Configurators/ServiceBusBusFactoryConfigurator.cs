@@ -37,7 +37,7 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
             _hosts = new BusHostCollection<ServiceBusHost>();
             _specifications = new List<IBusFactorySpecification>();
 
-            var queueName = this.GetTemporaryQueueName("bus");
+            var queueName = ((IServiceBusHost)null).GetTemporaryQueueName("bus");
             _settings = new ReceiveEndpointSettings(Defaults.CreateQueueDescription(queueName))
             {
                 QueueDescription =
@@ -113,7 +113,11 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
 
         public void ReceiveEndpoint(IServiceBusHost host, string queueName, Action<IServiceBusReceiveEndpointConfigurator> configure)
         {
-            var endpointConfigurator = new ServiceBusReceiveEndpointConfigurator(host, queueName);
+            var serviceBusHost = host as ServiceBusHost;
+            if (serviceBusHost == null)
+                throw new ArgumentException("Must be a ServiceBusHost", nameof(host));
+
+            var endpointConfigurator = new ServiceBusReceiveEndpointConfigurator(serviceBusHost, queueName);
 
             configure(endpointConfigurator);
 

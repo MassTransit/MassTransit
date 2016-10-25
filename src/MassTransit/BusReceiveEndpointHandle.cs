@@ -12,29 +12,22 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
-    using System;
-    using GreenPipes;
-    using Pipeline;
-    using Transports;
+    using System.Threading;
+    using System.Threading.Tasks;
 
 
-    /// <summary>
-    /// A bus is a logical element that includes a local endpoint and zero or more receive endpoints
-    /// </summary>
-    public interface IBus :
-        IPublishEndpoint,
-        ISendEndpointProvider,
-        IConsumePipeConnector,
-        IRequestPipeConnector,
-        IConsumeMessageObserverConnector,
-        IConsumeObserverConnector,
-        IReceiveObserverConnector,
-        IReceiveEndpointObserverConnector,
-        IProbeSite
+    public interface BusReceiveEndpointHandle
     {
         /// <summary>
-        /// The receive address of the bus itself, versus any receive endpoints that were created
+        /// A task which can be awaited to know when the receive endpoint is ready
         /// </summary>
-        Uri Address { get; }
+        Task<ReceiveEndpointReady> Ready { get; }
+
+        /// <summary>
+        /// Stop the receive endpoint.
+        /// </summary>
+        /// <param name="cancellationToken">Cancel the stop operation in progress</param>
+        /// <returns>An awaitable task that is completed once everything is stopped</returns>
+        Task StopAsync(CancellationToken cancellationToken = default(CancellationToken));
     }
 }

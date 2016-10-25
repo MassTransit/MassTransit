@@ -26,13 +26,13 @@ namespace MassTransit.Transports.InMemory
         readonly PublishObservable _publishObservable;
         readonly IPublishPipe _publishPipe;
         readonly ISendEndpointProvider _sendEndpointProvider;
-        readonly InMemoryTransportCache _transportCache;
+        readonly InMemoryHost _host;
 
         public InMemoryPublishEndpointProvider(ISendEndpointProvider sendEndpointProvider, ISendTransportProvider transportProvider, IPublishPipe publishPipe)
         {
             _sendEndpointProvider = sendEndpointProvider;
             _publishPipe = publishPipe;
-            _transportCache = transportProvider as InMemoryTransportCache;
+            _host = transportProvider as InMemoryHost;
             _publishObservable = new PublishObservable();
         }
 
@@ -46,7 +46,7 @@ namespace MassTransit.Transports.InMemory
             if (!TypeMetadataCache.IsValidMessageType(messageType))
                 throw new MessageException(messageType, "Anonymous types are not valid message types");
 
-            ISendEndpoint[] result = await Task.WhenAll(_transportCache.TransportAddresses.Select(x => _sendEndpointProvider.GetSendEndpoint(x)))
+            ISendEndpoint[] result = await Task.WhenAll(_host.TransportAddresses.Select(x => _sendEndpointProvider.GetSendEndpoint(x)))
                 .ConfigureAwait(false);
 
             return new FanoutSendEndpoint(result);

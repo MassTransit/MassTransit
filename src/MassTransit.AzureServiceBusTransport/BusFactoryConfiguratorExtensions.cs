@@ -92,7 +92,7 @@ namespace MassTransit
         public static void ReceiveEndpoint(this IServiceBusBusFactoryConfigurator configurator, IServiceBusHost host,
             Action<IServiceBusReceiveEndpointConfigurator> configure)
         {
-            var queueName = configurator.GetTemporaryQueueName("endpoint");
+            var queueName = host.GetTemporaryQueueName("endpoint");
 
             configurator.ReceiveEndpoint(host, queueName, x =>
             {

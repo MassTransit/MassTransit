@@ -27,7 +27,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         {
             Task<ConsumeContext<PingMessage>> pingHandled = null;
 
-            var handle = await Bus.ConnectReceiveEndpoint("second_queue", x =>
+            var handle = await Host.ConnectReceiveEndpoint("second_queue", x =>
             {
                 pingHandled = Handled<PingMessage>(x);
             });
@@ -50,7 +50,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         {
             Task<ConsumeContext<PingMessage>> pingHandled = null;
 
-            var handle = await Bus.ConnectReceiveEndpoint("second_queue", x =>
+            var handle = await Host.ConnectReceiveEndpoint("second_queue", x =>
             {
                 pingHandled = Handled<PingMessage>(x);
             });
@@ -58,11 +58,10 @@ namespace MassTransit.RabbitMqTransport.Tests
             {
                 Assert.That(async () =>
                 {
-                    BusHandle unused = await Bus.ConnectReceiveEndpoint("second_queue", x =>
+                    var unused = await Host.ConnectReceiveEndpoint("second_queue", x =>
                     {
                     });
                 }, Throws.TypeOf<ConfigurationException>());
-
             }
             finally
             {

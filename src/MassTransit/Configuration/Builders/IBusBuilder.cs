@@ -50,13 +50,6 @@ namespace MassTransit.Builders
         IPublishEndpointProvider CreatePublishEndpointProvider(Uri sourceAddress, params IPublishPipeSpecification[] specifications);
 
         /// <summary>
-        /// Adds a receive endpoint to the bus
-        /// </summary>
-        /// <param name="queueName">The name of the queue for the receive endpoint</param>
-        /// <param name="receiveEndpoint"></param>
-        void AddReceiveEndpoint(string queueName, IReceiveEndpoint receiveEndpoint);
-
-        /// <summary>
         /// Sets the outbound message serializer
         /// </summary>
         /// <param name="serializerFactory">The factory to create the message serializer</param>

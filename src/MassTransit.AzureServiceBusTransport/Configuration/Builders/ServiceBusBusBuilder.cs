@@ -38,6 +38,11 @@ namespace MassTransit.AzureServiceBusTransport.Builders
             _hosts = hosts;
 
             _busEndpointConfigurator = new ServiceBusReceiveEndpointConfigurator(_hosts[0], settings, ConsumePipe);
+
+            foreach (var host in hosts.Hosts)
+            {
+                host.ReceiveEndpointFactory = new ServiceBusReceiveEndpointFactory(this, host);
+            }
         }
 
         protected override Uri GetInputAddress()

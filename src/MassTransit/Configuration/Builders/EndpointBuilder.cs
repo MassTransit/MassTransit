@@ -23,14 +23,10 @@ namespace MassTransit.Builders
     {
         readonly IBusBuilder _builder;
 
-        IReceiveEndpoint _receiveEndpoint;
-
         protected EndpointBuilder(IBusBuilder builder)
         {
             _builder = builder;
         }
-
-        public IReceiveEndpoint ReceiveEndpoint => _receiveEndpoint;
 
         public ISendTransportProvider SendTransportProvider => _builder.SendTransportProvider;
 
@@ -47,16 +43,6 @@ namespace MassTransit.Builders
         public IPublishEndpointProvider CreatePublishEndpointProvider(Uri sourceAddress, params IPublishPipeSpecification[] specifications)
         {
             return _builder.CreatePublishEndpointProvider(sourceAddress, specifications);
-        }
-
-        public void AddReceiveEndpoint(string queueName, IReceiveEndpoint receiveEndpoint)
-        {
-            if (_receiveEndpoint != null)
-                throw new ConfigurationException("The receive endpoint with the same queue name is already configured");
-
-            _builder.AddReceiveEndpoint(queueName, receiveEndpoint);
-
-            _receiveEndpoint = receiveEndpoint;
         }
 
         public void SetMessageSerializer(Func<IMessageSerializer> serializerFactory)

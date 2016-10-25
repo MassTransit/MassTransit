@@ -13,6 +13,7 @@
 namespace MassTransit.RabbitMqTransport
 {
     using System;
+    using System.Threading.Tasks;
     using GreenPipes;
     using Integration;
     using Transports;
@@ -44,5 +45,20 @@ namespace MassTransit.RabbitMqTransport
         /// <param name="configure"></param>
         /// <returns></returns>
         Uri GetSendAddress(string exchangeName, Action<IExchangeConfigurator> configure = null);
+
+        /// <summary>
+        /// Create a temporary receive endpoint on the host, with a separate handle for stopping/removing the endpoint
+        /// </summary>
+        /// <param name="configure"></param>
+        /// <returns></returns>
+        Task<BusReceiveEndpointHandle> ConnectReceiveEndpoint(Action<IRabbitMqReceiveEndpointConfigurator> configure);
+
+        /// <summary>
+        /// Create a receive endpoint on the host, with a separate handle for stopping/removing the endpoint
+        /// </summary>
+        /// <param name="queueName"></param>
+        /// <param name="configure"></param>
+        /// <returns></returns>
+        Task<BusReceiveEndpointHandle> ConnectReceiveEndpoint(string queueName, Action<IRabbitMqReceiveEndpointConfigurator> configure);
     }
 }

@@ -10,31 +10,23 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit
+namespace MassTransit.Transports.InMemory
 {
     using System;
-    using GreenPipes;
-    using Pipeline;
-    using Transports;
+    using System.Threading.Tasks;
 
 
-    /// <summary>
-    /// A bus is a logical element that includes a local endpoint and zero or more receive endpoints
-    /// </summary>
-    public interface IBus :
-        IPublishEndpoint,
-        ISendEndpointProvider,
-        IConsumePipeConnector,
-        IRequestPipeConnector,
-        IConsumeMessageObserverConnector,
-        IConsumeObserverConnector,
-        IReceiveObserverConnector,
-        IReceiveEndpointObserverConnector,
-        IProbeSite
+    public interface IInMemoryHost :
+        IBusHost
     {
+        IReceiveTransport GetReceiveTransport(string queueName, int concurrencyLimit);
+
         /// <summary>
-        /// The receive address of the bus itself, versus any receive endpoints that were created
+        /// Create a receive endpoint on the host, with a separate handle for stopping/removing the endpoint
         /// </summary>
-        Uri Address { get; }
+        /// <param name="queueName"></param>
+        /// <param name="configure"></param>
+        /// <returns></returns>
+        Task<BusReceiveEndpointHandle> ConnectReceiveEndpoint(string queueName, Action<IInMemoryReceiveEndpointConfigurator> configure);
     }
 }

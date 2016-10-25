@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.AzureServiceBusTransport
 {
+    using System;
     using System.Threading.Tasks;
     using GreenPipes;
     using Microsoft.ServiceBus;
@@ -46,19 +47,33 @@ namespace MassTransit.AzureServiceBusTransport
         /// </summary>
         ITaskSupervisor Supervisor { get; }
 
-        string GetQueuePath(QueueDescription queueDescription);
-
         /// <summary>
         /// The retry policy shared by transports communicating with the host. Should be
         /// used for all operations against Azure.
         /// </summary>
         IRetryPolicy RetryPolicy { get; }
 
+        string GetQueuePath(QueueDescription queueDescription);
 
         Task<TopicDescription> CreateTopic(TopicDescription topicDescription);
 
         Task<QueueDescription> CreateQueue(QueueDescription queueDescription);
 
         Task<SubscriptionDescription> CreateTopicSubscription(SubscriptionDescription description);
+
+        /// <summary>
+        /// Create a temporary receive endpoint on the host, with a separate handle for stopping/removing the endpoint
+        /// </summary>
+        /// <param name="configure"></param>
+        /// <returns></returns>
+        Task<BusReceiveEndpointHandle> CreateReceiveEndpoint(Action<IServiceBusReceiveEndpointConfigurator> configure);
+
+        /// <summary>
+        /// Create a receive endpoint on the host, with a separate handle for stopping/removing the endpoint
+        /// </summary>
+        /// <param name="queueName"></param>
+        /// <param name="configure"></param>
+        /// <returns></returns>
+        Task<BusReceiveEndpointHandle> CreateReceiveEndpoint(string queueName, Action<IServiceBusReceiveEndpointConfigurator> configure);
     }
 }

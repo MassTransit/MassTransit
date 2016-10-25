@@ -49,11 +49,9 @@ namespace MassTransit.Transports
 
         void IProbeSite.Probe(ProbeContext context)
         {
-            var scope = context.CreateScope("receiveEndpoint");
+            _receiveTransport.Probe(context);
 
-            _receiveTransport.Probe(scope);
-
-            _receivePipe.Probe(scope);
+            _receivePipe.Probe(context);
         }
 
         ConnectHandle IReceiveEndpointObserverConnector.ConnectReceiveEndpointObserver(IReceiveEndpointObserver observer)

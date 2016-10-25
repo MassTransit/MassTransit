@@ -10,40 +10,41 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.RabbitMqTransport.Builders
+namespace MassTransit.RabbitMqTransport.Transport
 {
     using System;
+    using Builders;
     using Configurators;
-    using EndpointConfigurators;
     using MassTransit.Configurators;
-    using MassTransit.Pipeline;
 
 
     public class RabbitMqReceiveEndpointFactory :
-        IReceiveEndpointFactory
+        IRabbitMqReceiveEndpointFactory
     {
         readonly RabbitMqBusBuilder _builder;
+        readonly IRabbitMqHost _host;
 
-        public RabbitMqReceiveEndpointFactory(RabbitMqBusBuilder builder)
+        public RabbitMqReceiveEndpointFactory(RabbitMqBusBuilder builder, IRabbitMqHost host)
         {
             _builder = builder;
+            _host = host;
         }
 
-        public IReceiveEndpoint CreateReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configure)
+        public IReceiveEndpoint CreateReceiveEndpoint(string queueName, Action<IRabbitMqReceiveEndpointConfigurator> configure)
         {
-            IConsumePipe consumePipe = _builder.CreateConsumePipe();
+            var consumePipe = _builder.CreateConsumePipe();
 
-            var busEndpointConfigurator = new RabbitMqReceiveEndpointConfigurator(_builder.Hosts[0], queueName, consumePipe);
+            var endpointConfigurator = new RabbitMqReceiveEndpointConfigurator(_host, queueName, consumePipe);
 
-            configure?.Invoke(busEndpointConfigurator);
+            configure?.Invoke(endpointConfigurator);
 
-            ConfigurationResult configurationResult = BusConfigurationResult.CompileResults(busEndpointConfigurator.Validate());
+            BusConfigurationResult.CompileResults(endpointConfigurator.Validate());
 
             var endpointBuilder = new RabbitMqEndpointBuilder(_builder);
 
-            busEndpointConfigurator.Apply(endpointBuilder);
+            endpointConfigurator.Apply(endpointBuilder);
 
-            return endpointBuilder.ReceiveEndpoint;
+            return endpointConfigurator.ReceiveEndpoint;
         }
     }
 }

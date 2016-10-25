@@ -19,8 +19,10 @@ namespace MassTransit.AzureServiceBusTransport
     using System.Threading.Tasks;
     using GreenPipes;
     using Logging;
+    using MassTransit.Pipeline;
     using Microsoft.ServiceBus;
     using Microsoft.ServiceBus.Messaging;
+    using Transport;
     using Transports;
     using Util;
 
@@ -30,37 +32,43 @@ namespace MassTransit.AzureServiceBusTransport
         IBusHostControl
     {
         static readonly ILog _log = Logger.Get<ServiceBusHost>();
-        readonly IMessageNameFormatter _messageNameFormatter;
         readonly Lazy<Task<MessagingFactory>> _messagingFactory;
         readonly Lazy<NamespaceManager> _namespaceManager;
+        readonly IReceiveEndpointCollection _receiveEndpoints;
         readonly Lazy<NamespaceManager> _rootNamespaceManager;
         readonly Lazy<Task<MessagingFactory>> _sessionMessagingFactory;
-        readonly ServiceBusHostSettings _settings;
         readonly TaskSupervisor _supervisor;
 
         public ServiceBusHost(ServiceBusHostSettings settings)
         {
-            _settings = settings;
+            Settings = settings;
+
             _messagingFactory = new Lazy<Task<MessagingFactory>>(CreateMessagingFactory);
             _sessionMessagingFactory = new Lazy<Task<MessagingFactory>>(CreateNetMessagingFactory);
             _namespaceManager = new Lazy<NamespaceManager>(CreateNamespaceManager);
             _rootNamespaceManager = new Lazy<NamespaceManager>(CreateRootNamespaceManager);
+            MessageNameFormatter = new ServiceBusMessageNameFormatter();
+            _receiveEndpoints = new ReceiveEndpointCollection();
 
-            _messageNameFormatter = new ServiceBusMessageNameFormatter();
-
-            _supervisor = new TaskSupervisor($"{TypeMetadataCache<ServiceBusHost>.ShortName} - {_settings.ServiceUri}");
+            _supervisor = new TaskSupervisor($"{TypeMetadataCache<ServiceBusHost>.ShortName} - {Settings.ServiceUri}");
 
             RetryPolicy = Retry.Selected<ServerBusyException, TimeoutException>().Intervals(100, 500, 1000, 5000, 10000);
         }
 
-        public HostHandle Start()
+        public IServiceBusReceiveEndpointFactory ReceiveEndpointFactory { get; set; }
+
+        public IReceiveEndpointCollection ReceiveEndpoints => _receiveEndpoints;
+
+        public async Task<HostHandle> Start()
         {
-            return new Handle(_messagingFactory.Value, _sessionMessagingFactory, _settings, _supervisor);
+            BusReceiveEndpointHandle[] handles = await ReceiveEndpoints.StartEndpoints().ConfigureAwait(false);
+
+            return new Handle(this, _supervisor, handles);
         }
 
         public bool Matches(Uri address)
         {
-            return _settings.ServiceUri.GetLeftPart(UriPartial.Authority).Equals(address.GetLeftPart(UriPartial.Authority),
+            return Settings.ServiceUri.GetLeftPart(UriPartial.Authority).Equals(address.GetLeftPart(UriPartial.Authority),
                 StringComparison.OrdinalIgnoreCase);
         }
 
@@ -70,16 +78,18 @@ namespace MassTransit.AzureServiceBusTransport
 
         void IProbeSite.Probe(ProbeContext context)
         {
-            ProbeContext scope = context.CreateScope("host");
+            var scope = context.CreateScope("host");
             scope.Set(new
             {
                 Type = "Azure Service Bus",
-                _settings.ServiceUri,
-                _settings.OperationTimeout
+                Settings.ServiceUri,
+                Settings.OperationTimeout
             });
+
+            _receiveEndpoints.Probe(scope);
         }
 
-        ServiceBusHostSettings IServiceBusHost.Settings => _settings;
+        public ServiceBusHostSettings Settings { get; }
 
         Task<MessagingFactory> IServiceBusHost.MessagingFactory => _messagingFactory.Value;
 
@@ -87,13 +97,13 @@ namespace MassTransit.AzureServiceBusTransport
 
         public NamespaceManager RootNamespaceManager => _rootNamespaceManager.Value;
 
-        IMessageNameFormatter IServiceBusHost.MessageNameFormatter => _messageNameFormatter;
+        public IMessageNameFormatter MessageNameFormatter { get; }
 
         public ITaskSupervisor Supervisor => _supervisor;
 
         public string GetQueuePath(QueueDescription queueDescription)
         {
-            IEnumerable<string> segments = new[] {_settings.ServiceUri.AbsolutePath.Trim('/'), queueDescription.Path.Trim('/')}
+            IEnumerable<string> segments = new[] {Settings.ServiceUri.AbsolutePath.Trim('/'), queueDescription.Path.Trim('/')}
                 .Where(x => x.Length > 0);
 
             return string.Join("/", segments);
@@ -308,22 +318,61 @@ namespace MassTransit.AzureServiceBusTransport
             return subscriptionDescription;
         }
 
+        public Task<BusReceiveEndpointHandle> CreateReceiveEndpoint(Action<IServiceBusReceiveEndpointConfigurator> configure)
+        {
+            var queueName = this.GetTemporaryQueueName("endpoint");
+
+            return CreateReceiveEndpoint(queueName, configure);
+        }
+
+        public Task<BusReceiveEndpointHandle> CreateReceiveEndpoint(string queueName, Action<IServiceBusReceiveEndpointConfigurator> configure)
+        {
+            if (ReceiveEndpointFactory == null)
+                throw new ConfigurationException("The receive endpoint factory was not specified");
+
+            ReceiveEndpointFactory.CreateReceiveEndpoint(queueName, configure);
+
+            return _receiveEndpoints.Start(queueName);
+        }
+
+        public Uri Address => Settings.ServiceUri;
+
+        ConnectHandle IConsumeMessageObserverConnector.ConnectConsumeMessageObserver<T>(IConsumeMessageObserver<T> observer)
+        {
+            return _receiveEndpoints.ConnectConsumeMessageObserver(observer);
+        }
+
+        ConnectHandle IConsumeObserverConnector.ConnectConsumeObserver(IConsumeObserver observer)
+        {
+            return _receiveEndpoints.ConnectConsumeObserver(observer);
+        }
+
+        ConnectHandle IReceiveObserverConnector.ConnectReceiveObserver(IReceiveObserver observer)
+        {
+            return _receiveEndpoints.ConnectReceiveObserver(observer);
+        }
+
+        ConnectHandle IReceiveEndpointObserverConnector.ConnectReceiveEndpointObserver(IReceiveEndpointObserver observer)
+        {
+            return _receiveEndpoints.ConnectReceiveEndpointObserver(observer);
+        }
+
         Task<MessagingFactory> CreateMessagingFactory()
         {
             var mfs = new MessagingFactorySettings
             {
-                TokenProvider = _settings.TokenProvider,
-                OperationTimeout = _settings.OperationTimeout,
-                TransportType = _settings.TransportType
+                TokenProvider = Settings.TokenProvider,
+                OperationTimeout = Settings.OperationTimeout,
+                TransportType = Settings.TransportType
             };
 
-            switch (_settings.TransportType)
+            switch (Settings.TransportType)
             {
                 case TransportType.NetMessaging:
-                    mfs.NetMessagingTransportSettings = _settings.NetMessagingTransportSettings;
+                    mfs.NetMessagingTransportSettings = Settings.NetMessagingTransportSettings;
                     break;
                 case TransportType.Amqp:
-                    mfs.AmqpTransportSettings = _settings.AmqpTransportSettings;
+                    mfs.AmqpTransportSettings = Settings.AmqpTransportSettings;
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -334,26 +383,26 @@ namespace MassTransit.AzureServiceBusTransport
 
         async Task<MessagingFactory> CreateFactory(MessagingFactorySettings mfs)
         {
-            var builder = new UriBuilder(_settings.ServiceUri) {Path = ""};
+            var builder = new UriBuilder(Settings.ServiceUri) {Path = ""};
 
-            MessagingFactory messagingFactory = await MessagingFactory.CreateAsync(builder.Uri, mfs).ConfigureAwait(false);
+            var messagingFactory = await MessagingFactory.CreateAsync(builder.Uri, mfs).ConfigureAwait(false);
 
-            messagingFactory.RetryPolicy = new RetryExponential(_settings.RetryMinBackoff, _settings.RetryMaxBackoff, _settings.RetryLimit);
+            messagingFactory.RetryPolicy = new RetryExponential(Settings.RetryMinBackoff, Settings.RetryMaxBackoff, Settings.RetryLimit);
 
             return messagingFactory;
         }
 
         Task<MessagingFactory> CreateNetMessagingFactory()
         {
-            if (_settings.TransportType == TransportType.NetMessaging)
+            if (Settings.TransportType == TransportType.NetMessaging)
                 return _messagingFactory.Value;
 
             var mfs = new MessagingFactorySettings
             {
-                TokenProvider = _settings.TokenProvider,
-                OperationTimeout = _settings.OperationTimeout,
+                TokenProvider = Settings.TokenProvider,
+                OperationTimeout = Settings.OperationTimeout,
                 TransportType = TransportType.NetMessaging,
-                NetMessagingTransportSettings = _settings.NetMessagingTransportSettings
+                NetMessagingTransportSettings = Settings.NetMessagingTransportSettings
             };
 
             return CreateFactory(mfs);
@@ -363,23 +412,23 @@ namespace MassTransit.AzureServiceBusTransport
         {
             var nms = new NamespaceManagerSettings
             {
-                TokenProvider = _settings.TokenProvider,
-                OperationTimeout = _settings.OperationTimeout,
-                RetryPolicy = new RetryExponential(_settings.RetryMinBackoff, _settings.RetryMaxBackoff, _settings.RetryLimit)
+                TokenProvider = Settings.TokenProvider,
+                OperationTimeout = Settings.OperationTimeout,
+                RetryPolicy = new RetryExponential(Settings.RetryMinBackoff, Settings.RetryMaxBackoff, Settings.RetryLimit)
             };
 
-            return new NamespaceManager(_settings.ServiceUri, nms);
+            return new NamespaceManager(Settings.ServiceUri, nms);
         }
 
         NamespaceManager CreateRootNamespaceManager()
         {
             var nms = new NamespaceManagerSettings
             {
-                TokenProvider = _settings.TokenProvider,
-                OperationTimeout = _settings.OperationTimeout,
-                RetryPolicy = new RetryExponential(_settings.RetryMinBackoff, _settings.RetryMaxBackoff, _settings.RetryLimit)
+                TokenProvider = Settings.TokenProvider,
+                OperationTimeout = Settings.OperationTimeout,
+                RetryPolicy = new RetryExponential(Settings.RetryMinBackoff, Settings.RetryMaxBackoff, Settings.RetryLimit)
             };
-            var builder = new UriBuilder(_settings.ServiceUri)
+            var builder = new UriBuilder(Settings.ServiceUri)
             {
                 Path = ""
             };
@@ -389,32 +438,33 @@ namespace MassTransit.AzureServiceBusTransport
 
 
         class Handle :
-            HostHandle
+            DefaultHostHandle
         {
-            readonly Task<MessagingFactory> _messagingFactoryTask;
-            readonly Lazy<Task<MessagingFactory>> _sessionFactory;
-            readonly ServiceBusHostSettings _settings;
+            readonly ServiceBusHost _host;
             readonly TaskSupervisor _supervisor;
 
-            public Handle(Task<MessagingFactory> messagingFactoryTask, Lazy<Task<MessagingFactory>> sessionFactory, ServiceBusHostSettings settings,
-                TaskSupervisor supervisor)
+            public Handle(ServiceBusHost host, TaskSupervisor supervisor, BusReceiveEndpointHandle[] handles)
+                : base(host, handles)
             {
-                _messagingFactoryTask = messagingFactoryTask;
-                _sessionFactory = sessionFactory;
-                _settings = settings;
+                _host = host;
                 _supervisor = supervisor;
             }
 
-            async Task HostHandle.Stop(CancellationToken cancellationToken)
+            public override async Task Stop(CancellationToken cancellationToken)
             {
+                await base.Stop(cancellationToken).ConfigureAwait(false);
+
                 try
                 {
                     await _supervisor.Stop("Host stopped", cancellationToken).ConfigureAwait(false);
 
-                    MessagingFactory factory = await _messagingFactoryTask.ConfigureAwait(false);
+                    if (_host._messagingFactory.IsValueCreated)
+                    {
+                        var factory = await _host._messagingFactory.Value.ConfigureAwait(false);
 
-                    if (!factory.IsClosed)
-                        await factory.CloseAsync().ConfigureAwait(false);
+                        if (!factory.IsClosed)
+                            await factory.CloseAsync().ConfigureAwait(false);
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -422,11 +472,11 @@ namespace MassTransit.AzureServiceBusTransport
                         _log.Warn("Exception closing messaging factory", ex);
                 }
 
-                if (_sessionFactory.IsValueCreated && _settings.TransportType == TransportType.Amqp)
+                if (_host._sessionMessagingFactory.IsValueCreated && _host.Settings.TransportType == TransportType.Amqp)
                 {
                     try
                     {
-                        MessagingFactory factory = await _sessionFactory.Value.ConfigureAwait(false);
+                        var factory = await _host._sessionMessagingFactory.Value.ConfigureAwait(false);
 
                         if (!factory.IsClosed)
                             await factory.CloseAsync().ConfigureAwait(false);

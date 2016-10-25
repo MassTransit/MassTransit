@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -16,6 +16,7 @@ namespace MassTransit.EndpointConfigurators
     using Builders;
     using Pipeline;
     using Transports;
+    using Transports.InMemory;
 
 
     public class InMemoryReceiveEndpointConfigurator :
@@ -25,6 +26,7 @@ namespace MassTransit.EndpointConfigurators
     {
         readonly string _queueName;
         int _transportConcurrencyLimit;
+        ReceiveEndpoint _receiveEndpoint;
 
         public InMemoryReceiveEndpointConfigurator(string queueName, IConsumePipe consumePipe = null)
             : base(consumePipe)
@@ -33,13 +35,21 @@ namespace MassTransit.EndpointConfigurators
             _transportConcurrencyLimit = 0;
         }
 
+        public IReceiveEndpoint ReceiveEndpoint => _receiveEndpoint;
+
         public void Apply(IInMemoryBusBuilder builder)
         {
-            IReceiveTransport transport = builder.ReceiveTransportProvider.GetReceiveTransport(_queueName, _transportConcurrencyLimit);
+            var transport = builder.InMemoryHost.GetReceiveTransport(_queueName, _transportConcurrencyLimit);
 
             var receivePipe = CreateReceivePipe(builder, consumePipe => new InMemoryReceiveEndpointBuilder(consumePipe));
 
-            builder.AddReceiveEndpoint(_queueName, new ReceiveEndpoint(transport, receivePipe));
+            _receiveEndpoint = new ReceiveEndpoint(transport, receivePipe);
+
+            var inMemoryHost = builder.InMemoryHost as InMemoryHost;
+            if (inMemoryHost == null)
+                throw new ConfigurationException("Must be an InMemoryHost");
+
+            inMemoryHost.ReceiveEndpoints.Add(_queueName, _receiveEndpoint);
         }
 
         public int TransportConcurrencyLimit

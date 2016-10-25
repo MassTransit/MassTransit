@@ -34,7 +34,7 @@ namespace MassTransit.Monitoring.Performance
             return TaskUtil.Completed;
         }
 
-        public Task PostStart(IBus bus, Task busReady)
+        public Task PostStart(IBus bus, Task<BusReady> busReady)
         {
             return TaskUtil.Completed;
         }

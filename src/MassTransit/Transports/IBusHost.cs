@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,14 +12,24 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports
 {
+    using System;
     using GreenPipes;
+    using Pipeline;
 
 
     /// <summary>
     /// A Bus Host is a transport-neutral reference to a host
     /// </summary>
     public interface IBusHost :
+        IConsumeMessageObserverConnector,
+        IConsumeObserverConnector,
+        IReceiveObserverConnector,
+        IReceiveEndpointObserverConnector,
         IProbeSite
     {
+        /// <summary>
+        /// An address that identifies the host
+        /// </summary>
+        Uri Address { get; }
     }
 }

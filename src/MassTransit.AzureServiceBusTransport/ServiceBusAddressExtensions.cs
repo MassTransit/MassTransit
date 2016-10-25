@@ -25,7 +25,7 @@ namespace MassTransit.AzureServiceBusTransport
     {
         static readonly INewIdFormatter _formatter = new ZBase32Formatter();
 
-        public static string GetTemporaryQueueName(this IServiceBusBusFactoryConfigurator configurator, string prefix)
+        public static string GetTemporaryQueueName(this IServiceBusHost ignored, string prefix)
         {
             var sb = new StringBuilder();
 
@@ -98,7 +98,7 @@ namespace MassTransit.AzureServiceBusTransport
         public static IManagementEndpointConfigurator ManagementEndpoint(this IServiceBusBusFactoryConfigurator configurator,
             IServiceBusHost host, Action<IReceiveEndpointConfigurator> configure = null)
         {
-            var queueName = configurator.GetTemporaryQueueName("manage-");
+            var queueName = host.GetTemporaryQueueName("manage-");
 
             var endpointConfigurator = new ServiceBusReceiveEndpointConfigurator(host, queueName)
             {

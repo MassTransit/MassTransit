@@ -75,7 +75,6 @@
     <Compile Include="Configuration\Builders\RabbitMqBusBuilder.cs" />
     <Compile Include="Configuration\Builders\RabbitMqEndpointBuilder.cs" />
     <Compile Include="Configuration\Builders\RabbitMqReceiveEndpointBuilder.cs" />
-    <Compile Include="Configuration\Builders\RabbitMqReceiveEndpointFactory.cs" />
     <Compile Include="Configuration\Configurators\ConfigurationHostSettings.cs" />
     <Compile Include="Configuration\Configurators\RabbitMqClusterConfigurator.cs" />
     <Compile Include="Configuration\Configurators\RabbitMqHostConfigurator.cs" />
@@ -141,6 +140,7 @@
     <Compile Include="Topology\EntitySettings.cs" />
     <Compile Include="Topology\ReceiveSettings.cs" />
     <Compile Include="Topology\SendSettings.cs" />
+    <Compile Include="Transport\IRabbitMqReceiveEndpointFactory.cs" />
     <Compile Include="Transport\ModelSettings.cs" />
     <Compile Include="Transport\RabbitMqHost.cs" />
     <Compile Include="RabbitMqHostSettings.cs" />
@@ -152,6 +152,7 @@
     <Compile Include="RabbitMqMessageNameFormatter.cs" />
     <Compile Include="ModelContext.cs" />
     <Compile Include="RabbitMqSendContextExtensions.cs" />
+    <Compile Include="Transport\RabbitMqReceiveEndpointFactory.cs" />
     <Compile Include="Transport\RabbitMqSendEndpointProvider.cs" />
     <Compile Include="Transport\RabbitMqSendTransportProvider.cs" />
     <Compile Include="Transport\SequentialEndpointResolver.cs" />

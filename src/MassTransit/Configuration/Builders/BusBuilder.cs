@@ -17,7 +17,6 @@ namespace MassTransit.Builders
     using System.Linq;
     using System.Net.Mime;
     using BusConfigurators;
-    using EndpointConfigurators;
     using GreenPipes;
     using Pipeline;
     using Serialization;
@@ -35,7 +34,6 @@ namespace MassTransit.Builders
         readonly IBusHostCollection _hosts;
         readonly Lazy<Uri> _inputAddress;
         readonly IPublishPipeFactory _publishPipeFactory;
-        readonly IReceiveEndpointCollection _receiveEndpoints;
         readonly ISendPipeFactory _sendPipeFactory;
         readonly Lazy<ISendTransportProvider> _sendTransportProvider;
         readonly Lazy<IMessageSerializer> _serializer;
@@ -50,7 +48,6 @@ namespace MassTransit.Builders
             _hosts = hosts;
 
             _deserializerFactories = new Dictionary<string, DeserializerFactory>(StringComparer.OrdinalIgnoreCase);
-            _receiveEndpoints = new ReceiveEndpointCollection();
             _serializerFactory = () => new JsonMessageSerializer();
             _busObservable = new BusObservable();
             _serializer = new Lazy<IMessageSerializer>(CreateSerializer);
@@ -67,11 +64,7 @@ namespace MassTransit.Builders
                 (s, p) => new XmlMessageDeserializer(JsonMessageSerializer.Deserializer, s, p));
         }
 
-        public IReceiveEndpointFactory ReceiveEndpointFactory { get; protected set; }
-
         protected BusObservable BusObservable => _busObservable;
-
-        protected IReceiveEndpointCollection ReceiveEndpoints => _receiveEndpoints;
 
         public IMessageSerializer MessageSerializer => _serializer.Value;
 
@@ -123,11 +116,6 @@ namespace MassTransit.Builders
             return new SupportedMessageDeserializers(deserializers);
         }
 
-        public void AddReceiveEndpoint(string endpointKey, IReceiveEndpoint receiveEndpoint)
-        {
-            _receiveEndpoints.Add(endpointKey, receiveEndpoint);
-        }
-
         public ConnectHandle ConnectBusObserver(IBusObserver observer)
         {
             return _busObservable.Connect(observer);
@@ -156,11 +144,10 @@ namespace MassTransit.Builders
             {
                 PreBuild();
 
-                ISendEndpointProvider sendEndpointProvider = CreateSendEndpointProvider(InputAddress);
-                IPublishEndpointProvider publishEndpointProvider = CreatePublishEndpointProvider(InputAddress);
+                var sendEndpointProvider = CreateSendEndpointProvider(InputAddress);
+                var publishEndpointProvider = CreatePublishEndpointProvider(InputAddress);
 
-                var bus = new MassTransitBus(InputAddress, ConsumePipe, sendEndpointProvider, publishEndpointProvider, ReceiveEndpoints, _hosts, BusObservable,
-                    ReceiveEndpointFactory);
+                var bus = new MassTransitBus(InputAddress, ConsumePipe, sendEndpointProvider, publishEndpointProvider, _hosts, BusObservable);
 
                 TaskUtil.Await(() => _busObservable.PostCreate(bus));
 

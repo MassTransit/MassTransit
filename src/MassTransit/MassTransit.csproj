@@ -97,11 +97,11 @@
     <Compile Include="..\SolutionVersion.cs">
       <Link>Properties\SolutionVersion.cs</Link>
     </Compile>
+    <Compile Include="BusReady.cs" />
     <Compile Include="Configuration\Builders\ConsumePipeBuilder.cs" />
     <Compile Include="Configuration\Builders\EndpointBuilder.cs" />
     <Compile Include="Configuration\Builders\IConsumePipeBuilder.cs" />
     <Compile Include="Configuration\Builders\InMemoryEndpointBuilder.cs" />
-    <Compile Include="Configuration\Builders\InMemoryReceiveEndpointFactory.cs" />
     <Compile Include="Configuration\Builders\IPublishPipeBuilder.cs" />
     <Compile Include="Configuration\Builders\ISendPipeBuilder.cs" />
     <Compile Include="Configuration\Builders\PublishPipeBuilder.cs" />
@@ -112,6 +112,9 @@
     <Compile Include="Configuration\BusConfigurators\IConsumePipeFactory.cs" />
     <Compile Include="Configuration\BusConfigurators\IPublishPipeFactory.cs" />
     <Compile Include="Configuration\BusConfigurators\ISendPipeFactory.cs" />
+    <Compile Include="Events\BusReadyEvent.cs" />
+    <Compile Include="Events\HostReadyEvent.cs" />
+    <Compile Include="HostReady.cs" />
     <Compile Include="Monitoring\Performance\Configuration\PerformanceCounterBusFactorySpecification.cs" />
     <Compile Include="Configuration\BusConfigurators\PublishPipeConfigurator.cs" />
     <Compile Include="Configuration\BusConfigurators\SendPipeConfigurator.cs" />
@@ -255,7 +258,6 @@
     <Compile Include="IPublishEndpointProvider.cs" />
     <Compile Include="IPublishObserver.cs" />
     <Compile Include="IReceiveEndpointObserver.cs" />
-    <Compile Include="IReceiveEndpointObserverConnector.cs" />
     <Compile Include="ISendObserver.cs" />
     <Compile Include="ISendObserverConnector.cs" />
     <Compile Include="Logging\Tracing\ConsoleTraceListener.cs" />
@@ -300,7 +302,6 @@
     <Compile Include="Configuration\IInMemoryBusFactoryConfigurator.cs" />
     <Compile Include="Configuration\InMemoryBus.cs" />
     <Compile Include="Configuration\IReceiveEndpointConfigurator.cs" />
-    <Compile Include="Configuration\IReceiveTransportProvider.cs" />
     <Compile Include="Configuration\InMemoryConfigurationExtensions.cs" />
     <Compile Include="Configuration\ISendTransportProvider.cs" />
     <Compile Include="Configuration\IBusFactory.cs" />
@@ -450,7 +451,6 @@
     <Compile Include="Exceptions\ConsumerMessageException.cs" />
     <Compile Include="Headers.cs" />
     <Compile Include="IBusControl.cs" />
-    <Compile Include="IReceiveObserverConnector.cs" />
     <Compile Include="IConsumer.cs" />
     <Compile Include="IFault.cs" />
     <Compile Include="IMessageDeserializer.cs" />
@@ -554,7 +554,6 @@
     <Compile Include="Pipeline\IPublishMessageObserverConnector.cs" />
     <Compile Include="Pipeline\IPublishObserverConnector.cs" />
     <Compile Include="Pipeline\IPublishPipe.cs" />
-    <Compile Include="Pipeline\IReceiveEndpointConnector.cs" />
     <Compile Include="Pipeline\IReceivePipe.cs" />
     <Compile Include="Pipeline\IRequestPipeConnector.cs" />
     <Compile Include="Pipeline\ISendInterceptor.cs" />
@@ -592,6 +591,7 @@
     <Compile Include="ReceiveEndpointCompleted.cs" />
     <Compile Include="ReceiveEndpointEvent.cs" />
     <Compile Include="ReceiveEndpointFaulted.cs" />
+    <Compile Include="BusReceiveEndpointHandle.cs" />
     <Compile Include="ReceiveEndpointReady.cs" />
     <Compile Include="Request.cs" />
     <Compile Include="IRequestClient.cs" />
@@ -863,13 +863,19 @@
     <Compile Include="Transformation\TransformConfigurators\SendTransformSpecification.cs" />
     <Compile Include="Transformation\TransformConfigurators\TransformSpecification.cs" />
     <Compile Include="Transports\BusHostCollection.cs" />
+    <Compile Include="Transports\DefaultHostHandle.cs" />
     <Compile Include="Transports\DeliveryMetrics.cs" />
     <Compile Include="Transports\DeliveryTracker.cs" />
     <Compile Include="Transports\IBusHostCollection.cs" />
     <Compile Include="Transports\IDelivery.cs" />
     <Compile Include="Transports\IDeliveryTracker.cs" />
+    <Compile Include="Transports\InMemory\IInMemoryHost.cs" />
     <Compile Include="Transports\InMemory\IInMemoryTransport.cs" />
+    <Compile Include="Transports\InMemory\InMemoryReceiveEndpointFactory.cs" />
+    <Compile Include="Transports\InMemory\IReceiveEndpointFactory.cs" />
     <Compile Include="Transports\IReceiveEndpointCollection.cs" />
+    <Compile Include="Transports\IReceiveEndpointObserverConnector.cs" />
+    <Compile Include="Transports\IReceiveObserverConnector.cs" />
     <Compile Include="Transports\ReceiveEndpointCollection.cs" />
     <Compile Include="Transports\ZeroActiveDeliveryHandler.cs" />
     <Compile Include="Turnout\CancelJobConsumer.cs" />
@@ -945,7 +951,7 @@
     <Compile Include="Transports\InMemory\InMemorySendContext.cs" />
     <Compile Include="Transports\InMemory\InMemorySendEndpointProvider.cs" />
     <Compile Include="Transports\InMemory\InMemoryTransport.cs" />
-    <Compile Include="Transports\InMemory\InMemoryTransportCache.cs" />
+    <Compile Include="Transports\InMemory\InMemoryHost.cs" />
     <Compile Include="Transports\InMemory\InMemoryTransportMessage.cs" />
     <Compile Include="Transports\IReceiveTransport.cs" />
     <Compile Include="Transports\ISendTransport.cs" />

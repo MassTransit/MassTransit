@@ -10,20 +10,13 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Pipeline
+namespace MassTransit.AzureServiceBusTransport.Transport
 {
     using System;
-    using System.Threading.Tasks;
 
 
-    public interface IReceiveEndpointConnector
+    public interface IServiceBusReceiveEndpointFactory
     {
-        /// <summary>
-        /// Connect a receive endpoint, using the specified queue name
-        /// </summary>
-        /// <param name="queueName">The queue name for the receive endpoint</param>
-        /// <param name="configure">The callback to configure the receive endpoint</param>
-        /// <returns></returns>
-        Task<BusHandle> ConnectReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configure);
+        IReceiveEndpoint CreateReceiveEndpoint(string queueName, Action<IServiceBusReceiveEndpointConfigurator> configure);
     }
 }

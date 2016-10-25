@@ -29,25 +29,25 @@ namespace MassTransit.Builders
         readonly Uri _inputAddress;
         readonly ISendTransportProvider _sendTransportProvider;
 
-        public InMemoryBusBuilder(IReceiveTransportProvider receiveTransportProvider, ISendTransportProvider sendTransportProvider, BusHostCollection<IBusHostControl> hosts,
+        public InMemoryBusBuilder(InMemoryHost inMemoryHost, ISendTransportProvider sendTransportProvider, BusHostCollection<IBusHostControl> hosts,
             IConsumePipeFactory consumePipeFactory, ISendPipeFactory sendPipeFactory, IPublishPipeFactory publishPipeFactory)
             : base(consumePipeFactory, sendPipeFactory, publishPipeFactory, hosts)
         {
-            if (receiveTransportProvider == null)
-                throw new ArgumentNullException(nameof(receiveTransportProvider));
+            if (inMemoryHost == null)
+                throw new ArgumentNullException(nameof(inMemoryHost));
             if (sendTransportProvider == null)
                 throw new ArgumentNullException(nameof(sendTransportProvider));
 
             _busQueueName = GenerateBusQueueName();
             _inputAddress = new Uri($"loopback://localhost/{_busQueueName}");
 
-            ReceiveTransportProvider = receiveTransportProvider;
+            InMemoryHost = inMemoryHost;
             _sendTransportProvider = sendTransportProvider;
 
-            ReceiveEndpointFactory = new InMemoryReceiveEndpointFactory(this);
+            inMemoryHost.ReceiveEndpointFactory =  new InMemoryReceiveEndpointFactory(this);
         }
 
-        public IReceiveTransportProvider ReceiveTransportProvider { get; }
+        public IInMemoryHost InMemoryHost { get; }
 
         public override ISendEndpointProvider CreateSendEndpointProvider(Uri sourceAddress, params ISendPipeSpecification[] specifications)
         {
