@@ -27,10 +27,12 @@ namespace MassTransit.Tests
         public async Task Should_be_allowed()
         {
             Task<ConsumeContext<PingMessage>> pingHandled = null;
-            using (var handle = await Bus.ConnectReceiveEndpoint("second_queue", x =>
+
+            var handle = await Bus.ConnectReceiveEndpoint("second_queue", x =>
             {
                 pingHandled = Handled<PingMessage>(x);
-            }))
+            });
+            try
             {
                 await Bus.Publish(new PingMessage());
 
@@ -38,26 +40,33 @@ namespace MassTransit.Tests
 
                 Assert.That(pinged.DestinationAddress, Is.EqualTo(new Uri("loopback://localhost/second_queue")));
             }
+            finally
+            {
+                await handle.StopAsync();
+            }
         }
 
         [Test]
         public async Task Should_not_be_allowed_twice()
         {
             Task<ConsumeContext<PingMessage>> pingHandled = null;
-            using (var handle = await Bus.ConnectReceiveEndpoint("second_queue", x =>
+            var handle = await Bus.ConnectReceiveEndpoint("second_queue", x =>
             {
                 pingHandled = Handled<PingMessage>(x);
-            }))
+            });
+            try
             {
                 Assert.That(async () =>
                 {
-                    using (var unused = await Bus.ConnectReceiveEndpoint("second_queue", x =>
+                    BusHandle unused = await Bus.ConnectReceiveEndpoint("second_queue", x =>
                     {
-                    }))
-                    {
-                    }
-
+                    });
                 }, Throws.TypeOf<ConfigurationException>());
+
+            }
+            finally
+            {
+                await handle.StopAsync();
             }
         }
     }

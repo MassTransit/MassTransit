@@ -10,23 +10,14 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Testing
+namespace MassTransit.Transports
 {
-    using GreenPipes;
+    using System.Collections.Generic;
 
 
-    public interface ITestSubject<TSubject> :
-        IAsyncDisposable
-        where TSubject : class
+    public interface IReceiveEndpointCollection :
+        IEnumerable<IReceiveEndpoint>
     {
-    }
-
-
-    public interface ITestSubject<in TScenario, TSubject> :
-        ITestSubject<TSubject>
-        where TSubject : class
-        where TScenario : ITestScenario
-    {
-        void Prepare(TScenario scenario);
+        void Add(string endpointName, IReceiveEndpoint endpoint);
     }
 }

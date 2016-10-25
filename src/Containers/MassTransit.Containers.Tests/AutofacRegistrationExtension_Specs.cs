@@ -52,11 +52,11 @@ namespace MassTransit.Containers.Tests
                 x.ReceiveEndpoint("input_queue", e => e.LoadFrom(container));
             });
 
-            var busHandle = busControl.Start();
+            var busHandle = await busControl.StartAsync();
 
             await busHandle.Ready;
 
-            busHandle.Stop();
+            await busHandle.StopAsync();
         }
     }
 

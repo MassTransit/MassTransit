@@ -32,7 +32,7 @@ namespace MassTransit.Containers.Tests
         {
             var bus = _container.GetInstance<IBusControl>();
 
-            var busHandle = bus.Start();
+            var busHandle = await bus.StartAsync();
 
             await busHandle.Ready;
 

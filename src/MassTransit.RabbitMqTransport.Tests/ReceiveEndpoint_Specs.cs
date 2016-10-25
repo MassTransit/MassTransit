@@ -26,17 +26,21 @@ namespace MassTransit.RabbitMqTransport.Tests
         public async Task Should_be_allowed()
         {
             Task<ConsumeContext<PingMessage>> pingHandled = null;
-            using (BusHandle handle = await Bus.ConnectReceiveEndpoint("second_queue", x =>
+
+            var handle = await Bus.ConnectReceiveEndpoint("second_queue", x =>
             {
                 pingHandled = Handled<PingMessage>(x);
-            }))
+            });
+            try
             {
                 await Bus.Publish(new PingMessage());
 
                 ConsumeContext<PingMessage> pinged = await pingHandled;
 
                 Assert.That(pinged.ReceiveContext.InputAddress, Is.EqualTo(new Uri(HostAddress, "second_queue")));
-
+            }
+            finally
+            {
                 await handle.StopAsync();
             }
         }
@@ -45,20 +49,23 @@ namespace MassTransit.RabbitMqTransport.Tests
         public async Task Should_not_be_allowed_twice()
         {
             Task<ConsumeContext<PingMessage>> pingHandled = null;
-            using (BusHandle handle = await Bus.ConnectReceiveEndpoint("second_queue", x =>
+
+            var handle = await Bus.ConnectReceiveEndpoint("second_queue", x =>
             {
                 pingHandled = Handled<PingMessage>(x);
-            }))
+            });
+            try
             {
                 Assert.That(async () =>
                 {
-                    using (BusHandle unused = await Bus.ConnectReceiveEndpoint("second_queue", x =>
+                    BusHandle unused = await Bus.ConnectReceiveEndpoint("second_queue", x =>
                     {
-                    }))
-                    {
-                    }
+                    });
                 }, Throws.TypeOf<ConfigurationException>());
 
+            }
+            finally
+            {
                 await handle.StopAsync();
             }
         }

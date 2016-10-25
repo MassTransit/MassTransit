@@ -37,15 +37,15 @@ namespace MassTransit
         readonly IBusHostCollection _hosts;
         readonly Lazy<IPublishEndpoint> _publishEndpoint;
         readonly IPublishEndpointProvider _publishEndpointProvider;
-        readonly IReceiveEndpoint[] _receiveEndpoints;
+        readonly IReceiveEndpointFactory _receiveEndpointFactory;
+        readonly IReceiveEndpointCollection _receiveEndpoints;
         readonly ReceiveObservable _receiveObservers;
         readonly ISendEndpointProvider _sendEndpointProvider;
-        readonly IReceiveEndpointFactory _receiveEndpointFactory;
 
         BusHandle _busHandle;
 
         public MassTransitBus(Uri address, IConsumePipe consumePipe, ISendEndpointProvider sendEndpointProvider,
-            IPublishEndpointProvider publishEndpointProvider, IEnumerable<IReceiveEndpoint> receiveEndpoints, IBusHostCollection hosts,
+            IPublishEndpointProvider publishEndpointProvider, IReceiveEndpointCollection receiveEndpoints, IBusHostCollection hosts,
             IBusObserver busObservable, IReceiveEndpointFactory receiveEndpointFactory)
         {
             Address = address;
@@ -54,7 +54,7 @@ namespace MassTransit
             _publishEndpointProvider = publishEndpointProvider;
             _busObservable = busObservable;
             _receiveEndpointFactory = receiveEndpointFactory;
-            _receiveEndpoints = receiveEndpoints.ToArray();
+            _receiveEndpoints = receiveEndpoints;
             _hosts = hosts;
 
             _receiveObservers = new ReceiveObservable();
@@ -139,11 +139,6 @@ namespace MassTransit
             return _sendEndpointProvider.GetSendEndpoint(address);
         }
 
-        BusHandle IBusControl.Start()
-        {
-            return TaskUtil.Await(() => StartAsync(CancellationToken.None));
-        }
-
         public async Task<BusHandle> StartAsync(CancellationToken cancellationToken)
         {
             if (_busHandle != null)
@@ -222,17 +217,6 @@ namespace MassTransit
 
                 throw;
             }
-        }
-
-        void IBusControl.Stop(CancellationToken cancellationToken)
-        {
-            if (_busHandle == null)
-            {
-                _log.Warn($"The bus could not be stopped as it was never started: {Address}");
-                return;
-            }
-
-            _busHandle.Stop(cancellationToken);
         }
 
         public Task StopAsync(CancellationToken cancellationToken = new CancellationToken())
@@ -318,7 +302,8 @@ namespace MassTransit
 
         void IDisposable.Dispose()
         {
-            _busHandle?.Stop(CancellationToken.None);
+            if (_busHandle != null)
+                throw new MassTransitException("The bus was disposed without being stopped. Explicitly call StopAsync before the bus instance is disposed.");
 
             (_sendEndpointProvider as IDisposable)?.Dispose();
             (_publishEndpointProvider as IDisposable)?.Dispose();
@@ -415,16 +400,6 @@ namespace MassTransit
 
             public Task<ReceiveEndpointReady[]> Ready { get; }
 
-            public void Stop(CancellationToken cancellationToken)
-            {
-                if (_stopped)
-                    return;
-
-                TaskUtil.Await(() => StopAsync(cancellationToken), cancellationToken);
-
-                _stopped = true;
-            }
-
             public async Task StopAsync(CancellationToken cancellationToken)
             {
                 if (_stopped)
@@ -457,11 +432,6 @@ namespace MassTransit
                 }
 
                 _stopped = true;
-            }
-
-            void IDisposable.Dispose()
-            {
-                Task.Run(async () => await StopAsync(CancellationToken.None)).Wait();
             }
         }
     }

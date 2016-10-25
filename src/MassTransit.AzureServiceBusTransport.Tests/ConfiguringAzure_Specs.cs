@@ -72,7 +72,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
                 });
 
                 // TODO: Assert something here, need to get a hook to the underlying MessageReceiver
-                using (bus.Start())
+                using (bus.StartAsync())
                 {
                 }
 
@@ -125,8 +125,14 @@ namespace MassTransit.AzureServiceBusTransport.Tests
                     });
                 });
 
-                using (bus.Start())
+                var busHandle = await bus.StartAsync();
+                try
                 {
+
+                }
+                finally
+                {
+                    await busHandle.StopAsync();
                 }
 
 //                }))

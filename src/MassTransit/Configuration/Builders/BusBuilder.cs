@@ -35,7 +35,7 @@ namespace MassTransit.Builders
         readonly IBusHostCollection _hosts;
         readonly Lazy<Uri> _inputAddress;
         readonly IPublishPipeFactory _publishPipeFactory;
-        readonly IDictionary<string, IReceiveEndpoint> _receiveEndpoints;
+        readonly IReceiveEndpointCollection _receiveEndpoints;
         readonly ISendPipeFactory _sendPipeFactory;
         readonly Lazy<ISendTransportProvider> _sendTransportProvider;
         readonly Lazy<IMessageSerializer> _serializer;
@@ -50,7 +50,7 @@ namespace MassTransit.Builders
             _hosts = hosts;
 
             _deserializerFactories = new Dictionary<string, DeserializerFactory>(StringComparer.OrdinalIgnoreCase);
-            _receiveEndpoints = new Dictionary<string, IReceiveEndpoint>();
+            _receiveEndpoints = new ReceiveEndpointCollection();
             _serializerFactory = () => new JsonMessageSerializer();
             _busObservable = new BusObservable();
             _serializer = new Lazy<IMessageSerializer>(CreateSerializer);
@@ -71,7 +71,7 @@ namespace MassTransit.Builders
 
         protected BusObservable BusObservable => _busObservable;
 
-        protected IEnumerable<IReceiveEndpoint> ReceiveEndpoints => _receiveEndpoints.Values;
+        protected IReceiveEndpointCollection ReceiveEndpoints => _receiveEndpoints;
 
         public IMessageSerializer MessageSerializer => _serializer.Value;
 
@@ -125,12 +125,6 @@ namespace MassTransit.Builders
 
         public void AddReceiveEndpoint(string endpointKey, IReceiveEndpoint receiveEndpoint)
         {
-            if (endpointKey == null)
-                throw new ArgumentNullException(nameof(endpointKey));
-
-            if (_receiveEndpoints.ContainsKey(endpointKey))
-                throw new ConfigurationException($"A receive endpoint with the same key was already added: {endpointKey}");
-
             _receiveEndpoints.Add(endpointKey, receiveEndpoint);
         }
 

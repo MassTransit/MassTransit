@@ -133,7 +133,7 @@ namespace MassTransit.Transports.InMemory
                 Interlocked.Increment(ref _queueDepth);
 
 #pragma warning disable 4014
-                Task.Factory.StartNew(() => DispatchMessage(transportMessage), _supervisor.StoppedToken, TaskCreationOptions.HideScheduler, _scheduler);
+                Task.Factory.StartNew(() => DispatchMessage(transportMessage), _supervisor.StoppedToken, TaskCreationOptions.None, _scheduler);
 #pragma warning restore 4014
 
                 context.DestinationAddress.LogSent(context.MessageId?.ToString("N") ?? "", TypeMetadataCache<T>.ShortName);
@@ -168,7 +168,7 @@ namespace MassTransit.Transports.InMemory
             var transportMessage = new InMemoryTransportMessage(messageId, body, context.ContentType.MediaType, messageType);
 
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
-            Task.Factory.StartNew(() => DispatchMessage(transportMessage), _supervisor.StoppedToken, TaskCreationOptions.HideScheduler, _scheduler);
+            Task.Factory.StartNew(() => DispatchMessage(transportMessage), _supervisor.StoppedToken, TaskCreationOptions.None, _scheduler);
 #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
         }
 

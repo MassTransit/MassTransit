@@ -869,6 +869,8 @@
     <Compile Include="Transports\IDelivery.cs" />
     <Compile Include="Transports\IDeliveryTracker.cs" />
     <Compile Include="Transports\InMemory\IInMemoryTransport.cs" />
+    <Compile Include="Transports\IReceiveEndpointCollection.cs" />
+    <Compile Include="Transports\ReceiveEndpointCollection.cs" />
     <Compile Include="Transports\ZeroActiveDeliveryHandler.cs" />
     <Compile Include="Turnout\CancelJobConsumer.cs" />
     <Compile Include="Turnout\Commands\Supervise.cs" />

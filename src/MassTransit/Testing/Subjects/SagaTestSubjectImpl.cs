@@ -15,7 +15,9 @@ namespace MassTransit.Testing.Subjects
     using System;
     using System.Collections;
     using System.Collections.Generic;
+    using System.Threading.Tasks;
     using Configurators;
+    using GreenPipes.Util;
     using Saga;
     using ScenarioBuilders;
     using ScenarioConfigurators;
@@ -86,8 +88,9 @@ namespace MassTransit.Testing.Subjects
             return GetEnumerator();
         }
 
-        public void Dispose()
+        public Task DisposeAsync()
         {
+            return TaskUtil.Completed;
         }
     }
 }

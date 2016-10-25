@@ -48,9 +48,9 @@ namespace MassTransit.Tests.Testing
 		}
 
 		[TearDown]
-		public void Teardown()
+		public async Task Teardown()
 		{
-			_test.Dispose();
+			await _test.DisposeAsync();
 			_test = null;
 		}
 

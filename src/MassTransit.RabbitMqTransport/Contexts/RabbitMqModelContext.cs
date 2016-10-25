@@ -92,7 +92,7 @@ namespace MassTransit.RabbitMqTransport.Contexts
             if (_settings.PublisherConfirmation)
             {
                 var pendingPublish = await Task.Factory.StartNew(() => PublishAsync(exchange, routingKey, mandatory, basicProperties, body),
-                    _participant.StoppedToken, TaskCreationOptions.HideScheduler, _taskScheduler).ConfigureAwait(false);
+                    _participant.StoppedToken, TaskCreationOptions.None, _taskScheduler).ConfigureAwait(false);
 
                 if (awaitAck)
                     await pendingPublish.Task.ConfigureAwait(false);
@@ -100,50 +100,50 @@ namespace MassTransit.RabbitMqTransport.Contexts
             else
             {
                 await Task.Factory.StartNew(() => Publish(exchange, routingKey, mandatory, basicProperties, body),
-                    _participant.StoppedToken, TaskCreationOptions.HideScheduler, _taskScheduler).ConfigureAwait(false);
+                    _participant.StoppedToken, TaskCreationOptions.None, _taskScheduler).ConfigureAwait(false);
             }
         }
 
         Task ModelContext.ExchangeBind(string destination, string source, string routingKey, IDictionary<string, object> arguments)
         {
             return Task.Factory.StartNew(() => _model.ExchangeBind(destination, source, routingKey, arguments),
-                _participant.StoppedToken, TaskCreationOptions.HideScheduler, _taskScheduler);
+                _participant.StoppedToken, TaskCreationOptions.None, _taskScheduler);
         }
 
         Task ModelContext.ExchangeDeclare(string exchange, string type, bool durable, bool autoDelete, IDictionary<string, object> arguments)
         {
             return Task.Factory.StartNew(() => _model.ExchangeDeclare(exchange, type, durable, autoDelete, arguments),
-                _participant.StoppedToken, TaskCreationOptions.HideScheduler, _taskScheduler);
+                _participant.StoppedToken, TaskCreationOptions.None, _taskScheduler);
         }
 
         public Task ExchangeDeclarePassive(string exchange)
         {
             return Task.Factory.StartNew(() => _model.ExchangeDeclarePassive(exchange),
-                _participant.StoppedToken, TaskCreationOptions.HideScheduler, _taskScheduler);
+                _participant.StoppedToken, TaskCreationOptions.None, _taskScheduler);
         }
 
         Task ModelContext.QueueBind(string queue, string exchange, string routingKey, IDictionary<string, object> arguments)
         {
             return Task.Factory.StartNew(() => _model.QueueBind(queue, exchange, routingKey, arguments),
-                _participant.StoppedToken, TaskCreationOptions.HideScheduler, _taskScheduler);
+                _participant.StoppedToken, TaskCreationOptions.None, _taskScheduler);
         }
 
         Task<QueueDeclareOk> ModelContext.QueueDeclare(string queue, bool durable, bool exclusive, bool autoDelete, IDictionary<string, object> arguments)
         {
             return Task.Factory.StartNew(() => _model.QueueDeclare(queue, durable, exclusive, autoDelete, arguments),
-                _participant.StoppedToken, TaskCreationOptions.HideScheduler, _taskScheduler);
+                _participant.StoppedToken, TaskCreationOptions.None, _taskScheduler);
         }
 
         Task<uint> ModelContext.QueuePurge(string queue)
         {
             return Task.Factory.StartNew(() => _model.QueuePurge(queue),
-                _participant.StoppedToken, TaskCreationOptions.HideScheduler, _taskScheduler);
+                _participant.StoppedToken, TaskCreationOptions.None, _taskScheduler);
         }
 
         Task ModelContext.BasicQos(uint prefetchSize, ushort prefetchCount, bool global)
         {
             return Task.Factory.StartNew(() => _model.BasicQos(prefetchSize, prefetchCount, global),
-                _participant.StoppedToken, TaskCreationOptions.HideScheduler, _taskScheduler);
+                _participant.StoppedToken, TaskCreationOptions.None, _taskScheduler);
         }
 
         void ModelContext.BasicAck(ulong deliveryTag, bool multiple)
@@ -159,13 +159,13 @@ namespace MassTransit.RabbitMqTransport.Contexts
         Task<string> ModelContext.BasicConsume(string queue, bool noAck, IBasicConsumer consumer)
         {
             return Task.Factory.StartNew(() => _model.BasicConsume(queue, noAck, consumer),
-                _participant.StoppedToken, TaskCreationOptions.HideScheduler, _taskScheduler);
+                _participant.StoppedToken, TaskCreationOptions.None, _taskScheduler);
         }
 
         public Task BasicCancel(string consumerTag)
         {
             return Task.Factory.StartNew(() => _model.BasicCancel(consumerTag),
-                _participant.StoppedToken, TaskCreationOptions.HideScheduler, _taskScheduler);
+                _participant.StoppedToken, TaskCreationOptions.None, _taskScheduler);
         }
 
         void Close(string reason)
