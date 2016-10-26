@@ -44,15 +44,14 @@ namespace MassTransit.Transports
 
         IEnumerator<IReceiveEndpoint> IEnumerable<IReceiveEndpoint>.GetEnumerator()
         {
-            foreach (var endpoint in _endpoints.Values)
-            {
-                yield return endpoint;
-            }
+            lock (_mutateLock)
+                return _endpoints.Values.ToList().GetEnumerator();
         }
 
-        public IEnumerator GetEnumerator()
+        IEnumerator IEnumerable.GetEnumerator()
         {
-            return _endpoints.GetEnumerator();
+            lock (_mutateLock)
+                return _endpoints.Values.ToList().GetEnumerator();
         }
 
         public void Add(string endpointName, IReceiveEndpoint endpoint)
@@ -91,7 +90,7 @@ namespace MassTransit.Transports
                 if (!_endpoints.TryGetValue(endpointName, out endpoint))
                     throw new ConfigurationException($"A receive endpoint with the same key was already added: {endpointName}");
 
-                if(_handles.ContainsKey(endpointName))
+                if (_handles.ContainsKey(endpointName))
                     throw new ArgumentException($"The specified endpoint has already been started: {endpointName}", nameof(endpointName));
             }
 
@@ -143,8 +142,8 @@ namespace MassTransit.Transports
                 var receiveEndpointObserver = endpoint.ConnectReceiveEndpointObserver(_receiveEndpointObservers);
                 var endpointHandle = endpoint.Start();
 
-                var handle = new Handle(endpointHandle, receiveObserver, receiveEndpointObserver, consumeObserver, endpointReady.Ready,
-                    () => Remove(endpointName), endpoint);
+                var handle = new Handle(endpointHandle, endpoint, endpointReady.Ready, () => Remove(endpointName),
+                    receiveObserver, receiveEndpointObserver, consumeObserver);
 
                 await handle.Ready.ConfigureAwait(false);
 
@@ -178,21 +177,17 @@ namespace MassTransit.Transports
         class Handle :
             HostReceiveEndpointHandle
         {
-            readonly ConnectHandle _consumeObserver;
             readonly ReceiveEndpointHandle _endpointHandle;
+            readonly ConnectHandle[] _handles;
             readonly Action _onStopped;
-            readonly ConnectHandle _receiveEndpointObserver;
-            readonly ConnectHandle _receiveObserver;
             bool _stopped;
 
-            public Handle(ReceiveEndpointHandle endpointHandle, ConnectHandle receiveObserver, ConnectHandle receiveEndpointObserver,
-                ConnectHandle consumeObserver, Task<ReceiveEndpointReady> ready, Action onStopped, IReceiveEndpoint receiveEndpoint)
+            public Handle(ReceiveEndpointHandle endpointHandle, IReceiveEndpoint receiveEndpoint, Task<ReceiveEndpointReady> ready, Action onStopped,
+                params ConnectHandle[] handles)
             {
                 _endpointHandle = endpointHandle;
-                _receiveObserver = receiveObserver;
-                _receiveEndpointObserver = receiveEndpointObserver;
-                _consumeObserver = consumeObserver;
                 _onStopped = onStopped;
+                _handles = handles;
                 ReceiveEndpoint = receiveEndpoint;
 
                 Ready = ready;
@@ -207,9 +202,10 @@ namespace MassTransit.Transports
                 if (_stopped)
                     return;
 
-                _receiveObserver.Disconnect();
-                _receiveEndpointObserver.Disconnect();
-                _consumeObserver.Disconnect();
+                foreach (var handle in _handles)
+                {
+                    handle.Disconnect();
+                }
 
                 await _endpointHandle.Stop(cancellationToken).ConfigureAwait(false);
 
@@ -260,7 +256,7 @@ namespace MassTransit.Transports
                     return TaskUtil.Completed;
                 }
 
-                public Task Faulted(ReceiveEndpointFaulted faulted)
+                Task IReceiveEndpointObserver.Faulted(ReceiveEndpointFaulted faulted)
                 {
                     _ready.TrySetException(faulted.Exception);
 

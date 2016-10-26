@@ -14,6 +14,7 @@ namespace MassTransit.AzureServiceBusTransport.Settings
 {
     using System;
     using System.Collections.Generic;
+    using Transport;
 
 
     public abstract class BaseClientSettings :

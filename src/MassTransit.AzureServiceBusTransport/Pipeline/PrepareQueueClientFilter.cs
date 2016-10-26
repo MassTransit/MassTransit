@@ -17,6 +17,7 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
     using GreenPipes;
     using Logging;
     using Microsoft.ServiceBus.Messaging;
+    using Transport;
 
 
     public class PrepareQueueClientFilter :

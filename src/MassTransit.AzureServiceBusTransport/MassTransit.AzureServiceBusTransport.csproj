@@ -74,7 +74,7 @@
     <Compile Include="AzureBusFactory.cs" />
     <Compile Include="Configuration\Builders\ServiceBusEndpointBuilder.cs" />
     <Compile Include="Contexts\BrokeredMessageSessionContext.cs" />
-    <Compile Include="ClientSettings.cs" />
+    <Compile Include="Transport\ClientSettings.cs" />
     <Compile Include="RequestClientExtensions.cs" />
     <Compile Include="Settings\BaseClientSettings.cs" />
     <Compile Include="Settings\ReceiveEndpointSettings.cs" />
@@ -149,14 +149,14 @@
     <Compile Include="Transport\ReceiveTransport.cs" />
     <Compile Include="Transport\ServiceBusSendTransportProvider.cs" />
     <Compile Include="ServiceBusTokenProviderSettings.cs" />
-    <Compile Include="ReceiveSettings.cs" />
+    <Compile Include="Transport\ReceiveSettings.cs" />
     <Compile Include="ServiceBusMessageNameFormatter.cs" />
     <Compile Include="BusFactoryConfiguratorExtensions.cs" />
     <Compile Include="ServiceBusConfigurationExtensions.cs" />
     <Compile Include="Transport\ServiceBusSubscriptionEndpointFactory.cs" />
     <Compile Include="Transport\SessionReceiver.cs" />
     <Compile Include="Contexts\SubscriptionClientContext.cs" />
-    <Compile Include="SubscriptionSettings.cs" />
+    <Compile Include="Transport\SubscriptionSettings.cs" />
     <Compile Include="Transport\TopicSendClient.cs" />
     <Compile Include="TurnoutExtensions.cs" />
   </ItemGroup>

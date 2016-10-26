@@ -31,55 +31,20 @@ namespace MassTransit.AzureServiceBusTransport.Transport
         readonly ClientSettings _clientSettings;
         readonly ITaskParticipant _participant;
         readonly IPipe<ReceiveContext> _receivePipe;
+        readonly ITaskSupervisor _supervisor;
         readonly IDeliveryTracker _tracker;
         bool _shuttingDown;
 
-        public SessionReceiver(NamespaceContext context, ClientContext clientContext, IPipe<ReceiveContext> receivePipe,
-            ClientSettings clientSettings, ITaskSupervisor supervisor)
+        public SessionReceiver(ClientContext clientContext, IPipe<ReceiveContext> receivePipe, ClientSettings clientSettings, ITaskSupervisor supervisor)
         {
             _clientContext = clientContext;
             _receivePipe = receivePipe;
             _clientSettings = clientSettings;
+            _supervisor = supervisor;
 
             _tracker = new DeliveryTracker(HandleDeliveryComplete);
 
             _participant = supervisor.CreateParticipant($"{TypeMetadataCache<Receiver>.ShortName} - {clientContext.InputAddress}", Stop);
-
-            var options = new SessionHandlerOptions
-            {
-                AutoComplete = false,
-                AutoRenewTimeout = clientSettings.AutoRenewTimeout,
-                MaxConcurrentSessions = clientSettings.MaxConcurrentCalls,
-                MessageWaitTimeout = clientSettings.MessageWaitTimeout
-            };
-
-            options.ExceptionReceived += (sender, x) =>
-            {
-                if (!(x.Exception is OperationCanceledException))
-                {
-                    if (_log.IsErrorEnabled)
-                        _log.Error($"Exception received on session receiver: {clientContext.InputAddress} during {x.Action}", x.Exception);
-                }
-
-                if (_tracker.ActiveDeliveryCount == 0)
-                {
-                    if (_log.IsDebugEnabled)
-                        _log.DebugFormat("Session receiver shutdown completed: {0}", clientContext.InputAddress);
-
-                    _participant.SetComplete();
-                }
-            };
-
-            IMessageSessionAsyncHandlerFactory handlerFactory = new MessageSessionAsyncHandlerFactory(context, supervisor, this, _tracker);
-
-            clientContext.RegisterSessionHandlerFactoryAsync(handlerFactory, options);
-
-            _participant.SetReady();
-        }
-
-        public DeliveryMetrics GetDeliveryMetrics()
-        {
-            return _tracker.GetDeliveryMetrics();
         }
 
         bool ISessionReceiver.IsShuttingDown => _shuttingDown;
@@ -89,6 +54,11 @@ namespace MassTransit.AzureServiceBusTransport.Transport
         Uri ISessionReceiver.InputAddress => _clientContext.InputAddress;
 
         IPipe<ReceiveContext> ISessionReceiver.ReceivePipe => _receivePipe;
+
+        public DeliveryMetrics GetDeliveryMetrics()
+        {
+            return _tracker.GetDeliveryMetrics();
+        }
 
         void HandleDeliveryComplete()
         {
@@ -131,6 +101,40 @@ namespace MassTransit.AzureServiceBusTransport.Transport
 
                 _participant.SetComplete();
             }
+        }
+
+        public async Task Start(NamespaceContext context)
+        {
+            var options = new SessionHandlerOptions
+            {
+                AutoComplete = false,
+                AutoRenewTimeout = _clientSettings.AutoRenewTimeout,
+                MaxConcurrentSessions = _clientSettings.MaxConcurrentCalls,
+                MessageWaitTimeout = _clientSettings.MessageWaitTimeout
+            };
+
+            options.ExceptionReceived += (sender, x) =>
+            {
+                if (!(x.Exception is OperationCanceledException))
+                {
+                    if (_log.IsErrorEnabled)
+                        _log.Error($"Exception received on session receiver: {_clientContext.InputAddress} during {x.Action}", x.Exception);
+                }
+
+                if (_tracker.ActiveDeliveryCount == 0)
+                {
+                    if (_log.IsDebugEnabled)
+                        _log.DebugFormat("Session receiver shutdown completed: {0}", _clientContext.InputAddress);
+
+                    _participant.SetComplete();
+                }
+            };
+
+            IMessageSessionAsyncHandlerFactory handlerFactory = new MessageSessionAsyncHandlerFactory(context, _supervisor, this, _tracker);
+
+            await _clientContext.RegisterSessionHandlerFactoryAsync(handlerFactory, options).ConfigureAwait(false);
+
+            _participant.SetReady();
         }
     }
 }

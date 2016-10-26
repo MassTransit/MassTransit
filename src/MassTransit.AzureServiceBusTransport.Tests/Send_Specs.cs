@@ -79,4 +79,34 @@ namespace MassTransit.AzureServiceBusTransport.Tests
             Assert.AreEqual(message.CorrelationId, _ping.Result.Message.CorrelationId);
         }
     }
+
+    [TestFixture]
+    public class Sending_a_request_using_the_request_client_with_response_endpoint :
+        AzureServiceBusTestFixture
+    {
+        Task<ConsumeContext<PingMessage>> _ping;
+        Task<PongMessage> _response;
+        IRequestClient<PingMessage, PongMessage> _requestClient;
+
+        [OneTimeSetUp]
+        public async Task Setup()
+        {
+            _requestClient = await Host.CreateRequestClient<PingMessage, PongMessage>(Bus, InputQueueAddress, TestTimeout);
+
+            _response = _requestClient.Request(new PingMessage());
+        }
+
+        protected override void ConfigureInputQueueEndpoint(IServiceBusReceiveEndpointConfigurator configurator)
+        {
+            _ping = Handler<PingMessage>(configurator, async x => await x.RespondAsync(new PongMessage(x.Message.CorrelationId)));
+        }
+
+        [Test]
+        public async Task Should_receive_the_response()
+        {
+            PongMessage message = await _response;
+
+            Assert.AreEqual(message.CorrelationId, _ping.Result.Message.CorrelationId);
+        }
+    }
 }

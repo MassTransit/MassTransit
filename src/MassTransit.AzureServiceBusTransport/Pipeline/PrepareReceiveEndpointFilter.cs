@@ -22,6 +22,7 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
     using Microsoft.ServiceBus;
     using NewIdFormatters;
     using Settings;
+    using Transport;
 
 
     /// <summary>
@@ -94,6 +95,7 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
             }
             else
                 name = subscriptionPath;
+
             return name;
         }
     }

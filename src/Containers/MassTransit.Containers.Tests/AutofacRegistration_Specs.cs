@@ -64,6 +64,7 @@ namespace MassTransit.Containers.Tests
                 })
                     .As<IBus>()
                     .As<IBusControl>()
+                    .OnRelease(control => control.Stop())
                     .SingleInstance();
             }
         }
