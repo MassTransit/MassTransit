@@ -31,14 +31,17 @@ namespace MassTransit.RabbitMqTransport.Pipeline
         readonly IReceiveObserver _receiveObserver;
         readonly IPipe<ReceiveContext> _receivePipe;
         readonly ITaskSupervisor _supervisor;
+        readonly ISendEndpointProvider _sendEndpointProvider;
+        readonly IPublishEndpointProvider _publishEndpointProvider;
 
-        public RabbitMqConsumerFilter(IPipe<ReceiveContext> receivePipe, IReceiveObserver receiveObserver, IReceiveTransportObserver transportObserver,
-            ITaskSupervisor supervisor)
+        public RabbitMqConsumerFilter(IPipe<ReceiveContext> receivePipe, IReceiveObserver receiveObserver, IReceiveTransportObserver transportObserver, ITaskSupervisor supervisor, ISendEndpointProvider sendEndpointProvider, IPublishEndpointProvider publishEndpointProvider)
         {
             _receivePipe = receivePipe;
             _receiveObserver = receiveObserver;
             _transportObserver = transportObserver;
             _supervisor = supervisor;
+            _sendEndpointProvider = sendEndpointProvider;
+            _publishEndpointProvider = publishEndpointProvider;
         }
 
         void IProbeSite.Probe(ProbeContext context)
@@ -53,7 +56,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
 
             using (var scope = _supervisor.CreateScope($"{TypeMetadataCache<RabbitMqConsumerFilter>.ShortName} - {inputAddress}", () => TaskUtil.Completed))
             {
-                var consumer = new RabbitMqBasicConsumer(context, inputAddress, _receivePipe, _receiveObserver, scope);
+                var consumer = new RabbitMqBasicConsumer(context, inputAddress, _receivePipe, _receiveObserver, scope, _sendEndpointProvider, _publishEndpointProvider);
 
                 await context.BasicConsume(receiveSettings.QueueName, false, consumer).ConfigureAwait(false);
 

@@ -39,7 +39,9 @@ namespace MassTransit
         /// </summary>
         ContentType ContentType { get; }
 
-        // true if we know this message is being redelivered after a fault
+        /// <summary>
+        /// If True, the message is being redelivered by the transport
+        /// </summary>
         bool Redelivered { get; }
 
         /// <summary>
@@ -101,5 +103,15 @@ namespace MassTransit
         /// </summary>
         /// <param name="task"></param>
         void AddPendingTask(Task task);
+
+        /// <summary>
+        /// The send endpoint provider from the transport
+        /// </summary>
+        ISendEndpointProvider SendEndpointProvider { get; }
+
+        /// <summary>
+        /// The publish endpoint provider from the transport
+        /// </summary>
+        IPublishEndpointProvider PublishEndpointProvider { get; }
     }
 }

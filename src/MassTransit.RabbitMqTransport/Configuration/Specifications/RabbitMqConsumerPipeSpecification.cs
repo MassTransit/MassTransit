@@ -28,15 +28,15 @@ namespace MassTransit.RabbitMqTransport.Specifications
         readonly IReceiveTransportObserver _transportObserver;
         readonly ExchangeBindingSettings[] _exchangeBindings;
         readonly IManagementPipe _managementPipe;
+        readonly ISendEndpointProvider _sendEndpointProvider;
+        readonly IPublishEndpointProvider _publishEndpointProvider;
         readonly ModelSettings _modelSettings;
         readonly IReceiveObserver _receiveObserver;
         readonly IPipe<ReceiveContext> _receivePipe;
         readonly ReceiveSettings _settings;
         readonly ITaskSupervisor _supervisor;
 
-        public RabbitMqConsumerPipeSpecification(IPipe<ReceiveContext> receivePipe, ReceiveSettings settings, IReceiveObserver receiveObserver,
-            IReceiveTransportObserver transportObserver, IEnumerable<ExchangeBindingSettings> exchangeBindings, ITaskSupervisor supervisor,
-            IManagementPipe managementPipe)
+        public RabbitMqConsumerPipeSpecification(IPipe<ReceiveContext> receivePipe, ReceiveSettings settings, IReceiveObserver receiveObserver, IReceiveTransportObserver transportObserver, IEnumerable<ExchangeBindingSettings> exchangeBindings, ITaskSupervisor supervisor, IManagementPipe managementPipe, ISendEndpointProvider sendEndpointProvider, IPublishEndpointProvider publishEndpointProvider)
         {
             _settings = settings;
             _receiveObserver = receiveObserver;
@@ -45,6 +45,8 @@ namespace MassTransit.RabbitMqTransport.Specifications
             _exchangeBindings = exchangeBindings.ToArray();
             _receivePipe = receivePipe;
             _managementPipe = managementPipe;
+            _sendEndpointProvider = sendEndpointProvider;
+            _publishEndpointProvider = publishEndpointProvider;
             _modelSettings = new RabbitMqModelSettings();
         }
 
@@ -54,7 +56,7 @@ namespace MassTransit.RabbitMqTransport.Specifications
             {
                 x.UseFilter(new PrepareReceiveQueueFilter(_settings, _managementPipe, _exchangeBindings));
 
-                x.UseFilter(new RabbitMqConsumerFilter(_receivePipe, _receiveObserver, _transportObserver, _supervisor));
+                x.UseFilter(new RabbitMqConsumerFilter(_receivePipe, _receiveObserver, _transportObserver, _supervisor, _sendEndpointProvider, _publishEndpointProvider));
             });
 
             IFilter<ConnectionContext> modelFilter = new ReceiveModelFilter(pipe, _supervisor, _modelSettings);

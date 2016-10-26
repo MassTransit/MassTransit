@@ -119,7 +119,7 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
             if (endpointBuilder == null)
                 throw new InvalidOperationException("The endpoint builder was not initialized");
 
-            ApplyReceiveEndpoint(receivePipe,
+            ApplyReceiveEndpoint(builder, receivePipe,
                 new PrepareReceiveEndpointFilter(_settings, endpointBuilder.GetTopicSubscriptions().ToArray()),
                 new PrepareQueueClientFilter(_settings));
         }

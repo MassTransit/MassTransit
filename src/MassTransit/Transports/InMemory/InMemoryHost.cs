@@ -34,6 +34,8 @@ namespace MassTransit.Transports.InMemory
         readonly int _concurrencyLimit;
         readonly IReceiveEndpointCollection _receiveEndpoints;
         readonly ConcurrentDictionary<string, InMemoryTransport> _transports;
+        ISendEndpointProvider _sendEndpointProvider;
+        IPublishEndpointProvider _publishEndpointProvider;
 
         public InMemoryHost(int concurrencyLimit)
         {
@@ -85,12 +87,17 @@ namespace MassTransit.Transports.InMemory
             _receiveEndpoints.Probe(scope);
         }
 
-        public IReceiveTransport GetReceiveTransport(string queueName, int concurrencyLimit)
+        public IReceiveTransport GetReceiveTransport(string queueName, int concurrencyLimit, ISendEndpointProvider sendEndpointProvider, IPublishEndpointProvider publishEndpointProvider)
         {
             if (concurrencyLimit <= 0)
                 concurrencyLimit = _concurrencyLimit;
 
-            return _transports.GetOrAdd(queueName, name => new InMemoryTransport(new Uri(_baseUri, name), concurrencyLimit));
+            if (_sendEndpointProvider == null)
+                _sendEndpointProvider = sendEndpointProvider;
+            if (_publishEndpointProvider == null)
+                _publishEndpointProvider = publishEndpointProvider;
+
+            return _transports.GetOrAdd(queueName, name => new InMemoryTransport(new Uri(_baseUri, name), concurrencyLimit, sendEndpointProvider, publishEndpointProvider));
         }
 
         public Task<HostReceiveEndpointHandle> ConnectReceiveEndpoint(string queueName, Action<IInMemoryReceiveEndpointConfigurator> configure)
@@ -131,12 +138,18 @@ namespace MassTransit.Transports.InMemory
             if (queueName.StartsWith("/"))
                 queueName = queueName.Substring(1);
 
-            return _transports.GetOrAdd(queueName, name => new InMemoryTransport(new Uri(_baseUri, name), _concurrencyLimit));
+            return GetTransport(queueName);
         }
 
         public IInMemoryTransport GetTransport(string queueName)
         {
-            return _transports.GetOrAdd(queueName, name => new InMemoryTransport(new Uri(_baseUri, name), _concurrencyLimit));
+            return _transports.GetOrAdd(queueName, name =>
+            {
+                if (_sendEndpointProvider == null || _publishEndpointProvider == null)
+                    throw new NotSupportedException("Okay, so somehow a send transport was requested first.");
+
+                return new InMemoryTransport(new Uri(_baseUri, name), _concurrencyLimit, _sendEndpointProvider, _publishEndpointProvider);
+            });
         }
 
 

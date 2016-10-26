@@ -27,11 +27,16 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
         IFilter<NamespaceContext>
     {
         static readonly ILog _log = Logger.Get<MessageReceiverFilter>();
+        readonly IPublishEndpointProvider _publishEndpointProvider;
         readonly IPipe<ReceiveContext> _receivePipe;
+        readonly ISendEndpointProvider _sendEndpointProvider;
 
-        public MessageReceiverFilter(IPipe<ReceiveContext> receivePipe)
+        public MessageReceiverFilter(IPipe<ReceiveContext> receivePipe, ISendEndpointProvider sendEndpointProvider,
+            IPublishEndpointProvider publishEndpointProvider)
         {
             _receivePipe = receivePipe;
+            _sendEndpointProvider = sendEndpointProvider;
+            _publishEndpointProvider = publishEndpointProvider;
         }
 
         void IProbeSite.Probe(ProbeContext context)
@@ -49,7 +54,7 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
 
             using (var scope = context.CreateScope($"{TypeMetadataCache<MessageReceiverFilter>.ShortName} - {clientContext.InputAddress}"))
             {
-                var receiver = new Receiver(context, clientContext, _receivePipe, clientSettings, scope);
+                var receiver = new Receiver(context, clientContext, _receivePipe, clientSettings, scope, _sendEndpointProvider, _publishEndpointProvider);
 
                 await scope.Ready.ConfigureAwait(false);
 

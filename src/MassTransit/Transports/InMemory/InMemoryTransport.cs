@@ -34,20 +34,25 @@ namespace MassTransit.Transports.InMemory
         IInMemoryTransport
     {
         static readonly ILog _log = Logger.Get<InMemoryTransport>();
-        readonly ReceiveTransportObservable _transportObservable;
         readonly Uri _inputAddress;
         readonly ITaskParticipant _participant;
+        readonly IPublishEndpointProvider _publishEndpointProvider;
         readonly ReceiveObservable _receiveObservable;
         readonly LimitedConcurrencyLevelTaskScheduler _scheduler;
+        readonly ISendEndpointProvider _sendEndpointProvider;
         readonly SendObservable _sendObservable;
         readonly TaskSupervisor _supervisor;
         readonly IDeliveryTracker _tracker;
+        readonly ReceiveTransportObservable _transportObservable;
         int _queueDepth;
         IPipe<ReceiveContext> _receivePipe;
 
-        public InMemoryTransport(Uri inputAddress, int concurrencyLimit)
+        public InMemoryTransport(Uri inputAddress, int concurrencyLimit, ISendEndpointProvider sendEndpointProvider,
+            IPublishEndpointProvider publishEndpointProvider)
         {
             _inputAddress = inputAddress;
+            _sendEndpointProvider = sendEndpointProvider;
+            _publishEndpointProvider = publishEndpointProvider;
 
             _sendObservable = new SendObservable();
             _receiveObservable = new ReceiveObservable();
@@ -197,11 +202,10 @@ namespace MassTransit.Transports.InMemory
             if (_receivePipe == null)
                 throw new ArgumentException("ReceivePipe not configured");
 
-            var context = new InMemoryReceiveContext(_inputAddress, message, _receiveObservable);
+            var context = new InMemoryReceiveContext(_inputAddress, message, _receiveObservable, _sendEndpointProvider, _publishEndpointProvider);
 
             using (_tracker.BeginDelivery())
             {
-
                 try
                 {
                     await _receiveObservable.PreReceive(context).ConfigureAwait(false);

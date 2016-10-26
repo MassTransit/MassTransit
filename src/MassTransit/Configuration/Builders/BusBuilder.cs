@@ -57,11 +57,11 @@ namespace MassTransit.Builders
             _consumePipe = new Lazy<IConsumePipe>(GetConsumePipe);
 
             AddMessageDeserializer(JsonMessageSerializer.JsonContentType,
-                (s, p) => new JsonMessageDeserializer(JsonMessageSerializer.Deserializer, s, p));
+                () => new JsonMessageDeserializer(JsonMessageSerializer.Deserializer));
             AddMessageDeserializer(BsonMessageSerializer.BsonContentType,
-                (s, p) => new BsonMessageDeserializer(BsonMessageSerializer.Deserializer, s, p));
+                () => new BsonMessageDeserializer(BsonMessageSerializer.Deserializer));
             AddMessageDeserializer(XmlMessageSerializer.XmlContentType,
-                (s, p) => new XmlMessageDeserializer(JsonMessageSerializer.Deserializer, s, p));
+                () => new XmlMessageDeserializer(JsonMessageSerializer.Deserializer));
         }
 
         protected BusObservable BusObservable => _busObservable;
@@ -110,8 +110,7 @@ namespace MassTransit.Builders
 
         public IMessageDeserializer GetMessageDeserializer(ISendEndpointProvider sendEndpointProvider, IPublishEndpointProvider publishEndpointProvider)
         {
-            IMessageDeserializer[] deserializers =
-                _deserializerFactories.Values.Select(x => x(sendEndpointProvider, publishEndpointProvider)).ToArray();
+            IMessageDeserializer[] deserializers = _deserializerFactories.Values.Select(x => x()).ToArray();
 
             return new SupportedMessageDeserializers(deserializers);
         }

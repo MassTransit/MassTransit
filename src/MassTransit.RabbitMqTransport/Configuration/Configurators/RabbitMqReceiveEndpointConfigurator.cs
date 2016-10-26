@@ -91,7 +91,10 @@ namespace MassTransit.RabbitMqTransport.Configurators
             if (endpointBuilder == null)
                 throw new InvalidOperationException("The endpoint builder was not initialized");
 
-            var transport = new RabbitMqReceiveTransport(_host, _settings, _managementPipe, endpointBuilder.GetExchangeBindings().ToArray());
+            var sendEndpointProvider = CreateSendEndpointProvider(builder);
+            var publishEndpointProvider = CreatePublishEndpointProvider(builder);
+
+            var transport = new RabbitMqReceiveTransport(_host, _settings, _managementPipe, endpointBuilder.GetExchangeBindings().ToArray(), sendEndpointProvider, publishEndpointProvider);
 
             var rabbitMqHost = _host as RabbitMqHost;
             if (rabbitMqHost == null)

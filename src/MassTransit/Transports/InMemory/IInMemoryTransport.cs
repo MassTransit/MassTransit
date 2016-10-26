@@ -15,7 +15,9 @@ namespace MassTransit.Transports.InMemory
     /// <summary>
     /// Allows access to real-time metrics on the in-memory transport
     /// </summary>
-    public interface IInMemoryTransport
+    public interface IInMemoryTransport :
+        ISendTransport,
+        IReceiveTransport
     {
         /// <summary>
         /// The number of messages currently being delivered to consumers.

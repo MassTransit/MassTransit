@@ -34,13 +34,17 @@ namespace MassTransit.AzureServiceBusTransport.Transport
         readonly ITaskSupervisor _supervisor;
         readonly IDeliveryTracker _tracker;
         bool _shuttingDown;
+        readonly ISendEndpointProvider _sendEndpointProvider;
+        readonly IPublishEndpointProvider _publishEndpointProvider;
 
-        public SessionReceiver(ClientContext clientContext, IPipe<ReceiveContext> receivePipe, ClientSettings clientSettings, ITaskSupervisor supervisor)
+        public SessionReceiver(ClientContext clientContext, IPipe<ReceiveContext> receivePipe, ClientSettings clientSettings, ITaskSupervisor supervisor, ISendEndpointProvider sendEndpointProvider, IPublishEndpointProvider publishEndpointProvider)
         {
             _clientContext = clientContext;
             _receivePipe = receivePipe;
             _clientSettings = clientSettings;
             _supervisor = supervisor;
+            _sendEndpointProvider = sendEndpointProvider;
+            _publishEndpointProvider = publishEndpointProvider;
 
             _tracker = new DeliveryTracker(HandleDeliveryComplete);
 
@@ -130,7 +134,7 @@ namespace MassTransit.AzureServiceBusTransport.Transport
                 }
             };
 
-            IMessageSessionAsyncHandlerFactory handlerFactory = new MessageSessionAsyncHandlerFactory(context, _supervisor, this, _tracker);
+            IMessageSessionAsyncHandlerFactory handlerFactory = new MessageSessionAsyncHandlerFactory(context, _supervisor, this, _tracker, _sendEndpointProvider, _publishEndpointProvider);
 
             await _clientContext.RegisterSessionHandlerFactoryAsync(handlerFactory, options).ConfigureAwait(false);
 

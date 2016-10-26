@@ -129,6 +129,17 @@ namespace MassTransit.EndpointConfigurators
             return new ReceivePipe(receivePipe, consumePipe);
         }
 
+        protected ISendEndpointProvider CreateSendEndpointProvider(IBusBuilder builder)
+        {
+            return builder.CreateSendEndpointProvider(InputAddress, _sendPipeConfigurator);
+        }
+
+
+        protected IPublishEndpointProvider CreatePublishEndpointProvider(IBusBuilder builder)
+        {
+            return builder.CreatePublishEndpointProvider(InputAddress, _publishPipeConfigurator);
+        }
+
         void ConfigureAddDeadLetterFilter(ISendTransportProvider transportProvider)
         {
             IPipe<ReceiveContext> moveToDeadLetterPipe = Pipe.New<ReceiveContext>(x =>

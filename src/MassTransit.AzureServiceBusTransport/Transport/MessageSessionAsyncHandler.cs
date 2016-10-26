@@ -30,14 +30,19 @@ namespace MassTransit.AzureServiceBusTransport.Transport
         readonly MessageSession _session;
         readonly ITaskSupervisor _supervisor;
         readonly IDeliveryTracker _tracker;
+        readonly IPublishEndpointProvider _publishEndpointProvider;
+        readonly ISendEndpointProvider _sendEndpointProvider;
 
-        public MessageSessionAsyncHandler(NamespaceContext context, ITaskSupervisor supervisor, ISessionReceiver receiver, MessageSession session, IDeliveryTracker tracker)
+        public MessageSessionAsyncHandler(NamespaceContext context, ITaskSupervisor supervisor, ISessionReceiver receiver, MessageSession session,
+            IDeliveryTracker tracker, ISendEndpointProvider sendEndpointProvider, IPublishEndpointProvider publishEndpointProvider)
         {
             _context = context;
             _supervisor = supervisor;
             _receiver = receiver;
             _session = session;
             _tracker = tracker;
+            _sendEndpointProvider = sendEndpointProvider;
+            _publishEndpointProvider = publishEndpointProvider;
         }
 
         async Task IMessageSessionAsyncHandler.OnMessageAsync(MessageSession session, BrokeredMessage message)
@@ -53,7 +58,7 @@ namespace MassTransit.AzureServiceBusTransport.Transport
                 if (_log.IsDebugEnabled)
                     _log.DebugFormat("Receiving {0}:{1}({3}) - {2}", delivery.Id, message.MessageId, _receiver.QueuePath, session.SessionId);
 
-                var context = new ServiceBusReceiveContext(_receiver.InputAddress, message, _context);
+                var context = new ServiceBusReceiveContext(_receiver.InputAddress, message, _context, _sendEndpointProvider, _publishEndpointProvider);
 
                 context.GetOrAddPayload<MessageSessionContext>(() => new BrokeredMessageSessionContext(session));
                 context.GetOrAddPayload(() => _context);

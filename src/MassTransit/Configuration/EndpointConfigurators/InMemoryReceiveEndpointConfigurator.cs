@@ -36,7 +36,10 @@ namespace MassTransit.EndpointConfigurators
 
         public void Apply(IInMemoryBusBuilder builder)
         {
-            var transport = builder.InMemoryHost.GetReceiveTransport(_queueName, _transportConcurrencyLimit);
+            var sendEndpointProvider = CreateSendEndpointProvider(builder);
+            var publishEndpointProvider = CreatePublishEndpointProvider(builder);
+
+            var transport = builder.InMemoryHost.GetReceiveTransport(_queueName, _transportConcurrencyLimit, sendEndpointProvider, publishEndpointProvider);
 
             var receivePipe = CreateReceivePipe(builder, consumePipe => new InMemoryReceiveEndpointBuilder(consumePipe));
 

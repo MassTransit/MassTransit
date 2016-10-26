@@ -49,7 +49,7 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
         {
             var receivePipe = CreateReceivePipe(builder, consumePipe => new ServiceBusSubscriptionEndpointBuilder(consumePipe));
 
-            ApplyReceiveEndpoint(receivePipe,
+            ApplyReceiveEndpoint(builder, receivePipe,
                 new PrepareSubscriptionEndpointFilter(_settings),
                 new PrepareSubscriptionClientFilter(_settings));
         }

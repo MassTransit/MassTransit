@@ -49,17 +49,17 @@ namespace MassTransit.Tests.Serialization
             if (_serializerType == typeof(JsonMessageSerializer))
             {
                 Serializer = new JsonMessageSerializer();
-                Deserializer = new JsonMessageDeserializer(JsonMessageSerializer.Deserializer, Bus, PublishEndpointProvider);
+                Deserializer = new JsonMessageDeserializer(JsonMessageSerializer.Deserializer);
             }
             else if (_serializerType == typeof(BsonMessageSerializer))
             {
                 Serializer = new BsonMessageSerializer();
-                Deserializer = new BsonMessageDeserializer(BsonMessageSerializer.Deserializer, Bus, PublishEndpointProvider);
+                Deserializer = new BsonMessageDeserializer(BsonMessageSerializer.Deserializer);
             }
             else if (_serializerType == typeof(XmlMessageSerializer))
             {
                 Serializer = new XmlMessageSerializer();
-                Deserializer = new XmlMessageDeserializer(JsonMessageSerializer.Deserializer, Bus, PublishEndpointProvider);
+                Deserializer = new XmlMessageDeserializer(JsonMessageSerializer.Deserializer);
             }
             else if (_serializerType == typeof(EncryptedMessageSerializer))
             {
@@ -67,11 +67,11 @@ namespace MassTransit.Tests.Serialization
                 var streamProvider = new AesCryptoStreamProvider(keyProvider, "default");
 
                 Serializer = new EncryptedMessageSerializer(streamProvider);
-                Deserializer = new EncryptedMessageDeserializer(BsonMessageSerializer.Deserializer, Bus, PublishEndpointProvider, streamProvider);
+                Deserializer = new EncryptedMessageDeserializer(BsonMessageSerializer.Deserializer, streamProvider);
             }
             else if (_serializerType == typeof(BinaryMessageSerializer)) {
                 Serializer = new BinaryMessageSerializer();
-                Deserializer = new BinaryMessageDeserializer(JsonMessageSerializer.Serializer, Bus, PublishEndpointProvider);
+                Deserializer = new BinaryMessageDeserializer();
             }
             else
                 throw new ArgumentException("The serializer type is unknown");
@@ -112,7 +112,7 @@ namespace MassTransit.Tests.Serialization
             where T : class
         {
             var message = new InMemoryTransportMessage(Guid.NewGuid(), serializedMessageData, Serializer.ContentType.MediaType, TypeMetadataCache<T>.ShortName);
-            var receiveContext = new InMemoryReceiveContext(new Uri("loopback://localhost/input_queue"), message, new ReceiveObservable());
+            var receiveContext = new InMemoryReceiveContext(new Uri("loopback://localhost/input_queue"), message, new ReceiveObservable(), Bus, PublishEndpointProvider);
 
             ConsumeContext consumeContext = Deserializer.Deserialize(receiveContext);
 

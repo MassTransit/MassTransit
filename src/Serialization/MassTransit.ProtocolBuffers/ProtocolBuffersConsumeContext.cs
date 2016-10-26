@@ -41,9 +41,8 @@ namespace MassTransit.ProtocolBuffers
         Uri _responseAddress;
         Uri _sourceAddress;
 
-        public ProtocolBuffersConsumeContext(ISendEndpointProvider sendEndpointProvider,
-            IPublishEndpointProvider publishEndpointProvider, ReceiveContext receiveContext, ProtocolBuffersMessageEnvelope envelope, long offset)
-            : base(receiveContext, sendEndpointProvider, publishEndpointProvider)
+        public ProtocolBuffersConsumeContext(ReceiveContext receiveContext, ProtocolBuffersMessageEnvelope envelope, long offset)
+            : base(receiveContext)
         {
             _envelope = envelope;
             _offset = offset;
@@ -52,11 +51,11 @@ namespace MassTransit.ProtocolBuffers
             _objectTypeDeserializer = null;
         }
 
-        public override Guid? MessageId => _messageId.HasValue ? _messageId : (_messageId = ConvertIdToGuid(_envelope.MessageId));
-        public override Guid? RequestId => _requestId.HasValue ? _requestId : (_requestId = ConvertIdToGuid(_envelope.RequestId));
-        public override Guid? CorrelationId => _correlationId.HasValue ? _correlationId : (_correlationId = ConvertIdToGuid(_envelope.CorrelationId));
-        public override Guid? ConversationId => _conversationId.HasValue ? _conversationId : (_conversationId = ConvertIdToGuid(_envelope.ConversationId));
-        public override Guid? InitiatorId => _initiatorId.HasValue ? _initiatorId : (_initiatorId = ConvertIdToGuid(_envelope.InitiatorId));
+        public override Guid? MessageId => _messageId ?? (_messageId = ConvertIdToGuid(_envelope.MessageId));
+        public override Guid? RequestId => _requestId ?? (_requestId = ConvertIdToGuid(_envelope.RequestId));
+        public override Guid? CorrelationId => _correlationId ?? (_correlationId = ConvertIdToGuid(_envelope.CorrelationId));
+        public override Guid? ConversationId => _conversationId ?? (_conversationId = ConvertIdToGuid(_envelope.ConversationId));
+        public override Guid? InitiatorId => _initiatorId ?? (_initiatorId = ConvertIdToGuid(_envelope.InitiatorId));
         public override DateTime? ExpirationTime => _envelope.ExpirationTime;
         public override Uri SourceAddress => _sourceAddress ?? (_sourceAddress = ConvertToUri(_envelope.SourceAddress));
         public override Uri DestinationAddress => _destinationAddress ?? (_destinationAddress = ConvertToUri(_envelope.DestinationAddress));
@@ -99,7 +98,7 @@ namespace MassTransit.ProtocolBuffers
                     {
                         stream.Seek(_offset, SeekOrigin.Current);
 
-                        _messageTypes[typeof(T)] = message = new MessageConsumeContext<T>(this, ProtoBuf.Serializer.DeserializeWithLengthPrefix<T>(stream, PrefixStyle.Fixed32));
+                        _messageTypes[typeof(T)] = message = new MessageConsumeContext<T>(this, Serializer.DeserializeWithLengthPrefix<T>(stream, PrefixStyle.Fixed32));
                         return true;
                     }
                 }

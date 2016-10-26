@@ -110,12 +110,15 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
             set { _settings.UserMetadata = value; }
         }
 
-        protected void ApplyReceiveEndpoint(IReceivePipe receivePipe, params IFilter<NamespaceContext>[] filters)
+        protected void ApplyReceiveEndpoint(IBusBuilder builder, IReceivePipe receivePipe, params IFilter<NamespaceContext>[] filters)
         {
+            var sendEndpointProvider = CreateSendEndpointProvider(builder);
+            var publishEndpointProvider = CreatePublishEndpointProvider(builder);
+
             IPipeSpecification<NamespaceContext>[] specifications = filters
                 .Concat(Enumerable.Repeat(_settings.RequiresSession
-                    ? (IFilter<NamespaceContext>)new MessageSessionReceiverFilter(receivePipe)
-                    : new MessageReceiverFilter(receivePipe), 1))
+                    ? (IFilter<NamespaceContext>)new MessageSessionReceiverFilter(receivePipe, sendEndpointProvider, publishEndpointProvider)
+                    : new MessageReceiverFilter(receivePipe, sendEndpointProvider, publishEndpointProvider), 1))
                 .Select(x => (IPipeSpecification<NamespaceContext>)new FilterPipeSpecification<NamespaceContext>(x))
                 .ToArray();
 

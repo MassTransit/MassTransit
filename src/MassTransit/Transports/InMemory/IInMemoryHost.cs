@@ -19,7 +19,8 @@ namespace MassTransit.Transports.InMemory
     public interface IInMemoryHost :
         IHost
     {
-        IReceiveTransport GetReceiveTransport(string queueName, int concurrencyLimit);
+        IReceiveTransport GetReceiveTransport(string queueName, int concurrencyLimit, ISendEndpointProvider sendEndpointProvider,
+            IPublishEndpointProvider publishEndpointProvider);
 
         /// <summary>
         /// Create a receive endpoint on the host, with a separate handle for stopping/removing the endpoint

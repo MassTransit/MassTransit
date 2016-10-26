@@ -41,6 +41,8 @@ namespace MassTransit.RabbitMqTransport.Pipeline
         readonly ITaskParticipant _participant;
         readonly ConcurrentDictionary<ulong, RabbitMqReceiveContext> _pending;
         readonly IReceiveObserver _receiveObserver;
+        readonly ISendEndpointProvider _sendEndpointProvider;
+        readonly IPublishEndpointProvider _publishEndpointProvider;
         readonly IPipe<ReceiveContext> _receivePipe;
         readonly ReceiveSettings _receiveSettings;
         readonly IDeliveryTracker _tracker;
@@ -55,13 +57,16 @@ namespace MassTransit.RabbitMqTransport.Pipeline
         /// <param name="receivePipe">The receive pipe to dispatch messages</param>
         /// <param name="receiveObserver">The observer for receive events</param>
         /// <param name="taskSupervisor">The token used to cancel/stop the consumer at shutdown</param>
-        public RabbitMqBasicConsumer(ModelContext model, Uri inputAddress, IPipe<ReceiveContext> receivePipe, IReceiveObserver receiveObserver,
-            ITaskScope taskSupervisor)
+        /// <param name="sendEndpointProvider"></param>
+        /// <param name="publishEndpointProvider"></param>
+        public RabbitMqBasicConsumer(ModelContext model, Uri inputAddress, IPipe<ReceiveContext> receivePipe, IReceiveObserver receiveObserver, ITaskScope taskSupervisor, ISendEndpointProvider sendEndpointProvider, IPublishEndpointProvider publishEndpointProvider)
         {
             _model = model;
             _inputAddress = inputAddress;
             _receivePipe = receivePipe;
             _receiveObserver = receiveObserver;
+            _sendEndpointProvider = sendEndpointProvider;
+            _publishEndpointProvider = publishEndpointProvider;
 
             _tracker = new DeliveryTracker(HandleDeliveryComplete);
 
@@ -146,7 +151,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
             using (var delivery = _tracker.BeginDelivery())
             {
                 var context = new RabbitMqReceiveContext(_inputAddress, exchange, routingKey, _consumerTag, deliveryTag, body, redelivered, properties,
-                    _receiveObserver);
+                    _receiveObserver, _sendEndpointProvider, _publishEndpointProvider);
 
                 context.GetOrAddPayload(() => _receiveSettings);
                 context.GetOrAddPayload(() => _model);
