@@ -16,6 +16,7 @@ namespace MassTransit.AzureServiceBusTransport.Transport
     using System.Threading;
     using System.Threading.Tasks;
     using Contexts;
+    using Events;
     using GreenPipes;
     using Logging;
     using MassTransit.Pipeline;
@@ -28,7 +29,7 @@ namespace MassTransit.AzureServiceBusTransport.Transport
         IReceiveTransport
     {
         static readonly ILog _log = Logger.Get<ReceiveTransport>();
-        readonly ReceiveEndpointObservable _endpointObservers;
+        readonly ReceiveTransportObservable _endpointObservers;
         readonly IServiceBusHost _host;
         readonly ReceiveObservable _receiveObservers;
         readonly ClientSettings _settings;
@@ -40,7 +41,7 @@ namespace MassTransit.AzureServiceBusTransport.Transport
             _settings = settings;
             _specifications = specifications;
             _receiveObservers = new ReceiveObservable();
-            _endpointObservers = new ReceiveEndpointObservable();
+            _endpointObservers = new ReceiveTransportObservable();
         }
 
         void IProbeSite.Probe(ProbeContext context)
@@ -84,7 +85,7 @@ namespace MassTransit.AzureServiceBusTransport.Transport
             return _receiveObservers.Connect(observer);
         }
 
-        public ConnectHandle ConnectReceiveEndpointObserver(IReceiveEndpointObserver observer)
+        public ConnectHandle ConnectReceiveTransportObserver(IReceiveTransportObserver observer)
         {
             return _endpointObservers.Connect(observer);
         }
@@ -117,7 +118,7 @@ namespace MassTransit.AzureServiceBusTransport.Transport
                         if (_log.IsErrorEnabled)
                             _log.Error($"Azure Service Bus receiver faulted: {inputAddress}", ex);
 
-                        await _endpointObservers.Faulted(new Faulted(inputAddress, ex)).ConfigureAwait(false);
+                        await _endpointObservers.Faulted(new ReceiveTransportFaultedEvent(inputAddress, ex)).ConfigureAwait(false);
 
                         throw;
                     }
@@ -127,20 +128,6 @@ namespace MassTransit.AzureServiceBusTransport.Transport
             {
                 _log.Error($"Unhandled exception on Receiver: {inputAddress}", ex);
             }
-        }
-
-
-        class Faulted :
-            ReceiveEndpointFaulted
-        {
-            public Faulted(Uri inputAddress, Exception exception)
-            {
-                InputAddress = inputAddress;
-                Exception = exception;
-            }
-
-            public Uri InputAddress { get; }
-            public Exception Exception { get; }
         }
 
 

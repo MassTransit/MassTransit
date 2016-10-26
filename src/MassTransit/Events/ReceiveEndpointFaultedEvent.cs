@@ -1,4 +1,4 @@
-// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -15,17 +15,19 @@ namespace MassTransit.Events
     using System;
 
 
-    public class ReceiveEndpointReadyEvent :
-        ReceiveEndpointReady
+    public class ReceiveEndpointFaultedEvent :
+        ReceiveEndpointFaulted
     {
-        public ReceiveEndpointReadyEvent(Uri inputAddress, IReceiveEndpoint receiveEndpoint)
+        public ReceiveEndpointFaultedEvent(Uri inputAddress, Exception exception, IReceiveEndpoint receiveEndpoint)
         {
             InputAddress = inputAddress;
+            Exception = exception;
             ReceiveEndpoint = receiveEndpoint;
         }
 
         public Uri InputAddress { get; }
-
         public IReceiveEndpoint ReceiveEndpoint { get; }
+
+        public Exception Exception { get; }
     }
 }

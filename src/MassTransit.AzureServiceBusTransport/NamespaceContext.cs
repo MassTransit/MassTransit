@@ -26,7 +26,7 @@ namespace MassTransit.AzureServiceBusTransport
     public interface NamespaceContext :
         PipeContext,
         IReceiveObserver,
-        IReceiveEndpointObserver
+        IReceiveTransportObserver
     {
         /// <summary>
         /// The messaging factory initialized for the service bus

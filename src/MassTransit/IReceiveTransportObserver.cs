@@ -12,27 +12,33 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
-    using System.Threading;
     using System.Threading.Tasks;
 
 
     /// <summary>
-    /// Returned when a receive endpoint is added to a host
+    /// Used to observe the events signaled by a receive endpoint
     /// </summary>
-    public interface HostReceiveEndpointHandle
+    public interface IReceiveTransportObserver
     {
-        IReceiveEndpoint ReceiveEndpoint { get; }
+        /// <summary>
+        /// Called when the receive endpoint is ready to receive messages
+        /// </summary>
+        /// <param name="ready"></param>
+        /// <returns></returns>
+        Task Ready(ReceiveTransportReady ready);
 
         /// <summary>
-        /// A task which can be awaited to know when the receive endpoint is ready
+        /// Called when the receive endpoint has completed
         /// </summary>
-        Task<ReceiveEndpointReady> Ready { get; }
+        /// <param name="completed"></param>
+        /// <returns></returns>
+        Task Completed(ReceiveTransportCompleted completed);
 
         /// <summary>
-        /// Stop the receive endpoint.
+        /// Called when the receive endpoint faults
         /// </summary>
-        /// <param name="cancellationToken">Cancel the stop operation in progress</param>
-        /// <returns>An awaitable task that is completed once everything is stopped</returns>
-        Task StopAsync(CancellationToken cancellationToken = default(CancellationToken));
+        /// <param name="faulted"></param>
+        /// <returns></returns>
+        Task Faulted(ReceiveTransportFaulted faulted);
     }
 }

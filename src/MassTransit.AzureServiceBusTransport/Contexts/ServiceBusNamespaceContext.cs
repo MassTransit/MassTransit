@@ -26,17 +26,17 @@ namespace MassTransit.AzureServiceBusTransport.Contexts
         NamespaceContext
     {
         readonly IServiceBusHost _host;
-        readonly IReceiveEndpointObserver _receiveEndpointObserver;
+        readonly IReceiveTransportObserver _receiveTransportObserver;
         readonly IReceiveObserver _receiveObserver;
         readonly ITaskSupervisor _supervisor;
 
-        public ServiceBusNamespaceContext(IServiceBusHost host, IReceiveObserver receiveObserver, IReceiveEndpointObserver receiveEndpointObserver,
+        public ServiceBusNamespaceContext(IServiceBusHost host, IReceiveObserver receiveObserver, IReceiveTransportObserver receiveTransportObserver,
             TaskSupervisor supervisor)
             : base(new PayloadCache(), supervisor.StoppingToken)
         {
             _host = host;
             _receiveObserver = receiveObserver;
-            _receiveEndpointObserver = receiveEndpointObserver;
+            _receiveTransportObserver = receiveTransportObserver;
             _supervisor = supervisor;
         }
 
@@ -109,19 +109,19 @@ namespace MassTransit.AzureServiceBusTransport.Contexts
             return _receiveObserver.ReceiveFault(context, exception);
         }
 
-        Task IReceiveEndpointObserver.Ready(ReceiveEndpointReady ready)
+        Task IReceiveTransportObserver.Ready(ReceiveTransportReady ready)
         {
-            return _receiveEndpointObserver.Ready(ready);
+            return _receiveTransportObserver.Ready(ready);
         }
 
-        Task IReceiveEndpointObserver.Completed(ReceiveEndpointCompleted completed)
+        Task IReceiveTransportObserver.Completed(ReceiveTransportCompleted completed)
         {
-            return _receiveEndpointObserver.Completed(completed);
+            return _receiveTransportObserver.Completed(completed);
         }
 
-        Task IReceiveEndpointObserver.Faulted(ReceiveEndpointFaulted faulted)
+        Task IReceiveTransportObserver.Faulted(ReceiveTransportFaulted faulted)
         {
-            return _receiveEndpointObserver.Faulted(faulted);
+            return _receiveTransportObserver.Faulted(faulted);
         }
     }
 }

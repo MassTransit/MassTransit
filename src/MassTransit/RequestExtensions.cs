@@ -57,7 +57,7 @@ namespace MassTransit
                 ? TaskScheduler.Default
                 : TaskScheduler.FromCurrentSynchronizationContext();
 
-            var pipe = new SendRequest<TRequest>(bus, taskScheduler, callback);
+            var pipe = new SendRequest<TRequest>(bus, bus.Address, taskScheduler, callback);
 
             await sendEndpoint.Send(message, pipe, cancellationToken).ConfigureAwait(false);
 
@@ -82,7 +82,7 @@ namespace MassTransit
                 ? TaskScheduler.Default
                 : TaskScheduler.FromCurrentSynchronizationContext();
 
-            var pipe = new SendRequest<TRequest>(bus, taskScheduler, callback);
+            var pipe = new SendRequest<TRequest>(bus, bus.Address, taskScheduler, callback);
 
             await bus.Publish(message, pipe, cancellationToken).ConfigureAwait(false);
 

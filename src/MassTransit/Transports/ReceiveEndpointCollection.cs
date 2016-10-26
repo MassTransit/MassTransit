@@ -144,7 +144,7 @@ namespace MassTransit.Transports
                 var endpointHandle = endpoint.Start();
 
                 var handle = new Handle(endpointHandle, receiveObserver, receiveEndpointObserver, consumeObserver, endpointReady.Ready,
-                    () => Remove(endpointName));
+                    () => Remove(endpointName), endpoint);
 
                 await handle.Ready.ConfigureAwait(false);
 
@@ -186,16 +186,19 @@ namespace MassTransit.Transports
             bool _stopped;
 
             public Handle(ReceiveEndpointHandle endpointHandle, ConnectHandle receiveObserver, ConnectHandle receiveEndpointObserver,
-                ConnectHandle consumeObserver, Task<ReceiveEndpointReady> ready, Action onStopped)
+                ConnectHandle consumeObserver, Task<ReceiveEndpointReady> ready, Action onStopped, IReceiveEndpoint receiveEndpoint)
             {
                 _endpointHandle = endpointHandle;
                 _receiveObserver = receiveObserver;
                 _receiveEndpointObserver = receiveEndpointObserver;
                 _consumeObserver = consumeObserver;
                 _onStopped = onStopped;
+                ReceiveEndpoint = receiveEndpoint;
 
                 Ready = ready;
             }
+
+            public IReceiveEndpoint ReceiveEndpoint { get; }
 
             public Task<ReceiveEndpointReady> Ready { get; }
 

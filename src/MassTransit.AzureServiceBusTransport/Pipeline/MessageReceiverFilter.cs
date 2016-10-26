@@ -13,12 +13,10 @@
 namespace MassTransit.AzureServiceBusTransport.Pipeline
 {
     using System.Threading.Tasks;
-    using Contexts;
     using Events;
     using GreenPipes;
     using Logging;
     using Transport;
-    using Transports;
     using Util;
 
 
@@ -55,7 +53,7 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
 
                 await scope.Ready.ConfigureAwait(false);
 
-                await context.Ready(new ReceiveEndpointReadyEvent(clientContext.InputAddress)).ConfigureAwait(false);
+                await context.Ready(new ReceiveTransportReadyEvent(clientContext.InputAddress)).ConfigureAwait(false);
 
                 scope.SetReady();
 
@@ -65,9 +63,9 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
                 }
                 finally
                 {
-                    DeliveryMetrics metrics = receiver.GetDeliveryMetrics();
+                    var metrics = receiver.GetDeliveryMetrics();
 
-                    await context.Completed(new ReceiveEndpointCompletedEvent(clientContext.InputAddress, metrics)).ConfigureAwait(false);
+                    await context.Completed(new ReceiveTransportCompletedEvent(clientContext.InputAddress, metrics)).ConfigureAwait(false);
 
                     if (_log.IsDebugEnabled)
                     {

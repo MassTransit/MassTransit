@@ -13,19 +13,21 @@
 namespace MassTransit.Events
 {
     using System;
+    using Transports;
 
 
-    public class ReceiveEndpointReadyEvent :
-        ReceiveEndpointReady
+    public class ReceiveTransportCompletedEvent :
+        ReceiveTransportCompleted
     {
-        public ReceiveEndpointReadyEvent(Uri inputAddress, IReceiveEndpoint receiveEndpoint)
+        public ReceiveTransportCompletedEvent(Uri inputAddress, DeliveryMetrics metrics)
         {
             InputAddress = inputAddress;
-            ReceiveEndpoint = receiveEndpoint;
+            DeliveryCount = metrics.DeliveryCount;
+            ConcurrentDeliveryCount = metrics.ConcurrentDeliveryCount;
         }
 
         public Uri InputAddress { get; }
-
-        public IReceiveEndpoint ReceiveEndpoint { get; }
+        public long DeliveryCount { get; }
+        public long ConcurrentDeliveryCount { get; }
     }
 }

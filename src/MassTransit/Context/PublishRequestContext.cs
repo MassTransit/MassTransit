@@ -29,11 +29,9 @@ namespace MassTransit.Context
         readonly SendContext<TRequest> _context;
         readonly Task<TRequest> _requestTask;
 
-        public PublishRequestContext(IBus bus, SendContext<TRequest> context, Action<RequestContext<TRequest>> callback,
+        public PublishRequestContext(SendContext<TRequest> context, Action<RequestContext<TRequest>> callback,
             IDictionary<Type, RequestHandlerHandle> connections, Task<TRequest> requestTask)
         {
-            if (bus == null)
-                throw new ArgumentNullException(nameof(bus));
             if (context == null)
                 throw new ArgumentNullException(nameof(context));
             if (!context.RequestId.HasValue)

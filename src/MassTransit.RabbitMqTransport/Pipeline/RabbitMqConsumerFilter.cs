@@ -27,17 +27,17 @@ namespace MassTransit.RabbitMqTransport.Pipeline
         IFilter<ModelContext>
     {
         static readonly ILog _log = Logger.Get<RabbitMqConsumerFilter>();
-        readonly IReceiveEndpointObserver _endpointObserver;
+        readonly IReceiveTransportObserver _transportObserver;
         readonly IReceiveObserver _receiveObserver;
         readonly IPipe<ReceiveContext> _receivePipe;
         readonly ITaskSupervisor _supervisor;
 
-        public RabbitMqConsumerFilter(IPipe<ReceiveContext> receivePipe, IReceiveObserver receiveObserver, IReceiveEndpointObserver endpointObserver,
+        public RabbitMqConsumerFilter(IPipe<ReceiveContext> receivePipe, IReceiveObserver receiveObserver, IReceiveTransportObserver transportObserver,
             ITaskSupervisor supervisor)
         {
             _receivePipe = receivePipe;
             _receiveObserver = receiveObserver;
-            _endpointObserver = endpointObserver;
+            _transportObserver = transportObserver;
             _supervisor = supervisor;
         }
 
@@ -59,7 +59,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
 
                 await scope.Ready.ConfigureAwait(false);
 
-                await _endpointObserver.Ready(new ReceiveEndpointReadyEvent(inputAddress)).ConfigureAwait(false);
+                await _transportObserver.Ready(new ReceiveTransportReadyEvent(inputAddress)).ConfigureAwait(false);
 
                 scope.SetReady();
 
@@ -70,7 +70,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
                 finally
                 {
                     RabbitMqDeliveryMetrics metrics = consumer;
-                    await _endpointObserver.Completed(new ReceiveEndpointCompletedEvent(inputAddress, metrics)).ConfigureAwait(false);
+                    await _transportObserver.Completed(new ReceiveTransportCompletedEvent(inputAddress, metrics)).ConfigureAwait(false);
 
                     if (_log.IsDebugEnabled)
                     {

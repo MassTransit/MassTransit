@@ -117,8 +117,13 @@
     <Compile Include="Configuration\PipeConfigurators\ConsumeContextRescuePipeSpecification.cs" />
     <Compile Include="Events\BusReadyEvent.cs" />
     <Compile Include="Events\HostReadyEvent.cs" />
+    <Compile Include="Events\ReceiveEndpointFaultedEvent.cs" />
+    <Compile Include="Events\ReceiveTransportCompletedEvent.cs" />
+    <Compile Include="Events\ReceiveTransportFaultedEvent.cs" />
+    <Compile Include="Events\ReceiveTransportReadyEvent.cs" />
     <Compile Include="HostReady.cs" />
     <Compile Include="IHost.cs" />
+    <Compile Include="IReceiveTransportObserver.cs" />
     <Compile Include="Monitoring\Performance\Configuration\PerformanceCounterBusFactorySpecification.cs" />
     <Compile Include="Configuration\BusConfigurators\PublishPipeConfigurator.cs" />
     <Compile Include="Configuration\BusConfigurators\SendPipeConfigurator.cs" />
@@ -581,6 +586,7 @@
     <Compile Include="Pipeline\PublishObservable.cs" />
     <Compile Include="Pipeline\ReceiveEndpointObservable.cs" />
     <Compile Include="Pipeline\ReceiveObservable.cs" />
+    <Compile Include="Pipeline\ReceiveTransportObservable.cs" />
     <Compile Include="Pipeline\SendMessageObservable.cs" />
     <Compile Include="Pipeline\SendObservable.cs" />
     <Compile Include="Policies\IRepeatContext.cs" />
@@ -597,6 +603,10 @@
     <Compile Include="ReceiveEndpointFaulted.cs" />
     <Compile Include="HostReceiveEndpointHandle.cs" />
     <Compile Include="ReceiveEndpointReady.cs" />
+    <Compile Include="ReceiveTransportCompleted.cs" />
+    <Compile Include="ReceiveTransportEvent.cs" />
+    <Compile Include="ReceiveTransportFaulted.cs" />
+    <Compile Include="ReceiveTransportReady.cs" />
     <Compile Include="Request.cs" />
     <Compile Include="IRequestClient.cs" />
     <Compile Include="RequestClientExtensions.cs" />
@@ -880,6 +890,7 @@
     <Compile Include="Transports\IReceiveEndpointCollection.cs" />
     <Compile Include="Transports\IReceiveEndpointObserverConnector.cs" />
     <Compile Include="Transports\IReceiveObserverConnector.cs" />
+    <Compile Include="Transports\IReceiveTransportObserverConnector.cs" />
     <Compile Include="Transports\ReceiveEndpointCollection.cs" />
     <Compile Include="Transports\ZeroActiveDeliveryHandler.cs" />
     <Compile Include="Turnout\CancelJobConsumer.cs" />
@@ -1022,7 +1033,6 @@
     <Compile Include="Serialization\XmlMessageSerializer.cs" />
     <Compile Include="Exceptions\ConfigurationException.cs" />
     <Compile Include="Serialization\ExtensionsToMessageEnvelope.cs" />
-    <Compile Include="ServiceBusExtensions.cs" />
     <Compile Include="Saga\InMemorySagaRepository.cs" />
     <Compile Include="Util\QueryStringExtensions.cs" />
     <Compile Include="Exceptions\PipelineException.cs" />

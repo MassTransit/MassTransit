@@ -137,6 +137,7 @@
     <Compile Include="Configuration\Configurators\RabbitMqBusFactoryConfigurator.cs" />
     <Compile Include="Configuration\BusFactoryConfiguratorExtensions.cs" />
     <Compile Include="RabbitMqDeliveryMetrics.cs" />
+    <Compile Include="RequestClientExtensions.cs" />
     <Compile Include="Topology\EntitySettings.cs" />
     <Compile Include="Topology\ReceiveSettings.cs" />
     <Compile Include="Topology\SendSettings.cs" />

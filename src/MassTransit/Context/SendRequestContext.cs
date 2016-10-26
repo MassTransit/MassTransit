@@ -18,6 +18,7 @@ namespace MassTransit.Context
     using System.Threading;
     using System.Threading.Tasks;
     using GreenPipes;
+    using Pipeline;
     using Util;
 
 
@@ -25,7 +26,7 @@ namespace MassTransit.Context
         RequestContext<TRequest>
         where TRequest : class
     {
-        readonly IBus _bus;
+        readonly IRequestPipeConnector _connector;
         readonly Dictionary<Type, RequestHandlerHandle> _connections;
         readonly SendContext<TRequest> _context;
         readonly Guid _requestId;
@@ -34,10 +35,10 @@ namespace MassTransit.Context
         TimeSpan _timeout;
         CancellationTokenSource _timeoutToken;
 
-        public SendRequestContext(IBus bus, SendContext<TRequest> context, TaskScheduler taskScheduler, Action<RequestContext<TRequest>> callback)
+        public SendRequestContext(IRequestPipeConnector connector, SendContext<TRequest> context, TaskScheduler taskScheduler, Action<RequestContext<TRequest>> callback)
         {
-            if (bus == null)
-                throw new ArgumentNullException(nameof(bus));
+            if (connector == null)
+                throw new ArgumentNullException(nameof(connector));
             if (context == null)
                 throw new ArgumentNullException(nameof(context));
             if (!context.RequestId.HasValue)
@@ -46,7 +47,7 @@ namespace MassTransit.Context
             _connections = new Dictionary<Type, RequestHandlerHandle>();
 
             _requestId = context.RequestId.Value;
-            _bus = bus;
+            _connector = connector;
             _context = context;
             _taskScheduler = taskScheduler;
 
@@ -200,7 +201,7 @@ namespace MassTransit.Context
             if (_connections.ContainsKey(typeof(T)))
                 throw new RequestException($"Only one handler of type {TypeMetadataCache<T>.ShortName} can be registered");
 
-            ConnectHandle connectHandle = _bus.ConnectRequestHandler(_requestId, handler);
+            ConnectHandle connectHandle = _connector.ConnectRequestHandler(_requestId, handler);
 
             _connections.Add(typeof(T), new RequestHandlerHandle<T>(connectHandle));
         }
@@ -232,7 +233,7 @@ namespace MassTransit.Context
                 }
             };
 
-            ConnectHandle connectHandle = _bus.ConnectRequestHandler(_requestId, messageHandler);
+            ConnectHandle connectHandle = _connector.ConnectRequestHandler(_requestId, messageHandler);
 
             _connections.Add(typeof(T), new RequestHandlerHandle<T>(connectHandle, source));
 
@@ -264,7 +265,7 @@ namespace MassTransit.Context
                 return TaskUtil.Completed;
             };
 
-            ConnectHandle connectHandle = _bus.ConnectRequestHandler(_requestId, messageHandler);
+            ConnectHandle connectHandle = _connector.ConnectRequestHandler(_requestId, messageHandler);
 
             _connections.Add(typeof(T), new RequestHandlerHandle<T>(connectHandle, source));
 
@@ -293,7 +294,7 @@ namespace MassTransit.Context
                 return TaskUtil.Completed;
             };
 
-            ConnectHandle connectHandle = _bus.ConnectRequestHandler(_requestId, messageHandler);
+            ConnectHandle connectHandle = _connector.ConnectRequestHandler(_requestId, messageHandler);
 
             _connections.Add(typeof(Fault<TRequest>), new RequestHandlerHandle<Fault<TRequest>>(connectHandle, source));
         }

@@ -34,7 +34,7 @@ namespace MassTransit.Transports.InMemory
         IInMemoryTransport
     {
         static readonly ILog _log = Logger.Get<InMemoryTransport>();
-        readonly ReceiveEndpointObservable _endpointObservable;
+        readonly ReceiveTransportObservable _transportObservable;
         readonly Uri _inputAddress;
         readonly ITaskParticipant _participant;
         readonly ReceiveObservable _receiveObservable;
@@ -51,7 +51,7 @@ namespace MassTransit.Transports.InMemory
 
             _sendObservable = new SendObservable();
             _receiveObservable = new ReceiveObservable();
-            _endpointObservable = new ReceiveEndpointObservable();
+            _transportObservable = new ReceiveTransportObservable();
 
             _tracker = new DeliveryTracker(HandleDeliveryComplete);
 
@@ -93,7 +93,7 @@ namespace MassTransit.Transports.InMemory
             {
                 _receivePipe = receivePipe;
 
-                TaskUtil.Await(() => _endpointObservable.Ready(new ReceiveEndpointReadyEvent(_inputAddress)));
+                TaskUtil.Await(() => _transportObservable.Ready(new ReceiveTransportReadyEvent(_inputAddress)));
 
                 _participant.SetReady();
 
@@ -111,9 +111,9 @@ namespace MassTransit.Transports.InMemory
             return _receiveObservable.Connect(observer);
         }
 
-        public ConnectHandle ConnectReceiveEndpointObserver(IReceiveEndpointObserver observer)
+        public ConnectHandle ConnectReceiveTransportObserver(IReceiveTransportObserver observer)
         {
-            return _endpointObservable.Connect(observer);
+            return _transportObservable.Connect(observer);
         }
 
         async Task ISendTransport.Send<T>(T message, IPipe<SendContext<T>> pipe, CancellationToken cancelSend)
@@ -272,7 +272,7 @@ namespace MassTransit.Transports.InMemory
 
                 await _supervisor.Completed.ConfigureAwait(false);
 
-                await _transport._endpointObservable.Completed(new ReceiveEndpointCompletedEvent(_transport._inputAddress,
+                await _transport._transportObservable.Completed(new ReceiveTransportCompletedEvent(_transport._inputAddress,
                     _transport._tracker.GetDeliveryMetrics())).ConfigureAwait(false);
             }
         }

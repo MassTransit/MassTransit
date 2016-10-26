@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -16,6 +16,7 @@ namespace MassTransit
     using System.Threading;
     using System.Threading.Tasks;
     using Context;
+    using Pipeline;
 
 
     /// <summary>
@@ -29,30 +30,54 @@ namespace MassTransit
         where TRequest : class
         where TResponse : class
     {
-        readonly IBus _bus;
+        readonly Action<SendContext<TRequest>> _callback;
+        readonly IRequestPipeConnector _connector;
         readonly Lazy<Task<ISendEndpoint>> _requestEndpoint;
+        readonly Uri _responseAddress;
         readonly TimeSpan _timeout;
         readonly TimeSpan? _timeToLive;
-        readonly Action<SendContext<TRequest>> _callback;
 
         /// <summary>
         /// Creates a message request client for the bus and endpoint specified
         /// </summary>
         /// <param name="bus">The bus instance</param>
-        /// <param name="address">The service endpoint address</param>
+        /// <param name="serviceAddress">The service endpoint address</param>
         /// <param name="timeout">The request timeout</param>
         /// <param name="timeToLive">The time that the request will live for</param>
         /// <param name="callback"></param>
-        public MessageRequestClient(IBus bus, Uri address, TimeSpan timeout, TimeSpan? timeToLive = default(TimeSpan?), Action<SendContext<TRequest>> callback = null)
+        public MessageRequestClient(IBus bus, Uri serviceAddress, TimeSpan timeout, TimeSpan? timeToLive = default(TimeSpan?),
+            Action<SendContext<TRequest>> callback = null)
         {
-            _bus = bus;
+            _connector = bus;
+            _responseAddress = bus.Address;
             _timeout = timeout;
             _timeToLive = timeToLive;
             _callback = callback;
 
-            _requestEndpoint = new Lazy<Task<ISendEndpoint>>(async () => await _bus.GetSendEndpoint(address).ConfigureAwait(false));
+            _requestEndpoint = new Lazy<Task<ISendEndpoint>>(async () => await bus.GetSendEndpoint(serviceAddress).ConfigureAwait(false));
         }
 
+        /// <summary>
+        /// Creates a message request client for the bus and endpoint specified
+        /// </summary>
+        /// <param name="sendEndpointProvider"></param>
+        /// <param name="connector">The bus instance</param>
+        /// <param name="responseAddress">The response address of the connector</param>
+        /// <param name="serviceAddress">The service endpoint address</param>
+        /// <param name="timeout">The request timeout</param>
+        /// <param name="timeToLive">The time that the request will live for</param>
+        /// <param name="callback"></param>
+        public MessageRequestClient(ISendEndpointProvider sendEndpointProvider, IRequestPipeConnector connector, Uri responseAddress, Uri serviceAddress,
+            TimeSpan timeout, TimeSpan? timeToLive = default(TimeSpan?), Action<SendContext<TRequest>> callback = null)
+        {
+            _connector = connector;
+            _responseAddress = responseAddress;
+            _timeout = timeout;
+            _timeToLive = timeToLive;
+            _callback = callback;
+
+            _requestEndpoint = new Lazy<Task<ISendEndpoint>>(async () => await sendEndpointProvider.GetSendEndpoint(serviceAddress).ConfigureAwait(false));
+        }
 
         public async Task<TResponse> Request(TRequest request, CancellationToken cancellationToken)
         {
@@ -61,7 +86,7 @@ namespace MassTransit
                 : TaskScheduler.FromCurrentSynchronizationContext();
 
             Task<TResponse> responseTask = null;
-            var pipe = new SendRequest<TRequest>(_bus, taskScheduler, x =>
+            var pipe = new SendRequest<TRequest>(_connector, _responseAddress, taskScheduler, x =>
             {
                 x.TimeToLive = _timeToLive;
                 x.Timeout = _timeout;
@@ -70,7 +95,7 @@ namespace MassTransit
                 _callback?.Invoke(x);
             });
 
-            ISendEndpoint endpoint = await _requestEndpoint.Value.ConfigureAwait(false);
+            var endpoint = await _requestEndpoint.Value.ConfigureAwait(false);
 
             await endpoint.Send(request, pipe, cancellationToken).ConfigureAwait(false);
 

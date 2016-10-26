@@ -51,7 +51,7 @@ namespace MassTransit.RabbitMqTransport
         /// </summary>
         /// <param name="configure"></param>
         /// <returns></returns>
-        Task<HostReceiveEndpointHandle> ConnectReceiveEndpoint(Action<IRabbitMqReceiveEndpointConfigurator> configure);
+        Task<HostReceiveEndpointHandle> ConnectReceiveEndpoint(Action<IRabbitMqReceiveEndpointConfigurator> configure = null);
 
         /// <summary>
         /// Create a receive endpoint on the host, with a separate handle for stopping/removing the endpoint
@@ -59,6 +59,6 @@ namespace MassTransit.RabbitMqTransport
         /// <param name="queueName"></param>
         /// <param name="configure"></param>
         /// <returns></returns>
-        Task<HostReceiveEndpointHandle> ConnectReceiveEndpoint(string queueName, Action<IRabbitMqReceiveEndpointConfigurator> configure);
+        Task<HostReceiveEndpointHandle> ConnectReceiveEndpoint(string queueName, Action<IRabbitMqReceiveEndpointConfigurator> configure = null);
     }
 }

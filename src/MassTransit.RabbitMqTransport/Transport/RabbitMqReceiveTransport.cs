@@ -15,6 +15,7 @@ namespace MassTransit.RabbitMqTransport.Transport
     using System;
     using System.Threading;
     using System.Threading.Tasks;
+    using Events;
     using GreenPipes;
     using GreenPipes.Internals.Extensions;
     using Logging;
@@ -32,11 +33,11 @@ namespace MassTransit.RabbitMqTransport.Transport
         static readonly ILog _log = Logger.Get<RabbitMqReceiveTransport>();
         readonly ExchangeBindingSettings[] _bindings;
         readonly IRabbitMqHost _host;
-        readonly IManagementPipe _managementPipe;
-        readonly ReceiveEndpointObservable _receiveEndpointObservable;
-        readonly ReceiveObservable _receiveObservable;
-        readonly ReceiveSettings _settings;
         readonly Uri _inputAddress;
+        readonly IManagementPipe _managementPipe;
+        readonly ReceiveObservable _receiveObservable;
+        readonly ReceiveTransportObservable _receiveTransportObservable;
+        readonly ReceiveSettings _settings;
 
         public RabbitMqReceiveTransport(IRabbitMqHost host, ReceiveSettings settings, IManagementPipe managementPipe, params ExchangeBindingSettings[] bindings)
         {
@@ -46,7 +47,7 @@ namespace MassTransit.RabbitMqTransport.Transport
             _managementPipe = managementPipe;
 
             _receiveObservable = new ReceiveObservable();
-            _receiveEndpointObservable = new ReceiveEndpointObservable();
+            _receiveTransportObservable = new ReceiveTransportObservable();
 
             _inputAddress = _settings.GetInputAddress(_host.Settings.HostAddress);
         }
@@ -71,7 +72,7 @@ namespace MassTransit.RabbitMqTransport.Transport
 
             IPipe<ConnectionContext> pipe = Pipe.New<ConnectionContext>(x =>
             {
-                x.RabbitMqConsumer(receivePipe, _settings, _receiveObservable, _receiveEndpointObservable, _bindings, supervisor, _managementPipe);
+                x.RabbitMqConsumer(receivePipe, _settings, _receiveObservable, _receiveTransportObservable, _bindings, supervisor, _managementPipe);
             });
 
             Receiver(pipe, supervisor);
@@ -84,9 +85,9 @@ namespace MassTransit.RabbitMqTransport.Transport
             return _receiveObservable.Connect(observer);
         }
 
-        public ConnectHandle ConnectReceiveEndpointObserver(IReceiveEndpointObserver observer)
+        public ConnectHandle ConnectReceiveTransportObserver(IReceiveTransportObserver observer)
         {
-            return _receiveEndpointObservable.Connect(observer);
+            return _receiveTransportObservable.Connect(observer);
         }
 
         async void Receiver(IPipe<ConnectionContext> transportPipe, TaskSupervisor supervisor)
@@ -105,7 +106,7 @@ namespace MassTransit.RabbitMqTransport.Transport
                         if (_log.IsErrorEnabled)
                             _log.ErrorFormat("RabbitMQ connection failed: {0}", ex.Message);
 
-                        await _receiveEndpointObservable.Faulted(new Faulted(_inputAddress, ex)).ConfigureAwait(false);
+                        await _receiveTransportObservable.Faulted(new ReceiveTransportFaultedEvent(_inputAddress, ex)).ConfigureAwait(false);
 
                         throw;
                     }
@@ -117,7 +118,7 @@ namespace MassTransit.RabbitMqTransport.Transport
                         if (_log.IsErrorEnabled)
                             _log.ErrorFormat("RabbitMQ receive transport failed: {0}", ex.Message);
 
-                        await _receiveEndpointObservable.Faulted(new Faulted(_inputAddress, ex)).ConfigureAwait(false);
+                        await _receiveTransportObservable.Faulted(new ReceiveTransportFaultedEvent(_inputAddress, ex)).ConfigureAwait(false);
 
                         throw;
                     }
@@ -126,20 +127,6 @@ namespace MassTransit.RabbitMqTransport.Transport
             catch (TaskCanceledException)
             {
             }
-        }
-
-
-        class Faulted :
-            ReceiveEndpointFaulted
-        {
-            public Faulted(Uri inputAddress, Exception exception)
-            {
-                InputAddress = inputAddress;
-                Exception = exception;
-            }
-
-            public Uri InputAddress { get; }
-            public Exception Exception { get; }
         }
 
 

@@ -15,17 +15,14 @@ namespace MassTransit.Events
     using System;
 
 
-    public class ReceiveEndpointReadyEvent :
-        ReceiveEndpointReady
+    public class ReceiveTransportReadyEvent :
+        ReceiveTransportReady
     {
-        public ReceiveEndpointReadyEvent(Uri inputAddress, IReceiveEndpoint receiveEndpoint)
+        public ReceiveTransportReadyEvent(Uri inputAddress)
         {
             InputAddress = inputAddress;
-            ReceiveEndpoint = receiveEndpoint;
         }
 
         public Uri InputAddress { get; }
-
-        public IReceiveEndpoint ReceiveEndpoint { get; }
     }
 }
