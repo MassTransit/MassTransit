@@ -10,14 +10,7 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Transports
+namespace MassTransit.Transports.Metrics
 {
-    using System;
-
-
-    public interface IDelivery :
-        IDisposable
-    {
-        long Id { get; }
-    }
+    public delegate void ZeroActiveDeliveryHandler();
 }

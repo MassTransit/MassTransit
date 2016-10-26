@@ -120,7 +120,7 @@ namespace MassTransit.EndpointConfigurators
 
             var sendEndpointProvider = builder.CreateSendEndpointProvider(InputAddress, _sendPipeConfigurator);
 
-            var messageDeserializer = builder.GetMessageDeserializer(sendEndpointProvider, publishEndpointProvider);
+            var messageDeserializer = builder.MessageDeserializer;
 
             _receiveConfigurator.UseFilter(new DeserializeFilter(messageDeserializer, consumePipe));
 

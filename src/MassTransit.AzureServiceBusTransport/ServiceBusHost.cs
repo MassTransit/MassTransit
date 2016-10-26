@@ -461,7 +461,7 @@ namespace MassTransit.AzureServiceBusTransport
 
 
         class Handle :
-            DefaultHostHandle
+            BaseHostHandle
         {
             readonly ServiceBusHost _host;
             readonly TaskSupervisor _supervisor;

@@ -28,10 +28,14 @@ namespace MassTransit.Builders
         /// </summary>
         ISendTransportProvider SendTransportProvider { get; }
 
+        IMessageSerializer MessageSerializer { get; }
+
         /// <summary>
         /// The default message deserializer
         /// </summary>
-        IMessageDeserializer GetMessageDeserializer(ISendEndpointProvider sendEndpointProvider, IPublishEndpointProvider publishEndpointProvider);
+        IMessageDeserializer MessageDeserializer { get; }
+
+        SerializerBuilder CreateSerializerBuilder();
 
         /// <summary>
         /// Creates a send endpoint provider using the bus and supplied specifications
@@ -53,7 +57,7 @@ namespace MassTransit.Builders
         /// Sets the outbound message serializer
         /// </summary>
         /// <param name="serializerFactory">The factory to create the message serializer</param>
-        void SetMessageSerializer(Func<IMessageSerializer> serializerFactory);
+        void SetMessageSerializer(SerializerFactory serializerFactory);
 
         /// <summary>
         /// Adds an inbound message deserializer to the available deserializers
@@ -84,5 +88,7 @@ namespace MassTransit.Builders
         /// <param name="observer"></param>
         /// <returns></returns>
         ConnectHandle ConnectBusObserver(IBusObserver observer);
+
+        IPublishPipe CreatePublishPipe(params IPublishPipeSpecification[] specifications);
     }
 }

@@ -15,6 +15,5 @@ namespace MassTransit
     public interface ReceiveEndpointReady :
         ReceiveEndpointEvent
     {
-        IReceiveEndpoint ReceiveEndpoint { get; }
     }
 }

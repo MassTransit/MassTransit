@@ -10,18 +10,24 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Transports
+namespace MassTransit.EndpointConfigurators
 {
-    public interface DeliveryMetrics
-    {
-        /// <summary>
-        /// The number of messages consumed by the consumer
-        /// </summary>
-        long DeliveryCount { get; }
+    using System.Collections.Generic;
+    using GreenPipes;
 
-        /// <summary>
-        /// The highest concurrent message count that was received by the consumer
-        /// </summary>
-        int ConcurrentDeliveryCount { get; }
+
+    public class SetMessageSerializerReceiveEndpointSpecification<TSerializer> :
+        IReceiveEndpointSpecification
+        where TSerializer : IMessageSerializer, new()
+    {
+        public IEnumerable<ValidationResult> Validate()
+        {
+            yield break;
+        }
+
+        public void Configure(IReceiveEndpointBuilder builder)
+        {
+            builder.SetMessageSerializer(() => new TSerializer());
+        }
     }
 }

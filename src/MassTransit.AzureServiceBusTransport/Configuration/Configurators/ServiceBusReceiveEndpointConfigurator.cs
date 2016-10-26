@@ -112,7 +112,7 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
             ServiceBusReceiveEndpointBuilder endpointBuilder = null;
             var receivePipe = CreateReceivePipe(builder, consumePipe =>
             {
-                endpointBuilder = new ServiceBusReceiveEndpointBuilder(consumePipe, Host.MessageNameFormatter, _subscribeMessageTopics);
+                endpointBuilder = new ServiceBusReceiveEndpointBuilder(consumePipe, builder, Host.MessageNameFormatter, _subscribeMessageTopics);
                 return endpointBuilder;
             });
 

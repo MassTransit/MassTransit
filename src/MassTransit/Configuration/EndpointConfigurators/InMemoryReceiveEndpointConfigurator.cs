@@ -36,14 +36,16 @@ namespace MassTransit.EndpointConfigurators
 
         public void Apply(IInMemoryBusBuilder builder)
         {
-            var sendEndpointProvider = CreateSendEndpointProvider(builder);
-            var publishEndpointProvider = CreatePublishEndpointProvider(builder);
+            var endpointBuilder = new InMemoryEndpointBuilder(builder, InputAddress);
 
-            var transport = builder.InMemoryHost.GetReceiveTransport(_queueName, _transportConcurrencyLimit, sendEndpointProvider, publishEndpointProvider);
+            var receivePipe = CreateReceivePipe(endpointBuilder, consumePipe => new InMemoryReceiveEndpointBuilder(consumePipe, endpointBuilder));
 
-            var receivePipe = CreateReceivePipe(builder, consumePipe => new InMemoryReceiveEndpointBuilder(consumePipe));
+            var sendEndpointProvider = CreateSendEndpointProvider(endpointBuilder);
+            var publishEndpointProvider = CreatePublishEndpointProvider(endpointBuilder);
 
-            var inMemoryHost = builder.InMemoryHost as InMemoryHost;
+            var transport = endpointBuilder.InMemoryHost.GetReceiveTransport(_queueName, _transportConcurrencyLimit, sendEndpointProvider, publishEndpointProvider);
+
+            var inMemoryHost = endpointBuilder.InMemoryHost as InMemoryHost;
             if (inMemoryHost == null)
                 throw new ConfigurationException("Must be an InMemoryHost");
 

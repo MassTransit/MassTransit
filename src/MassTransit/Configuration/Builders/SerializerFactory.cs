@@ -12,16 +12,5 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Builders
 {
-    using Pipeline;
-
-
-    public class InMemoryReceiveEndpointBuilder :
-        ReceiveEndpointBuilder,
-        IReceiveEndpointBuilder
-    {
-        public InMemoryReceiveEndpointBuilder(IConsumePipe consumePipe, IBusBuilder busBuilder)
-            : base(consumePipe, busBuilder)
-        {
-        }
-    }
+    public delegate IMessageSerializer SerializerFactory();
 }

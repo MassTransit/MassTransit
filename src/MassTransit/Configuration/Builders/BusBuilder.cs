@@ -13,13 +13,10 @@
 namespace MassTransit.Builders
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
     using System.Net.Mime;
     using BusConfigurators;
     using GreenPipes;
     using Pipeline;
-    using Serialization;
     using Transports;
     using Util;
 
@@ -30,14 +27,12 @@ namespace MassTransit.Builders
         readonly BusObservable _busObservable;
         readonly Lazy<IConsumePipe> _consumePipe;
         readonly IConsumePipeFactory _consumePipeFactory;
-        readonly IDictionary<string, DeserializerFactory> _deserializerFactories;
         readonly IBusHostCollection _hosts;
         readonly Lazy<Uri> _inputAddress;
         readonly IPublishPipeFactory _publishPipeFactory;
         readonly ISendPipeFactory _sendPipeFactory;
         readonly Lazy<ISendTransportProvider> _sendTransportProvider;
-        readonly Lazy<IMessageSerializer> _serializer;
-        Func<IMessageSerializer> _serializerFactory;
+        readonly SerializerBuilder _serializerBuilder;
 
         protected BusBuilder(IConsumePipeFactory consumePipeFactory, ISendPipeFactory sendPipeFactory,
             IPublishPipeFactory publishPipeFactory, IBusHostCollection hosts)
@@ -47,55 +42,34 @@ namespace MassTransit.Builders
             _publishPipeFactory = publishPipeFactory;
             _hosts = hosts;
 
-            _deserializerFactories = new Dictionary<string, DeserializerFactory>(StringComparer.OrdinalIgnoreCase);
-            _serializerFactory = () => new JsonMessageSerializer();
+            _serializerBuilder = new SerializerBuilder();
+
             _busObservable = new BusObservable();
-            _serializer = new Lazy<IMessageSerializer>(CreateSerializer);
             _sendTransportProvider = new Lazy<ISendTransportProvider>(CreateSendTransportProvider);
 
             _inputAddress = new Lazy<Uri>(GetInputAddress);
             _consumePipe = new Lazy<IConsumePipe>(GetConsumePipe);
-
-            AddMessageDeserializer(JsonMessageSerializer.JsonContentType,
-                () => new JsonMessageDeserializer(JsonMessageSerializer.Deserializer));
-            AddMessageDeserializer(BsonMessageSerializer.BsonContentType,
-                () => new BsonMessageDeserializer(BsonMessageSerializer.Deserializer));
-            AddMessageDeserializer(XmlMessageSerializer.XmlContentType,
-                () => new XmlMessageDeserializer(JsonMessageSerializer.Deserializer));
         }
 
         protected BusObservable BusObservable => _busObservable;
-
-        public IMessageSerializer MessageSerializer => _serializer.Value;
-
         protected Uri InputAddress => _inputAddress.Value;
-
         protected IConsumePipe ConsumePipe => _consumePipe.Value;
+
+        public IMessageSerializer MessageSerializer => _serializerBuilder.Serializer;
+        public IMessageDeserializer MessageDeserializer => _serializerBuilder.Deserializer;
 
         public ISendTransportProvider SendTransportProvider => _sendTransportProvider.Value;
 
+        public SerializerBuilder SerializerBuilder => _serializerBuilder;
+
         public void AddMessageDeserializer(ContentType contentType, DeserializerFactory deserializerFactory)
         {
-            if (contentType == null)
-                throw new ArgumentNullException(nameof(contentType));
-            if (deserializerFactory == null)
-                throw new ArgumentNullException(nameof(deserializerFactory));
-
-            if (_deserializerFactories.ContainsKey(contentType.MediaType))
-                return;
-
-            _deserializerFactories[contentType.MediaType] = deserializerFactory;
+            _serializerBuilder.AddDeserializer(contentType, deserializerFactory);
         }
 
-        public void SetMessageSerializer(Func<IMessageSerializer> serializerFactory)
+        public void SetMessageSerializer(SerializerFactory serializerFactory)
         {
-            if (serializerFactory == null)
-                throw new ArgumentNullException(nameof(serializerFactory));
-
-            if (_serializer.IsValueCreated)
-                throw new ConfigurationException("The serializer has already been created, the serializer cannot be changed at this time.");
-
-            _serializerFactory = serializerFactory;
+            _serializerBuilder.SetSerializer(serializerFactory);
         }
 
         public ISendPipe CreateSendPipe(params ISendPipeSpecification[] specifications)
@@ -108,16 +82,14 @@ namespace MassTransit.Builders
             return _consumePipeFactory.CreateConsumePipe(specifications);
         }
 
-        public IMessageDeserializer GetMessageDeserializer(ISendEndpointProvider sendEndpointProvider, IPublishEndpointProvider publishEndpointProvider)
-        {
-            IMessageDeserializer[] deserializers = _deserializerFactories.Values.Select(x => x()).ToArray();
-
-            return new SupportedMessageDeserializers(deserializers);
-        }
-
         public ConnectHandle ConnectBusObserver(IBusObserver observer)
         {
             return _busObservable.Connect(observer);
+        }
+
+        public SerializerBuilder CreateSerializerBuilder()
+        {
+            return new SerializerBuilder(_serializerBuilder);
         }
 
         public abstract ISendEndpointProvider CreateSendEndpointProvider(Uri sourceAddress, params ISendPipeSpecification[] specifications);
@@ -130,11 +102,6 @@ namespace MassTransit.Builders
         public IPublishPipe CreatePublishPipe(params IPublishPipeSpecification[] specifications)
         {
             return _publishPipeFactory.CreatePublishPipe(specifications);
-        }
-
-        IMessageSerializer CreateSerializer()
-        {
-            return _serializerFactory();
         }
 
         public IBusControl Build()

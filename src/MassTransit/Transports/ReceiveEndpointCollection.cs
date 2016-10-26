@@ -13,7 +13,6 @@
 namespace MassTransit.Transports
 {
     using System;
-    using System.Collections;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading;
@@ -40,18 +39,6 @@ namespace MassTransit.Transports
             _receiveObservers = new ReceiveObservable();
             _receiveEndpointObservers = new ReceiveEndpointObservable();
             _consumeObservers = new ConsumeObservable();
-        }
-
-        IEnumerator<IReceiveEndpoint> IEnumerable<IReceiveEndpoint>.GetEnumerator()
-        {
-            lock (_mutateLock)
-                return _endpoints.Values.ToList().GetEnumerator();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            lock (_mutateLock)
-                return _endpoints.Values.ToList().GetEnumerator();
         }
 
         public void Add(string endpointName, IReceiveEndpoint endpoint)

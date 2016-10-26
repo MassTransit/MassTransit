@@ -14,39 +14,35 @@ namespace MassTransit.RabbitMqTransport.Builders
 {
     using System.Collections.Generic;
     using GreenPipes;
+    using MassTransit.Builders;
     using MassTransit.Pipeline;
     using Topology;
     using Transports;
 
 
     public class RabbitMqReceiveEndpointBuilder :
+        ReceiveEndpointBuilder,
         IRabbitMqReceiveEndpointBuilder
     {
-        readonly IConsumePipe _consumePipe;
         readonly List<ExchangeBindingSettings> _exchangeBindings;
         readonly IMessageNameFormatter _messageNameFormatter;
         readonly bool _bindMessageExchanges;
 
-        public RabbitMqReceiveEndpointBuilder(IConsumePipe consumePipe, IMessageNameFormatter messageNameFormatter, bool bindMessageExchanges)
+        public RabbitMqReceiveEndpointBuilder(IConsumePipe consumePipe, IBusBuilder busBuilder, IMessageNameFormatter messageNameFormatter, bool bindMessageExchanges)
+            : base(consumePipe, busBuilder)
         {
-            _consumePipe = consumePipe;
             _messageNameFormatter = messageNameFormatter;
             _bindMessageExchanges = bindMessageExchanges;
 
             _exchangeBindings = new List<ExchangeBindingSettings>();
         }
 
-        ConnectHandle IConsumePipeConnector.ConnectConsumePipe<T>(IPipe<ConsumeContext<T>> pipe)
+        public override ConnectHandle ConnectConsumePipe<T>(IPipe<ConsumeContext<T>> pipe)
         {
             if(_bindMessageExchanges)
                 _exchangeBindings.AddRange(typeof(T).GetExchangeBindings(_messageNameFormatter));
 
-            return _consumePipe.ConnectConsumePipe(pipe);
-        }
-
-        ConnectHandle IConsumeMessageObserverConnector.ConnectConsumeMessageObserver<T>(IConsumeMessageObserver<T> observer)
-        {
-            return _consumePipe.ConnectConsumeMessageObserver(observer);
+            return base.ConnectConsumePipe(pipe);
         }
 
         public void AddExchangeBindings(params ExchangeBindingSettings[] bindings)

@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -10,33 +10,32 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Transports
+namespace MassTransit.Context
 {
     using System.Threading.Tasks;
     using GreenPipes;
-    using Pipeline;
 
 
-    public class ScopePublishContextPipe<T> :
+    public class ConsumeContextScopePublishContextPipe<T> :
         IPipe<PublishContext<T>>
         where T : class
     {
         readonly ConsumeContext _context;
         readonly IPipe<PublishContext<T>> _pipe;
 
-        public ScopePublishContextPipe(IPipe<PublishContext<T>> pipe, ConsumeContext context)
+        public ConsumeContextScopePublishContextPipe(IPipe<PublishContext<T>> pipe, ConsumeContext context)
         {
             _pipe = pipe;
             _context = context;
         }
 
-        public ScopePublishContextPipe(IPipe<PublishContext> pipe, ConsumeContext context)
+        public ConsumeContextScopePublishContextPipe(IPipe<PublishContext> pipe, ConsumeContext context)
         {
             _pipe = pipe;
             _context = context;
         }
 
-        public ScopePublishContextPipe(ConsumeContext context)
+        public ConsumeContextScopePublishContextPipe(ConsumeContext context)
         {
             _pipe = Pipe.Empty<PublishContext<T>>();
             _context = context;

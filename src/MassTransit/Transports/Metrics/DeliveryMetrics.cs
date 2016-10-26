@@ -10,14 +10,18 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Transports
+namespace MassTransit.Transports.Metrics
 {
-    public interface IDeliveryTracker
+    public interface DeliveryMetrics
     {
-        int ActiveDeliveryCount { get; }
+        /// <summary>
+        /// The number of messages consumed by the consumer
+        /// </summary>
         long DeliveryCount { get; }
-        int MaxConcurrentDeliveryCount { get; }
-        DeliveryMetrics GetDeliveryMetrics();
-        IDelivery BeginDelivery();
+
+        /// <summary>
+        /// The highest concurrent message count that was received by the consumer
+        /// </summary>
+        int ConcurrentDeliveryCount { get; }
     }
 }

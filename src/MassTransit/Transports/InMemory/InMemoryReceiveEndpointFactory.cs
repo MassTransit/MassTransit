@@ -38,9 +38,7 @@ namespace MassTransit.Transports.InMemory
 
             BusConfigurationResult.CompileResults(endpointConfigurator.Validate());
 
-            var endpointBuilder = new InMemoryEndpointBuilder(_builder);
-
-            endpointConfigurator.Apply(endpointBuilder);
+            endpointConfigurator.Apply(_builder);
         }
     }
 }

@@ -47,7 +47,7 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
 
         public override void Apply(IBusBuilder builder)
         {
-            var receivePipe = CreateReceivePipe(builder, consumePipe => new ServiceBusSubscriptionEndpointBuilder(consumePipe));
+            var receivePipe = CreateReceivePipe(builder, consumePipe => new ServiceBusSubscriptionEndpointBuilder(consumePipe, builder));
 
             ApplyReceiveEndpoint(builder, receivePipe,
                 new PrepareSubscriptionEndpointFilter(_settings),

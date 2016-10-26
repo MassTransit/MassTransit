@@ -89,6 +89,7 @@ namespace MassTransit.Builders
             var busConsumePipe = CreateConsumePipe();
 
             var busEndpointConfigurator = new InMemoryReceiveEndpointConfigurator(_busQueueName, busConsumePipe);
+
             busEndpointConfigurator.Apply(this);
 
             return busConsumePipe;

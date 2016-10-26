@@ -18,13 +18,13 @@ namespace MassTransit.EndpointConfigurators
     using GreenPipes;
 
 
-    public class SupportMessageDeserializerBusFactorySpecification :
-        IBusFactorySpecification
+    public class SupportMessageDeserializerReceiveEndpointSpecification :
+        IReceiveEndpointSpecification
     {
         readonly ContentType _contentType;
         readonly DeserializerFactory _deserializerFactory;
 
-        public SupportMessageDeserializerBusFactorySpecification(ContentType contentType, DeserializerFactory deserializerFactory)
+        public SupportMessageDeserializerReceiveEndpointSpecification(ContentType contentType, DeserializerFactory deserializerFactory)
         {
             _contentType = contentType;
             _deserializerFactory = deserializerFactory;
@@ -44,7 +44,7 @@ namespace MassTransit.EndpointConfigurators
                 yield return this.Failure("DeserializerFactory", "must not be null");
         }
 
-        public void Apply(IBusBuilder builder)
+        public void Configure(IReceiveEndpointBuilder builder)
         {
             builder.AddMessageDeserializer(_contentType, _deserializerFactory);
         }

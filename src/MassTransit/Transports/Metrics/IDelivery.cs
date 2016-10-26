@@ -10,18 +10,14 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Builders
+namespace MassTransit.Transports.Metrics
 {
-    using Pipeline;
+    using System;
 
 
-    public class InMemoryReceiveEndpointBuilder :
-        ReceiveEndpointBuilder,
-        IReceiveEndpointBuilder
+    public interface IDelivery :
+        IDisposable
     {
-        public InMemoryReceiveEndpointBuilder(IConsumePipe consumePipe, IBusBuilder busBuilder)
-            : base(consumePipe, busBuilder)
-        {
-        }
+        long Id { get; }
     }
 }

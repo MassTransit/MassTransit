@@ -13,6 +13,7 @@
 namespace MassTransit.RabbitMqTransport
 {
     using Transports;
+    using Transports.Metrics;
 
 
     public interface RabbitMqDeliveryMetrics :

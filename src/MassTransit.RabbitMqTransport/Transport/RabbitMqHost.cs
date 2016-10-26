@@ -170,7 +170,7 @@ namespace MassTransit.RabbitMqTransport.Transport
 
 
         class Handle :
-            DefaultHostHandle
+            BaseHostHandle
         {
             readonly Task _connectionTask;
             readonly TaskSupervisor _supervisor;

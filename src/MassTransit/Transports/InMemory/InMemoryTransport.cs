@@ -19,6 +19,7 @@ namespace MassTransit.Transports.InMemory
     using Events;
     using GreenPipes;
     using Logging;
+    using Metrics;
     using Pipeline;
     using Util;
 

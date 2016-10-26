@@ -19,13 +19,13 @@ namespace MassTransit.Transports
     using Events;
 
 
-    public class DefaultHostHandle :
+    public abstract class BaseHostHandle :
         HostHandle
     {
         readonly HostReceiveEndpointHandle[] _handles;
         readonly IHost _host;
 
-        public DefaultHostHandle(IHost host, HostReceiveEndpointHandle[] handles)
+        protected BaseHostHandle(IHost host, HostReceiveEndpointHandle[] handles)
         {
             _host = host;
             _handles = handles;

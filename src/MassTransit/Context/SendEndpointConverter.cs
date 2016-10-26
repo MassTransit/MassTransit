@@ -17,7 +17,6 @@ namespace MassTransit.Context
     using System.Threading.Tasks;
     using GreenPipes;
     using Internals.Extensions;
-    using Pipeline;
 
 
     /// <summary>

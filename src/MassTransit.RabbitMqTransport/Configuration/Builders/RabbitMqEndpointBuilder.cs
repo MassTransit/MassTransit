@@ -18,7 +18,7 @@ namespace MassTransit.RabbitMqTransport.Builders
     public class RabbitMqEndpointBuilder :
         EndpointBuilder
     {
-        public RabbitMqEndpointBuilder(IBusBuilder builder)
+        public RabbitMqEndpointBuilder(BusBuilder builder)
             : base(builder)
         {
         }

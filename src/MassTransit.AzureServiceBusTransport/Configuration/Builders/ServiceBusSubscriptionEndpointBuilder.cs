@@ -12,28 +12,17 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.AzureServiceBusTransport.Builders
 {
-    using GreenPipes;
+    using MassTransit.Builders;
     using MassTransit.Pipeline;
 
 
     public class ServiceBusSubscriptionEndpointBuilder :
+        ReceiveEndpointBuilder,
         IReceiveEndpointBuilder
     {
-        readonly IConsumePipe _consumePipe;
-
-        public ServiceBusSubscriptionEndpointBuilder(IConsumePipe consumePipe)
+        public ServiceBusSubscriptionEndpointBuilder(IConsumePipe consumePipe, IBusBuilder busBuilder)
+            : base(consumePipe, busBuilder)
         {
-            _consumePipe = consumePipe;
-        }
-
-        ConnectHandle IConsumePipeConnector.ConnectConsumePipe<T>(IPipe<ConsumeContext<T>> pipe)
-        {
-            return _consumePipe.ConnectConsumePipe(pipe);
-        }
-
-        ConnectHandle IConsumeMessageObserverConnector.ConnectConsumeMessageObserver<T>(IConsumeMessageObserver<T> observer)
-        {
-            return _consumePipe.ConnectConsumeMessageObserver(observer);
         }
     }
 }

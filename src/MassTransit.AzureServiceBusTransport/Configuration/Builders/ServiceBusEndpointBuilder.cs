@@ -18,7 +18,7 @@ namespace MassTransit.AzureServiceBusTransport.Builders
     public class ServiceBusEndpointBuilder :
         EndpointBuilder
     {
-        public ServiceBusEndpointBuilder(IBusBuilder builder)
+        public ServiceBusEndpointBuilder(BusBuilder builder)
             : base(builder)
         {
         }

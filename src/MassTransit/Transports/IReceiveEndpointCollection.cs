@@ -12,7 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports
 {
-    using System.Collections.Generic;
     using System.Threading.Tasks;
     using GreenPipes;
     using Pipeline;
@@ -23,7 +22,6 @@ namespace MassTransit.Transports
         IReceiveEndpointObserverConnector,
         IConsumeMessageObserverConnector,
         IConsumeObserverConnector,
-        IEnumerable<IReceiveEndpoint>,
         IProbeSite
     {
         /// <summary>

@@ -18,41 +18,41 @@ namespace MassTransit.Builders
     using Pipeline;
 
 
-    public class EndpointBuilder :
+    public abstract class EndpointBuilder :
         IBusBuilder
     {
         readonly IBusBuilder _builder;
+        readonly SerializerBuilder _serializerBuilder;
 
         protected EndpointBuilder(IBusBuilder builder)
         {
             _builder = builder;
+            _serializerBuilder = builder.CreateSerializerBuilder();
         }
 
         public ISendTransportProvider SendTransportProvider => _builder.SendTransportProvider;
 
-        public IMessageDeserializer GetMessageDeserializer(ISendEndpointProvider sendEndpointProvider, IPublishEndpointProvider publishEndpointProvider)
+        public IMessageSerializer MessageSerializer => _serializerBuilder.Serializer;
+
+        public IMessageDeserializer MessageDeserializer => _serializerBuilder.Deserializer;
+
+        public SerializerBuilder CreateSerializerBuilder()
         {
-            return _builder.GetMessageDeserializer(sendEndpointProvider, publishEndpointProvider);
+            return new SerializerBuilder(_serializerBuilder);
         }
 
-        public ISendEndpointProvider CreateSendEndpointProvider(Uri sourceAddress, params ISendPipeSpecification[] specifications)
-        {
-            return _builder.CreateSendEndpointProvider(sourceAddress, specifications);
-        }
+        public abstract ISendEndpointProvider CreateSendEndpointProvider(Uri sourceAddress, params ISendPipeSpecification[] specifications);
 
-        public IPublishEndpointProvider CreatePublishEndpointProvider(Uri sourceAddress, params IPublishPipeSpecification[] specifications)
-        {
-            return _builder.CreatePublishEndpointProvider(sourceAddress, specifications);
-        }
+        public abstract IPublishEndpointProvider CreatePublishEndpointProvider(Uri sourceAddress, params IPublishPipeSpecification[] specifications);
 
-        public void SetMessageSerializer(Func<IMessageSerializer> serializerFactory)
+        public void SetMessageSerializer(SerializerFactory serializerFactory)
         {
-            _builder.SetMessageSerializer(serializerFactory);
+            _serializerBuilder.SetSerializer(serializerFactory);
         }
 
         public void AddMessageDeserializer(ContentType contentType, DeserializerFactory deserializerFactory)
         {
-            _builder.AddMessageDeserializer(contentType, deserializerFactory);
+            _serializerBuilder.AddDeserializer(contentType, deserializerFactory);
         }
 
         public IConsumePipe CreateConsumePipe(params IConsumePipeSpecification[] specifications)
@@ -68,6 +68,11 @@ namespace MassTransit.Builders
         ConnectHandle IBusBuilder.ConnectBusObserver(IBusObserver observer)
         {
             return _builder.ConnectBusObserver(observer);
+        }
+
+        public IPublishPipe CreatePublishPipe(params IPublishPipeSpecification[] specifications)
+        {
+            return _builder.CreatePublishPipe(specifications);
         }
     }
 }

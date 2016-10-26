@@ -154,7 +154,7 @@ namespace MassTransit.Transports.InMemory
 
 
         class Handle :
-            DefaultHostHandle
+            BaseHostHandle
         {
             readonly InMemoryHost _host;
 

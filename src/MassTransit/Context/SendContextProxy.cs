@@ -120,10 +120,7 @@ namespace MassTransit.Context
             set { _context.ScheduledMessageId = value; }
         }
 
-        public SendHeaders Headers
-        {
-            get { return _context.Headers; }
-        }
+        public SendHeaders Headers => _context.Headers;
 
         public TimeSpan? TimeToLive
         {

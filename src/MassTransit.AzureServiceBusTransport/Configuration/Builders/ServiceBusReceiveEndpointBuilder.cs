@@ -14,38 +14,35 @@ namespace MassTransit.AzureServiceBusTransport.Builders
 {
     using System.Collections.Generic;
     using GreenPipes;
+    using MassTransit.Builders;
     using MassTransit.Pipeline;
     using Settings;
     using Transports;
 
 
     public class ServiceBusReceiveEndpointBuilder :
+        ReceiveEndpointBuilder,
         IReceiveEndpointBuilder
     {
-        readonly IConsumePipe _consumePipe;
         readonly IMessageNameFormatter _messageNameFormatter;
         readonly bool _subscribeMessageTopics;
         readonly List<TopicSubscriptionSettings> _topicSubscriptions;
 
-        public ServiceBusReceiveEndpointBuilder(IConsumePipe consumePipe, IMessageNameFormatter messageNameFormatter, bool subscribeMessageTopics)
+        public ServiceBusReceiveEndpointBuilder(IConsumePipe consumePipe, IBusBuilder busBuilder, IMessageNameFormatter messageNameFormatter,
+            bool subscribeMessageTopics)
+            : base(consumePipe, busBuilder)
         {
-            _consumePipe = consumePipe;
             _messageNameFormatter = messageNameFormatter;
             _subscribeMessageTopics = subscribeMessageTopics;
             _topicSubscriptions = new List<TopicSubscriptionSettings>();
         }
 
-        ConnectHandle IConsumePipeConnector.ConnectConsumePipe<T>(IPipe<ConsumeContext<T>> pipe)
+        public override ConnectHandle ConnectConsumePipe<T>(IPipe<ConsumeContext<T>> pipe)
         {
             if (_subscribeMessageTopics)
                 _topicSubscriptions.AddRange(_messageNameFormatter.GetTopicSubscription(typeof(T)));
 
-            return _consumePipe.ConnectConsumePipe(pipe);
-        }
-
-        ConnectHandle IConsumeMessageObserverConnector.ConnectConsumeMessageObserver<T>(IConsumeMessageObserver<T> observer)
-        {
-            return _consumePipe.ConnectConsumeMessageObserver(observer);
+            return base.ConnectConsumePipe(pipe);
         }
 
         public IEnumerable<TopicSubscriptionSettings> GetTopicSubscriptions()

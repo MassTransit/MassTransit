@@ -12,19 +12,44 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Builders
 {
+    using System;
+    using Pipeline.Pipes;
+    using Transports;
     using Transports.InMemory;
 
 
-    public class InMemoryEndpointBuilder : 
+    public class InMemoryEndpointBuilder :
         EndpointBuilder,
         IInMemoryBusBuilder
     {
-        readonly InMemoryBusBuilder _builder;
+        readonly IInMemoryBusBuilder _builder;
+        readonly Uri _inputAddress;
 
-        public InMemoryEndpointBuilder(InMemoryBusBuilder builder)
+        public InMemoryEndpointBuilder(IInMemoryBusBuilder builder, Uri inputAddress)
             : base(builder)
         {
             _builder = builder;
+            _inputAddress = inputAddress;
+        }
+
+        public override ISendEndpointProvider CreateSendEndpointProvider(Uri sourceAddress, params ISendPipeSpecification[] specifications)
+        {
+            var sendPipe = CreateSendPipe(specifications);
+
+            var provider = new InMemorySendEndpointProvider(_inputAddress, _builder.SendTransportProvider, MessageSerializer, sendPipe);
+
+            return new SendEndpointCache(provider);
+        }
+
+        public override IPublishEndpointProvider CreatePublishEndpointProvider(Uri sourceAddress, params IPublishPipeSpecification[] specifications)
+        {
+            var sendEndpointProvider = new InMemorySendEndpointProvider(_inputAddress, _builder.SendTransportProvider, MessageSerializer, SendPipe.Empty);
+
+            var sendEndpointCache = new SendEndpointCache(sendEndpointProvider);
+
+            var publishPipe = CreatePublishPipe(specifications);
+
+            return new InMemoryPublishEndpointProvider(sendEndpointCache, _builder.SendTransportProvider, publishPipe);
         }
 
         public IInMemoryHost InMemoryHost => _builder.InMemoryHost;
