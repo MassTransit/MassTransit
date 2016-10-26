@@ -22,10 +22,10 @@ namespace MassTransit.Transports
     public class DefaultHostHandle :
         HostHandle
     {
-        readonly BusReceiveEndpointHandle[] _handles;
-        readonly IBusHost _host;
+        readonly HostReceiveEndpointHandle[] _handles;
+        readonly IHost _host;
 
-        public DefaultHostHandle(IBusHost host, BusReceiveEndpointHandle[] handles)
+        public DefaultHostHandle(IHost host, HostReceiveEndpointHandle[] handles)
         {
             _host = host;
             _handles = handles;

@@ -16,7 +16,10 @@ namespace MassTransit
     using System.Threading.Tasks;
 
 
-    public interface BusReceiveEndpointHandle
+    /// <summary>
+    /// Returned when a receive endpoint is added to a host
+    /// </summary>
+    public interface HostReceiveEndpointHandle
     {
         /// <summary>
         /// A task which can be awaited to know when the receive endpoint is ready

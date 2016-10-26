@@ -17,6 +17,6 @@ namespace MassTransit.Transports.InMemory
 
     public interface IInMemoryReceiveEndpointFactory
     {
-        IReceiveEndpoint CreateReceiveEndpoint(string queueName, Action<IInMemoryReceiveEndpointConfigurator> configure);
+        void CreateReceiveEndpoint(string queueName, Action<IInMemoryReceiveEndpointConfigurator> configure);
     }
 }

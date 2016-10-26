@@ -10,23 +10,13 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Transports.InMemory
+namespace MassTransit
 {
-    using System;
-    using System.Threading.Tasks;
+    using GreenPipes.Configurators;
 
 
-    public interface IInMemoryHost :
-        IHost
+    public interface IRescueConfigurator :
+        IExceptionConfigurator
     {
-        IReceiveTransport GetReceiveTransport(string queueName, int concurrencyLimit);
-
-        /// <summary>
-        /// Create a receive endpoint on the host, with a separate handle for stopping/removing the endpoint
-        /// </summary>
-        /// <param name="queueName"></param>
-        /// <param name="configure"></param>
-        /// <returns></returns>
-        Task<HostReceiveEndpointHandle> ConnectReceiveEndpoint(string queueName, Action<IInMemoryReceiveEndpointConfigurator> configure);
     }
 }

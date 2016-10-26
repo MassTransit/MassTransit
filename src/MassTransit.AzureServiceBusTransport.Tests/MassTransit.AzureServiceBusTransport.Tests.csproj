@@ -81,6 +81,7 @@
     <Compile Include="PublishDynamicType_Specs.cs" />
     <Compile Include="PublishFaultCache_Specs.cs" />
     <Compile Include="Publish_Specs.cs" />
+    <Compile Include="ReceiveEndpoint_Specs.cs" />
     <Compile Include="RequestClient_Specs.cs" />
     <Compile Include="SagaRepository_Specs.cs" />
     <Compile Include="ScheduleMessage_Specs.cs" />

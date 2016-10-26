@@ -25,7 +25,7 @@ namespace MassTransit.AzureServiceBusTransport
     /// An Azure ServiceBus Host, which caches the messaging factory and namespace manager
     /// </summary>
     public interface IServiceBusHost :
-        IBusHost
+        IHost
     {
         ServiceBusHostSettings Settings { get; }
 
@@ -66,7 +66,7 @@ namespace MassTransit.AzureServiceBusTransport
         /// </summary>
         /// <param name="configure"></param>
         /// <returns></returns>
-        Task<BusReceiveEndpointHandle> CreateReceiveEndpoint(Action<IServiceBusReceiveEndpointConfigurator> configure);
+        Task<HostReceiveEndpointHandle> ConnectReceiveEndpoint(Action<IServiceBusReceiveEndpointConfigurator> configure);
 
         /// <summary>
         /// Create a receive endpoint on the host, with a separate handle for stopping/removing the endpoint
@@ -74,6 +74,13 @@ namespace MassTransit.AzureServiceBusTransport
         /// <param name="queueName"></param>
         /// <param name="configure"></param>
         /// <returns></returns>
-        Task<BusReceiveEndpointHandle> CreateReceiveEndpoint(string queueName, Action<IServiceBusReceiveEndpointConfigurator> configure);
+        Task<HostReceiveEndpointHandle> ConnectReceiveEndpoint(string queueName, Action<IServiceBusReceiveEndpointConfigurator> configure);
+
+        Task<HostReceiveEndpointHandle> ConnectSubscriptionEndpoint<T>(string subscriptionName,
+            Action<IServiceBusSubscriptionEndpointConfigurator> configure)
+            where T : class;
+
+        Task<HostReceiveEndpointHandle> ConnectSubscriptionEndpoint(string subscriptionName, string topicName,
+            Action<IServiceBusSubscriptionEndpointConfigurator> configure);
     }
 }

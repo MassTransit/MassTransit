@@ -92,7 +92,7 @@ namespace MassTransit.AzureServiceBusTransport.Settings
 
         protected override IEnumerable<string> GetQueryStringOptions()
         {
-            if (SubscriptionDescription.AutoDeleteOnIdle > TimeSpan.Zero)
+            if (SubscriptionDescription.AutoDeleteOnIdle > TimeSpan.Zero && SubscriptionDescription.AutoDeleteOnIdle != Defaults.AutoDeleteOnIdle)
                 yield return $"autodelete={SubscriptionDescription.AutoDeleteOnIdle.TotalSeconds}";
         }
     }

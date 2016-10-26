@@ -94,6 +94,7 @@
     <Compile Include="Transport\IReceiveClient.cs" />
     <Compile Include="Transport\ISendClient.cs" />
     <Compile Include="Configuration\IServiceBusSubscriptionEndpointConfigurator.cs" />
+    <Compile Include="Transport\IServiceBusSubscriptionEndpointFactory.cs" />
     <Compile Include="Transport\ISessionReceiver.cs" />
     <Compile Include="Transport\MessageSessionAsyncHandler.cs" />
     <Compile Include="Transport\MessageSessionAsyncHandlerFactory.cs" />
@@ -151,6 +152,7 @@
     <Compile Include="ServiceBusMessageNameFormatter.cs" />
     <Compile Include="BusFactoryConfiguratorExtensions.cs" />
     <Compile Include="ServiceBusConfigurationExtensions.cs" />
+    <Compile Include="Transport\ServiceBusSubscriptionEndpointFactory.cs" />
     <Compile Include="Transport\SessionReceiver.cs" />
     <Compile Include="Contexts\SubscriptionClientContext.cs" />
     <Compile Include="SubscriptionSettings.cs" />

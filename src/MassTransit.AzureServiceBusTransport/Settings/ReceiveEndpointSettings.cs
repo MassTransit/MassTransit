@@ -115,7 +115,7 @@ namespace MassTransit.AzureServiceBusTransport.Settings
             if (QueueDescription.EnableExpress)
                 yield return "express=true";
 
-            if (QueueDescription.AutoDeleteOnIdle > TimeSpan.Zero)
+            if (QueueDescription.AutoDeleteOnIdle > TimeSpan.Zero && QueueDescription.AutoDeleteOnIdle != Defaults.AutoDeleteOnIdle)
                 yield return $"autodelete={QueueDescription.AutoDeleteOnIdle.TotalSeconds}";
         }
     }

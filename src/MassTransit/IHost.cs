@@ -12,15 +12,25 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
+    using System;
+    using GreenPipes;
+    using Pipeline;
+    using Transports;
+
+
     /// <summary>
-    ///   Used to identify a message as correlated so that the CorrelationId can be returned
+    /// A Bus Host is a transport-neutral reference to a host
     /// </summary>
-    /// <typeparam name = "TKey">The type of the CorrelationId used</typeparam>
-    public interface CorrelatedBy<out TKey>
+    public interface IHost :
+        IConsumeMessageObserverConnector,
+        IConsumeObserverConnector,
+        IReceiveObserverConnector,
+        IReceiveEndpointObserverConnector,
+        IProbeSite
     {
         /// <summary>
-        ///   Returns the CorrelationId for the message
+        /// An address that identifies the host
         /// </summary>
-        TKey CorrelationId { get; }
+        Uri Address { get; }
     }
 }

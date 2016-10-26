@@ -17,7 +17,7 @@ namespace MassTransit.Transports
 
 
     public interface IBusHostControl :
-        IBusHost
+        IHost
     {
         /// <summary>
         /// Starts the Host, which begins the connection asynchronously.

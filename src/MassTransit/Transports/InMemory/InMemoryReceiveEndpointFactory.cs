@@ -28,7 +28,7 @@ namespace MassTransit.Transports.InMemory
             _builder = builder;
         }
 
-        public IReceiveEndpoint CreateReceiveEndpoint(string queueName, Action<IInMemoryReceiveEndpointConfigurator> configure)
+        public void CreateReceiveEndpoint(string queueName, Action<IInMemoryReceiveEndpointConfigurator> configure)
         {
             var consumePipe = _builder.CreateConsumePipe();
 
@@ -41,8 +41,6 @@ namespace MassTransit.Transports.InMemory
             var endpointBuilder = new InMemoryEndpointBuilder(_builder);
 
             endpointConfigurator.Apply(endpointBuilder);
-
-            return endpointConfigurator.ReceiveEndpoint;
         }
     }
 }

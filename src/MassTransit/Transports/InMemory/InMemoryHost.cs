@@ -54,7 +54,7 @@ namespace MassTransit.Transports.InMemory
 
         public async Task<HostHandle> Start()
         {
-            BusReceiveEndpointHandle[] handles = await ReceiveEndpoints.StartEndpoints().ConfigureAwait(false);
+            HostReceiveEndpointHandle[] handles = await ReceiveEndpoints.StartEndpoints().ConfigureAwait(false);
 
             return new Handle(this, handles);
         }
@@ -93,7 +93,7 @@ namespace MassTransit.Transports.InMemory
             return _transports.GetOrAdd(queueName, name => new InMemoryTransport(new Uri(_baseUri, name), concurrencyLimit));
         }
 
-        public Task<BusReceiveEndpointHandle> ConnectReceiveEndpoint(string queueName, Action<IInMemoryReceiveEndpointConfigurator> configure)
+        public Task<HostReceiveEndpointHandle> ConnectReceiveEndpoint(string queueName, Action<IInMemoryReceiveEndpointConfigurator> configure)
         {
             if (ReceiveEndpointFactory == null)
                 throw new ConfigurationException("The receive endpoint factory was not specified");
@@ -145,7 +145,7 @@ namespace MassTransit.Transports.InMemory
         {
             readonly InMemoryHost _host;
 
-            public Handle(InMemoryHost host, BusReceiveEndpointHandle[] handles)
+            public Handle(InMemoryHost host, HostReceiveEndpointHandle[] handles)
                 : base(host, handles)
             {
                 _host = host;

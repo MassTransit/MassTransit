@@ -17,6 +17,6 @@ namespace MassTransit.RabbitMqTransport.Transport
 
     public interface IRabbitMqReceiveEndpointFactory
     {
-        IReceiveEndpoint CreateReceiveEndpoint(string queueName, Action<IRabbitMqReceiveEndpointConfigurator> configure);
+        void CreateReceiveEndpoint(string queueName, Action<IRabbitMqReceiveEndpointConfigurator> configure);
     }
 }

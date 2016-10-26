@@ -42,6 +42,7 @@ namespace MassTransit.AzureServiceBusTransport.Builders
             foreach (var host in hosts.Hosts)
             {
                 host.ReceiveEndpointFactory = new ServiceBusReceiveEndpointFactory(this, host);
+                host.SubscriptionEndpointFactory = new ServiceBusSubscriptionEndpointFactory(this, host);
             }
         }
 

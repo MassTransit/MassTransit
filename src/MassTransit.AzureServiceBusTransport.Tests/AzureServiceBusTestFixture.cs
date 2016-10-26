@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -37,6 +37,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
         readonly Uri _serviceUri;
         BusHandle _busHandle;
         readonly string _inputQueueName;
+        IServiceBusHost _host;
 
         public AzureServiceBusTestFixture()
             : this("input_queue")
@@ -152,6 +153,8 @@ namespace MassTransit.AzureServiceBusTransport.Tests
         {
         }
 
+        protected IServiceBusHost Host => _host;
+
         IBusControl CreateBus()
         {
             return MassTransit.Bus.Factory.CreateUsingAzureServiceBus(x =>
@@ -160,7 +163,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
 
                 ServiceBusTokenProviderSettings settings = new TestAzureServiceBusAccountSettings();
 
-                var host = x.Host(_serviceUri, h =>
+                _host = x.Host(_serviceUri, h =>
                 {
                     h.SharedAccessSignature(s =>
                     {
@@ -173,9 +176,9 @@ namespace MassTransit.AzureServiceBusTransport.Tests
 
                 x.UseServiceBusMessageScheduler();
 
-                ConfigureBusHost(x, host);
+                ConfigureBusHost(x, _host);
 
-                x.ReceiveEndpoint(host, _inputQueueName, e =>
+                x.ReceiveEndpoint(_host, _inputQueueName, e =>
                 {
                     _inputQueueAddress = e.InputAddress;
 

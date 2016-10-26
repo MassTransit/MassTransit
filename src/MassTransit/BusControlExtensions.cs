@@ -18,42 +18,42 @@ namespace MassTransit
     using Util;
 
 
-    public static class BusHandleExtensions
+    public static class BusControlExtensions
     {
         /// <summary>
         /// Stop a bus, throwing an exception if the bus does not stop
         /// </summary>
-        /// <param name="handle">The bus handle</param>
-        public static void Stop(this BusHandle handle)
+        /// <param name="busControl">The bus handle</param>
+        public static void Stop(this IBusControl busControl)
         {
-            TaskUtil.Await(() => handle.StopAsync());
+            TaskUtil.Await(() => busControl.StopAsync());
         }
 
         /// <summary>
         /// Stop a bus, throwing an exception if the bus does not stop in the specified timeout
         /// </summary>
-        /// <param name="handle">The bus handle</param>
+        /// <param name="bus">The bus handle</param>
         /// <param name="stopTimeout">The wait time before throwing an exception</param>
-        public static void Stop(this BusHandle handle, TimeSpan stopTimeout)
+        public static void Stop(this IBusControl bus, TimeSpan stopTimeout)
         {
             using (var cancellationTokenSource = new CancellationTokenSource(stopTimeout))
             {
                 var cancellationToken = cancellationTokenSource.Token;
 
-                TaskUtil.Await(() => handle.StopAsync(cancellationToken), cancellationToken);
+                TaskUtil.Await(() => bus.StopAsync(cancellationToken), cancellationToken);
             }
         }
 
         /// <summary>
         /// Stop a bus, throwing an exception if the bus does not stop in the specified timeout
         /// </summary>
-        /// <param name="handle">The bus handle</param>
+        /// <param name="bus">The bus handle</param>
         /// <param name="stopTimeout">The wait time before throwing an exception</param>
-        public static async Task StopAsync(this BusHandle handle, TimeSpan stopTimeout)
+        public static async Task StopAsync(this IBusControl bus, TimeSpan stopTimeout)
         {
             using (var cancellationTokenSource = new CancellationTokenSource(stopTimeout))
             {
-                await handle.StopAsync(cancellationTokenSource.Token).ConfigureAwait(false);
+                await bus.StopAsync(cancellationTokenSource.Token).ConfigureAwait(false);
             }
         }
     }

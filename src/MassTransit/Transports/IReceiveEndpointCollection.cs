@@ -38,13 +38,13 @@ namespace MassTransit.Transports
         /// for those endpoints.
         /// </summary>
         /// <returns></returns>
-        Task<BusReceiveEndpointHandle[]> StartEndpoints();
+        Task<HostReceiveEndpointHandle[]> StartEndpoints();
 
         /// <summary>
         /// Start a new receive endpoint
         /// </summary>
         /// <param name="endpointName"></param>
         /// <returns></returns>
-        Task<BusReceiveEndpointHandle> Start(string endpointName);
+        Task<HostReceiveEndpointHandle> Start(string endpointName);
     }
 }

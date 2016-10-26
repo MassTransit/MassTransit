@@ -22,6 +22,7 @@ namespace MassTransit.AzureServiceBusTransport
     using MassTransit.Pipeline;
     using Microsoft.ServiceBus;
     using Microsoft.ServiceBus.Messaging;
+    using Settings;
     using Transport;
     using Transports;
     using Util;
@@ -57,11 +58,13 @@ namespace MassTransit.AzureServiceBusTransport
 
         public IServiceBusReceiveEndpointFactory ReceiveEndpointFactory { get; set; }
 
+        public IServiceBusSubscriptionEndpointFactory SubscriptionEndpointFactory { get; set; }
+
         public IReceiveEndpointCollection ReceiveEndpoints => _receiveEndpoints;
 
         public async Task<HostHandle> Start()
         {
-            BusReceiveEndpointHandle[] handles = await ReceiveEndpoints.StartEndpoints().ConfigureAwait(false);
+            HostReceiveEndpointHandle[] handles = await ReceiveEndpoints.StartEndpoints().ConfigureAwait(false);
 
             return new Handle(this, _supervisor, handles);
         }
@@ -318,14 +321,14 @@ namespace MassTransit.AzureServiceBusTransport
             return subscriptionDescription;
         }
 
-        public Task<BusReceiveEndpointHandle> CreateReceiveEndpoint(Action<IServiceBusReceiveEndpointConfigurator> configure)
+        public Task<HostReceiveEndpointHandle> ConnectReceiveEndpoint(Action<IServiceBusReceiveEndpointConfigurator> configure)
         {
             var queueName = this.GetTemporaryQueueName("endpoint");
 
-            return CreateReceiveEndpoint(queueName, configure);
+            return ConnectReceiveEndpoint(queueName, configure);
         }
 
-        public Task<BusReceiveEndpointHandle> CreateReceiveEndpoint(string queueName, Action<IServiceBusReceiveEndpointConfigurator> configure)
+        public Task<HostReceiveEndpointHandle> ConnectReceiveEndpoint(string queueName, Action<IServiceBusReceiveEndpointConfigurator> configure)
         {
             if (ReceiveEndpointFactory == null)
                 throw new ConfigurationException("The receive endpoint factory was not specified");
@@ -333,6 +336,26 @@ namespace MassTransit.AzureServiceBusTransport
             ReceiveEndpointFactory.CreateReceiveEndpoint(queueName, configure);
 
             return _receiveEndpoints.Start(queueName);
+        }
+
+        public Task<HostReceiveEndpointHandle> ConnectSubscriptionEndpoint<T>(string subscriptionName,
+            Action<IServiceBusSubscriptionEndpointConfigurator> configure)
+            where T : class
+        {
+            return ConnectSubscriptionEndpoint(subscriptionName, MessageNameFormatter.GetTopicAddress(this, typeof(T)).AbsolutePath.Trim('/'), configure);
+        }
+
+        public Task<HostReceiveEndpointHandle> ConnectSubscriptionEndpoint(string subscriptionName, string topicName,
+            Action<IServiceBusSubscriptionEndpointConfigurator> configure)
+        {
+            if (SubscriptionEndpointFactory == null)
+                throw new ConfigurationException("The subscription endpoint factory was not specified");
+
+            var settings = new SubscriptionEndpointSettings(topicName, subscriptionName);
+
+            SubscriptionEndpointFactory.CreateSubscriptionEndpoint(settings, configure);
+
+            return _receiveEndpoints.Start(settings.Path);
         }
 
         public Uri Address => Settings.ServiceUri;
@@ -443,7 +466,7 @@ namespace MassTransit.AzureServiceBusTransport
             readonly ServiceBusHost _host;
             readonly TaskSupervisor _supervisor;
 
-            public Handle(ServiceBusHost host, TaskSupervisor supervisor, BusReceiveEndpointHandle[] handles)
+            public Handle(ServiceBusHost host, TaskSupervisor supervisor, HostReceiveEndpointHandle[] handles)
                 : base(host, handles)
             {
                 _host = host;

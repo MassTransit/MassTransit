@@ -17,6 +17,6 @@ namespace MassTransit.AzureServiceBusTransport.Transport
 
     public interface IServiceBusReceiveEndpointFactory
     {
-        IReceiveEndpoint CreateReceiveEndpoint(string queueName, Action<IServiceBusReceiveEndpointConfigurator> configure);
+        void CreateReceiveEndpoint(string queueName, Action<IServiceBusReceiveEndpointConfigurator> configure);
     }
 }

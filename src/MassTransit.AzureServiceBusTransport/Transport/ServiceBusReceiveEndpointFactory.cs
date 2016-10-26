@@ -30,7 +30,7 @@ namespace MassTransit.AzureServiceBusTransport.Transport
             _host = host;
         }
 
-        public IReceiveEndpoint CreateReceiveEndpoint(string queueName, Action<IServiceBusReceiveEndpointConfigurator> configure)
+        public void CreateReceiveEndpoint(string queueName, Action<IServiceBusReceiveEndpointConfigurator> configure)
         {
             var consumePipe = _builder.CreateConsumePipe();
 
@@ -43,8 +43,6 @@ namespace MassTransit.AzureServiceBusTransport.Transport
             var endpointBuilder = new ServiceBusEndpointBuilder(_builder);
 
             endpointConfigurator.Apply(endpointBuilder);
-
-            return endpointConfigurator.ReceiveEndpoint;
         }
     }
 }

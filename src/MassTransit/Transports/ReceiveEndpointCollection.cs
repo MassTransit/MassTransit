@@ -28,7 +28,7 @@ namespace MassTransit.Transports
     {
         readonly ConsumeObservable _consumeObservers;
         readonly Dictionary<string, IReceiveEndpoint> _endpoints;
-        readonly Dictionary<string, BusReceiveEndpointHandle> _handles;
+        readonly Dictionary<string, HostReceiveEndpointHandle> _handles;
         readonly object _mutateLock = new object();
         readonly ReceiveEndpointObservable _receiveEndpointObservers;
         readonly ReceiveObservable _receiveObservers;
@@ -36,7 +36,7 @@ namespace MassTransit.Transports
         public ReceiveEndpointCollection()
         {
             _endpoints = new Dictionary<string, IReceiveEndpoint>(StringComparer.OrdinalIgnoreCase);
-            _handles = new Dictionary<string, BusReceiveEndpointHandle>(StringComparer.OrdinalIgnoreCase);
+            _handles = new Dictionary<string, HostReceiveEndpointHandle>(StringComparer.OrdinalIgnoreCase);
             _receiveObservers = new ReceiveObservable();
             _receiveEndpointObservers = new ReceiveEndpointObservable();
             _consumeObservers = new ConsumeObservable();
@@ -71,7 +71,7 @@ namespace MassTransit.Transports
             }
         }
 
-        public Task<BusReceiveEndpointHandle[]> StartEndpoints()
+        public Task<HostReceiveEndpointHandle[]> StartEndpoints()
         {
             KeyValuePair<string, IReceiveEndpoint>[] startable;
             lock (_mutateLock)
@@ -80,7 +80,7 @@ namespace MassTransit.Transports
             return Task.WhenAll(startable.Select(x => StartEndpoint(x.Key, x.Value)));
         }
 
-        public Task<BusReceiveEndpointHandle> Start(string endpointName)
+        public Task<HostReceiveEndpointHandle> Start(string endpointName)
         {
             if (string.IsNullOrWhiteSpace(endpointName))
                 throw new ArgumentException($"The {nameof(endpointName)} must not be null or empty", nameof(endpointName));
@@ -132,7 +132,7 @@ namespace MassTransit.Transports
             return _consumeObservers.Connect(observer);
         }
 
-        async Task<BusReceiveEndpointHandle> StartEndpoint(string endpointName, IReceiveEndpoint endpoint)
+        async Task<HostReceiveEndpointHandle> StartEndpoint(string endpointName, IReceiveEndpoint endpoint)
         {
             try
             {
@@ -176,7 +176,7 @@ namespace MassTransit.Transports
 
 
         class Handle :
-            BusReceiveEndpointHandle
+            HostReceiveEndpointHandle
         {
             readonly ConnectHandle _consumeObserver;
             readonly ReceiveEndpointHandle _endpointHandle;

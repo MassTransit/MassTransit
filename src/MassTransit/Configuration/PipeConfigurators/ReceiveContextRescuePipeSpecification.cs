@@ -16,27 +16,24 @@ namespace MassTransit.PipeConfigurators
     using Context;
     using GreenPipes;
     using GreenPipes.Filters;
-    using GreenPipes.Policies;
-    using GreenPipes.Policies.ExceptionFilters;
+    using GreenPipes.Specifications;
 
 
     public class ReceiveContextRescuePipeSpecification :
+        ExceptionSpecification,
+        IRescueConfigurator,
         IPipeSpecification<ReceiveContext>
     {
-        readonly IExceptionFilter _exceptionFilter;
         readonly IPipe<ExceptionReceiveContext> _rescuePipe;
 
-        public ReceiveContextRescuePipeSpecification(IPipe<ExceptionReceiveContext> rescuePipe, IExceptionFilter exceptionFilter)
+        public ReceiveContextRescuePipeSpecification(IPipe<ExceptionReceiveContext> rescuePipe)
         {
             _rescuePipe = rescuePipe;
-            _exceptionFilter = exceptionFilter;
         }
 
         public void Apply(IPipeBuilder<ReceiveContext> builder)
         {
-            var filter = _exceptionFilter ?? new AllExceptionFilter();
-
-            builder.AddFilter(new RescueFilter<ReceiveContext, ExceptionReceiveContext>(_rescuePipe, filter,
+            builder.AddFilter(new RescueFilter<ReceiveContext, ExceptionReceiveContext>(_rescuePipe, Filter,
                 (context, ex) => new RescueExceptionReceiveContext(context, ex)));
         }
 

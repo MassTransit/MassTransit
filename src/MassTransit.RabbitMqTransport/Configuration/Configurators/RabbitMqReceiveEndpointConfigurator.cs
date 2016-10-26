@@ -37,7 +37,6 @@ namespace MassTransit.RabbitMqTransport.Configurators
         readonly IManagementPipe _managementPipe;
         readonly RabbitMqReceiveSettings _settings;
         bool _bindMessageExchanges;
-        ReceiveEndpoint _receiveEndpoint;
 
         public RabbitMqReceiveEndpointConfigurator(IRabbitMqHost host, string queueName = null, IConsumePipe consumePipe = null)
             : base(consumePipe)
@@ -65,8 +64,6 @@ namespace MassTransit.RabbitMqTransport.Configurators
             _managementPipe = new ManagementPipe();
             _exchangeBindings = new List<ExchangeBindingSettings>();
         }
-
-        public IReceiveEndpoint ReceiveEndpoint => _receiveEndpoint;
 
         public override IEnumerable<ValidationResult> Validate()
         {
@@ -96,13 +93,11 @@ namespace MassTransit.RabbitMqTransport.Configurators
 
             var transport = new RabbitMqReceiveTransport(_host, _settings, _managementPipe, endpointBuilder.GetExchangeBindings().ToArray());
 
-            _receiveEndpoint = new ReceiveEndpoint(transport, receivePipe);
-
             var rabbitMqHost = _host as RabbitMqHost;
             if (rabbitMqHost == null)
                 throw new ConfigurationException("Must be a RabbitMqHost");
 
-            rabbitMqHost.ReceiveEndpoints.Add(_settings.QueueName ?? NewId.Next().ToString(), _receiveEndpoint);
+            rabbitMqHost.ReceiveEndpoints.Add(_settings.QueueName ?? NewId.Next().ToString(), new ReceiveEndpoint(transport, receivePipe));
         }
 
         IRabbitMqHost IRabbitMqReceiveEndpointConfigurator.Host => _host;

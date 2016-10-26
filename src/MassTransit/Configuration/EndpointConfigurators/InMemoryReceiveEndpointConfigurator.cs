@@ -26,7 +26,6 @@ namespace MassTransit.EndpointConfigurators
     {
         readonly string _queueName;
         int _transportConcurrencyLimit;
-        ReceiveEndpoint _receiveEndpoint;
 
         public InMemoryReceiveEndpointConfigurator(string queueName, IConsumePipe consumePipe = null)
             : base(consumePipe)
@@ -35,21 +34,17 @@ namespace MassTransit.EndpointConfigurators
             _transportConcurrencyLimit = 0;
         }
 
-        public IReceiveEndpoint ReceiveEndpoint => _receiveEndpoint;
-
         public void Apply(IInMemoryBusBuilder builder)
         {
             var transport = builder.InMemoryHost.GetReceiveTransport(_queueName, _transportConcurrencyLimit);
 
             var receivePipe = CreateReceivePipe(builder, consumePipe => new InMemoryReceiveEndpointBuilder(consumePipe));
 
-            _receiveEndpoint = new ReceiveEndpoint(transport, receivePipe);
-
             var inMemoryHost = builder.InMemoryHost as InMemoryHost;
             if (inMemoryHost == null)
                 throw new ConfigurationException("Must be an InMemoryHost");
 
-            inMemoryHost.ReceiveEndpoints.Add(_queueName, _receiveEndpoint);
+            inMemoryHost.ReceiveEndpoints.Add(_queueName, new ReceiveEndpoint(transport, receivePipe));
         }
 
         public int TransportConcurrencyLimit

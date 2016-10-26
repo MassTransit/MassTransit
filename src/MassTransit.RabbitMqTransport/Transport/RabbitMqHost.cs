@@ -76,7 +76,7 @@ namespace MassTransit.RabbitMqTransport.Transport
             var connectionTask = _connectionRetryPolicy.RetryUntilCancelled(() => _connectionCache.Send(connectionPipe, _supervisor.StoppingToken),
                 _supervisor.StoppingToken);
 
-            BusReceiveEndpointHandle[] handles = await ReceiveEndpoints.StartEndpoints().ConfigureAwait(false);
+            HostReceiveEndpointHandle[] handles = await ReceiveEndpoints.StartEndpoints().ConfigureAwait(false);
 
 
             return new Handle(connectionTask, handles, _supervisor, this);
@@ -131,12 +131,12 @@ namespace MassTransit.RabbitMqTransport.Transport
             return sendSettings.GetSendAddress(_settings.HostAddress);
         }
 
-        public Task<BusReceiveEndpointHandle> ConnectReceiveEndpoint(Action<IRabbitMqReceiveEndpointConfigurator> configure)
+        public Task<HostReceiveEndpointHandle> ConnectReceiveEndpoint(Action<IRabbitMqReceiveEndpointConfigurator> configure)
         {
             return ConnectReceiveEndpoint(this.GetTemporaryQueueName("endpoint"), configure);
         }
 
-        public Task<BusReceiveEndpointHandle> ConnectReceiveEndpoint(string queueName, Action<IRabbitMqReceiveEndpointConfigurator> configure)
+        public Task<HostReceiveEndpointHandle> ConnectReceiveEndpoint(string queueName, Action<IRabbitMqReceiveEndpointConfigurator> configure)
         {
             if (ReceiveEndpointFactory == null)
                 throw new ConfigurationException("The receive endpoint factory was not specified");
@@ -175,7 +175,7 @@ namespace MassTransit.RabbitMqTransport.Transport
             readonly Task _connectionTask;
             readonly TaskSupervisor _supervisor;
 
-            public Handle(Task connectionTask, BusReceiveEndpointHandle[] handles, TaskSupervisor supervisor, IBusHost host)
+            public Handle(Task connectionTask, HostReceiveEndpointHandle[] handles, TaskSupervisor supervisor, IHost host)
                 : base(host, handles)
             {
                 _connectionTask = connectionTask;

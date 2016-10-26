@@ -97,6 +97,7 @@
     <Compile Include="..\SolutionVersion.cs">
       <Link>Properties\SolutionVersion.cs</Link>
     </Compile>
+    <Compile Include="BusControlExtensions.cs" />
     <Compile Include="BusReady.cs" />
     <Compile Include="Configuration\Builders\ConsumePipeBuilder.cs" />
     <Compile Include="Configuration\Builders\EndpointBuilder.cs" />
@@ -112,9 +113,12 @@
     <Compile Include="Configuration\BusConfigurators\IConsumePipeFactory.cs" />
     <Compile Include="Configuration\BusConfigurators\IPublishPipeFactory.cs" />
     <Compile Include="Configuration\BusConfigurators\ISendPipeFactory.cs" />
+    <Compile Include="Configuration\IRescueConfigurator.cs" />
+    <Compile Include="Configuration\PipeConfigurators\ConsumeContextRescuePipeSpecification.cs" />
     <Compile Include="Events\BusReadyEvent.cs" />
     <Compile Include="Events\HostReadyEvent.cs" />
     <Compile Include="HostReady.cs" />
+    <Compile Include="IHost.cs" />
     <Compile Include="Monitoring\Performance\Configuration\PerformanceCounterBusFactorySpecification.cs" />
     <Compile Include="Configuration\BusConfigurators\PublishPipeConfigurator.cs" />
     <Compile Include="Configuration\BusConfigurators\SendPipeConfigurator.cs" />
@@ -591,7 +595,7 @@
     <Compile Include="ReceiveEndpointCompleted.cs" />
     <Compile Include="ReceiveEndpointEvent.cs" />
     <Compile Include="ReceiveEndpointFaulted.cs" />
-    <Compile Include="BusReceiveEndpointHandle.cs" />
+    <Compile Include="HostReceiveEndpointHandle.cs" />
     <Compile Include="ReceiveEndpointReady.cs" />
     <Compile Include="Request.cs" />
     <Compile Include="IRequestClient.cs" />
@@ -942,7 +946,6 @@
     <Compile Include="Transports\EndpointLoggerExtensions.cs" />
     <Compile Include="Transports\FanoutSendEndpoint.cs" />
     <Compile Include="Transports\HostHandle.cs" />
-    <Compile Include="Transports\IBusHost.cs" />
     <Compile Include="Transports\IBusHostControl.cs" />
     <Compile Include="Transports\IMessageNameFormatter.cs" />
     <Compile Include="Transports\DictionaryHeaderProvider.cs" />
