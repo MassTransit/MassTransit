@@ -14,7 +14,7 @@ namespace MassTransit
 {
     using System;
     using System.Threading.Tasks;
-    using RabbitMqTransport;
+    using AzureServiceBusTransport;
 
 
     public static class RequestClientExtensions
@@ -31,7 +31,7 @@ namespace MassTransit
         /// <param name="ttl">THe time to live for the request message</param>
         /// <param name="callback">Callback when the request is sent</param>
         /// <returns></returns>
-        public static async Task<IRequestClient<TRequest, TResponse>> CreateRequestClient<TRequest, TResponse>(this IRabbitMqHost host,
+        public static async Task<IRequestClient<TRequest, TResponse>> CreateRequestClient<TRequest, TResponse>(this IServiceBusHost host,
             ISendEndpointProvider sendEndpointProvider, Uri address, TimeSpan timeout, TimeSpan? ttl = default(TimeSpan?),
             Action<SendContext<TRequest>> callback = null)
             where TRequest : class
@@ -56,7 +56,7 @@ namespace MassTransit
         /// <param name="host"></param>
         /// <param name="publishEndpoint"></param>
         /// <returns></returns>
-        public static async Task<IRequestClient<TRequest, TResponse>> CreatePublishRequestClient<TRequest, TResponse>(this IRabbitMqHost host,
+        public static async Task<IRequestClient<TRequest, TResponse>> CreatePublishRequestClient<TRequest, TResponse>(this IServiceBusHost host,
             IPublishEndpoint publishEndpoint, TimeSpan timeout, TimeSpan? ttl = default(TimeSpan?), Action<SendContext<TRequest>> callback = null)
             where TRequest : class
             where TResponse : class
