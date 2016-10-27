@@ -141,10 +141,8 @@
     <Compile Include="Topology\ReceiveSettings.cs" />
     <Compile Include="Topology\SendSettings.cs" />
     <Compile Include="Transport\IRabbitMqReceiveEndpointFactory.cs" />
-    <Compile Include="Transport\ModelSettings.cs" />
     <Compile Include="Transport\RabbitMqHost.cs" />
     <Compile Include="RabbitMqHostSettings.cs" />
-    <Compile Include="Transport\RabbitMqModelSettings.cs" />
     <Compile Include="Transport\RabbitMqPublishEndpointProvider.cs" />
     <Compile Include="ConnectionContext.cs" />
     <Compile Include="RabbitMqExtensions.cs" />

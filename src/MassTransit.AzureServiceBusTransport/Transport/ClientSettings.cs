@@ -43,6 +43,11 @@ namespace MassTransit.AzureServiceBusTransport.Transport
         TimeSpan LockDuration { get; }
 
         /// <summary>
+        /// True if a session is required/desired
+        /// </summary>
+        bool RequiresSession { get; }
+
+        /// <summary>
         /// The path of the message entity
         /// </summary>
         string Path { get; }

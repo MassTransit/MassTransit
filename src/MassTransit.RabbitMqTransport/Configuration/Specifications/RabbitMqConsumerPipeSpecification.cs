@@ -33,7 +33,7 @@ namespace MassTransit.RabbitMqTransport.Specifications
         readonly ReceiveSettings _settings;
         readonly ITaskSupervisor _supervisor;
         readonly IReceiveTransportObserver _transportObserver;
-        IRabbitMqHost _host;
+        readonly IRabbitMqHost _host;
 
         public RabbitMqConsumerPipeSpecification(IPipe<ReceiveContext> receivePipe, ReceiveSettings settings, IReceiveObserver receiveObserver,
             IReceiveTransportObserver transportObserver, IEnumerable<ExchangeBindingSettings> exchangeBindings, ITaskSupervisor supervisor,

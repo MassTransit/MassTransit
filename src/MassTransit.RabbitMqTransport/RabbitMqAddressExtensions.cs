@@ -97,8 +97,10 @@ namespace MassTransit.RabbitMqTransport
                     name = NewId.Next().ToString("NS");
                     uri = uri.Remove(uri.Length - 1) + name;
 
-                    var builder = new UriBuilder(uri);
-                    builder.Query = string.IsNullOrEmpty(address.Query) ? "" : address.Query.Substring(1);
+                    var builder = new UriBuilder(uri)
+                    {
+                        Query = string.IsNullOrEmpty(address.Query) ? "" : address.Query.Substring(1)
+                    };
 
                     address = builder.Uri;
                 }

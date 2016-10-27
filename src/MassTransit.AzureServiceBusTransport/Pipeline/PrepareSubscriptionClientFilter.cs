@@ -46,7 +46,9 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
 
             try
             {
-                var messagingFactory = await context.SessionMessagingFactory.ConfigureAwait(false);
+                var messagingFactory = _settings.RequiresSession
+                    ? await context.SessionMessagingFactory.ConfigureAwait(false)
+                    : await context.MessagingFactory.ConfigureAwait(false);
 
                 subscriptionClient = messagingFactory.CreateSubscriptionClient(_settings.TopicDescription.Path, _settings.SubscriptionDescription.Name);
 

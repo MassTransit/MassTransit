@@ -162,10 +162,11 @@ namespace MassTransit
 
             var queueName = host.GetTemporaryQueueName("manage-");
 
-            var endpointConfigurator = new RabbitMqReceiveEndpointSpecification(host, queueName);
-
-            endpointConfigurator.AutoDelete = true;
-            endpointConfigurator.Durable = false;
+            var endpointConfigurator = new RabbitMqReceiveEndpointSpecification(host, queueName)
+            {
+                AutoDelete = true,
+                Durable = false
+            };
 
             configure?.Invoke(endpointConfigurator);
 

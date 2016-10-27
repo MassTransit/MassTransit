@@ -17,7 +17,6 @@ namespace MassTransit.AzureServiceBusTransport.Transport
     using Contexts;
     using Logging;
     using Microsoft.ServiceBus.Messaging;
-    using Transports;
     using Transports.Metrics;
     using Util;
 

@@ -62,7 +62,6 @@ namespace MassTransit.AzureServiceBusTransport
         /// <summary>
         /// Declare a subscription endpoint on the broker and configure the endpoint settings and message consumers
         /// </summary>
-        /// <typeparam name="T"></typeparam>
         /// <param name="host">The host for this endpoint</param>
         /// <param name="subscriptionName">The name of the subscription</param>
         /// <param name="topicName">The topic name to subscribe</param>

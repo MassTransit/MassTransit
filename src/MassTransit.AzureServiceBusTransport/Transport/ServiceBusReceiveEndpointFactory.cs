@@ -32,8 +32,6 @@ namespace MassTransit.AzureServiceBusTransport.Transport
 
         public void CreateReceiveEndpoint(string queueName, Action<IServiceBusReceiveEndpointConfigurator> configure)
         {
-            var consumePipe = _builder.CreateConsumePipe();
-
             var endpointConfigurator = new ServiceBusReceiveEndpointSpecification(_host, queueName);
 
             configure?.Invoke(endpointConfigurator);

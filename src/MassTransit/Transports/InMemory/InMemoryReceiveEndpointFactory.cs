@@ -30,9 +30,7 @@ namespace MassTransit.Transports.InMemory
 
         public void CreateReceiveEndpoint(string queueName, Action<IInMemoryReceiveEndpointConfigurator> configure)
         {
-            var consumePipe = _builder.CreateConsumePipe();
-
-            var specification = new InMemoryReceiveEndpointSpecification(queueName, consumePipe);
+            var specification = new InMemoryReceiveEndpointSpecification(queueName);
 
             configure?.Invoke(specification);
 

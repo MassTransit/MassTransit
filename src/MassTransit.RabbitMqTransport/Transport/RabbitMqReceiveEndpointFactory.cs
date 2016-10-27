@@ -32,9 +32,7 @@ namespace MassTransit.RabbitMqTransport.Transport
 
         public void CreateReceiveEndpoint(string queueName, Action<IRabbitMqReceiveEndpointConfigurator> configure)
         {
-            var consumePipe = _builder.CreateConsumePipe();
-
-            var endpointConfigurator = new RabbitMqReceiveEndpointSpecification(_host, queueName, consumePipe);
+            var endpointConfigurator = new RabbitMqReceiveEndpointSpecification(_host, queueName);
 
             configure?.Invoke(endpointConfigurator);
 

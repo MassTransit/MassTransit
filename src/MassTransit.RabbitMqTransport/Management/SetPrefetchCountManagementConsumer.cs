@@ -66,7 +66,7 @@ namespace MassTransit.RabbitMqTransport.Management
                     }
                 }
                 else
-                    throw new CommandException($"The prefetch count was updated after the command was sent.");
+                    throw new CommandException("The prefetch count was updated after the command was sent.");
             }
         }
     }

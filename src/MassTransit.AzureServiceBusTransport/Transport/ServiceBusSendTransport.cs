@@ -192,7 +192,6 @@ namespace MassTransit.AzureServiceBusTransport.Transport
 
             readonly Stream _messageBodyStream;
             IMessageSerializer _serializer;
-            Guid? _scheduledMessageId;
 
             public ServiceBusMoveContext(ReceiveContext context)
             {
@@ -226,10 +225,7 @@ namespace MassTransit.AzureServiceBusTransport.Transport
                 }
             }
 
-            public BrokeredMessage BrokeredMessage
-            {
-                get { return _brokeredMessage; }
-            }
+            public BrokeredMessage BrokeredMessage => _brokeredMessage;
 
             public void Dispose()
             {
