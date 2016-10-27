@@ -38,8 +38,9 @@ namespace MassTransit.AutomatonymousIntegration.Tests
 
             await Task.WhenAny(statusTask, notFoundTask).ConfigureAwait(false);
 
-            Assert.AreEqual(TaskStatus.WaitingForActivation, statusTask.Status);
-            Assert.AreEqual(TaskStatus.RanToCompletion, notFoundTask.Status);
+            Assert.That(async() => await statusTask, Throws.TypeOf<TaskCanceledException>());
+
+            await notFoundTask;
 
             Assert.AreEqual("A", notFoundTask.Result.ServiceName);
         }
