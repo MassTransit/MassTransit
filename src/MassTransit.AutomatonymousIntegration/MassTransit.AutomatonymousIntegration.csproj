@@ -116,6 +116,7 @@
     <Compile Include="IStateMachineActivityFactory.cs" />
     <Compile Include="MassTransitStateMachine.cs" />
     <Compile Include="DestinationAddressProvider.cs" />
+    <Compile Include="ServiceAddressProvider.cs" />
     <Compile Include="ScheduleDelayProvider.cs" />
     <Compile Include="PublishExtensions.cs" />
     <Compile Include="Request.cs" />

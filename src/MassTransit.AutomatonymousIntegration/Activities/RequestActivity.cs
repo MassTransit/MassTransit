@@ -14,7 +14,6 @@ namespace Automatonymous.Activities
 {
     using System;
     using System.Threading.Tasks;
-    using GreenPipes;
 
 
     public class RequestActivity<TInstance, TRequest, TResponse> :
@@ -24,22 +23,26 @@ namespace Automatonymous.Activities
         where TRequest : class
         where TResponse : class
     {
+        readonly ServiceAddressProvider<TInstance> _serviceAddressProvider;
         readonly EventMessageFactory<TInstance, TRequest> _messageFactory;
 
         public RequestActivity(Request<TInstance, TRequest, TResponse> request, EventMessageFactory<TInstance, TRequest> messageFactory)
             : base(request)
         {
             _messageFactory = messageFactory;
+            _serviceAddressProvider = context => request.Settings.ServiceAddress;
+        }
+
+        public RequestActivity(Request<TInstance, TRequest, TResponse> request, ServiceAddressProvider<TInstance> serviceAddressProvider, EventMessageFactory<TInstance, TRequest> messageFactory)
+            : base(request)
+        {
+            _messageFactory = messageFactory;
+            _serviceAddressProvider = context => serviceAddressProvider(context) ?? request.Settings.ServiceAddress;
         }
 
         public void Accept(StateMachineVisitor visitor)
         {
             visitor.Visit(this);
-        }
-
-        public void Probe(ProbeContext context)
-        {
-            var scope = context.CreateScope("request");
         }
 
         async Task Activity<TInstance>.Execute(BehaviorContext<TInstance> context, Behavior<TInstance> next)
@@ -72,7 +75,7 @@ namespace Automatonymous.Activities
 
             var requestMessage = _messageFactory(consumeContext);
 
-            return SendRequest(context, consumeContext, requestMessage);
+            return SendRequest(context, consumeContext, requestMessage, _serviceAddressProvider(consumeContext));
         }
     }
 
@@ -85,22 +88,26 @@ namespace Automatonymous.Activities
         where TRequest : class
         where TResponse : class
     {
+        readonly ServiceAddressProvider<TInstance, TData> _serviceAddressProvider;
         readonly EventMessageFactory<TInstance, TData, TRequest> _messageFactory;
 
         public RequestActivity(Request<TInstance, TRequest, TResponse> request, EventMessageFactory<TInstance, TData, TRequest> messageFactory)
             : base(request)
         {
             _messageFactory = messageFactory;
+            _serviceAddressProvider = context => request.Settings.ServiceAddress;
+        }
+
+        public RequestActivity(Request<TInstance, TRequest, TResponse> request, ServiceAddressProvider<TInstance,TData> serviceAddressProvider, EventMessageFactory<TInstance, TData, TRequest> messageFactory)
+            : base(request)
+        {
+            _messageFactory = messageFactory;
+            _serviceAddressProvider = context => serviceAddressProvider(context) ?? request.Settings.ServiceAddress;
         }
 
         public void Accept(StateMachineVisitor visitor)
         {
             visitor.Visit(this);
-        }
-
-        public void Probe(ProbeContext context)
-        {
-            var scope = context.CreateScope("request");
         }
 
         public async Task Execute(BehaviorContext<TInstance, TData> context, Behavior<TInstance, TData> next)
@@ -109,7 +116,7 @@ namespace Automatonymous.Activities
 
             var requestMessage = _messageFactory(consumeContext);
 
-            await SendRequest(context, consumeContext, requestMessage).ConfigureAwait(false);
+            await SendRequest(context, consumeContext, requestMessage, _serviceAddressProvider(consumeContext)).ConfigureAwait(false);
 
             await next.Execute(context).ConfigureAwait(false);
         }
