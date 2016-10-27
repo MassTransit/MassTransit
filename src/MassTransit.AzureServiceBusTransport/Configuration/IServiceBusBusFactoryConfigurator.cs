@@ -19,7 +19,7 @@ namespace MassTransit.AzureServiceBusTransport
 
     public interface IServiceBusBusFactoryConfigurator :
         IBusFactoryConfigurator,
-        IServiceBusEndpointConfigurator
+        IServiceBusQueueEndpointConfigurator
     {
         /// <summary>
         /// In most cases, this is not needed and should not be used. However, if for any reason the default bus

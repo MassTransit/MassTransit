@@ -96,5 +96,10 @@ namespace MassTransit.AzureServiceBusTransport.Settings
             if (SubscriptionDescription.AutoDeleteOnIdle > TimeSpan.Zero && SubscriptionDescription.AutoDeleteOnIdle != Defaults.AutoDeleteOnIdle)
                 yield return $"autodelete={SubscriptionDescription.AutoDeleteOnIdle.TotalSeconds}";
         }
+
+        public override void SelectBasicTier()
+        {
+            
+        }
     }
 }

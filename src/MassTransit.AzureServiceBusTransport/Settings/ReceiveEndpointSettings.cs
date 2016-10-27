@@ -14,6 +14,8 @@ namespace MassTransit.AzureServiceBusTransport.Settings
 {
     using System;
     using System.Collections.Generic;
+    using System.Reflection;
+    using GreenPipes.Internals.Reflection;
     using Microsoft.ServiceBus.Messaging;
     using Transport;
 
@@ -22,9 +24,29 @@ namespace MassTransit.AzureServiceBusTransport.Settings
         BaseClientSettings,
         ReceiveSettings
     {
+        static readonly ReadWriteProperty<QueueDescription, TimeSpan?> _autoDeleteOnIdle;
+        static readonly ReadWriteProperty<QueueDescription, bool?> _enableExpress;
+
+        static ReceiveEndpointSettings()
+        {
+            var propertyInfo = typeof(QueueDescription).GetProperty("InternalAutoDeleteOnIdle", BindingFlags.Instance | BindingFlags.NonPublic);
+            _autoDeleteOnIdle = new ReadWriteProperty<QueueDescription, TimeSpan?>(propertyInfo);
+
+             propertyInfo = typeof(QueueDescription).GetProperty("InternalEnableExpress", BindingFlags.Instance | BindingFlags.NonPublic);
+            _enableExpress = new ReadWriteProperty<QueueDescription, bool?>(propertyInfo);
+        }
+
         public ReceiveEndpointSettings(QueueDescription description)
         {
             QueueDescription = description;
+        }
+
+        public override void SelectBasicTier()
+        {
+            _autoDeleteOnIdle.Set(QueueDescription, default(TimeSpan?));
+            _enableExpress.Set(QueueDescription, default(bool?));
+
+            QueueDescription.DefaultMessageTimeToLive = TimeSpan.FromDays(14);
         }
 
         public override TimeSpan AutoDeleteOnIdle

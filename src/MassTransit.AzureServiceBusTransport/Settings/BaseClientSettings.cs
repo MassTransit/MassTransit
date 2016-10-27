@@ -41,9 +41,11 @@ namespace MassTransit.AzureServiceBusTransport.Settings
 
         public abstract int MaxDeliveryCount { get; set; }
 
+        public abstract string UserMetadata { set; }
+
         public abstract bool RequiresSession { get; set; }
 
-        public abstract string UserMetadata { set; }
+        public bool UsingBasicTier { get; private set; }
 
         public int MaxConcurrentCalls { get; set; }
         public int PrefetchCount { get; set; }
@@ -65,5 +67,10 @@ namespace MassTransit.AzureServiceBusTransport.Settings
         }
 
         protected abstract IEnumerable<string> GetQueryStringOptions();
+
+        public virtual void SelectBasicTier()
+        {
+            UsingBasicTier = true;
+        }
     }
 }

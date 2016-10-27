@@ -66,6 +66,12 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
                 RequiresSession = _settings.RequiresSession
             };
 
+            if (_settings.UsingBasicTier == false)
+            {
+                description.AutoDeleteOnIdle = _settings.AutoDeleteOnIdle;
+            }
+
+
             return new ReceiveEndpointSettings(description);
         }
     }

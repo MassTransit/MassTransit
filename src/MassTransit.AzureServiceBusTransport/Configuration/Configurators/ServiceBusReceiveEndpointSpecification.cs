@@ -94,6 +94,13 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
             set { _settings.SupportOrdering = value; }
         }
 
+        public override void SelectBasicTier()
+        {
+            base.SelectBasicTier();
+
+            _subscribeMessageTopics = false;
+        }
+
         public override IEnumerable<ValidationResult> Validate()
         {
             foreach (var result in base.Validate())
@@ -122,13 +129,17 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
         {
             var description = new QueueDescription(queueName)
             {
-                AutoDeleteOnIdle = _settings.QueueDescription.AutoDeleteOnIdle,
-                EnableExpress = _settings.QueueDescription.EnableExpress,
                 DefaultMessageTimeToLive = _settings.QueueDescription.DefaultMessageTimeToLive,
                 MaxDeliveryCount = _settings.QueueDescription.MaxDeliveryCount,
                 RequiresSession = _settings.QueueDescription.RequiresSession,
                 EnablePartitioning = _settings.QueueDescription.EnablePartitioning
             };
+
+            if (_settings.UsingBasicTier == false)
+            {
+                description.AutoDeleteOnIdle = _settings.QueueDescription.AutoDeleteOnIdle;
+                description.EnableExpress = _settings.QueueDescription.EnableExpress;
+            }
 
             return new ReceiveEndpointSettings(description);
         }

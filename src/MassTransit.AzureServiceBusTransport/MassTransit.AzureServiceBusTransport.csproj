@@ -72,6 +72,7 @@
       <Link>Properties\SolutionVersion.cs</Link>
     </Compile>
     <Compile Include="AzureBusFactory.cs" />
+    <Compile Include="Configuration\IServiceBusQueueEndpointConfigurator.cs" />
     <Compile Include="Contexts\BrokeredMessageSessionContext.cs" />
     <Compile Include="Transport\ClientSettings.cs" />
     <Compile Include="RequestClientExtensions.cs" />

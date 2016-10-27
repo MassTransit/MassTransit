@@ -73,6 +73,7 @@
       <Link>Properties\SolutionVersion.cs</Link>
     </Compile>
     <Compile Include="AzureServiceBusTestFixture.cs" />
+    <Compile Include="Basic_Specs.cs" />
     <Compile Include="ConfiguringAzure_Specs.cs" />
     <Compile Include="ContextSetup.cs" />
     <Compile Include="ErrorQueue_Specs.cs" />
@@ -90,6 +91,7 @@
     <Compile Include="Session_Specs.cs" />
     <Compile Include="SharedAccessKeyTokenProvider.cs" />
     <Compile Include="Subscription_Specs.cs" />
+    <Compile Include="BasicAzureServiceBusAccountSettings.cs" />
     <Compile Include="TestAzureServiceBusAccountSettings.cs" />
     <Compile Include="Turnout_Sepcs.cs" />
     <Compile Include="TwoScopeAzureServiceBusTestFixture.cs" />

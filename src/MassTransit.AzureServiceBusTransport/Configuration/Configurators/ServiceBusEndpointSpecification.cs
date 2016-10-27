@@ -116,6 +116,11 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
             set { _settings.UserMetadata = value; }
         }
 
+        public virtual void SelectBasicTier()
+        {
+            _settings.SelectBasicTier();
+        }
+
         protected void ApplyReceiveEndpoint(IReceiveEndpointBuilder builder, IReceivePipe receivePipe, params IFilter<NamespaceContext>[] filters)
         {
             _sendEndpointProvider = CreateSendEndpointProvider(builder);

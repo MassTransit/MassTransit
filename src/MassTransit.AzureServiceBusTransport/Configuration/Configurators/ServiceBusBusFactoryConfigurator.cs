@@ -200,6 +200,11 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
             set { _settings.QueueDescription.UserMetadata = value; }
         }
 
+        public void SelectBasicTier()
+        {
+            _settings.SelectBasicTier();
+        }
+
         public void EnableDuplicateDetection(TimeSpan historyTimeWindow)
         {
             _settings.QueueDescription.RequiresDuplicateDetection = true;

@@ -44,7 +44,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
         {
         }
 
-        public AzureServiceBusTestFixture(string inputQueueName)
+        public AzureServiceBusTestFixture(string inputQueueName, Uri serviceUri = null)
         {
             ServiceBusEnvironment.SystemConnectivity.Mode = ConnectivityMode.Https;
 
@@ -52,7 +52,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
 
             TestTimeout = Debugger.IsAttached ? TimeSpan.FromMinutes(5) : TimeSpan.FromSeconds(60);
 
-            _serviceUri = ServiceBusEnvironment.CreateServiceUri("sb", "masstransit-build", "MassTransit.AzureServiceBusTransport.Tests");
+            _serviceUri = serviceUri ?? ServiceBusEnvironment.CreateServiceUri("sb", "masstransit-build", "MassTransit.AzureServiceBusTransport.Tests");
 
             _sendObserver = new TestSendObserver(TestTimeout);
         }
@@ -127,7 +127,8 @@ namespace MassTransit.AzureServiceBusTransport.Tests
             {
                 using (var tokenSource = new CancellationTokenSource(TestTimeout))
                 {
-                    await _busHandle?.StopAsync(tokenSource.Token);
+                    if(_busHandle != null)
+                        await _busHandle.StopAsync(tokenSource.Token);
                 }
             }
             catch (Exception ex)
@@ -161,7 +162,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
             {
                 ConfigureBus(x);
 
-                ServiceBusTokenProviderSettings settings = new TestAzureServiceBusAccountSettings();
+                ServiceBusTokenProviderSettings settings = GetAccountSettings();
 
                 _host = x.Host(_serviceUri, h =>
                 {
@@ -185,6 +186,11 @@ namespace MassTransit.AzureServiceBusTransport.Tests
                     ConfigureInputQueueEndpoint(e);
                 });
             });
+        }
+
+        protected virtual ServiceBusTokenProviderSettings GetAccountSettings()
+        {
+            return new TestAzureServiceBusAccountSettings();
         }
 
 

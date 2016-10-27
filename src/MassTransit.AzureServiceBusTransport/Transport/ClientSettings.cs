@@ -48,6 +48,11 @@ namespace MassTransit.AzureServiceBusTransport.Transport
         bool RequiresSession { get; }
 
         /// <summary>
+        /// True if the basic tier was selected
+        /// </summary>
+        bool UsingBasicTier { get; }
+
+        /// <summary>
         /// The path of the message entity
         /// </summary>
         string Path { get; }
