@@ -40,22 +40,22 @@ namespace MassTransit.RabbitMqTransport.Contexts
         readonly IModel _model;
         readonly ITaskParticipant _participant;
         readonly ConcurrentDictionary<ulong, PendingPublish> _published;
-        readonly ModelSettings _settings;
+        readonly IRabbitMqHost _host;
         readonly LimitedConcurrencyLevelTaskScheduler _taskScheduler;
         ulong _publishTagMax;
 
-        public RabbitMqModelContext(ConnectionContext connectionContext, IModel model, ITaskScope taskScope, ModelSettings settings)
-            : this(connectionContext, model, settings,
+        public RabbitMqModelContext(ConnectionContext connectionContext, IModel model, ITaskScope taskScope, IRabbitMqHost host)
+            : this(connectionContext, model, host,
                 taskScope.CreateParticipant($"{TypeMetadataCache<RabbitMqModelContext>.ShortName} - {connectionContext.HostSettings.ToDebugString()}"))
         {
         }
 
-        RabbitMqModelContext(ConnectionContext connectionContext, IModel model, ModelSettings settings, ITaskParticipant participant)
+        RabbitMqModelContext(ConnectionContext connectionContext, IModel model, IRabbitMqHost host, ITaskParticipant participant)
             : base(new PayloadCacheScope(connectionContext))
         {
             _connectionContext = connectionContext;
             _model = model;
-            _settings = settings;
+            _host = host;
 
             _participant = participant;
 
@@ -67,7 +67,7 @@ namespace MassTransit.RabbitMqTransport.Contexts
             _model.BasicNacks += OnBasicNacks;
             _model.BasicReturn += OnBasicReturn;
 
-            if (settings.PublisherConfirmation)
+            if (host.Settings.PublisherConfirmation)
             {
                 _model.ConfirmSelect();
             }
@@ -89,7 +89,7 @@ namespace MassTransit.RabbitMqTransport.Contexts
         async Task ModelContext.BasicPublishAsync(string exchange, string routingKey, bool mandatory, IBasicProperties basicProperties, byte[] body,
             bool awaitAck)
         {
-            if (_settings.PublisherConfirmation)
+            if (_host.Settings.PublisherConfirmation)
             {
                 var pendingPublish = await Task.Factory.StartNew(() => PublishAsync(exchange, routingKey, mandatory, basicProperties, body),
                     _participant.StoppedToken, TaskCreationOptions.None, _taskScheduler).ConfigureAwait(false);
@@ -175,7 +175,7 @@ namespace MassTransit.RabbitMqTransport.Contexts
 
             try
             {
-                if (_settings.PublisherConfirmation && _model.IsOpen && _published.Count > 0)
+                if (_host.Settings.PublisherConfirmation && _model.IsOpen && _published.Count > 0)
                 {
                     bool timedOut;
                     _model.WaitForConfirms(TimeSpan.FromSeconds(30), out timedOut);

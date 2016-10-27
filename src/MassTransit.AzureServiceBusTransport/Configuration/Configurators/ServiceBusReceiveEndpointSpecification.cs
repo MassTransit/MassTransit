@@ -24,19 +24,19 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
     using Settings;
 
 
-    public class ServiceBusReceiveEndpointConfigurator :
-        ServiceBusEndpointConfigurator,
+    public class ServiceBusReceiveEndpointSpecification :
+        ServiceBusEndpointSpecification,
         IServiceBusReceiveEndpointConfigurator
     {
         readonly ReceiveEndpointSettings _settings;
         bool _subscribeMessageTopics;
 
-        public ServiceBusReceiveEndpointConfigurator(IServiceBusHost host, string queueName, IConsumePipe consumePipe = null)
+        public ServiceBusReceiveEndpointSpecification(IServiceBusHost host, string queueName, IConsumePipe consumePipe = null)
             : this(host, new ReceiveEndpointSettings(Defaults.CreateQueueDescription(queueName)), consumePipe)
         {
         }
 
-        public ServiceBusReceiveEndpointConfigurator(IServiceBusHost host, ReceiveEndpointSettings settings, IConsumePipe consumePipe = null)
+        public ServiceBusReceiveEndpointSpecification(IServiceBusHost host, ReceiveEndpointSettings settings, IConsumePipe consumePipe = null)
             : base(host, settings, consumePipe)
         {
             _settings = settings;
@@ -109,18 +109,12 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
 
         public override void Apply(IBusBuilder builder)
         {
-            ServiceBusReceiveEndpointBuilder endpointBuilder = null;
-            var receivePipe = CreateReceivePipe(builder, consumePipe =>
-            {
-                endpointBuilder = new ServiceBusReceiveEndpointBuilder(consumePipe, builder, Host.MessageNameFormatter, _subscribeMessageTopics);
-                return endpointBuilder;
-            });
+            var receiveEndpointBuilder = new ServiceBusReceiveEndpointBuilder(CreateConsumePipe(builder), builder, _subscribeMessageTopics, Host);
 
-            if (endpointBuilder == null)
-                throw new InvalidOperationException("The endpoint builder was not initialized");
+            var receivePipe = CreateReceivePipe(receiveEndpointBuilder);
 
-            ApplyReceiveEndpoint(builder, receivePipe,
-                new PrepareReceiveEndpointFilter(_settings, endpointBuilder.GetTopicSubscriptions().ToArray()),
+            ApplyReceiveEndpoint(receiveEndpointBuilder, receivePipe,
+                new PrepareReceiveEndpointFilter(_settings, receiveEndpointBuilder.GetTopicSubscriptions().ToArray()),
                 new PrepareQueueClientFilter(_settings));
         }
 

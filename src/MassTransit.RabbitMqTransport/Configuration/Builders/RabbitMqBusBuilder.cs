@@ -26,22 +26,20 @@ namespace MassTransit.RabbitMqTransport.Builders
         BusBuilder
     {
         readonly TimeSpan _autoDeleteCacheTimeout;
-        readonly RabbitMqReceiveEndpointConfigurator _busEndpointConfigurator;
+        readonly RabbitMqReceiveEndpointSpecification _busEndpointSpecification;
         readonly BusHostCollection<RabbitMqHost> _hosts;
-        readonly ModelSettings _modelSettings;
         readonly TimeSpan _sendEndpointCacheTimeout;
 
         public RabbitMqBusBuilder(BusHostCollection<RabbitMqHost> hosts, IConsumePipeFactory consumePipeFactory, ISendPipeFactory sendPipeFactory,
-            IPublishPipeFactory publishPipeFactory, RabbitMqReceiveSettings busSettings, ModelSettings modelSettings)
+            IPublishPipeFactory publishPipeFactory, RabbitMqReceiveSettings busSettings)
             : base(consumePipeFactory, sendPipeFactory, publishPipeFactory, hosts)
         {
             _hosts = hosts;
-            _modelSettings = modelSettings;
 
             _autoDeleteCacheTimeout = TimeSpan.FromMinutes(1);
             _sendEndpointCacheTimeout = TimeSpan.FromDays(1);
 
-            _busEndpointConfigurator = new RabbitMqReceiveEndpointConfigurator(_hosts[0], busSettings, ConsumePipe);
+            _busEndpointSpecification = new RabbitMqReceiveEndpointSpecification(_hosts[0], busSettings, ConsumePipe);
 
             foreach (var host in hosts.Hosts)
             {
@@ -53,14 +51,18 @@ namespace MassTransit.RabbitMqTransport.Builders
 
         public BusHostCollection<RabbitMqHost> Hosts => _hosts;
 
+        public override IPublishEndpointProvider PublishEndpointProvider => _busEndpointSpecification.PublishEndpointProvider;
+
+        public override ISendEndpointProvider SendEndpointProvider => _busEndpointSpecification.SendEndpointProvider;
+
         protected override void PreBuild()
         {
-            _busEndpointConfigurator.Apply(this);
+            _busEndpointSpecification.Apply(this);
         }
 
         protected override Uri GetInputAddress()
         {
-            return _busEndpointConfigurator.InputAddress;
+            return _busEndpointSpecification.InputAddress;
         }
 
         protected override IConsumePipe GetConsumePipe()
@@ -70,19 +72,19 @@ namespace MassTransit.RabbitMqTransport.Builders
 
         protected override ISendTransportProvider CreateSendTransportProvider()
         {
-            return new RabbitMqSendTransportProvider(_hosts, _modelSettings);
+            return new RabbitMqSendTransportProvider(_hosts);
         }
 
         public override ISendEndpointProvider CreateSendEndpointProvider(Uri sourceAddress, params ISendPipeSpecification[] specifications)
         {
-            ISendPipe pipe = CreateSendPipe(specifications);
+            var pipe = CreateSendPipe(specifications);
 
             var provider = new RabbitMqSendEndpointProvider(MessageSerializer, sourceAddress, SendTransportProvider, pipe);
 
             return new SendEndpointCache(provider, CacheDurationProvider);
         }
 
-        TimeSpan CacheDurationProvider(Uri address)
+        public TimeSpan CacheDurationProvider(Uri address)
         {
             if (address.GetReceiveSettings().AutoDelete)
                 return _autoDeleteCacheTimeout;
@@ -92,9 +94,9 @@ namespace MassTransit.RabbitMqTransport.Builders
 
         public override IPublishEndpointProvider CreatePublishEndpointProvider(Uri sourceAddress, params IPublishPipeSpecification[] specifications)
         {
-            IPublishPipe pipe = CreatePublishPipe(specifications);
+            var pipe = CreatePublishPipe(specifications);
 
-            return new RabbitMqPublishEndpointProvider(_hosts[0], MessageSerializer, InputAddress, pipe, _modelSettings);
+            return new RabbitMqPublishEndpointProvider(_hosts[0], MessageSerializer, InputAddress, pipe);
         }
     }
 }

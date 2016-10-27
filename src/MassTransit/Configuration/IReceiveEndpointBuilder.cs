@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
+    using System;
     using System.Net.Mime;
     using Builders;
     using Pipeline;
@@ -21,6 +22,12 @@ namespace MassTransit
         IConsumePipeConnector,
         IConsumeMessageObserverConnector
     {
+        IConsumePipe ConsumePipe { get; }
+
+        ISendTransportProvider SendTransportProvider { get; }
+
+        IMessageDeserializer MessageDeserializer { get; }
+
         /// <summary>
         /// Sets the outbound message serializer
         /// </summary>
@@ -33,5 +40,21 @@ namespace MassTransit
         /// <param name="contentType">The content type of the deserializer</param>
         /// <param name="deserializerFactory">The factory to create the deserializer</param>
         void AddMessageDeserializer(ContentType contentType, DeserializerFactory deserializerFactory);
+
+        /// <summary>
+        /// Creates a send endpoint provider using the bus and supplied specifications
+        /// </summary>
+        /// <param name="sourceAddress"></param>
+        /// <param name="specifications"></param>
+        /// <returns></returns>
+        ISendEndpointProvider CreateSendEndpointProvider(Uri sourceAddress, params ISendPipeSpecification[] specifications);
+
+        /// <summary>
+        /// Creates a publish endpoint provider using the bus and supplied specifications
+        /// </summary>
+        /// <param name="sourceAddress"></param>
+        /// <param name="specifications"></param>
+        /// <returns></returns>
+        IPublishEndpointProvider CreatePublishEndpointProvider(Uri sourceAddress, params IPublishPipeSpecification[] specifications);
     }
 }

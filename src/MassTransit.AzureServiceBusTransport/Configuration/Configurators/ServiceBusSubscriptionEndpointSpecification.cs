@@ -22,18 +22,18 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
     using Settings;
 
 
-    public class ServiceBusSubscriptionEndpointConfigurator :
-        ServiceBusEndpointConfigurator,
+    public class ServiceBusSubscriptionEndpointSpecification :
+        ServiceBusEndpointSpecification,
         IServiceBusSubscriptionEndpointConfigurator
     {
         readonly SubscriptionEndpointSettings _settings;
 
-        public ServiceBusSubscriptionEndpointConfigurator(IServiceBusHost host, string subscriptionName, string topicName, IConsumePipe consumePipe = null)
+        public ServiceBusSubscriptionEndpointSpecification(IServiceBusHost host, string subscriptionName, string topicName, IConsumePipe consumePipe = null)
             : this(host, new SubscriptionEndpointSettings(topicName, subscriptionName), consumePipe)
         {
         }
 
-        public ServiceBusSubscriptionEndpointConfigurator(IServiceBusHost host, SubscriptionEndpointSettings settings, IConsumePipe consumePipe = null)
+        public ServiceBusSubscriptionEndpointSpecification(IServiceBusHost host, SubscriptionEndpointSettings settings, IConsumePipe consumePipe = null)
             : base(host, settings, consumePipe)
         {
             _settings = settings;
@@ -47,9 +47,11 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
 
         public override void Apply(IBusBuilder builder)
         {
-            var receivePipe = CreateReceivePipe(builder, consumePipe => new ServiceBusSubscriptionEndpointBuilder(consumePipe, builder));
+            var receiveEndpointBuilder = new ServiceBusReceiveEndpointBuilder(CreateConsumePipe(builder), builder, false, Host);
 
-            ApplyReceiveEndpoint(builder, receivePipe,
+            var receivePipe = CreateReceivePipe(receiveEndpointBuilder);
+
+            ApplyReceiveEndpoint(receiveEndpointBuilder, receivePipe,
                 new PrepareSubscriptionEndpointFilter(_settings),
                 new PrepareSubscriptionClientFilter(_settings));
         }

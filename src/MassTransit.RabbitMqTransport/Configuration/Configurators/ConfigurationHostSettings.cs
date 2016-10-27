@@ -30,6 +30,8 @@ namespace MassTransit.RabbitMqTransport.Configurators
             var connectionFactory = new ConnectionFactory();
             SslProtocol = connectionFactory.Ssl.Version;
             AcceptablePolicyErrors = connectionFactory.Ssl.AcceptablePolicyErrors;
+
+            PublisherConfirmation = true;
         }
 
         public string Host { get; set; }
@@ -68,5 +70,7 @@ namespace MassTransit.RabbitMqTransport.Configurators
                 return builder.Uri;
             }
         }
+
+        public bool PublisherConfirmation { get; set; }
     }
 }

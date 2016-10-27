@@ -34,15 +34,13 @@ namespace MassTransit.AzureServiceBusTransport.Transport
         {
             var consumePipe = _builder.CreateConsumePipe();
 
-            var endpointConfigurator = new ServiceBusReceiveEndpointConfigurator(_host, queueName, consumePipe);
+            var endpointConfigurator = new ServiceBusReceiveEndpointSpecification(_host, queueName);
 
             configure?.Invoke(endpointConfigurator);
 
             BusConfigurationResult.CompileResults(endpointConfigurator.Validate());
 
-            var endpointBuilder = new ServiceBusEndpointBuilder(_builder);
-
-            endpointConfigurator.Apply(endpointBuilder);
+            endpointConfigurator.Apply(_builder);
         }
     }
 }

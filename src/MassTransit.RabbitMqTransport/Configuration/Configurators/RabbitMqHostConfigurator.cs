@@ -42,6 +42,11 @@ namespace MassTransit.RabbitMqTransport.Configurators
 
         public RabbitMqHostSettings Settings => _settings;
 
+        public bool PublisherConfirmation
+        {
+            set { _settings.PublisherConfirmation = value; }
+        }
+
         public void UseSsl(Action<IRabbitMqSslConfigurator> configureSsl)
         {
             var configurator = new RabbitMqSslConfigurator(_settings);

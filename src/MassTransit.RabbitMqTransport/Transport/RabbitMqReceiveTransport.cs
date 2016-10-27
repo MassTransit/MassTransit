@@ -76,7 +76,7 @@ namespace MassTransit.RabbitMqTransport.Transport
 
             IPipe<ConnectionContext> pipe = Pipe.New<ConnectionContext>(x =>
             {
-                x.RabbitMqConsumer(receivePipe, _settings, _receiveObservable, _receiveTransportObservable, _bindings, supervisor, _managementPipe, _sendEndpointProvider, _publishEndpointProvider);
+                x.RabbitMqConsumer(receivePipe, _settings, _receiveObservable, _receiveTransportObservable, _bindings, supervisor, _managementPipe, _sendEndpointProvider, _publishEndpointProvider, _host);
             });
 
             Receiver(pipe, supervisor);

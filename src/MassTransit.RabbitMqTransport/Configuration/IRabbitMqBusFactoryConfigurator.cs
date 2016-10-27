@@ -13,6 +13,8 @@
 namespace MassTransit.RabbitMqTransport
 {
     using System;
+    using System.ComponentModel;
+    using MassTransit.Builders;
 
 
     public interface IRabbitMqBusFactoryConfigurator :
@@ -23,7 +25,14 @@ namespace MassTransit.RabbitMqTransport
         /// Enables RabbitMQ publish acknowledgement, so that the Task returned from Send/Publish 
         /// is not completed until the message has been confirmed by the broker.
         /// </summary>
+        [Obsolete("This is now on the host configuration, and this setting no longer has any effect")]
         bool PublisherConfirmation { set; }
+
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        void AddBusFactorySpecification(IBusFactorySpecification<IBusBuilder> specification);
+
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        void AddReceiveEndpointSpecification(IReceiveEndpointSpecification<IBusBuilder> specification);
 
         /// <summary>
         /// In most cases, this is not needed and should not be used. However, if for any reason the default bus

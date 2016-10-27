@@ -32,13 +32,13 @@ namespace MassTransit.Transports.InMemory
         {
             var consumePipe = _builder.CreateConsumePipe();
 
-            var endpointConfigurator = new InMemoryReceiveEndpointConfigurator(queueName, consumePipe);
+            var specification = new InMemoryReceiveEndpointSpecification(queueName, consumePipe);
 
-            configure?.Invoke(endpointConfigurator);
+            configure?.Invoke(specification);
 
-            BusConfigurationResult.CompileResults(endpointConfigurator.Validate());
+            BusConfigurationResult.CompileResults(specification.Validate());
 
-            endpointConfigurator.Apply(_builder);
+            specification.Apply(_builder);
         }
     }
 }

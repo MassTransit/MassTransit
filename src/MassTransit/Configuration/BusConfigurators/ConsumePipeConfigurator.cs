@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -16,9 +16,7 @@ namespace MassTransit.BusConfigurators
     using System.Collections.Generic;
     using System.Linq;
     using Builders;
-    using Configurators;
     using GreenPipes;
-    using PipeConfigurators;
     using Pipeline;
 
 
@@ -56,7 +54,7 @@ namespace MassTransit.BusConfigurators
 
             Apply(builder);
 
-            for (int i = 0; i < specifications.Length; i++)
+            for (var i = 0; i < specifications.Length; i++)
                 specifications[i].Apply(builder);
 
             return builder.Build();
@@ -69,7 +67,7 @@ namespace MassTransit.BusConfigurators
 
         public void Apply(IConsumePipeBuilder builder)
         {
-            foreach (IConsumePipeSpecification specification in _specifications)
+            foreach (var specification in _specifications)
                 specification.Apply(builder);
         }
 

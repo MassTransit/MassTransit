@@ -72,17 +72,15 @@
       <Link>Properties\SolutionVersion.cs</Link>
     </Compile>
     <Compile Include="AzureBusFactory.cs" />
-    <Compile Include="Configuration\Builders\ServiceBusEndpointBuilder.cs" />
     <Compile Include="Contexts\BrokeredMessageSessionContext.cs" />
     <Compile Include="Transport\ClientSettings.cs" />
     <Compile Include="RequestClientExtensions.cs" />
     <Compile Include="Settings\BaseClientSettings.cs" />
     <Compile Include="Settings\ReceiveEndpointSettings.cs" />
-    <Compile Include="Configuration\Configurators\ServiceBusEndpointConfigurator.cs" />
-    <Compile Include="Configuration\Configurators\ServiceBusReceiveEndpointConfigurator.cs" />
+    <Compile Include="Configuration\Configurators\ServiceBusEndpointSpecification.cs" />
+    <Compile Include="Configuration\Configurators\ServiceBusReceiveEndpointSpecification.cs" />
     <Compile Include="Configuration\Specifications\ServiceBusMessageSchedulerSpecification.cs" />
-    <Compile Include="Configuration\Builders\ServiceBusSubscriptionEndpointBuilder.cs" />
-    <Compile Include="Configuration\Configurators\ServiceBusSubscriptionEndpointConfigurator.cs" />
+    <Compile Include="Configuration\Configurators\ServiceBusSubscriptionEndpointSpecification.cs" />
     <Compile Include="Settings\SubscriptionEndpointSettings.cs" />
     <Compile Include="ClientContext.cs" />
     <Compile Include="Configuration\Defaults.cs" />

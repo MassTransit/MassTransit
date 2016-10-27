@@ -13,29 +13,24 @@
 namespace MassTransit.AzureServiceBusTransport.Configurators
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
     using Builders;
     using BusConfigurators;
-    using GreenPipes;
     using MassTransit.Builders;
     using Settings;
     using Transports;
 
 
     public class ServiceBusBusFactoryConfigurator :
-        BusFactoryConfigurator,
+        BusFactoryConfigurator<IBusBuilder>,
         IServiceBusBusFactoryConfigurator,
         IBusFactory
     {
         readonly BusHostCollection<ServiceBusHost> _hosts;
         readonly ReceiveEndpointSettings _settings;
-        readonly IList<IBusFactorySpecification> _specifications;
 
         public ServiceBusBusFactoryConfigurator()
         {
             _hosts = new BusHostCollection<ServiceBusHost>();
-            _specifications = new List<IBusFactorySpecification>();
 
             var queueName = ((IServiceBusHost)null).GetTemporaryQueueName("bus");
             _settings = new ReceiveEndpointSettings(Defaults.CreateQueueDescription(queueName))
@@ -48,28 +43,48 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
             };
         }
 
-        public override IEnumerable<ValidationResult> Validate()
+        public TimeSpan DuplicateDetectionHistoryTimeWindow
         {
-            return base.Validate()
-                .Concat(_specifications.SelectMany(x => x.Validate()));
+            set { _settings.QueueDescription.DuplicateDetectionHistoryTimeWindow = value; }
+        }
+
+        public bool EnableExpress
+        {
+            set { _settings.QueueDescription.EnableExpress = value; }
+        }
+
+        public bool EnablePartitioning
+        {
+            set { _settings.QueueDescription.EnablePartitioning = value; }
+        }
+
+        public bool IsAnonymousAccessible
+        {
+            set { _settings.QueueDescription.IsAnonymousAccessible = value; }
+        }
+
+        public int MaxSizeInMegabytes
+        {
+            set { _settings.QueueDescription.MaxSizeInMegabytes = value; }
+        }
+
+        public bool RequiresDuplicateDetection
+        {
+            set { _settings.QueueDescription.RequiresDuplicateDetection = value; }
+        }
+
+        public bool SupportOrdering
+        {
+            set { _settings.QueueDescription.SupportOrdering = value; }
         }
 
         public IBusControl CreateBus()
         {
             var builder = new ServiceBusBusBuilder(_hosts, ConsumePipeFactory, SendPipeFactory, PublishPipeFactory, _settings);
 
-            foreach (var configurator in _specifications)
-                configurator.Apply(builder);
+            ApplySpecifications(builder);
 
             return builder.Build();
-        }
-
-        public void AddBusFactorySpecification(IBusFactorySpecification specification)
-        {
-            if (specification == null)
-                throw new ArgumentNullException(nameof(specification));
-
-            _specifications.Add(specification);
         }
 
         public void ReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configureEndpoint)
@@ -117,11 +132,11 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
             if (serviceBusHost == null)
                 throw new ArgumentException("Must be a ServiceBusHost", nameof(host));
 
-            var endpointConfigurator = new ServiceBusReceiveEndpointConfigurator(serviceBusHost, queueName);
+            var specification = new ServiceBusReceiveEndpointSpecification(serviceBusHost, queueName);
 
-            configure(endpointConfigurator);
+            configure?.Invoke(specification);
 
-            AddBusFactorySpecification(endpointConfigurator);
+            AddReceiveEndpointSpecification(specification);
         }
 
         public void SubscriptionEndpoint<T>(IServiceBusHost host, string subscriptionName, Action<IServiceBusSubscriptionEndpointConfigurator> configure)
@@ -133,11 +148,11 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
         public void SubscriptionEndpoint(IServiceBusHost host, string subscriptionName, string topicName,
             Action<IServiceBusSubscriptionEndpointConfigurator> configure)
         {
-            var endpointSpecification = new ServiceBusSubscriptionEndpointConfigurator(host, subscriptionName, topicName);
+            var specification = new ServiceBusSubscriptionEndpointSpecification(host, subscriptionName, topicName);
 
-            configure?.Invoke(endpointSpecification);
+            configure?.Invoke(specification);
 
-            AddBusFactorySpecification(endpointSpecification);
+            AddReceiveEndpointSpecification(specification);
         }
 
         public TimeSpan AutoDeleteOnIdle
@@ -150,11 +165,6 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
             set { _settings.QueueDescription.DefaultMessageTimeToLive = value; }
         }
 
-        public TimeSpan DuplicateDetectionHistoryTimeWindow
-        {
-            set { _settings.QueueDescription.DuplicateDetectionHistoryTimeWindow = value; }
-        }
-
         public bool EnableBatchedOperations
         {
             set { _settings.QueueDescription.EnableBatchedOperations = value; }
@@ -165,30 +175,9 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
             set { _settings.QueueDescription.EnableDeadLetteringOnMessageExpiration = value; }
         }
 
-        public void EnableDuplicateDetection(TimeSpan historyTimeWindow)
-        {
-            _settings.QueueDescription.RequiresDuplicateDetection = true;
-            _settings.QueueDescription.DuplicateDetectionHistoryTimeWindow = historyTimeWindow;
-        }
-
-        public bool EnableExpress
-        {
-            set { _settings.QueueDescription.EnableExpress = value; }
-        }
-
-        public bool EnablePartitioning
-        {
-            set { _settings.QueueDescription.EnablePartitioning = value; }
-        }
-
         public string ForwardDeadLetteredMessagesTo
         {
             set { _settings.QueueDescription.ForwardDeadLetteredMessagesTo = value; }
-        }
-
-        public bool IsAnonymousAccessible
-        {
-            set { _settings.QueueDescription.IsAnonymousAccessible = value; }
         }
 
         public TimeSpan LockDuration
@@ -201,29 +190,20 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
             set { _settings.QueueDescription.MaxDeliveryCount = value; }
         }
 
-        public int MaxSizeInMegabytes
-        {
-            set { _settings.QueueDescription.MaxSizeInMegabytes = value; }
-        }
-
-        public bool RequiresDuplicateDetection
-        {
-            set { _settings.QueueDescription.RequiresDuplicateDetection = value; }
-        }
-
         public bool RequiresSession
         {
             set { _settings.QueueDescription.RequiresSession = value; }
         }
 
-        public bool SupportOrdering
-        {
-            set { _settings.QueueDescription.SupportOrdering = value; }
-        }
-
         public string UserMetadata
         {
             set { _settings.QueueDescription.UserMetadata = value; }
+        }
+
+        public void EnableDuplicateDetection(TimeSpan historyTimeWindow)
+        {
+            _settings.QueueDescription.RequiresDuplicateDetection = true;
+            _settings.QueueDescription.DuplicateDetectionHistoryTimeWindow = historyTimeWindow;
         }
     }
 }

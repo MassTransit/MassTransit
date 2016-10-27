@@ -100,17 +100,17 @@ namespace MassTransit.AzureServiceBusTransport
         {
             var queueName = host.GetTemporaryQueueName("manage-");
 
-            var endpointConfigurator = new ServiceBusReceiveEndpointConfigurator(host, queueName)
+            var specification = new ServiceBusReceiveEndpointSpecification(host, queueName)
             {
                 AutoDeleteOnIdle = TimeSpan.FromMinutes(5),
                 EnableExpress = true,
             };
 
-            configure?.Invoke(endpointConfigurator);
+            configure?.Invoke(specification);
 
-            configurator.AddBusFactorySpecification(endpointConfigurator);
+            configurator.AddReceiveEndpointSpecification(specification);
 
-            var managementEndpointConfigurator = new ManagementEndpointConfigurator(endpointConfigurator);
+            var managementEndpointConfigurator = new ManagementEndpointConfigurator(specification);
 
             return managementEndpointConfigurator;
         }

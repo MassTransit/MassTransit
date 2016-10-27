@@ -122,5 +122,10 @@ namespace MassTransit.RabbitMqTransport
         /// Returns the host address
         /// </summary>
         Uri HostAddress { get; }
+
+        /// <summary>
+        /// True if the publisher should confirm acceptance of messages
+        /// </summary>
+        bool PublisherConfirmation { get; }
     }
 }

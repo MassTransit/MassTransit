@@ -16,7 +16,6 @@ namespace MassTransit.RabbitMqTransport
     using System.Threading.Tasks;
     using GreenPipes;
     using Integration;
-    using Transports;
     using Util;
 
 

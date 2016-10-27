@@ -25,7 +25,7 @@ namespace MassTransit.AzureServiceBusTransport.Builders
     public class ServiceBusBusBuilder :
         BusBuilder
     {
-        readonly ServiceBusReceiveEndpointConfigurator _busEndpointConfigurator;
+        readonly ServiceBusReceiveEndpointSpecification _busEndpointSpecification;
         readonly BusHostCollection<ServiceBusHost> _hosts;
 
         public ServiceBusBusBuilder(BusHostCollection<ServiceBusHost> hosts, IConsumePipeFactory consumePipeFactory, ISendPipeFactory sendPipeFactory,
@@ -37,7 +37,7 @@ namespace MassTransit.AzureServiceBusTransport.Builders
 
             _hosts = hosts;
 
-            _busEndpointConfigurator = new ServiceBusReceiveEndpointConfigurator(_hosts[0], settings, ConsumePipe);
+            _busEndpointSpecification = new ServiceBusReceiveEndpointSpecification(_hosts[0], settings, ConsumePipe);
 
             foreach (var host in hosts.Hosts)
             {
@@ -46,9 +46,13 @@ namespace MassTransit.AzureServiceBusTransport.Builders
             }
         }
 
+        public override IPublishEndpointProvider PublishEndpointProvider => _busEndpointSpecification.PublishEndpointProvider;
+
+        public override ISendEndpointProvider SendEndpointProvider => _busEndpointSpecification.SendEndpointProvider;
+
         protected override Uri GetInputAddress()
         {
-            return _busEndpointConfigurator.InputAddress;
+            return _busEndpointSpecification.InputAddress;
         }
 
         protected override IConsumePipe GetConsumePipe()
@@ -79,7 +83,7 @@ namespace MassTransit.AzureServiceBusTransport.Builders
 
         public override IPublishEndpointProvider CreatePublishEndpointProvider(Uri sourceAddress, params IPublishPipeSpecification[] specifications)
         {
-            var provider = new PublishSendEndpointProvider(MessageSerializer, sourceAddress, _hosts);
+            var provider = new PublishSendEndpointProvider(MessageSerializer, sourceAddress, _hosts[0]);
 
             var cache = new SendEndpointCache(provider, TopicCacheDurationProvider);
 
@@ -97,9 +101,7 @@ namespace MassTransit.AzureServiceBusTransport.Builders
 
         protected override void PreBuild()
         {
-            base.PreBuild();
-
-            _busEndpointConfigurator.Apply(this);
+            _busEndpointSpecification.Apply(this);
         }
     }
 }

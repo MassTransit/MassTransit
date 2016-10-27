@@ -18,6 +18,12 @@ namespace MassTransit.RabbitMqTransport
     public interface IRabbitMqHostConfigurator
     {
         /// <summary>
+        /// Enables RabbitMQ publish acknowledgement, so that the Task returned from Send/Publish 
+        /// is not completed until the message has been confirmed by the broker.
+        /// </summary>
+        bool PublisherConfirmation { set; }
+
+        /// <summary>
         /// Configure the use of SSL to connection to RabbitMQ
         /// </summary>
         /// <param name="configureSsl"></param>

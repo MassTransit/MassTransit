@@ -13,6 +13,8 @@
 namespace MassTransit.AzureServiceBusTransport
 {
     using System;
+    using System.ComponentModel;
+    using MassTransit.Builders;
 
 
     public interface IServiceBusBusFactoryConfigurator :
@@ -25,6 +27,12 @@ namespace MassTransit.AzureServiceBusTransport
         /// endpoint or you will screw things up.
         /// </summary>
         void OverrideDefaultBusEndpointQueueName(string value);
+
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        void AddBusFactorySpecification(IBusFactorySpecification<IBusBuilder> specification);
+
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        void AddReceiveEndpointSpecification(IReceiveEndpointSpecification<IBusBuilder> specification);
 
         /// <summary>
         /// Configures a host

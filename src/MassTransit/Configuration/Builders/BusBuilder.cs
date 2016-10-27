@@ -60,8 +60,6 @@ namespace MassTransit.Builders
 
         public ISendTransportProvider SendTransportProvider => _sendTransportProvider.Value;
 
-        public SerializerBuilder SerializerBuilder => _serializerBuilder;
-
         public void AddMessageDeserializer(ContentType contentType, DeserializerFactory deserializerFactory)
         {
             _serializerBuilder.AddDeserializer(contentType, deserializerFactory);
@@ -93,8 +91,10 @@ namespace MassTransit.Builders
         }
 
         public abstract ISendEndpointProvider CreateSendEndpointProvider(Uri sourceAddress, params ISendPipeSpecification[] specifications);
-
         public abstract IPublishEndpointProvider CreatePublishEndpointProvider(Uri sourceAddress, params IPublishPipeSpecification[] specifications);
+
+        public abstract ISendEndpointProvider SendEndpointProvider { get; }
+        public abstract IPublishEndpointProvider PublishEndpointProvider { get; }
 
         protected abstract Uri GetInputAddress();
         protected abstract IConsumePipe GetConsumePipe();
@@ -110,10 +110,7 @@ namespace MassTransit.Builders
             {
                 PreBuild();
 
-                var sendEndpointProvider = CreateSendEndpointProvider(InputAddress);
-                var publishEndpointProvider = CreatePublishEndpointProvider(InputAddress);
-
-                var bus = new MassTransitBus(InputAddress, ConsumePipe, sendEndpointProvider, publishEndpointProvider, _hosts, BusObservable);
+                var bus = new MassTransitBus(InputAddress, ConsumePipe, SendEndpointProvider, PublishEndpointProvider, _hosts, BusObservable);
 
                 TaskUtil.Await(() => _busObservable.PostCreate(bus));
 

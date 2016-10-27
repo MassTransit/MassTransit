@@ -14,7 +14,6 @@ namespace MassTransit.BusConfigurators
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
     using Builders;
     using EndpointConfigurators;
     using GreenPipes;
@@ -23,11 +22,10 @@ namespace MassTransit.BusConfigurators
 
 
     public class InMemoryBusFactoryConfigurator :
-        BusFactoryConfigurator,
+        BusFactoryConfigurator<IInMemoryBusBuilder>,
         IInMemoryBusFactoryConfigurator,
         IBusFactory
     {
-        readonly IList<IInMemoryBusFactorySpecification> _configurators;
         readonly BusHostCollection<IBusHostControl> _hosts;
         int _concurrencyLimit;
         InMemoryHost _inMemoryHost;
@@ -35,8 +33,6 @@ namespace MassTransit.BusConfigurators
 
         public InMemoryBusFactoryConfigurator()
         {
-            _configurators = new List<IInMemoryBusFactorySpecification>();
-
             _concurrencyLimit = Environment.ProcessorCount;
 
             _hosts = new BusHostCollection<IBusHostControl>();
@@ -55,40 +51,30 @@ namespace MassTransit.BusConfigurators
 
             var builder = new InMemoryBusBuilder(_inMemoryHost, _sendTransportProvider, _hosts, ConsumePipeFactory, SendPipeFactory, PublishPipeFactory);
 
-            foreach (var configurator in _configurators)
-                configurator.Apply(builder);
+            ApplySpecifications(builder);
 
             return builder.Build();
         }
 
-        public override IEnumerable<ValidationResult> Validate()
+        protected override IBusFactorySpecification<IInMemoryBusBuilder> CreateSpecificationProxy(IBusFactorySpecification specification)
         {
-            return base.Validate()
-                .Concat(_configurators.SelectMany(x => x.Validate()));
+            return new ConfiguratorProxy(specification);
         }
 
-        void IBusFactoryConfigurator.AddBusFactorySpecification(IBusFactorySpecification specification)
-        {
-            _configurators.Add(new ConfiguratorProxy(specification));
-        }
 
         public int TransportConcurrencyLimit
         {
             set { _concurrencyLimit = value; }
         }
 
-        public void AddBusFactorySpecification(IInMemoryBusFactorySpecification configurator)
-        {
-            _configurators.Add(configurator);
-        }
 
         public void ReceiveEndpoint(string queueName, Action<IInMemoryReceiveEndpointConfigurator> configureEndpoint)
         {
-            var endpointConfigurator = new InMemoryReceiveEndpointConfigurator(queueName);
+            var specification = new InMemoryReceiveEndpointSpecification(queueName);
 
-            configureEndpoint(endpointConfigurator);
+            configureEndpoint?.Invoke(specification);
 
-            AddBusFactorySpecification(endpointConfigurator);
+            AddReceiveEndpointSpecification(specification);
         }
 
         void IBusFactoryConfigurator.ReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configureEndpoint)

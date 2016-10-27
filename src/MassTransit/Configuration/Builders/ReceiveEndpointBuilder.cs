@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Builders
 {
+    using System;
     using System.Net.Mime;
     using GreenPipes;
     using Pipeline;
@@ -20,33 +21,54 @@ namespace MassTransit.Builders
     public abstract class ReceiveEndpointBuilder
     {
         readonly IBusBuilder _builder;
+        readonly IConsumePipe _consumePipe;
+        readonly SerializerBuilder _serializerBuilder;
 
         protected ReceiveEndpointBuilder(IConsumePipe consumePipe, IBusBuilder builder)
         {
             _builder = builder;
-            ConsumePipe = consumePipe;
+            _consumePipe = consumePipe;
+            _serializerBuilder = builder.CreateSerializerBuilder();
         }
 
-        protected IConsumePipe ConsumePipe { get; }
+        public IConsumePipe ConsumePipe => _consumePipe;
+        public IMessageSerializer MessageSerializer => _serializerBuilder.Serializer;
+        public IMessageDeserializer MessageDeserializer => _serializerBuilder.Deserializer;
+
+        public ISendTransportProvider SendTransportProvider => _builder.SendTransportProvider;
 
         public void SetMessageSerializer(SerializerFactory serializerFactory)
         {
-            _builder.SetMessageSerializer(serializerFactory);
+            _serializerBuilder.SetSerializer(serializerFactory);
         }
 
         public void AddMessageDeserializer(ContentType contentType, DeserializerFactory deserializerFactory)
         {
-            _builder.AddMessageDeserializer(contentType, deserializerFactory);
+            _serializerBuilder.AddDeserializer(contentType, deserializerFactory);
         }
 
         public virtual ConnectHandle ConnectConsumePipe<T>(IPipe<ConsumeContext<T>> pipe) where T : class
         {
-            return ConsumePipe.ConnectConsumePipe(pipe);
+            return _consumePipe.ConnectConsumePipe(pipe);
         }
 
         public ConnectHandle ConnectConsumeMessageObserver<T>(IConsumeMessageObserver<T> observer) where T : class
         {
-            return ConsumePipe.ConnectConsumeMessageObserver(observer);
+            return _consumePipe.ConnectConsumeMessageObserver(observer);
         }
+
+        protected ISendPipe CreateSendPipe(params ISendPipeSpecification[] specifications)
+        {
+            return _builder.CreateSendPipe(specifications);
+        }
+
+        protected IPublishPipe CreatePublishPipe(params IPublishPipeSpecification[] specifications)
+        {
+            return _builder.CreatePublishPipe(specifications);
+        }
+
+        public abstract ISendEndpointProvider CreateSendEndpointProvider(Uri sourceAddress, params ISendPipeSpecification[] specifications);
+
+        public abstract IPublishEndpointProvider CreatePublishEndpointProvider(Uri sourceAddress, params IPublishPipeSpecification[] specifications);
     }
 }

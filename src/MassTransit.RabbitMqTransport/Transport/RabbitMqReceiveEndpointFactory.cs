@@ -34,15 +34,13 @@ namespace MassTransit.RabbitMqTransport.Transport
         {
             var consumePipe = _builder.CreateConsumePipe();
 
-            var endpointConfigurator = new RabbitMqReceiveEndpointConfigurator(_host, queueName, consumePipe);
+            var endpointConfigurator = new RabbitMqReceiveEndpointSpecification(_host, queueName, consumePipe);
 
             configure?.Invoke(endpointConfigurator);
 
             BusConfigurationResult.CompileResults(endpointConfigurator.Validate());
 
-            var endpointBuilder = new RabbitMqEndpointBuilder(_builder);
-
-            endpointConfigurator.Apply(endpointBuilder);
+            endpointConfigurator.Apply(_builder);
         }
     }
 }

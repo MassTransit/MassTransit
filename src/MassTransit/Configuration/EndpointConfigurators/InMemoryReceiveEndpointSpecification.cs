@@ -19,42 +19,53 @@ namespace MassTransit.EndpointConfigurators
     using Transports.InMemory;
 
 
-    public class InMemoryReceiveEndpointConfigurator :
-        ReceiveEndpointConfigurator,
+    public class InMemoryReceiveEndpointSpecification :
+        ReceiveEndpointSpecification,
         IInMemoryReceiveEndpointConfigurator,
-        IInMemoryBusFactorySpecification
+        IInMemoryReceiveEndpointSpecification
     {
         readonly string _queueName;
+        IPublishEndpointProvider _publishEndpointProvider;
+        ISendEndpointProvider _sendEndpointProvider;
         int _transportConcurrencyLimit;
 
-        public InMemoryReceiveEndpointConfigurator(string queueName, IConsumePipe consumePipe = null)
+        public InMemoryReceiveEndpointSpecification(string queueName, IConsumePipe consumePipe = null)
             : base(consumePipe)
         {
             _queueName = queueName;
             _transportConcurrencyLimit = 0;
         }
 
-        public void Apply(IInMemoryBusBuilder builder)
-        {
-            var endpointBuilder = new InMemoryEndpointBuilder(builder, InputAddress);
+        public ISendEndpointProvider SendEndpointProvider => _sendEndpointProvider;
 
-            var receivePipe = CreateReceivePipe(endpointBuilder, consumePipe => new InMemoryReceiveEndpointBuilder(consumePipe, endpointBuilder));
-
-            var sendEndpointProvider = CreateSendEndpointProvider(endpointBuilder);
-            var publishEndpointProvider = CreatePublishEndpointProvider(endpointBuilder);
-
-            var transport = endpointBuilder.InMemoryHost.GetReceiveTransport(_queueName, _transportConcurrencyLimit, sendEndpointProvider, publishEndpointProvider);
-
-            var inMemoryHost = endpointBuilder.InMemoryHost as InMemoryHost;
-            if (inMemoryHost == null)
-                throw new ConfigurationException("Must be an InMemoryHost");
-
-            inMemoryHost.ReceiveEndpoints.Add(_queueName, new ReceiveEndpoint(transport, receivePipe));
-        }
+        public IPublishEndpointProvider PublishEndpointProvider => _publishEndpointProvider;
 
         public int TransportConcurrencyLimit
         {
             set { _transportConcurrencyLimit = value; }
+        }
+
+        public void Apply(IInMemoryBusBuilder builder)
+        {
+            var receiveEndpointBuilder = new InMemoryReceiveEndpointBuilder(CreateConsumePipe(builder), builder);
+
+            var receivePipe = CreateReceivePipe(receiveEndpointBuilder);
+
+            _sendEndpointProvider = CreateSendEndpointProvider(receiveEndpointBuilder);
+            _publishEndpointProvider = CreatePublishEndpointProvider(receiveEndpointBuilder);
+
+            var inMemoryBusBuilder = builder as InMemoryBusBuilder;
+            if (inMemoryBusBuilder == null)
+                throw new ArgumentException("The bus builder is expected to by an InMemoryBusBuilder", nameof(inMemoryBusBuilder));
+
+            var transport = inMemoryBusBuilder.InMemoryHost.GetReceiveTransport(_queueName, _transportConcurrencyLimit, _sendEndpointProvider,
+                _publishEndpointProvider);
+
+            var inMemoryHost = inMemoryBusBuilder.InMemoryHost as InMemoryHost;
+            if (inMemoryHost == null)
+                throw new ConfigurationException("Must be an InMemoryHost");
+
+            inMemoryHost.ReceiveEndpoints.Add(_queueName, new ReceiveEndpoint(transport, receivePipe));
         }
 
         protected override Uri GetErrorAddress()

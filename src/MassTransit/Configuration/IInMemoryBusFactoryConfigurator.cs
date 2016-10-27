@@ -38,7 +38,10 @@ namespace MassTransit
         void SetHost(InMemoryHost transportProvider);
 
         [EditorBrowsable(EditorBrowsableState.Never)]
-        void AddBusFactorySpecification(IInMemoryBusFactorySpecification configurator);
+        void AddBusFactorySpecification(IBusFactorySpecification<IInMemoryBusBuilder> specification);
+
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        void AddReceiveEndpointSpecification(IReceiveEndpointSpecification<IInMemoryBusBuilder> specification);
 
         /// <summary>
         /// Specify a receive endpoint for the bus, with the specified queue name

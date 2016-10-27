@@ -162,14 +162,14 @@ namespace MassTransit
 
             var queueName = host.GetTemporaryQueueName("manage-");
 
-            var endpointConfigurator = new RabbitMqReceiveEndpointConfigurator(host, queueName);
+            var endpointConfigurator = new RabbitMqReceiveEndpointSpecification(host, queueName);
 
             endpointConfigurator.AutoDelete = true;
             endpointConfigurator.Durable = false;
 
             configure?.Invoke(endpointConfigurator);
 
-            configurator.AddBusFactorySpecification(endpointConfigurator);
+            configurator.AddReceiveEndpointSpecification(endpointConfigurator);
 
             var managementEndpointConfigurator = new ManagementEndpointConfigurator(endpointConfigurator);
 

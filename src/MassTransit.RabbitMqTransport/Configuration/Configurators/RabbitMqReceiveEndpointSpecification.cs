@@ -27,18 +27,20 @@ namespace MassTransit.RabbitMqTransport.Configurators
     using Transports;
 
 
-    public class RabbitMqReceiveEndpointConfigurator :
-        ReceiveEndpointConfigurator,
+    public class RabbitMqReceiveEndpointSpecification :
+        ReceiveEndpointSpecification,
         IRabbitMqReceiveEndpointConfigurator,
-        IBusFactorySpecification
+        IReceiveEndpointSpecification<IBusBuilder>
     {
         readonly List<ExchangeBindingSettings> _exchangeBindings;
         readonly IRabbitMqHost _host;
         readonly IManagementPipe _managementPipe;
         readonly RabbitMqReceiveSettings _settings;
         bool _bindMessageExchanges;
+        IPublishEndpointProvider _publishEndpointProvider;
+        ISendEndpointProvider _sendEndpointProvider;
 
-        public RabbitMqReceiveEndpointConfigurator(IRabbitMqHost host, string queueName = null, IConsumePipe consumePipe = null)
+        public RabbitMqReceiveEndpointSpecification(IRabbitMqHost host, string queueName = null, IConsumePipe consumePipe = null)
             : base(consumePipe)
         {
             _host = host;
@@ -54,54 +56,18 @@ namespace MassTransit.RabbitMqTransport.Configurators
             _exchangeBindings = new List<ExchangeBindingSettings>();
         }
 
-        public RabbitMqReceiveEndpointConfigurator(IRabbitMqHost host, RabbitMqReceiveSettings settings, IConsumePipe consumePipe)
+        public RabbitMqReceiveEndpointSpecification(IRabbitMqHost host, RabbitMqReceiveSettings settings, IConsumePipe consumePipe)
             : base(consumePipe)
         {
             _host = host;
-
             _settings = settings;
 
             _managementPipe = new ManagementPipe();
             _exchangeBindings = new List<ExchangeBindingSettings>();
         }
 
-        public override IEnumerable<ValidationResult> Validate()
-        {
-            foreach (var result in base.Validate())
-                yield return result.WithParentKey($"{_settings.QueueName}");
-
-            if (!RabbitMqAddressExtensions.IsValidQueueName(_settings.QueueName))
-                yield return this.Failure($"{_settings.QueueName}", "Is not a valid queue name");
-            if (_settings.PurgeOnStartup)
-                yield return this.Warning($"{_settings.QueueName}", "Existing messages in the queue will be purged on service start");
-        }
-
-        public void Apply(IBusBuilder builder)
-        {
-            RabbitMqReceiveEndpointBuilder endpointBuilder = null;
-            var receivePipe = CreateReceivePipe(builder, consumePipe =>
-            {
-                endpointBuilder = new RabbitMqReceiveEndpointBuilder(consumePipe, builder, _host.Settings.MessageNameFormatter, _bindMessageExchanges);
-
-                endpointBuilder.AddExchangeBindings(_exchangeBindings.ToArray());
-
-                return endpointBuilder;
-            });
-
-            if (endpointBuilder == null)
-                throw new InvalidOperationException("The endpoint builder was not initialized");
-
-            var sendEndpointProvider = CreateSendEndpointProvider(builder);
-            var publishEndpointProvider = CreatePublishEndpointProvider(builder);
-
-            var transport = new RabbitMqReceiveTransport(_host, _settings, _managementPipe, endpointBuilder.GetExchangeBindings().ToArray(), sendEndpointProvider, publishEndpointProvider);
-
-            var rabbitMqHost = _host as RabbitMqHost;
-            if (rabbitMqHost == null)
-                throw new ConfigurationException("Must be a RabbitMqHost");
-
-            rabbitMqHost.ReceiveEndpoints.Add(_settings.QueueName ?? NewId.Next().ToString(), new ReceiveEndpoint(transport, receivePipe));
-        }
+        public ISendEndpointProvider SendEndpointProvider => _sendEndpointProvider;
+        public IPublishEndpointProvider PublishEndpointProvider => _publishEndpointProvider;
 
         IRabbitMqHost IRabbitMqReceiveEndpointConfigurator.Host => _host;
 
@@ -212,6 +178,38 @@ namespace MassTransit.RabbitMqTransport.Configurators
             callback(exchangeSettings);
 
             _exchangeBindings.AddRange(exchangeSettings.GetExchangeBindings(exchangeName));
+        }
+
+        public override IEnumerable<ValidationResult> Validate()
+        {
+            foreach (var result in base.Validate())
+                yield return result.WithParentKey($"{_settings.QueueName}");
+
+            if (!RabbitMqAddressExtensions.IsValidQueueName(_settings.QueueName))
+                yield return this.Failure($"{_settings.QueueName}", "Is not a valid queue name");
+            if (_settings.PurgeOnStartup)
+                yield return this.Warning($"{_settings.QueueName}", "Existing messages in the queue will be purged on service start");
+        }
+
+        public void Apply(IBusBuilder builder)
+        {
+            var receiveEndpointBuilder = new RabbitMqReceiveEndpointBuilder(CreateConsumePipe(builder), builder, _bindMessageExchanges, _host);
+
+            receiveEndpointBuilder.AddExchangeBindings(_exchangeBindings.ToArray());
+
+            var receivePipe = CreateReceivePipe(receiveEndpointBuilder);
+
+            _sendEndpointProvider = CreateSendEndpointProvider(receiveEndpointBuilder);
+            _publishEndpointProvider = CreatePublishEndpointProvider(receiveEndpointBuilder);
+
+            var transport = new RabbitMqReceiveTransport(_host, _settings, _managementPipe, receiveEndpointBuilder.GetExchangeBindings().ToArray(),
+                _sendEndpointProvider, _publishEndpointProvider);
+
+            var rabbitMqHost = _host as RabbitMqHost;
+            if (rabbitMqHost == null)
+                throw new ConfigurationException("Must be a RabbitMqHost");
+
+            rabbitMqHost.ReceiveEndpoints.Add(_settings.QueueName ?? NewId.Next().ToString(), new ReceiveEndpoint(transport, receivePipe));
         }
 
         protected override Uri GetInputAddress()

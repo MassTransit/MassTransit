@@ -18,25 +18,26 @@ namespace MassTransit.RabbitMqTransport.Specifications
     using MassTransit.Pipeline.Pipes;
     using Pipeline;
     using Topology;
-    using Transport;
     using Util;
 
 
     public class RabbitMqConsumerPipeSpecification :
         IPipeSpecification<ConnectionContext>
     {
-        readonly IReceiveTransportObserver _transportObserver;
         readonly ExchangeBindingSettings[] _exchangeBindings;
         readonly IManagementPipe _managementPipe;
-        readonly ISendEndpointProvider _sendEndpointProvider;
         readonly IPublishEndpointProvider _publishEndpointProvider;
-        readonly ModelSettings _modelSettings;
         readonly IReceiveObserver _receiveObserver;
         readonly IPipe<ReceiveContext> _receivePipe;
+        readonly ISendEndpointProvider _sendEndpointProvider;
         readonly ReceiveSettings _settings;
         readonly ITaskSupervisor _supervisor;
+        readonly IReceiveTransportObserver _transportObserver;
+        IRabbitMqHost _host;
 
-        public RabbitMqConsumerPipeSpecification(IPipe<ReceiveContext> receivePipe, ReceiveSettings settings, IReceiveObserver receiveObserver, IReceiveTransportObserver transportObserver, IEnumerable<ExchangeBindingSettings> exchangeBindings, ITaskSupervisor supervisor, IManagementPipe managementPipe, ISendEndpointProvider sendEndpointProvider, IPublishEndpointProvider publishEndpointProvider)
+        public RabbitMqConsumerPipeSpecification(IPipe<ReceiveContext> receivePipe, ReceiveSettings settings, IReceiveObserver receiveObserver,
+            IReceiveTransportObserver transportObserver, IEnumerable<ExchangeBindingSettings> exchangeBindings, ITaskSupervisor supervisor,
+            IManagementPipe managementPipe, ISendEndpointProvider sendEndpointProvider, IPublishEndpointProvider publishEndpointProvider, IRabbitMqHost host)
         {
             _settings = settings;
             _receiveObserver = receiveObserver;
@@ -47,7 +48,7 @@ namespace MassTransit.RabbitMqTransport.Specifications
             _managementPipe = managementPipe;
             _sendEndpointProvider = sendEndpointProvider;
             _publishEndpointProvider = publishEndpointProvider;
-            _modelSettings = new RabbitMqModelSettings();
+            _host = host;
         }
 
         public void Apply(IPipeBuilder<ConnectionContext> builder)
@@ -56,10 +57,11 @@ namespace MassTransit.RabbitMqTransport.Specifications
             {
                 x.UseFilter(new PrepareReceiveQueueFilter(_settings, _managementPipe, _exchangeBindings));
 
-                x.UseFilter(new RabbitMqConsumerFilter(_receivePipe, _receiveObserver, _transportObserver, _supervisor, _sendEndpointProvider, _publishEndpointProvider));
+                x.UseFilter(new RabbitMqConsumerFilter(_receivePipe, _receiveObserver, _transportObserver, _supervisor, _sendEndpointProvider,
+                    _publishEndpointProvider));
             });
 
-            IFilter<ConnectionContext> modelFilter = new ReceiveModelFilter(pipe, _supervisor, _modelSettings);
+            IFilter<ConnectionContext> modelFilter = new ReceiveModelFilter(pipe, _supervisor, _host);
 
             builder.AddFilter(modelFilter);
         }

@@ -12,11 +12,13 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.AzureServiceBusTransport.Builders
 {
+    using System;
     using System.Collections.Generic;
     using GreenPipes;
     using MassTransit.Builders;
     using MassTransit.Pipeline;
     using Settings;
+    using Transport;
     using Transports;
 
 
@@ -24,25 +26,59 @@ namespace MassTransit.AzureServiceBusTransport.Builders
         ReceiveEndpointBuilder,
         IReceiveEndpointBuilder
     {
-        readonly IMessageNameFormatter _messageNameFormatter;
         readonly bool _subscribeMessageTopics;
+        readonly IServiceBusHost _host;
         readonly List<TopicSubscriptionSettings> _topicSubscriptions;
 
-        public ServiceBusReceiveEndpointBuilder(IConsumePipe consumePipe, IBusBuilder busBuilder, IMessageNameFormatter messageNameFormatter,
-            bool subscribeMessageTopics)
+        public ServiceBusReceiveEndpointBuilder(IConsumePipe consumePipe, IBusBuilder busBuilder,
+            bool subscribeMessageTopics, IServiceBusHost host)
             : base(consumePipe, busBuilder)
         {
-            _messageNameFormatter = messageNameFormatter;
             _subscribeMessageTopics = subscribeMessageTopics;
+            _host = host;
             _topicSubscriptions = new List<TopicSubscriptionSettings>();
         }
 
         public override ConnectHandle ConnectConsumePipe<T>(IPipe<ConsumeContext<T>> pipe)
         {
             if (_subscribeMessageTopics)
-                _topicSubscriptions.AddRange(_messageNameFormatter.GetTopicSubscription(typeof(T)));
+                _topicSubscriptions.AddRange(_host.MessageNameFormatter.GetTopicSubscription(typeof(T)));
 
             return base.ConnectConsumePipe(pipe);
+        }
+
+        public override ISendEndpointProvider CreateSendEndpointProvider(Uri sourceAddress, params ISendPipeSpecification[] specifications)
+        {
+            var pipe = CreateSendPipe(specifications);
+
+            var provider = new ServiceBusSendEndpointProvider(MessageSerializer, sourceAddress, SendTransportProvider, pipe);
+
+            return new SendEndpointCache(provider, QueueCacheDurationProvider);
+        }
+
+        public override IPublishEndpointProvider CreatePublishEndpointProvider(Uri sourceAddress, params IPublishPipeSpecification[] specifications)
+        {
+            var provider = new PublishSendEndpointProvider(MessageSerializer, sourceAddress, _host);
+
+            var cache = new SendEndpointCache(provider, TopicCacheDurationProvider);
+
+            var pipe = CreatePublishPipe(specifications);
+
+            return new ServiceBusPublishEndpointProvider(_host, cache, pipe);
+        }
+
+        TimeSpan QueueCacheDurationProvider(Uri address)
+        {
+            var timeSpan = address.GetQueueDescription().AutoDeleteOnIdle;
+
+            return timeSpan > TimeSpan.FromDays(1) ? TimeSpan.FromDays(1) : timeSpan;
+        }
+
+        TimeSpan TopicCacheDurationProvider(Uri address)
+        {
+            var timeSpan = address.GetTopicDescription().AutoDeleteOnIdle;
+
+            return timeSpan > TimeSpan.FromDays(1) ? TimeSpan.FromDays(1) : timeSpan;
         }
 
         public IEnumerable<TopicSubscriptionSettings> GetTopicSubscriptions()

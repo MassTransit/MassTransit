@@ -73,7 +73,6 @@
     </Compile>
     <Compile Include="Configuration\Builders\IRabbitMqReceiveEndpointBuilder.cs" />
     <Compile Include="Configuration\Builders\RabbitMqBusBuilder.cs" />
-    <Compile Include="Configuration\Builders\RabbitMqEndpointBuilder.cs" />
     <Compile Include="Configuration\Builders\RabbitMqReceiveEndpointBuilder.cs" />
     <Compile Include="Configuration\Configurators\ConfigurationHostSettings.cs" />
     <Compile Include="Configuration\Configurators\RabbitMqClusterConfigurator.cs" />
@@ -130,7 +129,7 @@
     <Compile Include="Configuration\IRabbitMqSslConfigurator.cs" />
     <Compile Include="Configuration\Configurators\RabbitMqSslConfigurator.cs" />
     <Compile Include="Configuration\IRabbitMqReceiveEndpointConfigurator.cs" />
-    <Compile Include="Configuration\Configurators\RabbitMqReceiveEndpointConfigurator.cs" />
+    <Compile Include="Configuration\Configurators\RabbitMqReceiveEndpointSpecification.cs" />
     <Compile Include="Configuration\RabbitMqHostConfigurationExtensions.cs" />
     <Compile Include="Configuration\IRabbitMqHostConfigurator.cs" />
     <Compile Include="Configuration\IRabbitMqBusFactoryConfigurator.cs" />

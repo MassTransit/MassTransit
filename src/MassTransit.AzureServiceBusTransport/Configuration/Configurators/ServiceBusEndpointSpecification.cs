@@ -26,19 +26,25 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
     using Transports;
 
 
-    public abstract class ServiceBusEndpointConfigurator :
-        ReceiveEndpointConfigurator,
+    public abstract class ServiceBusEndpointSpecification :
+        ReceiveEndpointSpecification,
         IServiceBusEndpointConfigurator,
-        IBusFactorySpecification
+        IReceiveEndpointSpecification<IBusBuilder>
     {
         readonly BaseClientSettings _settings;
+        IPublishEndpointProvider _publishEndpointProvider;
+        ISendEndpointProvider _sendEndpointProvider;
 
-        protected ServiceBusEndpointConfigurator(IServiceBusHost host, BaseClientSettings settings, IConsumePipe consumePipe = null)
+        protected ServiceBusEndpointSpecification(IServiceBusHost host, BaseClientSettings settings, IConsumePipe consumePipe = null)
             : base(consumePipe)
         {
             Host = host;
             _settings = settings;
         }
+
+        public ISendEndpointProvider SendEndpointProvider => _sendEndpointProvider;
+
+        public IPublishEndpointProvider PublishEndpointProvider => _publishEndpointProvider;
 
         public IServiceBusHost Host { get; }
 
@@ -110,15 +116,15 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
             set { _settings.UserMetadata = value; }
         }
 
-        protected void ApplyReceiveEndpoint(IBusBuilder builder, IReceivePipe receivePipe, params IFilter<NamespaceContext>[] filters)
+        protected void ApplyReceiveEndpoint(IReceiveEndpointBuilder builder, IReceivePipe receivePipe, params IFilter<NamespaceContext>[] filters)
         {
-            var sendEndpointProvider = CreateSendEndpointProvider(builder);
-            var publishEndpointProvider = CreatePublishEndpointProvider(builder);
+            _sendEndpointProvider = CreateSendEndpointProvider(builder);
+            _publishEndpointProvider = CreatePublishEndpointProvider(builder);
 
             IPipeSpecification<NamespaceContext>[] specifications = filters
                 .Concat(Enumerable.Repeat(_settings.RequiresSession
-                    ? (IFilter<NamespaceContext>)new MessageSessionReceiverFilter(receivePipe, sendEndpointProvider, publishEndpointProvider)
-                    : new MessageReceiverFilter(receivePipe, sendEndpointProvider, publishEndpointProvider), 1))
+                    ? (IFilter<NamespaceContext>)new MessageSessionReceiverFilter(receivePipe, _sendEndpointProvider, _publishEndpointProvider)
+                    : new MessageReceiverFilter(receivePipe, _sendEndpointProvider, _publishEndpointProvider), 1))
                 .Select(x => (IPipeSpecification<NamespaceContext>)new FilterPipeSpecification<NamespaceContext>(x))
                 .ToArray();
 

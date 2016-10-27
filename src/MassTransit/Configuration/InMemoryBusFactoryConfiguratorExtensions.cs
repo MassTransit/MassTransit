@@ -64,16 +64,16 @@ namespace MassTransit
         {
             var queueName = configurator.GetTemporaryQueueName("manage-");
 
-            var endpointConfigurator = new InMemoryReceiveEndpointConfigurator(queueName)
+            var specification = new InMemoryReceiveEndpointSpecification(queueName)
             {
                 TransportConcurrencyLimit = 1
             };
 
-            configure?.Invoke(endpointConfigurator);
+            configure?.Invoke(specification);
 
-            configurator.AddBusFactorySpecification(endpointConfigurator);
+            configurator.AddReceiveEndpointSpecification(specification);
 
-            var managementEndpointConfigurator = new ManagementEndpointConfigurator(endpointConfigurator);
+            var managementEndpointConfigurator = new ManagementEndpointConfigurator(specification);
 
             return managementEndpointConfigurator;
         }

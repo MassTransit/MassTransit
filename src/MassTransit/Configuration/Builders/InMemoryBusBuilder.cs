@@ -25,7 +25,7 @@ namespace MassTransit.Builders
         BusBuilder,
         IInMemoryBusBuilder
     {
-        readonly string _busQueueName;
+        readonly InMemoryReceiveEndpointSpecification _busEndpointSpecification;
         readonly Uri _inputAddress;
         readonly ISendTransportProvider _sendTransportProvider;
 
@@ -38,14 +38,20 @@ namespace MassTransit.Builders
             if (sendTransportProvider == null)
                 throw new ArgumentNullException(nameof(sendTransportProvider));
 
-            _busQueueName = GenerateBusQueueName();
-            _inputAddress = new Uri($"loopback://localhost/{_busQueueName}");
+            var busQueueName = GenerateBusQueueName();
+            _inputAddress = new Uri($"loopback://localhost/{busQueueName}");
 
             InMemoryHost = inMemoryHost;
             _sendTransportProvider = sendTransportProvider;
 
-            inMemoryHost.ReceiveEndpointFactory =  new InMemoryReceiveEndpointFactory(this);
+            _busEndpointSpecification = new InMemoryReceiveEndpointSpecification(busQueueName, ConsumePipe);
+
+            inMemoryHost.ReceiveEndpointFactory = new InMemoryReceiveEndpointFactory(this);
         }
+
+        public override IPublishEndpointProvider PublishEndpointProvider => _busEndpointSpecification.PublishEndpointProvider;
+
+        public override ISendEndpointProvider SendEndpointProvider => _busEndpointSpecification.SendEndpointProvider;
 
         public IInMemoryHost InMemoryHost { get; }
 
@@ -76,7 +82,7 @@ namespace MassTransit.Builders
 
         protected override IConsumePipe GetConsumePipe()
         {
-            return CreateBusReceiveEndpoint();
+            return CreateConsumePipe();
         }
 
         protected override ISendTransportProvider CreateSendTransportProvider()
@@ -84,15 +90,9 @@ namespace MassTransit.Builders
             return _sendTransportProvider;
         }
 
-        IConsumePipe CreateBusReceiveEndpoint()
+        protected override void PreBuild()
         {
-            var busConsumePipe = CreateConsumePipe();
-
-            var busEndpointConfigurator = new InMemoryReceiveEndpointConfigurator(_busQueueName, busConsumePipe);
-
-            busEndpointConfigurator.Apply(this);
-
-            return busConsumePipe;
+            _busEndpointSpecification.Apply(this);
         }
 
         static string GenerateBusQueueName()

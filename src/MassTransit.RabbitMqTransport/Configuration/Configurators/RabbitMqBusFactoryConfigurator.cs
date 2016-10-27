@@ -14,7 +14,6 @@ namespace MassTransit.RabbitMqTransport.Configurators
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
     using Builders;
     using BusConfigurators;
     using GreenPipes;
@@ -25,20 +24,16 @@ namespace MassTransit.RabbitMqTransport.Configurators
 
 
     public class RabbitMqBusFactoryConfigurator :
-        BusFactoryConfigurator,
+        BusFactoryConfigurator<IBusBuilder>,
         IRabbitMqBusFactoryConfigurator,
         IBusFactory
     {
         readonly BusHostCollection<RabbitMqHost> _hosts;
-        readonly RabbitMqModelSettings _modelSettings;
         readonly RabbitMqReceiveSettings _settings;
-        readonly IList<IBusFactorySpecification> _transportBuilderConfigurators;
 
         public RabbitMqBusFactoryConfigurator()
         {
             _hosts = new BusHostCollection<RabbitMqHost>();
-            _transportBuilderConfigurators = new List<IBusFactorySpecification>();
-            _modelSettings = new RabbitMqModelSettings();
 
             var queueName = ((IRabbitMqHost)null).GetTemporaryQueueName("bus-");
             _settings = new RabbitMqReceiveSettings
@@ -54,14 +49,11 @@ namespace MassTransit.RabbitMqTransport.Configurators
 
         public IBusControl CreateBus()
         {
-            var builder = new RabbitMqBusBuilder(_hosts, ConsumePipeFactory, SendPipeFactory, PublishPipeFactory, _settings, _modelSettings);
+            var builder = new RabbitMqBusBuilder(_hosts, ConsumePipeFactory, SendPipeFactory, PublishPipeFactory, _settings);
 
-            foreach (var configurator in _transportBuilderConfigurators)
-                configurator.Apply(builder);
+            ApplySpecifications(builder);
 
-            var bus = builder.Build();
-
-            return bus;
+            return builder.Build();
         }
 
         public override IEnumerable<ValidationResult> Validate()
@@ -73,9 +65,6 @@ namespace MassTransit.RabbitMqTransport.Configurators
                 yield return this.Failure("Host", "At least one host must be defined");
             if (string.IsNullOrWhiteSpace(_settings.QueueName))
                 yield return this.Failure("Bus", "The bus queue name must not be null or empty");
-
-            foreach (var result in _transportBuilderConfigurators.SelectMany(x => x.Validate()))
-                yield return result;
         }
 
         public ushort PrefetchCount
@@ -130,7 +119,7 @@ namespace MassTransit.RabbitMqTransport.Configurators
 
         public bool PublisherConfirmation
         {
-            set { _modelSettings.PublisherConfirmation = value; }
+            set { }
         }
 
         public IRabbitMqHost Host(RabbitMqHostSettings settings)
@@ -146,11 +135,6 @@ namespace MassTransit.RabbitMqTransport.Configurators
             _settings.QueueName = value;
         }
 
-        public void AddBusFactorySpecification(IBusFactorySpecification specification)
-        {
-            _transportBuilderConfigurators.Add(specification);
-        }
-
         public void ReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configureEndpoint)
         {
             if (_hosts.Count == 0)
@@ -164,11 +148,11 @@ namespace MassTransit.RabbitMqTransport.Configurators
             if (host == null)
                 throw new EndpointNotFoundException("The host address specified was not configured.");
 
-            var endpointConfigurator = new RabbitMqReceiveEndpointConfigurator(host, queueName);
+            var specification = new RabbitMqReceiveEndpointSpecification(host, queueName);
 
-            configure(endpointConfigurator);
+            configure?.Invoke(specification);
 
-            AddBusFactorySpecification(endpointConfigurator);
+            AddReceiveEndpointSpecification(specification);
         }
     }
 }

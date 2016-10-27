@@ -16,7 +16,6 @@ namespace MassTransit.RabbitMqTransport.Transport
     using System.Linq;
     using System.Threading.Tasks;
     using Integration;
-    using Topology;
     using Transports;
 
 
@@ -24,12 +23,10 @@ namespace MassTransit.RabbitMqTransport.Transport
         ISendTransportProvider
     {
         readonly BusHostCollection<RabbitMqHost> _hosts;
-        readonly ModelSettings _settings;
 
-        public RabbitMqSendTransportProvider(BusHostCollection<RabbitMqHost> hosts, ModelSettings settings)
+        public RabbitMqSendTransportProvider(BusHostCollection<RabbitMqHost> hosts)
         {
             _hosts = hosts;
-            _settings = settings;
         }
 
         public Task<ISendTransport> GetSendTransport(Uri address)
@@ -40,7 +37,7 @@ namespace MassTransit.RabbitMqTransport.Transport
 
             var sendSettings = address.GetSendSettings();
 
-            var modelCache = new RabbitMqModelCache(host.ConnectionCache, host.Supervisor, _settings);
+            var modelCache = new RabbitMqModelCache(host);
 
             return Task.FromResult<ISendTransport>(new RabbitMqSendTransport(modelCache, sendSettings));
         }

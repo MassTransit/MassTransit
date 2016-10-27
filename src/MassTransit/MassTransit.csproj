@@ -100,10 +100,10 @@
     <Compile Include="BusControlExtensions.cs" />
     <Compile Include="BusReady.cs" />
     <Compile Include="Configuration\Builders\ConsumePipeBuilder.cs" />
-    <Compile Include="Configuration\Builders\EndpointBuilder.cs" />
     <Compile Include="Configuration\Builders\IConsumePipeBuilder.cs" />
-    <Compile Include="Configuration\Builders\InMemoryEndpointBuilder.cs" />
+    <Compile Include="Configuration\Builders\IInMemoryReceiveEndpointSpecification.cs" />
     <Compile Include="Configuration\Builders\IPublishPipeBuilder.cs" />
+    <Compile Include="Configuration\Builders\IReceiveEndpointSpecification.cs" />
     <Compile Include="Configuration\Builders\ISendPipeBuilder.cs" />
     <Compile Include="Configuration\Builders\PublishPipeBuilder.cs" />
     <Compile Include="Configuration\Builders\ReceiveEndpointBuilder.cs" />
@@ -155,8 +155,8 @@
     <Compile Include="Configuration\ConsumerConvention.cs" />
     <Compile Include="Configuration\ContentFilterExtensions.cs" />
     <Compile Include="Configuration\DeadLetterExtensions.cs" />
-    <Compile Include="Configuration\EndpointConfigurators\InMemoryReceiveEndpointConfigurator.cs" />
-    <Compile Include="Configuration\EndpointConfigurators\ReceiveEndpointConfigurator.cs" />
+    <Compile Include="Configuration\EndpointConfigurators\InMemoryReceiveEndpointSpecification.cs" />
+    <Compile Include="Configuration\EndpointConfigurators\ReceiveEndpointSpecification.cs" />
     <Compile Include="Configuration\IConsumePipeConfigurator.cs" />
     <Compile Include="Configuration\IConsumePipeSpecification.cs" />
     <Compile Include="Configuration\IConsumerConvention.cs" />

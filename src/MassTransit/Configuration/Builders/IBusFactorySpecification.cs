@@ -20,4 +20,12 @@ namespace MassTransit.Builders
     {
         void Apply(IBusBuilder builder);
     }
+
+
+    public interface IBusFactorySpecification<in TBuilder> :
+        ISpecification
+        where TBuilder : IBusBuilder
+    {
+        void Apply(TBuilder builder);
+    }
 }
