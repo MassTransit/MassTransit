@@ -27,17 +27,34 @@ namespace MassTransit
         /// Subscribes an object instance to the bus
         /// </summary>
         /// <param name="configurator">Service Bus Service Configurator 
-        /// - the item that is passed as a parameter to
-        /// the action that is calling the configurator.</param>
+        ///     - the item that is passed as a parameter to
+        ///     the action that is calling the configurator.</param>
         /// <param name="instance">The instance to subscribe.</param>
         /// <returns>An instance subscription configurator.</returns>
-        public static IInstanceConfigurator Instance(this IReceiveEndpointConfigurator configurator, object instance)
+        public static void Instance(this IReceiveEndpointConfigurator configurator, object instance)
         {
             var instanceConfigurator = new InstanceConfigurator(instance);
 
             configurator.AddEndpointSpecification(instanceConfigurator);
+        }
 
-            return instanceConfigurator;
+        /// <summary>
+        /// Subscribes an object instance to the bus
+        /// </summary>
+        /// <param name="configurator">Service Bus Service Configurator 
+        ///     - the item that is passed as a parameter to
+        ///     the action that is calling the configurator.</param>
+        /// <param name="instance">The instance to subscribe.</param>
+        /// <param name="configure">Configure the instance</param>
+        /// <returns>An instance subscription configurator.</returns>
+        public static void Instance<T>(this IReceiveEndpointConfigurator configurator, T instance, Action<IInstanceConfigurator<T>> configure = null) 
+            where T : class, IConsumer
+        {
+            var instanceConfigurator = new InstanceConfigurator<T>(instance);
+
+            configure?.Invoke(instanceConfigurator);
+
+            configurator.AddEndpointSpecification(instanceConfigurator);
         }
 
         /// <summary>

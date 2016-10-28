@@ -32,15 +32,15 @@ namespace MassTransit.Pipeline.Filters
         readonly TConsumer _instance;
         readonly IPipe<ConsumerConsumeContext<TConsumer, TMessage>> _instancePipe;
 
-        public InstanceMessageFilter(TConsumer instance, IFilter<ConsumerConsumeContext<TConsumer, TMessage>> instanceFilter)
+        public InstanceMessageFilter(TConsumer instance, IPipe<ConsumerConsumeContext<TConsumer, TMessage>> instancePipe)
         {
             if (instance == null)
                 throw new ArgumentNullException(nameof(instance));
-            if (instanceFilter == null)
-                throw new ArgumentNullException(nameof(instanceFilter));
+            if (instancePipe == null)
+                throw new ArgumentNullException(nameof(instancePipe));
 
             _instance = instance;
-            _instancePipe = Pipe.New<ConsumerConsumeContext<TConsumer, TMessage>>(x => x.UseFilter(instanceFilter));
+            _instancePipe = instancePipe;
         }
 
         void IProbeSite.Probe(ProbeContext context)

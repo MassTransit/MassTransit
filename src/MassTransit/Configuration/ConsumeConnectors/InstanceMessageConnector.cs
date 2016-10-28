@@ -59,10 +59,32 @@ namespace MassTransit.ConsumeConnectors
 
             IPipe<ConsumeContext<TMessage>> instancePipe = Pipe.New<ConsumeContext<TMessage>>(x =>
             {
-                x.UseFilter(new InstanceMessageFilter<TConsumer, TMessage>(consumer, _consumeFilter));
+                x.UseFilter(new InstanceMessageFilter<TConsumer, TMessage>(consumer,
+                    Pipe.New<ConsumerConsumeContext<TConsumer, TMessage>>(p => p.UseFilter(_consumeFilter))));
             });
 
             return pipe.ConnectConsumePipe(instancePipe);
+        }
+
+        ConnectHandle IInstanceConnector.ConnectInstance<T>(IConsumePipeConnector consumePipe, T instance,
+            IPipeSpecification<ConsumerConsumeContext<T>>[] pipeSpecifications)
+        {
+            if (instance == null)
+                throw new ArgumentNullException(nameof(instance));
+
+            var consumer = instance as TConsumer;
+            if (consumer == null)
+            {
+                throw new ConsumerException(
+                    $"The instance type {instance.GetType().GetTypeName()} does not match the consumer type: {TypeMetadataCache<TConsumer>.ShortName}");
+            }
+
+            IPipe<ConsumerConsumeContext<TConsumer, TMessage>> consumerPipe = ConsumerPipeBuilder.BuildConsumerPipe(_consumeFilter, pipeSpecifications);
+
+            IPipe<ConsumeContext<TMessage>> messagePipe = MessagePipeBuilder.BuildMessagePipe<TConsumer, TMessage, T>(pipeSpecifications,
+                new InstanceMessageFilter<TConsumer, TMessage>(consumer, consumerPipe));
+
+            return consumePipe.ConnectConsumePipe(messagePipe);
         }
     }
 }

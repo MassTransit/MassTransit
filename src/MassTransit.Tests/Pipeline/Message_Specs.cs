@@ -81,4 +81,65 @@ namespace MassTransit.Tests.Pipeline
             }
         }
     }
+
+    [TestFixture]
+    public class Configuring_a_message_in_an_instance :
+        InMemoryTestFixture
+    {
+        [Test]
+        public async Task Should_include_all_the_stuff()
+        {
+            await InputQueueSendEndpoint.Send(new PingMessage());
+
+            await _consumer.Received;
+
+            await _message.Task;
+
+            await _consumerOnly.Task;
+
+            await _consumerMessage.Task;
+        }
+
+        MyConsumer _consumer;
+        TaskCompletionSource<PingMessage> _message;
+        TaskCompletionSource<Tuple<MyConsumer, PingMessage>> _consumerMessage;
+        TaskCompletionSource<MyConsumer> _consumerOnly;
+
+        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        {
+            _consumer = new MyConsumer(GetTask<PingMessage>());
+
+            _message = GetTask<PingMessage>();
+            _consumerOnly = GetTask<MyConsumer>();
+            _consumerMessage = GetTask<Tuple<MyConsumer, PingMessage>>();
+
+            configurator.Instance(_consumer, cfg =>
+            {
+                cfg.UseExecute(context => _consumerOnly.TrySetResult(context.Consumer));
+                cfg.Message<PingMessage>(m => m.UseExecute(context => _message.TrySetResult(context.Message)));
+                cfg.ConsumerMessage<PingMessage>(m => m.UseExecute(context => _consumerMessage.TrySetResult(Tuple.Create(context.Consumer, context.Message))));
+            });
+        }
+
+
+        class MyConsumer :
+            IConsumer<PingMessage>
+        {
+            readonly TaskCompletionSource<PingMessage> _received;
+
+            public MyConsumer(TaskCompletionSource<PingMessage> received)
+            {
+                _received = received;
+            }
+
+            public Task<PingMessage> Received => _received.Task;
+
+            public Task Consume(ConsumeContext<PingMessage> context)
+            {
+                _received.TrySetResult(context.Message);
+
+                return TaskUtil.Completed;
+            }
+        }
+    }
 }

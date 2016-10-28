@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,8 +12,37 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.ConsumeConfigurators
 {
+    using System;
+    using GreenPipes;
+
+
     public interface IInstanceConfigurator :
         IConsumeConfigurator
     {
+    }
+
+
+    public interface IInstanceConfigurator<TInstance> :
+        IPipeConfigurator<ConsumerConsumeContext<TInstance>>,
+        IInstanceConfigurator
+        where TInstance : class, IConsumer
+    {
+        /// <summary>
+        /// Configure a message type for the consumer, such as adding middleware to the pipeline for
+        /// the message type.
+        /// </summary>
+        /// <typeparam name="T">The message type</typeparam>
+        /// <param name="configure">The callback to configure the message pipeline</param>
+        void Message<T>(Action<IConsumerMessageConfigurator<T>> configure)
+            where T : class;
+
+        /// <summary>
+        /// Configure a message type for the consumer, such as adding middleware to the pipeline for
+        /// the message type.
+        /// </summary>
+        /// <typeparam name="T">The message type</typeparam>
+        /// <param name="configure">The callback to configure the message pipeline</param>
+        void ConsumerMessage<T>(Action<IConsumerMessageConfigurator<TInstance, T>> configure)
+            where T : class;
     }
 }

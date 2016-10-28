@@ -24,9 +24,9 @@ namespace MassTransit.ConsumeConfigurators
         where TConsumer : class, IConsumer
         where TMessage : class
     {
-        readonly IConsumerConfigurator<TConsumer> _configurator;
+        readonly IPipeConfigurator<ConsumerConsumeContext<TConsumer>> _configurator;
 
-        public ConsumerMessageConfigurator(IConsumerConfigurator<TConsumer> configurator)
+        public ConsumerMessageConfigurator(IPipeConfigurator<ConsumerConsumeContext<TConsumer>> configurator)
         {
             _configurator = configurator;
         }
