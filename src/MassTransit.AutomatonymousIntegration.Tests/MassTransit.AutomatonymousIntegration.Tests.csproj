@@ -124,6 +124,7 @@
     <Compile Include="Ignore_Specs.cs" />
     <Compile Include="Initiator_Specs.cs" />
     <Compile Include="InMemoryDeadlock_Specs.cs" />
+    <Compile Include="Message_Specs.cs" />
     <Compile Include="MissingInstance_Specs.cs" />
     <Compile Include="NHibernateFactory_Specs.cs" />
     <Compile Include="Publish_Specs.cs" />

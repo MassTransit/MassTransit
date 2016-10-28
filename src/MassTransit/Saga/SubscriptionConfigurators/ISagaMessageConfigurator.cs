@@ -20,4 +20,12 @@ namespace MassTransit.Saga.SubscriptionConfigurators
         where TMessage : class
     {
     }
+
+
+    public interface ISagaMessageConfigurator<TSaga, TMessage> :
+        IPipeConfigurator<SagaConsumeContext<TSaga, TMessage>>
+        where TMessage : class
+        where TSaga : class, ISaga
+    {
+    }
 }

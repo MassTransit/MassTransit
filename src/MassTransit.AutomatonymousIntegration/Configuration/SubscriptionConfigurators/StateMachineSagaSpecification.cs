@@ -17,8 +17,6 @@ namespace Automatonymous.SubscriptionConfigurators
     using System.Linq;
     using GreenPipes;
     using MassTransit;
-    using MassTransit.Configurators;
-    using MassTransit.PipeConfigurators;
     using MassTransit.Saga;
     using MassTransit.Saga.SubscriptionConfigurators;
     using SubscriptionConnectors;
@@ -57,6 +55,20 @@ namespace Automatonymous.SubscriptionConfigurators
         }
 
         public void ConfigureMessage<T>(Action<ISagaMessageConfigurator<T>> configure)
+            where T : class
+        {
+            Message(configure);
+        }
+
+        public void Message<T>(Action<ISagaMessageConfigurator<T>> configure)
+            where T : class
+        {
+            var messageConfigurator = new SagaMessageConfigurator<TInstance, T>(this);
+
+            configure(messageConfigurator);
+        }
+
+        public void ConsumerMessage<T>(Action<ISagaMessageConfigurator<TInstance, T>> configure)
             where T : class
         {
             var messageConfigurator = new SagaMessageConfigurator<TInstance, T>(this);

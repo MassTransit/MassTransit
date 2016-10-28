@@ -15,10 +15,8 @@ namespace MassTransit.Saga.SubscriptionConfigurators
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using Configurators;
     using Connectors;
     using GreenPipes;
-    using PipeConfigurators;
 
 
     public class SagaConfigurator<TSaga> :
@@ -45,12 +43,24 @@ namespace MassTransit.Saga.SubscriptionConfigurators
             if (_sagaRepository == null)
                 yield return this.Failure("The saga repository cannot be null. How else are we going to save stuff? #facetopalm");
 
-            foreach (ValidationResult result in _pipeSpecifications.SelectMany(x => x.Validate()))
+            foreach (var result in _pipeSpecifications.SelectMany(x => x.Validate()))
                 yield return result;
         }
 
         public void ConfigureMessage<T>(Action<ISagaMessageConfigurator<T>> configure)
             where T : class
+        {
+            Message(configure);
+        }
+
+        public void Message<T>(Action<ISagaMessageConfigurator<T>> configure) where T : class
+        {
+            var messageConfigurator = new SagaMessageConfigurator<TSaga, T>(this);
+
+            configure(messageConfigurator);
+        }
+
+        public void ConsumerMessage<T>(Action<ISagaMessageConfigurator<TSaga, T>> configure) where T : class
         {
             var messageConfigurator = new SagaMessageConfigurator<TSaga, T>(this);
 

@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -17,8 +17,6 @@ namespace Automatonymous.SubscriptionConnectors
     using System.Linq;
     using GreenPipes;
     using MassTransit;
-    using MassTransit.Configurators;
-    using MassTransit.PipeConfigurators;
     using MassTransit.Pipeline;
     using MassTransit.Saga;
     using MassTransit.Saga.Connectors;
@@ -53,9 +51,9 @@ namespace Automatonymous.SubscriptionConnectors
             var handles = new List<ConnectHandle>();
             try
             {
-                foreach (ISagaMessageConnector connector in _connectors)
+                foreach (var connector in _connectors)
                 {
-                    ConnectHandle handle = connector.ConnectSaga(consumePipe, sagaRepository, pipeSpecifications);
+                    var handle = connector.ConnectSaga(consumePipe, sagaRepository, pipeSpecifications);
 
                     handles.Add(handle);
                 }
@@ -64,7 +62,7 @@ namespace Automatonymous.SubscriptionConnectors
             }
             catch (Exception)
             {
-                foreach (ConnectHandle handle in handles)
+                foreach (var handle in handles)
                     handle.Dispose();
                 throw;
             }
@@ -72,7 +70,7 @@ namespace Automatonymous.SubscriptionConnectors
 
         IEnumerable<ISagaMessageConnector> StateMachineEvents()
         {
-            var correlations = _stateMachine.Correlations.ToArray();
+            EventCorrelation[] correlations = _stateMachine.Correlations.ToArray();
 
             StateMachineConfigurationResult.CompileResults(correlations.SelectMany(x => x.Validate()).ToArray());
 
@@ -81,7 +79,7 @@ namespace Automatonymous.SubscriptionConnectors
                 if (correlation.DataType.IsValueType)
                     continue;
 
-                Type genericType = typeof(StateMachineInterfaceType<,>).MakeGenericType(typeof(TInstance), correlation.DataType);
+                var genericType = typeof(StateMachineInterfaceType<,>).MakeGenericType(typeof(TInstance), correlation.DataType);
 
                 var interfaceType = (IStateMachineInterfaceType)Activator.CreateInstance(genericType,
                     _stateMachine, correlation);
