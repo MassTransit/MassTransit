@@ -19,6 +19,7 @@ namespace MassTransit.ConsumeConfigurators
 
 
     public class ConsumerMessageConfigurator<TConsumer, TMessage> :
+        IConsumerMessageConfigurator<TConsumer, TMessage>,
         IConsumerMessageConfigurator<TMessage>
         where TConsumer : class, IConsumer
         where TMessage : class
@@ -30,18 +31,23 @@ namespace MassTransit.ConsumeConfigurators
             _configurator = configurator;
         }
 
+        public void AddPipeSpecification(IPipeSpecification<ConsumerConsumeContext<TConsumer, TMessage>> specification)
+        {
+            _configurator.AddPipeSpecification(new ConsumerConsumeContextSpecificationProxy(specification));
+        }
+
         public void AddPipeSpecification(IPipeSpecification<ConsumeContext<TMessage>> specification)
         {
-            _configurator.AddPipeSpecification(new SpecificationProxy(specification));
+            _configurator.AddPipeSpecification(new ConsumeContextSpecificationProxy(specification));
         }
 
 
-        class SpecificationProxy :
+        class ConsumeContextSpecificationProxy :
             IPipeSpecification<ConsumerConsumeContext<TConsumer>>
         {
             readonly IPipeSpecification<ConsumeContext<TMessage>> _specification;
 
-            public SpecificationProxy(IPipeSpecification<ConsumeContext<TMessage>> specification)
+            public ConsumeContextSpecificationProxy(IPipeSpecification<ConsumeContext<TMessage>> specification)
             {
                 _specification = specification;
             }
@@ -59,7 +65,38 @@ namespace MassTransit.ConsumeConfigurators
                 if (!typeof(TConsumer).HasInterface<IConsumer<TMessage>>())
                     yield return this.Failure("MessageType", $"is not consumed by {TypeMetadataCache<TConsumer>.ShortName}");
 
-                foreach (ValidationResult validationResult in _specification.Validate())
+                foreach (var validationResult in _specification.Validate())
+                {
+                    yield return validationResult;
+                }
+            }
+        }
+
+
+        class ConsumerConsumeContextSpecificationProxy :
+            IPipeSpecification<ConsumerConsumeContext<TConsumer>>
+        {
+            readonly IPipeSpecification<ConsumerConsumeContext<TConsumer, TMessage>> _specification;
+
+            public ConsumerConsumeContextSpecificationProxy(IPipeSpecification<ConsumerConsumeContext<TConsumer, TMessage>> specification)
+            {
+                _specification = specification;
+            }
+
+            public void Apply(IPipeBuilder<ConsumerConsumeContext<TConsumer>> builder)
+            {
+                var messageBuilder = builder as IPipeBuilder<ConsumerConsumeContext<TConsumer, TMessage>>;
+
+                if (messageBuilder != null)
+                    _specification.Apply(messageBuilder);
+            }
+
+            public IEnumerable<ValidationResult> Validate()
+            {
+                if (!typeof(TConsumer).HasInterface<IConsumer<TMessage>>())
+                    yield return this.Failure("MessageType", $"is not consumed by {TypeMetadataCache<TConsumer>.ShortName}");
+
+                foreach (var validationResult in _specification.Validate())
                 {
                     yield return validationResult;
                 }

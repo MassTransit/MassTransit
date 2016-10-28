@@ -47,9 +47,9 @@ namespace MassTransit.Tests.Pipeline
 
             configurator.Consumer(() => new PartitionedConsumer(_completed), x =>
             {
-                x.ConfigureMessage<PartitionedMessage>(messageConfigurator =>
+                x.Message<PartitionedMessage>(m =>
                 {
-                    messageConfigurator.UsePartitioner(8, context => context.Message.CorrelationId);
+                    m.UsePartitioner(8, context => context.Message.CorrelationId);
                 });
             });
         }

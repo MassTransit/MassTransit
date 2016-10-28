@@ -15,7 +15,6 @@ namespace MassTransit.ConsumeConnectors
     using System;
     using System.Collections.Generic;
     using GreenPipes;
-    using PipeConfigurators;
     using Pipeline;
     using Pipeline.Filters;
     using Util;
@@ -42,7 +41,7 @@ namespace MassTransit.ConsumeConnectors
             if (factory == null)
                 throw new ArgumentException("The consumer factory type does not match: " + TypeMetadataCache<T>.ShortName);
 
-            var consumerPipe = BuildConsumerPipe(pipeSpecifications);
+            IPipe<ConsumerConsumeContext<TConsumer, TMessage>> consumerPipe = BuildConsumerPipe(pipeSpecifications);
 
             IPipe<ConsumeContext<TMessage>> pipe = BuildMessagePipe(pipeSpecifications, factory, consumerPipe);
 
@@ -53,7 +52,7 @@ namespace MassTransit.ConsumeConnectors
             where T : class
         {
             var builder = new ConsumerPipeBuilder<T>();
-            for (int i = 0; i < pipeSpecifications.Length; i++)
+            for (var i = 0; i < pipeSpecifications.Length; i++)
                 pipeSpecifications[i].Apply(builder);
 
             var builders = builder as ConsumerPipeBuilder<TConsumer>;
@@ -62,7 +61,7 @@ namespace MassTransit.ConsumeConnectors
 
             return Pipe.New<ConsumerConsumeContext<TConsumer, TMessage>>(x =>
             {
-                foreach (var filter in builders.Filters)
+                foreach (IFilter<ConsumerConsumeContext<TConsumer, TMessage>> filter in builders.Filters)
                     x.UseFilter(filter);
 
                 x.UseFilter(_consumeFilter);
@@ -76,14 +75,14 @@ namespace MassTransit.ConsumeConnectors
             return Pipe.New<ConsumeContext<TMessage>>(x =>
             {
                 var messagePipeBuilder = new MessagePipeBuilder<T>();
-                for (int i = 0; i < pipeSpecifications.Length; i++)
+                for (var i = 0; i < pipeSpecifications.Length; i++)
                     pipeSpecifications[i].Apply(messagePipeBuilder);
 
                 var pipeBuilder = messagePipeBuilder as MessagePipeBuilder<TConsumer>;
                 if (pipeBuilder == null)
                     throw new InvalidOperationException("Should not be null, ever");
 
-                foreach (var filter in pipeBuilder.Filters)
+                foreach (IFilter<ConsumeContext<TMessage>> filter in pipeBuilder.Filters)
                     x.UseFilter(filter);
 
                 x.UseFilter(new ConsumerMessageFilter<TConsumer, TMessage>(consumerFactory, consumerPipe));
@@ -93,7 +92,8 @@ namespace MassTransit.ConsumeConnectors
 
         class MessagePipeBuilder<T> :
             IPipeBuilder<ConsumerConsumeContext<T>>,
-            IPipeBuilder<ConsumeContext<TMessage>>
+            IPipeBuilder<ConsumeContext<TMessage>>,
+            IPipeBuilder<ConsumerConsumeContext<TConsumer, T>>
             where T : class
         {
             readonly IList<IFilter<ConsumeContext<TMessage>>> _filters;
@@ -114,11 +114,17 @@ namespace MassTransit.ConsumeConnectors
             {
                 // skip filters that are at the consumer level, only interested in message-level filters
             }
+
+            public void AddFilter(IFilter<ConsumerConsumeContext<TConsumer, T>> filter)
+            {
+                // skip filters that are at the consumer level, only interested in message-level filters
+            }
         }
 
 
         class ConsumerPipeBuilder<T> :
-            IPipeBuilder<ConsumerConsumeContext<T>>
+            IPipeBuilder<ConsumerConsumeContext<T>>,
+            IPipeBuilder<ConsumerConsumeContext<T, TMessage>>
             where T : class
         {
             readonly IList<IFilter<ConsumerConsumeContext<T, TMessage>>> _filters;
@@ -129,6 +135,11 @@ namespace MassTransit.ConsumeConnectors
             }
 
             public IEnumerable<IFilter<ConsumerConsumeContext<T, TMessage>>> Filters => _filters;
+
+            public void AddFilter(IFilter<ConsumerConsumeContext<T, TMessage>> filter)
+            {
+                _filters.Add(filter);
+            }
 
             public void AddFilter(IFilter<ConsumerConsumeContext<T>> filter)
             {

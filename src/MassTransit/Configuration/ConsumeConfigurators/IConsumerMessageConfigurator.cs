@@ -20,4 +20,12 @@ namespace MassTransit.ConsumeConfigurators
         where TMessage : class
     {
     }
+
+
+    public interface IConsumerMessageConfigurator<TConsumer, TMessage> :
+        IPipeConfigurator<ConsumerConsumeContext<TConsumer, TMessage>>
+        where TConsumer : class, IConsumer
+        where TMessage : class
+    {
+    }
 }
