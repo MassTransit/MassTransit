@@ -8,6 +8,7 @@ provided below.
 
     messages.rst
     consumer.rst
+    producing.rst
     locations.rst
     containers/index.rst
     request_response.rst
