@@ -24,6 +24,7 @@ namespace MassTransit.AzureServiceBusTransport.Transport
     using GreenPipes;
     using Logging;
     using MassTransit.Pipeline;
+    using MassTransit.Scheduling;
     using Microsoft.ServiceBus.Messaging;
     using Transports;
     using Util;
@@ -60,64 +61,96 @@ namespace MassTransit.AzureServiceBusTransport.Transport
             {
                 await pipe.Send(context).ConfigureAwait(false);
 
-                using (var messageBodyStream = context.GetBodyStream())
+                var cancelScheduledMessage = message as CancelScheduledMessage;
+                if (cancelScheduledMessage != null)
                 {
-                    using (var brokeredMessage = new BrokeredMessage(messageBodyStream))
+                    try
                     {
-                        brokeredMessage.ContentType = context.ContentType.MediaType;
-                        brokeredMessage.ForcePersistence = context.Durable;
-
-                        KeyValuePair<string, object>[] headers = context.Headers.GetAll()
-                            .Where(x => x.Value != null && (x.Value is string || x.Value.GetType().IsValueType))
-                            .ToArray();
-
-                        foreach (KeyValuePair<string, object> header in headers)
+                        long sequenceNumber;
+                        if (context.TryGetScheduledMessageId(out sequenceNumber))
                         {
-                            if (brokeredMessage.Properties.ContainsKey(header.Key))
-                                continue;
-
-                            brokeredMessage.Properties.Add(header.Key, header.Value);
-                        }
-
-                        if (context.TimeToLive.HasValue)
-                            brokeredMessage.TimeToLive = context.TimeToLive.Value;
-
-                        if (context.MessageId.HasValue)
-                            brokeredMessage.MessageId = context.MessageId.Value.ToString("N");
-
-                        if (context.CorrelationId.HasValue)
-                            brokeredMessage.CorrelationId = context.CorrelationId.Value.ToString("N");
-
-                        if (context.PartitionKey != null)
-                            brokeredMessage.PartitionKey = context.PartitionKey;
-
-                        if (context.SessionId != null)
-                        {
-                            brokeredMessage.SessionId = context.SessionId;
-
-                            if (context.ReplyToSessionId == null)
-                                brokeredMessage.ReplyToSessionId = context.SessionId;
-                        }
-
-                        if (context.ReplyToSessionId != null)
-                            brokeredMessage.ReplyToSessionId = context.ReplyToSessionId;
-
-                        await _observers.PreSend(context).ConfigureAwait(false);
-
-                        if (context.ScheduledEnqueueTimeUtc.HasValue)
-                        {
-                            var sequenceNumber = await _client.ScheduleSend(brokeredMessage, context.ScheduledEnqueueTimeUtc.Value).ConfigureAwait(false);
-
-                            context.SetScheduledMessageId(sequenceNumber);
+                            await _client.CancelScheduledSend(sequenceNumber).ConfigureAwait(false);
                         }
                         else
                         {
-                            await _client.Send(brokeredMessage).ConfigureAwait(false);
+                            sequenceNumber = context.GetSequenceNumber(cancelScheduledMessage.TokenId);
+
+                            await _client.CancelScheduledSend(sequenceNumber).ConfigureAwait(false);
                         }
 
-                        _log.DebugFormat("SEND {0} ({1})", brokeredMessage.MessageId, _client.Path);
+                        if (_log.IsDebugEnabled)
+                            _log.DebugFormat("Canceled Scheduled: {0} {1}", sequenceNumber, _client.Path);
 
-                        await _observers.PostSend(context).ConfigureAwait(false);
+                    }
+                    catch (MessageNotFoundException exception)
+                    {
+                        if(_log.IsDebugEnabled)
+                            _log.DebugFormat("The scheduled message was not found: {0}", exception.Detail.Message);
+                    }
+                }
+                else
+                {
+                    using (var messageBodyStream = context.GetBodyStream())
+                    {
+                        using (var brokeredMessage = new BrokeredMessage(messageBodyStream))
+                        {
+                            brokeredMessage.ContentType = context.ContentType.MediaType;
+                            brokeredMessage.ForcePersistence = context.Durable;
+
+                            KeyValuePair<string, object>[] headers = context.Headers.GetAll()
+                                .Where(x => x.Value != null && (x.Value is string || x.Value.GetType().IsValueType))
+                                .ToArray();
+
+                            foreach (KeyValuePair<string, object> header in headers)
+                            {
+                                if (brokeredMessage.Properties.ContainsKey(header.Key))
+                                    continue;
+
+                                brokeredMessage.Properties.Add(header.Key, header.Value);
+                            }
+
+                            if (context.TimeToLive.HasValue)
+                                brokeredMessage.TimeToLive = context.TimeToLive.Value;
+
+                            if (context.MessageId.HasValue)
+                                brokeredMessage.MessageId = context.MessageId.Value.ToString("N");
+
+                            if (context.CorrelationId.HasValue)
+                                brokeredMessage.CorrelationId = context.CorrelationId.Value.ToString("N");
+
+                            if (context.PartitionKey != null)
+                                brokeredMessage.PartitionKey = context.PartitionKey;
+
+                            if (context.SessionId != null)
+                            {
+                                brokeredMessage.SessionId = context.SessionId;
+
+                                if (context.ReplyToSessionId == null)
+                                    brokeredMessage.ReplyToSessionId = context.SessionId;
+                            }
+
+                            if (context.ReplyToSessionId != null)
+                                brokeredMessage.ReplyToSessionId = context.ReplyToSessionId;
+
+                            if (context.ScheduledEnqueueTimeUtc.HasValue)
+                            {
+                                var sequenceNumber = await _client.ScheduleSend(brokeredMessage, context.ScheduledEnqueueTimeUtc.Value).ConfigureAwait(false);
+
+                                context.SetScheduledMessageId(sequenceNumber);
+
+                                if (_log.IsDebugEnabled)
+                                    _log.DebugFormat("Scheduled: {0} {1} {2}", sequenceNumber, context.ScheduledEnqueueTimeUtc.Value, _client.Path);
+                            }
+                            else
+                            {
+                                await _observers.PreSend(context).ConfigureAwait(false);
+
+                                await _client.Send(brokeredMessage).ConfigureAwait(false);
+                                _log.DebugFormat("SEND {0} ({1})", brokeredMessage.MessageId, _client.Path);
+
+                                await _observers.PostSend(context).ConfigureAwait(false);
+                            }
+                        }
                     }
                 }
             }

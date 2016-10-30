@@ -43,5 +43,10 @@ namespace MassTransit.AzureServiceBusTransport.Transport
         {
             return _topicClient.ScheduleMessageAsync(message, scheduleEnqueueTimeUtc);
         }
+
+        public Task CancelScheduledSend(long sequenceNumber)
+        {
+            return _topicClient.CancelScheduledMessageAsync(sequenceNumber);
+        }
     }
 }

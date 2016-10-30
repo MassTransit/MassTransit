@@ -35,6 +35,7 @@ namespace MassTransit
         /// <param name="message">The message to send</param>
         /// <param name="pipe">Optional: A callback that gives the caller access to the publish context.</param>
         /// <returns>A handled to the scheduled message</returns>
+        [Obsolete("Use ScheduleSend instead, it's the future")]
         public static Task<ScheduledMessage<T>> ScheduleMessage<T>(this IPublishEndpoint publishEndpoint, Uri destinationAddress, DateTime scheduledTime,
             T message)
             where T : class
@@ -55,6 +56,7 @@ namespace MassTransit
         /// <param name="message">The message to send</param>
         /// <param name="pipe">Optional: A callback that gives the caller access to the publish context.</param>
         /// <returns>A handled to the scheduled message</returns>
+        [Obsolete("Use ScheduleSend instead, it's the future")]
         public static Task<ScheduledMessage<T>> ScheduleMessage<T>(this IPublishEndpoint publishEndpoint, Uri destinationAddress, DateTime scheduledTime,
             T message, IPipe<SendContext<T>> pipe)
             where T : class
@@ -75,6 +77,7 @@ namespace MassTransit
         /// <param name="message">The message to send</param>
         /// <param name="pipe">Optional: A callback that gives the caller access to the publish context.</param>
         /// <returns>A handled to the scheduled message</returns>
+        [Obsolete("Use ScheduleSend instead, it's the future")]
         public static Task<ScheduledMessage<T>> ScheduleMessage<T>(this IPublishEndpoint publishEndpoint, Uri destinationAddress, DateTime scheduledTime,
             T message, IPipe<SendContext> pipe)
             where T : class
@@ -94,6 +97,7 @@ namespace MassTransit
         /// <param name="message">The message to send</param>
         ///  /// <param name="pipe">Optional: A callback that gives the caller access to the publish context.</param>
         /// <returns>A handled to the scheduled message</returns>
+        [Obsolete("Use ScheduleSend instead, it's the future")]
         public static Task<ScheduledMessage<T>> ScheduleMessage<T>(this IBus bus, DateTime scheduledTime, T message)
             where T : class
         {
@@ -112,6 +116,7 @@ namespace MassTransit
         /// <param name="message">The message to send</param>
         ///  /// <param name="pipe">Optional: A callback that gives the caller access to the publish context.</param>
         /// <returns>A handled to the scheduled message</returns>
+        [Obsolete("Use ScheduleSend instead, it's the future")]
         public static Task<ScheduledMessage<T>> ScheduleMessage<T>(this IBus bus, DateTime scheduledTime, T message,
             IPipe<SendContext<T>> pipe)
             where T : class
@@ -131,6 +136,7 @@ namespace MassTransit
         /// <param name="message">The message to send</param>
         /// <param name="pipe">Optional: A callback that gives the caller access to the publish context.</param>
         /// <returns>A handled to the scheduled message</returns>
+        [Obsolete("Use ScheduleSend instead, it's the future")]
         public static Task<ScheduledMessage<T>> ScheduleMessage<T>(this IBus bus, DateTime scheduledTime, T message,
             IPipe<SendContext> pipe)
             where T : class
@@ -149,6 +155,7 @@ namespace MassTransit
         /// <param name="scheduledTime">The time when the message should be sent to the endpoint</param>
         /// <param name="message">The message to send</param>
         /// <returns>A handled to the scheduled message</returns>
+        [Obsolete("Use ScheduleSend instead, it's the future")]
         public static Task<ScheduledMessage<T>> ScheduleMessage<T>(this ConsumeContext context, DateTime scheduledTime, T message)
             where T : class
         {
@@ -171,6 +178,7 @@ namespace MassTransit
         /// <param name="message">The message to send</param>
         /// <param name="pipe">A callback that gives the caller access to the publish context.</param>
         /// <returns>A handled to the scheduled message</returns>
+        [Obsolete("Use ScheduleSend instead, it's the future")]
         public static Task<ScheduledMessage<T>> ScheduleMessage<T>(this ConsumeContext context, DateTime scheduledTime, T message,
             IPipe<SendContext> pipe)
             where T : class
@@ -194,6 +202,7 @@ namespace MassTransit
         /// <param name="scheduledTime">The time when the message should be sent to the endpoint</param>
         /// <param name="message">The message to send</param>
         /// <returns>A handled to the scheduled message</returns>
+        [Obsolete("Use ScheduleSend instead, it's the future")]
         public static Task<ScheduledMessage<T>> ScheduleMessage<T>(this ConsumeContext context, Uri destinationAddress, DateTime scheduledTime, T message)
             where T : class
         {
@@ -217,6 +226,7 @@ namespace MassTransit
         /// <param name="message">The message to send</param>
         /// <param name="pipe">A callback that gives the caller access to the publish context.</param>
         /// <returns>A handled to the scheduled message</returns>
+        [Obsolete("Use ScheduleSend instead, it's the future")]
         public static Task<ScheduledMessage<T>> ScheduleMessage<T>(this ConsumeContext context, Uri destinationAddress, DateTime scheduledTime, T message,
             IPipe<SendContext> pipe)
             where T : class
@@ -235,6 +245,7 @@ namespace MassTransit
         /// </summary>
         /// <param name="publishEndpoint"></param>
         /// <param name="message"> </param>
+        [Obsolete("Seriously this is just a disaster waiting to happen")]
         public static Task CancelScheduledMessage<T>(this IPublishEndpoint publishEndpoint, ScheduledMessage<T> message)
             where T : class
         {
@@ -249,6 +260,7 @@ namespace MassTransit
         /// </summary>
         /// <param name="publishEndpoint"></param>
         /// <param name="tokenId">The tokenId of the scheduled message</param>
+        [Obsolete("Seriously this is just a disaster waiting to happen")]
         public static Task CancelScheduledMessage(this IPublishEndpoint publishEndpoint, Guid tokenId)
         {
             if (publishEndpoint == null)
@@ -259,22 +271,5 @@ namespace MassTransit
             return scheduler.CancelScheduledSend(tokenId);
         }
 
-        /// <summary>
-        /// Cancel a scheduled message 
-        /// </summary>
-        /// <typeparam name="T">The message type</typeparam>
-        /// <param name="scheduler">The message scheduler</param>
-        /// <param name="message">The </param>
-        /// <returns></returns>
-        public static Task CancelScheduledSend<T>(this IMessageScheduler scheduler, ScheduledMessage<T> message)
-            where T : class
-        {
-            if (scheduler == null)
-                throw new ArgumentNullException(nameof(scheduler));
-            if (message == null)
-                throw new ArgumentNullException(nameof(message));
-
-            return scheduler.CancelScheduledSend(message.TokenId);
-        }
     }
 }

@@ -184,7 +184,16 @@ namespace MassTransit.AzureServiceBusTransport.Scheduling
 
         Task IMessageScheduler.CancelScheduledSend(Guid tokenId)
         {
-            throw new NotSupportedException("ServiceBus does not support cancelling scheduled messages");
+            throw new NotSupportedException("To cancel scheduled messages with Service Bus, use CancelScheduledSend(address,tokenId)");
+        }
+
+        public async Task CancelScheduledSend(Uri destinationAddress, Guid tokenId)
+        {
+            var command = new CancelScheduledMessageCommand(tokenId);
+
+            var endpoint = await _sendEndpointProvider.GetSendEndpoint(destinationAddress).ConfigureAwait(false);
+
+            await endpoint.Send<CancelScheduledMessage>(command).ConfigureAwait(false);
         }
 
         async Task<ScheduledMessage<T>> ScheduleSend<T>(Uri destinationAddress, DateTime scheduledTime, T message, ServiceBusScheduleMessagePipe<T> pipe,

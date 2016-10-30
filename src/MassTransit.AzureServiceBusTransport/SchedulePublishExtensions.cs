@@ -435,9 +435,7 @@ namespace MassTransit
         {
             var connectionContext = context.ReceiveContext.GetPayload<NamespaceContext>();
 
-            var address = connectionContext.GetTopicAddress(messageType);
-
-            return address;
+            return connectionContext.GetTopicAddress(messageType);
         }
 
         static async Task<ScheduledMessage<T>> Schedule<T>(ConsumeContext context, DateTime scheduledTime, T message, ServiceBusScheduleMessagePipe<T> pipe,

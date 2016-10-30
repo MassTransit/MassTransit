@@ -99,6 +99,7 @@
     </Compile>
     <Compile Include="BusControlExtensions.cs" />
     <Compile Include="BusReady.cs" />
+    <Compile Include="CancelScheduledSendExtensions.cs" />
     <Compile Include="Configuration\Builders\ConsumePipeBuilder.cs" />
     <Compile Include="Configuration\Builders\IConsumePipeBuilder.cs" />
     <Compile Include="Configuration\Builders\IInMemoryReceiveEndpointSpecification.cs" />

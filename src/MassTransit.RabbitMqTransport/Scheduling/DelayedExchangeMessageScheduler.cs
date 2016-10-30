@@ -164,6 +164,11 @@ namespace MassTransit.RabbitMqTransport.Scheduling
             throw new NotSupportedException("RabbitMQ delayed exchange does not support cancellation");
         }
 
+        public Task CancelScheduledSend(Uri destinationAddress, Guid tokenId)
+        {
+            throw new NotSupportedException("RabbitMQ delayed exchange does not support cancellation");
+        }
+
         async Task<ScheduledMessage<T>> ScheduleSend<T>(Uri destinationAddress, DateTime scheduledTime, T message, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken)
             where T : class
         {

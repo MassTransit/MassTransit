@@ -19,11 +19,37 @@ namespace MassTransit.AzureServiceBusTransport.Transport
 
     public interface ISendClient
     {
+        /// <summary>
+        /// The path of the messaging entity for this client
+        /// </summary>
         string Path { get; }
 
+        /// <summary>
+        /// Send the message to the messaging entity
+        /// </summary>
+        /// <param name="message"></param>
+        /// <returns></returns>
         Task Send(BrokeredMessage message);
 
+        /// <summary>
+        /// Close the messaging client
+        /// </summary>
+        /// <returns></returns>
         Task Close();
+
+        /// <summary>
+        /// Schedule a send in the future to the messaging entity
+        /// </summary>
+        /// <param name="message"></param>
+        /// <param name="scheduleEnqueueTimeUtc"></param>
+        /// <returns></returns>
         Task<long> ScheduleSend(BrokeredMessage message, DateTime scheduleEnqueueTimeUtc);
+
+        /// <summary>
+        /// Cancel a previously schedule send on the messaging entity
+        /// </summary>
+        /// <param name="sequenceNumber"></param>
+        /// <returns></returns>
+        Task CancelScheduledSend(long sequenceNumber);
     }
 }
