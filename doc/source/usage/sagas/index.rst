@@ -1,27 +1,13 @@
 Sagas
-=================
+=====
 
-Sagas, or distributed workflows, are a powerful feature provided by
-MassTransit to accompolish coordinated, long-lived and distributed transactions.
-Like most powerful features there is quite a bit of ground work
-that needs to be covered to really understand and leverage them correctly.
+The ability to ochestrate a series of events is a powerful feature, and MassTransit makes this possible.
 
-At their core, Sagas are really just fancy state machines, because of this
-the developers of MassTransit have leveraged existing state machine library
-called Automatonymous_. Automatonymous is a
-state machine engine written by Chris Patterson, aka, PhatBoyG.
-
-.. _Automatonymous: https://github.com/MassTransit/Automatonymous
 
 What is a saga?
-----------------
+---------------
 
-A saga is a long-lived transaction managed by a coordinator. Sagas are stateful
-entities which orchestrate events, changing state as events are observed, and
-maintaining the overall state of the transaction. Sagas were designed to manage
-the complexity of a distributed transaction without locking or immediate consistency.
-They manage state and are able to identify when a transaction completed successfully
-or if it faulted, necessitating compensation.
+A saga is a long-lived transaction managed by a coordinator. Sagas are initiated by an event, sagas orchestrate events, and sagas maintain the state of the overall transaction. Sagas are designed to manage the complexity of a distributed transaction without locking and immediate consistency. They manage state and track any compensations required if a partial failure occurs.
 
 We didn’t create it, we learned it from the `original Cornell paper`_ and from Arnon Rotem-Gal-Oz's `description`_.
 
@@ -29,8 +15,15 @@ We didn’t create it, we learned it from the `original Cornell paper`_ and from
 .. _description: http://www.rgoarchitects.com/Files/SOAPatterns/Saga.pdf
 
 
+State machine sagas
+-------------------
+
+At their core, sagas are just fancy state machines. Because of this, MassTransit uses the standalone state machine library
+called Automatonymous_. Automatonymous is a state machine engine written by Chris Patterson, aka, PhatBoyG.
+
+.. _Automatonymous: https://github.com/MassTransit/Automatonymous
+
 
 .. toctree::
 
-    correlation_ids.rst
     automatonymous.rst

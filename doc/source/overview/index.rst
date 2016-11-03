@@ -17,6 +17,7 @@ there are a number of subjects covered below that explain in detail how everythi
     valueadd.rst
     publishing.rst
     sending.rst
+    correlation_ids.rst
     versioning.rst
     saga.rst
     inheritance.rst

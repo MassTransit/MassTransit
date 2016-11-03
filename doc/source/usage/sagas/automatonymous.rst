@@ -217,10 +217,22 @@ To connect the state machine saga to a receive endpoint, a saga repository is us
 Combining events (think Fork/Join)
 ----------------------------------
 
-Multiple events can be combined into a single event, for the purposes of joining together multiple operations. To define a combined event, the ``Event``
-syntax has an overload.
+Multiple events can be combined into a single event, for the purposes of joining together multiple operations. To define a combined event, the ``Event`` syntax has an overload.
 
-// TBD
+.. sourcecode:: csharp
+
+    public Event<OrderReady> Ready { get; private set; }
+    public Event<PaymentApproved> Approved { get; private set; }
+    public Event<StockVerified> Verified { get; private set; }
+
+    CompositeEvent(() => OrderReady, x => x.OrderReadyStatus, PaymentApproved, StockVerified);
+
+Once both events have been delivered to the state machine, the third event, *OrderReady*, will be triggered.
+
+.. note::
+
+    The order of events being declared can impact the order in which they execute. Therefore, it is best to declare composite events at the end of the state machine declaration, after all other events and behaviors are declared. That way, the composite events will be raised *after* the dependent event behaviors.
+
 
 
 
