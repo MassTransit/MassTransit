@@ -20,6 +20,7 @@ Message-based communication is a reliable and scalable way to implement a servic
     overview/backstory.rst
     installation/index.rst
     usage/index.rst
+    sagas/index.rst
     middleware/index.rst
     scheduling/index.rst
     advanced/index.rst

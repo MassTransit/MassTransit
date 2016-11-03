@@ -9,6 +9,7 @@ provided below.
     messages.rst
     consumer.rst
     producing.rst
+    correlation_ids.rst
     locations.rst
     containers/index.rst
     request_response.rst
@@ -16,7 +17,6 @@ provided below.
     observers.rst
     busevents.rst
     connect.rst
-    sagas/index.rst
     retry.rst
     transactions.rst
     diagnostics.rst
