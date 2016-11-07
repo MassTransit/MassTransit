@@ -119,6 +119,7 @@
     <Compile Include="CorrelationUnknown_Specs.cs" />
     <Compile Include="DiscardEvent_Specs.cs" />
     <Compile Include="EnterEvent_Specs.cs" />
+    <Compile Include="FaultRescue_Specs.cs" />
     <Compile Include="Fault_Specs.cs" />
     <Compile Include="FilterFault_Specs.cs" />
     <Compile Include="Ignore_Specs.cs" />

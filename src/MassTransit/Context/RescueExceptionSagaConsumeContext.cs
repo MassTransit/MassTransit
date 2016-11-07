@@ -13,56 +13,44 @@
 namespace MassTransit.Context
 {
     using System;
+    using System.Threading.Tasks;
     using Events;
+    using Saga;
 
 
-    public class RescueExceptionConsumeContext<TMessage> :
-        ConsumeContextProxy<TMessage>,
-        ExceptionConsumeContext<TMessage>
-        where TMessage : class
-    {
-        readonly Exception _exception;
-        ExceptionInfo _exceptionInfo;
-
-        public RescueExceptionConsumeContext(ConsumeContext<TMessage> context, Exception exception)
-            : base(context)
-        {
-            _exception = exception;
-        }
-
-        Exception ExceptionConsumeContext.Exception => _exception;
-
-        ExceptionInfo ExceptionConsumeContext.ExceptionInfo
-        {
-            get
-            {
-                if (_exceptionInfo != null)
-                    return _exceptionInfo;
-
-                _exceptionInfo = new FaultExceptionInfo(_exception);
-
-                return _exceptionInfo;
-            }
-        }
-    }
-
-
-    public class RescueExceptionConsumeContext :
+    public class RescueExceptionSagaConsumeContext<TSaga> :
         ConsumeContextProxy,
-        ExceptionConsumeContext
+        ExceptionSagaConsumeContext<TSaga>
+        where TSaga : class, ISaga
     {
+        readonly SagaConsumeContext<TSaga> _context;
         readonly Exception _exception;
         ExceptionInfo _exceptionInfo;
 
-        public RescueExceptionConsumeContext(ConsumeContext context, Exception exception)
+        public RescueExceptionSagaConsumeContext(SagaConsumeContext<TSaga> context, Exception exception)
             : base(context)
         {
+            _context = context;
             _exception = exception;
         }
 
-        Exception ExceptionConsumeContext.Exception => _exception;
+        public TSaga Saga => _context.Saga;
 
-        ExceptionInfo ExceptionConsumeContext.ExceptionInfo
+        public SagaConsumeContext<TSaga, T> PopContext<T>() where T : class
+        {
+            return _context.PopContext<T>();
+        }
+
+        public Task SetCompleted()
+        {
+            return _context.SetCompleted();
+        }
+
+        public bool IsCompleted => _context.IsCompleted;
+
+        Exception ExceptionSagaConsumeContext<TSaga>.Exception => _exception;
+
+        ExceptionInfo ExceptionSagaConsumeContext<TSaga>.ExceptionInfo
         {
             get
             {

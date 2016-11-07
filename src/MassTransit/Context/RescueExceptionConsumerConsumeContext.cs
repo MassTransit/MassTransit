@@ -14,55 +14,35 @@ namespace MassTransit.Context
 {
     using System;
     using Events;
+    using Saga;
 
 
-    public class RescueExceptionConsumeContext<TMessage> :
-        ConsumeContextProxy<TMessage>,
-        ExceptionConsumeContext<TMessage>
-        where TMessage : class
-    {
-        readonly Exception _exception;
-        ExceptionInfo _exceptionInfo;
-
-        public RescueExceptionConsumeContext(ConsumeContext<TMessage> context, Exception exception)
-            : base(context)
-        {
-            _exception = exception;
-        }
-
-        Exception ExceptionConsumeContext.Exception => _exception;
-
-        ExceptionInfo ExceptionConsumeContext.ExceptionInfo
-        {
-            get
-            {
-                if (_exceptionInfo != null)
-                    return _exceptionInfo;
-
-                _exceptionInfo = new FaultExceptionInfo(_exception);
-
-                return _exceptionInfo;
-            }
-        }
-    }
-
-
-    public class RescueExceptionConsumeContext :
+    public class RescueExceptionConsumerConsumeContext<TConsumer> :
         ConsumeContextProxy,
-        ExceptionConsumeContext
+        ExceptionConsumerConsumeContext<TConsumer>
+        where TConsumer : class, ISaga
     {
+        readonly ConsumerConsumeContext<TConsumer> _context;
         readonly Exception _exception;
         ExceptionInfo _exceptionInfo;
 
-        public RescueExceptionConsumeContext(ConsumeContext context, Exception exception)
+        public RescueExceptionConsumerConsumeContext(ConsumerConsumeContext<TConsumer> context, Exception exception)
             : base(context)
         {
+            _context = context;
             _exception = exception;
         }
 
-        Exception ExceptionConsumeContext.Exception => _exception;
+        public TConsumer Consumer => _context.Consumer;
 
-        ExceptionInfo ExceptionConsumeContext.ExceptionInfo
+        public ConsumerConsumeContext<TConsumer, T> PopContext<T>() where T : class
+        {
+            return _context.PopContext<T>();
+        }
+
+        Exception ExceptionConsumerConsumeContext<TConsumer>.Exception => _exception;
+
+        ExceptionInfo ExceptionConsumerConsumeContext<TConsumer>.ExceptionInfo
         {
             get
             {

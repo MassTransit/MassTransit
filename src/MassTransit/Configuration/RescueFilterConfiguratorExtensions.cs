@@ -16,6 +16,7 @@ namespace MassTransit
     using GreenPipes;
     using GreenPipes.Configurators;
     using PipeConfigurators;
+    using Saga;
 
 
     public static class RescueFilterConfiguratorExtensions
@@ -72,6 +73,46 @@ namespace MassTransit
                 throw new ArgumentNullException(nameof(configurator));
 
             var rescueConfigurator = new ConsumeContextRescuePipeSpecification<T>(rescuePipe);
+
+            configure?.Invoke(rescueConfigurator);
+
+            configurator.AddPipeSpecification(rescueConfigurator);
+        }
+
+        /// <summary>
+        /// Rescue exceptions via the alternate pipe
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="rescuePipe"></param>
+        /// <param name="configure"></param>
+        public static void UseRescue<T>(this IPipeConfigurator<ConsumerConsumeContext<T>> configurator, IPipe<ExceptionConsumerConsumeContext<T>> rescuePipe,
+            Action<IExceptionConfigurator> configure = null)
+            where T : class, ISaga
+        {
+            if (configurator == null)
+                throw new ArgumentNullException(nameof(configurator));
+
+            var rescueConfigurator = new ConsumerConsumeContextRescuePipeSpecification<T>(rescuePipe);
+
+            configure?.Invoke(rescueConfigurator);
+
+            configurator.AddPipeSpecification(rescueConfigurator);
+        }
+
+        /// <summary>
+        /// Rescue exceptions via the alternate pipe
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="rescuePipe"></param>
+        /// <param name="configure"></param>
+        public static void UseRescue<T>(this IPipeConfigurator<SagaConsumeContext<T>> configurator, IPipe<ExceptionSagaConsumeContext<T>> rescuePipe,
+            Action<IExceptionConfigurator> configure = null)
+            where T : class, ISaga
+        {
+            if (configurator == null)
+                throw new ArgumentNullException(nameof(configurator));
+
+            var rescueConfigurator = new SagaConsumeContextRescuePipeSpecification<T>(rescuePipe);
 
             configure?.Invoke(rescueConfigurator);
 
