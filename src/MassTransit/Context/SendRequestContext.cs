@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -23,19 +23,19 @@ namespace MassTransit.Context
 
 
     public class SendRequestContext<TRequest> :
-        RequestContext<TRequest>
+        IRequestConfigurator<TRequest>
         where TRequest : class
     {
-        readonly IRequestPipeConnector _connector;
         readonly Dictionary<Type, RequestHandlerHandle> _connections;
+        readonly IRequestPipeConnector _connector;
         readonly SendContext<TRequest> _context;
         readonly Guid _requestId;
         readonly TaskCompletionSource<TRequest> _requestTask;
         TaskScheduler _taskScheduler;
-        TimeSpan _timeout;
         CancellationTokenSource _timeoutToken;
 
-        public SendRequestContext(IRequestPipeConnector connector, SendContext<TRequest> context, TaskScheduler taskScheduler, Action<RequestContext<TRequest>> callback)
+        public SendRequestContext(IRequestPipeConnector connector, SendContext<TRequest> context, TaskScheduler taskScheduler,
+            Action<IRequestConfigurator<TRequest>> callback)
         {
             if (connector == null)
                 throw new ArgumentNullException(nameof(connector));
@@ -57,9 +57,9 @@ namespace MassTransit.Context
 
             callback(this);
 
-            if (_timeout > TimeSpan.Zero)
+            if (Timeout > TimeSpan.Zero)
             {
-                _timeoutToken = new CancellationTokenSource(_timeout);
+                _timeoutToken = new CancellationTokenSource(Timeout);
                 _timeoutToken.Token.Register(TimeoutExpired);
             }
         }
@@ -178,35 +178,31 @@ namespace MassTransit.Context
             return _context.GetOrAddPayload(payloadFactory);
         }
 
-        TimeSpan RequestContext.Timeout
-        {
-            get { return _timeout; }
-            set { _timeout = value; }
-        }
+        public TimeSpan Timeout { get; set; }
 
-        Task<TRequest> RequestContext<TRequest>.Task => _requestTask.Task;
+        Task<TRequest> IRequestConfigurator<TRequest>.Task => _requestTask.Task;
 
-        void RequestContext.UseCurrentSynchronizationContext()
+        void IRequestConfigurator.UseCurrentSynchronizationContext()
         {
             _taskScheduler = TaskScheduler.FromCurrentSynchronizationContext();
         }
 
-        void RequestContext.SetTaskScheduler(TaskScheduler taskScheduler)
+        void IRequestConfigurator.SetTaskScheduler(TaskScheduler taskScheduler)
         {
             _taskScheduler = taskScheduler;
         }
 
-        void RequestContext.Watch<T>(MessageHandler<T> handler)
+        void IRequestConfigurator.Watch<T>(MessageHandler<T> handler)
         {
             if (_connections.ContainsKey(typeof(T)))
                 throw new RequestException($"Only one handler of type {TypeMetadataCache<T>.ShortName} can be registered");
 
-            ConnectHandle connectHandle = _connector.ConnectRequestHandler(_requestId, handler);
+            var connectHandle = _connector.ConnectRequestHandler(_requestId, handler);
 
             _connections.Add(typeof(T), new RequestHandlerHandle<T>(connectHandle));
         }
 
-        Task<T> RequestContext.Handle<T>(MessageHandler<T> handler)
+        Task<T> IRequestConfigurator.Handle<T>(MessageHandler<T> handler)
         {
             if (_connections.ContainsKey(typeof(T)))
                 throw new RequestException($"Only one handler of type {TypeMetadataCache<T>.ShortName} can be registered");
@@ -233,14 +229,14 @@ namespace MassTransit.Context
                 }
             };
 
-            ConnectHandle connectHandle = _connector.ConnectRequestHandler(_requestId, messageHandler);
+            var connectHandle = _connector.ConnectRequestHandler(_requestId, messageHandler);
 
             _connections.Add(typeof(T), new RequestHandlerHandle<T>(connectHandle, source));
 
             return source.Task;
         }
 
-        Task<T> RequestContext.Handle<T>()
+        Task<T> IRequestConfigurator.Handle<T>()
         {
             if (_connections.ContainsKey(typeof(T)))
                 throw new RequestException($"Only one handler of type {TypeMetadataCache<T>.ShortName} can be registered");
@@ -265,7 +261,7 @@ namespace MassTransit.Context
                 return TaskUtil.Completed;
             };
 
-            ConnectHandle connectHandle = _connector.ConnectRequestHandler(_requestId, messageHandler);
+            var connectHandle = _connector.ConnectRequestHandler(_requestId, messageHandler);
 
             _connections.Add(typeof(T), new RequestHandlerHandle<T>(connectHandle, source));
 
@@ -294,7 +290,7 @@ namespace MassTransit.Context
                 return TaskUtil.Completed;
             };
 
-            ConnectHandle connectHandle = _connector.ConnectRequestHandler(_requestId, messageHandler);
+            var connectHandle = _connector.ConnectRequestHandler(_requestId, messageHandler);
 
             _connections.Add(typeof(Fault<TRequest>), new RequestHandlerHandle<Fault<TRequest>>(connectHandle, source));
         }

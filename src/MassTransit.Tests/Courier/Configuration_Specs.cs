@@ -43,11 +43,11 @@ namespace MassTransit.Tests.Courier
             {
                 x.ExecuteActivityHost<TestActivity, TestArguments>(_compensateUri, h =>
                 {
-                    h.UseConsoleLog(async (context,log) => context.ActivityName);
+                    h.UseConsoleLog(async log => log.Context.ActivityName);
 
-                    h.Arguments(a => a.UseConsoleLog(async (context, log) => context.Arguments.Value));
+                    h.Arguments(a => a.UseConsoleLog(async log => log.Context.Arguments.Value));
 
-                    h.RoutingSlip(rs => rs.UseConsoleLog(async (context, log) => context.Message.TrackingNumber.ToString("N")));
+                    h.RoutingSlip(rs => rs.UseConsoleLog(async log => log.Context.Message.TrackingNumber.ToString("N")));
                 });
             });
 
@@ -55,11 +55,11 @@ namespace MassTransit.Tests.Courier
             {
                 x.CompensateActivityHost<TestActivity, TestLog>(h =>
                 {
-                    h.UseConsoleLog(async (context, log) => context.Log.OriginalValue);
+                    h.UseConsoleLog(async log => log.Context.Log.OriginalValue);
 
-                    h.Log(l => l.UseConsoleLog(async (context, log) => context.Log.OriginalValue));
+                    h.Log(l => l.UseConsoleLog(async log => log.Context.Log.OriginalValue));
 
-                    h.RoutingSlip(rs => rs.UseConsoleLog(async (context, log) => context.Message.TrackingNumber.ToString("N")));
+                    h.RoutingSlip(rs => rs.UseConsoleLog(async log => log.Context.Message.TrackingNumber.ToString("N")));
                 });
             });
         }

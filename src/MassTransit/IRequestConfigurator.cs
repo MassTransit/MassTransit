@@ -20,9 +20,9 @@ namespace MassTransit
     /// Sending of a request, allowing specification of response handlers, etc.
     /// </summary>
     /// <typeparam name="TRequest"></typeparam>
-    public interface RequestContext<TRequest> :
+    public interface IRequestConfigurator<TRequest> :
         SendContext<TRequest>,
-        RequestContext
+        IRequestConfigurator
         where TRequest : class
     {
         /// <summary>
@@ -36,13 +36,13 @@ namespace MassTransit
     /// Allows the request to be configured, specifying handlers, synchronization context,
     /// and timeout values
     /// </summary>
-    public interface RequestContext :
+    public interface IRequestConfigurator :
         SendContext
     {
         /// <summary>
         /// The timeout before the pending tasks are cancelled
         /// </summary>
-        TimeSpan Timeout { get; set; }
+        TimeSpan Timeout { set; }
 
         /// <summary>
         /// The request Task

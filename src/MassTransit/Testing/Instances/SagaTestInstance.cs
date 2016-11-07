@@ -13,6 +13,7 @@
 namespace MassTransit.Testing.Instances
 {
     using System.Collections.Generic;
+    using System.Threading;
     using System.Threading.Tasks;
     using Saga;
     using Subjects;
@@ -37,14 +38,14 @@ namespace MassTransit.Testing.Instances
 
         public SagaTestSubject<TSaga> Saga => _subject;
 
-        public override async Task DisposeAsync()
+        public override async Task DisposeAsync(CancellationToken cancellationToken = new CancellationToken())
         {
             if (_disposed)
                 return;
 
             await _subject.DisposeAsync().ConfigureAwait(false);
 
-            await base.DisposeAsync().ConfigureAwait(false);
+            await base.DisposeAsync(cancellationToken).ConfigureAwait(false);
 
             _disposed = true;
         }

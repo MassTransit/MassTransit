@@ -28,14 +28,14 @@ namespace MassTransit.Context
         Request<TRequest>
         where TRequest : class
     {
+        readonly Action<IRequestConfigurator<TRequest>> _callback;
         readonly IRequestPipeConnector _connector;
-        readonly Uri _responseAddress;
-        readonly Action<RequestContext<TRequest>> _callback;
         readonly Guid _requestId;
+        readonly Uri _responseAddress;
         readonly TaskScheduler _taskScheduler;
         SendRequestContext<TRequest> _requestContext;
 
-        public SendRequest(IRequestPipeConnector connector, Uri responseAddress, TaskScheduler taskScheduler, Action<RequestContext<TRequest>> callback)
+        public SendRequest(IRequestPipeConnector connector, Uri responseAddress, TaskScheduler taskScheduler, Action<IRequestConfigurator<TRequest>> callback)
         {
             _taskScheduler = taskScheduler;
             _callback = callback;
@@ -58,12 +58,12 @@ namespace MassTransit.Context
             else
             {
                 var publishContext = new PublishRequestContext<TRequest>(context, _callback, _requestContext.Connections,
-                    ((RequestContext<TRequest>)_requestContext).Task);
+                    ((IRequestConfigurator<TRequest>)_requestContext).Task);
             }
 
             return TaskUtil.Completed;
         }
 
-        Task Request<TRequest>.Task => ((RequestContext)_requestContext).Task;
+        Task Request<TRequest>.Task => ((IRequestConfigurator)_requestContext).Task;
     }
 }

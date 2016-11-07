@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -32,14 +32,14 @@ namespace MassTransit.AzureServiceBusTransport.Tests
             {
                 ServiceBusTokenProviderSettings settings = new TestAzureServiceBusAccountSettings();
 
-                Uri serviceUri = ServiceBusEnvironment.CreateServiceUri("sb", "masstransit-build",
+                var serviceUri = ServiceBusEnvironment.CreateServiceUri("sb", "masstransit-build",
                     "MassTransit.AzureServiceBusTransport.Tests");
 
                 var completed = new TaskCompletionSource<A>();
 
-                IBusControl bus = Bus.Factory.CreateUsingAzureServiceBus(x =>
+                var bus = Bus.Factory.CreateUsingAzureServiceBus(x =>
                 {
-                    IServiceBusHost host = x.Host(serviceUri, h =>
+                    var host = x.Host(serviceUri, h =>
                     {
                         h.SharedAccessSignature(s =>
                         {
@@ -58,7 +58,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
                     {
                         e.PrefetchCount = 16;
 
-                        e.UseLog(Console.Out, async (c, l) => string.Format("Logging: {0}", c.MessageId.Value));
+                        e.UseLog(Console.Out, async l => string.Format("Logging: {0}", l.Context.MessageId.Value));
 
                         e.Handler<A>(async context => completed.TrySetResult(context.Message));
 
@@ -82,14 +82,14 @@ namespace MassTransit.AzureServiceBusTransport.Tests
             {
                 ServiceBusTokenProviderSettings settings = new TestAzureServiceBusAccountSettings();
 
-                Uri serviceUri = ServiceBusEnvironment.CreateServiceUri("sb", "masstransit-build",
+                var serviceUri = ServiceBusEnvironment.CreateServiceUri("sb", "masstransit-build",
                     "MassTransit.AzureServiceBusTransport.Tests");
 
                 var completed = new TaskCompletionSource<A>();
 
-                IBusControl bus = Bus.Factory.CreateUsingAzureServiceBus(x =>
+                var bus = Bus.Factory.CreateUsingAzureServiceBus(x =>
                 {
-                    IServiceBusHost host = x.Host(serviceUri, h =>
+                    var host = x.Host(serviceUri, h =>
                     {
                         h.SharedAccessSignature(s =>
                         {
@@ -104,7 +104,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
                     {
                         e.PrefetchCount = 16;
 
-                        e.UseLog(Console.Out, async (c, l) => string.Format("Logging: {0}", c.MessageId.Value));
+                        e.UseLog(Console.Out, async l => string.Format("Logging: {0}", l.Context.MessageId.Value));
 
                         e.Handler<A>(async context => completed.TrySetResult(context.Message));
 
@@ -120,7 +120,6 @@ namespace MassTransit.AzureServiceBusTransport.Tests
                 var busHandle = await bus.StartAsync();
                 try
                 {
-
                 }
                 finally
                 {

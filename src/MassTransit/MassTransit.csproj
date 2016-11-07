@@ -72,7 +72,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="GreenPipes, Version=1.0.0.0, Culture=neutral, PublicKeyToken=b800c4cfcdeea87b, processorArchitecture=MSIL">
-      <HintPath>..\packages\GreenPipes.1.0.4\lib\net452\GreenPipes.dll</HintPath>
+      <HintPath>..\packages\GreenPipes.1.0.5\lib\net452\GreenPipes.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="NewId, Version=2.1.3.0, Culture=neutral, PublicKeyToken=b8e0e9f2f1e657fa, processorArchitecture=MSIL">
@@ -636,8 +636,9 @@
     <Compile Include="ReceiveTransportReady.cs" />
     <Compile Include="Request.cs" />
     <Compile Include="IRequestClient.cs" />
+    <Compile Include="RequestClient.cs" />
     <Compile Include="RequestClientExtensions.cs" />
-    <Compile Include="RequestContext.cs" />
+    <Compile Include="IRequestConfigurator.cs" />
     <Compile Include="RequestExtensions.cs" />
     <Compile Include="Retry.cs" />
     <Compile Include="RetryContextExtensions.cs" />

@@ -15,6 +15,7 @@ namespace Automatonymous.Testing
     using System;
     using System.Collections;
     using System.Collections.Generic;
+    using System.Threading;
     using System.Threading.Tasks;
     using GreenPipes.Util;
     using MassTransit.Saga;
@@ -94,7 +95,7 @@ namespace Automatonymous.Testing
             return _created.Contains(sagaId);
         }
 
-        public Task DisposeAsync()
+        public Task DisposeAsync(CancellationToken cancellationToken)
         {
             return TaskUtil.Completed;
         }

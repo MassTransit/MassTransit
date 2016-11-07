@@ -13,6 +13,7 @@
 namespace MassTransit.Testing.Instances
 {
     using System.Collections.Generic;
+    using System.Threading;
     using System.Threading.Tasks;
     using Subjects;
     using TestActions;
@@ -36,14 +37,14 @@ namespace MassTransit.Testing.Instances
 
         public IHandlerTestSubject<TMessage> Handler => _subject;
 
-        public override async Task DisposeAsync()
+        public override async Task DisposeAsync(CancellationToken cancellationToken = new CancellationToken())
         {
             if (_disposed)
                 return;
 
-            await _subject.DisposeAsync().ConfigureAwait(false);
+            await _subject.DisposeAsync(cancellationToken).ConfigureAwait(false);
 
-            await base.DisposeAsync().ConfigureAwait(false);
+            await base.DisposeAsync(cancellationToken).ConfigureAwait(false);
 
             _disposed = true;
         }

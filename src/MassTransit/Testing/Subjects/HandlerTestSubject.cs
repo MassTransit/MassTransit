@@ -14,6 +14,7 @@ namespace MassTransit.Testing.Subjects
 {
     using System;
     using System.Collections.Generic;
+    using System.Threading;
     using System.Threading.Tasks;
     using Configurators;
     using GreenPipes.Util;
@@ -67,7 +68,7 @@ namespace MassTransit.Testing.Subjects
             }
         }
 
-        public Task DisposeAsync()
+        public Task DisposeAsync(CancellationToken cancellationToken = default(CancellationToken))
         {
             return TaskUtil.Completed;
         }

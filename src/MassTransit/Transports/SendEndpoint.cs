@@ -43,7 +43,7 @@ namespace MassTransit.Transports
 
         Uri SourceAddress { get; }
 
-        public Task DisposeAsync()
+        public Task DisposeAsync(CancellationToken cancellationToken)
         {
             return _transport.Close();
         }

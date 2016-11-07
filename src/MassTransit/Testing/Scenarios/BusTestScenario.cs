@@ -76,7 +76,7 @@ namespace MassTransit.Testing.Scenarios
 
         public IReceivedMessageList Received { get; }
 
-        public virtual async Task DisposeAsync()
+        public virtual async Task DisposeAsync(CancellationToken cancellationToken = default(CancellationToken))
         {
             if (_busHandle != null)
             {

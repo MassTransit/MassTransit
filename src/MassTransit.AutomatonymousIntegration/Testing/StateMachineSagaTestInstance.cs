@@ -13,6 +13,7 @@
 namespace Automatonymous.Testing
 {
     using System.Collections.Generic;
+    using System.Threading;
     using System.Threading.Tasks;
     using MassTransit.Saga;
     using MassTransit.Testing;
@@ -40,14 +41,14 @@ namespace Automatonymous.Testing
 
         SagaTestSubject<TSaga> SagaTest<TSaga>.Saga => _subject;
 
-        public override async Task DisposeAsync()
+        public override async Task DisposeAsync(CancellationToken cancellationToken = new CancellationToken())
         {
             if (_disposed)
                 return;
 
-            await _subject.DisposeAsync().ConfigureAwait(false);
+            await _subject.DisposeAsync(cancellationToken).ConfigureAwait(false);
 
-            await base.DisposeAsync().ConfigureAwait(false);
+            await base.DisposeAsync(cancellationToken).ConfigureAwait(false);
 
             _disposed = true;
         }

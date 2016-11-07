@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -44,8 +44,8 @@ namespace MassTransit.Tests
         protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             _observer = new PingObserver();
-            configurator.Observer(_observer, x => 
-                x.UseLog(Console.Out, async (context, logContext) => string.Format("Observer: {0}", TypeMetadataCache<PingObserver>.ShortName)));
+            configurator.Observer(_observer, x =>
+                x.UseLog(Console.Out, async logContext => string.Format("Observer: {0}", TypeMetadataCache<PingObserver>.ShortName)));
         }
 
 

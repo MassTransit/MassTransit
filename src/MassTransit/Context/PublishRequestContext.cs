@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -21,15 +21,14 @@ namespace MassTransit.Context
     using Util;
 
 
-    public class PublishRequestContext<TRequest> :
-        RequestContext<TRequest>
+    public class PublishRequestContext<TRequest> : IRequestConfigurator<TRequest>
         where TRequest : class
     {
         readonly IDictionary<Type, RequestHandlerHandle> _connections;
         readonly SendContext<TRequest> _context;
         readonly Task<TRequest> _requestTask;
 
-        public PublishRequestContext(SendContext<TRequest> context, Action<RequestContext<TRequest>> callback,
+        public PublishRequestContext(SendContext<TRequest> context, Action<IRequestConfigurator<TRequest>> callback,
             IDictionary<Type, RequestHandlerHandle> connections, Task<TRequest> requestTask)
         {
             if (context == null)
@@ -44,7 +43,7 @@ namespace MassTransit.Context
             callback(this);
         }
 
-        Task RequestContext.Task => _requestTask;
+        Task IRequestConfigurator.Task => _requestTask;
 
         Uri SendContext.SourceAddress
         {
@@ -156,26 +155,26 @@ namespace MassTransit.Context
             return _context.GetOrAddPayload(payloadFactory);
         }
 
-        TimeSpan RequestContext.Timeout { get; set; }
+        public TimeSpan Timeout { get; set; }
 
         public Task<TRequest> Task => _requestTask;
 
-        void RequestContext.UseCurrentSynchronizationContext()
+        void IRequestConfigurator.UseCurrentSynchronizationContext()
         {
         }
 
-        void RequestContext.SetTaskScheduler(TaskScheduler taskScheduler)
+        void IRequestConfigurator.SetTaskScheduler(TaskScheduler taskScheduler)
         {
         }
 
-        void RequestContext.Watch<T>(MessageHandler<T> handler)
+        void IRequestConfigurator.Watch<T>(MessageHandler<T> handler)
         {
             RequestHandlerHandle connection;
             if (!_connections.TryGetValue(typeof(T), out connection))
                 throw new RequestException($"The previously registered handler of type {TypeMetadataCache<T>.ShortName} was not registered");
         }
 
-        Task<T> RequestContext.Handle<T>(MessageHandler<T> handler)
+        Task<T> IRequestConfigurator.Handle<T>(MessageHandler<T> handler)
         {
             RequestHandlerHandle connection;
             if (!_connections.TryGetValue(typeof(T), out connection))
@@ -184,7 +183,7 @@ namespace MassTransit.Context
             return connection.GetTask<T>();
         }
 
-        Task<T> RequestContext.Handle<T>()
+        Task<T> IRequestConfigurator.Handle<T>()
         {
             RequestHandlerHandle connection;
             if (!_connections.TryGetValue(typeof(T), out connection))
