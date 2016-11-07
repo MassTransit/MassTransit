@@ -236,7 +236,7 @@
     <Compile Include="Context\InMemoryOutboxConsumeContext.cs" />
     <Compile Include="Context\OutboxContext.cs" />
     <Compile Include="Context\PropertySetCorrelationId.cs" />
-    <Compile Include="Context\PublishRequestContext.cs" />
+    <Compile Include="Context\PublishRequestConfigurator.cs" />
     <Compile Include="Context\ReceiveContextProxy.cs" />
     <Compile Include="Context\RequestHandlerHandle.cs" />
     <Compile Include="Context\RescueExceptionConsumeContext.cs" />
@@ -382,7 +382,7 @@
     <Compile Include="Context\RetryConsumeContext.cs" />
     <Compile Include="Context\NewSagaConsumeContext.cs" />
     <Compile Include="Context\SendRequest.cs" />
-    <Compile Include="Context\SendRequestContext.cs" />
+    <Compile Include="Context\SendRequestConfigurator.cs" />
     <Compile Include="Context\SystemTransactionContext.cs" />
     <Compile Include="Courier\Activity.cs" />
     <Compile Include="Courier\ActivityFactory.cs" />

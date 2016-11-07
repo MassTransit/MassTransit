@@ -14,16 +14,17 @@ namespace MassTransit.Context
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Net.Mime;
     using System.Threading;
     using System.Threading.Tasks;
+    using ConsumeConfigurators;
     using GreenPipes;
     using Pipeline;
     using Util;
 
 
-    public class SendRequestContext<TRequest> :
-        IRequestConfigurator<TRequest>
+    public class SendRequestConfigurator<TRequest> : IRequestConfigurator<TRequest>
         where TRequest : class
     {
         readonly Dictionary<Type, RequestHandlerHandle> _connections;
@@ -34,7 +35,7 @@ namespace MassTransit.Context
         TaskScheduler _taskScheduler;
         CancellationTokenSource _timeoutToken;
 
-        public SendRequestContext(IRequestPipeConnector connector, SendContext<TRequest> context, TaskScheduler taskScheduler,
+        public SendRequestConfigurator(IRequestPipeConnector connector, SendContext<TRequest> context, TaskScheduler taskScheduler,
             Action<IRequestConfigurator<TRequest>> callback)
         {
             if (connector == null)
@@ -66,7 +67,7 @@ namespace MassTransit.Context
 
         public IDictionary<Type, RequestHandlerHandle> Connections => _connections;
 
-        public Task Task => _requestTask.Task;
+        Task<TRequest> IRequestConfigurator<TRequest>.Task => _requestTask.Task;
 
         Uri SendContext.SourceAddress
         {
@@ -180,29 +181,31 @@ namespace MassTransit.Context
 
         public TimeSpan Timeout { get; set; }
 
-        Task<TRequest> IRequestConfigurator<TRequest>.Task => _requestTask.Task;
-
-        void IRequestConfigurator.UseCurrentSynchronizationContext()
+        void IRequestConfigurator<TRequest>.UseCurrentSynchronizationContext()
         {
             _taskScheduler = TaskScheduler.FromCurrentSynchronizationContext();
         }
 
-        void IRequestConfigurator.SetTaskScheduler(TaskScheduler taskScheduler)
+        void IRequestConfigurator<TRequest>.SetTaskScheduler(TaskScheduler taskScheduler)
         {
             _taskScheduler = taskScheduler;
         }
 
-        void IRequestConfigurator.Watch<T>(MessageHandler<T> handler)
+        void IRequestConfigurator<TRequest>.Watch<T>(MessageHandler<T> handler, Action<IHandlerConfigurator<T>> configure)
         {
             if (_connections.ContainsKey(typeof(T)))
                 throw new RequestException($"Only one handler of type {TypeMetadataCache<T>.ShortName} can be registered");
 
-            var connectHandle = _connector.ConnectRequestHandler(_requestId, handler);
+            var configurator = new RequestHandlerConfigurator<T>(handler);
+
+            configure?.Invoke(configurator);
+
+            var connectHandle = configurator.Connect(_connector, _requestId);
 
             _connections.Add(typeof(T), new RequestHandlerHandle<T>(connectHandle));
         }
 
-        Task<T> IRequestConfigurator.Handle<T>(MessageHandler<T> handler)
+        Task<T> IRequestConfigurator<TRequest>.Handle<T>(MessageHandler<T> handler, Action<IHandlerConfigurator<T>> configure)
         {
             if (_connections.ContainsKey(typeof(T)))
                 throw new RequestException($"Only one handler of type {TypeMetadataCache<T>.ShortName} can be registered");
@@ -229,14 +232,18 @@ namespace MassTransit.Context
                 }
             };
 
-            var connectHandle = _connector.ConnectRequestHandler(_requestId, messageHandler);
+            var configurator = new RequestHandlerConfigurator<T>(messageHandler);
+
+            configure?.Invoke(configurator);
+
+            var connectHandle = configurator.Connect(_connector, _requestId);
 
             _connections.Add(typeof(T), new RequestHandlerHandle<T>(connectHandle, source));
 
             return source.Task;
         }
 
-        Task<T> IRequestConfigurator.Handle<T>()
+        Task<T> IRequestConfigurator<TRequest>.Handle<T>(Action<IHandlerConfigurator<T>> configure)
         {
             if (_connections.ContainsKey(typeof(T)))
                 throw new RequestException($"Only one handler of type {TypeMetadataCache<T>.ShortName} can be registered");
@@ -261,7 +268,11 @@ namespace MassTransit.Context
                 return TaskUtil.Completed;
             };
 
-            var connectHandle = _connector.ConnectRequestHandler(_requestId, messageHandler);
+            var configurator = new RequestHandlerConfigurator<T>(messageHandler);
+
+            configure?.Invoke(configurator);
+
+            var connectHandle = configurator.Connect(_connector, _requestId);
 
             _connections.Add(typeof(T), new RequestHandlerHandle<T>(connectHandle, source));
 
@@ -345,6 +356,37 @@ namespace MassTransit.Context
             }
 
             _requestTask.TrySetException(ex);
+        }
+
+
+        /// <summary>
+        /// Connects a handler to the inbound pipe of the receive endpoint
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        class RequestHandlerConfigurator<T> :
+            IHandlerConfigurator<T>
+            where T : class
+        {
+            readonly MessageHandler<T> _handler;
+            readonly IList<IPipeSpecification<ConsumeContext<T>>> _specifications;
+
+            public RequestHandlerConfigurator(MessageHandler<T> handler)
+            {
+                _handler = handler;
+                _specifications = new List<IPipeSpecification<ConsumeContext<T>>>();
+            }
+
+            public void AddPipeSpecification(IPipeSpecification<ConsumeContext<T>> specification)
+            {
+                _specifications.Add(specification);
+            }
+
+            public ConnectHandle Connect(IRequestPipeConnector connector, Guid requestId)
+            {
+                var connectHandle = connector.ConnectRequestHandler(requestId, _handler, _specifications.ToArray());
+
+                return connectHandle;
+            }
         }
 
 

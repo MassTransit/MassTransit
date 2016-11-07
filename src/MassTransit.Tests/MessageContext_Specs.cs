@@ -150,17 +150,28 @@ namespace MassTransit.Tests
             context.ConversationId.ShouldBe(_conversationId);
         }
 
+        [Test]
+        public async Task Should_call_the_middleware()
+        {
+            ConsumeContext<PongMessage> context = await _responseMiddleware.Task;
+
+            context.ConversationId.ShouldBe(_conversationId);
+        }
+
         Task<ConsumeContext<PingMessage>> _ping;
         Task<ConsumeContext<PongMessage>> _responseHandler;
         Task<Request<PingMessage>> _request;
         Task<PongMessage> _response;
         Guid? _conversationId;
+        TaskCompletionSource<ConsumeContext<PongMessage>> _responseMiddleware;
 
         [OneTimeSetUp]
         public async Task Setup()
         {
             _responseHandler = SubscribeHandler<PongMessage>();
             _conversationId = NewId.NextGuid();
+
+            _responseMiddleware = GetTask<ConsumeContext<PongMessage>>();
 
             _request = Bus.Request(InputQueueAddress, new PingMessage(), x =>
             {
@@ -169,7 +180,7 @@ namespace MassTransit.Tests
                 _response = x.Handle<PongMessage>(async context =>
                 {
                     Console.WriteLine("Response received");
-                });
+                }, cfg => cfg.UseExecute(context => _responseMiddleware.TrySetResult(context)));
                 x.Timeout = TestTimeout;
             });
 

@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,6 +14,7 @@ namespace MassTransit
 {
     using System;
     using System.Threading.Tasks;
+    using ConsumeConfigurators;
 
 
     /// <summary>
@@ -21,23 +22,8 @@ namespace MassTransit
     /// </summary>
     /// <typeparam name="TRequest"></typeparam>
     public interface IRequestConfigurator<TRequest> :
-        SendContext<TRequest>,
-        IRequestConfigurator
+        SendContext<TRequest>
         where TRequest : class
-    {
-        /// <summary>
-        /// The request Task
-        /// </summary>
-        new Task<TRequest> Task { get; }
-    }
-
-
-    /// <summary>
-    /// Allows the request to be configured, specifying handlers, synchronization context,
-    /// and timeout values
-    /// </summary>
-    public interface IRequestConfigurator :
-        SendContext
     {
         /// <summary>
         /// The timeout before the pending tasks are cancelled
@@ -47,7 +33,7 @@ namespace MassTransit
         /// <summary>
         /// The request Task
         /// </summary>
-        Task Task { get; }
+        Task<TRequest> Task { get; }
 
         /// <summary>
         /// Specify that the current synchronization context should be used for the request
@@ -67,7 +53,8 @@ namespace MassTransit
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="handler">The message handler invoked</param>
-        void Watch<T>(MessageHandler<T> handler)
+        /// <param name="configure"></param>
+        void Watch<T>(MessageHandler<T> handler, Action<IHandlerConfigurator<T>> configure = null)
             where T : class;
 
         /// <summary>
@@ -76,8 +63,9 @@ namespace MassTransit
         /// </summary>
         /// <typeparam name="T">The response type</typeparam>
         /// <param name="handler">The reponse handler</param>
+        /// <param name="configure"></param>
         /// <returns>The response task</returns>
-        Task<T> Handle<T>(MessageHandler<T> handler)
+        Task<T> Handle<T>(MessageHandler<T> handler, Action<IHandlerConfigurator<T>> configure = null)
             where T : class;
 
         /// <summary>
@@ -85,8 +73,9 @@ namespace MassTransit
         /// a response completes the request and either completes or fails the awaiting task
         /// </summary>
         /// <typeparam name="T">The response type</typeparam>
+        /// <param name="configure"></param>
         /// <returns>The response task</returns>
-        Task<T> Handle<T>()
+        Task<T> Handle<T>(Action<IHandlerConfigurator<T>> configure = null)
             where T : class;
     }
 }

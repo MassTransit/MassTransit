@@ -17,18 +17,20 @@ namespace MassTransit.Context
     using System.Net.Mime;
     using System.Threading;
     using System.Threading.Tasks;
+    using ConsumeConfigurators;
     using GreenPipes;
     using Util;
 
 
-    public class PublishRequestContext<TRequest> : IRequestConfigurator<TRequest>
+    public class PublishRequestConfigurator<TRequest> :
+        IRequestConfigurator<TRequest>
         where TRequest : class
     {
         readonly IDictionary<Type, RequestHandlerHandle> _connections;
         readonly SendContext<TRequest> _context;
         readonly Task<TRequest> _requestTask;
 
-        public PublishRequestContext(SendContext<TRequest> context, Action<IRequestConfigurator<TRequest>> callback,
+        public PublishRequestConfigurator(SendContext<TRequest> context, Action<IRequestConfigurator<TRequest>> callback,
             IDictionary<Type, RequestHandlerHandle> connections, Task<TRequest> requestTask)
         {
             if (context == null)
@@ -43,7 +45,7 @@ namespace MassTransit.Context
             callback(this);
         }
 
-        Task IRequestConfigurator.Task => _requestTask;
+        Task<TRequest> IRequestConfigurator<TRequest>.Task => _requestTask;
 
         Uri SendContext.SourceAddress
         {
@@ -87,19 +89,19 @@ namespace MassTransit.Context
             set { _context.CorrelationId = value; }
         }
 
-        public Guid? ConversationId
+        Guid? SendContext.ConversationId
         {
             get { return _context.ConversationId; }
             set { _context.ConversationId = value; }
         }
 
-        public Guid? InitiatorId
+        Guid? SendContext.InitiatorId
         {
             get { return _context.InitiatorId; }
             set { _context.InitiatorId = value; }
         }
 
-        public Guid? ScheduledMessageId
+        Guid? SendContext.ScheduledMessageId
         {
             get { return _context.ScheduledMessageId; }
             set { _context.ScheduledMessageId = value; }
@@ -157,24 +159,22 @@ namespace MassTransit.Context
 
         public TimeSpan Timeout { get; set; }
 
-        public Task<TRequest> Task => _requestTask;
-
-        void IRequestConfigurator.UseCurrentSynchronizationContext()
+        void IRequestConfigurator<TRequest>.UseCurrentSynchronizationContext()
         {
         }
 
-        void IRequestConfigurator.SetTaskScheduler(TaskScheduler taskScheduler)
+        void IRequestConfigurator<TRequest>.SetTaskScheduler(TaskScheduler taskScheduler)
         {
         }
 
-        void IRequestConfigurator.Watch<T>(MessageHandler<T> handler)
+        void IRequestConfigurator<TRequest>.Watch<T>(MessageHandler<T> messageHandler, Action<IHandlerConfigurator<T>> configure)
         {
             RequestHandlerHandle connection;
             if (!_connections.TryGetValue(typeof(T), out connection))
                 throw new RequestException($"The previously registered handler of type {TypeMetadataCache<T>.ShortName} was not registered");
         }
 
-        Task<T> IRequestConfigurator.Handle<T>(MessageHandler<T> handler)
+        Task<T> IRequestConfigurator<TRequest>.Handle<T>(MessageHandler<T> handler, Action<IHandlerConfigurator<T>> configure)
         {
             RequestHandlerHandle connection;
             if (!_connections.TryGetValue(typeof(T), out connection))
@@ -183,7 +183,7 @@ namespace MassTransit.Context
             return connection.GetTask<T>();
         }
 
-        Task<T> IRequestConfigurator.Handle<T>()
+        Task<T> IRequestConfigurator<TRequest>.Handle<T>(Action<IHandlerConfigurator<T>> configure)
         {
             RequestHandlerHandle connection;
             if (!_connections.TryGetValue(typeof(T), out connection))

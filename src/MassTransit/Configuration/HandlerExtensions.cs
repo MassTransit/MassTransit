@@ -61,10 +61,10 @@ namespace MassTransit
         /// <param name="requestId"></param>
         /// <param name="handler"></param>
         /// <returns></returns>
-        public static ConnectHandle ConnectRequestHandler<T>(this IRequestPipeConnector connector, Guid requestId, MessageHandler<T> handler)
+        public static ConnectHandle ConnectRequestHandler<T>(this IRequestPipeConnector connector, Guid requestId, MessageHandler<T> handler, params IPipeSpecification<ConsumeContext<T>>[] specifications)
             where T : class
         {
-            return HandlerConnectorCache<T>.Connector.ConnectRequestHandler(connector, requestId, handler);
+            return HandlerConnectorCache<T>.Connector.ConnectRequestHandler(connector, requestId, handler, specifications);
         }
     }
 }
