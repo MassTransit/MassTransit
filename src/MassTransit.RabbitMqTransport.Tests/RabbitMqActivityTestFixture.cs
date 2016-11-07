@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -38,7 +38,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
             var factoryConfigurator = new BusFactoryConfigurator(host, configurator);
 
-            foreach (ActivityTestContext activityTestContext in ActivityTestContexts.Values)
+            foreach (var activityTestContext in ActivityTestContexts.Values)
                 activityTestContext.Configure(factoryConfigurator);
         }
 
@@ -67,21 +67,23 @@ namespace MassTransit.RabbitMqTransport.Tests
         }
 
 
-        protected void AddActivityContext<T, TArguments, TLog>(Func<T> activityFactory)
+        protected void AddActivityContext<T, TArguments, TLog>(Func<T> activityFactory,
+            Action<IExecuteActivityConfigurator<T, TArguments>> configureExecute = null,
+            Action<ICompensateActivityConfigurator<T, TLog>> configureCompensate = null)
             where TArguments : class
             where TLog : class
             where T : class, Activity<TArguments, TLog>
         {
-            var context = new ActivityTestContext<T, TArguments, TLog>(HostAddress, activityFactory);
+            var context = new ActivityTestContext<T, TArguments, TLog>(HostAddress, activityFactory, configureExecute, configureCompensate);
 
             ActivityTestContexts.Add(typeof(T), context);
         }
 
-        protected void AddActivityContext<T, TArguments>(Func<T> activityFactory)
+        protected void AddActivityContext<T, TArguments>(Func<T> activityFactory, Action<IExecuteActivityConfigurator<T, TArguments>> configure = null)
             where TArguments : class
             where T : class, ExecuteActivity<TArguments>
         {
-            var context = new ActivityTestContext<T, TArguments>(HostAddress, activityFactory);
+            var context = new ActivityTestContext<T, TArguments>(HostAddress, activityFactory, configure);
 
             ActivityTestContexts.Add(typeof(T), context);
         }

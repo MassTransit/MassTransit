@@ -120,8 +120,10 @@
     <Compile Include="Configuration\BusConfigurators\IPublishPipeFactory.cs" />
     <Compile Include="Configuration\BusConfigurators\ISendPipeFactory.cs" />
     <Compile Include="Configuration\Builders\ConsumerPipeBuilder.cs" />
+    <Compile Include="Configuration\CompensateActivityPartitionerExtensions.cs" />
     <Compile Include="Configuration\ConsumeConfigurators\IRoutingSlipConfigurator.cs" />
     <Compile Include="Configuration\ConsumeConnectors\MessagePipeBuilder.cs" />
+    <Compile Include="Configuration\ExecuteActivityPartitionerExtensions.cs" />
     <Compile Include="Configuration\EndpointConfigurators\EncryptedMessageSerializerReceiveEndpointSpecification.cs" />
     <Compile Include="Configuration\EndpointConfigurators\SetMessageSerializerReceiveEndpointSpecification.cs" />
     <Compile Include="Configuration\EndpointConfigurators\SupportMessageDeserializerReceiveEndpointSpecification.cs" />

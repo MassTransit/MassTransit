@@ -57,21 +57,22 @@ namespace MassTransit.TestFramework
         }
 
 
-        protected void AddActivityContext<T, TArguments, TLog>(Func<T> activityFactory)
+        protected void AddActivityContext<T, TArguments, TLog>(Func<T> activityFactory, Action<IExecuteActivityConfigurator<T, TArguments>> configureExecute = null,
+            Action<ICompensateActivityConfigurator<T, TLog>> configureCompensate = null)
             where TArguments : class
             where TLog : class
             where T : class, Activity<TArguments, TLog>
         {
-            var context = new ActivityTestContext<T, TArguments, TLog>(BaseAddress, activityFactory);
+            var context = new ActivityTestContext<T, TArguments, TLog>(BaseAddress, activityFactory, configureExecute, configureCompensate);
 
             ActivityTestContexts.Add(typeof(T), context);
         }
 
-        protected void AddActivityContext<T, TArguments>(Func<T> activityFactory)
+        protected void AddActivityContext<T, TArguments>(Func<T> activityFactory, Action<IExecuteActivityConfigurator<T, TArguments>> configureExecute = null)
             where TArguments : class
             where T : class, ExecuteActivity<TArguments>
         {
-            var context = new ActivityTestContext<T, TArguments>(BaseAddress, activityFactory);
+            var context = new ActivityTestContext<T, TArguments>(BaseAddress, activityFactory, configureExecute);
 
             ActivityTestContexts.Add(typeof(T), context);
         }
