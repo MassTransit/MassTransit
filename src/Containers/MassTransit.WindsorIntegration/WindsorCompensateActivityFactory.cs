@@ -19,7 +19,6 @@ namespace MassTransit.WindsorIntegration
     using Courier.Hosts;
     using GreenPipes;
     using Logging;
-    using Pipeline;
     using Util;
 
 
@@ -29,7 +28,7 @@ namespace MassTransit.WindsorIntegration
     /// <typeparam name="TActivity"></typeparam>
     /// <typeparam name="TLog"></typeparam>
     public class WindsorCompensateActivityFactory<TActivity, TLog> :
-        CompensateActivityFactory<TLog>
+        CompensateActivityFactory<TActivity, TLog>
         where TActivity : class, CompensateActivity<TLog>
         where TLog : class
     {
@@ -41,7 +40,7 @@ namespace MassTransit.WindsorIntegration
             _kernel = kernel;
         }
 
-        public async Task Compensate(CompensateContext<TLog> context, IPipe<CompensateActivityContext<TLog>> next)
+        public async Task Compensate(CompensateContext<TLog> context, IPipe<CompensateActivityContext<TActivity, TLog>> next)
         {
             using (_kernel.RequireScope())
             {

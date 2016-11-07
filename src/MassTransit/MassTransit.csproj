@@ -100,7 +100,9 @@
     <Compile Include="BusControlExtensions.cs" />
     <Compile Include="BusReady.cs" />
     <Compile Include="CancelScheduledSendExtensions.cs" />
+    <Compile Include="Configuration\Builders\CompensateActivityPipeBuilder.cs" />
     <Compile Include="Configuration\Builders\ConsumePipeBuilder.cs" />
+    <Compile Include="Configuration\Builders\ExecuteActivityPipeBuilder.cs" />
     <Compile Include="Configuration\Builders\IConsumePipeBuilder.cs" />
     <Compile Include="Configuration\Builders\IInMemoryReceiveEndpointSpecification.cs" />
     <Compile Include="Configuration\Builders\IPublishPipeBuilder.cs" />
@@ -117,13 +119,22 @@
     <Compile Include="Configuration\BusConfigurators\IConsumePipeFactory.cs" />
     <Compile Include="Configuration\BusConfigurators\IPublishPipeFactory.cs" />
     <Compile Include="Configuration\BusConfigurators\ISendPipeFactory.cs" />
-    <Compile Include="Configuration\ConsumeConnectors\ConsumerPipeBuilder.cs" />
+    <Compile Include="Configuration\Builders\ConsumerPipeBuilder.cs" />
+    <Compile Include="Configuration\ConsumeConfigurators\IRoutingSlipConfigurator.cs" />
     <Compile Include="Configuration\ConsumeConnectors\MessagePipeBuilder.cs" />
     <Compile Include="Configuration\EndpointConfigurators\EncryptedMessageSerializerReceiveEndpointSpecification.cs" />
     <Compile Include="Configuration\EndpointConfigurators\SetMessageSerializerReceiveEndpointSpecification.cs" />
     <Compile Include="Configuration\EndpointConfigurators\SupportMessageDeserializerReceiveEndpointSpecification.cs" />
+    <Compile Include="Configuration\CourierHostConfiguratorExtensions.cs" />
+    <Compile Include="Configuration\ICompensateActivityConfigurator.cs" />
+    <Compile Include="Configuration\ICompensateActivityLogConfigurator.cs" />
+    <Compile Include="Configuration\IExecuteActivityArgumentsConfigurator.cs" />
+    <Compile Include="Configuration\IExecuteActivityConfigurator.cs" />
     <Compile Include="Configuration\IRescueConfigurator.cs" />
+    <Compile Include="Configuration\PipeConfigurators\CompensateActivityLogConfigurator.cs" />
     <Compile Include="Configuration\PipeConfigurators\ConsumeContextRescuePipeSpecification.cs" />
+    <Compile Include="Configuration\PipeConfigurators\ExecuteActivityArgumentsConfigurator.cs" />
+    <Compile Include="Configuration\PipeConfigurators\RoutingSlipConfigurator.cs" />
     <Compile Include="Context\ConsumeContextScopePublishContextPipe.cs" />
     <Compile Include="Context\ConsumeContextScopePublishEndpoint.cs" />
     <Compile Include="Events\BusReadyEvent.cs" />
@@ -408,7 +419,6 @@
     <Compile Include="Courier\ExecuteContext.cs" />
     <Compile Include="Courier\ExecutionResult.cs" />
     <Compile Include="Courier\Extensions\LinqExtensions.cs" />
-    <Compile Include="Courier\HostSubscriptionExtensions.cs" />
     <Compile Include="Courier\Hosts\CompensateActivityHost.cs" />
     <Compile Include="Courier\Hosts\HostCompensateActivityContext.cs" />
     <Compile Include="Courier\InternalMessages\RoutingSlipRevisedMessage.cs" />
@@ -418,7 +428,7 @@
     <Compile Include="Courier\Results\CompensatedCompensationResult.cs" />
     <Compile Include="Courier\Results\CompensatedWithVariablesCompensationResult.cs" />
     <Compile Include="Courier\Results\CompletedExecutionResult.cs" />
-    <Compile Include="Courier\Factories\DefaultConstructorActivityFactory.cs" />
+    <Compile Include="Courier\Factories\DefaultConstructorExecuteActivityFactory.cs" />
     <Compile Include="Courier\Factories\DefaultConstructorCompensateActivityFactory.cs" />
     <Compile Include="Courier\Pipeline\ExecuteActivityFilter.cs" />
     <Compile Include="Courier\Hosts\ExecuteActivityHost.cs" />
@@ -533,6 +543,7 @@
     <Compile Include="Pipeline\ConsumerFactories\DelegateConsumerFactory.cs" />
     <Compile Include="Pipeline\ConsumerFactories\InstanceConsumerFactory.cs" />
     <Compile Include="Pipeline\ConsumerFactories\ObjectConsumerFactory.cs" />
+    <Compile Include="Courier\Pipeline\CompensateActivitySplitFilter.cs" />
     <Compile Include="Pipeline\Filters\ConcurrencyLimit\ConcurrencyLimitFilterManagementConsumer.cs" />
     <Compile Include="Pipeline\Filters\ConsumeContextRetryContext.cs" />
     <Compile Include="Pipeline\Filters\ConsumeContextRetryPolicy.cs" />
@@ -540,6 +551,7 @@
     <Compile Include="Pipeline\Filters\ConsumerMessageFilter.cs" />
     <Compile Include="Pipeline\Filters\ConsumerSplitFilter.cs" />
     <Compile Include="Pipeline\Filters\DeadLetterFilter.cs" />
+    <Compile Include="Courier\Pipeline\ExecuteActivitySplitFilter.cs" />
     <Compile Include="Pipeline\Filters\LatestFilter.cs" />
     <Compile Include="Pipeline\Filters\Latest\ILatestFilter.cs" />
     <Compile Include="Pipeline\Filters\MessagePublishFilter.cs" />
@@ -583,8 +595,10 @@
     <Compile Include="Pipeline\ISendPipeConnector.cs" />
     <Compile Include="Pipeline\ConsumeMessageObservable.cs" />
     <Compile Include="Pipeline\ConsumeObservable.cs" />
+    <Compile Include="Courier\Pipeline\CompensateActivityMergePipe.cs" />
     <Compile Include="Pipeline\Pipes\ConsumeContextConverterFactory.cs" />
     <Compile Include="Pipeline\Pipes\ConsumeObserverAdapter.cs" />
+    <Compile Include="Courier\Pipeline\ExecuteActivityMergePipe.cs" />
     <Compile Include="Pipeline\Pipes\IManagementPipe.cs" />
     <Compile Include="Pipeline\Pipes\ManagementPipe.cs" />
     <Compile Include="Pipeline\Pipes\PublishPipe.cs" />

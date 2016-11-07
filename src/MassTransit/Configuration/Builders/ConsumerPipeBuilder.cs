@@ -10,7 +10,7 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.ConsumeConnectors
+namespace MassTransit.Builders
 {
     using System;
     using System.Collections.Generic;
@@ -26,11 +26,11 @@ namespace MassTransit.ConsumeConnectors
             where TMessage : class
             where T : class
         {
-            var builder = new ConsumerPipeBuilder<TConsumer, TMessage, T>();
+            var builder = new ConsumerPipeBuilder<T, TMessage>();
             for (var i = 0; i < pipeSpecifications.Length; i++)
                 pipeSpecifications[i].Apply(builder);
 
-            var builders = builder as ConsumerPipeBuilder<TConsumer, TMessage, TConsumer>;
+            var builders = builder as ConsumerPipeBuilder<TConsumer, TMessage>;
             if (builders == null)
                 throw new InvalidOperationException("Should not be null, ever");
 
@@ -45,10 +45,9 @@ namespace MassTransit.ConsumeConnectors
     }
 
 
-    public class ConsumerPipeBuilder<TConsumer, TMessage, T> :
+    public class ConsumerPipeBuilder<T, TMessage> :
         IPipeBuilder<ConsumerConsumeContext<T>>,
         IPipeBuilder<ConsumerConsumeContext<T, TMessage>>
-        where TConsumer : class
         where TMessage : class
         where T : class
     {
@@ -69,26 +68,6 @@ namespace MassTransit.ConsumeConnectors
         public void AddFilter(IFilter<ConsumerConsumeContext<T>> filter)
         {
             _filters.Add(new ConsumerSplitFilter<T, TMessage>(filter));
-        }
-
-        public static IPipe<ConsumerConsumeContext<TConsumer, TMessage>> BuildConsumerPipe(IFilter<ConsumerConsumeContext<TConsumer, TMessage>> consumeFilter,
-            IPipeSpecification<ConsumerConsumeContext<T>>[] pipeSpecifications)
-        {
-            var builder = new ConsumerPipeBuilder<TConsumer, TMessage, T>();
-            for (var i = 0; i < pipeSpecifications.Length; i++)
-                pipeSpecifications[i].Apply(builder);
-
-            var builders = builder as ConsumerPipeBuilder<TConsumer, TMessage, TConsumer>;
-            if (builders == null)
-                throw new InvalidOperationException("Should not be null, ever");
-
-            return Pipe.New<ConsumerConsumeContext<TConsumer, TMessage>>(x =>
-            {
-                foreach (IFilter<ConsumerConsumeContext<TConsumer, TMessage>> filter in builders.Filters)
-                    x.UseFilter<ConsumerConsumeContext<TConsumer, TMessage>>(filter);
-
-                x.UseFilter<ConsumerConsumeContext<TConsumer, TMessage>>(consumeFilter);
-            });
         }
     }
 }

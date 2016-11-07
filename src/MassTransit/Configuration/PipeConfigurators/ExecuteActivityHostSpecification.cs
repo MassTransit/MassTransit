@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -15,43 +15,59 @@ namespace MassTransit.PipeConfigurators
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using Configurators;
+    using Builders;
+    using ConsumeConfigurators;
     using Courier;
     using Courier.Contracts;
     using Courier.Hosts;
+    using Courier.Pipeline;
     using GreenPipes;
-    using Pipeline;
 
 
     public class ExecuteActivityHostSpecification<TActivity, TArguments> :
-        IPipeConfigurator<ConsumeContext<RoutingSlip>>,
+        IExecuteActivityConfigurator<TActivity, TArguments>,
         IReceiveEndpointSpecification
-        where TActivity : ExecuteActivity<TArguments>
+        where TActivity : class, ExecuteActivity<TArguments>
         where TArguments : class
     {
-        readonly ExecuteActivityFactory<TArguments> _activityFactory;
-        readonly Func<IFilter<ConsumeContext<RoutingSlip>>> _filterFactory;
-        readonly List<IPipeSpecification<ConsumeContext<RoutingSlip>>> _pipeSpecifications;
+        readonly ExecuteActivityFactory<TActivity, TArguments> _activityFactory;
+        readonly Func<IPipe<ExecuteActivityContext<TActivity, TArguments>>, IFilter<ConsumeContext<RoutingSlip>>> _filterFactory;
+        readonly List<IPipeSpecification<ExecuteActivityContext<TActivity, TArguments>>> _pipeSpecifications;
+        readonly RoutingSlipConfigurator _routingSlipConfigurator;
 
-        public ExecuteActivityHostSpecification(ExecuteActivityFactory<TArguments> activityFactory)
+        public ExecuteActivityHostSpecification(ExecuteActivityFactory<TActivity, TArguments> activityFactory)
         {
-            _pipeSpecifications = new List<IPipeSpecification<ConsumeContext<RoutingSlip>>>();
-
             _activityFactory = activityFactory;
-            _filterFactory = () => new ExecuteActivityHost<TActivity, TArguments>(_activityFactory);
+
+            _pipeSpecifications = new List<IPipeSpecification<ExecuteActivityContext<TActivity, TArguments>>>();
+            _routingSlipConfigurator = new RoutingSlipConfigurator();
+            _filterFactory = executePipe => new ExecuteActivityHost<TActivity, TArguments>(_activityFactory, executePipe);
         }
 
-        public ExecuteActivityHostSpecification(ExecuteActivityFactory<TArguments> activityFactory, Uri compensateAddress)
+        public ExecuteActivityHostSpecification(ExecuteActivityFactory<TActivity, TArguments> activityFactory, Uri compensateAddress)
         {
-            _pipeSpecifications = new List<IPipeSpecification<ConsumeContext<RoutingSlip>>>();
-
             _activityFactory = activityFactory;
-            _filterFactory = () => new ExecuteActivityHost<TActivity, TArguments>(_activityFactory, compensateAddress);
+
+            _pipeSpecifications = new List<IPipeSpecification<ExecuteActivityContext<TActivity, TArguments>>>();
+            _routingSlipConfigurator = new RoutingSlipConfigurator();
+            _filterFactory = executePipe => new ExecuteActivityHost<TActivity, TArguments>(_activityFactory, executePipe, compensateAddress);
         }
 
-        public void AddPipeSpecification(IPipeSpecification<ConsumeContext<RoutingSlip>> specification)
+        public void AddPipeSpecification(IPipeSpecification<ExecuteActivityContext<TActivity, TArguments>> specification)
         {
             _pipeSpecifications.Add(specification);
+        }
+
+        public void Arguments(Action<IExecuteActivityArgumentsConfigurator<TArguments>> configure)
+        {
+            var configurator = new ExecuteActivityArgumentsConfigurator<TActivity, TArguments>(this);
+
+            configure?.Invoke(configurator);
+        }
+
+        public void RoutingSlip(Action<IRoutingSlipConfigurator> configure)
+        {
+            configure?.Invoke(_routingSlipConfigurator);
         }
 
         public IEnumerable<ValidationResult> Validate()
@@ -59,45 +75,21 @@ namespace MassTransit.PipeConfigurators
             if (_filterFactory == null)
                 yield return this.Failure("FilterFactory", "must not be null");
 
-            foreach (ValidationResult result in _pipeSpecifications.SelectMany(x => x.Validate()))
+            foreach (var result in _pipeSpecifications.SelectMany(x => x.Validate()))
+                yield return result;
+
+            foreach (var result in _routingSlipConfigurator.Validate())
                 yield return result;
         }
 
         public void Configure(IReceiveEndpointBuilder builder)
         {
-            var builders = new ConsumerPipeBuilder<RoutingSlip>();
-            for (int i = 0; i < _pipeSpecifications.Count; i++)
-                _pipeSpecifications[i].Apply(builders);
+            IPipe<ExecuteActivityContext<TActivity, TArguments>> executeActivityPipe =
+                _pipeSpecifications.Build(new ExecuteActivityFilter<TActivity, TArguments>());
 
-            IPipe<ConsumeContext<RoutingSlip>> messagePipe = Pipe.New<ConsumeContext<RoutingSlip>>(x =>
-            {
-                foreach (var filter in builders.Filters)
-                    x.UseFilter(filter);
+            _routingSlipConfigurator.UseFilter(_filterFactory(executeActivityPipe));
 
-                x.UseFilter(_filterFactory());
-            });
-
-            builder.ConnectConsumePipe(messagePipe);
-        }
-
-
-        class ConsumerPipeBuilder<T> :
-            IPipeBuilder<ConsumeContext<T>>
-            where T : class
-        {
-            readonly IList<IFilter<ConsumeContext<T>>> _filters;
-
-            public ConsumerPipeBuilder()
-            {
-                _filters = new List<IFilter<ConsumeContext<T>>>();
-            }
-
-            public IEnumerable<IFilter<ConsumeContext<T>>> Filters => _filters;
-
-            void IPipeBuilder<ConsumeContext<T>>.AddFilter(IFilter<ConsumeContext<T>> filter)
-            {
-                _filters.Add(filter);
-            }
+            builder.ConnectConsumePipe(_routingSlipConfigurator.Build());
         }
     }
 }

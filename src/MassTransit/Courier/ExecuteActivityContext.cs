@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -16,7 +16,13 @@ namespace MassTransit.Courier
         ExecuteContext<TArguments>
         where TArguments : class
     {
-        ExecuteActivity<TArguments> Activity { get; } 
+        /// <summary>
+        /// Return the original consumer/message combined context, reapplying the message type
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        ExecuteActivityContext<T, TArguments> PopContext<T>()
+            where T : class, ExecuteActivity<TArguments>;
     }
 
 
@@ -33,6 +39,6 @@ namespace MassTransit.Courier
         /// <summary>
         /// The activity that was created/used for this execution
         /// </summary>
-        new TActivity Activity { get; }
+        TActivity Activity { get; }
     }
 }

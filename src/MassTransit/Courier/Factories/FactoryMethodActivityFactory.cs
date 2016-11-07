@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -15,17 +15,16 @@ namespace MassTransit.Courier.Factories
     using System;
     using System.Threading.Tasks;
     using GreenPipes;
-    using MassTransit.Pipeline;
 
 
     public class FactoryMethodActivityFactory<TActivity, TArguments, TLog> :
-        ActivityFactory<TArguments, TLog>
+        ActivityFactory<TActivity, TArguments, TLog>
         where TActivity : class, ExecuteActivity<TArguments>, CompensateActivity<TLog>
         where TArguments : class
         where TLog : class
     {
-        readonly CompensateActivityFactory<TLog> _compensateFactory;
-        readonly ExecuteActivityFactory<TArguments> _executeFactory;
+        readonly CompensateActivityFactory<TActivity, TLog> _compensateFactory;
+        readonly ExecuteActivityFactory<TActivity, TArguments> _executeFactory;
 
         public FactoryMethodActivityFactory(Func<TArguments, TActivity> executeFactory,
             Func<TLog, TActivity> compensateFactory)
@@ -34,12 +33,12 @@ namespace MassTransit.Courier.Factories
             _compensateFactory = new FactoryMethodCompensateActivityFactory<TActivity, TLog>(compensateFactory);
         }
 
-        public Task Execute(ExecuteContext<TArguments> context, IPipe<ExecuteActivityContext<TArguments>> next)
+        public Task Execute(ExecuteContext<TArguments> context, IPipe<ExecuteActivityContext<TActivity, TArguments>> next)
         {
             return _executeFactory.Execute(context, next);
         }
 
-        public Task Compensate(CompensateContext<TLog> context, IPipe<CompensateActivityContext<TLog>> next)
+        public Task Compensate(CompensateContext<TLog> context, IPipe<CompensateActivityContext<TActivity, TLog>> next)
         {
             return _compensateFactory.Compensate(context, next);
         }

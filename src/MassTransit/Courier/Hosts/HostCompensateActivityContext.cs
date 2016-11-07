@@ -18,6 +18,7 @@ namespace MassTransit.Courier.Hosts
     using System.Threading.Tasks;
     using GreenPipes;
     using MassTransit.Pipeline;
+    using Util;
 
 
     public class HostCompensateActivityContext<TActivity, TLog> :
@@ -35,6 +36,16 @@ namespace MassTransit.Courier.Hosts
         }
 
         CancellationToken PipeContext.CancellationToken => _context.CancellationToken;
+
+        public CompensateActivityContext<T, TLog> PopContext<T>() where T : class, CompensateActivity<TLog>
+        {
+            var context = this as CompensateActivityContext<T, TLog>;
+            if (context == null)
+                throw new ContextException(
+                    $"The CompensateActivityContext<{TypeMetadataCache<TLog>.ShortName}> could not be cast to {TypeMetadataCache<T>.ShortName}");
+
+            return context;
+        }
 
         bool PipeContext.HasPayloadType(Type contextType)
         {
@@ -143,7 +154,6 @@ namespace MassTransit.Courier.Hosts
         }
 
         TLog CompensateContext<TLog>.Log => _context.Log;
-        CompensateActivity<TLog> CompensateActivityContext<TLog>.Activity => _activity;
         TActivity CompensateActivityContext<TActivity, TLog>.Activity => _activity;
 
         ConnectHandle IPublishObserverConnector.ConnectPublishObserver(IPublishObserver observer)

@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -15,35 +15,50 @@ namespace MassTransit.PipeConfigurators
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using Configurators;
+    using Builders;
+    using ConsumeConfigurators;
     using Courier;
     using Courier.Contracts;
     using Courier.Hosts;
+    using Courier.Pipeline;
     using GreenPipes;
-    using Pipeline;
 
 
     public class CompensateActivityHostSpecification<TActivity, TLog> :
-        IPipeConfigurator<ConsumeContext<RoutingSlip>>,
+        ICompensateActivityConfigurator<TActivity, TLog>,
         IReceiveEndpointSpecification
-        where TActivity : CompensateActivity<TLog>
+        where TActivity : class, CompensateActivity<TLog>
         where TLog : class
     {
-        readonly CompensateActivityFactory<TLog> _activityFactory;
-        readonly Func<IFilter<ConsumeContext<RoutingSlip>>> _filterFactory;
-        readonly List<IPipeSpecification<ConsumeContext<RoutingSlip>>> _pipeSpecifications;
+        readonly CompensateActivityFactory<TActivity, TLog> _activityFactory;
+        readonly Func<IPipe<CompensateActivityContext<TActivity, TLog>>, IFilter<ConsumeContext<RoutingSlip>>> _filterFactory;
+        readonly List<IPipeSpecification<CompensateActivityContext<TActivity, TLog>>> _pipeSpecifications;
+        readonly RoutingSlipConfigurator _routingSlipConfigurator;
 
-        public CompensateActivityHostSpecification(CompensateActivityFactory<TLog> activityFactory)
+        public CompensateActivityHostSpecification(CompensateActivityFactory<TActivity, TLog> activityFactory)
         {
-            _pipeSpecifications = new List<IPipeSpecification<ConsumeContext<RoutingSlip>>>();
-
             _activityFactory = activityFactory;
-            _filterFactory = () => new CompensateActivityHost<TActivity, TLog>(_activityFactory);
+
+            _pipeSpecifications = new List<IPipeSpecification<CompensateActivityContext<TActivity, TLog>>>();
+            _routingSlipConfigurator = new RoutingSlipConfigurator();
+            _filterFactory = compensatePipe => new CompensateActivityHost<TActivity, TLog>(_activityFactory, compensatePipe);
         }
 
-        public void AddPipeSpecification(IPipeSpecification<ConsumeContext<RoutingSlip>> specification)
+        public void AddPipeSpecification(IPipeSpecification<CompensateActivityContext<TActivity, TLog>> specification)
         {
             _pipeSpecifications.Add(specification);
+        }
+
+        public void Log(Action<ICompensateActivityLogConfigurator<TLog>> configure)
+        {
+            var configurator = new CompensateActivityLogConfigurator<TActivity, TLog>(this);
+
+            configure?.Invoke(configurator);
+        }
+
+        public void RoutingSlip(Action<IRoutingSlipConfigurator> configure)
+        {
+            configure?.Invoke(_routingSlipConfigurator);
         }
 
         public IEnumerable<ValidationResult> Validate()
@@ -51,45 +66,21 @@ namespace MassTransit.PipeConfigurators
             if (_filterFactory == null)
                 yield return this.Failure("FilterFactory", "must not be null");
 
-            foreach (ValidationResult result in _pipeSpecifications.SelectMany(x => x.Validate()))
+            foreach (var result in _pipeSpecifications.SelectMany(x => x.Validate()))
                 yield return result;
         }
 
         public void Configure(IReceiveEndpointBuilder builder)
         {
-            var builders = new ConsumerPipeBuilder<RoutingSlip>();
-            for (int i = 0; i < _pipeSpecifications.Count; i++)
-                _pipeSpecifications[i].Apply(builders);
+            IPipe<CompensateActivityContext<TActivity, TLog>> compensateActivityPipe =
+                _pipeSpecifications.Build(new CompensateActivityFilter<TActivity, TLog>());
 
             IPipe<ConsumeContext<RoutingSlip>> messagePipe = Pipe.New<ConsumeContext<RoutingSlip>>(x =>
             {
-                foreach (var filter in builders.Filters)
-                    x.UseFilter(filter);
-
-                x.UseFilter(_filterFactory());
+                x.UseFilter(_filterFactory(compensateActivityPipe));
             });
 
             builder.ConnectConsumePipe(messagePipe);
-        }
-
-
-        class ConsumerPipeBuilder<T> :
-            IPipeBuilder<ConsumeContext<T>>
-            where T : class
-        {
-            readonly IList<IFilter<ConsumeContext<T>>> _filters;
-
-            public ConsumerPipeBuilder()
-            {
-                _filters = new List<IFilter<ConsumeContext<T>>>();
-            }
-
-            public IEnumerable<IFilter<ConsumeContext<T>>> Filters => _filters;
-
-            void IPipeBuilder<ConsumeContext<T>>.AddFilter(IFilter<ConsumeContext<T>> filter)
-            {
-                _filters.Add(filter);
-            }
         }
     }
 }

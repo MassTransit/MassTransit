@@ -10,19 +10,19 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Courier.Factories
+namespace MassTransit.ConsumeConfigurators
 {
-    public static class DefaultConstructorCompensateActivityFactory<TActivity, TLog>
-        where TActivity : class, CompensateActivity<TLog>, new()
-        where TLog : class
+    using Courier.Contracts;
+    using GreenPipes;
+
+
+    /// <summary>
+    /// Configure a message handler, including specifying filters that are executed around
+    /// the handler itself
+    /// </summary>
+    public interface IRoutingSlipConfigurator :
+        IConsumeConfigurator,
+        IPipeConfigurator<ConsumeContext<RoutingSlip>>
     {
-        public static CompensateActivityFactory<TActivity, TLog> CompensateFactory => ActivityFactoryCache.Factory;
-
-
-        static class ActivityFactoryCache
-        {
-            internal static readonly CompensateActivityFactory<TActivity, TLog> Factory =
-                new FactoryMethodCompensateActivityFactory<TActivity, TLog>(_ => new TActivity());
-        }
     }
 }

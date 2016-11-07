@@ -10,16 +10,21 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Courier
+namespace MassTransit
 {
-    using System.Threading.Tasks;
+    using ConsumeConfigurators;
+    using Courier;
     using GreenPipes;
 
 
-    public interface CompensateActivityFactory<out TActivity, TLog>
+    /// <summary>
+    /// Configure the execution of the activity and arguments with some tasty middleware.
+    /// </summary>
+    /// <typeparam name="TLog"></typeparam>
+    public interface ICompensateActivityLogConfigurator<TLog> :
+        IPipeConfigurator<CompensateActivityContext<TLog>>,
+        IConsumeConfigurator
         where TLog : class
-        where TActivity : class, CompensateActivity<TLog>
     {
-        Task Compensate(CompensateContext<TLog> context, IPipe<CompensateActivityContext<TActivity, TLog>> next);
     }
 }

@@ -59,7 +59,7 @@ namespace MassTransit.Host.Activities
             builder.RegisterType<TActivity>();
 
             builder.RegisterType<AutofacExecuteActivityFactory<TActivity, TArguments>>()
-                .As<ExecuteActivityFactory<TArguments>>();
+                .As<ExecuteActivityFactory<TActivity, TArguments>>();
 
             builder.RegisterType<ExecuteActivityService<TActivity, TArguments>>()
                 .As<ServiceControl>();

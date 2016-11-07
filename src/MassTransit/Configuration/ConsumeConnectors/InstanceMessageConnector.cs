@@ -13,6 +13,7 @@
 namespace MassTransit.ConsumeConnectors
 {
     using System;
+    using Builders;
     using GreenPipes;
     using Internals.Extensions;
     using Pipeline;

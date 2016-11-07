@@ -18,7 +18,6 @@ namespace MassTransit.AutofacIntegration
     using Courier.Hosts;
     using GreenPipes;
     using Logging;
-    using Pipeline;
     using Util;
 
 
@@ -28,7 +27,7 @@ namespace MassTransit.AutofacIntegration
     /// <typeparam name="TActivity"></typeparam>
     /// <typeparam name="TArguments"></typeparam>
     public class AutofacExecuteActivityFactory<TActivity, TArguments> :
-        ExecuteActivityFactory<TArguments>
+        ExecuteActivityFactory<TActivity, TArguments>
         where TActivity : class, ExecuteActivity<TArguments>
         where TArguments : class
     {
@@ -40,7 +39,7 @@ namespace MassTransit.AutofacIntegration
             _lifetimeScope = lifetimeScope;
         }
 
-        public async Task Execute(ExecuteContext<TArguments> context, IPipe<ExecuteActivityContext<TArguments>> next)
+        public async Task Execute(ExecuteContext<TArguments> context, IPipe<ExecuteActivityContext<TActivity, TArguments>> next)
         {
             using (var scope = _lifetimeScope.BeginLifetimeScope(x => ConfigureScope(x, context)))
             {
@@ -49,7 +48,7 @@ namespace MassTransit.AutofacIntegration
 
                 var activity = scope.Resolve<TActivity>(TypedParameter.From(context.Arguments));
 
-                ExecuteActivityContext<TArguments> activityContext = new HostExecuteActivityContext<TActivity, TArguments>(activity, context);
+                ExecuteActivityContext<TActivity, TArguments> activityContext = new HostExecuteActivityContext<TActivity, TArguments>(activity, context);
 
                 var consumerLifetimeScope = scope;
                 activityContext.GetOrAddPayload(() => consumerLifetimeScope);

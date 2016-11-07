@@ -10,28 +10,33 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Courier
+namespace MassTransit
 {
-    using System.Threading.Tasks;
+    using System;
+    using ConsumeConfigurators;
+    using Courier;
     using GreenPipes;
 
 
     /// <summary>
-    /// A factory that creates an execute activity and thenn invokes the pipe for the activity context
+    /// Configure the execution of the activity and arguments with some tasty middleware.
     /// </summary>
-    /// <typeparam name="TArguments"></typeparam>
     /// <typeparam name="TActivity"></typeparam>
-    public interface ExecuteActivityFactory<out TActivity, TArguments>
-        where TArguments : class
+    /// <typeparam name="TArguments"></typeparam>
+    public interface IExecuteActivityConfigurator<TActivity, TArguments> :
+        IPipeConfigurator<ExecuteActivityContext<TActivity, TArguments>>,
+        IConsumeConfigurator
         where TActivity : class, ExecuteActivity<TArguments>
+        where TArguments : class
     {
         /// <summary>
-        /// Executes the activity context by passing it to the activity factory, which creates the activity
-        /// and then invokes the next pipe with the combined activity context
+        /// Configure the arguments separate from the activity
         /// </summary>
-        /// <param name="context"></param>
-        /// <param name="next"></param>
-        /// <returns></returns>
-        Task Execute(ExecuteContext<TArguments> context, IPipe<ExecuteActivityContext<TActivity, TArguments>> next);
+        void Arguments(Action<IExecuteActivityArgumentsConfigurator<TArguments>> configure);
+
+        /// <summary>
+        /// Configure the routing slip pipe
+        /// </summary>
+        void RoutingSlip(Action<IRoutingSlipConfigurator> configure);
     }
 }

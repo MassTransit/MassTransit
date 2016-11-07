@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,7 +13,7 @@
 namespace MassTransit.Tests.Courier
 {
     using System;
-    using MassTransit.Courier;
+    using GreenPipes;
     using NUnit.Framework;
     using TestFramework;
     using TestFramework.Courier;
@@ -41,12 +41,26 @@ namespace MassTransit.Tests.Courier
         {
             configurator.ReceiveEndpoint("execute_testactivity", x =>
             {
-                x.ExecuteActivityHost<TestActivity, TestArguments>(_compensateUri);
+                x.ExecuteActivityHost<TestActivity, TestArguments>(_compensateUri, h =>
+                {
+                    h.UseConsoleLog(async (context,log) => context.ActivityName);
+
+                    h.Arguments(a => a.UseConsoleLog(async (context, log) => context.Arguments.Value));
+
+                    h.RoutingSlip(rs => rs.UseConsoleLog(async (context, log) => context.Message.TrackingNumber.ToString("N")));
+                });
             });
 
             configurator.ReceiveEndpoint("compensate_testactivity", x =>
             {
-                x.CompensateActivityHost<TestActivity, TestLog>();
+                x.CompensateActivityHost<TestActivity, TestLog>(h =>
+                {
+                    h.UseConsoleLog(async (context, log) => context.Log.OriginalValue);
+
+                    h.Log(l => l.UseConsoleLog(async (context, log) => context.Log.OriginalValue));
+
+                    h.RoutingSlip(rs => rs.UseConsoleLog(async (context, log) => context.Message.TrackingNumber.ToString("N")));
+                });
             });
         }
     }

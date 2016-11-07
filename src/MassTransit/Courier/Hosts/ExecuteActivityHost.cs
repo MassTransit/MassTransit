@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -18,22 +18,21 @@ namespace MassTransit.Courier.Hosts
     using Contracts;
     using GreenPipes;
     using Logging;
-    using MassTransit.Pipeline;
-    using Pipeline;
     using Util;
 
 
     public class ExecuteActivityHost<TActivity, TArguments> :
         IFilter<ConsumeContext<RoutingSlip>>
-        where TActivity : ExecuteActivity<TArguments>
+        where TActivity : class, ExecuteActivity<TArguments>
         where TArguments : class
     {
         static readonly ILog _log = Logger.Get<ExecuteActivityHost<TActivity, TArguments>>();
-        readonly ExecuteActivityFactory<TArguments> _activityFactory;
+        readonly ExecuteActivityFactory<TActivity, TArguments> _activityFactory;
         readonly Uri _compensateAddress;
-        readonly IPipe<ExecuteActivityContext<TArguments>> _executePipe;
+        readonly IPipe<ExecuteActivityContext<TActivity, TArguments>> _executePipe;
 
-        public ExecuteActivityHost(ExecuteActivityFactory<TArguments> activityFactory, Uri compensateAddress)
+        public ExecuteActivityHost(ExecuteActivityFactory<TActivity, TArguments> activityFactory,
+            IPipe<ExecuteActivityContext<TActivity, TArguments>> executePipe, Uri compensateAddress)
         {
             if (compensateAddress == null)
                 throw new ArgumentNullException(nameof(compensateAddress));
@@ -42,27 +41,26 @@ namespace MassTransit.Courier.Hosts
 
             _compensateAddress = compensateAddress;
             _activityFactory = activityFactory;
-
-            _executePipe = Pipe.New<ExecuteActivityContext<TArguments>>(x => x.UseFilter(new ExecuteActivityFilter<TArguments>()));
+            _executePipe = executePipe;
         }
 
-        public ExecuteActivityHost(ExecuteActivityFactory<TArguments> activityFactory)
+        public ExecuteActivityHost(ExecuteActivityFactory<TActivity, TArguments> activityFactory,
+            IPipe<ExecuteActivityContext<TActivity, TArguments>> executePipe)
         {
             if (activityFactory == null)
                 throw new ArgumentNullException(nameof(activityFactory));
 
             _activityFactory = activityFactory;
-
-            _executePipe = Pipe.New<ExecuteActivityContext<TArguments>>(x => x.UseFilter(new ExecuteActivityFilter<TArguments>()));
+            _executePipe = executePipe;
         }
 
         public void Probe(ProbeContext context)
         {
-            ProbeContext scope = context.CreateFilterScope("executeActivity");
+            var scope = context.CreateFilterScope("executeActivity");
             scope.Set(new
             {
                 ActivityType = TypeMetadataCache<TActivity>.ShortName,
-                ArgumentType = TypeMetadataCache<TArguments>.ShortName,
+                ArgumentType = TypeMetadataCache<TArguments>.ShortName
             });
             if (_compensateAddress != null)
                 scope.Add("compensateAddress", _compensateAddress);
@@ -72,7 +70,7 @@ namespace MassTransit.Courier.Hosts
 
         public async Task Send(ConsumeContext<RoutingSlip> context, IPipe<ConsumeContext<RoutingSlip>> next)
         {
-            Stopwatch timer = Stopwatch.StartNew();
+            var timer = Stopwatch.StartNew();
             try
             {
                 ExecuteContext<TArguments> executeContext = new HostExecuteContext<TArguments>(HostMetadataCache.Host, _compensateAddress, context);

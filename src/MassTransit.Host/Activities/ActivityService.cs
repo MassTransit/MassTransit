@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -20,21 +20,21 @@ namespace MassTransit.Host.Activities
 
     public class ActivityService<TActivity, TArguments, TLog> :
         IBusServiceConfigurator
-        where TActivity : Activity<TArguments, TLog>
+        where TActivity : class, Activity<TArguments, TLog>
         where TArguments : class
         where TLog : class
     {
         readonly string _activityName;
-        readonly CompensateActivityFactory<TLog> _compensateActivityFactory;
+        readonly CompensateActivityFactory<TActivity, TLog> _compensateActivityFactory;
         readonly int _compensateConsumerLimit;
         readonly string _compensateQueueName;
-        readonly ExecuteActivityFactory<TArguments> _executeActivityFactory;
+        readonly ExecuteActivityFactory<TActivity, TArguments> _executeActivityFactory;
         readonly int _executeConsumerLimit;
         readonly string _executeQueueName;
         readonly ILog _log;
 
         public ActivityService(IConfigurationProvider configuration, IActivityQueueNameProvider queueNameProvider,
-            ExecuteActivityFactory<TArguments> executeActivityFactory, CompensateActivityFactory<TLog> compensateActivityFactory)
+            ExecuteActivityFactory<TActivity, TArguments> executeActivityFactory, CompensateActivityFactory<TActivity, TLog> compensateActivityFactory)
         {
             _log = Logger.Get(GetType());
 
@@ -59,7 +59,7 @@ namespace MassTransit.Host.Activities
 
         static string GetActivityName()
         {
-            string activityName = typeof(TActivity).Name;
+            var activityName = typeof(TActivity).Name;
             if (activityName.EndsWith("Service", StringComparison.OrdinalIgnoreCase))
                 activityName = activityName.Substring(0, activityName.Length - "Service".Length);
             return activityName;
