@@ -18,6 +18,7 @@ namespace MassTransit.MongoDbIntegration.Saga
     using System.Threading.Tasks;
     using Context;
     using GreenPipes;
+    using GreenPipes.Internals.Extensions;
     using Logging;
     using MassTransit.Pipeline;
     using MassTransit.Saga;
@@ -70,7 +71,7 @@ namespace MassTransit.MongoDbIntegration.Saga
             {
                 Persistence = "mongodb",
                 SagaType = TypeMetadataCache<TSaga>.ShortName,
-                Properties = TypeMetadataCache<TSaga>.ReadWritePropertyCache.Select(x => x.Property.Name).ToArray()
+                Properties = TypeCache<TSaga>.ReadWritePropertyCache.Select(x => x.Property.Name).ToArray()
             });
         }
 

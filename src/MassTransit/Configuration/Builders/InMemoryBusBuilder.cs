@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -25,27 +25,35 @@ namespace MassTransit.Builders
         BusBuilder,
         IInMemoryBusBuilder
     {
-        readonly string _busQueueName;
+        readonly InMemoryReceiveEndpointSpecification _busEndpointSpecification;
         readonly Uri _inputAddress;
         readonly ISendTransportProvider _sendTransportProvider;
 
-        public InMemoryBusBuilder(IReceiveTransportProvider receiveTransportProvider, ISendTransportProvider sendTransportProvider, IBusHostControl[] hosts,
+        public InMemoryBusBuilder(InMemoryHost inMemoryHost, ISendTransportProvider sendTransportProvider, BusHostCollection<IBusHostControl> hosts,
             IConsumePipeFactory consumePipeFactory, ISendPipeFactory sendPipeFactory, IPublishPipeFactory publishPipeFactory)
             : base(consumePipeFactory, sendPipeFactory, publishPipeFactory, hosts)
         {
-            if (receiveTransportProvider == null)
-                throw new ArgumentNullException(nameof(receiveTransportProvider));
+            if (inMemoryHost == null)
+                throw new ArgumentNullException(nameof(inMemoryHost));
             if (sendTransportProvider == null)
                 throw new ArgumentNullException(nameof(sendTransportProvider));
 
-            _busQueueName = GenerateBusQueueName();
-            _inputAddress = new Uri($"loopback://localhost/{_busQueueName}");
+            var busQueueName = GenerateBusQueueName();
+            _inputAddress = new Uri($"loopback://localhost/{busQueueName}");
 
-            ReceiveTransportProvider = receiveTransportProvider;
+            InMemoryHost = inMemoryHost;
             _sendTransportProvider = sendTransportProvider;
+
+            _busEndpointSpecification = new InMemoryReceiveEndpointSpecification(busQueueName, ConsumePipe);
+
+            inMemoryHost.ReceiveEndpointFactory = new InMemoryReceiveEndpointFactory(this);
         }
 
-        public IReceiveTransportProvider ReceiveTransportProvider { get; }
+        public override IPublishEndpointProvider PublishEndpointProvider => _busEndpointSpecification.PublishEndpointProvider;
+
+        public override ISendEndpointProvider SendEndpointProvider => _busEndpointSpecification.SendEndpointProvider;
+
+        public IInMemoryHost InMemoryHost { get; }
 
         public override ISendEndpointProvider CreateSendEndpointProvider(Uri sourceAddress, params ISendPipeSpecification[] specifications)
         {
@@ -58,7 +66,6 @@ namespace MassTransit.Builders
 
         public override IPublishEndpointProvider CreatePublishEndpointProvider(Uri sourceAddress, params IPublishPipeSpecification[] specifications)
         {
-
             var sendEndpointProvider = new InMemorySendEndpointProvider(_inputAddress, _sendTransportProvider, MessageSerializer, SendPipe.Empty);
 
             var sendEndpointCache = new SendEndpointCache(sendEndpointProvider);
@@ -75,7 +82,7 @@ namespace MassTransit.Builders
 
         protected override IConsumePipe GetConsumePipe()
         {
-            return CreateBusReceiveEndpoint();
+            return CreateConsumePipe();
         }
 
         protected override ISendTransportProvider CreateSendTransportProvider()
@@ -83,14 +90,9 @@ namespace MassTransit.Builders
             return _sendTransportProvider;
         }
 
-        IConsumePipe CreateBusReceiveEndpoint()
+        protected override void PreBuild()
         {
-            IConsumePipe busConsumePipe = CreateConsumePipe();
-
-            var busEndpointConfigurator = new InMemoryReceiveEndpointConfigurator(_busQueueName, busConsumePipe);
-            busEndpointConfigurator.Apply(this);
-
-            return busConsumePipe;
+            _busEndpointSpecification.Apply(this);
         }
 
         static string GenerateBusQueueName()

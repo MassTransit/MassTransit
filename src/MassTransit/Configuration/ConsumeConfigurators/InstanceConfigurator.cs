@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,8 +12,9 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.ConsumeConfigurators
 {
+    using System;
     using System.Collections.Generic;
-    using Configurators;
+    using System.Linq;
     using ConsumeConnectors;
     using GreenPipes;
     using Internals.Extensions;
@@ -44,6 +45,54 @@ namespace MassTransit.ConsumeConfigurators
             {
                 yield return this.Warning($"The instance of {_instance.GetType().GetTypeName()} does not implement any consumer interfaces");
             }
+        }
+    }
+
+
+    public class InstanceConfigurator<TInstance> :
+        IInstanceConfigurator<TInstance>,
+        IReceiveEndpointSpecification
+        where TInstance : class, IConsumer
+    {
+        readonly TInstance _instance;
+        readonly List<IPipeSpecification<ConsumerConsumeContext<TInstance>>> _pipeSpecifications;
+
+        public InstanceConfigurator(TInstance instance)
+        {
+            _instance = instance;
+
+            _pipeSpecifications = new List<IPipeSpecification<ConsumerConsumeContext<TInstance>>>();
+        }
+
+        public void Message<T>(Action<IConsumerMessageConfigurator<T>> configure)
+            where T : class
+        {
+            var messageConfigurator = new ConsumerMessageConfigurator<TInstance, T>(this);
+
+            configure(messageConfigurator);
+        }
+
+        public void ConsumerMessage<T>(Action<IConsumerMessageConfigurator<TInstance, T>> configure)
+            where T : class
+        {
+            var messageConfigurator = new ConsumerMessageConfigurator<TInstance, T>(this);
+
+            configure(messageConfigurator);
+        }
+
+        public IEnumerable<ValidationResult> Validate()
+        {
+            return _pipeSpecifications.SelectMany(x => x.Validate());
+        }
+
+        public void Configure(IReceiveEndpointBuilder builder)
+        {
+            InstanceConnectorCache<TInstance>.Connector.ConnectInstance(builder, _instance, _pipeSpecifications.ToArray());
+        }
+
+        public void AddPipeSpecification(IPipeSpecification<ConsumerConsumeContext<TInstance>> specification)
+        {
+            _pipeSpecifications.Add(specification);
         }
     }
 }

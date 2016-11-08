@@ -13,13 +13,13 @@
 namespace MassTransit.RabbitMqTransport.Integration
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using Contexts;
     using GreenPipes;
     using Logging;
-    using MassTransit.Pipeline;
     using RabbitMQ.Client;
     using RabbitMQ.Client.Exceptions;
     using Util;
@@ -98,7 +98,7 @@ namespace MassTransit.RabbitMqTransport.Integration
                 }
                 else
                 {
-                    var hostNames = Enumerable.Repeat(_settings.Host, 1).ToList();
+                    List<string> hostNames = Enumerable.Repeat(_settings.Host, 1).ToList();
 
                     connection = _connectionFactory.CreateConnection(hostNames, _settings.ClientProvidedName);
                 }

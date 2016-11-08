@@ -28,7 +28,27 @@ namespace MassTransit.Saga.SubscriptionConfigurators
         /// </summary>
         /// <typeparam name="T">The message type</typeparam>
         /// <param name="configure">The callback to configure the message pipeline</param>
+        [Obsolete("This is just too long/noisy, so use Message<T> instead")]
         void ConfigureMessage<T>(Action<ISagaMessageConfigurator<T>> configure)
             where T : class;
+
+        /// <summary>
+        /// Configure a message type for the consumer, such as adding middleware to the pipeline for
+        /// the message type.
+        /// </summary>
+        /// <typeparam name="T">The message type</typeparam>
+        /// <param name="configure">The callback to configure the message pipeline</param>
+        void Message<T>(Action<ISagaMessageConfigurator<T>> configure)
+            where T : class;
+
+        /// <summary>
+        /// Configure a message type for the consumer, such as adding middleware to the pipeline for
+        /// the message type.
+        /// </summary>
+        /// <typeparam name="T">The message type</typeparam>
+        /// <param name="configure">The callback to configure the message pipeline</param>
+        void ConsumerMessage<T>(Action<ISagaMessageConfigurator<TSaga, T>> configure)
+            where T : class;
+
     }
 }

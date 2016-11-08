@@ -19,7 +19,6 @@ namespace MassTransit.WindsorIntegration
     using Courier.Hosts;
     using GreenPipes;
     using Logging;
-    using Pipeline;
     using Util;
 
 
@@ -29,7 +28,7 @@ namespace MassTransit.WindsorIntegration
     /// <typeparam name="TActivity"></typeparam>
     /// <typeparam name="TArguments"></typeparam>
     public class WindsorExecuteActivityFactory<TActivity, TArguments> :
-        ExecuteActivityFactory<TArguments>
+        ExecuteActivityFactory<TActivity, TArguments>
         where TActivity : class, ExecuteActivity<TArguments>
         where TArguments : class
     {
@@ -41,7 +40,7 @@ namespace MassTransit.WindsorIntegration
             _kernel = kernel;
         }
 
-        public async Task Execute(ExecuteContext<TArguments> context, IPipe<ExecuteActivityContext<TArguments>> next)
+        public async Task Execute(ExecuteContext<TArguments> context, IPipe<ExecuteActivityContext<TActivity, TArguments>> next)
         {
             using (_kernel.RequireScope())
             {

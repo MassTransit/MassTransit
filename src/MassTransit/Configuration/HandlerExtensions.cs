@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -16,7 +16,7 @@ namespace MassTransit
     using ConsumeConfigurators;
     using ConsumeConnectors;
     using GreenPipes;
-    using PipeConfigurators;
+    using Pipeline;
 
 
     public static class HandlerExtensions
@@ -43,27 +43,28 @@ namespace MassTransit
         /// Adds a message handler to the service bus for handling a specific type of message
         /// </summary>
         /// <typeparam name="T">The message type to handle, often inferred from the callback specified</typeparam>
-        /// <param name="bus"></param>
+        /// <param name="connector"></param>
         /// <param name="handler">The callback to invoke when messages of the specified type arrive on the service bus</param>
         /// <param name="specifications"></param>
-        public static ConnectHandle ConnectHandler<T>(this IBus bus, MessageHandler<T> handler, params IPipeSpecification<ConsumeContext<T>>[] specifications)
+        public static ConnectHandle ConnectHandler<T>(this IConsumePipeConnector connector, MessageHandler<T> handler,
+            params IPipeSpecification<ConsumeContext<T>>[] specifications)
             where T : class
         {
-            return HandlerConnectorCache<T>.Connector.ConnectHandler(bus, handler, specifications);
+            return HandlerConnectorCache<T>.Connector.ConnectHandler(connector, handler, specifications);
         }
 
         /// <summary>
         /// Subscribe a request handler to the bus's endpoint
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="bus"></param>
+        /// <param name="connector"></param>
         /// <param name="requestId"></param>
         /// <param name="handler"></param>
         /// <returns></returns>
-        public static ConnectHandle ConnectRequestHandler<T>(this IBus bus, Guid requestId, MessageHandler<T> handler)
+        public static ConnectHandle ConnectRequestHandler<T>(this IRequestPipeConnector connector, Guid requestId, MessageHandler<T> handler, params IPipeSpecification<ConsumeContext<T>>[] specifications)
             where T : class
         {
-            return HandlerConnectorCache<T>.Connector.ConnectRequestHandler(bus, requestId, handler);
+            return HandlerConnectorCache<T>.Connector.ConnectRequestHandler(connector, requestId, handler, specifications);
         }
     }
 }

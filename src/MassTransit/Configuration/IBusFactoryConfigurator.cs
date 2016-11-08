@@ -23,7 +23,7 @@ namespace MassTransit
         IPublishPipelineConfigurator
     {
         [EditorBrowsable(EditorBrowsableState.Never)]
-        void AddBusFactorySpecification(IBusFactorySpecification configurator);
+        void AddBusFactorySpecification(IBusFactorySpecification specification);
 
         /// <summary>
         /// Specify a receive endpoint for the bus, with the specified queue name

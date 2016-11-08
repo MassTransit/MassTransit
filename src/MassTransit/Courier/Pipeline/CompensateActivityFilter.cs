@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -16,7 +16,6 @@ namespace MassTransit.Courier.Pipeline
     using System.Threading.Tasks;
     using GreenPipes;
     using Logging;
-    using MassTransit.Pipeline;
     using Util;
 
 
@@ -24,18 +23,20 @@ namespace MassTransit.Courier.Pipeline
     /// Compensates an activity as part of an activity execute host pipe
     /// </summary>
     /// <typeparam name="TLog"></typeparam>
-    public class CompensateActivityFilter<TLog> :
-        IFilter<CompensateActivityContext<TLog>>
+    /// <typeparam name="TActivity"></typeparam>
+    public class CompensateActivityFilter<TActivity, TLog> :
+        IFilter<CompensateActivityContext<TActivity, TLog>>
         where TLog : class
+        where TActivity : class, CompensateActivity<TLog>
     {
-        static readonly ILog _log = Logger.Get<ExecuteActivityFilter<TLog>>();
+        static readonly ILog _log = Logger.Get<CompensateActivityFilter<TActivity, TLog>>();
 
         void IProbeSite.Probe(ProbeContext context)
         {
             context.CreateFilterScope("compensate");
         }
 
-        public async Task Send(CompensateActivityContext<TLog> context, IPipe<CompensateActivityContext<TLog>> next)
+        public async Task Send(CompensateActivityContext<TActivity, TLog> context, IPipe<CompensateActivityContext<TActivity, TLog>> next)
         {
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Compensating: {0}", context.TrackingNumber);
@@ -44,7 +45,7 @@ namespace MassTransit.Courier.Pipeline
             {
                 try
                 {
-                    CompensationResult result = await context.Activity.Compensate(context).ConfigureAwait(false);
+                    var result = await context.Activity.Compensate(context).ConfigureAwait(false);
 
                     await result.Evaluate().ConfigureAwait(false);
 
@@ -52,11 +53,10 @@ namespace MassTransit.Courier.Pipeline
                 }
                 catch (Exception ex)
                 {
-                    CompensationResult result = context.Failed(ex);
+                    var result = context.Failed(ex);
 
                     await result.Evaluate().ConfigureAwait(false);
                 }
-
             }
             catch (Exception ex)
             {

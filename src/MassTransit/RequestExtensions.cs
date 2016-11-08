@@ -31,7 +31,7 @@ namespace MassTransit
         /// <param name="cancellationToken">Can be used to cancel the request</param>
         /// <returns>An awaitable task that completes once the request is sent</returns>
         public static async Task<Request<TRequest>> Request<TRequest>(this IBus bus, Uri address, TRequest message,
-            Action<RequestContext<TRequest>> callback, CancellationToken cancellationToken = default(CancellationToken))
+            Action<IRequestConfigurator<TRequest>> callback, CancellationToken cancellationToken = default(CancellationToken))
             where TRequest : class
         {
             ISendEndpoint endpoint = await bus.GetSendEndpoint(address).ConfigureAwait(false);
@@ -50,14 +50,14 @@ namespace MassTransit
         /// <param name="cancellationToken">Can be used to cancel the request</param>
         /// <returns>An awaitable task that completes once the request is sent</returns>
         public static async Task<Request<TRequest>> Request<TRequest>(this IBus bus, ISendEndpoint sendEndpoint, TRequest message,
-            Action<RequestContext<TRequest>> callback, CancellationToken cancellationToken = default(CancellationToken))
+            Action<IRequestConfigurator<TRequest>> callback, CancellationToken cancellationToken = default(CancellationToken))
             where TRequest : class
         {
             TaskScheduler taskScheduler = SynchronizationContext.Current == null
                 ? TaskScheduler.Default
                 : TaskScheduler.FromCurrentSynchronizationContext();
 
-            var pipe = new SendRequest<TRequest>(bus, taskScheduler, callback);
+            var pipe = new SendRequest<TRequest>(bus, bus.Address, taskScheduler, callback);
 
             await sendEndpoint.Send(message, pipe, cancellationToken).ConfigureAwait(false);
 
@@ -75,14 +75,14 @@ namespace MassTransit
         /// <param name="cancellationToken">Can be used to cancel the request</param>
         /// <returns>An awaitable task that completes once the request is sent</returns>
         public static async Task<Request<TRequest>> PublishRequest<TRequest>(this IBus bus, TRequest message,
-            Action<RequestContext<TRequest>> callback, CancellationToken cancellationToken = default(CancellationToken))
+            Action<IRequestConfigurator<TRequest>> callback, CancellationToken cancellationToken = default(CancellationToken))
             where TRequest : class
         {
             TaskScheduler taskScheduler = SynchronizationContext.Current == null
                 ? TaskScheduler.Default
                 : TaskScheduler.FromCurrentSynchronizationContext();
 
-            var pipe = new SendRequest<TRequest>(bus, taskScheduler, callback);
+            var pipe = new SendRequest<TRequest>(bus, bus.Address, taskScheduler, callback);
 
             await bus.Publish(message, pipe, cancellationToken).ConfigureAwait(false);
 

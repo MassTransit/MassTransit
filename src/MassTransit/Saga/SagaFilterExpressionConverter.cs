@@ -56,7 +56,7 @@ namespace MassTransit.Saga
 			var parameter = exp.Expression as ParameterExpression;
 
 			Delegate fn =
-				Expression.Lambda(typeof (Func<,>).MakeGenericType(typeof (TMessage), exp.Type), exp, new[] {parameter}).Compile();
+				Expression.Lambda(typeof (Func<,>).MakeGenericType(typeof (TMessage), exp.Type), exp, parameter).Compile();
 
 			return Expression.Constant(fn.DynamicInvoke(_message), exp.Type);
 		}

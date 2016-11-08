@@ -16,7 +16,6 @@ namespace MassTransit
     using System.Threading;
     using System.Threading.Tasks;
     using GreenPipes;
-    using Pipeline;
     using RabbitMqTransport;
     using Scheduling;
 
@@ -436,7 +435,7 @@ namespace MassTransit
 
             var sendSettings = hostSettings.GetSendSettings(messageType);
 
-            return hostSettings.GetSendAddress(sendSettings);
+            return sendSettings.GetSendAddress(hostSettings.HostAddress);
         }
     }
 }

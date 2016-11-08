@@ -28,19 +28,15 @@ namespace MassTransit.Serialization
         ConsumeContext
     {
         readonly Lazy<IPublishEndpoint> _publishEndpoint;
-        readonly IPublishEndpointProvider _publishEndpointProvider;
         readonly ReceiveContext _receiveContext;
-        readonly ISendEndpointProvider _sendEndpointProvider;
 
-        protected BaseConsumeContext(ReceiveContext receiveContext, ISendEndpointProvider sendEndpointProvider, IPublishEndpointProvider publishEndpointProvider)
+        protected BaseConsumeContext(ReceiveContext receiveContext)
             : base(receiveContext)
         {
             _receiveContext = receiveContext;
-            _sendEndpointProvider = sendEndpointProvider;
-            _publishEndpointProvider = publishEndpointProvider;
 
-            _publishEndpoint =
-                new Lazy<IPublishEndpoint>(() => _publishEndpointProvider.CreatePublishEndpoint(_receiveContext.InputAddress, CorrelationId, ConversationId));
+            _publishEndpoint = new Lazy<IPublishEndpoint>(() =>
+                receiveContext.PublishEndpointProvider.CreatePublishEndpoint(_receiveContext.InputAddress, CorrelationId, ConversationId));
         }
 
         public ReceiveContext ReceiveContext => _receiveContext;
@@ -212,7 +208,7 @@ namespace MassTransit.Serialization
 
         public async Task<ISendEndpoint> GetSendEndpoint(Uri address)
         {
-            var sendEndpoint = await _sendEndpointProvider.GetSendEndpoint(address).ConfigureAwait(false);
+            var sendEndpoint = await _receiveContext.SendEndpointProvider.GetSendEndpoint(address).ConfigureAwait(false);
 
             return new ConsumeSendEndpoint(sendEndpoint, this);
         }
@@ -309,7 +305,7 @@ namespace MassTransit.Serialization
 
         public ConnectHandle ConnectSendObserver(ISendObserver observer)
         {
-            return _sendEndpointProvider.ConnectSendObserver(observer);
+            return _receiveContext.SendEndpointProvider.ConnectSendObserver(observer);
         }
 
         async Task GenerateFault<T>(ConsumeContext<T> context, Exception exception)

@@ -30,7 +30,7 @@ namespace MassTransit.Testing.Scenarios
         readonly Task<ISendEndpoint> _subjectSendEndpoint;
         readonly TimeSpan _timeout;
         readonly CancellationTokenSource _tokenSource;
-        BusHandle _busHandle;
+        Task<BusHandle> _busHandle;
 
         public BusTestScenario(TimeSpan timeout, IBusControl busControl)
         {
@@ -54,7 +54,7 @@ namespace MassTransit.Testing.Scenarios
             Received = consumeObserver.Messages;
             busControl.ConnectConsumeObserver(consumeObserver);
 
-            _busHandle = _busControl.Start();
+            _busHandle = _busControl.StartAsync();
         }
 
         public virtual Task<ISendEndpoint> SubjectSendEndpoint => _subjectSendEndpoint;
@@ -76,11 +76,12 @@ namespace MassTransit.Testing.Scenarios
 
         public IReceivedMessageList Received { get; }
 
-        public virtual void Dispose()
+        public virtual async Task DisposeAsync(CancellationToken cancellationToken = default(CancellationToken))
         {
             if (_busHandle != null)
             {
-                _busHandle.Stop(_timeout);
+                var busHandle = await _busHandle.ConfigureAwait(false);
+                await busHandle.StopAsync(_timeout).ConfigureAwait(false);
                 _busHandle = null;
             }
         }

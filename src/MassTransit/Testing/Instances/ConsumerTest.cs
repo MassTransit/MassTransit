@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,6 +13,8 @@
 namespace MassTransit.Testing.Instances
 {
     using System.Collections.Generic;
+    using System.Threading;
+    using System.Threading.Tasks;
     using Subjects;
     using TestActions;
 
@@ -35,16 +37,14 @@ namespace MassTransit.Testing.Instances
 
         public IConsumerTestSubject<TConsumer> Consumer => _subject;
 
-        protected override void Dispose(bool disposing)
+        public override async Task DisposeAsync(CancellationToken cancellationToken = new CancellationToken())
         {
             if (_disposed)
                 return;
-            if (disposing)
-            {
-                _subject.Dispose();
-            }
 
-            base.Dispose(disposing);
+            await _subject.DisposeAsync(cancellationToken).ConfigureAwait(false);
+
+            await base.DisposeAsync(cancellationToken).ConfigureAwait(false);
 
             _disposed = true;
         }

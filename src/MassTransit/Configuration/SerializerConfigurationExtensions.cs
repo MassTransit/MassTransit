@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -26,8 +26,16 @@ namespace MassTransit
         /// <param name="configurator"></param>
         public static void UseJsonSerializer(this IBusFactoryConfigurator configurator)
         {
-            configurator.AddBusFactorySpecification(
-                new SetMessageSerializerBusFactorySpecification<JsonMessageSerializer>());
+            configurator.AddBusFactorySpecification(new SetMessageSerializerBusFactorySpecification<JsonMessageSerializer>());
+        }
+
+        /// <summary>
+        /// Serialize messages using the JSON serializer
+        /// </summary>
+        /// <param name="configurator"></param>
+        public static void UseJsonSerializer(this IReceiveEndpointConfigurator configurator)
+        {
+            configurator.AddEndpointSpecification(new SetMessageSerializerReceiveEndpointSpecification<JsonMessageSerializer>());
         }
 
         /// <summary>
@@ -58,13 +66,26 @@ namespace MassTransit
         /// <param name="configurator"></param>
         public static void UseBsonSerializer(this IBusFactoryConfigurator configurator)
         {
-            configurator.AddBusFactorySpecification(
-                new SetMessageSerializerBusFactorySpecification<BsonMessageSerializer>());
+            configurator.AddBusFactorySpecification(new SetMessageSerializerBusFactorySpecification<BsonMessageSerializer>());
+        }
+
+        /// <summary>
+        /// Serialize messages using the BSON message serializer
+        /// </summary>
+        /// <param name="configurator"></param>
+        public static void UseBsonSerializer(this IReceiveEndpointConfigurator configurator)
+        {
+            configurator.AddEndpointSpecification(new SetMessageSerializerReceiveEndpointSpecification<BsonMessageSerializer>());
         }
 
         public static void UseEncryptedSerializer(this IBusFactoryConfigurator configurator, ICryptoStreamProvider streamProvider)
         {
             configurator.AddBusFactorySpecification(new EncryptedMessageSerializerBusFactorySpecification(streamProvider));
+        }
+
+        public static void UseEncryptedSerializer(this IReceiveEndpointConfigurator configurator, ICryptoStreamProvider streamProvider)
+        {
+            configurator.AddEndpointSpecification(new EncryptedMessageSerializerReceiveEndpointSpecification(streamProvider));
         }
 
         /// <summary>
@@ -73,8 +94,16 @@ namespace MassTransit
         /// <param name="configurator"></param>
         public static void UseXmlSerializer(this IBusFactoryConfigurator configurator)
         {
-            configurator.AddBusFactorySpecification(
-                new SetMessageSerializerBusFactorySpecification<XmlMessageSerializer>());
+            configurator.AddBusFactorySpecification(new SetMessageSerializerBusFactorySpecification<XmlMessageSerializer>());
+        }
+
+        /// <summary>
+        /// Serialize messages using the XML message serializer
+        /// </summary>
+        /// <param name="configurator"></param>
+        public static void UseXmlSerializer(this IReceiveEndpointConfigurator configurator)
+        {
+            configurator.AddEndpointSpecification(new SetMessageSerializerReceiveEndpointSpecification<XmlMessageSerializer>());
         }
 
         /// <summary>
@@ -83,8 +112,18 @@ namespace MassTransit
         /// <param name="configurator"></param>
         public static void UseBinarySerializer(this IBusFactoryConfigurator configurator)
         {
-            configurator.AddBusFactorySpecification(
-                new SetMessageSerializerBusFactorySpecification<BinaryMessageSerializer>());
+            configurator.AddBusFactorySpecification(new SetMessageSerializerBusFactorySpecification<BinaryMessageSerializer>());
+
+            configurator.SupportBinaryMessageDeserializer();
+        }
+
+        /// <summary>
+        /// Serialize message using the .NET binary formatter (also adds support for the binary deserializer)
+        /// </summary>
+        /// <param name="configurator"></param>
+        public static void UseBinarySerializer(this IReceiveEndpointConfigurator configurator)
+        {
+            configurator.AddEndpointSpecification(new SetMessageSerializerReceiveEndpointSpecification<BinaryMessageSerializer>());
 
             configurator.SupportBinaryMessageDeserializer();
         }
@@ -97,8 +136,20 @@ namespace MassTransit
         /// <returns></returns>
         public static void SupportBinaryMessageDeserializer(this IBusFactoryConfigurator configurator)
         {
-            configurator.AddBusFactorySpecification(new SupportMessageDeserializerBusFactorySpecification(
-                BinaryMessageSerializer.BinaryContentType, (s, p) => new BinaryMessageDeserializer(JsonMessageSerializer.Serializer, s, p)));
+            configurator.AddBusFactorySpecification(new SupportMessageDeserializerBusFactorySpecification(BinaryMessageSerializer.BinaryContentType,
+                () => new BinaryMessageDeserializer()));
+        }
+
+        /// <summary>
+        /// Add support for the binary message deserializer to the bus. This serializer is not supported
+        /// by default.
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <returns></returns>
+        public static void SupportBinaryMessageDeserializer(this IReceiveEndpointConfigurator configurator)
+        {
+            configurator.AddEndpointSpecification(new SupportMessageDeserializerReceiveEndpointSpecification(BinaryMessageSerializer.BinaryContentType,
+                () => new BinaryMessageDeserializer()));
         }
     }
 }

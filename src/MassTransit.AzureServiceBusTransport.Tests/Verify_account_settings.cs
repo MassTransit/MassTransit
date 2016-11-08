@@ -19,7 +19,6 @@ namespace MassTransit.AzureServiceBusTransport.Tests
         using System.IO;
         using System.Threading;
         using System.Threading.Tasks;
-        using Configuration;
         using Contexts;
         using MassTransit.Pipeline;
         using Microsoft.ServiceBus;
@@ -70,8 +69,6 @@ namespace MassTransit.AzureServiceBusTransport.Tests
                 const int limit = 1000;
                 receiver.OnMessageAsync(async message =>
                 {
-                    var receiveContext = new ServiceBusReceiveContext(new Uri("sb://localhost/queue"), message, new ReceiveObservable());
-
                     await message.CompleteAsync();
 
                     int received = Interlocked.Increment(ref count);

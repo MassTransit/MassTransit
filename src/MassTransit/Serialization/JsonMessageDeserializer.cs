@@ -27,15 +27,11 @@ namespace MassTransit.Serialization
     {
         readonly JsonSerializer _deserializer;
         readonly IObjectTypeDeserializer _objectTypeDeserializer;
-        readonly IPublishEndpointProvider _publishEndpointProvider;
-        readonly ISendEndpointProvider _sendEndpointProvider;
 
-        public JsonMessageDeserializer(JsonSerializer deserializer, ISendEndpointProvider sendEndpointProvider, IPublishEndpointProvider publishEndpointProvider)
+        public JsonMessageDeserializer(JsonSerializer deserializer)
         {
             _deserializer = deserializer;
             _objectTypeDeserializer = new ObjectTypeDeserializer(_deserializer);
-            _sendEndpointProvider = sendEndpointProvider;
-            _publishEndpointProvider = publishEndpointProvider;
         }
 
         void IProbeSite.Probe(ProbeContext context)
@@ -60,7 +56,7 @@ namespace MassTransit.Serialization
                     envelope = _deserializer.Deserialize<MessageEnvelope>(jsonReader);
                 }
 
-                return new JsonConsumeContext(_deserializer, _objectTypeDeserializer, _sendEndpointProvider, _publishEndpointProvider, receiveContext, envelope);
+                return new JsonConsumeContext(_deserializer, _objectTypeDeserializer, receiveContext, envelope);
             }
             catch (JsonSerializationException ex)
             {

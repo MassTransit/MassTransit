@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,12 +14,11 @@ namespace MassTransit.Courier.Factories
 {
     using System.Threading.Tasks;
     using GreenPipes;
-    using MassTransit.Pipeline;
 
 
     public class GenericActivityFactory<TActivity, TArguments, TLog> :
-        ActivityFactory<TArguments, TLog>
-        where TActivity : ExecuteActivity<TArguments>, CompensateActivity<TLog>
+        ActivityFactory<TActivity, TArguments, TLog>
+        where TActivity : class, ExecuteActivity<TArguments>, CompensateActivity<TLog>
         where TArguments : class
         where TLog : class
     {
@@ -30,14 +29,14 @@ namespace MassTransit.Courier.Factories
             _activityFactory = activityFactory;
         }
 
-        public Task Execute(ExecuteContext<TArguments> context, IPipe<ExecuteActivityContext<TArguments>> next)
+        public Task Execute(ExecuteContext<TArguments> context, IPipe<ExecuteActivityContext<TActivity, TArguments>> next)
         {
-            return _activityFactory.Execute<TActivity, TArguments>(context, next);
+            return _activityFactory.Execute(context, next);
         }
 
-        public Task Compensate(CompensateContext<TLog> context, IPipe<CompensateActivityContext<TLog>> next)
+        public Task Compensate(CompensateContext<TLog> context, IPipe<CompensateActivityContext<TActivity, TLog>> next)
         {
-            return _activityFactory.Compensate<TActivity, TLog>(context, next);
+            return _activityFactory.Compensate(context, next);
         }
     }
 }

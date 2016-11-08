@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,7 +13,10 @@
 namespace MassTransit.Testing.Subjects
 {
     using System.Collections.Generic;
+    using System.Threading;
+    using System.Threading.Tasks;
     using Configurators;
+    using GreenPipes.Util;
     using ScenarioBuilders;
     using ScenarioConfigurators;
     using TestDecorators;
@@ -35,8 +38,9 @@ namespace MassTransit.Testing.Subjects
 
         public IReceivedMessageList Received => _received;
 
-        public void Dispose()
+        public Task DisposeAsync(CancellationToken cancellationToken = default(CancellationToken))
         {
+            return TaskUtil.Completed;
         }
 
         public ITestScenarioBuilder<TScenario> Configure(ITestScenarioBuilder<TScenario> builder)

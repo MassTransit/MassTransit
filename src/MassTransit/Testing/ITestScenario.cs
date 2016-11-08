@@ -14,6 +14,7 @@ namespace MassTransit.Testing
 {
     using System;
     using System.Threading;
+    using GreenPipes;
 
 
     /// <summary>
@@ -22,7 +23,7 @@ namespace MassTransit.Testing
 	/// Inherits IDisposable.
 	/// </summary>
 	public interface ITestScenario :
-		IDisposable
+		IAsyncDisposable
 	{
 		/// <summary>
 		/// The list of published messages is contained within this instance.

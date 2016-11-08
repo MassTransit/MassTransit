@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -15,7 +15,6 @@ namespace MassTransit.Pipeline
     using System;
     using System.Threading.Tasks;
     using GreenPipes.Util;
-    using Util;
 
 
     public class BusObservable :
@@ -37,7 +36,7 @@ namespace MassTransit.Pipeline
             return ForEachAsync(x => x.PreStart(bus));
         }
 
-        public Task PostStart(IBus bus, Task busReady)
+        public Task PostStart(IBus bus, Task<BusReady> busReady)
         {
             return ForEachAsync(x => x.PostStart(bus, busReady));
         }

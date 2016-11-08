@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -16,7 +16,6 @@ namespace MassTransit.Courier.Pipeline
     using System.Threading.Tasks;
     using GreenPipes;
     using Logging;
-    using MassTransit.Pipeline;
     using Util;
 
 
@@ -24,18 +23,20 @@ namespace MassTransit.Courier.Pipeline
     /// Executes an activity as part of an activity execute host pipe
     /// </summary>
     /// <typeparam name="TArguments"></typeparam>
-    public class ExecuteActivityFilter<TArguments> :
-        IFilter<ExecuteActivityContext<TArguments>>
+    /// <typeparam name="TActivity"></typeparam>
+    public class ExecuteActivityFilter<TActivity, TArguments> :
+        IFilter<ExecuteActivityContext<TActivity, TArguments>>
+        where TActivity : class, ExecuteActivity<TArguments>
         where TArguments : class
     {
-        static readonly ILog _log = Logger.Get<ExecuteActivityFilter<TArguments>>();
+        static readonly ILog _log = Logger.Get<ExecuteActivityFilter<TActivity, TArguments>>();
 
         void IProbeSite.Probe(ProbeContext context)
         {
             context.CreateFilterScope("execute");
         }
 
-        public async Task Send(ExecuteActivityContext<TArguments> context, IPipe<ExecuteActivityContext<TArguments>> next)
+        public async Task Send(ExecuteActivityContext<TActivity, TArguments> context, IPipe<ExecuteActivityContext<TActivity, TArguments>> next)
         {
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Executing: {0}", context.TrackingNumber);
@@ -44,7 +45,7 @@ namespace MassTransit.Courier.Pipeline
             {
                 try
                 {
-                    ExecutionResult result = await context.Activity.Execute(context).ConfigureAwait(false);
+                    var result = await context.Activity.Execute(context).ConfigureAwait(false);
 
                     await result.Evaluate().ConfigureAwait(false);
 
@@ -52,11 +53,10 @@ namespace MassTransit.Courier.Pipeline
                 }
                 catch (Exception ex)
                 {
-                    ExecutionResult result = context.Faulted(ex);
+                    var result = context.Faulted(ex);
 
                     await result.Evaluate().ConfigureAwait(false);
                 }
-
             }
             catch (Exception ex)
             {

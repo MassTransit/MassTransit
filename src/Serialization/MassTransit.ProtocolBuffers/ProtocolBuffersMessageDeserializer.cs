@@ -22,15 +22,6 @@ namespace MassTransit.ProtocolBuffers
     public class ProtocolBuffersMessageDeserializer :
         IMessageDeserializer
     {
-        readonly IPublishEndpointProvider _publishEndpointProvider;
-        readonly ISendEndpointProvider _sendEndpointProvider;
-
-        public ProtocolBuffersMessageDeserializer(ISendEndpointProvider sendEndpointProvider, IPublishEndpointProvider publishEndpointProvider)
-        {
-            _sendEndpointProvider = sendEndpointProvider;
-            _publishEndpointProvider = publishEndpointProvider;
-        }
-
         void IProbeSite.Probe(ProbeContext context)
         {
             var scope = context.CreateScope("json");
@@ -52,7 +43,7 @@ namespace MassTransit.ProtocolBuffers
                     offset = body.Position;
                 }
 
-                return new ProtocolBuffersConsumeContext(_sendEndpointProvider, _publishEndpointProvider, receiveContext, envelope, offset);
+                return new ProtocolBuffersConsumeContext(receiveContext, envelope, offset);
             }
             catch (SerializationException)
             {

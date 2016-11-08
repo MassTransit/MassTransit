@@ -21,11 +21,11 @@ namespace MassTransit.RabbitMqTransport
     using System.Security.Cryptography.X509Certificates;
     using System.Text;
     using System.Text.RegularExpressions;
-    using Configuration;
-    using Configuration.Configurators;
+    using Configurators;
     using NewIdFormatters;
     using RabbitMQ.Client;
     using Topology;
+    using Transport;
     using Util;
 
 
@@ -34,7 +34,7 @@ namespace MassTransit.RabbitMqTransport
         static readonly INewIdFormatter _formatter = new ZBase32Formatter();
         static readonly Regex _regex = new Regex(@"^[A-Za-z0-9\-_\.:]+$");
 
-        public static string GetTemporaryQueueName(this IRabbitMqBusFactoryConfigurator configurator, string prefix)
+        public static string GetTemporaryQueueName(this IRabbitMqHost ignored, string prefix)
         {
             var sb = new StringBuilder(prefix);
 
@@ -59,117 +59,6 @@ namespace MassTransit.RabbitMqTransport
             sb.Append(NewId.Next().ToString(_formatter));
 
             return sb.ToString();
-        }
-
-        public static Uri GetInputAddress(this RabbitMqHostSettings hostSettings, ReceiveSettings receiveSettings)
-        {
-            var builder = new UriBuilder
-            {
-                Scheme = "rabbitmq",
-                Host = hostSettings.Host,
-                Port = hostSettings.Port,
-                Path = (string.IsNullOrWhiteSpace(hostSettings.VirtualHost) || hostSettings.VirtualHost == "/")
-                    ? receiveSettings.QueueName
-                    : string.Join("/", hostSettings.VirtualHost, receiveSettings.QueueName)
-            };
-
-            builder.Query += string.Join("&", GetQueryStringOptions(receiveSettings));
-
-            return builder.Uri;
-        }
-
-        public static Uri GetQueueAddress(this RabbitMqHostSettings hostSettings, string queueName)
-        {
-            UriBuilder builder = GetHostUriBuilder(hostSettings, queueName);
-
-            return builder.Uri;
-        }
-
-        /// <summary>
-        /// Returns a UriBuilder for the host and entity specified
-        /// </summary>
-        /// <param name="hostSettings">The host settings</param>
-        /// <param name="entityName">The entity name (queue/exchange)</param>
-        /// <returns>A UriBuilder</returns>
-        static UriBuilder GetHostUriBuilder(RabbitMqHostSettings hostSettings, string entityName)
-        {
-            return new UriBuilder
-            {
-                Scheme = "rabbitmq",
-                Host = hostSettings.Host,
-                Port = hostSettings.Port,
-                Path = (string.IsNullOrWhiteSpace(hostSettings.VirtualHost) || hostSettings.VirtualHost == "/")
-                    ? entityName
-                    : string.Join("/", hostSettings.VirtualHost, entityName)
-            };
-        }
-
-        /// <summary>
-        /// Return a send address for the exchange
-        /// </summary>
-        /// <param name="host">The RabbitMQ host</param>
-        /// <param name="exchangeName">The exchange name</param>
-        /// <param name="configure">An optional configuration for the exchange to set type, durable, etc.</param>
-        /// <returns></returns>
-        public static Uri GetSendAddress(this IRabbitMqHost host, string exchangeName, Action<IExchangeConfigurator> configure = null)
-        {
-            var builder = GetHostUriBuilder(host.Settings, exchangeName);
-
-            var sendSettings = new RabbitMqSendSettings(exchangeName, ExchangeType.Fanout, true, false);
-
-            configure?.Invoke(sendSettings);
-
-            builder.Query += string.Join("&", GetQueryStringOptions(sendSettings));
-
-            return builder.Uri;
-        }
-
-        public static Uri GetSendAddress(this RabbitMqHostSettings hostSettings, SendSettings sendSettings)
-        {
-            var builder = new UriBuilder
-            {
-                Scheme = "rabbitmq",
-                Host = hostSettings.Host,
-                Port = hostSettings.Port,
-                Path = hostSettings.VirtualHost != "/"
-                    ? string.Join("/", hostSettings.VirtualHost, sendSettings.ExchangeName)
-                    : sendSettings.ExchangeName
-            };
-
-            builder.Query += string.Join("&", GetQueryStringOptions(sendSettings));
-
-            return builder.Uri;
-        }
-
-        static IEnumerable<string> GetQueryStringOptions(ReceiveSettings settings)
-        {
-            if (!settings.Durable)
-                yield return "durable=false";
-            if (settings.AutoDelete)
-                yield return "autodelete=true";
-            if (settings.Exclusive)
-                yield return "exclusive=true";
-        }
-
-        static IEnumerable<string> GetQueryStringOptions(SendSettings settings)
-        {
-            if (!settings.Durable)
-                yield return "durable=false";
-            if (settings.AutoDelete)
-                yield return "autodelete=true";
-            if (settings.BindToQueue)
-                yield return "bind=true";
-            if (!string.IsNullOrWhiteSpace(settings.QueueName))
-                yield return "queue=" + WebUtility.UrlEncode(settings.QueueName);
-            if (settings.ExchangeType != ExchangeType.Fanout)
-                yield return "type=" + settings.ExchangeType;
-            if (settings.ExchangeArguments != null && settings.ExchangeArguments.ContainsKey("x-delayed-type"))
-                yield return "delayedType=" + settings.ExchangeArguments["x-delayed-type"];
-
-            foreach (var binding in settings.ExchangeBindings)
-            {
-                yield return $"bindexchange={binding.Exchange.ExchangeName}";
-            }
         }
 
         public static ReceiveSettings GetReceiveSettings(this Uri address)
@@ -208,8 +97,10 @@ namespace MassTransit.RabbitMqTransport
                     name = NewId.Next().ToString("NS");
                     uri = uri.Remove(uri.Length - 1) + name;
 
-                    var builder = new UriBuilder(uri);
-                    builder.Query = string.IsNullOrEmpty(address.Query) ? "" : address.Query.Substring(1);
+                    var builder = new UriBuilder(uri)
+                    {
+                        Query = string.IsNullOrEmpty(address.Query) ? "" : address.Query.Substring(1)
+                    };
 
                     address = builder.Uri;
                 }
@@ -289,12 +180,6 @@ namespace MassTransit.RabbitMqTransport
                 settings.BindToExchange(bindExchange);
 
             return settings;
-        }
-
-        [Obsolete]
-        public static SendSettings GetSendSettings(this IRabbitMqHost host, Type messageType)
-        {
-            return GetSendSettings(host.Settings, messageType);
         }
 
         public static SendSettings GetSendSettings(this RabbitMqHostSettings hostSettings, Type messageType)

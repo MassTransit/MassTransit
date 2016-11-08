@@ -14,8 +14,8 @@ namespace MassTransit.Tests
 {
     using System;
     using System.Collections.Generic;
-    using Internals.Mapping;
-    using Internals.Reflection;
+    using GreenPipes.Internals.Mapping;
+    using GreenPipes.Internals.Reflection;
     using NUnit.Framework;
 
 

@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,10 +13,9 @@
 namespace MassTransit.RabbitMqTransport.Hosting
 {
     using System;
-    using Builders;
     using GreenPipes;
+    using MassTransit.Builders;
     using MassTransit.Hosting;
-    using PipeConfigurators;
 
 
     /// <summary>
@@ -51,14 +50,15 @@ namespace MassTransit.RabbitMqTransport.Hosting
             _configurator.AddPipeSpecification(specification);
         }
 
-        public void AddPipeSpecification<T>(IPipeSpecification<ConsumeContext<T>> specification) where T : class
+        public void AddPipeSpecification<T>(IPipeSpecification<ConsumeContext<T>> specification)
+            where T : class
         {
             _configurator.AddPipeSpecification(specification);
         }
 
-        public void AddBusFactorySpecification(IBusFactorySpecification configurator)
+        public void AddBusFactorySpecification(IBusFactorySpecification specification)
         {
-            _configurator.AddBusFactorySpecification(configurator);
+            _configurator.AddBusFactorySpecification(specification);
         }
 
         public void ReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configureEndpoint)

@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -15,10 +15,9 @@ namespace MassTransit.Util
     using System;
     using System.Collections.Generic;
     using System.Reflection;
-    using Internals.Reflection;
 
 
-    public interface ITypeMetadataCache<T>
+    public interface ITypeMetadataCache<out T>
     {
         string ShortName { get; }
 
@@ -26,8 +25,6 @@ namespace MassTransit.Util
         /// True if the type implements any known saga interfaces
         /// </summary>
         bool HasSagaInterfaces { get; }
-
-        ReadOnlyPropertyCache<T> ReadOnlyPropertyCache { get; }
 
         /// <summary>
         /// True if the message type is a valid message type
@@ -43,8 +40,6 @@ namespace MassTransit.Util
         /// The names of all the message types supported by the message type
         /// </summary>
         string[] MessageTypeNames { get; }
-
-        ReadWritePropertyCache<T> ReadWritePropertyCache { get; }
 
         IEnumerable<PropertyInfo> Properties { get; }
 

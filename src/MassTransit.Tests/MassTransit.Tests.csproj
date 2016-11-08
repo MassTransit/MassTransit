@@ -59,7 +59,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="GreenPipes, Version=1.0.0.0, Culture=neutral, PublicKeyToken=b800c4cfcdeea87b, processorArchitecture=MSIL">
-      <HintPath>..\packages\GreenPipes.1.0.2\lib\net452\GreenPipes.dll</HintPath>
+      <HintPath>..\packages\GreenPipes.1.0.5\lib\net452\GreenPipes.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="log4net, Version=1.2.15.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
@@ -74,8 +74,8 @@
       <HintPath>..\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="nunit.framework, Version=3.4.1.0, Culture=neutral, PublicKeyToken=2638cd05610744eb, processorArchitecture=MSIL">
-      <HintPath>..\packages\NUnit.3.4.1\lib\net45\nunit.framework.dll</HintPath>
+    <Reference Include="nunit.framework, Version=3.5.0.0, Culture=neutral, PublicKeyToken=2638cd05610744eb, processorArchitecture=MSIL">
+      <HintPath>..\packages\NUnit.3.5.0\lib\net45\nunit.framework.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Shouldly, Version=2.8.2.0, Culture=neutral, PublicKeyToken=6042cbcb05cbc941, processorArchitecture=MSIL">
@@ -120,6 +120,7 @@
     <Compile Include="Courier\FaultActivityEvent_Specs.cs" />
     <Compile Include="Courier\Fault_Specs.cs" />
     <Compile Include="Courier\ObjectGraph_Specs.cs" />
+    <Compile Include="Courier\PartitionActivity_Specs.cs" />
     <Compile Include="Courier\RanToCompletion_Specs.cs" />
     <Compile Include="Courier\RequestRoutingSlip_Specs.cs" />
     <Compile Include="Courier\ReviseItinerary_Specs.cs" />
@@ -128,6 +129,7 @@
     <Compile Include="Courier\Subscription_Specs.cs" />
     <Compile Include="Courier\TwoActivityEvent_Specs.cs" />
     <Compile Include="Courier\UriArgument_Specs.cs" />
+    <Compile Include="Diagnostics\StatsD_Specs.cs" />
     <Compile Include="EventPublish_Specs.cs" />
     <Compile Include="ExcessiveAsyncFault_Specs.cs" />
     <Compile Include="HeaderObject_Specs.cs" />
@@ -169,6 +171,7 @@
     <Compile Include="Pipeline\ContentFilter_Specs.cs" />
     <Compile Include="Pipeline\LatestFilter_Specs.cs" />
     <Compile Include="Pipeline\MessageTestFixture.cs" />
+    <Compile Include="Pipeline\Message_Specs.cs" />
     <Compile Include="Pipeline\OneMessageConsumer.cs" />
     <Compile Include="Pipeline\PartitionByKey_Specs.cs" />
     <Compile Include="Pipeline\Retry_Specs.cs" />
@@ -176,11 +179,13 @@
     <Compile Include="Pipeline\TwoMessageConsumer.cs" />
     <Compile Include="PublishHeader_Specs.cs" />
     <Compile Include="PublishObserver_Specs.cs" />
+    <Compile Include="ReceiveEndpoint_Specs.cs" />
     <Compile Include="ReceiveObserver_Specs.cs" />
     <Compile Include="RequestClient_Specs.cs" />
     <Compile Include="Retry_Specs.cs" />
     <Compile Include="Saga\InjectingSampleSaga.cs" />
     <Compile Include="Saga\Injecting_Specs.cs" />
+    <Compile Include="Saga\MessageSaga_Specs.cs" />
     <Compile Include="Saga\PartitionSaga_Specs.cs" />
     <Compile Include="Saga\Using_correlated_messages_to_start_sagas.cs" />
     <Compile Include="SendEndpointCache_Specs.cs" />
@@ -195,9 +200,11 @@
     <Compile Include="Serialization\MessageDataSerialization_Specs.cs" />
     <Compile Include="Serialization\PolymorphicProperty_Specs.cs" />
     <Compile Include="Serialization\ReceiveFault_Serialization_Specs.cs" />
+    <Compile Include="Serialization\SeparateSerializer_Specs.cs" />
     <Compile Include="Serialization\SerializationException_Specs.cs" />
     <Compile Include="InMemoryTest_Specs.cs" />
     <Compile Include="Serialization\TypeHandling_Specs.cs" />
+    <Compile Include="ServiceBusExtensions.cs" />
     <Compile Include="SimpleConfiguration_Specs.cs" />
     <Compile Include="StaticProperty_Specs.cs" />
     <Compile Include="Supervisor_Specs.cs" />

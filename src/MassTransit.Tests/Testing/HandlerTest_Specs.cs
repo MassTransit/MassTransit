@@ -13,6 +13,7 @@
 namespace MassTransit.Tests.Testing
 {
     using System.Linq;
+    using System.Threading.Tasks;
     using NUnit.Framework;
 	using MassTransit.Testing;
 	using Shouldly;
@@ -36,9 +37,9 @@ namespace MassTransit.Tests.Testing
 		}
 
 		[TearDown]
-		public void Teardown()
+		public async Task Teardown()
 		{
-			_test.Dispose();
+			await _test.DisposeAsync();
 			_test = null;
 		}
 
@@ -107,9 +108,9 @@ namespace MassTransit.Tests.Testing
 		}
 
 		[TearDown]
-		public void Teardown()
+		public async Task Teardown()
 		{
-			_test.Dispose();
+			await _test.DisposeAsync();
 			_test = null;
 		}
 
@@ -177,9 +178,9 @@ namespace MassTransit.Tests.Testing
 		}
 
 		[TearDown]
-		public void Teardown()
+		public async Task Teardown()
 		{
-			_test.Dispose();
+			await _test.DisposeAsync();
 			_test = null;
 		}
 

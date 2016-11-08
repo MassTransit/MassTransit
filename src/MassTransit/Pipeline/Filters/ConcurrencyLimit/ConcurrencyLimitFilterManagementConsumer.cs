@@ -27,11 +27,11 @@ namespace MassTransit.Pipeline.Filters.ConcurrencyLimit
         IConsumer<SetConcurrencyLimit>
     {
         static readonly ILog _log = Logger.Get<ConcurrencyLimitFilterManagementConsumer>();
-        readonly ICommandRouter _router;
+        readonly IPipeRouter _router;
         readonly string _id;
         DateTime _lastUpdated;
 
-        public ConcurrencyLimitFilterManagementConsumer(ICommandRouter router, string id = null)
+        public ConcurrencyLimitFilterManagementConsumer(IPipeRouter router, string id = null)
         {
             _router = router;
             _id = id;

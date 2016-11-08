@@ -16,7 +16,6 @@ namespace MassTransit.RabbitMqTransport.Scheduling
     using System.Threading;
     using System.Threading.Tasks;
     using GreenPipes;
-    using MassTransit.Pipeline;
     using MassTransit.Scheduling;
     using Topology;
     using Util;
@@ -165,6 +164,11 @@ namespace MassTransit.RabbitMqTransport.Scheduling
             throw new NotSupportedException("RabbitMQ delayed exchange does not support cancellation");
         }
 
+        public Task CancelScheduledSend(Uri destinationAddress, Guid tokenId)
+        {
+            throw new NotSupportedException("RabbitMQ delayed exchange does not support cancellation");
+        }
+
         async Task<ScheduledMessage<T>> ScheduleSend<T>(Uri destinationAddress, DateTime scheduledTime, T message, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken)
             where T : class
         {
@@ -177,7 +181,7 @@ namespace MassTransit.RabbitMqTransport.Scheduling
 
             sendSettings.BindToExchange(destinationSettings.ExchangeName);
 
-            var delayExchangeAddress = _hostSettings.GetSendAddress(sendSettings);
+            var delayExchangeAddress = sendSettings.GetSendAddress(_hostSettings.HostAddress);
 
             var delayEndpoint = await _sendEndpointProvider.GetSendEndpoint(delayExchangeAddress).ConfigureAwait(false);
 

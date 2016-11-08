@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -15,7 +15,7 @@ namespace MassTransit
     using System;
     using System.ComponentModel;
     using Builders;
-    using Transports;
+    using Transports.InMemory;
 
 
     public interface IInMemoryBusFactoryConfigurator :
@@ -35,11 +35,13 @@ namespace MassTransit
         /// <typeparam name="T"></typeparam>
         /// <param name="transportProvider"></param>
         [EditorBrowsable(EditorBrowsableState.Advanced)]
-        void SetTransportProvider<T>(T transportProvider)
-            where T : ISendTransportProvider, IReceiveTransportProvider, IBusHostControl;
+        void SetHost(InMemoryHost transportProvider);
 
         [EditorBrowsable(EditorBrowsableState.Never)]
-        void AddBusFactorySpecification(IInMemoryBusFactorySpecification configurator);
+        void AddBusFactorySpecification(IBusFactorySpecification<IInMemoryBusBuilder> specification);
+
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        void AddReceiveEndpointSpecification(IReceiveEndpointSpecification<IInMemoryBusBuilder> specification);
 
         /// <summary>
         /// Specify a receive endpoint for the bus, with the specified queue name

@@ -20,5 +20,6 @@ namespace MassTransit.Pipeline
         IConsumeMessageObserverConnector,
         IConsumeObserverConnector
     {
+        IConsumePipe ConsumePipe { get; }
     }
 }

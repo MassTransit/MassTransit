@@ -13,12 +13,11 @@
 namespace MassTransit.Saga.SubscriptionConfigurators
 {
     using System.Collections.Generic;
-    using Configurators;
     using GreenPipes;
-    using PipeConfigurators;
 
 
     public class SagaMessageConfigurator<TSaga, TMessage> :
+        ISagaMessageConfigurator<TSaga, TMessage>,
         ISagaMessageConfigurator<TMessage>
         where TSaga : class, ISaga
         where TMessage : class
@@ -32,16 +31,21 @@ namespace MassTransit.Saga.SubscriptionConfigurators
 
         public void AddPipeSpecification(IPipeSpecification<ConsumeContext<TMessage>> specification)
         {
-            _configurator.AddPipeSpecification(new SpecificationProxy(specification));
+            _configurator.AddPipeSpecification(new ConsumeContextSpecificationProxy(specification));
+        }
+
+        public void AddPipeSpecification(IPipeSpecification<SagaConsumeContext<TSaga, TMessage>> specification)
+        {
+            _configurator.AddPipeSpecification(new SagaConsumeContextSpecificationProxy(specification));
         }
 
 
-        class SpecificationProxy :
+        class ConsumeContextSpecificationProxy :
             IPipeSpecification<SagaConsumeContext<TSaga>>
         {
             readonly IPipeSpecification<ConsumeContext<TMessage>> _specification;
 
-            public SpecificationProxy(IPipeSpecification<ConsumeContext<TMessage>> specification)
+            public ConsumeContextSpecificationProxy(IPipeSpecification<ConsumeContext<TMessage>> specification)
             {
                 _specification = specification;
             }
@@ -56,13 +60,32 @@ namespace MassTransit.Saga.SubscriptionConfigurators
 
             public IEnumerable<ValidationResult> Validate()
             {
-//                if (!typeof(TSaga).HasInterface<IConsumer<TMessage>>())
-//                    yield return this.Failure("MessageType", $"is not consumed by {TypeMetadataCache<TSaga>.ShortName}");
+                return _specification.Validate();
+            }
+        }
 
-                foreach (var validationResult in _specification.Validate())
-                {
-                    yield return validationResult;
-                }
+
+        class SagaConsumeContextSpecificationProxy :
+            IPipeSpecification<SagaConsumeContext<TSaga>>
+        {
+            readonly IPipeSpecification<SagaConsumeContext<TSaga, TMessage>> _specification;
+
+            public SagaConsumeContextSpecificationProxy(IPipeSpecification<SagaConsumeContext<TSaga, TMessage>> specification)
+            {
+                _specification = specification;
+            }
+
+            public void Apply(IPipeBuilder<SagaConsumeContext<TSaga>> builder)
+            {
+                var messageBuilder = builder as IPipeBuilder<SagaConsumeContext<TSaga, TMessage>>;
+
+                if (messageBuilder != null)
+                    _specification.Apply(messageBuilder);
+            }
+
+            public IEnumerable<ValidationResult> Validate()
+            {
+                return _specification.Validate();
             }
         }
     }

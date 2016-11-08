@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RabbitMqTransport
 {
+    using System;
     using System.Net.Security;
     using System.Security.Authentication;
     using System.Security.Cryptography.X509Certificates;
@@ -116,5 +117,15 @@ namespace MassTransit.RabbitMqTransport
         /// The client-provided name for the connection (displayed in RabbitMQ admin panel)
         /// </summary>
         string ClientProvidedName { get; }
+
+        /// <summary>
+        /// Returns the host address
+        /// </summary>
+        Uri HostAddress { get; }
+
+        /// <summary>
+        /// True if the publisher should confirm acceptance of messages
+        /// </summary>
+        bool PublisherConfirmation { get; }
     }
 }

@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -41,9 +41,8 @@ namespace MassTransit.Serialization
         Uri _responseAddress;
         Uri _sourceAddress;
 
-        public StaticConsumeContext(ISendEndpointProvider sendEndpointProvider, IPublishEndpointProvider publishEndpointProvider,
-            ReceiveContext receiveContext, object message, Header[] headers)
-            : base(receiveContext, sendEndpointProvider, publishEndpointProvider)
+        public StaticConsumeContext(ReceiveContext receiveContext, object message, Header[] headers)
+            : base(receiveContext)
         {
             _messageTypes = new Dictionary<Type, object>();
             _message = message;
@@ -51,31 +50,11 @@ namespace MassTransit.Serialization
             _supportedTypes = GetSupportedMessageTypes().ToArray();
         }
 
-        private IEnumerable<string> GetSupportedMessageTypes()
-        {
-            yield return GetHeaderString(BinaryMessageSerializer.MessageTypeKey);
-            var header = GetHeaderString(BinaryMessageSerializer.PolymorphicMessageTypesKey);
-            if (header != null)
-            {
-                var additionalMessageUrns = header.Split(';');
-                foreach (var additionalMessageUrn in additionalMessageUrns)
-                {
-                    yield return additionalMessageUrn;
-                }
-            }
-        }
-
-        public override Guid? MessageId => _messageId.HasValue ? _messageId : (_messageId = GetHeaderGuid(BinaryMessageSerializer.MessageIdKey));
-        public override Guid? RequestId => _requestId.HasValue ? _requestId : (_requestId = GetHeaderGuid(BinaryMessageSerializer.RequestIdKey));
-
-        public override Guid? CorrelationId
-            => _correlationId.HasValue ? _correlationId : (_correlationId = GetHeaderGuid(BinaryMessageSerializer.CorrelationIdKey));
-
-        public override Guid? ConversationId
-            => _conversationId.HasValue ? _conversationId : (_conversationId = GetHeaderGuid(BinaryMessageSerializer.ConversationIdKey))
-            ;
-
-        public override Guid? InitiatorId => _initiatorId.HasValue ? _initiatorId : (_initiatorId = GetHeaderGuid(BinaryMessageSerializer.InitiatorIdKey));
+        public override Guid? MessageId => _messageId ?? (_messageId = GetHeaderGuid(BinaryMessageSerializer.MessageIdKey));
+        public override Guid? RequestId => _requestId ?? (_requestId = GetHeaderGuid(BinaryMessageSerializer.RequestIdKey));
+        public override Guid? CorrelationId => _correlationId ?? (_correlationId = GetHeaderGuid(BinaryMessageSerializer.CorrelationIdKey));
+        public override Guid? ConversationId => _conversationId ?? (_conversationId = GetHeaderGuid(BinaryMessageSerializer.ConversationIdKey));
+        public override Guid? InitiatorId => _initiatorId ?? (_initiatorId = GetHeaderGuid(BinaryMessageSerializer.InitiatorIdKey));
         public override DateTime? ExpirationTime => GetHeaderDateTime(BinaryMessageSerializer.ExpirationTimeKey);
         public override Uri SourceAddress => _sourceAddress ?? (_sourceAddress = GetHeaderUri(BinaryMessageSerializer.SourceAddressKey));
         public override Uri DestinationAddress => _destinationAddress ?? (_destinationAddress = GetHeaderUri(BinaryMessageSerializer.DestinationAddressKey));
@@ -84,6 +63,20 @@ namespace MassTransit.Serialization
         public override Headers Headers => _headers ?? (_headers = new StaticHeaders(_binaryHeaders));
         public override HostInfo Host => _host ?? (_host = GetHeaderObject<HostInfo>(BinaryMessageSerializer.HostInfoKey));
         public override IEnumerable<string> SupportedMessageTypes => _supportedTypes;
+
+        IEnumerable<string> GetSupportedMessageTypes()
+        {
+            yield return GetHeaderString(BinaryMessageSerializer.MessageTypeKey);
+            var header = GetHeaderString(BinaryMessageSerializer.PolymorphicMessageTypesKey);
+            if (header != null)
+            {
+                string[] additionalMessageUrns = header.Split(';');
+                foreach (var additionalMessageUrn in additionalMessageUrns)
+                {
+                    yield return additionalMessageUrn;
+                }
+            }
+        }
 
         public override bool HasMessageType(Type messageType)
         {
@@ -94,7 +87,7 @@ namespace MassTransit.Serialization
                     return existing != null;
             }
 
-            string typeUrn = new MessageUrn(messageType).ToString();
+            var typeUrn = new MessageUrn(messageType).ToString();
 
             return _supportedTypes.Any(x => typeUrn.Equals(x, StringComparison.OrdinalIgnoreCase));
         }
@@ -110,7 +103,7 @@ namespace MassTransit.Serialization
                     return message != null;
                 }
 
-                string typeUrn = new MessageUrn(typeof(T)).ToString();
+                var typeUrn = new MessageUrn(typeof(T)).ToString();
 
                 if (_supportedTypes.Any(typeUrn.Equals))
                 {
@@ -131,7 +124,7 @@ namespace MassTransit.Serialization
 
         string GetHeaderString(string headerName)
         {
-            object header = GetHeader(headerName);
+            var header = GetHeader(headerName);
             if (header == null)
                 return null;
 
@@ -150,7 +143,7 @@ namespace MassTransit.Serialization
         {
             try
             {
-                object header = GetHeader(headerName);
+                var header = GetHeader(headerName);
                 if (header == null)
                     return null;
 
@@ -172,7 +165,7 @@ namespace MassTransit.Serialization
         T GetHeaderObject<T>(string headerName)
             where T : class
         {
-            object header = GetHeader(headerName);
+            var header = GetHeader(headerName);
 
             var obj = header as T;
 
@@ -183,7 +176,7 @@ namespace MassTransit.Serialization
         {
             try
             {
-                object header = GetHeader(headerName);
+                var header = GetHeader(headerName);
                 if (header == null)
                     return default(Guid?);
 
@@ -205,7 +198,7 @@ namespace MassTransit.Serialization
         {
             try
             {
-                object header = GetHeader(headerName);
+                var header = GetHeader(headerName);
                 if (header == null)
                     return default(DateTime?);
 

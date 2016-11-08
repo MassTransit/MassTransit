@@ -15,7 +15,8 @@ namespace MassTransit
     using System;
     using System.Threading;
     using System.Threading.Tasks;
-    using Context;
+    using GreenPipes;
+    using Pipeline;
 
 
     /// <summary>
@@ -24,14 +25,11 @@ namespace MassTransit
     /// <typeparam name="TRequest">The request message type</typeparam>
     /// <typeparam name="TResponse">The response message type</typeparam>
     public class PublishRequestClient<TRequest, TResponse> :
-        IRequestClient<TRequest, TResponse>
+        RequestClient<TRequest, TResponse>
         where TRequest : class
         where TResponse : class
     {
-        readonly IBus _bus;
-        readonly Action<SendContext<TRequest>> _callback;
-        readonly TimeSpan _timeout;
-        readonly TimeSpan? _timeToLive;
+        readonly IPublishEndpoint _publishEndpoint;
 
         /// <summary>
         /// Creates a message request client for the bus and endpoint specified
@@ -41,32 +39,31 @@ namespace MassTransit
         /// <param name="timeToLive">The time that the request will live for</param>
         /// <param name="callback"></param>
         public PublishRequestClient(IBus bus, TimeSpan timeout, TimeSpan? timeToLive = default(TimeSpan?), Action<SendContext<TRequest>> callback = null)
+            : base(bus, bus.Address, timeout, timeToLive, callback)
         {
-            _bus = bus;
-            _timeout = timeout;
-            _timeToLive = timeToLive;
-            _callback = callback;
+            _publishEndpoint = bus;
         }
 
-        async Task<TResponse> IRequestClient<TRequest, TResponse>.Request(TRequest request, CancellationToken cancellationToken)
+        /// <summary>
+        /// Creates a message request client for the bus and endpoint specified
+        /// </summary>
+        /// <param name="publishEndpoint"></param>
+        /// <param name="connector">The bus instance</param>
+        /// <param name="responseAddress">The response address of the connector</param>
+        /// <param name="serviceAddress">The service endpoint address</param>
+        /// <param name="timeout">The request timeout</param>
+        /// <param name="timeToLive">The time that the request will live for</param>
+        /// <param name="callback"></param>
+        public PublishRequestClient(IPublishEndpoint publishEndpoint, IRequestPipeConnector connector, Uri responseAddress,
+            TimeSpan timeout, TimeSpan? timeToLive = default(TimeSpan?), Action<SendContext<TRequest>> callback = null)
+            : base(connector, responseAddress, timeout, timeToLive, callback)
         {
-            var taskScheduler = SynchronizationContext.Current == null
-                ? TaskScheduler.Default
-                : TaskScheduler.FromCurrentSynchronizationContext();
+            _publishEndpoint = publishEndpoint;
+        }
 
-            Task<TResponse> responseTask = null;
-            var pipe = new SendRequest<TRequest>(_bus, taskScheduler, x =>
-            {
-                x.TimeToLive = _timeToLive;
-                x.Timeout = _timeout;
-                responseTask = x.Handle<TResponse>();
-
-                _callback?.Invoke(x);
-            });
-
-            await _bus.Publish(request, pipe, cancellationToken).ConfigureAwait(false);
-
-            return await responseTask.ConfigureAwait(false);
+        protected override Task SendRequest(TRequest request, IPipe<SendContext<TRequest>> requestPipe, CancellationToken cancellationToken)
+        {
+            return _publishEndpoint.Publish(request, requestPipe, cancellationToken);
         }
     }
 }

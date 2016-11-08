@@ -38,7 +38,7 @@ namespace MassTransit
         public static void SupportProtocolBuffersMessageDeserializer(this IBusFactoryConfigurator configurator)
         {
             configurator.AddBusFactorySpecification(new SupportMessageDeserializerBusFactorySpecification(
-                ProtocolBuffersMessageSerializer.ProtocolBuffersContentType, (s, p) => new ProtocolBuffersMessageDeserializer(s, p)));
+                ProtocolBuffersMessageSerializer.ProtocolBuffersContentType, () => new ProtocolBuffersMessageDeserializer()));
         }
     }
 }

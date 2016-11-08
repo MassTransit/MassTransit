@@ -15,10 +15,9 @@ namespace MassTransit
     using System;
     using System.Threading;
     using System.Threading.Tasks;
-    using AzureServiceBusTransport.Contexts;
+    using AzureServiceBusTransport;
     using AzureServiceBusTransport.Scheduling;
     using GreenPipes;
-    using Pipeline;
     using Scheduling;
     using Util;
 
@@ -436,9 +435,7 @@ namespace MassTransit
         {
             var connectionContext = context.ReceiveContext.GetPayload<NamespaceContext>();
 
-            var address = connectionContext.GetTopicAddress(messageType);
-
-            return address;
+            return connectionContext.GetTopicAddress(messageType);
         }
 
         static async Task<ScheduledMessage<T>> Schedule<T>(ConsumeContext context, DateTime scheduledTime, T message, ServiceBusScheduleMessagePipe<T> pipe,

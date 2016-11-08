@@ -64,6 +64,7 @@ namespace MassTransit.Containers.Tests
                 })
                     .As<IBus>()
                     .As<IBusControl>()
+                    .OnRelease(control => control.Stop())
                     .SingleInstance();
             }
         }
@@ -80,27 +81,35 @@ namespace MassTransit.Containers.Tests
         {
             var bus = _container.Resolve<IBusControl>();
 
-            bus.Start();
+            var busHandle = await bus.StartAsync();
+            try
+            {
+                ISendEndpoint endpoint = await bus.GetSendEndpoint(new Uri("loopback://localhost/input_queue"));
 
-            ISendEndpoint endpoint = await bus.GetSendEndpoint(new Uri("loopback://localhost/input_queue"));
+                const string name = "Joe";
 
-            const string name = "Joe";
+                await endpoint.Send(new SimpleMessageClass(name));
 
-            await endpoint.Send(new SimpleMessageClass(name));
+                SimpleConsumer lastConsumer = await SimpleConsumer.LastConsumer;
+                lastConsumer.ShouldNotBe(null);
 
-            SimpleConsumer lastConsumer = await SimpleConsumer.LastConsumer;
-            lastConsumer.ShouldNotBe(null);
+                SimpleMessageInterface last = await lastConsumer.Last;
+                last.Name
+                    .ShouldBe(name);
 
-            SimpleMessageInterface last = await lastConsumer.Last;
-            last.Name
-                .ShouldBe(name);
+                bool wasDisposed = await lastConsumer.Dependency.WasDisposed;
+                wasDisposed
+                    .ShouldBe(true); //Dependency was not disposed");
 
-            bool wasDisposed = await lastConsumer.Dependency.WasDisposed;
-            wasDisposed
-                .ShouldBe(true); //Dependency was not disposed");
+                lastConsumer.Dependency.SomethingDone
+                    .ShouldBe(true); //Dependency was disposed before consumer executed");
 
-            lastConsumer.Dependency.SomethingDone
-                .ShouldBe(true); //Dependency was disposed before consumer executed");
+            }
+            finally
+            {
+                await busHandle.StopAsync();
+            }
+
         }
     }
 }

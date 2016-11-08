@@ -17,24 +17,12 @@ namespace MassTransit.Serialization
     using System.Runtime.Remoting.Messaging;
     using System.Runtime.Serialization.Formatters.Binary;
     using GreenPipes;
-    using Newtonsoft.Json;
 
 
     public class BinaryMessageDeserializer :
         IMessageDeserializer
     {
         static readonly BinaryFormatter _formatter = new BinaryFormatter();
-        readonly JsonSerializer _deserializer;
-        readonly IPublishEndpointProvider _publishEndpoint;
-        readonly ISendEndpointProvider _sendEndpointProvider;
-
-        public BinaryMessageDeserializer(JsonSerializer deserializer, ISendEndpointProvider sendEndpointProvider,
-            IPublishEndpointProvider publishEndpoint)
-        {
-            _deserializer = deserializer;
-            _sendEndpointProvider = sendEndpointProvider;
-            _publishEndpoint = publishEndpoint;
-        }
 
         public ContentType ContentType => BinaryMessageSerializer.BinaryContentType;
 
@@ -47,7 +35,7 @@ namespace MassTransit.Serialization
                 obj = _formatter.Deserialize(body, x => headers = x);
             }
 
-            return new StaticConsumeContext(_sendEndpointProvider, _publishEndpoint, receiveContext, obj, headers);
+            return new StaticConsumeContext(receiveContext, obj, headers);
         }
 
         void IProbeSite.Probe(ProbeContext context)

@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,7 +14,6 @@ namespace MassTransit.EndpointConfigurators
 {
     using System.Collections.Generic;
     using Builders;
-    using Configurators;
     using GreenPipes;
     using Serialization;
 
@@ -41,15 +40,14 @@ namespace MassTransit.EndpointConfigurators
             builder.AddMessageDeserializer(EncryptedMessageSerializer.EncryptedContentType, CreateDeserializer);
         }
 
-        IMessageDeserializer CreateDeserializer(ISendEndpointProvider sendEndpointProvider, IPublishEndpointProvider publishEndpoint)
+        IMessageDeserializer CreateDeserializer()
         {
-            return new EncryptedMessageDeserializer(BsonMessageSerializer.Deserializer, sendEndpointProvider, publishEndpoint,
-                _streamProvider);
+            return new EncryptedMessageDeserializer(BsonMessageSerializer.Deserializer, _streamProvider);
         }
 
         IMessageSerializer CreateSerializer()
         {
-            ICryptoStreamProvider streamProvider = GetStreamProvider();
+            var streamProvider = GetStreamProvider();
 
             return new EncryptedMessageSerializer(streamProvider);
         }

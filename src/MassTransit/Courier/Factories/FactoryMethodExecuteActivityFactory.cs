@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -16,11 +16,10 @@ namespace MassTransit.Courier.Factories
     using System.Threading.Tasks;
     using GreenPipes;
     using Hosts;
-    using MassTransit.Pipeline;
 
 
     public class FactoryMethodExecuteActivityFactory<TActivity, TArguments> :
-        ExecuteActivityFactory<TArguments>
+        ExecuteActivityFactory<TActivity, TArguments>
         where TActivity : class, ExecuteActivity<TArguments>
         where TArguments : class
     {
@@ -31,7 +30,7 @@ namespace MassTransit.Courier.Factories
             _executeFactory = executeFactory;
         }
 
-        public async Task Execute(ExecuteContext<TArguments> context, IPipe<ExecuteActivityContext<TArguments>> next)
+        public async Task Execute(ExecuteContext<TArguments> context, IPipe<ExecuteActivityContext<TActivity, TArguments>> next)
         {
             TActivity activity = null;
             try

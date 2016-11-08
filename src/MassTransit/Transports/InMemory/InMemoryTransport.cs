@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -16,8 +16,10 @@ namespace MassTransit.Transports.InMemory
     using System.IO;
     using System.Threading;
     using System.Threading.Tasks;
+    using Events;
     using GreenPipes;
     using Logging;
+    using Metrics;
     using Pipeline;
     using Util;
 
@@ -33,40 +35,37 @@ namespace MassTransit.Transports.InMemory
         IInMemoryTransport
     {
         static readonly ILog _log = Logger.Get<InMemoryTransport>();
-        readonly ReceiveEndpointObservable _endpointObservable;
         readonly Uri _inputAddress;
         readonly ITaskParticipant _participant;
+        readonly IPublishEndpointProvider _publishEndpointProvider;
         readonly ReceiveObservable _receiveObservable;
         readonly LimitedConcurrencyLevelTaskScheduler _scheduler;
+        readonly ISendEndpointProvider _sendEndpointProvider;
         readonly SendObservable _sendObservable;
         readonly TaskSupervisor _supervisor;
-        int _pendingDeliveryCount;
-        long _deliveryCount;
-        int _maxPendingDeliveryCount;
+        readonly IDeliveryTracker _tracker;
+        readonly ReceiveTransportObservable _transportObservable;
         int _queueDepth;
         IPipe<ReceiveContext> _receivePipe;
 
-        public InMemoryTransport(Uri inputAddress, int concurrencyLimit)
+        public InMemoryTransport(Uri inputAddress, int concurrencyLimit, ISendEndpointProvider sendEndpointProvider,
+            IPublishEndpointProvider publishEndpointProvider)
         {
             _inputAddress = inputAddress;
+            _sendEndpointProvider = sendEndpointProvider;
+            _publishEndpointProvider = publishEndpointProvider;
 
             _sendObservable = new SendObservable();
             _receiveObservable = new ReceiveObservable();
-            _endpointObservable = new ReceiveEndpointObservable();
+            _transportObservable = new ReceiveTransportObservable();
+
+            _tracker = new DeliveryTracker(HandleDeliveryComplete);
 
             _supervisor = new TaskSupervisor($"{TypeMetadataCache<InMemoryTransport>.ShortName} - {_inputAddress}");
             _participant = _supervisor.CreateParticipant($"{TypeMetadataCache<InMemoryTransport>.ShortName} - {_inputAddress}");
 
             _scheduler = new LimitedConcurrencyLevelTaskScheduler(concurrencyLimit);
         }
-
-        public int PendingDeliveryCount => _pendingDeliveryCount;
-
-        public long DeliveryCount => _deliveryCount;
-
-        public int MaxPendingDeliveryCount => _maxPendingDeliveryCount;
-
-        public int QueueDepth => _queueDepth;
 
         public void Dispose()
         {
@@ -76,6 +75,14 @@ namespace MassTransit.Transports.InMemory
 
             TaskUtil.Await(() => _supervisor.Completed);
         }
+
+        public int PendingDeliveryCount => _tracker.ActiveDeliveryCount;
+
+        public long DeliveryCount => _tracker.DeliveryCount;
+
+        public int MaxPendingDeliveryCount => _tracker.MaxConcurrentDeliveryCount;
+
+        public int QueueDepth => _queueDepth;
 
         public void Probe(ProbeContext context)
         {
@@ -92,7 +99,7 @@ namespace MassTransit.Transports.InMemory
             {
                 _receivePipe = receivePipe;
 
-                TaskUtil.Await(() => _endpointObservable.Ready(new Ready(_inputAddress)));
+                TaskUtil.Await(() => _transportObservable.Ready(new ReceiveTransportReadyEvent(_inputAddress)));
 
                 _participant.SetReady();
 
@@ -110,9 +117,9 @@ namespace MassTransit.Transports.InMemory
             return _receiveObservable.Connect(observer);
         }
 
-        public ConnectHandle ConnectReceiveEndpointObserver(IReceiveEndpointObserver observer)
+        public ConnectHandle ConnectReceiveTransportObserver(IReceiveTransportObserver observer)
         {
-            return _endpointObservable.Connect(observer);
+            return _transportObservable.Connect(observer);
         }
 
         async Task ISendTransport.Send<T>(T message, IPipe<SendContext<T>> pipe, CancellationToken cancelSend)
@@ -132,7 +139,7 @@ namespace MassTransit.Transports.InMemory
                 Interlocked.Increment(ref _queueDepth);
 
 #pragma warning disable 4014
-                    Task.Factory.StartNew(() => DispatchMessage(transportMessage), _supervisor.StoppedToken, TaskCreationOptions.HideScheduler, _scheduler);
+                Task.Factory.StartNew(() => DispatchMessage(transportMessage), _supervisor.StoppedToken, TaskCreationOptions.None, _scheduler);
 #pragma warning restore 4014
 
                 context.DestinationAddress.LogSent(context.MessageId?.ToString("N") ?? "", TypeMetadataCache<T>.ShortName);
@@ -167,7 +174,7 @@ namespace MassTransit.Transports.InMemory
             var transportMessage = new InMemoryTransportMessage(messageId, body, context.ContentType.MediaType, messageType);
 
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
-            Task.Factory.StartNew(() => DispatchMessage(transportMessage), _supervisor.StoppedToken, TaskCreationOptions.HideScheduler, _scheduler);
+            Task.Factory.StartNew(() => DispatchMessage(transportMessage), _supervisor.StoppedToken, TaskCreationOptions.None, _scheduler);
 #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
         }
 
@@ -182,6 +189,10 @@ namespace MassTransit.Transports.InMemory
             return _sendObservable.Connect(observer);
         }
 
+        void HandleDeliveryComplete()
+        {
+        }
+
         async Task DispatchMessage(InMemoryTransportMessage message)
         {
             await _supervisor.Ready.ConfigureAwait(false);
@@ -192,40 +203,36 @@ namespace MassTransit.Transports.InMemory
             if (_receivePipe == null)
                 throw new ArgumentException("ReceivePipe not configured");
 
-            var context = new InMemoryReceiveContext(_inputAddress, message, _receiveObservable);
+            var context = new InMemoryReceiveContext(_inputAddress, message, _receiveObservable, _sendEndpointProvider, _publishEndpointProvider);
 
-            Interlocked.Increment(ref _deliveryCount);
-
-            var current = Interlocked.Increment(ref _pendingDeliveryCount);
-            while (current > _maxPendingDeliveryCount)
-                Interlocked.CompareExchange(ref _maxPendingDeliveryCount, current, _maxPendingDeliveryCount);
-
-            try
+            using (_tracker.BeginDelivery())
             {
-                await _receiveObservable.PreReceive(context).ConfigureAwait(false);
+                try
+                {
+                    await _receiveObservable.PreReceive(context).ConfigureAwait(false);
 
-                await _receivePipe.Send(context).ConfigureAwait(false);
+                    await _receivePipe.Send(context).ConfigureAwait(false);
 
-                await context.CompleteTask.ConfigureAwait(false);
+                    await context.CompleteTask.ConfigureAwait(false);
 
-                await _receiveObservable.PostReceive(context).ConfigureAwait(false);
+                    await _receiveObservable.PostReceive(context).ConfigureAwait(false);
 
-                _inputAddress.LogReceived(message.MessageId.ToString("N"), message.MessageType);
-            }
-            catch (Exception ex)
-            {
-                _log.Error($"RCV FAULT: {message.MessageId}", ex);
+                    _inputAddress.LogReceived(message.MessageId.ToString("N"), message.MessageType);
+                }
+                catch (Exception ex)
+                {
+                    _log.Error($"RCV FAULT: {message.MessageId}", ex);
 
-                await _receiveObservable.ReceiveFault(context, ex).ConfigureAwait(false);
+                    await _receiveObservable.ReceiveFault(context, ex).ConfigureAwait(false);
 
-                message.DeliveryCount++;
-            }
-            finally
-            {
-                Interlocked.Decrement(ref _pendingDeliveryCount);
-                Interlocked.Decrement(ref _queueDepth);
+                    message.DeliveryCount++;
+                }
+                finally
+                {
+                    Interlocked.Decrement(ref _queueDepth);
 
-                context.Dispose();
+                    context.Dispose();
+                }
             }
         }
 
@@ -270,37 +277,9 @@ namespace MassTransit.Transports.InMemory
 
                 await _supervisor.Completed.ConfigureAwait(false);
 
-                await _transport._endpointObservable.Completed(new Completed(_transport._inputAddress, _transport._deliveryCount,
-                    _transport._maxPendingDeliveryCount)).ConfigureAwait(false);
+                await _transport._transportObservable.Completed(new ReceiveTransportCompletedEvent(_transport._inputAddress,
+                    _transport._tracker.GetDeliveryMetrics())).ConfigureAwait(false);
             }
-        }
-
-
-        class Ready :
-            ReceiveEndpointReady
-        {
-            public Ready(Uri inputAddress)
-            {
-                InputAddress = inputAddress;
-            }
-
-            public Uri InputAddress { get; }
-        }
-
-
-        class Completed :
-            ReceiveEndpointCompleted
-        {
-            public Completed(Uri inputAddress, long deliveryCount, long concurrentDeliveryCount)
-            {
-                InputAddress = inputAddress;
-                DeliveryCount = deliveryCount;
-                ConcurrentDeliveryCount = concurrentDeliveryCount;
-            }
-
-            public Uri InputAddress { get; }
-            public long DeliveryCount { get; }
-            public long ConcurrentDeliveryCount { get; }
         }
     }
 }

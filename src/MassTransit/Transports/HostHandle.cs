@@ -19,6 +19,11 @@ namespace MassTransit.Transports
     public interface HostHandle
     {
         /// <summary>
+        /// A task which can be awaited to know when the host is ready
+        /// </summary>
+        Task<HostReady> Ready { get; }
+
+        /// <summary>
         /// Close the Host, shutting it down for good.
         /// </summary>
         /// <returns></returns>

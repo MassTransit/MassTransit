@@ -12,7 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Host
 {
-    using System;
     using Autofac;
     using Configuration;
     using Hosting;
@@ -42,10 +41,17 @@ namespace MassTransit.Host
             builder.RegisterType<AssemblyBusServiceConfigurator>()
                 .As<IBusServiceConfigurator>();
 
+            builder.Register(context =>
+            {
+                var parent = ParentLifetimeScope.Resolve<IConfigurationProvider>();
+                var current = context.Resolve<FileConfigurationProvider>();
+
+                return new ManyConfigurationProviders(current, parent);
+            })
+                .As<IConfigurationProvider>();
+
             builder.RegisterType<FileConfigurationProvider>()
-                .WithParameter(TypedParameter.From(_registration.Assembly))
-                .As<IConfigurationProvider>()
-                .SingleInstance();
+                .WithParameter(TypedParameter.From(_registration.Assembly));
 
             builder.RegisterModule<ConfigurationProviderModule>();
 

@@ -13,12 +13,16 @@
 namespace MassTransit.Testing.Instances
 {
     using System.Collections.Generic;
+    using System.Threading;
     using System.Threading.Tasks;
+    using GreenPipes;
     using TestActions;
     using Util;
 
 
-    public abstract class TestInstance<TScenario>
+    public abstract class TestInstance<TScenario> :
+        IAsyncDisposable
+
         where TScenario : ITestScenario
     {
         readonly IList<ITestAction<TScenario>> _actions;
@@ -51,23 +55,6 @@ namespace MassTransit.Testing.Instances
             return ExecuteTestActions();
         }
 
-        public void Dispose()
-        {
-            Dispose(true);
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (_disposed)
-                return;
-            if (disposing)
-            {
-                _scenario.Dispose();
-            }
-
-            _disposed = true;
-        }
-
         async Task ExecuteTestActions()
         {
             foreach (var action in _actions)
@@ -77,6 +64,16 @@ namespace MassTransit.Testing.Instances
 
                 await action.Act(_scenario, _scenario.CancellationToken).ConfigureAwait(false);
             }
+        }
+
+        public virtual async Task DisposeAsync(CancellationToken cancellationToken = new CancellationToken())
+        {
+            if (_disposed)
+                return;
+
+            await _scenario.DisposeAsync(cancellationToken).ConfigureAwait(false);
+
+            _disposed = true;
         }
     }
 }

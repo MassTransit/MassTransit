@@ -41,15 +41,15 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="GreenPipes, Version=1.0.0.0, Culture=neutral, PublicKeyToken=b800c4cfcdeea87b, processorArchitecture=MSIL">
-      <HintPath>..\packages\GreenPipes.1.0.2\lib\net452\GreenPipes.dll</HintPath>
+      <HintPath>..\packages\GreenPipes.1.0.5\lib\net452\GreenPipes.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.ServiceBus, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\WindowsAzure.ServiceBus.3.4.0\lib\net45-full\Microsoft.ServiceBus.dll</HintPath>
+      <HintPath>..\packages\WindowsAzure.ServiceBus.3.4.1\lib\net45-full\Microsoft.ServiceBus.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.WindowsAzure.Configuration, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.WindowsAzure.ConfigurationManager.3.2.1\lib\net40\Microsoft.WindowsAzure.Configuration.dll</HintPath>
+      <HintPath>..\packages\Microsoft.WindowsAzure.ConfigurationManager.3.2.3\lib\net40\Microsoft.WindowsAzure.Configuration.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="NewId, Version=2.1.3.0, Culture=neutral, PublicKeyToken=b8e0e9f2f1e657fa, processorArchitecture=MSIL">
@@ -72,74 +72,91 @@
       <Link>Properties\SolutionVersion.cs</Link>
     </Compile>
     <Compile Include="AzureBusFactory.cs" />
-    <Compile Include="BrokeredMessageSessionContext.cs" />
-    <Compile Include="Configuration\ReceiveEndpointSettings.cs" />
-    <Compile Include="Configuration\ServiceBusReceiveEndpointConfigurator.cs" />
-    <Compile Include="Configuration\ServiceBusMessageSchedulerSpecification.cs" />
-    <Compile Include="Defaults.cs" />
+    <Compile Include="Configuration\IServiceBusQueueEndpointConfigurator.cs" />
+    <Compile Include="Contexts\BrokeredMessageSessionContext.cs" />
+    <Compile Include="Transport\ClientSettings.cs" />
+    <Compile Include="RequestClientExtensions.cs" />
+    <Compile Include="Settings\BaseClientSettings.cs" />
+    <Compile Include="Settings\ReceiveEndpointSettings.cs" />
+    <Compile Include="Configuration\Configurators\ServiceBusEndpointSpecification.cs" />
+    <Compile Include="Configuration\Configurators\ServiceBusReceiveEndpointSpecification.cs" />
+    <Compile Include="Configuration\Specifications\ServiceBusMessageSchedulerSpecification.cs" />
+    <Compile Include="Configuration\Configurators\ServiceBusSubscriptionEndpointSpecification.cs" />
+    <Compile Include="Settings\SubscriptionEndpointSettings.cs" />
+    <Compile Include="ClientContext.cs" />
+    <Compile Include="Configuration\Defaults.cs" />
     <Compile Include="Hosting\ServiceBusAmqpTransportSettings.cs" />
     <Compile Include="Hosting\ServiceBusHostBusFactory.cs" />
     <Compile Include="Hosting\ServiceBusNetMessagingTransportSettings.cs" />
     <Compile Include="Hosting\ServiceBusServiceConfigurator.cs" />
     <Compile Include="Hosting\ServiceBusSettings.cs" />
-    <Compile Include="IQueueConfigurator.cs" />
-    <Compile Include="IServiceBusSendClient.cs" />
-    <Compile Include="MessageSessionAsyncHandler.cs" />
-    <Compile Include="MessageSessionAsyncHandlerFactory.cs" />
+    <Compile Include="Configuration\IServiceBusEndpointConfigurator.cs" />
+    <Compile Include="Transport\IReceiveClient.cs" />
+    <Compile Include="Transport\ISendClient.cs" />
+    <Compile Include="Configuration\IServiceBusSubscriptionEndpointConfigurator.cs" />
+    <Compile Include="Transport\IServiceBusSubscriptionEndpointFactory.cs" />
+    <Compile Include="Transport\ISessionReceiver.cs" />
+    <Compile Include="Transport\MessageSessionAsyncHandler.cs" />
+    <Compile Include="Transport\MessageSessionAsyncHandlerFactory.cs" />
     <Compile Include="MessageSessionContext.cs" />
-    <Compile Include="MessageSessionSagaConsumeContext.cs" />
-    <Compile Include="MessageSessionSagaRepository.cs" />
+    <Compile Include="Saga\MessageSessionSagaConsumeContext.cs" />
+    <Compile Include="Saga\MessageSessionSagaRepository.cs" />
     <Compile Include="NamespaceManagerExtensions.cs" />
     <Compile Include="Pipeline\MessageSessionReceiverFilter.cs" />
+    <Compile Include="Pipeline\PrepareQueueClientFilter.cs" />
+    <Compile Include="Pipeline\PrepareSubscriptionClientFilter.cs" />
+    <Compile Include="Pipeline\PrepareSubscriptionEndpointFilter.cs" />
     <Compile Include="Pipeline\ServiceBusMessageSchedulerFilter.cs" />
-    <Compile Include="QueueClientSendClient.cs" />
+    <Compile Include="Contexts\QueueClientContext.cs" />
+    <Compile Include="Transport\IServiceBusReceiveEndpointFactory.cs" />
+    <Compile Include="Transport\QueueSendClient.cs" />
     <Compile Include="ScheduleMessageExtensions.cs" />
     <Compile Include="SchedulePublishExtensions.cs" />
     <Compile Include="Scheduling\ServiceBusScheduleMessagePipe.cs" />
     <Compile Include="Scheduling\ServiceBusMessageScheduler.cs" />
     <Compile Include="ServiceBusAddressExtensions.cs" />
-    <Compile Include="ServiceBusPublishEndpointProvider.cs" />
+    <Compile Include="Transport\ServiceBusPublishEndpointProvider.cs" />
     <Compile Include="ServiceBusSendContext.cs" />
     <Compile Include="ServiceBusSendContextExtensions.cs" />
-    <Compile Include="ServiceBusSendEndpointProvider.cs" />
-    <Compile Include="ServiceBusSendTransport.cs" />
+    <Compile Include="Transport\ServiceBusReceiveEndpointFactory.cs" />
+    <Compile Include="Transport\ServiceBusSendEndpointProvider.cs" />
+    <Compile Include="Transport\ServiceBusSendTransport.cs" />
     <Compile Include="BrokeredMessageContext.cs" />
-    <Compile Include="Configuration\AzureServiceBusHostConfigurator.cs" />
-    <Compile Include="Configuration\ServiceBusBusBuilder.cs" />
-    <Compile Include="Configuration\ServiceBusBusFactoryConfigurator.cs" />
+    <Compile Include="Configuration\Configurators\AzureServiceBusHostConfigurator.cs" />
+    <Compile Include="Configuration\Builders\ServiceBusBusBuilder.cs" />
+    <Compile Include="Configuration\Configurators\ServiceBusBusFactoryConfigurator.cs" />
     <Compile Include="Configuration\IServiceBusBusFactoryConfigurator.cs" />
     <Compile Include="Configuration\ISharedAccessSignatureTokenProviderConfigurator.cs" />
     <Compile Include="Configuration\ITokenProviderConfigurator.cs" />
-    <Compile Include="Configuration\ServiceBusReceiveEndpointBuilder.cs" />
+    <Compile Include="Configuration\Builders\ServiceBusReceiveEndpointBuilder.cs" />
     <Compile Include="Configuration\ServiceBusTopicSubscriptionExtensions.cs" />
-    <Compile Include="Configuration\SharedAccessKeyTokenProvider.cs" />
     <Compile Include="Configuration\SharedAccessSignatureTokenProviderConfigurator.cs" />
-    <Compile Include="Configuration\TopicSubscriptionSettings.cs" />
+    <Compile Include="Settings\TopicSubscriptionSettings.cs" />
     <Compile Include="Contexts\ServiceBusReceiveContext.cs" />
     <Compile Include="Contexts\ServiceBusSendContextImpl.cs" />
-    <Compile Include="Contexts\NamespaceContext.cs" />
+    <Compile Include="NamespaceContext.cs" />
     <Compile Include="Contexts\ServiceBusNamespaceContext.cs" />
     <Compile Include="IServiceBusHost.cs" />
-    <Compile Include="IServiceBusHostConfigurator.cs" />
-    <Compile Include="IServiceBusReceiveEndpointConfigurator.cs" />
-    <Compile Include="Pipeline\PrepareReceiveQueueFilter.cs" />
-    <Compile Include="PublishSendEndpointProvider.cs" />
+    <Compile Include="Configuration\IServiceBusHostConfigurator.cs" />
+    <Compile Include="Configuration\IServiceBusReceiveEndpointConfigurator.cs" />
+    <Compile Include="Pipeline\PrepareReceiveEndpointFilter.cs" />
+    <Compile Include="Transport\PublishSendEndpointProvider.cs" />
     <Compile Include="ServiceBusHost.cs" />
     <Compile Include="ServiceBusHostSettings.cs" />
     <Compile Include="Pipeline\MessageReceiverFilter.cs" />
-    <Compile Include="Receiver.cs" />
-    <Compile Include="ServiceBusReceiveTransport.cs" />
-    <Compile Include="ServiceBusSendTransportProvider.cs" />
+    <Compile Include="Transport\Receiver.cs" />
+    <Compile Include="Transport\ReceiveTransport.cs" />
+    <Compile Include="Transport\ServiceBusSendTransportProvider.cs" />
     <Compile Include="ServiceBusTokenProviderSettings.cs" />
-    <Compile Include="IAzureServiceBusTokenProvider.cs" />
-    <Compile Include="ReceiverMetrics.cs" />
-    <Compile Include="ReceiveSettings.cs" />
-    <Compile Include="ServiceBusHostSettingsExtensions.cs" />
+    <Compile Include="Transport\ReceiveSettings.cs" />
     <Compile Include="ServiceBusMessageNameFormatter.cs" />
     <Compile Include="BusFactoryConfiguratorExtensions.cs" />
     <Compile Include="ServiceBusConfigurationExtensions.cs" />
-    <Compile Include="SessionReceiver.cs" />
-    <Compile Include="TopicClientSendClient.cs" />
+    <Compile Include="Transport\ServiceBusSubscriptionEndpointFactory.cs" />
+    <Compile Include="Transport\SessionReceiver.cs" />
+    <Compile Include="Contexts\SubscriptionClientContext.cs" />
+    <Compile Include="Transport\SubscriptionSettings.cs" />
+    <Compile Include="Transport\TopicSendClient.cs" />
     <Compile Include="TurnoutExtensions.cs" />
   </ItemGroup>
   <ItemGroup>

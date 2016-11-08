@@ -17,7 +17,6 @@ namespace MassTransit.Context
     using System.Threading.Tasks;
     using GreenPipes;
     using GreenPipes.Payloads;
-    using Transports;
 
 
     public abstract class ConsumeContextProxyScope<TMessage> :
@@ -29,7 +28,7 @@ namespace MassTransit.Context
         protected ConsumeContextProxyScope(ConsumeContext<TMessage> context)
             : base(context, new PayloadCacheScope(context))
         {
-            _publishEndpoint = new Lazy<IPublishEndpoint>(() => new ScopePublishEndpoint(this, context));
+            _publishEndpoint = new Lazy<IPublishEndpoint>(() => new ConsumeContextScopePublishEndpoint(this, context));
         }
 
         public override Task Publish<T>(T message, CancellationToken cancellationToken)

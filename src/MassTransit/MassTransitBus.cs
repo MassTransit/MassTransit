@@ -18,6 +18,7 @@ namespace MassTransit
     using System.Threading;
     using System.Threading.Tasks;
     using Context;
+    using Events;
     using GreenPipes;
     using Internals.Extensions;
     using Logging;
@@ -33,17 +34,15 @@ namespace MassTransit
         static readonly ILog _log = Logger.Get<MassTransitBus>();
         readonly IBusObserver _busObservable;
         readonly IConsumePipe _consumePipe;
-        readonly IBusHostControl[] _hosts;
+        readonly IBusHostCollection _hosts;
         readonly Lazy<IPublishEndpoint> _publishEndpoint;
         readonly IPublishEndpointProvider _publishEndpointProvider;
-        readonly IReceiveEndpoint[] _receiveEndpoints;
-        readonly ReceiveObservable _receiveObservers;
         readonly ISendEndpointProvider _sendEndpointProvider;
 
         BusHandle _busHandle;
 
         public MassTransitBus(Uri address, IConsumePipe consumePipe, ISendEndpointProvider sendEndpointProvider,
-            IPublishEndpointProvider publishEndpointProvider, IEnumerable<IReceiveEndpoint> receiveEndpoints, IEnumerable<IBusHostControl> hosts,
+            IPublishEndpointProvider publishEndpointProvider, IBusHostCollection hosts,
             IBusObserver busObservable)
         {
             Address = address;
@@ -51,10 +50,8 @@ namespace MassTransit
             _sendEndpointProvider = sendEndpointProvider;
             _publishEndpointProvider = publishEndpointProvider;
             _busObservable = busObservable;
-            _receiveEndpoints = receiveEndpoints.ToArray();
-            _hosts = hosts.ToArray();
+            _hosts = hosts;
 
-            _receiveObservers = new ReceiveObservable();
             _publishEndpoint = new Lazy<IPublishEndpoint>(() => publishEndpointProvider.CreatePublishEndpoint(address));
         }
 
@@ -66,16 +63,6 @@ namespace MassTransit
         ConnectHandle IRequestPipeConnector.ConnectRequestPipe<T>(Guid requestId, IPipe<ConsumeContext<T>> pipe)
         {
             return _consumePipe.ConnectRequestPipe(requestId, pipe);
-        }
-
-        ConnectHandle IConsumeMessageObserverConnector.ConnectConsumeMessageObserver<T>(IConsumeMessageObserver<T> observer)
-        {
-            return new MultipleConnectHandle(_receiveEndpoints.Select(x => x.ConnectConsumeMessageObserver(observer)));
-        }
-
-        ConnectHandle IConsumeObserverConnector.ConnectConsumeObserver(IConsumeObserver observer)
-        {
-            return new MultipleConnectHandle(_receiveEndpoints.Select(x => x.ConnectConsumeObserver(observer)));
         }
 
         Task IPublishEndpoint.Publish<T>(T message, CancellationToken cancellationToken)
@@ -136,11 +123,6 @@ namespace MassTransit
             return _sendEndpointProvider.GetSendEndpoint(address);
         }
 
-        BusHandle IBusControl.Start()
-        {
-            return TaskUtil.Await(() => StartAsync(CancellationToken.None));
-        }
-
         public async Task<BusHandle> StartAsync(CancellationToken cancellationToken)
         {
             if (_busHandle != null)
@@ -153,10 +135,7 @@ namespace MassTransit
 
             Handle busHandle = null;
 
-            var endpoints = new List<ReceiveEndpointHandle>();
             var hosts = new List<HostHandle>();
-            var observers = new List<ConnectHandle>();
-            var busReady = new BusReady(_receiveEndpoints);
             try
             {
                 if (_log.IsDebugEnabled)
@@ -164,29 +143,16 @@ namespace MassTransit
 
                 foreach (var host in _hosts)
                 {
-                    var hostHandle = host.Start();
+                    var hostHandle = await host.Start().ConfigureAwait(false);
 
                     hosts.Add(hostHandle);
                 }
 
-                if (_log.IsDebugEnabled)
-                    _log.DebugFormat("Starting receive endpoints...");
-
-                foreach (var endpoint in _receiveEndpoints)
-                {
-                    var observerHandle = endpoint.ConnectReceiveObserver(_receiveObservers);
-                    observers.Add(observerHandle);
-
-                    var handle = endpoint.Start();
-
-                    endpoints.Add(handle);
-                }
-
-                busHandle = new Handle(hosts, endpoints, observers, this, _busObservable, busReady);
+                busHandle = new Handle(hosts, this, _busObservable);
 
                 await busHandle.Ready.WithCancellation(cancellationToken).ConfigureAwait(false);
 
-                await _busObservable.PostStart(this, busReady.Ready).ConfigureAwait(false);
+                await _busObservable.PostStart(this, busHandle.Ready).ConfigureAwait(false);
 
                 _busHandle = busHandle;
 
@@ -205,7 +171,7 @@ namespace MassTransit
                     }
                     else
                     {
-                        var handle = new Handle(hosts, endpoints, observers, this, _busObservable, busReady);
+                        var handle = new Handle(hosts, this, _busObservable);
 
                         await handle.StopAsync(cancellationToken).ConfigureAwait(false);
                     }
@@ -221,17 +187,6 @@ namespace MassTransit
             }
         }
 
-        void IBusControl.Stop(CancellationToken cancellationToken)
-        {
-            if (_busHandle == null)
-            {
-                _log.Warn($"The bus could not be stopped as it was never started: {Address}");
-                return;
-            }
-
-            _busHandle.Stop(cancellationToken);
-        }
-
         public Task StopAsync(CancellationToken cancellationToken = new CancellationToken())
         {
             if (_busHandle == null)
@@ -243,9 +198,24 @@ namespace MassTransit
             return _busHandle.StopAsync(cancellationToken);
         }
 
+        ConnectHandle IConsumeObserverConnector.ConnectConsumeObserver(IConsumeObserver observer)
+        {
+            return new MultipleConnectHandle(_hosts.Select(h => h.ConnectConsumeObserver(observer)));
+        }
+
+        ConnectHandle IConsumeMessageObserverConnector.ConnectConsumeMessageObserver<T>(IConsumeMessageObserver<T> observer)
+        {
+            return new MultipleConnectHandle(_hosts.Select(h => h.ConnectConsumeMessageObserver(observer)));
+        }
+
         public ConnectHandle ConnectReceiveObserver(IReceiveObserver observer)
         {
-            return _receiveObservers.Connect(observer);
+            return new MultipleConnectHandle(_hosts.Select(x => x.ConnectReceiveObserver(observer)));
+        }
+
+        ConnectHandle IReceiveEndpointObserverConnector.ConnectReceiveEndpointObserver(IReceiveEndpointObserver observer)
+        {
+            return new MultipleConnectHandle(_hosts.Select(x => x.ConnectReceiveEndpointObserver(observer)));
         }
 
         public ConnectHandle ConnectPublishObserver(IPublishObserver observer)
@@ -263,9 +233,6 @@ namespace MassTransit
 
             foreach (var host in _hosts)
                 host.Probe(scope);
-
-            foreach (var receiveEndpoint in _receiveEndpoints)
-                receiveEndpoint.Probe(scope);
         }
 
         public ConnectHandle ConnectSendObserver(ISendObserver observer)
@@ -273,84 +240,13 @@ namespace MassTransit
             return _sendEndpointProvider.ConnectSendObserver(observer);
         }
 
-        ConnectHandle IReceiveEndpointObserverConnector.ConnectReceiveEndpointObserver(IReceiveEndpointObserver observer)
-        {
-            return new MultipleConnectHandle(_receiveEndpoints.Select(x => x.ConnectReceiveEndpointObserver(observer)));
-        }
-
         void IDisposable.Dispose()
         {
-            _busHandle?.Stop(CancellationToken.None);
+            if (_busHandle != null)
+                throw new MassTransitException("The bus was disposed without being stopped. Explicitly call StopAsync before the bus instance is disposed.");
 
             (_sendEndpointProvider as IDisposable)?.Dispose();
             (_publishEndpointProvider as IDisposable)?.Dispose();
-        }
-
-
-        class BusReady
-        {
-            readonly ReadyObserver[] _observers;
-
-            public BusReady(IEnumerable<IReceiveEndpoint> receiveEndpoints)
-            {
-                _observers = receiveEndpoints.Select(x => new ReadyObserver(x)).ToArray();
-            }
-
-            public Task<ReceiveEndpointReady[]> Ready
-            {
-                get { return ReadyOrNot(_observers.Select(x => x.Ready)); }
-            }
-
-            async Task<ReceiveEndpointReady[]> ReadyOrNot(IEnumerable<Task<ReceiveEndpointReady>> observers)
-            {
-                var tasks = observers as Task<ReceiveEndpointReady>[] ?? observers.ToArray();
-
-                foreach (Task<ReceiveEndpointReady> observer in tasks)
-                {
-                    await observer.ConfigureAwait(false);
-                }
-
-                return await Task.WhenAll(tasks).ConfigureAwait(false);
-            }
-
-
-            class ReadyObserver :
-                IReceiveEndpointObserver
-            {
-                readonly ConnectHandle _handle;
-                readonly TaskCompletionSource<ReceiveEndpointReady> _ready;
-
-                public ReadyObserver(IReceiveEndpoint endpoint)
-                {
-                    _ready = new TaskCompletionSource<ReceiveEndpointReady>();
-                    _handle = endpoint.ConnectReceiveEndpointObserver(this);
-                }
-
-                public Task<ReceiveEndpointReady> Ready => _ready.Task;
-
-                Task IReceiveEndpointObserver.Ready(ReceiveEndpointReady ready)
-                {
-                    _ready.TrySetResult(ready);
-
-                    _handle.Disconnect();
-
-                    return TaskUtil.Completed;
-                }
-
-                Task IReceiveEndpointObserver.Completed(ReceiveEndpointCompleted completed)
-                {
-                    return TaskUtil.Completed;
-                }
-
-                public Task Faulted(ReceiveEndpointFaulted faulted)
-                {
-                    _ready.TrySetException(faulted.Exception);
-
-                    _handle.Disconnect();
-
-                    return TaskUtil.Completed;
-                }
-            }
         }
 
 
@@ -359,33 +255,17 @@ namespace MassTransit
         {
             readonly IBus _bus;
             readonly IBusObserver _busObserver;
-            readonly ReceiveEndpointHandle[] _endpointHandles;
             readonly HostHandle[] _hostHandles;
-            readonly ConnectHandle[] _observerHandles;
             bool _stopped;
 
-            public Handle(IEnumerable<HostHandle> hostHandles, IEnumerable<ReceiveEndpointHandle> endpointHandles, IEnumerable<ConnectHandle> observerHandles,
-                IBus bus, IBusObserver busObserver, BusReady ready)
+            public Handle(IEnumerable<HostHandle> hostHandles, IBus bus, IBusObserver busObserver)
             {
                 _bus = bus;
                 _busObserver = busObserver;
-                _endpointHandles = endpointHandles.ToArray();
                 _hostHandles = hostHandles.ToArray();
-                _observerHandles = observerHandles.ToArray();
-                Ready = ready.Ready;
             }
 
-            public Task<ReceiveEndpointReady[]> Ready { get; }
-
-            public void Stop(CancellationToken cancellationToken)
-            {
-                if (_stopped)
-                    return;
-
-                TaskUtil.Await(() => StopAsync(cancellationToken), cancellationToken);
-
-                _stopped = true;
-            }
+            public Task<BusReady> Ready => ReadyOrNot(_hostHandles.Select(x => x.Ready));
 
             public async Task StopAsync(CancellationToken cancellationToken)
             {
@@ -396,14 +276,6 @@ namespace MassTransit
 
                 try
                 {
-                    foreach (var observerHandle in _observerHandles)
-                        observerHandle.Disconnect();
-
-                    if (_log.IsDebugEnabled)
-                        _log.DebugFormat("Stopping endpoints...");
-
-                    await Task.WhenAll(_endpointHandles.Select(x => x.Stop(cancellationToken))).ConfigureAwait(false);
-
                     if (_log.IsDebugEnabled)
                         _log.DebugFormat("Stopping hosts...");
 
@@ -421,9 +293,17 @@ namespace MassTransit
                 _stopped = true;
             }
 
-            void IDisposable.Dispose()
+            async Task<BusReady> ReadyOrNot(IEnumerable<Task<HostReady>> hosts)
             {
-                Stop(CancellationToken.None);
+                Task<HostReady>[] readyTasks = hosts as Task<HostReady>[] ?? hosts.ToArray();
+                foreach (Task<HostReady> ready in readyTasks)
+                {
+                    await ready.ConfigureAwait(false);
+                }
+
+                HostReady[] hostsReady = await Task.WhenAll(readyTasks).ConfigureAwait(false);
+
+                return new BusReadyEvent(hostsReady, _bus);
             }
         }
     }

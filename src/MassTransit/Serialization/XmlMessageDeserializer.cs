@@ -29,16 +29,11 @@ namespace MassTransit.Serialization
         IMessageDeserializer
     {
         readonly JsonSerializer _deserializer;
-        readonly IPublishEndpointProvider _publishEndpoint;
-        readonly ISendEndpointProvider _sendEndpointProvider;
         readonly IObjectTypeDeserializer _objectTypeDeserializer;
 
-        public XmlMessageDeserializer(JsonSerializer deserializer, ISendEndpointProvider sendEndpointProvider,
-            IPublishEndpointProvider publishEndpoint)
+        public XmlMessageDeserializer(JsonSerializer deserializer)
         {
             _deserializer = deserializer;
-            _sendEndpointProvider = sendEndpointProvider;
-            _publishEndpoint = publishEndpoint;
 
             _objectTypeDeserializer = new ObjectTypeDeserializer(_deserializer);
         }
@@ -77,7 +72,7 @@ namespace MassTransit.Serialization
                     envelope = _deserializer.Deserialize<MessageEnvelope>(jsonReader);
                 }
 
-                return new JsonConsumeContext(_deserializer, _objectTypeDeserializer, _sendEndpointProvider, _publishEndpoint, receiveContext, envelope);
+                return new JsonConsumeContext(_deserializer, _objectTypeDeserializer, receiveContext, envelope);
             }
             catch (JsonSerializationException ex)
             {

@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,7 +14,6 @@ namespace Automatonymous.Activities
 {
     using System;
     using System.Threading.Tasks;
-    using GreenPipes;
 
 
     public class FaultedRequestActivity<TInstance, TData, TException, TRequest, TResponse> :
@@ -27,22 +26,28 @@ namespace Automatonymous.Activities
         where TResponse : class
     {
         readonly EventExceptionMessageFactory<TInstance, TData, TException, TRequest> _messageFactory;
+        readonly ServiceAddressProvider<TInstance, TData, TException> _serviceAddressProvider;
 
         public FaultedRequestActivity(Request<TInstance, TRequest, TResponse> request,
             EventExceptionMessageFactory<TInstance, TData, TException, TRequest> messageFactory)
             : base(request)
         {
             _messageFactory = messageFactory;
+            _serviceAddressProvider = context => request.Settings.ServiceAddress;
+        }
+
+        public FaultedRequestActivity(Request<TInstance, TRequest, TResponse> request,
+            ServiceAddressProvider<TInstance, TData, TException> serviceAddressProvider,
+            EventExceptionMessageFactory<TInstance, TData, TException, TRequest> messageFactory)
+            : base(request)
+        {
+            _messageFactory = messageFactory;
+            _serviceAddressProvider = context => serviceAddressProvider(context) ?? request.Settings.ServiceAddress;
         }
 
         public void Accept(StateMachineVisitor visitor)
         {
             visitor.Visit(this);
-        }
-
-        public void Probe(ProbeContext context)
-        {
-            var scope = context.CreateScope("request-faulted");
         }
 
         Task Activity<TInstance, TData>.Execute(BehaviorContext<TInstance, TData> context, Behavior<TInstance, TData> next)
@@ -56,9 +61,10 @@ namespace Automatonymous.Activities
             ConsumeExceptionEventContext<TInstance, TData, TException> exceptionContext;
             if (context.TryGetExceptionContext(out exceptionContext))
             {
-                TRequest message = _messageFactory(exceptionContext);
+                var message = _messageFactory(exceptionContext);
+                var serviceAddress = _serviceAddressProvider(exceptionContext);
 
-                await SendRequest(context, exceptionContext, message).ConfigureAwait(false);
+                await SendRequest(context, exceptionContext, message, serviceAddress).ConfigureAwait(false);
             }
 
             await next.Faulted(context).ConfigureAwait(false);

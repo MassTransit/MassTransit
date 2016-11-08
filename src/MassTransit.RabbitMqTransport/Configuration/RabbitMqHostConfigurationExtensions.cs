@@ -14,8 +14,7 @@ namespace MassTransit
 {
     using System;
     using RabbitMqTransport;
-    using RabbitMqTransport.Configuration;
-    using RabbitMqTransport.Configuration.Configurators;
+    using RabbitMqTransport.Configurators;
 
 
     public static class RabbitMqHostConfigurationExtensions
@@ -134,7 +133,7 @@ namespace MassTransit
         public static void ReceiveEndpoint(this IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host,
             Action<IRabbitMqReceiveEndpointConfigurator> configure)
         {
-            var queueName = configurator.GetTemporaryQueueName("receiveEndpoint-");
+            var queueName = host.GetTemporaryQueueName("receiveEndpoint-");
 
             configurator.ReceiveEndpoint(host, queueName, x =>
             {
@@ -161,16 +160,17 @@ namespace MassTransit
             if (host == null)
                 throw new ArgumentNullException(nameof(host));
 
-            var queueName = configurator.GetTemporaryQueueName("manage-");
+            var queueName = host.GetTemporaryQueueName("manage-");
 
-            var endpointConfigurator = new RabbitMqReceiveEndpointConfigurator(host, queueName);
-
-            endpointConfigurator.AutoDelete = true;
-            endpointConfigurator.Durable = false;
+            var endpointConfigurator = new RabbitMqReceiveEndpointSpecification(host, queueName)
+            {
+                AutoDelete = true,
+                Durable = false
+            };
 
             configure?.Invoke(endpointConfigurator);
 
-            configurator.AddBusFactorySpecification(endpointConfigurator);
+            configurator.AddReceiveEndpointSpecification(endpointConfigurator);
 
             var managementEndpointConfigurator = new ManagementEndpointConfigurator(endpointConfigurator);
 

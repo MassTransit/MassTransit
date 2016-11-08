@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -17,7 +17,6 @@ namespace MassTransit.Context
     using System.Threading;
     using System.Threading.Tasks;
     using GreenPipes;
-    using Pipeline;
 
 
     /// <summary>
@@ -28,6 +27,8 @@ namespace MassTransit.Context
     {
         readonly ConcurrentDictionary<Type, Lazy<ISendEndpointConverter>> _types =
             new ConcurrentDictionary<Type, Lazy<ISendEndpointConverter>>();
+
+        ISendEndpointConverter this[Type type] => _types.GetOrAdd(type, CreateTypeConverter).Value;
 
         public static Task Send(ISendEndpoint endpoint, object message, Type messageType,
             CancellationToken cancellationToken = default(CancellationToken))
@@ -41,8 +42,6 @@ namespace MassTransit.Context
             return Cached.Converters.Value[messageType].Send(endpoint, message, pipe, cancellationToken);
         }
 
-        ISendEndpointConverter this[Type type] => _types.GetOrAdd(type, CreateTypeConverter).Value;
-
         static Lazy<ISendEndpointConverter> CreateTypeConverter(Type type)
         {
             return new Lazy<ISendEndpointConverter>(() => CreateConverter(type));
@@ -50,7 +49,7 @@ namespace MassTransit.Context
 
         static ISendEndpointConverter CreateConverter(Type type)
         {
-            Type converterType = typeof(SendEndpointConverter<>).MakeGenericType(type);
+            var converterType = typeof(SendEndpointConverter<>).MakeGenericType(type);
 
             return (ISendEndpointConverter)Activator.CreateInstance(converterType);
         }

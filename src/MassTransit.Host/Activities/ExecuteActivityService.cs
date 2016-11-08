@@ -27,11 +27,11 @@ namespace MassTransit.Host.Activities
     public class ExecuteActivityService<TActivity, TArguments> :
         ServiceControl,
         IDisposable
-        where TActivity : ExecuteActivity<TArguments>
+        where TActivity : class, ExecuteActivity<TArguments>
         where TArguments : class
     {
         readonly string _activityName;
-        readonly ExecuteActivityFactory<TArguments> _executeActivityFactory;
+        readonly ExecuteActivityFactory<TActivity,TArguments> _executeActivityFactory;
         readonly int _executeConsumerLimit;
         readonly string _executeQueueName;
         readonly ILog _log;
@@ -39,7 +39,7 @@ namespace MassTransit.Host.Activities
         bool _disposed;
 
         public ExecuteActivityService(IConfigurationProvider configuration, IServiceConfigurator serviceFactory,
-            IActivityQueueNameProvider activityUriProvider, ExecuteActivityFactory<TArguments> executeActivityFactory)
+            IActivityQueueNameProvider activityUriProvider, ExecuteActivityFactory<TActivity, TArguments> executeActivityFactory)
         {
             _log = Logger.Get(GetType());
 
@@ -79,7 +79,7 @@ namespace MassTransit.Host.Activities
 
         int GetExecuteConsumerLimit(IConfigurationProvider configurationProvider)
         {
-            string settingName = string.Format("{0}ConsumerLimit", _activityName);
+            string settingName = $"{_activityName}ConsumerLimit";
 
             return configurationProvider.GetSetting(settingName, Environment.ProcessorCount);
         }

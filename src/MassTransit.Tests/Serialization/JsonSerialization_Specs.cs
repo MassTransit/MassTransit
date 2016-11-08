@@ -19,6 +19,7 @@ namespace MassTransit.Tests.Serialization
     using System.Linq;
     using System.Text;
     using System.Xml.Linq;
+    using GreenPipes.Internals.Extensions;
     using MassTransit.Serialization;
     using MassTransit.Serialization.JsonConverters;
     using Newtonsoft.Json;
@@ -31,7 +32,7 @@ namespace MassTransit.Tests.Serialization
 
     public class When_serializing_messages_with_json_dot_net
     {
-        static Type _proxyType = TypeMetadataCache.GetImplementationType(typeof(MessageA));
+        static Type _proxyType = TypeCache.GetImplementationType(typeof(MessageA));
         string _body;
         JsonSerializer _deserializer;
         Envelope _envelope;
@@ -116,7 +117,7 @@ namespace MassTransit.Tests.Serialization
 
             using (var jsonReader = new JTokenReader(result.Message as JToken))
             {
-                Type proxyType = TypeMetadataCache.GetImplementationType(typeof(MessageA));
+                Type proxyType = TypeCache.GetImplementationType(typeof(MessageA));
                 var message = (MessageA)Activator.CreateInstance(proxyType);
 
                 _serializer.Populate(jsonReader, message);

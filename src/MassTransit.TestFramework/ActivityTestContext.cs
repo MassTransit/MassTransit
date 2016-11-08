@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -27,17 +27,21 @@ namespace MassTransit.TestFramework
     }
 
 
-    public class ActivityTestContext<T, TArguments, TLog> :
+    public class ActivityTestContext<TActivity, TArguments, TLog> :
         ActivityTestContext
-        where T : class, Activity<TArguments, TLog>
+        where TActivity : class, Activity<TArguments, TLog>
         where TArguments : class
         where TLog : class
     {
-        readonly ActivityFactory<TArguments, TLog> _activityFactory;
+        readonly Action<IExecuteActivityConfigurator<TActivity, TArguments>> _configureExecute;
+        readonly Action<ICompensateActivityConfigurator<TActivity, TLog>> _configureCompensate;
+        readonly ActivityFactory<TActivity, TArguments, TLog> _activityFactory;
 
-        public ActivityTestContext(Uri baseUri, Func<T> activityFactory)
+        public ActivityTestContext(Uri baseUri, Func<TActivity> activityFactory, Action<IExecuteActivityConfigurator<TActivity, TArguments>> configureExecute, Action<ICompensateActivityConfigurator<TActivity, TLog>> configureCompensate)
         {
-            _activityFactory = new FactoryMethodActivityFactory<T, TArguments, TLog>(_ => activityFactory(), _ => activityFactory());
+            _configureExecute = configureExecute;
+            _configureCompensate = configureCompensate;
+            _activityFactory = new FactoryMethodActivityFactory<TActivity, TArguments, TLog>(_ => activityFactory(), _ => activityFactory());
 
             Name = GetActivityName();
 
@@ -56,14 +60,14 @@ namespace MassTransit.TestFramework
 
         public void Configure(ActivityTestContextConfigurator configurator)
         {
-            configurator.ReceiveEndpoint(ExecuteQueueName, x => x.ExecuteActivityHost<T, TArguments>(CompensateUri, _activityFactory));
+            configurator.ReceiveEndpoint(ExecuteQueueName, x => x.ExecuteActivityHost(CompensateUri, _activityFactory, _configureExecute));
 
-            configurator.ReceiveEndpoint(CompensateQueueName, x => x.CompensateActivityHost<T, TLog>(_activityFactory));
+            configurator.ReceiveEndpoint(CompensateQueueName, x => x.CompensateActivityHost(_activityFactory, _configureCompensate));
         }
 
         static string GetActivityName()
         {
-            string name = typeof(T).Name;
+            var name = typeof(TActivity).Name;
             if (name.EndsWith("Activity"))
                 name = name.Substring(0, name.Length - "Activity".Length);
             return name;
@@ -76,21 +80,23 @@ namespace MassTransit.TestFramework
 
         string BuildQueueName(string prefix)
         {
-            return string.Format("{0}_{1}", prefix, typeof(T).Name.ToLowerInvariant());
+            return $"{prefix}_{typeof(TActivity).Name.ToLowerInvariant()}";
         }
     }
 
 
-    public class ActivityTestContext<T, TArguments> :
+    public class ActivityTestContext<TActivity, TArguments> :
         ActivityTestContext
-        where T : class, ExecuteActivity<TArguments>
+        where TActivity : class, ExecuteActivity<TArguments>
         where TArguments : class
     {
-        readonly ExecuteActivityFactory<TArguments> _activityFactory;
+        readonly ExecuteActivityFactory<TActivity, TArguments> _activityFactory;
+        readonly Action<IExecuteActivityConfigurator<TActivity, TArguments>> _configure;
 
-        public ActivityTestContext(Uri baseUri, Func<T> activityFactory)
+        public ActivityTestContext(Uri baseUri, Func<TActivity> activityFactory, Action<IExecuteActivityConfigurator<TActivity, TArguments>> configure)
         {
-            _activityFactory = new FactoryMethodExecuteActivityFactory<T, TArguments>(_ => activityFactory());
+            _configure = configure;
+            _activityFactory = new FactoryMethodExecuteActivityFactory<TActivity, TArguments>(_ => activityFactory());
 
             Name = GetActivityName();
 
@@ -105,12 +111,12 @@ namespace MassTransit.TestFramework
 
         public void Configure(ActivityTestContextConfigurator configurator)
         {
-            configurator.ReceiveEndpoint(ExecuteQueueName, x => x.ExecuteActivityHost<T, TArguments>(_activityFactory));
+            configurator.ReceiveEndpoint(ExecuteQueueName, x => x.ExecuteActivityHost(_activityFactory, h => _configure?.Invoke(h)));
         }
 
         static string GetActivityName()
         {
-            string name = typeof(T).Name;
+            var name = typeof(TActivity).Name;
             if (name.EndsWith("Activity"))
                 name = name.Substring(0, name.Length - "Activity".Length);
             return name;
@@ -123,7 +129,7 @@ namespace MassTransit.TestFramework
 
         string BuildQueueName(string prefix)
         {
-            return string.Format("{0}_{1}", prefix, typeof(T).Name.ToLowerInvariant());
+            return $"{prefix}_{typeof(TActivity).Name.ToLowerInvariant()}";
         }
     }
 }

@@ -12,13 +12,24 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports
 {
+    using System;
+    using System.Threading.Tasks;
+
+
     public interface IBusHostControl :
-        IBusHost
+        IHost
     {
         /// <summary>
         /// Starts the Host, which begins the connection asynchronously.
         /// </summary>
         /// <returns></returns>
-        HostHandle Start();
+        Task<HostHandle> Start();
+
+        /// <summary>
+        /// Returns true if the address matches the host
+        /// </summary>
+        /// <param name="address"></param>
+        /// <returns></returns>
+        bool Matches(Uri address);
     }
 }

@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,28 +12,40 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Builders
 {
-    using GreenPipes;
+    using System;
     using Pipeline;
+    using Pipeline.Pipes;
+    using Transports;
+    using Transports.InMemory;
 
 
     public class InMemoryReceiveEndpointBuilder :
+        ReceiveEndpointBuilder,
         IReceiveEndpointBuilder
     {
-        readonly IConsumePipe _consumePipe;
-
-        public InMemoryReceiveEndpointBuilder(IConsumePipe consumePipe)
+        public InMemoryReceiveEndpointBuilder(IConsumePipe consumePipe, IBusBuilder busBuilder)
+            : base(consumePipe, busBuilder)
         {
-            _consumePipe = consumePipe;
         }
 
-        ConnectHandle IConsumePipeConnector.ConnectConsumePipe<T>(IPipe<ConsumeContext<T>> pipe)
+        public override ISendEndpointProvider CreateSendEndpointProvider(Uri sourceAddress, params ISendPipeSpecification[] specifications)
         {
-            return _consumePipe.ConnectConsumePipe(pipe);
+            var sendPipe = CreateSendPipe(specifications);
+
+            var provider = new InMemorySendEndpointProvider(sourceAddress, SendTransportProvider, MessageSerializer, sendPipe);
+
+            return new SendEndpointCache(provider);
         }
 
-        ConnectHandle IConsumeMessageObserverConnector.ConnectConsumeMessageObserver<T>(IConsumeMessageObserver<T> observer)
+        public override IPublishEndpointProvider CreatePublishEndpointProvider(Uri sourceAddress, params IPublishPipeSpecification[] specifications)
         {
-            return _consumePipe.ConnectConsumeMessageObserver(observer);
+            var sendEndpointProvider = new InMemorySendEndpointProvider(sourceAddress, SendTransportProvider, MessageSerializer, SendPipe.Empty);
+
+            var sendEndpointCache = new SendEndpointCache(sendEndpointProvider);
+
+            var publishPipe = CreatePublishPipe(specifications);
+
+            return new InMemoryPublishEndpointProvider(sendEndpointCache, SendTransportProvider, publishPipe);
         }
     }
 }

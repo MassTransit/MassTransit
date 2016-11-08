@@ -18,7 +18,6 @@ namespace MassTransit
     using Context;
     using GreenPipes;
     using GreenPipes.Payloads;
-    using Pipeline;
 
 
     public static class ConsumeContextExtensions
@@ -30,7 +29,8 @@ namespace MassTransit
             return new ConsumerConsumeContextProxy<TConsumer, T>(context, consumer);
         }
 
-        public static ConsumerConsumeContext<TConsumer, TMessage> PushConsumerScope<TConsumer, TMessage, T>(this ConsumeContext<TMessage> context, TConsumer consumer,
+        public static ConsumerConsumeContext<TConsumer, TMessage> PushConsumerScope<TConsumer, TMessage, T>(this ConsumeContext<TMessage> context,
+            TConsumer consumer,
             T scope)
             where TMessage : class
             where TConsumer : class

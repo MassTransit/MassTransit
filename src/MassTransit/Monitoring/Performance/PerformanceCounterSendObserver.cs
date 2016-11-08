@@ -24,6 +24,13 @@ namespace MassTransit.Monitoring.Performance
     public class PerformanceCounterSendObserver :
         ISendObserver
     {
+        readonly ICounterFactory _factory;
+
+        public PerformanceCounterSendObserver(ICounterFactory factory)
+        {
+            _factory = factory;
+        }
+
         Task ISendObserver.PreSend<T>(SendContext<T> context)
         {
             return TaskUtil.Completed;
@@ -31,14 +38,14 @@ namespace MassTransit.Monitoring.Performance
 
         Task ISendObserver.PostSend<T>(SendContext<T> context)
         {
-            MessagePerformanceCounterCache<T>.Counter.Sent();
+            MessagePerformanceCounterCache<T>.Counter(_factory).Sent();
 
             return TaskUtil.Completed;
         }
 
         Task ISendObserver.SendFault<T>(SendContext<T> context, Exception exception)
         {
-            MessagePerformanceCounterCache<T>.Counter.SendFaulted();
+            MessagePerformanceCounterCache<T>.Counter(_factory).SendFaulted();
 
             return TaskUtil.Completed;
         }

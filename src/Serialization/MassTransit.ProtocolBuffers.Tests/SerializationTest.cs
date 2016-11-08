@@ -47,7 +47,7 @@ namespace MassTransit.ProtocolBuffers.Tests
             if (_serializerType == typeof(ProtocolBuffersMessageSerializer))
             {
                 Serializer = new ProtocolBuffersMessageSerializer();
-                Deserializer = new ProtocolBuffersMessageDeserializer(Bus, PublishEndpointProvider);
+                Deserializer = new ProtocolBuffersMessageDeserializer();
             }
             else
                 throw new ArgumentException("The serializer type is unknown");
@@ -89,7 +89,7 @@ namespace MassTransit.ProtocolBuffers.Tests
             where T : class
         {
             var message = new InMemoryTransportMessage(Guid.NewGuid(), serializedMessageData, Serializer.ContentType.MediaType, TypeMetadataCache<T>.ShortName);
-            var receiveContext = new InMemoryReceiveContext(new Uri("loopback://localhost/input_queue"), message, new ReceiveObservable());
+            var receiveContext = new InMemoryReceiveContext(new Uri("loopback://localhost/input_queue"), message, new ReceiveObservable(), Bus, PublishEndpointProvider);
 
             ConsumeContext consumeContext = Deserializer.Deserialize(receiveContext);
 

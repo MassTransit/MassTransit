@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -15,7 +15,6 @@ namespace MassTransit
     using System;
     using System.Threading.Tasks;
     using GreenPipes;
-    using Pipeline;
 
 
     public static class SendEndpointExtensions
@@ -31,7 +30,7 @@ namespace MassTransit
         public static async Task Send<T>(this ConsumeContext context, Uri destinationAddress, T message)
             where T : class
         {
-            ISendEndpoint endpoint = await context.GetSendEndpoint(destinationAddress).ConfigureAwait(false);
+            var endpoint = await context.GetSendEndpoint(destinationAddress).ConfigureAwait(false);
 
             await endpoint.Send(message, context.CancellationToken).ConfigureAwait(false);
         }
@@ -48,7 +47,7 @@ namespace MassTransit
         public static async Task Send<T>(this ConsumeContext context, Uri destinationAddress, T message, IPipe<SendContext<T>> pipe)
             where T : class
         {
-            ISendEndpoint endpoint = await context.GetSendEndpoint(destinationAddress).ConfigureAwait(false);
+            var endpoint = await context.GetSendEndpoint(destinationAddress).ConfigureAwait(false);
 
             await endpoint.Send(message, pipe, context.CancellationToken).ConfigureAwait(false);
         }
@@ -65,7 +64,7 @@ namespace MassTransit
         public static async Task Send<T>(this ConsumeContext context, Uri destinationAddress, T message, IPipe<SendContext> pipe)
             where T : class
         {
-            ISendEndpoint endpoint = await context.GetSendEndpoint(destinationAddress).ConfigureAwait(false);
+            var endpoint = await context.GetSendEndpoint(destinationAddress).ConfigureAwait(false);
 
             await endpoint.Send(message, pipe, context.CancellationToken).ConfigureAwait(false);
         }
@@ -79,7 +78,7 @@ namespace MassTransit
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
         public static async Task Send(this ConsumeContext context, Uri destinationAddress, object message)
         {
-            ISendEndpoint endpoint = await context.GetSendEndpoint(destinationAddress).ConfigureAwait(false);
+            var endpoint = await context.GetSendEndpoint(destinationAddress).ConfigureAwait(false);
 
             await endpoint.Send(message, context.CancellationToken).ConfigureAwait(false);
         }
@@ -94,7 +93,7 @@ namespace MassTransit
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
         public static async Task Send(this ConsumeContext context, Uri destinationAddress, object message, Type messageType)
         {
-            ISendEndpoint endpoint = await context.GetSendEndpoint(destinationAddress).ConfigureAwait(false);
+            var endpoint = await context.GetSendEndpoint(destinationAddress).ConfigureAwait(false);
 
             await endpoint.Send(message, messageType, context.CancellationToken).ConfigureAwait(false);
         }
@@ -110,7 +109,7 @@ namespace MassTransit
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
         public static async Task Send(this ConsumeContext context, Uri destinationAddress, object message, Type messageType, IPipe<SendContext> pipe)
         {
-            ISendEndpoint endpoint = await context.GetSendEndpoint(destinationAddress).ConfigureAwait(false);
+            var endpoint = await context.GetSendEndpoint(destinationAddress).ConfigureAwait(false);
 
             await endpoint.Send(message, messageType, pipe, context.CancellationToken).ConfigureAwait(false);
         }
@@ -125,7 +124,7 @@ namespace MassTransit
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
         public static async Task Send(this ConsumeContext context, Uri destinationAddress, object message, IPipe<SendContext> pipe)
         {
-            ISendEndpoint endpoint = await context.GetSendEndpoint(destinationAddress).ConfigureAwait(false);
+            var endpoint = await context.GetSendEndpoint(destinationAddress).ConfigureAwait(false);
 
             await endpoint.Send(message, pipe, context.CancellationToken).ConfigureAwait(false);
         }
@@ -141,7 +140,7 @@ namespace MassTransit
         public static async Task Send<T>(this ConsumeContext context, Uri destinationAddress, object values)
             where T : class
         {
-            ISendEndpoint endpoint = await context.GetSendEndpoint(destinationAddress).ConfigureAwait(false);
+            var endpoint = await context.GetSendEndpoint(destinationAddress).ConfigureAwait(false);
 
             await endpoint.Send<T>(values, context.CancellationToken).ConfigureAwait(false);
         }
@@ -158,7 +157,7 @@ namespace MassTransit
         public static async Task Send<T>(this ConsumeContext context, Uri destinationAddress, object values, IPipe<SendContext<T>> pipe)
             where T : class
         {
-            ISendEndpoint endpoint = await context.GetSendEndpoint(destinationAddress).ConfigureAwait(false);
+            var endpoint = await context.GetSendEndpoint(destinationAddress).ConfigureAwait(false);
 
             await endpoint.Send(values, pipe, context.CancellationToken).ConfigureAwait(false);
         }
@@ -175,7 +174,7 @@ namespace MassTransit
         public static async Task Send<T>(this ConsumeContext context, Uri destinationAddress, object values, IPipe<SendContext> pipe)
             where T : class
         {
-            ISendEndpoint endpoint = await context.GetSendEndpoint(destinationAddress).ConfigureAwait(false);
+            var endpoint = await context.GetSendEndpoint(destinationAddress).ConfigureAwait(false);
 
             await endpoint.Send<T>(values, pipe, context.CancellationToken).ConfigureAwait(false);
         }

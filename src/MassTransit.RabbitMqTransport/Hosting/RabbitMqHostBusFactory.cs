@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,20 +12,16 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RabbitMqTransport.Hosting
 {
-    using System.Net.Security;
-    using System.Security.Authentication;
-    using System.Security.Cryptography.X509Certificates;
+    using Configurators;
     using Logging;
     using MassTransit.Hosting;
-    using Transports;
 
 
     public class RabbitMqHostBusFactory :
         IHostBusFactory
     {
+        readonly RabbitMqHostSettings _hostSettings;
         readonly ILog _log = Logger.Get<RabbitMqHostBusFactory>();
-
-        readonly SettingsAdapter _hostSettings;
 
         public RabbitMqHostBusFactory(ISettingsProvider settingsProvider)
         {
@@ -33,7 +29,15 @@ namespace MassTransit.RabbitMqTransport.Hosting
             if (!settingsProvider.TryGetSettings("RabbitMQ", out settings))
                 throw new ConfigurationException("The RabbitMQ settings were not available");
 
-            _hostSettings = new SettingsAdapter(settings);
+            _hostSettings = new ConfigurationHostSettings
+            {
+                Host = settings.Host ?? "[::1]",
+                Port = settings.Port ?? 5672,
+                VirtualHost = string.IsNullOrWhiteSpace(settings.VirtualHost) ? "/" : $"/{settings.VirtualHost.Trim('/')}",
+                Username = settings.Username ?? "guest",
+                Password = settings.Password ?? "guest",
+                Heartbeat = settings.Heartbeat ?? 0
+            };
         }
 
         public IBusControl CreateBus(IBusServiceConfigurator busServiceConfigurator, string serviceName)
@@ -42,44 +46,13 @@ namespace MassTransit.RabbitMqTransport.Hosting
             {
                 var host = configurator.Host(_hostSettings);
 
-                if(_log.IsInfoEnabled)
+                if (_log.IsInfoEnabled)
                     _log.Info($"Configuring Host: {_hostSettings.ToDebugString()}");
 
                 var serviceConfigurator = new RabbitMqServiceConfigurator(configurator, host);
 
                 busServiceConfigurator.Configure(serviceConfigurator);
             });
-        }
-
-
-        class SettingsAdapter :
-            RabbitMqHostSettings
-        {
-            readonly RabbitMqSettings _settings;
-
-            public SettingsAdapter(RabbitMqSettings settings)
-            {
-                _settings = settings;
-            }
-
-            public string Host => _settings.Host ?? "[::1]";
-            public int Port => _settings.Port ?? 5672;
-            public string VirtualHost => _settings.VirtualHost ?? "/";
-            public string Username => _settings.Username ?? "guest";
-            public string Password => _settings.Password ?? "guest";
-            public ushort Heartbeat => _settings.Heartbeat ?? 0;
-            public bool Ssl => false;
-            public SslProtocols SslProtocol => SslProtocols.None;
-            public string SslServerName => null;
-            public SslPolicyErrors AcceptablePolicyErrors => SslPolicyErrors.None;
-            public string ClientCertificatePath => null;
-            public string ClientCertificatePassphrase => null;
-            public X509Certificate ClientCertificate => null;
-            public bool UseClientCertificateAsAuthenticationIdentity => false;
-            public IMessageNameFormatter MessageNameFormatter => new RabbitMqMessageNameFormatter();
-            public string[] ClusterMembers => null;
-            public IRabbitMqEndpointResolver HostNameSelector => null;
-            public string ClientProvidedName => null;
         }
     }
 }

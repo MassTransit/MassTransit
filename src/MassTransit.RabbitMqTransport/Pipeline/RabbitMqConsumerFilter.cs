@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,11 +12,11 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RabbitMqTransport.Pipeline
 {
-    using System;
     using System.Threading.Tasks;
+    using Events;
     using GreenPipes;
     using Logging;
-    using MassTransit.Pipeline;
+    using Topology;
     using Util;
 
 
@@ -27,18 +27,21 @@ namespace MassTransit.RabbitMqTransport.Pipeline
         IFilter<ModelContext>
     {
         static readonly ILog _log = Logger.Get<RabbitMqConsumerFilter>();
-        readonly IReceiveEndpointObserver _endpointObserver;
+        readonly IReceiveTransportObserver _transportObserver;
         readonly IReceiveObserver _receiveObserver;
         readonly IPipe<ReceiveContext> _receivePipe;
         readonly ITaskSupervisor _supervisor;
+        readonly ISendEndpointProvider _sendEndpointProvider;
+        readonly IPublishEndpointProvider _publishEndpointProvider;
 
-        public RabbitMqConsumerFilter(IPipe<ReceiveContext> receivePipe, IReceiveObserver receiveObserver, IReceiveEndpointObserver endpointObserver,
-            ITaskSupervisor supervisor)
+        public RabbitMqConsumerFilter(IPipe<ReceiveContext> receivePipe, IReceiveObserver receiveObserver, IReceiveTransportObserver transportObserver, ITaskSupervisor supervisor, ISendEndpointProvider sendEndpointProvider, IPublishEndpointProvider publishEndpointProvider)
         {
             _receivePipe = receivePipe;
             _receiveObserver = receiveObserver;
-            _endpointObserver = endpointObserver;
+            _transportObserver = transportObserver;
             _supervisor = supervisor;
+            _sendEndpointProvider = sendEndpointProvider;
+            _publishEndpointProvider = publishEndpointProvider;
         }
 
         void IProbeSite.Probe(ProbeContext context)
@@ -49,17 +52,17 @@ namespace MassTransit.RabbitMqTransport.Pipeline
         {
             var receiveSettings = context.GetPayload<ReceiveSettings>();
 
-            var inputAddress = context.ConnectionContext.HostSettings.GetInputAddress(receiveSettings);
+            var inputAddress = receiveSettings.GetInputAddress(context.ConnectionContext.HostSettings.HostAddress);
 
-            using (ITaskScope scope = _supervisor.CreateScope($"{TypeMetadataCache<RabbitMqConsumerFilter>.ShortName} - {inputAddress}", () => TaskUtil.Completed))
+            using (var scope = _supervisor.CreateScope($"{TypeMetadataCache<RabbitMqConsumerFilter>.ShortName} - {inputAddress}", () => TaskUtil.Completed))
             {
-                var consumer = new RabbitMqBasicConsumer(context, inputAddress, _receivePipe, _receiveObserver, scope);
+                var consumer = new RabbitMqBasicConsumer(context, inputAddress, _receivePipe, _receiveObserver, scope, _sendEndpointProvider, _publishEndpointProvider);
 
                 await context.BasicConsume(receiveSettings.QueueName, false, consumer).ConfigureAwait(false);
 
                 await scope.Ready.ConfigureAwait(false);
 
-                await _endpointObserver.Ready(new Ready(inputAddress)).ConfigureAwait(false);
+                await _transportObserver.Ready(new ReceiveTransportReadyEvent(inputAddress)).ConfigureAwait(false);
 
                 scope.SetReady();
 
@@ -69,8 +72,8 @@ namespace MassTransit.RabbitMqTransport.Pipeline
                 }
                 finally
                 {
-                    RabbitMqConsumerMetrics metrics = consumer;
-                    await _endpointObserver.Completed(new Completed(inputAddress, metrics)).ConfigureAwait(false);
+                    RabbitMqDeliveryMetrics metrics = consumer;
+                    await _transportObserver.Completed(new ReceiveTransportCompletedEvent(inputAddress, metrics)).ConfigureAwait(false);
 
                     if (_log.IsDebugEnabled)
                     {
@@ -79,34 +82,6 @@ namespace MassTransit.RabbitMqTransport.Pipeline
                     }
                 }
             }
-        }
-
-
-        class Ready :
-            ReceiveEndpointReady
-        {
-            public Ready(Uri inputAddress)
-            {
-                InputAddress = inputAddress;
-            }
-
-            public Uri InputAddress { get; }
-        }
-
-
-        class Completed :
-            ReceiveEndpointCompleted
-        {
-            public Completed(Uri inputAddress, RabbitMqConsumerMetrics metrics)
-            {
-                InputAddress = inputAddress;
-                DeliveryCount = metrics.DeliveryCount;
-                ConcurrentDeliveryCount = metrics.ConcurrentDeliveryCount;
-            }
-
-            public Uri InputAddress { get; }
-            public long DeliveryCount { get; }
-            public long ConcurrentDeliveryCount { get; }
         }
     }
 }

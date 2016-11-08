@@ -35,7 +35,12 @@ namespace MassTransit.ConsumeConnectors
                 .ToList();
         }
 
-        public ConnectHandle ConnectInstance(IConsumePipeConnector pipe, object instance)
+        ConnectHandle IInstanceConnector.ConnectInstance<T>(IConsumePipeConnector pipe, T instance, IPipeSpecification<ConsumerConsumeContext<T>>[] pipeSpecifications)
+        {
+            return new MultipleConnectHandle(_connectors.Select(x => x.ConnectInstance(pipe, instance, pipeSpecifications)));
+        }
+
+        ConnectHandle IInstanceConnector.ConnectInstance(IConsumePipeConnector pipe, object instance)
         {
             return new MultipleConnectHandle(_connectors.Select(x => x.ConnectInstance(pipe, instance)));
         }

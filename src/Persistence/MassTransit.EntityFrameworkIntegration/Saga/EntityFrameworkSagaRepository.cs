@@ -38,7 +38,7 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
         readonly IsolationLevel _isolationLevel;
         readonly SagaDbContextFactory _sagaDbContextFactory;
 
-        public EntityFrameworkSagaRepository(SagaDbContextFactory sagaDbContextFactory, IsolationLevel isolationLevel = IsolationLevel.Serializable)
+        public EntityFrameworkSagaRepository(SagaDbContextFactory sagaDbContextFactory, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
             _sagaDbContextFactory = sagaDbContextFactory;
             _isolationLevel = isolationLevel;
@@ -164,41 +164,70 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
             IPipe<SagaConsumeContext<TSaga, T>> next) where T : class
         {
             using (var dbContext = _sagaDbContextFactory())
-            using (var transaction = dbContext.Database.BeginTransaction(_isolationLevel))
             {
-                try
+                // We just get the correlation ids related to our Filter.
+                // We do this outside of the transaction to make sure we don't create a range lock.
+                var correlationIds = await dbContext.Set<TSaga>().Where(context.Query.FilterExpression)
+                    .Select(x => x.CorrelationId)
+                    .ToListAsync()
+                    .ConfigureAwait(false);
+
+                using (var transaction = dbContext.Database.BeginTransaction(_isolationLevel))
                 {
-                    // Hack to lock the whole table for the duration of the transaction.
-                    var tableName = ((IObjectContextAdapter)dbContext).ObjectContext.CreateObjectSet<TSaga>().EntitySet.Name;
-                    await dbContext.Database.ExecuteSqlCommandAsync($"select 1 from {tableName} WITH (TABLOCKX)").ConfigureAwait(false);
-
-                    List<TSaga> sagaInstances = await dbContext.Set<TSaga>().Where(context.Query.FilterExpression).ToListAsync().ConfigureAwait(false);
-                    if (sagaInstances.Count == 0)
+                    try
                     {
-                        var missingSagaPipe = new MissingPipe<T>(dbContext, next);
 
-                        await policy.Missing(context, missingSagaPipe).ConfigureAwait(false);
-                    }
-                    else
-                    {
-                        foreach (var instance in sagaInstances)
+                        if (correlationIds.Count == 0)
                         {
-                            await SendToInstance(context, dbContext, policy, instance, next).ConfigureAwait(false);
+                            var missingSagaPipe = new MissingPipe<T>(dbContext, next);
+
+                            await policy.Missing(context, missingSagaPipe).ConfigureAwait(false);
                         }
+                        else
+                        {
+                            var tableName = ((IObjectContextAdapter)dbContext).ObjectContext.CreateObjectSet<TSaga>().EntitySet.Name;
+                            foreach (var correlationId in correlationIds)
+                            {
+                                // Hack for locking row for the duration of the transaction. 
+                                // We only lock one at a time, since we don't want an accidental range lock.
+                                await
+                                    dbContext.Database.ExecuteSqlCommandAsync(
+                                        $"select 2 from {tableName} WITH (UPDLOCK, ROWLOCK) WHERE CorrelationId = @p0",
+                                        correlationId).ConfigureAwait(false);
+
+                                var instance = dbContext.Set<TSaga>().SingleOrDefault(x => x.CorrelationId == correlationId);
+
+                                await SendToInstance(context, dbContext, policy, instance, next).ConfigureAwait(false);
+                            }
+                        }
+
+                        await dbContext.SaveChangesAsync().ConfigureAwait(false);
+
+                        transaction.Commit();
                     }
-
-                    await dbContext.SaveChangesAsync().ConfigureAwait(false);
-
-                    transaction.Commit();
-                }
-                catch (DbUpdateException ex)
-                {
-                    var baseException = ex.GetBaseException() as SqlException;
-                    if (baseException != null && baseException.Number == 1205)
+                    catch (DbUpdateException ex)
                     {
-                        // deadlock, no need to rollback
+                        var baseException = ex.GetBaseException() as SqlException;
+                        if (baseException != null && baseException.Number == 1205)
+                        {
+                            // deadlock, no need to rollback
+                        }
+                        else
+                        {
+                            try
+                            {
+                                transaction.Rollback();
+                            }
+                            catch (Exception innerException)
+                            {
+                                if (_log.IsWarnEnabled)
+                                    _log.Warn("The transaction rollback failed", innerException);
+                            }
+                        }
+
+                        throw;
                     }
-                    else
+                    catch (SagaException sex)
                     {
                         try
                         {
@@ -209,41 +238,27 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
                             if (_log.IsWarnEnabled)
                                 _log.Warn("The transaction rollback failed", innerException);
                         }
-                    }
 
-                    throw;
-                }
-                catch (SagaException sex)
-                {
-                    try
-                    {
-                        transaction.Rollback();
+                        if (_log.IsErrorEnabled)
+                            _log.Error("Saga Exception Occurred", sex);
                     }
-                    catch (Exception innerException)
+                    catch (Exception ex)
                     {
-                        if (_log.IsWarnEnabled)
-                            _log.Warn("The transaction rollback failed", innerException);
-                    }
+                        try
+                        {
+                            transaction.Rollback();
+                        }
+                        catch (Exception innerException)
+                        {
+                            if (_log.IsWarnEnabled)
+                                _log.Warn("The transaction rollback failed", innerException);
+                        }
 
-                    if (_log.IsErrorEnabled)
-                        _log.Error("Saga Exception Occurred", sex);
-                }
-                catch (Exception ex)
-                {
-                    try
-                    {
-                        transaction.Rollback();
-                    }
-                    catch (Exception innerException)
-                    {
-                        if (_log.IsWarnEnabled)
-                            _log.Warn("The transaction rollback failed", innerException);
-                    }
+                        if (_log.IsErrorEnabled)
+                            _log.Error($"SAGA:{TypeMetadataCache<TSaga>.ShortName} Exception {TypeMetadataCache<T>.ShortName}", ex);
 
-                    if (_log.IsErrorEnabled)
-                        _log.Error($"SAGA:{TypeMetadataCache<TSaga>.ShortName} Exception {TypeMetadataCache<T>.ShortName}", ex);
-
-                    throw new SagaException(ex.Message, typeof(TSaga), typeof(T), Guid.Empty, ex);
+                        throw new SagaException(ex.Message, typeof(TSaga), typeof(T), Guid.Empty, ex);
+                    }
                 }
             }
         }

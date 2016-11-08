@@ -14,6 +14,7 @@ namespace MassTransit.Host
 {
     using System;
     using System.Diagnostics;
+    using Monitoring.Performance.Windows;
     using Topshelf;
     using Topshelf.HostConfigurators;
     using Topshelf.Runtime;
@@ -52,7 +53,7 @@ namespace MassTransit.Host
                 // this will force the performance counters to register during service installation
                 // making them created - of course using the InstallUtil stuff completely skips
                 // this part of the install :(
-                BusPerformanceCounters.Install();
+                new WindowsPerformanceCounterInstaller().Install();
             });
 
             configurator.Service(settings =>

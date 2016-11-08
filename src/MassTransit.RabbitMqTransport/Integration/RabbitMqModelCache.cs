@@ -18,9 +18,7 @@ namespace MassTransit.RabbitMqTransport.Integration
     using Contexts;
     using GreenPipes;
     using Logging;
-    using MassTransit.Pipeline;
     using RabbitMQ.Client;
-    using RabbitMQ.Client.Exceptions;
     using Util;
 
 
@@ -34,17 +32,15 @@ namespace MassTransit.RabbitMqTransport.Integration
         static readonly ILog _log = Logger.Get<RabbitMqModelCache>();
         readonly ITaskScope _cacheTaskScope;
 
-        readonly IConnectionCache _connectionCache;
-        readonly ModelSettings _modelSettings;
+        readonly IRabbitMqHost _host;
         readonly object _scopeLock = new object();
         ModelScope _scope;
 
-        public RabbitMqModelCache(IConnectionCache connectionCache, ITaskSupervisor supervisor, ModelSettings modelSettings)
+        public RabbitMqModelCache(IRabbitMqHost host)
         {
-            _connectionCache = connectionCache;
-            _modelSettings = modelSettings;
+            _host = host;
 
-            _cacheTaskScope = supervisor.CreateScope($"{TypeMetadataCache<RabbitMqModelCache>.ShortName}", CloseScope);
+            _cacheTaskScope = host.Supervisor.CreateScope($"{TypeMetadataCache<RabbitMqModelCache>.ShortName}", CloseScope);
         }
 
         public Task Send(IPipe<ModelContext> connectionPipe, CancellationToken cancellationToken)
@@ -102,7 +98,7 @@ namespace MassTransit.RabbitMqTransport.Integration
 
                     model.ModelShutdown += modelShutdown;
 
-                    var modelContext = new RabbitMqModelContext(connectionContext, model, _cacheTaskScope, _modelSettings);
+                    var modelContext = new RabbitMqModelContext(connectionContext, model, _cacheTaskScope, _host);
 
                     scope.Created(modelContext);
                 }
@@ -120,7 +116,7 @@ namespace MassTransit.RabbitMqTransport.Integration
 
             try
             {
-                await _connectionCache.Send(connectionPipe, _cacheTaskScope.StoppedToken).ConfigureAwait(false);
+                await _host.ConnectionCache.Send(connectionPipe, _cacheTaskScope.StoppedToken).ConfigureAwait(false);
             }
             catch (Exception exception)
             {

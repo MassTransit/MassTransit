@@ -14,8 +14,10 @@ namespace MassTransit.Testing.Subjects
 {
     using System;
     using System.Collections.Generic;
+    using System.Threading;
     using System.Threading.Tasks;
     using Configurators;
+    using GreenPipes.Util;
     using ScenarioBuilders;
     using ScenarioConfigurators;
 
@@ -35,10 +37,6 @@ namespace MassTransit.Testing.Subjects
         }
 
         public IReceivedMessageList<TSubject> Received => _received;
-
-        public void Dispose()
-        {
-        }
 
         public ITestScenarioBuilder<TScenario> Configure(ITestScenarioBuilder<TScenario> builder)
         {
@@ -68,6 +66,11 @@ namespace MassTransit.Testing.Subjects
             {
                 _received.Add(context, ex);
             }
+        }
+
+        public Task DisposeAsync(CancellationToken cancellationToken = default(CancellationToken))
+        {
+            return TaskUtil.Completed;
         }
     }
 }

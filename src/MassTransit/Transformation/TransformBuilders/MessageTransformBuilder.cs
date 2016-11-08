@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -16,8 +16,8 @@ namespace MassTransit.Transformation.TransformBuilders
     using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
-    using Configurators;
     using GreenPipes;
+    using GreenPipes.Internals.Extensions;
     using TransformConfigurators;
     using Transforms;
     using Util;
@@ -33,7 +33,7 @@ namespace MassTransit.Transformation.TransformBuilders
         public MessageTransformBuilder(TransformResultFactory<TResult> resultFactory)
         {
             ImplementationType = typeof(TResult).IsInterface
-                ? TypeMetadataCache.ImplementationBuilder.GetImplementationType(typeof(TResult))
+                ? TypeCache.ImplementationBuilder.GetImplementationType(typeof(TResult))
                 : typeof(TResult);
 
             _resultFactory = resultFactory;
@@ -72,7 +72,7 @@ namespace MassTransit.Transformation.TransformBuilders
             {
                 if (_resultTransforms.Count == 0)
                 {
-                    Type transformType = typeof(InputTransform<,>).MakeGenericType(typeof(TResult), typeof(TInput));
+                    var transformType = typeof(InputTransform<,>).MakeGenericType(typeof(TResult), typeof(TInput));
                     return (ITransform<TResult, TInput>)Activator.CreateInstance(transformType, _inputTransforms.Values);
                 }
 
@@ -86,9 +86,9 @@ namespace MassTransit.Transformation.TransformBuilders
 
         void CopyUnmappedProperties()
         {
-            foreach (PropertyInfo propertyInfo in GetUnmappedInputProperties())
+            foreach (var propertyInfo in GetUnmappedInputProperties())
             {
-                Type specificationType = typeof(CopyPropertyTransformSpecification<,,>).MakeGenericType(typeof(TResult), typeof(TInput),
+                var specificationType = typeof(CopyPropertyTransformSpecification<,,>).MakeGenericType(typeof(TResult), typeof(TInput),
                     propertyInfo.PropertyType);
 
                 var specification = (IPropertyTransformSpecification<TResult, TInput>)Activator.CreateInstance(specificationType, propertyInfo);
@@ -100,9 +100,9 @@ namespace MassTransit.Transformation.TransformBuilders
 
         void DefaultUnmappedProperties()
         {
-            foreach (PropertyInfo propertyInfo in GetUnmappedProperties())
+            foreach (var propertyInfo in GetUnmappedProperties())
             {
-                Type specificationType = typeof(DefaultPropertyTransformSpecification<,,>).MakeGenericType(typeof(TResult), typeof(TInput),
+                var specificationType = typeof(DefaultPropertyTransformSpecification<,,>).MakeGenericType(typeof(TResult), typeof(TInput),
                     propertyInfo.PropertyType);
 
                 var specification = (IPropertyTransformSpecification<TResult, TInput>)Activator.CreateInstance(specificationType, propertyInfo);

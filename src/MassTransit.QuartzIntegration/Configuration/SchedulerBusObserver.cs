@@ -50,7 +50,7 @@ namespace MassTransit.QuartzIntegration.Configuration
             return TaskUtil.Completed;
         }
 
-        public async Task PostStart(IBus bus, Task busReady)
+        public async Task PostStart(IBus bus, Task<BusReady> busReady)
         {
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Quartz Scheduler Starting: {0} ({1}/{2})", _schedulerEndpointAddress, _scheduler.SchedulerName, _scheduler.SchedulerInstanceId);

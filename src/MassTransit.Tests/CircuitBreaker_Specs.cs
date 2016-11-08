@@ -31,7 +31,7 @@ namespace MassTransit.Tests
         {
             base.ConfigureInputQueueEndpoint(configurator);
 
-            configurator.UseCircuitBreaker(x => x.ResetInterval(TimeSpan.FromSeconds(30)));
+            configurator.UseCircuitBreaker(x => x.ResetInterval = TimeSpan.FromSeconds(30));
         }
     }
 }

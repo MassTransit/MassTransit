@@ -18,7 +18,6 @@ namespace MassTransit.AutofacIntegration
     using Courier.Hosts;
     using GreenPipes;
     using Logging;
-    using Pipeline;
     using Util;
 
 
@@ -28,7 +27,7 @@ namespace MassTransit.AutofacIntegration
     /// <typeparam name="TActivity"></typeparam>
     /// <typeparam name="TLog"></typeparam>
     public class AutofacCompensateActivityFactory<TActivity, TLog> :
-        CompensateActivityFactory<TLog>
+        CompensateActivityFactory<TActivity, TLog>
         where TActivity : class, CompensateActivity<TLog>
         where TLog : class
     {
@@ -40,7 +39,7 @@ namespace MassTransit.AutofacIntegration
             _lifetimeScope = lifetimeScope;
         }
 
-        public async Task Compensate(CompensateContext<TLog> context, IPipe<CompensateActivityContext<TLog>> next)
+        public async Task Compensate(CompensateContext<TLog> context, IPipe<CompensateActivityContext<TActivity, TLog>> next)
         {
             using (var innerScope = _lifetimeScope.BeginLifetimeScope(x => ConfigureScope(x, context)))
             {
@@ -49,7 +48,7 @@ namespace MassTransit.AutofacIntegration
 
                 var activity = innerScope.Resolve<TActivity>(TypedParameter.From(context.Log));
 
-                CompensateActivityContext<TLog> activityContext = new HostCompensateActivityContext<TActivity, TLog>(activity, context);
+                CompensateActivityContext<TActivity, TLog> activityContext = new HostCompensateActivityContext<TActivity, TLog>(activity, context);
 
                 var consumerLifetimeScope = innerScope;
                 activityContext.GetOrAddPayload(() => consumerLifetimeScope);

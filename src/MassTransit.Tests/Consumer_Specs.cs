@@ -41,8 +41,8 @@ namespace MassTransit.Tests
         protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             configurator.Consumer<Consumer>(
-                x => x.UseConsoleLog(async (context, logContext) => string.Format("{1:u} {2:F0} Consumer: {0}", TypeMetadataCache<Consumer>.ShortName,
-                    logContext.StartTime, logContext.Duration.TotalMilliseconds)));
+                x => x.UseConsoleLog(async log => string.Format("{1:u} {2:F0} Consumer: {0}", TypeMetadataCache<Consumer>.ShortName,
+                    log.StartTime, log.Duration.TotalMilliseconds)));
         }
 
 

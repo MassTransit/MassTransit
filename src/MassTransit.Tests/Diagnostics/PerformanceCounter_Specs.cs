@@ -19,7 +19,7 @@ namespace MassTransit.Tests.Diagnostics
     using TestFramework.Messages;
 
 
-    [TestFixture]
+    [TestFixture, Explicit]
     public class Registering_a_performance_counter_observer :
         InMemoryTestFixture
     {
@@ -28,7 +28,7 @@ namespace MassTransit.Tests.Diagnostics
         {
             _completed = GetTask<bool>();
 
-            for (int i = 0; i < 1000; i++)
+            for (var i = 0; i < 1000; i++)
             {
                 await InputQueueSendEndpoint.Send(new PingMessage());
             }
@@ -42,7 +42,7 @@ namespace MassTransit.Tests.Diagnostics
         {
             base.ConfigureBus(configurator);
 
-            configurator.EnablePerformanceCounters();
+            configurator.EnableWindowsPerformanceCounters();
         }
 
         protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)

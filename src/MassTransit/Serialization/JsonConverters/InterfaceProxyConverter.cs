@@ -13,7 +13,7 @@
 namespace MassTransit.Serialization.JsonConverters
 {
     using System;
-    using Internals.Reflection;
+    using GreenPipes.Internals.Reflection;
     using Newtonsoft.Json;
     using Util;
 

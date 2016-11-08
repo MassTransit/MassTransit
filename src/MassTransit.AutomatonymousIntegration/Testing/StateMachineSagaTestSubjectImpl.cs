@@ -15,6 +15,9 @@ namespace Automatonymous.Testing
     using System;
     using System.Collections;
     using System.Collections.Generic;
+    using System.Threading;
+    using System.Threading.Tasks;
+    using GreenPipes.Util;
     using MassTransit.Saga;
     using MassTransit.Testing;
     using MassTransit.Testing.Configurators;
@@ -66,9 +69,6 @@ namespace Automatonymous.Testing
         IReceivedMessageList SagaTestSubject<TSaga>.Received => _received;
         ISagaList<TSaga> SagaTestSubject<TSaga>.Created => _created;
 
-        public void Dispose()
-        {
-        }
 
         public IEnumerator<ISagaInstance<TSaga>> GetEnumerator()
         {
@@ -93,6 +93,11 @@ namespace Automatonymous.Testing
         public TSaga Contains(Guid sagaId)
         {
             return _created.Contains(sagaId);
+        }
+
+        public Task DisposeAsync(CancellationToken cancellationToken)
+        {
+            return TaskUtil.Completed;
         }
     }
 }

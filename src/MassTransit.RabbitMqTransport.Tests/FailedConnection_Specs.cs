@@ -16,7 +16,6 @@ namespace MassTransit.RabbitMqTransport.Tests
     using System.Threading.Tasks;
     using NUnit.Framework;
     using TestFramework;
-    using Util;
 
 
     [TestFixture, Explicit]
@@ -32,21 +31,23 @@ namespace MassTransit.RabbitMqTransport.Tests
                 {
                     h.Username("whocares");
                     h.Password("Ohcrud");
-
                 });
             });
 
-            TestDelegate invocation = () =>
+            Assert.That(async () =>
             {
-                using (var handle = busControl.Start())
+                var handle = await busControl.StartAsync();
+                try
                 {
                     Console.WriteLine("Waiting for connection...");
 
-                    TaskUtil.Await(() => handle.Ready);
+                    await handle.Ready;
                 }
-            };
-
-            Assert.Throws<RabbitMqConnectionException>(invocation);
+                finally
+                {
+                    await handle.StopAsync();
+                }
+            }, Throws.TypeOf<RabbitMqConnectionException>());
         }
 
         [Test]
@@ -61,17 +62,20 @@ namespace MassTransit.RabbitMqTransport.Tests
                 });
             });
 
-            TestDelegate invocation = () =>
+            Assert.That(async () =>
             {
-                using (var handle = busControl.Start())
+                var handle = await busControl.StartAsync();
+                try
                 {
                     Console.WriteLine("Waiting for connection...");
 
-                    TaskUtil.Await(() => handle.Ready);
+                    await handle.Ready;
                 }
-            };
-
-            Assert.Throws<RabbitMqConnectionException>(invocation);
+                finally
+                {
+                    await handle.StopAsync();
+                }
+            }, Throws.TypeOf<RabbitMqConnectionException>());
         }
 
         [Test, Explicit]
@@ -84,9 +88,14 @@ namespace MassTransit.RabbitMqTransport.Tests
                 });
             });
 
-            using (var handle = await busControl.StartAsync())
+            var handle = await busControl.StartAsync();
+            try
             {
-                for (int i = 0; i < 10; i++)
+                Console.WriteLine("Waiting for connection...");
+
+                await handle.Ready;
+
+                for (var i = 0; i < 10; i++)
                 {
                     try
                     {
@@ -102,6 +111,10 @@ namespace MassTransit.RabbitMqTransport.Tests
                     }
                 }
             }
+            finally
+            {
+                await handle.StopAsync();
+            }
         }
 
         [Test, Explicit]
@@ -114,31 +127,16 @@ namespace MassTransit.RabbitMqTransport.Tests
                 });
             });
 
-            using (var handle = await busControl.StartAsync())
-            {
-                await Task.Delay(5000);
-            }
-        }
-
-        [Test, Explicit]
-        public async Task Should_startup_and_shut_down_cleanly_with_publish()
-        {
-            var busControl = Bus.Factory.CreateUsingRabbitMq(x =>
-            {
-                x.Host(new Uri("rabbitmq://localhost/"), h =>
-                {
-                });
-            });
-
-            await busControl.StartAsync();
+            var handle = await busControl.StartAsync();
             try
             {
-                await busControl.Publish(new TestMessage());
+                Console.WriteLine("Waiting for connection...");
 
+                await handle.Ready;
             }
             finally
             {
-                await busControl.StopAsync();
+                await handle.StopAsync();
             }
         }
 
@@ -159,9 +157,37 @@ namespace MassTransit.RabbitMqTransport.Tests
                 });
             });
 
-            using (var handle = await busControl.StartAsync())
+            var handle = await busControl.StartAsync();
+            try
             {
-                await Task.Delay(5000);
+                Console.WriteLine("Waiting for connection...");
+
+                await handle.Ready;
+            }
+            finally
+            {
+                await handle.StopAsync();
+            }
+        }
+
+        [Test, Explicit]
+        public async Task Should_startup_and_shut_down_cleanly_with_publish()
+        {
+            var busControl = Bus.Factory.CreateUsingRabbitMq(x =>
+            {
+                x.Host(new Uri("rabbitmq://localhost/"), h =>
+                {
+                });
+            });
+
+            await busControl.StartAsync();
+            try
+            {
+                await busControl.Publish(new TestMessage());
+            }
+            finally
+            {
+                await busControl.StopAsync();
             }
         }
 

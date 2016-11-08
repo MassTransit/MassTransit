@@ -1,14 +1,14 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+//  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
+// this file except in compliance with the License. You may obtain a copy of the 
+// License at 
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0 
+// 
 // Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.AzureServiceBusTransport.Hosting
 {
@@ -23,12 +23,11 @@ namespace MassTransit.AzureServiceBusTransport.Hosting
     public class ServiceBusHostBusFactory :
         IHostBusFactory
     {
-        readonly ILog _log = Logger.Get<ServiceBusHostBusFactory>();
-        readonly ServiceBusSettings _settings;
-
         readonly ServiceBusAmqpTransportSettings _ampAmqpTransportSettings;
+        readonly ILog _log = Logger.Get<ServiceBusHostBusFactory>();
 
         readonly ServiceBusNetMessagingTransportSettings _netMessagingTransportSettings;
+        readonly ServiceBusSettings _settings;
 
         public ServiceBusHostBusFactory(ISettingsProvider settingsProvider)
         {
@@ -53,7 +52,7 @@ namespace MassTransit.AzureServiceBusTransport.Hosting
         {
             serviceName = serviceName.ToLowerInvariant().Trim().Replace(" ", "_");
 
-            var hostSettings = new SettingsAdapter(_settings,_ampAmqpTransportSettings, _netMessagingTransportSettings, serviceName);
+            var hostSettings = new SettingsAdapter(_settings, _ampAmqpTransportSettings, _netMessagingTransportSettings, serviceName);
 
             if (hostSettings.ServiceUri == null)
                 throw new ConfigurationException("The ServiceBus ServiceUri setting has not been configured");
@@ -91,13 +90,13 @@ namespace MassTransit.AzureServiceBusTransport.Hosting
         class SettingsAdapter :
             ServiceBusHostSettings
         {
-            private readonly ServiceBusSettings _settings;
-
             private readonly ServiceBusAmqpTransportSettings _ampAmqpTransportSettings;
 
             private readonly ServiceBusNetMessagingTransportSettings _netMessagingTransportSettings;
+            private readonly ServiceBusSettings _settings;
 
-            public SettingsAdapter(ServiceBusSettings settings, ServiceBusAmqpTransportSettings ampAmqpTransportSettings, ServiceBusNetMessagingTransportSettings netMessagingTransportSettings, string serviceName)
+            public SettingsAdapter(ServiceBusSettings settings, ServiceBusAmqpTransportSettings ampAmqpTransportSettings,
+                ServiceBusNetMessagingTransportSettings netMessagingTransportSettings, string serviceName)
             {
                 _settings = settings;
                 _ampAmqpTransportSettings = ampAmqpTransportSettings;

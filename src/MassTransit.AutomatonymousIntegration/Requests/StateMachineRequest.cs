@@ -15,9 +15,9 @@ namespace Automatonymous.Requests
     using System;
     using System.Linq.Expressions;
     using Events;
+    using GreenPipes.Internals.Reflection;
     using MassTransit;
     using MassTransit.Internals.Extensions;
-    using MassTransit.Internals.Reflection;
 
 
     public class StateMachineRequest<TInstance, TRequest, TResponse> :

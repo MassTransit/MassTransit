@@ -14,7 +14,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 {
     using System;
     using System.Security.Authentication;
-    using Configuration.Configurators;
+    using Configurators;
     using NUnit.Framework;
     using Shouldly;
 

@@ -14,7 +14,6 @@ namespace MassTransit
 {
     using System;
     using AzureServiceBusTransport;
-    using AzureServiceBusTransport.Configuration;
     using Turnout.Configuration;
 
 
@@ -32,7 +31,7 @@ namespace MassTransit
             Action<ITurnoutHostConfigurator<T>> configure)
             where T : class
         {
-            var temporaryQueueName = busFactoryConfigurator.GetTemporaryQueueName("turnout-");
+            var temporaryQueueName = configurator.Host.GetTemporaryQueueName("turnout-");
 
             busFactoryConfigurator.ReceiveEndpoint(configurator.Host, temporaryQueueName, turnoutEndpointConfigurator =>
             {

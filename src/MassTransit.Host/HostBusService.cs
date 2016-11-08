@@ -17,6 +17,7 @@ namespace MassTransit.Host
     using Hosting;
     using Logging;
     using Topshelf;
+    using Util;
 
 
     /// <summary>
@@ -50,7 +51,7 @@ namespace MassTransit.Host
             {
                 _busControl = _hostBusFactory.CreateBus(_serviceConfigurator, _serviceName);
 
-                _busHandle = _busControl.Start();
+                _busHandle = TaskUtil.Await(() => _busControl.StartAsync());
 
                 if (_log.IsInfoEnabled)
                     _log.InfoFormat("Created bus for hosted service: {0}", _serviceName);

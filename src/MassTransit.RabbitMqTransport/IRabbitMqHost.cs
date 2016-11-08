@@ -12,14 +12,15 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RabbitMqTransport
 {
+    using System;
+    using System.Threading.Tasks;
     using GreenPipes;
     using Integration;
-    using Transports;
     using Util;
 
 
     public interface IRabbitMqHost :
-        IBusHost
+        IHost
     {
         IConnectionCache ConnectionCache { get; }
 
@@ -34,5 +35,29 @@ namespace MassTransit.RabbitMqTransport
         /// The supervisor for the host, which indicates when it's being stopped
         /// </summary>
         ITaskSupervisor Supervisor { get; }
+
+        /// <summary>
+        /// Return the send address for the exchange, which can be configured to include
+        /// additional settings.
+        /// </summary>
+        /// <param name="exchangeName">The exchange name</param>
+        /// <param name="configure"></param>
+        /// <returns></returns>
+        Uri GetSendAddress(string exchangeName, Action<IExchangeConfigurator> configure = null);
+
+        /// <summary>
+        /// Create a temporary receive endpoint on the host, with a separate handle for stopping/removing the endpoint
+        /// </summary>
+        /// <param name="configure"></param>
+        /// <returns></returns>
+        Task<HostReceiveEndpointHandle> ConnectReceiveEndpoint(Action<IRabbitMqReceiveEndpointConfigurator> configure = null);
+
+        /// <summary>
+        /// Create a receive endpoint on the host, with a separate handle for stopping/removing the endpoint
+        /// </summary>
+        /// <param name="queueName"></param>
+        /// <param name="configure"></param>
+        /// <returns></returns>
+        Task<HostReceiveEndpointHandle> ConnectReceiveEndpoint(string queueName, Action<IRabbitMqReceiveEndpointConfigurator> configure = null);
     }
 }

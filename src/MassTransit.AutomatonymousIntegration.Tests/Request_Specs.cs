@@ -288,7 +288,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
                             context.Instance.Address = context.Data.Address;
                             context.Instance.MemberNumber = context.Data.MemberNumber;
                         })
-                        .Request(ValidateAddress, context => new ValidateAddressRequest(context.Instance))
+                        .Request(ValidateAddress, context => ValidateAddress.Settings.ServiceAddress, context => new ValidateAddressRequest(context.Instance))
                         .TransitionTo(ValidateAddress.Pending));
 
                 During(ValidateAddress.Pending,

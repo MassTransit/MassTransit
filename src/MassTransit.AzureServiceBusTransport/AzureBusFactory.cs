@@ -13,7 +13,7 @@
 namespace MassTransit.AzureServiceBusTransport
 {
     using System;
-    using Configuration;
+    using Configurators;
 
 
     public static class AzureBusFactory

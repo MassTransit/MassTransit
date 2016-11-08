@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -25,6 +25,36 @@ namespace MassTransit.Context
         ExceptionInfo _exceptionInfo;
 
         public RescueExceptionConsumeContext(ConsumeContext<TMessage> context, Exception exception)
+            : base(context)
+        {
+            _exception = exception;
+        }
+
+        Exception ExceptionConsumeContext.Exception => _exception;
+
+        ExceptionInfo ExceptionConsumeContext.ExceptionInfo
+        {
+            get
+            {
+                if (_exceptionInfo != null)
+                    return _exceptionInfo;
+
+                _exceptionInfo = new FaultExceptionInfo(_exception);
+
+                return _exceptionInfo;
+            }
+        }
+    }
+
+
+    public class RescueExceptionConsumeContext :
+        ConsumeContextProxy,
+        ExceptionConsumeContext
+    {
+        readonly Exception _exception;
+        ExceptionInfo _exceptionInfo;
+
+        public RescueExceptionConsumeContext(ConsumeContext context, Exception exception)
             : base(context)
         {
             _exception = exception;

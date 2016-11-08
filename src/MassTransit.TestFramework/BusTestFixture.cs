@@ -175,8 +175,8 @@ namespace MassTransit.TestFramework
 
         protected void LogEndpoint(IReceiveEndpointConfigurator configurator)
         {
-            configurator.UseLog(Console.Out, (context,logContext) =>
-                Task.FromResult($"Received (input_queue): {context.ReceiveContext.TransportHeaders.Get("MessageId", "N/A")}, Types = ({string.Join(",", context.SupportedMessageTypes)})"));
+            configurator.UseLog(Console.Out, log =>
+                Task.FromResult($"Received (input_queue): {log.Context.ReceiveContext.TransportHeaders.Get("MessageId", "N/A")}, Types = ({string.Join(",", log.Context.SupportedMessageTypes)})"));
         }
     }
 }

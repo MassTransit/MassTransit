@@ -174,11 +174,16 @@ namespace MassTransit.Scheduling
             return ScheduleSend(destinationAddress, scheduledTime, message, pipeProxy, cancellationToken);
         }
 
-        Task IMessageScheduler.CancelScheduledSend(Guid tokenId)
+        public Task CancelScheduledSend(Guid tokenId)
         {
             var command = new CancelScheduledMessageCommand(tokenId);
 
             return _publishEndpoint.Publish<CancelScheduledMessage>(command);
+        }
+
+        public Task CancelScheduledSend(Uri destinationAddress, Guid tokenId)
+        {
+            return CancelScheduledSend(tokenId);
         }
 
         Task<ScheduledMessage<T>> ScheduleSend<T>(Uri destinationAddress, DateTime scheduledTime, T message, CancellationToken cancellationToken)

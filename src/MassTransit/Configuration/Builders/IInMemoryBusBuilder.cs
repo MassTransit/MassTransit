@@ -12,12 +12,15 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Builders
 {
+    using Transports.InMemory;
+
+
     public interface IInMemoryBusBuilder :
         IBusBuilder
     {
         /// <summary>
         /// The receive transport provider
         /// </summary>
-        IReceiveTransportProvider ReceiveTransportProvider { get; }
+        IInMemoryHost InMemoryHost { get; }
     }
 }

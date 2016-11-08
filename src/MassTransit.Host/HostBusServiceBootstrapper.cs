@@ -44,6 +44,8 @@ namespace MassTransit.Host
             return new LifetimeScopeServiceControl(lifetimeScope, serviceControl, _serviceName);
         }
 
+        protected ILifetimeScope ParentLifetimeScope => _lifetimeScope;
+
         protected virtual void ConfigureLifetimeScope(ContainerBuilder builder)
         {
             builder.RegisterAutofacConsumerFactory();

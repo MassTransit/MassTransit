@@ -10,14 +10,19 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.RabbitMqTransport.Configuration
+namespace MassTransit.RabbitMqTransport
 {
     using System;
-    using Configurators;
 
 
     public interface IRabbitMqHostConfigurator
     {
+        /// <summary>
+        /// Enables RabbitMQ publish acknowledgement, so that the Task returned from Send/Publish 
+        /// is not completed until the message has been confirmed by the broker.
+        /// </summary>
+        bool PublisherConfirmation { set; }
+
         /// <summary>
         /// Configure the use of SSL to connection to RabbitMQ
         /// </summary>

@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -23,18 +23,7 @@ namespace MassTransit
         /// Starts the bus (assuming the battery isn't dead). Once the bus has been started, it cannot be started again, even after is has been stopped.
         /// </summary>
         /// <returns>The BusHandle for the started bus. This is no longer needed, as calling Stop on the IBusControl will stop the bus equally well.</returns>
-        BusHandle Start();
-
-        /// <summary>
-        /// Starts the bus (assuming the battery isn't dead). Once the bus has been started, it cannot be started again, even after is has been stopped.
-        /// </summary>
-        /// <returns>The BusHandle for the started bus. This is no longer needed, as calling Stop on the IBusControl will stop the bus equally well.</returns>
         Task<BusHandle> StartAsync(CancellationToken cancellationToken = default(CancellationToken));
-
-        /// <summary>
-        /// Stops the bus if it has been started. If the bus hasn't been started, the method returns without any warning.
-        /// </summary>
-        void Stop(CancellationToken cancellationToken = default(CancellationToken));
 
         /// <summary>
         /// Stops the bus if it has been started. If the bus hasn't been started, the method returns without any warning.

@@ -116,7 +116,16 @@ namespace MassTransit.Policies
 
             while (!cancellationToken.IsCancellationRequested)
             {
-                await Retry(retryPolicy, retryMethod, cancellationToken).ConfigureAwait(false);
+                try
+                {
+                    await Retry(retryPolicy, retryMethod, cancellationToken).ConfigureAwait(false);
+                }
+                catch (TaskCanceledException)
+                {
+                }
+                catch (OperationCanceledException)
+                {
+                }
             }
         }
 

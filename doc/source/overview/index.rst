@@ -16,9 +16,6 @@ there are a number of subjects covered below that explain in detail how everythi
     underthehood.rst
     valueadd.rst
     publishing.rst
-    sending.rst
-    versioning.rst
-    saga.rst
     inheritance.rst
     perfcounters.rst
     videos.rst

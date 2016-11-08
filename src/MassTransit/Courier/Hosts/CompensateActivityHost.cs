@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -18,30 +18,28 @@ namespace MassTransit.Courier.Hosts
     using Contracts;
     using GreenPipes;
     using Logging;
-    using MassTransit.Pipeline;
-    using Pipeline;
     using Util;
 
 
     public class CompensateActivityHost<TActivity, TLog> :
         IFilter<ConsumeContext<RoutingSlip>>
-        where TActivity : CompensateActivity<TLog>
+        where TActivity : class, CompensateActivity<TLog>
         where TLog : class
     {
         static readonly ILog _log = Logger.Get<CompensateActivityHost<TActivity, TLog>>();
-        readonly CompensateActivityFactory<TLog> _activityFactory;
-        readonly IPipe<CompensateActivityContext<TLog>> _compensatePipe;
+        readonly CompensateActivityFactory<TActivity, TLog> _activityFactory;
+        readonly IPipe<CompensateActivityContext<TActivity, TLog>> _compensatePipe;
 
-        public CompensateActivityHost(CompensateActivityFactory<TLog> activityFactory)
+        public CompensateActivityHost(CompensateActivityFactory<TActivity, TLog> activityFactory,
+            IPipe<CompensateActivityContext<TActivity, TLog>> compensatePipe)
         {
             _activityFactory = activityFactory;
-
-            _compensatePipe = Pipe.New<CompensateActivityContext<TLog>>(x => x.UseFilter(new CompensateActivityFilter<TLog>()));
+            _compensatePipe = compensatePipe;
         }
 
         public async Task Send(ConsumeContext<RoutingSlip> context, IPipe<ConsumeContext<RoutingSlip>> next)
         {
-            Stopwatch timer = Stopwatch.StartNew();
+            var timer = Stopwatch.StartNew();
             try
             {
                 CompensateContext<TLog> compensateContext = new HostCompensateContext<TLog>(HostMetadataCache.Host, context);
@@ -69,11 +67,11 @@ namespace MassTransit.Courier.Hosts
 
         public void Probe(ProbeContext context)
         {
-            ProbeContext scope = context.CreateFilterScope("compensateActivity");
+            var scope = context.CreateFilterScope("compensateActivity");
             scope.Set(new
             {
                 ActivityType = TypeMetadataCache<TActivity>.ShortName,
-                LogType = TypeMetadataCache<TLog>.ShortName,
+                LogType = TypeMetadataCache<TLog>.ShortName
             });
 
             _compensatePipe.Probe(scope);

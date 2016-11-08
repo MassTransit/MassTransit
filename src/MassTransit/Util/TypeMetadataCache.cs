@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -19,7 +19,6 @@ namespace MassTransit.Util
     using System.Reflection;
     using System.Threading;
     using Internals.Extensions;
-    using Internals.Reflection;
     using Newtonsoft.Json.Linq;
     using Saga;
     using Serialization;
@@ -27,8 +26,6 @@ namespace MassTransit.Util
 
     public static class TypeMetadataCache
     {
-        public static IImplementationBuilder ImplementationBuilder => Cached.Builder;
-
         static CachedType GetOrAdd(Type type)
         {
             return Cached.Instance.GetOrAdd(type, _ =>
@@ -38,11 +35,6 @@ namespace MassTransit.Util
         public static string GetShortName(Type type)
         {
             return GetOrAdd(type).ShortName;
-        }
-
-        public static Type GetImplementationType(Type type)
-        {
-            return Cached.Builder.GetImplementationType(type);
         }
 
         public static bool IsValidMessageType(Type type)
@@ -58,7 +50,6 @@ namespace MassTransit.Util
 
         static class Cached
         {
-            internal static readonly IImplementationBuilder Builder = new DynamicImplementationBuilder();
             internal static readonly ConcurrentDictionary<Type, CachedType> Instance = new ConcurrentDictionary<Type, CachedType>();
         }
 
@@ -91,18 +82,13 @@ namespace MassTransit.Util
         readonly Lazy<string[]> _messageTypeNames;
         readonly Lazy<Type[]> _messageTypes;
         readonly Lazy<List<PropertyInfo>> _properties;
-        readonly Lazy<ReadOnlyPropertyCache<T>> _readPropertyCache;
         readonly string _shortName;
-        readonly Lazy<ReadWritePropertyCache<T>> _writePropertyCache;
 
         TypeMetadataCache()
         {
             _shortName = typeof(T).GetTypeName();
 
             _hasSagaInterfaces = new Lazy<bool>(ScanForSagaInterfaces, LazyThreadSafetyMode.PublicationOnly);
-
-            _readPropertyCache = new Lazy<ReadOnlyPropertyCache<T>>(() => new ReadOnlyPropertyCache<T>());
-            _writePropertyCache = new Lazy<ReadWritePropertyCache<T>>(() => new ReadWritePropertyCache<T>());
 
             _properties = new Lazy<List<PropertyInfo>>(() => typeof(T).GetAllProperties().ToList());
 
@@ -113,8 +99,6 @@ namespace MassTransit.Util
 
         public static string ShortName => Cached.Metadata.Value.ShortName;
         public static bool HasSagaInterfaces => Cached.Metadata.Value.HasSagaInterfaces;
-        public static ReadOnlyPropertyCache<T> ReadOnlyPropertyCache => Cached.Metadata.Value.ReadOnlyPropertyCache;
-        public static ReadWritePropertyCache<T> ReadWritePropertyCache => Cached.Metadata.Value.ReadWritePropertyCache;
         public static IEnumerable<PropertyInfo> Properties => Cached.Metadata.Value.Properties;
         public static bool IsValidMessageType => Cached.Metadata.Value.IsValidMessageType;
         public static Type[] MessageTypes => Cached.Metadata.Value.MessageTypes;
@@ -123,15 +107,13 @@ namespace MassTransit.Util
         IEnumerable<PropertyInfo> ITypeMetadataCache<T>.Properties => _properties.Value;
         bool ITypeMetadataCache<T>.IsValidMessageType => _isValidMessageType.Value;
         Type[] ITypeMetadataCache<T>.MessageTypes => _messageTypes.Value;
-        ReadOnlyPropertyCache<T> ITypeMetadataCache<T>.ReadOnlyPropertyCache => _readPropertyCache.Value;
-        ReadWritePropertyCache<T> ITypeMetadataCache<T>.ReadWritePropertyCache => _writePropertyCache.Value;
 
         T ITypeMetadataCache<T>.InitializeFromObject(object values)
         {
             if (values == null)
                 throw new ArgumentNullException(nameof(values));
 
-            JObject objValues = JObject.FromObject(values, JsonMessageSerializer.Serializer);
+            var objValues = JObject.FromObject(values, JsonMessageSerializer.Serializer);
 
             return objValues.ToObject<T>(JsonMessageSerializer.Deserializer);
         }
@@ -156,13 +138,13 @@ namespace MassTransit.Util
             if (typeof(T).Namespace == "System")
                 return false;
 
-            string ns = typeof(T).Namespace;
+            var ns = typeof(T).Namespace;
             if (ns != null && ns.StartsWith("System."))
                 return false;
 
             if (typeof(T).IsGenericType)
             {
-                Type typeDefinition = typeof(T).GetGenericTypeDefinition();
+                var typeDefinition = typeof(T).GetGenericTypeDefinition();
                 if (typeDefinition == typeof(CorrelatedBy<>))
                     return false;
                 if (typeDefinition == typeof(Orchestrates<>))
@@ -193,7 +175,7 @@ namespace MassTransit.Util
             if (IsValidMessageType)
                 yield return typeof(T);
 
-            Type baseType = typeof(T).BaseType;
+            var baseType = typeof(T).BaseType;
             while ((baseType != null) && TypeMetadataCache.IsValidMessageType(baseType))
             {
                 yield return baseType;
@@ -205,7 +187,7 @@ namespace MassTransit.Util
                 .GetInterfaces()
                 .Where(TypeMetadataCache.IsValidMessageType);
 
-            foreach (Type interfaceType in interfaces)
+            foreach (var interfaceType in interfaces)
                 yield return interfaceType;
         }
 

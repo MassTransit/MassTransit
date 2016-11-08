@@ -15,10 +15,8 @@ namespace MassTransit.ConsumeConfigurators
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using Configurators;
     using ConsumeConnectors;
     using GreenPipes;
-    using PipeConfigurators;
 
 
     public class ConsumerConfigurator<TConsumer> :
@@ -42,7 +40,20 @@ namespace MassTransit.ConsumeConfigurators
             _pipeSpecifications.Add(specification);
         }
 
-        public void ConfigureMessage<T>(Action<IConsumerMessageConfigurator<T>> configure)
+        void IConsumerConfigurator<TConsumer>.ConfigureMessage<T>(Action<IConsumerMessageConfigurator<T>> configure)
+        {
+            Message(configure);
+        }
+
+        public void Message<T>(Action<IConsumerMessageConfigurator<T>> configure)
+            where T : class
+        {
+            var messageConfigurator = new ConsumerMessageConfigurator<TConsumer, T>(this);
+
+            configure(messageConfigurator);
+        }
+
+        public void ConsumerMessage<T>(Action<IConsumerMessageConfigurator<TConsumer, T>> configure) 
             where T : class
         {
             var messageConfigurator = new ConsumerMessageConfigurator<TConsumer, T>(this);

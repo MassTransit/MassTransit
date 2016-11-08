@@ -25,16 +25,17 @@ namespace MassTransit.Monitoring.Performance
             _types = new ConcurrentDictionary<string, Lazy<ConsumerPerformanceCounter>>();
         }
 
-        public static IConsumerPerformanceCounter GetCounter(string consumerType)
+        public static IConsumerPerformanceCounter GetCounter(ICounterFactory factory, string consumerType)
         {
             return Cached.Counter.Value._types
-                .GetOrAdd(consumerType, x => new Lazy<ConsumerPerformanceCounter>(() => new ConsumerPerformanceCounter(x)))
+                .GetOrAdd(consumerType, x => new Lazy<ConsumerPerformanceCounter>(() => new ConsumerPerformanceCounter(factory, x)))
                 .Value;
         }
 
 
         static class Cached
         {
+
             public static readonly Lazy<ConsumerPerformanceCounterCache> Counter =
                 new Lazy<ConsumerPerformanceCounterCache>(() => new ConsumerPerformanceCounterCache());
         }

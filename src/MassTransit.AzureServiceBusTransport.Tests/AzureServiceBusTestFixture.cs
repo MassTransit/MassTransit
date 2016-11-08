@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -16,7 +16,6 @@ namespace MassTransit.AzureServiceBusTransport.Tests
     using System.Diagnostics;
     using System.Threading;
     using System.Threading.Tasks;
-    using Configuration;
     using Logging;
     using Microsoft.ServiceBus;
     using NUnit.Framework;
@@ -38,13 +37,14 @@ namespace MassTransit.AzureServiceBusTransport.Tests
         readonly Uri _serviceUri;
         BusHandle _busHandle;
         readonly string _inputQueueName;
+        IServiceBusHost _host;
 
         public AzureServiceBusTestFixture()
             : this("input_queue")
         {
         }
 
-        public AzureServiceBusTestFixture(string inputQueueName)
+        public AzureServiceBusTestFixture(string inputQueueName, Uri serviceUri = null)
         {
             ServiceBusEnvironment.SystemConnectivity.Mode = ConnectivityMode.Https;
 
@@ -52,7 +52,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
 
             TestTimeout = Debugger.IsAttached ? TimeSpan.FromMinutes(5) : TimeSpan.FromSeconds(60);
 
-            _serviceUri = ServiceBusEnvironment.CreateServiceUri("sb", "masstransit-build", "MassTransit.AzureServiceBusTransport.Tests");
+            _serviceUri = serviceUri ?? ServiceBusEnvironment.CreateServiceUri("sb", "masstransit-build", "MassTransit.AzureServiceBusTransport.Tests");
 
             _sendObserver = new TestSendObserver(TestTimeout);
         }
@@ -127,7 +127,8 @@ namespace MassTransit.AzureServiceBusTransport.Tests
             {
                 using (var tokenSource = new CancellationTokenSource(TestTimeout))
                 {
-                    await _busHandle?.StopAsync(tokenSource.Token);
+                    if(_busHandle != null)
+                        await _busHandle.StopAsync(tokenSource.Token);
                 }
             }
             catch (Exception ex)
@@ -153,15 +154,17 @@ namespace MassTransit.AzureServiceBusTransport.Tests
         {
         }
 
+        protected IServiceBusHost Host => _host;
+
         IBusControl CreateBus()
         {
             return MassTransit.Bus.Factory.CreateUsingAzureServiceBus(x =>
             {
                 ConfigureBus(x);
 
-                ServiceBusTokenProviderSettings settings = new TestAzureServiceBusAccountSettings();
+                ServiceBusTokenProviderSettings settings = GetAccountSettings();
 
-                var host = x.Host(_serviceUri, h =>
+                _host = x.Host(_serviceUri, h =>
                 {
                     h.SharedAccessSignature(s =>
                     {
@@ -174,15 +177,20 @@ namespace MassTransit.AzureServiceBusTransport.Tests
 
                 x.UseServiceBusMessageScheduler();
 
-                ConfigureBusHost(x, host);
+                ConfigureBusHost(x, _host);
 
-                x.ReceiveEndpoint(host, _inputQueueName, e =>
+                x.ReceiveEndpoint(_host, _inputQueueName, e =>
                 {
                     _inputQueueAddress = e.InputAddress;
 
                     ConfigureInputQueueEndpoint(e);
                 });
             });
+        }
+
+        protected virtual ServiceBusTokenProviderSettings GetAccountSettings()
+        {
+            return new TestAzureServiceBusAccountSettings();
         }
 
 

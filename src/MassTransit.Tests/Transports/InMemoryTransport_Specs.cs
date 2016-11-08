@@ -38,7 +38,7 @@ namespace MassTransit.Tests.Transports
 
                 var inputAddress = new Uri("loopback://localhost/input_queue");
 
-                var transport = new InMemoryTransport(inputAddress, Environment.ProcessorCount);
+                var transport = new InMemoryTransport(inputAddress, Environment.ProcessorCount, null, null);
 
                 TaskCompletionSource<int> received = GetTask<int>();
 

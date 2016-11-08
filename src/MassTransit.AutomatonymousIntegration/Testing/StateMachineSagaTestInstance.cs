@@ -13,6 +13,8 @@
 namespace Automatonymous.Testing
 {
     using System.Collections.Generic;
+    using System.Threading;
+    using System.Threading.Tasks;
     using MassTransit.Saga;
     using MassTransit.Testing;
     using MassTransit.Testing.Instances;
@@ -39,21 +41,16 @@ namespace Automatonymous.Testing
 
         SagaTestSubject<TSaga> SagaTest<TSaga>.Saga => _subject;
 
-        protected override void Dispose(bool disposing)
+        public override async Task DisposeAsync(CancellationToken cancellationToken = new CancellationToken())
         {
             if (_disposed)
                 return;
-            if (disposing)
-                _subject.Dispose();
 
-            base.Dispose(disposing);
+            await _subject.DisposeAsync(cancellationToken).ConfigureAwait(false);
+
+            await base.DisposeAsync(cancellationToken).ConfigureAwait(false);
 
             _disposed = true;
-        }
-
-        ~StateMachineSagaTestInstance()
-        {
-            Dispose(false);
         }
     }
 }

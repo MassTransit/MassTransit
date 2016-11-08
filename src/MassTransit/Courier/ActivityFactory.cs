@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,7 +14,6 @@ namespace MassTransit.Courier
 {
     using System.Threading.Tasks;
     using GreenPipes;
-    using MassTransit.Pipeline;
 
 
     /// <summary>
@@ -31,8 +30,8 @@ namespace MassTransit.Courier
         /// <param name="context"></param>
         /// <param name="next"></param>
         /// <returns></returns>
-        Task Execute<TActivity, TArguments>(ExecuteContext<TArguments> context, IPipe<ExecuteActivityContext<TArguments>> next)
-            where TActivity : ExecuteActivity<TArguments>
+        Task Execute<TActivity, TArguments>(ExecuteContext<TArguments> context, IPipe<ExecuteActivityContext<TActivity, TArguments>> next)
+            where TActivity : class, ExecuteActivity<TArguments>
             where TArguments : class;
 
         /// <summary>
@@ -41,15 +40,16 @@ namespace MassTransit.Courier
         /// <param name="compensateContext"></param>
         /// <param name="next"></param>
         /// <returns></returns>
-        Task Compensate<TActivity, TLog>(CompensateContext<TLog> compensateContext, IPipe<CompensateActivityContext<TLog>> next)
-            where TActivity : CompensateActivity<TLog>
+        Task Compensate<TActivity, TLog>(CompensateContext<TLog> compensateContext, IPipe<CompensateActivityContext<TActivity, TLog>> next)
+            where TActivity : class, CompensateActivity<TLog>
             where TLog : class;
     }
 
 
-    public interface ActivityFactory<TArguments, TLog> :
-        ExecuteActivityFactory<TArguments>,
-        CompensateActivityFactory<TLog>
+    public interface ActivityFactory<out TActivity, TArguments, TLog> :
+        ExecuteActivityFactory<TActivity, TArguments>,
+        CompensateActivityFactory<TActivity, TLog>
+        where TActivity : class, ExecuteActivity<TArguments>, CompensateActivity<TLog>
         where TArguments : class
         where TLog : class
     {

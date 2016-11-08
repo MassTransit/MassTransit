@@ -24,6 +24,13 @@ namespace MassTransit.Monitoring.Performance
     public class PerformanceCounterReceiveObserver :
         IReceiveObserver
     {
+        readonly ICounterFactory _factory;
+
+        public PerformanceCounterReceiveObserver(ICounterFactory factory)
+        {
+            _factory = factory;
+        }
+
         Task IReceiveObserver.PreReceive(ReceiveContext context)
         {
             return TaskUtil.Completed;
@@ -36,15 +43,15 @@ namespace MassTransit.Monitoring.Performance
 
         Task IReceiveObserver.PostConsume<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType)
         {
-            ConsumerPerformanceCounterCache.GetCounter(consumerType).Consumed(duration);
-            MessagePerformanceCounterCache<T>.Counter.Consumed(duration);
+            ConsumerPerformanceCounterCache.GetCounter(_factory, consumerType).Consumed(duration);
+            MessagePerformanceCounterCache<T>.Counter(_factory).Consumed(duration);
             return TaskUtil.Completed;
         }
 
         Task IReceiveObserver.ConsumeFault<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType, Exception exception)
         {
-            ConsumerPerformanceCounterCache.GetCounter(consumerType).Faulted();
-            MessagePerformanceCounterCache<T>.Counter.ConsumeFaulted(duration);
+            ConsumerPerformanceCounterCache.GetCounter(_factory, consumerType).Faulted();
+            MessagePerformanceCounterCache<T>.Counter(_factory).ConsumeFaulted(duration);
             return TaskUtil.Completed;
         }
 

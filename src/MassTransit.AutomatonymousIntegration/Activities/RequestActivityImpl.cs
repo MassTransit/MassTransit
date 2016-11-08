@@ -32,11 +32,11 @@ namespace Automatonymous.Activities
             _request = request;
         }
 
-        protected async Task SendRequest(BehaviorContext<TInstance> context, ConsumeContext consumeContext, TRequest requestMessage)
+        protected async Task SendRequest(BehaviorContext<TInstance> context, ConsumeContext consumeContext, TRequest requestMessage, Uri serviceAddress)
         {
             var pipe = new SendRequestPipe(consumeContext.ReceiveContext.InputAddress);
 
-            var endpoint = await consumeContext.GetSendEndpoint(_request.Settings.ServiceAddress).ConfigureAwait(false);
+            var endpoint = await consumeContext.GetSendEndpoint(serviceAddress).ConfigureAwait(false);
 
             await endpoint.Send(requestMessage, pipe).ConfigureAwait(false);
 
@@ -61,6 +61,14 @@ namespace Automatonymous.Activities
                 else
                     throw new ConfigurationException("A request timeout was specified but no message scheduler was specified or available");
             }
+        }
+
+        public virtual void Probe(ProbeContext context)
+        {
+            var scope = context.CreateScope("request");
+            scope.Add("requestType", TypeMetadataCache<TRequest>.ShortName);
+            scope.Add("responseType", TypeMetadataCache<TResponse>.ShortName);
+            scope.Set(_request.Settings);
         }
 
 

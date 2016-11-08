@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,13 +12,11 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.AzureServiceBusTransport.Pipeline
 {
-    using System;
     using System.Threading.Tasks;
-    using Contexts;
+    using Events;
     using GreenPipes;
     using Logging;
-    using MassTransit.Pipeline;
-    using Microsoft.ServiceBus.Messaging;
+    using Transport;
     using Util;
 
 
@@ -29,18 +27,15 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
         IFilter<NamespaceContext>
     {
         static readonly ILog _log = Logger.Get<MessageReceiverFilter>();
-        readonly IReceiveEndpointObserver _endpointObserver;
-        readonly IReceiveObserver _receiveObserver;
         readonly IPipe<ReceiveContext> _receivePipe;
-        readonly ITaskSupervisor _supervisor;
+        readonly ISendEndpointProvider _sendEndpointProvider;
+        readonly IPublishEndpointProvider _publishEndpointProvider;
 
-        public MessageSessionReceiverFilter(IPipe<ReceiveContext> receivePipe, IReceiveObserver receiveObserver, IReceiveEndpointObserver endpointObserver,
-            ITaskSupervisor supervisor)
+        public MessageSessionReceiverFilter(IPipe<ReceiveContext> receivePipe, ISendEndpointProvider sendEndpointProvider, IPublishEndpointProvider publishEndpointProvider)
         {
             _receivePipe = receivePipe;
-            _receiveObserver = receiveObserver;
-            _endpointObserver = endpointObserver;
-            _supervisor = supervisor;
+            _sendEndpointProvider = sendEndpointProvider;
+            _publishEndpointProvider = publishEndpointProvider;
         }
 
         void IProbeSite.Probe(ProbeContext context)
@@ -49,90 +44,45 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
 
         async Task IFilter<NamespaceContext>.Send(NamespaceContext context, IPipe<NamespaceContext> next)
         {
-            var receiveSettings = context.GetPayload<ReceiveSettings>();
+            var clientContext = context.GetPayload<ClientContext>();
 
-            var queuePath = context.GetQueuePath(receiveSettings.QueueDescription);
-
-            var inputAddress = context.GetQueueAddress(receiveSettings.QueueDescription);
+            var clientSettings = context.GetPayload<ClientSettings>();
 
             if (_log.IsDebugEnabled)
-                _log.DebugFormat("Creating message receiver for {0}", inputAddress);
+                _log.DebugFormat("Creating message receiver for {0}", clientContext.InputAddress);
 
-
-            QueueClient queueClient = null;
-
-            try
+            using (var scope = context.CreateScope($"{TypeMetadataCache<MessageReceiverFilter>.ShortName} - {clientContext.InputAddress}"))
             {
-                var messagingFactory = await context.SessionMessagingFactory.ConfigureAwait(false);
+                var receiver = new SessionReceiver(clientContext, _receivePipe, clientSettings, scope, _sendEndpointProvider, _publishEndpointProvider);
 
-                queueClient = messagingFactory.CreateQueueClient(queuePath);
+                await receiver.Start(context).ConfigureAwait(false);
 
-                queueClient.PrefetchCount = receiveSettings.PrefetchCount;
+                await scope.Ready.ConfigureAwait(false);
 
-                using (var scope = _supervisor.CreateScope($"{TypeMetadataCache<MessageReceiverFilter>.ShortName} - {inputAddress}"))
+                await context.Ready(new ReceiveTransportReadyEvent(clientContext.InputAddress)).ConfigureAwait(false);
+
+                scope.SetReady();
+
+                try
                 {
-                    var receiver = new SessionReceiver(context, queueClient, inputAddress, _receivePipe, receiveSettings, _receiveObserver, scope);
+                    await scope.Completed.ConfigureAwait(false);
+                }
+                finally
+                {
+                    var metrics = receiver.GetDeliveryMetrics();
 
-                    await scope.Ready.ConfigureAwait(false);
+                    await context.Completed(new ReceiveTransportCompletedEvent(clientContext.InputAddress, metrics)).ConfigureAwait(false);
 
-                    await _endpointObserver.Ready(new Ready(inputAddress)).ConfigureAwait(false);
-
-                    scope.SetReady();
-
-                    try
+                    if (_log.IsDebugEnabled)
                     {
-                        await scope.Completed.ConfigureAwait(false);
-                    }
-                    finally
-                    {
-                        ReceiverMetrics metrics = receiver;
-
-                        await _endpointObserver.Completed(new Completed(inputAddress, metrics)).ConfigureAwait(false);
-
-                        if (_log.IsDebugEnabled)
-                        {
-                            _log.DebugFormat("Consumer {0}: {1} received, {2} concurrent", queuePath,
-                                metrics.DeliveryCount,
-                                metrics.ConcurrentDeliveryCount);
-                        }
+                        _log.DebugFormat("Consumer {0}: {1} received, {2} concurrent", clientContext.InputAddress,
+                            metrics.DeliveryCount,
+                            metrics.ConcurrentDeliveryCount);
                     }
                 }
             }
-            finally
-            {
-                if (queueClient != null && !queueClient.IsClosed)
-                    await queueClient.CloseAsync().ConfigureAwait(false);
-            }
 
             await next.Send(context).ConfigureAwait(false);
-        }
-
-
-        class Ready :
-            ReceiveEndpointReady
-        {
-            public Ready(Uri inputAddress)
-            {
-                InputAddress = inputAddress;
-            }
-
-            public Uri InputAddress { get; }
-        }
-
-
-        class Completed :
-            ReceiveEndpointCompleted
-        {
-            public Completed(Uri inputAddress, ReceiverMetrics metrics)
-            {
-                InputAddress = inputAddress;
-                DeliveryCount = metrics.DeliveryCount;
-                ConcurrentDeliveryCount = metrics.ConcurrentDeliveryCount;
-            }
-
-            public Uri InputAddress { get; }
-            public long DeliveryCount { get; }
-            public long ConcurrentDeliveryCount { get; }
         }
     }
 }

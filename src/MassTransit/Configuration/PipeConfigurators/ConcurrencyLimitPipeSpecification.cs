@@ -30,13 +30,13 @@ namespace MassTransit.PipeConfigurators
     {
         readonly int _concurrencyLimit;
 
-        readonly ICommandRouter _dynamicRouter;
+        readonly IPipeRouter _dynamicRouter;
 
         public ConcurrencyLimitPipeSpecification(int concurrencyLimit)
         {
             _concurrencyLimit = concurrencyLimit;
 
-            _dynamicRouter = new CommandRouter();
+            _dynamicRouter = new PipeRouter();
         }
 
         public ConcurrencyLimitPipeSpecification(int concurrencyLimit, IManagementEndpointConfigurator configurator, string id = null)

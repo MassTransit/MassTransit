@@ -16,7 +16,6 @@ namespace MassTransit.Saga.Connectors
     using System.Collections.Generic;
     using GreenPipes;
     using MassTransit.Pipeline;
-    using PipeConfigurators;
     using Pipeline.Filters;
     using Util;
 
@@ -33,9 +32,9 @@ namespace MassTransit.Saga.Connectors
             if (repository == null)
                 throw new ArgumentException("The saga repository type does not match: " + TypeMetadataCache<T>.ShortName);
 
-            var sagaPipe = BuildSagaPipe(pipeSpecifications);
+            IPipe<SagaConsumeContext<TSaga, TMessage>> sagaPipe = BuildSagaPipe(pipeSpecifications);
 
-            var messagePipe = BuildMessagePipe(pipeSpecifications, repository, sagaPipe);
+            IPipe<ConsumeContext<TMessage>> messagePipe = BuildMessagePipe(pipeSpecifications, repository, sagaPipe);
 
             return consumePipe.ConnectConsumePipe(messagePipe);
         }
@@ -49,14 +48,14 @@ namespace MassTransit.Saga.Connectors
             return Pipe.New<ConsumeContext<TMessage>>(x =>
             {
                 var messagePipeBuilder = new MessagePipeBuilder<T>();
-                for (int i1 = 0; i1 < pipeSpecifications.Length; i1++)
+                for (var i1 = 0; i1 < pipeSpecifications.Length; i1++)
                     pipeSpecifications[i1].Apply(messagePipeBuilder);
 
                 var pipeBuilder = messagePipeBuilder as MessagePipeBuilder<TSaga>;
                 if (pipeBuilder == null)
                     throw new InvalidOperationException("Should not be null, ever");
 
-                foreach (var filter in pipeBuilder.Filters)
+                foreach (IFilter<ConsumeContext<TMessage>> filter in pipeBuilder.Filters)
                     x.UseFilter(filter);
 
                 ConfigureMessagePipe(x, repository, sagaPipe);
@@ -67,7 +66,7 @@ namespace MassTransit.Saga.Connectors
             where T : class, ISaga
         {
             var builder = new SagaPipeBuilder<T>();
-            for (int i = 0; i < pipeSpecifications.Length; i++)
+            for (var i = 0; i < pipeSpecifications.Length; i++)
                 pipeSpecifications[i].Apply(builder);
 
             var builders = builder as SagaPipeBuilder<TSaga>;
@@ -76,7 +75,7 @@ namespace MassTransit.Saga.Connectors
 
             return Pipe.New<SagaConsumeContext<TSaga, TMessage>>(x =>
             {
-                foreach (var filter in builders.Filters)
+                foreach (IFilter<SagaConsumeContext<TSaga, TMessage>> filter in builders.Filters)
                     x.UseFilter(filter);
 
                 ConfigureSagaPipe(x);
@@ -126,7 +125,8 @@ namespace MassTransit.Saga.Connectors
 
 
         class SagaPipeBuilder<T> :
-            IPipeBuilder<SagaConsumeContext<T>>
+            IPipeBuilder<SagaConsumeContext<T>>,
+            IPipeBuilder<SagaConsumeContext<T, TMessage>>
             where T : class, ISaga
         {
             readonly IList<IFilter<SagaConsumeContext<T, TMessage>>> _filters;
@@ -137,6 +137,11 @@ namespace MassTransit.Saga.Connectors
             }
 
             public IEnumerable<IFilter<SagaConsumeContext<T, TMessage>>> Filters => _filters;
+
+            public void AddFilter(IFilter<SagaConsumeContext<T, TMessage>> filter)
+            {
+                _filters.Add(filter);
+            }
 
             public void AddFilter(IFilter<SagaConsumeContext<T>> filter)
             {

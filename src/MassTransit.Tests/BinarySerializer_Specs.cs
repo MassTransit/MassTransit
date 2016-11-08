@@ -95,17 +95,17 @@ namespace MassTransit.Tests
         [Test]
         public async Task Should_be_able_to_consume_messages_polymorphically_if_the_receiving_bus_support_the_binary_serializer()
         {
-            var inMemoryTransportCache = new InMemoryTransportCache(Environment.ProcessorCount);
+            var inMemoryTransportCache = new InMemoryHost(Environment.ProcessorCount);
             var consumed = new TaskCompletionSource<Base>();
 
             var sourceBus = Bus.Factory.CreateUsingInMemory(x =>
             {
-                x.SetTransportProvider(inMemoryTransportCache);
+                x.SetHost(inMemoryTransportCache);
                 x.UseBinarySerializer();
             });
             var recvBus = Bus.Factory.CreateUsingInMemory(x =>
             {
-                x.SetTransportProvider(inMemoryTransportCache);
+                x.SetHost(inMemoryTransportCache);
                 x.SupportBinaryMessageDeserializer();
                 x.UseJsonSerializer();
                 x.ReceiveEndpoint("input_queue", configurator =>

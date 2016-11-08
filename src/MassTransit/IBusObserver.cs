@@ -48,7 +48,7 @@ namespace MassTransit
         /// <param name="bus"></param>
         /// <param name="busReady">A task which is completed once the bus is ready and all receive endpoints are ready.</param>
         /// <returns></returns>
-        Task PostStart(IBus bus, Task busReady);
+        Task PostStart(IBus bus, Task<BusReady> busReady);
 
         /// <summary>
         /// Called when the bus fails to start

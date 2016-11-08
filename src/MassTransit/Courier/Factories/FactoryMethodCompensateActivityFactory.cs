@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -16,11 +16,10 @@ namespace MassTransit.Courier.Factories
     using System.Threading.Tasks;
     using GreenPipes;
     using Hosts;
-    using MassTransit.Pipeline;
 
 
     public class FactoryMethodCompensateActivityFactory<TActivity, TLog> :
-        CompensateActivityFactory<TLog>
+        CompensateActivityFactory<TActivity, TLog>
         where TActivity : class, CompensateActivity<TLog>
         where TLog : class
     {
@@ -31,7 +30,7 @@ namespace MassTransit.Courier.Factories
             _compensateFactory = compensateFactory;
         }
 
-        public async Task Compensate(CompensateContext<TLog> context, IPipe<CompensateActivityContext<TLog>> next)
+        public async Task Compensate(CompensateContext<TLog> context, IPipe<CompensateActivityContext<TActivity, TLog>> next)
         {
             TActivity activity = null;
             try

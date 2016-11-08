@@ -78,10 +78,6 @@ namespace MassTransit.MongoDbIntegration.Tests.Courier
             Assert.IsNotNull(routingSlip);
             Assert.IsNotNull(routingSlip.Events);
             Assert.AreEqual(3, routingSlip.Events.Length);
-
-            var jsonResult = Bus.GetProbeResult().ToJsonString();
-
-            Console.WriteLine(jsonResult);
         }
 
         [OneTimeSetUp]

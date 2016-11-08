@@ -39,17 +39,19 @@ namespace MassTransit.Context
         readonly IReceiveObserver _receiveObserver;
         readonly Stopwatch _receiveTimer;
 
-        protected BaseReceiveContext(Uri inputAddress, bool redelivered, IReceiveObserver receiveObserver)
-            : this(inputAddress, redelivered, receiveObserver, new CancellationTokenSource())
+        protected BaseReceiveContext(Uri inputAddress, bool redelivered, IReceiveObserver receiveObserver, ISendEndpointProvider sendEndpointProvider, IPublishEndpointProvider publishEndpointProvider)
+            : this(inputAddress, redelivered, receiveObserver, new CancellationTokenSource(), sendEndpointProvider, publishEndpointProvider)
         {
         }
 
-        protected BaseReceiveContext(Uri inputAddress, bool redelivered, IReceiveObserver receiveObserver, CancellationTokenSource source)
+        protected BaseReceiveContext(Uri inputAddress, bool redelivered, IReceiveObserver receiveObserver, CancellationTokenSource source, ISendEndpointProvider sendEndpointProvider, IPublishEndpointProvider publishEndpointProvider)
             : base(new PayloadCache(), source.Token)
         {
             _receiveTimer = Stopwatch.StartNew();
 
             _cancellationTokenSource = source;
+            SendEndpointProvider = sendEndpointProvider;
+            PublishEndpointProvider = publishEndpointProvider;
             InputAddress = inputAddress;
             Redelivered = redelivered;
             _receiveObserver = receiveObserver;
@@ -64,6 +66,8 @@ namespace MassTransit.Context
         protected abstract IHeaderProvider HeaderProvider { get; }
         public bool IsDelivered { get; private set; }
         public bool IsFaulted { get; private set; }
+        public ISendEndpointProvider SendEndpointProvider { get; }
+        public IPublishEndpointProvider PublishEndpointProvider { get; }
 
         public Task CompleteTask
         {

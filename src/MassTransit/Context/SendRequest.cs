@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -28,17 +28,19 @@ namespace MassTransit.Context
         Request<TRequest>
         where TRequest : class
     {
-        readonly IBus _bus;
-        readonly Action<RequestContext<TRequest>> _callback;
-        readonly TaskScheduler _taskScheduler;
-        SendRequestContext<TRequest> _requestContext;
+        readonly Action<IRequestConfigurator<TRequest>> _callback;
+        readonly IRequestPipeConnector _connector;
         readonly Guid _requestId;
+        readonly Uri _responseAddress;
+        readonly TaskScheduler _taskScheduler;
+        SendRequestConfigurator<TRequest> _requestConfigurator;
 
-        public SendRequest(IBus bus, TaskScheduler taskScheduler, Action<RequestContext<TRequest>> callback)
+        public SendRequest(IRequestPipeConnector connector, Uri responseAddress, TaskScheduler taskScheduler, Action<IRequestConfigurator<TRequest>> callback)
         {
             _taskScheduler = taskScheduler;
             _callback = callback;
-            _bus = bus;
+            _connector = connector;
+            _responseAddress = responseAddress;
             _requestId = NewId.NextGuid();
         }
 
@@ -49,18 +51,19 @@ namespace MassTransit.Context
         Task IPipe<SendContext<TRequest>>.Send(SendContext<TRequest> context)
         {
             context.RequestId = _requestId;
-            context.ResponseAddress = _bus.Address;
+            context.ResponseAddress = _responseAddress;
 
-            if(_requestContext == null)
-                _requestContext = new SendRequestContext<TRequest>(_bus, context, _taskScheduler, _callback);
+            if (_requestConfigurator == null)
+                _requestConfigurator = new SendRequestConfigurator<TRequest>(_connector, context, _taskScheduler, _callback);
             else
             {
-                var publishContext = new PublishRequestContext<TRequest>(_bus, context, _callback, _requestContext.Connections, ((RequestContext<TRequest>)_requestContext).Task);
+                var publishContext = new PublishRequestConfigurator<TRequest>(context, _callback, _requestConfigurator.Connections,
+                    ((IRequestConfigurator<TRequest>)_requestConfigurator).Task);
             }
 
             return TaskUtil.Completed;
         }
 
-        Task Request<TRequest>.Task => ((RequestContext)_requestContext).Task;
+        Task<TRequest> Request<TRequest>.Task => ((IRequestConfigurator<TRequest>)_requestConfigurator).Task;
     }
 }

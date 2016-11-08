@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,14 +14,16 @@ namespace MassTransit.Courier
 {
     using System.Threading.Tasks;
     using GreenPipes;
-    using MassTransit.Pipeline;
+
 
     /// <summary>
     /// A factory that creates an execute activity and thenn invokes the pipe for the activity context
     /// </summary>
     /// <typeparam name="TArguments"></typeparam>
-    public interface ExecuteActivityFactory<TArguments>
+    /// <typeparam name="TActivity"></typeparam>
+    public interface ExecuteActivityFactory<out TActivity, TArguments>
         where TArguments : class
+        where TActivity : class, ExecuteActivity<TArguments>
     {
         /// <summary>
         /// Executes the activity context by passing it to the activity factory, which creates the activity
@@ -30,6 +32,6 @@ namespace MassTransit.Courier
         /// <param name="context"></param>
         /// <param name="next"></param>
         /// <returns></returns>
-        Task Execute(ExecuteContext<TArguments> context, IPipe<ExecuteActivityContext<TArguments>> next);
+        Task Execute(ExecuteContext<TArguments> context, IPipe<ExecuteActivityContext<TActivity, TArguments>> next);
     }
 }

@@ -13,7 +13,6 @@
 namespace MassTransit.RabbitMqTransport.Contexts
 {
     using System.Threading.Tasks;
-    using Context;
     using GreenPipes;
     using GreenPipes.Payloads;
     using Logging;
@@ -56,7 +55,7 @@ namespace MassTransit.RabbitMqTransport.Contexts
         public Task<IModel> CreateModel()
         {
             return Task.Factory.StartNew(() => _connection.CreateModel(),
-                _participant.StoppedToken, TaskCreationOptions.HideScheduler, _taskScheduler);
+                _participant.StoppedToken, TaskCreationOptions.None, _taskScheduler);
         }
 
         public IConnection Connection => _connection;
