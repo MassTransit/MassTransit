@@ -26,6 +26,7 @@ namespace MassTransit.AzureServiceBusTransport.Transport
     using MassTransit.Pipeline;
     using MassTransit.Scheduling;
     using Microsoft.ServiceBus.Messaging;
+    using Serialization;
     using Transports;
     using Util;
 
@@ -320,29 +321,6 @@ namespace MassTransit.AzureServiceBusTransport.Transport
 
             public string SessionId { get; set; }
             public string ReplyToSessionId { get; set; }
-
-
-            class CopyBodySerializer :
-                IMessageSerializer
-            {
-                readonly ReceiveContext _context;
-
-                public CopyBodySerializer(ReceiveContext context)
-                {
-                    _context = context;
-                    ContentType = context.ContentType;
-                }
-
-                public ContentType ContentType { get; }
-
-                void IMessageSerializer.Serialize<T>(Stream stream, SendContext<T> context)
-                {
-                    using (var bodyStream = _context.GetBody())
-                    {
-                        bodyStream.CopyTo(stream);
-                    }
-                }
-            }
         }
     }
 }

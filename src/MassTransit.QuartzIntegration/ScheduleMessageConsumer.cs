@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -47,9 +47,9 @@ namespace MassTransit.QuartzIntegration
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("ScheduleMessage: {0} at {1}", jobKey, context.Message.ScheduledTime);
 
-            IJobDetail jobDetail = await CreateJobDetail(context, context.Message.Destination, jobKey).ConfigureAwait(false);
+            var jobDetail = await CreateJobDetail(context, context.Message.Destination, jobKey).ConfigureAwait(false);
 
-            ITrigger trigger = TriggerBuilder.Create()
+            var trigger = TriggerBuilder.Create()
                 .ForJob(jobDetail)
                 .StartAt(context.Message.ScheduledTime)
                 .WithSchedule(SimpleScheduleBuilder.Create().WithMisfireHandlingInstructionFireNow())
@@ -69,11 +69,11 @@ namespace MassTransit.QuartzIntegration
 
             var jobKey = new JobKey(context.Message.Schedule.ScheduleId, context.Message.Schedule.ScheduleGroup);
 
-            IJobDetail jobDetail = await CreateJobDetail(context, context.Message.Destination, jobKey).ConfigureAwait(false);
+            var jobDetail = await CreateJobDetail(context, context.Message.Destination, jobKey).ConfigureAwait(false);
 
             var triggerKey = new TriggerKey("Recurring.Trigger." + context.Message.Schedule.ScheduleId, context.Message.Schedule.ScheduleGroup);
 
-            ITrigger trigger = CreateTrigger(context.Message.Schedule, jobDetail, triggerKey);
+            var trigger = CreateTrigger(context.Message.Schedule, jobDetail, triggerKey);
 
             if (_scheduler.CheckExists(triggerKey))
                 _scheduler.RescheduleJob(triggerKey, trigger);
@@ -83,11 +83,11 @@ namespace MassTransit.QuartzIntegration
 
         ITrigger CreateTrigger(RecurringSchedule schedule, IJobDetail jobDetail, TriggerKey triggerKey)
         {
-            TimeZoneInfo tz = TimeZoneInfo.Local;
+            var tz = TimeZoneInfo.Local;
             if (!string.IsNullOrWhiteSpace(schedule.TimeZoneId) && schedule.TimeZoneId != tz.Id)
                 tz = TimeZoneInfo.FindSystemTimeZoneById(schedule.TimeZoneId);
 
-            TriggerBuilder triggerBuilder = TriggerBuilder.Create()
+            var triggerBuilder = TriggerBuilder.Create()
                 .ForJob(jobDetail)
                 .WithIdentity(triggerKey)
                 .StartAt(schedule.StartTime)
@@ -117,7 +117,7 @@ namespace MassTransit.QuartzIntegration
             string body;
             using (var ms = new MemoryStream())
             {
-                using (Stream bodyStream = context.ReceiveContext.GetBody())
+                using (var bodyStream = context.ReceiveContext.GetBody())
                 {
                     await bodyStream.CopyToAsync(ms).ConfigureAwait(false);
                 }
@@ -126,8 +126,7 @@ namespace MassTransit.QuartzIntegration
             }
 
             if (string.Compare(context.ReceiveContext.ContentType.MediaType, JsonMessageSerializer.JsonContentType.MediaType,
-                StringComparison.OrdinalIgnoreCase)
-                == 0)
+                StringComparison.OrdinalIgnoreCase) == 0)
                 body = TranslateJsonBody(body, destination.ToString());
             else if (string.Compare(context.ReceiveContext.ContentType.MediaType, XmlMessageSerializer.XmlContentType.MediaType,
                 StringComparison.OrdinalIgnoreCase) == 0)
@@ -135,7 +134,7 @@ namespace MassTransit.QuartzIntegration
             else
                 throw new InvalidOperationException("Only JSON and XML messages can be scheduled");
 
-            JobBuilder builder = JobBuilder.Create<ScheduledMessageJob>()
+            var builder = JobBuilder.Create<ScheduledMessageJob>()
                 .RequestRecovery(true)
                 .WithIdentity(jobKey)
                 .UsingJobData("Destination", ToString(destination))
@@ -160,7 +159,7 @@ namespace MassTransit.QuartzIntegration
             if (tokenId.HasValue)
                 builder = builder.UsingJobData("TokenId", tokenId.Value.ToString("N"));
 
-            IJobDetail jobDetail = builder
+            var jobDetail = builder
                 .UsingJobData("HeadersAsJson", JsonConvert.SerializeObject(context.Headers.GetAll()))
                 .Build();
 
@@ -177,14 +176,14 @@ namespace MassTransit.QuartzIntegration
 
         static string TranslateJsonBody(string body, string destination)
         {
-            JObject envelope = JObject.Parse(body);
+            var envelope = JObject.Parse(body);
 
             envelope["destinationAddress"] = destination;
 
-            JToken message = envelope["message"];
+            var message = envelope["message"];
 
-            JToken payload = message["payload"];
-            JToken payloadType = message["payloadType"];
+            var payload = message["payload"];
+            var payloadType = message["payloadType"];
 
             envelope["message"] = payload;
             envelope["messageType"] = payloadType;
@@ -196,16 +195,16 @@ namespace MassTransit.QuartzIntegration
         {
             using (var reader = new StringReader(body))
             {
-                XDocument document = XDocument.Load(reader);
+                var document = XDocument.Load(reader);
 
-                XElement envelope = (from e in document.Descendants("envelope") select e).Single();
+                var envelope = (from e in document.Descendants("envelope") select e).Single();
 
-                XElement destinationAddress = (from a in envelope.Descendants("destinationAddress") select a).Single();
+                var destinationAddress = (from a in envelope.Descendants("destinationAddress") select a).Single();
 
-                XElement message = (from m in envelope.Descendants("message") select m).Single();
+                var message = (from m in envelope.Descendants("message") select m).Single();
                 IEnumerable<XElement> messageType = (from mt in envelope.Descendants("messageType") select mt);
 
-                XElement payload = (from p in message.Descendants("payload") select p).Single();
+                var payload = (from p in message.Descendants("payload") select p).Single();
                 IEnumerable<XElement> payloadType = (from pt in message.Descendants("payloadType") select pt);
 
                 message.Remove();

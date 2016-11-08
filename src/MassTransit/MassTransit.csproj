@@ -735,10 +735,12 @@
     <Compile Include="Serialization\BinaryMessageDeserializer.cs" />
     <Compile Include="Serialization\BsonMessageDeserializer.cs" />
     <Compile Include="Serialization\ConsumeSendEndpoint.cs" />
+    <Compile Include="Serialization\CopyBodySerializer.cs" />
     <Compile Include="Serialization\EncryptedMessageDeserializer.cs" />
     <Compile Include="Serialization\EncryptedMessageSerializer.cs" />
     <Compile Include="Serialization\ICryptoStreamProvider.cs" />
     <Compile Include="Serialization\ISymmetricKeyProvider.cs" />
+    <Compile Include="Serialization\BodySerializer.cs" />
     <Compile Include="Serialization\JsonConsumeContext.cs" />
     <Compile Include="Serialization\JsonConverters\ByteArrayConverter.cs" />
     <Compile Include="Serialization\JsonConverters\DictionaryJsonConverter.cs" />
@@ -755,6 +757,7 @@
     <Compile Include="Serialization\MessageEnvelope.cs" />
     <Compile Include="Serialization\StaticConsumeContext.cs" />
     <Compile Include="Serialization\StaticHeaders.cs" />
+    <Compile Include="Serialization\StringMessageSerializer.cs" />
     <Compile Include="Serialization\SupportedMessageDeserializers.cs" />
     <Compile Include="Configuration\ConsumeConfigurators\ConsumerFactoryConfiguratorExtensions.cs" />
     <Compile Include="Configuration\ConsumeConnectors\LegacyConsumerInterfaceType.cs" />

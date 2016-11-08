@@ -28,6 +28,7 @@ namespace MassTransit.RabbitMqTransport.Transport
     using MassTransit.Pipeline;
     using Pipeline;
     using RabbitMQ.Client;
+    using Serialization;
     using Topology;
     using Transports;
     using Util;
@@ -265,28 +266,6 @@ namespace MassTransit.RabbitMqTransport.Transport
             public bool AwaitAck { get; set; }
 
             public IBasicProperties BasicProperties { get; }
-
-
-            class CopyBodySerializer : IMessageSerializer
-            {
-                readonly ReceiveContext _context;
-
-                public CopyBodySerializer(ReceiveContext context)
-                {
-                    _context = context;
-                    ContentType = context.ContentType;
-                }
-
-                public ContentType ContentType { get; }
-
-                void IMessageSerializer.Serialize<T>(Stream stream, SendContext<T> context)
-                {
-                    using (var bodyStream = _context.GetBody())
-                    {
-                        bodyStream.CopyTo(stream);
-                    }
-                }
-            }
         }
     }
 }

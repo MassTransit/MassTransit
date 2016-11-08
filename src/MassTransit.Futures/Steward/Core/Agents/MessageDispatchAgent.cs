@@ -23,6 +23,7 @@ namespace MassTransit.Steward.Core.Agents
     using GreenPipes;
     using Logging;
     using Pipeline;
+    using Serialization;
 
 
     public class MessageDispatchAgent :
@@ -67,7 +68,7 @@ namespace MassTransit.Steward.Core.Agents
             {
                 context.SourceAddress = dispatchContext.ReceiveContext.InputAddress;
 
-                context.Serializer = new DispatchBodySerializer(context.ContentType, Encoding.UTF8.GetBytes(dispatchContext.Body));
+                context.Serializer = new BodySerializer(context.ContentType, Encoding.UTF8.GetBytes(dispatchContext.Body));
             });
 
             return pipe;
@@ -114,31 +115,6 @@ namespace MassTransit.Steward.Core.Agents
 
             public Guid EventId { get; private set; }
             public DateTime Timestamp { get; private set; }
-        }
-
-
-        class DispatchBodySerializer :
-            IMessageSerializer
-        {
-            readonly byte[] _body;
-            readonly ContentType _contentType;
-
-            public DispatchBodySerializer(ContentType contentType, byte[] body)
-            {
-                _contentType = contentType;
-                _body = body;
-            }
-
-            public ContentType ContentType
-            {
-                get { return _contentType; }
-            }
-
-            public void Serialize<T>(Stream stream, SendContext<T> context)
-                where T : class
-            {
-                stream.Write(_body, 0, _body.Length);
-            }
         }
 
 

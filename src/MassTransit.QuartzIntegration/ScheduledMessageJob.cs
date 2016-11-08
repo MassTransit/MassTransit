@@ -15,16 +15,11 @@ namespace MassTransit.QuartzIntegration
     using System;
     using System.Collections.Generic;
     using System.Globalization;
-    using System.IO;
-    using System.Linq;
     using System.Net.Mime;
-    using System.Text;
-    using System.Xml.Linq;
     using GreenPipes;
     using Logging;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
-    using Pipeline;
     using Quartz;
     using Serialization;
     using Util;
@@ -88,10 +83,10 @@ namespace MassTransit.QuartzIntegration
             {
                 x.UseExecute(context =>
                 {
-                    context.DestinationAddress = (destinationAddress);
-                    context.SourceAddress = (sourceAddress);
-                    context.ResponseAddress = (ToUri(ResponseAddress));
-                    context.FaultAddress = (ToUri(FaultAddress));
+                    context.DestinationAddress = destinationAddress;
+                    context.SourceAddress = sourceAddress;
+                    context.ResponseAddress = ToUri(ResponseAddress);
+                    context.FaultAddress = ToUri(FaultAddress);
 
                     SetHeaders(context);
 
@@ -112,12 +107,19 @@ namespace MassTransit.QuartzIntegration
                     if (!string.IsNullOrEmpty(ExpirationTime))
                         context.TimeToLive = DateTime.UtcNow - DateTime.Parse(ExpirationTime);
 
-                    if (string.Compare(ContentType, JsonMessageSerializer.JsonContentType.MediaType, StringComparison.OrdinalIgnoreCase) == 0)
-                        Body = UpdateJsonHeaders(Body);
-                    else if (string.Compare(ContentType, XmlMessageSerializer.XmlContentType.MediaType, StringComparison.OrdinalIgnoreCase) == 0)
-                        Body = UpdateXmlHeaders(Body);
+                    var bodySerializer = new StringMessageSerializer(new ContentType(ContentType), Body);
 
-                    context.Serializer = new ScheduledBodySerializer(new ContentType(ContentType), Encoding.UTF8.GetBytes(Body));
+                    if (!string.IsNullOrWhiteSpace(PayloadMessageHeadersAsJson))
+                    {
+                        var headers = JObject.Parse(PayloadMessageHeadersAsJson).ToObject<Dictionary<string, object>>();
+
+                        if (string.Compare(ContentType, JsonMessageSerializer.JsonContentType.MediaType, StringComparison.OrdinalIgnoreCase) == 0)
+                            bodySerializer.UpdateJsonHeaders(headers);
+                        else if (string.Compare(ContentType, XmlMessageSerializer.XmlContentType.MediaType, StringComparison.OrdinalIgnoreCase) == 0)
+                            bodySerializer.UpdateXmlHeaders(headers);
+                    }
+
+                    context.Serializer = bodySerializer;
                 });
             });
 
@@ -146,56 +148,6 @@ namespace MassTransit.QuartzIntegration
                 context.Headers.Set(header.Key, header.Value);
         }
 
-        string UpdateJsonHeaders(string body)
-        {
-            if (string.IsNullOrEmpty(PayloadMessageHeadersAsJson))
-                return body;
-
-            var envelope = JObject.Parse(body);
-
-            var payloadHeaders = JObject.Parse(PayloadMessageHeadersAsJson).ToObject<Dictionary<string, object>>();
-
-            var headersToken = envelope["headers"] ?? new JObject();
-            var headers = headersToken.ToObject<Dictionary<string, object>>();
-
-            foreach (KeyValuePair<string, object> payloadHeader in payloadHeaders)
-            {
-                headers[payloadHeader.Key] = payloadHeader.Value;
-            }
-            envelope["headers"] = JToken.FromObject(headers);
-
-            return JsonConvert.SerializeObject(envelope, Formatting.Indented);
-        }
-
-        string UpdateXmlHeaders(string body)
-        {
-            if (string.IsNullOrEmpty(PayloadMessageHeadersAsJson))
-                return body;
-
-            using (var reader = new StringReader(body))
-            {
-                var document = XDocument.Load(reader);
-
-                var envelope = (from e in document.Descendants("envelope") select e).Single();
-
-                var headers = (from h in envelope.Descendants("headers") select h).SingleOrDefault();
-                if (headers == null)
-                {
-                    headers = new XElement("headers");
-                    envelope.Add(headers);
-                }
-
-                var payloadHeaders = JObject.Parse(PayloadMessageHeadersAsJson).ToObject<Dictionary<string, object>>();
-
-                foreach (KeyValuePair<string, object> payloadHeader in payloadHeaders)
-                {
-                    headers.Add(new XElement(payloadHeader.Key, payloadHeader.Value));
-                }
-
-                return document.ToString();
-            }
-        }
-
         static Uri ToUri(string s)
         {
             if (string.IsNullOrEmpty(s))
@@ -207,27 +159,6 @@ namespace MassTransit.QuartzIntegration
 
         class Scheduled
         {
-        }
-
-
-        class ScheduledBodySerializer :
-            IMessageSerializer
-        {
-            readonly byte[] _body;
-
-            public ScheduledBodySerializer(ContentType contentType, byte[] body)
-            {
-                ContentType = contentType;
-                _body = body;
-            }
-
-            public ContentType ContentType { get; }
-
-            public void Serialize<T>(Stream stream, SendContext<T> context)
-                where T : class
-            {
-                stream.Write(_body, 0, _body.Length);
-            }
         }
     }
 }
