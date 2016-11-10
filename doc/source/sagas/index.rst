@@ -28,3 +28,5 @@ called Automatonymous_. Automatonymous is a state machine engine written by Chri
     :maxdepth: 0
 
     automatonymous.rst
+    persistence.rst
+    
