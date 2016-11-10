@@ -28,7 +28,7 @@ In addition to the basic routing slip pattern, MassTransit Courier also supports
 .. toctree::
     :maxdepth: 0
 
-    activity.rst
+    activities.rst
     builder.rst
     execute.rst
     events.rst
