@@ -60,7 +60,7 @@ namespace MassTransit.AzureServiceBusTransport
 
         static bool IsTemporaryMessageType(this Type messageType)
         {
-            return (!messageType.IsPublic && messageType.IsClass)
+            return (!messageType.IsVisible && messageType.IsClass)
                 || (messageType.IsGenericType && messageType.GetGenericArguments().Any(IsTemporaryMessageType));
         }
 
