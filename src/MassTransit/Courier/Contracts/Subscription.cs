@@ -13,6 +13,7 @@
 namespace MassTransit.Courier.Contracts
 {
     using System;
+    using MassTransit.Serialization;
 
 
     /// <summary>
@@ -35,5 +36,10 @@ namespace MassTransit.Courier.Contracts
         /// The event contents to include when published
         /// </summary>
         RoutingSlipEventContents Include { get; }
+
+        /// <summary>
+        /// The message sent as part of the subscription
+        /// </summary>
+        MessageEnvelope Message { get; }
     }
 }

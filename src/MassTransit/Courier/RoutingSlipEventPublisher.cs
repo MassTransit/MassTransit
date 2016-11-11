@@ -18,7 +18,9 @@ namespace MassTransit.Courier
     using System.Threading.Tasks;
     using Contracts;
     using InternalMessages;
+    using MassTransit.Serialization;
     using Newtonsoft.Json;
+    using Serialization;
     using Util;
 
 
@@ -221,18 +223,31 @@ namespace MassTransit.Courier
             {
                 foreach (var subscription in _routingSlip.Subscriptions)
                 {
-                    if (subscription.Events == RoutingSlipEvents.All || subscription.Events.HasFlag(eventFlag))
-                    {
-                        var endpoint = await _sendEndpointProvider.GetSendEndpoint(subscription.Address).ConfigureAwait(false);
-
-                        var subscriptionMessage = messageFactory(subscription.Include);
-
-                        await endpoint.Send(subscriptionMessage).ConfigureAwait(false);
-                    }
+                    await PublishSubscriptionEvent(eventFlag, messageFactory, subscription).ConfigureAwait(false);
                 }
             }
             else
                 await _publishEndpoint.Publish(messageFactory(RoutingSlipEventContents.All)).ConfigureAwait(false);
+        }
+
+        async Task PublishSubscriptionEvent<T>(RoutingSlipEvents eventFlag, Func<RoutingSlipEventContents, T> messageFactory, Subscription subscription)
+            where T : class
+        {
+            if (subscription.Events == RoutingSlipEvents.All || subscription.Events.HasFlag(eventFlag))
+            {
+                var endpoint = await _sendEndpointProvider.GetSendEndpoint(subscription.Address).ConfigureAwait(false);
+
+                var message = messageFactory(subscription.Include);
+
+                if (subscription.Message != null)
+                {
+                    var adapter = new MessageEnvelopeContextAdapter(null, subscription.Message, JsonMessageSerializer.ContentTypeHeaderValue, message);
+
+                    await endpoint.Send(message, adapter).ConfigureAwait(false);
+                }
+                else
+                    await endpoint.Send(message).ConfigureAwait(false);
+            }
         }
     }
 }

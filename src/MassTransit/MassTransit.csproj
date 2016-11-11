@@ -143,6 +143,10 @@
     <Compile Include="Context\ConsumeContextScopePublishEndpoint.cs" />
     <Compile Include="Context\RescueExceptionConsumerConsumeContext.cs" />
     <Compile Include="Context\RescueExceptionSagaConsumeContext.cs" />
+    <Compile Include="Courier\RoutingSlipBuilderSendEndpoint.cs" />
+    <Compile Include="Courier\RoutingSlipSendContext.cs" />
+    <Compile Include="Courier\Serialization\EnvelopeMessageSerializer.cs" />
+    <Compile Include="Courier\Serialization\MessageEnvelopeContextAdapter.cs" />
     <Compile Include="Events\BusReadyEvent.cs" />
     <Compile Include="Events\HostReadyEvent.cs" />
     <Compile Include="Events\ReceiveEndpointFaultedEvent.cs" />
@@ -754,7 +758,10 @@
     <Compile Include="Serialization\JsonMessageHeaders.cs" />
     <Compile Include="Serialization\JsonMessageDeserializer.cs" />
     <Compile Include="Serialization\JsonMessageEnvelope.cs" />
+    <Compile Include="Serialization\JsonSerializedMessage.cs" />
     <Compile Include="Serialization\MessageEnvelope.cs" />
+    <Compile Include="Serialization\SerializedMessage.cs" />
+    <Compile Include="Serialization\SerializedMessageContextAdapter.cs" />
     <Compile Include="Serialization\StaticConsumeContext.cs" />
     <Compile Include="Serialization\StaticHeaders.cs" />
     <Compile Include="Serialization\StringMessageSerializer.cs" />

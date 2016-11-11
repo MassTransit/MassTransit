@@ -18,6 +18,7 @@ namespace MassTransit.Courier.Hosts
     using System.Runtime.Serialization;
     using Contracts;
     using Exceptions;
+    using MassTransit.Serialization;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
     using Serialization;
@@ -248,11 +249,13 @@ namespace MassTransit.Courier.Hosts
                 Address = subscription.Address;
                 Events = subscription.Events;
                 Include = subscription.Include;
+                Message = subscription.Message;
             }
 
             public Uri Address { get; private set; }
             public RoutingSlipEvents Events { get; private set; }
             public RoutingSlipEventContents Include { get; private set; }
+            public MessageEnvelope Message { get; private set; }
         }
     }
 }

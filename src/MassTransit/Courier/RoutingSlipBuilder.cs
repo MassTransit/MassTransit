@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,9 +14,11 @@ namespace MassTransit.Courier
 {
     using System;
     using System.Collections.Generic;
+    using System.Threading.Tasks;
     using Contracts;
     using Events;
     using InternalMessages;
+    using MassTransit.Serialization;
     using Newtonsoft.Json.Linq;
 
 
@@ -216,9 +218,9 @@ namespace MassTransit.Courier
         /// <returns></returns>
         public int AddActivitiesFromSourceItinerary()
         {
-            int count = _sourceItinerary.Count;
+            var count = _sourceItinerary.Count;
 
-            foreach (Activity activity in _sourceItinerary)
+            foreach (var activity in _sourceItinerary)
                 _itinerary.Add(activity);
 
             _sourceItinerary.Clear();
@@ -294,8 +296,7 @@ namespace MassTransit.Courier
             if (exceptionInfo == null)
                 throw new ArgumentNullException(nameof(exceptionInfo));
 
-            ActivityException activityException = new ActivityExceptionImpl(name, host, activityTrackingNumber, timestamp, elapsed,
-                exceptionInfo);
+            ActivityException activityException = new ActivityExceptionImpl(name, host, activityTrackingNumber, timestamp, elapsed, exceptionInfo);
             _activityExceptions.Add(activityException);
         }
 
@@ -309,7 +310,7 @@ namespace MassTransit.Courier
 
         void SetVariablesFromDictionary(IEnumerable<KeyValuePair<string, object>> values)
         {
-            foreach (var value in values)
+            foreach (KeyValuePair<string, object> value in values)
             {
                 if (value.Value == null || (value.Value is string && string.IsNullOrEmpty((string)value.Value)))
                     _variables.Remove(value.Key);
@@ -323,7 +324,7 @@ namespace MassTransit.Courier
             if (values == null)
                 return new Dictionary<string, object>();
 
-            JObject dictionary = JObject.FromObject(values, SerializerCache.Serializer);
+            var dictionary = JObject.FromObject(values, SerializerCache.Serializer);
 
             return dictionary.ToObject<IDictionary<string, object>>();
         }
@@ -347,6 +348,30 @@ namespace MassTransit.Courier
         public void AddSubscription(Uri address, RoutingSlipEvents events, RoutingSlipEventContents contents)
         {
             _subscriptions.Add(new SubscriptionImpl(address, events, contents));
+        }
+
+        /// <summary>
+        /// Adds a custom subscription message to the routing slip which is sent at the specified events
+        /// </summary>
+        /// <param name="address">The destination address where the events are sent</param>
+        /// <param name="events">The events to include in the subscription</param>
+        /// <param name="contents">The contents of the routing slip event</param>
+        /// <param name="message">The custom message to be sent</param>
+        public void AddSubscription(Uri address, RoutingSlipEvents events, RoutingSlipEventContents contents, MessageEnvelope message)
+        {
+            _subscriptions.Add(new SubscriptionImpl(address, events, contents, message));
+        }
+
+        /// <summary>
+        /// Adds a message subscription to the routing slip that will be sent at the specified event points
+        /// </summary>
+        /// <param name="address"></param>
+        /// <param name="events"></param>
+        /// <param name="callback"></param>
+        /// <returns></returns>
+        public Task AddSubscription(Uri address, RoutingSlipEvents events, Func<ISendEndpoint, Task> callback)
+        {
+            return callback(new RoutingSlipBuilderSendEndpoint(this, address, events));
         }
     }
 }

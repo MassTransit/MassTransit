@@ -125,6 +125,7 @@
     <Compile Include="Courier\RequestRoutingSlip_Specs.cs" />
     <Compile Include="Courier\ReviseItinerary_Specs.cs" />
     <Compile Include="Courier\RoutingSlip_Specs.cs" />
+    <Compile Include="Courier\SendEvent_Specs.cs" />
     <Compile Include="Courier\SingleActivityEvent_Specs.cs" />
     <Compile Include="Courier\Subscription_Specs.cs" />
     <Compile Include="Courier\TwoActivityEvent_Specs.cs" />

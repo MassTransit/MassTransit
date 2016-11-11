@@ -168,10 +168,7 @@ namespace MassTransit.QuartzIntegration
 
         static string ToString(Uri uri)
         {
-            if (uri == null)
-                return "";
-
-            return uri.ToString();
+            return uri?.ToString() ?? "";
         }
 
         static string TranslateJsonBody(string body, string destination)
