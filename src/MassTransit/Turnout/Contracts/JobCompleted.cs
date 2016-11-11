@@ -13,6 +13,7 @@
 namespace MassTransit.Turnout.Contracts
 {
     using System;
+    using System.Collections.Generic;
 
 
     /// <summary>
@@ -29,6 +30,16 @@ namespace MassTransit.Turnout.Contracts
         /// The time the job completed
         /// </summary>
         DateTime Timestamp { get; }
+
+        /// <summary>
+        /// The arguments used to start the job
+        /// </summary>
+        IDictionary<string, object> Arguments { get; }
+
+        /// <summary>
+        /// The results of the job, serialized
+        /// </summary>
+        IDictionary<string, object> Results { get; }
     }
 
 

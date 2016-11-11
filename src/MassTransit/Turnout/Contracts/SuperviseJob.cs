@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -20,12 +20,18 @@ namespace MassTransit.Turnout.Contracts
     /// Sent to the node where the job is executing so that it can check the status
     /// of the job. Sent at an interval until the job is completed.
     /// </summary>
-    public interface SuperviseJob
+    public interface SuperviseJob<out T>
+        where T : class
     {
         /// <summary>
         /// The job identifier
         /// </summary>
         Guid JobId { get; }
+
+        /// <summary>
+        /// Identifies the execution of the job, in case of a retry
+        /// </summary>
+        Guid ExecutionId { get; }
 
         /// <summary>
         /// The time of the last job status check
@@ -36,5 +42,10 @@ namespace MassTransit.Turnout.Contracts
         /// The previous job status
         /// </summary>
         JobStatus LastStatus { get; }
+
+        /// <summary>
+        /// The job command, which initiated the job
+        /// </summary>
+        T Job { get; }
     }
 }

@@ -32,6 +32,15 @@ namespace MassTransit.RabbitMqTransport
         /// </summary>
         bool BindMessageExchanges { set; }
 
+        /// <summary>
+        /// Specifies the dead letter exchange name, which is used to send expired messages
+        /// </summary>
+        string DeadLetterExchange { set; }
+
+        /// <summary>
+        /// Configure a management endpoint for this receive endpoint
+        /// </summary>
+        /// <param name="management"></param>
         void ConnectManagementEndpoint(IManagementEndpointConfigurator management);
 
         /// <summary>

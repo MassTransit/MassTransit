@@ -50,11 +50,11 @@ namespace MassTransit.QuartzIntegration.Tests
         {
             base.ConfigureInputQueueEndpoint(configurator);
 
-            configurator.Turnout<ProcessFile>(_busFactoryConfigurator, x =>
-            {
-                x.SuperviseInterval = TimeSpan.FromSeconds(1);
-                x.SetJobFactory(async context => await Task.Delay(context.Message.Size));
-            });
+//            configurator.Turnout<ProcessFile>(_busFactoryConfigurator, x =>
+//            {
+//                x.SuperviseInterval = TimeSpan.FromSeconds(1);
+//                x.SetJobFactory(async context => await Task.Delay(context.Message.Size));
+//            });
         }
 
 
@@ -97,16 +97,16 @@ namespace MassTransit.QuartzIntegration.Tests
         {
             base.ConfigureInputQueueEndpoint(configurator);
 
-            configurator.Turnout<ProcessFile>(_busFactoryConfigurator, x =>
-            {
-                x.SuperviseInterval = TimeSpan.FromSeconds(1);
-                x.SetJobFactory(async context =>
-                {
-                    await Task.Delay(context.Message.Size);
-
-                    throw new IntentionalTestException();
-                });
-            });
+//            configurator.Turnout<ProcessFile>(_busFactoryConfigurator, x =>
+//            {
+//                x.SuperviseInterval = TimeSpan.FromSeconds(1);
+//                x.SetJobFactory(async context =>
+//                {
+//                    await Task.Delay(context.Message.Size);
+//
+//                    throw new IntentionalTestException();
+//                });
+//            });
         }
 
 

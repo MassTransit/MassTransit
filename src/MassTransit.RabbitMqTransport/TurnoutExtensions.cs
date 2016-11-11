@@ -23,21 +23,35 @@ namespace MassTransit.RabbitMqTransport
         /// completes.
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="configurator">The receive endpoint configurator</param>
         /// <param name="busFactoryConfigurator">The bus factory configuration to use a separate endpoint for the control traffic</param>
+        /// <param name="queueName">The receive queue name for commands</param>
         /// <param name="configure"></param>
-        public static void Turnout<T>(this IRabbitMqReceiveEndpointConfigurator configurator, IRabbitMqBusFactoryConfigurator busFactoryConfigurator,
+        /// <param name="host">The host on which to configure the endpoint</param>
+        public static void TurnoutEndpoint<T>(this IRabbitMqBusFactoryConfigurator busFactoryConfigurator, IRabbitMqHost host, string queueName,
             Action<ITurnoutHostConfigurator<T>> configure)
             where T : class
         {
-            var temporaryQueueName = configurator.Host.GetTemporaryQueueName("turnout-");
+            string deadLetterQueueName = $"{queueName}-expired";
 
-            busFactoryConfigurator.ReceiveEndpoint(configurator.Host, temporaryQueueName, turnoutEndpointConfigurator =>
+            // configure the dead letter endpoint, so it's available at startup
+            busFactoryConfigurator.ReceiveEndpoint(host, deadLetterQueueName, deadLetterConfigurator =>
             {
-                turnoutEndpointConfigurator.AutoDelete = true;
-                turnoutEndpointConfigurator.Durable = false;
+                // configure the turnout management endpoint
+                var temporaryQueueName = host.GetTemporaryQueueName("turnout-");
+                busFactoryConfigurator.ReceiveEndpoint(host, temporaryQueueName, turnoutConfigurator =>
+                {
+                    turnoutConfigurator.PrefetchCount = 100;
+                    turnoutConfigurator.AutoDelete = true;
+                    turnoutConfigurator.Durable = false;
 
-                configurator.ConfigureTurnoutEndpoints(busFactoryConfigurator, turnoutEndpointConfigurator, configure);
+                    turnoutConfigurator.DeadLetterExchange = deadLetterQueueName;
+
+                    // configure the input queue endpoint
+                    busFactoryConfigurator.ReceiveEndpoint(host, queueName, configurator =>
+                    {
+                        configurator.ConfigureTurnoutEndpoints(busFactoryConfigurator, turnoutConfigurator, deadLetterConfigurator, configure);
+                    });
+                });
             });
         }
     }

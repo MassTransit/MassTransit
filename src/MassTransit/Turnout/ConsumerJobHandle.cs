@@ -29,6 +29,8 @@ namespace MassTransit.Turnout
         {
             _jobContext = jobContext;
             _task = task;
+
+            ExecutionId = NewId.NextGuid();
         }
 
         public Guid JobId => _jobContext.JobId;
@@ -72,6 +74,8 @@ namespace MassTransit.Turnout
             return TaskUtil.Completed;
         }
 
-        public T Message => _jobContext.Message;
+        public T Command => _jobContext.Message;
+
+        public Guid ExecutionId { get; private set; }
     }
 }

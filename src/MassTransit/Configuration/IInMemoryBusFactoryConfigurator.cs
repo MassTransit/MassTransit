@@ -32,7 +32,6 @@ namespace MassTransit
         /// Sets the transport provider for the InMemory bus, used to share a transport cache between multiple
         /// bus instances. Normally this method is not used.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
         /// <param name="transportProvider"></param>
         [EditorBrowsable(EditorBrowsableState.Advanced)]
         void SetHost(InMemoryHost transportProvider);

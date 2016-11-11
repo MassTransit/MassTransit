@@ -131,6 +131,11 @@ namespace MassTransit.RabbitMqTransport.Configurators
             set { _bindMessageExchanges = value; }
         }
 
+        public string DeadLetterExchange
+        {
+            set { SetQueueArgument("x-dead-letter-exchange", value); }
+        }
+
         public void SetQueueArgument(string key, object value)
         {
             _settings.SetQueueArgument(key, value);

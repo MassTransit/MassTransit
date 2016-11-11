@@ -14,6 +14,7 @@ namespace MassTransit.Turnout
 {
     using System;
     using System.Collections.Concurrent;
+    using Logging;
 
 
     /// <summary>
@@ -22,6 +23,8 @@ namespace MassTransit.Turnout
     public class JobRoster :
         IJobRoster
     {
+        static readonly ILog _log = Logger.Get<JobRoster>();
+
         readonly ConcurrentDictionary<Guid, JobHandle> _jobs;
 
         public JobRoster()
@@ -42,8 +45,14 @@ namespace MassTransit.Turnout
 
         public void RemoveJob(Guid jobId)
         {
-            JobHandle ignored;
-            _jobs.TryRemove(jobId, out ignored);
+            JobHandle jobHandle;
+            bool removed = _jobs.TryRemove(jobId, out jobHandle);
+
+            if (removed)
+            {
+                if (_log.IsDebugEnabled)
+                    _log.DebugFormat("Removed job: {0} ({1})", jobId, jobHandle.Status);
+            }
         }
     }
 }

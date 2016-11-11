@@ -6,65 +6,24 @@
 	<log4net>
 		<root>
 			<level value="ERROR" />
-			<appender-ref ref="LogFileAppender" />
 			<appender-ref ref="console" />
 		</root>
 
-		<logger name="MassTransit">
-			<level value="DEBUG" />
-		</logger>
+<!--		<logger name="MassTransit">-->
+<!--			<level value="DEBUG" />-->
+<!--		</logger>-->
+<!---->
+<!--		<logger name="MassTransit.RabbitMqTransport">-->
+<!--			<level value="DEBUG" />-->
+<!--		</logger>-->
+<!---->
 
-		<logger name="MassTransit.RabbitMqTransport">
-			<level value="DEBUG" />
-		</logger>
-
-		<logger name="MassTransit.Util.TaskSupervisor">
-			<level value="DEBUG" />
-		</logger>
-
-		<logger name="NHibernate">
-			<level value="INFO"/>
-		</logger>
-
-		<logger name="MassTransit.Messages" additivity="false">
-			<level value="ERROR" />
-			<appender-ref ref="MessageLogAppender" />
-            <appender-ref ref="console" />
-        </logger>
-
+    <logger name="MassTransit.Turnout">
+      <level value="DEBUG" />
+    </logger>
 		<appender name="console" type="log4net.Appender.ConsoleAppender, log4net">
 			<layout type="log4net.Layout.PatternLayout,log4net">
 				<param name="ConversionPattern" value="%d [%t] %-5p %c - %m%n" />
-			</layout>
-		</appender>
-		<appender name="LogFileAppender"
-					type="log4net.Appender.RollingFileAppender" >
-			<param name="File"
-					 value="C:\LogFiles\MassTransit.ServiceBus.Tests.log" />
-			<param name="AppendToFile"
-					 value="false" />
-			<rollingStyle value="Size" />
-			<maxSizeRollBackups value="4" />
-			<maximumFileSize value="10MB" />
-			<staticLogFileName value="true" />
-			<layout type="log4net.Layout.PatternLayout">
-				<param name="ConversionPattern"
-						 value="%-5p %d{yyyy-MM-dd hh:mm:ss} - %m%n" />
-			</layout>
-		</appender>
-		<appender name="MessageLogAppender"
-					type="log4net.Appender.RollingFileAppender" >
-			<param name="File"
-					 value="C:\LogFiles\MassTransit.ServiceBus.Tests.Messages.log" />
-			<param name="AppendToFile"
-					 value="false" />
-			<rollingStyle value="Size" />
-			<maxSizeRollBackups value="4" />
-			<maximumFileSize value="10MB" />
-			<staticLogFileName value="true" />
-			<layout type="log4net.Layout.PatternLayout">
-				<param name="ConversionPattern"
-						 value="%-5p %d{yyyy-MM-dd hh:mm:ss} - %m%n" />
 			</layout>
 		</appender>
 	</log4net>

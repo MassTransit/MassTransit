@@ -25,13 +25,23 @@ namespace MassTransit.RabbitMqTransport.Tests
         [Test]
         public async Task Should_allow_scheduling_a_job()
         {
-            await Bus.Publish(new ProcessFile
+            var endpoint = await Bus.GetSendEndpoint(_commandEndpointAddress);
+
+            await endpoint.Send(new ProcessFile
             {
                 Filename = "log.txt",
-                Size = 10
+                Size = 1
             });
 
             ConsumeContext<JobCompleted> context = await _completed;
+
+            await endpoint.Send(new ProcessFile
+            {
+                Filename = "log.txt",
+                Size = 2
+            });
+
+            context = await _completed2;
         }
 
 
@@ -42,27 +52,29 @@ namespace MassTransit.RabbitMqTransport.Tests
         }
 
 
-        IRabbitMqBusFactoryConfigurator _busFactoryConfigurator;
         Task<ConsumeContext<JobCompleted>> _completed;
+        Uri _commandEndpointAddress;
+        Task<ConsumeContext<JobCompleted>> _completed2;
 
-        protected override void ConfigureBus(IRabbitMqBusFactoryConfigurator configurator)
+        protected override void ConfigureBusHost(IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host)
         {
-            base.ConfigureBus(configurator);
+            configurator.UseDelayedExchangeMessageScheduler();
 
-            _busFactoryConfigurator = configurator;
+            base.ConfigureBusHost(configurator, host);
+
+            configurator.TurnoutEndpoint<ProcessFile>(host, "process_queue", endpoint =>
+            {
+                endpoint.SuperviseInterval = TimeSpan.FromSeconds(1);
+                endpoint.SetJobFactory(async context => await Task.Delay(TimeSpan.FromSeconds(context.Message.Size)).ConfigureAwait(false));
+
+                _commandEndpointAddress = endpoint.InputAddress;
+            });
         }
 
         protected override void ConfigureInputQueueEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
-            base.ConfigureInputQueueEndpoint(configurator);
-
-            _completed = Handled<JobCompleted>(configurator);
-
-            configurator.Turnout<ProcessFile>(_busFactoryConfigurator, x =>
-            {
-                x.SuperviseInterval = TimeSpan.FromSeconds(1);
-                x.SetJobFactory(async context => await Task.Delay(context.Message.Size));
-            });
+            _completed = Handled<JobCompleted>(configurator, context => context.Message.GetArguments<ProcessFile>().Size == 1);
+            _completed2 = Handled<JobCompleted>(configurator, context => context.Message.GetArguments<ProcessFile>().Size == 2);
         }
     }
 }

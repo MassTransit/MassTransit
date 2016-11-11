@@ -55,6 +55,14 @@ namespace MassTransit.Util
             return Deserialize<T>(value);
         }
 
+        T IObjectTypeDeserializer.Deserialize<T>(IDictionary<string, object> dictionary)
+        {
+            var objDictionary = JObject.FromObject(dictionary ?? new Dictionary<string, object>());
+
+            using (var jsonReader = new JTokenReader(objDictionary))
+                return SerializerCache.Deserializer.Deserialize<T>(jsonReader);
+        }
+
         T IObjectTypeDeserializer.Deserialize<T>(IHeaderProvider dictionary, string key, T defaultValue)
         {
             object value;
@@ -94,6 +102,11 @@ namespace MassTransit.Util
             return Cached.Instance.Value.Deserialize<T>(dictionary, key);
         }
 
+        public static T Deserialize<T>(IDictionary<string, object> dictionary)
+        {
+            return Cached.Instance.Value.Deserialize<T>(dictionary);
+        }
+
         public static T Deserialize<T>(IDictionary<string, object> dictionary, string key, T defaultValue)
         {
             return Cached.Instance.Value.Deserialize(dictionary, key, defaultValue);
@@ -130,18 +143,5 @@ namespace MassTransit.Util
             internal static readonly Lazy<IObjectTypeDeserializer> Instance =
                 new Lazy<IObjectTypeDeserializer>(() => new ObjectTypeDeserializer(SerializerCache.Deserializer));
         }
-    }
-
-
-    public interface IObjectTypeDeserializer
-    {
-        T Deserialize<T>(IDictionary<string, object> dictionary, string key, T defaultValue);
-        T Deserialize<T>(IHeaderProvider headerProvider, string key, T defaultValue);
-
-        T Deserialize<T>(IDictionary<string, object> dictionary, string key);
-
-        T Deserialize<T>(object value);
-        T Deserialize<T>(object value, T defaultValue);
-        object Deserialize(object value, Type objectType, bool allowNull = false);
     }
 }

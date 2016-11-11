@@ -13,17 +13,23 @@
 namespace MassTransit.Turnout
 {
     using System;
+    using System.Collections.Generic;
     using System.Threading.Tasks;
     using Commands;
     using Contracts;
+    using Courier;
     using Events;
     using GreenPipes;
-    using Pipeline;
+    using Logging;
+    using Newtonsoft.Json.Linq;
+    using Util;
 
 
     public class TurnoutController :
         ITurnoutController
     {
+        static readonly ILog _log = Logger.Get<TurnoutController>();
+
         readonly Uri _controlAddress;
         readonly IJobRoster _roster;
         readonly TimeSpan _superviseInterval;
@@ -45,14 +51,23 @@ namespace MassTransit.Turnout
 
             _roster.Add(jobContext.JobId, jobHandle);
 
+            await ScheduleSupervision(context, context.Message, jobHandle).ConfigureAwait(false);
+
+            return jobHandle;
+        }
+
+        public Task ScheduleSupervision<T>(ConsumeContext context, T job, JobHandle jobHandle)
+            where T : class
+        {
             var utcNow = DateTime.UtcNow;
             var scheduledTime = utcNow + _superviseInterval;
 
-            var check = new Supervise(jobContext.JobId, utcNow, jobHandle.Status);
+            var check = new SuperviseJobCommand<T>(jobHandle.JobId, jobHandle.ExecutionId, job, utcNow, jobHandle.Status);
 
-            await context.ScheduleSend(_controlAddress, scheduledTime, check).ConfigureAwait(false);
+            if (_log.IsDebugEnabled)
+                _log.DebugFormat("Scheduled Job Supervision: {0}-{1}", jobHandle.JobId.ToString("N"), typeof(T).Name);
 
-            return jobHandle;
+            return context.ScheduleSend(_controlAddress, scheduledTime, check);
         }
 
         async Task Run<T>(ConsumerJobContext<T> jobContext, IJobFactory<T> jobFactory)
@@ -62,7 +77,9 @@ namespace MassTransit.Turnout
             {
                 IPipe<JobContext<T>> nextPipe = Pipe.ExecuteAsync<JobContext<T>>(async context =>
                 {
-                    await context.Publish<JobCompleted>(new Completed(context.JobId)).ConfigureAwait(false);
+                    var arguments = GetObjectAsDictionary(context.Message);
+
+                    await context.Publish<JobCompleted>(new JobCompletedEvent(context.JobId, arguments, new Dictionary<string, object>())).ConfigureAwait(false);
                 });
 
                 await jobFactory.Execute(jobContext, nextPipe).ConfigureAwait(false);
@@ -92,6 +109,16 @@ namespace MassTransit.Turnout
             JobContext<T> context = jobContext;
 
             await context.Publish<JobCanceled<T>>(new Canceled<T>(jobContext.JobId, jobContext.Message)).ConfigureAwait(false);
+        }
+
+        IDictionary<string, object> GetObjectAsDictionary(object values)
+        {
+            if (values == null)
+                return new Dictionary<string, object>();
+
+            var dictionary = JObject.FromObject(values, SerializerCache.Serializer);
+
+            return dictionary.ToObject<IDictionary<string, object>>();
         }
     }
 }

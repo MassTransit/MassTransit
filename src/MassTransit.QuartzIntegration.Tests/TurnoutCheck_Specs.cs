@@ -49,18 +49,18 @@ namespace MassTransit.QuartzIntegration.Tests
         {
             base.ConfigureInputQueueEndpoint(configurator);
 
-            configurator.Turnout<ProcessFile>(_busFactoryConfigurator, x =>
-            {
-                x.SuperviseInterval = TimeSpan.FromSeconds(1);
-                x.SetJobFactory(async context =>
-                {
-                    await Console.Out.WriteLineAsync($"Started: {context.Message.Filename}");
-
-                    await Task.Delay(context.Message.Size);
-
-                    await Console.Out.WriteLineAsync($"Stopped: {context.Message.Filename}");
-                });
-            });
+//            configurator.Turnout<ProcessFile>(_busFactoryConfigurator, x =>
+//            {
+//                x.SuperviseInterval = TimeSpan.FromSeconds(1);
+//                x.SetJobFactory(async context =>
+//                {
+//                    await Console.Out.WriteLineAsync($"Started: {context.Message.Filename}");
+//
+//                    await Task.Delay(context.Message.Size);
+//
+//                    await Console.Out.WriteLineAsync($"Stopped: {context.Message.Filename}");
+//                });
+//            });
         }
 
 

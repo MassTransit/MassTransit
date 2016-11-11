@@ -20,31 +20,12 @@ namespace MassTransit
 
     public static class TurnoutConfigurationExtensions
     {
-        /// <summary>
-        /// Configures a Turnout on the receive endpoint, which executes a long-running job and supervises the job until it
-        /// completes.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="configurator">The receive endpoint configurator</param>
-        /// <param name="busFactoryConfigurator">The bus factory configuration to use a separate endpoint for the control traffic</param>
-        /// <param name="configure"></param>
-        public static void Turnout<T>(this IReceiveEndpointConfigurator configurator, IInMemoryBusFactoryConfigurator busFactoryConfigurator,
+        public static void ConfigureTurnoutEndpoints<T>(this IReceiveEndpointConfigurator configurator, IBusFactoryConfigurator busFactoryConfigurator,
+            IReceiveEndpointConfigurator turnoutEndpointConfigurator, IReceiveEndpointConfigurator deadLetterConfigurator,
             Action<ITurnoutHostConfigurator<T>> configure)
             where T : class
         {
-            var temporaryQueueName = busFactoryConfigurator.GetTemporaryQueueName($"turnout-");
-
-            busFactoryConfigurator.ReceiveEndpoint(temporaryQueueName, turnoutEndpointConfigurator =>
-            {
-                configurator.ConfigureTurnoutEndpoints(busFactoryConfigurator, turnoutEndpointConfigurator, configure);
-            });
-        }
-
-        public static void ConfigureTurnoutEndpoints<T>(this IReceiveEndpointConfigurator endpointConfigurator, IBusFactoryConfigurator busFactoryConfigurator,
-            IReceiveEndpointConfigurator turnoutEndpointConfigurator, Action<ITurnoutHostConfigurator<T>> configure)
-            where T : class
-        {
-            var specification = new TurnoutHostSpecification<T>(turnoutEndpointConfigurator);
+            var specification = new TurnoutHostSpecification<T>(configurator);
 
             configure(specification);
 
@@ -53,15 +34,17 @@ namespace MassTransit
             busFactoryConfigurator.AddBusFactorySpecification(specification);
 
             var jobRoster = specification.JobRoster;
-            var superviseInterval = specification.SuperviseInterval;
 
-            turnoutEndpointConfigurator.Consumer(() => new SuperviseJobConsumer(jobRoster, superviseInterval));
-            turnoutEndpointConfigurator.Consumer(() => new CancelJobConsumer(jobRoster));
+            deadLetterConfigurator.Consumer(() => new ExpiredJobConsumer<T>(jobRoster));
 
             var controller = specification.Controller;
+
+            turnoutEndpointConfigurator.Consumer(() => new SuperviseJobConsumer<T>(jobRoster, controller));
+            turnoutEndpointConfigurator.Consumer(() => new CancelJobConsumer(jobRoster));
+
             IJobFactory<T> jobFactory = specification.JobFactory;
 
-            endpointConfigurator.Consumer(() => new CreateJobConsumer<T>(controller, jobFactory));
+            configurator.Consumer(() => new CreateJobConsumer<T>(controller, jobFactory));
         }
 
         /// <summary>

@@ -38,7 +38,7 @@ namespace MassTransit
                 turnoutEndpointConfigurator.AutoDeleteOnIdle = TimeSpan.FromMinutes(5);
                 turnoutEndpointConfigurator.EnableExpress = true;
 
-                configurator.ConfigureTurnoutEndpoints(busFactoryConfigurator, turnoutEndpointConfigurator, configure);
+//                configurator.ConfigureTurnoutEndpoints(busFactoryConfigurator, turnoutEndpointConfigurator, , foo);
             });
         }
     }

@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,6 +13,7 @@
 namespace MassTransit.Turnout.Contracts
 {
     using System;
+    using System.Collections.Generic;
 
 
     /// <summary>
@@ -26,8 +27,23 @@ namespace MassTransit.Turnout.Contracts
         Guid JobId { get; }
 
         /// <summary>
+        /// Identifies the job execution
+        /// </summary>
+        Guid ExecutionId { get; }
+
+        /// <summary>
         /// The time the job was started
         /// </summary>
         DateTime Timestamp { get; }
+
+        /// <summary>
+        /// Zero if the job is being started for the first time, otherwise, the number of previous failures
+        /// </summary>
+        int RetryCount { get; }
+
+        /// <summary>
+        /// The arguments used to create the job (The job message type serialized)
+        /// </summary>
+        IDictionary<string, object> Arguments { get; }
     }
 }

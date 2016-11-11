@@ -31,5 +31,8 @@ namespace MassTransit.Turnout
         /// <returns>The newly created job's handle</returns>
         Task<JobHandle<T>> CreateJob<T>(ConsumeContext<T> context, IJobFactory<T> jobFactory)
             where T : class;
+
+        Task ScheduleSupervision<T>(ConsumeContext context, T job, JobHandle jobHandle)
+            where T : class;
     }
 }

@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -22,9 +22,9 @@ namespace MassTransit.Turnout
         where T : class
     {
         /// <summary>
-        /// The message that initiated the job
+        /// The command that initiated the job
         /// </summary>
-        T Message { get; }
+        T Command { get; }
     }
 
 
@@ -47,6 +47,11 @@ namespace MassTransit.Turnout
         /// The job's status, derived from the underlying Task status
         /// </summary>
         JobStatus Status { get; }
+
+        /// <summary>
+        /// The execution identifier for this job
+        /// </summary>
+        Guid ExecutionId { get; }
 
         /// <summary>
         /// Cancel the job task
