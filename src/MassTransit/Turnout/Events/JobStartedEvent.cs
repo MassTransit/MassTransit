@@ -1,4 +1,4 @@
-// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -10,27 +10,27 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Turnout.Commands
+namespace MassTransit.Turnout.Events
 {
     using System;
+    using System.Collections.Generic;
     using Contracts;
 
 
-    class SuperviseJobCommand<T> :
-        SuperviseJob<T>
-        where T : class
+    public class JobStartedEvent :
+        JobStarted
     {
-        public SuperviseJobCommand(Guid jobId, T command, DateTime lastStatusTimestamp, JobStatus lastStatus)
+        public JobStartedEvent(Guid jobId, int retryCount, IDictionary<string, object> arguments)
         {
             JobId = jobId;
-            LastUpdated = lastStatusTimestamp;
-            LastStatus = lastStatus;
-            Command = command;
+            Timestamp = DateTime.UtcNow;
+            RetryCount = retryCount;
+            Arguments = arguments;
         }
 
         public Guid JobId { get; private set; }
-        public DateTime LastUpdated { get; private set; }
-        public JobStatus LastStatus { get; private set; }
-        public T Command { get; private set; }
+        public DateTime Timestamp { get; private set; }
+        public int RetryCount { get; private set; }
+        public IDictionary<string, object> Arguments { get; private set; }
     }
 }

@@ -16,10 +16,10 @@ namespace MassTransit.Turnout.Events
     using Contracts;
 
 
-    class Canceled<TInput> :
+    class JobCanceledEvent<TInput> :
         JobCanceled<TInput>
     {
-        public Canceled(Guid jobId, TInput input)
+        public JobCanceledEvent(Guid jobId, TInput input)
         {
             JobId = jobId;
             Input = input;

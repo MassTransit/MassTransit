@@ -29,14 +29,9 @@ namespace MassTransit.Turnout.Contracts
         Guid JobId { get; }
 
         /// <summary>
-        /// Identifies the execution of the job, in case of a retry
-        /// </summary>
-        Guid ExecutionId { get; }
-
-        /// <summary>
         /// The time of the last job status check
         /// </summary>
-        DateTime LastStatusTimestamp { get; }
+        DateTime LastUpdated { get; }
 
         /// <summary>
         /// The previous job status
@@ -46,6 +41,6 @@ namespace MassTransit.Turnout.Contracts
         /// <summary>
         /// The job command, which initiated the job
         /// </summary>
-        T Job { get; }
+        T Command { get; }
     }
 }

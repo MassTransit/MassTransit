@@ -22,7 +22,6 @@ namespace MassTransit.Turnout
     using GreenPipes;
     using Logging;
     using Newtonsoft.Json.Linq;
-    using Util;
 
 
     public class TurnoutController :
@@ -62,7 +61,7 @@ namespace MassTransit.Turnout
             var utcNow = DateTime.UtcNow;
             var scheduledTime = utcNow + _superviseInterval;
 
-            var check = new SuperviseJobCommand<T>(jobHandle.JobId, jobHandle.ExecutionId, job, utcNow, jobHandle.Status);
+            var check = new SuperviseJobCommand<T>(jobHandle.JobId, job, utcNow, jobHandle.Status);
 
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Scheduled Job Supervision: {0}-{1}", jobHandle.JobId.ToString("N"), typeof(T).Name);
@@ -75,14 +74,23 @@ namespace MassTransit.Turnout
         {
             try
             {
-                IPipe<JobContext<T>> nextPipe = Pipe.ExecuteAsync<JobContext<T>>(async context =>
+                IPipe<JobContext<T>> pipe = Pipe.New<JobContext<T>>(cfg =>
                 {
-                    var arguments = GetObjectAsDictionary(context.Message);
+                    cfg.UseRetry(r =>
+                    {
+                        r.Ignore<TaskCanceledException>();
+                        r.Ignore<OperationCanceledException>();
+                        r.Interval(1, 1000);
+                    });
 
-                    await context.Publish<JobCompleted>(new JobCompletedEvent(context.JobId, arguments, new Dictionary<string, object>())).ConfigureAwait(false);
+                    cfg.UseExecuteAsync(NotifyStarted);
+
+                    cfg.UseInlineFilter(jobFactory.Execute);
+
+                    cfg.UseExecuteAsync(NotifyCompleted);
                 });
 
-                await jobFactory.Execute(jobContext, nextPipe).ConfigureAwait(false);
+                await pipe.Send(jobContext).ConfigureAwait(false);
             }
             catch (TaskCanceledException)
             {
@@ -94,9 +102,7 @@ namespace MassTransit.Turnout
             }
             catch (Exception exception)
             {
-                JobContext<T> context = jobContext;
-
-                await context.Publish<JobFaulted<T>>(new Faulted<T>(jobContext.JobId, jobContext.Message, exception)).ConfigureAwait(false);
+                await NotifyFaulted(jobContext, exception).ConfigureAwait(false);
             }
             finally
             {
@@ -104,14 +110,27 @@ namespace MassTransit.Turnout
             }
         }
 
-        static async Task NotifyCanceled<T>(ConsumerJobContext<T> jobContext) where T : class
+        static Task NotifyCanceled<T>(JobContext<T> context) where T : class
         {
-            JobContext<T> context = jobContext;
-
-            await context.Publish<JobCanceled<T>>(new Canceled<T>(jobContext.JobId, jobContext.Message)).ConfigureAwait(false);
+            return context.Publish<JobCanceled<T>>(new JobCanceledEvent<T>(context.JobId, context.Message));
         }
 
-        IDictionary<string, object> GetObjectAsDictionary(object values)
+        static Task NotifyStarted<T>(JobContext<T> context) where T : class
+        {
+            return context.Publish<JobStarted>(new JobStartedEvent(context.JobId, 0, GetObjectAsDictionary(context.Message)));
+        }
+
+        static Task NotifyCompleted<T>(JobContext<T> context) where T : class
+        {
+            return context.Publish<JobCompleted>(new JobCompletedEvent(context.JobId, GetObjectAsDictionary(context.Message), new Dictionary<string, object>()));
+        }
+
+        static Task NotifyFaulted<T>(JobContext<T> context, Exception exception) where T : class
+        {
+            return context.Publish<JobFaulted<T>>(new JobFaultedEvent<T>(context.JobId, context.Message, exception));
+        }
+
+        static IDictionary<string, object> GetObjectAsDictionary(object values)
         {
             if (values == null)
                 return new Dictionary<string, object>();

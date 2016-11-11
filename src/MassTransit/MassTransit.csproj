@@ -942,9 +942,10 @@
     <Compile Include="Turnout\Contracts\CancelJob.cs" />
     <Compile Include="Turnout\Contracts\JobCanceled.cs" />
     <Compile Include="Turnout\Contracts\MonitorJob.cs" />
-    <Compile Include="Turnout\Events\Canceled.cs" />
+    <Compile Include="Turnout\Events\JobCanceledEvent.cs" />
     <Compile Include="Turnout\Events\JobCompletedEvent.cs" />
-    <Compile Include="Turnout\Events\Faulted.cs" />
+    <Compile Include="Turnout\Events\JobFaultedEvent.cs" />
+    <Compile Include="Turnout\Events\JobStartedEvent.cs" />
     <Compile Include="Turnout\ExpiredJobConsumer.cs" />
     <Compile Include="Turnout\SuperviseJobConsumer.cs" />
     <Compile Include="Turnout\Contracts\SuperviseJob.cs" />

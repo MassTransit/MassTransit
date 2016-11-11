@@ -27,11 +27,6 @@ namespace MassTransit.Turnout.Contracts
         Guid JobId { get; }
 
         /// <summary>
-        /// Identifies the job execution
-        /// </summary>
-        Guid ExecutionId { get; }
-
-        /// <summary>
         /// The time the job was started
         /// </summary>
         DateTime Timestamp { get; }

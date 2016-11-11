@@ -17,10 +17,10 @@ namespace MassTransit.Turnout.Events
     using MassTransit.Events;
 
 
-    class Faulted<TInput> :
+    class JobFaultedEvent<TInput> :
         JobFaulted<TInput>
     {
-        public Faulted(Guid jobId, TInput input, Exception exception)
+        public JobFaultedEvent(Guid jobId, TInput input, Exception exception)
         {
             JobId = jobId;
             Input = input;

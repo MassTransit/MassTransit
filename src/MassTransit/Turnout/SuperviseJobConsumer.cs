@@ -40,18 +40,11 @@ namespace MassTransit.Turnout
             JobHandle jobHandle;
             if (_roster.TryGetJob(context.Message.JobId, out jobHandle))
             {
-                if (jobHandle.ExecutionId != context.Message.ExecutionId)
-                {
-                    // handle not the right job
-                    if (_log.IsWarnEnabled)
-                        _log.WarnFormat("JobId found, but ExecutionId did not match: {0}/{1}", context.Message.JobId, context.Message.ExecutionId);
-                }
-
                 switch (jobHandle.Status)
                 {
                     case JobStatus.Created:
                     case JobStatus.Running:
-                        await _controller.ScheduleSupervision(context, context.Message.Job, jobHandle).ConfigureAwait(false);
+                        await _controller.ScheduleSupervision(context, context.Message.Command, jobHandle).ConfigureAwait(false);
                         break;
 
                     case JobStatus.RanToCompletion:

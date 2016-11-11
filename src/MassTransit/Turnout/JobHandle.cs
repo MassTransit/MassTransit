@@ -49,11 +49,6 @@ namespace MassTransit.Turnout
         JobStatus Status { get; }
 
         /// <summary>
-        /// The execution identifier for this job
-        /// </summary>
-        Guid ExecutionId { get; }
-
-        /// <summary>
         /// Cancel the job task
         /// </summary>
         /// <returns></returns>

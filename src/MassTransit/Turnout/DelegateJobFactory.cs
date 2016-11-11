@@ -15,7 +15,6 @@ namespace MassTransit.Turnout
     using System;
     using System.Threading.Tasks;
     using GreenPipes;
-    using Pipeline;
 
 
     public class DelegateJobFactory<TInput> :
