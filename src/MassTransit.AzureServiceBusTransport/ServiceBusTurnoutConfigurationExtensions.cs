@@ -10,13 +10,14 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.RabbitMqTransport
+namespace MassTransit
 {
     using System;
+    using AzureServiceBusTransport;
     using Turnout.Configuration;
 
 
-    public static class TurnoutExtensions
+    public static class ServiceBusTurnoutConfigurationExtensions
     {
         /// <summary>
         /// Configures a Turnout on the receive endpoint, which executes a long-running job and supervises the job until it
@@ -24,32 +25,34 @@ namespace MassTransit.RabbitMqTransport
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="busFactoryConfigurator">The bus factory configuration to use a separate endpoint for the control traffic</param>
-        /// <param name="queueName">The receive queue name for commands</param>
+        /// <param name="queueName"></param>
         /// <param name="configure"></param>
-        /// <param name="host">The host on which to configure the endpoint</param>
-        public static void TurnoutEndpoint<T>(this IRabbitMqBusFactoryConfigurator busFactoryConfigurator, IRabbitMqHost host, string queueName,
-            Action<ITurnoutHostConfigurator<T>> configure)
+        /// <param name="host"></param>
+        public static void TurnoutEndpoint<T>(this IServiceBusBusFactoryConfigurator busFactoryConfigurator, IServiceBusHost host, string queueName,
+            Action<ITurnoutServiceConfigurator<T>> configure)
             where T : class
         {
-            string deadLetterQueueName = $"{queueName}-expired";
+            string expiredQueueName = $"{queueName}-expired";
 
-            // configure the dead letter endpoint, so it's available at startup
-            busFactoryConfigurator.ReceiveEndpoint(host, deadLetterQueueName, deadLetterConfigurator =>
+            // configure the message expiration endpoint, so it's available at startup
+            busFactoryConfigurator.ReceiveEndpoint(host, expiredQueueName, expiredEndpointConfigurator =>
             {
                 // configure the turnout management endpoint
                 var temporaryQueueName = host.GetTemporaryQueueName("turnout-");
-                busFactoryConfigurator.ReceiveEndpoint(host, temporaryQueueName, turnoutConfigurator =>
+                busFactoryConfigurator.ReceiveEndpoint(host, temporaryQueueName, turnoutEndpointConfigurator =>
                 {
-                    turnoutConfigurator.PrefetchCount = 100;
-                    turnoutConfigurator.AutoDelete = true;
-                    turnoutConfigurator.Durable = false;
+                    turnoutEndpointConfigurator.PrefetchCount = 100;
+                    turnoutEndpointConfigurator.AutoDeleteOnIdle = TimeSpan.FromMinutes(5);
+                    turnoutEndpointConfigurator.EnableExpress = true;
 
-                    turnoutConfigurator.DeadLetterExchange = deadLetterQueueName;
+                    turnoutEndpointConfigurator.EnableDeadLetteringOnMessageExpiration = true;
+                    turnoutEndpointConfigurator.ForwardDeadLetteredMessagesTo = expiredQueueName;
 
                     // configure the input queue endpoint
-                    busFactoryConfigurator.ReceiveEndpoint(host, queueName, configurator =>
+                    busFactoryConfigurator.ReceiveEndpoint(host, queueName, commandEndpointConfigurator =>
                     {
-                        configurator.ConfigureTurnoutEndpoints(busFactoryConfigurator, turnoutConfigurator, deadLetterConfigurator, configure);
+                        commandEndpointConfigurator.ConfigureTurnoutEndpoints(busFactoryConfigurator, turnoutEndpointConfigurator, expiredEndpointConfigurator,
+                            configure);
                     });
                 });
             });

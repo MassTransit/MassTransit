@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,6 +13,7 @@
 namespace MassTransit.Turnout
 {
     using System;
+    using System.Threading.Tasks;
 
 
     public interface JobContext :
@@ -29,23 +30,31 @@ namespace MassTransit.Turnout
         /// The elapsed time of the job
         /// </summary>
         TimeSpan ElapsedTime { get; }
+
+        Task NotifyCanceled(string reason = null);
+
+        Task NotifyStarted(Uri managementAddress);
+
+        Task NotifyCompleted();
+
+        Task NotifyFaulted(Exception exception);
     }
 
 
-    public interface JobContext<out TInput> :
+    public interface JobContext<out TCommand> :
         JobContext
-        where TInput : class
+        where TCommand : class
     {
         /// <summary>
         /// The message that initiated the job
         /// </summary>
-        TInput Message { get; }
+        TCommand Command { get; }
     }
 
 
-    public interface JobContext<out TInput, TResult> :
-        JobContext<TInput>
-        where TInput : class
+    public interface JobContext<out TCommand, TResult> :
+        JobContext<TCommand>
+        where TCommand : class
         where TResult : class
     {
         /// <summary>
@@ -53,6 +62,6 @@ namespace MassTransit.Turnout
         /// </summary>
         /// <param name="result">The job's result</param>
         /// <returns></returns>
-        JobResultContext<TInput, TResult> FromResult(TResult result);
+        JobResultContext<TCommand, TResult> FromResult(TResult result);
     }
 }

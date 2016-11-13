@@ -14,37 +14,45 @@ namespace MassTransit
 {
     using System;
     using System.Threading.Tasks;
+    using GreenPipes;
     using Turnout;
     using Turnout.Configuration;
+    using Turnout.Contracts;
 
 
     public static class TurnoutConfigurationExtensions
     {
         public static void ConfigureTurnoutEndpoints<T>(this IReceiveEndpointConfigurator configurator, IBusFactoryConfigurator busFactoryConfigurator,
-            IReceiveEndpointConfigurator turnoutEndpointConfigurator, IReceiveEndpointConfigurator deadLetterConfigurator,
-            Action<ITurnoutHostConfigurator<T>> configure)
+            IReceiveEndpointConfigurator turnoutEndpointConfigurator, IReceiveEndpointConfigurator expiredEndpointConfigurator,
+            Action<ITurnoutServiceConfigurator<T>> configure)
             where T : class
         {
-            var specification = new TurnoutHostSpecification<T>(configurator);
+            var specification = new TurnoutServiceSpecification<T>(configurator);
 
             configure(specification);
 
-            specification.ControlAddress = turnoutEndpointConfigurator.InputAddress;
+            specification.ManagementAddress = turnoutEndpointConfigurator.InputAddress;
 
             busFactoryConfigurator.AddBusFactorySpecification(specification);
 
-            var jobRoster = specification.JobRoster;
+            var partitioner = busFactoryConfigurator.CreatePartitioner(specification.PartitionCount);
 
-            deadLetterConfigurator.Consumer(() => new ExpiredJobConsumer<T>(jobRoster));
+            expiredEndpointConfigurator.Consumer(() => new JobCustodian<T>(specification.JobRegistry), x =>
+            {
+                x.Message<SuperviseJob<T>>(m => m.UsePartitioner(partitioner, p => p.Message.JobId));
+            });
 
-            var controller = specification.Controller;
-
-            turnoutEndpointConfigurator.Consumer(() => new SuperviseJobConsumer<T>(jobRoster, controller));
-            turnoutEndpointConfigurator.Consumer(() => new CancelJobConsumer(jobRoster));
+            turnoutEndpointConfigurator.Consumer(() => new JobSupervisor<T>(specification.Service, specification.JobRegistry), x =>
+            {
+                x.Message<CancelJob>(m => m.UsePartitioner(partitioner, p => p.Message.JobId));
+                x.Message<SuperviseJob<T>>(m => m.UsePartitioner(partitioner, p => p.Message.JobId));
+            });
 
             IJobFactory<T> jobFactory = specification.JobFactory;
 
-            configurator.Consumer(() => new CreateJobConsumer<T>(controller, jobFactory));
+            configurator.Consumer(() => new JobProducer<T>(specification.Service, jobFactory));
+
+            busFactoryConfigurator.BusObserver(() => new JobServiceBusObserver(specification.Service));
         }
 
         /// <summary>
@@ -53,7 +61,7 @@ namespace MassTransit
         /// <typeparam name="T">The message type</typeparam>
         /// <param name="configurator">The turnout configurator</param>
         /// <param name="jobFactory">A function that returns a Task for the job</param>
-        public static void SetJobFactory<T>(this ITurnoutHostConfigurator<T> configurator, Func<JobContext<T>, Task> jobFactory)
+        public static void SetJobFactory<T>(this ITurnoutServiceConfigurator<T> configurator, Func<JobContext<T>, Task> jobFactory)
             where T : class
         {
             configurator.JobFactory = new DelegateJobFactory<T>(jobFactory);

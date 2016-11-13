@@ -134,9 +134,9 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
 
             var specification = new ServiceBusReceiveEndpointSpecification(serviceBusHost, queueName);
 
-            configure?.Invoke(specification);
-
             AddReceiveEndpointSpecification(specification);
+
+            configure?.Invoke(specification);
         }
 
         public void SubscriptionEndpoint<T>(IServiceBusHost host, string subscriptionName, Action<IServiceBusSubscriptionEndpointConfigurator> configure)
@@ -150,9 +150,9 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
         {
             var specification = new ServiceBusSubscriptionEndpointSpecification(host, subscriptionName, topicName);
 
-            configure?.Invoke(specification);
-
             AddReceiveEndpointSpecification(specification);
+
+            configure?.Invoke(specification);
         }
 
         public TimeSpan AutoDeleteOnIdle

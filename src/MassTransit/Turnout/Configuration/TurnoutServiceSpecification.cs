@@ -18,61 +18,51 @@ namespace MassTransit.Turnout.Configuration
     using GreenPipes;
 
 
-    public class TurnoutHostSpecification<T> :
+    public class TurnoutServiceSpecification<TCommand> :
         IBusFactorySpecification,
-        ITurnoutHostConfigurator<T>
-        where T : class
+        ITurnoutServiceConfigurator<TCommand>
+        where TCommand : class
     {
         readonly IReceiveEndpointConfigurator _configurator;
-        readonly Lazy<ITurnoutController> _controller;
-        readonly IJobRoster _jobRoster;
-        Uri _controlAddress;
-        IJobFactory<T> _jobFactory;
-        TimeSpan _superviseInterval;
+        readonly IJobRegistry _jobRegistry;
+        readonly Lazy<IJobService> _jobService;
 
-        public TurnoutHostSpecification(IReceiveEndpointConfigurator configurator)
+        public TurnoutServiceSpecification(IReceiveEndpointConfigurator configurator)
         {
             _configurator = configurator;
-            _superviseInterval = TimeSpan.FromMinutes(1);
-            _jobRoster = new JobRoster();
 
-            _controller = new Lazy<ITurnoutController>(CreateController);
+            SuperviseInterval = TimeSpan.FromMinutes(1);
+            _jobRegistry = new JobRegistry();
+            PartitionCount = 8;
+
+            _jobService = new Lazy<IJobService>(CreateJobService);
         }
 
-        public IJobRoster JobRoster => _jobRoster;
+        public IJobRegistry JobRegistry => _jobRegistry;
 
-        public Uri ControlAddress
-        {
-            set { _controlAddress = value; }
-        }
+        public Uri ManagementAddress { private get; set; }
 
-        public ITurnoutController Controller => _controller.Value;
+        public IJobService Service => _jobService.Value;
 
         public IEnumerable<ValidationResult> Validate()
         {
-            if (_jobFactory == null)
+            if (JobFactory == null)
                 yield return this.Failure("JobFactory", "must be specified");
-            if (_controlAddress == null)
+            if (ManagementAddress == null)
                 yield return this.Failure("ControlAddress", "must be a valid address");
-            if (_superviseInterval < TimeSpan.FromSeconds(1))
+            if (SuperviseInterval < TimeSpan.FromSeconds(1))
                 yield return this.Failure("SuperviseInterval", "must be >= 1 second");
+            if (PartitionCount < 1)
+                yield return this.Failure("PartitionCount", "must be > 0");
         }
 
         public void Apply(IBusBuilder builder)
         {
         }
 
-        public TimeSpan SuperviseInterval
-        {
-            get { return _superviseInterval; }
-            set { _superviseInterval = value; }
-        }
+        public TimeSpan SuperviseInterval { private get; set; }
 
-        public IJobFactory<T> JobFactory
-        {
-            get { return _jobFactory; }
-            set { _jobFactory = value; }
-        }
+        public IJobFactory<TCommand> JobFactory { get; set; }
 
         void IPipeConfigurator<ConsumeContext>.AddPipeSpecification(IPipeSpecification<ConsumeContext> specification)
         {
@@ -91,6 +81,8 @@ namespace MassTransit.Turnout.Configuration
 
         Uri IReceiveEndpointConfigurator.InputAddress => _configurator.InputAddress;
 
+        public int PartitionCount { get; set; }
+
         void ISendPipelineConfigurator.ConfigureSend(Action<ISendPipeConfigurator> callback)
         {
             _configurator.ConfigureSend(callback);
@@ -101,9 +93,9 @@ namespace MassTransit.Turnout.Configuration
             _configurator.ConfigurePublish(callback);
         }
 
-        ITurnoutController CreateController()
+        IJobService CreateJobService()
         {
-            return new TurnoutController(_jobRoster, _controlAddress, _superviseInterval);
+            return new JobService(_jobRegistry, _configurator.InputAddress, ManagementAddress, SuperviseInterval);
         }
     }
 }

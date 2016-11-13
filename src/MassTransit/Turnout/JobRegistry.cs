@@ -14,20 +14,21 @@ namespace MassTransit.Turnout
 {
     using System;
     using System.Collections.Concurrent;
+    using System.Collections.Generic;
     using Logging;
 
 
     /// <summary>
     /// Maintains the jobs for a turnout
     /// </summary>
-    public class JobRoster :
-        IJobRoster
+    public class JobRegistry :
+        IJobRegistry
     {
-        static readonly ILog _log = Logger.Get<JobRoster>();
+        static readonly ILog _log = Logger.Get<JobRegistry>();
 
         readonly ConcurrentDictionary<Guid, JobHandle> _jobs;
 
-        public JobRoster()
+        public JobRegistry()
         {
             _jobs = new ConcurrentDictionary<Guid, JobHandle>();
         }
@@ -37,22 +38,29 @@ namespace MassTransit.Turnout
             return _jobs.TryGetValue(jobId, out jobReference);
         }
 
-        public void Add(Guid jobId, JobHandle jobReference)
+        public void Add(JobHandle jobReference)
         {
-            if (!_jobs.TryAdd(jobId, jobReference))
-                throw new JobAlreadyExistsException(jobId);
+            if (!_jobs.TryAdd(jobReference.JobId, jobReference))
+                throw new JobAlreadyExistsException(jobReference.JobId);
         }
 
-        public void RemoveJob(Guid jobId)
+        public bool TryRemoveJob(Guid jobId, out JobHandle jobHandle)
         {
-            JobHandle jobHandle;
-            bool removed = _jobs.TryRemove(jobId, out jobHandle);
-
+            var removed = _jobs.TryRemove(jobId, out jobHandle);
             if (removed)
             {
                 if (_log.IsDebugEnabled)
                     _log.DebugFormat("Removed job: {0} ({1})", jobId, jobHandle.Status);
+
+                return true;
             }
+
+            return false;
+        }
+
+        public ICollection<JobHandle> GetAll()
+        {
+            return _jobs.Values;
         }
     }
 }

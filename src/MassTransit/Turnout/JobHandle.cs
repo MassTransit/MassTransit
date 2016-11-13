@@ -53,5 +53,13 @@ namespace MassTransit.Turnout
         /// </summary>
         /// <returns></returns>
         Task Cancel();
+
+        Task NotifyCanceled(string reason);
+
+        Task NotifyStarted(Uri managementAddress);
+
+        Task NotifyCompleted();
+
+        Task NotifyFaulted(Exception exception);
     }
 }

@@ -13,29 +13,35 @@
 namespace MassTransit.Turnout
 {
     using System.Threading.Tasks;
+    using Contracts;
 
 
     /// <summary>
     /// The consumer that creates the job using the turnout host
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class CreateJobConsumer<T> :
-        IConsumer<T>
+    public class JobProducer<T> :
+        IConsumer<T>,
+        IConsumer<SubmitJob<T>>
         where T : class
-
     {
         readonly IJobFactory<T> _jobFactory;
-        readonly ITurnoutController _turnoutHost;
+        readonly IJobService _jobService;
 
-        public CreateJobConsumer(ITurnoutController turnoutHost, IJobFactory<T> jobFactory)
+        public JobProducer(IJobService jobService, IJobFactory<T> jobFactory)
         {
-            _turnoutHost = turnoutHost;
+            _jobService = jobService;
             _jobFactory = jobFactory;
+        }
+
+        public async Task Consume(ConsumeContext<SubmitJob<T>> context)
+        {
+            JobHandle<T> job = await _jobService.CreateJob(context, context.Message.JobId, context.Message.Command, _jobFactory).ConfigureAwait(false);
         }
 
         public async Task Consume(ConsumeContext<T> context)
         {
-            JobHandle<T> job = await _turnoutHost.CreateJob(context, _jobFactory).ConfigureAwait(false);
+            JobHandle<T> job = await _jobService.CreateJob(context, NewId.NextGuid(), context.Message, _jobFactory).ConfigureAwait(false);
         }
     }
 }

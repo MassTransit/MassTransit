@@ -10,17 +10,18 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.RabbitMqTransport.Tests
+namespace MassTransit.AzureServiceBusTransport.Tests
 {
     using System;
     using System.Threading.Tasks;
+    using AzureServiceBusTransport;
     using NUnit.Framework;
     using Turnout.Contracts;
 
 
     [TestFixture]
     public class Creating_a_turnout_job :
-        RabbitMqTestFixture
+        AzureServiceBusTestFixture
     {
         [Test]
         public async Task Should_allow_scheduling_a_job()
@@ -56,9 +57,9 @@ namespace MassTransit.RabbitMqTransport.Tests
         Uri _commandEndpointAddress;
         Task<ConsumeContext<JobCompleted>> _completed2;
 
-        protected override void ConfigureBusHost(IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host)
+        protected override void ConfigureBusHost(IServiceBusBusFactoryConfigurator configurator, IServiceBusHost host)
         {
-            configurator.UseDelayedExchangeMessageScheduler();
+            configurator.UseServiceBusMessageScheduler();
 
             base.ConfigureBusHost(configurator, host);
 
@@ -71,7 +72,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             });
         }
 
-        protected override void ConfigureInputQueueEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInputQueueEndpoint(IServiceBusReceiveEndpointConfigurator configurator)
         {
             _completed = Handled<JobCompleted>(configurator, context => context.Message.GetArguments<ProcessFile>().Size == 1);
             _completed2 = Handled<JobCompleted>(configurator, context => context.Message.GetArguments<ProcessFile>().Size == 2);
@@ -80,7 +81,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
     [TestFixture]
     public class Stopping_the_bus_before_the_job_is_done :
-        RabbitMqTestFixture
+        AzureServiceBusTestFixture
     {
         [Test]
         public async Task Should_send_the_job_canceled()
@@ -109,9 +110,9 @@ namespace MassTransit.RabbitMqTransport.Tests
         Task<ConsumeContext<JobStarted>> _started;
         Uri _commandEndpointAddress;
 
-        protected override void ConfigureBusHost(IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host)
+        protected override void ConfigureBusHost(IServiceBusBusFactoryConfigurator configurator, IServiceBusHost host)
         {
-            configurator.UseDelayedExchangeMessageScheduler();
+            configurator.UseServiceBusMessageScheduler();
 
             base.ConfigureBusHost(configurator, host);
 
@@ -135,7 +136,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             });
         }
 
-        protected override void ConfigureInputQueueEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInputQueueEndpoint(IServiceBusReceiveEndpointConfigurator configurator)
         {
             _started = Handled<JobStarted>(configurator);
         }
@@ -143,7 +144,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
     [TestFixture]
     public class Cancelling_a_job_using_the_management_address :
-        RabbitMqTestFixture
+        AzureServiceBusTestFixture
     {
         [Test]
         public async Task Should_send_the_job_canceled()
@@ -186,9 +187,9 @@ namespace MassTransit.RabbitMqTransport.Tests
         Uri _commandEndpointAddress;
         Task<ConsumeContext<JobCanceled<ProcessFile>>> _canceled;
 
-        protected override void ConfigureBusHost(IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host)
+        protected override void ConfigureBusHost(IServiceBusBusFactoryConfigurator configurator, IServiceBusHost host)
         {
-            configurator.UseDelayedExchangeMessageScheduler();
+            configurator.UseServiceBusMessageScheduler();
 
             base.ConfigureBusHost(configurator, host);
 
@@ -212,7 +213,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             });
         }
 
-        protected override void ConfigureInputQueueEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInputQueueEndpoint(IServiceBusReceiveEndpointConfigurator configurator)
         {
             _started = Handled<JobStarted>(configurator);
             _canceled = Handled<JobCanceled<ProcessFile>>(configurator);

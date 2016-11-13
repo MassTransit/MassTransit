@@ -37,6 +37,11 @@ namespace MassTransit.Turnout.Contracts
         int RetryCount { get; }
 
         /// <summary>
+        /// The management address on which this job was started
+        /// </summary>
+        Uri ManagementAddress { get; }
+
+        /// <summary>
         /// The arguments used to create the job (The job message type serialized)
         /// </summary>
         IDictionary<string, object> Arguments { get; }

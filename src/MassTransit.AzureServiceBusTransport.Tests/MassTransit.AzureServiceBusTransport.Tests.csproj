@@ -93,7 +93,7 @@
     <Compile Include="Subscription_Specs.cs" />
     <Compile Include="BasicAzureServiceBusAccountSettings.cs" />
     <Compile Include="TestAzureServiceBusAccountSettings.cs" />
-    <Compile Include="Turnout_Sepcs.cs" />
+    <Compile Include="Turnout_Specs.cs" />
     <Compile Include="TwoScopeAzureServiceBusTestFixture.cs" />
     <Compile Include="Verify_account_settings.cs" />
   </ItemGroup>

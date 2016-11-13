@@ -98,7 +98,7 @@
     <Compile Include="Contracts\SetPrefetchCount.cs" />
     <Compile Include="DeferExtensions.cs" />
     <Compile Include="DelayedExchangeRetryExtensions.cs" />
-    <Compile Include="DelayedExchangeSchedulerExtensions.cs" />
+    <Compile Include="Configuration\DelayedExchangeSchedulerExtensions.cs" />
     <Compile Include="Exceptions\MessageNotConfirmedException.cs" />
     <Compile Include="Exceptions\PublishNackException.cs" />
     <Compile Include="Exceptions\PublishReturnedException.cs" />
@@ -168,7 +168,7 @@
     <Compile Include="Topology\RabbitMqHostEqualityComparer.cs" />
     <Compile Include="Topology\RabbitMqReceiveSettings.cs" />
     <Compile Include="Topology\RabbitMqSendSettings.cs" />
-    <Compile Include="TurnoutExtensions.cs" />
+    <Compile Include="Configuration\RabbitMqTurnoutConfigurationExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MassTransit\MassTransit.csproj">

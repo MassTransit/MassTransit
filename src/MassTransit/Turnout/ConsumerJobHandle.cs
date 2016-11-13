@@ -15,7 +15,7 @@ namespace MassTransit.Turnout
     using System;
     using System.Threading.Tasks;
     using Contracts;
-    using Util;
+    using Internals.Extensions;
 
 
     public class ConsumerJobHandle<T> :
@@ -65,13 +65,42 @@ namespace MassTransit.Turnout
             }
         }
 
-        Task JobHandle.Cancel()
+        async Task JobHandle.Cancel()
         {
             _jobContext.Cancel();
 
-            return TaskUtil.Completed;
+            try
+            {
+                await _task.WithTimeout(TimeSpan.FromSeconds(30)).ConfigureAwait(false);
+            }
+            catch (TaskCanceledException)
+            {
+            }
+            catch (OperationCanceledException)
+            {
+            }
         }
 
-        public T Command => _jobContext.Message;
+        public Task NotifyCanceled(string reason = null)
+        {
+            return _jobContext.NotifyCanceled(reason);
+        }
+
+        public Task NotifyStarted(Uri managementAddress)
+        {
+            return _jobContext.NotifyStarted(managementAddress);
+        }
+
+        public Task NotifyCompleted()
+        {
+            return _jobContext.NotifyCompleted();
+        }
+
+        public Task NotifyFaulted(Exception exception)
+        {
+            return _jobContext.NotifyFaulted(exception);
+        }
+
+        public T Command => _jobContext.Command;
     }
 }

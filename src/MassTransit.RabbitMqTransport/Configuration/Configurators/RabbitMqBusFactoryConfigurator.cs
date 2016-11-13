@@ -150,9 +150,9 @@ namespace MassTransit.RabbitMqTransport.Configurators
 
             var specification = new RabbitMqReceiveEndpointSpecification(host, queueName);
 
-            configure?.Invoke(specification);
-
             AddReceiveEndpointSpecification(specification);
+
+            configure?.Invoke(specification);
         }
     }
 }

@@ -20,43 +20,62 @@ namespace MassTransit.Turnout
     /// <summary>
     /// Consumer that handles the SuperviseJob message to check the status of the job
     /// </summary>
-    public class SuperviseJobConsumer<T> :
-        IConsumer<SuperviseJob<T>>
+    public class JobSupervisor<T> :
+        IConsumer<SuperviseJob<T>>,
+        IConsumer<CancelJob>
         where T : class
     {
-        static readonly ILog _log = Logger.Get<SuperviseJobConsumer<T>>();
+        static readonly ILog _log = Logger.Get<JobSupervisor<T>>();
 
-        readonly ITurnoutController _controller;
-        readonly IJobRoster _roster;
+        readonly IJobRegistry _registry;
+        readonly IJobService _service;
 
-        public SuperviseJobConsumer(IJobRoster roster, ITurnoutController controller)
+        public JobSupervisor(IJobService service, IJobRegistry registry)
         {
-            _roster = roster;
-            _controller = controller;
+            _registry = registry;
+            _service = service;
+        }
+
+        public async Task Consume(ConsumeContext<CancelJob> context)
+        {
+            JobHandle jobHandle;
+            if (!_registry.TryGetJob(context.Message.JobId, out jobHandle))
+                throw new JobNotFoundException($"The JobId {context.Message.JobId} was not found.");
+
+            if (_log.IsDebugEnabled)
+                _log.DebugFormat("Cancelling job: {0}", jobHandle.JobId);
+
+            await jobHandle.Cancel().ConfigureAwait(false);
+
+            JobHandle removed;
+            _registry.TryRemoveJob(jobHandle.JobId, out removed);
+
+            await jobHandle.NotifyCanceled("Job Service Stopped").ConfigureAwait(false);
         }
 
         public async Task Consume(ConsumeContext<SuperviseJob<T>> context)
         {
             JobHandle jobHandle;
-            if (_roster.TryGetJob(context.Message.JobId, out jobHandle))
+            if (_registry.TryGetJob(context.Message.JobId, out jobHandle))
             {
+                JobHandle removed;
                 switch (jobHandle.Status)
                 {
                     case JobStatus.Created:
                     case JobStatus.Running:
-                        await _controller.ScheduleSupervision(context, context.Message.Command, jobHandle).ConfigureAwait(false);
+                        await _service.ScheduleSupervision(context, context.Message.Command, jobHandle).ConfigureAwait(false);
                         break;
 
                     case JobStatus.RanToCompletion:
-                        _roster.RemoveJob(context.Message.JobId);
+                        _registry.TryRemoveJob(jobHandle.JobId, out removed);
                         break;
 
                     case JobStatus.Faulted:
-                        _roster.RemoveJob(context.Message.JobId);
+                        _registry.TryRemoveJob(jobHandle.JobId, out removed);
                         break;
 
                     case JobStatus.Canceled:
-                        _roster.RemoveJob(context.Message.JobId);
+                        _registry.TryRemoveJob(jobHandle.JobId, out removed);
                         break;
                 }
             }

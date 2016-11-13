@@ -17,40 +17,44 @@ namespace MassTransit.Turnout
     using System.Threading.Tasks;
     using Commands;
     using Contracts;
-    using Courier;
-    using Events;
     using GreenPipes;
     using Logging;
-    using Newtonsoft.Json.Linq;
 
 
-    public class TurnoutController :
-        ITurnoutController
+    public class JobService :
+        IJobService
     {
-        static readonly ILog _log = Logger.Get<TurnoutController>();
+        static readonly ILog _log = Logger.Get<JobService>();
 
-        readonly Uri _controlAddress;
-        readonly IJobRoster _roster;
+        readonly Uri _managementAddress;
+        readonly IJobRegistry _registry;
         readonly TimeSpan _superviseInterval;
+        bool _stopping;
 
-        public TurnoutController(IJobRoster jobRoster, Uri controlAddress, TimeSpan superviseInterval)
+        public JobService(IJobRegistry jobRegistry, Uri inputAddress, Uri managementAddress, TimeSpan superviseInterval)
         {
             _superviseInterval = superviseInterval;
-            _roster = jobRoster;
-            _controlAddress = controlAddress;
+            InputAddress = inputAddress;
+            _registry = jobRegistry;
+            _managementAddress = managementAddress;
         }
 
-        async Task<JobHandle<T>> ITurnoutController.CreateJob<T>(ConsumeContext<T> context, IJobFactory<T> jobFactory)
+        public Uri InputAddress { get; }
+
+        async Task<JobHandle<T>> IJobService.CreateJob<T>(ConsumeContext context, Guid jobId, T command, IJobFactory<T> jobFactory)
         {
-            var jobContext = new ConsumerJobContext<T>(context);
+            if (_stopping)
+                throw new InvalidOperationException("The job service is stopping.");
+
+            var jobContext = new ConsumerJobContext<T>(context, jobId, command);
 
             var babyTask = Run(jobContext, jobFactory);
 
             var jobHandle = new ConsumerJobHandle<T>(jobContext, babyTask);
 
-            _roster.Add(jobContext.JobId, jobHandle);
+            _registry.Add(jobHandle);
 
-            await ScheduleSupervision(context, context.Message, jobHandle).ConfigureAwait(false);
+            await ScheduleSupervision(jobContext, jobContext.Command, jobHandle).ConfigureAwait(false);
 
             return jobHandle;
         }
@@ -66,7 +70,38 @@ namespace MassTransit.Turnout
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Scheduled Job Supervision: {0}-{1}", jobHandle.JobId.ToString("N"), typeof(T).Name);
 
-            return context.ScheduleSend(_controlAddress, scheduledTime, check);
+            return context.ScheduleSend(_managementAddress, scheduledTime, check);
+        }
+
+        public async Task Stop()
+        {
+            _stopping = true;
+
+            ICollection<JobHandle> pendingJobs = _registry.GetAll();
+
+            foreach (var jobHandle in pendingJobs)
+            {
+                if (jobHandle.Status == JobStatus.Created || jobHandle.Status == JobStatus.Running)
+                {
+                    try
+                    {
+                        if (_log.IsDebugEnabled)
+                            _log.DebugFormat("Cancelling job: {0}", jobHandle.JobId);
+
+                        await jobHandle.Cancel().ConfigureAwait(false);
+
+                        JobHandle removed;
+                        _registry.TryRemoveJob(jobHandle.JobId, out removed);
+
+                        await jobHandle.NotifyCanceled("Job Service Stopped").ConfigureAwait(false);
+                    }
+                    catch (Exception ex)
+                    {
+                        if (_log.IsErrorEnabled)
+                            _log.Error($"Failed to cancel job: {jobHandle.JobId:N}", ex);
+                    }
+                }
+            }
         }
 
         async Task Run<T>(ConsumerJobContext<T> jobContext, IJobFactory<T> jobFactory)
@@ -83,61 +118,31 @@ namespace MassTransit.Turnout
                         r.Interval(1, 1000);
                     });
 
-                    cfg.UseExecuteAsync(NotifyStarted);
+                    cfg.UseExecuteAsync(context => context.NotifyStarted(_managementAddress));
 
                     cfg.UseInlineFilter(jobFactory.Execute);
 
-                    cfg.UseExecuteAsync(NotifyCompleted);
+                    cfg.UseExecuteAsync(context => context.NotifyCompleted());
                 });
 
                 await pipe.Send(jobContext).ConfigureAwait(false);
             }
             catch (TaskCanceledException)
             {
-                await NotifyCanceled(jobContext).ConfigureAwait(false);
+                await jobContext.NotifyCanceled("Task canceled").ConfigureAwait(false);
             }
             catch (OperationCanceledException)
             {
-                await NotifyCanceled(jobContext).ConfigureAwait(false);
+                await jobContext.NotifyCanceled("Operation canceled").ConfigureAwait(false);
             }
             catch (Exception exception)
             {
-                await NotifyFaulted(jobContext, exception).ConfigureAwait(false);
+                await jobContext.NotifyFaulted(exception).ConfigureAwait(false);
             }
             finally
             {
                 jobContext.Dispose();
             }
-        }
-
-        static Task NotifyCanceled<T>(JobContext<T> context) where T : class
-        {
-            return context.Publish<JobCanceled<T>>(new JobCanceledEvent<T>(context.JobId, context.Message));
-        }
-
-        static Task NotifyStarted<T>(JobContext<T> context) where T : class
-        {
-            return context.Publish<JobStarted>(new JobStartedEvent(context.JobId, 0, GetObjectAsDictionary(context.Message)));
-        }
-
-        static Task NotifyCompleted<T>(JobContext<T> context) where T : class
-        {
-            return context.Publish<JobCompleted>(new JobCompletedEvent(context.JobId, GetObjectAsDictionary(context.Message), new Dictionary<string, object>()));
-        }
-
-        static Task NotifyFaulted<T>(JobContext<T> context, Exception exception) where T : class
-        {
-            return context.Publish<JobFaulted<T>>(new JobFaultedEvent<T>(context.JobId, context.Message, exception));
-        }
-
-        static IDictionary<string, object> GetObjectAsDictionary(object values)
-        {
-            if (values == null)
-                return new Dictionary<string, object>();
-
-            var dictionary = JObject.FromObject(values, SerializerCache.Serializer);
-
-            return dictionary.ToObject<IDictionary<string, object>>();
         }
     }
 }

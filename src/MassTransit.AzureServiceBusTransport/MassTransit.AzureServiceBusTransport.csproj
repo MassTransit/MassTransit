@@ -157,7 +157,7 @@
     <Compile Include="Contexts\SubscriptionClientContext.cs" />
     <Compile Include="Transport\SubscriptionSettings.cs" />
     <Compile Include="Transport\TopicSendClient.cs" />
-    <Compile Include="TurnoutExtensions.cs" />
+    <Compile Include="ServiceBusTurnoutConfigurationExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

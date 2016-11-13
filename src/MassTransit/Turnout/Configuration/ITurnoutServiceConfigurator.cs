@@ -15,12 +15,19 @@ namespace MassTransit.Turnout.Configuration
     using System;
 
 
-    public interface ITurnoutHostConfigurator<T> :
+    public interface ITurnoutServiceConfigurator<T> :
         IReceiveEndpointConfigurator
         where T : class
     {
         IJobFactory<T> JobFactory { set; }
 
         TimeSpan SuperviseInterval { set; }
+
+        /// <summary>
+        /// Sets the number of partitions which can be used to process job commands
+        /// concurrently. Note that this does not set the maximum number of jobs 
+        /// executing, but just defines the concurrency for the consumers.
+        /// </summary>
+        int PartitionCount { set; }
     }
 }

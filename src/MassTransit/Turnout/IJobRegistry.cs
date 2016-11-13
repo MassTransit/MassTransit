@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -10,30 +10,36 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Turnout.Contracts
+namespace MassTransit.Turnout
 {
     using System;
+    using System.Collections.Generic;
 
 
     /// <summary>
-    /// Send to the monitor queue so that any running node can monitor the queue of a worker node
-    /// and handle the job if the original node fails to read the queue.
+    /// Contains the active jobs for the receive endpoint which have not been acknowledged
     /// </summary>
-    public interface MonitorJob
+    public interface IJobRegistry
     {
-        /// <summary>
-        /// The job identifier
-        /// </summary>
-        Guid JobId { get; }
+        bool TryGetJob(Guid jobId, out JobHandle jobReference);
 
         /// <summary>
-        /// The address of the job host
+        /// Add a job to the registry
         /// </summary>
-        Uri JobHostAddress { get; }
+        /// <param name="jobReference"></param>
+        void Add(JobHandle jobReference);
 
         /// <summary>
-        /// The message identifier of the matching SuperviseJob message
+        /// Remove the job from the roster
         /// </summary>
-        Guid MessageId { get; }
+        /// <param name="jobId"></param>
+        /// <param name="jobHandle"></param>
+        bool TryRemoveJob(Guid jobId, out JobHandle jobHandle);
+
+        /// <summary>
+        /// Return all pending jobs from the registry
+        /// </summary>
+        /// <returns></returns>
+        ICollection<JobHandle> GetAll();
     }
 }

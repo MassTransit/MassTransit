@@ -20,17 +20,19 @@ namespace MassTransit.Turnout.Events
     public class JobStartedEvent :
         JobStarted
     {
-        public JobStartedEvent(Guid jobId, int retryCount, IDictionary<string, object> arguments)
+        public JobStartedEvent(Guid jobId, int retryCount, Uri managementAddress, IDictionary<string, object> arguments)
         {
             JobId = jobId;
             Timestamp = DateTime.UtcNow;
             RetryCount = retryCount;
             Arguments = arguments;
+            ManagementAddress = managementAddress;
         }
 
         public Guid JobId { get; private set; }
         public DateTime Timestamp { get; private set; }
         public int RetryCount { get; private set; }
+        public Uri ManagementAddress { get; private set; }
         public IDictionary<string, object> Arguments { get; private set; }
     }
 }
