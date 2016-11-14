@@ -74,6 +74,11 @@ namespace MassTransit.AzureServiceBusTransport.Contexts
             return _host.CreateTopicSubscription(Defaults.CreateSubscriptionDescription(topicPath, subscriptionName, queueDescription, queuePath));
         }
 
+        public Task DeleteTopicSubscription(SubscriptionDescription description)
+        {
+            return _host.DeleteTopicSubscription(description);
+        }
+
         ITaskScope NamespaceContext.CreateScope(string tag)
         {
             return _supervisor.CreateScope(tag);

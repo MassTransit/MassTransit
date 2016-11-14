@@ -19,7 +19,9 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
     using System.Text;
     using System.Threading.Tasks;
     using GreenPipes;
+    using Logging;
     using Microsoft.ServiceBus;
+    using Microsoft.ServiceBus.Messaging;
     using NewIdFormatters;
     using Settings;
     using Transport;
@@ -31,6 +33,8 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
     public class PrepareReceiveEndpointFilter :
         IFilter<NamespaceContext>
     {
+        static readonly ILog _log = Logger.Get<PrepareReceiveEndpointFilter>();
+
         static readonly INewIdFormatter _formatter = new ZBase32Formatter();
         readonly ReceiveSettings _settings;
         readonly TopicSubscriptionSettings[] _subscriptionSettings;
@@ -49,18 +53,37 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
         {
             await context.CreateQueue(_settings.QueueDescription).ConfigureAwait(false);
 
+            var subscriptions = new Func<Task>[0];
             if (_subscriptionSettings.Length > 0)
             {
-                await Task.WhenAll(_subscriptionSettings.Select(subscription => CreateSubscription(context, context.NamespaceManager, subscription)))
+                subscriptions = await Task.WhenAll(_subscriptionSettings.Select(s => CreateSubscription(context, context.NamespaceManager, s)))
                     .ConfigureAwait(false);
             }
 
             context.GetOrAddPayload(() => _settings);
 
-            await next.Send(context).ConfigureAwait(false);
+            try
+            {
+                await next.Send(context).ConfigureAwait(false);
+            }
+            finally
+            {
+                if (_settings.RemoveSubscriptions)
+                {
+                    try
+                    {
+                        await Task.WhenAll(subscriptions.Select(x => x())).ConfigureAwait(false);
+                    }
+                    catch (Exception ex)
+                    {
+                        if (_log.IsWarnEnabled)
+                            _log.Warn($"Failed to remove one or more subsriptions from the endpoint: {_settings.QueueDescription.Path}", ex);
+                    }
+                }
+            }
         }
 
-        async Task CreateSubscription(NamespaceContext context, NamespaceManager namespaceManager, TopicSubscriptionSettings settings)
+        async Task<Func<Task>> CreateSubscription(NamespaceContext context, NamespaceManager namespaceManager, TopicSubscriptionSettings settings)
         {
             var topicDescription = await context.CreateTopic(settings.Topic).ConfigureAwait(false);
 
@@ -69,7 +92,15 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
 
             var subscriptionName = GetSubscriptionName(namespaceManager, _settings.QueueDescription.Path);
 
-            await context.CreateTopicSubscription(subscriptionName, topicDescription.Path, queuePath, _settings.QueueDescription).ConfigureAwait(false);
+            var description =
+                await context.CreateTopicSubscription(subscriptionName, topicDescription.Path, queuePath, _settings.QueueDescription).ConfigureAwait(false);
+
+            return () => DeleteSubscription(context, description);
+        }
+
+        Task DeleteSubscription(NamespaceContext context, SubscriptionDescription description)
+        {
+            return context.DeleteTopicSubscription(description);
         }
 
         static string GetSubscriptionName(NamespaceManager namespaceManager, string queuePath)

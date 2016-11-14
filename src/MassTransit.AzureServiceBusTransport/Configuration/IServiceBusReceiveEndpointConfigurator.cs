@@ -25,9 +25,14 @@ namespace MassTransit.AzureServiceBusTransport
         IServiceBusHost Host { get; }
 
         /// <summary>
-        /// If true, subscribes the message type exchanges to the queue
+        /// If true, adds subscriptions for the message types to the related topics.
         /// </summary>
         bool SubscribeMessageTopics { set; }
 
+        /// <summary>
+        /// If true, on shutdown, the subscriptions added are removed. This is used to avoid auto-delete
+        /// queues from creating abandoned subscriptions on the topic, resulting in a quota overflow.
+        /// </summary>
+        bool RemoveSubscriptions { set; }
     }
 }

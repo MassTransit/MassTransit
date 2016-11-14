@@ -100,5 +100,12 @@ namespace MassTransit.AzureServiceBusTransport
         /// </summary>
         /// <returns></returns>
         ITaskScope CreateScope(string tag);
+
+        /// <summary>
+        /// Delete a subscription from the topic
+        /// </summary>
+        /// <param name="description"></param>
+        /// <returns></returns>
+        Task DeleteTopicSubscription(SubscriptionDescription description);
     }
 }

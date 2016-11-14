@@ -125,6 +125,8 @@ namespace MassTransit.AzureServiceBusTransport.Settings
 
         public QueueDescription QueueDescription { get; }
 
+        public bool RemoveSubscriptions { get; set; }
+
         public override TimeSpan LockDuration
         {
             get { return QueueDescription.LockDuration; }

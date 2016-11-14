@@ -19,5 +19,10 @@ namespace MassTransit.AzureServiceBusTransport.Transport
         ClientSettings
     {
         QueueDescription QueueDescription { get; }
+
+        /// <summary>
+        /// If TRUE, subscriptions will be removed on shutdown to avoid overflowing the topic
+        /// </summary>
+        bool RemoveSubscriptions { get; }
     }
 }

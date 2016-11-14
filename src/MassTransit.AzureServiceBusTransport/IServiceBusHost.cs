@@ -96,5 +96,12 @@ namespace MassTransit.AzureServiceBusTransport
         /// <returns></returns>
         Task<HostReceiveEndpointHandle> ConnectSubscriptionEndpoint(string subscriptionName, string topicName,
             Action<IServiceBusSubscriptionEndpointConfigurator> configure = null);
+
+        /// <summary>
+        /// Delete a topic subscription from the host
+        /// </summary>
+        /// <param name="description"></param>
+        /// <returns></returns>
+        Task DeleteTopicSubscription(SubscriptionDescription description);
     }
 }

@@ -31,6 +31,8 @@ namespace MassTransit.RabbitMqTransport.Tests
             var handle = await Host.ConnectReceiveEndpoint("second_queue", x =>
             {
                 pingHandled = Handled<PingMessage>(x);
+
+                x.RemoveSubscriptions = true;
             });
             try
             {

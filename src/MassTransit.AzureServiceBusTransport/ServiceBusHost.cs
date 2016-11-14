@@ -321,6 +321,25 @@ namespace MassTransit.AzureServiceBusTransport
             return subscriptionDescription;
         }
 
+        public async Task DeleteTopicSubscription(SubscriptionDescription description)
+        {
+            try
+            {
+                if (await RootNamespaceManager.SubscriptionExistsAsync(description.TopicPath, description.Name).ConfigureAwait(false))
+                {
+                    await RootNamespaceManager.DeleteSubscriptionAsync(description.TopicPath, description.Name).ConfigureAwait(false);
+                }
+            }
+            catch (MessagingEntityNotFoundException)
+            {
+            }
+
+            if (_log.IsDebugEnabled)
+            {
+                _log.DebugFormat("Subscription Deleted: {0} ({1} -> {2})", description.Name, description.TopicPath, description.ForwardTo);
+            }
+        }
+
         public Task<HostReceiveEndpointHandle> ConnectReceiveEndpoint(Action<IServiceBusReceiveEndpointConfigurator> configure)
         {
             var queueName = this.GetTemporaryQueueName("endpoint");

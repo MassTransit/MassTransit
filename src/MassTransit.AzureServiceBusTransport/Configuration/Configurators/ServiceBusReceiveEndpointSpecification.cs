@@ -94,6 +94,11 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
             set { _settings.SupportOrdering = value; }
         }
 
+        public bool RemoveSubscriptions
+        {
+            set { _settings.RemoveSubscriptions = value; }
+        }
+
         public override void SelectBasicTier()
         {
             base.SelectBasicTier();
