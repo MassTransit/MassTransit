@@ -14,6 +14,7 @@ namespace MassTransit.HttpTransport.Tests
 {
     using System;
     using System.Threading;
+    using System.Threading.Tasks;
     using Configuration.Builders;
     using Logging;
     using NUnit.Framework;
@@ -60,10 +61,10 @@ namespace MassTransit.HttpTransport.Tests
         }
 
         [TestFixtureSetUp]
-        public void SetupInMemoryTestFixture()
+        public async Task SetupInMemoryTestFixture()
         {
              _bus = CreateBus();
-            _busHandle = _bus.Start();
+            _busHandle = await _bus.StartAsync();
 
             try
             {
@@ -79,7 +80,7 @@ namespace MassTransit.HttpTransport.Tests
                 {
                     using (var tokenSource = new CancellationTokenSource(TestTimeout))
                     {
-                        _busHandle?.Stop(tokenSource.Token);
+                        _busHandle?.StopAsync(tokenSource.Token);
                     }
                 }
                 finally
@@ -99,7 +100,7 @@ namespace MassTransit.HttpTransport.Tests
             {
                 using (var tokenSource = new CancellationTokenSource(TestTimeout))
                 {
-                    _bus.Stop(tokenSource.Token);
+                    _bus.StopAsync(tokenSource.Token);
                 }
             }
             catch (Exception ex)

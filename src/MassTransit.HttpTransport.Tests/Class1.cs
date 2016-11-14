@@ -83,7 +83,7 @@ namespace MassTransit.HottpTransport.Tests
                 });
             });
 
-            bus.Start();
+            bus.StartAsync();
 
             Thread.Sleep(TimeSpan.FromMinutes(500));
         }
