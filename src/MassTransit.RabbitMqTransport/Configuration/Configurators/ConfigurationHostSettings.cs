@@ -18,6 +18,7 @@ namespace MassTransit.RabbitMqTransport.Configurators
     using System.Security.Cryptography.X509Certificates;
     using RabbitMQ.Client;
     using Transports;
+    using Util;
 
 
     class ConfigurationHostSettings :
@@ -32,6 +33,8 @@ namespace MassTransit.RabbitMqTransport.Configurators
             AcceptablePolicyErrors = connectionFactory.Ssl.AcceptablePolicyErrors;
 
             PublisherConfirmation = true;
+
+            ClientProvidedName = HostMetadataCache.Host.ProcessName;
         }
 
         public string Host { get; set; }

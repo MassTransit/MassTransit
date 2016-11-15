@@ -29,7 +29,7 @@ namespace MassTransit.Util
         {
             MachineName = Environment.MachineName;
 
-            MassTransitVersion = GetAssemblyFileVersion(typeof(IBus).Assembly);
+            MassTransitVersion = GetAssemblyInformationalVersion(typeof(IBus).Assembly);
             FrameworkVersion = Environment.Version.ToString();
             OperatingSystemVersion = Environment.OSVersion.ToString();
             var currentProcess = Process.GetCurrentProcess();
@@ -64,6 +64,17 @@ namespace MassTransit.Util
                 return FileVersionInfo.GetVersionInfo(assemblyLocation).FileVersion;
 
             return "Unknown";
+        }
+
+        static string GetAssemblyInformationalVersion(Assembly assembly)
+        {
+            var attribute = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>();
+            if (attribute != null)
+            {
+                return attribute.InformationalVersion;
+            }
+
+            return GetAssemblyFileVersion(assembly);
         }
     }
 }

@@ -39,7 +39,7 @@ namespace MassTransit
         string Assembly { get; }
 
         /// <summary>
-        /// The assembly version of the assembly where the exception occurred
+        /// The assembly version
         /// </summary>
         string AssemblyVersion { get; }
 

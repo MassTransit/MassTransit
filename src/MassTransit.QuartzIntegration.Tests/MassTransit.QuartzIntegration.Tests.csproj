@@ -81,8 +81,6 @@
     <Compile Include="Recurring_Specs.cs" />
     <Compile Include="ScheduleMessage_Specs.cs" />
     <Compile Include="Service_Specs.cs" />
-    <Compile Include="TramJob_Specs.cs" />
-    <Compile Include="TurnoutCheck_Specs.cs" />
     <Compile Include="Utils.cs" />
   </ItemGroup>
   <ItemGroup>

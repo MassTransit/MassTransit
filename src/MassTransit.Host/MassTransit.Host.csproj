@@ -70,6 +70,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\SolutionVersion.cs">
+      <Link>Properties\SolutionVersion.cs</Link>
+    </Compile>
     <Compile Include="Activities\ActivityService.cs" />
     <Compile Include="Activities\ActivityServiceBootstrapper.cs" />
     <Compile Include="AssemblyBusServiceConfigurator.cs" />
@@ -93,7 +96,6 @@
     <Compile Include="IServiceBusInstance.cs" />
     <Compile Include="LifetimeScopeServiceControl.cs" />
     <Compile Include="Program.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="MassTransitHostConfigurator.cs" />
     <Compile Include="ScopedServiceFactory.cs" />
     <Compile Include="ServiceBootstrapper.cs" />
