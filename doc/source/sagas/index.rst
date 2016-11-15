@@ -25,8 +25,9 @@ called Automatonymous_. Automatonymous is a state machine engine written by Chri
 
 
 .. toctree::
-    :maxdepth: 0
 
     automatonymous.rst
+    quickstart.rst
+    samplestatemachine.rst
     persistence.rst
     

@@ -15,7 +15,7 @@ Message-based communication is a reliable and scalable way to implement a servic
 .. image:: https://ci.appveyor.com/api/projects/status/hox8dhh5eyy7jsf4/branch/master?svg=true
 
 .. toctree::
-    :maxdepth: 2
+    :maxdepth: 1
 
     overview/backstory.rst
     installation/index.rst
