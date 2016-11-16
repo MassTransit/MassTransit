@@ -33,6 +33,9 @@
     <NoWarn>1587,1591,1998,3008,3001</NoWarn>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Automatonymous">
+      <HintPath>..\tests\NHibernate\Automatonymous.dll</HintPath>
+    </Reference>
     <Reference Include="GreenPipes, Version=1.0.0.0, Culture=neutral, PublicKeyToken=b800c4cfcdeea87b, processorArchitecture=MSIL">
       <HintPath>..\packages\GreenPipes.1.0.5\lib\net452\GreenPipes.dll</HintPath>
       <Private>True</Private>
@@ -77,6 +80,7 @@
     <Compile Include="ConfiguringAzure_Specs.cs" />
     <Compile Include="ContextSetup.cs" />
     <Compile Include="ErrorQueue_Specs.cs" />
+    <Compile Include="Express_Specs.cs" />
     <Compile Include="IAzureServiceBusTokenProvider.cs" />
     <Compile Include="Performance_Specs.cs" />
     <Compile Include="PublishDynamicType_Specs.cs" />
@@ -86,6 +90,7 @@
     <Compile Include="RequestClient_Specs.cs" />
     <Compile Include="SagaRepository_Specs.cs" />
     <Compile Include="ScheduleMessage_Specs.cs" />
+    <Compile Include="ScheduleTimeout_Specs.cs" />
     <Compile Include="SendContext_Specs.cs" />
     <Compile Include="Send_Specs.cs" />
     <Compile Include="Session_Specs.cs" />
@@ -104,6 +109,10 @@
     <ProjectReference Include="..\Loggers\MassTransit.Log4NetIntegration\MassTransit.Log4NetIntegration.csproj">
       <Project>{8d2be372-a756-4676-b2ea-ed7846809bfe}</Project>
       <Name>MassTransit.Log4NetIntegration</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\MassTransit.AutomatonymousIntegration\MassTransit.AutomatonymousIntegration.csproj">
+      <Project>{a852511b-2742-4f4d-bd4e-adddbf3bd4b3}</Project>
+      <Name>MassTransit.AutomatonymousIntegration</Name>
     </ProjectReference>
     <ProjectReference Include="..\MassTransit.AzureServiceBusTransport\MassTransit.AzureServiceBusTransport.csproj">
       <Project>{a84b8d78-6592-4340-9e78-4ac608f53efd}</Project>

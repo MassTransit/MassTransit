@@ -69,7 +69,7 @@ namespace Automatonymous.Activities
                     await scheduleEndpoint.CancelScheduledSend(requestId.Value).ConfigureAwait(false);
                 }
                 else if (consumeContext.TryGetPayload(out schedulerContext))
-                    await schedulerContext.CancelScheduledSend(requestId.Value).ConfigureAwait(false);
+                    await schedulerContext.CancelScheduledSend(consumeContext.ReceiveContext.InputAddress, requestId.Value).ConfigureAwait(false);
                 else
                     throw new ConfigurationException("A scheduler was not available to cancel the scheduled request timeout");
             }

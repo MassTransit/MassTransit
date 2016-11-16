@@ -101,7 +101,7 @@ namespace Automatonymous.Activities
             Guid? previousTokenId = _schedule.GetTokenId(context.Instance);
             if (previousTokenId.HasValue)
             {
-                await schedulerContext.CancelScheduledSend(previousTokenId.Value).ConfigureAwait(false);
+                await schedulerContext.CancelScheduledSend(consumeContext.ReceiveContext.InputAddress, previousTokenId.Value).ConfigureAwait(false);
             }
 
             _schedule?.SetTokenId(context.Instance, scheduledMessage.TokenId);
@@ -165,7 +165,7 @@ namespace Automatonymous.Activities
             Guid? previousTokenId = _schedule.GetTokenId(context.Instance);
             if (previousTokenId.HasValue)
             {
-                await schedulerContext.CancelScheduledSend(previousTokenId.Value).ConfigureAwait(false);
+                await schedulerContext.CancelScheduledSend(consumeContext.ReceiveContext.InputAddress, previousTokenId.Value).ConfigureAwait(false);
             }
 
             _schedule?.SetTokenId(context.Instance, scheduledMessage.TokenId);

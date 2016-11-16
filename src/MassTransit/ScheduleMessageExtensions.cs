@@ -15,7 +15,6 @@ namespace MassTransit
     using System;
     using System.Threading.Tasks;
     using GreenPipes;
-    using Pipeline;
     using Scheduling;
 
 
@@ -270,6 +269,5 @@ namespace MassTransit
 
             return scheduler.CancelScheduledSend(tokenId);
         }
-
     }
 }

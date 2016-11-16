@@ -10,7 +10,7 @@
 		</root>
 
 		<logger name="MassTransit">
-			<level value="WARN" />
+			<level value="DEBUG" />
 		</logger>
 
 		<logger name="MassTransit.AzureServiceBusTransport">

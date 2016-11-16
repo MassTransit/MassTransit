@@ -87,7 +87,7 @@ namespace Automatonymous.Activities
                 Guid? previousTokenId = _schedule.GetTokenId(context.Instance);
                 if (previousTokenId.HasValue)
                 {
-                    await schedulerContext.CancelScheduledSend(previousTokenId.Value).ConfigureAwait(false);
+                    await schedulerContext.CancelScheduledSend(exceptionContext.ReceiveContext.InputAddress, previousTokenId.Value).ConfigureAwait(false);
                 }
 
                 _schedule?.SetTokenId(context.Instance, scheduledMessage.TokenId);

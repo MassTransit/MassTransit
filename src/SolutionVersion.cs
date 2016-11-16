@@ -6,7 +6,7 @@ using System.Reflection;
 [assembly: AssemblyProductAttribute("MassTransit")]
 [assembly: AssemblyVersionAttribute("3.5.0.0")]
 [assembly: AssemblyFileVersionAttribute("3.5.0.0")]
-[assembly: AssemblyInformationalVersionAttribute("3.5.0.0 (develop/8502840a)")]
+[assembly: AssemblyInformationalVersionAttribute("3.5.0.0 (develop/67f890c7)")]
 namespace System {
     internal static class AssemblyVersionInformation {
         internal const string Version = "3.5.0.0";
