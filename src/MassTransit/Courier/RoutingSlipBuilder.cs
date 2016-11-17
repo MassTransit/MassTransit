@@ -27,7 +27,8 @@ namespace MassTransit.Courier
     /// is valid.
     /// </summary>
     public class RoutingSlipBuilder :
-        ItineraryBuilder
+        ItineraryBuilder,
+        IRoutingSlipSendEndpointTarget
     {
         public static readonly IDictionary<string, object> NoArguments = new Dictionary<string, object>(StringComparer.InvariantCultureIgnoreCase);
 
@@ -98,6 +99,18 @@ namespace MassTransit.Courier
         }
 
         public IList<Activity> SourceItinerary => _sourceItinerary;
+
+        /// <summary>
+        /// Adds a custom subscription message to the routing slip which is sent at the specified events
+        /// </summary>
+        /// <param name="address">The destination address where the events are sent</param>
+        /// <param name="events">The events to include in the subscription</param>
+        /// <param name="contents">The contents of the routing slip event</param>
+        /// <param name="message">The custom message to be sent</param>
+        void IRoutingSlipSendEndpointTarget.AddSubscription(Uri address, RoutingSlipEvents events, RoutingSlipEventContents contents, MessageEnvelope message)
+        {
+            _subscriptions.Add(new SubscriptionImpl(address, events, contents, message));
+        }
 
         /// <summary>
         /// The tracking number of the routing slip
@@ -351,18 +364,6 @@ namespace MassTransit.Courier
         }
 
         /// <summary>
-        /// Adds a custom subscription message to the routing slip which is sent at the specified events
-        /// </summary>
-        /// <param name="address">The destination address where the events are sent</param>
-        /// <param name="events">The events to include in the subscription</param>
-        /// <param name="contents">The contents of the routing slip event</param>
-        /// <param name="message">The custom message to be sent</param>
-        public void AddSubscription(Uri address, RoutingSlipEvents events, RoutingSlipEventContents contents, MessageEnvelope message)
-        {
-            _subscriptions.Add(new SubscriptionImpl(address, events, contents, message));
-        }
-
-        /// <summary>
         /// Adds a message subscription to the routing slip that will be sent at the specified event points
         /// </summary>
         /// <param name="address"></param>
@@ -372,6 +373,19 @@ namespace MassTransit.Courier
         public Task AddSubscription(Uri address, RoutingSlipEvents events, Func<ISendEndpoint, Task> callback)
         {
             return callback(new RoutingSlipBuilderSendEndpoint(this, address, events));
+        }
+
+        /// <summary>
+        /// Adds a message subscription to the routing slip that will be sent at the specified event points
+        /// </summary>
+        /// <param name="address"></param>
+        /// <param name="events"></param>
+        /// <param name="contents"></param>
+        /// <param name="callback"></param>
+        /// <returns></returns>
+        public Task AddSubscription(Uri address, RoutingSlipEvents events, RoutingSlipEventContents contents, Func<ISendEndpoint, Task> callback)
+        {
+            return callback(new RoutingSlipBuilderSendEndpoint(this, address, events, contents));
         }
     }
 }

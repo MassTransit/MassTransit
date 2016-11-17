@@ -143,6 +143,7 @@
     <Compile Include="Context\ConsumeContextScopePublishEndpoint.cs" />
     <Compile Include="Context\RescueExceptionConsumerConsumeContext.cs" />
     <Compile Include="Context\RescueExceptionSagaConsumeContext.cs" />
+    <Compile Include="Courier\IRoutingSlipSendEndpointTarget.cs" />
     <Compile Include="Courier\RoutingSlipBuilderSendEndpoint.cs" />
     <Compile Include="Courier\RoutingSlipSendContext.cs" />
     <Compile Include="Courier\Serialization\EnvelopeMessageSerializer.cs" />

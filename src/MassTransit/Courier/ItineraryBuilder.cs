@@ -14,6 +14,8 @@ namespace MassTransit.Courier
 {
     using System;
     using System.Collections.Generic;
+    using System.Threading.Tasks;
+    using Contracts;
 
 
     public interface ItineraryBuilder
@@ -80,5 +82,39 @@ namespace MassTransit.Courier
         /// </summary>
         /// <returns>The number of activities added to the itinerary</returns>
         int AddActivitiesFromSourceItinerary();
+
+        /// <summary>
+        /// Add an explicit subscription to the routing slip events
+        /// </summary>
+        /// <param name="address">The destination address where the events are sent</param>
+        /// <param name="events">The events to include in the subscription</param>
+        void AddSubscription(Uri address, RoutingSlipEvents events);
+
+        /// <summary>
+        /// Add an explicit subscription to the routing slip events
+        /// </summary>
+        /// <param name="address">The destination address where the events are sent</param>
+        /// <param name="events">The events to include in the subscription</param>
+        /// <param name="contents">The contents of the routing slip event</param>
+        void AddSubscription(Uri address, RoutingSlipEvents events, RoutingSlipEventContents contents);
+
+        /// <summary>
+        /// Adds a message subscription to the routing slip that will be sent at the specified event points
+        /// </summary>
+        /// <param name="address"></param>
+        /// <param name="events"></param>
+        /// <param name="callback"></param>
+        /// <returns></returns>
+        Task AddSubscription(Uri address, RoutingSlipEvents events, Func<ISendEndpoint, Task> callback);
+
+        /// <summary>
+        /// Adds a message subscription to the routing slip that will be sent at the specified event points
+        /// </summary>
+        /// <param name="address"></param>
+        /// <param name="events"></param>
+        /// <param name="contents"></param>
+        /// <param name="callback"></param>
+        /// <returns></returns>
+        Task AddSubscription(Uri address, RoutingSlipEvents events, RoutingSlipEventContents contents, Func<ISendEndpoint, Task> callback);
     }
 }

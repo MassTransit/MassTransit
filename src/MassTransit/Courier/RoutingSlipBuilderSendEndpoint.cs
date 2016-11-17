@@ -25,13 +25,13 @@ namespace MassTransit.Courier
     public class RoutingSlipBuilderSendEndpoint :
         ISendEndpoint
     {
-        readonly RoutingSlipBuilder _builder;
+        readonly IRoutingSlipSendEndpointTarget _builder;
         readonly Uri _destinationAddress;
         readonly RoutingSlipEvents _events;
         readonly RoutingSlipEventContents _include;
         readonly SendObservable _observers;
 
-        public RoutingSlipBuilderSendEndpoint(RoutingSlipBuilder builder, Uri destinationAddress, RoutingSlipEvents events,
+        public RoutingSlipBuilderSendEndpoint(IRoutingSlipSendEndpointTarget builder, Uri destinationAddress, RoutingSlipEvents events,
             RoutingSlipEventContents include = RoutingSlipEventContents.All)
         {
             _observers = new SendObservable();
