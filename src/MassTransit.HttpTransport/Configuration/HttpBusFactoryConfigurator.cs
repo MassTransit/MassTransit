@@ -20,20 +20,21 @@ namespace MassTransit.HttpTransport.Configuration
     using GreenPipes;
     using Hosting;
     using MassTransit.Builders;
+    using Transports;
 
 
     public class HttpBusFactoryConfigurator :
-        BusFactoryConfigurator,
+        BusFactoryConfigurator<IBusBuilder>,
         IHttpBusFactoryConfigurator,
         IBusFactory
     {
-        readonly IList<HttpHost> _hosts;
+        readonly BusHostCollection<HttpHost> _hosts;
         readonly IList<IBusFactorySpecification> _transportBuilderConfigurators;
         readonly HttpReceiveSettings _settings;
 
         public HttpBusFactoryConfigurator()
         {
-            _hosts = new List<HttpHost>();
+            _hosts = new BusHostCollection<HttpHost>();
             _transportBuilderConfigurators = new List<IBusFactorySpecification>();
             _settings = new HttpReceiveSettings
             {
@@ -43,7 +44,7 @@ namespace MassTransit.HttpTransport.Configuration
 
         public IBusControl CreateBus()
         {
-            var builder = new HttpBusBuilder(_hosts.ToArray(), ConsumePipeFactory, SendPipeFactory, PublishPipeFactory, _settings);
+            var builder = new HttpBusBuilder(_hosts, ConsumePipeFactory, SendPipeFactory, PublishPipeFactory, _settings);
 
             foreach (var configurator in _transportBuilderConfigurators)
                 configurator.Apply(builder);
@@ -84,7 +85,7 @@ namespace MassTransit.HttpTransport.Configuration
             if (host == null)
                 throw new EndpointNotFoundException("The host address specified was not configured.");
 
-            var ep = new HttpReceiveEndpointConfigurator(host, null, null);
+            var ep = new HttpReceiveEndpointSpecification(host, null, null);
 
             if (configure != null)
                 configure(ep);

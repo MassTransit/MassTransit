@@ -12,15 +12,13 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.HttpTransport.Pipeline
 {
-    public interface HttpConsumerMetrics
-    {
-        /// <summary>
-        /// The number of messages consumed by the consumer
-        /// </summary>
-        long DeliveryCount { get; }
+    using Transports.Metrics;
 
+
+    public interface HttpConsumerMetrics :
+        DeliveryMetrics
+    {
         string Route { get; set; }
-        long ConcurrentDeliveryCount { get; set; }
         string ConsumerTag { get; }
     }
 }

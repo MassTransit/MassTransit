@@ -22,8 +22,8 @@ namespace MassTransit.HttpTransport.Hosting
     {
         readonly Stream _body;
 
-        public HttpReceiveContext(Uri inputAddress, Stream body, IHeaderProvider provider, bool redelivered, IReceiveObserver receiveObserver)
-            : base(inputAddress, redelivered, receiveObserver)
+        public HttpReceiveContext(Uri inputAddress, Stream body, IHeaderProvider provider, bool redelivered, IReceiveObserver receiveObserver, ISendEndpointProvider sendEndpointProvider, IPublishEndpointProvider publishEndpointProvider)
+            : base(inputAddress, redelivered, receiveObserver, sendEndpointProvider, publishEndpointProvider)
         {
             _body = body;
             HeaderProvider = provider;

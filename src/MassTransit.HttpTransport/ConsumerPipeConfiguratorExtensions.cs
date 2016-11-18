@@ -28,20 +28,22 @@ namespace MassTransit.HttpTransport
         /// <param name="receivePipe"></param>
         /// <param name="settings"></param>
         /// <param name="receiveObserver"></param>
-        /// <param name="endpointObserver"></param>
+        /// <param name="receiveTransportObserver"></param>
         /// <param name="supervisor"></param>
         public static void HttpConsumer(this IPipeConfigurator<OwinHostContext> configurator,
             IPipe<ReceiveContext> receivePipe, 
             HttpHostSettings settings,
             IReceiveObserver receiveObserver, 
-            IReceiveEndpointObserver endpointObserver,
-            ITaskSupervisor supervisor)
+            IReceiveTransportObserver receiveTransportObserver,
+            ITaskSupervisor supervisor,
+            ISendEndpointProvider sendEndpointProvider, 
+            IPublishEndpointProvider publishEndpointProvider)
         {
             if (configurator == null)
                 throw new ArgumentNullException(nameof(configurator));
 
-            var pipeBuilderConfigurator = new HttpConsumerPipeSpecification(settings, receivePipe, receiveObserver, endpointObserver,
-                supervisor);
+            var pipeBuilderConfigurator = new HttpConsumerPipeSpecification(settings, receivePipe, receiveObserver, receiveTransportObserver,
+                supervisor, sendEndpointProvider, publishEndpointProvider);
 
             configurator.AddPipeSpecification(pipeBuilderConfigurator);
         }

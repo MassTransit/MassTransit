@@ -13,11 +13,10 @@
 namespace MassTransit.HttpTransport
 {
     using Hosting;
-    using Transports;
     using Util;
 
 
-    public interface IHttpHost : IBusHost
+    public interface IHttpHost : IHost
     {
         HttpHostSettings Settings { get; }
 

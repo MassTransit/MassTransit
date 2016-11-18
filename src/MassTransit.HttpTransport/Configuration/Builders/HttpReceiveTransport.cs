@@ -30,13 +30,24 @@ namespace MassTransit.HttpTransport.Configuration.Builders
         readonly IHttpHost _host;
         readonly ReceiveEndpointObservable _receiveEndpointObservable;
         readonly ReceiveObservable _receiveObservable;
+        readonly ReceiveTransportObservable _receiveTransportObservable;
+        readonly ISendEndpointProvider _sendEndpointProvider;
+        readonly IPublishEndpointProvider _publishEndpointProvider;
 
-        public HttpReceiveTransport(IHttpHost host)
+        public HttpReceiveTransport(IHttpHost host, ISendEndpointProvider sendEndpointProvider, IPublishEndpointProvider publishEndpointProvider)
         {
             _host = host;
+            _sendEndpointProvider = sendEndpointProvider;
+            _publishEndpointProvider = publishEndpointProvider;
 
             _receiveObservable = new ReceiveObservable();
             _receiveEndpointObservable = new ReceiveEndpointObservable();
+            _receiveTransportObservable = new ReceiveTransportObservable();
+        }
+
+        public ConnectHandle ConnectReceiveTransportObserver(IReceiveTransportObserver observer)
+        {
+            return _receiveTransportObservable.Connect(observer);
         }
 
         public ConnectHandle ConnectReceiveObserver(IReceiveObserver observer)
@@ -60,44 +71,15 @@ namespace MassTransit.HttpTransport.Configuration.Builders
         {
             var supervisor = new TaskSupervisor($"{TypeMetadataCache<HttpReceiveTransport>.ShortName} - {_host.Settings.GetInputAddress()}");
 
-            IPipe<OwinHostContext> hostPipe = Pipe.New<OwinHostContext>(async cxt =>
+            IPipe<OwinHostContext> hostPipe = Pipe.New<OwinHostContext>(cxt =>
             {
-                cxt.HttpConsumer(receivePipe, _host.Settings, _receiveObservable, _receiveEndpointObservable, supervisor);
-
-                await _receiveEndpointObservable.Ready(new Ready(_host.Settings.GetInputAddress())).ConfigureAwait(false);
+                cxt.HttpConsumer(receivePipe, _host.Settings, _receiveObservable, _receiveTransportObservable, supervisor, _sendEndpointProvider, _publishEndpointProvider);
             });
 
             var hostTask = _host.OwinHostCache.Send(hostPipe, supervisor.StoppingToken);
 
             return new Handle(supervisor, hostTask);
         }
-
-
-        class Ready :
-            ReceiveEndpointReady
-        {
-            public Ready(Uri inputAddress)
-            {
-                InputAddress = inputAddress;
-            }
-
-            public Uri InputAddress { get; }
-        }
-
-
-        class Faulted :
-            ReceiveEndpointFaulted
-        {
-            public Faulted(Uri inputAddress, Exception exception)
-            {
-                InputAddress = inputAddress;
-                Exception = exception;
-            }
-
-            public Uri InputAddress { get; }
-            public Exception Exception { get; }
-        }
-
 
         class Handle :
             ReceiveTransportHandle

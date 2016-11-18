@@ -1,10 +1,8 @@
 namespace MassTransit.HttpTransport.Tests
 {
     using System;
-    using System.Net.Http;
     using System.Threading;
-    using Configuration.Builders;
-    using Hosting;
+    using System.Threading.Tasks;
     using HottpTransport.Tests;
     using NUnit.Framework;
 
@@ -12,7 +10,7 @@ namespace MassTransit.HttpTransport.Tests
     public class OwinTesting
     {
         [Test]
-        public void WholeBus()
+        public async Task WholeBus()
         {
             var bus = Bus.Factory.CreateUsingHttp(cfg =>
             {
@@ -31,7 +29,7 @@ namespace MassTransit.HttpTransport.Tests
                 });
             });
             
-            var uu = bus.Start();
+            var uu = await bus.StartAsync();
 
             Thread.Sleep(100000);
             uu.Stop();

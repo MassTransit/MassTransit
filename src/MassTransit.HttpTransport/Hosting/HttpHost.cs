@@ -18,6 +18,7 @@ namespace MassTransit.HttpTransport.Hosting
     using Configuration.Builders;
     using GreenPipes;
     using Logging;
+    using MassTransit.Pipeline;
     using Transports;
     using Util;
 
@@ -28,17 +29,28 @@ namespace MassTransit.HttpTransport.Hosting
     {
         static readonly ILog _log = Logger.Get<HttpHost>();
         readonly OwinHostCache _owinHostCache;
-
+        // Retry
+        readonly HttpHostSettings _settings;
         readonly TaskSupervisor _supervisor;
+        Uri _address;
 
         public HttpHost(HttpHostSettings hostSettings)
         {
-            Settings = hostSettings;
+            _settings = hostSettings;
+
+            //exception Filter
+            ReceiveEndpoints = new ReceiveEndpointCollection();
+
+            //connection retry policy
+
             _supervisor = new TaskSupervisor($"{TypeMetadataCache<HttpHost>.ShortName} - {Settings.Host}");
+
             _owinHostCache = new OwinHostCache(Settings, _supervisor);
         }
 
-        public HostHandle Start()
+        public IReceiveEndpointCollection ReceiveEndpoints { get; }
+
+        public async Task<HostHandle> Start()
         {
             IPipe<OwinHostContext> connectionPipe = Pipe.ExecuteAsync<OwinHostContext>(async context =>
             {
@@ -60,7 +72,17 @@ namespace MassTransit.HttpTransport.Hosting
 
             var connectionTask = OwinHostCache.Send(connectionPipe, _supervisor.StoppingToken);
 
-            return new Handle(connectionTask, _supervisor);
+            HostReceiveEndpointHandle[] handles = await ReceiveEndpoints.StartEndpoints().ConfigureAwait(false);
+
+
+            return new Handle(connectionTask, handles, _supervisor, this);
+        }
+
+        public bool Matches(Uri address)
+        {
+            var settings = address.GetHostSettings();
+
+            return HttpHostEqualityComparer.Default.Equals(_settings, settings);
         }
 
         public void Probe(ProbeContext context)
@@ -76,29 +98,56 @@ namespace MassTransit.HttpTransport.Hosting
 
 
             _owinHostCache.Probe(scope);
+
+            ReceiveEndpoints.Probe(scope);
         }
 
         public IOwinHostCache OwinHostCache => _owinHostCache;
-
-        public HttpHostSettings Settings { get; }
-
+        public HttpHostSettings Settings => _settings;
+        // Retry
         public ITaskSupervisor Supervisor => _supervisor;
 
 
+        public Uri Address => new Uri($"{_settings.Scheme}{_settings.Host}:{_settings.Port}");
+
+        ConnectHandle IConsumeMessageObserverConnector.ConnectConsumeMessageObserver<T>(IConsumeMessageObserver<T> observer)
+        {
+            return ReceiveEndpoints.ConnectConsumeMessageObserver(observer);
+        }
+
+        ConnectHandle IConsumeObserverConnector.ConnectConsumeObserver(IConsumeObserver observer)
+        {
+            return ReceiveEndpoints.ConnectConsumeObserver(observer);
+        }
+
+        ConnectHandle IReceiveObserverConnector.ConnectReceiveObserver(IReceiveObserver observer)
+        {
+            return ReceiveEndpoints.ConnectReceiveObserver(observer);
+        }
+
+        ConnectHandle IReceiveEndpointObserverConnector.ConnectReceiveEndpointObserver(IReceiveEndpointObserver observer)
+        {
+            return ReceiveEndpoints.ConnectReceiveEndpointObserver(observer);
+        }
+
+
         class Handle :
-            HostHandle
+            BaseHostHandle
         {
             readonly Task _connectionTask;
             readonly TaskSupervisor _supervisor;
 
-            public Handle(Task connectionTask, TaskSupervisor supervisor)
+            public Handle(Task connectionTask, HostReceiveEndpointHandle[] handles, TaskSupervisor supervisor, IHost host)
+                : base(host, handles)
             {
                 _connectionTask = connectionTask;
                 _supervisor = supervisor;
             }
 
-            async Task HostHandle.Stop(CancellationToken cancellationToken)
+            public override async Task Stop(CancellationToken cancellationToken)
             {
+                await base.Stop(cancellationToken).ConfigureAwait(false);
+
                 await _supervisor.Stop("Host stopped", cancellationToken).ConfigureAwait(false);
 
                 try

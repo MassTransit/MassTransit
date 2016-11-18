@@ -75,7 +75,7 @@
     <Compile Include="Configuration\Builders\HttpOwinHostContext.cs" />
     <Compile Include="Configuration\Builders\HttpPublishEndpointProvider.cs" />
     <Compile Include="Configuration\Builders\HttpReceiveEndpointBuilder.cs" />
-    <Compile Include="Configuration\Builders\HttpReceiveEndpointConfigurator.cs" />
+    <Compile Include="Configuration\Builders\HttpReceiveEndpointSpecification.cs" />
     <Compile Include="Configuration\Builders\HttpReceiveTransport.cs" />
     <Compile Include="Configuration\Builders\IHttpReceiveEndpointBuilder.cs" />
     <Compile Include="Configuration\Builders\IHttpReceiveEndpointConfigurator.cs" />

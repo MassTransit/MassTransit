@@ -24,10 +24,10 @@ namespace MassTransit.HttpTransport.Configuration.Builders
     public class HttpBusBuilder :
         BusBuilder
     {
-        readonly HttpReceiveEndpointConfigurator _busEndpointConfigurator;
-        readonly HttpHost[] _hosts;
+        readonly HttpReceiveEndpointSpecification _busEndpointSpecification;
+        readonly BusHostCollection<HttpHost> _hosts;
 
-        public HttpBusBuilder(HttpHost[] hosts,
+        public HttpBusBuilder(BusHostCollection<HttpHost> hosts,
             IConsumePipeFactory consumePipeFactory,
             ISendPipeFactory sendPipeFactory,
             IPublishPipeFactory publishPipeFactory,
@@ -35,12 +35,18 @@ namespace MassTransit.HttpTransport.Configuration.Builders
             : base(consumePipeFactory, sendPipeFactory, publishPipeFactory, hosts)
         {
             _hosts = hosts;
-            _busEndpointConfigurator = new HttpReceiveEndpointConfigurator(_hosts[0], settings, ConsumePipe);
+            _busEndpointSpecification = new HttpReceiveEndpointSpecification(_hosts[0], settings, ConsumePipe);
         }
+
+        public BusHostCollection<HttpHost> Hosts => _hosts;
+
+        public override IPublishEndpointProvider PublishEndpointProvider => _busEndpointSpecification.PublishEndpointProvider;
+
+        public override ISendEndpointProvider SendEndpointProvider => _busEndpointSpecification.SendEndpointProvider;
 
         protected override Uri GetInputAddress()
         {
-            return _busEndpointConfigurator.InputAddress;
+            return _busEndpointSpecification.InputAddress;
         }
 
         protected override IConsumePipe GetConsumePipe()
@@ -70,13 +76,6 @@ namespace MassTransit.HttpTransport.Configuration.Builders
         public override IPublishEndpointProvider CreatePublishEndpointProvider(Uri sourceAddress, params IPublishPipeSpecification[] specifications)
         {
             return new HttpPublishEndpointProvider();
-        }
-
-        public override IMessageDeserializer GetMessageDeserializer(ISendEndpointProvider sendEndpointProvider, IPublishEndpointProvider publishEndpointProvider)
-        {
-            var m = base.GetMessageDeserializer(sendEndpointProvider, publishEndpointProvider);
-
-            return new HttpMessageDeserializerProxy(m);
         }
     }
 }

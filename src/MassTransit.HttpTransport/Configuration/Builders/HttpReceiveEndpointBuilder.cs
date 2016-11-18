@@ -12,28 +12,42 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.HttpTransport.Configuration.Builders
 {
-    using GreenPipes;
+    using System;
+    using Clients;
+    using MassTransit.Builders;
     using MassTransit.Pipeline;
+    using Transports;
 
 
     public class HttpReceiveEndpointBuilder :
+        ReceiveEndpointBuilder,
         IHttpReceiveEndpointBuilder
     {
-        readonly IConsumePipe _consumePipe;
 
-        public HttpReceiveEndpointBuilder(IConsumePipe consumePipe)
+        public HttpReceiveEndpointBuilder(IConsumePipe consumePipe, IBusBuilder busBuilder)
+            : base(consumePipe, busBuilder)
         {
-            _consumePipe = consumePipe;
         }
 
-        public ConnectHandle ConnectConsumePipe<T>(IPipe<ConsumeContext<T>> pipe) where T : class
+        public override ISendEndpointProvider CreateSendEndpointProvider(Uri sourceAddress, params ISendPipeSpecification[] specifications)
         {
-            return _consumePipe.ConnectConsumePipe(pipe);
+            var pipe = CreateSendPipe(specifications);
+
+            var provider = new HttpSendEndpointProvider(MessageSerializer, sourceAddress, SendTransportProvider, pipe);
+
+            return new SendEndpointCache(provider, CacheDurationProvider);
         }
 
-        public ConnectHandle ConnectConsumeMessageObserver<T>(IConsumeMessageObserver<T> observer) where T : class
+        public override IPublishEndpointProvider CreatePublishEndpointProvider(Uri sourceAddress, params IPublishPipeSpecification[] specifications)
         {
-            return _consumePipe.ConnectConsumeMessageObserver(observer);
+            var pipe = CreatePublishPipe(specifications);
+
+            return new HttpPublishEndpointProvider();
+        }
+
+        public TimeSpan CacheDurationProvider(Uri address)
+        {
+            return TimeSpan.FromDays(1);
         }
     }
 }

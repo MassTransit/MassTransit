@@ -28,14 +28,19 @@ namespace MassTransit.HttpTransport
         readonly ITaskParticipant _participant;
         int _maxPendingDeliveryCount;
         readonly ConcurrentDictionary<Guid, HttpReceiveContext> _pending;
+        readonly ISendEndpointProvider _sendEndpointProvider;
+        readonly IPublishEndpointProvider _publishEndpointProvider;
 
         public HttpConsumerAction(IReceiveObserver receiveObserver, 
             HttpHostSettings settings,
             IPipe<ReceiveContext> receivePipe,
-            ITaskScope taskSupervisor)
+            ITaskScope taskSupervisor, ISendEndpointProvider sendEndpointProvider, 
+            IPublishEndpointProvider publishEndpointProvider)
         {
             _receiveObserver = receiveObserver;
             _receivePipe = receivePipe;
+            _sendEndpointProvider = sendEndpointProvider;
+            _publishEndpointProvider = publishEndpointProvider;
 
             _pending = new ConcurrentDictionary<Guid, HttpReceiveContext>();
             _inputAddress = settings.GetInputAddress();
@@ -50,9 +55,11 @@ namespace MassTransit.HttpTransport
 
         public string Route { get; set; }
 
-        public long ConcurrentDeliveryCount { get; set; }
+        public int ConcurrentDeliveryCount { get; set; }
 
         public string ConsumerTag => Guid.Empty.ToString();
+
+
 
         public async Task Handle(IOwinContext owinContext, Func<Task> next)
         {
@@ -75,7 +82,7 @@ namespace MassTransit.HttpTransport
             var body = owinContext.Request.Body;
             var headers = new HttpHeaderProvider(owinContext.Request.Headers);
 
-            var context = new HttpReceiveContext(inputAddress, body, headers, false, _receiveObserver);
+            var context = new HttpReceiveContext(inputAddress, body, headers, false, _receiveObserver, _sendEndpointProvider, _publishEndpointProvider);
             
             context.GetOrAddPayload(() => owinContext.Request);
             context.GetOrAddPayload(() => owinContext.Response);

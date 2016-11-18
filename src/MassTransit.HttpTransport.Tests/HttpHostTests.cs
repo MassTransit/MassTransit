@@ -15,6 +15,7 @@ namespace MassTransit.HttpTransport.Tests
     using System;
     using System.Net.Http;
     using System.Threading;
+    using System.Threading.Tasks;
     using Configuration.Builders;
     using GreenPipes;
     using Hosting;
@@ -25,7 +26,7 @@ namespace MassTransit.HttpTransport.Tests
     public class HttpHostTests
     {
         [Test]
-        public async void X()
+        public async Task X()
         {
             var sup = new TaskSupervisor("test");
             var cache = new OwinHostCache(new ConfigurationHostSettings("http", "localhost", 8080, HttpMethod.Post), sup);
@@ -34,10 +35,10 @@ namespace MassTransit.HttpTransport.Tests
         }
 
         [Test]
-        public async void HttpHost_NoEndpoints()
+        public async Task HttpHost_NoEndpoints()
         {
             var host = new HttpHost(new ConfigurationHostSettings("http","localhost",8080, HttpMethod.Post));
-            var handle = host.Start();
+            var handle = await host.Start();
             using (var tokenSource = new CancellationTokenSource(TimeSpan.FromMinutes(1)))
             {
                 await handle.Stop(tokenSource.Token);
@@ -45,13 +46,13 @@ namespace MassTransit.HttpTransport.Tests
         }
 
         [Test]
-        public async void HttpHost_Endpoints()
+        public async Task HttpHost_Endpoints()
         {
             var host = new HttpHost(new ConfigurationHostSettings("http", "localhost", 8080, HttpMethod.Post));
-            var rep = new HttpReceiveTransport(host);
+            var rep = new HttpReceiveTransport(host, null, null);
             var randle = rep.Start(Pipe.Empty<ReceiveContext>());
 
-            var handle = host.Start();
+            var handle = await host.Start();
             using (var tokenSource = new CancellationTokenSource(TimeSpan.FromMinutes(1)))
             {
                 await randle.Stop(tokenSource.Token);

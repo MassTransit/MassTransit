@@ -3,6 +3,7 @@ namespace MassTransit.HttpTransport
     using System;
     using System.Threading.Tasks;
     using Configuration.Builders;
+    using Events;
     using GreenPipes;
     using Hosting;
     using Logging;
@@ -10,27 +11,34 @@ namespace MassTransit.HttpTransport
     using Util;
 
 
-    public class HttpConsumerFilter : IFilter<OwinHostContext>
+    public class HttpConsumerFilter 
+        : IFilter<OwinHostContext>
     {
         static readonly ILog _log = Logger.Get<HttpConsumerFilter>();
 
-        readonly IPipe<ReceiveContext> _receivePipe;
+        readonly IReceiveTransportObserver _transportObserver;
         readonly IReceiveObserver _receiveObserver;
-        readonly IReceiveEndpointObserver _endpointObserver;
+        readonly IPipe<ReceiveContext> _receivePipe;
         readonly ITaskSupervisor _supervisor;
         readonly HttpHostSettings _settings;
+        readonly ISendEndpointProvider _sendEndpointProvider;
+        readonly IPublishEndpointProvider _publishEndpointProvider;
 
         public HttpConsumerFilter(IPipe<ReceiveContext> receivePipe,
             IReceiveObserver receiveObserver,
-            IReceiveEndpointObserver endpointObserver,
+            IReceiveTransportObserver transportObserver,
             ITaskSupervisor supervisor, 
-            HttpHostSettings settings)
+            HttpHostSettings settings,
+            ISendEndpointProvider sendEndpointProvider, 
+            IPublishEndpointProvider publishEndpointProvider)
         {
             _receivePipe = receivePipe;
             _receiveObserver = receiveObserver;
-            _endpointObserver = endpointObserver;
+            _transportObserver = transportObserver;
             _supervisor = supervisor;
             _settings = settings;
+            _sendEndpointProvider = sendEndpointProvider;
+            _publishEndpointProvider = publishEndpointProvider;
         }
 
         public void Probe(ProbeContext context)
@@ -46,12 +54,12 @@ namespace MassTransit.HttpTransport
 
             using (ITaskScope scope = _supervisor.CreateScope($"{TypeMetadataCache<HttpConsumerFilter>.ShortName} - {inputAddress}", () => TaskUtil.Completed))
             {
-                var controller = new HttpConsumerAction(_receiveObserver, _settings, _receivePipe, scope);
+                var controller = new HttpConsumerAction(_receiveObserver, _settings, _receivePipe, scope, _sendEndpointProvider, _publishEndpointProvider);
                 context.StartHttpListener(controller);
 
                 await scope.Ready.ConfigureAwait(false);
 
-                await _endpointObserver.Ready(new Ready(inputAddress)).ConfigureAwait(false);
+                await _transportObserver.Ready(new ReceiveTransportReadyEvent(inputAddress)).ConfigureAwait(false);
 
                 scope.SetReady();
 
@@ -62,7 +70,7 @@ namespace MassTransit.HttpTransport
                 finally
                 {
                     HttpConsumerMetrics metrics = controller;
-                    await _endpointObserver.Completed(new Completed(inputAddress, metrics)).ConfigureAwait(false);
+                    await _transportObserver.Completed(new ReceiveTransportCompletedEvent(inputAddress, metrics)).ConfigureAwait(false);
 
                     if (_log.IsDebugEnabled)
                     {
@@ -71,33 +79,6 @@ namespace MassTransit.HttpTransport
                     }
                 }
             }
-        }
-
-        class Ready :
-          ReceiveEndpointReady
-        {
-            public Ready(Uri inputAddress)
-            {
-                InputAddress = inputAddress;
-            }
-
-            public Uri InputAddress { get; }
-        }
-
-
-        class Completed :
-            ReceiveEndpointCompleted
-        {
-            public Completed(Uri inputAddress, HttpConsumerMetrics metrics)
-            {
-                InputAddress = inputAddress;
-                DeliveryCount = metrics.DeliveryCount;
-                ConcurrentDeliveryCount = metrics.ConcurrentDeliveryCount;
-            }
-
-            public Uri InputAddress { get; }
-            public long DeliveryCount { get; }
-            public long ConcurrentDeliveryCount { get; }
         }
     }
 }

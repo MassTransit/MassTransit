@@ -24,15 +24,18 @@ namespace MassTransit.HttpTransport.Configuration.Builders
     using Transports;
 
 
-    public class HttpReceiveEndpointConfigurator :
-        ReceiveEndpointConfigurator,
+    public class HttpReceiveEndpointSpecification :
+        ReceiveEndpointSpecification,
         IHttpReceiveEndpointConfigurator,
         IBusFactorySpecification
     {
         readonly IHttpHost _host;
         readonly HttpReceiveSettings _settings;
-        
-        public HttpReceiveEndpointConfigurator(IHttpHost host, HttpReceiveSettings settings, IConsumePipe consumePipe = null)
+
+        IPublishEndpointProvider _publishEndpointProvider;
+        ISendEndpointProvider _sendEndpointProvider;
+
+        public HttpReceiveEndpointSpecification(IHttpHost host, HttpReceiveSettings settings, IConsumePipe consumePipe = null)
             :
                 base(consumePipe)
         {
@@ -48,21 +51,25 @@ namespace MassTransit.HttpTransport.Configuration.Builders
 
         public void Apply(IBusBuilder builder)
         {
-            HttpReceiveEndpointBuilder endpointBuilder = null;
-            var receivePipe = CreateReceivePipe(builder, consumePipe =>
-            {
-                endpointBuilder = new HttpReceiveEndpointBuilder(consumePipe);
+            HttpReceiveEndpointBuilder receiveEndpointBuilder = new HttpReceiveEndpointBuilder(CreateConsumePipe(builder), builder);
 
-                return endpointBuilder;
-            });
+            var receivePipe = CreateReceivePipe(receiveEndpointBuilder);
 
-            if (endpointBuilder == null)
-                throw new InvalidOperationException("The endpoint builder was not initialized");
+            _sendEndpointProvider = CreateSendEndpointProvider(receiveEndpointBuilder);
+            _publishEndpointProvider = CreatePublishEndpointProvider(receiveEndpointBuilder);
 
-            var transport = new HttpReceiveTransport(_host);
+            var transport = new HttpReceiveTransport(_host, _sendEndpointProvider, _publishEndpointProvider);
 
-            builder.AddReceiveEndpoint(NewId.Next().ToString(), new ReceiveEndpoint(transport, receivePipe));
+            var httpHost = _host as HttpHost;
+            if(httpHost == null)
+                throw new ConfigurationException("Must be a HttpHost");
+
+            httpHost.ReceiveEndpoints.Add(_settings.Path ?? NewId.Next().ToString(),
+                new ReceiveEndpoint(transport, receivePipe));
         }
+
+        public ISendEndpointProvider SendEndpointProvider => _sendEndpointProvider;
+        public IPublishEndpointProvider PublishEndpointProvider => _publishEndpointProvider;
 
         protected override Uri GetInputAddress()
         {
