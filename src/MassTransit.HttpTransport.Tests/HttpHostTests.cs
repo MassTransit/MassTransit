@@ -16,10 +16,14 @@ namespace MassTransit.HttpTransport.Tests
     using System.Net.Http;
     using System.Threading;
     using System.Threading.Tasks;
+    using Clients;
     using Configuration.Builders;
     using GreenPipes;
     using Hosting;
+    using MassTransit.Pipeline.Pipes;
     using NUnit.Framework;
+    using Serialization;
+    using Transports;
     using Util;
 
 
@@ -49,13 +53,21 @@ namespace MassTransit.HttpTransport.Tests
         public async Task HttpHost_Endpoints()
         {
             var host = new HttpHost(new ConfigurationHostSettings("http", "localhost", 8080, HttpMethod.Post));
-            var rep = new HttpReceiveTransport(host, null, null);
-            var randle = rep.Start(Pipe.Empty<ReceiveContext>());
+            var hosts = new BusHostCollection<HttpHost>();
+            hosts.Add(host);
+
+            var ser = new JsonMessageSerializer();
+            var stp = new HttpSendTransportProvider(hosts);
+            SendPipe sp = null;
+            var sep = new HttpSendEndpointProvider(ser, new Uri("http://localhost:8080"), stp, sp);
+            var pep = new HttpPublishEndpointProvider();
+            var httpReceiveTransport = new HttpReceiveTransport(host, sep, pep);
+            var receiveTransportHandle = httpReceiveTransport.Start(Pipe.Empty<ReceiveContext>());
 
             var handle = await host.Start();
             using (var tokenSource = new CancellationTokenSource(TimeSpan.FromMinutes(1)))
             {
-                await randle.Stop(tokenSource.Token);
+                await receiveTransportHandle.Stop(tokenSource.Token);
                 await handle.Stop(tokenSource.Token);
             }
         }
