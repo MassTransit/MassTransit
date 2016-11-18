@@ -134,8 +134,6 @@ namespace MassTransit.RabbitMqTransport.Transport
 
                 p.UseExecuteAsync(async modelContext =>
                 {
-                    Guid? messageId = context.TransportHeaders.Get("MessageId", default(Guid?));
-
                     try
                     {
                         IBasicProperties properties;
@@ -166,17 +164,11 @@ namespace MassTransit.RabbitMqTransport.Transport
 
                         var task = modelContext.BasicPublishAsync(_sendSettings.ExchangeName, "", true, properties, body, true);
                         context.AddPendingTask(task);
-
-                        if (_log.IsDebugEnabled)
-                        {
-                            context.InputAddress.LogMoved(_sendSettings.GetSendAddress(modelContext.ConnectionContext.HostSettings.HostAddress),
-                                messageId?.ToString() ?? "N/A", "Moved");
-                        }
                     }
                     catch (Exception ex)
                     {
                         if (_log.IsErrorEnabled)
-                            _log.Error("Move To Error Queue Fault: " + _sendSettings.ExchangeName, ex);
+                            _log.Error("Faulted moving message to error queue: " + _sendSettings.ExchangeName, ex);
 
                         throw;
                     }

@@ -16,6 +16,7 @@ namespace MassTransit.Pipeline.Filters
     using System.Threading.Tasks;
     using Events;
     using GreenPipes;
+    using Logging;
     using Transports;
     using Util;
 
@@ -29,6 +30,8 @@ namespace MassTransit.Pipeline.Filters
     {
         readonly Uri _destinationAddress;
         readonly Lazy<Task<ISendTransport>> _getDestinationTransport;
+
+        readonly ILog _log = Logger.Get<MoveExceptionToTransportFilter>();
         readonly IPublishEndpointProvider _publishEndpoint;
 
         public MoveExceptionToTransportFilter(IPublishEndpointProvider publishEndpoint, Uri destinationAddress,
@@ -49,13 +52,13 @@ namespace MassTransit.Pipeline.Filters
         {
             var transport = await _getDestinationTransport.Value.ConfigureAwait(false);
 
+            var exception = context.Exception.GetBaseException() ?? context.Exception;
+
+            var message = exception?.Message ?? $"An exception of type {context.Exception.GetType()} was thrown but the message was null.";
+
             IPipe<SendContext> pipe = Pipe.Execute<SendContext>(sendContext =>
             {
                 sendContext.Headers.Set(MessageHeaders.Reason, "fault");
-
-                var exception = context.Exception.GetBaseException() ?? context.Exception;
-
-                var message = exception?.Message ?? $"An exception of type {context.Exception.GetType()} was thrown but the message was null.";
 
                 sendContext.Headers.Set(MessageHeaders.FaultMessage, message);
                 sendContext.Headers.Set(MessageHeaders.FaultTimestamp, context.ExceptionTimestamp.ToString("O"));
@@ -71,6 +74,8 @@ namespace MassTransit.Pipeline.Filters
                 GenerateFault(context);
 
             await transport.Move(context, pipe).ConfigureAwait(false);
+
+            context.InputAddress.LogMoved(_destinationAddress, context.TransportHeaders.Get("MessageId", "N/A"), message);
 
             await next.Send(context).ConfigureAwait(false);
         }
