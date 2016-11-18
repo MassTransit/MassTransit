@@ -38,6 +38,11 @@ namespace MassTransit.Courier.Contracts
         RoutingSlipEventContents Include { get; }
 
         /// <summary>
+        /// If specified, events are only used in this subscription if the activity name matches
+        /// </summary>
+        string ActivityName { get; }
+
+        /// <summary>
         /// The message sent as part of the subscription
         /// </summary>
         MessageEnvelope Message { get; }

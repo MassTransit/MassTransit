@@ -119,6 +119,7 @@
     <Compile Include="Courier\EncryptedArgument_Specs.cs" />
     <Compile Include="Courier\FaultActivityEvent_Specs.cs" />
     <Compile Include="Courier\Fault_Specs.cs" />
+    <Compile Include="Courier\ItinerarySubscription_Specs.cs" />
     <Compile Include="Courier\ObjectGraph_Specs.cs" />
     <Compile Include="Courier\PartitionActivity_Specs.cs" />
     <Compile Include="Courier\RanToCompletion_Specs.cs" />

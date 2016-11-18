@@ -25,18 +25,20 @@ namespace MassTransit.Courier
     public class RoutingSlipBuilderSendEndpoint :
         ISendEndpoint
     {
+        readonly string _activityName;
         readonly IRoutingSlipSendEndpointTarget _builder;
         readonly Uri _destinationAddress;
         readonly RoutingSlipEvents _events;
         readonly RoutingSlipEventContents _include;
         readonly SendObservable _observers;
 
-        public RoutingSlipBuilderSendEndpoint(IRoutingSlipSendEndpointTarget builder, Uri destinationAddress, RoutingSlipEvents events,
+        public RoutingSlipBuilderSendEndpoint(IRoutingSlipSendEndpointTarget builder, Uri destinationAddress, RoutingSlipEvents events, string activityName,
             RoutingSlipEventContents include = RoutingSlipEventContents.All)
         {
             _observers = new SendObservable();
             _builder = builder;
             _events = events;
+            _activityName = activityName;
             _include = include;
             _destinationAddress = destinationAddress;
         }
@@ -49,7 +51,7 @@ namespace MassTransit.Courier
 
             var context = new RoutingSlipSendContext<T>(message, cancellationToken, _destinationAddress);
 
-            _builder.AddSubscription(_destinationAddress, _events, _include, context.GetMessageEnvelope());
+            _builder.AddSubscription(_destinationAddress, _events, _include, _activityName, context.GetMessageEnvelope());
 
             return TaskUtil.Completed;
         }
@@ -66,7 +68,7 @@ namespace MassTransit.Courier
 
             await pipe.Send(context).ConfigureAwait(false);
 
-            _builder.AddSubscription(_destinationAddress, _events, _include, context.GetMessageEnvelope());
+            _builder.AddSubscription(_destinationAddress, _events, _include, _activityName, context.GetMessageEnvelope());
         }
 
         public Task Send(object message, CancellationToken cancellationToken)
@@ -112,7 +114,7 @@ namespace MassTransit.Courier
 
             await pipe.Send(context).ConfigureAwait(false);
 
-            _builder.AddSubscription(_destinationAddress, _events, _include, context.GetMessageEnvelope());
+            _builder.AddSubscription(_destinationAddress, _events, _include, _activityName, context.GetMessageEnvelope());
         }
 
         public Task Send(object message, IPipe<SendContext> pipe, CancellationToken cancellationToken)

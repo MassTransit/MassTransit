@@ -20,9 +20,10 @@ namespace MassTransit.Courier.InternalMessages
     public class SubscriptionImpl :
         Subscription
     {
-        public SubscriptionImpl(Uri address, RoutingSlipEvents events, RoutingSlipEventContents include, MessageEnvelope message = null)
+        public SubscriptionImpl(Uri address, RoutingSlipEvents events, RoutingSlipEventContents include, string activityName = null, MessageEnvelope message = null)
         {
             Include = include;
+            ActivityName = activityName;
             Address = address;
             Events = events;
             Message = message;
@@ -32,5 +33,6 @@ namespace MassTransit.Courier.InternalMessages
         public RoutingSlipEvents Events { get; private set; }
         public RoutingSlipEventContents Include { get; private set; }
         public MessageEnvelope Message { get; private set; }
+        public string ActivityName { get; private set; }
     }
 }

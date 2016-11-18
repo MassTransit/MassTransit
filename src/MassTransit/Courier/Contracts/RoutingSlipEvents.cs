@@ -67,5 +67,17 @@ namespace MassTransit.Courier.Contracts
         /// Send the RoutingSlipCompensationFailed event
         /// </summary>
         ActivityCompensationFailed = 0x0800,
+
+        /// <summary>
+        /// Used to mask the events so that upper-level flags don't conflict
+        /// </summary>
+        EventMask = 0xFFFF,
+
+        /// <summary>
+        /// If specified, the event subscription is supplemental and should not prevent
+        /// the publishing of existing routing slip events. By default, any subscription
+        /// suppresses publishing of events.
+        /// </summary>
+        Supplemental = 0x10000,
     }
 }

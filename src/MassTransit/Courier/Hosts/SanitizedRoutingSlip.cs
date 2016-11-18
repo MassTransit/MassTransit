@@ -250,11 +250,13 @@ namespace MassTransit.Courier.Hosts
                 Events = subscription.Events;
                 Include = subscription.Include;
                 Message = subscription.Message;
+                ActivityName = subscription.ActivityName;
             }
 
             public Uri Address { get; private set; }
             public RoutingSlipEvents Events { get; private set; }
             public RoutingSlipEventContents Include { get; private set; }
+            public string ActivityName { get; private set; }
             public MessageEnvelope Message { get; private set; }
         }
     }

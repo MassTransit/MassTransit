@@ -106,10 +106,12 @@ namespace MassTransit.Courier
         /// <param name="address">The destination address where the events are sent</param>
         /// <param name="events">The events to include in the subscription</param>
         /// <param name="contents">The contents of the routing slip event</param>
+        /// <param name="activityName"></param>
         /// <param name="message">The custom message to be sent</param>
-        void IRoutingSlipSendEndpointTarget.AddSubscription(Uri address, RoutingSlipEvents events, RoutingSlipEventContents contents, MessageEnvelope message)
+        void IRoutingSlipSendEndpointTarget.AddSubscription(Uri address, RoutingSlipEvents events, RoutingSlipEventContents contents, string activityName,
+            MessageEnvelope message)
         {
-            _subscriptions.Add(new SubscriptionImpl(address, events, contents, message));
+            _subscriptions.Add(new SubscriptionImpl(address, events, contents, activityName, message));
         }
 
         /// <summary>
@@ -242,6 +244,79 @@ namespace MassTransit.Courier
         }
 
         /// <summary>
+        /// Add an explicit subscription to the routing slip events
+        /// </summary>
+        /// <param name="address">The destination address where the events are sent</param>
+        /// <param name="events">The events to include in the subscription</param>
+        public void AddSubscription(Uri address, RoutingSlipEvents events)
+        {
+            _subscriptions.Add(new SubscriptionImpl(address, events, RoutingSlipEventContents.All));
+        }
+
+        /// <summary>
+        /// Add an explicit subscription to the routing slip events
+        /// </summary>
+        /// <param name="address">The destination address where the events are sent</param>
+        /// <param name="events">The events to include in the subscription</param>
+        /// <param name="contents">The contents of the routing slip event</param>
+        public void AddSubscription(Uri address, RoutingSlipEvents events, RoutingSlipEventContents contents)
+        {
+            _subscriptions.Add(new SubscriptionImpl(address, events, contents));
+        }
+
+        /// <summary>
+        /// Add an explicit subscription to the routing slip events
+        /// </summary>
+        /// <param name="address">The destination address where the events are sent</param>
+        /// <param name="events">The events to include in the subscription</param>
+        /// <param name="contents">The contents of the routing slip event</param>
+        /// <param name="activityName">Only send events for the specified activity</param>
+        public void AddSubscription(Uri address, RoutingSlipEvents events, RoutingSlipEventContents contents, string activityName)
+        {
+            _subscriptions.Add(new SubscriptionImpl(address, events, contents, activityName));
+        }
+
+        /// <summary>
+        /// Adds a message subscription to the routing slip that will be sent at the specified event points
+        /// </summary>
+        /// <param name="address"></param>
+        /// <param name="events"></param>
+        /// <param name="callback"></param>
+        /// <returns></returns>
+        public Task AddSubscription(Uri address, RoutingSlipEvents events, Func<ISendEndpoint, Task> callback)
+        {
+            return callback(new RoutingSlipBuilderSendEndpoint(this, address, events, null));
+        }
+
+        /// <summary>
+        /// Adds a message subscription to the routing slip that will be sent at the specified event points
+        /// </summary>
+        /// <param name="address"></param>
+        /// <param name="events"></param>
+        /// <param name="contents"></param>
+        /// <param name="callback"></param>
+        /// <returns></returns>
+        public Task AddSubscription(Uri address, RoutingSlipEvents events, RoutingSlipEventContents contents, Func<ISendEndpoint, Task> callback)
+        {
+            return callback(new RoutingSlipBuilderSendEndpoint(this, address, events, null, contents));
+        }
+
+        /// <summary>
+        /// Adds a message subscription to the routing slip that will be sent at the specified event points
+        /// </summary>
+        /// <param name="address"></param>
+        /// <param name="events"></param>
+        /// <param name="activityName">Only send events for the specified activity</param>
+        /// <param name="contents"></param>
+        /// <param name="callback"></param>
+        /// <returns></returns>
+        public Task AddSubscription(Uri address, RoutingSlipEvents events, RoutingSlipEventContents contents, string activityName,
+            Func<ISendEndpoint, Task> callback)
+        {
+            return callback(new RoutingSlipBuilderSendEndpoint(this, address, events, activityName, contents));
+        }
+
+        /// <summary>
         /// Builds the routing slip using the current state of the builder
         /// </summary>
         /// <returns>The RoutingSlip</returns>
@@ -340,52 +415,6 @@ namespace MassTransit.Courier
             var dictionary = JObject.FromObject(values, SerializerCache.Serializer);
 
             return dictionary.ToObject<IDictionary<string, object>>();
-        }
-
-        /// <summary>
-        /// Add an explicit subscription to the routing slip events
-        /// </summary>
-        /// <param name="address">The destination address where the events are sent</param>
-        /// <param name="events">The events to include in the subscription</param>
-        public void AddSubscription(Uri address, RoutingSlipEvents events)
-        {
-            _subscriptions.Add(new SubscriptionImpl(address, events, RoutingSlipEventContents.All));
-        }
-
-        /// <summary>
-        /// Add an explicit subscription to the routing slip events
-        /// </summary>
-        /// <param name="address">The destination address where the events are sent</param>
-        /// <param name="events">The events to include in the subscription</param>
-        /// <param name="contents">The contents of the routing slip event</param>
-        public void AddSubscription(Uri address, RoutingSlipEvents events, RoutingSlipEventContents contents)
-        {
-            _subscriptions.Add(new SubscriptionImpl(address, events, contents));
-        }
-
-        /// <summary>
-        /// Adds a message subscription to the routing slip that will be sent at the specified event points
-        /// </summary>
-        /// <param name="address"></param>
-        /// <param name="events"></param>
-        /// <param name="callback"></param>
-        /// <returns></returns>
-        public Task AddSubscription(Uri address, RoutingSlipEvents events, Func<ISendEndpoint, Task> callback)
-        {
-            return callback(new RoutingSlipBuilderSendEndpoint(this, address, events));
-        }
-
-        /// <summary>
-        /// Adds a message subscription to the routing slip that will be sent at the specified event points
-        /// </summary>
-        /// <param name="address"></param>
-        /// <param name="events"></param>
-        /// <param name="contents"></param>
-        /// <param name="callback"></param>
-        /// <returns></returns>
-        public Task AddSubscription(Uri address, RoutingSlipEvents events, RoutingSlipEventContents contents, Func<ISendEndpoint, Task> callback)
-        {
-            return callback(new RoutingSlipBuilderSendEndpoint(this, address, events, contents));
         }
     }
 }

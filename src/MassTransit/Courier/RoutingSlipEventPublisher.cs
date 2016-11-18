@@ -31,6 +31,7 @@ namespace MassTransit.Courier
         readonly IPublishEndpoint _publishEndpoint;
         readonly RoutingSlip _routingSlip;
         readonly ISendEndpointProvider _sendEndpointProvider;
+        readonly string _activityName;
 
         static RoutingSlipEventPublisher()
         {
@@ -43,6 +44,7 @@ namespace MassTransit.Courier
             _sendEndpointProvider = compensateContext;
             _publishEndpoint = compensateContext;
             _routingSlip = routingSlip;
+            _activityName = compensateContext.ActivityName;
             _host = compensateContext.Host;
         }
 
@@ -52,6 +54,7 @@ namespace MassTransit.Courier
             _sendEndpointProvider = executeContext;
             _publishEndpoint = executeContext;
             _routingSlip = routingSlip;
+            _activityName = executeContext.ActivityName;
             _host = executeContext.Host;
         }
 
@@ -69,7 +72,7 @@ namespace MassTransit.Courier
                 _routingSlip.TrackingNumber,
                 timestamp,
                 duration,
-                (contents == RoutingSlipEventContents.All || contents.HasFlag(RoutingSlipEventContents.Variables))
+                contents == RoutingSlipEventContents.All || contents.HasFlag(RoutingSlipEventContents.Variables)
                     ? variables
                     : GetEmptyObject()
                 ));
@@ -83,7 +86,7 @@ namespace MassTransit.Courier
                 timestamp,
                 duration,
                 exceptions,
-                (contents == RoutingSlipEventContents.All || contents.HasFlag(RoutingSlipEventContents.Variables))
+                contents == RoutingSlipEventContents.All || contents.HasFlag(RoutingSlipEventContents.Variables)
                     ? variables
                     : GetEmptyObject()
                 ));
@@ -100,13 +103,13 @@ namespace MassTransit.Courier
                 executionId,
                 timestamp,
                 duration,
-                (contents == RoutingSlipEventContents.All || contents.HasFlag(RoutingSlipEventContents.Variables))
+                contents == RoutingSlipEventContents.All || contents.HasFlag(RoutingSlipEventContents.Variables)
                     ? variables
                     : GetEmptyObject(),
-                (contents == RoutingSlipEventContents.All || contents.HasFlag(RoutingSlipEventContents.Arguments))
+                contents == RoutingSlipEventContents.All || contents.HasFlag(RoutingSlipEventContents.Arguments)
                     ? arguments
                     : GetEmptyObject(),
-                (contents == RoutingSlipEventContents.All || contents.HasFlag(RoutingSlipEventContents.Data))
+                contents == RoutingSlipEventContents.All || contents.HasFlag(RoutingSlipEventContents.Data)
                     ? data
                     : GetEmptyObject()));
         }
@@ -122,10 +125,10 @@ namespace MassTransit.Courier
                 timestamp,
                 duration,
                 exceptionInfo,
-                (contents == RoutingSlipEventContents.All || contents.HasFlag(RoutingSlipEventContents.Variables))
+                contents == RoutingSlipEventContents.All || contents.HasFlag(RoutingSlipEventContents.Variables)
                     ? variables
                     : GetEmptyObject(),
-                (contents == RoutingSlipEventContents.All || contents.HasFlag(RoutingSlipEventContents.Arguments))
+                contents == RoutingSlipEventContents.All || contents.HasFlag(RoutingSlipEventContents.Arguments)
                     ? arguments
                     : GetEmptyObject()));
         }
@@ -140,10 +143,10 @@ namespace MassTransit.Courier
                 executionId,
                 timestamp,
                 duration,
-                (contents == RoutingSlipEventContents.All || contents.HasFlag(RoutingSlipEventContents.Variables))
+                contents == RoutingSlipEventContents.All || contents.HasFlag(RoutingSlipEventContents.Variables)
                     ? variables
                     : GetEmptyObject(),
-                (contents == RoutingSlipEventContents.All || contents.HasFlag(RoutingSlipEventContents.Arguments))
+                contents == RoutingSlipEventContents.All || contents.HasFlag(RoutingSlipEventContents.Arguments)
                     ? data
                     : GetEmptyObject()));
         }
@@ -159,13 +162,13 @@ namespace MassTransit.Courier
                 executionId,
                 timestamp,
                 duration,
-                (contents == RoutingSlipEventContents.All || contents.HasFlag(RoutingSlipEventContents.Variables))
+                contents == RoutingSlipEventContents.All || contents.HasFlag(RoutingSlipEventContents.Variables)
                     ? variables
                     : GetEmptyObject(),
-                (contents == RoutingSlipEventContents.All || contents.HasFlag(RoutingSlipEventContents.Itinerary))
+                contents == RoutingSlipEventContents.All || contents.HasFlag(RoutingSlipEventContents.Itinerary)
                     ? itinerary
                     : Enumerable.Empty<Activity>(),
-                (contents == RoutingSlipEventContents.All || contents.HasFlag(RoutingSlipEventContents.Itinerary))
+                contents == RoutingSlipEventContents.All || contents.HasFlag(RoutingSlipEventContents.Itinerary)
                     ? previousItinerary
                     : Enumerable.Empty<Activity>()));
         }
@@ -181,10 +184,10 @@ namespace MassTransit.Courier
                 executionId,
                 timestamp,
                 duration,
-                (contents == RoutingSlipEventContents.All || contents.HasFlag(RoutingSlipEventContents.Variables))
+                contents == RoutingSlipEventContents.All || contents.HasFlag(RoutingSlipEventContents.Variables)
                     ? variables
                     : GetEmptyObject(),
-                (contents == RoutingSlipEventContents.All || contents.HasFlag(RoutingSlipEventContents.Itinerary))
+                contents == RoutingSlipEventContents.All || contents.HasFlag(RoutingSlipEventContents.Itinerary)
                     ? previousItinerary
                     : Enumerable.Empty<Activity>()));
         }
@@ -203,10 +206,10 @@ namespace MassTransit.Courier
                 failureTimestamp,
                 routingSlipDuration,
                 exceptionInfo,
-                (contents == RoutingSlipEventContents.All || contents.HasFlag(RoutingSlipEventContents.Variables))
+                contents == RoutingSlipEventContents.All || contents.HasFlag(RoutingSlipEventContents.Variables)
                     ? variables
                     : GetEmptyObject(),
-                (contents == RoutingSlipEventContents.All || contents.HasFlag(RoutingSlipEventContents.Data))
+                contents == RoutingSlipEventContents.All || contents.HasFlag(RoutingSlipEventContents.Data)
                     ? data
                     : GetEmptyObject()));
         }
@@ -219,22 +222,25 @@ namespace MassTransit.Courier
         async Task PublishEvent<T>(RoutingSlipEvents eventFlag, Func<RoutingSlipEventContents, T> messageFactory)
             where T : class
         {
-            if (_routingSlip.Subscriptions.Any())
+            foreach (var subscription in _routingSlip.Subscriptions)
             {
-                foreach (var subscription in _routingSlip.Subscriptions)
-                {
-                    await PublishSubscriptionEvent(eventFlag, messageFactory, subscription).ConfigureAwait(false);
-                }
+                await PublishSubscriptionEvent(eventFlag, messageFactory, subscription).ConfigureAwait(false);
             }
-            else
+
+            if (_routingSlip.Subscriptions.All(sub => sub.Events.HasFlag(RoutingSlipEvents.Supplemental)))
+            {
                 await _publishEndpoint.Publish(messageFactory(RoutingSlipEventContents.All)).ConfigureAwait(false);
+            }
         }
 
         async Task PublishSubscriptionEvent<T>(RoutingSlipEvents eventFlag, Func<RoutingSlipEventContents, T> messageFactory, Subscription subscription)
             where T : class
         {
-            if (subscription.Events == RoutingSlipEvents.All || subscription.Events.HasFlag(eventFlag))
+            if ((subscription.Events & RoutingSlipEvents.EventMask) == RoutingSlipEvents.All || subscription.Events.HasFlag(eventFlag))
             {
+                if (string.IsNullOrWhiteSpace(_activityName) || string.IsNullOrWhiteSpace(subscription.ActivityName)
+                    || _activityName.Equals(subscription.ActivityName, StringComparison.OrdinalIgnoreCase))
+                {
                 var endpoint = await _sendEndpointProvider.GetSendEndpoint(subscription.Address).ConfigureAwait(false);
 
                 var message = messageFactory(subscription.Include);
@@ -247,6 +253,7 @@ namespace MassTransit.Courier
                 }
                 else
                     await endpoint.Send(message).ConfigureAwait(false);
+                }
             }
         }
     }

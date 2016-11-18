@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -33,11 +33,11 @@ namespace MassTransit.Tests.Courier
 
             builder.AddSubscription(new Uri("loopback://localhost/events"), RoutingSlipEvents.Completed | RoutingSlipEvents.Faulted);
 
-            RoutingSlip routingSlip = builder.Build();
+            var routingSlip = builder.Build();
 
-            string jsonString = routingSlip.ToJsonString();
+            var jsonString = routingSlip.ToJsonString();
 
-            RoutingSlip loaded = RoutingSlipExtensions.GetRoutingSlip(jsonString);
+            var loaded = RoutingSlipExtensions.GetRoutingSlip(jsonString);
 
             Assert.AreEqual(RoutingSlipEvents.Completed | RoutingSlipEvents.Faulted, loaded.Subscriptions[0].Events);
         }
@@ -72,6 +72,23 @@ namespace MassTransit.Tests.Courier
             Assert.AreEqual(_trackingNumber, context.Message.TrackingNumber);
         }
 
+        [Test]
+        public void Should_serialize_and_deserialize_properly()
+        {
+            var builder = new RoutingSlipBuilder(Guid.NewGuid());
+            builder.AddActivity("a", new Uri("loopback://locahost/execute_a"));
+
+            builder.AddSubscription(new Uri("loopback://localhost/events"), RoutingSlipEvents.Completed | RoutingSlipEvents.Faulted);
+
+            var routingSlip = builder.Build();
+
+            var jsonString = routingSlip.ToJsonString();
+
+            var loaded = RoutingSlipExtensions.GetRoutingSlip(jsonString);
+
+            Assert.AreEqual(RoutingSlipEvents.Completed | RoutingSlipEvents.Faulted, loaded.Subscriptions[0].Events);
+        }
+
         Task<ConsumeContext<RoutingSlipCompleted>> _completed;
         Task<ConsumeContext<RoutingSlipActivityCompleted>> _activityCompleted;
         Guid _trackingNumber;
@@ -86,10 +103,10 @@ namespace MassTransit.Tests.Courier
             var builder = new RoutingSlipBuilder(_trackingNumber);
             builder.AddSubscription(Bus.Address, RoutingSlipEvents.ActivityCompleted, RoutingSlipEventContents.None);
 
-            ActivityTestContext testActivity = GetActivityContext<TestActivity>();
+            var testActivity = GetActivityContext<TestActivity>();
             builder.AddActivity(testActivity.Name, testActivity.ExecuteUri, new
             {
-                Value = "Hello",
+                Value = "Hello"
             });
 
             builder.AddVariable("Variable", "Knife");
@@ -102,81 +119,4 @@ namespace MassTransit.Tests.Courier
             AddActivityContext<TestActivity, TestArguments, TestLog>(() => new TestActivity());
         }
     }
-
-
-//    [TestFixture]
-//    public class Adding_a_subscription_to_the_routing_slip
-//    {
-//        [Test]
-//        public void Should_send_the_completed_event()
-//        {
-//            Assert.IsTrue(_test.Sent.Select<RoutingSlipCompleted>());
-//        }
-//
-//        [Test]
-//        public void Should_not_publish_the_completed_event()
-//        {
-//            Assert.IsFalse(_test.Published.Select<RoutingSlipCompleted>());
-//        }
-//
-//        IConsumerTest<IBusTestScenario, ExecuteActivityHost<TestActivity, TestArguments>> _test;
-//
-//        [OneTimeSetUp]
-//        public void Setup()
-//        {
-//            _test = TestFactory.ForConsumer<ExecuteActivityHost<TestActivity, TestArguments>>()
-//                .InSingleBusScenario()
-//                .New(x =>
-//                {
-//                    x.UseConsumerFactory(() =>
-//                    {
-//                        var compensateAddress = new Uri("loopback://localhost/mt_server");
-//
-//                        return new ExecuteActivityHost<TestActivity, TestArguments>(compensateAddress,
-//                            new FactoryMethodExecuteActivityFactory<TestActivity, TestArguments>(_ => new TestActivity()));
-//                    });
-//
-//                    var builder = new RoutingSlipBuilder(Guid.NewGuid());
-//                    builder.AddActivity("test", new Uri("loopback://localhost/mt_client"), new
-//                    {
-//                        Value = "Hello",
-//                    });
-//                    builder.AddSubscription(new Uri("loopback://localhost/mt_client"), RoutingSlipEvents.Completed | RoutingSlipEvents.Faulted);
-//
-//                    var routingSlip = builder.Build();
-//
-//                    string jsonString = routingSlip.ToJsonString();
-//
-//                    Console.WriteLine(jsonString);
-//
-//                    x.Send(routingSlip);
-//                });
-//
-//            _test.Execute();
-//        }
-//
-//        [OneTimeTearDown]
-//        public void Teardown()
-//        {
-//            _test.Dispose();
-//        }
-//
-//
-//        [Test]
-//        public void Should_serialize_and_deserialize_properly()
-//        {
-//            var builder = new RoutingSlipBuilder(Guid.NewGuid());
-//            builder.AddActivity("a", new Uri("loopback://locahost/execute_a"));
-//
-//            builder.AddSubscription(new Uri("loopback://localhost/events"), RoutingSlipEvents.Completed | RoutingSlipEvents.Faulted);
-//
-//            RoutingSlip routingSlip = builder.Build();
-//
-//            string jsonString = routingSlip.ToJsonString();
-//
-//            RoutingSlip loaded = RoutingSlipExtensions.GetRoutingSlip(jsonString);
-//
-//            Assert.AreEqual(RoutingSlipEvents.Completed | RoutingSlipEvents.Faulted, loaded.Subscriptions[0].Events);
-//        }
-//    }
 }
