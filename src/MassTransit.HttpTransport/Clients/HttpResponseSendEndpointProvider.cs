@@ -14,12 +14,21 @@
         readonly ISendEndpointProvider _wrapped;
         readonly SendObservable _sendObservable;
         readonly IOwinContext _owinContext;
+        readonly IMessageSerializer _messageSerializer;
+        readonly Uri _inputAddress;
+        readonly ISendPipe _sendPipe;
 
         public HttpResponseSendEndpointProvider(ISendEndpointProvider wrapped, 
-            IOwinContext owinContext)
+            IOwinContext owinContext,
+            IMessageSerializer messageSerializer,
+            Uri inputAddress,
+            ISendPipe sendPipe)
         {
             _wrapped = wrapped;
             _owinContext = owinContext;
+            _messageSerializer = messageSerializer;
+            _inputAddress = inputAddress;
+            _sendPipe = sendPipe;
 
             _sendObservable = new SendObservable();
         }
@@ -30,10 +39,7 @@
             {
                 var responseTransport = new HttpResponseTransport(_owinContext);
 
-                IMessageSerializer serializer = null;
-                Uri inputAddress = null;
-                ISendPipe sendPipe = null;
-                var ep  = new SendEndpoint(responseTransport, serializer, address, inputAddress, sendPipe);
+                var ep  = new SendEndpoint(responseTransport, _messageSerializer, address, _inputAddress, _sendPipe);
                 return Task.FromResult<ISendEndpoint>(ep);
             }
 

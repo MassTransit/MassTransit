@@ -16,6 +16,7 @@ namespace MassTransit.HttpTransport
     using Configuration.Builders;
     using GreenPipes;
     using Hosting;
+    using MassTransit.Pipeline;
     using Util;
 
 
@@ -30,20 +31,17 @@ namespace MassTransit.HttpTransport
         /// <param name="receiveObserver"></param>
         /// <param name="receiveTransportObserver"></param>
         /// <param name="supervisor"></param>
-        public static void HttpConsumer(this IPipeConfigurator<OwinHostContext> configurator,
-            IPipe<ReceiveContext> receivePipe, 
-            HttpHostSettings settings,
-            IReceiveObserver receiveObserver, 
-            IReceiveTransportObserver receiveTransportObserver,
-            ITaskSupervisor supervisor,
-            ISendEndpointProvider sendEndpointProvider, 
-            IPublishEndpointProvider publishEndpointProvider)
+        /// <param name="sendEndpointProvider"></param>
+        /// <param name="publishEndpointProvider"></param>
+        /// <param name="messageSerializer"></param>
+        /// <param name="sendPipe"></param>
+        public static void HttpConsumer(this IPipeConfigurator<OwinHostContext> configurator, IPipe<ReceiveContext> receivePipe, HttpHostSettings settings, IReceiveObserver receiveObserver, IReceiveTransportObserver receiveTransportObserver, ITaskSupervisor supervisor, ISendEndpointProvider sendEndpointProvider, IPublishEndpointProvider publishEndpointProvider, IMessageSerializer messageSerializer, ISendPipe sendPipe)
         {
             if (configurator == null)
                 throw new ArgumentNullException(nameof(configurator));
 
             var pipeBuilderConfigurator = new HttpConsumerPipeSpecification(settings, receivePipe, receiveObserver, receiveTransportObserver,
-                supervisor, sendEndpointProvider, publishEndpointProvider);
+                supervisor, sendEndpointProvider, publishEndpointProvider, messageSerializer, sendPipe);
 
             configurator.AddPipeSpecification(pipeBuilderConfigurator);
         }

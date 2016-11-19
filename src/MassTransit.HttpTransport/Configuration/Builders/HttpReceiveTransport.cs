@@ -33,12 +33,16 @@ namespace MassTransit.HttpTransport.Configuration.Builders
         readonly ReceiveTransportObservable _receiveTransportObservable;
         readonly ISendEndpointProvider _sendEndpointProvider;
         readonly IPublishEndpointProvider _publishEndpointProvider;
+        readonly IMessageSerializer _messageSerializer;
+        readonly ISendPipe _sendPipe;
 
-        public HttpReceiveTransport(IHttpHost host, ISendEndpointProvider sendEndpointProvider, IPublishEndpointProvider publishEndpointProvider)
+        public HttpReceiveTransport(IHttpHost host, ISendEndpointProvider sendEndpointProvider, IPublishEndpointProvider publishEndpointProvider, IMessageSerializer messageSerializer, ISendPipe sendPipe)
         {
             _host = host;
             _sendEndpointProvider = sendEndpointProvider;
             _publishEndpointProvider = publishEndpointProvider;
+            _messageSerializer = messageSerializer;
+            _sendPipe = sendPipe;
 
             _receiveObservable = new ReceiveObservable();
             _receiveEndpointObservable = new ReceiveEndpointObservable();
@@ -73,7 +77,7 @@ namespace MassTransit.HttpTransport.Configuration.Builders
 
             IPipe<OwinHostContext> hostPipe = Pipe.New<OwinHostContext>(cxt =>
             {
-                cxt.HttpConsumer(receivePipe, _host.Settings, _receiveObservable, _receiveTransportObservable, supervisor, _sendEndpointProvider, _publishEndpointProvider);
+                cxt.HttpConsumer(receivePipe, _host.Settings, _receiveObservable, _receiveTransportObservable, supervisor, _sendEndpointProvider, _publishEndpointProvider, _messageSerializer, _sendPipe);
             });
 
             var hostTask = _host.OwinHostCache.Send(hostPipe, supervisor.StoppingToken);

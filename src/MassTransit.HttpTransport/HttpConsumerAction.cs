@@ -10,6 +10,7 @@ namespace MassTransit.HttpTransport
     using Hosting;
     using Internals.Extensions;
     using Logging;
+    using MassTransit.Pipeline;
     using Microsoft.Owin;
     using Pipeline;
     using Util;
@@ -31,17 +32,24 @@ namespace MassTransit.HttpTransport
         readonly ConcurrentDictionary<Guid, HttpReceiveContext> _pending;
         readonly ISendEndpointProvider _sendEndpointProvider;
         readonly IPublishEndpointProvider _publishEndpointProvider;
+        readonly IMessageSerializer _messageSerializer;
+        ISendPipe _sendPipe;
 
         public HttpConsumerAction(IReceiveObserver receiveObserver, 
             HttpHostSettings settings,
             IPipe<ReceiveContext> receivePipe,
-            ITaskScope taskSupervisor, ISendEndpointProvider sendEndpointProvider, 
-            IPublishEndpointProvider publishEndpointProvider)
+            ITaskScope taskSupervisor,
+            ISendEndpointProvider sendEndpointProvider, 
+            IPublishEndpointProvider publishEndpointProvider,
+            IMessageSerializer messageSerializer, 
+            ISendPipe sendPipe)
         {
             _receiveObserver = receiveObserver;
             _receivePipe = receivePipe;
             _sendEndpointProvider = sendEndpointProvider;
             _publishEndpointProvider = publishEndpointProvider;
+            _messageSerializer = messageSerializer;
+            _sendPipe = sendPipe;
 
             _pending = new ConcurrentDictionary<Guid, HttpReceiveContext>();
             _inputAddress = settings.GetInputAddress();
@@ -81,7 +89,7 @@ namespace MassTransit.HttpTransport
             
             var headers = new HttpHeaderProvider(owinContext.Request.Headers);
 
-            var responseProxy = new HttpResponseSendEndpointProvider(_sendEndpointProvider, owinContext);
+            var responseProxy = new HttpResponseSendEndpointProvider(_sendEndpointProvider, owinContext, _messageSerializer, _inputAddress, _sendPipe);
             var context = new HttpReceiveContext(owinContext, headers, false, _receiveObserver, responseProxy, _publishEndpointProvider);
             
             try

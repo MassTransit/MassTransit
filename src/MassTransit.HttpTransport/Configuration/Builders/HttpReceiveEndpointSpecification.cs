@@ -51,13 +51,13 @@ namespace MassTransit.HttpTransport.Configuration.Builders
         public void Apply(IBusBuilder builder)
         {
             HttpReceiveEndpointBuilder receiveEndpointBuilder = new HttpReceiveEndpointBuilder(CreateConsumePipe(builder), builder);
-
+            
             var receivePipe = CreateReceivePipe(receiveEndpointBuilder);
 
             _sendEndpointProvider = CreateSendEndpointProvider(receiveEndpointBuilder);
             _publishEndpointProvider = CreatePublishEndpointProvider(receiveEndpointBuilder);
 
-            var transport = new HttpReceiveTransport(_host, _sendEndpointProvider, _publishEndpointProvider);
+            var transport = new HttpReceiveTransport(_host, _sendEndpointProvider, _publishEndpointProvider, receiveEndpointBuilder.MessageSerializer, null);
 
             var httpHost = _host as HttpHost;
             if(httpHost == null)

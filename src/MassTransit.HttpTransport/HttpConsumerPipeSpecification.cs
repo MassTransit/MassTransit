@@ -4,6 +4,7 @@ namespace MassTransit.HttpTransport
     using Configuration.Builders;
     using GreenPipes;
     using Hosting;
+    using MassTransit.Pipeline;
     using Util;
 
 
@@ -17,6 +18,8 @@ namespace MassTransit.HttpTransport
         readonly ITaskSupervisor _supervisor;
         readonly ISendEndpointProvider _sendEndpointProvider;
         readonly IPublishEndpointProvider _publishEndpointProvider;
+        readonly IMessageSerializer _messageSerializer;
+        readonly ISendPipe _sendPipe;
 
         public HttpConsumerPipeSpecification(HttpHostSettings settings, 
             IPipe<ReceiveContext> receivePipe, 
@@ -24,7 +27,9 @@ namespace MassTransit.HttpTransport
             IReceiveTransportObserver transportObserver,
             ITaskSupervisor supervisor, 
             ISendEndpointProvider sendEndpointProvider,
-            IPublishEndpointProvider publishEndpointProvider)
+            IPublishEndpointProvider publishEndpointProvider,
+            IMessageSerializer messageSerializer,
+            ISendPipe sendPipe)
         {
             _settings = settings;
             _receivePipe = receivePipe;
@@ -33,12 +38,14 @@ namespace MassTransit.HttpTransport
             _supervisor = supervisor;
             _sendEndpointProvider = sendEndpointProvider;
             _publishEndpointProvider = publishEndpointProvider;
+            _messageSerializer = messageSerializer;
+            _sendPipe = sendPipe;
         }
 
         public void Apply(IPipeBuilder<OwinHostContext> builder)
         {
             builder.AddFilter(new HttpConsumerFilter(_receivePipe, _receiveObserver, _transportObserver, _supervisor, _settings, _sendEndpointProvider,
-                    _publishEndpointProvider));
+                    _publishEndpointProvider, _messageSerializer, _sendPipe));
         }
 
         public IEnumerable<ValidationResult> Validate()
