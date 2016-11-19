@@ -106,9 +106,8 @@ namespace MassTransit.HttpTransport
 
                 await context.CompleteTask.ConfigureAwait(false);
 
-                //TODO: is this a good ack replacement
                 owinContext.Response.StatusCode = (int)HttpStatusCode.Accepted;
-                owinContext.Response.Write("DELIVERED");
+            
                 await next();
 
                 await _receiveObserver.PostReceive(context).ConfigureAwait(false);
@@ -119,7 +118,6 @@ namespace MassTransit.HttpTransport
                 await _receiveObserver.ReceiveFault(context, ex).ConfigureAwait(false);
 
                 owinContext.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
-                owinContext.Response.Write("ERROR");
             }
             finally
             {
