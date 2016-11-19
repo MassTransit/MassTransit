@@ -18,6 +18,7 @@ namespace MassTransit.HottpTransport.Tests
     using System.Threading.Tasks;
     using GreenPipes;
     using NUnit.Framework;
+    using TestFramework;
 
 
     public class Class1

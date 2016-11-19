@@ -27,6 +27,7 @@ namespace MassTransit.HttpTransport.Tests
                 {
                     ep.Consumer<HttpEater>();
                 });
+                
             });
             
             var uu = await bus.StartAsync();

@@ -18,6 +18,8 @@ namespace MassTransit.HttpTransport.Tests
     using NUnit.Framework;
     using TestFramework.Messages;
     using MassTransit.HttpTransport.Configuration.Builders;
+    using TestFramework;
+
 
     [TestFixture]
     public class Sending_a_message_to_an_endpoint :
