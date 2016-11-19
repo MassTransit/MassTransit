@@ -60,7 +60,7 @@ namespace MassTransit.HttpTransport.Tests
             var stp = new HttpSendTransportProvider(hosts);
             SendPipe sp = null;
             var sep = new HttpSendEndpointProvider(ser, new Uri("http://localhost:8080"), stp, sp);
-            var pep = new HttpPublishEndpointProvider();
+            var pep = new HttpPublishEndpointProvider(null);
             var httpReceiveTransport = new HttpReceiveTransport(host, sep, pep, ser, null);
             var receiveTransportHandle = httpReceiveTransport.Start(Pipe.Empty<ReceiveContext>());
 

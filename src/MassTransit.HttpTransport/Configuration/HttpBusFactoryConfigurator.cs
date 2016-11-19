@@ -78,7 +78,7 @@ namespace MassTransit.HttpTransport.Configuration
             if (host == null)
                 throw new EndpointNotFoundException("The host address specified was not configured.");
 
-            var ep = new HttpReceiveEndpointSpecification(host, new HttpReceiveSettings(), null);
+            var ep = new HttpReceiveEndpointSpecification(host, new HttpReceiveSettings());
 
             configure?.Invoke(ep);
 

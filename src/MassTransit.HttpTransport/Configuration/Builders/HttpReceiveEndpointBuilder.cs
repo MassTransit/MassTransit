@@ -42,7 +42,7 @@ namespace MassTransit.HttpTransport.Configuration.Builders
         {
             var pipe = CreatePublishPipe(specifications);
 
-            return new HttpPublishEndpointProvider();
+            return new HttpPublishEndpointProvider(pipe);
         }
 
         public TimeSpan CacheDurationProvider(Uri address)

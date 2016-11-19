@@ -1,6 +1,7 @@
 ﻿namespace MassTransit.HttpTransport.Clients
 {
     using System.Linq;
+    using System.Net;
     using System.Threading;
     using System.Threading.Tasks;
     using GreenPipes;
@@ -52,7 +53,7 @@
             if (context.RequestId.HasValue)
                 _owinContext.Response.Headers[HttpHeaders.RequestId] = context.RequestId.Value.ToString();
 
-
+            _owinContext.Response.StatusCode = (int)HttpStatusCode.OK;
             _owinContext.Response.Write(context.Body);
 
             // ??

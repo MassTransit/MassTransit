@@ -29,8 +29,7 @@ namespace MassTransit
         {
             var httpHostCfg = new HttpHostConfigurator(scheme, host, port);
 
-            if (configure != null)
-                configure(httpHostCfg);
+            configure?.Invoke(httpHostCfg);
 
             return cfg.Host(httpHostCfg.Settings);
         }

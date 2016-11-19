@@ -16,14 +16,17 @@ namespace MassTransit.HttpTransport.Configuration.Builders
     using System.Threading.Tasks;
     using GreenPipes;
     using MassTransit.Pipeline;
+    using Transports;
 
 
     public class HttpPublishEndpointProvider : IPublishEndpointProvider
     {
+        readonly IPublishPipe _publishPipe;
         readonly PublishObservable _publishObservable;
 
-        public HttpPublishEndpointProvider()
+        public HttpPublishEndpointProvider(IPublishPipe publishPipe)
         {
+            _publishPipe = publishPipe;
             _publishObservable = new PublishObservable();
         }
 
@@ -34,12 +37,13 @@ namespace MassTransit.HttpTransport.Configuration.Builders
 
         public IPublishEndpoint CreatePublishEndpoint(Uri sourceAddress, Guid? correlationId = null, Guid? conversationId = null)
         {
-            return null;
+            return new PublishEndpoint(sourceAddress, this, _publishObservable, _publishPipe, correlationId, conversationId );
         }
 
         public Task<ISendEndpoint> GetPublishSendEndpoint(Type messageType)
         {
-            return null;
+            var sep = new SendEndpoint(null, null, null, null, null);
+            return Task.FromResult<ISendEndpoint>(sep);
         }
     }
 }

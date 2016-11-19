@@ -14,15 +14,18 @@ namespace MassTransit.HttpTransport.Tests
         {
             var bus = Bus.Factory.CreateUsingHttp(cfg =>
             {
+                // TODO: Support routes?
                 cfg.Host(new Uri("http://localhost:8080"));
-                //                var slack = cfg.Host("http", "slack.com", 80);
-//                var request = cfg.Host(new Uri("http://requestb.in"), host =>
-//                {
-//                    host.UseMethod(HttpMethod.Put);
-//                    //TODO: Serializer
-//                });
 
-                //http://localhost:8080/
+                //var slack = cfg.Host("http", "slack.com", 80);
+                //var request = cfg.Host(new Uri("http://requestb.in"), host =>
+                //{
+                //    host.UseMethod(HttpMethod.Put);
+                //    //TODO: Serializer
+                //});
+
+                // This uses the default host
+                // http://localhost:8080/
                 cfg.ReceiveEndpoint(ep =>
                 {
                     ep.Consumer<HttpEater>();

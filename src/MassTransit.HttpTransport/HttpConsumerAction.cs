@@ -68,8 +68,6 @@ namespace MassTransit.HttpTransport
 
         public string ConsumerTag => Guid.Empty.ToString();
 
-
-
         public async Task Handle(IOwinContext owinContext, Func<Task> next)
         {
             Guid deliveryTag = NewId.NextGuid();
@@ -106,8 +104,13 @@ namespace MassTransit.HttpTransport
 
                 await context.CompleteTask.ConfigureAwait(false);
 
-                owinContext.Response.StatusCode = (int)HttpStatusCode.Accepted;
-            
+                //TODO: Push into Pipe!
+                if (!owinContext.Response.ContentLength.HasValue)
+                {
+                    owinContext.Response.StatusCode = (int)HttpStatusCode.Accepted;
+                    owinContext.Response.Write("");
+                }
+                
                 await next();
 
                 await _receiveObserver.PostReceive(context).ConfigureAwait(false);
@@ -117,6 +120,7 @@ namespace MassTransit.HttpTransport
             {
                 await _receiveObserver.ReceiveFault(context, ex).ConfigureAwait(false);
 
+                //TODO: Push into pipe?
                 owinContext.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
             }
             finally
@@ -133,8 +137,6 @@ namespace MassTransit.HttpTransport
                     _deliveryComplete.TrySetResult(true);
                 }
             }
-
-            await next();
         }
 
         async Task Stop()
