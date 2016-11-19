@@ -55,8 +55,8 @@ namespace MassTransit.Builders
         protected Uri InputAddress => _inputAddress.Value;
         protected IConsumePipe ConsumePipe => _consumePipe.Value;
 
-        public IMessageSerializer MessageSerializer => _serializerBuilder.Serializer;
-        public IMessageDeserializer MessageDeserializer => _serializerBuilder.Deserializer;
+        public abstract ISendEndpointProvider SendEndpointProvider { get; }
+        public abstract IPublishEndpointProvider PublishEndpointProvider { get; }
 
         public ISendTransportProvider SendTransportProvider => _sendTransportProvider.Value;
 
@@ -90,19 +90,13 @@ namespace MassTransit.Builders
             return new SerializerBuilder(_serializerBuilder);
         }
 
-        public abstract ISendEndpointProvider CreateSendEndpointProvider(Uri sourceAddress, params ISendPipeSpecification[] specifications);
-        public abstract IPublishEndpointProvider CreatePublishEndpointProvider(Uri sourceAddress, params IPublishPipeSpecification[] specifications);
-
-        public abstract ISendEndpointProvider SendEndpointProvider { get; }
-        public abstract IPublishEndpointProvider PublishEndpointProvider { get; }
-
-        protected abstract Uri GetInputAddress();
-        protected abstract IConsumePipe GetConsumePipe();
-
         public IPublishPipe CreatePublishPipe(params IPublishPipeSpecification[] specifications)
         {
             return _publishPipeFactory.CreatePublishPipe(specifications);
         }
+
+        protected abstract Uri GetInputAddress();
+        protected abstract IConsumePipe GetConsumePipe();
 
         public IBusControl Build()
         {

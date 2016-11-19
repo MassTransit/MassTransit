@@ -25,19 +25,14 @@ namespace MassTransit.RabbitMqTransport.Builders
     public class RabbitMqBusBuilder :
         BusBuilder
     {
-        readonly TimeSpan _autoDeleteCacheTimeout;
         readonly RabbitMqReceiveEndpointSpecification _busEndpointSpecification;
         readonly BusHostCollection<RabbitMqHost> _hosts;
-        readonly TimeSpan _sendEndpointCacheTimeout;
 
         public RabbitMqBusBuilder(BusHostCollection<RabbitMqHost> hosts, IConsumePipeFactory consumePipeFactory, ISendPipeFactory sendPipeFactory,
             IPublishPipeFactory publishPipeFactory, RabbitMqReceiveSettings busSettings)
             : base(consumePipeFactory, sendPipeFactory, publishPipeFactory, hosts)
         {
             _hosts = hosts;
-
-            _autoDeleteCacheTimeout = TimeSpan.FromMinutes(1);
-            _sendEndpointCacheTimeout = TimeSpan.FromDays(1);
 
             _busEndpointSpecification = new RabbitMqReceiveEndpointSpecification(_hosts[0], busSettings, ConsumePipe);
 
@@ -73,30 +68,6 @@ namespace MassTransit.RabbitMqTransport.Builders
         protected override ISendTransportProvider CreateSendTransportProvider()
         {
             return new RabbitMqSendTransportProvider(_hosts);
-        }
-
-        public override ISendEndpointProvider CreateSendEndpointProvider(Uri sourceAddress, params ISendPipeSpecification[] specifications)
-        {
-            var pipe = CreateSendPipe(specifications);
-
-            var provider = new RabbitMqSendEndpointProvider(MessageSerializer, sourceAddress, SendTransportProvider, pipe);
-
-            return new SendEndpointCache(provider, CacheDurationProvider);
-        }
-
-        public TimeSpan CacheDurationProvider(Uri address)
-        {
-            if (address.GetReceiveSettings().AutoDelete)
-                return _autoDeleteCacheTimeout;
-
-            return _sendEndpointCacheTimeout;
-        }
-
-        public override IPublishEndpointProvider CreatePublishEndpointProvider(Uri sourceAddress, params IPublishPipeSpecification[] specifications)
-        {
-            var pipe = CreatePublishPipe(specifications);
-
-            return new RabbitMqPublishEndpointProvider(_hosts[0], MessageSerializer, InputAddress, pipe);
         }
     }
 }

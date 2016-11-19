@@ -16,7 +16,6 @@ namespace MassTransit.Builders
     using BusConfigurators;
     using EndpointConfigurators;
     using Pipeline;
-    using Pipeline.Pipes;
     using Transports;
     using Transports.InMemory;
 
@@ -54,26 +53,6 @@ namespace MassTransit.Builders
         public override ISendEndpointProvider SendEndpointProvider => _busEndpointSpecification.SendEndpointProvider;
 
         public IInMemoryHost InMemoryHost { get; }
-
-        public override ISendEndpointProvider CreateSendEndpointProvider(Uri sourceAddress, params ISendPipeSpecification[] specifications)
-        {
-            var sendPipe = CreateSendPipe(specifications);
-
-            var provider = new InMemorySendEndpointProvider(_inputAddress, _sendTransportProvider, MessageSerializer, sendPipe);
-
-            return new SendEndpointCache(provider);
-        }
-
-        public override IPublishEndpointProvider CreatePublishEndpointProvider(Uri sourceAddress, params IPublishPipeSpecification[] specifications)
-        {
-            var sendEndpointProvider = new InMemorySendEndpointProvider(_inputAddress, _sendTransportProvider, MessageSerializer, SendPipe.Empty);
-
-            var sendEndpointCache = new SendEndpointCache(sendEndpointProvider);
-
-            var publishPipe = CreatePublishPipe(specifications);
-
-            return new InMemoryPublishEndpointProvider(sendEndpointCache, _sendTransportProvider, publishPipe);
-        }
 
         protected override Uri GetInputAddress()
         {

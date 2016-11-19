@@ -57,7 +57,9 @@ namespace MassTransit.HttpTransport.Configuration.Builders
             _sendEndpointProvider = CreateSendEndpointProvider(receiveEndpointBuilder);
             _publishEndpointProvider = CreatePublishEndpointProvider(receiveEndpointBuilder);
 
-            var transport = new HttpReceiveTransport(_host, _sendEndpointProvider, _publishEndpointProvider, receiveEndpointBuilder.MessageSerializer, builder.CreateSendPipe());
+            var sendPipe = builder.CreateSendPipe();
+
+            var transport = new HttpReceiveTransport(_host, _sendEndpointProvider, _publishEndpointProvider, receiveEndpointBuilder.MessageSerializer, sendPipe);
 
             var httpHost = _host as HttpHost;
             if(httpHost == null)

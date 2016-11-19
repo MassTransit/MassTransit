@@ -65,40 +65,6 @@ namespace MassTransit.AzureServiceBusTransport.Builders
             return new ServiceBusSendTransportProvider(_hosts);
         }
 
-        public override ISendEndpointProvider CreateSendEndpointProvider(Uri sourceAddress, params ISendPipeSpecification[] specifications)
-        {
-            var pipe = CreateSendPipe(specifications);
-
-            var provider = new ServiceBusSendEndpointProvider(MessageSerializer, sourceAddress, SendTransportProvider, pipe);
-
-            return new SendEndpointCache(provider, QueueCacheDurationProvider);
-        }
-
-        TimeSpan QueueCacheDurationProvider(Uri address)
-        {
-            var timeSpan = address.GetQueueDescription().AutoDeleteOnIdle;
-
-            return timeSpan > TimeSpan.FromDays(1) ? TimeSpan.FromDays(1) : timeSpan;
-        }
-
-        public override IPublishEndpointProvider CreatePublishEndpointProvider(Uri sourceAddress, params IPublishPipeSpecification[] specifications)
-        {
-            var provider = new PublishSendEndpointProvider(MessageSerializer, sourceAddress, _hosts[0]);
-
-            var cache = new SendEndpointCache(provider, TopicCacheDurationProvider);
-
-            var pipe = CreatePublishPipe(specifications);
-
-            return new ServiceBusPublishEndpointProvider(_hosts[0], cache, pipe);
-        }
-
-        TimeSpan TopicCacheDurationProvider(Uri address)
-        {
-            var timeSpan = address.GetTopicDescription().AutoDeleteOnIdle;
-
-            return timeSpan > TimeSpan.FromDays(1) ? TimeSpan.FromDays(1) : timeSpan;
-        }
-
         protected override void PreBuild()
         {
             _busEndpointSpecification.Apply(this);

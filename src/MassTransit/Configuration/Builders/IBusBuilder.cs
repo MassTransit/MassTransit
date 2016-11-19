@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,7 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Builders
 {
-    using System;
     using System.Net.Mime;
     using GreenPipes;
     using Pipeline;
@@ -28,30 +27,7 @@ namespace MassTransit.Builders
         /// </summary>
         ISendTransportProvider SendTransportProvider { get; }
 
-        IMessageSerializer MessageSerializer { get; }
-
-        /// <summary>
-        /// The default message deserializer
-        /// </summary>
-        IMessageDeserializer MessageDeserializer { get; }
-
         SerializerBuilder CreateSerializerBuilder();
-
-        /// <summary>
-        /// Creates a send endpoint provider using the bus and supplied specifications
-        /// </summary>
-        /// <param name="sourceAddress"></param>
-        /// <param name="specifications"></param>
-        /// <returns></returns>
-        ISendEndpointProvider CreateSendEndpointProvider(Uri sourceAddress, params ISendPipeSpecification[] specifications);
-
-        /// <summary>
-        /// Creates a publish endpoint provider using the bus and supplied specifications
-        /// </summary>
-        /// <param name="sourceAddress"></param>
-        /// <param name="specifications"></param>
-        /// <returns></returns>
-        IPublishEndpointProvider CreatePublishEndpointProvider(Uri sourceAddress, params IPublishPipeSpecification[] specifications);
 
         /// <summary>
         /// Sets the outbound message serializer
