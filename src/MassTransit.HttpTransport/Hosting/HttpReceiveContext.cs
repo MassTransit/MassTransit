@@ -12,28 +12,35 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.HttpTransport.Hosting
 {
-    using System;
     using System.IO;
     using Context;
+    using Microsoft.Owin;
 
 
     public class HttpReceiveContext :
         BaseReceiveContext
     {
-        readonly Stream _body;
+        readonly IOwinContext _requestContext;
 
-        public HttpReceiveContext(Uri inputAddress, Stream body, IHeaderProvider provider, bool redelivered, IReceiveObserver receiveObserver, ISendEndpointProvider sendEndpointProvider, IPublishEndpointProvider publishEndpointProvider)
-            : base(inputAddress, redelivered, receiveObserver, sendEndpointProvider, publishEndpointProvider)
+        public HttpReceiveContext(IOwinContext requestContext, 
+            IHeaderProvider provider,
+            bool redelivered,
+            IReceiveObserver receiveObserver, 
+            ISendEndpointProvider sendEndpointProvider,
+            IPublishEndpointProvider publishEndpointProvider)
+            : base(requestContext.Request.Uri, redelivered, receiveObserver, sendEndpointProvider, publishEndpointProvider)
         {
-            _body = body;
+            _requestContext = requestContext;
             HeaderProvider = provider;
         }
 
         protected override IHeaderProvider HeaderProvider { get; }
 
+        public IOwinContext RequestContext => _requestContext;
+
         protected override Stream GetBodyStream()
         {
-            return _body;
+            return _requestContext.Request.Body;
         }
     }
 }

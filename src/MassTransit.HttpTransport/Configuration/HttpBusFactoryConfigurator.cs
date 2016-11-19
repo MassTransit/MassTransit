@@ -14,7 +14,6 @@ namespace MassTransit.HttpTransport.Configuration
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
     using Builders;
     using BusConfigurators;
     using GreenPipes;
@@ -29,13 +28,11 @@ namespace MassTransit.HttpTransport.Configuration
         IBusFactory
     {
         readonly BusHostCollection<HttpHost> _hosts;
-        readonly IList<IBusFactorySpecification> _transportBuilderConfigurators;
         readonly HttpReceiveSettings _settings;
 
         public HttpBusFactoryConfigurator()
         {
             _hosts = new BusHostCollection<HttpHost>();
-            _transportBuilderConfigurators = new List<IBusFactorySpecification>();
             _settings = new HttpReceiveSettings
             {
                 Port = 9090
@@ -46,8 +43,7 @@ namespace MassTransit.HttpTransport.Configuration
         {
             var builder = new HttpBusBuilder(_hosts, ConsumePipeFactory, SendPipeFactory, PublishPipeFactory, _settings);
 
-            foreach (var configurator in _transportBuilderConfigurators)
-                configurator.Apply(builder);
+            ApplySpecifications(builder);
 
             var bus = builder.Build();
 
@@ -61,9 +57,6 @@ namespace MassTransit.HttpTransport.Configuration
 
             if (_hosts.Count == 0)
                 yield return this.Failure("Host", "At least one host must be defined");
-
-            foreach (var result in _transportBuilderConfigurators.SelectMany(x => x.Validate()))
-                yield return result;
         }
 
         public IHttpHost Host(HttpHostSettings settings)
@@ -85,17 +78,11 @@ namespace MassTransit.HttpTransport.Configuration
             if (host == null)
                 throw new EndpointNotFoundException("The host address specified was not configured.");
 
-            var ep = new HttpReceiveEndpointSpecification(host, null, null);
+            var ep = new HttpReceiveEndpointSpecification(host, new HttpReceiveSettings(), null);
 
-            if (configure != null)
-                configure(ep);
+            configure?.Invoke(ep);
 
             AddBusFactorySpecification(ep);
-        }
-
-        public void AddBusFactorySpecification(IBusFactorySpecification configurator)
-        {
-            _transportBuilderConfigurators.Add(configurator);
         }
 
         public void OverrideDefaultBusEndpoint(int port)

@@ -71,6 +71,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Clients\ClientCache.cs" />
+    <Compile Include="Clients\HttpResponseSendEndpointProvider.cs" />
+    <Compile Include="Clients\HttpResponseTransport.cs" />
     <Compile Include="Configuration\Builders\HttpBusBuilder.cs" />
     <Compile Include="Configuration\Builders\HttpOwinHostContext.cs" />
     <Compile Include="Configuration\Builders\HttpPublishEndpointProvider.cs" />

@@ -13,6 +13,7 @@
 namespace MassTransit.HttpTransport.Hosting
 {
     using System;
+    using System.Diagnostics;
     using System.Threading;
     using System.Threading.Tasks;
     using Configuration.Builders;
@@ -23,6 +24,7 @@ namespace MassTransit.HttpTransport.Hosting
     using Util;
 
 
+    [DebuggerDisplay("{DebuggerDisplay}")]
     public class HttpHost :
         IHttpHost,
         IBusHostControl
@@ -108,7 +110,7 @@ namespace MassTransit.HttpTransport.Hosting
         public ITaskSupervisor Supervisor => _supervisor;
 
 
-        public Uri Address => new Uri($"{_settings.Scheme}{_settings.Host}:{_settings.Port}");
+        public Uri Address => new Uri($"{_settings.Scheme}://{_settings.Host}:{_settings.Port}");
 
         ConnectHandle IConsumeMessageObserverConnector.ConnectConsumeMessageObserver<T>(IConsumeMessageObserver<T> observer)
         {
@@ -130,6 +132,7 @@ namespace MassTransit.HttpTransport.Hosting
             return ReceiveEndpoints.ConnectReceiveEndpointObserver(observer);
         }
 
+        string DebuggerDisplay => $"{Address}";
 
         class Handle :
             BaseHostHandle

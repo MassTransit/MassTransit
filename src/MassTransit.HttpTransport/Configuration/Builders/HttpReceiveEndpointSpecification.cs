@@ -36,8 +36,7 @@ namespace MassTransit.HttpTransport.Configuration.Builders
         ISendEndpointProvider _sendEndpointProvider;
 
         public HttpReceiveEndpointSpecification(IHttpHost host, HttpReceiveSettings settings, IConsumePipe consumePipe = null)
-            :
-                base(consumePipe)
+            : base(consumePipe)
         {
             _host = host;
             _settings = settings;

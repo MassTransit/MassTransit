@@ -5,6 +5,7 @@ namespace MassTransit.HttpTransport
     using System.Net;
     using System.Threading;
     using System.Threading.Tasks;
+    using Clients;
     using GreenPipes;
     using Hosting;
     using Internals.Extensions;
@@ -77,16 +78,12 @@ namespace MassTransit.HttpTransport
             int current = Interlocked.Increment(ref _currentPendingDeliveryCount);
             while (current > _maxPendingDeliveryCount)
                 Interlocked.CompareExchange(ref _maxPendingDeliveryCount, current, _maxPendingDeliveryCount);
-
-            var inputAddress = owinContext.Request.Uri;
-            var body = owinContext.Request.Body;
+            
             var headers = new HttpHeaderProvider(owinContext.Request.Headers);
 
-            var context = new HttpReceiveContext(inputAddress, body, headers, false, _receiveObserver, _sendEndpointProvider, _publishEndpointProvider);
+            var responseProxy = new HttpResponseSendEndpointProvider(_sendEndpointProvider, owinContext);
+            var context = new HttpReceiveContext(owinContext, headers, false, _receiveObserver, responseProxy, _publishEndpointProvider);
             
-            context.GetOrAddPayload(() => owinContext.Request);
-            context.GetOrAddPayload(() => owinContext.Response);
-
             try
             {
                 if (!_pending.TryAdd(deliveryTag, context))

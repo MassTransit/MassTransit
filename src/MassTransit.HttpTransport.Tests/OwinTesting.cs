@@ -14,7 +14,7 @@ namespace MassTransit.HttpTransport.Tests
         {
             var bus = Bus.Factory.CreateUsingHttp(cfg =>
             {
-                var h = cfg.Host(new Uri("http://localhost:8080"));
+                cfg.Host(new Uri("http://localhost:8080"));
                 //                var slack = cfg.Host("http", "slack.com", 80);
 //                var request = cfg.Host(new Uri("http://requestb.in"), host =>
 //                {
