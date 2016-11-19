@@ -33,7 +33,7 @@ namespace MassTransit.HttpTransport
         readonly ISendEndpointProvider _sendEndpointProvider;
         readonly IPublishEndpointProvider _publishEndpointProvider;
         readonly IMessageSerializer _messageSerializer;
-        ISendPipe _sendPipe;
+        readonly ISendPipe _sendPipe;
 
         public HttpConsumerAction(IReceiveObserver receiveObserver, 
             HttpHostSettings settings,
