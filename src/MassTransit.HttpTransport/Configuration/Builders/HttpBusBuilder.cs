@@ -30,12 +30,11 @@ namespace MassTransit.HttpTransport.Configuration.Builders
         public HttpBusBuilder(BusHostCollection<HttpHost> hosts,
             IConsumePipeFactory consumePipeFactory,
             ISendPipeFactory sendPipeFactory,
-            IPublishPipeFactory publishPipeFactory,
-            HttpReceiveSettings settings)
+            IPublishPipeFactory publishPipeFactory)
             : base(consumePipeFactory, sendPipeFactory, publishPipeFactory, hosts)
         {
             _hosts = hosts;
-            _busEndpointSpecification = new HttpReceiveEndpointSpecification(_hosts[0], settings, ConsumePipe);
+            _busEndpointSpecification = new HttpReceiveEndpointSpecification(_hosts[0], ConsumePipe);
         }
 
         public BusHostCollection<HttpHost> Hosts => _hosts;

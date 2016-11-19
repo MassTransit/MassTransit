@@ -127,8 +127,6 @@ namespace MassTransit.HttpTransport.Tests
         {
             return MassTransit.Bus.Factory.CreateUsingHttp(x =>
             {
-                x.OverrideDefaultBusEndpoint(9090);
-
                 ConfigureBus(x);
 
                 var host = x.Host(_hostAddress);

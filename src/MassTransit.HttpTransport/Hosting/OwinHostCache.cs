@@ -18,9 +18,6 @@ namespace MassTransit.HttpTransport.Hosting
     using Configuration.Builders;
     using GreenPipes;
     using Logging;
-    using MassTransit.Pipeline;
-    using Microsoft.Owin.Hosting;
-    using Owin;
     using Util;
 
 

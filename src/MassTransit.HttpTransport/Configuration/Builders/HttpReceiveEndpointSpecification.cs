@@ -30,16 +30,14 @@ namespace MassTransit.HttpTransport.Configuration.Builders
         IBusFactorySpecification
     {
         readonly IHttpHost _host;
-        readonly HttpReceiveSettings _settings;
 
         IPublishEndpointProvider _publishEndpointProvider;
         ISendEndpointProvider _sendEndpointProvider;
 
-        public HttpReceiveEndpointSpecification(IHttpHost host, HttpReceiveSettings settings, IConsumePipe consumePipe = null)
+        public HttpReceiveEndpointSpecification(IHttpHost host, IConsumePipe consumePipe = null)
             : base(consumePipe)
         {
             _host = host;
-            _settings = settings;
         }
 
         public override IEnumerable<ValidationResult> Validate()
@@ -65,7 +63,7 @@ namespace MassTransit.HttpTransport.Configuration.Builders
             if(httpHost == null)
                 throw new ConfigurationException("Must be a HttpHost");
 
-            httpHost.ReceiveEndpoints.Add(_settings.Path ?? NewId.Next().ToString(),
+            httpHost.ReceiveEndpoints.Add(NewId.Next().ToString(),
                 new ReceiveEndpoint(transport, receivePipe));
         }
 

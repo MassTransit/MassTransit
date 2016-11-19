@@ -28,20 +28,16 @@ namespace MassTransit.HttpTransport.Configuration
         IBusFactory
     {
         readonly BusHostCollection<HttpHost> _hosts;
-        readonly HttpReceiveSettings _settings;
 
         public HttpBusFactoryConfigurator()
         {
             _hosts = new BusHostCollection<HttpHost>();
-            _settings = new HttpReceiveSettings
-            {
-                Port = 9090
-            };
+
         }
 
         public IBusControl CreateBus()
         {
-            var builder = new HttpBusBuilder(_hosts, ConsumePipeFactory, SendPipeFactory, PublishPipeFactory, _settings);
+            var builder = new HttpBusBuilder(_hosts, ConsumePipeFactory, SendPipeFactory, PublishPipeFactory);
 
             ApplySpecifications(builder);
 
@@ -78,16 +74,11 @@ namespace MassTransit.HttpTransport.Configuration
             if (host == null)
                 throw new EndpointNotFoundException("The host address specified was not configured.");
 
-            var ep = new HttpReceiveEndpointSpecification(host, new HttpReceiveSettings());
+            var ep = new HttpReceiveEndpointSpecification(host);
 
             configure?.Invoke(ep);
 
             AddBusFactorySpecification(ep);
-        }
-
-        public void OverrideDefaultBusEndpoint(int port)
-        {
-            _settings.Port = port;
         }
     }
 }

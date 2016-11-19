@@ -42,10 +42,7 @@ namespace MassTransit.HttpTransport.Configuration.Builders
             _participant.SetComplete();
         }
 
-        public CancellationToken CancellationToken
-        {
-            get { return _cancellationToken; }
-        }
+        public CancellationToken CancellationToken => _cancellationToken;
 
         public bool HasPayloadType(Type contextType)
         {
@@ -62,10 +59,7 @@ namespace MassTransit.HttpTransport.Configuration.Builders
             return _context.GetOrAddPayload(payloadFactory);
         }
 
-        public HttpHostSettings HostSettings
-        {
-            get { return _context.HostSettings; }
-        }
+        public HttpHostSettings HostSettings => _context.HostSettings;
 
         public void StartHttpListener(HttpConsumerAction controller)
         {

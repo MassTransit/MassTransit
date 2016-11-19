@@ -24,6 +24,5 @@ namespace MassTransit
 
         void ReceiveEndpoint(Action<IHttpReceiveEndpointConfigurator> configure = null);
         void ReceiveEndpoint(IHttpHost host, Action<IHttpReceiveEndpointConfigurator> configure = null);
-        void OverrideDefaultBusEndpoint(int port);
     }
 }

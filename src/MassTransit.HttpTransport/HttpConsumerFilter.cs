@@ -55,9 +55,7 @@ namespace MassTransit.HttpTransport
 
         public async Task Send(OwinHostContext context, IPipe<OwinHostContext> next)
         {
-            //var receiveSettings = context.GetPayload<ReceiveSettings>();
-            //var inputAddress = context.HostSettings.GetInputAddress(receiveSettings);
-            var inputAddress = new Uri("http://localhost:8080");
+            var inputAddress = context.HostSettings.GetInputAddress();
 
             using (ITaskScope scope = _supervisor.CreateScope($"{TypeMetadataCache<HttpConsumerFilter>.ShortName} - {inputAddress}", () => TaskUtil.Completed))
             {
