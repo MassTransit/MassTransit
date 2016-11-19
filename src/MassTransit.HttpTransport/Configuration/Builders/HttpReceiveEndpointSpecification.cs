@@ -50,7 +50,7 @@ namespace MassTransit.HttpTransport.Configuration.Builders
 
         public void Apply(IBusBuilder builder)
         {
-            var receiveEndpointBuilder = new HttpReceiveEndpointBuilder(CreateConsumePipe(builder), builder);
+            var receiveEndpointBuilder = new HttpReceiveEndpointBuilder(_host, CreateConsumePipe(builder), builder);
             
             var receivePipe = CreateReceivePipe(receiveEndpointBuilder);
 

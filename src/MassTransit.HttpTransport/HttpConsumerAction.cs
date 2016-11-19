@@ -104,7 +104,7 @@ namespace MassTransit.HttpTransport
 
                 await context.CompleteTask.ConfigureAwait(false);
 
-                //TODO: Push into Pipe!
+                //TODO: Push into Pipe! -- cant' be on the receive pipe because it doesn't have the content
                 if (!owinContext.Response.ContentLength.HasValue)
                 {
                     owinContext.Response.StatusCode = (int)HttpStatusCode.Accepted;

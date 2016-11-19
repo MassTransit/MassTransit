@@ -21,12 +21,23 @@ namespace MassTransit.HttpTransport.Configuration.Builders
 
     public class HttpPublishEndpointProvider : IPublishEndpointProvider
     {
+        readonly IHttpHost _host;
+        readonly IMessageSerializer _serializer;
+        readonly ISendTransportProvider _transportProvider;
         readonly IPublishPipe _publishPipe;
+        readonly ISendPipe _sendPipe;
         readonly PublishObservable _publishObservable;
 
-        public HttpPublishEndpointProvider(IPublishPipe publishPipe)
+        public HttpPublishEndpointProvider(IHttpHost host, IMessageSerializer serializer,
+            ISendTransportProvider transportProvider,
+            IPublishPipe publishPipe,
+            ISendPipe sendPipe)
         {
+            _host = host;
+            _serializer = serializer;
+            _transportProvider = transportProvider;
             _publishPipe = publishPipe;
+            _sendPipe = sendPipe;
             _publishObservable = new PublishObservable();
         }
 
@@ -40,10 +51,13 @@ namespace MassTransit.HttpTransport.Configuration.Builders
             return new PublishEndpoint(sourceAddress, this, _publishObservable, _publishPipe, correlationId, conversationId );
         }
 
-        public Task<ISendEndpoint> GetPublishSendEndpoint(Type messageType)
+        public async Task<ISendEndpoint> GetPublishSendEndpoint(Type messageType)
         {
-            var sep = new SendEndpoint(null, null, null, null, null);
-            return Task.FromResult<ISendEndpoint>(sep);
+            var destinationUri = new Uri("http://localhost");
+
+            var st = await _transportProvider.GetSendTransport(destinationUri);
+            var sep = new SendEndpoint(st, _serializer, destinationUri, _host.Address, _sendPipe);
+            return sep;
         }
     }
 }

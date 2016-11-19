@@ -23,10 +23,12 @@ namespace MassTransit.HttpTransport.Configuration.Builders
         ReceiveEndpointBuilder,
         IHttpReceiveEndpointBuilder
     {
+        readonly IHttpHost _host;
 
-        public HttpReceiveEndpointBuilder(IConsumePipe consumePipe, IBusBuilder busBuilder)
+        public HttpReceiveEndpointBuilder(IHttpHost host, IConsumePipe consumePipe, IBusBuilder busBuilder)
             : base(consumePipe, busBuilder)
         {
+            _host = host;
         }
 
         public override ISendEndpointProvider CreateSendEndpointProvider(Uri sourceAddress, params ISendPipeSpecification[] specifications)
@@ -40,9 +42,11 @@ namespace MassTransit.HttpTransport.Configuration.Builders
 
         public override IPublishEndpointProvider CreatePublishEndpointProvider(Uri sourceAddress, params IPublishPipeSpecification[] specifications)
         {
-            var pipe = CreatePublishPipe(specifications);
+            var publishPipe = CreatePublishPipe(specifications);
 
-            return new HttpPublishEndpointProvider(pipe);
+            var sendPipe = CreateSendPipe();
+
+            return new HttpPublishEndpointProvider(_host, MessageSerializer, SendTransportProvider, publishPipe, sendPipe);
         }
 
         public TimeSpan CacheDurationProvider(Uri address)
