@@ -19,6 +19,5 @@ namespace MassTransit.HttpTransport.Pipeline
         DeliveryMetrics
     {
         string Route { get; set; }
-        string ConsumerTag { get; }
     }
 }

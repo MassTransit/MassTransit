@@ -10,13 +10,13 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit
+namespace MassTransit.HttpTransport
 {
     using System.Net.Http;
 
 
     public interface IHttpHostConfigurator
     {
-        void UseMethod(HttpMethod method);
+        HttpMethod Method { set; }
     }
 }

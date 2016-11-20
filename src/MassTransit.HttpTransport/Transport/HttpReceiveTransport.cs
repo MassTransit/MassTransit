@@ -10,12 +10,11 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.HttpTransport.Configuration.Builders
+namespace MassTransit.HttpTransport.Transport
 {
     using System.Threading;
     using System.Threading.Tasks;
     using GreenPipes;
-    using Logging;
     using MassTransit.Pipeline;
     using Transports;
     using Util;
@@ -24,18 +23,16 @@ namespace MassTransit.HttpTransport.Configuration.Builders
     public class HttpReceiveTransport :
         IReceiveTransport
     {
-        static readonly ILog _log = Logger.Get<HttpReceiveTransport>();
-
         readonly IHttpHost _host;
-        readonly ReceiveEndpointObservable _receiveEndpointObservable;
+        readonly IMessageSerializer _messageSerializer;
+        readonly IPublishEndpointProvider _publishEndpointProvider;
         readonly ReceiveObservable _receiveObservable;
         readonly ReceiveTransportObservable _receiveTransportObservable;
         readonly ISendEndpointProvider _sendEndpointProvider;
-        readonly IPublishEndpointProvider _publishEndpointProvider;
-        readonly IMessageSerializer _messageSerializer;
         readonly ISendPipe _sendPipe;
 
-        public HttpReceiveTransport(IHttpHost host, ISendEndpointProvider sendEndpointProvider, IPublishEndpointProvider publishEndpointProvider, IMessageSerializer messageSerializer, ISendPipe sendPipe)
+        public HttpReceiveTransport(IHttpHost host, ISendEndpointProvider sendEndpointProvider, IPublishEndpointProvider publishEndpointProvider,
+            IMessageSerializer messageSerializer, ISendPipe sendPipe)
         {
             _host = host;
             _sendEndpointProvider = sendEndpointProvider;
@@ -44,7 +41,6 @@ namespace MassTransit.HttpTransport.Configuration.Builders
             _sendPipe = sendPipe;
 
             _receiveObservable = new ReceiveObservable();
-            _receiveEndpointObservable = new ReceiveEndpointObservable();
             _receiveTransportObservable = new ReceiveTransportObservable();
         }
 
@@ -58,15 +54,10 @@ namespace MassTransit.HttpTransport.Configuration.Builders
             return _receiveObservable.Connect(observer);
         }
 
-        public ConnectHandle ConnectReceiveEndpointObserver(IReceiveEndpointObserver observer)
-        {
-            return _receiveEndpointObservable.Connect(observer);
-        }
-
         public void Probe(ProbeContext context)
         {
             var scope = context.CreateScope("transport");
-            scope.Add("type", "HTTP");
+            scope.Add("type", "http");
             scope.Set(_host.Settings);
         }
 
@@ -76,13 +67,15 @@ namespace MassTransit.HttpTransport.Configuration.Builders
 
             IPipe<OwinHostContext> hostPipe = Pipe.New<OwinHostContext>(cxt =>
             {
-                cxt.HttpConsumer(receivePipe, _host.Settings, _receiveObservable, _receiveTransportObservable, supervisor, _sendEndpointProvider, _publishEndpointProvider, _messageSerializer, _sendPipe);
+                cxt.HttpConsumer(receivePipe, _host.Settings, _receiveObservable, _receiveTransportObservable, supervisor, _sendEndpointProvider,
+                    _publishEndpointProvider, _messageSerializer, _sendPipe);
             });
 
             var hostTask = _host.OwinHostCache.Send(hostPipe, supervisor.StoppingToken);
 
             return new Handle(supervisor, hostTask);
         }
+
 
         class Handle :
             ReceiveTransportHandle

@@ -10,26 +10,16 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.HttpTransport.Configuration
+namespace MassTransit.HttpTransport
 {
-    using System.Net.Http;
     using Hosting;
 
 
-    public class HttpHostConfigurator : IHttpHostConfigurator
+    public static class HttpHostSettingsExtensions
     {
-        readonly ConfigurationHostSettings _settings;
-
-        public HttpHostConfigurator(string scheme, string host, int port)
+        public static string ToDebugString(this HttpHostSettings settings)
         {
-            _settings = new ConfigurationHostSettings(scheme, host, port, HttpMethod.Post);
-        }
-
-        public HttpHostSettings Settings => _settings;
-
-        public void UseMethod(HttpMethod method)
-        {
-            _settings.Method = method;
+            return $"{settings.Host}:{settings.Port}";
         }
     }
 }

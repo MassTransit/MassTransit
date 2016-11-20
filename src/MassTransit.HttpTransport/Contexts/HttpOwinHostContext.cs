@@ -10,7 +10,7 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.HttpTransport.Configuration.Builders
+namespace MassTransit.HttpTransport.Contexts
 {
     using System;
     using GreenPipes;
@@ -30,12 +30,12 @@ namespace MassTransit.HttpTransport.Configuration.Builders
         IDisposable _owinHost;
         bool _started;
 
-        public HttpOwinHostContext( HttpHostSettings settings, ITaskSupervisor supervisor)
+        public HttpOwinHostContext(HttpHostSettings settings, ITaskSupervisor supervisor)
             : this(settings, supervisor.CreateParticipant($"{TypeMetadataCache<HttpOwinHostContext>.ShortName} - {settings.ToDebugString()}"))
         {
         }
 
-        HttpOwinHostContext( HttpHostSettings settings, ITaskParticipant participant)
+        HttpOwinHostContext(HttpHostSettings settings, ITaskParticipant participant)
             : base(new PayloadCache(), participant.StoppedToken)
         {
             HostSettings = settings;
@@ -50,7 +50,7 @@ namespace MassTransit.HttpTransport.Configuration.Builders
             _participant.SetComplete();
         }
 
-        public HttpHostSettings HostSettings { get; set; }
+        public HttpHostSettings HostSettings { get; }
 
         public void StartHttpListener(HttpConsumerAction controller)
         {
@@ -58,9 +58,13 @@ namespace MassTransit.HttpTransport.Configuration.Builders
                 return;
 
             _started = true;
-            var options = new StartOptions();
+
+            var options = new StartOptions
+            {
+                Port = HostSettings.Port
+            };
+
             options.Urls.Add(HostSettings.Host);
-            options.Port = HostSettings.Port;
 
             _owinHost = WebApp.Start(options, app =>
             {

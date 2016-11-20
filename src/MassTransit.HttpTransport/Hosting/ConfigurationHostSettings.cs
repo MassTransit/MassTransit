@@ -15,7 +15,8 @@ namespace MassTransit.HttpTransport.Hosting
     using System.Net.Http;
 
 
-    public class ConfigurationHostSettings : HttpHostSettings
+    public class ConfigurationHostSettings :
+        HttpHostSettings
     {
         public ConfigurationHostSettings(string scheme, string host, int port, HttpMethod method)
         {
@@ -26,8 +27,7 @@ namespace MassTransit.HttpTransport.Hosting
         }
 
         public HttpMethod Method { get; set; }
-
-        public string Scheme { get; set; }
+        public string Scheme { get; }
         public string Host { get; }
         public int Port { get; }
     }

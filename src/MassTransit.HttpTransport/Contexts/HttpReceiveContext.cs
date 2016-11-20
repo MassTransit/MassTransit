@@ -10,7 +10,7 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.HttpTransport.Hosting
+namespace MassTransit.HttpTransport.Contexts
 {
     using System.IO;
     using Context;
@@ -22,12 +22,8 @@ namespace MassTransit.HttpTransport.Hosting
     {
         readonly IOwinContext _requestContext;
 
-        public HttpReceiveContext(IOwinContext requestContext, 
-            IHeaderProvider provider,
-            bool redelivered,
-            IReceiveObserver receiveObserver, 
-            ISendEndpointProvider sendEndpointProvider,
-            IPublishEndpointProvider publishEndpointProvider)
+        public HttpReceiveContext(IOwinContext requestContext, IHeaderProvider provider, bool redelivered, IReceiveObserver receiveObserver,
+            ISendEndpointProvider sendEndpointProvider, IPublishEndpointProvider publishEndpointProvider)
             : base(requestContext.Request.Uri, redelivered, receiveObserver, sendEndpointProvider, publishEndpointProvider)
         {
             _requestContext = requestContext;

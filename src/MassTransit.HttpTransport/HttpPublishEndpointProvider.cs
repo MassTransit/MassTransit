@@ -10,7 +10,7 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.HttpTransport.Configuration.Builders
+namespace MassTransit.HttpTransport
 {
     using System;
     using System.Threading.Tasks;
@@ -19,18 +19,17 @@ namespace MassTransit.HttpTransport.Configuration.Builders
     using Transports;
 
 
-    public class HttpPublishEndpointProvider : IPublishEndpointProvider
+    public class HttpPublishEndpointProvider :
+        IPublishEndpointProvider
     {
         readonly IHttpHost _host;
-        readonly IMessageSerializer _serializer;
-        readonly ISendTransportProvider _transportProvider;
+        readonly PublishObservable _publishObservable;
         readonly IPublishPipe _publishPipe;
         readonly ISendPipe _sendPipe;
-        readonly PublishObservable _publishObservable;
+        readonly IMessageSerializer _serializer;
+        readonly ISendTransportProvider _transportProvider;
 
-        public HttpPublishEndpointProvider(IHttpHost host, IMessageSerializer serializer,
-            ISendTransportProvider transportProvider,
-            IPublishPipe publishPipe,
+        public HttpPublishEndpointProvider(IHttpHost host, IMessageSerializer serializer, ISendTransportProvider transportProvider, IPublishPipe publishPipe,
             ISendPipe sendPipe)
         {
             _host = host;
@@ -38,6 +37,7 @@ namespace MassTransit.HttpTransport.Configuration.Builders
             _transportProvider = transportProvider;
             _publishPipe = publishPipe;
             _sendPipe = sendPipe;
+
             _publishObservable = new PublishObservable();
         }
 
@@ -48,16 +48,17 @@ namespace MassTransit.HttpTransport.Configuration.Builders
 
         public IPublishEndpoint CreatePublishEndpoint(Uri sourceAddress, Guid? correlationId = null, Guid? conversationId = null)
         {
-            return new PublishEndpoint(sourceAddress, this, _publishObservable, _publishPipe, correlationId, conversationId );
+            return new PublishEndpoint(sourceAddress, this, _publishObservable, _publishPipe, correlationId, conversationId);
         }
 
         public async Task<ISendEndpoint> GetPublishSendEndpoint(Type messageType)
         {
-            var destinationUri = new Uri("http://localhost");
+            // TODO: this needs some love
+            var destinationAddress = new Uri("http://localhost");
 
-            var st = await _transportProvider.GetSendTransport(destinationUri);
-            var sep = new SendEndpoint(st, _serializer, destinationUri, _host.Address, _sendPipe);
-            return sep;
+            var transport = await _transportProvider.GetSendTransport(destinationAddress).ConfigureAwait(false);
+
+            return new SendEndpoint(transport, _serializer, destinationAddress, _host.Address, _sendPipe);
         }
     }
 }

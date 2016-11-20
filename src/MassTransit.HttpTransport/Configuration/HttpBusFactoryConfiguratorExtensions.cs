@@ -10,22 +10,20 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit
+namespace MassTransit.HttpTransport
 {
     using System;
-    using HttpTransport;
-    using HttpTransport.Configuration;
+    using Specifications;
 
 
     public static class HttpBusFactoryConfiguratorExtensions
     {
-        public static IHttpHost Host(this IHttpBusFactoryConfigurator cfg, Uri host, Action<IHttpHostConfigurator> configure = null)
+        public static IHttpHost Host(this IHttpBusFactoryConfigurator cfg, Uri hostAddress, Action<IHttpHostConfigurator> configure = null)
         {
-            return cfg.Host(host.Scheme, host.Host, host.Port, configure);
+            return cfg.Host(hostAddress.Scheme, hostAddress.Host, hostAddress.Port, configure);
         }
 
-        public static IHttpHost Host(this IHttpBusFactoryConfigurator cfg, string scheme, string host, int port,
-            Action<IHttpHostConfigurator> configure = null)
+        public static IHttpHost Host(this IHttpBusFactoryConfigurator cfg, string scheme, string host, int port, Action<IHttpHostConfigurator> configure = null)
         {
             var httpHostCfg = new HttpHostConfigurator(scheme, host, port);
 

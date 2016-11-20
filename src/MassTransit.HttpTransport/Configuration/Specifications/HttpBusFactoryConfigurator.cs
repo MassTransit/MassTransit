@@ -10,7 +10,7 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.HttpTransport.Configuration
+namespace MassTransit.HttpTransport.Specifications
 {
     using System;
     using System.Collections.Generic;
@@ -19,6 +19,7 @@ namespace MassTransit.HttpTransport.Configuration
     using GreenPipes;
     using Hosting;
     using MassTransit.Builders;
+    using Transport;
     using Transports;
 
 
@@ -79,6 +80,12 @@ namespace MassTransit.HttpTransport.Configuration
             configure?.Invoke(ep);
 
             AddBusFactorySpecification(ep);
+        }
+
+        public void ReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configureEndpoint)
+        {
+            // TODO: need to come up with a way this makes sense - virtual directory perhaps?
+            throw new NotImplementedException();
         }
     }
 }

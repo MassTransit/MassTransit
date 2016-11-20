@@ -16,6 +16,7 @@ namespace MassTransit.HttpTransport.Clients
     using System.Linq;
     using System.Threading.Tasks;
     using Hosting;
+    using Transport;
     using Transports;
 
 

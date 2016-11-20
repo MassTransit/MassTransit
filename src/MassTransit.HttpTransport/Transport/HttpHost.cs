@@ -10,14 +10,14 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.HttpTransport.Hosting
+namespace MassTransit.HttpTransport.Transport
 {
     using System;
     using System.Diagnostics;
     using System.Threading;
     using System.Threading.Tasks;
-    using Configuration.Builders;
     using GreenPipes;
+    using Hosting;
     using Logging;
     using MassTransit.Pipeline;
     using Transports;

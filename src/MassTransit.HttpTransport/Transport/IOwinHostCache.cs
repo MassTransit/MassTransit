@@ -10,33 +10,15 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.HttpTransport.Hosting
+namespace MassTransit.HttpTransport.Transport
 {
-    using System;
-    using System.Runtime.Serialization;
+    using System.Threading;
+    using System.Threading.Tasks;
+    using GreenPipes;
 
 
-    [Serializable]
-    public class HttpConnectionException :
-        MassTransitException
+    public interface IOwinHostCache
     {
-        public HttpConnectionException()
-        {
-        }
-
-        public HttpConnectionException(string message)
-            : base(message)
-        {
-        }
-
-        public HttpConnectionException(string message, Exception innerException)
-            : base(message, innerException)
-        {
-        }
-
-        protected HttpConnectionException(SerializationInfo info, StreamingContext context)
-            : base(info, context)
-        {
-        }
+        Task Send(IPipe<OwinHostContext> connectionPipe, CancellationToken stoppingToken);
     }
 }

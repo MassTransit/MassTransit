@@ -13,6 +13,7 @@
 namespace MassTransit.HttpTransport
 {
     using Hosting;
+    using Transport;
     using Util;
 
 

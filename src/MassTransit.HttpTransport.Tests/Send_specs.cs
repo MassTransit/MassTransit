@@ -14,10 +14,10 @@ namespace MassTransit.HttpTransport.Tests
 {
     using System;
     using System.Threading.Tasks;
+    using Builders;
     using GreenPipes;
     using NUnit.Framework;
     using TestFramework.Messages;
-    using MassTransit.HttpTransport.Configuration.Builders;
     using TestFramework;
 
 

@@ -1,8 +1,18 @@
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+//  
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
+// this file except in compliance with the License. You may obtain a copy of the 
+// License at 
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0 
+// 
+// Unless required by applicable law or agreed to in writing, software distributed
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// specific language governing permissions and limitations under the License.
 namespace MassTransit.HttpTransport
 {
-    using System;
     using System.Threading.Tasks;
-    using Configuration.Builders;
     using Events;
     using GreenPipes;
     using Hosting;
@@ -12,28 +22,28 @@ namespace MassTransit.HttpTransport
     using Util;
 
 
-    public class HttpConsumerFilter 
-        : IFilter<OwinHostContext>
+    public class HttpConsumerFilter :
+        IFilter<OwinHostContext>
     {
         static readonly ILog _log = Logger.Get<HttpConsumerFilter>();
-
-        readonly IReceiveTransportObserver _transportObserver;
+        readonly IMessageSerializer _messageSerializer;
+        readonly IPublishEndpointProvider _publishEndpointProvider;
         readonly IReceiveObserver _receiveObserver;
         readonly IPipe<ReceiveContext> _receivePipe;
-        readonly ITaskSupervisor _supervisor;
-        readonly HttpHostSettings _settings;
         readonly ISendEndpointProvider _sendEndpointProvider;
-        readonly IPublishEndpointProvider _publishEndpointProvider;
-        readonly IMessageSerializer _messageSerializer;
         readonly ISendPipe _sendPipe;
+        readonly HttpHostSettings _settings;
+        readonly ITaskSupervisor _supervisor;
+
+        readonly IReceiveTransportObserver _transportObserver;
 
         public HttpConsumerFilter(IPipe<ReceiveContext> receivePipe,
             IReceiveObserver receiveObserver,
             IReceiveTransportObserver transportObserver,
-            ITaskSupervisor supervisor, 
+            ITaskSupervisor supervisor,
             HttpHostSettings settings,
-            ISendEndpointProvider sendEndpointProvider, 
-            IPublishEndpointProvider publishEndpointProvider, 
+            ISendEndpointProvider sendEndpointProvider,
+            IPublishEndpointProvider publishEndpointProvider,
             IMessageSerializer messageSerializer,
             ISendPipe sendPipe)
         {
@@ -57,9 +67,11 @@ namespace MassTransit.HttpTransport
         {
             var inputAddress = context.HostSettings.GetInputAddress();
 
-            using (ITaskScope scope = _supervisor.CreateScope($"{TypeMetadataCache<HttpConsumerFilter>.ShortName} - {inputAddress}", () => TaskUtil.Completed))
+            using (var scope = _supervisor.CreateScope($"{TypeMetadataCache<HttpConsumerFilter>.ShortName} - {inputAddress}", () => TaskUtil.Completed))
             {
-                var controller = new HttpConsumerAction(_receiveObserver, _settings, _receivePipe, scope, _sendEndpointProvider, _publishEndpointProvider, _messageSerializer, _sendPipe);
+                var controller = new HttpConsumerAction(_receiveObserver, _settings, _receivePipe, scope, _sendEndpointProvider, _publishEndpointProvider,
+                    _messageSerializer, _sendPipe);
+
                 context.StartHttpListener(controller);
 
                 await scope.Ready.ConfigureAwait(false);
@@ -79,8 +91,7 @@ namespace MassTransit.HttpTransport
 
                     if (_log.IsDebugEnabled)
                     {
-                        _log.DebugFormat("Consumer {0}: {1} received, {2} concurrent", metrics.ConsumerTag, metrics.DeliveryCount,
-                            metrics.ConcurrentDeliveryCount);
+                        _log.DebugFormat("Consumer {0} received, {1} concurrent", metrics.DeliveryCount, metrics.ConcurrentDeliveryCount);
                     }
                 }
             }

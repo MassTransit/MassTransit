@@ -17,6 +17,7 @@ namespace MassTransit.HottpTransport.Tests
     using System.Threading;
     using System.Threading.Tasks;
     using GreenPipes;
+    using HttpTransport;
     using NUnit.Framework;
     using TestFramework;
 
@@ -34,7 +35,7 @@ namespace MassTransit.HottpTransport.Tests
                 // No bueno
                 var allowedOutboundCommunication = cfg.Host(new Uri("http://requestb.in"), host =>
                 {
-                    host.UseMethod(HttpMethod.Put);
+                    host.Method = HttpMethod.Put;
                 });
 
 
@@ -100,7 +101,7 @@ namespace MassTransit.HottpTransport.Tests
 
                 var allowedOutboundCommunication = cfg.Host(new Uri("http://requestb.in"), host =>
                 {
-                    host.UseMethod(HttpMethod.Put);
+                    host.Method = HttpMethod.Put;
                     //TODO: Serializer
                 });
             });
@@ -122,12 +123,15 @@ namespace MassTransit.HottpTransport.Tests
 //            await Console.Out.WriteLineAsync(string.Format("Message-Id: {0}", context.MessageId));
 //            await Console.Out.WriteAsync(context.Message.Hello);
 
-            context.Respond(new Pong());
+            context.Respond(new Pong() {Value = $"{context.Message.Hello}, World."});
         }
     }
 
+
     public class Pong
-    { }
+    {
+        public string Value { get; set; }
+    }
 
     public class Ping
     {

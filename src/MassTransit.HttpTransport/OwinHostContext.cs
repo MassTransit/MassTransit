@@ -10,10 +10,17 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.HttpTransport.Configuration.Builders
+namespace MassTransit.HttpTransport
 {
-    public interface IHttpReceiveEndpointBuilder :
-        IReceiveEndpointBuilder
+    using GreenPipes;
+    using Hosting;
+
+
+    public interface OwinHostContext :
+        PipeContext
     {
+        HttpHostSettings HostSettings { get; }
+
+        void StartHttpListener(HttpConsumerAction controller);
     }
 }

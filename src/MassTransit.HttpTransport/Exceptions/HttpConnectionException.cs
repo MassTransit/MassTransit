@@ -10,13 +10,33 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.HttpTransport.Hosting
+namespace MassTransit.HttpTransport
 {
-    public static class HttpHostSettingsExtensions
+    using System;
+    using System.Runtime.Serialization;
+
+
+    [Serializable]
+    public class HttpConnectionException :
+        MassTransitException
     {
-        public static string ToDebugString(this HttpHostSettings settings)
+        public HttpConnectionException()
         {
-            return $"{settings.Host}:{settings.Port}";
+        }
+
+        public HttpConnectionException(string message)
+            : base(message)
+        {
+        }
+
+        public HttpConnectionException(string message, Exception innerException)
+            : base(message, innerException)
+        {
+        }
+
+        protected HttpConnectionException(SerializationInfo info, StreamingContext context)
+            : base(info, context)
+        {
         }
     }
 }

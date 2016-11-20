@@ -16,13 +16,14 @@ namespace MassTransit.HttpTransport.Tests
     using System.Net.Http;
     using System.Threading;
     using System.Threading.Tasks;
+    using Builders;
     using Clients;
-    using Configuration.Builders;
     using GreenPipes;
     using Hosting;
     using MassTransit.Pipeline.Pipes;
     using NUnit.Framework;
     using Serialization;
+    using Transport;
     using Transports;
     using Util;
 
