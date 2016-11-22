@@ -47,7 +47,7 @@ namespace MassTransit.Pipeline.Filters
             if (context.IsDelivered || context.IsFaulted)
                 return;
 
-            context.InputAddress.LogSkipped(context.TransportHeaders.Get("MessageId", "N/A"));
+            context.LogSkipped();
 
             await _deadLetterPipe.Send(context).ConfigureAwait(false);
         }

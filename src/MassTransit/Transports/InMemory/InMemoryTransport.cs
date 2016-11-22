@@ -142,13 +142,13 @@ namespace MassTransit.Transports.InMemory
                 Task.Factory.StartNew(() => DispatchMessage(transportMessage), _supervisor.StoppedToken, TaskCreationOptions.None, _scheduler);
 #pragma warning restore 4014
 
-                context.DestinationAddress.LogSent(context.MessageId?.ToString("N") ?? "", TypeMetadataCache<T>.ShortName);
+                context.LogSent();
 
                 await _sendObservable.PostSend(context).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
-                _log.Error($"SEND FAULT: {_inputAddress} {context.MessageId} {TypeMetadataCache<T>.ShortName}", ex);
+                context.LogFaulted(ex);
 
                 await _sendObservable.SendFault(context, ex).ConfigureAwait(false);
 
@@ -216,13 +216,9 @@ namespace MassTransit.Transports.InMemory
                     await context.CompleteTask.ConfigureAwait(false);
 
                     await _receiveObservable.PostReceive(context).ConfigureAwait(false);
-
-                    _inputAddress.LogReceived(message.MessageId.ToString("N"), message.MessageType);
                 }
                 catch (Exception ex)
                 {
-                    _log.Error($"RCV FAULT: {message.MessageId}", ex);
-
                     await _receiveObservable.ReceiveFault(context, ex).ConfigureAwait(false);
 
                     message.DeliveryCount++;

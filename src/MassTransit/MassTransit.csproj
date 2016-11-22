@@ -999,7 +999,7 @@
     <Compile Include="Transformation\Transforms\ResultTransform.cs" />
     <Compile Include="Transports\AddressEqualityComparer.cs" />
     <Compile Include="Transports\DefaultMessageNameFormatter.cs" />
-    <Compile Include="Transports\EndpointLoggerExtensions.cs" />
+    <Compile Include="Transports\ReceiveEndpointLoggingExtensions.cs" />
     <Compile Include="Transports\FanoutSendEndpoint.cs" />
     <Compile Include="Transports\HostHandle.cs" />
     <Compile Include="Transports\IBusHostControl.cs" />

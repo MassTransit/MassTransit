@@ -23,6 +23,7 @@ namespace MassTransit.Context
     using GreenPipes;
     using GreenPipes.Payloads;
     using Serialization;
+    using Transports;
     using Util;
 
 
@@ -119,12 +120,16 @@ namespace MassTransit.Context
         {
             IsDelivered = true;
 
+            context.LogConsumed(duration, consumerType);
+
             return _receiveObserver.PostConsume(context, duration, consumerType);
         }
 
         public virtual Task NotifyFaulted<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType, Exception exception) where T : class
         {
             IsFaulted = true;
+
+            context.LogFaulted(duration, consumerType, exception);
 
             return _receiveObserver.ConsumeFault(context, duration, consumerType, exception);
         }

@@ -135,19 +135,21 @@ namespace MassTransit.AzureServiceBusTransport.Transport
 
                             if (context.ScheduledEnqueueTimeUtc.HasValue)
                             {
-                                var sequenceNumber = await _client.ScheduleSend(brokeredMessage, context.ScheduledEnqueueTimeUtc.Value).ConfigureAwait(false);
+                                var enqueueTimeUtc = context.ScheduledEnqueueTimeUtc.Value;
+
+                                var sequenceNumber = await _client.ScheduleSend(brokeredMessage, enqueueTimeUtc).ConfigureAwait(false);
 
                                 context.SetScheduledMessageId(sequenceNumber);
 
-                                if (_log.IsDebugEnabled)
-                                    _log.DebugFormat("Scheduled: {0} {1} {2}", sequenceNumber, context.ScheduledEnqueueTimeUtc.Value, _client.Path);
+                                context.LogScheduled(enqueueTimeUtc);
                             }
                             else
                             {
                                 await _observers.PreSend(context).ConfigureAwait(false);
 
                                 await _client.Send(brokeredMessage).ConfigureAwait(false);
-                                _log.DebugFormat("SEND {0} ({1})", brokeredMessage.MessageId, _client.Path);
+
+                                context.LogSent();
 
                                 await _observers.PostSend(context).ConfigureAwait(false);
                             }

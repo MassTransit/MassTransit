@@ -107,7 +107,7 @@ namespace MassTransit.RabbitMqTransport.Transport
                         await modelContext.BasicPublishAsync(context.Exchange, context.RoutingKey, context.Mandatory,
                             context.BasicProperties, context.Body, context.AwaitAck).ConfigureAwait(false);
 
-                        context.DestinationAddress.LogSent(context.MessageId?.ToString("N") ?? "", TypeMetadataCache<T>.ShortName);
+                        context.LogSent();
 
                         await _observers.PostSend(context).ConfigureAwait(false);
                     }

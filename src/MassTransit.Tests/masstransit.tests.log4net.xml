@@ -1,16 +1,16 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <log4net>
   <root>
-    <level value="OFF" />
+    <level value="ERROR" />
     <appender-ref ref="console" />
   </root>
 
   <logger name="MassTransit">
-    <level value="OFF" />
+    <level value="ERROR" />
   </logger>
 
-  <logger name="MassTransit.Messages" additivity="false">
-    <level value="OFF" />
+  <logger name="MassTransit.Messages">
+    <level value="DEBUG" />
   </logger>
 
   <appender name="console" type="log4net.Appender.ConsoleAppender, log4net">
