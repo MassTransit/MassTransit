@@ -57,12 +57,10 @@
     <Compile Include="..\..\SolutionVersion.cs">
       <Link>Properties\SolutionVersion.cs</Link>
     </Compile>
-    <Compile Include="ActivityExtensions.cs" />
-    <Compile Include="AutofacFactoryActivity.cs" />
-    <Compile Include="IStateMachineActivitySelector.cs" />
+    <Compile Include="AutofacStateMachineActivityFactory.cs" />
+    <Compile Include="AutofacStateMachineSagaRepository.cs" />
     <Compile Include="LoadStateMachineSagaExtensions.cs" />
     <Compile Include="RegisterStateMachineSagaExtensions.cs" />
-    <Compile Include="StateMachineActivitySelector.cs" />
     <Compile Include="StateMachineSagaConfiguratorCache.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -73,10 +71,6 @@
     <ProjectReference Include="..\..\MassTransit\MassTransit.csproj">
       <Project>{6efd69fc-cbcc-4f85-aee0-efba73f4d273}</Project>
       <Name>MassTransit</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\MassTransit.AutofacIntegration\MassTransit.AutofacIntegration.csproj">
-      <Project>{a31f2c6b-c806-46fd-a4f3-c54209dd495c}</Project>
-      <Name>MassTransit.AutofacIntegration</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

@@ -13,14 +13,16 @@
 namespace MassTransit.Containers.Tests
 {
     using System.Threading.Tasks;
-    using Autofac;
+    using Automatonymous;
     using NUnit.Framework;
     using Saga;
     using Scenarios.StateMachines;
+    using StructureMap;
+    using StructureMap.Pipeline;
     using TestFramework;
 
 
-    public class AutofacStateMachineSaga_Specs :
+    public class StructureMapStateMachineSaga_Specs :
         InMemoryTestFixture
     {
         [Test]
@@ -42,17 +44,18 @@ namespace MassTransit.Containers.Tests
 
         protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
-            var builder = new ContainerBuilder();
+            _container = new Container(x =>
+            {
+                x.For(typeof(ISagaRepository<>), new SingletonLifecycle())
+                    .Use(typeof(InMemorySagaRepository<>));
 
-            builder.RegisterGeneric(typeof(InMemorySagaRepository<>))
-                .As(typeof(ISagaRepository<>))
-                .SingleInstance();
+                x.ForConcreteType<PublishTestStartedActivity>();
 
-            builder.RegisterType<PublishTestStartedActivity>();
+                x.For<TestStateMachineSaga>(new SingletonLifecycle())
+                    .Use<TestStateMachineSaga>();
 
-            builder.RegisterStateMachineSagas(typeof(TestStateMachineSaga).Assembly);
-
-            _container = builder.Build();
+                x.Forward<SagaStateMachine<TestInstance>, TestStateMachineSaga>();
+            });
 
             configurator.LoadStateMachineSagas(_container);
         }

@@ -100,16 +100,16 @@
       <HintPath>..\..\packages\Shouldly.2.8.2\lib\net451\Shouldly.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="SimpleInjector, Version=3.2.7.0, Culture=neutral, PublicKeyToken=984cb50dea722e99, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\SimpleInjector.3.2.7\lib\net45\SimpleInjector.dll</HintPath>
+    <Reference Include="SimpleInjector, Version=3.3.1.0, Culture=neutral, PublicKeyToken=984cb50dea722e99, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\SimpleInjector.3.3.1\lib\net45\SimpleInjector.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="SimpleInjector.Extensions.ExecutionContextScoping, Version=3.2.7.0, Culture=neutral, PublicKeyToken=984cb50dea722e99, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\SimpleInjector.Extensions.ExecutionContextScoping.3.2.7\lib\net45\SimpleInjector.Extensions.ExecutionContextScoping.dll</HintPath>
+    <Reference Include="SimpleInjector.Extensions.ExecutionContextScoping, Version=3.3.1.0, Culture=neutral, PublicKeyToken=984cb50dea722e99, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\SimpleInjector.Extensions.ExecutionContextScoping.3.3.1\lib\net45\SimpleInjector.Extensions.ExecutionContextScoping.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="StructureMap, Version=4.4.1.451, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\StructureMap.4.4.1\lib\net45\StructureMap.dll</HintPath>
+    <Reference Include="StructureMap, Version=4.4.2.472, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\StructureMap.4.4.2\lib\net45\StructureMap.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
@@ -120,6 +120,7 @@
   <ItemGroup>
     <Compile Include="AutofacRegistrationExtension_Specs.cs" />
     <Compile Include="AutofacRegistration_Specs.cs" />
+    <Compile Include="StructureMapStateMachineSaga_Specs.cs" />
     <Compile Include="AutofacStateMachineSaga_Specs.cs" />
     <Compile Include="Autofac_TenantContainerSpecs.cs" />
     <Compile Include="CastleWindsor_Specs.cs" />
@@ -178,6 +179,10 @@
     <ProjectReference Include="..\MassTransit.Automatonymous.AutofacIntegration\MassTransit.Automatonymous.AutofacIntegration.csproj">
       <Project>{b2c9f22a-459a-4828-8017-0db76f81f1a1}</Project>
       <Name>MassTransit.Automatonymous.AutofacIntegration</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\MassTransit.Automatonymous.StructureMapIntegration\MassTransit.Automatonymous.StructureMapIntegration.csproj">
+      <Project>{4a042032-21a2-40ca-bbe7-5d47f786a949}</Project>
+      <Name>MassTransit.Automatonymous.StructureMapIntegration</Name>
     </ProjectReference>
     <ProjectReference Include="..\MassTransit.NinjectIntegration\MassTransit.NinjectIntegration.csproj">
       <Project>{25A2A3C3-27D0-4C55-A9E9-0B82D6B6913F}</Project>

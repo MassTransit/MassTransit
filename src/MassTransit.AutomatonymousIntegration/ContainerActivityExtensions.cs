@@ -14,10 +14,9 @@ namespace Automatonymous
 {
     using System;
     using Binders;
-    using MassTransit.AutomatonymousAutofacIntegration;
 
 
-    public static class ActivityExtensions
+    public static class ContainerActivityExtensions
     {
         /// <summary>
         /// Adds an activity to the state machine that is resolved from the container, rather than being initialized directly.

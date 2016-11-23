@@ -10,23 +10,10 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.AutomatonymousAutofacIntegration
+namespace Automatonymous
 {
-    using Automatonymous;
-    using Automatonymous.Binders;
+    using Binders;
 
-
-    public interface IStateMachineActivitySelector<TInstance>
-        where TInstance : class, SagaStateMachineInstance
-    {
-        /// <summary>
-        /// An activity which accepts the instance and data from the event
-        /// </summary>
-        /// <typeparam name="TActivity"></typeparam>
-        /// <returns></returns>
-        EventActivityBinder<TInstance> OfType<TActivity>()
-            where TActivity : Activity<TInstance>;
-    }
 
     public interface IStateMachineActivitySelector<TInstance, TData>
         where TInstance : class, SagaStateMachineInstance
@@ -46,6 +33,19 @@ namespace MassTransit.AutomatonymousAutofacIntegration
         /// <typeparam name="TActivity"></typeparam>
         /// <returns></returns>
         EventActivityBinder<TInstance, TData> OfInstanceType<TActivity>()
+            where TActivity : Activity<TInstance>;
+    }
+
+
+    public interface IStateMachineActivitySelector<TInstance>
+        where TInstance : class, SagaStateMachineInstance
+    {
+        /// <summary>
+        /// An activity which accepts the instance and data from the event
+        /// </summary>
+        /// <typeparam name="TActivity"></typeparam>
+        /// <returns></returns>
+        EventActivityBinder<TInstance> OfType<TActivity>()
             where TActivity : Activity<TInstance>;
     }
 }

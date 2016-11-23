@@ -10,22 +10,23 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.StructureMapIntegration
+namespace MassTransit.AutomatonymousStructureMapIntegration
 {
     using System.Threading.Tasks;
+    using Automatonymous;
     using GreenPipes;
     using Saga;
     using StructureMap;
 
 
-    public class StructureMapSagaRepository<TSaga> :
+    public class StructureMapStateMachineSagaRepository<TSaga> :
         ISagaRepository<TSaga>
         where TSaga : class, ISaga
     {
         readonly IContainer _container;
         readonly ISagaRepository<TSaga> _repository;
 
-        public StructureMapSagaRepository(ISagaRepository<TSaga> repository, IContainer container)
+        public StructureMapStateMachineSagaRepository(ISagaRepository<TSaga> repository, IContainer container)
         {
             _repository = repository;
             _container = container;
@@ -52,15 +53,20 @@ namespace MassTransit.StructureMapIntegration
                         .Use(proxy);
                 });
 
+                proxy.GetOrAddPayload<IStateMachineActivityFactory>(() => new StructureMapStateMachineActivityFactory());
+
                 await _repository.Send(proxy, policy, next).ConfigureAwait(false);
             }
         }
 
-        async Task ISagaRepository<TSaga>.SendQuery<T>(SagaQueryConsumeContext<TSaga, T> context, ISagaPolicy<TSaga, T> policy, IPipe<SagaConsumeContext<TSaga, T>> next)
+        async Task ISagaRepository<TSaga>.SendQuery<T>(SagaQueryConsumeContext<TSaga, T> context, ISagaPolicy<TSaga, T> policy,
+            IPipe<SagaConsumeContext<TSaga, T>> next)
         {
             using (var nestedContainer = _container.GetNestedContainer())
             {
                 SagaQueryConsumeContext<TSaga, T> proxy = context.CreateQueryScope(nestedContainer);
+
+                proxy.GetOrAddPayload<IStateMachineActivityFactory>(() => new StructureMapStateMachineActivityFactory());
 
                 await _repository.SendQuery(proxy, policy, next).ConfigureAwait(false);
             }

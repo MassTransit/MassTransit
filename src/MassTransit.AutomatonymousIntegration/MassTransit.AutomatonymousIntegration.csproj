@@ -69,6 +69,7 @@
     </Compile>
     <Compile Include="Activities\CancelRequestTimeoutActivity.cs" />
     <Compile Include="Activities\ClearRequestActivity.cs" />
+    <Compile Include="Activities\ContainerFactoryActivity.cs" />
     <Compile Include="Activities\FaultedPublishActivity.cs" />
     <Compile Include="Activities\FaultedRequestActivity.cs" />
     <Compile Include="Activities\FaultedRespondActivity.cs" />
@@ -84,10 +85,12 @@
     <Compile Include="Configuration\CorrelationConfigurators\UncorrelatedEventCorrelation.cs" />
     <Compile Include="Configuration\EventMissingInstanceConfigurator.cs" />
     <Compile Include="Configuration\MissingInstanceConfigurator.cs" />
+    <Compile Include="Configuration\StateMachineActivitySelector.cs" />
     <Compile Include="Configuration\StateMachineConfigurationResult.cs" />
     <Compile Include="Configuration\ScheduleConfigurator.cs" />
     <Compile Include="Configuration\StateMachineScheduleConfigurator.cs" />
     <Compile Include="ConsumeExceptionEventContext.cs" />
+    <Compile Include="ContainerActivityExtensions.cs" />
     <Compile Include="ContextExtensions.cs" />
     <Compile Include="Contexts\AutomatonymousConsumeExceptionEventContext.cs" />
     <Compile Include="EventExceptionMessageFactory.cs" />
@@ -113,6 +116,8 @@
     <Compile Include="Contexts\AutomatonymousConsumeEventContext.cs" />
     <Compile Include="Events\RequestTimeoutExpired.cs" />
     <Compile Include="Exceptions\NotAcceptedStateMachineException.cs" />
+    <Compile Include="IStateMachineActivityFactory.cs" />
+    <Compile Include="IStateMachineActivitySelector.cs" />
     <Compile Include="MassTransitStateMachine.cs" />
     <Compile Include="DestinationAddressProvider.cs" />
     <Compile Include="ServiceAddressProvider.cs" />

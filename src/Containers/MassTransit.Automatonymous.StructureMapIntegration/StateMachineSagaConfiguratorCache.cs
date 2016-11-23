@@ -10,13 +10,13 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.AutomatonymousAutofacIntegration
+namespace MassTransit.AutomatonymousStructureMapIntegration
 {
     using System;
     using System.Collections.Concurrent;
-    using Autofac;
     using Automatonymous;
     using Saga;
+    using StructureMap;
 
 
     public static class StateMachineSagaConfiguratorCache
@@ -26,9 +26,9 @@ namespace MassTransit.AutomatonymousAutofacIntegration
             return Cached.Instance.GetOrAdd(type, _ => (CachedConfigurator)Activator.CreateInstance(typeof(CachedConfigurator<>).MakeGenericType(type)));
         }
 
-        public static void Configure(Type sagaType, IReceiveEndpointConfigurator configurator, ILifetimeScope scope, string name)
+        public static void Configure(Type sagaType, IReceiveEndpointConfigurator configurator, IContainer container)
         {
-            GetOrAdd(sagaType).Configure(configurator, scope, name);
+            GetOrAdd(sagaType).Configure(configurator, container);
         }
 
 
@@ -40,7 +40,7 @@ namespace MassTransit.AutomatonymousAutofacIntegration
 
         interface CachedConfigurator
         {
-            void Configure(IReceiveEndpointConfigurator configurator, ILifetimeScope scope, string name);
+            void Configure(IReceiveEndpointConfigurator configurator, IContainer container);
         }
 
 
@@ -48,12 +48,12 @@ namespace MassTransit.AutomatonymousAutofacIntegration
             CachedConfigurator
             where T : class, SagaStateMachineInstance
         {
-            public void Configure(IReceiveEndpointConfigurator configurator, ILifetimeScope scope, string name)
+            public void Configure(IReceiveEndpointConfigurator configurator, IContainer container)
             {
-                var sagaRepository = scope.Resolve<ISagaRepository<T>>();
-                var stateMachine = scope.Resolve<SagaStateMachine<T>>();
+                var sagaRepository = container.GetInstance<ISagaRepository<T>>();
+                var stateMachine = container.GetInstance<SagaStateMachine<T>>();
 
-                var autofacSagaRepository = new AutofacStateMachineSagaRepository<T>(sagaRepository, scope, name);
+                var autofacSagaRepository = new StructureMapStateMachineSagaRepository<T>(sagaRepository, container);
 
                 configurator.StateMachineSaga(stateMachine, autofacSagaRepository);
             }

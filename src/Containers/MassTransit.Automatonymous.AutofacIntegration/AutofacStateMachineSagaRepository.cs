@@ -10,15 +10,16 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.AutofacIntegration
+namespace MassTransit.AutomatonymousAutofacIntegration
 {
     using System.Threading.Tasks;
     using Autofac;
+    using Automatonymous;
     using GreenPipes;
     using Saga;
 
 
-    public class AutofacSagaRepository<TSaga> :
+    public class AutofacStateMachineSagaRepository<TSaga> :
         ISagaRepository<TSaga>
         where TSaga : class, ISaga
     {
@@ -26,7 +27,7 @@ namespace MassTransit.AutofacIntegration
         readonly ISagaRepository<TSaga> _repository;
         readonly ILifetimeScope _scope;
 
-        public AutofacSagaRepository(ISagaRepository<TSaga> repository, ILifetimeScope scope, string name)
+        public AutofacStateMachineSagaRepository(ISagaRepository<TSaga> repository, ILifetimeScope scope, string name)
         {
             _repository = repository;
             _scope = scope;
@@ -47,6 +48,8 @@ namespace MassTransit.AutofacIntegration
             {
                 ConsumeContext<T> proxy = context.CreateScope(lifetimeScope);
 
+                proxy.GetOrAddPayload<IStateMachineActivityFactory>(() => new AutofacStateMachineActivityFactory());
+
                 await _repository.Send(proxy, policy, next).ConfigureAwait(false);
             }
         }
@@ -57,6 +60,8 @@ namespace MassTransit.AutofacIntegration
             using (var lifetimeScope = _scope.BeginLifetimeScope(_name))
             {
                 SagaQueryConsumeContext<TSaga, T> proxy = context.CreateQueryScope(lifetimeScope);
+
+                proxy.GetOrAddPayload<IStateMachineActivityFactory>(() => new AutofacStateMachineActivityFactory());
 
                 await _repository.SendQuery(proxy, policy, next).ConfigureAwait(false);
             }

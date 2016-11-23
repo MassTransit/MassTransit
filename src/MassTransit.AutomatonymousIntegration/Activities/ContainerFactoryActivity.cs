@@ -10,16 +10,14 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.AutomatonymousAutofacIntegration
+namespace Automatonymous.Activities
 {
     using System.Threading.Tasks;
-    using Autofac;
-    using Automatonymous;
-    using Automatonymous.Behaviors;
+    using Behaviors;
     using GreenPipes;
 
 
-    public class AutofacFactoryActivity<TInstance, TActivity> :
+    public class ContainerFactoryActivity<TInstance, TActivity> :
         Activity<TInstance>
         where TActivity : Activity<TInstance>
     {
@@ -30,18 +28,18 @@ namespace MassTransit.AutomatonymousAutofacIntegration
 
         Task Activity<TInstance>.Execute(BehaviorContext<TInstance> context, Behavior<TInstance> next)
         {
-            var lifetimeScope = context.GetPayload<ILifetimeScope>();
+            var factory = context.GetPayload<IStateMachineActivityFactory>();
 
-            Activity<TInstance> activity = lifetimeScope.Resolve<TActivity>();
+            Activity<TInstance> activity = factory.GetActivity<TActivity, TInstance>(context);
 
             return activity.Execute(context, next);
         }
 
         Task Activity<TInstance>.Execute<T>(BehaviorContext<TInstance, T> context, Behavior<TInstance, T> next)
         {
-            var lifetimeScope = context.GetPayload<ILifetimeScope>();
+            var factory = context.GetPayload<IStateMachineActivityFactory>();
 
-            Activity<TInstance> activity = lifetimeScope.Resolve<TActivity>();
+            Activity<TInstance> activity = factory.GetActivity<TActivity, TInstance>(context);
 
             var upconvert = new WidenBehavior<TInstance, T>(next, context);
 
@@ -60,12 +58,12 @@ namespace MassTransit.AutomatonymousAutofacIntegration
 
         public void Probe(ProbeContext context)
         {
-            context.CreateScope("autofacActivityFactory");
+            context.CreateScope("containerActivityFactory");
         }
     }
 
 
-    public class AutofacFactoryActivity<TInstance, TData, TActivity> :
+    public class ContainerFactoryActivity<TInstance, TData, TActivity> :
         Activity<TInstance, TData>
         where TActivity : Activity<TInstance, TData>
     {
@@ -74,11 +72,16 @@ namespace MassTransit.AutomatonymousAutofacIntegration
             visitor.Visit(this);
         }
 
+        void IProbeSite.Probe(ProbeContext context)
+        {
+            context.CreateScope("containerActivityFactory");
+        }
+
         Task Activity<TInstance, TData>.Execute(BehaviorContext<TInstance, TData> context, Behavior<TInstance, TData> next)
         {
-            var lifetimeScope = context.GetPayload<ILifetimeScope>();
+            var factory = context.GetPayload<IStateMachineActivityFactory>();
 
-            Activity<TInstance, TData> activity = lifetimeScope.Resolve<TActivity>();
+            Activity<TInstance, TData> activity = factory.GetActivity<TActivity, TInstance, TData>(context);
 
             return activity.Execute(context, next);
         }
@@ -86,11 +89,6 @@ namespace MassTransit.AutomatonymousAutofacIntegration
         Task Activity<TInstance, TData>.Faulted<TException>(BehaviorExceptionContext<TInstance, TData, TException> context, Behavior<TInstance, TData> next)
         {
             return next.Faulted(context);
-        }
-
-        void IProbeSite.Probe(ProbeContext context)
-        {
-            context.CreateScope("autofacActivityFactory");
         }
     }
 }

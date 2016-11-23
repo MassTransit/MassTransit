@@ -10,10 +10,10 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.AutomatonymousAutofacIntegration
+namespace Automatonymous
 {
-    using Automatonymous;
-    using Automatonymous.Binders;
+    using Activities;
+    using Binders;
 
 
     public class StateMachineActivitySelector<TInstance> :
@@ -29,7 +29,7 @@ namespace MassTransit.AutomatonymousAutofacIntegration
 
         EventActivityBinder<TInstance> IStateMachineActivitySelector<TInstance>.OfType<TActivity>()
         {
-            var activity = new AutofacFactoryActivity<TInstance, TActivity>();
+            var activity = new ContainerFactoryActivity<TInstance, TActivity>();
 
             return _binder.Add(activity);
         }
@@ -50,14 +50,14 @@ namespace MassTransit.AutomatonymousAutofacIntegration
 
         EventActivityBinder<TInstance, TData> IStateMachineActivitySelector<TInstance, TData>.OfType<TActivity>()
         {
-            var activity = new AutofacFactoryActivity<TInstance, TData, TActivity>();
+            var activity = new ContainerFactoryActivity<TInstance, TData, TActivity>();
 
             return _binder.Add(activity);
         }
 
         EventActivityBinder<TInstance, TData> IStateMachineActivitySelector<TInstance, TData>.OfInstanceType<TActivity>()
         {
-            var activity = new AutofacFactoryActivity<TInstance, TActivity>();
+            var activity = new ContainerFactoryActivity<TInstance, TActivity>();
 
             return _binder.Add(activity);
         }
