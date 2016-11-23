@@ -32,16 +32,13 @@ namespace MassTransit
         /// <param name="destinationAddress">The destination address where the schedule message should be sent</param>
         /// <param name="scheduledTime">The time when the message should be sent to the endpoint</param>
         /// <param name="message">The message to send</param>
-        /// <param name="pipe">Optional: A callback that gives the caller access to the publish context.</param>
         /// <returns>A handled to the scheduled message</returns>
         [Obsolete("Use ScheduleSend instead, it's the future")]
         public static Task<ScheduledMessage<T>> ScheduleMessage<T>(this IPublishEndpoint publishEndpoint, Uri destinationAddress, DateTime scheduledTime,
             T message)
             where T : class
         {
-            IMessageScheduler scheduler = new PublishMessageScheduler(publishEndpoint);
-
-            return scheduler.ScheduleSend(destinationAddress, scheduledTime, message);
+            return publishEndpoint.ScheduleSend(destinationAddress, scheduledTime, message);
         }
 
         /// <summary>
@@ -60,9 +57,7 @@ namespace MassTransit
             T message, IPipe<SendContext<T>> pipe)
             where T : class
         {
-            IMessageScheduler scheduler = new PublishMessageScheduler(publishEndpoint);
-
-            return scheduler.ScheduleSend(destinationAddress, scheduledTime, message, pipe);
+            return publishEndpoint.ScheduleSend(destinationAddress, scheduledTime, message, pipe);
         }
 
         /// <summary>
@@ -81,9 +76,7 @@ namespace MassTransit
             T message, IPipe<SendContext> pipe)
             where T : class
         {
-            IMessageScheduler scheduler = new PublishMessageScheduler(publishEndpoint);
-
-            return scheduler.ScheduleSend(destinationAddress, scheduledTime, message, pipe);
+            return publishEndpoint.ScheduleSend(destinationAddress, scheduledTime, message, pipe);
         }
 
         /// <summary>
@@ -100,9 +93,7 @@ namespace MassTransit
         public static Task<ScheduledMessage<T>> ScheduleMessage<T>(this IBus bus, DateTime scheduledTime, T message)
             where T : class
         {
-            IMessageScheduler scheduler = new PublishMessageScheduler(bus);
-
-            return scheduler.ScheduleSend(bus.Address, scheduledTime, message);
+            return bus.ScheduleSend(bus.Address, scheduledTime, message);
         }
 
         /// <summary>
@@ -120,9 +111,7 @@ namespace MassTransit
             IPipe<SendContext<T>> pipe)
             where T : class
         {
-            IMessageScheduler scheduler = new PublishMessageScheduler(bus);
-
-            return scheduler.ScheduleSend(bus.Address, scheduledTime, message, pipe);
+            return bus.ScheduleSend(bus.Address, scheduledTime, message, pipe);
         }
 
         /// <summary>
@@ -140,9 +129,7 @@ namespace MassTransit
             IPipe<SendContext> pipe)
             where T : class
         {
-            IMessageScheduler scheduler = new PublishMessageScheduler(bus);
-
-            return scheduler.ScheduleSend(bus.Address, scheduledTime, message, pipe);
+            return bus.ScheduleSend(bus.Address, scheduledTime, message, pipe);
         }
 
         /// <summary>
@@ -211,7 +198,9 @@ namespace MassTransit
                 return schedulerContext.ScheduleSend(destinationAddress, scheduledTime, message);
             }
 
-            return ScheduleMessage((IPublishEndpoint)context, destinationAddress, scheduledTime, message);
+            IPublishEndpoint endpoint = context;
+
+            return endpoint.ScheduleSend(destinationAddress, scheduledTime, message);
         }
 
         /// <summary>
@@ -236,7 +225,9 @@ namespace MassTransit
                 return schedulerContext.ScheduleSend(destinationAddress, scheduledTime, message, pipe);
             }
 
-            return ScheduleMessage((IPublishEndpoint)context, destinationAddress, scheduledTime, message, pipe);
+            IPublishEndpoint endpoint = context;
+
+            return endpoint.ScheduleSend(destinationAddress, scheduledTime, message, pipe);
         }
 
         /// <summary>
@@ -244,14 +235,11 @@ namespace MassTransit
         /// </summary>
         /// <param name="publishEndpoint"></param>
         /// <param name="message"> </param>
-        [Obsolete("Seriously this is just a disaster waiting to happen")]
+        [Obsolete("Use CancelScheduledSend() instead")]
         public static Task CancelScheduledMessage<T>(this IPublishEndpoint publishEndpoint, ScheduledMessage<T> message)
             where T : class
         {
-            if (message == null)
-                throw new ArgumentNullException(nameof(message));
-
-            return CancelScheduledMessage(publishEndpoint, message.TokenId);
+            return publishEndpoint.CancelScheduledSend(message);
         }
 
         /// <summary>
@@ -259,15 +247,10 @@ namespace MassTransit
         /// </summary>
         /// <param name="publishEndpoint"></param>
         /// <param name="tokenId">The tokenId of the scheduled message</param>
-        [Obsolete("Seriously this is just a disaster waiting to happen")]
+        [Obsolete("Use CancelScheduledSend() instead")]
         public static Task CancelScheduledMessage(this IPublishEndpoint publishEndpoint, Guid tokenId)
         {
-            if (publishEndpoint == null)
-                throw new ArgumentNullException(nameof(publishEndpoint));
-
-            IMessageScheduler scheduler = new PublishMessageScheduler(publishEndpoint);
-
-            return scheduler.CancelScheduledSend(tokenId);
+            return publishEndpoint.CancelScheduledSend(tokenId);
         }
     }
 }

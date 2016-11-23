@@ -16,7 +16,6 @@ namespace MassTransit
     using System.Threading;
     using System.Threading.Tasks;
     using GreenPipes;
-    using Pipeline;
     using Scheduling;
 
 
@@ -31,7 +30,8 @@ namespace MassTransit
         /// <param name="message">The message</param>
         /// <param name="cancellationToken"></param>
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
-        public static Task<ScheduledMessage<T>> ScheduleSend<T>(this MessageSchedulerContext scheduler, TimeSpan delay, T message, CancellationToken cancellationToken = default(CancellationToken))
+        public static Task<ScheduledMessage<T>> ScheduleSend<T>(this MessageSchedulerContext scheduler, TimeSpan delay, T message,
+            CancellationToken cancellationToken = default(CancellationToken))
             where T : class
         {
             var scheduledTime = DateTime.UtcNow + delay;

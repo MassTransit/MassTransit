@@ -16,7 +16,6 @@ namespace MassTransit.Scheduling
     using System.Threading;
     using System.Threading.Tasks;
     using GreenPipes;
-    using Pipeline;
 
 
     /// <summary>
@@ -29,5 +28,11 @@ namespace MassTransit.Scheduling
 
         Task<ScheduledMessage> ScheduleSend(IMessageScheduler scheduler, Uri destinationAddress, DateTime scheduledTime, object message, IPipe<SendContext> pipe,
             CancellationToken cancellationToken);
+
+        Task<ScheduledRecurringMessage> ScheduleRecurringSend(IRecurringMessageScheduler scheduler, Uri destinationAddress, RecurringSchedule schedule, object message, IPipe<SendContext> pipe,
+            CancellationToken cancellationToken);
+
+        Task<ScheduledRecurringMessage> ScheduleRecurringSend(IRecurringMessageScheduler scheduler, Uri destinationAddress,
+            RecurringSchedule schedule, object message, CancellationToken cancellationToken);
     }
 }

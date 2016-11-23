@@ -15,17 +15,21 @@ namespace MassTransit.Scheduling
     using System;
 
 
-    public interface ScheduledRecurringMessage
+    public class CancelScheduledRecurringMessageCommand :
+        CancelScheduledRecurringMessage
     {
-        RecurringSchedule Schedule { get; }
-        Uri Destination { get; }
-    }
+        public CancelScheduledRecurringMessageCommand(string scheduleId, string scheduleGroup)
+        {
+            CorrelationId = NewId.NextGuid();
+            Timestamp = DateTime.UtcNow;
 
+            ScheduleId = scheduleId;
+            ScheduleGroup = scheduleGroup;
+        }
 
-    public interface ScheduledRecurringMessage<out T> :
-        ScheduledRecurringMessage
-        where T : class
-    {
-        T Payload { get; }
+        public Guid CorrelationId { get; }
+        public DateTime Timestamp { get; }
+        public string ScheduleId { get; }
+        public string ScheduleGroup { get; }
     }
 }

@@ -72,8 +72,10 @@ namespace MassTransit.QuartzIntegration.Tests
 
             Assert.IsNotNull(_lastInterval.Headers.Get<DateTimeOffset>(MessageHeaders.Quartz.Scheduled, null));
             Assert.IsNotNull(_lastInterval.Headers.Get<DateTimeOffset>(MessageHeaders.Quartz.Sent, null));
-            //Assert.IsNotNull(_lastInterval.Headers.Get<DateTimeOffset>("NextFireTimeUtc", null));
+            Assert.IsNotNull(_lastInterval.Headers.Get<DateTimeOffset>(MessageHeaders.Quartz.NextScheduled, null));
             Assert.IsNotNull(_lastInterval.Headers.Get<DateTimeOffset>(MessageHeaders.Quartz.PreviousSent, null));
+
+            Console.WriteLine("{0}", _lastInterval.Headers.Get<DateTimeOffset>(MessageHeaders.Quartz.NextScheduled, null));
         }
 
         Task<ConsumeContext<Done>> _done;

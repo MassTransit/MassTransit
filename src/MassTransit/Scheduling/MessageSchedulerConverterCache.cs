@@ -17,7 +17,6 @@ namespace MassTransit.Scheduling
     using System.Threading;
     using System.Threading.Tasks;
     using GreenPipes;
-    using Pipeline;
 
 
     /// <summary>
@@ -41,6 +40,18 @@ namespace MassTransit.Scheduling
             Type messageType, IPipe<SendContext> pipe, CancellationToken cancellationToken)
         {
             return Cached.Converters.Value[messageType].ScheduleSend(scheduler, destinationAddress, scheduledTime, message, pipe, cancellationToken);
+        }
+
+        public static Task<ScheduledRecurringMessage> ScheduleRecurringSend(IRecurringMessageScheduler scheduler, Uri destinationAddress, RecurringSchedule schedule, object message,
+            Type messageType, IPipe<SendContext> pipe, CancellationToken cancellationToken)
+        {
+            return Cached.Converters.Value[messageType].ScheduleRecurringSend(scheduler, destinationAddress, schedule, message, pipe, cancellationToken);
+        }
+
+        public static Task<ScheduledRecurringMessage> ScheduleRecurringSend(IRecurringMessageScheduler scheduler, Uri destinationAddress, RecurringSchedule schedule, object message,
+            Type messageType, CancellationToken cancellationToken)
+        {
+            return Cached.Converters.Value[messageType].ScheduleRecurringSend(scheduler, destinationAddress, schedule, message, cancellationToken);
         }
 
         static Lazy<IMessageSchedulerConverter> CreateTypeConverter(Type type)

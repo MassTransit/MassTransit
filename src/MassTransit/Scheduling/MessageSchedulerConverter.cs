@@ -17,7 +17,6 @@ namespace MassTransit.Scheduling
     using System.Threading.Tasks;
     using GreenPipes;
     using Internals.Extensions;
-    using Pipeline;
 
 
     /// <summary>
@@ -29,7 +28,8 @@ namespace MassTransit.Scheduling
         IMessageSchedulerConverter
         where T : class
     {
-        public async Task<ScheduledMessage> ScheduleSend(IMessageScheduler scheduler, Uri destinationAddress, DateTime scheduledTime, object message, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<ScheduledMessage> ScheduleSend(IMessageScheduler scheduler, Uri destinationAddress, DateTime scheduledTime, object message,
+            CancellationToken cancellationToken = default(CancellationToken))
         {
             if (scheduler == null)
                 throw new ArgumentNullException(nameof(scheduler));
@@ -45,7 +45,8 @@ namespace MassTransit.Scheduling
             return scheduleSend;
         }
 
-        public async Task<ScheduledMessage> ScheduleSend(IMessageScheduler scheduler, Uri destinationAddress, DateTime scheduledTime, object message, IPipe<SendContext> pipe, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<ScheduledMessage> ScheduleSend(IMessageScheduler scheduler, Uri destinationAddress, DateTime scheduledTime, object message,
+            IPipe<SendContext> pipe, CancellationToken cancellationToken = default(CancellationToken))
         {
             if (scheduler == null)
                 throw new ArgumentNullException(nameof(scheduler));
@@ -60,6 +61,48 @@ namespace MassTransit.Scheduling
 
             ScheduledMessage<T> scheduleSend =
                 await scheduler.ScheduleSend(destinationAddress, scheduledTime, msg, pipe, cancellationToken).ConfigureAwait(false);
+
+            return scheduleSend;
+        }
+
+        public async Task<ScheduledRecurringMessage> ScheduleRecurringSend(IRecurringMessageScheduler scheduler, Uri destinationAddress,
+            RecurringSchedule schedule, object message, CancellationToken cancellationToken)
+        {
+            if (scheduler == null)
+                throw new ArgumentNullException(nameof(scheduler));
+            if (schedule == null)
+                throw new ArgumentNullException(nameof(schedule));
+            if (message == null)
+                throw new ArgumentNullException(nameof(message));
+
+            var msg = message as T;
+            if (msg == null)
+                throw new ArgumentException("Unexpected message type: " + message.GetType().GetTypeName());
+
+            ScheduledRecurringMessage<T> scheduleSend = await scheduler.ScheduleRecurringSend(destinationAddress, schedule, msg, cancellationToken)
+                .ConfigureAwait(false);
+
+            return scheduleSend;
+        }
+
+        public async Task<ScheduledRecurringMessage> ScheduleRecurringSend(IRecurringMessageScheduler scheduler, Uri destinationAddress,
+            RecurringSchedule schedule, object message, IPipe<SendContext> pipe, CancellationToken cancellationToken)
+        {
+            if (scheduler == null)
+                throw new ArgumentNullException(nameof(scheduler));
+            if (schedule == null)
+                throw new ArgumentNullException(nameof(schedule));
+            if (message == null)
+                throw new ArgumentNullException(nameof(message));
+            if (pipe == null)
+                throw new ArgumentNullException(nameof(pipe));
+
+            var msg = message as T;
+            if (msg == null)
+                throw new ArgumentException("Unexpected message type: " + message.GetType().GetTypeName());
+
+            ScheduledRecurringMessage<T> scheduleSend = await scheduler.ScheduleRecurringSend(destinationAddress, schedule, msg, pipe, cancellationToken)
+                .ConfigureAwait(false);
 
             return scheduleSend;
         }
