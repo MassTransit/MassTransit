@@ -86,13 +86,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\..\SolutionVersion.cs">
-      <Link>SolutionVersion.cs</Link>
+      <Link>Properties\SolutionVersion.cs</Link>
     </Compile>
     <Compile Include="ConsumerConfiguratorCache.cs" />
     <Compile Include="NinjectExtensions.cs" />
     <Compile Include="NinjectConsumerFactory.cs" />
     <Compile Include="NinjectSagaRepository.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SagaConfiguratorCache.cs" />
   </ItemGroup>
   <ItemGroup>

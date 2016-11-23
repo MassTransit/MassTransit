@@ -13,13 +13,13 @@
 namespace Automatonymous.Pipeline
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
     using Contexts;
     using GreenPipes;
     using MassTransit;
     using MassTransit.Logging;
-    using MassTransit.Pipeline;
     using MassTransit.Saga;
     using MassTransit.Saga.Pipeline.Filters;
     using MassTransit.Util;
@@ -55,7 +55,7 @@ namespace Automatonymous.Pipeline
                 InstanceType = TypeMetadataCache<TInstance>.ShortName
             });
 
-            var states = _machine.States.Cast<State<TInstance>>()
+            List<State<TInstance>> states = _machine.States.Cast<State<TInstance>>()
                 .Where(x => x.Events.Contains(_event)).ToList();
             if (states.Any())
             {
@@ -67,7 +67,7 @@ namespace Automatonymous.Pipeline
 
         public async Task Send(SagaConsumeContext<TInstance, TData> context, IPipe<SagaConsumeContext<TInstance, TData>> next)
         {
-            var eventContext = new StateMachineEventContext<TInstance, TData>(_machine, context.Saga, _event, context.Message, context.CancellationToken);
+            var eventContext = new StateMachineEventContext<TInstance, TData>(context, _machine, context.Saga, _event, context.Message);
 
             eventContext.GetOrAddPayload(() => context);
             eventContext.GetOrAddPayload(() => (ConsumeContext<TData>)context);

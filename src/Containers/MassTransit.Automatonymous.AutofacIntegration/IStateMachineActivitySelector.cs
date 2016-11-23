@@ -10,32 +10,42 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace Automatonymous
+namespace MassTransit.AutomatonymousAutofacIntegration
 {
-    /// <summary>
-    /// Creates a state machine activity within the given context of execution
-    /// </summary>
-    public interface IStateMachineActivityFactory
+    using Automatonymous;
+    using Automatonymous.Binders;
+
+
+    public interface IStateMachineActivitySelector<TInstance>
+        where TInstance : class, SagaStateMachineInstance
     {
         /// <summary>
-        /// Creates a state machine activity for the specified context
+        /// An activity which accepts the instance and data from the event
         /// </summary>
         /// <typeparam name="TActivity"></typeparam>
-        /// <typeparam name="TInstance"></typeparam>
-        /// <typeparam name="TData"></typeparam>
-        /// <param name="context"></param>
         /// <returns></returns>
-        Activity<TInstance, TData> GetActivity<TActivity, TInstance, TData>(BehaviorContext<TInstance, TData> context)
+        EventActivityBinder<TInstance> OfType<TActivity>()
+            where TActivity : Activity<TInstance>;
+    }
+
+    public interface IStateMachineActivitySelector<TInstance, TData>
+        where TInstance : class, SagaStateMachineInstance
+        where TData : class
+    {
+        /// <summary>
+        /// An activity which accepts the instance and data from the event
+        /// </summary>
+        /// <typeparam name="TActivity"></typeparam>
+        /// <returns></returns>
+        EventActivityBinder<TInstance, TData> OfType<TActivity>()
             where TActivity : Activity<TInstance, TData>;
 
         /// <summary>
-        /// Creates a state machine activity for the specified context
+        /// An activity that only accepts the instance, and does not require the event data
         /// </summary>
         /// <typeparam name="TActivity"></typeparam>
-        /// <typeparam name="TInstance"></typeparam>
-        /// <param name="context"></param>
         /// <returns></returns>
-        Activity<TInstance> GetActivity<TActivity, TInstance>(BehaviorContext<TInstance> context)
+        EventActivityBinder<TInstance, TData> OfInstanceType<TActivity>()
             where TActivity : Activity<TInstance>;
     }
 }

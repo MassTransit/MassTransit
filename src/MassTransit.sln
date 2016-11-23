@@ -100,6 +100,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{C0CD
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Host.Quartz", "MassTransit.Host.Quartz\MassTransit.Host.Quartz.csproj", "{E390AD5C-61D3-4EF4-9858-5DBE0F0849D9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Automatonymous.AutofacIntegration", "Containers\MassTransit.Automatonymous.AutofacIntegration\MassTransit.Automatonymous.AutofacIntegration.csproj", "{B2C9F22A-459A-4828-8017-0DB76F81F1A1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -441,6 +443,18 @@ Global
 		{E390AD5C-61D3-4EF4-9858-5DBE0F0849D9}.ReleaseUnsigned|Any CPU.ActiveCfg = Release|Any CPU
 		{E390AD5C-61D3-4EF4-9858-5DBE0F0849D9}.ReleaseUnsigned|x86.ActiveCfg = Release|Any CPU
 		{E390AD5C-61D3-4EF4-9858-5DBE0F0849D9}.ReleaseUnsigned|x86.Build.0 = Release|Any CPU
+		{B2C9F22A-459A-4828-8017-0DB76F81F1A1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B2C9F22A-459A-4828-8017-0DB76F81F1A1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B2C9F22A-459A-4828-8017-0DB76F81F1A1}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{B2C9F22A-459A-4828-8017-0DB76F81F1A1}.Debug|x86.Build.0 = Debug|Any CPU
+		{B2C9F22A-459A-4828-8017-0DB76F81F1A1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B2C9F22A-459A-4828-8017-0DB76F81F1A1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B2C9F22A-459A-4828-8017-0DB76F81F1A1}.Release|x86.ActiveCfg = Release|Any CPU
+		{B2C9F22A-459A-4828-8017-0DB76F81F1A1}.Release|x86.Build.0 = Release|Any CPU
+		{B2C9F22A-459A-4828-8017-0DB76F81F1A1}.ReleaseUnsigned|Any CPU.ActiveCfg = Release|Any CPU
+		{B2C9F22A-459A-4828-8017-0DB76F81F1A1}.ReleaseUnsigned|Any CPU.Build.0 = Release|Any CPU
+		{B2C9F22A-459A-4828-8017-0DB76F81F1A1}.ReleaseUnsigned|x86.ActiveCfg = Release|Any CPU
+		{B2C9F22A-459A-4828-8017-0DB76F81F1A1}.ReleaseUnsigned|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -475,6 +489,7 @@ Global
 		{82586835-CC1A-4DDE-AF8F-A8EEEF84E8C1} = {40AD8EF9-3B80-49B2-91DF-6DA2FC438055}
 		{FD3E8EA7-3180-468C-94EE-9EA2D15188ED} = {40AD8EF9-3B80-49B2-91DF-6DA2FC438055}
 		{E390AD5C-61D3-4EF4-9858-5DBE0F0849D9} = {FDC1A760-D4E5-44F4-B0D9-C19F2E14253A}
+		{B2C9F22A-459A-4828-8017-0DB76F81F1A1} = {6C61507E-FF16-45C8-8FE4-350069D9B4C1}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		EnterpriseLibraryConfigurationToolBinariesPath = packages\Unity.2.1.505.2\lib\NET35

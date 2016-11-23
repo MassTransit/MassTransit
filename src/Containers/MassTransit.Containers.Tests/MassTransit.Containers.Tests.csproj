@@ -40,6 +40,10 @@
     <Reference Include="Autofac">
       <HintPath>..\..\packages\Autofac.3.5.2\lib\net40\Autofac.dll</HintPath>
     </Reference>
+    <Reference Include="Automatonymous, Version=3.5.0.0, Culture=neutral, PublicKeyToken=b800c4cfcdeea87b, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Automatonymous.3.5.6-develop\lib\net452\Automatonymous.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Castle.Core">
       <HintPath>..\..\packages\Castle.Core.3.3.3\lib\net45\Castle.Core.dll</HintPath>
     </Reference>
@@ -116,6 +120,7 @@
   <ItemGroup>
     <Compile Include="AutofacRegistrationExtension_Specs.cs" />
     <Compile Include="AutofacRegistration_Specs.cs" />
+    <Compile Include="AutofacStateMachineSaga_Specs.cs" />
     <Compile Include="Autofac_TenantContainerSpecs.cs" />
     <Compile Include="CastleWindsor_Specs.cs" />
     <Compile Include="ContextSetup.cs" />
@@ -130,6 +135,13 @@
     <Compile Include="Scenarios\AnotherMessageConsumerImpl.cs" />
     <Compile Include="Scenarios\SimpleConsumerDependency.cs" />
     <Compile Include="Scenarios\SimpleSaga.cs" />
+    <Compile Include="Scenarios\StateMachines\PublishTestStartedActivity.cs" />
+    <Compile Include="Scenarios\StateMachines\StartTest.cs" />
+    <Compile Include="Scenarios\StateMachines\TestInstance.cs" />
+    <Compile Include="Scenarios\StateMachines\TestStarted.cs" />
+    <Compile Include="Scenarios\StateMachines\TestStateMachineSaga.cs" />
+    <Compile Include="Scenarios\StateMachines\TestUpdated.cs" />
+    <Compile Include="Scenarios\StateMachines\UpdateTest.cs" />
     <Compile Include="Scenarios\ThirdSagaMessage.cs" />
     <Compile Include="Scenarios\When_registering_a_saga.cs" />
     <Compile Include="Scenarios\When_registering_a_consumer.cs" />
@@ -147,6 +159,10 @@
       <Project>{0e90afe6-99e8-43cf-995e-e99466dd6807}</Project>
       <Name>MassTransit.SerilogIntegration</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\MassTransit.AutomatonymousIntegration\MassTransit.AutomatonymousIntegration.csproj">
+      <Project>{a852511b-2742-4f4d-bd4e-adddbf3bd4b3}</Project>
+      <Name>MassTransit.AutomatonymousIntegration</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\MassTransit.TestFramework\MassTransit.TestFramework.csproj">
       <Project>{3c4b5f1a-69ad-415e-9f40-a7fdbd7a3012}</Project>
       <Name>MassTransit.TestFramework</Name>
@@ -158,6 +174,10 @@
     <ProjectReference Include="..\MassTransit.AutofacIntegration\MassTransit.AutofacIntegration.csproj">
       <Project>{A31F2C6B-C806-46FD-A4F3-C54209DD495C}</Project>
       <Name>MassTransit.AutofacIntegration</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\MassTransit.Automatonymous.AutofacIntegration\MassTransit.Automatonymous.AutofacIntegration.csproj">
+      <Project>{b2c9f22a-459a-4828-8017-0db76f81f1a1}</Project>
+      <Name>MassTransit.Automatonymous.AutofacIntegration</Name>
     </ProjectReference>
     <ProjectReference Include="..\MassTransit.NinjectIntegration\MassTransit.NinjectIntegration.csproj">
       <Project>{25A2A3C3-27D0-4C55-A9E9-0B82D6B6913F}</Project>

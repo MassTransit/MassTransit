@@ -15,7 +15,6 @@ namespace MassTransit.AutofacIntegration
     using System.Threading.Tasks;
     using Autofac;
     using GreenPipes;
-    using Pipeline;
     using Saga;
 
 
@@ -63,7 +62,7 @@ namespace MassTransit.AutofacIntegration
             }
         }
 
-        static void ConfigureScope(ContainerBuilder containerBuilder, ConsumeContext context)
+        protected virtual void ConfigureScope(ContainerBuilder containerBuilder, ConsumeContext context)
         {
             containerBuilder.RegisterInstance(context)
                 .ExternallyOwned();

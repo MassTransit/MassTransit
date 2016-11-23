@@ -96,12 +96,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\..\SolutionVersion.cs">
-      <Link>SolutionVersion.cs</Link>
+      <Link>Properties\SolutionVersion.cs</Link>
     </Compile>
     <Compile Include="ConsumerConfiguratorCache.cs" />
     <Compile Include="SagaConfiguratorCache.cs" />
     <Compile Include="UnityExtensions.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UnityConsumerFactory.cs" />
     <Compile Include="UnitySagaRepository.cs" />
   </ItemGroup>

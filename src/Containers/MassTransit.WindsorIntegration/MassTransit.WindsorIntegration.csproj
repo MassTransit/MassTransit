@@ -90,7 +90,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\..\SolutionVersion.cs">
-      <Link>SolutionVersion.cs</Link>
+      <Link>Properties\SolutionVersion.cs</Link>
     </Compile>
     <Compile Include="WindsorCompensateActivityFactory.cs" />
     <Compile Include="WindsorExecuteActivityFactory.cs" />
@@ -100,7 +100,6 @@
     <Compile Include="SagaConfiguratorCache.cs" />
     <Compile Include="WindsorMessageScopeFilter.cs" />
     <Compile Include="WindsorMessageScopePipeSpecification.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="WindsorContainerExtensions.cs" />
     <Compile Include="WindsorConsumerFactory.cs" />
     <Compile Include="WindsorSagaRepository.cs" />

@@ -59,10 +59,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\..\SolutionVersion.cs">
-      <Link>SolutionVersion.cs</Link>
+      <Link>Properties\SolutionVersion.cs</Link>
     </Compile>
     <Compile Include="ConsumerConfiguratorCache.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SagaConfiguratorCache.cs" />
     <Compile Include="SimpleInjectorConsumerFactory.cs" />
     <Compile Include="SimpleInjectorExtensions.cs" />

@@ -39,14 +39,14 @@ namespace MassTransit
         public static void LoadFrom(this IReceiveEndpointConfigurator configurator, ILifetimeScope scope,
             string name = "message")
         {
-            IList<Type> concreteTypes = FindTypes<IConsumer>(scope, r => !r.HasInterface<ISaga>());
+            IList<Type> concreteTypes = FindTypes(scope, r => !r.HasInterface<ISaga>(), typeof(IConsumer));
             if (concreteTypes.Count > 0)
             {
                 foreach (var concreteType in concreteTypes)
                     ConsumerConfiguratorCache.Configure(concreteType, configurator, scope, name);
             }
 
-            IList<Type> sagaTypes = FindTypes<ISaga>(scope, x => true);
+            IList<Type> sagaTypes = FindTypes(scope, x => true, typeof(ISaga));
             if (sagaTypes.Count > 0)
             {
                 foreach (var sagaType in sagaTypes)
@@ -304,11 +304,11 @@ namespace MassTransit
                 .SingleInstance();
         }
 
-        static IList<Type> FindTypes<T>(IComponentContext scope, Func<Type, bool> filter)
+        public static IList<Type> FindTypes(IComponentContext scope, Func<Type, bool> filter, Type interfaceType)
         {
             return scope.ComponentRegistry.Registrations
                 .SelectMany(r => r.Services.OfType<IServiceWithType>(), (r, s) => new {r, s})
-                .Where(rs => rs.s.ServiceType.HasInterface<T>())
+                .Where(rs => rs.s.ServiceType.HasInterface(interfaceType))
                 .Select(rs => rs.s.ServiceType)
                 .Where(filter)
                 .ToList();

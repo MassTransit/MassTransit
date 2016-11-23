@@ -174,6 +174,11 @@ Target "Package" (fun _ ->
                   PackageFile = @".\src\Containers\MassTransit.AutofacIntegration\packages.config"
                   Files = [ (@"..\src\Containers\MassTransit.AutofacIntegration\bin\Release\MassTransit.AutofacIntegration.*", Some @"lib\net452", None);
                             (@"..\src\Containers\MassTransit.AutofacIntegration\**\*.cs", Some @"src", None) ] } 
+                { Project = "MassTransit.Automatonymous.Autofac"
+                  Summary = "MassTransit Automatonymous Autofac Container Support"
+                  PackageFile = @".\src\Containers\MassTransit.Automatonymous.AutofacIntegration\packages.config"
+                  Files = [ (@"..\src\Containers\MassTransit.Automatonymous.AutofacIntegration\bin\Release\MassTransit.Automatonymous.AutofacIntegration.*", Some @"lib\net452", None);
+                            (@"..\src\Containers\MassTransit.Automatonymous.AutofacIntegration\**\*.cs", Some @"src", None) ] } 
                 { Project = "MassTransit.CastleWindsor"
                   Summary = "MassTransit Castle Windsor Container Support"
                   PackageFile = @".\src\Containers\MassTransit.WindsorIntegration\packages.config"
