@@ -14,6 +14,7 @@ namespace MassTransit.TestFramework
 {
     using System;
     using System.Collections.Generic;
+    using System.IO;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
@@ -22,6 +23,8 @@ namespace MassTransit.TestFramework
     using GreenPipes.Payloads;
     using GreenPipes.Util;
     using Pipeline;
+    using Transports;
+    using Transports.InMemory;
     using Util;
 
 
@@ -53,6 +56,8 @@ namespace MassTransit.TestFramework
             _messageId = NewId.NextGuid();
             _sourceAddress = new Uri("loopback://localhost/input_queue");
             _destinationAddress = new Uri("loopback://localhost/input_queue");
+
+            _receiveContext = new TestReceiveContext(_sourceAddress);
         }
 
         public Guid? MessageId
@@ -282,6 +287,23 @@ namespace MassTransit.TestFramework
         public ConnectHandle ConnectSendObserver(ISendObserver observer)
         {
             return new Connectable<ISendObserver>().Connect(observer);
+        }
+    }
+
+
+    public class TestReceiveContext : 
+        BaseReceiveContext
+    {
+        public TestReceiveContext(Uri sourceAddress)
+            : base(sourceAddress, false, new ReceiveObservable(), null, null)
+        {
+            HeaderProvider = new DictionaryHeaderProvider(new Dictionary<string, object>());
+        }
+
+        protected override IHeaderProvider HeaderProvider { get; }
+        protected override Stream GetBodyStream()
+        {
+            return new MemoryStream();
         }
     }
 }
