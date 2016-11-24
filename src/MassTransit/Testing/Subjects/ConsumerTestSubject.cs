@@ -22,16 +22,16 @@ namespace MassTransit.Testing.Subjects
     using TestDecorators;
 
 
-    public class ConsumerTestSubject<TScenario, TSubject> :
-        IConsumerTestSubject<TSubject>,
+    public class ConsumerTestSubject<TScenario, TConsumer> :
+        IConsumerTestSubject<TConsumer>,
         IScenarioSpecification<TScenario>
-        where TSubject : class, IConsumer
+        where TConsumer : class, IConsumer
         where TScenario : IBusTestScenario
     {
-        readonly IConsumerFactory<TSubject> _consumerFactory;
+        readonly IConsumerFactory<TConsumer> _consumerFactory;
         ReceivedMessageList _received;
 
-        public ConsumerTestSubject(IConsumerFactory<TSubject> consumerFactory)
+        public ConsumerTestSubject(IConsumerFactory<TConsumer> consumerFactory)
         {
             _consumerFactory = consumerFactory;
         }
@@ -46,7 +46,8 @@ namespace MassTransit.Testing.Subjects
         public ITestScenarioBuilder<TScenario> Configure(ITestScenarioBuilder<TScenario> builder)
         {
             _received = new ReceivedMessageList(builder.Timeout);
-            var decoratedConsumerFactory = new TestConsumerFactoryDecorator<TSubject>(_consumerFactory, _received);
+
+            var decoratedConsumerFactory = new TestConsumerFactoryDecorator<TConsumer>(_consumerFactory, _received);
 
             var scenarioBuilder = builder as IBusTestScenarioBuilder;
             scenarioBuilder?.ConfigureReceiveEndpoint(x => x.Consumer(decoratedConsumerFactory));

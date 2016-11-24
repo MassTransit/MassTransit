@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -19,8 +19,7 @@ namespace MassTransit.Testing.TestInstanceConfigurators
     using Builders;
     using Configurators;
     using ScenarioBuilders;
-    using ScenarioConfigurators;
-    using TestDecorators;
+    using Subjects;
 
 
     public class ConsumerTestConfigurator<TScenario, TConsumer> :
@@ -30,10 +29,9 @@ namespace MassTransit.Testing.TestInstanceConfigurators
         where TScenario : IBusTestScenario
     {
         readonly IList<IConsumerTestSpecification<TScenario, TConsumer>> _testSpecifications;
+        IConsumerFactory<TConsumer> _consumerFactory;
 
         Func<TScenario, IConsumerTestBuilder<TScenario, TConsumer>> _testBuilderFactory;
-        IConsumerFactory<TConsumer> _consumerFactory;
-        ReceivedMessageList _received;
 
         public ConsumerTestConfigurator(Func<ITestScenarioBuilder<TScenario>> scenarioBuilderFactory)
             : base(scenarioBuilderFactory)
@@ -41,7 +39,6 @@ namespace MassTransit.Testing.TestInstanceConfigurators
             _testSpecifications = new List<IConsumerTestSpecification<TScenario, TConsumer>>();
 
             _testBuilderFactory = scenario => new ConsumerTestBuilderImpl<TScenario, TConsumer>(scenario);
-
         }
 
         public void UseTestBuilder(Func<TScenario, IConsumerTestBuilder<TScenario, TConsumer>> builderFactory)
@@ -65,7 +62,7 @@ namespace MassTransit.Testing.TestInstanceConfigurators
                 yield return this.Failure("UseConsumerFactory", "The consumer factory must be configured (using ConstructedBy)");
 
             IEnumerable<TestConfiguratorResult> results = base.Validate().Concat(_testSpecifications.SelectMany(x => x.Validate()));
-            foreach (TestConfiguratorResult result in results)
+            foreach (var result in results)
             {
                 yield return result;
             }
@@ -73,49 +70,21 @@ namespace MassTransit.Testing.TestInstanceConfigurators
 
         public IConsumerTest<TScenario, TConsumer> Build()
         {
-            // TODO pull from scenario
-            _received = new ReceivedMessageList(TimeSpan.FromSeconds(8));
+            var consumerTestSubject = new ConsumerTestSubject<TScenario, TConsumer>(_consumerFactory);
 
-            AddScenarioConfigurator(new ConsumerScenarioSpecification(_consumerFactory, _received));
+            AddScenarioConfigurator(consumerTestSubject);
 
-            TScenario scenario = BuildTestScenario();
+            var scenario = BuildTestScenario();
 
             IConsumerTestBuilder<TScenario, TConsumer> builder = _testBuilderFactory(scenario);
 
-            builder.SetConsumerFactory(_consumerFactory);
+            builder.SetConsumerTestSubject(consumerTestSubject);
 
             builder = _testSpecifications.Aggregate(builder, (current, configurator) => configurator.Configure(current));
 
             BuildTestActions(builder);
 
             return builder.Build();
-        }
-
-
-        class ConsumerScenarioSpecification :
-            IScenarioSpecification<TScenario>
-        {
-            readonly IConsumerFactory<TConsumer> _consumerFactory;
-
-            public ConsumerScenarioSpecification(IConsumerFactory<TConsumer> consumerFactory, ReceivedMessageList received)
-            {
-                var decoratedConsumerFactory = new TestConsumerFactoryDecorator<TConsumer>(consumerFactory, received);
-
-                _consumerFactory = decoratedConsumerFactory;
-            }
-
-            public ITestScenarioBuilder<TScenario> Configure(ITestScenarioBuilder<TScenario> builder)
-            {
-                var scenarioBuilder = builder as IBusTestScenarioBuilder;
-                scenarioBuilder?.ConfigureReceiveEndpoint(x => x.Consumer(_consumerFactory));
-
-                return builder;
-            }
-
-            public IEnumerable<TestConfiguratorResult> Validate()
-            {
-                yield break;
-            }
         }
     }
 }

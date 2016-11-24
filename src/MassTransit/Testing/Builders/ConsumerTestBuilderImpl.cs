@@ -25,7 +25,7 @@ namespace MassTransit.Testing.Builders
     {
         readonly IList<ITestAction<TScenario>> _actions;
         readonly TScenario _scenario;
-        IConsumerFactory<TConsumer> _consumerFactory;
+        IConsumerTestSubject<TConsumer> _consumerTestSubject;
 
         public ConsumerTestBuilderImpl(TScenario scenario)
         {
@@ -36,12 +36,12 @@ namespace MassTransit.Testing.Builders
 
         public IConsumerTest<TScenario, TConsumer> Build()
         {
-            return new ConsumerTest<TScenario, TConsumer>(_scenario, _actions, new ConsumerTestSubject<TScenario, TConsumer>(_consumerFactory));
+            return new ConsumerTest<TScenario, TConsumer>(_scenario, _actions, _consumerTestSubject);
         }
 
-        public void SetConsumerFactory(IConsumerFactory<TConsumer> consumerFactory)
+        public void SetConsumerTestSubject(IConsumerTestSubject<TConsumer> testSubject)
         {
-            _consumerFactory = consumerFactory;
+            _consumerTestSubject = testSubject;
         }
 
         public void AddTestAction(ITestAction<TScenario> testAction)

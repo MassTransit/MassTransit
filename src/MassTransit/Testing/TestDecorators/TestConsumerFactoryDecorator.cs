@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -15,7 +15,6 @@ namespace MassTransit.Testing.TestDecorators
     using System;
     using System.Threading.Tasks;
     using GreenPipes;
-    using Pipeline;
 
 
     public class TestConsumerFactoryDecorator<TConsumer> :
@@ -25,8 +24,7 @@ namespace MassTransit.Testing.TestDecorators
         readonly IConsumerFactory<TConsumer> _consumerFactory;
         readonly ReceivedMessageList _received;
 
-        public TestConsumerFactoryDecorator(IConsumerFactory<TConsumer> consumerFactory,
-            ReceivedMessageList received)
+        public TestConsumerFactoryDecorator(IConsumerFactory<TConsumer> consumerFactory, ReceivedMessageList received)
         {
             _consumerFactory = consumerFactory;
             _received = received;
@@ -40,9 +38,9 @@ namespace MassTransit.Testing.TestDecorators
 
         void IProbeSite.Probe(ProbeContext context)
         {
-            ProbeContext scope = context.CreateScope("testDecorator");
+            var scope = context.CreateScope("testDecorator");
 
-             _consumerFactory.Probe(scope);
+            _consumerFactory.Probe(scope);
         }
 
 

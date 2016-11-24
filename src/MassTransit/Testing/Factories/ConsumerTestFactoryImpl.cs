@@ -29,8 +29,7 @@ namespace MassTransit.Testing.Factories
             _scenarioBuilderFactory = scenarioBuilderFactory;
         }
 
-        public IConsumerTest<TScenario, TConsumer> New(
-            Action<IConsumerTestConfigurator<TScenario, TConsumer>> configureTest)
+        public IConsumerTest<TScenario, TConsumer> New(Action<IConsumerTestConfigurator<TScenario, TConsumer>> configureTest)
         {
             var configurator = new ConsumerTestConfigurator<TScenario, TConsumer>(_scenarioBuilderFactory);
 

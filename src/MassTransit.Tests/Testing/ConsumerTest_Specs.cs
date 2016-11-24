@@ -18,13 +18,13 @@ namespace MassTransit.Tests.Testing
     using MassTransit.Testing;
     using Shouldly;
 
-    [Explicit]
+    [TestFixture]
     public class When_a_consumer_is_being_tested
     {
         IConsumerTest<IBusTestScenario, Testsumer> _test;
 
         [SetUp]
-        public void A_consumer_is_being_tested()
+        public async Task A_consumer_is_being_tested()
         {
             _test = TestFactory.ForConsumer<Testsumer>()
                 .New(x =>
@@ -34,7 +34,7 @@ namespace MassTransit.Tests.Testing
                         x.Send(new A());
                     });
 
-            _test.Execute();
+            await _test.ExecuteAsync();
         }
 
         [TearDown]
@@ -93,7 +93,7 @@ namespace MassTransit.Tests.Testing
         IConsumerTest<IBusTestScenario, Testsumer> _test;
 
         [SetUp]
-        public void A_consumer_is_being_tested()
+        public async Task A_consumer_is_being_tested()
         {
             _test = TestFactory.ForConsumer<Testsumer>()
                 .New(x =>
@@ -103,7 +103,7 @@ namespace MassTransit.Tests.Testing
                         x.Send(new A(), (scenario, context) => context.ResponseAddress = scenario.Bus.Address);
                     });
 
-            _test.ExecuteAsync();
+            await _test.ExecuteAsync();
         }
 
         [TearDown]
