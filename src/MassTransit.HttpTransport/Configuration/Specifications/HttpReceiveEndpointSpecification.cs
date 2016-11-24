@@ -19,7 +19,6 @@ namespace MassTransit.HttpTransport.Specifications
     using Clients;
     using EndpointConfigurators;
     using GreenPipes;
-    using Hosting;
     using MassTransit.Builders;
     using MassTransit.Pipeline;
     using Transport;

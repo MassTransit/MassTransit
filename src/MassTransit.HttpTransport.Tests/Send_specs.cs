@@ -14,7 +14,6 @@ namespace MassTransit.HttpTransport.Tests
 {
     using System;
     using System.Threading.Tasks;
-    using Builders;
     using GreenPipes;
     using NUnit.Framework;
     using TestFramework.Messages;
@@ -39,7 +38,7 @@ namespace MassTransit.HttpTransport.Tests
         }
 
         [Test]
-        public async void Should_have_a_redelivery_flag_of_false()
+        public async Task Should_have_a_redelivery_flag_of_false()
         {
             var context = await _handler;
 
@@ -47,7 +46,7 @@ namespace MassTransit.HttpTransport.Tests
         }
 
         [Test]
-        public async void Should_succeed()
+        public async Task Should_succeed()
         {
             await _handler;
         }
@@ -75,7 +74,7 @@ namespace MassTransit.HttpTransport.Tests
         }   
 
         [Test]
-        public async void Should_receive_the_response()
+        public async Task Should_receive_the_response()
         {
             var re = Bus.GetProbeResult();
             Console.WriteLine(re.ToJsonString());

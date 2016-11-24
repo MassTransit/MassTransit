@@ -15,7 +15,6 @@ namespace MassTransit.HttpTransport.Builders
     using System;
     using BusConfigurators;
     using Clients;
-    using Hosting;
     using MassTransit.Builders;
     using MassTransit.Pipeline;
     using Specifications;
@@ -36,7 +35,15 @@ namespace MassTransit.HttpTransport.Builders
             : base(consumePipeFactory, sendPipeFactory, publishPipeFactory, hosts)
         {
             _hosts = hosts;
+
             _busEndpointSpecification = new HttpReceiveEndpointSpecification(_hosts[0], ConsumePipe);
+
+            foreach (var host in hosts.Hosts)
+            {
+//                var factory = new RabbitMqReceiveEndpointFactory(this, host);
+//
+//                host.ReceiveEndpointFactory = factory;
+            }
         }
 
         public BusHostCollection<HttpHost> Hosts => _hosts;
@@ -44,6 +51,11 @@ namespace MassTransit.HttpTransport.Builders
         public override IPublishEndpointProvider PublishEndpointProvider => _busEndpointSpecification.PublishEndpointProvider;
 
         public override ISendEndpointProvider SendEndpointProvider => _busEndpointSpecification.SendEndpointProvider;
+
+        protected override void PreBuild()
+        {
+            _busEndpointSpecification.Apply(this);
+        }
 
         protected override Uri GetInputAddress()
         {

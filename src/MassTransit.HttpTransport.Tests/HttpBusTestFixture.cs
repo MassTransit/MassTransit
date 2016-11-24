@@ -15,7 +15,6 @@ namespace MassTransit.HttpTransport.Tests
     using System;
     using System.Threading;
     using System.Threading.Tasks;
-    using Builders;
     using Logging;
     using NUnit.Framework;
     using TestFramework;
@@ -31,14 +30,12 @@ namespace MassTransit.HttpTransport.Tests
         ISendEndpoint _inputQueueSendEndpoint;
         ISendEndpoint _busSendEndpoint;
         readonly TestSendObserver _sendObserver;
-        Uri _inputQueueAddress;
-        readonly Uri _hostAddress;
+        Uri _hostAddress;
 
         public HttpBusTestFixture()
         {
             _sendObserver = new TestSendObserver(TestTimeout);
-            _hostAddress = new Uri("http://localhost:8080/host");
-            _inputQueueAddress = new Uri("http://localhost:8080/input");
+            _hostAddress = new Uri("http://localhost:8080");
         }
 
 
@@ -50,28 +47,28 @@ namespace MassTransit.HttpTransport.Tests
 
         protected Uri InputQueueAddress
         {
-            get { return _inputQueueAddress; }
+            get { return _hostAddress; }
             set
             {
                 if (Bus != null)
                     throw new InvalidOperationException("The LocalBus has already been created, too late to change the URI");
 
-                _inputQueueAddress = value;
+                _hostAddress = value;
             }
         }
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public async Task SetupInMemoryTestFixture()
         {
              _bus = CreateBus();
-            _busHandle = await _bus.StartAsync();
 
+            _busHandle = await _bus.StartAsync();
             try
             {
                 _busSendEndpoint = Await(() => _bus.GetSendEndpoint(_bus.Address));
                 _busSendEndpoint.ConnectSendObserver(_sendObserver);
 
-                _inputQueueSendEndpoint = Await(() => _bus.GetSendEndpoint(_inputQueueAddress));
+                _inputQueueSendEndpoint = Await(() => _bus.GetSendEndpoint(_hostAddress));
                 _inputQueueSendEndpoint.ConnectSendObserver(_sendObserver);
             }
             catch (Exception)
@@ -93,7 +90,7 @@ namespace MassTransit.HttpTransport.Tests
             }
         }
 
-        [TestFixtureTearDown]
+        [OneTimeTearDown]
         public void TearDownInMemoryTestFixture()
         {
             try
@@ -116,6 +113,7 @@ namespace MassTransit.HttpTransport.Tests
 
         protected virtual void ConfigureBus(IHttpBusFactoryConfigurator configurator)
         {
+            configurator.Host(_hostAddress);
         }
 
         protected virtual void ConfigureInputQueueEndpoint(IHttpReceiveEndpointConfigurator configurator)
@@ -129,12 +127,9 @@ namespace MassTransit.HttpTransport.Tests
             {
                 ConfigureBus(x);
 
-                var host = x.Host(_hostAddress);
 
-                x.ReceiveEndpoint(host, e =>
+                x.ReceiveEndpoint(e =>
                 {
-                    _inputQueueAddress = e.InputAddress;
-
                     ConfigureInputQueueEndpoint(e);
                 });
             });
