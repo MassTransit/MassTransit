@@ -59,7 +59,11 @@ namespace MassTransit.HttpTransport.Builders
 
         protected override Uri GetInputAddress()
         {
-            return _busEndpointSpecification.InputAddress;
+            //TODO: Is this the best approach?
+            var addy = _busEndpointSpecification.InputAddress;
+            var urb = new UriBuilder(addy);
+            urb.Scheme = "reply";
+            return urb.Uri;
         }
 
         protected override IConsumePipe GetConsumePipe()

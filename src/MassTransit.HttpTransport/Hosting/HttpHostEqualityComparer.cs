@@ -30,10 +30,16 @@ namespace MassTransit.HttpTransport.Hosting
             if (ReferenceEquals(y, null))
                 return false;
             return string.Equals(x.Host, y.Host, StringComparison.OrdinalIgnoreCase)
-                && string.Equals(x.Scheme, y.Scheme, StringComparison.OrdinalIgnoreCase)
+                && CheckScheme(x.Scheme, y.Scheme)
                 && x.Port == y.Port;
         }
 
+        static bool CheckScheme(string x, string y)
+        {
+            var xr = x == "reply" ? "http" : x == "replys" ? "https" : x;
+            var xy = y == "reply" ? "http" : y == "replys" ? "https" : y;
+            return string.Equals(xr, xy, StringComparison.OrdinalIgnoreCase);
+        }
         public int GetHashCode(HttpHostSettings obj)
         {
             unchecked

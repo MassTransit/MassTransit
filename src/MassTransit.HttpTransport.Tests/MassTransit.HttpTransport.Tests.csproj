@@ -59,6 +59,7 @@
     <Compile Include="CanItStartAndStop.cs" />
     <Compile Include="Class1.cs" />
     <Compile Include="HttpBusTestFixture.cs" />
+    <Compile Include="HttpHostEqualityComparerTests.cs" />
     <Compile Include="HttpHostTests.cs" />
     <Compile Include="OwinTesting.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

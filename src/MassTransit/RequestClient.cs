@@ -48,13 +48,13 @@ namespace MassTransit
                 : TaskScheduler.FromCurrentSynchronizationContext();
 
             Task<TResponse> responseTask = null;
-            var pipe = new SendRequest<TRequest>(_connector, _responseAddress, taskScheduler, x =>
+            var pipe = new SendRequest<TRequest>(_connector, _responseAddress, taskScheduler, cfg =>
             {
-                x.TimeToLive = _timeToLive;
-                x.Timeout = _timeout;
-                responseTask = x.Handle<TResponse>();
+                cfg.TimeToLive = _timeToLive;
+                cfg.Timeout = _timeout;
+                responseTask = cfg.Handle<TResponse>();
 
-                _callback?.Invoke(x);
+                _callback?.Invoke(cfg);
             });
 
             await SendRequest(request, pipe, cancellationToken).ConfigureAwait(false);

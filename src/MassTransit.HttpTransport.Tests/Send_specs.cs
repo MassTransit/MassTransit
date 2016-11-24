@@ -55,24 +55,7 @@ namespace MassTransit.HttpTransport.Tests
     [TestFixture]
     public class Sending_a_request_using_the_request_client :
         HttpBusTestFixture
-    {       
-        Task<ConsumeContext<PingMessage>> _ping;
-        Task<PongMessage> _response;
-        IRequestClient<PingMessage, PongMessage> _requestClient;
-
-        [TestFixtureSetUp]
-        public void Setup()
-        {
-            _requestClient = new MessageRequestClient<PingMessage, PongMessage>(Bus, InputQueueAddress, TestTimeout);
-
-            _response = _requestClient.Request(new PingMessage());
-        }
-
-        protected override void ConfigureInputQueueEndpoint(IHttpReceiveEndpointConfigurator configurator)
-        {
-            _ping = Handler<PingMessage>(configurator, async cxt => await cxt.RespondAsync(new PongMessage(cxt.Message.CorrelationId)));
-        }   
-
+    {
         [Test]
         public async Task Should_receive_the_response()
         {
@@ -82,5 +65,23 @@ namespace MassTransit.HttpTransport.Tests
 
             Assert.AreEqual(message.CorrelationId, _ping.Result.Message.CorrelationId);
         }
+
+        Task<ConsumeContext<PingMessage>> _ping;
+        Task<PongMessage> _response;
+        IRequestClient<PingMessage, PongMessage> _requestClient;
+
+        [OneTimeSetUp]
+        public void Setup()
+        {
+            _requestClient = new MessageRequestClient<PingMessage, PongMessage>(Bus, InputQueueAddress, TimeSpan.FromSeconds(8),
+                TimeSpan.FromSeconds(8));
+
+            _response = _requestClient.Request(new PingMessage());
+        }
+
+        protected override void ConfigureInputQueueEndpoint(IHttpReceiveEndpointConfigurator configurator)
+        {
+            _ping = Handler<PingMessage>(configurator, async cxt => await cxt.RespondAsync(new PongMessage(cxt.Message.CorrelationId)));
+        }   
     }
 }
