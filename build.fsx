@@ -194,6 +194,11 @@ Target "Package" (fun _ ->
                   PackageFile = @".\src\Containers\MassTransit.StructureMapIntegration\packages.config"
                   Files = [ (@"..\src\Containers\MassTransit.StructureMapIntegration\bin\Release\MassTransit.StructureMapIntegration.*", Some @"lib\net452", None);
                             (@"..\src\Containers\MassTransit.StructureMapIntegration\**\*.cs", Some @"src", None) ] } 
+                { Project = "MassTransit.Automatonymous.StructureMap"
+                  Summary = "MassTransit Automatonymous StructureMap Container Support"
+                  PackageFile = @".\src\Containers\MassTransit.Automatonymous.StructureMapIntegration\packages.config"
+                  Files = [ (@"..\src\Containers\MassTransit.Automatonymous.StructureMapIntegration\bin\Release\MassTransit.Automatonymous.StructureMapIntegration.*", Some @"lib\net452", None);
+                            (@"..\src\Containers\MassTransit.Automatonymous.StructureMapIntegration\**\*.cs", Some @"src", None) ] } 
                 { Project = "MassTransit.Unity"
                   Summary = "MassTransit Unity Container Support"
                   PackageFile = @".\src\Containers\MassTransit.UnityIntegration\packages.config"
