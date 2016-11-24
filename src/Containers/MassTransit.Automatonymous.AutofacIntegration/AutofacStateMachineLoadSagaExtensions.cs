@@ -15,38 +15,40 @@ namespace MassTransit
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using Autofac;
+    using Autofac.Core;
     using Automatonymous;
-    using AutomatonymousStructureMapIntegration;
+    using AutomatonymousAutofacIntegration;
     using Internals.Extensions;
-    using StructureMap;
 
 
-    public static class LoadStateMachineSagaExtensions
+    public static class AutofacStateMachineLoadSagaExtensions
     {
         /// <summary>
         /// Scans the lifetime scope and registers any state machines sagas which are found in the scope using the Autofac saga repository
         /// and the appropriate state machine saga repository under the hood.
         /// </summary>
         /// <param name="configurator"></param>
-        /// <param name="container"></param>
-        public static void LoadStateMachineSagas(this IReceiveEndpointConfigurator configurator, IContainer container)
+        /// <param name="context"></param>
+        /// <param name="name"></param>
+        public static void LoadStateMachineSagas(this IReceiveEndpointConfigurator configurator, IComponentContext context, string name = "message")
         {
-            IList<Type> sagaTypes = FindStateMachineSagaTypes(container);
+            var scope = context.Resolve<ILifetimeScope>();
+
+            IList<Type> sagaTypes = FindStateMachineSagaTypes(context);
 
             foreach (var sagaType in sagaTypes)
             {
-                StateMachineSagaConfiguratorCache.Configure(sagaType, configurator, container);
+                StateMachineSagaConfiguratorCache.Configure(sagaType, configurator, scope, name);
             }
         }
 
-        public static IList<Type> FindStateMachineSagaTypes(IContainer container)
+        public static IList<Type> FindStateMachineSagaTypes(IComponentContext context)
         {
-            return container
-                .Model
-                .PluginTypes
-                .Where(x => x.PluginType.HasInterface(typeof(SagaStateMachine<>)))
-                .Select(i => i.PluginType.GetClosingArguments(typeof(SagaStateMachine<>)).First())
-                .Distinct()
+            return context.ComponentRegistry.Registrations
+                .SelectMany(r => r.Services.OfType<IServiceWithType>(), (r, s) => new {r, s})
+                .Where(rs => rs.s.ServiceType.HasInterface(typeof(SagaStateMachine<>)))
+                .Select(rs => rs.s.ServiceType.GetClosingArguments(typeof(SagaStateMachine<>)).First())
                 .ToList();
         }
     }

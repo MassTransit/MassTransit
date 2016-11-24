@@ -10,18 +10,18 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace Automatonymous
+namespace MassTransit
 {
     using System;
     using Autofac;
+    using Automatonymous;
+    using Automatonymous.SubscriptionConfigurators;
+    using Automatonymous.SubscriptionConnectors;
+    using AutomatonymousAutofacIntegration;
     using GreenPipes;
-    using MassTransit;
-    using MassTransit.AutomatonymousAutofacIntegration;
-    using MassTransit.Pipeline;
-    using MassTransit.Saga;
-    using MassTransit.Saga.SubscriptionConfigurators;
-    using SubscriptionConfigurators;
-    using SubscriptionConnectors;
+    using Pipeline;
+    using Saga;
+    using Saga.SubscriptionConfigurators;
 
 
     public static class AutofacStateMachineSubscriptionExtensions

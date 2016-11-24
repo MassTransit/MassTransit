@@ -20,7 +20,7 @@ namespace MassTransit
     using Automatonymous;
 
 
-    public static class RegisterStateMachineSagaExtensions
+    public static class AutofacStateMachineRegisterSagaExtensions
     {
         /// <summary>
         /// Register the state machine sagas found in the specified assemblies using the ContainerBuilder provided. The

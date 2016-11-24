@@ -56,7 +56,7 @@
     <Compile Include="StructureMapStateMachineSubscriptionExtensions.cs" />
     <Compile Include="StructureMapSagaRepository.cs" />
     <Compile Include="StructureMapStateMachineActivityFactory.cs" />
-    <Compile Include="LoadStateMachineSagaExtensions.cs" />
+    <Compile Include="StructureMapStateMachineLoadSagaExtensions.cs" />
     <Compile Include="StateMachineSagaConfiguratorCache.cs" />
   </ItemGroup>
   <ItemGroup>

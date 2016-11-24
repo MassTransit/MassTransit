@@ -59,10 +59,10 @@
     </Compile>
     <Compile Include="AutofacStateMachineActivityFactory.cs" />
     <Compile Include="AutofacStateMachineSagaRepository.cs" />
-    <Compile Include="LoadStateMachineSagaExtensions.cs" />
-    <Compile Include="RegisterStateMachineSagaExtensions.cs" />
+    <Compile Include="AutofacStateMachineLoadSagaExtensions.cs" />
+    <Compile Include="AutofacStateMachineRegisterSagaExtensions.cs" />
     <Compile Include="StateMachineSagaConfiguratorCache.cs" />
-    <Compile Include="StructureMapStateMachineSubscriptionExtensions.cs" />
+    <Compile Include="AutofacStateMachineSubscriptionExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\MassTransit.AutomatonymousIntegration\MassTransit.AutomatonymousIntegration.csproj">

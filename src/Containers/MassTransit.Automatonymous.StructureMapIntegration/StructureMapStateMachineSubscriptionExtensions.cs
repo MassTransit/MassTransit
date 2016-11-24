@@ -10,18 +10,18 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace Automatonymous
+namespace MassTransit
 {
     using System;
+    using Automatonymous;
+    using Automatonymous.SubscriptionConfigurators;
+    using Automatonymous.SubscriptionConnectors;
+    using AutomatonymousStructureMapIntegration;
     using GreenPipes;
-    using MassTransit;
-    using MassTransit.AutomatonymousStructureMapIntegration;
-    using MassTransit.Pipeline;
-    using MassTransit.Saga;
-    using MassTransit.Saga.SubscriptionConfigurators;
+    using Pipeline;
+    using Saga;
+    using Saga.SubscriptionConfigurators;
     using StructureMap;
-    using SubscriptionConfigurators;
-    using SubscriptionConnectors;
 
 
     public static class StructureMapStateMachineSubscriptionExtensions
