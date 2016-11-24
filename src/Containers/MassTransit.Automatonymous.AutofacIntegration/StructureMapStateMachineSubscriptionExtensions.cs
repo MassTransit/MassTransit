@@ -13,8 +13,10 @@
 namespace Automatonymous
 {
     using System;
+    using Autofac;
     using GreenPipes;
     using MassTransit;
+    using MassTransit.AutomatonymousAutofacIntegration;
     using MassTransit.Pipeline;
     using MassTransit.Saga;
     using MassTransit.Saga.SubscriptionConfigurators;
@@ -22,7 +24,7 @@ namespace Automatonymous
     using SubscriptionConnectors;
 
 
-    public static class StateMachineSubscriptionExtensions
+    public static class AutofacStateMachineSubscriptionExtensions
     {
         /// <summary>
         /// Subscribe a state machine saga to the endpoint
@@ -30,15 +32,18 @@ namespace Automatonymous
         /// <typeparam name="TInstance">The state machine instance type</typeparam>
         /// <param name="configurator"></param>
         /// <param name="stateMachine">The state machine</param>
-        /// <param name="repository">The saga repository for the instances</param>
+        /// <param name="container">The StructureMap Container to resolve the repository</param>
         /// <param name="configure">Optionally configure the saga</param>
         /// <returns></returns>
-        public static void StateMachineSaga<TInstance>(
-            this IReceiveEndpointConfigurator configurator, SagaStateMachine<TInstance> stateMachine,
-            ISagaRepository<TInstance> repository, Action<ISagaConfigurator<TInstance>> configure = null)
+        public static void StateMachineSaga<TInstance>(this IReceiveEndpointConfigurator configurator, SagaStateMachine<TInstance> stateMachine,
+            ILifetimeScope container, Action<ISagaConfigurator<TInstance>> configure = null)
             where TInstance : class, SagaStateMachineInstance
         {
-            var stateMachineConfigurator = new StateMachineSagaSpecification<TInstance>(stateMachine, repository);
+            var sagaRepository = container.Resolve<ISagaRepository<TInstance>>();
+
+            var containerRepository = new AutofacStateMachineSagaRepository<TInstance>(sagaRepository, container);
+
+            var stateMachineConfigurator = new StateMachineSagaSpecification<TInstance>(stateMachine, containerRepository);
 
             configure?.Invoke(stateMachineConfigurator);
 
@@ -46,12 +51,16 @@ namespace Automatonymous
         }
 
         public static ConnectHandle ConnectStateMachineSaga<TInstance>(this IConsumePipeConnector bus, SagaStateMachine<TInstance> stateMachine,
-            ISagaRepository<TInstance> repository)
+            ILifetimeScope container)
             where TInstance : class, SagaStateMachineInstance
         {
             var connector = new StateMachineConnector<TInstance>(stateMachine);
 
-            return connector.ConnectSaga(bus, repository);
+            var sagaRepository = container.Resolve<ISagaRepository<TInstance>>();
+
+            var containerRepository = new AutofacStateMachineSagaRepository<TInstance>(sagaRepository, container);
+
+            return connector.ConnectSaga(bus, containerRepository);
         }
     }
 }

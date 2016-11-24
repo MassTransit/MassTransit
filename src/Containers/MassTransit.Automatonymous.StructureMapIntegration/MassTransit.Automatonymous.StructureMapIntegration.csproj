@@ -53,6 +53,7 @@
     <Compile Include="..\..\SolutionVersion.cs">
       <Link>Properties\SolutionVersion.cs</Link>
     </Compile>
+    <Compile Include="StructureMapStateMachineSubscriptionExtensions.cs" />
     <Compile Include="StructureMapSagaRepository.cs" />
     <Compile Include="StructureMapStateMachineActivityFactory.cs" />
     <Compile Include="LoadStateMachineSagaExtensions.cs" />

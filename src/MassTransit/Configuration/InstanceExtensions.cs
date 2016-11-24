@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -16,6 +16,7 @@ namespace MassTransit
     using ConsumeConfigurators;
     using ConsumeConnectors;
     using GreenPipes;
+    using Pipeline;
 
 
     /// <summary>
@@ -47,7 +48,7 @@ namespace MassTransit
         /// <param name="instance">The instance to subscribe.</param>
         /// <param name="configure">Configure the instance</param>
         /// <returns>An instance subscription configurator.</returns>
-        public static void Instance<T>(this IReceiveEndpointConfigurator configurator, T instance, Action<IInstanceConfigurator<T>> configure = null) 
+        public static void Instance<T>(this IReceiveEndpointConfigurator configurator, T instance, Action<IInstanceConfigurator<T>> configure = null)
             where T : class, IConsumer
         {
             var instanceConfigurator = new InstanceConfigurator<T>(instance);
@@ -64,14 +65,14 @@ namespace MassTransit
         /// <param name="instance"></param>
         /// <returns>The unsubscribe action that can be called to unsubscribe the instance
         /// passed as an argument.</returns>
-        public static ConnectHandle ConnectInstance(this IBus bus, object instance)
+        public static ConnectHandle ConnectInstance(this IConsumePipeConnector bus, object instance)
         {
             if (bus == null)
                 throw new ArgumentNullException(nameof(bus));
             if (instance == null)
                 throw new ArgumentNullException(nameof(instance));
 
-            IInstanceConnector connector = InstanceConnectorCache.GetInstanceConnector(instance.GetType());
+            var connector = InstanceConnectorCache.GetInstanceConnector(instance.GetType());
 
             return connector.ConnectInstance(bus, instance);
         }
@@ -84,10 +85,10 @@ namespace MassTransit
         /// <param name="instance">The instance to subscribe.</param>
         /// <returns>The unsubscribe action that can be called to unsubscribe the instance
         /// passed as an argument.</returns>
-        public static ConnectHandle ConnectInstance<T>(this IBus bus, T instance)
+        public static ConnectHandle ConnectInstance<T>(this IConsumePipeConnector bus, T instance)
             where T : class, IConsumer
         {
-            IInstanceConnector connector = InstanceConnectorCache.GetInstanceConnector<T>();
+            var connector = InstanceConnectorCache.GetInstanceConnector<T>();
 
             return connector.ConnectInstance(bus, instance);
         }

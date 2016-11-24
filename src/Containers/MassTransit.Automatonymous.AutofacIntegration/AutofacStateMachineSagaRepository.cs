@@ -27,7 +27,7 @@ namespace MassTransit.AutomatonymousAutofacIntegration
         readonly ISagaRepository<TSaga> _repository;
         readonly ILifetimeScope _scope;
 
-        public AutofacStateMachineSagaRepository(ISagaRepository<TSaga> repository, ILifetimeScope scope, string name)
+        public AutofacStateMachineSagaRepository(ISagaRepository<TSaga> repository, ILifetimeScope scope, string name = "message")
         {
             _repository = repository;
             _scope = scope;

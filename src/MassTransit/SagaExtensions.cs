@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -15,7 +15,7 @@ namespace MassTransit
     using System;
     using GreenPipes;
     using Logging;
-    using PipeConfigurators;
+    using Pipeline;
     using Saga;
     using Saga.Connectors;
     using Saga.SubscriptionConfigurators;
@@ -55,7 +55,7 @@ namespace MassTransit
         /// <param name="bus">The bus to which the saga is to be connected</param>
         /// <param name="sagaRepository">The saga repository</param>
         /// <param name="pipeSpecifications"></param>
-        public static ConnectHandle ConnectSaga<T>(this IBus bus, ISagaRepository<T> sagaRepository,
+        public static ConnectHandle ConnectSaga<T>(this IConsumePipeConnector bus, ISagaRepository<T> sagaRepository,
             params IPipeSpecification<SagaConsumeContext<T>>[] pipeSpecifications)
             where T : class, ISaga
         {

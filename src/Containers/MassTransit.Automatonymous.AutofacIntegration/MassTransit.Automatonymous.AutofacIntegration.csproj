@@ -62,6 +62,7 @@
     <Compile Include="LoadStateMachineSagaExtensions.cs" />
     <Compile Include="RegisterStateMachineSagaExtensions.cs" />
     <Compile Include="StateMachineSagaConfiguratorCache.cs" />
+    <Compile Include="StructureMapStateMachineSubscriptionExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\MassTransit.AutomatonymousIntegration\MassTransit.AutomatonymousIntegration.csproj">
