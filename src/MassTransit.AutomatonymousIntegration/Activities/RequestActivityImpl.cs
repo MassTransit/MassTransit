@@ -79,11 +79,12 @@ namespace Automatonymous.Activities
             IPipe<SendContext<TRequest>>
         {
             readonly Uri _responseAddress;
-            Guid _requestId;
+            readonly Guid _requestId;
 
             public SendRequestPipe(Uri responseAddress)
             {
                 _responseAddress = responseAddress;
+                _requestId = NewId.NextGuid();
             }
 
             public Guid RequestId => _requestId;
@@ -94,8 +95,6 @@ namespace Automatonymous.Activities
 
             Task IPipe<SendContext<TRequest>>.Send(SendContext<TRequest> context)
             {
-                _requestId = NewId.NextGuid();
-
                 context.RequestId = _requestId;
                 context.ResponseAddress = _responseAddress;
 
