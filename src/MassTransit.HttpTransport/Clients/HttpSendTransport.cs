@@ -18,7 +18,9 @@ namespace MassTransit.HttpTransport.Clients
     using System.Net.Http.Headers;
     using System.Threading;
     using System.Threading.Tasks;
+    using Contexts;
     using GreenPipes;
+    using Hosting;
     using Logging;
     using MassTransit.Pipeline;
     using Transports;
@@ -99,7 +101,17 @@ namespace MassTransit.HttpTransport.Clients
 
                             await _observers.PreSend(context).ConfigureAwait(false);
 
-                            var r = await clientContext.SendAsync(msg, cancelSend).ConfigureAwait(false);
+                            var response = await clientContext.SendAsync(msg, cancelSend).ConfigureAwait(false);
+
+                            if (context.RequestId.HasValue)
+                            {
+                                // this was a request. need to feed the response back in.
+                                var headers = new HttpClientHeaderProvider(response.Headers);
+                                var receiveContext = new HttpClientReceiveContext(response, headers, false, null, null, null);
+
+                                // now send it to myself.
+                                // this is not a trivial thing to do, HttpConsumerAction has a decent amount of stuff going on.
+                            }
 
                             await _observers.PostSend(context).ConfigureAwait(false);
                         }

@@ -74,7 +74,9 @@
     <Compile Include="Clients\HttpResponseSendEndpointProvider.cs" />
     <Compile Include="Clients\HttpResponseTransport.cs" />
     <Compile Include="Configuration\Builders\HttpBusBuilder.cs" />
+    <Compile Include="Contexts\HttpClientReceiveContext.cs" />
     <Compile Include="Contexts\HttpOwinHostContext.cs" />
+    <Compile Include="Hosting\HttpClientHeaderProvider.cs" />
     <Compile Include="HttpPublishEndpointProvider.cs" />
     <Compile Include="Configuration\Builders\HttpReceiveEndpointBuilder.cs" />
     <Compile Include="Configuration\Specifications\HttpReceiveEndpointSpecification.cs" />

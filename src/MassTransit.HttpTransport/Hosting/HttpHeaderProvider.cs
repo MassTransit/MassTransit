@@ -14,6 +14,7 @@ namespace MassTransit.HttpTransport.Hosting
 {
     using System.Collections.Generic;
     using System.Linq;
+    using System.Net;
     using Context;
     using Microsoft.Owin;
 
