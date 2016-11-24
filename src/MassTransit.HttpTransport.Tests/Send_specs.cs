@@ -73,8 +73,7 @@ namespace MassTransit.HttpTransport.Tests
         [OneTimeSetUp]
         public void Setup()
         {
-            _requestClient = new MessageRequestClient<PingMessage, PongMessage>(Bus, InputQueueAddress, TimeSpan.FromSeconds(8),
-                TimeSpan.FromSeconds(8));
+            _requestClient = new MessageRequestClient<PingMessage, PongMessage>(Bus, InputQueueAddress, TestTimeout);
 
             _response = _requestClient.Request(new PingMessage());
         }

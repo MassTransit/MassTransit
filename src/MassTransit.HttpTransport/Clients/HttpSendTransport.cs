@@ -137,7 +137,7 @@ namespace MassTransit.HttpTransport.Clients
         public const string RequestId = "MassTransit-Request-Id";
         public const string ConversationId = "MassTransit-Conversation-Id";
         public const string MessageId = "MassTransit-Message-Id";
-        public const string CorrelationId = "MassTransit-Message-Id";
+        public const string CorrelationId = "MassTransit-Correlation-Id";
     }
 
 }
