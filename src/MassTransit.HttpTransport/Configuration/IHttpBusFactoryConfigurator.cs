@@ -13,7 +13,6 @@
 namespace MassTransit.HttpTransport
 {
     using System;
-    using Builders;
     using Hosting;
 
 
@@ -23,6 +22,7 @@ namespace MassTransit.HttpTransport
         IHttpHost Host(HttpHostSettings settings);
 
         void ReceiveEndpoint(Action<IHttpReceiveEndpointConfigurator> configure = null);
+
         void ReceiveEndpoint(IHttpHost host, Action<IHttpReceiveEndpointConfigurator> configure = null);
     }
 }

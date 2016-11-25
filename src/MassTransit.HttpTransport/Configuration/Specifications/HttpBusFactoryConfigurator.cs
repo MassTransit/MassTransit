@@ -73,13 +73,13 @@ namespace MassTransit.HttpTransport.Specifications
         public void ReceiveEndpoint(IHttpHost host, Action<IHttpReceiveEndpointConfigurator> configure = null)
         {
             if (host == null)
-                throw new EndpointNotFoundException("The host address specified was not configured.");
+                throw new ArgumentNullException(nameof(host));
 
-            var ep = new HttpReceiveEndpointSpecification(host);
+            var specification = new HttpReceiveEndpointSpecification(host);
 
-            configure?.Invoke(ep);
+            configure?.Invoke(specification);
 
-            AddBusFactorySpecification(ep);
+            AddBusFactorySpecification(specification);
         }
 
         public void ReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configureEndpoint)

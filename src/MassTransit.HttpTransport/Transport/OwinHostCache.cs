@@ -81,8 +81,6 @@ namespace MassTransit.HttpTransport.Transport
                 if (_log.IsDebugEnabled)
                     _log.DebugFormat("Connecting: {0}", _settings.ToDebugString());
                 
-                
-
                 if (_log.IsDebugEnabled)
                 {
                     _log.DebugFormat("Connected: {0} (address: {1}, local: {2}", _settings.ToDebugString(),

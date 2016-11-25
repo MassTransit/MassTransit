@@ -86,6 +86,8 @@ namespace MassTransit.HttpTransport
                 }
                 finally
                 {
+                    context.StopHttpListener();
+
                     HttpConsumerMetrics metrics = controller;
                     await _transportObserver.Completed(new ReceiveTransportCompletedEvent(inputAddress, metrics)).ConfigureAwait(false);
 

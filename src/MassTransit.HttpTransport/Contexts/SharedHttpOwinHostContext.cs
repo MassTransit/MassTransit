@@ -65,5 +65,10 @@ namespace MassTransit.HttpTransport.Contexts
         {
             _context.StartHttpListener(controller);
         }
+
+        public void StopHttpListener()
+        {
+            _context.StopHttpListener();
+        }
     }
 }

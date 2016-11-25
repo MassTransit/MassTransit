@@ -50,6 +50,8 @@ namespace MassTransit.HttpTransport.Transport
             _owinHostCache = new OwinHostCache(Settings, _supervisor);
         }
 
+        public IHttpReceiveEndpointFactory ReceiveEndpointFactory { get; set; }
+
         public IReceiveEndpointCollection ReceiveEndpoints { get; }
 
         public async Task<HostHandle> Start()

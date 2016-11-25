@@ -71,5 +71,13 @@ namespace MassTransit.HttpTransport.Contexts
                 app.Use(controller.Handle);
             });
         }
+
+        public void StopHttpListener()
+        {
+            if (_started)
+            {
+                _owinHost?.Dispose();
+            }
+        }
     }
 }

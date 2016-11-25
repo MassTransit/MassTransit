@@ -14,6 +14,7 @@ namespace MassTransit.HttpTransport.Contexts
 {
     using System.IO;
     using Context;
+    using Hosting;
     using Microsoft.Owin;
 
 
@@ -22,12 +23,13 @@ namespace MassTransit.HttpTransport.Contexts
     {
         readonly IOwinContext _requestContext;
 
-        public HttpReceiveContext(IOwinContext requestContext, IHeaderProvider provider, bool redelivered, IReceiveObserver receiveObserver,
+        public HttpReceiveContext(IOwinContext requestContext, bool redelivered, IReceiveObserver receiveObserver,
             ISendEndpointProvider sendEndpointProvider, IPublishEndpointProvider publishEndpointProvider)
             : base(requestContext.Request.Uri, redelivered, receiveObserver, sendEndpointProvider, publishEndpointProvider)
         {
             _requestContext = requestContext;
-            HeaderProvider = provider;
+
+            HeaderProvider = new HttpHeaderProvider(requestContext.Request.Headers);
         }
 
         protected override IHeaderProvider HeaderProvider { get; }

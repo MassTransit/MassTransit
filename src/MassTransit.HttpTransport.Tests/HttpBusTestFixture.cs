@@ -28,7 +28,7 @@ namespace MassTransit.HttpTransport.Tests
         IBusControl _bus;
         BusHandle _busHandle;
         ISendEndpoint _inputQueueSendEndpoint;
-        ISendEndpoint _busSendEndpoint;
+        //ISendEndpoint _busSendEndpoint;
         readonly TestSendObserver _sendObserver;
         Uri _hostAddress;
 
@@ -65,8 +65,8 @@ namespace MassTransit.HttpTransport.Tests
             _busHandle = await _bus.StartAsync();
             try
             {
-                _busSendEndpoint = Await(() => _bus.GetSendEndpoint(_bus.Address));
-                _busSendEndpoint.ConnectSendObserver(_sendObserver);
+//                _busSendEndpoint = Await(() => _bus.GetSendEndpoint(_bus.Address));
+//                _busSendEndpoint.ConnectSendObserver(_sendObserver);
 
                 _inputQueueSendEndpoint = Await(() => _bus.GetSendEndpoint(_hostAddress));
                 _inputQueueSendEndpoint.ConnectSendObserver(_sendObserver);
@@ -77,7 +77,7 @@ namespace MassTransit.HttpTransport.Tests
                 {
                     using (var tokenSource = new CancellationTokenSource(TestTimeout))
                     {
-                        _busHandle?.StopAsync(tokenSource.Token);
+                        await _busHandle?.StopAsync(tokenSource.Token);
                     }
                 }
                 finally
@@ -91,13 +91,13 @@ namespace MassTransit.HttpTransport.Tests
         }
 
         [OneTimeTearDown]
-        public void TearDownInMemoryTestFixture()
+        public async Task TearDownInMemoryTestFixture()
         {
             try
             {
                 using (var tokenSource = new CancellationTokenSource(TestTimeout))
                 {
-                    _bus.StopAsync(tokenSource.Token);
+                    await _bus.StopAsync(tokenSource.Token);
                 }
             }
             catch (Exception ex)
@@ -113,8 +113,10 @@ namespace MassTransit.HttpTransport.Tests
 
         protected virtual void ConfigureBus(IHttpBusFactoryConfigurator configurator)
         {
-            configurator.Host(_hostAddress);
+            Host = configurator.Host(_hostAddress);
         }
+
+        protected IHttpHost Host { get; private set; }
 
         protected virtual void ConfigureInputQueueEndpoint(IHttpReceiveEndpointConfigurator configurator)
         {
@@ -127,11 +129,7 @@ namespace MassTransit.HttpTransport.Tests
             {
                 ConfigureBus(x);
 
-
-                x.ReceiveEndpoint(e =>
-                {
-                    ConfigureInputQueueEndpoint(e);
-                });
+                x.ReceiveEndpoint(Host, ConfigureInputQueueEndpoint);
             });
         }
     }

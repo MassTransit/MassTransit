@@ -41,6 +41,9 @@ namespace MassTransit.HttpTransport.Specifications
             _host = host;
         }
 
+        public ISendEndpointProvider SendEndpointProvider => _sendEndpointProvider;
+        public IPublishEndpointProvider PublishEndpointProvider => _publishEndpointProvider;
+
         public override IEnumerable<ValidationResult> Validate()
         {
             foreach (var result in base.Validate())
@@ -50,7 +53,7 @@ namespace MassTransit.HttpTransport.Specifications
         public void Apply(IBusBuilder builder)
         {
             var receiveEndpointBuilder = new HttpReceiveEndpointBuilder(_host, CreateConsumePipe(builder), builder);
-            
+
             var receivePipe = CreateReceivePipe(receiveEndpointBuilder);
 
             _sendEndpointProvider = CreateSendEndpointProvider(receiveEndpointBuilder);
@@ -61,15 +64,11 @@ namespace MassTransit.HttpTransport.Specifications
             var transport = new HttpReceiveTransport(_host, _sendEndpointProvider, _publishEndpointProvider, receiveEndpointBuilder.MessageSerializer, sendPipe);
 
             var httpHost = _host as HttpHost;
-            if(httpHost == null)
+            if (httpHost == null)
                 throw new ConfigurationException("Must be a HttpHost");
 
-            httpHost.ReceiveEndpoints.Add(NewId.Next().ToString(),
-                new ReceiveEndpoint(transport, receivePipe));
+            httpHost.ReceiveEndpoints.Add(NewId.Next().ToString(), new ReceiveEndpoint(transport, receivePipe));
         }
-
-        public ISendEndpointProvider SendEndpointProvider => _sendEndpointProvider;
-        public IPublishEndpointProvider PublishEndpointProvider => _publishEndpointProvider;
 
         protected override Uri GetInputAddress()
         {

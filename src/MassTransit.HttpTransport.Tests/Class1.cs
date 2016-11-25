@@ -53,21 +53,22 @@ namespace MassTransit.HottpTransport.Tests
 
         [Test]
         [Explicit]
-        public void Request()
+        public async Task Request()
         {
             var bus = Bus.Factory.CreateUsingHttp(cfg =>
             {
                 var mainHost = cfg.Host(new Uri("http://localhost:8080"));
                 //TODO: serializer?
-                
+
                 cfg.ReceiveEndpoint(ep =>
                 {
                     ep.Consumer<HttpEater>();
                 });
             });
 
-            var mc = new MessageRequestClient<Ping, Pong>(bus, new Uri("http://requestb.in/15alnbk1"), TimeSpan.FromMinutes(500) );
-            mc.Request(new Ping(), default(CancellationToken)).Wait(TimeSpan.FromMinutes(100));
+            var mc = new MessageRequestClient<Ping, Pong>(bus, new Uri("http://requestb.in/15alnbk1"), TimeSpan.FromMinutes(500));
+
+            await mc.Request(new Ping(), default(CancellationToken));
         }
 
         [Test]

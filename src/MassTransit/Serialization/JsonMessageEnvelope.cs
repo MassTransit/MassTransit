@@ -17,7 +17,7 @@ namespace MassTransit.Serialization
     using Util;
 
 
-    class JsonMessageEnvelope :
+    public class JsonMessageEnvelope :
         MessageEnvelope
     {
         public JsonMessageEnvelope(SendContext context, object message, string[] messageTypeNames)

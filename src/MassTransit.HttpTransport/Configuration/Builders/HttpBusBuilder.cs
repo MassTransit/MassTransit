@@ -40,9 +40,9 @@ namespace MassTransit.HttpTransport.Builders
 
             foreach (var host in hosts.Hosts)
             {
-//                var factory = new RabbitMqReceiveEndpointFactory(this, host);
-//
-//                host.ReceiveEndpointFactory = factory;
+                var factory = new HttpReceiveEndpointFactory(this, host);
+
+                host.ReceiveEndpointFactory = factory;
             }
         }
 

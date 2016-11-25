@@ -89,11 +89,10 @@ namespace MassTransit.HttpTransport
 
             using (_tracker.BeginDelivery())
             {
-                var headers = new HttpHeaderProvider(owinContext.Request.Headers);
 
                 var responseProxy = new HttpResponseSendEndpointProvider(_sendEndpointProvider, owinContext, _messageSerializer, _inputAddress, _sendPipe);
 
-                var context = new HttpReceiveContext(owinContext, headers, false, _receiveObserver, responseProxy, _publishEndpointProvider);
+                var context = new HttpReceiveContext(owinContext, false, _receiveObserver, responseProxy, _publishEndpointProvider);
 
                 try
                 {
@@ -161,6 +160,10 @@ namespace MassTransit.HttpTransport
                         _log.WarnFormat("Timeout waiting for consumer to exit: {0}", _inputAddress);
                 }
             }
+
+            // this has to do something to stop the train, for now, just set complete.
+
+            _participant.SetComplete();
 
             await _participant.ParticipantCompleted.ConfigureAwait(false);
         }
