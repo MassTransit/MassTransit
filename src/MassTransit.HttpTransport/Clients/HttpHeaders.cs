@@ -12,21 +12,12 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.HttpTransport.Clients
 {
-    using System;
-    using System.Net.Http;
-    using System.Threading;
-    using System.Threading.Tasks;
-    using GreenPipes;
-
-
-    public interface ClientContext :
-        PipeContext
+    public static class HttpHeaders
     {
-        //HttpClient Client { get; }
-        Uri BaseAddress { get; }
-
-        Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken);
-
-        Task ReceiveResponse(ReceiveContext receiveContext);
+        public const string InitiatorId = "MassTransit-Initiator-Id";
+        public const string RequestId = "MassTransit-Request-Id";
+        public const string ConversationId = "MassTransit-Conversation-Id";
+        public const string MessageId = "MassTransit-Message-Id";
+        public const string CorrelationId = "MassTransit-Correlation-Id";
     }
 }

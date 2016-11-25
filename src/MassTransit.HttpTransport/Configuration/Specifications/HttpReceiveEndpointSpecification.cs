@@ -31,7 +31,6 @@ namespace MassTransit.HttpTransport.Specifications
         IBusFactorySpecification
     {
         readonly IHttpHost _host;
-
         IPublishEndpointProvider _publishEndpointProvider;
         ISendEndpointProvider _sendEndpointProvider;
 

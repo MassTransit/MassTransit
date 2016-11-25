@@ -13,31 +13,38 @@
 namespace MassTransit.HttpTransport.Clients
 {
     using System;
+    using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Linq;
     using System.Net.Http;
     using System.Net.Http.Headers;
+    using System.Reflection;
     using System.Threading;
     using System.Threading.Tasks;
     using Contexts;
     using GreenPipes;
-    using Hosting;
     using Logging;
     using MassTransit.Pipeline;
     using Transports;
+    using Util;
 
 
     public class HttpSendTransport :
         ISendTransport
     {
         static readonly ILog _log = Logger.Get<HttpSendTransport>();
+
+        static readonly string Version = GetAssemblyFileVersion(typeof(IBusControl).Assembly);
         readonly ClientCache _clientCache;
         readonly SendObservable _observers;
         readonly HttpSendSettings _sendSettings;
+        readonly IReceiveObserver _receiveObserver;
 
-        public HttpSendTransport(ClientCache clientCache, HttpSendSettings sendSettings)
+        public HttpSendTransport(ClientCache clientCache, HttpSendSettings sendSettings, IReceiveObserver receiveObserver)
         {
             _clientCache = clientCache;
             _sendSettings = sendSettings;
+            _receiveObserver = receiveObserver;
             _observers = new SendObservable();
         }
 
@@ -68,14 +75,16 @@ namespace MassTransit.HttpTransport.Clients
                         using (var payload = new ByteArrayContent(context.Body))
                         {
                             //TODO: Get access to a HostInfo instance
-                            msg.Headers.UserAgent.Add(new ProductInfoHeaderValue("MassTransit", "3"));
+                            msg.Headers.UserAgent.Add(new ProductInfoHeaderValue("MassTransit", Version));
 
                             if (context.ResponseAddress != null)
                                 msg.Headers.Referrer = context.ResponseAddress;
 
                             payload.Headers.ContentType = new MediaTypeHeaderValue(context.ContentType.MediaType);
 
-                            foreach (var header in context.Headers.GetAll().Where(h => h.Value != null && (h.Value is string || h.Value.GetType().IsValueType)))
+                            foreach (
+                                KeyValuePair<string, object> header in
+                                    context.Headers.GetAll().Where(h => h.Value != null && (h.Value is string || h.Value.GetType().IsValueType)))
                             {
                                 msg.Headers.Add(header.Key, header.Value.ToString());
                             }
@@ -86,13 +95,13 @@ namespace MassTransit.HttpTransport.Clients
                             if (context.CorrelationId.HasValue)
                                 msg.Headers.Add(HttpHeaders.CorrelationId, context.CorrelationId.Value.ToString());
 
-                            if(context.InitiatorId.HasValue)
+                            if (context.InitiatorId.HasValue)
                                 msg.Headers.Add(HttpHeaders.InitiatorId, context.InitiatorId.Value.ToString());
 
                             if (context.ConversationId.HasValue)
                                 msg.Headers.Add(HttpHeaders.ConversationId, context.ConversationId.Value.ToString());
 
-                            if(context.RequestId.HasValue)
+                            if (context.RequestId.HasValue)
                                 msg.Headers.Add(HttpHeaders.RequestId, context.RequestId.Value.ToString());
 
                             //TODO: TTL?
@@ -101,16 +110,17 @@ namespace MassTransit.HttpTransport.Clients
 
                             await _observers.PreSend(context).ConfigureAwait(false);
 
-                            var response = await clientContext.SendAsync(msg, cancelSend).ConfigureAwait(false);
-
-                            if (context.RequestId.HasValue)
+                            using (var response = await clientContext.SendAsync(msg, cancelSend).ConfigureAwait(false))
                             {
-                                // this was a request. need to feed the response back in.
-                                var headers = new HttpClientHeaderProvider(response.Headers);
-                                var receiveContext = new HttpClientReceiveContext(response, headers, false, null, null, null);
+                                var responseStream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
 
-                                // now send it to myself.
-                                // this is not a trivial thing to do, HttpConsumerAction has a decent amount of stuff going on.
+                                ISendEndpointProvider sendEndpointProvider = new HttpClientSendEndpointProvider();
+                                IPublishEndpointProvider publishEndpointProvider = new HttpClientPublishEndpointProvider();
+
+                                var receiveContext = new HttpClientReceiveContext(response, responseStream, false, _receiveObserver, sendEndpointProvider,
+                                    publishEndpointProvider);
+
+                                await clientContext.ReceiveResponse(receiveContext).ConfigureAwait(false);
                             }
 
                             await _observers.PostSend(context).ConfigureAwait(false);
@@ -131,25 +141,78 @@ namespace MassTransit.HttpTransport.Clients
             await _clientCache.DoWith(clientPipe, cancelSend).ConfigureAwait(false);
         }
 
+
+        class HttpClientSendEndpointProvider :
+            ISendEndpointProvider
+        {
+            readonly SendObservable _observers;
+
+            public HttpClientSendEndpointProvider()
+            {
+                _observers = new SendObservable();
+            }
+
+            public ConnectHandle ConnectSendObserver(ISendObserver observer)
+            {
+                return _observers.Connect(observer);
+            }
+
+            public Task<ISendEndpoint> GetSendEndpoint(Uri address)
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+
+        class HttpClientPublishEndpointProvider :
+            IPublishEndpointProvider
+        {
+            readonly PublishObservable _observers;
+
+            public HttpClientPublishEndpointProvider()
+            {
+                _observers = new PublishObservable();
+            }
+
+            public ConnectHandle ConnectPublishObserver(IPublishObserver observer)
+            {
+                return _observers.Connect(observer);
+            }
+
+            public IPublishEndpoint CreatePublishEndpoint(Uri sourceAddress, Guid? correlationId = null, Guid? conversationId = null)
+            {
+                throw new NotImplementedException();
+            }
+
+            public Task<ISendEndpoint> GetPublishSendEndpoint(Type messageType)
+            {
+                throw new NotImplementedException();
+            }
+        }
+
         public Task Move(ReceiveContext context, IPipe<SendContext> pipe)
         {
-            return Task.FromResult(true);
+            return TaskUtil.Completed;
         }
 
         public Task Close()
         {
-            return Task.FromResult(0);
+            return TaskUtil.Completed;
+        }
+
+        static string GetAssemblyFileVersion(Assembly assembly)
+        {
+            var attribute = assembly.GetCustomAttribute<AssemblyFileVersionAttribute>();
+            if (attribute != null)
+            {
+                return attribute.Version;
+            }
+
+            var assemblyLocation = assembly.Location;
+            if (assemblyLocation != null)
+                return FileVersionInfo.GetVersionInfo(assemblyLocation).FileVersion;
+
+            return "Unknown";
         }
     }
-
-
-    public class HttpHeaders
-    {
-        public const string InitiatorId = "MassTransit-Initiator-Id";
-        public const string RequestId = "MassTransit-Request-Id";
-        public const string ConversationId = "MassTransit-Conversation-Id";
-        public const string MessageId = "MassTransit-Message-Id";
-        public const string CorrelationId = "MassTransit-Correlation-Id";
-    }
-
 }

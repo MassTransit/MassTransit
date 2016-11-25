@@ -15,6 +15,7 @@ namespace MassTransit.HttpTransport.Clients
     using System;
     using System.Linq;
     using System.Threading.Tasks;
+    using MassTransit.Pipeline;
     using Transport;
     using Transports;
 
@@ -23,24 +24,27 @@ namespace MassTransit.HttpTransport.Clients
         ISendTransportProvider
     {
         readonly BusHostCollection<HttpHost> _hosts;
+        readonly IReceiveObserver _receiveObserver;
+        readonly IReceivePipe _receivePipe;
 
-        public HttpSendTransportProvider(BusHostCollection<HttpHost> hosts)
+        public HttpSendTransportProvider(BusHostCollection<HttpHost> hosts, IReceivePipe receivePipe, IReceiveObserver receiveObserver)
         {
             _hosts = hosts;
+            _receivePipe = receivePipe;
+            _receiveObserver = receiveObserver;
         }
 
         public Task<ISendTransport> GetSendTransport(Uri address)
         {
             var sendSettings = address.GetSendSettings();
-            var hostSettings = address.GetHostSettings();
 
             var host = _hosts.GetHosts(address).FirstOrDefault();
             if (host == null)
                 throw new EndpointNotFoundException("The endpoint address specified an unknown host: " + address);
 
-            var clientCache = new HttpClientCache(_hosts[0].Supervisor);
+            var clientCache = new HttpClientCache(_hosts[0].Supervisor, _receivePipe);
 
-            return Task.FromResult<ISendTransport>(new HttpSendTransport(clientCache, sendSettings));
+            return Task.FromResult<ISendTransport>(new HttpSendTransport(clientCache, sendSettings, _receiveObserver));
         }
     }
 }

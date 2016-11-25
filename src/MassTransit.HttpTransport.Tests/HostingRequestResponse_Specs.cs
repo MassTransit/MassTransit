@@ -14,6 +14,7 @@ namespace MassTransit.HttpTransport.Tests
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Net.Http;
     using System.Text;
     using System.Threading.Tasks;
@@ -29,8 +30,6 @@ namespace MassTransit.HttpTransport.Tests
     public class HostingRequestResponse_Specs :
         AsyncTestFixture
     {
-        Uri _hostAddress;
-
         [Test]
         [Explicit]
         public async Task Should_create_a_host_that_responds_to_requests()
@@ -59,16 +58,28 @@ namespace MassTransit.HttpTransport.Tests
                     var envelope = new HttpMessageEnvelope(request, TypeMetadataCache<Request>.MessageTypeNames);
                     envelope.RequestId = NewId.NextGuid().ToString();
                     envelope.DestinationAddress = _hostAddress.ToString();
-                    envelope.ResponseAddress = _hostAddress.ToString();
+                    envelope.ResponseAddress = new Uri("reply://localhost:8080/").ToString();
 
                     var messageBody = JsonConvert.SerializeObject(envelope, JsonMessageSerializer.SerializerSettings);
 
-                    var content = new StringContent(messageBody, Encoding.UTF8, "application/vnd.masstransit+json");
+                    for (var i = 0; i < 5; i++)
+                    {
+                        var content = new StringContent(messageBody, Encoding.UTF8, "application/vnd.masstransit+json");
 
-                    var result = await client.PostAsync(_hostAddress, content);
+                        var timer = Stopwatch.StartNew();
 
-                    await Console.Out.WriteLineAsync("Request complete");
+                        string response;
+                        using (var result = await client.PostAsync(_hostAddress, content))
+                        {
+                            response = await result.Content.ReadAsStringAsync();
+                        }
 
+                        timer.Stop();
+
+                        await Console.Out.WriteLineAsync($"Request complete: {timer.ElapsedMilliseconds}ms");
+
+                        //    await Console.Out.WriteLineAsync(response);
+                    }
                 }
             }
             catch (Exception)
@@ -85,6 +96,57 @@ namespace MassTransit.HttpTransport.Tests
             //          await mc.Request(new Ping(), default(CancellationToken));
         }
 
+        [Test]
+        [Explicit]
+        public async Task Should_work_with_the_message_request_client_too()
+        {
+            _hostAddress = new Uri("http://localhost:8080");
+
+            var busControl = Bus.Factory.CreateUsingHttp(cfg =>
+            {
+                var mainHost = cfg.Host(_hostAddress, h =>
+                {
+                    h.Method = HttpMethod.Post;
+                });
+
+                cfg.ReceiveEndpoint(mainHost, ep =>
+                {
+                    ep.Consumer<HttpRequestConsumer>();
+                });
+            });
+
+            await busControl.StartAsync(TestCancellationToken);
+            try
+            {
+                IRequestClient<Request, Response> client = new MessageRequestClient<Request, Response>(busControl, _hostAddress, TimeSpan.FromSeconds(30));
+
+                var request = new Request {Value = "Hello"};
+
+
+                for (var i = 0; i < 5; i++)
+                {
+                    var timer = Stopwatch.StartNew();
+
+
+                    var result = await client.Request(request);
+
+                    timer.Stop();
+
+                    await Console.Out.WriteLineAsync($"Request complete: {timer.ElapsedMilliseconds}ms, Response = {result.ResponseValue}");
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            finally
+            {
+                await busControl.StopAsync().WithTimeout(TimeSpan.FromSeconds(30));
+            }
+        }
+
+        Uri _hostAddress;
+
 
         public class HttpRequestConsumer :
             IConsumer<Request>
@@ -93,7 +155,7 @@ namespace MassTransit.HttpTransport.Tests
             {
                 await Console.Out.WriteLineAsync($"Received Request: {context.Message.Value}");
 
-    //            context.Respond(new Response {RequestValue = context.Message.Value, ResponseValue = $"{context.Message.Value}, World."});
+                context.Respond(new Response {RequestValue = context.Message.Value, ResponseValue = $"{context.Message.Value}, World."});
             }
         }
 

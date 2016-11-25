@@ -19,7 +19,9 @@ namespace MassTransit.HttpTransport.Tests
     using Builders;
     using Clients;
     using GreenPipes;
+    using GreenPipes.Filters;
     using Hosting;
+    using MassTransit.Pipeline;
     using MassTransit.Pipeline.Pipes;
     using NUnit.Framework;
     using Serialization;
@@ -58,7 +60,7 @@ namespace MassTransit.HttpTransport.Tests
             hosts.Add(host);
 
             var ser = new JsonMessageSerializer();
-            var stp = new HttpSendTransportProvider(hosts);
+            var stp = new HttpSendTransportProvider(hosts, new ReceivePipe(Pipe.Empty<ReceiveContext>(), new ConsumePipe(new DynamicFilter<ConsumeContext, Guid>(new ConsumeContextConverterFactory(), x => x.RequestId ?? Guid.Empty), Pipe.Empty<ConsumeContext>())), new ReceiveObservable());
             SendPipe sp = null;
             var sep = new HttpSendEndpointProvider(ser, new Uri("http://localhost:8080"), stp, sp);
             var pep = new HttpPublishEndpointProvider(null, null, null,null,null);

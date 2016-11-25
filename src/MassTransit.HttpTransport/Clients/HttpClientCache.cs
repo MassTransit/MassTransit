@@ -18,6 +18,7 @@ namespace MassTransit.HttpTransport.Clients
     using System.Threading.Tasks;
     using GreenPipes;
     using Logging;
+    using MassTransit.Pipeline;
     using Util;
 
 
@@ -25,14 +26,16 @@ namespace MassTransit.HttpTransport.Clients
         ClientCache,
         IProbeSite
     {
+        readonly IReceivePipe _receivePipe;
         static readonly ILog _log = Logger.Get<HttpClientCache>();
         readonly ITaskScope _cacheTaskScope;
 
         readonly object _scopeLock = new object();
         ClientScope _scope;
 
-        public HttpClientCache(ITaskSupervisor supervisor)
+        public HttpClientCache(ITaskSupervisor supervisor, IReceivePipe receivePipe)
         {
+            _receivePipe = receivePipe;
             _cacheTaskScope = supervisor.CreateScope($"{TypeMetadataCache<HttpClientCache>.ShortName}", CloseScope);
         }
 
@@ -85,7 +88,7 @@ namespace MassTransit.HttpTransport.Clients
             try
             {
                 var client = new HttpClient();
-                var clientContext = new HttpClientContext(client, _cacheTaskScope);
+                var clientContext = new HttpClientContext(client, _receivePipe, _cacheTaskScope);
 
                 scope.Created(clientContext);
             }
@@ -152,12 +155,11 @@ namespace MassTransit.HttpTransport.Clients
                 _taskScope.Stop(new StopEventArgs($"Client faulted: {exception.Message}"));
             }
 
-            public async Task<HttpClientContext> Attach(CancellationToken cancellationToken)
+            public async Task<SharedHttpClientContext> Attach(CancellationToken cancellationToken)
             {
                 var clientContext = await _clientContext.Task.ConfigureAwait(false);
 
-                //TODO: new SharedClientContext(clientContext, concellationToken, _taskScope);
-                return clientContext;
+                return new SharedHttpClientContext(clientContext, cancellationToken, _taskScope);
             }
 
             async Task CloseContext()

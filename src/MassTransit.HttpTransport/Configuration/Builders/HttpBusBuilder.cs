@@ -15,8 +15,11 @@ namespace MassTransit.HttpTransport.Builders
     using System;
     using BusConfigurators;
     using Clients;
+    using GreenPipes;
     using MassTransit.Builders;
     using MassTransit.Pipeline;
+    using MassTransit.Pipeline.Filters;
+    using MassTransit.Pipeline.Pipes;
     using Specifications;
     using Transport;
     using Transports;
@@ -43,6 +46,8 @@ namespace MassTransit.HttpTransport.Builders
                 var factory = new HttpReceiveEndpointFactory(this, host);
 
                 host.ReceiveEndpointFactory = factory;
+
+                var responseFactory = new HttpResponseEndpointFactory(this, host, ConsumePipe);
             }
         }
 
@@ -73,7 +78,23 @@ namespace MassTransit.HttpTransport.Builders
 
         protected override ISendTransportProvider CreateSendTransportProvider()
         {
-            return new HttpSendTransportProvider(_hosts);
+            var receivePipe = CreateReceivePipe();
+
+            return new HttpSendTransportProvider(_hosts, receivePipe, new ReceiveObservable());
+        }
+
+        protected IReceivePipe CreateReceivePipe()
+        {
+            //            AddRescueFilter(builder);
+
+            var endpointBuilder = new HttpReceiveEndpointBuilder(_hosts[0], ConsumePipe, this);
+
+            IPipe<ReceiveContext> receivePipe = Pipe.New<ReceiveContext>(x =>
+            {
+                x.UseFilter(new DeserializeFilter(endpointBuilder.MessageDeserializer, ConsumePipe));
+            });
+
+            return new ReceivePipe(receivePipe, ConsumePipe);
         }
     }
 }
