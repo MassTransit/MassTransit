@@ -25,6 +25,7 @@ namespace MassTransit.HttpTransport
     using MassTransit.Pipeline;
     using Microsoft.Owin;
     using Pipeline;
+    using Transport;
     using Transports.Metrics;
     using Util;
 
@@ -36,30 +37,24 @@ namespace MassTransit.HttpTransport
 
         readonly Uri _inputAddress;
         readonly ILog _log = Logger.Get<HttpConsumerAction>();
-        readonly IMessageSerializer _messageSerializer;
         readonly ITaskParticipant _participant;
-        readonly IPublishEndpointProvider _publishEndpointProvider;
         readonly IReceiveObserver _receiveObserver;
+        readonly ReceiveSettings _receiveSettings;
         readonly IPipe<ReceiveContext> _receivePipe;
-        readonly ISendEndpointProvider _sendEndpointProvider;
         readonly ISendPipe _sendPipe;
         readonly IDeliveryTracker _tracker;
         bool _stopping;
 
         public HttpConsumerAction(IReceiveObserver receiveObserver,
             HttpHostSettings settings,
+            ReceiveSettings receiveSettings,
             IPipe<ReceiveContext> receivePipe,
             ITaskScope taskSupervisor,
-            ISendEndpointProvider sendEndpointProvider,
-            IPublishEndpointProvider publishEndpointProvider,
-            IMessageSerializer messageSerializer,
             ISendPipe sendPipe)
         {
             _receiveObserver = receiveObserver;
+            _receiveSettings = receiveSettings;
             _receivePipe = receivePipe;
-            _sendEndpointProvider = sendEndpointProvider;
-            _publishEndpointProvider = publishEndpointProvider;
-            _messageSerializer = messageSerializer;
             _sendPipe = sendPipe;
 
             _tracker = new DeliveryTracker(OnDeliveryComplete);
@@ -90,9 +85,9 @@ namespace MassTransit.HttpTransport
             using (_tracker.BeginDelivery())
             {
 
-                var responseProxy = new HttpResponseSendEndpointProvider(_sendEndpointProvider, owinContext, _messageSerializer, _inputAddress, _sendPipe);
+                var responseProxy = new HttpResponseSendEndpointProvider(_receiveSettings, owinContext, _inputAddress, _sendPipe);
 
-                var context = new HttpReceiveContext(owinContext, false, _receiveObserver, responseProxy, _publishEndpointProvider);
+                var context = new HttpReceiveContext(owinContext, false, _receiveObserver, responseProxy, _receiveSettings.PublishEndpointProvider);
 
                 try
                 {

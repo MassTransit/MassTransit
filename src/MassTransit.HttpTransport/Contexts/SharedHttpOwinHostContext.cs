@@ -14,8 +14,10 @@ namespace MassTransit.HttpTransport.Contexts
 {
     using System;
     using System.Threading;
+    using System.Threading.Tasks;
     using GreenPipes;
     using Hosting;
+    using Microsoft.Owin;
     using Util;
 
 
@@ -61,14 +63,19 @@ namespace MassTransit.HttpTransport.Contexts
 
         public HttpHostSettings HostSettings => _context.HostSettings;
 
-        public void StartHttpListener(HttpConsumerAction controller)
+        public void RegisterEndpointHandler(string pathMatch, HttpConsumerAction handler)
         {
-            _context.StartHttpListener(controller);
+            _context.RegisterEndpointHandler(pathMatch, handler);
         }
 
         public void StopHttpListener()
         {
             _context.StopHttpListener();
+        }
+
+        public void StartHost()
+        {
+            _context.StartHost();
         }
     }
 }

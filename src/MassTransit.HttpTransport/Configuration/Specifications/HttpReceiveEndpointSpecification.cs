@@ -31,13 +31,15 @@ namespace MassTransit.HttpTransport.Specifications
         IBusFactorySpecification
     {
         readonly IHttpHost _host;
+        readonly string _pathMatch;
         IPublishEndpointProvider _publishEndpointProvider;
         ISendEndpointProvider _sendEndpointProvider;
 
-        public HttpReceiveEndpointSpecification(IHttpHost host, IConsumePipe consumePipe = null)
+        public HttpReceiveEndpointSpecification(IHttpHost host, string pathMatch, IConsumePipe consumePipe = null)
             : base(consumePipe)
         {
             _host = host;
+            _pathMatch = pathMatch;
         }
 
         public ISendEndpointProvider SendEndpointProvider => _sendEndpointProvider;
@@ -47,6 +49,9 @@ namespace MassTransit.HttpTransport.Specifications
         {
             foreach (var result in base.Validate())
                 yield return result.WithParentKey($"{_host.Settings.ToDebugString()}");
+
+            if (_pathMatch.EndsWith("/"))
+                yield return this.Failure("PathMatch", "Must not end with a /");
         }
 
         public void Apply(IBusBuilder builder)
@@ -60,7 +65,9 @@ namespace MassTransit.HttpTransport.Specifications
 
             var sendPipe = builder.CreateSendPipe();
 
-            var transport = new HttpReceiveTransport(_host, _sendEndpointProvider, _publishEndpointProvider, receiveEndpointBuilder.MessageSerializer, sendPipe);
+            var receiveSettings = new Settings(_pathMatch, receiveEndpointBuilder.MessageSerializer, _sendEndpointProvider, _publishEndpointProvider);
+
+            var transport = new HttpReceiveTransport(_host, receiveSettings, sendPipe);
 
             var httpHost = _host as HttpHost;
             if (httpHost == null)
@@ -88,6 +95,25 @@ namespace MassTransit.HttpTransport.Specifications
             var sendSettings = new HttpSendSettingsImpl(HttpMethod.Delete, deadLetterQueueName);
 
             return _host.Settings.GetSendAddress(sendSettings);
+        }
+
+
+        class Settings :
+            ReceiveSettings
+        {
+            public Settings(string pathMatch, IMessageSerializer messageSerializer, ISendEndpointProvider sendEndpointProvider,
+                IPublishEndpointProvider publishEndpointProvider)
+            {
+                PathMatch = pathMatch;
+                MessageSerializer = messageSerializer;
+                SendEndpointProvider = sendEndpointProvider;
+                PublishEndpointProvider = publishEndpointProvider;
+            }
+
+            public string PathMatch { get; }
+            public IMessageSerializer MessageSerializer { get; }
+            public ISendEndpointProvider SendEndpointProvider { get; }
+            public IPublishEndpointProvider PublishEndpointProvider { get; }
         }
     }
 }

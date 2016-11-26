@@ -43,7 +43,7 @@ namespace MassTransit.HttpTransport.Tests
                     h.Method = HttpMethod.Post;
                 });
 
-                cfg.ReceiveEndpoint(mainHost, ep =>
+                cfg.ReceiveEndpoint(mainHost, "", ep =>
                 {
                     ep.Consumer<HttpRequestConsumer>();
                 });
@@ -98,6 +98,70 @@ namespace MassTransit.HttpTransport.Tests
 
         [Test]
         [Explicit]
+        public async Task Should_work_with_api_receive_endpoint()
+        {
+            _hostAddress = new Uri("http://localhost:8080");
+
+            var busControl = Bus.Factory.CreateUsingHttp(cfg =>
+            {
+                var mainHost = cfg.Host(_hostAddress, h =>
+                {
+                    h.Method = HttpMethod.Post;
+                });
+
+                cfg.ReceiveEndpoint(mainHost, "", ep =>
+                {
+                    ep.Consumer<HttpRequestConsumer>();
+                });
+
+                cfg.ReceiveEndpoint(mainHost, "/api", ep =>
+                {
+                    ep.Consumer<HttpApiRequestConsumer>();
+                });
+            });
+
+            await busControl.StartAsync(TestCancellationToken);
+            try
+            {
+                IRequestClient<Request, Response> client = new MessageRequestClient<Request, Response>(busControl, new Uri(_hostAddress, "/api"),
+                    TimeSpan.FromSeconds(30));
+
+                var request = new Request {Value = "Hello"};
+
+
+                Stopwatch timer;
+                Response result;
+                for (var i = 0; i < 5; i++)
+                {
+                    timer = Stopwatch.StartNew();
+
+                    result = await client.Request(request);
+
+                    timer.Stop();
+
+                    await Console.Out.WriteLineAsync($"Request complete: {timer.ElapsedMilliseconds}ms, Response = {result.ResponseValue}");
+                }
+
+                IRequestClient<Request, Response> rootClient = new MessageRequestClient<Request, Response>(busControl, _hostAddress, TimeSpan.FromSeconds(30));
+
+                timer = Stopwatch.StartNew();
+                result = await rootClient.Request(request);
+                timer.Stop();
+
+                await Console.Out.WriteLineAsync($"Request complete: {timer.ElapsedMilliseconds}ms, Response = {result.ResponseValue}");
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            finally
+            {
+                await busControl.StopAsync().WithTimeout(TimeSpan.FromSeconds(30));
+            }
+        }
+
+        [Test]
+        [Explicit]
         public async Task Should_work_with_the_message_request_client_too()
         {
             _hostAddress = new Uri("http://localhost:8080");
@@ -109,7 +173,7 @@ namespace MassTransit.HttpTransport.Tests
                     h.Method = HttpMethod.Post;
                 });
 
-                cfg.ReceiveEndpoint(mainHost, ep =>
+                cfg.ReceiveEndpoint(mainHost, "", ep =>
                 {
                     ep.Consumer<HttpRequestConsumer>();
                 });
@@ -156,6 +220,18 @@ namespace MassTransit.HttpTransport.Tests
                 await Console.Out.WriteLineAsync($"Received Request: {context.Message.Value}");
 
                 context.Respond(new Response {RequestValue = context.Message.Value, ResponseValue = $"{context.Message.Value}, World."});
+            }
+        }
+
+
+        public class HttpApiRequestConsumer :
+            IConsumer<Request>
+        {
+            public async Task Consume(ConsumeContext<Request> context)
+            {
+                await Console.Out.WriteLineAsync($"API Received Request: {context.Message.Value}");
+
+                context.Respond(new Response {RequestValue = context.Message.Value, ResponseValue = $"{context.Message.Value}, World. I am your API."});
             }
         }
 

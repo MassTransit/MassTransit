@@ -16,52 +16,46 @@ namespace MassTransit.HttpTransport
     using GreenPipes;
     using Hosting;
     using MassTransit.Pipeline;
+    using Transport;
     using Util;
 
 
     public class HttpConsumerPipeSpecification :
         IPipeSpecification<OwinHostContext>
     {
-        readonly IMessageSerializer _messageSerializer;
-        readonly IPublishEndpointProvider _publishEndpointProvider;
         readonly IReceiveObserver _receiveObserver;
         readonly IPipe<ReceiveContext> _receivePipe;
-        readonly ISendEndpointProvider _sendEndpointProvider;
         readonly ISendPipe _sendPipe;
-        readonly HttpHostSettings _settings;
+        readonly HttpHostSettings _hostSettings;
+        readonly ReceiveSettings _receiveSettings;
         readonly ITaskSupervisor _supervisor;
         readonly IReceiveTransportObserver _transportObserver;
 
-        public HttpConsumerPipeSpecification(HttpHostSettings settings,
+        public HttpConsumerPipeSpecification(HttpHostSettings hostSettings,
+            ReceiveSettings receiveSettings,
             IPipe<ReceiveContext> receivePipe,
             IReceiveObserver receiveObserver,
             IReceiveTransportObserver transportObserver,
             ITaskSupervisor supervisor,
-            ISendEndpointProvider sendEndpointProvider,
-            IPublishEndpointProvider publishEndpointProvider,
-            IMessageSerializer messageSerializer,
             ISendPipe sendPipe)
         {
-            _settings = settings;
+            _hostSettings = hostSettings;
+            _receiveSettings = receiveSettings;
             _receivePipe = receivePipe;
             _receiveObserver = receiveObserver;
             _transportObserver = transportObserver;
             _supervisor = supervisor;
-            _sendEndpointProvider = sendEndpointProvider;
-            _publishEndpointProvider = publishEndpointProvider;
-            _messageSerializer = messageSerializer;
             _sendPipe = sendPipe;
         }
 
         public void Apply(IPipeBuilder<OwinHostContext> builder)
         {
-            builder.AddFilter(new HttpConsumerFilter(_receivePipe, _receiveObserver, _transportObserver, _supervisor, _settings, _sendEndpointProvider,
-                _publishEndpointProvider, _messageSerializer, _sendPipe));
+            builder.AddFilter(new HttpConsumerFilter(_receivePipe, _receiveObserver, _transportObserver, _supervisor, _hostSettings, _receiveSettings, _sendPipe));
         }
 
         public IEnumerable<ValidationResult> Validate()
         {
-            if (_settings == null)
+            if (_hostSettings == null)
                 yield return this.Failure("Settings", "must not be null");
         }
     }

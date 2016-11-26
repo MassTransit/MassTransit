@@ -67,15 +67,15 @@ namespace MassTransit.HttpTransport.Specifications
 
         public void ReceiveEndpoint(Action<IHttpReceiveEndpointConfigurator> configure = null)
         {
-            ReceiveEndpoint(_hosts[0], configure);
+            ReceiveEndpoint(_hosts[0], "", configure);
         }
 
-        public void ReceiveEndpoint(IHttpHost host, Action<IHttpReceiveEndpointConfigurator> configure = null)
+        public void ReceiveEndpoint(IHttpHost host, string pathMatch, Action<IHttpReceiveEndpointConfigurator> configure = null)
         {
             if (host == null)
                 throw new ArgumentNullException(nameof(host));
 
-            var specification = new HttpReceiveEndpointSpecification(host);
+            var specification = new HttpReceiveEndpointSpecification(host, pathMatch);
 
             configure?.Invoke(specification);
 

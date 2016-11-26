@@ -19,6 +19,7 @@ namespace MassTransit.HttpTransport
     using Logging;
     using MassTransit.Pipeline;
     using Pipeline;
+    using Transport;
     using Util;
 
 
@@ -26,35 +27,28 @@ namespace MassTransit.HttpTransport
         IFilter<OwinHostContext>
     {
         static readonly ILog _log = Logger.Get<HttpConsumerFilter>();
-        readonly IMessageSerializer _messageSerializer;
-        readonly IPublishEndpointProvider _publishEndpointProvider;
         readonly IReceiveObserver _receiveObserver;
         readonly IPipe<ReceiveContext> _receivePipe;
-        readonly ISendEndpointProvider _sendEndpointProvider;
         readonly ISendPipe _sendPipe;
-        readonly HttpHostSettings _settings;
+        readonly HttpHostSettings _hostSettings;
+        readonly ReceiveSettings _receiveSettings;
         readonly ITaskSupervisor _supervisor;
-
         readonly IReceiveTransportObserver _transportObserver;
 
         public HttpConsumerFilter(IPipe<ReceiveContext> receivePipe,
             IReceiveObserver receiveObserver,
             IReceiveTransportObserver transportObserver,
             ITaskSupervisor supervisor,
-            HttpHostSettings settings,
-            ISendEndpointProvider sendEndpointProvider,
-            IPublishEndpointProvider publishEndpointProvider,
-            IMessageSerializer messageSerializer,
+            HttpHostSettings hostSettings,
+            ReceiveSettings receiveSettings,
             ISendPipe sendPipe)
         {
             _receivePipe = receivePipe;
             _receiveObserver = receiveObserver;
             _transportObserver = transportObserver;
             _supervisor = supervisor;
-            _settings = settings;
-            _sendEndpointProvider = sendEndpointProvider;
-            _publishEndpointProvider = publishEndpointProvider;
-            _messageSerializer = messageSerializer;
+            _hostSettings = hostSettings;
+            _receiveSettings = receiveSettings;
             _sendPipe = sendPipe;
         }
 
@@ -69,10 +63,9 @@ namespace MassTransit.HttpTransport
 
             using (var scope = _supervisor.CreateScope($"{TypeMetadataCache<HttpConsumerFilter>.ShortName} - {inputAddress}", () => TaskUtil.Completed))
             {
-                var controller = new HttpConsumerAction(_receiveObserver, _settings, _receivePipe, scope, _sendEndpointProvider, _publishEndpointProvider,
-                    _messageSerializer, _sendPipe);
+                var controller = new HttpConsumerAction(_receiveObserver, _hostSettings, _receiveSettings, _receivePipe, scope, _sendPipe);
 
-                context.StartHttpListener(controller);
+                context.RegisterEndpointHandler(_receiveSettings.PathMatch, controller);
 
                 await scope.Ready.ConfigureAwait(false);
 

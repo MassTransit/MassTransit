@@ -21,8 +21,18 @@ namespace MassTransit.HttpTransport
     {
         IHttpHost Host(HttpHostSettings settings);
 
+        /// <summary>
+        /// Maps a handler to the path specified
+        /// </summary>
+        /// <param name="configure">Configures the receive endpoint on this path</param>
         void ReceiveEndpoint(Action<IHttpReceiveEndpointConfigurator> configure = null);
 
-        void ReceiveEndpoint(IHttpHost host, Action<IHttpReceiveEndpointConfigurator> configure = null);
+        /// <summary>
+        /// Maps a handler to the path specified
+        /// </summary>
+        /// <param name="host">The host on which to connect the path/handler</param>
+        /// <param name="pathMatch">The path to match for this handler</param>
+        /// <param name="configure">Configures the receive endpoint on this path</param>
+        void ReceiveEndpoint(IHttpHost host, string pathMatch, Action<IHttpReceiveEndpointConfigurator> configure = null);
     }
 }

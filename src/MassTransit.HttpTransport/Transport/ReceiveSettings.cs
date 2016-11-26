@@ -12,11 +12,17 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.HttpTransport.Transport
 {
-    using System;
-
-
-    public interface IHttpReceiveEndpointFactory
+    public interface ReceiveSettings
     {
-        void CreateReceiveEndpoint(string pathMatch, Action<IHttpReceiveEndpointConfigurator> configure);
+        /// <summary>
+        /// The path for the receiver
+        /// </summary>
+        string PathMatch { get; }
+
+        IMessageSerializer MessageSerializer { get; }
+
+        ISendEndpointProvider SendEndpointProvider { get; }
+
+        IPublishEndpointProvider PublishEndpointProvider { get; }
     }
 }

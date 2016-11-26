@@ -21,8 +21,9 @@ namespace MassTransit.HttpTransport
     {
         HttpHostSettings HostSettings { get; }
 
-        void StartHttpListener(HttpConsumerAction controller);
+        void RegisterEndpointHandler(string pathMatch, HttpConsumerAction handler);
 
         void StopHttpListener();
+        void StartHost();
     }
 }

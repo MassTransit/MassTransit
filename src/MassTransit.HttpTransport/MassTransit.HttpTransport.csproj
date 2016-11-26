@@ -126,6 +126,7 @@
     <Compile Include="IHttpHost.cs" />
     <Compile Include="Pipeline\HttpConsumerMetrics.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Transport\ReceiveSettings.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MassTransit\MassTransit.csproj">

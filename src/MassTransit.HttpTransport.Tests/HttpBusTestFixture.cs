@@ -129,7 +129,7 @@ namespace MassTransit.HttpTransport.Tests
             {
                 ConfigureBus(x);
 
-                x.ReceiveEndpoint(Host, ConfigureInputQueueEndpoint);
+                x.ReceiveEndpoint(Host, "/", ConfigureInputQueueEndpoint);
             });
         }
     }

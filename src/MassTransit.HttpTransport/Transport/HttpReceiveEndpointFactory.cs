@@ -15,7 +15,6 @@ namespace MassTransit.HttpTransport.Transport
     using System;
     using Builders;
     using Configurators;
-    using MassTransit.Pipeline;
     using Specifications;
 
 
@@ -31,30 +30,15 @@ namespace MassTransit.HttpTransport.Transport
             _host = host;
         }
 
-        public void CreateReceiveEndpoint(Action<IHttpReceiveEndpointConfigurator> configure)
+        public void CreateReceiveEndpoint(string pathMatch, Action<IHttpReceiveEndpointConfigurator> configure)
         {
-            var endpointConfigurator = new HttpReceiveEndpointSpecification(_host);
+            var endpointConfigurator = new HttpReceiveEndpointSpecification(_host, pathMatch);
 
             configure?.Invoke(endpointConfigurator);
 
             BusConfigurationResult.CompileResults(endpointConfigurator.Validate());
 
             endpointConfigurator.Apply(_builder);
-        }
-    }
-
-
-    public class HttpResponseEndpointFactory
-    {
-        readonly HttpBusBuilder _builder;
-        readonly IConsumePipe _consumePipe;
-        readonly IHttpHost _host;
-
-        public HttpResponseEndpointFactory(HttpBusBuilder builder, IHttpHost host, IConsumePipe consumePipe)
-        {
-            _builder = builder;
-            _host = host;
-            _consumePipe = consumePipe;
         }
     }
 }

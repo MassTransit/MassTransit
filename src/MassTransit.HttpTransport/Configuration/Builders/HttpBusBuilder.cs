@@ -39,15 +39,13 @@ namespace MassTransit.HttpTransport.Builders
         {
             _hosts = hosts;
 
-            _busEndpointSpecification = new HttpReceiveEndpointSpecification(_hosts[0], ConsumePipe);
+            _busEndpointSpecification = new HttpReceiveEndpointSpecification(_hosts[0], "", ConsumePipe);
 
             foreach (var host in hosts.Hosts)
             {
                 var factory = new HttpReceiveEndpointFactory(this, host);
 
                 host.ReceiveEndpointFactory = factory;
-
-                var responseFactory = new HttpResponseEndpointFactory(this, host, ConsumePipe);
             }
         }
 

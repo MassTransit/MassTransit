@@ -52,28 +52,28 @@ namespace MassTransit.HttpTransport.Tests
             }
         }
 
-        [Test]
-        public async Task HttpHost_Endpoints()
-        {
-            var host = new HttpHost(new ConfigurationHostSettings("http", "localhost", 8080, HttpMethod.Post));
-            var hosts = new BusHostCollection<HttpHost>();
-            hosts.Add(host);
-
-            var ser = new JsonMessageSerializer();
-            var stp = new HttpSendTransportProvider(hosts, new ReceivePipe(Pipe.Empty<ReceiveContext>(), new ConsumePipe(new DynamicFilter<ConsumeContext, Guid>(new ConsumeContextConverterFactory(), x => x.RequestId ?? Guid.Empty), Pipe.Empty<ConsumeContext>())), new ReceiveObservable());
-            SendPipe sp = null;
-            var sep = new HttpSendEndpointProvider(ser, new Uri("http://localhost:8080"), stp, sp);
-            var pep = new HttpPublishEndpointProvider(null, null, null,null,null);
-            var httpReceiveTransport = new HttpReceiveTransport(host, sep, pep, ser, null);
-            var receiveTransportHandle = httpReceiveTransport.Start(Pipe.Empty<ReceiveContext>());
-
-            var handle = await host.Start();
-            using (var tokenSource = new CancellationTokenSource(TimeSpan.FromMinutes(1)))
-            {
-                await receiveTransportHandle.Stop(tokenSource.Token);
-                await handle.Stop(tokenSource.Token);
-            }
-        }
+//        [Test]
+//        public async Task HttpHost_Endpoints()
+//        {
+//            var host = new HttpHost(new ConfigurationHostSettings("http", "localhost", 8080, HttpMethod.Post));
+//            var hosts = new BusHostCollection<HttpHost>();
+//            hosts.Add(host);
+//
+//            var ser = new JsonMessageSerializer();
+//            var stp = new HttpSendTransportProvider(hosts, new ReceivePipe(Pipe.Empty<ReceiveContext>(), new ConsumePipe(new DynamicFilter<ConsumeContext, Guid>(new ConsumeContextConverterFactory(), x => x.RequestId ?? Guid.Empty), Pipe.Empty<ConsumeContext>())), new ReceiveObservable());
+//            SendPipe sp = null;
+//            var sep = new HttpSendEndpointProvider(ser, new Uri("http://localhost:8080"), stp, sp);
+//            var pep = new HttpPublishEndpointProvider(null, null, null,null,null);
+//            var httpReceiveTransport = new HttpReceiveTransport(host, sep, pep, ser, null);
+//            var receiveTransportHandle = httpReceiveTransport.Start(Pipe.Empty<ReceiveContext>());
+//
+//            var handle = await host.Start();
+//            using (var tokenSource = new CancellationTokenSource(TimeSpan.FromMinutes(1)))
+//            {
+//                await receiveTransportHandle.Stop(tokenSource.Token);
+//                await handle.Stop(tokenSource.Token);
+//            }
+//        }
 
         [Test]
         public void Endpoint()

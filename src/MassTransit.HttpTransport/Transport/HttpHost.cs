@@ -56,6 +56,9 @@ namespace MassTransit.HttpTransport.Transport
 
         public async Task<HostHandle> Start()
         {
+            TaskCompletionSource<HostReceiveEndpointHandle[]> handlesReady = new TaskCompletionSource<HostReceiveEndpointHandle[]>();
+            TaskCompletionSource<bool> hostStarted = new TaskCompletionSource<bool>();
+
             IPipe<OwinHostContext> connectionPipe = Pipe.ExecuteAsync<OwinHostContext>(async context =>
             {
                 if (_log.IsDebugEnabled)
@@ -63,12 +66,25 @@ namespace MassTransit.HttpTransport.Transport
 
                 try
                 {
+                    var endpointHandles = await handlesReady.Task.ConfigureAwait(false);
+
+                    context.StartHost();
+
+                    hostStarted.TrySetResult(true);
+
                     //Wait until someone shuts down the bus - Parked thread.
                     await _supervisor.StopRequested.ConfigureAwait(false);
                 }
-                catch (OperationCanceledException)
+                catch (OperationCanceledException ex)
                 {
+                    hostStarted.TrySetException(ex);
                 }
+                catch (Exception ex)
+                {
+                    hostStarted.TrySetException(ex);
+                    throw;
+                }
+
             });
 
             if (_log.IsDebugEnabled)
@@ -78,6 +94,9 @@ namespace MassTransit.HttpTransport.Transport
 
             HostReceiveEndpointHandle[] handles = await ReceiveEndpoints.StartEndpoints().ConfigureAwait(false);
 
+            handlesReady.TrySetResult(handles);
+
+            await hostStarted.Task.ConfigureAwait(false);
 
             return new Handle(connectionTask, handles, _supervisor, this);
         }
