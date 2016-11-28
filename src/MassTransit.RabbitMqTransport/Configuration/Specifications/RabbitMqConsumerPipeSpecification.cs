@@ -43,7 +43,7 @@ namespace MassTransit.RabbitMqTransport.Specifications
             _receiveObserver = receiveObserver;
             _transportObserver = transportObserver;
             _supervisor = supervisor;
-            _exchangeBindings = exchangeBindings.ToArray();
+            _exchangeBindings = exchangeBindings.Distinct().ToArray();
             _receivePipe = receivePipe;
             _managementPipe = managementPipe;
             _sendEndpointProvider = sendEndpointProvider;

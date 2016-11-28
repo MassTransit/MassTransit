@@ -37,16 +37,17 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
 
         static readonly INewIdFormatter _formatter = new ZBase32Formatter();
         readonly ReceiveSettings _settings;
-        readonly TopicSubscriptionSettings[] _subscriptionSettings;
+        readonly TopicSubscriptionSettings[] _subscriptions;
 
-        public PrepareReceiveEndpointFilter(ReceiveSettings settings, params TopicSubscriptionSettings[] subscriptionSettings)
+        public PrepareReceiveEndpointFilter(ReceiveSettings settings, params TopicSubscriptionSettings[] subscriptions)
         {
             _settings = settings;
-            _subscriptionSettings = subscriptionSettings;
+            _subscriptions = subscriptions;
         }
 
         void IProbeSite.Probe(ProbeContext context)
         {
+            context.CreateFilterScope("prepareReceiveEndpoint");
         }
 
         public async Task Send(NamespaceContext context, IPipe<NamespaceContext> next)
@@ -54,9 +55,9 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
             await context.CreateQueue(_settings.QueueDescription).ConfigureAwait(false);
 
             var subscriptions = new Func<Task>[0];
-            if (_subscriptionSettings.Length > 0)
+            if (_subscriptions.Length > 0)
             {
-                subscriptions = await Task.WhenAll(_subscriptionSettings.Select(s => CreateSubscription(context, context.NamespaceManager, s)))
+                subscriptions = await Task.WhenAll(_subscriptions.Select(s => CreateSubscription(context, context.NamespaceManager, s)))
                     .ConfigureAwait(false);
             }
 

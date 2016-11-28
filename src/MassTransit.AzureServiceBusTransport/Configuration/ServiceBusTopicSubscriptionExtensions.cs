@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -28,7 +28,7 @@ namespace MassTransit.AzureServiceBusTransport
             if (!IsSubscriptionMessageType(messageType))
                 yield break;
 
-            bool temporary = IsTemporaryMessageType(messageType);
+            var temporary = IsTemporaryMessageType(messageType);
 
             var topicDescription = Defaults.CreateTopicDescription(messageNameFormatter.GetMessageName(messageType).ToString());
             topicDescription.EnableExpress = temporary;
@@ -48,7 +48,7 @@ namespace MassTransit.AzureServiceBusTransport
 
         public static Uri GetTopicAddress(this IMessageNameFormatter messageNameFormatter, IServiceBusHost host, Type messageType)
         {
-            string messageName = messageNameFormatter.GetMessageName(messageType).ToString();
+            var messageName = messageNameFormatter.GetMessageName(messageType).ToString();
 
             var builder = new UriBuilder(host.Settings.ServiceUri)
             {
@@ -74,6 +74,27 @@ namespace MassTransit.AzureServiceBusTransport
             }
 
             public TopicDescription Topic { get; }
+
+            protected bool Equals(TopicSubscription other)
+            {
+                return Topic.Path.Equals(other.Topic.Path);
+            }
+
+            public override bool Equals(object obj)
+            {
+                if (ReferenceEquals(null, obj))
+                    return false;
+                if (ReferenceEquals(this, obj))
+                    return true;
+                if (obj.GetType() != GetType())
+                    return false;
+                return Equals((TopicSubscription)obj);
+            }
+
+            public override int GetHashCode()
+            {
+                return Topic.Path.GetHashCode();
+            }
         }
     }
 }

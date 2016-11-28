@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -26,7 +26,7 @@ namespace MassTransit.RabbitMqTransport.Topology
             if (!IsBindableMessageType(messageType))
                 yield break;
 
-            bool temporary = IsTemporaryMessageType(messageType);
+            var temporary = IsTemporaryMessageType(messageType);
 
             var exchange = new Exchange(messageNameFormatter.GetMessageName(messageType).ToString(), !temporary, temporary);
 
@@ -94,6 +94,27 @@ namespace MassTransit.RabbitMqTransport.Topology
             public bool Durable { get; }
             public bool AutoDelete { get; }
             public IDictionary<string, object> Arguments { get; }
+
+            protected bool Equals(Exchange other)
+            {
+                return string.Equals(ExchangeName, other.ExchangeName);
+            }
+
+            public override bool Equals(object obj)
+            {
+                if (ReferenceEquals(null, obj))
+                    return false;
+                if (ReferenceEquals(this, obj))
+                    return true;
+                if (obj.GetType() != GetType())
+                    return false;
+                return Equals((Exchange)obj);
+            }
+
+            public override int GetHashCode()
+            {
+                return ExchangeName.GetHashCode();
+            }
         }
 
 
@@ -110,6 +131,30 @@ namespace MassTransit.RabbitMqTransport.Topology
             public ExchangeSettings Exchange { get; }
             public string RoutingKey { get; }
             public IDictionary<string, object> Arguments { get; }
+
+            protected bool Equals(ExchangeBinding other)
+            {
+                return Equals(Exchange, other.Exchange) && string.Equals(RoutingKey, other.RoutingKey);
+            }
+
+            public override bool Equals(object obj)
+            {
+                if (ReferenceEquals(null, obj))
+                    return false;
+                if (ReferenceEquals(this, obj))
+                    return true;
+                if (obj.GetType() != GetType())
+                    return false;
+                return Equals((ExchangeBinding)obj);
+            }
+
+            public override int GetHashCode()
+            {
+                unchecked
+                {
+                    return ((Exchange?.GetHashCode() ?? 0) * 397) ^ (RoutingKey?.GetHashCode() ?? 0);
+                }
+            }
         }
     }
 }

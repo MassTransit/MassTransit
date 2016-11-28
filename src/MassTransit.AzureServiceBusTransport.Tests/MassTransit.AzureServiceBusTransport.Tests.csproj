@@ -80,6 +80,7 @@
     <Compile Include="Basic_Specs.cs" />
     <Compile Include="ConfiguringAzure_Specs.cs" />
     <Compile Include="ContextSetup.cs" />
+    <Compile Include="DuplicateSubscription_Specs.cs" />
     <Compile Include="ErrorQueue_Specs.cs" />
     <Compile Include="Express_Specs.cs" />
     <Compile Include="IAzureServiceBusTokenProvider.cs" />

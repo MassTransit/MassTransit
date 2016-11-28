@@ -126,7 +126,7 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
             var receivePipe = CreateReceivePipe(receiveEndpointBuilder);
 
             ApplyReceiveEndpoint(receiveEndpointBuilder, receivePipe,
-                new PrepareReceiveEndpointFilter(_settings, receiveEndpointBuilder.GetTopicSubscriptions().ToArray()),
+                new PrepareReceiveEndpointFilter(_settings, receiveEndpointBuilder.GetTopicSubscriptions().Distinct().ToArray()),
                 new PrepareQueueClientFilter(_settings));
         }
 
