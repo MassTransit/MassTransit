@@ -43,10 +43,10 @@ namespace MassTransit.Host.Quartz
             var partitioner = configurator.CreatePartitioner(ConsumerLimit);
 
             configurator.Consumer(_scheduleMessageConsumerFactory, x =>
-                x.ConfigureMessage<ScheduleMessage>(m => m.UsePartitioner(partitioner, p => p.Message.CorrelationId)));
+                x.Message<ScheduleMessage>(m => m.UsePartitioner(partitioner, p => p.Message.CorrelationId)));
 
             configurator.Consumer(_cancelScheduledMessageConsumerFactory, x =>
-                x.ConfigureMessage<CancelScheduledMessage>(m => m.UsePartitioner(partitioner, p => p.Message.TokenId)));
+                x.Message<CancelScheduledMessage>(m => m.UsePartitioner(partitioner, p => p.Message.TokenId)));
 
             _configureMessageScheduler.SchedulerAddress = configurator.InputAddress;
         }

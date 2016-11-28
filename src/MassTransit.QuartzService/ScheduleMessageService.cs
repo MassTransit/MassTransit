@@ -64,9 +64,9 @@ namespace MassTransit.QuartzService
                             var partitioner = endpoint.CreatePartitioner(_consumerLimit);
 
                             endpoint.Consumer(() => new ScheduleMessageConsumer(_scheduler), x =>
-                                x.ConfigureMessage<ScheduleMessage>(m => m.UsePartitioner(partitioner, p => p.Message.CorrelationId)));
+                                x.Message<ScheduleMessage>(m => m.UsePartitioner(partitioner, p => p.Message.CorrelationId)));
                             endpoint.Consumer(() => new CancelScheduledMessageConsumer(_scheduler), x =>
-                                x.ConfigureMessage<CancelScheduledMessage>(m => m.UsePartitioner(partitioner, p => p.Message.TokenId)));
+                                x.Message<CancelScheduledMessage>(m => m.UsePartitioner(partitioner, p => p.Message.TokenId)));
                         });
                     });
                 }

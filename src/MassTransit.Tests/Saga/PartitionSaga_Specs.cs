@@ -61,7 +61,7 @@ namespace MassTransit.Tests.Saga
 
             configurator.Saga(_repository, x =>
             {
-                x.ConfigureMessage<CreateSaga>(m => m.UsePartitioner(4, p => p.Message.CorrelationId));
+                x.Message<CreateSaga>(m => m.UsePartitioner(4, p => p.Message.CorrelationId));
             });
         }
 

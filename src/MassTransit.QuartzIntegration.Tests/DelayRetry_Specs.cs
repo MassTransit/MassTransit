@@ -106,7 +106,7 @@ namespace MassTransit.QuartzIntegration.Tests
 
             configurator.Consumer(() => _consumer, x =>
             {
-                x.ConfigureMessage<PingMessage>(m => m.UseScheduledRedelivery(r => r.Intervals(1000, 2000)));
+                x.Message<PingMessage>(m => m.UseScheduledRedelivery(r => r.Intervals(1000, 2000)));
             });
         }
 

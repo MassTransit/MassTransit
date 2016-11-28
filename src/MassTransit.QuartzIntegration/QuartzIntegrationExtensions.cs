@@ -36,9 +36,9 @@ namespace MassTransit
                 var partitioner = configurator.CreatePartitioner(16);
 
                 e.Consumer(() => new ScheduleMessageConsumer(scheduler), x =>
-                    x.ConfigureMessage<ScheduleMessage>(m => m.UsePartitioner(partitioner, p => p.Message.CorrelationId)));
+                    x.Message<ScheduleMessage>(m => m.UsePartitioner(partitioner, p => p.Message.CorrelationId)));
                 e.Consumer(() => new CancelScheduledMessageConsumer(scheduler), x =>
-                    x.ConfigureMessage<CancelScheduledMessage>(m => m.UsePartitioner(partitioner, p => p.Message.TokenId)));
+                    x.Message<CancelScheduledMessage>(m => m.UsePartitioner(partitioner, p => p.Message.TokenId)));
 
                 configurator.UseMessageScheduler(e.InputAddress);
 

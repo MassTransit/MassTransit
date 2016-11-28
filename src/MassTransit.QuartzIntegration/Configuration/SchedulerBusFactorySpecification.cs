@@ -15,7 +15,6 @@ namespace MassTransit.QuartzIntegration.Configuration
     using System;
     using System.Collections.Generic;
     using Builders;
-    using Configurators;
     using GreenPipes;
     using Quartz;
 

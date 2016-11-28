@@ -43,15 +43,15 @@ namespace MassTransit
         public static void RoutingSlipEventConsumers(this IReceiveEndpointConfigurator configurator, IRoutingSlipEventPersister persister, IPartitioner partitioner)
         {
             configurator.Consumer(() => new RoutingSlipCompletedConsumer(persister),
-                x => x.ConfigureMessage<RoutingSlipCompleted>(y => y.UsePartitioner(partitioner, p => p.Message.TrackingNumber)));
+                x => x.Message<RoutingSlipCompleted>(y => y.UsePartitioner(partitioner, p => p.Message.TrackingNumber)));
             configurator.Consumer(() => new RoutingSlipFaultedConsumer(persister),
-                x => x.ConfigureMessage<RoutingSlipFaulted>(y => y.UsePartitioner(partitioner, p => p.Message.TrackingNumber)));
+                x => x.Message<RoutingSlipFaulted>(y => y.UsePartitioner(partitioner, p => p.Message.TrackingNumber)));
             configurator.Consumer(() => new RoutingSlipCompensationFailedConsumer(persister),
-                x => x.ConfigureMessage<RoutingSlipCompensationFailed>(y => y.UsePartitioner(partitioner, p => p.Message.TrackingNumber)));
+                x => x.Message<RoutingSlipCompensationFailed>(y => y.UsePartitioner(partitioner, p => p.Message.TrackingNumber)));
             configurator.Consumer(() => new RoutingSlipRevisedConsumer(persister),
-                x => x.ConfigureMessage<RoutingSlipRevised>(y => y.UsePartitioner(partitioner, p => p.Message.TrackingNumber)));
+                x => x.Message<RoutingSlipRevised>(y => y.UsePartitioner(partitioner, p => p.Message.TrackingNumber)));
             configurator.Consumer(() => new RoutingSlipTerminatedConsumer(persister),
-                x => x.ConfigureMessage<RoutingSlipTerminated>(y => y.UsePartitioner(partitioner, p => p.Message.TrackingNumber)));
+                x => x.Message<RoutingSlipTerminated>(y => y.UsePartitioner(partitioner, p => p.Message.TrackingNumber)));
         }
 
         /// <summary>
@@ -76,13 +76,13 @@ namespace MassTransit
         public static void RoutingSlipActivityEventConsumers(this IReceiveEndpointConfigurator configurator, IRoutingSlipEventPersister persister, IPartitioner partitioner)
         {
             configurator.Consumer(() => new RoutingSlipActivityCompensatedConsumer(persister),
-                x => x.ConfigureMessage<RoutingSlipActivityCompensated>(y => y.UsePartitioner(partitioner, p => p.Message.TrackingNumber)));
+                x => x.Message<RoutingSlipActivityCompensated>(y => y.UsePartitioner(partitioner, p => p.Message.TrackingNumber)));
             configurator.Consumer(() => new RoutingSlipActivityCompletedConsumer(persister),
-                x => x.ConfigureMessage<RoutingSlipActivityCompleted>(y => y.UsePartitioner(partitioner, p => p.Message.TrackingNumber)));
+                x => x.Message<RoutingSlipActivityCompleted>(y => y.UsePartitioner(partitioner, p => p.Message.TrackingNumber)));
             configurator.Consumer(() => new RoutingSlipActivityFaultedConsumer(persister),
-                x => x.ConfigureMessage<RoutingSlipActivityFaulted>(y => y.UsePartitioner(partitioner, p => p.Message.TrackingNumber)));
+                x => x.Message<RoutingSlipActivityFaulted>(y => y.UsePartitioner(partitioner, p => p.Message.TrackingNumber)));
             configurator.Consumer(() => new RoutingSlipActivityCompensationFailedConsumer(persister),
-                x => x.ConfigureMessage<RoutingSlipActivityCompensationFailed>(y => y.UsePartitioner(partitioner, p => p.Message.TrackingNumber)));
+                x => x.Message<RoutingSlipActivityCompensationFailed>(y => y.UsePartitioner(partitioner, p => p.Message.TrackingNumber)));
         }
     }
 }

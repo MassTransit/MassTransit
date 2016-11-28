@@ -50,7 +50,7 @@ namespace MassTransit.Tests.Pipeline
 
             configurator.Consumer(() => _consumer, x =>
             {
-                x.ConfigureMessage<TestMessage>(v => v.UseContentFilter(async context => context.Message.Key == "ACCEPT"));
+                x.Message<TestMessage>(v => v.UseContentFilter(async context => context.Message.Key == "ACCEPT"));
             });
 
             _accepted = Handled<TestMessage>(configurator, x => x.Message.Key == "ACCEPT");

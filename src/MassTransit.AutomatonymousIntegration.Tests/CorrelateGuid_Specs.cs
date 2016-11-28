@@ -37,7 +37,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
 
             configurator.StateMachineSaga(_machine, _repository, x =>
             {
-                x.ConfigureMessage<BeginTransaction>(m => m.UsePartitioner(4, p => p.Message.TransactionId));
+                x.Message<BeginTransaction>(m => m.UsePartitioner(4, p => p.Message.TransactionId));
             });
         }
 

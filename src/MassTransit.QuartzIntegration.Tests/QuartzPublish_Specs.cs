@@ -44,7 +44,7 @@ namespace MassTransit.QuartzIntegration.Tests
 
             Bus.ConnectConsumer(() => new SomeMessageConsumer());
 
-            await Bus.ScheduleMessage(DateTime.Now, new SomeMessage
+            await Bus.ScheduleSend(Bus.Address, DateTime.Now, new SomeMessage
             {
                 SendDate = DateTime.Now,
                 Source = "Schedule"

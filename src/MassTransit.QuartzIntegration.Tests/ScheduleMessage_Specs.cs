@@ -28,7 +28,7 @@ namespace MassTransit.QuartzIntegration.Tests
         {
             _first = Handler<FirstMessage>(configurator, async context =>
             {
-                await context.ScheduleMessage(DateTime.Now, new SecondMessage());
+                await context.ScheduleMessage(DateTime.Now + TimeSpan.FromSeconds(10), new SecondMessage());
             });
 
             _second = Handled<SecondMessage>(configurator);
@@ -48,9 +48,11 @@ namespace MassTransit.QuartzIntegration.Tests
         [Test]
         public async Task Should_get_both_messages()
         {
-            await Bus.ScheduleMessage(InputQueueAddress, DateTime.Now, new FirstMessage());
+            await Bus.ScheduleSend(InputQueueAddress, DateTime.Now, new FirstMessage());
 
             await _first;
+
+            AdvanceTime(TimeSpan.FromSeconds(10));
 
             await _second;
         }

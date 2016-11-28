@@ -29,7 +29,7 @@ namespace MassTransit.QuartzIntegration.Tests
             Task<ConsumeContext<A>> handlerA = SubscribeHandler<A>();
             Task<ConsumeContext<IA>> handlerIA = SubscribeHandler<IA>();
 
-            await Bus.ScheduleMessage(DateTime.UtcNow + TimeSpan.FromSeconds(1), new A {Name = "Joe"});
+            await Bus.ScheduleSend(Bus.Address, DateTime.UtcNow + TimeSpan.FromSeconds(1), new A {Name = "Joe"});
 
             await handlerA;
             await handlerIA;
@@ -59,7 +59,7 @@ namespace MassTransit.QuartzIntegration.Tests
             Task<ConsumeContext<A>> handlerA = SubscribeHandler<A>();
             Task<ConsumeContext<IA>> handlerIA = SubscribeHandler<IA>();
 
-            await Bus.ScheduleMessage(DateTime.UtcNow + TimeSpan.FromSeconds(1), new A {Name = "Joe"});
+            await Bus.ScheduleSend(Bus.Address, DateTime.UtcNow + TimeSpan.FromSeconds(1), new A {Name = "Joe"});
 
             await handlerA;
 
@@ -100,11 +100,11 @@ namespace MassTransit.QuartzIntegration.Tests
             Task<ConsumeContext<A>> handlerA = SubscribeHandler<A>();
 
             ScheduledMessage<A> scheduledMessage =
-                await Bus.ScheduleMessage(DateTime.UtcNow + TimeSpan.FromSeconds(3), new A {Name = "Joe"});
+                await Bus.ScheduleSend(Bus.Address, DateTime.UtcNow + TimeSpan.FromSeconds(3), new A {Name = "Joe"});
 
             await Task.Delay(1000);
 
-            await Bus.CancelScheduledMessage(scheduledMessage);
+            await Bus.CancelScheduledSend(scheduledMessage);
 
             Assert.That(async () => await handlerA.WithTimeout(5000), Throws.TypeOf<TaskCanceledException>());
         }
