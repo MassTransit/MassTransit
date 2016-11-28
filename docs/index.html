@@ -1,0 +1,36 @@
+---
+layout: default
+title: "Green Pipes"
+subtitle: Composable middleware for the Task Parallel Library
+---
+
+<div class="introduction">
+  <h1>Hi.</h1>
+
+  <p>Green Pipes is a composable middleware framework which extends the Task Parallel Library (TPL) designed around the widely understood concept of pipes and filters. By leveraging _Tasks_, filters can execute quickly while also remaining asynchronous friendly.</p>
+
+  <p>You would use Green Pipes if you want to:</p>
+
+  <ul>
+    <li>Build a reactive, event-driven application</li>
+    <li>Enable developers to add behavior to applications</li>
+  </ul>
+
+</div>
+
+<hr>
+
+<div class="toc">
+  <h2>Docs</h2>
+  <ul class="post">
+  {% for item in site.texts do %}
+
+    <li class="post-title">
+      <a href="{{ site.baseurl }}{{ item.url }}">
+        {{ item.title }}
+      </a>
+    </li>
+  {% endfor %}
+  </ul>
+
+</div>
