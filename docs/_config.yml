@@ -1,11 +1,11 @@
 # Built with Jekyll 3.2.0
 
 # Setup
-title:               GreenPipes.
-tagline:             'Composable TPL Middleware'
+title:               MassTransit
+tagline:             '.Net Messaging'
 description:         'Stuff'
-url:                 'http://blog.phatboyg.com'
-baseurl:             '/GreenPipes'
+url:                 'http://masstransit.io'
+baseurl:             '/masstransit'
 
 # About/contact
 author:
@@ -23,7 +23,13 @@ encoding: utf-8
 
 # Collections for texts
 collections:
-  texts:
+  usecases:
+    output: true
+  entrypoints:
+    output: true
+  transports:
+    output: true
+  architecture:
     output: true
 
 # Markdown specs

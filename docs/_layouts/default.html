@@ -3,34 +3,18 @@
 
   {% include head.html %}
 
-  <body>
+  <body class="sans-serif bg-white">
 
-    <!-- This if statement decides which sidebar to use -->
-    {% if page.toc %}
-    {% include sidebar-toc.html %}
-    {% else %}
-    {% include sidebar.html %}
-    {% endif %}
-
-
-
-    <!-- Wrap is the content to shift when toggling the sidebar. We wrap the content to avoid any CSS collisions with our real content. -->
-    <div class="wrap">
-      <div class="masthead">
-        <div class="container">
-          <h3 class="masthead-title">
-            <a href="{{ site.baseurl }}/" title="Home">{{ site.title }}</a>
-            <br><small>{{ site.tagline }}</small>
-          </h3>
-        </div>
-      </div>
-
-      <div class="container content" id="main">
-        {{ content }}
-      </div>
+    <div class="mw5 mw9-ns center pa3 ph5-ns">
+      <h1 class="f2 fw7 ttu tracked lh-title mt0 mb3 avenir">
+        <a href="{{ site.baseurl }}/" title="Home">{{ site.title }}</a>
+        <br>
+        <small>{{ site.tagline }}</small>
+      </h1>
     </div>
-
-    <label for="sidebar-checkbox" class="sidebar-toggle"></label>
+    <div class="mw5 mw9-ns center pa3 ph5-ns">
+      {{ content }}
+    </div>
 
     <script>
 
@@ -48,7 +32,7 @@
         document.getElementById("main").innerHTML = content.replace(regex, "<mark>$1</mark>");
       }
 
-    // Toggle sidebar  
+    // Toggle sidebar
       (function(document) {
         var toggle = document.querySelector('.sidebar-toggle');
         var sidebar = document.querySelector('#sidebar');

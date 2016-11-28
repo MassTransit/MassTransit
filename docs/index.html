@@ -4,33 +4,121 @@ title: "Green Pipes"
 subtitle: Composable middleware for the Task Parallel Library
 ---
 
-<div class="introduction">
-  <h1>Hi.</h1>
+<div class="cf mb5">
+  <div class="fl w-20-ns">
+    <img src="http://docs.masstransit-project.com/en/latest/_images/mt-logo.png" />
+  </div>
+  <div class="fl w-50-ns">
+    <p class="f5 lh-copy measure">MassTransit is a free, open source, lightweight message bus for creating distributed applications using the .NET framework. MassTransit provides an extensive set of features on top existing message transports, resulting in a developer friendly way to asynchronously connect services using message-based conversation patterns. Message-based communication is a reliable and scalable way to implement a service oriented architecture.</p>
 
-  <p>Green Pipes is a composable middleware framework which extends the Task Parallel Library (TPL) designed around the widely understood concept of pipes and filters. By leveraging _Tasks_, filters can execute quickly while also remaining asynchronous friendly.</p>
+    <a href="https://gitter.im/MassTransit/MassTransit?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge">
+      <img src="https://badges.gitter.im/Join%20Chat.svg" />
+    </a>
 
-  <p>You would use Green Pipes if you want to:</p>
 
-  <ul>
-    <li>Build a reactive, event-driven application</li>
-    <li>Enable developers to add behavior to applications</li>
-  </ul>
-
+      <img src="https://ci.appveyor.com/api/projects/status/hox8dhh5eyy7jsf4/branch/master?svg=true" />
+  </div>
+  <div class="fl w-30-ns">
+    <div class="cf">
+      <dl class="fl fn-l w-100 dib-l w-auto-l lh-title mr5-l">
+        <dd class="f6 fw4 ml0">NuGet Version</dd>
+        <dd class="f3 fw6 ml0">3.4.1</dd>
+      </dl>
+      <dl class="fl fn-l w-100 dib-l w-auto-l lh-title mr5-l">
+        <dd class="f6 fw4 ml0">Build Status</dd>
+        <dd class="f3 fw6 ml0">
+          abc
+        </dd>
+      </dl>
+      <dl class="fl fn-l w-100 dib-l w-auto-l lh-title mr5-l">
+        <dd class="f6 fw4 ml0">Closed Issues</dd>
+        <dd class="f3 fw6 ml0">1,024</dd>
+      </dl>
+      <dl class="fl fn-l w-100 dib-l w-auto-l lh-title mr5-l">
+        <dd class="f6 fw4 ml0">Closed Issues</dd>
+        <dd class="f3 fw6 ml0">1,024</dd>
+      </dl>
+    </div>
+  </div>
 </div>
 
-<hr>
+<div class="cf">
+  <div class="fl w-50 w-25-ns pa3 pv2 bg-black-05">
+    <div class="toc">
+      <h3 class="fw9">I just want to ...</h2>
+      <ul class="list pl3">
+      {% for item in site.entrypoints do %}
 
-<div class="toc">
-  <h2>Docs</h2>
-  <ul class="post">
-  {% for item in site.texts do %}
+        <li class="post-title">
+          <a href="{{ site.baseurl }}{{ item.url }}" class="fw7">
+            {{ item.title }}
+          </a>
 
-    <li class="post-title">
-      <a href="{{ site.baseurl }}{{ item.url }}">
-        {{ item.title }}
-      </a>
-    </li>
-  {% endfor %}
-  </ul>
+            <div class="pl3 fw2">
+              {{item.excerpt}}
+            </div>
+        </li>
+      {% endfor %}
+      </ul>
+
+    </div>
+  </div>
+
+  <div class="fl w-50 w-25-ns pa3 pv2">
+    <div class="toc">
+      <h3 class="fw9">I am using ...</h2>
+      <ul class="list pl3">
+      {% for item in site.transports do %}
+        <li class="post-title">
+          <a href="{{ site.baseurl }}{{ item.url }}" class="fw7">
+            {{ item.title }}
+          </a>
+
+            <div class="pl3 fw2">
+              {{item.excerpt}}
+            </div>
+        </li>
+      {% endfor %}
+      </ul>
+    </div>
+  </div>
+
+  <div class="fl w-50 w-25-ns pa3 pv2 bg-black-05">
+    <div class="toc">
+      <h3 class="fw9">How do I ...</h2>
+      <ul class="list pl3">
+      {% for item in site.usecases do %}
+        <li class="post-title">
+          <a href="{{ site.baseurl }}{{ item.url }}" class="fw7">
+            {{ item.title }}
+          </a>
+
+            <div class="pl3 fw2">
+              {{item.excerpt}}
+            </div>
+        </li>
+      {% endfor %}
+      </ul>
+    </div>
+  </div>
+
+  <div class="fl w-50 w-25-ns pa3 pv2">
+    <div class="toc">
+      <h3 class="fw9">What am I missing?</h2>
+      <ul class="list pl3">
+      {% for item in site.architecture do %}
+        <li>
+          <a href="{{ site.baseurl }}{{ item.url }}" class="fw7">
+            {{ item.title }}
+          </a>
+
+            <div class="pl3 fw2">
+              {{item.excerpt}}
+            </div>
+        </li>
+      {% endfor %}
+      </ul>
+    </div>
+  </div>
 
 </div>
