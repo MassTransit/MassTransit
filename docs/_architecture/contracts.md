@@ -6,6 +6,9 @@ subtitle: Leverage contracts to enable decoupled systems.
 
 Good fences make good neighbors.
 
+* ToC
+{:toc}
+
 In MassTransit, a message contract is defined using the .NET type system. Messages can be defined using both classes and interfaces, however, it is suggested that types use read-only properties and no behavior.
 
 > It is strongly suggested to use interfaces for message contracts, based on experience over several years with varying levels of developer experience. MassTransit will create dynamic interface implementations for the messages, ensuring a clean separation of the message contract from the consumer.
