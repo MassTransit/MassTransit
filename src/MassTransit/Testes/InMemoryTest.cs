@@ -10,30 +10,29 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit
+namespace MassTransit.Testes
 {
     using System;
-    using Testes;
+    using Configurators;
 
 
-    public static class InMemoryConfigurationExtensions
+    public static class InMemoryTest
     {
         /// <summary>
         /// Configure and create an in-memory bus
         /// </summary>
-        /// <param name="selector">Hang off the selector interface for visibility</param>
+        /// <param name="consumerFactory"></param>
         /// <param name="configure">The configuration callback to configure the bus</param>
         /// <returns></returns>
-        public static IBusControl CreateUsingInMemory(this IBusFactorySelector selector, Action<IInMemoryBusFactoryConfigurator> configure)
-        {
-            return InMemoryBus.Create(configure);
-        }
-
-        public static IConsumerBusTest<TConsumer> CreateUsingInMemory<TConsumer>(this IConsumerTestFactorySelector<TConsumer> selector,
+        public static IConsumerBusTest<TConsumer> CreateConsumerTest<TConsumer>(IConsumerFactory<TConsumer> consumerFactory,
             Action<IInMemoryTestFactoryConfigurator> configure)
             where TConsumer : class, IConsumer
         {
-            return InMemoryTest.CreateConsumerTest<TConsumer>(selector.ConsumerFactory, configure);
+            var configurator = new InMemoryConsumerTestFactoryConfigurator<TConsumer>(consumerFactory);
+
+            configure(configurator);
+
+            return configurator.Build();
         }
     }
 }

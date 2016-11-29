@@ -218,6 +218,7 @@
     <Compile Include="Testing\HandlerRespond_Specs.cs" />
     <Compile Include="Testing\HandlerTest_Specs.cs" />
     <Compile Include="Testing\SagaTest_Specs.cs" />
+    <Compile Include="Testing\StandaloneConsumer_Specs.cs" />
     <Compile Include="Threading_Specs.cs" />
     <Compile Include="Transforms\SendTransform_Specs.cs" />
     <Compile Include="Transforms\SetProperty_Specs.cs" />

@@ -62,12 +62,12 @@ namespace MassTransit.EndpointConfigurators
 
         public Uri InputAddress => _inputAddress.Value;
 
-        void IPipeConfigurator<ConsumeContext>.AddPipeSpecification(IPipeSpecification<ConsumeContext> specification)
+        public void AddPipeSpecification(IPipeSpecification<ConsumeContext> specification)
         {
             _consumePipeSpecification.AddPipeSpecification(specification);
         }
 
-        void IConsumePipeConfigurator.AddPipeSpecification<T>(IPipeSpecification<ConsumeContext<T>> specification)
+        public void AddPipeSpecification<T>(IPipeSpecification<ConsumeContext<T>> specification) where T : class
         {
             _consumePipeSpecification.AddPipeSpecification(specification);
         }

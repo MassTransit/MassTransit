@@ -1,4 +1,4 @@
-// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -10,21 +10,24 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit
+namespace MassTransit.Testes
 {
-    using Configurators;
+    using System.Threading.Tasks;
 
 
-    /// <summary>
-    /// used to get access to the bus factories
-    /// </summary>
-    public static class Bus
+    public interface IBusTest :
+        ISendEndpoint
     {
         /// <summary>
-        /// Access a bus factory from this main factory interface (easy extension method support)
+        /// Start the bus test, which starts any underlying bus and endpoints
         /// </summary>
-        public static IBusFactorySelector Factory { get; } = new BusFactorySelector();
+        /// <returns></returns>
+        Task Start();
 
-        public static ITestFactorySelector TestFactory { get; } = new TestFactorySelector();
+        /// <summary>
+        /// Stop the bus test, including any underlying bus and endpoints
+        /// </summary>
+        /// <returns></returns>
+        Task Stop();
     }
 }

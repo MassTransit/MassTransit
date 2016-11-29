@@ -1,4 +1,4 @@
-// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,19 +12,15 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
-    using Configurators;
-
-
-    /// <summary>
-    /// used to get access to the bus factories
-    /// </summary>
-    public static class Bus
+    public class ConsumerTestFactorySelector<TConsumer> :
+        IConsumerTestFactorySelector<TConsumer>
+        where TConsumer : class, IConsumer
     {
-        /// <summary>
-        /// Access a bus factory from this main factory interface (easy extension method support)
-        /// </summary>
-        public static IBusFactorySelector Factory { get; } = new BusFactorySelector();
+        public ConsumerTestFactorySelector(IConsumerFactory<TConsumer> consumerFactory)
+        {
+            ConsumerFactory = consumerFactory;
+        }
 
-        public static ITestFactorySelector TestFactory { get; } = new TestFactorySelector();
+        public IConsumerFactory<TConsumer> ConsumerFactory { get; }
     }
 }
