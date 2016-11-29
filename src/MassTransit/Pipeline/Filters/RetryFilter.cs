@@ -52,38 +52,52 @@ namespace MassTransit.Pipeline.Filters
         [DebuggerNonUserCode]
         async Task Attempt(TContext context, IPipe<T> next)
         {
-            context.ClearPendingFaults();
-
-            TimeSpan delay;
-            try
+            while (true)
             {
-                await next.Send(context).ConfigureAwait(false);
+                var cancellationToken = context.CancellationToken;
+                cancellationToken.ThrowIfCancellationRequested();
 
-                return;
-            }
-            catch (Exception ex)
-            {
-                if (!_retryPolicy.CanRetry(ex))
+                context.ClearPendingFaults();
+
+                TimeSpan delay;
+                try
                 {
-                    context.NotifyPendingFaults();
-                    throw;
+                    await next.Send(context).ConfigureAwait(false);
+                    cancellationToken.ThrowIfCancellationRequested();
+
+                    return;
+                }
+                catch (Exception ex)
+                {
+                    if (cancellationToken.IsCancellationRequested)
+                    {
+                        if (ex is OperationCanceledException && ((OperationCanceledException)ex).CancellationToken == cancellationToken)
+                        {
+                            throw;
+                        }
+                        cancellationToken.ThrowIfCancellationRequested();
+                    }
+
+                    if (!_retryPolicy.CanRetry(ex))
+                    {
+                        context.NotifyPendingFaults();
+                        throw;
+                    }
+
+                    // by not adding the retry payload until the exception occurs, the deepest retry filter
+                    // is the one to set the actual retry context with the deepest configured policy
+                    var retryContext = context.GetOrAddPayload(() => _retryPolicy.GetRetryContext());
+                    if (!retryContext.CanRetry(ex, out delay))
+                    {
+                        context.NotifyPendingFaults();
+                        throw;
+                    }
                 }
 
-                // by not adding the retry payload until the exception occurs, the deepest retry filter
-                // is the one to set the actual retry context with the deepest configured policy
-                var retryContext = context.GetOrAddPayload(() => _retryPolicy.GetRetryContext());
-                if (!retryContext.CanRetry(ex, out delay))
-                {
-                    context.NotifyPendingFaults();
-                    throw;
-                }
+                await Task.Delay(delay).ConfigureAwait(false);
+
+                context.RetryAttempt++;
             }
-
-            await Task.Delay(delay).ConfigureAwait(false);
-
-            context.RetryAttempt++;
-
-            await Attempt(context, next).ConfigureAwait(false);
         }
     }
 

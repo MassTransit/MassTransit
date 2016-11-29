@@ -261,4 +261,57 @@ namespace MassTransit.Tests
             });
         }
     }
+
+    [TestFixture]
+    public class When_specifying_the_bus_too_many_retries_policy :
+        InMemoryTestFixture
+    {
+
+        const int retries = 10000;
+
+        [Test]
+        public async Task Should_no_exception()
+        {
+            Task<ConsumeContext<Fault<PingMessage>>> fault = SubscribeHandler<Fault<PingMessage>>();
+
+            await InputQueueSendEndpoint.Send(new PingMessage(), context =>
+            {
+                context.ResponseAddress = BusAddress;
+                context.FaultAddress = BusAddress;
+            });
+
+            await fault;
+
+            _attempts.ShouldBe(retries + 1);
+        }
+
+
+        [Test]
+        public void Should_return_a_wonderful_breakdown_of_the_guts_inside_it()
+        {
+            ProbeResult result = Bus.GetProbeResult();
+
+            Console.WriteLine(result.ToJsonString());
+        }
+
+        int _attempts;
+
+        protected override void ConfigureBus(IInMemoryBusFactoryConfigurator configurator)
+        {
+            configurator.UseRetry(Retry.Immediate(retries));
+
+            base.ConfigureBus(configurator);
+        }
+
+        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        {
+            Handler<PingMessage>(configurator, async context =>
+            {
+                _attempts++;
+                throw new IntentionalTestException();
+            });
+        }
+    }
+
+
 }
