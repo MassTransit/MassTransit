@@ -394,9 +394,9 @@ Sagas are stateful event-based message consumers -- they retain state. Therefore
 
 Saga instances are identified by a unique identifier (`Guid`), represented by the `CorrelationId` on the saga instance. Events are correlated to the saga instance using either the unique identifier, or alternatively using an expression that correlates properties on the saga instance to each event. If the `CorrelationId` is used, it's always a one-to-one match, either the saga already exists, or it's a new saga instance. With a correlation expression, the expression might match to more than one saga instance, so care should be used -- because the event would be delivered to all matching instances.
 
-{% note %}
+{% danger %}
 Seriously, don't sent an event to all instances -- unless you want to watch your messages consumers lock your entire saga storage engine.
-{% endnote %}
+{% enddanger %}
 
 ### Storage Engines
 
