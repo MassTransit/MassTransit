@@ -46,6 +46,11 @@ namespace MassTransit.Pipeline.Filters
 
             return new ConsumeContextRetryPolicyContext(retryPolicyContext, retryConsumeContext) as RetryPolicyContext<T>;
         }
+
+        public bool IsHandled(Exception exception)
+        {
+            return _retryPolicy.IsHandled(exception);
+        }
     }
 
 
@@ -81,6 +86,11 @@ namespace MassTransit.Pipeline.Filters
             var retryConsumeContext = _contextFactory(filterContext);
 
             return new ConsumeContextRetryPolicyContext<TFilter, TContext>(retryPolicyContext, retryConsumeContext) as RetryPolicyContext<T>;
+        }
+
+        public bool IsHandled(Exception exception)
+        {
+            return _retryPolicy.IsHandled(exception);
         }
     }
 }

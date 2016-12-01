@@ -26,7 +26,7 @@ namespace MassTransit
         /// <summary>
         /// Create a policy that does not retry any messages
         /// </summary>
-        public static IRetryPolicy None { get; } = new NoRetryPolicy();
+        public static IRetryPolicy None { get; } = new NoRetryPolicy(new AllExceptionFilter());
 
         /// <summary>
         /// Create an immediate retry policy with the specified number of retries, with no
