@@ -176,14 +176,8 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
                 {
                     try
                     {
-
-                        if (correlationIds.Count == 0)
-                        {
-                            var missingSagaPipe = new MissingPipe<T>(dbContext, next);
-
-                            await policy.Missing(context, missingSagaPipe).ConfigureAwait(false);
-                        }
-                        else
+                        var missingCorrelationIds = new List<Guid>();
+                        if (correlationIds.Any())
                         {
                             var tableName = ((IObjectContextAdapter)dbContext).ObjectContext.CreateObjectSet<TSaga>().EntitySet.Name;
                             foreach (var correlationId in correlationIds)
@@ -197,8 +191,23 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
 
                                 var instance = dbContext.Set<TSaga>().SingleOrDefault(x => x.CorrelationId == correlationId);
 
-                                await SendToInstance(context, dbContext, policy, instance, next).ConfigureAwait(false);
+                                if (instance != null)
+                                {
+                                    await SendToInstance(context, dbContext, policy, instance, next).ConfigureAwait(false);
+                                }
+                                else
+                                {
+                                    missingCorrelationIds.Add(correlationId);
+                                }
                             }
+                        }
+
+                        // If no sagas are found or all are missing
+                        if (correlationIds.Count == missingCorrelationIds.Count)
+                        {
+                            var missingSagaPipe = new MissingPipe<T>(dbContext, next);
+
+                            await policy.Missing(context, missingSagaPipe).ConfigureAwait(false);
                         }
 
                         await dbContext.SaveChangesAsync().ConfigureAwait(false);
