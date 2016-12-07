@@ -13,6 +13,7 @@
 namespace MassTransit.Testes
 {
     using System.Threading.Tasks;
+    using Testing;
 
 
     public interface IBusTest :
@@ -29,5 +30,15 @@ namespace MassTransit.Testes
         /// </summary>
         /// <returns></returns>
         Task Stop();
+
+        /// <summary>
+        /// Access the published messages during the test
+        /// </summary>
+        IPublishedMessageList Published { get; }
+
+        /// <summary>
+        /// Access the consumed messages during the test
+        /// </summary>
+        IReceivedMessageList Consumed { get; }
     }
 }

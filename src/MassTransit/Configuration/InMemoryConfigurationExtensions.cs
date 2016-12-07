@@ -33,7 +33,7 @@ namespace MassTransit
             Action<IInMemoryTestFactoryConfigurator> configure)
             where TConsumer : class, IConsumer
         {
-            return InMemoryTest.CreateConsumerTest<TConsumer>(selector.ConsumerFactory, configure);
+            return InMemoryTest.CreateConsumerTest(selector.ConsumerFactory, configure);
         }
     }
 }

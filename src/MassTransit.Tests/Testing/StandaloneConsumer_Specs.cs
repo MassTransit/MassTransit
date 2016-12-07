@@ -13,6 +13,7 @@
 namespace MassTransit.Tests.Testing
 {
     using System;
+    using System.Linq;
     using System.Threading.Tasks;
     using NUnit.Framework;
     using Testes;
@@ -34,7 +35,7 @@ namespace MassTransit.Tests.Testing
             {
                 await test.Send(new PingMessage());
 
-                await Task.Delay(1000);
+                Assert.That(test.Consumed.Select<PingMessage>().Any(), Is.True);
             }
             finally
             {

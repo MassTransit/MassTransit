@@ -13,23 +13,43 @@
 namespace MassTransit.Testes
 {
     using System;
+    using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
     using GreenPipes;
+    using Testing;
 
 
     public abstract class BusTest :
         IBusTest
     {
         readonly IBusControl _busControl;
+        readonly BusTestConsumeObserver _consumed;
+        readonly List<ConnectHandle> _handles;
+        readonly BusTestPublishObserver _published;
         ISendEndpoint _endpoint;
 
         protected BusTest(IBusControl busControl)
         {
             _busControl = busControl;
+
+            TestTimeout = TimeSpan.FromSeconds(30);
+            _handles = new List<ConnectHandle>();
+
+            _published = new BusTestPublishObserver(TestTimeout);
+            _handles.Add(busControl.ConnectPublishObserver(_published));
+
+            _consumed = new BusTestConsumeObserver(TestTimeout);
+            _handles.Add(busControl.ConnectConsumeObserver(_consumed));
         }
 
+        public TimeSpan TestTimeout { get; set; }
+
+        public IReceivedMessageList Consumed => _consumed.Messages;
+
         protected abstract Uri InputQueueAddress { get; }
+
+        public IPublishedMessageList Published => _published.Messages;
 
         public async Task Start()
         {
@@ -41,6 +61,13 @@ namespace MassTransit.Testes
         public async Task Stop()
         {
             await _busControl.StopAsync().ConfigureAwait(false);
+
+            foreach (var handle in _handles)
+            {
+                handle.Disconnect();
+            }
+
+            _handles.Clear();
         }
 
         ConnectHandle ISendObserverConnector.ConnectSendObserver(ISendObserver observer)
