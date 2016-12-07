@@ -48,7 +48,8 @@ namespace MassTransit
             return context.ComponentRegistry.Registrations
                 .SelectMany(r => r.Services.OfType<IServiceWithType>(), (r, s) => new {r, s})
                 .Where(rs => rs.s.ServiceType.HasInterface(typeof(SagaStateMachine<>)))
-                .Select(rs => rs.s.ServiceType.GetClosingArguments(typeof(SagaStateMachine<>)).First())
+                .Select(rs => rs.s.ServiceType.GetClosingArguments(typeof(SagaStateMachine<>)).Single())
+                .Distinct()
                 .ToList();
         }
     }
