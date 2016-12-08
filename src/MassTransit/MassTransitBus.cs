@@ -38,8 +38,7 @@ namespace MassTransit
         readonly Lazy<IPublishEndpoint> _publishEndpoint;
         readonly IPublishEndpointProvider _publishEndpointProvider;
         readonly ISendEndpointProvider _sendEndpointProvider;
-
-        BusHandle _busHandle;
+        Handle _busHandle;
 
         public MassTransitBus(Uri address, IConsumePipe consumePipe, ISendEndpointProvider sendEndpointProvider,
             IPublishEndpointProvider publishEndpointProvider, IBusHostCollection hosts,
@@ -242,7 +241,7 @@ namespace MassTransit
 
         void IDisposable.Dispose()
         {
-            if (_busHandle != null)
+            if (_busHandle != null && !_busHandle.Stopped)
                 throw new MassTransitException("The bus was disposed without being stopped. Explicitly call StopAsync before the bus instance is disposed.");
 
             (_sendEndpointProvider as IDisposable)?.Dispose();
@@ -264,6 +263,8 @@ namespace MassTransit
                 _busObserver = busObserver;
                 _hostHandles = hostHandles.ToArray();
             }
+
+            public bool Stopped => _stopped;
 
             public Task<BusReady> Ready => ReadyOrNot(_hostHandles.Select(x => x.Ready));
 
