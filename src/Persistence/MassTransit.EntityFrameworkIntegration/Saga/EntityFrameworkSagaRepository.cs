@@ -25,13 +25,12 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
     using GreenPipes;
     using Logging;
     using MassTransit.Saga;
-    using Pipeline;
     using Util;
 
 
     public class EntityFrameworkSagaRepository<TSaga> :
-            ISagaRepository<TSaga>,
-            IQuerySagaRepository<TSaga>
+        ISagaRepository<TSaga>,
+        IQuerySagaRepository<TSaga>
         where TSaga : class, ISaga
     {
         static readonly ILog _log = Logger.Get<EntityFrameworkSagaRepository<TSaga>>();
@@ -85,7 +84,7 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
                 // Hack for locking row for the duration of the transaction.
                 var tableName = ((IObjectContextAdapter)dbContext).ObjectContext.CreateObjectSet<TSaga>().EntitySet.Name;
                 await dbContext.Database.ExecuteSqlCommandAsync($"select 1 from {tableName} WITH (UPDLOCK, ROWLOCK) WHERE CorrelationId = @p0", sagaId)
-                        .ConfigureAwait(false);
+                    .ConfigureAwait(false);
 
                 var inserted = false;
 
@@ -167,7 +166,7 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
             {
                 // We just get the correlation ids related to our Filter.
                 // We do this outside of the transaction to make sure we don't create a range lock.
-                var correlationIds = await dbContext.Set<TSaga>().Where(context.Query.FilterExpression)
+                List<Guid> correlationIds = await dbContext.Set<TSaga>().Where(context.Query.FilterExpression)
                     .Select(x => x.CorrelationId)
                     .ToListAsync()
                     .ConfigureAwait(false);
@@ -249,7 +248,9 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
                         }
 
                         if (_log.IsErrorEnabled)
-                            _log.Error("Saga Exception Occurred", sex);
+                            _log.Error($"SAGA:{TypeMetadataCache<TSaga>.ShortName} Exception {TypeMetadataCache<T>.ShortName}", sex);
+
+                        throw;
                     }
                     catch (Exception ex)
                     {
@@ -325,7 +326,7 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
         /// </summary>
         /// <typeparam name="TMessage"></typeparam>
         class MissingPipe<TMessage> :
-                IPipe<SagaConsumeContext<TSaga, TMessage>>
+            IPipe<SagaConsumeContext<TSaga, TMessage>>
             where TMessage : class
         {
             readonly DbContext _dbContext;

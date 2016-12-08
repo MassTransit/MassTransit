@@ -20,14 +20,13 @@ namespace MassTransit.MongoDbIntegration.Saga
     using GreenPipes;
     using GreenPipes.Internals.Extensions;
     using Logging;
-    using MassTransit.Pipeline;
     using MassTransit.Saga;
     using MongoDB.Driver;
     using Pipeline;
     using Util;
 
 
-    public class MongoDbSagaRepository<TSaga> : 
+    public class MongoDbSagaRepository<TSaga> :
         ISagaRepository<TSaga>
         where TSaga : class, IVersionedSaga
     {
@@ -129,7 +128,9 @@ namespace MassTransit.MongoDbIntegration.Saga
             catch (SagaException sex)
             {
                 if (_log.IsErrorEnabled)
-                    _log.Error("Saga Exception Occurred", sex);
+                    _log.Error($"SAGA:{TypeMetadataCache<TSaga>.ShortName} Exception {TypeMetadataCache<T>.ShortName}", sex);
+
+                throw;
             }
             catch (Exception ex)
             {

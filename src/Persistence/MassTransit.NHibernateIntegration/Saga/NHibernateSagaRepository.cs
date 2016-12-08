@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -22,7 +22,6 @@ namespace MassTransit.NHibernateIntegration.Saga
     using MassTransit.Saga;
     using NHibernate;
     using NHibernate.Exceptions;
-    using Pipeline;
     using Util;
 
 
@@ -52,7 +51,7 @@ namespace MassTransit.NHibernateIntegration.Saga
         public Task<IEnumerable<Guid>> Find(ISagaQuery<TSaga> query)
         {
             using (var scope = new TransactionScope(TransactionScopeOption.RequiresNew))
-            using (ISession session = _sessionFactory.OpenSession())
+            using (var session = _sessionFactory.OpenSession())
             {
                 IList<Guid> result = session.QueryOver<TSaga>()
                     .Where(query.FilterExpression)
@@ -67,7 +66,7 @@ namespace MassTransit.NHibernateIntegration.Saga
 
         void IProbeSite.Probe(ProbeContext context)
         {
-            ProbeContext scope = context.CreateScope("sagaRepository");
+            var scope = context.CreateScope("sagaRepository");
             scope.Set(new
             {
                 Persistence = "nhibernate",
@@ -80,16 +79,16 @@ namespace MassTransit.NHibernateIntegration.Saga
             if (!context.CorrelationId.HasValue)
                 throw new SagaException("The CorrelationId was not specified", typeof(TSaga), typeof(T));
 
-            Guid sagaId = context.CorrelationId.Value;
+            var sagaId = context.CorrelationId.Value;
 
-            using (ISession session = _sessionFactory.OpenSession())
-            using (ITransaction transaction = session.BeginTransaction())
+            using (var session = _sessionFactory.OpenSession())
+            using (var transaction = session.BeginTransaction())
             {
-                bool inserted = false;
+                var inserted = false;
 
                 TSaga instance;
                 if (policy.PreInsertInstance(context, out instance))
-                    inserted = PreInsertSagaInstance<T>(session, instance, inserted);
+                    inserted = PreInsertSagaInstance<T>(session, instance);
 
                 try
                 {
@@ -130,8 +129,8 @@ namespace MassTransit.NHibernateIntegration.Saga
         public async Task SendQuery<T>(SagaQueryConsumeContext<TSaga, T> context, ISagaPolicy<TSaga, T> policy, IPipe<SagaConsumeContext<TSaga, T>> next)
             where T : class
         {
-            using (ISession session = _sessionFactory.OpenSession())
-            using (ITransaction transaction = session.BeginTransaction())
+            using (var session = _sessionFactory.OpenSession())
+            using (var transaction = session.BeginTransaction())
             {
                 try
                 {
@@ -155,7 +154,12 @@ namespace MassTransit.NHibernateIntegration.Saga
                 catch (SagaException sex)
                 {
                     if (_log.IsErrorEnabled)
-                        _log.Error("Saga Exception Occurred", sex);
+                        _log.Error($"SAGA:{TypeMetadataCache<TSaga>.ShortName} Exception {TypeMetadataCache<T>.ShortName}", sex);
+
+                    if (transaction.IsActive)
+                        transaction.Rollback();
+
+                    throw;
                 }
                 catch (Exception ex)
                 {
@@ -170,8 +174,10 @@ namespace MassTransit.NHibernateIntegration.Saga
             }
         }
 
-        static bool PreInsertSagaInstance<T>(ISession session, TSaga instance, bool inserted)
+        static bool PreInsertSagaInstance<T>(ISession session, TSaga instance)
         {
+            bool inserted = false;
+
             try
             {
                 session.Save(instance);
