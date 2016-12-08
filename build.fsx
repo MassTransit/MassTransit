@@ -224,6 +224,11 @@ Target "Package" (fun _ ->
                   PackageFile = @".\src\Persistence\MassTransit.MongoDbIntegration\packages.config"
                   Files = [ (@"..\src\Persistence\MassTransit.MongoDbIntegration\bin\Release\MassTransit.MongoDbIntegration.*", Some @"lib\net452", None);
                             (@"..\src\Persistence\MassTransit.MongoDbIntegration\**\*.cs", Some @"src", None) ] } 
+                { Project = "MassTransit.Redis"
+                  Summary = "MassTransit Redis Saga Storage"
+                  PackageFile = @".\src\Persistence\MassTransit.RedisIntegration\packages.config"
+                  Files = [ (@"..\src\Persistence\MassTransit.RedisIntegration\bin\Release\MassTransit.RedisIntegration.*", Some @"lib\net452", None);
+                            (@"..\src\Persistence\MassTransit.RedisIntegration\**\*.cs", Some @"src", None) ] } 
                 { Project = "MassTransit.TestFramework"
                   Summary = "MassTransit NUnit Test Framework"
                   PackageFile = @".\src\MassTransit.TestFramework\packages.config"

@@ -104,6 +104,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Automatonymous.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Automatonymous.StructureMapIntegration", "Containers\MassTransit.Automatonymous.StructureMapIntegration\MassTransit.Automatonymous.StructureMapIntegration.csproj", "{4A042032-21A2-40CA-BBE7-5D47F786A949}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.RedisIntegration", "Persistence\MassTransit.RedisIntegration\MassTransit.RedisIntegration.csproj", "{3016A502-4855-477F-9113-1A6B224BD9E0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.RedisIntegration.Tests", "Persistence\MassTransit.RedisIntegration.Tests\MassTransit.RedisIntegration.Tests.csproj", "{F3D11920-BA34-4EDB-91A6-C8B5EFCE1F98}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -469,6 +473,30 @@ Global
 		{4A042032-21A2-40CA-BBE7-5D47F786A949}.ReleaseUnsigned|Any CPU.Build.0 = Release|Any CPU
 		{4A042032-21A2-40CA-BBE7-5D47F786A949}.ReleaseUnsigned|x86.ActiveCfg = Release|Any CPU
 		{4A042032-21A2-40CA-BBE7-5D47F786A949}.ReleaseUnsigned|x86.Build.0 = Release|Any CPU
+		{3016A502-4855-477F-9113-1A6B224BD9E0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3016A502-4855-477F-9113-1A6B224BD9E0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3016A502-4855-477F-9113-1A6B224BD9E0}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{3016A502-4855-477F-9113-1A6B224BD9E0}.Debug|x86.Build.0 = Debug|Any CPU
+		{3016A502-4855-477F-9113-1A6B224BD9E0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3016A502-4855-477F-9113-1A6B224BD9E0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3016A502-4855-477F-9113-1A6B224BD9E0}.Release|x86.ActiveCfg = Release|Any CPU
+		{3016A502-4855-477F-9113-1A6B224BD9E0}.Release|x86.Build.0 = Release|Any CPU
+		{3016A502-4855-477F-9113-1A6B224BD9E0}.ReleaseUnsigned|Any CPU.ActiveCfg = Release|Any CPU
+		{3016A502-4855-477F-9113-1A6B224BD9E0}.ReleaseUnsigned|Any CPU.Build.0 = Release|Any CPU
+		{3016A502-4855-477F-9113-1A6B224BD9E0}.ReleaseUnsigned|x86.ActiveCfg = Release|Any CPU
+		{3016A502-4855-477F-9113-1A6B224BD9E0}.ReleaseUnsigned|x86.Build.0 = Release|Any CPU
+		{F3D11920-BA34-4EDB-91A6-C8B5EFCE1F98}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F3D11920-BA34-4EDB-91A6-C8B5EFCE1F98}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F3D11920-BA34-4EDB-91A6-C8B5EFCE1F98}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{F3D11920-BA34-4EDB-91A6-C8B5EFCE1F98}.Debug|x86.Build.0 = Debug|Any CPU
+		{F3D11920-BA34-4EDB-91A6-C8B5EFCE1F98}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F3D11920-BA34-4EDB-91A6-C8B5EFCE1F98}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F3D11920-BA34-4EDB-91A6-C8B5EFCE1F98}.Release|x86.ActiveCfg = Release|Any CPU
+		{F3D11920-BA34-4EDB-91A6-C8B5EFCE1F98}.Release|x86.Build.0 = Release|Any CPU
+		{F3D11920-BA34-4EDB-91A6-C8B5EFCE1F98}.ReleaseUnsigned|Any CPU.ActiveCfg = Release|Any CPU
+		{F3D11920-BA34-4EDB-91A6-C8B5EFCE1F98}.ReleaseUnsigned|Any CPU.Build.0 = Release|Any CPU
+		{F3D11920-BA34-4EDB-91A6-C8B5EFCE1F98}.ReleaseUnsigned|x86.ActiveCfg = Release|Any CPU
+		{F3D11920-BA34-4EDB-91A6-C8B5EFCE1F98}.ReleaseUnsigned|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -505,6 +533,8 @@ Global
 		{E390AD5C-61D3-4EF4-9858-5DBE0F0849D9} = {FDC1A760-D4E5-44F4-B0D9-C19F2E14253A}
 		{B2C9F22A-459A-4828-8017-0DB76F81F1A1} = {6C61507E-FF16-45C8-8FE4-350069D9B4C1}
 		{4A042032-21A2-40CA-BBE7-5D47F786A949} = {6C61507E-FF16-45C8-8FE4-350069D9B4C1}
+		{3016A502-4855-477F-9113-1A6B224BD9E0} = {56F516D7-BC3C-49E1-A639-83C5F14953F8}
+		{F3D11920-BA34-4EDB-91A6-C8B5EFCE1F98} = {56F516D7-BC3C-49E1-A639-83C5F14953F8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		EnterpriseLibraryConfigurationToolBinariesPath = packages\Unity.2.1.505.2\lib\NET35
