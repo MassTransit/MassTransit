@@ -14,7 +14,6 @@ namespace MassTransit.Tests
 {
     namespace MyNamespace
     {
-        using System;
         using System.Linq;
         using System.Threading.Tasks;
         using MassTransit.Testing;
@@ -61,73 +60,6 @@ namespace MassTransit.Tests
             protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
             {
                 Handled<PingMessage>(configurator);
-            }
-        }
-
-
-        [TestFixture]
-        public class Multiple_observations :
-            InMemoryTestFixture
-        {
-            [Test]
-            public async Task MutlipleConsumerMessages()
-            {
-                Bus.ConnectConsumeMessageObserver(new TestObserver());
-
-                await InputQueueSendEndpoint.Send(new Message(Guid.NewGuid()));
-
-                await Task.Delay(TimeSpan.FromSeconds(5));
-            }
-
-
-            class MessageConsumer : IConsumer<Message>
-            {
-                public Task Consume(ConsumeContext<Message> context)
-                {
-                    Console.WriteLine("Consumed {0}", context.MessageId);
-                    return Task.FromResult(1);
-                }
-            }
-
-
-            protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
-            {
-                base.ConfigureInputQueueEndpoint(configurator);
-
-                configurator.Consumer<MessageConsumer>();
-            }
-
-
-            class TestObserver : IConsumeMessageObserver<Message>
-            {
-                public Task PreConsume(ConsumeContext<Message> context)
-                {
-                    Console.WriteLine("Pre {0}", context.MessageId);
-                    return Task.FromResult(1);
-                }
-
-                public Task PostConsume(ConsumeContext<Message> context)
-                {
-                    Console.WriteLine("Post {0}", context.MessageId);
-                    return Task.FromResult(1);
-                }
-
-                public Task ConsumeFault(ConsumeContext<Message> context, Exception exception)
-                {
-                    Console.WriteLine("Fault");
-                    return Task.FromResult(1);
-                }
-            }
-
-
-            class Message
-            {
-                public Message(Guid id)
-                {
-                    Id = id;
-                }
-
-                public Guid Id { get; }
             }
         }
     }
