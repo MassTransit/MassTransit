@@ -231,7 +231,7 @@ namespace MassTransit.Transports
 
                 Task IReceiveEndpointObserver.Ready(ReceiveEndpointReady ready)
                 {
-                    _ready.TrySetResult(ready);
+                    _ready.TrySetResultWithBackgroundContinuations(ready);
 
                     _handle.Disconnect();
 
@@ -245,7 +245,7 @@ namespace MassTransit.Transports
 
                 Task IReceiveEndpointObserver.Faulted(ReceiveEndpointFaulted faulted)
                 {
-                    _ready.TrySetException(faulted.Exception);
+                    _ready.TrySetExceptionWithBackgroundContinuations(faulted.Exception);
 
                     _handle.Disconnect();
 

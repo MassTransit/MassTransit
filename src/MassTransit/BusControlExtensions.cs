@@ -30,6 +30,15 @@ namespace MassTransit
         }
 
         /// <summary>
+        /// Stop a bus, throwing an exception if the bus does not stop
+        /// </summary>
+        /// <param name="busControl">The bus handle</param>
+        public static void Start(this IBusControl busControl)
+        {
+            TaskUtil.Await(() => busControl.StartAsync());
+        }
+
+        /// <summary>
         /// Stop a bus, throwing an exception if the bus does not stop in the specified timeout
         /// </summary>
         /// <param name="bus">The bus handle</param>

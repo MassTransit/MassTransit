@@ -54,25 +54,27 @@ namespace MassTransit.Util
         public void SetComplete()
         {
             _stoppedToken.Cancel();
-            _completed.TrySetResult(true);
+
+            _completed.TrySetResultWithBackgroundContinuations(true);
 
             _remove();
         }
 
         public void SetReady()
         {
-            _ready.TrySetResult(true);
+            _ready.TrySetResultWithBackgroundContinuations(true);
         }
 
         public void SetNotReady(Exception exception)
         {
-            _ready.TrySetException(exception);
+            _ready.TrySetExceptionWithBackgroundContinuations(exception);
         }
 
         void ITaskParticipant.Stop(IStopEvent stopEvent)
         {
             _stoppingToken.Cancel();
-            _stopRequested.TrySetResult(stopEvent);
+
+            _stopRequested.TrySetResultWithBackgroundContinuations(stopEvent);
         }
 
         public override string ToString()

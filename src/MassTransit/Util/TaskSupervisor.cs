@@ -28,7 +28,7 @@ namespace MassTransit.Util
     public class TaskSupervisor :
         ITaskSupervisor
     {
-        readonly Dictionary<long, ITaskParticipant> _participants; 
+        readonly Dictionary<long, ITaskParticipant> _participants;
         readonly CancellationTokenSource _stoppedToken;
         readonly CancellationTokenSource _stoppingToken;
         readonly TaskCompletionSource<IStopEvent> _stopRequested;
@@ -57,6 +57,8 @@ namespace MassTransit.Util
 
         public Task<IStopEvent> StopRequested => _stopRequested.Task;
 
+        public string Tag => _tag;
+
         public Task Ready
         {
             get
@@ -80,7 +82,7 @@ namespace MassTransit.Util
             if (_stoppingToken.IsCancellationRequested)
                 throw new OperationCanceledException("The supervisor is stopping, no additional participants can be created");
 
-            long id = Interlocked.Increment(ref _nextId);
+            var id = Interlocked.Increment(ref _nextId);
 
             var participant = new TaskParticipant(tag, () => RemoveParticipant(id));
             lock (_participants)
@@ -91,18 +93,12 @@ namespace MassTransit.Util
             return participant;
         }
 
-        void RemoveParticipant(long id)
-        {
-            lock (_participants)
-                _participants.Remove(id);
-        }
-
         public ITaskScope CreateScope(string tag)
         {
             if (_stoppingToken.IsCancellationRequested)
                 throw new OperationCanceledException("The supervisor is stopping, no additional scopes can be created");
 
-            long id = Interlocked.Increment(ref _nextId);
+            var id = Interlocked.Increment(ref _nextId);
 
             var scope = new TaskScope(tag, () => RemoveParticipant(id));
             lock (_participants)
@@ -113,7 +109,11 @@ namespace MassTransit.Util
             return scope;
         }
 
-        public string Tag => _tag;
+        void RemoveParticipant(long id)
+        {
+            lock (_participants)
+                _participants.Remove(id);
+        }
 
         async Task WhenAll(IEnumerable<ITaskParticipant> participants, Func<ITaskParticipant, Task> selector)
         {
@@ -132,11 +132,11 @@ namespace MassTransit.Util
                     {
                         Console.WriteLine("{0} - {1}", task, selector(task).Status);
                     }
-
                 }
                 else
                 {
-                    var ready = taskArray.Where(x => selector(x).Status == TaskStatus.RanToCompletion || selector(x).Status == TaskStatus.Canceled);
+                    IEnumerable<ITaskParticipant> ready =
+                        taskArray.Where(x => selector(x).Status == TaskStatus.RanToCompletion || selector(x).Status == TaskStatus.Canceled);
                     foreach (var participant in ready)
                     {
                         Console.WriteLine("Completed: {0} - {1}", participant, ToString());
@@ -151,26 +151,29 @@ namespace MassTransit.Util
 
         void OnStopRequested(Task stopRequested)
         {
-            stopRequested.ContinueWith(async stopTask =>
-            {
-                await stopTask.ConfigureAwait(false);
+            SetupStopRequested(stopRequested);
+        }
 
-                await Stop("Parent Stop Requested").ConfigureAwait(false);
-            });
+        async void SetupStopRequested(Task stopRequested)
+        {
+            await stopRequested.ConfigureAwait(false);
+
+            await Stop("Parent Stop Requested").ConfigureAwait(false);
         }
 
         public async Task Stop(string reason, CancellationToken cancellationToken = default(CancellationToken))
         {
             var eventArgs = new StopEventArgs(reason);
             _stoppingToken.Cancel();
-            _stopRequested.TrySetResult(eventArgs);
+            _stopRequested.TrySetResultWithBackgroundContinuations(eventArgs);
 
+            ITaskParticipant[] participants;
             lock (_participants)
+                participants = _participants.Values.ToArray();
+
+            foreach (var participant in participants)
             {
-                foreach (var participant in _participants)
-                {
-                    participant.Value.Stop(eventArgs);
-                }
+                participant.Stop(eventArgs);
             }
 
             await Completed.WithCancellation(cancellationToken).ConfigureAwait(false);

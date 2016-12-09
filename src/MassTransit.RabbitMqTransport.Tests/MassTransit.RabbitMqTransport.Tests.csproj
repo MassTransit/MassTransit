@@ -100,6 +100,7 @@
     <Compile Include="PriorityQueue_Specs.cs" />
     <Compile Include="PublishFaultChannel_Specs.cs" />
     <Compile Include="PublishFaultObserver_Specs.cs" />
+    <Compile Include="PublishStop_Specs.cs" />
     <Compile Include="RabbitMqActivityTestFixture.cs" />
     <Compile Include="RabbitMqTestFixture.cs" />
     <Compile Include="PublisherConfirm_Specs.cs" />

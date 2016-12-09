@@ -165,5 +165,31 @@ namespace MassTransit.Util
                 _completed = true;
             }
         }
+
+        /// <summary>
+        /// Sets the result of the continuation source and forces the continuations to run on the background threadpool
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="source"></param>
+        /// <param name="result"></param>
+        public static void TrySetResultWithBackgroundContinuations<T>(this TaskCompletionSource<T> source, T result)
+        {
+            Task.Run(() => source.TrySetResult(result));
+
+            source.Task.Wait();
+        }
+
+        /// <summary>
+        /// Sets the result of the continuation source and forces the continuations to run on the background threadpool
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="source"></param>
+        /// <param name="result"></param>
+        public static void TrySetExceptionWithBackgroundContinuations<T>(this TaskCompletionSource<T> source, Exception exception)
+        {
+            Task.Run(() => source.TrySetException(exception));
+
+            source.Task.Wait();
+        }
     }
 }
