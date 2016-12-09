@@ -15,6 +15,18 @@ namespace MassTransit
     using System;
 
 
+    public interface IEndpointConventionCache
+    {
+        /// <summary>
+        /// Returns the endpoint address for the message
+        /// </summary>
+        /// <param name="message"></param>
+        /// <param name="address"></param>
+        /// <returns></returns>
+        bool TryGetEndpointAddress(object message, out Uri address);
+    }
+
+
     public interface IEndpointConventionCache<in T>
         where T : class
     {

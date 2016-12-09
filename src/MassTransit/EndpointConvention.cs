@@ -48,5 +48,13 @@ namespace MassTransit
         {
             return EndpointConventionCache<T>.TryGetEndpointAddress(message, out destinationAddress);
         }
+
+        public static bool TryGetDestinationAddress(object message, out Uri destinationAddress)
+        {
+            if (message == null)
+                throw new ArgumentNullException(nameof(message));
+
+            return EndpointConventionCache.TryGetEndpointAddress(message, out destinationAddress);
+        }
     }
 }

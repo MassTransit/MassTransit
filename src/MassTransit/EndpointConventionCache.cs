@@ -13,7 +13,54 @@
 namespace MassTransit
 {
     using System;
+    using System.Collections.Concurrent;
     using System.Threading;
+    using Saga;
+    using Util;
+
+
+    public static class EndpointConventionCache 
+    {
+        public static bool TryGetEndpointAddress(object message, out Uri address)
+        {
+            var messageType = message.GetType();
+
+            return GetOrAdd(messageType).TryGetEndpointAddress(message, out address);
+        }
+
+        static CachedConvention GetOrAdd(Type type)
+        {
+            return Cached.Instance.GetOrAdd(type, _ =>
+                (CachedConvention)Activator.CreateInstance(typeof(CachedConvention<>).MakeGenericType(type)));
+        }
+
+
+        static class Cached
+        {
+            internal static readonly ConcurrentDictionary<Type, CachedConvention> Instance = new ConcurrentDictionary<Type, CachedConvention>();
+        }
+
+
+        interface CachedConvention
+        {
+            bool TryGetEndpointAddress(object message, out Uri address);
+        }
+
+
+        class CachedConvention<T> :
+            CachedConvention
+            where T : class, ISaga
+        {
+            public bool TryGetEndpointAddress(object message, out Uri address)
+            {
+                var messageOfT = message as T;
+                if (messageOfT == null)
+                    throw new ArgumentException($"Message was not a valid type: {TypeMetadataCache<T>.ShortName}", nameof(message));
+
+                return EndpointConventionCache<T>.TryGetEndpointAddress(messageOfT, out address);
+            }
+        }
+    }
 
 
     /// <summary>
