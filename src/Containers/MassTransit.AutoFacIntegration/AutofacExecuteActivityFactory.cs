@@ -39,7 +39,8 @@ namespace MassTransit.AutofacIntegration
             _lifetimeScope = lifetimeScope;
         }
 
-        public async Task Execute(ExecuteContext<TArguments> context, IPipe<ExecuteActivityContext<TActivity, TArguments>> next)
+        public async Task<ResultContext<ExecutionResult>> Execute(ExecuteContext<TArguments> context,
+            IRequestPipe<ExecuteActivityContext<TActivity, TArguments>, ExecutionResult> next)
         {
             using (var scope = _lifetimeScope.BeginLifetimeScope(x => ConfigureScope(x, context)))
             {
@@ -53,7 +54,7 @@ namespace MassTransit.AutofacIntegration
                 var consumerLifetimeScope = scope;
                 activityContext.GetOrAddPayload(() => consumerLifetimeScope);
 
-                await next.Send(activityContext).ConfigureAwait(false);
+                return await next.Send(activityContext).ConfigureAwait(false);
             }
         }
 

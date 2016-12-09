@@ -17,14 +17,15 @@ namespace MassTransit.Builders
     using Courier;
     using Courier.Pipeline;
     using GreenPipes;
-    using Pipeline.Filters;
+    using GreenPipes.Contexts;
+    using GreenPipes.Specifications;
 
 
     public static class ExecuteActivityPipeBuilder
     {
-        public static IPipe<ExecuteActivityContext<TActivity, TArguments>> Build<TActivity, TArguments>(
+        public static IPipe<RequestContext> Build<TActivity, TArguments>(
             this IEnumerable<IPipeSpecification<ExecuteActivityContext<TActivity, TArguments>>> pipeSpecifications,
-            IFilter<ExecuteActivityContext<TActivity, TArguments>> consumeFilter)
+            IFilter<RequestContext<ExecuteActivityContext<TActivity, TArguments>>> consumeFilter)
             where TActivity : class, ExecuteActivity<TArguments>
             where TArguments : class
         {
@@ -36,13 +37,35 @@ namespace MassTransit.Builders
             if (builders == null)
                 throw new InvalidOperationException("Should not be null, ever");
 
-            return Pipe.New<ExecuteActivityContext<TActivity, TArguments>>(x =>
+            return Pipe.New<RequestContext>(cfg =>
             {
-                foreach (IFilter<ExecuteActivityContext<TActivity, TArguments>> filter in builders.Filters)
-                    x.UseFilter(filter);
+                cfg.UseDispatch(new RequestConverterFactory(), d =>
+                {
+                    d.Handle<ExecuteActivityContext<TActivity, TArguments>>(h =>
+                    {
+                        AddFilters(builders, h);
 
-                x.UseFilter(consumeFilter);
+                        h.UseFilter(consumeFilter);
+                    });
+                });
             });
+        }
+
+        static void AddFilters<TActivity, TArguments>(ExecuteActivityPipeBuilder<TActivity, TArguments> builders,
+            IPipeConfigurator<RequestContext<ExecuteActivityContext<TActivity, TArguments>>> h)
+            where TActivity : class, ExecuteActivity<TArguments>
+            where TArguments : class
+        {
+            foreach (IFilter<ExecuteActivityContext<TActivity, TArguments>> filter in builders.Filters)
+            {
+                var filterSpecification = new FilterPipeSpecification<ExecuteActivityContext<TActivity, TArguments>>(filter);
+
+                var pipeSpecification = new SplitFilterPipeSpecification
+                    <RequestContext<ExecuteActivityContext<TActivity, TArguments>>, ExecuteActivityContext<TActivity, TArguments>>(
+                    filterSpecification, (input, context) => input, context => context.Request);
+
+                h.AddPipeSpecification(pipeSpecification);
+            }
         }
     }
 

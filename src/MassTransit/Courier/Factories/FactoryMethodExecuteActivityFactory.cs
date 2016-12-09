@@ -30,7 +30,8 @@ namespace MassTransit.Courier.Factories
             _executeFactory = executeFactory;
         }
 
-        public async Task Execute(ExecuteContext<TArguments> context, IPipe<ExecuteActivityContext<TActivity, TArguments>> next)
+        public async Task<ResultContext<ExecutionResult>> Execute(ExecuteContext<TArguments> context,
+            IRequestPipe<ExecuteActivityContext<TActivity, TArguments>, ExecutionResult> next)
         {
             TActivity activity = null;
             try
@@ -39,7 +40,7 @@ namespace MassTransit.Courier.Factories
 
                 var activityContext = new HostExecuteActivityContext<TActivity, TArguments>(activity, context);
 
-                await next.Send(activityContext).ConfigureAwait(false);
+                return await next.Send(activityContext).ConfigureAwait(false);
             }
             finally
             {

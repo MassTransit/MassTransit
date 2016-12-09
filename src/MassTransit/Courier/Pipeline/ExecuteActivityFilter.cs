@@ -12,11 +12,9 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Courier.Pipeline
 {
-    using System;
     using System.Threading.Tasks;
     using GreenPipes;
     using Logging;
-    using Util;
 
 
     /// <summary>
@@ -25,7 +23,7 @@ namespace MassTransit.Courier.Pipeline
     /// <typeparam name="TArguments"></typeparam>
     /// <typeparam name="TActivity"></typeparam>
     public class ExecuteActivityFilter<TActivity, TArguments> :
-        IFilter<ExecuteActivityContext<TActivity, TArguments>>
+        IFilter<RequestContext<ExecuteActivityContext<TActivity, TArguments>>>
         where TActivity : class, ExecuteActivity<TArguments>
         where TArguments : class
     {
@@ -36,34 +34,17 @@ namespace MassTransit.Courier.Pipeline
             context.CreateFilterScope("execute");
         }
 
-        public async Task Send(ExecuteActivityContext<TActivity, TArguments> context, IPipe<ExecuteActivityContext<TActivity, TArguments>> next)
+        public async Task Send(RequestContext<ExecuteActivityContext<TActivity, TArguments>> context,
+            IPipe<RequestContext<ExecuteActivityContext<TActivity, TArguments>>> next)
         {
             if (_log.IsDebugEnabled)
-                _log.DebugFormat("Executing: {0}", context.TrackingNumber);
+                _log.DebugFormat("Executing: {0}", context.Request.TrackingNumber);
 
-            try
-            {
-                try
-                {
-                    var result = await context.Activity.Execute(context).ConfigureAwait(false);
+            var result = await context.Request.Activity.Execute(context.Request).ConfigureAwait(false);
 
-                    await result.Evaluate().ConfigureAwait(false);
+            context.TrySetResult(result);
 
-                    await next.Send(context).ConfigureAwait(false);
-                }
-                catch (Exception ex)
-                {
-                    var result = context.Faulted(ex);
-
-                    await result.Evaluate().ConfigureAwait(false);
-                }
-            }
-            catch (Exception ex)
-            {
-                _log.Error($"The activity {TypeMetadataCache.GetShortName(context.Activity.GetType())} threw an exception", ex);
-
-                throw;
-            }
+            await next.Send(context).ConfigureAwait(false);
         }
     }
 }

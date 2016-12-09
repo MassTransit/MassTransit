@@ -31,7 +31,7 @@ namespace MassTransit.PipeConfigurators
         where TArguments : class
     {
         readonly ExecuteActivityFactory<TActivity, TArguments> _activityFactory;
-        readonly Func<IPipe<ExecuteActivityContext<TActivity, TArguments>>, IFilter<ConsumeContext<RoutingSlip>>> _filterFactory;
+        readonly Func<IPipe<RequestContext>, IFilter<ConsumeContext<RoutingSlip>>> _filterFactory;
         readonly List<IPipeSpecification<ExecuteActivityContext<TActivity, TArguments>>> _pipeSpecifications;
         readonly RoutingSlipConfigurator _routingSlipConfigurator;
 
@@ -84,8 +84,7 @@ namespace MassTransit.PipeConfigurators
 
         public void Configure(IReceiveEndpointBuilder builder)
         {
-            IPipe<ExecuteActivityContext<TActivity, TArguments>> executeActivityPipe =
-                _pipeSpecifications.Build(new ExecuteActivityFilter<TActivity, TArguments>());
+            IPipe<RequestContext> executeActivityPipe = _pipeSpecifications.Build(new ExecuteActivityFilter<TActivity, TArguments>());
 
             _routingSlipConfigurator.UseFilter(_filterFactory(executeActivityPipe));
 

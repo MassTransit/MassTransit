@@ -29,10 +29,10 @@ namespace MassTransit.Courier.Hosts
         static readonly ILog _log = Logger.Get<ExecuteActivityHost<TActivity, TArguments>>();
         readonly ExecuteActivityFactory<TActivity, TArguments> _activityFactory;
         readonly Uri _compensateAddress;
-        readonly IPipe<ExecuteActivityContext<TActivity, TArguments>> _executePipe;
+        readonly IRequestPipe<ExecuteActivityContext<TActivity, TArguments>, ExecutionResult> _executePipe;
 
         public ExecuteActivityHost(ExecuteActivityFactory<TActivity, TArguments> activityFactory,
-            IPipe<ExecuteActivityContext<TActivity, TArguments>> executePipe, Uri compensateAddress)
+            IPipe<RequestContext> executePipe, Uri compensateAddress)
         {
             if (compensateAddress == null)
                 throw new ArgumentNullException(nameof(compensateAddress));
@@ -41,17 +41,17 @@ namespace MassTransit.Courier.Hosts
 
             _compensateAddress = compensateAddress;
             _activityFactory = activityFactory;
-            _executePipe = executePipe;
+            _executePipe = executePipe.CreateRequestPipe<ExecuteActivityContext<TActivity, TArguments>, ExecutionResult>();
         }
 
         public ExecuteActivityHost(ExecuteActivityFactory<TActivity, TArguments> activityFactory,
-            IPipe<ExecuteActivityContext<TActivity, TArguments>> executePipe)
+            IPipe<RequestContext> executePipe)
         {
             if (activityFactory == null)
                 throw new ArgumentNullException(nameof(activityFactory));
 
             _activityFactory = activityFactory;
-            _executePipe = executePipe;
+            _executePipe = executePipe.CreateRequestPipe<ExecuteActivityContext<TActivity, TArguments>, ExecutionResult>();
         }
 
         public void Probe(ProbeContext context)
@@ -83,7 +83,18 @@ namespace MassTransit.Courier.Hosts
 
                 await Task.Yield();
 
-                await _activityFactory.Execute(executeContext, _executePipe).ConfigureAwait(false);
+                try
+                {
+                    var result = await _activityFactory.Execute(executeContext, _executePipe).Result().ConfigureAwait(false);
+
+                    await result.Evaluate().ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    var result = executeContext.Faulted(ex);
+
+                    await result.Evaluate().ConfigureAwait(false);
+                }
 
                 await context.NotifyConsumed(timer.Elapsed, TypeMetadataCache<TActivity>.ShortName).ConfigureAwait(false);
 
@@ -91,7 +102,10 @@ namespace MassTransit.Courier.Hosts
             }
             catch (Exception ex)
             {
+                _log.Error($"The activity {TypeMetadataCache<TActivity>.ShortName} threw an exception", ex);
+
                 await context.NotifyFaulted(timer.Elapsed, TypeMetadataCache<TActivity>.ShortName, ex).ConfigureAwait(false);
+
                 throw;
             }
         }

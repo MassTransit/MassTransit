@@ -17,14 +17,15 @@ namespace MassTransit.Builders
     using Courier;
     using Courier.Pipeline;
     using GreenPipes;
-    using Pipeline.Filters;
+    using GreenPipes.Contexts;
+    using GreenPipes.Specifications;
 
 
     public static class CompensateActivityPipeBuilder
     {
-        public static IPipe<CompensateActivityContext<TActivity, TLog>> Build<TActivity, TLog>(
+        public static IPipe<RequestContext> Build<TActivity, TLog>(
             this IEnumerable<IPipeSpecification<CompensateActivityContext<TActivity, TLog>>> pipeSpecifications,
-            IFilter<CompensateActivityContext<TActivity, TLog>> consumeFilter)
+            IFilter<RequestContext<CompensateActivityContext<TActivity, TLog>>> consumeFilter)
             where TActivity : class, CompensateActivity<TLog>
             where TLog : class
         {
@@ -36,13 +37,35 @@ namespace MassTransit.Builders
             if (builders == null)
                 throw new InvalidOperationException("Should not be null, ever");
 
-            return Pipe.New<CompensateActivityContext<TActivity, TLog>>(x =>
+            return Pipe.New<RequestContext>(cfg =>
             {
-                foreach (IFilter<CompensateActivityContext<TActivity, TLog>> filter in builders.Filters)
-                    x.UseFilter(filter);
+                cfg.UseDispatch(new RequestConverterFactory(), d =>
+                {
+                    d.Handle<CompensateActivityContext<TActivity, TLog>>(h =>
+                    {
+                        AddFilters(builders, h);
 
-                x.UseFilter(consumeFilter);
+                        h.UseFilter(consumeFilter);
+                    });
+                });
             });
+        }
+
+        static void AddFilters<TActivity, TLog>(CompensateActivityPipeBuilder<TActivity, TLog> builders,
+            IPipeConfigurator<RequestContext<CompensateActivityContext<TActivity, TLog>>> h)
+            where TActivity : class, CompensateActivity<TLog>
+            where TLog : class
+        {
+            foreach (IFilter<CompensateActivityContext<TActivity, TLog>> filter in builders.Filters)
+            {
+                var filterSpecification = new FilterPipeSpecification<CompensateActivityContext<TActivity, TLog>>(filter);
+
+                var pipeSpecification = new SplitFilterPipeSpecification
+                    <RequestContext<CompensateActivityContext<TActivity, TLog>>, CompensateActivityContext<TActivity, TLog>>(
+                    filterSpecification, (input, context) => input, context => context.Request);
+
+                h.AddPipeSpecification(pipeSpecification);
+            }
         }
     }
 

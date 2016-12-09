@@ -30,7 +30,8 @@ namespace MassTransit.Courier
         /// <param name="context"></param>
         /// <param name="next"></param>
         /// <returns></returns>
-        Task Execute<TActivity, TArguments>(ExecuteContext<TArguments> context, IPipe<ExecuteActivityContext<TActivity, TArguments>> next)
+        Task<ResultContext<ExecutionResult>> Execute<TActivity, TArguments>(ExecuteContext<TArguments> context,
+            IRequestPipe<ExecuteActivityContext<TActivity, TArguments>, ExecutionResult> next)
             where TActivity : class, ExecuteActivity<TArguments>
             where TArguments : class;
 
@@ -40,7 +41,8 @@ namespace MassTransit.Courier
         /// <param name="compensateContext"></param>
         /// <param name="next"></param>
         /// <returns></returns>
-        Task Compensate<TActivity, TLog>(CompensateContext<TLog> compensateContext, IPipe<CompensateActivityContext<TActivity, TLog>> next)
+        Task<ResultContext<CompensationResult>> Compensate<TActivity, TLog>(CompensateContext<TLog> compensateContext,
+            IRequestPipe<CompensateActivityContext<TActivity, TLog>, CompensationResult> next)
             where TActivity : class, CompensateActivity<TLog>
             where TLog : class;
     }

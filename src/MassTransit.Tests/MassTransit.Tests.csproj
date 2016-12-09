@@ -124,6 +124,7 @@
     <Compile Include="Courier\PartitionActivity_Specs.cs" />
     <Compile Include="Courier\RanToCompletion_Specs.cs" />
     <Compile Include="Courier\RequestRoutingSlip_Specs.cs" />
+    <Compile Include="Courier\RetryActivity_Specs.cs" />
     <Compile Include="Courier\ReviseItinerary_Specs.cs" />
     <Compile Include="Courier\RoutingSlip_Specs.cs" />
     <Compile Include="Courier\SendEvent_Specs.cs" />

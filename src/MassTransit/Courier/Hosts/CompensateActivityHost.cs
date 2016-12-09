@@ -28,13 +28,13 @@ namespace MassTransit.Courier.Hosts
     {
         static readonly ILog _log = Logger.Get<CompensateActivityHost<TActivity, TLog>>();
         readonly CompensateActivityFactory<TActivity, TLog> _activityFactory;
-        readonly IPipe<CompensateActivityContext<TActivity, TLog>> _compensatePipe;
+        readonly IRequestPipe<CompensateActivityContext<TActivity, TLog>, CompensationResult> _compensatePipe;
 
         public CompensateActivityHost(CompensateActivityFactory<TActivity, TLog> activityFactory,
-            IPipe<CompensateActivityContext<TActivity, TLog>> compensatePipe)
+            IPipe<RequestContext> compensatePipe)
         {
             _activityFactory = activityFactory;
-            _compensatePipe = compensatePipe;
+            _compensatePipe = compensatePipe.CreateRequestPipe<CompensateActivityContext<TActivity, TLog>, CompensationResult>();
         }
 
         public async Task Send(ConsumeContext<RoutingSlip> context, IPipe<ConsumeContext<RoutingSlip>> next)
@@ -52,7 +52,18 @@ namespace MassTransit.Courier.Hosts
 
                 await Task.Yield();
 
-                await _activityFactory.Compensate(compensateContext, _compensatePipe).ConfigureAwait(false);
+                try
+                {
+                    var result = await _activityFactory.Compensate(compensateContext, _compensatePipe).Result().ConfigureAwait(false);
+
+                    await result.Evaluate().ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    var result = compensateContext.Failed(ex);
+
+                    await result.Evaluate().ConfigureAwait(false);
+                }
 
                 await context.NotifyConsumed(timer.Elapsed, TypeMetadataCache<TActivity>.ShortName).ConfigureAwait(false);
 
@@ -60,7 +71,10 @@ namespace MassTransit.Courier.Hosts
             }
             catch (Exception ex)
             {
+                _log.Error($"The activity {TypeMetadataCache<TActivity>.ShortName} threw an exception", ex);
+
                 await context.NotifyFaulted(timer.Elapsed, TypeMetadataCache<TActivity>.ShortName, ex).ConfigureAwait(false);
+
                 throw;
             }
         }

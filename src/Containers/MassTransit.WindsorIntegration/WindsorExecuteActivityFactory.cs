@@ -40,7 +40,8 @@ namespace MassTransit.WindsorIntegration
             _kernel = kernel;
         }
 
-        public async Task Execute(ExecuteContext<TArguments> context, IPipe<ExecuteActivityContext<TActivity, TArguments>> next)
+        public async Task<ResultContext<ExecutionResult>> Execute(ExecuteContext<TArguments> context,
+            IRequestPipe<ExecuteActivityContext<TActivity, TArguments>, ExecutionResult> next)
         {
             using (_kernel.RequireScope())
             {
@@ -55,7 +56,7 @@ namespace MassTransit.WindsorIntegration
 
                 var activityContext = new HostExecuteActivityContext<TActivity, TArguments>(activity, context);
 
-                await next.Send(activityContext).ConfigureAwait(false);
+                return await next.Send(activityContext).ConfigureAwait(false);
             }
         }
     }

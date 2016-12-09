@@ -33,12 +33,12 @@ namespace MassTransit.Courier.Factories
             _compensateFactory = new FactoryMethodCompensateActivityFactory<TActivity, TLog>(compensateFactory);
         }
 
-        public Task Execute(ExecuteContext<TArguments> context, IPipe<ExecuteActivityContext<TActivity, TArguments>> next)
+        public Task<ResultContext<ExecutionResult>> Execute(ExecuteContext<TArguments> context, IRequestPipe<ExecuteActivityContext<TActivity, TArguments>, ExecutionResult> next)
         {
             return _executeFactory.Execute(context, next);
         }
 
-        public Task Compensate(CompensateContext<TLog> context, IPipe<CompensateActivityContext<TActivity, TLog>> next)
+        public Task<ResultContext<CompensationResult>> Compensate(CompensateContext<TLog> context, IRequestPipe<CompensateActivityContext<TActivity, TLog>, CompensationResult> next)
         {
             return _compensateFactory.Compensate(context, next);
         }

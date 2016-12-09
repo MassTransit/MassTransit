@@ -31,7 +31,7 @@ namespace MassTransit.PipeConfigurators
         where TLog : class
     {
         readonly CompensateActivityFactory<TActivity, TLog> _activityFactory;
-        readonly Func<IPipe<CompensateActivityContext<TActivity, TLog>>, IFilter<ConsumeContext<RoutingSlip>>> _filterFactory;
+        readonly Func<IPipe<RequestContext>, IFilter<ConsumeContext<RoutingSlip>>> _filterFactory;
         readonly List<IPipeSpecification<CompensateActivityContext<TActivity, TLog>>> _pipeSpecifications;
         readonly RoutingSlipConfigurator _routingSlipConfigurator;
 
@@ -72,8 +72,7 @@ namespace MassTransit.PipeConfigurators
 
         public void Configure(IReceiveEndpointBuilder builder)
         {
-            IPipe<CompensateActivityContext<TActivity, TLog>> compensateActivityPipe =
-                _pipeSpecifications.Build(new CompensateActivityFilter<TActivity, TLog>());
+            IPipe<RequestContext> compensateActivityPipe = _pipeSpecifications.Build(new CompensateActivityFilter<TActivity, TLog>());
 
             IPipe<ConsumeContext<RoutingSlip>> messagePipe = Pipe.New<ConsumeContext<RoutingSlip>>(x =>
             {

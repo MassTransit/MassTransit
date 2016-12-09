@@ -40,7 +40,8 @@ namespace MassTransit.WindsorIntegration
             _kernel = kernel;
         }
 
-        public async Task Compensate(CompensateContext<TLog> context, IPipe<CompensateActivityContext<TActivity, TLog>> next)
+        public async Task<ResultContext<CompensationResult>> Compensate(CompensateContext<TLog> context,
+            IRequestPipe<CompensateActivityContext<TActivity, TLog>, CompensationResult> next)
         {
             using (_kernel.RequireScope())
             {
@@ -55,7 +56,7 @@ namespace MassTransit.WindsorIntegration
 
                 var activityContext = new HostCompensateActivityContext<TActivity, TLog>(activity, context);
 
-                await next.Send(activityContext).ConfigureAwait(false);
+                return await next.Send(activityContext).ConfigureAwait(false);
             }
         }
     }

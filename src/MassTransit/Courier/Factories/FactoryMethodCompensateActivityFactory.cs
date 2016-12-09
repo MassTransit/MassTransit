@@ -30,7 +30,8 @@ namespace MassTransit.Courier.Factories
             _compensateFactory = compensateFactory;
         }
 
-        public async Task Compensate(CompensateContext<TLog> context, IPipe<CompensateActivityContext<TActivity, TLog>> next)
+        public async Task<ResultContext<CompensationResult>> Compensate(CompensateContext<TLog> context,
+            IRequestPipe<CompensateActivityContext<TActivity, TLog>, CompensationResult> next)
         {
             TActivity activity = null;
             try
@@ -39,7 +40,7 @@ namespace MassTransit.Courier.Factories
 
                 var activityContext = new HostCompensateActivityContext<TActivity, TLog>(activity, context);
 
-                await next.Send(activityContext).ConfigureAwait(false);
+                return await next.Send(activityContext).ConfigureAwait(false);
             }
             finally
             {
