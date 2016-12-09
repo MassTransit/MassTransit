@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -16,7 +16,6 @@ namespace MassTransit.Pipeline
     using ConsumeConnectors;
     using ConsumerFactories;
     using GreenPipes;
-    using PipeConfigurators;
 
 
     public static class ConsumePipeExtensions
@@ -40,17 +39,18 @@ namespace MassTransit.Pipeline
         {
             var consumerFactory = new DefaultConstructorConsumerFactory<T>();
 
-            IConsumerConnector connector = ConsumerConnectorCache.GetConsumerConnector<T>();
+            var connector = ConsumerConnectorCache.GetConsumerConnector<T>();
 
             return connector.ConnectConsumer(filter, consumerFactory, pipeSpecifications);
         }
 
-        public static ConnectHandle ConnectConsumer<T>(this IConsumePipeConnector filter, Func<T> factoryMethod, params IPipeSpecification<ConsumerConsumeContext<T>>[] specifications)
+        public static ConnectHandle ConnectConsumer<T>(this IConsumePipeConnector filter, Func<T> factoryMethod,
+            params IPipeSpecification<ConsumerConsumeContext<T>>[] specifications)
             where T : class
         {
             var consumerFactory = new DelegateConsumerFactory<T>(factoryMethod);
 
-            IConsumerConnector connector = ConsumerConnectorCache.GetConsumerConnector<T>();
+            var connector = ConsumerConnectorCache.GetConsumerConnector<T>();
 
             return connector.ConnectConsumer(filter, consumerFactory, specifications);
         }
@@ -68,6 +68,9 @@ namespace MassTransit.Pipeline
 
         public static ConnectHandle ConnectInstance(this IConsumePipeConnector filter, object instance)
         {
+            if (instance == null)
+                throw new ArgumentNullException(nameof(instance));
+
             return InstanceConnectorCache.GetInstanceConnector(instance.GetType()).ConnectInstance(filter, instance);
         }
     }

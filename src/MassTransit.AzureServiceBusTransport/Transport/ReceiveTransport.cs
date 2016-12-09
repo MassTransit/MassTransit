@@ -20,6 +20,7 @@ namespace MassTransit.AzureServiceBusTransport.Transport
     using GreenPipes;
     using Logging;
     using MassTransit.Pipeline;
+    using MassTransit.Pipeline.Observables;
     using Policies;
     using Transports;
     using Util;

@@ -19,6 +19,7 @@ namespace MassTransit.RabbitMqTransport.Transport
     using GreenPipes;
     using Integration;
     using MassTransit.Pipeline;
+    using MassTransit.Pipeline.Observables;
     using MassTransit.Pipeline.Pipes;
     using Topology;
     using Transports;

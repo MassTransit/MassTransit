@@ -10,32 +10,30 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Pipeline
+namespace MassTransit.Pipeline.Observables
 {
     using System;
     using System.Threading.Tasks;
     using GreenPipes.Util;
-    using Util;
 
 
-    public class SendMessageObservable<TMessage> :
-        Connectable<ISendMessageObserver<TMessage>>,
-        ISendMessageObserver<TMessage>
-        where TMessage : class
+    public class PublishObservable :
+        Connectable<IPublishObserver>,
+        IPublishObserver
     {
-        public Task PreSend(SendContext<TMessage> context)
+        public Task PrePublish<T>(PublishContext<T> context) where T : class
         {
-            return ForEachAsync(x => x.PreSend(context));
+            return ForEachAsync(x => x.PrePublish(context));
         }
 
-        public Task PostSend(SendContext<TMessage> context)
+        public Task PostPublish<T>(PublishContext<T> context) where T : class
         {
-            return ForEachAsync(x => x.PostSend(context));
+            return ForEachAsync(x => x.PostPublish(context));
         }
 
-        public Task SendFault(SendContext<TMessage> context, Exception exception)
+        public Task PublishFault<T>(PublishContext<T> context, Exception exception) where T : class
         {
-            return ForEachAsync(x => x.SendFault(context, exception));
+            return ForEachAsync(x => x.PublishFault(context, exception));
         }
     }
 }

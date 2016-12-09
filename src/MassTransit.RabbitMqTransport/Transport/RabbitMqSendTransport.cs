@@ -26,6 +26,7 @@ namespace MassTransit.RabbitMqTransport.Transport
     using Integration;
     using Logging;
     using MassTransit.Pipeline;
+    using MassTransit.Pipeline.Observables;
     using Pipeline;
     using RabbitMQ.Client;
     using Serialization;

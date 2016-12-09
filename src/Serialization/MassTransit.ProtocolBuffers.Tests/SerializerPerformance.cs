@@ -17,6 +17,7 @@ namespace MassTransit.ProtocolBuffers.Tests
     using System.IO;
     using NUnit.Framework;
     using Pipeline;
+    using Pipeline.Observables;
     using Transports.InMemory;
     using Util;
 

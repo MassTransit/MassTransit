@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,6 +14,7 @@ namespace MassTransit.Tests
 {
     namespace MyNamespace
     {
+        using System;
         using System.Linq;
         using System.Threading.Tasks;
         using MassTransit.Testing;
@@ -28,6 +29,20 @@ namespace MassTransit.Tests
         public class Observing_consumer_messages :
             InMemoryTestFixture
         {
+            [Test]
+            public async Task Should_trigger_the_consume_message_observer()
+            {
+                var context = await _pingObserver.PostConsumed;
+            }
+
+            [Test]
+            public void Should_trigger_the_consume_observer()
+            {
+                IReceivedMessage<PingMessage> context = _observer.Messages.Select<PingMessage>().First();
+
+                context.ShouldNotBeNull();
+            }
+
             TestConsumeObserver<PingMessage> _pingObserver;
             TestConsumeObserver _observer;
 
@@ -47,19 +62,72 @@ namespace MassTransit.Tests
             {
                 Handled<PingMessage>(configurator);
             }
+        }
 
+
+        [TestFixture]
+        public class Multiple_observations :
+            InMemoryTestFixture
+        {
             [Test]
-            public async Task Should_trigger_the_consume_message_observer()
+            public async Task MutlipleConsumerMessages()
             {
-                var context = await _pingObserver.PostConsumed;
+                Bus.ConnectConsumeMessageObserver(new TestObserver());
+
+                await InputQueueSendEndpoint.Send(new Message(Guid.NewGuid()));
+
+                await Task.Delay(TimeSpan.FromSeconds(5));
             }
 
-            [Test]
-            public void Should_trigger_the_consume_observer()
-            {
-                IReceivedMessage<PingMessage> context = _observer.Messages.Select<PingMessage>().First();
 
-                context.ShouldNotBeNull();
+            class MessageConsumer : IConsumer<Message>
+            {
+                public Task Consume(ConsumeContext<Message> context)
+                {
+                    Console.WriteLine("Consumed {0}", context.MessageId);
+                    return Task.FromResult(1);
+                }
+            }
+
+
+            protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+            {
+                base.ConfigureInputQueueEndpoint(configurator);
+
+                configurator.Consumer<MessageConsumer>();
+            }
+
+
+            class TestObserver : IConsumeMessageObserver<Message>
+            {
+                public Task PreConsume(ConsumeContext<Message> context)
+                {
+                    Console.WriteLine("Pre {0}", context.MessageId);
+                    return Task.FromResult(1);
+                }
+
+                public Task PostConsume(ConsumeContext<Message> context)
+                {
+                    Console.WriteLine("Post {0}", context.MessageId);
+                    return Task.FromResult(1);
+                }
+
+                public Task ConsumeFault(ConsumeContext<Message> context, Exception exception)
+                {
+                    Console.WriteLine("Fault");
+                    return Task.FromResult(1);
+                }
+            }
+
+
+            class Message
+            {
+                public Message(Guid id)
+                {
+                    Id = id;
+                }
+
+                public Guid Id { get; }
             }
         }
     }

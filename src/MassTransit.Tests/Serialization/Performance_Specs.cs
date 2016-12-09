@@ -16,6 +16,7 @@ namespace MassTransit.Tests.Serialization
     using System.Diagnostics;
     using System.IO;
     using MassTransit.Pipeline;
+    using MassTransit.Pipeline.Observables;
     using MassTransit.Serialization;
     using MassTransit.Transports;
     using MassTransit.Transports.InMemory;

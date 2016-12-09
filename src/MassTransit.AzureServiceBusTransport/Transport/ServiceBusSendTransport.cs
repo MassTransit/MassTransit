@@ -24,6 +24,7 @@ namespace MassTransit.AzureServiceBusTransport.Transport
     using GreenPipes;
     using Logging;
     using MassTransit.Pipeline;
+    using MassTransit.Pipeline.Observables;
     using MassTransit.Scheduling;
     using Microsoft.ServiceBus.Messaging;
     using Serialization;

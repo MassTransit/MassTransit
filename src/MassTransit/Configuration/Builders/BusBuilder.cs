@@ -17,6 +17,7 @@ namespace MassTransit.Builders
     using BusConfigurators;
     using GreenPipes;
     using Pipeline;
+    using Pipeline.Observables;
     using Transports;
     using Util;
 

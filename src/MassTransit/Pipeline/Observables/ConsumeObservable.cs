@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -10,32 +10,33 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Pipeline
+namespace MassTransit.Pipeline.Observables
 {
     using System;
     using System.Threading.Tasks;
     using GreenPipes.Util;
-    using Util;
 
 
-    public class PublishMessageObservable<T> :
-        Connectable<IPublishMessageObserver<T>>,
-        IPublishMessageObserver<T>
-        where T : class
+    public class ConsumeObservable :
+        Connectable<IConsumeObserver>,
+        IConsumeObserver
     {
-        public Task PrePublish(PublishContext<T> context)
+        public Task PreConsume<T>(ConsumeContext<T> context)
+            where T : class
         {
-            return ForEachAsync(x => x.PrePublish(context));
+            return ForEachAsync(x => x.PreConsume(context));
         }
 
-        public Task PostPublish(PublishContext<T> context)
+        public Task PostConsume<T>(ConsumeContext<T> context)
+            where T : class
         {
-            return ForEachAsync(x => x.PostPublish(context));
+            return ForEachAsync(x => x.PostConsume(context));
         }
 
-        public Task PublishFault(PublishContext<T> context, Exception exception)
+        public Task ConsumeFault<T>(ConsumeContext<T> context, Exception exception)
+            where T : class
         {
-            return ForEachAsync(x => x.PublishFault(context, exception));
+            return ForEachAsync(x => x.ConsumeFault(context, exception));
         }
     }
 }

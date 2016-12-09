@@ -13,6 +13,7 @@
 namespace MassTransit.Pipeline.Pipes
 {
     using System;
+    using Context;
     using GreenPipes;
     using GreenPipes.Pipes;
 

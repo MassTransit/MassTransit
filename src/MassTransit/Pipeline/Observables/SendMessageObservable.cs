@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -10,29 +10,31 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Pipeline
+namespace MassTransit.Pipeline.Observables
 {
+    using System;
     using System.Threading.Tasks;
     using GreenPipes.Util;
 
 
-    public class ReceiveTransportObservable :
-        Connectable<IReceiveTransportObserver>,
-        IReceiveTransportObserver
+    public class SendMessageObservable<TMessage> :
+        Connectable<ISendMessageObserver<TMessage>>,
+        ISendMessageObserver<TMessage>
+        where TMessage : class
     {
-        public Task Ready(ReceiveTransportReady ready)
+        public Task PreSend(SendContext<TMessage> context)
         {
-            return ForEachAsync(x => x.Ready(ready));
+            return ForEachAsync(x => x.PreSend(context));
         }
 
-        public Task Completed(ReceiveTransportCompleted completed)
+        public Task PostSend(SendContext<TMessage> context)
         {
-            return ForEachAsync(x => x.Completed(completed));
+            return ForEachAsync(x => x.PostSend(context));
         }
 
-        public Task Faulted(ReceiveTransportFaulted faulted)
+        public Task SendFault(SendContext<TMessage> context, Exception exception)
         {
-            return ForEachAsync(x => x.Faulted(faulted));
+            return ForEachAsync(x => x.SendFault(context, exception));
         }
     }
 }

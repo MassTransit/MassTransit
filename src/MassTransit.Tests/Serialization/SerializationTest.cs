@@ -17,6 +17,7 @@ namespace MassTransit.Tests.Serialization
     using System.IO;
     using System.Text;
     using MassTransit.Pipeline;
+    using MassTransit.Pipeline.Observables;
     using MassTransit.Serialization;
     using MassTransit.Transports.InMemory;
     using Newtonsoft.Json;

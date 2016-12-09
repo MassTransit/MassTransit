@@ -13,6 +13,7 @@
 namespace MassTransit.Builders
 {
     using System;
+    using Context;
     using GreenPipes;
     using GreenPipes.Builders;
     using GreenPipes.Filters;

@@ -21,6 +21,7 @@ namespace MassTransit.Transports.InMemory
     using Logging;
     using Metrics;
     using Pipeline;
+    using Pipeline.Observables;
     using Util;
 
 

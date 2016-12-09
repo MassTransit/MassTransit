@@ -18,6 +18,7 @@ namespace MassTransit.Transports
     using Events;
     using GreenPipes;
     using Pipeline;
+    using Pipeline.Observables;
 
 
     /// <summary>

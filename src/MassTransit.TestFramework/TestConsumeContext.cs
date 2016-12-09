@@ -23,6 +23,7 @@ namespace MassTransit.TestFramework
     using GreenPipes.Payloads;
     using GreenPipes.Util;
     using Pipeline;
+    using Pipeline.Observables;
     using Transports;
     using Transports.InMemory;
     using Util;
