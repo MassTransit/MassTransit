@@ -24,7 +24,8 @@ namespace MassTransit.Context
     using Util;
 
 
-    public class SendRequestConfigurator<TRequest> : IRequestConfigurator<TRequest>
+    public class SendRequestConfigurator<TRequest> : 
+        IRequestConfigurator<TRequest>
         where TRequest : class
     {
         readonly Dictionary<Type, RequestHandlerHandle> _connections;
@@ -202,7 +203,9 @@ namespace MassTransit.Context
 
             var connectHandle = configurator.Connect(_connector, _requestId);
 
-            _connections.Add(typeof(T), new RequestHandlerHandle<T>(connectHandle));
+            var source = new TaskCompletionSource<T>();
+
+            _connections.Add(typeof(T), new RequestHandlerHandle<T>(connectHandle, source, _context.CancellationToken));
         }
 
         Task<T> IRequestConfigurator<TRequest>.Handle<T>(MessageHandler<T> handler, Action<IHandlerConfigurator<T>> configure)
@@ -238,7 +241,7 @@ namespace MassTransit.Context
 
             var connectHandle = configurator.Connect(_connector, _requestId);
 
-            _connections.Add(typeof(T), new RequestHandlerHandle<T>(connectHandle, source));
+            _connections.Add(typeof(T), new RequestHandlerHandle<T>(connectHandle, source, _context.CancellationToken));
 
             return source.Task;
         }
@@ -274,7 +277,7 @@ namespace MassTransit.Context
 
             var connectHandle = configurator.Connect(_connector, _requestId);
 
-            _connections.Add(typeof(T), new RequestHandlerHandle<T>(connectHandle, source));
+            _connections.Add(typeof(T), new RequestHandlerHandle<T>(connectHandle, source, _context.CancellationToken));
 
             return source.Task;
         }
@@ -303,7 +306,7 @@ namespace MassTransit.Context
 
             var connectHandle = _connector.ConnectRequestHandler(_requestId, messageHandler);
 
-            _connections.Add(typeof(Fault<TRequest>), new RequestHandlerHandle<Fault<TRequest>>(connectHandle, source));
+            _connections.Add(typeof(Fault<TRequest>), new RequestHandlerHandle<Fault<TRequest>>(connectHandle, source, _context.CancellationToken));
         }
 
         void TimeoutExpired()
@@ -395,26 +398,24 @@ namespace MassTransit.Context
         {
             readonly ConnectHandle _handle;
             readonly TaskCompletionSource<TResponse> _source;
+            CancellationTokenRegistration _registration;
 
-            public RequestHandlerHandle(ConnectHandle handle, TaskCompletionSource<TResponse> source)
+            public RequestHandlerHandle(ConnectHandle handle, TaskCompletionSource<TResponse> source, CancellationToken cancellationToken)
             {
                 _handle = handle;
                 _source = source;
-            }
-
-            public RequestHandlerHandle(ConnectHandle handle)
-            {
-                _handle = handle;
-                _source = new TaskCompletionSource<TResponse>(TaskCreationOptions.None);
+                _registration = cancellationToken.Register(TrySetCanceled);
             }
 
             public void Dispose()
             {
+                _registration.Dispose();
                 _handle.Dispose();
             }
 
             public void Disconnect()
             {
+                _registration.Dispose();
                 _handle.Disconnect();
             }
 

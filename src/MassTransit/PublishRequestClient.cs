@@ -50,7 +50,6 @@ namespace MassTransit
         /// <param name="publishEndpoint"></param>
         /// <param name="connector">The bus instance</param>
         /// <param name="responseAddress">The response address of the connector</param>
-        /// <param name="serviceAddress">The service endpoint address</param>
         /// <param name="timeout">The request timeout</param>
         /// <param name="timeToLive">The time that the request will live for</param>
         /// <param name="callback"></param>

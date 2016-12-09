@@ -13,6 +13,7 @@
 namespace MassTransit.Tests
 {
     using System;
+    using System.Threading;
     using System.Threading.Tasks;
     using NUnit.Framework;
     using Shouldly;
@@ -105,4 +106,45 @@ namespace MassTransit.Tests
             });
         }
     }
+
+    [TestFixture]
+    public class Cancelling_a_request_mid_stream :
+    InMemoryTestFixture
+    {
+        [Test]
+        public async Task Should_throw_a_cancelled_exception()
+        {
+            Assert.That(async () =>  await _response, Throws.TypeOf<TaskCanceledException>());
+        }
+
+        Task<ConsumeContext<PingMessage>> _ping;
+        Task<PongMessage> _response;
+        IRequestClient<PingMessage, PongMessage> _requestClient;
+
+        [OneTimeSetUp]
+        public void Setup()
+        {
+            _requestClient = CreateRequestClient<PingMessage, PongMessage>();
+
+            var cts = new CancellationTokenSource();
+
+            Task.Run(async () =>
+            {
+                await Task.Delay(500);
+                cts.Cancel();
+            });
+
+            _response = _requestClient.Request(new PingMessage(), cts.Token);
+        }
+
+        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        {
+            _ping = Handler<PingMessage>(configurator, async x =>
+            {
+                await Task.Delay(2000);
+                await x.RespondAsync(new PongMessage(x.Message.CorrelationId));
+            });
+        }
+    }
+
 }
