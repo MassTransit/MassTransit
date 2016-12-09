@@ -123,8 +123,7 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
                 }
                 catch (DbUpdateException ex)
                 {
-                    var baseException = ex.GetBaseException() as SqlException;
-                    if (baseException != null && baseException.Number == 1205)
+                    if (IsDeadlockException(ex))
                     {
                         // deadlock, no need to rollback
                     }
@@ -215,8 +214,7 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
                     }
                     catch (DbUpdateException ex)
                     {
-                        var baseException = ex.GetBaseException() as SqlException;
-                        if (baseException != null && baseException.Number == 1205)
+                        if (IsDeadlockException(ex))
                         {
                             // deadlock, no need to rollback
                         }
@@ -271,6 +269,13 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
                     }
                 }
             }
+        }
+
+        static bool IsDeadlockException(DataException exception)
+        {
+            var baseException = exception.GetBaseException() as SqlException;
+
+            return baseException != null && baseException.Number == 1205;
         }
 
         static async Task<bool> PreInsertSagaInstance<T>(DbContext dbContext, TSaga instance, CancellationToken cancellationToken)

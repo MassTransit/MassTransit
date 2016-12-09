@@ -108,7 +108,7 @@ namespace MassTransit.Transports
         {
             var baseException = exception.GetBaseException() ?? exception;
 
-            return baseException?.Message ?? $"An exception of type {exception.GetType()} was thrown but the message was null.";
+            return ExceptionUtil.GetMessage(baseException);
         }
     }
 }

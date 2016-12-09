@@ -27,6 +27,18 @@ namespace MassTransit.Util
                 RegexOptions.Multiline | RegexOptions.Compiled);
         }
 
+        public static string GetMessage(Exception exception)
+        {
+            try
+            {
+                return exception.Message ?? $"An exception of type {exception.GetType()} was thrown but the message was null.";
+            }
+            catch
+            {
+                return $"An exception of type {exception.GetType()} was thrown but the Message property threw an exception.";
+            }
+        }
+
         public static string GetStackTrace(Exception exception)
         {
             if (string.IsNullOrWhiteSpace(exception?.StackTrace))

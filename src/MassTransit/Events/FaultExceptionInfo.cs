@@ -13,7 +13,6 @@
 namespace MassTransit.Events
 {
     using System;
-    using Internals.Extensions;
     using Util;
 
 
@@ -23,12 +22,17 @@ namespace MassTransit.Events
     {
         public FaultExceptionInfo(Exception exception)
         {
-            ExceptionType = exception.GetType().GetTypeName();
+            if (exception == null)
+                throw new ArgumentNullException(nameof(exception));
+
+            exception = exception.GetBaseException() ?? exception;
+
+            ExceptionType = TypeMetadataCache.GetShortName(exception.GetType());
             InnerException = exception.InnerException != null
                 ? new FaultExceptionInfo(exception.InnerException)
                 : null;
             StackTrace = ExceptionUtil.GetStackTrace(exception);
-            Message = exception.Message;
+            Message = ExceptionUtil.GetMessage(exception);
             Source = exception.Source;
         }
 

@@ -54,13 +54,13 @@ namespace MassTransit.Pipeline.Filters
 
             var exception = context.Exception.GetBaseException() ?? context.Exception;
 
-            var faultMessage = exception?.Message ?? $"An exception of type {context.Exception.GetType()} was thrown but the message was null.";
+            var exceptionMessage = ExceptionUtil.GetMessage(exception);
 
             IPipe<SendContext> pipe = Pipe.Execute<SendContext>(sendContext =>
             {
                 sendContext.Headers.Set(MessageHeaders.Reason, "fault");
 
-                sendContext.Headers.Set(MessageHeaders.FaultMessage, faultMessage);
+                sendContext.Headers.Set(MessageHeaders.FaultMessage, exceptionMessage);
                 sendContext.Headers.Set(MessageHeaders.FaultTimestamp, context.ExceptionTimestamp.ToString("O"));
                 sendContext.Headers.Set(MessageHeaders.FaultStackTrace, ExceptionUtil.GetStackTrace(exception));
 
@@ -75,7 +75,7 @@ namespace MassTransit.Pipeline.Filters
 
             await transport.Move(context, pipe).ConfigureAwait(false);
 
-            context.LogMoved(_destinationAddress, $"Fault: {faultMessage}");
+            context.LogMoved(_destinationAddress, $"Fault: {exceptionMessage}");
 
             await next.Send(context).ConfigureAwait(false);
         }
