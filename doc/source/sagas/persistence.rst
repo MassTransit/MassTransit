@@ -103,7 +103,7 @@ Each saga instance will be placed in a collection specific to the instance type.
 NHibernate
 ~~~~~~~~~~
 
-While the project seems dead, NHibernate is still widely used and is supported by MassTransit for saga storage. The example below shows the code-first approach to using NHibernate for saga persistence.
+Although NHibernate is not being actively developed recently, it is still widely used and is supported by MassTransit for saga storage. The example below shows the code-first approach to using NHibernate for saga persistence.
 
 .. sourcecode:: csharp
     :linenos:
