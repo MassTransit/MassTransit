@@ -25,6 +25,7 @@ namespace MassTransit.HottpTransport.Tests
     public class Class1
     {
         [Test]
+        [Explicit]
         public void CheckProbe()
         {
             var bus = Bus.Factory.CreateUsingHttp(cfg =>
@@ -37,7 +38,6 @@ namespace MassTransit.HottpTransport.Tests
                 {
                     host.Method = HttpMethod.Put;
                 });
-
 
                 //http://localhost:8080/
                 cfg.ReceiveEndpoint(ep =>
@@ -124,7 +124,7 @@ namespace MassTransit.HottpTransport.Tests
 //            await Console.Out.WriteLineAsync(string.Format("Message-Id: {0}", context.MessageId));
 //            await Console.Out.WriteAsync(context.Message.Hello);
 
-            context.Respond(new Pong() {Value = $"{context.Message.Hello}, World."});
+            context.Respond(new Pong {Value = $"{context.Message.Hello}, World."});
         }
     }
 
@@ -133,6 +133,7 @@ namespace MassTransit.HottpTransport.Tests
     {
         public string Value { get; set; }
     }
+
 
     public class Ping
     {

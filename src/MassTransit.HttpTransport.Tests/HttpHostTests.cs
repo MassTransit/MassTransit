@@ -16,23 +16,16 @@ namespace MassTransit.HttpTransport.Tests
     using System.Net.Http;
     using System.Threading;
     using System.Threading.Tasks;
-    using Builders;
-    using Clients;
     using GreenPipes;
-    using GreenPipes.Filters;
     using Hosting;
-    using MassTransit.Pipeline;
-    using MassTransit.Pipeline.Pipes;
     using NUnit.Framework;
-    using Serialization;
     using Transport;
-    using Transports;
     using Util;
 
 
     public class HttpHostTests
     {
-        [Test]
+        [Test, Explicit]
         public async Task X()
         {
             var sup = new TaskSupervisor("test");
@@ -41,10 +34,10 @@ namespace MassTransit.HttpTransport.Tests
             await sup.Stop("test");
         }
 
-        [Test]
+        [Test, Explicit]
         public async Task HttpHost_NoEndpoints()
         {
-            var host = new HttpHost(new ConfigurationHostSettings("http","localhost",8080, HttpMethod.Post));
+            var host = new HttpHost(new ConfigurationHostSettings("http", "localhost", 8080, HttpMethod.Post));
             var handle = await host.Start();
             using (var tokenSource = new CancellationTokenSource(TimeSpan.FromMinutes(1)))
             {
@@ -78,7 +71,6 @@ namespace MassTransit.HttpTransport.Tests
         [Test]
         public void Endpoint()
         {
-            
         }
     }
 }

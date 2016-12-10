@@ -13,6 +13,7 @@
 namespace MassTransit.HttpTransport.Tests
 {
     using System;
+    using System.Net.Http;
     using System.Threading;
     using System.Threading.Tasks;
     using Logging;
@@ -25,12 +26,12 @@ namespace MassTransit.HttpTransport.Tests
         BusTestFixture
     {
         static readonly ILog _log = Logger.Get<HttpBusTestFixture>();
+
+        readonly TestSendObserver _sendObserver;
         IBusControl _bus;
         BusHandle _busHandle;
-        ISendEndpoint _inputQueueSendEndpoint;
-        //ISendEndpoint _busSendEndpoint;
-        readonly TestSendObserver _sendObserver;
         Uri _hostAddress;
+        ISendEndpoint _rootEndpoint;
 
         public HttpBusTestFixture()
         {
@@ -38,38 +39,37 @@ namespace MassTransit.HttpTransport.Tests
             _hostAddress = new Uri("http://localhost:8080");
         }
 
-
         /// <summary>
         /// The sending endpoint for the InputQueue
         /// </summary>
-        protected ISendEndpoint InputQueueSendEndpoint => _inputQueueSendEndpoint;
+        protected ISendEndpoint RootEndpoint => _rootEndpoint;
+
         protected override IBus Bus => _bus;
 
-        protected Uri InputQueueAddress
+        protected Uri HostAddress
         {
             get { return _hostAddress; }
             set
             {
                 if (Bus != null)
-                    throw new InvalidOperationException("The LocalBus has already been created, too late to change the URI");
+                    throw new InvalidOperationException("The Bus has already been created, too late to change the address");
 
                 _hostAddress = value;
             }
         }
 
-        [OneTimeSetUp]
-        public async Task SetupInMemoryTestFixture()
-        {
-             _bus = CreateBus();
+        protected IHttpHost Host { get; private set; }
 
-            _busHandle = await _bus.StartAsync();
+        [OneTimeSetUp]
+        public async Task SetupHttpTestFixture()
+        {
+            _bus = CreateBus();
+
+            _busHandle = await _bus.StartAsync(TestCancellationToken);
             try
             {
-//                _busSendEndpoint = Await(() => _bus.GetSendEndpoint(_bus.Address));
-//                _busSendEndpoint.ConnectSendObserver(_sendObserver);
-
-                _inputQueueSendEndpoint = Await(() => _bus.GetSendEndpoint(_hostAddress));
-                _inputQueueSendEndpoint.ConnectSendObserver(_sendObserver);
+                _rootEndpoint = Await(() => _bus.GetSendEndpoint(_hostAddress));
+                _rootEndpoint.ConnectSendObserver(_sendObserver);
             }
             catch (Exception)
             {
@@ -91,7 +91,7 @@ namespace MassTransit.HttpTransport.Tests
         }
 
         [OneTimeTearDown]
-        public async Task TearDownInMemoryTestFixture()
+        public async Task TearDownHttpTestFixture()
         {
             try
             {
@@ -103,6 +103,8 @@ namespace MassTransit.HttpTransport.Tests
             catch (Exception ex)
             {
                 _log.Error("Bus Stop Failed", ex);
+
+                throw;
             }
             finally
             {
@@ -113,15 +115,16 @@ namespace MassTransit.HttpTransport.Tests
 
         protected virtual void ConfigureBus(IHttpBusFactoryConfigurator configurator)
         {
-            Host = configurator.Host(_hostAddress);
+            Host = configurator.Host(_hostAddress, h => h.Method = HttpMethod.Post);
         }
 
-        protected IHttpHost Host { get; private set; }
-
-        protected virtual void ConfigureInputQueueEndpoint(IHttpReceiveEndpointConfigurator configurator)
+        protected virtual void ConfigureBusHost(IHttpBusFactoryConfigurator configurator, IHttpHost host)
         {
         }
 
+        protected virtual void ConfigureRootReceiveEndpoint(IHttpReceiveEndpointConfigurator configurator)
+        {
+        }
 
         IBusControl CreateBus()
         {
@@ -129,7 +132,9 @@ namespace MassTransit.HttpTransport.Tests
             {
                 ConfigureBus(x);
 
-                x.ReceiveEndpoint(Host, "/", ConfigureInputQueueEndpoint);
+                ConfigureBusHost(x, Host);
+
+                x.ReceiveEndpoint(Host, "", ConfigureRootReceiveEndpoint);
             });
         }
     }

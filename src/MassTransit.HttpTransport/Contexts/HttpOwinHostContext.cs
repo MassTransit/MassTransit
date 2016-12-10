@@ -30,7 +30,7 @@ namespace MassTransit.HttpTransport.Contexts
     {
         readonly StartOptions _options;
         readonly ITaskParticipant _participant;
-        SortedDictionary<string, List<Endpoint>> _endpoints;
+        readonly SortedDictionary<string, List<Endpoint>> _endpoints;
         IDisposable _owinHost;
         bool _started;
 

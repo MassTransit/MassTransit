@@ -114,13 +114,16 @@ namespace MassTransit.HttpTransport.Clients
                             {
                                 var responseStream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
 
-                                ISendEndpointProvider sendEndpointProvider = new HttpClientSendEndpointProvider();
-                                IPublishEndpointProvider publishEndpointProvider = new HttpClientPublishEndpointProvider();
+                                if (responseStream.Length > 0)
+                                {
+                                    ISendEndpointProvider sendEndpointProvider = new HttpClientSendEndpointProvider();
+                                    IPublishEndpointProvider publishEndpointProvider = new HttpClientPublishEndpointProvider();
 
-                                var receiveContext = new HttpClientReceiveContext(response, responseStream, false, _receiveObserver, sendEndpointProvider,
-                                    publishEndpointProvider);
+                                    var receiveContext = new HttpClientReceiveContext(response, responseStream, false, _receiveObserver, sendEndpointProvider,
+                                        publishEndpointProvider);
 
-                                await clientContext.ReceiveResponse(receiveContext).ConfigureAwait(false);
+                                    await clientContext.ReceiveResponse(receiveContext).ConfigureAwait(false);
+                                }
                             }
 
                             await _observers.PostSend(context).ConfigureAwait(false);

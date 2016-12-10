@@ -14,10 +14,8 @@ namespace MassTransit.HttpTransport.Contexts
 {
     using System;
     using System.Threading;
-    using System.Threading.Tasks;
     using GreenPipes;
     using Hosting;
-    using Microsoft.Owin;
     using Util;
 
 
@@ -25,14 +23,13 @@ namespace MassTransit.HttpTransport.Contexts
         OwinHostContext,
         IDisposable
     {
-        readonly CancellationToken _cancellationToken;
         readonly OwinHostContext _context;
         readonly ITaskParticipant _participant;
 
-        public SharedHttpOwinHostContext(OwinHostContext context, CancellationToken cancellationToken, ITaskScope scope)
+        public SharedHttpOwinHostContext(OwinHostContext context, CancellationToken cancellationToken, ITaskSupervisor scope)
         {
             _context = context;
-            _cancellationToken = cancellationToken;
+            CancellationToken = cancellationToken;
 
 
             _participant = scope.CreateParticipant($"{TypeMetadataCache<SharedHttpOwinHostContext>.ShortName} - {context.HostSettings.ToDebugString()}");
@@ -44,36 +41,36 @@ namespace MassTransit.HttpTransport.Contexts
             _participant.SetComplete();
         }
 
-        public CancellationToken CancellationToken => _cancellationToken;
+        public CancellationToken CancellationToken { get; }
 
-        public bool HasPayloadType(Type contextType)
+        bool PipeContext.HasPayloadType(Type contextType)
         {
             return _context.HasPayloadType(contextType);
         }
 
-        public bool TryGetPayload<TPayload>(out TPayload payload) where TPayload : class
+        bool PipeContext.TryGetPayload<TPayload>(out TPayload payload)
         {
             return _context.TryGetPayload(out payload);
         }
 
-        public TPayload GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory) where TPayload : class
+        TPayload PipeContext.GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory)
         {
             return _context.GetOrAddPayload(payloadFactory);
         }
 
         public HttpHostSettings HostSettings => _context.HostSettings;
 
-        public void RegisterEndpointHandler(string pathMatch, HttpConsumerAction handler)
+        void OwinHostContext.RegisterEndpointHandler(string pathMatch, HttpConsumerAction handler)
         {
             _context.RegisterEndpointHandler(pathMatch, handler);
         }
 
-        public void StopHttpListener()
+        void OwinHostContext.StopHttpListener()
         {
             _context.StopHttpListener();
         }
 
-        public void StartHost()
+        void OwinHostContext.StartHost()
         {
             _context.StartHost();
         }

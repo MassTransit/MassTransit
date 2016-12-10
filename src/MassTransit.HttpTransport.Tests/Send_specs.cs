@@ -12,35 +12,19 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.HttpTransport.Tests
 {
-    using System;
     using System.Threading.Tasks;
-    using GreenPipes;
     using NUnit.Framework;
     using TestFramework.Messages;
-    using TestFramework;
 
 
     [TestFixture]
     public class Sending_a_message_to_an_endpoint :
-       HttpBusTestFixture
+        HttpBusTestFixture
     {
-        Task<ConsumeContext<PingMessage>> _handler;
-        
-        protected override void ConfigureInputQueueEndpoint(IHttpReceiveEndpointConfigurator configurator)
-        {
-            _handler = Handled<PingMessage>(configurator);
-        }
-
-        [TestFixtureSetUp]
-        public void Setup()
-        {
-            Await(() => InputQueueSendEndpoint.Send(new PingMessage()));
-        }
-
         [Test]
         public async Task Should_have_a_redelivery_flag_of_false()
         {
-            var context = await _handler;
+            ConsumeContext<PingMessage> context = await _handler;
 
             Assert.IsFalse(context.ReceiveContext.Redelivered);
         }
@@ -50,7 +34,21 @@ namespace MassTransit.HttpTransport.Tests
         {
             await _handler;
         }
+
+        Task<ConsumeContext<PingMessage>> _handler;
+
+        protected override void ConfigureRootReceiveEndpoint(IHttpReceiveEndpointConfigurator configurator)
+        {
+            _handler = Handled<PingMessage>(configurator);
+        }
+
+        [OneTimeSetUp]
+        public async Task Setup()
+        {
+            await RootEndpoint.Send(new PingMessage());
+        }
     }
+
 
     [TestFixture]
     public class Sending_a_request_using_the_request_client :
@@ -59,9 +57,7 @@ namespace MassTransit.HttpTransport.Tests
         [Test]
         public async Task Should_receive_the_response()
         {
-            var re = Bus.GetProbeResult();
-            Console.WriteLine(re.ToJsonString());
-            PongMessage message = await _response;
+            var message = await _response;
 
             Assert.AreEqual(message.CorrelationId, _ping.Result.Message.CorrelationId);
         }
@@ -73,14 +69,14 @@ namespace MassTransit.HttpTransport.Tests
         [OneTimeSetUp]
         public void Setup()
         {
-            _requestClient = new MessageRequestClient<PingMessage, PongMessage>(Bus, InputQueueAddress, TestTimeout);
+            _requestClient = new MessageRequestClient<PingMessage, PongMessage>(Bus, HostAddress, TestTimeout);
 
             _response = _requestClient.Request(new PingMessage());
         }
 
-        protected override void ConfigureInputQueueEndpoint(IHttpReceiveEndpointConfigurator configurator)
+        protected override void ConfigureRootReceiveEndpoint(IHttpReceiveEndpointConfigurator configurator)
         {
-            _ping = Handler<PingMessage>(configurator, async cxt => await cxt.RespondAsync(new PongMessage(cxt.Message.CorrelationId)));
-        }   
+            _ping = Handler<PingMessage>(configurator, cxt => cxt.RespondAsync(new PongMessage(cxt.Message.CorrelationId)));
+        }
     }
 }
