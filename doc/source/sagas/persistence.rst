@@ -180,8 +180,7 @@ The Redis saga repository requires ``ServiceStack.Redis.IRedisClientsManager`` a
     :linenos:
 
     var redisConnectionString = "redis://localhost:6379";
-    var repository = new RedisSagaRepository<SagaInstance>(
-        new RedisManagerPool(redisConnectionString));
+    var repository = new RedisSagaRepository<SagaInstance>(new RedisManagerPool(redisConnectionString));
 
 
 If you use a container, you can use the code like this (example for Autofac):
@@ -190,8 +189,6 @@ If you use a container, you can use the code like this (example for Autofac):
     :linenos:
 
     var redisConnectionString = "redis://localhost:6379";
-    builder.Register<IRedisClientsManager>
-        (c => new RedisManagerPool(redisConnectionString));
-    builder.RegisterGeneric(typeof(RedisSagaRepository<>))
-        .As(typeof(ISagaRepository<>));
+    builder.Register<IRedisClientsManager>(c => new RedisManagerPool(redisConnectionString)).SingleInstance();
+    builder.RegisterGeneric(typeof(RedisSagaRepository<>)).As(typeof(ISagaRepository<>)).SingleInstance();
 
