@@ -149,6 +149,11 @@ Target "Package" (fun _ ->
                   PackageFile = @".\src\MassTransit.AzureServiceBusTransport\packages.config"
                   Files = [ (@"..\src\MassTransit.AzureServiceBusTransport\bin\Release\MassTransit.AzureServiceBusTransport.*", Some @"lib\net452", None);
                             (@"..\src\MassTransit.AzureServiceBusTransport\**\*.cs", Some @"src", None) ] } 
+                { Project = "MassTransit.Http"
+                  Summary = "MassTransit HTTP Transport"
+                  PackageFile = @".\src\MassTransit.HttpTransport\packages.config"
+                  Files = [ (@"..\src\MassTransit.HttpTransport\bin\Release\MassTransit.HttpTransport.*", Some @"lib\net452", None);
+                            (@"..\src\MassTransit.HttpTransport\**\*.cs", Some @"src", None) ] } 
                 { Project = "MassTransit.Automatonymous"
                   Summary = "MassTransit Automatonymous State Machine Support"
                   PackageFile = @".\src\MassTransit.AutomatonymousIntegration\packages.config"
