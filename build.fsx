@@ -84,7 +84,6 @@ Target "Build" (fun _ ->
                 "DebugSymbols", "True"
                 "RestorePackages", "True"
                 "Configuration", buildMode
-                "TargetFrameworkVersion", "v4.5.2"
                 "Platform", "Any CPU"
             ]
   }
@@ -230,6 +229,11 @@ Target "Package" (fun _ ->
                   PackageFile = @".\src\Persistence\MassTransit.RedisIntegration\packages.config"
                   Files = [ (@"..\src\Persistence\MassTransit.RedisIntegration\bin\Release\MassTransit.RedisIntegration.*", Some @"lib\net452", None);
                             (@"..\src\Persistence\MassTransit.RedisIntegration\**\*.cs", Some @"src", None) ] } 
+                { Project = "MassTransit.Marten"
+                  Summary = "MassTransit Marten (Postgresql JSONB) Saga Storage"
+                  PackageFile = @".\src\Persistence\MassTransit.MartenIntegration\packages.config"
+                  Files = [ (@"..\src\Persistence\MassTransit.MartenIntegration\bin\Release\MassTransit.MartenIntegration.*", Some @"lib\net461", None);
+                            (@"..\src\Persistence\MassTransit.MartenIntegration\**\*.cs", Some @"src", None) ] } 
                 { Project = "MassTransit.TestFramework"
                   Summary = "MassTransit NUnit Test Framework"
                   PackageFile = @".\src\MassTransit.TestFramework\packages.config"

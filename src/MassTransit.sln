@@ -108,6 +108,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.RedisIntegratio
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.RedisIntegration.Tests", "Persistence\MassTransit.RedisIntegration.Tests\MassTransit.RedisIntegration.Tests.csproj", "{F3D11920-BA34-4EDB-91A6-C8B5EFCE1F98}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.MartenIntegration", "Persistence\MassTransit.MartenIntegration\MassTransit.MartenIntegration.csproj", "{0D261888-4187-43BB-9EE2-9C04EEC4AAC0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.MartenIntegration.Tests", "Persistence\MassTransit.MartenIntegration.Tests\MassTransit.MartenIntegration.Tests.csproj", "{92BE64BB-FF25-4CC8-B64F-3BF02F18F089}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -497,6 +501,30 @@ Global
 		{F3D11920-BA34-4EDB-91A6-C8B5EFCE1F98}.ReleaseUnsigned|Any CPU.Build.0 = Release|Any CPU
 		{F3D11920-BA34-4EDB-91A6-C8B5EFCE1F98}.ReleaseUnsigned|x86.ActiveCfg = Release|Any CPU
 		{F3D11920-BA34-4EDB-91A6-C8B5EFCE1F98}.ReleaseUnsigned|x86.Build.0 = Release|Any CPU
+		{0D261888-4187-43BB-9EE2-9C04EEC4AAC0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0D261888-4187-43BB-9EE2-9C04EEC4AAC0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0D261888-4187-43BB-9EE2-9C04EEC4AAC0}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{0D261888-4187-43BB-9EE2-9C04EEC4AAC0}.Debug|x86.Build.0 = Debug|Any CPU
+		{0D261888-4187-43BB-9EE2-9C04EEC4AAC0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0D261888-4187-43BB-9EE2-9C04EEC4AAC0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0D261888-4187-43BB-9EE2-9C04EEC4AAC0}.Release|x86.ActiveCfg = Release|Any CPU
+		{0D261888-4187-43BB-9EE2-9C04EEC4AAC0}.Release|x86.Build.0 = Release|Any CPU
+		{0D261888-4187-43BB-9EE2-9C04EEC4AAC0}.ReleaseUnsigned|Any CPU.ActiveCfg = Release|Any CPU
+		{0D261888-4187-43BB-9EE2-9C04EEC4AAC0}.ReleaseUnsigned|Any CPU.Build.0 = Release|Any CPU
+		{0D261888-4187-43BB-9EE2-9C04EEC4AAC0}.ReleaseUnsigned|x86.ActiveCfg = Release|Any CPU
+		{0D261888-4187-43BB-9EE2-9C04EEC4AAC0}.ReleaseUnsigned|x86.Build.0 = Release|Any CPU
+		{92BE64BB-FF25-4CC8-B64F-3BF02F18F089}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{92BE64BB-FF25-4CC8-B64F-3BF02F18F089}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{92BE64BB-FF25-4CC8-B64F-3BF02F18F089}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{92BE64BB-FF25-4CC8-B64F-3BF02F18F089}.Debug|x86.Build.0 = Debug|Any CPU
+		{92BE64BB-FF25-4CC8-B64F-3BF02F18F089}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{92BE64BB-FF25-4CC8-B64F-3BF02F18F089}.Release|Any CPU.Build.0 = Release|Any CPU
+		{92BE64BB-FF25-4CC8-B64F-3BF02F18F089}.Release|x86.ActiveCfg = Release|Any CPU
+		{92BE64BB-FF25-4CC8-B64F-3BF02F18F089}.Release|x86.Build.0 = Release|Any CPU
+		{92BE64BB-FF25-4CC8-B64F-3BF02F18F089}.ReleaseUnsigned|Any CPU.ActiveCfg = Release|Any CPU
+		{92BE64BB-FF25-4CC8-B64F-3BF02F18F089}.ReleaseUnsigned|Any CPU.Build.0 = Release|Any CPU
+		{92BE64BB-FF25-4CC8-B64F-3BF02F18F089}.ReleaseUnsigned|x86.ActiveCfg = Release|Any CPU
+		{92BE64BB-FF25-4CC8-B64F-3BF02F18F089}.ReleaseUnsigned|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -535,6 +563,8 @@ Global
 		{4A042032-21A2-40CA-BBE7-5D47F786A949} = {6C61507E-FF16-45C8-8FE4-350069D9B4C1}
 		{3016A502-4855-477F-9113-1A6B224BD9E0} = {56F516D7-BC3C-49E1-A639-83C5F14953F8}
 		{F3D11920-BA34-4EDB-91A6-C8B5EFCE1F98} = {56F516D7-BC3C-49E1-A639-83C5F14953F8}
+		{0D261888-4187-43BB-9EE2-9C04EEC4AAC0} = {56F516D7-BC3C-49E1-A639-83C5F14953F8}
+		{92BE64BB-FF25-4CC8-B64F-3BF02F18F089} = {56F516D7-BC3C-49E1-A639-83C5F14953F8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		EnterpriseLibraryConfigurationToolBinariesPath = packages\Unity.2.1.505.2\lib\NET35
