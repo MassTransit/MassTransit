@@ -231,7 +231,7 @@ namespace MassTransit.Transports
 
                 Task IReceiveEndpointObserver.Ready(ReceiveEndpointReady ready)
                 {
-                    _ready.TrySetResultWithBackgroundContinuations(ready);
+                    _ready.TrySetResult(ready);
 
                     _handle.Disconnect();
 

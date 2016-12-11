@@ -50,22 +50,22 @@ namespace MassTransit.RabbitMqTransport.Integration
 
         public void Ack()
         {
-            _source.TrySetResultWithBackgroundContinuations(_publishTag);
+            _source.TrySetResult(_publishTag);
         }
 
         public void Nack()
         {
-            _source.TrySetExceptionWithBackgroundContinuations(new PublishNackException(DestinationAddress, "The message was nacked by RabbitMQ"));
+            _source.TrySetException(new PublishNackException(DestinationAddress, "The message was nacked by RabbitMQ"));
         }
 
         public void PublishNotConfirmed()
         {
-            _source.TrySetExceptionWithBackgroundContinuations(new MessageNotConfirmedException(DestinationAddress));
+            _source.TrySetException(new MessageNotConfirmedException(DestinationAddress));
         }
 
         public void PublishReturned(ushort code, string text)
         {
-            _source.TrySetExceptionWithBackgroundContinuations(new PublishReturnedException(DestinationAddress, $"The message was returned by RabbitMQ: {code}-{text}"));
+            _source.TrySetException(new PublishReturnedException(DestinationAddress, $"The message was returned by RabbitMQ: {code}-{text}"));
         }
     }
 }

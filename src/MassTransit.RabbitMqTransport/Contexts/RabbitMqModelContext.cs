@@ -94,7 +94,11 @@ namespace MassTransit.RabbitMqTransport.Contexts
                     _participant.StoppedToken, TaskCreationOptions.None, _taskScheduler).ConfigureAwait(false);
 
                 if (awaitAck)
+                {
                     await pendingPublish.Task.ConfigureAwait(false);
+
+                    await Task.Yield();
+                }
             }
             else
             {
