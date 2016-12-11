@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,6 +14,7 @@ namespace MassTransit.Util
 {
     using System;
     using System.Collections.Concurrent;
+    using System.Runtime.CompilerServices;
     using System.Threading;
     using System.Threading.Tasks;
 
@@ -30,17 +31,48 @@ namespace MassTransit.Util
             if (taskFactory == null)
                 throw new ArgumentNullException(nameof(taskFactory));
 
-            SynchronizationContext previousContext = SynchronizationContext.Current;
+            var previousContext = SynchronizationContext.Current;
             try
             {
                 var syncContext = new SingleThreadSynchronizationContext(cancellationToken);
                 SynchronizationContext.SetSynchronizationContext(syncContext);
 
-                Task t = taskFactory();
+                var t = taskFactory();
                 if (t == null)
                     throw new InvalidOperationException("The taskFactory must return a Task");
 
                 var awaiter = t.GetAwaiter();
+
+                while (!awaiter.IsCompleted)
+                {
+                    if (cancellationToken.IsCancellationRequested)
+                        throw new OperationCanceledException("The task was not completed before being cancelled");
+
+                    syncContext.RunOnCurrentThread(cancellationToken);
+                }
+
+                syncContext.SetComplete();
+
+                awaiter.GetResult();
+            }
+            finally
+            {
+                SynchronizationContext.SetSynchronizationContext(previousContext);
+            }
+        }
+
+        public static void Await(Task task, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            if (task == null)
+                throw new ArgumentNullException(nameof(task));
+
+            var previousContext = SynchronizationContext.Current;
+            try
+            {
+                var syncContext = new SingleThreadSynchronizationContext(cancellationToken);
+                SynchronizationContext.SetSynchronizationContext(syncContext);
+
+                var awaiter = task.GetAwaiter();
 
                 while (!awaiter.IsCompleted)
                 {
@@ -65,7 +97,7 @@ namespace MassTransit.Util
             if (taskFactory == null)
                 throw new ArgumentNullException(nameof(taskFactory));
 
-            SynchronizationContext previousContext = SynchronizationContext.Current;
+            var previousContext = SynchronizationContext.Current;
             try
             {
                 var syncContext = new SingleThreadSynchronizationContext(cancellationToken);
@@ -75,7 +107,7 @@ namespace MassTransit.Util
                 if (t == null)
                     throw new InvalidOperationException("The taskFactory must return a Task");
 
-                var awaiter = t.GetAwaiter();
+                TaskAwaiter<T> awaiter = t.GetAwaiter();
 
                 while (!awaiter.IsCompleted)
                 {
@@ -95,6 +127,27 @@ namespace MassTransit.Util
             }
         }
 
+        /// <summary>
+        /// Sets the result of the continuation source and forces the continuations to run on the background threadpool
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="source"></param>
+        /// <param name="result"></param>
+        public static void TrySetResultWithBackgroundContinuations<T>(this TaskCompletionSource<T> source, T result)
+        {
+            Task.Run(() => source.TrySetResult(result));
+        }
+
+        /// <summary>
+        /// Sets the result of the continuation source and forces the continuations to run on the background threadpool
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="source"></param>
+        /// <param name="exception"></param>
+        public static void TrySetExceptionWithBackgroundContinuations<T>(this TaskCompletionSource<T> source, Exception exception)
+        {
+            Task.Run(() => source.TrySetException(exception));
+        }
 
         static class Cached
         {
@@ -164,32 +217,6 @@ namespace MassTransit.Util
             {
                 _completed = true;
             }
-        }
-
-        /// <summary>
-        /// Sets the result of the continuation source and forces the continuations to run on the background threadpool
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="source"></param>
-        /// <param name="result"></param>
-        public static void TrySetResultWithBackgroundContinuations<T>(this TaskCompletionSource<T> source, T result)
-        {
-            Task.Run(() => source.TrySetResult(result));
-
-            source.Task.Wait();
-        }
-
-        /// <summary>
-        /// Sets the result of the continuation source and forces the continuations to run on the background threadpool
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="source"></param>
-        /// <param name="result"></param>
-        public static void TrySetExceptionWithBackgroundContinuations<T>(this TaskCompletionSource<T> source, Exception exception)
-        {
-            Task.Run(() => source.TrySetException(exception));
-
-            source.Task.Wait();
         }
     }
 }
