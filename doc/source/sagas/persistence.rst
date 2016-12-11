@@ -13,6 +13,25 @@ Saga instances are identified by a unique identifier (``Guid``), represented by 
 
     Seriously, don't sent an event to all instances -- unless you want to watch your messages consumers lock your entire saga storage engine.
 
+Publishing and Sending From Sagas
+---------------------------------
+
+Sagas are completely message-driven and therefore not only consume but also publish events and send commands. However, if your saga received a lot of messages coming roughly at the same time and the endpoint is set to process multiple messages in parallel - this can lead to a conflict between message processing and saga persistence.
+
+This means that there could be more than one saga state updates that are being persisted at the same time. Depending on the saga repository type, this might fail for different reasons - versioning issue, row or table lock or eTag mismatch. All those problems are basically saying that you are having a concurrency issue.
+
+It is normal for the saga repository to throw an exception in such case but if your saga is publishing messages, they were already published but the saga state has not been updated. MassTransit will eventually use retry policy on the endpoint and more messages will be send, potentially leading to mess. Or, if there are no retry policies configured, messages might be sent indicating that the process needs to continue but saga instance will be in the old state and will not accept any further messages because they will come in a wrong state.
+
+This issue is common and can be solved by postponing the message publish and send operations until all persistence work is done. All messages that should be published, are collected in a buffer, which is called "outbox". MassTransit implements this feature and it can be configured by adding these lines to your endpoint configuration:
+
+.. sourcecode:: csharp
+    :linenos:
+
+	c.ReceiveEndpoint("queue", e =>
+	{
+	    e.UseInMemoryOutbox();
+	    // other endpoint configuration here
+	}
 
 Storage Engines
 ---------------
