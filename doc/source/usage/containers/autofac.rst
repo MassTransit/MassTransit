@@ -144,3 +144,53 @@ using modules with Autofac is shown below.
         });
     }
 
+Registering State Machine Sagas
+-------------------------------
+
+By using an additional package `MassTransit.Automatonymous.Autofac` you can also register state machine sagas 
+
+.. sourcecode:: csharp
+
+    var builder = new ContainerBuilder();
+    // register everything else
+
+    // register saga state machines, assuming Saga1 and Saga2 are in different assemblies
+    builder.RegisterStateMachineSagas(typeof(Saga1).Assembly, typeof(Saga2).Assembly);
+
+    // registering saga state machines from current assembly
+    builder.RegisterStateMachineSagas(Assembly.GetExecutingAssembly());
+
+    // do not forget registering saga repositories (example for NHibernate)
+    var mappings = mappingsAssembly
+        .GetTypes()
+        .Where(t => t.BaseType != null && t.BaseType.IsGenericType &&
+            (t.BaseType.GetGenericTypeDefinition() == typeof(SagaClassMapping<>) ||
+            t.BaseType.GetGenericTypeDefinition() == typeof(ClassMapping<>)))
+        .ToArray();    
+    builder.Register(c => new SqlServerSessionFactoryProvider(connString, mappings).GetSessionFactory())
+        .As<ISessionFactory>()
+        .SingleInstance();
+    builder.RegisterGeneric(typeof(NHibernateSagaRepository<>))
+        .As(typeof(ISagaRepository<>));
+
+and load them from a contained when configuring the bus.
+
+.. sourcecode:: csharp
+
+    var busControl = Bus.Factory.CreateUsingRabbitMq(cfg =>
+    {
+        var host = cfg.Host(busSettings.HostAddress, h =>
+        {
+            h.Username(busSettings.Username);
+            h.Password(busSettings.Password);
+        });
+
+        sbc.ReceiveEndpoint(busSettings.QueueName, ec =>
+        {
+            // loading consumers
+            ec.LoadFrom(context);
+
+            // loading saga state machines
+            ec.LoadStateMachineSagas(context);
+        })
+    });
