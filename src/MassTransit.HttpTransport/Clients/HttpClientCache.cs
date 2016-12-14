@@ -59,11 +59,13 @@ namespace MassTransit.HttpTransport.Clients
             return SendUsingNewClient(clientPipe, newScope, cancellationToken);
         }
 
-        public async Task Close()
+        public Task Close()
         {
             Interlocked.Exchange(ref _scope, null);
 
             _cacheTaskScope.Stop(new StopEventArgs("Closed by owner"));
+
+            return TaskUtil.Completed;
         }
 
         public void Probe(ProbeContext context)

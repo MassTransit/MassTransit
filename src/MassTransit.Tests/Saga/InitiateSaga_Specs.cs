@@ -62,12 +62,12 @@ namespace MassTransit.Tests.Saga
         {
             base.ConfigureBus(configurator);
 
-            configurator.UseRetry(Retry.None);
+            configurator.UseRetry(x => x.None());
         }
 
         protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
-            configurator.UseRetry(Retry.Immediate(2));
+            configurator.UseRetry(x => x.Immediate(2));
             configurator.Saga(_repository);
         }
 

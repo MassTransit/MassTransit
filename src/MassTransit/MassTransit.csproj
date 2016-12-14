@@ -135,6 +135,7 @@
     <Compile Include="Configuration\IRescueConfigurator.cs" />
     <Compile Include="Configuration\PipeConfigurators\CompensateActivityLogConfigurator.cs" />
     <Compile Include="Configuration\PipeConfigurators\ConsumeContextRescuePipeSpecification.cs" />
+    <Compile Include="Configuration\PipeConfigurators\ConsumeContextRetryPipeSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\ConsumerConsumeContextRescuePipeSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\ExecuteActivityArgumentsConfigurator.cs" />
     <Compile Include="Configuration\PipeConfigurators\RoutingSlipConfigurator.cs" />
@@ -181,7 +182,6 @@
     <Compile Include="Configuration\ConsumeConnectors\IObserverConnector.cs" />
     <Compile Include="Configuration\ConsumeConnectors\ObserverConnectorCache.cs" />
     <Compile Include="Configuration\ConsumerConvention.cs" />
-    <Compile Include="Configuration\ContentFilterExtensions.cs" />
     <Compile Include="Configuration\DeadLetterExtensions.cs" />
     <Compile Include="Configuration\EndpointConfigurators\InMemoryReceiveEndpointSpecification.cs" />
     <Compile Include="Configuration\EndpointConfigurators\ReceiveEndpointSpecification.cs" />
@@ -210,7 +210,6 @@
     <Compile Include="Configuration\MessageDataConfiguratorExtensions.cs" />
     <Compile Include="Configuration\MessageSchedulerExtensions.cs" />
     <Compile Include="Configuration\InMemoryOutboxConfiguratorExtensions.cs" />
-    <Compile Include="Configuration\PartitionerExtensions.cs" />
     <Compile Include="Configuration\PipeConfigurators\CompensateActivityHostSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\DeadLetterPipeSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\ExecuteActivityHostSpecification.cs" />

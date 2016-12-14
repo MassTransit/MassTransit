@@ -95,7 +95,7 @@ namespace MassTransit.MongoDbIntegration.Tests.Courier
         Guid _trackingNumber;
         Task<ConsumeContext<RoutingSlipCompleted>> _completed;
 
-        protected override void SetupActivities()
+        protected override void SetupActivities(IInMemoryBusFactoryConfigurator configurator)
         {
         }
     }

@@ -114,7 +114,7 @@ namespace MassTransit.Tests.Courier
             await Bus.Execute(builder.Build());
         }
 
-        protected override void SetupActivities()
+        protected override void SetupActivities(IInMemoryBusFactoryConfigurator configurator)
         {
             AddActivityContext<TestActivity, TestArguments, TestLog>(() => new TestActivity());
         }

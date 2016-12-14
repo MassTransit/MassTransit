@@ -13,7 +13,7 @@
 namespace MassTransit.Tests.Courier
 {
     using System.Threading.Tasks;
-    using GreenPipes.Partitioning;
+    using GreenPipes;
     using MassTransit.Courier;
     using MassTransit.Courier.Contracts;
     using NUnit.Framework;
@@ -44,9 +44,9 @@ namespace MassTransit.Tests.Courier
             await completed;
         }
 
-        protected override void SetupActivities()
+        protected override void SetupActivities(IInMemoryBusFactoryConfigurator configurator)
         {
-            var partitioner = new Partitioner(8, new Murmur3UnsafeHashGenerator());
+            var partitioner = configurator.CreatePartitioner(8);
 
             AddActivityContext<TestActivity, TestArguments, TestLog>(() => new TestActivity(), h => h.UsePartitioner(partitioner, args => args.Arguments.Value),
                 h => h.UsePartitioner(partitioner, args => args.Log.OriginalValue));

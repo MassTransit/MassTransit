@@ -66,7 +66,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
                         // if an exception is thrown
                         e.Handler<A>(Handle, h =>
                         {
-                            h.UseRetry(Retry.Interval(5, 100));
+                            h.UseRetry(r => r.Interval(5, 100));
                         });
                     });
                 });
@@ -112,7 +112,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
                         // if an exception is thrown
                         e.Handler<A>(Handle, h =>
                         {
-                            h.UseRetry(Retry.Interval(5, 100));
+                            h.UseRetry(r => r.Interval(5, 100));
                         });
                     });
                 });

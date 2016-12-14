@@ -100,7 +100,7 @@ namespace MassTransit.Tests.Courier
         Task<ConsumeContext<RoutingSlipActivityCompleted>> _secondActivityCompleted;
         RoutingSlip _routingSlip;
 
-        protected override void SetupActivities()
+        protected override void SetupActivities(IInMemoryBusFactoryConfigurator configurator)
         {
             AddActivityContext<TestActivity, TestArguments, TestLog>(() => new TestActivity());
             AddActivityContext<SecondTestActivity, TestArguments, TestLog>(() => new SecondTestActivity());

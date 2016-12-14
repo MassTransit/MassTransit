@@ -13,6 +13,7 @@
 namespace MassTransit
 {
     using Courier.Contracts;
+    using GreenPipes;
     using GreenPipes.Partitioning;
     using MongoDbIntegration.Courier;
     using MongoDbIntegration.Courier.Consumers;

@@ -55,7 +55,7 @@ namespace MassTransit.Tests
 
         protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
-            configurator.UseRetry(Retry.None);
+            configurator.UseRetry(x => x.None());
 
             Handler<PingMessage>(configurator, async context =>
             {
@@ -142,7 +142,7 @@ namespace MassTransit.Tests
         {
             configurator.Consumer(() => new Consumer(), x =>
             {
-                x.UseRetry(Retry.Immediate(5));
+                x.UseRetry(r => r.Immediate(5));
             });
         }
 
@@ -194,7 +194,7 @@ namespace MassTransit.Tests
 
         protected override void ConfigureBus(IInMemoryBusFactoryConfigurator configurator)
         {
-            configurator.UseRetry(Retry.Immediate(1));
+            configurator.UseRetry(x => x.Immediate(1));
 
             base.ConfigureBus(configurator);
         }
@@ -244,14 +244,14 @@ namespace MassTransit.Tests
 
         protected override void ConfigureBus(IInMemoryBusFactoryConfigurator configurator)
         {
-            configurator.UseRetry(Retry.Immediate(1));
+            configurator.UseRetry(x => x.Immediate(1));
 
             base.ConfigureBus(configurator);
         }
 
         protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
-            configurator.UseRetry(Retry.Immediate(3));
+            configurator.UseRetry(x => x.Immediate(3));
             Handler<PingMessage>(configurator, async context =>
             {
                 Interlocked.Increment(ref _attempts);

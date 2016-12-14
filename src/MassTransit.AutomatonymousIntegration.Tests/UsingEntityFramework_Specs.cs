@@ -19,6 +19,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
     using Automatonymous;
     using EntityFrameworkIntegration;
     using EntityFrameworkIntegration.Saga;
+    using GreenPipes;
     using NUnit.Framework;
     using Saga;
     using TestFramework;
@@ -36,7 +37,11 @@ namespace MassTransit.AutomatonymousIntegration.Tests
         {
             _machine = new SuperShopper();
 
-            configurator.UseRetry(Retry.Selected<DbUpdateException>().Immediate(5));
+            configurator.UseRetry(x =>
+            {
+                x.Handle<DbUpdateException>();
+                x.Immediate(5);
+            });
             configurator.StateMachineSaga(_machine, _repository.Value);
 
             configurator.TransportConcurrencyLimit = 16;

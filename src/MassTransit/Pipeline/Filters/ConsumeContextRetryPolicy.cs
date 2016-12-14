@@ -59,8 +59,8 @@ namespace MassTransit.Pipeline.Filters
         where TFilter : class, ConsumeContext
         where TContext : RetryConsumeContext, TFilter
     {
-        readonly IRetryPolicy _retryPolicy;
         readonly Func<TFilter, TContext> _contextFactory;
+        readonly IRetryPolicy _retryPolicy;
 
         public ConsumeContextRetryPolicy(IRetryPolicy retryPolicy, Func<TFilter, TContext> contextFactory)
         {

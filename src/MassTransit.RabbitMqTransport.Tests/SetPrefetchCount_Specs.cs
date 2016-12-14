@@ -16,6 +16,7 @@ namespace MassTransit.RabbitMqTransport.Tests
     using System.Linq;
     using System.Threading.Tasks;
     using Contracts;
+    using GreenPipes;
     using MassTransit.Contracts;
     using MassTransit.Testing;
     using NUnit.Framework;

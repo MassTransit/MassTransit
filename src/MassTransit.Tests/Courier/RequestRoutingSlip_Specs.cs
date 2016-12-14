@@ -51,7 +51,7 @@ namespace MassTransit.Tests.Courier
             _requestAddress = configurator.InputAddress;
         }
 
-        protected override void SetupActivities()
+        protected override void SetupActivities(IInMemoryBusFactoryConfigurator configurator)
         {
             AddActivityContext<TestActivity, TestArguments, TestLog>(() => new TestActivity());
             AddActivityContext<SecondTestActivity, TestArguments, TestLog>(() => new SecondTestActivity());
@@ -141,7 +141,7 @@ namespace MassTransit.Tests.Courier
             _requestAddress = configurator.InputAddress;
         }
 
-        protected override void SetupActivities()
+        protected override void SetupActivities(IInMemoryBusFactoryConfigurator configurator)
         {
             AddActivityContext<TestActivity, TestArguments, TestLog>(() => new TestActivity());
             AddActivityContext<FaultyActivity, FaultyArguments, FaultyLog>(() => new FaultyActivity());

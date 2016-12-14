@@ -39,7 +39,7 @@ namespace MassTransit.Tests.Courier
         };
 
 
-        protected override void SetupActivities()
+        protected override void SetupActivities(IInMemoryBusFactoryConfigurator configurator)
         {
             AddActivityContext<ObjectGraphTestActivity, ObjectGraphActivityArguments, TestLog>(
                 () => new ObjectGraphTestActivity(_intValue, _stringValue, _decimalValue, new[] { "Albert", "Chris" }, _argumentsDictionary));

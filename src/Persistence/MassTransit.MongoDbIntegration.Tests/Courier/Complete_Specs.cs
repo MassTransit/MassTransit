@@ -112,7 +112,11 @@ namespace MassTransit.MongoDbIntegration.Tests.Courier
 
             var persister = new RoutingSlipEventPersister(_collection);
 
-            configurator.UseRetry(Retry.Selected<MongoWriteException>().Interval(10, TimeSpan.FromMilliseconds(20)));
+            configurator.UseRetry(x =>
+            {
+                x.Handle<MongoWriteException>();
+                x.Interval(10, TimeSpan.FromMilliseconds(20));
+            });
 
             var partitioner = configurator.CreatePartitioner(16);
 
@@ -130,7 +134,7 @@ namespace MassTransit.MongoDbIntegration.Tests.Courier
         Task<ConsumeContext<RoutingSlipActivityCompleted>> _prepareCompleted;
         Task<ConsumeContext<RoutingSlipActivityCompleted>> _sendCompleted;
 
-        protected override void SetupActivities()
+        protected override void SetupActivities(IInMemoryBusFactoryConfigurator configurator)
         {
         }
     }

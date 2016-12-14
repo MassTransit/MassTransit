@@ -53,7 +53,7 @@ namespace MassTransit.Tests.Courier
             await _completed;
         }
 
-        protected override void SetupActivities()
+        protected override void SetupActivities(IInMemoryBusFactoryConfigurator configurator)
         {
             AddActivityContext<SetVariableActivity, SetVariableArguments>(() => new SetVariableActivity());
         }
@@ -108,7 +108,7 @@ namespace MassTransit.Tests.Courier
             await _completed;
         }
 
-        protected override void SetupActivities()
+        protected override void SetupActivities(IInMemoryBusFactoryConfigurator configurator)
         {
             AddActivityContext<SetVariableActivity, SetVariableArguments>(() => new SetVariableActivity());
         }

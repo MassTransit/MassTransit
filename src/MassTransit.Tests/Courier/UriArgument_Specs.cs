@@ -82,7 +82,7 @@ namespace MassTransit.Tests.Courier
             Assert.AreEqual(new Uri("http://google.com/"), context.Message.GetResult<string>("UsedAddress"));
         }
 
-        protected override void SetupActivities()
+        protected override void SetupActivities(IInMemoryBusFactoryConfigurator configurator)
         {
             AddActivityContext<AddressActivity, AddressArguments, AddressLog>(() => new AddressActivity());
             AddActivityContext<FaultyActivity, FaultyArguments>(() => new FaultyActivity());

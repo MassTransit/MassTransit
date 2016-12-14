@@ -31,7 +31,7 @@ namespace MassTransit.TestFramework
 
         protected override void ConfigureBus(IInMemoryBusFactoryConfigurator configurator)
         {
-            SetupActivities();
+            SetupActivities(configurator);
 
             var factoryConfigurator = new BusFactoryConfigurator(configurator);
 
@@ -82,6 +82,6 @@ namespace MassTransit.TestFramework
             return ActivityTestContexts[typeof(T)];
         }
 
-        protected abstract void SetupActivities();
+        protected abstract void SetupActivities(IInMemoryBusFactoryConfigurator configurator);
     }
 }

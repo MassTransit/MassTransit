@@ -22,6 +22,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         using System;
         using System.Linq;
         using System.Threading.Tasks;
+        using GreenPipes;
         using MassTransit.Testing;
         using NUnit.Framework;
         using Serialization;

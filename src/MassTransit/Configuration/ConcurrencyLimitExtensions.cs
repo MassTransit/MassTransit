@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -10,11 +10,11 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit
+namespace GreenPipes
 {
     using System;
-    using GreenPipes;
-    using PipeConfigurators;
+    using MassTransit;
+    using MassTransit.PipeConfigurators;
 
 
     public static class ConcurrencyLimitExtensions
@@ -29,17 +29,20 @@ namespace MassTransit
         /// <param name="managementEndpointConfigurator">A management endpoint configurator to support runtime adjustment</param>
         /// <param name="id">An identifier for the concurrency limit to allow selective adjustment</param>
         public static void UseConcurrencyLimit<T>(this IPipeConfigurator<T> configurator, int concurrencyLimit,
-            IManagementEndpointConfigurator managementEndpointConfigurator = null, string id = null)
+            IManagementEndpointConfigurator managementEndpointConfigurator, string id = null)
             where T : class, PipeContext
         {
             if (configurator == null)
                 throw new ArgumentNullException(nameof(configurator));
 
-            var specification = managementEndpointConfigurator != null
-                ? new ConcurrencyLimitPipeSpecification<T>(concurrencyLimit, managementEndpointConfigurator, id)
-                : new ConcurrencyLimitPipeSpecification<T>(concurrencyLimit);
-
-            configurator.AddPipeSpecification(specification);
+            if (managementEndpointConfigurator != null)
+            {
+                configurator.AddPipeSpecification(new ConcurrencyLimitPipeSpecification<T>(concurrencyLimit, managementEndpointConfigurator, id));
+            }
+            else
+            {
+                configurator.AddPipeSpecification(new Specifications.ConcurrencyLimitPipeSpecification<T>(concurrencyLimit));
+            }
         }
     }
 }

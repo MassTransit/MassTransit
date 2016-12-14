@@ -73,7 +73,7 @@ namespace MassTransit.Tests.Courier
             _handled = Handled<RoutingSlipActivityCompleted>(configurator, x => x.Message.ActivityName == testActivity.Name);
         }
 
-        protected override void SetupActivities()
+        protected override void SetupActivities(IInMemoryBusFactoryConfigurator configurator)
         {
             AddActivityContext<TestActivity, TestArguments, TestLog>(() => new TestActivity());
 

@@ -35,7 +35,7 @@ namespace MassTransit.Tests.Pipeline
             int count = 0;
             IPipe<ConsumeContext<A>> pipe = Pipe.New<ConsumeContext<A>>(x =>
             {
-                x.UseRetry(Retry.Interval(4, TimeSpan.FromMilliseconds(2)));
+                x.UseRetry(r => r.Interval(4, TimeSpan.FromMilliseconds(2)));
                 x.UseExecute(payload =>
                 {
                     count++;
@@ -56,8 +56,8 @@ namespace MassTransit.Tests.Pipeline
             int count = 0;
             IPipe<ConsumeContext<A>> pipe = Pipe.New<ConsumeContext<A>>(x =>
             {
-                x.UseRetry(Retry.Interval(4, TimeSpan.FromMilliseconds(2)));
-                x.UseRetry(Retry.None);
+                x.UseRetry(r => r.Interval(4, TimeSpan.FromMilliseconds(2)));
+                x.UseRetry(r => r.None());
                 x.UseExecute(payload =>
                 {
                     count++;
@@ -78,8 +78,8 @@ namespace MassTransit.Tests.Pipeline
             int count = 0;
             IPipe<ConsumeContext<A>> pipe = Pipe.New<ConsumeContext<A>>(x =>
             {
-                x.UseRetry(Retry.None);
-                x.UseRetry(Retry.Interval(4, TimeSpan.FromMilliseconds(2)));
+                x.UseRetry(r => r.None());
+                x.UseRetry(r => r.Interval(4, TimeSpan.FromMilliseconds(2)));
                 x.UseExecute(payload =>
                 {
                     count++;

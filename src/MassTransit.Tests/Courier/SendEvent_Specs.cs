@@ -61,7 +61,7 @@ namespace MassTransit.Tests.Courier
             Console.WriteLine(GetBodyString(context.ReceiveContext));
         }
 
-        protected override void SetupActivities()
+        protected override void SetupActivities(IInMemoryBusFactoryConfigurator configurator)
         {
             AddActivityContext<TestActivity, TestArguments, TestLog>(() => new TestActivity(), h =>
             {

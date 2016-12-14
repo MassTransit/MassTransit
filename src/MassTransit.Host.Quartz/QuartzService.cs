@@ -13,6 +13,7 @@
 namespace MassTransit.Host.Quartz
 {
     using System;
+    using GreenPipes;
     using Hosting;
 
 
@@ -30,7 +31,7 @@ namespace MassTransit.Host.Quartz
         {
             _configureMessageScheduler.Configurator = configurator;
 
-            configurator.UseRetry(Retry.Interval(5, TimeSpan.FromMilliseconds(100)));
+            configurator.UseRetry(r => r.Interval(5, TimeSpan.FromMilliseconds(100)));
         }
     }
 }

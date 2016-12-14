@@ -15,6 +15,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
     using System;
     using System.Threading.Tasks;
     using Automatonymous;
+    using GreenPipes;
     using NUnit.Framework;
     using Saga;
     using TestFramework;
@@ -51,7 +52,11 @@ namespace MassTransit.AutomatonymousIntegration.Tests
             _machine = new TestStateMachine();
             _repository = new InMemorySagaRepository<Instance>();
 
-            configurator.UseRetry(Retry.Except<NotSupportedException>().Immediate(2));
+            configurator.UseRetry(x =>
+            {
+                x.Ignore<NotSupportedException>();
+                x.Immediate(2);
+            });
 
             configurator.StateMachineSaga(_machine, _repository);
         }

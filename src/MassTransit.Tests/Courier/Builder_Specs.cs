@@ -55,7 +55,7 @@ namespace MassTransit.Tests.Courier
         }
 
 
-        protected override void SetupActivities()
+        protected override void SetupActivities(IInMemoryBusFactoryConfigurator configurator)
         {
         }
     }
@@ -97,7 +97,7 @@ namespace MassTransit.Tests.Courier
         }
 
 
-        protected override void SetupActivities()
+        protected override void SetupActivities(IInMemoryBusFactoryConfigurator configurator)
         {
         }
     }

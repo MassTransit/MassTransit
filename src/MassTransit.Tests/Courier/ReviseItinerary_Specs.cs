@@ -26,7 +26,7 @@ namespace MassTransit.Tests.Courier
     public class When_an_itinerary_is_revised :
         InMemoryActivityTestFixture
     {
-        protected override void SetupActivities()
+        protected override void SetupActivities(IInMemoryBusFactoryConfigurator configurator)
         {
             AddActivityContext<TestActivity, TestArguments, TestLog>(() => new TestActivity());
             AddActivityContext<ReviseToEmptyItineraryActivity, TestArguments, TestLog>(

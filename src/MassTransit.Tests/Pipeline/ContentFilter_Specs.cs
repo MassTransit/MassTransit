@@ -14,6 +14,7 @@ namespace MassTransit.Tests.Pipeline
 {
     using System.Threading;
     using System.Threading.Tasks;
+    using GreenPipes;
     using NUnit.Framework;
     using Shouldly;
     using TestFramework;
@@ -50,7 +51,7 @@ namespace MassTransit.Tests.Pipeline
 
             configurator.Consumer(() => _consumer, x =>
             {
-                x.Message<TestMessage>(v => v.UseContentFilter(async context => context.Message.Key == "ACCEPT"));
+                x.Message<TestMessage>(v => v.UseContextFilter(async context => context.Message.Key == "ACCEPT"));
             });
 
             _accepted = Handled<TestMessage>(configurator, x => x.Message.Key == "ACCEPT");
