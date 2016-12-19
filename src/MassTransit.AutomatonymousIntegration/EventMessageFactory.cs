@@ -17,4 +17,7 @@ namespace Automatonymous
 
     public delegate TMessage EventMessageFactory<in TInstance, in TData, out TMessage>(ConsumeEventContext<TInstance, TData> context)
         where TData : class;
+
+    public delegate TMessage EventMessageFactory<in TInstance, in TData, in TInput, out TMessage>(ConsumeEventContext<TInstance, TData> context, TInput input)
+        where TData : class;
 }

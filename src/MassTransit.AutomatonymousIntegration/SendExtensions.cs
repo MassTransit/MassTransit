@@ -18,7 +18,7 @@ namespace Automatonymous
     using MassTransit;
 
 
-    public static class SendExtensions
+    public static class SendManyExtensions
     {
         public static EventActivityBinder<TInstance> Send<TInstance, TMessage>(this EventActivityBinder<TInstance> source,
             DestinationAddressProvider<TInstance> destinationAddressProvider, TMessage message)

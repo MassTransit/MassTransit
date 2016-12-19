@@ -33,4 +33,14 @@ namespace Automatonymous
     /// <returns></returns>
     public delegate Uri DestinationAddressProvider<in TInstance>(TInstance instance)
         where TInstance : SagaStateMachineInstance;
+
+    /// <summary>
+    /// Returns the address for the message provided
+    /// </summary>
+    /// <typeparam name="TInstance">The saga instance</typeparam>
+    /// <typeparam name="TData">The message data.</typeparam>
+    /// <typeparam name="TInput">Custom input.</typeparam>
+    /// <returns></returns>
+    public delegate Uri DestinationAddressProvider<in TInstance, in TData, in TInput>(BehaviorContext<TInstance, TData> context, TInput input)
+        where TData : class;
 }
