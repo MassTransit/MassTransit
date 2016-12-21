@@ -21,12 +21,15 @@ namespace MassTransit.Containers.Tests
     using StructureMap.Configuration.DSL;
     using StructureMap.Pipeline;
     using TestFramework;
+    using Testing;
 
 
     [TestFixture]
     public class StructureMap_Idiomatic :
         AsyncTestFixture
     {
+        protected override AsyncTestHarness AsyncTestHarness { get; } = new InMemoryTestHarness();
+
         [Test]
         public async Task Should_work_with_the_registry()
         {

@@ -13,11 +13,9 @@
 namespace MassTransit.TestFramework
 {
     using System;
-    using System.Threading;
     using System.Threading.Tasks;
-    using Logging;
     using NUnit.Framework;
-    using Pipeline.Pipes;
+    using Testing;
     using Transports.InMemory;
     using Util;
 
@@ -38,65 +36,49 @@ namespace MassTransit.TestFramework
             return _busCreationScope.TestTeardown();
         }
 
-        static readonly ILog _log = Logger.Get<InMemoryTestFixture>();
+        protected InMemoryTestHarness InMemoryTestHarness { get; } = new InMemoryTestHarness();
 
-        IBusControl _bus;
-        Uri _inputQueueAddress;
-        ISendEndpoint _inputQueueSendEndpoint;
-        ISendEndpoint _busSendEndpoint;
-        BusHandle _busHandle;
-        InMemoryHost _inMemoryHost;
+        protected override BusTestHarness BusTestHarness => InMemoryTestHarness;
+
         readonly IBusCreationScope _busCreationScope;
-        protected string InputQueueName { get; }
 
-        protected Uri BaseAddress { get; }
+        protected string InputQueueName => InMemoryTestHarness.InputQueueName;
 
-        protected IInMemoryHost Host => _inMemoryHost;
+        protected Uri BaseAddress => InMemoryTestHarness.BaseAddress;
+
+        protected IInMemoryHost Host => InMemoryTestHarness.Host;
 
         public InMemoryTestFixture(bool busPerTest = false)
         {
-            BaseAddress = new Uri("loopback://localhost/");
-
-            InputQueueName = "input_queue";
-            _inputQueueAddress = new Uri($"loopback://localhost/{InputQueueName}");
-
             if (busPerTest)
                 _busCreationScope = new PerTestBusCreationScope(SetupBus, TeardownBus);
             else
                 _busCreationScope = new PerTestFixtureBusCreationScope(SetupBus, TeardownBus);
+
+            InMemoryTestHarness.OnConnectObservers += ConnectObservers;
+            InMemoryTestHarness.OnConfigureBus += ConfigureBus;
+            InMemoryTestHarness.OnConfigureInputQueueEndpoint += ConfigureInputQueueEndpoint;
         }
 
         /// <summary>
         /// The sending endpoint for the InputQueue
         /// </summary>
-        protected ISendEndpoint InputQueueSendEndpoint => _inputQueueSendEndpoint;
+        protected ISendEndpoint InputQueueSendEndpoint => InMemoryTestHarness.InputQueueSendEndpoint;
 
         /// <summary>
         /// The sending endpoint for the Bus 
         /// </summary>
-        protected ISendEndpoint BusSendEndpoint => _busSendEndpoint;
+        protected ISendEndpoint BusSendEndpoint => InMemoryTestHarness.BusSendEndpoint;
 
-        protected Uri BusAddress => _bus.Address;
+        protected Uri BusAddress => InMemoryTestHarness.BusAddress;
 
-        protected Uri InputQueueAddress
-        {
-            get { return _inputQueueAddress; }
-            set
-            {
-                if (Bus != null)
-                    throw new InvalidOperationException("The LocalBus has already been created, too late to change the URI");
-
-                _inputQueueAddress = value;
-            }
-        }
-
-        protected override IBus Bus => _bus;
+        protected Uri InputQueueAddress => InMemoryTestHarness.InputQueueAddress;
 
         protected IRequestClient<TRequest, TResponse> CreateRequestClient<TRequest, TResponse>()
             where TRequest : class
             where TResponse : class
         {
-            return Bus.CreateRequestClient<TRequest, TResponse>(InputQueueAddress, TestTimeout);
+            return InMemoryTestHarness.CreateRequestClient<TRequest, TResponse>();
         }
 
         [OneTimeSetUp]
@@ -105,80 +87,42 @@ namespace MassTransit.TestFramework
             return _busCreationScope.TestFixtureSetup();
         }
 
-        async Task SetupBus()
+        Task SetupBus()
         {
-            _bus = CreateBus();
-
-            ConnectObservers(_bus);
-
-            _busHandle = await _bus.StartAsync();
-
-            _busSendEndpoint = await GetSendEndpoint(_bus.Address);
-
-            _inputQueueSendEndpoint = await GetSendEndpoint(InputQueueAddress);
+            return InMemoryTestHarness.Start();
         }
 
-        protected async Task<ISendEndpoint> GetSendEndpoint(Uri address)
+        protected Task<ISendEndpoint> GetSendEndpoint(Uri address)
         {
-            var sendEndpoint = await _bus.GetSendEndpoint(address).ConfigureAwait(false);
-
-            return sendEndpoint;
+            return InMemoryTestHarness.GetSendEndpoint(address);
         }
 
-        protected IPublishEndpointProvider PublishEndpointProvider => new InMemoryPublishEndpointProvider(Bus, _inMemoryHost, PublishPipe.Empty);
+        protected IPublishEndpointProvider PublishEndpointProvider => InMemoryTestHarness.PublishEndpointProvider;
 
         protected IInMemoryTransport GetTransport(string queueName)
         {
-            return _inMemoryHost.GetTransport(queueName);
+            return InMemoryTestHarness.GetTransport(queueName);
         }
 
         [OneTimeTearDown]
-        public Task TearDownInMemoryTestFixture()
+        public async Task TearDownInMemoryTestFixture()
         {
-            return _busCreationScope.TestFixtureTeardown();
+             await _busCreationScope.TestFixtureTeardown().ConfigureAwait(false);
+
+            InMemoryTestHarness.Dispose();
         }
 
-        async Task TeardownBus()
+        Task TeardownBus()
         {
-            try
-            {
-                await (_busHandle?.StopAsync(new CancellationTokenSource(TestTimeout).Token) ?? TaskUtil.Completed).ConfigureAwait(false);
-            }
-            catch (Exception ex)
-            {
-                _log.Error("Bus Stop Failed: ", ex);
-                throw;
-            }
-            finally
-            {
-                _busHandle = null;
-                _bus = null;
-            }
+            return InMemoryTestHarness.Stop();
         }
 
         protected virtual void ConfigureBus(IInMemoryBusFactoryConfigurator configurator)
         {
         }
 
-        protected virtual void ConnectObservers(IBus bus)
-        {
-        }
-
         protected virtual void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
-        }
-
-        IBusControl CreateBus()
-        {
-            return MassTransit.Bus.Factory.CreateUsingInMemory(x =>
-            {
-                _inMemoryHost = new InMemoryHost(Environment.ProcessorCount);
-
-                x.SetHost(_inMemoryHost);
-                ConfigureBus(x);
-
-                x.ReceiveEndpoint("input_queue", configurator => ConfigureInputQueueEndpoint(configurator));
-            });
         }
 
 

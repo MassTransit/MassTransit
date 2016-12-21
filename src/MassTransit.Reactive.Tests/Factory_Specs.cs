@@ -19,6 +19,7 @@ namespace MassTransit.Reactive.Tests
     using System.Threading.Tasks;
     using NUnit.Framework;
     using TestFramework;
+    using Testing.Observers;
     using Util;
 
 

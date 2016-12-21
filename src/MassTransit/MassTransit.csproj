@@ -853,6 +853,7 @@
     <Compile Include="Testing\ActionConfigurators\PublishTestActionConfigurator.cs" />
     <Compile Include="Testing\ActionConfigurators\SendTestActionConfigurator.cs" />
     <Compile Include="Testing\ActionConfigurators\ITestActionConfigurator.cs" />
+    <Compile Include="Testing\AsyncTestHarness.cs" />
     <Compile Include="Testing\BuilderConfigurators\IConsumerTestSpecification.cs" />
     <Compile Include="Testing\BuilderConfigurators\IHandlerTestSpecification.cs" />
     <Compile Include="Testing\BuilderConfigurators\ISagaTestSpecification.cs" />
@@ -864,6 +865,7 @@
     <Compile Include="Testing\Builders\SagaTestBuilder.cs" />
     <Compile Include="Testing\Builders\SagaTestBuilderImpl.cs" />
     <Compile Include="Testing\Builders\ITestBuilder.cs" />
+    <Compile Include="Testing\BusTestHarness.cs" />
     <Compile Include="Testing\IBusTestScenario.cs" />
     <Compile Include="Testing\Configurators\ITestConfigurator.cs" />
     <Compile Include="Testing\Configurators\TestConfiguratorResult.cs" />
@@ -875,6 +877,7 @@
     <Compile Include="Testing\Factories\SagaTestFactory.cs" />
     <Compile Include="Testing\Factories\SagaTestFactoryImpl.cs" />
     <Compile Include="Testing\IConsumedMessage.cs" />
+    <Compile Include="Testing\InMemoryTestHarness.cs" />
     <Compile Include="Testing\Instances\SagaTestInstance.cs" />
     <Compile Include="Testing\ISentMessage.cs" />
     <Compile Include="Testing\ISentMessageList.cs" />
@@ -886,6 +889,8 @@
     <Compile Include="Testing\IPublishedMessage.cs" />
     <Compile Include="Testing\ObservedPublishedMessage.cs" />
     <Compile Include="Testing\IPublishedMessageList.cs" />
+    <Compile Include="Testing\Observers\TestReceiveEndpointObserver.cs" />
+    <Compile Include="Testing\Observers\TestSendObserver.cs" />
     <Compile Include="Testing\PublishedMessageList.cs" />
     <Compile Include="Testing\ISagaInstance.cs" />
     <Compile Include="Testing\ObservedSagaInstance.cs" />
@@ -920,7 +925,8 @@
     <Compile Include="Testing\TestActions\SendTestAction.cs" />
     <Compile Include="Testing\TestActions\ITestAction.cs" />
     <Compile Include="Testing\TestConfiguratorResultExtensions.cs" />
-    <Compile Include="Testing\TestDecorators\TestConsumeObserver.cs" />
+    <Compile Include="Testing\Observers\TestObserver.cs" />
+    <Compile Include="Testing\Observers\TestConsumeObserver.cs" />
     <Compile Include="Testing\TestDecorators\TestConsumerFactoryDecorator.cs" />
     <Compile Include="Testing\Instances\HandlerTest.cs" />
     <Compile Include="Testing\Factories\HandlerTestFactory.cs" />
@@ -930,7 +936,6 @@
     <Compile Include="Testing\Subjects\IHandlerTestSubject.cs" />
     <Compile Include="Testing\Subjects\HandlerTestSubject.cs" />
     <Compile Include="Testing\TestDecorators\SagaRepositoryTestDecorator.cs" />
-    <Compile Include="Testing\TestDecorators\TestSendObserver.cs" />
     <Compile Include="Testing\TestFactory.cs" />
     <Compile Include="Testing\ITest.cs" />
     <Compile Include="Testing\TestInstanceConfigurators\ISagaTestConfigurator.cs" />

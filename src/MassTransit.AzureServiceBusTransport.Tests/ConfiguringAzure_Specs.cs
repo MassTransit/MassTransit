@@ -17,6 +17,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
         using System;
         using System.Threading.Tasks;
         using GreenPipes;
+        using MassTransit.Testing;
         using Microsoft.ServiceBus;
         using Microsoft.ServiceBus.Messaging;
         using NUnit.Framework;
@@ -27,6 +28,8 @@ namespace MassTransit.AzureServiceBusTransport.Tests
         public class Configuring_a_bus_instance :
             AsyncTestFixture
         {
+            protected override AsyncTestHarness AsyncTestHarness { get; } = new InMemoryTestHarness();
+
             [Test]
             public async Task Should_Support_NetMessaging_Protocol()
             {

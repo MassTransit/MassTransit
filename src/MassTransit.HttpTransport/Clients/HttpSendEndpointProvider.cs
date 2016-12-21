@@ -16,6 +16,7 @@ namespace MassTransit.HttpTransport.Clients
     using System.Threading.Tasks;
     using GreenPipes;
     using MassTransit.Pipeline;
+    using MassTransit.Pipeline.Observables;
     using Transports;
 
 

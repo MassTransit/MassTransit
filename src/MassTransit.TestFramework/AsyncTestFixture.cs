@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,70 +13,41 @@
 namespace MassTransit.TestFramework
 {
     using System;
-    using System.Collections.Generic;
-    using System.Diagnostics;
     using System.Threading;
     using System.Threading.Tasks;
-    using Testing.TestDecorators;
-    using Util;
+    using Testing;
+    using Testing.Observers;
 
 
     public abstract class AsyncTestFixture
     {
-        CancellationToken _cancellationToken;
-        CancellationTokenSource _cancellationTokenSource;
-        Task<bool> _cancelledTask;
-
-        protected AsyncTestFixture()
-        {
-            TestTimeout = Debugger.IsAttached ? TimeSpan.FromMinutes(50) : TimeSpan.FromSeconds(30);
-        }
+        protected abstract AsyncTestHarness AsyncTestHarness { get; }
 
         /// <summary>
         /// Task that is canceled when the test is aborted, for continueWith usage
         /// </summary>
-        protected Task TestCancelledTask
-        {
-            get
-            {
-                CancellationToken token = TestCancellationToken;
-                return _cancelledTask;
-            }
-        }
+        protected Task TestCancelledTask => AsyncTestHarness.TestCancelledTask;
 
         /// <summary>
         /// CancellationToken that is canceled when the test is being aborted
         /// </summary>
-        protected CancellationToken TestCancellationToken
-        {
-            get
-            {
-                if (_cancellationToken == CancellationToken.None)
-                {
-                    _cancellationTokenSource = new CancellationTokenSource((int)TestTimeout.TotalMilliseconds);
-                    _cancellationToken = _cancellationTokenSource.Token;
-
-                    var source = new TaskCompletionSource<bool>();
-                    _cancelledTask = source.Task;
-
-                    _cancellationToken.Register(() => source.TrySetCanceled());
-                }
-
-                return _cancellationToken;
-            }
-        }
+        protected CancellationToken TestCancellationToken => AsyncTestHarness.TestCancellationToken;
 
         /// <summary>
         /// Timeout for the test, used for any delay timers
         /// </summary>
-        protected TimeSpan TestTimeout { get; set; }
+        protected TimeSpan TestTimeout
+        {
+            get { return AsyncTestHarness.TestTimeout; }
+            set { AsyncTestHarness.TestTimeout = value; }
+        }
 
         /// <summary>
         /// Forces the test to be cancelled, aborting any awaiting tasks
         /// </summary>
         protected void CancelTest()
         {
-            _cancellationTokenSource.Cancel();
+            AsyncTestHarness.CancelTest();
         }
 
         /// <summary>
@@ -86,33 +57,29 @@ namespace MassTransit.TestFramework
         /// <returns></returns>
         protected TaskCompletionSource<T> GetTask<T>()
         {
-            var source = new TaskCompletionSource<T>();
-
-            TestCancelledTask.ContinueWith(x => source.TrySetCanceled(), TaskContinuationOptions.OnlyOnCanceled);
-
-            return source;
+            return AsyncTestHarness.GetTask<T>();
         }
 
         protected TestConsumeObserver<T> GetConsumeObserver<T>()
             where T : class
         {
-            return new TestConsumeObserver<T>(GetTask<T>(), GetTask<T>(), GetTask<T>());
+            return AsyncTestHarness.GetConsumeObserver<T>();
         }
 
         protected TestConsumeObserver GetConsumeObserver()
         {
-            return new TestConsumeObserver(TestTimeout);
+            return AsyncTestHarness.GetConsumeObserver();
         }
 
-        protected TestObserver<T> GetObserver<T>() 
+        protected TestObserver<T> GetObserver<T>()
             where T : class
         {
-            return new TestObserver<T>(GetTask<ConsumeContext<T>>(), GetTask<Exception>(), GetTask<bool>());
+            return AsyncTestHarness.GetObserver<T>();
         }
 
         protected TestSendObserver GetSendObserver()
         {
-            return new TestSendObserver(TestTimeout);
+            return AsyncTestHarness.GetSendObserver();
         }
 
         /// <summary>
@@ -121,7 +88,7 @@ namespace MassTransit.TestFramework
         /// <param name="taskFactory"></param>
         protected void Await(Func<Task> taskFactory)
         {
-            TaskUtil.Await(taskFactory, CancellationToken.None);
+            AsyncTestHarness.Await(taskFactory);
         }
 
         /// <summary>
@@ -131,7 +98,7 @@ namespace MassTransit.TestFramework
         /// <param name="cancellationToken"></param>
         protected void Await(Func<Task> taskFactory, CancellationToken cancellationToken)
         {
-            TaskUtil.Await(taskFactory, cancellationToken);
+            AsyncTestHarness.Await(taskFactory, cancellationToken);
         }
 
         /// <summary>
@@ -140,7 +107,7 @@ namespace MassTransit.TestFramework
         /// <param name="taskFactory"></param>
         protected T Await<T>(Func<Task<T>> taskFactory)
         {
-            return TaskUtil.Await(taskFactory, TestCancellationToken);
+            return AsyncTestHarness.Await(taskFactory);
         }
 
         /// <summary>
@@ -150,7 +117,7 @@ namespace MassTransit.TestFramework
         /// <param name="cancellationToken"></param>
         protected T Await<T>(Func<Task<T>> taskFactory, CancellationToken cancellationToken)
         {
-            return TaskUtil.Await(taskFactory, cancellationToken);
+            return AsyncTestHarness.Await(taskFactory, cancellationToken);
         }
     }
 }

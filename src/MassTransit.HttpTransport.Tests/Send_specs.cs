@@ -19,7 +19,7 @@ namespace MassTransit.HttpTransport.Tests
 
     [TestFixture]
     public class Sending_a_message_to_an_endpoint :
-        HttpBusTestFixture
+        HttpTestFixture
     {
         [Test]
         public async Task Should_have_a_redelivery_flag_of_false()
@@ -52,7 +52,7 @@ namespace MassTransit.HttpTransport.Tests
 
     [TestFixture]
     public class Sending_a_request_using_the_request_client :
-        HttpBusTestFixture
+        HttpTestFixture
     {
         [Test]
         public async Task Should_receive_the_response()

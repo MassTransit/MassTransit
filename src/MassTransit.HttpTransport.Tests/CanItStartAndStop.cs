@@ -16,7 +16,7 @@ namespace MassTransit.HttpTransport.Tests
 
 
     public class CanItStartAndStop :
-        HttpBusTestFixture
+        HttpTestFixture
     {
         [Test]
         public void StartStop()

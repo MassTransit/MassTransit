@@ -19,12 +19,15 @@ namespace MassTransit.Containers.Tests
     using Scenarios;
     using Shouldly;
     using TestFramework;
+    using Testing;
 
 
     [TestFixture]
     public class AutofacContainer_Setup :
         AsyncTestFixture
     {
+        protected override AsyncTestHarness AsyncTestHarness { get; } = new InMemoryTestHarness();
+
         IContainer _container;
 
         [OneTimeSetUp]

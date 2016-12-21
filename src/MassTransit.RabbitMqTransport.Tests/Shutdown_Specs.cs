@@ -14,6 +14,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 {
     using System;
     using System.Threading.Tasks;
+    using MassTransit.Testing;
     using NUnit.Framework;
     using TestFramework;
     using TestFramework.Messages;
@@ -26,11 +27,11 @@ namespace MassTransit.RabbitMqTransport.Tests
         [Test]
         public async Task Should_complete_running_consumers_nicely()
         {
-            var consumerStarted = GetTask<PingMessage>();
+            TaskCompletionSource<PingMessage> consumerStarted = GetTask<PingMessage>();
 
-            IBusControl bus = Bus.Factory.CreateUsingRabbitMq(x =>
+            var bus = Bus.Factory.CreateUsingRabbitMq(x =>
             {
-                IRabbitMqHost host = x.Host("[::1]", "test", h =>
+                var host = x.Host("[::1]", "test", h =>
                 {
                 });
 
@@ -44,7 +45,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
                         consumerStarted.TrySetResult(context.Message);
 
-                        for (int i = 0; i < 5; i++)
+                        for (var i = 0; i < 5; i++)
                         {
                             await Task.Delay(1000);
 
@@ -81,9 +82,9 @@ namespace MassTransit.RabbitMqTransport.Tests
         [Test]
         public async Task Should_complete_with_nothing_running()
         {
-            IBusControl bus = Bus.Factory.CreateUsingRabbitMq(x =>
+            var bus = Bus.Factory.CreateUsingRabbitMq(x =>
             {
-                IRabbitMqHost host = x.Host("[::1]", "test", h =>
+                var host = x.Host("[::1]", "test", h =>
                 {
                 });
 
@@ -95,7 +96,7 @@ namespace MassTransit.RabbitMqTransport.Tests
                     {
                         await Console.Out.WriteLineAsync("Starting handler");
 
-                        for (int i = 0; i < 5; i++)
+                        for (var i = 0; i < 5; i++)
                         {
                             await Task.Delay(1000);
 
@@ -126,5 +127,7 @@ namespace MassTransit.RabbitMqTransport.Tests
                 await Console.Out.WriteLineAsync("Bus stopped");
             }
         }
+
+        protected override AsyncTestHarness AsyncTestHarness { get; } = new InMemoryTestHarness();
     }
 }

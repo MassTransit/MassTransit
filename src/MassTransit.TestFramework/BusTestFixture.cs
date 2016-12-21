@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,9 +13,8 @@
 namespace MassTransit.TestFramework
 {
     using System;
-    using System.Threading;
     using System.Threading.Tasks;
-    using GreenPipes;
+    using Testing;
 
 
     /// <summary>
@@ -24,7 +23,11 @@ namespace MassTransit.TestFramework
     public abstract class BusTestFixture :
         AsyncTestFixture
     {
-        protected abstract IBus Bus { get; }
+        protected abstract BusTestHarness BusTestHarness { get; }
+
+        protected override AsyncTestHarness AsyncTestHarness => BusTestHarness;
+
+        protected IBus Bus => BusTestHarness.Bus;
 
         /// <summary>
         /// Subscribes a message handler to the bus, which is disconnected after the message
@@ -35,24 +38,7 @@ namespace MassTransit.TestFramework
         protected Task<ConsumeContext<T>> SubscribeHandler<T>()
             where T : class
         {
-            var source = new TaskCompletionSource<ConsumeContext<T>>();
-
-            ConnectHandle handler = null;
-            handler = Bus.ConnectHandler<T>(async context =>
-            {
-                source.SetResult(context);
-
-                handler.Disconnect();
-            });
-
-            TestCancelledTask.ContinueWith(x =>
-            {
-                source.TrySetCanceled();
-
-                handler.Disconnect();
-            }, TaskContinuationOptions.OnlyOnCanceled);
-
-            return source.Task;
+            return BusTestHarness.SubscribeHandler<T>();
         }
 
         /// <summary>
@@ -65,27 +51,7 @@ namespace MassTransit.TestFramework
         protected Task<ConsumeContext<T>> SubscribeHandler<T>(Func<ConsumeContext<T>, bool> filter)
             where T : class
         {
-            var source = new TaskCompletionSource<ConsumeContext<T>>();
-
-            ConnectHandle handler = null;
-            handler = Bus.ConnectHandler<T>(async context =>
-            {
-                if (filter(context))
-                {
-                    source.SetResult(context);
-
-                    handler.Disconnect();
-                }
-            });
-
-            TestCancelledTask.ContinueWith(x =>
-            {
-                source.TrySetCanceled();
-
-                handler.Disconnect();
-            }, TaskContinuationOptions.OnlyOnCanceled);
-
-            return source.Task;
+            return BusTestHarness.SubscribeHandler(filter);
         }
 
         /// <summary>
@@ -98,11 +64,7 @@ namespace MassTransit.TestFramework
         protected Task<ConsumeContext<T>> Handled<T>(IReceiveEndpointConfigurator configurator)
             where T : class
         {
-            var source = GetTask<ConsumeContext<T>>();
-
-            configurator.Handler<T>(async context => source.TrySetResult(context));
-
-            return source.Task;
+            return BusTestHarness.Handled<T>(configurator);
         }
 
         /// <summary>
@@ -116,15 +78,7 @@ namespace MassTransit.TestFramework
         protected Task<ConsumeContext<T>> Handled<T>(IReceiveEndpointConfigurator configurator, Func<ConsumeContext<T>, bool> filter)
             where T : class
         {
-            var source = GetTask<ConsumeContext<T>>();
-
-            configurator.Handler<T>(async context =>
-            {
-                if (filter(context))
-                    source.TrySetResult(context);
-            });
-
-            return source.Task;
+            return BusTestHarness.Handled(configurator, filter);
         }
 
         /// <summary>
@@ -138,17 +92,7 @@ namespace MassTransit.TestFramework
         protected Task<ConsumeContext<T>> Handled<T>(IReceiveEndpointConfigurator configurator, int expectedCount)
             where T : class
         {
-            var source = GetTask<ConsumeContext<T>>();
-
-            int count = 0;
-            configurator.Handler<T>(async context =>
-            {
-                var value = Interlocked.Increment(ref count);
-                if(value == expectedCount)
-                    source.TrySetResult(context);
-            });
-
-            return source.Task;
+            return BusTestHarness.Handled<T>(configurator, expectedCount);
         }
 
         /// <summary>
@@ -162,21 +106,17 @@ namespace MassTransit.TestFramework
         protected Task<ConsumeContext<T>> Handler<T>(IReceiveEndpointConfigurator configurator, MessageHandler<T> handler)
             where T : class
         {
-            var source = GetTask<ConsumeContext<T>>();
-
-            configurator.Handler<T>(async context =>
-            {
-                await handler(context);
-                source.TrySetResult(context);
-            });
-
-            return source.Task;
+            return BusTestHarness.Handler(configurator, handler);
         }
+
+        protected virtual void ConnectObservers(IBus bus)
+        {
+        }
+
 
         protected void LogEndpoint(IReceiveEndpointConfigurator configurator)
         {
-            configurator.UseLog(Console.Out, log =>
-                Task.FromResult($"Received (input_queue): {log.Context.ReceiveContext.TransportHeaders.Get("MessageId", "N/A")}, Types = ({string.Join(",", log.Context.SupportedMessageTypes)})"));
+            BusTestHarness.LogEndpoint(configurator);
         }
     }
 }

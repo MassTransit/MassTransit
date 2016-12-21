@@ -20,194 +20,130 @@ namespace MassTransit.HttpTransport.Tests
         using System.Net.Http;
         using System.Text;
         using System.Threading.Tasks;
-        using Internals.Extensions;
         using Newtonsoft.Json;
         using NUnit.Framework;
         using Serialization;
-        using TestFramework;
         using Util;
 
 
         [TestFixture]
         public class HostingRequestResponse_Specs :
-            AsyncTestFixture
+            HttpTestFixture
         {
             [Test]
             public async Task Should_create_a_host_that_responds_to_requests()
             {
-                _hostAddress = new Uri("http://localhost:8080");
-
-                var busControl = Bus.Factory.CreateUsingHttp(cfg =>
+                using (var client = new HttpClient())
                 {
-                    var mainHost = cfg.Host(_hostAddress, h =>
+                    var request = new Request {Value = "Hello"};
+                    var envelope = new HttpMessageEnvelope(request, TypeMetadataCache<Request>.MessageTypeNames);
+                    envelope.RequestId = NewId.NextGuid().ToString();
+                    envelope.DestinationAddress = HostAddress.ToString();
+                    envelope.ResponseAddress = new Uri("reply://localhost:8080/").ToString();
+
+                    var messageBody = JsonConvert.SerializeObject(envelope, JsonMessageSerializer.SerializerSettings);
+
+                    for (var i = 0; i < 5; i++)
                     {
-                        h.Method = HttpMethod.Post;
-                    });
+                        var content = new StringContent(messageBody, Encoding.UTF8, "application/vnd.masstransit+json");
 
-                    cfg.ReceiveEndpoint(mainHost, "", ep =>
-                    {
-                        ep.Consumer<HttpRequestConsumer>();
-                    });
-                });
+                        var timer = Stopwatch.StartNew();
 
-                await busControl.StartAsync(TestCancellationToken);
-                try
-                {
-                    using (var client = new HttpClient())
-                    {
-                        var request = new Request {Value = "Hello"};
-                        var envelope = new HttpMessageEnvelope(request, TypeMetadataCache<Request>.MessageTypeNames);
-                        envelope.RequestId = NewId.NextGuid().ToString();
-                        envelope.DestinationAddress = _hostAddress.ToString();
-                        envelope.ResponseAddress = new Uri("reply://localhost:8080/").ToString();
-
-                        var messageBody = JsonConvert.SerializeObject(envelope, JsonMessageSerializer.SerializerSettings);
-
-                        for (var i = 0; i < 5; i++)
+                        string response;
+                        using (var result = await client.PostAsync(HostAddress, content))
                         {
-                            var content = new StringContent(messageBody, Encoding.UTF8, "application/vnd.masstransit+json");
-
-                            var timer = Stopwatch.StartNew();
-
-                            string response;
-                            using (var result = await client.PostAsync(_hostAddress, content))
-                            {
-                                response = await result.Content.ReadAsStringAsync();
-                            }
-
-                            timer.Stop();
-
-                            await Console.Out.WriteLineAsync($"Request complete: {timer.ElapsedMilliseconds}ms");
+                            response = await result.Content.ReadAsStringAsync();
                         }
+
+                        timer.Stop();
+
+                        await Console.Out.WriteLineAsync($"Request complete: {timer.ElapsedMilliseconds}ms");
                     }
-                }
-                finally
-                {
-                    await busControl.StopAsync().WithTimeout(TimeSpan.FromSeconds(30));
                 }
             }
 
-            Uri _hostAddress;
+            protected override void ConfigureRootReceiveEndpoint(IHttpReceiveEndpointConfigurator configurator)
+            {
+                configurator.Consumer<HttpRequestConsumer>();
+            }
         }
 
 
         [TestFixture]
         public class HostingRequestResponse2_Specs :
-            AsyncTestFixture
+            HttpTestFixture
         {
             [Test]
             public async Task Should_work_with_api_receive_endpoint()
             {
-                _hostAddress = new Uri("http://localhost:8080");
+                IRequestClient<Request, Response> client = HttpTestHarness.CreateRequestClient<Request, Response>(new Uri(HostAddress, "/api"));
 
-                var busControl = Bus.Factory.CreateUsingHttp(cfg =>
+                var request = new Request {Value = "Hello"};
+
+
+                Stopwatch timer;
+                Response result;
+                for (var i = 0; i < 5; i++)
                 {
-                    var mainHost = cfg.Host(_hostAddress, h =>
-                    {
-                        h.Method = HttpMethod.Post;
-                    });
-
-                    cfg.ReceiveEndpoint(mainHost, "", ep =>
-                    {
-                        ep.Consumer<HttpRequestConsumer>();
-                    });
-
-                    cfg.ReceiveEndpoint(mainHost, "/api", ep =>
-                    {
-                        ep.Consumer<HttpApiRequestConsumer>();
-                    });
-                });
-
-                await busControl.StartAsync(TestCancellationToken);
-                try
-                {
-                    IRequestClient<Request, Response> client = new MessageRequestClient<Request, Response>(busControl, new Uri(_hostAddress, "/api"),
-                        TimeSpan.FromSeconds(30));
-
-                    var request = new Request {Value = "Hello"};
-
-
-                    Stopwatch timer;
-                    Response result;
-                    for (var i = 0; i < 5; i++)
-                    {
-                        timer = Stopwatch.StartNew();
-
-                        result = await client.Request(request);
-
-                        timer.Stop();
-
-                        await Console.Out.WriteLineAsync($"Request complete: {timer.ElapsedMilliseconds}ms, Response = {result.ResponseValue}");
-                    }
-
-                    IRequestClient<Request, Response> rootClient = new MessageRequestClient<Request, Response>(busControl, _hostAddress,
-                        TimeSpan.FromSeconds(30));
-
                     timer = Stopwatch.StartNew();
-                    result = await rootClient.Request(request);
+
+                    result = await client.Request(request);
+
                     timer.Stop();
 
                     await Console.Out.WriteLineAsync($"Request complete: {timer.ElapsedMilliseconds}ms, Response = {result.ResponseValue}");
                 }
-                finally
-                {
-                    await busControl.StopAsync().WithTimeout(TimeSpan.FromSeconds(30));
-                }
+
+                IRequestClient<Request, Response> rootClient = HttpTestHarness.CreateRequestClient<Request, Response>();
+
+                timer = Stopwatch.StartNew();
+                result = await rootClient.Request(request);
+                timer.Stop();
+
+                await Console.Out.WriteLineAsync($"Request complete: {timer.ElapsedMilliseconds}ms, Response = {result.ResponseValue}");
             }
 
-            Uri _hostAddress;
+            protected override void ConfigureRootReceiveEndpoint(IHttpReceiveEndpointConfigurator configurator)
+            {
+                configurator.Consumer<HttpRequestConsumer>();
+            }
+
+            protected override void ConfigureBusHost(IHttpBusFactoryConfigurator configurator, IHttpHost host)
+            {
+                configurator.ReceiveEndpoint(host, "/api", ep => ep.Consumer<HttpApiRequestConsumer>());
+            }
         }
 
 
         [TestFixture]
         public class HostingRequestResponse3_Specs :
-            AsyncTestFixture
+            HttpTestFixture
         {
             [Test]
             public async Task Should_work_with_the_message_request_client_too()
             {
-                _hostAddress = new Uri("http://localhost:8080");
+                IRequestClient<Request, Response> client = HttpTestHarness.CreateRequestClient<Request, Response>();
 
-                var busControl = Bus.Factory.CreateUsingHttp(cfg =>
+                var request = new Request {Value = "Hello"};
+
+
+                for (var i = 0; i < 5; i++)
                 {
-                    var mainHost = cfg.Host(_hostAddress, h =>
-                    {
-                        h.Method = HttpMethod.Post;
-                    });
-
-                    cfg.ReceiveEndpoint(mainHost, "", ep =>
-                    {
-                        ep.Consumer<HttpRequestConsumer>();
-                    });
-                });
-
-                await busControl.StartAsync(TestCancellationToken);
-                try
-                {
-                    IRequestClient<Request, Response> client = new MessageRequestClient<Request, Response>(busControl, _hostAddress, TimeSpan.FromSeconds(30));
-
-                    var request = new Request {Value = "Hello"};
+                    var timer = Stopwatch.StartNew();
 
 
-                    for (var i = 0; i < 5; i++)
-                    {
-                        var timer = Stopwatch.StartNew();
+                    var result = await client.Request(request);
 
+                    timer.Stop();
 
-                        var result = await client.Request(request);
-
-                        timer.Stop();
-
-                        await Console.Out.WriteLineAsync($"Request complete: {timer.ElapsedMilliseconds}ms, Response = {result.ResponseValue}");
-                    }
-                }
-                finally
-                {
-                    await busControl.StopAsync().WithTimeout(TimeSpan.FromSeconds(30));
+                    await Console.Out.WriteLineAsync($"Request complete: {timer.ElapsedMilliseconds}ms, Response = {result.ResponseValue}");
                 }
             }
 
-            Uri _hostAddress;
+            protected override void ConfigureRootReceiveEndpoint(IHttpReceiveEndpointConfigurator configurator)
+            {
+                configurator.Consumer<HttpRequestConsumer>();
+            }
         }
 
 

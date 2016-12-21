@@ -25,6 +25,7 @@ namespace MassTransit.HttpTransport.Clients
     using GreenPipes;
     using Logging;
     using MassTransit.Pipeline;
+    using MassTransit.Pipeline.Observables;
     using Transports;
     using Util;
 

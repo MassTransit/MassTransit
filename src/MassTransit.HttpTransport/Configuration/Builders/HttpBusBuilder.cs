@@ -19,6 +19,7 @@ namespace MassTransit.HttpTransport.Builders
     using MassTransit.Builders;
     using MassTransit.Pipeline;
     using MassTransit.Pipeline.Filters;
+    using MassTransit.Pipeline.Observables;
     using MassTransit.Pipeline.Pipes;
     using Specifications;
     using Transport;

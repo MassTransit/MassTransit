@@ -14,11 +14,13 @@ namespace MassTransit.RabbitMqTransport.Tests
 {
     using System;
     using System.Threading.Tasks;
+    using MassTransit.Testing;
     using NUnit.Framework;
     using TestFramework;
 
 
-    [TestFixture, Explicit]
+    [TestFixture]
+    [Explicit]
     public class Failing_to_connect_to_rabbitmq :
         AsyncTestFixture
     {
@@ -78,7 +80,8 @@ namespace MassTransit.RabbitMqTransport.Tests
             }, Throws.TypeOf<RabbitMqConnectionException>());
         }
 
-        [Test, Explicit]
+        [Test]
+        [Explicit]
         public async Task Should_recover_from_a_crashed_server()
         {
             var busControl = Bus.Factory.CreateUsingRabbitMq(x =>
@@ -117,7 +120,8 @@ namespace MassTransit.RabbitMqTransport.Tests
             }
         }
 
-        [Test, Explicit]
+        [Test]
+        [Explicit]
         public async Task Should_startup_and_shut_down_cleanly()
         {
             var busControl = Bus.Factory.CreateUsingRabbitMq(x =>
@@ -140,7 +144,8 @@ namespace MassTransit.RabbitMqTransport.Tests
             }
         }
 
-        [Test, Explicit]
+        [Test]
+        [Explicit]
         public async Task Should_startup_and_shut_down_cleanly_with_an_endpoint()
         {
             var busControl = Bus.Factory.CreateUsingRabbitMq(x =>
@@ -170,7 +175,8 @@ namespace MassTransit.RabbitMqTransport.Tests
             }
         }
 
-        [Test, Explicit]
+        [Test]
+        [Explicit]
         public async Task Should_startup_and_shut_down_cleanly_with_publish()
         {
             var busControl = Bus.Factory.CreateUsingRabbitMq(x =>
@@ -190,6 +196,8 @@ namespace MassTransit.RabbitMqTransport.Tests
                 await busControl.StopAsync();
             }
         }
+
+        protected override AsyncTestHarness AsyncTestHarness { get; } = new InMemoryTestHarness();
 
 
         public interface Test

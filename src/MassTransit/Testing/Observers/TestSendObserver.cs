@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -10,43 +10,42 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Testing.TestDecorators
+namespace MassTransit.Testing.Observers
 {
     using System;
     using System.Threading.Tasks;
-    using Pipeline;
-    using Util;
 
 
-    public class TestConsumeObserver :
-        IConsumeObserver
+    /// <summary>
+    /// Observes sent messages for test fixtures
+    /// </summary>
+    public class TestSendObserver :
+        ISendObserver
     {
-        readonly ReceivedMessageList _messages;
+        readonly ObservedSentMessageList _messages;
 
-        public TestConsumeObserver(TimeSpan timeout)
+        public TestSendObserver(TimeSpan timeout)
         {
-            _messages = new ReceivedMessageList(timeout);
+            _messages = new ObservedSentMessageList(timeout);
         }
 
-        public IReceivedMessageList Messages => _messages;
+        public ISentMessageList Messages => _messages;
 
-        Task IConsumeObserver.PreConsume<T>(ConsumeContext<T> context)
+        public async Task PreSend<T>(SendContext<T> context)
+            where T : class
         {
-            return TaskUtil.Completed;
         }
 
-        Task IConsumeObserver.PostConsume<T>(ConsumeContext<T> context)
+        public async Task PostSend<T>(SendContext<T> context)
+            where T : class
         {
             _messages.Add(context);
-
-            return TaskUtil.Completed;
         }
 
-        Task IConsumeObserver.ConsumeFault<T>(ConsumeContext<T> context, Exception exception)
+        public async Task SendFault<T>(SendContext<T> context, Exception exception)
+            where T : class
         {
             _messages.Add(context, exception);
-
-            return TaskUtil.Completed;
         }
     }
 }

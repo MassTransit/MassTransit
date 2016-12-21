@@ -13,133 +13,67 @@
 namespace MassTransit.AzureServiceBusTransport.Tests
 {
     using System;
-    using System.Diagnostics;
-    using System.Threading;
     using System.Threading.Tasks;
     using Logging;
+    using MassTransit.Testing;
     using Microsoft.ServiceBus;
     using NUnit.Framework;
     using TestFramework;
     using Testing;
-    using Testing.TestDecorators;
 
 
     [TestFixture]
-    public class AzureServiceBusTestFixture :
+    public abstract class AzureServiceBusTestFixture :
         BusTestFixture
     {
+        protected AzureServiceBusTestHarness AzureServiceBusTestHarness { get; }
+
+        protected override BusTestHarness BusTestHarness => AzureServiceBusTestHarness;
+
         static readonly ILog _log = Logger.Get<AzureServiceBusTestFixture>();
-        IBusControl _bus;
-        Uri _inputQueueAddress;
-        ISendEndpoint _inputQueueSendEndpoint;
-        ISendEndpoint _busSendEndpoint;
-        readonly TestSendObserver _sendObserver;
-        readonly Uri _serviceUri;
-        BusHandle _busHandle;
-        readonly string _inputQueueName;
-        IServiceBusHost _host;
 
-        public AzureServiceBusTestFixture()
-            : this("input_queue")
+        public AzureServiceBusTestFixture(string inputQueueName = null, Uri serviceUri = null, ServiceBusTokenProviderSettings settings = null)
         {
+            serviceUri = serviceUri ?? ServiceBusEnvironment.CreateServiceUri("sb", "masstransit-build", "MassTransit.AzureServiceBusTransport.Tests");
+
+            settings = settings ?? new TestAzureServiceBusAccountSettings();
+
+            AzureServiceBusTestHarness = new AzureServiceBusTestHarness(serviceUri, settings.KeyName, settings.SharedAccessKey, inputQueueName);
+
+            AzureServiceBusTestHarness.OnConnectObservers += ConnectObservers;
+            AzureServiceBusTestHarness.OnConfigureBus += ConfigureBus;
+            AzureServiceBusTestHarness.OnConfigureBusHost += ConfigureBusHost;
+            AzureServiceBusTestHarness.OnConfigureInputQueueEndpoint += ConfigureInputQueueEndpoint;
         }
 
-        public AzureServiceBusTestFixture(string inputQueueName, Uri serviceUri = null)
-        {
-            ServiceBusEnvironment.SystemConnectivity.Mode = ConnectivityMode.Https;
-
-            _inputQueueName = inputQueueName;
-
-            TestTimeout = Debugger.IsAttached ? TimeSpan.FromMinutes(5) : TimeSpan.FromSeconds(60);
-
-            _serviceUri = serviceUri ?? ServiceBusEnvironment.CreateServiceUri("sb", "masstransit-build", "MassTransit.AzureServiceBusTransport.Tests");
-
-            _sendObserver = new TestSendObserver(TestTimeout);
-        }
+        protected string InputQueueName => AzureServiceBusTestHarness.InputQueueName;
 
         /// <summary>
         /// The sending endpoint for the InputQueue
         /// </summary>
-        protected ISendEndpoint InputQueueSendEndpoint => _inputQueueSendEndpoint;
+        protected ISendEndpoint InputQueueSendEndpoint => AzureServiceBusTestHarness.InputQueueSendEndpoint;
 
         /// <summary>
         /// The sending endpoint for the Bus 
         /// </summary>
-        protected ISendEndpoint BusSendEndpoint => _busSendEndpoint;
+        protected ISendEndpoint BusSendEndpoint => AzureServiceBusTestHarness.BusSendEndpoint;
 
-        protected ISentMessageList Sent => _sendObserver.Messages;
+        protected ISentMessageList Sent => AzureServiceBusTestHarness.Sent;
 
-        protected Uri BusAddress => _bus.Address;
+        protected Uri BusAddress => AzureServiceBusTestHarness.BusAddress;
 
-        protected Uri InputQueueAddress
-        {
-            get { return _inputQueueAddress; }
-            set
-            {
-                if (Bus != null)
-                    throw new InvalidOperationException("The LocalBus has already been created, too late to change the URI");
-
-                _inputQueueAddress = value;
-            }
-        }
-
-        protected override IBus Bus => _bus;
+        protected Uri InputQueueAddress => AzureServiceBusTestHarness.InputQueueAddress;
 
         [OneTimeSetUp]
-        public async Task SetupAzureServiceBusTestFixture()
+        public Task SetupAzureServiceBusTestFixture()
         {
-            _bus = CreateBus();
-
-            _bus.ConnectReceiveEndpointObserver(new ReceiveEndpointObserver());
-
-            _busHandle = await _bus.StartAsync();
-            try
-            {
-                _busSendEndpoint = await _bus.GetSendEndpoint(_bus.Address);
-                _busSendEndpoint.ConnectSendObserver(_sendObserver);
-
-                _inputQueueSendEndpoint = await _bus.GetSendEndpoint(_inputQueueAddress);
-                _inputQueueSendEndpoint.ConnectSendObserver(_sendObserver);
-            }
-            catch (Exception)
-            {
-                try
-                {
-                    using (var tokenSource = new CancellationTokenSource(TestTimeout))
-                    {
-                        await _bus.StopAsync(tokenSource.Token);
-                    }
-                }
-                finally
-                {
-                    _busHandle = null;
-                    _bus = null;
-                }
-
-                throw;
-            }
+            return AzureServiceBusTestHarness.Start();
         }
 
         [OneTimeTearDown]
-        public async Task TearDownInMemoryTestFixture()
+        public Task TearDownInMemoryTestFixture()
         {
-            try
-            {
-                using (var tokenSource = new CancellationTokenSource(TestTimeout))
-                {
-                    if(_busHandle != null)
-                        await _busHandle.StopAsync(tokenSource.Token);
-                }
-            }
-            catch (Exception ex)
-            {
-                _log.Error("Bus Stop Failed", ex);
-            }
-            finally
-            {
-                _busHandle = null;
-                _bus = null;
-            }
+            return AzureServiceBusTestHarness.Stop();
         }
 
         protected virtual void ConfigureBus(IServiceBusBusFactoryConfigurator configurator)
@@ -154,63 +88,6 @@ namespace MassTransit.AzureServiceBusTransport.Tests
         {
         }
 
-        protected IServiceBusHost Host => _host;
-
-        IBusControl CreateBus()
-        {
-            return MassTransit.Bus.Factory.CreateUsingAzureServiceBus(x =>
-            {
-                ConfigureBus(x);
-
-                ServiceBusTokenProviderSettings settings = GetAccountSettings();
-
-                _host = x.Host(_serviceUri, h =>
-                {
-                    h.SharedAccessSignature(s =>
-                    {
-                        s.KeyName = settings.KeyName;
-                        s.SharedAccessKey = settings.SharedAccessKey;
-                        s.TokenTimeToLive = settings.TokenTimeToLive;
-                        s.TokenScope = settings.TokenScope;
-                    });
-                });
-
-                x.UseServiceBusMessageScheduler();
-
-                ConfigureBusHost(x, _host);
-
-                x.ReceiveEndpoint(_host, _inputQueueName, e =>
-                {
-                    _inputQueueAddress = e.InputAddress;
-
-                    ConfigureInputQueueEndpoint(e);
-                });
-            });
-        }
-
-        protected virtual ServiceBusTokenProviderSettings GetAccountSettings()
-        {
-            return new TestAzureServiceBusAccountSettings();
-        }
-
-
-        class ReceiveEndpointObserver :
-            IReceiveEndpointObserver
-        {
-            public Task Ready(ReceiveEndpointReady ready)
-            {
-                return Console.Out.WriteLineAsync($"Endpoint Ready: {ready.InputAddress}");
-            }
-
-            public Task Completed(ReceiveEndpointCompleted completed)
-            {
-                return Console.Out.WriteLineAsync($"Endpoint Complete: {completed.DeliveryCount}/{completed.ConcurrentDeliveryCount} - {completed.InputAddress}");
-            }
-
-            public Task Faulted(ReceiveEndpointFaulted faulted)
-            {
-                return Console.Out.WriteLineAsync($"Endpoint Faulted: {faulted.Exception} - {faulted.InputAddress}");
-            }
-        }
+        protected IServiceBusHost Host => AzureServiceBusTestHarness.Host;
     }
 }

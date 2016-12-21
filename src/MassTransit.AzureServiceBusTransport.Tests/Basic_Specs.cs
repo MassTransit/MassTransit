@@ -42,16 +42,13 @@ namespace MassTransit.AzureServiceBusTransport.Tests
         }
 
         public Sending_a_message_to_a_basic_endpoint()
-            : base("input_queue", ServiceBusEnvironment.CreateServiceUri("sb", "masstransit-basic", "MassTransit.AzureServiceBusTransport.Tests"))
+            : base(
+                "input_queue", ServiceBusEnvironment.CreateServiceUri("sb", "masstransit-basic", "MassTransit.AzureServiceBusTransport.Tests"),
+                new BasicAzureServiceBusAccountSettings())
         {
         }
 
         Task<ConsumeContext<PingMessage>> _handler;
-
-        protected override ServiceBusTokenProviderSettings GetAccountSettings()
-        {
-            return new BasicAzureServiceBusAccountSettings();
-        }
 
         protected override void ConfigureInputQueueEndpoint(IServiceBusReceiveEndpointConfigurator configurator)
         {

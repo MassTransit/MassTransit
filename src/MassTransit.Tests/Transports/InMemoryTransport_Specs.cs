@@ -21,6 +21,7 @@ namespace MassTransit.Tests.Transports
         using MassTransit.Pipeline.Filters;
         using MassTransit.Pipeline.Pipes;
         using MassTransit.Serialization;
+        using MassTransit.Testing;
         using MassTransit.Transports;
         using MassTransit.Transports.InMemory;
         using NUnit.Framework;
@@ -62,6 +63,8 @@ namespace MassTransit.Tests.Transports
 
                 await receiveHandle.Stop();
             }
+
+            protected override AsyncTestHarness AsyncTestHarness { get; } = new InMemoryTestHarness();
         }
 
 

@@ -81,6 +81,7 @@
     <Compile Include="HttpPublishEndpointProvider.cs" />
     <Compile Include="Configuration\Builders\HttpReceiveEndpointBuilder.cs" />
     <Compile Include="Configuration\Specifications\HttpReceiveEndpointSpecification.cs" />
+    <Compile Include="Testing\HttpTestHarness.cs" />
     <Compile Include="Transport\HttpReceiveEndpointFactory.cs" />
     <Compile Include="Transport\HttpReceiveTransport.cs" />
     <Compile Include="Configuration\IHttpReceiveEndpointBuilder.cs" />

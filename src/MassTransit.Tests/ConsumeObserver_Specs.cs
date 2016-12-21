@@ -17,7 +17,7 @@ namespace MassTransit.Tests
         using System.Linq;
         using System.Threading.Tasks;
         using MassTransit.Testing;
-        using MassTransit.Testing.TestDecorators;
+        using MassTransit.Testing.Observers;
         using NUnit.Framework;
         using Shouldly;
         using TestFramework;

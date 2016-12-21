@@ -64,7 +64,7 @@
     <Compile Include="Class1.cs" />
     <Compile Include="ContextSetup.cs" />
     <Compile Include="HostingRequestResponse_Specs.cs" />
-    <Compile Include="HttpBusTestFixture.cs" />
+    <Compile Include="HttpTestFixture.cs" />
     <Compile Include="HttpHostEqualityComparerTests.cs" />
     <Compile Include="HttpHostTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

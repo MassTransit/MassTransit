@@ -74,6 +74,7 @@
     <Compile Include="AzureBusFactory.cs" />
     <Compile Include="Configuration\IServiceBusQueueEndpointConfigurator.cs" />
     <Compile Include="Contexts\BrokeredMessageSessionContext.cs" />
+    <Compile Include="Testing\AzureServiceBusTestHarness.cs" />
     <Compile Include="Transport\ClientSettings.cs" />
     <Compile Include="RequestClientExtensions.cs" />
     <Compile Include="Settings\BaseClientSettings.cs" />

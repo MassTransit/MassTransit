@@ -251,14 +251,15 @@ namespace MassTransit.Tests.Serialization
 
         static object ConvertJson(JToken token)
         {
-            if (token is JValue)
-                return ((JValue)token).Value;
+            var value = token as JValue;
+            if (value != null)
+                return value.Value;
 
             if (token is JObject)
             {
                 IDictionary<string, object> expando = new Dictionary<string, object>();
 
-                (from childToken in (token) where childToken is JProperty select childToken as JProperty).ToList().ForEach(
+                (from childToken in token where childToken is JProperty select childToken as JProperty).ToList().ForEach(
                     property =>
                     {
                         expando.Add(property.Name, ConvertJson(property.Value));

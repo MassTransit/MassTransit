@@ -146,8 +146,6 @@
     <Compile Include="ExtensionMethodsForSagas.cs" />
     <Compile Include="SerializerCache.cs" />
     <Compile Include="TestConsumeContext.cs" />
-    <Compile Include="TestConsumeObserver.cs" />
-    <Compile Include="TestObserver.cs" />
     <Compile Include="TestSymmetricKeyProvider.cs" />
     <Compile Include="ThreadSafeRandom.cs" />
   </ItemGroup>

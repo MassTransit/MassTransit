@@ -138,6 +138,7 @@
     <Compile Include="RabbitMqDeliveryMetrics.cs" />
     <Compile Include="RequestClientExtensions.cs" />
     <Compile Include="SchedulePublishBusExtensions.cs" />
+    <Compile Include="Testing\RabbitMqTestHarness.cs" />
     <Compile Include="Topology\EntitySettings.cs" />
     <Compile Include="Topology\ReceiveSettings.cs" />
     <Compile Include="Topology\SendSettings.cs" />
@@ -160,8 +161,6 @@
     <Compile Include="Transport\RabbitMqSendTransport.cs" />
     <Compile Include="SchedulePublishExtensions.cs" />
     <Compile Include="Scheduling\DelayedExchangeMessageScheduler.cs" />
-    <Compile Include="Testing\BusTestScenarioExtensions.cs" />
-    <Compile Include="Testing\RabbitMqBusTestScenarioBuilder.cs" />
     <Compile Include="Topology\RabbitMqEntitySettings.cs" />
     <Compile Include="Topology\ExchangeBindingSettings.cs" />
     <Compile Include="Topology\ExchangeSettings.cs" />
