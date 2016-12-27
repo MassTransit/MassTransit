@@ -27,7 +27,8 @@ namespace MassTransit.Tests
         [Test]
         public void FirstTestName()
         {
-            IBusControl busControl = Bus.Factory.CreateUsingInMemory(x =>
+            IBusControl busControl = Bus.Factory.
+                CreateUsingInMemory(x =>
             {
                 x.UseTransform<PingMessage>(v =>
                 {

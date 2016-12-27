@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -16,21 +16,36 @@ namespace MassTransit.Testing
     using System.Linq;
     using Automatonymous;
     using Automatonymous.Testing;
-    using TestInstanceConfigurators;
+    using Saga;
 
 
-    public static class StateMachineSagaTestingExtensions
+    public static class StateMachineSagaTestHarnessExtensions
     {
-        public static void UseStateMachineBuilder<TScenario, TSaga, TStateMachine>(
-            this ISagaTestConfigurator<TScenario, TSaga> configurator, TStateMachine stateMachine)
-            where TSaga : class, SagaStateMachineInstance
-            where TScenario : ITestScenario
-            where TStateMachine : SagaStateMachine<TSaga>
+        public static StateMachineSagaTestHarness<TInstance, TStateMachine> StateMachineSaga<TInstance, TStateMachine>(this BusTestHarness harness,
+            TStateMachine stateMachine)
+            where TInstance : class, SagaStateMachineInstance
+            where TStateMachine : SagaStateMachine<TInstance>
         {
-            configurator.UseBuilder(scenario =>
-                new StateMachineSagaTestBuilderImpl<TScenario, TSaga, TStateMachine>(scenario,
-                    stateMachine));
+            if (stateMachine == null)
+                throw new ArgumentNullException(nameof(stateMachine));
+            var repository = new InMemorySagaRepository<TInstance>();
+
+            return new StateMachineSagaTestHarness<TInstance, TStateMachine>(harness, repository, stateMachine);
         }
+
+        public static StateMachineSagaTestHarness<TInstance, TStateMachine> StateMachineSaga<TInstance, TStateMachine>(this BusTestHarness harness,
+            TStateMachine stateMachine, ISagaRepository<TInstance> repository)
+            where TInstance : class, SagaStateMachineInstance
+            where TStateMachine : SagaStateMachine<TInstance>
+        {
+            if (stateMachine == null)
+                throw new ArgumentNullException(nameof(stateMachine));
+            if (repository == null)
+                throw new ArgumentNullException(nameof(repository));
+
+            return new StateMachineSagaTestHarness<TInstance, TStateMachine>(harness, repository, stateMachine);
+        }
+
         public static TSaga ContainsInState<TSaga>(this ISagaList<TSaga> sagas, Guid sagaId,
             State state, SagaStateMachine<TSaga> machine)
             where TSaga : class, SagaStateMachineInstance

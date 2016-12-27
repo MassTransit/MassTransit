@@ -18,7 +18,6 @@ namespace MassTransit.Testing
     using GreenPipes;
     using Logging;
     using Observers;
-    using Testes;
     using Util;
 
 

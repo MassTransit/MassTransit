@@ -13,7 +13,6 @@
 namespace MassTransit
 {
     using System;
-    using Testes;
 
 
     public static class InMemoryConfigurationExtensions
@@ -27,13 +26,6 @@ namespace MassTransit
         public static IBusControl CreateUsingInMemory(this IBusFactorySelector selector, Action<IInMemoryBusFactoryConfigurator> configure)
         {
             return InMemoryBus.Create(configure);
-        }
-
-        public static IConsumerBusTest<TConsumer> CreateUsingInMemory<TConsumer>(this IConsumerTestFactorySelector<TConsumer> selector,
-            Action<IInMemoryTestFactoryConfigurator> configure)
-            where TConsumer : class, IConsumer
-        {
-            return InMemoryTest.CreateConsumerTest(selector.ConsumerFactory, configure);
         }
     }
 }

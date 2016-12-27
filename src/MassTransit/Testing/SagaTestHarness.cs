@@ -21,9 +21,10 @@ namespace MassTransit.Testing
         where TSaga : class, ISaga
     {
         readonly ReceivedMessageList _consumed;
-        readonly ISagaRepository<TSaga> _repository;
         readonly SagaList<TSaga> _created;
+        readonly ISagaRepository<TSaga> _repository;
         readonly SagaList<TSaga> _sagas;
+        readonly TestSagaRepositoryDecorator<TSaga> _testRepository;
 
         public SagaTestHarness(BusTestHarness testHarness, ISagaRepository<TSaga> repository)
         {
@@ -33,18 +34,23 @@ namespace MassTransit.Testing
             _created = new SagaList<TSaga>(testHarness.TestTimeout);
             _sagas = new SagaList<TSaga>(testHarness.TestTimeout);
 
+            _testRepository = new TestSagaRepositoryDecorator<TSaga>(_repository, _consumed, _created, _sagas);
+
             testHarness.OnConfigureReceiveEndpoint += ConfigureReceiveEndpoint;
+        }
+
+        public TestSagaRepositoryDecorator<TSaga> TestRepository
+        {
+            get { return _testRepository; }
         }
 
         public IReceivedMessageList Consumed => _consumed;
         public ISagaList<TSaga> Sagas => _sagas;
         public ISagaList<TSaga> Created => _sagas;
 
-        void ConfigureReceiveEndpoint(IReceiveEndpointConfigurator configurator)
+        protected virtual void ConfigureReceiveEndpoint(IReceiveEndpointConfigurator configurator)
         {
-            var decorator = new SagaRepositoryTestDecorator<TSaga>(_repository, _consumed, _created, _sagas);
-
-            configurator.Saga(decorator);
+            configurator.Saga(_testRepository);
         }
     }
 }

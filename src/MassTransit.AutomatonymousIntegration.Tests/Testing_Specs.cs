@@ -1,12 +1,12 @@
-﻿// Copyright 2011 Chris Patterson, Dru Sellers
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
 // License at 
 // 
 //     http://www.apache.org/licenses/LICENSE-2.0 
 // 
-// Unless required by applicable law or agreed to in writing, software distributed 
+// Unless required by applicable law or agreed to in writing, software distributed
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
@@ -16,68 +16,77 @@ namespace MassTransit.AutomatonymousIntegration.Tests
     using System.Linq;
     using System.Threading.Tasks;
     using Automatonymous;
+    using Automatonymous.Testing;
     using NUnit.Framework;
     using Testing;
 
 
-    [TestFixture, Explicit]
+    [TestFixture]
     public class Using_the_testing_framework_built_into_masstransit
     {
         [Test]
         public async Task Should_handle_the_initial_state()
         {
+            var harness = new InMemoryTestHarness();
+            StateMachineSagaTestHarness<Instance, TestStateMachine> saga = harness.StateMachineSaga<Instance, TestStateMachine>(_machine);
+
             Guid sagaId = Guid.NewGuid();
 
-            SagaTest<IBusTestScenario, Instance> test = TestFactory.ForSaga<Instance>().New(x =>
+            await harness.Start();
+            try
+            {
+                await harness.InputQueueSendEndpoint.Send(new Start
                 {
-                    x.UseStateMachineBuilder(_machine);
-
-                    x.Publish(new Start
-                        {
-                            CorrelationId = sagaId
-                        });
+                    CorrelationId = sagaId
                 });
 
-            await test.ExecuteAsync();
+                Assert.IsTrue(harness.Consumed.Select<Start>().Any(), "Message not received");
 
-            Assert.IsTrue(test.Received.Select<Start>().Any(), "Message not received");
+                Instance instance = saga.Created.Contains(sagaId);
+                Assert.IsNotNull(instance, "Saga instance not found");
 
-            Instance instance = test.Saga.Created.Contains(sagaId);
-            Assert.IsNotNull(instance, "Saga instance not found");
-
-            Assert.AreEqual(instance.CurrentState, _machine.Running);
+                Assert.AreEqual(instance.CurrentState, _machine.Running);
+            }
+            finally
+            {
+                await harness.Stop();
+            }
         }
 
         [Test]
         public async Task Should_handle_the_stop_state()
         {
+            var harness = new InMemoryTestHarness();
+            StateMachineSagaTestHarness<Instance, TestStateMachine> saga = harness.StateMachineSaga<Instance, TestStateMachine>(_machine);
+
             Guid sagaId = Guid.NewGuid();
 
-            SagaTest<IBusTestScenario, Instance> test = TestFactory.ForSaga<Instance>().New(x =>
+            await harness.Start();
+            try
+            {
+                await harness.InputQueueSendEndpoint.Send(new Start
                 {
-                    x.UseStateMachineBuilder(_machine);
-
-                    x.Publish(new Start
-                        {
-                            CorrelationId = sagaId
-                        });
-                    x.Publish(new Stop
-                        {
-                            CorrelationId = sagaId
-                        });
+                    CorrelationId = sagaId
                 });
 
-            await test.ExecuteAsync();
+                await harness.InputQueueSendEndpoint.Send(new Stop
+                {
+                    CorrelationId = sagaId
+                });
 
-            Assert.IsTrue(test.Received.Select<Start>().Any(), "Start not received");
-            Assert.IsTrue(test.Received.Select<Stop>().Any(), "Stop not received");
+                Assert.IsTrue(harness.Consumed.Select<Start>().Any(), "Start not received");
+                Assert.IsTrue(harness.Consumed.Select<Stop>().Any(), "Stop not received");
 
-            Instance instance = test.Saga.Created.Contains(sagaId);
-            Assert.IsNotNull(instance, "Saga instance not found");
+                Instance instance = saga.Created.Contains(sagaId);
+                Assert.IsNotNull(instance, "Saga instance not found");
 
-            Assert.AreEqual(instance.CurrentState, _machine.Final);
+                Assert.AreEqual(instance.CurrentState, _machine.Final);
+            }
+            finally
+            {
+                await harness.Stop();
+            }
         }
-
 
         TestStateMachine _machine;
 

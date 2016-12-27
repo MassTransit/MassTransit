@@ -134,9 +134,7 @@
     <Compile Include="SchedulerExtensions.cs" />
     <Compile Include="ScheduleSettings.cs" />
     <Compile Include="SendExtensions.cs" />
-    <Compile Include="Testing\StateMachineSagaTestBuilderImpl.cs" />
-    <Compile Include="Testing\StateMachineSagaTestInstance.cs" />
-    <Compile Include="Testing\StateMachineSagaTestSubjectImpl.cs" />
+    <Compile Include="Testing\StateMachineSagaTestHarness.cs" />
     <Compile Include="Testing\StateMachineSagaTestingExtensions.cs" />
     <Compile Include="Configuration\StateMachineSubscriptionExtensions.cs" />
     <Compile Include="Configuration\SubscriptionConfigurators\StateMachineSagaSpecification.cs" />

@@ -30,8 +30,6 @@ namespace MassTransit.Tests.Testing
             _harness = new InMemoryTestHarness();
             _handler = _harness.Handler<A>(async context => context.Respond(new B()));
 
-            //x.Send(new A(), (scenario, context) => context.SendResponseTo(scenario.Bus));
-
             await _harness.Start();
 
             await _harness.InputQueueSendEndpoint.Send(new A(), x => x.ResponseAddress = _harness.BusAddress);
@@ -62,56 +60,6 @@ namespace MassTransit.Tests.Testing
         public void Should_support_a_simple_handler()
         {
             _handler.Consumed.Select().Any().ShouldBe(true);
-        }
-
-
-        class A
-        {
-        }
-
-
-        class B
-        {
-        }
-    }
-
-
-    [Explicit]
-    public class When_a_handler_responds_to_a_message_using_context
-    {
-        IHandlerTest<A> _test;
-
-        [SetUp]
-        public void A_handler_responds_to_a_message_using_context()
-        {
-            _test = TestFactory.ForHandler<A>()
-                .New(x =>
-                {
-                    x.Handler(async context => context.Respond(new B()));
-
-                    //x.Send(new A(), (scenario, context) => context.SendResponseTo(scenario.Bus));
-                });
-
-            _test.ExecuteAsync();
-        }
-
-        [TearDown]
-        public async Task Teardown()
-        {
-            await _test.DisposeAsync();
-            _test = null;
-        }
-
-        [Test]
-        public void Should_have_sent_a_message_of_type_b()
-        {
-            _test.Sent.Select<B>().Any().ShouldBe(true);
-        }
-
-        [Test]
-        public void Should_support_a_simple_handler()
-        {
-            _test.Handler.Received.Select().Any().ShouldBe(true);
         }
 
 

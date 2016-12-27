@@ -19,7 +19,7 @@ namespace MassTransit.Testing.Decorators
     using Saga;
 
 
-    public class SagaRepositoryTestDecorator<TSaga> :
+    public class TestSagaRepositoryDecorator<TSaga> :
         ISagaRepository<TSaga>
         where TSaga : class, ISaga
     {
@@ -28,7 +28,7 @@ namespace MassTransit.Testing.Decorators
         readonly ISagaRepository<TSaga> _sagaRepository;
         readonly SagaList<TSaga> _sagas;
 
-        public SagaRepositoryTestDecorator(ISagaRepository<TSaga> sagaRepository, ReceivedMessageList received, SagaList<TSaga> created,
+        public TestSagaRepositoryDecorator(ISagaRepository<TSaga> sagaRepository, ReceivedMessageList received, SagaList<TSaga> created,
             SagaList<TSaga> sagas)
         {
             _sagaRepository = sagaRepository;

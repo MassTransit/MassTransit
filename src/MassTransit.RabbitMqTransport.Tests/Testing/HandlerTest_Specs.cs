@@ -16,69 +16,56 @@ namespace MassTransit.RabbitMqTransport.Tests.Testing
     using System.Threading.Tasks;
     using NUnit.Framework;
     using MassTransit.Testing;
+    using RabbitMqTransport.Testing;
     using Shouldly;
 
 
-    [Ignore("This is broken because RabbitMQ does not have subscriptions")]
+    [TestFixture]
 	public class Using_the_handler_test_factory
 	{
-		IHandlerTest<A> _test;
+        RabbitMqTestHarness _harness;
+        HandlerTestHarness<A> _handler;
 
-		[SetUp]
-		public void Setup()
-		{
-			_test = TestFactory.ForHandler<A>()
-				.New(x =>
-					{
-//						x.UseRabbitMqBusScenario();
+        [OneTimeSetUp]
+        public async Task Setup()
+        {
+            _harness = new RabbitMqTestHarness();
+            _handler = _harness.Handler<A>();
 
-						x.Send(new A());
-						x.Send(new B());
-					});
-			_test.ExecuteAsync();
-		}
+            await _harness.Start();
 
-		[TearDown]
-		public async Task Teardown()
-		{
-			await _test.DisposeAsync();
-			_test = null;
-		}
+            await _harness.InputQueueSendEndpoint.Send(new A());
+            await _harness.InputQueueSendEndpoint.Send(new B());
+        }
+
+        [OneTimeTearDown]
+        public async Task Teardown()
+        {
+            await _harness.Stop();
+        }
 
 		[Test]
 		public void Should_have_received_a_message_of_type_a()
 		{
-            _test.Received.Select<A>().Any().ShouldBe(true);
-		}
-
-		[Test]
-		public void Should_have_skipped_a_message_of_type_b()
-		{
-            _test.Skipped.Select<B>().Any().ShouldBe(true);
-		}
-
-		[Test]
-		public void Should_not_have_skipped_a_message_of_type_a()
-		{
-            _test.Skipped.Select<A>().Any().ShouldBe(false);
+            _harness.Consumed.Select<A>().Any().ShouldBe(true);
 		}
 
 		[Test]
 		public void Should_have_sent_a_message_of_type_a()
 		{
-            _test.Sent.Select<A>().Any().ShouldBe(true);
+            _harness.Sent.Select<A>().Any().ShouldBe(true);
 		}
 
 		[Test]
 		public void Should_have_sent_a_message_of_type_b()
 		{
-            _test.Sent.Select<B>().Any().ShouldBe(true);
+            _harness.Sent.Select<B>().Any().ShouldBe(true);
 		}
 
 		[Test]
 		public void Should_support_a_simple_handler()
 		{
-            _test.Handler.Received.Select().Any().ShouldBe(true);
+            _handler.Consumed.Select().Any().ShouldBe(true);
 		}
 
 		class A
