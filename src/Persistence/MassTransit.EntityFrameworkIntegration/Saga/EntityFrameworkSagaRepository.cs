@@ -36,11 +36,13 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
         static readonly ILog _log = Logger.Get<EntityFrameworkSagaRepository<TSaga>>();
         readonly IsolationLevel _isolationLevel;
         readonly SagaDbContextFactory _sagaDbContextFactory;
+        readonly bool _optimistic;
 
-        public EntityFrameworkSagaRepository(SagaDbContextFactory sagaDbContextFactory, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
+        public EntityFrameworkSagaRepository(SagaDbContextFactory sagaDbContextFactory, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted, bool optimistic = false)
         {
             _sagaDbContextFactory = sagaDbContextFactory;
             _isolationLevel = isolationLevel;
+            _optimistic = optimistic;
         }
 
         async Task<IEnumerable<Guid>> IQuerySagaRepository<TSaga>.Find(ISagaQuery<TSaga> query)
@@ -81,10 +83,13 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
             using (var dbContext = _sagaDbContextFactory())
             using (var transaction = dbContext.Database.BeginTransaction(_isolationLevel))
             {
-                // Hack for locking row for the duration of the transaction.
-                var tableName = ((IObjectContextAdapter)dbContext).ObjectContext.CreateObjectSet<TSaga>().EntitySet.Name;
-                await dbContext.Database.ExecuteSqlCommandAsync($"select 1 from {tableName} WITH (UPDLOCK, ROWLOCK) WHERE CorrelationId = @p0", sagaId)
-                    .ConfigureAwait(false);
+                if (!_optimistic)
+                {
+                    // Hack for locking row for the duration of the transaction.
+                    var tableName = ((IObjectContextAdapter)dbContext).ObjectContext.CreateObjectSet<TSaga>().EntitySet.Name;
+                    await dbContext.Database.ExecuteSqlCommandAsync($"select 1 from {tableName} WITH (UPDLOCK, ROWLOCK) WHERE CorrelationId = @p0", sagaId)
+                        .ConfigureAwait(false);
+                }
 
                 var inserted = false;
 
@@ -120,6 +125,20 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
                     await dbContext.SaveChangesAsync().ConfigureAwait(false);
 
                     transaction.Commit();
+                }
+                catch (DbUpdateConcurrencyException ex)
+                {
+                    try
+                    {
+                        transaction.Rollback();
+                    }
+                    catch (Exception innerException)
+                    {
+                        if (_log.IsWarnEnabled)
+                            _log.Warn("The transaction rollback failed", innerException);
+                    }
+
+                    throw;
                 }
                 catch (DbUpdateException ex)
                 {
@@ -180,12 +199,15 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
                             var tableName = ((IObjectContextAdapter)dbContext).ObjectContext.CreateObjectSet<TSaga>().EntitySet.Name;
                             foreach (var correlationId in correlationIds)
                             {
-                                // Hack for locking row for the duration of the transaction. 
-                                // We only lock one at a time, since we don't want an accidental range lock.
-                                await
-                                    dbContext.Database.ExecuteSqlCommandAsync(
-                                        $"select 2 from {tableName} WITH (UPDLOCK, ROWLOCK) WHERE CorrelationId = @p0",
-                                        correlationId).ConfigureAwait(false);
+                                if (!_optimistic)
+                                {
+                                    // Hack for locking row for the duration of the transaction. 
+                                    // We only lock one at a time, since we don't want an accidental range lock.
+                                    await
+                                        dbContext.Database.ExecuteSqlCommandAsync(
+                                            $"select 2 from {tableName} WITH (UPDLOCK, ROWLOCK) WHERE CorrelationId = @p0",
+                                            correlationId).ConfigureAwait(false);
+                                }
 
                                 var instance = dbContext.Set<TSaga>().SingleOrDefault(x => x.CorrelationId == correlationId);
 
@@ -211,6 +233,20 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
                         await dbContext.SaveChangesAsync().ConfigureAwait(false);
 
                         transaction.Commit();
+                    }
+                    catch (DbUpdateConcurrencyException ex)
+                    {
+                        try
+                        {
+                            transaction.Rollback();
+                        }
+                        catch (Exception innerException)
+                        {
+                            if (_log.IsWarnEnabled)
+                                _log.Warn("The transaction rollback failed", innerException);
+                        }
+
+                        throw;
                     }
                     catch (DbUpdateException ex)
                     {

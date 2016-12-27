@@ -141,10 +141,14 @@
     <Compile Include="SingleConnectionSessionFactory.cs" />
     <Compile Include="SqlLiteSessionFactoryProvider.cs" />
     <Compile Include="StateMachineTestFixture.cs" />
+    <Compile Include="Storage2Spec_Types.cs" />
     <Compile Include="TestExtensions.cs" />
     <Compile Include="Testing_Specs.cs" />
     <Compile Include="UncorrelatedMessage_Specs.cs" />
     <Compile Include="StorageSpec_Types.cs" />
+    <Compile Include="UsingEntityFrameworkConcurrencyFail_Specs.cs" />
+    <Compile Include="UsingEntityFrameworkConcurrencyPessimistic_Specs.cs" />
+    <Compile Include="UsingEntityFrameworkConcurrencyOptimistic_Specs.cs" />
     <Compile Include="UsingEntityFramework_Specs.cs" />
     <Compile Include="UsingNHibernate_Specs.cs" />
   </ItemGroup>

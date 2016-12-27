@@ -23,7 +23,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
     using NUnit.Framework;
     using Saga;
     using TestFramework;
-
+    using System.Collections.Generic;
 
     [TestFixture]
     public class When_using_EntityFramework :
@@ -93,18 +93,22 @@ namespace MassTransit.AutomatonymousIntegration.Tests
         [Test, Explicit]
         public async Task Should_handle_the_big_load()
         {
+            var tasks = new List<Task>();
+
             Guid[] sagaIds = new Guid[200];
             for (int i = 0; i < 200; i++)
             {
                 Guid correlationId = Guid.NewGuid();
 
-                InputQueueSendEndpoint.Send(new GirlfriendYelling
+                tasks.Add(InputQueueSendEndpoint.Send(new GirlfriendYelling
                 {
                     CorrelationId = correlationId
-                });
+                }));
 
                 sagaIds[i] = correlationId;
             }
+
+            await Task.WhenAll(tasks);
 
             for (int i = 0; i < 200; i++)
             {
