@@ -27,17 +27,21 @@ namespace MassTransit.HttpTransport.Tests
         static readonly ILog _log = Logger.Get<HttpTestFixture>();
 
         public HttpTestFixture()
-        {
-            HttpTestHarness = new HttpTestHarness(new Uri("http://localhost:8080"));
+            : this(new HttpTestHarness(new Uri("http://localhost:8080")))
+        {            
+        }
 
-            HttpTestHarness.OnConfigureBus += ConfigureBus;
-            HttpTestHarness.OnConfigureBusHost += ConfigureBusHost;
-            HttpTestHarness.OnConfigureRootReceiveEndpoint += ConfigureRootReceiveEndpoint;
+        public HttpTestFixture(HttpTestHarness harness)
+            : base(harness)
+        {
+            HttpTestHarness = harness;
+
+            HttpTestHarness.OnConfigureHttpBus += ConfigureHttpBus;
+            HttpTestHarness.OnConfigureHttpBusHost += ConfigureHttpBusHost;
+            HttpTestHarness.OnConfigureHttpReceiveEndpoint += ConfigureHttpReceiveEndpoint;
         }
 
         protected HttpTestHarness HttpTestHarness { get; }
-
-        protected override BusTestHarness BusTestHarness => HttpTestHarness;
 
         protected Uri HostAddress => HttpTestHarness.HostAddress;
 
@@ -57,15 +61,15 @@ namespace MassTransit.HttpTransport.Tests
             return HttpTestHarness.Stop();
         }
 
-        protected virtual void ConfigureBus(IHttpBusFactoryConfigurator configurator)
+        protected virtual void ConfigureHttpBus(IHttpBusFactoryConfigurator configurator)
         {
         }
 
-        protected virtual void ConfigureBusHost(IHttpBusFactoryConfigurator configurator, IHttpHost host)
+        protected virtual void ConfigureHttpBusHost(IHttpBusFactoryConfigurator configurator, IHttpHost host)
         {
         }
 
-        protected virtual void ConfigureRootReceiveEndpoint(IHttpReceiveEndpointConfigurator configurator)
+        protected virtual void ConfigureHttpReceiveEndpoint(IHttpReceiveEndpointConfigurator configurator)
         {
         }
     }

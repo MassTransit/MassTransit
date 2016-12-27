@@ -14,6 +14,7 @@ namespace MassTransit.Testing.Observers
 {
     using System;
     using System.Threading.Tasks;
+    using MessageObservers;
 
 
     /// <summary>
@@ -22,11 +23,11 @@ namespace MassTransit.Testing.Observers
     public class TestSendObserver :
         ISendObserver
     {
-        readonly ObservedSentMessageList _messages;
+        readonly SentMessageList _messages;
 
         public TestSendObserver(TimeSpan timeout)
         {
-            _messages = new ObservedSentMessageList(timeout);
+            _messages = new SentMessageList(timeout);
         }
 
         public ISentMessageList Messages => _messages;

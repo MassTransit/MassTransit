@@ -27,7 +27,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         [Test]
         public void Should_fault_nicely()
         {
-            var busControl = Bus.Factory.CreateUsingRabbitMq(x =>
+            IBusControl busControl = Bus.Factory.CreateUsingRabbitMq(x =>
             {
                 x.Host(new Uri("rabbitmq://unknownhost:32787"), h =>
                 {
@@ -38,7 +38,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
             Assert.That(async () =>
             {
-                var handle = await busControl.StartAsync();
+                BusHandle handle = await busControl.StartAsync();
                 try
                 {
                     Console.WriteLine("Waiting for connection...");
@@ -55,7 +55,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         [Test]
         public void Should_fault_when_credentials_are_bad()
         {
-            var busControl = Bus.Factory.CreateUsingRabbitMq(x =>
+            IBusControl busControl = Bus.Factory.CreateUsingRabbitMq(x =>
             {
                 x.Host(new Uri("rabbitmq://localhost/"), h =>
                 {
@@ -66,7 +66,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
             Assert.That(async () =>
             {
-                var handle = await busControl.StartAsync();
+                BusHandle handle = await busControl.StartAsync();
                 try
                 {
                     Console.WriteLine("Waiting for connection...");
@@ -84,14 +84,14 @@ namespace MassTransit.RabbitMqTransport.Tests
         [Explicit]
         public async Task Should_recover_from_a_crashed_server()
         {
-            var busControl = Bus.Factory.CreateUsingRabbitMq(x =>
+            IBusControl busControl = Bus.Factory.CreateUsingRabbitMq(x =>
             {
                 x.Host(new Uri("rabbitmq://localhost/"), h =>
                 {
                 });
             });
 
-            var handle = await busControl.StartAsync();
+            BusHandle handle = await busControl.StartAsync();
             try
             {
                 Console.WriteLine("Waiting for connection...");
@@ -124,14 +124,14 @@ namespace MassTransit.RabbitMqTransport.Tests
         [Explicit]
         public async Task Should_startup_and_shut_down_cleanly()
         {
-            var busControl = Bus.Factory.CreateUsingRabbitMq(x =>
+            IBusControl busControl = Bus.Factory.CreateUsingRabbitMq(x =>
             {
                 x.Host(new Uri("rabbitmq://localhost/"), h =>
                 {
                 });
             });
 
-            var handle = await busControl.StartAsync();
+            BusHandle handle = await busControl.StartAsync();
             try
             {
                 Console.WriteLine("Waiting for connection...");
@@ -148,9 +148,9 @@ namespace MassTransit.RabbitMqTransport.Tests
         [Explicit]
         public async Task Should_startup_and_shut_down_cleanly_with_an_endpoint()
         {
-            var busControl = Bus.Factory.CreateUsingRabbitMq(x =>
+            IBusControl busControl = Bus.Factory.CreateUsingRabbitMq(x =>
             {
-                var host = x.Host(new Uri("rabbitmq://localhost/"), h =>
+                IRabbitMqHost host = x.Host(new Uri("rabbitmq://localhost/"), h =>
                 {
                 });
 
@@ -162,7 +162,7 @@ namespace MassTransit.RabbitMqTransport.Tests
                 });
             });
 
-            var handle = await busControl.StartAsync();
+            BusHandle handle = await busControl.StartAsync();
             try
             {
                 Console.WriteLine("Waiting for connection...");
@@ -179,7 +179,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         [Explicit]
         public async Task Should_startup_and_shut_down_cleanly_with_publish()
         {
-            var busControl = Bus.Factory.CreateUsingRabbitMq(x =>
+            IBusControl busControl = Bus.Factory.CreateUsingRabbitMq(x =>
             {
                 x.Host(new Uri("rabbitmq://localhost/"), h =>
                 {
@@ -197,7 +197,10 @@ namespace MassTransit.RabbitMqTransport.Tests
             }
         }
 
-        protected override AsyncTestHarness AsyncTestHarness { get; } = new InMemoryTestHarness();
+        public Failing_to_connect_to_rabbitmq()
+            : base(new InMemoryTestHarness())
+        {
+        }
 
 
         public interface Test

@@ -24,7 +24,7 @@ namespace MassTransit.QuartzIntegration.Tests
         Task<ConsumeContext<SecondMessage>> _second;
         Task<ConsumeContext<FirstMessage>> _first;
 
-        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             _first = Handler<FirstMessage>(configurator, async context =>
             {

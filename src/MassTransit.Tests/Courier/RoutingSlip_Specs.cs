@@ -37,7 +37,7 @@ namespace MassTransit.Tests.Courier
 
         Task<ConsumeContext<RoutingSlip>> _received;
 
-        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             _received = Handled<RoutingSlip>(configurator);
         }

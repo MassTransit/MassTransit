@@ -217,6 +217,7 @@
     <Compile Include="Testing\ConsumerTest_Specs.cs" />
     <Compile Include="Testing\HandlerRespond_Specs.cs" />
     <Compile Include="Testing\HandlerTest_Specs.cs" />
+    <Compile Include="Testing\NewTest_Specs.cs" />
     <Compile Include="Testing\SagaTest_Specs.cs" />
     <Compile Include="Testing\StandaloneConsumer_Specs.cs" />
     <Compile Include="Threading_Specs.cs" />

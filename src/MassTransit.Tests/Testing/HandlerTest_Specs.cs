@@ -18,65 +18,52 @@ namespace MassTransit.Tests.Testing
 	using MassTransit.Testing;
 	using Shouldly;
 
-    [TestFixture, Explicit]
+    [TestFixture]
     public class Using_the_handler_test_factory
 	{
-		IHandlerTest<A> _test;
+	    InMemoryTestHarness _harness;
+        HandlerTestHarness<A> _handler;
 
-		[SetUp]
-		public void Setup()
+        [OneTimeSetUp]
+		public async Task Setup()
 		{
-			_test = TestFactory.ForHandler<A>()
-				.New(x =>
-					{
-						x.Send(new A());
-						x.Send(new B());
-					});
+            _harness = new InMemoryTestHarness();
+            _handler = _harness.Handler<A>();
 
-			_test.ExecuteAsync();
+            await _harness.Start();
+
+            await _harness.InputQueueSendEndpoint.Send(new A());
+            await _harness.InputQueueSendEndpoint.Send(new B());
 		}
 
-		[TearDown]
+		[OneTimeTearDown]
 		public async Task Teardown()
 		{
-			await _test.DisposeAsync();
-			_test = null;
+			await _harness.Stop();
 		}
 
 		[Test]
 		public void Should_have_received_a_message_of_type_a()
 		{
-			_test.Received.Select<A>().Any().ShouldBe(true);
-		}
-
-		[Test]
-		public void Should_have_skipped_a_message_of_type_b()
-		{
-			_test.Skipped.Select<B>().Any().ShouldBe(true);
-		}
-
-		[Test]
-		public void Should_not_have_skipped_a_message_of_type_a()
-		{
-            _test.Skipped.Select<A>().Any().ShouldBe(false);
+            _harness.Consumed.Select<A>().Any().ShouldBe(true);
 		}
 
 		[Test]
 		public void Should_have_sent_a_message_of_type_a()
 		{
-            _test.Sent.Select<A>().Any().ShouldBe(true);
+            _harness.Sent.Select<A>().Any().ShouldBe(true);
 		}
 
 		[Test]
 		public void Should_have_sent_a_message_of_type_b()
 		{
-            _test.Sent.Select<B>().Any().ShouldBe(true);
+            _harness.Sent.Select<B>().Any().ShouldBe(true);
 		}
 
 		[Test]
 		public void Should_support_a_simple_handler()
 		{
-			_test.Handler.Received.Select().Any().ShouldBe(true);
+            _handler.Consumed.Select().Any().ShouldBe(true);
 		}
 
 		class A
@@ -88,142 +75,59 @@ namespace MassTransit.Tests.Testing
 		}
 	}
 
-       
-    [TestFixture, Explicit]
-	public class Using_the_handler_on_a_remote_bus
-	{
-		IHandlerTest<A> _test;
 
-		[SetUp]
-		public void Setup()
-		{
-			_test = TestFactory.ForHandler<A>()
-				.New(x =>
-					{
-						x.Send(new A());
-						x.Send(new B());
-					});
-
-			_test.ExecuteAsync();
-		}
-
-		[TearDown]
-		public async Task Teardown()
-		{
-			await _test.DisposeAsync();
-			_test = null;
-		}
-
-		[Test]
-		public void Should_have_received_a_message_of_type_a()
-		{
-            _test.Received.Select<A>().Any().ShouldBe(true);
-		}
-
-		[Test]
-		public void Should_have_skipped_a_message_of_type_b()
-		{
-            _test.Skipped.Select<B>().Any().ShouldBe(true);
-		}
-
-		[Test]
-		public void Should_not_have_skipped_a_message_of_type_a()
-		{
-            _test.Skipped.Select<A>().Any().ShouldBe(false);
-		}
-
-		[Test]
-		public void Should_have_sent_a_message_of_type_a()
-		{
-            _test.Sent.Select<A>().Any().ShouldBe(true);
-		}
-
-		[Test]
-		public void Should_have_sent_a_message_of_type_b()
-		{
-            _test.Sent.Select<B>().Any().ShouldBe(true);
-		}
-
-		[Test]
-		public void Should_support_a_simple_handler()
-		{
-			_test.Handler.Received.Select().Any().ShouldBe(true);
-		}
-
-		class A
-		{
-		}
-
-		class B
-		{
-		}
-	}
-
-    [TestFixture, Explicit]
+    [TestFixture]
 	public class Publishing_to_a_handler_test
 	{
-		IHandlerTest<A> _test;
+        InMemoryTestHarness _harness;
+        HandlerTestHarness<A> _handler;
 
-		[SetUp]
-		public void Setup()
-		{
-			_test = TestFactory.ForHandler<A>()
-				.New(x =>
-					{
-						x.Publish(new A());
-						x.Publish(new B());
-					});
+        [OneTimeSetUp]
+        public async Task Setup()
+        {
+            _harness = new InMemoryTestHarness();
+            _handler = _harness.Handler<A>();
 
-			_test.ExecuteAsync();
-		}
+            await _harness.Start();
 
-		[TearDown]
-		public async Task Teardown()
-		{
-			await _test.DisposeAsync();
-			_test = null;
-		}
+            await _harness.Bus.Publish(new A());
+            await _harness.Bus.Publish(new B());
+        }
+
+        [OneTimeTearDown]
+        public async Task Teardown()
+        {
+            await _harness.Stop();
+        }
 
 		[Test]
 		public void Should_have_received_a_message_of_type_a()
 		{
-            _test.Received.Select<A>().Any().ShouldBe(true);
+            _harness.Consumed.Select<A>().Any().ShouldBe(true);
 		}
 
 		[Test]
 		public void Should_have_published_a_message_of_type_b()
 		{
-            _test.Published.Select<B>().Any().ShouldBe(true);
+            _harness.Published.Select<B>().Any().ShouldBe(true);
 		}
 
 		[Test]
 		public void Should_have_published_a_message_of_type_ib()
 		{
-            _test.Published.Select<IB>().Any().ShouldBe(true);
-		}
-
-		[Test]
-		public void Should_not_have_skipped_a_message_of_type_a()
-		{
-            _test.Skipped.Select<A>().Any().ShouldBe(false);
+            _harness.Published.Select<IB>().Any().ShouldBe(true);
 		}
 
 		[Test]
 		public void Should_have_sent_a_message_of_type_a()
 		{
-            _test.Sent.Select<A>().Any().ShouldBe(true);
-		}
-
-		[Test]
-		public void Should_not_have_sent_a_message_of_type_b()
-		{
-            _test.Sent.Select<B>().Any().ShouldBe(false);
+            _harness.Sent.Select<A>().Any().ShouldBe(true);
 		}
 
 		[Test]
 		public void Should_support_a_simple_handler()
 		{
-			_test.Handler.Received.Select().Any().ShouldBe(true);
+			_handler.Consumed.Select().Any().ShouldBe(true);
 		}
 
 		class A

@@ -28,11 +28,15 @@ namespace MassTransit.RabbitMqTransport.Tests
     {
         protected RabbitMqTestHarness RabbitMqTestHarness { get; }
 
-        protected override BusTestHarness BusTestHarness => RabbitMqTestHarness;
-
         public RabbitMqTestFixture(Uri logicalHostAddress = null, string inputQueueName = null)
+            : this(new RabbitMqTestHarness(inputQueueName))
         {
-            RabbitMqTestHarness = new RabbitMqTestHarness(inputQueueName);
+            
+        }
+        public RabbitMqTestFixture(RabbitMqTestHarness harness, Uri logicalHostAddress = null)
+            : base(harness)
+        {
+            RabbitMqTestHarness = harness;
 
             if (logicalHostAddress != null)
             {
@@ -40,9 +44,9 @@ namespace MassTransit.RabbitMqTransport.Tests
                 RabbitMqTestHarness.HostAddress = logicalHostAddress;
             }
 
-            RabbitMqTestHarness.OnConfigureBus += ConfigureBus;
-            RabbitMqTestHarness.OnConfigureBusHost += ConfigureBusHost;
-            RabbitMqTestHarness.OnConfigureInputQueueEndpoint += ConfigureInputQueueEndpoint;
+            RabbitMqTestHarness.OnConfigureRabbitMqBus += ConfigureRabbitMqBus;
+            RabbitMqTestHarness.OnConfigureRabbitMqBusHost += ConfigureRabbitMqBusHost;
+            RabbitMqTestHarness.OnConfigureRabbitMqReceiveEndoint += ConfigureRabbitMqReceiveEndoint;
             RabbitMqTestHarness.OnCleanupVirtualHost += OnCleanupVirtualHost;
         }
 
@@ -76,15 +80,15 @@ namespace MassTransit.RabbitMqTransport.Tests
             return RabbitMqTestHarness.Stop();
         }
 
-        protected virtual void ConfigureBus(IRabbitMqBusFactoryConfigurator configurator)
+        protected virtual void ConfigureRabbitMqBus(IRabbitMqBusFactoryConfigurator configurator)
         {
         }
 
-        protected virtual void ConfigureBusHost(IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host)
+        protected virtual void ConfigureRabbitMqBusHost(IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host)
         {
         }
 
-        protected virtual void ConfigureInputQueueEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
+        protected virtual void ConfigureRabbitMqReceiveEndoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
         }
 

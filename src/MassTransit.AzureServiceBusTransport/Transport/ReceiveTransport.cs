@@ -19,7 +19,6 @@ namespace MassTransit.AzureServiceBusTransport.Transport
     using Events;
     using GreenPipes;
     using Logging;
-    using MassTransit.Pipeline;
     using MassTransit.Pipeline.Observables;
     using Policies;
     using Transports;
@@ -32,14 +31,17 @@ namespace MassTransit.AzureServiceBusTransport.Transport
         static readonly ILog _log = Logger.Get<ReceiveTransport>();
         readonly ReceiveTransportObservable _endpointObservers;
         readonly IServiceBusHost _host;
+        readonly IPublishEndpointProvider _publishEndpointProvider;
         readonly ReceiveObservable _receiveObservers;
         readonly ClientSettings _settings;
         readonly IPipeSpecification<NamespaceContext>[] _specifications;
 
-        public ReceiveTransport(IServiceBusHost host, ClientSettings settings, IPipeSpecification<NamespaceContext>[] specifications)
+        public ReceiveTransport(IServiceBusHost host, ClientSettings settings, IPublishEndpointProvider publishEndpointProvider,
+            IPipeSpecification<NamespaceContext>[] specifications)
         {
             _host = host;
             _settings = settings;
+            _publishEndpointProvider = publishEndpointProvider;
             _specifications = specifications;
             _receiveObservers = new ReceiveObservable();
             _endpointObservers = new ReceiveTransportObservable();
@@ -47,7 +49,7 @@ namespace MassTransit.AzureServiceBusTransport.Transport
 
         void IProbeSite.Probe(ProbeContext context)
         {
-            var scope = context.CreateScope("transport");
+            ProbeContext scope = context.CreateScope("transport");
             scope.Set(new
             {
                 Type = "Azure Service Bus",
@@ -59,7 +61,7 @@ namespace MassTransit.AzureServiceBusTransport.Transport
 
         public ReceiveTransportHandle Start(IPipe<ReceiveContext> receivePipe)
         {
-            var inputAddress = _settings.GetInputAddress(_host.Settings.ServiceUri);
+            Uri inputAddress = _settings.GetInputAddress(_host.Settings.ServiceUri);
 
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Starting receive transport: {0}", inputAddress);
@@ -91,9 +93,14 @@ namespace MassTransit.AzureServiceBusTransport.Transport
             return _endpointObservers.Connect(observer);
         }
 
+        public ConnectHandle ConnectPublishObserver(IPublishObserver observer)
+        {
+            return _publishEndpointProvider.ConnectPublishObserver(observer);
+        }
+
         async void Receiver(IPipe<NamespaceContext> pipe, TaskSupervisor supervisor)
         {
-            var inputAddress = _settings.GetInputAddress(_host.Settings.ServiceUri);
+            Uri inputAddress = _settings.GetInputAddress(_host.Settings.ServiceUri);
 
             try
             {

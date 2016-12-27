@@ -99,7 +99,7 @@
             }));
         }
 
-        protected override void ConfigureBusHost(IServiceBusBusFactoryConfigurator configurator, IServiceBusHost host)
+        protected override void ConfigureServiceBusBusHost(IServiceBusBusFactoryConfigurator configurator, IServiceBusHost host)
         {
             configurator.ReceiveEndpoint(host, "input_queue_error", x =>
             {
@@ -107,7 +107,7 @@
             });
         }
 
-        protected override void ConfigureInputQueueEndpoint(IServiceBusReceiveEndpointConfigurator configurator)
+        protected override void ConfigureServiceBusReceiveEndpoint(IServiceBusReceiveEndpointConfigurator configurator)
         {
             Handler<PingMessage>(configurator, async context =>
             {

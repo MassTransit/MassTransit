@@ -23,9 +23,13 @@ namespace MassTransit.TestFramework
     public abstract class BusTestFixture :
         AsyncTestFixture
     {
-        protected abstract BusTestHarness BusTestHarness { get; }
+        protected BusTestFixture(BusTestHarness harness)
+            : base(harness)
+        {
+            BusTestHarness = harness;
+        }
 
-        protected override AsyncTestHarness AsyncTestHarness => BusTestHarness;
+        protected BusTestHarness BusTestHarness { get; }
 
         protected IBus Bus => BusTestHarness.Bus;
 
@@ -112,7 +116,6 @@ namespace MassTransit.TestFramework
         protected virtual void ConnectObservers(IBus bus)
         {
         }
-
 
         protected void LogEndpoint(IReceiveEndpointConfigurator configurator)
         {

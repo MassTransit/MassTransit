@@ -47,7 +47,7 @@ namespace MassTransit.Tests
             Assert.AreEqual("AAD:Claims", identity.IdentityType);
         }
 
-        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             _header = GetTask<ClaimsIdentity>();
 

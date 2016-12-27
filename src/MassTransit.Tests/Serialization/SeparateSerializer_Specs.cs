@@ -41,9 +41,9 @@ namespace MassTransit.Tests.Serialization
 
         Task<ConsumeContext<PingMessage>> _handled;
 
-        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
-            base.ConfigureInputQueueEndpoint(configurator);
+            base.ConfigureInMemoryReceiveEndpoint(configurator);
 
             configurator.UseBsonSerializer();
 

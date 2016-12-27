@@ -30,9 +30,9 @@ namespace MassTransit.RabbitMqTransport.Tests
             await _second;
         }
 
-        protected override void ConfigureBusHost(IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host)
+        protected override void ConfigureRabbitMqBusHost(IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host)
         {
-            base.ConfigureBusHost(configurator, host);
+            base.ConfigureRabbitMqBusHost(configurator, host);
 
             configurator.UseDelayedExchangeMessageScheduler();
         }
@@ -40,7 +40,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         Task<ConsumeContext<SecondMessage>> _second;
         Task<ConsumeContext<FirstMessage>> _first;
 
-        protected override void ConfigureInputQueueEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
+        protected override void ConfigureRabbitMqReceiveEndoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
             _first = Handler<FirstMessage>(configurator, async context =>
             {
@@ -76,9 +76,9 @@ namespace MassTransit.RabbitMqTransport.Tests
             await _second;
         }
 
-        protected override void ConfigureBusHost(IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host)
+        protected override void ConfigureRabbitMqBusHost(IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host)
         {
-            base.ConfigureBusHost(configurator, host);
+            base.ConfigureRabbitMqBusHost(configurator, host);
 
             configurator.UseDelayedExchangeMessageScheduler();
         }
@@ -86,7 +86,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         Task<ConsumeContext<SecondMessage>> _second;
         Task<ConsumeContext<FirstMessage>> _first;
 
-        protected override void ConfigureInputQueueEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
+        protected override void ConfigureRabbitMqReceiveEndoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
             _first = Handler<FirstMessage>(configurator, async context =>
             {
@@ -122,9 +122,9 @@ namespace MassTransit.RabbitMqTransport.Tests
             await _second;
         }
 
-        protected override void ConfigureBusHost(IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host)
+        protected override void ConfigureRabbitMqBusHost(IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host)
         {
-            base.ConfigureBusHost(configurator, host);
+            base.ConfigureRabbitMqBusHost(configurator, host);
 
             configurator.UseDelayedExchangeMessageScheduler();
         }
@@ -132,7 +132,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         Task<ConsumeContext<SecondMessage>> _second;
         Task<ConsumeContext<FirstMessage>> _first;
 
-        protected override void ConfigureInputQueueEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
+        protected override void ConfigureRabbitMqReceiveEndoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
             _first = Handler<FirstMessage>(configurator, async context =>
             {

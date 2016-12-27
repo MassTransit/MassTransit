@@ -21,62 +21,61 @@ namespace MassTransit.Tests.Testing
 	using MassTransit.Testing;
 	using Shouldly;
 
-    [Explicit]
     public class When_a_saga_is_being_tested
 	{
 		Guid _sagaId;
-		SagaTest<IBusTestScenario, TestSaga> _test;
 		string _testValueA;
+        InMemoryTestHarness _harness;
+        SagaTestHarness<TestSaga> _saga;
 
-		[SetUp]
-		public void A_saga_is_being_tested()
+        [OneTimeSetUp]
+		public async Task A_saga_is_being_tested()
 		{
 			_sagaId = Guid.NewGuid();
 			_testValueA = "TestValueA";
 
-			_test = TestFactory.ForSaga<TestSaga>()
-				.New(x =>
-					{
-						x.Send(new A
+            _harness = new InMemoryTestHarness();
+            _saga = _harness.Saga<TestSaga>();
+
+            await _harness.Start();
+
+            await _harness.InputQueueSendEndpoint.Send(new A
 							{
 								CorrelationId = _sagaId, 
 								Value = _testValueA
 							});
-					});
 
-			_test.ExecuteAsync();
 		}
 
-		[TearDown]
+		[OneTimeTearDown]
 		public async Task Teardown()
 		{
-			await _test.DisposeAsync();
-			_test = null;
+			await _harness.Stop();
 		}
 
 
 		[Test]
 		public void Should_send_the_initial_message_to_the_consumer()
 		{
-            _test.Sent.Select<A>().Any().ShouldBe(true);
+            _harness.Sent.Select<A>().Any().ShouldBe(true);
 		}
 
 		[Test]
 		public void Should_receive_the_message_type_a()
 		{
-            _test.Received.Select<A>().Any().ShouldBe(true);
+            _harness.Consumed.Select<A>().Any().ShouldBe(true);
 		}
 
 		[Test]
 		public void Should_create_a_new_saga_for_the_message()
 		{
-            _test.Saga.Created.Select(x => x.CorrelationId == _sagaId).Any().ShouldBe(true);
+            _saga.Created.Select(x => x.CorrelationId == _sagaId).Any().ShouldBe(true);
 		}
 
 		[Test]
 		public void Should_have_the_saga_instance_with_the_value()
 		{
-			TestSaga saga = _test.Saga.Created.Contains(_sagaId);
+			TestSaga saga = _saga.Created.Contains(_sagaId);
 			saga.ShouldNotBe(null);
 
 			saga.ValueA.ShouldBe(_testValueA);
@@ -85,13 +84,13 @@ namespace MassTransit.Tests.Testing
 		[Test]
 		public void Should_have_published_event_message()
 		{
-			_test.Published.Select<Aa>().Any().ShouldBe(true);
+			_harness.Published.Select<Aa>().Any().ShouldBe(true);
 		}
 
 		[Test]
 		public void Should_have_called_the_consumer_method()
 		{
-            _test.Saga.Received.Select<A>().Any().ShouldBe(true);
+            _saga.Consumed.Select<A>().Any().ShouldBe(true);
 		}
 
 		class TestSaga :

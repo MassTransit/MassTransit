@@ -17,6 +17,7 @@ namespace MassTransit.Tests
     using System.Threading.Tasks;
     using GreenPipes;
     using MassTransit.Testing;
+    using MassTransit.Testing.MessageObservers;
     using NUnit.Framework;
     using Shouldly;
     using TestFramework;
@@ -37,7 +38,7 @@ namespace MassTransit.Tests
 
         PingConsumer _consumer;
 
-        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             _consumer = new PingConsumer(TimeSpan.FromSeconds(5));
 

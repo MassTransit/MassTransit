@@ -36,9 +36,9 @@ namespace MassTransit.Tests.Transforms
 
         Task<ConsumeContext<A>> _received;
 
-        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
-            base.ConfigureInputQueueEndpoint(configurator);
+            base.ConfigureInMemoryReceiveEndpoint(configurator);
 
             configurator.UseTransform<A>(x => x.Get<FullTransform>());
 

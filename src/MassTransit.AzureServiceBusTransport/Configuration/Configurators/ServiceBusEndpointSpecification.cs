@@ -133,7 +133,7 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
                 .Select(x => (IPipeSpecification<NamespaceContext>)new FilterPipeSpecification<NamespaceContext>(x))
                 .ToArray();
 
-            var transport = new ReceiveTransport(Host, _settings, specifications);
+            var transport = new ReceiveTransport(Host, _settings, _publishEndpointProvider, specifications);
 
             var serviceBusHost = Host as ServiceBusHost;
             if (serviceBusHost == null)

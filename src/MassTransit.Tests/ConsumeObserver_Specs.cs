@@ -42,7 +42,7 @@ namespace MassTransit.Tests
                 context.ShouldNotBeNull();
             }
 
-            TestConsumeObserver<PingMessage> _pingObserver;
+            TestConsumeMessageObserver<PingMessage> _pingObserver;
             TestConsumeObserver _observer;
 
             [OneTimeSetUp]
@@ -57,7 +57,7 @@ namespace MassTransit.Tests
                 await Bus.Publish(new PingMessage());
             }
 
-            protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+            protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
             {
                 Handled<PingMessage>(configurator);
             }

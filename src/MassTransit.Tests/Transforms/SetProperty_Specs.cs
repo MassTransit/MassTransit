@@ -35,9 +35,9 @@ namespace MassTransit.Tests.Transforms
 
         Task<ConsumeContext<A>> _received;
 
-        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
-            base.ConfigureInputQueueEndpoint(configurator);
+            base.ConfigureInMemoryReceiveEndpoint(configurator);
 
             configurator.UseTransform<A>(t =>
             {
@@ -74,9 +74,9 @@ namespace MassTransit.Tests.Transforms
 
         Task<ConsumeContext<A>> _received;
 
-        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
-            base.ConfigureInputQueueEndpoint(configurator);
+            base.ConfigureInMemoryReceiveEndpoint(configurator);
 
             configurator.UseTransform<A>(t =>
             {
@@ -121,9 +121,9 @@ namespace MassTransit.Tests.Transforms
         Task<ConsumeContext<IA>> _received;
         TaskCompletionSource<IA> _tweaked;
 
-        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
-            base.ConfigureInputQueueEndpoint(configurator);
+            base.ConfigureInMemoryReceiveEndpoint(configurator);
 
             _received = Handled<IA>(configurator);
 
@@ -174,9 +174,9 @@ namespace MassTransit.Tests.Transforms
         Task<ConsumeContext<IA>> _received;
         TaskCompletionSource<IA> _tweaked;
 
-        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
-            base.ConfigureInputQueueEndpoint(configurator);
+            base.ConfigureInMemoryReceiveEndpoint(configurator);
 
             _received = Handled<IA>(configurator);
 

@@ -69,16 +69,16 @@ namespace MassTransit.AutomatonymousIntegration.Tests
             }
         }
 
-        protected override void ConfigureBus(IInMemoryBusFactoryConfigurator configurator)
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
-            base.ConfigureBus(configurator);
+            base.ConfigureInMemoryBus(configurator);
 
             configurator.ReceiveEndpoint("service_queue", ConfigureServiceQueueEndpoint);
         }
 
-        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
-            base.ConfigureInputQueueEndpoint(configurator);
+            base.ConfigureInMemoryReceiveEndpoint(configurator);
 
             _repository = new InMemorySagaRepository<Request_Specs.TestState>();
 

@@ -24,7 +24,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
     public class Using_a_simple_state_machine :
         InMemoryTestFixture
     {
-        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             configurator.StateMachineSaga(_machine, _repository);
         }

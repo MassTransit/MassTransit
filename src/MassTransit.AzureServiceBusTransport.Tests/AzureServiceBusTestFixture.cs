@@ -28,22 +28,26 @@ namespace MassTransit.AzureServiceBusTransport.Tests
     {
         protected AzureServiceBusTestHarness AzureServiceBusTestHarness { get; }
 
-        protected override BusTestHarness BusTestHarness => AzureServiceBusTestHarness;
-
         static readonly ILog _log = Logger.Get<AzureServiceBusTestFixture>();
 
         public AzureServiceBusTestFixture(string inputQueueName = null, Uri serviceUri = null, ServiceBusTokenProviderSettings settings = null)
+            : this(new AzureServiceBusTestHarness(
+                serviceUri ?? ServiceBusEnvironment.CreateServiceUri("sb", "masstransit-build", "MassTransit.AzureServiceBusTransport.Tests"),
+                settings?.KeyName ?? ((ServiceBusTokenProviderSettings)new TestAzureServiceBusAccountSettings()).KeyName,
+                settings?.SharedAccessKey ?? ((ServiceBusTokenProviderSettings)new TestAzureServiceBusAccountSettings()).SharedAccessKey,
+                inputQueueName))
         {
-            serviceUri = serviceUri ?? ServiceBusEnvironment.CreateServiceUri("sb", "masstransit-build", "MassTransit.AzureServiceBusTransport.Tests");
+        }
 
-            settings = settings ?? new TestAzureServiceBusAccountSettings();
-
-            AzureServiceBusTestHarness = new AzureServiceBusTestHarness(serviceUri, settings.KeyName, settings.SharedAccessKey, inputQueueName);
+        protected AzureServiceBusTestFixture(AzureServiceBusTestHarness harness)
+            : base(harness)
+        {
+            AzureServiceBusTestHarness = harness;
 
             AzureServiceBusTestHarness.OnConnectObservers += ConnectObservers;
-            AzureServiceBusTestHarness.OnConfigureBus += ConfigureBus;
-            AzureServiceBusTestHarness.OnConfigureBusHost += ConfigureBusHost;
-            AzureServiceBusTestHarness.OnConfigureInputQueueEndpoint += ConfigureInputQueueEndpoint;
+            AzureServiceBusTestHarness.OnConfigureServiceBusBus += ConfigureServiceBusBus;
+            AzureServiceBusTestHarness.OnConfigureServiceBusBusHost += ConfigureServiceBusBusHost;
+            AzureServiceBusTestHarness.OnConfigureServiceBusReceiveEndpoint += ConfigureServiceBusReceiveEndpoint;
         }
 
         protected string InputQueueName => AzureServiceBusTestHarness.InputQueueName;
@@ -76,15 +80,15 @@ namespace MassTransit.AzureServiceBusTransport.Tests
             return AzureServiceBusTestHarness.Stop();
         }
 
-        protected virtual void ConfigureBus(IServiceBusBusFactoryConfigurator configurator)
+        protected virtual void ConfigureServiceBusBus(IServiceBusBusFactoryConfigurator configurator)
         {
         }
 
-        protected virtual void ConfigureBusHost(IServiceBusBusFactoryConfigurator configurator, IServiceBusHost host)
+        protected virtual void ConfigureServiceBusBusHost(IServiceBusBusFactoryConfigurator configurator, IServiceBusHost host)
         {
         }
 
-        protected virtual void ConfigureInputQueueEndpoint(IServiceBusReceiveEndpointConfigurator configurator)
+        protected virtual void ConfigureServiceBusReceiveEndpoint(IServiceBusReceiveEndpointConfigurator configurator)
         {
         }
 

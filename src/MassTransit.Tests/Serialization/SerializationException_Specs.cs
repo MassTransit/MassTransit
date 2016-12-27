@@ -40,7 +40,7 @@ namespace MassTransit.Tests.Serialization
 //            errorTransport.Count.ShouldBe(1);
         }
 
-        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             Handled<BadMessage>(configurator);
         }

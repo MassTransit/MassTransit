@@ -52,7 +52,7 @@ namespace MassTransit.RabbitMqTransport.Builders
             _exchangeBindings.AddRange(bindings);
         }
 
-        public override ISendEndpointProvider CreateSendEndpointProvider(Uri sourceAddress, params ISendPipeSpecification[] specifications)
+        public ISendEndpointProvider CreateSendEndpointProvider(Uri sourceAddress, params ISendPipeSpecification[] specifications)
         {
             var pipe = CreateSendPipe(specifications);
 
@@ -61,7 +61,7 @@ namespace MassTransit.RabbitMqTransport.Builders
             return new SendEndpointCache(provider, CacheDurationProvider);
         }
 
-        public override IPublishEndpointProvider CreatePublishEndpointProvider(Uri sourceAddress, params IPublishPipeSpecification[] specifications)
+        public IPublishEndpointProvider CreatePublishEndpointProvider(Uri sourceAddress, params IPublishPipeSpecification[] specifications)
         {
             var pipe = CreatePublishPipe(specifications);
 

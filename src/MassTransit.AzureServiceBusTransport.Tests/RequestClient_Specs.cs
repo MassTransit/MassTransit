@@ -24,7 +24,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
         Task<ConsumeContext<PingMessage>> _handler;
         IRequestClient<PingMessage, PongMessage> _requestClient;
 
-        protected override void ConfigureInputQueueEndpoint(IServiceBusReceiveEndpointConfigurator configurator)
+        protected override void ConfigureServiceBusReceiveEndpoint(IServiceBusReceiveEndpointConfigurator configurator)
         {
             _handler = Handler<PingMessage>(configurator, context => context.RespondAsync(new PongMessage(context.Message.CorrelationId)));
         }

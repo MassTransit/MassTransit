@@ -43,16 +43,16 @@ namespace MassTransit.Tests
             Assert.AreEqual(TaskStatus.RanToCompletion, updated.Status);
         }
 
-        protected override void ConfigureBus(IInMemoryBusFactoryConfigurator configurator)
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
             _management = configurator.ManagementEndpoint();
 
-            base.ConfigureBus(configurator);
+            base.ConfigureInMemoryBus(configurator);
         }
 
-        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
-            base.ConfigureInputQueueEndpoint(configurator);
+            base.ConfigureInMemoryReceiveEndpoint(configurator);
 
             configurator.UseConcurrencyLimit(32, _management);
         }

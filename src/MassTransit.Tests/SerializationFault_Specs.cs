@@ -43,11 +43,11 @@ namespace MassTransit.Tests
             _response = _requestClient.Request(new PingMessage());
         }
 
-        protected override void ConfigureBus(IInMemoryBusFactoryConfigurator configurator)
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
         }
 
-        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             Handler<PingMessage>(configurator, async context =>
             {
@@ -90,12 +90,12 @@ namespace MassTransit.Tests
             _response = _requestClient.Request(new PingMessage2());
         }
 
-        protected override void ConfigureBus(IInMemoryBusFactoryConfigurator configurator)
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
             configurator.UseBinarySerializer();
         }
 
-        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             Handler<PingMessage2>(configurator, async context =>
             {
@@ -125,7 +125,7 @@ namespace MassTransit.Tests
             var faultContext = await _faulted;
         }
 
-        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             _handled = Handled<PingMessage>(configurator);
 

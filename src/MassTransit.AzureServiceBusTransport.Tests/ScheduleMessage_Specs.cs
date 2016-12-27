@@ -36,7 +36,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
         Task<ConsumeContext<SecondMessage>> _second;
         Task<ConsumeContext<FirstMessage>> _first;
 
-        protected override void ConfigureInputQueueEndpoint(IServiceBusReceiveEndpointConfigurator configurator)
+        protected override void ConfigureServiceBusReceiveEndpoint(IServiceBusReceiveEndpointConfigurator configurator)
         {
             _first = Handler<FirstMessage>(configurator, async context =>
             {
@@ -71,9 +71,9 @@ namespace MassTransit.AzureServiceBusTransport.Tests
             await _second;
         }
 
-        protected override void ConfigureBusHost(IServiceBusBusFactoryConfigurator configurator, IServiceBusHost host)
+        protected override void ConfigureServiceBusBusHost(IServiceBusBusFactoryConfigurator configurator, IServiceBusHost host)
         {
-            base.ConfigureBusHost(configurator, host);
+            base.ConfigureServiceBusBusHost(configurator, host);
 
             configurator.UseServiceBusMessageScheduler();
         }
@@ -81,7 +81,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
         Task<ConsumeContext<SecondMessage>> _second;
         Task<ConsumeContext<FirstMessage>> _first;
 
-        protected override void ConfigureInputQueueEndpoint(IServiceBusReceiveEndpointConfigurator configurator)
+        protected override void ConfigureServiceBusReceiveEndpoint(IServiceBusReceiveEndpointConfigurator configurator)
         {
             _first = Handler<FirstMessage>(configurator, async context =>
             {
@@ -116,9 +116,9 @@ namespace MassTransit.AzureServiceBusTransport.Tests
             Assert.That(async () => await _second.WithTimeout(TimeSpan.FromSeconds(8)), Throws.TypeOf<TaskCanceledException>());
         }
 
-        protected override void ConfigureBusHost(IServiceBusBusFactoryConfigurator configurator, IServiceBusHost host)
+        protected override void ConfigureServiceBusBusHost(IServiceBusBusFactoryConfigurator configurator, IServiceBusHost host)
         {
-            base.ConfigureBusHost(configurator, host);
+            base.ConfigureServiceBusBusHost(configurator, host);
 
             configurator.UseServiceBusMessageScheduler();
         }
@@ -126,7 +126,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
         Task<ConsumeContext<SecondMessage>> _second;
         Task<ConsumeContext<FirstMessage>> _first;
 
-        protected override void ConfigureInputQueueEndpoint(IServiceBusReceiveEndpointConfigurator configurator)
+        protected override void ConfigureServiceBusReceiveEndpoint(IServiceBusReceiveEndpointConfigurator configurator)
         {
             _first = Handler<FirstMessage>(configurator, async context =>
             {

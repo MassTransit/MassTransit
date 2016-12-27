@@ -18,11 +18,12 @@ namespace MassTransit.Testing.Subjects
     using System.Threading;
     using System.Threading.Tasks;
     using Configurators;
+    using Decorators;
     using GreenPipes.Util;
+    using MessageObservers;
     using Saga;
     using ScenarioBuilders;
     using ScenarioConfigurators;
-    using TestDecorators;
 
 
     public class SagaTestSubjectImpl<TScenario, TSaga> :
@@ -32,9 +33,9 @@ namespace MassTransit.Testing.Subjects
         where TScenario : IBusTestScenario
     {
         readonly ISagaRepository<TSaga> _sagaRepository;
-        SagaListImpl<TSaga> _created;
+        SagaList<TSaga> _created;
         ReceivedMessageList _received;
-        SagaListImpl<TSaga> _sagas;
+        SagaList<TSaga> _sagas;
 
         public SagaTestSubjectImpl(ISagaRepository<TSaga> sagaRepository)
         {
@@ -44,8 +45,8 @@ namespace MassTransit.Testing.Subjects
         public ITestScenarioBuilder<TScenario> Configure(ITestScenarioBuilder<TScenario> builder)
         {
             _received = new ReceivedMessageList(builder.Timeout);
-            _created = new SagaListImpl<TSaga>(builder.Timeout);
-            _sagas = new SagaListImpl<TSaga>(builder.Timeout);
+            _created = new SagaList<TSaga>(builder.Timeout);
+            _sagas = new SagaList<TSaga>(builder.Timeout);
 
             var decoratedSagaRepository = new SagaRepositoryTestDecorator<TSaga>(_sagaRepository, _received, _created, _sagas);
 

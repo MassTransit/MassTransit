@@ -19,7 +19,6 @@ namespace MassTransit.RabbitMqTransport.Transport
     using GreenPipes;
     using GreenPipes.Internals.Extensions;
     using Logging;
-    using MassTransit.Pipeline;
     using MassTransit.Pipeline.Observables;
     using MassTransit.Pipeline.Pipes;
     using Policies;
@@ -33,16 +32,17 @@ namespace MassTransit.RabbitMqTransport.Transport
     {
         static readonly ILog _log = Logger.Get<RabbitMqReceiveTransport>();
         readonly ExchangeBindingSettings[] _bindings;
-        readonly ISendEndpointProvider _sendEndpointProvider;
-        readonly IPublishEndpointProvider _publishEndpointProvider;
         readonly IRabbitMqHost _host;
         readonly Uri _inputAddress;
         readonly IManagementPipe _managementPipe;
+        readonly IPublishEndpointProvider _publishEndpointProvider;
         readonly ReceiveObservable _receiveObservable;
         readonly ReceiveTransportObservable _receiveTransportObservable;
+        readonly ISendEndpointProvider _sendEndpointProvider;
         readonly ReceiveSettings _settings;
 
-        public RabbitMqReceiveTransport(IRabbitMqHost host, ReceiveSettings settings, IManagementPipe managementPipe, ExchangeBindingSettings[] bindings, ISendEndpointProvider sendEndpointProvider, IPublishEndpointProvider publishEndpointProvider)
+        public RabbitMqReceiveTransport(IRabbitMqHost host, ReceiveSettings settings, IManagementPipe managementPipe, ExchangeBindingSettings[] bindings,
+            ISendEndpointProvider sendEndpointProvider, IPublishEndpointProvider publishEndpointProvider)
         {
             _host = host;
             _settings = settings;
@@ -59,7 +59,7 @@ namespace MassTransit.RabbitMqTransport.Transport
 
         void IProbeSite.Probe(ProbeContext context)
         {
-            var scope = context.CreateScope("transport");
+            ProbeContext scope = context.CreateScope("transport");
             scope.Add("type", "RabbitMQ");
             scope.Set(_settings);
             scope.Add("bindings", _bindings);
@@ -77,7 +77,8 @@ namespace MassTransit.RabbitMqTransport.Transport
 
             IPipe<ConnectionContext> pipe = Pipe.New<ConnectionContext>(x =>
             {
-                x.RabbitMqConsumer(receivePipe, _settings, _receiveObservable, _receiveTransportObservable, _bindings, supervisor, _managementPipe, _sendEndpointProvider, _publishEndpointProvider, _host);
+                x.RabbitMqConsumer(receivePipe, _settings, _receiveObservable, _receiveTransportObservable, _bindings, supervisor, _managementPipe,
+                    _sendEndpointProvider, _publishEndpointProvider, _host);
             });
 
             Receiver(pipe, supervisor);
@@ -93,6 +94,11 @@ namespace MassTransit.RabbitMqTransport.Transport
         public ConnectHandle ConnectReceiveTransportObserver(IReceiveTransportObserver observer)
         {
             return _receiveTransportObservable.Connect(observer);
+        }
+
+        public ConnectHandle ConnectPublishObserver(IPublishObserver observer)
+        {
+            return _publishEndpointProvider.ConnectPublishObserver(observer);
         }
 
         async void Receiver(IPipe<ConnectionContext> transportPipe, TaskSupervisor supervisor)

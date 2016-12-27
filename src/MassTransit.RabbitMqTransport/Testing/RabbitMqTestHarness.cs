@@ -56,24 +56,24 @@ namespace MassTransit.RabbitMqTransport.Testing
 
         public override Uri InputQueueAddress => _inputQueueAddress;
 
-        public event Action<IRabbitMqBusFactoryConfigurator> OnConfigureBus;
-        public event Action<IRabbitMqBusFactoryConfigurator, IRabbitMqHost> OnConfigureBusHost;
-        public event Action<IRabbitMqReceiveEndpointConfigurator> OnConfigureInputQueueEndpoint;
+        public event Action<IRabbitMqBusFactoryConfigurator> OnConfigureRabbitMqBus;
+        public event Action<IRabbitMqBusFactoryConfigurator, IRabbitMqHost> OnConfigureRabbitMqBusHost;
+        public event Action<IRabbitMqReceiveEndpointConfigurator> OnConfigureRabbitMqReceiveEndoint;
         public event Action<IModel> OnCleanupVirtualHost;
 
-        protected virtual void ConfigureBus(IRabbitMqBusFactoryConfigurator configurator)
+        protected virtual void ConfigureRabbitMqBus(IRabbitMqBusFactoryConfigurator configurator)
         {
-            OnConfigureBus?.Invoke(configurator);
+            OnConfigureRabbitMqBus?.Invoke(configurator);
         }
 
-        protected virtual void ConfigureBusHost(IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host)
+        protected virtual void ConfigureRabbitMqBusHost(IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host)
         {
-            OnConfigureBusHost?.Invoke(configurator, host);
+            OnConfigureRabbitMqBusHost?.Invoke(configurator, host);
         }
 
-        protected virtual void ConfigureInputQueueEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
+        protected virtual void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
-            OnConfigureInputQueueEndpoint?.Invoke(configurator);
+            OnConfigureRabbitMqReceiveEndoint?.Invoke(configurator);
         }
 
         protected virtual void CleanupVirtualHost(IModel model)
@@ -99,18 +99,22 @@ namespace MassTransit.RabbitMqTransport.Testing
             {
                 ConfigureBus(x);
 
+                ConfigureRabbitMqBus(x);
+
                 Host = ConfigureHost(x);
 
                 CleanUpVirtualHost(Host);
 
-                ConfigureBusHost(x, Host);
+                ConfigureRabbitMqBusHost(x, Host);
 
                 x.ReceiveEndpoint(Host, InputQueueName, e =>
                 {
                     e.PrefetchCount = 16;
                     e.PurgeOnStartup = true;
-               
-                    ConfigureInputQueueEndpoint(e);
+
+                    ConfigureReceiveEndpoint(e);
+
+                    ConfigureRabbitMqReceiveEndpoint(e);
 
                     _inputQueueAddress = e.InputAddress;
                 });

@@ -28,21 +28,19 @@ namespace MassTransit.AzureServiceBusTransport.Tests
         public class Configuring_a_bus_instance :
             AsyncTestFixture
         {
-            protected override AsyncTestHarness AsyncTestHarness { get; } = new InMemoryTestHarness();
-
             [Test]
             public async Task Should_Support_NetMessaging_Protocol()
             {
                 ServiceBusTokenProviderSettings settings = new TestAzureServiceBusAccountSettings();
 
-                var serviceUri = ServiceBusEnvironment.CreateServiceUri("sb", "masstransit-build",
+                Uri serviceUri = ServiceBusEnvironment.CreateServiceUri("sb", "masstransit-build",
                     "MassTransit.AzureServiceBusTransport.Tests");
 
                 var completed = new TaskCompletionSource<A>();
 
-                var bus = Bus.Factory.CreateUsingAzureServiceBus(x =>
+                IBusControl bus = Bus.Factory.CreateUsingAzureServiceBus(x =>
                 {
-                    var host = x.Host(serviceUri, h =>
+                    IServiceBusHost host = x.Host(serviceUri, h =>
                     {
                         h.SharedAccessSignature(s =>
                         {
@@ -75,7 +73,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
                 });
 
                 // TODO: Assert something here, need to get a hook to the underlying MessageReceiver
-                var busHandle = await bus.StartAsync();
+                BusHandle busHandle = await bus.StartAsync();
 
                 await busHandle.StopAsync();
             }
@@ -85,14 +83,14 @@ namespace MassTransit.AzureServiceBusTransport.Tests
             {
                 ServiceBusTokenProviderSettings settings = new TestAzureServiceBusAccountSettings();
 
-                var serviceUri = ServiceBusEnvironment.CreateServiceUri("sb", "masstransit-build",
+                Uri serviceUri = ServiceBusEnvironment.CreateServiceUri("sb", "masstransit-build",
                     "MassTransit.AzureServiceBusTransport.Tests");
 
                 var completed = new TaskCompletionSource<A>();
 
-                var bus = Bus.Factory.CreateUsingAzureServiceBus(x =>
+                IBusControl bus = Bus.Factory.CreateUsingAzureServiceBus(x =>
                 {
-                    var host = x.Host(serviceUri, h =>
+                    IServiceBusHost host = x.Host(serviceUri, h =>
                     {
                         h.SharedAccessSignature(s =>
                         {
@@ -120,7 +118,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
                     });
                 });
 
-                var busHandle = await bus.StartAsync();
+                BusHandle busHandle = await bus.StartAsync();
                 try
                 {
                 }
@@ -136,6 +134,11 @@ namespace MassTransit.AzureServiceBusTransport.Tests
 //
 //                    await endpoint.Send(new A());
 //                }
+            }
+
+            public Configuring_a_bus_instance()
+                : base(new InMemoryTestHarness())
+            {
             }
 
             async Task Handle(ConsumeContext<A> context)

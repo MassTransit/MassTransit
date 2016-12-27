@@ -41,7 +41,7 @@ namespace MassTransit.Containers.Tests
                 .To<AnotherMessageConsumerImpl>().InNamedScope("message");
         }
 
-        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             configurator.LoadFrom(_container);
         }
@@ -70,7 +70,7 @@ namespace MassTransit.Containers.Tests
                 .InSingletonScope();
         }
 
-        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             // we have to do this explicitly, since the metadata is not exposed by Ninject
             configurator.Saga<SimpleSaga>(_container);

@@ -41,23 +41,23 @@ namespace MassTransit.HttpTransport.Testing
 
         public override Uri InputQueueAddress => _inputQueueAddress;
 
-        public event Action<IHttpBusFactoryConfigurator> OnConfigureBus;
-        public event Action<IHttpBusFactoryConfigurator, IHttpHost> OnConfigureBusHost;
-        public event Action<IHttpReceiveEndpointConfigurator> OnConfigureRootReceiveEndpoint;
+        public event Action<IHttpBusFactoryConfigurator> OnConfigureHttpBus;
+        public event Action<IHttpBusFactoryConfigurator, IHttpHost> OnConfigureHttpBusHost;
+        public event Action<IHttpReceiveEndpointConfigurator> OnConfigureHttpReceiveEndpoint;
 
-        protected virtual void ConfigureBus(IHttpBusFactoryConfigurator configurator)
+        protected virtual void ConfigureHttpBus(IHttpBusFactoryConfigurator configurator)
         {
-            OnConfigureBus?.Invoke(configurator);
+            OnConfigureHttpBus?.Invoke(configurator);
         }
 
-        protected virtual void ConfigureBusHost(IHttpBusFactoryConfigurator configurator, IHttpHost host)
+        protected virtual void ConfigureHttpBusHost(IHttpBusFactoryConfigurator configurator, IHttpHost host)
         {
-            OnConfigureBusHost?.Invoke(configurator, host);
+            OnConfigureHttpBusHost?.Invoke(configurator, host);
         }
 
-        protected virtual void ConfigureRootReceiveEndpoint(IHttpReceiveEndpointConfigurator configurator)
+        protected virtual void ConfigureHttpReceiveEndpoint(IHttpReceiveEndpointConfigurator configurator)
         {
-            OnConfigureRootReceiveEndpoint?.Invoke(configurator);
+            OnConfigureHttpReceiveEndpoint?.Invoke(configurator);
         }
 
         protected override IBusControl CreateBus()
@@ -66,13 +66,17 @@ namespace MassTransit.HttpTransport.Testing
             {
                 ConfigureBus(x);
 
+                ConfigureHttpBus(x);
+
                 Host = x.Host(HostAddress, h => h.Method = HttpMethod.Post);
 
-                ConfigureBusHost(x, Host);
+                ConfigureHttpBusHost(x, Host);
 
                 x.ReceiveEndpoint(Host, "", e =>
                 {
-                    ConfigureRootReceiveEndpoint(e);
+                    ConfigureReceiveEndpoint(e);
+
+                    ConfigureHttpReceiveEndpoint(e);
 
                     _inputQueueAddress = e.InputAddress;
                 });

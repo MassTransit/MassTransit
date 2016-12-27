@@ -24,7 +24,7 @@ namespace MassTransit.Tests.Saga
     public class When_a_unknown_user_registers :
         InMemoryTestFixture
     {
-        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             var sagaRepository = new InMemorySagaRepository<RegisterUserSaga>();
             configurator.Saga(sagaRepository);

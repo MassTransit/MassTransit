@@ -56,9 +56,9 @@ namespace MassTransit.AutomatonymousIntegration.Tests
             Console.WriteLine(result.ToJsonString());
         }
 
-        protected override void ConfigureBus(IInMemoryBusFactoryConfigurator configurator)
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
-            base.ConfigureBus(configurator);
+            base.ConfigureInMemoryBus(configurator);
 
             configurator.ReceiveEndpoint("observer", e =>
             {
@@ -68,7 +68,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
             });
         }
 
-        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             _machine = new TestStateMachine(_handlerAddress);
             _repository = new InMemorySagaRepository<Instance>();

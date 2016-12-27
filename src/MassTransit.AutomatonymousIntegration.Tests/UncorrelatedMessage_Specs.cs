@@ -98,7 +98,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
             Assert.AreEqual("B", status.ServiceName);
         }
 
-        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             _machine = new TestStateMachine();
             _repository = new InMemorySagaRepository<Instance>();

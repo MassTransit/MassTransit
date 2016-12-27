@@ -45,7 +45,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         TaskCompletionSource<A> _received;
         A _message;
 
-        protected override void ConfigureInputQueueEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
+        protected override void ConfigureRabbitMqReceiveEndoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
             _received = GetTask<A>();
 

@@ -41,9 +41,9 @@ namespace MassTransit.RabbitMqTransport.Tests
         static int _messageCount = 100;
         static TaskCompletionSource<bool> _complete;
 
-        protected override void ConfigureInputQueueEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
+        protected override void ConfigureRabbitMqReceiveEndoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
-            base.ConfigureInputQueueEndpoint(configurator);
+            base.ConfigureRabbitMqReceiveEndoint(configurator);
 
             _consumer = new Consumer();
 

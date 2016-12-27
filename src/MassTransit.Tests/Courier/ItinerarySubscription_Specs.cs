@@ -64,9 +64,9 @@ namespace MassTransit.Tests.Courier
 
         Task<ConsumeContext<RoutingSlipActivityCompleted>> _handled;
 
-        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
-            base.ConfigureInputQueueEndpoint(configurator);
+            base.ConfigureInMemoryReceiveEndpoint(configurator);
 
             var testActivity = GetActivityContext<TestActivity>();
 

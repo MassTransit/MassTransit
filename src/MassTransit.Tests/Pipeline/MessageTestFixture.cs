@@ -23,7 +23,10 @@ namespace MassTransit.Tests.Pipeline
     public abstract class MessageTestFixture :
         AsyncTestFixture
     {
-        protected override AsyncTestHarness AsyncTestHarness { get; } = new InMemoryTestHarness();
+        public MessageTestFixture()
+            : base(new InMemoryTestHarness())
+        {
+        }
 
         protected ConsumeContext GetConsumeContext<T>(T message)
             where T : class

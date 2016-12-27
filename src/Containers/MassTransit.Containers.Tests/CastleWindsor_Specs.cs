@@ -49,7 +49,7 @@ namespace MassTransit.Containers.Tests
                     .LifestyleTransient());
         }
 
-        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             configurator.LoadFrom(_container);
         }
@@ -77,7 +77,7 @@ namespace MassTransit.Containers.Tests
                     .LifeStyle.Singleton);
         }
 
-        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             configurator.LoadFrom(_container);
         }
@@ -129,7 +129,7 @@ namespace MassTransit.Containers.Tests
                     .LifeStyle.Singleton);
         }
 
-        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             configurator.LoadFrom(_container);
         }
@@ -170,11 +170,11 @@ namespace MassTransit.Containers.Tests
                     .LifestyleScoped<MessageScope>());
         }
 
-        protected override void ConfigureBus(IInMemoryBusFactoryConfigurator configurator)
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
         }
 
-        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             configurator.UseMessageScope();
 

@@ -35,7 +35,7 @@ namespace MassTransit.Tests.Configuration
         OneMessageConsumer _consumer;
         MessageA _message;
 
-        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             _consumer = new OneMessageConsumer(GetTask<MessageA>());
 
@@ -62,7 +62,7 @@ namespace MassTransit.Tests.Configuration
         OneMessageConsumer _consumer;
         MessageA _message;
 
-        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             _consumer = new OneMessageConsumer(GetTask<MessageA>());
 
@@ -87,7 +87,7 @@ namespace MassTransit.Tests.Configuration
         OneMessageConsumer _consumer;
         MessageA _message;
 
-        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             _consumer = new OneMessageConsumer(GetTask<MessageA>());
 

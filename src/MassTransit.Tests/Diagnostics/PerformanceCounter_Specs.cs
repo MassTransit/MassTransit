@@ -38,14 +38,14 @@ namespace MassTransit.Tests.Diagnostics
 
         TaskCompletionSource<bool> _completed;
 
-        protected override void ConfigureBus(IInMemoryBusFactoryConfigurator configurator)
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
-            base.ConfigureBus(configurator);
+            base.ConfigureInMemoryBus(configurator);
 
             configurator.EnableWindowsPerformanceCounters();
         }
 
-        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             long value = 0;
             configurator.Handler<PingMessage>(async context =>

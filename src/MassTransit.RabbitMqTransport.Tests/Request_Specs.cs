@@ -44,7 +44,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             _response = _requestClient.Request(new PingMessage());
         }
 
-        protected override void ConfigureInputQueueEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
+        protected override void ConfigureRabbitMqReceiveEndoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
             _ping = Handler<PingMessage>(configurator, async x => await x.RespondAsync(new PongMessage(x.Message.CorrelationId)));
         }
@@ -75,14 +75,14 @@ namespace MassTransit.RabbitMqTransport.Tests
             _response = _requestClient.Request(new PingMessage());
         }
 
-        protected override void ConfigureBus(IRabbitMqBusFactoryConfigurator configurator)
+        protected override void ConfigureRabbitMqBus(IRabbitMqBusFactoryConfigurator configurator)
         {
-            base.ConfigureBus(configurator);
+            base.ConfigureRabbitMqBus(configurator);
 
             configurator.PublisherConfirmation = false;
         }
 
-        protected override void ConfigureInputQueueEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
+        protected override void ConfigureRabbitMqReceiveEndoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
             _ping = Handler<PingMessage>(configurator, async x => await x.RespondAsync(new PongMessage(x.Message.CorrelationId)));
         }
@@ -135,7 +135,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             _response = _requestClient.Request(new PingMessage());
         }
 
-        protected override void ConfigureInputQueueEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
+        protected override void ConfigureRabbitMqReceiveEndoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
             _ping = Handler<PingMessage>(configurator, async x =>
             {

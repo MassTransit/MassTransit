@@ -44,7 +44,7 @@ namespace MassTransit.Tests.Pipeline
         TaskCompletionSource<Tuple<MyConsumer, PingMessage>> _consumerMessage;
         TaskCompletionSource<MyConsumer> _consumerOnly;
 
-        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             _consumer = new MyConsumer(GetTask<PingMessage>());
 
@@ -105,7 +105,7 @@ namespace MassTransit.Tests.Pipeline
         TaskCompletionSource<Tuple<MyConsumer, PingMessage>> _consumerMessage;
         TaskCompletionSource<MyConsumer> _consumerOnly;
 
-        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             _consumer = new MyConsumer(GetTask<PingMessage>());
 

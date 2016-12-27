@@ -25,9 +25,9 @@ namespace MassTransit.RabbitMqTransport.Tests
     {
         ReconnectConsumer _consumer;
 
-        protected override void ConfigureInputQueueEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
+        protected override void ConfigureRabbitMqReceiveEndoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
-            base.ConfigureInputQueueEndpoint(configurator);
+            base.ConfigureRabbitMqReceiveEndoint(configurator);
 
             _consumer = new ReconnectConsumer(TestTimeout);
 

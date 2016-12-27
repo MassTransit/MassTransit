@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,22 +12,17 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Testing
 {
-    using System;
+    using Pipeline.ConsumerFactories;
 
 
-    public interface SentMessage
+    public static class ConsumerTestHarnessExtensions
     {
-        SendContext Context { get; }
-        Exception Exception { get; }
+        public static ConsumerTestHarness<T> Consumer<T>(this BusTestHarness harness)
+            where T : class, IConsumer, new()
+        {
+            var consumerFactory = new DefaultConstructorConsumerFactory<T>();
 
-        Type MessageType { get; }
-    }
-
-
-    public interface SentMessage<out T> :
-        SentMessage
-        where T : class
-    {
-        new SendContext<T> Context { get; }
+            return new ConsumerTestHarness<T>(harness, consumerFactory);
+        }
     }
 }

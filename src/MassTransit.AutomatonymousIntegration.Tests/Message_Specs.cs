@@ -42,7 +42,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
         TaskCompletionSource<Instance> _consumerOnly;
         InMemorySagaRepository<Instance> _repository;
 
-        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             _message = GetTask<Start>();
             _consumerOnly = GetTask<Instance>();

@@ -36,12 +36,12 @@ namespace MassTransit.Tests
         Task<ConsumeContext<A>> _requestReceived;
         Task<ConsumeContext<B>> _responseReceived;
 
-        protected override void ConfigureBus(IInMemoryBusFactoryConfigurator configurator)
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
             configurator.UseXmlSerializer();
         }
 
-        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             // TODO would be nice to support serialization per receiving endpoint
 

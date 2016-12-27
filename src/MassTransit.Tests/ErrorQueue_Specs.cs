@@ -40,7 +40,7 @@ namespace MassTransit.Tests
             }));
         }
 
-        protected override void ConfigureBus(IInMemoryBusFactoryConfigurator configurator)
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
             configurator.ReceiveEndpoint("input_queue_error", x =>
             {
@@ -48,7 +48,7 @@ namespace MassTransit.Tests
             });
         }
 
-        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             Handler<PingMessage>(configurator, async context =>
             {

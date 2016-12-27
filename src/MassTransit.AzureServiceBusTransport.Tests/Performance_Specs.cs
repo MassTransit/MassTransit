@@ -38,15 +38,15 @@ namespace MassTransit.AzureServiceBusTransport.Tests
             _requestClient = new MessageRequestClient<PingMessage, PongMessage>(Bus, InputQueueAddress, TestTimeout);
         }
 
-        protected override void ConfigureBus(IServiceBusBusFactoryConfigurator configurator)
+        protected override void ConfigureServiceBusBus(IServiceBusBusFactoryConfigurator configurator)
         {
-            base.ConfigureBus(configurator);
+            base.ConfigureServiceBusBus(configurator);
 
             configurator.MaxConcurrentCalls = 16;
             configurator.PrefetchCount = 64;
         }
 
-        protected override void ConfigureInputQueueEndpoint(IServiceBusReceiveEndpointConfigurator configurator)
+        protected override void ConfigureServiceBusReceiveEndpoint(IServiceBusReceiveEndpointConfigurator configurator)
         {
             configurator.PrefetchCount = 64;
             configurator.MaxConcurrentCalls = 16;

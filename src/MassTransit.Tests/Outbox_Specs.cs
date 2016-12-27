@@ -60,7 +60,7 @@ namespace MassTransit.Tests
 
         TaskCompletionSource<ConsumeContext<PingMessage>> _pingReceived;
 
-        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             configurator.UseInMemoryOutbox();
 

@@ -67,7 +67,7 @@ namespace MassTransit.HttpTransport.Specifications
 
             var receiveSettings = new Settings(_pathMatch, receiveEndpointBuilder.MessageSerializer, _sendEndpointProvider, _publishEndpointProvider);
 
-            var transport = new HttpReceiveTransport(_host, receiveSettings, sendPipe);
+            var transport = new HttpReceiveTransport(_host, receiveSettings, _publishEndpointProvider, sendPipe);
 
             var httpHost = _host as HttpHost;
             if (httpHost == null)

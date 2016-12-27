@@ -30,9 +30,9 @@ namespace MassTransit.RabbitMqTransport.Tests
 
         protected IDictionary<Type, ActivityTestContext> ActivityTestContexts { get; private set; }
 
-        protected override void ConfigureBusHost(IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host)
+        protected override void ConfigureRabbitMqBusHost(IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host)
         {
-            base.ConfigureBusHost(configurator, host);
+            base.ConfigureRabbitMqBusHost(configurator, host);
 
             SetupActivities();
 

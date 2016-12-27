@@ -98,10 +98,10 @@ namespace MassTransit.Testing
             return source;
         }
 
-        public TestConsumeObserver<T> GetConsumeObserver<T>()
+        public TestConsumeMessageObserver<T> GetConsumeObserver<T>()
             where T : class
         {
-            return new TestConsumeObserver<T>(GetTask<T>(), GetTask<T>(), GetTask<T>());
+            return new TestConsumeMessageObserver<T>(GetTask<T>(), GetTask<T>(), GetTask<T>());
         }
 
         public TestConsumeObserver GetConsumeObserver()

@@ -10,7 +10,7 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Testing
+namespace MassTransit.Testing.MessageObservers
 {
     using System;
     using System.Collections.Generic;
@@ -44,13 +44,13 @@ namespace MassTransit.Testing
         public void Add<T>(ConsumeContext<T> context)
             where T : class
         {
-            Add(new ObservedReceivedMessage<T>(context), context.MessageId);
+            Add(new ReceivedMessage<T>(context), context.MessageId);
         }
 
         public void Add<T>(ConsumeContext<T> context, Exception exception)
             where T : class
         {
-            Add(new ObservedReceivedMessage<T>(context, exception), context.MessageId);
+            Add(new ReceivedMessage<T>(context, exception), context.MessageId);
         }
     }
 
@@ -67,12 +67,12 @@ namespace MassTransit.Testing
 
         public void Add(ConsumeContext<T> context)
         {
-            Add(new ObservedReceivedMessage<T>(context), context.MessageId);
+            Add(new ReceivedMessage<T>(context), context.MessageId);
         }
 
         public void Add(ConsumeContext<T> context, Exception exception)
         {
-            Add(new ObservedReceivedMessage<T>(context, exception), context.MessageId);
+            Add(new ReceivedMessage<T>(context, exception), context.MessageId);
         }
     }
 }

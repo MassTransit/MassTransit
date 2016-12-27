@@ -43,9 +43,9 @@ namespace MassTransit.Tests.Pipeline
         Task<ConsumeContext<TestMessage>> _accepted;
         Task<ConsumeContext<TestMessage>> _denied;
 
-        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
-            base.ConfigureInputQueueEndpoint(configurator);
+            base.ConfigureInMemoryReceiveEndpoint(configurator);
 
             _consumer = new MyConsumer();
 

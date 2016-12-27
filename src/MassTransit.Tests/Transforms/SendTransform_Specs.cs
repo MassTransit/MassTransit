@@ -35,7 +35,7 @@ namespace MassTransit.Tests.Transforms
 
         Task<ConsumeContext<A>> _received;
 
-        protected override void ConfigureBus(IInMemoryBusFactoryConfigurator configurator)
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
             configurator.ConfigureSend(s => s.UseTransform<A>(t =>
             {
@@ -43,9 +43,9 @@ namespace MassTransit.Tests.Transforms
             }));
         }
 
-        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
-            base.ConfigureInputQueueEndpoint(configurator);
+            base.ConfigureInMemoryReceiveEndpoint(configurator);
 
             _received = Handled<A>(configurator);
         }
@@ -76,7 +76,7 @@ namespace MassTransit.Tests.Transforms
 
         Task<ConsumeContext<A>> _received;
 
-        protected override void ConfigureBus(IInMemoryBusFactoryConfigurator configurator)
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
             configurator.ConfigureSend(s => s.UseTransform<A>(t =>
             {
@@ -84,9 +84,9 @@ namespace MassTransit.Tests.Transforms
             }));
         }
 
-        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
-            base.ConfigureInputQueueEndpoint(configurator);
+            base.ConfigureInMemoryReceiveEndpoint(configurator);
 
             _received = Handled<A>(configurator);
         }
@@ -117,7 +117,7 @@ namespace MassTransit.Tests.Transforms
 
         Task<ConsumeContext<A>> _received;
 
-        protected override void ConfigureBus(IInMemoryBusFactoryConfigurator configurator)
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
             configurator.ConfigurePublish(s => s.UseTransform<A>(t =>
             {
@@ -125,9 +125,9 @@ namespace MassTransit.Tests.Transforms
             }));
         }
 
-        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
-            base.ConfigureInputQueueEndpoint(configurator);
+            base.ConfigureInMemoryReceiveEndpoint(configurator);
 
             _received = Handled<A>(configurator);
         }
@@ -158,7 +158,7 @@ namespace MassTransit.Tests.Transforms
 
         Task<ConsumeContext<A>> _received;
 
-        protected override void ConfigureBus(IInMemoryBusFactoryConfigurator configurator)
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
             configurator.ConfigurePublish(s => s.UseTransform<A>(t =>
             {
@@ -166,9 +166,9 @@ namespace MassTransit.Tests.Transforms
             }));
         }
 
-        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
-            base.ConfigureInputQueueEndpoint(configurator);
+            base.ConfigureInMemoryReceiveEndpoint(configurator);
 
             _received = Handled<A>(configurator);
         }

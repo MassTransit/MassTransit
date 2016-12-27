@@ -42,7 +42,7 @@ namespace MassTransit.Tests.Pipeline
 
         TaskCompletionSource<int> _completed;
 
-        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             _completed = GetTask<int>();
 

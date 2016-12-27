@@ -53,7 +53,7 @@ namespace MassTransit.Tests
 
         int _attempts;
 
-        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             configurator.UseRetry(x => x.None());
 
@@ -97,7 +97,7 @@ namespace MassTransit.Tests
 
         int _attempts;
 
-        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             Handler<PingMessage>(configurator, async context =>
             {
@@ -138,7 +138,7 @@ namespace MassTransit.Tests
 
         int _attempts;
 
-        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             configurator.Consumer(() => new Consumer(), x =>
             {
@@ -192,14 +192,14 @@ namespace MassTransit.Tests
 
         int _attempts;
 
-        protected override void ConfigureBus(IInMemoryBusFactoryConfigurator configurator)
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
             configurator.UseRetry(x => x.Immediate(1));
 
-            base.ConfigureBus(configurator);
+            base.ConfigureInMemoryBus(configurator);
         }
 
-        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             Handler<PingMessage>(configurator, async context =>
             {
@@ -242,14 +242,14 @@ namespace MassTransit.Tests
         int _attempts;
         int _lastAttempt;
 
-        protected override void ConfigureBus(IInMemoryBusFactoryConfigurator configurator)
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
             configurator.UseRetry(x => x.Immediate(1));
 
-            base.ConfigureBus(configurator);
+            base.ConfigureInMemoryBus(configurator);
         }
 
-        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             configurator.UseRetry(x => x.Immediate(3));
             Handler<PingMessage>(configurator, async context =>

@@ -10,18 +10,18 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Testing
+namespace MassTransit.Testing.MessageObservers
 {
     using System;
 
 
-    public class ObservedPublishedMessage<T> :
+    public class PublishedMessage<T> :
         IPublishedMessage<T>
         where T : class
     {
         readonly PublishContext<T> _context;
 
-        public ObservedPublishedMessage(PublishContext<T> context, Exception exception = null)
+        public PublishedMessage(PublishContext<T> context, Exception exception = null)
         {
             _context = context;
             Exception = exception;
@@ -40,7 +40,7 @@ namespace MassTransit.Testing
             return _context?.GetHashCode() ?? 0;
         }
 
-        public bool Equals(ObservedPublishedMessage<T> other)
+        public bool Equals(PublishedMessage<T> other)
         {
             if (ReferenceEquals(null, other))
                 return false;
@@ -55,9 +55,9 @@ namespace MassTransit.Testing
                 return false;
             if (ReferenceEquals(this, obj))
                 return true;
-            if (obj.GetType() != typeof(ObservedPublishedMessage<T>))
+            if (obj.GetType() != typeof(PublishedMessage<T>))
                 return false;
-            return Equals((ObservedPublishedMessage<T>)obj);
+            return Equals((PublishedMessage<T>)obj);
         }
     }
 }

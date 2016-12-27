@@ -36,7 +36,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
                 && Equals(x.CurrentState, _machine.FailedToStart), TestTimeout);
         }
 
-        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             _machine = new TestStateMachine();
             _repository = new InMemorySagaRepository<Instance>();

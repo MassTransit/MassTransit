@@ -33,7 +33,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
             Assert.Throws<ConfigurationException>(invocation);
         }
 
-        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             _machine = new TestStateMachine();
             _repository = new InMemorySagaRepository<Instance>();

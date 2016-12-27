@@ -18,6 +18,7 @@ namespace MassTransit.Testing.Subjects
     using System.Threading.Tasks;
     using Configurators;
     using GreenPipes.Util;
+    using MessageObservers;
     using ScenarioBuilders;
     using ScenarioConfigurators;
 

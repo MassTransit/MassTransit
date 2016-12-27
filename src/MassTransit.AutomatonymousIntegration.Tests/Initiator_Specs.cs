@@ -26,7 +26,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
     public class When_a_state_machine_instance_is_created :
         InMemoryTestFixture
     {
-        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             _machine = new TestStateMachine();
             _repository = new InMemorySagaRepository<Instance>();

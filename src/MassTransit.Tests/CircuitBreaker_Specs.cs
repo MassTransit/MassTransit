@@ -27,9 +27,9 @@ namespace MassTransit.Tests
         {            
         }
 
-        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
-            base.ConfigureInputQueueEndpoint(configurator);
+            base.ConfigureInMemoryReceiveEndpoint(configurator);
 
             configurator.UseCircuitBreaker(x => x.ResetInterval = TimeSpan.FromSeconds(30));
         }

@@ -56,11 +56,11 @@ namespace MassTransit.RabbitMqTransport.Tests
         Uri _commandEndpointAddress;
         Task<ConsumeContext<JobCompleted>> _completed2;
 
-        protected override void ConfigureBusHost(IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host)
+        protected override void ConfigureRabbitMqBusHost(IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host)
         {
             configurator.UseDelayedExchangeMessageScheduler();
 
-            base.ConfigureBusHost(configurator, host);
+            base.ConfigureRabbitMqBusHost(configurator, host);
 
             configurator.TurnoutEndpoint<ProcessFile>(host, "process_queue", endpoint =>
             {
@@ -71,7 +71,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             });
         }
 
-        protected override void ConfigureInputQueueEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
+        protected override void ConfigureRabbitMqReceiveEndoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
             _completed = Handled<JobCompleted>(configurator, context => context.Message.GetArguments<ProcessFile>().Size == 1);
             _completed2 = Handled<JobCompleted>(configurator, context => context.Message.GetArguments<ProcessFile>().Size == 2);
@@ -109,11 +109,11 @@ namespace MassTransit.RabbitMqTransport.Tests
         Task<ConsumeContext<JobStarted>> _started;
         Uri _commandEndpointAddress;
 
-        protected override void ConfigureBusHost(IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host)
+        protected override void ConfigureRabbitMqBusHost(IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host)
         {
             configurator.UseDelayedExchangeMessageScheduler();
 
-            base.ConfigureBusHost(configurator, host);
+            base.ConfigureRabbitMqBusHost(configurator, host);
 
             configurator.TurnoutEndpoint<ProcessFile>(host, "process_queue", endpoint =>
             {
@@ -135,7 +135,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             });
         }
 
-        protected override void ConfigureInputQueueEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
+        protected override void ConfigureRabbitMqReceiveEndoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
             _started = Handled<JobStarted>(configurator);
         }
@@ -186,11 +186,11 @@ namespace MassTransit.RabbitMqTransport.Tests
         Uri _commandEndpointAddress;
         Task<ConsumeContext<JobCanceled<ProcessFile>>> _canceled;
 
-        protected override void ConfigureBusHost(IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host)
+        protected override void ConfigureRabbitMqBusHost(IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host)
         {
             configurator.UseDelayedExchangeMessageScheduler();
 
-            base.ConfigureBusHost(configurator, host);
+            base.ConfigureRabbitMqBusHost(configurator, host);
 
             configurator.TurnoutEndpoint<ProcessFile>(host, "process_queue", endpoint =>
             {
@@ -212,7 +212,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             });
         }
 
-        protected override void ConfigureInputQueueEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
+        protected override void ConfigureRabbitMqReceiveEndoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
             _started = Handled<JobStarted>(configurator);
             _canceled = Handled<JobCanceled<ProcessFile>>(configurator);

@@ -45,7 +45,7 @@ namespace MassTransit.Tests
             _response = _requestClient.Request(new PingMessage());
         }
 
-        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             _ping = Handler<PingMessage>(configurator, async x => await x.RespondAsync(new PongMessage(x.Message.CorrelationId)));
         }
@@ -98,7 +98,7 @@ namespace MassTransit.Tests
             _response = _requestClient.Request(new PingMessage());
         }
 
-        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             _ping = Handler<PingMessage>(configurator, async x =>
             {
@@ -137,7 +137,7 @@ namespace MassTransit.Tests
             _response = _requestClient.Request(new PingMessage(), cts.Token);
         }
 
-        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             _ping = Handler<PingMessage>(configurator, async x =>
             {

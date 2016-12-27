@@ -30,16 +30,16 @@ namespace MassTransit.RabbitMqTransport.Tests
             await client.Request(new PingMessage(), TestCancellationToken);
         }
 
-        protected override void ConfigureBusHost(IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host)
+        protected override void ConfigureRabbitMqBusHost(IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host)
         {
-            base.ConfigureBusHost(configurator, host);
+            base.ConfigureRabbitMqBusHost(configurator, host);
 
             configurator.OverrideDefaultBusEndpointQueueName($"super-bus-{NewId.NextGuid().ToString("N")}");
         }
 
-        protected override void ConfigureInputQueueEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
+        protected override void ConfigureRabbitMqReceiveEndoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
-            base.ConfigureInputQueueEndpoint(configurator);
+            base.ConfigureRabbitMqReceiveEndoint(configurator);
 
             configurator.Handler<PingMessage>(context => context.RespondAsync(new PongMessage(context.Message.CorrelationId)));
         }

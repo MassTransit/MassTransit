@@ -139,7 +139,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
                 _jobId = NewId.NextGuid();
             }
 
-            protected override void ConfigureInputQueueEndpoint(IServiceBusReceiveEndpointConfigurator configurator)
+            protected override void ConfigureServiceBusReceiveEndpoint(IServiceBusReceiveEndpointConfigurator configurator)
             {
                 configurator.RequiresSession = true;
 

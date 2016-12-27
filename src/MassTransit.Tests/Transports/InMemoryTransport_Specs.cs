@@ -50,7 +50,7 @@ namespace MassTransit.Tests.Transports
                     received.TrySetResult(1);
                 });
 
-                var receiveHandle = ((IReceiveTransport)transport).Start(receivePipe);
+                ReceiveTransportHandle receiveHandle = ((IReceiveTransport)transport).Start(receivePipe);
 
                 var sendEndpoint = new SendEndpoint(transport, new JsonMessageSerializer(), inputAddress,
                     inputAddress, new SendPipe(new MessageTypeSendFilter(), Pipe.Empty<SendContext>()));
@@ -64,7 +64,10 @@ namespace MassTransit.Tests.Transports
                 await receiveHandle.Stop();
             }
 
-            protected override AsyncTestHarness AsyncTestHarness { get; } = new InMemoryTestHarness();
+            public Using_the_in_memory_transport()
+                : base(new InMemoryTestHarness())
+            {
+            }
         }
 
 

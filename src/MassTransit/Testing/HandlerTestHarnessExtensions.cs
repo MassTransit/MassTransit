@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,18 +12,21 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Testing
 {
-    using Saga;
+    using Util;
 
 
-    public class ObservedSagaInstance<T> :
-        ISagaInstance<T>
-        where T : class, ISaga
+    public static class HandlerTestHarnessExtensions
     {
-        public ObservedSagaInstance(T saga)
+        public static HandlerTestHarness<T> Handler<T>(this BusTestHarness harness, MessageHandler<T> handler)
+            where T : class
         {
-            Saga = saga;
+            return new HandlerTestHarness<T>(harness, handler);
         }
 
-        public T Saga { get; set; }
+        public static HandlerTestHarness<T> Handler<T>(this BusTestHarness harness)
+            where T : class
+        {
+            return new HandlerTestHarness<T>(harness, context => TaskUtil.Completed);
+        }
     }
 }

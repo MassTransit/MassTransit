@@ -29,7 +29,7 @@ namespace MassTransit.TestFramework
 
         protected IDictionary<Type, ActivityTestContext> ActivityTestContexts { get; private set; }
 
-        protected override void ConfigureBus(IInMemoryBusFactoryConfigurator configurator)
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
             SetupActivities(configurator);
 

@@ -80,7 +80,7 @@ namespace MassTransit.Tests
                 .Wait(TestCancellationToken);
         }
 
-        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             _handler = Handled<IProxyMe>(configurator);
         }

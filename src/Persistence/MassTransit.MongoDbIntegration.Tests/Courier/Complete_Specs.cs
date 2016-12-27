@@ -97,16 +97,16 @@ namespace MassTransit.MongoDbIntegration.Tests.Courier
                 NewId.NextGuid(), DateTime.UtcNow));
         }
 
-        protected override void ConfigureBus(IInMemoryBusFactoryConfigurator configurator)
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
-            base.ConfigureBus(configurator);
+            base.ConfigureInMemoryBus(configurator);
 
             configurator.ConfigureRoutingSlipEventCorrelation();
         }
 
-        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
-            base.ConfigureInputQueueEndpoint(configurator);
+            base.ConfigureInMemoryReceiveEndpoint(configurator);
 
             _collection = Database.GetCollection<RoutingSlipDocument>(EventCollectionName);
 

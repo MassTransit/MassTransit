@@ -40,7 +40,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
             Assert.AreEqual(1, _repository[saga.Value].Instance.OnEnter);
         }
 
-        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             configurator.StateMachineSaga(_machine, _repository);
         }

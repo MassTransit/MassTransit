@@ -19,55 +19,52 @@ namespace MassTransit.Tests.Testing
     using Shouldly;
 
 
-    [Explicit]
     public class When_a_consumer_with_multiple_message_consumers_is_tested
     {
-        IConsumerTest<IBusTestScenario, TwoMessageConsumer> _test;
+        InMemoryTestHarness _harness;
+        ConsumerTestHarness<TwoMessageConsumer> _consumer;
 
-        [SetUp]
-        public void A_consumer_is_being_tested()
+        [OneTimeSetUp]
+        public async Task A_consumer_is_being_tested()
         {
-            _test = TestFactory.ForConsumer<TwoMessageConsumer>()
-                .New(x =>
-                {
-                    x.UseConsumerFactory(() => new TwoMessageConsumer());
+            _harness = new InMemoryTestHarness();
+            _consumer = _harness.Consumer<TwoMessageConsumer>();
 
-                    x.Send(new A(), (scenario, context) => context.ResponseAddress = scenario.Bus.Address);
-                    x.Send(new B(), (scenario, context) => context.ResponseAddress = scenario.Bus.Address);
-                });
+            await _harness.Start();
 
-            _test.Execute();
+            await _harness.InputQueueSendEndpoint.Send(new A(), context => context.ResponseAddress = _harness.BusAddress);
+            await _harness.InputQueueSendEndpoint.Send(new B(), context => context.ResponseAddress = _harness.BusAddress);
+
         }
 
         [TearDown]
         public async Task Teardown()
         {
-            await _test.DisposeAsync();
-            _test = null;
+            await _harness.Stop();
         }
 
         [Test]
         public void Should_have_sent_the_aa_response_from_the_consumer()
         {
-            _test.Sent.Select<Aa>().Any().ShouldBe(true);
+            _harness.Sent.Select<Aa>().Any().ShouldBe(true);
         }
 
         [Test]
         public void Should_have_sent_the_bb_response_from_the_consumer()
         {
-            _test.Sent.Select<Bb>().Any().ShouldBe(true);
+            _harness.Sent.Select<Bb>().Any().ShouldBe(true);
         }
 
         [Test]
         public void Should_have_called_the_consumer_a_method()
         {
-            _test.Consumer.Received.Select<A>().Any().ShouldBe(true);
+            _consumer.Consumed.Select<A>().Any().ShouldBe(true);
         }
 
         [Test]
         public void Should_have_called_the_consumer_b_method()
         {
-            _test.Consumer.Received.Select<B>().Any().ShouldBe(true);
+            _consumer.Consumed.Select<B>().Any().ShouldBe(true);
         }
 
 

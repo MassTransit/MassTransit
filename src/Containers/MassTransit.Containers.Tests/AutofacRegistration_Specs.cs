@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -26,7 +26,44 @@ namespace MassTransit.Containers.Tests
     public class AutofacContainer_Setup :
         AsyncTestFixture
     {
-        protected override AsyncTestHarness AsyncTestHarness { get; } = new InMemoryTestHarness();
+        [Test]
+        public async Task Should_work_with_lifecycle_managed_bus()
+        {
+            var bus = _container.Resolve<IBusControl>();
+
+            BusHandle busHandle = await bus.StartAsync();
+            try
+            {
+                ISendEndpoint endpoint = await bus.GetSendEndpoint(new Uri("loopback://localhost/input_queue"));
+
+                const string name = "Joe";
+
+                await endpoint.Send(new SimpleMessageClass(name));
+
+                SimpleConsumer lastConsumer = await SimpleConsumer.LastConsumer;
+                lastConsumer.ShouldNotBe(null);
+
+                SimpleMessageInterface last = await lastConsumer.Last;
+                last.Name
+                    .ShouldBe(name);
+
+                bool wasDisposed = await lastConsumer.Dependency.WasDisposed;
+                wasDisposed
+                    .ShouldBe(true); //Dependency was not disposed");
+
+                lastConsumer.Dependency.SomethingDone
+                    .ShouldBe(true); //Dependency was disposed before consumer executed");
+            }
+            finally
+            {
+                await busHandle.StopAsync();
+            }
+        }
+
+        public AutofacContainer_Setup()
+            : base(new InMemoryTestHarness())
+        {
+        }
 
         IContainer _container;
 
@@ -77,42 +114,6 @@ namespace MassTransit.Containers.Tests
         public void Teardown()
         {
             _container.Dispose();
-        }
-
-        [Test]
-        public async Task Should_work_with_lifecycle_managed_bus()
-        {
-            var bus = _container.Resolve<IBusControl>();
-
-            var busHandle = await bus.StartAsync();
-            try
-            {
-                ISendEndpoint endpoint = await bus.GetSendEndpoint(new Uri("loopback://localhost/input_queue"));
-
-                const string name = "Joe";
-
-                await endpoint.Send(new SimpleMessageClass(name));
-
-                SimpleConsumer lastConsumer = await SimpleConsumer.LastConsumer;
-                lastConsumer.ShouldNotBe(null);
-
-                SimpleMessageInterface last = await lastConsumer.Last;
-                last.Name
-                    .ShouldBe(name);
-
-                bool wasDisposed = await lastConsumer.Dependency.WasDisposed;
-                wasDisposed
-                    .ShouldBe(true); //Dependency was not disposed");
-
-                lastConsumer.Dependency.SomethingDone
-                    .ShouldBe(true); //Dependency was disposed before consumer executed");
-
-            }
-            finally
-            {
-                await busHandle.StopAsync();
-            }
-
         }
     }
 }

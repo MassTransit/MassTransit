@@ -56,7 +56,7 @@ namespace MassTransit.Tests.Saga
 
         const int Limit = 100;
 
-        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             _repository = new InMemorySagaRepository<LegacySaga>();
 

@@ -78,7 +78,7 @@ namespace MassTransit.NHibernateIntegration.Tests
                 Assert.AreEqual("A", notFoundTask.Result.ServiceName);
             }
 
-            protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+            protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
             {
                 _provider = new SQLiteSessionFactoryProvider(false, typeof(MissingInstanceMap));
                 _sessionFactory = _provider.GetSessionFactory();

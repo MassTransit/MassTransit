@@ -88,9 +88,9 @@ namespace MassTransit.AzureServiceBusTransport.Tests
                 return _machine.GetState(state).Result;
             }
 
-            protected override void ConfigureBusHost(IServiceBusBusFactoryConfigurator configurator, IServiceBusHost host)
+            protected override void ConfigureServiceBusBusHost(IServiceBusBusFactoryConfigurator configurator, IServiceBusHost host)
             {
-                base.ConfigureBus(configurator);
+                base.ConfigureServiceBusBus(configurator);
 
                 configurator.UseServiceBusMessageScheduler();
 
@@ -100,9 +100,9 @@ namespace MassTransit.AzureServiceBusTransport.Tests
                 });
             }
 
-            protected override void ConfigureInputQueueEndpoint(IServiceBusReceiveEndpointConfigurator configurator)
+            protected override void ConfigureServiceBusReceiveEndpoint(IServiceBusReceiveEndpointConfigurator configurator)
             {
-                base.ConfigureInputQueueEndpoint(configurator);
+                base.ConfigureServiceBusReceiveEndpoint(configurator);
 
                 _repository = new InMemorySagaRepository<TestState>();
 

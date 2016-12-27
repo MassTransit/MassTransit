@@ -36,9 +36,7 @@ namespace MassTransit.TestFramework
             return _busCreationScope.TestTeardown();
         }
 
-        protected InMemoryTestHarness InMemoryTestHarness { get; } = new InMemoryTestHarness();
-
-        protected override BusTestHarness BusTestHarness => InMemoryTestHarness;
+        protected InMemoryTestHarness InMemoryTestHarness { get; }
 
         readonly IBusCreationScope _busCreationScope;
 
@@ -49,15 +47,23 @@ namespace MassTransit.TestFramework
         protected IInMemoryHost Host => InMemoryTestHarness.Host;
 
         public InMemoryTestFixture(bool busPerTest = false)
+            : this(new InMemoryTestHarness(), busPerTest)
+        {            
+        }
+
+        public InMemoryTestFixture(InMemoryTestHarness harness, bool busPerTest = false)
+            : base(harness)
         {
+            InMemoryTestHarness = harness;
+
             if (busPerTest)
                 _busCreationScope = new PerTestBusCreationScope(SetupBus, TeardownBus);
             else
                 _busCreationScope = new PerTestFixtureBusCreationScope(SetupBus, TeardownBus);
 
             InMemoryTestHarness.OnConnectObservers += ConnectObservers;
-            InMemoryTestHarness.OnConfigureBus += ConfigureBus;
-            InMemoryTestHarness.OnConfigureInputQueueEndpoint += ConfigureInputQueueEndpoint;
+            InMemoryTestHarness.OnConfigureInMemoryBus += ConfigureInMemoryBus;
+            InMemoryTestHarness.OnConfigureInMemoryReceiveEndpoint += ConfigureInMemoryReceiveEndpoint;
         }
 
         /// <summary>
@@ -117,11 +123,11 @@ namespace MassTransit.TestFramework
             return InMemoryTestHarness.Stop();
         }
 
-        protected virtual void ConfigureBus(IInMemoryBusFactoryConfigurator configurator)
+        protected virtual void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
         }
 
-        protected virtual void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected virtual void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
         }
 

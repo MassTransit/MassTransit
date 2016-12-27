@@ -56,14 +56,14 @@ namespace MassTransit.RabbitMqTransport.Tests
             _requestClient = new MessageRequestClient<PingMessage, PongMessage>(Bus, InputQueueAddress, TestTimeout);
         }
 
-        protected override void ConfigureBus(IRabbitMqBusFactoryConfigurator configurator)
+        protected override void ConfigureRabbitMqBus(IRabbitMqBusFactoryConfigurator configurator)
         {
-            base.ConfigureBus(configurator);
+            base.ConfigureRabbitMqBus(configurator);
 
             configurator.PrefetchCount = 100;
         }
 
-        protected override void ConfigureInputQueueEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
+        protected override void ConfigureRabbitMqReceiveEndoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
             configurator.PrefetchCount = 100;
 
@@ -117,9 +117,9 @@ namespace MassTransit.RabbitMqTransport.Tests
             _requestClient = new MessageRequestClient<PingMessage, PongMessage>(Bus, _serviceAddress, TestTimeout);
         }
 
-        protected override void ConfigureBusHost(IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host)
+        protected override void ConfigureRabbitMqBusHost(IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host)
         {
-            base.ConfigureBusHost(configurator, host);
+            base.ConfigureRabbitMqBusHost(configurator, host);
 
             configurator.PrefetchCount = 100;
 

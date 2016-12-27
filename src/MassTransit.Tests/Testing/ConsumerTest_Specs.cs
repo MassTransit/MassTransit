@@ -21,52 +21,49 @@ namespace MassTransit.Tests.Testing
     [TestFixture]
     public class When_a_consumer_is_being_tested
     {
-        IConsumerTest<IBusTestScenario, Testsumer> _test;
+        InMemoryTestHarness _harness;
+        ConsumerTestHarness<Testsumer> _consumer;
 
-        [SetUp]
+        [OneTimeSetUp]
         public async Task A_consumer_is_being_tested()
         {
-            _test = TestFactory.ForConsumer<Testsumer>()
-                .New(x =>
-                    {
-                        x.UseConsumerFactory(() => new Testsumer());
+            _harness = new InMemoryTestHarness();
+            _consumer = _harness.Consumer<Testsumer>();
 
-                        x.Send(new A());
-                    });
+            await _harness.Start();
 
-            await _test.ExecuteAsync();
+            await _harness.InputQueueSendEndpoint.Send(new A());
         }
 
-        [TearDown]
+        [OneTimeTearDown]
         public async Task Teardown()
         {
-            await _test.DisposeAsync();
-            _test = null;
+            await _harness.Stop();
         }
 
 
         [Test]
         public void Should_send_the_initial_message_to_the_consumer()
         {
-            _test.Sent.Select<A>().Any().ShouldBe(true);
+            _harness.Sent.Select<A>().Any().ShouldBe(true);
         }
 
         [Test]
         public void Should_have_sent_the_response_from_the_consumer()
         {
-            _test.Sent.Select<B>().Any().ShouldBe(true);
+            _harness.Sent.Select<B>().Any().ShouldBe(true);
         }
 
         [Test]
         public void Should_receive_the_message_type_a()
         {
-            _test.Received.Select<A>().Any().ShouldBe(true);
+            _harness.Consumed.Select<A>().Any().ShouldBe(true);
         }
 
         [Test]
         public void Should_have_called_the_consumer_method()
         {
-            _test.Consumer.Received.Select<A>().Any().ShouldBe(true);
+            _consumer.Consumed.Select<A>().Any().ShouldBe(true);
         }
 
         class Testsumer :
@@ -87,55 +84,50 @@ namespace MassTransit.Tests.Testing
         }
     }
 
-    [Explicit]
     public class When_a_context_consumer_is_being_tested
     {
-        IConsumerTest<IBusTestScenario, Testsumer> _test;
+        InMemoryTestHarness _harness;
+        ConsumerTestHarness<Testsumer> _consumer;
 
-        [SetUp]
+        [OneTimeSetUp]
         public async Task A_consumer_is_being_tested()
         {
-            _test = TestFactory.ForConsumer<Testsumer>()
-                .New(x =>
-                    {
-                        x.UseConsumerFactory(() => new Testsumer());
+            _harness = new InMemoryTestHarness();
+            _consumer = _harness.Consumer<Testsumer>();
 
-                        x.Send(new A(), (scenario, context) => context.ResponseAddress = scenario.Bus.Address);
-                    });
+            await _harness.Start();
 
-            await _test.ExecuteAsync();
+            await _harness.InputQueueSendEndpoint.Send(new A(), context => context.ResponseAddress = _harness.BusAddress);
         }
 
-        [TearDown]
+        [OneTimeTearDown]
         public async Task Teardown()
         {
-            await _test.DisposeAsync();
-            _test = null;
+            await _harness.Stop();
         }
-
 
         [Test]
         public void Should_send_the_initial_message_to_the_consumer()
         {
-            _test.Sent.Select<A>().Any().ShouldBe(true);
+            _harness.Sent.Select<A>().Any().ShouldBe(true);
         }
 
         [Test]
         public void Should_have_sent_the_response_from_the_consumer()
         {
-            _test.Sent.Select<B>().Any().ShouldBe(true);
+            _harness.Sent.Select<B>().Any().ShouldBe(true);
         }
 
         [Test]
         public void Should_receive_the_message_type_a()
         {
-            _test.Received.Select<A>().Any().ShouldBe(true);
+            _harness.Consumed.Select<A>().Any().ShouldBe(true);
         }
 
         [Test]
         public void Should_have_called_the_consumer_method()
         {
-            _test.Consumer.Received.Select<A>().Any().ShouldBe(true);
+            _consumer.Consumed.Select<A>().Any().ShouldBe(true);
         }
 
         class Testsumer :

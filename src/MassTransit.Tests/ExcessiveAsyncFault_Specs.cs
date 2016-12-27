@@ -48,7 +48,7 @@ namespace MassTransit.Tests
 
             PingConsumer _consumer;
 
-            protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+            protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
             {
                 _consumer = new PingConsumer(TestTimeout);
 

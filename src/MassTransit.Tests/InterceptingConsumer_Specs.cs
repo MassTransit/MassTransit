@@ -31,7 +31,7 @@ namespace MassTransit.Tests
         MyConsumer _myConsumer;
         TransactionFilter _transactionFilter;
 
-        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             _myConsumer = new MyConsumer(GetTask<A>());
             _transactionFilter = new TransactionFilter(GetTask<bool>(), GetTask<bool>());

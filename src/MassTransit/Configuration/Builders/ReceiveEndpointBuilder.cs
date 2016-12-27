@@ -66,9 +66,5 @@ namespace MassTransit.Builders
         {
             return _builder.CreatePublishPipe(specifications);
         }
-
-        public abstract ISendEndpointProvider CreateSendEndpointProvider(Uri sourceAddress, params ISendPipeSpecification[] specifications);
-
-        public abstract IPublishEndpointProvider CreatePublishEndpointProvider(Uri sourceAddress, params IPublishPipeSpecification[] specifications);
     }
 }

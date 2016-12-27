@@ -35,14 +35,14 @@ namespace MassTransit.AzureServiceBusTransport.Tests
             Task<ConsumeContext<MessageA>> _handledA;
             Task<ConsumeContext<MessageB>> _handledB;
 
-            protected override void ConfigureInputQueueEndpoint(IServiceBusReceiveEndpointConfigurator configurator)
+            protected override void ConfigureServiceBusReceiveEndpoint(IServiceBusReceiveEndpointConfigurator configurator)
             {
                 _handledA = Handled<MessageA>(configurator);
             }
 
-            protected override void ConfigureBusHost(IServiceBusBusFactoryConfigurator configurator, IServiceBusHost host)
+            protected override void ConfigureServiceBusBusHost(IServiceBusBusFactoryConfigurator configurator, IServiceBusHost host)
             {
-                base.ConfigureBusHost(configurator, host);
+                base.ConfigureServiceBusBusHost(configurator, host);
 
                 configurator.SubscriptionEndpoint<MessageB>(host, "phatboyg_you_know_me", x =>
                 {
@@ -96,9 +96,9 @@ namespace MassTransit.AzureServiceBusTransport.Tests
             Task<ConsumeContext<ResponseA>> _responseA;
             Task<ConsumeContext<ResponseB>> _responseB;
 
-            protected override void ConfigureBusHost(IServiceBusBusFactoryConfigurator configurator, IServiceBusHost host)
+            protected override void ConfigureServiceBusBusHost(IServiceBusBusFactoryConfigurator configurator, IServiceBusHost host)
             {
-                base.ConfigureBusHost(configurator, host);
+                base.ConfigureServiceBusBusHost(configurator, host);
 
                 configurator.SubscriptionEndpoint<MessageA>(host, "phatboyg_you_know_me", x =>
                 {

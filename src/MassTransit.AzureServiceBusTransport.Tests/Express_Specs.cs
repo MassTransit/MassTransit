@@ -31,9 +31,9 @@ namespace MassTransit.AzureServiceBusTransport.Tests
         }
         Task<ConsumeContext<PingMessage>> _handled;
 
-        protected override void ConfigureBusHost(IServiceBusBusFactoryConfigurator configurator, IServiceBusHost host)
+        protected override void ConfigureServiceBusBusHost(IServiceBusBusFactoryConfigurator configurator, IServiceBusHost host)
         {
-            base.ConfigureBusHost(configurator, host);
+            base.ConfigureServiceBusBusHost(configurator, host);
 
             configurator.ReceiveEndpoint(host, "input_express", x =>
             {

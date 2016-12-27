@@ -30,14 +30,14 @@ namespace MassTransit.RabbitMqTransport.Tests
         IManagementEndpointConfigurator _management;
         TestConsumer _consumer;
 
-        protected override void ConfigureBusHost(IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host)
+        protected override void ConfigureRabbitMqBusHost(IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host)
         {
             _management = configurator.ManagementEndpoint(host);
         }
 
-        protected override void ConfigureInputQueueEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
+        protected override void ConfigureRabbitMqReceiveEndoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
-            base.ConfigureInputQueueEndpoint(configurator);
+            base.ConfigureRabbitMqReceiveEndoint(configurator);
 
             configurator.ConnectManagementEndpoint(_management);
 

@@ -26,7 +26,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
     {
         Task<ConsumeContext<PingMessage>> _handler;
 
-        protected override void ConfigureInputQueueEndpoint(IServiceBusReceiveEndpointConfigurator configurator)
+        protected override void ConfigureServiceBusReceiveEndpoint(IServiceBusReceiveEndpointConfigurator configurator)
         {
             _handler = Handled<PingMessage>(configurator);
         }

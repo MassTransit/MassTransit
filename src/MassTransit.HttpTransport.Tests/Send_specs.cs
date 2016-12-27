@@ -37,7 +37,7 @@ namespace MassTransit.HttpTransport.Tests
 
         Task<ConsumeContext<PingMessage>> _handler;
 
-        protected override void ConfigureRootReceiveEndpoint(IHttpReceiveEndpointConfigurator configurator)
+        protected override void ConfigureHttpReceiveEndpoint(IHttpReceiveEndpointConfigurator configurator)
         {
             _handler = Handled<PingMessage>(configurator);
         }
@@ -74,7 +74,7 @@ namespace MassTransit.HttpTransport.Tests
             _response = _requestClient.Request(new PingMessage());
         }
 
-        protected override void ConfigureRootReceiveEndpoint(IHttpReceiveEndpointConfigurator configurator)
+        protected override void ConfigureHttpReceiveEndpoint(IHttpReceiveEndpointConfigurator configurator)
         {
             _ping = Handler<PingMessage>(configurator, cxt => cxt.RespondAsync(new PongMessage(cxt.Message.CorrelationId)));
         }

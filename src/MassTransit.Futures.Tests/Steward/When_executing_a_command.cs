@@ -41,7 +41,7 @@ namespace MassTransit.Tests.Steward
 
         Task<ConsumeContext<DispatchAccepted>> _accepted;
 
-        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             _accepted = Handled<DispatchAccepted>(configurator);
         }

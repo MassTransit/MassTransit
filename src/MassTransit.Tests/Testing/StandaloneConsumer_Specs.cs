@@ -15,8 +15,8 @@ namespace MassTransit.Tests.Testing
     using System;
     using System.Linq;
     using System.Threading.Tasks;
+    using MassTransit.Testing;
     using NUnit.Framework;
-    using Testes;
     using TestFramework.Messages;
 
 
@@ -26,20 +26,21 @@ namespace MassTransit.Tests.Testing
         [Test]
         public async Task Should_be_able_to_create_standalone_consumer_test_in_memory()
         {
-            IConsumerBusTest<MyConsumer> test = Bus.TestFactory.ForConsumer<MyConsumer>().CreateUsingInMemory(x =>
-            {
-            });
+            var harness = new InMemoryTestHarness();
+            ConsumerTestHarness<MyConsumer> consumer = harness.Consumer<MyConsumer>();
 
-            await test.Start();
+            await harness.Start();
             try
             {
-                await test.Send(new PingMessage());
+                await harness.InputQueueSendEndpoint.Send(new PingMessage());
 
-                Assert.That(test.Consumed.Select<PingMessage>().Any(), Is.True);
+                Assert.That(harness.Consumed.Select<PingMessage>().Any(), Is.True);
+
+                Assert.That(consumer.Consumed.Select<PingMessage>().Any(), Is.True);
             }
             finally
             {
-                await test.Stop();
+                await harness.Stop();
             }
         }
 

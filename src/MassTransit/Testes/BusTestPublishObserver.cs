@@ -16,6 +16,7 @@ namespace MassTransit.Testes
     using System.Threading.Tasks;
     using Pipeline;
     using Testing;
+    using Testing.MessageObservers;
     using Util;
 
 

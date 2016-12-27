@@ -52,23 +52,23 @@ namespace MassTransit.AzureServiceBusTransport.Testing
 
         public override Uri InputQueueAddress => _inputQueueAddress;
 
-        public event Action<IServiceBusBusFactoryConfigurator> OnConfigureBus;
-        public event Action<IServiceBusBusFactoryConfigurator, IServiceBusHost> OnConfigureBusHost;
-        public event Action<IServiceBusReceiveEndpointConfigurator> OnConfigureInputQueueEndpoint;
+        public event Action<IServiceBusBusFactoryConfigurator> OnConfigureServiceBusBus;
+        public event Action<IServiceBusBusFactoryConfigurator, IServiceBusHost> OnConfigureServiceBusBusHost;
+        public event Action<IServiceBusReceiveEndpointConfigurator> OnConfigureServiceBusReceiveEndpoint;
 
-        protected virtual void ConfigureBus(IServiceBusBusFactoryConfigurator configurator)
+        protected virtual void ConfigureServiceBusBus(IServiceBusBusFactoryConfigurator configurator)
         {
-            OnConfigureBus?.Invoke(configurator);
+            OnConfigureServiceBusBus?.Invoke(configurator);
         }
 
-        protected virtual void ConfigureBusHost(IServiceBusBusFactoryConfigurator configurator, IServiceBusHost host)
+        protected virtual void ConfigureServiceBusBusHost(IServiceBusBusFactoryConfigurator configurator, IServiceBusHost host)
         {
-            OnConfigureBusHost?.Invoke(configurator, host);
+            OnConfigureServiceBusBusHost?.Invoke(configurator, host);
         }
 
-        protected virtual void ConfigureInputQueueEndpoint(IServiceBusReceiveEndpointConfigurator configurator)
+        protected virtual void ConfigureServiceBusReceiveEndpoint(IServiceBusReceiveEndpointConfigurator configurator)
         {
-            OnConfigureInputQueueEndpoint?.Invoke(configurator);
+            OnConfigureServiceBusReceiveEndpoint?.Invoke(configurator);
         }
 
         protected override IBusControl CreateBus()
@@ -76,6 +76,8 @@ namespace MassTransit.AzureServiceBusTransport.Testing
             return MassTransit.Bus.Factory.CreateUsingAzureServiceBus(x =>
             {
                 ConfigureBus(x);
+
+                ConfigureServiceBusBus(x);
 
                 Host = x.Host(_serviceUri, h =>
                 {
@@ -90,11 +92,13 @@ namespace MassTransit.AzureServiceBusTransport.Testing
 
                 x.UseServiceBusMessageScheduler();
 
-                ConfigureBusHost(x, Host);
+                ConfigureServiceBusBusHost(x, Host);
 
                 x.ReceiveEndpoint(Host, InputQueueName, e =>
                 {
-                    ConfigureInputQueueEndpoint(e);
+                    ConfigureReceiveEndpoint(e);
+
+                    ConfigureServiceBusReceiveEndpoint(e);
 
                     _inputQueueAddress = e.InputAddress;
                 });

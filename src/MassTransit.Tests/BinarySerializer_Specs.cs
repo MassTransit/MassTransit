@@ -25,14 +25,14 @@ namespace MassTransit.Tests
     {
         readonly TaskCompletionSource<Fault<A>> _faultTaskTcs = new TaskCompletionSource<Fault<A>>();
 
-        protected override void ConfigureBus(IInMemoryBusFactoryConfigurator configurator)
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
             configurator.UseBinarySerializer();
-            base.ConfigureBus(configurator);
+            base.ConfigureInMemoryBus(configurator);
         }
-        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
-            base.ConfigureInputQueueEndpoint(configurator);
+            base.ConfigureInMemoryReceiveEndpoint(configurator);
 
             #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
 

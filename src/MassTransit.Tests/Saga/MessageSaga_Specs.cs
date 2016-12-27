@@ -43,7 +43,7 @@ namespace MassTransit.Tests.Saga
         TaskCompletionSource<MySaga> _consumerOnly;
         InMemorySagaRepository<MySaga> _repository;
 
-        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             _message = GetTask<PingMessage>();
             _consumerOnly = GetTask<MySaga>();

@@ -33,7 +33,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
         readonly SagaDbContextFactory _sagaDbContextFactory;
         readonly Lazy<ISagaRepository<ShoppingChore>> _repository;
 
-        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             _machine = new SuperShopper();
 
@@ -142,9 +142,9 @@ namespace MassTransit.AutomatonymousIntegration.Tests
             Assert.IsTrue(instance.Screwed);
         }
 
-        protected override void ConfigureBus(IInMemoryBusFactoryConfigurator configurator)
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
-            base.ConfigureBus(configurator);
+            base.ConfigureInMemoryBus(configurator);
 
             configurator.TransportConcurrencyLimit = 16;
         }

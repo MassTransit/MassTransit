@@ -29,9 +29,9 @@ namespace MassTransit.RabbitMqTransport.Tests
         {
             TaskCompletionSource<PingMessage> consumerStarted = GetTask<PingMessage>();
 
-            var bus = Bus.Factory.CreateUsingRabbitMq(x =>
+            IBusControl bus = Bus.Factory.CreateUsingRabbitMq(x =>
             {
-                var host = x.Host("[::1]", "test", h =>
+                IRabbitMqHost host = x.Host("[::1]", "test", h =>
                 {
                 });
 
@@ -82,9 +82,9 @@ namespace MassTransit.RabbitMqTransport.Tests
         [Test]
         public async Task Should_complete_with_nothing_running()
         {
-            var bus = Bus.Factory.CreateUsingRabbitMq(x =>
+            IBusControl bus = Bus.Factory.CreateUsingRabbitMq(x =>
             {
-                var host = x.Host("[::1]", "test", h =>
+                IRabbitMqHost host = x.Host("[::1]", "test", h =>
                 {
                 });
 
@@ -128,6 +128,9 @@ namespace MassTransit.RabbitMqTransport.Tests
             }
         }
 
-        protected override AsyncTestHarness AsyncTestHarness { get; } = new InMemoryTestHarness();
+        public Stopping_the_bus()
+            : base(new InMemoryTestHarness())
+        {
+        }
     }
 }

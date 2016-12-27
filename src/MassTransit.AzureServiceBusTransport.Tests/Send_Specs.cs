@@ -23,7 +23,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
     {
         Task<ConsumeContext<PingMessage>> _handler;
 
-        protected override void ConfigureInputQueueEndpoint(IServiceBusReceiveEndpointConfigurator configurator)
+        protected override void ConfigureServiceBusReceiveEndpoint(IServiceBusReceiveEndpointConfigurator configurator)
         {
             _handler = Handled<PingMessage>(configurator);
         }
@@ -66,7 +66,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
             _response = _requestClient.Request(new PingMessage());
         }
 
-        protected override void ConfigureInputQueueEndpoint(IServiceBusReceiveEndpointConfigurator configurator)
+        protected override void ConfigureServiceBusReceiveEndpoint(IServiceBusReceiveEndpointConfigurator configurator)
         {
             _ping = Handler<PingMessage>(configurator, async x => await x.RespondAsync(new PongMessage(x.Message.CorrelationId)));
         }
@@ -96,7 +96,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
             _response = _requestClient.Request(new PingMessage());
         }
 
-        protected override void ConfigureInputQueueEndpoint(IServiceBusReceiveEndpointConfigurator configurator)
+        protected override void ConfigureServiceBusReceiveEndpoint(IServiceBusReceiveEndpointConfigurator configurator)
         {
             _ping = Handler<PingMessage>(configurator, async x => await x.RespondAsync(new PongMessage(x.Message.CorrelationId)));
         }

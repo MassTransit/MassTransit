@@ -31,7 +31,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
         ISessionFactory _sessionFactory;
         ISagaRepository<ShoppingChore> _repository;
 
-        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             _machine = new SuperShopper();
 

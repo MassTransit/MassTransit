@@ -62,7 +62,7 @@ namespace MassTransit.HttpTransport.Tests
                 }
             }
 
-            protected override void ConfigureRootReceiveEndpoint(IHttpReceiveEndpointConfigurator configurator)
+            protected override void ConfigureHttpReceiveEndpoint(IHttpReceiveEndpointConfigurator configurator)
             {
                 configurator.Consumer<HttpRequestConsumer>();
             }
@@ -103,12 +103,12 @@ namespace MassTransit.HttpTransport.Tests
                 await Console.Out.WriteLineAsync($"Request complete: {timer.ElapsedMilliseconds}ms, Response = {result.ResponseValue}");
             }
 
-            protected override void ConfigureRootReceiveEndpoint(IHttpReceiveEndpointConfigurator configurator)
+            protected override void ConfigureHttpReceiveEndpoint(IHttpReceiveEndpointConfigurator configurator)
             {
                 configurator.Consumer<HttpRequestConsumer>();
             }
 
-            protected override void ConfigureBusHost(IHttpBusFactoryConfigurator configurator, IHttpHost host)
+            protected override void ConfigureHttpBusHost(IHttpBusFactoryConfigurator configurator, IHttpHost host)
             {
                 configurator.ReceiveEndpoint(host, "/api", ep => ep.Consumer<HttpApiRequestConsumer>());
             }
@@ -140,7 +140,7 @@ namespace MassTransit.HttpTransport.Tests
                 }
             }
 
-            protected override void ConfigureRootReceiveEndpoint(IHttpReceiveEndpointConfigurator configurator)
+            protected override void ConfigureHttpReceiveEndpoint(IHttpReceiveEndpointConfigurator configurator)
             {
                 configurator.Consumer<HttpRequestConsumer>();
             }

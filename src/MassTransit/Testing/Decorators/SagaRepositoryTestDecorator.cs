@@ -10,12 +10,12 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Testing.TestDecorators
+namespace MassTransit.Testing.Decorators
 {
     using System;
     using System.Threading.Tasks;
     using GreenPipes;
-    using Pipeline;
+    using MessageObservers;
     using Saga;
 
 
@@ -23,13 +23,13 @@ namespace MassTransit.Testing.TestDecorators
         ISagaRepository<TSaga>
         where TSaga : class, ISaga
     {
-        readonly SagaListImpl<TSaga> _created;
+        readonly SagaList<TSaga> _created;
         readonly ReceivedMessageList _received;
         readonly ISagaRepository<TSaga> _sagaRepository;
-        readonly SagaListImpl<TSaga> _sagas;
+        readonly SagaList<TSaga> _sagas;
 
-        public SagaRepositoryTestDecorator(ISagaRepository<TSaga> sagaRepository, ReceivedMessageList received, SagaListImpl<TSaga> created,
-            SagaListImpl<TSaga> sagas)
+        public SagaRepositoryTestDecorator(ISagaRepository<TSaga> sagaRepository, ReceivedMessageList received, SagaList<TSaga> created,
+            SagaList<TSaga> sagas)
         {
             _sagaRepository = sagaRepository;
             _received = received;
@@ -66,9 +66,9 @@ namespace MassTransit.Testing.TestDecorators
         {
             readonly IPipe<SagaConsumeContext<TSaga, TMessage>> _pipe;
             readonly ReceivedMessageList _received;
-            readonly SagaListImpl<TSaga> _sagas;
+            readonly SagaList<TSaga> _sagas;
 
-            public InterceptPipe(SagaListImpl<TSaga> sagas, ReceivedMessageList received, IPipe<SagaConsumeContext<TSaga, TMessage>> pipe)
+            public InterceptPipe(SagaList<TSaga> sagas, ReceivedMessageList received, IPipe<SagaConsumeContext<TSaga, TMessage>> pipe)
             {
                 _sagas = sagas;
                 _received = received;
@@ -103,10 +103,10 @@ namespace MassTransit.Testing.TestDecorators
             ISagaPolicy<TSaga, TMessage>
             where TMessage : class
         {
-            readonly SagaListImpl<TSaga> _created;
+            readonly SagaList<TSaga> _created;
             readonly ISagaPolicy<TSaga, TMessage> _policy;
 
-            public InterceptPolicy(SagaListImpl<TSaga> created, ISagaPolicy<TSaga, TMessage> policy)
+            public InterceptPolicy(SagaList<TSaga> created, ISagaPolicy<TSaga, TMessage> policy)
             {
                 _created = created;
                 _policy = policy;
@@ -133,10 +133,10 @@ namespace MassTransit.Testing.TestDecorators
             class InterceptPolicyPipe :
                 IPipe<SagaConsumeContext<TSaga, TMessage>>
             {
-                readonly SagaListImpl<TSaga> _created;
+                readonly SagaList<TSaga> _created;
                 readonly IPipe<SagaConsumeContext<TSaga, TMessage>> _pipe;
 
-                public InterceptPolicyPipe(SagaListImpl<TSaga> created, IPipe<SagaConsumeContext<TSaga, TMessage>> pipe)
+                public InterceptPolicyPipe(SagaList<TSaga> created, IPipe<SagaConsumeContext<TSaga, TMessage>> pipe)
                 {
                     _created = created;
                     _pipe = pipe;

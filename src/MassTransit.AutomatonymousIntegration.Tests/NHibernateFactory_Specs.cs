@@ -107,7 +107,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
         public class When_pre_inserting_the_state_machine_instance :
             InMemoryTestFixture
         {
-            protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+            protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
             {
                 _machine = new TestStateMachine();
                 _sessionFactory = new SQLiteSessionFactoryProvider(typeof(InstanceMap))
@@ -186,7 +186,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
         public class When_pre_inserting_in_an_invalid_state :
             InMemoryTestFixture
         {
-            protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+            protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
             {
                 _machine = new TestStateMachine();
                 _sessionFactory = new SQLiteSessionFactoryProvider(typeof(InstanceMap))
@@ -296,7 +296,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
                 _repository = new EntityFrameworkSagaRepository<Instance>(sagaDbContextFactory);
             }
 
-            protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+            protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
             {
                 _machine = new TestStateMachine();
 

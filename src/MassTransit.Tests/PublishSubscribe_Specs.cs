@@ -36,7 +36,7 @@ namespace MassTransit.Tests
 
         Task<ConsumeContext<PingMessage>> _received;
 
-        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             _received = Handled<PingMessage>(configurator);
         }
@@ -58,7 +58,7 @@ namespace MassTransit.Tests
 
         Task<ConsumeContext<PingMessage>> _received;
 
-        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             _received = Handled<PingMessage>(configurator);
         }
@@ -84,7 +84,7 @@ namespace MassTransit.Tests
         Task<ConsumeContext<PingMessage>> _received;
         readonly Guid _requestId = NewId.NextGuid();
 
-        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             _received = Handled<PingMessage>(configurator);
         }
@@ -110,7 +110,7 @@ namespace MassTransit.Tests
         Task<ConsumeContext<PingMessage>> _received;
         readonly Guid _requestId = NewId.NextGuid();
 
-        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             _received = Handled<PingMessage>(configurator);
         }
@@ -135,7 +135,7 @@ namespace MassTransit.Tests
         Task<ConsumeContext<PingMessage>> _received;
         readonly Guid _requestId = NewId.NextGuid();
 
-        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             _received = Handled<PingMessage>(configurator);
         }
@@ -156,7 +156,7 @@ namespace MassTransit.Tests
 
         Task<ConsumeContext<PingMessage>> _received;
 
-        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             _received = Handled<PingMessage>(configurator);
         }
@@ -181,7 +181,7 @@ namespace MassTransit.Tests
         Task<ConsumeContext<PingMessage>> _received;
         readonly Guid _requestId = NewId.NextGuid();
 
-        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             _received = Handled<PingMessage>(configurator);
         }

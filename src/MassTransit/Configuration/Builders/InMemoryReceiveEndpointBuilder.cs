@@ -28,7 +28,7 @@ namespace MassTransit.Builders
         {
         }
 
-        public override ISendEndpointProvider CreateSendEndpointProvider(Uri sourceAddress, params ISendPipeSpecification[] specifications)
+        public ISendEndpointProvider CreateSendEndpointProvider(Uri sourceAddress, params ISendPipeSpecification[] specifications)
         {
             var sendPipe = CreateSendPipe(specifications);
 
@@ -37,7 +37,7 @@ namespace MassTransit.Builders
             return new SendEndpointCache(provider);
         }
 
-        public override IPublishEndpointProvider CreatePublishEndpointProvider(Uri sourceAddress, params IPublishPipeSpecification[] specifications)
+        public IPublishEndpointProvider CreatePublishEndpointProvider(Uri sourceAddress, params IPublishPipeSpecification[] specifications)
         {
             var sendEndpointProvider = new InMemorySendEndpointProvider(sourceAddress, SendTransportProvider, MessageSerializer, SendPipe.Empty);
 

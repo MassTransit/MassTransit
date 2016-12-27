@@ -33,7 +33,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
         Task<ConsumeContext<A>> _received;
 
-        protected override void ConfigureInputQueueEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
+        protected override void ConfigureRabbitMqReceiveEndoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
             _received = Handled<A>(configurator);
         }

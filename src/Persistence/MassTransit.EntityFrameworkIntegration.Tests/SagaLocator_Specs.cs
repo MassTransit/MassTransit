@@ -57,7 +57,7 @@
             _sagaRepository = new Lazy<ISagaRepository<SimpleSaga>>(() => new EntityFrameworkSagaRepository<SimpleSaga>(sagaDbContextFactory));
         }
 
-        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             configurator.Saga(_sagaRepository.Value);
         }

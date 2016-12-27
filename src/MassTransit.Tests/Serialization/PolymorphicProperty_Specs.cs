@@ -68,7 +68,7 @@ namespace MassTransit.Tests.Serialization
 
             Task<ConsumeContext<ITestMessage>> _handled;
 
-            protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+            protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
             {
                 _handled = Handled<ITestMessage>(configurator);
             }

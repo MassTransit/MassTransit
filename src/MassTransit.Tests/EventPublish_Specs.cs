@@ -61,7 +61,7 @@ namespace MassTransit.Tests
             await InputQueueSendEndpoint.Send(new PingMessage());
         }
 
-        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             configurator.Consumer(() => new Consumar(GetTransport(InputQueueName)));
 

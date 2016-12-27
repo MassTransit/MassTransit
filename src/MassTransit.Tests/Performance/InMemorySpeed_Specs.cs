@@ -57,14 +57,14 @@ namespace MassTransit.Tests.Performance
             _requestClient = new MessageRequestClient<PingMessage, PongMessage>(Bus, InputQueueAddress, TestTimeout);
         }
 
-        protected override void ConfigureBus(IInMemoryBusFactoryConfigurator configurator)
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
             configurator.UseBsonSerializer();
 
-            base.ConfigureBus(configurator);
+            base.ConfigureInMemoryBus(configurator);
         }
 
-        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             configurator.Handler<PingMessage>(async context =>
             {
@@ -109,7 +109,7 @@ namespace MassTransit.Tests.Performance
             _requestClient = CreateRequestClient<PerformanceRequest, PerformanceResult>();
         }
 
-        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             configurator.Handler<PerformanceRequest>(async context =>
             {

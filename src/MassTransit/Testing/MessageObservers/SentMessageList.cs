@@ -10,18 +10,18 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Testing
+namespace MassTransit.Testing.MessageObservers
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
 
 
-    public class ObservedSentMessageList :
+    public class SentMessageList :
         MessageList<ISentMessage>,
         ISentMessageList
     {
-        public ObservedSentMessageList(TimeSpan timeout)
+        public SentMessageList(TimeSpan timeout)
             : base((int)timeout.TotalMilliseconds)
         {
         }
@@ -44,13 +44,13 @@ namespace MassTransit.Testing
         public void Add<T>(SendContext<T> context)
             where T : class
         {
-            Add(new ObservedSentMessage<T>(context), context.MessageId);
+            Add(new SentMessage<T>(context), context.MessageId);
         }
 
         public void Add<T>(SendContext<T> context, Exception exception)
             where T : class
         {
-            Add(new ObservedSentMessage<T>(context, exception), context.MessageId);
+            Add(new SentMessage<T>(context, exception), context.MessageId);
         }
     }
 }

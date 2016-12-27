@@ -21,11 +21,19 @@ namespace MassTransit.Testing.Observers
         IReceiveEndpointObserver
     {
         readonly ILog _log = Logger.Get<TestReceiveEndpointObserver>();
+        readonly IPublishObserver _publishObserver;
+
+        public TestReceiveEndpointObserver(IPublishObserver publishObserver)
+        {
+            _publishObserver = publishObserver;
+        }
 
         public Task Ready(ReceiveEndpointReady ready)
         {
             if (_log.IsDebugEnabled)
                 _log.Debug($"Endpoint Ready: {ready.InputAddress}");
+
+            ready.ReceiveEndpoint.ConnectPublishObserver(_publishObserver);
 
             return TaskUtil.Completed;
         }

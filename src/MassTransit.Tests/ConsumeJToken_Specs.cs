@@ -40,7 +40,7 @@ namespace MassTransit.Tests
             _completed = GetTask<JToken>();
         }
 
-        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             configurator.Handler<JToken>(async context =>
             {

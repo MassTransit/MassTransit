@@ -42,7 +42,7 @@ namespace MassTransit.Tests.Saga
         Dependency _dependency;
         Guid _sagaId;
 
-        protected override void ConfigureBus(IInMemoryBusFactoryConfigurator configurator)
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
             _sagaId = NewId.NextGuid();
 
@@ -54,7 +54,7 @@ namespace MassTransit.Tests.Saga
             _repository = SetupSagaRepository<InjectingSampleSaga>();
         }
 
-        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             configurator.Saga(_repository, x => x.UseExecute(context => context.Saga.Dependency = _dependency));
         }

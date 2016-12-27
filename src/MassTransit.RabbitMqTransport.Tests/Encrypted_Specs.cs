@@ -25,19 +25,19 @@ namespace MassTransit.RabbitMqTransport.Tests
     {
         Task<ConsumeContext<PingMessage>> _handler;
 
-        protected override void ConfigureInputQueueEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
+        protected override void ConfigureRabbitMqReceiveEndoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
             _handler = Handled<PingMessage>(configurator);
         }
 
-        protected override void ConfigureBus(IRabbitMqBusFactoryConfigurator configurator)
+        protected override void ConfigureRabbitMqBus(IRabbitMqBusFactoryConfigurator configurator)
         {
             ISymmetricKeyProvider keyProvider = new TestSymmetricKeyProvider("secure");
 
             var streamProvider = new AesCryptoStreamProvider(keyProvider, "default");
             configurator.UseEncryptedSerializer(streamProvider);
 
-            base.ConfigureBus(configurator);
+            base.ConfigureRabbitMqBus(configurator);
         }
 
         [Test]

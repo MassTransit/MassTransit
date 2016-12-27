@@ -17,7 +17,7 @@ namespace MassTransit.Testing
     using Saga;
 
 
-    public interface ISagaList<T> :
+    public interface ISagaList<out T> :
         IEnumerable<ISagaInstance<T>>
         where T : class, ISaga
     {

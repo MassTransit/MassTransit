@@ -20,13 +20,4 @@ namespace MassTransit.Testing
         where TSubject : class
     {
     }
-
-
-    public interface ITestSubject<in TScenario, TSubject> :
-        ITestSubject<TSubject>
-        where TSubject : class
-        where TScenario : ITestScenario
-    {
-        void Prepare(TScenario scenario);
-    }
 }

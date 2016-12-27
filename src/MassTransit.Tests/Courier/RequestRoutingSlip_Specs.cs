@@ -37,7 +37,7 @@ namespace MassTransit.Tests.Courier
         Uri _requestAddress;
         IRequestClient<Request, Response> _requestClient;
 
-        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             var testActivity = GetActivityContext<TestActivity>();
             var secondActivity = GetActivityContext<SecondTestActivity>();
@@ -127,7 +127,7 @@ namespace MassTransit.Tests.Courier
         Uri _requestAddress;
         IRequestClient<Request, Response> _requestClient;
 
-        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             var testActivity = GetActivityContext<TestActivity>();
             var secondActivity = GetActivityContext<FaultyActivity>();

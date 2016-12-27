@@ -15,8 +15,8 @@ namespace MassTransit.Testing.Scenarios
     using System;
     using System.Threading;
     using System.Threading.Tasks;
+    using MessageObservers;
     using Observers;
-    using TestDecorators;
 
 
     /// <summary>

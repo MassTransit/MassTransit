@@ -58,14 +58,14 @@ namespace MassTransit.Tests.Saga
             _sagaId = Guid.NewGuid();
         }
 
-        protected override void ConfigureBus(IInMemoryBusFactoryConfigurator configurator)
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
-            base.ConfigureBus(configurator);
+            base.ConfigureInMemoryBus(configurator);
 
             configurator.UseRetry(x => x.None());
         }
 
-        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             configurator.UseRetry(x => x.Immediate(2));
             configurator.Saga(_repository);
@@ -109,7 +109,7 @@ namespace MassTransit.Tests.Saga
             _sagaId = Guid.NewGuid();
         }
 
-        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             configurator.Saga(_repository);
         }
@@ -148,7 +148,7 @@ namespace MassTransit.Tests.Saga
             _sagaId = Guid.NewGuid();
         }
 
-        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             configurator.Saga(_repository);
         }
@@ -187,7 +187,7 @@ namespace MassTransit.Tests.Saga
             _sagaId = Guid.NewGuid();
         }
 
-        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             configurator.Saga(_repository);
         }

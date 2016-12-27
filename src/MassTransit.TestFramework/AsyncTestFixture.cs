@@ -21,7 +21,12 @@ namespace MassTransit.TestFramework
 
     public abstract class AsyncTestFixture
     {
-        protected abstract AsyncTestHarness AsyncTestHarness { get; }
+        protected AsyncTestFixture(AsyncTestHarness harness)
+        {
+            AsyncTestHarness = harness;
+        }
+
+        protected AsyncTestHarness AsyncTestHarness { get; }
 
         /// <summary>
         /// Task that is canceled when the test is aborted, for continueWith usage
@@ -60,7 +65,7 @@ namespace MassTransit.TestFramework
             return AsyncTestHarness.GetTask<T>();
         }
 
-        protected TestConsumeObserver<T> GetConsumeObserver<T>()
+        protected TestConsumeMessageObserver<T> GetConsumeObserver<T>()
             where T : class
         {
             return AsyncTestHarness.GetConsumeObserver<T>();

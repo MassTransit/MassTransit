@@ -46,17 +46,17 @@ namespace MassTransit.Testing
             return _inMemoryHost.GetTransport(queueName);
         }
 
-        public event Action<IInMemoryBusFactoryConfigurator> OnConfigureBus;
-        public event Action<IInMemoryReceiveEndpointConfigurator> OnConfigureInputQueueEndpoint;
+        public event Action<IInMemoryBusFactoryConfigurator> OnConfigureInMemoryBus;
+        public event Action<IInMemoryReceiveEndpointConfigurator> OnConfigureInMemoryReceiveEndpoint;
 
-        protected virtual void ConfigureBus(IInMemoryBusFactoryConfigurator configurator)
+        protected virtual void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
-            OnConfigureBus?.Invoke(configurator);
+            OnConfigureInMemoryBus?.Invoke(configurator);
         }
 
-        protected virtual void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected virtual void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
-            OnConfigureInputQueueEndpoint?.Invoke(configurator);
+            OnConfigureInMemoryReceiveEndpoint?.Invoke(configurator);
         }
 
         protected override IBusControl CreateBus()
@@ -66,9 +66,15 @@ namespace MassTransit.Testing
                 _inMemoryHost = new InMemoryHost(Environment.ProcessorCount);
 
                 x.SetHost(_inMemoryHost);
-                ConfigureBus(x);
 
-                x.ReceiveEndpoint(InputQueueName, ConfigureInputQueueEndpoint);
+                ConfigureInMemoryBus(x);
+
+                x.ReceiveEndpoint(InputQueueName, configurator =>
+                {
+                    ConfigureReceiveEndpoint(configurator);
+
+                    ConfigureInMemoryReceiveEndpoint(configurator);
+                });
             });
         }
     }

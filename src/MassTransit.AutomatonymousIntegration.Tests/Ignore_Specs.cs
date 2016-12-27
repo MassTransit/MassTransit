@@ -66,7 +66,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
             return null;
         }
 
-        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             configurator.StateMachineSaga(_machine, _repository);
         }

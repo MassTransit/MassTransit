@@ -42,7 +42,7 @@ namespace MassTransit.Containers.Tests
                 Lifestyle.Scoped);
         }
 
-        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             configurator.LoadFrom(_container);
         }
@@ -68,7 +68,7 @@ namespace MassTransit.Containers.Tests
                 Lifestyle.Singleton);
         }
 
-        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             configurator.Saga<SimpleSaga>(_container);
         }

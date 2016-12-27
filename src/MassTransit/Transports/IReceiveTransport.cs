@@ -13,11 +13,13 @@
 namespace MassTransit.Transports
 {
     using GreenPipes;
+    using Pipeline;
 
 
     public interface IReceiveTransport :
         IReceiveObserverConnector,
         IReceiveTransportObserverConnector,
+        IPublishObserverConnector,
         IProbeSite
     {
         /// <summary>

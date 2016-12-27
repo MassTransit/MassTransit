@@ -18,6 +18,7 @@ namespace MassTransit.Testing
     using GreenPipes;
     using Logging;
     using Observers;
+    using Testes;
     using Util;
 
 
@@ -30,8 +31,15 @@ namespace MassTransit.Testing
         static readonly ILog _log = Logger.Get<BusTestHarness>();
 
         IBusControl _bus;
+        ConnectHandle _busConsumeObserver;
         BusHandle _busHandle;
+        ConnectHandle _busPublishObserver;
+        ConnectHandle _busSendObserver;
+        BusTestConsumeObserver _consumed;
+        ConnectHandle _inputQueueSendObserver;
+        BusTestPublishObserver _published;
         ConnectHandle _receiveEndpointObserver;
+        TestSendObserver _sent;
 
         public IBus Bus => _bus;
 
@@ -55,13 +63,11 @@ namespace MassTransit.Testing
         /// </summary>
         public ISendEndpoint InputQueueSendEndpoint { get; private set; }
 
+        public ISentMessageList Sent => _sent.Messages;
+        public IReceivedMessageList Consumed => _consumed.Messages;
+        public IPublishedMessageList Published => _published.Messages;
+
         protected abstract IBusControl CreateBus();
-
-        public ISentMessageList Sent => _sendObserver.Messages;
-
-        TestSendObserver _sendObserver;
-        ConnectHandle _busSendObserver;
-        ConnectHandle _inputQueueSendObserver;
 
         public virtual IRequestClient<TRequest, TResponse> CreateRequestClient<TRequest, TResponse>()
             where TRequest : class
@@ -79,15 +85,31 @@ namespace MassTransit.Testing
 
         protected virtual void ConnectObservers(IBus bus)
         {
-            _receiveEndpointObserver = bus.ConnectReceiveEndpointObserver(new TestReceiveEndpointObserver());
+            _receiveEndpointObserver = bus.ConnectReceiveEndpointObserver(new TestReceiveEndpointObserver(_published));
 
             OnConnectObservers?.Invoke(bus);
         }
 
+        protected virtual void ConfigureBus(IBusFactoryConfigurator configurator)
+        {
+            OnConfigureBus?.Invoke(configurator);
+        }
+
+        protected virtual void ConfigureReceiveEndpoint(IReceiveEndpointConfigurator configurator)
+        {
+            OnConfigureReceiveEndpoint?.Invoke(configurator);
+        }
+
+        public event Action<IReceiveEndpointConfigurator> OnConfigureReceiveEndpoint;
+        public event Action<IBusFactoryConfigurator> OnConfigureBus;
         public event Action<IBus> OnConnectObservers;
 
         public virtual async Task Start()
         {
+            _sent = new TestSendObserver(TestTimeout);
+            _consumed = new BusTestConsumeObserver(TestTimeout);
+            _published = new BusTestPublishObserver(TestTimeout);
+
             _bus = CreateBus();
 
             ConnectObservers(_bus);
@@ -96,14 +118,14 @@ namespace MassTransit.Testing
 
             BusSendEndpoint = await GetSendEndpoint(_bus.Address).ConfigureAwait(false);
 
-            _sendObserver = new TestSendObserver(TestTimeout);
-
-            _busSendObserver = BusSendEndpoint.ConnectSendObserver(_sendObserver);
-
-
             InputQueueSendEndpoint = await GetSendEndpoint(InputQueueAddress).ConfigureAwait(false);
 
-            _inputQueueSendObserver = InputQueueSendEndpoint.ConnectSendObserver(_sendObserver);
+            _busSendObserver = BusSendEndpoint.ConnectSendObserver(_sent);
+            _inputQueueSendObserver = InputQueueSendEndpoint.ConnectSendObserver(_sent);
+
+            _busConsumeObserver = _bus.ConnectConsumeObserver(_consumed);
+
+            _busPublishObserver = _bus.ConnectPublishObserver(_published);
         }
 
         public virtual async Task Stop()
@@ -118,6 +140,12 @@ namespace MassTransit.Testing
 
                 _inputQueueSendObserver?.Disconnect();
                 _inputQueueSendObserver = null;
+
+                _busPublishObserver?.Disconnect();
+                _busPublishObserver = null;
+
+                _busConsumeObserver?.Disconnect();
+                _busConsumeObserver = null;
 
                 using (var tokenSource = new CancellationTokenSource(TestTimeout))
                 {
@@ -258,7 +286,7 @@ namespace MassTransit.Testing
             var count = 0;
             configurator.Handler<T>(async context =>
             {
-                var value = Interlocked.Increment(ref count);
+                int value = Interlocked.Increment(ref count);
                 if (value == expectedCount)
                     source.TrySetResult(context);
             });

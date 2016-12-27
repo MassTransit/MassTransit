@@ -20,7 +20,6 @@ namespace MassTransit.Transports.InMemory
     using GreenPipes;
     using Logging;
     using Metrics;
-    using Pipeline;
     using Pipeline.Observables;
     using Util;
 
@@ -87,7 +86,7 @@ namespace MassTransit.Transports.InMemory
 
         public void Probe(ProbeContext context)
         {
-            var scope = context.CreateScope("transport");
+            ProbeContext scope = context.CreateScope("transport");
             scope.Set(new
             {
                 Address = _inputAddress
@@ -123,6 +122,11 @@ namespace MassTransit.Transports.InMemory
             return _transportObservable.Connect(observer);
         }
 
+        public ConnectHandle ConnectPublishObserver(IPublishObserver observer)
+        {
+            return _publishEndpointProvider.ConnectPublishObserver(observer);
+        }
+
         async Task ISendTransport.Send<T>(T message, IPipe<SendContext<T>> pipe, CancellationToken cancelSend)
         {
             var context = new InMemorySendContext<T>(message, cancelSend);
@@ -131,7 +135,7 @@ namespace MassTransit.Transports.InMemory
             {
                 await pipe.Send(context).ConfigureAwait(false);
 
-                var messageId = context.MessageId ?? NewId.NextGuid();
+                Guid messageId = context.MessageId ?? NewId.NextGuid();
 
                 await _sendObservable.PreSend(context).ConfigureAwait(false);
 
@@ -159,10 +163,10 @@ namespace MassTransit.Transports.InMemory
 
         async Task ISendTransport.Move(ReceiveContext context, IPipe<SendContext> pipe)
         {
-            var messageId = GetMessageId(context);
+            Guid messageId = GetMessageId(context);
 
             byte[] body;
-            using (var bodyStream = context.GetBody())
+            using (Stream bodyStream = context.GetBody())
             {
                 body = await GetMessageBody(bodyStream).ConfigureAwait(false);
             }

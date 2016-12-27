@@ -28,9 +28,9 @@ namespace MassTransit.AutomatonymousIntegration.Tests
         InMemorySagaRepository<TransactionState> _repository;
         TransactionStateMachine _machine;
 
-        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
-            base.ConfigureInputQueueEndpoint(configurator);
+            base.ConfigureInMemoryReceiveEndpoint(configurator);
 
             _repository = new InMemorySagaRepository<TransactionState>();
             _machine = new TransactionStateMachine();

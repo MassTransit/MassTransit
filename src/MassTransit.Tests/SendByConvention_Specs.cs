@@ -31,7 +31,7 @@ namespace MassTransit.Tests
             await _handled;
         }
 
-        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             _handled = Handled<NastyMessage>(configurator);
 

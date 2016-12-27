@@ -31,7 +31,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             TestTimeout = TimeSpan.FromSeconds(180);
         }
 
-        protected override void ConfigureInputQueueEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
+        protected override void ConfigureRabbitMqReceiveEndoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
             _completed = GetTask<int>();
             int count = 0;

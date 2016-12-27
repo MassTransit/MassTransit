@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -18,7 +18,6 @@ namespace MassTransit.Containers.Tests
     using Scenarios;
     using Shouldly;
     using StructureMap;
-    using StructureMap.Configuration.DSL;
     using StructureMap.Pipeline;
     using TestFramework;
     using Testing;
@@ -28,14 +27,12 @@ namespace MassTransit.Containers.Tests
     public class StructureMap_Idiomatic :
         AsyncTestFixture
     {
-        protected override AsyncTestHarness AsyncTestHarness { get; } = new InMemoryTestHarness();
-
         [Test]
         public async Task Should_work_with_the_registry()
         {
             var bus = _container.GetInstance<IBusControl>();
 
-            var busHandle = await bus.StartAsync();
+            BusHandle busHandle = await bus.StartAsync();
 
             await busHandle.Ready;
 
@@ -58,6 +55,11 @@ namespace MassTransit.Containers.Tests
 
             lastConsumer.Dependency.SomethingDone
                 .ShouldBe(true); //Dependency was disposed before consumer executed");
+        }
+
+        public StructureMap_Idiomatic()
+            : base(new InMemoryTestHarness())
+        {
         }
 
         Container _container;

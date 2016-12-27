@@ -24,9 +24,9 @@ namespace MassTransit.Tests.Conventional
         TaskCompletionSource<MessageA> _receivedA;
         TaskCompletionSource<MessageB> _receivedB;
 
-        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
-            base.ConfigureInputQueueEndpoint(configurator);
+            base.ConfigureInMemoryReceiveEndpoint(configurator);
 
             _receivedA = GetTask<MessageA>();
             _receivedB = GetTask<MessageB>();

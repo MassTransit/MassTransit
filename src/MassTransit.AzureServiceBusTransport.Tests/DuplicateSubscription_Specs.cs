@@ -24,7 +24,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
         {
         }
 
-        protected override void ConfigureInputQueueEndpoint(IServiceBusReceiveEndpointConfigurator configurator)
+        protected override void ConfigureServiceBusReceiveEndpoint(IServiceBusReceiveEndpointConfigurator configurator)
         {
             Handled<MessageA>(configurator);
             Handled<MessageA>(configurator);

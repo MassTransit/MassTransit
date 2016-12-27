@@ -44,7 +44,7 @@ namespace MassTransit.Reactive.Tests
         }
 
 
-        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             _observer = GetObserver<A>();
 
@@ -78,7 +78,7 @@ namespace MassTransit.Reactive.Tests
 
         ObservableObserver<ConsumeContext<A>> _observer;
 
-        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             _observer = new ObservableObserver<ConsumeContext<A>>();
 

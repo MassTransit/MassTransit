@@ -40,7 +40,7 @@ namespace MassTransit.Containers.Tests
 
         IContainer _container;
 
-        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             var builder = new ContainerBuilder();
 

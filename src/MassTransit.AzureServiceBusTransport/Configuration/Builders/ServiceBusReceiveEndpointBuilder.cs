@@ -47,7 +47,7 @@ namespace MassTransit.AzureServiceBusTransport.Builders
             return base.ConnectConsumePipe(pipe);
         }
 
-        public override ISendEndpointProvider CreateSendEndpointProvider(Uri sourceAddress, params ISendPipeSpecification[] specifications)
+        public ISendEndpointProvider CreateSendEndpointProvider(Uri sourceAddress, params ISendPipeSpecification[] specifications)
         {
             var pipe = CreateSendPipe(specifications);
 
@@ -56,7 +56,7 @@ namespace MassTransit.AzureServiceBusTransport.Builders
             return new SendEndpointCache(provider, QueueCacheDurationProvider);
         }
 
-        public override IPublishEndpointProvider CreatePublishEndpointProvider(Uri sourceAddress, params IPublishPipeSpecification[] specifications)
+        public IPublishEndpointProvider CreatePublishEndpointProvider(Uri sourceAddress, params IPublishPipeSpecification[] specifications)
         {
             var provider = new PublishSendEndpointProvider(MessageSerializer, sourceAddress, _host);
 

@@ -41,7 +41,7 @@ namespace MassTransit.Tests
             _requestClient = CreateRequestClient<PingMessage, PongMessage>();
         }
 
-        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             _observer = new PingObserver();
             configurator.Observer(_observer, x =>

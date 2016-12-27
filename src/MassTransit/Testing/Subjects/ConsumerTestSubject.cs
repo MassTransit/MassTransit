@@ -16,10 +16,11 @@ namespace MassTransit.Testing.Subjects
     using System.Threading;
     using System.Threading.Tasks;
     using Configurators;
+    using Decorators;
     using GreenPipes.Util;
+    using MessageObservers;
     using ScenarioBuilders;
     using ScenarioConfigurators;
-    using TestDecorators;
 
 
     public class ConsumerTestSubject<TScenario, TConsumer> :

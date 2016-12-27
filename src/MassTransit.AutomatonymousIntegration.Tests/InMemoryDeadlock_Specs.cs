@@ -64,9 +64,9 @@ namespace MassTransit.AutomatonymousIntegration.Tests
         InMemorySagaRepository<Instance> _repository;
         DeadlockStateMachine _machine;
 
-        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
-            base.ConfigureInputQueueEndpoint(configurator);
+            base.ConfigureInMemoryReceiveEndpoint(configurator);
 
             _repository = new InMemorySagaRepository<Instance>();
             _machine = new DeadlockStateMachine();

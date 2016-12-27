@@ -26,14 +26,16 @@ namespace MassTransit.HttpTransport.Transport
     {
         readonly IHttpHost _host;
         readonly ReceiveSettings _receiveSettings;
+        readonly IPublishEndpointProvider _publishEndpointProvider;
         readonly ReceiveObservable _receiveObservable;
         readonly ReceiveTransportObservable _receiveTransportObservable;
         readonly ISendPipe _sendPipe;
 
-        public HttpReceiveTransport(IHttpHost host, ReceiveSettings receiveSettings, ISendPipe sendPipe)
+        public HttpReceiveTransport(IHttpHost host, ReceiveSettings receiveSettings, IPublishEndpointProvider publishEndpointProvider, ISendPipe sendPipe)
         {
             _host = host;
             _receiveSettings = receiveSettings;
+            _publishEndpointProvider = publishEndpointProvider;
             _sendPipe = sendPipe;
 
             _receiveObservable = new ReceiveObservable();
@@ -90,6 +92,12 @@ namespace MassTransit.HttpTransport.Transport
 
                 await _connectionTask.ConfigureAwait(false);
             }
+        }
+
+
+        public ConnectHandle ConnectPublishObserver(IPublishObserver observer)
+        {
+            return _publishEndpointProvider.ConnectPublishObserver(observer);
         }
     }
 }

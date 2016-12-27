@@ -25,7 +25,7 @@ namespace MassTransit.Tests
     {
         Task<ConsumeContext<PingMessage>> _handled;
 
-        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             _handled = Handler<PingMessage>(configurator, context => context.Publish(new PongMessage(context.Message.CorrelationId)));
         }

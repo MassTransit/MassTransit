@@ -83,7 +83,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
             Lazy<ISagaRepository<SimpleState>> _simpleStateRepository;
             TaskCompletionSource<bool> _discarded;
 
-            protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+            protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
             {
                 _discarded = GetTask<bool>();
 
@@ -99,7 +99,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
 
                 configurator.StateMachineSaga(_simpleStateMachine, _simpleStateRepository.Value);
 
-                base.ConfigureInputQueueEndpoint(configurator);
+                base.ConfigureInMemoryReceiveEndpoint(configurator);
             }
         }
 

@@ -16,6 +16,7 @@ namespace MassTransit.Tests
     using System.Linq;
     using GreenPipes;
     using MassTransit.Testing;
+    using MassTransit.Testing.MessageObservers;
     using NUnit.Framework;
     using Shouldly;
     using TestFramework;

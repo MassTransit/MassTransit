@@ -21,10 +21,11 @@ namespace Automatonymous.Testing
     using MassTransit.Saga;
     using MassTransit.Testing;
     using MassTransit.Testing.Configurators;
+    using MassTransit.Testing.Decorators;
+    using MassTransit.Testing.MessageObservers;
     using MassTransit.Testing.ScenarioBuilders;
     using MassTransit.Testing.ScenarioConfigurators;
     using MassTransit.Testing.Subjects;
-    using MassTransit.Testing.TestDecorators;
 
 
     public class StateMachineSagaTestSubjectImpl<TScenario, TSaga, TStateMachine> :
@@ -36,9 +37,9 @@ namespace Automatonymous.Testing
     {
         readonly ISagaRepository<TSaga> _sagaRepository;
         readonly TStateMachine _stateMachine;
-        SagaListImpl<TSaga> _created;
+        SagaList<TSaga> _created;
         ReceivedMessageList _received;
-        SagaListImpl<TSaga> _sagas;
+        SagaList<TSaga> _sagas;
 
         public StateMachineSagaTestSubjectImpl(ISagaRepository<TSaga> sagaRepository, TStateMachine stateMachine)
         {
@@ -49,8 +50,8 @@ namespace Automatonymous.Testing
         public ITestScenarioBuilder<TScenario> Configure(ITestScenarioBuilder<TScenario> builder)
         {
             _received = new ReceivedMessageList(builder.Timeout);
-            _created = new SagaListImpl<TSaga>(builder.Timeout);
-            _sagas = new SagaListImpl<TSaga>(builder.Timeout);
+            _created = new SagaList<TSaga>(builder.Timeout);
+            _sagas = new SagaList<TSaga>(builder.Timeout);
 
             var decoratedSagaRepository = new SagaRepositoryTestDecorator<TSaga>(_sagaRepository, _received, _created,
                 _sagas);

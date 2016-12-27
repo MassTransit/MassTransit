@@ -10,7 +10,7 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Testing
+namespace MassTransit.Testing.MessageObservers
 {
     using System;
     using System.Collections.Generic;
@@ -18,12 +18,12 @@ namespace MassTransit.Testing
     using Saga;
 
 
-    public class SagaListImpl<T> :
+    public class SagaList<T> :
         MessageList<ISagaInstance<T>>,
         ISagaList<T>
         where T : class, ISaga
     {
-        public SagaListImpl(TimeSpan timeout)
+        public SagaList(TimeSpan timeout)
             : base((int)timeout.TotalMilliseconds)
         {
         }
@@ -40,7 +40,7 @@ namespace MassTransit.Testing
 
         public void Add(SagaConsumeContext<T> context)
         {
-            Add(new ObservedSagaInstance<T>(context.Saga), context.Saga.CorrelationId);
+            Add(new SagaInstance<T>(context.Saga), context.Saga.CorrelationId);
         }
 
 

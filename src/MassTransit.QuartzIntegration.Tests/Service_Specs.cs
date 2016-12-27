@@ -81,11 +81,11 @@ namespace MassTransit.QuartzIntegration.Tests
         }
 
 
-        protected override void ConfigureBus(IInMemoryBusFactoryConfigurator configurator)
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
             configurator.UseXmlSerializer();
 
-            base.ConfigureBus(configurator);
+            base.ConfigureInMemoryBus(configurator);
         }
     }
 

@@ -57,11 +57,11 @@ namespace MassTransit.AzureServiceBusTransport.Tests
         Uri _commandEndpointAddress;
         Task<ConsumeContext<JobCompleted>> _completed2;
 
-        protected override void ConfigureBusHost(IServiceBusBusFactoryConfigurator configurator, IServiceBusHost host)
+        protected override void ConfigureServiceBusBusHost(IServiceBusBusFactoryConfigurator configurator, IServiceBusHost host)
         {
             configurator.UseServiceBusMessageScheduler();
 
-            base.ConfigureBusHost(configurator, host);
+            base.ConfigureServiceBusBusHost(configurator, host);
 
             configurator.TurnoutEndpoint<ProcessFile>(host, "process_queue", endpoint =>
             {
@@ -72,7 +72,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
             });
         }
 
-        protected override void ConfigureInputQueueEndpoint(IServiceBusReceiveEndpointConfigurator configurator)
+        protected override void ConfigureServiceBusReceiveEndpoint(IServiceBusReceiveEndpointConfigurator configurator)
         {
             _completed = Handled<JobCompleted>(configurator, context => context.Message.GetArguments<ProcessFile>().Size == 1);
             _completed2 = Handled<JobCompleted>(configurator, context => context.Message.GetArguments<ProcessFile>().Size == 2);
@@ -110,11 +110,11 @@ namespace MassTransit.AzureServiceBusTransport.Tests
         Task<ConsumeContext<JobStarted>> _started;
         Uri _commandEndpointAddress;
 
-        protected override void ConfigureBusHost(IServiceBusBusFactoryConfigurator configurator, IServiceBusHost host)
+        protected override void ConfigureServiceBusBusHost(IServiceBusBusFactoryConfigurator configurator, IServiceBusHost host)
         {
             configurator.UseServiceBusMessageScheduler();
 
-            base.ConfigureBusHost(configurator, host);
+            base.ConfigureServiceBusBusHost(configurator, host);
 
             configurator.TurnoutEndpoint<ProcessFile>(host, "process_queue", endpoint =>
             {
@@ -136,7 +136,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
             });
         }
 
-        protected override void ConfigureInputQueueEndpoint(IServiceBusReceiveEndpointConfigurator configurator)
+        protected override void ConfigureServiceBusReceiveEndpoint(IServiceBusReceiveEndpointConfigurator configurator)
         {
             _started = Handled<JobStarted>(configurator);
         }
@@ -187,11 +187,11 @@ namespace MassTransit.AzureServiceBusTransport.Tests
         Uri _commandEndpointAddress;
         Task<ConsumeContext<JobCanceled<ProcessFile>>> _canceled;
 
-        protected override void ConfigureBusHost(IServiceBusBusFactoryConfigurator configurator, IServiceBusHost host)
+        protected override void ConfigureServiceBusBusHost(IServiceBusBusFactoryConfigurator configurator, IServiceBusHost host)
         {
             configurator.UseServiceBusMessageScheduler();
 
-            base.ConfigureBusHost(configurator, host);
+            base.ConfigureServiceBusBusHost(configurator, host);
 
             configurator.TurnoutEndpoint<ProcessFile>(host, "process_queue", endpoint =>
             {
@@ -213,7 +213,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
             });
         }
 
-        protected override void ConfigureInputQueueEndpoint(IServiceBusReceiveEndpointConfigurator configurator)
+        protected override void ConfigureServiceBusReceiveEndpoint(IServiceBusReceiveEndpointConfigurator configurator)
         {
             _started = Handled<JobStarted>(configurator);
             _canceled = Handled<JobCanceled<ProcessFile>>(configurator);

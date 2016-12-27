@@ -133,7 +133,7 @@ namespace MassTransit.Containers.Tests
         }
 
 
-        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             configurator.UseConcurrencyLimit(1);
 
