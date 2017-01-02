@@ -170,7 +170,7 @@ namespace MassTransit.Containers.Tests
                     .LifestyleScoped<MessageScope>());
         }
 
-        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
+        protected override void PreCreateBus(IInMemoryBusFactoryConfigurator configurator)
         {
         }
 

@@ -49,7 +49,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
             }
         }
 
-        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
+        protected override void PreCreateBus(IInMemoryBusFactoryConfigurator configurator)
         {
             configurator.UseInMemoryScheduler();
         }

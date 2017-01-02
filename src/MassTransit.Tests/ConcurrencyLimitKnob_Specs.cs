@@ -43,11 +43,11 @@ namespace MassTransit.Tests
             Assert.AreEqual(TaskStatus.RanToCompletion, updated.Status);
         }
 
-        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
+        protected override void PreCreateBus(IInMemoryBusFactoryConfigurator configurator)
         {
             _management = configurator.ManagementEndpoint();
 
-            base.ConfigureInMemoryBus(configurator);
+            base.PreCreateBus(configurator);
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)

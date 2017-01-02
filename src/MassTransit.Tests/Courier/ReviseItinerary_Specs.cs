@@ -16,6 +16,7 @@ namespace MassTransit.Tests.Courier
     using System.Threading.Tasks;
     using MassTransit.Courier;
     using MassTransit.Courier.Contracts;
+    using MassTransit.Testing;
     using NUnit.Framework;
     using Shouldly;
     using TestFramework;
@@ -26,7 +27,7 @@ namespace MassTransit.Tests.Courier
     public class When_an_itinerary_is_revised :
         InMemoryActivityTestFixture
     {
-        protected override void SetupActivities(IInMemoryBusFactoryConfigurator configurator)
+        protected override void SetupActivities(BusTestHarness testHarness)
         {
             AddActivityContext<TestActivity, TestArguments, TestLog>(() => new TestActivity());
             AddActivityContext<ReviseToEmptyItineraryActivity, TestArguments, TestLog>(

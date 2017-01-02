@@ -19,6 +19,7 @@ namespace MassTransit.Tests.Courier
     using GreenPipes;
     using MassTransit.Courier;
     using MassTransit.Courier.Contracts;
+    using MassTransit.Testing;
     using NUnit.Framework;
     using TestFramework;
     using TestFramework.Courier;
@@ -61,7 +62,7 @@ namespace MassTransit.Tests.Courier
             Console.WriteLine(GetBodyString(context.ReceiveContext));
         }
 
-        protected override void SetupActivities(IInMemoryBusFactoryConfigurator configurator)
+        protected override void SetupActivities(BusTestHarness testHarness)
         {
             AddActivityContext<TestActivity, TestArguments, TestLog>(() => new TestActivity(), h =>
             {

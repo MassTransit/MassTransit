@@ -58,9 +58,9 @@ namespace MassTransit.Tests.Saga
             _sagaId = Guid.NewGuid();
         }
 
-        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
+        protected override void PreCreateBus(IInMemoryBusFactoryConfigurator configurator)
         {
-            base.ConfigureInMemoryBus(configurator);
+            base.PreCreateBus(configurator);
 
             configurator.UseRetry(x => x.None());
         }

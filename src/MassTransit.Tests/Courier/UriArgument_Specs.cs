@@ -16,6 +16,7 @@ namespace MassTransit.Tests.Courier
     using System.Threading.Tasks;
     using MassTransit.Courier;
     using MassTransit.Courier.Contracts;
+    using MassTransit.Testing;
     using NUnit.Framework;
     using TestFramework;
     using TestFramework.Courier;
@@ -82,7 +83,7 @@ namespace MassTransit.Tests.Courier
             Assert.AreEqual(new Uri("http://google.com/"), context.Message.GetResult<string>("UsedAddress"));
         }
 
-        protected override void SetupActivities(IInMemoryBusFactoryConfigurator configurator)
+        protected override void SetupActivities(BusTestHarness testHarness)
         {
             AddActivityContext<AddressActivity, AddressArguments, AddressLog>(() => new AddressActivity());
             AddActivityContext<FaultyActivity, FaultyArguments>(() => new FaultyActivity());

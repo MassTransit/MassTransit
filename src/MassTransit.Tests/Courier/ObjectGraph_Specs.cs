@@ -18,6 +18,7 @@ namespace MassTransit.Tests.Courier
     using System.Threading.Tasks;
     using MassTransit.Courier;
     using MassTransit.Courier.Contracts;
+    using MassTransit.Testing;
     using NUnit.Framework;
     using Shouldly;
     using TestFramework;
@@ -39,7 +40,7 @@ namespace MassTransit.Tests.Courier
         };
 
 
-        protected override void SetupActivities(IInMemoryBusFactoryConfigurator configurator)
+        protected override void SetupActivities(BusTestHarness testHarness)
         {
             AddActivityContext<ObjectGraphTestActivity, ObjectGraphActivityArguments, TestLog>(
                 () => new ObjectGraphTestActivity(_intValue, _stringValue, _decimalValue, new[] { "Albert", "Chris" }, _argumentsDictionary));

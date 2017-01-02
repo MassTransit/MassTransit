@@ -1,4 +1,4 @@
-// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -15,6 +15,7 @@ namespace MassTransit.TestFramework
     using System;
     using MassTransit.Courier;
     using MassTransit.Courier.Factories;
+    using Testing;
 
 
     public interface ActivityTestContext
@@ -22,8 +23,6 @@ namespace MassTransit.TestFramework
         string Name { get; }
 
         Uri ExecuteUri { get; }
-
-        void Configure(ActivityTestContextConfigurator configurator);
     }
 
 
@@ -33,55 +32,19 @@ namespace MassTransit.TestFramework
         where TArguments : class
         where TLog : class
     {
-        readonly Action<IExecuteActivityConfigurator<TActivity, TArguments>> _configureExecute;
-        readonly Action<ICompensateActivityConfigurator<TActivity, TLog>> _configureCompensate;
-        readonly ActivityFactory<TActivity, TArguments, TLog> _activityFactory;
+        ActivityTestHarness<TActivity, TArguments, TLog> _harness;
 
-        public ActivityTestContext(Uri baseUri, Func<TActivity> activityFactory, Action<IExecuteActivityConfigurator<TActivity, TArguments>> configureExecute, Action<ICompensateActivityConfigurator<TActivity, TLog>> configureCompensate)
+        public ActivityTestContext(BusTestHarness testHarness, Func<TActivity> activityFactory,
+            Action<IExecuteActivityConfigurator<TActivity, TArguments>> configureExecute,
+            Action<ICompensateActivityConfigurator<TActivity, TLog>> configureCompensate)
         {
-            _configureExecute = configureExecute;
-            _configureCompensate = configureCompensate;
-            _activityFactory = new FactoryMethodActivityFactory<TActivity, TArguments, TLog>(_ => activityFactory(), _ => activityFactory());
+            var factory = new FactoryMethodActivityFactory<TActivity, TArguments, TLog>(_ => activityFactory(), _ => activityFactory());
 
-            Name = GetActivityName();
-
-            ExecuteQueueName = BuildQueueName("execute");
-            CompensateQueueName = BuildQueueName("compensate");
-
-            ExecuteUri = BuildQueueUri(baseUri, ExecuteQueueName);
-            CompensateUri = BuildQueueUri(baseUri, CompensateQueueName);
+            _harness = new ActivityTestHarness<TActivity, TArguments, TLog>(testHarness, factory, configureExecute, configureCompensate);
         }
 
-        public string ExecuteQueueName { get; private set; }
-        public string CompensateQueueName { get; private set; }
-        public Uri CompensateUri { get; private set; }
-        public string Name { get; private set; }
-        public Uri ExecuteUri { get; private set; }
-
-        public void Configure(ActivityTestContextConfigurator configurator)
-        {
-            configurator.ReceiveEndpoint(ExecuteQueueName, x => x.ExecuteActivityHost(CompensateUri, _activityFactory, _configureExecute));
-
-            configurator.ReceiveEndpoint(CompensateQueueName, x => x.CompensateActivityHost(_activityFactory, _configureCompensate));
-        }
-
-        static string GetActivityName()
-        {
-            var name = typeof(TActivity).Name;
-            if (name.EndsWith("Activity"))
-                name = name.Substring(0, name.Length - "Activity".Length);
-            return name;
-        }
-
-        Uri BuildQueueUri(Uri baseUri, string queueName)
-        {
-            return new Uri(baseUri, queueName);
-        }
-
-        string BuildQueueName(string prefix)
-        {
-            return $"{prefix}_{typeof(TActivity).Name.ToLowerInvariant()}";
-        }
+        public Uri ExecuteUri => _harness.ExecuteAddress;
+        public string Name => _harness.Name;
     }
 
 
@@ -90,46 +53,17 @@ namespace MassTransit.TestFramework
         where TActivity : class, ExecuteActivity<TArguments>
         where TArguments : class
     {
-        readonly ExecuteActivityFactory<TActivity, TArguments> _activityFactory;
-        readonly Action<IExecuteActivityConfigurator<TActivity, TArguments>> _configure;
+        readonly ExecuteActivityTestHarness<TActivity, TArguments> _harness;
 
-        public ActivityTestContext(Uri baseUri, Func<TActivity> activityFactory, Action<IExecuteActivityConfigurator<TActivity, TArguments>> configure)
+        public ActivityTestContext(BusTestHarness testHarness, Func<TActivity> activityFactory,
+            Action<IExecuteActivityConfigurator<TActivity, TArguments>> configureExecute)
         {
-            _configure = configure;
-            _activityFactory = new FactoryMethodExecuteActivityFactory<TActivity, TArguments>(_ => activityFactory());
+            var factory = new FactoryMethodExecuteActivityFactory<TActivity, TArguments>(_ => activityFactory());
 
-            Name = GetActivityName();
-
-            ExecuteQueueName = BuildQueueName("execute");
-
-            ExecuteUri = BuildQueueUri(baseUri, ExecuteQueueName);
+            _harness = new ExecuteActivityTestHarness<TActivity, TArguments>(testHarness, factory, configureExecute);
         }
 
-        public string ExecuteQueueName { get; private set; }
-        public string Name { get; private set; }
-        public Uri ExecuteUri { get; private set; }
-
-        public void Configure(ActivityTestContextConfigurator configurator)
-        {
-            configurator.ReceiveEndpoint(ExecuteQueueName, x => x.ExecuteActivityHost(_activityFactory, h => _configure?.Invoke(h)));
-        }
-
-        static string GetActivityName()
-        {
-            var name = typeof(TActivity).Name;
-            if (name.EndsWith("Activity"))
-                name = name.Substring(0, name.Length - "Activity".Length);
-            return name;
-        }
-
-        Uri BuildQueueUri(Uri baseUri, string queueName)
-        {
-            return new Uri(baseUri, queueName);
-        }
-
-        string BuildQueueName(string prefix)
-        {
-            return $"{prefix}_{typeof(TActivity).Name.ToLowerInvariant()}";
-        }
+        public Uri ExecuteUri => _harness.ExecuteAddress;
+        public string Name => _harness.Name;
     }
 }

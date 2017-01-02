@@ -21,6 +21,7 @@ namespace MassTransit.MongoDbIntegration.Tests.Courier
     using MongoDbIntegration.Courier.Events;
     using MongoDB.Driver;
     using NUnit.Framework;
+    using Testing;
     using Util;
 
 
@@ -71,9 +72,9 @@ namespace MassTransit.MongoDbIntegration.Tests.Courier
             await Bus.Publish<RoutingSlipCompleted>(new RoutingSlipCompletedEvent(_trackingNumber, DateTime.UtcNow, TimeSpan.FromSeconds(1)));
         }
 
-        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
+        protected override void PreCreateBus(IInMemoryBusFactoryConfigurator configurator)
         {
-            base.ConfigureInMemoryBus(configurator);
+            base.PreCreateBus(configurator);
 
             configurator.ConfigureRoutingSlipEventCorrelation();
         }
@@ -95,7 +96,7 @@ namespace MassTransit.MongoDbIntegration.Tests.Courier
         Guid _trackingNumber;
         Task<ConsumeContext<RoutingSlipCompleted>> _completed;
 
-        protected override void SetupActivities(IInMemoryBusFactoryConfigurator configurator)
+        protected override void SetupActivities(BusTestHarness testHarness)
         {
         }
     }

@@ -25,10 +25,10 @@ namespace MassTransit.Tests
     {
         readonly TaskCompletionSource<Fault<A>> _faultTaskTcs = new TaskCompletionSource<Fault<A>>();
 
-        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
+        protected override void PreCreateBus(IInMemoryBusFactoryConfigurator configurator)
         {
             configurator.UseBinarySerializer();
-            base.ConfigureInMemoryBus(configurator);
+            base.PreCreateBus(configurator);
         }
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {

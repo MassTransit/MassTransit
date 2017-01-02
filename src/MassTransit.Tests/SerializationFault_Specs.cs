@@ -43,7 +43,7 @@ namespace MassTransit.Tests
             _response = _requestClient.Request(new PingMessage());
         }
 
-        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
+        protected override void PreCreateBus(IInMemoryBusFactoryConfigurator configurator)
         {
         }
 
@@ -90,7 +90,7 @@ namespace MassTransit.Tests
             _response = _requestClient.Request(new PingMessage2());
         }
 
-        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
+        protected override void PreCreateBus(IInMemoryBusFactoryConfigurator configurator)
         {
             configurator.UseBinarySerializer();
         }

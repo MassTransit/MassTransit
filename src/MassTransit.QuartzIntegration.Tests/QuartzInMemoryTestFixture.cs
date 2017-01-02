@@ -35,9 +35,9 @@ namespace MassTransit.QuartzIntegration.Tests
 
         protected ISendEndpoint QuartzEndpoint => _quartzEndpoint;
 
-        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
+        protected override void PreCreateBus(IInMemoryBusFactoryConfigurator configurator)
         {
-            base.ConfigureInMemoryBus(configurator);
+            base.PreCreateBus(configurator);
 
             configurator.UseInMemoryScheduler();
         }

@@ -99,6 +99,7 @@ namespace MassTransit.Testing
             OnConfigureReceiveEndpoint?.Invoke(configurator);
         }
 
+        public event Action<BusTestHarness> PreCreateBus;
         public event Action<IReceiveEndpointConfigurator> OnConfigureReceiveEndpoint;
         public event Action<IBusFactoryConfigurator> OnConfigureBus;
         public event Action<IBus> OnConnectObservers;
@@ -108,6 +109,8 @@ namespace MassTransit.Testing
             _sent = new TestSendObserver(TestTimeout);
             _consumed = new BusTestConsumeObserver(TestTimeout);
             _published = new BusTestPublishObserver(TestTimeout);
+
+            PreCreateBus?.Invoke(this);
 
             _bus = CreateBus();
 

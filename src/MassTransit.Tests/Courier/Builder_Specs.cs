@@ -14,6 +14,7 @@ namespace MassTransit.Tests.Courier
 {
     using System;
     using MassTransit.Courier;
+    using MassTransit.Testing;
     using Newtonsoft.Json;
     using NUnit.Framework;
     using TestFramework;
@@ -55,7 +56,7 @@ namespace MassTransit.Tests.Courier
         }
 
 
-        protected override void SetupActivities(IInMemoryBusFactoryConfigurator configurator)
+        protected override void SetupActivities(BusTestHarness testHarness)
         {
         }
     }
@@ -97,7 +98,7 @@ namespace MassTransit.Tests.Courier
         }
 
 
-        protected override void SetupActivities(IInMemoryBusFactoryConfigurator configurator)
+        protected override void SetupActivities(BusTestHarness testHarness)
         {
         }
     }

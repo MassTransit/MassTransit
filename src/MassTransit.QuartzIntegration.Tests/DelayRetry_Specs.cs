@@ -41,9 +41,9 @@ namespace MassTransit.QuartzIntegration.Tests
         Stopwatch _timer;
         int _count;
 
-        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
+        protected override void PreCreateBus(IInMemoryBusFactoryConfigurator configurator)
         {
-            base.ConfigureInMemoryBus(configurator);
+            base.PreCreateBus(configurator);
 
             configurator.UseMessageScheduler(QuartzAddress);
         }
@@ -93,9 +93,9 @@ namespace MassTransit.QuartzIntegration.Tests
 
         MyConsumer _consumer;
 
-        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
+        protected override void PreCreateBus(IInMemoryBusFactoryConfigurator configurator)
         {
-            base.ConfigureInMemoryBus(configurator);
+            base.PreCreateBus(configurator);
 
             configurator.UseMessageScheduler(QuartzAddress);
         }
@@ -172,9 +172,9 @@ namespace MassTransit.QuartzIntegration.Tests
         Stopwatch _timer;
         int _count;
 
-        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
+        protected override void PreCreateBus(IInMemoryBusFactoryConfigurator configurator)
         {
-            base.ConfigureInMemoryBus(configurator);
+            base.PreCreateBus(configurator);
 
             configurator.UseMessageScheduler(QuartzAddress);
         }

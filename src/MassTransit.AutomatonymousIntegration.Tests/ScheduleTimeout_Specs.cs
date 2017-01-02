@@ -34,9 +34,9 @@ namespace MassTransit.AutomatonymousIntegration.Tests
                 return _machine.GetState(state).Result;
             }
 
-            protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
+            protected override void PreCreateBus(IInMemoryBusFactoryConfigurator configurator)
             {
-                base.ConfigureInMemoryBus(configurator);
+                base.PreCreateBus(configurator);
 
                 configurator.UseMessageScheduler(QuartzQueueAddress);
             }

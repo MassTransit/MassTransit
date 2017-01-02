@@ -142,9 +142,9 @@ namespace MassTransit.AutomatonymousIntegration.Tests
             Assert.IsTrue(instance.Screwed);
         }
 
-        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
+        protected override void PreCreateBus(IInMemoryBusFactoryConfigurator configurator)
         {
-            base.ConfigureInMemoryBus(configurator);
+            base.PreCreateBus(configurator);
 
             configurator.TransportConcurrencyLimit = 16;
         }

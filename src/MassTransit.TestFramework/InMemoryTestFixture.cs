@@ -62,7 +62,7 @@ namespace MassTransit.TestFramework
                 _busCreationScope = new PerTestFixtureBusCreationScope(SetupBus, TeardownBus);
 
             InMemoryTestHarness.OnConnectObservers += ConnectObservers;
-            InMemoryTestHarness.OnConfigureInMemoryBus += ConfigureInMemoryBus;
+            InMemoryTestHarness.OnConfigureInMemoryBus += PreCreateBus;
             InMemoryTestHarness.OnConfigureInMemoryReceiveEndpoint += ConfigureInMemoryReceiveEndpoint;
         }
 
@@ -123,7 +123,7 @@ namespace MassTransit.TestFramework
             return InMemoryTestHarness.Stop();
         }
 
-        protected virtual void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
+        protected virtual void PreCreateBus(IInMemoryBusFactoryConfigurator configurator)
         {
         }
 

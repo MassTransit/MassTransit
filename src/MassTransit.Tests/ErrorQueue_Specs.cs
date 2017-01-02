@@ -40,7 +40,7 @@ namespace MassTransit.Tests
             }));
         }
 
-        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
+        protected override void PreCreateBus(IInMemoryBusFactoryConfigurator configurator)
         {
             configurator.ReceiveEndpoint("input_queue_error", x =>
             {

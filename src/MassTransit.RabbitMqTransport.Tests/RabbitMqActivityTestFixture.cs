@@ -36,10 +36,6 @@ namespace MassTransit.RabbitMqTransport.Tests
 
             SetupActivities();
 
-            var factoryConfigurator = new BusFactoryConfigurator(host, configurator);
-
-            foreach (var activityTestContext in ActivityTestContexts.Values)
-                activityTestContext.Configure(factoryConfigurator);
         }
 
 
@@ -74,7 +70,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             where TLog : class
             where T : class, Activity<TArguments, TLog>
         {
-            var context = new ActivityTestContext<T, TArguments, TLog>(HostAddress, activityFactory, configureExecute, configureCompensate);
+            var context = new ActivityTestContext<T, TArguments, TLog>(BusTestHarness, activityFactory, configureExecute, configureCompensate);
 
             ActivityTestContexts.Add(typeof(T), context);
         }
@@ -83,7 +79,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             where TArguments : class
             where T : class, ExecuteActivity<TArguments>
         {
-            var context = new ActivityTestContext<T, TArguments>(HostAddress, activityFactory, configure);
+            var context = new ActivityTestContext<T, TArguments>(BusTestHarness, activityFactory, configure);
 
             ActivityTestContexts.Add(typeof(T), context);
         }

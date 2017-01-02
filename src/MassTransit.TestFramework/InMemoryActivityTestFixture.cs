@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -16,6 +16,7 @@ namespace MassTransit.TestFramework
     using System.Collections.Generic;
     using MassTransit.Courier;
     using NUnit.Framework;
+    using Testing;
 
 
     [TestFixture]
@@ -25,45 +26,25 @@ namespace MassTransit.TestFramework
         protected InMemoryActivityTestFixture()
         {
             ActivityTestContexts = new Dictionary<Type, ActivityTestContext>();
+
+            InMemoryTestHarness.PreCreateBus += PreCreateBus;
         }
 
         protected IDictionary<Type, ActivityTestContext> ActivityTestContexts { get; private set; }
 
-        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
+        void PreCreateBus(BusTestHarness harness)
         {
-            SetupActivities(configurator);
-
-            var factoryConfigurator = new BusFactoryConfigurator(configurator);
-
-            foreach (ActivityTestContext activityTestContext in ActivityTestContexts.Values)
-                activityTestContext.Configure(factoryConfigurator);
+            SetupActivities(harness);
         }
 
-
-        class BusFactoryConfigurator :
-            ActivityTestContextConfigurator
-        {
-            readonly IInMemoryBusFactoryConfigurator _configurator;
-
-            public BusFactoryConfigurator(IInMemoryBusFactoryConfigurator configurator)
-            {
-                _configurator = configurator;
-            }
-
-            public void ReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configure)
-            {
-                _configurator.ReceiveEndpoint(queueName, configure);
-            }
-        }
-
-
-        protected void AddActivityContext<T, TArguments, TLog>(Func<T> activityFactory, Action<IExecuteActivityConfigurator<T, TArguments>> configureExecute = null,
+        protected void AddActivityContext<T, TArguments, TLog>(Func<T> activityFactory,
+            Action<IExecuteActivityConfigurator<T, TArguments>> configureExecute = null,
             Action<ICompensateActivityConfigurator<T, TLog>> configureCompensate = null)
             where TArguments : class
             where TLog : class
             where T : class, Activity<TArguments, TLog>
         {
-            var context = new ActivityTestContext<T, TArguments, TLog>(BaseAddress, activityFactory, configureExecute, configureCompensate);
+            var context = new ActivityTestContext<T, TArguments, TLog>(BusTestHarness, activityFactory, configureExecute, configureCompensate);
 
             ActivityTestContexts.Add(typeof(T), context);
         }
@@ -72,7 +53,7 @@ namespace MassTransit.TestFramework
             where TArguments : class
             where T : class, ExecuteActivity<TArguments>
         {
-            var context = new ActivityTestContext<T, TArguments>(BaseAddress, activityFactory, configureExecute);
+            var context = new ActivityTestContext<T, TArguments>(BusTestHarness, activityFactory, configureExecute);
 
             ActivityTestContexts.Add(typeof(T), context);
         }
@@ -82,6 +63,6 @@ namespace MassTransit.TestFramework
             return ActivityTestContexts[typeof(T)];
         }
 
-        protected abstract void SetupActivities(IInMemoryBusFactoryConfigurator configurator);
+        protected abstract void SetupActivities(BusTestHarness testHarness);
     }
 }

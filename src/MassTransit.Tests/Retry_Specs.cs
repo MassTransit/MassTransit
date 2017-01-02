@@ -192,11 +192,11 @@ namespace MassTransit.Tests
 
         int _attempts;
 
-        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
+        protected override void PreCreateBus(IInMemoryBusFactoryConfigurator configurator)
         {
             configurator.UseRetry(x => x.Immediate(1));
 
-            base.ConfigureInMemoryBus(configurator);
+            base.PreCreateBus(configurator);
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
@@ -242,11 +242,11 @@ namespace MassTransit.Tests
         int _attempts;
         int _lastAttempt;
 
-        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
+        protected override void PreCreateBus(IInMemoryBusFactoryConfigurator configurator)
         {
             configurator.UseRetry(x => x.Immediate(1));
 
-            base.ConfigureInMemoryBus(configurator);
+            base.PreCreateBus(configurator);
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)

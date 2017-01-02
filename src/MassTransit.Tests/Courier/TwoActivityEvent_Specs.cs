@@ -18,6 +18,7 @@ namespace MassTransit.Tests.Courier
     using GreenPipes.Introspection;
     using MassTransit.Courier;
     using MassTransit.Courier.Contracts;
+    using MassTransit.Testing;
     using NUnit.Framework;
     using TestFramework;
     using TestFramework.Courier;
@@ -100,7 +101,7 @@ namespace MassTransit.Tests.Courier
         Task<ConsumeContext<RoutingSlipActivityCompleted>> _secondActivityCompleted;
         RoutingSlip _routingSlip;
 
-        protected override void SetupActivities(IInMemoryBusFactoryConfigurator configurator)
+        protected override void SetupActivities(BusTestHarness testHarness)
         {
             AddActivityContext<TestActivity, TestArguments, TestLog>(() => new TestActivity());
             AddActivityContext<SecondTestActivity, TestArguments, TestLog>(() => new SecondTestActivity());

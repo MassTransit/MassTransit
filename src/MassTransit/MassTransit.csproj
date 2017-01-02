@@ -833,10 +833,12 @@
     <Compile Include="Serialization\XmlMessageDeserializer.cs" />
     <Compile Include="MassTransitBus.cs" />
     <Compile Include="SuperExtensions.cs" />
+    <Compile Include="Testing\ActivityTestHarness.cs" />
     <Compile Include="Testing\AsyncTestHarness.cs" />
     <Compile Include="Testing\BusTestHarness.cs" />
     <Compile Include="Testing\ConsumerTestHarness.cs" />
     <Compile Include="Testing\ConsumerTestHarnessExtensions.cs" />
+    <Compile Include="Testing\ExecuteActivityTestHarness.cs" />
     <Compile Include="Testing\HandlerTestHarness.cs" />
     <Compile Include="Testing\HandlerTestHarnessExtensions.cs" />
     <Compile Include="Testing\IConsumedMessage.cs" />

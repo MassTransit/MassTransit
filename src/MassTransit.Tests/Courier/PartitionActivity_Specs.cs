@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,8 +14,10 @@ namespace MassTransit.Tests.Courier
 {
     using System.Threading.Tasks;
     using GreenPipes;
+    using GreenPipes.Partitioning;
     using MassTransit.Courier;
     using MassTransit.Courier.Contracts;
+    using MassTransit.Testing;
     using NUnit.Framework;
     using TestFramework;
     using TestFramework.Courier;
@@ -44,12 +46,19 @@ namespace MassTransit.Tests.Courier
             await completed;
         }
 
-        protected override void SetupActivities(IInMemoryBusFactoryConfigurator configurator)
-        {
-            var partitioner = configurator.CreatePartitioner(8);
+        IPartitioner _partitioner;
 
-            AddActivityContext<TestActivity, TestArguments, TestLog>(() => new TestActivity(), h => h.UsePartitioner(partitioner, args => args.Arguments.Value),
-                h => h.UsePartitioner(partitioner, args => args.Log.OriginalValue));
+        protected override void SetupActivities(BusTestHarness testHarness)
+        {
+            testHarness.OnConfigureBus += ConfigureBus;
+
+            AddActivityContext<TestActivity, TestArguments, TestLog>(() => new TestActivity(), h => h.UsePartitioner(_partitioner, args => args.Arguments.Value),
+                h => h.UsePartitioner(_partitioner, args => args.Log.OriginalValue));
+        }
+
+        void ConfigureBus(IBusFactoryConfigurator configurator)
+        {
+            _partitioner = configurator.CreatePartitioner(8);
         }
     }
 }
