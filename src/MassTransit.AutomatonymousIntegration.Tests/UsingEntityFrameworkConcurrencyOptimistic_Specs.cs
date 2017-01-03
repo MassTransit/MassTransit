@@ -33,7 +33,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
         readonly SagaDbContextFactory _sagaDbContextFactory;
         readonly Lazy<ISagaRepository<ChoirState>> _repository;
 
-        protected override void ConfigureInputQueueEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             _machine = new ChoirStateMachine();
 
@@ -131,9 +131,9 @@ namespace MassTransit.AutomatonymousIntegration.Tests
             Assert.IsTrue(instance.CurrentState.Equals("Harmony"));
         }
 
-        protected override void ConfigureBus(IInMemoryBusFactoryConfigurator configurator)
+        protected override void PreCreateBus(IInMemoryBusFactoryConfigurator configurator)
         {
-            base.ConfigureBus(configurator);
+            base.PreCreateBus(configurator);
 
             configurator.TransportConcurrencyLimit = 16;
         }
