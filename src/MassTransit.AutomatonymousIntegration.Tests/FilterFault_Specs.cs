@@ -34,7 +34,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
             await InputQueueSendEndpoint.Send(message);
 
             Guid? saga = await _repository.ShouldContainSaga(x => x.CorrelationId == message.CorrelationId
-                && GetCurrentState(x) == _machine.WaitingToStart, TestTimeout);
+                && GetCurrentState(x) == _machine.WaitingToStart, TimeSpan.FromSeconds(8));
             Assert.IsTrue(saga.HasValue);
 
             await InputQueueSendEndpoint.Send(new Start(message.CorrelationId));
@@ -42,7 +42,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
             await faulted;
 
             saga = await _repository.ShouldContainSaga(x => x.CorrelationId == message.CorrelationId
-                && GetCurrentState(x) == _machine.WaitingToStart && x.StartAttempts == 1, TestTimeout);
+                && GetCurrentState(x) == _machine.WaitingToStart && x.StartAttempts == 1, TimeSpan.FromSeconds(8));
             Assert.IsTrue(saga.HasValue);
 
         }

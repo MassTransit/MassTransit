@@ -262,4 +262,100 @@ namespace MassTransit.Tests
             });
         }
     }
+
+    [TestFixture]
+    public class When_ignoring_the_exception :
+        InMemoryTestFixture
+    {
+        [Test]
+        public async Task Should_just_call_once()
+        {
+            Task<ConsumeContext<Fault<PingMessage>>> fault = SubscribeHandler<Fault<PingMessage>>();
+
+            await InputQueueSendEndpoint.Send(new PingMessage(), Pipe.Execute<SendContext<PingMessage>>(x =>
+            {
+                x.ResponseAddress = BusAddress;
+                x.FaultAddress = BusAddress;
+            }));
+            await fault;
+
+            _attempts.ShouldBe(1);
+
+            _lastAttempt.ShouldBe(0);
+        }
+
+        int _attempts;
+        int _lastAttempt;
+
+        protected override void PreCreateBus(IInMemoryBusFactoryConfigurator configurator)
+        {
+            configurator.UseRetry(x =>
+            {
+                x.Ignore<IntentionalTestException>();
+                x.Immediate(1);
+            });
+
+            base.PreCreateBus(configurator);
+        }
+
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        {
+            Handler<PingMessage>(configurator, async context =>
+            {
+                Interlocked.Increment(ref _attempts);
+
+                _lastAttempt = context.GetRetryAttempt();
+
+                throw new IntentionalTestException();
+            });
+        }
+    }
+
+    [TestFixture]
+    public class When_ignoring_the_inner_exception :
+        InMemoryTestFixture
+    {
+        [Test]
+        public async Task Should_just_call_once()
+        {
+            Task<ConsumeContext<Fault<PingMessage>>> fault = SubscribeHandler<Fault<PingMessage>>();
+
+            await InputQueueSendEndpoint.Send(new PingMessage(), Pipe.Execute<SendContext<PingMessage>>(x =>
+            {
+                x.ResponseAddress = BusAddress;
+                x.FaultAddress = BusAddress;
+            }));
+            await fault;
+
+            _attempts.ShouldBe(1);
+
+            _lastAttempt.ShouldBe(0);
+        }
+
+        int _attempts;
+        int _lastAttempt;
+
+        protected override void PreCreateBus(IInMemoryBusFactoryConfigurator configurator)
+        {
+            configurator.UseRetry(x =>
+            {
+                x.Ignore<IntentionalTestException>();
+                x.Immediate(1);
+            });
+
+            base.PreCreateBus(configurator);
+        }
+
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        {
+            Handler<PingMessage>(configurator, async context =>
+            {
+                Interlocked.Increment(ref _attempts);
+
+                _lastAttempt = context.GetRetryAttempt();
+
+                throw new ApplicationException("Yonder", new IntentionalTestException());
+            });
+        }
+    }
 }

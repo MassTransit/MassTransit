@@ -15,6 +15,7 @@ namespace MassTransit.RabbitMqTransport.Tests
     using System;
     using System.Collections.Generic;
     using Courier;
+    using MassTransit.Testing;
     using NUnit.Framework;
     using TestFramework;
 
@@ -26,18 +27,16 @@ namespace MassTransit.RabbitMqTransport.Tests
         protected RabbitMqActivityTestFixture()
         {
             ActivityTestContexts = new Dictionary<Type, ActivityTestContext>();
+
+            RabbitMqTestHarness.PreCreateBus += PreCreateBus;
         }
 
         protected IDictionary<Type, ActivityTestContext> ActivityTestContexts { get; private set; }
 
-        protected override void ConfigureRabbitMqBusHost(IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host)
+        void PreCreateBus(BusTestHarness harness)
         {
-            base.ConfigureRabbitMqBusHost(configurator, host);
-
-            SetupActivities();
-
+            SetupActivities(harness);
         }
-
 
         class BusFactoryConfigurator :
             ActivityTestContextConfigurator
@@ -89,7 +88,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             return ActivityTestContexts[typeof(T)];
         }
 
-        protected virtual void SetupActivities()
+        protected virtual void SetupActivities(BusTestHarness testHarness)
         {
         }
     }

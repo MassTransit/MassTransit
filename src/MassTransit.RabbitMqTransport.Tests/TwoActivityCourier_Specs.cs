@@ -21,6 +21,7 @@ namespace MassTransit.RabbitMqTransport.Tests
     using Courier.Contracts;
     using GreenPipes;
     using GreenPipes.Introspection;
+    using MassTransit.Testing;
     using NUnit.Framework;
     using TestFramework;
     using TestFramework.Courier;
@@ -100,7 +101,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         Task<ConsumeContext<RoutingSlipActivityCompleted>> _secondActivityCompleted;
         RoutingSlip _routingSlip;
 
-        protected override void SetupActivities()
+        protected override void SetupActivities(BusTestHarness testHarness)
         {
             AddActivityContext<TestActivity, TestArguments, TestLog>(() => new TestActivity());
             AddActivityContext<SecondTestActivity, TestArguments, TestLog>(() => new SecondTestActivity());
@@ -164,7 +165,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         Task<ConsumeContext<RoutingSlipCompleted>> _completed;
         RoutingSlip _routingSlip;
 
-        protected override void SetupActivities()
+        protected override void SetupActivities(BusTestHarness testHarness)
         {
             AddActivityContext<TestActivity, TestArguments, TestLog>(() => new TestActivity());
             AddActivityContext<SecondTestActivity, TestArguments, TestLog>(() => new SecondTestActivity());
@@ -227,7 +228,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         int _count;
         int _limit;
 
-        protected override void SetupActivities()
+        protected override void SetupActivities(BusTestHarness testHarness)
         {
             AddActivityContext<TestActivity, TestArguments, TestLog>(() => new TestActivity());
             AddActivityContext<SecondTestActivity, TestArguments, TestLog>(() => new SecondTestActivity());
@@ -295,7 +296,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         int _count;
         int _limit;
 
-        protected override void SetupActivities()
+        protected override void SetupActivities(BusTestHarness testHarness)
         {
             AddActivityContext<TestActivity, TestArguments, TestLog>(() => new TestActivity());
             AddActivityContext<SecondTestActivity, TestArguments, TestLog>(() => new SecondTestActivity());

@@ -75,10 +75,6 @@ namespace MassTransit.AzureServiceBusTransport.Testing
         {
             return MassTransit.Bus.Factory.CreateUsingAzureServiceBus(x =>
             {
-                ConfigureBus(x);
-
-                ConfigureServiceBusBus(x);
-
                 Host = x.Host(_serviceUri, h =>
                 {
                     h.SharedAccessSignature(s =>
@@ -89,6 +85,10 @@ namespace MassTransit.AzureServiceBusTransport.Testing
                         s.TokenScope = TokenScope;
                     });
                 });
+
+                ConfigureBus(x);
+
+                ConfigureServiceBusBus(x);
 
                 x.UseServiceBusMessageScheduler();
 

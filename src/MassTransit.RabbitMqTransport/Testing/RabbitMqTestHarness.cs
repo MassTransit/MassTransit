@@ -97,13 +97,13 @@ namespace MassTransit.RabbitMqTransport.Testing
         {
             return MassTransit.Bus.Factory.CreateUsingRabbitMq(x =>
             {
-                ConfigureBus(x);
-
-                ConfigureRabbitMqBus(x);
-
                 Host = ConfigureHost(x);
 
                 CleanUpVirtualHost(Host);
+
+                ConfigureBus(x);
+
+                ConfigureRabbitMqBus(x);
 
                 ConfigureRabbitMqBusHost(x, Host);
 

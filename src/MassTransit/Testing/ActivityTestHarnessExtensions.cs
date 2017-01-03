@@ -12,17 +12,24 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Testing
 {
-    using Pipeline.ConsumerFactories;
+    using Courier;
+    using Courier.Factories;
 
 
-    public static class ConsumerTestHarnessExtensions
+    public static class ActivityTestHarnessExtensions
     {
-        public static ConsumerTestHarness<T> Consumer<T>(this BusTestHarness harness)
-            where T : class, IConsumer, new()
+        public static ActivityTestHarness<TActivity, TArguments, TLog> Activity<TActivity, TArguments, TLog>(this BusTestHarness harness)
+            where TActivity : class, Activity<TArguments, TLog>, new()
+            where TArguments : class
+            where TLog : class
         {
-            var consumerFactory = new DefaultConstructorConsumerFactory<T>();
+            var activityFactory = new FactoryMethodActivityFactory<TActivity, TArguments, TLog>(x => new TActivity(), x => new TActivity());
 
-            return new ConsumerTestHarness<T>(harness, consumerFactory);
+            return new ActivityTestHarness<TActivity, TArguments, TLog>(harness, activityFactory, x =>
+            {
+            }, x =>
+            {
+            });
         }
     }
 }

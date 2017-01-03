@@ -34,7 +34,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
             Assert.AreEqual(message.CorrelationId, received.Message.CorrelationId);
 
-            Assert.AreEqual(LogicalHostAddress.Host, received.DestinationAddress.Host);
+            Assert.AreEqual(_logicalHostAddress.Host, received.DestinationAddress.Host);
         }
 
         public When_clustering_nodes_into_a_logical_broker()
@@ -42,7 +42,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         {
         }
 
-        protected readonly Uri LogicalHostAddress = new Uri("rabbitmq://cluster/test/");
+        readonly Uri _logicalHostAddress = new Uri("rabbitmq://cluster/test/");
 
         Task<ConsumeContext<PingMessage>> _receivedA;
 
