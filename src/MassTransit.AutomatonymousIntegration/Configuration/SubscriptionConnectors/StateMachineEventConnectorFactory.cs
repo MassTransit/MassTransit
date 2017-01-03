@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,9 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace Automatonymous.SubscriptionConnectors
 {
-    using CorrelationConfigurators;
-    using GreenPipes;
-    using MassTransit;
+    using System;
     using MassTransit.Saga;
     using MassTransit.Saga.ConnectorFactories;
     using MassTransit.Saga.Connectors;
@@ -26,23 +24,23 @@ namespace Automatonymous.SubscriptionConnectors
         where TInstance : class, ISaga, SagaStateMachineInstance
         where TMessage : class
     {
-        readonly StateMachineSagaMessageFilter<TInstance, TMessage> _consumeFilter;
-        readonly IFilter<ConsumeContext<TMessage>> _messageFilter;
-        readonly ISagaPolicy<TInstance, TMessage> _policy;
-        readonly SagaFilterFactory<TInstance, TMessage> _sagaFilterFactory;
+        readonly ISagaMessageConnector<TInstance> _connector;
 
         public StateMachineEventConnectorFactory(SagaStateMachine<TInstance> stateMachine, EventCorrelation<TInstance, TMessage> correlation)
         {
-            _consumeFilter = new StateMachineSagaMessageFilter<TInstance, TMessage>(stateMachine, correlation.Event);
+            var consumeFilter = new StateMachineSagaMessageFilter<TInstance, TMessage>(stateMachine, correlation.Event);
 
-            _sagaFilterFactory = correlation.FilterFactory;
-            _policy = correlation.Policy;
-            _messageFilter = correlation.MessageFilter;
+            _connector = new StateMachineSagaMessageConnector<TInstance, TMessage>(consumeFilter, correlation.Policy, correlation.FilterFactory,
+                correlation.MessageFilter);
         }
 
-        public ISagaMessageConnector CreateMessageConnector()
+        ISagaMessageConnector<T> ISagaConnectorFactory.CreateMessageConnector<T>()
         {
-            return new StateMachineSagaMessageConnector<TInstance, TMessage>(_consumeFilter, _policy, _sagaFilterFactory, _messageFilter);
+            var connector = _connector as ISagaMessageConnector<T>;
+            if (connector == null)
+                throw new ArgumentException("The saga type did not match the connector type");
+
+            return connector;
         }
     }
 }

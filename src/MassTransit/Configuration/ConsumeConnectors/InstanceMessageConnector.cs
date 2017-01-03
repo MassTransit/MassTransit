@@ -1,4 +1,4 @@
-// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,12 +13,10 @@
 namespace MassTransit.ConsumeConnectors
 {
     using System;
-    using Builders;
+    using ConsumeConfigurators;
     using GreenPipes;
-    using Internals.Extensions;
     using Pipeline;
     using Pipeline.Filters;
-    using Util;
 
 
     /// <summary>
@@ -29,7 +27,7 @@ namespace MassTransit.ConsumeConnectors
     /// <typeparam name="TConsumer">The consumer type</typeparam>
     /// <typeparam name="TMessage">The message type</typeparam>
     public class InstanceMessageConnector<TConsumer, TMessage> :
-        IInstanceMessageConnector
+        IInstanceMessageConnector<TConsumer>
         where TConsumer : class
         where TMessage : class
     {
@@ -46,46 +44,33 @@ namespace MassTransit.ConsumeConnectors
 
         Type IInstanceMessageConnector.MessageType => typeof(TMessage);
 
-        ConnectHandle IInstanceConnector.ConnectInstance(IConsumePipeConnector pipe, object instance)
+        ConnectHandle IInstanceMessageConnector<TConsumer>.ConnectInstance(IConsumePipeConnector pipeConnector, TConsumer instance,
+            IConsumerSpecification<TConsumer> specification)
         {
+            if (pipeConnector == null)
+                throw new ArgumentNullException(nameof(pipeConnector));
             if (instance == null)
                 throw new ArgumentNullException(nameof(instance));
+            if (specification == null)
+                throw new ArgumentNullException(nameof(specification));
 
-            var consumer = instance as TConsumer;
-            if (consumer == null)
-            {
-                throw new ConsumerException(
-                    $"The instance type {instance.GetType().GetTypeName()} does not match the consumer type: {TypeMetadataCache<TConsumer>.ShortName}");
-            }
+            IConsumerMessageSpecification<TConsumer, TMessage> messageSpecification = specification.GetMessageSpecification<TMessage>();
 
-            IPipe<ConsumeContext<TMessage>> instancePipe = Pipe.New<ConsumeContext<TMessage>>(x =>
+            messageSpecification.UseFilter(_consumeFilter);
+
+            IPipe<ConsumerConsumeContext<TConsumer, TMessage>> consumerPipe = messageSpecification.Build();
+
+            IPipe<ConsumeContext<TMessage>> messagePipe = Pipe.New<ConsumeContext<TMessage>>(x =>
             {
-                x.UseFilter(new InstanceMessageFilter<TConsumer, TMessage>(consumer,
-                    Pipe.New<ConsumerConsumeContext<TConsumer, TMessage>>(p => p.UseFilter(_consumeFilter))));
+                x.UseFilter(new InstanceMessageFilter<TConsumer, TMessage>(instance, consumerPipe));
             });
 
-            return pipe.ConnectConsumePipe(instancePipe);
+            return pipeConnector.ConnectConsumePipe(messagePipe);
         }
 
-        ConnectHandle IInstanceConnector.ConnectInstance<T>(IConsumePipeConnector consumePipe, T instance,
-            IPipeSpecification<ConsumerConsumeContext<T>>[] pipeSpecifications)
+        public IConsumerMessageSpecification<TConsumer> CreateConsumerMessageSpecification()
         {
-            if (instance == null)
-                throw new ArgumentNullException(nameof(instance));
-
-            var consumer = instance as TConsumer;
-            if (consumer == null)
-            {
-                throw new ConsumerException(
-                    $"The instance type {instance.GetType().GetTypeName()} does not match the consumer type: {TypeMetadataCache<TConsumer>.ShortName}");
-            }
-
-            IPipe<ConsumerConsumeContext<TConsumer, TMessage>> consumerPipe = ConsumerPipeBuilder.BuildConsumerPipe(_consumeFilter, pipeSpecifications);
-
-            IPipe<ConsumeContext<TMessage>> messagePipe = MessagePipeBuilder.BuildMessagePipe<TConsumer, TMessage, T>(pipeSpecifications,
-                new InstanceMessageFilter<TConsumer, TMessage>(consumer, consumerPipe));
-
-            return consumePipe.ConnectConsumePipe(messagePipe);
+            return new ConsumerMessageSpecification<TConsumer, TMessage>();
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,9 +12,12 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.ConsumeConnectors
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
+    using ConsumeConfigurators;
     using GreenPipes;
+    using Internals.Extensions;
     using Pipeline;
     using Util;
 
@@ -23,7 +26,7 @@ namespace MassTransit.ConsumeConnectors
         IInstanceConnector
         where TConsumer : class
     {
-        readonly IEnumerable<IInstanceMessageConnector> _connectors;
+        readonly IEnumerable<IInstanceMessageConnector<TConsumer>> _connectors;
 
         public InstanceConnector()
         {
@@ -31,23 +34,60 @@ namespace MassTransit.ConsumeConnectors
                 throw new ConfigurationException("A saga cannot be registered as a consumer");
 
             _connectors = Consumes()
-                .Distinct((x, y) => x.MessageType == y.MessageType)
                 .ToList();
         }
 
-        ConnectHandle IInstanceConnector.ConnectInstance<T>(IConsumePipeConnector pipe, T instance, IPipeSpecification<ConsumerConsumeContext<T>>[] pipeSpecifications)
+        public ConnectHandle ConnectInstance<T>(IConsumePipeConnector pipeConnector, T instance, IConsumerSpecification<T> specification)
+            where T : class
         {
-            return new MultipleConnectHandle(_connectors.Select(x => x.ConnectInstance(pipe, instance, pipeSpecifications)));
+            var handles = new List<ConnectHandle>();
+            try
+            {
+                foreach (IInstanceMessageConnector<T> connector in _connectors.Cast<IInstanceMessageConnector<T>>())
+                {
+                    var handle = connector.ConnectInstance(pipeConnector, instance, specification);
+
+                    handles.Add(handle);
+                }
+
+                return new MultipleConnectHandle(handles);
+            }
+            catch (Exception)
+            {
+                foreach (var handle in handles)
+                    handle.Dispose();
+                throw;
+            }
         }
 
-        ConnectHandle IInstanceConnector.ConnectInstance(IConsumePipeConnector pipe, object instance)
+        ConnectHandle IInstanceConnector.ConnectInstance(IConsumePipeConnector pipeConnector, object instance)
         {
-            return new MultipleConnectHandle(_connectors.Select(x => x.ConnectInstance(pipe, instance)));
+            var consumer = instance as TConsumer;
+            if (consumer == null)
+            {
+                throw new ConsumerException(
+                    $"The instance type {instance.GetType().GetTypeName()} does not match the consumer type: {TypeMetadataCache<TConsumer>.ShortName}");
+            }
+
+            IConsumerSpecification<TConsumer> specification = CreateConsumerSpecification<TConsumer>();
+
+            return ConnectInstance(pipeConnector, consumer, specification);
         }
 
-        static IEnumerable<IInstanceMessageConnector> Consumes()
+        public IConsumerSpecification<T> CreateConsumerSpecification<T>()
+            where T : class
         {
-            return ConsumerMetadataCache<TConsumer>.ConsumerTypes.Select(x => x.GetInstanceConnector());
+            List<IConsumerMessageSpecification<T>> messageSpecifications =
+                _connectors.Select(x => x.CreateConsumerMessageSpecification())
+                    .Cast<IConsumerMessageSpecification<T>>()
+                    .ToList();
+
+            return new ConsumerSpecification<T>(messageSpecifications);
+        }
+
+        static IEnumerable<IInstanceMessageConnector<TConsumer>> Consumes()
+        {
+            return ConsumerMetadataCache<TConsumer>.ConsumerTypes.Select(x => x.GetInstanceConnector<TConsumer>());
         }
     }
 }

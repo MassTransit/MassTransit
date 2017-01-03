@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -40,6 +40,23 @@ namespace MassTransit
         }
 
         /// <summary>
+        /// Connects any consumers for the object to the message dispatcher
+        /// </summary>
+        /// <param name="connector">The service bus to configure</param>
+        /// <param name="instance"></param>
+        /// <returns>The unsubscribe action that can be called to unsubscribe the instance
+        /// passed as an argument.</returns>
+        public static ConnectHandle ConnectInstance(this IConsumePipeConnector connector, object instance)
+        {
+            if (connector == null)
+                throw new ArgumentNullException(nameof(connector));
+            if (instance == null)
+                throw new ArgumentNullException(nameof(instance));
+
+            return InstanceConnectorCache.GetInstanceConnector(instance.GetType()).ConnectInstance(connector, instance);
+        }
+
+        /// <summary>
         /// Subscribes an object instance to the bus
         /// </summary>
         /// <param name="configurator">Service Bus Service Configurator 
@@ -61,36 +78,15 @@ namespace MassTransit
         /// <summary>
         /// Connects any consumers for the object to the message dispatcher
         /// </summary>
-        /// <param name="bus">The service bus to configure</param>
-        /// <param name="instance"></param>
-        /// <returns>The unsubscribe action that can be called to unsubscribe the instance
-        /// passed as an argument.</returns>
-        public static ConnectHandle ConnectInstance(this IConsumePipeConnector bus, object instance)
-        {
-            if (bus == null)
-                throw new ArgumentNullException(nameof(bus));
-            if (instance == null)
-                throw new ArgumentNullException(nameof(instance));
-
-            var connector = InstanceConnectorCache.GetInstanceConnector(instance.GetType());
-
-            return connector.ConnectInstance(bus, instance);
-        }
-
-        /// <summary>
-        /// Connects any consumers for the object to the message dispatcher
-        /// </summary>
         /// <typeparam name="T">The consumer type</typeparam>
-        /// <param name="bus">The service bus instance to call this method on.</param>
+        /// <param name="connector">The service bus instance to call this method on.</param>
         /// <param name="instance">The instance to subscribe.</param>
         /// <returns>The unsubscribe action that can be called to unsubscribe the instance
         /// passed as an argument.</returns>
-        public static ConnectHandle ConnectInstance<T>(this IConsumePipeConnector bus, T instance)
+        public static ConnectHandle ConnectInstance<T>(this IConsumePipeConnector connector, T instance)
             where T : class, IConsumer
         {
-            var connector = InstanceConnectorCache.GetInstanceConnector<T>();
-
-            return connector.ConnectInstance(bus, instance);
+            return InstanceConnectorCache<T>.Connector.ConnectInstance(connector, instance);
         }
     }
 }

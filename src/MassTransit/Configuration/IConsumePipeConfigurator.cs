@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,19 +12,26 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
+    using System.ComponentModel;
+    using Configuration;
+    using ConsumeConfigurators;
     using GreenPipes;
-    using PipeConfigurators;
+    using Saga;
 
 
     public interface IConsumePipeConfigurator :
-        IPipeConfigurator<ConsumeContext>
+        IPipeConfigurator<ConsumeContext>,
+        IConsumerConfigurationObserverConnector,
+        ISagaConfigurationObserverConnector,
+        IConsumerConfigurationObserver,
+        ISagaConfigurationObserver
     {
         /// <summary>
         /// Adds a type-specific pipe specification to the consume pipe
         /// </summary>
         /// <typeparam name="T">The message type</typeparam>
         /// <param name="specification"></param>
-        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         void AddPipeSpecification<T>(IPipeSpecification<ConsumeContext<T>> specification)
             where T : class;
     }

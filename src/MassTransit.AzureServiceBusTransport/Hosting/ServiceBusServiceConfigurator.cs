@@ -1,4 +1,4 @@
-// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,9 +13,13 @@
 namespace MassTransit.AzureServiceBusTransport.Hosting
 {
     using System;
+    using Configuration;
+    using ConsumeConfigurators;
     using GreenPipes;
     using MassTransit.Builders;
     using MassTransit.Hosting;
+    using MassTransit.Saga;
+    using MassTransit.Saga.SubscriptionConfigurators;
 
 
     /// <summary>
@@ -65,6 +69,11 @@ namespace MassTransit.AzureServiceBusTransport.Hosting
             ReceiveEndpoint(queueName, _defaultConsumerLimit, configureEndpoint);
         }
 
+        ConnectHandle IConsumerConfigurationObserverConnector.ConnectConfigurationObserver(IConsumerConfigurationObserver observer)
+        {
+            return _configurator.ConnectConfigurationObserver(observer);
+        }
+
         public void ConfigureSend(Action<ISendPipeConfigurator> callback)
         {
             _configurator.ConfigureSend(callback);
@@ -73,6 +82,31 @@ namespace MassTransit.AzureServiceBusTransport.Hosting
         public void ConfigurePublish(Action<IPublishPipeConfigurator> callback)
         {
             _configurator.ConfigurePublish(callback);
+        }
+
+        void IConsumerConfigurationObserver.ConfigureConsumer<TConsumer>(IConsumerConfigurator<TConsumer> configurator)
+        {
+            _configurator.ConfigureConsumer(configurator);
+        }
+
+        void IConsumerConfigurationObserver.ConfigureConsumerMessage<TConsumer, TMessage>(IConsumerMessageConfigurator<TConsumer, TMessage> configurator)
+        {
+            _configurator.ConfigureConsumerMessage(configurator);
+        }
+
+        public ConnectHandle ConnectSagaConfigurationObserver(ISagaConfigurationObserver observer)
+        {
+            return _configurator.ConnectSagaConfigurationObserver(observer);
+        }
+
+        public void SagaConfigured<TSaga>(ISagaConfigurator<TSaga> configurator) where TSaga : class, ISaga
+        {
+            _configurator.SagaConfigured(configurator);
+        }
+
+        public void SagaMessageConfigured<TSaga, TMessage>(ISagaMessageConfigurator<TSaga, TMessage> configurator) where TSaga : class, ISaga where TMessage : class
+        {
+            _configurator.SagaMessageConfigured(configurator);
         }
     }
 }

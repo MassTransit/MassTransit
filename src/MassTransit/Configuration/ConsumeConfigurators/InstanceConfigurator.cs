@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,7 +14,6 @@ namespace MassTransit.ConsumeConfigurators
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
     using ConsumeConnectors;
     using GreenPipes;
     using Internals.Extensions;
@@ -55,44 +54,50 @@ namespace MassTransit.ConsumeConfigurators
         where TInstance : class, IConsumer
     {
         readonly TInstance _instance;
-        readonly List<IPipeSpecification<ConsumerConsumeContext<TInstance>>> _pipeSpecifications;
+        readonly IConsumerSpecification<TInstance> _specification;
 
         public InstanceConfigurator(TInstance instance)
         {
             _instance = instance;
 
-            _pipeSpecifications = new List<IPipeSpecification<ConsumerConsumeContext<TInstance>>>();
+            _specification = ConsumerConnectorCache<TInstance>.Connector.CreateConsumerSpecification<TInstance>();
         }
 
         public void Message<T>(Action<IConsumerMessageConfigurator<T>> configure)
             where T : class
         {
-            var messageConfigurator = new ConsumerMessageConfigurator<TInstance, T>(this);
+            if (configure == null)
+                throw new ArgumentNullException(nameof(configure));
 
-            configure(messageConfigurator);
+            IConsumerMessageSpecification<TInstance, T> specification = _specification.GetMessageSpecification<T>();
+
+            configure(specification);
         }
 
         public void ConsumerMessage<T>(Action<IConsumerMessageConfigurator<TInstance, T>> configure)
             where T : class
         {
-            var messageConfigurator = new ConsumerMessageConfigurator<TInstance, T>(this);
+            if (configure == null)
+                throw new ArgumentNullException(nameof(configure));
 
-            configure(messageConfigurator);
-        }
+            IConsumerMessageSpecification<TInstance, T> specification = _specification.GetMessageSpecification<T>();
 
-        public IEnumerable<ValidationResult> Validate()
-        {
-            return _pipeSpecifications.SelectMany(x => x.Validate());
-        }
-
-        public void Configure(IReceiveEndpointBuilder builder)
-        {
-            InstanceConnectorCache<TInstance>.Connector.ConnectInstance(builder, _instance, _pipeSpecifications.ToArray());
+            configure(specification);
         }
 
         public void AddPipeSpecification(IPipeSpecification<ConsumerConsumeContext<TInstance>> specification)
         {
-            _pipeSpecifications.Add(specification);
+            _specification.AddPipeSpecification(specification);
+        }
+
+        public IEnumerable<ValidationResult> Validate()
+        {
+            return _specification.Validate();
+        }
+
+        public void Configure(IReceiveEndpointBuilder builder)
+        {
+            InstanceConnectorCache<TInstance>.Connector.ConnectInstance(builder, _instance, _specification);
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -16,7 +16,6 @@ namespace Automatonymous
     using System.Threading.Tasks;
     using GreenPipes;
     using MassTransit;
-    using MassTransit.Pipeline;
 
 
     public static class BehaviorContextExtensions
@@ -27,13 +26,13 @@ namespace Automatonymous
             return GetConsumeContext(context).Publish(message);
         }
 
-        public static Task Publish<TInstance, TData, T>(this BehaviorContext<TInstance, TData> context, T message, IPipe<SendContext<T>> sendPipe)
+        public static Task Publish<TInstance, TData, T>(this BehaviorContext<TInstance, TData> context, T message, IPipe<PublishContext<T>> sendPipe)
             where T : class
         {
             return GetConsumeContext(context).Publish(message, sendPipe);
         }
 
-        public static Task Publish<TInstance, TData, T>(this BehaviorContext<TInstance, TData> context, T message, IPipe<SendContext> sendPipe)
+        public static Task Publish<TInstance, TData, T>(this BehaviorContext<TInstance, TData> context, T message, IPipe<PublishContext> sendPipe)
             where T : class
         {
             return GetConsumeContext(context).Publish(message, sendPipe);
@@ -49,13 +48,13 @@ namespace Automatonymous
             return GetConsumeContext(context).Publish(message, messageType);
         }
 
-        public static Task Publish<TInstance, TData>(this BehaviorContext<TInstance, TData> context, object message, IPipe<SendContext> sendPipe)
+        public static Task Publish<TInstance, TData>(this BehaviorContext<TInstance, TData> context, object message, IPipe<PublishContext> sendPipe)
         {
             return GetConsumeContext(context).Publish(message, sendPipe);
         }
 
         public static Task Publish<TInstance, TData>(this BehaviorContext<TInstance, TData> context, object message, Type messageType,
-            IPipe<SendContext> sendPipe)
+            IPipe<PublishContext> sendPipe)
         {
             return GetConsumeContext(context).Publish(message, messageType, sendPipe);
         }
@@ -66,13 +65,13 @@ namespace Automatonymous
             return GetConsumeContext(context).Publish<T>(values);
         }
 
-        public static Task Publish<TInstance, TData, T>(this BehaviorContext<TInstance, TData> context, object values, IPipe<SendContext<T>> sendPipe)
+        public static Task Publish<TInstance, TData, T>(this BehaviorContext<TInstance, TData> context, object values, IPipe<PublishContext<T>> sendPipe)
             where T : class
         {
             return GetConsumeContext(context).Publish(values, sendPipe);
         }
 
-        public static Task Publish<TInstance, TData, T>(this BehaviorContext<TInstance, TData> context, object values, IPipe<SendContext> sendPipe)
+        public static Task Publish<TInstance, TData, T>(this BehaviorContext<TInstance, TData> context, object values, IPipe<PublishContext> sendPipe)
             where T : class
         {
             return GetConsumeContext(context).Publish<T>(values, sendPipe);
@@ -153,6 +152,131 @@ namespace Automatonymous
                 return consumeContext;
 
             throw new ArgumentException("The ConsumeContext was not present", nameof(context));
+        }
+
+        public static Task Publish<TInstance, T>(this BehaviorContext<TInstance> context, T message)
+            where T : class
+        {
+            return GetConsumeContext(context).Publish(message);
+        }
+
+        public static Task Publish<TInstance, T>(this BehaviorContext<TInstance> context, T message, IPipe<PublishContext<T>> sendPipe)
+            where T : class
+        {
+            return GetConsumeContext(context).Publish(message, sendPipe);
+        }
+
+        public static Task Publish<TInstance, T>(this BehaviorContext<TInstance> context, T message, IPipe<PublishContext> sendPipe)
+            where T : class
+        {
+            return GetConsumeContext(context).Publish(message, sendPipe);
+        }
+
+        public static Task Publish<TInstance>(this BehaviorContext<TInstance> context, object message)
+        {
+            return GetConsumeContext(context).Publish(message);
+        }
+
+        public static Task Publish<TInstance>(this BehaviorContext<TInstance> context, object message, Type messageType)
+        {
+            return GetConsumeContext(context).Publish(message, messageType);
+        }
+
+        public static Task Publish<TInstance>(this BehaviorContext<TInstance> context, object message, IPipe<PublishContext> sendPipe)
+        {
+            return GetConsumeContext(context).Publish(message, sendPipe);
+        }
+
+        public static Task Publish<TInstance>(this BehaviorContext<TInstance> context, object message, Type messageType,
+            IPipe<PublishContext> sendPipe)
+        {
+            return GetConsumeContext(context).Publish(message, messageType, sendPipe);
+        }
+
+        public static Task Publish<TInstance, T>(this BehaviorContext<TInstance> context, object values)
+            where T : class
+        {
+            return GetConsumeContext(context).Publish<T>(values);
+        }
+
+        public static Task Publish<TInstance, T>(this BehaviorContext<TInstance> context, object values, IPipe<PublishContext<T>> sendPipe)
+            where T : class
+        {
+            return GetConsumeContext(context).Publish(values, sendPipe);
+        }
+
+        public static Task Publish<TInstance, T>(this BehaviorContext<TInstance> context, object values, IPipe<PublishContext> sendPipe)
+            where T : class
+        {
+            return GetConsumeContext(context).Publish<T>(values, sendPipe);
+        }
+
+        public static Task<ISendEndpoint> GetSendEndpoint<TInstance>(this BehaviorContext<TInstance> context, Uri address)
+        {
+            return GetConsumeContext(context).GetSendEndpoint(address);
+        }
+
+        public static Task RespondAsync<TInstance, T>(this BehaviorContext<TInstance> context, T message)
+            where T : class
+        {
+            return GetConsumeContext(context).RespondAsync(message);
+        }
+
+        public static Task RespondAsync<TInstance, T>(this BehaviorContext<TInstance> context, T message, IPipe<SendContext<T>> sendPipe)
+            where T : class
+        {
+            return GetConsumeContext(context).RespondAsync(message, sendPipe);
+        }
+
+        public static Task RespondAsync<TInstance, T>(this BehaviorContext<TInstance> context, T message, IPipe<SendContext> sendPipe)
+            where T : class
+        {
+            return GetConsumeContext(context).RespondAsync(message, sendPipe);
+        }
+
+        public static Task RespondAsync<TInstance>(this BehaviorContext<TInstance> context, object message)
+        {
+            return GetConsumeContext(context).RespondAsync(message);
+        }
+
+        public static Task RespondAsync<TInstance>(this BehaviorContext<TInstance> context, object message, Type messageType)
+        {
+            return GetConsumeContext(context).RespondAsync(message, messageType);
+        }
+
+        public static Task RespondAsync<TInstance>(this BehaviorContext<TInstance> context, object message, IPipe<SendContext> sendPipe)
+        {
+            return GetConsumeContext(context).RespondAsync(message, sendPipe);
+        }
+
+        public static Task RespondAsync<TInstance>(this BehaviorContext<TInstance> context, object message, Type messageType,
+            IPipe<SendContext> sendPipe)
+        {
+            return GetConsumeContext(context).RespondAsync(message, messageType, sendPipe);
+        }
+
+        public static Task RespondAsync<TInstance, T>(this BehaviorContext<TInstance> context, object values)
+            where T : class
+        {
+            return GetConsumeContext(context).RespondAsync<T>(values);
+        }
+
+        public static Task RespondAsync<TInstance, T>(this BehaviorContext<TInstance> context, object values, IPipe<SendContext<T>> sendPipe)
+            where T : class
+        {
+            return GetConsumeContext(context).RespondAsync(values, sendPipe);
+        }
+
+        public static Task RespondAsync<TInstance, T>(this BehaviorContext<TInstance> context, object values, IPipe<SendContext> sendPipe)
+            where T : class
+        {
+            return GetConsumeContext(context).RespondAsync<T>(values, sendPipe);
+        }
+
+        public static void Respond<TInstance, T>(this BehaviorContext<TInstance> context, T message)
+            where T : class
+        {
+            GetConsumeContext(context).Respond(message);
         }
     }
 }

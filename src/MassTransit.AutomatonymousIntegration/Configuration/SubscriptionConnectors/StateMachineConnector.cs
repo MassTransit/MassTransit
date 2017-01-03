@@ -19,6 +19,7 @@ namespace Automatonymous.SubscriptionConnectors
     using MassTransit;
     using MassTransit.Pipeline;
     using MassTransit.Saga;
+    using MassTransit.Saga.Configuration;
     using MassTransit.Saga.Connectors;
     using MassTransit.Util;
 
@@ -27,7 +28,7 @@ namespace Automatonymous.SubscriptionConnectors
         ISagaConnector
         where TInstance : class, ISaga, SagaStateMachineInstance
     {
-        readonly IEnumerable<ISagaMessageConnector> _connectors;
+        readonly List<ISagaMessageConnector<TInstance>> _connectors;
         readonly SagaStateMachine<TInstance> _stateMachine;
 
         public StateMachineConnector(SagaStateMachine<TInstance> stateMachine)
@@ -44,16 +45,25 @@ namespace Automatonymous.SubscriptionConnectors
             }
         }
 
-        public ConnectHandle ConnectSaga<T>(IConsumePipeConnector consumePipe, ISagaRepository<T> sagaRepository,
-            params IPipeSpecification<SagaConsumeContext<T>>[] pipeSpecifications)
+        public ISagaSpecification<T> CreateSagaSpecification<T>() where T : class, ISaga
+        {
+            List<ISagaMessageSpecification<T>> messageSpecifications =
+                _connectors.Select(x => x.CreateSagaMessageSpecification())
+                    .Cast<ISagaMessageSpecification<T>>()
+                    .ToList();
+
+            return new SagaSpecification<T>(messageSpecifications);
+        }
+
+        public ConnectHandle ConnectSaga<T>(IConsumePipeConnector consumePipe, ISagaRepository<T> sagaRepository, ISagaSpecification<T> specification)
             where T : class, ISaga
         {
             var handles = new List<ConnectHandle>();
             try
             {
-                foreach (var connector in _connectors)
+                foreach (var connector in _connectors.Cast<ISagaMessageConnector<T>>())
                 {
-                    var handle = connector.ConnectSaga(consumePipe, sagaRepository, pipeSpecifications);
+                    var handle = connector.ConnectSaga(consumePipe, sagaRepository, specification);
 
                     handles.Add(handle);
                 }
@@ -68,7 +78,7 @@ namespace Automatonymous.SubscriptionConnectors
             }
         }
 
-        IEnumerable<ISagaMessageConnector> StateMachineEvents()
+        IEnumerable<ISagaMessageConnector<TInstance>> StateMachineEvents()
         {
             EventCorrelation[] correlations = _stateMachine.Correlations.ToArray();
 
@@ -84,7 +94,7 @@ namespace Automatonymous.SubscriptionConnectors
                 var interfaceType = (IStateMachineInterfaceType)Activator.CreateInstance(genericType,
                     _stateMachine, correlation);
 
-                yield return interfaceType.GetConnector();
+                yield return interfaceType.GetConnector<TInstance>();
             }
         }
     }

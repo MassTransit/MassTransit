@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -16,7 +16,6 @@ namespace MassTransit.ConsumeConfigurators
     using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
-    using Configurators;
     using ConsumeConnectors;
     using GreenPipes;
     using Internals.Extensions;
@@ -25,8 +24,6 @@ namespace MassTransit.ConsumeConfigurators
 
     public static class ConsumerFactoryConfiguratorExtensions
     {
-        public static IEqualityComparer<IMessageInterfaceType> MessageTypeComparer { get; } = new MessageTypeEqualityComparer();
-
         public static IEnumerable<ValidationResult> ValidateConsumer<TConsumer>(this ISpecification configurator)
             where TConsumer : class
         {
@@ -37,7 +34,7 @@ namespace MassTransit.ConsumeConfigurators
             }
 
             IEnumerable<ValidationResult> warningForMessages = ConsumerMetadataCache<TConsumer>
-                .ConsumerTypes.Distinct(MessageTypeComparer)
+                .ConsumerTypes.Distinct((x,y) => x.MessageType == y.MessageType)
                 .Where(x => !x.MessageType.IsInterface)
                 .Where(x => !(HasProtectedDefaultConstructor(x.MessageType) || HasSinglePublicConstructor(x.MessageType)))
                 .Select(x =>
@@ -47,7 +44,7 @@ namespace MassTransit.ConsumeConfigurators
                         + " depends upon logic in the constructor to be executed.")
                 .Select(message => configurator.Warning("Message", message));
 
-            foreach (ValidationResult message in warningForMessages)
+            foreach (var message in warningForMessages)
                 yield return message;
         }
 
@@ -57,7 +54,7 @@ namespace MassTransit.ConsumeConfigurators
             if (consumerFactory == null)
                 yield return ValidationResultExtensions.Failure(null, "UseConsumerFactory", "must not be null");
 
-            foreach (ValidationResult result in ValidateConsumer<TConsumer>(null))
+            foreach (var result in ValidateConsumer<TConsumer>(null))
                 yield return result;
         }
 
@@ -72,29 +69,6 @@ namespace MassTransit.ConsumeConfigurators
             return type.GetConstructors(BindingFlags.Public | BindingFlags.Instance)
                 .All(constructorInfo => !constructorInfo.GetParameters().Any())
                 && type.GetConstructors().Length == 1;
-        }
-
-
-        sealed class MessageTypeEqualityComparer :
-            IEqualityComparer<IMessageInterfaceType>
-        {
-            public bool Equals(IMessageInterfaceType x, IMessageInterfaceType y)
-            {
-                if (ReferenceEquals(x, y))
-                    return true;
-                if (ReferenceEquals(x, null))
-                    return false;
-                if (ReferenceEquals(y, null))
-                    return false;
-                if (x.GetType() != y.GetType())
-                    return false;
-                return x.MessageType.Equals(y.MessageType);
-            }
-
-            public int GetHashCode(IMessageInterfaceType obj)
-            {
-                return obj.MessageType.GetHashCode();
-            }
         }
     }
 }

@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -20,8 +20,8 @@ namespace MassTransit.Saga
     public class SagaInterfaceType
     {
         readonly Lazy<ISagaConnectorFactory> _initiatedByConnectorFactory;
-        readonly Lazy<ISagaConnectorFactory> _orchestratesConnectorFactory;
         readonly Lazy<ISagaConnectorFactory> _observesConnectorFactory;
+        readonly Lazy<ISagaConnectorFactory> _orchestratesConnectorFactory;
 
         public SagaInterfaceType(Type interfaceType, Type messageType, Type sagaType)
         {
@@ -45,19 +45,22 @@ namespace MassTransit.Saga
         public Type InterfaceType { get; private set; }
         public Type MessageType { get; private set; }
 
-        public ISagaMessageConnector GetInitiatedByConnector()
+        public ISagaMessageConnector<T> GetInitiatedByConnector<T>()
+            where T : class, ISaga
         {
-            return _initiatedByConnectorFactory.Value.CreateMessageConnector();
+            return _initiatedByConnectorFactory.Value.CreateMessageConnector<T>();
         }
 
-        public ISagaMessageConnector GetOrchestratesConnector()
+        public ISagaMessageConnector<T> GetOrchestratesConnector<T>()
+            where T : class, ISaga
         {
-            return _orchestratesConnectorFactory.Value.CreateMessageConnector();
+            return _orchestratesConnectorFactory.Value.CreateMessageConnector<T>();
         }
 
-        public ISagaMessageConnector GetObservesConnector()
+        public ISagaMessageConnector<T> GetObservesConnector<T>()
+            where T : class, ISaga
         {
-            return _observesConnectorFactory.Value.CreateMessageConnector();
+            return _observesConnectorFactory.Value.CreateMessageConnector<T>();
         }
     }
 }

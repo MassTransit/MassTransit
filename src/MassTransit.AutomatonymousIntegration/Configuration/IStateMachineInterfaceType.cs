@@ -12,11 +12,13 @@
 // specific language governing permissions and limitations under the License.
 namespace Automatonymous
 {
+    using MassTransit.Saga;
     using MassTransit.Saga.Connectors;
 
 
     public interface IStateMachineInterfaceType
     {
-        ISagaMessageConnector GetConnector();
+        ISagaMessageConnector<T> GetConnector<T>() 
+            where T : class, ISaga;
     }
 }

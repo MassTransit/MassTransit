@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,7 +14,6 @@ namespace Automatonymous.SubscriptionConfigurators
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
     using GreenPipes;
     using MassTransit;
     using MassTransit.Saga;
@@ -22,21 +21,26 @@ namespace Automatonymous.SubscriptionConfigurators
     using SubscriptionConnectors;
 
 
-    public class StateMachineSagaSpecification<TInstance> :
+    public class StateMachineSagaConfigurator<TInstance> :
         ISagaConfigurator<TInstance>,
         IReceiveEndpointSpecification
         where TInstance : class, SagaStateMachineInstance
     {
-        readonly IList<IPipeSpecification<SagaConsumeContext<TInstance>>> _pipeSpecifications;
+        readonly StateMachineConnector<TInstance> _connector;
         readonly ISagaRepository<TInstance> _repository;
+        readonly ISagaSpecification<TInstance> _specification;
         readonly SagaStateMachine<TInstance> _stateMachine;
 
-        public StateMachineSagaSpecification(SagaStateMachine<TInstance> stateMachine,
-            ISagaRepository<TInstance> repository)
+        public StateMachineSagaConfigurator(SagaStateMachine<TInstance> stateMachine, ISagaRepository<TInstance> repository, ISagaConfigurationObserver observer)
         {
             _stateMachine = stateMachine;
             _repository = repository;
-            _pipeSpecifications = new List<IPipeSpecification<SagaConsumeContext<TInstance>>>();
+
+            _connector = new StateMachineConnector<TInstance>(_stateMachine);
+
+            _specification = _connector.CreateSagaSpecification<TInstance>();
+
+            _specification.ConnectSagaConfigurationObserver(observer);
         }
 
         public IEnumerable<ValidationResult> Validate()
@@ -45,40 +49,37 @@ namespace Automatonymous.SubscriptionConfigurators
                 yield return this.Failure("StateMachine", "must not be null");
             if (_repository == null)
                 yield return this.Failure("Repository", "must not be null");
+
+            foreach (var result in _specification.Validate())
+                yield return result;
         }
 
         public void Configure(IReceiveEndpointBuilder builder)
         {
-            var connector = new StateMachineConnector<TInstance>(_stateMachine);
-
-            connector.ConnectSaga(builder, _repository, _pipeSpecifications.ToArray());
+            _connector.ConnectSaga(builder, _repository, _specification);
         }
 
         public void ConfigureMessage<T>(Action<ISagaMessageConfigurator<T>> configure)
             where T : class
         {
-            Message(configure);
+            _specification.Message(configure);
         }
 
         public void Message<T>(Action<ISagaMessageConfigurator<T>> configure)
             where T : class
         {
-            var messageConfigurator = new SagaMessageConfigurator<TInstance, T>(this);
-
-            configure(messageConfigurator);
+            _specification.Message(configure);
         }
 
-        public void ConsumerMessage<T>(Action<ISagaMessageConfigurator<TInstance, T>> configure)
+        public void SagaMessage<T>(Action<ISagaMessageConfigurator<TInstance, T>> configure)
             where T : class
         {
-            var messageConfigurator = new SagaMessageConfigurator<TInstance, T>(this);
-
-            configure(messageConfigurator);
+            _specification.SagaMessage(configure);
         }
 
         public void AddPipeSpecification(IPipeSpecification<SagaConsumeContext<TInstance>> specification)
         {
-            _pipeSpecifications.Add(specification);
+            _specification.AddPipeSpecification(specification);
         }
     }
 }

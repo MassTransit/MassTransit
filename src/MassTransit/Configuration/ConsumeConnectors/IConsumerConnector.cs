@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.ConsumeConnectors
 {
+    using ConsumeConfigurators;
     using GreenPipes;
     using Pipeline;
 
@@ -22,8 +23,11 @@ namespace MassTransit.ConsumeConnectors
     /// </summary>
     public interface IConsumerConnector
     {
+        IConsumerSpecification<TConsumer> CreateConsumerSpecification<TConsumer>()
+            where TConsumer : class;
+
         ConnectHandle ConnectConsumer<TConsumer>(IConsumePipeConnector consumePipe, IConsumerFactory<TConsumer> consumerFactory,
-            IPipeSpecification<ConsumerConsumeContext<TConsumer>>[] pipeSpecifications)
+            IConsumerSpecification<TConsumer> specification)
             where TConsumer : class;
     }
 }

@@ -1,4 +1,4 @@
-// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -56,21 +56,17 @@ namespace MassTransit.BusConfigurators
             return builder.Build();
         }
 
-        protected override IBusFactorySpecification<IInMemoryBusBuilder> CreateSpecificationProxy(IBusFactorySpecification specification)
-        {
-            return new ConfiguratorProxy(specification);
-        }
-
-
         public int TransportConcurrencyLimit
         {
             set { _concurrencyLimit = value; }
         }
 
-
         public void ReceiveEndpoint(string queueName, Action<IInMemoryReceiveEndpointConfigurator> configureEndpoint)
         {
             var specification = new InMemoryReceiveEndpointSpecification(queueName);
+
+            specification.ConnectConfigurationObserver(this);
+            specification.ConnectSagaConfigurationObserver(this);
 
             configureEndpoint?.Invoke(specification);
 
@@ -87,6 +83,11 @@ namespace MassTransit.BusConfigurators
             _inMemoryHost = host;
             _sendTransportProvider = host;
             _hosts.Add(host);
+        }
+
+        protected override IBusFactorySpecification<IInMemoryBusBuilder> CreateSpecificationProxy(IBusFactorySpecification specification)
+        {
+            return new ConfiguratorProxy(specification);
         }
 
 

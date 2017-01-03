@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.ConsumeConnectors
 {
+    using System;
     using Pipeline.Filters;
 
 
@@ -20,21 +21,35 @@ namespace MassTransit.ConsumeConnectors
         where TConsumer : class, IMessageConsumer<TMessage>
         where TMessage : class
     {
-        readonly LegacyMethodConsumerMessageFilter<TConsumer, TMessage> _filter;
+        readonly ConsumerMessageConnector<TConsumer, TMessage> _consumerConnector;
+        readonly InstanceMessageConnector<TConsumer, TMessage> _instanceConnector;
 
         public LegacyConsumeConnectorFactory()
         {
-            _filter = new LegacyMethodConsumerMessageFilter<TConsumer, TMessage>();
+            var filter = new LegacyMethodConsumerMessageFilter<TConsumer, TMessage>();
+
+            _consumerConnector = new ConsumerMessageConnector<TConsumer, TMessage>(filter);
+            _instanceConnector = new InstanceMessageConnector<TConsumer, TMessage>(filter);
         }
 
-        public IConsumerMessageConnector CreateConsumerConnector()
+        public IConsumerMessageConnector<T> CreateConsumerConnector<T>()
+            where T : class
         {
-            return new ConsumerMessageConnector<TConsumer, TMessage>(_filter);
+            var result = _consumerConnector as IConsumerMessageConnector<T>;
+            if (result == null)
+                throw new ArgumentException("The consumer type did not match the connector type");
+
+            return result;
         }
 
-        public IInstanceMessageConnector CreateInstanceConnector()
+        public IInstanceMessageConnector<T> CreateInstanceConnector<T>()
+            where T : class
         {
-            return new InstanceMessageConnector<TConsumer, TMessage>(_filter);
+            var result = _instanceConnector as IInstanceMessageConnector<T>;
+            if (result == null)
+                throw new ArgumentException("The consumer type did not match the connector type");
+
+            return result;
         }
     }
 }

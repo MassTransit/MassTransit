@@ -41,7 +41,7 @@ namespace MassTransit
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Subscribing Saga: {0}", TypeMetadataCache<T>.ShortName);
 
-            var sagaConfigurator = new SagaConfigurator<T>(sagaRepository);
+            var sagaConfigurator = new SagaConfigurator<T>(sagaRepository, configurator);
 
             configure?.Invoke(sagaConfigurator);
 
@@ -67,7 +67,13 @@ namespace MassTransit
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Subscribing Saga: {0}", TypeMetadataCache<T>.ShortName);
 
-            return SagaConnectorCache<T>.Connector.ConnectSaga(bus, sagaRepository, pipeSpecifications);
+            ISagaSpecification<T> specification = SagaConnectorCache<T>.Connector.CreateSagaSpecification<T>();
+            foreach (IPipeSpecification<SagaConsumeContext<T>> pipeSpecification in pipeSpecifications)
+            {
+                specification.AddPipeSpecification(pipeSpecification);
+            }
+
+            return SagaConnectorCache<T>.Connector.ConnectSaga(bus, sagaRepository, specification);
         }
     }
 }

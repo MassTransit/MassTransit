@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,7 +14,7 @@ namespace MassTransit.Saga.Pipeline.Filters
 {
     using System.Threading.Tasks;
     using GreenPipes;
-    using MassTransit.Pipeline;
+    using MassTransit.Pipeline.Pipes;
     using Pipes;
     using Util;
 
@@ -39,10 +39,10 @@ namespace MassTransit.Saga.Pipeline.Filters
 
         void IProbeSite.Probe(ProbeContext context)
         {
-            ProbeContext scope = context.CreateFilterScope("split");
+            var scope = context.CreateFilterScope("split");
             scope.Set(new
             {
-                ConsumerType = TypeMetadataCache<TSaga>.ShortName,
+                SagaType = TypeMetadataCache<TSaga>.ShortName
             });
 
             _next.Probe(scope);

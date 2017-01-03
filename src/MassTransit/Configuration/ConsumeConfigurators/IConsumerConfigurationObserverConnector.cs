@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -10,16 +10,19 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace Automatonymous.CorrelationConfigurators
+namespace MassTransit.ConsumeConfigurators
 {
+    using Configuration;
     using GreenPipes;
-    using MassTransit;
-    using MassTransit.Pipeline;
-    using MassTransit.Saga;
 
 
-    public delegate IFilter<ConsumeContext<TData>> SagaFilterFactory<TInstance, TData>(
-        ISagaRepository<TInstance> repository, ISagaPolicy<TInstance, TData> policy, IPipe<SagaConsumeContext<TInstance, TData>> sagaPipe)
-        where TInstance : class, ISaga
-        where TData : class;
+    public interface IConsumerConfigurationObserverConnector
+    {
+        /// <summary>
+        /// Connect a configuration observer to the bus configurator, which is invoked as consumers are configured.
+        /// </summary>
+        /// <param name="observer"></param>
+        /// <returns></returns>
+        ConnectHandle ConnectConfigurationObserver(IConsumerConfigurationObserver observer);
+    }
 }

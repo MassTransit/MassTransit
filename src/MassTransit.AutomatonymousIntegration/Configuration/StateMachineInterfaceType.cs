@@ -30,9 +30,9 @@ namespace Automatonymous
             _connectorFactory = new StateMachineEventConnectorFactory<TInstance, TData>(machine, correlation);
         }
 
-        public ISagaMessageConnector GetConnector()
+        ISagaMessageConnector<T> IStateMachineInterfaceType.GetConnector<T>()
         {
-            return _connectorFactory.CreateMessageConnector();
+            return _connectorFactory.CreateMessageConnector<T>();
         }
     }
 }

@@ -54,7 +54,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
             {
                 cfg.UseExecute(context => _consumerOnly.TrySetResult(context.Saga));
                 cfg.Message<Start>(m => m.UseExecute(context => _message.TrySetResult(context.Message)));
-                cfg.ConsumerMessage<Start>(m => m.UseExecute(context => _consumerMessage.TrySetResult(Tuple.Create(context.Saga, context.Message))));
+                cfg.SagaMessage<Start>(m => m.UseExecute(context => _consumerMessage.TrySetResult(Tuple.Create(context.Saga, context.Message))));
             });
         }
 

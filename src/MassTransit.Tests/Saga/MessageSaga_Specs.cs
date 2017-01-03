@@ -55,7 +55,7 @@ namespace MassTransit.Tests.Saga
             {
                 cfg.UseExecute(context => _consumerOnly.TrySetResult(context.Saga));
                 cfg.Message<PingMessage>(m => m.UseExecute(context => _message.TrySetResult(context.Message)));
-                cfg.ConsumerMessage<PingMessage>(m => m.UseExecute(context => _consumerMessage.TrySetResult(Tuple.Create(context.Saga, context.Message))));
+                cfg.SagaMessage<PingMessage>(m => m.UseExecute(context => _consumerMessage.TrySetResult(Tuple.Create(context.Saga, context.Message))));
             });
         }
 

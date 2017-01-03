@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,10 +14,9 @@ namespace MassTransit.ConsumeConnectors
 {
     using System;
     using System.Collections.Concurrent;
-    using System.Linq;
     using System.Threading;
+    using ConsumeConfigurators;
     using GreenPipes;
-    using PipeConfigurators;
     using Pipeline;
     using Pipeline.ConsumerFactories;
 
@@ -49,12 +48,6 @@ namespace MassTransit.ConsumeConnectors
 
     public static class ConsumerConnectorCache
     {
-        public static IConsumerConnector GetConsumerConnector<T>()
-            where T : class
-        {
-            return Cached.Instance.GetOrAdd(typeof(T), x => new CachedConnector<T>()).Connector;
-        }
-
         static CachedConnector GetOrAdd(Type type)
         {
             return Cached.Instance.GetOrAdd(type, _ =>
@@ -76,8 +69,6 @@ namespace MassTransit.ConsumeConnectors
 
         interface CachedConnector
         {
-            IConsumerConnector Connector { get; }
-
             ConnectHandle Connect(IConsumePipeConnector consumePipe, Func<Type, object> objectFactory);
         }
 
@@ -93,13 +84,13 @@ namespace MassTransit.ConsumeConnectors
                 _connector = new Lazy<IConsumerConnector>(() => ConsumerConnectorCache<T>.Connector);
             }
 
-            public IConsumerConnector Connector => _connector.Value;
-
             public ConnectHandle Connect(IConsumePipeConnector consumePipe, Func<Type, object> objectFactory)
             {
                 var consumerFactory = new ObjectConsumerFactory<T>(objectFactory);
 
-                return _connector.Value.ConnectConsumer(consumePipe, consumerFactory, Enumerable.Empty<IPipeSpecification<ConsumerConsumeContext<T>>>().ToArray());
+                IConsumerSpecification<T> specification = _connector.Value.CreateConsumerSpecification<T>();
+
+                return _connector.Value.ConnectConsumer(consumePipe, consumerFactory, specification);
             }
         }
     }

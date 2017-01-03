@@ -121,9 +121,13 @@
     <Compile Include="Configuration\BusConfigurators\ISendPipeFactory.cs" />
     <Compile Include="Configuration\Builders\ConsumerPipeBuilder.cs" />
     <Compile Include="Configuration\CompensateActivityPartitionerExtensions.cs" />
-    <Compile Include="Configuration\Configurators\TestFactorySelector.cs" />
+    <Compile Include="Configuration\Configuration\IConsumerConfigurationObserver.cs" />
+    <Compile Include="Configuration\ConsumeConfigurators\IConsumerConfigurationObserverConnector.cs" />
     <Compile Include="Configuration\ConsumeConfigurators\IRoutingSlipConfigurator.cs" />
-    <Compile Include="Configuration\ConsumeConnectors\MessagePipeBuilder.cs" />
+    <Compile Include="Configuration\ConsumeConfigurators\ConsumerMessageSpecification.cs" />
+    <Compile Include="Configuration\ConsumeConfigurators\ConsumerSpecification.cs" />
+    <Compile Include="Configuration\ConsumeConfigurators\IConsumerMessageSpecification.cs" />
+    <Compile Include="Configuration\ConsumeConfigurators\IConsumerSpecification.cs" />
     <Compile Include="Configuration\ExecuteActivityPartitionerExtensions.cs" />
     <Compile Include="Configuration\EndpointConfigurators\EncryptedMessageSerializerReceiveEndpointSpecification.cs" />
     <Compile Include="Configuration\EndpointConfigurators\SetMessageSerializerReceiveEndpointSpecification.cs" />
@@ -134,20 +138,24 @@
     <Compile Include="Configuration\IExecuteActivityArgumentsConfigurator.cs" />
     <Compile Include="Configuration\IExecuteActivityConfigurator.cs" />
     <Compile Include="Configuration\IRescueConfigurator.cs" />
+    <Compile Include="Configuration\Observables\ConsumerConfigurationObservable.cs" />
+    <Compile Include="Configuration\Observables\SagaConfigurationObservable.cs" />
     <Compile Include="Configuration\PipeConfigurators\CompensateActivityLogConfigurator.cs" />
     <Compile Include="Configuration\PipeConfigurators\ConsumeContextRescuePipeSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\ConsumeContextRetryPipeSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\ConsumerConsumeContextRescuePipeSpecification.cs" />
+    <Compile Include="Configuration\PipeConfigurators\ConsumerPipeSpecificationProxy.cs" />
+    <Compile Include="Configuration\PipeConfigurators\ConsumerSplitFilterSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\ExecuteActivityArgumentsConfigurator.cs" />
+    <Compile Include="Configuration\PipeConfigurators\ConsumerMessageSplitFilterSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\RoutingSlipConfigurator.cs" />
     <Compile Include="Configuration\PipeConfigurators\SagaConsumeContextRescuePipeSpecification.cs" />
-    <Compile Include="Configuration\TestFactorySelectorExtensions.cs" />
-    <Compile Include="ConsumerTestFactorySelector.cs" />
     <Compile Include="Context\ConsumeContextConverterFactory.cs" />
     <Compile Include="Context\ConsumeContextScopePublishContextPipe.cs" />
     <Compile Include="Context\ConsumeContextScopePublishEndpoint.cs" />
     <Compile Include="Context\RescueExceptionConsumerConsumeContext.cs" />
     <Compile Include="Context\RescueExceptionSagaConsumeContext.cs" />
+    <Compile Include="Context\SagaConsumeContextProxy.cs" />
     <Compile Include="Courier\IRoutingSlipSendEndpointTarget.cs" />
     <Compile Include="Courier\RoutingSlipBuilderSendEndpoint.cs" />
     <Compile Include="Courier\RoutingSlipSendContext.cs" />
@@ -170,12 +178,10 @@
     <Compile Include="IReceiveTransportObserver.cs" />
     <Compile Include="IRecurringMessageScheduler.cs" />
     <Compile Include="ISendMessageObserver.cs" />
-    <Compile Include="ITestFactorySelector.cs" />
     <Compile Include="Monitoring\Performance\Configuration\PerformanceCounterBusFactorySpecification.cs" />
     <Compile Include="Configuration\BusConfigurators\PublishPipeConfigurator.cs" />
     <Compile Include="Configuration\BusConfigurators\SendPipeConfigurator.cs" />
     <Compile Include="Configuration\BusObserverExtensions.cs" />
-    <Compile Include="Configuration\ConsumeConfigurators\ConsumerMessageConfigurator.cs" />
     <Compile Include="Configuration\ConsumeConfigurators\IConsumerMessageConfigurator.cs" />
     <Compile Include="Configuration\ConsumeConnectors\AsyncConsumerConvention.cs" />
     <Compile Include="Configuration\ConsumeConnectors\ConsumerConnector.cs" />
@@ -561,6 +567,7 @@
     <Compile Include="Monitoring\Performance\Windows\BaseWindowsPerformanceCounters.cs" />
     <Compile Include="Monitoring\Performance\PerformanceCounterSendObserver.cs" />
     <Compile Include="Monitoring\Performance\Configuration\PerformanceCounterExtensions.cs" />
+    <Compile Include="Pipeline\Filters\MessageSplitFilter.cs" />
     <Compile Include="Pipeline\Observables\BusObservable.cs" />
     <Compile Include="Pipeline\ConsumerFactories\DefaultConstructorConsumerFactory.cs" />
     <Compile Include="Pipeline\ConsumerFactories\DelegateConsumerFactory.cs" />
@@ -602,7 +609,6 @@
     <Compile Include="Pipeline\IConsumerMessageFilter.cs" />
     <Compile Include="Pipeline\IConsumeMessageObserverConnector.cs" />
     <Compile Include="Pipeline\IConsumePipe.cs" />
-    <Compile Include="Pipeline\ConsumePipeExtensions.cs" />
     <Compile Include="Pipeline\IPublishMessageObserverConnector.cs" />
     <Compile Include="Pipeline\IPublishObserverConnector.cs" />
     <Compile Include="Pipeline\IPublishPipe.cs" />
@@ -618,6 +624,7 @@
     <Compile Include="Courier\Pipeline\ExecuteActivityMergePipe.cs" />
     <Compile Include="Pipeline\Pipes\IManagementPipe.cs" />
     <Compile Include="Pipeline\Pipes\ManagementPipe.cs" />
+    <Compile Include="Pipeline\Pipes\ConsumerMessageMergePipe.cs" />
     <Compile Include="Pipeline\Pipes\PublishPipe.cs" />
     <Compile Include="Pipeline\Pipes\ReceivePipe.cs" />
     <Compile Include="Pipeline\Pipes\ResponsePipe.cs" />
@@ -664,7 +671,12 @@
     <Compile Include="SagaExtensions.cs" />
     <Compile Include="SagaFilterExtensions.cs" />
     <Compile Include="SagaPipeConfiguratorExtensions.cs" />
+    <Compile Include="Saga\Configuration\SagaMessageSpecification.cs" />
+    <Compile Include="Saga\Configuration\SagaPipeSpecificationProxy.cs" />
     <Compile Include="Saga\Configuration\SagaFilterSpecification.cs" />
+    <Compile Include="Saga\Configuration\SagaMessageSplitFilterSpecification.cs" />
+    <Compile Include="Saga\Configuration\SagaSpecification.cs" />
+    <Compile Include="Saga\Configuration\SagaSplitFilterSpecification.cs" />
     <Compile Include="Saga\ConnectorFactories\InitiatedBySagaConnectorFactory.cs" />
     <Compile Include="Saga\ConnectorFactories\ISagaConnectorFactory.cs" />
     <Compile Include="Saga\ConnectorFactories\ObservesSagaConnectorFactory.cs" />
@@ -675,15 +687,21 @@
     <Compile Include="Saga\DefaultSagaFactory.cs" />
     <Compile Include="Saga\ExpressionSagaQueryFactory.cs" />
     <Compile Include="Saga\FactoryMethodSagaFactory.cs" />
+    <Compile Include="Saga\ISagaConfigurationObserverConnector.cs" />
     <Compile Include="Saga\InMemorySagaConsumeContext.cs" />
     <Compile Include="Saga\IQuerySagaRepository.cs" />
     <Compile Include="Saga\ISagaCompletionPolicy.cs" />
+    <Compile Include="Saga\ISagaConfigurationObserver.cs" />
     <Compile Include="Saga\ISagaFactory.cs" />
+    <Compile Include="Saga\ISagaMessageSpecification.cs" />
     <Compile Include="Saga\ISagaMetadataCache.cs" />
     <Compile Include="Saga\ISagaPolicy.cs" />
     <Compile Include="Saga\ISagaQuery.cs" />
     <Compile Include="Saga\ISagaQueryFactory.cs" />
     <Compile Include="Saga\CorrelationExpressionToSagaIdVisitor.cs" />
+    <Compile Include="Saga\ISagaSpecification.cs" />
+    <Compile Include="Saga\Pipeline\Filters\SagaMessageSplitFilter.cs" />
+    <Compile Include="Saga\Pipeline\Pipes\SagaMessageMergePipe.cs" />
     <Compile Include="Saga\SagaContextExtensions.cs" />
     <Compile Include="Saga\SagaFactoryMethod.cs" />
     <Compile Include="Saga\Pipeline\Filters\CorrelationIdMessageFilter.cs" />
@@ -1065,9 +1083,7 @@
       <Install>true</Install>
     </BootstrapperPackage>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Configuration\Configuration\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

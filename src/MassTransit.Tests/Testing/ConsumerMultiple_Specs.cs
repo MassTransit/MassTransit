@@ -37,7 +37,7 @@ namespace MassTransit.Tests.Testing
 
         }
 
-        [TearDown]
+        [OneTimeTearDown]
         public async Task Teardown()
         {
             await _harness.Stop();

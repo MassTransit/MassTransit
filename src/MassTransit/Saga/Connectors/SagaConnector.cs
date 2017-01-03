@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -15,6 +15,7 @@ namespace MassTransit.Saga.Connectors
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using Configuration;
     using GreenPipes;
     using MassTransit.Pipeline;
     using Util;
@@ -24,7 +25,7 @@ namespace MassTransit.Saga.Connectors
         ISagaConnector
         where TSaga : class, ISaga
     {
-        readonly List<ISagaMessageConnector> _connectors;
+        readonly List<ISagaMessageConnector<TSaga>> _connectors;
 
         public SagaConnector()
         {
@@ -50,16 +51,24 @@ namespace MassTransit.Saga.Connectors
 
         public IEnumerable<ISagaMessageConnector> Connectors => _connectors;
 
-        public ConnectHandle ConnectSaga<T>(IConsumePipeConnector consumePipe, ISagaRepository<T> sagaRepository,
-            params IPipeSpecification<SagaConsumeContext<T>>[] pipeSpecifications)
-            where T : class, ISaga
+        ISagaSpecification<T> ISagaConnector.CreateSagaSpecification<T>()
+        {
+            List<ISagaMessageSpecification<T>> messageSpecifications =
+                _connectors.Select(x => x.CreateSagaMessageSpecification())
+                    .Cast<ISagaMessageSpecification<T>>()
+                    .ToList();
+
+            return new SagaSpecification<T>(messageSpecifications);
+        }
+
+        ConnectHandle ISagaConnector.ConnectSaga<T>(IConsumePipeConnector consumePipe, ISagaRepository<T> repository, ISagaSpecification<T> specification)
         {
             var handles = new List<ConnectHandle>();
             try
             {
-                foreach (var connector in _connectors)
+                foreach (ISagaMessageConnector<T> connector in _connectors.Cast<ISagaMessageConnector<T>>())
                 {
-                    var handle = connector.ConnectSaga(consumePipe, sagaRepository, pipeSpecifications);
+                    var handle = connector.ConnectSaga(consumePipe, repository, specification);
 
                     handles.Add(handle);
                 }
@@ -74,19 +83,19 @@ namespace MassTransit.Saga.Connectors
             }
         }
 
-        static IEnumerable<ISagaMessageConnector> Initiates()
+        static IEnumerable<ISagaMessageConnector<TSaga>> Initiates()
         {
-            return SagaMetadataCache<TSaga>.InitiatedByTypes.Select(x => x.GetInitiatedByConnector());
+            return SagaMetadataCache<TSaga>.InitiatedByTypes.Select(x => x.GetInitiatedByConnector<TSaga>());
         }
 
-        static IEnumerable<ISagaMessageConnector> Orchestrates()
+        static IEnumerable<ISagaMessageConnector<TSaga>> Orchestrates()
         {
-            return SagaMetadataCache<TSaga>.OrchestratesTypes.Select(x => x.GetOrchestratesConnector());
+            return SagaMetadataCache<TSaga>.OrchestratesTypes.Select(x => x.GetOrchestratesConnector<TSaga>());
         }
 
-        static IEnumerable<ISagaMessageConnector> Observes()
+        static IEnumerable<ISagaMessageConnector<TSaga>> Observes()
         {
-            return SagaMetadataCache<TSaga>.ObservesTypes.Select(x => x.GetObservesConnector());
+            return SagaMetadataCache<TSaga>.ObservesTypes.Select(x => x.GetObservesConnector<TSaga>());
         }
     }
 }

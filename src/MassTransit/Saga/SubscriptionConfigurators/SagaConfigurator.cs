@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,7 +14,6 @@ namespace MassTransit.Saga.SubscriptionConfigurators
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
     using Connectors;
     using GreenPipes;
 
@@ -24,18 +23,21 @@ namespace MassTransit.Saga.SubscriptionConfigurators
         IReceiveEndpointSpecification
         where TSaga : class, ISaga
     {
-        readonly IList<IPipeSpecification<SagaConsumeContext<TSaga>>> _pipeSpecifications;
         readonly ISagaRepository<TSaga> _sagaRepository;
+        readonly ISagaSpecification<TSaga> _specification;
 
-        public SagaConfigurator(ISagaRepository<TSaga> sagaRepository)
+        public SagaConfigurator(ISagaRepository<TSaga> sagaRepository, ISagaConfigurationObserver observer)
         {
             _sagaRepository = sagaRepository;
-            _pipeSpecifications = new List<IPipeSpecification<SagaConsumeContext<TSaga>>>();
+
+            _specification = SagaConnectorCache<TSaga>.Connector.CreateSagaSpecification<TSaga>();
+
+            _specification.ConnectSagaConfigurationObserver(observer);
         }
 
         public void Configure(IReceiveEndpointBuilder builder)
         {
-            SagaConnectorCache<TSaga>.Connector.ConnectSaga(builder, _sagaRepository, _pipeSpecifications.ToArray());
+            SagaConnectorCache<TSaga>.Connector.ConnectSaga(builder, _sagaRepository, _specification);
         }
 
         public IEnumerable<ValidationResult> Validate()
@@ -43,33 +45,29 @@ namespace MassTransit.Saga.SubscriptionConfigurators
             if (_sagaRepository == null)
                 yield return this.Failure("The saga repository cannot be null. How else are we going to save stuff? #facetopalm");
 
-            foreach (var result in _pipeSpecifications.SelectMany(x => x.Validate()))
+            foreach (var result in _specification.Validate())
                 yield return result;
         }
 
         public void ConfigureMessage<T>(Action<ISagaMessageConfigurator<T>> configure)
             where T : class
         {
-            Message(configure);
+            _specification.Message(configure);
         }
 
         public void Message<T>(Action<ISagaMessageConfigurator<T>> configure) where T : class
         {
-            var messageConfigurator = new SagaMessageConfigurator<TSaga, T>(this);
-
-            configure(messageConfigurator);
+            _specification.Message(configure);
         }
 
-        public void ConsumerMessage<T>(Action<ISagaMessageConfigurator<TSaga, T>> configure) where T : class
+        public void SagaMessage<T>(Action<ISagaMessageConfigurator<TSaga, T>> configure) where T : class
         {
-            var messageConfigurator = new SagaMessageConfigurator<TSaga, T>(this);
-
-            configure(messageConfigurator);
+            _specification.SagaMessage(configure);
         }
 
         public void AddPipeSpecification(IPipeSpecification<SagaConsumeContext<TSaga>> specification)
         {
-            _pipeSpecifications.Add(specification);
+            _specification.AddPipeSpecification(specification);
         }
     }
 }

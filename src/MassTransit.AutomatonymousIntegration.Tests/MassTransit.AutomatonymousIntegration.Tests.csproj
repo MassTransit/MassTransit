@@ -132,6 +132,7 @@
     <Compile Include="RemoveWhen_Specs.cs" />
     <Compile Include="Request_Specs.cs" />
     <Compile Include="Respond_Specs.cs" />
+    <Compile Include="SagaConfigurationObserver_Specs.cs" />
     <Compile Include="SagaDbContextFactoryProvider.cs" />
     <Compile Include="SchedulerLoadInMemory_Specs.cs" />
     <Compile Include="ScheduleTimeout_Specs.cs" />

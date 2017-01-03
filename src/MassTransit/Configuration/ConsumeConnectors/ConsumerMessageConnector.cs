@@ -1,4 +1,4 @@
-// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,15 +13,14 @@
 namespace MassTransit.ConsumeConnectors
 {
     using System;
-    using Builders;
+    using ConsumeConfigurators;
     using GreenPipes;
     using Pipeline;
     using Pipeline.Filters;
-    using Util;
 
 
     public class ConsumerMessageConnector<TConsumer, TMessage> :
-        IConsumerMessageConnector
+        IConsumerMessageConnector<TConsumer>
         where TConsumer : class
         where TMessage : class
     {
@@ -34,16 +33,24 @@ namespace MassTransit.ConsumeConnectors
 
         public Type MessageType => typeof(TMessage);
 
-        ConnectHandle IConsumerConnector.ConnectConsumer<T>(IConsumePipeConnector consumePipe, IConsumerFactory<T> consumerFactory,
-            IPipeSpecification<ConsumerConsumeContext<T>>[] pipeSpecifications)
+        public IConsumerMessageSpecification<TConsumer> CreateConsumerMessageSpecification()
         {
-            var factory = consumerFactory as IConsumerFactory<TConsumer>;
-            if (factory == null)
-                throw new ArgumentException("The consumer factory type does not match: " + TypeMetadataCache<T>.ShortName);
+            return new ConsumerMessageSpecification<TConsumer, TMessage>();
+        }
 
-            IPipe<ConsumerConsumeContext<TConsumer, TMessage>> consumerPipe = ConsumerPipeBuilder.BuildConsumerPipe(_consumeFilter, pipeSpecifications);
+        public ConnectHandle ConnectConsumer(IConsumePipeConnector consumePipe, IConsumerFactory<TConsumer> consumerFactory,
+            IConsumerSpecification<TConsumer> specification)
+        {
+            IConsumerMessageSpecification<TConsumer, TMessage> messageSpecification = specification.GetMessageSpecification<TMessage>();
 
-            IPipe<ConsumeContext<TMessage>> messagePipe = MessagePipeBuilder.BuildMessagePipe<TConsumer, TMessage, T>(pipeSpecifications, new ConsumerMessageFilter<TConsumer, TMessage>(factory, consumerPipe));
+            messageSpecification.UseFilter(_consumeFilter);
+
+            IPipe<ConsumerConsumeContext<TConsumer, TMessage>> consumerPipe = messageSpecification.Build();
+
+            IPipe<ConsumeContext<TMessage>> messagePipe = Pipe.New<ConsumeContext<TMessage>>(x =>
+            {
+                x.UseFilter(new ConsumerMessageFilter<TConsumer, TMessage>(consumerFactory, consumerPipe));
+            });
 
             return consumePipe.ConnectConsumePipe(messagePipe);
         }

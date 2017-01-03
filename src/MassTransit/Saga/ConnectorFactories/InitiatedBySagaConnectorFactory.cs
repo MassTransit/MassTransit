@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -23,21 +23,26 @@ namespace MassTransit.Saga.ConnectorFactories
         where TSaga : class, ISaga, InitiatedBy<TMessage>
         where TMessage : class, CorrelatedBy<Guid>
     {
-        readonly InitiatedBySagaMessageFilter<TSaga, TMessage> _consumeFilter;
-        readonly NewSagaPolicy<TSaga, TMessage> _policy;
+        readonly ISagaMessageConnector<TSaga> _connector;
 
         public InitiatedBySagaConnectorFactory()
         {
-            _consumeFilter = new InitiatedBySagaMessageFilter<TSaga, TMessage>();
+            var consumeFilter = new InitiatedBySagaMessageFilter<TSaga, TMessage>();
 
             ISagaFactory<TSaga, TMessage> sagaFactory = new DefaultSagaFactory<TSaga, TMessage>();
 
-            _policy = new NewSagaPolicy<TSaga, TMessage>(sagaFactory, false);
+            var policy = new NewSagaPolicy<TSaga, TMessage>(sagaFactory, false);
+
+            _connector = new CorrelatedSagaMessageConnector<TSaga, TMessage>(consumeFilter, policy, x => x.Message.CorrelationId);
         }
 
-        public ISagaMessageConnector CreateMessageConnector()
+        ISagaMessageConnector<T> ISagaConnectorFactory.CreateMessageConnector<T>()
         {
-            return new CorrelatedSagaMessageConnector<TSaga, TMessage>(_consumeFilter, _policy, x => x.Message.CorrelationId);
+            var connector = _connector as ISagaMessageConnector<T>;
+            if (connector == null)
+                throw new ArgumentException("The saga type did not match the connector type");
+
+            return connector;
         }
     }
 }

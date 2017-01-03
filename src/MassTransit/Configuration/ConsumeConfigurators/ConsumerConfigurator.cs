@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -15,60 +15,62 @@ namespace MassTransit.ConsumeConfigurators
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using Configuration;
     using ConsumeConnectors;
     using GreenPipes;
 
 
     public class ConsumerConfigurator<TConsumer> :
         IConsumerConfigurator<TConsumer>,
+        IConsumerConfigurationObserverConnector,
         IReceiveEndpointSpecification
         where TConsumer : class, IConsumer
     {
         readonly IConsumerFactory<TConsumer> _consumerFactory;
+        readonly IConsumerSpecification<TConsumer> _specification;
 
-        readonly List<IPipeSpecification<ConsumerConsumeContext<TConsumer>>> _pipeSpecifications;
-
-        public ConsumerConfigurator(IConsumerFactory<TConsumer> consumerFactory)
+        public ConsumerConfigurator(IConsumerFactory<TConsumer> consumerFactory, IConsumerConfigurationObserver observer)
         {
             _consumerFactory = consumerFactory;
 
-            _pipeSpecifications = new List<IPipeSpecification<ConsumerConsumeContext<TConsumer>>>();
+            _specification = ConsumerConnectorCache<TConsumer>.Connector.CreateConsumerSpecification<TConsumer>();
+
+            _specification.ConnectConfigurationObserver(observer);
         }
 
         public void AddPipeSpecification(IPipeSpecification<ConsumerConsumeContext<TConsumer>> specification)
         {
-            _pipeSpecifications.Add(specification);
+            _specification.AddPipeSpecification(specification);
+        }
+
+        public ConnectHandle ConnectConfigurationObserver(IConsumerConfigurationObserver observer)
+        {
+            return _specification.ConnectConfigurationObserver(observer);
         }
 
         void IConsumerConfigurator<TConsumer>.ConfigureMessage<T>(Action<IConsumerMessageConfigurator<T>> configure)
         {
-            Message(configure);
+            _specification.Message(configure);
         }
 
-        public void Message<T>(Action<IConsumerMessageConfigurator<T>> configure)
-            where T : class
+        void IConsumerConfigurator<TConsumer>.Message<T>(Action<IConsumerMessageConfigurator<T>> configure)
         {
-            var messageConfigurator = new ConsumerMessageConfigurator<TConsumer, T>(this);
-
-            configure(messageConfigurator);
+            _specification.Message(configure);
         }
 
-        public void ConsumerMessage<T>(Action<IConsumerMessageConfigurator<TConsumer, T>> configure) 
-            where T : class
+        void IConsumerConfigurator<TConsumer>.ConsumerMessage<T>(Action<IConsumerMessageConfigurator<TConsumer, T>> configure)
         {
-            var messageConfigurator = new ConsumerMessageConfigurator<TConsumer, T>(this);
-
-            configure(messageConfigurator);
+            _specification.ConsumerMessage(configure);
         }
 
         public IEnumerable<ValidationResult> Validate()
         {
-            return _consumerFactory.Validate().Concat(_pipeSpecifications.SelectMany(x => x.Validate()));
+            return _consumerFactory.Validate().Concat(_specification.Validate());
         }
 
         public void Configure(IReceiveEndpointBuilder builder)
         {
-            ConsumerConnectorCache<TConsumer>.Connector.ConnectConsumer(builder, _consumerFactory, _pipeSpecifications.ToArray());
+            ConsumerConnectorCache<TConsumer>.Connector.ConnectConsumer(builder, _consumerFactory, _specification);
         }
     }
 }

@@ -85,6 +85,7 @@
     <Compile Include="Configuration\CorrelationConfigurators\UncorrelatedEventCorrelation.cs" />
     <Compile Include="Configuration\EventMissingInstanceConfigurator.cs" />
     <Compile Include="Configuration\MissingInstanceConfigurator.cs" />
+    <Compile Include="Configuration\SagaFilterFactory.cs" />
     <Compile Include="Configuration\StateMachineActivitySelector.cs" />
     <Compile Include="Configuration\StateMachineConfigurationResult.cs" />
     <Compile Include="Configuration\ScheduleConfigurator.cs" />
@@ -103,7 +104,6 @@
     <Compile Include="Configuration\CorrelationConfigurators\ExpressionCorrelationSagaQueryFactory.cs" />
     <Compile Include="Configuration\CorrelationConfigurators\MassTransitEventCorrelation.cs" />
     <Compile Include="Configuration\CorrelationConfigurators\PropertyExpressionSagaQueryFactory.cs" />
-    <Compile Include="Configuration\CorrelationConfigurators\SagaFilterFactory.cs" />
     <Compile Include="Configuration\EventCorrelation.cs" />
     <Compile Include="Configuration\EventCorrelationConfigurator.cs" />
     <Compile Include="Configuration\IStateMachineInterfaceType.cs" />
@@ -137,7 +137,7 @@
     <Compile Include="Testing\StateMachineSagaTestHarness.cs" />
     <Compile Include="Testing\StateMachineSagaTestingExtensions.cs" />
     <Compile Include="Configuration\StateMachineSubscriptionExtensions.cs" />
-    <Compile Include="Configuration\SubscriptionConfigurators\StateMachineSagaSpecification.cs" />
+    <Compile Include="Configuration\SubscriptionConfigurators\StateMachineSagaConfigurator.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\StateMachineSagaMessageConnector.cs" />
     <Compile Include="Configuration\SubscriptionConnectors\StateMachineConnector.cs" />
     <Compile Include="SagaStateMachineInstance.cs" />
@@ -149,9 +149,7 @@
       <Name>MassTransit</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Configuration\BuilderConfigurators\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>

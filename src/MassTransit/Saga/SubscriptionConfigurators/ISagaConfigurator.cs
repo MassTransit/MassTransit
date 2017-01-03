@@ -47,7 +47,7 @@ namespace MassTransit.Saga.SubscriptionConfigurators
         /// </summary>
         /// <typeparam name="T">The message type</typeparam>
         /// <param name="configure">The callback to configure the message pipeline</param>
-        void ConsumerMessage<T>(Action<ISagaMessageConfigurator<TSaga, T>> configure)
+        void SagaMessage<T>(Action<ISagaMessageConfigurator<TSaga, T>> configure)
             where T : class;
 
     }

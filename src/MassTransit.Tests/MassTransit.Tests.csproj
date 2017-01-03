@@ -99,6 +99,8 @@
     <Compile Include="BusActivityMonitor_Specs.cs" />
     <Compile Include="CircuitBreaker_Specs.cs" />
     <Compile Include="ConcurrencyLimitKnob_Specs.cs" />
+    <Compile Include="Configuration\ConfigurationObserver_Specs.cs" />
+    <Compile Include="Configuration\SagaConfigurationObserver_Specs.cs" />
     <Compile Include="ConsumeJToken_Specs.cs" />
     <Compile Include="ConsumeObserver_Specs.cs" />
     <Compile Include="ConsumerFactoryMiddleware_Specs.cs" />

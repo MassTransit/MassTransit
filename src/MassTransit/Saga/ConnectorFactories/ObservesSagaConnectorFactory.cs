@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -24,27 +24,31 @@ namespace MassTransit.Saga.ConnectorFactories
         where TSaga : class, ISaga, Observes<TMessage, TSaga>
         where TMessage : class
     {
-        readonly ObservesSagaMessageFilter<TSaga, TMessage> _consumeFilter;
-        readonly AnyExistingSagaPolicy<TSaga, TMessage> _policy;
-        readonly ISagaQueryFactory<TSaga, TMessage> _queryFactory;
+        readonly ISagaMessageConnector<TSaga> _connector;
 
         public ObservesSagaConnectorFactory()
         {
-            _policy = new AnyExistingSagaPolicy<TSaga, TMessage>();
+            var policy = new AnyExistingSagaPolicy<TSaga, TMessage>();
 
-            _queryFactory = new ExpressionSagaQueryFactory<TSaga, TMessage>(GetFilterExpression());
+            ISagaQueryFactory<TSaga, TMessage> queryFactory = new ExpressionSagaQueryFactory<TSaga, TMessage>(GetFilterExpression());
 
-            _consumeFilter = new ObservesSagaMessageFilter<TSaga, TMessage>();
+            var consumeFilter = new ObservesSagaMessageFilter<TSaga, TMessage>();
+
+            _connector = new QuerySagaMessageConnector<TSaga, TMessage>(consumeFilter, policy, queryFactory);
         }
 
-        public ISagaMessageConnector CreateMessageConnector()
+        ISagaMessageConnector<T> ISagaConnectorFactory.CreateMessageConnector<T>()
         {
-            return new QuerySagaMessageConnector<TSaga, TMessage>(_consumeFilter, _policy, _queryFactory);
+            var connector = _connector as ISagaMessageConnector<T>;
+            if (connector == null)
+                throw new ArgumentException("The saga type did not match the connector type");
+
+            return connector;
         }
 
         static Expression<Func<TSaga, TMessage, bool>> GetFilterExpression()
         {
-            TSaga instance = SagaMetadataCache<TSaga>.FactoryMethod(NewId.NextGuid());
+            var instance = SagaMetadataCache<TSaga>.FactoryMethod(NewId.NextGuid());
 
             return instance.CorrelationExpression;
         }

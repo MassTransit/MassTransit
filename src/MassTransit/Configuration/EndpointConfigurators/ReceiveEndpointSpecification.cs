@@ -1,4 +1,4 @@
-// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -18,6 +18,8 @@ namespace MassTransit.EndpointConfigurators
     using System.Threading.Tasks;
     using Builders;
     using BusConfigurators;
+    using Configuration;
+    using ConsumeConfigurators;
     using GreenPipes;
     using GreenPipes.Builders;
     using GreenPipes.Configurators;
@@ -25,6 +27,8 @@ namespace MassTransit.EndpointConfigurators
     using Pipeline;
     using Pipeline.Filters;
     using Pipeline.Pipes;
+    using Saga;
+    using Saga.SubscriptionConfigurators;
     using Transports;
 
 
@@ -70,6 +74,37 @@ namespace MassTransit.EndpointConfigurators
         public void AddPipeSpecification<T>(IPipeSpecification<ConsumeContext<T>> specification) where T : class
         {
             _consumePipeSpecification.AddPipeSpecification(specification);
+        }
+
+        public ConnectHandle ConnectConfigurationObserver(IConsumerConfigurationObserver observer)
+        {
+            return _consumePipeSpecification.ConnectConfigurationObserver(observer);
+        }
+
+        void IConsumerConfigurationObserver.ConfigureConsumer<TConsumer>(IConsumerConfigurator<TConsumer> configurator)
+        {
+            _consumePipeSpecification.ConfigureConsumer(configurator);
+        }
+
+        void IConsumerConfigurationObserver.ConfigureConsumerMessage<TConsumer, TMessage>(IConsumerMessageConfigurator<TConsumer, TMessage> configurator)
+        {
+            _consumePipeSpecification.ConfigureConsumerMessage(configurator);
+        }
+
+        public ConnectHandle ConnectSagaConfigurationObserver(ISagaConfigurationObserver observer)
+        {
+            return _consumePipeSpecification.ConnectSagaConfigurationObserver(observer);
+        }
+
+        public void SagaConfigured<TSaga>(ISagaConfigurator<TSaga> configurator) where TSaga : class, ISaga
+        {
+            _consumePipeSpecification.SagaConfigured(configurator);
+        }
+
+        public void SagaMessageConfigured<TSaga, TMessage>(ISagaMessageConfigurator<TSaga, TMessage> configurator) where TSaga : class, ISaga
+            where TMessage : class
+        {
+            _consumePipeSpecification.SagaMessageConfigured(configurator);
         }
 
         public void ConfigurePublish(Action<IPublishPipeConfigurator> callback)

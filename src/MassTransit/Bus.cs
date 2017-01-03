@@ -24,7 +24,5 @@ namespace MassTransit
         /// Access a bus factory from this main factory interface (easy extension method support)
         /// </summary>
         public static IBusFactorySelector Factory { get; } = new BusFactorySelector();
-
-        public static ITestFactorySelector TestFactory { get; } = new TestFactorySelector();
     }
 }

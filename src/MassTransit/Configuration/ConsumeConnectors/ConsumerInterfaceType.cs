@@ -34,14 +34,16 @@ namespace MassTransit.ConsumeConnectors
 
         public Type MessageType { get; }
 
-        public IConsumerMessageConnector GetConsumerConnector()
+        public IConsumerMessageConnector<T> GetConsumerConnector<T>()
+            where T : class
         {
-            return _consumeConnectorFactory.Value.CreateConsumerConnector();
+            return _consumeConnectorFactory.Value.CreateConsumerConnector<T>();
         }
 
-        public IInstanceMessageConnector GetInstanceConnector()
+        public IInstanceMessageConnector<T> GetInstanceConnector<T>()
+            where T : class
         {
-            return _consumeConnectorFactory.Value.CreateInstanceConnector();
+            return _consumeConnectorFactory.Value.CreateInstanceConnector<T>();
         }
     }
 }

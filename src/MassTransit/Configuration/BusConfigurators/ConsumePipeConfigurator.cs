@@ -1,4 +1,4 @@
-// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -16,8 +16,13 @@ namespace MassTransit.BusConfigurators
     using System.Collections.Generic;
     using System.Linq;
     using Builders;
+    using Configuration;
+    using ConsumeConfigurators;
     using GreenPipes;
+    using Observables;
     using Pipeline;
+    using Saga;
+    using Saga.SubscriptionConfigurators;
 
 
     public class ConsumePipeConfigurator :
@@ -25,11 +30,15 @@ namespace MassTransit.BusConfigurators
         IConsumePipeFactory,
         IConsumePipeSpecification
     {
+        readonly ConsumerConfigurationObservable _consumerObservers;
+        readonly SagaConfigurationObservable _sagaObservers;
         readonly IList<IConsumePipeSpecification> _specifications;
 
         public ConsumePipeConfigurator()
         {
             _specifications = new List<IConsumePipeSpecification>();
+            _consumerObservers = new ConsumerConfigurationObservable();
+            _sagaObservers = new SagaConfigurationObservable();
         }
 
         public void AddPipeSpecification(IPipeSpecification<ConsumeContext> specification)
@@ -46,6 +55,38 @@ namespace MassTransit.BusConfigurators
                 throw new ArgumentNullException(nameof(specification));
 
             _specifications.Add(new Proxy<T>(specification));
+        }
+
+        public ConnectHandle ConnectConfigurationObserver(IConsumerConfigurationObserver observer)
+        {
+            return _consumerObservers.Connect(observer);
+        }
+
+        public void ConfigureConsumer<TConsumer>(IConsumerConfigurator<TConsumer> configurator) where TConsumer : class
+        {
+            _consumerObservers.ConfigureConsumer(configurator);
+        }
+
+        public void ConfigureConsumerMessage<TConsumer, TMessage>(IConsumerMessageConfigurator<TConsumer, TMessage> configurator) where TConsumer : class
+            where TMessage : class
+        {
+            _consumerObservers.ConfigureConsumerMessage(configurator);
+        }
+
+        public void SagaConfigured<TSaga>(ISagaConfigurator<TSaga> configurator) where TSaga : class, ISaga
+        {
+            _sagaObservers.SagaConfigured(configurator);
+        }
+
+        public void SagaMessageConfigured<TSaga, TMessage>(ISagaMessageConfigurator<TSaga, TMessage> configurator) where TSaga : class, ISaga
+            where TMessage : class
+        {
+            _sagaObservers.SagaMessageConfigured(configurator);
+        }
+
+        public ConnectHandle ConnectSagaConfigurationObserver(ISagaConfigurationObserver observer)
+        {
+            return _sagaObservers.Connect(observer);
         }
 
         public IConsumePipe CreateConsumePipe(params IConsumePipeSpecification[] specifications)

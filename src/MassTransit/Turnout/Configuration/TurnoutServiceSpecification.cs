@@ -15,7 +15,11 @@ namespace MassTransit.Turnout.Configuration
     using System;
     using System.Collections.Generic;
     using Builders;
+    using ConsumeConfigurators;
     using GreenPipes;
+    using MassTransit.Configuration;
+    using Saga;
+    using Saga.SubscriptionConfigurators;
 
 
     public class TurnoutServiceSpecification<TCommand> :
@@ -74,6 +78,11 @@ namespace MassTransit.Turnout.Configuration
             _configurator.AddPipeSpecification(specification);
         }
 
+        public ConnectHandle ConnectConfigurationObserver(IConsumerConfigurationObserver observer)
+        {
+            return _configurator.ConnectConfigurationObserver(observer);
+        }
+
         void IReceiveEndpointConfigurator.AddEndpointSpecification(IReceiveEndpointSpecification configurator)
         {
             _configurator.AddEndpointSpecification(configurator);
@@ -96,6 +105,31 @@ namespace MassTransit.Turnout.Configuration
         IJobService CreateJobService()
         {
             return new JobService(_jobRegistry, _configurator.InputAddress, ManagementAddress, SuperviseInterval);
+        }
+
+        public void ConfigureConsumer<TConsumer>(IConsumerConfigurator<TConsumer> configurator) where TConsumer : class
+        {
+            _configurator.ConfigureConsumer(configurator);
+        }
+
+        public void ConfigureConsumerMessage<TConsumer, TMessage>(IConsumerMessageConfigurator<TConsumer, TMessage> configurator) where TConsumer : class where TMessage : class
+        {
+            _configurator.ConfigureConsumerMessage(configurator);
+        }
+
+        public ConnectHandle ConnectSagaConfigurationObserver(ISagaConfigurationObserver observer)
+        {
+            return _configurator.ConnectSagaConfigurationObserver(observer);
+        }
+
+        public void SagaConfigured<TSaga>(ISagaConfigurator<TSaga> configurator) where TSaga : class, ISaga
+        {
+            _configurator.SagaConfigured(configurator);
+        }
+
+        public void SagaMessageConfigured<TSaga, TMessage>(ISagaMessageConfigurator<TSaga, TMessage> configurator) where TSaga : class, ISaga where TMessage : class
+        {
+            _configurator.SagaMessageConfigured(configurator);
         }
     }
 }

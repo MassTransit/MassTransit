@@ -1,4 +1,4 @@
-// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,73 +13,37 @@
 namespace MassTransit.Saga.Connectors
 {
     using System;
-    using System.Collections.Generic;
+    using Configuration;
     using GreenPipes;
     using MassTransit.Pipeline;
-    using Pipeline.Filters;
-    using Util;
 
 
     public abstract class SagaMessageConnector<TSaga, TMessage> :
-        ISagaMessageConnector
+        ISagaMessageConnector<TSaga>
         where TSaga : class, ISaga
         where TMessage : class
     {
-        ConnectHandle ISagaConnector.ConnectSaga<T>(IConsumePipeConnector consumePipe, ISagaRepository<T> sagaRepository,
-            params IPipeSpecification<SagaConsumeContext<T>>[] pipeSpecifications)
-        {
-            var repository = sagaRepository as ISagaRepository<TSaga>;
-            if (repository == null)
-                throw new ArgumentException("The saga repository type does not match: " + TypeMetadataCache<T>.ShortName);
-
-            IPipe<SagaConsumeContext<TSaga, TMessage>> sagaPipe = BuildSagaPipe(pipeSpecifications);
-
-            IPipe<ConsumeContext<TMessage>> messagePipe = BuildMessagePipe(pipeSpecifications, repository, sagaPipe);
-
-            return consumePipe.ConnectConsumePipe(messagePipe);
-        }
-
         public Type MessageType => typeof(TMessage);
 
-        IPipe<ConsumeContext<TMessage>> BuildMessagePipe<T>(IPipeSpecification<SagaConsumeContext<T>>[] pipeSpecifications, ISagaRepository<TSaga> repository,
-            IPipe<SagaConsumeContext<TSaga, TMessage>> sagaPipe)
-            where T : class, ISaga
+        public ISagaMessageSpecification<TSaga> CreateSagaMessageSpecification()
         {
-            return Pipe.New<ConsumeContext<TMessage>>(x =>
-            {
-                var messagePipeBuilder = new MessagePipeBuilder<T>();
-                for (var i1 = 0; i1 < pipeSpecifications.Length; i1++)
-                    pipeSpecifications[i1].Apply(messagePipeBuilder);
-
-                var pipeBuilder = messagePipeBuilder as MessagePipeBuilder<TSaga>;
-                if (pipeBuilder == null)
-                    throw new InvalidOperationException("Should not be null, ever");
-
-                foreach (IFilter<ConsumeContext<TMessage>> filter in pipeBuilder.Filters)
-                    x.UseFilter(filter);
-
-                ConfigureMessagePipe(x, repository, sagaPipe);
-            });
+            return new SagaMessageSpecification<TSaga, TMessage>();
         }
 
-        IPipe<SagaConsumeContext<TSaga, TMessage>> BuildSagaPipe<T>(IPipeSpecification<SagaConsumeContext<T>>[] pipeSpecifications)
-            where T : class, ISaga
+        public ConnectHandle ConnectSaga(IConsumePipeConnector consumePipe, ISagaRepository<TSaga> repository, ISagaSpecification<TSaga> specification)
         {
-            var builder = new SagaPipeBuilder<T>();
-            for (var i = 0; i < pipeSpecifications.Length; i++)
-                pipeSpecifications[i].Apply(builder);
+            ISagaMessageSpecification<TSaga, TMessage> messageSpecification = specification.GetMessageSpecification<TMessage>();
 
-            var builders = builder as SagaPipeBuilder<TSaga>;
-            if (builders == null)
-                throw new InvalidOperationException("Should not be null, ever");
+            ConfigureSagaPipe(messageSpecification);
 
-            return Pipe.New<SagaConsumeContext<TSaga, TMessage>>(x =>
+            IPipe<SagaConsumeContext<TSaga, TMessage>> consumerPipe = messageSpecification.Build();
+
+            IPipe<ConsumeContext<TMessage>> messagePipe = Pipe.New<ConsumeContext<TMessage>>(x =>
             {
-                foreach (IFilter<SagaConsumeContext<TSaga, TMessage>> filter in builders.Filters)
-                    x.UseFilter(filter);
-
-                ConfigureSagaPipe(x);
+                ConfigureMessagePipe(x, repository, consumerPipe);
             });
+
+            return consumePipe.ConnectConsumePipe(messagePipe);
         }
 
         /// <summary>
@@ -96,57 +60,5 @@ namespace MassTransit.Saga.Connectors
         /// <param name="sagaPipe"></param>
         protected abstract void ConfigureMessagePipe(IPipeConfigurator<ConsumeContext<TMessage>> configurator, ISagaRepository<TSaga> repository,
             IPipe<SagaConsumeContext<TSaga, TMessage>> sagaPipe);
-
-
-        class MessagePipeBuilder<T> :
-            IPipeBuilder<SagaConsumeContext<T>>,
-            IPipeBuilder<ConsumeContext<TMessage>>
-            where T : class, ISaga
-        {
-            readonly IList<IFilter<ConsumeContext<TMessage>>> _filters;
-
-            public MessagePipeBuilder()
-            {
-                _filters = new List<IFilter<ConsumeContext<TMessage>>>();
-            }
-
-            public IEnumerable<IFilter<ConsumeContext<TMessage>>> Filters => _filters;
-
-            public void AddFilter(IFilter<ConsumeContext<TMessage>> filter)
-            {
-                _filters.Add(filter);
-            }
-
-            public void AddFilter(IFilter<SagaConsumeContext<T>> filter)
-            {
-                // skip filters that are at the saga level, only interested in message-level filters
-            }
-        }
-
-
-        class SagaPipeBuilder<T> :
-            IPipeBuilder<SagaConsumeContext<T>>,
-            IPipeBuilder<SagaConsumeContext<T, TMessage>>
-            where T : class, ISaga
-        {
-            readonly IList<IFilter<SagaConsumeContext<T, TMessage>>> _filters;
-
-            public SagaPipeBuilder()
-            {
-                _filters = new List<IFilter<SagaConsumeContext<T, TMessage>>>();
-            }
-
-            public IEnumerable<IFilter<SagaConsumeContext<T, TMessage>>> Filters => _filters;
-
-            public void AddFilter(IFilter<SagaConsumeContext<T, TMessage>> filter)
-            {
-                _filters.Add(filter);
-            }
-
-            public void AddFilter(IFilter<SagaConsumeContext<T>> filter)
-            {
-                _filters.Add(new SagaSplitFilter<T, TMessage>(filter));
-            }
-        }
     }
 }
