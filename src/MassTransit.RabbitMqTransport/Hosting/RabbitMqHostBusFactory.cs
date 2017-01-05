@@ -36,7 +36,8 @@ namespace MassTransit.RabbitMqTransport.Hosting
                 VirtualHost = string.IsNullOrWhiteSpace(settings.VirtualHost) ? "/" : settings.VirtualHost.Trim('/'),
                 Username = settings.Username ?? "guest",
                 Password = settings.Password ?? "guest",
-                Heartbeat = settings.Heartbeat ?? 0
+                Heartbeat = settings.Heartbeat ?? 0,
+                ClusterMembers = settings.ClusterMembers?.Split(',')
             };
         }
 
