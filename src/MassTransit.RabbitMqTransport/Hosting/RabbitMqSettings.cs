@@ -48,5 +48,10 @@ namespace MassTransit.RabbitMqTransport.Hosting
         /// The virtual host for the connection
         /// </summary>
         string VirtualHost { get; }
+
+        /// <summary>
+        /// Csv string for all Clustered Members
+        /// </summary>
+        string ClusterMembers { get; }
     }
 }
