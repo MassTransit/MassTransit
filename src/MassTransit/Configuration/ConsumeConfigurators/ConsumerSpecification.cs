@@ -34,7 +34,7 @@ namespace MassTransit.ConsumeConfigurators
             _messageTypes = messageSpecifications.ToDictionary(x => x.MessageType);
 
             _observers = new ConsumerConfigurationObservable();
-            _handles = _messageTypes.Values.Select(x => x.ConnectConfigurationObserver(_observers)).ToArray();
+            _handles = _messageTypes.Values.Select(x => x.ConnectConsumerConfigurationObserver(_observers)).ToArray();
         }
 
         void IConsumerConfigurator<TConsumer>.ConfigureMessage<T>(Action<IConsumerMessageConfigurator<T>> configure)
@@ -79,7 +79,7 @@ namespace MassTransit.ConsumeConfigurators
         {
             _observers.All(observer =>
             {
-                observer.ConfigureConsumer(this);
+                observer.ConsumerConfigured(this);
                 return true;
             });
 
@@ -94,7 +94,7 @@ namespace MassTransit.ConsumeConfigurators
             }
         }
 
-        public ConnectHandle ConnectConfigurationObserver(IConsumerConfigurationObserver observer)
+        public ConnectHandle ConnectConsumerConfigurationObserver(IConsumerConfigurationObserver observer)
         {
             return _observers.Connect(observer);
         }

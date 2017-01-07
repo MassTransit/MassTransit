@@ -68,13 +68,15 @@ namespace MassTransit.Saga.Configuration
             _configurator.AddPipeSpecification(new SagaPipeSpecificationProxy<TSaga, TMessage>(specification));
         }
 
-        public IPipe<SagaConsumeContext<TSaga, TMessage>> Build()
+        public IPipe<SagaConsumeContext<TSaga, TMessage>> Build(IFilter<SagaConsumeContext<TSaga, TMessage>> consumeFilter)
         {
             _observers.All(observer =>
             {
                 observer.SagaMessageConfigured(this);
                 return true;
             });
+
+            _configurator.UseFilter(consumeFilter);
 
             return _configurator.Build();
         }

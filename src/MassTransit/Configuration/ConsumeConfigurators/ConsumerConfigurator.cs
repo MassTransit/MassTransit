@@ -35,7 +35,7 @@ namespace MassTransit.ConsumeConfigurators
 
             _specification = ConsumerConnectorCache<TConsumer>.Connector.CreateConsumerSpecification<TConsumer>();
 
-            _specification.ConnectConfigurationObserver(observer);
+            _specification.ConnectConsumerConfigurationObserver(observer);
         }
 
         public void AddPipeSpecification(IPipeSpecification<ConsumerConsumeContext<TConsumer>> specification)
@@ -43,9 +43,9 @@ namespace MassTransit.ConsumeConfigurators
             _specification.AddPipeSpecification(specification);
         }
 
-        public ConnectHandle ConnectConfigurationObserver(IConsumerConfigurationObserver observer)
+        public ConnectHandle ConnectConsumerConfigurationObserver(IConsumerConfigurationObserver observer)
         {
-            return _specification.ConnectConfigurationObserver(observer);
+            return _specification.ConnectConsumerConfigurationObserver(observer);
         }
 
         void IConsumerConfigurator<TConsumer>.ConfigureMessage<T>(Action<IConsumerMessageConfigurator<T>> configure)

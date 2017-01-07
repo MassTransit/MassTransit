@@ -120,6 +120,7 @@
   <ItemGroup>
     <Compile Include="AutofacRegistrationExtension_Specs.cs" />
     <Compile Include="AutofacRegistration_Specs.cs" />
+    <Compile Include="Autofac_FilterSpecs.cs" />
     <Compile Include="StructureMapStateMachineSaga_Specs.cs" />
     <Compile Include="AutofacStateMachineSaga_Specs.cs" />
     <Compile Include="Autofac_TenantContainerSpecs.cs" />

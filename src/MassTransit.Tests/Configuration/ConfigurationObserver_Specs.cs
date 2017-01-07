@@ -33,7 +33,7 @@ namespace MassTransit.Tests.Configuration
 
             var bus = Bus.Factory.CreateUsingInMemory(cfg =>
             {
-                cfg.ConnectConfigurationObserver(observer);
+                cfg.ConnectConsumerConfigurationObserver(observer);
 
                 cfg.ReceiveEndpoint("hello", e =>
                 {
@@ -89,12 +89,12 @@ namespace MassTransit.Tests.Configuration
 
             public HashSet<Tuple<Type, Type>> MessageTypes => _messageTypes;
 
-            void IConsumerConfigurationObserver.ConfigureConsumer<TConsumer>(IConsumerConfigurator<TConsumer> configurator)
+            void IConsumerConfigurationObserver.ConsumerConfigured<TConsumer>(IConsumerConfigurator<TConsumer> configurator)
             {
                 _consumerTypes.Add(typeof(TConsumer));
             }
 
-            void IConsumerConfigurationObserver.ConfigureConsumerMessage<TConsumer, TMessage>(IConsumerMessageConfigurator<TConsumer, TMessage> configurator)
+            void IConsumerConfigurationObserver.ConsumerMessageConfigured<TConsumer, TMessage>(IConsumerMessageConfigurator<TConsumer, TMessage> configurator)
             {
                 _messageTypes.Add(Tuple.Create(typeof(TConsumer), typeof(TMessage)));
             }

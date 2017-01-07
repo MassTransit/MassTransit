@@ -23,6 +23,6 @@ namespace MassTransit.ConsumeConfigurators
         /// </summary>
         /// <param name="observer"></param>
         /// <returns></returns>
-        ConnectHandle ConnectConfigurationObserver(IConsumerConfigurationObserver observer);
+        ConnectHandle ConnectConsumerConfigurationObserver(IConsumerConfigurationObserver observer);
     }
 }

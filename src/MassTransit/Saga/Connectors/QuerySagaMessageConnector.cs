@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,7 +13,6 @@
 namespace MassTransit.Saga.Connectors
 {
     using GreenPipes;
-    using MassTransit.Pipeline;
     using Pipeline.Filters;
 
 
@@ -22,21 +21,15 @@ namespace MassTransit.Saga.Connectors
         where TSaga : class, ISaga
         where TMessage : class
     {
-        readonly IFilter<SagaConsumeContext<TSaga, TMessage>> _consumeFilter;
         readonly ISagaPolicy<TSaga, TMessage> _policy;
         readonly ISagaQueryFactory<TSaga, TMessage> _queryFactory;
 
         public QuerySagaMessageConnector(IFilter<SagaConsumeContext<TSaga, TMessage>> consumeFilter, ISagaPolicy<TSaga, TMessage> policy,
             ISagaQueryFactory<TSaga, TMessage> queryFactory)
+            : base(consumeFilter)
         {
-            _consumeFilter = consumeFilter;
             _policy = policy;
             _queryFactory = queryFactory;
-        }
-
-        protected override void ConfigureSagaPipe(IPipeConfigurator<SagaConsumeContext<TSaga, TMessage>> configurator)
-        {
-            configurator.UseFilter(_consumeFilter);
         }
 
         protected override void ConfigureMessagePipe(IPipeConfigurator<ConsumeContext<TMessage>> configurator, ISagaRepository<TSaga> repository,

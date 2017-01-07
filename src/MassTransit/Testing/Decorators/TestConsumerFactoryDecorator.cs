@@ -74,6 +74,8 @@ namespace MassTransit.Testing.Decorators
                 catch (Exception ex)
                 {
                     _received.Add(context, ex);
+
+                    throw;
                 }
             }
         }

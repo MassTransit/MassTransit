@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.ConsumeConfigurators
 {
+    using System;
     using GreenPipes;
 
 
@@ -27,5 +28,13 @@ namespace MassTransit.ConsumeConfigurators
         where TConsumer : class
         where TMessage : class
     {
+        /// <summary>
+        /// Configure a message type for the consumer, such as adding middleware to the pipeline for
+        /// the message type.
+        /// </summary>
+        /// <typeparam name="T">The message type</typeparam>
+        /// <param name="configure">The callback to configure the message pipeline</param>
+        void Message(Action<IConsumerMessageConfigurator<TMessage>> configure);
+
     }
 }

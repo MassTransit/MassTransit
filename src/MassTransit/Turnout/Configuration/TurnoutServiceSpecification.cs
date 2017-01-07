@@ -78,9 +78,9 @@ namespace MassTransit.Turnout.Configuration
             _configurator.AddPipeSpecification(specification);
         }
 
-        public ConnectHandle ConnectConfigurationObserver(IConsumerConfigurationObserver observer)
+        public ConnectHandle ConnectConsumerConfigurationObserver(IConsumerConfigurationObserver observer)
         {
-            return _configurator.ConnectConfigurationObserver(observer);
+            return _configurator.ConnectConsumerConfigurationObserver(observer);
         }
 
         void IReceiveEndpointConfigurator.AddEndpointSpecification(IReceiveEndpointSpecification configurator)
@@ -107,14 +107,14 @@ namespace MassTransit.Turnout.Configuration
             return new JobService(_jobRegistry, _configurator.InputAddress, ManagementAddress, SuperviseInterval);
         }
 
-        public void ConfigureConsumer<TConsumer>(IConsumerConfigurator<TConsumer> configurator) where TConsumer : class
+        public void ConsumerConfigured<TConsumer>(IConsumerConfigurator<TConsumer> configurator) where TConsumer : class
         {
-            _configurator.ConfigureConsumer(configurator);
+            _configurator.ConsumerConfigured(configurator);
         }
 
-        public void ConfigureConsumerMessage<TConsumer, TMessage>(IConsumerMessageConfigurator<TConsumer, TMessage> configurator) where TConsumer : class where TMessage : class
+        public void ConsumerMessageConfigured<TConsumer, TMessage>(IConsumerMessageConfigurator<TConsumer, TMessage> configurator) where TConsumer : class where TMessage : class
         {
-            _configurator.ConfigureConsumerMessage(configurator);
+            _configurator.ConsumerMessageConfigured(configurator);
         }
 
         public ConnectHandle ConnectSagaConfigurationObserver(ISagaConfigurationObserver observer)

@@ -87,9 +87,9 @@ namespace MassTransit.BusConfigurators
             _endpointSpecifications.Add(specification);
         }
 
-        public ConnectHandle ConnectConfigurationObserver(IConsumerConfigurationObserver observer)
+        public ConnectHandle ConnectConsumerConfigurationObserver(IConsumerConfigurationObserver observer)
         {
-            return _consumePipeSpecification.ConnectConfigurationObserver(observer);
+            return _consumePipeSpecification.ConnectConsumerConfigurationObserver(observer);
         }
 
         public ConnectHandle ConnectSagaConfigurationObserver(ISagaConfigurationObserver observer)
@@ -120,15 +120,15 @@ namespace MassTransit.BusConfigurators
             return new ConfiguratorProxy(specification);
         }
 
-        public void ConfigureConsumer<TConsumer>(IConsumerConfigurator<TConsumer> configurator) where TConsumer : class
+        public void ConsumerConfigured<TConsumer>(IConsumerConfigurator<TConsumer> configurator) where TConsumer : class
         {
-            _consumePipeSpecification.ConfigureConsumer(configurator);
+            _consumePipeSpecification.ConsumerConfigured(configurator);
         }
 
-        public void ConfigureConsumerMessage<TConsumer, TMessage>(IConsumerMessageConfigurator<TConsumer, TMessage> configurator) where TConsumer : class
+        public void ConsumerMessageConfigured<TConsumer, TMessage>(IConsumerMessageConfigurator<TConsumer, TMessage> configurator) where TConsumer : class
             where TMessage : class
         {
-            _consumePipeSpecification.ConfigureConsumerMessage(configurator);
+            _consumePipeSpecification.ConsumerMessageConfigured(configurator);
         }
 
         public void SagaConfigured<TSaga>(ISagaConfigurator<TSaga> configurator) where TSaga : class, ISaga

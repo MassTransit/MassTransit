@@ -21,24 +21,24 @@ namespace MassTransit.Observables
         Connectable<IConsumerConfigurationObserver>,
         IConsumerConfigurationObserver
     {
-        public void ConfigureConsumer<TConsumer>(IConsumerConfigurator<TConsumer> configurator)
+        public void ConsumerConfigured<TConsumer>(IConsumerConfigurator<TConsumer> configurator)
             where TConsumer : class
         {
             All(observer =>
             {
-                observer.ConfigureConsumer(configurator);
+                observer.ConsumerConfigured(configurator);
 
                 return true;
             });
         }
 
-        public void ConfigureConsumerMessage<TConsumer, TMessage>(IConsumerMessageConfigurator<TConsumer, TMessage> configurator)
+        public void ConsumerMessageConfigured<TConsumer, TMessage>(IConsumerMessageConfigurator<TConsumer, TMessage> configurator)
             where TConsumer : class
             where TMessage : class
         {
             All(observer =>
             {
-                observer.ConfigureConsumerMessage(configurator);
+                observer.ConsumerMessageConfigured(configurator);
 
                 return true;
             });

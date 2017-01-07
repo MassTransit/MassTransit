@@ -14,7 +14,6 @@ namespace MassTransit.Saga
 {
     using System;
     using GreenPipes;
-    using GreenPipes.Builders;
     using SubscriptionConfigurators;
 
 
@@ -33,11 +32,11 @@ namespace MassTransit.Saga
 
     public interface ISagaMessageSpecification<TSaga, TMessage> :
         ISagaMessageSpecification<TSaga>,
-        IBuildPipeConfigurator<SagaConsumeContext<TSaga, TMessage>>,
         ISagaMessageConfigurator<TSaga, TMessage>,
         ISagaMessageConfigurator<TMessage>
         where TSaga : class, ISaga
         where TMessage : class
     {
+        IPipe<SagaConsumeContext<TSaga, TMessage>> Build(IFilter<SagaConsumeContext<TSaga, TMessage>> consumeFilter);
     }
 }

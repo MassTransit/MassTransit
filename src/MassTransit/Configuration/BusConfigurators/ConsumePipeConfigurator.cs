@@ -57,20 +57,20 @@ namespace MassTransit.BusConfigurators
             _specifications.Add(new Proxy<T>(specification));
         }
 
-        public ConnectHandle ConnectConfigurationObserver(IConsumerConfigurationObserver observer)
+        public ConnectHandle ConnectConsumerConfigurationObserver(IConsumerConfigurationObserver observer)
         {
             return _consumerObservers.Connect(observer);
         }
 
-        public void ConfigureConsumer<TConsumer>(IConsumerConfigurator<TConsumer> configurator) where TConsumer : class
+        public void ConsumerConfigured<TConsumer>(IConsumerConfigurator<TConsumer> configurator) where TConsumer : class
         {
-            _consumerObservers.ConfigureConsumer(configurator);
+            _consumerObservers.ConsumerConfigured(configurator);
         }
 
-        public void ConfigureConsumerMessage<TConsumer, TMessage>(IConsumerMessageConfigurator<TConsumer, TMessage> configurator) where TConsumer : class
+        public void ConsumerMessageConfigured<TConsumer, TMessage>(IConsumerMessageConfigurator<TConsumer, TMessage> configurator) where TConsumer : class
             where TMessage : class
         {
-            _consumerObservers.ConfigureConsumerMessage(configurator);
+            _consumerObservers.ConsumerMessageConfigured(configurator);
         }
 
         public void SagaConfigured<TSaga>(ISagaConfigurator<TSaga> configurator) where TSaga : class, ISaga

@@ -37,9 +37,9 @@ namespace MassTransit.ConsumeConfigurators
             _specification = ConsumerConnectorCache<TConsumer>.Connector.CreateConsumerSpecification<TConsumer>();
         }
 
-        public ConnectHandle ConnectConfigurationObserver(IConsumerConfigurationObserver observer)
+        public ConnectHandle ConnectConsumerConfigurationObserver(IConsumerConfigurationObserver observer)
         {
-            return _specification.ConnectConfigurationObserver(observer);
+            return _specification.ConnectConsumerConfigurationObserver(observer);
         }
 
         public IEnumerable<ValidationResult> Validate()

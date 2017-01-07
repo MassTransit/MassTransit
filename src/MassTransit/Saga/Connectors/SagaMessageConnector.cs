@@ -23,6 +23,13 @@ namespace MassTransit.Saga.Connectors
         where TSaga : class, ISaga
         where TMessage : class
     {
+        readonly IFilter<SagaConsumeContext<TSaga, TMessage>> _consumeFilter;
+
+        protected SagaMessageConnector(IFilter<SagaConsumeContext<TSaga, TMessage>> consumeFilter)
+        {
+            _consumeFilter = consumeFilter;
+        }
+
         public Type MessageType => typeof(TMessage);
 
         public ISagaMessageSpecification<TSaga> CreateSagaMessageSpecification()
@@ -34,9 +41,7 @@ namespace MassTransit.Saga.Connectors
         {
             ISagaMessageSpecification<TSaga, TMessage> messageSpecification = specification.GetMessageSpecification<TMessage>();
 
-            ConfigureSagaPipe(messageSpecification);
-
-            IPipe<SagaConsumeContext<TSaga, TMessage>> consumerPipe = messageSpecification.Build();
+            IPipe<SagaConsumeContext<TSaga, TMessage>> consumerPipe = messageSpecification.Build(_consumeFilter);
 
             IPipe<ConsumeContext<TMessage>> messagePipe = Pipe.New<ConsumeContext<TMessage>>(x =>
             {
@@ -45,12 +50,6 @@ namespace MassTransit.Saga.Connectors
 
             return consumePipe.ConnectConsumePipe(messagePipe);
         }
-
-        /// <summary>
-        /// Configure the saga pipe to which the saga instance is sent
-        /// </summary>
-        /// <param name="configurator"></param>
-        protected abstract void ConfigureSagaPipe(IPipeConfigurator<SagaConsumeContext<TSaga, TMessage>> configurator);
 
         /// <summary>
         /// Configure the message pipe that is prior to the saga repository

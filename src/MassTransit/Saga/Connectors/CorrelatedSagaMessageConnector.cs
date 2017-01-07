@@ -28,21 +28,15 @@ namespace MassTransit.Saga.Connectors
         where TSaga : class, ISaga
         where TMessage : class
     {
-        readonly IFilter<SagaConsumeContext<TSaga, TMessage>> _consumeFilter;
         readonly Func<ConsumeContext<TMessage>, Guid> _correlationIdSelector;
         readonly ISagaPolicy<TSaga, TMessage> _policy;
 
         public CorrelatedSagaMessageConnector(IFilter<SagaConsumeContext<TSaga, TMessage>> consumeFilter, ISagaPolicy<TSaga, TMessage> policy,
             Func<ConsumeContext<TMessage>, Guid> correlationIdSelector)
+            : base(consumeFilter)
         {
-            _consumeFilter = consumeFilter;
             _policy = policy;
             _correlationIdSelector = correlationIdSelector;
-        }
-
-        protected override void ConfigureSagaPipe(IPipeConfigurator<SagaConsumeContext<TSaga, TMessage>> configurator)
-        {
-            configurator.UseFilter(_consumeFilter);
         }
 
         protected override void ConfigureMessagePipe(IPipeConfigurator<ConsumeContext<TMessage>> configurator, ISagaRepository<TSaga> repository,

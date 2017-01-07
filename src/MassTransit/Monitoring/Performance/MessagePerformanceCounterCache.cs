@@ -13,8 +13,9 @@
 namespace MassTransit.Monitoring.Performance
 {
     using System;
+    using Windows;
 
-    
+
     public static class MessagePerformanceCounterCache<T>
     {
         static Lazy<MessagePerformanceCounter<T>> _cache;

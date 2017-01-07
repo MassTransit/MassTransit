@@ -150,7 +150,7 @@ namespace MassTransit.RabbitMqTransport.Configurators
 
             var specification = new RabbitMqReceiveEndpointSpecification(host, queueName);
 
-            specification.ConnectConfigurationObserver(this);
+            specification.ConnectConsumerConfigurationObserver(this);
             specification.ConnectSagaConfigurationObserver(this);
 
             AddReceiveEndpointSpecification(specification);

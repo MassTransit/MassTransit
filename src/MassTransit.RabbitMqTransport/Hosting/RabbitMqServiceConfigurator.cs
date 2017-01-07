@@ -70,9 +70,9 @@ namespace MassTransit.RabbitMqTransport.Hosting
             ReceiveEndpoint(queueName, _defaultConsumerLimit, configureEndpoint);
         }
 
-        ConnectHandle IConsumerConfigurationObserverConnector.ConnectConfigurationObserver(IConsumerConfigurationObserver observer)
+        ConnectHandle IConsumerConfigurationObserverConnector.ConnectConsumerConfigurationObserver(IConsumerConfigurationObserver observer)
         {
-            return _configurator.ConnectConfigurationObserver(observer);
+            return _configurator.ConnectConsumerConfigurationObserver(observer);
         }
 
         public void ConfigureSend(Action<ISendPipeConfigurator> callback)
@@ -85,14 +85,14 @@ namespace MassTransit.RabbitMqTransport.Hosting
             _configurator.ConfigurePublish(callback);
         }
 
-        void IConsumerConfigurationObserver.ConfigureConsumer<TConsumer>(IConsumerConfigurator<TConsumer> configurator)
+        void IConsumerConfigurationObserver.ConsumerConfigured<TConsumer>(IConsumerConfigurator<TConsumer> configurator)
         {
-            _configurator.ConfigureConsumer(configurator);
+            _configurator.ConsumerConfigured(configurator);
         }
 
-        void IConsumerConfigurationObserver.ConfigureConsumerMessage<TConsumer, TMessage>(IConsumerMessageConfigurator<TConsumer, TMessage> configurator)
+        void IConsumerConfigurationObserver.ConsumerMessageConfigured<TConsumer, TMessage>(IConsumerMessageConfigurator<TConsumer, TMessage> configurator)
         {
-            _configurator.ConfigureConsumerMessage(configurator);
+            _configurator.ConsumerMessageConfigured(configurator);
         }
 
         public ConnectHandle ConnectSagaConfigurationObserver(ISagaConfigurationObserver observer)

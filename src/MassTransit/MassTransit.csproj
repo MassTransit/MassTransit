@@ -140,6 +140,7 @@
     <Compile Include="Configuration\IRescueConfigurator.cs" />
     <Compile Include="Configuration\Observables\ConsumerConfigurationObservable.cs" />
     <Compile Include="Configuration\Observables\SagaConfigurationObservable.cs" />
+    <Compile Include="Configuration\PerformanceCounterExtensions.cs" />
     <Compile Include="Configuration\PipeConfigurators\CompensateActivityLogConfigurator.cs" />
     <Compile Include="Configuration\PipeConfigurators\ConsumeContextRescuePipeSpecification.cs" />
     <Compile Include="Configuration\PipeConfigurators\ConsumeContextRetryPipeSpecification.cs" />
@@ -566,7 +567,6 @@
     <Compile Include="Monitoring\Performance\PerformanceCounterReceiveObserver.cs" />
     <Compile Include="Monitoring\Performance\Windows\BaseWindowsPerformanceCounters.cs" />
     <Compile Include="Monitoring\Performance\PerformanceCounterSendObserver.cs" />
-    <Compile Include="Monitoring\Performance\Configuration\PerformanceCounterExtensions.cs" />
     <Compile Include="Pipeline\Filters\MessageSplitFilter.cs" />
     <Compile Include="Pipeline\Observables\BusObservable.cs" />
     <Compile Include="Pipeline\ConsumerFactories\DefaultConstructorConsumerFactory.cs" />
@@ -914,6 +914,8 @@
     <Compile Include="Transports\IReceiveTransportObserverConnector.cs" />
     <Compile Include="Transports\ReceiveEndpointCollection.cs" />
     <Compile Include="Transports\Metrics\ZeroActiveDeliveryHandler.cs" />
+    <Compile Include="TurnoutConfigurationExtensions.cs" />
+    <Compile Include="TurnoutEventExtensions.cs" />
     <Compile Include="Turnout\Commands\SuperviseJobCommand.cs" />
     <Compile Include="Turnout\Configuration\ITurnoutServiceConfigurator.cs" />
     <Compile Include="Turnout\Configuration\TurnoutServiceSpecification.cs" />
@@ -942,7 +944,6 @@
     <Compile Include="Turnout\JobContext.cs" />
     <Compile Include="Turnout\ConsumerJobHandle.cs" />
     <Compile Include="Turnout\JobRegistry.cs" />
-    <Compile Include="Turnout\TurnoutConfigurationExtensions.cs" />
     <Compile Include="Turnout\JobService.cs" />
     <Compile Include="TransactionContextExtensions.cs" />
     <Compile Include="Transformation\Contexts\ConsumeTransformContext.cs" />
@@ -1007,7 +1008,6 @@
     <Compile Include="Exceptions\ShutDownException.cs" />
     <Compile Include="Exceptions\EndpointException.cs" />
     <Compile Include="Turnout\JobResultContext.cs" />
-    <Compile Include="Turnout\TurnoutEventExtensions.cs" />
     <Compile Include="Util\AssemblyTypeCache.cs" />
     <Compile Include="Util\IObjectTypeDeserializer.cs" />
     <Compile Include="Util\ObservableObserver.cs" />

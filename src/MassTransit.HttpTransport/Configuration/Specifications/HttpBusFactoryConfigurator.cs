@@ -77,7 +77,7 @@ namespace MassTransit.HttpTransport.Specifications
 
             var specification = new HttpReceiveEndpointSpecification(host, pathMatch);
 
-            specification.ConnectConfigurationObserver(this);
+            specification.ConnectConsumerConfigurationObserver(this);
             specification.ConnectSagaConfigurationObserver(this);
 
             configure?.Invoke(specification);

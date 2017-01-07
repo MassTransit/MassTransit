@@ -23,23 +23,17 @@ namespace Automatonymous.SubscriptionConnectors
         where TInstance : class, ISaga, SagaStateMachineInstance
         where TMessage : class
     {
-        readonly IFilter<SagaConsumeContext<TInstance, TMessage>> _consumeFilter;
         readonly IFilter<ConsumeContext<TMessage>> _messageFilter;
         readonly ISagaPolicy<TInstance, TMessage> _policy;
         readonly SagaFilterFactory<TInstance, TMessage> _sagaFilterFactory;
 
         public StateMachineSagaMessageConnector(IFilter<SagaConsumeContext<TInstance, TMessage>> consumeFilter, ISagaPolicy<TInstance, TMessage> policy,
             SagaFilterFactory<TInstance, TMessage> sagaFilterFactory, IFilter<ConsumeContext<TMessage>> messageFilter)
+            : base(consumeFilter)
         {
-            _consumeFilter = consumeFilter;
             _policy = policy;
             _sagaFilterFactory = sagaFilterFactory;
             _messageFilter = messageFilter;
-        }
-
-        protected override void ConfigureSagaPipe(IPipeConfigurator<SagaConsumeContext<TInstance, TMessage>> configurator)
-        {
-            configurator.UseFilter(_consumeFilter);
         }
 
         protected override void ConfigureMessagePipe(IPipeConfigurator<ConsumeContext<TMessage>> configurator, ISagaRepository<TInstance> repository,

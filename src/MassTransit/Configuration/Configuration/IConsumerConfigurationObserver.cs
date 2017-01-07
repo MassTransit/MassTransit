@@ -22,7 +22,7 @@ namespace MassTransit.Configuration
         /// </summary>
         /// <typeparam name="TConsumer"></typeparam>
         /// <param name="configurator"></param>
-        void ConfigureConsumer<TConsumer>(IConsumerConfigurator<TConsumer> configurator)
+        void ConsumerConfigured<TConsumer>(IConsumerConfigurator<TConsumer> configurator)
             where TConsumer : class;
 
         /// <summary>
@@ -31,7 +31,7 @@ namespace MassTransit.Configuration
         /// <typeparam name="TConsumer"></typeparam>
         /// <typeparam name="TMessage"></typeparam>
         /// <param name="configurator"></param>
-        void ConfigureConsumerMessage<TConsumer, TMessage>(IConsumerMessageConfigurator<TConsumer, TMessage> configurator)
+        void ConsumerMessageConfigured<TConsumer, TMessage>(IConsumerMessageConfigurator<TConsumer, TMessage> configurator)
             where TConsumer : class
             where TMessage : class;
     }

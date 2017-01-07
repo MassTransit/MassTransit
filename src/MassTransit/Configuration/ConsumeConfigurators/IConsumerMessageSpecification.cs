@@ -14,7 +14,6 @@ namespace MassTransit.ConsumeConfigurators
 {
     using System;
     using GreenPipes;
-    using GreenPipes.Builders;
 
 
     public interface IConsumerMessageSpecification<TConsumer> :
@@ -32,11 +31,11 @@ namespace MassTransit.ConsumeConfigurators
 
     public interface IConsumerMessageSpecification<TConsumer, TMessage> :
         IConsumerMessageSpecification<TConsumer>,
-        IBuildPipeConfigurator<ConsumerConsumeContext<TConsumer, TMessage>>,
         IConsumerMessageConfigurator<TConsumer, TMessage>,
         IConsumerMessageConfigurator<TMessage>
         where TConsumer : class
         where TMessage : class
     {
+        IPipe<ConsumerConsumeContext<TConsumer, TMessage>> Build(IFilter<ConsumerConsumeContext<TConsumer, TMessage>> consumeFilter);
     }
 }

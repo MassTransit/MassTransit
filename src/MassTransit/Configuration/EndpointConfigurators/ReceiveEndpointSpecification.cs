@@ -76,19 +76,19 @@ namespace MassTransit.EndpointConfigurators
             _consumePipeSpecification.AddPipeSpecification(specification);
         }
 
-        public ConnectHandle ConnectConfigurationObserver(IConsumerConfigurationObserver observer)
+        public ConnectHandle ConnectConsumerConfigurationObserver(IConsumerConfigurationObserver observer)
         {
-            return _consumePipeSpecification.ConnectConfigurationObserver(observer);
+            return _consumePipeSpecification.ConnectConsumerConfigurationObserver(observer);
         }
 
-        void IConsumerConfigurationObserver.ConfigureConsumer<TConsumer>(IConsumerConfigurator<TConsumer> configurator)
+        void IConsumerConfigurationObserver.ConsumerConfigured<TConsumer>(IConsumerConfigurator<TConsumer> configurator)
         {
-            _consumePipeSpecification.ConfigureConsumer(configurator);
+            _consumePipeSpecification.ConsumerConfigured(configurator);
         }
 
-        void IConsumerConfigurationObserver.ConfigureConsumerMessage<TConsumer, TMessage>(IConsumerMessageConfigurator<TConsumer, TMessage> configurator)
+        void IConsumerConfigurationObserver.ConsumerMessageConfigured<TConsumer, TMessage>(IConsumerMessageConfigurator<TConsumer, TMessage> configurator)
         {
-            _consumePipeSpecification.ConfigureConsumerMessage(configurator);
+            _consumePipeSpecification.ConsumerMessageConfigured(configurator);
         }
 
         public ConnectHandle ConnectSagaConfigurationObserver(ISagaConfigurationObserver observer)

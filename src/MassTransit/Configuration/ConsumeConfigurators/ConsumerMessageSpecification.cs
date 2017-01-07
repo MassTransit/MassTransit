@@ -70,13 +70,15 @@ namespace MassTransit.ConsumeConfigurators
             _configurator.AddPipeSpecification(new ConsumerPipeSpecificationProxy<TConsumer, TMessage>(specification));
         }
 
-        public IPipe<ConsumerConsumeContext<TConsumer, TMessage>> Build()
+        public IPipe<ConsumerConsumeContext<TConsumer, TMessage>> Build(IFilter<ConsumerConsumeContext<TConsumer, TMessage>> consumeFilter)
         {
             _observers.All(observer =>
             {
-                observer.ConfigureConsumerMessage(this);
+                observer.ConsumerMessageConfigured(this);
                 return true;
             });
+
+            _configurator.UseFilter(consumeFilter);
 
             return _configurator.Build();
         }
@@ -86,9 +88,14 @@ namespace MassTransit.ConsumeConfigurators
             _configurator.AddPipeSpecification(new ConsumerPipeSpecificationProxy<TConsumer, TMessage>(specification));
         }
 
-        public ConnectHandle ConnectConfigurationObserver(IConsumerConfigurationObserver observer)
+        public ConnectHandle ConnectConsumerConfigurationObserver(IConsumerConfigurationObserver observer)
         {
             return _observers.Connect(observer);
+        }
+
+        public void Message(Action<IConsumerMessageConfigurator<TMessage>> configure)
+        {
+            configure(this);
         }
     }
 }
