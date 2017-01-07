@@ -31,7 +31,7 @@ namespace MassTransit.RabbitMqTransport.Integration
     {
         static readonly ILog _log = Logger.Get<RabbitMqConnectionCache>();
         readonly ITaskScope _cacheTaskScope;
-        readonly ConnectionFactory _connectionFactory;
+        readonly Lazy<ConnectionFactory> _connectionFactory;
         readonly object _scopeLock = new object();
         readonly RabbitMqHostSettings _settings;
         ConnectionScope _scope;
@@ -39,7 +39,7 @@ namespace MassTransit.RabbitMqTransport.Integration
         public RabbitMqConnectionCache(RabbitMqHostSettings settings, ITaskSupervisor supervisor)
         {
             _settings = settings;
-            _connectionFactory = settings.GetConnectionFactory();
+            _connectionFactory = new Lazy<ConnectionFactory>(settings.GetConnectionFactory);
 
             _cacheTaskScope = supervisor.CreateScope($"{TypeMetadataCache<RabbitMqConnectionCache>.ShortName} - {settings.ToDebugString()}", CloseScope);
         }
@@ -94,13 +94,13 @@ namespace MassTransit.RabbitMqTransport.Integration
                 IConnection connection;
                 if (_settings.ClusterMembers?.Any() ?? false)
                 {
-                    connection = _connectionFactory.CreateConnection(_settings.ClusterMembers, _settings.ClientProvidedName);
+                    connection = _connectionFactory.Value.CreateConnection(_settings.ClusterMembers, _settings.ClientProvidedName);
                 }
                 else
                 {
                     List<string> hostNames = Enumerable.Repeat(_settings.Host, 1).ToList();
 
-                    connection = _connectionFactory.CreateConnection(hostNames, _settings.ClientProvidedName);
+                    connection = _connectionFactory.Value.CreateConnection(hostNames, _settings.ClientProvidedName);
                 }
 
 

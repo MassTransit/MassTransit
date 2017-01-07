@@ -124,6 +124,7 @@
     <Compile Include="MessageName_Specs.cs" />
     <Compile Include="Testing\HandlerTest_Specs.cs" />
     <Compile Include="TestRegularExpression_Specs.cs" />
+    <Compile Include="ThreadBlock_Specs.cs" />
     <Compile Include="Turnout_Specs.cs" />
     <Compile Include="TwoActivityCourier_Specs.cs" />
     <Compile Include="UsingCluster_Specs.cs" />
