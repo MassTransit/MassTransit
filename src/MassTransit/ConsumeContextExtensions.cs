@@ -127,9 +127,9 @@ namespace MassTransit
         /// <param name="context"></param>
         /// <param name="callback">A callback to modify the send context</param>
         /// <returns></returns>
-        public static IPipe<SendContext> CreateCopyContextPipe(this ConsumeContext context, Action<ConsumeContext, SendContext> callback)
+        public static IPipe<SendContext> CreateCopyContextPipe(this ConsumeContext context, Action<ConsumeContext, SendContext> callback = null)
         {
-            return Pipe.New<SendContext>(x => x.UseExecute(sendContext =>
+            return Pipe.Execute<SendContext>(sendContext =>
             {
                 sendContext.RequestId = context.RequestId;
                 sendContext.CorrelationId = context.CorrelationId;
@@ -145,8 +145,8 @@ namespace MassTransit
                 foreach (KeyValuePair<string, object> header in context.Headers.GetAll())
                     sendContext.Headers.Set(header.Key, header.Value);
 
-                callback(context, sendContext);
-            }));
+                callback?.Invoke(context, sendContext);
+            });
         }
     }
 }

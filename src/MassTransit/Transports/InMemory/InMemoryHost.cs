@@ -30,16 +30,17 @@ namespace MassTransit.Transports.InMemory
         ISendTransportProvider,
         IBusHostControl
     {
-        readonly Uri _baseUri = new Uri("loopback://localhost/");
+        readonly Uri _baseUri;
         readonly int _concurrencyLimit;
         readonly IReceiveEndpointCollection _receiveEndpoints;
         readonly ConcurrentDictionary<string, InMemoryTransport> _transports;
         ISendEndpointProvider _sendEndpointProvider;
         IPublishEndpointProvider _publishEndpointProvider;
 
-        public InMemoryHost(int concurrencyLimit)
+        public InMemoryHost(int concurrencyLimit, Uri baseAddress = null)
         {
             _concurrencyLimit = concurrencyLimit;
+            _baseUri = baseAddress ?? new Uri("loopback://localhost/");
 
             _transports = new ConcurrentDictionary<string, InMemoryTransport>(StringComparer.OrdinalIgnoreCase);
             _receiveEndpoints = new ReceiveEndpointCollection();
@@ -63,8 +64,7 @@ namespace MassTransit.Transports.InMemory
 
         public bool Matches(Uri address)
         {
-            return address.Scheme.Equals(_baseUri.Scheme, StringComparison.OrdinalIgnoreCase)
-                && address.Host.Equals(_baseUri.Host, StringComparison.OrdinalIgnoreCase);
+            return address.ToString().StartsWith(_baseUri.ToString(), StringComparison.OrdinalIgnoreCase);
         }
 
         void IProbeSite.Probe(ProbeContext context)
@@ -134,9 +134,7 @@ namespace MassTransit.Transports.InMemory
 
         public async Task<ISendTransport> GetSendTransport(Uri address)
         {
-            var queueName = address.AbsolutePath;
-            if (queueName.StartsWith("/"))
-                queueName = queueName.Substring(1);
+            var queueName = address.AbsolutePath.Split('/').Last();
 
             return GetTransport(queueName);
         }

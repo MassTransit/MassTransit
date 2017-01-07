@@ -38,12 +38,12 @@ namespace MassTransit.Builders
                 throw new ArgumentNullException(nameof(sendTransportProvider));
 
             var busQueueName = GenerateBusQueueName();
-            _inputAddress = new Uri($"loopback://localhost/{busQueueName}");
+            _inputAddress = new Uri(inMemoryHost.Address, $"{busQueueName}");
 
             InMemoryHost = inMemoryHost;
             _sendTransportProvider = sendTransportProvider;
 
-            _busEndpointSpecification = new InMemoryReceiveEndpointSpecification(busQueueName, ConsumePipe);
+            _busEndpointSpecification = new InMemoryReceiveEndpointSpecification(inMemoryHost.Address, busQueueName, ConsumePipe);
 
             inMemoryHost.ReceiveEndpointFactory = new InMemoryReceiveEndpointFactory(this);
         }

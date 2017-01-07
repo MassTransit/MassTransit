@@ -38,18 +38,31 @@ namespace MassTransit.BusConfigurators
             _hosts = new BusHostCollection<IBusHostControl>();
         }
 
+        InMemoryHost InMemoryHost
+        {
+            get
+            {
+                if (_inMemoryHost == null || _sendTransportProvider == null)
+                {
+                    var host = new InMemoryHost(_concurrencyLimit);
+                    _hosts.Add(host);
+
+                    _inMemoryHost = _inMemoryHost ?? host;
+                    _sendTransportProvider = _sendTransportProvider ?? host;
+                }
+
+                return _inMemoryHost;
+            }
+        }
+
+        ISendTransportProvider SendTransportProvider
+        {
+            get { return _sendTransportProvider ?? (_sendTransportProvider = InMemoryHost); }
+        }
+
         public IBusControl CreateBus()
         {
-            if (_inMemoryHost == null || _sendTransportProvider == null)
-            {
-                var transportProvider = new InMemoryHost(_concurrencyLimit);
-                _hosts.Add(transportProvider);
-
-                _inMemoryHost = _inMemoryHost ?? transportProvider;
-                _sendTransportProvider = _sendTransportProvider ?? transportProvider;
-            }
-
-            var builder = new InMemoryBusBuilder(_inMemoryHost, _sendTransportProvider, _hosts, ConsumePipeFactory, SendPipeFactory, PublishPipeFactory);
+            var builder = new InMemoryBusBuilder(InMemoryHost, SendTransportProvider, _hosts, ConsumePipeFactory, SendPipeFactory, PublishPipeFactory);
 
             ApplySpecifications(builder);
 
@@ -63,7 +76,7 @@ namespace MassTransit.BusConfigurators
 
         public void ReceiveEndpoint(string queueName, Action<IInMemoryReceiveEndpointConfigurator> configureEndpoint)
         {
-            var specification = new InMemoryReceiveEndpointSpecification(queueName);
+            var specification = new InMemoryReceiveEndpointSpecification(InMemoryHost.Address, queueName);
 
             specification.ConnectConsumerConfigurationObserver(this);
             specification.ConnectSagaConfigurationObserver(this);
@@ -80,10 +93,15 @@ namespace MassTransit.BusConfigurators
 
         void IInMemoryBusFactoryConfigurator.SetHost(InMemoryHost host)
         {
+            if (_inMemoryHost != null)
+                throw new ConfigurationException("The host has already been configured");
+
             _inMemoryHost = host;
             _sendTransportProvider = host;
             _hosts.Add(host);
         }
+
+        public IInMemoryHost Host => InMemoryHost;
 
         protected override IBusFactorySpecification<IInMemoryBusBuilder> CreateSpecificationProxy(IBusFactorySpecification specification)
         {

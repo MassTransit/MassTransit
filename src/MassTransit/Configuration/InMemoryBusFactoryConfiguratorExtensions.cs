@@ -64,7 +64,7 @@ namespace MassTransit
         {
             var queueName = configurator.GetTemporaryQueueName("manage-");
 
-            var specification = new InMemoryReceiveEndpointSpecification(queueName)
+            var specification = new InMemoryReceiveEndpointSpecification(configurator.Host.Address, queueName)
             {
                 TransportConcurrencyLimit = 1
             };

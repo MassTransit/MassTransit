@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Testing
 {
+    using System;
     using Pipeline.ConsumerFactories;
 
 
@@ -29,6 +30,12 @@ namespace MassTransit.Testing
             where T : class, IConsumer, new()
         {
             return new ConsumerTestHarness<T>(harness, consumerFactory);
+        }
+
+        public static ConsumerTestHarness<T> Consumer<T>(this BusTestHarness harness, Func<T> consumerFactoryMethod)
+            where T : class, IConsumer
+        {
+            return new ConsumerTestHarness<T>(harness, new DelegateConsumerFactory<T>(consumerFactoryMethod));
         }
     }
 }

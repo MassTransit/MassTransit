@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,7 +13,6 @@
 namespace MassTransit.Testing
 {
     using System;
-    using Logging;
     using Pipeline.Pipes;
     using Transports.InMemory;
 
@@ -21,16 +20,16 @@ namespace MassTransit.Testing
     public class InMemoryTestHarness :
         BusTestHarness
     {
-        static readonly ILog _log = Logger.Get<InMemoryTestHarness>();
-
         InMemoryHost _inMemoryHost;
 
-        public InMemoryTestHarness()
+        public InMemoryTestHarness(string virtualHost = null)
         {
             BaseAddress = new Uri("loopback://localhost/");
+            if (!string.IsNullOrWhiteSpace(virtualHost))
+                BaseAddress = new Uri(BaseAddress, virtualHost.Trim('/') + '/');
 
             InputQueueName = "input_queue";
-            InputQueueAddress = new Uri($"loopback://localhost/{InputQueueName}");
+            InputQueueAddress = new Uri(BaseAddress, InputQueueName);
         }
 
         public string InputQueueName { get; }
@@ -63,7 +62,7 @@ namespace MassTransit.Testing
         {
             return MassTransit.Bus.Factory.CreateUsingInMemory(x =>
             {
-                _inMemoryHost = new InMemoryHost(Environment.ProcessorCount);
+                _inMemoryHost = new InMemoryHost(Environment.ProcessorCount, BaseAddress);
 
                 x.SetHost(_inMemoryHost);
 

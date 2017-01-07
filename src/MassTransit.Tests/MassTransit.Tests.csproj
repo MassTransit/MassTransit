@@ -140,6 +140,7 @@
     <Compile Include="FaultPublish_Specs.cs" />
     <Compile Include="HeaderObject_Specs.cs" />
     <Compile Include="HostInfo_Specs.cs" />
+    <Compile Include="InMemoryDuo_Specs.cs" />
     <Compile Include="Introspection_Specs.cs" />
     <Compile Include="LazyMemoryCache_Specs.cs" />
     <Compile Include="MessageData\DataBus_Specs.cs" />

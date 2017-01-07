@@ -24,14 +24,16 @@ namespace MassTransit.EndpointConfigurators
         IInMemoryReceiveEndpointConfigurator,
         IInMemoryReceiveEndpointSpecification
     {
+        readonly Uri _baseAddress;
         readonly string _queueName;
         IPublishEndpointProvider _publishEndpointProvider;
         ISendEndpointProvider _sendEndpointProvider;
         int _transportConcurrencyLimit;
 
-        public InMemoryReceiveEndpointSpecification(string queueName, IConsumePipe consumePipe = null)
+        public InMemoryReceiveEndpointSpecification(Uri baseAddress, string queueName, IConsumePipe consumePipe = null)
             : base(consumePipe)
         {
+            _baseAddress = baseAddress;
             _queueName = queueName;
             _transportConcurrencyLimit = 0;
         }
@@ -70,17 +72,17 @@ namespace MassTransit.EndpointConfigurators
 
         protected override Uri GetErrorAddress()
         {
-            return new Uri($"loopback://localhost/{_queueName}_error");
+            return new Uri(_baseAddress, $"{_queueName}_error");
         }
 
         protected override Uri GetDeadLetterAddress()
         {
-            return new Uri($"loopback://localhost/{_queueName}_skipped");
+            return new Uri(_baseAddress, $"{_queueName}_skipped");
         }
 
         protected override Uri GetInputAddress()
         {
-            return new Uri($"loopback://localhost/{_queueName}");
+            return new Uri(_baseAddress, $"{_queueName}");
         }
     }
 }
