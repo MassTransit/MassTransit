@@ -23,6 +23,7 @@ namespace MassTransit.Containers.Tests
     using NUnit.Framework;
     using TestFramework;
     using Testing;
+    using Util;
 
 
     [TestFixture]
@@ -33,7 +34,7 @@ namespace MassTransit.Containers.Tests
         public async Task Should_fail_on_bad_validation()
         {
             Task<B> result = null;
-            var request = await _harness.Bus.Request(_harness.InputQueueSendEndpoint, (new A {PostalCode = "74011"}), r =>
+            Request<A> request = await _harness.Bus.Request(_harness.InputQueueSendEndpoint, (new A {PostalCode = "74011"}), r =>
             {
                 r.Timeout = _harness.TestTimeout;
                 result = r.Handle<B>(context =>
@@ -48,7 +49,7 @@ namespace MassTransit.Containers.Tests
         public async Task Should_fail_on_bad_validation_at_the_request_task()
         {
             Task<B> result = null;
-            var request = await _harness.Bus.Request(_harness.InputQueueSendEndpoint, (new A {PostalCode = "74011"}), r =>
+            Request<A> request = await _harness.Bus.Request(_harness.InputQueueSendEndpoint, (new A {PostalCode = "74011"}), r =>
             {
                 r.Timeout = _harness.TestTimeout;
                 result = r.Handle<B>(context =>
@@ -160,16 +161,23 @@ namespace MassTransit.Containers.Tests
 
             public void Probe(ProbeContext context)
             {
+                context.CreateFilterScope("validator");
             }
         }
 
 
         class MyConsumer :
-            IConsumer<A>
+            IConsumer<A>,
+            IConsumer<C>
         {
             public async Task Consume(ConsumeContext<A> context)
             {
                 await context.RespondAsync(new B {Success = true});
+            }
+
+            public Task Consume(ConsumeContext<C> context)
+            {
+                return TaskUtil.Completed;
             }
         }
 
@@ -201,10 +209,13 @@ namespace MassTransit.Containers.Tests
             {
                 _messageTypes.Add(Tuple.Create(typeof(TConsumer), typeof(TMessage)));
 
-                ValidatorFilter<TMessage> filter;
-                if (_lifetimeScope.TryResolve(out filter))
+                if (_lifetimeScope.IsRegistered<IValidator<TMessage>>())
                 {
-                    configurator.Message(m => m.UseFilter(filter));
+                    ValidatorFilter<TMessage> filter;
+                    if (_lifetimeScope.TryResolve(out filter))
+                    {
+                        configurator.Message(m => m.UseFilter(filter));
+                    }
                 }
             }
         }
@@ -219,6 +230,12 @@ namespace MassTransit.Containers.Tests
         public class B
         {
             public bool Success { get; set; }
+        }
+
+
+        public class C
+        {
+            public string Value { get; set; }
         }
     }
 }
