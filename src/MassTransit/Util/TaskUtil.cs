@@ -26,6 +26,11 @@ namespace MassTransit.Util
         public static Task<bool> False => Cached.FalseTask;
         public static Task<bool> True => Cached.TrueTask;
 
+        public static Task<T> Cancelled<T>()
+        {
+            return Cached<T>.CanceledTask;
+        }
+
         public static void Await(Func<Task> taskFactory, CancellationToken cancellationToken = default(CancellationToken))
         {
             if (taskFactory == null)

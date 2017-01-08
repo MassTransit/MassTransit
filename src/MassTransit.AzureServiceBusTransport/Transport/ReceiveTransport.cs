@@ -70,8 +70,6 @@ namespace MassTransit.AzureServiceBusTransport.Transport
 
             IPipe<NamespaceContext> pipe = Pipe.New<NamespaceContext>(x =>
             {
-                x.UseRetry(r => r.SetRetryPolicy(_ => _host.RetryPolicy));
-
                 for (var i = 0; i < _specifications.Length; i++)
                 {
                     x.AddPipeSpecification(_specifications[i]);
