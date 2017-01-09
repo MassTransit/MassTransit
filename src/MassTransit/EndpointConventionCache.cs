@@ -1,4 +1,4 @@
-// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,12 +14,13 @@ namespace MassTransit
 {
     using System;
     using System.Collections.Concurrent;
+    using System.Linq;
     using System.Threading;
     using Saga;
     using Util;
 
 
-    public static class EndpointConventionCache 
+    public static class EndpointConventionCache
     {
         public static bool TryGetEndpointAddress(object message, out Uri address)
         {
@@ -47,17 +48,17 @@ namespace MassTransit
         }
 
 
-        class CachedConvention<T> :
+        class CachedConvention<TMessage> :
             CachedConvention
-            where T : class, ISaga
+            where TMessage : class, ISaga
         {
-            public bool TryGetEndpointAddress(object message, out Uri address)
+            bool CachedConvention.TryGetEndpointAddress(object message, out Uri address)
             {
-                var messageOfT = message as T;
+                var messageOfT = message as TMessage;
                 if (messageOfT == null)
-                    throw new ArgumentException($"Message was not a valid type: {TypeMetadataCache<T>.ShortName}", nameof(message));
+                    throw new ArgumentException($"Message was not a valid type: {TypeMetadataCache<TMessage>.ShortName}", nameof(message));
 
-                return EndpointConventionCache<T>.TryGetEndpointAddress(messageOfT, out address);
+                return EndpointConventionCache<TMessage>.TryGetEndpointAddress(messageOfT, out address);
             }
         }
     }
@@ -66,55 +67,94 @@ namespace MassTransit
     /// <summary>
     /// A cache of convention-based CorrelationId mappers, used unless overridden by some mystical force
     /// </summary>
-    /// <typeparam name="T"></typeparam>
-    public class EndpointConventionCache<T> :
-        IEndpointConventionCache<T>
-        where T : class
+    /// <typeparam name="TMessage"></typeparam>
+    public class EndpointConventionCache<TMessage> :
+        IEndpointConventionCache<TMessage>
+        where TMessage : class
     {
-        readonly Lazy<EndpointAddressProvider<T>> _endpointAddressProvider;
+        readonly Lazy<EndpointAddressProvider<TMessage>> _endpointAddressProvider;
 
         EndpointConventionCache()
         {
-            _endpointAddressProvider = new Lazy<EndpointAddressProvider<T>>(CreateDefaultConvention);
+            _endpointAddressProvider = new Lazy<EndpointAddressProvider<TMessage>>(CreateDefaultConvention);
         }
 
-        EndpointConventionCache(EndpointAddressProvider<T> endpointAddressProvider)
+        EndpointConventionCache(EndpointAddressProvider<TMessage> endpointAddressProvider)
         {
-            _endpointAddressProvider = new Lazy<EndpointAddressProvider<T>>(() => endpointAddressProvider);
+            _endpointAddressProvider = new Lazy<EndpointAddressProvider<TMessage>>(() => endpointAddressProvider);
         }
 
-        bool IEndpointConventionCache<T>.TryGetEndpointAddress(T message, out Uri address)
+        bool IEndpointConventionCache<TMessage>.TryGetEndpointAddress(TMessage message, out Uri address)
         {
             return _endpointAddressProvider.Value(message, out address);
         }
 
-        internal static void Map(EndpointAddressProvider<T> endpointAddressProvider)
+        internal static void Map(EndpointAddressProvider<TMessage> endpointAddressProvider)
         {
             if (Cached.Metadata.IsValueCreated)
                 throw new InvalidOperationException("The correlationId pipe has already been created");
 
-            Cached.Metadata = new Lazy<IEndpointConventionCache<T>>(() => new EndpointConventionCache<T>(endpointAddressProvider));
+            Cached.Metadata = new Lazy<IEndpointConventionCache<TMessage>>(() => new EndpointConventionCache<TMessage>(endpointAddressProvider));
         }
 
-        internal static bool TryGetEndpointAddress(T message, out Uri address)
+        internal static bool TryGetEndpointAddress(TMessage message, out Uri address)
         {
             return Cached.Metadata.Value.TryGetEndpointAddress(message, out address);
         }
 
-        EndpointAddressProvider<T> CreateDefaultConvention()
+        EndpointAddressProvider<TMessage> CreateDefaultConvention()
         {
-            return (T message, out Uri address) =>
+            IEndpointConventionCache<TMessage>[] implementedTypes = TypeMetadataCache<TMessage>.MessageTypes
+                .Where(x => x != typeof(TMessage))
+                .Select(x => Activator.CreateInstance(typeof(TypeAdapter<>).MakeGenericType(typeof(TMessage), x)))
+                .Cast<IEndpointConventionCache<TMessage>>()
+                .ToArray();
+
+            if (implementedTypes.Any())
             {
-                address = null;
+                return (TMessage message, out Uri address) =>
+                {
+                    for (var i = 0; i < implementedTypes.Length; i++)
+                    {
+                        if (implementedTypes[i].TryGetEndpointAddress(message, out address))
+                            return true;
+                    }
+
+                    address = default(Uri);
+                    return false;
+                };
+            }
+
+            return (TMessage message, out Uri address) =>
+            {
+                address = default(Uri);
                 return false;
             };
         }
 
 
+        class TypeAdapter<TAdapter> :
+            IEndpointConventionCache<TMessage>
+            where TAdapter : class
+        {
+            bool IEndpointConventionCache<TMessage>.TryGetEndpointAddress(TMessage message, out Uri address)
+            {
+                var messageOfT = message as TAdapter;
+                if (messageOfT != null)
+                {
+                    return EndpointConventionCache<TAdapter>.TryGetEndpointAddress(messageOfT, out address);
+                }
+
+                address = default(Uri);
+                return false;
+            }
+        }
+
+
         static class Cached
         {
-            internal static Lazy<IEndpointConventionCache<T>> Metadata = new Lazy<IEndpointConventionCache<T>>(
-                () => new EndpointConventionCache<T>(), LazyThreadSafetyMode.PublicationOnly);
+            internal static Lazy<IEndpointConventionCache<TMessage>> Metadata = new Lazy<IEndpointConventionCache<TMessage>>(
+                () => new EndpointConventionCache<TMessage>(), LazyThreadSafetyMode.PublicationOnly);
         }
     }
 }

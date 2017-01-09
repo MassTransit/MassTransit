@@ -1,4 +1,4 @@
-// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -15,7 +15,8 @@ namespace MassTransit
     using System;
 
 
-    public interface IEndpointConventionCache
+    public interface IEndpointConventionCache<in TMessage> 
+        where TMessage : class
     {
         /// <summary>
         /// Returns the endpoint address for the message
@@ -23,19 +24,6 @@ namespace MassTransit
         /// <param name="message"></param>
         /// <param name="address"></param>
         /// <returns></returns>
-        bool TryGetEndpointAddress(object message, out Uri address);
-    }
-
-
-    public interface IEndpointConventionCache<in T>
-        where T : class
-    {
-        /// <summary>
-        /// Returns the endpoint address for the message
-        /// </summary>
-        /// <param name="message"></param>
-        /// <param name="address"></param>
-        /// <returns></returns>
-        bool TryGetEndpointAddress(T message, out Uri address);
+        bool TryGetEndpointAddress(TMessage message, out Uri address);
     }
 }
