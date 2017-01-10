@@ -93,6 +93,8 @@ namespace MassTransit.Policies
                 try
                 {
                     await retryMethod().ConfigureAwait(false);
+
+                    return;
                 }
                 catch (Exception exception)
                 {

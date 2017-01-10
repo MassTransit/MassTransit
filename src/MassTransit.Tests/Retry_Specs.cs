@@ -358,4 +358,49 @@ namespace MassTransit.Tests
             });
         }
     }
+
+    [TestFixture]
+    public class When_eventually_you_succeed :
+    InMemoryTestFixture
+    {
+        [Test]
+        public async Task After_try_trying_again()
+        {
+            await InputQueueSendEndpoint.Send(new PingMessage());
+
+            await _completed.Task;
+
+            await Task.Delay(100);
+
+            _attempts.ShouldBe(2);
+        }
+
+        int _attempts;
+        TaskCompletionSource<PingMessage> _completed;
+
+        protected override void PreCreateBus(IInMemoryBusFactoryConfigurator configurator)
+        {
+            configurator.UseRetry(x => x.Immediate(1));
+
+            base.PreCreateBus(configurator);
+        }
+
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        {
+            _completed = GetTask<PingMessage>();
+
+            Handler<PingMessage>(configurator, context =>
+            {
+                var attempt = Interlocked.Increment(ref _attempts);
+
+                if(attempt == 1)
+                    throw new IntentionalTestException();
+
+                _completed.TrySetResult(context.Message);
+
+                return TaskUtil.Completed;
+            });
+        }
+    }
+
 }
