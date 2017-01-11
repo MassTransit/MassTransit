@@ -11,6 +11,7 @@ only_commits:
     - '**/*.md'
     - '**/*.html'
     - docs.yml
+    - package.json
 install:
   - npm install -g npm
   - ps: $env:path = $env:appdata + "\npm;" + $env:path
