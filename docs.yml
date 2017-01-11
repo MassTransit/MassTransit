@@ -9,7 +9,7 @@ only_commits:
     - '**/*.html'
     - docs.yml
 install:
-  - npm install --no-optional
   - npm install -g gitbook-cli
+  - npm install --no-optional --force
 build_script:
   - "%CMD_IN_ENV% npm run docs:publish"
