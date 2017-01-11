@@ -1,6 +1,7 @@
 {
   "gitbook": "3.2.2",
   "title": "MassTransit",
+  "root": "docs",
   "plugins": [
     "edit-link",
     "prism",

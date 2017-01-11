@@ -1,7 +1,6 @@
 # Summary
 
 ## Overview
-* [Introduction](README.md)
 * [Loving the Community](loving-the-community.md)
 
 ## Usage
@@ -11,3 +10,4 @@
 
 * [Using MassTransit](using-masstransit.md)
     * [Message Contracts](message-contracts.md)
+    
