@@ -1,4 +1,4 @@
-// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,10 +13,15 @@
 namespace MassTransit
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
+    using Configurators;
     using GreenPipes;
+    using GreenPipes.Configurators;
+    using GreenPipes.Observers;
     using GreenPipes.Policies;
     using GreenPipes.Policies.ExceptionFilters;
+    using GreenPipes.Specifications;
 
 
     public static class Retry
@@ -206,6 +211,15 @@ namespace MassTransit
             return new IncrementalRetryPolicy(filter, retryLimit, initialInterval, intervalIncrement);
         }
 
+        public static IRetryPolicy CreatePolicy(Action<IRetryConfigurator> configure)
+        {
+            var configurator = new RetryConfigurator();
+
+            configure(configurator);
+
+            return configurator.Build();
+        }
+
         /// <summary>
         /// Retry all exceptions except for the exception types specified
         /// </summary>
@@ -299,6 +313,51 @@ namespace MassTransit
             where T : Exception
         {
             return new FilterExceptionFilter<T>(filter);
+        }
+
+
+        class RetryConfigurator :
+            ExceptionSpecification,
+            IRetryConfigurator,
+            ISpecification
+        {
+            readonly RetryObservable _observers;
+            RetryPolicyFactory _policyFactory;
+
+            public RetryConfigurator()
+            {
+                _observers = new RetryObservable();
+            }
+
+            public void SetRetryPolicy(RetryPolicyFactory factory)
+            {
+                _policyFactory = factory;
+            }
+
+            ConnectHandle IRetryObserverConnector.ConnectRetryObserver(IRetryObserver observer)
+            {
+                return _observers.Connect(observer);
+            }
+
+            public IEnumerable<ValidationResult> Validate()
+            {
+                if (_policyFactory == null)
+                    yield return this.Failure("RetryPolicy", "must not be null");
+            }
+
+            public IRetryPolicy Build()
+            {
+                var result = RetryConfigurationResult.CompileResults(Validate());
+
+                try
+                {
+                    return _policyFactory(Filter);
+                }
+                catch (Exception ex)
+                {
+                    throw new ConfigurationException(result, "An exception occurred during retry policy creation", ex);
+                }
+            }
         }
     }
 }

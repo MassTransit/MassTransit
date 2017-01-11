@@ -122,6 +122,7 @@
     <Compile Include="Configuration\Builders\ConsumerPipeBuilder.cs" />
     <Compile Include="Configuration\CompensateActivityPartitionerExtensions.cs" />
     <Compile Include="Configuration\Configuration\IConsumerConfigurationObserver.cs" />
+    <Compile Include="Configuration\Configurators\RetryConfigurationResult.cs" />
     <Compile Include="Configuration\ConsumeConfigurators\IConsumerConfigurationObserverConnector.cs" />
     <Compile Include="Configuration\ConsumeConfigurators\IRoutingSlipConfigurator.cs" />
     <Compile Include="Configuration\ConsumeConfigurators\ConsumerMessageSpecification.cs" />

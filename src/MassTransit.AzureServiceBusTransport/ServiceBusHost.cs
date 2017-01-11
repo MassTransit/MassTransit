@@ -53,7 +53,21 @@ namespace MassTransit.AzureServiceBusTransport
 
             _supervisor = new TaskSupervisor($"{TypeMetadataCache<ServiceBusHost>.ShortName} - {Settings.ServiceUri}");
 
-            RetryPolicy = Retry.Selected<ServerBusyException, TimeoutException>().Intervals(100, 500, 1000, 5000, 10000);
+            RetryPolicy = Retry.CreatePolicy(x =>
+            {
+                x.Ignore<MessagingEntityNotFoundException>();
+                x.Ignore<MessagingEntityAlreadyExistsException>();
+                x.Ignore<MessageNotFoundException>();
+                x.Ignore<MessageSizeExceededException>();
+                x.Ignore<NoMatchingSubscriptionException>();
+                x.Ignore<TransactionSizeExceededException>();
+
+                x.Handle<ServerBusyException>(exception => exception.IsTransient || exception.IsWrappedExceptionTransient());
+                x.Handle<MessagingException>(exception => exception.IsTransient || exception.IsWrappedExceptionTransient());
+                x.Handle<TimeoutException>();
+
+                x.Intervals(100, 500, 1000, 5000, 10000);
+            });
         }
 
         public IServiceBusReceiveEndpointFactory ReceiveEndpointFactory { get; set; }
