@@ -19,5 +19,7 @@ install:
 build_script:
   - node --version && npm --version
   - git config --global credential.helper store
+  - git config --global user.name "%APPVEYOR_REPO_COMMIT_AUTHOR%"
+  - git config --global user.email "%APPVEYOR_REPO_COMMIT_AUTHOR_EMAIL%"
   - ps: Add-Content "$env:USERPROFILE\.git-credentials" "https://$($env:access_token):x-oauth-basic@github.com`n"
   - "%CMD_IN_ENV% npm run docs:publish"
