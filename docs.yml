@@ -5,7 +5,9 @@ branches:
 only_commits:
   files:
     - docs/*
+    - '**/*.md'
     - '**/*.html'
+    - docs.yml
 install:
   - ps: Install-Product node 0
   - npm install
