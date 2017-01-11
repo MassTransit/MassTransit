@@ -638,7 +638,6 @@
     <Compile Include="Pipeline\Observables\ReceiveTransportObservable.cs" />
     <Compile Include="Pipeline\Observables\SendMessageObservable.cs" />
     <Compile Include="Pipeline\Observables\SendObservable.cs" />
-    <Compile Include="Policies\IRepeatContext.cs" />
     <Compile Include="Policies\MessageRetryPolicyExtensions.cs" />
     <Compile Include="Policies\PipeRetryExtensions.cs" />
     <Compile Include="ProbeContextExtensions.cs" />

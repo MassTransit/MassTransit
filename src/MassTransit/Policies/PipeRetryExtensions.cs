@@ -17,10 +17,13 @@ namespace MassTransit.Policies
     using System.Threading.Tasks;
     using GreenPipes;
     using GreenPipes.Payloads;
+    using Logging;
 
 
     public static class PipeRetryExtensions
     {
+        static readonly ILog _log = Logger.Get<IRetryPolicy>();
+
         public static async Task Retry(this IRetryPolicy retryPolicy, Func<Task> retryMethod, CancellationToken cancellationToken = default(CancellationToken))
         {
             RetryPolicyContext<InlinePipeContext> policyContext = retryPolicy.CreatePolicyContext(new InlinePipeContext(cancellationToken));
@@ -176,6 +179,11 @@ namespace MassTransit.Policies
                 }
                 catch (OperationCanceledException)
                 {
+                }
+                catch (Exception ex)
+                {
+                    if (_log.IsWarnEnabled)
+                        _log.Warn($"Repeating until cancelled: {cancellationToken.IsCancellationRequested}", ex);
                 }
             }
         }
