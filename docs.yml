@@ -9,6 +9,6 @@ only_commits:
     - '**/*.html'
     - docs.yml
 install:
-  - npm install
+  - npm install --force
 build_script:
   - "%CMD_IN_ENV% npm run docs:publish"
