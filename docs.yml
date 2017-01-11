@@ -2,9 +2,6 @@ branches:
   only:
     - develop
     - master
-environment:
-  access_token:
-    secure: bgkFWgBVYEWGU8K+80lgwzBnK1TID6FfFgscdOhUD6hkqPietVeOe16UvnrUHqbL
 only_commits:
   files:
     - docs/*
