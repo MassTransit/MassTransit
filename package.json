@@ -16,12 +16,12 @@
   "devDependencies": {},
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/alexeyzimarev/masstransit-gitbook.git"
+    "url": "git+https://github.com/MassTransit/MassTransit.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/alexeyzimarev/masstransit-gitbook/issues"
+    "url": "https://github.com/MassTransit/MassTransit/issues"
   },
-  "homepage": "https://github.com/alexeyzimarev/masstransit-gitbook#readme"
+  "homepage": "https://github.com/MassTransit/MassTransit#readme"
 }
