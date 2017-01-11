@@ -46,3 +46,5 @@ doc/build/*
 *.DotSettings
 /src/MassTransit.SimpleInjectorIntegration/MassTransit.SimpleInjectorIntegration.csproj.nuspec
 *.DS_Store
+
+_book

@@ -1,0 +1,27 @@
+{
+  "name": "masstransit-docs",
+  "version": "0.1.0",
+  "description": "MassTransit Documentation",
+  "main": "index.js",
+  "dependencies": {
+    "gitbook": "^3.2.2",
+    "gitbook-cli": "^2.3.0"
+  },
+	"scripts": {
+	   "docs:prepare": "gitbook install",
+	   "docs:watch": "npm run docs:prepare && gitbook serve",
+     "docs:build": "npm run docs:prepare && bash -c \"rm -rf _book\" && gitbook build",
+     "docs:publish": "npm run docs:build && cd _book && git init && git commit --allow-empty -m 'Update docs' && git checkout -b gh-pages && git add . && git commit -am 'Update docs' && git push git@github.com:alexeyzimarev/masstransit.git gh-pages --force"
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/alexeyzimarev/masstransit-gitbook.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/alexeyzimarev/masstransit-gitbook/issues"
+  },
+  "homepage": "https://github.com/alexeyzimarev/masstransit-gitbook#readme"
+}
