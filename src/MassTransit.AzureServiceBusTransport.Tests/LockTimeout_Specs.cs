@@ -31,7 +31,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
         {
             configurator.LockDuration = TimeSpan.FromSeconds(60);
 
-            configurator.UseRenewLockFilter(TimeSpan.FromSeconds(20));
+            configurator.UseRenewLock(TimeSpan.FromSeconds(20));
 
             configurator.Consumer<PingConsumer>();
         }

@@ -19,7 +19,13 @@ namespace MassTransit
 
     public static class RenewLockConfigurationExtensions
     {
-        public static void UseRenewLockFilter(this IPipeConfigurator<ConsumeContext> configurator, TimeSpan? delay = default(TimeSpan?))
+        /// <summary>
+        /// Use the automatic lock renewal filter with Azure Service Bus, so that longer running consumers can run without losing the
+        /// message lock.
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="delay">The delay before the lock is renewed (should be reasonably less than the lock time).</param>
+        public static void UseRenewLock(this IPipeConfigurator<ConsumeContext> configurator, TimeSpan? delay = default(TimeSpan?))
         {
             var specification = new RenewLockSpecification(delay);
 
