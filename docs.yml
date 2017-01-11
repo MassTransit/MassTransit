@@ -12,8 +12,12 @@ only_commits:
     - '**/*.html'
     - docs.yml
 install:
-  - npm install --force
+  - npm install -g npm
+  - ps: $env:path = $env:appdata + "\npm;" + $env:path
+  - npm install -g gitbook-cli
+  - npm install --no-optional
 build_script:
+  - node --version && npm --version
   - git config --global credential.helper store
   - ps: Add-Content "$env:USERPROFILE\.git-credentials" "https://$($env:access_token):x-oauth-basic@github.com`n"
   - "%CMD_IN_ENV% npm run docs:publish"
