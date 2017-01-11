@@ -1,7 +1,3 @@
-environment:
-  matrix:
-    - nodejs_version: "0.10"
-    - nodejs_version: "0.11"
 branches:
   only:
     - develop
@@ -11,7 +7,7 @@ only_commits:
     - docs/*
     - '**/*.html'
 install:
-  - ps: Install-Product node $env:nodejs_version
+  - ps: Install-Product node 0
   - npm install
 build_script:
   - "%CMD_IN_ENV% npm run docs:publish"
