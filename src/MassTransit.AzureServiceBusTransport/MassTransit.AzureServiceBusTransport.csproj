@@ -73,7 +73,10 @@
     </Compile>
     <Compile Include="AzureBusFactory.cs" />
     <Compile Include="Configuration\IServiceBusQueueEndpointConfigurator.cs" />
+    <Compile Include="Configuration\Specifications\RenewLockSpecification.cs" />
     <Compile Include="Contexts\BrokeredMessageSessionContext.cs" />
+    <Compile Include="Pipeline\RenewLockFilter.cs" />
+    <Compile Include="RenewLockConfigurationExtensions.cs" />
     <Compile Include="Testing\AzureServiceBusTestHarness.cs" />
     <Compile Include="Transport\ClientSettings.cs" />
     <Compile Include="RequestClientExtensions.cs" />
