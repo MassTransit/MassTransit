@@ -2,6 +2,9 @@ branches:
   only:
     - develop
     - master
+environment:
+  access_token:
+    secure: bgkFWgBVYEWGU8K+80lgwzBnK1TID6FfFgscdOhUD6hkqPietVeOe16UvnrUHqbL
 only_commits:
   files:
     - docs/*
@@ -11,4 +14,6 @@ only_commits:
 install:
   - npm install --force
 build_script:
+  - git config --global credential.helper store
+  - ps: Add-Content "$env:USERPROFILE\.git-credentials" "https://$($env:access_token):x-oauth-basic@github.com`n"
   - "%CMD_IN_ENV% npm run docs:publish"
