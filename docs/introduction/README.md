@@ -4,5 +4,7 @@ This section of the online docs will explain how to get MassTransit into your pr
 It will also show you where to get help, how to report bugs, etc. 
 Hopefully, you will find it useful as you explore the MassTransit framework.
 
-* [Prerequisites](/prerequisites.md)
-* [How to Install](/how-to-install.md)
+* [Prerequisites](prerequisites.md)
+* [How to Install](how-to-install.md)
+* [Getting Html](getting-help.md)
+* [How to Report Bugs](how-to-report-bugs.md)

@@ -33,7 +33,7 @@ git clone git://github.com/MassTransit/MassTransit.git
 
 To compile MassTransit from source you will need the following developer tools installed:
 
-> * .NET 4.5 SDK or later
+ - .NET 4.5 SDK or later
 
 ## Compiling
 

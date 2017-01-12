@@ -7,11 +7,12 @@
     "prism",
     "-highlight",
     "github",
-    "anchorjs"
+    "anchorjs",
+    "expandable-chapters"
   ],
   "pluginsConfig": {
     "edit-link": {
-      "base": "https://github.com/masstransit/masstransit/tree/master",
+      "base": "https://github.com/masstransit/masstransit/tree/master/docs",
       "label": "Edit This Page"
     },
     "github": {
