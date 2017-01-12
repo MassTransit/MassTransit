@@ -51,9 +51,10 @@ Example Commands:
 
 ### Events
 
-An event signifies that something has happened. Events are published \(using`Publish`\) using either`IBus`or the`ConsumeContext`within a message consumer. An event should never be sent directly to an endpoint.
+An event signifies that something has happened. Events are published (using`Publish`) using 
+either`IBus`or the `ConsumeContext`within a message consumer. An event should never be sent directly to an endpoint.
 
-Events should be expressed in a noun-verb \(past tense\) sequence, indicating that something happened.
+Events should be expressed in a noun-verb (past tense) sequence, indicating that something happened.
 
 Example Events:
 
@@ -61,35 +62,15 @@ Example Events:
 * CustomerAccountUpgraded
 * OrderSubmitted, OrderAccepted, OrderRejected, OrderShipped
 
-## Correlating messages
+## Message correlation
 
-There are several built-in message headers that can be used to correlate messages. However, it is also
-completely acceptable to add properties to the message contract for correlation. The default headers
-available include:
+Since messages are usually do not live in isolation, publishing one message usually lead to publishing another 
+message and then another and so on. It is useful to trace such sequences but to find them, these messages
+need to have some information, how do they relate to each other.
 
-#### CorrelationId
-  An explicit correlation identifier for the message. If the message contract has a property named
-  `CorrelationId`, `CommandId`, or `EventId` this header is automatically populated on Send
-  or Publish. Otherwise, it can be manually specified using the `SendContext`.
+The principle of binding messages together by some identifier is called correlation. Usually, message correlation
+is done by some unique identifier, which is shared among all messages in one logical sequence.
+This identifier is called correlationId.
 
-#### RequestId
-  When using the `RequestClient`, or the request/response message handling of MassTransit, each
-  request is assigned a unique `RequestId`. When the message is received by a consumer, the response
-  message sent by the `Respond` method (on the `ConsumeContext`) is assigned the same `RequestId`
-  so that it can be correlated by the request client. This header should not typically be set by the
-  consumer, as it is handled automatically.
-
-#### ConversationId
-  The conversation is created by the first message that is sent or published, in which no existing
-  context is available (such as when a message is sent or published from a message consumer). If an
-  existing context is used to send or publish a message, the `ConversationId` is copied to the
-  new message, ensuring that a set of messages within the same *conversation* have the same identifier.
-
-#### InitiatorId
-  When a message is created within the context of an existing message, such as in a consumer, a saga, etc.,
-  the `CorrelationId` of the message (if available, otherwise the `MessageId` may be used) is copied
-  to the `InitiatorId` header. This makes it possible to combine a chain of messages into a graph of
-  producers and consumers.
-
-#### MessageId
-  When a message is sent or published, this header is automatically generated for the message.
+MassTransit supports different methods to specify the correlationId. Check the [Correlating messages](correlation.md) 
+article for more information.
