@@ -8,7 +8,7 @@ To configure the default retry policy for the entire bus.
 ```csharp
 Bus.Factory.CreateUsingInMemory(cfg =>
 {
-    cfg.UseRetry(Retry.None);
+    cfg.UseRetry(retryConfig => retryConfig.None);
 });
 ```
 
@@ -19,7 +19,7 @@ Bus.Factory.CreateUsingInMemory(cfg =>
 {
     cfg.ReceiveEndpoint("inbound", ep =>
     {
-        ep.UseRetry(Retry.Immediate(5));
+        ep.UseRetry(retryConfig => retryConfig.Immediate(5));
     });
 });
 ```
@@ -33,13 +33,14 @@ Bus.Factory.CreateUsingInMemory(cfg =>
     {
         ep.Consumer<MyConsumer>(consumerCfg =>
         {
-            consumerCfg.UseRetry(Retry.Interval(10, 200));
-        })
+            consumerCfg.UseRetry(retryConfig => 
+                retryConfig.Interval(10, TimeSpan.FromMilliseconds(200)));
+        });
     });
 });
 ```
 
-## Retry Policies
+### Available retry policies
 
 * None
 * Immediate
@@ -47,12 +48,38 @@ Bus.Factory.CreateUsingInMemory(cfg =>
 * Exponential
 * Incremental
 
-## Retry Filters
+## Retry filters
 
-A retry policy can also be configured for a specific set of exceptions, using a filter.
+Sometimes you do not want to always retry, but instead only retry when some specific exception
+is thrown and fail for all other exceptions.
+
+To implement this, you can use an exception filter.
+
+### Available filters
 
 * Except
 * Selected
 * All
 * Filter
 
+Sample:
+```csharp
+Bus.Factory.CreateUsingInMemory(cfg =>
+{
+    cfg.ReceiveEndpoint("inbound", ep =>
+    {
+        ep.UseRetry(retryConfig => 
+        {
+            retryConfig.Immediate(5);
+            retryConfig.Filter(x => x.Message.Contains("SQL"));
+        });
+        ep.Consumer<MyConsumer>(consumerCfg =>
+            consumerCfg.UseRetry(retryConfig => 
+            {
+                retryConfig.Interval(10, TimeSpan.FromMilliseconds(200));
+                retryConfig.Select<ArgumentNullException>();
+            });
+        );
+    });
+});
+```
