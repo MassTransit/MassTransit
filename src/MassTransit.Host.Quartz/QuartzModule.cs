@@ -17,6 +17,7 @@ using StdSchedulerFactory = Quartz.Impl.StdSchedulerFactory;
 namespace MassTransit.Host.Quartz
 {
     using Autofac;
+    using QuartzIntegration;
     using QuartzIntegration.Configuration;
 
 
@@ -37,6 +38,12 @@ namespace MassTransit.Host.Quartz
             builder.Register(CreateScheduler)
                 .As<IScheduler>()
                 .SingleInstance();
+
+            builder.RegisterType<ScheduleMessageConsumer>()
+                .AsSelf();
+
+            builder.RegisterType<CancelScheduledMessageConsumer>()
+                .AsSelf();
         }
 
         static IScheduler CreateScheduler(IComponentContext context)
