@@ -25,6 +25,20 @@ namespace MassTransit
         /// <typeparam name="T"></typeparam>
         /// <param name="source"></param>
         /// <returns></returns>
+        public static T GetArguments<T>(this JobStarted source)
+        {
+            if (source == null)
+                throw new ArgumentNullException(nameof(source));
+
+            return ObjectTypeDeserializer.Deserialize<T>(source.Arguments);
+        }
+
+        /// <summary>
+        /// Returns the arguments from the JobCompleted event
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="source"></param>
+        /// <returns></returns>
         public static T GetArguments<T>(this JobCompleted source)
         {
             if (source == null)

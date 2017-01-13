@@ -37,20 +37,26 @@ namespace MassTransit
             // configure the message expiration endpoint, so it's available at startup
             busFactoryConfigurator.ReceiveEndpoint(host, expiredQueueName, expiredEndpointConfigurator =>
             {
+                expiredEndpointConfigurator.SubscribeMessageTopics = false;
+
                 // configure the turnout management endpoint
                 var temporaryQueueName = host.GetTemporaryQueueName("turnout-");
                 busFactoryConfigurator.ReceiveEndpoint(host, temporaryQueueName, turnoutEndpointConfigurator =>
                 {
                     turnoutEndpointConfigurator.PrefetchCount = 100;
-                    turnoutEndpointConfigurator.AutoDeleteOnIdle = TimeSpan.FromMinutes(5);
                     turnoutEndpointConfigurator.EnableExpress = true;
+                    turnoutEndpointConfigurator.SubscribeMessageTopics = false;
 
                     turnoutEndpointConfigurator.EnableDeadLetteringOnMessageExpiration = true;
                     turnoutEndpointConfigurator.ForwardDeadLetteredMessagesTo = expiredQueueName;
 
+                    turnoutEndpointConfigurator.AutoDeleteOnIdle = TimeSpan.FromMinutes(5);
+
                     // configure the input queue endpoint
                     busFactoryConfigurator.ReceiveEndpoint(host, queueName, commandEndpointConfigurator =>
                     {
+                        commandEndpointConfigurator.SubscribeMessageTopics = false;
+
                         commandEndpointConfigurator.ConfigureTurnoutEndpoints(busFactoryConfigurator, turnoutEndpointConfigurator, expiredEndpointConfigurator,
                             configure);
                     });

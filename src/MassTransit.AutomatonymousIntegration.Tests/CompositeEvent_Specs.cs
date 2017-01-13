@@ -96,8 +96,6 @@ namespace MassTransit.AutomatonymousIntegration.Tests
 
                 Event(() => Second, x => x.CorrelateById(m => m.Message.CorrelationId));
 
-                CompositeEvent(() => Third, x => x.CompositeStatus, First, Second);
-
                 Initially(
                     When(Start)
                         .TransitionTo(Waiting));
@@ -106,10 +104,13 @@ namespace MassTransit.AutomatonymousIntegration.Tests
                     When(First)
                         .TransitionTo(WaitingForSecond));
 
+                CompositeEvent(() => Third, x => x.CompositeStatus, First, Second);
+
                 During(WaitingForSecond,
                     When(Third)
                         .Publish(context => new CompleteMessage(context.Instance.CorrelationId))
                         .Finalize());
+
             }
 
             public State Waiting { get; private set; }

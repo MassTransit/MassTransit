@@ -59,5 +59,10 @@ namespace MassTransit.AzureServiceBusTransport
         /// </summary>
         /// <param name="historyTimeWindow">The time window for duplicate history</param>
         void EnableDuplicateDetection(TimeSpan historyTimeWindow);
+
+        /// <summary>
+        /// Sets the message session timeout period
+        /// </summary>
+        TimeSpan MessageWaitTimeout { set; }
     }
 }

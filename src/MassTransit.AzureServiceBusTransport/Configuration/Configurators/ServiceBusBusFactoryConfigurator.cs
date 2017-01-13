@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -43,6 +43,15 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
             };
         }
 
+        public IBusControl CreateBus()
+        {
+            var builder = new ServiceBusBusBuilder(_hosts, ConsumePipeFactory, SendPipeFactory, PublishPipeFactory, _settings);
+
+            ApplySpecifications(builder);
+
+            return builder.Build();
+        }
+
         public TimeSpan DuplicateDetectionHistoryTimeWindow
         {
             set { _settings.QueueDescription.DuplicateDetectionHistoryTimeWindow = value; }
@@ -76,15 +85,6 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
         public bool SupportOrdering
         {
             set { _settings.QueueDescription.SupportOrdering = value; }
-        }
-
-        public IBusControl CreateBus()
-        {
-            var builder = new ServiceBusBusBuilder(_hosts, ConsumePipeFactory, SendPipeFactory, PublishPipeFactory, _settings);
-
-            ApplySpecifications(builder);
-
-            return builder.Build();
         }
 
         public void ReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configureEndpoint)
@@ -215,6 +215,11 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
         {
             _settings.QueueDescription.RequiresDuplicateDetection = true;
             _settings.QueueDescription.DuplicateDetectionHistoryTimeWindow = historyTimeWindow;
+        }
+
+        TimeSpan IServiceBusQueueEndpointConfigurator.MessageWaitTimeout
+        {
+            set { _settings.MessageWaitTimeout = value; }
         }
     }
 }

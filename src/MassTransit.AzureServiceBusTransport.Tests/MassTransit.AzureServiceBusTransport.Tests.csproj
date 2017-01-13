@@ -101,6 +101,11 @@
     <Compile Include="Subscription_Specs.cs" />
     <Compile Include="BasicAzureServiceBusAccountSettings.cs" />
     <Compile Include="TestAzureServiceBusAccountSettings.cs" />
+    <Compile Include="TurningItOut\LongTimeJob.cs" />
+    <Compile Include="TurningItOut\Success_Specs.cs" />
+    <Compile Include="TurningItOut\TurnoutJobCompleted.cs" />
+    <Compile Include="TurningItOut\TurnoutJobState.cs" />
+    <Compile Include="TurningItOut\TurnoutJobStateMachine.cs" />
     <Compile Include="Turnout_Specs.cs" />
     <Compile Include="TwoScopeAzureServiceBusTestFixture.cs" />
     <Compile Include="Verify_account_settings.cs" />

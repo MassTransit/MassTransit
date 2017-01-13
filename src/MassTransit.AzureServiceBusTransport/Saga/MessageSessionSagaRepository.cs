@@ -14,11 +14,13 @@ namespace MassTransit.AzureServiceBusTransport.Saga
 {
     using System;
     using System.IO;
+    using System.Text;
     using System.Threading.Tasks;
     using Context;
     using GreenPipes;
     using Logging;
     using MassTransit.Saga;
+    using Newtonsoft.Json;
     using Newtonsoft.Json.Bson;
     using Serialization;
     using Util;
@@ -106,9 +108,10 @@ namespace MassTransit.AzureServiceBusTransport.Saga
         async Task WriteSagaState(MessageSessionContext context, TSaga saga)
         {
             using (var serializeStream = new MemoryStream())
-            using (var bsonWriter = new BsonWriter(serializeStream))
+            using (var writer = new StreamWriter(serializeStream, Encoding.UTF8, 1024, true))
+            using (var bsonWriter = new JsonTextWriter(writer))
             {
-                BsonMessageSerializer.Serializer.Serialize(bsonWriter, saga);
+                JsonMessageSerializer.Serializer.Serialize(bsonWriter, saga);
 
                 bsonWriter.Flush();
                 await serializeStream.FlushAsync().ConfigureAwait(false);
@@ -129,9 +132,10 @@ namespace MassTransit.AzureServiceBusTransport.Saga
                     if (stateStream == null || stateStream.Length == 0)
                         return default(TSaga);
 
-                    using (var bsonReader = new BsonReader(stateStream))
+                    using (var reader = new StreamReader(stateStream, Encoding.UTF8, false, 1024, true))
+                    using (var bsonReader = new JsonTextReader(reader))
                     {
-                        return BsonMessageSerializer.Deserializer.Deserialize<TSaga>(bsonReader);
+                        return JsonMessageSerializer.Deserializer.Deserialize<TSaga>(bsonReader);
                     }
                 }
             }

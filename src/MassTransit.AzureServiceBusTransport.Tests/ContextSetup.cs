@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.AzureServiceBusTransport.Tests
 {
+    using System.Net;
     using Log4NetIntegration.Logging;
     using Microsoft.ServiceBus;
     using NUnit.Framework;
@@ -24,6 +25,10 @@ namespace MassTransit.AzureServiceBusTransport.Tests
         public void Before_any()
         {
             ServiceBusEnvironment.SystemConnectivity.Mode = ConnectivityMode.Https;
+
+            ServicePointManager.DefaultConnectionLimit = 100;
+            ServicePointManager.UseNagleAlgorithm = false;
+            ServicePointManager.Expect100Continue = false;
 
             string file = "test.log4net.xml";
 

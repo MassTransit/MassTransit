@@ -30,9 +30,6 @@ namespace MassTransit.AzureServiceBusTransport.Settings
 
             MaxConcurrentCalls = Math.Max(Environment.ProcessorCount, 8);
             PrefetchCount = Math.Max(MaxConcurrentCalls, 32);
-
-            AutoRenewTimeout = TimeSpan.FromSeconds(60);
-            MessageWaitTimeout = TimeSpan.FromDays(1);
         }
 
         public override TimeSpan AutoDeleteOnIdle

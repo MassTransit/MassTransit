@@ -5,7 +5,7 @@
 	</configSections>
 	<log4net>
 		<root>
-			<level value="ERROR" />
+			<level value="DEBUG" />
 			<appender-ref ref="console" />
 		</root>
 
@@ -17,9 +17,6 @@
 			<level value="DEBUG" />
 		</logger>
 
-		<logger name="NHibernate">
-			<level value="INFO"/>
-		</logger>
     <appender name="console" type="log4net.Appender.ConsoleAppender, log4net">
       <layout type="log4net.Layout.PatternLayout,log4net">
         <param name="ConversionPattern" value="%d [%t] %-5p %c - %m%n" />
