@@ -28,7 +28,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             _callback = callback;
         }
 
-        async void IProbeSite.Probe(ProbeContext context)
+        void IProbeSite.Probe(ProbeContext context)
         {
         }
 

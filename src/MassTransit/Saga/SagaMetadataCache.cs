@@ -58,7 +58,7 @@ namespace MassTransit.Saga
                 // while the optimized method is generated asynchronously
                 _factoryMethod = correlationId => (TSaga)Activator.CreateInstance(typeof(TSaga), correlationId);
 
-                GenerateFactoryMethodAsynchronously();
+                Task.Factory.StartNew(GenerateFactoryMethodAsynchronously, CancellationToken.None, TaskCreationOptions.None, TaskScheduler.Default);
             }
             else
             {
@@ -77,7 +77,7 @@ namespace MassTransit.Saga
                         return saga;
                     };
 
-                    GeneratePropertyFactoryMethodAsynchronously();
+                    Task.Factory.StartNew(GeneratePropertyFactoryMethodAsynchronously, CancellationToken.None, TaskCreationOptions.None, TaskScheduler.Default);
                 }
                 else
                 {
@@ -92,7 +92,7 @@ namespace MassTransit.Saga
         /// regular Activator, but doing this asynchronously ensures we don't slow down startup
         /// </summary>
         /// <returns></returns>
-        async void GenerateFactoryMethodAsynchronously()
+        async Task GenerateFactoryMethodAsynchronously()
         {
             await Task.Yield();
 
@@ -114,7 +114,7 @@ namespace MassTransit.Saga
         /// regular Activator, but doing this asynchronously ensures we don't slow down startup
         /// </summary>
         /// <returns></returns>
-        async void GeneratePropertyFactoryMethodAsynchronously()
+        async Task GeneratePropertyFactoryMethodAsynchronously()
         {
             await Task.Yield();
 

@@ -140,11 +140,11 @@ namespace MassTransit.Util.Caching
             var existingItem = arguments.CacheItem.Value as CachedValue;
             if (existingItem?.IsValueCreated ?? false)
             {
-                CleanupCacheItem(existingItem.Value, arguments.CacheItem.Key, arguments.RemovedReason);
+                Task.Factory.StartNew(() => CleanupCacheItem(existingItem.Value, arguments.CacheItem.Key, arguments.RemovedReason), CancellationToken.None, TaskCreationOptions.None, TaskScheduler.Default);
             }
         }
 
-        async void CleanupCacheItem(Task<TValue> valueTask, string textKey, CacheEntryRemovedReason reason)
+        async Task CleanupCacheItem(Task<TValue> valueTask, string textKey, CacheEntryRemovedReason reason)
         {
             try
             {

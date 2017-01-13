@@ -70,11 +70,11 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
 
                 if (context != null)
                 {
-                    LockRenewal();
+                    Task.Factory.StartNew(LockRenewal, CancellationToken.None, TaskCreationOptions.None, TaskScheduler.Default);
                 }
             }
 
-            async void LockRenewal()
+            async Task LockRenewal()
             {
                 var delay = _delay;
 

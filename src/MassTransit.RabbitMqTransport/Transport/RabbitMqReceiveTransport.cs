@@ -81,7 +81,7 @@ namespace MassTransit.RabbitMqTransport.Transport
                     _sendEndpointProvider, _publishEndpointProvider, _host);
             });
 
-            Receiver(pipe, supervisor);
+            Task.Factory.StartNew(() => Receiver(pipe, supervisor), CancellationToken.None, TaskCreationOptions.None, TaskScheduler.Default);
 
             return new Handle(supervisor);
         }
@@ -101,7 +101,7 @@ namespace MassTransit.RabbitMqTransport.Transport
             return _publishEndpointProvider.ConnectPublishObserver(observer);
         }
 
-        async void Receiver(IPipe<ConnectionContext> transportPipe, TaskSupervisor supervisor)
+        async Task Receiver(IPipe<ConnectionContext> transportPipe, TaskSupervisor supervisor)
         {
             try
             {

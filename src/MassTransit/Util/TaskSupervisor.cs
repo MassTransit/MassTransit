@@ -151,10 +151,10 @@ namespace MassTransit.Util
 
         void OnStopRequested(Task stopRequested)
         {
-            SetupStopRequested(stopRequested);
+            Task.Factory.StartNew(() => SetupStopRequested(stopRequested), CancellationToken.None, TaskCreationOptions.None, TaskScheduler.Default);
         }
 
-        async void SetupStopRequested(Task stopRequested)
+        async Task SetupStopRequested(Task stopRequested)
         {
             await stopRequested.ConfigureAwait(false);
 

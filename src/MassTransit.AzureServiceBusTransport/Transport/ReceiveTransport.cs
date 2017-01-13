@@ -76,7 +76,7 @@ namespace MassTransit.AzureServiceBusTransport.Transport
                 }
             });
 
-            Receiver(pipe, supervisor);
+            Task.Factory.StartNew(() => Receiver(pipe, supervisor), CancellationToken.None, TaskCreationOptions.None, TaskScheduler.Default);
 
             return new Handle(supervisor);
         }
@@ -96,7 +96,7 @@ namespace MassTransit.AzureServiceBusTransport.Transport
             return _publishEndpointProvider.ConnectPublishObserver(observer);
         }
 
-        async void Receiver(IPipe<NamespaceContext> pipe, TaskSupervisor supervisor)
+        async Task Receiver(IPipe<NamespaceContext> pipe, TaskSupervisor supervisor)
         {
             Uri inputAddress = _settings.GetInputAddress(_host.Settings.ServiceUri);
 
