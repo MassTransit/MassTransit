@@ -120,6 +120,9 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
                         if (exception.IsTransient)
                             delay = TimeSpan.Zero;
                     }
+                    catch (OperationCanceledException)
+                    {
+                    }
                     catch (Exception exception)
                     {
                         _source.Cancel();
