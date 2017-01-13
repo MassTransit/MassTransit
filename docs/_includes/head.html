@@ -1,0 +1,65 @@
+<head>
+  <!-- Canonical link to help search engines -->
+  <link rel="canonical" href="{{ site.baseurl }}{{ page.url }}"/>
+
+  <!-- Basic meta elements -->
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+
+  <!-- Enable responsiveness on mobile devices-->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1"/>
+
+  <!--   Dublin Core metadata for Zotero -->
+  <meta name="DC.title" content="{{ page.title }}" />
+  <meta name="DC.creator" content="{{ page.author }}" />
+  <meta name="DC.contributor" content="{{ page.editor }}" />
+  <meta name="DC.date" content="{{ page.publication-date }}" />
+  <meta name="DC.rights" content="{{ page.rights }}" />
+  <meta name="DC.source" content="{{ site.title }}" />
+
+    <!-- Open Graph metadata -->
+
+    {% if page.layout == "default" %}
+    <meta property="og:title" content="{{page.title}}"/>
+    <meta property="og:description" content="{{site.description}}">
+    <meta property="fb:admins" content="elotroalex"/>
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="{{site.url}}{{site.baseurl}}{{page.url}}"/>
+    <meta property="fb:app_id" content="589495744558280"/>
+    <meta property="og:image" content="{{site.url}}{{site.baseurl}}/public/open-graph-logo.png"/>
+    <meta property="og:image:width" content="200" />
+    <meta property="og:image:height" content="200" />
+
+    {% else %}
+    <meta property="og:title" content="{{page.title}}"/>
+    <meta property="og:description" content="An Ed edition">
+    <meta property="fb:admins" content="elotroalex"/>
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content="{{site.url}}{{site.baseurl}}{{page.url}}"/>
+    <meta property="fb:app_id" content="589495744558280"/>
+    <meta property="og:image" content="{{site.url}}{{site.baseurl}}/public/open-graph-logo.png"/>
+    <meta property="og:image:width" content="200" />
+    <meta property="og:image:height" content="200" />
+    {% endif %}
+
+  <title>
+    {% if page.title == "Home" %}
+      {{ site.title }}
+    {% else %}
+      {{ page.title }}
+    {% endif %}
+  </title>
+
+  <!-- CSS links -->
+  <link rel="stylesheet" href="{{ site.baseurl }}/public/css/syntax.css"/>
+  <link rel="stylesheet" href="https://unpkg.com/tachyons@4.5.5/css/tachyons.min.css"/>
+  <link rel="stylesheet" href="{{ site.baseurl }}/public/css/mt.css"/>
+
+
+  <!-- Icons -->
+  <link rel="apple-touch-icon-precomposed" sizes="180x180" href="{{ site.baseurl }}/public/apple-touch-icon-precomposed.png"/>
+  <link rel="shortcut icon" href="{{ site.baseurl }}/public/favicon.png"/>
+
+  <!-- RSS -->
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="{{ site.baseurl }}/atom.xml"/>
+</head>

@@ -1,0 +1,51 @@
+# Built with Jekyll 3.2.0
+
+# Setup
+title:               MassTransit
+tagline:             '.Net Messaging'
+description:         'Stuff'
+url:                 'http://masstransit.io'
+baseurl:             '/masstransit'
+
+# About/contact
+author:
+  name:              PhatboyG
+  url:               https://twitter.com/phatboyg
+  email:             chris@phatboyg.com
+
+# Permalinks
+
+permalink: pretty
+permalink: /:title/
+
+# Set encoding to UTF-8
+encoding: utf-8
+
+# Collections for texts
+collections:
+  usecases:
+    output: true
+  entrypoints:
+    output: true
+  transports:
+    output: true
+  architecture:
+    output: true
+
+# Markdown specs
+markdown: kramdown
+
+kramdown:
+  auto_ids:       true
+  footnote_nr:    1
+  entity_output:  as_char
+  footnote_backlink: "&#x21a9;&#xfe0e;"
+  toc_levels:     1..6
+  smart_quotes:   lsquo,rsquo,ldquo,rdquo
+  enable_coderay: false
+
+# Custom vars
+version:             0.0.6
+
+# Exclusions from the final site
+exclude: [optional, vendor]

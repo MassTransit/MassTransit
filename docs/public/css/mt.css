@@ -1,0 +1,18 @@
+p {
+    /* include times lh-copy measure f4 mt0 */
+    line-height: 1.5;
+    font-size: 1.25rem;
+    padding: 1rem;
+    max-width: 30em;
+}
+
+/* links */
+
+a, .post-title a {
+  color: #3b8fd1;
+  text-decoration: none;
+}
+
+a strong {
+  color: inherit;
+}

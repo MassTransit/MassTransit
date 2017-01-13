@@ -1,0 +1,75 @@
+# Built with Jekyll 3.2.0
+#
+# Permalinks
+#
+# Use of `relative_permalinks` ensures post links from the index work properly.
+permalink: none
+
+# Set encoding to UTF-8
+encoding: utf-8
+
+# Markdown specs
+markdown: kramdown
+
+collections:
+  texts:
+    output: true
+
+kramdown:
+  auto_ids:       true
+  footnote_nr:    1
+  entity_output:  as_char
+  footnote_backlink: "&#x21a9;&#xfe0e;"
+  toc_levels:     1..6
+  smart_quotes:   lsquo,rsquo,ldquo,rdquo
+  enable_coderay: false
+
+# Setup
+title:               Ed.
+tagline:             'A Jekyll theme for minimal editions'
+description:         'Ed is a Jekyll theme designed for textual editors based on minimal computing principles, and focused on legibility and flexibility.'
+url:                 https://github.com/elotroalex/ed
+baseurl:             '/ed'
+
+# About/contact
+author:
+  name:              Alex Gil
+  url:               https://twitter.com/elotroalex
+  email:             colibri.alex@gmail.com
+
+# Custom vars
+version:             0.0.5
+
+# Exclude optional folder
+exclude: [optional]
+
+# Gems
+gems: ['jekyll/scholar']
+
+# Scholar
+scholar:
+  style: modern-language-association
+  locale: en
+
+  sort_by: none
+  order: ascending
+
+  group_by: none
+  group_order: ascending
+
+  source: ./_bibliography
+  bibliography: references.bib
+  bibliography_template: "{{reference}}"
+  relative: "/ed/bibliography.html"
+
+  replace_strings: true
+  join_strings:    true
+
+  use_raw_bibtex_entry: false
+
+  details_dir:    bibliography
+  details_layout: bibtex.html
+  details_link:   Details
+
+  query: "@*"
+
