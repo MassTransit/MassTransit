@@ -57,10 +57,8 @@ To implement this, you can use an exception filter.
 
 ### Available filters
 
-* Except
-* Selected
-* All
-* Filter
+* Handle
+* Ignore
 
 Sample:
 ```csharp
@@ -71,13 +69,13 @@ Bus.Factory.CreateUsingInMemory(cfg =>
         ep.UseRetry(retryConfig => 
         {
             retryConfig.Immediate(5);
-            retryConfig.Filter(x => x.Message.Contains("SQL"));
+            retryConfig.Handle(x => x.Message.Contains("SQL"));
         });
         ep.Consumer<MyConsumer>(consumerCfg =>
             consumerCfg.UseRetry(retryConfig => 
             {
                 retryConfig.Interval(10, TimeSpan.FromMilliseconds(200));
-                retryConfig.Select<ArgumentNullException>();
+                retryConfig.Ignore<ArgumentNullException>();
             });
         );
     });
