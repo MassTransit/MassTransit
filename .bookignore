@@ -1,0 +1,7 @@
+doc
+host
+src
+*.yml
+build.*
+*.snk
+*.nuspec

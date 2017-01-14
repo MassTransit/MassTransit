@@ -1,0 +1,60 @@
+version: 3.5.4.{build}
+branches:
+  only:
+  - develop
+  - master
+skip_tags: true
+skip_commits:
+  files:
+    - docs/*
+    - '**/*.html'
+image: Visual Studio 2015
+configuration: Release
+platform: Any CPU
+services:
+- mongodb
+- postgresql
+nuget:
+  project_feed: true
+  disable_publish_on_pr: true
+build_script:
+- cmd: >-
+    @echo off
+
+    cls
+
+    SET PGUSER=postgres
+
+    SET PGPASSWORD=Password12!
+
+    PATH=C:\Program Files\PostgreSQL\9.3\bin\;%PATH%
+
+    createdb MartenTest
+
+    If Not Exist src\.nuget\nuget.exe msbuild src\.nuget\NuGet.targets -Target:RestorePackages
+
+    If Not Exist src\packages\gitlink\lib\net45\GitLink.exe src\.nuget\nuget.exe Install gitlink -Source "https://www.nuget.org/api/v2/" -OutputDirectory "src\packages" -ExcludeVersion
+
+    If Not Exist src\packages\FAKE\tools\fake.exe src\.nuget\nuget.exe Install FAKE -OutputDirectory "src\packages" -ExcludeVersion
+
+    src\packages\FAKE\tools\fake.exe build.fsx %*
+test:
+  assemblies:
+  - src/MassTransit.Tests/bin/Release/MassTransit.Tests.dll
+  - src/Containers/MassTransit.Containers.Tests/bin/Release/MassTransit.Containers.Tests.dll
+  - src/MassTransit.AutomatonymousIntegration.Tests/bin/Release/MassTransit.AutomatonymousIntegration.Tests.dll
+  - src/Persistence/MassTransit.MongoDbIntegration.Tests/bin/Release/MassTransit.MongoDbIntegration.Tests.dll
+  - src/Persistence/MassTransit.MartenIntegration.Tests/bin/Release/MassTransit.MartenIntegration.Tests.dll
+  - src/MassTransit.HttpTransport.Tests/bin/Release/MassTransit.HttpTransport.Tests.dll
+  categories:
+    except:
+    - Flakey
+artifacts:
+- path: build_artifacts/*.nupkg
+  name: Packages
+notifications:
+- provider: Webhook
+  url: https://webhooks.gitter.im/e/27919bcbf1f770b0befd
+  on_build_success: true
+  on_build_failure: true
+  on_build_status_changed: true
