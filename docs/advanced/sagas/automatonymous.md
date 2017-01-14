@@ -239,7 +239,7 @@ Once both events have been delivered to the state machine, the third event, *Ord
 <b>Note:</b>
     The order of events being declared can impact the order in which they execute. Therefore, it is best to declare 
     composite events at the end of the state machine declaration, after all other events and behaviors are declared. 
-    That way, the composite events will be raised *after* the dependent event behaviors.
+    That way, the composite events will be raised <i>after</i> the dependent event behaviors.
 </div>
 
 

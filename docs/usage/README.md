@@ -3,6 +3,7 @@
 In order to use and understand MassTransit, a set of recipe-based usage examples are provided below.
 
 * [Configure MassTransit](configuration.md)
+* [Choose a transport](transports.md)
 * [Message Contracts](message-contracts.md)
 * [Create message consumers](message-consumers.md)
 * [Produce messages](producing-messages.md)
@@ -16,6 +17,11 @@ In order to use and understand MassTransit, a set of recipe-based usage examples
 * [Request/response](request-response.md)
 * [Handle exceptions](exceptions.md)
 * [Configure retries](retries.md)
+* [Schedule messages](scheduling/README.md)
+    * [Scheduling API](scheduling/scheduling-api.md)
+    * [In-memory scheduling](scheduling/in-memory.md)
+    * [Redelivering messages](scheduling/redeliver.md)
+    * [Azure Service Bus](scheduling/azure-sb-scheduler.md)
 * [Observe messages](observers.md)
 * [Observe lifecycle](lifecycle-observers.md)
 * [Connect endpoints](connect-endpoint.md)
