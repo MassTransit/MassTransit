@@ -40,15 +40,16 @@
         * [Castle Windsor](usage/containers/castlewindsor.md)
     * [Request/response](usage/request-response.md)
     * [Handle exceptions](usage/exceptions.md)
+    * [Configure retries](usage/retries.md)
     * [Observe messages](usage/observers.md)
     * [Observe lifecycle](usage/lifecycle-observers.md)
     * [Connect endpoints](usage/connect-endpoint.md)
-    * [Configure retries](usage/retries.md)
-    * [Manage transactions](usage/transactions.md)
-    * [Show configuration](usage/show-config.md)
-    
-* [Sagas](sagas/README.md)
 
-* [Courier](courier/README.md)
-
-* [Middleware](middleware.md)
+## Advanced 
+* [Sagas](advanced/sagas/README.md)
+    * [Automatonymous](advanced/sagas/automatonymous.md)
+    * [Persistence](advanced/sagas/persistence.md)
+* [Courier](advanced/courier/README.md)
+* [Middleware](advanced/middleware.md)
+* [Transactions](advanced/transactions.md)
+* [Diagnostics](advanced/show-config.md)
