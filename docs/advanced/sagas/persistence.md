@@ -50,6 +50,11 @@ c.ReceiveEndpoint("queue", e =>
 MassTransit supports several storage engines, including NHibernate, Entity Framework, MongoDB and Redis. 
 Each of these are setup in a similar way, but examples are shown below for each engine.
 
+* [Entity Framework](#entity-framework)
+* [NHibernate](#nhibernate)
+* [MondoDB](#mongodb)
+* [Redis](#redis)
+
 ### Entity Framework
 
 Entity Framework seems to be the most common ORM for class-SQL mappings, and SQL is still widely used 
@@ -227,3 +232,54 @@ builder.RegisterGeneric(typeof(RedisSagaRepository<>))
     .As(typeof(ISagaRepository<>)).SingleInstance();
 ```
 
+### Marten
+
+[Marten][2] is an open-source library that provides an API to the PostgreSQL [JSONB storage][1], influenced by
+RavenDb client API. It allows to use PotgreSQL as schema-less NoSQL document storage. Unlike typical document
+databases, PostgreSQL JSONB storage provides you the ACID-compliant transactional store with full consistency.
+
+To use Marten and PostgreSQL as saga persistence, you need to install `MassTransit.Marten` NuGet package and
+add some code.
+
+First, your saga state class needs to mark the correlationId property with the `[Identity]` arrtibute. By this
+you inform Marten that correlationId will be used as the primary key.
+
+```csharp
+public class SampleSaga : ISaga
+{
+    [Identity]
+    public Guid CorrelationId { get; set; }
+    public string State { get; set; }
+    public string SomeProperty { get; set; }
+}
+```
+
+Then you need to initialize the document store and the repository. Repository needs the store as its constructor
+parameter.
+
+```csharp
+var connectionString =
+    "server=localhost;port=5432;database=test;user id=test;password=test;";
+var store = DocumentStore.For(connectionString);
+var repository = new MartenSagaRepository<SampleSaga>(store);
+```
+
+If you use a container, you can use the code like this (example for Autofac):
+
+```csharp
+var connectionString =
+    "server=localhost;port=5432;database=test;user id=test;password=test;";
+builder.Register<IDocumentStore>(c => DocumentStore.For(connectionString);
+builder.RegisterGeneric(typeof(MartenSagaRepository<>))
+    .As(typeof(ISagaRepository<>)).SingleInstance();
+```
+
+Marten will create necessary tables for you. This type of saga repository supports correlation by id and custom expressions.
+
+### Azure Service Bus
+
+TODO
+
+
+[1]: https://www.postgresql.org/docs/9.5/static/functions-json.html
+[2]: http://jasperfx.github.io/marten/
