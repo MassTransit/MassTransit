@@ -18,6 +18,7 @@
     * [Videos](learn/videos.md)
     * [Courses](learn/courses.md)
     * [Loving the community](learn/loving-the-community.md)
+* [Contributing](contributing/README.md)
 
 ## Usage
 * [Installation](introduction/README.md)
