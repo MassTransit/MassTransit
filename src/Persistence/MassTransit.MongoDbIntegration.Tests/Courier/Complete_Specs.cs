@@ -98,9 +98,9 @@ namespace MassTransit.MongoDbIntegration.Tests.Courier
                 NewId.NextGuid(), DateTime.UtcNow));
         }
 
-        protected override void PreCreateBus(IInMemoryBusFactoryConfigurator configurator)
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
-            base.PreCreateBus(configurator);
+            base.ConfigureInMemoryBus(configurator);
 
             configurator.ConfigureRoutingSlipEventCorrelation();
         }

@@ -15,6 +15,7 @@ namespace MassTransit
     using System;
     using ConsumeConfigurators;
     using ConsumeConnectors;
+    using ConsumerSpecifications;
     using GreenPipes;
     using Internals.Extensions;
     using Logging;

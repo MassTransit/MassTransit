@@ -13,7 +13,6 @@
 namespace MassTransit
 {
     using GreenPipes;
-    using PipeConfigurators;
 
 
     public interface IPublishTransformSpecification<TMessage> :

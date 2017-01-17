@@ -78,7 +78,7 @@ namespace MassTransit.Tests
         [Test]
         public async Task Should_include_a_converation_id()
         {
-            var responseHandled = SubscribeHandler<PongMessage>();
+            var responseHandled = ConnectPublishHandler<PongMessage>();
 
             await InputQueueSendEndpoint.Send(new PingMessage());
 

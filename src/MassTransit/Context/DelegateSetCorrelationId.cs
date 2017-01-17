@@ -19,9 +19,9 @@ namespace MassTransit.Context
         ISetCorrelationId<T>
         where T : class
     {
-        readonly Func<T, Guid?> _getCorrelationId;
+        readonly Func<T, Guid> _getCorrelationId;
 
-        public DelegateSetCorrelationId(Func<T, Guid?> getCorrelationId)
+        public DelegateSetCorrelationId(Func<T, Guid> getCorrelationId)
         {
             _getCorrelationId = getCorrelationId;
         }
@@ -29,8 +29,7 @@ namespace MassTransit.Context
         public void SetCorrelationId(SendContext<T> context)
         {
             var correlationId = _getCorrelationId(context.Message);
-            if (correlationId.HasValue && correlationId.Value != Guid.Empty)
-                context.CorrelationId = correlationId;
+            context.CorrelationId = correlationId;
         }
     }
 }

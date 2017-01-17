@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -35,15 +35,6 @@ namespace MassTransit.RabbitMqTransport
         /// The supervisor for the host, which indicates when it's being stopped
         /// </summary>
         ITaskSupervisor Supervisor { get; }
-
-        /// <summary>
-        /// Return the send address for the exchange, which can be configured to include
-        /// additional settings.
-        /// </summary>
-        /// <param name="exchangeName">The exchange name</param>
-        /// <param name="configure"></param>
-        /// <returns></returns>
-        Uri GetSendAddress(string exchangeName, Action<IExchangeConfigurator> configure = null);
 
         /// <summary>
         /// Create a temporary receive endpoint on the host, with a separate handle for stopping/removing the endpoint

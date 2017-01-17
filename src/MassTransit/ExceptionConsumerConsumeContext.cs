@@ -15,7 +15,7 @@ namespace MassTransit
     using System;
 
 
-    public interface ExceptionConsumerConsumeContext<T> :
+    public interface ExceptionConsumerConsumeContext<out T> :
         ConsumerConsumeContext<T>
         where T : class
     {

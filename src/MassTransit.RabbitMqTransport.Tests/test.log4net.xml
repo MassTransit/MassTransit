@@ -5,7 +5,7 @@
 	</configSections>
 	<log4net>
 		<root>
-			<level value="ERROR" />
+			<level value="INFO" />
 			<appender-ref ref="console" />
 		</root>
 

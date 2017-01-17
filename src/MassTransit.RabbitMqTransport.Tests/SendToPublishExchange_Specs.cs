@@ -24,10 +24,9 @@ namespace MassTransit.RabbitMqTransport.Tests
         [Test]
         public async Task Should_arrive_on_the_receive_endpoint()
         {
-            var sendSettings = _host.Settings.GetSendSettings(typeof(A));
-            var sendAddress = sendSettings.GetSendAddress(_host.Settings.HostAddress);
+            var destinationAddress = _host.Settings.Topology.GetDestinationAddress(typeof(A));
 
-            var endpoint = await Bus.GetSendEndpoint(sendAddress);
+            var endpoint = await Bus.GetSendEndpoint(destinationAddress);
 
             await endpoint.Send(new A());
 

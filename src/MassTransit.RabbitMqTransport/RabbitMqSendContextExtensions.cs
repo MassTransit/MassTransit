@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -72,6 +72,20 @@ namespace MassTransit
                 throw new ArgumentException("The RabbitMqSendContext was not available");
 
             sendContext.AwaitAck = awaitAck;
+        }
+
+        /// <summary>
+        /// Sets the routing key for this message
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="routingKey">The routing key for this message</param>
+        public static void SetRoutingKey(this SendContext context, string routingKey)
+        {
+            RabbitMqSendContext sendContext;
+            if (!context.TryGetPayload(out sendContext))
+                throw new ArgumentException("The RabbitMqSendContext was not available");
+
+            sendContext.RoutingKey = routingKey;
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -431,11 +431,19 @@ namespace MassTransit
             return SchedulePublish<T>(context, scheduledTime, values, pipe, cancellationToken);
         }
 
-        static Uri GetDestinationAddress(ConsumeContext context, Type messageType)
+        static Uri GetDestinationAddress<T>(ConsumeContext context, T message)
+            where T : class
         {
-            var connectionContext = context.ReceiveContext.GetPayload<NamespaceContext>();
+            var namespaceContext = context.ReceiveContext.GetPayload<NamespaceContext>();
 
-            return connectionContext.GetTopicAddress(messageType);
+            Uri publishAddress;
+            if (context.ReceiveContext.Topology.Publish.GetMessageTopology<T>().TryGetPublishAddress(namespaceContext.ServiceAddress, message,
+                out publishAddress))
+            {
+                return publishAddress;
+            }
+
+            throw new EndpointNotFoundException($"The publish endpoint for the message type could not be found: {TypeMetadataCache<T>.ShortName}");
         }
 
         static async Task<ScheduledMessage<T>> Schedule<T>(ConsumeContext context, DateTime scheduledTime, T message, ServiceBusScheduleMessagePipe<T> pipe,
@@ -444,7 +452,7 @@ namespace MassTransit
         {
             await context.Publish(message, pipe, cancellationToken).ConfigureAwait(false);
 
-            var destinationAddress = GetDestinationAddress(context, typeof(T));
+            var destinationAddress = GetDestinationAddress(context, message);
 
             return new ScheduledMessageHandle<T>(pipe.ScheduledMessageId ?? NewId.NextGuid(), scheduledTime, destinationAddress, message);
         }
@@ -454,7 +462,8 @@ namespace MassTransit
         {
             await context.Publish(message, pipe, cancellationToken).ConfigureAwait(false);
 
-            var destinationAddress = GetDestinationAddress(context, messageType);
+            // TODO this is fucked for now
+            var destinationAddress = GetDestinationAddress(context, message);
 
             return new ScheduledMessageHandle(pipe.ScheduledMessageId ?? NewId.NextGuid(), scheduledTime, destinationAddress);
         }

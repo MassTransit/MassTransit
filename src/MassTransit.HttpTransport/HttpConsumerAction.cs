@@ -1,4 +1,4 @@
-// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -16,16 +16,14 @@ namespace MassTransit.HttpTransport
     using System.Net;
     using System.Threading;
     using System.Threading.Tasks;
-    using Clients;
     using Contexts;
     using GreenPipes;
     using Hosting;
     using Internals.Extensions;
     using Logging;
-    using MassTransit.Pipeline;
     using Microsoft.Owin;
     using Pipeline;
-    using Transport;
+    using Topology;
     using Transports.Metrics;
     using Util;
 
@@ -39,23 +37,17 @@ namespace MassTransit.HttpTransport
         readonly ILog _log = Logger.Get<HttpConsumerAction>();
         readonly ITaskParticipant _participant;
         readonly IReceiveObserver _receiveObserver;
-        readonly ReceiveSettings _receiveSettings;
         readonly IPipe<ReceiveContext> _receivePipe;
-        readonly ISendPipe _sendPipe;
+        readonly IHttpReceiveEndpointTopology _topology;
         readonly IDeliveryTracker _tracker;
         bool _stopping;
 
-        public HttpConsumerAction(IReceiveObserver receiveObserver,
-            HttpHostSettings settings,
-            ReceiveSettings receiveSettings,
-            IPipe<ReceiveContext> receivePipe,
-            ITaskScope taskSupervisor,
-            ISendPipe sendPipe)
+        public HttpConsumerAction(IReceiveObserver receiveObserver, HttpHostSettings settings, IPipe<ReceiveContext> receivePipe, ITaskScope taskSupervisor,
+            IHttpReceiveEndpointTopology topology)
         {
             _receiveObserver = receiveObserver;
-            _receiveSettings = receiveSettings;
             _receivePipe = receivePipe;
-            _sendPipe = sendPipe;
+            _topology = topology;
 
             _tracker = new DeliveryTracker(OnDeliveryComplete);
             _inputAddress = settings.GetInputAddress();
@@ -84,10 +76,9 @@ namespace MassTransit.HttpTransport
 
             using (_tracker.BeginDelivery())
             {
+                var responseEndpointTopology = _topology.CreateResponseEndpointTopology(owinContext);
 
-                var responseProxy = new HttpResponseSendEndpointProvider(_receiveSettings, owinContext, _inputAddress, _sendPipe);
-
-                var context = new HttpReceiveContext(owinContext, false, _receiveObserver, responseProxy, _receiveSettings.PublishEndpointProvider);
+                var context = new HttpReceiveContext(owinContext, false, _receiveObserver, responseEndpointTopology);
 
                 try
                 {

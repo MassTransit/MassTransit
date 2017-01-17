@@ -56,13 +56,6 @@ namespace MassTransit.AzureServiceBusTransport
         string GetQueuePath(QueueDescription queueDescription);
 
         /// <summary>
-        /// Returns the Topic address for the message type being published
-        /// </summary>
-        /// <param name="messageType"></param>
-        /// <returns></returns>
-        Uri GetTopicAddress(Type messageType);
-
-        /// <summary>
         /// Create a queue in the host namespace (which is scoped to the full ServiceUri)
         /// </summary>
         /// <param name="queueDescription"></param>

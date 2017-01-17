@@ -76,27 +76,24 @@ namespace MassTransit.Util.Caching
         {
             var key = _keyProvider(value);
 
-            return TryGetExistingNode(key, out node);
+            lock (_lock)
+                return TryGetExistingNode(key, out node);
         }
 
         public void ValueAdded(INode<TValue> node, TValue value)
         {
-            lock (_lock)
-            {
-                var key = _keyProvider(value);
+            var key = _keyProvider(value);
 
+            lock (_lock)
                 _index[key] = new WeakReference<INode<TValue>>(node, false);
-            }
         }
 
         public void ValueRemoved(INode<TValue> node, TValue value)
         {
-            lock (_lock)
-            {
-                var key = _keyProvider(value);
+            var key = _keyProvider(value);
 
+            lock (_lock)
                 _index.Remove(key);
-            }
         }
 
         public void CacheCleared()
@@ -144,12 +141,12 @@ namespace MassTransit.Util.Caching
 
         public bool Remove(TKey key)
         {
-            INode<TValue> existingNode;
-            if (!TryGetExistingNode(key, out existingNode))
-                return false;
-
             lock (_lock)
             {
+                INode<TValue> existingNode;
+                if (!TryGetExistingNode(key, out existingNode))
+                    return false;
+
                 var result = _index.Remove(key);
 
                 // if the node is resolved, it's likely been notified, so remove it from
@@ -163,27 +160,24 @@ namespace MassTransit.Util.Caching
 
         bool TryGetExistingNode(TKey key, out INode<TValue> existingNode)
         {
-            lock (_lock)
+            WeakReference<INode<TValue>> existingReference;
+            if (_index.TryGetValue(key, out existingReference)
+                && existingReference.TryGetTarget(out existingNode)
+                && existingNode.Value != null)
             {
-                WeakReference<INode<TValue>> existingReference;
-                if (_index.TryGetValue(key, out existingReference)
-                    && existingReference.TryGetTarget(out existingNode)
-                    && existingNode.Value != null)
+                if (existingNode.Value.IsFaulted)
                 {
-                    if (existingNode.Value.IsFaulted)
-                    {
-                        _index.Remove(key);
+                    _index.Remove(key);
 
-                        existingNode = null;
-                        return false;
-                    }
-
-                    return true;
+                    existingNode = null;
+                    return false;
                 }
 
-                existingNode = null;
-                return false;
+                return true;
             }
+
+            existingNode = null;
+            return false;
         }
 
         void Rebuild()

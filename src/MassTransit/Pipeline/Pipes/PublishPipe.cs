@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,51 +13,139 @@
 namespace MassTransit.Pipeline.Pipes
 {
     using System;
+    using System.Collections.Concurrent;
+    using System.Diagnostics;
     using System.Threading.Tasks;
-    using Filters;
     using GreenPipes;
+    using Observables;
+    using PublishPipeSpecifications;
+    using Util;
 
 
     public class PublishPipe :
         IPublishPipe
     {
-        static readonly IPublishPipe _empty = new PublishPipe(new MessageTypePublishFilter(), Pipe.Empty<PublishContext>());
-        readonly MessageTypePublishFilter _filter;
-        readonly IPipe<PublishContext> _pipe;
+        readonly PublishObservable _observers;
+        readonly ConcurrentDictionary<Type, IMessagePipe> _outputPipes;
+        readonly IPublishPipeSpecification _specification;
 
-        public PublishPipe(MessageTypePublishFilter messageTypePublishFilter, IPipe<PublishContext> pipe)
+        public PublishPipe(IPublishPipeSpecification specification)
         {
-            if (messageTypePublishFilter == null)
-                throw new ArgumentNullException(nameof(messageTypePublishFilter));
-            if (pipe == null)
-                throw new ArgumentNullException(nameof(pipe));
-
-            _filter = messageTypePublishFilter;
-            _pipe = pipe;
+            _specification = specification;
+            _outputPipes = new ConcurrentDictionary<Type, IMessagePipe>();
+            _observers = new PublishObservable();
         }
-
-        public static IPublishPipe Empty => _empty;
 
         void IProbeSite.Probe(ProbeContext context)
         {
-            ProbeContext scope = context.CreateScope("sendPipe");
+            var scope = context.CreateScope("publishPipe");
 
-            _pipe.Probe(scope);
+            foreach (var outputPipe in _outputPipes.Values)
+            {
+                outputPipe.Probe(scope);
+            }
         }
 
-        Task IPipe<PublishContext>.Send(PublishContext context)
+        ConnectHandle IPublishMessageObserverConnector.ConnectPublishMessageObserver<T>(IPublishMessageObserver<T> observer)
         {
-            return _pipe.Send(context);
-        }
-
-        ConnectHandle IPublishMessageObserverConnector.ConnectPublishMessageObserver<TMessage>(IPublishMessageObserver<TMessage> observer)
-        {
-            return _filter.ConnectPublishMessageObserver(observer);
+            return GetPipe<T, IPublishMessageObserverConnector>().ConnectPublishMessageObserver(observer);
         }
 
         ConnectHandle IPublishObserverConnector.ConnectPublishObserver(IPublishObserver observer)
         {
-            return _filter.ConnectPublishObserver(observer);
+            return _observers.Connect(observer);
+        }
+
+        [DebuggerNonUserCode]
+        [DebuggerStepThrough]
+        Task IPublishPipe.Send<T>(PublishContext<T> context)
+        {
+            return GetPipe<T>().Send(context);
+        }
+
+        TResult GetPipe<T, TResult>()
+            where T : class
+            where TResult : class
+        {
+            return GetPipe<T>().As<TResult>();
+        }
+
+        IMessagePipe GetPipe<T>()
+            where T : class
+        {
+            return _outputPipes.GetOrAdd(typeof(T), x => new MessagePipe<T>(_observers, _specification.GetMessageSpecification<T>()));
+        }
+
+
+        interface IMessagePipe :
+            IPublishMessageObserverConnector,
+            IProbeSite
+        {
+            Task Send<T>(PublishContext<T> context)
+                where T : class;
+
+            TResult As<TResult>()
+                where TResult : class;
+        }
+
+
+        class MessagePipe<TMessage> :
+            IMessagePipe
+            where TMessage : class
+        {
+            readonly PublishObservable _observers;
+            readonly Lazy<IMessagePublishPipe<TMessage>> _output;
+            readonly IMessagePublishPipeSpecification<TMessage> _specification;
+
+            public MessagePipe(PublishObservable observers, IMessagePublishPipeSpecification<TMessage> specification)
+
+            {
+                _output = new Lazy<IMessagePublishPipe<TMessage>>(CreateFilter);
+
+                _observers = observers;
+                _specification = specification;
+            }
+
+            TResult IMessagePipe.As<TResult>()
+            {
+                return _output.Value as TResult;
+            }
+
+            Task IMessagePipe.Send<T>(PublishContext<T> context)
+            {
+                var sendContext = context as PublishContext<TMessage>;
+                if (sendContext == null)
+                    throw new ArgumentException($"The argument type did not match the output type: {TypeMetadataCache<T>.ShortName}");
+
+                return _output.Value.Send(sendContext);
+            }
+
+            public void Probe(ProbeContext context)
+            {
+                _output.Value.Probe(context);
+            }
+
+            ConnectHandle IPublishMessageObserverConnector.ConnectPublishMessageObserver<T>(IPublishMessageObserver<T> observer)
+            {
+                var connector = _output.Value as IMessagePublishPipe<T>;
+                if (connector == null)
+                    throw new ArgumentException($"The filter is not of the specified type: {typeof(T).Name}", nameof(observer));
+
+                return connector.ConnectPublishMessageObserver(observer);
+            }
+
+            IMessagePublishPipe<TMessage> CreateFilter()
+            {
+                IPipe<PublishContext<TMessage>> messagePipe = _specification.BuildMessagePipe();
+
+                IMessagePublishPipe<TMessage> messagePublishPipe = new MessagePublishPipe<TMessage>(messagePipe);
+
+                var adapter = new PublishMessageObserverAdapter<TMessage>(_observers);
+
+                messagePublishPipe.ConnectPublishMessageObserver(adapter);
+
+                return messagePublishPipe;
+            }
         }
     }
 }

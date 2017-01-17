@@ -15,43 +15,10 @@ namespace MassTransit.RabbitMqTransport.Topology
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using Newtonsoft.Json.Linq;
-    using Transports;
 
 
     public static class RabbitMqExchangeBindingExtensions
     {
-        public static IEnumerable<ExchangeBindingSettings> GetExchangeBindings(this Type messageType, IMessageNameFormatter messageNameFormatter)
-        {
-            if (!IsBindableMessageType(messageType))
-                yield break;
-
-            var temporary = IsTemporaryMessageType(messageType);
-
-            var exchange = new Exchange(messageNameFormatter.GetMessageName(messageType).ToString(), !temporary, temporary);
-
-            var binding = new ExchangeBinding(exchange);
-
-            yield return binding;
-        }
-
-        static bool IsBindableMessageType(Type messageType)
-        {
-            if (typeof(JToken) == messageType)
-                return false;
-
-            return true;
-        }
-
-        public static ExchangeBindingSettings GetErrorExchangeBinding(this SendSettings settings)
-        {
-            var exchange = new Exchange(settings.ExchangeName, true, false);
-
-            var binding = new ExchangeBinding(exchange);
-
-            return binding;
-        }
-
         public static ExchangeBindingSettings GetExchangeBinding(this SendSettings settings, string exchangeName)
         {
             var exchange = new Exchange(exchangeName, settings.Durable, settings.AutoDelete);
@@ -59,15 +26,6 @@ namespace MassTransit.RabbitMqTransport.Topology
             var binding = new ExchangeBinding(exchange);
 
             return binding;
-        }
-
-        public static IEnumerable<ExchangeBindingSettings> GetExchangeBindings(this RabbitMqReceiveSettings settings, string exchangeName)
-        {
-            var exchange = new Exchange(exchangeName, settings.Durable, settings.AutoDelete, settings.ExchangeType);
-
-            var binding = new ExchangeBinding(exchange, settings.RoutingKey ?? "");
-
-            yield return binding;
         }
 
         public static bool IsTemporaryMessageType(this Type messageType)

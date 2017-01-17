@@ -48,11 +48,6 @@ namespace MassTransit.AzureServiceBusTransport.Contexts
 
         public Uri ServiceAddress => _host.Settings.ServiceUri;
 
-        public Uri GetTopicAddress(Type messageType)
-        {
-            return _host.MessageNameFormatter.GetTopicAddress(_host, messageType);
-        }
-
         public Task<QueueDescription> CreateQueue(QueueDescription queueDescription)
         {
             return _host.CreateQueue(queueDescription);

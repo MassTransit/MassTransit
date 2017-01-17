@@ -107,17 +107,29 @@ namespace MassTransit.Tests.Courier
             AddActivityContext<SecondTestActivity, TestArguments, TestLog>(() => new SecondTestActivity());
         }
 
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
+        {
+            base.ConfigureInMemoryBus(configurator);
+
+            configurator.ReceiveEndpoint("events", x =>
+            {
+                _completed = Handled<RoutingSlipCompleted>(x);
+
+                ActivityTestContext testActivity = GetActivityContext<TestActivity>();
+                ActivityTestContext secondActivity = GetActivityContext<SecondTestActivity>();
+
+                _firstActivityCompleted =
+                    Handled<RoutingSlipActivityCompleted>(x, context => context.Message.ActivityName.Equals(testActivity.Name));
+                _secondActivityCompleted =
+                    Handled<RoutingSlipActivityCompleted>(x, context => context.Message.ActivityName.Equals(secondActivity.Name));
+            });
+        }
+
         [OneTimeSetUp]
         public async Task Setup()
         {
             ActivityTestContext testActivity = GetActivityContext<TestActivity>();
             ActivityTestContext secondActivity = GetActivityContext<SecondTestActivity>();
-
-            _completed = SubscribeHandler<RoutingSlipCompleted>();
-            _firstActivityCompleted =
-                SubscribeHandler<RoutingSlipActivityCompleted>(context => context.Message.ActivityName.Equals(testActivity.Name));
-            _secondActivityCompleted =
-                SubscribeHandler<RoutingSlipActivityCompleted>(context => context.Message.ActivityName.Equals(secondActivity.Name));
 
             var builder = new RoutingSlipBuilder(Guid.NewGuid());
 

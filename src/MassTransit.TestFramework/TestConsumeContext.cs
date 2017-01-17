@@ -296,7 +296,7 @@ namespace MassTransit.TestFramework
         BaseReceiveContext
     {
         public TestReceiveContext(Uri sourceAddress)
-            : base(sourceAddress, false, new ReceiveObservable(), null, null)
+            : base(sourceAddress, false, new ReceiveObservable(), null)
         {
             HeaderProvider = new DictionaryHeaderProvider(new Dictionary<string, object>());
         }

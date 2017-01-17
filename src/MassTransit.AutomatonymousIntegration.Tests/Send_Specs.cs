@@ -56,9 +56,9 @@ namespace MassTransit.AutomatonymousIntegration.Tests
             Console.WriteLine(result.ToJsonString());
         }
 
-        protected override void PreCreateBus(IInMemoryBusFactoryConfigurator configurator)
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
-            base.PreCreateBus(configurator);
+            base.ConfigureInMemoryBus(configurator);
 
             configurator.ReceiveEndpoint("observer", e =>
             {

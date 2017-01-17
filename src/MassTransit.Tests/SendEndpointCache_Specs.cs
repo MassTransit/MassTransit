@@ -18,7 +18,7 @@ namespace MassTransit.Tests
     using TestFramework;
 
 
-    [TestFixture]
+    [TestFixture, Explicit]
     public class Querying_the_send_endpoint_cache_concurrently :
         InMemoryTestFixture
     {
@@ -26,7 +26,7 @@ namespace MassTransit.Tests
         public async Task Querying_for_two_endpoints_at_the_same_time()
         {
             await Task.WhenAll(Bus.GetSendEndpoint(new Uri("loopback://localhost/queue_a")),
-                Bus.GetSendEndpoint(new Uri("loopback://localhost/queue_b")));
+                Bus.GetSendEndpoint(new Uri("loopback://localhost/queue_b"))).ConfigureAwait(false);
 
             Assert.DoesNotThrowAsync(async () =>
             {

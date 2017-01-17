@@ -42,7 +42,7 @@ namespace MassTransit.Tests.Saga
         Dependency _dependency;
         Guid _sagaId;
 
-        protected override void PreCreateBus(IInMemoryBusFactoryConfigurator configurator)
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
             _sagaId = NewId.NextGuid();
 

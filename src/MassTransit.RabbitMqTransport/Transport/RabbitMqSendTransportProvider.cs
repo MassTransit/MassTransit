@@ -1,4 +1,4 @@
-// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,9 +13,11 @@
 namespace MassTransit.RabbitMqTransport.Transport
 {
     using System;
-    using System.Linq;
     using System.Threading.Tasks;
     using Integration;
+    using Pipeline;
+    using Specifications;
+    using Topology;
     using Transports;
 
 
@@ -23,23 +25,27 @@ namespace MassTransit.RabbitMqTransport.Transport
         ISendTransportProvider
     {
         readonly BusHostCollection<RabbitMqHost> _hosts;
+        readonly IRabbitMqEndpointConfiguration _configuration;
 
-        public RabbitMqSendTransportProvider(BusHostCollection<RabbitMqHost> hosts)
+        public RabbitMqSendTransportProvider(BusHostCollection<RabbitMqHost> hosts, IRabbitMqEndpointConfiguration configuration)
         {
             _hosts = hosts;
+            _configuration = configuration;
         }
 
         public Task<ISendTransport> GetSendTransport(Uri address)
         {
-            var host = _hosts.GetHosts(address).FirstOrDefault();
-            if (host == null)
-                throw new EndpointNotFoundException("The endpoint address specified an unknown host: " + address);
+            var host = _hosts.GetHost(address);
 
-            var sendSettings = address.GetSendSettings();
+            var sendSettings = _configuration.SendTopology.GetSendSettings(address);
+
+            var topology = _configuration.SendTopology.GetTopologyLayout(address);
 
             var modelCache = new RabbitMqModelCache(host);
 
-            return Task.FromResult<ISendTransport>(new RabbitMqSendTransport(modelCache, sendSettings));
+            var configureTopologyFilter = new ConfigureTopologyFilter<SendSettings>(sendSettings, topology);
+
+            return Task.FromResult<ISendTransport>(new RabbitMqSendTransport(modelCache, sendSettings, configureTopologyFilter));
         }
     }
 }

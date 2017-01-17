@@ -104,7 +104,7 @@ namespace MassTransit.Serialization
                 {
                     object obj;
                     Type deserializeType = typeof(T);
-                    if (deserializeType.IsInterface && TypeMetadataCache.IsValidMessageType(deserializeType))
+                    if (deserializeType.IsInterface && TypeMetadataCache<T>.IsValidMessageType)
                         deserializeType = TypeCache.GetImplementationType(deserializeType);
 
                     using (JsonReader jsonReader = _messageToken.CreateReader())

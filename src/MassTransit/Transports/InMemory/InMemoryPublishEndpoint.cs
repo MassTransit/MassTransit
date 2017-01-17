@@ -1,4 +1,4 @@
-// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,28 +13,42 @@
 namespace MassTransit.Transports.InMemory
 {
     using System;
-    using System.Linq;
     using System.Threading.Tasks;
     using GreenPipes;
     using Pipeline;
     using Pipeline.Observables;
+    using Pipeline.Pipes;
+    using Topology;
     using Util;
+    using Util.Caching;
 
 
     public class InMemoryPublishEndpointProvider :
         IPublishEndpointProvider
     {
+        readonly InMemoryHost _host;
+        readonly IIndex<TypeKey, CachedSendEndpoint<TypeKey>> _index;
         readonly PublishObservable _publishObservable;
         readonly IPublishPipe _publishPipe;
+        readonly IInMemoryPublishTopology _publishTopology;
         readonly ISendEndpointProvider _sendEndpointProvider;
-        readonly InMemoryHost _host;
+        readonly IMessageSerializer _serializer;
+        readonly Uri _sourceAddress;
 
-        public InMemoryPublishEndpointProvider(ISendEndpointProvider sendEndpointProvider, ISendTransportProvider transportProvider, IPublishPipe publishPipe)
+        public InMemoryPublishEndpointProvider(ISendEndpointProvider sendEndpointProvider, ISendTransportProvider transportProvider, IPublishPipe publishPipe,
+            IInMemoryPublishTopology publishTopology, IMessageSerializer serializer, Uri sourceAddress)
         {
             _sendEndpointProvider = sendEndpointProvider;
             _publishPipe = publishPipe;
+            _publishTopology = publishTopology;
+            _serializer = serializer;
+            _sourceAddress = sourceAddress;
             _host = transportProvider as InMemoryHost;
             _publishObservable = new PublishObservable();
+
+
+            var cache = new GreenCache<CachedSendEndpoint<TypeKey>>(10000, TimeSpan.FromMinutes(1), TimeSpan.FromHours(24), () => DateTime.UtcNow);
+            _index = cache.AddIndex("type", x => x.Key);
         }
 
         public IPublishEndpoint CreatePublishEndpoint(Uri sourceAddress, Guid? correlationId, Guid? conversationId)
@@ -42,20 +56,67 @@ namespace MassTransit.Transports.InMemory
             return new PublishEndpoint(sourceAddress, this, _publishObservable, _publishPipe, correlationId, conversationId);
         }
 
-        public async Task<ISendEndpoint> GetPublishSendEndpoint(Type messageType)
+        public async Task<ISendEndpoint> GetPublishSendEndpoint<T>(T message)
+            where T : class
         {
-            if (!TypeMetadataCache.IsValidMessageType(messageType))
-                throw new MessageException(messageType, "Anonymous types are not valid message types");
+            Uri publishAddress;
+            if (!_publishTopology.GetMessageTopology<T>()
+                .TryGetPublishAddress(_host.Address, message, out publishAddress))
+                throw new PublishException($"An address for publishing message type {TypeMetadataCache<T>.ShortName} was not found.");
 
-            ISendEndpoint[] result = await Task.WhenAll(_host.TransportAddresses.Select(x => _sendEndpointProvider.GetSendEndpoint(x)))
-                .ConfigureAwait(false);
-
-            return new FanoutSendEndpoint(result);
+            return await _index.Get(new TypeKey(typeof(T), publishAddress), typeKey => CreateSendEndpoint<T>(typeKey)).ConfigureAwait(false);
         }
 
         public ConnectHandle ConnectPublishObserver(IPublishObserver observer)
         {
             return _publishObservable.Connect(observer);
+        }
+
+        async Task<CachedSendEndpoint<TypeKey>> CreateSendEndpoint<T>(TypeKey typeKey)
+            where T : class
+        {
+            var builder = _host.CreatePublishTopologyBuilder();
+
+            _publishTopology.GetMessageTopology<T>().Apply(builder);
+
+            ISendTransport exchange = await _host.GetSendTransport(typeKey.Address).ConfigureAwait(false);
+
+            var sendEndpoint = new SendEndpoint(exchange, _serializer, typeKey.Address, _sourceAddress, SendPipe.Empty);
+
+            return new CachedSendEndpoint<TypeKey>(typeKey, sendEndpoint);
+        }
+
+
+        struct TypeKey
+        {
+            public readonly Type MessageType;
+            public readonly Uri Address;
+
+            public TypeKey(Type messageType, Uri address)
+            {
+                MessageType = messageType;
+                Address = address;
+            }
+
+            public bool Equals(TypeKey other)
+            {
+                return MessageType == other.MessageType && Address.Equals(other.Address);
+            }
+
+            public override bool Equals(object obj)
+            {
+                if (ReferenceEquals(null, obj))
+                    return false;
+                return obj is TypeKey && Equals((TypeKey)obj);
+            }
+
+            public override int GetHashCode()
+            {
+                unchecked
+                {
+                    return (MessageType.GetHashCode() * 397) ^ Address.GetHashCode();
+                }
+            }
         }
     }
 }

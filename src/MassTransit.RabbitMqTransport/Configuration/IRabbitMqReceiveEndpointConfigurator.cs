@@ -13,6 +13,7 @@
 namespace MassTransit.RabbitMqTransport
 {
     using System;
+    using Topology;
 
 
     /// <summary>
@@ -61,6 +62,6 @@ namespace MassTransit.RabbitMqTransport
         /// </summary>
         /// <param name="exchangeName">The exchange name</param>
         /// <param name="callback">Configure the exchange and binding</param>
-        void Bind(string exchangeName, Action<IExchangeBindingConfigurator> callback);
+        void Bind(string exchangeName, Action<IBindExchangeConfigurator> callback);
     }
 }

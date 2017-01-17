@@ -29,11 +29,12 @@ namespace MassTransit.Tests.Courier
         [Test]
         public async Task Should_capture_a_thrown_exception()
         {
-            Task<ConsumeContext<RoutingSlipFaulted>> handled = SubscribeHandler<RoutingSlipFaulted>();
+            var builder = new RoutingSlipBuilder(Guid.NewGuid());
+
+            Task<ConsumeContext<RoutingSlipFaulted>> handled = ConnectPublishHandler<RoutingSlipFaulted>(x => x.Message.TrackingNumber == builder.TrackingNumber);
 
             ActivityTestContext faultActivity = GetActivityContext<NastyFaultyActivity>();
 
-            var builder = new RoutingSlipBuilder(Guid.NewGuid());
             builder.AddActivity(faultActivity.Name, faultActivity.ExecuteUri);
 
             await Bus.Execute(builder.Build());
@@ -44,12 +45,13 @@ namespace MassTransit.Tests.Courier
         [Test]
         public async Task Should_compensate_both_activities()
         {
-            Task<ConsumeContext<RoutingSlipFaulted>> handled = SubscribeHandler<RoutingSlipFaulted>();
+            var builder = new RoutingSlipBuilder(Guid.NewGuid());
+
+            Task<ConsumeContext<RoutingSlipFaulted>> handled = ConnectPublishHandler<RoutingSlipFaulted>(x => x.Message.TrackingNumber == builder.TrackingNumber);
 
             ActivityTestContext testActivity = GetActivityContext<TestActivity>();
             ActivityTestContext faultActivity = GetActivityContext<NastyFaultyActivity>();
 
-            var builder = new RoutingSlipBuilder(Guid.NewGuid());
             builder.AddActivity(testActivity.Name, testActivity.ExecuteUri, new
             {
                 Value = "Hello Again!",
@@ -68,16 +70,17 @@ namespace MassTransit.Tests.Courier
         [Test]
         public async Task Should_handle_the_failed_to_compensate_event()
         {
+            var builder = new RoutingSlipBuilder(Guid.NewGuid());
+
             Task<ConsumeContext<RoutingSlipActivityCompensationFailed>> handledCompensationFailure =
-                SubscribeHandler<RoutingSlipActivityCompensationFailed>();
+                ConnectPublishHandler<RoutingSlipActivityCompensationFailed>(x => x.Message.TrackingNumber == builder.TrackingNumber);
             Task<ConsumeContext<RoutingSlipCompensationFailed>> handledRoutingSlipFailure =
-                SubscribeHandler<RoutingSlipCompensationFailed>();
+                ConnectPublishHandler<RoutingSlipCompensationFailed>(x => x.Message.TrackingNumber == builder.TrackingNumber);
 
             ActivityTestContext testActivity = GetActivityContext<TestActivity>();
             ActivityTestContext faultyCompensateActivity = GetActivityContext<FaultyCompensateActivity>();
             ActivityTestContext faultActivity = GetActivityContext<FaultyActivity>();
 
-            var builder = new RoutingSlipBuilder(Guid.NewGuid());
             builder.AddVariable("Value", "Hello");
             builder.AddActivity(testActivity.Name, testActivity.ExecuteUri);
             builder.AddActivity(faultyCompensateActivity.Name, faultyCompensateActivity.ExecuteUri);
@@ -93,15 +96,16 @@ namespace MassTransit.Tests.Courier
         [Test]
         public async Task Should_publish_the_faulted_routing_slip_event()
         {
+            var builder = new RoutingSlipBuilder(Guid.NewGuid());
+
             ActivityTestContext testActivity = GetActivityContext<TestActivity>();
             ActivityTestContext secondTestActivity = GetActivityContext<SecondTestActivity>();
             ActivityTestContext faultActivity = GetActivityContext<FaultyActivity>();
 
-            Task<ConsumeContext<RoutingSlipFaulted>> handled = SubscribeHandler<RoutingSlipFaulted>();
-            Task<ConsumeContext<RoutingSlipActivityCompensated>> compensated = SubscribeHandler<RoutingSlipActivityCompensated>(
+            Task<ConsumeContext<RoutingSlipFaulted>> handled = ConnectPublishHandler<RoutingSlipFaulted>(x => x.Message.TrackingNumber == builder.TrackingNumber);
+            Task<ConsumeContext<RoutingSlipActivityCompensated>> compensated = ConnectPublishHandler<RoutingSlipActivityCompensated>(
                 context => context.Message.ActivityName.Equals(testActivity.Name));
 
-            var builder = new RoutingSlipBuilder(Guid.NewGuid());
             builder.AddActivity(testActivity.Name, testActivity.ExecuteUri, new
             {
                 Value = "Hello",

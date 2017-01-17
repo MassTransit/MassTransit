@@ -72,7 +72,29 @@
       <Link>Properties\SolutionVersion.cs</Link>
     </Compile>
     <Compile Include="Configuration\Builders\IRabbitMqReceiveEndpointBuilder.cs" />
+    <Compile Include="Configuration\Specifications\IRabbitMqEndpointConfiguration.cs" />
+    <Compile Include="Configuration\Specifications\RabbitMqEndpointConfiguration.cs" />
+    <Compile Include="Pipeline\ConfigureTopologyFilter.cs" />
+    <Compile Include="Pipeline\PurgeOnStartupFilter.cs" />
+    <Compile Include="Pipeline\SetRoutingKeyFilter.cs" />
+    <Compile Include="Topology\Entities\ExchangeBindingEntity.cs" />
+    <Compile Include="Topology\Entities\ExchangeEntity.cs" />
+    <Compile Include="Topology\Builders\PublishEndpointTopologyBuilder.cs" />
+    <Compile Include="Topology\Entities\QueueBindingEntity.cs" />
+    <Compile Include="Topology\Entities\QueueEntity.cs" />
+    <Compile Include="Topology\Builders\RabbitMqTopologyBuilder.cs" />
+    <Compile Include="Topology\Builders\RabbitMqTopologyLayout.cs" />
+    <Compile Include="Topology\Builders\ReceiveEndpointConsumeTopologyBuilder.cs" />
+    <Compile Include="Topology\Builders\TopologyLayout.cs" />
+    <Compile Include="Topology\Builders\TopologyLayoutExtensions.cs" />
+    <Compile Include="Topology\Configurators\ExchangeBindingConfigurator.cs" />
+    <Compile Include="Topology\Conventions\IRoutingKeyMessageSendTopologyConvention.cs" />
+    <Compile Include="Topology\Conventions\IRoutingKeySendTopologyConvention.cs" />
     <Compile Include="Configuration\Builders\RabbitMqBusBuilder.cs" />
+    <Compile Include="Topology\Conventions\RoutingKeyMessageSendTopologyConvention.cs" />
+    <Compile Include="Topology\Conventions\RoutingKeySendTopologyConvention.cs" />
+    <Compile Include="Configuration\Builders\SetRoutingKeyMessageSendTopology.cs" />
+    <Compile Include="Configuration\Builders\StaticRabbitMqPublishTopology.cs" />
     <Compile Include="Configuration\Builders\RabbitMqReceiveEndpointBuilder.cs" />
     <Compile Include="Configuration\Configurators\ConfigurationHostSettings.cs" />
     <Compile Include="Configuration\Configurators\RabbitMqClusterConfigurator.cs" />
@@ -91,7 +113,7 @@
     <Compile Include="Contexts\RabbitMqHeaderProvider.cs" />
     <Compile Include="Contexts\RabbitMqModelContext.cs" />
     <Compile Include="Contexts\RabbitMqReceiveContext.cs" />
-    <Compile Include="Contexts\RabbitMqSendContextImpl.cs" />
+    <Compile Include="Contexts\BasicPublishRabbitMqSendContext.cs" />
     <Compile Include="Contexts\SharedConnectionContext.cs" />
     <Compile Include="Contexts\SharedModelContext.cs" />
     <Compile Include="Contracts\PrefetchCountUpdated.cs" />
@@ -118,10 +140,9 @@
     <Compile Include="Management\ISetPrefetchCount.cs" />
     <Compile Include="Pipeline\DelayedExchangeMessageSchedulerFilter.cs" />
     <Compile Include="Pipeline\RabbitMqConsumerFilter.cs" />
-    <Compile Include="Pipeline\PrepareSendExchangeFilter.cs" />
     <Compile Include="Pipeline\RabbitMqBasicConsumer.cs" />
     <Compile Include="Pipeline\ReceiveModelFilter.cs" />
-    <Compile Include="Pipeline\PrepareReceiveQueueFilter.cs" />
+    <Compile Include="Pipeline\PrefetchCountFilter.cs" />
     <Compile Include="Management\SetPrefetchCountManagementConsumer.cs" />
     <Compile Include="RabbitMqBusFactory.cs" />
     <Compile Include="RabbitMqAddressExtensions.cs" />
@@ -137,11 +158,63 @@
     <Compile Include="Configuration\BusFactoryConfiguratorExtensions.cs" />
     <Compile Include="RabbitMqDeliveryMetrics.cs" />
     <Compile Include="RequestClientExtensions.cs" />
+    <Compile Include="Topology\Conventions\RoutingKeyConventionExtensions.cs" />
     <Compile Include="SchedulePublishBusExtensions.cs" />
     <Compile Include="Testing\RabbitMqTestHarness.cs" />
+    <Compile Include="Topology\DelegateRoutingKeyFormatter.cs" />
+    <Compile Include="Topology\Exchange.cs" />
+    <Compile Include="Topology\ExchangeBinding.cs" />
+    <Compile Include="Topology\ExchangeBindingHandle.cs" />
+    <Compile Include="Topology\ExchangeHandle.cs" />
+    <Compile Include="Topology\ExchangeToExchangeBinding.cs" />
+    <Compile Include="Topology\ExchangeToQueueBinding.cs" />
+    <Compile Include="Topology\FanoutExchangeTypeSelector.cs" />
+    <Compile Include="Topology\EmptyRoutingKeyFormatter.cs" />
     <Compile Include="Topology\EntitySettings.cs" />
+    <Compile Include="Topology\IBindExchangeConfigurator.cs" />
+    <Compile Include="Topology\IExchangeTypeSelector.cs" />
+    <Compile Include="Topology\IMessageExchangeTypeSelector.cs" />
+    <Compile Include="Topology\IMessageRoutingKeyFormatter.cs" />
+    <Compile Include="Topology\IRabbitMqConsumeTopology.cs" />
+    <Compile Include="Topology\IRabbitMqConsumeTopologyBuilder.cs" />
+    <Compile Include="Topology\IRabbitMqConsumeTopologyConfigurator.cs" />
+    <Compile Include="Topology\IRabbitMqConsumeTopologySpecification.cs" />
+    <Compile Include="Topology\IRabbitMqImplementedMessagePublishTopologyConfigurator.cs" />
+    <Compile Include="Topology\IRabbitMqMessageConsumeTopology.cs" />
+    <Compile Include="Topology\IRabbitMqMessageConsumeTopologyConfigurator.cs" />
+    <Compile Include="Topology\IRabbitMqMessagePublishTopology.cs" />
+    <Compile Include="Topology\IRabbitMqMessagePublishTopologyConfigurator.cs" />
+    <Compile Include="Topology\IRabbitMqMessageSendTopology.cs" />
+    <Compile Include="Topology\IRabbitMqMessageSendTopologyConfigurator.cs" />
+    <Compile Include="Topology\IRabbitMqPublishTopology.cs" />
+    <Compile Include="Topology\IRabbitMqPublishTopologyBuilder.cs" />
+    <Compile Include="Topology\IRabbitMqPublishTopologyConfigurator.cs" />
+    <Compile Include="Topology\IRabbitMqReceiveEndpointTopology.cs" />
+    <Compile Include="Topology\IRabbitMqSendTopology.cs" />
+    <Compile Include="Topology\IRabbitMqSendTopologyConfigurator.cs" />
+    <Compile Include="Topology\IRabbitMqHostTopology.cs" />
+    <Compile Include="Topology\IRabbitMqTopologyBuilder.cs" />
+    <Compile Include="Topology\IRoutingKeyFormatter.cs" />
+    <Compile Include="Topology\MessageExchange.cs" />
+    <Compile Include="Topology\MessageExchangeTypeSelector.cs" />
+    <Compile Include="Topology\MessageRoutingKeyFormatter.cs" />
+    <Compile Include="Topology\Queue.cs" />
+    <Compile Include="Topology\QueueBindingHandle.cs" />
+    <Compile Include="Topology\QueueHandle.cs" />
+    <Compile Include="Topology\RabbitMqConsumeTopology.cs" />
+    <Compile Include="Topology\RabbitMqEntityNameValidator.cs" />
+    <Compile Include="Topology\RabbitMqMessageConsumeTopology.cs" />
+    <Compile Include="Topology\RabbitMqReceiveEndpointTopology.cs" />
+    <Compile Include="Topology\RabbitMqMessagePublishTopology.cs" />
+    <Compile Include="Topology\RabbitMqMessageSendTopology.cs" />
+    <Compile Include="Topology\RabbitMqPublishTopology.cs" />
+    <Compile Include="Topology\RabbitMqSendTopology.cs" />
+    <Compile Include="Topology\RabbitMqTopology.cs" />
     <Compile Include="Topology\ReceiveSettings.cs" />
     <Compile Include="Topology\SendSettings.cs" />
+    <Compile Include="Topology\Specifications\ExchangeBindingConsumeTopologySpecification.cs" />
+    <Compile Include="Topology\Specifications\ExchangeToExchangeBindingConsumeTopologySpecification.cs" />
+    <Compile Include="Topology\Specifications\InvalidRabbitMqConsumeTopologySpecification.cs" />
     <Compile Include="Transport\IRabbitMqReceiveEndpointFactory.cs" />
     <Compile Include="Transport\RabbitMqHost.cs" />
     <Compile Include="RabbitMqHostSettings.cs" />
@@ -181,7 +254,9 @@
     <None Include="packages.config" />
     <None Include="README.md" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Topology\Conventions\RoutingKey\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

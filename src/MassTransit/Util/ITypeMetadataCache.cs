@@ -32,6 +32,11 @@ namespace MassTransit.Util
         bool IsValidMessageType { get; }
 
         /// <summary>
+        /// True if this message is not a public type
+        /// </summary>
+        bool IsTemporaryMessageType { get; }
+
+        /// <summary>
         /// Returns all valid message types that are contained within the s
         /// </summary>
         Type[] MessageTypes { get; }

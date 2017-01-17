@@ -30,21 +30,11 @@ namespace MassTransit.Tests.Courier
         [Test]
         public async Task Should_continue_with_the_source_itinerary()
         {
-            var trackingNumber = Guid.NewGuid();
+            _trackingNumber = Guid.NewGuid();
 
-            var testActivity = GetActivityContext<TestActivity>();
             var reviseActivity = GetActivityContext<ReviseItineraryActivity>();
 
-            Task<ConsumeContext<RoutingSlipCompleted>> completed =
-                SubscribeHandler<RoutingSlipCompleted>(context => (context.Message.TrackingNumber == trackingNumber));
-
-            Task<ConsumeContext<RoutingSlipActivityCompleted>> testActivityCompleted = SubscribeHandler<RoutingSlipActivityCompleted>(
-                context => context.Message.TrackingNumber == trackingNumber && context.Message.ActivityName.Equals(testActivity.Name));
-
-            Task<ConsumeContext<RoutingSlipActivityCompleted>> reviseActivityCompleted = SubscribeHandler<RoutingSlipActivityCompleted>(
-                context => context.Message.TrackingNumber == trackingNumber && context.Message.ActivityName.Equals(reviseActivity.Name));
-
-            var builder = new RoutingSlipBuilder(trackingNumber);
+            var builder = new RoutingSlipBuilder(_trackingNumber);
             builder.AddActivity(reviseActivity.Name, reviseActivity.ExecuteUri, new
             {
                 Value = "Time to add a new item!"
@@ -52,9 +42,9 @@ namespace MassTransit.Tests.Courier
 
             await Bus.Execute(builder.Build());
 
-            await completed;
-            await reviseActivityCompleted;
-            ConsumeContext<RoutingSlipActivityCompleted> testActivityResult = await testActivityCompleted;
+            await _completed;
+            await _reviseActivityCompleted;
+            ConsumeContext<RoutingSlipActivityCompleted> testActivityResult = await _testActivityCompleted;
 
             testActivityResult.Message.GetArgument<string>("Value").ShouldBe("Added");
 
@@ -64,6 +54,30 @@ namespace MassTransit.Tests.Courier
         }
 
         Task<ConsumeContext<RoutingSlipActivityCompleted>> _handled;
+        Task<ConsumeContext<RoutingSlipCompleted>> _completed;
+        Task<ConsumeContext<RoutingSlipActivityCompleted>> _testActivityCompleted;
+        Task<ConsumeContext<RoutingSlipActivityCompleted>> _reviseActivityCompleted;
+        Guid _trackingNumber;
+
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
+        {
+            base.ConfigureInMemoryBus(configurator);
+
+            configurator.ReceiveEndpoint("events", x =>
+            {
+                var testActivity = GetActivityContext<TestActivity>();
+                var reviseActivity = GetActivityContext<ReviseItineraryActivity>();
+
+                _completed = Handled<RoutingSlipCompleted>(x, context => (context.Message.TrackingNumber == _trackingNumber));
+
+                _testActivityCompleted = Handled<RoutingSlipActivityCompleted>(x,
+                    context => context.Message.TrackingNumber == _trackingNumber && context.Message.ActivityName.Equals(testActivity.Name));
+
+                _reviseActivityCompleted = Handled<RoutingSlipActivityCompleted>(x,
+                    context => context.Message.TrackingNumber == _trackingNumber && context.Message.ActivityName.Equals(reviseActivity.Name));
+
+            });
+        }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {

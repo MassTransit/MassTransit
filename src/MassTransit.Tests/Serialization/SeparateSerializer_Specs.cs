@@ -26,9 +26,9 @@ namespace MassTransit.Tests.Serialization
         [Test]
         public async Task Should_handle_both_serializers()
         {
-            Task<ConsumeContext<PongMessage>> ponged = SubscribeHandler<PongMessage>();
+            Task<ConsumeContext<PongMessage>> ponged = ConnectPublishHandler<PongMessage>();
 
-            Bus.Publish(new PingMessage());
+            await Bus.Publish(new PingMessage());
 
             ConsumeContext<PingMessage> pingContext = await _handled;
 

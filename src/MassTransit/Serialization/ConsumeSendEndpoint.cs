@@ -17,7 +17,6 @@ namespace MassTransit.Serialization
     using System.Threading.Tasks;
     using Context;
     using GreenPipes;
-    using Pipeline;
     using Util;
 
 

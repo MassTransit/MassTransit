@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -15,7 +15,7 @@ namespace MassTransit.HttpTransport
     using System;
     using GreenPipes;
     using Hosting;
-    using MassTransit.Pipeline;
+    using Topology;
     using Transport;
     using Util;
 
@@ -32,17 +32,15 @@ namespace MassTransit.HttpTransport
         /// <param name="receiveObserver"></param>
         /// <param name="receiveTransportObserver"></param>
         /// <param name="supervisor"></param>
-        /// <param name="sendPipe"></param>
+        /// <param name="topology"></param>
         public static void HttpConsumer(this IPipeConfigurator<OwinHostContext> configurator, IPipe<ReceiveContext> receivePipe, HttpHostSettings settings,
-            ReceiveSettings receiveSettings,
-            IReceiveObserver receiveObserver, IReceiveTransportObserver receiveTransportObserver, ITaskSupervisor supervisor,
-            ISendPipe sendPipe)
+            ReceiveSettings receiveSettings, IReceiveObserver receiveObserver, IReceiveTransportObserver receiveTransportObserver, ITaskSupervisor supervisor, IHttpReceiveEndpointTopology topology)
         {
             if (configurator == null)
                 throw new ArgumentNullException(nameof(configurator));
 
             var pipeBuilderConfigurator = new HttpConsumerPipeSpecification(settings, receiveSettings, receivePipe, receiveObserver, receiveTransportObserver,
-                supervisor, sendPipe);
+                supervisor, topology);
 
             configurator.AddPipeSpecification(pipeBuilderConfigurator);
         }

@@ -15,7 +15,6 @@ namespace MassTransit.Pipeline.ConsumerFactories
     using System;
     using System.Threading.Tasks;
     using GreenPipes;
-    using Util;
 
 
     public class ObjectConsumerFactory<TConsumer> :

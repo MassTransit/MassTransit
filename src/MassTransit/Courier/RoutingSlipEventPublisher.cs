@@ -35,7 +35,7 @@ namespace MassTransit.Courier
 
         static RoutingSlipEventPublisher()
         {
-            RoutingSlipEventCorrelation.ConfigureMessageCorrelation();
+            RoutingSlipEventCorrelation.ConfigureCorrelationIds();
         }
 
         public RoutingSlipEventPublisher(CompensateContext compensateContext, RoutingSlip routingSlip)

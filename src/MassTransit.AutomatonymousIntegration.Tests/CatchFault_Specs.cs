@@ -158,7 +158,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
         {
             var message = new Start();
 
-            var serviceFaulted = SubscribeHandler<ServiceFaulted>();
+            var serviceFaulted = ConnectPublishHandler<ServiceFaulted>();
 
             Task<StartFaulted> faulted = null;
             var request = await Bus.Request(InputQueueSendEndpoint, message, x =>

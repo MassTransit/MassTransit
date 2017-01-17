@@ -33,7 +33,7 @@ namespace MassTransit.Tests
         [Test]
         public async Task Should_source_address_from_the_endpoint()
         {
-            var responseHandled = SubscribeHandler<PongMessage>();
+            var responseHandled = ConnectPublishHandler<PongMessage>();
 
             await InputQueueSendEndpoint.Send(new PingMessage());
 

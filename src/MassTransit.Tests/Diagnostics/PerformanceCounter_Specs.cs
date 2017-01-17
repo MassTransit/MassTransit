@@ -38,9 +38,9 @@ namespace MassTransit.Tests.Diagnostics
 
         TaskCompletionSource<bool> _completed;
 
-        protected override void PreCreateBus(IInMemoryBusFactoryConfigurator configurator)
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
-            base.PreCreateBus(configurator);
+            base.ConfigureInMemoryBus(configurator);
 
             configurator.EnableWindowsPerformanceCounters();
         }

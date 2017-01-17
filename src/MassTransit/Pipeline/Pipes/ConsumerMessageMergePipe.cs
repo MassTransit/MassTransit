@@ -51,6 +51,9 @@ namespace MassTransit.Pipeline.Pipes
 
         public Task Send(ConsumeContext<TMessage> context)
         {
+            if (ReferenceEquals(context, _context))
+                return _output.Send(_context);
+
             ConsumerConsumeContext<TConsumer, TMessage> consumerContext = context as ConsumerConsumeContext<TConsumer, TMessage>
                 ?? new ConsumerConsumeContextProxy<TConsumer, TMessage>(context, _context.Consumer);
 

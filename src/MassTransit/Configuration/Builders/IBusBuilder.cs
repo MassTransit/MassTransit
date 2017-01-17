@@ -46,17 +46,21 @@ namespace MassTransit.Builders
         /// Create a consume pipe for the endpoint, using the bus builder. The bus builder may add additional filters
         /// from the bus configuration to the endpoint which can be overridden by the endpoint.
         /// </summary>
-        /// <param name="specifications"></param>
         /// <returns></returns>
-        IConsumePipe CreateConsumePipe(params IConsumePipeSpecification[] specifications);
+        IConsumePipe CreateConsumePipe();
 
         /// <summary>
         /// Create a send pipe for the endpoint, using the bus builder. The bus builder may add additional filters
         /// from the bus configuration to the endpoint.
         /// </summary>
-        /// <param name="specifications"></param>
         /// <returns></returns>
-        ISendPipe CreateSendPipe(params ISendPipeSpecification[] specifications);
+        ISendPipe CreateSendPipe();
+
+        /// <summary>
+        /// Create a publish pipe for the receive endpoint, using the bus builder.
+        /// </summary>
+        /// <returns></returns>
+        IPublishPipe CreatePublishPipe();
 
         /// <summary>
         /// Connects a bus observer to the bus to observe lifecycle events on the bus
@@ -64,7 +68,5 @@ namespace MassTransit.Builders
         /// <param name="observer"></param>
         /// <returns></returns>
         ConnectHandle ConnectBusObserver(IBusObserver observer);
-
-        IPublishPipe CreatePublishPipe(params IPublishPipeSpecification[] specifications);
     }
 }

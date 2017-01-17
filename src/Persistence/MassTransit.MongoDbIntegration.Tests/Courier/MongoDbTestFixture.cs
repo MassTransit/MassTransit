@@ -31,9 +31,9 @@ namespace MassTransit.MongoDbIntegration.Tests.Courier
 
         MassTransitMongoDbConventions _convention;
 
-        protected override void PreCreateBus(IInMemoryBusFactoryConfigurator configurator)
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
-            base.PreCreateBus(configurator);
+            base.ConfigureInMemoryBus(configurator);
 
             var builder = new MongoUrlBuilder
             {

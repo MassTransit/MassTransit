@@ -39,7 +39,7 @@ namespace MassTransit.TestFramework
         /// </summary>
         /// <typeparam name="T">The message type</typeparam>
         /// <returns>An awaitable task completed when the message is received</returns>
-        protected Task<ConsumeContext<T>> SubscribeHandler<T>()
+        protected virtual Task<ConsumeContext<T>> SubscribeHandler<T>()
             where T : class
         {
             return BusTestHarness.SubscribeHandler<T>();
@@ -52,7 +52,7 @@ namespace MassTransit.TestFramework
         /// <typeparam name="T">The message type</typeparam>
         /// <param name="filter">A filter that only completes the task if filter is true</param>
         /// <returns>An awaitable task completed when the message is received</returns>
-        protected Task<ConsumeContext<T>> SubscribeHandler<T>(Func<ConsumeContext<T>, bool> filter)
+        protected virtual Task<ConsumeContext<T>> SubscribeHandler<T>(Func<ConsumeContext<T>, bool> filter)
             where T : class
         {
             return BusTestHarness.SubscribeHandler(filter);

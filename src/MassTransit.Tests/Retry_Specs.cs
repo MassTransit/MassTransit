@@ -192,11 +192,11 @@ namespace MassTransit.Tests
 
         int _attempts;
 
-        protected override void PreCreateBus(IInMemoryBusFactoryConfigurator configurator)
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
             configurator.UseRetry(x => x.Immediate(1));
 
-            base.PreCreateBus(configurator);
+            base.ConfigureInMemoryBus(configurator);
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
@@ -206,6 +206,64 @@ namespace MassTransit.Tests
                 _attempts++;
                 throw new IntentionalTestException();
             });
+        }
+    }
+
+    [TestFixture]
+    public class When_specifying_the_bus_level_retry_policy_for_base_type :
+        InMemoryTestFixture
+    {
+        [Test]
+        public async Task Should_only_call_the_handler_twice()
+        {
+            Task<ConsumeContext<Fault<BaseMessage>>> fault = SubscribeHandler<Fault<BaseMessage>>();
+
+            await InputQueueSendEndpoint.Send(new BaseMessage(), context =>
+            {
+                context.ResponseAddress = BusAddress;
+                context.FaultAddress = BusAddress;
+            });
+
+            await fault;
+
+            _attempts.ShouldBe(2);
+        }
+
+        [Test]
+        public void Should_return_a_wonderful_breakdown_of_the_guts_inside_it()
+        {
+            ProbeResult result = Bus.GetProbeResult();
+
+            Console.WriteLine(result.ToJsonString());
+        }
+
+        int _attempts;
+
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
+        {
+            configurator.UseRetry(x => x.Immediate(1));
+
+            base.ConfigureInMemoryBus(configurator);
+        }
+
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        {
+            Handler<BaseMessage>(configurator, async context =>
+            {
+                _attempts++;
+                throw new IntentionalTestException();
+            });
+        }
+
+
+        public interface IBaseMessage
+        {
+        }
+
+
+        public class BaseMessage :
+            IBaseMessage
+        {
         }
     }
 
@@ -242,11 +300,11 @@ namespace MassTransit.Tests
         int _attempts;
         int _lastAttempt;
 
-        protected override void PreCreateBus(IInMemoryBusFactoryConfigurator configurator)
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
             configurator.UseRetry(x => x.Immediate(1));
 
-            base.PreCreateBus(configurator);
+            base.ConfigureInMemoryBus(configurator);
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
@@ -287,7 +345,7 @@ namespace MassTransit.Tests
         int _attempts;
         int _lastAttempt;
 
-        protected override void PreCreateBus(IInMemoryBusFactoryConfigurator configurator)
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
             configurator.UseRetry(x =>
             {
@@ -295,7 +353,7 @@ namespace MassTransit.Tests
                 x.Immediate(1);
             });
 
-            base.PreCreateBus(configurator);
+            base.ConfigureInMemoryBus(configurator);
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
@@ -335,7 +393,7 @@ namespace MassTransit.Tests
         int _attempts;
         int _lastAttempt;
 
-        protected override void PreCreateBus(IInMemoryBusFactoryConfigurator configurator)
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
             configurator.UseRetry(x =>
             {
@@ -343,7 +401,7 @@ namespace MassTransit.Tests
                 x.Immediate(1);
             });
 
-            base.PreCreateBus(configurator);
+            base.ConfigureInMemoryBus(configurator);
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
@@ -378,11 +436,11 @@ namespace MassTransit.Tests
         int _attempts;
         TaskCompletionSource<PingMessage> _completed;
 
-        protected override void PreCreateBus(IInMemoryBusFactoryConfigurator configurator)
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
             configurator.UseRetry(x => x.Immediate(1));
 
-            base.PreCreateBus(configurator);
+            base.ConfigureInMemoryBus(configurator);
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)

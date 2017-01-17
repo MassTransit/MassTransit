@@ -12,11 +12,11 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Monitoring.Performance
 {
-    public class BuiltInCounters
+    public static class BuiltInCounters
     {
         public static class Consumers
         {
-            public static CounterCategory Category = new CounterCategory("MassTransit Consumers", "Consumers built using MassTransit");
+            public static readonly CounterCategory Category = new CounterCategory("MassTransit Consumers", "Consumers built using MassTransit");
 
             public static class Counters
             {
@@ -33,7 +33,7 @@ namespace MassTransit.Monitoring.Performance
 
         public static class Messages
         {
-            public static CounterCategory Category = new CounterCategory("MassTransit Messages", "Messages handled by MassTransit");
+            public static readonly CounterCategory Category = new CounterCategory("MassTransit Messages", "Messages handled by MassTransit");
 
             public static class Counters
             {

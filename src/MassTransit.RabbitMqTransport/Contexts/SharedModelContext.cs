@@ -90,6 +90,11 @@ namespace MassTransit.RabbitMqTransport.Contexts
             return _context.QueueDeclare(queue, durable, exclusive, autoDelete, arguments);
         }
 
+        Task<QueueDeclareOk> ModelContext.QueueDeclarePassive(string queue)
+        {
+            return _context.QueueDeclarePassive(queue);
+        }
+
         Task<uint> ModelContext.QueuePurge(string queue)
         {
             return _context.QueuePurge(queue);

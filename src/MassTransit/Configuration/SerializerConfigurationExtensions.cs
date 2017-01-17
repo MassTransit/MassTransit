@@ -13,7 +13,7 @@
 namespace MassTransit
 {
     using System;
-    using EndpointConfigurators;
+    using EndpointSpecifications;
     using Newtonsoft.Json;
     using Serialization;
 

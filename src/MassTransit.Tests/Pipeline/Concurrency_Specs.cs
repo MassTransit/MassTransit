@@ -18,11 +18,9 @@ namespace MassTransit.Tests.Pipeline
     using System.Threading;
     using System.Threading.Tasks;
     using GreenPipes;
-    using MassTransit.Pipeline;
     using NUnit.Framework;
     using Shouldly;
     using TestFramework;
-    using Transports.InMemoryTransport_Specs;
 
 
     [TestFixture]
@@ -34,7 +32,7 @@ namespace MassTransit.Tests.Pipeline
             int currentCount = 0;
             int maxCount = 0;
 
-            IPipe<ConsumeContext<A>> pipe = Pipe.New<ConsumeContext<A>>(x =>
+            IPipe<ConsumeContext<Running_two_in_memory_transports.A>> pipe = Pipe.New<ConsumeContext<Running_two_in_memory_transports.A>>(x =>
             {
                 x.UseConcurrencyLimit(1);
                 x.UseExecuteAsync(async payload =>
@@ -49,7 +47,7 @@ namespace MassTransit.Tests.Pipeline
                 });
             });
 
-            var context = new TestConsumeContext<A>(new A());
+            var context = new TestConsumeContext<Running_two_in_memory_transports.A>(new Running_two_in_memory_transports.A());
 
             Task[] tasks = Enumerable.Range(0, 50)
                 .Select(index => Task.Run(async () => await pipe.Send(context)))
@@ -66,7 +64,7 @@ namespace MassTransit.Tests.Pipeline
             int currentCount = 0;
             int maxCount = 0;
 
-            IPipe<ConsumeContext<A>> pipe = Pipe.New<ConsumeContext<A>>(x =>
+            IPipe<ConsumeContext<Running_two_in_memory_transports.A>> pipe = Pipe.New<ConsumeContext<Running_two_in_memory_transports.A>>(x =>
             {
                 x.UseConcurrencyLimit(32);
                 x.UseExecuteAsync(async payload =>
@@ -81,7 +79,7 @@ namespace MassTransit.Tests.Pipeline
                 });
             });
 
-            var context = new TestConsumeContext<A>(new A());
+            var context = new TestConsumeContext<Running_two_in_memory_transports.A>(new Running_two_in_memory_transports.A());
 
             Task[] tasks = Enumerable.Range(0, 500)
                 .Select(index => Task.Run(async () => await pipe.Send(context)))
@@ -100,7 +98,7 @@ namespace MassTransit.Tests.Pipeline
         public async Task Should_only_do_n_messages_per_interval()
         {
             int count = 0;
-            IPipe<ConsumeContext<A>> pipe = Pipe.New<ConsumeContext<A>>(x =>
+            IPipe<ConsumeContext<Running_two_in_memory_transports.A>> pipe = Pipe.New<ConsumeContext<Running_two_in_memory_transports.A>>(x =>
             {
                 x.UseRateLimit(10, TimeSpan.FromSeconds(1));
                 x.UseExecute(payload =>
@@ -109,7 +107,7 @@ namespace MassTransit.Tests.Pipeline
                 });
             });
 
-            var context = new TestConsumeContext<A>(new A());
+            var context = new TestConsumeContext<Running_two_in_memory_transports.A>(new Running_two_in_memory_transports.A());
 
             var timer = Stopwatch.StartNew();
 
@@ -128,7 +126,7 @@ namespace MassTransit.Tests.Pipeline
         public async Task Should_count_success_and_failure_as_same()
         {
             int count = 0;
-            IPipe<ConsumeContext<A>> pipe = Pipe.New<ConsumeContext<A>>(x =>
+            IPipe<ConsumeContext<Running_two_in_memory_transports.A>> pipe = Pipe.New<ConsumeContext<Running_two_in_memory_transports.A>>(x =>
             {
                 x.UseRateLimit(10, TimeSpan.FromSeconds(1));
                 x.UseExecute(payload =>
@@ -139,7 +137,7 @@ namespace MassTransit.Tests.Pipeline
                 });
             });
 
-            var context = new TestConsumeContext<A>(new A());
+            var context = new TestConsumeContext<Running_two_in_memory_transports.A>(new Running_two_in_memory_transports.A());
 
             var timer = Stopwatch.StartNew();
 

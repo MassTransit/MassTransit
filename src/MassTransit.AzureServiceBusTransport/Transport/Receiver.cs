@@ -19,6 +19,7 @@ namespace MassTransit.AzureServiceBusTransport.Transport
     using GreenPipes;
     using Internals.Extensions;
     using Logging;
+    using MassTransit.Topology;
     using Microsoft.ServiceBus.Messaging;
     using Transports.Metrics;
     using Util;
@@ -34,18 +35,16 @@ namespace MassTransit.AzureServiceBusTransport.Transport
         readonly IPipe<ReceiveContext> _receivePipe;
         readonly IDeliveryTracker _tracker;
         bool _shuttingDown;
-        readonly ISendEndpointProvider _sendEndpointProvider;
-        readonly IPublishEndpointProvider _publishEndpointProvider;
+        readonly IReceiveEndpointTopology _topology;
 
         public Receiver(NamespaceContext context, ClientContext clientContext, IPipe<ReceiveContext> receivePipe, ClientSettings clientSettings,
-            ITaskSupervisor supervisor, ISendEndpointProvider sendEndpointProvider, IPublishEndpointProvider publishEndpointProvider)
+            ITaskSupervisor supervisor, IReceiveEndpointTopology topology)
         {
             _context = context;
             _clientContext = clientContext;
             _receivePipe = receivePipe;
             _clientSettings = clientSettings;
-            _sendEndpointProvider = sendEndpointProvider;
-            _publishEndpointProvider = publishEndpointProvider;
+            _topology = topology;
 
             _tracker = new DeliveryTracker(DeliveryComplete);
 
@@ -141,7 +140,7 @@ namespace MassTransit.AzureServiceBusTransport.Transport
                 if (_log.IsDebugEnabled)
                     _log.DebugFormat("Receiving {0}:{1} - {2}", delivery.Id, message.MessageId, _clientSettings.Path);
 
-                var context = new ServiceBusReceiveContext(_clientContext.InputAddress, message, _context, _sendEndpointProvider, _publishEndpointProvider);
+                var context = new ServiceBusReceiveContext(_clientContext.InputAddress, message, _context, _topology);
                 context.GetOrAddPayload(() => _context);
 
                 try

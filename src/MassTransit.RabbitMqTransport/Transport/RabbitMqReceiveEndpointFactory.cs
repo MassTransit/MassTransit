@@ -1,4 +1,4 @@
-// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -16,6 +16,7 @@ namespace MassTransit.RabbitMqTransport.Transport
     using Builders;
     using Configurators;
     using MassTransit.Configurators;
+    using Specifications;
 
 
     public class RabbitMqReceiveEndpointFactory :
@@ -23,16 +24,20 @@ namespace MassTransit.RabbitMqTransport.Transport
     {
         readonly RabbitMqBusBuilder _builder;
         readonly IRabbitMqHost _host;
+        readonly IRabbitMqEndpointConfiguration _configuration;
 
-        public RabbitMqReceiveEndpointFactory(RabbitMqBusBuilder builder, IRabbitMqHost host)
+        public RabbitMqReceiveEndpointFactory(RabbitMqBusBuilder builder, IRabbitMqHost host, IRabbitMqEndpointConfiguration configuration)
         {
             _builder = builder;
             _host = host;
+            _configuration = configuration;
         }
 
         public void CreateReceiveEndpoint(string queueName, Action<IRabbitMqReceiveEndpointConfigurator> configure)
         {
-            var endpointConfigurator = new RabbitMqReceiveEndpointSpecification(_host, queueName);
+            var endpointTopologySpecification = _configuration.CreateConfiguration();
+
+            var endpointConfigurator = new RabbitMqReceiveEndpointSpecification(_host, endpointTopologySpecification, queueName);
 
             configure?.Invoke(endpointConfigurator);
 

@@ -13,7 +13,6 @@
 namespace MassTransit.Events
 {
     using System;
-    using Transports;
     using Transports.Metrics;
 
 
