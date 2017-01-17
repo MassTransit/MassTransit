@@ -35,7 +35,7 @@ namespace MassTransit.Tests.Transforms
 
         Task<ConsumeContext<A>> _received;
 
-        protected override void PreCreateBus(IInMemoryBusFactoryConfigurator configurator)
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
             configurator.ConfigureSend(s => s.UseTransform<A>(t =>
             {
@@ -76,7 +76,7 @@ namespace MassTransit.Tests.Transforms
 
         Task<ConsumeContext<A>> _received;
 
-        protected override void PreCreateBus(IInMemoryBusFactoryConfigurator configurator)
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
             configurator.ConfigureSend(s => s.UseTransform<A>(t =>
             {
@@ -117,7 +117,7 @@ namespace MassTransit.Tests.Transforms
 
         Task<ConsumeContext<A>> _received;
 
-        protected override void PreCreateBus(IInMemoryBusFactoryConfigurator configurator)
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
             configurator.ConfigurePublish(s => s.UseTransform<A>(t =>
             {
@@ -158,7 +158,7 @@ namespace MassTransit.Tests.Transforms
 
         Task<ConsumeContext<A>> _received;
 
-        protected override void PreCreateBus(IInMemoryBusFactoryConfigurator configurator)
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
             configurator.ConfigurePublish(s => s.UseTransform<A>(t =>
             {

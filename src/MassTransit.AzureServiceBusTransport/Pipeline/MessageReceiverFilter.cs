@@ -16,6 +16,7 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
     using Events;
     using GreenPipes;
     using Logging;
+    using MassTransit.Topology;
     using Transport;
     using Util;
 
@@ -27,16 +28,13 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
         IFilter<NamespaceContext>
     {
         static readonly ILog _log = Logger.Get<MessageReceiverFilter>();
-        readonly IPublishEndpointProvider _publishEndpointProvider;
         readonly IPipe<ReceiveContext> _receivePipe;
-        readonly ISendEndpointProvider _sendEndpointProvider;
+        readonly IReceiveEndpointTopology _topology;
 
-        public MessageReceiverFilter(IPipe<ReceiveContext> receivePipe, ISendEndpointProvider sendEndpointProvider,
-            IPublishEndpointProvider publishEndpointProvider)
+        public MessageReceiverFilter(IPipe<ReceiveContext> receivePipe, IReceiveEndpointTopology topology)
         {
             _receivePipe = receivePipe;
-            _sendEndpointProvider = sendEndpointProvider;
-            _publishEndpointProvider = publishEndpointProvider;
+            _topology = topology;
         }
 
         void IProbeSite.Probe(ProbeContext context)
@@ -54,7 +52,7 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
 
             using (var scope = context.CreateScope($"{TypeMetadataCache<MessageReceiverFilter>.ShortName} - {clientContext.InputAddress}"))
             {
-                var receiver = new Receiver(context, clientContext, _receivePipe, clientSettings, scope, _sendEndpointProvider, _publishEndpointProvider);
+                var receiver = new Receiver(context, clientContext, _receivePipe, clientSettings, scope, _topology);
 
                 await scope.Ready.ConfigureAwait(false);
 

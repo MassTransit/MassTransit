@@ -159,32 +159,6 @@ namespace MassTransit.Tests
         }
 
         [TestFixture]
-        public class Connecting_a_send_observer_to_the_bus_CP :
-            InMemoryTestFixture
-        {
-            Observer _observer;
-
-            protected override void ConnectObservers(IBus bus)
-            {
-                base.ConnectObservers(bus);
-
-                _observer = new Observer();
-
-                bus.ConnectSendObserver(_observer);
-            }
-            
-
-            [Test]
-            public async Task Should_invoke_the_observer_after_send()
-            {
-                    await Bus.Publish(new PingMessage());
-
-                    await _observer.PostSent;
-            }
-            
-        }
-
-        [TestFixture]
         public class Connecting_a_send_observer_to_the_bus_D :
             InMemoryTestFixture
         {

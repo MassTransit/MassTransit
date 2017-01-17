@@ -433,9 +433,7 @@ namespace MassTransit
 
             var hostSettings = modelContext.ConnectionContext.HostSettings;
 
-            var sendSettings = hostSettings.GetSendSettings(messageType);
-
-            return sendSettings.GetSendAddress(hostSettings.HostAddress);
+            return hostSettings.Topology.GetDestinationAddress(messageType);
         }
     }
 }

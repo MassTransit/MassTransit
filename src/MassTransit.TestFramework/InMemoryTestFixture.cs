@@ -48,7 +48,7 @@ namespace MassTransit.TestFramework
 
         public InMemoryTestFixture(bool busPerTest = false)
             : this(new InMemoryTestHarness(), busPerTest)
-        {            
+        {
         }
 
         public InMemoryTestFixture(InMemoryTestHarness harness, bool busPerTest = false)
@@ -62,7 +62,7 @@ namespace MassTransit.TestFramework
                 _busCreationScope = new PerTestFixtureBusCreationScope(SetupBus, TeardownBus);
 
             InMemoryTestHarness.OnConnectObservers += ConnectObservers;
-            InMemoryTestHarness.OnConfigureInMemoryBus += PreCreateBus;
+            InMemoryTestHarness.OnConfigureInMemoryBus += ConfigureInMemoryBus;
             InMemoryTestHarness.OnConfigureInMemoryReceiveEndpoint += ConfigureInMemoryReceiveEndpoint;
         }
 
@@ -103,17 +103,10 @@ namespace MassTransit.TestFramework
             return InMemoryTestHarness.GetSendEndpoint(address);
         }
 
-        protected IPublishEndpointProvider PublishEndpointProvider => InMemoryTestHarness.PublishEndpointProvider;
-
-        protected IInMemoryTransport GetTransport(string queueName)
-        {
-            return InMemoryTestHarness.GetTransport(queueName);
-        }
-
         [OneTimeTearDown]
         public async Task TearDownInMemoryTestFixture()
         {
-             await _busCreationScope.TestFixtureTeardown().ConfigureAwait(false);
+            await _busCreationScope.TestFixtureTeardown().ConfigureAwait(false);
 
             InMemoryTestHarness.Dispose();
         }
@@ -123,12 +116,36 @@ namespace MassTransit.TestFramework
             return InMemoryTestHarness.Stop();
         }
 
-        protected virtual void PreCreateBus(IInMemoryBusFactoryConfigurator configurator)
+        protected virtual void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
         }
 
         protected virtual void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
+        }
+
+        protected Task<ConsumeContext<T>> ConnectPublishHandler<T>()
+            where T : class
+        {
+            Task<ConsumeContext<T>> result = null;
+            Host.ConnectReceiveEndpoint(NewId.NextGuid().ToString(), context =>
+            {
+                result = Handled<T>(context);
+            });
+
+            return result;
+        }
+
+        protected Task<ConsumeContext<T>> ConnectPublishHandler<T>(Func<ConsumeContext<T>, bool> filter)
+            where T : class
+        {
+            Task<ConsumeContext<T>> result = null;
+            Host.ConnectReceiveEndpoint(NewId.NextGuid().ToString(), context =>
+            {
+                result = Handled<T>(context, filter);
+            });
+
+            return result;
         }
 
 

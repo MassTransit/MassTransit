@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,7 +13,6 @@
 namespace MassTransit.HttpTransport.Builders
 {
     using System;
-    using BusConfigurators;
     using Clients;
     using GreenPipes;
     using MassTransit.Builders;
@@ -24,6 +23,7 @@ namespace MassTransit.HttpTransport.Builders
     using Specifications;
     using Transport;
     using Transports;
+    using Transports.InMemory;
 
 
     public class HttpBusBuilder :
@@ -31,20 +31,21 @@ namespace MassTransit.HttpTransport.Builders
     {
         readonly HttpReceiveEndpointSpecification _busEndpointSpecification;
         readonly BusHostCollection<HttpHost> _hosts;
+        readonly IInMemoryEndpointConfiguration _configuration;
 
-        public HttpBusBuilder(BusHostCollection<HttpHost> hosts,
-            IConsumePipeFactory consumePipeFactory,
-            ISendPipeFactory sendPipeFactory,
-            IPublishPipeFactory publishPipeFactory)
-            : base(consumePipeFactory, sendPipeFactory, publishPipeFactory, hosts)
+        public HttpBusBuilder(BusHostCollection<HttpHost> hosts, IInMemoryEndpointConfiguration configuration)
+            : base(hosts, configuration)
         {
             _hosts = hosts;
+            _configuration = configuration;
 
-            _busEndpointSpecification = new HttpReceiveEndpointSpecification(_hosts[0], "", ConsumePipe);
+            var endpointSpecification = configuration.CreateConfiguration(ConsumePipe);
+
+            _busEndpointSpecification = new HttpReceiveEndpointSpecification(_hosts[0], "", endpointSpecification);
 
             foreach (var host in hosts.Hosts)
             {
-                var factory = new HttpReceiveEndpointFactory(this, host);
+                var factory = new HttpReceiveEndpointFactory(this, host, configuration);
 
                 host.ReceiveEndpointFactory = factory;
             }
@@ -70,23 +71,21 @@ namespace MassTransit.HttpTransport.Builders
             return urb.Uri;
         }
 
-        protected override IConsumePipe GetConsumePipe()
-        {
-            return CreateConsumePipe();
-        }
-
         protected override ISendTransportProvider CreateSendTransportProvider()
         {
             var receivePipe = CreateReceivePipe();
 
-            return new HttpSendTransportProvider(_hosts, receivePipe, new ReceiveObservable());
+            var endpointBuilder = new HttpReceiveEndpointBuilder(this, _hosts[0], _configuration);
+
+            return new HttpSendTransportProvider(_hosts, receivePipe, new ReceiveObservable(), _busEndpointSpecification.Configuration,
+                _busEndpointSpecification.InputAddress, endpointBuilder.MessageSerializer, _hosts[0]);
         }
 
         protected IReceivePipe CreateReceivePipe()
         {
             //            AddRescueFilter(builder);
 
-            var endpointBuilder = new HttpReceiveEndpointBuilder(_hosts[0], ConsumePipe, this);
+            var endpointBuilder = new HttpReceiveEndpointBuilder(this, _hosts[0], _configuration);
 
             IPipe<ReceiveContext> receivePipe = Pipe.New<ReceiveContext>(x =>
             {

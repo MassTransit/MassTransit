@@ -172,7 +172,7 @@ namespace MassTransit.RabbitMqTransport.Scheduling
         async Task<ScheduledMessage<T>> ScheduleSend<T>(Uri destinationAddress, DateTime scheduledTime, T message, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken)
             where T : class
         {
-            var destinationSettings = destinationAddress.GetSendSettings();
+            var destinationSettings = _hostSettings.Topology.GetSendSettings(destinationAddress);
 
             var sendSettings = new RabbitMqSendSettings(destinationSettings.ExchangeName + "_delay", "x-delayed-message", destinationSettings.Durable,
                 destinationSettings.AutoDelete);

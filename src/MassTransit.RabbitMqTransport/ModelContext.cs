@@ -52,6 +52,7 @@ namespace MassTransit.RabbitMqTransport
         Task ExchangeDeclarePassive(string exchange);
         Task QueueBind(string queue, string exchange, string routingKey, IDictionary<string, object> arguments);
         Task<QueueDeclareOk> QueueDeclare(string queue, bool durable, bool exclusive, bool autoDelete, IDictionary<string, object> arguments);
+        Task<QueueDeclareOk> QueueDeclarePassive(string queue);
         Task<uint> QueuePurge(string queue);
         Task BasicQos(uint prefetchSize, ushort prefetchCount, bool global);
         void BasicAck(ulong deliveryTag, bool multiple);

@@ -1,12 +1,12 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <log4net>
   <root>
-    <level value="ERROR" />
+    <level value="DEBUG" />
     <appender-ref ref="console" />
   </root>
 
   <logger name="MassTransit">
-    <level value="ERROR" />
+    <level value="DEBUG" />
   </logger>
 
   <logger name="MassTransit.Messages">

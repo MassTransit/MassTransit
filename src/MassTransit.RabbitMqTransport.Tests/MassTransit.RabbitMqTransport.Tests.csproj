@@ -79,6 +79,7 @@
     <Compile Include="Assumptions\PerformanceAssumptions.cs" />
     <Compile Include="Assumptions\RoutingAssumptions.cs" />
     <Compile Include="Assumptions\TransactionAssumptions.cs" />
+    <Compile Include="BuildTopology_Specs.cs" />
     <Compile Include="Bytes_Specs.cs" />
     <Compile Include="RabbitMqHostBusFactory_Specs.cs" />
     <Compile Include="ConcurrencyFilter_Specs.cs" />

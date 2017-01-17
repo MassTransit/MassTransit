@@ -17,6 +17,7 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
     using BusConfigurators;
     using MassTransit.Builders;
     using Settings;
+    using Specifications;
     using Transports;
 
 
@@ -25,11 +26,14 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
         IServiceBusBusFactoryConfigurator,
         IBusFactory
     {
+        readonly IServiceBusEndpointConfiguration _configuration;
         readonly BusHostCollection<ServiceBusHost> _hosts;
         readonly ReceiveEndpointSettings _settings;
 
-        public ServiceBusBusFactoryConfigurator()
+        public ServiceBusBusFactoryConfigurator(IServiceBusEndpointConfiguration configuration)
+            : base(configuration)
         {
+            _configuration = configuration;
             _hosts = new BusHostCollection<ServiceBusHost>();
 
             var queueName = ((IServiceBusHost)null).GetTemporaryQueueName("bus");
@@ -45,7 +49,7 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
 
         public IBusControl CreateBus()
         {
-            var builder = new ServiceBusBusBuilder(_hosts, ConsumePipeFactory, SendPipeFactory, PublishPipeFactory, _settings);
+            var builder = new ServiceBusBusBuilder(_hosts, _settings, _configuration);
 
             ApplySpecifications(builder);
 
@@ -132,7 +136,9 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
             if (serviceBusHost == null)
                 throw new ArgumentException("Must be a ServiceBusHost", nameof(host));
 
-            var specification = new ServiceBusReceiveEndpointSpecification(serviceBusHost, queueName);
+            var endpointTopologySpecification = _configuration.CreateConfiguration();
+
+            var specification = new ServiceBusReceiveEndpointSpecification(serviceBusHost, queueName, endpointTopologySpecification);
 
             specification.ConnectConsumerConfigurationObserver(this);
             specification.ConnectSagaConfigurationObserver(this);
@@ -151,7 +157,9 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
         public void SubscriptionEndpoint(IServiceBusHost host, string subscriptionName, string topicName,
             Action<IServiceBusSubscriptionEndpointConfigurator> configure)
         {
-            var specification = new ServiceBusSubscriptionEndpointSpecification(host, subscriptionName, topicName);
+            var endpointTopologySpecification = _configuration.CreateConfiguration();
+
+            var specification = new ServiceBusSubscriptionEndpointSpecification(host, subscriptionName, topicName, endpointTopologySpecification);
 
             specification.ConnectConsumerConfigurationObserver(this);
             specification.ConnectSagaConfigurationObserver(this);

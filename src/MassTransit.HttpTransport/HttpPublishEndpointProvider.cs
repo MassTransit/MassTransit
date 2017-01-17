@@ -1,4 +1,4 @@
-// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -17,6 +17,7 @@ namespace MassTransit.HttpTransport
     using GreenPipes;
     using MassTransit.Pipeline;
     using MassTransit.Pipeline.Observables;
+    using MassTransit.Pipeline.Pipes;
     using Transports;
 
 
@@ -26,18 +27,15 @@ namespace MassTransit.HttpTransport
         readonly IHttpHost _host;
         readonly PublishObservable _publishObservable;
         readonly IPublishPipe _publishPipe;
-        readonly ISendPipe _sendPipe;
         readonly IMessageSerializer _serializer;
         readonly ISendTransportProvider _transportProvider;
 
-        public HttpPublishEndpointProvider(IHttpHost host, IMessageSerializer serializer, ISendTransportProvider transportProvider, IPublishPipe publishPipe,
-            ISendPipe sendPipe)
+        public HttpPublishEndpointProvider(IHttpHost host, IMessageSerializer serializer, ISendTransportProvider transportProvider, IPublishPipe publishPipe)
         {
             _host = host;
             _serializer = serializer;
             _transportProvider = transportProvider;
             _publishPipe = publishPipe;
-            _sendPipe = sendPipe;
 
             _publishObservable = new PublishObservable();
         }
@@ -52,14 +50,14 @@ namespace MassTransit.HttpTransport
             return new PublishEndpoint(sourceAddress, this, _publishObservable, _publishPipe, correlationId, conversationId);
         }
 
-        public async Task<ISendEndpoint> GetPublishSendEndpoint(Type messageType)
+        async Task<ISendEndpoint> IPublishEndpointProvider.GetPublishSendEndpoint<T>(T message)
         {
             // TODO: this needs some love
             var destinationAddress = new Uri("http://localhost");
 
             var transport = await _transportProvider.GetSendTransport(destinationAddress).ConfigureAwait(false);
 
-            return new SendEndpoint(transport, _serializer, destinationAddress, _host.Address, _sendPipe);
+            return new SendEndpoint(transport, _serializer, destinationAddress, _host.Address, SendPipe.Empty);
         }
     }
 }

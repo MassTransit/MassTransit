@@ -15,7 +15,6 @@ namespace MassTransit.Saga.Policies
     using System;
     using System.Threading.Tasks;
     using GreenPipes;
-    using MassTransit.Pipeline;
 
 
     /// <summary>

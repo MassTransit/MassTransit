@@ -58,7 +58,7 @@ namespace MassTransit.Tests.Steward
             CommandTestContexts.Add(typeof(T), context);
         }
 
-        protected override void PreCreateBus(IInMemoryBusFactoryConfigurator configurator)
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
             AddCommandContext<DispatchMessageConsumer, DispatchMessage>(new DelegateConsumerFactory<DispatchMessageConsumer>(() =>
             {

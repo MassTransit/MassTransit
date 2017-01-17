@@ -113,7 +113,7 @@ namespace MassTransit.Tests.Serialization
             where T : class
         {
             var message = new InMemoryTransportMessage(Guid.NewGuid(), serializedMessageData, Serializer.ContentType.MediaType, TypeMetadataCache<T>.ShortName);
-            var receiveContext = new InMemoryReceiveContext(new Uri("loopback://localhost/input_queue"), message, new ReceiveObservable(), Bus, PublishEndpointProvider);
+            var receiveContext = new InMemoryReceiveContext(new Uri("loopback://localhost/input_queue"), message, new ReceiveObservable(), null);
 
             ConsumeContext consumeContext = Deserializer.Deserialize(receiveContext);
 

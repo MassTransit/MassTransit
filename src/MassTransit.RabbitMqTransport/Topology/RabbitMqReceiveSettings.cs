@@ -1,4 +1,4 @@
-// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -20,7 +20,8 @@ namespace MassTransit.RabbitMqTransport.Topology
         RabbitMqEntitySettings,
         ReceiveSettings,
         IQueueConfigurator,
-        IExchangeBindingConfigurator
+        IExchangeBindingConfigurator,
+        IBindExchangeConfigurator
     {
         public RabbitMqReceiveSettings()
         {
@@ -29,8 +30,10 @@ namespace MassTransit.RabbitMqTransport.Topology
             PrefetchCount = (ushort)Math.Min(Environment.ProcessorCount * 2, 16);
 
             Exclusive = false;
+            RoutingKey = "";
 
             QueueArguments = new Dictionary<string, object>();
+            BindingArguments = new Dictionary<string, object>();
         }
 
         public RabbitMqReceiveSettings(ReceiveSettings settings)
@@ -45,9 +48,25 @@ namespace MassTransit.RabbitMqTransport.Topology
             PurgeOnStartup = settings.PurgeOnStartup;
             ExchangeType = settings.ExchangeType;
             QueueArguments = new Dictionary<string, object>(settings.QueueArguments);
+            RoutingKey = settings.RoutingKey;
+            BindingArguments = new Dictionary<string, object>(settings.BindingArguments);
         }
 
-        public string RoutingKey { get; set; }
+        public void SetBindingArgument(string key, object value)
+        {
+            if (key == null)
+                throw new ArgumentNullException(nameof(key));
+
+            if (value == null)
+                BindingArguments.Remove(key);
+            else
+                BindingArguments[key] = value;
+        }
+
+        string IExchangeConfigurator.ExchangeType
+        {
+            set { ExchangeType = value; }
+        }
 
         public void SetQueueArgument(string key, object value)
         {
@@ -65,16 +84,18 @@ namespace MassTransit.RabbitMqTransport.Topology
             set { SetQueueArgument("x-queue-mode", value ? "lazy" : "default"); }
         }
 
-
         public void EnablePriority(byte maxPriority)
         {
             QueueArguments["x-max-priority"] = (int)maxPriority;
         }
 
+        public string RoutingKey { get; set; }
+
         public string QueueName { get; set; }
         public bool Exclusive { get; set; }
         public ushort PrefetchCount { get; set; }
         public IDictionary<string, object> QueueArguments { get; }
+        public IDictionary<string, object> BindingArguments { get; }
         public bool PurgeOnStartup { get; set; }
 
         public Uri GetInputAddress(Uri hostAddress)

@@ -37,7 +37,6 @@ namespace MassTransit.Turnout
         /// <summary>
         /// Execute the job, invoking next with the result of the job once it completed
         /// </summary>
-        /// <typeparam name="T"></typeparam>
         /// <param name="context"></param>
         /// <param name="next"></param>
         /// <returns></returns>

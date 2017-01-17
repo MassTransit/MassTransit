@@ -19,7 +19,7 @@ namespace MassTransit
     {
         public static void ConfigureRoutingSlipEventCorrelation(this IBusFactoryConfigurator configurator)
         {
-            RoutingSlipEventCorrelation.ConfigureMessageCorrelation();
+            RoutingSlipEventCorrelation.ConfigureCorrelationIds();
         }
     }
 }

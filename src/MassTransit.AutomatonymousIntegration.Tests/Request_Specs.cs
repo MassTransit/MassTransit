@@ -29,7 +29,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
             [Test]
             public async Task Should_handle_the_response()
             {
-                Task<ConsumeContext<MemberRegistered>> handler = SubscribeHandler<MemberRegistered>();
+                Task<ConsumeContext<MemberRegistered>> handler = ConnectPublishHandler<MemberRegistered>();
 
                 RegisterMember registerMember = new RegisterMemberCommand
                 {
@@ -77,9 +77,9 @@ namespace MassTransit.AutomatonymousIntegration.Tests
                 }
             }
 
-            protected override void PreCreateBus(IInMemoryBusFactoryConfigurator configurator)
+            protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
             {
-                base.PreCreateBus(configurator);
+                base.ConfigureInMemoryBus(configurator);
 
                 configurator.ReceiveEndpoint("service_queue", ConfigureServiceQueueEndpoint);
             }

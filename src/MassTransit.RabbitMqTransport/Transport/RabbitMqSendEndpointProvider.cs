@@ -23,18 +23,19 @@ namespace MassTransit.RabbitMqTransport.Transport
     public class RabbitMqSendEndpointProvider :
         ISendEndpointProvider
     {
-        readonly Uri _inputAddress;
+        readonly Uri _sourceAddress;
         readonly SendObservable _sendObservable;
         readonly IMessageSerializer _serializer;
         readonly ISendTransportProvider _transportProvider;
         readonly ISendPipe _sendPipe;
 
-        public RabbitMqSendEndpointProvider(IMessageSerializer serializer, Uri inputAddress, ISendTransportProvider transportProvider, ISendPipe sendPipe)
+        public RabbitMqSendEndpointProvider(IMessageSerializer serializer, Uri sourceAddress, ISendTransportProvider transportProvider, ISendPipe sendPipe)
         {
-            _inputAddress = inputAddress;
+            _serializer = serializer;
+            _sourceAddress = sourceAddress;
             _transportProvider = transportProvider;
             _sendPipe = sendPipe;
-            _serializer = serializer;
+
             _sendObservable = new SendObservable();
         }
 
@@ -42,9 +43,9 @@ namespace MassTransit.RabbitMqTransport.Transport
         {
             ISendTransport sendTransport = await _transportProvider.GetSendTransport(address).ConfigureAwait(false);
 
-            sendTransport.ConnectSendObserver(_sendObservable);
+            var handle = sendTransport.ConnectSendObserver(_sendObservable);
 
-            return new SendEndpoint(sendTransport, _serializer, address, _inputAddress, _sendPipe);
+            return new SendEndpoint(sendTransport, _serializer, address, _sourceAddress, _sendPipe, handle);
         }
 
         public ConnectHandle ConnectSendObserver(ISendObserver observer)

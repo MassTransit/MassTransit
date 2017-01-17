@@ -26,7 +26,6 @@ namespace MassTransit.Serialization
         /// <summary>
         /// Returns a stream with the encryption bits in place to ensure proper message encryption
         /// </summary>
-        /// <typeparam name="T">The message type</typeparam>
         /// <param name="stream">The original stream to which the encrypted message content is written</param>
         /// <param name="keyId">The encryption key identifier</param>
         /// <param name="streamMode"></param>

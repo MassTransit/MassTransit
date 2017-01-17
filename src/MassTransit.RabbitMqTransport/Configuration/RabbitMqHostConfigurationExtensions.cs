@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -133,7 +133,7 @@ namespace MassTransit
         public static void ReceiveEndpoint(this IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host,
             Action<IRabbitMqReceiveEndpointConfigurator> configure)
         {
-            var queueName = host.GetTemporaryQueueName("receiveEndpoint-");
+            var queueName = host.Settings.Topology.CreateTemporaryQueueName("receiveEndpoint-");
 
             configurator.ReceiveEndpoint(host, queueName, x =>
             {
@@ -160,19 +160,21 @@ namespace MassTransit
             if (host == null)
                 throw new ArgumentNullException(nameof(host));
 
-            var queueName = host.GetTemporaryQueueName("manage-");
+            var queueName = host.Settings.Topology.CreateTemporaryQueueName("manage-");
 
-            var endpointConfigurator = new RabbitMqReceiveEndpointSpecification(host, queueName)
+            IRabbitMqReceiveEndpointConfigurator specification = null;
+
+            configurator.ReceiveEndpoint(host, queueName, x =>
             {
-                AutoDelete = true,
-                Durable = false
-            };
+                x.AutoDelete = true;
+                x.Durable = false;
 
-            configure?.Invoke(endpointConfigurator);
+                configure?.Invoke(x);
 
-            configurator.AddReceiveEndpointSpecification(endpointConfigurator);
+                specification = x;
+            });
 
-            var managementEndpointConfigurator = new ManagementEndpointConfigurator(endpointConfigurator);
+            var managementEndpointConfigurator = new ManagementEndpointConfigurator(specification);
 
             return managementEndpointConfigurator;
         }

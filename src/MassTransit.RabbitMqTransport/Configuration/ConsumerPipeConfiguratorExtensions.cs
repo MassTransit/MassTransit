@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,7 +13,6 @@
 namespace MassTransit
 {
     using System;
-    using System.Collections.Generic;
     using GreenPipes;
     using Pipeline.Pipes;
     using RabbitMqTransport;
@@ -32,19 +31,19 @@ namespace MassTransit
         /// <param name="settings"></param>
         /// <param name="receiveObserver"></param>
         /// <param name="transportObserver"></param>
-        /// <param name="exchangeBindings"></param>
         /// <param name="supervisor"></param>
         /// <param name="managementPipe"></param>
-        /// <param name="sendEndpointProvider"></param>
-        /// <param name="publishEndpointProvider"></param>
         /// <param name="host"></param>
-        public static void RabbitMqConsumer(this IPipeConfigurator<ConnectionContext> configurator, IPipe<ReceiveContext> pipe, ReceiveSettings settings, IReceiveObserver receiveObserver, IReceiveTransportObserver transportObserver, IEnumerable<ExchangeBindingSettings> exchangeBindings, ITaskSupervisor supervisor, IManagementPipe managementPipe, ISendEndpointProvider sendEndpointProvider, IPublishEndpointProvider publishEndpointProvider, IRabbitMqHost host)
+        /// <param name="topology"></param>
+        public static void RabbitMqConsumer(this IPipeConfigurator<ConnectionContext> configurator, IPipe<ReceiveContext> pipe, ReceiveSettings settings,
+            IReceiveObserver receiveObserver, IReceiveTransportObserver transportObserver, ITaskSupervisor supervisor, IManagementPipe managementPipe,
+            IRabbitMqHost host, IRabbitMqReceiveEndpointTopology topology)
         {
             if (configurator == null)
                 throw new ArgumentNullException(nameof(configurator));
 
-            var pipeBuilderConfigurator = new RabbitMqConsumerPipeSpecification(pipe, settings, receiveObserver, transportObserver, exchangeBindings,
-                supervisor, managementPipe, sendEndpointProvider, publishEndpointProvider, host);
+            var pipeBuilderConfigurator = new RabbitMqConsumerPipeSpecification(pipe, settings, receiveObserver, transportObserver,
+                supervisor, managementPipe, host, topology);
 
             configurator.AddPipeSpecification(pipeBuilderConfigurator);
         }

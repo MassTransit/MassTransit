@@ -44,7 +44,6 @@ namespace MassTransit
         /// <summary>
         /// Returns a stream with the encryption bits in place to ensure proper message encryption
         /// </summary>
-        /// <typeparam name="T">The message type</typeparam>
         /// <param name="provider">The crypto stream provider</param>
         /// <param name="stream">The original stream to which the encrypted message content is written</param>
         /// <param name="context">The second context of the message</param>

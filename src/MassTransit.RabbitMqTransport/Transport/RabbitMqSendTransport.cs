@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -25,32 +25,30 @@ namespace MassTransit.RabbitMqTransport.Transport
     using GreenPipes;
     using Integration;
     using Logging;
-    using MassTransit.Pipeline;
     using MassTransit.Pipeline.Observables;
-    using Pipeline;
     using RabbitMQ.Client;
     using Serialization;
     using Topology;
     using Transports;
-    using Util;
 
 
     public class RabbitMqSendTransport :
         ISendTransport
     {
         static readonly ILog _log = Logger.Get<RabbitMqSendTransport>();
-        readonly PrepareSendExchangeFilter _filter;
+
+        readonly IFilter<ModelContext> _filter;
         readonly IModelCache _modelCache;
         readonly SendObservable _observers;
         readonly SendSettings _sendSettings;
 
-        public RabbitMqSendTransport(IModelCache modelCache, SendSettings sendSettings, params ExchangeBindingSettings[] exchangeBindings)
+        public RabbitMqSendTransport(IModelCache modelCache, SendSettings sendSettings, IFilter<ModelContext> preSendFilter)
         {
             _observers = new SendObservable();
             _sendSettings = sendSettings;
             _modelCache = modelCache;
 
-            _filter = new PrepareSendExchangeFilter(_sendSettings, exchangeBindings);
+            _filter = preSendFilter;
         }
 
         async Task ISendTransport.Send<T>(T message, IPipe<SendContext<T>> pipe, CancellationToken cancelSend)
@@ -63,7 +61,7 @@ namespace MassTransit.RabbitMqTransport.Transport
                 {
                     var properties = modelContext.Model.CreateBasicProperties();
 
-                    var context = new RabbitMqSendContextImpl<T>(properties, message, _sendSettings, cancelSend);
+                    var context = new BasicPublishRabbitMqSendContext<T>(properties, message, _sendSettings, cancelSend);
 
                     try
                     {

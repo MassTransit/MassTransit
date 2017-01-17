@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -78,6 +78,7 @@ namespace MassTransit.Util
         ITypeMetadataCache<T>
     {
         readonly Lazy<bool> _hasSagaInterfaces;
+        readonly Lazy<bool> _isTemporaryMessageType;
         readonly Lazy<bool> _isValidMessageType;
         readonly Lazy<string[]> _messageTypeNames;
         readonly Lazy<Type[]> _messageTypes;
@@ -93,6 +94,7 @@ namespace MassTransit.Util
             _properties = new Lazy<List<PropertyInfo>>(() => typeof(T).GetAllProperties().ToList());
 
             _isValidMessageType = new Lazy<bool>(CheckIfValidMessageType);
+            _isTemporaryMessageType = new Lazy<bool>(() => CheckIfTemporaryMessageType(typeof(T)));
             _messageTypes = new Lazy<Type[]>(() => GetMessageTypes().ToArray());
             _messageTypeNames = new Lazy<string[]>(() => GetMessageTypeNames().ToArray());
         }
@@ -101,8 +103,10 @@ namespace MassTransit.Util
         public static bool HasSagaInterfaces => Cached.Metadata.Value.HasSagaInterfaces;
         public static IEnumerable<PropertyInfo> Properties => Cached.Metadata.Value.Properties;
         public static bool IsValidMessageType => Cached.Metadata.Value.IsValidMessageType;
+        public static bool IsTemporaryMessageType => Cached.Metadata.Value.IsTemporaryMessageType;
         public static Type[] MessageTypes => Cached.Metadata.Value.MessageTypes;
         public static string[] MessageTypeNames => Cached.Metadata.Value.MessageTypeNames;
+        bool ITypeMetadataCache<T>.IsTemporaryMessageType => _isTemporaryMessageType.Value;
         string[] ITypeMetadataCache<T>.MessageTypeNames => _messageTypeNames.Value;
         IEnumerable<PropertyInfo> ITypeMetadataCache<T>.Properties => _properties.Value;
         bool ITypeMetadataCache<T>.IsValidMessageType => _isValidMessageType.Value;
@@ -162,6 +166,12 @@ namespace MassTransit.Util
                 return false;
 
             return true;
+        }
+
+        bool CheckIfTemporaryMessageType(Type messageType)
+        {
+            return (!messageType.IsVisible && messageType.IsClass)
+                || (messageType.IsGenericType && messageType.GetGenericArguments().Any(CheckIfTemporaryMessageType));
         }
 
         /// <summary>

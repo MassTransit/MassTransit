@@ -16,7 +16,6 @@ namespace MassTransit.Saga.Pipeline.Filters
     using System.Threading.Tasks;
     using Context;
     using GreenPipes;
-    using MassTransit.Pipeline;
 
 
     /// <summary>

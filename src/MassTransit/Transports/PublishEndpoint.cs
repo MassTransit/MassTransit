@@ -46,7 +46,7 @@ namespace MassTransit.Transports
             var adapter = new PublishPipeContextAdapter<T>(_publishPipe, _publishObserver, _sourceAddress, _correlationId, _conversationId, message);
             try
             {
-                var sendEndpoint = await _endpointProvider.GetPublishSendEndpoint(typeof(T)).ConfigureAwait(false);
+                var sendEndpoint = await _endpointProvider.GetPublishSendEndpoint(message).ConfigureAwait(false);
 
                 await sendEndpoint.Send(message, adapter, cancellationToken).ConfigureAwait(false);
 
@@ -65,7 +65,7 @@ namespace MassTransit.Transports
             var adapter = new PublishPipeContextAdapter<T>(publishPipe, _publishPipe, _publishObserver, _sourceAddress, _correlationId, _conversationId, message);
             try
             {
-                var sendEndpoint = await _endpointProvider.GetPublishSendEndpoint(typeof(T)).ConfigureAwait(false);
+                var sendEndpoint = await _endpointProvider.GetPublishSendEndpoint(message).ConfigureAwait(false);
 
                 await sendEndpoint.Send(message, adapter, cancellationToken).ConfigureAwait(false);
 
@@ -83,7 +83,7 @@ namespace MassTransit.Transports
             var adapter = new PublishPipeContextAdapter<T>(publishPipe, _publishPipe, _publishObserver, _sourceAddress, _correlationId, _conversationId, message);
             try
             {
-                var sendEndpoint = await _endpointProvider.GetPublishSendEndpoint(typeof(T)).ConfigureAwait(false);
+                var sendEndpoint = await _endpointProvider.GetPublishSendEndpoint(message).ConfigureAwait(false);
 
                 await sendEndpoint.Send(message, adapter, cancellationToken).ConfigureAwait(false);
 
@@ -136,7 +136,7 @@ namespace MassTransit.Transports
             var adapter = new PublishPipeContextAdapter<T>(_publishPipe, _publishObserver, _sourceAddress, _correlationId, _conversationId, message);
             try
             {
-                var sendEndpoint = await _endpointProvider.GetPublishSendEndpoint(typeof(T)).ConfigureAwait(false);
+                var sendEndpoint = await _endpointProvider.GetPublishSendEndpoint(message).ConfigureAwait(false);
 
                 await sendEndpoint.Send(message, adapter, cancellationToken).ConfigureAwait(false);
 
@@ -160,7 +160,7 @@ namespace MassTransit.Transports
             var adapter = new PublishPipeContextAdapter<T>(publishPipe, _publishPipe, _publishObserver, _sourceAddress, _correlationId, _conversationId, message);
             try
             {
-                var sendEndpoint = await _endpointProvider.GetPublishSendEndpoint(typeof(T)).ConfigureAwait(false);
+                var sendEndpoint = await _endpointProvider.GetPublishSendEndpoint(message).ConfigureAwait(false);
 
                 await sendEndpoint.Send(message, adapter, cancellationToken).ConfigureAwait(false);
 
@@ -184,7 +184,7 @@ namespace MassTransit.Transports
             var adapter = new PublishPipeContextAdapter<T>(publishPipe, _publishPipe, _publishObserver, _sourceAddress, _correlationId, _conversationId, message);
             try
             {
-                var sendEndpoint = await _endpointProvider.GetPublishSendEndpoint(typeof(T)).ConfigureAwait(false);
+                var sendEndpoint = await _endpointProvider.GetPublishSendEndpoint(message).ConfigureAwait(false);
 
                 await sendEndpoint.Send(message, adapter, cancellationToken).ConfigureAwait(false);
 

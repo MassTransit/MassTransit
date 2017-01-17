@@ -15,6 +15,7 @@ namespace MassTransit.RabbitMqTransport
     using System;
     using System.ComponentModel;
     using MassTransit.Builders;
+    using Topology;
 
 
     public interface IRabbitMqBusFactoryConfigurator :
@@ -22,11 +23,28 @@ namespace MassTransit.RabbitMqTransport
         IQueueConfigurator
     {
         /// <summary>
-        /// Enables RabbitMQ publish acknowledgement, so that the Task returned from Send/Publish 
-        /// is not completed until the message has been confirmed by the broker.
+        /// Configure the send topology of the message type
         /// </summary>
-        [Obsolete("This is now on the host configuration, and this setting no longer has any effect")]
-        bool PublisherConfirmation { set; }
+        /// <typeparam name="T"></typeparam>
+        /// <param name="configureTopology"></param>
+        void SendTopology<T>(Action<IRabbitMqMessageSendTopologyConfigurator<T>> configureTopology)
+            where T : class;
+
+        /// <summary>
+        /// Configure the send topology of the message type
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="configureTopology"></param>
+        void PublishTopology<T>(Action<IRabbitMqMessagePublishTopologyConfigurator<T>> configureTopology)
+            where T : class;
+
+        /// <summary>
+        /// Before configuring any topology options, calling this will make it so that send and publish
+        /// topologies are completely separated for this bus. This means that some types may not properly
+        /// follow the topology rules, so use with caution.
+        /// </summary>
+        void SeparatePublishFromSendTopology();
+
 
         [EditorBrowsable(EditorBrowsableState.Never)]
         void AddBusFactorySpecification(IBusFactorySpecification<IBusBuilder> specification);

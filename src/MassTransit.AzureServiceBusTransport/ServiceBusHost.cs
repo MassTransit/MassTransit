@@ -469,8 +469,7 @@ namespace MassTransit.AzureServiceBusTransport
             var nms = new NamespaceManagerSettings
             {
                 TokenProvider = Settings.TokenProvider,
-                OperationTimeout = Settings.OperationTimeout,
-                RetryPolicy = new RetryExponential(Settings.RetryMinBackoff, Settings.RetryMaxBackoff, Settings.RetryLimit)
+                OperationTimeout = Settings.OperationTimeout
             };
 
             return new NamespaceManager(Settings.ServiceUri, nms);
@@ -481,8 +480,7 @@ namespace MassTransit.AzureServiceBusTransport
             var nms = new NamespaceManagerSettings
             {
                 TokenProvider = Settings.TokenProvider,
-                OperationTimeout = Settings.OperationTimeout,
-                RetryPolicy = new RetryExponential(Settings.RetryMinBackoff, Settings.RetryMaxBackoff, Settings.RetryLimit)
+                OperationTimeout = Settings.OperationTimeout
             };
             var builder = new UriBuilder(Settings.ServiceUri)
             {

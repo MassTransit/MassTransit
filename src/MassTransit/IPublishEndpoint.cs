@@ -16,7 +16,6 @@ namespace MassTransit
     using System.Threading;
     using System.Threading.Tasks;
     using GreenPipes;
-    using Pipeline;
 
     /// <summary>
     /// A publish endpoint lets the underlying transport determine the actual endpoint to which

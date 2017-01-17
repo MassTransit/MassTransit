@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -16,6 +16,7 @@ namespace MassTransit.AzureServiceBusTransport.Transport
     using Builders;
     using Configurators;
     using MassTransit.Configurators;
+    using Specifications;
 
 
     public class ServiceBusReceiveEndpointFactory :
@@ -23,16 +24,20 @@ namespace MassTransit.AzureServiceBusTransport.Transport
     {
         readonly ServiceBusBusBuilder _builder;
         readonly ServiceBusHost _host;
+        readonly IServiceBusEndpointConfiguration _configuration;
 
-        public ServiceBusReceiveEndpointFactory(ServiceBusBusBuilder builder, ServiceBusHost host)
+        public ServiceBusReceiveEndpointFactory(ServiceBusBusBuilder builder, ServiceBusHost host, IServiceBusEndpointConfiguration configuration)
         {
             _builder = builder;
             _host = host;
+            _configuration = configuration;
         }
 
         public void CreateReceiveEndpoint(string queueName, Action<IServiceBusReceiveEndpointConfigurator> configure)
         {
-            var endpointConfigurator = new ServiceBusReceiveEndpointSpecification(_host, queueName);
+            var endpointTopologySpecification = _configuration.CreateConfiguration();
+
+            var endpointConfigurator = new ServiceBusReceiveEndpointSpecification(_host, queueName, endpointTopologySpecification);
 
             configure?.Invoke(endpointConfigurator);
 

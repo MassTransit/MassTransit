@@ -13,7 +13,6 @@
 namespace MassTransit.Testing
 {
     using System;
-    using Pipeline.Pipes;
     using Transports.InMemory;
 
 
@@ -37,13 +36,6 @@ namespace MassTransit.Testing
         public IInMemoryHost Host => _inMemoryHost;
 
         public override Uri InputQueueAddress { get; }
-
-        public IPublishEndpointProvider PublishEndpointProvider => new InMemoryPublishEndpointProvider(Bus, _inMemoryHost, PublishPipe.Empty);
-
-        public IInMemoryTransport GetTransport(string queueName)
-        {
-            return _inMemoryHost.GetTransport(queueName);
-        }
 
         public event Action<IInMemoryBusFactoryConfigurator> OnConfigureInMemoryBus;
         public event Action<IInMemoryReceiveEndpointConfigurator> OnConfigureInMemoryReceiveEndpoint;

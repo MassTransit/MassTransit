@@ -58,9 +58,9 @@ namespace MassTransit.Tests.Saga
             _sagaId = Guid.NewGuid();
         }
 
-        protected override void PreCreateBus(IInMemoryBusFactoryConfigurator configurator)
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
-            base.PreCreateBus(configurator);
+            base.ConfigureInMemoryBus(configurator);
 
             configurator.UseRetry(x => x.None());
         }
@@ -83,7 +83,7 @@ namespace MassTransit.Tests.Saga
         [Test]
         public async Task The_message_should_fault()
         {
-            Task<ConsumeContext<Fault<InitiateSimpleSaga>>> faulted = SubscribeHandler<Fault<InitiateSimpleSaga>>();
+            Task<ConsumeContext<Fault<InitiateSimpleSaga>>> faulted = ConnectPublishHandler<Fault<InitiateSimpleSaga>>();
 
             var message = new InitiateSimpleSaga(_sagaId);
 

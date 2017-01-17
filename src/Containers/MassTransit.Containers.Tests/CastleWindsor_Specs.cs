@@ -166,11 +166,12 @@ namespace MassTransit.Containers.Tests
                 Component.For<FirstConsumer>(),
                 Component.For<SecondConsumer>(),
                 Component.For<IScopedDependency>()
+                    .UsingFactoryMethod(() => new Depedency(GetTask<string>(), GetTask<string>()))
                     .ImplementedBy<Depedency>()
                     .LifestyleScoped<MessageScope>());
         }
 
-        protected override void PreCreateBus(IInMemoryBusFactoryConfigurator configurator)
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
         }
 
@@ -220,19 +221,19 @@ namespace MassTransit.Containers.Tests
         public class Depedency :
             IScopedDependency
         {
-            static TaskCompletionSource<string> _completed;
-            TaskCompletionSource<string> _first;
-            TaskCompletionSource<string> _second;
+            static readonly TaskCompletionSource<string> _completed;
+            readonly TaskCompletionSource<string> _first;
+            readonly TaskCompletionSource<string> _second;
 
             static Depedency()
             {
                 _completed = new TaskCompletionSource<string>();
             }
 
-            public Depedency()
+            public Depedency(TaskCompletionSource<string> first, TaskCompletionSource<string> second)
             {
-                _first = new TaskCompletionSource<string>();
-                _second = new TaskCompletionSource<string>();
+                _first = first;
+                _second = second;
             }
 
             public static Task<string> Completed => _completed.Task;

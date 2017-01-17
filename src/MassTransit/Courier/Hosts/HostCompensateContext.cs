@@ -18,12 +18,10 @@ namespace MassTransit.Courier.Hosts
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
-    using Context;
     using Contracts;
     using Exceptions;
     using GreenPipes;
     using GreenPipes.Payloads;
-    using MassTransit.Pipeline;
     using Results;
 
 

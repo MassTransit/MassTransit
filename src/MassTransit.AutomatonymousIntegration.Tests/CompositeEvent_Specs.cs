@@ -30,7 +30,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
         {
             var message = new StartMessage();
 
-            Task<ConsumeContext<CompleteMessage>> received = SubscribeHandler<CompleteMessage>(x => x.Message.CorrelationId == message.CorrelationId);
+            Task<ConsumeContext<CompleteMessage>> received = ConnectPublishHandler<CompleteMessage>(x => x.Message.CorrelationId == message.CorrelationId);
 
             await Bus.Publish(message);
 

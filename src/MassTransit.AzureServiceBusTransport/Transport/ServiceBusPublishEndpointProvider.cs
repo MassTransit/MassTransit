@@ -1,4 +1,4 @@
-// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -17,6 +17,7 @@ namespace MassTransit.AzureServiceBusTransport.Transport
     using GreenPipes;
     using MassTransit.Pipeline;
     using MassTransit.Pipeline.Observables;
+    using Topology;
     using Transports;
     using Util;
 
@@ -25,17 +26,18 @@ namespace MassTransit.AzureServiceBusTransport.Transport
         IPublishEndpointProvider
     {
         readonly IServiceBusHost _host;
-        readonly IMessageNameFormatter _nameFormatter;
         readonly PublishObservable _publishObservable;
         readonly IPublishPipe _publishPipe;
+        readonly IServiceBusPublishTopology _publishTopology;
         readonly ISendEndpointProvider _sendEndpointProvider;
 
-        public ServiceBusPublishEndpointProvider(IServiceBusHost host, ISendEndpointProvider sendEndpointProvider, IPublishPipe publishPipe)
+        public ServiceBusPublishEndpointProvider(IServiceBusHost host, ISendEndpointProvider sendEndpointProvider, IPublishPipe publishPipe,
+            IServiceBusPublishTopology publishTopology)
         {
             _host = host;
             _sendEndpointProvider = sendEndpointProvider;
             _publishPipe = publishPipe;
-            _nameFormatter = host.MessageNameFormatter;
+            _publishTopology = publishTopology;
             _publishObservable = new PublishObservable();
         }
 
@@ -44,14 +46,15 @@ namespace MassTransit.AzureServiceBusTransport.Transport
             return new PublishEndpoint(sourceAddress, this, _publishObservable, _publishPipe, correlationId, conversationId);
         }
 
-        public Task<ISendEndpoint> GetPublishSendEndpoint(Type messageType)
+        public Task<ISendEndpoint> GetPublishSendEndpoint<T>(T message) where T : class
         {
-            if (!TypeMetadataCache.IsValidMessageType(messageType))
-                throw new MessageException(messageType, "Anonymous types are not valid message types");
+            IServiceBusMessagePublishTopologyConfigurator<T> messageTopology = _publishTopology.GetMessageTopology<T>();
 
-            var address = _nameFormatter.GetTopicAddress(_host, messageType);
+            Uri publishAddress;
+            if (!messageTopology.TryGetPublishAddress(_host.Address, message, out publishAddress))
+                throw new PublishException($"An address for publishing message type {TypeMetadataCache<T>.ShortName} was not found.");
 
-            return _sendEndpointProvider.GetSendEndpoint(address);
+            return _sendEndpointProvider.GetSendEndpoint(publishAddress);
         }
 
         public ConnectHandle ConnectPublishObserver(IPublishObserver observer)
