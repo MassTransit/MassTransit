@@ -13,6 +13,7 @@
 namespace MassTransit.AzureServiceBusTransport.Transport
 {
     using System;
+    using MassTransit.Topology;
     using Microsoft.ServiceBus.Messaging;
     using Transports.Metrics;
     using Util;
@@ -22,26 +23,23 @@ namespace MassTransit.AzureServiceBusTransport.Transport
         IMessageSessionAsyncHandlerFactory
     {
         readonly NamespaceContext _context;
-        readonly IPublishEndpointProvider _publishEndpointProvider;
         readonly ISessionReceiver _receiver;
-        readonly ISendEndpointProvider _sendEndpointProvider;
         readonly ITaskSupervisor _supervisor;
         readonly IDeliveryTracker _tracker;
+        readonly IReceiveEndpointTopology _topology;
 
-        public MessageSessionAsyncHandlerFactory(NamespaceContext context, ITaskSupervisor supervisor, ISessionReceiver receiver, IDeliveryTracker tracker,
-            ISendEndpointProvider sendEndpointProvider, IPublishEndpointProvider publishEndpointProvider)
+        public MessageSessionAsyncHandlerFactory(NamespaceContext context, ITaskSupervisor supervisor, ISessionReceiver receiver, IDeliveryTracker tracker, IReceiveEndpointTopology topology)
         {
             _context = context;
             _supervisor = supervisor;
             _receiver = receiver;
             _tracker = tracker;
-            _sendEndpointProvider = sendEndpointProvider;
-            _publishEndpointProvider = publishEndpointProvider;
+            _topology = topology;
         }
 
         public IMessageSessionAsyncHandler CreateInstance(MessageSession session, BrokeredMessage message)
         {
-            return new MessageSessionAsyncHandler(_context, _supervisor, _receiver, session, _tracker, _sendEndpointProvider, _publishEndpointProvider);
+            return new MessageSessionAsyncHandler(_context, _supervisor, _receiver, session, _tracker, _topology);
         }
 
         public void DisposeInstance(IMessageSessionAsyncHandler handler)

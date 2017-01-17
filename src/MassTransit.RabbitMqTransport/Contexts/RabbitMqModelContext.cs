@@ -137,6 +137,11 @@ namespace MassTransit.RabbitMqTransport.Contexts
                 _participant.StoppedToken, TaskCreationOptions.None, _taskScheduler);
         }
 
+        Task<QueueDeclareOk> ModelContext.QueueDeclarePassive(string queue)
+        {
+            return Task.Factory.StartNew(() => _model.QueueDeclarePassive(queue),_participant.StoppedToken, TaskCreationOptions.None, _taskScheduler);
+        }
+
         Task<uint> ModelContext.QueuePurge(string queue)
         {
             return Task.Factory.StartNew(() => _model.QueuePurge(queue),

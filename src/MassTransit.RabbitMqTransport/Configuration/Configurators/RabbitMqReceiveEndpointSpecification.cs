@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,14 +14,13 @@ namespace MassTransit.RabbitMqTransport.Configurators
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
     using Builders;
-    using EndpointConfigurators;
+    using EndpointSpecifications;
     using GreenPipes;
     using Management;
     using MassTransit.Builders;
-    using MassTransit.Pipeline;
     using MassTransit.Pipeline.Pipes;
+    using Specifications;
     using Topology;
     using Transport;
     using Transports;
@@ -32,18 +31,19 @@ namespace MassTransit.RabbitMqTransport.Configurators
         IRabbitMqReceiveEndpointConfigurator,
         IReceiveEndpointSpecification<IBusBuilder>
     {
-        readonly List<ExchangeBindingSettings> _exchangeBindings;
         readonly IRabbitMqHost _host;
         readonly IManagementPipe _managementPipe;
         readonly RabbitMqReceiveSettings _settings;
+        readonly IRabbitMqEndpointConfiguration _configuration;
         bool _bindMessageExchanges;
         IPublishEndpointProvider _publishEndpointProvider;
         ISendEndpointProvider _sendEndpointProvider;
 
-        public RabbitMqReceiveEndpointSpecification(IRabbitMqHost host, string queueName = null, IConsumePipe consumePipe = null)
-            : base(consumePipe)
+        public RabbitMqReceiveEndpointSpecification(IRabbitMqHost host, IRabbitMqEndpointConfiguration configuration, string queueName = null)
+            : base(configuration)
         {
             _host = host;
+            _configuration = configuration;
 
             _bindMessageExchanges = true;
 
@@ -53,17 +53,17 @@ namespace MassTransit.RabbitMqTransport.Configurators
             };
 
             _managementPipe = new ManagementPipe();
-            _exchangeBindings = new List<ExchangeBindingSettings>();
         }
 
-        public RabbitMqReceiveEndpointSpecification(IRabbitMqHost host, RabbitMqReceiveSettings settings, IConsumePipe consumePipe)
-            : base(consumePipe)
+        public RabbitMqReceiveEndpointSpecification(IRabbitMqHost host, IRabbitMqEndpointConfiguration configuration,
+            RabbitMqReceiveSettings settings)
+            : base(configuration)
         {
             _host = host;
+            _configuration = configuration;
             _settings = settings;
 
             _managementPipe = new ManagementPipe();
-            _exchangeBindings = new List<ExchangeBindingSettings>();
         }
 
         public ISendEndpointProvider SendEndpointProvider => _sendEndpointProvider;
@@ -123,7 +123,7 @@ namespace MassTransit.RabbitMqTransport.Configurators
 
         public bool Lazy
         {
-            set { SetQueueArgument("x-queue-mode", value ? "lazy" : "default"); }
+            set { _settings.Lazy = value; }
         }
 
         public bool BindMessageExchanges
@@ -162,27 +162,23 @@ namespace MassTransit.RabbitMqTransport.Configurators
             if (exchangeName == null)
                 throw new ArgumentNullException(nameof(exchangeName));
 
-            _exchangeBindings.AddRange(_settings.GetExchangeBindings(exchangeName));
+            _configuration.ConsumeTopology.Bind(exchangeName);
         }
 
         public void Bind<T>()
             where T : class
         {
-            _exchangeBindings.AddRange(typeof(T).GetExchangeBindings(_host.Settings.MessageNameFormatter));
+            _configuration.ConsumeTopology.GetMessageTopology<T>().Bind();
         }
 
-        public void Bind(string exchangeName, Action<IExchangeBindingConfigurator> callback)
+        public void Bind(string exchangeName, Action<IBindExchangeConfigurator> callback)
         {
             if (exchangeName == null)
                 throw new ArgumentNullException(nameof(exchangeName));
             if (callback == null)
                 throw new ArgumentNullException(nameof(callback));
 
-            var exchangeSettings = new RabbitMqReceiveSettings(_settings);
-
-            callback(exchangeSettings);
-
-            _exchangeBindings.AddRange(exchangeSettings.GetExchangeBindings(exchangeName));
+            _configuration.ConsumeTopology.Bind(exchangeName, callback);
         }
 
         public override IEnumerable<ValidationResult> Validate()
@@ -198,17 +194,16 @@ namespace MassTransit.RabbitMqTransport.Configurators
 
         public void Apply(IBusBuilder builder)
         {
-            var receiveEndpointBuilder = new RabbitMqReceiveEndpointBuilder(CreateConsumePipe(builder), builder, _bindMessageExchanges, _host);
-
-            receiveEndpointBuilder.AddExchangeBindings(_exchangeBindings.ToArray());
+            var receiveEndpointBuilder = new RabbitMqReceiveEndpointBuilder(builder, _host, _bindMessageExchanges, _configuration);
 
             var receivePipe = CreateReceivePipe(receiveEndpointBuilder);
 
-            _sendEndpointProvider = CreateSendEndpointProvider(receiveEndpointBuilder);
-            _publishEndpointProvider = CreatePublishEndpointProvider(receiveEndpointBuilder);
+            var receiveEndpointTopology = receiveEndpointBuilder.CreateReceiveEndpointTopology(InputAddress, _settings);
 
-            var transport = new RabbitMqReceiveTransport(_host, _settings, _managementPipe, receiveEndpointBuilder.GetExchangeBindings().ToArray(),
-                _sendEndpointProvider, _publishEndpointProvider);
+            _sendEndpointProvider = receiveEndpointTopology.SendEndpointProvider;
+            _publishEndpointProvider = receiveEndpointTopology.PublishEndpointProvider;
+
+            var transport = new RabbitMqReceiveTransport(_host, _settings, _managementPipe, receiveEndpointTopology);
 
             var rabbitMqHost = _host as RabbitMqHost;
             if (rabbitMqHost == null)
@@ -224,24 +219,12 @@ namespace MassTransit.RabbitMqTransport.Configurators
 
         protected override Uri GetErrorAddress()
         {
-            var errorQueueName = _settings.QueueName + "_error";
-            var sendSettings = new RabbitMqSendSettings(errorQueueName, RabbitMQ.Client.ExchangeType.Fanout, _settings.Durable,
-                _settings.AutoDelete);
-
-            sendSettings.BindToQueue(errorQueueName);
-
-            return sendSettings.GetSendAddress(_host.Settings.HostAddress);
+            return _host.Settings.Topology.GetErrorAddress(_settings);
         }
 
         protected override Uri GetDeadLetterAddress()
         {
-            var errorQueueName = _settings.QueueName + "_skipped";
-            var sendSettings = new RabbitMqSendSettings(errorQueueName, RabbitMQ.Client.ExchangeType.Fanout, _settings.Durable,
-                _settings.AutoDelete);
-
-            sendSettings.BindToQueue(errorQueueName);
-
-            return sendSettings.GetSendAddress(_host.Settings.HostAddress);
+            return _host.Settings.Topology.GetDeadLetterAddress(_settings);
         }
     }
 }

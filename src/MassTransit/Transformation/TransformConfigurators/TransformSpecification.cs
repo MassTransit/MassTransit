@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -17,7 +17,6 @@ namespace MassTransit.Transformation.TransformConfigurators
     using System.Linq;
     using System.Linq.Expressions;
     using System.Reflection;
-    using Configurators;
     using GreenPipes;
     using Internals.Extensions;
     using TransformBuilders;
@@ -88,7 +87,7 @@ namespace MassTransit.Transformation.TransformConfigurators
         {
             var builder = new MessageTransformBuilder<TMessage, TMessage>(() => TypeMetadataCache<TMessage>.InitializeFromObject(new object()));
 
-            for (int i = 0; i < _specifications.Count; i++)
+            for (var i = 0; i < _specifications.Count; i++)
                 _specifications[i].Configure(builder);
 
             return builder.Build();

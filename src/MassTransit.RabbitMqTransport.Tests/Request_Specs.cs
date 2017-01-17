@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -29,6 +29,16 @@ namespace MassTransit.RabbitMqTransport.Tests
             var message = await _response;
 
             message.CorrelationId.ShouldBe(_ping.Result.Message.CorrelationId);
+        }
+
+        public Sending_a_request_using_the_request_client()
+        {
+            RabbitMqTestHarness.OnConfigureRabbitMqHost += ConfigureHost;
+        }
+
+        void ConfigureHost(IRabbitMqHostConfigurator configurator)
+        {
+            configurator.PublisherConfirmation = false;
         }
 
         Task<ConsumeContext<PingMessage>> _ping;
@@ -120,6 +130,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         }
     }
 
+
     [TestFixture]
     public class Sending_a_request_using_the_request_client_with_no_confirmations :
         RabbitMqTestFixture
@@ -143,13 +154,6 @@ namespace MassTransit.RabbitMqTransport.Tests
                 TimeSpan.FromSeconds(8));
 
             _response = _requestClient.Request(new PingMessage());
-        }
-
-        protected override void ConfigureRabbitMqBus(IRabbitMqBusFactoryConfigurator configurator)
-        {
-            base.ConfigureRabbitMqBus(configurator);
-
-            configurator.PublisherConfirmation = false;
         }
 
         protected override void ConfigureRabbitMqReceiveEndoint(IRabbitMqReceiveEndpointConfigurator configurator)

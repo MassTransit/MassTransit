@@ -30,7 +30,7 @@ namespace MassTransit.Util
 
 						return new {Key = values[0], Value = values[1]};
 					})
-				.Where(x => String.Compare(x.Key, key, true) == 0)
+				.Where(x => string.Compare(x.Key, key, StringComparison.OrdinalIgnoreCase) == 0)
 				.Select(x => x.Value)
 				.DefaultIfEmpty(null)
 				.SingleOrDefault();

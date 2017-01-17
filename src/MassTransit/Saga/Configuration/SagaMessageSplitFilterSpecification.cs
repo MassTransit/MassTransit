@@ -36,9 +36,6 @@ namespace MassTransit.Saga.Configuration
 
         public IEnumerable<ValidationResult> Validate()
         {
-//            if (!typeof(TSaga).HasInterface<ISaga<TMessage>>())
-//                yield return this.Failure("MessageType", $"is not consumed by {TypeMetadataCache<TSaga>.ShortName}");
-
             foreach (var validationResult in _specification.Validate())
             {
                 yield return validationResult;

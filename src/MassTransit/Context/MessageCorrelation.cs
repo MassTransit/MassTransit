@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,6 +13,7 @@
 namespace MassTransit.Context
 {
     using System;
+    using Topology;
 
 
     public static class MessageCorrelation
@@ -20,7 +21,7 @@ namespace MassTransit.Context
         public static void UseCorrelationId<T>(Func<T, Guid> getCorrelationId)
             where T : class
         {
-            MessageCorrelationCache<T>.UseCorrelationId(getCorrelationId);
+            GlobalTopology.Send.UseCorrelationId<T>(x => getCorrelationId(x));
         }
     }
 }

@@ -24,7 +24,7 @@ namespace MassTransit.Tests
         [Test]
         public async Task Should_be_able_to_read_xml_when_using_json()
         {
-            _responseReceived = SubscribeHandler<B>();
+            _responseReceived = ConnectPublishHandler<B>();
 
             await InputQueueSendEndpoint.Send(new A {Key = "Hello"});
 
@@ -36,7 +36,7 @@ namespace MassTransit.Tests
         Task<ConsumeContext<A>> _requestReceived;
         Task<ConsumeContext<B>> _responseReceived;
 
-        protected override void PreCreateBus(IInMemoryBusFactoryConfigurator configurator)
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
             configurator.UseXmlSerializer();
         }

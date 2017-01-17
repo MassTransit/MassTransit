@@ -57,7 +57,7 @@ namespace MassTransit.AzureServiceBusTransport.Transport
 
         async Task ISendTransport.Send<T>(T message, IPipe<SendContext<T>> pipe, CancellationToken cancelSend)
         {
-            var context = new ServiceBusSendContextImpl<T>(message, cancelSend);
+            var context = new AzureServiceBusSendContext<T>(message, cancelSend);
 
             try
             {

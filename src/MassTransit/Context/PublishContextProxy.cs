@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,6 +12,29 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Context
 {
+    public class PublishContextProxy :
+        SendContextProxy,
+        PublishContext
+    {
+        readonly SendContext _context;
+
+        public PublishContextProxy(SendContext context)
+            : base(context)
+        {
+            _context = context;
+
+            _context.GetOrAddPayload<PublishContext>(() => this);
+        }
+
+        bool PublishContext.Mandatory { get; set; }
+
+        SendContext<T> SendContext.CreateProxy<T>(T message)
+        {
+            return new PublishContextProxy<T>(_context, message);
+        }
+    }
+
+
     public class PublishContextProxy<TMessage> :
         SendContextProxy<TMessage>,
         PublishContext<TMessage>
@@ -34,18 +57,5 @@ namespace MassTransit.Context
         {
             return new PublishContextProxy<T>(_context, message);
         }
-    }
-
-
-    public class PublishContextProxy :
-        SendContextProxy,
-        PublishContext
-    {
-        public PublishContextProxy(SendContext context)
-            : base(context)
-        {
-        }
-
-        bool PublishContext.Mandatory { get; set; }
     }
 }

@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,6 +14,7 @@ namespace MassTransit.HttpTransport
 {
     using System;
     using Specifications;
+    using Transports.InMemory;
 
 
     public static class HttpBusFactory
@@ -25,7 +26,7 @@ namespace MassTransit.HttpTransport
         /// <returns></returns>
         public static IBusControl Create(Action<IHttpBusFactoryConfigurator> configure)
         {
-            var configurator = new HttpBusFactoryConfigurator();
+            var configurator = new HttpBusFactoryConfigurator(new InMemoryEndpointConfiguration());
 
             configure(configurator);
 

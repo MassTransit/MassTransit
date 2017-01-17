@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,11 +13,14 @@
 namespace MassTransit.HttpTransport.Clients
 {
     using System;
-    using System.Linq;
     using System.Threading.Tasks;
     using MassTransit.Pipeline;
+    using MassTransit.Topology;
+    using Topology;
     using Transport;
     using Transports;
+    using Transports.InMemory;
+    using Transports.InMemory.Topology;
 
 
     public class HttpSendTransportProvider :
@@ -26,25 +29,26 @@ namespace MassTransit.HttpTransport.Clients
         readonly BusHostCollection<HttpHost> _hosts;
         readonly IReceiveObserver _receiveObserver;
         readonly IReceivePipe _receivePipe;
+        readonly IReceiveEndpointTopology _topology;
 
-        public HttpSendTransportProvider(BusHostCollection<HttpHost> hosts, IReceivePipe receivePipe, IReceiveObserver receiveObserver)
+        public HttpSendTransportProvider(BusHostCollection<HttpHost> hosts, IReceivePipe receivePipe, IReceiveObserver receiveObserver,
+            IInMemoryEndpointConfiguration configuration, Uri inputAddress, IMessageSerializer serializer, IHttpHost host)
         {
             _hosts = hosts;
             _receivePipe = receivePipe;
             _receiveObserver = receiveObserver;
+            _topology = new HttpReceiveEndpointTopology(configuration, inputAddress, serializer, this, host);
         }
 
         public Task<ISendTransport> GetSendTransport(Uri address)
         {
             var sendSettings = address.GetSendSettings();
 
-            var host = _hosts.GetHosts(address).FirstOrDefault();
-            if (host == null)
-                throw new EndpointNotFoundException("The endpoint address specified an unknown host: " + address);
+            var host = _hosts.GetHost(address);
 
             var clientCache = new HttpClientCache(_hosts[0].Supervisor, _receivePipe);
 
-            return Task.FromResult<ISendTransport>(new HttpSendTransport(clientCache, sendSettings, _receiveObserver));
+            return Task.FromResult<ISendTransport>(new HttpSendTransport(clientCache, sendSettings, _receiveObserver, _topology));
         }
     }
 }

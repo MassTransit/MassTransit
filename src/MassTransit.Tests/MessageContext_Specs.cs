@@ -15,6 +15,7 @@ namespace MassTransit.Tests
     using System;
     using System.Threading.Tasks;
     using GreenPipes;
+    using GreenPipes.Introspection;
     using NUnit.Framework;
     using Shouldly;
     using TestFramework;
@@ -259,6 +260,16 @@ namespace MassTransit.Tests
             message.CorrelationId.ShouldBe(_ping.Result.Message.CorrelationId);
         }
 
+        [Test]
+        public async Task Should_wonderful_display()
+        {
+            ProbeResult result = Bus.GetProbeResult();
+
+            Console.WriteLine(result.ToJsonString());
+
+        }
+
+
         Task<ConsumeContext<PingMessage>> _ping;
         Task<ConsumeContext<PongMessage>> _responseHandler;
         Task<Request<PingMessage>> _request;
@@ -270,8 +281,10 @@ namespace MassTransit.Tests
         {
             _responseHandler = SubscribeHandler<PongMessage>();
 
+
             _request = Bus.PublishRequest(new PingMessage(), x =>
             {
+                x.Timeout = TimeSpan.FromSeconds(10);
                 _response = x.Handle<PongMessage>(async _ =>
                 {
                 });

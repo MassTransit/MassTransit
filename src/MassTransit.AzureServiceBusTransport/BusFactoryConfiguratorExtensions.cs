@@ -30,7 +30,7 @@ namespace MassTransit
         public static IServiceBusHost Host(this IServiceBusBusFactoryConfigurator configurator, Uri hostAddress,
             Action<IServiceBusHostConfigurator> configure)
         {
-            var hostConfigurator = new AzureServiceBusHostConfigurator(hostAddress);
+            var hostConfigurator = new ServiceBusHostConfigurator(hostAddress);
 
             configure(hostConfigurator);
 
@@ -60,7 +60,7 @@ namespace MassTransit
 
             var namespaceManager = NamespaceManager.CreateFromConnectionString(connectionString);
 
-            var hostConfigurator = new AzureServiceBusHostConfigurator(namespaceManager.Address)
+            var hostConfigurator = new ServiceBusHostConfigurator(namespaceManager.Address)
             {
                 TokenProvider = namespaceManager.Settings.TokenProvider,
                 OperationTimeout = namespaceManager.Settings.OperationTimeout

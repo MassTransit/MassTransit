@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,13 +14,13 @@ namespace MassTransit.Transports.InMemory
 {
     using System;
     using System.Threading.Tasks;
+    using MassTransit.Topology;
 
 
     public interface IInMemoryHost :
         IHost
     {
-        IReceiveTransport GetReceiveTransport(string queueName, int concurrencyLimit, ISendEndpointProvider sendEndpointProvider,
-            IPublishEndpointProvider publishEndpointProvider);
+        IReceiveTransport GetReceiveTransport(string queueName, int concurrencyLimit, IReceiveEndpointTopology topology);
 
         /// <summary>
         /// Create a receive endpoint on the host, with a separate handle for stopping/removing the endpoint

@@ -1,4 +1,4 @@
-// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,8 +12,8 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Courier
 {
-    using Context;
     using Contracts;
+    using Topology;
 
 
     public static class RoutingSlipEventCorrelation
@@ -21,24 +21,30 @@ namespace MassTransit.Courier
         static readonly object _lock = new object();
         static bool _configured;
 
-        public static void ConfigureMessageCorrelation()
+        public static void ConfigureCorrelationIds()
         {
             lock (_lock)
             {
                 if (_configured)
                     return;
-                MessageCorrelation.UseCorrelationId<RoutingSlipCompleted>(x => x.TrackingNumber);
-                MessageCorrelation.UseCorrelationId<RoutingSlipFaulted>(x => x.TrackingNumber);
-                MessageCorrelation.UseCorrelationId<RoutingSlipActivityCompleted>(x => x.ExecutionId);
-                MessageCorrelation.UseCorrelationId<RoutingSlipActivityFaulted>(x => x.ExecutionId);
-                MessageCorrelation.UseCorrelationId<RoutingSlipActivityCompensated>(x => x.ExecutionId);
-                MessageCorrelation.UseCorrelationId<RoutingSlipActivityCompensationFailed>(x => x.ExecutionId);
-                MessageCorrelation.UseCorrelationId<RoutingSlipCompensationFailed>(x => x.TrackingNumber);
-                MessageCorrelation.UseCorrelationId<RoutingSlipTerminated>(x => x.TrackingNumber);
-                MessageCorrelation.UseCorrelationId<RoutingSlipRevised>(x => x.TrackingNumber);
+
+                ConfigureCorrelationIds(GlobalTopology.Send);
 
                 _configured = true;
             }
+        }
+
+        public static void ConfigureCorrelationIds(ISendTopology topology)
+        {
+            topology.UseCorrelationId<RoutingSlipCompleted>(x => x.TrackingNumber);
+            topology.UseCorrelationId<RoutingSlipFaulted>(x => x.TrackingNumber);
+            topology.UseCorrelationId<RoutingSlipActivityCompleted>(x => x.ExecutionId);
+            topology.UseCorrelationId<RoutingSlipActivityFaulted>(x => x.ExecutionId);
+            topology.UseCorrelationId<RoutingSlipActivityCompensated>(x => x.ExecutionId);
+            topology.UseCorrelationId<RoutingSlipActivityCompensationFailed>(x => x.ExecutionId);
+            topology.UseCorrelationId<RoutingSlipCompensationFailed>(x => x.TrackingNumber);
+            topology.UseCorrelationId<RoutingSlipTerminated>(x => x.TrackingNumber);
+            topology.UseCorrelationId<RoutingSlipRevised>(x => x.TrackingNumber);
         }
     }
 }

@@ -28,8 +28,8 @@ namespace MassTransit.Containers.Tests
         [Test]
         public async Task Should_receive_the_first_event_successfully()
         {
-            Task<ConsumeContext<TestStarted>> started = SubscribeHandler<TestStarted>();
-            Task<ConsumeContext<TestUpdated>> updated = SubscribeHandler<TestUpdated>();
+            Task<ConsumeContext<TestStarted>> started = ConnectPublishHandler<TestStarted>();
+            Task<ConsumeContext<TestUpdated>> updated = ConnectPublishHandler<TestUpdated>();
 
             await InputQueueSendEndpoint.Send(new StartTest {CorrelationId = NewId.NextGuid(), TestKey = "Unique"});
 

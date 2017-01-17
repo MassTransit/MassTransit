@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -18,7 +18,6 @@ namespace MassTransit.HttpTransport.Clients
     using MassTransit.Pipeline;
     using MassTransit.Pipeline.Observables;
     using Microsoft.Owin;
-    using Transport;
     using Transports;
 
 
@@ -26,22 +25,22 @@ namespace MassTransit.HttpTransport.Clients
         ISendEndpointProvider
     {
         readonly Uri _inputAddress;
-        readonly IOwinContext _owinContext;
-        readonly ReceiveSettings _receiveSettings;
         readonly SendObservable _observers;
+        readonly IOwinContext _owinContext;
+        readonly ISendEndpointProvider _sendEndpointProvider;
         readonly ISendPipe _sendPipe;
+        readonly IMessageSerializer _serializer;
 
-        public HttpResponseSendEndpointProvider(ReceiveSettings receiveSettings,
-            IOwinContext owinContext,
-            Uri inputAddress,
-            ISendPipe sendPipe)
+        public HttpResponseSendEndpointProvider(IOwinContext owinContext, Uri inputAddress, ISendPipe sendPipe, IMessageSerializer serializer,
+            ISendEndpointProvider sendEndpointProvider)
         {
-            _receiveSettings = receiveSettings;
+            _serializer = serializer;
             _owinContext = owinContext;
             _inputAddress = inputAddress;
             _sendPipe = sendPipe;
 
             _observers = new SendObservable();
+            _sendEndpointProvider = sendEndpointProvider;
         }
 
         public Task<ISendEndpoint> GetSendEndpoint(Uri address)
@@ -50,14 +49,14 @@ namespace MassTransit.HttpTransport.Clients
             {
                 var responseTransport = new HttpResponseTransport(_owinContext);
 
-                var endpoint = new SendEndpoint(responseTransport, _receiveSettings.MessageSerializer, address, _inputAddress, _sendPipe);
+                var endpoint = new SendEndpoint(responseTransport, _serializer, address, _inputAddress, _sendPipe);
 
                 endpoint.ConnectSendObserver(_observers);
 
                 return Task.FromResult<ISendEndpoint>(endpoint);
             }
 
-            return _receiveSettings.SendEndpointProvider.GetSendEndpoint(address);
+            return _sendEndpointProvider.GetSendEndpoint(address);
         }
 
         public ConnectHandle ConnectSendObserver(ISendObserver observer)

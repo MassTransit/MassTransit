@@ -1,4 +1,4 @@
-// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,10 +13,9 @@
 namespace MassTransit.RabbitMqTransport.Builders
 {
     using System;
-    using BusConfigurators;
     using Configurators;
     using MassTransit.Builders;
-    using MassTransit.Pipeline;
+    using Specifications;
     using Topology;
     using Transport;
     using Transports;
@@ -27,18 +26,22 @@ namespace MassTransit.RabbitMqTransport.Builders
     {
         readonly RabbitMqReceiveEndpointSpecification _busEndpointSpecification;
         readonly BusHostCollection<RabbitMqHost> _hosts;
+        readonly IRabbitMqEndpointConfiguration _configuration;
 
-        public RabbitMqBusBuilder(BusHostCollection<RabbitMqHost> hosts, IConsumePipeFactory consumePipeFactory, ISendPipeFactory sendPipeFactory,
-            IPublishPipeFactory publishPipeFactory, RabbitMqReceiveSettings busSettings)
-            : base(consumePipeFactory, sendPipeFactory, publishPipeFactory, hosts)
+        public RabbitMqBusBuilder(BusHostCollection<RabbitMqHost> hosts, RabbitMqReceiveSettings busSettings,
+            IRabbitMqEndpointConfiguration configuration)
+            : base(hosts, configuration)
         {
             _hosts = hosts;
+            _configuration = configuration;
 
-            _busEndpointSpecification = new RabbitMqReceiveEndpointSpecification(_hosts[0], busSettings, ConsumePipe);
+            var endpointTopologySpecification = configuration.CreateConfiguration(ConsumePipe);
+
+            _busEndpointSpecification = new RabbitMqReceiveEndpointSpecification(_hosts[0], endpointTopologySpecification, busSettings);
 
             foreach (var host in hosts.Hosts)
             {
-                var factory = new RabbitMqReceiveEndpointFactory(this, host);
+                var factory = new RabbitMqReceiveEndpointFactory(this, host, configuration);
 
                 host.ReceiveEndpointFactory = factory;
             }
@@ -60,14 +63,9 @@ namespace MassTransit.RabbitMqTransport.Builders
             return _busEndpointSpecification.InputAddress;
         }
 
-        protected override IConsumePipe GetConsumePipe()
-        {
-            return CreateConsumePipe();
-        }
-
         protected override ISendTransportProvider CreateSendTransportProvider()
         {
-            return new RabbitMqSendTransportProvider(_hosts);
+            return new RabbitMqSendTransportProvider(_hosts, _configuration);
         }
     }
 }

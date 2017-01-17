@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,7 +14,6 @@ namespace MassTransit
 {
     using System;
     using System.Threading.Tasks;
-    using Pipeline;
 
 
     public interface IPublishEndpointProvider :
@@ -23,10 +22,12 @@ namespace MassTransit
         IPublishEndpoint CreatePublishEndpoint(Uri sourceAddress, Guid? correlationId = default(Guid?), Guid? conversationId = default(Guid?));
 
         /// <summary>
-        /// Returns the ISendEndpoint for the specified message type.
+        /// Return the SendEndpoint used for publishing the specified message
         /// </summary>
-        /// <param name="messageType"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="message"></param>
         /// <returns></returns>
-        Task<ISendEndpoint> GetPublishSendEndpoint(Type messageType);
+        Task<ISendEndpoint> GetPublishSendEndpoint<T>(T message)
+            where T : class;
     }
 }

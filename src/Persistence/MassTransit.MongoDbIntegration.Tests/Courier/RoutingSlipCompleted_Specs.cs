@@ -72,9 +72,9 @@ namespace MassTransit.MongoDbIntegration.Tests.Courier
             await Bus.Publish<RoutingSlipCompleted>(new RoutingSlipCompletedEvent(_trackingNumber, DateTime.UtcNow, TimeSpan.FromSeconds(1)));
         }
 
-        protected override void PreCreateBus(IInMemoryBusFactoryConfigurator configurator)
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
-            base.PreCreateBus(configurator);
+            base.ConfigureInMemoryBus(configurator);
 
             configurator.ConfigureRoutingSlipEventCorrelation();
         }

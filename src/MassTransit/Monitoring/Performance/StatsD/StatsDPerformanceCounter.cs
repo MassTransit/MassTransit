@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,13 +14,15 @@ namespace MassTransit.Monitoring.Performance.StatsD
 {
     using System.Net.Sockets;
     using System.Text;
+    using System.Threading.Tasks;
 
 
-    public class StatsDPerformanceCounter : IPerformanceCounter
+    public class StatsDPerformanceCounter : 
+        IPerformanceCounter
     {
+        readonly UdpClient _client;
         readonly string _fullName;
         readonly byte[] _incrementPayload;
-        readonly UdpClient _client;
 
         public StatsDPerformanceCounter(StatsDConfiguration cfg, string category, string name, string instance)
         {
@@ -29,23 +31,24 @@ namespace MassTransit.Monitoring.Performance.StatsD
             _incrementPayload = Encoding.UTF8.GetBytes(increment);
             _client = new UdpClient(cfg.Hostname, cfg.Port);
         }
+
         public void Increment()
         {
-            var t = _client.SendAsync(_incrementPayload, _incrementPayload.Length);
+            Task<int> t = _client.SendAsync(_incrementPayload, _incrementPayload.Length);
         }
 
         public void IncrementBy(long val)
         {
             var payload = $"{_fullName}:{val}|c";
-            byte[] datagram = System.Text.Encoding.UTF8.GetBytes(payload);
-            var t = _client.SendAsync(datagram, datagram.Length);
+            byte[] datagram = Encoding.UTF8.GetBytes(payload);
+            Task<int> t = _client.SendAsync(datagram, datagram.Length);
         }
 
         public void Set(long val)
         {
             var payload = $"{_fullName}:{val}|g";
-            byte[] datagram = System.Text.Encoding.UTF8.GetBytes(payload);
-            var t = _client.SendAsync(datagram, datagram.Length);
+            byte[] datagram = Encoding.UTF8.GetBytes(payload);
+            Task<int> t = _client.SendAsync(datagram, datagram.Length);
         }
 
         public void Dispose()

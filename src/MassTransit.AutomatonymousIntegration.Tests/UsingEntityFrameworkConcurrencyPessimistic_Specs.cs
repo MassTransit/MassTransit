@@ -124,9 +124,9 @@ namespace MassTransit.AutomatonymousIntegration.Tests
             Assert.IsTrue(instance.CurrentState.Equals("Harmony"));
         }
 
-        protected override void PreCreateBus(IInMemoryBusFactoryConfigurator configurator)
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
-            base.PreCreateBus(configurator);
+            base.ConfigureInMemoryBus(configurator);
 
             configurator.TransportConcurrencyLimit = 16;
         }

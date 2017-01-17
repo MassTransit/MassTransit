@@ -33,7 +33,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
             {
                 var correlationId = NewId.NextGuid();
 
-                tasks.Add(SubscribeHandler<Stopped>(context => context.Message.CorrelationId == correlationId));
+                tasks.Add(ConnectPublishHandler<Stopped>(context => context.Message.CorrelationId == correlationId));
 
                 await InputQueueSendEndpoint.Send(new Start {CorrelationId = correlationId});
             }

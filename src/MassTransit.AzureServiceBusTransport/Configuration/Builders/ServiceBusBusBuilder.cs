@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,11 +13,10 @@
 namespace MassTransit.AzureServiceBusTransport.Builders
 {
     using System;
-    using BusConfigurators;
     using Configurators;
     using MassTransit.Builders;
-    using MassTransit.Pipeline;
     using Settings;
+    using Specifications;
     using Transport;
     using Transports;
 
@@ -28,21 +27,23 @@ namespace MassTransit.AzureServiceBusTransport.Builders
         readonly ServiceBusReceiveEndpointSpecification _busEndpointSpecification;
         readonly BusHostCollection<ServiceBusHost> _hosts;
 
-        public ServiceBusBusBuilder(BusHostCollection<ServiceBusHost> hosts, IConsumePipeFactory consumePipeFactory, ISendPipeFactory sendPipeFactory,
-            IPublishPipeFactory publishPipeFactory, ReceiveEndpointSettings settings)
-            : base(consumePipeFactory, sendPipeFactory, publishPipeFactory, hosts)
+        public ServiceBusBusBuilder(BusHostCollection<ServiceBusHost> hosts, ReceiveEndpointSettings settings,
+            IServiceBusEndpointConfiguration configuration)
+            : base(hosts, configuration)
         {
             if (hosts == null)
                 throw new ArgumentNullException(nameof(hosts));
 
             _hosts = hosts;
 
-            _busEndpointSpecification = new ServiceBusReceiveEndpointSpecification(_hosts[0], settings, ConsumePipe);
+            var endpointTopologySpecification = configuration.CreateConfiguration(ConsumePipe);
+
+            _busEndpointSpecification = new ServiceBusReceiveEndpointSpecification(_hosts[0], settings, endpointTopologySpecification);
 
             foreach (var host in hosts.Hosts)
             {
-                host.ReceiveEndpointFactory = new ServiceBusReceiveEndpointFactory(this, host);
-                host.SubscriptionEndpointFactory = new ServiceBusSubscriptionEndpointFactory(this, host);
+                host.ReceiveEndpointFactory = new ServiceBusReceiveEndpointFactory(this, host, configuration);
+                host.SubscriptionEndpointFactory = new ServiceBusSubscriptionEndpointFactory(this, host, configuration);
             }
         }
 
@@ -53,11 +54,6 @@ namespace MassTransit.AzureServiceBusTransport.Builders
         protected override Uri GetInputAddress()
         {
             return _busEndpointSpecification.InputAddress;
-        }
-
-        protected override IConsumePipe GetConsumePipe()
-        {
-            return CreateConsumePipe();
         }
 
         protected override ISendTransportProvider CreateSendTransportProvider()

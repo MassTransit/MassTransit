@@ -55,8 +55,8 @@ namespace MassTransit.Tests.Courier
             _stringValue = "Hello, World.";
             _decimalValue = 123.45m;
 
-            Task<ConsumeContext<RoutingSlipCompleted>> completed = SubscribeHandler<RoutingSlipCompleted>();
-            Task<ConsumeContext<RoutingSlipFaulted>> faulted = SubscribeHandler<RoutingSlipFaulted>();
+            Task<ConsumeContext<RoutingSlipCompleted>> completed = ConnectPublishHandler<RoutingSlipCompleted>();
+            Task<ConsumeContext<RoutingSlipFaulted>> faulted = ConnectPublishHandler<RoutingSlipFaulted>();
 
             ActivityTestContext testActivity = GetActivityContext<ObjectGraphTestActivity>();
             ActivityTestContext testActivity2 = GetActivityContext<TestActivity>();

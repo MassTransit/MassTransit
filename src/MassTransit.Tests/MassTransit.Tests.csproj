@@ -112,8 +112,10 @@
     <Compile Include="ConcurrencyLimitKnob_Specs.cs" />
     <Compile Include="Configuration\ConfigurationObserver_Specs.cs" />
     <Compile Include="Configuration\SagaConfigurationObserver_Specs.cs" />
+    <Compile Include="Configuration\SendSpecification_Specs.cs" />
     <Compile Include="ConsumeJToken_Specs.cs" />
     <Compile Include="ConsumeObserver_Specs.cs" />
+    <Compile Include="ConsumePipeBuilder.cs" />
     <Compile Include="ConsumerFactoryMiddleware_Specs.cs" />
     <Compile Include="Consumer_Specs.cs" />
     <Compile Include="ContainedMessage_Specs.cs" />
@@ -151,6 +153,7 @@
     <Compile Include="FaultPublish_Specs.cs" />
     <Compile Include="HeaderObject_Specs.cs" />
     <Compile Include="HostInfo_Specs.cs" />
+    <Compile Include="IConsumePipeBuilder.cs" />
     <Compile Include="InMemoryDuo_Specs.cs" />
     <Compile Include="Introspection_Specs.cs" />
     <Compile Include="MessageData\DataBus_Specs.cs" />
@@ -234,10 +237,11 @@
     <Compile Include="Testing\SagaTest_Specs.cs" />
     <Compile Include="Testing\StandaloneConsumer_Specs.cs" />
     <Compile Include="Threading_Specs.cs" />
+    <Compile Include="Topology\CreateTopology_Specs.cs" />
     <Compile Include="Transforms\SendTransform_Specs.cs" />
     <Compile Include="Transforms\SetProperty_Specs.cs" />
     <Compile Include="Transforms\TransformClass_Specs.cs" />
-    <Compile Include="Transports\InMemoryTransport_Specs.cs" />
+    <Compile Include="Transports\MessageFabric_Specs.cs" />
     <Compile Include="Uri_Specs.cs" />
     <Compile Include="Saga\Messages\CompleteSimpleSaga.cs" />
     <Compile Include="Saga\Messages\InitiateSimpleSaga.cs" />

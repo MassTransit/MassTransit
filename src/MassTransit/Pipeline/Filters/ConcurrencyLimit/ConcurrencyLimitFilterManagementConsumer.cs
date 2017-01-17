@@ -70,7 +70,7 @@ namespace MassTransit.Pipeline.Filters.ConcurrencyLimit
                     }
                 }
                 else
-                    throw new CommandException($"The concurrency limit was updated after the command was sent.");
+                    throw new CommandException("The concurrency limit was updated after the command was sent.");
             }
         }
     }

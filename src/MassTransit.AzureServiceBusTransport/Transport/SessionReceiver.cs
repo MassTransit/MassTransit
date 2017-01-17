@@ -18,6 +18,7 @@ namespace MassTransit.AzureServiceBusTransport.Transport
     using GreenPipes;
     using Internals.Extensions;
     using Logging;
+    using MassTransit.Topology;
     using Microsoft.ServiceBus.Messaging;
     using Transports.Metrics;
     using Util;
@@ -34,17 +35,15 @@ namespace MassTransit.AzureServiceBusTransport.Transport
         readonly ITaskSupervisor _supervisor;
         readonly IDeliveryTracker _tracker;
         bool _shuttingDown;
-        readonly ISendEndpointProvider _sendEndpointProvider;
-        readonly IPublishEndpointProvider _publishEndpointProvider;
+        readonly IReceiveEndpointTopology _topology;
 
-        public SessionReceiver(ClientContext clientContext, IPipe<ReceiveContext> receivePipe, ClientSettings clientSettings, ITaskSupervisor supervisor, ISendEndpointProvider sendEndpointProvider, IPublishEndpointProvider publishEndpointProvider)
+        public SessionReceiver(ClientContext clientContext, IPipe<ReceiveContext> receivePipe, ClientSettings clientSettings, ITaskSupervisor supervisor, IReceiveEndpointTopology topology)
         {
             _clientContext = clientContext;
             _receivePipe = receivePipe;
             _clientSettings = clientSettings;
             _supervisor = supervisor;
-            _sendEndpointProvider = sendEndpointProvider;
-            _publishEndpointProvider = publishEndpointProvider;
+            _topology = topology;
 
             _tracker = new DeliveryTracker(HandleDeliveryComplete);
 
@@ -134,7 +133,7 @@ namespace MassTransit.AzureServiceBusTransport.Transport
                 }
             };
 
-            IMessageSessionAsyncHandlerFactory handlerFactory = new MessageSessionAsyncHandlerFactory(context, _supervisor, this, _tracker, _sendEndpointProvider, _publishEndpointProvider);
+            IMessageSessionAsyncHandlerFactory handlerFactory = new MessageSessionAsyncHandlerFactory(context, _supervisor, this, _tracker, _topology);
 
             await _clientContext.RegisterSessionHandlerFactoryAsync(handlerFactory, options).ConfigureAwait(false);
 

@@ -13,7 +13,6 @@
 namespace MassTransit.PipeConfigurators
 {
     using System.Collections.Generic;
-    using Configurators;
     using GreenPipes;
     using Pipeline.Filters;
 

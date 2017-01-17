@@ -16,6 +16,7 @@ namespace MassTransit.RabbitMqTransport
     using System.Net.Security;
     using System.Security.Authentication;
     using System.Security.Cryptography.X509Certificates;
+    using Topology;
     using Transports;
 
 
@@ -102,6 +103,9 @@ namespace MassTransit.RabbitMqTransport
         /// The message name formatter for the publisher
         /// </summary>
         IMessageNameFormatter MessageNameFormatter { get; }
+
+
+        IRabbitMqHostTopology Topology { get; }
 
         /// <summary>
         /// When using a RabbitMQ cluster, this contains the host names which make up the cluster. In the event of a connection failure, the next host in the array will be connected to.

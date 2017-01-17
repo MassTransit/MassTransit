@@ -1,4 +1,4 @@
-// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -20,7 +20,6 @@ namespace MassTransit.RabbitMqTransport.Transport
     using Logging;
     using MassTransit.Pipeline;
     using Policies;
-    using RabbitMQ.Client;
     using Topology;
     using Transports;
     using Util;
@@ -122,18 +121,9 @@ namespace MassTransit.RabbitMqTransport.Transport
         public IRetryPolicy ConnectionRetryPolicy => _connectionRetryPolicy;
         public ITaskSupervisor Supervisor => _supervisor;
 
-        public Uri GetSendAddress(string exchangeName, Action<IExchangeConfigurator> configure = null)
-        {
-            var sendSettings = new RabbitMqSendSettings(exchangeName, ExchangeType.Fanout, true, false);
-
-            configure?.Invoke(sendSettings);
-
-            return sendSettings.GetSendAddress(_settings.HostAddress);
-        }
-
         public Task<HostReceiveEndpointHandle> ConnectReceiveEndpoint(Action<IRabbitMqReceiveEndpointConfigurator> configure)
         {
-            return ConnectReceiveEndpoint(this.GetTemporaryQueueName("endpoint"), configure);
+            return ConnectReceiveEndpoint(_settings.Topology.CreateTemporaryQueueName("endpoint"), configure);
         }
 
         public Task<HostReceiveEndpointHandle> ConnectReceiveEndpoint(string queueName, Action<IRabbitMqReceiveEndpointConfigurator> configure)

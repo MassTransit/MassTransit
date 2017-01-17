@@ -18,7 +18,6 @@ namespace MassTransit.Courier
     using Context;
     using Contracts;
     using GreenPipes;
-    using MassTransit.Pipeline;
     using MassTransit.Pipeline.Observables;
     using Util;
 

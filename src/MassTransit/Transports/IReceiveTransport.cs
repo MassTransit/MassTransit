@@ -13,7 +13,6 @@
 namespace MassTransit.Transports
 {
     using GreenPipes;
-    using Pipeline;
 
 
     public interface IReceiveTransport :

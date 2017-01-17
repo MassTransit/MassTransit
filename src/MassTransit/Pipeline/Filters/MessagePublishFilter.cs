@@ -20,7 +20,6 @@ namespace MassTransit.Pipeline.Filters
     using GreenPipes;
     using GreenPipes.Pipes;
     using Observables;
-    using Pipes;
     using Util;
 
 

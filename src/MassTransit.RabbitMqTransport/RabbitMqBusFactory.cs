@@ -25,7 +25,7 @@ namespace MassTransit.RabbitMqTransport
         /// <returns></returns>
         public static IBusControl Create(Action<IRabbitMqBusFactoryConfigurator> configure)
         {
-            var configurator = new RabbitMqBusFactoryConfigurator();
+            var configurator = new RabbitMqBusFactoryConfigurator(new Specifications.RabbitMqEndpointConfiguration());
 
             configure(configurator);
 

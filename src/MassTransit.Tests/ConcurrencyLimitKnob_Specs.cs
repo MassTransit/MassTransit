@@ -29,8 +29,8 @@ namespace MassTransit.Tests
         [Test]
         public async Task Should_allow_reconfiguration()
         {
-            var updated = SubscribeHandler<ConcurrencyLimitUpdated>();
-            var faulted = SubscribeHandler<Fault<SetConcurrencyLimit>>();
+            var updated = ConnectPublishHandler<ConcurrencyLimitUpdated>();
+            var faulted = ConnectPublishHandler<Fault<SetConcurrencyLimit>>();
 
             await Bus.Publish<SetConcurrencyLimit>(new
             {
@@ -43,11 +43,11 @@ namespace MassTransit.Tests
             Assert.AreEqual(TaskStatus.RanToCompletion, updated.Status);
         }
 
-        protected override void PreCreateBus(IInMemoryBusFactoryConfigurator configurator)
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
             _management = configurator.ManagementEndpoint();
 
-            base.PreCreateBus(configurator);
+            base.ConfigureInMemoryBus(configurator);
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)

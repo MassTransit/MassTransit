@@ -41,7 +41,7 @@ namespace MassTransit.Tests.Saga
             var timer = Stopwatch.StartNew();
 
             var controller = new RegisterUserController(Bus);
-            using (ConnectHandle unsubscribe = Bus.ConnectInstance(controller))
+            using (var unsubscribe = Host.ConnectReceiveEndpoint(NewId.NextGuid().ToString(), x => x.Instance(controller)))
             {
                 bool complete = controller.RegisterUser("username", "password", "Display Name", "user@domain.com");
 

@@ -1,4 +1,4 @@
-// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -15,7 +15,7 @@ namespace MassTransit.HttpTransport
     using System.Collections.Generic;
     using GreenPipes;
     using Hosting;
-    using MassTransit.Pipeline;
+    using Topology;
     using Transport;
     using Util;
 
@@ -23,12 +23,12 @@ namespace MassTransit.HttpTransport
     public class HttpConsumerPipeSpecification :
         IPipeSpecification<OwinHostContext>
     {
+        readonly HttpHostSettings _hostSettings;
         readonly IReceiveObserver _receiveObserver;
         readonly IPipe<ReceiveContext> _receivePipe;
-        readonly ISendPipe _sendPipe;
-        readonly HttpHostSettings _hostSettings;
         readonly ReceiveSettings _receiveSettings;
         readonly ITaskSupervisor _supervisor;
+        readonly IHttpReceiveEndpointTopology _topology;
         readonly IReceiveTransportObserver _transportObserver;
 
         public HttpConsumerPipeSpecification(HttpHostSettings hostSettings,
@@ -36,8 +36,7 @@ namespace MassTransit.HttpTransport
             IPipe<ReceiveContext> receivePipe,
             IReceiveObserver receiveObserver,
             IReceiveTransportObserver transportObserver,
-            ITaskSupervisor supervisor,
-            ISendPipe sendPipe)
+            ITaskSupervisor supervisor, IHttpReceiveEndpointTopology topology)
         {
             _hostSettings = hostSettings;
             _receiveSettings = receiveSettings;
@@ -45,12 +44,13 @@ namespace MassTransit.HttpTransport
             _receiveObserver = receiveObserver;
             _transportObserver = transportObserver;
             _supervisor = supervisor;
-            _sendPipe = sendPipe;
+            _topology = topology;
         }
 
         public void Apply(IPipeBuilder<OwinHostContext> builder)
         {
-            builder.AddFilter(new HttpConsumerFilter(_receivePipe, _receiveObserver, _transportObserver, _supervisor, _hostSettings, _receiveSettings, _sendPipe));
+            builder.AddFilter(new HttpConsumerFilter(_receivePipe, _receiveObserver, _transportObserver, _supervisor, _hostSettings, _receiveSettings,
+                _topology));
         }
 
         public IEnumerable<ValidationResult> Validate()

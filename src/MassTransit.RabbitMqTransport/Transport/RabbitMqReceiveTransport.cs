@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -31,38 +31,34 @@ namespace MassTransit.RabbitMqTransport.Transport
         IReceiveTransport
     {
         static readonly ILog _log = Logger.Get<RabbitMqReceiveTransport>();
-        readonly ExchangeBindingSettings[] _bindings;
         readonly IRabbitMqHost _host;
         readonly Uri _inputAddress;
         readonly IManagementPipe _managementPipe;
-        readonly IPublishEndpointProvider _publishEndpointProvider;
         readonly ReceiveObservable _receiveObservable;
         readonly ReceiveTransportObservable _receiveTransportObservable;
-        readonly ISendEndpointProvider _sendEndpointProvider;
         readonly ReceiveSettings _settings;
+        readonly IRabbitMqReceiveEndpointTopology _topology;
 
-        public RabbitMqReceiveTransport(IRabbitMqHost host, ReceiveSettings settings, IManagementPipe managementPipe, ExchangeBindingSettings[] bindings,
-            ISendEndpointProvider sendEndpointProvider, IPublishEndpointProvider publishEndpointProvider)
+        public RabbitMqReceiveTransport(IRabbitMqHost host, ReceiveSettings settings, IManagementPipe managementPipe, IRabbitMqReceiveEndpointTopology topology)
         {
             _host = host;
             _settings = settings;
-            _bindings = bindings;
-            _sendEndpointProvider = sendEndpointProvider;
-            _publishEndpointProvider = publishEndpointProvider;
+            _topology = topology;
             _managementPipe = managementPipe;
 
             _receiveObservable = new ReceiveObservable();
             _receiveTransportObservable = new ReceiveTransportObservable();
 
-            _inputAddress = _settings.GetInputAddress(_host.Settings.HostAddress);
+            _inputAddress = topology.InputAddress;
         }
 
         void IProbeSite.Probe(ProbeContext context)
         {
-            ProbeContext scope = context.CreateScope("transport");
+            var scope = context.CreateScope("transport");
             scope.Add("type", "RabbitMQ");
             scope.Set(_settings);
-            scope.Add("bindings", _bindings);
+            var topologyScope = scope.CreateScope("topology");
+            _topology.TopologyLayout.Probe(topologyScope);
         }
 
         /// <summary>
@@ -77,8 +73,7 @@ namespace MassTransit.RabbitMqTransport.Transport
 
             IPipe<ConnectionContext> pipe = Pipe.New<ConnectionContext>(x =>
             {
-                x.RabbitMqConsumer(receivePipe, _settings, _receiveObservable, _receiveTransportObservable, _bindings, supervisor, _managementPipe,
-                    _sendEndpointProvider, _publishEndpointProvider, _host);
+                x.RabbitMqConsumer(receivePipe, _settings, _receiveObservable, _receiveTransportObservable, supervisor, _managementPipe, _host, _topology);
             });
 
             Task.Factory.StartNew(() => Receiver(pipe, supervisor), CancellationToken.None, TaskCreationOptions.None, TaskScheduler.Default);
@@ -98,7 +93,7 @@ namespace MassTransit.RabbitMqTransport.Transport
 
         public ConnectHandle ConnectPublishObserver(IPublishObserver observer)
         {
-            return _publishEndpointProvider.ConnectPublishObserver(observer);
+            return _topology.PublishEndpointProvider.ConnectPublishObserver(observer);
         }
 
         async Task Receiver(IPipe<ConnectionContext> transportPipe, TaskSupervisor supervisor)

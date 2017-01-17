@@ -18,6 +18,7 @@ namespace MassTransit.AzureServiceBusTransport.Contexts
     using System.Net.Mime;
     using System.Threading.Tasks;
     using Context;
+    using MassTransit.Topology;
     using Microsoft.ServiceBus.Messaging;
     using Transports;
 
@@ -29,8 +30,8 @@ namespace MassTransit.AzureServiceBusTransport.Contexts
         readonly BrokeredMessage _message;
         byte[] _body;
 
-        public ServiceBusReceiveContext(Uri inputAddress, BrokeredMessage message, IReceiveObserver observer, ISendEndpointProvider sendEndpointProvider, IPublishEndpointProvider publishEndpointProvider)
-            : base(inputAddress, message.DeliveryCount > 1, observer, sendEndpointProvider, publishEndpointProvider)
+        public ServiceBusReceiveContext(Uri inputAddress, BrokeredMessage message, IReceiveObserver observer, IReceiveEndpointTopology topology)
+            : base(inputAddress, message.DeliveryCount > 1, observer, topology)
         {
             _message = message;
 

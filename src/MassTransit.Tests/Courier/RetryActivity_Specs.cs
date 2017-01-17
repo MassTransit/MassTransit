@@ -33,8 +33,8 @@ namespace MassTransit.Tests.Courier
             var testActivity = GetActivityContext<TestActivity>();
             var faultActivity = GetActivityContext<FaultyActivity>();
 
-            Task<ConsumeContext<RoutingSlipFaulted>> handled = SubscribeHandler<RoutingSlipFaulted>();
-            Task<ConsumeContext<RoutingSlipActivityCompensated>> compensated = SubscribeHandler<RoutingSlipActivityCompensated>(
+            Task<ConsumeContext<RoutingSlipFaulted>> handled = ConnectPublishHandler<RoutingSlipFaulted>();
+            Task<ConsumeContext<RoutingSlipActivityCompensated>> compensated = ConnectPublishHandler<RoutingSlipActivityCompensated>(
                 context => context.Message.ActivityName.Equals(testActivity.Name));
 
             var builder = new RoutingSlipBuilder(Guid.NewGuid());

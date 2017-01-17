@@ -14,14 +14,14 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
     using Builders;
     using GreenPipes;
     using MassTransit.Builders;
-    using MassTransit.Pipeline;
     using Microsoft.ServiceBus.Messaging;
     using Pipeline;
     using Settings;
+    using Specifications;
+    using Transport;
 
 
     public class ServiceBusReceiveEndpointSpecification :
@@ -29,17 +29,20 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
         IServiceBusReceiveEndpointConfigurator
     {
         readonly ReceiveEndpointSettings _settings;
+        readonly IServiceBusEndpointConfiguration _configuration;
         bool _subscribeMessageTopics;
 
-        public ServiceBusReceiveEndpointSpecification(IServiceBusHost host, string queueName, IConsumePipe consumePipe = null)
-            : this(host, new ReceiveEndpointSettings(Defaults.CreateQueueDescription(queueName)), consumePipe)
+        public ServiceBusReceiveEndpointSpecification(IServiceBusHost host, string queueName, IServiceBusEndpointConfiguration configuration)
+            : this(host, new ReceiveEndpointSettings(Defaults.CreateQueueDescription(queueName)), configuration)
         {
         }
 
-        public ServiceBusReceiveEndpointSpecification(IServiceBusHost host, ReceiveEndpointSettings settings, IConsumePipe consumePipe = null)
-            : base(host, settings, consumePipe)
+        public ServiceBusReceiveEndpointSpecification(IServiceBusHost host, ReceiveEndpointSettings settings,
+            IServiceBusEndpointConfiguration configuration)
+            : base(host, settings, configuration)
         {
             _settings = settings;
+            _configuration = configuration;
             _subscribeMessageTopics = true;
         }
 
@@ -126,13 +129,17 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
 
         public override void Apply(IBusBuilder builder)
         {
-            var receiveEndpointBuilder = new ServiceBusReceiveEndpointBuilder(CreateConsumePipe(builder), builder, _subscribeMessageTopics, Host);
+            var receiveEndpointBuilder = new ServiceBusReceiveEndpointBuilder(builder, Host, _subscribeMessageTopics, _configuration);
 
             var receivePipe = CreateReceivePipe(receiveEndpointBuilder);
 
-            ApplyReceiveEndpoint(receiveEndpointBuilder, receivePipe,
-                new PrepareReceiveEndpointFilter(_settings, receiveEndpointBuilder.GetTopicSubscriptions().Distinct().ToArray()),
-                new PrepareQueueClientFilter(_settings));
+            var receiveEndpointTopology = receiveEndpointBuilder.CreateReceiveEndpointTopology(InputAddress, _settings);
+
+            ApplyReceiveEndpoint(receivePipe, receiveEndpointTopology, x =>
+            {
+                x.UseFilter(new ConfigureTopologyFilter<ReceiveSettings>(_settings, receiveEndpointTopology.TopologyLayout, _settings.RemoveSubscriptions));
+                x.UseFilter(new PrepareQueueClientFilter(_settings));
+            });
         }
 
         protected override ReceiveEndpointSettings GetReceiveEndpointSettings(string queueName)

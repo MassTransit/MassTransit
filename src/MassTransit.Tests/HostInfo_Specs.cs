@@ -56,11 +56,11 @@ namespace MassTransit.Tests
     {
         Task<ConsumeContext<PingMessage>> _handled;
 
-        protected override void PreCreateBus(IInMemoryBusFactoryConfigurator configurator)
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
             configurator.UseBinarySerializer();
 
-            base.PreCreateBus(configurator);
+            base.ConfigureInMemoryBus(configurator);
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)

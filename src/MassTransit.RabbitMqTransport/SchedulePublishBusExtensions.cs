@@ -412,9 +412,7 @@ namespace MassTransit
         {
             var hostSettings = context.Address.GetHostSettings();
 
-            var sendSettings = hostSettings.GetSendSettings(messageType);
-
-            return sendSettings.GetSendAddress(hostSettings.HostAddress);
+            return hostSettings.Topology.GetDestinationAddress(messageType);
         }
     }
 }
