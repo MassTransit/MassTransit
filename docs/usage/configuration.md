@@ -233,7 +233,7 @@ and so it requires a different approach to ensure the bus is disposed properly.
 This example shows an OWIN WebApi2 project using the Autofac Container. The concept should
 be similar if you aren't using WebApi2 or a different Container, but still OWIN.
 
-```
+```csharp
 public class Startup
 {
     public void Configuration(IAppBuilder app)
@@ -304,7 +304,7 @@ service bus.
 
 Now your controller might look like:
 
-```
+```csharp
 public class MyController : ApiController
 {
     private readonly IPublishEndpoint _publishEndpoint;
