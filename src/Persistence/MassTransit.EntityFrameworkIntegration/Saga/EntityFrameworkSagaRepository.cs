@@ -86,7 +86,7 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
                 if (!_optimistic)
                 {
                     // Hack for locking row for the duration of the transaction.
-                    var tableName = ((IObjectContextAdapter)dbContext).ObjectContext.CreateObjectSet<TSaga>().EntitySet.Name;
+                    var tableName = dbContext.GetTableName<TSaga>();
                     await dbContext.Database.ExecuteSqlCommandAsync($"select 1 from {tableName} WITH (UPDLOCK, ROWLOCK) WHERE CorrelationId = @p0", sagaId)
                         .ConfigureAwait(false);
                 }
@@ -196,7 +196,7 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
                         var missingCorrelationIds = new List<Guid>();
                         if (correlationIds.Any())
                         {
-                            var tableName = ((IObjectContextAdapter)dbContext).ObjectContext.CreateObjectSet<TSaga>().EntitySet.Name;
+                            var tableName = dbContext.GetTableName<TSaga>();
                             foreach (var correlationId in correlationIds)
                             {
                                 if (!_optimistic)

@@ -137,6 +137,8 @@ namespace MassTransit.AutomatonymousIntegration.Tests
     {
         public EntityFrameworkChoirStateMapPessmistic()
         {
+            ToTable("ChoirStates", "test");
+
             Property(x => x.CurrentState);
             Property(x => x.BassName);
             Property(x => x.BaritoneName);
