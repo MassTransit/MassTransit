@@ -67,7 +67,10 @@
     * [Rate limiter](advanced/middleware/rate-limiter.md)
     * [Latest](advanced/middleware/latest.md)
     * [Custom](advanced/middleware/custom.md)
+* [Turnout](advanced/turnout/README.md)
+* [Versioning](advanced/versioning.md)
 * [Transactions](advanced/transactions.md)
+* [Interoperability](advanced/interoperability.md)
 
 ## Troubleshooting
 * [Troubleshooting](troubleshooting/README.md)
