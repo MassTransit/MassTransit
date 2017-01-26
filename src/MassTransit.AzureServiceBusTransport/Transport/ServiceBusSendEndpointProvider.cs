@@ -40,9 +40,9 @@ namespace MassTransit.AzureServiceBusTransport.Transport
 
         public async Task<ISendEndpoint> GetSendEndpoint(Uri address)
         {
-            ISendTransport transport = await _transportProvider.GetSendTransport(address).ConfigureAwait(false);
-
-            return new SendEndpoint(transport, _serializer, address, _sourceAddress, _sendPipe);
+            ISendTransport sendTransport = await _transportProvider.GetSendTransport(address).ConfigureAwait(false);
+            sendTransport.ConnectSendObserver(_sendObservable);
+            return new SendEndpoint(sendTransport, _serializer, address, _sourceAddress, _sendPipe);
         }
 
         public ConnectHandle ConnectSendObserver(ISendObserver observer)

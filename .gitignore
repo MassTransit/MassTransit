@@ -49,3 +49,4 @@ doc/build/*
 
 _book
 /node_modules
+.vscode

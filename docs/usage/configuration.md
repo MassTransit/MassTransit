@@ -140,6 +140,8 @@ Configuring a bus in a web site is typically done to publish events, send comman
 as well as engage in request/response conversations. Hosting receive endpoints and
 persistent consumers is not recommended (use a service as shown above).
 
+### ASP.NET (MVC/WebApi2)
+
 In a web application, the `HttpApplication` class methods of `Application_Start` and
 `Application_End` are used to configure/start the bus and stop the bus respectively.
 
@@ -221,3 +223,107 @@ In fact, the inherited `IPublishEndpoint` and `ISendEndpointProvider` should als
 be registered.
 
 The example controllers show how to publish and send messages as well.
+
+
+### OWIN Pipeline (WebApi2)
+
+WebApi2 can alternatively use the OWIN pipeline. But OWIN doesn't have `Application_End`
+and so it requires a different approach to ensure the bus is disposed properly.
+
+This example shows an OWIN WebApi2 project using the Autofac Container. The concept should
+be similar if you aren't using WebApi2 or a different Container, but still OWIN.
+
+```csharp
+public class Startup
+{
+    public void Configuration(IAppBuilder app)
+    {
+        // STANDARD WEB API SETUP:
+
+        // Get your HttpConfiguration. In OWIN, you'll create one
+        // rather than using GlobalConfiguration.
+        var config = new HttpConfiguration();
+
+        WebApiConfig.Register(config); // Register your routes
+
+        // Make the autofac container
+        var builder = new ContainerBuilder();
+
+        // Register your Bus
+        builder.Register(c =>
+            {
+                return Bus.Factory.CreateUsingRabbitMq(sbc =>
+                    sbc.Host("localhost","dev", h =>
+                    {
+                        h.Username("guest");
+                        h.Password("guest");
+                    })
+                );
+            })
+            .As<IBusControl>()
+            .As<IPublishEndpoint>()
+            .SingleInstance();
+
+        // Register anything else you might need...
+
+        // Build the container
+        var container = builder.Build();
+
+        // OWIN WEB API SETUP:
+
+        // set the DependencyResolver
+        config.DependencyResolver = new AutofacWebApiDependencyResolver(container);
+
+        // Register the Autofac middleware FIRST, then the Autofac Web API middleware,
+        // and finally the standard Web API middleware.
+
+        app.UseAutofacMiddleware(container);
+        app.UseAutofacWebApi(config);
+        app.UseWebApi(config);
+
+        // Starts Mass Transit Service bus, and registers stopping of bus on app dispose
+        var bus = container.Resolve<IBusControl>();
+        var busHandle = TaskUtil.Await(() => bus.StartAsync());
+
+        var properties = new AppProperties(app.Properties);
+
+        if(properties.OnAppDisposing != CancellationToken.None)
+        {
+            properties.OnAppDisposing.Register(() => busHandle.Stop(TimeSpan.FromSeconds(30)));
+        }
+    }
+}
+```
+
+The important bit is the last several lines where we resolve the `IBusControl` and
+register an action to stop when the app disposes.
+
+You'll also notice we registered the bus `.As<IPublishEndpoint>()`. That's because we are
+following the guidance above, where our websites should really only be Publishing to the
+service bus.
+
+Now your controller might look like:
+
+```csharp
+public class MyController : ApiController
+{
+    private readonly IPublishEndpoint _publishEndpoint;
+
+    public MyController(IPublishEndpoint publishEndpoint)
+    {
+        _publishEndpoint = publishEndpoint;
+    }
+
+    [HttpPost]
+    public async Task<IHttpActionResult> OrderShipped(int orderId)
+    {
+        await _publishEndpoint.Publish<OrderShipped>(
+        new
+        {
+            OrderId = orderId
+        });
+
+        return Ok("Success!");
+    }
+}
+```
