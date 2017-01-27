@@ -20,9 +20,9 @@ varies (for MSMQ, the framework uses XML by default, for RabbitMQ JSON is used i
 default serialization can be changed when a service bus is being configured.
 
 ```csharp
-    sbc.UseJsonSerializer(); // uses JSON by default
-    sbc.UseXmlSerializer();  // uses XML by default
-    sbc.UseBsonSerializer(); // uses BSON (binary JSON) by default
+sbc.UseJsonSerializer(); // uses JSON by default
+sbc.UseXmlSerializer();  // uses XML by default
+sbc.UseBsonSerializer(); // uses BSON (binary JSON) by default
 ```
 
 ## Sagas
@@ -42,17 +42,19 @@ the saga instance, but this should be done carefully to avoid potentially matchi
 to hundreds of saga instances which may cause database performance issues.
 
 ```csharp
-    public class MySaga :
-        ISaga,
-        InitiatedBy<MyInitialMessage>,
-        Orchestrates<MyFollowUpMessage>
-    {
-        public Guid CorrelationId { get; set; }
-        public Task Consume(ConsumeContext<MyInitialMessage> message)
-        {}
-        public Task Consume(ConsumeContext<MyFollowUpMessage> message)
-        {}
-    }
+public class MySaga :
+    ISaga,
+    InitiatedBy<MyInitialMessage>,
+    Orchestrates<MyFollowUpMessage>
+{
+    public Guid CorrelationId { get; set; }
+
+    public Task Consume(ConsumeContext<MyInitialMessage> message)
+    {}
+
+    public Task Consume(ConsumeContext<MyFollowUpMessage> message)
+    {}
+}
 ```
 
 ## Transports and endpoints

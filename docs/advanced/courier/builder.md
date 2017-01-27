@@ -7,7 +7,8 @@ to create a routing slip with two activities and an additional variable, a devel
 
 ```csharp
 var builder = new RoutingSlipBuilder(NewId.NextGuid());
-builder.AddActivity("DownloadImage", "rabbitmq://localhost/execute_downloadimage", new
+builder.AddActivity("DownloadImage", "rabbitmq://localhost/execute_downloadimage", 
+    new
     {
         ImageUri = new Uri("http://images.google.com/someImage.jpg")
     });

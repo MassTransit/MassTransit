@@ -30,63 +30,63 @@ coupled.
 To see how this plays out, consider the following message types:
 
 ```csharp
-    namespace Company.Messages 
+namespace Company.Messages 
+{
+    public interface CustomerAddressUpdated 
     {
-        public interface CustomerAddressUpdated 
-        {
-        }
-
-        public interface UpdateCustomerAddress
-        {
-        }
-
-        public class UpdateCustomerAddressCommand : 
-            UpdateCustomerAddress
-        {
-        }
     }
+
+    public interface UpdateCustomerAddress
+    {
+    }
+
+    public class UpdateCustomerAddressCommand : 
+        UpdateCustomerAddress
+    {
+    }
+}
 ```
 
 Once the messages have been published, exchanges are created in RabbitMQ for each of the message types:
 ```
-    Exchanges
+Exchanges
 
-    Company.Messages.CustomerAddressUpdated
-    Company.Messages.UpdateCustomerAddress
-    Company.Messages.UpdateCustomerAddressCommand
-        - Includes a binding to Company.Messages.UpdateCustomerAddress
+Company.Messages.CustomerAddressUpdated
+Company.Messages.UpdateCustomerAddress
+Company.Messages.UpdateCustomerAddressCommand
+    - Includes a binding to Company.Messages.UpdateCustomerAddress
 ```
 
 When a receive endpoint is started, the second half of the exchange/queue binding is performed, where the consumer subscriptions
 are bound to the consumer message type exchanges, closing the loop.
 
 ```csharp
-    var busControl = Bus.Factory.CreateUsingRabbitMq(cfg =>
+var busControl = Bus.Factory.CreateUsingRabbitMq(cfg =>
+{
+    var host = cfg.Host(new Uri("rabbitmq://localhost/"), h =>
     {
-        var host = cfg.Host(new Uri("rabbitmq://localhost/"), h =>
-        {
-            h.Username("guest");
-            h.Password("guest");
-        });
-
-        cfg.ReceiveEndpoint(host, "customer_update_queue", e =>
-        {
-            e.Consumer<UpdateCustomerConsumer>();
-        });
+        h.Username("guest");
+        h.Password("guest");
     });
+
+    cfg.ReceiveEndpoint(host, "customer_update_queue", e =>
+    {
+        e.Consumer<UpdateCustomerConsumer>();
+    });
+});
 ```
 
 This results in the creation of a queue, as well as a binding to the queue from the `UpdateCustomerAddress` exchange.
 ```
-    Exchanges
+Exchanges
 
-    customer_update_queue
-        - Includes a binding from Company.Messages.UpdateCustomerAddress
+customer_update_queue
+    - Includes a binding from Company.Messages.UpdateCustomerAddress
 
-    Queues
-    
-    customer_update_queue
-        - Includes a binding from the customer_update_queue exchange
+Queues
+
+customer_update_queue
+    - Includes a binding from the customer_update_queue exchange
 ```
 
 

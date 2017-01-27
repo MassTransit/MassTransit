@@ -7,9 +7,9 @@ However, when there are issues it is important to know how it works so you can t
 To see how this plays out, consider the following message types:
 
 ```csharp
-	namespace MySystem.Messages {
-		interface SomeMessage {}
-	}
+namespace MySystem.Messages {
+    interface SomeMessage {}
+}
 ```
 
 Configure the bus that will listen to `SomeMessage` with an endpoint of `my_endpoint`.

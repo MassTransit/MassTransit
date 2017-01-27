@@ -4,6 +4,21 @@ Sagas are stateful event-based message consumers -- they retain state. Therefore
 events is important. Without persistent state, a saga would consider each event a new event, and orchestration 
 of subsequent events would be meaningless.
 
+<!-- TOC depthFrom:2 -->
+
+- [Specifying saga persistence](#specifying-saga-persistence)
+- [Identity](#identity)
+- [Publishing and Sending From Sagas](#publishing-and-sending-from-sagas)
+- [Storage Engines](#storage-engines)
+    - [Entity Framework](#entity-framework)
+    - [MongoDB](#mongodb)
+    - [NHibernate](#nhibernate)
+    - [Redis](#redis)
+    - [Marten](#marten)
+    - [Azure Service Bus](#azure-service-bus)
+
+<!-- /TOC -->
+
 ## Specifying saga persistence
 
 In order to store the saga state, you need to use one form of saga persistence. There are several
@@ -89,8 +104,8 @@ endpoint configuration:
 ```csharp
 c.ReceiveEndpoint("queue", e =>
 {
-e.UseInMemoryOutbox();
-// other endpoint configuration here
+    e.UseInMemoryOutbox();
+    // other endpoint configuration here
 }
 ```
 
@@ -103,6 +118,8 @@ Each of these are setup in a similar way, but examples are shown below for each 
 * [NHibernate](#nhibernate)
 * [MondoDB](#mongodb)
 * [Redis](#redis)
+* [Marten](#marten)
+* [Azure Service Bus](#azure-service-bus)
 
 ### Entity Framework
 
@@ -111,31 +128,29 @@ for storing data. So it's a win to have it supported out of the box by MassTrans
 example below shows the basics of getting started.
 
 ```csharp
-public class SagaInstance :
-SagaStateMachineInstance
+public class SagaInstance : SagaStateMachineInstance
 {
-public SagaInstance(Guid correlationId)
-{
-    CorrelationId = correlationId;
+    public SagaInstance(Guid correlationId)
+    {
+        CorrelationId = correlationId;
+    }
+
+    protected SagaInstance()
+    {
+    }
+
+    public string CurrentState { get; set; }
+    public string ServiceName { get; set; }
+    public Guid CorrelationId { get; set; }
 }
 
-protected SagaInstance()
+public class SagaInstanceMap : SagaClassMapping<SagaInstance>
 {
-}
-
-public string CurrentState { get; set; }
-public string ServiceName { get; set; }
-public Guid CorrelationId { get; set; }
-}
-
-public class SagaInstanceMap :
-SagaClassMapping<SagaInstance>
-{
-public SagaInstanceMap()
-{
-    Property(x => x.CurrentState);
-    Property(x => x.ServiceName, x => x.Length(40));
-}
+    public SagaInstanceMap()
+    {
+        Property(x => x.CurrentState);
+        Property(x => x.ServiceName, x => x.Length(40));
+    }
 }
 ```
 
@@ -143,7 +158,7 @@ The repository is then created on the context factory for the `DbContext` is ava
 
 ```csharp
 SagaDbContextFactory contextFactory = () => 
-new SagaDbContext<SagaInstance, SagaInstanceMap>(_connectionString);
+    new SagaDbContext<SagaInstance, SagaInstanceMap>(_connectionString);
 
 var repository = new EntityFrameworkSagaRepository<SagaInstance>(contextFactory);
 ```
@@ -154,21 +169,18 @@ MongoDB is an easy to use saga repository, because setup is easy. There is no ne
 the saga instances can be persisted easily using a MongoDB collection.
 
 ```csharp
-public class SagaInstance :
-SagaStateMachineInstance
+public class SagaInstance : SagaStateMachineInstance
 {
-public SagaInstance(Guid correlationId)
-{
-    CorrelationId = correlationId;
-}
+    public SagaInstance(Guid correlationId)
+    {
+        CorrelationId = correlationId;
+    }
 
-protected SagaInstance()
-{
-}
+    protected SagaInstance() { }
 
-public string CurrentState { get; set; }
-public string ServiceName { get; set; }
-public Guid CorrelationId { get; set; }
+    public string CurrentState { get; set; }
+    public string ServiceName { get; set; }
+    public Guid CorrelationId { get; set; }
 }
 ```
 
@@ -188,31 +200,27 @@ is supported by MassTransit for saga storage. The example below shows the code-f
 to using NHibernate for saga persistence.
 
 ```csharp
-public class SagaInstance :
-SagaStateMachineInstance
+public class SagaInstance : SagaStateMachineInstance
 {
-public SagaInstance(Guid correlationId)
-{
-    CorrelationId = correlationId;
+    public SagaInstance(Guid correlationId)
+    {
+        CorrelationId = correlationId;
+    }
+
+    protected SagaInstance() { }
+
+    public string CurrentState { get; set; }
+    public string ServiceName { get; set; }
+    public Guid CorrelationId { get; set; }
 }
 
-protected SagaInstance()
+public class SagaInstanceMap : SagaClassMapping<SagaInstance>
 {
-}
-
-public string CurrentState { get; set; }
-public string ServiceName { get; set; }
-public Guid CorrelationId { get; set; }
-}
-
-public class SagaInstanceMap :
-SagaClassMapping<SagaInstance>
-{
-public SagaInstanceMap()
-{
-    Property(x => x.CurrentState);
-    Property(x => x.ServiceName, x => x.Length(40));
-}
+    public SagaInstanceMap()
+    {
+        Property(x => x.CurrentState);
+        Property(x => x.ServiceName, x => x.Length(40));
+    }
 }
 ```
 
@@ -241,13 +249,13 @@ value of the `CorrelationId` property:
 
 ```csharp
 public class SagaInstance : 
-SagaStateMachineInstance, IHasGuidId
+    SagaStateMachineInstance, IHasGuidId
 {
-public Guid CorrelationId { get; set; }
-public Guid Id => CorrelationId;
-public string CurrentState { get; set; }
+    public Guid CorrelationId { get; set; }
+    public Guid Id => CorrelationId;
+    public string CurrentState { get; set; }
 
-public string CustomData { get; set; }
+    public string CustomData { get; set; }
 }
 ```
 
@@ -268,7 +276,7 @@ For containerless initialization the code would look like:
 ```csharp
 var redisConnectionString = "redis://localhost:6379";
 var repository = new RedisSagaRepository<SagaInstance>(
-new RedisManagerPool(redisConnectionString));
+    new RedisManagerPool(redisConnectionString));
 ```
 
 If you use a container, you can use the code like this (example for Autofac):
@@ -276,9 +284,9 @@ If you use a container, you can use the code like this (example for Autofac):
 ```csharp
 var redisConnectionString = "redis://localhost:6379";
 builder.Register<IRedisClientsManager>(c => 
-new RedisManagerPool(redisConnectionString)).SingleInstance();
+    new RedisManagerPool(redisConnectionString)).SingleInstance();
 builder.RegisterGeneric(typeof(RedisSagaRepository<>))
-.As(typeof(ISagaRepository<>)).SingleInstance();
+    .As(typeof(ISagaRepository<>)).SingleInstance();
 ```
 
 ### Marten
@@ -296,10 +304,10 @@ you inform Marten that correlationId will be used as the primary key.
 ```csharp
 public class SampleSaga : ISaga
 {
-[Identity]
-public Guid CorrelationId { get; set; }
-public string State { get; set; }
-public string SomeProperty { get; set; }
+    [Identity]
+    public Guid CorrelationId { get; set; }
+    public string State { get; set; }
+    public string SomeProperty { get; set; }
 }
 ```
 
@@ -308,7 +316,7 @@ parameter.
 
 ```csharp
 var connectionString =
-"server=localhost;port=5432;database=test;user id=test;password=test;";
+    "server=localhost;port=5432;database=test;user id=test;password=test;";
 var store = DocumentStore.For(connectionString);
 var repository = new MartenSagaRepository<SampleSaga>(store);
 ```
@@ -317,10 +325,10 @@ If you use a container, you can use the code like this (example for Autofac):
 
 ```csharp
 var connectionString =
-"server=localhost;port=5432;database=test;user id=test;password=test;";
+    "server=localhost;port=5432;database=test;user id=test;password=test;";
 builder.Register<IDocumentStore>(c => DocumentStore.For(connectionString);
 builder.RegisterGeneric(typeof(MartenSagaRepository<>))
-.As(typeof(ISagaRepository<>)).SingleInstance();
+    .As(typeof(ISagaRepository<>)).SingleInstance();
 ```
 
 Marten will create necessary tables for you. This type of saga repository
@@ -347,8 +355,8 @@ var sagaStateMachine = new MySagaStateMachine();
 var repository = new MessageSessionSagaRepository<MySaga>(); 
 sbc.ReceiveEndpoint(host, "test_queue", ep =>
 {
-ep.RequiresSession = true;
-ep.StateMachineSaga(sagaStateMachine, repository);
+    ep.RequiresSession = true;
+    ep.StateMachineSaga(sagaStateMachine, repository);
 });
 ```
 
