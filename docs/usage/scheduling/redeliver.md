@@ -47,8 +47,8 @@ var busControl = Bus.Factory.CreateUsingRabbitMq(cfg =>
 
 The redelivered message includes two additional message headers:
 
-### MT-Redelivery-Count
+#### MT-Redelivery-Count
   The number of redelivery attempts the message has had. The first attempt is number 1.
 
-### MT-Scheduling-DeliveredAddress
+#### MT-Scheduling-DeliveredAddress
   The address where the message was last delivered and subsequently scheduled for redelivery.

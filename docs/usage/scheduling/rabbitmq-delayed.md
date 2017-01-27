@@ -51,4 +51,6 @@ public async Task Consume(ConsumeContext<MyMessage> context)
 }
 ```
 
+Read more about message redelivery in [Redelivering messages](redeliver.md)
+
 [1]: https://github.com/rabbitmq/rabbitmq-delayed-message-exchange/
