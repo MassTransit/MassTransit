@@ -68,6 +68,7 @@
       <Link>Properties\SolutionVersion.cs</Link>
     </Compile>
     <Compile Include="DbContextExtensions.cs" />
+    <Compile Include="AssemblyScanningSagaDbContext .cs" />
     <Compile Include="SagaClassMapping.cs" />
     <Compile Include="SagaDbContext.cs" />
     <Compile Include="SagaDbContextFactory.cs" />
