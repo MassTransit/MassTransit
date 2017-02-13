@@ -64,7 +64,7 @@ namespace MassTransit.Context
         internal static void UseTokenId(TokenIdSelector tokenIdSelector)
         {
             if (Cached.Metadata.IsValueCreated)
-                throw new InvalidOperationException("The correlationId pipe has already been created");
+                return;
 
             Cached.Metadata = new Lazy<IScheduleTokenIdCache<T>>(() => new ScheduleTokenIdCache<T>(tokenIdSelector));
         }
