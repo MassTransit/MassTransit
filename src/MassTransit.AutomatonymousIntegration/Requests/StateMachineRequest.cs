@@ -42,7 +42,7 @@ namespace Automatonymous.Requests
         RequestSettings Request<TInstance, TRequest, TResponse>.Settings => _settings;
         public Event<TResponse> Completed { get; set; }
         public Event<Fault<TRequest>> Faulted { get; set; }
-        public Event<RequestTimeoutExpired> TimeoutExpired { get; set; }
+        public Event<RequestTimeoutExpired<TRequest>> TimeoutExpired { get; set; }
         public State Pending { get; set; }
 
         public void SetRequestId(TInstance instance, Guid? requestId)
