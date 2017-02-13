@@ -52,7 +52,7 @@ namespace Automatonymous
         /// <summary>
         /// The event raised when the request times out with no response received
         /// </summary>
-        Event<RequestTimeoutExpired> TimeoutExpired { get; set; }
+        Event<RequestTimeoutExpired<TRequest>> TimeoutExpired { get; set; }
 
         /// <summary>
         /// The state that is transitioned to once the request is pending

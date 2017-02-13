@@ -15,7 +15,7 @@ namespace Automatonymous.Events
     using System;
 
 
-    public interface RequestTimeoutExpired
+    public interface RequestTimeoutExpired<TRequest> where TRequest : class
     {
         /// <summary>
         /// The correlationId of the state machine

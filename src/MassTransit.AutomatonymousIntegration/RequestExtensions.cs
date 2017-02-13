@@ -21,11 +21,6 @@ namespace Automatonymous
 
     public static class RequestExtensions
     {
-        static RequestExtensions()
-        {
-            ScheduleTokenId.UseTokenId<RequestTimeoutExpired>(x => x.RequestId);
-        }
-
         /// <summary>
         /// Send a request to the configured service endpoint, and setup the state machine to accept the response.
         /// </summary>
@@ -45,6 +40,7 @@ namespace Automatonymous
             where TRequest : class
             where TResponse : class
         {
+            ScheduleTokenId.UseTokenId<RequestTimeoutExpired<TRequest>>(x => x.RequestId);
             var activity = new RequestActivity<TInstance, TData, TRequest, TResponse>(request, messageFactory);
 
             return binder.Add(activity);
@@ -70,6 +66,7 @@ namespace Automatonymous
             where TRequest : class
             where TResponse : class
         {
+            ScheduleTokenId.UseTokenId<RequestTimeoutExpired<TRequest>>(x => x.RequestId);
             var activity = new RequestActivity<TInstance, TData, TRequest, TResponse>(request, serviceAddressProvider, messageFactory);
 
             return binder.Add(activity);
@@ -96,6 +93,7 @@ namespace Automatonymous
             where TResponse : class
             where TException : Exception
         {
+            ScheduleTokenId.UseTokenId<RequestTimeoutExpired<TRequest>>(x => x.RequestId);
             var activity = new FaultedRequestActivity<TInstance, TData, TException, TRequest, TResponse>(request, messageFactory);
 
             return binder.Add(activity);
@@ -124,6 +122,7 @@ namespace Automatonymous
             where TResponse : class
             where TException : Exception
         {
+            ScheduleTokenId.UseTokenId<RequestTimeoutExpired<TRequest>>(x => x.RequestId);
             var activity = new FaultedRequestActivity<TInstance, TData, TException, TRequest, TResponse>(request, serviceAddressProvider, messageFactory);
 
             return binder.Add(activity);
@@ -146,6 +145,7 @@ namespace Automatonymous
             where TRequest : class
             where TResponse : class
         {
+            ScheduleTokenId.UseTokenId<RequestTimeoutExpired<TRequest>>(x => x.RequestId);
             var activity = new RequestActivity<TInstance, TRequest, TResponse>(request, messageFactory);
 
             return binder.Add(activity);
@@ -169,6 +169,7 @@ namespace Automatonymous
             where TRequest : class
             where TResponse : class
         {
+            ScheduleTokenId.UseTokenId<RequestTimeoutExpired<TRequest>>(x => x.RequestId);
             var activity = new RequestActivity<TInstance, TRequest, TResponse>(request, serviceAddressProvider, messageFactory);
 
             return binder.Add(activity);
