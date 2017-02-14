@@ -178,6 +178,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
         class TestState :
             SagaStateMachineInstance
         {
+            Guid? _doSomethingRequestId;
             public State CurrentState { get; set; }
 
             public string MemberNumber { get; set; }
@@ -187,6 +188,8 @@ namespace MassTransit.AutomatonymousIntegration.Tests
             public Guid? ValidateAddressRequestId { get; set; }
 
             public Guid CorrelationId { get; set; }
+
+            public Guid? DoSomethingRequestId { get; set; }
         }
 
 
@@ -265,6 +268,11 @@ namespace MassTransit.AutomatonymousIntegration.Tests
         }
 
 
+        interface DoSomething { }
+
+        interface DoSomethingResponse { }
+
+
         class TestStateMachine :
             MassTransitStateMachine<TestState>
         {
@@ -275,6 +283,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
                     .SelectId(context => NewId.NextGuid()));
 
                 Request(() => ValidateAddress, x => x.ValidateAddressRequestId, settings);
+                Request(() => DoSomething, x => x.DoSomethingRequestId, settings);
 
                 Initially(
                     When(Register)
@@ -310,6 +319,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
             }
 
             public Request<TestState, ValidateAddress, AddressValidated> ValidateAddress { get; private set; }
+            public Request<TestState, DoSomething, DoSomethingResponse> DoSomething { get; private set; }
 
             public Event<RegisterMember> Register { get; private set; }
 

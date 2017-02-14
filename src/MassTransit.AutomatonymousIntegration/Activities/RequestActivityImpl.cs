@@ -47,7 +47,7 @@ namespace Automatonymous.Activities
                 var now = DateTime.UtcNow;
                 var expirationTime = now + _request.Settings.Timeout;
 
-                RequestTimeoutExpired message = new TimeoutExpired(now, expirationTime, context.Instance.CorrelationId, pipe.RequestId);
+                RequestTimeoutExpired<TRequest> message = new TimeoutExpired<TRequest>(now, expirationTime, context.Instance.CorrelationId, pipe.RequestId);
 
                 MessageSchedulerContext schedulerContext;
                 if (_request.Settings.SchedulingServiceAddress != null)
@@ -103,8 +103,8 @@ namespace Automatonymous.Activities
         }
 
 
-        class TimeoutExpired :
-            RequestTimeoutExpired
+        class TimeoutExpired<T> :
+            RequestTimeoutExpired<T> where T : class
         {
             public TimeoutExpired(DateTime timestamp, DateTime expirationTime, Guid correlationId, Guid requestId)
             {
