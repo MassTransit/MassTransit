@@ -61,11 +61,11 @@ namespace MassTransit.RabbitMqTransport.Topology
             return binding;
         }
 
-        public static IEnumerable<ExchangeBindingSettings> GetExchangeBindings(this ReceiveSettings settings, string exchangeName)
+        public static IEnumerable<ExchangeBindingSettings> GetExchangeBindings(this RabbitMqReceiveSettings settings, string exchangeName)
         {
             var exchange = new Exchange(exchangeName, settings.Durable, settings.AutoDelete, settings.ExchangeType);
 
-            var binding = new ExchangeBinding(exchange);
+            var binding = new ExchangeBinding(exchange, settings.RoutingKey ?? "");
 
             yield return binding;
         }
