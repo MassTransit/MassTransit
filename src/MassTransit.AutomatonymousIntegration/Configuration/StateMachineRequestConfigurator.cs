@@ -34,9 +34,6 @@ namespace Automatonymous
                 if (ServiceAddress == null)
                     throw new AutomatonymousException("The ServiceAddress was not specified.");
 
-                if (SchedulingServiceAddress == null)
-                    throw new AutomatonymousException("The SchedulingServiceAdress was not specified");
-
                 return this;
             }
         }

@@ -245,7 +245,7 @@ namespace Automatonymous
                 When(request.Faulted)
                     .CancelRequestTimeout(request)
                     .ClearRequest(request),
-                When(request.TimeoutExpired)
+                When(request.TimeoutExpired, request.EventFilter)
                     .ClearRequest(request));
 
         }

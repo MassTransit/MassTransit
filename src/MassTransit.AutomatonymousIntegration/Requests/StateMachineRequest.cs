@@ -60,5 +60,19 @@ namespace Automatonymous.Requests
 
             return _requestIdProperty.Get(instance);
         }
+
+        public bool EventFilter(EventContext<TInstance, RequestTimeoutExpired<TRequest>> context)
+        {
+            ConsumeContext<RequestTimeoutExpired<TRequest>> consumeContext;
+            if (!context.TryGetPayload(out consumeContext))
+                return false;
+
+            if (!consumeContext.RequestId.HasValue)
+                return false;
+
+            var requestId = _requestIdProperty.Get(context.Instance);
+
+            return requestId.HasValue && requestId.Value == consumeContext.RequestId.Value;
+        }
     }
 }
