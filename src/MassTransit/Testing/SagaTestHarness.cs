@@ -32,7 +32,7 @@ namespace MassTransit.Testing
         readonly SagaList<TSaga> _sagas;
         readonly TimeSpan _testTimeout;
 
-        public SagaTestHarness(BusTestHarness testHarness, ISagaRepository<TSaga> repository)
+        public SagaTestHarness(BusTestHarness testHarness, ISagaRepository<TSaga> repository, string queueName)
         {
             _repository = repository;
             _querySagaRepository = _repository as IQuerySagaRepository<TSaga>;
@@ -45,7 +45,10 @@ namespace MassTransit.Testing
 
             TestRepository = new TestSagaRepositoryDecorator<TSaga>(_repository, _consumed, _created, _sagas);
 
-            testHarness.OnConfigureReceiveEndpoint += ConfigureReceiveEndpoint;
+            if (string.IsNullOrWhiteSpace(queueName))
+                testHarness.OnConfigureReceiveEndpoint += ConfigureReceiveEndpoint;
+            else
+                testHarness.OnConfigureBus += configurator => ConfigureNamedReceiveEndpoint(configurator, queueName);
         }
 
         public TestSagaRepositoryDecorator<TSaga> TestRepository { get; }
@@ -57,6 +60,14 @@ namespace MassTransit.Testing
         protected virtual void ConfigureReceiveEndpoint(IReceiveEndpointConfigurator configurator)
         {
             configurator.Saga(TestRepository);
+        }
+
+        protected virtual void ConfigureNamedReceiveEndpoint(IBusFactoryConfigurator configurator, string queueName)
+        {
+            configurator.ReceiveEndpoint(queueName, x =>
+            {
+                x.Saga(TestRepository);
+            });
         }
 
         /// <summary>

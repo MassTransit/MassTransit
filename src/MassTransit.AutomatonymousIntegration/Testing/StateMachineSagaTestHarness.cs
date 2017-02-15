@@ -24,8 +24,8 @@ namespace Automatonymous.Testing
     {
         readonly TStateMachine _stateMachine;
 
-        public StateMachineSagaTestHarness(BusTestHarness testHarness, ISagaRepository<TInstance> repository, TStateMachine stateMachine)
-            : base(testHarness, repository)
+        public StateMachineSagaTestHarness(BusTestHarness testHarness, ISagaRepository<TInstance> repository, TStateMachine stateMachine, string queueName)
+            : base(testHarness, repository, queueName)
         {
             _stateMachine = stateMachine;
         }
@@ -33,6 +33,14 @@ namespace Automatonymous.Testing
         protected override void ConfigureReceiveEndpoint(IReceiveEndpointConfigurator configurator)
         {
             configurator.StateMachineSaga(_stateMachine, TestRepository);
+        }
+
+        protected override void ConfigureNamedReceiveEndpoint(IBusFactoryConfigurator configurator, string queueName)
+        {
+            configurator.ReceiveEndpoint(queueName, x =>
+            {
+                x.StateMachineSaga(_stateMachine, TestRepository);
+            });
         }
     }
 }

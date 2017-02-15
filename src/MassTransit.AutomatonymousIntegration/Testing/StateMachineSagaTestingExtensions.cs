@@ -22,7 +22,7 @@ namespace MassTransit.Testing
     public static class StateMachineSagaTestHarnessExtensions
     {
         public static StateMachineSagaTestHarness<TInstance, TStateMachine> StateMachineSaga<TInstance, TStateMachine>(this BusTestHarness harness,
-            TStateMachine stateMachine)
+            TStateMachine stateMachine, string queueName = null)
             where TInstance : class, SagaStateMachineInstance
             where TStateMachine : SagaStateMachine<TInstance>
         {
@@ -30,11 +30,11 @@ namespace MassTransit.Testing
                 throw new ArgumentNullException(nameof(stateMachine));
             var repository = new InMemorySagaRepository<TInstance>();
 
-            return new StateMachineSagaTestHarness<TInstance, TStateMachine>(harness, repository, stateMachine);
+            return new StateMachineSagaTestHarness<TInstance, TStateMachine>(harness, repository, stateMachine, queueName);
         }
 
         public static StateMachineSagaTestHarness<TInstance, TStateMachine> StateMachineSaga<TInstance, TStateMachine>(this BusTestHarness harness,
-            TStateMachine stateMachine, ISagaRepository<TInstance> repository)
+            TStateMachine stateMachine, ISagaRepository<TInstance> repository, string queueName = null)
             where TInstance : class, SagaStateMachineInstance
             where TStateMachine : SagaStateMachine<TInstance>
         {
@@ -43,7 +43,7 @@ namespace MassTransit.Testing
             if (repository == null)
                 throw new ArgumentNullException(nameof(repository));
 
-            return new StateMachineSagaTestHarness<TInstance, TStateMachine>(harness, repository, stateMachine);
+            return new StateMachineSagaTestHarness<TInstance, TStateMachine>(harness, repository, stateMachine, queueName);
         }
 
         public static TSaga ContainsInState<TSaga>(this ISagaList<TSaga> sagas, Guid sagaId,
