@@ -106,7 +106,7 @@ class BusModule : Module
                     h.Password(busSettings.Password);
                 });
 
-                sbc.ReceiveEndpoint(busSettings.QueueName, ec =>
+                cfg.ReceiveEndpoint(busSettings.QueueName, ec =>
                 {
                     ec.LoadFrom(context);
                 })
@@ -152,18 +152,8 @@ builder.RegisterStateMachineSagas(typeof(Saga1).Assembly, typeof(Saga2).Assembly
 // registering saga state machines from current assembly
 builder.RegisterStateMachineSagas(Assembly.GetExecutingAssembly());
 
-// do not forget registering saga repositories (example for NHibernate)
-var mappings = mappingsAssembly
-    .GetTypes()
-    .Where(t => t.BaseType != null && t.BaseType.IsGenericType &&
-        (t.BaseType.GetGenericTypeDefinition() == typeof(SagaClassMapping<>) ||
-        t.BaseType.GetGenericTypeDefinition() == typeof(ClassMapping<>)))
-    .ToArray();    
-builder.Register(c => new SqlServerSessionFactoryProvider(connString, mappings).GetSessionFactory())
-    .As<ISessionFactory>()
-    .SingleInstance();
-builder.RegisterGeneric(typeof(NHibernateSagaRepository<>))
-    .As(typeof(ISagaRepository<>));
+// do not forget registering saga repositories
+// see examples below
 ```
 
 and load them from a contained when configuring the bus.
@@ -177,7 +167,7 @@ var busControl = Bus.Factory.CreateUsingRabbitMq(cfg =>
         h.Password(busSettings.Password);
     });
 
-    sbc.ReceiveEndpoint(busSettings.QueueName, ec =>
+    cfg.ReceiveEndpoint(busSettings.QueueName, ec =>
     {
         // loading consumers
         ec.LoadFrom(context);
@@ -187,3 +177,58 @@ var busControl = Bus.Factory.CreateUsingRabbitMq(cfg =>
     })
 });
 ```
+
+## Saga persistence
+
+Below you find samples of how to register different saga persistence implementations with Autofac.
+
+### NHibernate
+
+For NHibernate you can scan an assembly where your saga instance mappings are defined to find
+the mapping classes, and then give the list of mapping types as a parameter to the session factory provider.
+
+Then, you instruct Autofac to use the session factory provider to get the `ISession` instance. 
+NHibernate saga repository is then registered as generic and since it only uses the `ISession`, 
+everything will just work.
+
+```csharp
+var mappings = mappingsAssembly
+    .GetTypes()
+    .Where(t => t.BaseType != null && t.BaseType.IsGenericType &&
+        (t.BaseType.GetGenericTypeDefinition() == typeof(SagaClassMapping<>) ||
+        t.BaseType.GetGenericTypeDefinition() == typeof(ClassMapping<>)))
+    .ToArray();    
+builder.Register(c => new SqlServerSessionFactoryProvider(connString, mappings).GetSessionFactory())
+    .As<ISessionFactory>()
+    .SingleInstance();
+builder.RegisterGeneric(typeof(NHibernateSagaRepository<>))
+    .As(typeof(ISagaRepository<>));
+```
+
+### Entity Framework
+
+Entity Framework saga repository needs to have a context factory as a constructor parameter.
+This factory just returns a `DbContext` instance, which should have the information about
+the saga instance class mapping.
+
+When using the `SagaDbContext<TSaga, TSagaClassMapping>`, you need to register each repository
+separately like this:
+
+```csharp
+builder.Register(c => new EntityFrameworkSagaRepository<MySaga>(
+    () => new SagaDbContext<MySaga, MySagaMapping>(connectionString)));
+```
+
+You can use your own context implementation and register the repository as generic like this:
+
+```csharp
+builder.Register(c => new AssemblyScanningSagaDbContext(typeof(MySagaMapping).Assembly,
+    connectionString).As<DbContext>();
+builder.RegisterGeneric(typeof(EntityFrameworkSagaRepository<>))
+    .As(typeof(ISagaRepository<>))
+    .SingleInstance();
+builder.RegisterStateMachineSagas(typeof(MySaga).Assembly);
+```
+
+The example above uses the assembly scanning `DbContext` implementation, which
+you can find in [this gist](https://gist.github.com/alexeyzimarev/34542645ff8f27550d0679c7cb696111).
