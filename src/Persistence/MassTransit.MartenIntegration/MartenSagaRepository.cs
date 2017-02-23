@@ -104,7 +104,9 @@
                 catch (SagaException sex)
                 {
                     if (_log.IsErrorEnabled)
-                        _log.Error("Saga Exception Occurred", sex);
+                        _log.Error($"SAGA:{TypeMetadataCache<TSaga>.ShortName} Exception {TypeMetadataCache<T>.ShortName}", sex);
+
+                    throw;
                 }
                 catch (Exception ex)
                 {

@@ -148,6 +148,9 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
                     }
                     else
                     {
+                        if (_log.IsErrorEnabled)
+                            _log.Error($"SAGA:{TypeMetadataCache<TSaga>.ShortName} Exception {TypeMetadataCache<T>.ShortName}", ex);
+
                         try
                         {
                             transaction.Rollback();
@@ -161,8 +164,11 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
 
                     throw;
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
+                    if (_log.IsErrorEnabled)
+                        _log.Error($"SAGA:{TypeMetadataCache<TSaga>.ShortName} Exception {TypeMetadataCache<T>.ShortName}", ex);
+
                     try
                     {
                         transaction.Rollback();
@@ -271,6 +277,9 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
                     }
                     catch (SagaException sex)
                     {
+                        if (_log.IsErrorEnabled)
+                            _log.Error($"SAGA:{TypeMetadataCache<TSaga>.ShortName} Exception {TypeMetadataCache<T>.ShortName}", sex);
+
                         try
                         {
                             transaction.Rollback();
@@ -280,9 +289,6 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
                             if (_log.IsWarnEnabled)
                                 _log.Warn("The transaction rollback failed", innerException);
                         }
-
-                        if (_log.IsErrorEnabled)
-                            _log.Error($"SAGA:{TypeMetadataCache<TSaga>.ShortName} Exception {TypeMetadataCache<T>.ShortName}", sex);
 
                         throw;
                     }

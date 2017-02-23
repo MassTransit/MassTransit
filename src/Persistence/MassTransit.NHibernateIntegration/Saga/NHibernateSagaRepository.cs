@@ -116,8 +116,11 @@ namespace MassTransit.NHibernateIntegration.Saga
                     if (transaction.IsActive)
                         transaction.Commit();
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
+                    if (_log.IsErrorEnabled)
+                        _log.Error($"SAGA:{TypeMetadataCache<TSaga>.ShortName} Exception {TypeMetadataCache<T>.ShortName}", ex);
+
                     if (transaction.IsActive)
                         transaction.Rollback();
 
