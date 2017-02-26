@@ -12,11 +12,14 @@ MassTransit is Apache 2.0 licensed.
 
 ## Getting started with MassTransit
 
-In order to get started with MassTransit, you can have a look at the documentation, which is located at [http://docs.masstransit-project.com/](http://docs.masstransit-project.com/).
+In order to get started with MassTransit, you can have a look at the
+documentation, which is located at [http://masstransit-project.com/MassTransit](http://masstransit-project.com/MassTransit).
 
 ### Simplest possible thing:
 
-`install-package MassTransit.RabbitMq` then;
+`install-package MassTransit.RabbitMq`
+
+and then:
 
 ```
 // Message Definition
@@ -62,7 +65,7 @@ You need to add the management interface before you can login. First, from an el
 
 Next, run the following command to enable the rabbitmq management plugin:
 
-	rabbitmq-plugins.bat enable rabbitmq_management 
+`rabbitmq-plugins.bat enable rabbitmq_management`
 
 ### Downloads
 

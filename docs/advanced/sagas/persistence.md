@@ -80,6 +80,9 @@ delivered to all matching instances.
 > Seriously, don't sent an event to all instances -- unless you want to watch your messages consumers lock 
 > your entire saga storage engine.
 
+It is strongly advised to have `CorrelationId` as your table/document key. This will enable better
+concurrency handling and will make the saga state consistent.
+
 ## Publishing and Sending From Sagas
 
 Sagas are completely message-driven and therefore not only consume but also publish events and send commands. 
@@ -154,6 +157,11 @@ public class SagaInstanceMap : SagaClassMapping<SagaInstance>
 }
 ```
 
+> Important:
+> The `SagaClassMapping` has default mapping for the `CorrelationId` as a database generated primary key.
+> If you use your own mapping, you must follow the same convention, otherwise there is a big chance to
+> get deadlock exceptions in case of high throughput.
+
 The repository is then created on the context factory for the `DbContext` is available.
 
 ```csharp
@@ -225,9 +233,14 @@ public class SagaInstanceMap : SagaClassMapping<SagaInstance>
 ```
 
 The `SagaClassMapping` base class maps the `CorrelationId` of the saga, and handles some of the basic 
-bootstrapping of the class map. All of the properties, including the property for the `CurrentState` 
+bootstrapping of the class map. All other properties, including the property for the `CurrentState` 
 (if you're using state machine sagas), must be mapped by the developer. Once mapped, the `ISessionFactory` 
 can be created using NHibernate directly. From the session factory, the saga repository can be created.
+
+> Important:
+> The `SagaClassMapping` has default mapping for the `CorrelationId` as a database generated primary key.
+> If you use your own mapping, you must follow the same convention, otherwise there is a big chance to
+> get deadlock exceptions in case of high throughput.
 
 ```csharp
 ISessionFactory sessionFactory = CreateSessionFactory();
