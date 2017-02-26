@@ -37,7 +37,7 @@ namespace MassTransit.HttpTransport.Builders
 
             var provider = new HttpSendEndpointProvider(MessageSerializer, sourceAddress, SendTransportProvider, pipe);
 
-            return new SendEndpointCache(provider, CacheDurationProvider);
+            return new SendEndpointCache(provider);
         }
 
         public IPublishEndpointProvider CreatePublishEndpointProvider(Uri sourceAddress, params IPublishPipeSpecification[] specifications)
@@ -47,11 +47,6 @@ namespace MassTransit.HttpTransport.Builders
             var sendPipe = CreateSendPipe();
 
             return new HttpPublishEndpointProvider(_host, MessageSerializer, SendTransportProvider, publishPipe, sendPipe);
-        }
-
-        public TimeSpan CacheDurationProvider(Uri address)
-        {
-            return TimeSpan.FromDays(1);
         }
     }
 }

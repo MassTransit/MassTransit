@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -58,7 +58,7 @@ namespace MassTransit.RabbitMqTransport.Builders
 
             var provider = new RabbitMqSendEndpointProvider(MessageSerializer, sourceAddress, SendTransportProvider, pipe);
 
-            return new SendEndpointCache(provider, CacheDurationProvider);
+            return new SendEndpointCache(provider);
         }
 
         public IPublishEndpointProvider CreatePublishEndpointProvider(Uri sourceAddress, params IPublishPipeSpecification[] specifications)
@@ -66,14 +66,6 @@ namespace MassTransit.RabbitMqTransport.Builders
             var pipe = CreatePublishPipe(specifications);
 
             return new RabbitMqPublishEndpointProvider(_host, MessageSerializer, sourceAddress, pipe);
-        }
-
-        public TimeSpan CacheDurationProvider(Uri address)
-        {
-            if (address.GetReceiveSettings().AutoDelete)
-                return TimeSpan.FromMinutes(1);
-
-            return TimeSpan.FromDays(1);
         }
 
         public IEnumerable<ExchangeBindingSettings> GetExchangeBindings()

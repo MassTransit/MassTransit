@@ -97,6 +97,14 @@
       <Link>Properties\SolutionVersion.cs</Link>
     </Compile>
     <Compile Include="BusActivityMonitor_Specs.cs" />
+    <Compile Include="CachingTests\Bucket_Specs.cs" />
+    <Compile Include="CachingTests\Endpoint.cs" />
+    <Compile Include="CachingTests\Index_Specs.cs" />
+    <Compile Include="CachingTests\NodeTracker_Specs.cs" />
+    <Compile Include="CachingTests\MissingValueFactory_Specs.cs" />
+    <Compile Include="CachingTests\TestException.cs" />
+    <Compile Include="CachingTests\Tests.cs" />
+    <Compile Include="CachingTests\TwoIndex_Specs.cs" />
     <Compile Include="CircuitBreaker_Specs.cs" />
     <Compile Include="ConcurrencyLimitKnob_Specs.cs" />
     <Compile Include="Configuration\ConfigurationObserver_Specs.cs" />
@@ -142,7 +150,6 @@
     <Compile Include="HostInfo_Specs.cs" />
     <Compile Include="InMemoryDuo_Specs.cs" />
     <Compile Include="Introspection_Specs.cs" />
-    <Compile Include="LazyMemoryCache_Specs.cs" />
     <Compile Include="MessageData\DataBus_Specs.cs" />
     <Compile Include="Diagnostics\PerformanceCounter_Specs.cs" />
     <Compile Include="DictionaryToObject_Specs.cs" />

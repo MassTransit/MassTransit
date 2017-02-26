@@ -1,4 +1,4 @@
-// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,11 +13,9 @@
 namespace MassTransit.Transports
 {
     using System;
-    using System.Threading;
     using System.Threading.Tasks;
     using GreenPipes;
     using Logging;
-    using Util;
     using Util.Caching;
 
 
@@ -25,38 +23,26 @@ namespace MassTransit.Transports
     /// Caches SendEndpoint instances by address (ignoring the query string entirely, case insensitive)
     /// </summary>
     public class SendEndpointCache :
-        ISendEndpointProvider,
-        IDisposable
+        ISendEndpointProvider
     {
         static readonly ILog _log = Logger.Get<SendEndpointCache>();
 
-        readonly LazyMemoryCache<Uri, ISendEndpoint> _cache;
-        readonly Func<Uri, TimeSpan> _cacheDurationProvider;
+        readonly IIndex<Uri, CachedSendEndpoint<Uri>> _index;
         readonly ISendEndpointProvider _sendEndpointProvider;
 
-        public SendEndpointCache(ISendEndpointProvider sendEndpointProvider, Func<Uri, TimeSpan> cacheDurationProvider = null)
+        public SendEndpointCache(ISendEndpointProvider sendEndpointProvider)
         {
             _sendEndpointProvider = sendEndpointProvider;
 
-            _cacheDurationProvider = cacheDurationProvider ?? DefaultCacheDurationProvider;
-
-            var cacheId = NewId.NextGuid().ToString();
-            _cache = new LazyMemoryCache<Uri, ISendEndpoint>(cacheId, GetSendEndpointFromProvider, GetEndpointCachePolicy, FormatAddressKey,
-                OnCachedEndpointRemoved);
-        }
-
-        public void Dispose()
-        {
-            _cache.Dispose();
+            var cache = new GreenCache<CachedSendEndpoint<Uri>>(10000, TimeSpan.FromMinutes(1), TimeSpan.FromHours(24), () => DateTime.UtcNow);
+            _index = cache.AddIndex("address", x => x.Key);
         }
 
         public async Task<ISendEndpoint> GetSendEndpoint(Uri address)
         {
-            Cached<ISendEndpoint> cached = await _cache.Get(address).ConfigureAwait(false);
+            CachedSendEndpoint<Uri> sendEndpoint = await _index.Get(address, GetSendEndpointFromProvider).ConfigureAwait(false);
 
-            var endpoint = await cached.Value.ConfigureAwait(false);
-
-            return new CachedSendEndpoint(endpoint, cached.Touch);
+            return sendEndpoint;
         }
 
         public ConnectHandle ConnectSendObserver(ISendObserver observer)
@@ -64,114 +50,14 @@ namespace MassTransit.Transports
             return _sendEndpointProvider.ConnectSendObserver(observer);
         }
 
-        TimeSpan DefaultCacheDurationProvider(Uri address)
-        {
-            return TimeSpan.FromMinutes(60);
-        }
-
-        Task OnCachedEndpointRemoved(string key, ISendEndpoint value, string reason)
-        {
-            if (_log.IsDebugEnabled)
-                _log.DebugFormat("Cached endpoint expired: {0} - {1}", key, reason);
-
-            return TaskUtil.Completed;
-        }
-
-        string FormatAddressKey(Uri key)
-        {
-            return key.ToString().ToLowerInvariant();
-        }
-
-        LazyMemoryCache<Uri, ISendEndpoint>.ICacheExpiration GetEndpointCachePolicy(LazyMemoryCache<Uri, ISendEndpoint>.ICacheExpirationSelector selector)
-        {
-            return selector.SlidingWindow(_cacheDurationProvider(selector.Key));
-        }
-
-        Task<ISendEndpoint> GetSendEndpointFromProvider(Uri address)
+        async Task<CachedSendEndpoint<Uri>> GetSendEndpointFromProvider(Uri address)
         {
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("GetSendEndpoint: {0}", address);
 
-            return _sendEndpointProvider.GetSendEndpoint(address);
-        }
+            var sendEndpoint = await _sendEndpointProvider.GetSendEndpoint(address).ConfigureAwait(false);
 
-
-        class CachedSendEndpoint :
-            ISendEndpoint
-        {
-            readonly ISendEndpoint _endpoint;
-            readonly Action _touch;
-
-            public CachedSendEndpoint(ISendEndpoint endpoint, Action touch)
-            {
-                _endpoint = endpoint;
-                _touch = touch;
-            }
-
-            public ConnectHandle ConnectSendObserver(ISendObserver observer)
-            {
-                return _endpoint.ConnectSendObserver(observer);
-            }
-
-            public Task Send<T>(T message, CancellationToken cancellationToken = new CancellationToken()) where T : class
-            {
-                _touch();
-                return _endpoint.Send(message, cancellationToken);
-            }
-
-            public Task Send<T>(T message, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken = new CancellationToken()) where T : class
-            {
-                _touch();
-                return _endpoint.Send(message, pipe, cancellationToken);
-            }
-
-            public Task Send<T>(T message, IPipe<SendContext> pipe, CancellationToken cancellationToken = new CancellationToken()) where T : class
-            {
-                _touch();
-                return _endpoint.Send(message, pipe, cancellationToken);
-            }
-
-            public Task Send(object message, CancellationToken cancellationToken = new CancellationToken())
-            {
-                _touch();
-                return _endpoint.Send(message, cancellationToken);
-            }
-
-            public Task Send(object message, Type messageType, CancellationToken cancellationToken = new CancellationToken())
-            {
-                _touch();
-                return _endpoint.Send(message, messageType, cancellationToken);
-            }
-
-            public Task Send(object message, IPipe<SendContext> pipe, CancellationToken cancellationToken = new CancellationToken())
-            {
-                _touch();
-                return _endpoint.Send(message, pipe, cancellationToken);
-            }
-
-            public Task Send(object message, Type messageType, IPipe<SendContext> pipe, CancellationToken cancellationToken = new CancellationToken())
-            {
-                _touch();
-                return _endpoint.Send(message, messageType, pipe, cancellationToken);
-            }
-
-            public Task Send<T>(object values, CancellationToken cancellationToken = new CancellationToken()) where T : class
-            {
-                _touch();
-                return _endpoint.Send<T>(values, cancellationToken);
-            }
-
-            public Task Send<T>(object values, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken = new CancellationToken()) where T : class
-            {
-                _touch();
-                return _endpoint.Send(values, pipe, cancellationToken);
-            }
-
-            public Task Send<T>(object values, IPipe<SendContext> pipe, CancellationToken cancellationToken = new CancellationToken()) where T : class
-            {
-                _touch();
-                return _endpoint.Send<T>(values, pipe, cancellationToken);
-            }
+            return new CachedSendEndpoint<Uri>(address, sendEndpoint);
         }
     }
 }

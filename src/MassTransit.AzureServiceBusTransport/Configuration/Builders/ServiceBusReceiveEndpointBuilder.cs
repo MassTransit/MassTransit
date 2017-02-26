@@ -53,32 +53,18 @@ namespace MassTransit.AzureServiceBusTransport.Builders
 
             var provider = new ServiceBusSendEndpointProvider(MessageSerializer, sourceAddress, SendTransportProvider, pipe);
 
-            return new SendEndpointCache(provider, QueueCacheDurationProvider);
+            return new SendEndpointCache(provider);
         }
 
         public IPublishEndpointProvider CreatePublishEndpointProvider(Uri sourceAddress, params IPublishPipeSpecification[] specifications)
         {
             var provider = new PublishSendEndpointProvider(MessageSerializer, sourceAddress, _host);
 
-            var cache = new SendEndpointCache(provider, TopicCacheDurationProvider);
+            var cache = new SendEndpointCache(provider);
 
             var pipe = CreatePublishPipe(specifications);
 
             return new ServiceBusPublishEndpointProvider(_host, cache, pipe);
-        }
-
-        TimeSpan QueueCacheDurationProvider(Uri address)
-        {
-            var timeSpan = address.GetQueueDescription().AutoDeleteOnIdle;
-
-            return timeSpan > TimeSpan.FromDays(1) ? TimeSpan.FromDays(1) : timeSpan;
-        }
-
-        TimeSpan TopicCacheDurationProvider(Uri address)
-        {
-            var timeSpan = address.GetTopicDescription().AutoDeleteOnIdle;
-
-            return timeSpan > TimeSpan.FromDays(1) ? TimeSpan.FromDays(1) : timeSpan;
         }
 
         public IEnumerable<TopicSubscriptionSettings> GetTopicSubscriptions()
