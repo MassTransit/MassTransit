@@ -1,4 +1,16 @@
-﻿namespace MassTransit.Util.Caching
+﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+//  
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
+// this file except in compliance with the License. You may obtain a copy of the 
+// License at 
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0 
+// 
+// Unless required by applicable law or agreed to in writing, software distributed
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// specific language governing permissions and limitations under the License.
+namespace MassTransit.Util.Caching
 {
     using System;
     using System.Threading;
@@ -8,15 +20,19 @@
         where TValue : class
     {
         readonly INodeTracker<TValue> _tracker;
+        int _count;
+        IBucketNode<TValue> _first;
         DateTime _startTime;
         DateTime? _stopTime;
-        IBucketNode<TValue> _first;
-        int _count;
 
         public Bucket(INodeTracker<TValue> tracker)
         {
             _tracker = tracker;
         }
+
+        public IBucketNode<TValue> First => _first;
+
+        public int Count => _count;
 
         public bool HasExpired(TimeSpan maxAge, DateTime now)
         {
@@ -34,8 +50,6 @@
             _count = 0;
         }
 
-        public IBucketNode<TValue> First => _first;
-
         public void Stop(DateTime now)
         {
             _stopTime = now;
@@ -50,11 +64,9 @@
             _count = 0;
         }
 
-        public int Count => _count;
-
         public IBucketNode<TValue> Push(IBucketNode<TValue> node)
         {
-            var next = _first;
+            IBucketNode<TValue> next = _first;
 
             _first = node;
 

@@ -19,13 +19,11 @@ namespace MassTransit.Util.Caching
     using GreenPipes;
 
 
-    class CacheValueObservable<TValue> :
-        Connectable<ICacheValueObserver<TValue>>,
-        ICacheValueObserver<TValue>
+    class CacheValueObservable<TValue> : ICacheValueObserver<TValue>
         where TValue : class
     {
+        readonly Dictionary<long, ICacheValueObserver<TValue>> _connections;
         ICacheValueObserver<TValue>[] _connected;
-        Dictionary<long, ICacheValueObserver<TValue>> _connections;
         long _nextId;
 
         public CacheValueObservable()

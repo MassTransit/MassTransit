@@ -1,4 +1,16 @@
-﻿namespace MassTransit.Util.Caching
+﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+//  
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
+// this file except in compliance with the License. You may obtain a copy of the 
+// License at 
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0 
+// 
+// Unless required by applicable law or agreed to in writing, software distributed
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// specific language governing permissions and limitations under the License.
+namespace MassTransit.Util.Caching
 {
     using System.Threading.Tasks;
 
@@ -13,6 +25,11 @@
         where TValue : class
     {
         /// <summary>
+        /// Returns the final value of the factory, either completed or faulted
+        /// </summary>
+        Task<TValue> Value { get; }
+
+        /// <summary>
         /// Add a pending value to the factory, which will either use a previously
         /// completed value or become the new factory method for the value.
         /// </summary>
@@ -25,10 +42,5 @@
         /// </summary>
         /// <returns>The ultimate value task, either completed or faulted</returns>
         Task<TValue> CreateValue();
-
-        /// <summary>
-        /// Returns the final value of the factory, either completed or faulted
-        /// </summary>
-        Task<TValue> Value { get; }
     }
 }

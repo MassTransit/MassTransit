@@ -1,4 +1,16 @@
-﻿namespace MassTransit.Util.Caching
+﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+//  
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
+// this file except in compliance with the License. You may obtain a copy of the 
+// License at 
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0 
+// 
+// Unless required by applicable law or agreed to in writing, software distributed
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// specific language governing permissions and limitations under the License.
+namespace MassTransit.Util.Caching
 {
     using System;
     using System.Collections.Generic;
@@ -12,21 +24,21 @@
         where TValue : class
     {
         const double MaxAgeUpperLimit = 24.0 * 60 * 60 * 1000;
+        readonly int _bucketCount;
+        readonly int _bucketSize;
         readonly object _lock = new object();
+        readonly TimeSpan _maxAge;
+        readonly TimeSpan _minAge;
         readonly CurrentTimeProvider _nowProvider;
         readonly CacheValueObservable<TValue> _observers;
-        Bucket<TValue> _currentBucket;
+        readonly TimeSpan _validityCheckInterval;
         BucketCollection<TValue> _buckets;
+        DateTime _cacheResetTime;
+        bool _cleanupScheduled;
+        Bucket<TValue> _currentBucket;
         int _currentBucketIndex;
         DateTime _nextValidityCheck;
-        DateTime _cacheResetTime;
-        readonly TimeSpan _validityCheckInterval;
         int _oldestBucketIndex;
-        readonly TimeSpan _minAge;
-        readonly TimeSpan _maxAge;
-        readonly int _bucketSize;
-        bool _cleanupScheduled;
-        readonly int _bucketCount;
 
         public NodeTracker(int capacity, TimeSpan minAge, TimeSpan maxAge, CurrentTimeProvider nowProvider)
         {
@@ -34,7 +46,7 @@
 
             _observers = new CacheValueObservable<TValue>();
 
-            double maxAgeInMilliseconds = Math.Min(maxAge.TotalMilliseconds, MaxAgeUpperLimit);
+            var maxAgeInMilliseconds = Math.Min(maxAge.TotalMilliseconds, MaxAgeUpperLimit);
 
             _minAge = minAge;
             _maxAge = TimeSpan.FromMilliseconds(maxAgeInMilliseconds);
@@ -53,8 +65,6 @@
 
             OpenBucket(0);
         }
-
-        public CacheStatistics Statistics { get; }
 
         int OldestBucketIndex
         {
@@ -78,6 +88,12 @@
 
         bool IsCleanupRequired => (_currentBucket.Count > _bucketSize || _nowProvider() > _nextValidityCheck) && _cleanupScheduled == false;
 
+        bool AreLowOnBuckets => CurrentBucketIndex - OldestBucketIndex > _buckets.Count - 5;
+
+        bool IsCurrentBucketOldest => OldestBucketIndex == CurrentBucketIndex;
+
+        public CacheStatistics Statistics { get; }
+
         public void Add(INodeValueFactory<TValue> nodeValueFactory)
         {
             Task.Run(() => AddNode(nodeValueFactory));
@@ -95,7 +111,7 @@
 
         public IEnumerable<INode<TValue>> GetAll()
         {
-            for (int bucketIndex = CurrentBucketIndex; bucketIndex >= OldestBucketIndex; --bucketIndex)
+            for (var bucketIndex = CurrentBucketIndex; bucketIndex >= OldestBucketIndex; --bucketIndex)
             {
                 Bucket<TValue> bucket = _buckets[bucketIndex];
 
@@ -108,6 +124,39 @@
                         yield return node;
                 }
             }
+        }
+
+        public void Clear()
+        {
+            lock (_lock)
+            {
+                _buckets.Empty();
+
+                _buckets = new BucketCollection<TValue>(this, _bucketCount);
+
+                _cacheResetTime = _nowProvider().Add(TimeSpan.FromMilliseconds(MaxAgeUpperLimit));
+
+                OldestBucketIndex = 0;
+
+                OpenBucket(0);
+
+                Statistics.Reset();
+
+                _observers.CacheCleared();
+            }
+        }
+
+        public void Rebucket(IBucketNode<TValue> node)
+        {
+            lock (_lock)
+            {
+                node.SetBucket(_currentBucket);
+            }
+        }
+
+        public ConnectHandle Connect(ICacheValueObserver<TValue> observer)
+        {
+            return _observers.Connect(observer);
         }
 
         async Task RemoveNode(INode<TValue> node)
@@ -148,18 +197,18 @@
 
         void OpenBucket(int index)
         {
-            bool lockTaken = false;
+            var lockTaken = false;
 
             Monitor.Enter(_lock, ref lockTaken);
             try
             {
-                DateTime now = _nowProvider();
+                var now = _nowProvider();
 
                 _currentBucket?.Stop(now);
 
                 CurrentBucketIndex = index;
 
-                var openingBucket = _buckets[index];
+                Bucket<TValue> openingBucket = _buckets[index];
                 openingBucket.Start(now);
 
                 _currentBucket = openingBucket;
@@ -210,12 +259,12 @@
                 {
                     try
                     {
-                        int itemsAboveCapacity = Statistics.Count - Statistics.Capacity;
+                        var itemsAboveCapacity = Statistics.Count - Statistics.Capacity;
                         Bucket<TValue> bucket = _buckets[OldestBucketIndex];
 
                         while (AreLowOnBuckets
-                               || bucket.HasExpired(_maxAge, now)
-                               || (itemsAboveCapacity > 0 && bucket.IsOldEnough(_minAge, now)))
+                            || bucket.HasExpired(_maxAge, now)
+                            || (itemsAboveCapacity > 0 && bucket.IsOldEnough(_minAge, now)))
                         {
                             IBucketNode<TValue> node = bucket.First;
 
@@ -273,43 +322,6 @@
             Statistics.ValueRemoved();
 
             node.Evict();
-        }
-
-        bool AreLowOnBuckets => CurrentBucketIndex - OldestBucketIndex > _buckets.Count - 5;
-
-        bool IsCurrentBucketOldest => OldestBucketIndex == CurrentBucketIndex;
-
-        public void Clear()
-        {
-            lock (_lock)
-            {
-                _buckets.Empty();
-
-                _buckets = new BucketCollection<TValue>(this, _bucketCount);
-
-                _cacheResetTime = _nowProvider().Add(TimeSpan.FromMilliseconds(MaxAgeUpperLimit));
-
-                OldestBucketIndex = 0;
-
-                OpenBucket(0);
-
-                Statistics.Reset();
-
-                _observers.CacheCleared();
-            }
-        }
-
-        public void Rebucket(IBucketNode<TValue> node)
-        {
-            lock (_lock)
-            {
-                node.SetBucket(_currentBucket);
-            }
-        }
-
-        public ConnectHandle Connect(ICacheValueObserver<TValue> observer)
-        {
-            return _observers.Connect(observer);
         }
     }
 }

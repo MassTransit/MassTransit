@@ -44,7 +44,7 @@
 
             var nodeValueFactory = new NodeValueFactory<SimpleValue>(pendingValue, 100);
 
-            Assert.That(async () => await nodeValueFactory.CreateValue(), Throws.TypeOf<ValueFactoryException>());
+            Assert.That(async () => await nodeValueFactory.CreateValue(), Throws.TypeOf<TestException>());
         }
 
         [Test]

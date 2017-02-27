@@ -1015,7 +1015,6 @@
     <Compile Include="Util\Caching\BucketNode.cs" />
     <Compile Include="Util\Caching\CacheStatistics.cs" />
     <Compile Include="Util\Caching\CacheValueObservable.cs" />
-    <Compile Include="Util\Caching\Connectable.cs" />
     <Compile Include="Util\Caching\CurrentTimeProvider.cs" />
     <Compile Include="Util\Caching\FactoryNode.cs" />
     <Compile Include="Util\Caching\GreenCache.cs" />
