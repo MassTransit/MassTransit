@@ -21,7 +21,7 @@ documentation, which is located at [http://masstransit-project.com/MassTransit](
 
 and then:
 
-```
+```csharp
 // Message Definition
 class MyMessage
 {
