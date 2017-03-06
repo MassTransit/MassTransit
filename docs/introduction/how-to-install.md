@@ -5,16 +5,20 @@
 The simplest way to install MassTransit into your solution/project is to use NuGet.
 
 ```
-nuget nstall-Package MassTransit
+nuget Install-Package MassTransit
 ```
 
-However, the NuGet packages don’t contain the MassTransit.RuntimeServices executable and database SQL scripts. The RuntimeServices system routes messages to multiple subscribers via the Subscription Service. If you plan to use the “UseSubscriptionService” feature, then you’ll need to get compile that from source.
+Then, depending upon your transport, you could install one of the following transports.
 
-### Then you will need to add references to
+RabbitMQ:
+```
+nuget Install-Package MassTransit.RabbitMQ
+```
 
-* MassTransit.dll
-* MassTransit.&lt;Transport&gt;.dll \(RabbitMQ and Azure Service Bus\)
-* *Optionally* MassTransit.&lt;ContainerSupport&gt;.dll \(Castle, AutoFac, and StructureMap\)
+Azure Service Bus:
+```
+nuget Install-Package MassTransit.AzureServiceBus
+```
 
 ## Compiling from source
 
@@ -23,7 +27,7 @@ Lastly, if you want to hack on MassTransit or just want to have the actual sourc
 To clone the repository using git try the following:
 
 ```
-git clone git://github.com/MassTransit/MassTransit.git
+git clone https://github.com/MassTransit/MassTransit.git
 
 ```
 
@@ -33,7 +37,7 @@ git clone git://github.com/MassTransit/MassTransit.git
 
 To compile MassTransit from source you will need the following developer tools installed:
 
- - .NET 4.5 SDK or later
+- .NET 4.5.2 SDK or later
 
 ## Compiling
 
@@ -41,8 +45,4 @@ To compile the source code, drop to the command line and type:
 
 ```
 .\build.bat
-
 ```
-
-If you look in the`.\build_output`folder you should see the binaries.
-
