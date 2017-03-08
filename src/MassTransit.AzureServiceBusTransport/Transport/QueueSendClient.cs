@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,24 +14,36 @@ namespace MassTransit.AzureServiceBusTransport.Transport
 {
     using System;
     using System.Threading.Tasks;
+    using GreenPipes;
     using Microsoft.ServiceBus.Messaging;
+    using Policies;
 
 
     public class QueueSendClient :
         ISendClient
     {
         readonly QueueClient _queueClient;
+        readonly IRetryPolicy _retryPolicy;
 
         public QueueSendClient(QueueClient queueClient)
         {
             _queueClient = queueClient;
+
+            _retryPolicy = Retry.CreatePolicy(x =>
+            {
+                x.Handle<ServerBusyException>();
+                x.Handle<MessagingException>(exception => exception.IsTransient || exception.IsWrappedExceptionTransient());
+                x.Handle<TimeoutException>();
+
+                x.Interval(5, TimeSpan.FromSeconds(10));
+            });
         }
 
         public string Path => _queueClient.Path;
 
         public Task Send(BrokeredMessage message)
         {
-            return _queueClient.SendAsync(message);
+            return _retryPolicy.Retry(() => _queueClient.SendAsync(message));
         }
 
         public Task Close()
@@ -41,7 +53,7 @@ namespace MassTransit.AzureServiceBusTransport.Transport
 
         public Task<long> ScheduleSend(BrokeredMessage message, DateTime scheduleEnqueueTimeUtc)
         {
-            return _queueClient.ScheduleMessageAsync(message, scheduleEnqueueTimeUtc);
+            return _retryPolicy.Retry(() => _queueClient.ScheduleMessageAsync(message, scheduleEnqueueTimeUtc));
         }
 
         public Task CancelScheduledSend(long sequenceNumber)
