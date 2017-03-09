@@ -33,6 +33,7 @@ namespace MassTransit.AzureServiceBusTransport.Transport
             {
                 x.Handle<ServerBusyException>();
                 x.Handle<MessagingException>(exception => exception.IsTransient || exception.IsWrappedExceptionTransient());
+                x.Handle<MessagingCommunicationException>(exception => exception.IsTransient || exception.IsWrappedExceptionTransient());
                 x.Handle<TimeoutException>();
 
                 x.Interval(5, TimeSpan.FromSeconds(10));
