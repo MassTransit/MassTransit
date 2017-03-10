@@ -15,7 +15,7 @@ namespace MassTransit.Containers.Tests
     using Logging;
     using NUnit.Framework;
     using Serilog;
-    using SeriLogIntegration;
+    using SerilogIntegration;
 
 
     [SetUpFixture]

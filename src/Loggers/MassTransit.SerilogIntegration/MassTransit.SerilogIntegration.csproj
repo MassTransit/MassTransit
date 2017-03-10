@@ -7,8 +7,8 @@
     <ProjectGuid>{0E90AFE6-99E8-43CF-995E-E99466DD6807}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>MassTransit.SeriLogIntegration</RootNamespace>
-    <AssemblyName>MassTransit.SeriLogIntegration</AssemblyName>
+    <RootNamespace>MassTransit.SerilogIntegration</RootNamespace>
+    <AssemblyName>MassTransit.SerilogIntegration</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SccProjectName>SAK</SccProjectName>
@@ -36,7 +36,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>bin\Release\MassTransit.SeriLogIntegration.XML</DocumentationFile>
+    <DocumentationFile>bin\Release\MassTransit.SerilogIntegration.XML</DocumentationFile>
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup>
@@ -69,9 +69,9 @@
     <Compile Include="..\..\SolutionVersion.cs">
       <Link>Properties\SolutionVersion.cs</Link>
     </Compile>
-    <Compile Include="SeriLogConfiguratorExtensions.cs" />
+    <Compile Include="SerilogConfiguratorExtensions.cs" />
     <Compile Include="SerilogLog.cs" />
-    <Compile Include="SeriLogLogger.cs" />
+    <Compile Include="SerilogLogger.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\MassTransit\MassTransit.csproj">

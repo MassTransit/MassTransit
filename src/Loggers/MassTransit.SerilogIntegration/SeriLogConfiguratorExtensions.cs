@@ -14,7 +14,7 @@ namespace MassTransit
 {
     using System;
     using Serilog;
-    using SeriLogIntegration;
+    using SerilogIntegration;
 
 
     public static class SerilogConfiguratorExtensions
