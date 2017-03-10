@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -22,17 +22,20 @@ namespace MassTransit.NLogIntegration.Logging
         MassTransit.Logging.ILogger
     {
         readonly Func<string, NLog.Logger> _logFactory;
-        readonly ConcurrentDictionary<string, NLogLog> _logs; 
+        readonly ConcurrentDictionary<string, NLogLog> _logs;
+        readonly bool _shutdownLogManager;
 
         public NLogLogger(LogFactory factory)
         {
             _logFactory = factory.GetLogger;
+            _shutdownLogManager = false;
             _logs = new ConcurrentDictionary<string, NLogLog>();
         }
 
-        public NLogLogger() 
+        public NLogLogger()
         {
             _logFactory = LogManager.GetLogger;
+            _shutdownLogManager = true;
             _logs = new ConcurrentDictionary<string, NLogLog>();
         }
 
@@ -43,10 +46,10 @@ namespace MassTransit.NLogIntegration.Logging
 
         public void Shutdown()
         {
-            foreach (var log in _logs.Values)
-            {
-                log.Shutdown();
-            }
+            LogManager.Flush();
+
+            if (_shutdownLogManager)
+                LogManager.Shutdown();
         }
 
         public static void Use()
