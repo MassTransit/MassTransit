@@ -123,6 +123,13 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
                     catch (OperationCanceledException)
                     {
                     }
+                    catch (TimeoutException exception)
+                    {
+                        delay = TimeSpan.Zero;
+
+                        if (_log.IsWarnEnabled)
+                            _log.Warn($"Renew Lock Timeout (will retry): {_context.MessageId}", exception);
+                    }
                     catch (Exception exception)
                     {
                         _source.Cancel();
