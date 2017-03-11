@@ -127,8 +127,20 @@ Each of these are setup in a similar way, but examples are shown below for each 
 ### Entity Framework
 
 Entity Framework seems to be the most common ORM for class-SQL mappings, and SQL is still widely used 
-for storing data. So it's a win to have it supported out of the box by MassTransit. The code-first mapping 
-example below shows the basics of getting started.
+for storing data. So it's a win to have it supported out of the box by MassTransit.
+
+#### Optimistic vs Pessimistic Concurrency
+Most Relational Databases baked into MassTransit need some way to guarantee ACID when processing Sagas. Because there can be multiple threads _consuming_ multiple bus events meant for the same Saga Instance, they could end up overwriting eachother (Race Condition). Fortunately Relational DB's can easily handle this by setting the transaction type to Serializable or (Page/Row) locking. This would be considered __pessimistic concurrency__.
+
+Fortunately Entity Framework is a Repository pattern itself, and they have baked in a Column Type `[Timestamp]` (a.k.a. `IsRowVersion` with fluent mapping) which will check the value of the column when it started it's "unit of work" and if that value is the same when updating that row in the database, everybody is happy!. But if that column value is different, then it was updated elsewhere. So EF will throw an exception `DbUpdateConcurrencyException`. This is __optimistic concurrency_. It doesn't guarantee your unit of work with the database will succeed (must retry these exceptions), but it also doesn't block anybody else from working within the same database page (not locking the table/page).
+
+##### So Which one should I use?
+
+For almost every scenario, I've used optimistic, because most state machine logic should be fairly quick. So
+for most scenarios, optimistic concurrency should be fine, but you can choose what's the most appropriate for you.
+
+The code-first mapping example below shows the basics of getting started. The lines have been commented
+where the additional optimistic concurrency column is needed.
 
 ```csharp
 public class SagaInstance : SagaStateMachineInstance
@@ -145,6 +157,7 @@ public class SagaInstance : SagaStateMachineInstance
     public string CurrentState { get; set; }
     public string ServiceName { get; set; }
     public Guid CorrelationId { get; set; }
+    public byte[] RowVersion { get; set; } // For Optimistic Concurrency
 }
 
 public class SagaInstanceMap : SagaClassMapping<SagaInstance>
@@ -153,6 +166,7 @@ public class SagaInstanceMap : SagaClassMapping<SagaInstance>
     {
         Property(x => x.CurrentState);
         Property(x => x.ServiceName, x => x.Length(40));
+        Property(x => x.RowVersion).IsRowVersion(); // For Optimistic Concurrency
     }
 }
 ```
@@ -168,7 +182,24 @@ The repository is then created on the context factory for the `DbContext` is ava
 SagaDbContextFactory contextFactory = () => 
     new SagaDbContext<SagaInstance, SagaInstanceMap>(_connectionString);
 
-var repository = new EntityFrameworkSagaRepository<SagaInstance>(contextFactory);
+var repository = new EntityFrameworkSagaRepository<SagaInstance>(contextFactory, optimistic: true); // true For Optimistic Concurrency, false is default for pessimistic
+```
+
+Lastly, this snippit below is __only needed for optimistic concurrency__, because the saga should retry processing
+if a failure occurred when writing to the database. This snippit is adding a [retry policies](retries.md) middleware to the
+saga receive endpoint from the [first section](#specifying-saga-persistence).
+
+```csharp
+    ...
+    x.ReceiveEndpoint(host, "shopping_cart_state", e =>
+    {
+        e.UseRetry(x => {
+            x.Handle<DbUpdateConcurrencyException>();
+            x.Interval(5, TimeSpan.FromMilliseconds(100)));
+        }); // Add Retry Middleware for Optimistic Concurrency
+        e.StateMachineSaga(sagaStateMachine, repository);
+    });
+    ...
 ```
 
 ### MongoDB
