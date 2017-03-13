@@ -75,7 +75,7 @@ var busControl = Bus.Factory.CreateUsingRabbitMq(cfg =>
 
     cfg.ReceiveEndpoint(host, "customer_update_queue", e =>
     {
-        e.UseRetry(Retry.Immediate(5));
+        e.UseRetry(r => r.Immediate(5));
         e.Consumer(() => new UpdateCustomerAddressConsumer(sessionFactory));
     });
 });
