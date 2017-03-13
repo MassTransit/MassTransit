@@ -21,7 +21,8 @@ namespace MassTransit
     public static class BusControlExtensions
     {
         /// <summary>
-        /// Stop a bus, throwing an exception if the bus does not stop
+        /// Stop a bus, throwing an exception if the bus does not stop.
+        /// It is a wrapper of the async method `StopAsync`
         /// </summary>
         /// <param name="busControl">The bus handle</param>
         public static void Stop(this IBusControl busControl)
@@ -30,7 +31,8 @@ namespace MassTransit
         }
 
         /// <summary>
-        /// Stop a bus, throwing an exception if the bus does not stop
+        /// Starts a bus, throwing an exception if the bus does not start
+        /// It is a wrapper of the async method `StartAsync`
         /// </summary>
         /// <param name="busControl">The bus handle</param>
         public static void Start(this IBusControl busControl)

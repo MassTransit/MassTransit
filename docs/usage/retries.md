@@ -74,7 +74,8 @@ is possible if this version is used.
 You can use multiple calls to these methods to specify filters for multiple exception types:
 
 ```csharp
-cfg.UseRetry(r => {
+cfg.UseRetry(r => 
+{
     c.Handle<ArgumentNullException>();
     c.Ignore(typeof(InvalidOperationException), typeof(InvalidCastException));
     c.Ignore<ArgumentException>(t => t.ParamName == "orderTotal");
