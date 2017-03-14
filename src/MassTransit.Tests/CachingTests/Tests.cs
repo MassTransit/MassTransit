@@ -37,7 +37,7 @@
 
 
         public class SmartValue :
-            INotifyValueTouched
+            INotifyValueUsed
         {
             readonly string _id;
             readonly string _value;
@@ -48,7 +48,7 @@
                 _value = value;
             }
 
-            public event Action Touched;
+            public event Action Used;
 
             public string Id => _id;
 
@@ -56,7 +56,7 @@
             {
                 get
                 {
-                    Touched?.Invoke();
+                    Used?.Invoke();
 
                     return _value;
                 }

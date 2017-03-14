@@ -64,6 +64,11 @@ namespace MassTransit.Util.Caching
             _count = 0;
         }
 
+        /// <summary>
+        /// Push a node to the front of the bucket, and set the node's bucket to this bucket
+        /// </summary>
+        /// <param name="node"></param>
+        /// <returns></returns>
         public IBucketNode<TValue> Push(IBucketNode<TValue> node)
         {
             IBucketNode<TValue> next = _first;
@@ -77,7 +82,11 @@ namespace MassTransit.Util.Caching
             return next;
         }
 
-        public void Touch(IBucketNode<TValue> node)
+        /// <summary>
+        /// When a node is used, check and rebucket if necessary to keep it in the cache
+        /// </summary>
+        /// <param name="node"></param>
+        public void Used(IBucketNode<TValue> node)
         {
             // a stopped bucket is no longer the current bucket, so give the node back to the manager
             if (_stopTime.HasValue)

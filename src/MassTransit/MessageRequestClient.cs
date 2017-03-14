@@ -30,7 +30,8 @@ namespace MassTransit
         where TRequest : class
         where TResponse : class
     {
-        readonly Lazy<Task<ISendEndpoint>> _requestEndpoint;
+        readonly ISendEndpointProvider _sendEndpointProvider;
+        readonly Uri _serviceAddress;
 
         /// <summary>
         /// Creates a message request client for the bus and endpoint specified
@@ -44,7 +45,8 @@ namespace MassTransit
             Action<SendContext<TRequest>> callback = null)
             : base(bus, bus.Address, timeout, timeToLive, callback)
         {
-            _requestEndpoint = new Lazy<Task<ISendEndpoint>>(async () => await bus.GetSendEndpoint(serviceAddress).ConfigureAwait(false));
+            _sendEndpointProvider = bus;
+            _serviceAddress = serviceAddress;
         }
 
         /// <summary>
@@ -61,12 +63,13 @@ namespace MassTransit
             TimeSpan timeout, TimeSpan? timeToLive = default(TimeSpan?), Action<SendContext<TRequest>> callback = null)
             : base(connector, responseAddress, timeout, timeToLive, callback)
         {
-            _requestEndpoint = new Lazy<Task<ISendEndpoint>>(async () => await sendEndpointProvider.GetSendEndpoint(serviceAddress).ConfigureAwait(false));
+            _sendEndpointProvider = sendEndpointProvider;
+            _serviceAddress = serviceAddress;
         }
 
         protected override async Task SendRequest(TRequest request, IPipe<SendContext<TRequest>> requestPipe, CancellationToken cancellationToken)
         {
-            var endpoint = await _requestEndpoint.Value.ConfigureAwait(false);
+            var endpoint = await _sendEndpointProvider.GetSendEndpoint(_serviceAddress).ConfigureAwait(false);
 
             await endpoint.Send(request, requestPipe, cancellationToken).ConfigureAwait(false);
         }

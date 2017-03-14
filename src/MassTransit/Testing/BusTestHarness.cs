@@ -72,7 +72,7 @@ namespace MassTransit.Testing
             where TRequest : class
             where TResponse : class
         {
-            return Bus.CreateRequestClient<TRequest, TResponse>(InputQueueAddress, TestTimeout);
+            return CreateRequestClient<TRequest, TResponse>(InputQueueAddress);
         }
 
         public virtual IRequestClient<TRequest, TResponse> CreateRequestClient<TRequest, TResponse>(Uri destinationAddress)

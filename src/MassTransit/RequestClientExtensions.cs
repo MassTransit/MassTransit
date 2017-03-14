@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -85,6 +85,29 @@ namespace MassTransit
 
             return new MessageRequestClient<TRequest, TResponse>(sendEndpointProvider, ready.ReceiveEndpoint, ready.InputAddress, address, timeout, ttl,
                 callback);
+        }
+
+        /// <summary>
+        /// Creates a request client factory which can be used to create a request client per message within a consume context.
+        /// </summary>
+        /// <typeparam name="TRequest"></typeparam>
+        /// <typeparam name="TResponse"></typeparam>
+        /// <param name="host">The host for the response endpoint</param>
+        /// <param name="address">The service address</param>
+        /// <param name="timeout">The request timeout</param>
+        /// <param name="timeToLive">The request time to live</param>
+        /// <param name="callback">Customize the send context</param>
+        /// <returns></returns>
+        public static async Task<IRequestClientFactory<TRequest, TResponse>> CreateRequestClientFactory<TRequest, TResponse>(this IInMemoryHost host,
+            Uri address, TimeSpan timeout, TimeSpan? timeToLive = default(TimeSpan?), Action<SendContext<TRequest>> callback = null)
+            where TRequest : class
+            where TResponse : class
+        {
+            var endpoint = await host.ConnectReceiveEndpoint(NewId.NextGuid().ToString("N")).ConfigureAwait(false);
+
+            var ready = await endpoint.Ready.ConfigureAwait(false);
+
+            return new MessageRequestClientFactory<TRequest, TResponse>(endpoint, ready.ReceiveEndpoint, ready.InputAddress, address, timeout, timeToLive, callback);
         }
 
         /// <summary>

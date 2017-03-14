@@ -33,16 +33,16 @@ namespace MassTransit.Util.Caching
         {
             _value = Task.FromResult(value);
 
-            var notify = value as INotifyValueTouched;
+            var notify = value as INotifyValueUsed;
             if (notify != null)
-                notify.Touched += Touch;
+                notify.Used += Used;
         }
 
         public Task<TValue> Value
         {
             get
             {
-                Touch();
+                Used();
                 return _value;
             }
         }
@@ -72,9 +72,9 @@ namespace MassTransit.Util.Caching
             _bucket = null;
             _next = null;
 
-            var notify = _value.Result as INotifyValueTouched;
+            var notify = _value.Result as INotifyValueUsed;
             if (notify != null)
-                notify.Touched -= Touch;
+                notify.Used -= Used;
 
             Interlocked.Exchange(ref _value, Cached.Removed);
         }
@@ -88,9 +88,9 @@ namespace MassTransit.Util.Caching
             return next;
         }
 
-        void Touch()
+        void Used()
         {
-            _bucket?.Touch(this);
+            _bucket?.Used(this);
         }
 
 

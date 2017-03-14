@@ -46,6 +46,29 @@ namespace MassTransit
         }
 
         /// <summary>
+        /// Creates a request client factory which can be used to create a request client per message within a consume context.
+        /// </summary>
+        /// <typeparam name="TRequest"></typeparam>
+        /// <typeparam name="TResponse"></typeparam>
+        /// <param name="host">The host for the response endpoint</param>
+        /// <param name="address">The service address</param>
+        /// <param name="timeout">The request timeout</param>
+        /// <param name="timeToLive">The request time to live</param>
+        /// <param name="callback">Customize the send context</param>
+        /// <returns></returns>
+        public static async Task<IRequestClientFactory<TRequest, TResponse>> CreateRequestClientFactory<TRequest, TResponse>(this IServiceBusHost host,
+            Uri address, TimeSpan timeout, TimeSpan? timeToLive = default(TimeSpan?), Action<SendContext<TRequest>> callback = null)
+            where TRequest : class
+            where TResponse : class
+        {
+            var endpoint = await host.ConnectReceiveEndpoint(host.GetTemporaryQueueName("response")).ConfigureAwait(false);
+
+            var ready = await endpoint.Ready.ConfigureAwait(false);
+
+            return new MessageRequestClientFactory<TRequest, TResponse>(endpoint, ready.ReceiveEndpoint, ready.InputAddress, address, timeout, timeToLive, callback);
+        }
+
+        /// <summary>
         /// Creates a request client that uses the bus to publish a request.
         /// </summary>
         /// <typeparam name="TRequest">The request type</typeparam>

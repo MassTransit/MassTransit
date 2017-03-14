@@ -168,6 +168,19 @@ namespace MassTransit.Util.Caching
             Statistics.ValueRemoved();
 
             CheckCacheStatus();
+
+            try
+            {
+                var disposable = value as IDisposable;
+                disposable?.Dispose();
+
+                var asyncDisposable = value as IAsyncDisposable;
+                if (asyncDisposable != null)
+                    await asyncDisposable.DisposeAsync().ConfigureAwait(false);
+            }
+            catch
+            {
+            }
         }
 
         async Task AddNode(INodeValueFactory<TValue> nodeValueFactory)

@@ -179,7 +179,9 @@
     <Compile Include="IPublishMessageObserver.cs" />
     <Compile Include="IReceiveTransportObserver.cs" />
     <Compile Include="IRecurringMessageScheduler.cs" />
+    <Compile Include="IRequestClientFactory.cs" />
     <Compile Include="ISendMessageObserver.cs" />
+    <Compile Include="MessageRequestClientFactory.cs" />
     <Compile Include="Monitoring\Performance\Configuration\PerformanceCounterBusFactorySpecification.cs" />
     <Compile Include="Configuration\BusConfigurators\PublishPipeConfigurator.cs" />
     <Compile Include="Configuration\BusConfigurators\SendPipeConfigurator.cs" />
@@ -1029,7 +1031,7 @@
     <Compile Include="Util\Caching\INode.cs" />
     <Compile Include="Util\Caching\INodeTracker.cs" />
     <Compile Include="Util\Caching\INodeValueFactory.cs" />
-    <Compile Include="Util\Caching\INotifyValueTouched.cs" />
+    <Compile Include="Util\Caching\INotifyValueUsed.cs" />
     <Compile Include="Util\Caching\IPendingValue.cs" />
     <Compile Include="Util\Caching\KeyProvider.cs" />
     <Compile Include="Util\Caching\MissingValueFactory.cs" />
