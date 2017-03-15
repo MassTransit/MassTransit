@@ -1,4 +1,4 @@
-Microsoft Visual Studio Solution File, Format Version 12.00
+﻿Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
@@ -115,6 +115,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.MartenIntegration", "Persistence\MassTransit.MartenIntegration\MassTransit.MartenIntegration.csproj", "{0D261888-4187-43BB-9EE2-9C04EEC4AAC0}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.MartenIntegration.Tests", "Persistence\MassTransit.MartenIntegration.Tests\MassTransit.MartenIntegration.Tests.csproj", "{92BE64BB-FF25-4CC8-B64F-3BF02F18F089}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Audit", "MassTransit.Audit\MassTransit.Audit.csproj", "{AE85151C-C049-47B2-BD8B-9915A3103299}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -553,6 +555,18 @@ Global
 		{4A042032-21A2-40CA-BBE7-5D47F786A949}.ReleaseUnsigned|Any CPU.Build.0 = Release|Any CPU
 		{4A042032-21A2-40CA-BBE7-5D47F786A949}.ReleaseUnsigned|x86.ActiveCfg = Release|Any CPU
 		{4A042032-21A2-40CA-BBE7-5D47F786A949}.ReleaseUnsigned|x86.Build.0 = Release|Any CPU
+		{AE85151C-C049-47B2-BD8B-9915A3103299}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AE85151C-C049-47B2-BD8B-9915A3103299}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AE85151C-C049-47B2-BD8B-9915A3103299}.Debug|x86.ActiveCfg = Debug|x86
+		{AE85151C-C049-47B2-BD8B-9915A3103299}.Debug|x86.Build.0 = Debug|x86
+		{AE85151C-C049-47B2-BD8B-9915A3103299}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AE85151C-C049-47B2-BD8B-9915A3103299}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AE85151C-C049-47B2-BD8B-9915A3103299}.Release|x86.ActiveCfg = Release|x86
+		{AE85151C-C049-47B2-BD8B-9915A3103299}.Release|x86.Build.0 = Release|x86
+		{AE85151C-C049-47B2-BD8B-9915A3103299}.ReleaseUnsigned|Any CPU.ActiveCfg = ReleaseUnsigned|Any CPU
+		{AE85151C-C049-47B2-BD8B-9915A3103299}.ReleaseUnsigned|Any CPU.Build.0 = ReleaseUnsigned|Any CPU
+		{AE85151C-C049-47B2-BD8B-9915A3103299}.ReleaseUnsigned|x86.ActiveCfg = ReleaseUnsigned|x86
+		{AE85151C-C049-47B2-BD8B-9915A3103299}.ReleaseUnsigned|x86.Build.0 = ReleaseUnsigned|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
