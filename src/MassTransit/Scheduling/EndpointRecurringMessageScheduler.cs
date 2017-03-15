@@ -22,16 +22,16 @@ namespace MassTransit.Scheduling
     public class EndpointRecurringMessageScheduler :
         IRecurringMessageScheduler
     {
-        readonly Lazy<Task<ISendEndpoint>> _schedulerEndpoint;
+        readonly Func<Task<ISendEndpoint>> _schedulerEndpoint;
 
         public EndpointRecurringMessageScheduler(ISendEndpointProvider sendEndpointProvider, Uri schedulerAddress)
         {
-            _schedulerEndpoint = new Lazy<Task<ISendEndpoint>>(() => sendEndpointProvider.GetSendEndpoint(schedulerAddress));
+            _schedulerEndpoint = () => sendEndpointProvider.GetSendEndpoint(schedulerAddress);
         }
 
         public EndpointRecurringMessageScheduler(ISendEndpoint sendEndpoint)
         {
-            _schedulerEndpoint = new Lazy<Task<ISendEndpoint>>(() => Task.FromResult(sendEndpoint));
+            _schedulerEndpoint = () => Task.FromResult(sendEndpoint);
         }
 
         Task<ScheduledRecurringMessage<T>> IRecurringMessageScheduler.ScheduleRecurringSend<T>(Uri destinationAddress, RecurringSchedule schedule, T message,
@@ -181,7 +181,7 @@ namespace MassTransit.Scheduling
         {
             var command = new CancelScheduledRecurringMessageCommand(scheduleId, scheduleGroup);
 
-            var endpoint = await _schedulerEndpoint.Value.ConfigureAwait(false);
+            var endpoint = await _schedulerEndpoint().ConfigureAwait(false);
 
             await endpoint.Send<CancelScheduledRecurringMessage>(command).ConfigureAwait(false);
         }
@@ -192,7 +192,7 @@ namespace MassTransit.Scheduling
         {
             ScheduleRecurringMessage<T> command = new ScheduleRecurringMessageCommand<T>(schedule, destinationAddress, message);
 
-            var endpoint = await _schedulerEndpoint.Value.ConfigureAwait(false);
+            var endpoint = await _schedulerEndpoint().ConfigureAwait(false);
 
             await endpoint.Send(command, cancellationToken).ConfigureAwait(false);
 
@@ -206,7 +206,7 @@ namespace MassTransit.Scheduling
         {
             ScheduleRecurringMessage<T> command = new ScheduleRecurringMessageCommand<T>(schedule, destinationAddress, message);
 
-            var endpoint = await _schedulerEndpoint.Value.ConfigureAwait(false);
+            var endpoint = await _schedulerEndpoint().ConfigureAwait(false);
 
             await endpoint.Send(command, pipe, cancellationToken).ConfigureAwait(false);
 
@@ -220,7 +220,7 @@ namespace MassTransit.Scheduling
         {
             ScheduleRecurringMessage<T> command = new ScheduleRecurringMessageCommand<T>(schedule, destinationAddress, message);
 
-            var endpoint = await _schedulerEndpoint.Value.ConfigureAwait(false);
+            var endpoint = await _schedulerEndpoint().ConfigureAwait(false);
 
             await endpoint.Send(command, pipe, cancellationToken).ConfigureAwait(false);
 

@@ -23,16 +23,16 @@ namespace MassTransit.Scheduling
     public class EndpointMessageScheduler :
         IMessageScheduler
     {
-        readonly Lazy<Task<ISendEndpoint>> _schedulerEndpoint;
+        readonly Func<Task<ISendEndpoint>> _schedulerEndpoint;
 
         public EndpointMessageScheduler(ISendEndpointProvider sendEndpointProvider, Uri schedulerAddress)
         {
-            _schedulerEndpoint = new Lazy<Task<ISendEndpoint>>(() => sendEndpointProvider.GetSendEndpoint(schedulerAddress));
+            _schedulerEndpoint = () => sendEndpointProvider.GetSendEndpoint(schedulerAddress);
         }
 
         public EndpointMessageScheduler(ISendEndpoint sendEndpoint)
         {
-            _schedulerEndpoint = new Lazy<Task<ISendEndpoint>>(() => Task.FromResult(sendEndpoint));
+            _schedulerEndpoint = () => Task.FromResult(sendEndpoint);
         }
 
         Task<ScheduledMessage<T>> IMessageScheduler.ScheduleSend<T>(Uri destinationAddress, DateTime scheduledTime, T message,
@@ -183,7 +183,7 @@ namespace MassTransit.Scheduling
         {
             var command = new CancelScheduledMessageCommand(tokenId);
 
-            var endpoint = await _schedulerEndpoint.Value.ConfigureAwait(false);
+            var endpoint = await _schedulerEndpoint().ConfigureAwait(false);
 
             await endpoint.Send<CancelScheduledMessage>(command).ConfigureAwait(false);
         }
@@ -211,7 +211,7 @@ namespace MassTransit.Scheduling
 
             ScheduleMessage<T> command = new ScheduleMessageCommand<T>(scheduledTime, destinationAddress, message, tokenId);
 
-            var endpoint = await _schedulerEndpoint.Value.ConfigureAwait(false);
+            var endpoint = await _schedulerEndpoint().ConfigureAwait(false);
 
             await endpoint.Send(command, pipe, cancellationToken).ConfigureAwait(false);
 
