@@ -53,7 +53,7 @@
 
         public Locating_an_existing_ef_saga()
         {
-            sagaDbContextFactory = () => new SagaDbContext<SimpleSaga, SimpleSagaMap>(SagaDbContextFactoryProvider.GetLocalDbConnectionString());
+            sagaDbContextFactory = () => new SagaDbContext<SimpleSaga, SimpleSagaMap>(LocalDbConnectionStringProvider.GetLocalDbConnectionString());
             _sagaRepository = new Lazy<ISagaRepository<SimpleSaga>>(() => new EntityFrameworkSagaRepository<SimpleSaga>(sagaDbContextFactory));
         }
 

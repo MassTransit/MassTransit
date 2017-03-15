@@ -67,6 +67,10 @@
     <Compile Include="..\..\SolutionVersion.cs">
       <Link>Properties\SolutionVersion.cs</Link>
     </Compile>
+    <Compile Include="Audit\AuditDbContext.cs" />
+    <Compile Include="Audit\AuditMapping.cs" />
+    <Compile Include="Audit\AuditRecord.cs" />
+    <Compile Include="Audit\EntityFrameworkAuditStore.cs" />
     <Compile Include="DbContextExtensions.cs" />
     <Compile Include="SagaClassMapping.cs" />
     <Compile Include="SagaDbContext.cs" />
@@ -80,6 +84,10 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\MassTransit.Audit\MassTransit.Audit.csproj">
+      <Project>{AE85151C-C049-47B2-BD8B-9915A3103299}</Project>
+      <Name>MassTransit.Audit</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\MassTransit\MassTransit.csproj">
       <Project>{6efd69fc-cbcc-4f85-aee0-efba73f4d273}</Project>
       <Name>MassTransit</Name>
