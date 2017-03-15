@@ -74,9 +74,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AuditStore_Specs.cs" />
     <Compile Include="ContextSetup.cs" />
     <Compile Include="DbQuery.cs" />
-    <Compile Include="SagaDbContextFactoryProvider.cs" />
+    <Compile Include="LocalDbConnectionStringProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SagaLocator_Specs.cs" />
     <Compile Include="SimpleSagaMap.cs" />
@@ -89,6 +90,10 @@
     <ProjectReference Include="..\..\Loggers\MassTransit.Log4NetIntegration\MassTransit.Log4NetIntegration.csproj">
       <Project>{8d2be372-a756-4676-b2ea-ed7846809bfe}</Project>
       <Name>MassTransit.Log4NetIntegration</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\MassTransit.Audit\MassTransit.Audit.csproj">
+      <Project>{AE85151C-C049-47B2-BD8B-9915A3103299}</Project>
+      <Name>MassTransit.Audit</Name>
     </ProjectReference>
     <ProjectReference Include="..\MassTransit.EntityFrameworkIntegration\MassTransit.EntityFrameworkIntegration.csproj">
       <Project>{442e2b78-0237-458d-b32b-cec94413f44d}</Project>

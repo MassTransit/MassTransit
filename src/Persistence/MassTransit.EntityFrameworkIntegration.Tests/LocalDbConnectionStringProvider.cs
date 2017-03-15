@@ -3,7 +3,7 @@
     using System;
     using System.Data.SqlClient;
 
-    public static class SagaDbContextFactoryProvider
+    public static class LocalDbConnectionStringProvider
     {
         /// <summary>
         /// This is a list of the connection strings that we will attempt to find what LocalDb versions
@@ -24,36 +24,36 @@
         /// </summary>
         public static string GetLocalDbConnectionString()
         {
-            if (string.IsNullOrWhiteSpace(_connectionString))
-            {
-                lock (_lockConnectionString)
-                {
-                    if (string.IsNullOrWhiteSpace(_connectionString))
-                    {
-                        // Lets find a localdb that we can use for our unit test
-                        foreach (var connectionString in _possibleLocalDbConnectionStrings)
-                        {
-                            try
-                            {
-                                using (var connection = new SqlConnection(connectionString))
-                                {
-                                    // It worked, we can save this as our connection string
-                                    _connectionString = connectionString;
-                                    break;
-                                }
-                            }
-                            catch (Exception)
-                            {
-                                // Swallow
-                            }
-                        }
+            if (!string.IsNullOrWhiteSpace(_connectionString))
+                return _connectionString;
 
-                        // If we looped through all possible localdb connection strings and didn't find one, we fail.
-                        if (string.IsNullOrWhiteSpace(_connectionString))
-                            throw new InvalidOperationException(
-                                "Couldn't connect to any of the LocalDB Databases. You might have a version installed that is not in the list. Please check the list and modify as necessary");
+            lock (_lockConnectionString)
+            {
+                if (!string.IsNullOrWhiteSpace(_connectionString))
+                    return _connectionString;
+
+                // Lets find a localdb that we can use for our unit test
+                foreach (var connectionString in _possibleLocalDbConnectionStrings)
+                {
+                    try
+                    {
+                        using (var connection = new SqlConnection(connectionString))
+                        {
+                            // It worked, we can save this as our connection string
+                            _connectionString = connectionString;
+                            break;
+                        }
+                    }
+                    catch (Exception)
+                    {
+                        // Swallow
                     }
                 }
+
+                // If we looped through all possible localdb connection strings and didn't find one, we fail.
+                if (string.IsNullOrWhiteSpace(_connectionString))
+                    throw new InvalidOperationException(
+                        "Couldn't connect to any of the LocalDB Databases. You might have a version installed that is not in the list. Please check the list and modify as necessary");
             }
 
             return _connectionString;

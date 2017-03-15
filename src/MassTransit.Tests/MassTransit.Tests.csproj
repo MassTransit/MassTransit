@@ -96,6 +96,9 @@
     <Compile Include="..\SolutionVersion.cs">
       <Link>Properties\SolutionVersion.cs</Link>
     </Compile>
+    <Compile Include="Audit\AuditFilter_Specs.cs" />
+    <Compile Include="Audit\Audit_Specs.cs" />
+    <Compile Include="Audit\InMemoryAuditStore.cs" />
     <Compile Include="BusActivityMonitor_Specs.cs" />
     <Compile Include="CachingTests\Bucket_Specs.cs" />
     <Compile Include="CachingTests\Endpoint.cs" />
@@ -275,6 +278,10 @@
     <ProjectReference Include="..\Loggers\MassTransit.Log4NetIntegration\MassTransit.Log4NetIntegration.csproj">
       <Project>{8D2BE372-A756-4676-B2EA-ED7846809BFE}</Project>
       <Name>MassTransit.Log4NetIntegration</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\MassTransit.Audit\MassTransit.Audit.csproj">
+      <Project>{AE85151C-C049-47B2-BD8B-9915A3103299}</Project>
+      <Name>MassTransit.Audit</Name>
     </ProjectReference>
     <ProjectReference Include="..\MassTransit.TestFramework\MassTransit.TestFramework.csproj">
       <Project>{3C4B5F1A-69AD-415E-9F40-A7FDBD7A3012}</Project>
