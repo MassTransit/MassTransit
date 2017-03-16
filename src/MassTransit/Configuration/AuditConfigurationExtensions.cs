@@ -17,7 +17,9 @@ namespace MassTransit
     using Audit.MetadataFactories;
     using Audit.Observers;
     using Configurators;
+    using GreenPipes;
     using Pipeline;
+    using Util;
 
 
     public static class AuditConfigurationExtensions
@@ -29,7 +31,8 @@ namespace MassTransit
         /// <param name="store">Audit store</param>
         /// <param name="configureFilter">Filter configuration delegate</param>
         /// <param name="metadataFactory">Message metadata factory. If omited, the default one will be used.</param>
-        public static void ConnectSendAuditObservers<T>(this T connector, IMessageAuditStore store, Action<IMessageFilterConfigurator> configureFilter = null,
+        public static ConnectHandle ConnectSendAuditObservers<T>(this T connector, IMessageAuditStore store,
+            Action<IMessageFilterConfigurator> configureFilter = null,
             ISendMetadataFactory metadataFactory = null)
             where T : ISendObserverConnector, IPublishObserverConnector
         {
@@ -38,8 +41,10 @@ namespace MassTransit
 
             var factory = metadataFactory ?? new DefaultSendMetadataFactory();
 
-            connector.ConnectSendObserver(new AuditSendObserver(store, factory, specification.Filter));
-            connector.ConnectPublishObserver(new AuditPublishObserver(store, factory, specification.Filter));
+            var sendHandle = connector.ConnectSendObserver(new AuditSendObserver(store, factory, specification.Filter));
+            var publishHandle = connector.ConnectPublishObserver(new AuditPublishObserver(store, factory, specification.Filter));
+
+            return new MultipleConnectHandle(sendHandle, publishHandle);
         }
 
         /// <summary>
@@ -49,7 +54,7 @@ namespace MassTransit
         /// <param name="store">The audit store</param>
         /// <param name="configureFilter">Filter configuration delegate</param>
         /// <param name="metadataFactory">Message metadata factory. If omited, the default one will be used.</param>
-        public static void ConnectConsumeAuditObserver(this IConsumeObserverConnector connector, IMessageAuditStore store,
+        public static ConnectHandle ConnectConsumeAuditObserver(this IConsumeObserverConnector connector, IMessageAuditStore store,
             Action<IMessageFilterConfigurator> configureFilter = null, IConsumeMetadataFactory metadataFactory = null)
         {
             if (connector == null)
@@ -62,7 +67,7 @@ namespace MassTransit
 
             var factory = metadataFactory ?? new DefaultConsumeMetadataFactory();
 
-            connector.ConnectConsumeObserver(new AuditConsumeObserver(store, factory, specification.Filter));
+            return connector.ConnectConsumeObserver(new AuditConsumeObserver(store, factory, specification.Filter));
         }
     }
 }
