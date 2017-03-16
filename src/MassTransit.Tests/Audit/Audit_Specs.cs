@@ -14,6 +14,7 @@ namespace MassTransit.Audit.Tests
 {
     using System.Linq;
     using System.Threading.Tasks;
+    using MassTransit.Tests.Audit;
     using NUnit.Framework;
     using Shouldly;
     using Testing;
@@ -32,28 +33,34 @@ namespace MassTransit.Audit.Tests
             _harness = new InMemoryTestHarness();
             _harness.OnConnectObservers += bus =>
             {
-                bus.UseSendAudit(_store);
-                bus.UseConsumeAudit(_store);
+                bus.ConnectSendAuditObservers(_store);
+                bus.ConnectConsumeAuditObserver(_store);
             };
             _harness.Consumer<TestConsumer>();
 
             await _harness.Start();
 
-            await _harness.InputQueueSendEndpoint.Send(new A());
+            var response = _harness.SubscribeHandler<B>();
+
+            await _harness.InputQueueSendEndpoint.Send(new A(), x => x.ResponseAddress = _harness.BusAddress);
+
+            await response;
         }
 
         [Test]
         public async Task Should_audit_sent_messages()
         {
-            var sentCount = _harness.Sent.Select().Count();
-            _store.Audit.Count(x => x.Metadata.ContextType == "Send").ShouldBe(sentCount);
+            var expected = _harness.Sent.Select<A>().Any();
+            var expectedB = _harness.Sent.Select<B>().Any();
+            _store.Count(x => x.Metadata.ContextType == "Send").ShouldBe(2);
         }
 
         [Test]
         public async Task Should_audit_consumed_messages()
         {
-            var consumedCount = _harness.Consumed.Select().Count();
-            _store.Audit.Count(x => x.Metadata.ContextType == "Consume").ShouldBe(consumedCount);
+            bool expected = _harness.Consumed.Select<A>().Any();
+            bool expectedB = _harness.Consumed.Select<B>().Any();
+            _store.Count(x => x.Metadata.ContextType == "Consume").ShouldBe(2);
         }
 
 

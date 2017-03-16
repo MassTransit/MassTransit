@@ -14,6 +14,7 @@ namespace MassTransit.Util.Caching
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
 
 
     public class GreenCache<TValue> :
@@ -71,9 +72,9 @@ namespace MassTransit.Util.Caching
             _nodeTracker.Clear();
         }
 
-        public IEnumerable<INode<TValue>> GetAll()
+        public IEnumerable<TValue> GetAll()
         {
-            return _nodeTracker.GetAll();
+            return _nodeTracker.GetAll().Select(x => x.Value.Result);
         }
     }
 }

@@ -1,46 +1,79 @@
 ﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
+//  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
+// this file except in compliance with the License. You may obtain a copy of the 
+// License at 
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0 
+// 
 // Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Audit.Tests
+namespace MassTransit.Tests.Audit
 {
+    using System;
+    using System.Collections;
     using System.Collections.Generic;
     using System.Threading.Tasks;
-    using GreenPipes.Util;
+    using MassTransit.Audit;
+    using Util;
+    using Util.Caching;
 
 
-    public class InMemoryAuditStore : MessageAuditStore
+    public class InMemoryAuditStore :
+        IMessageAuditStore,
+        IEnumerable<InMemoryAuditStore.AuditRecord>
     {
-        internal List<AuditRecord> Audit = new List<AuditRecord>();
+        readonly ICache<AuditRecord> _audits;
+        readonly IIndex<Guid, AuditRecord> _messageId;
 
-        public Task StoreMessage(object message, string messageType, MessageAuditMetadata metadata)
+        public InMemoryAuditStore()
         {
-            Audit.Add(new AuditRecord(message, messageType, metadata));
+            _audits = new GreenCache<AuditRecord>(10000, TimeSpan.FromMinutes(1), TimeSpan.FromMinutes(60), () => DateTime.UtcNow);
+            _messageId = _audits.AddIndex("messageId", x => x.Metadata.MessageId.Value);
+        }
+
+        Task IMessageAuditStore.StoreMessage<T>(T message, MessageAuditMetadata metadata)
+        {
+            _audits.Add(new AuditRecord<T>(message, metadata));
+
             return TaskUtil.Completed;
         }
 
 
-        internal class AuditRecord
+        public interface AuditRecord
         {
-            public AuditRecord(object message, string messageType, MessageAuditMetadata metadata)
+            string MessageType { get; }
+            MessageAuditMetadata Metadata { get; }
+        }
+
+
+        public class AuditRecord<T> :
+            AuditRecord
+            where T : class
+        {
+            public AuditRecord(T message, MessageAuditMetadata metadata)
             {
                 Message = message;
-                MessageType = messageType;
+                MessageType = TypeMetadataCache<T>.ShortName;
                 Metadata = metadata;
             }
 
-            public object Message { get; }
+            public T Message { get; }
             public string MessageType { get; }
             public MessageAuditMetadata Metadata { get; }
         }
-    }
 
+
+        public IEnumerator<AuditRecord> GetEnumerator()
+        {
+            return _audits.GetAll().GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+    }
 }
