@@ -97,9 +97,22 @@
     <Compile Include="..\SolutionVersion.cs">
       <Link>Properties\SolutionVersion.cs</Link>
     </Compile>
+    <Compile Include="Configuration\Configurators\ConsumeMessageFilterSpecification.cs" />
+    <Compile Include="Configuration\Configurators\SendMessageFilterSpecification.cs" />
+    <Compile Include="Audit\Observers\AuditConsumeObserver.cs" />
+    <Compile Include="Audit\Observers\AuditPublishObserver.cs" />
+    <Compile Include="Audit\Observers\AuditSendObserver.cs" />
+    <Compile Include="Audit\MetadataFactories\DefaultConsumeMetadataFactory.cs" />
+    <Compile Include="Audit\MetadataFactories\DefaultSendMetadataFactory.cs" />
+    <Compile Include="Audit\IConsumeMetadataFactory.cs" />
+    <Compile Include="Audit\IMessageAuditStore.cs" />
+    <Compile Include="Configuration\IMessageFilterConfigurator.cs" />
+    <Compile Include="Audit\ISendMetadataFactory.cs" />
+    <Compile Include="Audit\MessageAuditMetadata.cs" />
     <Compile Include="BusControlExtensions.cs" />
     <Compile Include="BusReady.cs" />
     <Compile Include="CancelScheduledSendExtensions.cs" />
+    <Compile Include="Configuration\AuditConfigurationExtensions.cs" />
     <Compile Include="Configuration\Builders\CompensateActivityPipeBuilder.cs" />
     <Compile Include="Configuration\Builders\ConsumePipeBuilder.cs" />
     <Compile Include="Configuration\Builders\ExecuteActivityPipeBuilder.cs" />

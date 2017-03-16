@@ -12,6 +12,9 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Util.Caching
 {
+    using System.Collections.Generic;
+
+
     public interface ICache<TValue>
         where TValue : class
     {
@@ -39,6 +42,12 @@ namespace MassTransit.Util.Caching
         /// </summary>
         /// <param name="value">The value to add</param>
         void Add(TValue value);
+
+        /// <summary>
+        /// Returns all the values in the cache
+        /// </summary>
+        /// <returns></returns>
+        IEnumerable<TValue> GetAll();
 
         /// <summary>
         /// Forcibly clear the cache immediately (disposal of cached items may take some time, occurs asynchronously)

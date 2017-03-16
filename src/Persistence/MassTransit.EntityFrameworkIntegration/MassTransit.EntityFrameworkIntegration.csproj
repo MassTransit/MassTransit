@@ -56,11 +56,8 @@
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
-    <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
@@ -84,10 +81,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\MassTransit.Audit\MassTransit.Audit.csproj">
-      <Project>{AE85151C-C049-47B2-BD8B-9915A3103299}</Project>
-      <Name>MassTransit.Audit</Name>
-    </ProjectReference>
     <ProjectReference Include="..\..\MassTransit\MassTransit.csproj">
       <Project>{6efd69fc-cbcc-4f85-aee0-efba73f4d273}</Project>
       <Name>MassTransit</Name>

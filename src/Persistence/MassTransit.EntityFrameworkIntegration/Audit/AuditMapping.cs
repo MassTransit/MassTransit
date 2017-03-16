@@ -14,6 +14,7 @@ namespace MassTransit.EntityFrameworkIntegration
 {
     using System.ComponentModel.DataAnnotations.Schema;
     using System.Data.Entity.ModelConfiguration;
+    using Audit;
 
 
     public class AuditMapping : EntityTypeConfiguration<AuditRecord>
