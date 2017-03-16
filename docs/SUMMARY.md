@@ -68,6 +68,7 @@
     * [Rate limiter](advanced/middleware/rate-limiter.md)
     * [Latest](advanced/middleware/latest.md)
     * [Custom](advanced/middleware/custom.md)
+* [Audit](advanced/audit/README.md)
 * [Turnout](advanced/turnout/README.md)
 * [Versioning](advanced/versioning.md)
 * [Transactions](advanced/transactions.md)

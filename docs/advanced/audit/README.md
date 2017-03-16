@@ -31,10 +31,10 @@ Message metadata includes:
 * Response address (for request/response)
 * Fault address
 
-The audit feature is generic and requires an implementation for the `MessageAuditStore` interface.
+The audit feature is generic and requires an implementation for the `IMessageAuditStore` interface.
 This interface is very simple and has one method only:
 ```csharp
-Task StoreMessage(object message, string messageType, MessageAuditMetadata metadata);
+Task StoreMessage<T>(<T> message, MessageAuditMetadata metadata);
 ```
 
 Some audit store implementations are included out of the box and described below.
@@ -54,8 +54,8 @@ Configuring both looks like this:
 
 ```csharp
 var busControl = ConfigureBus(); // all usual configuration
-busControl.UseSendAudit(auditStore);
-busControl.UseConsumeAudit(auditStore);
+busControl.ConnectSendAuditObservers(auditStore);
+busControl.ConnectConsumeAuditObserver(auditStore);
 ```
 
 There, the `auditStore` is the audit persistent store. Currently available stores include:
@@ -73,9 +73,9 @@ In order not to save these messages to the audit store, you can filter them out.
 the observers to use message filters like this:
 
 ```csharp
-busControl.UseSendAudit(auditStore, 
+busControl.ConnectSendAuditObservers(auditStore, 
     c => c.Ignore<HealthCheck>());
-busControl.UseConsumeAudit(auditStore, 
+busControl.ConnectConsumeAuditObserver(auditStore, 
     c => c.Ignore(typeof(ServicePoll), typeof(RubbishEvent)));
 ```
 
@@ -85,35 +85,33 @@ By default, the audit logging feature uses its own, quite complete, metadata col
 However, you can implement your own metadata factories to collect more data or different data.
 
 There are two types of metadata factories:
-* `MessageAuditConsumeObserver.MetadataFactory` that gets the `ConsumeObserver`
-* `MessageAuditSendObserver.MetadataFactory` that gets the `SendObserver` (which is used for both send and publish)
+* `DefaultConsumeMetadataFactory` that gets the `ConsumeObserver`
+* `DefaultSendMetadataFactory` that gets the `SendObserver` (which is used for both send and publish)
 
-Factories are simple functions that return a new `MessageAuditMetadata` object from a given context.
-For example, the default consume audit metadata factory looks like this:
+Factories are simple classes that implement `IConsumeMetadataFactory` or `ISendMetadataFactory`
+interfaces and return a new `MessageAuditMetadata` object from a given context.
+For example, the default consume audit metadata factory implementation looks like this:
 
 ```csharp
-public static readonly MessageAuditConsumeObserver.MetadataFactory 
-    DefaultConsumeContextMetadataFactory =
-    c => new MessageAuditMetadata
-    {
-        ContextType = "Consume",
-        ConversationId = c.ConversationId,
-        CorrelationId = c.CorrelationId,
-        InitiatorId = c.InitiatorId,
-        MessageId = c.MessageId,
-        RequestId = c.RequestId,
-        DestinationAddress = c.DestinationAddress?.AbsoluteUri,
-        SourceAddress = c.SourceAddress?.AbsoluteUri,
-        FaultAddress = c.FaultAddress?.AbsoluteUri,
-        ResponseAddress = c.ResponseAddress?.AbsoluteUri,
-        Headers = c.Headers?.GetAll()?
-            .ToDictionary(k => k.Key, v => v.Value.ToString())
-    };
+return new MessageAuditMetadata
+{
+    ContextType = contextType,
+    ConversationId = context.ConversationId,
+    CorrelationId = context.CorrelationId,
+    InitiatorId = context.InitiatorId,
+    MessageId = context.MessageId,
+    RequestId = context.RequestId,
+    DestinationAddress = context.DestinationAddress?.AbsoluteUri,
+    SourceAddress = context.SourceAddress?.AbsoluteUri,
+    FaultAddress = context.FaultAddress?.AbsoluteUri,
+    ResponseAddress = context.ResponseAddress?.AbsoluteUri,
+    Headers = context.Headers?.GetAll()?.ToDictionary(k => k.Key, v => v.Value.ToString())
+};
 ```
 
 To use your own factory, you can use the third parameter when configuring the observers:
 
 ```csharp
-busControl.UseSendAudit(auditStore, filter, c => GetMyMetadataFromSendContext(c));
-busControl.UseConsumeAudit(auditStore, filter, c => GetMyMetadataFromConsumeContext(c));
+busControl.ConnectSendAuditObservers(auditStore, filter, new MySendContextMetadataFactory());
+busControl.ConnectConsumeAuditObserver(auditStore, filter, new MySendContextMetadataFactory());
 ```
