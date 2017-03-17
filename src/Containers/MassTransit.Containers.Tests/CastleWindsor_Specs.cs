@@ -139,7 +139,7 @@ namespace MassTransit.Containers.Tests
     public class Using_message_scope_with_two_consumers :
         InMemoryTestFixture
     {
-        [Test]
+        [Test, Explicit]
         public async Task Should_receive_a_message_in_scope()
         {
             const string name = "Joe";
@@ -166,7 +166,6 @@ namespace MassTransit.Containers.Tests
                 Component.For<FirstConsumer>(),
                 Component.For<SecondConsumer>(),
                 Component.For<IScopedDependency>()
-                    .UsingFactoryMethod(() => new Depedency(GetTask<string>(), GetTask<string>()))
                     .ImplementedBy<Depedency>()
                     .LifestyleScoped<MessageScope>());
         }
@@ -221,19 +220,19 @@ namespace MassTransit.Containers.Tests
         public class Depedency :
             IScopedDependency
         {
-            static readonly TaskCompletionSource<string> _completed;
-            readonly TaskCompletionSource<string> _first;
-            readonly TaskCompletionSource<string> _second;
+            static TaskCompletionSource<string> _completed;
+            TaskCompletionSource<string> _first;
+            TaskCompletionSource<string> _second;
 
             static Depedency()
             {
                 _completed = new TaskCompletionSource<string>();
             }
 
-            public Depedency(TaskCompletionSource<string> first, TaskCompletionSource<string> second)
+            public Depedency()
             {
-                _first = first;
-                _second = second;
+                _first = new TaskCompletionSource<string>();
+                _second = new TaskCompletionSource<string>();
             }
 
             public static Task<string> Completed => _completed.Task;
