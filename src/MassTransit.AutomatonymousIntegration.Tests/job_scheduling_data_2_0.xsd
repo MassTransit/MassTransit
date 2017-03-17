@@ -1,0 +1,361 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns="http://quartznet.sourceforge.net/JobSchedulingData"
+           targetNamespace="http://quartznet.sourceforge.net/JobSchedulingData"
+           elementFormDefault="qualified"
+           version="2.0">
+
+  <xs:element name="job-scheduling-data">
+    <xs:annotation>
+      <xs:documentation>Root level node</xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence maxOccurs="unbounded">
+        <xs:element name="pre-processing-commands" type="pre-processing-commandsType" minOccurs="0" maxOccurs="1">
+          <xs:annotation>
+            <xs:documentation>Commands to be executed before scheduling the jobs and triggers in this file.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="processing-directives" type="processing-directivesType" minOccurs="0" maxOccurs="1">
+          <xs:annotation>
+            <xs:documentation>Directives to be followed while scheduling the jobs and triggers in this file.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="schedule" minOccurs="0" maxOccurs="unbounded">
+          <xs:complexType>
+            <xs:sequence maxOccurs="unbounded">
+              <xs:element name="job" type="job-detailType" minOccurs="0" maxOccurs="unbounded" />
+              <xs:element name="trigger" type="triggerType" minOccurs="0" maxOccurs="unbounded" />
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+      <xs:attribute name="version" type="xs:string">
+        <xs:annotation>
+          <xs:documentation>Version of the XML Schema instance</xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:complexType name="pre-processing-commandsType">
+    <xs:sequence maxOccurs="unbounded">
+      <xs:element name="delete-jobs-in-group" type="xs:string" minOccurs="0" maxOccurs="unbounded">
+        <xs:annotation>
+          <xs:documentation>Delete all jobs, if any, in the identified group. "*" can be used to identify all groups. Will also result in deleting all triggers related to the jobs.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="delete-triggers-in-group" type="xs:string" minOccurs="0" maxOccurs="unbounded">
+        <xs:annotation>
+          <xs:documentation>Delete all triggers, if any, in the identified group. "*" can be used to identify all groups. Will also result in deletion of related jobs that are non-durable.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="delete-job" minOccurs="0" maxOccurs="unbounded">
+        <xs:annotation>
+          <xs:documentation>Delete the identified job if it exists (will also result in deleting all triggers related to it).</xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="name" type="xs:string" />
+            <xs:element name="group" type="xs:string" minOccurs="0" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="delete-trigger" minOccurs="0" maxOccurs="unbounded">
+        <xs:annotation>
+          <xs:documentation>Delete the identified trigger if it exists (will also result in deletion of related jobs that are non-durable).</xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="name" type="xs:string" />
+            <xs:element name="group" type="xs:string" minOccurs="0" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="processing-directivesType">
+    <xs:sequence>
+      <xs:element name="overwrite-existing-data" type="xs:boolean" minOccurs="0" default="true">
+        <xs:annotation>
+          <xs:documentation>Whether the existing scheduling data (with same identifiers) will be overwritten. If false, and ignore-duplicates is not false, and jobs or triggers with the same names already exist as those in the file, an error will occur.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="ignore-duplicates" type="xs:boolean" minOccurs="0" default="false">
+        <xs:annotation>
+          <xs:documentation>If true (and overwrite-existing-data is false) then any job/triggers encountered in this file that have names that already exist in the scheduler will be ignored, and no error will be produced.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="schedule-trigger-relative-to-replaced-trigger" type="xs:boolean" minOccurs="0" default="false">
+        <xs:annotation>
+          <xs:documentation>If true trigger's start time is calculated based on earlier run time instead of fixed value. Trigger's start time must be undefined for this to work.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="job-detailType">
+    <xs:annotation>
+      <xs:documentation>Define a JobDetail</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="name" type="xs:string" />
+      <xs:element name="group" type="xs:string" minOccurs="0" />
+      <xs:element name="description" type="xs:string" minOccurs="0" />
+      <xs:element name="job-type" type="xs:string" />
+      <xs:sequence minOccurs="0">
+        <xs:element name="durable" type="xs:boolean" />
+        <xs:element name="recover" type="xs:boolean" />
+      </xs:sequence>
+      <xs:element name="job-data-map" type="job-data-mapType" minOccurs="0" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="job-data-mapType">
+    <xs:annotation>
+      <xs:documentation>Define a JobDataMap</xs:documentation>
+    </xs:annotation>
+    <xs:sequence minOccurs="0" maxOccurs="unbounded">
+      <xs:element name="entry" type="entryType" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="entryType">
+    <xs:annotation>
+      <xs:documentation>Define a JobDataMap entry</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="key" type="xs:string" />
+      <xs:element name="value" type="xs:string" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="triggerType">
+    <xs:annotation>
+      <xs:documentation>Define a Trigger</xs:documentation>
+    </xs:annotation>
+    <xs:choice>
+      <xs:element name="simple" type="simpleTriggerType" />
+      <xs:element name="cron" type="cronTriggerType" />
+      <xs:element name="calendar-interval" type="calendarIntervalTriggerType" />
+    </xs:choice>
+  </xs:complexType>
+
+  <xs:complexType name="abstractTriggerType" abstract="true">
+    <xs:annotation>
+      <xs:documentation>Common Trigger definitions</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="name" type="xs:string" />
+      <xs:element name="group" type="xs:string" minOccurs="0" />
+      <xs:element name="description" type="xs:string" minOccurs="0" />
+      <xs:element name="job-name" type="xs:string" />
+      <xs:element name="job-group" type="xs:string" minOccurs="0" />
+      <xs:element name="priority" type="xs:nonNegativeInteger" minOccurs="0" />
+      <xs:element name="calendar-name" type="xs:string" minOccurs="0" />
+      <xs:element name="job-data-map" type="job-data-mapType" minOccurs="0" />
+      <xs:sequence minOccurs="0">
+        <xs:choice>
+          <xs:element name="start-time" type="xs:dateTime" />
+          <xs:element name="start-time-seconds-in-future" type="xs:nonNegativeInteger" />
+        </xs:choice>
+        <xs:element name="end-time" type="xs:dateTime" minOccurs="0" />
+      </xs:sequence>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="simpleTriggerType">
+    <xs:annotation>
+      <xs:documentation>Define a SimpleTrigger</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="abstractTriggerType">
+        <xs:sequence>
+          <xs:element name="misfire-instruction" type="simple-trigger-misfire-instructionType" minOccurs="0" />
+          <xs:sequence minOccurs="0">
+            <xs:element name="repeat-count" type="repeat-countType" />
+            <xs:element name="repeat-interval" type="xs:nonNegativeInteger" />
+          </xs:sequence>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="cronTriggerType">
+    <xs:annotation>
+      <xs:documentation>Define a CronTrigger</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="abstractTriggerType">
+        <xs:sequence>
+          <xs:element name="misfire-instruction" type="cron-trigger-misfire-instructionType" minOccurs="0" />
+          <xs:element name="cron-expression" type="cron-expressionType" />
+          <xs:element name="time-zone" type="xs:string" minOccurs="0" />
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="calendarIntervalTriggerType">
+    <xs:annotation>
+      <xs:documentation>Define a DateIntervalTrigger</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="abstractTriggerType">
+        <xs:sequence>
+          <xs:element name="misfire-instruction" type="date-interval-trigger-misfire-instructionType" minOccurs="0" />
+          <xs:element name="repeat-interval" type="xs:nonNegativeInteger" />
+          <xs:element name="repeat-interval-unit" type="interval-unitType" />
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:simpleType name="cron-expressionType">
+    <xs:annotation>
+      <xs:documentation>
+        Cron expression (see JavaDoc for examples)
+
+        Special thanks to Chris Thatcher (thatcher@butterfly.net) for the regular expression!
+
+        Regular expressions are not my strong point but I believe this is complete,
+        with the caveat that order for expressions like 3-0 is not legal but will pass,
+        and month and day names must be capitalized.
+        If you want to examine the correctness look for the [\s] to denote the
+        seperation of individual regular expressions. This is how I break them up visually
+        to examine them:
+
+        SECONDS:
+        (
+        ((([0-9]|[0-5][0-9])(-([0-9]|[0-5][0-9]))?,)*([0-9]|[0-5][0-9])(-([0-9]|[0-5][0-9]))?)
+        | (([\*]|[0-9]|[0-5][0-9])/([0-9]|[0-5][0-9]))
+        | ([\?])
+        | ([\*])
+        ) [\s]
+        MINUTES:
+        (
+        ((([0-9]|[0-5][0-9])(-([0-9]|[0-5][0-9]))?,)*([0-9]|[0-5][0-9])(-([0-9]|[0-5][0-9]))?)
+        | (([\*]|[0-9]|[0-5][0-9])/([0-9]|[0-5][0-9]))
+        | ([\?])
+        | ([\*])
+        ) [\s]
+        HOURS:
+        (
+        ((([0-9]|[0-1][0-9]|[2][0-3])(-([0-9]|[0-1][0-9]|[2][0-3]))?,)*([0-9]|[0-1][0-9]|[2][0-3])(-([0-9]|[0-1][0-9]|[2][0-3]))?)
+        | (([\*]|[0-9]|[0-1][0-9]|[2][0-3])/([0-9]|[0-1][0-9]|[2][0-3]))
+        | ([\?])
+        | ([\*])
+        ) [\s]
+        DAY OF MONTH:
+        (
+        ((([1-9]|[0][1-9]|[1-2][0-9]|[3][0-1])(-([1-9]|[0][1-9]|[1-2][0-9]|[3][0-1]))?,)*([1-9]|[0][1-9]|[1-2][0-9]|[3][0-1])(-([1-9]|[0][1-9]|[1-2][0-9]|[3][0-1]))?(C)?)
+        | (([1-9]|[0][1-9]|[1-2][0-9]|[3][0-1])/([1-9]|[0][1-9]|[1-2][0-9]|[3][0-1])(C)?)
+        | (L(-[0-9])?)
+        | (L(-[1-2][0-9])?)
+        | (L(-[3][0-1])?)
+        | (LW)
+        | ([1-9]W)
+        | ([1-3][0-9]W)
+        | ([\?])
+        | ([\*])
+        )[\s]
+        MONTH:
+        (
+        ((([1-9]|0[1-9]|1[0-2])(-([1-9]|0[1-9]|1[0-2]))?,)*([1-9]|0[1-9]|1[0-2])(-([1-9]|0[1-9]|1[0-2]))?)
+        | (([1-9]|0[1-9]|1[0-2])/([1-9]|0[1-9]|1[0-2]))
+        | (((JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)(-(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC))?,)*(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)(-(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC))?)
+        | ((JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)/(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC))
+        | ([\?])
+        | ([\*])
+        )[\s]
+        DAY OF WEEK:
+        (
+        (([1-7](-([1-7]))?,)*([1-7])(-([1-7]))?)
+        | ([1-7]/([1-7]))
+        | (((MON|TUE|WED|THU|FRI|SAT|SUN)(-(MON|TUE|WED|THU|FRI|SAT|SUN))?,)*(MON|TUE|WED|THU|FRI|SAT|SUN)(-(MON|TUE|WED|THU|FRI|SAT|SUN))?(C)?)
+        | ((MON|TUE|WED|THU|FRI|SAT|SUN)/(MON|TUE|WED|THU|FRI|SAT|SUN)(C)?)
+        | (([1-7]|(MON|TUE|WED|THU|FRI|SAT|SUN))(L|LW)?)
+        | (([1-7]|MON|TUE|WED|THU|FRI|SAT|SUN)#([1-7])?)
+        | ([\?])
+        | ([\*])
+        )
+        YEAR (OPTIONAL):
+        (
+        [\s]?
+        ([\*])?
+        | ((19[7-9][0-9])|(20[0-9][0-9]))?
+        | (((19[7-9][0-9])|(20[0-9][0-9]))/((19[7-9][0-9])|(20[0-9][0-9])))?
+        | ((((19[7-9][0-9])|(20[0-9][0-9]))(-((19[7-9][0-9])|(20[0-9][0-9])))?,)*((19[7-9][0-9])|(20[0-9][0-9]))(-((19[7-9][0-9])|(20[0-9][0-9])))?)?
+        )
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string">
+      <xs:pattern
+        value="(((([0-9]|[0-5][0-9])(-([0-9]|[0-5][0-9]))?,)*([0-9]|[0-5][0-9])(-([0-9]|[0-5][0-9]))?)|(([\*]|[0-9]|[0-5][0-9])/([0-9]|[0-5][0-9]))|([\?])|([\*]))[\s](((([0-9]|[0-5][0-9])(-([0-9]|[0-5][0-9]))?,)*([0-9]|[0-5][0-9])(-([0-9]|[0-5][0-9]))?)|(([\*]|[0-9]|[0-5][0-9])/([0-9]|[0-5][0-9]))|([\?])|([\*]))[\s](((([0-9]|[0-1][0-9]|[2][0-3])(-([0-9]|[0-1][0-9]|[2][0-3]))?,)*([0-9]|[0-1][0-9]|[2][0-3])(-([0-9]|[0-1][0-9]|[2][0-3]))?)|(([\*]|[0-9]|[0-1][0-9]|[2][0-3])/([0-9]|[0-1][0-9]|[2][0-3]))|([\?])|([\*]))[\s](((([1-9]|[0][1-9]|[1-2][0-9]|[3][0-1])(-([1-9]|[0][1-9]|[1-2][0-9]|[3][0-1]))?,)*([1-9]|[0][1-9]|[1-2][0-9]|[3][0-1])(-([1-9]|[0][1-9]|[1-2][0-9]|[3][0-1]))?(C)?)|(([1-9]|[0][1-9]|[1-2][0-9]|[3][0-1])/([1-9]|[0][1-9]|[1-2][0-9]|[3][0-1])(C)?)|(L(-[0-9])?)|(L(-[1-2][0-9])?)|(L(-[3][0-1])?)|(LW)|([1-9]W)|([1-3][0-9]W)|([\?])|([\*]))[\s](((([1-9]|0[1-9]|1[0-2])(-([1-9]|0[1-9]|1[0-2]))?,)*([1-9]|0[1-9]|1[0-2])(-([1-9]|0[1-9]|1[0-2]))?)|(([1-9]|0[1-9]|1[0-2])/([1-9]|0[1-9]|1[0-2]))|(((JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)(-(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC))?,)*(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)(-(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC))?)|((JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)/(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC))|([\?])|([\*]))[\s]((([1-7](-([1-7]))?,)*([1-7])(-([1-7]))?)|([1-7]/([1-7]))|(((MON|TUE|WED|THU|FRI|SAT|SUN)(-(MON|TUE|WED|THU|FRI|SAT|SUN))?,)*(MON|TUE|WED|THU|FRI|SAT|SUN)(-(MON|TUE|WED|THU|FRI|SAT|SUN))?(C)?)|((MON|TUE|WED|THU|FRI|SAT|SUN)/(MON|TUE|WED|THU|FRI|SAT|SUN)(C)?)|(([1-7]|(MON|TUE|WED|THU|FRI|SAT|SUN))?(L|LW)?)|(([1-7]|MON|TUE|WED|THU|FRI|SAT|SUN)#([1-7])?)|([\?])|([\*]))([\s]?(([\*])?|(19[7-9][0-9])|(20[0-9][0-9]))?| (((19[7-9][0-9])|(20[0-9][0-9]))/((19[7-9][0-9])|(20[0-9][0-9])))?| ((((19[7-9][0-9])|(20[0-9][0-9]))(-((19[7-9][0-9])|(20[0-9][0-9])))?,)*((19[7-9][0-9])|(20[0-9][0-9]))(-((19[7-9][0-9])|(20[0-9][0-9])))?)?)" />
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="repeat-countType">
+    <xs:annotation>
+      <xs:documentation>Number of times to repeat the Trigger (-1 for indefinite)</xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:integer">
+      <xs:minInclusive value="-1" />
+    </xs:restriction>
+  </xs:simpleType>
+
+
+  <xs:simpleType name="simple-trigger-misfire-instructionType">
+    <xs:annotation>
+      <xs:documentation>Simple Trigger Misfire Instructions</xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string">
+      <xs:pattern value="SmartPolicy" />
+      <xs:pattern value="RescheduleNextWithExistingCount" />
+      <xs:pattern value="RescheduleNextWithRemainingCount" />
+      <xs:pattern value="RescheduleNowWithExistingRepeatCount" />
+      <xs:pattern value="RescheduleNowWithRemainingRepeatCount" />
+      <xs:pattern value="FireNow" />
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="cron-trigger-misfire-instructionType">
+    <xs:annotation>
+      <xs:documentation>Cron Trigger Misfire Instructions</xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string">
+      <xs:pattern value="SmartPolicy" />
+      <xs:pattern value="DoNothing" />
+      <xs:pattern value="FireOnceNow" />
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="date-interval-trigger-misfire-instructionType">
+    <xs:annotation>
+      <xs:documentation>Date Interval Trigger Misfire Instructions</xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string">
+      <xs:pattern value="SmartPolicy" />
+      <xs:pattern value="DoNothing" />
+      <xs:pattern value="FireOnceNow" />
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="interval-unitType">
+    <xs:annotation>
+      <xs:documentation>Interval Units</xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string">
+      <xs:pattern value="Day" />
+      <xs:pattern value="Hour" />
+      <xs:pattern value="Minute" />
+      <xs:pattern value="Month" />
+      <xs:pattern value="Second" />
+      <xs:pattern value="Week" />
+      <xs:pattern value="Year" />
+    </xs:restriction>
+  </xs:simpleType>
+
+</xs:schema>
