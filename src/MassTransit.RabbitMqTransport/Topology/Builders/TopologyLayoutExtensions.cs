@@ -23,12 +23,12 @@ namespace MassTransit.RabbitMqTransport.Topology.Builders
         {
             foreach (var exchange in layout.Exchanges)
             {
-                _log.InfoFormat("ExchangeName: {0}, type: {1}, durable: {2}, auto-delete: {3}", exchange.Name, exchange.Type, exchange.Durable, exchange.AutoDelete);
+                _log.InfoFormat("ExchangeName: {0}, type: {1}, durable: {2}, auto-delete: {3}", exchange.ExchangeName, exchange.ExchangeType, exchange.Durable, exchange.AutoDelete);
             }
 
             foreach (var binding in layout.ExchangeBindings)
             {
-                _log.InfoFormat("ExchangeName Binding: source {0}, destination: {1}, routingKey: {2}", binding.Source.Name, binding.Destination.Name,
+                _log.InfoFormat("ExchangeName Binding: source {0}, destination: {1}, routingKey: {2}", binding.Source.ExchangeName, binding.Destination.ExchangeName,
                     binding.RoutingKey);
             }
         }

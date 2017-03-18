@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -10,31 +10,25 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.RabbitMqTransport.Builders
+namespace MassTransit.RabbitMqTransport.Topology.Conventions.RoutingKey
 {
     using System;
-    using Topology;
 
 
-    public class StaticRabbitMqPublishTopology<TMessage> 
+    public class DelegateRoutingKeyFormatter<TMessage> :
+        IMessageRoutingKeyFormatter<TMessage>
         where TMessage : class
     {
-        readonly Uri _address;
+        readonly Func<SendContext<TMessage>, string> _formatter;
 
-        public StaticRabbitMqPublishTopology(Uri address)
+        public DelegateRoutingKeyFormatter(Func<SendContext<TMessage>, string> formatter)
         {
-            _address = address;
+            _formatter = formatter;
         }
 
-        public bool TryGetPublishAddress(IRabbitMqHostTopology topology, TMessage message, out Uri address)
+        public string FormatRoutingKey(SendContext<TMessage> context)
         {
-            address = _address;
-            return true;
-        }
-
-        public void ApplyPublishTopology(RabbitMqSendContext<TMessage> context)
-        {
-            throw new NotImplementedException();
+            return _formatter(context) ?? "";
         }
     }
 }

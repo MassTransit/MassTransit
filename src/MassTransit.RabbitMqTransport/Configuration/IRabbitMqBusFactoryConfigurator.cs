@@ -20,7 +20,7 @@ namespace MassTransit.RabbitMqTransport
 
     public interface IRabbitMqBusFactoryConfigurator :
         IBusFactoryConfigurator,
-        IQueueConfigurator
+        IQueueEndpointConfigurator
     {
         /// <summary>
         /// Configure the send topology of the message type

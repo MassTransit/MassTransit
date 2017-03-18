@@ -118,10 +118,8 @@ namespace MassTransit.RabbitMqTransport
             bool exclusive = address.Query.GetValueFromQueryString("exclusive", isTemporary);
             bool autoDelete = address.Query.GetValueFromQueryString("autodelete", isTemporary);
 
-            ReceiveSettings settings = new RabbitMqReceiveSettings
+            ReceiveSettings settings = new RabbitMqReceiveSettings(name, ExchangeType.Fanout, durable, autoDelete)
             {
-                AutoDelete = autoDelete,
-                Durable = durable,
                 Exclusive = exclusive,
                 QueueName = name,
                 PrefetchCount = prefetch,

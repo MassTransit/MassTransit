@@ -12,55 +12,30 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RabbitMqTransport.Topology
 {
-    using System;
     using System.Collections.Generic;
+    using Configurators;
 
 
-    public abstract class RabbitMqEntitySettings
+    public static class RabbitMqEntityExtensions
     {
-        protected RabbitMqEntitySettings()
+        public static IEnumerable<string> GetQueryStringOptions(this ExchangeConfigurator exchange)
         {
-            Durable = true;
-            ExchangeType = RabbitMQ.Client.ExchangeType.Fanout;
-
-            ExchangeArguments = new Dictionary<string, object>();
-        }
-
-        protected RabbitMqEntitySettings(EntitySettings settings)
-        {
-            Durable = settings.Durable;
-            AutoDelete = settings.AutoDelete;
-
-            ExchangeArguments = new Dictionary<string, object>(settings.ExchangeArguments);
-        }
-
-        public bool Durable { get; set; }
-        public bool AutoDelete { get; set; }
-        public string ExchangeName { get; set; }
-        public string ExchangeType { get; set; }
-        public IDictionary<string, object> ExchangeArguments { get; }
-
-        public void SetExchangeArgument(string key, object value)
-        {
-            if (key == null)
-                throw new ArgumentNullException(nameof(key));
-
-            if (value == null)
-            {
-                ExchangeArguments.Remove(key);
-            }
-            else
-                ExchangeArguments[key] = value;
-        }
-
-        protected virtual IEnumerable<string> GetQueryStringOptions()
-        {
-            if (!Durable)
+            if (!exchange.Durable)
                 yield return "durable=false";
-            if (AutoDelete)
+            if (exchange.AutoDelete)
                 yield return "autodelete=true";
-            if (ExchangeType != RabbitMQ.Client.ExchangeType.Fanout)
-                yield return "type=" + ExchangeType;
+            if (exchange.ExchangeType != RabbitMQ.Client.ExchangeType.Fanout)
+                yield return "type=" + exchange.ExchangeType;
+        }
+
+        public static IEnumerable<string> GetQueryStringOptions(this QueueConfigurator exchange)
+        {
+            if (!exchange.Durable)
+                yield return "durable=false";
+            if (exchange.AutoDelete)
+                yield return "autodelete=true";
+            if (exchange.ExchangeType != RabbitMQ.Client.ExchangeType.Fanout)
+                yield return "type=" + exchange.ExchangeType;
         }
     }
 }

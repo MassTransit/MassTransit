@@ -89,7 +89,7 @@ namespace MassTransit.RabbitMqTransport.Transport
 
             var modelCache = new RabbitMqModelCache(_host);
 
-            var sendTransport = new RabbitMqSendTransport(modelCache, sendSettings, new ConfigureTopologyFilter<SendSettings>(sendSettings, topology));
+            var sendTransport = new RabbitMqSendTransport(modelCache, new ConfigureTopologyFilter<SendSettings>(sendSettings, topology), sendSettings.ExchangeName);
 
             var sendEndpoint = new SendEndpoint(sendTransport, _serializer, typeKey.Address, _sourceAddress, SendPipe.Empty);
 

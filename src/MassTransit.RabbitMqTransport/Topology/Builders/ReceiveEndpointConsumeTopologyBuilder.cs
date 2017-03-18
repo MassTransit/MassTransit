@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RabbitMqTransport.Topology.Builders
 {
+    using Entities;
     using MassTransit.Topology.Entities;
 
 
