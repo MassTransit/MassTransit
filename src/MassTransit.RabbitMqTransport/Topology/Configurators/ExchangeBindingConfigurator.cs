@@ -12,58 +12,35 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RabbitMqTransport.Topology.Configurators
 {
+    using System;
     using System.Collections.Generic;
 
 
     public class ExchangeBindingConfigurator :
-        ExchangeBinding,
-        IBindExchangeConfigurator
+        ExchangeConfigurator,
+        IExchangeBindingConfigurator
     {
-        readonly MessageExchange _source;
-
-        public ExchangeBindingConfigurator(MessageExchange source, string routingKey)
+        public ExchangeBindingConfigurator(string exchangeName, string exchangeType, bool durable, bool autoDelete, string routingKey)
+            : base(exchangeName, exchangeType, durable, autoDelete)
         {
-            _source = source;
             RoutingKey = routingKey;
 
-            Arguments = new Dictionary<string, object>();
-        }
-
-        public Exchange Source => _source;
-
-        public string RoutingKey { get; set; }
-
-        public IDictionary<string, object> Arguments { get; }
-
-        public bool Durable
-        {
-            set { _source.Durable = value; }
-        }
-
-        public bool AutoDelete
-        {
-            set { _source.AutoDelete = value; }
-        }
-
-        public string ExchangeType
-        {
-            set { _source.Type = value; }
-        }
-
-        public void SetExchangeArgument(string key, object value)
-        {
-            if (value != null)
-                _source.Arguments[key] = value;
-            else
-                _source.Arguments.Remove(key);
+            BindingArguments = new Dictionary<string, object>();
         }
 
         public void SetBindingArgument(string key, object value)
         {
-            if (value != null)
-                Arguments[key] = value;
+            if (key == null)
+                throw new ArgumentNullException(nameof(key));
+
+            if (value == null)
+                BindingArguments.Remove(key);
             else
-                Arguments.Remove(key);
+                BindingArguments[key] = value;
         }
+
+        public IDictionary<string, object> BindingArguments { get; }
+
+        public string RoutingKey { get; set; }
     }
 }

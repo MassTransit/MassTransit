@@ -15,7 +15,7 @@ namespace MassTransit
     using System;
     using RabbitMqTransport.Topology;
     using RabbitMqTransport.Topology.Conventions;
-    using Topology;
+    using RabbitMqTransport.Topology.Conventions.RoutingKey;
     using Topology.Configuration;
 
 

@@ -12,6 +12,9 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RabbitMqTransport
 {
+    using System;
+
+
     /// <summary>
     /// Configures an exchange for RabbitMQ
     /// </summary>
@@ -39,5 +42,12 @@ namespace MassTransit.RabbitMqTransport
         /// <param name="key">The argument key</param>
         /// <param name="value">The argument value</param>
         void SetExchangeArgument(string key, object value);
+
+        /// <summary>
+        /// Set the exchange argument to the TimeSpan (which is converted to milliseconds)
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="value"></param>
+        void SetExchangeArgument(string key, TimeSpan value);
     }
 }

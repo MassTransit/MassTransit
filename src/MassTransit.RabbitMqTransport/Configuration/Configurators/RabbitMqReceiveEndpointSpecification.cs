@@ -47,7 +47,7 @@ namespace MassTransit.RabbitMqTransport.Configurators
 
             _bindMessageExchanges = true;
 
-            _settings = new RabbitMqReceiveSettings
+            _settings = new RabbitMqReceiveSettings(queueName, configuration.ConsumeTopology.ExchangeTypeSelector.DefaultExchangeType, true, false)
             {
                 QueueName = queueName
             };
@@ -79,6 +79,11 @@ namespace MassTransit.RabbitMqTransport.Configurators
 
                 Changed("Durable");
             }
+        }
+
+        public string QueueName
+        {
+            set { _settings.QueueName = value; }
         }
 
         public bool Exclusive
@@ -141,7 +146,17 @@ namespace MassTransit.RabbitMqTransport.Configurators
             _settings.SetQueueArgument(key, value);
         }
 
+        public void SetQueueArgument(string key, TimeSpan value)
+        {
+            _settings.SetQueueArgument(key, value);
+        }
+
         public void SetExchangeArgument(string key, object value)
+        {
+            _settings.SetExchangeArgument(key, value);
+        }
+
+        public void SetExchangeArgument(string key, TimeSpan value)
         {
             _settings.SetExchangeArgument(key, value);
         }
@@ -171,7 +186,7 @@ namespace MassTransit.RabbitMqTransport.Configurators
             _configuration.ConsumeTopology.GetMessageTopology<T>().Bind();
         }
 
-        public void Bind(string exchangeName, Action<IBindExchangeConfigurator> callback)
+        public void Bind(string exchangeName, Action<IExchangeBindingConfigurator> callback)
         {
             if (exchangeName == null)
                 throw new ArgumentNullException(nameof(exchangeName));

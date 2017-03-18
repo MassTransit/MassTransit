@@ -34,7 +34,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         {
             base.ConfigureRabbitMqBusHost(configurator, host);
 
-            configurator.OverrideDefaultBusEndpointQueueName($"super-bus-{NewId.NextGuid().ToString("N")}");
+            configurator.OverrideDefaultBusEndpointQueueName($"super-bus-{NewId.NextGuid():N}");
         }
 
         protected override void ConfigureRabbitMqReceiveEndoint(IRabbitMqReceiveEndpointConfigurator configurator)

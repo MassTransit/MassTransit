@@ -45,7 +45,7 @@ namespace MassTransit.RabbitMqTransport.Transport
 
             var configureTopologyFilter = new ConfigureTopologyFilter<SendSettings>(sendSettings, topology);
 
-            return Task.FromResult<ISendTransport>(new RabbitMqSendTransport(modelCache, sendSettings, configureTopologyFilter));
+            return Task.FromResult<ISendTransport>(new RabbitMqSendTransport(modelCache, configureTopologyFilter, sendSettings.ExchangeName));
         }
     }
 }

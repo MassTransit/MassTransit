@@ -15,25 +15,22 @@ namespace MassTransit.RabbitMqTransport.Topology
     using System;
     using System.Collections.Generic;
     using System.Net;
+    using Configurators;
+    using Specifications;
 
 
     public class RabbitMqSendSettings :
-        RabbitMqEntitySettings,
-        SendSettings,
-        IExchangeConfigurator
+        ExchangeConfigurator,
+        SendSettings
     {
-        readonly IList<ExchangeBindingSettings> _exchangeBindings;
+        readonly IList<ExchangeBindingPublishTopologySpecification> _exchangeBindings;
         bool _bindToQueue;
         string _queueName;
 
         public RabbitMqSendSettings(string exchangeName, string exchangeType, bool durable, bool autoDelete)
+            : base(exchangeName, exchangeType, durable, autoDelete)
         {
-            ExchangeName = exchangeName;
-            ExchangeType = exchangeType;
-            Durable = durable;
-            AutoDelete = autoDelete;
-
-            _exchangeBindings = new List<ExchangeBindingSettings>();
+            _exchangeBindings = new List<ExchangeBindingPublishTopologySpecification>();
 
             QueueArguments = new Dictionary<string, object>();
         }
@@ -44,7 +41,7 @@ namespace MassTransit.RabbitMqTransport.Topology
 
         public IDictionary<string, object> QueueArguments { get; }
 
-        public IEnumerable<ExchangeBindingSettings> ExchangeBindings => _exchangeBindings;
+        public IEnumerable<IRabbitMqPublishTopologySpecification> PublishTopologySpecifications => _exchangeBindings;
 
         public Uri GetSendAddress(Uri hostAddress)
         {
@@ -65,11 +62,13 @@ namespace MassTransit.RabbitMqTransport.Topology
             _queueName = queueName;
         }
 
-        public void BindToExchange(string exchangeName)
+        public void BindToExchange(string exchangeName, Action<IExchangeBindingConfigurator> configure = null)
         {
-            var settings = this.GetExchangeBinding(exchangeName);
+            ExchangeBindingConfigurator configurator = new ExchangeBindingConfigurator(exchangeName, RabbitMQ.Client.ExchangeType.Fanout, Durable, AutoDelete, "");
 
-            _exchangeBindings.Add(settings);
+            configure?.Invoke(configurator);
+
+            _exchangeBindings.Add(new ExchangeBindingPublishTopologySpecification(configurator));
         }
 
         public void SetQueueArgument(string key, object value)
@@ -99,9 +98,9 @@ namespace MassTransit.RabbitMqTransport.Topology
             if (ExchangeArguments != null && ExchangeArguments.ContainsKey("x-delayed-type"))
                 yield return "delayedType=" + ExchangeArguments["x-delayed-type"];
 
-            foreach (var binding in ExchangeBindings)
+            foreach (var binding in _exchangeBindings)
             {
-                yield return $"bindexchange={binding.Exchange.ExchangeName}";
+                yield return $"bindexchange={binding.ExchangeName}";
             }
         }
 

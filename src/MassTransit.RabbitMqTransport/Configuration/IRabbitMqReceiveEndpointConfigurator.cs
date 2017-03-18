@@ -13,7 +13,6 @@
 namespace MassTransit.RabbitMqTransport
 {
     using System;
-    using Topology;
 
 
     /// <summary>
@@ -21,7 +20,7 @@ namespace MassTransit.RabbitMqTransport
     /// </summary>
     public interface IRabbitMqReceiveEndpointConfigurator :
         IReceiveEndpointConfigurator,
-        IQueueConfigurator
+        IQueueEndpointConfigurator
     {
         /// <summary>
         /// The host on which the endpoint is being configured
@@ -62,6 +61,6 @@ namespace MassTransit.RabbitMqTransport
         /// </summary>
         /// <param name="exchangeName">The exchange name</param>
         /// <param name="callback">Configure the exchange and binding</param>
-        void Bind(string exchangeName, Action<IBindExchangeConfigurator> callback);
+        void Bind(string exchangeName, Action<IExchangeBindingConfigurator> callback);
     }
 }

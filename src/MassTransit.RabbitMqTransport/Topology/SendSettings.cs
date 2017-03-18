@@ -30,14 +30,15 @@ namespace MassTransit.RabbitMqTransport.Topology
         string QueueName { get; }
 
         /// <summary>
+        /// The legacy exchange bindings, this needs to be upgraded asap
+        /// TODO: UPgrade
+        /// </summary>
+        IEnumerable<IRabbitMqPublishTopologySpecification> PublishTopologySpecifications { get; }
+
+        /// <summary>
         /// Arguments passed to QueueDeclare
         /// </summary>
         IDictionary<string, object> QueueArguments { get; }
-
-        /// <summary>
-        /// The exchange bindings for the send
-        /// </summary>
-        IEnumerable<ExchangeBindingSettings> ExchangeBindings { get; }
 
         /// <summary>
         /// Returns the send address for the settings

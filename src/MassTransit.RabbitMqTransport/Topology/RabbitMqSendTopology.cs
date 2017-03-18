@@ -95,12 +95,9 @@ namespace MassTransit.RabbitMqTransport.Topology
                 builder.QueueBind(builder.Exchange, queue, "", new Dictionary<string, object>());
             }
 
-            foreach (var exchangeBinding in settings.ExchangeBindings)
+            foreach (var specification in settings.PublishTopologySpecifications)
             {
-                var exchange = builder.ExchangeDeclare(exchangeBinding.Exchange.ExchangeName, exchangeBinding.Exchange.ExchangeType, exchangeBinding.Exchange.Durable,
-                    exchangeBinding.Exchange.AutoDelete, exchangeBinding.Exchange.Arguments);
-
-                builder.ExchangeBind(builder.Exchange, exchange, exchangeBinding.RoutingKey, exchangeBinding.Arguments);
+                specification.Apply(builder);
             }
 
             return builder.BuildTopologyLayout();

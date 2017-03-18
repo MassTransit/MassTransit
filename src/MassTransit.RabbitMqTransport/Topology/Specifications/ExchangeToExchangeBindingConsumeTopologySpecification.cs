@@ -38,12 +38,12 @@ namespace MassTransit.RabbitMqTransport.Topology.Specifications
         {
             var source = _binding.Source;
 
-            var sourceHandle = builder.ExchangeDeclare(source.Name, source.Type, source.Durable, source.AutoDelete, source.Arguments);
+            var sourceHandle = builder.ExchangeDeclare(source.ExchangeName, source.ExchangeType, source.Durable, source.AutoDelete, source.ExchangeArguments);
 
             var destination = _binding.Destination;
 
-            var destinationHandle = builder.ExchangeDeclare(destination.Name, destination.Type, destination.Durable, destination.AutoDelete,
-                destination.Arguments);
+            var destinationHandle = builder.ExchangeDeclare(destination.ExchangeName, destination.ExchangeType, destination.Durable, destination.AutoDelete,
+                destination.ExchangeArguments);
 
             var bindingHandle = builder.ExchangeBind(sourceHandle, destinationHandle, _binding.RoutingKey, _binding.Arguments);
         }

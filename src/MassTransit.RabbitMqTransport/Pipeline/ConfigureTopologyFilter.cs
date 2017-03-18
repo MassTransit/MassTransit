@@ -76,7 +76,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
                 _log.DebugFormat("Declare exchange ({0})", exchange);
             }
 
-            return context.ExchangeDeclare(exchange.Name, exchange.Type, exchange.Durable, exchange.AutoDelete, exchange.Arguments);
+            return context.ExchangeDeclare(exchange.ExchangeName, exchange.ExchangeType, exchange.Durable, exchange.AutoDelete, exchange.ExchangeArguments);
         }
 
         Task Declare(ModelContext context, Queue queue)
@@ -86,7 +86,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
                 _log.DebugFormat("Declare queue ({0})", queue);
             }
 
-            return context.QueueDeclare(queue.Name, queue.Durable, queue.Exclusive, queue.AutoDelete, queue.Arguments);
+            return context.QueueDeclare(queue.QueueName, queue.Durable, queue.Exclusive, queue.AutoDelete, queue.QueueArguments);
         }
 
         Task Bind(ModelContext context, ExchangeToExchangeBinding binding)
@@ -96,7 +96,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
                 _log.DebugFormat("Bind exchange to exchange ({0})", binding);
             }
 
-            return context.ExchangeBind(binding.Destination.Name, binding.Source.Name, binding.RoutingKey, binding.Arguments);
+            return context.ExchangeBind(binding.Destination.ExchangeName, binding.Source.ExchangeName, binding.RoutingKey, binding.Arguments);
         }
 
         Task Bind(ModelContext context, ExchangeToQueueBinding binding)
@@ -106,7 +106,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
                 _log.DebugFormat("Bind exchange to queue ({0})", binding);
             }
 
-            return context.QueueBind(binding.Destination.Name, binding.Source.Name, binding.RoutingKey, binding.Arguments);
+            return context.QueueBind(binding.Destination.QueueName, binding.Source.ExchangeName, binding.RoutingKey, binding.Arguments);
         }
 
 

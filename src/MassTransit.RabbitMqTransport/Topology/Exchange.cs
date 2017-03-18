@@ -23,12 +23,12 @@ namespace MassTransit.RabbitMqTransport.Topology
         /// <summary>
         /// The exchange name
         /// </summary>
-        string Name { get; }
+        string ExchangeName { get; }
 
         /// <summary>
         /// The exchange type
         /// </summary>
-        string Type { get; }
+        string ExchangeType { get; }
 
         /// <summary>
         /// True if the exchange should be durable, and survive a broker restart
@@ -43,6 +43,6 @@ namespace MassTransit.RabbitMqTransport.Topology
         /// <summary>
         /// Additional exchange arguments
         /// </summary>
-        IDictionary<string, object> Arguments { get; }
+        IDictionary<string, object> ExchangeArguments { get; }
     }
 }
