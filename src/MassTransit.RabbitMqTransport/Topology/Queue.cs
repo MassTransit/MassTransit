@@ -23,7 +23,7 @@ namespace MassTransit.RabbitMqTransport.Topology
         /// <summary>
         /// The queue name
         /// </summary>
-        string Name { get; }
+        string QueueName { get; }
 
         /// <summary>
         /// True if the queue should be durable, and survive a broker restart
@@ -43,6 +43,6 @@ namespace MassTransit.RabbitMqTransport.Topology
         /// <summary>
         /// Additional queue arguments
         /// </summary>
-        IDictionary<string, object> Arguments { get; }
+        IDictionary<string, object> QueueArguments { get; }
     }
 }

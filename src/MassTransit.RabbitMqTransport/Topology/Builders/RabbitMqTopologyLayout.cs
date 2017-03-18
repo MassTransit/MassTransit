@@ -41,12 +41,12 @@ namespace MassTransit.RabbitMqTransport.Topology.Builders
                 var exchangeScope = context.CreateScope("exchange");
                 exchangeScope.Set(new
                 {
-                    exchange.Name,
-                    exchange.Type,
+                    Name = exchange.ExchangeName,
+                    Type = exchange.ExchangeType,
                     exchange.Durable,
                     exchange.AutoDelete
                 });
-                foreach (KeyValuePair<string, object> argument in exchange.Arguments)
+                foreach (KeyValuePair<string, object> argument in exchange.ExchangeArguments)
                 {
                     var argumentScope = exchangeScope.CreateScope("argument");
                     argumentScope.Add("key", argument.Key);
@@ -59,12 +59,12 @@ namespace MassTransit.RabbitMqTransport.Topology.Builders
                 var exchangeScope = context.CreateScope("queue");
                 exchangeScope.Set(new
                 {
-                    queue.Name,
+                    Name = queue.QueueName,
                     queue.Durable,
                     queue.AutoDelete,
                     queue.Exclusive
                 });
-                foreach (KeyValuePair<string, object> argument in queue.Arguments)
+                foreach (KeyValuePair<string, object> argument in queue.QueueArguments)
                 {
                     var argumentScope = exchangeScope.CreateScope("argument");
                     argumentScope.Add("key", argument.Key);
@@ -77,8 +77,8 @@ namespace MassTransit.RabbitMqTransport.Topology.Builders
                 var exchangeScope = context.CreateScope("exchange-binding");
                 exchangeScope.Set(new
                 {
-                    Source = binding.Source.Name,
-                    Destination = binding.Destination.Name,
+                    Source = binding.Source.ExchangeName,
+                    Destination = binding.Destination.ExchangeName,
                     binding.RoutingKey
                 });
                 foreach (KeyValuePair<string, object> argument in binding.Arguments)
@@ -94,8 +94,8 @@ namespace MassTransit.RabbitMqTransport.Topology.Builders
                 var exchangeScope = context.CreateScope("queue-binding");
                 exchangeScope.Set(new
                 {
-                    Source = binding.Source.Name,
-                    Destination = binding.Destination.Name,
+                    Source = binding.Source.ExchangeName,
+                    Destination = binding.Destination.QueueName,
                     binding.RoutingKey
                 });
                 foreach (KeyValuePair<string, object> argument in binding.Arguments)

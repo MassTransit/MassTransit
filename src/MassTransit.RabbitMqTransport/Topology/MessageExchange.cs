@@ -20,18 +20,18 @@ namespace MassTransit.RabbitMqTransport.Topology
     {
         public MessageExchange(string name, string type, bool durable, bool autoDelete)
         {
-            Name = name;
-            Type = type;
+            ExchangeName = name;
+            ExchangeType = type;
             Durable = durable;
             AutoDelete = autoDelete;
 
-            Arguments = new Dictionary<string, object>();
+            ExchangeArguments = new Dictionary<string, object>();
         }
 
-        public string Name { get; set; }
-        public string Type { get; set; }
+        public string ExchangeName { get; set; }
+        public string ExchangeType { get; set; }
         public bool Durable { get; set; }
         public bool AutoDelete { get; set; }
-        public IDictionary<string, object> Arguments { get; }
+        public IDictionary<string, object> ExchangeArguments { get; }
     }
 }

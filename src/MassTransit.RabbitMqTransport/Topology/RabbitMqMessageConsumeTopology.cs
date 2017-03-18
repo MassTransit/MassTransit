@@ -59,7 +59,7 @@ namespace MassTransit.RabbitMqTransport.Topology
             }
         }
 
-        public void Bind(Action<IBindExchangeConfigurator> configure = null)
+        public void Bind(Action<IExchangeBindingConfigurator> configure = null)
         {
             if (!IsBindableMessageType)
             {
@@ -75,9 +75,7 @@ namespace MassTransit.RabbitMqTransport.Topology
             var autoDelete = temporary;
             var durable = !temporary;
 
-            var exchange = new MessageExchange(exchangeName, exchangeType, durable, autoDelete);
-
-            var binding = new ExchangeBindingConfigurator(exchange, "");
+            var binding = new ExchangeBindingConfigurator(exchangeName, exchangeType, durable, autoDelete, "");
 
             configure?.Invoke(binding);
 

@@ -10,7 +10,7 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.RabbitMqTransport.Topology.Builders
+namespace MassTransit.RabbitMqTransport.Topology.Entities
 {
     using System.Collections.Generic;
     using System.Linq;
@@ -46,8 +46,8 @@ namespace MassTransit.RabbitMqTransport.Topology.Builders
         {
             return string.Join(", ", new[]
             {
-                $"source: {Source.Name}",
-                $"destination: {Destination.Name}",
+                $"source: {Source.ExchangeName}",
+                $"destination: {Destination.QueueName}",
                 string.IsNullOrWhiteSpace(RoutingKey) ? "" : $"routing-key: {RoutingKey}",
                 string.Join(", ", Arguments.Select(x => $"{x.Key}: {x.Value}"))
             }.Where(x => !string.IsNullOrWhiteSpace(x)));

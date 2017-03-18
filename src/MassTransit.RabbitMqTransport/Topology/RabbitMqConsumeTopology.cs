@@ -53,16 +53,14 @@ namespace MassTransit.RabbitMqTransport.Topology
             ForEach<IRabbitMqMessageConsumeTopologyConfigurator>(x => x.Apply(builder));
         }
 
-        public void Bind(string exchangeName, Action<IBindExchangeConfigurator> configure = null)
+        public void Bind(string exchangeName, Action<IExchangeBindingConfigurator> configure = null)
         {
             var exchangeType = ExchangeTypeSelector.DefaultExchangeType;
 
             var autoDelete = false;
             var durable = true;
 
-            var exchange = new MessageExchange(exchangeName, exchangeType, durable, autoDelete);
-
-            var binding = new ExchangeBindingConfigurator(exchange, "");
+            var binding = new ExchangeBindingConfigurator(exchangeName, exchangeType, durable, autoDelete, "");
 
             configure?.Invoke(binding);
 

@@ -60,13 +60,13 @@ namespace MassTransit.RabbitMqTransport.Tests
 
             var interfaceName = _nameFormatter.GetMessageName(typeof(SecondInterface)).ToString();
 
-            Assert.That(topology.Exchanges.Any(x => x.Name == interfaceName), Is.True);
-            Assert.That(topology.ExchangeBindings.Any(x => x.Source.Name == interfaceName && x.Destination.Name == _inputQueueName), Is.True);
+            Assert.That(topology.Exchanges.Any(x => x.ExchangeName == interfaceName), Is.True);
+            Assert.That(topology.ExchangeBindings.Any(x => x.Source.ExchangeName == interfaceName && x.Destination.ExchangeName == _inputQueueName), Is.True);
 
             interfaceName = _nameFormatter.GetMessageName(typeof(FirstInterface)).ToString();
 
-            Assert.That(topology.Exchanges.Any(x => x.Name == interfaceName), Is.False);
-            Assert.That(topology.ExchangeBindings.Any(x => x.Source.Name == interfaceName && x.Destination.Name == _inputQueueName), Is.False);
+            Assert.That(topology.Exchanges.Any(x => x.ExchangeName == interfaceName), Is.False);
+            Assert.That(topology.ExchangeBindings.Any(x => x.Source.ExchangeName == interfaceName && x.Destination.ExchangeName == _inputQueueName), Is.False);
         }
 
         [Test]
@@ -81,8 +81,8 @@ namespace MassTransit.RabbitMqTransport.Tests
 
             var singleInterfaceName = _nameFormatter.GetMessageName(typeof(SingleInterface)).ToString();
 
-            Assert.That(topology.Exchanges.Any(x => x.Name == singleInterfaceName), Is.True);
-            Assert.That(topology.ExchangeBindings.Any(x => x.Source.Name == singleInterfaceName && x.Destination.Name == _inputQueueName), Is.True);
+            Assert.That(topology.Exchanges.Any(x => x.ExchangeName == singleInterfaceName), Is.True);
+            Assert.That(topology.ExchangeBindings.Any(x => x.Source.ExchangeName == singleInterfaceName && x.Destination.ExchangeName == _inputQueueName), Is.True);
         }
 
         [SetUp]
@@ -123,12 +123,12 @@ namespace MassTransit.RabbitMqTransport.Tests
             var singleInterfaceName = _nameFormatter.GetMessageName(typeof(FirstInterface)).ToString();
             var interfaceName = _nameFormatter.GetMessageName(typeof(SecondInterface)).ToString();
 
-            Assert.That(topology.Exchanges.Any(x => x.Name == interfaceName), Is.True);
+            Assert.That(topology.Exchanges.Any(x => x.ExchangeName == interfaceName), Is.True);
             Assert.That(topology.Exchanges.Length, Is.EqualTo(2));
             Assert.That(topology.ExchangeBindings.Length, Is.EqualTo(1));
-            Assert.That(topology.ExchangeBindings.Any(x => x.Source.Name == interfaceName && x.Destination.Name == singleInterfaceName), Is.True);
+            Assert.That(topology.ExchangeBindings.Any(x => x.Source.ExchangeName == interfaceName && x.Destination.ExchangeName == singleInterfaceName), Is.True);
 
-            Assert.That(topology.Exchanges.Any(x => x.Name == singleInterfaceName), Is.True);
+            Assert.That(topology.Exchanges.Any(x => x.ExchangeName == singleInterfaceName), Is.True);
         }
 
         [Test]
@@ -141,7 +141,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
             var singleInterfaceName = _nameFormatter.GetMessageName(typeof(SingleInterface)).ToString();
 
-            Assert.That(topology.Exchanges.Any(x => x.Name == singleInterfaceName), Is.True);
+            Assert.That(topology.Exchanges.Any(x => x.ExchangeName == singleInterfaceName), Is.True);
             Assert.That(topology.Exchanges.Length, Is.EqualTo(1));
             Assert.That(topology.ExchangeBindings.Length, Is.EqualTo(0));
         }
@@ -178,12 +178,12 @@ namespace MassTransit.RabbitMqTransport.Tests
             var singleInterfaceName = _nameFormatter.GetMessageName(typeof(FirstInterface)).ToString();
             var interfaceName = _nameFormatter.GetMessageName(typeof(SecondInterface)).ToString();
 
-            Assert.That(topology.Exchanges.Any(x => x.Name == interfaceName), Is.True);
+            Assert.That(topology.Exchanges.Any(x => x.ExchangeName == interfaceName), Is.True);
             Assert.That(topology.Exchanges.Length, Is.EqualTo(2));
             Assert.That(topology.ExchangeBindings.Length, Is.EqualTo(1));
-            Assert.That(topology.ExchangeBindings.Any(x => x.Source.Name == interfaceName && x.Destination.Name == singleInterfaceName), Is.True);
+            Assert.That(topology.ExchangeBindings.Any(x => x.Source.ExchangeName == interfaceName && x.Destination.ExchangeName == singleInterfaceName), Is.True);
 
-            Assert.That(topology.Exchanges.Any(x => x.Name == singleInterfaceName), Is.True);
+            Assert.That(topology.Exchanges.Any(x => x.ExchangeName == singleInterfaceName), Is.True);
         }
 
         [Test]
@@ -199,13 +199,13 @@ namespace MassTransit.RabbitMqTransport.Tests
             var secondInterfaceName = _nameFormatter.GetMessageName(typeof(SecondInterface)).ToString();
             var thirdInterfaceName = _nameFormatter.GetMessageName(typeof(ThirdInterface)).ToString();
 
-            Assert.That(topology.Exchanges.Any(x => x.Name == secondInterfaceName), Is.True);
+            Assert.That(topology.Exchanges.Any(x => x.ExchangeName == secondInterfaceName), Is.True);
             Assert.That(topology.Exchanges.Length, Is.EqualTo(3));
             Assert.That(topology.ExchangeBindings.Length, Is.EqualTo(2));
-            Assert.That(topology.ExchangeBindings.Any(x => x.Source.Name == secondInterfaceName && x.Destination.Name == firstInterfaceName), Is.True);
-            Assert.That(topology.ExchangeBindings.Any(x => x.Source.Name == thirdInterfaceName && x.Destination.Name == secondInterfaceName), Is.True);
+            Assert.That(topology.ExchangeBindings.Any(x => x.Source.ExchangeName == secondInterfaceName && x.Destination.ExchangeName == firstInterfaceName), Is.True);
+            Assert.That(topology.ExchangeBindings.Any(x => x.Source.ExchangeName == thirdInterfaceName && x.Destination.ExchangeName == secondInterfaceName), Is.True);
 
-            Assert.That(topology.Exchanges.Any(x => x.Name == firstInterfaceName), Is.True);
+            Assert.That(topology.Exchanges.Any(x => x.ExchangeName == firstInterfaceName), Is.True);
         }
 
         [Test]
@@ -219,7 +219,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
             var singleInterfaceName = _nameFormatter.GetMessageName(typeof(SingleInterface)).ToString();
 
-            Assert.That(topology.Exchanges.Any(x => x.Name == singleInterfaceName), Is.True);
+            Assert.That(topology.Exchanges.Any(x => x.ExchangeName == singleInterfaceName), Is.True);
             Assert.That(topology.Exchanges.Length, Is.EqualTo(1));
             Assert.That(topology.ExchangeBindings.Length, Is.EqualTo(0));
         }

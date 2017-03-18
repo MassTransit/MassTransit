@@ -15,7 +15,6 @@ namespace MassTransit.RabbitMqTransport.Contexts
     using System.Threading;
     using Context;
     using RabbitMQ.Client;
-    using Topology;
 
 
     public class BasicPublishRabbitMqSendContext<T> :
@@ -23,7 +22,7 @@ namespace MassTransit.RabbitMqTransport.Contexts
         RabbitMqSendContext<T>
         where T : class
     {
-        public BasicPublishRabbitMqSendContext(IBasicProperties basicProperties, T message, SendSettings sendSettings, CancellationToken cancellationToken)
+        public BasicPublishRabbitMqSendContext(IBasicProperties basicProperties, string exchange, T message, CancellationToken cancellationToken)
             : base(message, cancellationToken)
         {
             BasicProperties = basicProperties;
@@ -32,7 +31,7 @@ namespace MassTransit.RabbitMqTransport.Contexts
 
             RoutingKey = "";
 
-            Exchange = sendSettings.ExchangeName;
+            Exchange = exchange;
         }
 
         public bool Mandatory { get; set; }

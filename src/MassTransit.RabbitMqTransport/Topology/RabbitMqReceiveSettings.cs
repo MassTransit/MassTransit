@@ -13,89 +13,20 @@
 namespace MassTransit.RabbitMqTransport.Topology
 {
     using System;
-    using System.Collections.Generic;
+    using Configurators;
 
 
     public class RabbitMqReceiveSettings :
-        RabbitMqEntitySettings,
-        ReceiveSettings,
-        IQueueConfigurator,
-        IExchangeBindingConfigurator,
-        IBindExchangeConfigurator
+        QueueBindingConfigurator,
+        ReceiveSettings
     {
-        public RabbitMqReceiveSettings()
+        public RabbitMqReceiveSettings(string name, string type, bool durable, bool autoDelete)
+            : base(name,type,durable,autoDelete)
         {
-            QueueArguments = new Dictionary<string, object>();
-
             PrefetchCount = (ushort)Math.Min(Environment.ProcessorCount * 2, 16);
-
-            Exclusive = false;
-            RoutingKey = "";
-
-            QueueArguments = new Dictionary<string, object>();
-            BindingArguments = new Dictionary<string, object>();
         }
 
-        public RabbitMqReceiveSettings(ReceiveSettings settings)
-            : base(settings)
-        {
-            QueueName = settings.QueueName;
-            ExchangeName = settings.ExchangeName;
-            PrefetchCount = settings.PrefetchCount;
-            Durable = settings.Durable;
-            Exclusive = settings.Exclusive;
-            AutoDelete = settings.AutoDelete;
-            PurgeOnStartup = settings.PurgeOnStartup;
-            ExchangeType = settings.ExchangeType;
-            QueueArguments = new Dictionary<string, object>(settings.QueueArguments);
-            RoutingKey = settings.RoutingKey;
-            BindingArguments = new Dictionary<string, object>(settings.BindingArguments);
-        }
-
-        public void SetBindingArgument(string key, object value)
-        {
-            if (key == null)
-                throw new ArgumentNullException(nameof(key));
-
-            if (value == null)
-                BindingArguments.Remove(key);
-            else
-                BindingArguments[key] = value;
-        }
-
-        string IExchangeConfigurator.ExchangeType
-        {
-            set { ExchangeType = value; }
-        }
-
-        public void SetQueueArgument(string key, object value)
-        {
-            if (key == null)
-                throw new ArgumentNullException(nameof(key));
-
-            if (value == null)
-                QueueArguments.Remove(key);
-            else
-                QueueArguments[key] = value;
-        }
-
-        public bool Lazy
-        {
-            set { SetQueueArgument("x-queue-mode", value ? "lazy" : "default"); }
-        }
-
-        public void EnablePriority(byte maxPriority)
-        {
-            QueueArguments["x-max-priority"] = (int)maxPriority;
-        }
-
-        public string RoutingKey { get; set; }
-
-        public string QueueName { get; set; }
-        public bool Exclusive { get; set; }
         public ushort PrefetchCount { get; set; }
-        public IDictionary<string, object> QueueArguments { get; }
-        public IDictionary<string, object> BindingArguments { get; }
         public bool PurgeOnStartup { get; set; }
 
         public Uri GetInputAddress(Uri hostAddress)
@@ -109,17 +40,6 @@ namespace MassTransit.RabbitMqTransport.Topology
             builder.Query += string.Join("&", GetQueryStringOptions());
 
             return builder.Uri;
-        }
-
-        protected override IEnumerable<string> GetQueryStringOptions()
-        {
-            foreach (var option in base.GetQueryStringOptions())
-            {
-                yield return option;
-            }
-
-            if (Exclusive)
-                yield return "exclusive=true";
         }
     }
 }

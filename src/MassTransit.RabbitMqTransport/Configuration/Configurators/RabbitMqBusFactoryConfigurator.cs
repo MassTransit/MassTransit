@@ -40,14 +40,9 @@ namespace MassTransit.RabbitMqTransport.Configurators
 
             _hosts = new BusHostCollection<RabbitMqHost>();
 
-            _settings = new RabbitMqReceiveSettings
-            {
-                AutoDelete = true,
-                Durable = false
-            };
-
-            _settings.QueueArguments["x-expires"] = 60000;
-            _settings.ExchangeArguments["x-expires"] = 60000;
+            _settings = new RabbitMqReceiveSettings("ignore", "fanout", false, true);
+            _settings.SetQueueArgument("x-expires", TimeSpan.FromMinutes(1));
+            _settings.SetExchangeArgument("x-expires", TimeSpan.FromMinutes(1));
         }
 
         public IBusControl CreateBus()
@@ -80,6 +75,11 @@ namespace MassTransit.RabbitMqTransport.Configurators
             set { _settings.Durable = value; }
         }
 
+        public string QueueName
+        {
+            set { _settings.QueueName = value; }
+        }
+
         public bool Exclusive
         {
             set { _settings.Exclusive = value; }
@@ -110,7 +110,17 @@ namespace MassTransit.RabbitMqTransport.Configurators
             _settings.SetQueueArgument(key, value);
         }
 
+        public void SetQueueArgument(string key, TimeSpan value)
+        {
+            _settings.SetQueueArgument(key, value);
+        }
+
         public void SetExchangeArgument(string key, object value)
+        {
+            _settings.SetExchangeArgument(key, value);
+        }
+
+        public void SetExchangeArgument(string key, TimeSpan value)
         {
             _settings.SetExchangeArgument(key, value);
         }
@@ -147,6 +157,7 @@ namespace MassTransit.RabbitMqTransport.Configurators
 
         public void OverrideDefaultBusEndpointQueueName(string value)
         {
+            _settings.ExchangeName = value;
             _settings.QueueName = value;
         }
 
