@@ -1,5 +1,10 @@
     .. MassTransit documentation master file, created by sphinx-quickstart on Mon Jan 17 15:29:48 2011.
 
+# This page is *obsolete*. New documentation is located at 
+[http://masstransit-project.com/MassTransit](http://masstransit-project.com/MassTransit).
+## The latest version of this page can be found [here]
+(http://masstransit-project.com/MassTransit/).
+
 MassTransit
 ===========
 
