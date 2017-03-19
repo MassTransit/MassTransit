@@ -1,3 +1,8 @@
+# This page is *obsolete*. New documentation is located at 
+[http://masstransit-project.com/MassTransit](http://masstransit-project.com/MassTransit).
+## The latest version of this page can be found [here]
+(http://masstransit-project.com/MassTransit/introduction/how-to-install.html)
+
 How to install
 """"""""""""""
 
