@@ -155,9 +155,9 @@ To connect the observer, you already guessed it, use the `ConnectSendObserver` m
 
 ## Observing published messages
 
-In addition to send, publish is also observable. Because the semantics matter, absolutely. Published messages are
-also sent, so if you're observing both outbound message flows, you will get duplicates. Using the MessageId to link
-them up as it's unique for each message.
+In addition to send, publish is also observable. Because the semantics matter, absolutely. Using the MessageId to link
+them up as it's unique for each message. Remember that Publish and Send are two distinct operations so if you
+want to observe all messages that are leaving your service, you have to connect both Publish and Send observers.
 
 ```csharp
 public class PublishObserver : IPublishObserver
