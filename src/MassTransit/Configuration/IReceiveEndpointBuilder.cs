@@ -23,8 +23,6 @@ namespace MassTransit
     {
         IConsumePipe ConsumePipe { get; }
 
-        ISendTransportProvider SendTransportProvider { get; }
-
         IMessageDeserializer MessageDeserializer { get; }
 
         /// <summary>

@@ -16,7 +16,6 @@ namespace MassTransit.RabbitMqTransport.Transport
     using System.Threading.Tasks;
     using Integration;
     using Pipeline;
-    using Specifications;
     using Topology;
     using Transports;
 
@@ -25,23 +24,23 @@ namespace MassTransit.RabbitMqTransport.Transport
         ISendTransportProvider
     {
         readonly BusHostCollection<RabbitMqHost> _hosts;
-        readonly IRabbitMqEndpointConfiguration _configuration;
+        readonly IRabbitMqTopology _topology;
 
-        public RabbitMqSendTransportProvider(BusHostCollection<RabbitMqHost> hosts, IRabbitMqEndpointConfiguration configuration)
+        public RabbitMqSendTransportProvider(BusHostCollection<RabbitMqHost> hosts, IRabbitMqTopology topology)
         {
             _hosts = hosts;
-            _configuration = configuration;
+            _topology = topology;
         }
 
         public Task<ISendTransport> GetSendTransport(Uri address)
         {
             var host = _hosts.GetHost(address);
 
-            var sendSettings = _configuration.SendTopology.GetSendSettings(address);
+            var sendSettings = _topology.SendTopology.GetSendSettings(address);
 
-            var topology = _configuration.SendTopology.GetTopologyLayout(address);
+            var topology = _topology.SendTopology.GetTopologyLayout(address);
 
-            var modelCache = new RabbitMqModelCache(host);
+            var modelCache = new RabbitMqModelCache(host, _topology);
 
             var configureTopologyFilter = new ConfigureTopologyFilter<SendSettings>(sendSettings, topology);
 

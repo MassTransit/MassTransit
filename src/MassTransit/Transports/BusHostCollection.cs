@@ -40,6 +40,17 @@ namespace MassTransit.Transports
             }
         }
 
+        public IEnumerable<T> GetHosts<T>()
+            where T : class, IHost
+        {
+            foreach (var host in _hosts)
+            {
+                T result = host as T;
+                if (result != null)
+                    yield return result;
+            }
+        }
+
         IEnumerator IEnumerable.GetEnumerator()
         {
             return _hosts.GetEnumerator();

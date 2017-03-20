@@ -136,9 +136,14 @@ namespace MassTransit.RabbitMqTransport.Configurators
             _hosts.Add(host);
 
             if (_hosts.Count == 1 && string.IsNullOrWhiteSpace(_settings.QueueName))
-                _settings.QueueName = host.Settings.Topology.CreateTemporaryQueueName("bus-");
+                _settings.QueueName = _configuration.ConsumeTopology.CreateTemporaryQueueName("bus-");
 
             return host;
+        }
+
+        public string CreateTemporaryQueueName(string prefix)
+        {
+            return _configuration.ConsumeTopology.CreateTemporaryQueueName(prefix);
         }
 
         void IRabbitMqBusFactoryConfigurator.SendTopology<T>(Action<IRabbitMqMessageSendTopologyConfigurator<T>> configureTopology)

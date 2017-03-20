@@ -19,28 +19,13 @@ namespace MassTransit.RabbitMqTransport.Topology
     public interface IRabbitMqHostTopology :
         IHostTopology
     {
-        IExchangeTypeSelector ExchangeTypeSelector { get; }
-
-        /// <summary>
-        /// Throws if the entity name is invalid, either a queue or exchange name
-        /// </summary>
-        /// <param name="name">The name to validate</param>
-        void ThrowIfEntityNameInvalid(string name);
-
-        /// <summary>
-        /// Determines if the entity name specified is valid
-        /// </summary>
-        /// <param name="name"></param>
-        /// <returns></returns>
-        bool IsValidEntityName(string name);
-
         /// <summary>
         /// Returns the destination address for the specified exchange
         /// </summary>
         /// <param name="exchangeName"></param>
         /// <param name="configure">Callback to configure exchange settings</param>
         /// <returns></returns>
-        Uri GetDestinationAddress(string exchangeName, Action<RabbitMqTransport.IExchangeConfigurator> configure = null);
+        Uri GetDestinationAddress(string exchangeName, Action<IExchangeConfigurator> configure = null);
 
         /// <summary>
         /// Returns the destination address for the specified message type
@@ -48,7 +33,7 @@ namespace MassTransit.RabbitMqTransport.Topology
         /// <param name="messageType">The message type</param>
         /// <param name="configure">Callback to configure exchange settings</param>
         /// <returns></returns>
-        Uri GetDestinationAddress(Type messageType, Action<RabbitMqTransport.IExchangeConfigurator> configure = null);
+        Uri GetDestinationAddress(Type messageType, Action<IExchangeConfigurator> configure = null);
 
         /// <summary>
         /// Returns the settings for sending to the specified address. Will parse any arguments
@@ -58,17 +43,5 @@ namespace MassTransit.RabbitMqTransport.Topology
         /// <param name="address">The RabbitMQ endpoint address</param>
         /// <returns>The send settings for the address</returns>
         SendSettings GetSendSettings(Uri address);
-
-        /// <summary>
-        /// Returns the settings for sending the specified message type. 
-        /// </summary>
-        /// <param name="messageType">The message type</param>
-        /// <param name="configure"></param>
-        /// <returns>The send settings for the address</returns>
-        SendSettings GetSendSettings(Type messageType, Action<RabbitMqTransport.IExchangeConfigurator> configure = null);
-
-        Uri GetDeadLetterAddress(ReceiveSettings settings);
-
-        Uri GetErrorAddress(ReceiveSettings settings);
     }
 }

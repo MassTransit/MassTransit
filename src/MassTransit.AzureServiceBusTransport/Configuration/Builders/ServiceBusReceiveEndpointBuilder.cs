@@ -20,6 +20,7 @@ namespace MassTransit.AzureServiceBusTransport.Builders
     using Topology;
     using Topology.Builders;
     using Transport;
+    using Transports;
 
 
     public class ServiceBusReceiveEndpointBuilder :
@@ -29,14 +30,16 @@ namespace MassTransit.AzureServiceBusTransport.Builders
         readonly IServiceBusHost _host;
         readonly bool _subscribeMessageTopics;
         readonly IServiceBusEndpointConfiguration _configuration;
+        BusHostCollection<ServiceBusHost> _hosts;
 
-        public ServiceBusReceiveEndpointBuilder(IBusBuilder busBuilder, IServiceBusHost host, bool subscribeMessageTopics,
+        public ServiceBusReceiveEndpointBuilder(IBusBuilder busBuilder, IServiceBusHost host, BusHostCollection<ServiceBusHost> hosts, bool subscribeMessageTopics,
             IServiceBusEndpointConfiguration configuration)
             : base(busBuilder, configuration)
         {
             _subscribeMessageTopics = subscribeMessageTopics;
             _configuration = configuration;
             _host = host;
+            _hosts = hosts;
         }
 
         public override ConnectHandle ConnectConsumePipe<T>(IPipe<ConsumeContext<T>> pipe)
@@ -61,7 +64,7 @@ namespace MassTransit.AzureServiceBusTransport.Builders
         {
             var topologyLayout = BuildTopology(settings);
 
-            return new ServiceBusReceiveEndpointTopology(_configuration, inputAddress, MessageSerializer, SendTransportProvider, _host, topologyLayout);
+            return new ServiceBusReceiveEndpointTopology(_configuration, inputAddress, MessageSerializer, _host, _hosts, topologyLayout);
         }
 
         TopologyLayout BuildTopology(ReceiveSettings settings)

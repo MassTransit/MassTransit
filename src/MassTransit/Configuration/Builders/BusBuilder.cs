@@ -28,7 +28,6 @@ namespace MassTransit.Builders
         readonly BusObservable _busObservable;
         readonly IBusHostCollection _hosts;
         readonly Lazy<Uri> _inputAddress;
-        readonly Lazy<ISendTransportProvider> _sendTransportProvider;
         readonly SerializerBuilder _serializerBuilder;
         readonly IEndpointConfiguration _configuration;
         readonly IConsumePipe _consumePipe;
@@ -41,7 +40,6 @@ namespace MassTransit.Builders
             _serializerBuilder = new SerializerBuilder();
 
             _busObservable = new BusObservable();
-            _sendTransportProvider = new Lazy<ISendTransportProvider>(CreateSendTransportProvider);
 
             _inputAddress = new Lazy<Uri>(GetInputAddress);
 
@@ -54,8 +52,6 @@ namespace MassTransit.Builders
 
         public abstract ISendEndpointProvider SendEndpointProvider { get; }
         public abstract IPublishEndpointProvider PublishEndpointProvider { get; }
-
-        public ISendTransportProvider SendTransportProvider => _sendTransportProvider.Value;
 
         public void AddMessageDeserializer(ContentType contentType, DeserializerFactory deserializerFactory)
         {
@@ -117,7 +113,5 @@ namespace MassTransit.Builders
         protected virtual void PreBuild()
         {
         }
-
-        protected abstract ISendTransportProvider CreateSendTransportProvider();
     }
 }

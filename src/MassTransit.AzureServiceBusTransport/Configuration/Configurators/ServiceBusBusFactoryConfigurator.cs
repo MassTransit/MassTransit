@@ -138,7 +138,7 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
 
             var endpointTopologySpecification = _configuration.CreateConfiguration();
 
-            var specification = new ServiceBusReceiveEndpointSpecification(serviceBusHost, queueName, endpointTopologySpecification);
+            var specification = new ServiceBusReceiveEndpointSpecification(serviceBusHost, _hosts, queueName, endpointTopologySpecification);
 
             specification.ConnectConsumerConfigurationObserver(this);
             specification.ConnectSagaConfigurationObserver(this);
@@ -159,7 +159,7 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
         {
             var endpointTopologySpecification = _configuration.CreateConfiguration();
 
-            var specification = new ServiceBusSubscriptionEndpointSpecification(host, subscriptionName, topicName, endpointTopologySpecification);
+            var specification = new ServiceBusSubscriptionEndpointSpecification(host, _hosts, subscriptionName, topicName, endpointTopologySpecification);
 
             specification.ConnectConsumerConfigurationObserver(this);
             specification.ConnectSagaConfigurationObserver(this);

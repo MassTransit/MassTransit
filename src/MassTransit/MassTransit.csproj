@@ -975,7 +975,6 @@
     <Compile Include="Topology\MessageEntityNameFormatter.cs" />
     <Compile Include="Topology\MessagePublishTopology.cs" />
     <Compile Include="Topology\Entities\NamedEntityCollection.cs" />
-    <Compile Include="Topology\ReceiveEndpointTopology.cs" />
     <Compile Include="Topology\Specifications\MessagePublishTopologyPipeSpecification.cs" />
     <Compile Include="Topology\MessageSendTopology.cs" />
     <Compile Include="Topology\GlobalMessageTopology.cs" />

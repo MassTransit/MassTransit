@@ -57,6 +57,8 @@ namespace MassTransit.EndpointSpecifications
         }
 
         public Uri InputAddress => _inputAddress.Value;
+        public Uri DeadLetterAddress => _deadLetterAddress.Value;
+        public Uri ErrorAddress => _errorAddress.Value;
 
         public void AddPipeSpecification(IPipeSpecification<ConsumeContext> specification)
         {
@@ -146,10 +148,8 @@ namespace MassTransit.EndpointSpecifications
             foreach (var specification in _specifications)
                 specification.Configure(builder);
 
-            AddDeadLetterFilter(builder);
-
-            AddRescueFilter(builder);
-
+            _receiveConfigurator.UseDeadLetterQueue(Pipe.New<ReceiveContext>(x => x.UseFilter(new MoveToTransportFilter(DeadLetterAddress, "dead-letter"))));
+            _receiveConfigurator.UseRescue(Pipe.New<ExceptionReceiveContext>(x => x.UseFilter(new MoveExceptionToTransportFilter(ErrorAddress))));
             _receiveConfigurator.UseFilter(new DeserializeFilter(builder.MessageDeserializer, builder.ConsumePipe));
 
             IPipe<ReceiveContext> receivePipe = _receiveConfigurator.Build();
@@ -157,29 +157,6 @@ namespace MassTransit.EndpointSpecifications
             return new ReceivePipe(receivePipe, builder.ConsumePipe);
         }
 
-        void AddDeadLetterFilter(IReceiveEndpointBuilder builder)
-        {
-            IPipe<ReceiveContext> moveToDeadLetterPipe = Pipe.New<ReceiveContext>(x =>
-            {
-                Func<Task<ISendTransport>> getDeadLetterTransport = () => builder.SendTransportProvider.GetSendTransport(_deadLetterAddress.Value);
-
-                x.UseFilter(new MoveToTransportFilter(_deadLetterAddress.Value, getDeadLetterTransport, "dead-letter"));
-            });
-
-            _receiveConfigurator.UseDeadLetterQueue(moveToDeadLetterPipe);
-        }
-
-        void AddRescueFilter(IReceiveEndpointBuilder builder)
-        {
-            IPipe<ExceptionReceiveContext> moveToErrorPipe = Pipe.New<ExceptionReceiveContext>(x =>
-            {
-                Func<Task<ISendTransport>> getErrorTransport = () => builder.SendTransportProvider.GetSendTransport(_errorAddress.Value);
-
-                x.UseFilter(new MoveExceptionToTransportFilter(_errorAddress.Value, getErrorTransport));
-            });
-
-            _receiveConfigurator.UseRescue(moveToErrorPipe);
-        }
 
         protected virtual void Changed(string key)
         {

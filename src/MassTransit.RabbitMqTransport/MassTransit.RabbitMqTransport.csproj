@@ -198,6 +198,7 @@
     <Compile Include="Topology\IRabbitMqSendTopology.cs" />
     <Compile Include="Topology\IRabbitMqSendTopologyConfigurator.cs" />
     <Compile Include="Topology\IRabbitMqHostTopology.cs" />
+    <Compile Include="Topology\IRabbitMqTopology.cs" />
     <Compile Include="Topology\IRabbitMqTopologyBuilder.cs" />
     <Compile Include="Topology\IRoutingKeyFormatter.cs" />
     <Compile Include="Topology\MessageExchange.cs" />
@@ -240,7 +241,6 @@
     <Compile Include="Transport\RabbitMqSendTransport.cs" />
     <Compile Include="SchedulePublishExtensions.cs" />
     <Compile Include="Scheduling\DelayedExchangeMessageScheduler.cs" />
-    <Compile Include="Topology\RabbitMqEntitySettings.cs" />
     <Compile Include="Topology\ExchangeBindingSettings.cs" />
     <Compile Include="Topology\ExchangeSettings.cs" />
     <Compile Include="Topology\RabbitMqExchangeBindingExtensions.cs" />

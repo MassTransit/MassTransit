@@ -16,19 +16,19 @@ namespace MassTransit.Transports.InMemory
     using Builders;
     using Configuration;
     using Configurators;
-    using EndpointSpecifications;
-    using MassTransit.Builders;
 
 
     public class InMemoryReceiveEndpointFactory :
         IInMemoryReceiveEndpointFactory
     {
         readonly InMemoryBusBuilder _builder;
+        readonly ISendTransportProvider _sendTransportProvider;
         readonly IInMemoryEndpointConfiguration _configuration;
 
-        public InMemoryReceiveEndpointFactory(InMemoryBusBuilder builder, IInMemoryEndpointConfiguration configuration)
+        public InMemoryReceiveEndpointFactory(InMemoryBusBuilder builder, ISendTransportProvider sendTransportProvider, IInMemoryEndpointConfiguration configuration)
         {
             _builder = builder;
+            _sendTransportProvider = sendTransportProvider;
             _configuration = configuration;
         }
 
@@ -36,7 +36,7 @@ namespace MassTransit.Transports.InMemory
         {
             var endpointSpecification = _configuration.CreateConfiguration();
 
-            var specification = new InMemoryReceiveEndpointSpecification(_builder.InMemoryHost.Address, queueName, endpointSpecification);
+            var specification = new InMemoryReceiveEndpointSpecification(_builder.InMemoryHost.Address, queueName, _sendTransportProvider, endpointSpecification);
 
             configure?.Invoke(specification);
 

@@ -67,8 +67,10 @@ namespace MassTransit.Context
         protected abstract IHeaderProvider HeaderProvider { get; }
         public bool IsDelivered { get; private set; }
         public bool IsFaulted { get; private set; }
+
         public ISendEndpointProvider SendEndpointProvider => Topology.SendEndpointProvider;
         public IPublishEndpointProvider PublishEndpointProvider => Topology.PublishEndpointProvider;
+        public ISendTransportProvider SendTransportProvider => Topology.SendTransportProvider;
         public IReceiveEndpointTopology Topology { get; }
 
         public Task CompleteTask
