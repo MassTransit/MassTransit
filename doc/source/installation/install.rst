@@ -1,14 +1,14 @@
-This page is obsolete 
----------------------
+How to install
+""""""""""""""
 
-**New documentation is located at** http://masstransit-project.com/MassTransit
+.. attention:: This page is obsolete 
+
+   New documentation is located at http://masstransit-project.com/MassTransit
 
 **The latest version of this page can be found** here_
 
 .. _here: http://masstransit-project.com/MassTransit/introduction/how-to-install.html
 
-How to install
-""""""""""""""
 
 NuGet
 '''''

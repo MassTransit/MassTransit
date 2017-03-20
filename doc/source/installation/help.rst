@@ -1,14 +1,13 @@
-This page is obsolete 
----------------------
+Getting Help
+============
 
-**New documentation is located at** http://masstransit-project.com/MassTransit
+.. attention:: This page is obsolete 
+
+   New documentation is located at http://masstransit-project.com/MassTransit
 
 **The latest version of this page can be found** here_
 
 .. _here: http://masstransit-project.com/MassTransit/introduction/getting-help.html
-
-Getting Help
-============
 
 Writing distributed applications is hard, and sometimes you need help. There are several ways to get in
 touch with the developers behind MassTransit. In most cases, you can expect a response within a few days,
