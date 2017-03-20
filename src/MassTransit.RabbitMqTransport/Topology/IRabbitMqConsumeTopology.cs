@@ -36,5 +36,7 @@ namespace MassTransit.RabbitMqTransport.Topology
         /// <param name="exchangeName"></param>
         /// <param name="configure"></param>
         void Bind(string exchangeName, Action<IExchangeBindingConfigurator> configure = null);
+
+        string CreateTemporaryQueueName(string prefix);
     }
 }

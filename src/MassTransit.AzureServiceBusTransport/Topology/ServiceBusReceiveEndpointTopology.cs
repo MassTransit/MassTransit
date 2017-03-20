@@ -18,30 +18,30 @@ namespace MassTransit.AzureServiceBusTransport.Topology
     using Specifications;
     using Transport;
     using Transports;
-    using Transports.InMemory.Topology;
 
 
     public class ServiceBusReceiveEndpointTopology :
         IServiceBusReceiveEndpointTopology
     {
         readonly IServiceBusHost _host;
+        readonly BusHostCollection<ServiceBusHost> _hosts;
         readonly IServiceBusPublishTopology _publish;
         readonly Lazy<IPublishEndpointProvider> _publishEndpointProvider;
         readonly IPublishPipe _publishPipe;
         readonly IServiceBusSendTopology _send;
         readonly Lazy<ISendEndpointProvider> _sendEndpointProvider;
         readonly ISendPipe _sendPipe;
-        readonly ISendTransportProvider _sendTransportProvider;
+        readonly Lazy<ISendTransportProvider> _sendTransportProvider;
         readonly IMessageSerializer _serializer;
         readonly TopologyLayout _topologyLayout;
 
         public ServiceBusReceiveEndpointTopology(IServiceBusEndpointConfiguration configuration, Uri inputAddress, IMessageSerializer serializer,
-            ISendTransportProvider sendTransportProvider, IServiceBusHost host, TopologyLayout topologyLayout)
+            IServiceBusHost host, BusHostCollection<ServiceBusHost> hosts, TopologyLayout topologyLayout)
         {
             InputAddress = inputAddress;
             _serializer = serializer;
-            _sendTransportProvider = sendTransportProvider;
             _host = host;
+            _hosts = hosts;
             _topologyLayout = topologyLayout;
 
             _send = configuration.SendTopology;
@@ -52,6 +52,7 @@ namespace MassTransit.AzureServiceBusTransport.Topology
 
             _sendEndpointProvider = new Lazy<ISendEndpointProvider>(CreateSendEndpointProvider);
             _publishEndpointProvider = new Lazy<IPublishEndpointProvider>(CreatePublishEndpointProvider);
+            _sendTransportProvider = new Lazy<ISendTransportProvider>(CreateSendTransportProvider);
         }
 
         public TopologyLayout TopologyLayout => _topologyLayout;
@@ -59,12 +60,19 @@ namespace MassTransit.AzureServiceBusTransport.Topology
         public Uri InputAddress { get; }
         public ISendTopology Send => _send;
         public IPublishTopology Publish => _publish;
-        public ISendEndpointProvider SendEndpointProvider => _sendEndpointProvider.Value;
-        public IPublishEndpointProvider PublishEndpointProvider => _publishEndpointProvider.Value;
+
+        ISendEndpointProvider IReceiveEndpointTopology.SendEndpointProvider => _sendEndpointProvider.Value;
+        IPublishEndpointProvider IReceiveEndpointTopology.PublishEndpointProvider => _publishEndpointProvider.Value;
+        ISendTransportProvider IReceiveEndpointTopology.SendTransportProvider => _sendTransportProvider.Value;
+
+        ISendTransportProvider CreateSendTransportProvider()
+        {
+            return new ServiceBusSendTransportProvider(_hosts);
+        }
 
         ISendEndpointProvider CreateSendEndpointProvider()
         {
-            var provider = new ServiceBusSendEndpointProvider(_serializer, InputAddress, _sendTransportProvider, _sendPipe);
+            var provider = new ServiceBusSendEndpointProvider(_serializer, InputAddress, _sendTransportProvider.Value, _sendPipe);
 
             return new SendEndpointCache(provider);
         }

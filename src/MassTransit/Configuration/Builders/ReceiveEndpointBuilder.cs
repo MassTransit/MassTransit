@@ -20,14 +20,12 @@ namespace MassTransit.Builders
 
     public abstract class ReceiveEndpointBuilder
     {
-        readonly IBusBuilder _builder;
         readonly IConsumePipe _consumePipe;
         readonly SerializerBuilder _serializerBuilder;
         readonly IEndpointConfiguration _configuration;
 
         protected ReceiveEndpointBuilder(IBusBuilder builder, IEndpointConfiguration configuration)
         {
-            _builder = builder;
             _configuration = configuration;
 
             _consumePipe = configuration.CreateConsumePipe();
@@ -38,8 +36,6 @@ namespace MassTransit.Builders
         public IConsumePipe ConsumePipe => _consumePipe;
         public IMessageSerializer MessageSerializer => _serializerBuilder.Serializer;
         public IMessageDeserializer MessageDeserializer => _serializerBuilder.Deserializer;
-
-        public ISendTransportProvider SendTransportProvider => _builder.SendTransportProvider;
 
         public void SetMessageSerializer(SerializerFactory serializerFactory)
         {

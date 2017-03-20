@@ -21,6 +21,7 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
     using Settings;
     using Specifications;
     using Transport;
+    using Transports;
 
 
     public class ServiceBusSubscriptionEndpointSpecification :
@@ -30,15 +31,14 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
         readonly SubscriptionEndpointSettings _settings;
         readonly IServiceBusEndpointConfiguration _configuration;
 
-        public ServiceBusSubscriptionEndpointSpecification(IServiceBusHost host, string subscriptionName, string topicName,
+        public ServiceBusSubscriptionEndpointSpecification(IServiceBusHost host,BusHostCollection<ServiceBusHost> hosts, string subscriptionName, string topicName,
             IServiceBusEndpointConfiguration configuration)
-            : this(host, new SubscriptionEndpointSettings(topicName, subscriptionName), configuration)
+            : this(host, hosts, new SubscriptionEndpointSettings(topicName, subscriptionName), configuration)
         {
         }
 
-        public ServiceBusSubscriptionEndpointSpecification(IServiceBusHost host, SubscriptionEndpointSettings settings,
-            IServiceBusEndpointConfiguration configuration)
-            : base(host, settings, configuration)
+        public ServiceBusSubscriptionEndpointSpecification(IServiceBusHost host, BusHostCollection<ServiceBusHost> hosts, SubscriptionEndpointSettings settings, IServiceBusEndpointConfiguration configuration)
+            : base(host, hosts, settings, configuration)
         {
             _settings = settings;
             _configuration = configuration;
@@ -52,7 +52,7 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
 
         public override void Apply(IBusBuilder builder)
         {
-            var receiveEndpointBuilder = new ServiceBusSubscriptionEndpointBuilder(builder, Host, _configuration);
+            var receiveEndpointBuilder = new ServiceBusSubscriptionEndpointBuilder(builder, Host, Hosts, _configuration);
 
             var receivePipe = CreateReceivePipe(receiveEndpointBuilder);
 
@@ -64,6 +64,7 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
                 x.UseFilter(new PrepareSubscriptionClientFilter(_settings));
             });
         }
+
 
         protected override ReceiveEndpointSettings GetReceiveEndpointSettings(string queueName)
         {

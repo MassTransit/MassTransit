@@ -97,7 +97,7 @@ namespace MassTransit.BusConfigurators
         {
             var endpointSpecification = _configuration.CreateConfiguration();
 
-            var specification = new InMemoryReceiveEndpointSpecification(InMemoryHost.Address, queueName, endpointSpecification);
+            var specification = new InMemoryReceiveEndpointSpecification(InMemoryHost.Address, queueName, SendTransportProvider, endpointSpecification);
 
             specification.ConnectConsumerConfigurationObserver(this);
             specification.ConnectSagaConfigurationObserver(this);

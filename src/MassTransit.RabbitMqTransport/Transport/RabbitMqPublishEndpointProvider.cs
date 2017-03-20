@@ -20,6 +20,7 @@ namespace MassTransit.RabbitMqTransport.Transport
     using MassTransit.Pipeline.Observables;
     using MassTransit.Pipeline.Pipes;
     using Pipeline;
+    using Specifications;
     using Topology;
     using Topology.Builders;
     using Transports;
@@ -34,18 +35,18 @@ namespace MassTransit.RabbitMqTransport.Transport
         readonly IIndex<TypeKey, CachedSendEndpoint<TypeKey>> _index;
         readonly PublishObservable _publishObservable;
         readonly IPublishPipe _publishPipe;
-        readonly IRabbitMqPublishTopology _publishTopology;
+        readonly IRabbitMqTopology _topology;
         readonly IMessageSerializer _serializer;
         readonly Uri _sourceAddress;
 
         public RabbitMqPublishEndpointProvider(IRabbitMqHost host, IMessageSerializer serializer, Uri sourceAddress, IPublishPipe publishPipe,
-            IRabbitMqPublishTopology publishTopology)
+            IRabbitMqTopology topology)
         {
             _host = host;
             _serializer = serializer;
             _sourceAddress = sourceAddress;
             _publishPipe = publishPipe;
-            _publishTopology = publishTopology;
+            _topology = topology;
 
             _publishObservable = new PublishObservable();
 
@@ -61,7 +62,7 @@ namespace MassTransit.RabbitMqTransport.Transport
         public async Task<ISendEndpoint> GetPublishSendEndpoint<T>(T message)
             where T : class
         {
-            IRabbitMqMessagePublishTopologyConfigurator<T> messageTopology = _publishTopology.GetMessageTopology<T>();
+            IRabbitMqMessagePublishTopologyConfigurator<T> messageTopology = _topology.PublishTopology.GetMessageTopology<T>();
 
             Uri publishAddress;
             if (!messageTopology.TryGetPublishAddress(_host.Address, message, out publishAddress))
@@ -78,7 +79,7 @@ namespace MassTransit.RabbitMqTransport.Transport
         Task<CachedSendEndpoint<TypeKey>> CreateSendEndpoint<T>(TypeKey typeKey)
             where T : class
         {
-            IRabbitMqMessagePublishTopologyConfigurator<T> messageTopology = _publishTopology.GetMessageTopology<T>();
+            IRabbitMqMessagePublishTopologyConfigurator<T> messageTopology = _topology.PublishTopology.GetMessageTopology<T>();
 
             var sendSettings = messageTopology.GetSendSettings();
 
@@ -87,7 +88,7 @@ namespace MassTransit.RabbitMqTransport.Transport
 
             var topology = builder.BuildTopologyLayout();
 
-            var modelCache = new RabbitMqModelCache(_host);
+            var modelCache = new RabbitMqModelCache(_host, _topology);
 
             var sendTransport = new RabbitMqSendTransport(modelCache, new ConfigureTopologyFilter<SendSettings>(sendSettings, topology), sendSettings.ExchangeName);
 

@@ -22,11 +22,6 @@ namespace MassTransit.Builders
     /// </summary>
     public interface IBusBuilder
     {
-        /// <summary>
-        /// The Send Transport Provider
-        /// </summary>
-        ISendTransportProvider SendTransportProvider { get; }
-
         SerializerBuilder CreateSerializerBuilder();
 
         /// <summary>

@@ -6,6 +6,7 @@ namespace MassTransit.AzureServiceBusTransport.Builders
     using Topology;
     using Topology.Builders;
     using Transport;
+    using Transports;
 
 
     public class ServiceBusSubscriptionEndpointBuilder :
@@ -14,20 +15,21 @@ namespace MassTransit.AzureServiceBusTransport.Builders
     {
         readonly IServiceBusHost _host;
         readonly IServiceBusEndpointConfiguration _configuration;
+        BusHostCollection<ServiceBusHost> _hosts;
 
-        public ServiceBusSubscriptionEndpointBuilder(IBusBuilder busBuilder, IServiceBusHost host,
-            IServiceBusEndpointConfiguration configuration)
+        public ServiceBusSubscriptionEndpointBuilder(IBusBuilder busBuilder, IServiceBusHost host, BusHostCollection<ServiceBusHost> hosts, IServiceBusEndpointConfiguration configuration)
             : base(busBuilder, configuration)
         {
             _configuration = configuration;
             _host = host;
+            _hosts = hosts;
         }
 
         public IServiceBusReceiveEndpointTopology CreateReceiveEndpointTopology(Uri inputAddress, SubscriptionSettings settings)
         {
             var topologyLayout = BuildTopology(settings);
 
-            return new ServiceBusReceiveEndpointTopology(_configuration, inputAddress, MessageSerializer, SendTransportProvider, _host, topologyLayout);
+            return new ServiceBusReceiveEndpointTopology(_configuration, inputAddress, MessageSerializer, _host, _hosts, topologyLayout);
         }
 
         TopologyLayout BuildTopology(SubscriptionSettings settings)

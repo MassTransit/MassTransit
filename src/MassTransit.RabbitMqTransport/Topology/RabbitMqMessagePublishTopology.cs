@@ -64,7 +64,7 @@ namespace MassTransit.RabbitMqTransport.Topology
 
         public IMessageExchangeTypeSelector<TMessage> ExchangeTypeSelector { get; }
 
-        public bool TryGetPublishAddress(Uri baseAddress, TMessage message, out Uri publishAddress)
+        public override bool TryGetPublishAddress(Uri baseAddress, TMessage message, out Uri publishAddress)
         {
             var exchangeName = EntityNameFormatter.FormatEntityName();
             var exchangeType = ExchangeTypeSelector.GetExchangeType(exchangeName);

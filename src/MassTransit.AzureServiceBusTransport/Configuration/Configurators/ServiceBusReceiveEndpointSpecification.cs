@@ -22,6 +22,7 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
     using Settings;
     using Specifications;
     using Transport;
+    using Transports;
 
 
     public class ServiceBusReceiveEndpointSpecification :
@@ -32,14 +33,15 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
         readonly IServiceBusEndpointConfiguration _configuration;
         bool _subscribeMessageTopics;
 
-        public ServiceBusReceiveEndpointSpecification(IServiceBusHost host, string queueName, IServiceBusEndpointConfiguration configuration)
-            : this(host, new ReceiveEndpointSettings(Defaults.CreateQueueDescription(queueName)), configuration)
+        public ServiceBusReceiveEndpointSpecification(IServiceBusHost host, BusHostCollection<ServiceBusHost> hosts, string queueName,
+            IServiceBusEndpointConfiguration configuration)
+            : this(host, hosts, new ReceiveEndpointSettings(Defaults.CreateQueueDescription(queueName)), configuration)
         {
         }
 
-        public ServiceBusReceiveEndpointSpecification(IServiceBusHost host, ReceiveEndpointSettings settings,
+        public ServiceBusReceiveEndpointSpecification(IServiceBusHost host, BusHostCollection<ServiceBusHost> hosts, ReceiveEndpointSettings settings,
             IServiceBusEndpointConfiguration configuration)
-            : base(host, settings, configuration)
+            : base(host, hosts, settings, configuration)
         {
             _settings = settings;
             _configuration = configuration;
@@ -129,7 +131,7 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
 
         public override void Apply(IBusBuilder builder)
         {
-            var receiveEndpointBuilder = new ServiceBusReceiveEndpointBuilder(builder, Host, _subscribeMessageTopics, _configuration);
+            var receiveEndpointBuilder = new ServiceBusReceiveEndpointBuilder(builder, Host, Hosts, _subscribeMessageTopics, _configuration);
 
             var receivePipe = CreateReceivePipe(receiveEndpointBuilder);
 

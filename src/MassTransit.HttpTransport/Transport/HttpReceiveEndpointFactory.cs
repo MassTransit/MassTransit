@@ -16,6 +16,7 @@ namespace MassTransit.HttpTransport.Transport
     using Builders;
     using Configurators;
     using Specifications;
+    using Transports;
     using Transports.InMemory;
 
 
@@ -25,17 +26,19 @@ namespace MassTransit.HttpTransport.Transport
         readonly HttpBusBuilder _builder;
         readonly IHttpHost _host;
         readonly IInMemoryEndpointConfiguration _configuration;
+        readonly BusHostCollection<HttpHost> _hosts;
 
-        public HttpReceiveEndpointFactory(HttpBusBuilder builder, IHttpHost host, IInMemoryEndpointConfiguration configuration)
+        public HttpReceiveEndpointFactory(HttpBusBuilder builder, IHttpHost host, BusHostCollection<HttpHost> hosts, IInMemoryEndpointConfiguration configuration)
         {
             _builder = builder;
             _host = host;
+            _hosts = hosts;
             _configuration = configuration;
         }
 
         public void CreateReceiveEndpoint(string pathMatch, Action<IHttpReceiveEndpointConfigurator> configure)
         {
-            var endpointConfigurator = new HttpReceiveEndpointSpecification(_host, pathMatch, _configuration);
+            var endpointConfigurator = new HttpReceiveEndpointSpecification(_host, _hosts, pathMatch, _configuration);
 
             configure?.Invoke(endpointConfigurator);
 

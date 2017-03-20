@@ -18,6 +18,7 @@ namespace MassTransit.AzureServiceBusTransport.Transport
     using MassTransit.Configurators;
     using Settings;
     using Specifications;
+    using Transports;
 
 
     public class ServiceBusSubscriptionEndpointFactory :
@@ -26,20 +27,22 @@ namespace MassTransit.AzureServiceBusTransport.Transport
         readonly ServiceBusBusBuilder _builder;
         readonly ServiceBusHost _host;
         readonly IServiceBusEndpointConfiguration _configuration;
+        readonly BusHostCollection<ServiceBusHost> _hosts;
 
         public ServiceBusSubscriptionEndpointFactory(ServiceBusBusBuilder builder, ServiceBusHost host,
-            IServiceBusEndpointConfiguration configuration)
+            BusHostCollection<ServiceBusHost> hosts, IServiceBusEndpointConfiguration configuration)
         {
             _builder = builder;
             _host = host;
             _configuration = configuration;
+            _hosts = hosts;
         }
 
         public void CreateSubscriptionEndpoint(SubscriptionEndpointSettings settings, Action<IServiceBusSubscriptionEndpointConfigurator> configure)
         {
             var endpointTopologySpecification = _configuration.CreateConfiguration();
 
-            var endpointConfigurator = new ServiceBusSubscriptionEndpointSpecification(_host, settings, endpointTopologySpecification);
+            var endpointConfigurator = new ServiceBusSubscriptionEndpointSpecification(_host, _hosts, settings, endpointTopologySpecification);
 
             configure?.Invoke(endpointConfigurator);
 

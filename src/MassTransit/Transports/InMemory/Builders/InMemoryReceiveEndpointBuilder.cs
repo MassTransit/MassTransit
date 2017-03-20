@@ -23,12 +23,14 @@ namespace MassTransit.Transports.InMemory.Builders
         IReceiveEndpointBuilder
     {
         readonly InMemoryHost _host;
+        readonly ISendTransportProvider _sendTransportProvider;
         readonly IInMemoryEndpointConfiguration _configuration;
 
-        public InMemoryReceiveEndpointBuilder(IBusBuilder busBuilder, InMemoryHost host, IInMemoryEndpointConfiguration configuration)
+        public InMemoryReceiveEndpointBuilder(IBusBuilder busBuilder, InMemoryHost host, ISendTransportProvider sendTransportProvider, IInMemoryEndpointConfiguration configuration)
             : base(busBuilder, configuration)
         {
             _host = host;
+            _sendTransportProvider = sendTransportProvider;
             _configuration = configuration;
         }
 
@@ -54,7 +56,7 @@ namespace MassTransit.Transports.InMemory.Builders
 
             _configuration.ConsumeTopology.Apply(builder);
 
-            return new InMemoryReceiveEndpointTopology(_configuration, inputAddress, MessageSerializer, SendTransportProvider);
+            return new InMemoryReceiveEndpointTopology(_configuration, inputAddress, MessageSerializer, _sendTransportProvider);
         }
     }
 }

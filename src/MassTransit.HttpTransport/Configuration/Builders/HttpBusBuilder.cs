@@ -13,13 +13,7 @@
 namespace MassTransit.HttpTransport.Builders
 {
     using System;
-    using Clients;
-    using GreenPipes;
     using MassTransit.Builders;
-    using MassTransit.Pipeline;
-    using MassTransit.Pipeline.Filters;
-    using MassTransit.Pipeline.Observables;
-    using MassTransit.Pipeline.Pipes;
     using Specifications;
     using Transport;
     using Transports;
@@ -41,11 +35,11 @@ namespace MassTransit.HttpTransport.Builders
 
             var endpointSpecification = configuration.CreateConfiguration(ConsumePipe);
 
-            _busEndpointSpecification = new HttpReceiveEndpointSpecification(_hosts[0], "", endpointSpecification);
+            _busEndpointSpecification = new HttpReceiveEndpointSpecification(_hosts[0], _hosts, "", endpointSpecification);
 
             foreach (var host in hosts.Hosts)
             {
-                var factory = new HttpReceiveEndpointFactory(this, host, configuration);
+                var factory = new HttpReceiveEndpointFactory(this, host, hosts, configuration);
 
                 host.ReceiveEndpointFactory = factory;
             }
@@ -69,30 +63,6 @@ namespace MassTransit.HttpTransport.Builders
             var urb = new UriBuilder(addy);
             urb.Scheme = "reply";
             return urb.Uri;
-        }
-
-        protected override ISendTransportProvider CreateSendTransportProvider()
-        {
-            var receivePipe = CreateReceivePipe();
-
-            var endpointBuilder = new HttpReceiveEndpointBuilder(this, _hosts[0], _configuration);
-
-            return new HttpSendTransportProvider(_hosts, receivePipe, new ReceiveObservable(), _busEndpointSpecification.Configuration,
-                _busEndpointSpecification.InputAddress, endpointBuilder.MessageSerializer, _hosts[0]);
-        }
-
-        protected IReceivePipe CreateReceivePipe()
-        {
-            //            AddRescueFilter(builder);
-
-            var endpointBuilder = new HttpReceiveEndpointBuilder(this, _hosts[0], _configuration);
-
-            IPipe<ReceiveContext> receivePipe = Pipe.New<ReceiveContext>(x =>
-            {
-                x.UseFilter(new DeserializeFilter(endpointBuilder.MessageDeserializer, ConsumePipe));
-            });
-
-            return new ReceivePipe(receivePipe, ConsumePipe);
         }
     }
 }

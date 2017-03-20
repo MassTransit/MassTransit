@@ -27,53 +27,69 @@ namespace MassTransit.RabbitMqTransport.Topology
         readonly IRabbitMqHost _host;
         readonly IRabbitMqPublishTopology _publish;
         readonly Lazy<IPublishEndpointProvider> _publishEndpointProvider;
-        readonly IPublishPipe _publishPipe;
+        readonly IRabbitMqConsumeTopology _consume;
         readonly IRabbitMqSendTopology _send;
         readonly Lazy<ISendEndpointProvider> _sendEndpointProvider;
-        readonly ISendPipe _sendPipe;
-        readonly ISendTransportProvider _sendTransportProvider;
+        readonly Lazy<ISendTransportProvider> _sendTransportProvider;
+        readonly IRabbitMqEndpointConfiguration _configuration;
         readonly IMessageSerializer _serializer;
         readonly TopologyLayout _topologyLayout;
+        readonly BusHostCollection<RabbitMqHost> _hosts;
 
         public RabbitMqReceiveEndpointTopology(IRabbitMqEndpointConfiguration configuration, Uri inputAddress, IMessageSerializer serializer,
-            ISendTransportProvider sendTransportProvider, IRabbitMqHost host, TopologyLayout topologyLayout)
+            IRabbitMqHost host, BusHostCollection<RabbitMqHost> hosts, TopologyLayout topologyLayout)
         {
             InputAddress = inputAddress;
+            _configuration = configuration;
             _serializer = serializer;
-            _sendTransportProvider = sendTransportProvider;
             _host = host;
             _topologyLayout = topologyLayout;
+
+            _hosts = hosts;
+
+            _consume = configuration.ConsumeTopology;
 
             _send = configuration.SendTopology;
             _publish = configuration.PublishTopology;
 
-            _sendPipe = configuration.CreateSendPipe();
-            _publishPipe = configuration.CreatePublishPipe();
-
+            _sendTransportProvider = new Lazy<ISendTransportProvider>(CreateSendTransportProvider);
             _sendEndpointProvider = new Lazy<ISendEndpointProvider>(CreateSendEndpointProvider);
             _publishEndpointProvider = new Lazy<IPublishEndpointProvider>(CreatePublishEndpointProvider);
         }
 
+        public Uri InputAddress { get; }
         public TopologyLayout TopologyLayout => _topologyLayout;
 
-        public Uri InputAddress { get; }
+        public IRabbitMqConsumeTopology ConsumeTopology => _consume;
+        public IRabbitMqSendTopology SendTopology => _send;
+        public IRabbitMqPublishTopology PublishTopology => _publish;
 
-        public ISendTopology Send => _send;
-        public IPublishTopology Publish => _publish;
+        ISendTopology IReceiveEndpointTopology.Send => _send;
+        IPublishTopology IReceiveEndpointTopology.Publish => _publish;
 
-        public ISendEndpointProvider SendEndpointProvider => _sendEndpointProvider.Value;
-        public IPublishEndpointProvider PublishEndpointProvider => _publishEndpointProvider.Value;
+        ISendEndpointProvider IReceiveEndpointTopology.SendEndpointProvider => _sendEndpointProvider.Value;
+        IPublishEndpointProvider IReceiveEndpointTopology.PublishEndpointProvider => _publishEndpointProvider.Value;
+        ISendTransportProvider IReceiveEndpointTopology.SendTransportProvider => _sendTransportProvider.Value;
 
-        public ISendEndpointProvider CreateSendEndpointProvider()
+        ISendEndpointProvider CreateSendEndpointProvider()
         {
-            var provider = new RabbitMqSendEndpointProvider(_serializer, InputAddress, _sendTransportProvider, _sendPipe);
+            var sendPipe = _configuration.CreateSendPipe();
+
+            var provider = new RabbitMqSendEndpointProvider(_serializer, InputAddress, _sendTransportProvider.Value, sendPipe);
 
             return new SendEndpointCache(provider);
         }
 
         IPublishEndpointProvider CreatePublishEndpointProvider()
         {
-            return new RabbitMqPublishEndpointProvider(_host, _serializer, InputAddress, _publishPipe, _publish);
+            IPublishPipe publishPipe = _configuration.CreatePublishPipe();
+
+            return new RabbitMqPublishEndpointProvider(_host, _serializer, InputAddress, publishPipe, this);
+        }
+
+        ISendTransportProvider CreateSendTransportProvider()
+        {
+            return new RabbitMqSendTransportProvider(_hosts, this);
         }
     }
 }

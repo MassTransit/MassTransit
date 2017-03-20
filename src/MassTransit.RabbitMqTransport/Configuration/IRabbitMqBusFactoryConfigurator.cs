@@ -68,6 +68,13 @@ namespace MassTransit.RabbitMqTransport
         IRabbitMqHost Host(RabbitMqHostSettings settings);
 
         /// <summary>
+        /// Create a temporary queue name, using the configured consume topology
+        /// </summary>
+        /// <param name="prefix"></param>
+        /// <returns></returns>
+        string CreateTemporaryQueueName(string prefix);
+
+        /// <summary>
         /// Declare a ReceiveEndpoint on the broker and configure the endpoint settings and message consumers.
         /// </summary>
         /// <param name="host">The host for this endpoint</param>

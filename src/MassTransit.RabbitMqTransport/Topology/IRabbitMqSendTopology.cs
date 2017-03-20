@@ -14,6 +14,7 @@ namespace MassTransit.RabbitMqTransport.Topology
 {
     using System;
     using Builders;
+    using Configurators;
     using MassTransit.Topology;
 
 
@@ -31,5 +32,21 @@ namespace MassTransit.RabbitMqTransport.Topology
         /// <param name="address">A valid RabbitMQ endpoint address</param>
         /// <returns></returns>
         TopologyLayout GetTopologyLayout(Uri address);
+
+        /// <summary>
+        /// Returns the error address for the specified queue
+        /// </summary>
+        /// <param name="configurator">The configurator for the receive endpoint</param>
+        /// <param name="hostAddress">The host address</param>
+        /// <returns></returns>
+        Uri GetErrorAddress(QueueConfigurator configurator, Uri hostAddress);
+
+        /// <summary>
+        /// Returns the dead letter address for the specified queue
+        /// </summary>
+        /// <param name="configurator">The configurator for the receive endpoint</param>
+        /// <param name="hostAddress">The host address</param>
+        /// <returns></returns>
+        Uri GetDeadLetterAddress(QueueConfigurator configurator, Uri hostAddress);
     }
 }

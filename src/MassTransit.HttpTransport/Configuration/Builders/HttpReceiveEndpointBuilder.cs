@@ -15,6 +15,8 @@ namespace MassTransit.HttpTransport.Builders
     using System;
     using MassTransit.Builders;
     using Topology;
+    using Transport;
+    using Transports;
     using Transports.InMemory;
 
 
@@ -24,17 +26,19 @@ namespace MassTransit.HttpTransport.Builders
     {
         readonly IHttpHost _host;
         readonly IInMemoryEndpointConfiguration _configuration;
+        readonly BusHostCollection<HttpHost> _hosts;
 
-        public HttpReceiveEndpointBuilder(IBusBuilder busBuilder, IHttpHost host, IInMemoryEndpointConfiguration configuration)
+        public HttpReceiveEndpointBuilder(IBusBuilder busBuilder, IHttpHost host, BusHostCollection<HttpHost> hosts, IInMemoryEndpointConfiguration configuration)
             : base(busBuilder, configuration)
         {
             _host = host;
             _configuration = configuration;
+            _hosts = hosts;
         }
 
         public IHttpReceiveEndpointTopology CreateReceiveEndpointTopology(Uri inputAddress)
         {
-            return new HttpReceiveEndpointTopology(_configuration, inputAddress, MessageSerializer, SendTransportProvider, _host);
+            return new HttpReceiveEndpointTopology(_configuration, inputAddress, MessageSerializer, _host, _hosts);
         }
     }
 }
