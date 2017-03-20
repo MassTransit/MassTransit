@@ -25,6 +25,8 @@ namespace MassTransit.RabbitMqTransport.Contexts
     using Logging;
     using RabbitMQ.Client;
     using RabbitMQ.Client.Events;
+    using Specifications;
+    using Topology;
     using Util;
 
 
@@ -33,6 +35,7 @@ namespace MassTransit.RabbitMqTransport.Contexts
         ModelContext,
         IDisposable
     {
+        readonly IRabbitMqTopology _topology;
         static readonly ILog _log = Logger.Get<RabbitMqModelContext>();
 
         readonly ConnectionContext _connectionContext;
@@ -43,10 +46,11 @@ namespace MassTransit.RabbitMqTransport.Contexts
         readonly LimitedConcurrencyLevelTaskScheduler _taskScheduler;
         ulong _publishTagMax;
 
-        public RabbitMqModelContext(ConnectionContext connectionContext, IModel model, ITaskScope taskScope, IRabbitMqHost host)
+        public RabbitMqModelContext(ConnectionContext connectionContext, IModel model, ITaskScope taskScope, IRabbitMqHost host, IRabbitMqTopology topology)
             : this(connectionContext, model, host,
                 taskScope.CreateParticipant($"{TypeMetadataCache<RabbitMqModelContext>.ShortName} - {connectionContext.HostSettings.ToDebugString()}"))
         {
+            _topology = topology;
         }
 
         RabbitMqModelContext(ConnectionContext connectionContext, IModel model, IRabbitMqHost host, ITaskParticipant participant)
@@ -82,6 +86,8 @@ namespace MassTransit.RabbitMqTransport.Contexts
         IModel ModelContext.Model => _model;
 
         ConnectionContext ModelContext.ConnectionContext => _connectionContext;
+
+        IRabbitMqPublishTopology ModelContext.PublishTopology => _topology.PublishTopology;
 
         CancellationToken PipeContext.CancellationToken => _participant.StoppedToken;
 

@@ -39,17 +39,18 @@ namespace MassTransit.HttpTransport.Topology
             _sendEndpointProvider = new Lazy<ISendEndpointProvider>(CreateSendEndpointProvider);
         }
 
-        public Uri InputAddress => _topology.InputAddress;
+        Uri IReceiveEndpointTopology.InputAddress => _topology.InputAddress;
 
-        public ISendTopology Send => _topology.Send;
-        public IPublishTopology Publish => _topology.Publish;
+        ISendTopology IReceiveEndpointTopology.Send => _topology.Send;
+        IPublishTopology IReceiveEndpointTopology.Publish => _topology.Publish;
 
-        public ISendEndpointProvider SendEndpointProvider => _sendEndpointProvider.Value;
-        public IPublishEndpointProvider PublishEndpointProvider => _topology.PublishEndpointProvider;
+        ISendEndpointProvider IReceiveEndpointTopology.SendEndpointProvider => _sendEndpointProvider.Value;
+        IPublishEndpointProvider IReceiveEndpointTopology.PublishEndpointProvider => _topology.PublishEndpointProvider;
+        ISendTransportProvider IReceiveEndpointTopology.SendTransportProvider => _topology.SendTransportProvider;
 
         ISendEndpointProvider CreateSendEndpointProvider()
         {
-            return new HttpResponseSendEndpointProvider(_owinContext, InputAddress, _sendPipe, _serializer, _topology.SendEndpointProvider);
+            return new HttpResponseSendEndpointProvider(_owinContext, _topology.InputAddress, _sendPipe, _serializer, _topology.SendEndpointProvider);
         }
     }
 }

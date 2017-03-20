@@ -15,6 +15,8 @@ namespace MassTransit.RabbitMqTransport.Pipeline
     using System.Threading.Tasks;
     using Contexts;
     using GreenPipes;
+    using Specifications;
+    using Topology;
     using Util;
 
 
@@ -27,12 +29,14 @@ namespace MassTransit.RabbitMqTransport.Pipeline
         readonly IRabbitMqHost _host;
         readonly IPipe<ModelContext> _pipe;
         readonly ITaskSupervisor _supervisor;
+        readonly IRabbitMqTopology _topology;
 
-        public ReceiveModelFilter(IPipe<ModelContext> pipe, ITaskSupervisor supervisor, IRabbitMqHost host)
+        public ReceiveModelFilter(IPipe<ModelContext> pipe, ITaskSupervisor supervisor, IRabbitMqHost host, IRabbitMqTopology topology)
         {
             _pipe = pipe;
             _supervisor = supervisor;
             _host = host;
+            _topology = topology;
         }
 
         void IProbeSite.Probe(ProbeContext context)
@@ -45,7 +49,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
             {
                 var model = await context.CreateModel().ConfigureAwait(false);
 
-                using (var modelContext = new RabbitMqModelContext(context, model, scope, _host))
+                using (var modelContext = new RabbitMqModelContext(context, model, scope, _host, _topology))
                 {
                     await _pipe.Send(modelContext).ConfigureAwait(false);
                 }

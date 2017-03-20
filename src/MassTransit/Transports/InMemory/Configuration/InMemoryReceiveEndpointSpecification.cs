@@ -24,16 +24,18 @@ namespace MassTransit.Transports.InMemory.Configuration
     {
         readonly Uri _baseAddress;
         readonly string _queueName;
+        readonly ISendTransportProvider _sendTransportProvider;
         readonly IInMemoryEndpointConfiguration _configuration;
         IPublishEndpointProvider _publishEndpointProvider;
         ISendEndpointProvider _sendEndpointProvider;
         int _transportConcurrencyLimit;
 
-        public InMemoryReceiveEndpointSpecification(Uri baseAddress, string queueName, IInMemoryEndpointConfiguration configuration)
+        public InMemoryReceiveEndpointSpecification(Uri baseAddress, string queueName, ISendTransportProvider sendTransportProvider, IInMemoryEndpointConfiguration configuration)
             : base(configuration)
         {
             _baseAddress = baseAddress;
             _queueName = queueName;
+            _sendTransportProvider = sendTransportProvider;
             _configuration = configuration;
             _transportConcurrencyLimit = 0;
         }
@@ -57,7 +59,7 @@ namespace MassTransit.Transports.InMemory.Configuration
             if (inMemoryHost == null)
                 throw new ConfigurationException("Must be an InMemoryHost");
 
-            var receiveEndpointBuilder = new InMemoryReceiveEndpointBuilder(builder, inMemoryHost, _configuration);
+            var receiveEndpointBuilder = new InMemoryReceiveEndpointBuilder(builder, inMemoryHost, _sendTransportProvider, _configuration);
 
             var receivePipe = CreateReceivePipe(receiveEndpointBuilder);
 

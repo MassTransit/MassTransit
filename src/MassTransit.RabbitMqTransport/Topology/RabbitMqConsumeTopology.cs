@@ -14,10 +14,13 @@ namespace MassTransit.RabbitMqTransport.Topology
 {
     using System;
     using System.Collections.Generic;
+    using System.Text;
     using Configurators;
     using MassTransit.Topology;
     using MassTransit.Topology.Configuration;
+    using NewIdFormatters;
     using Specifications;
+    using Util;
 
 
     public class RabbitMqConsumeTopology :
@@ -80,5 +83,34 @@ namespace MassTransit.RabbitMqTransport.Topology
 
             return messageTopology;
         }
+
+        public string CreateTemporaryQueueName(string prefix)
+        {
+            var sb = new StringBuilder(prefix);
+
+            var host = HostMetadataCache.Host;
+
+            foreach (var c in host.MachineName)
+            {
+                if (char.IsLetterOrDigit(c))
+                    sb.Append(c);
+                else if (c == '.' || c == '_' || c == '-' || c == ':')
+                    sb.Append(c);
+            }
+            sb.Append('-');
+            foreach (var c in host.ProcessName)
+            {
+                if (char.IsLetterOrDigit(c))
+                    sb.Append(c);
+                else if (c == '.' || c == '_' || c == '-' || c == ':')
+                    sb.Append(c);
+            }
+            sb.Append('-');
+            sb.Append(NewId.Next().ToString(_formatter));
+
+            return sb.ToString();
+        }
+
+        static readonly INewIdFormatter _formatter = new ZBase32Formatter();
     }
 }

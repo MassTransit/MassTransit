@@ -52,8 +52,8 @@ namespace MassTransit.Transports.InMemory
         public IPublishTopology Publish { get; }
 
         ISendEndpointProvider IReceiveEndpointTopology.SendEndpointProvider => _sendEndpointProvider.Value;
-
         IPublishEndpointProvider IReceiveEndpointTopology.PublishEndpointProvider => _publishEndpointProvider.Value;
+        ISendTransportProvider IReceiveEndpointTopology.SendTransportProvider => _sendTransportProvider;
 
         ISendEndpointProvider CreateSendEndpointProvider()
         {

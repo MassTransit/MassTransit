@@ -14,7 +14,6 @@ namespace MassTransit.Transports.InMemory.Builders
 {
     using System;
     using Configuration;
-    using EndpointSpecifications;
     using MassTransit.Builders;
 
 
@@ -24,7 +23,6 @@ namespace MassTransit.Transports.InMemory.Builders
     {
         readonly InMemoryReceiveEndpointSpecification _busEndpointSpecification;
         readonly Uri _inputAddress;
-        readonly ISendTransportProvider _sendTransportProvider;
         readonly IInMemoryEndpointConfiguration _configuration;
 
         public InMemoryBusBuilder(InMemoryHost inMemoryHost, ISendTransportProvider sendTransportProvider, BusHostCollection<IBusHostControl> hosts,
@@ -40,14 +38,13 @@ namespace MassTransit.Transports.InMemory.Builders
             _inputAddress = new Uri(inMemoryHost.Address, $"{busQueueName}");
 
             InMemoryHost = inMemoryHost;
-            _sendTransportProvider = sendTransportProvider;
             _configuration = configuration;
 
             var busEndpointSpecification = _configuration.CreateConfiguration(ConsumePipe);
 
-            _busEndpointSpecification = new InMemoryReceiveEndpointSpecification(inMemoryHost.Address, busQueueName, busEndpointSpecification);
+            _busEndpointSpecification = new InMemoryReceiveEndpointSpecification(inMemoryHost.Address, busQueueName, sendTransportProvider, busEndpointSpecification);
 
-            inMemoryHost.ReceiveEndpointFactory = new InMemoryReceiveEndpointFactory(this, configuration);
+            inMemoryHost.ReceiveEndpointFactory = new InMemoryReceiveEndpointFactory(this, sendTransportProvider, configuration);
         }
 
         public override IPublishEndpointProvider PublishEndpointProvider => _busEndpointSpecification.PublishEndpointProvider;
@@ -59,11 +56,6 @@ namespace MassTransit.Transports.InMemory.Builders
         protected override Uri GetInputAddress()
         {
             return _inputAddress;
-        }
-
-        protected override ISendTransportProvider CreateSendTransportProvider()
-        {
-            return _sendTransportProvider;
         }
 
         protected override void PreBuild()

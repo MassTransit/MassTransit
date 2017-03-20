@@ -35,12 +35,13 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
         IPublishEndpointProvider _publishEndpointProvider;
         ISendEndpointProvider _sendEndpointProvider;
 
-        protected ServiceBusEndpointSpecification(IServiceBusHost host, BaseClientSettings settings,
-            IServiceBusEndpointConfiguration configuration)
+        protected ServiceBusEndpointSpecification(IServiceBusHost host, BusHostCollection<ServiceBusHost> hosts,
+            BaseClientSettings settings, IServiceBusEndpointConfiguration configuration)
             : base(configuration)
         {
             Host = host;
             _settings = settings;
+            Hosts = hosts;
         }
 
         public ISendEndpointProvider SendEndpointProvider => _sendEndpointProvider;
@@ -48,6 +49,8 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
         public IPublishEndpointProvider PublishEndpointProvider => _publishEndpointProvider;
 
         public IServiceBusHost Host { get; }
+
+        protected BusHostCollection<ServiceBusHost> Hosts { get; }
 
         public override IEnumerable<ValidationResult> Validate()
         {

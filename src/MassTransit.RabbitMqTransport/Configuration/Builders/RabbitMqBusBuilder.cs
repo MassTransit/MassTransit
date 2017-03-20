@@ -26,14 +26,12 @@ namespace MassTransit.RabbitMqTransport.Builders
     {
         readonly RabbitMqReceiveEndpointSpecification _busEndpointSpecification;
         readonly BusHostCollection<RabbitMqHost> _hosts;
-        readonly IRabbitMqEndpointConfiguration _configuration;
 
         public RabbitMqBusBuilder(BusHostCollection<RabbitMqHost> hosts, RabbitMqReceiveSettings busSettings,
             IRabbitMqEndpointConfiguration configuration)
             : base(hosts, configuration)
         {
             _hosts = hosts;
-            _configuration = configuration;
 
             var endpointTopologySpecification = configuration.CreateConfiguration(ConsumePipe);
 
@@ -61,11 +59,6 @@ namespace MassTransit.RabbitMqTransport.Builders
         protected override Uri GetInputAddress()
         {
             return _busEndpointSpecification.InputAddress;
-        }
-
-        protected override ISendTransportProvider CreateSendTransportProvider()
-        {
-            return new RabbitMqSendTransportProvider(_hosts, _configuration);
         }
     }
 }

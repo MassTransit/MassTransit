@@ -16,6 +16,7 @@ namespace MassTransit.RabbitMqTransport
     using System.Threading.Tasks;
     using GreenPipes;
     using RabbitMQ.Client;
+    using Topology;
 
 
     /// <summary>
@@ -34,6 +35,8 @@ namespace MassTransit.RabbitMqTransport
         /// The connection context on which the model was created
         /// </summary>
         ConnectionContext ConnectionContext { get; }
+
+        IRabbitMqPublishTopology PublishTopology { get; }
 
         /// <summary>
         /// Publish a message to the broker, asynchronously

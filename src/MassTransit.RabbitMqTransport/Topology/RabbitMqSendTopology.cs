@@ -16,6 +16,7 @@ namespace MassTransit.RabbitMqTransport.Topology
     using System.Collections.Generic;
     using System.Net;
     using Builders;
+    using Configurators;
     using MassTransit.Topology;
     using MassTransit.Topology.Configuration;
     using Util;
@@ -39,6 +40,16 @@ namespace MassTransit.RabbitMqTransport.Topology
             IMessageSendTopologyConfigurator<T> configurator = base.GetMessageTopology<T>();
 
             return configurator as IRabbitMqMessageSendTopologyConfigurator<T>;
+        }
+
+        public Uri GetErrorAddress(QueueConfigurator configurator, Uri hostAddress)
+        {
+            return GetQueueAddress(configurator, hostAddress, "_error");
+        }
+
+        public Uri GetDeadLetterAddress(QueueConfigurator configurator, Uri hostAddress)
+        {
+            return GetQueueAddress(configurator, hostAddress, "_skipped");
         }
 
         public SendSettings GetSendSettings(Uri address)
@@ -110,6 +121,16 @@ namespace MassTransit.RabbitMqTransport.Topology
             OnMessageTopologyCreated(messageTopology);
 
             return messageTopology;
+        }
+
+        Uri GetQueueAddress(QueueConfigurator configurator, Uri hostAddress, string suffix)
+        {
+            var queueName = configurator.QueueName + suffix;
+            var sendSettings = new RabbitMqSendSettings(queueName, ExchangeTypeSelector.DefaultExchangeType, configurator.Durable, configurator.AutoDelete);
+
+            sendSettings.BindToQueue(queueName);
+
+            return sendSettings.GetSendAddress(hostAddress);
         }
     }
 }

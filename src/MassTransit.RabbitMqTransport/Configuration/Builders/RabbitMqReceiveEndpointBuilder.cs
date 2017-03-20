@@ -18,6 +18,8 @@ namespace MassTransit.RabbitMqTransport.Builders
     using Specifications;
     using Topology;
     using Topology.Builders;
+    using Transport;
+    using Transports;
 
 
     public class RabbitMqReceiveEndpointBuilder :
@@ -26,15 +28,17 @@ namespace MassTransit.RabbitMqTransport.Builders
     {
         readonly bool _bindMessageExchanges;
         readonly IRabbitMqHost _host;
+        readonly BusHostCollection<RabbitMqHost> _hosts;
         readonly IRabbitMqEndpointConfiguration _configuration;
 
-        public RabbitMqReceiveEndpointBuilder(IBusBuilder busBuilder, IRabbitMqHost host, bool bindMessageExchanges,
+        public RabbitMqReceiveEndpointBuilder(IBusBuilder busBuilder, IRabbitMqHost host, BusHostCollection<RabbitMqHost> hosts, bool bindMessageExchanges,
             IRabbitMqEndpointConfiguration configuration)
             : base(busBuilder, configuration)
         {
             _bindMessageExchanges = bindMessageExchanges;
             _configuration = configuration;
             _host = host;
+            _hosts = hosts;
         }
 
         public override ConnectHandle ConnectConsumePipe<T>(IPipe<ConsumeContext<T>> pipe)
@@ -51,20 +55,20 @@ namespace MassTransit.RabbitMqTransport.Builders
 
         public IRabbitMqReceiveEndpointTopology CreateReceiveEndpointTopology(Uri inputAddress, ReceiveSettings settings)
         {
-            var result = BuildTopology(settings);
+            var topologyLayout = BuildTopology(settings);
 
-            return new RabbitMqReceiveEndpointTopology(_configuration, inputAddress, MessageSerializer, SendTransportProvider, _host, result);
+            return new RabbitMqReceiveEndpointTopology(_configuration, inputAddress, MessageSerializer, _host, _hosts, topologyLayout);
         }
 
         TopologyLayout BuildTopology(ReceiveSettings settings)
         {
             var topologyBuilder = new ReceiveEndpointConsumeTopologyBuilder();
 
-            topologyBuilder.Queue = topologyBuilder.QueueDeclare(settings.QueueName, settings.Durable, settings.AutoDelete, settings.Exclusive,
-                settings.QueueArguments);
-            topologyBuilder.Exchange = topologyBuilder.ExchangeDeclare(settings.ExchangeName ?? settings.QueueName, settings.ExchangeType, settings.Durable,
-                settings.AutoDelete,
+            topologyBuilder.Queue = topologyBuilder.QueueDeclare(settings.QueueName, settings.Durable, settings.AutoDelete, settings.Exclusive, settings.QueueArguments);
+
+            topologyBuilder.Exchange = topologyBuilder.ExchangeDeclare(settings.ExchangeName ?? settings.QueueName, settings.ExchangeType, settings.Durable, settings.AutoDelete,
                 settings.ExchangeArguments);
+
             topologyBuilder.QueueBind(topologyBuilder.Exchange, topologyBuilder.Queue, settings.RoutingKey, settings.BindingArguments);
 
             _configuration.ConsumeTopology.Apply(topologyBuilder);

@@ -16,11 +16,8 @@ namespace MassTransit.HttpTransport.Clients
     using System.Threading.Tasks;
     using MassTransit.Pipeline;
     using MassTransit.Topology;
-    using Topology;
     using Transport;
     using Transports;
-    using Transports.InMemory;
-    using Transports.InMemory.Topology;
 
 
     public class HttpSendTransportProvider :
@@ -28,16 +25,15 @@ namespace MassTransit.HttpTransport.Clients
     {
         readonly BusHostCollection<HttpHost> _hosts;
         readonly IReceiveObserver _receiveObserver;
-        readonly IReceivePipe _receivePipe;
         readonly IReceiveEndpointTopology _topology;
+        readonly IReceivePipe _receivePipe;
 
-        public HttpSendTransportProvider(BusHostCollection<HttpHost> hosts, IReceivePipe receivePipe, IReceiveObserver receiveObserver,
-            IInMemoryEndpointConfiguration configuration, Uri inputAddress, IMessageSerializer serializer, IHttpHost host)
+        public HttpSendTransportProvider(BusHostCollection<HttpHost> hosts, IReceivePipe receivePipe, IReceiveObserver receiveObserver, IReceiveEndpointTopology topology)
         {
             _hosts = hosts;
             _receivePipe = receivePipe;
             _receiveObserver = receiveObserver;
-            _topology = new HttpReceiveEndpointTopology(configuration, inputAddress, serializer, this, host);
+            _topology = topology;
         }
 
         public Task<ISendTransport> GetSendTransport(Uri address)
@@ -46,7 +42,7 @@ namespace MassTransit.HttpTransport.Clients
 
             var host = _hosts.GetHost(address);
 
-            var clientCache = new HttpClientCache(_hosts[0].Supervisor, _receivePipe);
+            var clientCache = new HttpClientCache(host.Supervisor, _receivePipe);
 
             return Task.FromResult<ISendTransport>(new HttpSendTransport(clientCache, sendSettings, _receiveObserver, _topology));
         }

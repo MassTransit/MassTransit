@@ -28,11 +28,9 @@ namespace MassTransit.Pipeline.Filters
         IFilter<ExceptionReceiveContext>
     {
         readonly Uri _destinationAddress;
-        readonly Lazy<Task<ISendTransport>> _getDestinationTransport;
 
-        public MoveExceptionToTransportFilter(Uri destinationAddress, Func<Task<ISendTransport>> getDestinationTransport)
+        public MoveExceptionToTransportFilter(Uri destinationAddress)
         {
-            _getDestinationTransport = new Lazy<Task<ISendTransport>>(getDestinationTransport);
             _destinationAddress = destinationAddress;
         }
 
@@ -44,7 +42,7 @@ namespace MassTransit.Pipeline.Filters
 
         async Task IFilter<ExceptionReceiveContext>.Send(ExceptionReceiveContext context, IPipe<ExceptionReceiveContext> next)
         {
-            var transport = await _getDestinationTransport.Value.ConfigureAwait(false);
+            var transport = await context.SendTransportProvider.GetSendTransport(_destinationAddress).ConfigureAwait(false);
 
             var exception = context.Exception.GetBaseException() ?? context.Exception;
 

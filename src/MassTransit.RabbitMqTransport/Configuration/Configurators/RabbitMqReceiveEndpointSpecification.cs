@@ -209,7 +209,12 @@ namespace MassTransit.RabbitMqTransport.Configurators
 
         public void Apply(IBusBuilder builder)
         {
-            var receiveEndpointBuilder = new RabbitMqReceiveEndpointBuilder(builder, _host, _bindMessageExchanges, _configuration);
+            var rabbitMqBusBuilder = builder as RabbitMqBusBuilder;
+            if (rabbitMqBusBuilder == null)
+                throw new ConfigurationException("Must be a RabbitMqBusBuilder");
+
+            var receiveEndpointBuilder = new RabbitMqReceiveEndpointBuilder(builder, _host, rabbitMqBusBuilder.Hosts, _bindMessageExchanges, _configuration);
+
 
             var receivePipe = CreateReceivePipe(receiveEndpointBuilder);
 
@@ -234,12 +239,12 @@ namespace MassTransit.RabbitMqTransport.Configurators
 
         protected override Uri GetErrorAddress()
         {
-            return _host.Settings.Topology.GetErrorAddress(_settings);
+            return _configuration.SendTopology.GetErrorAddress(_settings, _host.Address);
         }
 
         protected override Uri GetDeadLetterAddress()
         {
-            return _host.Settings.Topology.GetDeadLetterAddress(_settings);
+            return _configuration.SendTopology.GetDeadLetterAddress(_settings, _host.Address);
         }
     }
 }

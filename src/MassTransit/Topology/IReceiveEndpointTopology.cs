@@ -40,5 +40,10 @@ namespace MassTransit.Topology
         /// </summary>
         /// <value></value>
         IPublishEndpointProvider PublishEndpointProvider { get; }
+
+        /// <summary>
+        /// Returns the send transport provider
+        /// </summary>
+        ISendTransportProvider SendTransportProvider { get; }
     }
 }

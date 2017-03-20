@@ -80,7 +80,7 @@ namespace MassTransit.HttpTransport.Specifications
 
             var endpointSpecification = _configuration.CreateConfiguration();
 
-            var specification = new HttpReceiveEndpointSpecification(host, pathMatch, endpointSpecification);
+            var specification = new HttpReceiveEndpointSpecification(host, _hosts, pathMatch, endpointSpecification);
 
             specification.ConnectConsumerConfigurationObserver(this);
             specification.ConnectSagaConfigurationObserver(this);

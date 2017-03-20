@@ -38,12 +38,12 @@ namespace MassTransit.AzureServiceBusTransport.Builders
 
             var endpointTopologySpecification = configuration.CreateConfiguration(ConsumePipe);
 
-            _busEndpointSpecification = new ServiceBusReceiveEndpointSpecification(_hosts[0], settings, endpointTopologySpecification);
+            _busEndpointSpecification = new ServiceBusReceiveEndpointSpecification(_hosts[0], _hosts, settings, endpointTopologySpecification);
 
             foreach (var host in hosts.Hosts)
             {
-                host.ReceiveEndpointFactory = new ServiceBusReceiveEndpointFactory(this, host, configuration);
-                host.SubscriptionEndpointFactory = new ServiceBusSubscriptionEndpointFactory(this, host, configuration);
+                host.ReceiveEndpointFactory = new ServiceBusReceiveEndpointFactory(this, host, _hosts, configuration);
+                host.SubscriptionEndpointFactory = new ServiceBusSubscriptionEndpointFactory(this, host, _hosts, configuration);
             }
         }
 
@@ -54,11 +54,6 @@ namespace MassTransit.AzureServiceBusTransport.Builders
         protected override Uri GetInputAddress()
         {
             return _busEndpointSpecification.InputAddress;
-        }
-
-        protected override ISendTransportProvider CreateSendTransportProvider()
-        {
-            return new ServiceBusSendTransportProvider(_hosts);
         }
 
         protected override void PreBuild()

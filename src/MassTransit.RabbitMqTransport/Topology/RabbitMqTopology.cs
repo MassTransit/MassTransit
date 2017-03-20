@@ -40,8 +40,6 @@ namespace MassTransit.RabbitMqTransport.Topology
             _hostAddress = hostAddress;
         }
 
-        public IExchangeTypeSelector ExchangeTypeSelector => _exchangeTypeSelector;
-
         public void ThrowIfEntityNameInvalid(string name)
         {
             if (string.IsNullOrWhiteSpace(name))
@@ -97,44 +95,6 @@ namespace MassTransit.RabbitMqTransport.Topology
                 settings.BindToExchange(bindExchange);
 
             return settings;
-        }
-
-        public SendSettings GetSendSettings(Type messageType, Action<IExchangeConfigurator> configure = null)
-        {
-            var isTemporary = messageType.IsTemporaryMessageType();
-
-            var durable = !isTemporary;
-            var autoDelete = isTemporary;
-
-            var name = _messageNameFormatter.GetMessageName(messageType).ToString();
-
-            var settings = new RabbitMqSendSettings(name, _exchangeTypeSelector.DefaultExchangeType, durable, autoDelete);
-
-            configure?.Invoke(settings);
-
-            return settings;
-        }
-
-        public Uri GetDeadLetterAddress(ReceiveSettings settings)
-        {
-            var errorQueueName = settings.QueueName + "_skipped";
-            var sendSettings = new RabbitMqSendSettings(errorQueueName, _exchangeTypeSelector.DefaultExchangeType, settings.Durable,
-                settings.AutoDelete);
-
-            sendSettings.BindToQueue(errorQueueName);
-
-            return sendSettings.GetSendAddress(_hostAddress);
-        }
-
-        public Uri GetErrorAddress(ReceiveSettings settings)
-        {
-            var errorQueueName = settings.QueueName + "_error";
-            var sendSettings = new RabbitMqSendSettings(errorQueueName, _exchangeTypeSelector.DefaultExchangeType, settings.Durable,
-                settings.AutoDelete);
-
-            sendSettings.BindToQueue(errorQueueName);
-
-            return sendSettings.GetSendAddress(_hostAddress);
         }
 
         public Uri GetDestinationAddress(string exchangeName, Action<IExchangeConfigurator> configure = null)
