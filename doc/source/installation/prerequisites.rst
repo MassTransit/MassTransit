@@ -1,14 +1,13 @@
-This page is obsolete 
----------------------
+Prerequisites
+=============
 
-**New documentation is located at** http://masstransit-project.com/MassTransit
+.. attention:: This page is obsolete 
+
+   New documentation is located at http://masstransit-project.com/MassTransit
 
 **The latest version of this page can be found** here_
 
 .. _here: http://masstransit-project.com/MassTransit/introduction/prerequisites.html
-
-Prerequisites
-=============
 
 MassTransit is written in C# and requires a compatible .NET framework. MassTransit is built and tested with .NET 4.5,
 and the shipped assemblies target this version. Visual Studio 2015 is used, and the new C# 6 syntax is used.
