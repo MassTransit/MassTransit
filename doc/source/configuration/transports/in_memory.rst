@@ -1,6 +1,14 @@
 In-Memory transport
 ===================
 
+.. attention:: **This page is obsolete!**
+
+   New documentation is located at http://masstransit-project.com/MassTransit.
+
+   The latest version of this page can be found here_.
+
+.. _here: http://masstransit-project.com/MassTransit/usage/transports.html#in-memory-transport
+
 .. warning::
 
     The in-memory transport is designed for use within a single process only.

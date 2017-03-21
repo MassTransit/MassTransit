@@ -1,6 +1,14 @@
 Show me the code!
 =================
 
+.. attention:: **This page is obsolete!**
+
+   New documentation is located at http://masstransit-project.com/MassTransit.
+
+   The latest version of this page can be found here_.
+
+.. _here: http://masstransit-project.com/MassTransit/quickstart.html
+
 All right, all right, already. Here you go. Below is a functional setup of
 MassTransit.
 
