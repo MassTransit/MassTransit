@@ -1,6 +1,14 @@
 Key terminology
 ===============
 
+.. attention:: **This page is obsolete!**
+
+   New documentation is located at http://masstransit-project.com/MassTransit.
+
+   The latest version of this page can be found here_.
+
+.. _here: http://masstransit-project.com/MassTransit/understand/key-ideas.html
+
 When getting started using MassTransit, it is a good idea to have a handle on the terminology
 used in messaging. To ensure that you are on the right path when looking at a class or interface,
 here are some of the terms used when working with MassTransit.
