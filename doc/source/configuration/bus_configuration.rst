@@ -1,6 +1,14 @@
 Bus configuration
 =================
 
+.. attention:: **This page is obsolete!**
+
+   New documentation is located at http://masstransit-project.com/MassTransit.
+
+   The latest version of this page can be found here_.
+
+.. _here: http://masstransit-project.com/MassTransit/usage/configuration.html
+
 Trying to get multiple applications to talk to each other is not a simple problem.
 Often times the biggest is just getting everything configured. With over eight
 years of experience in setting up message based systems the developers of MassTransit
