@@ -1,6 +1,14 @@
 Publishing messages
 ===================
 
+.. attention:: **This page is obsolete!**
+
+   New documentation is located at http://masstransit-project.com/MassTransit.
+
+   The latest version of this page can be found here_.
+
+.. _here: http://masstransit-project.com/MassTransit/understand/publishing.html
+
 When a message is published (by way of a call to ``bus.Publish``), it's important to understand what MassTransit actually
 does under the hood. While the explicit implementation details depend upon the message transport being used, the general
 pattern is the same.
