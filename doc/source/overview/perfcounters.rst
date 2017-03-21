@@ -1,6 +1,14 @@
 Performance counters
 ======================
 
+.. attention:: **This page is obsolete!**
+
+   New documentation is located at http://masstransit-project.com/MassTransit.
+
+   The latest version of this page can be found here_.
+
+.. _here: http://masstransit-project.com/MassTransit/understand/perfcounters.html
+
 Masstransit has support for updating Windows performance counters. Chris has a post introducing them - Performance Counters Added to MassTransit. http://lostechies.com/chrispatterson/2009/10/14/performance-counters-added-to-masstransit/
 
 User permissions
