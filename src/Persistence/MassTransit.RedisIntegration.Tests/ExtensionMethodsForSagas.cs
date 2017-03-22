@@ -17,7 +17,7 @@ namespace MassTransit.RedisIntegration.Tests
     using System.Threading.Tasks;
     using RedisIntegration;
     using Saga;
-    using ServiceStack.DesignPatterns.Model;
+    using ServiceStack.Model;
 
 
     public static class ExtensionMethodsForSagas

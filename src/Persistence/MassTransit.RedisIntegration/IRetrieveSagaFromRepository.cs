@@ -12,9 +12,10 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RedisIntegration
 {
-    using ServiceStack.DesignPatterns.Model;
     using System;
     using Saga;
+    using ServiceStack.Model;
+
 
     public interface IRetrieveSagaFromRepository<out TSaga> where TSaga: ISaga, IHasGuidId
     {
