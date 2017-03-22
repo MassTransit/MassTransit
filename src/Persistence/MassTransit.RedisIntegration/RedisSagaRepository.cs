@@ -17,7 +17,7 @@ namespace MassTransit.RedisIntegration
     using GreenPipes;
     using Logging;
     using Saga;
-    using ServiceStack.DesignPatterns.Model;
+    using ServiceStack.Model;
     using ServiceStack.Redis;
     using ServiceStack.Redis.Generic;
     using Util;

@@ -15,14 +15,13 @@ namespace MassTransit.RedisIntegration.Tests
     using System;
     using System.Threading.Tasks;
     using Saga;
-    using ServiceStack.DesignPatterns.Model;
+    using ServiceStack.Model;
 
 
     public class SimpleSaga :
         InitiatedBy<InitiateSimpleSaga>,
         Orchestrates<CompleteSimpleSaga>,
         //Observes<ObservableSagaMessage, SimpleSaga>,
-        ISaga,
         IHasGuidId,
         IVersionedSaga
     {

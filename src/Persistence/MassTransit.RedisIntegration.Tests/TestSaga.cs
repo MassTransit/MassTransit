@@ -14,7 +14,7 @@ namespace MassTransit.RedisIntegration.Tests
 {
     using System;
     using Saga;
-    using ServiceStack.DesignPatterns.Model;
+    using ServiceStack.Model;
 
 
     public class TestSaga : ISaga,
