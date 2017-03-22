@@ -16,7 +16,7 @@ namespace MassTransit.RedisIntegration
     using System.Threading.Tasks;
     using Context;
     using Logging;
-    using ServiceStack.DesignPatterns.Model;
+    using ServiceStack.Model;
     using ServiceStack.Redis;
     using Util;
 
