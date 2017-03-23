@@ -1,6 +1,14 @@
 Tuning the transport
 ====================
 
+.. attention:: **This page is obsolete!**
+
+   New documentation is located at http://masstransit-project.com/MassTransit.
+
+   The latest version of this page can be found here_.
+
+.. _here: http://masstransit-project.com/MassTransit
+
 There are a number of settings which can be configured, not including the available
 middleware components. Many of them are specific to the transport, but some are
 common.
