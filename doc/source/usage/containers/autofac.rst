@@ -1,6 +1,14 @@
 Configuring Autofac
 ===================
 
+.. attention:: **This page is obsolete!**
+
+   New documentation is located at http://masstransit-project.com/MassTransit.
+
+   The latest version of this page can be found here_.
+
+.. _here: http://masstransit-project.com/MassTransit/usage/containers/autofac.html
+
 Autofac is a powerful and fast container, and is well supported by MassTransit. Nested lifetime scopes are used
 extensively to encapsulate dependencies and ensure clean object lifetime management. The following examples show the
 various ways that MassTransit can be configured, including the appropriate interfaces necessary.

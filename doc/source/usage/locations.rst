@@ -1,6 +1,14 @@
 Configuring MassTransit
 =======================
 
+.. attention:: **This page is obsolete!**
+
+   New documentation is located at http://masstransit-project.com/MassTransit.
+
+   The latest version of this page can be found here_.
+
+.. _here: http://masstransit-project.com/MassTransit/usage/configuration.html
+
 To configure MassTransit in your application, it depends upon the application type.
 There are several application types, which are covered below. In these examples, the
 use of a dependency injection framework is not included. Using a container (such as

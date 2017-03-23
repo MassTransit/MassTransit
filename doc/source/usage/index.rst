@@ -1,10 +1,13 @@
-# This page is *obsolete*. New documentation is located at 
-[http://masstransit-project.com/MassTransit](http://masstransit-project.com/MassTransit).
-## The latest version of this page can be found [here]
-(http://masstransit-project.com/MassTransit/usage/)
-
 Using MassTransit
 =================
+
+.. attention:: **This page is obsolete!**
+
+   New documentation is located at http://masstransit-project.com/MassTransit.
+
+   The latest version of this page can be found here_.
+
+.. _here: http://masstransit-project.com/MassTransit/usage/
 
 In order to use and understand MassTransit, a set of recipe-based usage examples are
 provided below.

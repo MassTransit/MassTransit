@@ -1,6 +1,14 @@
 Observing lifecycle events
 ==========================
 
+.. attention:: **This page is obsolete!**
+
+   New documentation is located at http://masstransit-project.com/MassTransit.
+
+   The latest version of this page can be found here_.
+
+.. _here: http://masstransit-project.com/MassTransit/usage/lifecycle-observers.html
+
 When integrating a framework into your application, it can be useful to understand when the framework is "doing stuff."
 Whether it is starting up, shutting down, or anything in between, being notified and thereby able to take action is a
 huge benefit.
