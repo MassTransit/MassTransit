@@ -1,6 +1,14 @@
 Loving the community
 ====================
 
+.. attention:: **This page is obsolete!**
+
+   New documentation is located at http://masstransit-project.com/MassTransit.
+
+   The latest version of this page can be found here_.
+
+.. _here: http://masstransit-project.com/MassTransit/learn/loving-the-community.html
+
 MassTransit has a great community of developers, many of which have contributed their time and energy to 
 help make MassTransit what it is today. To that end, I felt it would be useful to compile some of the
 blog posts and articles that have been written by developers using MassTransit.

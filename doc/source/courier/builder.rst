@@ -1,6 +1,14 @@
 Building a routing slip
 =======================
 
+.. attention:: **This page is obsolete!**
+
+   New documentation is located at http://masstransit-project.com/MassTransit.
+
+   The latest version of this page can be found here_.
+
+.. _here: http://masstransit-project.com/MassTransit/advanced/courier/builder.html
+
 Developers are discouraged from directly implementing the *RoutingSlip* message type and should instead use a *RoutingSlipBuilder* to create a routing slip. The *RoutingSlipBuilder* encapsulates the creation of the routing slip and includes methods to add activities, activity logs, and variables to the routing slip. For example, to create a routing slip with two activities and an additional variable, a developer would write:
 
 .. sourcecode:: csharp
