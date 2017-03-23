@@ -1,6 +1,14 @@
 Configuring StructureMap
 ========================
 
+.. attention:: **This page is obsolete!**
+
+   New documentation is located at http://masstransit-project.com/MassTransit.
+
+   The latest version of this page can be found here_.
+
+.. _here: http://masstransit-project.com/MassTransit/usage/containers/structuremap.html
+
 The following example shows how to configure a simple StructureMap container, and include the bus in the
 container. The two bus interfaces, ``IBus`` and ``IBusControl``, are included.
 

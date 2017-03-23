@@ -1,6 +1,14 @@
 Creating a message contract
 ===========================
 
+.. attention:: **This page is obsolete!**
+
+   New documentation is located at http://masstransit-project.com/MassTransit.
+
+   The latest version of this page can be found here_.
+
+.. _here: http://masstransit-project.com/MassTransit/usage/message-contracts.html
+
 In MassTransit, a message contract is defined using the .NET type system. Messages
 can be defined using both classes and interfaces, however, it is suggested that types
 use read-only properties and no behavior.

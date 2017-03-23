@@ -1,6 +1,14 @@
 Creating a message consumer
 ===========================
 
+.. attention:: **This page is obsolete!**
+
+   New documentation is located at http://masstransit-project.com/MassTransit.
+
+   The latest version of this page can be found here_.
+
+.. _here: http://masstransit-project.com/MassTransit/usage/message-consumers.html
+
 A message consumer is a class that consumes one or more message types, specified by the
 ``IConsumer<T>`` interface, where ``T`` is the message type.
 

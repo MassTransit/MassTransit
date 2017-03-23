@@ -1,6 +1,14 @@
 Displaying configuration
 ========================
 
+.. attention:: **This page is obsolete!**
+
+   New documentation is located at http://masstransit-project.com/MassTransit.
+
+   The latest version of this page can be found here_.
+
+.. _here: http://masstransit-project.com/MassTransit/troubleshooting/show-config.html
+
 A bus instance is composed of many classes, all of which are wired together to form a connection pipeline of
 message processing goodness. This brings a bit of complexity, as there are many moving parts behind the curtain.
 To help troubleshoot and understand how a bus is configured, it is possible to probe the bus and return an object
