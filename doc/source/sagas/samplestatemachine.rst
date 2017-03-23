@@ -1,6 +1,14 @@
 Sample State Machine
 ====================
 
+.. attention:: **This page is obsolete!**
+
+   New documentation is located at http://masstransit-project.com/MassTransit.
+
+   The latest version of this page can be found here_.
+
+.. _here: http://masstransit-project.com/MassTransit/advanced/sagas/automatonymous.html
+
 Automatonymous_ is a
 state machine engine written by Chris Patterson, aka, PhatBoyG.
 
