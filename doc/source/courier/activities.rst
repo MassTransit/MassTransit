@@ -1,6 +1,14 @@
 Activities
 ==========
 
+.. attention:: **This page is obsolete!**
+
+   New documentation is located at http://masstransit-project.com/MassTransit.
+
+   The latest version of this page can be found here_.
+
+.. _here: http://masstransit-project.com/MassTransit/advanced/courier/activities.html
+
 In MassTransit Courier, an *Activity* refers to a processing step that can be added to a routing slip. To create an activity, create a class that implements the *Activity* interface.
 
 .. sourcecode:: csharp
