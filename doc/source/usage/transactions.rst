@@ -1,6 +1,14 @@
 Managing transactions
 =====================
 
+.. attention:: **This page is obsolete!**
+
+   New documentation is located at http://masstransit-project.com/MassTransit.
+
+   The latest version of this page can be found here_.
+
+.. _here: http://masstransit-project.com/MassTransit/advanced/transactions.html
+
 .. note::
 
     This is an advanced concept, and scenarios vary, so consider this guidance, not gospel.

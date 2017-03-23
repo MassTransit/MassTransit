@@ -1,6 +1,14 @@
 Handling exceptions
 ===================
 
+.. attention:: **This page is obsolete!**
+
+   New documentation is located at http://masstransit-project.com/MassTransit.
+
+   The latest version of this page can be found here_.
+
+.. _here: http://masstransit-project.com/MassTransit/usage/exceptions.html
+
 Let's face it, bad things happen. Networks partition, data servers crash, remote endpoints get busy and fail
 to respond. And when bad things happen, exceptions get thrown. And when exceptions get thrown, people die.
 Okay, maybe that's a bit dramatic, but the point is, exceptions are a fact of software development.
