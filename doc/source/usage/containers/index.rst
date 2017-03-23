@@ -1,6 +1,14 @@
 Configuring a container
 =======================
 
+.. attention:: **This page is obsolete!**
+
+   New documentation is located at http://masstransit-project.com/MassTransit.
+
+   The latest version of this page can be found here_.
+
+.. _here: http://masstransit-project.com/MassTransit/usage/containers/
+
 When MassTransit was originally built, it required a dependency injection container to work. Unfortunately,
 in 2008 there were few .NET developers who knew what Inversion of Control (IOC) or Dependency Injection (DI) was,
 and even fewer who used it. Several versions later, the requirement was dropped and container support was put back

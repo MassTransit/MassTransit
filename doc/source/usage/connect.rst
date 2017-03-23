@@ -1,6 +1,14 @@
 Connecting endpoints
 ====================
 
+.. attention:: **This page is obsolete!**
+
+   New documentation is located at http://masstransit-project.com/MassTransit.
+
+   The latest version of this page can be found here_.
+
+.. _here: http://masstransit-project.com/MassTransit/usage/connect-endpoint.html
+
 Once the bus is started, additional endpoints may be connected. An additional endpoint may be needed for a temporary process, or to allow an application to receive responses on a dedicated queue versus using the existing bus receive endpoint.
 
 

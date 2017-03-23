@@ -1,6 +1,14 @@
 Producing messages
 ==================
 
+.. attention:: **This page is obsolete!**
+
+   New documentation is located at http://masstransit-project.com/MassTransit.
+
+   The latest version of this page can be found here_.
+
+.. _here: http://masstransit-project.com/MassTransit/usage/producing-messages.html
+
 An application or service can produce messages using two different methods. A message can be sent using ``Send`` or a 
 message can be published using ``Publish``. The behavior of each method is very different, but it easy to understand
 by looking at the type of messages involved with each particular method.
