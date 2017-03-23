@@ -1,6 +1,14 @@
 Interoperability
 ================
 
+.. attention:: **This page is obsolete!**
+
+   New documentation is located at http://masstransit-project.com/MassTransit.
+
+   The latest version of this page can be found here_.
+
+.. _here: http://masstransit-project.com/MassTransit/advanced/interoperability.html
+
 In MassTransit, developers specify types for messages. MassTransit's serializers then perform the hard work of converting the types to the serializer format (such as JSON, XML, BSON, etc.) and then back again.
 
 To interoperate with other languages and platforms, the message structure is important.
