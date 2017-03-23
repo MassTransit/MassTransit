@@ -50,7 +50,7 @@ namespace MassTransit.Serialization
             {
                 MessageEnvelope envelope;
                 using (Stream body = receiveContext.GetBody())
-                using (var jsonReader = new BsonReader(body))
+                using (var jsonReader = new BsonDataReader(body))
                 {
                     envelope = _deserializer.Deserialize<MessageEnvelope>(jsonReader);
                 }

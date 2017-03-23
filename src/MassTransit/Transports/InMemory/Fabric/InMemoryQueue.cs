@@ -72,7 +72,7 @@ namespace MassTransit.Transports.InMemory.Fabric
             {
                 await consumer.Consume(message, _cancellationToken.Token);
             }
-            catch (Exception ex)
+            catch
             {
             }
             finally

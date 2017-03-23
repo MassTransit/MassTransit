@@ -99,7 +99,7 @@ namespace MassTransit.Transports.InMemory
                 _topology = topology;
 
             if (_log.IsDebugEnabled)
-                _log.DebugFormat("Creating receive transport for queueu: {0}", queueName);
+                _log.DebugFormat("Creating receive transport for queue: {0}", queueName);
 
             var queue = _messageFabric.GetQueue(queueName);
 

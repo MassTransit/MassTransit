@@ -38,46 +38,46 @@ namespace MassTransit.Topology.Observers
         }
 
 
-        class Proxy<T> :
-            IMessagePublishTopology<T>
-            where T : class
+        class Proxy<TMessage> :
+            IMessagePublishTopology<TMessage>
+            where TMessage : class
         {
-            readonly IMessageSendTopology<T> _topology;
+            readonly IMessageSendTopology<TMessage> _topology;
 
-            public Proxy(IMessageSendTopology<T> topology)
+            public Proxy(IMessageSendTopology<TMessage> topology)
             {
                 _topology = topology;
             }
 
-            public void Apply(ITopologyPipeBuilder<PublishContext<T>> builder)
+            public void Apply(ITopologyPipeBuilder<PublishContext<TMessage>> builder)
             {
                 var sendBuilder = new Builder(builder);
 
                 _topology.Apply(sendBuilder);
             }
 
-            public bool TryGetPublishAddress(Uri baseAddress, T message, out Uri publishAddress)
+            public bool TryGetPublishAddress(Uri baseAddress, TMessage message, out Uri publishAddress)
             {
                 publishAddress = null;
                 return false;
             }
 
-            public IMessageEntityNameFormatter<T> EntityNameFormatter => null;
+            public IMessageEntityNameFormatter<TMessage> EntityNameFormatter => null;
 
 
             class Builder :
-                ITopologyPipeBuilder<SendContext<T>>
+                ITopologyPipeBuilder<SendContext<TMessage>>
             {
-                readonly ITopologyPipeBuilder<PublishContext<T>> _builder;
+                readonly ITopologyPipeBuilder<PublishContext<TMessage>> _builder;
 
-                public Builder(ITopologyPipeBuilder<PublishContext<T>> builder)
+                public Builder(ITopologyPipeBuilder<PublishContext<TMessage>> builder)
                 {
                     _builder = builder;
                 }
 
-                public void AddFilter(IFilter<SendContext<T>> filter)
+                public void AddFilter(IFilter<SendContext<TMessage>> filter)
                 {
-                    var splitFilter = new SplitFilter<PublishContext<T>, SendContext<T>>(filter, MergeContext, FilterContext);
+                    var splitFilter = new SplitFilter<PublishContext<TMessage>, SendContext<TMessage>>(filter, MergeContext, FilterContext);
 
                     _builder.AddFilter(splitFilter);
                 }
@@ -85,21 +85,21 @@ namespace MassTransit.Topology.Observers
                 public bool IsDelegated => _builder.IsDelegated;
                 public bool IsImplemented => _builder.IsImplemented;
 
-                public ITopologyPipeBuilder<SendContext<T>> CreateDelegatedBuilder()
+                public ITopologyPipeBuilder<SendContext<TMessage>> CreateDelegatedBuilder()
                 {
-                    return new ChildBuilder<SendContext<T>>(this, IsImplemented, true);
+                    return new ChildBuilder<SendContext<TMessage>>(this, IsImplemented, true);
                 }
 
-                static SendContext<T> FilterContext(PublishContext<T> context)
+                static SendContext<TMessage> FilterContext(PublishContext<TMessage> context)
                 {
                     return context;
                 }
 
-                static PublishContext<T> MergeContext(PublishContext<T> input, SendContext context)
+                static PublishContext<TMessage> MergeContext(PublishContext<TMessage> input, SendContext context)
                 {
-                    var result = context as PublishContext<T>;
+                    var result = context as PublishContext<TMessage>;
 
-                    return result ?? new PublishContextProxy<T>(context, input.Message);
+                    return result ?? new PublishContextProxy<TMessage>(context, input.Message);
                 }
 
 
