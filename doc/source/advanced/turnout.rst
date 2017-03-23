@@ -1,6 +1,14 @@
 Long-running tasks using Turnout
 ================================
 
+.. attention:: **This page is obsolete!**
+
+   New documentation is located at http://masstransit-project.com/MassTransit.
+
+   The latest version of this page can be found here_.
+
+.. _here: http://masstransit-project.com/MassTransit/advanced/turnout/
+
 Message consumers are similar to web controllers in that they are intended to live for a short time -- the time it takes to process a single message. However, there are times when the processing *initiated* by a message takes long time (for instance, longer than a minute). Rather than block the message consumer and preventing it from consuming additional messages, a way to start an asynchronous task is required.
 
 Turnout enables the execution of long-running tasks initiated by a message consumer. Turnout manages the lifetime of the task, and appropriately handles failure and handing off to other nodes in the event of a server failure.
