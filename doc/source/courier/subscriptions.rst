@@ -1,6 +1,14 @@
 Subscriptions
 =============
 
+.. attention:: **This page is obsolete!**
+
+   New documentation is located at http://masstransit-project.com/MassTransit.
+
+   The latest version of this page can be found here_.
+
+.. _here: http://masstransit-project.com/MassTransit/advanced/courier/subscriptions.html
+
 By default, routing slip events are published -- which means that any subscribed consumers will receive the events. While this is useful getting started, it can quickly get out of control as applications grow and multiple unrelated routing slips are used. To handle this, subscriptions were added (yes, added, because they weren't though of until we experienced this ourselves).
 
 Subscriptions are added to the routing slip at the time it is built using the ``RoutingSlipBuilder``.

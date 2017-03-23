@@ -1,6 +1,14 @@
 Using Courier
 =============
 
+.. attention:: **This page is obsolete!**
+
+   New documentation is located at http://masstransit-project.com/MassTransit.
+
+   The latest version of this page can be found here_.
+
+.. _here: http://masstransit-project.com/MassTransit/advanced/courier/
+
 Developing applications using a distributed, message-based architecture significantly increases the complexity of performing operations transactionally, where an end-to-end set of steps much be completed entirely, or not at all. In an application using an ACID database, this is typically done using SQL transactions, where partial operations are rolled back if the transaction cannot be completed. However, this doesn't scale when the steps being to include dependencies outside of a single database. And in the distributed, *micro-services* based architectures, the use of a single ACID database is shrinking to completely non-existent.
 
 MassTransit Courier is a mechanism for creating and executing distributed transactions with fault compensation that can be used to meet the requirements previously within the domain of database transactions, but built to scale across a large system of distributed services. Courier also works well with MassTransit sagas, which add transaction monitoring and recoverability.
