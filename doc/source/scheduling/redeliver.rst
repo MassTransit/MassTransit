@@ -1,6 +1,14 @@
 Redelivering messages
 =====================
 
+.. attention:: **This page is obsolete!**
+
+   New documentation is located at http://masstransit-project.com/MassTransit.
+
+   The latest version of this page can be found here_.
+
+.. _here: http://masstransit-project.com/MassTransit/usage/scheduling/redeliver.html
+
 There are situations where a message cannot be processed, either due to an unavailable resource or a situation
 in which message ordering is important (you should try not to depend upon message order, but sometimes it is an
 easy workaround). In these situations, scheduling a message for redelivery is a powerful tool.
