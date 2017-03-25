@@ -1,6 +1,14 @@
 Retry
 =====
 
+.. attention:: **This page is obsolete!**
+
+   New documentation is located at http://masstransit-project.com/MassTransit.
+
+   The latest version of this page can be found here_.
+
+.. _here: http://masstransit-project.com/MassTransit/usage/retries.html
+
 The retry policy can be specified at the bus level, as well as the endpoint and consumer level.
 The policy closest to the exception is the policy that is used.
 
