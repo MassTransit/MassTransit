@@ -1,6 +1,14 @@
 Using the rate limiter
 ======================
 
+.. attention:: **This page is obsolete!**
+
+   New documentation is located at http://masstransit-project.com/MassTransit.
+
+   The latest version of this page can be found here_.
+
+.. _here: http://masstransit-project.com/MassTransit/advanced/middleware/rate-limiter.html
+
 A rate limiter is used to restrict the number of messages processed within a time period. The reason may be
 that an API or service only accepts a certain number of calls per minute, and will delay any subsequent attempts
 until the rate limiting period has expired.

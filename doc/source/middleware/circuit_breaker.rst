@@ -1,6 +1,14 @@
 Using the circuit breaker
 =========================
 
+.. attention:: **This page is obsolete!**
+
+   New documentation is located at http://masstransit-project.com/MassTransit.
+
+   The latest version of this page can be found here_.
+
+.. _here: http://masstransit-project.com/MassTransit/advanced/middleware/circuit-breaker.html
+
 A circuit breaker is used to protect resources (remote, local, or otherwise) from being overloaded when
 in a failure state. For example, a remote web site may be unavailable and calling that web site in a
 message consumer takes 30-60 seconds to time out. By continuing to call the failing service, the service

@@ -1,6 +1,14 @@
 Logging in MassTransit
 ======================
 
+.. attention:: **This page is obsolete!**
+
+   New documentation is located at http://masstransit-project.com/MassTransit.
+
+   The latest version of this page can be found here_.
+
+.. _here: http://masstransit-project.com/MassTransit/usage/logging.html
+
 Loggin in MassTransit is now done using an internal abstraction allowing you
 to choose your preferred logging solution. Like NHibernate's 'NHibernate.SQL'
 where all of NHibernate's generated sql is logged, MassTransit has a log named

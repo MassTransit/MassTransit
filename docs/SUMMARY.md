@@ -52,6 +52,7 @@
     * [Observe messages](usage/observers.md)
     * [Observe lifecycle](usage/lifecycle-observers.md)
     * [Connect endpoints](usage/connect-endpoint.md)
+    * [Logging](usage/logging.md)
 
 ## Advanced 
 * [Sagas](advanced/sagas/README.md)

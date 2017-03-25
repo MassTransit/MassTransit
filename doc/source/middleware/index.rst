@@ -1,6 +1,14 @@
 Using middleware
 ================
 
+.. attention:: **This page is obsolete!**
+
+   New documentation is located at http://masstransit-project.com/MassTransit.
+
+   The latest version of this page can be found here_.
+
+.. _here: http://masstransit-project.com/MassTransit/advanced/middleware/
+
 MassTransit is composed of a network of pipelines, which are used to dispatch messages from the transport,
 through the receive endpoint, past deserialization, and ultimately to the consumers. And these pipelines
 are entirely asynchronous, making them very fast and very flexible.

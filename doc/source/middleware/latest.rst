@@ -1,6 +1,14 @@
 Using the latest filter
 =======================
 
+.. attention:: **This page is obsolete!**
+
+   New documentation is located at http://masstransit-project.com/MassTransit.
+
+   The latest version of this page can be found here_.
+
+.. _here: http://masstransit-project.com/MassTransit/advanced/middleware/latest.html
+
 The latest filter is pretty simple, it keeps track of the latest message received by the pipeline and makes that
 value available. It seems pretty simple, and it is, but it is actually useful in metrics and monitoring scenarios.
 
