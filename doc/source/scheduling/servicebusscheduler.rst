@@ -1,6 +1,14 @@
 Scheduling with Azure Service Bus
 =================================
 
+.. attention:: **This page is obsolete!**
+
+   New documentation is located at http://masstransit-project.com/MassTransit.
+
+   The latest version of this page can be found here_.
+
+.. _here: http://masstransit-project.com/MassTransit/usage/scheduling/azure-sb-scheduler.html
+
 Azure Service Bus allows the enqueue time of a message to be specified, making it possible to schedule messsages without the use of a separate message scheduler. MassTransit makes it easy to take advanced of this feature by configuring the bus scheduler to specify the enqueue time for scheduled messages.
 
 Configuring the enqueue time scheduler

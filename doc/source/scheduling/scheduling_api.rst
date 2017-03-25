@@ -1,6 +1,14 @@
 Using the scheduling API
 ========================
 
+.. attention:: **This page is obsolete!**
+
+   New documentation is located at http://masstransit-project.com/MassTransit.
+
+   The latest version of this page can be found here_.
+
+.. _here: http://masstransit-project.com/MassTransit/usage/scheduling/scheduling-api.html
+
 The scheduling API consists of several extension methods that send messages to an endpoint where
 the Quartz scheduling consumers are connected.
 
