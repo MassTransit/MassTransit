@@ -46,5 +46,15 @@ namespace MassTransit
 
             ConsumerConventionCache.Add(TypeMetadataCache<T>.ShortName, convention);
         }
+
+        /// <summary>
+        /// Remove a consumer convention used for finding message types
+        /// </summary>
+        /// <typeparam name="T">The convention type to remove</typeparam>
+        public static void Remove<T>()
+            where T : IConsumerConvention
+        {
+            ConsumerConventionCache.Remove(TypeMetadataCache<T>.ShortName);
+        }
     }
 }
