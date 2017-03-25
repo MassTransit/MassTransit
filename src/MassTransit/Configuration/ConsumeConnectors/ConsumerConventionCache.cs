@@ -15,12 +15,23 @@ namespace MassTransit.ConsumeConnectors
     using System.Collections.Concurrent;
     using System.Collections.Generic;
 
-
     public static class ConsumerConventionCache
     {
+        static ConsumerConventionCache()
+        {
+            ConsumerConvention.Register<AsyncConsumerConvention>();
+            ConsumerConvention.Register<LegacyConsumerConvention>();
+        }
+
         public static void Add(string conventionName, IConsumerConvention convention)
         {
             Cached.Instance.AddOrUpdate(conventionName, add => convention, (_, update) => convention);
+        }
+
+        public static void Remove(string conventionName)
+        {
+            IConsumerConvention _;
+            Cached.Instance.TryRemove(conventionName, out _);
         }
 
         /// <summary>
@@ -31,9 +42,6 @@ namespace MassTransit.ConsumeConnectors
         public static IEnumerable<IConsumerMessageConvention> GetConventions<T>()
             where T : class
         {
-            yield return new AsyncConsumerMessageConvention<T>();
-            yield return new LegacyConsumerMessageConvention<T>();
-
             foreach (var convention in Cached.Instance.Values)
             {
                 yield return convention.GetConsumerMessageConvention<T>();
