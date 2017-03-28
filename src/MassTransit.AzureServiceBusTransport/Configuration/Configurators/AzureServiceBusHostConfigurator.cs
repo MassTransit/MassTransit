@@ -76,7 +76,7 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
             public HostSettings(Uri serviceUri)
             {
                 ServiceUri = serviceUri;
-                OperationTimeout = TimeSpan.FromSeconds(10);
+                OperationTimeout = TimeSpan.FromSeconds(60);
 
                 RetryMinBackoff = TimeSpan.FromMilliseconds(100);
                 RetryMaxBackoff = TimeSpan.FromSeconds(20);
