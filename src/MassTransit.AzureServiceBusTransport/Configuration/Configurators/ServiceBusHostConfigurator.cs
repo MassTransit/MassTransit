@@ -80,7 +80,7 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
 
                 RetryMinBackoff = TimeSpan.FromMilliseconds(100);
                 RetryMaxBackoff = TimeSpan.FromSeconds(30);
-                RetryLimit = 3;
+                RetryLimit = 10;
 
                 TransportType = TransportType.Amqp;
                 AmqpTransportSettings = new AmqpTransportSettings();
