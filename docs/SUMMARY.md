@@ -4,6 +4,7 @@
 * [Understanding MassTransit](understand/README.md)
     * [Key terminology](understand/key-ideas.md)
     * [Under the hood](understand/under-the-hood.md)
+        * [Topology](understand/default-topology.md)
     * [What we add to the transport](understand/additions-to-transport.md)
     * [Publishing messages](understand/publishing.md)
     * [Sending messages](understand/sending.md)
