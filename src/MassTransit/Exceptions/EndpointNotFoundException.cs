@@ -17,29 +17,24 @@ namespace MassTransit
 
 
     [Serializable]
-    public class EndpointException :
-        AbstractUriException
+    public class EndpointNotFoundException :
+        MassTransitException
     {
-        public EndpointException()
+        public EndpointNotFoundException()
         {
         }
 
-        public EndpointException(Uri uri)
-            : base(uri)
+        public EndpointNotFoundException(string message)
+            : base(message)
         {
         }
 
-        public EndpointException(Uri uri, string message)
-            : base(uri, message)
+        public EndpointNotFoundException(string message, Exception innerException)
+            : base(message, innerException)
         {
         }
 
-        public EndpointException(Uri uri, string message, Exception innerException)
-            : base(uri, message, innerException)
-        {
-        }
-
-        protected EndpointException(SerializationInfo info, StreamingContext context)
+        protected EndpointNotFoundException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
         }

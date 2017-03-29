@@ -1,4 +1,4 @@
-// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -10,36 +10,36 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit
+namespace MassTransit.AzureServiceBusTransport
 {
     using System;
     using System.Runtime.Serialization;
 
 
     [Serializable]
-    public class EndpointException :
-        AbstractUriException
+    public class MessageTimeToLiveExpiredException :
+        TransportException
     {
-        public EndpointException()
+        public MessageTimeToLiveExpiredException()
         {
         }
 
-        public EndpointException(Uri uri)
+        public MessageTimeToLiveExpiredException(Uri uri)
             : base(uri)
         {
         }
 
-        public EndpointException(Uri uri, string message)
+        public MessageTimeToLiveExpiredException(Uri uri, string message)
             : base(uri, message)
         {
         }
 
-        public EndpointException(Uri uri, string message, Exception innerException)
+        public MessageTimeToLiveExpiredException(Uri uri, string message, Exception innerException)
             : base(uri, message, innerException)
         {
         }
 
-        protected EndpointException(SerializationInfo info, StreamingContext context)
+        protected MessageTimeToLiveExpiredException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
         }

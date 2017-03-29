@@ -148,6 +148,12 @@ namespace MassTransit.AzureServiceBusTransport.Transport
                 {
                     await _context.PreReceive(context).ConfigureAwait(false);
 
+                    if (message.LockedUntilUtc <= DateTime.UtcNow)
+                        throw new MessageLockExpiredException(_clientContext.InputAddress, $"The message lock expired: {message.MessageId}");
+
+                    if (message.ExpiresAtUtc < DateTime.UtcNow)
+                        throw new MessageTimeToLiveExpiredException(_clientContext.InputAddress, $"The message TTL expired: {message.MessageId}");
+
                     await _receivePipe.Send(context).ConfigureAwait(false);
 
                     await context.CompleteTask.ConfigureAwait(false);
@@ -164,13 +170,27 @@ namespace MassTransit.AzureServiceBusTransport.Transport
                     if (_log.IsErrorEnabled)
                         _log.Error($"Received faulted: {message.MessageId}", ex);
 
-                    await message.AbandonAsync().ConfigureAwait(false);
+                    await AbandonMessage(message).ConfigureAwait(false);
+
                     await _context.ReceiveFault(context, ex).ConfigureAwait(false);
                 }
                 finally
                 {
                     context.Dispose();
                 }
+            }
+        }
+
+        static async Task AbandonMessage(BrokeredMessage message)
+        {
+            try
+            {
+                await message.AbandonAsync().ConfigureAwait(false);
+            }
+            catch (Exception exception)
+            {
+                if (_log.IsWarnEnabled)
+                    _log.Warn($"Abandon message faulted: {message.MessageId}", exception);
             }
         }
 

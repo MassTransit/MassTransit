@@ -78,6 +78,11 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
             {
                 var delay = _delay;
 
+                if (LockWouldExpireBeforeRenewal())
+                {
+                    delay = TimeSpan.Zero;
+                }
+
                 while (_source.Token.IsCancellationRequested == false)
                 {
                     try
@@ -141,6 +146,11 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
                 }
 
                 _completed.TrySetResult(true);
+            }
+
+            bool LockWouldExpireBeforeRenewal()
+            {
+                return DateTime.UtcNow + _delay >= _context.LockedUntil;
             }
 
             public Task Complete()

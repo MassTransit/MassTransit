@@ -184,6 +184,7 @@
     <Compile Include="Events\ReceiveTransportReadyEvent.cs" />
     <Compile Include="ExceptionConsumerConsumeContext.cs" />
     <Compile Include="ExceptionSagaConsumeContext.cs" />
+    <Compile Include="Exceptions\EndpointNotFoundException.cs" />
     <Compile Include="HostReady.cs" />
     <Compile Include="IConsumeMessageObserver.cs" />
     <Compile Include="IConsumeObserver.cs" />
