@@ -136,7 +136,7 @@ The receive endpoint on the `service-queue`, when the bus is started, ensures th
 <div class="alert alert-info">
 <b>Important!:</b>
 The same rule for publish applies to send, if the consumer topology isn't setup by the receive endpoint, messages will disappear.
-</div>div>
+</div>
 
 ## Azure Service Bus
 
