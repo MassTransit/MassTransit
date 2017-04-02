@@ -16,7 +16,7 @@ namespace MassTransit.SimpleInjectorIntegration
     using GreenPipes;
     using Pipeline;
     using SimpleInjector;
-    using SimpleInjector.Extensions.ExecutionContextScoping;
+    using SimpleInjector.Lifestyles;
     using Util;
 
 
@@ -33,7 +33,7 @@ namespace MassTransit.SimpleInjectorIntegration
 
         async Task IConsumerFactory<TConsumer>.Send<T>(ConsumeContext<T> context, IPipe<ConsumerConsumeContext<TConsumer, T>> next)
         {
-            using (var scope = _container.BeginExecutionContextScope())
+            using (var scope = AsyncScopedLifestyle.BeginScope(_container))
             {
                 var consumer = _container.GetInstance<TConsumer>();
                 if (consumer == null)

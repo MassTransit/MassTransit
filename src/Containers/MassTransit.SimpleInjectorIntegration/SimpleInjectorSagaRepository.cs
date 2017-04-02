@@ -17,7 +17,7 @@ namespace MassTransit.SimpleInjectorIntegration
     using Pipeline;
     using Saga;
     using SimpleInjector;
-    using SimpleInjector.Extensions.ExecutionContextScoping;
+    using SimpleInjector.Lifestyles;
 
 
     public class SimpleInjectorSagaRepository<TSaga> :
@@ -42,7 +42,7 @@ namespace MassTransit.SimpleInjectorIntegration
 
         public async Task Send<T>(ConsumeContext<T> context, ISagaPolicy<TSaga, T> policy, IPipe<SagaConsumeContext<TSaga, T>> next) where T : class
         {
-            using (var scope = _container.BeginExecutionContextScope())
+            using (var scope = AsyncScopedLifestyle.BeginScope(_container))
             {
                 ConsumeContext<T> proxy = context.CreateScope(scope);
 
@@ -53,7 +53,7 @@ namespace MassTransit.SimpleInjectorIntegration
         public async Task SendQuery<T>(SagaQueryConsumeContext<TSaga, T> context, ISagaPolicy<TSaga, T> policy, IPipe<SagaConsumeContext<TSaga, T>> next)
             where T : class
         {
-            using (var scope = _container.BeginExecutionContextScope())
+            using (var scope = AsyncScopedLifestyle.BeginScope(_container))
             {
                 SagaQueryConsumeContext<TSaga, T> proxy = context.CreateQueryScope(scope);
 
