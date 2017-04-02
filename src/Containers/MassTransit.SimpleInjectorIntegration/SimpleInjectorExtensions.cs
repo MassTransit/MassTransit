@@ -18,7 +18,7 @@ namespace MassTransit.SimpleInjectorIntegration
         /// </summary>
         /// <param name="configurator">The configurator the extension method works on.</param>
         /// <param name="container">The SimpleInjector container.</param>
-        /// <remarks>You should register your message consumers with ExecutionContext scope.</remarks>
+        /// <remarks>You should register your message consumers with AsyncScoped lifestyle.</remarks>
         public static void LoadFrom(this IReceiveEndpointConfigurator configurator, Container container)
         {
             IList<Type> concreteTypes = FindTypes<IConsumer>(container, x => !x.HasInterface<ISaga>());
