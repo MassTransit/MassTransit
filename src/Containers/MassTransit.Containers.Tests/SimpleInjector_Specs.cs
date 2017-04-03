@@ -16,7 +16,7 @@ namespace MassTransit.Containers.Tests
     using Saga;
     using Scenarios;
     using SimpleInjector;
-    using SimpleInjector.Extensions.ExecutionContextScoping;
+    using SimpleInjector.Lifestyles;
     using SimpleInjectorIntegration;
 
 
@@ -34,7 +34,7 @@ namespace MassTransit.Containers.Tests
         public SimpleInjector_Consumer()
         {
             _container = new Container();
-            _container.Options.DefaultScopedLifestyle = new ExecutionContextScopeLifestyle();
+            _container.Options.DefaultScopedLifestyle = new AsyncScopedLifestyle();
             _container.Register<SimpleConsumer>(Lifestyle.Scoped);
             _container.Register<ISimpleConsumerDependency, SimpleConsumerDependency>(
                 Lifestyle.Scoped);
@@ -63,7 +63,7 @@ namespace MassTransit.Containers.Tests
         public SimpleInjector_Saga()
         {
             _container = new Container();
-            _container.Options.DefaultScopedLifestyle = new ExecutionContextScopeLifestyle();
+            _container.Options.DefaultScopedLifestyle = new AsyncScopedLifestyle();
             _container.Register(typeof(ISagaRepository<>), typeof(InMemorySagaRepository<>),
                 Lifestyle.Singleton);
         }
