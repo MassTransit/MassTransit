@@ -34,6 +34,8 @@ namespace MassTransit.UnityIntegration
         {
             using (var childContainer = _container.CreateChildContainer())
             {
+                childContainer.RegisterInstance(typeof(ConsumeContext), context);
+                
                 var consumer = childContainer.Resolve<TConsumer>();
                 if (consumer == null)
                 {
