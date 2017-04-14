@@ -1,3 +1,11 @@
+using GreenPipes;
+using MassTransit.Courier;
+using MassTransit.Courier.Hosts;
+using MassTransit.Logging;
+using MassTransit.Util;
+using Microsoft.Practices.Unity;
+using System.Threading.Tasks;
+
 namespace MassTransit.UnityIntegration
 {
     public class UnityCompensateActivityFactory<TActivity, TLog> :
