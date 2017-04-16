@@ -100,6 +100,8 @@
     </Compile>
     <Compile Include="ConsumerConfiguratorCache.cs" />
     <Compile Include="SagaConfiguratorCache.cs" />
+    <Compile Include="UnityCompensateActivityFactory.cs" />
+    <Compile Include="UnityExecuteActivityFactory.cs" />
     <Compile Include="UnityExtensions.cs" />
     <Compile Include="UnityConsumerFactory.cs" />
     <Compile Include="UnitySagaRepository.cs" />

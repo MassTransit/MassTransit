@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -16,8 +16,10 @@ namespace MassTransit
     using System.Collections.Generic;
     using System.Linq;
     using ConsumeConfigurators;
+    using Courier;
     using Internals.Extensions;
     using Microsoft.Practices.Unity;
+    using PipeConfigurators;
     using Saga;
     using Saga.SubscriptionConfigurators;
     using UnityIntegration;
@@ -30,14 +32,14 @@ namespace MassTransit
             IList<Type> concreteTypes = FindTypes<IConsumer>(container, x => !x.HasInterface<ISaga>());
             if (concreteTypes.Count > 0)
             {
-                foreach (Type concreteType in concreteTypes)
+                foreach (var concreteType in concreteTypes)
                     ConsumerConfiguratorCache.Configure(concreteType, configurator, container);
             }
 
             IList<Type> sagaTypes = FindTypes<ISaga>(container, x => true);
             if (sagaTypes.Count > 0)
             {
-                foreach (Type sagaType in sagaTypes)
+                foreach (var sagaType in sagaTypes)
                     SagaConfiguratorCache.Configure(sagaType, configurator, container);
             }
         }
@@ -60,6 +62,39 @@ namespace MassTransit
             var unitySagaRepository = new UnitySagaRepository<T>(sagaRepository, container);
 
             configurator.Saga(unitySagaRepository, configure);
+        }
+
+        public static void ExecuteActivityHost<TActivity, TArguments>(
+            this IReceiveEndpointConfigurator configurator,
+            Uri compensateAddress, IUnityContainer container)
+            where TActivity : class, ExecuteActivity<TArguments>
+            where TArguments : class
+        {
+            var factory = new UnityExecuteActivityFactory<TActivity, TArguments>(container);
+            var specification = new ExecuteActivityHostSpecification<TActivity, TArguments>(factory, compensateAddress);
+
+            configurator.AddEndpointSpecification(specification);
+        }
+
+        public static void ExecuteActivityHost<TActivity, TArguments>(
+            this IReceiveEndpointConfigurator configurator, IUnityContainer container)
+            where TActivity : class, ExecuteActivity<TArguments>
+            where TArguments : class
+        {
+            var factory = new UnityExecuteActivityFactory<TActivity, TArguments>(container);
+            var specification = new ExecuteActivityHostSpecification<TActivity, TArguments>(factory);
+
+            configurator.AddEndpointSpecification(specification);
+        }
+
+        public static void CompensateActivityHost<TActivity, TLog>(this IReceiveEndpointConfigurator configurator, IUnityContainer container)
+            where TActivity : class, CompensateActivity<TLog>
+            where TLog : class
+        {
+            var factory = new UnityCompensateActivityFactory<TActivity, TLog>(container);
+            var specification = new CompensateActivityHostSpecification<TActivity, TLog>(factory);
+
+            configurator.AddEndpointSpecification(specification);
         }
 
         static IList<Type> FindTypes<T>(IUnityContainer container, Func<Type, bool> filter)
