@@ -36,11 +36,13 @@ namespace MassTransit.ConsumerSpecifications
         where TConsumer : class
     {
         readonly IBuildPipeConfigurator<ConsumerConsumeContext<TConsumer, TMessage>> _configurator;
+        readonly IBuildPipeConfigurator<ConsumeContext<TMessage>> _messagePipeConfigurator;
         readonly ConsumerConfigurationObservable _observers;
 
         public ConsumerMessageSpecification()
         {
             _configurator = new PipeConfigurator<ConsumerConsumeContext<TConsumer, TMessage>>();
+            _messagePipeConfigurator = new PipeConfigurator<ConsumeContext<TMessage>>();
             _observers = new ConsumerConfigurationObservable();
         }
 
@@ -67,7 +69,7 @@ namespace MassTransit.ConsumerSpecifications
 
         public void AddPipeSpecification(IPipeSpecification<ConsumeContext<TMessage>> specification)
         {
-            _configurator.AddPipeSpecification(new ConsumerPipeSpecificationProxy<TConsumer, TMessage>(specification));
+            _messagePipeConfigurator.AddPipeSpecification(specification);
         }
 
         public IPipe<ConsumerConsumeContext<TConsumer, TMessage>> Build(IFilter<ConsumerConsumeContext<TConsumer, TMessage>> consumeFilter)
@@ -83,6 +85,13 @@ namespace MassTransit.ConsumerSpecifications
             return _configurator.Build();
         }
 
+        public IPipe<ConsumeContext<TMessage>> BuildMessagePipe(Action<IPipeConfigurator<ConsumeContext<TMessage>>> configure)
+        {
+            configure?.Invoke(_messagePipeConfigurator);
+
+            return _messagePipeConfigurator.Build();
+        }
+
         public void AddPipeSpecification(IPipeSpecification<ConsumerConsumeContext<TConsumer>> specification)
         {
             _configurator.AddPipeSpecification(new ConsumerPipeSpecificationProxy<TConsumer, TMessage>(specification));
@@ -95,7 +104,24 @@ namespace MassTransit.ConsumerSpecifications
 
         public void Message(Action<IConsumerMessageConfigurator<TMessage>> configure)
         {
-            configure(this);
+            configure?.Invoke(new ConsumerMessageConfigurator(_configurator));
+        }
+
+
+        class ConsumerMessageConfigurator :
+            IConsumerMessageConfigurator<TMessage>
+        {
+            readonly IPipeConfigurator<ConsumerConsumeContext<TConsumer, TMessage>> _configurator;
+
+            public ConsumerMessageConfigurator(IPipeConfigurator<ConsumerConsumeContext<TConsumer, TMessage>> configurator)
+            {
+                _configurator = configurator;
+            }
+
+            public void AddPipeSpecification(IPipeSpecification<ConsumeContext<TMessage>> specification)
+            {
+                _configurator.AddPipeSpecification(new ConsumerPipeSpecificationProxy<TConsumer, TMessage>(specification));
+            }
         }
     }
 }

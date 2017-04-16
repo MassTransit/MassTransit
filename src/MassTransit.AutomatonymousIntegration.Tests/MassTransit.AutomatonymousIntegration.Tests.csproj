@@ -128,6 +128,7 @@
     <Compile Include="Message_Specs.cs" />
     <Compile Include="MissingInstance_Specs.cs" />
     <Compile Include="NHibernateFactory_Specs.cs" />
+    <Compile Include="Partitioning_Specs.cs" />
     <Compile Include="Publish_Specs.cs" />
     <Compile Include="RemoveWhen_Specs.cs" />
     <Compile Include="Request_Specs.cs" />

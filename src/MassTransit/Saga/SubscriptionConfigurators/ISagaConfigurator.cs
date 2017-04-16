@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -33,8 +33,7 @@ namespace MassTransit.Saga.SubscriptionConfigurators
             where T : class;
 
         /// <summary>
-        /// Configure a message type for the consumer, such as adding middleware to the pipeline for
-        /// the message type.
+        /// Add middleware to the message pipeline, which is invoked prior to the saga repository.
         /// </summary>
         /// <typeparam name="T">The message type</typeparam>
         /// <param name="configure">The callback to configure the message pipeline</param>
@@ -42,13 +41,12 @@ namespace MassTransit.Saga.SubscriptionConfigurators
             where T : class;
 
         /// <summary>
-        /// Configure a message type for the consumer, such as adding middleware to the pipeline for
-        /// the message type.
+        /// Add middleware to the saga pipeline, for the specified message type, which is invoked
+        /// after the saga repository.
         /// </summary>
         /// <typeparam name="T">The message type</typeparam>
         /// <param name="configure">The callback to configure the message pipeline</param>
         void SagaMessage<T>(Action<ISagaMessageConfigurator<TSaga, T>> configure)
             where T : class;
-
     }
 }

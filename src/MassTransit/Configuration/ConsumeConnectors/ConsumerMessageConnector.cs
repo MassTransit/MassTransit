@@ -45,7 +45,7 @@ namespace MassTransit.ConsumeConnectors
 
             IPipe<ConsumerConsumeContext<TConsumer, TMessage>> consumerPipe = messageSpecification.Build(_consumeFilter);
 
-            IPipe<ConsumeContext<TMessage>> messagePipe = Pipe.New<ConsumeContext<TMessage>>(x =>
+            IPipe<ConsumeContext<TMessage>> messagePipe = messageSpecification.BuildMessagePipe(x =>
             {
                 x.UseFilter(new ConsumerMessageFilter<TConsumer, TMessage>(consumerFactory, consumerPipe));
             });

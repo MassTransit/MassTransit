@@ -37,6 +37,19 @@ namespace MassTransit.Saga
         where TSaga : class, ISaga
         where TMessage : class
     {
-        IPipe<SagaConsumeContext<TSaga, TMessage>> Build(IFilter<SagaConsumeContext<TSaga, TMessage>> consumeFilter);
+        /// <summary>
+        /// Build the consumer pipe, using the consume filter specified.
+        /// </summary>
+        /// <param name="consumeFilter"></param>
+        /// <returns></returns>
+        IPipe<SagaConsumeContext<TSaga, TMessage>> BuildConsumerPipe(IFilter<SagaConsumeContext<TSaga, TMessage>> consumeFilter);
+
+        /// <summary>
+        /// Configure the message pipe as it is built. Any previously configured filters will preceed
+        /// the configuration applied by the <paramref name="configure"/> callback.
+        /// </summary>
+        /// <param name="configure">Configure the message pipe</param>
+        /// <returns></returns>
+        IPipe<ConsumeContext<TMessage>> BuildMessagePipe(Action<IPipeConfigurator<ConsumeContext<TMessage>>> configure);
     }
 }
