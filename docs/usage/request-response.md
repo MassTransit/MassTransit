@@ -6,7 +6,7 @@ since the service many be hosted in another process, on another machine, or may 
 network. While in many cases it is best to avoid request/response use in distributed applications, particularly when
 the request is a command, it is often necessary and preferred over more complex solutions.
 
-Fortunately for .NET developers, C# 5.0 introduced the async/await keywords, making it easier to program applications
+Fortunately for .NET developers, C# with TPL makes it easier to program applications
 that call services asynchronously. By using *Tasks* and the *async* and *await* keywords, developers can write
 procedural code and avoid the complex use of callbacks and handlers. Additionally, multiple asynchronous requests can
 be executed at once, reducing the overall execution time to that of the longest request.
@@ -29,6 +29,47 @@ public interface OrderStatusResult
     string StatusText { get; }
 }
 ```
+
+## Handling requests
+
+In order for the request to return anything, it needs to be handled. Handling requests
+is done by using normal consumers. The only difference is that such consumer needs to send a response back.
+
+For the aforementioned message contracts, the request handler can look like this:
+
+```csharp
+public class CheckOrderStatusConsumer : IConsumer<CheckOurderStatus>
+{
+    readonly IOrderRepository _orderRepository;
+
+    public CheckOrderStatusConsumer(IOrderRepository orderRepository)
+    {
+        _orderRepository = orderRepository;
+    }
+
+    public async Task Consume(ConsumeContext<CheckOrderStatus> context)
+    {
+        var order = await _orderRepository.Get(context.Message.OrderId);
+        if (order == null)
+            throw new InvalidOperationException("Order not found");
+        
+        await context.RespondAsync<OrderStatusResult>(
+            new 
+            {
+                OrderId = order.Id,
+                Timestamp = order.Timestamp,
+                StatusCode = order.StatusCode,
+                StatusText = order.StatusText
+            }
+        )
+    }
+}
+```
+
+The response will be sent back to the requestor. In case the exception is thrown, 
+MassTransit will create a `Fault<CheckOrderStatus>` message and send it back to the
+requestor. The requestor address is available in the consume context of the 
+request message as `context.ResponseAddress`.
 
 ## Creating the message request client
 
@@ -60,7 +101,18 @@ IRequestClient<CheckOrderStatus, OrderStatusResult> client =
     new MessageRequestClient<CheckOrderStatus, OrderStatusResult>(bus, address, requestTimeout);
 ```
 
-Once created, the request client instance can be registered with the dependency resolver using the `IRequestClient`
+Once created, the request client instance can be used to perform the request:
+
+```csharp
+var result = await _client.Request<CheckOrderStatus>(new {OrderId = id});
+```
+
+The syntax is significantly cleaner than dealing with message object, consumer contexts, responses,
+etc. And since async/await and messaging are both about asynchronous programming, it's a natural fit.
+
+## Using the request client in ASP.NET MVC
+
+The request client instance can be registered with the dependency resolver using the `IRequestClient`
 interface type. Once registered, a controller can use the client via a constructor dependency.
 
 ```csharp
@@ -75,12 +127,7 @@ public class RequestController : Controller
 
     public async Task<ActionResult> Get(string id)
     {
-        var command = new CheckOrderStatus
-        {
-            OrderId = id
-        };
-
-        var result = await _client.Request(command);
+        var result = await _client.Request<CheckOrderStatus>(new {OrderId = id});
 
         return View(result);
     }
@@ -88,8 +135,6 @@ public class RequestController : Controller
 ```
 
 The controller method will send the command, and return the view once the result has been received.
-The syntax is significantly cleaner than dealing with message object, consumer contexts, responses,
-etc. And since async/await and messaging are both about asynchronous programming, it's a natural fit.
 
 ## Composing multiple requests
 
