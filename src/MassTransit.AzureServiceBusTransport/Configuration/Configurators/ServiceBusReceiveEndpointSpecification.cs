@@ -121,8 +121,8 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
             foreach (var result in base.Validate())
                 yield return result;
 
-            if (_settings.PrefetchCount <= 0)
-                yield return this.Failure("PrefetchCount", "must be > 0");
+            if (_settings.PrefetchCount < 0)
+                yield return this.Failure("PrefetchCount", "must be >= 0");
             if (_settings.MaxConcurrentCalls <= 0)
                 yield return this.Failure("MaxConcurrentCalls", "must be > 0");
             if (_settings.QueueDescription.AutoDeleteOnIdle != TimeSpan.Zero && _settings.QueueDescription.AutoDeleteOnIdle < TimeSpan.FromMinutes(5))
