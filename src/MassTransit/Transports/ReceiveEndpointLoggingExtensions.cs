@@ -61,8 +61,10 @@ namespace MassTransit.Transports
         {
             if (_messages.IsErrorEnabled)
             {
+                var faultMessage = GetFaultMessage(exception);
+
                 _messages.Error(
-                    $"R-FAULT {context.ReceiveContext.InputAddress} {GetMessageId(context.ReceiveContext)} {TypeMetadataCache<T>.ShortName} {consumerType}({duration})",
+                    $"R-FAULT {context.ReceiveContext.InputAddress} {GetMessageId(context.ReceiveContext)} {TypeMetadataCache<T>.ShortName} {consumerType}({duration}) {faultMessage}",
                     exception);
             }
         }
@@ -71,7 +73,9 @@ namespace MassTransit.Transports
         {
             if (_messages.IsWarnEnabled)
             {
-                _messages.Warn($"R-RETRY {context.ReceiveContext.InputAddress} {GetMessageId(context.ReceiveContext)}", exception);
+                var faultMessage = GetFaultMessage(exception);
+
+                _messages.Warn($"R-RETRY {context.ReceiveContext.InputAddress} {GetMessageId(context.ReceiveContext)} {faultMessage}", exception);
             }
         }
 
@@ -80,7 +84,9 @@ namespace MassTransit.Transports
         {
             if (_messages.IsWarnEnabled)
             {
-                _messages.Warn($"S-FAULT {context.DestinationAddress} {context.MessageId} {TypeMetadataCache<T>.ShortName}", exception);
+                var faultMessage = GetFaultMessage(exception);
+
+                _messages.Warn($"S-FAULT {context.DestinationAddress} {context.MessageId} {TypeMetadataCache<T>.ShortName} {faultMessage}", exception);
             }
         }
 
@@ -97,6 +103,13 @@ namespace MassTransit.Transports
             if (_messages.IsDebugEnabled)
                 _messages.Debug(
                     $"SCHED {context.DestinationAddress} {context.MessageId} {TypeMetadataCache<T>.ShortName} {deliveryTime:G} {context.ScheduledMessageId?.ToString("N") ?? ""}");
+        }
+
+        static string GetFaultMessage(Exception exception)
+        {
+            var baseException = exception.GetBaseException() ?? exception;
+
+            return ExceptionUtil.GetMessage(baseException);
         }
     }
 }
