@@ -14,6 +14,7 @@ namespace MassTransit.Topology.Conventions.CorrelationIdConvention
 {
     using System;
     using Context;
+    using CorrelationId;
     using Internals.Extensions;
 
 
