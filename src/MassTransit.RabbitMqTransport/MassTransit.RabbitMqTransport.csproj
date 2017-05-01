@@ -1,26 +1,11 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.30729</ProductVersion>
-    <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{6C7149D7-4D97-45DF-A05D-61EC7374491D}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>MassTransit.RabbitMqTransport</RootNamespace>
-    <AssemblyName>MassTransit.RabbitMqTransport</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <TargetFrameworkProfile />
-    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
-    <RestorePackages>true</RestorePackages>
+    <TargetFrameworks>net452</TargetFrameworks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>TRACE;DEBUG;$(DefineConstants)</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -31,7 +16,6 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE;$(DefineConstants)</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -41,239 +25,16 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <SignAssembly>true</SignAssembly>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+	<SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\MassTransit.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="GreenPipes, Version=1.0.0.0, Culture=neutral, PublicKeyToken=b800c4cfcdeea87b, processorArchitecture=MSIL">
-      <HintPath>..\packages\GreenPipes.1.0.9\lib\net452\GreenPipes.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="NewId, Version=3.0.0.0, Culture=neutral, PublicKeyToken=b8e0e9f2f1e657fa, processorArchitecture=MSIL">
-      <HintPath>..\packages\NewId.3.0.0\lib\net452\NewId.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.10.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="RabbitMQ.Client, Version=4.0.0.0, Culture=neutral, PublicKeyToken=89e7d7c5feba84ce, processorArchitecture=MSIL">
-      <HintPath>..\packages\RabbitMQ.Client.4.1.3\lib\net451\RabbitMQ.Client.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
+    <PackageReference Include="GreenPipes" Version="1.0.9" />
+    <PackageReference Include="NewId" Version="3.0.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="10.0.2" />
+    <PackageReference Include="RabbitMQ.Client" Version="4.1.3" />
     <Reference Include="System" />
-    <Reference Include="System.Core">
-    </Reference>
+    <Reference Include="System.Core" />
+	<ProjectReference Include="..\MassTransit\MassTransit.csproj" />
   </ItemGroup>
-  <ItemGroup>
-    <Compile Include="..\SolutionVersion.cs">
-      <Link>Properties\SolutionVersion.cs</Link>
-    </Compile>
-    <Compile Include="Configuration\Builders\IRabbitMqReceiveEndpointBuilder.cs" />
-    <Compile Include="Configuration\IQueueBindingConfigurator.cs" />
-    <Compile Include="Configuration\IQueueEndpointConfigurator.cs" />
-    <Compile Include="Configuration\Specifications\IRabbitMqEndpointConfiguration.cs" />
-    <Compile Include="Configuration\Specifications\RabbitMqEndpointConfiguration.cs" />
-    <Compile Include="Pipeline\ConfigureTopologyFilter.cs" />
-    <Compile Include="Pipeline\PurgeOnStartupFilter.cs" />
-    <Compile Include="Pipeline\SetRoutingKeyFilter.cs" />
-    <Compile Include="Topology\Configurators\ExchangeConfigurator.cs" />
-    <Compile Include="Topology\Configurators\QueueBindingConfigurator.cs" />
-    <Compile Include="Topology\Configurators\QueueConfigurator.cs" />
-    <Compile Include="Topology\Conventions\RoutingKey\DelegateRoutingKeyFormatter.cs" />
-    <Compile Include="Topology\Conventions\RoutingKey\EmptyRoutingKeyFormatter.cs" />
-    <Compile Include="Topology\Conventions\RoutingKey\RoutingKeyMessageSendTopologyConvention.cs" />
-    <Compile Include="Topology\Conventions\RoutingKey\RoutingKeySendTopologyConvention.cs" />
-    <Compile Include="Topology\Conventions\RoutingKey\SetRoutingKeyMessageSendTopology.cs" />
-    <Compile Include="Topology\Entities\ExchangeBindingEntity.cs" />
-    <Compile Include="Topology\Entities\ExchangeEntity.cs" />
-    <Compile Include="Topology\Builders\PublishEndpointTopologyBuilder.cs" />
-    <Compile Include="Topology\Entities\QueueBindingEntity.cs" />
-    <Compile Include="Topology\Entities\QueueEntity.cs" />
-    <Compile Include="Topology\Builders\RabbitMqTopologyBuilder.cs" />
-    <Compile Include="Topology\Builders\RabbitMqTopologyLayout.cs" />
-    <Compile Include="Topology\Builders\ReceiveEndpointConsumeTopologyBuilder.cs" />
-    <Compile Include="Topology\Builders\TopologyLayout.cs" />
-    <Compile Include="Topology\Builders\TopologyLayoutExtensions.cs" />
-    <Compile Include="Topology\Configurators\ExchangeBindingConfigurator.cs" />
-    <Compile Include="Topology\Conventions\IRoutingKeyMessageSendTopologyConvention.cs" />
-    <Compile Include="Topology\Conventions\IRoutingKeySendTopologyConvention.cs" />
-    <Compile Include="Configuration\Builders\RabbitMqBusBuilder.cs" />
-    <Compile Include="Configuration\Builders\RabbitMqReceiveEndpointBuilder.cs" />
-    <Compile Include="Configuration\Configurators\ConfigurationHostSettings.cs" />
-    <Compile Include="Configuration\Configurators\RabbitMqClusterConfigurator.cs" />
-    <Compile Include="Configuration\Configurators\RabbitMqHostConfigurator.cs" />
-    <Compile Include="Configuration\Specifications\DelayedExchangeMessageSchedulerSpecification.cs" />
-    <Compile Include="Configuration\Specifications\DelayedExchangeRedeliveryPipeSpecification.cs" />
-    <Compile Include="Configuration\IExchangeBindingConfigurator.cs" />
-    <Compile Include="Configuration\IExchangeConfigurator.cs" />
-    <Compile Include="Configuration\IQueueConfigurator.cs" />
-    <Compile Include="Configuration\IRabbitMqClusterConfigurator.cs" />
-    <Compile Include="Configuration\Specifications\RabbitMqConsumerPipeSpecification.cs" />
-    <Compile Include="Configuration\ConsumerPipeConfiguratorExtensions.cs" />
-    <Compile Include="Contexts\DelayedExchangeMessageRedeliveryContext.cs" />
-    <Compile Include="Contexts\RabbitMqSendHeaders.cs" />
-    <Compile Include="Contexts\RabbitMqConnectionContext.cs" />
-    <Compile Include="Contexts\RabbitMqHeaderProvider.cs" />
-    <Compile Include="Contexts\RabbitMqModelContext.cs" />
-    <Compile Include="Contexts\RabbitMqReceiveContext.cs" />
-    <Compile Include="Contexts\BasicPublishRabbitMqSendContext.cs" />
-    <Compile Include="Contexts\SharedConnectionContext.cs" />
-    <Compile Include="Contexts\SharedModelContext.cs" />
-    <Compile Include="Contracts\PrefetchCountUpdated.cs" />
-    <Compile Include="Contracts\SetPrefetchCount.cs" />
-    <Compile Include="DeferExtensions.cs" />
-    <Compile Include="DelayedExchangeRetryExtensions.cs" />
-    <Compile Include="Configuration\DelayedExchangeSchedulerExtensions.cs" />
-    <Compile Include="Exceptions\MessageNotConfirmedException.cs" />
-    <Compile Include="Exceptions\PublishNackException.cs" />
-    <Compile Include="Exceptions\PublishReturnedException.cs" />
-    <Compile Include="Exceptions\RabbitMqAddressException.cs" />
-    <Compile Include="Exceptions\RabbitMqConnectionException.cs" />
-    <Compile Include="Hosting\RabbitMqHostBusFactory.cs" />
-    <Compile Include="Hosting\RabbitMqServiceConfigurator.cs" />
-    <Compile Include="Hosting\RabbitMqSettings.cs" />
-    <Compile Include="Integration\IConnectionCache.cs" />
-    <Compile Include="Integration\IModelCache.cs" />
-    <Compile Include="Integration\PendingPublish.cs" />
-    <Compile Include="Integration\RabbitMqConnectionCache.cs" />
-    <Compile Include="Integration\RabbitMqModelCache.cs" />
-    <Compile Include="IRabbitMqHost.cs" />
-    <Compile Include="IRabbitMqEndpointResolver.cs" />
-    <Compile Include="Pipeline\DelayedExchangeMessageRedeliveryFilter.cs" />
-    <Compile Include="Management\ISetPrefetchCount.cs" />
-    <Compile Include="Pipeline\DelayedExchangeMessageSchedulerFilter.cs" />
-    <Compile Include="Pipeline\RabbitMqConsumerFilter.cs" />
-    <Compile Include="Pipeline\RabbitMqBasicConsumer.cs" />
-    <Compile Include="Pipeline\ReceiveModelFilter.cs" />
-    <Compile Include="Pipeline\PrefetchCountFilter.cs" />
-    <Compile Include="Management\SetPrefetchCountManagementConsumer.cs" />
-    <Compile Include="RabbitMqBusFactory.cs" />
-    <Compile Include="RabbitMqAddressExtensions.cs" />
-    <Compile Include="RabbitMqBasicConsumeContext.cs" />
-    <Compile Include="Configuration\IRabbitMqSslConfigurator.cs" />
-    <Compile Include="Configuration\Configurators\RabbitMqSslConfigurator.cs" />
-    <Compile Include="Configuration\IRabbitMqReceiveEndpointConfigurator.cs" />
-    <Compile Include="Configuration\Configurators\RabbitMqReceiveEndpointSpecification.cs" />
-    <Compile Include="Configuration\RabbitMqHostConfigurationExtensions.cs" />
-    <Compile Include="Configuration\IRabbitMqHostConfigurator.cs" />
-    <Compile Include="Configuration\IRabbitMqBusFactoryConfigurator.cs" />
-    <Compile Include="Configuration\Configurators\RabbitMqBusFactoryConfigurator.cs" />
-    <Compile Include="Configuration\BusFactoryConfiguratorExtensions.cs" />
-    <Compile Include="RabbitMqDeliveryMetrics.cs" />
-    <Compile Include="RequestClientExtensions.cs" />
-    <Compile Include="Topology\Conventions\RoutingKeyConventionExtensions.cs" />
-    <Compile Include="SchedulePublishBusExtensions.cs" />
-    <Compile Include="Testing\RabbitMqTestHarness.cs" />
-    <Compile Include="Topology\Exchange.cs" />
-    <Compile Include="Topology\ExchangeBinding.cs" />
-    <Compile Include="Topology\ExchangeBindingHandle.cs" />
-    <Compile Include="Topology\ExchangeHandle.cs" />
-    <Compile Include="Topology\ExchangeToExchangeBinding.cs" />
-    <Compile Include="Topology\ExchangeToQueueBinding.cs" />
-    <Compile Include="Topology\FanoutExchangeTypeSelector.cs" />
-    <Compile Include="Topology\EntitySettings.cs" />
-    <Compile Include="Topology\IBindExchangeConfigurator.cs" />
-    <Compile Include="Topology\IExchangeTypeSelector.cs" />
-    <Compile Include="Topology\IMessageExchangeTypeSelector.cs" />
-    <Compile Include="Topology\IMessageRoutingKeyFormatter.cs" />
-    <Compile Include="Topology\IRabbitMqConsumeTopology.cs" />
-    <Compile Include="Topology\IRabbitMqConsumeTopologyBuilder.cs" />
-    <Compile Include="Topology\IRabbitMqConsumeTopologyConfigurator.cs" />
-    <Compile Include="Topology\IRabbitMqConsumeTopologySpecification.cs" />
-    <Compile Include="Topology\IRabbitMqImplementedMessagePublishTopologyConfigurator.cs" />
-    <Compile Include="Topology\IRabbitMqMessageConsumeTopology.cs" />
-    <Compile Include="Topology\IRabbitMqMessageConsumeTopologyConfigurator.cs" />
-    <Compile Include="Topology\IRabbitMqMessagePublishTopology.cs" />
-    <Compile Include="Topology\IRabbitMqMessagePublishTopologyConfigurator.cs" />
-    <Compile Include="Topology\IRabbitMqMessageSendTopology.cs" />
-    <Compile Include="Topology\IRabbitMqMessageSendTopologyConfigurator.cs" />
-    <Compile Include="Topology\IRabbitMqPublishTopology.cs" />
-    <Compile Include="Topology\IRabbitMqPublishTopologyBuilder.cs" />
-    <Compile Include="Topology\IRabbitMqPublishTopologyConfigurator.cs" />
-    <Compile Include="Topology\IRabbitMqPublishTopologySpecification.cs" />
-    <Compile Include="Topology\IRabbitMqReceiveEndpointTopology.cs" />
-    <Compile Include="Topology\IRabbitMqSendTopology.cs" />
-    <Compile Include="Topology\IRabbitMqSendTopologyConfigurator.cs" />
-    <Compile Include="Topology\IRabbitMqHostTopology.cs" />
-    <Compile Include="Topology\IRabbitMqTopology.cs" />
-    <Compile Include="Topology\IRabbitMqTopologyBuilder.cs" />
-    <Compile Include="Topology\IRoutingKeyFormatter.cs" />
-    <Compile Include="Topology\MessageExchange.cs" />
-    <Compile Include="Topology\MessageExchangeTypeSelector.cs" />
-    <Compile Include="Topology\MessageRoutingKeyFormatter.cs" />
-    <Compile Include="Topology\Queue.cs" />
-    <Compile Include="Topology\QueueBindingHandle.cs" />
-    <Compile Include="Topology\QueueHandle.cs" />
-    <Compile Include="Topology\RabbitMqConsumeTopology.cs" />
-    <Compile Include="Topology\RabbitMqEntityNameValidator.cs" />
-    <Compile Include="Topology\RabbitMqMessageConsumeTopology.cs" />
-    <Compile Include="Topology\RabbitMqReceiveEndpointTopology.cs" />
-    <Compile Include="Topology\RabbitMqMessagePublishTopology.cs" />
-    <Compile Include="Topology\RabbitMqMessageSendTopology.cs" />
-    <Compile Include="Topology\RabbitMqPublishTopology.cs" />
-    <Compile Include="Topology\RabbitMqSendTopology.cs" />
-    <Compile Include="Topology\RabbitMqTopology.cs" />
-    <Compile Include="Topology\ReceiveSettings.cs" />
-    <Compile Include="Topology\SendSettings.cs" />
-    <Compile Include="Topology\Specifications\ExchangeBindingConsumeTopologySpecification.cs" />
-    <Compile Include="Topology\Specifications\ExchangeBindingPublishTopologySpecification.cs" />
-    <Compile Include="Topology\Specifications\ExchangeToExchangeBindingConsumeTopologySpecification.cs" />
-    <Compile Include="Topology\Specifications\InvalidRabbitMqConsumeTopologySpecification.cs" />
-    <Compile Include="Transport\IRabbitMqReceiveEndpointFactory.cs" />
-    <Compile Include="Transport\RabbitMqHost.cs" />
-    <Compile Include="RabbitMqHostSettings.cs" />
-    <Compile Include="Transport\RabbitMqPublishEndpointProvider.cs" />
-    <Compile Include="ConnectionContext.cs" />
-    <Compile Include="RabbitMqExtensions.cs" />
-    <Compile Include="RabbitMqHeaders.cs" />
-    <Compile Include="RabbitMqMessageNameFormatter.cs" />
-    <Compile Include="ModelContext.cs" />
-    <Compile Include="RabbitMqSendContextExtensions.cs" />
-    <Compile Include="Transport\RabbitMqReceiveEndpointFactory.cs" />
-    <Compile Include="Transport\RabbitMqSendEndpointProvider.cs" />
-    <Compile Include="Transport\RabbitMqSendTransportProvider.cs" />
-    <Compile Include="Transport\SequentialEndpointResolver.cs" />
-    <Compile Include="Transport\RabbitMqReceiveTransport.cs" />
-    <Compile Include="RabbitMqSendContext.cs" />
-    <Compile Include="Transport\RabbitMqSendTransport.cs" />
-    <Compile Include="SchedulePublishExtensions.cs" />
-    <Compile Include="Scheduling\DelayedExchangeMessageScheduler.cs" />
-    <Compile Include="Topology\ExchangeBindingSettings.cs" />
-    <Compile Include="Topology\ExchangeSettings.cs" />
-    <Compile Include="Topology\RabbitMqExchangeBindingExtensions.cs" />
-    <Compile Include="Topology\RabbitMqHostEqualityComparer.cs" />
-    <Compile Include="Topology\RabbitMqReceiveSettings.cs" />
-    <Compile Include="Topology\RabbitMqSendSettings.cs" />
-    <Compile Include="Configuration\RabbitMqTurnoutConfigurationExtensions.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\MassTransit\MassTransit.csproj">
-      <Project>{6EFD69FC-CBCC-4F85-AEE0-EFBA73F4D273}</Project>
-      <Name>MassTransit</Name>
-      <Private>False</Private>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
-    <None Include="README.md" />
-  </ItemGroup>
-  <ItemGroup />
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
-  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
-    <PropertyGroup>
-      <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
-    </PropertyGroup>
-    <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
-  </Target>
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
 </Project>
