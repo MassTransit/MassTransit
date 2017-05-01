@@ -7,7 +7,7 @@ skip_commits:
   files:
     - docs/*
     - '**/*.html'
-image: Visual Studio 2015
+image: Visual Studio 2017
 configuration: Release
 platform: Any CPU
 services:
