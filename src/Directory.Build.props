@@ -11,7 +11,7 @@
     <Description>MassTransit is a distributed application framework for .NET http://masstransit-project.com</Description>
   </PropertyGroup>
 
-  <!-- Treat warnings as errors for all projects -->
+  <!-- Treat warnings as errors for all projects
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
     <TreatSpecificWarningsAsErrors />
@@ -19,5 +19,5 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
     <TreatSpecificWarningsAsErrors />
-  </PropertyGroup>
+  </PropertyGroup> -->
 </Project>
