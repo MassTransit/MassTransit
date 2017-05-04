@@ -54,6 +54,10 @@
     * [Observe lifecycle](usage/lifecycle-observers.md)
     * [Connect endpoints](usage/connect-endpoint.md)
     * [Logging](usage/logging.md)
+    * [Testing](usage/testing/README.md)
+        * [Bus harness](usage/testing/bus-harness.md)
+        * [Testing consumers](usage/testing/testing-consumers.md)
+        * [Testing sagas](usage/testing/testing-sagas.md)
 
 ## Advanced 
 * [Sagas](advanced/sagas/README.md)
