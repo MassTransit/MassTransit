@@ -41,7 +41,7 @@ namespace MassTransit
             _callback = callback;
         }
 
-        public async Task<TResponse> Request(TRequest request, CancellationToken cancellationToken)
+        public async Task<TResponse> Request(TRequest request, CancellationToken cancellationToken = default(CancellationToken))
         {
             var taskScheduler = SynchronizationContext.Current == null
                 ? TaskScheduler.Default
