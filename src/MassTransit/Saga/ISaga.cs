@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Saga
 {
+    using Newtonsoft.Json;
     using System;
 
 
@@ -26,6 +27,7 @@ namespace MassTransit.Saga
         /// for the instance. While the setter is not typically called, it is there
         /// to support persistence consistently across implementations.
         /// </summary>
+        [JsonProperty("id")]
         Guid CorrelationId { get; set; }
     }
 }
