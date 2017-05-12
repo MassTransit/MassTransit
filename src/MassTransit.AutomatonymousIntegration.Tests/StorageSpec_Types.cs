@@ -14,6 +14,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
 {
     using System;
     using Automatonymous;
+    using Newtonsoft.Json;
 
 
     /// <summary>
@@ -52,6 +53,8 @@ namespace MassTransit.AutomatonymousIntegration.Tests
         public string CurrentState { get; set; }
         public int Everything { get; set; }
         public bool Screwed { get; set; }
+
+        [JsonProperty(PropertyName = "id")]
         public Guid CorrelationId { get; set; }
     }
 
