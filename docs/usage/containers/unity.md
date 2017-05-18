@@ -1,6 +1,6 @@
 # Configuring Unity
 
-The following example shows how to configure a simple StructureMap container, and include the bus in the
+The following example shows how to configure a simple Unity container, and include the bus in the
 container. The two bus interfaces, `IBus` and `IBusControl`, are included.
 
 <div class="alert alert-info">
