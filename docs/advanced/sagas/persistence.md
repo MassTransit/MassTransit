@@ -4,22 +4,16 @@ Sagas are stateful event-based message consumers -- they retain state. Therefore
 events is important. Without persistent state, a saga would consider each event a new event, and orchestration 
 of subsequent events would be meaningless.
 
-<!-- TOC depthFrom:2 -->
-
 - [Specifying saga persistence](#specifying-saga-persistence)
 - [Identity](#identity)
 - [Publishing and Sending From Sagas](#publishing-and-sending-from-sagas)
 - [Storage Engines](#storage-engines)
     - [Entity Framework](#entity-framework)
-        - [Optimistic vs pessimistic concurrency](#optimistic-vs-pessimistic-concurrency)
-            - [So, which one should I use?](#so-which-one-should-i-use)
     - [MongoDB](#mongodb)
     - [NHibernate](#nhibernate)
     - [Redis](#redis)
     - [Marten](#marten)
     - [Azure Service Bus](#azure-service-bus)
-
-<!-- /TOC -->
 
 ## Specifying saga persistence
 
