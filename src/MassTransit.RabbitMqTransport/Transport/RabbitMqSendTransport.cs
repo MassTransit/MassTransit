@@ -66,6 +66,8 @@ namespace MassTransit.RabbitMqTransport.Transport
                     {
                         await pipe.Send(context).ConfigureAwait(false);
 
+                        var body = context.Body;
+
                         PublishContext publishContext;
                         if (context.TryGetPayload(out publishContext))
                             context.Mandatory = context.Mandatory || publishContext.Mandatory;
@@ -103,7 +105,7 @@ namespace MassTransit.RabbitMqTransport.Transport
                         await _observers.PreSend(context).ConfigureAwait(false);
 
                         await modelContext.BasicPublishAsync(context.Exchange, context.RoutingKey, context.Mandatory,
-                            context.BasicProperties, context.Body, context.AwaitAck).ConfigureAwait(false);
+                            context.BasicProperties, body, context.AwaitAck).ConfigureAwait(false);
 
                         context.LogSent();
 
