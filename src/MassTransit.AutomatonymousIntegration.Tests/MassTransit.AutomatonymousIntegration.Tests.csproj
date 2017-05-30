@@ -1,28 +1,11 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>8.0.30703</ProductVersion>
-    <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{1DAB3D46-3386-48F8-8381-2F5B678D1DB6}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>MassTransit.AutomatonymousIntegration.Tests</RootNamespace>
-    <AssemblyName>MassTransit.AutomatonymousIntegration.Tests</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\..\src\</SolutionDir>
-    <TargetFrameworkProfile />
-    <NuGetPackageImportStamp>
-    </NuGetPackageImportStamp>
-    <RestorePackages>true</RestorePackages>
+    <TargetFrameworks>net452</TargetFrameworks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -31,7 +14,6 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -39,179 +21,31 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Automatonymous, Version=3.5.0.0, Culture=neutral, PublicKeyToken=b800c4cfcdeea87b, processorArchitecture=MSIL">
-      <HintPath>..\packages\Automatonymous.3.5.11\lib\net452\Automatonymous.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Automatonymous.NHibernateIntegration, Version=3.5.0.0, Culture=neutral, PublicKeyToken=b800c4cfcdeea87b, processorArchitecture=MSIL">
-      <HintPath>..\packages\Automatonymous.NHibernate.3.5.11\lib\net452\Automatonymous.NHibernateIntegration.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Common.Logging, Version=3.3.1.0, Culture=neutral, PublicKeyToken=af08829b84f0328e, processorArchitecture=MSIL">
-      <HintPath>..\packages\Common.Logging.3.3.1\lib\net40\Common.Logging.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Common.Logging.Core, Version=3.3.1.0, Culture=neutral, PublicKeyToken=af08829b84f0328e, processorArchitecture=MSIL">
-      <HintPath>..\packages\Common.Logging.Core.3.3.1\lib\net40\Common.Logging.Core.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
-      <HintPath>..\packages\EntityFramework.6.1.3\lib\net45\EntityFramework.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="EntityFramework.SqlServer, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
-      <HintPath>..\packages\EntityFramework.6.1.3\lib\net45\EntityFramework.SqlServer.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="GreenPipes, Version=1.0.0.0, Culture=neutral, PublicKeyToken=b800c4cfcdeea87b, processorArchitecture=MSIL">
-      <HintPath>..\packages\GreenPipes.1.0.9\lib\net452\GreenPipes.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Iesi.Collections">
-      <HintPath>..\packages\Iesi.Collections.4.0.1.4000\lib\net40\Iesi.Collections.dll</HintPath>
-    </Reference>
-    <Reference Include="log4net, Version=2.0.8.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
-      <HintPath>..\packages\log4net.2.0.8\lib\net45-full\log4net.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="NewId, Version=3.0.0.0, Culture=neutral, PublicKeyToken=b8e0e9f2f1e657fa, processorArchitecture=MSIL">
-      <HintPath>..\packages\NewId.3.0.0\lib\net452\NewId.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.10.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="NHibernate, Version=4.1.0.4000, Culture=neutral, PublicKeyToken=aa95f207798dfdb4, processorArchitecture=MSIL">
-      <HintPath>..\packages\NHibernate.4.1.1.4000\lib\net40\NHibernate.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="nunit.framework, Version=3.6.1.0, Culture=neutral, PublicKeyToken=2638cd05610744eb, processorArchitecture=MSIL">
-      <HintPath>..\packages\NUnit.3.6.1\lib\net45\nunit.framework.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Quartz, Version=2.5.0.0, Culture=neutral, PublicKeyToken=f6b8c98a402cc8a4, processorArchitecture=MSIL">
-      <HintPath>..\packages\Quartz.2.5.0\lib\net40\Quartz.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Shouldly, Version=2.8.2.0, Culture=neutral, PublicKeyToken=6042cbcb05cbc941, processorArchitecture=MSIL">
-      <HintPath>..\packages\Shouldly.2.8.2\lib\net451\Shouldly.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
+    <PackageReference Include="Automatonymous" Version="3.5.11" />
+    <PackageReference Include="Automatonymous.NHibernate" Version="3.5.11" />
+    <PackageReference Include="Common.Logging" Version="3.3.1" />
+    <PackageReference Include="Common.Logging.Core" Version="3.3.1" />
+    <PackageReference Include="EntityFramework" Version="6.1.3" />
+    <PackageReference Include="GreenPipes" Version="1.0.9" />
+    <PackageReference Include="Iesi.Collections" Version="4.0.1.4000" />
+    <PackageReference Include="log4net" Version="2.0.8" />
+    <PackageReference Include="NewId" Version="3.0.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="10.0.2" />
+    <PackageReference Include="NHibernate" Version="4.1.1.4000" />
+    <PackageReference Include="NUnit" Version="3.6.1" />
+    <PackageReference Include="Quartz" Version="2.5.0" />
+    <PackageReference Include="Shouldly" Version="2.8.2" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data" />
-    <Reference Include="System.Data.SQLite, Version=1.0.104.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Data.SQLite.Core.1.0.104.0\lib\net451\System.Data.SQLite.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
+    <PackageReference Include="System.Data.SQLite" Version="1.0.104.0" />
     <Reference Include="System.XML" />
+	<ProjectReference Include="..\Loggers\MassTransit.Log4NetIntegration\MassTransit.Log4NetIntegration.csproj" />
+    <ProjectReference Include="..\MassTransit.AutomatonymousIntegration\MassTransit.AutomatonymousIntegration.csproj" />
+    <ProjectReference Include="..\MassTransit.QuartzIntegration\MassTransit.QuartzIntegration.csproj" />
+    <ProjectReference Include="..\MassTransit.TestFramework\MassTransit.TestFramework.csproj" />
+    <ProjectReference Include="..\MassTransit\MassTransit.csproj" />
+    <ProjectReference Include="..\Persistence\MassTransit.EntityFrameworkIntegration\MassTransit.EntityFrameworkIntegration.csproj" />
+    <ProjectReference Include="..\Persistence\MassTransit.NHibernateIntegration\MassTransit.NHibernateIntegration.csproj" />
   </ItemGroup>
-  <ItemGroup>
-    <Compile Include="..\SolutionVersion.cs">
-      <Link>Properties\SolutionVersion.cs</Link>
-    </Compile>
-    <Compile Include="CatchFault_Specs.cs" />
-    <Compile Include="CompositeEvent_Specs.cs" />
-    <Compile Include="ContextSetup.cs" />
-    <Compile Include="CorrelateGuid_Specs.cs" />
-    <Compile Include="CorrelationExpression_Specs.cs" />
-    <Compile Include="CorrelationUnknown_Specs.cs" />
-    <Compile Include="DiscardEvent_Specs.cs" />
-    <Compile Include="EnterEvent_Specs.cs" />
-    <Compile Include="FaultRescue_Specs.cs" />
-    <Compile Include="Fault_Specs.cs" />
-    <Compile Include="FilterFault_Specs.cs" />
-    <Compile Include="Ignore_Specs.cs" />
-    <Compile Include="Initiator_Specs.cs" />
-    <Compile Include="InMemoryDeadlock_Specs.cs" />
-    <Compile Include="Message_Specs.cs" />
-    <Compile Include="MissingInstance_Specs.cs" />
-    <Compile Include="NHibernateFactory_Specs.cs" />
-    <Compile Include="Partitioning_Specs.cs" />
-    <Compile Include="Publish_Specs.cs" />
-    <Compile Include="RemoveWhen_Specs.cs" />
-    <Compile Include="Request_Specs.cs" />
-    <Compile Include="Respond_Specs.cs" />
-    <Compile Include="SagaConfigurationObserver_Specs.cs" />
-    <Compile Include="SagaDbContextFactoryProvider.cs" />
-    <Compile Include="SchedulerLoadInMemory_Specs.cs" />
-    <Compile Include="ScheduleTimeout_Specs.cs" />
-    <Compile Include="Sending_a_request_that_times_out.cs" />
-    <Compile Include="Send_Specs.cs" />
-    <Compile Include="SimpleStateMachine_Specs.cs" />
-    <Compile Include="SingleConnectionSessionFactory.cs" />
-    <Compile Include="SqlLiteSessionFactoryProvider.cs" />
-    <Compile Include="StateMachineTestFixture.cs" />
-    <Compile Include="Storage2Spec_Types.cs" />
-    <Compile Include="TestExtensions.cs" />
-    <Compile Include="Testing_Specs.cs" />
-    <Compile Include="UncorrelatedMessage_Specs.cs" />
-    <Compile Include="StorageSpec_Types.cs" />
-    <Compile Include="UsingEntityFrameworkConcurrencyFail_Specs.cs" />
-    <Compile Include="UsingEntityFrameworkConcurrencyPessimistic_Specs.cs" />
-    <Compile Include="UsingEntityFrameworkConcurrencyOptimistic_Specs.cs" />
-    <Compile Include="UsingEntityFramework_Specs.cs" />
-    <Compile Include="UsingNHibernate_Specs.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Loggers\MassTransit.Log4NetIntegration\MassTransit.Log4NetIntegration.csproj">
-      <Project>{8d2be372-a756-4676-b2ea-ed7846809bfe}</Project>
-      <Name>MassTransit.Log4NetIntegration</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\MassTransit.AutomatonymousIntegration\MassTransit.AutomatonymousIntegration.csproj">
-      <Project>{A852511B-2742-4F4D-BD4E-ADDDBF3BD4B3}</Project>
-      <Name>MassTransit.AutomatonymousIntegration</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\MassTransit.QuartzIntegration\MassTransit.QuartzIntegration.csproj">
-      <Project>{2f7db49b-b650-4b57-bb9d-5d1b913ccacc}</Project>
-      <Name>MassTransit.QuartzIntegration</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\MassTransit.TestFramework\MassTransit.TestFramework.csproj">
-      <Project>{3c4b5f1a-69ad-415e-9f40-a7fdbd7a3012}</Project>
-      <Name>MassTransit.TestFramework</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\MassTransit\MassTransit.csproj">
-      <Project>{6efd69fc-cbcc-4f85-aee0-efba73f4d273}</Project>
-      <Name>MassTransit</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Persistence\MassTransit.EntityFrameworkIntegration\MassTransit.EntityFrameworkIntegration.csproj">
-      <Project>{442e2b78-0237-458d-b32b-cec94413f44d}</Project>
-      <Name>MassTransit.EntityFrameworkIntegration</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Persistence\MassTransit.NHibernateIntegration\MassTransit.NHibernateIntegration.csproj">
-      <Project>{073A90FD-9A3E-4704-B3B5-6D8A9F4B442E}</Project>
-      <Name>MassTransit.NHibernateIntegration</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="app.config" />
-    <None Include="job_scheduling_data_2_0.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="masstransit.tests.log4net.xml">
-      <SubType>Designer</SubType>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-  <ItemGroup>
-    <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
-    <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
-    <Error Condition="!Exists('..\packages\System.Data.SQLite.Core.1.0.104.0\build\net451\System.Data.SQLite.Core.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\System.Data.SQLite.Core.1.0.104.0\build\net451\System.Data.SQLite.Core.targets'))" />
-  </Target>
-  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
-  <Import Project="..\packages\System.Data.SQLite.Core.1.0.104.0\build\net451\System.Data.SQLite.Core.targets" Condition="Exists('..\packages\System.Data.SQLite.Core.1.0.104.0\build\net451\System.Data.SQLite.Core.targets')" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
 </Project>
