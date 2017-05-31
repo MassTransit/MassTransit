@@ -20,6 +20,7 @@ namespace MassTransit.AzureServiceBusTransport.Hosting
     using MassTransit.Hosting;
     using MassTransit.Saga;
     using MassTransit.Saga.SubscriptionConfigurators;
+    using Turnout.Configuration;
 
 
     /// <summary>
@@ -47,6 +48,12 @@ namespace MassTransit.AzureServiceBusTransport.Hosting
 
                 configureEndpoint(x);
             });
+        }
+
+        public void TurnoutEndpoint<T>(string queueName, Action<ITurnoutServiceConfigurator<T>> configureTurnout)
+            where T : class
+        {
+            _configurator.TurnoutEndpoint(_host, queueName, configureTurnout);
         }
 
         public void AddPipeSpecification(IPipeSpecification<ConsumeContext> specification)
