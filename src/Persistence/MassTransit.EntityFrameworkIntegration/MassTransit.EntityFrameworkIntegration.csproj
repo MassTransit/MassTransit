@@ -69,6 +69,7 @@
     <Compile Include="Audit\AuditRecord.cs" />
     <Compile Include="Audit\EntityFrameworkAuditStore.cs" />
     <Compile Include="DbContextExtensions.cs" />
+    <Compile Include="AssemblyScanningSagaDbContext .cs" />
     <Compile Include="SagaClassMapping.cs" />
     <Compile Include="SagaDbContext.cs" />
     <Compile Include="SagaDbContextFactory.cs" />

@@ -79,6 +79,7 @@
     <Compile Include="DbQuery.cs" />
     <Compile Include="LocalDbConnectionStringProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="AssemblyScanningSagaLocator_Specs.cs" />
     <Compile Include="SagaLocator_Specs.cs" />
     <Compile Include="SimpleSagaMap.cs" />
   </ItemGroup>
