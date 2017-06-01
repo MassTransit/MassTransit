@@ -27,7 +27,7 @@ A message consumer is a class that consumes one or more message types, specified
 
 When a consumer is subscribed to a receive endpoint, and a message consumed by the consumer is
 received by the endpoint, an instance of the consumer is created (using a consumer factory, which
-is covered --> here <--). The message (wrapped in a ``ConsumeContext``) is then delivered to the
+is covered --> here <-- ^where? looks like a link is missing here^ ). The message (wrapped in a ``ConsumeContext``) is then delivered to the
 consumer via the ``Consume`` method.
 
 The ``Consume`` method is asynchronous, and returns a Task. The task is awaited by MassTransit,
