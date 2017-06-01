@@ -58,5 +58,5 @@ can be shared across bus instances. To share a transport cache, use the syntax b
         cfg.SetTransportProvider(inMemoryTransportCache);
     });
 
-As many bus instances as desired can be share the same cache. Again, useful for testing. Not sure I'd
+As many bus instances as desired can share the same cache. Again, useful for testing. Not sure I'd
 want to use this anywhere else.
