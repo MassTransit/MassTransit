@@ -21,12 +21,12 @@
     <Compile Remove="Configuration\Builders\HttpPublishEndpointProvider.cs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="GreenPipes" Version="1.0.9" />
+    <PackageReference Include="GreenPipes" Version="1.0.10" />
     <PackageReference Include="Microsoft.Owin" Version="3.0.1" />
     <PackageReference Include="Microsoft.Owin.Diagnostics" Version="3.0.1" />
     <PackageReference Include="Microsoft.Owin.Host.HttpListener" Version="3.0.1" />
     <PackageReference Include="Microsoft.Owin.Hosting" Version="3.0.1" />
-    <PackageReference Include="NewId" Version="3.0.0" />
+    <PackageReference Include="NewId" Version="3.0.1" />
     <PackageReference Include="Newtonsoft.Json" Version="10.0.2" />
     <PackageReference Include="Owin" Version="1.0" />
     <Reference Include="System" />

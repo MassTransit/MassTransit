@@ -28,7 +28,7 @@
     <AssemblyOriginatorKeyFile>..\..\..\MassTransit.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="GreenPipes" Version="1.0.9" />
+    <PackageReference Include="GreenPipes" Version="1.0.10" />
     <PackageReference Include="Iesi.Collections" Version="4.0.1.4000" />
     <PackageReference Include="Newtonsoft.Json" Version="10.0.2" />
     <PackageReference Include="NHibernate" Version="4.1.1.4000" />

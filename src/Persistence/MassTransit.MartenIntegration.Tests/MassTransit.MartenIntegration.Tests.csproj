@@ -19,13 +19,13 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Baseline" Version="1.3.0" />
-    <PackageReference Include="GreenPipes" Version="1.0.9" />
-    <PackageReference Include="Marten" Version="1.5.0" />
+    <PackageReference Include="GreenPipes" Version="1.0.10" />
+    <PackageReference Include="Marten" Version="1.5.2" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="1.1.0" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="1.1.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="1.1.0" />
     <PackageReference Include="Microsoft.Win32.Primitives" Version="4.3.0" />
-    <PackageReference Include="NewId" Version="3.0.0" />
+    <PackageReference Include="NewId" Version="3.0.1" />
     <PackageReference Include="Newtonsoft.Json" Version="10.0.2" />
     <PackageReference Include="Npgsql" Version="3.2.2" />
     <PackageReference Include="NUnit" Version="3.6.1" />

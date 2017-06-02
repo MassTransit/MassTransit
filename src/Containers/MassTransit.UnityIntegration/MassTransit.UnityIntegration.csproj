@@ -29,7 +29,7 @@
     <AssemblyOriginatorKeyFile>..\..\..\MassTransit.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="GreenPipes" Version="1.0.9" />
+    <PackageReference Include="GreenPipes" Version="1.0.10" />
     <PackageReference Include="CommonServiceLocator" Version="1.3" />
     <PackageReference Include="Unity" Version="4.0.1" />
     <PackageReference Include="Newtonsoft.Json" Version="10.0.2" />
