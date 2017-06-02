@@ -6,7 +6,6 @@ open Fake.Git.Information
 open Fake.SemVerHelper
 open System
 
-let buildOutputPath = FullName "./build_output"
 let buildArtifactPath = FullName "./build_artifacts"
 let packagesPath = FullName "./src/packages"
 let keyFile = FullName "./MassTransit.snk"
@@ -43,14 +42,13 @@ let nugetVersion = (fun _ ->
 let InfoVersion = informationalVersion()
 let NuGetVersion = nugetVersion()
 
+let versionArgs = [ @"/p:Version=""" + NuGetVersion + @""""; @"/p:AssemblyVersion=""" + FileVersion + @""""; @"/p:FileVersion=""" + FileVersion + @""""; @"/p:InformationalVersion=""" + InfoVersion + @"""" ]
 
 printfn "Using version: %s" Version
 
 Target "Clean" (fun _ ->
-  ensureDirectory buildOutputPath
   ensureDirectory buildArtifactPath
 
-  CleanDir buildOutputPath
   CleanDir buildArtifactPath
 )
 
@@ -59,18 +57,10 @@ Target "RestorePackages" (fun _ ->
 )
 
 Target "Build" (fun _ ->
-
-  CreateCSharpAssemblyInfo @".\src\SolutionVersion.cs"
-    [ Attribute.Title "MassTransit"
-      Attribute.Description "MassTransit is a distributed application framework for .NET http://masstransit-project.com"
-      Attribute.Product "MassTransit"
-      Attribute.Version assemblyVersion
-      Attribute.FileVersion FileVersion
-      Attribute.InformationalVersion InfoVersion
-    ]
-  DotNetCli.Build (fun p-> { p with Project = @".\src\MassTransit"
+  DotNetCli.Build (fun p-> { p with Project = @".\src\MassTransit.sln"
                                     Configuration= "Release"
-                                    Output = buildArtifactPath})
+                                    Output = buildArtifactPath
+                                    AdditionalArgs = versionArgs })
 )
 
 let gitLink = (packagesPath @@ "gitlink" @@ "lib" @@ "net45" @@ "GitLink.exe")
@@ -90,9 +80,10 @@ Target "GitLink" (fun _ ->
 
 Target "Package" (fun _ ->
   DotNetCli.Pack (fun p-> { p with 
-                                Project = @".\src\MassTransit"
+                                Project = @".\src\MassTransit.sln"
                                 Configuration= "Release"
-                                OutputPath= buildArtifactPath })
+                                OutputPath= buildArtifactPath
+                                AdditionalArgs = versionArgs })
 )
 
 Target "Default" (fun _ ->
@@ -102,7 +93,6 @@ Target "Default" (fun _ ->
 "Clean"
   ==> "RestorePackages"
   ==> "Build"
-  ==> "GitLink"
   ==> "Package"
   ==> "Default"
 

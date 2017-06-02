@@ -24,11 +24,11 @@
     <AssemblyOriginatorKeyFile>..\..\MassTransit.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="GreenPipes" Version="1.0.9" />
+    <PackageReference Include="GreenPipes" Version="1.0.10" />
 	<PackageReference Include="Newtonsoft.Json" Version="10.0.2" />
-    <PackageReference Include="WindowsAzure.ServiceBus" Version="4.0.0" />
+    <PackageReference Include="WindowsAzure.ServiceBus" Version="4.1.1" />
     <PackageReference Include="Microsoft.WindowsAzure.ConfigurationManager" Version="3.2.3" />
-    <PackageReference Include="NewId" Version="3.0.0" />
+    <PackageReference Include="NewId" Version="3.0.1" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data" />

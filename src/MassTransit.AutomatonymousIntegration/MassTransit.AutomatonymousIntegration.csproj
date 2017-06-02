@@ -28,9 +28,9 @@
     <AssemblyOriginatorKeyFile>..\..\MassTransit.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Automatonymous" Version="3.5.11" />
-    <PackageReference Include="GreenPipes" Version="1.0.9" />
-    <PackageReference Include="NewId" Version="3.0.0.0" />
+    <PackageReference Include="Automatonymous" Version="3.5.12" />
+    <PackageReference Include="GreenPipes" Version="1.0.10" />
+    <PackageReference Include="NewId" Version="3.0.1" />
     <PackageReference Include="Newtonsoft.Json" Version="10.0.2" />
     <Reference Include="System" />
     <Reference Include="System.Core" />

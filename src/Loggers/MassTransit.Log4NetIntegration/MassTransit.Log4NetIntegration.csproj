@@ -31,7 +31,7 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="log4net" Version="2.0.8" />
-	<PackageReference Include="GreenPipes" Version="1.0.9" />
+	<PackageReference Include="GreenPipes" Version="1.0.10" />
 	<PackageReference Include="Newtonsoft.Json" Version="10.0.2" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
