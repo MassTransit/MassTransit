@@ -59,7 +59,6 @@ Target "RestorePackages" (fun _ ->
 Target "Build" (fun _ ->
   DotNetCli.Build (fun p-> { p with Project = @".\src\MassTransit.sln"
                                     Configuration= "Release"
-                                    Output = buildArtifactPath
                                     AdditionalArgs = versionArgs })
 )
 
@@ -83,7 +82,7 @@ Target "Package" (fun _ ->
                                 Project = @".\src\MassTransit.sln"
                                 Configuration= "Release"
                                 OutputPath= buildArtifactPath
-                                AdditionalArgs = versionArgs })
+                                AdditionalArgs = versionArgs @ [ @"--include-symbols"; @"--include-source" ] })
 )
 
 Target "Default" (fun _ ->
