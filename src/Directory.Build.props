@@ -3,18 +3,19 @@
 <Project>
   <!-- These properties will be shared for all projects -->
   <PropertyGroup>
-	<Title>MassTransit</Title>
+  <Title>MassTransit</Title>
     <Version>3.6.0.0</Version>
-	<FileVersion>3.6.0.0</FileVersion>
-	<InformationalVersion>3.6.0.0 (develop/52a30ae5)</InformationalVersion>
+    <FileVersion>3.6.0.0</FileVersion>
+    <InformationalVersion>3.6.0.0 (develop/52a30ae5)</InformationalVersion>
     <Product>MassTransit</Product>
     <Description>MassTransit is a message-based distributed application framework for .NET http://masstransit-project.com</Description>
     <PackageProjectUrl>https://github.com/MassTransit/MassTransit</PackageProjectUrl>
     <PackageLicenseUrl>https://github.com/MassTransit/MassTransit/blob/master/LICENSE</PackageLicenseUrl>
     <RepositoryUrl>https://github.com/MassTransit/MassTransit</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
     <PackageTags>MassTransit</PackageTags>
-    <Authors>Chris Patterson, Dru Sellers, Travis Smith, et. al.</Authors>
-    <Copyright>Copyright 2012-2017 Chris Patterson</Copyright>
+    <Authors>Chris Patterson;Dru Sellers;Travis Smith</Authors>
+    <Copyright>Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.</Copyright>
     <WarningLevel>4</WarningLevel>
     <NoWarn>1587,1591,1998,3008,3001</NoWarn>
   </PropertyGroup>
