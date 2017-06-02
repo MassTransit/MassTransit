@@ -3,21 +3,12 @@
     <RootNamespace>MassTransit.AutomatonymousStructureMapIntegration</RootNamespace>
     <AssemblyName>MassTransit.Automatonymous.StructureMapIntegration</AssemblyName>
     <TargetFrameworks>net452</TargetFrameworks>
+    <DebugType>portable</DebugType>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
+  <PropertyGroup>
+    <PackageId>MassTransit.Automatonymous.StructureMap</PackageId>
+    <Description>MassTransit StructureMap container support for Automatonymous; $(Description)</Description>
+    <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\MassTransit.Automatonymous.StructureMapIntegration.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Automatonymous" Version="3.5.12" />
@@ -27,7 +18,7 @@
     <PackageReference Include="StructureMap" Version="4.4.4" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
-	<ProjectReference Include="..\..\MassTransit.AutomatonymousIntegration\MassTransit.AutomatonymousIntegration.csproj" />
-	<ProjectReference Include="..\..\MassTransit\MassTransit.csproj" />
+    <ProjectReference Include="..\..\MassTransit.AutomatonymousIntegration\MassTransit.AutomatonymousIntegration.csproj" />
+    <ProjectReference Include="..\..\MassTransit\MassTransit.csproj" />
   </ItemGroup>
 </Project>

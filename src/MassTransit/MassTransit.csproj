@@ -1,13 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks>net452</TargetFrameworks>
-	<SignAssembly>true</SignAssembly>
+    <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\MassTransit.snk</AssemblyOriginatorKeyFile>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <DebugType>portable</DebugType>
   </PropertyGroup>
   <PropertyGroup>
-    <PackageId>MassTransit</PackageId>
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\MassTransit.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
