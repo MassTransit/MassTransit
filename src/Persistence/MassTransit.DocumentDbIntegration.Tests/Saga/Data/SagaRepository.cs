@@ -36,7 +36,14 @@
 
         public async Task DeleteSaga(Guid correlationId)
         {
-            await Client.DeleteDocumentAsync(UriFactory.CreateDocumentUri(DatabaseName, CollectionName, correlationId.ToString()));
+            try
+            {
+                await Client.DeleteDocumentAsync(UriFactory.CreateDocumentUri(DatabaseName, CollectionName, correlationId.ToString()));
+            }
+            catch (DocumentClientException e) when (e.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                // Swallow not found
+            }
         }
 
         public async Task<SimpleSaga> GetSaga(Guid correlationId)
