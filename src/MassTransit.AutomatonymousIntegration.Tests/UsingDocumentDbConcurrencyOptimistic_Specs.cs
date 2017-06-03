@@ -118,6 +118,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
             }
 
             await Task.WhenAll(tasks);
+            await Task.Delay(2000);
             tasks.Clear();
 
             foreach(var sid in sagaIds)
