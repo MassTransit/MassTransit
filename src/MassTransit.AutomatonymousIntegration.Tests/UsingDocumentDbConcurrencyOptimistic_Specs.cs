@@ -55,7 +55,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
         {
             _databaseName = "choirSagas";
             _collectionName = "sagas";
-            _documentClient = new DocumentClient(new Uri(AzureConstants.EndpointUri), AzureConstants.Key);
+            _documentClient = new DocumentClient(new Uri(EmulatorConstants.EndpointUri), EmulatorConstants.Key);
 
             _repository = new Lazy<ISagaRepository<ChoirState>>(() => new DocumentDbSagaRepository<ChoirState>(_documentClient, _databaseName, _collectionName));
         }
