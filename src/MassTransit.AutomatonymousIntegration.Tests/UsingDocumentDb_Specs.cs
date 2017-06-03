@@ -56,7 +56,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
         {
             _databaseName = "shoppingChoreSagas";
             _collectionName = "sagas";
-            _documentClient = new DocumentClient(new Uri(AzureConstants.EndpointUri), AzureConstants.Key);
+            _documentClient = new DocumentClient(new Uri(EmulatorConstants.EndpointUri), EmulatorConstants.Key);
 
             _repository = new Lazy<ISagaRepository<ShoppingChore>>(() => new DocumentDbSagaRepository<ShoppingChore>(_documentClient, _databaseName, _collectionName));
         }

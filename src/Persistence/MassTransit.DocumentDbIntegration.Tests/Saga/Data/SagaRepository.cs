@@ -26,7 +26,7 @@
             await _documentClient.CreateDocumentCollectionIfNotExistsAsync(UriFactory.CreateDatabaseUri(DatabaseName), new DocumentCollection { Id = CollectionName }).ConfigureAwait(false);
         }
 
-        private readonly DocumentClient _documentClient = new DocumentClient(new Uri(AzureConstants.EndpointUri), AzureConstants.Key);
+        private readonly DocumentClient _documentClient = new DocumentClient(new Uri(EmulatorConstants.EndpointUri), EmulatorConstants.Key);
         public IDocumentClient Client => _documentClient;
 
         public async Task InsertSaga(SimpleSaga saga)

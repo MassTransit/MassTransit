@@ -48,7 +48,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
         {
             _databaseName = "choirSagas";
             _collectionName = "sagas";
-            _documentClient = new DocumentClient(new Uri(AzureConstants.EndpointUri), AzureConstants.Key);
+            _documentClient = new DocumentClient(new Uri(EmulatorConstants.EndpointUri), EmulatorConstants.Key);
 
             _repository = new Lazy<ISagaRepository<ChoirState>>(() => new DocumentDbSagaRepository<ChoirState>(_documentClient, _databaseName, _collectionName));
         }
@@ -82,7 +82,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
         }
 
         [Test]
-        public async Task Should_not_be_in_final_state_all()
+        public async Task Some_should_not_be_in_final_state_all()
         {
             var tasks = new List<Task>();
 
@@ -113,12 +113,16 @@ namespace MassTransit.AutomatonymousIntegration.Tests
             await Task.WhenAll(tasks);
             tasks.Clear();
 
+            var someNotInFinalState = false;
+
             foreach (var sid in sagaIds)
             {
                 ChoirState instance = await GetSaga(sid);
 
-                Assert.IsTrue(!instance.CurrentState.Equals("Harmony"));
+                someNotInFinalState = !instance.CurrentState.Equals("Harmony");
             }
+
+            Assert.IsTrue(someNotInFinalState);
         }
 
         [Test]
