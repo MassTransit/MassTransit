@@ -16,6 +16,12 @@ services:
 nuget:
   project_feed: true
   disable_publish_on_pr: true
+install:
+  # Install DocumentDB Emulator
+  - ps: Start-FileDownload 'https://aka.ms/documentdb-emulator' -FileName 'C:\DocumentDB.Emulator.msi'
+  - msiexec.exe /i C:\DocumentDB.Emulator.msi /quiet /qn /log install.log
+  - ps: >-
+      & "${env:ProgramFiles}\DocumentDB Emulator\DocumentDB.Emulator.exe"
 build_script:
 - cmd: >-
     @echo off
@@ -43,6 +49,7 @@ test:
   - src/Containers/MassTransit.Containers.Tests/bin/Release/MassTransit.Containers.Tests.dll
   - src/MassTransit.AutomatonymousIntegration.Tests/bin/Release/MassTransit.AutomatonymousIntegration.Tests.dll
   - src/Persistence/MassTransit.MongoDbIntegration.Tests/bin/Release/MassTransit.MongoDbIntegration.Tests.dll
+  - src/Persistence/MassTransit.DocumentDbIntegration.Tests/bin/Release/MassTransit.DocumentDbIntegration.Tests.dll
   - src/Persistence/MassTransit.MartenIntegration.Tests/bin/Release/MassTransit.MartenIntegration.Tests.dll
   - src/MassTransit.HttpTransport.Tests/bin/Release/MassTransit.HttpTransport.Tests.dll
   categories:
