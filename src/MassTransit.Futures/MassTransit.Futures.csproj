@@ -2,6 +2,7 @@
   <PropertyGroup>
     <RootNamespace>MassTransit</RootNamespace>
     <AssemblyName>MassTransit.Futures</AssemblyName>
+    <IsPackable>false</IsPackable>
     <TargetFrameworks>net452</TargetFrameworks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
