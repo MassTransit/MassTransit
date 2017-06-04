@@ -3,29 +3,14 @@
     <RootNamespace>Automatonymous</RootNamespace>
     <AssemblyName>MassTransit.AutomatonymousIntegration</AssemblyName>
     <TargetFrameworks>net452</TargetFrameworks>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <NoWarn>1587,1591,1998,3008,3001</NoWarn>
-    <DocumentationFile>bin\Release\MassTransit.AutomatonymousIntegration.xml</DocumentationFile>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-	<SignAssembly>true</SignAssembly>
+    <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\MassTransit.snk</AssemblyOriginatorKeyFile>
+    <DebugType>portable</DebugType>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PackageId>MassTransit.Automatonymous</PackageId>
+    <Description>MassTransit Automatonymous state machine support; $(Description)</Description>
+    <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\MassTransit.AutomatonymousIntegration.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Automatonymous" Version="3.5.12" />
