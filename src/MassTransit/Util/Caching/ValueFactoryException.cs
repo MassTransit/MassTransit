@@ -29,9 +29,11 @@ namespace MassTransit.Util.Caching
         {
         }
 
+#if !NETCORE
         protected ValueFactoryException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
         }
+#endif
     }
 }

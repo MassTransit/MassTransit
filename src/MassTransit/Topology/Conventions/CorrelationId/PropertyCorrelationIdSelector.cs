@@ -13,6 +13,7 @@
 namespace MassTransit.Topology.Conventions.CorrelationId
 {
     using System;
+    using System.Reflection;
     using Context;
 
 

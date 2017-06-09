@@ -39,7 +39,7 @@ namespace MassTransit.Topology.Conventions
                 throw new ArgumentException("The type specified must be a generic type", nameof(genericType));
             if (typeInfo.GenericTypeParameters.Length != 1)
                 throw new ArgumentException("The generic type must have a single generic argument", nameof(genericType));
-            if (!typeof(TValue).IsAssignableFrom(typeInfo))
+            if (!typeof(TValue).IsAssignableFrom(genericType))
                 throw new ArgumentException("The generic type must be assignable to T", nameof(genericType));
 
             _dictionary = new ConcurrentDictionary<Type, Cached>();

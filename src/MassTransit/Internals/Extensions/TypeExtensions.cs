@@ -129,7 +129,7 @@ namespace MassTransit.Internals.Extensions
         public static bool IsNullable(this Type type)
         {
             TypeInfo typeInfo = type.GetTypeInfo();
-            return typeInfo.IsGenericType && typeInfo.GetGenericTypeDefinition() == typeof(Nullable<>).GetTypeInfo();
+            return typeInfo.IsGenericType && typeInfo.GetGenericTypeDefinition() == typeof(Nullable<>);
         }
 
         /// <summary>
@@ -142,7 +142,7 @@ namespace MassTransit.Internals.Extensions
         {
             TypeInfo typeInfo = type.GetTypeInfo();
             bool isNullable = typeInfo.IsGenericType
-                && typeInfo.GetGenericTypeDefinition() == typeof(Nullable<>).GetTypeInfo();
+                && typeInfo.GetGenericTypeDefinition() == typeof(Nullable<>);
             underlyingType = isNullable ? Nullable.GetUnderlyingType(type) : null;
             return isNullable;
         }
@@ -166,7 +166,7 @@ namespace MassTransit.Internals.Extensions
         public static bool CanBeNull(this Type type)
         {
             TypeInfo typeInfo = type.GetTypeInfo();
-            return !typeInfo.IsValueType || type.IsNullable() || typeInfo == typeof(string);
+            return !typeInfo.IsValueType || type.IsNullable() || type == typeof(string);
         }
 
         /// <summary>
@@ -211,7 +211,7 @@ namespace MassTransit.Internals.Extensions
         /// <returns></returns>
         public static bool IsAnonymousType(this Type type)
         {
-            return type.HasAttribute<CompilerGeneratedAttribute>() && type.FullName.Contains("AnonymousType");
+            return type.GetTypeInfo().HasAttribute<CompilerGeneratedAttribute>() && type.FullName.Contains("AnonymousType");
         }
 
         /// <summary>

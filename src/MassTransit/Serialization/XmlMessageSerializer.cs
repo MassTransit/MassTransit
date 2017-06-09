@@ -93,7 +93,7 @@ namespace MassTransit.Serialization
                     var document = (XDocument)XmlSerializer.Deserialize(jsonReader, typeof(XDocument));
 
                     using (var writer = new StreamWriter(stream, _encoding.Value, 1024, true))
-                    using (var xmlWriter = new XmlTextWriter(writer))
+                    using (var xmlWriter = XmlWriter.Create(writer))
                     {
                         document.WriteTo(xmlWriter);
                     }

@@ -42,6 +42,7 @@ namespace MassTransit
         public string RequestType { get; private set; }
         public Fault Fault { get; private set; }
 
+#if !NETCORE
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             base.GetObjectData(info, context);
@@ -49,5 +50,6 @@ namespace MassTransit
             info.AddValue("RequestType", RequestType);
             info.AddValue("Fault", Fault);
         }
+#endif
     }
 }
