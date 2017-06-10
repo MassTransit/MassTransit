@@ -15,7 +15,6 @@ namespace MassTransit
     using System;
     using Monitoring.Performance.Configuration;
     using Monitoring.Performance.StatsD;
-    using Monitoring.Performance.Windows;
 
 
     public static class PerformanceCounterExtensions
