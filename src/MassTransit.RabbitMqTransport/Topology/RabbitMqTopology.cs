@@ -14,6 +14,7 @@ namespace MassTransit.RabbitMqTransport.Topology
 {
     using System;
     using System.Net;
+    using System.Reflection;
     using System.Text;
     using System.Text.RegularExpressions;
     using NewIdFormatters;
@@ -108,7 +109,7 @@ namespace MassTransit.RabbitMqTransport.Topology
 
         public Uri GetDestinationAddress(Type messageType, Action<IExchangeConfigurator> configure = null)
         {
-            var isTemporary = messageType.IsTemporaryMessageType();
+            var isTemporary = messageType.GetTypeInfo().IsTemporaryMessageType();
 
             var durable = !isTemporary;
             var autoDelete = isTemporary;

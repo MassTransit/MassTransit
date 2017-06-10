@@ -15,6 +15,7 @@ namespace MassTransit
 {
     using System;
     using System.Collections.Generic;
+    using System.Reflection;
     using System.Runtime.Serialization;
     using System.Text;
 
@@ -94,26 +95,27 @@ namespace MassTransit
 
 		static string GetMessageName(StringBuilder sb, Type type, bool includeScope)
 		{
-            if (type.IsGenericParameter)
+		    var typeInfo = type.GetTypeInfo();
+            if (typeInfo.IsGenericParameter)
                 return "";
 
-			if (includeScope && type.Namespace != null)
+			if (includeScope && typeInfo.Namespace != null)
 			{
-				string ns = type.Namespace;
+				string ns = typeInfo.Namespace;
 				sb.Append(ns);
 
 				sb.Append(':');
 			}
 
-			if (type.IsNested)
+			if (typeInfo.IsNested)
 			{
-				GetMessageName(sb, type.DeclaringType, false);
+				GetMessageName(sb, typeInfo.DeclaringType, false);
 				sb.Append('+');
 			}
 
-			if (type.IsGenericType)
+			if (typeInfo.IsGenericType)
 			{
-			    var name = type.GetGenericTypeDefinition().Name;
+			    var name = typeInfo.GetGenericTypeDefinition().Name;
 
                 //remove `1
 			    int index = name.IndexOf('`');
@@ -124,7 +126,7 @@ namespace MassTransit
 			    sb.Append(name);
 				sb.Append('[');
 
-				Type[] arguments = type.GetGenericArguments();
+				Type[] arguments = typeInfo.GetGenericArguments();
 				for (int i = 0; i < arguments.Length; i++)
 				{
 					if (i > 0)
@@ -138,7 +140,7 @@ namespace MassTransit
 				sb.Append(']');
 			}
 			else
-				sb.Append(type.Name);
+				sb.Append(typeInfo.Name);
 
 			return sb.ToString();
 		}

@@ -14,6 +14,7 @@ namespace MassTransit.MongoDbIntegration
 {
     using System;
     using System.Linq.Expressions;
+    using System.Reflection;
     using Courier;
     using Courier.Documents;
     using Courier.Events;
@@ -61,7 +62,7 @@ namespace MassTransit.MongoDbIntegration
 
         static bool IsSagaClass(Type type)
         {
-            return type.IsClass && typeof(IVersionedSaga).IsAssignableFrom(type);
+            return type.GetTypeInfo().IsClass && typeof(IVersionedSaga).IsAssignableFrom(type);
         }
 
         public void RegisterClass<T>(Expression<Func<T, Guid>> id)
