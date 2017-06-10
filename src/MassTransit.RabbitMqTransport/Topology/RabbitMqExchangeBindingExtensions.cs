@@ -15,6 +15,7 @@ namespace MassTransit.RabbitMqTransport.Topology
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Reflection;
 
 
     public static class RabbitMqExchangeBindingExtensions
@@ -28,10 +29,10 @@ namespace MassTransit.RabbitMqTransport.Topology
             return binding;
         }
 
-        public static bool IsTemporaryMessageType(this Type messageType)
+        public static bool IsTemporaryMessageType(this TypeInfo messageTypeInfo)
         {
-            return (!messageType.IsVisible && messageType.IsClass)
-                || (messageType.IsGenericType && messageType.GetGenericArguments().Any(IsTemporaryMessageType));
+            return (!messageTypeInfo.IsVisible && messageTypeInfo.IsClass)
+                || (messageTypeInfo.IsGenericType && messageTypeInfo.GetGenericArguments().Any(x => IsTemporaryMessageType(x.GetTypeInfo())));
         }
 
 

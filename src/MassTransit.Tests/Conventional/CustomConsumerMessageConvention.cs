@@ -14,6 +14,7 @@ namespace MassTransit.Tests.Conventional
 {
     using System.Collections.Generic;
     using System.Linq;
+    using System.Reflection;
 
 
     class CustomConsumerMessageConvention<T> :
@@ -22,18 +23,19 @@ namespace MassTransit.Tests.Conventional
     {
         public IEnumerable<IMessageInterfaceType> GetMessageTypes()
         {
-            if (typeof(T).IsGenericType && typeof(T).GetGenericTypeDefinition() == typeof(IHandler<>))
+            var typeInfo = typeof(T).GetTypeInfo();
+            if (typeInfo.IsGenericType && typeInfo.GetGenericTypeDefinition() == typeof(IHandler<>))
             {
-                var interfaceType = new CustomConsumerInterfaceType(typeof(T).GetGenericArguments()[0], typeof(T));
-                if (interfaceType.MessageType.IsValueType == false && interfaceType.MessageType != typeof(string))
+                var interfaceType = new CustomConsumerInterfaceType(typeInfo.GetGenericArguments()[0], typeof(T));
+                if (interfaceType.MessageType.GetTypeInfo().IsValueType == false && interfaceType.MessageType != typeof(string))
                     yield return interfaceType;
             }
 
             IEnumerable<CustomConsumerInterfaceType> types = typeof(T).GetInterfaces()
-                .Where(x => x.IsGenericType)
-                .Where(x => x.GetGenericTypeDefinition() == typeof(IHandler<>))
-                .Select(x => new CustomConsumerInterfaceType(x.GetGenericArguments()[0], typeof(T)))
-                .Where(x => x.MessageType.IsValueType == false && x.MessageType != typeof(string));
+                .Where(x => x.GetTypeInfo().IsGenericType)
+                .Where(x => x.GetTypeInfo().GetGenericTypeDefinition() == typeof(IHandler<>))
+                .Select(x => new CustomConsumerInterfaceType(x.GetTypeInfo().GetGenericArguments()[0], typeof(T)))
+                .Where(x => x.MessageType.GetTypeInfo().IsValueType == false && x.MessageType != typeof(string));
 
             foreach (CustomConsumerInterfaceType type in types)
                 yield return type;

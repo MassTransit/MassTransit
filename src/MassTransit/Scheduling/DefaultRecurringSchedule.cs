@@ -13,6 +13,7 @@
 namespace MassTransit.Scheduling
 {
     using System;
+    using System.Reflection;
     using Util;
 
 
@@ -21,7 +22,7 @@ namespace MassTransit.Scheduling
         protected DefaultRecurringSchedule()
         {
             ScheduleId = TypeMetadataCache.GetShortName(GetType());
-            ScheduleGroup = GetType().Assembly.FullName.Split(",".ToCharArray(), StringSplitOptions.RemoveEmptyEntries)[0];
+            ScheduleGroup = GetType().GetTypeInfo().Assembly.FullName.Split(",".ToCharArray(), StringSplitOptions.RemoveEmptyEntries)[0];
 
             TimeZoneId = TimeZoneInfo.Local.Id;
             StartTime = DateTime.Now;
