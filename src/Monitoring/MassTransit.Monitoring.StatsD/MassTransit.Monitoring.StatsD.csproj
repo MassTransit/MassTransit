@@ -9,8 +9,8 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="GreenPipes" Version="1.0.10" />
+    <ProjectReference Include="..\MassTransit.Monitoring.Windows\MassTransit.Monitoring.Windows.csproj" />
     <ProjectReference Include="..\MassTransit.Monitoring\MassTransit.Monitoring.csproj" />
-    <ProjectReference Include="..\MassTransit.Monitoring\MassTransit.Monitoring.Windows.csproj" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <ProjectReference Include="..\..\MassTransit\MassTransit.csproj" />
