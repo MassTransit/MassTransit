@@ -14,6 +14,7 @@ namespace MassTransit.ConsumeConnectors
 {
     using System.Collections.Generic;
     using System.Linq;
+    using System.Reflection;
 
 
     /// <summary>
@@ -26,18 +27,18 @@ namespace MassTransit.ConsumeConnectors
     {
         public IEnumerable<IMessageInterfaceType> GetMessageTypes()
         {
-            if (typeof(T).IsGenericType && typeof(T).GetGenericTypeDefinition() == typeof(IMessageConsumer<>))
+            if (typeof(T).GetTypeInfo().IsGenericType && typeof(T).GetGenericTypeDefinition() == typeof(IMessageConsumer<>))
             {
                 var interfaceType = new LegacyConsumerInterfaceType(typeof(T).GetGenericArguments()[0], typeof(T));
-                if (interfaceType.MessageType.IsValueType == false && interfaceType.MessageType != typeof(string))
+                if (interfaceType.MessageType.GetTypeInfo().IsValueType == false && interfaceType.MessageType != typeof(string))
                     yield return interfaceType;
             }
 
             IEnumerable<LegacyConsumerInterfaceType> types = typeof(T).GetInterfaces()
-                .Where(x => x.IsGenericType)
+                .Where(x => x.GetTypeInfo().IsGenericType)
                 .Where(x => x.GetGenericTypeDefinition() == typeof(IMessageConsumer<>))
                 .Select(x => new LegacyConsumerInterfaceType(x.GetGenericArguments()[0], typeof(T)))
-                .Where(x => x.MessageType.IsValueType == false && x.MessageType != typeof(string));
+                .Where(x => x.MessageType.GetTypeInfo().IsValueType == false && x.MessageType != typeof(string));
 
             foreach (LegacyConsumerInterfaceType type in types)
                 yield return type;

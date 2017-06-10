@@ -20,6 +20,7 @@ namespace MassTransit.Util.Scanning
     using System.Threading.Tasks;
     using Internals.Extensions;
 
+
     public class AssemblyScanner :
         IAssemblyScanner
     {
@@ -39,7 +40,7 @@ namespace MassTransit.Util.Scanning
 
         public void Assembly(string assemblyName)
         {
-            Assembly(System.Reflection.Assembly.Load(assemblyName));
+            Assembly(System.Reflection.Assembly.Load(new AssemblyName(assemblyName)));
         }
 
         public void AssemblyContainingType<T>()
@@ -209,22 +210,19 @@ namespace MassTransit.Util.Scanning
         {
             var trace = new StackTrace(false);
 
-            var thisAssembly = System.Reflection.Assembly.GetExecutingAssembly();
-            var mtAssembly = typeof(IBus).Assembly;
+            var thisAssembly = typeof(AssemblyScanner).GetTypeInfo().Assembly;
+            var mtAssembly = typeof(IBus).GetTypeInfo().Assembly;
 
             Assembly callingAssembly = null;
             for (var i = 0; i < trace.FrameCount; i++)
             {
                 var frame = trace.GetFrame(i);
-                var declaringType = frame.GetMethod().DeclaringType;
-                if (declaringType != null)
+                var assembly = frame.GetMethod().DeclaringType?.GetTypeInfo()?.Assembly;
+
+                if (assembly != null && assembly != thisAssembly && assembly != mtAssembly)
                 {
-                    var assembly = declaringType.Assembly;
-                    if (assembly != thisAssembly && assembly != mtAssembly)
-                    {
-                        callingAssembly = assembly;
-                        break;
-                    }
+                    callingAssembly = assembly;
+                    break;
                 }
             }
             return callingAssembly;

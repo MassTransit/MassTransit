@@ -16,6 +16,7 @@ namespace MassTransit.Serialization
     using System.Collections.Generic;
     using System.IO;
     using System.Net.Mime;
+    using System.Reflection;
     using System.Runtime.Remoting.Messaging;
     using System.Runtime.Serialization.Formatters.Binary;
     using Util;
@@ -52,7 +53,7 @@ namespace MassTransit.Serialization
             if (message == null)
                 throw new ArgumentNullException(nameof(context), "The message must not be null");
 
-            Type t = message.GetType();
+            Type t = message.GetType().GetTypeInfo();
             if (!t.IsSerializable)
             {
                 throw new ConventionException(

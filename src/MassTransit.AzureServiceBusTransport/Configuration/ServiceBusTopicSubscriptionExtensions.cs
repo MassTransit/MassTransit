@@ -15,6 +15,7 @@ namespace MassTransit.AzureServiceBusTransport
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Reflection;
     using Microsoft.ServiceBus.Messaging;
     using Newtonsoft.Json.Linq;
     using Settings;
@@ -28,7 +29,7 @@ namespace MassTransit.AzureServiceBusTransport
             if (!IsSubscriptionMessageType(messageType))
                 yield break;
 
-            var temporary = IsTemporaryMessageType(messageType);
+            var temporary = IsTemporaryMessageType(messageType.GetTypeInfo());
 
             var topicDescription = Defaults.CreateTopicDescription(messageNameFormatter.GetMessageName(messageType).ToString());
             topicDescription.EnableExpress = temporary;
@@ -58,10 +59,10 @@ namespace MassTransit.AzureServiceBusTransport
             return builder.Uri;
         }
 
-        static bool IsTemporaryMessageType(this Type messageType)
+        static bool IsTemporaryMessageType(this TypeInfo messageTypeInfo)
         {
-            return (!messageType.IsVisible && messageType.IsClass)
-                || (messageType.IsGenericType && messageType.GetGenericArguments().Any(IsTemporaryMessageType));
+            return (!messageTypeInfo.IsVisible && messageTypeInfo.IsClass)
+                || (messageTypeInfo.IsGenericType && messageTypeInfo.GetGenericArguments().Any(x => IsTemporaryMessageType(x.GetTypeInfo())));
         }
 
 
