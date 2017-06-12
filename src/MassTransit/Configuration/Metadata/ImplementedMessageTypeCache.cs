@@ -15,6 +15,7 @@ namespace MassTransit.Metadata
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Reflection;
     using System.Threading;
     using Util;
 
@@ -71,31 +72,33 @@ namespace MassTransit.Metadata
             {
                 yield return new ImplementedType(baseInterface, false);
             }
-
-            var baseType = typeof(TMessage).BaseType;
+            
+            var baseType = typeof(TMessage).GetTypeInfo().BaseType;
             while (baseType != null && TypeMetadataCache.IsValidMessageType(baseType))
             {
-                yield return new ImplementedType(baseType, typeof(TMessage).BaseType == baseType);
+                yield return new ImplementedType(baseType, typeof(TMessage).GetTypeInfo().BaseType == baseType);
 
                 foreach (var baseInterface in GetImplementedInterfaces(baseType).Where(TypeMetadataCache.IsValidMessageType))
                 {
                     yield return new ImplementedType(baseInterface, false);
                 }
 
-                baseType = baseType.BaseType;
+                baseType = baseType.GetTypeInfo().BaseType;
             }
         }
 
         static IEnumerable<Type> GetImplementedInterfaces(Type baseType)
         {
-            IEnumerable<Type> baseInterfaces = baseType
+            var baseTypeInfo = baseType.GetTypeInfo();
+
+            IEnumerable<Type> baseInterfaces = baseTypeInfo
                 .GetInterfaces()
                 .Where(TypeMetadataCache.IsValidMessageType)
                 .ToArray();
 
-            if (baseType.BaseType != null && baseType.BaseType != typeof(object))
+            if (baseTypeInfo.BaseType != null && baseTypeInfo.BaseType != typeof(object))
                 baseInterfaces = baseInterfaces
-                    .Except(baseType.BaseType.GetInterfaces())
+                    .Except(baseTypeInfo.BaseType.GetInterfaces())
                     .Except(baseInterfaces.SelectMany(x => x.GetInterfaces()))
                     .ToArray();
 

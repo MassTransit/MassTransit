@@ -52,7 +52,7 @@ namespace MassTransit.Serialization.JsonConverters
                 if (typeInfo.HasElementType && typeInfo.GetElementType() == typeof(byte))
                     return false;
 
-                return typeInfo.HasInterface<IEnumerable>();
+                return objectType.HasInterface<IEnumerable>();
             }
 
             if (typeInfo.IsGenericType)

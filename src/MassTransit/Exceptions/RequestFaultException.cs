@@ -32,12 +32,14 @@ namespace MassTransit
         {
         }
 
+#if !NETCORE
         protected RequestFaultException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
             RequestType = info.GetString("RequestType");
             Fault = (Fault)info.GetValue("Fault", typeof(Fault));
         }
+#endif
 
         public string RequestType { get; private set; }
         public Fault Fault { get; private set; }

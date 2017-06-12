@@ -34,10 +34,12 @@ namespace MassTransit
         {
         }
 
+#if !NETCORE
         protected RequestCancelledException( SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
         }
+#endif
 
         static string FormatMessage(string requestId)
         {

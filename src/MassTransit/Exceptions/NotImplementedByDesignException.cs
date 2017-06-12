@@ -35,9 +35,11 @@ namespace MassTransit
         {
         }
 
+#if !NETCORE
         protected NotImplementedByDesignException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
         }
+#endif
     }
 }
