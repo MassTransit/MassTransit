@@ -12,6 +12,5 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <ProjectReference Include="..\..\MassTransit\MassTransit.csproj" />
-    <ProjectReference Include="..\MassTransit.Monitoring\MassTransit.Monitoring.csproj" />
   </ItemGroup>
 </Project>
