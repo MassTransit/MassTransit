@@ -1,4 +1,4 @@
-// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -10,11 +10,16 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Monitoring.Performance
+namespace MassTransit.Monitoring.Performance.Windows
 {
-    public interface ISendPerformanceCounter
+    using System.Diagnostics;
+
+    public class WindowsCounterFactory : ICounterFactory
     {
-        void Sent();
-        void Faulted();
+        public IPerformanceCounter Create(CounterCategory category, string counterName, string instanceName)
+        {
+            var counter = new PerformanceCounter(category.Name, counterName, instanceName, false);
+            return new WindowsPerformanceCounter(counter);
+        }
     }
 }

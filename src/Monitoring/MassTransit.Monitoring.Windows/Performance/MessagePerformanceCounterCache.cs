@@ -1,4 +1,4 @@
-// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,9 +12,21 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Monitoring.Performance
 {
-    public interface ISendPerformanceCounter
+    using System;
+    using Windows;
+
+
+    public static class MessagePerformanceCounterCache<T>
     {
-        void Sent();
-        void Faulted();
+        static Lazy<MessagePerformanceCounter<T>> _cache;
+
+        public static IMessagePerformanceCounter Counter(ICounterFactory factory)
+        {
+            if (_cache == null)
+            {
+                _cache = new Lazy<MessagePerformanceCounter<T>>(() => new MessagePerformanceCounter<T>(factory));
+            }
+            return _cache.Value;
+        }
     }
 }
