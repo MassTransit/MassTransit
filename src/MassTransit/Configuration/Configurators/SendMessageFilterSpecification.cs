@@ -14,6 +14,7 @@ namespace MassTransit.Configurators
 {
     using System;
     using System.Linq;
+    using System.Reflection;
     using Util.Scanning;
 
 

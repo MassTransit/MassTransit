@@ -40,8 +40,13 @@ namespace MassTransit.Util.Scanning
 
         public void Assembly(string assemblyName)
         {
+#if NETCORE
             var name = new AssemblyName(assemblyName);
-            Assembly(System.Reflection.Assembly.Load(name));
+            var asm = System.Runtime.Loader.AssemblyLoadContext.Default.LoadFromAssemblyName(name);
+#else
+            var asm = System.Reflection.Assembly.Load(assemblyName);
+#endif
+            Assembly(asm);
         }
 
         public void AssemblyContainingType<T>()

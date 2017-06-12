@@ -75,7 +75,11 @@ namespace MassTransit.Util
         /// </summary> 
         private void NotifyThreadPoolOfPendingWork()
         {
+#if NETCORE
+            ThreadPool.QueueUserWorkItem(_ =>
+#else
             ThreadPool.UnsafeQueueUserWorkItem(_ =>
+#endif
             {
                 // Note that the current thread is now processing work items. 
                 // This is necessary to enable inlining of tasks into this thread. 
