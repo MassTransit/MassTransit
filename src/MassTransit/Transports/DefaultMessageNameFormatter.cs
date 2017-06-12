@@ -14,6 +14,7 @@ namespace MassTransit.Transports
 {
     using System;
     using System.Collections.Concurrent;
+    using System.Reflection;
     using System.Text;
 
 
@@ -44,7 +45,7 @@ namespace MassTransit.Transports
 
         string CreateMessageName(Type type)
         {
-            if (type.IsGenericTypeDefinition)
+            if (type.GetTypeInfo().IsGenericTypeDefinition)
                 throw new ArgumentException("An open generic type cannot be used as a message name");
 
             var sb = new StringBuilder("");
@@ -54,12 +55,13 @@ namespace MassTransit.Transports
 
         string GetMessageName(StringBuilder sb, Type type, string scope)
         {
-            if (type.IsGenericParameter)
+            var typeInfo = type.GetTypeInfo();
+            if (typeInfo.IsGenericParameter)
                 return "";
 
-            if (type.Namespace != null)
+            if (typeInfo.Namespace != null)
             {
-                string ns = type.Namespace;
+                string ns = typeInfo.Namespace;
                 if (!ns.Equals(scope))
                 {
                     sb.Append(ns);
@@ -67,15 +69,15 @@ namespace MassTransit.Transports
                 }
             }
 
-            if (type.IsNested)
+            if (typeInfo.IsNested)
             {
-                GetMessageName(sb, type.DeclaringType, type.Namespace);
+                GetMessageName(sb, typeInfo.DeclaringType, typeInfo.Namespace);
                 sb.Append(_nestedTypeSeparator);
             }
 
-            if (type.IsGenericType)
+            if (typeInfo.IsGenericType)
             {
-                string name = type.GetGenericTypeDefinition().Name;
+                string name = typeInfo.GetGenericTypeDefinition().Name;
 
                 //remove `1
                 int index = name.IndexOf('`');
@@ -85,19 +87,19 @@ namespace MassTransit.Transports
                 sb.Append(name);
                 sb.Append(_genericTypeSeparator);
 
-                Type[] arguments = type.GetGenericArguments();
+                Type[] arguments = typeInfo.GetGenericArguments();
                 for (int i = 0; i < arguments.Length; i++)
                 {
                     if (i > 0)
                         sb.Append(_genericArgumentSeparator);
 
-                    GetMessageName(sb, arguments[i], type.Namespace);
+                    GetMessageName(sb, arguments[i], typeInfo.Namespace);
                 }
 
                 sb.Append(_genericTypeSeparator);
             }
             else
-                sb.Append(type.Name);
+                sb.Append(typeInfo.Name);
 
             return sb.ToString();
         }

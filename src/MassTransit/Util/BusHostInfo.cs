@@ -29,7 +29,7 @@ namespace MassTransit.Util
         {
             MachineName = Environment.MachineName;
 
-            MassTransitVersion = GetAssemblyInformationalVersion(typeof(IBus).Assembly);
+            MassTransitVersion = GetAssemblyInformationalVersion(typeof(IBus).GetTypeInfo().Assembly);
             FrameworkVersion = Environment.Version.ToString();
             OperatingSystemVersion = Environment.OSVersion.ToString();
             var currentProcess = Process.GetCurrentProcess();

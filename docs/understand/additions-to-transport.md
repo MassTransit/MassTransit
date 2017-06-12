@@ -1,4 +1,4 @@
-# What does MassTransit adds to the transport?
+# What does MassTransit add to the transport?
 
 MassTransit is a lightweight service bus for building distributed .NET applications. The main goal is to provide
 a consistent, .NET friendly abstraction over the message transport (whether it is RabbitMQ, Azure Service Bus, etc.).

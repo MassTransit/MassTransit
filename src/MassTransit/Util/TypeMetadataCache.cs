@@ -94,7 +94,7 @@ namespace MassTransit.Util
             _properties = new Lazy<List<PropertyInfo>>(() => typeof(T).GetAllProperties().ToList());
 
             _isValidMessageType = new Lazy<bool>(CheckIfValidMessageType);
-            _isTemporaryMessageType = new Lazy<bool>(() => CheckIfTemporaryMessageType(typeof(T)));
+            _isTemporaryMessageType = new Lazy<bool>(() => CheckIfTemporaryMessageType(typeof(T).GetTypeInfo()));
             _messageTypes = new Lazy<Type[]>(() => GetMessageTypes().ToArray());
             _messageTypeNames = new Lazy<string[]>(() => GetMessageTypeNames().ToArray());
         }
@@ -133,22 +133,24 @@ namespace MassTransit.Util
         /// <returns>True if the message can be sent, otherwise false</returns>
         bool CheckIfValidMessageType()
         {
-            if (typeof(T).Namespace == null)
+            var typeInfo = typeof(T).GetTypeInfo();
+
+            if (typeInfo.Namespace == null)
                 return false;
 
-            if (typeof(T).Assembly == typeof(object).Assembly)
+            if (typeInfo.Assembly == typeof(object).GetTypeInfo().Assembly)
                 return false;
 
-            if (typeof(T).Namespace == "System")
+            if (typeInfo.Namespace == "System")
                 return false;
 
-            var ns = typeof(T).Namespace;
+            var ns = typeInfo.Namespace;
             if (ns != null && ns.StartsWith("System."))
                 return false;
 
-            if (typeof(T).IsGenericType)
+            if (typeInfo.IsGenericType)
             {
-                var typeDefinition = typeof(T).GetGenericTypeDefinition();
+                var typeDefinition = typeInfo.GetGenericTypeDefinition();
                 if (typeDefinition == typeof(CorrelatedBy<>))
                     return false;
                 if (typeDefinition == typeof(Orchestrates<>))
@@ -158,20 +160,17 @@ namespace MassTransit.Util
                 if (typeDefinition == typeof(Observes<,>))
                     return false;
 
-                if (typeof(T).IsOpenGeneric())
+                if (typeInfo.IsOpenGeneric())
                     return false;
             }
 
-            if (typeof(T).IsAnonymousType())
-                return false;
-
-            return true;
+            return !typeInfo.IsAnonymousType();
         }
 
-        bool CheckIfTemporaryMessageType(Type messageType)
+        bool CheckIfTemporaryMessageType(TypeInfo messageTypeInfo)
         {
-            return (!messageType.IsVisible && messageType.IsClass)
-                || (messageType.IsGenericType && messageType.GetGenericArguments().Any(CheckIfTemporaryMessageType));
+            return (!messageTypeInfo.IsVisible && messageTypeInfo.IsClass)
+                || messageTypeInfo.IsGenericType && messageTypeInfo.GetGenericArguments().Any(x => CheckIfTemporaryMessageType(x.GetTypeInfo()));
         }
 
         /// <summary>
@@ -186,7 +185,7 @@ namespace MassTransit.Util
                 yield return typeof(T);
 
             var baseType = typeof(T).BaseType;
-            while ((baseType != null) && TypeMetadataCache.IsValidMessageType(baseType))
+            while (baseType != null && TypeMetadataCache.IsValidMessageType(baseType))
             {
                 yield return baseType;
 
@@ -194,6 +193,7 @@ namespace MassTransit.Util
             }
 
             IEnumerable<Type> interfaces = typeof(T)
+                .GetTypeInfo()
                 .GetInterfaces()
                 .Where(TypeMetadataCache.IsValidMessageType);
 
@@ -213,14 +213,18 @@ namespace MassTransit.Util
 
         static bool ScanForSagaInterfaces()
         {
-            Type[] interfaces = typeof(T).GetInterfaces();
+            Type[] interfaces = typeof(T).GetTypeInfo().GetInterfaces();
 
             if (interfaces.Contains(typeof(ISaga)))
                 return true;
 
-            return interfaces.Any(x => x.HasInterface(typeof(InitiatedBy<>))
-                || x.HasInterface(typeof(Orchestrates<>))
-                || x.HasInterface(typeof(Observes<,>)));
+            return interfaces.Any(t =>
+            {
+                var x = t.GetTypeInfo();
+                return x.HasInterface(typeof(InitiatedBy<>))
+                    || x.HasInterface(typeof(Orchestrates<>))
+                    || x.HasInterface(typeof(Observes<,>));
+            });
         }
 
 

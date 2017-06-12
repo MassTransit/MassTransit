@@ -35,7 +35,7 @@ namespace MassTransit.HttpTransport.Clients
     {
         static readonly ILog _log = Logger.Get<HttpSendTransport>();
 
-        static readonly string Version = GetAssemblyFileVersion(typeof(IBusControl).Assembly);
+        static readonly string Version = GetAssemblyFileVersion(typeof(IBusControl).GetTypeInfo().Assembly);
         readonly ClientCache _clientCache;
         readonly SendObservable _observers;
         readonly IReceiveObserver _receiveObserver;
