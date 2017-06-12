@@ -88,7 +88,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
             }
         }
 
-        [Test]
+        [Test, Explicit]
         public async Task Should_capture_all_events_many_sagas()
         {
             var tasks = new List<Task>();
@@ -121,12 +121,12 @@ namespace MassTransit.AutomatonymousIntegration.Tests
             await Task.Delay(2000);
             tasks.Clear();
 
-            foreach(var sid in sagaIds)
-            {
-                var sagaId = await _repository.Value.ShouldContainSaga(x => x.CorrelationId == sid
-                && x.CurrentState == _machine.Harmony.Name, TestTimeout);
 
-                Assert.IsTrue(sagaId.HasValue);
+            foreach (var sid in sagaIds)
+            {
+                ChoirState instance = await GetSaga(sid);
+
+                Assert.IsTrue(instance.CurrentState.Equals("Harmony"));
             }
         }
 

@@ -56,4 +56,7 @@
     <ProjectReference Include="..\MassTransit.UnityIntegration\MassTransit.UnityIntegration.csproj" />
     <ProjectReference Include="..\MassTransit.WindsorIntegration\MassTransit.WindsorIntegration.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <Service Include="{82a7f48d-3b50-4b1e-b82e-3ada8210c358}" />
+  </ItemGroup>
 </Project>
