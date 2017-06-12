@@ -109,7 +109,6 @@ namespace MassTransit.DocumentDbIntegration.Saga
 
                 if (document != null)
                 {
-                    var temp = (TSaga)(dynamic)document;
                     instance = JsonConvert.DeserializeObject<TSaga>(document.ToString());
                 }
 

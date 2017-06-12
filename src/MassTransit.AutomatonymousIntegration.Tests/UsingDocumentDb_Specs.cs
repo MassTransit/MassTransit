@@ -12,21 +12,19 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.AutomatonymousIntegration.Tests
 {
-    using System;
-    using System.Data.Entity.Infrastructure;
-    using System.Linq;
-    using System.Threading.Tasks;
     using Automatonymous;
     using DocumentDbIntegration.Saga;
+    using DocumentDbIntegration.Tests;
     using GreenPipes;
-    using NUnit.Framework;
-    using Saga;
-    using TestFramework;
-    using System.Collections.Generic;
     using Microsoft.Azure.Documents;
     using Microsoft.Azure.Documents.Client;
     using Newtonsoft.Json;
-    using DocumentDbIntegration.Tests;
+    using NUnit.Framework;
+    using Saga;
+    using System;
+    using System.Data.Entity.Infrastructure;
+    using System.Threading.Tasks;
+    using TestFramework;
 
     [TestFixture]
     public class When_using_DocumentDB :

@@ -81,7 +81,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
             }
         }
 
-        [Test]
+        [Test, Explicit]
         public async Task Some_should_not_be_in_final_state_all()
         {
             var tasks = new List<Task>();

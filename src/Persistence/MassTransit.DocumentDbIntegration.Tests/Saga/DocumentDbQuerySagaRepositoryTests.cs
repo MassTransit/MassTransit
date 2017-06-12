@@ -1,14 +1,11 @@
 ﻿namespace MassTransit.DocumentDbIntegration.Tests.Saga
 {
+    using DocumentDbIntegration.Saga;
+    using MassTransit.Saga;
+    using NUnit.Framework;
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Threading.Tasks;
-    using MassTransit.Saga;
-    using DocumentDbIntegration.Saga;
-    using Microsoft.Azure.Documents;
-    using Microsoft.Azure.Documents.Client;
-    using NUnit.Framework;
 
 
     [TestFixture]
