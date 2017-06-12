@@ -19,10 +19,6 @@
       <Project>{1fb26639-3ee4-4456-9e59-f494f232232d}</Project>
       <Name>MassTransit.Monitoring.Windows</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Monitoring\MassTransit.Monitoring\MassTransit.Monitoring.csproj">
-      <Project>{f98e12bd-b027-468c-982e-257a8f71ef54}</Project>
-      <Name>MassTransit.Monitoring</Name>
-    </ProjectReference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
