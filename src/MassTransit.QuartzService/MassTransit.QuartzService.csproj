@@ -27,5 +27,6 @@
     <ProjectReference Include="..\MassTransit.QuartzIntegration\MassTransit.QuartzIntegration.csproj" />
     <ProjectReference Include="..\MassTransit.RabbitMqTransport\MassTransit.RabbitMqTransport.csproj" />
     <ProjectReference Include="..\MassTransit\MassTransit.csproj" />
+    <ProjectReference Include="..\Monitoring\MassTransit.Monitoring.Windows\MassTransit.Monitoring.Windows.csproj" />
   </ItemGroup>
 </Project>
