@@ -39,12 +39,12 @@ build_script:
     src\packages\FAKE\tools\fake.exe build.fsx %*
 test:
   assemblies:
-  - src/MassTransit.Tests/bin/Release/MassTransit.Tests.dll
-  - src/Containers/MassTransit.Containers.Tests/bin/Release/MassTransit.Containers.Tests.dll
-  - src/MassTransit.AutomatonymousIntegration.Tests/bin/Release/MassTransit.AutomatonymousIntegration.Tests.dll
-  - src/Persistence/MassTransit.MongoDbIntegration.Tests/bin/Release/MassTransit.MongoDbIntegration.Tests.dll
-  - src/Persistence/MassTransit.MartenIntegration.Tests/bin/Release/MassTransit.MartenIntegration.Tests.dll
-  - src/MassTransit.HttpTransport.Tests/bin/Release/MassTransit.HttpTransport.Tests.dll
+  - src/MassTransit.Tests/bin/Release/net452/MassTransit.Tests.dll
+  - src/Containers/MassTransit.Containers.Tests/bin/Release/net452/MassTransit.Containers.Tests.dll
+  - src/MassTransit.AutomatonymousIntegration.Tests/bin/Release/net452/MassTransit.AutomatonymousIntegration.Tests.dll
+  - src/Persistence/MassTransit.MongoDbIntegration.Tests/bin/Release/net452/MassTransit.MongoDbIntegration.Tests.dll
+  - src/Persistence/MassTransit.MartenIntegration.Tests/bin/Release/net452/MassTransit.MartenIntegration.Tests.dll
+  - src/MassTransit.HttpTransport.Tests/bin/Release/net452/MassTransit.HttpTransport.Tests.dll
   categories:
     except:
     - Flakey
