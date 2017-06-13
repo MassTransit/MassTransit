@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26430.12
+VisualStudioVersion = 15.0.26430.13
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Persistence", "Persistence", "{56F516D7-BC3C-49E1-A639-83C5F14953F8}"
 EndProject
@@ -317,15 +317,15 @@ Global
 		{CC243B02-0542-48CB-B175-C8035075E376}.ReleaseUnsigned|x86.ActiveCfg = Release|Any CPU
 		{989BA511-C126-4C88-A74B-BAD83DF2291B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{989BA511-C126-4C88-A74B-BAD83DF2291B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{989BA511-C126-4C88-A74B-BAD83DF2291B}.Debug|x86.ActiveCfg = Debug|x86
-		{989BA511-C126-4C88-A74B-BAD83DF2291B}.Debug|x86.Build.0 = Debug|x86
+		{989BA511-C126-4C88-A74B-BAD83DF2291B}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{989BA511-C126-4C88-A74B-BAD83DF2291B}.Debug|x86.Build.0 = Debug|Any CPU
 		{989BA511-C126-4C88-A74B-BAD83DF2291B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{989BA511-C126-4C88-A74B-BAD83DF2291B}.Release|Any CPU.Build.0 = Release|Any CPU
-		{989BA511-C126-4C88-A74B-BAD83DF2291B}.Release|x86.ActiveCfg = Release|x86
-		{989BA511-C126-4C88-A74B-BAD83DF2291B}.Release|x86.Build.0 = Release|x86
+		{989BA511-C126-4C88-A74B-BAD83DF2291B}.Release|x86.ActiveCfg = Release|Any CPU
+		{989BA511-C126-4C88-A74B-BAD83DF2291B}.Release|x86.Build.0 = Release|Any CPU
 		{989BA511-C126-4C88-A74B-BAD83DF2291B}.ReleaseUnsigned|Any CPU.ActiveCfg = Release|Any CPU
-		{989BA511-C126-4C88-A74B-BAD83DF2291B}.ReleaseUnsigned|x86.ActiveCfg = Release|x86
-		{989BA511-C126-4C88-A74B-BAD83DF2291B}.ReleaseUnsigned|x86.Build.0 = Release|x86
+		{989BA511-C126-4C88-A74B-BAD83DF2291B}.ReleaseUnsigned|x86.ActiveCfg = Release|Any CPU
+		{989BA511-C126-4C88-A74B-BAD83DF2291B}.ReleaseUnsigned|x86.Build.0 = Release|Any CPU
 		{29BC6AB5-2697-45EC-8172-475AB8ACE834}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{29BC6AB5-2697-45EC-8172-475AB8ACE834}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{29BC6AB5-2697-45EC-8172-475AB8ACE834}.Debug|x86.ActiveCfg = Debug|Any CPU
