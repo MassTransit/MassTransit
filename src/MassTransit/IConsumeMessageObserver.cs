@@ -17,7 +17,7 @@ namespace MassTransit
 
 
     /// <summary>
-    /// Intercepts the ConsumeContext<typeparam name="T">T</typeparam>
+    /// Intercepts the ConsumeContext
     /// </summary>
     /// <typeparam name="T">The message type</typeparam>
     public interface IConsumeMessageObserver<in T>
