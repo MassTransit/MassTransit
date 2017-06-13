@@ -15,6 +15,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
     using System;
     using Automatonymous;
     using Saga;
+    using Newtonsoft.Json;
 
     public class RehersalBegins
     {
@@ -59,6 +60,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
 
         public string CurrentState { get; set; }
         public int Harmony { get; set; }
+        [JsonProperty("id")]
         public Guid CorrelationId { get; set; }
         public byte[] RowVersion { get; set; }
         public string BassName { get; set; }
