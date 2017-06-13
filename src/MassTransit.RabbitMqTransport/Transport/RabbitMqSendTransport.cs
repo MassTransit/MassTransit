@@ -20,6 +20,7 @@ namespace MassTransit.RabbitMqTransport.Transport
     using System.Net.Mime;
     using System.Threading;
     using System.Threading.Tasks;
+    using System.Reflection;
     using Context;
     using Contexts;
     using GreenPipes;
@@ -75,7 +76,7 @@ namespace MassTransit.RabbitMqTransport.Transport
                         properties.ContentType = context.ContentType.MediaType;
 
                         KeyValuePair<string, object>[] headers = context.Headers.GetAll()
-                            .Where(x => x.Value != null && (x.Value is string || x.Value.GetType().IsValueType))
+                            .Where(x => x.Value != null && (x.Value is string || x.Value.GetType().GetTypeInfo().IsValueType))
                             .ToArray();
 
                         if (properties.Headers == null)

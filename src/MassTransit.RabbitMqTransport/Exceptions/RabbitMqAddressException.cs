@@ -39,9 +39,11 @@ namespace MassTransit.RabbitMqTransport
             HelpLink = DefaultHelpLink;
         }
 
+#if !NETCORE
         public RabbitMqAddressException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
         }
+#endif
     }
 }

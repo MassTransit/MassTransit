@@ -57,6 +57,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
         /// <param name="receivePipe">The receive pipe to dispatch messages</param>
         /// <param name="receiveObserver">The observer for receive events</param>
         /// <param name="taskSupervisor">The token used to cancel/stop the consumer at shutdown</param>
+        /// <param name="topology">The topology</param>
         public RabbitMqBasicConsumer(ModelContext model, Uri inputAddress, IPipe<ReceiveContext> receivePipe, IReceiveObserver receiveObserver, ITaskScope taskSupervisor, IReceiveEndpointTopology topology)
         {
             _model = model;
