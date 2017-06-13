@@ -14,12 +14,11 @@ namespace MassTransit
 {
     using System;
 
-
     /// <summary>
     /// Returns the address for the message provided
     /// </summary>
-    /// <typeparam name="T"></typeparam>
     /// <param name="message"></param>
+    /// <param name="address"></param>
     /// <returns></returns>
     public delegate bool EndpointAddressProvider<in T>(T message, out Uri address)
         where T : class;
