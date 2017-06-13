@@ -90,7 +90,7 @@ namespace MassTransit.RabbitMqTransport
 
             if (name == "*")
             {
-                string uri = address.GetLeftPart(UriPartial.Path);
+                string uri = address.GetComponents(UriComponents.Scheme | UriComponents.StrongAuthority | UriComponents.Path, UriFormat.UriEscaped);
                 if (uri.EndsWith("*"))
                 {
                     name = NewId.Next().ToString("NS");

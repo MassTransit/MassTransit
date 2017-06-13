@@ -27,6 +27,7 @@ namespace MassTransit
         /// </summary>
         /// <typeparam name="T">The message type</typeparam>
         /// <param name="bus">The consume context</param>
+        /// <param name="schedulerEndpoint">The scheduler endpoint</param>
         /// <param name="scheduledTime">The time at which the message should be delivered to the queue</param>
         /// <param name="message">The message</param>
         /// <param name="cancellationToken"></param>
@@ -45,6 +46,7 @@ namespace MassTransit
         /// </summary>
         /// <typeparam name="T">The message type</typeparam>
         /// <param name="bus">The consume context</param>
+        /// <param name="schedulerEndpoint">The scheduler endpoint</param>
         /// <param name="scheduledTime">The time at which the message should be delivered to the queue</param>
         /// <param name="message">The message</param>
         /// <param name="pipe"></param>
@@ -64,6 +66,7 @@ namespace MassTransit
         /// </summary>
         /// <typeparam name="T">The message type</typeparam>
         /// <param name="bus">The consume context</param>
+        /// <param name="schedulerEndpoint">The scheduler endpoint</param>
         /// <param name="scheduledTime">The time at which the message should be delivered to the queue</param>
         /// <param name="message">The message</param>
         /// <param name="pipe"></param>
@@ -82,6 +85,7 @@ namespace MassTransit
         ///     Sends an object as a message, using the type of the message instance.
         /// </summary>
         /// <param name="bus">The consume context</param>
+        /// <param name="schedulerEndpoint">The scheduler endpoint</param>
         /// <param name="scheduledTime">The time at which the message should be delivered to the queue</param>
         /// <param name="message">The message object</param>
         /// <param name="cancellationToken"></param>
@@ -104,6 +108,7 @@ namespace MassTransit
         ///     to the specified message type, an exception will be thrown.
         /// </summary>
         /// <param name="bus">The consume context</param>
+        /// <param name="schedulerEndpoint">The scheduler endpoint</param>
         /// <param name="scheduledTime">The time at which the message should be delivered to the queue</param>
         /// <param name="message">The message object</param>
         /// <param name="messageType">The type of the message (use message.GetType() if desired)</param>
@@ -125,6 +130,7 @@ namespace MassTransit
         ///     to the specified message type, an exception will be thrown.
         /// </summary>
         /// <param name="bus">The consume context</param>
+        /// <param name="schedulerEndpoint">The scheduler endpoint</param>
         /// <param name="scheduledTime">The time at which the message should be delivered to the queue</param>
         /// <param name="message">The message object</param>
         /// <param name="pipe"></param>
@@ -148,6 +154,7 @@ namespace MassTransit
         ///     to the specified message type, an exception will be thrown.
         /// </summary>
         /// <param name="bus">The consume context</param>
+        /// <param name="schedulerEndpoint">The scheduler endpoint</param>
         /// <param name="scheduledTime">The time at which the message should be delivered to the queue</param>
         /// <param name="message">The message object</param>
         /// <param name="messageType">The type of the message (use message.GetType() if desired)</param>
@@ -168,6 +175,7 @@ namespace MassTransit
         /// </summary>
         /// <typeparam name="T">The interface type to send</typeparam>
         /// <param name="bus">The consume context</param>
+        /// <param name="schedulerEndpoint">The scheduler endpoint</param>
         /// <param name="scheduledTime">The time at which the message should be delivered to the queue</param>
         /// <param name="values">The property values to initialize on the interface</param>
         /// <param name="cancellationToken"></param>
@@ -187,6 +195,7 @@ namespace MassTransit
         /// </summary>
         /// <typeparam name="T">The interface type to send</typeparam>
         /// <param name="bus">The consume context</param>
+        /// <param name="schedulerEndpoint">The scheduler endpoint</param>
         /// <param name="scheduledTime">The time at which the message should be delivered to the queue</param>
         /// <param name="values">The property values to initialize on the interface</param>
         /// <param name="pipe"></param>
@@ -207,6 +216,7 @@ namespace MassTransit
         /// </summary>
         /// <typeparam name="T">The interface type to send</typeparam>
         /// <param name="bus">The consume context</param>
+        /// <param name="schedulerEndpoint">The scheduler endpoint</param>
         /// <param name="scheduledTime">The time at which the message should be delivered to the queue</param>
         /// <param name="values">The property values to initialize on the interface</param>
         /// <param name="pipe"></param>
@@ -226,6 +236,7 @@ namespace MassTransit
         /// </summary>
         /// <typeparam name="T">The message type</typeparam>
         /// <param name="bus">The consume context</param>
+        /// <param name="schedulerEndpoint">The scheduler endpoint</param>
         /// <param name="delay">The time at which the message should be delivered to the queue</param>
         /// <param name="message">The message</param>
         /// <param name="cancellationToken"></param>
@@ -244,6 +255,7 @@ namespace MassTransit
         /// </summary>
         /// <typeparam name="T">The message type</typeparam>
         /// <param name="bus">The consume context</param>
+        /// <param name="schedulerEndpoint">The scheduler endpoint</param>
         /// <param name="message">The message</param>
         /// <param name="delay">The time at which the message should be delivered to the queue</param>
         /// <param name="pipe"></param>
@@ -263,6 +275,7 @@ namespace MassTransit
         /// </summary>
         /// <typeparam name="T">The message type</typeparam>
         /// <param name="bus">The consume context</param>
+        /// <param name="schedulerEndpoint">The scheduler endpoint</param>
         /// <param name="message">The message</param>
         /// <param name="delay">The time at which the message should be delivered to the queue</param>
         /// <param name="pipe"></param>
@@ -281,6 +294,7 @@ namespace MassTransit
         ///     Sends an object as a message, using the type of the message instance.
         /// </summary>
         /// <param name="bus">The consume context</param>
+        /// <param name="schedulerEndpoint">The scheduler endpoint</param>
         /// <param name="message">The message object</param>
         /// <param name="delay">The time at which the message should be delivered to the queue</param>
         /// <param name="cancellationToken"></param>
@@ -298,6 +312,7 @@ namespace MassTransit
         ///     to the specified message type, an exception will be thrown.
         /// </summary>
         /// <param name="bus">The consume context</param>
+        /// <param name="schedulerEndpoint">The scheduler endpoint</param>
         /// <param name="message">The message object</param>
         /// <param name="messageType">The type of the message (use message.GetType() if desired)</param>
         /// <param name="delay">The time at which the message should be delivered to the queue</param>
@@ -316,6 +331,7 @@ namespace MassTransit
         ///     to the specified message type, an exception will be thrown.
         /// </summary>
         /// <param name="bus">The consume context</param>
+        /// <param name="schedulerEndpoint">The scheduler endpoint</param>
         /// <param name="message">The message object</param>
         /// <param name="delay">The time at which the message should be delivered to the queue</param>
         /// <param name="pipe"></param>
@@ -334,6 +350,7 @@ namespace MassTransit
         ///     to the specified message type, an exception will be thrown.
         /// </summary>
         /// <param name="bus">The consume context</param>
+        /// <param name="schedulerEndpoint">The scheduler endpoint</param>
         /// <param name="message">The message object</param>
         /// <param name="messageType">The type of the message (use message.GetType() if desired)</param>
         /// <param name="delay">The time at which the message should be delivered to the queue</param>
@@ -354,6 +371,7 @@ namespace MassTransit
         /// </summary>
         /// <typeparam name="T">The interface type to send</typeparam>
         /// <param name="bus">The consume context</param>
+        /// <param name="schedulerEndpoint">The scheduler endpoint</param>
         /// <param name="values">The property values to initialize on the interface</param>
         /// <param name="delay">The time at which the message should be delivered to the queue</param>
         /// <param name="cancellationToken"></param>
@@ -373,6 +391,7 @@ namespace MassTransit
         /// </summary>
         /// <typeparam name="T">The interface type to send</typeparam>
         /// <param name="bus">The consume context</param>
+        /// <param name="schedulerEndpoint">The scheduler endpoint</param>
         /// <param name="values">The property values to initialize on the interface</param>
         /// <param name="delay">The time at which the message should be delivered to the queue</param>
         /// <param name="pipe"></param>

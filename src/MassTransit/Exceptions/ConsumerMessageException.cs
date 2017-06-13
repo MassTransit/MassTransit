@@ -30,10 +30,12 @@ namespace MassTransit
         {
         }
 
+#if !NETCORE
         protected ConsumerMessageException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
         }
+#endif
 
         public ConsumerMessageException()
         {
@@ -59,9 +61,11 @@ namespace MassTransit
         {
         }
 
+#if !NETCORE
         protected ConsumerException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
         }
+#endif
     }
 }

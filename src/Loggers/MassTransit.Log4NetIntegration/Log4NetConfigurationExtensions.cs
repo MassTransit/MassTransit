@@ -40,7 +40,11 @@ namespace MassTransit.Log4NetIntegration
         {
             Log4NetLogger.Use();
 
+#if NETCORE
+            string path = AppContext.BaseDirectory;
+#else
             string path = AppDomain.CurrentDomain.BaseDirectory;
+#endif
 
             string file = Path.Combine(path, configFileName);
 
