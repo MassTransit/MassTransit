@@ -22,7 +22,7 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Autofac" Version="3.5.2" />
+    <PackageReference Include="Autofac" Version="4.6.0" />
     <PackageReference Include="Automatonymous" Version="3.5.12" />
     <PackageReference Include="Castle.Core" Version="3.3.3" />
     <PackageReference Include="Castle.Windsor" Version="3.4.0" />

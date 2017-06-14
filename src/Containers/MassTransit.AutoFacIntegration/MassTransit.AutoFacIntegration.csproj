@@ -3,7 +3,7 @@
   <PropertyGroup>
     <RootNamespace>MassTransit.AutofacIntegration</RootNamespace>
     <AssemblyName>MassTransit.AutofacIntegration</AssemblyName>
-    <TargetFrameworks>net452</TargetFrameworks>
+    <TargetFrameworks>netstandard1.6;net452</TargetFrameworks>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\..\MassTransit.snk</AssemblyOriginatorKeyFile>
     <DebugType>portable</DebugType>
@@ -14,7 +14,7 @@
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\MassTransit.AutofacIntegration.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Autofac" Version="3.5.2" />
+    <PackageReference Include="Autofac" Version="4.6.0" />
     <PackageReference Include="GreenPipes" Version="1.0.10" />
     <PackageReference Include="Newtonsoft.Json" Version="10.0.2" />
     <Reference Include="System" />
