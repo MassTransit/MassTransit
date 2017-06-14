@@ -37,12 +37,12 @@ build_script:
     createdb MartenTest
 
     If Not Exist src\.nuget\nuget.exe msbuild src\.nuget\NuGet.targets -Target:RestorePackages
+    
+    If Not Exist tools\Cake\Cake.exe src\.nuget\nuget.exe Install Cake -Source "https://www.nuget.org/api/v2/" -OutputDirectory "tools" -ExcludeVersion
 
-    If Not Exist src\packages\gitlink\lib\net45\GitLink.exe src\.nuget\nuget.exe Install gitlink -Source "https://www.nuget.org/api/v2/" -OutputDirectory "src\packages" -ExcludeVersion
+    SET NUGET_EXE=%cd%\src\.nuget\nuget.exe
 
-    If Not Exist src\packages\FAKE\tools\fake.exe src\.nuget\nuget.exe Install FAKE -OutputDirectory "src\packages" -ExcludeVersion
-
-    src\packages\FAKE\tools\fake.exe build.fsx %*
+    tools\Cake\Cake.exe build.cake -Experimental
 test:
   assemblies:
   - src/MassTransit.Tests/bin/Release/net452/MassTransit.Tests.dll

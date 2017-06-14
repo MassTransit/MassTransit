@@ -5,7 +5,7 @@ build_temp/*
 *.user
 packages
 *.dotCover
-
+tools/
 *.ncrunch*
 .vs
 
