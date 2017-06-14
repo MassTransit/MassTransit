@@ -383,7 +383,7 @@ namespace Automatonymous
                     continue;
 
                 var messageTypeInfo = propertyTypeInfo.GetGenericArguments().First().GetTypeInfo();
-                if (messageTypeInfo.HasInterface<CorrelatedBy<Guid>>())
+                if (messageTypeInfo.AsType().HasInterface<CorrelatedBy<Guid>>())
                 {
                     var declarationType = typeof(CorrelatedEventRegistration<,>).MakeGenericType(typeof(TInstance), machineType,
                         messageTypeInfo.AsType());
