@@ -35,15 +35,13 @@ namespace MassTransit.TestFramework
                 byte[] key;
                 byte[] iv;
 
-                using (var provider = new AesCryptoServiceProvider())
+                using (var aes = Aes.Create())
                 {
-                    provider.GenerateIV();
-                    provider.GenerateKey();
+                    aes.GenerateKey();
+                    aes.GenerateIV();
 
-                    key = provider.Key;
-                    iv = provider.IV;
-
-                    provider.Clear();
+                    key = aes.Key;
+                    iv = aes.IV;
                 }
 
                 _keys.Add(id, new TestSymmetricKey(key, iv));
