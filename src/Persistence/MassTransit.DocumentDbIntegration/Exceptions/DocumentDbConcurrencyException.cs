@@ -33,10 +33,11 @@ namespace MassTransit.DocumentDbIntegration
             : base(message, inner)
         {
         }
-
+#if !NETCORE
         public DocumentDbConcurrencyException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
         }
+#endif
     }
 }
