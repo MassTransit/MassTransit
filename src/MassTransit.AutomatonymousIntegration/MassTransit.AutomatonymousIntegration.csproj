@@ -3,6 +3,7 @@
     <RootNamespace>Automatonymous</RootNamespace>
     <AssemblyName>MassTransit.AutomatonymousIntegration</AssemblyName>
     <TargetFrameworks>netstandard1.6;net452</TargetFrameworks>
+    <NetStandardImplicitPackageVersion>1.6.1</NetStandardImplicitPackageVersion>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\MassTransit.snk</AssemblyOriginatorKeyFile>
     <DebugType>portable</DebugType>
