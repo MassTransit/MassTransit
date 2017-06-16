@@ -6,6 +6,7 @@ using MassTransit.ConsumeConfigurators;
 using System.Collections.Generic;
 using MassTransit.Saga;
 using MassTransit.ExtensionsDependencyInjectionIntegration;
+using MassTransit.Saga.SubscriptionConfigurators;
 
 namespace MassTransit
 {
@@ -29,6 +30,16 @@ namespace MassTransit
         {
             var factory = new ExtensionsDependencyInjectionConsumerFactory<T>(services);
             configurator.Consumer(factory, configure);
+        }
+
+        public static void Saga<T>(this IReceiveEndpointConfigurator configurator, IServiceProvider services, Action<ISagaConfigurator<T>> configure = null)
+            where T : class, ISaga
+        {
+            var sagaRepository = services.GetRequiredService<ISagaRepository<T>>();
+
+            var extensionsSagaRepository = new ExtensionsDependencyInjectionSagaRepository<T>(sagaRepository, services);
+
+            configurator.Saga(extensionsSagaRepository, configure);
         }
 
         public static void AddMassTransit(this IServiceCollection serviceCollection, Action<MassTransitOptions> opt = null)

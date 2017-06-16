@@ -36,13 +36,7 @@ namespace MassTransit.Containers.Tests
 
             _services = collection.BuildServiceProvider();
         }
-
-        // [OneTimeTearDown]
-        // public void Close_container()
-        // {
-        //     _container.Dispose();
-        // }
-
+        
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             configurator.LoadFrom(_services);
@@ -50,33 +44,28 @@ namespace MassTransit.Containers.Tests
     }
 
 
-    // public class ExtensionsDependencyInjectionIntegration_Saga :
-    //     When_registering_a_saga
-    // {
-    //     [OneTimeTearDown]
-    //     public void Close_container()
-    //     {
-    //         _container.Dispose();
-    //     }
+    public class ExtensionsDependencyInjectionIntegration_Saga :
+        When_registering_a_saga
+    {
+        readonly IServiceProvider _services;
 
-    //     readonly Container _container;
+        public ExtensionsDependencyInjectionIntegration_Saga()
+        {
+            var collection = new ServiceCollection();
 
-    //     public SimpleInjector_Saga()
-    //     {
-    //         _container = new Container();
-    //         _container.Options.DefaultScopedLifestyle = new AsyncScopedLifestyle();
-    //         _container.Register(typeof(ISagaRepository<>), typeof(InMemorySagaRepository<>),
-    //             Lifestyle.Singleton);
-    //     }
+            collection.AddSingleton<ISagaRepository<SimpleSaga>, InMemorySagaRepository<SimpleSaga>>();
 
-    //     protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
-    //     {
-    //         configurator.Saga<SimpleSaga>(_container);
-    //     }
+            _services = collection.BuildServiceProvider();
+        }
 
-    //     protected override ISagaRepository<T> GetSagaRepository<T>()
-    //     {
-    //         return _container.GetInstance<ISagaRepository<T>>();
-    //     }
-    // }
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        {
+            configurator.Saga<SimpleSaga>(_services);
+        }
+
+        protected override ISagaRepository<T> GetSagaRepository<T>()
+        {
+            return _services.GetService<ISagaRepository<T>>();
+        }
+    }
 }

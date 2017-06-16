@@ -22,7 +22,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration
         public void AddConsumer<T>()
             where T : class, IConsumer
         {
-            _services.AddScoped<T>();   
+            _services.AddScoped<T>();
 
             _consumerHandlers.GetOrAdd(typeof(T), _ => new CachedConfigurator<T>());
         }
