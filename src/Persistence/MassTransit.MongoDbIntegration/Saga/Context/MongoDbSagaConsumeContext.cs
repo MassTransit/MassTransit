@@ -55,7 +55,12 @@ namespace MassTransit.MongoDbIntegration.Saga.Context
 
             if (_existing)
             {
-                await _collection.DeleteOneAsync(x => x.CorrelationId == Saga.CorrelationId, CancellationToken).ConfigureAwait(false);
+                var result = await _collection.DeleteOneAsync(x => x.CorrelationId == Saga.CorrelationId && x.Version <= Saga.Version, CancellationToken).ConfigureAwait(false);
+
+                if (result.DeletedCount == 0)
+                {
+                    throw new MongoDbConcurrencyException("Unable to delete saga. It may not have been found or may have been updated by another process.");
+                }
 
                 if (_log.IsDebugEnabled)
                     _log.DebugFormat("SAGA:{0}:{1} Removed {2}", TypeMetadataCache<TSaga>.ShortName, TypeMetadataCache<TMessage>.ShortName, Saga.CorrelationId);
