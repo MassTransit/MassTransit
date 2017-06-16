@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks>net452</TargetFrameworks>
     <IsPackable>false</IsPackable>
@@ -34,15 +34,10 @@
     <PackageReference Include="Ninject" Version="3.2.2" />
     <PackageReference Include="Ninject.Extensions.NamedScope" Version="3.2.0.0" />
     <PackageReference Include="NUnit" Version="3.6.1" />
-    <PackageReference Include="Serilog" Version="2.4.0" />
     <PackageReference Include="Serilog.Sinks.Console" Version="2.1.0" />
     <PackageReference Include="Shouldly" Version="2.8.2" />
     <PackageReference Include="SimpleInjector" Version="4.0.7" />
     <PackageReference Include="StructureMap" Version="4.5.0" />
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />
 	<ProjectReference Include="..\..\Loggers\MassTransit.SerilogIntegration\MassTransit.SerilogIntegration.csproj" />
     <ProjectReference Include="..\..\MassTransit.AutomatonymousIntegration\MassTransit.AutomatonymousIntegration.csproj" />
     <ProjectReference Include="..\..\MassTransit.TestFramework\MassTransit.TestFramework.csproj" />
@@ -55,6 +50,7 @@
     <ProjectReference Include="..\MassTransit.StructureMapIntegration\MassTransit.StructureMapIntegration.csproj" />
     <ProjectReference Include="..\MassTransit.UnityIntegration\MassTransit.UnityIntegration.csproj" />
     <ProjectReference Include="..\MassTransit.WindsorIntegration\MassTransit.WindsorIntegration.csproj" />
+    <ProjectReference Include="..\MassTransit.ExtensionsDependencyInjectionIntegration\MassTransit.ExtensionsDependencyInjectionIntegration.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Service Include="{82a7f48d-3b50-4b1e-b82e-3ada8210c358}" />

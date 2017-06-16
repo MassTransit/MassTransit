@@ -37,7 +37,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration
         {
             public void Configure(IReceiveEndpointConfigurator configurator, IServiceProvider services)
             {
-                configurator.Consumer(new MicrosoftExtensionsDependencyInjectionConsumerFactory<T>(services));
+                configurator.Consumer(new ExtensionsDependencyInjectionConsumerFactory<T>(services));
             }
         }
     }

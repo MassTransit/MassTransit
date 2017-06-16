@@ -3,13 +3,13 @@ using System.Linq;
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using MassTransit.ConsumeConfigurators;
-using MassTransit.MicrosoftExtensionsDependencyInjectionIntegration;
 using System.Collections.Generic;
 using MassTransit.Saga;
+using MassTransit.ExtensionsDependencyInjectionIntegration;
 
 namespace MassTransit
 {
-    public static class ExtensionsDependencyInjectionIntegration
+    public static class ExtensionsDependencyInjectionIntegrationExtensions
     {
         public static void LoadFrom(this IReceiveEndpointConfigurator configurator, IServiceProvider services)
         {
@@ -27,7 +27,7 @@ namespace MassTransit
         public static void Consumer<T>(this IReceiveEndpointConfigurator configurator, IServiceProvider services, Action<IConsumerConfigurator<T>> configure = null)
             where T : class, IConsumer
         {
-            var factory = new MicrosoftExtensionsDependencyInjectionConsumerFactory<T>(services);
+            var factory = new ExtensionsDependencyInjectionConsumerFactory<T>(services);
             configurator.Consumer(factory, configure);
         }
 
