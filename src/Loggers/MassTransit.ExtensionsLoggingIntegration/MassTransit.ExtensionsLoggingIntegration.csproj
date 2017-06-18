@@ -10,7 +10,7 @@
     <DebugType>portable</DebugType>
   </PropertyGroup>
   <PropertyGroup>
-    <PackageId>MassTransit.ExtensionsLoggingIntegration</PackageId>
+    <PackageId>MassTransit.Extensions.Logging</PackageId>
     <Description>MassTransit Microsoft.Extensions.Logging support; $(Description)</Description>
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\MassTransit.ExtensionsLoggingIntegration.xml</DocumentationFile>
   </PropertyGroup>
