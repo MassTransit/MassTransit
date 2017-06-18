@@ -34,11 +34,11 @@
     <PackageReference Include="Ninject" Version="3.2.2" />
     <PackageReference Include="Ninject.Extensions.NamedScope" Version="3.2.0.0" />
     <PackageReference Include="NUnit" Version="3.6.1" />
-    <PackageReference Include="Serilog" Version="2.2.1" />
+    <PackageReference Include="Serilog" Version="2.4.0" />
     <PackageReference Include="Serilog.Sinks.Console" Version="2.1.0" />
     <PackageReference Include="Shouldly" Version="2.8.2" />
     <PackageReference Include="SimpleInjector" Version="4.0.7" />
-    <PackageReference Include="StructureMap" Version="4.4.4" />
+    <PackageReference Include="StructureMap" Version="4.5.0" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data" />
