@@ -31,6 +31,16 @@
     <Compile Remove="Pipeline/Transaction_Specs.cs" />
     <Compile Remove="Diagnostics/StatsD_Specs.cs" />
     <Compile Remove="ContextSetup.cs" />
+    <Compile Remove="BinarySerializer_Specs.cs" />
+    <Compile Remove="Courier/EncryptedArgument_Specs.cs" />
+    <Compile Remove="Diagnostics/PerformanceCounter_Specs.cs" />
+    <Compile Remove="SerializationFault_Specs.cs" />
+    <Compile Remove="Serialization/Array_Specs.cs" />
+    <Compile Remove="HostInfo_Specs.cs" />
+    <Compile Remove="MessageData/DataBus_Specs.cs" />
+    <Compile Remove="MessageData/FileSystem_Specs.cs" />
+    <Compile Remove="SimpleConfiguration_Specs.cs" />
+    <Compile Remove="Saga/RegisterUser_Specs.cs" />
     <Compile Remove="Serialization/ReceiveFault_Serialization_Specs.cs" />
   </ItemGroup>
   <ItemGroup>

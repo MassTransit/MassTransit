@@ -17,6 +17,7 @@ namespace MassTransit.Tests.Serialization
     using System.Diagnostics;
     using System.IO;
     using System.Linq;
+    using System.Reflection;
     using System.Text;
     using System.Xml.Linq;
     using GreenPipes.Internals.Extensions;
@@ -367,7 +368,7 @@ namespace MassTransit.Tests.Serialization
 
             public override bool CanConvert(Type objectType)
             {
-                return typeof(MessageA).IsAssignableFrom(objectType);
+                return typeof(MessageA).GetTypeInfo().IsAssignableFrom(objectType);
             }
         }
 

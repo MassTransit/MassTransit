@@ -412,7 +412,7 @@ namespace MassTransit.Tests
 
                 _lastAttempt = context.GetRetryAttempt();
 
-                throw new ApplicationException("Yonder", new IntentionalTestException());
+                throw new Exception("Yonder", new IntentionalTestException());
             });
         }
     }
