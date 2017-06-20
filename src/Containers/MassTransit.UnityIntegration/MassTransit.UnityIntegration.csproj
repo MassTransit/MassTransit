@@ -7,7 +7,7 @@
     <DebugType>portable</DebugType>
     <PackageTargetFallback Condition="'$(TargetFramework)'=='netstandard1.6'">
       $(PackageTargetFallback);portable-net45+win8+wp8+wpa81
-    </PackageTargetFallback >
+    </PackageTargetFallback>
   </PropertyGroup>
   <PropertyGroup>
     <PackageId>MassTransit.Unity</PackageId>
@@ -18,7 +18,7 @@
     <PackageReference Include="GreenPipes" Version="1.0.10" />
     <PackageReference Include="CommonServiceLocator" Version="1.3" />
     <PackageReference Include="Unity" Version="4.0.1" />
-    <PackageReference Include="Newtonsoft.Json" Version="10.0.2" />
+    <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
     <ProjectReference Include="..\..\MassTransit\MassTransit.csproj" />
   </ItemGroup>
 </Project>

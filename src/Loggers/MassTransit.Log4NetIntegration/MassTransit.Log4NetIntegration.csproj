@@ -20,7 +20,7 @@
   <ItemGroup>
     <PackageReference Include="log4net" Version="2.0.8" />
 	  <PackageReference Include="GreenPipes" Version="1.0.10" />
-	  <PackageReference Include="Newtonsoft.Json" Version="10.0.2" />
+	  <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
 	  <ProjectReference Include="..\..\MassTransit\MassTransit.csproj" />
   </ItemGroup>
 </Project>

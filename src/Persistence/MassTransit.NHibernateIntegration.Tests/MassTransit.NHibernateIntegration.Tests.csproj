@@ -9,10 +9,10 @@
     <PackageReference Include="Iesi.Collections" Version="4.0.1.4000" />
     <PackageReference Include="log4net" Version="2.0.8" />
     <PackageReference Include="NewId" Version="3.0.1" />
-    <PackageReference Include="Newtonsoft.Json" Version="10.0.2" />
+    <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
     <PackageReference Include="NHibernate" Version="4.1.1.4000" />
-    <PackageReference Include="NUnit" Version="3.6.1" />
-    <PackageReference Include="Shouldly" Version="2.8.2" />
+    <PackageReference Include="NUnit" Version="3.7.1" />
+    <PackageReference Include="Shouldly" Version="2.8.3" />
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />

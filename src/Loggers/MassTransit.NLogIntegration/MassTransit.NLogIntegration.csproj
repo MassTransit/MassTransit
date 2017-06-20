@@ -15,8 +15,8 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="GreenPipes" Version="1.0.10" />
- 	  <PackageReference Include="Newtonsoft.Json" Version="10.0.2" />
-    <PackageReference Include="NLog" Version="4.4.10" />
+ 	  <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
+    <PackageReference Include="NLog" Version="4.4.11" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
 	  <ProjectReference Include="..\..\MassTransit\MassTransit.csproj" />

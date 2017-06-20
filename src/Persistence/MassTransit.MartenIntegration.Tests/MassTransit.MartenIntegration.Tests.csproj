@@ -22,22 +22,22 @@
     <PackageReference Include="Baseline" Version="1.3.0" />
     <PackageReference Include="GreenPipes" Version="1.0.10" />
     <PackageReference Include="Marten" Version="1.5.2" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="1.1.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging" Version="1.1.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="1.1.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="1.1.1" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="1.1.2" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="1.1.2" />
     <PackageReference Include="Microsoft.Win32.Primitives" Version="4.3.0" />
     <PackageReference Include="NewId" Version="3.0.1" />
-    <PackageReference Include="Newtonsoft.Json" Version="10.0.2" />
+    <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
     <PackageReference Include="Npgsql" Version="3.2.2" />
-    <PackageReference Include="NUnit" Version="3.6.1" />
+    <PackageReference Include="NUnit" Version="3.7.1" />
     <PackageReference Include="Remotion.Linq" Version="2.1.1" />
-    <PackageReference Include="Shouldly" Version="2.8.2" />
+    <PackageReference Include="Shouldly" Version="2.8.3" />
     <Reference Include="System" />
     <PackageReference Include="System.AppContext" Version="4.3.0" />
     <Reference Include="System.ComponentModel.Composition" />
     <PackageReference Include="System.Console" Version="4.3.0" />
     <Reference Include="System.Core" />
-    <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="4.3.0" />
+    <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="4.3.1" />
     <PackageReference Include="System.Globalization.Calendars" Version="4.3.0" />
     <PackageReference Include="System.IO.Compression" Version="4.3.0" />
     <Reference Include="System.IO.Compression.FileSystem" />

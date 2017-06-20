@@ -17,7 +17,7 @@
     <PackageReference Include="Automatonymous" Version="3.5.12" />
     <PackageReference Include="GreenPipes" Version="1.0.10" />
     <PackageReference Include="NewId" Version="3.0.1" />
-    <PackageReference Include="Newtonsoft.Json" Version="10.0.2" />
+    <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
     <ProjectReference Include="..\..\MassTransit.AutomatonymousIntegration\MassTransit.AutomatonymousIntegration.csproj" />
     <ProjectReference Include="..\..\MassTransit\MassTransit.csproj" />
   </ItemGroup>
