@@ -26,9 +26,6 @@
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Xml.Linq" />
-    <ProjectReference Include="..\Loggers\MassTransit.Log4NetIntegration\MassTransit.Log4NetIntegration.csproj" />
-    <ProjectReference Include="..\MassTransit.TestFramework\MassTransit.TestFramework.csproj" />
-    <ProjectReference Include="..\MassTransit\MassTransit.csproj" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)'=='netcoreapp1.1'">
     <Compile Remove="Pipeline/Transaction_Specs.cs" />
