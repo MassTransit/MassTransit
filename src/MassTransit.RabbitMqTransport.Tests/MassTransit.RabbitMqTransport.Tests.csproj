@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net452</TargetFrameworks>
+    <TargetFrameworks>netcoreapp1.1;net452</TargetFrameworks>
     <IsPackable>false</IsPackable>
     <DebugType>portable</DebugType>
   </PropertyGroup>
@@ -19,5 +19,10 @@
     <ProjectReference Include="..\MassTransit.TestFramework\MassTransit.TestFramework.csproj" />
     <ProjectReference Include="..\MassTransit\MassTransit.csproj" />
     <ProjectReference Include="..\MassTransit.RabbitMqTransport\MassTransit.RabbitMqTransport.csproj" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)'=='net452'">
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.XML" />
   </ItemGroup>
 </Project>
