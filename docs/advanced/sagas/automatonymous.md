@@ -195,7 +195,7 @@ message identifier. Message scheduling within sagas is a powerful feature, which
 }
 ```
 
-The remainder of the properites are relevant to the application, and are saved when properly mapped 
+The remainder of the properties are relevant to the application, and are saved when properly mapped 
 using the saga repository (which can be any supported storage engine, Entity Framework and NHibernate 
 are supported out of the box).
 
@@ -250,7 +250,7 @@ In some cases you may want to ignore events, which can not be handled by the sag
  State machine can be configured to ignore events if they can not be handled. This can be done with the use of <i>Ignore()</i> method:
 
 ```csharp
-    public State Intermidiate { get; set; }
+    public State Intermediate { get; set; }
     public Event Start { get; private set; }
 
     public MyMachine()
@@ -258,10 +258,10 @@ In some cases you may want to ignore events, which can not be handled by the sag
         Initially(
             When(Start)
                 .ThenAsync(context => Console.Out.WriteAsync("Initially"))
-                .TransitionTo(Intermidiate)
+                .TransitionTo(Intermediate)
             );
 
-        During(Intermidiate,
+        During(Intermediate,
             When(AllowedEvent)
                 .Then(context => Console.Out.WriteAsync("AllowedEvent"))
                 .TransitionTo(SomeState),
@@ -271,13 +271,13 @@ In some cases you may want to ignore events, which can not be handled by the sag
 ```
 
 In the example above MyMachine will only handle Start event in <i>Initial</i> state. If Start event is correlated with the saga,
-    which is in the state <i>Intermidiate</i>, such event will be ignored without moving message to the error queue.
+    which is in the state <i>Intermediate</i>, such event will be ignored without moving message to the error queue.
 
-Another approach to configure ignorance is to use <i>Ignore()</i> methid inside <i>DuringAny()</i>. This aproach is more 
+Another approach to configure ignorance is to use <i>Ignore()</i> method inside <i>DuringAny()</i>. This approach is more 
 suitable when a sufficiently large number of states is defined:
 
 ```csharp
-    public State Intermidiate { get; set; }
+    public State Intermediate { get; set; }
     public State AnotherState { get; set; }
     public State SomeAnotherState { get; set; }
     public Event Start { get; private set; }
@@ -289,10 +289,10 @@ suitable when a sufficiently large number of states is defined:
         Initially(
             When(Start)
                 .ThenAsync(context => Console.Out.WriteAsync("Initially"))
-                .TransitionTo(Intermidiate)
+                .TransitionTo(Intermediate)
             );
 
-        During(Intermidiate,
+        During(Intermediate,
             When(AllowedEvent)
                 .Then(context => Console.Out.WriteAsync("AllowedEvent"))
             Ignore(Start)
