@@ -128,7 +128,7 @@ for storing data. So it's a win to have it supported out of the box by MassTrans
 #### Optimistic vs pessimistic concurrency
 Most relational databases baked into MassTransit need some way to guarantee ACID when processing sagas. 
 Because there can be multiple threads _consuming_ multiple bus events meant for the same saga instance, 
-they could end up overwriting each other (race condition). Fortunately, relational databasess can easily 
+they could end up overwriting each other (race condition). Fortunately, relational databases can easily 
 handle this by setting the transaction type to *serializable* or (page/row) locking. This would be 
 considered as _pessimistic concurrency_.
 
@@ -309,9 +309,9 @@ public class SagaInstance :
 }
 ```
 
-Redis saga persistence does not aquire locking on the database record when writing it so potentially 
+Redis saga persistence does not acquire locking on the database record when writing it so potentially 
 you can have write conflict in case the saga is updating its state frequently (hundreds of times per second). 
-To resolve this, the saga instance can implement the `IVersionedSaga` inteface and include the Version property:
+To resolve this, the saga instance can implement the `IVersionedSaga` interface and include the Version property:
 
 ```csharp
 public int Version { get; set; }
@@ -348,7 +348,7 @@ databases, PostgreSQL JSONB storage provides you the ACID-compliant transactiona
 To use Marten and PostgreSQL as saga persistence, you need to install `MassTransit.Marten` NuGet package and
 add some code.
 
-First, your saga state class needs to mark the correlationId property with the `[Identity]` arrtibute. By this
+First, your saga state class needs to mark the correlationId property with the `[Identity]` attribute. By this
 you inform Marten that correlationId will be used as the primary key.
 
 ```csharp
@@ -390,7 +390,7 @@ Azure Service Bus provides a feature called *message sessions*, to process multi
 to store some state on a temporary basis, which can be retrieved by some key.
 
 The latter give us an ability to use this feature as saga state storage. Using message sessions
-as saga persistence, you can only use Azure Service Bus for both messaging and saga persistencepurposes,
+as saga persistence, you can only use Azure Service Bus for both messaging and saga persistence purposes,
 without needing any additional infrastructure.
 
 There is a limitation for using message sessions - this feature is not supported for AMQP transport.
@@ -412,7 +412,7 @@ sbc.ReceiveEndpoint(host, "test_queue", ep =>
 
 As mentioned before, the message session allows storing and retrieving any state by some unique key.
 This means that this type of saga persistence only support correlation by id. So, similar to Redis
-saga persistence, you cannot use `CorralateBy` to specify how to find the saga instance, but only
+saga persistence, you cannot use `CorrelateBy` to specify how to find the saga instance, but only
 `CorrelateById`.
 
 

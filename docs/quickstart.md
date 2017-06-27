@@ -53,7 +53,7 @@ configure every aspect
 of the bus.
 
 One of your first decisions is going to be "What transport do I want to run on?"
-Here we have choosen RabbitMQ (`Bus.Factory.CreateUsingRabbitMQ()`) because
+Here we have chosen RabbitMQ (`Bus.Factory.CreateUsingRabbitMQ()`) because
 its the defacto bus choice for MassTransit.
 
 After that we need to configure the RabbitMQ host settings `sbc.Host()`. The
@@ -74,7 +74,7 @@ console the text of the message.
 
 And now we have a bus instance that is fully configured and can start processing
 messages. We can grab the `busControl` that we created and call `Start` on it
-to get everyting rolling. We again `await` on the result and now we can go.
+to get everything rolling. We again `await` on the result and now we can go.
 
 We can call the `Publish` method on the `busControl` and we should see our
 console write out the output.

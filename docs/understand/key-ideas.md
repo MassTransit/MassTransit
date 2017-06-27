@@ -88,7 +88,7 @@ the message to the consumers. Applications do not interact with receive endpoint
 configure and connect consumers. The rest of the work is done entirely by MassTransit.
 
 ### Send endpoints
-A send endpoint is used by an application to send a message to a specific adddress. They can be
+A send endpoint is used by an application to send a message to a specific address. They can be
 obtained from the `ConsumeContext` or the `IBus`, and support a variety of message types.
 
 ### Endpoint addressing

@@ -330,7 +330,7 @@ public class MyController : ApiController
 
 ### ASP.NET Core
 
-With the latest version of ASP.NET the WebAPI functionality was merged into ASP.NET removing the previous dicotomy. As in the previous example we'll build on top of Autofac. There is a built-in container in ASP.NET Core but it lacks some advanced capabilities which are a nice to have. 
+With the latest version of ASP.NET the WebAPI functionality was merged into ASP.NET removing the previous dichotomy. As in the previous example we'll build on top of Autofac. There is a built-in container in ASP.NET Core but it lacks some advanced capabilities which are a nice to have. 
 
 In the startup.cs we'll need to edit two functions. The first is the `ConfigureServices` method which is used to register services in the dependency injection framework. 
 

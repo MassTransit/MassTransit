@@ -63,7 +63,7 @@ so if you publish to it, the message will just disappear.
 
 ## Faq
 
-* How many messages at a time will be simultaniously processed?
+* How many messages at a time will be simultaneously processed?
     * Each endpoint you create represents 1 queue.  That queue can receive any number of different message types (based on what you subscribe to it)
     * The configuration of each endpoint you can set the number of consumers with a call to `PrefetchCount(x)`.  
     * This is the total number of consumers for all message types sent to this queue.
@@ -75,7 +75,7 @@ so if you publish to it, the message will just disappear.
    
     `x.Consumer(new AutofacConsumerFactory<…>(), p => p.UseConcurrencyLimit(1));  x.PrefetchCount=16;`
     
-     PrefetchCount should be relatively high, a multiple of your concurrency limit for all message types so that RabbitMQ doesn’t choke delivery messages due to network delays. Always have a queue ready to receive the message.
+     PrefetchCount should be relatively high, a multiple of your concurrency limit for all message types so that RabbitMQ doesn't choke delivery messages due to network delays. Always have a queue ready to receive the message.
 
 
 * When my consumer is not running, I do not want the messages to wait in the queue.  How can I do this?
@@ -84,7 +84,7 @@ so if you publish to it, the message will just disappear.
 		2. Set `AutoDelete=true` in the endpoint configuration. This causes the queue to be removed when your application stops.
 
 
-* How are Retrys handled?
+* How are Retries handled?
     * This is handled by [middleware](middleware.md). Each endpoint has a [retry policy](retry.md). 
 
 

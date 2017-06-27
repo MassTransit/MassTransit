@@ -32,7 +32,7 @@ public delegate Task<TValue> MissingValueFactory<in TKey, TValue>(TKey key);
 
 The compositional nature of the TPL makes this a really strong abstraction -- the `Task` returned by the `Get` method above is not the same task that is returned from the missing value factory. In order to make cache access quick, the `Task` returned is a placeholder which is decoupled from the factory method. This placeholder reserves an index slot for the key specified, while the factory method is invoked asynchronously.
 
-Adding the key to the index allows subsequent reads for the same key to receive the same placeholder as the first read -- preventing duplicate factory methods being executed. The factory methods for these reads aren't lost, hwoever, and are stored by the placeholder in the order they were received. This approach makes it possible for dozens of tasks to wait on the creation of the value for the same key to be returned.
+Adding the key to the index allows subsequent reads for the same key to receive the same placeholder as the first read -- preventing duplicate factory methods being executed. The factory methods for these reads aren't lost, however, and are stored by the placeholder in the order they were received. This approach makes it possible for dozens of tasks to wait on the creation of the value for the same key to be returned.
 
 A subsequent reader for the same key may receive one of the following results:
 
@@ -47,9 +47,9 @@ If a subsequent reader does not provide a missing value factory, the reader will
 * The value created by a previous reader, if any previous reader's factory method ran to completion.
 * A `KeyNotFoundException` if no previous reader's factory method ran to completion (either cancelled or faulted).
 
-Once the value has been created, the placeholder is replaced with a cached node by the node tracker. If the cache has multiple indices, the value is then propogated to the other indices, making it available to readers.
+Once the value has been created, the placeholder is replaced with a cached node by the node tracker. If the cache has multiple indices, the value is then propagated to the other indices, making it available to readers.
 
-> An index by itself is consistent, you can read cached values and they'll exist once created, but there is no guarantee that another index will have the value until after it has been created and propogated.
+> An index by itself is consistent, you can read cached values and they'll exist once created, but there is no guarantee that another index will have the value until after it has been created and propagated.
 
 
 ## Recycling (staying Green)

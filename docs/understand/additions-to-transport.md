@@ -44,7 +44,7 @@ any messaging pattern.
 
 ### Consumer lifecycle management
 MassTransit handles consumer creation and disposal, and integrates with most major dependency injection containers
-using their built-in lifetime scope management. This ensures that depedencies are created and destroyed as part of 
+using their built-in lifetime scope management. This ensures that dependencies are created and destroyed as part of 
 the message consumption pipeline.
 
 ### Routing

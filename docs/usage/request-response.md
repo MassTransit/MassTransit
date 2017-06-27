@@ -38,7 +38,7 @@ is done by using normal consumers. The only difference is that such consumer nee
 For the aforementioned message contracts, the request handler can look like this:
 
 ```csharp
-public class CheckOrderStatusConsumer : IConsumer<CheckOurderStatus>
+public class CheckOrderStatusConsumer : IConsumer<CheckOrderStatus>
 {
     readonly IOrderRepository _orderRepository;
 

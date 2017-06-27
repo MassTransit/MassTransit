@@ -17,13 +17,13 @@ else has already experienced the same issue.
 
 Before you just post your question, however, spend a few moments to compose your thoughts and formulate your
 question. There is nothing as pointless as simply telling us "MassTransit does not work for me" with no further
-information to give any clue to why. Before you post, search the web to see if your question hass already been
+information to give any clue to why. Before you post, search the web to see if your question has already been
 asked or even answered. And if it has been, you will already have your answer.
 
 ## Mailing List
 
 A long history of support is available on the mailing list, which is hosted on [Google Groups][2]. There are
-a wide vareity of developers using MassTransit on the list, and often times they can help. If you are going to
+a wide variety of developers using MassTransit on the list, and often times they can help. If you are going to
 use MassTransit, joining the mailing list is a great way to participate in the community.
 
 When posting on the mailing list, pick a good subject line, and if the subject of the thread changes, please
