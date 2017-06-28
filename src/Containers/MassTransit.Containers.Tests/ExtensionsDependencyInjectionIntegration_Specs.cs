@@ -31,12 +31,18 @@ namespace MassTransit.Containers.Tests
             var collection = new ServiceCollection();
 
             collection.AddScoped<SimpleConsumer>();
+
+            collection.AddMassTransit(options =>
+            {
+                options.AddConsumer<SimpleConsumer>();
+            });
+
             collection.AddScoped<ISimpleConsumerDependency, SimpleConsumerDependency>();
             collection.AddScoped<AnotherMessageConsumer, AnotherMessageConsumerImpl>();
 
             _services = collection.BuildServiceProvider();
         }
-        
+
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             configurator.LoadFrom(_services);
@@ -53,6 +59,11 @@ namespace MassTransit.Containers.Tests
         {
             var collection = new ServiceCollection();
 
+            collection.AddMassTransit(options =>
+            {
+                options.AddSaga<SimpleSaga>();
+            });
+
             collection.AddSingleton<ISagaRepository<SimpleSaga>, InMemorySagaRepository<SimpleSaga>>();
 
             _services = collection.BuildServiceProvider();
@@ -60,7 +71,8 @@ namespace MassTransit.Containers.Tests
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
-            configurator.Saga<SimpleSaga>(_services);
+            //configurator.Saga<SimpleSaga>(_services);
+            configurator.LoadFrom(_services);
         }
 
         protected override ISagaRepository<T> GetSagaRepository<T>()
