@@ -1,111 +1,47 @@
-using System;
-using System.Linq;
-using System.Reflection;
-using Microsoft.Extensions.DependencyInjection;
-using MassTransit.ConsumeConfigurators;
-using System.Collections.Generic;
-using MassTransit.Saga;
-using MassTransit.ExtensionsDependencyInjectionIntegration;
-using MassTransit.Saga.SubscriptionConfigurators;
-
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+//  
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
+// this file except in compliance with the License. You may obtain a copy of the 
+// License at 
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0 
+// 
+// Unless required by applicable law or agreed to in writing, software distributed
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
+    using MassTransit.ExtensionsDependencyInjectionIntegration;
+    using Microsoft.Extensions.DependencyInjection;
+    using System;
+
     public static class ExtensionsDependencyInjectionIntegrationExtensions
     {
         public static void LoadFrom(this IReceiveEndpointConfigurator configurator, IServiceProvider services)
         {
-            foreach(var consumer in ConsumerConfiguratorCache.GetConsumers())
+            // get IConsumerCacheService and pull Consumers
+
+            var consumerCache = services.GetService<IConsumerCacheService>();
+
+            var consumers = consumerCache.Instance.Keys;
+
+            foreach (var consumer in consumers)
             {
-                ConsumerConfiguratorCache.Configure(consumer, configurator, services);
+                consumerCache.Configure(consumer, configurator, services);
             }
 
-            foreach(var saga in SagaConfiguratorCache.GetSagas())
+            // get ISagaCacheService and pull Sagas
+
+            var sagaCache = services.GetService<ISagaCacheService>();
+
+            var sagas = sagaCache.Instance.Keys;
+
+            foreach (var saga in sagas)
             {
-                SagaConfiguratorCache.Configure(saga, configurator, services);
+                sagaCache.Configure(saga, configurator, services);
             }
-        }
 
-        public static void Consumer<T>(this IReceiveEndpointConfigurator configurator, IServiceProvider services, Action<IConsumerConfigurator<T>> configure = null)
-            where T : class, IConsumer
-        {
-            var factory = new ExtensionsDependencyInjectionConsumerFactory<T>(services);
-            configurator.Consumer(factory, configure);
-        }
-
-        public static void Saga<T>(this IReceiveEndpointConfigurator configurator, IServiceProvider services, Action<ISagaConfigurator<T>> configure = null)
-            where T : class, ISaga
-        {
-            var sagaRepository = services.GetRequiredService<ISagaRepository<T>>();
-
-            var extensionsSagaRepository = new ExtensionsDependencyInjectionSagaRepository<T>(sagaRepository, services);
-
-            configurator.Saga(extensionsSagaRepository, configure);
-        }
-
-        public static void AddMassTransit(this IServiceCollection serviceCollection, Action<MassTransitOptions> opt = null)
-        {            
-            var options = new MassTransitOptions(serviceCollection);
-            serviceCollection.AddSingleton(options);
-
-            if(opt == null)
-            opt(options);
-        }
-
-        public static void AddMassTransit(this IServiceCollection services, params Assembly[] assemblies)
-        {
-            AddRequiredServices(services);
-            AddHandlers(services, assemblies);
-        }
-
-        public static void AddMassTransit(this IServiceCollection services, IEnumerable<Assembly> assemblies)
-        {
-            AddRequiredServices(services);
-            AddHandlers(services, assemblies);
-        }
-
-        public static void AddMassTransit(this IServiceCollection services, params Type[] handlerAssemblyMarkerTypes)
-        {
-            AddRequiredServices(services);
-            AddHandlers(services, handlerAssemblyMarkerTypes.Select(t => t.GetTypeInfo().Assembly));
-        }
-
-        public static void AddMassTransit(this IServiceCollection services, IEnumerable<Type> handlerAssemblyMarkerTypes)
-        {
-            AddRequiredServices(services);
-            AddHandlers(services, handlerAssemblyMarkerTypes.Select(t => t.GetTypeInfo().Assembly));
-        }
-
-        private static void AddRequiredServices(IServiceCollection services)
-        {
-            
-        }
-
-        private static void AddHandlers(this IServiceCollection services, IEnumerable<Assembly> assembliesToScan)
-        {
-            assembliesToScan = assembliesToScan as Assembly[] ?? assembliesToScan.ToArray();
-
-            foreach(var type in assembliesToScan.SelectMany(a => a.ExportedTypes))
-            {
-                if(type.CanBeCastTo(typeof(ISaga)))
-                {
-                    services.AddScoped(type);
-                    SagaConfiguratorCache.Cache(type);
-                }
-                else if(type.CanBeCastTo(typeof(IConsumer)))
-                {
-                    services.AddScoped(type);
-                    ConsumerConfiguratorCache.Cache(type);
-                }
-            }
-        }
-
-        private static bool CanBeCastTo(this Type handlerType, Type interfaceType)
-        {
-            if (handlerType == null) return false;
-
-            if (handlerType == interfaceType) return true;
-
-            return interfaceType.GetTypeInfo().IsAssignableFrom(handlerType.GetTypeInfo());
         }
     }
 }
