@@ -182,7 +182,7 @@ namespace MassTransit
         {
             return container
                 .GetAssignableHandlers(typeof(T))
-                .Select(h => h.ComponentModel.Implementation)
+                .Select(h => h.ComponentModel.Services.First())
                 .Where(filter)
                 .ToList();
         }
