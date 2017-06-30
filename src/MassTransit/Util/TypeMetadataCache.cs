@@ -184,12 +184,12 @@ namespace MassTransit.Util
             if (IsValidMessageType)
                 yield return typeof(T);
 
-            var baseType = typeof(T).BaseType;
+            var baseType = typeof(T).GetTypeInfo().BaseType;
             while (baseType != null && TypeMetadataCache.IsValidMessageType(baseType))
             {
                 yield return baseType;
 
-                baseType = baseType.BaseType;
+                baseType = baseType.GetTypeInfo().BaseType;
             }
 
             IEnumerable<Type> interfaces = typeof(T)
@@ -220,10 +220,9 @@ namespace MassTransit.Util
 
             return interfaces.Any(t =>
             {
-                var x = t.GetTypeInfo();
-                return x.HasInterface(typeof(InitiatedBy<>))
-                    || x.HasInterface(typeof(Orchestrates<>))
-                    || x.HasInterface(typeof(Observes<,>));
+                return t.HasInterface(typeof(InitiatedBy<>))
+                    || t.HasInterface(typeof(Orchestrates<>))
+                    || t.HasInterface(typeof(Observes<,>));
             });
         }
 

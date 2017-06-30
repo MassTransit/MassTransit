@@ -15,7 +15,7 @@ namespace MassTransit.Testing.MessageObservers
     using System;
     using System.Collections.Generic;
     using System.Linq;
-
+    using System.Reflection;
 
     public class ReceivedMessageList :
         MessageList<IReceivedMessage>,

@@ -26,8 +26,8 @@
     <PackageReference Include="Common.Logging.Core" Version="3.3.1" />
     <PackageReference Include="GreenPipes" Version="1.0.10" />
     <PackageReference Include="log4net" Version="2.0.8" />
-    <PackageReference Include="Newtonsoft.Json" Version="10.0.2" />
-    <PackageReference Include="NUnit" Version="3.6.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
+    <PackageReference Include="NUnit" Version="3.7.1" />
     <PackageReference Include="Quartz" Version="2.5.0" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -35,5 +35,8 @@
     <ProjectReference Include="..\MassTransit.QuartzIntegration\MassTransit.QuartzIntegration.csproj" />
     <ProjectReference Include="..\MassTransit.TestFramework\MassTransit.TestFramework.csproj" />
     <ProjectReference Include="..\MassTransit\MassTransit.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{82a7f48d-3b50-4b1e-b82e-3ada8210c358}" />
   </ItemGroup>
 </Project>

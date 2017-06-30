@@ -138,7 +138,7 @@ namespace MassTransit.Saga
                 .Where(x => x.GetTypeInfo().IsGenericType)
                 .Where(x => x.GetGenericTypeDefinition() == typeof(InitiatedBy<>))
                 .Select(x => new SagaInterfaceType(x, x.GetGenericArguments()[0], typeof(TSaga)))
-                .Where(x => x.MessageType.IsValueType == false && x.MessageType != typeof(string));
+                .Where(x => x.MessageType.GetTypeInfo().IsValueType == false && x.MessageType != typeof(string));
         }
 
         static IEnumerable<SagaInterfaceType> GetOrchestratingTypes()
@@ -147,7 +147,7 @@ namespace MassTransit.Saga
                 .Where(x => x.GetTypeInfo().IsGenericType)
                 .Where(x => x.GetGenericTypeDefinition() == typeof(Orchestrates<>))
                 .Select(x => new SagaInterfaceType(x, x.GetGenericArguments()[0], typeof(TSaga)))
-                .Where(x => x.MessageType.IsValueType == false && x.MessageType != typeof(string));
+                .Where(x => x.MessageType.GetTypeInfo().IsValueType == false && x.MessageType != typeof(string));
         }
 
         static IEnumerable<SagaInterfaceType> GetObservingTypes()
@@ -156,7 +156,7 @@ namespace MassTransit.Saga
                 .Where(x => x.GetTypeInfo().IsGenericType)
                 .Where(x => x.GetGenericTypeDefinition() == typeof(Observes<,>))
                 .Select(x => new SagaInterfaceType(x, x.GetGenericArguments()[0], typeof(TSaga)))
-                .Where(x => x.MessageType.IsValueType == false && x.MessageType != typeof(string));
+                .Where(x => x.MessageType.GetTypeInfo().IsValueType == false && x.MessageType != typeof(string));
         }
 
 

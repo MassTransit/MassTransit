@@ -18,7 +18,6 @@ namespace MassTransit.PipeConfigurators
     using GreenPipes;
     using Pipeline.Filters;
 
-
     public class TransactionPipeSpecification<T> :
         ITransactionConfigurator,
         IPipeSpecification<T>

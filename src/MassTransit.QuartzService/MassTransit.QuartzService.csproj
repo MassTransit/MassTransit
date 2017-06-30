@@ -13,7 +13,7 @@
     <PackageReference Include="Common.Logging.Log4Net1213" Version="3.3.1" />
     <PackageReference Include="GreenPipes" Version="1.0.10" />
     <PackageReference Include="log4net" Version="2.0.8" />
-    <PackageReference Include="Newtonsoft.Json" Version="10.0.2" />
+    <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
     <PackageReference Include="Quartz" Version="2.5.0" />
     <ProjectReference Include="..\Monitoring\MassTransit.Monitoring.Windows\MassTransit.Monitoring.Windows.csproj">
       <Project>{1fb26639-3ee4-4456-9e59-f494f232232d}</Project>

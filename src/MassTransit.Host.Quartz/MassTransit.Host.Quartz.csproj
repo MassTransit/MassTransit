@@ -8,13 +8,13 @@
     <DebugType>portable</DebugType>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Autofac" Version="3.5.2" />
+    <PackageReference Include="Autofac" Version="4.6.0" />
     <PackageReference Include="Common.Logging" Version="3.3.1" />
     <PackageReference Include="Common.Logging.Core" Version="3.3.1" />
     <PackageReference Include="Common.Logging.Log4Net1213" Version="3.3.1" />
     <PackageReference Include="GreenPipes" Version="1.0.10" />
     <PackageReference Include="log4net" Version="2.0.8" />
-    <PackageReference Include="Newtonsoft.Json" Version="10.0.2" />
+    <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
     <PackageReference Include="Quartz" Version="2.5.0" />
     <Reference Include="System" />
     <Reference Include="System.Core" />

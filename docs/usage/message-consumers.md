@@ -23,7 +23,7 @@ consumer via the `Consume` method.
 
 The `Consume` method is asynchronous, and returns a Task. The task is awaited by MassTransit,
 during which time the message is unavailable to other receive endpoints. If the consume method
-completes successfuly (a task status of RanToCompletion), the message is acknowledged and removed
+completes successfully (a task status of RanToCompletion), the message is acknowledged and removed
 from the queue.
 
 <div class="alert alert-info">

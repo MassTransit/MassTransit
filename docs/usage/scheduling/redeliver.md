@@ -86,12 +86,12 @@ cfg.ReceiveEndpoint(host, "endpoint_queue", e =>
     e.Consumer<MyConsumerClass>(c =>
     {
         c.Message<MyMessage>(x => x.UseScheduledRedelivery(
-            Retry.Incrememtal(3, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(10))));
+            Retry.Incremental(3, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(10))));
     });
 });
 ```
 
-and to appy such confgiuration to handler delegates:
+and to apply such configuration to handler delegates:
 
 ```csharp
 cfg.ReceiveEndpoint(host, "endpoint_queue", e =>
@@ -100,7 +100,7 @@ cfg.ReceiveEndpoint(host, "endpoint_queue", e =>
     {
         // handling the message
     }, x => x.UseScheduledRedelivery(
-        Retry.Incrememtal(3, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(10))));
+        Retry.Incremental(3, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(10))));
 });
 ```
 

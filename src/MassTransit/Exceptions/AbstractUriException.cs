@@ -41,10 +41,12 @@ namespace MassTransit
             Uri = uri;
         }
 
+#if !NETCORE
         protected AbstractUriException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
         }
+#endif
 
         public Uri Uri { get; protected set; }
     }

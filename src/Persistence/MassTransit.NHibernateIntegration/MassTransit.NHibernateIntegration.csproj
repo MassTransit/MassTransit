@@ -12,7 +12,7 @@
   <ItemGroup>
     <PackageReference Include="GreenPipes" Version="1.0.10" />
     <PackageReference Include="Iesi.Collections" Version="4.0.1.4000" />
-    <PackageReference Include="Newtonsoft.Json" Version="10.0.2" />
+    <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
     <PackageReference Include="NHibernate" Version="4.1.1.4000" />
     <Reference Include="System" />
     <Reference Include="System.Core" />

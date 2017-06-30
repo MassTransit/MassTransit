@@ -251,8 +251,6 @@ namespace Automatonymous
         /// <summary>
         /// Unschedule a message, if the message was scheduled.
         /// </summary>
-        /// <typeparam name="TInstance"></typeparam>
-        /// <typeparam name="TData"></typeparam>
         /// <param name="source"></param>
         /// <param name="schedule"></param>
         /// <returns></returns>

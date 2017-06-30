@@ -33,7 +33,7 @@ namespace MassTransit
             params Assembly[] assemblies)
         {
             return builder.RegisterAssemblyTypes(assemblies)
-                .Where(t => t.GetTypeInfo().ImplementedInterfaces.Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(SagaStateMachine<>)))
+                .Where(t => t.GetTypeInfo().ImplementedInterfaces.Any(i => i.GetTypeInfo().IsGenericType && i.GetGenericTypeDefinition() == typeof(SagaStateMachine<>)))
                 .AsImplementedInterfaces()
                 .AsSelf();
         }

@@ -42,10 +42,12 @@ namespace MassTransit
         {
         }
 
+#if !NETCORE
         protected RequestException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
         }
+#endif
 
         protected RequestException(string message, object response)
             : base(message)

@@ -45,7 +45,7 @@ namespace MassTransit.Internals.Extensions
                         Value = ""
                     };
                 })
-                .Where(x => string.Compare(x.Key, key, true, CultureInfo.InvariantCulture) == 0)
+                .Where(x => string.Compare(x.Key, key, StringComparison.OrdinalIgnoreCase) == 0)
                 .Select(x => x.Value)
                 .DefaultIfEmpty(null)
                 .SingleOrDefault();

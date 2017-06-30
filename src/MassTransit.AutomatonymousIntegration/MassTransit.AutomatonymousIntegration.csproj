@@ -2,7 +2,8 @@
   <PropertyGroup>
     <RootNamespace>Automatonymous</RootNamespace>
     <AssemblyName>MassTransit.AutomatonymousIntegration</AssemblyName>
-    <TargetFrameworks>net452</TargetFrameworks>
+    <TargetFrameworks>netstandard1.6;net452</TargetFrameworks>
+    <NetStandardImplicitPackageVersion>1.6.1</NetStandardImplicitPackageVersion>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\MassTransit.snk</AssemblyOriginatorKeyFile>
     <DebugType>portable</DebugType>
@@ -16,9 +17,7 @@
     <PackageReference Include="Automatonymous" Version="3.5.12" />
     <PackageReference Include="GreenPipes" Version="1.0.10" />
     <PackageReference Include="NewId" Version="3.0.1" />
-    <PackageReference Include="Newtonsoft.Json" Version="10.0.2" />
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
+    <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
 	<ProjectReference Include="..\MassTransit\MassTransit.csproj" />
   </ItemGroup>
 </Project>

@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -40,7 +40,13 @@ namespace MassTransit.Util.Scanning
 
         public void Assembly(string assemblyName)
         {
-            Assembly(System.Reflection.Assembly.Load(new AssemblyName(assemblyName)));
+#if NETCORE
+            var name = new AssemblyName(assemblyName);
+            var asm = System.Runtime.Loader.AssemblyLoadContext.Default.LoadFromAssemblyName(name);
+#else
+            var asm = System.Reflection.Assembly.Load(assemblyName);
+#endif
+            Assembly(asm);
         }
 
         public void AssemblyContainingType<T>()
@@ -86,20 +92,6 @@ namespace MassTransit.Util.Scanning
         public void ExcludeType<T>()
         {
             Exclude(type => type == typeof(T));
-        }
-
-        public void TheCallingAssembly()
-        {
-            var callingAssembly = FindTheCallingAssembly();
-
-            if (callingAssembly != null)
-            {
-                Assembly(callingAssembly);
-            }
-            else
-            {
-                throw new ConfigurationException("Could not determine the calling assembly, you may need to explicitly call IAssemblyScanner.Assembly()");
-            }
         }
 
         public void AssembliesFromApplicationBaseDirectory()
@@ -206,26 +198,50 @@ namespace MassTransit.Util.Scanning
             return _assemblies.Any();
         }
 
+#if NETCORE
+        public void TheCallingAssembly()
+        {
+            throw new ConfigurationException("Could not determine the calling assembly, you may need to explicitly call IAssemblyScanner.Assembly()");
+        }
+
+#else
+        public void TheCallingAssembly()
+        {
+            var callingAssembly = FindTheCallingAssembly();
+
+            if (callingAssembly != null)
+            {
+                Assembly(callingAssembly);
+            }
+            else
+            {
+                throw new ConfigurationException("Could not determine the calling assembly, you may need to explicitly call IAssemblyScanner.Assembly()");
+            }
+        }
+
         static Assembly FindTheCallingAssembly()
         {
             var trace = new StackTrace(false);
-
-            var thisAssembly = typeof(AssemblyScanner).GetTypeInfo().Assembly;
+            var thisAssembly = System.Reflection.Assembly.GetExecutingAssembly();
             var mtAssembly = typeof(IBus).GetTypeInfo().Assembly;
 
             Assembly callingAssembly = null;
             for (var i = 0; i < trace.FrameCount; i++)
             {
                 var frame = trace.GetFrame(i);
-                var assembly = frame.GetMethod().DeclaringType?.GetTypeInfo()?.Assembly;
-
-                if (assembly != null && assembly != thisAssembly && assembly != mtAssembly)
+                var declaringType = frame.GetMethod().DeclaringType;
+                if (declaringType != null)
                 {
-                    callingAssembly = assembly;
-                    break;
+                    var assembly = declaringType.GetTypeInfo().Assembly;
+                    if (assembly != thisAssembly && assembly != mtAssembly)
+                    {
+                        callingAssembly = assembly;
+                        break;
+                    }
                 }
             }
             return callingAssembly;
         }
+#endif
     }
 }
