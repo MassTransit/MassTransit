@@ -20,7 +20,7 @@
 
             await InputQueueSendEndpoint.Send(message);
 
-            var found = await _sagaRepository.Value.ShouldContainSaga(message.CorrelationId, TestTimeout);
+            Guid? found = await _sagaRepository.Value.ShouldContainSaga(message.CorrelationId, TestTimeout);
 
             found.ShouldBe(sagaId);
 
@@ -40,7 +40,7 @@
 
             await InputQueueSendEndpoint.Send(message);
 
-            var found = await _sagaRepository.Value.ShouldContainSaga(message.CorrelationId, TestTimeout);
+            Guid? found = await _sagaRepository.Value.ShouldContainSaga(message.CorrelationId, TestTimeout);
 
             found.ShouldBe(sagaId);
         }

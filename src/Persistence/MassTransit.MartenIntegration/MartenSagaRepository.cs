@@ -40,6 +40,12 @@
             using (var session = _store.QuerySession())
                 return session.Load<TSaga>(correlationId);
         }
+        
+        public async Task<TSaga> GetSagaAsync(Guid correlationId)
+        {
+            using (var session = _store.QuerySession())
+                return await session.LoadAsync<TSaga>(correlationId).ConfigureAwait(false);
+        }
 
         void IProbeSite.Probe(ProbeContext context)
         {
@@ -62,7 +68,7 @@
             {
                 TSaga instance;
                 if (policy.PreInsertInstance(context, out instance))
-                    PreInsertSagaInstance<T>(session, instance);
+                    await PreInsertSagaInstance<T>(session, instance).ConfigureAwait(false);
 
                 if (instance == null)
                     instance = session.Load<TSaga>(sagaId);
@@ -118,13 +124,13 @@
             }
         }
 
-        static bool PreInsertSagaInstance<T>(IDocumentSession session, TSaga instance)
+        static async Task<bool> PreInsertSagaInstance<T>(IDocumentSession session, TSaga instance)
         {
             var inserted = false;
             try
             {
                 session.Store(instance);
-                session.SaveChanges();
+                await session.SaveChangesAsync().ConfigureAwait(false);
                 inserted = true;
 
                 _log.DebugFormat("SAGA:{0}:{1} Insert {2}", TypeMetadataCache<TSaga>.ShortName, instance.CorrelationId,
@@ -158,10 +164,7 @@
                 await policy.Existing(sagaConsumeContext, next).ConfigureAwait(false);
 
                 if (!sagaConsumeContext.IsCompleted)
-                {
-                    session.Store(instance);
-                    session.SaveChanges();
-                }
+                    await session.SaveChangesAsync().ConfigureAwait(false);
             }
             catch (SagaException)
             {
@@ -213,7 +216,7 @@
                 if (!proxy.IsCompleted)
                 {
                     _session.Store(context.Saga);
-                    _session.SaveChanges();
+                    await _session.SaveChangesAsync().ConfigureAwait(false);
                 }
             }
         }
