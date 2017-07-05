@@ -120,31 +120,46 @@ Each of these are setup in a similar way, but examples are shown below for each 
 * [Marten](#marten)
 * [Azure Service Bus](#azure-service-bus)
 
+### Optimistic vs pessimistic concurrency
+
+Most persistence mechanisms for sagas supported by MassTransit need some way to guarantee ACID when processing sagas. 
+Because there can be multiple threads _consuming_ multiple bus events meant for the same saga instance, 
+they could end up overwriting each other (race condition). 
+
+Relational databases can easily handle this by setting the transaction type to *serializable* or (page/row) locking. 
+This would be considered as _pessimistic concurrency_.
+
+Another way to handle concurrency is to have some attribute like version or timestamp, which updates
+every time a saga is persisted. By doing that we can instruct the database only to update the
+record if this attribute matches between what we are trying to persist and what is stored in the 
+database record we are trying to update.
+
+This is type of concurrency is called an _optimistic concurrency_. 
+It doesn't guarantee your unit of work with the database will succeed (must retry after these exceptions), 
+but it also doesn't block anybody else from working within the same database page (not locking the table/page).
+
+#### So, which one should I use?
+
+For almost every scenario, it is recommended using the optimistic concurrency, because most state machine 
+logic should be fairly quick. 
+
+If the chosen persistence method supports optimistic concurrency, race conditions can be handled rather
+easily by specifying a retry policy for concurrency exceptions or using generic retry policy.
+
 ### Entity Framework
 
 Entity Framework seems to be the most common ORM for class-SQL mappings, and SQL is still widely used 
 for storing data. So it's a win to have it supported out of the box by MassTransit.
 
-#### Optimistic vs pessimistic concurrency
-Most relational databases baked into MassTransit need some way to guarantee ACID when processing sagas. 
-Because there can be multiple threads _consuming_ multiple bus events meant for the same saga instance, 
-they could end up overwriting each other (race condition). Fortunately, relational databases can easily 
-handle this by setting the transaction type to *serializable* or (page/row) locking. This would be 
-considered as _pessimistic concurrency_.
+#### Concurrency handling
+Fortunately, Entity Framework is a repository pattern itself, and has a column type `[Timestamp]` 
+(a.k.a. `IsRowVersion` with fluent mapping), which will check the value of the column when it starts it's 
+"unit of work" and if that value is the same when updating that row in the database - everybody is happy! 
+But, if that column value is different, then it has been updated elsewhere. 
+So, the Entity Framework will throw a `DbUpdateConcurrencyException`, which can be handled by a retry policy
+to fix the concurrency violation.
 
-Fortunately Entity Framework is a repository pattern itself, and they have baked in a column type 
-`[Timestamp]` (a.k.a. `IsRowVersion` with fluent mapping) which will check the value of the column 
-when it starts it's "unit of work" and if that value is the same when updating that row in the 
-database - everybody is happy! But, if that column value is different, then it has been updated elsewhere. 
-So, the Entity Framework will throw an exception `DbUpdateConcurrencyException`. This is type of concurrency 
-is called an _optimistic concurrency_. It doesn't guarantee your unit of work with the database will 
-succeed (must retry after these exceptions), but it also doesn't block anybody else from working within 
-the same database page (not locking the table/page).
-
-##### So, which one should I use?
-For almost every scenario, it is recommended using the optimistic concurrency, because most state machine 
-logic should be fairly quick. 
-
+#### Configuration and usage
 The code-first mapping example below shows the basics of getting started. The lines have been commented
 where the additional optimistic concurrency column is needed.
 
@@ -208,13 +223,24 @@ x.ReceiveEndpoint(host, "shopping_cart_state", e =>
 });
 ```
 
+Hence, that if you have retry policy without an exception filter, it will also handle
+the concurrency exception, so explicit configuration is not required in this case.
+
 ### MongoDB
 
 MongoDB is an easy to use saga repository, because setup is easy. There is no need for class mapping, 
 the saga instances can be persisted easily using a MongoDB collection.
 
+#### Concurrency
+
+MongoDb saga persistence requires that saga instance classes implement `IVersionedSaga` interface.
+This interface has a `Version` property, which allows the saga persistence to handle optimistic
+concurrency.
+
+#### Configuration and usage
+
 ```csharp
-public class SagaInstance : SagaStateMachineInstance
+public class SagaInstance : SagaStateMachineInstance, IVersionedSaga
 {
     public SagaInstance(Guid correlationId)
     {
@@ -226,6 +252,7 @@ public class SagaInstance : SagaStateMachineInstance
     public string CurrentState { get; set; }
     public string ServiceName { get; set; }
     public Guid CorrelationId { get; set; }
+    public int Version { get; set; }
 }
 ```
 
@@ -244,6 +271,14 @@ Although NHibernate is not being actively developed recently, it is still widely
 is supported by MassTransit for saga storage. The example below shows the code-first approach 
 to using NHibernate for saga persistence.
 
+#### Concurrency
+
+NHibernate natively supports multiple concurrency handling mechanisms.
+The easiest is probably adding a `Version` property of type `int` to the saga instance class
+and map it to the column with the same name. NHibernate will use it by default.
+
+#### Configuration and usage
+
 ```csharp
 public class SagaInstance : SagaStateMachineInstance
 {
@@ -257,6 +292,7 @@ public class SagaInstance : SagaStateMachineInstance
     public string CurrentState { get; set; }
     public string ServiceName { get; set; }
     public Guid CorrelationId { get; set; }
+    public int Version { get; set; } // for optimistic concurrency
 }
 
 public class SagaInstanceMap : SagaClassMapping<SagaInstance>
@@ -265,6 +301,7 @@ public class SagaInstanceMap : SagaClassMapping<SagaInstance>
     {
         Property(x => x.CurrentState);
         Property(x => x.ServiceName, x => x.Length(40));
+        Property(x => x.Version); // for optimistic concurrency
     }
 }
 ```
@@ -309,6 +346,8 @@ public class SagaInstance :
 }
 ```
 
+#### Concurrency
+
 Redis saga persistence does not acquire locking on the database record when writing it so potentially 
 you can have write conflict in case the saga is updating its state frequently (hundreds of times per second). 
 To resolve this, the saga instance can implement the `IVersionedSaga` interface and include the Version property:
@@ -319,6 +358,8 @@ public int Version { get; set; }
 
 When version of the instance that is being updated will be lower than the expected version, 
 the saga repository will trow an exception and force the message to be retried, potentially resolving the issue.
+
+#### Redis client initialization
 
 The Redis saga repository requires `ServiceStack.Redis.IRedisClientsManager` as constructor parameter. 
 For containerless initialization the code would look like:
@@ -383,6 +424,35 @@ builder.RegisterGeneric(typeof(MartenSagaRepository<>))
 
 Marten will create necessary tables for you. This type of saga repository
 supports correlation by id and custom expressions.
+
+#### Concurrency
+
+Marten supports optimistic concurrency by using an eTag-like version field in the metadata.
+This means that the saga instance class does not need any additional fields for version.
+
+There are two ways to use this feature:
+
+1) Apply `[UseOptimisticConcurrency]` attribute to the saga instance class
+
+```csharp
+[UseOptimisticConcurrency]
+public class SampleSaga : ISaga
+{
+    [Identity]
+    public Guid CorrelationId { get; set; }
+    ...
+}
+```
+
+2. Configure the store to use optimistic concurrency for your saga instance class
+
+ ```csharp 
+ var store = DocumentStore.For(_ =>
+ {
+     // Adds optimistic concurrency checking to Issue
+     _.Schema.For<SampleSaga>().UseOptimisticConcurrency(true);
+ });
+ ```
 
 ### Azure Service Bus
 
