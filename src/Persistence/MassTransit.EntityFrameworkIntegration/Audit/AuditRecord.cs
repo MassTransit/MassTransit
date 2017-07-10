@@ -18,7 +18,6 @@ namespace MassTransit.EntityFrameworkIntegration.Audit
     using MassTransit.Audit;
     using Newtonsoft.Json;
 
-
     public class AuditRecord
     {
         public int AuditRecordId { get; set; }
@@ -39,13 +38,10 @@ namespace MassTransit.EntityFrameworkIntegration.Audit
         [NotMapped]
         public Dictionary<string, string> Custom
         {
-            get
-            {
-                return string.IsNullOrEmpty(_custom)
-                    ? new Dictionary<string, string>()
-                    : JsonConvert.DeserializeObject<Dictionary<string, string>>(_custom);
-            }
-            set { _custom = JsonConvert.SerializeObject(value); }
+            get => string.IsNullOrEmpty(_custom)
+                       ? new Dictionary<string, string>()
+                       : JsonConvert.DeserializeObject<Dictionary<string, string>>(_custom);
+            set => _custom = JsonConvert.SerializeObject(value);
         }
 
         internal string _headers { get; set; }
@@ -53,13 +49,10 @@ namespace MassTransit.EntityFrameworkIntegration.Audit
         [NotMapped]
         public Dictionary<string, string> Headers
         {
-            get
-            {
-                return string.IsNullOrEmpty(_headers)
-                    ? new Dictionary<string, string>()
-                    : JsonConvert.DeserializeObject<Dictionary<string, string>>(_headers);
-            }
-            set { _headers = JsonConvert.SerializeObject(value); }
+            get => string.IsNullOrEmpty(_headers)
+                       ? new Dictionary<string, string>()
+                       : JsonConvert.DeserializeObject<Dictionary<string, string>>(_headers);
+            set => _headers = JsonConvert.SerializeObject(value);
         }
 
         internal string _message { get; set; }
@@ -67,13 +60,10 @@ namespace MassTransit.EntityFrameworkIntegration.Audit
         [NotMapped]
         public object Message
         {
-            get
-            {
-                return string.IsNullOrEmpty(_message)
-                    ? null
-                    : JsonConvert.DeserializeObject(_message);
-            }
-            set { _message = JsonConvert.SerializeObject(value); }
+            get => string.IsNullOrEmpty(_message)
+                       ? null
+                       : JsonConvert.DeserializeObject(_message);
+            set => _message = JsonConvert.SerializeObject(value);
         }
 
         internal static AuditRecord Create<T>(T message, string messageType, MessageAuditMetadata metadata)

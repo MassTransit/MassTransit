@@ -1,0 +1,497 @@
+[33mcommit 239516a572a854f72c202b8f7997efdbd6cb854e[m
+Author: clintcparker <clintcparker@gmail.com>
+Date:   Tue Jun 27 13:44:10 2017 -0700
+
+    Fixed various typos in docs
+
+[33mcommit aeffe4bf20f8e7db937925a704cc2abe3976d018[m
+Author: Aarron Szalacinski <aarron.szalacinski@callminer.com>
+Date:   Wed Jun 28 14:48:53 2017 -0400
+
+    Fixes dotnet core dependency injection implementation; cleans up implementation API to minimize code needed to wire up a Consumer service; it should be noted that the Saga functionality needs to be revisited as I have never worked with that part of the API.
+
+[33mcommit 511d1ef97a0c31067caba1872a817224a1e4ce28[m
+Author: Chris Patterson <chris@phatboyg.com>
+Date:   Tue Jun 20 09:10:58 2017 -0700
+
+    Fixed missing update
+
+[33mcommit 6493cd0c840ccff85b0b72cac48765bdc6e4984f[m
+Author: Chris Patterson <chris@phatboyg.com>
+Date:   Tue Jun 20 08:21:42 2017 -0700
+
+    Version updates, changed packageId for dependency injection
+
+[33mcommit 9e00cba9a80644c71ec766926dc9d120f3085960[m
+Author: Jarrod Alexander <jarrod.alexander@gmail.com>
+Date:   Thu Jun 15 23:12:13 2017 -0500
+
+    Added saga support to MassTransit.ExtensionsDependencyInjectionIntegration
+
+[33mcommit 96f68cb315503bf9d7a8aac64a25ed137cf55a22[m
+Author: Jarrod Alexander <jarrod.alexander@gmail.com>
+Date:   Thu Jun 15 22:05:17 2017 -0500
+
+    Adding initial support for Microsoft.Extensions.DependencyInjection.  Consumer tests pass, now to add saga support.
+
+[33mcommit 9cedbcb030eb1756f4bc69d3d0124ab910742e06[m
+Author: Jarrod Alexander <jarrod.alexander@gmail.com>
+Date:   Thu Jun 15 08:59:30 2017 -0500
+
+    Moving existing code over.
+
+[33mcommit 0941c7cbdda9842915311c43e4bb20390b614cf7[m
+Author: Chris Patterson <chris@phatboyg.com>
+Date:   Sun Jun 18 08:06:27 2017 -0700
+
+    More updates for package consistency
+
+[33mcommit f086122b0f385479c16b2ba07d2463e4eb97a10a[m
+Author: Chris Patterson <chris@phatboyg.com>
+Date:   Sun Jun 18 07:19:52 2017 -0700
+
+    Changed my stuff to work and build clean
+
+[33mcommit acd319b65cad16c28ef42169f46fbec6ca7df822[m
+Author: jacob povar <jacob.povar@gmail.com>
+Date:   Thu Jun 15 06:34:31 2017 +0300
+
+    add .net standard support to reactive and testframework
+
+[33mcommit 114d4b9ea2065634f86f309d6917d632e734b4c0[m
+Author: jacob povar <jacob.povar@gmail.com>
+Date:   Wed Jun 14 17:25:59 2017 +0300
+
+    add .net standard support to simple injection support lib
+
+[33mcommit 5beaf551f8c8ca58cdb8fdbaf0aadbf99f673105[m
+Author: Andrew McClenaghan <andrew.mcclenaghan@gmail.com>
+Date:   Thu Jun 15 20:46:05 2017 +1000
+
+    netstandard1.6 for MongoDb integration
+
+[33mcommit ae12238bc6daf4360ceeefdd3f2c6d1661736ce4[m
+Author: Andrew McClenaghan <andrew.mcclenaghan@gmail.com>
+Date:   Thu Jun 15 21:00:31 2017 +1000
+
+    Add netstandard1.6 tfm to DocumentDb integration
+
+[33mcommit c5b716f68e0fdb008fde99742ddf219af7288557[m
+Author: Jarrod Alexander <jarrod.alexander@gmail.com>
+Date:   Thu Jun 15 21:16:48 2017 -0500
+
+    Added netstandard target for `MassTransit.Automatonymous.StructureMapIntegration`
+
+[33mcommit 31826c3ed0013f43396ba2287b47d7d57bca8b48[m
+Author: Jarrod Alexander <jarrod.alexander@gmail.com>
+Date:   Thu Jun 15 20:54:56 2017 -0500
+
+    Adding netstandard target to UnityIntegration
+
+[33mcommit 41172bc1cad746ab5f1fc3e6b35088a59db25e21[m
+Author: Jarrod Alexander <jarrod.alexander@gmail.com>
+Date:   Thu Jun 15 09:15:19 2017 -0500
+
+    Adding netstandard target for StructureMapIntegration
+
+[33mcommit 5be996ccf41c95153ab90b1fffeb33cdf6d11279[m
+Author: Nikolay Balakin <n@balakin.me>
+Date:   Fri Jun 16 17:43:30 2017 +0300
+
+    Fix concurrency issue in case of simultaneous saga update and delete operations
+
+[33mcommit 9feb4a1b4134a5e1d4a3f3d4f27c42de6fa497e6[m
+Author: Jarrod Alexander <jarrod.alexander@gmail.com>
+Date:   Tue Jun 13 22:47:56 2017 -0500
+
+    Adding logging integration for Microsoft.Extensions.Logging
+
+[33mcommit 47571ea427c90155f416342954207c5304c74e6a[m
+Author: Jarrod Alexander <jarrod.alexander@gmail.com>
+Date:   Tue Jun 13 20:56:20 2017 -0500
+
+    Added netstandard1.6 target to SerilogIntegration.
+
+[33mcommit 912051ee72067acacc1afc67f4d8ad8a8ef88f37[m
+Author: Andrew McClenaghan <andrew.mcclenaghan@gmail.com>
+Date:   Thu Jun 15 08:56:48 2017 +1000
+
+    Add netstandard1.6 support to MassTransit.AutomatonymousIntegration
+
+[33mcommit b7769a5d69e3aea9ca5fe7ffde0eb054f7a0339a[m
+Author: Andrew McClenaghan <andrew.mcclenaghan@gmail.com>
+Date:   Thu Jun 15 08:29:04 2017 +1000
+
+    Add netstandard1.6 support and upgrade to Autofac 4.6.0
+
+[33mcommit aef8b765aa1baeca0e8852fefc25e49782fd43bc[m
+Author: Jarrod Alexander <jarrod.alexander@gmail.com>
+Date:   Tue Jun 13 17:05:33 2017 -0500
+
+     Fixed Xml serialization issues.
+
+[33mcommit 544b5bb8d2581d11635db818d053d7046ff28e92[m
+Author: Jarrod Alexander <jarrod.alexander@gmail.com>
+Date:   Tue Jun 13 08:31:23 2017 -0500
+
+    Ported Log4Net logger to netstandard1.6
+
+[33mcommit 774e79b28f059217d4d1a5764c9775db4faf6de7[m
+Author: Jarrod Alexander <jarrod.alexander@gmail.com>
+Date:   Tue Jun 13 08:30:45 2017 -0500
+
+    Ported RabbitMqTransport to netstandard1.6
+
+[33mcommit bf22cc2e9e77f31382f59f2057c995fa9e8b307e[m
+Author: Jarrod Alexander <jarrod.alexander@gmail.com>
+Date:   Mon Jun 12 16:37:54 2017 -0500
+
+    MassTransit project now building for net452 and netstandard1.6
+
+[33mcommit 4f4b40d8c5576c9bc8c1ee17edc8083e82bc172f[m
+Author: Jarrod Alexander <jarrod.alexander@gmail.com>
+Date:   Fri Jun 9 16:39:27 2017 -0500
+
+    First wave of netcore port changes.
+
+[33mcommit 0086b67dc0133e21065351a45c5070e93bd37c89[m
+Author: maldworth <m@maldworth.com>
+Date:   Mon Jun 12 18:18:37 2017 -0400
+
+    Updated for .net Standard changes
+
+[33mcommit e199574847cd23f556e9482cff8dc9f2aee0dfe7[m
+Author: maldworth <m@maldworth.com>
+Date:   Sat Jun 3 08:03:42 2017 -0400
+
+    Some tweaks because the appveyor emulator behaves differently
+
+[33mcommit efe5b45b5bad2db31471e7fe7d5bffc941f7a036[m
+Author: maldworth <m@maldworth.com>
+Date:   Sat Jun 3 07:34:47 2017 -0400
+
+    Adding DocumentDb Yaml stuff
+
+[33mcommit 465446daeeda09f9cd914240e255a22e80dfc185[m
+Author: maldworth <m@maldworth.com>
+Date:   Sat Jun 3 06:59:54 2017 -0400
+
+    Using DocumentDb Emulator
+
+[33mcommit 9d3cef8dd1142a73bb4ff6abfa663098aa3f3229[m
+Author: maldworth <m@maldworth.com>
+Date:   Thu May 11 22:14:05 2017 -0400
+
+    Add DocumentDb Saga Persistence
+
+[33mcommit d02d1c7251fdf33591e203f89a799c6fbd88b756[m
+Author: John Strömblom <john.stromblom@outlook.com>
+Date:   Tue Jun 13 20:14:46 2017 +0200
+
+    Removed signing on MongoDbIntegration. Added bindingRedirect.
+
+[33mcommit 7ad70c65c61dfc5f0ddfb882dcbd22834f8d339c[m
+Author: John Strömblom <johstr@jetshop.se>
+Date:   Tue Jun 13 16:59:06 2017 +0200
+
+    Updated appveyor.yml to reflect new build paths for tests.
+
+[33mcommit 35d04560760f83fc2a70fa30e54d3bf6292673a5[m
+Author: Alexey Zimarev <alex@zimarev.com>
+Date:   Sat Jun 10 14:28:01 2017 +0200
+
+    Changing System.Type calls to use TypeInfo
+
+[33mcommit 9f38ab333432bb083a683cacb7be85c0e1fd3edc[m
+Author: Chris Patterson <chris@phatboyg.com>
+Date:   Wed Jun 7 06:39:54 2017 -0700
+
+    Fixes #892 copyright/notice files
+
+[33mcommit a02e1681090245730f37f651da503d99eee033c1[m
+Author: Chris Patterson <chris@phatboyg.com>
+Date:   Sun Jun 4 13:26:11 2017 -0700
+
+    I think most packages are right now, and strong named where appropriate.
+
+[33mcommit a53d94ba87306da98bdf12871cee1d2d7f390dda[m
+Author: Chris Patterson <chris@phatboyg.com>
+Date:   Sun Jun 4 06:54:46 2017 -0700
+
+    Removed unused/incomplete projects
+
+[33mcommit 5d7d3f16030cc433e5107510169a52c1e084a673[m
+Author: Chris Patterson <chris@phatboyg.com>
+Date:   Fri Jun 2 16:21:41 2017 -0700
+
+    Continued to standardize the build for 2017
+
+[33mcommit 69af7a3c084a033812aeb53619ab3ddb2c89e697[m
+Author: Chris Patterson <chris@phatboyg.com>
+Date:   Fri Jun 2 13:45:55 2017 -0700
+
+    Continued tweaks to build
+
+[33mcommit 46227bd400249cbc2a70285141612279eb955680[m
+Author: Chris Patterson <chris@phatboyg.com>
+Date:   Fri Jun 2 13:19:41 2017 -0700
+
+    Reviewing all changes, updating packages, working through csproj files to standardize
+
+[33mcommit 8fa0868b7b42b34fd81ee2b9c38f9d93b961125f[m
+Author: Andrew McClenaghan <andrew.mcclenaghan@gmail.com>
+Date:   Mon May 1 16:55:07 2017 +1000
+
+    Fix build.fsx
+
+[33mcommit 37ce64b1a2d2fe42732252639dda03b0b38d3627[m
+Author: Andrew McClenaghan <andrew.mcclenaghan@gmail.com>
+Date:   Mon May 1 16:50:06 2017 +1000
+
+    Update PostgesSQL to 9.6
+
+[33mcommit 2eb894880a622745b3ddec5760db38482a8a4165[m
+Author: Andrew McClenaghan <andrew.mcclenaghan@gmail.com>
+Date:   Mon May 1 16:48:39 2017 +1000
+
+    Undo TreatWarningsAsErrors
+
+[33mcommit ce58aa1d572e06856cacec6d8ba41c0e7345d45a[m
+Author: Andrew McClenaghan <andrew.mcclenaghan@gmail.com>
+Date:   Mon May 1 16:42:37 2017 +1000
+
+    Remove extra AssemblyInfo files
+
+[33mcommit 46beb71571f98c9063d33c4f8cc4f00de019a158[m
+Author: Andrew McClenaghan <andrew.mcclenaghan@gmail.com>
+Date:   Mon May 1 16:30:31 2017 +1000
+
+    Move SolutionVersion.cs to Directory.Build.props for new build system
+
+[33mcommit cc85ddf3de8b5ab9825f58ce1e3a11140722c983[m
+Author: Andrew McClenaghan <andrew.mcclenaghan@gmail.com>
+Date:   Mon May 1 11:39:08 2017 +1000
+
+    Initial conversion to VS2017 csproj
+
+[33mcommit db0f880f34045f779712f34f63ab9855003e8764[m
+Author: Teun Duynstee <github@duynstee.com>
+Date:   Mon May 29 14:02:53 2017 +0200
+
+    Update additions-to-transport.md
+    
+    typo
+
+[33mcommit bfff6478f7cd4cf2f1465dd15a51e6f049fedd80[m
+Author: Richárd Nyüsti <richard.nyusti@outlook.com>
+Date:   Wed May 24 18:55:26 2017 +0200
+
+    Fixed issue on RabbitMQ transport when using custom serializer and custom transport headers got missing.
+
+[33mcommit 227a7ecc3aa2b985bd309b8b11ee152783ee8c5a[m
+Author: Alexey Zimarev <alex@zimarev.com>
+Date:   Sun May 21 23:12:04 2017 +0200
+
+    Removed some autogenerated entries
+
+[33mcommit bdb595d53fbf228ae913b99c891e2cc79cfafe76[m
+Author: Alexey Zimarev <alex@zimarev.com>
+Date:   Sun May 21 23:09:53 2017 +0200
+
+    Fixing the EF section in saga persistence
+
+[33mcommit d22bdb0952b94605f77034b9939b4547923daa74[m
+Author: Chris Patterson <chris@phatboyg.com>
+Date:   Thu May 18 06:43:48 2017 -0700
+
+    Changed name in unity
+
+[33mcommit 6578d00f6c26f123e949a07a049c387467346cfe[m
+Author: Alexey Zimarev <alex@zimarev.com>
+Date:   Mon May 8 21:39:54 2017 +0200
+
+    Implementing the IRequestClient interface properly
+
+[33mcommit 34d96efb09a737eb16b40f934bbae6b3073a672b[m
+Author: Ushenko Dmitry <dushenko@mindscan.ru>
+Date:   Tue May 2 10:57:08 2017 +0300
+
+    Docs on ignoring events in saga
+
+[33mcommit 85f75dada217b0682193acdafaf7775b9665e591[m
+Author: Alexey Zimarev <alex@zimarev.com>
+Date:   Thu May 4 20:57:37 2017 +0200
+
+    Testing start, Autofac saga fix and Redelivery
+
+[33mcommit 66f192766c529319b69999296c7dfde6e663209f[m
+Author: Alexey Zimarev <alex@zimarev.com>
+Date:   Thu May 4 20:31:43 2017 +0200
+
+    Base structure for testing docs
+
+[33mcommit 2c4affe9317cfdbc416c9163878ed4f279dfa582[m
+Author: Octavio Fernandes <octavio.fernandes@mediamonks.com>
+Date:   Fri Apr 28 10:47:06 2017 +0200
+
+    Add back faultmessage on the log message (#871)
+
+[33mcommit d03fe966337ba4a51f097d97b23f0f3e5348286a[m
+Author: Octavio Fernandes <octavio.fernandes@mediamonks.com>
+Date:   Wed Apr 26 11:03:35 2017 +0200
+
+    Change ReceivedEndpointLoggingExtensions to log passing the exception along instead of formating inside text string (#871)
+
+[33mcommit 975cf8cbb7ef3c8ef7b7182718c5ea1b851b35b5[m
+Author: Alen Siljak <MisterY@users.noreply.github.com>
+Date:   Thu Apr 20 11:37:20 2017 +0200
+
+    minor syntax update / spelling correction
+
+[33mcommit 488217a5acc0be5b5536cba1a0bef535611e4f2c[m
+Author: Alexey Zimarev <alex@zimarev.com>
+Date:   Wed Apr 19 19:32:03 2017 +0200
+
+    Resolves #865
+
+[33mcommit dde50256918f5bb6b61f0912c617f33f1dc05171[m
+Author: Alexey Zimarev <alex@zimarev.com>
+Date:   Wed Apr 19 19:10:42 2017 +0200
+
+    Added some more details about request/response
+
+[33mcommit 365b40687ff1c154a8146762f5c9747bb2816367[m
+Author: Chris Patterson <chris@phatboyg.com>
+Date:   Sun Apr 16 10:33:51 2017 -0700
+
+    Updated csproj, added extension methods for configuration
+
+[33mcommit e754f4df202d9dbc32b8e9c53ae69c4a12f49dae[m
+Author: akayyali <amin.kayyali@hotmail.com>
+Date:   Thu Apr 13 15:28:20 2017 +0300
+
+    Registered ConsumeContext instance within the UnityConsumerFactory<TConsumer>
+    
+    Create UnityExecuteActivityFactory.cs
+    
+    Create UnityCompensateActivityFactory.cs
+
+[33mcommit ac96ad7ef476b3e91531b7caa0e062b9ef2b311e[m
+Author: Chris Patterson <chris@phatboyg.com>
+Date:   Sun Apr 16 10:25:42 2017 -0700
+
+    Changed consumer and saga message configuration to allow middleware prior to the consumer factory/saga repository
+
+[33mcommit 695966c72e55193552aef09549c5f7a9436ab165[m
+Author: Chris Patterson <chris@phatboyg.com>
+Date:   Thu Apr 6 12:47:03 2017 -0700
+
+    Dependency updation
+
+[33mcommit cdf3f318aeb854abd27b9211ff8421076a0b59df[m
+Author: jacob povar <jacob.povar@gmail.com>
+Date:   Sun Apr 2 23:32:36 2017 +0300
+
+    update simpleinjector package to 4.0
+
+[33mcommit d9deca8136a4b81e78b9a02817df98acbe12cae5[m
+Author: Alexey Zimarev <alzi@abax.no>
+Date:   Thu Apr 6 12:34:54 2017 +0200
+
+    Added a note about opening issues for questions
+
+[33mcommit f39ce1a739d6533a686188655ebd03b98aaf05f6[m
+Author: Alexey Zimarev <alzi@abax.no>
+Date:   Thu Apr 6 12:24:11 2017 +0200
+
+    Resolves #838
+
+[33mcommit 27a290447066663f8db434154573a7cad06bdc51[m
+Author: Chris Patterson <chris@phatboyg.com>
+Date:   Wed Mar 29 12:37:03 2017 -0700
+
+    Added initial topology page to documentation, trying images
+
+[33mcommit 6e75e281b43fc2b00b279f42fd048be343db85f9[m
+Author: Bradley Dylan Orr <orrtechnologies@gmail.com>
+Date:   Fri Mar 24 14:26:22 2017 -0500
+
+    Update README.md
+
+[33mcommit 246ec997d3bedda02d75adf3aedf324e1aad3e29[m
+Author: Chris Patterson <chris@phatboyg.com>
+Date:   Tue Mar 28 12:10:43 2017 -0700
+
+    Changed OperationTimeout to 60 seconds, since it's the overall maximum for anything
+
+[33mcommit 571fd98dc9deb3bb20945a77f00094f3975317ec[m
+Author: Shea Strickland <shea@strickland.com.au>
+Date:   Sat Mar 25 14:55:36 2017 +1000
+
+    Added ability to Remove a ConsumerConvention
+
+[33mcommit 9f31b66e5d2c3150ce5fcf306fa19f29a087170b[m
+Author: Alexey Zimarev <alexey@Alexeys-Mac-Pro-2.local>
+Date:   Sat Mar 25 19:59:58 2017 +0100
+
+    Final bit
+
+[33mcommit 22e67fdc00d0a104a59e23393c9becc8725b8842[m
+Author: Alexey Zimarev <alexey@Alexeys-Mac-Pro-2.local>
+Date:   Sat Mar 25 19:58:28 2017 +0100
+
+    Docs redirect for samples
+
+[33mcommit 8fe327ac683169a7ffa9bad9d2a1dc2878da5dea[m
+Author: Alexey Zimarev <alexey@Alexeys-Mac-Pro-2.local>
+Date:   Sat Mar 25 19:55:57 2017 +0100
+
+    Docs redirect scheduling
+
+[33mcommit 3e14a574e06ece8728f409037d4bb6085ff7f0e3[m
+Author: Alexey Zimarev <alexey@Alexeys-Mac-Pro-2.local>
+Date:   Sat Mar 25 19:53:45 2017 +0100
+
+    Docs redirect for middleware section
+
+[33mcommit eb2c2ced7db4d6473796575992021a776995c02b[m
+Author: Alexey Zimarev <alex@zimarev.com>
+Date:   Thu Mar 23 19:45:52 2017 +0100
+
+    Courier docs redirects
+
+[33mcommit 51e339f3f56d8deff45f925d4d07293869af1b42[m
+Author: Alexey Zimarev <alex@zimarev.com>
+Date:   Thu Mar 23 19:43:22 2017 +0100
+
+    Advanced section docs redirects
+
+[33mcommit c78b182f869aeba61841b196fef9a12130b8b3e6[m
+Author: Alexey Zimarev <alex@zimarev.com>
+Date:   Thu Mar 23 19:40:27 2017 +0100
+
+    Sagas docs redirects
+
+[33mcommit e8a015c5479e907a1f79471c54e176ef47325cbd[m
+Author: Alexey Zimarev <alex@zimarev.com>
+Date:   Thu Mar 23 19:35:18 2017 +0100
+
+    Redirects for usage docs
+
+[33mcommit 6d5327cb203355ebbf4625cce8cdedd5f8e874a3[m
+Author: Chris Patterson <chris@phatboyg.com>
+Date:   Thu Mar 23 08:24:36 2017 -0700
+
+    BSON is now a separate assembly with JSON.NET, wonderful.
+
+[33mcommit e9234c32f436bb9547ef9b2c0dd2d01a187900d8[m
+Author: Chris Patterson <chris@phatboyg.com>
+Date:   Wed Mar 22 11:09:47 2017 -0700
+
+    Updated package for Redis on ServiceStack
+
+[33mcommit 1b92293c12e27c7fba194d4b2bcb6842d766152e[m
+Author: Alexey Zimarev <alex@zimarev.com>
+Date:   Tue Mar 21 21:06:27 2017 +0100
+
+    Redirects for old docs
