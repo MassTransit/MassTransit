@@ -14,6 +14,7 @@ namespace MassTransit.Tests.Serialization
 {
     using System;
     using System.Linq;
+    using System.Reflection;
     using System.Threading.Tasks;
     using Builders;
     using MassTransit.Serialization;
@@ -133,7 +134,7 @@ namespace MassTransit.Tests.Serialization
                 return false;
             if (ReferenceEquals(this, obj))
                 return true;
-            if (!typeof(User).IsAssignableFrom(obj.GetType()))
+            if (!typeof(User).GetTypeInfo().IsAssignableFrom(obj.GetType()))
                 return false;
             return Equals((User)obj);
         }

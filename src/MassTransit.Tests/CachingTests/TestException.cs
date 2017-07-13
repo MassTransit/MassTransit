@@ -17,6 +17,7 @@
         {
         }
 
+#if !NETCORE
         protected TestException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
@@ -26,5 +27,6 @@
             : base(message, innerException)
         {
         }
+#endif
     }
 }

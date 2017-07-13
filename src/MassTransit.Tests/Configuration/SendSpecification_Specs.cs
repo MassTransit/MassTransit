@@ -15,6 +15,7 @@ namespace MassTransit.Tests.Configuration
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Reflection;
     using System.Threading.Tasks;
     using GreenPipes;
     using GreenPipes.Filters;
@@ -205,7 +206,7 @@ namespace MassTransit.Tests.Configuration
                 yield return baseInterface;
             }
 
-            var baseType = typeof(TMessage).BaseType;
+            var baseType = typeof(TMessage).GetTypeInfo().BaseType;
             while (baseType != null && TypeMetadataCache.IsValidMessageType(baseType))
             {
                 yield return baseType;
@@ -215,7 +216,7 @@ namespace MassTransit.Tests.Configuration
                     yield return baseInterface;
                 }
 
-                baseType = baseType.BaseType;
+                baseType = baseType.GetTypeInfo().BaseType;
             }
         }
 
@@ -226,9 +227,9 @@ namespace MassTransit.Tests.Configuration
                 .Where(TypeMetadataCache.IsValidMessageType)
                 .ToArray();
 
-            if (baseType.BaseType != null && baseType.BaseType != typeof(object))
+            if (baseType.GetTypeInfo().BaseType != null && baseType.GetTypeInfo().BaseType != typeof(object))
                 baseInterfaces = baseInterfaces
-                    .Except(baseType.BaseType.GetInterfaces())
+                    .Except(baseType.GetTypeInfo().BaseType.GetInterfaces())
                     .Except(baseInterfaces.SelectMany(x => x.GetInterfaces()))
                     .ToArray();
 
