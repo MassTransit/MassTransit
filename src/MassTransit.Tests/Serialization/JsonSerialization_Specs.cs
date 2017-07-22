@@ -51,6 +51,10 @@ namespace MassTransit.Tests.Serialization
                     new TestMessageDetail {Item = "A", Value = 27.5d},
                     new TestMessageDetail {Item = "B", Value = 13.5d},
                 },
+                EnumDetails = new List<TestMessageDetail>
+                {
+                    new TestMessageDetail{Item = "1", Value = 42.0d}
+                }
             };
 
             _envelope = new Envelope
@@ -143,6 +147,8 @@ namespace MassTransit.Tests.Serialization
 
                 message.Name.ShouldBe("Joe");
                 message.Details.Count.ShouldBe(2);
+
+                message.EnumDetails.Count().ShouldBe(1);
             }
         }
 
@@ -308,6 +314,7 @@ namespace MassTransit.Tests.Serialization
             public IList<TestMessageDetail> Details { get; set; }
             public int Level { get; set; }
             public string Name { get; set; }
+            public IEnumerable<TestMessageDetail> EnumDetails { get; set; }
         }
 
 
