@@ -14,10 +14,10 @@ namespace MassTransit
 {
     using System;
     using System.Threading.Tasks;
-    using RabbitMqTransport;
+    using AzureServiceBusTransport;
 
 
-    public static class RequestClientExtensions
+    public static class ServiceBusRequestClientExtensions
     {
         /// <summary>
         /// Creates a request client that uses the bus to retrieve the endpoint and send the request.
@@ -31,13 +31,13 @@ namespace MassTransit
         /// <param name="ttl">THe time to live for the request message</param>
         /// <param name="callback">Callback when the request is sent</param>
         /// <returns></returns>
-        public static async Task<IRequestClient<TRequest, TResponse>> CreateRequestClient<TRequest, TResponse>(this IRabbitMqHost host,
+        public static async Task<IRequestClient<TRequest, TResponse>> CreateRequestClient<TRequest, TResponse>(this IServiceBusHost host,
             ISendEndpointProvider sendEndpointProvider, Uri address, TimeSpan timeout, TimeSpan? ttl = default(TimeSpan?),
             Action<SendContext<TRequest>> callback = null)
             where TRequest : class
             where TResponse : class
         {
-            var endpoint = await host.ConnectReceiveEndpoint(host.Settings.Topology.CreateTemporaryQueueName("response")).ConfigureAwait(false);
+            var endpoint = await host.ConnectReceiveEndpoint(host.GetTemporaryQueueName("response")).ConfigureAwait(false);
 
             var ready = await endpoint.Ready.ConfigureAwait(false);
 
@@ -56,18 +56,17 @@ namespace MassTransit
         /// <param name="timeToLive">The request time to live</param>
         /// <param name="callback">Customize the send context</param>
         /// <returns></returns>
-        public static async Task<IRequestClientFactory<TRequest, TResponse>> CreateRequestClientFactory<TRequest, TResponse>(this IRabbitMqHost host,
+        public static async Task<IRequestClientFactory<TRequest, TResponse>> CreateRequestClientFactory<TRequest, TResponse>(this IServiceBusHost host,
             Uri address, TimeSpan timeout, TimeSpan? timeToLive = default(TimeSpan?), Action<SendContext<TRequest>> callback = null)
             where TRequest : class
             where TResponse : class
         {
-            var endpoint = await host.ConnectReceiveEndpoint(host.Settings.Topology.CreateTemporaryQueueName("response")).ConfigureAwait(false);
+            var endpoint = await host.ConnectReceiveEndpoint(host.GetTemporaryQueueName("response")).ConfigureAwait(false);
 
             var ready = await endpoint.Ready.ConfigureAwait(false);
 
             return new MessageRequestClientFactory<TRequest, TResponse>(endpoint, ready.ReceiveEndpoint, ready.InputAddress, address, timeout, timeToLive, callback);
         }
-
 
         /// <summary>
         /// Creates a request client that uses the bus to publish a request.
@@ -80,7 +79,7 @@ namespace MassTransit
         /// <param name="host"></param>
         /// <param name="publishEndpoint"></param>
         /// <returns></returns>
-        public static async Task<IRequestClient<TRequest, TResponse>> CreatePublishRequestClient<TRequest, TResponse>(this IRabbitMqHost host,
+        public static async Task<IRequestClient<TRequest, TResponse>> CreatePublishRequestClient<TRequest, TResponse>(this IServiceBusHost host,
             IPublishEndpoint publishEndpoint, TimeSpan timeout, TimeSpan? ttl = default(TimeSpan?), Action<SendContext<TRequest>> callback = null)
             where TRequest : class
             where TResponse : class
@@ -91,6 +90,5 @@ namespace MassTransit
 
             return new PublishRequestClient<TRequest, TResponse>(publishEndpoint, ready.ReceiveEndpoint, ready.InputAddress, timeout, ttl, callback);
         }
-
     }
 }
