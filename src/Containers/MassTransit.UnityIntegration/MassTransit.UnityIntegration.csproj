@@ -10,7 +10,7 @@
     </PackageTargetFallback>
   </PropertyGroup>
   <PropertyGroup>
-    <PackageId>MassTransit.Unity</PackageId>
+    <PackageId>MassTransit.Unity<PackageId><Title>MassTransit.Unity</Title>
     <Description>MassTransit Unity container support; $(Description)</Description>
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\MassTransit.UnityIntegration.xml</DocumentationFile>
   </PropertyGroup>

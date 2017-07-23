@@ -7,7 +7,7 @@
     <DebugType>portable</DebugType>
   </PropertyGroup>
   <PropertyGroup>
-    <PackageId>MassTransit.Automatonymous.StructureMap</PackageId>
+    <PackageId>MassTransit.Automatonymous.StructureMap<PackageId><Title>MassTransit.Automatonymous.StructureMap</Title>
     <Description>MassTransit StructureMap container support for Automatonymous; $(Description)</Description>
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\MassTransit.Automatonymous.StructureMapIntegration.xml</DocumentationFile>
   </PropertyGroup>

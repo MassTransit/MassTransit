@@ -7,7 +7,7 @@
     <DebugType>portable</DebugType>
   </PropertyGroup>
   <PropertyGroup>
-    <PackageId>MassTransit.AzureServiceBus</PackageId>
+    <PackageId>MassTransit.AzureServiceBus<PackageId><Title>MassTransit.AzureServiceBus</Title>
     <Description>MassTransit Azure Service Bus transport support; $(Description)</Description>
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\MassTransit.AzureServiceBusTransport.xml</DocumentationFile>
   </PropertyGroup>

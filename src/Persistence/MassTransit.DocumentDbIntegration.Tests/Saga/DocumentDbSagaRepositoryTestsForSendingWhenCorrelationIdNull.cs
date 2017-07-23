@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,13 +14,13 @@ namespace MassTransit.DocumentDbIntegration.Tests.Saga
 {
     using System;
     using System.Threading.Tasks;
+    using DocumentDbIntegration.Saga;
     using GreenPipes;
     using MassTransit.Saga;
-    using DocumentDbIntegration.Saga;
+    using Microsoft.Azure.Documents;
     using Moq;
     using NUnit.Framework;
-    using Pipeline;
-    using Microsoft.Azure.Documents;
+
 
     [TestFixture]
     public class DocumentDbSagaRepositoryTestsForSendingWhenCorrelationIdNull

@@ -8,7 +8,7 @@
     <DebugType>portable</DebugType>
   </PropertyGroup>
   <PropertyGroup>
-    <PackageId>MassTransit.Automatonymous.Autofac</PackageId>
+    <PackageId>MassTransit.Automatonymous.Autofac<PackageId><Title>MassTransit.Automatonymous.Autofac</Title>
     <Description>MassTransit Autofac container support for Automatonymous; $(Description)</Description>
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\MassTransit.Automatonymous.AutofacIntegration.xml</DocumentationFile>
   </PropertyGroup>

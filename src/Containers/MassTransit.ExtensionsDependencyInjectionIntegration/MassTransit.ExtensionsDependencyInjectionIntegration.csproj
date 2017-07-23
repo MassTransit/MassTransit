@@ -10,7 +10,7 @@
     <DebugType>portable</DebugType>
   </PropertyGroup>
   <PropertyGroup>
-    <PackageId>MassTransit.Extensions.DependencyInjection</PackageId>
+    <PackageId>MassTransit.Extensions.DependencyInjection<PackageId><Title>MassTransit.Extensions.DependencyInjection</Title>
     <Description>MassTransit Microsoft.Extensions.DependencyInjection support; $(Description)</Description>
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\MassTransit.Extensions.DependencyInjectionIntegration.xml</DocumentationFile>
   </PropertyGroup>

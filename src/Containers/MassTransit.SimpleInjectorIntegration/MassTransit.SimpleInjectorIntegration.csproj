@@ -7,7 +7,7 @@
     <DebugType>portable</DebugType>
   </PropertyGroup>
   <PropertyGroup>
-    <PackageId>MassTransit.SimpleInjector</PackageId>
+    <PackageId>MassTransit.SimpleInjector<PackageId><Title>MassTransit.SimpleInjector</Title>
     <Description>MassTransit SimpleInjector container support; $(Description)</Description>
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\MassTransit.SimpleInjectorIntegration.xml</DocumentationFile>
   </PropertyGroup>

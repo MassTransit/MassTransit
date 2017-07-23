@@ -7,7 +7,7 @@
     <DebugType>portable</DebugType>
   </PropertyGroup>
   <PropertyGroup>
-    <PackageId>MassTransit.Http</PackageId>
+    <PackageId>MassTransit.Http<PackageId><Title>MassTransit.Http</Title>
     <Description>MassTransit HTTP transport support; $(Description)</Description>
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\MassTransit.HttpTransport.xml</DocumentationFile>
   </PropertyGroup>

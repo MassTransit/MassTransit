@@ -7,7 +7,7 @@
     <DebugType>portable</DebugType>
   </PropertyGroup>
   <PropertyGroup>
-    <PackageId>MassTransit.Quartz</PackageId>
+    <PackageId>MassTransit.Quartz<PackageId><Title>MassTransit.Quartz</Title>
     <Description>MassTransit Quartz.NET scheduler support; $(Description)</Description>
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\MassTransit.QuartzIntegration.xml</DocumentationFile>
   </PropertyGroup>

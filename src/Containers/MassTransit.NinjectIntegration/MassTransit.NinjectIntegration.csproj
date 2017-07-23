@@ -6,7 +6,7 @@
     <DebugType>portable</DebugType>
   </PropertyGroup>
   <PropertyGroup>
-    <PackageId>MassTransit.Ninject</PackageId>
+    <PackageId>MassTransit.Ninject<PackageId><Title>MassTransit.Ninject</Title>
     <Description>MassTransit Ninject container support; $(Description)</Description>
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\MassTransit.NinjectIntegration.xml</DocumentationFile>
   </PropertyGroup>

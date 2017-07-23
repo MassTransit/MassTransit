@@ -10,7 +10,7 @@
     <DebugType>portable</DebugType>
   </PropertyGroup>
   <PropertyGroup>
-    <PackageId>MassTransit.Log4Net</PackageId>
+    <PackageId>MassTransit.Log4Net<PackageId><Title>MassTransit.Log4Net</Title>
     <Description>MassTransit Log4Net logger support; $(Description)</Description>
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\MassTransit.Log4NetIntegration.xml</DocumentationFile>
   </PropertyGroup>

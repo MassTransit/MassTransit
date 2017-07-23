@@ -6,7 +6,7 @@
     <DebugType>portable</DebugType>
   </PropertyGroup>
   <PropertyGroup>
-    <PackageId>MassTransit.CastleWindsor</PackageId>
+    <PackageId>MassTransit.CastleWindsor<PackageId><Title>MassTransit.CastleWindsor</Title>
     <Description>MassTransit Castle Windsor container support; $(Description)</Description>
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\MassTransit.WindsorIntegration.xml</DocumentationFile>
   </PropertyGroup>
