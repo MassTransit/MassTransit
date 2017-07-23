@@ -71,9 +71,6 @@ namespace MassTransit.Serialization
 
             string contentType = deserializer.ContentType.MediaType;
 
-            if (_deserializers.ContainsKey(contentType))
-                return;
-
             _deserializers[contentType] = deserializer;
         }
     }

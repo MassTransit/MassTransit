@@ -70,9 +70,6 @@ namespace MassTransit.Builders
             if (deserializerFactory == null)
                 throw new ArgumentNullException(nameof(deserializerFactory));
 
-            if (_deserializerFactories.ContainsKey(contentType.MediaType))
-                return;
-
             _deserializerFactories[contentType.MediaType] = deserializerFactory;
         }
 
