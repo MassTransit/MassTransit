@@ -56,7 +56,7 @@ namespace MassTransit.Topology
             where T : class
         {
             if (TypeMetadataCache<T>.IsValidMessageType == false)
-                throw new ArgumentException($"The specified type is not a valid message type: {TypeMetadataCache<T>.ShortName}", nameof(T));
+                throw new ArgumentException(TypeMetadataCache<T>.InvalidMessageTypeReason, nameof(T));
 
             var specification = _messageConfigurators.GetOrAdd(typeof(T), CreateMessageTopology<T>);
 

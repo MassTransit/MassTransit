@@ -30,6 +30,11 @@ namespace MassTransit.Util
         /// True if the message type is a valid message type
         /// </summary>
         bool IsValidMessageType { get; }
+        
+        /// <summary>
+        /// Once checked, the reason why the message type is invalid
+        /// </summary>
+        string InvalidMessageTypeReason { get; }
 
         /// <summary>
         /// True if this message is not a public type

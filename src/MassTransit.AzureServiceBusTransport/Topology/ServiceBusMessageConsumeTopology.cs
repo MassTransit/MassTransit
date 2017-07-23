@@ -35,7 +35,7 @@ namespace MassTransit.AzureServiceBusTransport.Topology
             _specifications = new List<IServiceBusConsumeTopologySpecification>();
         }
 
-        bool IsBindableMessageType => typeof(JToken) != typeof(TMessage);
+        static bool IsBindableMessageType => typeof(JToken) != typeof(TMessage);
 
         IServiceBusMessageConsumeTopologyConfigurator<T> IServiceBusMessageConsumeTopologyConfigurator.GetMessageTopology<T>()
         {

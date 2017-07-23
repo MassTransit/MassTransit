@@ -84,6 +84,7 @@ namespace MassTransit.Util
         readonly Lazy<Type[]> _messageTypes;
         readonly Lazy<List<PropertyInfo>> _properties;
         readonly string _shortName;
+        string _invalidMessageTypeReason;
 
         TypeMetadataCache()
         {
@@ -103,6 +104,7 @@ namespace MassTransit.Util
         public static bool HasSagaInterfaces => Cached.Metadata.Value.HasSagaInterfaces;
         public static IEnumerable<PropertyInfo> Properties => Cached.Metadata.Value.Properties;
         public static bool IsValidMessageType => Cached.Metadata.Value.IsValidMessageType;
+        public static string InvalidMessageTypeReason => Cached.Metadata.Value.InvalidMessageTypeReason;
         public static bool IsTemporaryMessageType => Cached.Metadata.Value.IsTemporaryMessageType;
         public static Type[] MessageTypes => Cached.Metadata.Value.MessageTypes;
         public static string[] MessageTypeNames => Cached.Metadata.Value.MessageTypeNames;
@@ -110,6 +112,7 @@ namespace MassTransit.Util
         string[] ITypeMetadataCache<T>.MessageTypeNames => _messageTypeNames.Value;
         IEnumerable<PropertyInfo> ITypeMetadataCache<T>.Properties => _properties.Value;
         bool ITypeMetadataCache<T>.IsValidMessageType => _isValidMessageType.Value;
+        string ITypeMetadataCache<T>.InvalidMessageTypeReason => _invalidMessageTypeReason;
         Type[] ITypeMetadataCache<T>.MessageTypes => _messageTypes.Value;
 
         T ITypeMetadataCache<T>.InitializeFromObject(object values)
@@ -135,39 +138,73 @@ namespace MassTransit.Util
         {
             var typeInfo = typeof(T).GetTypeInfo();
 
-            if (typeInfo.Namespace == null)
+            if (typeInfo.IsAnonymousType())
+            {
+                _invalidMessageTypeReason = $"Message types must not be anonymous types: {ShortName}";
                 return false;
+            }
 
-            if (typeInfo.Assembly == typeof(object).GetTypeInfo().Assembly)
+            if (typeInfo.Namespace == null)
+            {
+                _invalidMessageTypeReason = $"Messages types must have a valid namespace: {ShortName}";
                 return false;
+            }
+
+            if (typeof(object).GetTypeInfo().Assembly.Equals(typeInfo.Assembly))
+            {
+                _invalidMessageTypeReason = $"Messages types must not be System types: {ShortName}";
+                return false;
+            }
 
             if (typeInfo.Namespace == "System")
+            {
+                _invalidMessageTypeReason = $"Messages types must not be in the System namespace: {ShortName}";
                 return false;
+            }
 
             var ns = typeInfo.Namespace;
             if (ns != null && ns.StartsWith("System."))
+            {
+                _invalidMessageTypeReason = $"Messages types must not be in the System namespace: {ShortName}";
                 return false;
+            }
 
             if (typeInfo.IsGenericType)
             {
                 var typeDefinition = typeInfo.GetGenericTypeDefinition();
                 if (typeDefinition == typeof(CorrelatedBy<>))
+                {
+                    _invalidMessageTypeReason = $"CorrelatedBy<{typeof(T).GetClosingArguments(typeof(CorrelatedBy<>)).First().Name} is not a valid message type";
                     return false;
+                }
                 if (typeDefinition == typeof(Orchestrates<>))
+                {
+                    _invalidMessageTypeReason = $"Orchestrates<{typeof(T).GetClosingArguments(typeof(Orchestrates<>)).First().Name} is not a valid message type";
                     return false;
+                }
                 if (typeDefinition == typeof(InitiatedBy<>))
+                {
+                    _invalidMessageTypeReason = $"InitiatedBy<{typeof(T).GetClosingArguments(typeof(InitiatedBy<>)).First().Name} is not a valid message type";
                     return false;
+                }
                 if (typeDefinition == typeof(Observes<,>))
+                {
+                    var closingArguments = typeof(T).GetClosingArguments(typeof(Observes<,>)).ToArray();
+                    _invalidMessageTypeReason = $"Observes<{closingArguments[0].Name},{closingArguments[1].Name} is not a valid message type";
                     return false;
+                }
 
                 if (typeInfo.IsOpenGeneric())
+                {
+                    _invalidMessageTypeReason = $"Message types must not be open generic types: {ShortName}";
                     return false;
+                }
             }
 
-            return !typeInfo.IsAnonymousType();
+            return true;
         }
 
-        bool CheckIfTemporaryMessageType(TypeInfo messageTypeInfo)
+        static bool CheckIfTemporaryMessageType(TypeInfo messageTypeInfo)
         {
             return (!messageTypeInfo.IsVisible && messageTypeInfo.IsClass)
                 || messageTypeInfo.IsGenericType && messageTypeInfo.GetGenericArguments().Any(x => CheckIfTemporaryMessageType(x.GetTypeInfo()));
@@ -218,12 +255,9 @@ namespace MassTransit.Util
             if (interfaces.Contains(typeof(ISaga)))
                 return true;
 
-            return interfaces.Any(t =>
-            {
-                return t.HasInterface(typeof(InitiatedBy<>))
-                    || t.HasInterface(typeof(Orchestrates<>))
-                    || t.HasInterface(typeof(Observes<,>));
-            });
+            return interfaces.Any(t => t.HasInterface(typeof(InitiatedBy<>))
+                || t.HasInterface(typeof(Orchestrates<>))
+                || t.HasInterface(typeof(Observes<,>)));
         }
 
 

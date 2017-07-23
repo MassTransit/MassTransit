@@ -28,6 +28,7 @@ namespace MassTransit.Serialization.JsonConverters
         {
             if (builder == null)
                 throw new ArgumentNullException(nameof(builder));
+            
             _builder = builder;
         }
 
