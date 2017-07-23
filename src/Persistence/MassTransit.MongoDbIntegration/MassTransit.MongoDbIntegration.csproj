@@ -7,6 +7,8 @@
     <DebugType>portable</DebugType>
   </PropertyGroup>
   <PropertyGroup>
+    <PackageId>MassTransit.MongoDb</PackageId><Title>MassTransit.MongoDb</Title>
+    <Description>MassTransit MongoDb support; $(Description)</Description>
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\MassTransit.MongoDbIntegration.xml</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard1.6' ">

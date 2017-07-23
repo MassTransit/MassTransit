@@ -7,6 +7,8 @@
     <DebugType>portable</DebugType>
   </PropertyGroup>
   <PropertyGroup>
+    <PackageId>MassTransit.DocumentDb</PackageId><Title>MassTransit.DocumentDb</Title>
+    <Description>MassTransit DocumentDb support; $(Description)</Description>
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\MassTransit.DocumentDbIntegration.xml</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard1.6' ">

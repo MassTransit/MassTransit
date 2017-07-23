@@ -6,6 +6,14 @@
     <AssemblyOriginatorKeyFile>..\..\MassTransit.snk</AssemblyOriginatorKeyFile>
     <DebugType>portable</DebugType>
   </PropertyGroup>
+  <PropertyGroup>
+    <PackageId>MassTransit.Reactive</PackageId><Title>MassTransit.Reactive</Title>
+    <Description>MassTransit Rx extensions support; $(Description)</Description>
+    <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\MassTransit.Reactive.xml</DocumentationFile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard1.6' ">
+    <DefineConstants>$(DefineConstants);NETCORE</DefineConstants>
+  </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="GreenPipes" Version="1.0.10" />
     <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />

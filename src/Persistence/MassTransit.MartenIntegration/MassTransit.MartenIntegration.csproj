@@ -7,6 +7,8 @@
     <DebugType>portable</DebugType>
   </PropertyGroup>
   <PropertyGroup>
+    <PackageId>MassTransit.Marten</PackageId><Title>MassTransit.Marten</Title>
+    <Description>MassTransit Marten support; $(Description)</Description>
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\MassTransit.MartenIntegration.xml</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard1.6' ">

@@ -7,6 +7,8 @@
     <DebugType>portable</DebugType>
   </PropertyGroup>
   <PropertyGroup>
+    <PackageId>MassTransit.EntityFrameworkCore</PackageId><Title>MassTransit.EntityFrameworkCore</Title>
+    <Description>MassTransit Entity Framework Core support; $(Description)</Description>
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\MassTransit.EntityFrameworkIntegration.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>

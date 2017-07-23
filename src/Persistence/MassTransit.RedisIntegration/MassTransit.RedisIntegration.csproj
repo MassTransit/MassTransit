@@ -3,6 +3,8 @@
     <TargetFrameworks>net452</TargetFrameworks>
   </PropertyGroup>
   <PropertyGroup>
+    <PackageId>MassTransit.Redis</PackageId><Title>MassTransit.Redis</Title>
+    <Description>MassTransit Redis support; $(Description)</Description>
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\MassTransit.RedisIntegration.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
