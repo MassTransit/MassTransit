@@ -5,7 +5,7 @@
     <DebugType>portable</DebugType>
   </PropertyGroup>
   <PropertyGroup>
-    <PackageId>MassTransit.StructureMap<PackageId><Title>MassTransit.StructureMap</Title>
+    <PackageId>MassTransit.StructureMap</PackageId><Title>MassTransit.StructureMap</Title>
     <Description>MassTransit StructureMap container support; $(Description)</Description>
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\MassTransit.StructureMapIntegration.xml</DocumentationFile>
   </PropertyGroup>

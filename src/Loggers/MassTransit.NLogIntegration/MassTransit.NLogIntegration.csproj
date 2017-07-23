@@ -9,7 +9,7 @@
     <DebugType>portable</DebugType>
   </PropertyGroup>
   <PropertyGroup>
-    <PackageId>MassTransit.NLog<PackageId><Title>MassTransit.NLog</Title>
+    <PackageId>MassTransit.NLog</PackageId><Title>MassTransit.NLog</Title>
     <Description>MassTransit NLog logger support; $(Description)</Description>
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\MassTransit.NLogIntegration.xml</DocumentationFile>
   </PropertyGroup>

@@ -9,7 +9,7 @@
     <DebugType>portable</DebugType>
   </PropertyGroup>
   <PropertyGroup>
-    <PackageId>MassTransit.Autofac<PackageId><Title>MassTransit.Autofac</Title>
+    <PackageId>MassTransit.Autofac</PackageId><Title>MassTransit.Autofac</Title>
     <Description>MassTransit Autofac container support; $(Description)</Description>
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\MassTransit.AutofacIntegration.xml</DocumentationFile>
   </PropertyGroup>

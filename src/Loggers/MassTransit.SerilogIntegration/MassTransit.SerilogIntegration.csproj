@@ -8,7 +8,7 @@
     <DebugType>portable</DebugType>
   </PropertyGroup>
   <PropertyGroup>
-    <PackageId>MassTransit.SerilogIntegration<PackageId><Title>MassTransit.SerilogIntegration</Title>
+    <PackageId>MassTransit.SerilogIntegration</PackageId><Title>MassTransit.SerilogIntegration</Title>
     <Description>MassTransit Serilog logger support; $(Description)</Description>
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\MassTransit.SerilogIntegration.xml</DocumentationFile>
   </PropertyGroup>

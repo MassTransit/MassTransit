@@ -9,7 +9,7 @@
     <DebugType>portable</DebugType>
   </PropertyGroup>
   <PropertyGroup>
-    <PackageId>MassTransit.Automatonymous<PackageId><Title>MassTransit.Automatonymous</Title>
+    <PackageId>MassTransit.Automatonymous</PackageId><Title>MassTransit.Automatonymous</Title>
     <Description>MassTransit Automatonymous state machine support; $(Description)</Description>
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\MassTransit.AutomatonymousIntegration.xml</DocumentationFile>
   </PropertyGroup>
