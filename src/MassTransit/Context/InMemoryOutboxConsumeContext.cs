@@ -201,15 +201,20 @@ namespace MassTransit.Context
             });
         }
 
-        public Task ExecutePendingActions()
+        public async Task ExecutePendingActions()
         {
             _clearToSend.TrySetResult(this);
 
-            IEnumerable<Task> tasks;
+            Func<Task>[] pendingActions;
             lock (_pendingActions)
-                tasks = _pendingActions.Select(x => x()).Where(x => x != null).ToArray();
+                pendingActions = _pendingActions.ToArray();
 
-            return Task.WhenAll(tasks);
+            foreach (var action in pendingActions)
+            {
+                var task = action();
+                if (task != null)
+                    await task.ConfigureAwait(false);
+            }
         }
 
         public Task DiscardPendingActions()
