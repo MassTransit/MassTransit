@@ -37,8 +37,12 @@
         [OneTimeSetUp]
         public void Setup()
         {
-            var baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
-
+#if NETCORE
+            string baseDirectory = AppContext.BaseDirectory;
+#else
+            string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
+#endif
+            
             var messageDataPath = Path.Combine(baseDirectory, "MessageData");
 
             var dataDirectory = new DirectoryInfo(messageDataPath);

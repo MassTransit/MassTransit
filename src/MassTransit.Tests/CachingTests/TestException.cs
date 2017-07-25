@@ -17,10 +17,12 @@
         {
         }
 
+#if !NETCORE
         protected TestException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
         }
+#endif
 
         public TestException(string message, Exception innerException)
             : base(message, innerException)
