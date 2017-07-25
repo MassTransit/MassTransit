@@ -12,7 +12,10 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.Saga
 {
+    using System;
     using System.Diagnostics;
+    using System.Threading.Tasks;
+
     using GreenPipes;
     using MassTransit.Saga;
     using Messages;
@@ -36,13 +39,15 @@ namespace MassTransit.Tests.Saga
         }
 
         [Test]
-        public void The_user_should_be_pending()
+        public async Task The_user_should_be_pending()
         {
             var timer = Stopwatch.StartNew();
 
             var controller = new RegisterUserController(Bus);
-            using (var unsubscribe = Host.ConnectReceiveEndpoint(NewId.NextGuid().ToString(), x => x.Instance(controller)))
+            HostReceiveEndpointHandle connectReceiveEndpoint = null;
+            try
             {
+                connectReceiveEndpoint = await this.Host.ConnectReceiveEndpoint(NewId.NextGuid().ToString(), x => x.Instance(controller));
                 bool complete = controller.RegisterUser("username", "password", "Display Name", "user@domain.com");
 
                 complete.ShouldBe(true); //("The user should be pending");
@@ -53,6 +58,11 @@ namespace MassTransit.Tests.Saga
                 complete = controller.ValidateUser();
 
                 complete.ShouldBe(true); //("The user should be complete");
+            }
+            finally
+            {
+                if (connectReceiveEndpoint != null)
+                    await connectReceiveEndpoint.StopAsync();
             }
         }
     }

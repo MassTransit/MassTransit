@@ -50,6 +50,8 @@ namespace MassTransit.Tests
         }
     }
 
+#if !NETCORE
+
     [TestFixture]
     public class Host_info_should_be_included_on_binary_serialization :
         InMemoryTestFixture
@@ -87,4 +89,6 @@ namespace MassTransit.Tests
             Assert.AreEqual(HostMetadataCache.Host.ProcessId, context.Host.ProcessId);
         }
     }
+
+#endif
 }

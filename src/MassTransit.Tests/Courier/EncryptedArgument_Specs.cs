@@ -28,7 +28,7 @@ namespace MassTransit.Tests.Courier
             [Test]
             public void Should_fail_if_not_supported()
             {
-                using (var provider = new AesCryptoServiceProvider())
+                using (var provider = Aes.Create())
                 {
                     provider.GenerateKey();
                     provider.GenerateIV();
