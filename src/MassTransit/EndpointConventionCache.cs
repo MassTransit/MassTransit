@@ -50,7 +50,7 @@ namespace MassTransit
 
         class CachedConvention<TMessage> :
             CachedConvention
-            where TMessage : class, ISaga
+            where TMessage : class
         {
             bool CachedConvention.TryGetEndpointAddress(object message, out Uri address)
             {
