@@ -1,22 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net452</TargetFrameworks>
+    <TargetFrameworks>net452;netcoreapp1.1.1</TargetFrameworks>
     <IsPackable>false</IsPackable>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="MongoMessageDataRepositoryTestsForGettingMessageData.cs" />
@@ -33,10 +18,8 @@
     <PackageReference Include="NewId" Version="3.0.1" />
     <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
     <PackageReference Include="NUnit" Version="3.7.1" />
-    <PackageReference Include="Autofixture" Version="3.50.2" />
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <PackageReference Include="System.Runtime.InteropServices.RuntimeInformation" Version="4.3.0" />
+    <PackageReference Include="NUnit3TestAdapter" Version="3.8.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.0.0" />
     <ProjectReference Include="..\..\Loggers\MassTransit.Log4NetIntegration\MassTransit.Log4NetIntegration.csproj" />
     <ProjectReference Include="..\..\MassTransit.AutomatonymousIntegration\MassTransit.AutomatonymousIntegration.csproj" />
     <ProjectReference Include="..\..\MassTransit.TestFramework\MassTransit.TestFramework.csproj" />

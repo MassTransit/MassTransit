@@ -12,8 +12,14 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests
         public SagaDbContext<SimpleSaga, SimpleSagaMap> Create(DbContextFactoryOptions options)
         {
             var dbContextOptionsBuilder = new DbContextOptionsBuilder<SagaDbContext<SimpleSaga, SimpleSagaMap>>();
+
             dbContextOptionsBuilder.UseSqlServer(LocalDbConnectionStringProvider.GetLocalDbConnectionString(),
-                m => m.MigrationsAssembly(Assembly.GetExecutingAssembly().GetName().Name));
+                m =>
+                    {
+                        var executingAssembly = typeof(ContextFactory).GetTypeInfo().Assembly;
+
+                        m.MigrationsAssembly(executingAssembly.GetName().Name);
+                    });
 
             return new SagaDbContext<SimpleSaga, SimpleSagaMap>(dbContextOptionsBuilder.Options);
         }

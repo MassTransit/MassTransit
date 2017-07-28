@@ -1,37 +1,18 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net452</TargetFrameworks>
+    <TargetFrameworks>net452;netcoreapp1.1.1</TargetFrameworks>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <NoWarn>1587,1591,1998,3008,3001</NoWarn>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
+  
   <ItemGroup>
     <PackageReference Include="GreenPipes" Version="1.0.10" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
     <PackageReference Include="NUnit" Version="3.7.1" />
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Data" />
+    <PackageReference Include="NUnit3TestAdapter" Version="3.8.0" />
     <PackageReference Include="System.Reactive.Core" Version="3.1.1" />
     <PackageReference Include="System.Reactive.Interfaces" Version="3.1.1" />
     <PackageReference Include="System.Reactive.Linq" Version="3.1.1" />
-    <Reference Include="System.Xml.Linq" />
     <ProjectReference Include="..\MassTransit.Reactive\MassTransit.Reactive.csproj" />
     <ProjectReference Include="..\MassTransit.TestFramework\MassTransit.TestFramework.csproj" />
     <ProjectReference Include="..\MassTransit\MassTransit.csproj" />

@@ -19,7 +19,6 @@ namespace MassTransit.Containers.Tests
     using Saga;
     using Scenarios;
 
-
     [TestFixture]
     public class AutofacContainer_RegistrationExtension
     {
@@ -28,7 +27,7 @@ namespace MassTransit.Containers.Tests
         {
             var builder = new ContainerBuilder();
 
-            builder.RegisterConsumers(Assembly.GetExecutingAssembly());
+            builder.RegisterConsumers(typeof(AutofacContainer_RegistrationExtension).GetTypeInfo().Assembly);
 
             var container = builder.Build();
 
@@ -40,7 +39,7 @@ namespace MassTransit.Containers.Tests
         {
             var builder = new ContainerBuilder();
 
-            builder.RegisterConsumers(Assembly.GetExecutingAssembly());
+            builder.RegisterConsumers(typeof(AutofacContainer_RegistrationExtension).GetTypeInfo().Assembly);
             builder.RegisterType<InMemorySagaRepository<SimpleSaga>>()
                 .As<ISagaRepository<SimpleSaga>>()
                 .SingleInstance();
