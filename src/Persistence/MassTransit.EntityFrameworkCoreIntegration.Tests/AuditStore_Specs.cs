@@ -65,7 +65,9 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests
                 UseSqlServer(LocalDbConnectionStringProvider.GetLocalDbConnectionString(),
                 m =>
                     {
-                        m.MigrationsAssembly(Assembly.GetExecutingAssembly().GetName().Name);
+                        var executingAssembly = typeof(ContextFactory).GetTypeInfo().Assembly;
+
+                        m.MigrationsAssembly(executingAssembly.GetName().Name);
                         m.MigrationsHistoryTable("__AuditEFMigrationHistoryAudit");
                     });
 

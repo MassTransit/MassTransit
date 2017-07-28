@@ -17,7 +17,6 @@ namespace MassTransit.Containers.Tests
     using Saga;
     using Scenarios;
 
-
     public class Unity_Consumer :
         When_registering_a_consumer
     {
