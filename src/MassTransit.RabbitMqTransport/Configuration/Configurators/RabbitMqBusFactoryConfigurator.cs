@@ -40,7 +40,8 @@ namespace MassTransit.RabbitMqTransport.Configurators
 
             _hosts = new BusHostCollection<RabbitMqHost>();
 
-            _settings = new RabbitMqReceiveSettings("ignore", "fanout", false, true);
+            var queueName = _configuration.ConsumeTopology.CreateTemporaryQueueName("bus-");
+            _settings = new RabbitMqReceiveSettings(queueName, "fanout", false, true);
             _settings.SetQueueArgument("x-expires", TimeSpan.FromMinutes(1));
             _settings.SetExchangeArgument("x-expires", TimeSpan.FromMinutes(1));
         }
@@ -134,9 +135,6 @@ namespace MassTransit.RabbitMqTransport.Configurators
         {
             var host = new RabbitMqHost(settings);
             _hosts.Add(host);
-
-            if (_hosts.Count == 1 && string.IsNullOrWhiteSpace(_settings.QueueName))
-                _settings.QueueName = _configuration.ConsumeTopology.CreateTemporaryQueueName("bus-");
 
             return host;
         }
