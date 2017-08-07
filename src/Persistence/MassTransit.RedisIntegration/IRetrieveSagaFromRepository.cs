@@ -13,12 +13,12 @@
 namespace MassTransit.RedisIntegration
 {
     using System;
+    using System.Threading.Tasks;
     using Saga;
-    using ServiceStack.Model;
 
 
-    public interface IRetrieveSagaFromRepository<out TSaga> where TSaga: ISaga, IHasGuidId
+    public interface IRetrieveSagaFromRepository<TSaga> where TSaga: ISaga
     {
-        TSaga GetSaga(Guid correlationId);
+        Task<TSaga> GetSaga(Guid correlationId);
     }
 }
