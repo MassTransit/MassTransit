@@ -14,7 +14,6 @@ namespace MassTransit.RedisIntegration
 {
     using System;
     using System.Threading.Tasks;
-    using Newtonsoft.Json;
     using StackExchange.Redis;
 
 
@@ -27,17 +26,13 @@ namespace MassTransit.RedisIntegration
         public async Task<T> Get(Guid key)
         {
             var value = await _db.StringGetAsync(key.ToString()).ConfigureAwait(false);
-            return value.IsNullOrEmpty ? null : Deserialize<T>(value);
+            return value.IsNullOrEmpty ? null : SagaSerializer.Deserialize<T>(value);
         }
 
         public async Task Put(Guid key, T value) =>
-            await _db.StringSetAsync(key.ToString(), Serialize(value)).ConfigureAwait(false);
+            await _db.StringSetAsync(key.ToString(), SagaSerializer.Serialize(value)).ConfigureAwait(false);
         
         public async Task Delete(Guid key) => await _db.KeyDeleteAsync(key.ToString()).ConfigureAwait(false);
-
-        static T Deserialize<T>(string json) => JsonConvert.DeserializeObject<T>(json);
-
-        static string Serialize<T>(T value) => JsonConvert.SerializeObject(value);
     }
 
     public interface ITypedDatabase<T> where T: class
