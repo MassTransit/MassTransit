@@ -11,6 +11,7 @@
     * [Message contract design](understand/message-contracts.md)
     * [Performance counters](understand/perfcounters.md)
 * [Quick Start!](quickstart.md)
+* [I need help!](introduction/getting-help.md)
 * [Learning MassTransit](learn/README.md)
     * [Samples](learn/samples/README.md)
         * [Courier](learn/samples/courier.md)

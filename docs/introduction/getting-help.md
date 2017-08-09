@@ -50,9 +50,10 @@ If it is complex, it's likely you'll be pushed to hit the mailing list.
 
 ## GitHub Issues
 
-Please do not open an issue on github, unless you have spotted an actual bug in MassTransit. If you are unsure,
-ask on the mailing list, and if we confirm it's a bug, we'll ask you to [create the issue][3]. Issues are not
-the place for questions, and they'll likely be closed.
+Please **do not open an issue on GitHub**, unless you have spotted an actual bug in MassTransit. If you are unsure,
+ask on the [mailing list][2] or on [StackOverflow][1], and if we confirm it's a bug, we'll ask you to [create the issue][3]. 
+
+**Issues are not the place for questions, and they'll likely be closed.**
 
 This policy is in place to avoid bugs being drowned out in a pile of sensible suggestions for future enhancements
 and calls for help from people who forget to check back if they get it and so on.
