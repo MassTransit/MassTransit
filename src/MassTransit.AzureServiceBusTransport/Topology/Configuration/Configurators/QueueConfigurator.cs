@@ -13,8 +13,9 @@
 namespace MassTransit.AzureServiceBusTransport.Topology.Configurators
 {
     using System;
+#if !NETCORE
     using Microsoft.ServiceBus.Messaging;
-
+#endif
 
     public class QueueConfigurator :
         MessageEntityConfigurator,

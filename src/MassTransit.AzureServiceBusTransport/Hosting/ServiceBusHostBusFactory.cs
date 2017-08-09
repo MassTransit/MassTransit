@@ -15,10 +15,11 @@ namespace MassTransit.AzureServiceBusTransport.Hosting
     using System;
     using Logging;
     using MassTransit.Hosting;
+#if !NETCORE
     using Microsoft.ServiceBus;
     using Microsoft.ServiceBus.Messaging;
     using Microsoft.ServiceBus.Messaging.Amqp;
-
+#endif
 
     public class ServiceBusHostBusFactory :
         IHostBusFactory

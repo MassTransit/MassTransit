@@ -13,10 +13,11 @@
 namespace MassTransit.AzureServiceBusTransport
 {
     using System;
+#if !NETCORE
     using Microsoft.ServiceBus;
     using Microsoft.ServiceBus.Messaging;
     using Microsoft.ServiceBus.Messaging.Amqp;
-
+#endif
 
     /// <summary>
     /// The host settings used to configure the service bus connection

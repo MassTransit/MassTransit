@@ -12,8 +12,9 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.AzureServiceBusTransport.Topology.Entities
 {
+#if !NETCORE
     using Microsoft.ServiceBus.Messaging;
-
+#endif
 
     /// <summary>
     /// A subscription, as defined

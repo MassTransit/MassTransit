@@ -12,8 +12,9 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.AzureServiceBusTransport.Topology.Configurators
 {
+#if !NETCORE
     using Microsoft.ServiceBus.Messaging;
-
+#endif
 
     public class TopicConfigurator :
         MessageEntityConfigurator,

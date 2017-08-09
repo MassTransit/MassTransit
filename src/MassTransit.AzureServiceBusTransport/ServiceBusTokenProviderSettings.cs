@@ -13,8 +13,9 @@
 namespace MassTransit.AzureServiceBusTransport
 {
     using System;
+#if !NETCORE
     using Microsoft.ServiceBus;
-
+#endif
 
     public interface ServiceBusTokenProviderSettings
     {

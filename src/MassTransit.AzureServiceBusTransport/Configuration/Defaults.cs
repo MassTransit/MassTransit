@@ -14,8 +14,9 @@ namespace MassTransit.AzureServiceBusTransport
 {
     using System;
     using System.ComponentModel;
+#if !NETCORE
     using Microsoft.ServiceBus.Messaging;
-
+#endif
 
     [EditorBrowsable(EditorBrowsableState.Never)]
     static class Defaults

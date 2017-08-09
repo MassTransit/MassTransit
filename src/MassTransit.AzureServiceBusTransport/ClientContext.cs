@@ -14,8 +14,9 @@ namespace MassTransit.AzureServiceBusTransport
 {
     using System;
     using System.Threading.Tasks;
+#if !NETCORE
     using Microsoft.ServiceBus.Messaging;
-
+#endif
 
     /// <summary>
     /// The client context is used to access the queue/subscription/topic client.

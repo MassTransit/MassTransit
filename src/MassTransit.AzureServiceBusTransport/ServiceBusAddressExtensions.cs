@@ -16,7 +16,9 @@ namespace MassTransit.AzureServiceBusTransport
     using System.Text;
     using Configurators;
     using Internals.Extensions;
+#if !NETCORE
     using Microsoft.ServiceBus.Messaging;
+#endif
     using NewIdFormatters;
     using Util;
 

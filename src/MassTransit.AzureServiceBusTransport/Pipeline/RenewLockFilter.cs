@@ -17,8 +17,9 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
     using System.Threading.Tasks;
     using GreenPipes;
     using Logging;
+#if !NETCORE
     using Microsoft.ServiceBus.Messaging;
-
+#endif
 
     public class RenewLockFilter :
         IFilter<ConsumeContext>

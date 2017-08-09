@@ -14,8 +14,9 @@ namespace MassTransit.AzureServiceBusTransport.Contexts
 {
     using System;
     using System.Threading.Tasks;
+#if !NETCORE
     using Microsoft.ServiceBus.Messaging;
-
+#endif
 
     public class QueueClientContext :
         ClientContext

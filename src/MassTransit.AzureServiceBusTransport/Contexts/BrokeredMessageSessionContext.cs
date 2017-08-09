@@ -15,8 +15,9 @@ namespace MassTransit.AzureServiceBusTransport.Contexts
     using System;
     using System.IO;
     using System.Threading.Tasks;
+#if !NETCORE
     using Microsoft.ServiceBus.Messaging;
-
+#endif
 
     public class BrokeredMessageSessionContext :
         MessageSessionContext

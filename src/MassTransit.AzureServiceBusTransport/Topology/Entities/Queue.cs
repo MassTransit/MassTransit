@@ -12,8 +12,9 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.AzureServiceBusTransport.Topology.Entities
 {
+#if !NETCORE
     using Microsoft.ServiceBus.Messaging;
-
+#endif
 
     /// <summary>
     /// The queue details used to declare the queue to RabbitMQ

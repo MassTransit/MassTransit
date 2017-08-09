@@ -16,7 +16,9 @@ namespace MassTransit.AzureServiceBusTransport
     using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
+#if !NETCORE
     using Microsoft.ServiceBus.Messaging;
+#endif
     using Newtonsoft.Json.Linq;
     using Settings;
     using Transports;

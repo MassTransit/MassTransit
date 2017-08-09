@@ -15,8 +15,9 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Builders
     using System.Threading;
     using Entities;
     using MassTransit.Topology.Entities;
+#if !NETCORE
     using Microsoft.ServiceBus.Messaging;
-
+#endif
 
     public abstract class ServiceBusTopologyBuilder :
         IServiceBusTopologyBuilder

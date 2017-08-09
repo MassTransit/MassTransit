@@ -20,8 +20,10 @@ namespace MassTransit.AzureServiceBusTransport
     using GreenPipes;
     using Logging;
     using MassTransit.Pipeline;
+#if !NETCORE
     using Microsoft.ServiceBus;
     using Microsoft.ServiceBus.Messaging;
+#endif
     using Settings;
     using Transport;
     using Transports;

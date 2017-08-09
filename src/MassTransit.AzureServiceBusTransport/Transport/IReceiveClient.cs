@@ -13,8 +13,9 @@
 namespace MassTransit.AzureServiceBusTransport.Transport
 {
     using System.Threading.Tasks;
+#if !NETCORE
     using Microsoft.ServiceBus.Messaging;
-
+#endif
 
     public interface IReceiveClient
     {
