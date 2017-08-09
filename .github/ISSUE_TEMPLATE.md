@@ -104,5 +104,5 @@
   We still appreciate the report though, as eventually somebody else might
   create a reproducible example for it.
 
-  Thanks for helping us help you!
+  Thanks for helping us help you! 
 -->
