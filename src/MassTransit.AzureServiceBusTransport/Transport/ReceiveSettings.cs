@@ -14,6 +14,8 @@ namespace MassTransit.AzureServiceBusTransport.Transport
 {
 #if !NETCORE
     using Microsoft.ServiceBus.Messaging;
+#else
+    using Microsoft.Azure.ServiceBus;
 #endif
 
     public interface ReceiveSettings :

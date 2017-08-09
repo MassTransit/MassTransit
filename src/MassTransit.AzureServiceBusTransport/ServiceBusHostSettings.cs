@@ -17,6 +17,8 @@ namespace MassTransit.AzureServiceBusTransport
     using Microsoft.ServiceBus;
     using Microsoft.ServiceBus.Messaging;
     using Microsoft.ServiceBus.Messaging.Amqp;
+#else
+    using Microsoft.Azure.ServiceBus;
 #endif
 
     /// <summary>

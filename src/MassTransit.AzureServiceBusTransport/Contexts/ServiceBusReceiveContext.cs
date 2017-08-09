@@ -21,6 +21,8 @@ namespace MassTransit.AzureServiceBusTransport.Contexts
     using MassTransit.Topology;
 #if !NETCORE
     using Microsoft.ServiceBus.Messaging;
+#else
+    using Microsoft.Azure.ServiceBus;
 #endif
     using Transports;
 

@@ -17,6 +17,8 @@ namespace MassTransit.AzureServiceBusTransport.Testing
     using MassTransit.Testing;
 #if !NETCORE
     using Microsoft.ServiceBus;
+#else
+    using Microsoft.Azure.ServiceBus;
 #endif
 
     public class AzureServiceBusTestHarness :

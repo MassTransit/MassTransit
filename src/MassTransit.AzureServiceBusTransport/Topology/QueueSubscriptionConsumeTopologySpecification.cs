@@ -19,6 +19,8 @@ namespace MassTransit.AzureServiceBusTransport.Topology
     using GreenPipes;
 #if !NETCORE
     using Microsoft.ServiceBus.Messaging;
+#else
+    using Microsoft.Azure.ServiceBus;
 #endif
     using NewIdFormatters;
 

@@ -18,6 +18,8 @@ namespace MassTransit.AzureServiceBusTransport
 #if !NETCORE
     using Microsoft.ServiceBus;
     using Microsoft.ServiceBus.Messaging;
+#else
+    using Microsoft.Azure.ServiceBus;
 #endif
     using Transports;
     using Util;

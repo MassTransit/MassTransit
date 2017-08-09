@@ -15,6 +15,8 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Configurators
     using System;
 #if !NETCORE
     using Microsoft.ServiceBus.Messaging;
+#else
+    using Microsoft.Azure.ServiceBus;
 #endif
 
     public class SubscriptionConfigurator :

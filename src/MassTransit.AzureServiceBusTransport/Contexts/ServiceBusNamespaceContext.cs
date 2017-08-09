@@ -19,6 +19,8 @@ namespace MassTransit.AzureServiceBusTransport.Contexts
 #if !NETCORE
     using Microsoft.ServiceBus;
     using Microsoft.ServiceBus.Messaging;
+#else
+    using Microsoft.Azure.ServiceBus;
 #endif
     using Util;
 

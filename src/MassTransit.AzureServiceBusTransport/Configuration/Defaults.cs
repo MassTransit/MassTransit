@@ -16,6 +16,8 @@ namespace MassTransit.AzureServiceBusTransport
     using System.ComponentModel;
 #if !NETCORE
     using Microsoft.ServiceBus.Messaging;
+#else
+    using Microsoft.Azure.ServiceBus;
 #endif
 
     [EditorBrowsable(EditorBrowsableState.Never)]

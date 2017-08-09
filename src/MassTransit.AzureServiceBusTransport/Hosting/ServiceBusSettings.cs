@@ -17,6 +17,8 @@ namespace MassTransit.AzureServiceBusTransport.Hosting
 #if !NETCORE
     using Microsoft.ServiceBus;
     using Microsoft.ServiceBus.Messaging;
+#else
+    using Microsoft.Azure.ServiceBus;
 #endif
 
     public interface ServiceBusSettings :
