@@ -4,9 +4,9 @@
   <!-- These properties will be shared for all projects -->
   <PropertyGroup>
   <Title>MassTransit</Title>
-    <Version>3.6.0.0</Version>
-    <FileVersion>3.6.0.0</FileVersion>
-    <InformationalVersion>3.6.0.0 (develop/52a30ae5)</InformationalVersion>
+    <Version>4.0.0.0</Version>
+    <FileVersion>4.0.0.0</FileVersion>
+    <InformationalVersion>4.0.0.0 (develop/52a30ae5)</InformationalVersion>
     <Product>MassTransit</Product>
     <Description>MassTransit is a message-based distributed application framework for .NET http://masstransit-project.com</Description>
     <PackageProjectUrl>https://github.com/MassTransit/MassTransit</PackageProjectUrl>
