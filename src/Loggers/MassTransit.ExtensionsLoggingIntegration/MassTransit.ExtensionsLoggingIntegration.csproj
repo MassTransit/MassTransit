@@ -2,7 +2,7 @@
   <PropertyGroup>
     <RootNamespace>MassTransit.ExtensionsLoggingIntegration</RootNamespace>
     <AssemblyName>MassTransit.ExtensionsLoggingIntegration</AssemblyName>
-    <TargetFrameworks>netstandard1.6</TargetFrameworks>
+    <TargetFrameworks>net452;netstandard1.6</TargetFrameworks>
     <NetStandardImplicitPackageVersion>1.6.1</NetStandardImplicitPackageVersion>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\..\MassTransit.snk</AssemblyOriginatorKeyFile>
